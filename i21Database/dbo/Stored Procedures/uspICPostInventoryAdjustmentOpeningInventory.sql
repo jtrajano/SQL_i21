@@ -68,8 +68,8 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId)
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= ISNULL(Detail.dblNewWeight, 0)
-			,dblUOMQty				= ISNULL(WeightUOM.dblUnitQty, 0)
+			,dblQty					= COALESCE(Detail.dblNewWeight, Detail.dblNewQuantity, 0)
+			,dblUOMQty				= COALESCE(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
 			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -95,9 +95,10 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+	WHERE	
+		Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-		AND Item.strLotTracking != 'No'
+		AND Item.strLotTracking <> 'No'
 	UNION ALL
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
@@ -132,7 +133,8 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+	WHERE	
+		Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 		AND Item.strLotTracking = 'No'
 
@@ -175,10 +177,10 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= Detail.intNewWeightUOMId 
+			,intItemUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId)
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= Detail.dblNewWeight
-			,dblUOMQty				= WeightUOM.dblUnitQty	
+			,dblQty					= COALESCE(Detail.dblNewWeight, Detail.dblNewQuantity, 0)
+			,dblUOMQty				= COALESCE(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
 			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -204,9 +206,10 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+	WHERE	
+		Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Storage
-		AND Item.strLotTracking != 'No'
+		AND Item.strLotTracking <> 'No'
 	UNION ALL
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
@@ -241,7 +244,8 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+	WHERE	
+		Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Storage
 		AND Item.strLotTracking = 'No'
 
