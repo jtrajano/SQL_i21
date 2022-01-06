@@ -48,7 +48,7 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblGLFiscalYearPeriod_dtmEndDate]
     ON [dbo].[tblGLFiscalYearPeriod]([dtmEndDate] ASC)
 GO
-ALTER TABLE [dbo].[tblGLFiscalYearPeriod]  WITH CHECK ADD  CONSTRAINT [FK_tblGLFiscalYearPeriod_tblGLFiscalYear] FOREIGN KEY([intFiscalYearId])
+ALTER TABLE [dbo].[tblGLFiscalYearPeriod] ADD CONSTRAINT [FK_tblGLFiscalYearPeriod_tblGLFiscalYear] FOREIGN KEY([intFiscalYearId])
 REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId])
 ON DELETE CASCADE
 GO

@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[tblCMBorrowingFacilityLimit](
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[tblCMBorrowingFacilityLimit]  WITH CHECK ADD  CONSTRAINT [FK_tblCMBorrowingFacilityLimit_tblCMBorrowingFacility] 
+ALTER TABLE [dbo].[tblCMBorrowingFacilityLimit] ADD  CONSTRAINT [FK_tblCMBorrowingFacilityLimit_tblCMBorrowingFacility] 
 FOREIGN KEY([intBorrowingFacilityId])
 REFERENCES [dbo].[tblCMBorrowingFacility] ([intBorrowingFacilityId])
 GO

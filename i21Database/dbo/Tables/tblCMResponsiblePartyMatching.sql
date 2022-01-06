@@ -20,21 +20,21 @@ GO
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [DF__tblCMResp__intCo__345999B0]  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount] FOREIGN KEY([intOffsetBankId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount] FOREIGN KEY([intOffsetBankId])
 REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1] FOREIGN KEY([intPrimaryBankId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1] FOREIGN KEY([intPrimaryBankId])
 REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccount] FOREIGN KEY([intPrimaryAccountId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccount] FOREIGN KEY([intPrimaryAccountId])
 REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 GO
 

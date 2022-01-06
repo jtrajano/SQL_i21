@@ -16,6 +16,6 @@ CREATE TABLE tblCMBorrowingFacility(
 GO
 
 
-ALTER TABLE [dbo].[tblCMBorrowingFacility]  WITH CHECK ADD  CONSTRAINT [FK_tblCMBorrowingFacility_tblCMBank] FOREIGN KEY([intBankId])
+ALTER TABLE [dbo].[tblCMBorrowingFacility] ADD  CONSTRAINT [FK_tblCMBorrowingFacility_tblCMBank] FOREIGN KEY([intBankId])
 REFERENCES [dbo].[tblCMBank] ([intBankId])
 GO
