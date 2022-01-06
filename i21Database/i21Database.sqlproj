@@ -450,6 +450,9 @@
     <None Include="Scripts\Post-Deployment\ST\40_Rename_And_Alter_int_trl_dept_number.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
     <None Include="Scripts\Post-Deployment\IC\30_InventoryValuationAccountIds.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
+    <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
