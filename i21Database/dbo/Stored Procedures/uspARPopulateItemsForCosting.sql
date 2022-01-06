@@ -261,9 +261,8 @@ WHERE
 	AND ARID.[intItemId] IS NOT NULL
 	AND ISNULL(ARIC.[intBundleItemId],0) <> 0
 	AND ARID.[strTransactionType] <> 'Debit Memo'	
-	AND ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
-	AND ICI.[strType] NOT IN ('Non-Inventory')
-	AND ICI.[strType] = 'Bundle'
+	AND ARID.[strItemType] = 'Bundle'
+	AND ICI.[strType] <> 'Non-Inventory'
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 
