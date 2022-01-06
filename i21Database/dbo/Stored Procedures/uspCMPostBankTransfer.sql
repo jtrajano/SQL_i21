@@ -199,6 +199,10 @@ BEGIN
     END
 END  
 
+
+
+
+
 DECLARE @intSwapShortId INT,@intSwapLongId INT, @intBankSwapId INT, @ysnLockShort BIT
 IF @intBankTransferTypeId = 5
 BEGIN
@@ -704,11 +708,13 @@ END
     --IF @dblDifference <> 0  
   
       IF @ysnPost =1
-      BEGIN
-        EXEC [uspCMInsertGainLossBankTransfer] @intDefaultCurrencyId, 
-        'Gain / Loss from Bank Transfer',
-        @intRealizedAccountId  
-      END
+        EXEC [uspCMInsertGainLossBankTransfer] 
+          @intDefaultCurrencyId, 
+          'Gain / Loss from Bank Transfer',
+          @intBankTransferTypeId,
+          @intGLAccountIdTo,
+          @intRealizedAccountId
+      
   --END  
   
     

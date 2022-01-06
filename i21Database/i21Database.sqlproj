@@ -10234,13 +10234,13 @@
     <Build Include="dbo\Functions\fnGLCheckScale.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
-    <Build Include="dbo\Functions\fnGLGetOverrideGLAccount.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\2_ElectronicFileFormats.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
     <None Include="Scripts\Post-Deployment\CRM\SplitCRMData.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetOverrideGLAccount.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
