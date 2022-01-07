@@ -179,6 +179,7 @@ INSERT INTO @InTransitItems
     ,[dblForexRate]
 	,[strBOLNumber]	
 	,[intTicketId]
+	,[intSourceEntityId]
 )
 SELECT
      [intItemId] 
@@ -206,6 +207,7 @@ SELECT
     ,[dblForexRate]
 	,[strBOLNumber]
 	,[intTicketId]
+	,[intSourceEntityId]
 FROM ##ARItemsForInTransitCosting
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
