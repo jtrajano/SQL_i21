@@ -388,8 +388,7 @@ FROM
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 120 THEN '91 - 120 Days' 
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 120 THEN 'Over 120' END
 				END
-FROM ##POSTEDINVOICES I WITH (NOLOCK)
-WHERE strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) AS A
+FROM ##POSTEDINVOICES I WITH (NOLOCK)) AS A
 
 LEFT JOIN
     
