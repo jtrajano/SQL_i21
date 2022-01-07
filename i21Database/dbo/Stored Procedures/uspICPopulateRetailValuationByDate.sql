@@ -62,8 +62,7 @@ INSERT INTO tblICRetailValuation (
 SELECT	category.intCategoryId
 		,categoryLocation.intCategoryLocationId
 		,intLocationId = categoryLocation.intLocationId 
-		-- ,categoryLocation.intRegisterDepartmentId
-		,CAST(categoryLocation.strCashRegisterDepartment AS INT)
+		,categoryLocation.intRegisterDepartmentId
 		,companyLocation.strLocationName
 		,category.strCategoryCode	
 		,strCategoryDescription		= category.strDescription	
