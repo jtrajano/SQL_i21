@@ -202,7 +202,7 @@ BEGIN TRY
 				DECLARE @strCompanyLocationName NVARCHAR(500) = NULL
 				SELECT TOP 1 @strCompanyLocationName = strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocation
 				SET @err = 'Item ' + @strItem + ' is not valid in location ' + @strCompanyLocationName 
-				RAISERROR(err, 16, 1)
+				RAISERROR(@err, 16, 1)
 			END
 			
 			IF (@intStockUOMId IS NULL)
