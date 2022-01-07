@@ -89,6 +89,7 @@ BEGIN
 		SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
 	)GL
 	END
+
 END
 GO
 

@@ -32,18 +32,25 @@ IF NOT EXISTS(
     GOTO _end
     END
 
+IF NOT EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType = @intStructureType)
+BEGIN
+	SET @intAccountOverride = @intAccountId1
+	GOTO _end
+END
+
 
 DECLARE @strAccountId NVARCHAR(30) ,@strAccountId1 NVARCHAR(30) , @msg NVARCHAR(100)
 SELECT @strAccountId = strAccountId from tblGLAccount where intAccountId = @intAccountId
 SELECT @strAccountId1 = strAccountId from tblGLAccount where intAccountId = @intAccountId1
 
 IF @strAccountId IS NULL
-	SET @msg = 'Overriding Account Id is not existing GL Account'
+BEGIN
+	SET @msg = 'Overriding Account Id is not existing GL Account for Gain/Loss'
 	GOTO _raiserror
-
+END
 IF @strAccountId1 IS NULL
 BEGIN
-	SET @msg = 'Account Id To Override is not existing GL Account'
+	SET @msg = 'Account Id To Override is not existing GL Account for Gain/Loss'
 	GOTO _raiserror
 END
 
@@ -84,7 +91,7 @@ END
 ELSE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount WHERE strAccountId = @str)
 BEGIN
-	SET @msg = @str + ' Not an existing account for override.'
+	SET @msg = @str + ' Not an existing account for override for Gain/Loss.'
 	GOTO _raiserror
 END
 ELSE
