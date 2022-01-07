@@ -26,6 +26,8 @@ BEGIN
 		,strCustomer = CEN.strName
 		,strShipFrom = VEL.strLocationName
 		,strShipTo = CEL.strLocationName
+		,strSeller = SLR.strName
+		,strSalesperson = SP.strName
 		,ysnBundle = CONVERT(BIT, CASE Item.strType
 				WHEN 'Bundle'
 					THEN 1
@@ -82,6 +84,8 @@ BEGIN
 	LEFT JOIN tblICItemUOM						WeightItemUOM	ON		WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
 	LEFT JOIN tblICUnitMeasure					WeightUOM		ON		WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute			CA				ON		CA.intCommodityAttributeId = Item.intOriginId
+	LEFT JOIN tblEMEntity						SLR				ON		SLR.intEntityId = LoadDetail.intSellerId
+	LEFT JOIN tblEMEntity						SP				ON		SP.intEntityId = LoadDetail.intSalespersonId
 	LEFT JOIN tblAPBillDetail					BD				ON		BD.intLoadDetailId = LoadDetail.intLoadDetailId AND BD.intItemId = LoadDetail.intItemId
 	LEFT JOIN tblAPBill							B				ON		B.intBillId = BD.intBillId
 	LEFT JOIN tblICItemContract					ICI				ON		ICI.intItemId = Item.intItemId AND PDetail.intItemContractId = ICI.intItemContractId
