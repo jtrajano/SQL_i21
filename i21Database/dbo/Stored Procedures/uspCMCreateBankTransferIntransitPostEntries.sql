@@ -96,21 +96,21 @@ BEGIN
         ,[dtmDate]              = @dtmDate    
         ,[strBatchId]           = @strBatchId    
         ,[intAccountId]         = @intBTInTransitAccountId
-        ,[dblDebit]             = dblAmountTo
+        ,[dblDebit]             = dblAmountFrom
         ,[dblCredit]            = 0     
-        ,[dblDebitForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo   
-                                    THEN dblAmountTo ELSE  dblAmountForeignTo END  
+        ,[dblDebitForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom
+                                    THEN dblAmountTo ELSE  dblAmountForeignFrom END  
         ,[dblCreditForeign]     = 0    
         ,[dblDebitUnit]         = 0    
         ,[dblCreditUnit]        = 0    
         ,[strDescription]       = A.strDescription    
         ,[strCode]              = @GL_DETAIL_CODE    
-        ,[strReference]         = strReferenceTo    
-        ,[intCurrencyId]        = intCurrencyIdAmountTo    
-        ,[intCurrencyExchangeRateTypeId] = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountTo THEN NULL ELSE intRateTypeIdAmountTo END  
-        ,[dblExchangeRate]      = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountTo THEN 1  
+        ,[strReference]         = strReferenceFrom
+        ,[intCurrencyId]        = intCurrencyIdAmountFrom  
+        ,[intCurrencyExchangeRateTypeId] = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountFrom THEN NULL ELSE intRateTypeIdAmountFrom END  
+        ,[dblExchangeRate]      = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountFrom THEN 1  
                                         --WHEN @ysnForeignToForeign = 1 THEN dblAmountSettlementTo/dblAmountForeignFrom  
-                                        ELSE dblRateAmountTo END  
+                                        ELSE dblRateAmountFrom END  
         ,[dtmDateEntered]       = GETDATE()    
         ,[dtmTransactionDate]   = A.dtmDate    
         ,[strJournalLineDescription]  = GLAccnt.strDescription    
@@ -127,7 +127,6 @@ BEGIN
     )GLAccnt
     WHERE A.strTransactionId = @strTransactionId   
 
-    EXEC uspCMCreateBankTransferDiffEntries @strTransactionId, @dtmDate, @strBatchId, @intDefaultCurrencyId
     EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', 
         @dtmDate, @strBatchId, @intDefaultCurrencyId   
     
@@ -204,18 +203,18 @@ BEGIN
         ,[strBatchId]            = @strBatchId    
         ,[intAccountId]          = @intBTInTransitAccountId
         ,[dblDebit]              = 0
-        ,[dblCredit]             = dblAmountTo
+        ,[dblCredit]             = dblAmountFrom
         ,[dblDebitForeign]       = 0
         ,[dblCreditForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom   
-                                    THEN dblAmountTo ELSE  dblAmountForeignTo END      
+                                    THEN dblAmountFrom ELSE  dblAmountForeignFrom END      
         ,[dblDebitUnit]          = 0    
         ,[dblCreditUnit]         = 0    
         ,[strDescription]        = A.strDescription    
         ,[strCode]               = @GL_DETAIL_CODE    
         ,[strReference]          = A.strReferenceTo
-        ,[intCurrencyId]         = intCurrencyIdAmountTo    
-        ,[intCurrencyExchangeRateTypeId] =  CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo THEN NULL ELSE  intRateTypeIdAmountTo  END  
-        ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo THEN 1 ELSE dblRateAmountTo  END  
+        ,[intCurrencyId]         = intCurrencyIdAmountFrom   
+        ,[intCurrencyExchangeRateTypeId] =  CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN NULL ELSE  intRateTypeIdAmountFrom  END  
+        ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountFrom  END  
         ,[dtmDateEntered]        = GETDATE()    
         ,[dtmTransactionDate]    = A.dtmDate    
         ,[strJournalLineDescription]  = GLAccnt.strDescription    
@@ -230,9 +229,10 @@ BEGIN
     OUTER APPLY(
         SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intBTInTransitAccountId
     )GLAccnt
-    WHERE A.strTransactionId = @strTransactionId    
+    WHERE A.strTransactionId = @strTransactionId
 
     
+    EXEC uspCMCreateBankTransferDiffEntries @strTransactionId, @dtmDate, @strBatchId, @intDefaultCurrencyId
     EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To' , @dtmDate, @strBatchId, @intDefaultCurrencyId  
 
 
