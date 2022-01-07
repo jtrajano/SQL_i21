@@ -150,12 +150,7 @@ BEGIN TRY
 			, @dblSurcharge = RT.dblSurcharge
 		FROM #ReceiptList RT
 
-		SELECT TOP 1@intStockUOMId = intStockUOMId
-			, @strItem = strItemNo
-			, @strDescription = REPLACE(strDescription, '%', '')
-		FROM vyuICGetItemStock
-		WHERE intItemId = @intItemId
-			AND intLocationId = @intCompanyLocation
+		SELECT TOP 1 @strItem = strItemNo, @strDescription = REPLACE(strDescription, '%', '') FROM tblICItem where intItemId = @intItemId
 
 		IF(@strFreightBilledBy = 'Other' AND (@dblFreight > 0 OR @dblSurcharge > 0))
 		BEGIN
@@ -216,6 +211,14 @@ BEGIN TRY
 
 			--	RAISERROR(@err, 16, 1)
 			--END
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetItemStock WHERE intItemId = @intItemId AND intLocationId = @intCompanyLocation)
+			BEGIN
+				DECLARE @strCompanyLocationName NVARCHAR(500) = NULL
+				SELECT TOP 1 @strCompanyLocationName = strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocation
+				SET @err = 'Item ' + @strItem + ' is not valid in location ' + @strCompanyLocationName 
+				RAISERROR(err, 16, 1)
+			END
 			
 			IF (@intStockUOMId IS NULL)
 			BEGIN
