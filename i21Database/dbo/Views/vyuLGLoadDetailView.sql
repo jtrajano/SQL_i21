@@ -61,7 +61,6 @@ SELECT LD.intLoadDetailId
 	, ysnPSubCurrency = AD.ysnSeqSubCurrency
 	, dblPMainCashPrice = PDetail.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END
 	, dblPFranchise = CASE WHEN PWG.dblFranchise > 0 THEN PWG.dblFranchise / 100 ELSE 0 END
-	, strSeller = Seller.strName
 
 -- Inbound Company Location
 	, LD.intPCompanyLocationId
@@ -114,7 +113,6 @@ SELECT LD.intLoadDetailId
 	, ysnSSubCurrency = ADS.ysnSeqSubCurrency
 	, dblSMainCashPrice = SDetail.dblCashPrice / CASE WHEN ISNULL(CUS.intCent,0) = 0 THEN 1 ELSE CUS.intCent END
 	, dblSFranchise = CASE WHEN SWG.dblFranchise > 0 THEN SWG.dblFranchise / 100 ELSE 0 END
-	, strSalesperson = Salesperson.strName
 
 -- Outbound Company Location
 	, LD.intSCompanyLocationId
@@ -237,8 +235,6 @@ LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEnt
 LEFT JOIN tblSMTaxGroup CustomerTax ON CustomerTax.intTaxGroupId = CEL.intTaxGroupId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
-LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = LD.intSellerId
-LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = LD.intSalespersonId
 LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
 LEFT JOIN tblCTPricingType PPricingType ON PPricingType.intPricingTypeId = PDetail.intPricingTypeId

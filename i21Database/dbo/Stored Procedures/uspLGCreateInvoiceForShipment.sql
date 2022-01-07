@@ -135,7 +135,7 @@ DECLARE
 		,@Interest					= @ZeroDecimal
 		,@AmountDue					= @ZeroDecimal
 		,@Payment					= @ZeroDecimal
-		,@EntitySalespersonId		= ISNULL(LD.intSalespersonId, ARC.[intSalespersonId])
+		,@EntitySalespersonId		= ARC.[intSalespersonId]
 		,@FreightTermId				= L.intFreightTermId
 		,@ShipViaId					= CD.intShipViaId
 		,@PaymentMethodId			= NULL
