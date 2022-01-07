@@ -63,14 +63,14 @@ DECLARE @EmployeeCount AS INT
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeEarnings)
 	BEGIN
 		SELECT TOP 1 
-			 @strEmployeeId				= TRIM(intEntityNo)
-			,@intEntityNo				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = TRIM(intEntityNo)) 
-			,@strEarningId				= TRIM(strEarningDesc)
+			 @strEmployeeId				= LTRIM(RTRIM(intEntityNo))
+			,@intEntityNo				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(intEntityNo))) 
+			,@strEarningId				= LTRIM(RTRIM(strEarningDesc))
 			,@dblEarningAmount			= dblEarningAmount
 			,@ysnEarningDefault			= ysnEarningDefault
-			,@strPayGroup				= TRIM(strPayGroup)
-			,@strCalculationType		= TRIM(strCalculationType)
-			,@strLinkedEarning			= TRIM(strLinkedEarning)
+			,@strPayGroup				= LTRIM(RTRIM(strPayGroup))
+			,@strCalculationType		= LTRIM(RTRIM(strCalculationType))
+			,@strLinkedEarning			= LTRIM(RTRIM(strLinkedEarning))
 			,@dblAmount					= dblAmount
 			,@dblDefaultHours			= dblDefaultHours
 			,@strAccrueTimeOff			= strAccrueTimeOff
@@ -96,12 +96,12 @@ DECLARE @EmployeeCount AS INT
 			@EmployeeEntityNo = COUNT(intEntityEmployeeId) 
 		FROM tblPREmployeeEarning 
 		WHERE intEntityEmployeeId = @intEntityNo
-		  AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE TRIM(strEarning) = TRIM(@strEarningId))
+		  AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE LTRIM(RTRIM(strEarning)) = LTRIM(RTRIM(@strEarningId)))
 	
 		
 		IF (@EmployeeEntityNo = 0)
 			BEGIN
-				SELECT TOP 1 @EmployeeCount = COUNT(intEntityId) FROM tblPREmployee WHERE TRIM(strEmployeeId) = @strEmployeeId
+				SELECT TOP 1 @EmployeeCount = COUNT(intEntityId) FROM tblPREmployee WHERE LTRIM(RTRIM(strEmployeeId)) = @strEmployeeId
 
 				IF(@EmployeeCount != 0)
 				BEGIN
@@ -127,7 +127,7 @@ DECLARE @EmployeeCount AS INT
 						,intConcurrencyId
 					)
 					SELECT
-						(SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = TRIM(@strEmployeeId)) 
+						(SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(@strEmployeeId))) 
 					   ,(SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = strEarningDesc)
 					   ,strCalculationType
 					   ,CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
