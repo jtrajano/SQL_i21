@@ -4290,12 +4290,14 @@ BEGIN TRY
 				SET @FinalQty = CASE WHEN @intContractStatusId IN (1, 4) THEN @dblCurrentQty - @dblQuantityAppliedAndPriced ELSE 0 END
 
 				-- Negate all the priced quantities
-				UPDATE @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
+				-- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
+				UPDATE @cbLogSpecific SET dblQty = (case when dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end) * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				-- Add all the basis quantities
 				-- Use current Basis Price when putting back basis qty
-				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
+				-- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
+				UPDATE @cbLogSpecific SET dblQty = (case when dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end), intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
