@@ -8,12 +8,19 @@ CREATE PROCEDURE [dbo].[uspARLogPerformanceRuntime]
     , @intNewPerformanceLogId   INT = NULL OUTPUT
 AS
  
-SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
- 
+
+DECLARE @ysnLogPerformanceRuntime BIT = 0
+
+SELECT TOP 1 @ysnLogPerformanceRuntime = ISNULL(ysnLogPerformanceRuntime, 0)
+FROM tblARCompanyPreference
+ORDER BY intCompanyPreferenceId DESC
+
+IF @ysnLogPerformanceRuntime = 0
+    RETURN
+
 BEGIN
     IF ISNULL(@ysnStart, 0) = 1
         BEGIN
