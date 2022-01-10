@@ -391,13 +391,15 @@ BEGIN -- VALIDATION
   -- Check if the bank account is inactive    
   IF @ysnRecap = 0     
   BEGIN    
-    SELECT TOP 1 @ysnBankAccountActive = ISNULL(A.ysnActive,0) & ISNULL(B.ysnActive,0)    
+
+    SELECT TOP 1 @ysnBankAccountActive = 1
     FROM tblCMBankAccount A JOIN vyuGLAccountDetail B    
     ON A.intGLAccountId = B.intAccountId    
     WHERE intBankAccountId IN (@intBankAccountIdFrom, @intBankAccountIdTo)     
+    AND ISNULL(A.ysnActive,0) = 1 AND ISNULL(B.ysnActive,0)  = 1
       
       
-    IF @ysnBankAccountActive = 0    
+    IF ISNULL(@ysnBankAccountActive,0) = 0    
     BEGIN    
     -- 'The bank account is inactive.'    
     RAISERROR('The bank account or its associated GL account is inactive.', 11, 1)    
