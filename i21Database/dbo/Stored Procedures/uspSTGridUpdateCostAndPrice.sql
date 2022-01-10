@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTGridUpdateCostAndPrice]
+CREATE PROCEDURE [dbo].[uspSTGridUpdateCostAndPrice]
     @intEntityId INT,
     @ysnRecap BIT,
 	@UDTItemGridToUpdate StoreItemGridToUpdate	READONLY,
@@ -199,7 +199,7 @@ AS
 							,@dtmEndDate					= @dtmLoopEndDate 
 							,@strUpcCode					= @strPromoLoopUpcCode
 							,@intItemId						= @intPromoLoopItemId
-							,@intLocationId					= @intPromoLoopItemLocationId
+							,@intItemLocationId				= @intPromoLoopItemLocationId
 							,@intEntityUserSecurityId		= @intEntityId
 						
 						

@@ -51,6 +51,7 @@ DECLARE
 	,@ysnAllowUserSelfPost AS BIT = 0
 	,@intCurrencyId INT
 	,@intDefaultCurrencyId INT
+	,@dblAmountDetailTotalForeign NUMERIC(18,6)
 	-- Table Variables
 	,@RecapTable AS RecapTableType
 	,@GLEntries AS  RecapTableType
@@ -104,8 +105,8 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
 SELECT	TOP 1 
 		@intTransactionId = intTransactionId
 		,@dtmDate = dtmDate
-		,@dblAmount = dblAmount
-		,@dblShortAmount = dblShortAmount
+		,@dblAmount = ISNULL(dblAmount,0)
+		,@dblShortAmount = ISNULL(dblShortAmount,0)
 		,@dblTotalAmount = ISNULL(dblAmount, 0) + ISNULL(dblShortAmount,0)
 		,@intShortGLAccountId = intShortGLAccountId
 		,@ysnTransactionPostedFlag = ysnPosted
@@ -129,11 +130,16 @@ WHERE	ysnAllowUserSelfPost = 1
 IF @@ERROR <> 0	GOTO Post_Rollback		
 		
 -- Read the detail table and populate the variables. 
-SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
+SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0)),
+@dblAmountDetailTotalForeign = SUM(ISNULL(dblCreditForeign, 0) - ISNULL(dblDebitForeign, 0))
 FROM	[dbo].tblCMBankTransactionDetail
 WHERE	intTransactionId = @intTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
+DECLARE @dblComputedExchangeRate NUMERIC (18,6)
+
+
+SELECT @dblComputedExchangeRate = @dblAmountDetailTotal / CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END
 --=====================================================================================================================================
 -- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -189,7 +195,9 @@ BEGIN
 	END
 
 	-- Check the bank deposit balance. 
-	IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblTotalAmount, 0)
+	IF ISNULL(CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END, 0) 
+	<>
+	(@dblAmount + @dblShortAmount)
 	BEGIN
 		-- The debit and credit amounts are not balanced.
 		RAISERROR('The debit and credit amounts are not balanced.', 11, 1)
@@ -340,9 +348,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN A.dblAmount ELSE ROUND(A.dblAmount * A.dblExchangeRate,2) END 
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 1 THEN ROUND(@dblComputedExchangeRate * A.dblAmount,2) ELSE A.dblAmount END
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE A.dblAmount END
+			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 1  THEN A.dblAmount ELSE 0 END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -350,8 +358,8 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
-			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
+			,[intCurrencyExchangeRateTypeId] =  NULL
+			,[dblExchangeRate]		= @dblComputedExchangeRate 
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = A.strMemo
@@ -378,9 +386,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= A.intShortGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN A.dblShortAmount ELSE ROUND(A.dblShortAmount * A.dblExchangeRate,2) END --A.dblShortAmount * ISNULL(A.dblExchangeRate,1)
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 1 THEN ROUND(@dblComputedExchangeRate * A.dblShortAmount,2) ELSE A.dblShortAmount END
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE A.dblShortAmount  END
+			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 1  THEN A.dblShortAmount ELSE 0 END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -388,8 +396,8 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
-			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
+			,[intCurrencyExchangeRateTypeId] =  NULL
+			,[dblExchangeRate]		= CASE WHEN @ysnForeignTransaction =1 THEN @dblComputedExchangeRate ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = A.strMemo
@@ -416,10 +424,10 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN B.dblDebit ELSE ROUND(B.dblDebit * B.dblExchangeRate,2) END
-			,[dblCredit]			= CASE WHEN @ysnForeignTransaction = 0 THEN B.dblCredit ELSE ROUND(B.dblCredit * B.dblExchangeRate,2) END
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE B.dblDebit END
-			,[dblCreditForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE B.dblCredit END
+			,[dblDebit]				= ROUND(B.dblDebit,2)
+			,[dblCredit]			= ROUND(B.dblCredit,2)
+			,[dblDebitForeign]		= B.dblDebitForeign
+			,[dblCreditForeign]		= B.dblCreditForeign
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
@@ -448,15 +456,9 @@ BEGIN
 				ON B.intEntityId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 
-	DECLARE @gainLoss DECIMAL (18,6)
-	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
-
-	if(@gainLoss <> 0  AND @ysnForeignTransaction = 1)
-		EXEC [uspCMInsertGainLossBankTransfer]   @intDefaultCurrencyId, 'Gain / Loss on Multicurrency Bank Deposit'
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
-	-- Update the posted flag in the transaction table
 
 	
 END -- @ysnPost = 1

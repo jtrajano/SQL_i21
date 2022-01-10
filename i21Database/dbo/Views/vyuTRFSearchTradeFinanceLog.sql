@@ -28,6 +28,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC)
 	, der.strInternalTradeNo
 	, sold_to.intContractHeaderId
 	, sold_to.strContractNumber
+	, tf.intConcurrencyId
 FROM tblTRFTradeFinanceLog tf
 LEFT JOIN tblEMEntity U ON U.intEntityId = tf.intUserId
 
@@ -39,9 +40,8 @@ OUTER APPLY(
 	LEFT JOIN tblRKFutOptTransaction ifot
 		ON aftcs.intFutOptTransactionId = ifot.intFutOptTransactionId
 	WHERE tf.strTransactionType = 'Contract'
-	AND tf.intTransactionHeaderId = aftcs.intContractHeaderId
 	AND tf.intTransactionDetailId = aftcs.intContractDetailId
-	AND aftcs.ysnIsHedged = 0
+	AND aftcs.ysnIsHedged = 1
 	ORDER BY aftcs.dtmMatchDate DESC
 ) der
 

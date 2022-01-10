@@ -134,6 +134,10 @@ SELECT LD.intLoadDetailId
 	, LD.ysnUpdateLoadDirections
 	, LD.ysnPrintLoadDirections
 	, Item.strLotTracking
+	, LD.dtmPickUpFrom
+	, LD.dtmPickUpTo
+	, LD.dtmDeliveryFrom
+	, LD.dtmDeliveryTo
 
 -- Load Header
 	, L.intLoadId

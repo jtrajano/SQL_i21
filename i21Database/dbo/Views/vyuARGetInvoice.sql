@@ -164,6 +164,8 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , ysnInterCompany						= ISNULL(INV.ysnInterCompany, 0)
      , ysnImportFromCSV						= ISNULL(INV.ysnImportFromCSV, 0)
      , strInterCompanyName					= INTERCOMPANY.strCompanyName
+     , ysnOverrideCashFlow                  = INV.ysnOverrideCashFlow
+     , dtmCashFlowDate                      = INV.dtmCashFlowDate
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId

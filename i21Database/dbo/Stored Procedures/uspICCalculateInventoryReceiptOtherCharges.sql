@@ -16,6 +16,7 @@ BEGIN
 			,@COST_METHOD_AMOUNT AS NVARCHAR(50) = 'Amount'
 			,@COST_METHOD_GROSS_UNIT AS NVARCHAR(50) = 'Gross Unit'
 			,@COST_METHOD_PER_CONTAINER AS NVARCHAR(50) = 'Per Container'
+			,@COST_METHOD_CUSTOM_UNIT AS NVARCHAR(50) = 'Custom Unit'
 
 			,@INVENTORY_RECEIPT_TYPE AS INT = 4
 			,@STARTING_NUMBER_BATCH AS INT = 3  
@@ -662,6 +663,59 @@ BEGIN
 	END 
 END 
 
+-- Calculate the cost method for "Custom Unit"
+BEGIN 
+	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId] 
+			,[intInventoryReceiptItemId] 
+			,[intChargeId] 
+			,[intEntityVendorId] 
+			,[dblCalculatedAmount] 
+			,[dblCalculatedQty]
+			,[intContractId]
+			,[intContractDetailId]
+			,[strAllocateCostBy]
+			,[ysnAccrue]
+			,[ysnPrice]
+			,[ysnInventoryCost]
+			,[strChargesLink]
+	)
+	SELECT	[intInventoryReceiptId]			= Receipt.intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
+			,[intInventoryReceiptItemId]	= NULL 
+			,[intChargeId]					= Charge.intChargeId
+			,[intEntityVendorId]			= Charge.intEntityVendorId
+			,[dblCalculatedAmount]			= ROUND(dbo.fnMultiply(Charge.dblQuantity, Charge.dblRate), 2)
+			,[dblCalculatedQty]				= NULL 
+			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
+			,[strAllocateCostBy]			= Charge.strAllocateCostBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
+			,[ysnInventoryCost]				= Charge.ysnInventoryCost
+			,[strChargesLink]				= Charge.strChargesLink
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId			
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND Charge.strCostMethod = @COST_METHOD_CUSTOM_UNIT
+			AND ChargeItem.intOnCostTypeId IS NULL
+
+	UPDATE	Charge
+	SET
+			dblAmount = ROUND(dbo.fnMultiply(Charge.dblQuantity, Charge.dblRate), 2)
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId			
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND Charge.strCostMethod = @COST_METHOD_CUSTOM_UNIT
+			AND ChargeItem.intOnCostTypeId IS NULL
+END 
+
+
 -- Update the Other Charge amounts
 -- If it is in sub-currency, convert it back to the currency amount.
 BEGIN 
@@ -693,7 +747,7 @@ BEGIN
 				ON CalculatedCharges.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			AND Item.intOnCostTypeId IS NULL
-			AND ReceiptCharge.strCostMethod <> @COST_METHOD_AMOUNT
+			AND ReceiptCharge.strCostMethod NOT IN (@COST_METHOD_AMOUNT, @COST_METHOD_CUSTOM_UNIT)
 END 
 
 -- Exit point

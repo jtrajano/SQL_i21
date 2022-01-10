@@ -151,19 +151,19 @@ BEGIN
 			, intFutureMonthId
 			, strFutureMonth
 			, dtmFutureMonthsDate
-			, intOptionMonthId = mf.intOptionMonthId
-			, strOptionMonth = mf.strOptionMonth
-			, dblStrike = CAST(ISNULL(mf.dblStrike, 0.00) AS NUMERIC(24, 10))
-			, strOptionType = mf.strOptionType
-			, strInstrumentType = mf.strInstrumentType
-			, mf.intBrokerageAccountId
-			, strBrokerAccount = mf.strBrokerAccount
+			, intOptionMonthId
+			, strOptionMonth 
+			, dblStrike = CAST(ISNULL(dblStrike, 0.00) AS NUMERIC(24, 10))
+			, strOptionType
+			, strInstrumentType 
+			, intBrokerageAccountId
+			, strBrokerAccount 
 			, intEntityId
-			, strBroker = mf.strBroker
+			, strBroker 
 			, strBuySell = c.strDistributionType
-			, ysnPreCrush = CAST(ISNULL(mf.ysnPreCrush, 0) AS BIT)
+			, ysnPreCrush = CAST(ISNULL(ysnPreCrush, 0) AS BIT)
 			, strNotes
-			, strBrokerTradeNo = mf.strBrokerTradeNo			
+			, strBrokerTradeNo		
 			, intFutOptTransactionHeaderId = c.intTransactionRecordHeaderId
 			, c.intCurrencyId
 			, c.strCurrency
@@ -173,7 +173,6 @@ BEGIN
 			, strUserName
 			, strAction
 		FROM vyuRKGetSummaryLog c
-		CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(c.strMiscField) mf
 		LEFT JOIN MatchDerivatives md ON md.intTransactionRecordId = c.intTransactionRecordId and md.strDistributionType = c.strDistributionType and md.intFutureMarketId = c.intFutureMarketId
 		WHERE strTransactionType IN ('Derivative Entry')
 			AND c.dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))  
@@ -181,7 +180,9 @@ BEGIN
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 			AND intFutOptTransactionId NOT IN (SELECT intTransactionRecordId FROM OptionsLifecycle)
-			AND isnull(c.ysnNegate,0) = CASE WHEN CONVERT(DATE, @dtmDate) = CONVERT(DATE, GETDATE()) THEN  0  ELSE isnull(c.ysnNegate,0) END
+			AND isnull(c.ysnNegate,0) = CASE WHEN CONVERT(DATE, @dtmDate) = CONVERT(DATE, GETDATE()) THEN  0  
+												ELSE CASE WHEN  c.dtmCreatedDate < DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate))) THEN 0 ELSE  isnull(c.ysnNegate,0) END 
+										END
 
 	) t WHERE intRowNum = 1
 

@@ -37,6 +37,22 @@ BEGIN TRY
 			AND intTransUsedBy = 3
 	END
 
+	/*If Used By Transport Load*/
+	IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND intTransUsedBy = 3)
+	BEGIN
+		UPDATE L
+		SET intShipmentStatus = CASE WHEN (TL.ysnPosted = 1) THEN 
+										CASE WHEN (L.intPurchaseSale = 1) THEN 4 ELSE 6 END
+									ELSE
+										CASE WHEN (L.ysnDispatched = 1) THEN 2 ELSE 1 END
+									END
+			,ysnPosted = TL.ysnPosted
+		FROM tblLGLoad L
+		INNER JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = L.intLoadHeaderId
+		WHERE L.intLoadId = @intLoadId AND intTransUsedBy = 3
+
+	END
+
 	UPDATE tblLGLoad SET 
 		ysnInProgress=@ysnInProgress,
 		dtmDeliveredDate=@dtmDeliveredDate,

@@ -96,6 +96,7 @@
 [dtmPlannedAvailabilityDate] DATETIME NULL,
 [dtmCashFlowDate] DATETIME NULL,
 [ysnCashFlowOverride] [bit] NULL,
+[intTermId] INT NULL,
 [ysnArrivedInPort] [bit] NULL,
 [ysnDocumentsApproved] [bit] NULL,
 [ysnCustomsReleased] [bit] NULL,
@@ -213,7 +214,8 @@ CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPOLReasonCodeId_intReasonCodeId] 
 CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETSPOLReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETSPOLReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
 CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPODReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPODReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
 CONSTRAINT [FK_tblLGLoad_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
-CONSTRAINT [FK_tblLGLoad_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId])
+CONSTRAINT [FK_tblLGLoad_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
+CONSTRAINT [FK_tblLGLoad_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])
 )
 
 go

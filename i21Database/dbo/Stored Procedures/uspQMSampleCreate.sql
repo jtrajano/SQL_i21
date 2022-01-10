@@ -362,7 +362,7 @@ BEGIN TRY
 		,strLotNumber
 		,strSampleNote
 		,dtmSampleReceivedDate
-		,dtmTestedOn
+		--,dtmTestedOn
 		--,intTestedById
 		,dblSampleQty
 		,intSampleUOMId
@@ -392,6 +392,7 @@ BEGIN TRY
 		,strForwardingAgentRef
 		,strSentBy
 		,intSentById
+		,ysnImpactPricing
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -431,7 +432,7 @@ BEGIN TRY
 		,strLotNumber
 		,strSampleNote
 		,dtmSampleReceivedDate
-		,dtmTestedOn
+		--,dtmTestedOn
 		--,intTestedById
 		,dblSampleQty
 		,intSampleUOMId
@@ -461,6 +462,7 @@ BEGIN TRY
 		,strForwardingAgentRef
 		,strSentBy
 		,intSentById
+		,ysnImpactPricing
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -495,7 +497,7 @@ BEGIN TRY
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
-			,dtmTestedOn DATETIME
+			--,dtmTestedOn DATETIME
 			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
@@ -520,6 +522,7 @@ BEGIN TRY
 			,strForwardingAgentRef NVARCHAR(50)
 			,strSentBy NVARCHAR(50)
 			,intSentById INT
+			,ysnImpactPricing BIT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT

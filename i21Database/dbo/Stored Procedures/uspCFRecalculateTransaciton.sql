@@ -1219,6 +1219,9 @@ BEGIN
 					,@intFreightTermId				=@companyConfigFreightTermId
 
 
+
+
+
 				-- RE COMPUTE TAX > FOR CFN NETWORK ONLY
 				IF(@strNetworkType = 'CFN' AND ISNULL(@intTaxGroupId,0) = 0)
 				BEGIN

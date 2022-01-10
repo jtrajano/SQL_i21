@@ -430,4 +430,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\9_FRD\4_2110_to_2120.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\AddEffectiveItemPriceUOMColumn.sql" />
+  </ItemGroup>
 </Project>

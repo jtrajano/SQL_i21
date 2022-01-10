@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
+﻿ CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -56,6 +56,7 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnGLOnly]
 	,[strBOLNumber]
 	,[intTicketId]
+	,[intSourceEntityId]
 )
 
 SELECT 
@@ -121,6 +122,7 @@ SELECT
 	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0) THEN @ZeroBit ELSE @OneBit END
 	,[strBOLNumber]				= ARID.strBOLNumber 
 	,[intTicketId]				= ARID.intTicketId
+	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -193,6 +195,7 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnAutoBlend]
 	,[strBOLNumber] 
 	,[intTicketId]
+	,[intSourceEntityId]
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
@@ -232,6 +235,7 @@ SELECT
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[strBOLNumber]				= ARID.strBOLNumber 
 	,[intTicketId]				= ARID.intTicketId
+	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
@@ -257,8 +261,8 @@ WHERE
 	AND ARID.[intItemId] IS NOT NULL
 	AND ISNULL(ARIC.[intBundleItemId],0) <> 0
 	AND ARID.[strTransactionType] <> 'Debit Memo'	
-	AND ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
-	AND ICI.[strType] NOT IN ('Non-Inventory')
+	AND ARID.[strItemType] = 'Bundle'
+	AND ICI.[strType] <> 'Non-Inventory'
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 
@@ -292,6 +296,7 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnAutoBlend]
 	,[strBOLNumber] 
 	,[intTicketId]
+	,[intSourceEntityId]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -322,6 +327,7 @@ SELECT
 	,ARID.[ysnAutoBlend]
 	,ARID.[strBOLNumber] 
 	,ARID.[intTicketId]
+	,ARID.[intEntityCustomerId]
 FROM ##ARItemsForCosting ARIC
 INNER JOIN ##ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId

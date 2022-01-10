@@ -37,7 +37,7 @@ begin
 			,intInvoiceDetailId = (case when @strScreen = 'Invoice' then @intDetailId else null end)  
 			,intSourceId = @intSourceDetailId
 			,dblQuantity = @dblQuantity
-			,dtmCreatedDate = getdate()
+			,dtmCreatedDate = GETUTCDATE()
 			,ysnMarkDelete = null
 			,ysnReturn = @ysnReturn
 			,intConcurrencyId = 1 

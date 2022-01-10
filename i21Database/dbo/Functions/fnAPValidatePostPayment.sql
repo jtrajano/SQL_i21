@@ -687,34 +687,51 @@ BEGIN
 			AND B.dtmCheckPrinted IS NOT NULL
 
 		--Do not allow to unpost if there is latest payment made
+	-- 	INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+	-- 	SELECT 
+	-- 		'You cannot unpost ' + A.strPaymentRecordNum + '. Unpost first ' + LatestPayment.strPaymentRecordNum + '.',
+	-- 		'Payable',
+	-- 		A.strPaymentRecordNum,
+	-- 		A.intPaymentId
+	-- 	FROM tblAPPayment A 
+	-- 	INNER JOIN (
+	-- 		SELECT * FROM (
+	-- 			SELECT 
+	-- 				A1.intPaymentId, 
+	-- 				OtherPayments.intPostPaymentId,
+	-- 				strPaymentRecordNum, 
+	-- 				dtmDatePaid,
+	-- 				ROW_NUMBER() OVER(PARTITION BY A2.intBillId ORDER BY A1.intPaymentId DESC) rowNum
+	-- 			FROM tblAPPayment A1
+	-- 				INNER JOIN tblAPPaymentDetail A2 ON A1.intPaymentId = A2.intPaymentId
+	-- 				INNER JOIN 
+	-- 				(
+	-- 					SELECT intBillId, A3.intPaymentId, tmpPayments.intId AS intPostPaymentId
+	-- 					FROM tblAPPaymentDetail A3 INNER JOIN @paymentIds AS tmpPayments ON A3.intPaymentId = tmpPayments.intId
+	-- 				) OtherPayments ON A2.intBillId = OtherPayments.intBillId
+	-- 			WHERE A1.intPaymentId NOT IN (SELECT intId FROM @paymentIds) --exclude the for posted on results
+	-- 			AND A1.ysnPosted = 1 --get only the posted
+	-- 			) OtherPaymentsFiltered WHERE rowNum = 1
+	-- 		) LatestPayment ON A.intPaymentId = LatestPayment.intPostPaymentId
+	-- 	WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) 
+	-- 	AND A.dtmDatePaid < LatestPayment.dtmDatePaid  
+	
+		--DO NOT ALLOW TO UNPOST THE PREPAYMENT PAYMENT IF IT WAS APPLIED ON THE BILLS
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			'You cannot unpost ' + A.strPaymentRecordNum + '. Unpost first ' + LatestPayment.strPaymentRecordNum + '.',
+		SELECT
+			'You cannot unpost ' + A.strPaymentRecordNum + ', this prepayment offsets ' + A.strBillId + '.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
-		FROM tblAPPayment A 
-		INNER JOIN (
-			SELECT * FROM (
-				SELECT 
-					A1.intPaymentId, 
-					OtherPayments.intPostPaymentId,
-					strPaymentRecordNum, 
-					dtmDatePaid,
-					ROW_NUMBER() OVER(PARTITION BY A2.intBillId ORDER BY A1.intPaymentId DESC) rowNum
-				FROM tblAPPayment A1
-					INNER JOIN tblAPPaymentDetail A2 ON A1.intPaymentId = A2.intPaymentId
-					INNER JOIN 
-					(
-						SELECT intBillId, A3.intPaymentId, tmpPayments.intId AS intPostPaymentId
-						FROM tblAPPaymentDetail A3 INNER JOIN @paymentIds AS tmpPayments ON A3.intPaymentId = tmpPayments.intId
-					) OtherPayments ON A2.intBillId = OtherPayments.intBillId
-				WHERE A1.intPaymentId NOT IN (SELECT intId FROM @paymentIds) --exclude the for posted on results
-				AND A1.ysnPosted = 1 --get only the posted
-				) OtherPaymentsFiltered WHERE rowNum = 1
-			) LatestPayment ON A.intPaymentId = LatestPayment.intPostPaymentId
-		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) 
-		AND A.intPaymentId < LatestPayment.intPaymentId
+		FROM (
+			SELECT A.intPaymentId, A.strPaymentRecordNum, E.strBillId 
+			FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+			INNER JOIN tblAPAppliedPrepaidAndDebit D ON C.intBillId = D.intTransactionId
+			INNER JOIN tblAPBill E ON D.intBillId = E.intBillId
+			WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND D.dblAmountApplied > 0 AND E.ysnPosted = 1 AND B.ysnOffset = 0
+		) A
 	END
 
 	RETURN

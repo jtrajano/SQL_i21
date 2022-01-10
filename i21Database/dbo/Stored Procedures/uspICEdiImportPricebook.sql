@@ -735,6 +735,7 @@ FROM (
 		UPDATE 
 		SET	
 			intUnitMeasureId = Source_Query.intUnitMeasureId
+			,strUpcCode = dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
 			,intModifiedByUserId = @intUserId 
 			,intConcurrencyId = ItemUOM.intConcurrencyId + 1
 
@@ -749,7 +750,7 @@ FROM (
 			intItemId
 			,intUnitMeasureId
 			,dblUnitQty
-			--,strUpcCode
+			,strUpcCode
 			,strLongUPCCode
 			,ysnStockUnit
 			,ysnAllowPurchase
@@ -763,7 +764,7 @@ FROM (
 			Source_Query.intItemId --intItemId
 			,Source_Query.intUnitMeasureId --,intUnitMeasureId
 			,1--,dblUnitQty
-			--,Source_Query.strSellingUpcNumber--,strUpcCode
+			,dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
 			,Source_Query.strSellingUpcNumber--,strLongUPCCode
 			,Source_Query.ysnStockUnit--,ysnStockUnit
 			,1--,ysnAllowPurchase

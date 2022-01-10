@@ -11,5 +11,6 @@
 	[dtmEnd] DATETIME NULL,
     [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[ysnFailed] BIT NULL,
     CONSTRAINT [PK_tblICBackup] PRIMARY KEY NONCLUSTERED ([intBackupId])
 )

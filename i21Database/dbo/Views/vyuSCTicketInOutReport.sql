@@ -22,8 +22,27 @@
 			else ''
 		end as strGroupIndicator
 		, Ticket.intProcessingLocationId
-		
+		, Item.strItemNo
+		, Commodity.strCommodityCode
+		, UOM.strUnitMeasure
+
+		,case when ScaleSetup.intUnitMeasureId != UOM.intUnitMeasureId then
+			round(dbo.fnGRConvertQuantityToTargetItemUOM(
+									Ticket.intItemId
+									, UOM.intUnitMeasureId
+									, ScaleSetup.intUnitMeasureId
+									, Ticket.dblGrossUnits) , 4)
+		else
+			Ticket.dblGrossUnits
+		end as dblComputedGrossUnits
+
+		,ScaleSetupUOM.strUnitMeasure as strStationUnitMeasure
+
 		from tblSCTicket Ticket
+			join tblICItem Item
+				on Ticket.intItemId = Item.intItemId
+			join tblICCommodity Commodity
+				on Item.intCommodityId = Commodity.intCommodityId
 			join tblEMEntity Entity
 				on Ticket.intEntityId = Entity.intEntityId
 			join tblSMCompanyLocation CompanyLocation
@@ -32,6 +51,18 @@
 				on Ticket.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId
 			join tblSCListTicketTypes TicketType
 				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
+
+			join tblICItemUOM ItemUOM
+					on Ticket.intItemUOMIdTo = ItemUOM.intItemUOMId
+						and Ticket.intItemId = ItemUOM.intItemId
+
+			join tblICUnitMeasure UOM
+					on ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			join tblSCScaleSetup ScaleSetup
+				on Ticket.intScaleSetupId = ScaleSetup.intScaleSetupId
+			join tblICUnitMeasure ScaleSetupUOM
+				on ScaleSetup.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+
 			left join tblSCDeliverySheet DeliverySheet
 				on Ticket.intDeliverySheetId = DeliverySheet.intDeliverySheetId
 	where Ticket.intTicketType = 1
@@ -52,7 +83,26 @@
 		, Ticket.dtmTicketDateTime
 		, 'Transfer Outbound' as strGroupIndicator
 		, Ticket.intProcessingLocationId
-		from tblSCTicket Ticket			
+		, Item.strItemNo
+		, Commodity.strCommodityCode
+		, UOM.strUnitMeasure
+
+		,case when ScaleSetup.intUnitMeasureId != UOM.intUnitMeasureId then
+			dbo.fnGRConvertQuantityToTargetItemUOM(
+									Ticket.intItemId
+									, UOM.intUnitMeasureId
+									, ScaleSetup.intUnitMeasureId
+									, Ticket.dblGrossUnits)
+		else
+			Ticket.dblGrossUnits
+		end as dblComputedGrossUnits
+
+		,ScaleSetupUOM.strUnitMeasure as strStationUnitMeasure
+		from tblSCTicket Ticket	
+			join tblICItem Item
+				on Ticket.intItemId = Item.intItemId
+			join tblICCommodity Commodity
+				on Item.intCommodityId = Commodity.intCommodityId		
 			join tblSMCompanyLocation CompanyLocation
 				on Ticket.intProcessingLocationId = CompanyLocation.intCompanyLocationId
 			join tblSMCompanyLocation EntityCompanyLocation
@@ -60,6 +110,17 @@
 			join tblSCListTicketTypes TicketType
 				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
 
+			join tblICItemUOM ItemUOM
+					on Ticket.intItemUOMIdTo = ItemUOM.intItemUOMId
+						and Ticket.intItemId = ItemUOM.intItemId			
+
+			join tblICUnitMeasure UOM
+					on ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			join tblSCScaleSetup ScaleSetup
+				on Ticket.intScaleSetupId = ScaleSetup.intScaleSetupId
+			join tblICUnitMeasure ScaleSetupUOM
+				on ScaleSetup.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+			
 	where Ticket.intTicketType = 7
 		and CompanyLocation.ysnLicensed = 1
 		and EntityCompanyLocation.ysnLicensed = 1
@@ -79,7 +140,26 @@
 		, Ticket.dtmTicketDateTime
 		, 'Transfer Inbound' as strGroupIndicator
 		, Ticket.intTransferLocationId
-		from tblSCTicket Ticket			
+		, Item.strItemNo
+		, Commodity.strCommodityCode
+		, UOM.strUnitMeasure
+
+		,case when ScaleSetup.intUnitMeasureId != UOM.intUnitMeasureId then
+			dbo.fnGRConvertQuantityToTargetItemUOM(
+									Ticket.intItemId
+									, UOM.intUnitMeasureId
+									, ScaleSetup.intUnitMeasureId
+									, Ticket.dblGrossUnits)
+		else
+			Ticket.dblGrossUnits
+		end as dblComputedGrossUnits
+
+		,ScaleSetupUOM.strUnitMeasure as strStationUnitMeasure
+		from tblSCTicket Ticket		
+			join tblICItem Item
+				on Ticket.intItemId = Item.intItemId
+			join tblICCommodity Commodity
+				on Item.intCommodityId = Commodity.intCommodityId	
 			join tblSMCompanyLocation CompanyLocation
 				on Ticket.intTransferLocationId = CompanyLocation.intCompanyLocationId		
 			join tblSMCompanyLocation EntityCompanyLocation
@@ -87,11 +167,21 @@
 			join tblSCListTicketTypes TicketType
 				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
 
+			join tblICItemUOM ItemUOM
+					on Ticket.intItemUOMIdTo = ItemUOM.intItemUOMId
+						and Ticket.intItemId = ItemUOM.intItemId					
+
+			join tblICUnitMeasure UOM
+					on ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			join tblSCScaleSetup ScaleSetup
+				on Ticket.intScaleSetupId = ScaleSetup.intScaleSetupId
+			join tblICUnitMeasure ScaleSetupUOM
+				on ScaleSetup.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+
 	where Ticket.intTicketType = 7
 		and CompanyLocation.ysnLicensed = 1		
 		and EntityCompanyLocation.ysnLicensed = 1
 		--and dtmTicketDateTime between '2021-10-15' and '2021-10-22'
-
-
-	
 GO
+
+

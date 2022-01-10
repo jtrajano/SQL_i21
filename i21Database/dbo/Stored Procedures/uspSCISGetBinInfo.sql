@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCISGetBinInfo]
 	@intStorageLocationId int
+	,@intItemId int = null
 	,@dblAvailableOutput decimal(20,2) = null output 
 	,@dblCapacityOutput decimal(20,2) = null output
 	,@dblOccupiedOutput decimal(20,2) = null output
@@ -17,7 +18,7 @@ begin
 		,@dblOccupiedOutput = dblCapacity - dblAvailable
 		from vyuICGetStorageBinDetails 
 			where intStorageLocationId = @intStorageLocationId
-
+				and (@intItemId is null or intItemId = @intItemId)
 	select @StorageLocation = strName 
 		from tblICStorageLocation 
 			where intStorageLocationId = @intStorageLocationId
@@ -42,9 +43,9 @@ begin
 					and (BinSearch.dtmTrackingDate is null or Ticket.dtmTicketDateTime >= BinSearch.dtmTrackingDate) 
 			join tblSCISBinSearchDiscountTracking DiscountTracking
 				on Item.intItemId = DiscountTracking.intItemId
-				
+					and BinSearch.intBinSearchId = DiscountTracking.intBinSearchId
 		where Ticket.intStorageLocationId = @intStorageLocationId
-			and ( strShortName is not null or strShortName <> '')
+			and ( strShortName is not null or strShortName <> '')	
 		 group by Item.strShortName
 
 	select @FinalReading = @FinalReading + strShortName + ':'+ cast(dblAverageReading as nvarchar) + '| ' from @FinalResult	

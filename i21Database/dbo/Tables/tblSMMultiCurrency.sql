@@ -43,6 +43,7 @@
 	[intCashManagementRealizedId]					INT NULL,
 	[intGainOnForwardRealizedId]					INT NULL,
 	[intGainOnSwapRealizedId]						INT NULL,
+	[intForexDifferenceRealizedId]					INT NULL,
 	/* Bank Transfer */
 
 	[intConcurrencyId]								INT NOT NULL DEFAULT 1, 

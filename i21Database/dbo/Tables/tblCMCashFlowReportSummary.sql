@@ -21,7 +21,7 @@
 
 	CONSTRAINT [PK_tblCMCashFlowReportSummary] PRIMARY KEY CLUSTERED ([intCashFlowReportSummaryId] ASC),
 	CONSTRAINT [FK_tblCMCashFlowReportSummary_tblCMCashFlowReportSummaryCode] FOREIGN KEY ([intCashFlowReportSummaryCodeId]) REFERENCES [dbo].[tblCMCashFlowReportSummaryCode]([intCashFlowReportSummaryCodeId]),
-	CONSTRAINT [FK_tblCMCashFlowReportSummary_tblCMCashFlowReport] FOREIGN KEY ([intCashFlowReportId]) REFERENCES [dbo].[tblCMCashFlowReport]([intCashFlowReportId]),
+	CONSTRAINT [FK_tblCMCashFlowReportSummary_tblCMCashFlowReport] FOREIGN KEY ([intCashFlowReportId]) REFERENCES [dbo].[tblCMCashFlowReport]([intCashFlowReportId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCMCashFlowReportSummary_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount]([intBankAccountId]),
 	CONSTRAINT [FK_tblCMCashFlowReportSummary_tblSMCurrency_Reporting] FOREIGN KEY ([intReportingCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCMCashFlowReportSummary_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation]([intCompanyLocationId]),

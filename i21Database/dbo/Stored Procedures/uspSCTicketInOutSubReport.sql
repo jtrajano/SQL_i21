@@ -93,11 +93,12 @@ begin
 	declare @sqlcmd nvarchar(500)
 	set @sqlcmd = 'select 
 					   strGroupIndicator as strStorageTypeDescription
-					   , sum(dblGrossUnits) as dblGrossUnits 
+					   , strCommodityCode
+					   , sum(dblComputedGrossUnits) as dblGrossUnits 
 
 					from vyuSCTicketInOutReport
 						where (dtmTicketDateTime between ''' + @sFrom + ''' and  ''' + @sTo + ''')
-						group by strGroupIndicator	
+						group by strGroupIndicator, strCommodityCode	
 					'
 
 

@@ -125,23 +125,29 @@ BEGIN
 				SET @strOrigin = CASE WHEN @intVendorId IS NULL THEN 'Location' ELSE 'Terminal' END
 
 				-- GET UNIT COST
+				SELECT @dblUnitCost = dblReceiveLastCost 
+					FROM vyuICGetItemStock WHERE intItemId = @intPullProductId 
+					AND intLocationId = @intVendorCompanyLocationId 
+					AND strType NOT IN ('Other Charge','Bundle','Kit','Service','Sofware')
+
 				IF(@strOrigin = 'Terminal')
 				BEGIN
+					DECLARE @dblRackPriceUnitCost NUMERIC(18,6) = NULL
 					EXECUTE [dbo].[uspTRGetRackPrice] 
 						@dtmPullDate
 						,0
 						,@intSupplyPointId
 						,@intPullProductId
-						,@dblUnitCost OUTPUT
+						,@dblRackPriceUnitCost OUTPUT
+
+					IF(ISNULL(@dblRackPriceUnitCost, 0) != 0)
+					BEGIN
+						SET @dblUnitCost = @dblRackPriceUnitCost
+					END
 				END
 				ELSE
 				BEGIN
-					SET @strGrossNet = 'Gross'
-
-					SELECT @dblUnitCost = dblReceiveLastCost 
-					FROM vyuICGetItemStock WHERE intItemId = @intPullProductId 
-					AND intLocationId = @intVendorCompanyLocationId 
-					AND strType NOT IN ('Other Charge','Bundle','Kit','Service','Sofware')
+					SET @strGrossNet = 'Gross'	
 				END
 
 				-- RECEIPT
@@ -406,7 +412,9 @@ BEGIN
 						@dblBlendSurchargeReceipt DECIMAL(18,6),
 						@dblBlendSurchargeDistribution DECIMAL(18,6),
 						@ysnBlendFreightInPrice BIT,
-						@ysnBlendFreightOnly BIT
+						@ysnBlendFreightOnly BIT,
+						@dblBlendMinimumUnitsIn  DECIMAL(18,6),
+						@dblBlendMinimumUnitsOut DECIMAL(18,6)
 
 					EXECUTE [dbo].[uspTRGetCustomerFreight]
 						@intCustomerOrLocation -- Customer / Company Location
@@ -425,6 +433,8 @@ BEGIN
 						,@dblBlendSurchargeDistribution OUTPUT
 						,@ysnBlendFreightInPrice OUTPUT
 						,@ysnBlendFreightOnly OUTPUT
+						,@dblBlendMinimumUnitsIn OUTPUT
+	 					,@dblBlendMinimumUnitsOut OUTPUT
 
 					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum, dblFreightRate = @dblBlendFreightRateDistribution 
 					WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
@@ -492,7 +502,9 @@ BEGIN
 						@dblSurchargeReceipt DECIMAL(18,6),
 						@dblSurchargeDistribution DECIMAL(18,6),
 						@ysnFreightInPrice BIT,
-						@ysnFreightOnly BIT
+						@ysnFreightOnly BIT,
+						@dblMinimumUnitsIn DECIMAL(18,6),
+						@dblMinimumUnitsOut DECIMAL(18,6)
 
 					IF(@intNonBlendDropProductId IS NOT NULL AND @intCarrierId IS NOT NULL)
 					BEGIN
@@ -523,6 +535,8 @@ BEGIN
 							,@dblSurchargeDistribution OUTPUT
 							,@ysnFreightInPrice OUTPUT
 							,@ysnFreightOnly OUTPUT
+							,@dblMinimumUnitsIn OUTPUT
+	 						,@dblMinimumUnitsOut OUTPUT
 					END
 
 					UPDATE tblTRLoadReceipt SET dblFreightRate = @dblFreightRateReceipt, dblPurSurcharge = @dblSurchargeReceipt

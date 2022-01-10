@@ -2,7 +2,7 @@
 
 AS
 
-SELECT intId = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intPriceFixationDetailId))
+SELECT intId
 	, intContractDetailId
 	, intPriceFixationId
 	, intPriceFixationDetailId
@@ -21,7 +21,9 @@ SELECT intId = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intPriceFixationDetailId
 	, intPriceContractId
 	, strPriceContractNo
 FROM (
-	SELECT pf.intContractDetailId
+	SELECT
+		intId = pfd.intPriceFixationDetailId
+		, pf.intContractDetailId
 		, pf.intPriceFixationId
 		, pfd.intPriceFixationDetailId
 		, pfd.dtmFixationDate
@@ -62,7 +64,9 @@ FROM (
 		, pc.intPriceContractId
 		, pc.strPriceContractNo
 	
-	UNION ALL SELECT cd.intContractDetailId
+	UNION ALL SELECT
+		intId = cd.intContractDetailId
+		, cd.intContractDetailId
 		, intPriceFixationId = NULL
 		, intPriceFixationDetailId = NULL
 		, dtmFixationDate = NULL
@@ -84,7 +88,6 @@ FROM (
 	CROSS APPLY (
 		SELECT intPricingCount = COUNT(*)
 		FROM tblCTPriceFixation pf
-		JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 		WHERE pf.intContractDetailId = cd.intContractDetailId
 	) noPrice
 	WHERE cd.dblCashPrice IS NOT NULL

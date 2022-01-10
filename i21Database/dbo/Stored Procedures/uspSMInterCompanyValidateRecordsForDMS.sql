@@ -208,12 +208,47 @@ BEGIN
 								--execute the sp in the other database.
 								IF ISNULL(@intInterCompanyMappingIdToUse, 0) <> 0
 								BEGIN
+									DECLARE @databaseToUseForUpdate VARCHAR(MAX) = CONVERT(VARCHAR(MAX),DB_NAME())
+
+									--we need to update the refer document id to use the counterpart document id from the linked database
+									--example, irelyRO: document refer id = 88, in the irelyCH 88 is a different document
+									IF ISNULL(@intReferToDocumentId, 0) <> 0
+									BEGIN
+										DECLARE @newReferDocumentId INT
+
+										--file uploaded from Zug, the data for transfer log is on the zug database
+										SET @sql = N'
+										SELECT @paramOut = A.intSourceRecordId FROM [' + @strReferenceDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForDMS] A  
+										WHERE ISNULL(A.intDestinationCompanyId, 0) = ' + CONVERT(VARCHAR, @intCurrentCompanyId) + '
+										AND A.intDestinationRecordId = ' + CAST(@intReferToDocumentId AS NVARCHAR) + '
+										'
+										EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @newReferDocumentId OUTPUT;
+
+										--file uploaded from BU, the data for transfer log is on the bu database
+										IF ISNULL(@newReferDocumentId, 0) = 0
+										BEGIN
+											SET @sql = N'
+											SELECT @paramOut = A.intDestinationRecordId FROM [' + CONVERT(VARCHAR(MAX),DB_NAME()) + '].dbo.[tblSMInterCompanyTransferLogForDMS] A  
+											WHERE ISNULL(A.intDestinationCompanyId, 0) = ' + CONVERT(VARCHAR, @intReferenceCompanyId) + '
+											AND A.intSourceRecordId = ' + CAST(@intReferToDocumentId AS NVARCHAR) + '
+											'
+											EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @newReferDocumentId OUTPUT;
+										END
+
+										IF ISNULL(@newReferDocumentId, 0) <> 0
+										BEGIN
+											SET @intReferToDocumentId = @newReferDocumentId
+											SET @databaseToUseForUpdate = @strReferenceDatabaseName
+										END
+									END
+
+
 									SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyValidateRecordsForDMS] ' + 
 														 CONVERT(VARCHAR(MAX), @intInterCompanyMappingIdToUse) + ', ' +
 														 CONVERT(VARCHAR(MAX), @intCurrentCompanyId) + ', ''' +
 														 CONVERT(VARCHAR(MAX), @strFinishedTransactionId) + ','',' +
 														 '@intReferToDocumentId = ' + CONVERT(VARCHAR(MAX), ISNULL(CAST(@intReferToDocumentId AS NVARCHAR), 'NULL')) + ', ' +
-														 '@strDatabaseToUseForUpdate = ''' + CONVERT(VARCHAR(MAX),DB_NAME()) + ''''
+														 '@strDatabaseToUseForUpdate = ''' + @databaseToUseForUpdate + ''''
 
 									EXEC sp_executesql @sql;
 								END

@@ -212,6 +212,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 :r .\DB\6_PanelOwnerMigration.sql
 :r .\DB\7_Create_BusinessInsights.sql
+:r .\DB\8_RiskDemoData.sql
 
 -- Fixed Assets
 :r .\FA\DefaultData\FixedAssetGroup.sql
@@ -244,6 +245,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1u_InsertDefaultDataSync.sql
 :r .\GL\DefaultData\1v_PostHistoryGroupings.sql
 :r .\GL\DefaultData\1w_UpdateGLAccount.sql
+:r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -261,6 +263,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\11_TradingFinance.sql
 :r .\CM\12_CashFlowReportSummary.sql
 :r .\CM\13_InsertDefaultCashFlowReportBucketType.sql
+:r .\CM\14_BankAccountTypes.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 
@@ -376,6 +379,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\27_ActivateItemLocations.sql 
 :r .\IC\28_PopulateICAPClearing.sql 
 :r .\IC\29_CleanupObjects.sql
+:r .\IC\30_InventoryValuationAccountIds.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 

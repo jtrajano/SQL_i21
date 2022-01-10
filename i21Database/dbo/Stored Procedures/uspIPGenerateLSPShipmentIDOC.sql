@@ -67,7 +67,8 @@ Declare @intMinHeader				INT,
 		@strMVoyageNumber			NVARCHAR(200),
 		@intPositionId				INT,
 		@strPositionType			NVARCHAR(50),
-		@str10Zeros					NVARCHAR(50)='0000000000'
+		@str10Zeros					NVARCHAR(50)='0000000000',
+		@ysnPosted BIT
 
 Declare @tblDetail AS Table
 (
@@ -154,11 +155,13 @@ Begin
 
 	Set @intPositionId=NULL
 
+	SELECT @ysnPosted = NULL
+
 	Select TOP 1 @strPackingDesc=ct.strPackingDescription,@intPositionId=ch.intPositionId From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
 	Join tblCTContractHeader ch on ch.intContractHeaderId=ct.intContractHeaderId
 	Where ld.intLoadId=@intLoadId
 
-	SELECT @dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate FROM tblLGLoad WHERE intLoadId = @intLoadId
+	SELECT @dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate,@ysnPosted = ISNULL(ysnPosted, 0) FROM tblLGLoad WHERE intLoadId = @intLoadId
 
 	Update tblLGLoadLSPStg Set dtmPlannedAvailabilityDate=@dtmPlannedAvailabilityDate Where intLoadStgId=@intLoadStgId
 
@@ -190,6 +193,21 @@ Begin
 	Begin
 		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='It is a Spot Contract' Where intLoadStgId=@intLoadStgId
 		GOTO NEXT_SHIPMENT
+	End
+
+	IF UPPER(@strHeaderRowState) <> 'DELETE' AND ISNULL(@ysnPosted, 0) = 0
+	Begin
+		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='LS is not yet posted' Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+
+	If UPPER(@strHeaderRowState) = 'DELETE'
+	Begin
+		If NOT EXISTS (Select TOP 1 1 from tblLGLoadLSPStg where intLoadId = @intLoadId AND intLoadStgId < @intLoadStgId AND ISNULL(strFeedStatus,'') = 'Awt Ack')
+		Begin
+			Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='No LS feed were sent earlier' Where intLoadStgId=@intLoadStgId
+			GOTO NEXT_SHIPMENT
+		End
 	End
 
 	If ISNULL(@strExternalDeliveryNumber,'')=''

@@ -69,7 +69,7 @@ BEGIN
         intId,  'Next Depreciation Date is on a closed period in this asset.'
         FROM @Id I 
             CROSS APPLY(
-                SELECT TOP 1  DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (dtmDepreciationToDate))+ 2, 0))  nextDate
+                SELECT TOP 1 dbo.fnFAGetNextDepreciationDate(intAssetId, intBookId) nextDate
                 FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =I.intId AND ISNULL(intBookId,1) = @BookId
                 AND strTransaction = 'Depreciation'
                 AND dtmDepreciationToDate IS NOT NULL

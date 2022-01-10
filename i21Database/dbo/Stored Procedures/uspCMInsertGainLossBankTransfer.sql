@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]
 @intDefaultCurrencyId INT,
 @strDescription nvarchar(300),
+@intBankTransferTypeId INT,
+@intGLAccountIdTo INT,
 @intRealizedGainAccountId INT = NULL
 
 AS
@@ -22,6 +24,11 @@ BEGIN
 	SELECT @gainLoss= sum(dblDebit - dblCredit) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
 	SELECT @gainLossForeign= sum(dblDebitForeign - dblCreditForeign) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
 	IF @gainLoss <> 0
+	BEGIN
+
+	EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,3, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
+	EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,6, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
+
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
@@ -58,8 +65,8 @@ BEGIN
 			,[intAccountId]			= @intRealizedGainAccountId
 			,[dblDebit]				= case when @gainLoss < 0 then @gainLoss * -1  else 0 end
 			,[dblCredit]			= case when @gainLoss >= 0 then @gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
-			,[dblDebitForeign]		= case when @gainLoss < 0 then @gainLoss * -1  else 0 end
-			,[dblCreditForeign]		= case when @gainLoss >= 0 then @gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
+			,[dblDebitForeign]		= 0
+			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
@@ -81,6 +88,8 @@ BEGIN
 	CROSS APPLY (
 		SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
 	)GL
+	END
+
 END
 GO
 

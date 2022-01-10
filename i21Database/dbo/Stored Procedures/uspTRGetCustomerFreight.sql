@@ -14,7 +14,9 @@ CREATE PROCEDURE [dbo].[uspTRGetCustomerFreight]
 	 @dblReceiptSurchargeRate decimal(18,6) OUTPUT,
 	 @dblInvoiceSurchargeRate decimal(18,6) OUTPUT,
 	 @ysnFreightInPrice bit OUTPUT,
-	 @ysnFreightOnly bit OUTPUT
+	 @ysnFreightOnly bit OUTPUT,
+	 @dblMinimumUnitsIn decimal(18,6) OUTPUT,
+	 @dblMinimumUnitsOut decimal(18,6) OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -32,8 +34,10 @@ DECLARE @freight decimal(18,6),
 		@intEntityShipViaId int,
 		@intMiles int,
 		@intTariffType int,
-		@dblRate decimal(18,6),
-		@dblSurchargeRate decimal(18,6),
+		@dblFreightRateOut decimal(18,6),
+		@dblFreightRateIn decimal(18,6),
+		@dblSurchargeRateIn decimal(18,6),
+		@dblSurchargeRateOut decimal(18,6),
 		@dblMinimumUnits decimal(18,6),
 		@dblCostRatePerUnit decimal(18,6),
 		@dblInvoiceRatePerUnit decimal(18,6);
@@ -44,6 +48,8 @@ set @dblReceiptFreightRate = 0;
 set @dblReceiptSurchargeRate =0;
 set @dblInvoiceSurchargeRate =0;
 
+SET @dblMinimumUnitsIn = 0
+SET	@dblMinimumUnitsOut = 0
 
      select @intCategoryid = intCategoryId from tblICItem where intItemId = @intItemId
      IF @intCategoryid IS NULL 
@@ -57,10 +63,13 @@ set @dblInvoiceSurchargeRate =0;
 	                @strFreightType = CF.strFreightType,
 	           		@intEntityShipViaId = CF.intShipViaId,
 	           		@intMiles = convert(int,CF.dblFreightMiles),
-	           		@dblRate = ISNULL(CF.dblFreightRate, 0),
+					@dblFreightRateIn = ISNULL(CF.dblFreightRateIn, 0),
+	           		@dblFreightRateOut = ISNULL(CF.dblFreightRate, 0),
 	           		@ysnFreightInPrice = CF.ysnFreightInPrice, 
-	           		@dblMinimumUnits = CF.dblMinimumUnits,
-					@intTariffType   = CF.intEntityTariffTypeId
+					@dblMinimumUnitsIn = CF.dblMinimumUnitsIn,
+	           		@dblMinimumUnitsOut = CF.dblMinimumUnits,
+					@intTariffType  = CF.intEntityTariffTypeId,
+					@dblSurchargeRateOut = CF.dblSurchargeOut
 	    from tblARCustomerFreightXRef CF 
 			join tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
 	            where CF.intEntityCustomerId = @intEntityCustomerId 
@@ -74,22 +83,26 @@ set @dblInvoiceSurchargeRate =0;
 	                @strFreightType = BPF.strFreightType,
 	           		@intEntityShipViaId = BPF.intShipViaId,
 	           		@intMiles = convert(int,BPF.dblFreightMiles),
-	           		@dblRate = ISNULL(BPF.dblFreightRate, 0),
+					@dblFreightRateIn = ISNULL(BPF.dblFreightRateIn, 0),
+	           		@dblFreightRateOut = ISNULL(BPF.dblFreightRate, 0),
 	           		@ysnFreightInPrice = convert(bit,0), 
-	           		@dblMinimumUnits = BPF.dblMinimumUnits,
-					@intTariffType   = BPF.intEntityTariffTypeId
+					@dblMinimumUnitsIn = BPF.dblMinimumUnitsIn,
+	           		@dblMinimumUnitsOut = BPF.dblMinimumUnits,
+					@intTariffType   = BPF.intEntityTariffTypeId,
+					@dblSurchargeRateOut = BPF.dblSurchargeOut
 	    from tblTRBulkPlantFreight BPF 
 	            where BPF.strZipCode = @strZipCode
 	           			and BPF.intCategoryId = @intCategoryid
                         and BPF.intCompanyLocationId = @intShipToId
+
      END
 
 
 
-     IF ((isNull(@dblMinimumUnits,0) > isNull(@dblInvoiceGallons,0)) or (isNull(@dblMinimumUnits,0) > isNull(@dblReceiptGallons,0)) )
-     BEGIN
-	     RAISERROR('Gallons less than Minimum Freight Units' , 16, 1);
-	 END
+    --  IF ((isNull(@dblMinimumUnits,0) > isNull(@dblInvoiceGallons,0)) or (isNull(@dblMinimumUnits,0) > isNull(@dblReceiptGallons,0)) )
+    --  BEGIN
+	--      RAISERROR('Gallons less than Minimum Freight Units' , 16, 1);
+	--  END
 	 
 	 IF isNull(@strFreightType,0) = '0'
 	 BEGIN
@@ -101,10 +114,10 @@ set @dblInvoiceSurchargeRate =0;
 	 IF ISNULL(@strFreightType,0) = 'Rate'
 	 BEGIN
 
-		SET @dblInvoiceFreightRate = @dblRate
-		SET @dblReceiptFreightRate = @dblRate
+		SET @dblInvoiceFreightRate = @dblFreightRateOut
+		SET @dblReceiptFreightRate = @dblFreightRateIn
 		
-		 SELECT TOP 1 @dblSurchargeRate=ISNULL(FS.dblFuelSurcharge, 0) 
+		 SELECT TOP 1 @dblSurchargeRateIn=ISNULL(FS.dblFuelSurcharge, 0) 
 		 FROM [tblEMEntityTariff] TA INNER JOIN [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId
 	  		LEFT JOIN [tblEMEntityTariffFuelSurcharge] FS ON FS.intEntityTariffId = TC.intEntityTariffId				   
 	  	 WHERE TA.intEntityId = ISNULL(@intEntityShipViaId,@intShipViaId)
@@ -114,8 +127,17 @@ set @dblInvoiceSurchargeRate =0;
 			AND TA.intEntityTariffTypeId = @intTariffType 
 	  	 ORDER BY TA.dtmEffectiveDate DESC,FS.dtmEffectiveDate DESC
 
-		SET @dblReceiptSurchargeRate = @dblSurchargeRate
-		SET @dblInvoiceSurchargeRate = @dblSurchargeRate
+		SET @dblReceiptSurchargeRate = @dblSurchargeRateIn
+	
+		IF(@dblSurchargeRateOut != 0)
+		BEGIN
+			SET @dblInvoiceSurchargeRate = @dblSurchargeRateOut
+		END
+		ELSE 
+		BEGIN
+			SET @dblInvoiceSurchargeRate = @dblSurchargeRateIn
+		END
+	
 	 END
 
      IF isNull(@strFreightType,0) = 'Miles'

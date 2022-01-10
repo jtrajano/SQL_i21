@@ -40,4 +40,6 @@
 	, ysnDeleted BIT NULL DEFAULT((0))
 	-- Dynamic value
 	, dblDynamic NUMERIC(24, 10) NULL DEFAULT((0))
+	, ysnInvoicePosted BIT NULL DEFAULT((0))
+	, strInvoiceType nvarchar(25)
 )

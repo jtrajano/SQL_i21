@@ -43,7 +43,7 @@ INSERT INTO @tblAsset
 SELECT
 B.strAssetId,
 A.intAssetId,
-D.dtmDepreciationToDate,
+B.dtmDispositionDate,
 F.ysnOpenPeriod,
 0,
 0,
@@ -74,7 +74,7 @@ CROSS APPLY(
 	AND (ISNULL(ysnOpen,0) &  ISNULL(ysnFAOpen,0)) = 1
 	ORDER BY dtmStartDate 
 )F
-WHERE ysnOpenPeriod = 0
+WHERE ysnOpenPeriod = 0 AND A.dtmDispose IS NULL
 
 IF EXISTS(SELECT TOP 1 1 FROM @tblAsset WHERE ysnOpenPeriod = 0)
 BEGIN

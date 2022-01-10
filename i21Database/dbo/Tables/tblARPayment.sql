@@ -54,9 +54,14 @@ CREATE NONCLUSTERED INDEX [NC_Index_tblARPayment]
 	ON [dbo].[tblARPayment]([intEntityCustomerId], [ysnPosted], [ysnProcessedToNSF]) 
 INCLUDE ([dtmDatePaid], [dblAmountPaid], [strRecordNumber], [ysnInvoicePrepayment]);
 GO
-CREATE NONCLUSTERED INDEX [IDX_tblARPayment_strRecordNumber] 
-	ON [dbo].[tblARPayment] ([strRecordNumber])
-	
+CREATE NONCLUSTERED INDEX [IDX_tblARPayment_strRecordNumber_intAccountId] 
+	ON [dbo].[tblARPayment] ([strRecordNumber], [intAccountId])
+GO
+CREATE NONCLUSTERED INDEX [NC_tblARPayment_AgingSummary]
+ON [dbo].[tblARPayment] ([ysnPosted],[dtmDatePaid],[ysnProcessedToNSF])
+INCLUDE ([intEntityCustomerId],[intPaymentMethodId],[dblAmountPaid],[strRecordNumber],[ysnInvoicePrepayment])
+GO
+
 --TRIGGERS INSERT
 GO
 CREATE TRIGGER trgReceivePaymentRecordNumber
@@ -112,7 +117,6 @@ BEGIN
 
 	DECLARE @strRecordNumber 	NVARCHAR(50) = NULL
 		  , @strError 			NVARCHAR(500) = NULL
-		  , @strPaidInvoice 	NVARCHAR(MAX) = NULL
 		  , @intPaymentId 		INT = NULL
 		  , @ysnPosted			BIT = 0		  
 
@@ -121,22 +125,11 @@ BEGIN
 		 , @ysnPosted		= ysnPosted 
 	FROM DELETED 
 
-	SELECT @strPaidInvoice = COALESCE(@strPaidInvoice + ', ' + I.strInvoiceNumber, I.strInvoiceNumber)
-	FROM tblARPaymentDetail PD
-	INNER JOIN DELETED D ON PD.intPaymentId = D.intPaymentId
-	INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
-	WHERE D.ysnPosted = 0
-	  AND I.ysnPaid = 1
-	GROUP BY I.strInvoiceNumber
-
 	IF EXISTS (SELECT TOP 1 NULL FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strCode = 'AR' AND intTransactionId = @intPaymentId AND strTransactionId = @strRecordNumber)
 		SET @strError = 'You cannot delete payment ' + @strRecordNumber + '. It has existing posted GL entries.';
 
 	IF @ysnPosted = 1
 		SET @strError = 'You cannot delete posted payment (' + @strRecordNumber + ')';
-
-	IF @strPaidInvoice <> ''
-		SET @strError = 'Invoice (' + @strPaidInvoice + ') has been fully paid. This payment may not be deleted.';
 
 	IF ISNULL(@strError, '') <> ''
 		RAISERROR(@strError, 16, 1);

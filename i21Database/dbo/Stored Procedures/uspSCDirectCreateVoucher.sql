@@ -835,6 +835,62 @@ BEGIN TRY
 				LEFT JOIN tblICItem IC 
 					ON IC.intItemId = SC.intFreightItemId
 				WHERE SC.intScaleTicketId = @intTicketId 
+
+				---Extra line without using Load
+				INSERT INTO @voucherDetailDirectInventory(
+					[intAccountId],
+					[intItemId],
+					[strMiscDescription],
+					[dblQtyReceived], 
+					[dblUnitQty],
+					[dblDiscount], 
+					[dblCost], 
+					[intTaxGroupId],
+					[intInvoiceId],
+					[intScaleTicketId],
+					[intUnitOfMeasureId],
+					[intCostUOMId],
+					[dblCostUnitQty],
+					[intContractDetailId],
+					[intLoadDetailId]
+					,intTicketDistributionAllocationId
+				)
+				SELECT 
+					intAccountId			= NULL
+					,intItemId				= IC.intItemId
+					,strMiscDescription		= IC.strDescription
+					,dblQtyReceived			= (CASE 
+												WHEN IC.strCostMethod = 'Amount' THEN 1
+												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity END
+												ELSE CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
+											END) * -1
+					,dblUnitQty				= SC.dblUnitQty
+					,dblDiscount			= 0
+					,dblCost				= LDCTC.dblRate
+					,intTaxGroupId			= SC.intTaxGroupId
+					,intInvoiceId			= null
+					,intScaleTicketId		= SC.intScaleTicketId
+					,intUnitOfMeasureId		= LDCTC.intItemUOMId
+					,intCostUOMId			= LDCTC.intItemUOMId
+					,dblCostUnitQty			= LDCTCITM.dblUnitQty
+					,intContractDetailId	= SC.intContractDetailId
+					,intLoadDetailId		= SC.intLoadDetailId
+					,SC.intTicketDistributionAllocationId
+				FROM @ScaleToVoucherStagingTable SC
+				------******* START Load Contract Cost *****----------------
+				INNER JOIN tblCTContractDetail LDCT
+					ON SC.intContractDetailId = LDCT.intContractDetailId
+				INNER JOIN tblCTContractCost LDCTC
+					ON LDCT.intContractDetailId = LDCTC.intContractDetailId
+						AND LDCTC.intItemId = SC.intFreightItemId
+						AND LDCTC.ysnPrice = 1
+				INNER JOIN tblICItemUOM LDCTCITM		
+					ON LDCTCITM.intItemUOMId = LDCTC.intItemUOMId
+				------******* END Load Contract Cost *****----------------
+				LEFT JOIN tblICItem IC 
+					ON IC.intItemId = SC.intFreightItemId
+				WHERE SC.intScaleTicketId = @intTicketId 
+					AND (SC.intLoadDetailId IS NULL OR SC.intLoadDetailId = 0)
 				
 			END
 			ELSE

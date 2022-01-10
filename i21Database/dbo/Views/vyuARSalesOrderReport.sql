@@ -10,6 +10,13 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 									   WHEN L.strUseLocationAddress = 'Letterhead'
 											THEN ''
 								  END COLLATE Latin1_General_CI_AS
+	 , strCompanyInfo			= CASE WHEN L.strUseLocationAddress IS NULL OR L.strUseLocationAddress = 'No' OR L.strUseLocationAddress = '' OR L.strUseLocationAddress = 'Always'
+											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip, COMPANY.strCountry, NULL, 0)
+									   WHEN L.strUseLocationAddress = 'Yes'
+											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, L.strAddress, L.strCity, L.strStateProvince, L.strZipPostalCode, L.strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
+									   WHEN L.strUseLocationAddress = 'Letterhead'
+											THEN ''
+								  END  + CHAR(10) + ISNULL(COMPANY.strEmail,'')   + CHAR(10) + ISNULL(COMPANY.strPhone,'')
 	 , strOrderType				= ISNULL(SO.strType, 'Standard')
      , strCustomerName			= CUSTOMER.strName
 	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
@@ -298,5 +305,7 @@ OUTER APPLY (
 			   , strZip
 			   , strCountry
 			   , ysnIncludeEntityName
+			   , strEmail
+			   , strPhone
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY

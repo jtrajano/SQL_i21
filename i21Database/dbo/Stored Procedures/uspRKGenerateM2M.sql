@@ -263,7 +263,7 @@ BEGIN TRY
 					, CT.intFutOptTransactionId intContractDetailId
 					, intContractHeaderId = NULL
 					, CT.intFutOptTransactionHeaderId
-					, CL.strLocationName
+					, CL.strLocationName	
 					, C.strCommodityCode
 					, strContractType = strBuySell
 					, strContractNumber = CT.strInternalTradeNo
@@ -550,7 +550,7 @@ BEGIN TRY
 			, dblUnPricedQty NUMERIC(24, 10)
 			, dblPricedAmount NUMERIC(24, 10)
 			, strMarketZoneCode NVARCHAR(200))
-
+			
 		--There is an error "An INSERT EXEC statement cannot be nested." that is why we cannot directly call the uspRKDPRContractDetail AND insert
 		DECLARE @ContractBalance TABLE (intRowNum INT
 			, strCommodityCode NVARCHAR(100)
@@ -629,16 +629,22 @@ BEGIN TRY
 			, z.intQtyUOMId
 			, ysnFullyPriced = CAST(CASE WHEN ctd.intPricingTypeId = 1 AND pricingLatestDate.pricedCount = pricingByEndDate.pricedCount THEN 1
 						ELSE 0 END AS bit)
+			, intEntityId
+			, strEntityName
+			, intQtyCurrencyId
 		INTO #tempLatestContractDetails
 		FROM
 		(
 			SELECT 
 				intContractHeaderId
-				,intContractDetailId
-				,dtmEndDate 
-				,dblBasis
-				,dblFutures
-				,intQtyUOMId
+				, intContractDetailId
+				, dtmEndDate 
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, t.intEntityId
+				, strEntityName = EM.strName
+				, intQtyCurrencyId
 			FROM (
 				SELECT 
 					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END DESC)
@@ -649,6 +655,7 @@ BEGIN TRY
 				AND CBL.strTransactionType = 'Contract Balance'
 				AND (CBL.dblBasis IS NOT NULL OR CBL.intPricingTypeId = 3)
 			) t
+			LEFT JOIN tblEMEntity EM ON EM.intEntityId = t.intEntityId
 			WHERE intRowNum = 1
 		) z
 
@@ -753,12 +760,12 @@ BEGIN TRY
 				, strPricingType
 				, intCommodityUnitMeasureId = NULL
 				, tbl.intContractDetailId
-				, intEntityId
-				, intQtyCurrencyId
+				, lcd.intEntityId
+				, lcd.intQtyCurrencyId
 				, strType = strContractType + ' ' + strPricingType
 				, intItemId
 				, strItemNo
-				, strEntityName
+				, lcd.strEntityName
 				, strCustomerContract = ''
 				--, intFutureMarketId
 				--, intFutureMonthId
@@ -787,11 +794,11 @@ BEGIN TRY
 					, CBL.intLocationId
 					, strContractType = CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
 					, PT.strPricingType
-					, CBL.intEntityId
-					, CBL.intQtyCurrencyId
+					--, CBL.intEntityId
+					--, CBL.intQtyCurrencyId
 					, CBL.intItemId
 					, strItemNo
-					, strEntityName = EM.strName
+					--, strEntityName = EM.strName
 					--, CBL.intFutureMarketId
 					--, CBL.intFutureMonthId
 					, stat.strPricingStatus
@@ -1192,6 +1199,7 @@ BEGIN TRY
 			, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
 			, temp.intCurrencyId
 			, temp.intCommodityId
+			, temp.intMarketZoneId
 		INTO #tmpM2MBasisDetail
 		FROM tblRKM2MBasisDetail temp
 		LEFT JOIN tblSMCurrency c ON temp.intCurrencyId=c.intCurrencyID
@@ -1494,7 +1502,8 @@ BEGIN TRY
 					AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 													THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
 												ELSE tmp.strPeriodTo END
-					AND tmp.strContractInventory = 'Contract') basisDetail
+					AND tmp.strContractInventory = 'Contract'
+					AND tmp.intMarketZoneId = ISNULL(cd.intMarketZoneId, tmp.intMarketZoneId) ) basisDetail
 			LEFT JOIN tblCTContractHeader cth
 				ON cd.intContractHeaderId = cth.intContractHeaderId
 			OUTER APPLY (
@@ -1514,18 +1523,21 @@ BEGIN TRY
 							WHERE pfh.intPriceFixationId = pfdi.intPriceFixationId
 							AND pfdi.dtmFixationDate <= @dtmEndDate
 						) pricedTotal
-					WHERE intContractDetailId = cd.intContractDetailId
-						AND (   
-								-- Basis (Partially Priced) Priced Record
-								(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
-								-- Backdated and not yet fully priced in that specific date
-								OR ((cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced') 
-									 AND EXISTS (SELECT TOP 1 '' FROM @ContractBalance cb
-												WHERE cb.intContractDetailId = cd.intContractDetailId
-												AND cb.strPricingType = 'Basis'
-												)
-									)
-							)
+					WHERE (cd.ysnMultiplePriceFixation = 1 AND intContractHeaderId = cd.intContractHeaderId 
+							OR intContractDetailId = cd.intContractDetailId
+						   )
+							AND (   
+									-- Basis (Partially Priced) Priced Record
+									(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
+									-- Backdated and not yet fully priced in that specific date
+									OR ((cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced') 
+											AND EXISTS (SELECT TOP 1 '' FROM @ContractBalance cb
+													WHERE cb.intContractDetailId = cd.intContractDetailId
+													AND cb.strPricingType = 'Basis'
+													)
+										)
+								)
+							
 				) t
 			) priceFixationDetail
 			WHERE cd.intCommodityId = @intCommodityId 
@@ -4110,6 +4122,31 @@ BEGIN TRY
 			, dblUnfixedPurchaseValue NUMERIC(24, 10)
 			, dblTotalCommittedValue NUMERIC(24, 10))
 
+		DECLARE @tmpCustomerExposureDetail TABLE(intM2MHeaderId INT
+			, intContractHeaderId INT
+			, strContractSeq NVARCHAR(100)
+			, strEntityName NVARCHAR(100)
+			, strCountry NVARCHAR(100)
+			, intEntityId INT
+			, dblM2M NUMERIC(24, 10)
+			, dblFixedSalesVolume NUMERIC(24, 10)
+			, dblUnfixedSalesVolume NUMERIC(24, 10)
+			, dblTotalCommittedVolume NUMERIC(24, 10)
+			, dblSalesOpenQty NUMERIC(24, 10)
+			, dblSalesContractBasisPrice NUMERIC(24, 10)
+			, dblSalesFuturesPrice NUMERIC(24, 10)
+			, dblSalesCashPrice NUMERIC(24, 10)
+			, dblFixedSalesValue NUMERIC(24, 10)
+			, dblUnSalesOpenQty NUMERIC(24, 10)
+			, dblUnSalesContractBasisPrice NUMERIC(24, 10)
+			, dblUnSalesFuturesPrice NUMERIC(24, 10)
+			, dblUnSalesCashPrice NUMERIC(24, 10)
+			, dblUnfixedSalesValue NUMERIC(24, 10)
+			, dblTotalCommittedValue NUMERIC(24, 10)
+			, dblCreditLimit NUMERIC(24, 10)
+			, dblOpenInvoicedValue NUMERIC(24, 10)
+			, dblVariance NUMERIC(24, 10))
+
 		IF (ISNULL(@ysnByProducer, 0) = 0)
 		BEGIN
 			INSERT INTO @tmpCPEDetail (intM2MHeaderId
@@ -4159,7 +4196,7 @@ BEGIN TRY
 					, e.intEntityId
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
-					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN CASE WHEN strPricingType = 'Priced' THEN 'Priced' ELSE 'Unpriced' END
 														WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 														WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 														ELSE strPriOrNotPriOrParPriced END)
@@ -4186,6 +4223,95 @@ BEGIN TRY
 				FROM #tmpCPE fd
 				JOIN tblAPVendor e ON e.intEntityId = fd.intEntityId
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
+			) t
+
+
+			INSERT INTO @tmpCustomerExposureDetail (intM2MHeaderId
+				, intContractHeaderId
+				, strContractSeq
+				, strEntityName
+				, strCountry
+				, intEntityId
+				, dblM2M
+				, dblFixedSalesVolume
+				, dblUnfixedSalesVolume
+				, dblTotalCommittedVolume
+				, dblSalesOpenQty
+				, dblSalesContractBasisPrice
+				, dblSalesFuturesPrice
+				, dblSalesCashPrice
+				, dblFixedSalesValue
+				, dblUnSalesOpenQty
+				, dblUnSalesContractBasisPrice
+				, dblUnSalesFuturesPrice
+				, dblUnSalesCashPrice
+				, dblUnfixedSalesValue
+				, dblTotalCommittedValue
+				, dblCreditLimit
+				, dblOpenInvoicedValue
+				, dblVariance)
+			SELECT intM2MHeaderId = @intM2MHeaderId
+				, intContractHeaderId
+				, strContractSeq
+				, strEntityName
+				, strCountry
+				, intEntityId
+				, dblM2M
+				, dblFixedSalesVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
+				, dblUnfixedSalesVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
+				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
+				, dblSalesOpenQty = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPValueQty ELSE 0 END)
+				, dblSalesContractBasisPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPContractBasis ELSE 0 END)
+				, dblSalesFuturesPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPFutures ELSE 0 END)
+				, dblSalesCashPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPContractBasis ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPFutures ELSE 0 END)
+				, dblFixedSalesValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END)
+				, dblUnSalesOpenQty = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPValueQty ELSE 0 END)
+				, dblUnSalesContractBasisPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPContractBasis ELSE 0 END)
+				, dblUnSalesFuturesPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
+				, dblUnSalesCashPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPContractBasis ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
+				, dblUnfixedSalesValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
+				, dblTotalCommittedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
+				, dblCreditLimit
+				, dblOpenInvoicedValue
+				, dblVariance = isnull(dblCreditLimit,0) - isnull(dblOpenInvoicedValue,0)
+			FROM (
+				SELECT fd.intContractHeaderId
+					, fd.strContractSeq
+					, fd.strEntityName
+					, Loc.strCountry
+					, e.intEntityId
+					, fd.dblOpenQty
+					, dblM2M = ISNULL(dblResult, 0)
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+														WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
+														WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
+														ELSE strPriOrNotPriOrParPriced END)
+					, dblPValueQty = 0.0
+					, dblPContractBasis = ISNULL(fd.dblContractBasis, 0)
+					, dblPFutures = ISNULL(fd.dblFutures, 0)
+					, dblQtyPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN fd.intCommodityUnitMeasureId ELSE intQuantityUOMId END
+																, fd.intCommodityUnitMeasureId
+																, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
+																											, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
+																											, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFutures, 0))))
+					, dblUPValueQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN fd.intCommodityUnitMeasureId ELSE intQuantityUOMId END
+																, fd.intCommodityUnitMeasureId
+																, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
+																											, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
+																											, fd.dblOpenQty))
+					, dblUPContractBasis = ISNULL(fd.dblContractBasis, 0)
+					, dblUPFutures = ISNULL(fd.dblFuturePrice, 0)
+					, dblQtyUnFixedPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN fd.intCommodityUnitMeasureId ELSE intQuantityUOMId END
+																, fd.intCommodityUnitMeasureId
+																, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
+																											, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
+																											, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (ISNULL(fd.dblFuturePrice, 0)))))
+					, dblCreditLimit
+					, dblOpenInvoicedValue = e.dblARBalance--(select sum(dblAmountDue) from vyuARInvoiceSearch where intEntityCustomerId = fd.intEntityId)
+				FROM #tmpCPE fd
+				JOIN tblARCustomer e ON e.intEntityId = fd.intEntityId
+				LEFT JOIN tblEMEntityLocation AS Loc ON e.intEntityId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
+				WHERE strContractOrInventoryType IN ('Contract(S)', 'In-transit(S)', 'Inventory (S)')
 			) t
 		END
 		ELSE
@@ -4237,7 +4363,7 @@ BEGIN TRY
 					, intEntityId = ISNULL(fd.intProducerId, fd.intEntityId)
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
-					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN CASE WHEN strPricingType = 'Priced' THEN 'Priced' ELSE 'Unpriced' END
 							WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 							WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 							ELSE strPriOrNotPriOrParPriced END)
@@ -4309,6 +4435,59 @@ BEGIN TRY
 			, dblTotalCommittedVolume
 			, dblTotalCommittedValue
 		FROM @tmpCPEDetail
+
+		DELETE FROM tblRKM2MCustomerExposure WHERE intM2MHeaderId = @intM2MHeaderId
+
+		INSERT INTO tblRKM2MCustomerExposure(intM2MHeaderId
+			, intContractHeaderId
+			, strContractSeq
+			, strEntityName
+			, strCountry
+			, intCustomerId
+			, dblMToM
+			, dblFixedSalesVolume
+			, dblUnfixedSalesVolume
+			, dblSalesOpenQty
+			, dblSalesContractBasisPrice
+			, dblSalesFuturesPrice
+			, dblSalesCashPrice
+			, dblFixedSalesValue
+			, dblUnSalesOpenQty
+			, dblUnSalesContractBasisPrice
+			, dblUnSalesFuturesPrice
+			, dblUnSalesCashPrice
+			, dblUnfixedSalesValue
+			, dblTotalCommittedVolume
+			, dblTotalCommittedValue
+			, dblCreditLimit
+			, dblOpenInvoicedValue
+			, dblVariance)
+		SELECT intM2MHeaderId
+			, intContractHeaderId
+			, strContractSeq
+			, strEntityName
+			, strCountry
+			, intEntityId
+			, dblM2M
+			, dblFixedSalesVolume
+			, dblUnfixedSalesVolume
+			, dblSalesOpenQty
+			, dblSalesContractBasisPrice
+			, dblSalesFuturesPrice
+			, dblSalesCashPrice
+			, dblFixedSalesValue
+			, dblUnSalesOpenQty
+			, dblUnSalesContractBasisPrice
+			, dblUnSalesFuturesPrice
+			, dblUnSalesCashPrice
+			, dblUnfixedSalesValue
+			, dblTotalCommittedVolume
+			, dblTotalCommittedValue
+			, dblCreditLimit
+			, dblOpenInvoicedValue
+			, dblVariance
+		FROM @tmpCustomerExposureDetail
+
 
 		-- Post Preview
 		IF EXISTS(SELECT TOP 1 1 FROM tblRKM2MPostPreview WHERE intM2MHeaderId = @intM2MHeaderId)

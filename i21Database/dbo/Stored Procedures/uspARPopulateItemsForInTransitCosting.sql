@@ -46,6 +46,7 @@ INSERT INTO ##ARItemsForInTransitCosting
 	,[intLinkedItem]
 	,[strBOLNumber]
 	,[intTicketId]
+    ,[intSourceEntityId]
 )
 --INVENTORY SHIPMENT NON-LOTTED
 SELECT
@@ -75,6 +76,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
@@ -138,6 +140,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]
@@ -221,6 +224,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
 INNER JOIN (	
@@ -288,6 +292,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
@@ -371,6 +376,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -421,7 +427,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ICIT.[dblQty] * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END
+	,[dblQty]						= (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ARID.[dblShipmentNetWt] * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -443,6 +449,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -533,6 +540,7 @@ SELECT
 	,[intLinkedItem]				= NULL
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -605,6 +613,7 @@ SELECT
 	,[intLinkedItem]				= NULL
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -673,6 +682,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM 
 (SELECT 
 	ARPID.intInvoiceId
@@ -698,6 +708,7 @@ FROM
 	, INVD.dblShipmentNetWt
 	, ARPID.strType
 	, ARPID.strBOLNumber
+	, ARPID.intEntityCustomerId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -776,6 +787,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM 
 (SELECT 
 	ARPID.intInvoiceId
@@ -803,6 +815,7 @@ FROM
 	, INVD.intOrderUOMId
 	, ARPID.strType
 	, ARPID.strBOLNumber 
+	, ARPID.intEntityCustomerId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -881,6 +894,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM 
 (SELECT 
 	INVD.intInvoiceId
@@ -904,6 +918,7 @@ FROM
 	, ARPID.ysnFromProvisional
 	, ARPID.ysnProvisionalWithGL
 	, ARPID.strBOLNumber 
+	, ARPID.intEntityCustomerId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -971,6 +986,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM 
 (SELECT 
 	INVD.intInvoiceId
@@ -995,6 +1011,7 @@ FROM
 	, ARPID.ysnFromProvisional
 	, ARPID.ysnProvisionalWithGL
 	, ARPID.strBOLNumber 
+	, ARPID.intEntityCustomerId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -1062,6 +1079,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]
@@ -1151,6 +1169,7 @@ SELECT
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]

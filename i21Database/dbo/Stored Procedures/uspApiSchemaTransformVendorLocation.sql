@@ -112,16 +112,16 @@ BEGIN
 			   VL.dtmW9Signed,
 			   @guiApiUniqueId
 		FROM #tmpApiSchemaVendorLocationTop VL
-		INNER JOIN tblEMEntity E ON E.strEntityNo = VL.strEntityNo
-		INNER JOIN tblSMShipVia SV ON SV.strShipVia = VL.strShipVia
-		INNER JOIN tblSMTerms T ON T.strTerm = VL.strTerm
-		INNER JOIN tblSMCompanyLocation CL ON CL.strLocationName = VL.strWarehouseName
-		INNER JOIN tblSMFreightTerms FT ON FT.strFreightTerm = VL.strFreightTerm
-		INNER JOIN tblSMTaxCode TC ON TC.strTaxCode = VL.strTaxCode
-		INNER JOIN tblSMTaxGroup TG ON TG.strTaxGroup = VL.strTaxGroup
-		INNER JOIN tblSMTaxClass TC2 ON TC2.strTaxClass = VL.strTaxClass
-		INNER JOIN tblSMCurrency C ON C.strCurrency = VL.strCurrency
-		INNER JOIN tblAPVendor V ON V.strVendorId = VL.strVendorLink
+		LEFT JOIN tblEMEntity E ON E.strEntityNo = VL.strEntityNo
+		LEFT JOIN tblSMShipVia SV ON SV.strShipVia = VL.strShipVia
+		LEFT JOIN tblSMTerm T ON T.strTerm = VL.strTerm
+		LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = VL.strWarehouseName
+		LEFT JOIN tblSMFreightTerms FT ON FT.strFreightTerm = VL.strFreightTerm
+		LEFT JOIN tblSMTaxCode TC ON TC.strTaxCode = VL.strTaxCode
+		LEFT JOIN tblSMTaxGroup TG ON TG.strTaxGroup = VL.strTaxGroup
+		LEFT JOIN tblSMTaxClass TC2 ON TC2.strTaxClass = VL.strTaxClass
+		LEFT JOIN tblSMCurrency C ON C.strCurrency = VL.strCurrency
+		LEFT JOIN tblAPVendor V ON V.strVendorId = VL.strVendorLink
 
 		DELETE FROM #tmpApiSchemaVendorLocation WHERE intKey IN (SELECT intKey FROM #tmpApiSchemaVendorLocationTop)
 	END

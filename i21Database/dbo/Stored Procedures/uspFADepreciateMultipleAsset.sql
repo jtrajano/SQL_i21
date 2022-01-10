@@ -922,38 +922,36 @@ END
       FROM @GLEntries C WHERE @strBatchId = strBatchId
       AND ysnIsUnposted = 0  AND @BookId = 1
       AND strModuleName ='Fixed Assets'
-	  AND strTransactionId = @strTransactionId
       GROUP by strReference, strTransactionId, dtmDate
     UNION
 	  SELECT strAssetId, strTransactionId, 'Asset Basis Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) 
 	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId = 1 AND @BookId = 1
-	  AND strTransactionId = @strAdjustmentTransactionId
+	  AND strTransaction = 'Basis Adjustment'
 	UNION
       SELECT strAssetId, strTransactionId, 'Asset Depreciation Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) 
 	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId = 1 AND @BookId = 1 
-	  AND strTransactionId = @strDepAdjustmentTransactionId
+	  AND strTransaction = 'Depreciation Adjustment'
 	UNION
       SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
 	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
-	  AND strTransactionId = @strTransactionId
 	UNION
       SELECT strAssetId, strTransactionId, 'Tax Basis Adjusted' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
 	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
-	  AND strTransactionId = @strAdjustmentTransactionId
+	  AND strTransaction = 'Basis Adjustment'
 	UNION
       SELECT strAssetId, strTransactionId, 'Tax Depreciation Adjusted' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
 	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
-	  AND strTransactionId = @strDepAdjustmentTransactionId
+	  AND strTransaction = 'Depreciation Adjustment'
     UNION
       SELECT strAssetId,'' strTransactionId, strError strResult, 
       CASE WHEN @BookId = 1 THEN 'GAAP' 
@@ -964,7 +962,7 @@ END
       FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
   )
   INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strBook, strResult, dtmDate,ysnError) 
-  SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate, ysnError FROM Q 
+  SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate, ysnError FROM Q ORDER BY strAssetId
 
 DECLARE @intGLEntry INT
 

@@ -14,4 +14,5 @@
 	,strWorkCenter NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmDueDate DATETIME
 	,strMachine NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,intLineTrxSequenceNo BIGINT
 	)

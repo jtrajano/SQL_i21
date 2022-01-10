@@ -5,6 +5,7 @@ CREATE TABLE [dbo].[tblICImportStagingCategoryLocation]
 	[strCategory] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLocationName] [nvarchar](200) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intCashRegisterDepartment] INT NULL,
+	[strCashRegisterDepartment] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnUpdatePrices] BIT NULL DEFAULT ((0)),
 	[ysnUseTaxFlag1] BIT NULL DEFAULT ((0)),
 	[ysnUseTaxFlag2] BIT NULL DEFAULT ((0)),

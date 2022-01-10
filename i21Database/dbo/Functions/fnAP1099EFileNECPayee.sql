@@ -42,9 +42,9 @@ BEGIN
 					REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblNonemployeeCompensationNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)))) --add zeros after the whole number
 					+ CAST(FLOOR((CAST(ISNULL(A.dblNonemployeeCompensationNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)) --get the whole number
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblNonemployeeCompensationNEC,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2)) --last two digit decimal
-			END
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12)
+			END -- Amount Code 1
+		+ REPLICATE('0',12) -- Amount Code 2
+		+ REPLICATE('0',12) -- Amount Code 3
 		+ CASE WHEN ISNULL(A.dblFederalIncomeNEC,0) > @maxAmount 
 			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
 				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
@@ -53,30 +53,32 @@ BEGIN
 				REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblFederalIncomeNEC,0))) AS NVARCHAR(100))))
 				+ CAST(FLOOR((CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 				+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
-			END
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12) 
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12) 
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12) 
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12)
-		+ ' ' --Foreign Indicator
-		+ dbo.fnTrimX(A.strPayeeName) + SPACE(40 - LEN(dbo.fnTrimX(A.strPayeeName)))
-		+ SPACE(40) -- 288-327
+			END -- Amount Code 4
+		+ REPLICATE('0',12) -- Amount Code 5
+		+ REPLICATE('0',12) -- Amount Code 6
+		+ REPLICATE('0',12) -- Amount Code 7
+		+ REPLICATE('0',12) -- Amount Code 8
+		+ REPLICATE('0',12) -- Amount Code 9
+		+ REPLICATE('0',12) -- Amount Code A
+		+ REPLICATE('0',12) -- Amount Code B
+		+ REPLICATE('0',12) -- Amount Code C
+		+ REPLICATE('0',12) -- Amount Code D
+		+ REPLICATE('0',12) -- Amount Code E
+		+ REPLICATE('0',12) -- Amount Code F
+		+ REPLICATE('0',12) -- Amount Code G
+		+ REPLICATE('0',12) -- Amount Code H
+		+ REPLICATE('0',12) -- Amount Code J
+		+ SPACE(16) -- 271-286
+		+ ' ' -- 287 Foreign Indicator
+		+ dbo.fnTrimX(A.strPayeeName) + SPACE(40 - LEN(dbo.fnTrimX(A.strPayeeName))) -- 288-327
 		+ SPACE(40) -- 328-367
-		+ ISNULL(A.strAddress,'') + SPACE(40 - LEN(ISNULL(A.strAddress,'')))
-		+ SPACE(40)
-		+ ISNULL(A.strCity,'') + SPACE(40 - LEN(ISNULL(A.strCity,'')))
-		+ ISNULL(A.strState,SPACE(2))
-		+ REPLACE(ISNULL(A.strZip,''),'-','') + SPACE(9 - LEN(REPLACE(ISNULL(A.strZip,''),'-','')))
-		+ ' '
-		+ REPLICATE('0',8 - LEN(CAST((2 + ROW_NUMBER() OVER (ORDER BY (SELECT 1))) AS NVARCHAR(100)))) + CAST((2 + ROW_NUMBER() OVER (ORDER BY (SELECT 1))) AS NVARCHAR(100))
+		+ ISNULL(A.strAddress,'') + SPACE(40 - LEN(ISNULL(A.strAddress,''))) -- 368-367
+		+ SPACE(40) -- 408-447
+		+ ISNULL(A.strCity,'') + SPACE(40 - LEN(ISNULL(A.strCity,''))) -- 448-487
+		+ ISNULL(SUBSTRING(UPPER(A.strState), 1, 2),'') + SPACE(2 - LEN(ISNULL(SUBSTRING(UPPER(A.strState), 1, 2),''))) -- 488-489
+		+ REPLACE(ISNULL(A.strZip,''),'-','') + SPACE(9 - LEN(REPLACE(ISNULL(A.strZip,''),'-',''))) -- 490-498
+		+ SPACE(1) -- 499
+		+ REPLICATE('0',8 - LEN(CAST((2 + ROW_NUMBER() OVER (ORDER BY (SELECT 1))) AS NVARCHAR(100)))) + CAST((2 + ROW_NUMBER() OVER (ORDER BY (SELECT 1))) AS NVARCHAR(100)) -- 500-507
 		+ SPACE(36)
 		+ SPACE(1) --544
 		+ SPACE(3) --545-547

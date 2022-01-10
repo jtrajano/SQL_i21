@@ -28,9 +28,11 @@
 	[dblCreditForeign]	 NUMERIC(18, 6) NULL, 
     [dblCreditReport]	 NUMERIC(18, 6) NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
+	[intCurrencyId]     INT NULL,
     CONSTRAINT [PK_tblGLJournalDetail] PRIMARY KEY CLUSTERED ([intJournalDetailId] ASC),
     CONSTRAINT [FK_tblGLJournalDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLJournalDetail_tblGLJournal] FOREIGN KEY ([intJournalId]) REFERENCES [dbo].[tblGLJournal] ([intJournalId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblGLJournalDetail_tblSMCurrency] FOREIGN KEY([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblGLJournalDetail_tblSMCurrencyExchangeRateType] FOREIGN KEY([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
 GO
@@ -92,3 +94,6 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Credit Report'
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Exchange Rate Type Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLJournalDetail', @level2type=N'COLUMN',@level2name=N'intCurrencyExchangeRateTypeId' 
 GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLJournalDetail', @level2type=N'COLUMN',@level2name=N'intCurrencyId' 
+GO
+

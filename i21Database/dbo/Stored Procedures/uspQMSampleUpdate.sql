@@ -36,6 +36,11 @@ BEGIN TRY
 		,@dblOldSampleQty NUMERIC(18, 6)
 		,@intConcurrencyId INT
 		,@intCurrentConcurrencyId INT
+		,@ysnImpactPricing BIT
+		,@ysnOldImpactPricing BIT
+		,@intContractDetailId INT
+		,@strErrorSampleNumber NVARCHAR(50)
+		,@strErrorMessage NVARCHAR(MAX)
 	DECLARE @intRepresentingUOMId INT
 		,@dblRepresentingQty NUMERIC(18, 6)
 		,@dblConvertedSampleQty NUMERIC(18, 6)
@@ -45,6 +50,8 @@ BEGIN TRY
 		,@intOrgItemId INT
 		,@intOrgCountryID INT
 		,@intOrgCompanyLocationSubLocationId INT
+
+	SELECT @strErrorSampleNumber = NULL
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblQMCompanyPreference
@@ -71,6 +78,8 @@ BEGIN TRY
 		,@intSampleTypeId = intSampleTypeId
 		,@intContractHeaderId = intContractHeaderId
 		,@intConcurrencyId = intConcurrencyId
+		,@ysnImpactPricing = ysnImpactPricing
+		,@intContractDetailId = intContractDetailId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
 			,strMarks NVARCHAR(100)
@@ -83,6 +92,8 @@ BEGIN TRY
 			,intSampleTypeId INT
 			,intContractHeaderId INT
 			,intConcurrencyId INT
+			,ysnImpactPricing BIT
+			,intContractDetailId INT
 			)
 
 	IF NOT EXISTS (
@@ -169,10 +180,33 @@ BEGIN TRY
 		END
 	END
 
+	-- Impact Pricing validation
+	IF @ysnImpactPricing = 1
+		AND ISNULL(@intContractDetailId, 0) > 0
+	BEGIN
+		SELECT TOP 1 @strErrorSampleNumber = strSampleNumber
+		FROM tblQMSample
+		WHERE intContractDetailId = @intContractDetailId
+			AND ysnImpactPricing = 1
+			AND intSampleId <> @intSampleId
+
+		IF ISNULL(@strErrorSampleNumber, '') <> ''
+		BEGIN
+			SELECT @strErrorMessage = 'Impact Pricing is already selected in sample ' + @strErrorSampleNumber + ' which belongs to the same contract sequence.'
+
+			RAISERROR (
+					@strErrorMessage
+					,16
+					,1
+					)
+		END
+	END
+
 	BEGIN TRAN
 
 	SELECT @dblOldSampleQty = dblSampleQty
 		,@intCurrentConcurrencyId = intConcurrencyId
+		,@ysnOldImpactPricing = ISNULL(ysnImpactPricing, 0)
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
 
@@ -233,7 +267,7 @@ BEGIN TRY
 		,strLotNumber = x.strLotNumber
 		,strSampleNote = x.strSampleNote
 		,dtmSampleReceivedDate = x.dtmSampleReceivedDate
-		,dtmTestedOn = x.dtmTestedOn
+		--,dtmTestedOn = x.dtmTestedOn
 		--,intTestedById = x.intTestedById
 		,dblSampleQty = x.dblSampleQty
 		,intSampleUOMId = x.intSampleUOMId
@@ -260,6 +294,7 @@ BEGIN TRY
 		,strForwardingAgentRef = x.strForwardingAgentRef
 		,strSentBy = x.strSentBy
 		,intSentById = x.intSentById
+		,ysnImpactPricing = x.ysnImpactPricing
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -291,7 +326,7 @@ BEGIN TRY
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
-			,dtmTestedOn DATETIME
+			--,dtmTestedOn DATETIME
 			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
@@ -318,6 +353,7 @@ BEGIN TRY
 			,strForwardingAgentRef NVARCHAR(50)
 			,strSentBy NVARCHAR(50)
 			,intSentById INT
+			,ysnImpactPricing BIT
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)
@@ -330,6 +366,11 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblQMSample
 		SET intPreviousSampleStatusId = @intPreviousSampleStatusId
+		WHERE intSampleId = @intSampleId
+
+		UPDATE tblQMSample
+		SET dtmTestedOn = NULL
+			,intTestedById = NULL
 		WHERE intSampleId = @intSampleId
 	END
 
@@ -653,9 +694,31 @@ BEGIN TRY
 		,@strSampleNumber = strSampleNumber
 		,@ysnAdjustInventoryQtyBySampleQty=IsNULL(ysnAdjustInventoryQtyBySampleQty,0)
 		,@intLastModifiedUserId=intLastModifiedUserId
+		,@ysnImpactPricing = ISNULL(ysnImpactPricing, 0)
+		,@intContractDetailId = intContractDetailId
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
 
+	-- Impact Pricing is selected
+	IF @ysnImpactPricing = 1
+		AND ISNULL(@intContractDetailId, 0) > 0
+	BEGIN
+		EXEC uspCTSaveContractSamplePremium @intContractDetailId = @intContractDetailId
+			,@intSampleId = @intSampleId
+			,@intUserId = @intLastModifiedUserId
+			,@ysnImpactPricing = 1
+	END
+
+	-- Impact Pricing is reversed
+	IF @ysnOldImpactPricing = 1
+		AND @ysnImpactPricing = 0
+		AND ISNULL(@intContractDetailId, 0) > 0
+	BEGIN
+		EXEC uspCTSaveContractSamplePremium @intContractDetailId = @intContractDetailId
+			,@intSampleId = @intSampleId
+			,@intUserId = @intLastModifiedUserId
+			,@ysnImpactPricing = 0
+	END
 
 	IF @ysnAdjustInventoryQtyBySampleQty=1
 		AND ISNULL(@dblSampleQty, 0) > 0

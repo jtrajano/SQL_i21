@@ -482,16 +482,16 @@ BEGIN TRY
 					FROM dbo.tblSMCountry WITH (NOLOCK)
 					WHERE strCountry = @strDetailCountry
 
-					IF @intDetailCountryId IS NULL
-					BEGIN
-						SELECT @strError = 'Detail - Country not found.'
+					--IF @intDetailCountryId IS NULL
+					--BEGIN
+					--	SELECT @strError = 'Detail - Country not found.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 				END
 				ELSE IF @intDetailLineType = 3
 				BEGIN

@@ -3,7 +3,7 @@ AS
 
 SELECT 
 	strUniqueId 
-	, intTrlDeptNumber
+	, strTrlDeptNumber
 	, strTrlDept
 	, strTrlNetwCode
 	, strTrlUPC
@@ -38,7 +38,7 @@ FROM
               CAST(TR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TR.intStoreId AS NVARCHAR(MAX)) 
                      --+ CAST(USec.intEntityId AS NVARCHAR(MAX)) 
                      COLLATE Latin1_General_CI_AS AS strUniqueId
-       , TR.intTrlDeptNumber
+       , TR.strTrlDeptNumber
        , TR.strTrlDept
        , TR.strTrlNetwCode
        , TR.strTrlUPC
@@ -53,8 +53,8 @@ FROM
        , TR.dtmDate AS dtmDateTime
        , CONVERT(VARCHAR, TR.dtmDate, 23) AS dtmDate
        , CAST(TR.intCashierPosNum AS INT) AS intCashierPosNum
-       , CAST(ST.intStoreId AS INT) AS intStoreId
-       , CAST(ST.intStoreNo AS INT) AS intStoreNo
+       , CAST(TR.intStoreId AS INT) AS intStoreId
+       , CAST(TR.intStoreNumber AS INT) AS intStoreNo
        , CAST(TR.intTrTickNumPosNum AS INT) AS intTicketPosNum -- Ticket Number
        , CAST(TR.intTrTickNumTrSeq AS INT) AS intTicketTrSeq -- Ticket Number
        , TR.strTransType 
@@ -100,8 +100,8 @@ FROM
 		,TR.strTrlMatchLineTrlMatchName  -- Added 09/26/2021
 
        FROM tblSTTranslogRebates TR 
-       JOIN tblSTStore ST 
-              ON TR.intStoreId = ST.intStoreId 
+       --JOIN tblSTStore ST 
+       --       ON TR.intStoreId = ST.intStoreId 
         WHERE (strTransRollback IS NULL) AND (strTransFuelPrepayCompletion IS NULL) and (strTransType not Like '%void%') -- Added 09/26/2021
           
 ) x

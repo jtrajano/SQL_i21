@@ -355,6 +355,8 @@ BEGIN
 			,[strSourceNumber]
 			,[strBOLNumber]
 			,[intTicketId]
+			,[strAccountIdInventory]
+			,[strAccountIdInTransit]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -403,9 +405,26 @@ BEGIN
 			,[strSourceNumber]						= ActualTransaction.strSourceNumber
 			,[strBOLNumber]							= ActualTransaction.strBOLNumber
 			,[intTicketId]							= ActualTransaction.intTicketId
+			,[strAccountIdInventory]				= glAccountIdInventory.strAccountId
+			,[strAccountIdInTransit]				= glAccountIdInTransit.strAccountId
+
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId				
-	
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				ActualTransaction.intItemId
+				,ISNULL(ActualTransaction.intInTransitSourceLocationId, ActualTransaction.intItemLocationId)
+				,'Inventory'
+			) accountIdInventory
+			LEFT JOIN tblGLAccount glAccountIdInventory
+				ON accountIdInventory.intAccountId = glAccountIdInventory.intAccountId
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				ActualTransaction.intItemId
+				,ISNULL(ActualTransaction.intInTransitSourceLocationId, ActualTransaction.intItemLocationId)
+				,'Inventory In-Transit'
+			) accountIdInTransit
+			LEFT JOIN tblGLAccount glAccountIdInTransit
+				ON accountIdInTransit.intAccountId = glAccountIdInTransit.intAccountId	
+
 	----------------------------------------------------
 	-- Create reversal of the inventory LOT transactions
 	----------------------------------------------------
@@ -803,7 +822,9 @@ BEGIN
 						,[intConcurrencyId]
 						,[strDescription]
 						,[intCompanyLocationId]
-				)			
+						,[strAccountIdInventory]
+						,[strAccountIdInTransit]
+				)		
 			SELECT	
 					[intItemId]								= @intItemId
 					,[intItemLocationId]					= @intItemLocationId
@@ -847,10 +868,26 @@ BEGIN
 																, DEFAULT
 															)
 					,[intCompanyLocationId]					= [location].intCompanyLocationId
+					,[strAccountIdInventory]				= glAccountIdInventory.strAccountId
+					,[strAccountIdInTransit]				= glAccountIdInTransit.strAccountId
 			FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 						ON ItemPricing.intItemId = Stock.intItemId
 						AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 					CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
+					OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+						@intItemId
+						,ISNULL(@intInTransitSourceLocationId, @intItemLocationId)
+						,'Inventory'
+					) accountIdInventory
+					LEFT JOIN tblGLAccount glAccountIdInventory
+						ON accountIdInventory.intAccountId = glAccountIdInventory.intAccountId
+					OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+						@intItemId
+						,ISNULL(@intInTransitSourceLocationId, @intItemLocationId)
+						,'Inventory In-Transit'
+					) accountIdInTransit
+					LEFT JOIN tblGLAccount glAccountIdInTransit
+						ON accountIdInTransit.intAccountId = glAccountIdInTransit.intAccountId	
 
 			WHERE	ItemPricing.intItemId = @intItemId
 					AND ItemPricing.intItemLocationId = @intItemLocationId			

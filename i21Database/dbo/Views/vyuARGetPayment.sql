@@ -39,6 +39,7 @@ SELECT intPaymentId						= P.intPaymentId
 	 , strCustomerName					= C.strName
 	 , strCustomerNumber				= C.strCustomerNumber
 	 , dblTotalAR						= C.dblARBalance
+	 , dblCreditLimit					= C.dblCreditLimit
 	 , ysnHasBudgetSetup				= C.ysnHasBudgetSetup
 	 , strLocationName					= CL.strLocationName
 	 , strCurrency						= CUR.strCurrency

@@ -50,7 +50,7 @@ begin try
 		,@intPayToAddressId				INT
 		,@intCurrencyId					INT
 		,@dtmDate						DATETIME
-		,@dtmVoucherDate				DATETIME = getdate()
+		,@dtmVoucherDate				DATETIME = GETUTCDATE()
 		,@dtmDueDate					DATETIME
 		,@strVendorOrderNumber			NVARCHAR (MAX)
 		,@strReference					NVARCHAR(400)
@@ -1047,6 +1047,14 @@ begin try
 					,@intCreatedInventoryReceiptItemId int
 					,@dblCreatedQtyReceived numeric(18,6);
 
+
+
+				declare @prePayId Id;
+				
+				declare @processedPayment table (
+					intBillId int
+				);
+
 				select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
 				while (@intCreatedBillDetailId is not null and @intCreatedBillDetailId > 0)
 				begin
@@ -1083,6 +1091,27 @@ begin try
 							,@dblQuantity = @dblCreatedQtyReceived
 							,@strScreen = 'Voucher'
 					end
+
+					delete from @prePayId
+
+					insert into
+						@prePayId([intId])
+					select distinct
+						BD.intBillId
+					from
+						tblAPBillDetail BD
+						join tblAPBill BL ON BL.intBillId = BD.intBillId
+					where
+						BD.intContractDetailId = @intContractDetailId
+						and BL.intTransactionType in(2, 13)
+						and BL.ysnPosted = 1
+						and BL.ysnPaid = 0
+
+					if (exists(select top 1 1 from @prePayId) and not exists (select top 1 1 from @processedPayment where intBillId = @intCreatedBillId))
+					begin
+						insert into @processedPayment select intBillId = @intCreatedBillId;
+						EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
+					end
 						
 					select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
 				end
@@ -1095,10 +1124,7 @@ begin try
 					select top 1 @intInventoryReceiptItemId = intInventoryReceiptItemId, @ysnPostBill = 1, @intCreatedBillDetailId = intBillDetailId from @CreatedVoucher where intBillId = @intCreatedBillId ;
 					if exists (select top 1 1 from tblICInventoryReceiptItem ri join tblICInventoryReceipt ir on ir.intInventoryReceiptId = ri.intInventoryReceiptId where ri.intInventoryReceiptItemId = @intInventoryReceiptItemId and ir.intSourceType = 1)
 					begin
-						if exists (select top 1 1 from tblAPBillDetail bd join tblCTContractDetail cd on cd.intContractDetailId = bd.intContractDetailId where bd.intBillDetailId = @intCreatedBillDetailId and cd.intPricingTypeId in (1,6))
-						begin
-							select top 1 @ysnPostBill = isnull(v.ysnPostVoucher,0)from tblAPBill b join tblAPVendor v on v.intEntityId = b.intEntityVendorId where b.intBillId = @intCreatedBillId
-						end
+						select top 1 @ysnPostBill = isnull(v.ysnPostVoucher,0)from tblAPBill b join tblAPVendor v on v.intEntityId = b.intEntityVendorId where b.intBillId = @intCreatedBillId
 					end
 					if (@ysnPostBill = 1)
 					begin

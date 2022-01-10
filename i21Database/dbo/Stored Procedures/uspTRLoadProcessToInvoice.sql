@@ -110,7 +110,7 @@ BEGIN TRY
 		,[intOrderUOMId]						= Item.intIssueUOMId
 		,[intItemUOMId]							= Item.intIssueUOMId
 		,[dblQtyOrdered]						= DD.dblUnits
-		,[dblQtyShipped]						= DD.dblUnits
+		,[dblQtyShipped]						= DD.dblFreightUnit
 		,[dblDiscount]							= 0
 		,[dblPrice]								--= DD.dblPrice
 												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
@@ -156,6 +156,7 @@ BEGIN TRY
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
 		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
+		,dblMinimumUnits						= DD.dblMinimumUnits
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -576,7 +577,7 @@ BEGIN TRY
 		FROM #tmpSourceTable
 	) Invoices
 
-		--Freight Items
+	--Freight Items
 	INSERT INTO #tmpSourceTableFinal(
 		[intId] 
 		,[strSourceTransaction]
@@ -702,7 +703,7 @@ BEGIN TRY
 		,[intOrderUOMId]						= @intFreightItemUOMId
 		,[intItemUOMId]							= @intFreightItemUOMId
 		,[dblQtyOrdered]						= IE.dblQtyOrdered
-		,[dblQtyShipped]						= IE.dblQtyShipped
+		,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN IE.dblMinimumUnits ELSE IE.dblQtyShipped END
 		,[dblDiscount]							= 0
 		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 THEN ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
 													WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1  THEN ISNULL(IE.[dblFreightRate],0) END 
@@ -867,7 +868,7 @@ BEGIN TRY
 		,[intOrderUOMId]						= TR.intOrderUOMId
 		,[intItemUOMId]							= TR.intItemUOMId
 		,[dblQtyOrdered]						= TR.dblQtyOrdered
-		,[dblQtyShipped]						= TR.dblQtyShipped
+		,[dblQtyShipped]						= CASE WHEN intId = 0 THEN TR.dblQtyShipped ELSE TR.dblQtyOrdered END
 		,[dblDiscount]							= TR.dblDiscount
 		,[dblPrice]								= TR.dblPrice
 		,[ysnRefreshPrice]						= TR.ysnRefreshPrice
@@ -1031,8 +1032,8 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000)
-			,[dblQtyShipped]						= ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000)
+			,[dblQtyOrdered]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END 
+			,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END 
 			,[dblDiscount]							= 0
 			,[dblPrice]								= ISNULL(IE.dblSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
@@ -1280,7 +1281,7 @@ BEGIN TRY
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
 
-	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
+	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 
 	EXEC [dbo].[uspARProcessInvoices]
 			 @InvoiceEntries	= @EntriesForInvoice

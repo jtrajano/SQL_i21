@@ -29,6 +29,8 @@ SELECT
 	A.dtmDatePaid,
 	A.dtmBillDate,
 	A.dtmDueDate,
+	ISNULL(A.ysnOverrideCashFlow, 0) ysnOverrideCashFlow,
+	ISNULL(A.dtmCashFlowDate, A.dtmDueDate) dtmCashFlowDate,
 	A.strVendorOrderNumber,
 	A.strReference,
 	A.strCreatedWith,

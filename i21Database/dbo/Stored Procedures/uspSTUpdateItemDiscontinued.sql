@@ -196,9 +196,11 @@ BEGIN TRY
 					ON invoicedetail.intInvoiceId = invoice.intInvoiceId
 				LEFT JOIN tblICInventoryReceiptItem receipt
 					ON item.intItemId = receipt.intItemId
-				WHERE item.strStatus != 'Discontinued'
-
+				WHERE item.strStatus != 'Discontinued' AND invoice.dtmDate IS NOT NULL OR
+				item.dtmDateCreated IS NOT NULL OR receipt.dtmDateCreated IS NOT NULL
 		END
+
+
 	END
 	-- END Add the filter records
 
@@ -207,7 +209,9 @@ BEGIN TRY
 
 	BEGIN TRY
 		
-		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items))
+		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Location)
+		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Vendor) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Category)
+		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Family) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Class))
 		BEGIN
 			-- This is where IC SP Executed for updating 
 			EXEC [uspICUpdateItemForCStore]
@@ -357,6 +361,36 @@ BEGIN TRY
 			)
 			DELETE FROM CTE WHERE RN > 1 
 		--END Remove the Duplicate on the @tblPreview
+		
+		--Remove the Item from the temp table value is NULL fields (dtmNotSoldSince, dtmNotPurchased , dtmCreatedOlderThan)
+			IF (@CreatedOlder IS NOT NULL)
+			BEGIN
+				IF (@NotSoldSince IS NULL AND
+					@NotPurchasedSince IS NULL )
+				BEGIN
+					DELETE FROM @tblPreview WHERE dtmCreatedOlderThan IS NULL
+				END
+			END
+
+			IF (@NotSoldSince IS NOT NULL)
+			BEGIN
+				IF (@CreatedOlder IS NULL AND
+					@NotPurchasedSince IS NULL )
+				BEGIN
+					DELETE FROM @tblPreview WHERE dtmNotSoldSince IS NULL
+				END
+			END
+
+			IF (@NotPurchasedSince IS NOT NULL)
+			BEGIN
+				IF (@CreatedOlder IS NULL AND
+					@NotSoldSince IS NULL )
+				BEGIN
+					DELETE FROM @tblPreview WHERE dtmNotPurchased IS NULL
+				END
+			END
+
+		--Remove the Item from the temp table value is NULL fields (dtmNotSoldSince, dtmNotPurchased , dtmCreatedOlderThan)
 	END
 
 	DELETE FROM @tblPreview WHERE ISNULL(strPreviewOldData, '') = ISNULL(strPreviewNewData, '')

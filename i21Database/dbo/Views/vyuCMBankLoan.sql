@@ -6,9 +6,7 @@ BA.strBankAccountNo,
 BA.strBankName,  
 BA.strCurrency,  
 BA.intBankId,
-T.intCurrencyId,  
 strStatus = CASE WHEN L.ysnOpen = 1 THEN  'Open' ELSE 'Closed' END COLLATE Latin1_General_CI_AS,  
-T.ysnPosted,
 strLimitType=
 CASE 
   WHEN intLimitTypeId =1 THEN 'Contract'
@@ -23,8 +21,6 @@ CASE
   WHEN intLoanTypeId = 2 THEN 'Trade Limit'
 END,
 strBorrowingFacilityId
-FROM tblCMBankLoan L   
-LEFT JOIN tblCMBankTransaction T  
-ON L.intBankLoanId = T.intBankLoanId  
+FROM tblCMBankLoan L
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = L.intBorrowingFacilityId
