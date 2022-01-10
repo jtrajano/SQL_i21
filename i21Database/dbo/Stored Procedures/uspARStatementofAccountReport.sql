@@ -364,6 +364,12 @@ BEGIN
 				, @intEntityUserId				= @intEntityUserId
 		END
 
+	--LOGO
+	UPDATE tblARCustomerStatementStagingTable
+	SET blbLogo = @blbLogo
+	WHERE intEntityUserId = @intEntityUserId
+	  AND strStatementFormat = @strStatementFormat
+
 	DELETE FROM tblARCustomerStatementOfAccountStagingTable
 	WHERE intEntityUserId = @intEntityUserId
 	AND strReportLogId <> @strReportLogId

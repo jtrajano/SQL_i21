@@ -434,7 +434,7 @@ SET dblTotalAR = dblTotalAR - ISNULL(dblFuture, 0)
   , dblFuture = 0.000000
 
 --#INVOICES
-INSERT INTO #INVOICES (
+INSERT INTO #INVOICES WITH (TABLOCK) (
 	  intInvoiceId
 	, intPaymentId
 	, intEntityCustomerId
@@ -459,6 +459,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmDate					= I.dtmDate
 	 , dtmDueDate				= I.dtmDueDate	 
 FROM tblARInvoice I WITH (NOLOCK)
+INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #COMPANYLOCATIONS CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND I.ysnCancelled = 0

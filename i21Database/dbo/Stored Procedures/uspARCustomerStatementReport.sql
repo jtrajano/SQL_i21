@@ -340,7 +340,8 @@ SELECT intEntityCustomerId		= I.intEntityCustomerId
 	, dtmDueDate				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo') THEN NULL ELSE I.dtmDueDate END
 	, ysnImportedFromOrigin		= I.ysnImportedFromOrigin
 	, strLocationName			= L.strLocationName
-FROM tblARInvoice I WITH (NOLOCK)    
+FROM tblARInvoice I WITH (NOLOCK)
+INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId
 INNER JOIN #LOCATIONS L ON I.intCompanyLocationId = L.intCompanyLocationId
 WHERE ysnPosted  = 1        
