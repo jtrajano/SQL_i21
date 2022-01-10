@@ -139,6 +139,11 @@ BEGIN
 		,[dblQty] = 0 
 	FROM 
 		@stock
+	ORDER BY
+		[intItemId] ASC 
+		,[intItemLocationId] ASC 
+		,[intItemUOMId] ASC 
+		,[dtmDate] ASC 
 		 
 	UPDATE asOfDate
 	SET
