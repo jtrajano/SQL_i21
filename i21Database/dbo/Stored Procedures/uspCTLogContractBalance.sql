@@ -227,7 +227,7 @@ BEGIN
 			, strProcess
 			, ysnDeleted
 		FROM #tmpLogItems WHERE intId = @Id
-		AND NOT (@intHeaderPricingTypeId IN (1, 4, 5, 6, 7, 8) AND strTransactionType LIKE '%Basis Deliveries%')
+		AND NOT (@intHeaderPricingTypeId IN (1, 3, 4, 5, 6, 7, 8) AND strTransactionType LIKE '%Basis Deliveries%')
 
 		SET @intTransCtr += 1
 		IF (@intTransCtr % 10000 = 0)
