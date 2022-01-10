@@ -275,8 +275,6 @@
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerPricing.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaEMEntity.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
