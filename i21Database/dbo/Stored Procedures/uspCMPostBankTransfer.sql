@@ -164,6 +164,10 @@ FROM [dbo].tblCMBankTransfer A JOIN
 WHERE strTransactionId = @strTransactionId     
   
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference      
+
+EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,3, @intBankTransferTypeId -- location
+EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,6, @intBankTransferTypeId -- company
+
   
 IF ((@intCurrencyIdFrom != @intDefaultCurrencyId) OR (@intCurrencyIdTo != @intDefaultCurrencyId ) )AND @ysnPost = 1
 BEGIN  
