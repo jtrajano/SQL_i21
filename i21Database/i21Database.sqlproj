@@ -10440,6 +10440,7 @@
     <Build Include="dbo\Tables\tblARSalesAnalysisStagingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
     <None Include="Scripts\Post-Deployment\CM\14_BankAccountTypes.sql" />
+    <None Include="Scripts\Post-Deployment\CM\15_CompanyPreferenceOptions.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
