@@ -61,6 +61,7 @@ INSERT INTO @ItemsForPost
     ,[intTicketId]
 	,[strSourceNumber]
 	,[strSourceType]
+	,[intSourceEntityId]
 ) 
 SELECT 
      [intItemId]
@@ -96,6 +97,7 @@ SELECT
     ,[intTicketId]
 	,[strSourceNumber]
 	,[strSourceType]
+	,[intSourceEntityId]
 FROM 
 	##ARItemsForCosting
 
