@@ -43,12 +43,18 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 DECLARE @strCompanyFullAddress	NVARCHAR(500) = NULL
 	  , @strCompanyName			NVARCHAR(100) = NULL
 	  , @strSalesOrderIds		NVARCHAR(MAX) = NULL
+	  , @strRequestId			NVARCHAR(200) = NULL
 	  , @blbLogo				VARBINARY(MAX) = NULL
 	  , @dtmDateFrom			DATETIME = NULL
 	  , @dtmDateTo				DATETIME = NULL
 	  , @intSalesOrderIdFrom	INT = NULL
 	  , @intSalesOrderIdTo		INT = NULL
 	  , @xmlDocumentId			INT = NULL
+	  , @strEmail				NVARCHAR(100) = NULL
+	  , @strPhone				NVARCHAR(100) = NULL
+	  , @intPerformanceLogId	INT = NULL
+	  , @intEntityUserId		INT = NULL
+	  , @strReportLogId			NVARCHAR(MAX)
 
 --PREPARE XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
@@ -84,6 +90,28 @@ WHERE [fieldname] = 'intSalesOrderId'
 SELECT @strSalesOrderIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM #XMLTABLE
 WHERE [fieldname] = 'strSalesOrderIds'
+
+SELECT	@intEntityUserId = [from]
+FROM #XMLTABLE
+WHERE [fieldname] = 'intSrCurrentUserId'
+
+SELECT @strRequestId = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM #XMLTABLE
+WHERE [fieldname] = 'strRequestId'
+
+SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM #XMLTABLE
+WHERE [fieldname] = 'strReportLogId'
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	BEGIN
+		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+		VALUES (@strReportLogId, GETDATE())
+	END
+ELSE
+	RETURN
+
+EXEC dbo.uspARLogPerformanceRuntime 'Sales Order Report', 'uspARSalesOrderReport', @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -125,6 +153,8 @@ ELSE
 --COMPANY INFO
 SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
 		   , @strCompanyName		= strCompanyName
+		   , @strPhone				= strPhone
+		   , @strEmail				= strEmail
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -153,6 +183,10 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 									   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
 									   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
 								  END
+	 , strCompanyInfo			= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+									   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
+									   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
+								  END  + CHAR(10) + ISNULL(@strEmail,'')   + CHAR(10) + ISNULL(@strPhone,'')
 	 , strOrderType				= ISNULL(SO.strType, 'Standard')
 	 , strLocationName			= L.strLocationName
 	 , dtmDate					= SO.dtmDate
@@ -186,7 +220,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN CASE WHEN SALESORDERDETAIL.intProductTypeId IS NULL THEN 'No Product Type' ELSE SALESORDERDETAIL.strProductTypeName + ' - ' + SALESORDERDETAIL.strProductTypeDescription END ELSE NULL END
 	 , strProductTypeName		= CASE WHEN SO.strTransactionType = 'Quote' THEN SALESORDERDETAIL.strProductTypeName ELSE NULL END
 	 , dtmExpirationDate		= CASE WHEN SO.strTransactionType = 'Quote' THEN SO.dtmExpirationDate ELSE NULL END
-	 , strBillTo				= ISNULL(RTRIM(SO.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(SO.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(SO.strBillToCity), '') + ISNULL(RTRIM(', ' + SO.strBillToState), '') + ISNULL(RTRIM(', ' + SO.strBillToZipCode), '') + ISNULL(RTRIM(', ' + SO.strBillToCountry), '')
+	 , strBillTo				= ISNULL(RTRIM(ENTITYLOCATION.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(SO.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(SO.strBillToCity), '') + ISNULL(RTRIM(', ' + SO.strBillToState), '') + ISNULL(RTRIM(', ' + SO.strBillToZipCode), '') + ISNULL(RTRIM(', ' + SO.strBillToCountry), '')
 	 , strShipTo				= ISNULL(RTRIM(SO.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(SO.strShipToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(SO.strShipToCity), '') + ISNULL(RTRIM(', ' + SO.strShipToState), '') + ISNULL(RTRIM(', ' + SO.strShipToZipCode), '') + ISNULL(RTRIM(', ' + SO.strShipToCountry), '')
 	 , strSalespersonName		= SPE.strName
 	 , strOrderedByName			= EOB.strName
@@ -276,6 +310,7 @@ LEFT JOIN tblARSalesperson SALESPERSON WITH (NOLOCK) ON SO.intEntitySalespersonI
 LEFT JOIN tblEMEntity SPE WITH (NOLOCK) ON SALESPERSON.intEntityId = SPE.intEntityId
 LEFT JOIN tblSMShipVia SHIPVIA ON SO.intShipViaId = SHIPVIA.intEntityId
 LEFT JOIN tblEMEntity SVE WITH (NOLOCK) ON SHIPVIA.intEntityId = SVE.intEntityId
+LEFT JOIN tblEMEntityLocation ENTITYLOCATION ON ENTITYLOCATION.intEntityLocationId = SO.intBillToLocationId
 LEFT JOIN tblSMCurrency CUR WITH (NOLOCK) ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN tblSMTerm T WITH (NOLOCK) ON SO.intTermId = T.intTermID
 LEFT JOIN tblEMEntity EOB WITH (NOLOCK) ON SO.intOrderedById = EOB.intEntityId
@@ -389,6 +424,7 @@ INSERT INTO tblARSalesOrderReportStagingTable WITH (TABLOCK) (
 	 , intEntityCustomerId
 	 , strCompanyName
 	 , strCompanyAddress
+	 , strCompanyInfo
 	 , strOrderType
 	 , strLocationName
 	 , dtmDate
@@ -462,6 +498,7 @@ SELECT intSalesOrderId
 	 , intEntityCustomerId
 	 , strCompanyName
 	 , strCompanyAddress
+	 , strCompanyInfo
 	 , strOrderType
 	 , strLocationName
 	 , dtmDate
@@ -532,3 +569,5 @@ SELECT intSalesOrderId
 FROM #SALESORDERS
 
 SELECT * FROM tblARSalesOrderReportStagingTable
+
+EXEC dbo.uspARLogPerformanceRuntime 'Sales Order Report', 'uspARSalesOrderReport', @strRequestId, 0, @intEntityUserId, @intPerformanceLogId, NULL
