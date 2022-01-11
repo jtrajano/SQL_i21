@@ -13,4 +13,5 @@
 	strTerminalNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,					-- Terminal No						| OPTIONAL
 	strSupplyPointForRackPrices NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,	-- Supply Point For Rack Prices		| OPTIONAL
 	ysnMultipleDueDates BIT NULL,													-- Multiple Due Dates				| OPTIONAL
+	strFreightSalesUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,				-- Freight Sales Unit				| OPTIONAL
 )
