@@ -1,3 +1,5 @@
+
+
 CREATE PROCEDURE uspCMValidateSegmentPosting
 @intAccountId INT,
 @intAccountId1 INT,
@@ -5,8 +7,8 @@ CREATE PROCEDURE uspCMValidateSegmentPosting
 @intBankTransferTypeId INT
 AS
 
-DECLARE @intLocationId INT, @intLocationId1 INT
-DECLARE @intCompanyId INT, @intCompanyId1 INT
+DECLARE @strLocationId nvarchar(10), @strLocationId1  nvarchar(10)
+DECLARE @strCompanyId  nvarchar(10), @strCompanyId1  nvarchar(10)
 
 
 IF @intStructureType = 3
@@ -16,16 +18,18 @@ BEGIN
     
         _beginL:
         
-        SELECT @intCompanyId = NULL , @intCompanyId1 = NULL
+        SELECT @strLocationId = '' , @strLocationId1 = ''
 
-        SELECT TOP 1 @intLocationId = [Location] FROM tblGLAccount A JOIN tblGLTempCOASegment B ON A.intAccountId = B.intAccountId    AND A.intAccountId = @intAccountId
-        SELECT TOP 1 @intLocationId1 = [Location] FROM tblGLAccount A JOIN tblGLTempCOASegment B ON A.intAccountId = B.intAccountId    AND A.intAccountId = @intAccountId1
+        SELECT TOP 1 @strLocationId = [Location] FROM tblGLTempCOASegment WHERE intAccountId = @intAccountId
+        SELECT TOP 1 @strLocationId1 = [Location] FROM tblGLTempCOASegment WHERE intAccountId = @intAccountId1
 
-        IF @intAccountId <> @intAccountId1
+        IF @strLocationId <> @strLocationId1
         BEGIN
             RAISERROR('Posting between locations is not allowed', 16,1)
             GOTO _end
         END
+		ELSE
+			GOTO _end
     END
 
     IF EXISTS (SELECT TOP 1 1 FROM tblCMCompanyPreferenceOption WHERE ysnAllowBetweenLocations_Forward = 0 AND @intBankTransferTypeId = 3)
@@ -44,17 +48,19 @@ BEGIN
     BEGIN
         _beginC:
 
-        SELECT @intCompanyId = NULL , @intCompanyId1 = NULL
+        SELECT @strCompanyId = '' , @strCompanyId1 = ''
 
-        DECLARE @sql nvarchar(max) = 'SELECT TOP 1 @intCompanyId = [Company] FROM tblGLAccount A JOIN tblGLTempCOASegment B ON A.intAccountId = B.intAccountId    AND A.intAccountId = @intAccountId'
-        EXEC sys.sp_executesql @sql, N'@intAccountId, @intCompanyId INT OUT', @intAccountId,@intCompanyId OUT
-        EXEC sys.sp_executesql @sql, N'@intAccountId, @intCompanyId INT OUT', @intAccountId,@intCompanyId1 OUT
+        DECLARE @sql nvarchar(max) = 'SELECT TOP 1 @strCompanyId = [Company] FROM tblGLTempCOASegment WHERE intAccountId = @intAccountId'
+        EXEC sys.sp_executesql @sql, N'@intAccountId INT, @strCompanyId NVARCHAR(10) OUT', @intAccountId,@strCompanyId OUT
+        EXEC sys.sp_executesql @sql, N'@intAccountId INT, @strCompanyId NVARCHAR(10) OUT', @intAccountId1,@strCompanyId1 OUT
 
-        IF @intCompanyId <> @intCompanyId1
+        IF @strCompanyId <> @strCompanyId1
         BEGIN
             RAISERROR('Posting between companies is not allowed', 16,1)
             GOTO _end
         END
+		ELSE
+			GOTO _end
 
     END
 
