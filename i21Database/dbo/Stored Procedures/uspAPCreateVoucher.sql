@@ -39,6 +39,8 @@ BEGIN TRY
 	DECLARE @voucherHeader AS VoucherPayable;
 	DECLARE @SavePoint NVARCHAR(32) = 'uspAPCreateVoucher';
 
+	DECLARE @startingNumberDigit INT = 0;
+	DECLARE @startingNumberPadding NVARCHAR(10) = '0000000000';
 	DECLARE @voucherStartNum INT = 0;
 	DECLARE @voucherPref NVARCHAR(50);
 	DECLARE @debitMemoStartNum INT = 0;
@@ -281,11 +283,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@voucherStartNum = A.intNumber
 		,@voucherPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 9
 
 	UPDATE A
-		SET A.strBillId = @voucherPref + CAST(@voucherStartNum AS NVARCHAR)
+		SET A.strBillId = @voucherPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@voucherStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@voucherStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@voucherStartNum = @voucherStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 1
@@ -295,11 +300,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@debitMemoStartNum = A.intNumber
 		,@debitMemoPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 18
 
 	UPDATE A
-		SET A.strBillId = @debitMemoPref + CAST(@debitMemoStartNum AS NVARCHAR)
+		SET A.strBillId = @debitMemoPref + CASE 
+												WHEN @startingNumberDigit = 0 THEN CAST(@debitMemoStartNum AS NVARCHAR)
+												ELSE RIGHT(@startingNumberPadding + CAST(@debitMemoStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@debitMemoStartNum = @debitMemoStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 3
@@ -309,11 +317,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@claimStartNum = A.intNumber
 		,@claimPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 101
 
 	UPDATE A
-		SET A.strBillId = @claimPref + CAST(@claimStartNum AS NVARCHAR)
+		SET A.strBillId = @claimPref + CASE 
+											WHEN @startingNumberDigit = 0 THEN CAST(@claimStartNum AS NVARCHAR)
+											ELSE RIGHT(@startingNumberPadding + CAST(@claimStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@claimStartNum = @claimStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 11
@@ -323,11 +334,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@baStartNum = A.intNumber
 		,@baPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 124
 
 	UPDATE A
-		SET A.strBillId = @baPref + CAST(@baStartNum AS NVARCHAR)
+		SET A.strBillId = @baPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@baStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@baStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@baStartNum = @baStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 13
@@ -337,11 +351,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@prepaidStartNum = A.intNumber
 		,@prepaidPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 20
 
 	UPDATE A
-		SET A.strBillId = @prepaidPref + CAST(@prepaidStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @prepaidPref + CASE 
+											WHEN @startingNumberDigit = 0 THEN CAST(@prepaidStartNum AS NVARCHAR)
+											ELSE RIGHT(@startingNumberPadding + CAST(@prepaidStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@prepaidStartNum = @prepaidStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 2
@@ -351,11 +368,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@deferStartNum = A.intNumber
 		,@deferPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 132
 
 	UPDATE A
-		SET A.strBillId = @deferPref + CAST(@deferStartNum AS NVARCHAR)
+		SET A.strBillId = @deferPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@deferStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@deferStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@deferStartNum = @deferStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 14
@@ -365,11 +385,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@adjStartNum = A.intNumber
 		,@adjPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 77
 
 	UPDATE A
-		SET A.strBillId = @adjPref + CAST(@adjStartNum AS NVARCHAR)
+		SET A.strBillId = @adjPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@adjStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@adjStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@adjStartNum = @adjStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 9
