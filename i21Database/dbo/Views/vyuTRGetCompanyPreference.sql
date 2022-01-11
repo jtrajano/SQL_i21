@@ -36,6 +36,7 @@ SELECT CP.intCompanyPreferenceId
 	, CP.strRackPriceImportArchiveFolder
 	, CP.intConcurrencyId
 	, CP.ysnFreightInRequired
+	, CP.ysnComboFreight
 FROM tblTRCompanyPreference CP
 LEFT JOIN tblSMImportFileHeader Import on Import.intImportFileHeaderId = CP.intRackPriceImportMappingId
 LEFT JOIN tblSMImportFileHeader ImportBol ON ImportBol.intImportFileHeaderId = CP.intBolImportFormatId 
