@@ -145,6 +145,7 @@ BEGIN
 	, @intTerminalControlNumberId INT = NULL
 	, @intRackPriceSupplyPointId INT = NULL
 	, @ysnMultipleDueDates BIT = NULL
+	, @strFreightSalesUnit NVARCHAR(50) = NULL
 	, @intRowNumber INT = NULL
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD	
     FOR 
@@ -158,6 +159,10 @@ BEGIN
 		, TCN.intTerminalControlNumberId
 		, SPV.intRackPriceSupplyPointId
 		, SPD.ysnMultipleDueDates
+		, CASE WHEN SPD.strFreightSalesUnit IS NULL THEN NULL 
+			   WHEN SPD.strFreightSalesUnit = 'Net' THEN 'Net' 
+			   WHEN SPD.strFreightSalesUnit = 'Gross' THEN 'Gross'
+			   ELSE NULL END AS strFreightSalesUnit
 		, SPD.intRowNumber
 	FROM tblApiSchemaTRVendorSupplyPointDetail SPD
 	INNER JOIN tblEMEntity E ON E.strEntityNo = SPD.strVendorEntityNo
@@ -184,6 +189,7 @@ BEGIN
 	, @intTerminalControlNumberId 
 	, @intRackPriceSupplyPointId
 	, @ysnMultipleDueDates
+	, @strFreightSalesUnit
 	, @intRowNumber 
 
 	WHILE @@FETCH_STATUS = 0
@@ -202,6 +208,7 @@ BEGIN
 				, intTerminalControlNumberId = @intTerminalControlNumberId
 				, intRackPriceSupplyPointId = @intRackPriceSupplyPointId
 				, ysnMultipleDueDates = @ysnMultipleDueDates
+				, strFreightSalesUnit = @strFreightSalesUnit
 				, guiApiUniqueId = @guiApiUniqueId
 			WHERE intSupplyPointId = @intSupplyPointId
 
@@ -219,6 +226,7 @@ BEGIN
 				, intTerminalControlNumberId
 				, intRackPriceSupplyPointId
 				, ysnMultipleDueDates
+				, strFreightSalesUnit
 				, guiApiUniqueId
 				, intConcurrencyId
 			)
@@ -232,6 +240,7 @@ BEGIN
 				, @intTerminalControlNumberId
 				, @intRackPriceSupplyPointId
 				, @ysnMultipleDueDates
+				, @strFreightSalesUnit
 				, @guiApiUniqueId
 				, 1
 			)
@@ -272,6 +281,7 @@ BEGIN
 		, @intTerminalControlNumberId 
 		, @intRackPriceSupplyPointId
 		, @ysnMultipleDueDates
+		, @strFreightSalesUnit
 		, @intRowNumber 
 	END
 	CLOSE DataCursor
