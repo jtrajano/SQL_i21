@@ -42,4 +42,13 @@ DECLARE
 		@intBankId = @intBankId, 
 		@intBankAccountId = @intBankAccountId, 
 		@intCompanyLocationId = @intCompanyLocationId
+
+	-- Total AR
+	EXEC [dbo].[uspCMGenerateARCashFlow] 
+		@intCashFlowReportId = @intCashFlowReportId, 
+		@dtmReportDate = @dtmReportDate, 
+		@intReportingCurrencyId = @intReportingCurrencyId, 
+		@intBankId = @intBankId, 
+		@intBankAccountId = @intBankAccountId, 
+		@intCompanyLocationId = @intCompanyLocationId
  END

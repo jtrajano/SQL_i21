@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCMGenerateAPCashFlow]
+﻿CREATE PROCEDURE [dbo].[uspCMGenerateARCashFlow]
 (
 	@intCashFlowReportId INT,
 	@dtmReportDate DATETIME,
@@ -10,11 +10,8 @@
 AS
 BEGIN
 	SET NOCOUNT, XACT_ABORT ON;
-
+	
 	DECLARE
-		@intCurrentAccountId INT,
-		@intCurrentBankAccountId INT,
-		@strCurrentAccountId NVARCHAR(100),
 		@dblBucket1 NUMERIC(18, 6) = 0,
 		@dblBucket2 DECIMAL(18, 6) = 0,
 		@dblBucket3 DECIMAL(18, 6) = 0,
@@ -81,11 +78,6 @@ BEGIN
 	FROM tblCMCashFlowReportRateType
 	WHERE intCashFlowReportId = @intCashFlowReportId
 
-	/*
-		TO DO/IN PROGRESS: Filter by Bank Account
-		Insert each transactions of each bucket to the drilldown table	
-	*/
-
 	INSERT INTO tblCMCashFlowReportSummaryDetail (
 			[intCashFlowReportId]
 			,[intTransactionId]
@@ -117,7 +109,7 @@ BEGIN
 		'Current',
 		NULL,
 		@dtmReportDate,
-		ISNULL(SUM(dblAmount), 0) * RateFilter.dblRateBucket1 * -1,
+		ISNULL(SUM(dblAmount), 0) * RateFilter.dblRateBucket1,
 		0,
 		0,
 		0,
@@ -134,19 +126,25 @@ BEGIN
 		NULL,
 		@intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](NULL, @dtmReportDate)
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate <= @dtmReportDate
 	GROUP BY
 		RateFilter.dblRateBucket1,
 		intCurrencyId,
@@ -161,7 +159,7 @@ BEGIN
 		strTransactionType,
 		dtmDate,
 		0,
-		(dblAmount * RateFilter.dblRateBucket2) * -1,
+		(dblAmount * RateFilter.dblRateBucket2),
 		0,
 		0,
 		0,
@@ -174,22 +172,29 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket2,
 		RateFilter.dblRateBucket2,
 		intGLAccountId,
-		NULL, --intBankAccountId,
+		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 1, @dtmReportDate), DATEADD(DAY, 7, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 1, @dtmReportDate) AND DATEADD(DAY, 7, @dtmReportDate)
+
 	-- Bucket 8 - 14
 	UNION ALL
 	SELECT
@@ -200,7 +205,7 @@ BEGIN
 		dtmDate,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket3) * -1,
+		(dblAmount * RateFilter.dblRateBucket3),
 		0,
 		0,
 		0,
@@ -212,22 +217,29 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket3,
 		RateFilter.dblRateBucket3,
 		intGLAccountId,
-		NULL, --intBankAccountId,
+		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 8, @dtmReportDate), DATEADD(DAY, 14, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 8, @dtmReportDate) AND DATEADD(DAY, 14, @dtmReportDate)
+
 	-- Bucket 15 - 21
 	UNION ALL
 	SELECT
@@ -239,7 +251,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket4) * -1,
+		(dblAmount * RateFilter.dblRateBucket4),
 		0,
 		0,
 		0,
@@ -250,22 +262,29 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket4,
 		RateFilter.dblRateBucket4,
 		intGLAccountId,
-		NULL, --intBankAccountId,
+		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 15, @dtmReportDate), DATEADD(DAY, 21, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 15, @dtmReportDate) AND DATEADD(DAY, 21, @dtmReportDate)
+
 	-- Bucket 22 - 29
 	UNION ALL
 	SELECT
@@ -278,7 +297,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket5) * -1,
+		(dblAmount * RateFilter.dblRateBucket5),
 		0,
 		0,
 		0,
@@ -288,22 +307,29 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket5,
 		RateFilter.dblRateBucket5,
 		intGLAccountId,
-		NULL, --intBankAccountId,
+		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 22, @dtmReportDate), DATEADD(DAY, 29, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 22, @dtmReportDate) AND DATEADD(DAY, 29, @dtmReportDate)
+
 	-- Bucket 30 - 60
 	UNION ALL
 	SELECT
@@ -317,7 +343,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket6) * -1,
+		(dblAmount * RateFilter.dblRateBucket6),
 		0,
 		0,
 		0,
@@ -326,22 +352,29 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket6,
 		RateFilter.dblRateBucket6,
 		intGLAccountId,
-		NULL, --intBankAccountId,
+		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 30, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 30, @dtmReportDate) AND DATEADD(DAY, 60, @dtmReportDate)
+	
 	-- Bucket 60 - 90
 	UNION ALL
 	SELECT
@@ -356,7 +389,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket7) * -1,
+		(dblAmount * RateFilter.dblRateBucket7),
 		0,
 		0,
 		intCurrencyId,
@@ -364,22 +397,29 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket7,
 		RateFilter.dblRateBucket7,
 		intGLAccountId,
-		NULL, --intBankAccountId,
+		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 60, @dtmReportDate) AND DATEADD(DAY, 90, @dtmReportDate)
+
 	-- Bucket 90 - 120
 	UNION ALL
 	SELECT
@@ -395,29 +435,36 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket8) * -1,
+		(dblAmount * RateFilter.dblRateBucket8),
 		0,
 		intCurrencyId,
 		@intReportingCurrencyId,
 		RateTypeFilter.intRateTypeBucket8,
 		RateFilter.dblRateBucket8,
 		intGLAccountId,
-		NULL, --intBankAccountId,
+		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-	AND dtmDate BETWEEN DATEADD(DAY, 90, @dtmReportDate) AND DATEADD(DAY, 120, @dtmReportDate)
+
 	-- Bucket 120+
 	UNION ALL
 	SELECT
@@ -434,91 +481,98 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket9) * -1,
+		(dblAmount * RateFilter.dblRateBucket9),
 		intCurrencyId,
 		@intReportingCurrencyId,
 		RateTypeFilter.intRateTypeBucket9,
 		RateFilter.dblRateBucket9,
 		intGLAccountId,
-		NULL, --intBankAccountId,
+		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
 		ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 	WHERE 
 		(
+			CASE WHEN @intBankAccountId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 120, @dtmReportDate) AND DATEADD(DAY, 3650, @dtmReportDate)
 
-		-- Get sum of each bucket
-		SELECT 
-			@dblBucket1 = ISNULL(SUM(dblBucket1), 0),
-			@dblBucket2 = ISNULL(SUM(dblBucket2), 0), 
-			@dblBucket3 = ISNULL(SUM(dblBucket3), 0),
-			@dblBucket4 = ISNULL(SUM(dblBucket4), 0),
-			@dblBucket5 = ISNULL(SUM(dblBucket5), 0),
-			@dblBucket6 = ISNULL(SUM(dblBucket6), 0),
-			@dblBucket7 = ISNULL(SUM(dblBucket7), 0),
-			@dblBucket8 = ISNULL(SUM(dblBucket8), 0),
-			@dblBucket9 = ISNULL(SUM(dblBucket9), 0)
-		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
+	-- Get sum of each bucket
+	SELECT 
+		@dblBucket1 = ISNULL(SUM(dblBucket1), 0),
+		@dblBucket2 = ISNULL(SUM(dblBucket2), 0), 
+		@dblBucket3 = ISNULL(SUM(dblBucket3), 0),
+		@dblBucket4 = ISNULL(SUM(dblBucket4), 0),
+		@dblBucket5 = ISNULL(SUM(dblBucket5), 0),
+		@dblBucket6 = ISNULL(SUM(dblBucket6), 0),
+		@dblBucket7 = ISNULL(SUM(dblBucket7), 0),
+		@dblBucket8 = ISNULL(SUM(dblBucket8), 0),
+		@dblBucket9 = ISNULL(SUM(dblBucket9), 0)
+	FROM tblCMCashFlowReportSummaryDetail 
+	WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
 
-		-- Insert sum of buckets to report summary table
-		INSERT INTO tblCMCashFlowReportSummary
-		(
-			dtmReportDate,
-			intReportingCurrencyId,
-			intBankAccountId,
-			intCompanyLocationId,
-			dblTotal,
-			dblBucket1,
-			dblBucket2,
-			dblBucket3,
-			dblBucket4,
-			dblBucket5,
-			dblBucket6,
-			dblBucket7,
-			dblBucket8,
-			dblBucket9,
-			intCashFlowReportId,
-			intCashFlowReportSummaryCodeId,
-			intConcurrencyId
-		)
-		VALUES (
-			 @dtmReportDate
-			,@intReportingCurrencyId
-			,NULL--@intCurrentBankAccountId
-			,@intCompanyLocationId
-			,@dblBucket1 + @dblBucket2 + @dblBucket3 + @dblBucket4 + @dblBucket5 + @dblBucket6 + @dblBucket7 + @dblBucket8 + @dblBucket9
-			,@dblBucket1
-			,@dblBucket2
-			,@dblBucket3
-			,@dblBucket4
-			,@dblBucket5
-			,@dblBucket6
-			,@dblBucket7
-			,@dblBucket8
-			,@dblBucket9
-			,@intCashFlowReportId
-			,5 -- Report Code = 5 for Total AP
-			,1
-		)
+	-- Insert sum of buckets to report summary table
+	INSERT INTO tblCMCashFlowReportSummary
+	(
+		dtmReportDate,
+		intReportingCurrencyId,
+		intBankAccountId,
+		intCompanyLocationId,
+		dblTotal,
+		dblBucket1,
+		dblBucket2,
+		dblBucket3,
+		dblBucket4,
+		dblBucket5,
+		dblBucket6,
+		dblBucket7,
+		dblBucket8,
+		dblBucket9,
+		intCashFlowReportId,
+		intCashFlowReportSummaryCodeId,
+		intConcurrencyId
+	)
+	VALUES (
+			@dtmReportDate
+		,@intReportingCurrencyId
+		,@intBankAccountId
+		,@intCompanyLocationId
+		,@dblBucket1 + @dblBucket2 + @dblBucket3 + @dblBucket4 + @dblBucket5 + @dblBucket6 + @dblBucket7 + @dblBucket8 + @dblBucket9
+		,@dblBucket1
+		,@dblBucket2
+		,@dblBucket3
+		,@dblBucket4
+		,@dblBucket5
+		,@dblBucket6
+		,@dblBucket7
+		,@dblBucket8
+		,@dblBucket9
+		,@intCashFlowReportId
+		,2 -- Report Code = 2 for Total AR
+		,1
+	)
 		
-		DECLARE @intCashFlowReportSummaryId INT
-		SELECT @intCashFlowReportSummaryId = CAST(IDENT_CURRENT('dbo.tblCMCashFlowReportSummary') AS INT)
+	DECLARE @intCashFlowReportSummaryId INT
+	SELECT @intCashFlowReportSummaryId = CAST(IDENT_CURRENT('dbo.tblCMCashFlowReportSummary') AS INT)
 
-		-- Update the intCashFlowReportSummaryId of drilldown records
-		UPDATE tblCMCashFlowReportSummaryDetail
-		SET
-			intCashFlowReportSummaryId = @intCashFlowReportSummaryId
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
+	-- Update the intCashFlowReportSummaryId of drilldown records
+	UPDATE tblCMCashFlowReportSummaryDetail
+	SET
+		intCashFlowReportSummaryId = @intCashFlowReportSummaryId
+	WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
 END
+
 RETURN 0
