@@ -395,7 +395,7 @@ BEGIN TRY
 
 		SELECT @intInvoiceForIntegration = intId FROM @InvoicesForIntegration
 
-		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intInvoiceForIntegration, @ForDelete = 0, @UserId = @userId, @Post = @post, @Recap = @recap
+		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intInvoiceForIntegration, @ForDelete = 0, @UserId = @userId, @Post = @post, @Recap = @recap, @FromPosting = 1
 
 		DELETE FROM @InvoicesForIntegration WHERE intId = @intInvoiceForIntegration
 	END
