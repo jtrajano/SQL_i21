@@ -4308,9 +4308,9 @@ BEGIN TRY
                 -- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
 				UPDATE @cbLogSpecific SET dblQty = (
 					case
-					when (case when dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end) > @TotalPriced
+					when (case when @FinalQty = 0 and dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end) > @TotalPriced
 					then @TotalPriced
-					else (case when dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end)
+					else (case when @FinalQty = 0 and dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end)
 					end
 				) * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
@@ -4320,9 +4320,9 @@ BEGIN TRY
                 -- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
 				UPDATE @cbLogSpecific SET dblQty = (
 					case
-					when @TotalBasis > 0 and (case when dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end) > @TotalBasis
+					when @TotalBasis > 0 and (case when @FinalQty = 0 and dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end) > @TotalBasis
 					then @TotalBasis
-					else (case when dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end)
+					else (case when @FinalQty = 0 and dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end)
 					end
 				), intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
 
