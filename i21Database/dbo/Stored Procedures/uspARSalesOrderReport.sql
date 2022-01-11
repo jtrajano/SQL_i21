@@ -53,7 +53,8 @@ DECLARE @strCompanyFullAddress	NVARCHAR(500) = NULL
 	  , @strEmail				NVARCHAR(100) = NULL
 	  , @strPhone				NVARCHAR(100) = NULL
 	  , @intPerformanceLogId	INT = NULL
-	  , @intEntityUserId		INT = NULL	  
+	  , @intEntityUserId		INT = NULL
+	  , @strReportLogId			NVARCHAR(MAX)
 
 --PREPARE XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
@@ -97,6 +98,18 @@ WHERE [fieldname] = 'intSrCurrentUserId'
 SELECT @strRequestId = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM #XMLTABLE
 WHERE [fieldname] = 'strRequestId'
+
+SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM #XMLTABLE
+WHERE [fieldname] = 'strReportLogId'
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	BEGIN
+		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+		VALUES (@strReportLogId, GETDATE())
+	END
+ELSE
+	RETURN
 
 EXEC dbo.uspARLogPerformanceRuntime 'Sales Order Report', 'uspARSalesOrderReport', @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 

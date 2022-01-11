@@ -69,7 +69,8 @@ DECLARE  @dtmDateTo				AS DATETIME
 		,@intInvoiceIdFrom		AS INT
 		,@xmlDocumentId			AS INT
 		,@intEntityUserId		AS INT
-		,@strMainQuery			AS NVARCHAR(MAX)	
+		,@strMainQuery			AS NVARCHAR(MAX)
+		,@strReportLogId		AS NVARCHAR(MAX)
 			
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -145,6 +146,18 @@ WHERE [fieldname] = 'strTransactionType'
 SELECT @strRequestId = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strRequestId'
+
+SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strReportLogId'
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	BEGIN
+		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+		VALUES (@strReportLogId, GETDATE())
+	END
+ELSE
+	RETURN	
 
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
