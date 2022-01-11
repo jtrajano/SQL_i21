@@ -172,6 +172,7 @@ DECLARE @strInvoiceReportName			NVARCHAR(100) = NULL
 	  , @strOtherChargeCreditMemoReport	NVARCHAR(100) = NULL
 	  , @strServiceChargeFormat		    NVARCHAR(100) = NULL
 	  , @ysnStretchLogo					BIT = 0
+	  , @intPerformanceLogId			INT = NULL
 
 SELECT TOP 1 @strInvoiceReportName				= ISNULL(strInvoiceReportName, 'Standard')
 		   , @strTankDeliveryInvoiceFormat		= ISNULL(strTankDeliveryInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
@@ -184,6 +185,8 @@ SELECT TOP 1 @strInvoiceReportName				= ISNULL(strInvoiceReportName, 'Standard')
 		   , @strServiceChargeFormat			= ISNULL(strServiceChargeFormat, ISNULL(strInvoiceReportName, 'Standard'))
 		   , @ysnStretchLogo					= ISNULL(ysnStretchLogo, 0)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+
+EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceMainReport', @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 
 SET @strInvoiceReportName = ISNULL(@strInvoiceReportName, 'Standard')
 SET @strTankDeliveryInvoiceFormat = ISNULL(@strTankDeliveryInvoiceFormat, 'Standard')
@@ -279,3 +282,5 @@ IF EXISTS (SELECT TOP 1 NULL FROM #STANDARDINVOICES)
 	EXEC dbo.[uspARInvoiceReport] @intEntityUserId, @strRequestId
 
 SELECT * FROM #INVOICETABLE
+
+EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceMainReport', @strRequestId, 0, @intEntityUserId, @intPerformanceLogId, NULL
