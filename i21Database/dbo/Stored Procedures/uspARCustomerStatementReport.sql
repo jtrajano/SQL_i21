@@ -39,8 +39,8 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strDateTo							AS NVARCHAR(50)
 	  , @strDateFrom						AS NVARCHAR(50)	  
 	  , @filter								AS NVARCHAR(MAX)	= ''
+	  , @query								AS NVARCHAR(MAX)	= ''
 	  , @queryRunningBalance				AS NVARCHAR(MAX)	= ''
-	  , @queryRunningBalanceBudget			AS NVARCHAR(MAX)	= ''
 	  , @intEntityUserIdLocal				AS INT				= NULL
 	  , @ysnStretchLogo						AS BIT				= 0
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
@@ -82,7 +82,6 @@ FROM tblARCompanyPreference WITH (NOLOCK)
 IF (@@version NOT LIKE '%2008%')
 	BEGIN
 		SET @queryRunningBalance = ' ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
-		SET @queryRunningBalanceBudget = ' ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
 	END
 ELSE  
 	BEGIN
@@ -150,6 +149,7 @@ CREATE TABLE #INVOICES (
 	  intEntityCustomerId		INT NULL
 	, intInvoiceId				INT NOT NULL PRIMARY KEY
 	, intCompanyLocationId		INT NOT NULL
+	, intDaysDue				INT NULL DEFAULT 0
 	, strTransactionType		NVARCHAR(25) COLLATE Latin1_General_CI_AS   NOT	NULL
 	, strType					NVARCHAR(25) COLLATE Latin1_General_CI_AS   NULL DEFAULT 'Standard' 
 	, strInvoiceNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
@@ -160,6 +160,7 @@ CREATE TABLE #INVOICES (
 	, dtmPostDate				DATETIME NOT NULL
 	, dtmDueDate				DATETIME NULL
 	, ysnImportedFromOrigin		BIT NULL
+	, ysnPastDue				BIT NULL
 	, strLocationName			NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
 	, strTicketNumbers			NVARCHAR(500) COLLATE Latin1_General_CI_AS  NULL
 )
@@ -223,6 +224,7 @@ ELSE
 		  AND ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
 END
 
+--FILTER CUSTOMERS BY STATUS CODE
 IF @strAccountStatusCodeLocal IS NOT NULL
     BEGIN
         DELETE FROM #CUSTOMERS
@@ -234,6 +236,7 @@ IF @strAccountStatusCodeLocal IS NOT NULL
         )
     END
 
+--FILTER CUSTOMERS BY EMAIL SETUP
 IF @ysnEmailOnly IS NOT NULL
 	BEGIN
 		DELETE C
@@ -275,14 +278,14 @@ IF @strLocationNameLocal IS NOT NULL
 		) C (intCompanyLocationId)
 	END
 
---CUSTOMER_ADDRESS
+--CUSTOMER ADDRESS
 UPDATE C
 SET strFullAddress		= CASE WHEN C.strStatementFormat <> 'Running Balance' THEN EL.strLocationName ELSE '' END + CHAR(13) + CHAR(10) + EL.strAddress + CHAR(13) + char(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry 
   , strCustomerName		= CASE WHEN C.strStatementFormat <> 'Running Balance' THEN C.strCustomerName ELSE ISNULL(NULLIF(EL.strCheckPayeeName, ''), C.strCustomerName) END
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 
---CUSTOMER_FOOTERCOMMENT
+--CUSTOMER FOOTERCOMMENT
 UPDATE C
 SET strStatementFooterComment	= FOOTER.strMessage
 FROM #CUSTOMERS C
@@ -316,6 +319,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	  intEntityCustomerId
 	, intInvoiceId
 	, intCompanyLocationId
+	, intDaysDue
 	, strTransactionType
 	, strType
 	, strInvoiceNumber
@@ -325,11 +329,13 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	, dtmPostDate
 	, dtmDueDate
 	, ysnImportedFromOrigin
+	, ysnPastDue
 	, strLocationName
 )
 SELECT intEntityCustomerId		= I.intEntityCustomerId
 	, intInvoiceId				= I.intInvoiceId
 	, intCompanyLocationId		= L.intCompanyLocationId
+	, intDaysDue				= DATEDIFF(DAY, I.dtmDueDate, @dtmDateToLocal)
 	, strTransactionType		= CASE WHEN I.strType = 'Service Charge' THEN 'Service Charge' ELSE I.strTransactionType END
 	, strType					= I.strType
 	, strInvoiceNumber			= CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 THEN I.strInvoiceNumber ELSE ISNULL(I.strInvoiceOriginId, I.strInvoiceNumber) END
@@ -339,6 +345,7 @@ SELECT intEntityCustomerId		= I.intEntityCustomerId
 	, dtmPostDate				= I.dtmPostDate
 	, dtmDueDate				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo') THEN NULL ELSE I.dtmDueDate END
 	, ysnImportedFromOrigin		= I.ysnImportedFromOrigin
+	, ysnPastDue				= CASE WHEN @dtmDateToLocal > I.dtmDueDate AND I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE 0 END
 	, strLocationName			= L.strLocationName
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -405,6 +412,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom				= @dtmDateFromLocal
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal
 
 --MAIN STATEMENT
+SET @query = CAST('' AS NVARCHAR(MAX)) + '
 INSERT INTO #STATEMENTTABLE WITH (TABLOCK) (
 	   strReferenceNumber
 	 , strTransactionType
@@ -430,29 +438,29 @@ INSERT INTO #STATEMENTTABLE WITH (TABLOCK) (
 	 , dblARBalance
 	 , strComment
 )
-SELECT strReferenceNumber		= I.strInvoiceNumber
-	 , strTransactionType		= I.strTransactionType
-	 , intEntityCustomerId		= C.intEntityCustomerId     
-	 , dtmDueDate				= I.dtmDueDate
-	 , dtmDate					= I.dtmDate     
-	 , intDaysDue				= DATEDIFF(DAY, I.dtmDueDate, @dtmDateToLocal)     
-	 , dblTotalAmount			= I.dblInvoiceTotal
-	 , dblAmountPaid			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(TOTALPAYMENT.dblPayment, 0) * -1 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END     
-	 , dblAmountDue				= I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0)     
-	 , dblPastDue				= CASE WHEN @dtmDateToLocal > I.dtmDueDate AND I.strTransactionType IN ('Invoice', 'Debit Memo') THEN I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) ELSE 0 END     
-	 , dblMonthlyBudget			= I.dblMonthlyBudget   
-	 , dblRunningBalance		= SUM(CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)     
-	 , strCustomerNumber		= C.strCustomerNumber     
-	 , strDisplayName			= C.strCustomerName
-	 , strName					= C.strCustomerName
-	 , strBOLNumber				= I.strBOLNumber
-	 , dblCreditLimit			= C.dblCreditLimit
-	 , strTicketNumbers			= I.strTicketNumbers
-	 , strLocationName			= I.strLocationName
-	 , strFullAddress			= C.strFullAddress
-	 , strStatementFooterComment = C.strStatementFooterComment     
-	 , dblARBalance				= C.dblARBalance 
-	 , strComment				= C.strComment
+SELECT strReferenceNumber			= I.strInvoiceNumber
+	 , strTransactionType			= I.strTransactionType
+	 , intEntityCustomerId			= C.intEntityCustomerId     
+	 , dtmDueDate					= I.dtmDueDate
+	 , dtmDate						= I.dtmDate     
+	 , intDaysDue					= I.intDaysDue
+	 , dblTotalAmount				= I.dblInvoiceTotal
+	 , dblAmountPaid				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(TOTALPAYMENT.dblPayment, 0) * -1 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END     
+	 , dblAmountDue					= I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0)     
+	 , dblPastDue					= CASE WHEN I.ysnPastDue = 1 THEN I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) ELSE 0 END     
+	 , dblMonthlyBudget				= I.dblMonthlyBudget   
+	 , dblRunningBalance			= SUM(CASE WHEN I.strType = ''CF Tran'' THEN 0 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId' + ISNULL(@queryRunningBalance, '') +')
+	 , strCustomerNumber			= C.strCustomerNumber     
+	 , strDisplayName				= C.strCustomerName
+	 , strName						= C.strCustomerName
+	 , strBOLNumber					= I.strBOLNumber
+	 , dblCreditLimit				= C.dblCreditLimit
+	 , strTicketNumbers				= I.strTicketNumbers
+	 , strLocationName				= I.strLocationName
+	 , strFullAddress				= C.strFullAddress
+	 , strStatementFooterComment	= C.strStatementFooterComment     
+	 , dblARBalance					= C.dblARBalance 
+	 , strComment					= C.strComment
 FROM #CUSTOMERS C
 INNER JOIN #INVOICES I ON I.intEntityCustomerId = C.intEntityCustomerId     
 LEFT JOIN (    
@@ -469,7 +477,9 @@ LEFT JOIN (
 	WHERE ysnApplied = 1    
 	GROUP BY intPrepaymentId   
 ) PC ON I.intInvoiceId = PC.intPrepaymentId   
-WHERE I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
+WHERE I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0'
+
+EXEC sp_executesql @query
 
 --BUDGET STATEMENT
 IF @ysnIncludeBudgetLocal = 1
