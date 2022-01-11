@@ -7859,6 +7859,7 @@
 </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
+  </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
