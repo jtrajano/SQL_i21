@@ -197,8 +197,6 @@ SELECT
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
---LEFT JOIN vyuAPBillPayment B2
---	ON B.intBillId = B2.intBillId   
 LEFT JOIN (
 	SELECT
 		P2.intBillId
