@@ -21,6 +21,7 @@ CREATE TABLE [dbo].[tblGLRevalueDetails](
 	[dblHistoricAmount] [numeric](18, 6) NOT NULL,
 	[dblNewForexRate] [numeric](18, 6) NOT NULL,
 	[dblNewAmount] [numeric](18, 6) NOT NULL,
+	[dblAmountDifference] [numeric](18, 6) NULL,
 	[dblUnrealizedGain] [numeric](18, 6) NOT NULL,
 	[dblUnrealizedLoss] [numeric](18, 6) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,

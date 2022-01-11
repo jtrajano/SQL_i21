@@ -36,6 +36,43 @@ DECLARE @strMessage NVARCHAR(100)
 		ELSE
 			SELECT @strPostBatchId =  NEWID()
 
+		-- For Bank Transfer Accounts
+		DECLARE @tblBankTransferAccounts TABLE
+		(
+			strModule NVARCHAR(50),
+			strType NVARCHAR(50),
+			AccountId INT,
+			Offset INT
+		)
+
+		DECLARE @strAccountErrorMessage NVARCHAR(255)
+		
+		IF ((SELECT strTransactionType FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId) = 'CM Forwards')
+		BEGIN
+			DECLARE @tblTransactions TABLE (
+				strTransactionId NVARCHAR(100)
+			)
+			DECLARE @strCurrentTransaction NVARCHAR(100)
+
+			INSERT INTO @tblTransactions
+			SELECT strTransactionId
+			FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId
+
+			WHILE EXISTS(SELECT TOP 1 1 FROM @tblTransactions)
+			BEGIN
+				SELECT TOP 1 @strCurrentTransaction = strTransactionId FROM @tblTransactions
+				BEGIN TRY
+					INSERT @tblBankTransferAccounts EXEC dbo.uspCMGetBankTransferGLRevalueAccount @strCurrentTransaction, 'CM Forwards'
+				END TRY
+				BEGIN CATCH
+					SELECT  @strMessage = ERROR_MESSAGE(); 
+					GOTO _raiserror
+				END CATCH
+
+				DELETE	@tblTransactions WHERE strTransactionId = @strCurrentTransaction
+			END
+		END
+
 		;WITH cte as(
 			SELECT 
 			 [strTransactionId]		= B.strConsolidationNumber
@@ -151,7 +188,7 @@ DECLARE @strMessage NVARCHAR(100)
 		SELECT 
 			 [strTransactionId]		
 			,[intTransactionId]		
-			,[intAccountId]	= G.AccountId		
+			,[intAccountId]	= CASE WHEN A.strModule = 'CM Forwards' THEN BankTransferAccount.AccountId ELSE G.AccountId	END
 			,[strDescription]		
 			,[dtmTransactionDate]	
 			,[dblDebit]				
@@ -177,6 +214,12 @@ DECLARE @strMessage NVARCHAR(100)
 			AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS
 			AND f.OffSet  = A.OffSet
 		)G
+		OUTER APPLY (
+			SELECT TOP 1 AccountId from @tblBankTransferAccounts f 
+			WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS 
+			AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS
+			AND f.Offset = A.OffSet
+		) BankTransferAccount
 		DECLARE @dtmReverseDate DATETIME, @missingAccountMessage NVARCHAR(150)
 		SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @missingAccountMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
 		IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)
@@ -386,7 +429,7 @@ DECLARE @strMessage NVARCHAR(100)
 					SELECT
 						[strTransactionId]
 						,[intTransactionId]
-						,[intAccountId] = G.AccountId
+						,[intAccountId] = CASE WHEN A.strModule = 'CM Forwards' THEN BankTransferAccount.AccountId ELSE G.AccountId	END
 						,[strDescription]
 						,[dtmTransactionDate]
 						,[dblDebit]  
@@ -413,6 +456,12 @@ DECLARE @strMessage NVARCHAR(100)
 						AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS
 						AND f.OffSet  = A.OffSet
 					)G
+					OUTER APPLY (
+						SELECT TOP 1 AccountId from @tblBankTransferAccounts f 
+						WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS 
+						AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS
+						AND f.Offset = A.OffSet
+					) BankTransferAccount
 					EXEC uspGLBookEntries @PostGLEntries, 1
 					EXEC uspGLBookEntries @ReversePostGLEntries, 1
 
@@ -503,3 +552,6 @@ DECLARE @strMessage NVARCHAR(100)
 			
 		END
 	SELECT @strPostBatchId PostBatchId--,	@strReversePostBatchId ReversePostBatchId
+
+_raiserror:
+	RAISERROR (@strMessage ,11,1)

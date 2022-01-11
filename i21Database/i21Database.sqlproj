@@ -454,6 +454,9 @@
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerPricing.sql" />
+    <Build Include="dbo\Views\vyuCMForwardPayablesMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuCMForwardReceivablesMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGetBankTransferGLRevalueAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

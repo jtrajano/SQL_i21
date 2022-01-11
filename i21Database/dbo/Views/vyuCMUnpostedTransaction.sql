@@ -20,4 +20,6 @@ strDescription,
 strUserName = (SELECT strName from tblEMEntity where intEntityId = BTransfer.intEntityId),
 intEntityId
 FROM tblCMBankTransfer BTransfer
-WHERE        (ISNULL(ysnPosted, 0) = 0)
+WHERE
+	(ISNULL(ysnPosted, 0) = 0) 
+	AND BTransfer.intBankTransferTypeId <> 3
