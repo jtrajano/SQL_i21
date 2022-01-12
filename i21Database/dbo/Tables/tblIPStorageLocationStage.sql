@@ -9,5 +9,6 @@
 	,strStorageUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,strStorageUnitType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,intStatusId int
 	,CONSTRAINT PK_tblIPStorageLocationStage PRIMARY KEY (intStorageLocationStageId)
 	)
