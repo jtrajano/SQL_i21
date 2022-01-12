@@ -4,6 +4,7 @@
     [intRowNumber]                INT NULL,
     [intKey]                      INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
 	[strEntityNo]			      NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strCustomerName]			  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerLocation]		  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPriceBasis]				  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strCostToUse]				  NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
