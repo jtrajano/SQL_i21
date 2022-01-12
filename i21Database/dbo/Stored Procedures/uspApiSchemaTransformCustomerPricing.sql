@@ -10,7 +10,7 @@ SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 SET XACT_ABORT ON
 
--- Validate Entity No
+-- Validate Entity No and Customer Name
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
       guiApiImportLogDetailId = NEWID()
@@ -20,10 +20,11 @@ SELECT
     , strLogLevel = 'Error'
     , strStatus = 'Failed'
     , intRowNo = SCSP.intRowNumber
-    , strMessage = 'Customer No. is blank.'
+    , strMessage = 'Customer No. or Customer Name must have a value.'
 FROM tblApiSchemaCustomerPricing SCSP
 WHERE SCSP.guiApiUniqueId = @guiApiUniqueId
 AND RTRIM(LTRIM(ISNULL(SCSP.strEntityNo, ''))) = '' 
+AND RTRIM(LTRIM(ISNULL(SCSP.strCustomerName, ''))) = '' 
 
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -40,6 +41,42 @@ WHERE SCSP.guiApiUniqueId = @guiApiUniqueId
 AND RTRIM(LTRIM(ISNULL(SCSP.strEntityNo, ''))) <> '' 
 AND NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomer C WHERE C.strCustomerNumber = SCSP.strEntityNo)
 
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+	  guiApiImportLogDetailId = NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Customer Name'
+    , strValue = SCSP.strCustomerName
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = SCSP.intRowNumber
+    , strMessage = 'Customer Name ('+ SCSP.strCustomerName + ') does not exists.'
+FROM tblApiSchemaCustomerPricing SCSP
+WHERE SCSP.guiApiUniqueId = @guiApiUniqueId
+AND RTRIM(LTRIM(ISNULL(SCSP.strCustomerName, ''))) <> '' 
+AND NOT EXISTS (SELECT TOP 1 NULL FROM tblEMEntity C WHERE C.strName = SCSP.strCustomerName)
+
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+	  guiApiImportLogDetailId = NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Customer Name'
+    , strValue = SCSP.strCustomerName
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = SCSP.intRowNumber
+    , strMessage = 'Customer No. and Customer Name does not match.'
+FROM tblApiSchemaCustomerPricing SCSP
+WHERE SCSP.guiApiUniqueId = @guiApiUniqueId
+AND RTRIM(LTRIM(ISNULL(SCSP.strEntityNo, ''))) <> '' 
+AND RTRIM(LTRIM(ISNULL(SCSP.strCustomerName, ''))) <> '' 
+AND SCSP.strCustomerName <> (SELECT TOP 1 E.strName 
+							 FROM tblARCustomer C 
+									INNER JOIN
+								  tblEMEntity E
+							 ON C.intEntityId = E.intEntityId
+						     WHERE C.strCustomerNumber = SCSP.strEntityNo)
+
 --Validate Customer Location
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -54,11 +91,33 @@ SELECT
 FROM tblApiSchemaCustomerPricing SCSP
 WHERE SCSP.guiApiUniqueId = @guiApiUniqueId
 AND RTRIM(LTRIM(ISNULL(SCSP.strCustomerLocation, ''))) <> ''
+AND RTRIM(LTRIM(ISNULL(SCSP.strEntityNo, ''))) <> ''
 AND NOT EXISTS (SELECT TOP 1 NULL 
 				FROM tblEMEntity E
 					INNER JOIN tblEMEntityLocation EL 
 				ON E.intEntityId = EL.intEntityId
 				WHERE E.strEntityNo = SCSP.strEntityNo AND
+					RTRIM(LTRIM(LOWER(EL.strLocationName))) = RTRIM(LTRIM(LOWER(SCSP.strCustomerLocation))))
+
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      guiApiImportLogDetailId = NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Customer Location'
+    , strValue = SCSP.strCustomerLocation
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = SCSP.intRowNumber
+    , strMessage = 'Customer Location ('+ SCSP.strCustomerLocation + ') does not exists.'
+FROM tblApiSchemaCustomerPricing SCSP
+WHERE SCSP.guiApiUniqueId = @guiApiUniqueId
+AND RTRIM(LTRIM(ISNULL(SCSP.strCustomerLocation, ''))) <> ''
+AND RTRIM(LTRIM(ISNULL(SCSP.strCustomerName, ''))) <> ''
+AND NOT EXISTS (SELECT TOP 1 NULL 
+				FROM tblEMEntity E
+					INNER JOIN tblEMEntityLocation EL 
+				ON E.intEntityId = EL.intEntityId
+				WHERE E.strName = SCSP.strCustomerName AND
 					RTRIM(LTRIM(LOWER(EL.strLocationName))) = RTRIM(LTRIM(LOWER(SCSP.strCustomerLocation))))
 
 
@@ -353,6 +412,7 @@ DECLARE @intEntityId			INT
 
 DECLARE  
 	 @strEntityNo			      NVARCHAR(100) 
+	,@strCustomerName			  NVARCHAR(100) 
 	,@strCustomerLocation		  NVARCHAR(100) 
 	,@strPriceBasis				  NVARCHAR(100) 
 	,@strCostToUse				  NVARCHAR(100)	
@@ -377,7 +437,8 @@ DECLARE
 
 DECLARE cursorSC CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT   strEntityNo			
+SELECT   strEntityNo	
+		,strCustomerName
 		,strCustomerLocation	
 		,strPriceBasis			
 		,strCostToUse			
@@ -406,7 +467,8 @@ AND		intRowNumber NOT IN (SELECT intRowNo FROM tblApiImportLogDetail WHERE guiAp
 OPEN cursorSC;
 
 FETCH NEXT FROM cursorSC INTO 
-	  @strEntityNo			   
+	  @strEntityNo	
+	,@strCustomerName
 	,@strCustomerLocation		
 	,@strPriceBasis				
 	,@strCostToUse				
@@ -435,6 +497,13 @@ BEGIN
 	SELECT TOP 1 @intEntityId = intEntityId
 	FROM tblARCustomer
 	WHERE strCustomerNumber = RTRIM(LTRIM(@strEntityNo))
+
+	IF @intEntityId IS NULL
+	BEGIN
+		SELECT TOP 1 @intEntityId = E.intEntityId
+		FROM tblEMEntity E
+		WHERE E.strName = @strCustomerName
+	END
 
 	--@intEntityVendorId
 	SELECT TOP 1 @intEntityVendorId = E.intEntityId
@@ -492,7 +561,7 @@ BEGIN
 	WHERE C.strCurrency = @strCurrency
 
 	--@intProgramId
-	SELECT TOP 1 @intProgramId =P.intProgramId 
+	SELECT TOP 1 @intProgramId = P.intProgramId 
 	FROM tblVRProgram P
 	WHERE P.strProgram = @strProgram
 
@@ -552,19 +621,20 @@ BEGIN
 	SELECT
 		  guiApiImportLogDetailId = NEWID()
 		, guiApiImportLogId = @guiLogId
-		, strField = 'Customer No. - Begin Date' + CASE WHEN @strPriceBasis IS NULL OR @strPriceBasis = '' THEN '' ELSE ' - Price Basis' END 
-		, strValue = @strEntityNo + ' - ' + @strBeginDate + CASE WHEN @strPriceBasis IS NULL OR @strPriceBasis = '' THEN '' ELSE ' - ' + @strPriceBasis END
+		, strField = CASE WHEN @strEntityNo IS NULL OR @strEntityNo = '' THEN 'Customer Name ' ELSE 'Customer No. ' END + ' - Begin Date' + CASE WHEN @strPriceBasis IS NULL OR @strPriceBasis = '' THEN '' ELSE ' - Price Basis' END 
+		, strValue = CASE WHEN @strEntityNo IS NULL OR @strEntityNo = '' THEN @strCustomerName ELSE @strEntityNo  END + ' - ' + @strBeginDate + CASE WHEN @strPriceBasis IS NULL OR @strPriceBasis = '' THEN '' ELSE ' - ' + @strPriceBasis END
 		, strLogLevel = 'Info'
 		, strStatus = 'Success'
 		, intRowNo = @intRowNumber
 		, strMessage = 'The record was imported successfully.'
 	FROM tblApiSchemaCustomerPricing SCSP
-	WHERE guiApiUniqueId = @guiApiUniqueId
+	WHERE guiApiUniqueId = @guiApiUniqueId AND SCSP.intRowNumber = @intRowNumber
 	
 
 	FETCH NEXT FROM cursorSC INTO 
           @strEntityNo			   
-		,@strCustomerLocation		
+		,@strCustomerName
+		,@strCustomerLocation
 		,@strPriceBasis				
 		,@strCostToUse				
 		,@strVendorNumber			
