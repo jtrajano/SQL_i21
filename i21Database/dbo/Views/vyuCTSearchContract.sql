@@ -103,16 +103,15 @@ AS
 		) F
  GROUP BY HV.intContractHeaderId
  )BL ON  BL.intContractHeaderId = CH.intContractHeaderId
- LEFT JOIN	
+ OUTER APPLY
  (
-		SELECT * FROM 
-		(
-			SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY TR.intRecordId ASC) intRowNum,
-					TR.intRecordId, TR.ysnOnceApproved, ysnApproved = case when TR.strApprovalStatus = 'Approved' then convert(bit,1) else convert(bit,0) end 
-			FROM	tblSMTransaction	TR WITH (NOLOCK)
-			JOIN	tblSMScreen			SC	WITH (NOLOCK) ON	SC.intScreenId		=	TR.intScreenId
-			WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
-										'ContractManagement.view.Amendments')
-		) t
-		WHERE intRowNum = 1
-) TR ON TR.intRecordId = CH.intContractHeaderId	
+	SELECT intRecordId = MIN(TR.intRecordId)
+		, TR.ysnOnceApproved
+		, ysnApproved = CASE WHEN TR.strApprovalStatus IN ( 'Approved', 'Approved with Modifications') THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END
+	FROM tblSMTransaction TR WITH (NOLOCK)
+	JOIN tblSMScreen SC	WITH (NOLOCK) ON SC.intScreenId = TR.intScreenId
+	WHERE SC.strNamespace IN('ContractManagement.view.Contract', 'ContractManagement.view.Amendments') AND TR.intRecordId = CH.intContractHeaderId
+	GROUP BY TR.ysnOnceApproved
+		, CASE WHEN TR.strApprovalStatus IN ( 'Approved', 'Approved with Modifications') THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END
+	
+) TR --ON TR.intRecordId = CH.intContractHeaderId	

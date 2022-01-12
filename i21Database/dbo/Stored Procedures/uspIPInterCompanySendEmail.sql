@@ -321,7 +321,7 @@ BEGIN
 			   <td>&nbsp;' + ISNULL(S.strReference, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
-			   '<td>&nbsp;' + 'Success' + '</td>
+			   '<td>&nbsp;' + ISNULL(S.strMessage, 'Success') + '</td>
 		</tr>'
 		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
 		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId

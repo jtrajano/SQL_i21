@@ -195,3 +195,36 @@ BEGIN
 	ELSE
 		RAISERROR('Cannot update posted payment',16,1)		
 END
+
+GO
+CREATE TRIGGER trgForDeleteARPayment
+    ON dbo.tblARPayment
+    FOR DELETE
+AS
+BEGIN
+	IF EXISTS (SELECT * FROM DELETED)
+		BEGIN
+			--iNSERT
+		   INSERT INTO  tblARAuditLog
+		   SELECT 'Deleted','Payment',strRecordNumber,GETDATE(),NULL,0 FROM DELETED
+
+		END
+END
+
+GO
+CREATE TRIGGER trgForUpdatePayment 
+	ON dbo.tblARPayment
+	FOR UPDATE 
+AS
+BEGIN
+		DECLARE @strRecordNumber NVARCHAR (50) 
+		SELECT @strRecordNumber=i.strRecordNumber from deleted i; IF UPDATE(strRecordNumber)
+
+		IF @strRecordNumber IS NOT  NULL
+		BEGIN
+		IF UPDATE (strRecordNumber)
+		INSERT INTO  tblARAuditLog
+		   SELECT 'Updated','Payment',strRecordNumber,GETDATE(),NULL,0 FROM deleted
+
+		END
+END

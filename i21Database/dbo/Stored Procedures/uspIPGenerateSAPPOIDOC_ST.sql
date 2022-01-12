@@ -14,6 +14,7 @@ BEGIN
 		,@strSubBook NVARCHAR(50)
 		,@intSubBookId INT
 		,@strContractNumber NVARCHAR(50)
+		,@strINCOLocation NVARCHAR(50)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strContractFeedIds NVARCHAR(MAX)
@@ -53,6 +54,7 @@ BEGIN
 		UPDATE CF
 		SET CF.strMessage = 'Destination Port is empty.'
 			,CF.strFeedStatus = 'IGNORE'
+			,ysnMailSent =0
 		FROM dbo.tblCTContractFeed CF
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
 		WHERE IsNULL(CF.strFeedStatus, '') = ''
@@ -144,6 +146,7 @@ BEGIN
 			,@intSubBookId = NULL
 			,@strSubBook = NULL
 			,@strContractNumber = NULL
+			,@strINCOLocation = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
@@ -194,7 +197,7 @@ BEGIN
 		IF NOT EXISTS (
 				SELECT TOP 1 1
 				FROM tblSMTransaction
-				WHERE strApprovalStatus = 'Approved'
+				WHERE strApprovalStatus IN ('Approved', 'Approved with Modifications')
 					AND intRecordId = @intContractHeaderId
 					AND intScreenId = 15
 				)
@@ -219,7 +222,7 @@ BEGIN
 			IF NOT EXISTS (
 					SELECT TOP 1 1
 					FROM tblSMTransaction
-					WHERE strApprovalStatus = 'Approved'
+					WHERE strApprovalStatus IN ('Approved', 'Approved with Modifications')
 						AND intRecordId = @intPriceContractId
 						AND intScreenId = 123
 					)
@@ -249,6 +252,7 @@ BEGIN
 				,RN = ROW_NUMBER() OVER (
 					PARTITION BY intContractDetailId ORDER BY intContractFeedId DESC
 					)
+					,ysnMailSent
 			FROM dbo.tblCTContractFeed CF
 			WHERE CF.intContractHeaderId = @intContractHeaderId
 				AND IsNULL(CF.strFeedStatus, '') = ''
@@ -257,6 +261,7 @@ BEGIN
 		UPDATE CTE
 		SET strFeedStatus = 'IGNORE'
 			,strMessage = 'Duplicate Entry.'
+			,ysnMailSent=1
 		WHERE RN > 1
 
 		DELETE
@@ -297,11 +302,27 @@ BEGIN
 			WHERE intContractDetailId > @intContractDetailId
 		END
 
+		SELECT @strINCOLocation = (
+				CASE 
+					WHEN FT.strINCOLocationType = 'City'
+						OR FT.strINCOLocationType = 'Port'
+						THEN CT.strCity
+					WHEN FT.strINCOLocationType = 'Warehouse'
+						THEN SL.strSubLocationName
+					ELSE ''
+					END
+				)
+		FROM tblCTContractHeader CH
+		JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CH.intFreightTermId
+			AND intContractHeaderId = @intContractHeaderId
+		LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId
+		LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = CH.intWarehouseId
+		
 		SELECT @strHeaderXML = '<ROOT_PO><CTRL_POINT>' + '<DOC_NO>' + Ltrim(IsNULL(CF.intContractFeedId, '')) + '</DOC_NO>' + '<MSG_TYPE>' + CASE 
 				WHEN UPPER(CF.strRowState) = 'ADDED'
 					THEN 'PO_CREATE'
 				ELSE 'PO_UPDATE'
-				END + '</MSG_TYPE>' + '<SENDER>i21</SENDER>' + '<RECEIVER>ERP</RECEIVER>' + '</CTRL_POINT>' + '<HEADER>' + '<COMP_CODE>' + IsNULL('', '') + '</COMP_CODE>' + '<CONTRACT_NO>' + IsNULL(CF.strContractNumber, '') + '</CONTRACT_NO>' + '<PO_NUMBER>' + IsNULL(CF.strERPPONumber, '') + '</PO_NUMBER>' + '<VENDOR>' + IsNULL(strVendorAccountNum, '') + '</VENDOR>' + '<PAYMENT_TERM>' + IsNULL(CF.strTerm, '') + '</PAYMENT_TERM>' + '<INCO_TERM>' + IsNULL(CF.strContractBasis, '') + '</INCO_TERM>' + '<POSITION>' + IsNULL(strPosition, '') + '</POSITION>' + '<WEIGHT_TERM>' + IsNULL(W.strWeightGradeDesc, '') + '</WEIGHT_TERM>' + '<APPROVAL_BASIS>' + IsNULL(G.strWeightGradeDesc, '') + '</APPROVAL_BASIS>' + '<CREATE_DATE>' + IsNULL(Convert(NVARCHAR, CH.dtmCreated, 112), '') + '</CREATE_DATE>' + '<CREATED_BY>' + IsNULL(CF.strCreatedBy, '') + '</CREATED_BY>' + '<TRACKING_NO>' + Ltrim(IsNULL(CF.intContractFeedId, '')) + '</TRACKING_NO>' + '</HEADER>'
+				END + '</MSG_TYPE>' + '<SENDER>i21</SENDER>' + '<RECEIVER>ERP</RECEIVER>' + '</CTRL_POINT>' + '<HEADER>' + '<COMP_CODE>' + IsNULL('', '') + '</COMP_CODE>' + '<CONTRACT_NO>' + IsNULL(CF.strContractNumber, '') + '</CONTRACT_NO>' + '<PO_NUMBER>' + IsNULL(CF.strERPPONumber, '') + '</PO_NUMBER>' + '<VENDOR>' + IsNULL(strVendorAccountNum, '') + '</VENDOR>' + '<PAYMENT_TERM>' + IsNULL(CF.strTerm, '') + '</PAYMENT_TERM>' + '<INCO_TERM>' + IsNULL(CF.strContractBasis, '') + '</INCO_TERM>' + '<INCO_TERM_LOCATION>' + ISNULL(@strINCOLocation, '') + '</INCO_TERM_LOCATION>' + '<POSITION>' + IsNULL(strPosition, '') + '</POSITION>' + '<WEIGHT_TERM>' + IsNULL(W.strWeightGradeDesc, '') + '</WEIGHT_TERM>' + '<APPROVAL_BASIS>' + IsNULL(G.strWeightGradeDesc, '') + '</APPROVAL_BASIS>' + '<CREATE_DATE>' + IsNULL(Convert(NVARCHAR, CH.dtmCreated, 112), '') + '</CREATE_DATE>' + '<CREATED_BY>' + IsNULL(CF.strCreatedBy, '') + '</CREATED_BY>' + '<TRACKING_NO>' + Ltrim(IsNULL(CF.intContractFeedId, '')) + '</TRACKING_NO>' + '</HEADER>'
 		FROM tblCTContractFeed CF
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		JOIN tblCTPosition P ON P.intPositionId = CH.intPositionId
@@ -315,7 +336,7 @@ BEGIN
 				WHEN UPPER(RS.strOrgRowState) = 'MODIFIED'
 					THEN IsNULL(CF.strERPItemNumber, '')
 				ELSE ''
-				END + '</PO_LINE_ITEM_NO>' + '<ITEM_NO>' + IsNull(I.strItemNo, '') + '</ITEM_NO>' + '<SUB_LOCATION>' + IsNULL(CF.strSubLocation, '') + '</SUB_LOCATION>' + '<STORAGE_LOCATION>' + IsNULL(CF.strStorageLocation, '') + '</STORAGE_LOCATION>' + '<QUANTITY>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblQuantity)), '') + '</QUANTITY>' + '<QUANTITY_UOM>' + IsNULL(CF.strQuantityUOM, '') + '</QUANTITY_UOM>' + '<NET_WEIGHT>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblNetWeight)), '') + '</NET_WEIGHT>' + '<NET_WEIGHT_UOM>' + IsNULL(strNetWeightUOM, '') + '</NET_WEIGHT_UOM>' + '<PRICE_TYPE>' + IsNULL(PT.strPricingType, 0) + '</PRICE_TYPE>' + '<PRICE_MARKET>' + IsNULL(FM.strFutMarketName, 0) + '</PRICE_MARKET>' + '<PRICE_MONTH>' + IsNULL(Left(Convert(NVARCHAR, Convert(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>' + '<PRICE>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblCashPrice)), '') + '</PRICE>' + '<PRICE_UOM>' + IsNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>' + '<PRICE_CURRENCY>' + IsNULL(C2.strDescription, 
+				END + '</PO_LINE_ITEM_NO>' + '<ITEM_NO>' + IsNull(I.strItemNo, '') + '</ITEM_NO>' + '<SUB_LOCATION>' + dbo.fnEscapeXML(IsNULL(CF.strSubLocation, '')) + '</SUB_LOCATION>' + '<STORAGE_LOCATION>' + dbo.fnEscapeXML(IsNULL(CF.strStorageLocation, '')) + '</STORAGE_LOCATION>' + '<QUANTITY>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblQuantity)), '') + '</QUANTITY>' + '<QUANTITY_UOM>' + IsNULL(CF.strQuantityUOM, '') + '</QUANTITY_UOM>' + '<NET_WEIGHT>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblNetWeight)), '') + '</NET_WEIGHT>' + '<NET_WEIGHT_UOM>' + IsNULL(strNetWeightUOM, '') + '</NET_WEIGHT_UOM>' + '<PRICE_TYPE>' + IsNULL(PT.strPricingType, 0) + '</PRICE_TYPE>' + '<PRICE_MARKET>' + IsNULL(FM.strFutMarketName, 0) + '</PRICE_MARKET>' + '<PRICE_MONTH>' + IsNULL(Left(Convert(NVARCHAR, Convert(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>' + '<PRICE>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblCashPrice)), '') + '</PRICE>' + '<PRICE_UOM>' + IsNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>' + '<PRICE_CURRENCY>' + IsNULL(C2.strDescription, 
 				'') + '</PRICE_CURRENCY>' + '<BASIS>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>' + '<BASIS_UOM>' + IsNULL(UM.strUnitMeasure, '') + '</BASIS_UOM>' + '<BASIS_CURRENCY>' + IsNULL(C.strDescription, '') + '</BASIS_CURRENCY>' + '<FIXATION_DATE>' + rtrim(ltrim(IsNULL(Convert(CHAR, (
 								CASE 
 									WHEN CH.intPricingTypeId = 1
@@ -385,6 +406,10 @@ BEGIN
 			WHERE intContractHeaderId = @intContractHeaderId
 				AND IsNULL(strFeedStatus, '') = ''
 				AND strRowState = @strRowState
+
+			Update tblCTContractHeader 
+			Set ysnExported =1, dtmExported =GETDATE()
+			Where intContractHeaderId = @intContractHeaderId
 		END
 
 		IF EXISTS (

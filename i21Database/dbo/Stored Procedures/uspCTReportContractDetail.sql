@@ -130,64 +130,16 @@ BEGIN TRY
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
-			-- strStraussPrice			= 	CASE
-			-- 								WHEN
-			-- 									CD.intPricingTypeId = 2
-			-- 								THEN
-			-- 									'PTBF basis '
-			-- 									+ MA.strFutMarketName
-			-- 									+ ' '
-			-- 									+ DATENAME(mm,MO.dtmFutureMonthsDate)
-			-- 									+ ' '
-			-- 									+ DATENAME(yyyy,MO.dtmFutureMonthsDate)
-			-- 									+ CASE
-			-- 											WHEN CD.dblBasis < 0
-			-- 											THEN ' minus '
-			-- 											ELSE ' plus '
-			-- 											END
-			-- 									+ BCU.strCurrency
-			-- 									+ ' '
-			-- 									+ dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2)
-			-- 									+ '/'
-			-- 									+ BUM.strUnitMeasure
-			-- 									+ ' at '
-			-- 									+ CD.strFixationBy
-			-- 									+ '''s option prior to FND of '
-			-- 									+ DATENAME(mm,MO.dtmFutureMonthsDate)
-			-- 									+ ' '
-			-- 									+ DATENAME(yyyy,MO.dtmFutureMonthsDate)
-			-- 									+ ' or on presentation of documents,whichever is earlier.'
-			-- 								ELSE
-			-- 									''
-			-- 									+ dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)
-			-- 									+ ' '
-			-- 									+ BCU.strCurrency
-			-- 									+ ' per '
-			-- 									+ PU.strUnitMeasure
-			-- 						   END,
-			strStraussPrice			=	'PTBF basis '
-										+ MA.strFutMarketName
-										+ ' '
-										+ DATENAME(mm,MO.dtmFutureMonthsDate)
-										+ ' '
-										+ DATENAME(yyyy,MO.dtmFutureMonthsDate)
-										+ CASE
-												WHEN CD.dblBasis < 0
-												THEN ' minus '
-												ELSE ' plus '
-												END
-										+ BCU.strCurrency
-										+ ' '
-										+ dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2)
-										+ '/'
-										+ BUM.strUnitMeasure
-										+ ' at '
-										+ CD.strFixationBy
-										+ '''s option prior to FND of '
-										+ DATENAME(mm,MO.dtmFutureMonthsDate)
-										+ ' '
-										+ DATENAME(yyyy,MO.dtmFutureMonthsDate)
-										+ ' or on presentation of documents,whichever is earlier.',
+			strStraussPrice			= CASE WHEN CH.intPricingTypeId = 2
+											THEN 'PTBF basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+			 									+ CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END
+			 									+ BCU.strCurrency + ' '
+			 									+ dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/' + BUM.strUnitMeasure
+			 									+ ' at ' + CD.strFixationBy + '''s option prior to FND of '
+			 									+ DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+			 									+ ' or prior to presentation of documents,whichever is earlier.'
+			 								ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
+			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
 			strStraussShipment		= FORMAT( CD.dtmStartDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')) + ' - ' + FORMAT( CD.dtmEndDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')),
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end)

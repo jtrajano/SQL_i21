@@ -309,6 +309,7 @@ BEGIN TRY
 				,strExternalLoadNumber = @strContractNumber
 			WHERE intLoadId = @intLoadRefId
 				AND intLoadRefId IS NULL
+				AND intBookId=@intBookId
 
 			-----------------------------------Detail-------------------------------------------
 			EXEC sp_xml_removedocument @idoc

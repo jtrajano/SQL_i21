@@ -112,7 +112,7 @@ BEGIN TRY
 	FROM	tblSMApproval 
 	WHERE	intTransactionId = @intTransactionId
 	AND		strStatus = 'Approved' 
-	ORDER BY intApprovalId
+	ORDER BY intApprovalId DESC
 
 	IF (ISNULL(@StraussContractSubmitId, 0) = 0)
 	BEGIN

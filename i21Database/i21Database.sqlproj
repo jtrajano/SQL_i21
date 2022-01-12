@@ -8884,6 +8884,7 @@
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
     <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
+    <Build Include="dbo\Tables\tblARAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9138,6 +9139,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
     <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
     <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

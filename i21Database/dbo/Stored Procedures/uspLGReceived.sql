@@ -111,12 +111,13 @@ SET ANSI_WARNINGS OFF
 				SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
 
 				IF @ysnReverse = 0
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+				BEGIN
+					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
-				-- Insert to Pending Claims
-				EXEC uspLGAddPendingClaim @intLoadId, 1
-			END
+					-- Insert to Pending Claims if all containers are received
+					IF NOT EXISTS(SELECT 1 from tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId AND ISNULL(dblReceivedQty, 0) = 0)
+					EXEC uspLGAddPendingClaim @intLoadId, 1
+				END
 			ELSE 
 			BEGIN
 				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
@@ -187,7 +188,8 @@ SET ANSI_WARNINGS OFF
 			BEGIN
 				UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
-				-- Insert to Pending Claims
+				-- Insert to Pending Claims if all containers are received
+				IF NOT EXISTS(SELECT 1 from tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId AND ISNULL(dblReceivedQty, 0) = 0)
 				EXEC uspLGAddPendingClaim @intLoadId, 1
 			END
 			ELSE 

@@ -59,7 +59,8 @@ BEGIN TRY
 			@intMarketCurrencyId		INT,
 			@intPriceContractId			INT,
 			@ysnSeqSubCurrency			BIT,
-			@contractDetails 			AS [dbo].[ContractDetailTable]
+			@contractDetails 			AS [dbo].[ContractDetailTable],
+			@ysnPricingAsAmendment		BIT = 1;
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -84,7 +85,7 @@ BEGIN TRY
 
 	SELECT	@ysnUnlimitedQuantity	=	ysnUnlimitedQuantity FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity FROM tblCTCompanyPreference
+	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity, @ysnPricingAsAmendment = ysnPricingAsAmendment FROM tblCTCompanyPreference
 
 	declare @intDWGIdId int
 			,@ysnDestinationWeightsAndGrades bit;
@@ -682,7 +683,10 @@ BEGIN TRY
 					AND CD.intContractDetailId not in (select distinct intContractDetailId from tblCTSequenceAmendmentLog where intContractHeaderId = CD.intContractHeaderId)
 		  end
 		/*End of CT-3569*/
-		
+
+
+		if (@ysnPricingAsAmendment = 1)
+		begin
 				INSERT INTO tblCTSequenceAmendmentLog
 				(
 					 intSequenceHistoryId
@@ -805,6 +809,8 @@ BEGIN TRY
 					OR ISNULL(CH.ysnSigned, 0) = 1
 					)
 				AND CD.intContractDetailId = @intContractDetailId
+
+		end
 
 		
 		IF	@ysnMultiplePriceFixation = 1
