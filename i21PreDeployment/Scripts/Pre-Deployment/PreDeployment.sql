@@ -148,6 +148,7 @@
 :r .\11_IC\FixFKItemPricingLevel.sql 
 :r .\11_IC\ImproveValuationReport.sql
 :r .\11_IC\DropIndexes.sql
+:r .\11_IC\RenameAndAlterCashRegisterDepartment.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql

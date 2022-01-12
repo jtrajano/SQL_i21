@@ -425,4 +425,7 @@
     <None Include="Scripts\Pre-Deployment\7_AR\15_FixtblARCustomer_MissingColumn.sql" />
     <None Include="Scripts\Pre-Deployment\20_CF\CardFuelingDeleteObject.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\RenameAndAlterCashRegisterDepartment.sql" />
+  </ItemGroup>
 </Project>
