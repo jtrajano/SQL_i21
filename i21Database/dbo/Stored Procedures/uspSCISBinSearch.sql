@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCISBinSearch]
 	@strStorageLocation nvarchar(100) = ''
 	,@strCommodity nvarchar(100) = ''
+	,@strStorageUnitName nvarchar(100) = ''
+	,@strItemNo nvarchar(100) = ''
 	,@strBinType1 nvarchar(100) = ''
 	,@strBinType2 nvarchar(100) = ''
 	,@strBinNotes nvarchar(100) = ''
@@ -66,6 +68,49 @@ begin
 	INSERT INTO #tmpCommodityFilter (intCommodityId) VALUES (NULL) 
 
 
+	IF OBJECT_ID('tempdb..#tmpStorageUnit') IS NULL  
+	BEGIN 
+		CREATE TABLE #tmpStorageUnit (
+			intStorageUnitId INT NULL 
+		)
+	END 
+
+	IF LTRIM(RTRIM(ISNULL(@strStorageUnitName, ''))) <> ''
+	BEGIN 
+		DECLARE @storageUnitName_XML AS XML = CAST('<root><ID>' + REPLACE(@strStorageUnitName, ',', '</ID><ID>') + '</ID></root>' AS XML) 	
+		INSERT INTO #tmpStorageUnit (
+			intStorageUnitId
+		)
+		SELECT f.x.value('.', 'INT') AS id
+		FROM @storageUnitName_XML.nodes('/root/ID') f(x)
+	END 
+
+	DELETE FROM #tmpStorageUnit WHERE intStorageUnitId IS NULL 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpStorageUnit)
+	INSERT INTO #tmpStorageUnit (intStorageUnitId) VALUES (NULL) 
+
+
+	IF OBJECT_ID('tempdb..#tmpItem') IS NULL  
+	BEGIN 
+		CREATE TABLE #tmpItem (
+			intItemId INT NULL 
+		)
+	END 
+
+	IF LTRIM(RTRIM(ISNULL(@strItemNo, ''))) <> ''
+	BEGIN 
+		DECLARE @item_XML AS XML = CAST('<root><ID>' + REPLACE(@strItemNo, ',', '</ID><ID>') + '</ID></root>' AS XML) 	
+		INSERT INTO #tmpItem (
+			intItemId
+		)
+		SELECT f.x.value('.', 'INT') AS id
+		FROM @item_XML.nodes('/root/ID') f(x)
+	END 
+
+	DELETE FROM #tmpItem WHERE intItemId IS NULL 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpItem)
+	INSERT INTO #tmpItem (intItemId) VALUES (NULL) 
+
 
 
 	set @sql = N'
@@ -77,7 +122,7 @@ begin
 						, SubLocation.strSubLocationName as strStorageLocationName
 						, StorageLocation.strName as strStorageUnitName
 						, Commodity.strCommodityCode
-						, BinDetails.strItemNo
+						, isnull(BinDetails.strItemNo, '''') as strItemNo
 						, replace(DiscountHeader.strHeader, '' '', ''_'') as strHeader
 						, Bin.strBinType
 						, Bin.strBinType2
@@ -145,11 +190,21 @@ begin
 						)BinDetails
 						
 						inner join #tmpLocationFilter locationFilter
-							on StorageLocation.intStorageLocationId = locationFilter.intStorageLocationId
+							on SubLocation.intCompanyLocationSubLocationId = locationFilter.intStorageLocationId
 							or locationFilter.intStorageLocationId IS NULL 
 						inner join #tmpCommodityFilter commodityFilter
 							on Commodity.intCommodityId = commodityFilter.intCommodityId
 							or commodityFilter.intCommodityId IS NULL
+
+						inner join #tmpStorageUnit storageUnitFilter
+							on Bin.intStorageLocationId = storageUnitFilter.intStorageUnitId
+							or storageUnitFilter.intStorageUnitId IS NULL
+
+						inner join #tmpItem itemFilter
+							on BinDetails.intItemId = itemFilter.intItemId
+							or itemFilter.intItemId IS NULL
+
+
 					where 
 						((@strBinType1 = '''' or @strBinType1 is null) or Bin.strBinType like ''%'' + @strBinType1 + ''%'')
 						and ((@strBinType2 = '''' or @strBinType2 is null)  or Bin.strBinType2 like ''%'' + @strBinType2 + ''%'')

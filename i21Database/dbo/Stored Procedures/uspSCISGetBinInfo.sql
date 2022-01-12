@@ -10,15 +10,32 @@
 as
 begin
 	declare @dblAvailable decimal(20,2)
-	declare @FinalReading nvarchar(max) = ''
+	declare @FinalReading nvarchar(max) = ''	
+	declare @intBinDetailUnitMeasureId int
+	declare @intBinUnitMeasureId int
 	
-	select @dblPercentageOutput = round( dbo.fnMultiply( dbo.fnDivide( (dblCapacity - dblAvailable),  dblCapacity) , 100), 2)
-		,@dblAvailable = dblAvailable
-		,@dblCapacityOutput = dblCapacity
-		,@dblOccupiedOutput = dblCapacity - dblAvailable
-		from vyuICGetStorageBinDetails 
-			where intStorageLocationId = @intStorageLocationId
-				and (@intItemId is null or intItemId = @intItemId)
+	select @dblPercentageOutput = round( dbo.fnMultiply( dbo.fnDivide( (BinDetails.dblCapacity - BinDetails.dblAvailable),  BinDetails.dblCapacity) , 100), 2)
+		,@dblAvailable = BinDetails.dblAvailable
+		,@dblCapacityOutput = BinDetails.dblCapacity
+		,@dblOccupiedOutput = BinDetails.dblCapacity - BinDetails.dblAvailable
+		,@intBinDetailUnitMeasureId = ItemUOM.intUnitMeasureId
+		,@intBinUnitMeasureId = Bin.intUnitMeasureId
+
+
+		from vyuICGetStorageBinDetails BinDetails
+			join tblSCISBinSearch Bin 
+				on BinDetails.intStorageLocationId = Bin.intStorageLocationId			
+			join tblICItemUOM ItemUOM
+				on BinDetails.intItemUOMId = ItemUOM.intItemUOMId
+
+			
+
+
+
+			where BinDetails.intStorageLocationId = @intStorageLocationId
+				and (@intItemId is null or BinDetails.intItemId = @intItemId)
+
+
 	select @StorageLocation = strName 
 		from tblICStorageLocation 
 			where intStorageLocationId = @intStorageLocationId
@@ -50,6 +67,16 @@ begin
 
 	select @FinalReading = @FinalReading + strShortName + ':'+ cast(dblAverageReading as nvarchar) + '| ' from @FinalResult	
 
+	
+	if @intBinDetailUnitMeasureId is not null 
+		and @intBinUnitMeasureId is not null 
+		and @intItemId is not null
+		and @intBinDetailUnitMeasureId <> @intBinUnitMeasureId
+	begin
+		select @dblAvailable = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblAvailable), 2)
+			, @dblCapacityOutput = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblCapacityOutput), 2)
+			, @dblOccupiedOutput = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblOccupiedOutput), 2)
+	end
 	
 	select @dblAvailableOutput = @dblAvailable
 		, @FinalReadingOutput = @FinalReading
