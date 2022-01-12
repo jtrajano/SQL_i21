@@ -55,7 +55,7 @@ DECLARE @strMessage NVARCHAR(100)
 			DECLARE @strCurrentTransaction NVARCHAR(100)
 
 			INSERT INTO @tblTransactions
-			SELECT strTransactionId
+			SELECT DISTINCT strTransactionId
 			FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tblTransactions)

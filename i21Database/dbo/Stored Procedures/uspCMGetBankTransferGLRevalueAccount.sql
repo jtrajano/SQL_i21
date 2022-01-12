@@ -136,5 +136,5 @@ BEGIN
 		SET @intAccountOverridden = NULL
 	END
 
-	RETURN SELECT strModule, strType, intFinalAccountId AccountId, intOffset Offset FROM @tblAccountId
+	SELECT strModule, strType, intFinalAccountId AccountId, intOffset Offset FROM @tblAccountId GROUP BY strModule, strType, intFinalAccountId, intOffset
 END
