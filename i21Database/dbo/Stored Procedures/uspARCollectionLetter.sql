@@ -25,7 +25,7 @@ BEGIN
 		  , @intSourceLetterId		INT
 		  , @intEntityUserId		INT
 		  , @strTableSource 		VARCHAR(MAX)
-		  , @dtmDateFrom			DATETIME = NULL;
+		  , @dtmDateFrom			DATETIME = NULL
 		  , @strReportLogId			NVARCHAR(MAX)
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -87,7 +87,7 @@ BEGIN
 	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
 
 	SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
-	FROM @temp_xml_table
+	FROM @temp_params
 	WHERE [fieldname] = 'strReportLogId'
 
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
