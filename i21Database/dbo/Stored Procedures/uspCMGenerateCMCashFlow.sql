@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMGenerateCMCashFlow]
 (
+	@tblRateTypeFilters CMCashFlowReportFilterRateTypeTable READONLY,
+	@tblRateFilters CMCashFlowReportFilterRateTable READONLY,
 	@intCashFlowReportId INT,
 	@dtmReportDate DATETIME,
 	@intReportingCurrencyId INT,
@@ -27,51 +29,6 @@ BEGIN
 		@dblBucket9 DECIMAL(18, 6) = 0
 
 	SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
-
-	-- Rate Filter table - table for filter currency and currency exchange rates per bucket
-	DECLARE @tblRateFilters CMCashFlowReportFilterRateType
-	DECLARE @tblRateTypeFilters TABLE(
-		intFilterCurrencyId INT,
-		intRateTypeBucket1 INT,
-		intRateTypeBucket2 INT,
-		intRateTypeBucket3 INT,
-		intRateTypeBucket4 INT,
-		intRateTypeBucket5 INT,
-		intRateTypeBucket6 INT,
-		intRateTypeBucket7 INT,
-		intRateTypeBucket8 INT,
-		intRateTypeBucket9 INT
-	)
-
-	INSERT INTO @tblRateFilters
-	SELECT 
-		intFilterCurrencyId,
-		dblRateBucket1,
-		dblRateBucket2,
-		dblRateBucket3,
-		dblRateBucket4,
-		dblRateBucket5,
-		dblRateBucket6,
-		dblRateBucket7,
-		dblRateBucket8,
-		dblRateBucket9
-	FROM tblCMCashFlowReportRate
-	WHERE intCashFlowReportId = @intCashFlowReportId
-
-	INSERT INTO @tblRateTypeFilters
-	SELECT
-		intFilterCurrencyId,
-		intRateTypeBucket1,
-		intRateTypeBucket2,
-		intRateTypeBucket3,
-		intRateTypeBucket4,
-		intRateTypeBucket5,
-		intRateTypeBucket6,
-		intRateTypeBucket7,
-		intRateTypeBucket8,
-		intRateTypeBucket9
-	FROM tblCMCashFlowReportRateType
-	WHERE intCashFlowReportId = @intCashFlowReportId
 
 	-- Table for GL Accounts to be processed
 	CREATE TABLE 

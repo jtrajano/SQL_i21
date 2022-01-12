@@ -7693,4 +7693,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="fnCMCashFlowTransactions" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="bebf8c7b-83fd-45f6-a235-96ede918f976" ChangeDateTime="01/12/2022 03:24:35">
+    <Property Name="ElementName" Value="[dbo].[CMCashFlowReportFilterRateType]" />
+    <Property Name="ElementType" Value="SqlTableType" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[CMCashFlowReportFilterRateTable]" />
+  </Operation>
 </Operations>

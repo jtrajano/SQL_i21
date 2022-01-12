@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMGenerateARCashFlow]
 (
+	@tblRateTypeFilters CMCashFlowReportFilterRateTypeTable READONLY,
+	@tblRateFilters CMCashFlowReportFilterRateTable READONLY,
 	@intCashFlowReportId INT,
 	@dtmReportDate DATETIME,
 	@intReportingCurrencyId INT,
@@ -21,62 +23,6 @@ BEGIN
 		@dblBucket7 DECIMAL(18, 6) = 0,
 		@dblBucket8 DECIMAL(18, 6) = 0,
 		@dblBucket9 DECIMAL(18, 6) = 0
-
-	DECLARE @tblRateFilters TABLE (
-		[intFilterCurrencyId]	INT,
-		[dblRateBucket1]	NUMERIC(18,6),
-		[dblRateBucket2]	NUMERIC(18,6),
-		[dblRateBucket3]	NUMERIC(18,6),
-		[dblRateBucket4]	NUMERIC(18,6),
-		[dblRateBucket5]	NUMERIC(18,6),
-		[dblRateBucket6]	NUMERIC(18,6),
-		[dblRateBucket7]	NUMERIC(18,6),
-		[dblRateBucket8]	NUMERIC(18,6),
-		[dblRateBucket9]	NUMERIC(18,6)
-	)
-
-	DECLARE @tblRateTypeFilters TABLE(
-		intFilterCurrencyId INT,
-		intRateTypeBucket1 INT,
-		intRateTypeBucket2 INT,
-		intRateTypeBucket3 INT,
-		intRateTypeBucket4 INT,
-		intRateTypeBucket5 INT,
-		intRateTypeBucket6 INT,
-		intRateTypeBucket7 INT,
-		intRateTypeBucket8 INT,
-		intRateTypeBucket9 INT
-	)
-
-	INSERT INTO @tblRateFilters
-	SELECT 
-		intFilterCurrencyId,
-		dblRateBucket1,
-		dblRateBucket2,
-		dblRateBucket3,
-		dblRateBucket4,
-		dblRateBucket5,
-		dblRateBucket6,
-		dblRateBucket7,
-		dblRateBucket8,
-		dblRateBucket9
-	FROM tblCMCashFlowReportRate
-	WHERE intCashFlowReportId = @intCashFlowReportId
-
-	INSERT INTO @tblRateTypeFilters
-	SELECT
-		intFilterCurrencyId,
-		intRateTypeBucket1,
-		intRateTypeBucket2,
-		intRateTypeBucket3,
-		intRateTypeBucket4,
-		intRateTypeBucket5,
-		intRateTypeBucket6,
-		intRateTypeBucket7,
-		intRateTypeBucket8,
-		intRateTypeBucket9
-	FROM tblCMCashFlowReportRateType
-	WHERE intCashFlowReportId = @intCashFlowReportId
 
 	INSERT INTO tblCMCashFlowReportSummaryDetail (
 			[intCashFlowReportId]

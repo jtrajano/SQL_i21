@@ -318,7 +318,7 @@
     <Build Include="dbo\Tables\tblCMCashFlowReportRateType.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportRateType.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportRate.sql" />
-    <Build Include="dbo\User Defined Types\CMCashFlowReportFilterRateType.sql" />
+    <Build Include="dbo\User Defined Types\CMCashFlowReportFilterRateTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCMCashFlow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCashFlowReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMValidateSegmentPosting.sql" />
@@ -458,6 +458,8 @@
     <Build Include="dbo\Views\vyuCMForwardReceivablesMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankTransferGLRevalueAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateARCashFlow.sql" />
+    <Build Include="dbo\User Defined Types\CMCashFlowReportFilterRateTypeTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGenerateLGCashFlow.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -1,4 +1,4 @@
-CREATE TYPE [dbo].[CMCashFlowReportFilterRateType] AS TABLE (
+CREATE TYPE [dbo].[CMCashFlowReportFilterRateTable] AS TABLE (
 	[intFilterCurrencyId]	INT NOT NULL,
 	[dblRateBucket1]		NUMERIC(18,6) NULL,
 	[dblRateBucket2]		NUMERIC(18,6) NULL,
