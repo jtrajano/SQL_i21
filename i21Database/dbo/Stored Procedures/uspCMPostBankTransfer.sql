@@ -196,7 +196,7 @@ BEGIN
         GOTO Post_Rollback    
       END  
     END  
-    IF @intBankTransferTypeId = 5
+    IF @intBankTransferTypeId = 5 OR @intBankTransferTypeId = 4
     BEGIN  
       SELECT TOP 1 @intRealizedAccountId= intGainOnSwapRealizedId   
       FROM tblSMMultiCurrency  
