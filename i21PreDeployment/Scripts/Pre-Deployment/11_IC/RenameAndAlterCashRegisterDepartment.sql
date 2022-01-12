@@ -6,11 +6,14 @@ BEGIN
     END
     IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME = N'strCashRegisterDepartment' AND OBJECT_ID = OBJECT_ID(N'tblICCategoryLocation')) 
     BEGIN
-		EXEC('UPDATE tblICCategoryLocation SET strCashRegisterDepartment = CAST(intRegisterDepartmentId AS NVARCHAR)')
+		IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME = N'intRegisterDepartmentId' AND OBJECT_ID = OBJECT_ID(N'tblICCategoryLocation'))
+		BEGIN
+			EXEC('UPDATE tblICCategoryLocation SET strCashRegisterDepartment = CAST(intRegisterDepartmentId AS NVARCHAR)')
 
-		EXEC('
-			ALTER TABLE tblICCategoryLocation
-			DROP COLUMN intRegisterDepartmentId
-		')
+			EXEC('
+				ALTER TABLE tblICCategoryLocation
+				DROP COLUMN intRegisterDepartmentId
+			')
+		END
     END
 END
