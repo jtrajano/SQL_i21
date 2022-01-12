@@ -22,6 +22,7 @@
 	[strTransRecalled] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	[strTransRollback] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	[strTransFuelPrepayCompletion] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
+	[strTransFuelPrepay] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	-- trHeader
     [intTermMsgSN] bigint NULL,
 	[strTermMsgSNtype] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
