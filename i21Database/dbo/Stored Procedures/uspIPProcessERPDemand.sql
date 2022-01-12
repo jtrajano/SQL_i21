@@ -31,9 +31,27 @@ BEGIN TRY
 		,@intItemUOMId INT
 		,@intDemandHeaderId INT
 		,@intCounter INT = 1
+	DECLARE @tblIPDemandStage TABLE (intDemandStageId INT)
+
+	INSERT INTO @tblIPDemandStage (intDemandStageId)
+	SELECT intDemandStageId
+	FROM tblIPDemandStage
+	WHERE intStatusId IS NULL
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
-	FROM tblIPDemandStage
+	FROM @tblIPDemandStage
+
+	IF @intDemandStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblIPDemandStage
+	SET intStatusId = - 1
+	WHERE intDemandStageId IN (
+			SELECT DS.intDemandStageId
+			FROM @tblIPDemandStage DS
+			)
 
 	SELECT @strInfo1 = ''
 
@@ -379,9 +397,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intDemandStageId = MIN(intDemandStageId)
-		FROM dbo.tblIPDemandStage
+		FROM @tblIPDemandStage
 		WHERE intDemandStageId > @intDemandStageId
 	END
+
+	UPDATE tblIPDemandStage
+	SET intStatusId = NULL
+	WHERE intDemandStageId IN (
+			SELECT PS.intDemandStageId
+			FROM @tblIPDemandStage PS
+			)
+		AND intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

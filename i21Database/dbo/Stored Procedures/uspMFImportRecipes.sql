@@ -604,6 +604,7 @@ BEGIN
 					SELECT @intRecipeId = intRecipeId
 					FROM tblMFRecipe
 					WHERE strERPRecipeNo = @strERPRecipeNo
+					AND intLocationId = @intLocationId
 				END
 				ELSE
 				BEGIN
@@ -858,8 +859,7 @@ BEGIN
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFRecipeItemStage
-				WHERE ysnInitialAckSent IS NULL
-					AND strRecipeItemNo = I.strItemNo
+				WHERE strRecipeItemNo = I.strItemNo
 					AND strRecipeHeaderItemNo = HI.strItemNo
 				)
 			AND RI.ysnImported = 1

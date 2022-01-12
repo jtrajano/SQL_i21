@@ -105,7 +105,8 @@ CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
 l.intParentLotId,
 sl.intStorageLocationId,
 u1.strUnitMeasure AS strPhysicalItemUOM,
-i.intCategoryId
+i.intCategoryId,
+ls.strSecondaryStatus
 into #tempLot
 from tblICLot l
 Join tblICItem i on l.intItemId=i.intItemId
@@ -139,7 +140,7 @@ Begin
 		tl.intPhysicalItemUOMId, tl.dtmReceiveDate, tl.dtmExpiryDate, tl.strVendorId, tl.strVendorLotNo, 
 		tl.strGarden, tl.intLocationId, tl.strLocationName, tl.strSubLocationName, tl.strStorageLocationName,tl.intStorageLocationId, 
 		tl.strRemarks, tl.dblRiskScore, tl.dblConfigRatio, tl.dblDensity, tl.dblScore, tl.intParentLotId,
-		CAST(0 AS bit) AS ysnParentLot,tl.strPhysicalItemUOM,tl.intCategoryId 
+		CAST(0 AS bit) AS ysnParentLot,tl.strPhysicalItemUOM,tl.intCategoryId,tl.strSecondaryStatus 
 		from #tempLot tl Left Join @tblReservedQty r on tl.intLotId=r.intLotId
 End
 Else
@@ -154,6 +155,7 @@ Begin
 		MAX(tl.strRemarks) AS strRemarks, MAX(tl.dblRiskScore) AS dblRiskScore, MAX(tl.dblConfigRatio) AS dblConfigRatio, MAX(tl.dblDensity) AS dblDensity, 
 		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId
 		,tl.strPhysicalItemUOM
+		,MAX(tl.strSecondaryStatus) strSecondaryStatus
 		into #tempParentLotByStorageLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,
@@ -176,6 +178,7 @@ Begin
 		MAX(tl.strRemarks) AS strRemarks, MAX(tl.dblRiskScore) AS dblRiskScore, MAX(tl.dblConfigRatio) AS dblConfigRatio, MAX(tl.dblDensity) AS dblDensity, 
 		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId 
 		,tl.strPhysicalItemUOM
+		,MAX(tl.strSecondaryStatus) strSecondaryStatus
 		into #tempParentLotByLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,tl.strLotAlias,

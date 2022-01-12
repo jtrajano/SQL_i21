@@ -63,7 +63,7 @@ BEGIN TRY
 		,strReceiptNo
 		,strAdjustmentNo
 		)
-	SELECT intInitialAckId
+	SELECT TOP 1000 intInitialAckId
 		,intTrxSequenceNo
 		,strCompanyLocation
 		,dtmCreatedDate
