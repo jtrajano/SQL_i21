@@ -16,7 +16,7 @@ BEGIN
 		IF @intRealizedGainAccountId is NULL
 		BEGIN
 			RAISERROR ('Cash Management Realized Gain/Loss account was not set in Company Configuration- Multicurrency screen.',11,1)
-			RETURN
+			GOTO _end
 		END
 	END
 
@@ -27,7 +27,9 @@ BEGIN
 	BEGIN
 
 	EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,3, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
+	IF @@ERROR <> 0 GOTO _end
 	EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,6, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
+	IF @@ERROR <> 0 GOTO _end
 
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
@@ -89,6 +91,8 @@ BEGIN
 		SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
 	)GL
 	END
+
+	_end:
 
 END
 GO

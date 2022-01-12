@@ -725,6 +725,8 @@ END
           @intBankTransferTypeId,
           @intGLAccountIdTo,
           @intRealizedAccountId
+
+      IF @@ERROR <> 0 GOTO Post_Rollback
       
   --END  
   
