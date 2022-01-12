@@ -273,6 +273,15 @@ IF @ARAccountId IS NOT NULL AND @TransactionType = 'Cash Refund' AND NOT EXISTS 
 		RETURN 0;
 	END
 
+IF (@TransactionType IN ('Cash Refund', 'Customer Prepayment') AND NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ISNULL(intSalesAdvAcct, 0) <> 0))
+	BEGIN		
+		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR('There is no Customer Prepaid account setup under Company Location - %s.', 16, 1, @CompanyLocation);
+		SET @ErrorMessage = [dbo].[fnARFormatMessage]('There is no Customer Prepaid account setup under Company Location - %s.', @CompanyLocation, DEFAULT) 
+		RETURN 0;
+	END
+
 IF @ARAccountId IS NULL AND @TransactionType = 'Customer Prepayment'
 	BEGIN		
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
