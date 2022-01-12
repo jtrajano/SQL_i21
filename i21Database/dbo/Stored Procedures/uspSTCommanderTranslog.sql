@@ -132,6 +132,7 @@ BEGIN
 							[strTransRecalled],
 							[strTransRollback],
 							[strTransFuelPrepayCompletion],
+							[strTransFuelPrepay],
 							-- trHeader
 							[intTermMsgSN],
 							[strTermMsgSNtype],
@@ -363,6 +364,7 @@ BEGIN
 							[strTransRecalled]					= strTransRecalled,
 							[strTransRollback]					= strTransRollback,
 							[strTransFuelPrepayCompletion]		= strTransFuelPrepayCompletion,
+							[strTransFuelPrepay]				= strTransFuelPrepay,
 							-- trHeader
 							[intTermMsgSN]						= intTermMsgSN,
 							[strTermMsgSNtype]					= strTermMsgSNtype,
