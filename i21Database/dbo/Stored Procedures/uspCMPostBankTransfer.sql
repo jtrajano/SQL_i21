@@ -168,7 +168,9 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
 IF @ysnPost = 1 AND @ysnRecap = 0
 BEGIN
   EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,3, @intBankTransferTypeId -- location
+  IF @@ERROR <> 0 GOTO Post_Rollback
   EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,6, @intBankTransferTypeId -- company
+  IF @@ERROR <> 0 GOTO Post_Rollback
 END
 
   
