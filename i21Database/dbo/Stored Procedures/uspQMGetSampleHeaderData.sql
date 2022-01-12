@@ -137,7 +137,7 @@ BEGIN
 		,ISNULL(C.strItemContractOrigin, C.strItemOriginCountry) AS strCountry
 		,S.strMarks
 		,S.intPSubLocationId AS intCompanyLocationSubLocationId
-		,S.strSubLocationName
+		,CL.strSubLocationName
 		,C.intContractTypeId
 		,C.strItemSpecification
 		,(
@@ -166,6 +166,7 @@ BEGIN
 		AND S.strType = 'Inbound'
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
 	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
+	LEFT JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = S.intPSubLocationId
 	WHERE S.intLoadDetailContainerLinkId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 10 -- Shipment Line Item  

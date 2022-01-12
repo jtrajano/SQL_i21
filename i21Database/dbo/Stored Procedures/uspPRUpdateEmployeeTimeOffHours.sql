@@ -175,13 +175,13 @@ BEGIN
   UPDATE tblPREmployeeTimeOff    
    SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN          
                             CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN          
-								CASE WHEN (dblMaxBalance IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover > dblMaxBalance) THEN
+								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover > dblMaxBalance) THEN
 									T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)
 								ELSE
 									T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned)
 								END
                             ELSE          
-								CASE WHEN (dblMaxBalance IS NOT NULL AND Carryover + T.dblEarnedHours > dblMaxBalance) THEN          
+								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL AND Carryover + T.dblEarnedHours > dblMaxBalance) THEN          
 									T.dblEarnedHours - ((T.dblEarnedHours + Carryover) - dblMaxBalance)  
 								ELSE          
 									(dblHoursEarned + T.dblEarnedHours)          

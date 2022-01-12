@@ -34,7 +34,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
@@ -62,6 +62,10 @@ DECLARE @intId AS INT
 		,@dblAdjustCostValue NUMERIC(38, 20)
 		,@dblAdjustRetailValue NUMERIC(38, 20)
 		,@intSourceEntityId INT 
+		,@strSourceType AS NVARCHAR(100)
+		,@strSourceNumber AS NVARCHAR(100)
+		,@strBOLNumber AS NVARCHAR(100)
+		,@intTicketId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -80,6 +84,7 @@ DECLARE @InventoryTransactionType_MarkUpOrDown AS INT = 49
 DECLARE @InventoryTransactionType_WriteOff AS INT = 50
 
 DECLARE @intReturnValue AS INT 
+		,@intInventoryTransactionIdentityId AS INT 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post
@@ -120,13 +125,17 @@ INSERT INTO @StockToPost (
 	,[intCostingMethod]
 	,[ysnAllowVoucher]
 	,[intSourceEntityId]
+	,[strSourceType] 
+	,[strSourceNumber]
+	,[strBOLNumber]
+	,[intTicketId] 
 )
 SELECT
 	[intItemId] = p.intItemId 
 	,[intItemLocationId] = p.intItemLocationId
 	,[intItemUOMId] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN iu.intItemUOMId ELSE p.intItemUOMId END 
 	,[dtmDate] = 
-		p.dtmDate
+		dbo.fnRemoveTimeOnDate(p.dtmDate) 
 		-- Revert the code below. It is causing problems at Pri Mar. See IC-8966. 
 		/**
 		CASE 			
@@ -163,6 +172,10 @@ SELECT
 	,[intCostingMethod] = p.intCostingMethod
 	,[ysnAllowVoucher] = p.ysnAllowVoucher
 	,[intSourceEntityId] = p.intSourceEntityId 
+	,[strSourceType] = p.strSourceType 
+	,[strSourceNumber] = p.strSourceNumber 
+	,[strBOLNumber] = p.strBOLNumber 
+	,[intTicketId] = p.intTicketId
 FROM 
 	@ItemsToPost p 
 	INNER JOIN tblICItem i 
@@ -170,18 +183,6 @@ FROM
 	LEFT JOIN tblICItemUOM iu
 		ON iu.intItemId = p.intItemId
 		AND iu.ysnStockUnit = 1
-	--OUTER APPLY (
-	--	SELECT TOP 1 
-	--		t.dtmDate
-	--	FROM 
-	--		tblICInventoryTransaction t
-	--	WHERE
-	--		t.strTransactionId = p.strTransactionId	
-	--		AND t.strBatchId <> REPLACE(@strBatchId, '-P', '') 
-	--	ORDER BY 
-	--		t.intInventoryTransactionId DESC 
-	--) lastTransaction
-
 ORDER BY 
 	p.intId
 
@@ -231,6 +232,10 @@ SELECT  p.intId
 		,p.dblAdjustCostValue
 		,p.dblAdjustRetailValue
 		,p.intSourceEntityId
+		,p.strSourceType 
+		,p.strSourceNumber 
+		,p.strBOLNumber 
+		,p.intTicketId
 FROM	@StockToPost p INNER JOIN tblICItem i 
 			ON p.intItemId = i.intItemId 
 WHERE
@@ -266,6 +271,11 @@ FETCH NEXT FROM loopItems INTO
 	,@dblAdjustCostValue
 	,@dblAdjustRetailValue
 	,@intSourceEntityId
+	,@strSourceType 
+	,@strSourceNumber 
+	,@strBOLNumber 
+	,@intTicketId
+
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -322,6 +332,10 @@ BEGIN
 			,@dblUnitRetail
 			,@ysnTransferOnSameLocation
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -352,6 +366,10 @@ BEGIN
 			,@dblForexRate
 			,@dblUnitRetail
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -382,6 +400,10 @@ BEGIN
 			,@dblForexRate
 			,@dblUnitRetail
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -413,6 +435,10 @@ BEGIN
 			,@dblForexRate
 			,@dblUnitRetail
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -446,6 +472,10 @@ BEGIN
 			,@dblAdjustCostValue 
 			,@dblAdjustRetailValue
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -494,6 +524,10 @@ BEGIN
 					,@dblForexRate
 					,@dblUnitRetail
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -523,6 +557,10 @@ BEGIN
 					,@dblForexRate
 					,@dblUnitRetail
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -552,6 +590,10 @@ BEGIN
 					,@dblForexRate
 					,@dblUnitRetail
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -582,6 +624,10 @@ BEGIN
 					,@dblForexRate
 					,@dblUnitRetail
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -614,6 +660,10 @@ BEGIN
 					,@dblAdjustCostValue
 					,@dblAdjustRetailValue
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END
@@ -644,6 +694,10 @@ BEGIN
 				,@dblForexRate
 				,@dblUnitRetail
 				,@intSourceEntityId
+				,@strSourceType 
+				,@strSourceNumber 
+				,@strBOLNumber 
+				,@intTicketId 
 				;
 
 			IF @intReturnValue < 0 GOTO _TerminateLoop;
@@ -792,6 +846,10 @@ BEGIN
 		,@dblAdjustCostValue
 		,@dblAdjustRetailValue
 		,@intSourceEntityId
+		,@strSourceType 
+		,@strSourceNumber 
+		,@strBOLNumber 
+		,@intTicketId
 		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -879,12 +937,12 @@ BEGIN
 		SET @InventoryTransactionIdentityId = NULL 
 
 		SELECT	
-				@dblAutoVariance = dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+				@dblAutoVariance = dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - itemTotal.itemTotalValue
 				,@strAutoVarianceDescription = 
 						-- 'Inventory variance is created. The current item valuation is %c. The new valuation is (Qty x New Average Cost) %c x %c = %c.'
 							dbo.fnFormatMessage(
 							dbo.fnICGetErrorMessage(80078)
-							,dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+							,itemTotal.itemTotalValue
 							,Stock.dblUnitOnHand
 							,ItemPricing.dblAverageCost
 							,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
@@ -899,9 +957,12 @@ BEGIN
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 				CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, DEFAULT) [location]
+		OUTER APPLY (
+			SELECT [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId) itemTotalValue
+		) itemTotal
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
-				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
+				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - itemTotal.itemTotalValue, 2) <> 0
 
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -933,6 +994,17 @@ BEGIN
 				,@dblForexRate = 1
 				,@strDescription = @strAutoVarianceDescription 
 				,@intSourceEntityId = @intSourceEntityId
+
+		SET @intInventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+		-----------------------------------------
+		-- Log the Daily Stock Quantity
+		-----------------------------------------
+		IF @intInventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			EXEC uspICPostStockDailyQuantity 
+				@intInventoryTransactionId = @intInventoryTransactionIdentityId
+		END 
 
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative
@@ -1087,8 +1159,7 @@ BEGIN
 		,@intContraInventory_ItemLocationId
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
-END 
-
+END 	
 
 -----------------------------------------
 -- Call the Risk Log sp
@@ -1096,8 +1167,9 @@ END
 BEGIN 
 	EXEC @intReturnValue = dbo.uspICLogRiskPositionFromOnHand
 		@strBatchId
-		,@strTransactionId
+		,NULL
 		,@intEntityUserSecurityId
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
 END 
+

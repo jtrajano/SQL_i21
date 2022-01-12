@@ -391,7 +391,21 @@ BEGIN TRY
 		END
 		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
 
-		EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+		if (@ysnMultiplePriceFixation = 1)
+		begin
+			declare @intPriceContractId int;
+
+			select top 1 @intPriceContractId = intPriceContractId from tblCTPriceFixationMultiplePrice where intContractDetailId = @intContractDetailId;
+			
+			exec uspCTProcessPriceFixationMultiplePrice
+				@intPriceContractId = @intPriceContractId
+				,@intUserId = @intLastModifiedById
+
+		end
+		else
+		begin
+			EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+		end
 
 		IF	@intContractStatusId	=	1	AND
 			@ysnOnceApproved		=	1	AND
@@ -446,7 +460,7 @@ BEGIN TRY
 		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 		WHERE	CD.intContractHeaderId = @intContractHeaderId
 
-		UPDATE b SET dblNoOfLots = b.dblQuantity / (c.dblQuantity/c.dblNoOfLots)--(b.dblQuantity / d.dblContractSize)
+		UPDATE b SET dblNoOfLots = (b.dblQuantity / (c.dblQuantity/c.dblNoOfLots))
 		FROM tblCTPriceFixation a
 		INNER JOIN tblCTPriceFixationDetail b ON a.intPriceFixationId =  b.intPriceFixationId
 		INNER JOIN tblCTContractDetail c ON a.intContractDetailId = c.intContractDetailId

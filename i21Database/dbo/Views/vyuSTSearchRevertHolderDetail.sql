@@ -11,6 +11,8 @@ SELECT --DISTINCT
 	, RHD.intItemUOMId
 	, RHD.intItemLocationId
 	, RHD.intItemPricingId
+	, RHD.intEffectiveItemCostId
+	, RHD.intEffectiveItemPriceId
 	, RHD.intItemSpecialPricingId
 	, RHD.intCompanyLocationId
 	, RHD.dtmDateModified
@@ -50,6 +52,10 @@ SELECT --DISTINCT
 											THEN CAST(CAST(ItemLoc.dblMinOrder AS FLOAT) AS NVARCHAR(50))
 										WHEN RHD.strTableColumnName = 'dblSuggestedQty'
 											THEN CAST(CAST(ItemLoc.dblSuggestedQty AS FLOAT) AS NVARCHAR(50))
+										WHEN RHD.strTableColumnName = 'dblTransactionQtyLimit'
+											THEN CAST(CAST(ItemLoc.dblTransactionQtyLimit AS FLOAT) AS NVARCHAR(50))
+										WHEN RHD.strTableColumnName = 'strStorageUnitNo'
+											THEN CAST(ItemLoc.strStorageUnitNo AS NVARCHAR(1000))
 										WHEN RHD.strTableColumnName = 'intStorageLocationId'
 											THEN ISNULL(StorageLoc_New.strName, '')
 										WHEN RHD.strTableColumnName = 'intCountGroupId'
@@ -101,15 +107,13 @@ SELECT --DISTINCT
 
 							 WHEN revertHolder.intRevertType = 2
 								THEN CASE
-									WHEN RHD.strTableColumnName = 'dblSalePrice'
-										THEN CAST(CAST(ItemPricing_New.dblSalePrice AS FLOAT) AS NVARCHAR(50))
-									WHEN RHD.strTableColumnName = 'dblStandardCost'
-										THEN CAST(CAST(ItemPricing_New.dblStandardCost AS FLOAT) AS NVARCHAR(50))
-									WHEN RHD.strTableColumnName = 'dblLastCost'
-										THEN CAST(CAST(ItemPricing_New.dblLastCost AS FLOAT) AS NVARCHAR(50))
+									WHEN RHD.strTableColumnName = 'dblRetailPrice'
+										THEN CAST(CAST(ItemPricingPrice_New.dblRetailPrice AS FLOAT) AS NVARCHAR(50))
+									WHEN RHD.strTableColumnName = 'dblCost' AND RHD.strChangeDescription != 'Promotional Cost'
+										THEN CAST(CAST(ItemPricingCost_New.dblCost AS FLOAT) AS NVARCHAR(50))
 									WHEN RHD.strTableColumnName = 'dblUnitAfterDiscount'
 										THEN CAST(CAST(ItemSpecialPricing_New.dblUnitAfterDiscount AS FLOAT) AS NVARCHAR(50))
-									WHEN RHD.strTableColumnName = 'dblCost'
+									WHEN RHD.strTableColumnName = 'dblCost' AND RHD.strChangeDescription = 'Promotional Cost'
 										THEN CAST(CAST(ItemSpecialPricing_New.dblCost AS FLOAT) AS NVARCHAR(50))
 
 									WHEN RHD.strTableColumnName = 'dtmBeginDate'
@@ -142,6 +146,7 @@ SELECT --DISTINCT
 								ELSE
 									ISNULL(CAST(RHD.strPreviewOldData AS NVARCHAR(50)), RHD.strOldData)
 						END COLLATE Latin1_General_CI_AS
+	, strAction = RHD.strAction
 --, strPreviewOldData = CASE
 --							WHEN RHD.strTableColumnName = 'intCategoryId'
 --								THEN Category_Old.strCategoryCode
@@ -189,6 +194,7 @@ SELECT --DISTINCT
 --							-- Else will handle these columns: 'dblUnitAfterDiscount', 'dtmBeginDate', 'dtmEndDate'
 --							ELSE RHD.strOldData
 --						END
+
 FROM tblSTRevertHolderDetail RHD
 INNER JOIN tblSTRevertHolder revertHolder
 	ON RHD.intRevertHolderId = revertHolder.intRevertHolderId
@@ -222,6 +228,10 @@ LEFT JOIN tblICItemUOM Uom_New
 	ON ItemLoc.intDepositPLUId = Uom_New.intItemUOMId
 LEFT JOIN tblICItemPricing ItemPricing_New
 	ON RHD.intItemPricingId = ItemPricing_New.intItemPricingId
+LEFT JOIN tblICEffectiveItemCost ItemPricingCost_New
+	ON RHD.intEffectiveItemCostId = ItemPricingCost_New.intEffectiveItemCostId
+LEFT JOIN tblICEffectiveItemPrice ItemPricingPrice_New
+	ON RHD.intEffectiveItemPriceId = ItemPricingPrice_New.intEffectiveItemPriceId
 LEFT JOIN tblICItemSpecialPricing ItemSpecialPricing_New
 	ON RHD.intItemSpecialPricingId = ItemSpecialPricing_New.intItemSpecialPricingId
 

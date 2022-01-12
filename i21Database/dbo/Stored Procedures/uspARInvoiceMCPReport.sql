@@ -10,8 +10,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @blbLogo 			VARBINARY (MAX) = NULL
-      , @blbStretchedLogo 	VARBINARY (MAX) = NULL
+DECLARE @blbLogo 			VARBINARY (MAX)  = NULL
+      , @blbStretchedLogo 	VARBINARY (MAX)  = NULL
+	  , @dblCreditMemo		NUMERIC   (18,6) = 1
 
 SELECT		TOP 1 @blbLogo = U.blbFile 
 FROM		dbo.tblSMUpload AS U
@@ -36,6 +37,11 @@ WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference'
 		AND A.strComment = 'Stretched Header'
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
+
+SELECT TOP 1 @dblCreditMemo = CASE WHEN INV.strTransactionType IN ('Credit Memo') THEN -1 ELSE 1 END 
+FROM dbo.tblARInvoice INV WITH (NOLOCK)
+INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
+WHERE  SELECTEDINV.strType IN ('Transport Delivery','Tank Delivery')
 
 DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
 INSERT INTO tblARInvoiceReportStagingTable (
@@ -139,18 +145,18 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 								  END
 	 , intInvoiceDetailId		= ISNULL(INVOICEDETAIL.intInvoiceDetailId,0)
 	 , intSiteId				= INVOICEDETAIL.intSiteId
-	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped
-	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax') THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
+	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped * @dblCreditMemo
+	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 5 - Honstein' THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
 	 , strItemNo				= INVOICEDETAIL.strItemNo
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strContractNo			= INVOICEDETAIL.strContractNo
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
-	 , dblPrice					= INVOICEDETAIL.dblPrice
+	 , dblPrice					= INVOICEDETAIL.dblPrice * @dblCreditMemo
 	 , dblItemPrice				= INVOICEDETAIL.dblTotal
-	 , dblPriceWithTax			= INVOICEDETAIL.dblPriceWithTax
-	 , dblTotalPriceWithTax		= INVOICEDETAIL.dblTotalPriceWithTax
-	 , dblInvoiceSubtotal		= ISNULL(INV.dblInvoiceSubtotal, 0)
-	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
+	 , dblPriceWithTax			= INVOICEDETAIL.dblPriceWithTax * @dblCreditMemo
+	 , dblTotalPriceWithTax		= INVOICEDETAIL.dblTotalPriceWithTax * @dblCreditMemo
+	 , dblInvoiceSubtotal		= ISNULL(INV.dblInvoiceSubtotal, 0) * @dblCreditMemo
+	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0) * @dblCreditMemo
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
 	 , dblTotalTax				= INVOICEDETAIL.dblTotalTax

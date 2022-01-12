@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿
+CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -119,7 +120,7 @@
 	,@VehicleNumberForDualCard			NVARCHAR(MAX)	= NULL
 	,@strDriverPin						NVARCHAR(MAX)	= NULL
 	,@intUserId							INT				= NULL
-
+	,@LinkedNetworkCardNumber			NVARCHAR(MAX)	= NULL
 	
 
 
@@ -382,6 +383,16 @@ BEGIN
 		--TAX PERCENTAGE CONVERSION--
 
 
+	END
+	ELSE IF (@strNetworkType = 'NBS')
+	BEGIN
+			IF(@strCardId LIKE '%X%')
+			BEGIN
+				SET @strTransactionType = 'Foreign Sale'
+				SET @dblTransferCost = @dblOriginalGrossPrice
+				SET @dblOriginalGrossPrice = @dblTransferCost
+				SET @intCustomerId = @intForeignCustomerId
+			END
 	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
@@ -960,6 +971,7 @@ BEGIN
 				ON C.intAccountId = A.intAccountId
 				WHERE C.strCardNumber = @strCardId 
 				AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+				AND C.intNetworkId = @intNetworkId
 			END
 			ELSE
 			BEGIN
@@ -974,6 +986,7 @@ BEGIN
 					ON C.intAccountId = A.intAccountId
 					WHERE C.strCardNumber = @strCardId
 					AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+					AND C.intNetworkId = @intNetworkId
 				END
 				ELSE
 				BEGIN
@@ -984,7 +997,7 @@ BEGIN
 					ON C.intAccountId = A.intAccountId
 					WHERE C.intCardId = @intCardId
 					AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
-
+					AND C.intNetworkId = @intNetworkId
 					SET @ysnCreditCardUsed = 1
 
 				END
@@ -1001,6 +1014,7 @@ BEGIN
 				ON C.intAccountId = A.intAccountId
 				WHERE C.strCardNumber = @strCardId
 				AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+				AND C.intNetworkId = @intNetworkId
 			END
 		END
 	END
@@ -1015,12 +1029,36 @@ BEGIN
 			ON C.intAccountId = A.intAccountId
 			WHERE C.strCardNumber = @strCardId
 			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+			AND C.intNetworkId = @intNetworkId
 		END
 	END
+	
+	
+
+	--FIND CARD IN LINKED NETWORK CARDS--
+	DECLARE @intLinkedNetworkId INT
+	IF(ISNULL(@intCardId,0) = 0)
+	BEGIN
+		SELECT TOP 1 @intLinkedNetworkId = intLinkedNetworkId FROM tblCFNetwork WHERE intNetworkId = @intNetworkId
+		IF(ISNULL(@intLinkedNetworkId,0) != 0)
+		BEGIN
+			SELECT TOP 1 
+				 @intCardId = C.intCardId
+				,@intCustomerId = A.intCustomerId
+			FROM tblCFCard C
+			INNER JOIN tblCFAccount A
+			ON C.intAccountId = A.intAccountId
+			WHERE C.strCardNumber = @LinkedNetworkCardNumber
+			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+			AND C.intNetworkId = @intLinkedNetworkId
+		END
+	END
+
 
 	IF(LOWER(@strTransactionType) LIKE '%foreign%')
 	BEGIN
 		SET @intCardId = NULL
+		SET @intCustomerId = @intForeignCustomerId
 	END
 
 	IF (@intCardId = 0)
@@ -1426,6 +1464,19 @@ BEGIN
 
 		------------------------------------------------------------
 
+
+		DECLARE @ysnTempInvalid BIT
+		IF(@ysnInvalid= 1)
+		BEGIN
+			SET @ysnTempInvalid = 0
+		END
+		ELSE
+		BEGIN
+			SET @ysnInvalid= 1
+			SET @ysnTempInvalid = 1
+		END
+
+
 		------------------------------------------------------------
 		--				INSERT TRANSACTION RECORD				  --
 		------------------------------------------------------------
@@ -1479,6 +1530,8 @@ BEGIN
 			,[intImportCardId]
 			,[intDriverPinId]
 			,[ysnInvoiced]
+			,[intUserId]
+			,[ysnImported]
 		)
 		VALUES
 		(
@@ -1531,6 +1584,8 @@ BEGIN
 			,@intCardId
 			,@intDriverPinId
 			,@ysnInvoiced
+			,@intUserId
+			,1
 		)			
 	
 		DECLARE @Pk	INT		
@@ -1541,6 +1596,7 @@ BEGIN
 		------------------------------------------------------------
 		--				INSERT IMPORT ERROR LOGS				  --
 		------------------------------------------------------------
+		
 		
 		
 		IF(ISNULL(@ysnWriteDriverPinError,0) = 1)
@@ -1842,9 +1898,23 @@ BEGIN
 		WHERE intTransactionId = @Pk
 		
 
-		IF(@ysnRecalculateInvalid = 1)
-		BEGIN 
-			SET @ysnInvalid = @ysnRecalculateInvalid
+		IF(@ysnTempInvalid = 1)
+		BEGIN
+			IF(@ysnRecalculateInvalid = 1)
+			BEGIN 
+				SET @ysnInvalid = @ysnRecalculateInvalid
+			END
+			ELSE
+			BEGIN
+				SET @ysnInvalid = 0
+			END
+		END
+		ELSE
+		BEGIN
+			IF(@ysnRecalculateInvalid = 1)
+			BEGIN 
+				SET @ysnInvalid = @ysnRecalculateInvalid
+			END
 		END
 
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')

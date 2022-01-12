@@ -9,7 +9,7 @@ BEGIN
 	SELECT IU.intItemId
 		,IU.intItemUOMId
 		,IU.intUnitMeasureId
-		,IUA.strLongUpcCode
+		,IUA.strLongUpcCode AS strLongUPCCode
 		,IUA.strUpcCode
 	FROM tblICItemUOM IU
 	JOIN tblICItemUomUpc IUA ON IUA.intItemUOMId = IU.intItemUOMId

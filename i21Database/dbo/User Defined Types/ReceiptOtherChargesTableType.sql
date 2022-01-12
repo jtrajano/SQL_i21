@@ -40,4 +40,5 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[ysnAllowVoucher] BIT NULL
 	,[intLoadShipmentId] INT NULL
 	,[intLoadShipmentCostId] INT NULL
+	,[intSort] INT NULL
 )

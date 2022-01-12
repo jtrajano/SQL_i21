@@ -321,7 +321,8 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 WHERE GL.strDescription LIKE '%Charges from %'
 --and TS.dtmTransferStorageDate between '2021-03-02' and '2021-03-03'
-AND (CASE WHEN GL.dblDebitUnit = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END = SR.dblUnitQty)
+AND ((CASE WHEN GL.dblDebitUnit = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END = SR.dblUnitQty)
+    OR (CASE WHEN GL.dblDebitUnit = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END = CS.dblGrossQuantity))
 UNION ALL      
 --Transfer for Receipt Charge Taxes
 SELECT DISTINCT '5',
@@ -863,6 +864,9 @@ AND GLDetail.intAccountId IS NOT NULL
         ON bill.intBillId = billDetail.intBillId
     INNER JOIN tblGRCustomerStorage CS_TO
         ON CS_TO.intCustomerStorageId = billDetail.intCustomerStorageId
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+        AND ST.ysnDPOwnedType = 1
     INNER JOIN tblGRTransferStorageReference TSR
         ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
     INNER JOIN tblGRCustomerStorage CS_FROM

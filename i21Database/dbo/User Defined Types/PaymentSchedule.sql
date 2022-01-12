@@ -2,6 +2,7 @@
 (
     [intBillId] INT NOT NULL,
 	[intTermsId] INT NOT NULL,
+	[strPaymentScheduleNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDueDate] DATETIME,
 	[dtmDiscountDate] DATETIME NULL,
 	[dblPayment] DECIMAL(18,2),

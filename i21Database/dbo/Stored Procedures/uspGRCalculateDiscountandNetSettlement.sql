@@ -164,7 +164,7 @@ BEGIN TRY
 					SELECT 
 						@SettleStorageKey
 						,CASE 
-							WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblStorageUnits / Discounts.dblOpenBalance) 
+							WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblStorageUnits / Discounts.dblOriginalBalance) 
 							ELSE @dblStorageUnits 
 						END
 						,CASE 
@@ -174,7 +174,7 @@ BEGIN TRY
 					FROM (
 						SELECT 
 							CS.dblGrossQuantity
-							,CS.dblOpenBalance
+							,CS.dblOriginalBalance
 							,TD.strCalcMethod
 							,TD.dblDiscountDue
 						FROM tblGRCustomerStorage CS
@@ -207,7 +207,7 @@ BEGIN TRY
 					SELECT 
 						 @SettleStorageKey
 						,CASE 
-							WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblContractUnits / Discounts.dblOpenBalance) 
+							WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblContractUnits / Discounts.dblOriginalBalance) 
 							ELSE @dblContractUnits 
 						END
 						,CASE 
@@ -217,7 +217,7 @@ BEGIN TRY
 					FROM (
 						SELECT 
 							CS.dblGrossQuantity
-							,CS.dblOpenBalance
+							,CS.dblOriginalBalance
 							,TD.strCalcMethod
 							,TD.dblDiscountDue
 						FROM tblGRCustomerStorage CS
@@ -259,14 +259,14 @@ BEGIN TRY
 				SELECT 
 					 @SettleStorageKey
 					,CASE 
-						WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblStorageUnits / Discounts.dblOpenBalance) 
+						WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblStorageUnits / Discounts.dblOriginalBalance) 
 						ELSE @dblStorageUnits 
 					END
 					,Discounts.dblDiscountDue
 				FROM (
 					SELECT 
 						CS.dblGrossQuantity
-						,CS.dblOpenBalance
+						,CS.dblOriginalBalance
 						,TD.strCalcMethod
 						,TD.dblDiscountDue
 					FROM tblGRCustomerStorage CS
@@ -292,14 +292,14 @@ BEGIN TRY
 				SELECT 
 					@SettleStorageKey
 					,CASE 
-						WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblSpotUnits / Discounts.dblOpenBalance) 
+						WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblSpotUnits / Discounts.dblOriginalBalance) 
 						ELSE @dblSpotUnits 
 					END
 					,Discounts.dblDiscountDue
 				FROM (
 					SELECT 
 						CS.dblGrossQuantity
-						,CS.dblOpenBalance
+						,CS.dblOriginalBalance
 						,TD.strCalcMethod
 						,TD.dblDiscountDue
 					FROM tblGRCustomerStorage CS

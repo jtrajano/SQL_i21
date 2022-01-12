@@ -90,6 +90,25 @@ BEGIN
 		if exists(select top 1 1 from [tblEMEntityCredential] where strUserName = @userName and intEntityId <> @intEntityContactId)
 		begin
 			set @message =  'Username already exists'
+
+			--lets improve message to show where it is existing
+			declare @entityContactIdForDuplicate INT
+			declare @entityIdForDuplicate INT
+			declare @entityTypeForDuplicate VARCHAR(500)
+			select top 1 @entityContactIdForDuplicate = intEntityId from [tblEMEntityCredential] where strUserName = @userName and intEntityId <> @intEntityContactId
+			if isnull(@entityContactIdForDuplicate, 0) <> 0
+			begin
+				select top 1 @entityIdForDuplicate = intEntityId from [tblEMEntityToContact] where intEntityContactId = @entityContactIdForDuplicate
+				if isnull(@entityIdForDuplicate, 0) <> 0
+				begin
+					select @entityTypeForDuplicate = strType from [tblEMEntityType] where intEntityId = @entityIdForDuplicate
+					if ISNULL(@entityTypeForDuplicate, '') <> ''
+					begin
+						set @message =  'Username already exists as ' + @entityTypeForDuplicate
+					end
+				end
+			end
+
 			return 0
 		end
 

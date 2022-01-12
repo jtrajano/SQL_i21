@@ -7,16 +7,12 @@
 		@strResultMsg					NVARCHAR(1000) OUTPUT
 	AS
 BEGIN TRY
-	    
-		
-
-
 
 		IF NOT EXISTS(
 						SELECT TOP 1 1 FROM vyuSTSearchRevertHolderDetail detail
 						WHERE detail.intRevertHolderId = @intRevertHolderId
 							AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-							AND detail.strPreviewOldData != detail.strPreviewNewData
+							AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 					 )
 			BEGIN 
 				SET @ysnSuccess	= 0
@@ -318,6 +314,8 @@ BEGIN TRY
 								intMinimumAge				INT		NULL,
 								dblMinOrder					NUMERIC(18, 6) NULL,
 								dblSuggestedQty				NUMERIC(18, 6) NULL,
+								strStorageUnitNo			NVARCHAR(1000) NULL,
+								dblTransactionQtyLimit		NUMERIC(18, 6) NULL,
 								intStorageLocationId		INT		NULL,
 								intCountGroupId				INT		NULL
 						)
@@ -356,6 +354,8 @@ BEGIN TRY
 							intMinimumAge,
 							dblMinOrder,
 							dblSuggestedQty,
+							dblTransactionQtyLimit,
+							strStorageUnitNo,
 							intStorageLocationId,
 							intCountGroupId
 						)
@@ -387,7 +387,9 @@ BEGIN TRY
 							intVendorId				= CASE WHEN piv.intVendorId = '' THEN NULL ELSE piv.intVendorId END, --piv.intVendorId,
 							intMinimumAge			= CASE WHEN piv.intMinimumAge = '' THEN NULL ELSE piv.intMinimumAge END, -- piv.intMinimumAge,
 							dblMinOrder				= CASE WHEN piv.dblMinOrder = '' THEN NULL ELSE piv.dblMinOrder END, -- piv.dblMinOrder,
-							dblSuggestedQty			= CASE WHEN piv.dblSuggestedQty = '' THEN NULL ELSE piv.dblSuggestedQty END, -- piv.dblSuggestedQty,
+							dblSuggestedQty			= CASE WHEN piv.dblSuggestedQty = '' THEN NULL ELSE piv.dblSuggestedQty END, -- piv.dblSuggestedQty, 
+							dblTransactionQtyLimit	= CASE WHEN piv.dblTransactionQtyLimit = '' THEN NULL ELSE piv.dblTransactionQtyLimit END, -- piv.dblTransactionQtyLimit, 
+							strStorageUnitNo		= piv.strStorageUnitNo,
 							intStorageLocationId	= CASE WHEN piv.intStorageLocationId = '' THEN NULL ELSE piv.intStorageLocationId END, --piv.intStorageLocationId
 							intCountGroupId			= CASE WHEN piv.intCountGroupId = '' THEN NULL ELSE piv.intCountGroupId END --piv.intStorageLocationId
 						FROM (
@@ -404,7 +406,7 @@ BEGIN TRY
 						PIVOT (
 							MAX(strOldData) FOR strTableColumnName IN (ysnTaxFlag1,ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnDepositRequired, intDepositPLUId, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable,
 																		ysnReturnable, ysnSaleable, ysnIdRequiredLiquor, ysnIdRequiredCigarette, ysnPromotionalItem, ysnPrePriced, ysnApplyBlueLaw1, ysnApplyBlueLaw2,
-																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, 
+																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, dblTransactionQtyLimit, strStorageUnitNo, 
 																		intStorageLocationId, intCountGroupId)
 						) piv
 
@@ -466,6 +468,8 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
+									 ItemLoc.dblTransactionQtyLimit,
+									 ItemLoc.strStorageUnitNo,
 									 ItemLoc.intStorageLocationId,
 									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc
@@ -516,7 +520,9 @@ BEGIN TRY
 											@intVendorId				INT,
 											@intMinimumAge				INT,
 											@dblMinOrder				NUMERIC(18, 6),
-											@dblSuggestedQty			NUMERIC(18, 6),
+											@dblSuggestedQty			NUMERIC(18, 6), 
+											@dblTransactionQtyLimit		NUMERIC(18, 6),
+											@strStorageUnitNo			NVARCHAR(1000),
 											@intStorageLocationId		INT,
 											@intCountGroupId			INT
 				
@@ -550,6 +556,8 @@ BEGIN TRY
 											@intMinimumAge				= ISNULL(temp.intMinimumAge, ItemLoc.intMinimumAge),
 											@dblMinOrder				= ISNULL(temp.dblMinOrder, ItemLoc.dblMinOrder),
 											@dblSuggestedQty			= ISNULL(temp.dblSuggestedQty, ItemLoc.dblSuggestedQty),
+											@strStorageUnitNo			= ISNULL(temp.strStorageUnitNo, ItemLoc.strStorageUnitNo),
+											@dblTransactionQtyLimit		= ISNULL(temp.dblTransactionQtyLimit, ItemLoc.dblTransactionQtyLimit),
 											@intStorageLocationId		= ISNULL(temp.intStorageLocationId, ItemLoc.intStorageLocationId), -- CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
 											@intCountGroupId			= ISNULL(temp.intCountGroupId, ItemLoc.intCountGroupId)
 								FROM @tempITEMLOCATION temp
@@ -596,6 +604,8 @@ BEGIN TRY
 										,@intMinimumAge								= @intMinimumAge 
 										,@dblMinOrder								= @dblMinOrder 
 										,@dblSuggestedQty							= @dblSuggestedQty
+										,@strStorageUnitNo							= @strStorageUnitNo
+										,@dblTransactionQtyLimit					= @dblTransactionQtyLimit
 										,@intCountGroupId							= @intCountGroupId
 										,@intStorageLocationId						= @intStorageLocationId 
 										,@dblReorderPoint							= NULL
@@ -691,6 +701,8 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
+									 ItemLoc.strStorageUnitNo,
+									 ItemLoc.dblTransactionQtyLimit,
 									 ItemLoc.intStorageLocationId,
 									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc
@@ -726,66 +738,56 @@ BEGIN TRY
 				
 				-- ITEM PRICING
 				-- ==================================================================================================================================================
-				-- [START] - Revert ITEM PRICING
+				-- [START] - Revert ITEM PRICING COST
 				-- ==================================================================================================================================================
 				IF EXISTS(
 							SELECT TOP 1 1 FROM vyuSTSearchRevertHolderDetail detail
-							WHERE detail.strTableName = N'tblICItemPricing' 
+							WHERE detail.strTableName = N'tblICEffectiveItemCost' 
 								AND detail.intRevertHolderId = @intRevertHolderId
 								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-								AND detail.strPreviewOldData != detail.strPreviewNewData
+								AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 						 )
 					BEGIN
 							-- Create
-							DECLARE @tempITEMPRICING TABLE (
-									intItemPricingId		INT NOT NULL
-									, dblStandardCost		NUMERIC(38, 20) NULL
-									, dblSalePrice			NUMERIC(38, 20) NULL
-									, dblLastCost			NUMERIC(38, 20) NULL
-									, intItemId				INT
-									, intCompanyLocationId	INT
-									, intItemLocationId		INT
-									, intItemUOMId			INT
+							DECLARE @tempITEMPRICINGCost TABLE (
+									intEffectiveItemCostId		INT NOT NULL
+									, dblCost					NUMERIC(38, 20) NULL
+									, intItemId					INT
+									, intItemLocationId			INT
+									, strAction					VARCHAR(20)
 							)
 
 
 							-- Insert
-							INSERT INTO @tempITEMPRICING
+							INSERT INTO @tempITEMPRICINGCost
 							(
-								intItemPricingId
-								, dblStandardCost
-								, dblSalePrice
-								, dblLastCost
+								intEffectiveItemCostId
+								, dblCost
 								, intItemId
-								, intCompanyLocationId
 								, intItemLocationId
-								, intItemUOMId
+								, strAction
 							)
 							SELECT DISTINCT
-								intItemPricingId		= piv.intItemPricingId
-								, dblStandardCost		= piv.dblStandardCost
-								, dblSalePrice			= piv.dblSalePrice
-								, dblLastCost			= piv.dblLastCost
+								intEffectiveItemCostId	= piv.intEffectiveItemCostId
+								, dblCost				= CAST(piv.dblCost AS NUMERIC(38, 20))
 								, intItemId				= piv.intItemId
-								, intCompanyLocationId	= piv.intCompanyLocationId
 								, intItemLocationId		= piv.intItemLocationId
-								, intItemUOMId			= piv.intItemUOMId
+								, strAction				= piv.strAction
 							FROM (
-								SELECT detail.intItemPricingId
+								SELECT detail.intEffectiveItemCostId
 									 , detail.intItemId
-									 , detail.intCompanyLocationId
 									 , detail.intItemLocationId
-									 , detail.intItemUOMId
 									 , detail.strTableColumnName
-									 , detail.strOldData
+									 , detail.strPreviewOldData
+									 , detail.strAction
 								FROM vyuSTSearchRevertHolderDetail detail
-								WHERE detail.strTableName = N'tblICItemPricing'
+								WHERE detail.strTableName = N'tblICEffectiveItemCost'
 									AND detail.intRevertHolderId = @intRevertHolderId
 									AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-									AND detail.strPreviewOldData != detail.strPreviewNewData
+									AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 							) src
 							PIVOT (
-								MAX(strOldData) FOR strTableColumnName IN (dblStandardCost, dblSalePrice, dblLastCost)
+								MAX(strPreviewOldData) FOR strTableColumnName IN (dblCost)
 							) piv
 
 
@@ -794,124 +796,97 @@ BEGIN TRY
 							SET @intRevertItemPricingRecords = (
 																SELECT COUNT(detail.intItemLocationId)
 																FROM vyuSTSearchRevertHolderDetail detail
-																WHERE detail.strTableName = N'tblICItemPricing' 
+																WHERE detail.strTableName = N'tblICEffectiveItemCost' 
 																	AND detail.intRevertHolderId = @intRevertHolderId
 																	AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-																	AND detail.strPreviewOldData != detail.strPreviewNewData
+																	AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 																)
 
 
 
 							-----------------------------------------------------------------------------
-							-- [START] - ITEM PRICING DEBUG MODE
+							-- [START] - ITEM EFFECTIVE PRICING COST DEBUG MODE
 							-----------------------------------------------------------------------------
 							IF (@ysnDebug = 1)
 								BEGIN
-									SELECT 'tblICItemPricing temp table', * FROM @tempITEMPRICING
+									SELECT 'tblICEffectiveItemCost temp table', * FROM @tempITEMPRICINGCost
 
 									SELECT DISTINCT
-										   'tblICItemPricing - Before Update'
+										   'tblICEffectiveItemCost - Before Update'
 										     , Item.strItemNo
 											 , Item.strDescription
-											 , ItemPricing.intItemPricingId
-											 , ItemPricing.dblStandardCost
-											 , ItemPricing.dblSalePrice
-											 , ItemPricing.dblLastCost
-									FROM tblICItemPricing ItemPricing
+											 , EffectivePricingCost.intEffectiveItemCostId
+											 , EffectivePricingCost.dblCost
+											 , detail.strAction
+									FROM tblICEffectiveItemCost EffectivePricingCost
 									INNER JOIN tblICItem Item
-										ON ItemPricing.intItemId = Item.intItemId
+										ON EffectivePricingCost.intItemId = Item.intItemId
 									INNER JOIN vyuSTSearchRevertHolderDetail detail
-										ON ItemPricing.intItemPricingId = detail.intItemPricingId	
-									WHERE detail.strTableName = N'tblICItemPricing'
+										ON EffectivePricingCost.intEffectiveItemCostId = detail.intEffectiveItemCostId	
+									WHERE detail.strTableName = N'tblICEffectiveItemCost'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										-- AND detail.strPreviewOldData != detail.strPreviewNewData
-									ORDER BY ItemPricing.intItemPricingId ASC
+										AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
+									ORDER BY EffectivePricingCost.intEffectiveItemCostId ASC
 								END
 							-----------------------------------------------------------------------------
-							-- [END] - ITEM PRICING DEBUG MODE
+							-- [END] - ITEM EFFECTIVE PRICING COST DEBUG MODE
 							-----------------------------------------------------------------------------
 
 
 
-							-- LOOP ITEM PRICING's
-							WHILE EXISTS(SELECT TOP 1 1 FROM @tempITEMPRICING)
+							-- LOOP ITEM EFFECTIVE PRICING's Cost
+							WHILE EXISTS(SELECT TOP 1 1 FROM @tempITEMPRICINGCost)
 								BEGIN			
 	
-									DECLARE  @intItemPricingId		INT
-											, @dblStandardCost		DECIMAL(38, 20)
-											, @dblSalePrice			DECIMAL(38, 20)
-											, @dblLastCost			DECIMAL(38, 20)
+									DECLARE  @intEffectiveItemCostId	INT
+											, @intCostItemId			INT
+											, @dblCost					DECIMAL(38, 20)
+											, @strAction				NVARCHAR(150)
 
-											, @intCompanyLocationId INT
-											, @intItemUOMId			INT
-											, @strItemDescription	NVARCHAR(150)
-											, @strUpcCode			NVARCHAR(50)
 
 
 								    -- GET VALUES HERE
 									SELECT TOP 1 
-											@intItemPricingId			=  temp.intItemPricingId
-											, @intItemId				=  temp.intItemId
-											, @intCompanyLocationId		=  temp.intCompanyLocationId
-											, @intItemLocationId		=  temp.intItemLocationId
-											, @intItemUOMId				=  temp.intItemUOMId
-											, @strItemDescription		=  Item.strDescription
-											, @strUpcCode				=  CASE 
-																				WHEN Uom.strLongUPCCode IS NULL OR Uom.strLongUPCCode = ''
-																					THEN Uom.strUpcCode
-																				ELSE Uom.strLongUPCCode
-																		END
-																				
-
-											, @dblStandardCost			=  CASE 
-																				WHEN temp.dblStandardCost IS NULL
-																					THEN ItemPricing.dblStandardCost
-																				ELSE temp.dblStandardCost
-																		END
-											, @dblSalePrice				=  CASE 
-																				WHEN temp.dblSalePrice IS NULL
-																					THEN ItemPricing.dblSalePrice
-																				ELSE temp.dblSalePrice
-																		END
-											, @dblLastCost				=  CASE 
-																				WHEN temp.dblLastCost IS NULL
-																					THEN ItemPricing.dblLastCost
-																				ELSE temp.dblLastCost
-																		END
-									FROM @tempITEMPRICING temp
-									INNER JOIN tblICItemPricing ItemPricing
-										ON temp.intItemPricingId = ItemPricing.intItemPricingId
+											@intEffectiveItemCostId		=  tempCost.intEffectiveItemCostId
+											, @intCostItemId			=  tempCost.intItemId
+											, @dblCost					=  tempCost.dblCost
+											, @strAction				=  tempCost.strAction
+									FROM @tempITEMPRICINGCost tempCost
+									INNER JOIN tblICEffectiveItemCost ItemPricingCost
+										ON tempCost.intEffectiveItemCostId = ItemPricingCost.intEffectiveItemCostId
 									INNER JOIN tblICItem Item
-										ON ItemPricing.intItemId = Item.intItemId
+										ON ItemPricingCost.intItemId = Item.intItemId
 									INNER JOIN tblICItemLocation ItemLoc
 										ON Item.intItemId = ItemLoc.intItemId
-										AND temp.intItemLocationId = ItemLoc.intItemLocationId
-									LEFT JOIN tblICItemUOM Uom
-										ON temp.intItemUOMId = Uom.intItemUOMId
-										AND Item.intItemId = Uom.intItemId
-									WHERE Uom.ysnStockUnit = 1
-									ORDER BY temp.intItemPricingId ASC
+										AND tempCost.intItemLocationId = ItemLoc.intItemLocationId
+									ORDER BY tempCost.intEffectiveItemCostId ASC
 										
 								
-
+								
+									BEGIN TRY
 									-- UPDATE ITEM PRICING
-									EXEC [dbo].[uspICUpdateItemPricingForCStore]
+									EXEC [dbo].[uspICUpdateRevertEffectivePricingForCStore]
 											-- filter params
-											@strUpcCode					= @strUpcCode 
-											,@strDescription			= @strItemDescription 
-											,@intItemId					= @intItemId 
-											,@intItemPricingId			= @intItemPricingId 
+											@intItemId					= @intCostItemId 
+											,@intEffectiveItemCostId	= @intEffectiveItemCostId 
+											,@strAction					= @strAction 
+											,@dtmEffectiveDate			= @dtmEffectiveDate
+											,@strScreen					= 'Mass Revert Pricebook' 
 
 											-- update params
-											,@dblStandardCost			= @dblStandardCost 
-											,@dblRetailPrice			= @dblSalePrice 
-											,@dblLastCost				= @dblLastCost
-											,@dtmEffectiveDate			= @dtmEffectiveDate
+											,@dblCost					= @dblCost 
 											,@intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
+									
+									END TRY
+									BEGIN CATCH
+										SELECT 'uspICUpdateRevertEffectivePricingForCStore', ERROR_MESSAGE()
+										SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
 
+										GOTO ExitWithRollback 
+									END CATCH
 			
 									-- Remove
-									DELETE FROM @tempITEMPRICING WHERE intItemPricingId = @intItemPricingId
+									DELETE FROM @tempITEMPRICINGCost WHERE intEffectiveItemCostId = @intEffectiveItemCostId
 		
 								END
 
@@ -923,25 +898,23 @@ BEGIN TRY
 							-----------------------------------------------------------------------------
 							IF (@ysnDebug = 1)
 								BEGIN
-									SELECT 'tblICItemPricing temp table', * FROM @tempITEMPRICING
+									SELECT '@tempITEMPRICINGCost temp table', * FROM @tempITEMPRICINGCost
 
 									SELECT DISTINCT
-										   'tblICItemPricing - After Update'
+										   '@tempITEMPRICINGCost - After Update'
 										     , Item.strItemNo
 											 , Item.strDescription
-											 , ItemPricing.intItemPricingId
-											 , ItemPricing.dblStandardCost
-											 , ItemPricing.dblSalePrice
-											 , ItemPricing.dblLastCost
-									FROM tblICItemPricing ItemPricing
+											 , ItemPricingCost.intEffectiveItemCostId
+											 , ItemPricingCost.dblCost
+									FROM tblICEffectiveItemCost ItemPricingCost
 									INNER JOIN tblICItem Item
-										ON ItemPricing.intItemId = Item.intItemId
+										ON ItemPricingCost.intItemId = Item.intItemId
 									INNER JOIN vyuSTSearchRevertHolderDetail detail
-										ON ItemPricing.intItemPricingId = detail.intItemPricingId	
-									WHERE detail.strTableName = N'tblICItemPricing'
+										ON ItemPricingCost.intEffectiveItemCostId = detail.intEffectiveItemCostId	
+									WHERE detail.strTableName = N'tblICEffectiveItemCost'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										-- AND detail.strPreviewOldData != detail.strPreviewNewData
-									ORDER BY ItemPricing.intItemPricingId ASC
+										AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
+									ORDER BY ItemPricingCost.intEffectiveItemCostId ASC
 								END
 							-----------------------------------------------------------------------------
 							-- [END] - ITEM PRICING DEBUG MODE
@@ -950,7 +923,197 @@ BEGIN TRY
 
 					END	
 				-- ==================================================================================================================================================
-				-- [END] - Revert ITEM PRICING
+				-- [END] - Revert ITEM PRICING COST
+				-- ==================================================================================================================================================
+
+				
+				-- ==================================================================================================================================================
+				-- [START] - Revert ITEM PRICING PRICE
+				-- ==================================================================================================================================================
+				IF EXISTS(
+							SELECT TOP 1 1 FROM vyuSTSearchRevertHolderDetail detail
+							WHERE detail.strTableName = N'tblICEffectiveItemPrice' 
+								AND detail.intRevertHolderId = @intRevertHolderId
+								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+								AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
+						 )
+					BEGIN
+							-- Create
+							DECLARE @tempITEMPRICINGPrice TABLE (
+									intEffectiveItemPriceId		INT NOT NULL
+									, dblRetailPrice			NUMERIC(38, 20) NULL
+									, intItemId					INT
+									, intItemLocationId			INT
+									, strPriceAction			VARCHAR(20)
+							)
+
+
+							-- Insert
+							INSERT INTO @tempITEMPRICINGPrice
+							(
+								intEffectiveItemPriceId
+								, dblRetailPrice
+								, intItemId
+								, intItemLocationId
+								, strPriceAction
+							)
+							SELECT DISTINCT
+								intEffectiveItemPriceId	= piv.intEffectiveItemPriceId
+								, dblRetailPrice		= CAST(piv.dblRetailPrice AS NUMERIC(38, 20))
+								, intItemId				= piv.intItemId
+								, intItemLocationId		= piv.intItemLocationId
+								, strPriceAction		= piv.strAction
+							FROM (
+								SELECT detail.intEffectiveItemPriceId
+									 , detail.intItemId
+									 , detail.intItemLocationId
+									 , detail.strTableColumnName
+									 , detail.strPreviewOldData
+									 , detail.strAction
+								FROM vyuSTSearchRevertHolderDetail detail
+								WHERE detail.strTableName = N'tblICEffectiveItemPrice'
+									AND detail.intRevertHolderId = @intRevertHolderId
+									AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+									AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
+							) src
+							PIVOT (
+								MAX(strPreviewOldData) FOR strTableColumnName IN (dblRetailPrice)
+							) piv
+
+
+
+							-- Count records
+							SET @intRevertItemPricingRecords = (
+																SELECT COUNT(detail.intItemLocationId)
+																FROM vyuSTSearchRevertHolderDetail detail
+																WHERE detail.strTableName = N'tblICEffectiveItemPrice' 
+																	AND detail.intRevertHolderId = @intRevertHolderId
+																	AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+																	AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
+																) + @intRevertItemPricingRecords
+
+
+
+							-----------------------------------------------------------------------------
+							-- [START] - ITEM EFFECTIVE PRICING PRICE DEBUG MODE
+							-----------------------------------------------------------------------------
+							IF (@ysnDebug = 1)
+								BEGIN
+									SELECT 'tblICEffectiveItemPrice temp table', * FROM @tempITEMPRICINGPrice
+
+									SELECT DISTINCT
+										   'tblICEffectiveItemPrice - Before Update'
+										     , Item.strItemNo
+											 , Item.strDescription
+											 , EffectivePricingPrice.intEffectiveItemPriceId
+											 , EffectivePricingPrice.dblRetailPrice
+											 , detail.strAction AS strPriceAction
+									FROM tblICEffectiveItemPrice EffectivePricingPrice
+									INNER JOIN tblICItem Item
+										ON EffectivePricingPrice.intItemId = Item.intItemId
+									INNER JOIN vyuSTSearchRevertHolderDetail detail
+										ON EffectivePricingPrice.intEffectiveItemPriceId = detail.intEffectiveItemPriceId	
+									WHERE detail.strTableName = N'tblICEffectiveItemPrice'
+										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+										AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
+									ORDER BY EffectivePricingPrice.intEffectiveItemPriceId ASC
+								END
+							-----------------------------------------------------------------------------
+							-- [END] - ITEM EFFECTIVE PRICING PRICE DEBUG MODE
+							-----------------------------------------------------------------------------
+
+
+
+							-- LOOP ITEM EFFECTIVE PRICING's Price
+							WHILE EXISTS(SELECT TOP 1 1 FROM @tempITEMPRICINGPrice)
+								BEGIN			
+	
+									DECLARE  @intEffectiveItemPriceId	INT
+											, @intPriceItemId			INT
+											, @dblRetailPrice			DECIMAL(38, 20)
+											, @strPriceAction				NVARCHAR(150)
+
+
+
+								    -- GET VALUES HERE
+									SELECT TOP 1 
+											@intEffectiveItemPriceId	=  tempPrice.intEffectiveItemPriceId
+											, @intPriceItemId			=  tempPrice.intItemId
+											, @dblRetailPrice			=  tempPrice.dblRetailPrice
+											, @strPriceAction			=  tempPrice.strPriceAction
+									FROM @tempITEMPRICINGPrice tempPrice
+									INNER JOIN tblICEffectiveItemPrice ItemPricingPrice
+										ON ItemPricingPrice.intEffectiveItemPriceId = tempPrice.intEffectiveItemPriceId
+									INNER JOIN tblICItem Item
+										ON ItemPricingPrice.intItemId = Item.intItemId
+									INNER JOIN tblICItemLocation ItemLoc
+										ON Item.intItemId = ItemLoc.intItemId
+										AND ItemPricingPrice.intItemLocationId = ItemLoc.intItemLocationId
+									ORDER BY ItemPricingPrice.intEffectiveItemPriceId ASC
+										
+								
+								
+									BEGIN TRY
+									-- UPDATE ITEM PRICING
+									EXEC [dbo].[uspICUpdateRevertEffectivePricingForCStore]
+											-- filter params
+											@intItemId					= @intPriceItemId 
+											,@intEffectiveItemPriceId	= @intEffectiveItemPriceId 
+											,@strAction					= @strPriceAction 
+											,@dtmEffectiveDate			= @dtmEffectiveDate
+											,@strScreen					= 'Mass Revert Pricebook' 
+
+											-- update params
+											,@dblRetailPrice			= @dblRetailPrice 
+											,@intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
+									
+									END TRY
+									BEGIN CATCH
+										SELECT 'uspICUpdateRevertEffectivePricingForCStore', ERROR_MESSAGE()
+										SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
+
+										GOTO ExitWithRollback 
+									END CATCH
+			
+									-- Remove
+									DELETE FROM @tempITEMPRICINGPrice WHERE intEffectiveItemPriceId = @intEffectiveItemPriceId
+		
+								END
+
+
+							
+
+							-----------------------------------------------------------------------------
+							-- [START] - ITEM PRICING DEBUG MODE
+							-----------------------------------------------------------------------------
+							IF (@ysnDebug = 1)
+								BEGIN
+									SELECT '@tempITEMPRICINGPrice temp table', * FROM @tempITEMPRICINGPrice
+
+									SELECT DISTINCT
+										   '@tempITEMPRICINGPrice - After Update'
+										     , Item.strItemNo
+											 , Item.strDescription
+											 , ItemPricingPrice.intEffectiveItemPriceId
+											 , ItemPricingPrice.dblRetailPrice
+									FROM tblICEffectiveItemPrice ItemPricingPrice
+									INNER JOIN tblICItem Item
+										ON ItemPricingPrice.intItemId = Item.intItemId
+									INNER JOIN vyuSTSearchRevertHolderDetail detail
+										ON ItemPricingPrice.intEffectiveItemPriceId = detail.intEffectiveItemPriceId	
+									WHERE detail.strTableName = N'tblICEffectiveItemPrice'
+										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+										AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
+									ORDER BY ItemPricingPrice.intEffectiveItemPriceId ASC
+								END
+							-----------------------------------------------------------------------------
+							-- [END] - ITEM PRICING DEBUG MODE
+							-----------------------------------------------------------------------------
+
+
+					END	
+				-- ==================================================================================================================================================
+				-- [END] - Revert ITEM PRICING PRICE
 				-- ==================================================================================================================================================
 
 
@@ -965,7 +1128,7 @@ BEGIN TRY
 							WHERE detail.strTableName = N'tblICItemSpecialPricing' 
 								AND detail.intRevertHolderId = @intRevertHolderId
 								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-								AND detail.strPreviewOldData != detail.strPreviewNewData
+								AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 						 )
 					BEGIN
 	
@@ -982,6 +1145,7 @@ BEGIN TRY
 										, intCompanyLocationId		INT
 										, intItemLocationId			INT
 										, intItemUOMId				INT
+										, strAction					VARCHAR(20)
 							)
 
 
@@ -998,6 +1162,7 @@ BEGIN TRY
 								, intCompanyLocationId
 								, intItemLocationId
 								, intItemUOMId
+								, strAction
 							)
 							SELECT DISTINCT
 								intItemSpecialPricingId	= piv.intItemSpecialPricingId
@@ -1010,6 +1175,7 @@ BEGIN TRY
 								, intCompanyLocationId	= piv.intCompanyLocationId
 								, intItemLocationId		= piv.intItemLocationId
 								, intItemUOMId			= piv.intItemUOMId
+								, strAction				= piv.strAction
 							FROM (
 								SELECT detail.intItemSpecialPricingId
 									 , detail.intItemId
@@ -1018,11 +1184,12 @@ BEGIN TRY
 									 , detail.intItemUOMId
 									 , detail.strTableColumnName
 									 , detail.strOldData
+									 , detail.strAction
 								FROM vyuSTSearchRevertHolderDetail detail
 								WHERE detail.strTableName = N'tblICItemSpecialPricing'
 									AND detail.intRevertHolderId = @intRevertHolderId
 									AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-									AND detail.strPreviewOldData != detail.strPreviewNewData
+									AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 							) src
 							PIVOT (
 								MAX(strOldData) FOR strTableColumnName IN (dblUnitAfterDiscount, dblCost, dtmBeginDate, dtmEndDate)
@@ -1035,7 +1202,7 @@ BEGIN TRY
 																		WHERE detail.strTableName = N'tblICItemSpecialPricing' 
 																			AND detail.intRevertHolderId = @intRevertHolderId
 																			AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-																			AND detail.strPreviewOldData != detail.strPreviewNewData
+																			AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 																	  )
 
 
@@ -1077,10 +1244,15 @@ BEGIN TRY
 								BEGIN			
 	
 									DECLARE  @intItemSpecialPricingId		INT
+											, @intCompanyLocationId			INT
+											, @intItemUOMId					INT
 											, @dblUnitAfterDiscount			DECIMAL(38, 20)
-											, @dblCost						DECIMAL(38, 20)
+											, @dblPromoCost						DECIMAL(38, 20)
 											, @dtmBeginDate					DATETIME
 											, @dtmEndDate					DATETIME
+											, @strItemDescription			VARCHAR(100)
+											, @strUpcCode					VARCHAR(100)
+											, @strActionToDo				VARCHAR(20)
 
 								    -- GET VALUES HERE
 									SELECT TOP 1 
@@ -1098,9 +1270,10 @@ BEGIN TRY
 																				
 
 											, @dblUnitAfterDiscount		= ISNULL(temp.dblUnitAfterDiscount, ItemSpecialPricing.dblUnitAfterDiscount)
-											, @dblCost					= ISNULL(temp.dblCost, ItemSpecialPricing.dblCost)
+											, @dblPromoCost					= ISNULL(temp.dblCost, ItemSpecialPricing.dblCost)
 											, @dtmBeginDate				= ISNULL(temp.dtmBeginDate, ItemSpecialPricing.dtmBeginDate)
 											, @dtmEndDate				= ISNULL(temp.dtmEndDate, ItemSpecialPricing.dtmEndDate)
+											, @strActionToDo			= temp.strAction
 									FROM @tempITEMSPECIALPRICING temp
 									INNER JOIN tblICItemSpecialPricing ItemSpecialPricing
 										ON temp.intItemSpecialPricingId = ItemSpecialPricing.intItemSpecialPricingId
@@ -1120,10 +1293,11 @@ BEGIN TRY
 									-- UPDATE ITEM PECIAL PRICING
 									EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 											@dblPromotionalSalesPrice	= @dblUnitAfterDiscount 
-											, @dblPromotionalCost		= @dblCost 
+											, @dblPromotionalCost		= @dblPromoCost 
 											, @dtmBeginDate				= @dtmBeginDate 
 											, @dtmEndDate 				= @dtmEndDate 
 											, @intItemSpecialPricingId  = @intItemSpecialPricingId
+											, @strAction				= @strActionToDo
 											, @intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
 	
@@ -1156,7 +1330,7 @@ BEGIN TRY
 										ON ItemSpecialPricing.intItemSpecialPricingId = detail.intItemSpecialPricingId	
 									WHERE detail.strTableName = N'tblICItemSpecialPricing'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										--AND detail.strPreviewOldData != detail.strPreviewNewData
+										AND detail.strPreviewOldData != detail.strPreviewNewData
 									ORDER BY ItemSpecialPricing.intItemSpecialPricingId ASC
 								END
 							-----------------------------------------------------------------------------

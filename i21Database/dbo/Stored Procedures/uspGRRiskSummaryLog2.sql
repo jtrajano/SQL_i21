@@ -67,7 +67,7 @@ BEGIN TRY
 															ELSE NULL 
 														END
 												WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
-												WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo 
+												WHEN intTransactionTypeId = 9 THEN ISNULL(sh.strAdjustmentNo,sh.strTransactionId)
 											END
 			,dtmTransactionDate 			= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId
@@ -159,7 +159,7 @@ BEGIN TRY
 															ELSE NULL 
 														END
 												WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
-												WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo 
+												WHEN intTransactionTypeId = 9 THEN ISNULL(sh.strAdjustmentNo,sh.strTransactionId)
 											END
 			,dtmTransactionDate				= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId

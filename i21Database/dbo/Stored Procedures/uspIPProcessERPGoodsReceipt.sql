@@ -67,6 +67,9 @@ BEGIN TRY
 		,@intParentLotId INT
 		,@strParentLotNumber NVARCHAR(50)
 		,@strLotCondition NVARCHAR(50)
+		,@intDefaultForexRateTypeId INT
+		,@dblForexRate NUMERIC(18,6)
+		,@intTransferDetailCurrencyId INT
 	DECLARE @InventoryTransferDetail TABLE (intInventoryTransferDetailId INT)
 
 	SELECT @intUserId = intEntityId
@@ -342,6 +345,9 @@ BEGIN TRY
 					,@intParentLotId = NULL
 					,@strParentLotNumber = NULL
 					,@strLotCondition = NULL
+					,@intDefaultForexRateTypeId = NULL
+					,@dblForexRate = NULL
+					,@intTransferDetailCurrencyId = NULL
 
 				SELECT @strItemNo = RIS.strItemNo
 					,@strSubLocationName = RIS.strSubLocationName
@@ -374,7 +380,8 @@ BEGIN TRY
 					,@intQtyUnitMeasureId = IUOM.intUnitMeasureId
 					,@intLotId = L.intLotId
 					,@strLotCondition = ISNULL(ITD.strLotCondition, 'Sound/Full')
-					,@dblCost = (dbo.fnMultiply(ITD.dblQuantity, ISNULL(ITD.dblCost, 0)) / ITD.dblNet) -- Line Total / Net Wt
+					--,@dblCost = (dbo.fnMultiply(ITD.dblQuantity, ISNULL(ITD.dblCost, 0)) / ITD.dblNet) -- Line Total / Net Wt
+					,@intTransferDetailCurrencyId = ITD.intCurrencyId
 				FROM tblICInventoryTransferDetail ITD
 				JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ITD.intItemUOMId
 					AND ITD.intInventoryTransferId = @intInventoryTransferId
@@ -385,6 +392,15 @@ BEGIN TRY
 						FROM @InventoryTransferDetail
 						)
 				ORDER BY ABS(ITD.dblNet - @dblNetWeight)
+
+				SELECT TOP 1 @dblCost = dblCost
+				FROM tblICInventoryTransaction WITH (NOLOCK)
+				WHERE intTransactionTypeId = 13
+					AND intTransactionId = @intInventoryTransferId
+					AND intTransactionDetailId = @intInventoryTransferDetailId
+					AND ysnIsUnposted = 0
+					AND dblQty > 0
+				ORDER BY intInventoryTransactionId DESC
 
 				IF ISNULL(@intLotId, 0) = 0
 				BEGIN
@@ -567,6 +583,10 @@ BEGIN TRY
 				SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId
 				FROM tblSMCompanyPreference t WITH (NOLOCK)
 
+				SELECT @strCurrency = strCurrency
+				FROM tblSMCurrency
+				WHERE intCurrencyID = @intTransferDetailCurrencyId
+
 				IF ISNULL(@strCurrency, '') <> ''
 				BEGIN
 					SELECT @intCurrencyId = t.intCurrencyID
@@ -583,6 +603,15 @@ BEGIN TRY
 					SELECT @intCurrencyId = @intDefaultCurrencyId
 						,@ysnSubCurrency = 0
 				END
+
+				--IF @intDefaultCurrencyId <> @intCurrencyId
+				--BEGIN
+				--	SELECT TOP 1 @intDefaultForexRateTypeId = intInventoryRateTypeId
+				--	FROM tblSMMultiCurrency
+
+				--	SELECT @dblForexRate = dblRate
+				--	FROM [dbo].[fnSMGetForexRate](@intCurrencyId, @intDefaultForexRateTypeId, GETDATE())
+				--END
 
 				IF @intInventoryReceiptId IS NULL
 				BEGIN
@@ -671,6 +700,8 @@ BEGIN TRY
 					,dtmDateCreated
 					,intCreatedByUserId
 					,dblLineTotal
+					,intForexRateTypeId
+					,dblForexRate
 					)
 				SELECT 1
 					,@intInventoryReceiptId
@@ -697,6 +728,8 @@ BEGIN TRY
 					,GETUTCDATE()
 					,@intUserId
 					,0
+					,@intDefaultForexRateTypeId
+					,@dblForexRate
 
 				UPDATE RH
 				SET RH.intSubCurrencyCents = (
@@ -795,6 +828,8 @@ BEGIN TRY
 					,0
 					,@strReceiptNo
 					,@intUserId
+
+				EXEC uspICUpdateTransferOrderStatus @intInventoryReceiptId,3 -- Set status of the transfer order to 'Closed'
 			END
 
 			INSERT INTO tblIPInitialAck (

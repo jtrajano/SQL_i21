@@ -40,12 +40,12 @@ BEGIN
 	IF (ISNULL(@Param, '') <> '') 
 		INSERT INTO #TempMBILPayment EXEC (@Param)
 	ELSE
-		INSERT INTO #TempMBILPayment SELECT [intPaymentId] FROM tblMBILPayment WHERE ysnPosted = 0
+		INSERT INTO #TempMBILPayment SELECT [intPaymentId] FROM vyuMBILPayment WHERE ysnPosted = 0
 
 	-------------------------------------------------------------
 	------------------- Validate Invoices -----------------------
 	-------------------------------------------------------------
-	IF EXISTS(SELECT TOP 1 1 FROM tblMBILPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #TempMBILPayment) AND inti21PaymentId IS NOT NULL)
+	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #TempMBILPayment) AND inti21PaymentId IS NOT NULL)
 	BEGIN
 		SET @ErrorMessage = 'Record already posted.'
 		RETURN

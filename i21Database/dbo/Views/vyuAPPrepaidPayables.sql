@@ -133,6 +133,7 @@ LEFT JOIN dbo.tblGLAccount F ON  prepaidDetail.intAccountId = F.intAccountId
 		WHERE B.intBillId = A.intBillId AND C.ysnPrepay = 1
 	)
 	AND A.ysnOrigin = 1
+	AND A.intTransactionReversed IS NULL --REMOVE ALREADY REVERSED
 UNION ALL
 --NEGATIVE PART
 SELECT
@@ -313,7 +314,7 @@ FROM dbo.tblARPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strRecordNumber = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2)

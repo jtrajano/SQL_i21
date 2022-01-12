@@ -165,6 +165,8 @@
 	[dtmDateCreatedUtc] DATETIME2 NULL,
 	[dtmDateModifiedUtc] DATETIME2 NULL,
 	[dtmDateLastUpdatedUtc] AS COALESCE(dtmDateModifiedUtc, dtmDateCreatedUtc),
+    [dblDWGSpotPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+    [intFreightCostUOMId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -229,6 +231,14 @@ CREATE NONCLUSTERED INDEX [IX_tblSCTicket_6_2143072608__K2_K1_K99_K93_K14_K15_K9
 	[intStorageScheduleId] ASC
 )
 INCLUDE([strTicketNumber],[strOriginalTicketNumber],[intScaleSetupId],[intTicketPoolId],[intTicketLocationId],[intTicketType],[strInOutFlag],[dtmTicketDateTime],[dtmTicketTransferDateTime],[dtmTicketVoidDateTime],[strScaleOperatorUser],[intEntityScaleOperatorId],[strTruckName],[strDriverName],[ysnDriverOff],[ysnSplitWeightTicket],[ysnGrossManual],[ysnGross1Manual],[ysnGross2Manual],[dblGrossWeight],[dblGrossWeight1],[dblGrossWeight2],[dblGrossWeightOriginal],[dblGrossWeightSplit1],[dblGrossWeightSplit2],[dtmGrossDateTime],[dtmGrossDateTime1],[dtmGrossDateTime2],[intGrossUserId],[ysnTareManual],[ysnTare1Manual],[ysnTare2Manual],[dblTareWeight],[dblTareWeight1],[dblTareWeight2],[dblTareWeightOriginal],[dblTareWeightSplit1],[dblTareWeightSplit2],[dtmTareDateTime],[dtmTareDateTime1],[dtmTareDateTime2],[intTareUserId],[dblGrossUnits],[dblShrink],[dblNetUnits],[strItemUOM],[intCustomerId],[intSplitId],[strDistributionOption],[intDiscountSchedule],[strDiscountLocation],[dtmDeferDate],[strContractNumber],[intContractSequence],[strContractLocation],[dblUnitPrice],[dblUnitBasis],[dblTicketFees],[intCurrencyId],[dblCurrencyRate],[strTicketComment],[strCustomerReference],[ysnTicketPrinted],[ysnPlantTicketPrinted],[ysnGradingTagPrinted],[intFreightCarrierId],[dblFreightRate],[dblFreightAdjustment],[intFreightCurrencyId],[dblFreightCurrencyRate],[strFreightCContractNumber],[ysnFarmerPaysFreight],[ysnCusVenPaysFees],[strLoadNumber],[intLoadLocationId],[intAxleCount],[intAxleCount1],[intAxleCount2],[strPitNumber],[intGradingFactor],[strVarietyType],[strFarmNumber],[strFieldNumber],[strDiscountComment],[intDiscountId],[intDiscountLocationId],[intItemId],[intEntityId],[intSubLocationId],[intStorageLocationId],[intSubLocationToId],[intStorageLocationToId],[intFarmFieldId],[intDistributionMethod],[intSplitInvoiceOption],[intDriverEntityId],[intConcurrencyId],[dblNetWeightDestination],[ysnHasGeneratedTicketNumber],[dblScheduleQty],[dblConvertedUOMQty],[dblContractCostConvertedUOM],[intItemUOMIdFrom],[intItemUOMIdTo],[intTicketTypeId],[intStorageScheduleTypeId],[strFreightSettlement],[strCostMethod],[intDeliverySheetId],[intCommodityAttributeId],[strElevatorReceiptNumber],[ysnRailCar],[ysnDeliverySheetPost],[intLotId],[strLotNumber],[strPlateNumber],[blbPlateNumber],[ysnDestinationWeightGradePost],[ysnReadyToTransfer],[ysnExport],[ysnHasSpecialDiscount],[ysnSpecialGradePosted],[intItemContractDetailId],[ysnCertOfAnalysisPosted],[ysnExportRailXML],[strTrailerId],[intTransferWeight])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intLoadDetailId]
+ON [dbo].[tblSCTicket] ([intLoadDetailId])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intInvoiceId]
+ON [dbo].[tblSCTicket] ([intInvoiceId])
 GO
 
 EXEC sp_addextendedproperty @name = N'MS_Description',

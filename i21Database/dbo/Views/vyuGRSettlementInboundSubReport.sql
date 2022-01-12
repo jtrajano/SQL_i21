@@ -1,5 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuGRSettlementInboundSubReport]
 AS
+	
+	-- We are using this view to directly insert table to an API Export table
+	-- If there are changes in the view please update the insert in uspGRAPISettlementReportExport as well
+
 	WITH MSPG_123 (intPaymentId, strId, intBillId, intItemId, strDiscountCode, strDiscountCodeDescription, dblDiscountAmount, dblAmount, dblTax, Net, intCustomerStorageId, intInventoryReceiptChargeId)
 	AS 
 	(
@@ -77,14 +81,21 @@ AS
 					FROM tblICInventoryReceiptCharge INVRCPTCHR 
 					LEFT JOIN tblICInventoryReceipt INVRCPT 
 						ON INVRCPTCHR.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+					-- LEFT JOIN (
+					-- 		SELECT intSourceId
+					-- 			,intInventoryReceiptId
+					-- 			,ROW_NUMBER() OVER (PARTITION BY intInventoryReceiptId ORDER BY intSourceId) intRowNum
+					-- 		FROM tblICInventoryReceiptItem
+					-- ) INVRCPTITEM 
+					-- 	ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId 
+					-- 		AND INVRCPTITEM.intRowNum =1
 					LEFT JOIN (
-							SELECT intSourceId
+							SELECT MIN(intSourceId) intSourceId
 								,intInventoryReceiptId
-								,ROW_NUMBER() OVER (PARTITION BY intInventoryReceiptId ORDER BY intSourceId) intRowNum
 							FROM tblICInventoryReceiptItem
+							GROUP BY intInventoryReceiptId
 					) INVRCPTITEM 
-						ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId 
-							AND INVRCPTITEM.intRowNum =1
+						ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId
 					LEFT JOIN (
 								SELECT 
 									QM.intTicketId

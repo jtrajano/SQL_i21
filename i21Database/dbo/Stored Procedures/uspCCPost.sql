@@ -35,6 +35,23 @@ BEGIN TRY
 	--WHERE SH.intSiteHeaderId = @intSiteHeaderId
 	--	AND CL.intEntityId = @userId
 
+	-- CHECK THE POST STATUS
+	DECLARE @ysnCurrentPostValue BIT = NULL
+
+	SELECT @ysnCurrentPostValue = ysnPosted FROM tblCCSiteHeader WHERE intSiteHeaderId = @intSiteHeaderId
+	
+	IF(@ysnCurrentPostValue = @post) 
+	BEGIN
+		IF(@ysnCurrentPostValue = 1)
+		BEGIN
+			RAISERROR('Transaction is already posted.',16,1)
+		END
+		ELSE IF (@ysnCurrentPostValue = 0)
+		BEGIN
+			RAISERROR('Transaction is already unposted.',16,1)
+		END
+	END
+
 	IF(@intCompanyLocationId IS NULL)
 	BEGIN
 		RAISERROR('Invalid Vendor Company Location!', 16, 1)
@@ -77,6 +94,8 @@ BEGIN TRY
 
 	SET @errorMessage = NULL
 
+	DECLARE @errorMessagePerProcess NVARCHAR(4000) = NULL
+
 	-- AP Transaction and Posting
 	EXEC [dbo].[uspCCTransactionToAPBill] 
 		@intSiteHeaderId = @intSiteHeaderId
@@ -84,10 +103,18 @@ BEGIN TRY
 		,@post	= @post
 		,@recap = 0
 		,@success = @success OUTPUT
-		,@errorMessage = @errorMessage OUTPUT
+		,@errorMessage = @errorMessagePerProcess OUTPUT
 		--,@createdBillId = @billId OUTPUT
 
-	
+	IF(ISNULL(@errorMessage, '') = '')
+	BEGIN
+		SET @errorMessage = @errorMessagePerProcess
+	END
+	ELSE
+	BEGIN
+		SET @errorMessage = @errorMessage + CHAR(13) + @errorMessagePerProcess
+	END
+
 	IF(@success = 1)
 	BEGIN
 		SET @errorMessage = NULL
@@ -99,7 +126,16 @@ BEGIN TRY
 			,@Recap = 0
 			,@CreatedIvoices = @InvoicesId OUTPUT
 			,@success = @success OUTPUT
-			,@ErrorMessage = @errorMessage OUTPUT
+			,@ErrorMessage = @errorMessagePerProcess OUTPUT
+
+		IF(ISNULL(@errorMessage, '') = '')
+		BEGIN
+			SET @errorMessage = @errorMessagePerProcess
+		END
+		ELSE
+		BEGIN
+			SET @errorMessage = @errorMessage + CHAR(13) + @errorMessagePerProcess
+		END
 	END
 
 	IF(@success = 1)
@@ -112,8 +148,17 @@ BEGIN TRY
 			,@post	= @post
 			,@recap = 0
 			,@success = @success OUTPUT
-			,@errorMessage = @errorMessage OUTPUT
+			,@errorMessage = @errorMessagePerProcess OUTPUT
 			,@createdBankTransactionId = @bankTransactionId OUTPUT
+
+		IF(ISNULL(@errorMessage, '') = '')
+		BEGIN
+			SET @errorMessage = @errorMessagePerProcess
+		END
+		ELSE
+		BEGIN
+			SET @errorMessage = @errorMessage +  CHAR(13) + @errorMessagePerProcess
+		END
 	END
 
 	-- SET Posted Flag
@@ -134,8 +179,10 @@ BEGIN TRY
 		RAISERROR(@errorMessage,16,1)
 	END
 
-	COMMIT TRANSACTION
-
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		COMMIT TRANSACTION
+	END
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
@@ -147,6 +194,9 @@ BEGIN CATCH
 	SET @errorMessage  = ERROR_MESSAGE()
 	SET @ErrorState    = ERROR_STATE()
 	SET	@success = 0
-	ROLLBACK TRANSACTION
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
 	RAISERROR (@errorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH

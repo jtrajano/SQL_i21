@@ -332,7 +332,7 @@ BEGIN TRY
 
 			---******************* Other Charge
 			DELETE
-			FROM @tblMFAdditionalBasisOtherChargeChanges
+			FROM @tblMFAdditionalBasisOtherChargeImport
 
 			INSERT INTO @tblMFAdditionalBasisOtherChargeImport (
 				strOtherChargeItemNo

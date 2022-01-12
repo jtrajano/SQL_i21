@@ -583,6 +583,54 @@ BEGIN
 	VALUES ('Yes', 1)
 END
 
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Deleted on')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Deleted on', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Unposted on')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Unposted on', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Created - Record')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Created - Record', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Updated - Record')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Updated - Record', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Deleted - Record')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Deleted - Record', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Posted - Record')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Posted - Record', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Unposted - Record')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Unposted - Record', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Processed - Record')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Processed - Record', 1)
+END
+
 --========================================== Messages =====================================================--
 
 IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Do you want to save the changes you made?')

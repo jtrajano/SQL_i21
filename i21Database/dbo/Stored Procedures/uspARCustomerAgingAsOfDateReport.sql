@@ -346,6 +346,11 @@ IF (@ysnPrintFromCFLocal = 1)
 		WHERE I.strType = 'CF Tran'
 		  AND ISNULL(CF.ysnInvoiced, 0) = 1
 		  AND I.dtmPostDate <= @dtmDateToLocal
+
+		IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
+		BEGIN
+ 			DELETE FROM #POSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmForgiveDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+		END
 	END
 
 --#CASHREFUNDS
@@ -378,12 +383,6 @@ WHERE I.ysnPosted = 1
   AND ISNULL(I.strInvoiceOriginId, '') <> ''
   AND ISNULL(RI.ysnReturned, 0) = 0
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-
---REMOVE SERVICE CHARGE THAT WAS ALREADY CAUGHT IN BALANCE FORWARD
--- IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
--- BEGIN
--- 	DELETE FROM #POSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND @dtmBalanceForwardDate < dtmForgiveDate
--- END
 	
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
@@ -471,7 +470,6 @@ WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit
 
 ) AS A  
 
-
 LEFT JOIN
           
 (SELECT DISTINCT 
@@ -529,7 +527,7 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 	) PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 UNION ALL
 
@@ -545,9 +543,9 @@ SELECT I.intInvoiceId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType = 'Customer Prepayment'
+	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	                                          
 UNION ALL
             

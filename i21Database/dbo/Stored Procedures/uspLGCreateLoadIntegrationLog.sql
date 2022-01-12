@@ -2,6 +2,7 @@
 	 @intLoadId INT
 	,@strRowState NVARCHAR(100)
 	,@intShipmentType INT = 1
+	,@intUserId INT = NULL
 AS
 BEGIN TRY
 	DECLARE @intLoadStgId INT
@@ -11,6 +12,7 @@ BEGIN TRY
 	DECLARE @intLeadTime INT
 	DECLARE @dtmCurrentPlannedAvailabilityDate DATETIME
 	DECLARE @dtmCurrentUpdatedAvailabilityDate DATETIME
+	DECLARE @dtmCalculatedAvailabilityDate DATETIME
 	DECLARE @dtmMaxETAPOD DATETIME
 	DECLARE @dtmCurrentETSPOL DATETIME
 	DECLARE @dtmMaxETSPOL DATETIME
@@ -21,11 +23,16 @@ BEGIN TRY
 	DECLARE @intMinLoadDetailRecordId INT
 	DECLARE @intLoadDetailId INT
 	DECLARE @intContractDetailId INT
+	DECLARE @intContractSeq INT
 	DECLARE @intContractHeaderId INT
 	DECLARE @dtmPlannedAvailabilityDate DATETIME
 	DECLARE @intApprovedById INT
 	DECLARE @intShipmentStatus INT
 	DECLARE @intPurchaseSale INT
+	DECLARE @intSContractDetailId INT
+	DECLARE @intSContractSeq INT
+	DECLARE @intSContractHeaderId INT
+	DECLARE @strAuditDescription NVARCHAR(MAX)
 
 	DECLARE @tblLoadDetail TABLE
 			(intDetailRecordId INT Identity(1, 1),
@@ -81,6 +88,7 @@ BEGIN TRY
 		SET @strRowState = 'Added'
 	END
 
+	/* Create Integration Log */
 	IF (@intShipmentType = 1)
 	BEGIN
 		IF (@strRowState IN ('Added','Delete'))
@@ -526,170 +534,164 @@ BEGIN TRY
 		END
 	END
 
+	/* Update ETA POD Tracking */
 	IF (@intShipmentType = 1 AND @dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete')
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId AND strTrackingType = 'ETA POD')
 		BEGIN
-			INSERT INTO tblLGETATracking (
-				intLoadId
-				,strTrackingType
-				,dtmETAPOD
-				,strETAPODReasonCode
-				,dtmModifiedOn
-				,intConcurrencyId
-				)
-			SELECT @intLoadId
-				,'ETA POD'
-				,@dtmCurrentETAPOD
-				,@strETAPODReasonCode
-				,GETDATE()
-				,1
+			INSERT INTO tblLGETATracking (intLoadId, strTrackingType, dtmETAPOD, strETAPODReasonCode, dtmModifiedOn, intConcurrencyId)
+			SELECT @intLoadId, 'ETA POD', @dtmCurrentETAPOD, @strETAPODReasonCode, GETDATE(), 1
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 @dtmMaxETAPOD = dtmETAPOD
-			FROM tblLGETATracking
-			WHERE intLoadId = @intLoadId AND strTrackingType = 'ETA POD'
-			ORDER BY intETATrackingId DESC
+			SELECT TOP 1 @dtmMaxETAPOD = dtmETAPOD FROM tblLGETATracking 
+			WHERE intLoadId = @intLoadId AND strTrackingType = 'ETA POD' ORDER BY intETATrackingId DESC
 
 			IF (@dtmMaxETAPOD <> @dtmCurrentETAPOD)
 			BEGIN
-				INSERT INTO tblLGETATracking (
-					intLoadId
-					,strTrackingType
-					,dtmETAPOD
-					,strETAPODReasonCode
-					,dtmModifiedOn
-					,intConcurrencyId
-					)
-				SELECT @intLoadId
-					,'ETA POD'
-					,@dtmCurrentETAPOD
-					,@strETAPODReasonCode
-					,GETDATE()
-					,1
+				INSERT INTO tblLGETATracking (intLoadId, strTrackingType, dtmETAPOD, strETAPODReasonCode, dtmModifiedOn, intConcurrencyId)
+				SELECT @intLoadId, 'ETA POD', @dtmCurrentETAPOD, @strETAPODReasonCode, GETDATE(), 1
 			END
 		END
 	END
 
+	/* Update ETS POL Tracking */
 	IF (@intShipmentType = 1 AND @dtmCurrentETSPOL IS NOT NULL AND @strRowState <> 'Delete')
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId AND strTrackingType = 'ETS POL')
 		BEGIN
-			INSERT INTO tblLGETATracking (
-				 intLoadId
-				,strTrackingType
-				,dtmETSPOL
-				,strETSPOLReasonCode
-				,dtmModifiedOn
-				,intConcurrencyId
-				)
-			SELECT @intLoadId
-				,'ETS POL'
-				,@dtmCurrentETSPOL
-				,@strETSPOLReasonCode
-				,GETDATE()
-				,1
+			INSERT INTO tblLGETATracking (intLoadId, strTrackingType, dtmETSPOL, strETSPOLReasonCode, dtmModifiedOn, intConcurrencyId)
+			SELECT @intLoadId, 'ETS POL', @dtmCurrentETSPOL, @strETSPOLReasonCode, GETDATE(), 1
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 @dtmMaxETSPOL = dtmETSPOL
-			FROM tblLGETATracking
-			WHERE intLoadId = @intLoadId AND strTrackingType = 'ETS POL'
-			ORDER BY intETATrackingId DESC
+			SELECT TOP 1 @dtmMaxETSPOL = dtmETSPOL FROM tblLGETATracking 
+			WHERE intLoadId = @intLoadId AND strTrackingType = 'ETS POL' ORDER BY intETATrackingId DESC
 
 			IF (@dtmMaxETSPOL <> @dtmCurrentETSPOL)
 			BEGIN
-				INSERT INTO tblLGETATracking (
-					intLoadId
-					,strTrackingType
-					,dtmETSPOL
-					,strETSPOLReasonCode
-					,dtmModifiedOn
-					,intConcurrencyId
-					)
-				SELECT @intLoadId
-					,'ETS POL'
-					,@dtmCurrentETSPOL
-					,@strETSPOLReasonCode					
-					,GETDATE()
-					,1
+				INSERT INTO tblLGETATracking (intLoadId, strTrackingType, dtmETSPOL, strETSPOLReasonCode, dtmModifiedOn, intConcurrencyId)
+				SELECT @intLoadId, 'ETS POL', @dtmCurrentETSPOL, @strETSPOLReasonCode, GETDATE(), 1
 			END
 		END
 	END
 
-
-	IF (ISNULL(@ysnPOETAFeedToERP,0) = 1 OR ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1)
+	/* Feed ETA to Contract */
+	IF ((ISNULL(@ysnPOETAFeedToERP,0) = 1 OR ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) AND (@dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete'))
 	BEGIN
-		IF (@dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete')
+		SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId) FROM @tblLoadDetail
+
+		WHILE (ISNULL(@intMinLoadDetailRecordId,0)>0)
 		BEGIN
-			SELECT @intMinLoadDetailRecordId  = MIN(intDetailRecordId) FROM @tblLoadDetail
+			SELECT @intLoadDetailId = NULL
+				,@intContractDetailId = NULL
+				,@intContractHeaderId = NULL
+				,@dtmPlannedAvailabilityDate = NULL
+				,@intApprovedById = NULL
 
-			IF (ISNULL(@intMinLoadDetailRecordId,0)>0)
+			SELECT @intLoadDetailId = intLoadDetailId
+				,@intContractDetailId = intContractDetailId
+				,@intContractHeaderId = intContractHeaderId
+				,@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate
+			FROM @tblLoadDetail WHERE intDetailRecordId = @intMinLoadDetailRecordId
+
+			SELECT 
+				@intContractSeq = intContractSeq
+				,@dtmCurrentPlannedAvailabilityDate = dtmPlannedAvailabilityDate
+				,@dtmCurrentUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
+				,@dtmCalculatedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
+			FROM tblCTContractDetail
+			WHERE intContractDetailId = @intContractDetailId
+
+			DECLARE @ysnIsETAUpdated BIT = 0
+
+			IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId AND intShipmentStatus <> 10)
 			BEGIN
-				SET @intLoadDetailId = NULL
-				SET @intContractDetailId = NULL
-				SET @intContractHeaderId = NULL
-				SET @dtmPlannedAvailabilityDate = NULL
-				SET @intApprovedById = NULL
-
-				SELECT @intLoadDetailId = intLoadDetailId,
-						@intContractDetailId = intContractDetailId,
-						@intContractHeaderId = intContractHeaderId,
-						@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate
-				FROM @tblLoadDetail WHERE intDetailRecordId = @intMinLoadDetailRecordId
-
-				SELECT TOP 1 @intApprovedById = intApprovedById
-				FROM tblCTApprovedContract
-				WHERE intContractDetailId = @intContractDetailId
-				ORDER BY intApprovedContractId DESC
-
-				SELECT @dtmCurrentPlannedAvailabilityDate = dtmPlannedAvailabilityDate
-					,@dtmCurrentUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
-				FROM tblCTContractDetail
-				WHERE intContractDetailId = @intContractDetailId
-
-				DECLARE @ysnIsETAUpdated BIT = 0
-
-				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId AND intShipmentStatus <> 10)
+				IF ((@dtmCurrentETAPOD IS NOT NULL))
 				BEGIN
-					IF ((@dtmCurrentETAPOD IS NOT NULL))
+					IF (ISNULL(@ysnPOETAFeedToERP,0) = 1 AND ISNULL(@dtmCalculatedAvailabilityDate, '') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,''))
 					BEGIN
-						IF (ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,''))
-						BEGIN
-							UPDATE tblCTContractDetail 
-							SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD
-								,intConcurrencyId = intConcurrencyId + 1
-							WHERE intContractDetailId = @intContractDetailId 
+						UPDATE tblCTContractDetail 
+						SET dtmPlannedAvailabilityDate = @dtmCalculatedAvailabilityDate
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intContractDetailId = @intContractDetailId 
 
-							SELECT @ysnIsETAUpdated = 1
+						SELECT @ysnIsETAUpdated = 1
+						SET @strAuditDescription = 'Sequence - ' + CAST(@intContractSeq AS VARCHAR(20)) + ', Planned Availability Date'
+							
+						EXEC dbo.uspSMAuditLog @keyValue = @intContractHeaderId 
+							,@screenName = 'ContractManagement.view.Contract'
+							,@entityId = @intUserId
+							,@actionType = 'Updated (from Feed)'
+							,@actionIcon = 'small-tree-modified'
+							,@changeDescription = @strAuditDescription
+							,@fromValue = @dtmCurrentPlannedAvailabilityDate
+							,@toValue = @dtmCalculatedAvailabilityDate
+					END
+
+					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
+					BEGIN
+						UPDATE tblCTContractDetail 
+						SET dtmUpdatedAvailabilityDate = @dtmCalculatedAvailabilityDate
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intContractDetailId = @intContractDetailId 
+							OR (@intPurchaseSale = 3 AND intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId))
+
+						SET @strAuditDescription = 'Sequence - ' + CAST(@intContractSeq AS VARCHAR(20)) + ', Updated Availability Date'	
+						EXEC dbo.uspSMAuditLog @keyValue = @intContractHeaderId 
+							,@screenName = 'ContractManagement.view.Contract'
+							,@entityId = @intUserId
+							,@actionType = 'Updated (from Feed)'
+							,@actionIcon = 'small-tree-modified'
+							,@changeDescription = @strAuditDescription
+							,@fromValue = @dtmCurrentUpdatedAvailabilityDate
+							,@toValue = @dtmCalculatedAvailabilityDate
+
+						IF (@intPurchaseSale = 3)
+						BEGIN
+							SELECT 
+								@intSContractSeq = intContractSeq
+								,@intSContractDetailId = intContractDetailId
+								,@intSContractHeaderId = intContractHeaderId
+							FROM tblCTContractDetail
+							WHERE intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId)
+							
+							UPDATE tblCTContractDetail 
+							SET dtmUpdatedAvailabilityDate = @dtmCalculatedAvailabilityDate
+								,intConcurrencyId = intConcurrencyId + 1
+							WHERE intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId)
+
+							SET @strAuditDescription = 'Sequence - ' + CAST(@intSContractSeq AS VARCHAR(20)) + ', Updated Availability Date'
+							EXEC dbo.uspSMAuditLog @keyValue = @intSContractHeaderId 
+								,@screenName = 'ContractManagement.view.Contract'
+								,@entityId = @intUserId
+								,@actionType = 'Updated (from Feed)'
+								,@actionIcon = 'small-tree-modified'
+								,@changeDescription = @strAuditDescription
+								,@fromValue = @dtmCurrentUpdatedAvailabilityDate
+								,@toValue = @dtmCalculatedAvailabilityDate
 						END
 
-						IF (@intShipmentType = 1 AND ISNULL(DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD),'') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
-						BEGIN
-							UPDATE tblCTContractDetail 
-							SET dtmUpdatedAvailabilityDate = CASE WHEN (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) THEN DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
-																ELSE dtmUpdatedAvailabilityDate END
-								,intConcurrencyId = intConcurrencyId + 1
-							WHERE intContractDetailId = @intContractDetailId 
-								OR (@intPurchaseSale = 3 AND intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId))
-
-							SELECT @ysnIsETAUpdated = 1
-						END
+						SELECT @ysnIsETAUpdated = 1
+					END
 						
-						IF (@ysnIsETAUpdated = 1) 
-						BEGIN
-							EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
-								@intApprovedById =  @intApprovedById, 
-								@intContractDetailId = @intContractDetailId
-						END
+					IF (@ysnIsETAUpdated = 1) 
+					BEGIN
+						SELECT TOP 1 @intApprovedById = intApprovedById
+						FROM tblCTApprovedContract
+						WHERE intContractDetailId = @intContractDetailId
+						ORDER BY intApprovedContractId DESC
+				
+						EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
+							@intApprovedById =  @intApprovedById, 
+							@intContractDetailId = @intContractDetailId
 					END
 				END
-
-				SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId)
-				FROM @tblLoadDetail
-				WHERE intDetailRecordId > @intMinLoadDetailRecordId
 			END
+
+			SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId)
+			FROM @tblLoadDetail
+			WHERE intDetailRecordId > @intMinLoadDetailRecordId
 		END
 	END
 

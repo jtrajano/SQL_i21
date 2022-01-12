@@ -12,7 +12,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
@@ -281,6 +281,9 @@ OPEN intListCursor;
 						ELSE  
 						BEGIN  
 
+							exec uspSCCheckContractStatus  @intContractDetailId = @intLoopContractId
+
+							
 							-- do not schedule if the contract is the same as the ticket contract since this is already scheduled upon saving the ticket. Only adjust
 							IF ISNULL(@intLoopContractId,0) <> 0 AND @strTicketDistributionOption = 'CNT' AND @intTicketContractDetailId = @intLoopContractId  
 							BEGIN  

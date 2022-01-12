@@ -10,6 +10,7 @@
 	[strChangeDescription] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strOldData] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strNewData] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	[strActionType] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 
 	-- Item Validation
 	[intItemId] INT,

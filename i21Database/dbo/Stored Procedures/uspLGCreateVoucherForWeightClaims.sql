@@ -10,22 +10,16 @@ BEGIN TRY
 	DECLARE @total AS INT
 	DECLARE @intVendorEntityId AS INT;
 	DECLARE @intMinRecord AS INT
-	DECLARE @VoucherDetailClaim AS VoucherDetailClaim
 	DECLARE @voucherPayableToProcess AS VoucherPayable
 	DECLARE @intAPAccount INT
 	DECLARE @strWeightClaimNo NVARCHAR(100)
 	DECLARE @intWeightClaimDetailId INT
 	DECLARE @intCount INT
 	DECLARE @intLoadId INT
-	DECLARE @intCurrencyId INT
-	DECLARE @ysnSubCurrency BIT
 	DECLARE @dblClaimAmount NUMERIC(18,6)
 	DECLARE @dblNetWeight NUMERIC(18,6)
-	DECLARE @dblTotalForBill NUMERIC(18,6)
-	DECLARE @dblAmountDueForBill NUMERIC(18,6)
 	DECLARE @intBillId INT
 	DECLARE @intVoucherType INT
-	DECLARE @intShipTo INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -40,6 +34,7 @@ BEGIN TRY
 		,dblQtyReceived DECIMAL(18, 6)
 		,dblCost DECIMAL(18, 6)
 		,dblCostUnitQty DECIMAL(18, 6)
+		,intCostCurrencyId INT
 		,dblWeightUnitQty DECIMAL(18, 6)
 		,dblClaimAmount DECIMAL(18, 6)
 		,dblUnitQty DECIMAL(18, 6)
@@ -48,33 +43,18 @@ BEGIN TRY
 		,intCostUOMId INT
 		,intItemId INT
 		,intContractHeaderId INT
-		,intInventoryReceiptItemId INT
 		,intContractDetailId INT
+		,intCompanyLocationId INT
 		,intSubLocationId INT
 		,intStorageLocationId INT
 		,dblFranchiseAmount DECIMAL(18, 6)
-		,intCurrencyId INT)
+		,intCurrencyId INT
+		,ysnSubCurrency BIT
+		,intSubCurrencyCents INT)
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
 		,intVendorEntityId INT)
-
-	DECLARE @distinctItem TABLE 
-		(intItemRecordId INT Identity(1, 1)
-		,intItemId INT)
-
-	SELECT @strWeightClaimNo = strReferenceNumber
-		,@intLoadId = intLoadId
-	FROM tblLGWeightClaim
-	WHERE intWeightClaimId = @intWeightClaimId
-
-	SELECT @intCurrencyId = intCurrencyId
-	FROM tblLGWeightClaimDetail
-	WHERE intWeightClaimId = @intWeightClaimId
-
-	SELECT @ysnSubCurrency = ISNULL(ysnSubCurrency, 0)
-	FROM tblSMCurrency
-	WHERE intCurrencyID = @intCurrencyId
 
 	IF EXISTS (SELECT TOP 1 1
 			   FROM tblAPBill AB
@@ -82,18 +62,13 @@ BEGIN TRY
 			   WHERE WCD.intWeightClaimId = @intWeightClaimId)
 	BEGIN
 		DECLARE @ErrorMessage NVARCHAR(250)
-
-		SET @ErrorMessage = 'Voucher was already created for ' + @strWeightClaimNo;
+		SELECT @ErrorMessage = 'Voucher was already created for ' + strReferenceNumber
+		FROM tblLGWeightClaim
+		WHERE intWeightClaimId = @intWeightClaimId
 
 		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
-
-	SELECT TOP 1 @intShipTo = CD.intCompanyLocationId
-	FROM tblLGLoad L
-	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intPContractDetailId,LD.intSContractDetailId)
-	WHERE L.intLoadId = @intLoadId
 
 	SELECT TOP 1 @intAPAccount = (ISNULL(intAPAccount,0))
 	FROM tblLGWeightClaim WC 
@@ -122,6 +97,7 @@ BEGIN TRY
 		  ,dblQtyReceived
 		  ,dblCost
 		  ,dblCostUnitQty
+		  ,intCostCurrencyId
 		  ,dblWeightUnitQty
 		  ,dblClaimAmount
 		  ,dblUnitQty
@@ -130,12 +106,14 @@ BEGIN TRY
 		  ,intCostUOMId
 		  ,intItemId
 		  ,intContractHeaderId
-		  ,intInventoryReceiptItemId
 		  ,intContractDetailId
+		  ,intCompanyLocationId
 		  ,intSubLocationId
 		  ,intStorageLocationId
 		  ,dblFranchiseAmount
-		  ,intCurrencyId)
+		  ,intCurrencyId
+		  ,ysnSubCurrency
+		  ,intSubCurrencyCents)
 	/* Weight Claim Details */
 	SELECT intWeightClaimId = WC.intWeightClaimId
 		,strReferenceNumber = WC.strReferenceNumber
@@ -148,6 +126,7 @@ BEGIN TRY
 		,dblQtyReceived = (ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END)
 		,dblCost = WCD.dblUnitPrice
 		,dblCostUnitQty = ISNULL(IU.dblUnitQty,1)
+		,intCostCurrencyId = CU.intCurrencyID
 		,dblWeightUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
 		,dblClaimAmount
 		,dblUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
@@ -156,29 +135,23 @@ BEGIN TRY
 		,intCostUOMId = WCD.intPriceItemUOMId
 		,intItemId = WCD.intItemId
 		,intContractHeaderId = CH.intContractHeaderId
-		,intInventoryReceiptItemId = NULL
 		,intContractDetailId = WCD.intContractDetailId
+		,intCompanyLocationId = CD.intCompanyLocationId
 		,intSubLocationId = CD.intSubLocationId
 		,intStorageLocationId = CD.intStorageLocationId
-		,dblFranchiseAmount = ROUND(CASE 
-				 WHEN CU.ysnSubCurrency = 1
-					THEN (dbo.fnCTConvertQtyToTargetItemUOM(
-						(SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId),
-						WCD.intPriceItemUOMId, dblUnitPrice)) * dblFranchiseWt / 100
-				 ELSE (dbo.fnCTConvertQtyToTargetItemUOM(
-						(SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId), 
-						WCD.intPriceItemUOMId, dblUnitPrice)) * dblFranchiseWt
-			   END, 2)
-		,intCurrencyId = WCD.intCurrencyId
+		,dblFranchiseAmount = ROUND(
+			(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM.intItemUOMId, WCD.intPriceItemUOMId, dblUnitPrice) * dblFranchiseWt)
+			/ CASE WHEN (CU.ysnSubCurrency = 1) THEN 100 ELSE 1 END, 2)
+		,intCurrencyId = ISNULL(CU.intMainCurrencyId, CU.intCurrencyID)
+		,ysnSubCurrency = CU.ysnSubCurrency
+		,intSubCurrencyCents = CU.intCent
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
-	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
-	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
+	JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
-	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
-	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 	OUTER APPLY (SELECT TOP 1 
 					intItemUOMId = IU.intItemUOMId
@@ -202,6 +175,7 @@ BEGIN TRY
 		,dblQtyReceived = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN WCOC.dblQuantity ELSE 1 END
 		,dblCost = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN WCOC.dblRate ELSE WCOC.dblAmount END
 		,dblCostUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(CostUOM.dblUnitQty,1) ELSE 1 END
+		,intCostCurrencyId = CU.intCurrencyID
 		,dblWeightUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(DamageWeightUOM.dblUnitQty,1) ELSE 1 END
 		,dblClaimAmount = WCOC.dblAmount
 		,dblUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(ItemUOM.dblUnitQty,1) ELSE 1 END
@@ -210,18 +184,19 @@ BEGIN TRY
 		,intCostUOMId = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN WCOC.intRateUOMId ELSE WCD.intDamageToPriceItemUOMId END
 		,intItemId = WCOC.intItemId
 		,intContractHeaderId = NULL
-		,intInventoryReceiptItemId = NULL 
 		,intContractDetailId = NULL
+		,intCompanyLocationId = WCD.intCompanyLocationId
 		,intSubLocationId = NULL
 		,intStorageLocationId = NULL
 		,dblFranchiseAmount = 0
-		,intCurrencyId = WCOC.intRateCurrencyId
+		,intCurrencyId = ISNULL(CU.intMainCurrencyId, CU.intCurrencyID)
+		,ysnSubCurrency = CU.ysnSubCurrency
+		,intSubCurrencyCents = CU.intCent
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimOtherCharges WCOC ON WCOC.intWeightClaimId = WC.intWeightClaimId
-	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
-	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
+	JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = WCOC.intRateUOMId
-	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CostUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCOC.intRateCurrencyId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = WCOC.intItemUOMId
 	OUTER APPLY (SELECT TOP 1 
@@ -231,9 +206,11 @@ BEGIN TRY
 				WHERE IU.intItemId = WCOC.intItemId
 					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) DamageWeightUOM
 	OUTER APPLY (SELECT TOP 1
-					intPriceItemUOMId = WCD.intPriceItemUOMId
+					intCompanyLocationId = CD.intCompanyLocationId
+					,intPriceItemUOMId = WCD.intPriceItemUOMId
 					,intDamageToPriceItemUOMId = IU2.intItemUOMId
 				FROM tblLGWeightClaimDetail WCD
+					INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
 					INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
 					INNER JOIN tblICItemUOM IU2 ON IU.intUnitMeasureId = IU.intUnitMeasureId AND IU2.intItemId = WCOC.intItemId
 				WHERE WCD.intWeightClaimId = WC.intWeightClaimId
@@ -250,10 +227,6 @@ BEGIN TRY
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intPartyEntityId
-	FROM @voucherDetailData
-
-	INSERT INTO @distinctItem
-	SELECT DISTINCT intItemId
 	FROM @voucherDetailData
 
 	SELECT @total = COUNT(*)
@@ -339,8 +312,8 @@ BEGIN TRY
 		SELECT
 			[intEntityVendorId] = VDD.intPartyEntityId
 			,[intTransactionType] = @intVoucherType
-			,[intLocationId] = CD.intCompanyLocationId
-			,[intCurrencyId] = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)
+			,[intLocationId] = VDD.intCompanyLocationId
+			,[intCurrencyId] = VDD.intCurrencyId
 			,[dtmDate] = GETDATE()
 			,[strVendorOrderNumber] = ''
 			,[strReference] = ''
@@ -372,12 +345,12 @@ BEGIN TRY
 			,[dblFranchiseAmount] = VDD.dblFranchiseAmount
 			,[dblWeightUnitQty] = VDD.dblWeightUnitQty
 			,[intWeightUOMId] = VDD.intWeightUOMId
-			,[intCostCurrencyId] = VDD.intCurrencyId
+			,[intCostCurrencyId] = VDD.intCostCurrencyId
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = 1
-			,[ysnSubCurrency] = CUR.ysnSubCurrency
-			,[intSubCurrencyCents] = CUR.intCent
+			,[ysnSubCurrency] = VDD.ysnSubCurrency
+			,[intSubCurrencyCents] = VDD.intSubCurrencyCents
 			,[intAccountId] = CASE WHEN (VDD.intContractDetailId IS NULL) 
 								THEN (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing') 
 								ELSE V.intGLAccountExpenseId END
@@ -391,7 +364,6 @@ BEGIN TRY
 			LEFT JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = VDD.intWeightClaimId
 			LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimDetailId = VDD.intWeightClaimDetailId
 			LEFT JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
-			LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
 			LEFT JOIN tblAPVendor V ON VDD.intPartyEntityId = V.intEntityId
 			OUTER APPLY (SELECT TOP 1 ld.intLoadDetailId FROM tblLGLoadDetail ld 
 						 LEFT JOIN tblLGLoadDetailContainerLink ldcl on ldcl.intLoadDetailId = ld.intLoadDetailId

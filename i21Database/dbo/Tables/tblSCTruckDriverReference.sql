@@ -3,7 +3,7 @@
 	[intTruckDriverReferenceId] INT NOT NULL  IDENTITY, 
     [intEntityId] INT NULL, 
     [strRecordType] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
-    [strData] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strData] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSCTruckDriverReference_intTruckDriverReferenceId] PRIMARY KEY ([intTruckDriverReferenceId]), 
     CONSTRAINT [FK_tblSCTruckDriverReference_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]), 

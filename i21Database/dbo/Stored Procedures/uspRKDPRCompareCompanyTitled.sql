@@ -18,7 +18,7 @@ SELECT TOP 1
 	@strCommodityCode = strCommodityCode
 	,@dtmRunDateTime1 = dtmRunDateTime
 	,@dtmDPRDate1 = dtmDPRDate
-FROM tblRKDPRRunLogDetail LD
+FROM tblRKDPRRunLogDetail LD	
 INNER JOIN tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 WHERE intRunNumber = @intDPRRun1
 
@@ -195,7 +195,7 @@ FROM (
 	from tblRKDPRRunLogDetail LD
 	inner join tblRKDPRRunLog L on L.intDPRRunLogId = LD.intDPRRunLogId
 	where strType in( 'Purchase Basis','Purchase Priced','Purchase Basis Deliveries','Sale Basis','Sale Priced','Sales Basis Deliveries') 
-		and L.intDPRRunLogId = @intDPRRun2
+		and L.intRunNumber = @intDPRRun2
 	group by strTransactionReferenceId,strType
 ) t
 PIVOT (

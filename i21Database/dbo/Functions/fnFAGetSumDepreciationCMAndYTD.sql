@@ -18,7 +18,7 @@ DECLARE
 		dtmDepreciationToDate DATETIME NULL,
 		dblDepreciationToDate DECIMAL(18, 6) NULL,
 		strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
-		dblDepreciation DECIMAL NULL,
+		dblDepreciation DECIMAL(18, 6) NULL,
 		ysnProcessed BIT NULL DEFAULT(0)
 	)
 DECLARE

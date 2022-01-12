@@ -26,4 +26,10 @@ CREATE INDEX [IX_tblTRLoadDistributionHeader_intLoadHeaderId] ON [dbo].[tblTRLoa
 GO 
 
 CREATE INDEX [IX_tblTRLoadDistributionHeader_intCompanyLocationId] ON [dbo].[tblTRLoadDistributionHeader] ([intCompanyLocationId] ASC)
+GO
+
+CREATE INDEX [IX_tblTRLoadDistributionHeader_intShipToLocationId] ON [dbo].[tblTRLoadDistributionHeader] ([intShipToLocationId] ASC)
+GO 
+
+CREATE INDEX [IX_tblTRLoadDistributionHeader_intEntityCustomerId] ON [dbo].[tblTRLoadDistributionHeader] ([intEntityCustomerId] ASC)
 GO 

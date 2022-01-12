@@ -261,3 +261,8 @@ UPDATE tblIPStep
 SET intDeleteFilesPriorTo = 0
 WHERE intDeleteFilesPriorTo IS NULL
 GO
+
+UPDATE tblIPItemArchive
+SET ysnMailSent = 0
+WHERE ysnMailSent IS NULL
+GO

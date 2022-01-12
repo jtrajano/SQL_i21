@@ -1,5 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuGRSettlementOutboundSubReport]
 AS
+
+	-- We are using this view to directly insert table to an API Export table
+	-- If there are changes in the view please update the insert in uspGRAPISettlementReportExport as well
 SELECT intPaymentId
 	,strDiscountCode
 	,strDiscountCodeDescription

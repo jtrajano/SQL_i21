@@ -6,7 +6,10 @@ AS
 
 BEGIN TRY
 	
-	DECLARE	@ErrMsg	NVARCHAR(MAX);
+	DECLARE	@ErrMsg	NVARCHAR(MAX)
+		,@strLotCalculationType nvarchar(50);
+
+	select top 1 @strLotCalculationType = lower(strLotCalculationType) from tblCTCompanyPreference where strPricingQuantity = 'By Futures Contracts' and strLotCalculationType = 'Round';
 	
 	with fixationDetailInvoice as (
 		select
@@ -79,9 +82,49 @@ BEGIN TRY
 			GROUP BY PFD.intPriceFixationDetailId, BP.ysnPaid
 		)
 
-	SELECT	FD.*,
-
-			PM.strUnitMeasure	AS strPricingUOM,
+	SELECT
+			FD.intPriceFixationDetailId
+			,FD.intPriceFixationId
+			,FD.intNumber
+			,FD.strTradeNo
+			,FD.strOrder
+			,FD.dtmFixationDate
+			,FD.dblQuantity
+			,FD.dblQuantityAppliedAndPriced
+			,FD.dblLoadAppliedAndPriced
+			,FD.dblLoadPriced
+			,FD.intQtyItemUOMId
+			,dblNoOfLots = (case when @strLotCalculationType = 'round' then ROUND(FD.dblNoOfLots,0,0) else FD.dblNoOfLots end)
+			,FD.intFutureMarketId
+			,FD.intFutureMonthId
+			,FD.dblFixationPrice
+			,FD.dblFutures
+			,FD.dblBasis
+			,FD.dblPolRefPrice
+			,FD.dblPolPremium
+			,FD.dblCashPrice
+			,FD.intPricingUOMId
+			,FD.ysnHedge
+			,FD.ysnAA
+			,FD.dblHedgePrice
+			,FD.intHedgeFutureMonthId
+			,FD.intBrokerId
+			,FD.intBrokerageAccountId
+			,FD.intFutOptTransactionId
+			,FD.dblFinalPrice
+			,FD.strNotes
+			,FD.intPriceFixationDetailRefId
+			,FD.intBillId
+			,FD.intBillDetailId
+			,FD.intInvoiceId
+			,FD.intInvoiceDetailId
+			,FD.intDailyAveragePriceDetailId
+			,FD.dblHedgeNoOfLots
+			,FD.dblLoadApplied
+			,FD.ysnToBeDeleted
+			,FD.dblPreviousQty
+			,FD.intConcurrencyId
+			,PM.strUnitMeasure	AS strPricingUOM,
 			strHedgeCurrency = case when FD.ysnHedge = 1 then CY.strCurrency else null end,
 			strHedgeUOM = case when FD.ysnHedge = 1 then UM.strUnitMeasure	else null end,
 			strHedgeMonth = case when FD.ysnHedge = 1 then REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') else null end,
@@ -103,7 +146,8 @@ BEGIN TRY
 			strBillIds = FDV.strBillIds,
 			strBills = FDV.strBills,
 			strEditErrorMessage = dbo.fnCTGetPricingDetailVoucherInvoice(FD.intPriceFixationDetailId),
-			ysnPaid = CAST((CASE WHEN CH.intContractTypeId = 1 THEN ISNULL(PV.ysnPaid,0) ELSE 0 END) AS BIT)
+			ysnPaid = CAST((CASE WHEN CH.intContractTypeId = 1 THEN ISNULL(PV.ysnPaid,0) ELSE 0 END) AS BIT),
+			REPLACE(FM.strFutureMonth, ' ', '(' + FM.strSymbol + ') ') strPricingMonth
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
@@ -114,6 +158,7 @@ BEGIN TRY
 	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	MA.intCurrencyId			LEFT
 	JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	MA.intUnitMeasureId			LEFT
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	FD.intHedgeFutureMonthId	LEFT
+	JOIN	tblRKFuturesMonth			FM	ON	FM.intFutureMonthId				=	FD.intFutureMonthId			LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	FD.intBrokerId				LEFT
 	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	FD.intBrokerageAccountId	LEFT
 	JOIN	tblRKFutOptTransaction		TR	ON	TR.intFutOptTransactionId		=	FD.intFutOptTransactionId	LEFT

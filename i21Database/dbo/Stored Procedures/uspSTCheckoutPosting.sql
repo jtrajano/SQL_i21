@@ -736,7 +736,7 @@ BEGIN
 
 										,[dblDiscount]				= 0
 										
-										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - CAST(Tax.[dblAdjustedTax] AS DECIMAL(18,8))) / CAST(CPT.dblQuantity AS DECIMAL(18,8)),6) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
+										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -5256,48 +5256,6 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 						SELECT TOP 1 @loopId = intReceiveLotteryId FROM #tblSTTempReceiveLottery
 
-						-- SELECT TOP 1 
-						-- intStoreId,
-						-- strBookNumber,
-						-- 'Low to High',
-						-- intLotteryGameId,
-						-- dtmReceiptDate,
-						-- intTicketPerPack,
-						-- 'Inactive'
-						-- FROM #tblSTTempReceiveLottery
-						-- WHERE intReceiveLotteryId = @loopId
-
-
-						--CREATE LOTTERY BOOK ENTRY--
-						-- INSERT INTO tblSTLotteryBook
-						-- (
-						-- 	intStoreId
-						-- 	,strBookNumber
-						-- 	,strCountDirection
-						-- 	,intLotteryGameId
-						-- 	,dtmReceiptDate
-						-- 	,dblQuantityRemaining
-						-- 	,strStatus
-						-- 	,intConcurrencyId
-						-- )
-						-- SELECT TOP 1 
-						-- intStoreId,
-						-- strBookNumber,
-						-- 'Low to High',
-						-- intLotteryGameId,
-						-- dtmReceiptDate,
-						-- intTicketPerPack,
-						-- 'Inactive',
-						-- 1
-						-- FROM #tblSTTempReceiveLottery
-						-- WHERE intReceiveLotteryId = @loopId
-
-						-- DECLARE @lotteryBookPK INT
-						-- SET @lotteryBookPK = SCOPE_IDENTITY() 
-
-						-- UPDATE tblSTReceiveLottery SET intLotteryBookId = @lotteryBookPK WHERE intReceiveLotteryId = @loopId
-
-
 						-- Validate if there is Item UOM setup
 						IF EXISTS(SELECT TOP 1 1 FROM tblSTReceiveLottery RL
 							INNER JOIN tblSTStore S ON S.intStoreId = RL.intStoreId
@@ -5305,11 +5263,11 @@ IF(@ysnDebug = CAST(1 AS BIT))
 							LEFT JOIN tblICItemLocation IL ON IL.intLocationId = S.intCompanyLocationId
 								AND IL.intItemId = LG.intItemId
 							LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = IL.intIssueUOMId
-							WHERE RL.intReceiveLotteryId = @Id
+							WHERE RL.intReceiveLotteryId = @loopId
 							AND IU.intItemUOMId IS NULL)
 						BEGIN
 							-- SET @Success = CAST(0 AS BIT)
-							SET @strStatusMsg = 'Missing UOM setup on Item Location.'
+							SET @strStatusMsg = 'Missing Sale UOM setup on Item Location.'
 							GOTO ExitWithRollback
 							RETURN
 						END
@@ -5396,7 +5354,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					,strSourceId			= NULL
 					,intPaymentOn			= NULL
 					,strChargesLink			= NULL
-					,dblUnitRetail			= NULL
+					,dblUnitRetail			= tblSTLotteryGame.dblTicketValue
 					,intSort				= NULL
 					,strDataSource			= @strSourceScreenName
 					FROM tblSTReceiveLottery

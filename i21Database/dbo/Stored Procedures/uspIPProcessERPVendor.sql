@@ -48,6 +48,8 @@ BEGIN TRY
 		,@strDetailTerm NVARCHAR(100)
 	DECLARE @intDetailCountryId INT
 		,@intDetailTermId INT
+		,@intEntityContactId INT
+		,@intEntityLocationId INT
 	DECLARE @tblEMEntity TABLE (
 		strOldName NVARCHAR(100)
 		,ysnOldActive BIT
@@ -159,6 +161,8 @@ BEGIN TRY
 				,@strEntityNo = NULL
 				,@intAuditDetailId = NULL
 				,@intStageEntityTermId = NULL
+				,@intEntityContactId = NULL
+				,@intEntityLocationId = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
@@ -372,6 +376,8 @@ BEGIN TRY
 
 				SELECT @intDetailCountryId = NULL
 					,@intDetailTermId = NULL
+					,@intEntityContactId = NULL
+					,@intEntityLocationId = NULL
 
 				SELECT @intDetailActionId = intActionId
 					,@intDetailLineType = intLineType
@@ -439,53 +445,53 @@ BEGIN TRY
 								)
 					END
 
-					IF ISNULL(@strDetailCity, '') = ''
-					BEGIN
-						SELECT @strError = 'Detail - City cannot be blank.'
+					--IF ISNULL(@strDetailCity, '') = ''
+					--BEGIN
+					--	SELECT @strError = 'Detail - City cannot be blank.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 
-					IF ISNULL(@strDetailState, '') = ''
-					BEGIN
-						SELECT @strError = 'Detail - State cannot be blank.'
+					--IF ISNULL(@strDetailState, '') = ''
+					--BEGIN
+					--	SELECT @strError = 'Detail - State cannot be blank.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 
-					IF ISNULL(@strDetailZip, '') = ''
-					BEGIN
-						SELECT @strError = 'Detail - Zip Code cannot be blank.'
+					--IF ISNULL(@strDetailZip, '') = ''
+					--BEGIN
+					--	SELECT @strError = 'Detail - Zip Code cannot be blank.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 
 					SELECT @intDetailCountryId = intCountryID
 					FROM dbo.tblSMCountry WITH (NOLOCK)
 					WHERE strCountry = @strDetailCountry
 
-					IF @intDetailCountryId IS NULL
-					BEGIN
-						SELECT @strError = 'Detail - Country not found.'
+					--IF @intDetailCountryId IS NULL
+					--BEGIN
+					--	SELECT @strError = 'Detail - Country not found.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 				END
 				ELSE IF @intDetailLineType = 3
 				BEGIN
@@ -577,6 +583,54 @@ BEGIN TRY
 							,'Futures Broker'
 							,1
 							)
+					END
+
+					--Entity Type
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntityType ET
+							WHERE ET.intEntityId = @intEntityId
+								AND ET.strType = @strEntityType
+							)
+					BEGIN
+						INSERT INTO tblEMEntityType (
+							intEntityId
+							,strType
+							,intConcurrencyId
+							)
+						OUTPUT inserted.intEntityTypeId
+							,inserted.strType
+						INTO @tblEMEntityType
+						SELECT @intEntityId
+							,@strEntityType
+							,1
+
+						IF @strEntityType = 'Ship Via'
+						BEGIN
+							IF NOT EXISTS (
+									SELECT 1
+									FROM tblSMShipVia
+									WHERE intEntityId = @intEntityId
+									)
+							BEGIN
+								INSERT INTO tblSMShipVia (
+									intEntityId
+									,strShipVia
+									,strShippingService
+									,strFreightBilledBy
+									,ysnCompanyOwnedCarrier
+									,ysnActive
+									,intSort
+									)
+								SELECT @intEntityId
+									,@strName
+									,'None'
+									,'Other'
+									,0
+									,1
+									,0
+							END
+						END
 					END
 
 					--Entity Location
@@ -713,6 +767,43 @@ BEGIN TRY
 							FROM tblAPVendorTerm VT
 							WHERE VT.intEntityVendorId = @intEntityId
 							)
+
+					--Add Contacts to Entity table
+					INSERT INTO tblEMEntity (
+						strName
+						,ysnActive
+						,strContactNumber
+						,strEmail
+						,intConcurrencyId
+						)
+					SELECT @strName
+						,1
+						,''
+						,''
+						,1
+
+					SELECT @intEntityContactId = SCOPE_IDENTITY()
+
+					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
+					FROM tblEMEntityLocation
+					WHERE intEntityId = @intEntityId
+						AND ysnDefaultLocation = 1
+
+					--Map Contacts to Vendor
+					INSERT INTO tblEMEntityToContact (
+						intEntityId
+						,intEntityContactId
+						,intEntityLocationId
+						,ysnPortalAccess
+						,ysnDefaultContact
+						,intConcurrencyId
+						)
+					SELECT @intEntityId
+						,@intEntityContactId
+						,@intEntityLocationId
+						,0
+						,1
+						,1
 
 					EXEC uspSMAuditLog @keyValue = @intEntityId
 						,@screenName = 'EntityManagement.view.Entity'
@@ -1006,6 +1097,50 @@ BEGIN TRY
 					AND ETS.intStageEntityId = @intStageEntityId
 					AND ETS.intLineType = 3
 					AND ETS.intActionId = 4
+
+				IF NOT EXISTS (
+						SELECT TOP 1 1
+						FROM tblEMEntityToContact EC
+						WHERE EC.intEntityId = @intEntityId
+						)
+				BEGIN
+					--Add Contacts to Entity table
+					INSERT INTO tblEMEntity (
+						strName
+						,ysnActive
+						,strContactNumber
+						,strEmail
+						,intConcurrencyId
+						)
+					SELECT @strName
+						,1
+						,''
+						,''
+						,1
+
+					SELECT @intEntityContactId = SCOPE_IDENTITY()
+
+					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
+					FROM tblEMEntityLocation
+					WHERE intEntityId = @intEntityId
+						AND ysnDefaultLocation = 1
+
+					--Map Contacts to Vendor
+					INSERT INTO tblEMEntityToContact (
+						intEntityId
+						,intEntityContactId
+						,intEntityLocationId
+						,ysnPortalAccess
+						,ysnDefaultContact
+						,intConcurrencyId
+						)
+					SELECT @intEntityId
+						,@intEntityContactId
+						,@intEntityLocationId
+						,0
+						,1
+						,1
+				END
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 

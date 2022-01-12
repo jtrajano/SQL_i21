@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFStageWorkOrderByLot (
+﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrderByLot] (
 	@strXML NVARCHAR(MAX)
 	,@intWorkOrderInputLotId INT = NULL OUTPUT
 	)
@@ -81,6 +81,7 @@ BEGIN TRY
 		,@dblRequiredQty NUMERIC(18, 6)
 		,@dblSwapToQty2 NUMERIC(18, 6)
 		,@intMainItemId INT
+		,@strConsumeSourceLocation NVARCHAR(50)
 	DECLARE @tblMFSwapto TABLE (
 		intSwapTo INT identity(1, 1)
 		,intWorkOrderId INT
@@ -440,6 +441,18 @@ BEGIN TRY
 	IF @strMultipleMachinesShareCommonStagingLocation IS NULL
 	BEGIN
 		SELECT @strMultipleMachinesShareCommonStagingLocation = 'False'
+	END
+
+	SELECT @strConsumeSourceLocation = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 124
+
+	IF @strConsumeSourceLocation = ''
+		OR @strConsumeSourceLocation IS NULL
+	BEGIN
+		SELECT @strConsumeSourceLocation = 'False'
 	END
 
 	--*************************************
@@ -937,6 +950,7 @@ BEGIN TRY
 	SELECT @intWorkOrderInputLotId = SCOPE_IDENTITY()
 
 	IF @strInventoryTracking = 'Lot Level'
+		AND @strConsumeSourceLocation = 'False'
 	BEGIN
 		SET @dblNewWeight = CASE 
 				WHEN @ysnEmptyOut = 0
@@ -1189,6 +1203,26 @@ BEGIN TRY
 		SELECT @intMachineId = NULL
 	END
 
+	IF @intMainItemId IS NOT NULL
+	BEGIN
+		UPDATE tblMFProductionSummary
+		SET intMainItemId = @intMainItemId
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intInputItemId
+			AND IsNULL(intMachineId, 0) = (
+				CASE 
+					WHEN intMachineId IS NOT NULL
+						THEN IsNULL(@intMachineId, 0)
+					ELSE IsNULL(intMachineId, 0)
+					END
+				)
+			AND intItemTypeId IN (
+				1
+				,3
+				)
+			AND intMainItemId IS NULL
+	END
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
@@ -1266,49 +1300,55 @@ BEGIN TRY
 	END
 
 	---************************************
-	IF @intSwapToLotId IS NOT NULL
-	BEGIN
-		DELETE
-		FROM @ItemsToReserve
+	--IF @intSwapToLotId IS NOT NULL
+	--BEGIN
+	DELETE
+	FROM @ItemsToReserve
 
-		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intWorkOrderId
-			,9
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,9
 
-		INSERT INTO @ItemsToReserve (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			,dblQty
-			,intTransactionId
-			,strTransactionId
-			,intTransactionTypeId
+	INSERT INTO @ItemsToReserve (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		,dblQty
+		,intTransactionId
+		,strTransactionId
+		,intTransactionTypeId
+		)
+	SELECT intItemId = T.intItemId
+		,intItemLocationId = IL.intItemLocationId
+		,intItemUOMId = T.intItemUOMId
+		,intLotId = T.intLotId
+		,intSubLocationId = SL.intSubLocationId
+		,intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
+		,dblQty = T.dblPickQty
+		,intTransactionId = @intWorkOrderId
+		,strTransactionId = @strWorkOrderNo
+		,intTransactionTypeId = 9
+	FROM tblMFTask T
+	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+	JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+		AND IL.intLocationId = SL.intLocationId
+	WHERE T.intOrderHeaderId = @intOrderHeaderId
+		AND T.intTaskStateId = 4
+		AND T.intLotId NOT IN (
+			SELECT WI.intLotId
+			FROM tblMFWorkOrderInputLot WI
+			WHERE WI.intWorkOrderId = @intWorkOrderId
+				AND WI.ysnConsumptionReversed = 0
 			)
-		SELECT intItemId = T.intItemId
-			,intItemLocationId = IL.intItemLocationId
-			,intItemUOMId = T.intItemUOMId
-			,intLotId = T.intLotId
-			,intSubLocationId = SL.intSubLocationId
-			,intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
-			,dblQty = T.dblPickQty
-			,intTransactionId = @intWorkOrderId
-			,strTransactionId = @strWorkOrderNo
-			,intTransactionTypeId = 9
-		FROM tblMFTask T
-		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
-		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
-			AND IL.intLocationId = SL.intLocationId
-		WHERE T.intOrderHeaderId = @intOrderHeaderId
-			AND T.intTaskStateId = 4
 
-		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intWorkOrderId
-			,9
-	END
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,9
 
+	--END
 	---************************************
 	DELETE
 	FROM @ItemsToReserve
@@ -1390,18 +1430,6 @@ BEGIN TRY
 		,@intWorkOrderInputLotId = @intWorkOrderInputLotId
 		,@intWorkOrderProducedLotId = NULL
 		,@intWorkOrderId = @intWorkOrderId
-
-	UPDATE WRD
-	SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, RD.intItemUOMId, @dblInputWeight), 0)
-		,WRD.dblActualAmount = (IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, RD.intItemUOMId, @dblInputWeight), 0)) * dblUnitRate
-		,WRD.dblDifference = CASE 
-			WHEN ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, RD.intItemUOMId, @dblInputWeight), 0)) * dblUnitRate) > 0
-				THEN IsNULL(dblEstimatedAmount,0) - ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, RD.intItemUOMId, @dblInputWeight), 0)) * dblUnitRate)
-			ELSE NULL
-			END
-	FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
-	JOIN dbo.tblLGWarehouseRateMatrixDetail RD ON RD.intWarehouseRateMatrixDetailId = WRD.intWarehouseRateMatrixDetailId
-	WHERE WRD.intWorkOrderId = @intWorkOrderId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

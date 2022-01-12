@@ -98,7 +98,8 @@ BEGIN TRY
 
 		UPDATE	FD
 		SET		FD.dblNoOfLots			=	CD.dblNoOfLots,
-				FD.dblQuantity			=	CD.dblQuantity
+				FD.dblQuantity			=	CD.dblQuantity,
+				FD.dblHedgeNoOfLots		=	CASE WHEN FD.ysnHedge = 1 THEN CD.dblNoOfLots ELSE NULL END
 		FROM	tblCTPriceFixation			PF 
 		JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
 		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -111,6 +112,15 @@ BEGIN TRY
 		UPDATE	tblRKFutOptTransaction 
 		SET		dblNoOfContract			=	@dblNoOfLots
 		WHERE	intFutOptTransactionId	=	@intFutOptTransactionId
+
+		if (@ysnHedge = 1)
+		begin
+			 --Insert into Summary Log
+			EXEC uspRKSaveDerivativeEntry @intFutOptTransactionId, NULL, @intUserId, 'UPDATE';
+
+			 --Insert into Derivative History
+			EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, NULL, 'Contracts', @intUserId, 'UPDATE' , 0;
+		end
 
 		SELECT	@intChildContractDetailId = MIN(intContractDetailId) 
 		FROM	tblCTContractDetail 
@@ -149,7 +159,7 @@ BEGIN TRY
 					WHERE	@intFutOptTransactionId = intFutOptTransactionId
 					AND		intContractDetailId	= @intContractDetailId	
 					
-					EXEC	uspCTGetStartingNumber 'FutOpt Transaction', @strTradeNo OUTPUT
+					EXEC	uspCTGetStartingNumber 'Derivative Entry', @strTradeNo OUTPUT
 					SET		@strTradeNo	=	LTRIM(RTRIM(@strTradeNo)) + '-H'
 					SET		@XML =	'<root><toUpdate><dblNoOfContract>'+STR(@dblChildSeqLots,18,6)+'</dblNoOfContract>'+
 									'<dtmTransactionDate>'+@strDate+'</dtmTransactionDate>'+
@@ -158,7 +168,14 @@ BEGIN TRY
 
 					EXEC uspCTCreateADuplicateRecord 'tblRKFutOptTransaction',@intFutOptTransactionId, @intNewFutOptTransactionId OUTPUT,@XML
 
+					--Insert into Summary Log
+					EXEC uspRKSaveDerivativeEntry @intNewFutOptTransactionId, NULL, @intUserId, 'ADD';
+
+					 --Insert into Derivative History
+					EXEC uspRKFutOptTransactionHistory @intNewFutOptTransactionId, NULL, 'Contracts', @intUserId, 'ADD' , 0;
+
 					SET @XML =	'<root><toUpdate><intHedgedLots>'+STR(@dblChildSeqLots,18,6)+'</intHedgedLots>'+
+								'<dblHedgedLots>'+STR(@dblChildSeqLots,18,6)+'</dblHedgedLots>'+
 								'<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>'+
 								'<dtmMatchDate>'+@strDate+'</dtmMatchDate>'+
 								'<intContractDetailId>'+STR(@intChildContractDetailId)+'</intContractDetailId></toUpdate></root>' 
@@ -171,6 +188,7 @@ BEGIN TRY
 								'<dblQuantity>'+STR(@dblChildSeqQty,18,6)+'</dblQuantity>'+
 								--'<dtmFixationDate>'+@strDateWithTime+'</dtmFixationDate>'+
 								CASE WHEN @ysnHedge = 1 THEN '<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>' ELSE '' END +
+								CASE WHEN @ysnHedge = 1 THEN '<dblHedgeNoOfLots>'+STR(@dblChildSeqLots,18,6)+'</dblHedgeNoOfLots>' ELSE '' END +
 								'<intPriceFixationId>'+STR(@intNewPriceFixationId)+'</intPriceFixationId></toUpdate></root>' 
 				
 				EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixationDetail',@intPriceFixationDetailId, @intNewPFDetailId OUTPUT,@XML

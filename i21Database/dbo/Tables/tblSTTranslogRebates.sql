@@ -120,10 +120,16 @@
     [dblTrlSellUnitPrice]                    DECIMAL (18, 3) NULL,
     [dblTrlUnitPrice]                        DECIMAL (18, 3) NULL,
     [dblTrlLineTot]                          DECIMAL (18, 3) NULL,
+    [dblTrlPrcOvrd]                          DECIMAL (18, 3) NULL,
     [strTrlDesc]                             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlUPC]                              NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlModifier]                         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlUPCEntryType]                     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [strTrloLnItemDiscProgramId]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [dblTrloLnItemDiscDiscAmt]               DECIMAL (18, 3) NULL,
+    [dblTrloLnItemDiscQty]                   DECIMAL (18, 3) NULL,
+    [intTrloLnItemDiscTaxCred]               INT             NULL,
+
     [strTrlFuelType]                         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlFuelSeq]                          INT             NULL,
     [strTrlFuelPosition]                     INT             NULL,
@@ -377,4 +383,9 @@ CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_strTrlUPCwithoutCheckDigit_idx]
 GO
 CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_dtmDate_idx]
     ON [dbo].[tblSTTranslogRebates]([dtmDate] ASC);
+	
+GO
+CREATE NONCLUSTERED INDEX [IX_intStoreNumber]
+    ON [dbo].[tblSTTranslogRebates]([intStoreNumber] ASC, [dtmDate] ASC);
+
 

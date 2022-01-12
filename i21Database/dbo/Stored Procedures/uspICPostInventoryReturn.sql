@@ -10,7 +10,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -543,6 +543,8 @@ BEGIN
 				,intForexRateTypeId
 				,dblForexRate
 				,intSourceEntityId
+				,strBOLNumber 
+				,intTicketId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -645,6 +647,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										/ Header.intSubCurrencyCents 
 
@@ -676,6 +680,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 
@@ -705,6 +711,8 @@ BEGIN
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
 				,intSourceEntityId = Header.intEntityVendorId
+				,strBOLNumber = Header.strBillOfLading 
+				,intTicketId = CASE WHEN Header.intSourceType = 1 THEN DetailItem.intSourceId ELSE NULL END 
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN tblICItem Item 
@@ -819,6 +827,18 @@ BEGIN
 				i.strType = 'Non-Inventory'
 		END 
 
+		-- Update the @ItemsForPost for source type and source no.
+		BEGIN
+			UPDATE i
+			SET
+				i.strSourceType = v.strSourceType
+				,i.strSourceNumber = v.strSourceNumber			
+			FROM 
+				@ItemsForPost i INNER JOIN vyuICGetReceiptItemSource v
+					ON i.intTransactionDetailId = v.intInventoryReceiptItemId
+					AND i.intTransactionId = v.intInventoryReceiptId
+		END
+
 		-- Update currency fields to functional currency. 
 		BEGIN 
 			UPDATE	itemCost
@@ -871,6 +891,10 @@ BEGIN
 					,intForexRateTypeId
 					,dblForexRate
 					,intSourceEntityId
+					,strSourceType
+					,strSourceNumber
+					,strBOLNumber
+					,intTicketId
 			)
 			SELECT 
 					intItemId  
@@ -895,6 +919,10 @@ BEGIN
 					,intForexRateTypeId
 					,dblForexRate
 					,intSourceEntityId
+					,strSourceType
+					,strSourceNumber
+					,strBOLNumber
+					,intTicketId
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 		
@@ -978,6 +1006,9 @@ BEGIN
 				,intInTransitSourceLocationId
 				,intForexRateTypeId
 				,dblForexRate
+				,intSourceEntityId
+				,strBOLNumber 
+				,intTicketId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -1079,6 +1110,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										/ Header.intSubCurrencyCents 
 
@@ -1110,6 +1143,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 
@@ -1137,6 +1172,9 @@ BEGIN
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
+				,intSourceEntityId = Header.intEntityVendorId
+				,strBOLNumber = Header.strBillOfLading 
+				,intTicketId = CASE WHEN Header.intSourceType = 1 THEN DetailItem.intSourceId ELSE NULL END 
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 					
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -1171,6 +1209,35 @@ BEGIN
 		-- Negate the qty 
 		UPDATE @StorageItemsForPost
 		SET		dblQty = -dblQty 
+
+		-- Update the @ItemsForPost for source type and source no.
+		BEGIN
+			UPDATE i
+			SET
+				i.strSourceType = v.strSourceType
+				,i.strSourceNumber = v.strSourceNumber			
+			FROM 
+				@StorageItemsForPost i INNER JOIN vyuICGetReceiptItemSource v
+					ON i.intTransactionDetailId = v.intInventoryReceiptItemId
+					AND i.intTransactionId = v.intInventoryReceiptId
+		END	
+
+		-- Update currency fields to functional currency. 
+		BEGIN 
+			UPDATE	storageCost
+			SET		dblExchangeRate = 1
+					,dblForexRate = 1
+					,intCurrencyId = @intFunctionalCurrencyId
+			FROM	@StorageItemsForPost storageCost
+			WHERE	ISNULL(storageCost.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId 
+
+			UPDATE	storageCost
+			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
+					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+			FROM	@StorageItemsForPost storageCost
+			WHERE	storageCost.intCurrencyId <> @intFunctionalCurrencyId 
+		END
 
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 

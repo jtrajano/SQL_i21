@@ -25,7 +25,8 @@ CREATE TABLE #tempEquityPayments(
 	[ysnQualified] BIT,
 	[strName] NVARCHAR(100),
 	[ysnVendor] BIT,
-	[dblEquityPaid] NUMERIC(18,6)
+	[dblEquityPaid] NUMERIC(18,6),
+	[ysnPriorYear] BIT
 )
 
 CREATE TABLE #tempVoucherReference(
@@ -45,10 +46,21 @@ IF(@equityPaymentIds = 'all')
 			 , strName					= EM.strName
 			 , ysnVendor				= APV.Vendor
 			 , dblEquityPaid			= EPS.dblEquityPaid
+			 , ysnPriorYear =	CASE WHEN CAST(GLFYP.strFiscalYear AS INT) > CAST(GLFY.strFiscalYear AS INT) THEN 1 ELSE 0 END
 		FROM tblPATEquityPay EP
 		INNER JOIN tblPATEquityPaySummary EPS ON EPS.intEquityPayId = EP.intEquityPayId
 		INNER JOIN tblEMEntity EM ON EM.intEntityId = EPS.intCustomerPatronId
 		LEFT OUTER JOIN vyuEMEntityType APV ON APV.intEntityId = EPS.intCustomerPatronId
+		OUTER APPLY (
+			SELECT TOP 1 strFiscalYear
+			FROM tblGLFiscalYear
+			WHERE intFiscalYearId = EP.intFiscalYearId
+		) GLFY
+		OUTER APPLY (
+			SELECT TOP 1 strFiscalYear
+			FROM tblGLFiscalYear
+			WHERE EP.dtmPaymentDate BETWEEN dtmDateFrom AND dtmDateTo
+		) GLFYP
 		WHERE EP.intEquityPayId = @equityPay
 		  AND EPS.intBillId IS NULL
 	END
@@ -64,11 +76,22 @@ ELSE
 			 , strName					= EM.strName
 			 , ysnVendor				= APV.Vendor
 			 , dblEquityPaid			= EPS.dblEquityPaid
+			 , ysnPriorYear =	CASE WHEN CAST(GLFYP.strFiscalYear AS INT) > CAST(GLFY.strFiscalYear AS INT) THEN 1 ELSE 0 END
 		FROM tblPATEquityPay EP
 		INNER JOIN tblPATEquityPaySummary EPS ON EPS.intEquityPayId = EP.intEquityPayId
 		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@equityPaymentIds) DV ON EPS.intEquityPaySummaryId = DV.intID
 		INNER JOIN tblEMEntity EM ON EM.intEntityId = EPS.intCustomerPatronId
 		LEFT OUTER JOIN vyuEMEntityType APV ON APV.intEntityId = EPS.intCustomerPatronId
+		OUTER APPLY (
+			SELECT TOP 1 strFiscalYear
+			FROM tblGLFiscalYear
+			WHERE intFiscalYearId = EP.intFiscalYearId
+		) GLFY
+		OUTER APPLY (
+			SELECT TOP 1 strFiscalYear
+			FROM tblGLFiscalYear
+			WHERE EP.dtmPaymentDate BETWEEN dtmDateFrom AND dtmDateTo
+		) GLFYP
 		WHERE EPS.intBillId IS NULL
 	END
 
@@ -129,6 +152,7 @@ BEGIN TRY
 		, [int1099Form]
 		, [int1099Category]
 		, [dbl1099]
+		, [ysnStage]
 	)
 	SELECT [intPartitionId]			= EquityPay.intEquityPaySummaryId
 		, [intEntityVendorId]		= EquityPay.intCustomerPatronId
@@ -139,9 +163,10 @@ BEGIN TRY
 		, [intAccountId]			= @intAPClearing
 		, [dblQuantityToBill]		= 1
 		, [dblCost]					= ROUND(EquityPay.dblEquityPaid, 2)
-		, [int1099Form]				= CASE WHEN EquityPay.ysnQualified = 1 THEN 4 ELSE 0 END
-		, [int1099Category]			= CASE WHEN EquityPay.ysnQualified = 1 THEN 5 ELSE 0 END
+		, [int1099Form]				= CASE WHEN EquityPay.ysnQualified = 1 AND EquityPay.ysnPriorYear = 0 THEN 4 ELSE 0 END
+		, [int1099Category]			= CASE WHEN EquityPay.ysnQualified = 1 AND EquityPay.ysnPriorYear = 0 THEN 5 ELSE 0 END
 		, [dbl1099]					= CASE WHEN EquityPay.ysnQualified = 1 THEN ROUND(EquityPay.dblEquityPaid, 2) ELSE 0 END
+		, [ysnStage]				= 0
 	FROM #tempEquityPayments EquityPay	
 			
 	EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable

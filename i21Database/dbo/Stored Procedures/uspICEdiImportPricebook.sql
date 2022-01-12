@@ -37,10 +37,13 @@ DECLARE
 	,@insertedVendorXRef AS INT = 0 
 	,@updatedItemLocation AS INT = 0
 	,@insertedItemLocation AS INT = 0 
-
+	,@insertedProductClass AS INT = 0 
+	,@insertedFamilyClass AS INT = 0 
+	
 	,@originalPricebookCount AS INT = 0 
 	,@duplicatePricebookCount AS INT = 0 
 	,@missingVendorCategoryXRef AS INT = 0 
+	,@duplicate2ndUOMUPCCode AS INT = 0 
 	
 DECLARE 
 	@TotalRowsUpdated AS INT = 0 
@@ -126,8 +129,8 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItem') IS NULL
 		,strAction NVARCHAR(50) NULL
 		,intBrandId_Old INT NULL 
 		,intBrandId_New INT NULL 
-		,strDescription_Old NVARCHAR(50) NULL
-		,strDescription_New NVARCHAR(50) NULL 
+		,strDescription_Old NVARCHAR(250) NULL
+		,strDescription_New NVARCHAR(250) NULL 
 		,strShortName_Old NVARCHAR(50) NULL
 		,strShortName_New NVARCHAR(50) NULL
 		,strItemNo_Old NVARCHAR(50) NULL
@@ -155,8 +158,8 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemVendorXref') IS NULL
 		,intVendorId_New INT NULL 
 		,strVendorProduct_Old NVARCHAR(50) NULL
 		,strVendorProduct_New NVARCHAR(50) NULL 
-		,strProductDescription_Old NVARCHAR(50) NULL
-		,strProductDescription_New NVARCHAR(50) NULL
+		,strProductDescription_Old NVARCHAR(250) NULL
+		,strProductDescription_New NVARCHAR(250) NULL
 	)
 ;
 
@@ -404,6 +407,70 @@ FROM (
 	) x
 WHERE
 	x.row_no > 1 
+	
+-- Log the duplicate UPC code for the 2nd UOM. 
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, intRecordNumber
+	, 'strOrderCaseUpcNumber'
+	, strOrderCaseUpcNumber
+	, 'Duplicate UPC code is used for ' + strOrderPackageDescription
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM 
+	tblICEdiPricebook p
+	LEFT JOIN tblICItemUOM u 
+		--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+		ON (
+			ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+			OR u.intUpcCode = 
+				CASE 
+					WHEN p.strSellingUpcNumber IS NOT NULL 
+						AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+						AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+					THEN 
+						CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+					ELSE 
+						CAST(NULL AS BIGINT) 	
+				END		
+		)
+	OUTER APPLY (
+		SELECT TOP 1 
+			i.intItemId 
+		FROM
+			tblICItem i 
+		WHERE
+			i.intItemId = u.intItemId
+			OR i.strItemNo = p.strSellingUpcNumber
+	) i
+	OUTER APPLY (
+		SELECT TOP 1 
+			iu.intItemUOMId 
+		FROM 
+			tblICItemUOM iu
+		WHERE
+			iu.intItemId = i.intItemId
+			AND iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
+	) existUOM
+WHERE
+	p.strUniqueId = @UniqueId
+	AND i.intItemId IS NOT NULL 
+	AND NULLIF(p.strOrderCaseUpcNumber, '') IS NOT NULL 
+	AND p.ysnAddOrderingUPC = 1
+	AND existUOM.intItemUOMId IS NOT NULL  
 
 IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
 	GOTO _Exit_With_Errors
@@ -453,21 +520,41 @@ FROM (
 		SELECT 
 			i.intItemId 
 			,intBrandId = ISNULL(b.intBrandId, i.intBrandId)
-			,strDescription = ISNULL(NULLIF(p.strSellingUpcLongDescription, ''), i.strDescription)
-			,strShortName = ISNULL(ISNULL(NULLIF(p.strSellingUpcShortDescription, ''), SUBSTRING(p.strSellingUpcLongDescription, 1, 15)), i.strShortName)
+			,strDescription = CAST(ISNULL(NULLIF(p.strSellingUpcLongDescription, ''), i.strDescription) AS NVARCHAR(250))
+			,strShortName = CAST(ISNULL(ISNULL(NULLIF(p.strSellingUpcShortDescription, ''), SUBSTRING(p.strSellingUpcLongDescription, 1, 15)), i.strShortName) AS NVARCHAR(50))
 			,b.intManufacturerId 
 			,intDuplicateItemId = dup.intItemId 
 			,p.* 
 		FROM 
 			tblICEdiPricebook p
 			LEFT JOIN tblICItemUOM u 
-				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			LEFT JOIN tblICItem i 
 				ON i.intItemId = u.intItemId
 			LEFT JOIN tblICBrand b 
 				ON b.strBrandName = p.strManufacturersBrandName	
-			LEFT JOIN tblICItem dup
-				ON dup.strItemNo = p.strSellingUpcNumber
+			OUTER APPLY (
+				SELECT TOP 1 
+					dup.*
+				FROM 
+					tblICItem dup
+				WHERE
+					dup.strItemNo = p.strSellingUpcNumber			
+			) dup
+			
 		WHERE
 			p.strUniqueId = @UniqueId		
 	) AS Source_Query  
@@ -575,7 +662,20 @@ FROM (
 		FROM 
 			tblICEdiPricebook p
 			LEFT JOIN tblICItemUOM u 
-				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			OUTER APPLY (
 				SELECT TOP 1 
 					i.intItemId 
@@ -601,7 +701,7 @@ FROM (
 				WHERE
 					s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
 				ORDER BY 
-					m.intUnitMeasureId 
+					s.intUnitMeasureId 
 			) s
 			OUTER APPLY (
 				SELECT TOP 1 
@@ -682,6 +782,70 @@ FROM (
 SELECT @updatedItemUOM = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemUOM WHERE strAction = 'UPDATE'
 SELECT @insertedItemUOM = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemUOM WHERE strAction = 'INSERT'
 
+-- Create the valid list of 2nd UOM
+DECLARE @valid2ndUOM AS TABLE (
+	intEdiPricebookId INT 
+	,strLongUPCCode NVARCHAR(50) NULL 
+)
+
+INSERT INTO @valid2ndUOM (
+	intEdiPricebookId
+	,strLongUPCCode
+)
+SELECT  
+	p.intEdiPricebookId
+	,p.strOrderCaseUpcNumber
+FROM 
+	tblICEdiPricebook p
+	LEFT JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	OUTER APPLY (
+		SELECT TOP 1 
+			i.intItemId 
+		FROM
+			tblICItem i 
+		WHERE
+			i.intItemId = u.intItemId
+			OR i.strItemNo = p.strSellingUpcNumber
+	) i		
+WHERE
+	p.strUniqueId = @UniqueId
+	AND i.intItemId IS NOT NULL 
+	AND NULLIF(p.strCaseBoxSizeQuantityPerCaseBox, '') IS NOT NULL 
+	AND NULLIF(p.strOrderPackageDescription, '') IS NOT NULL 
+	AND p.ysnAddOrderingUPC = 1
+
+SELECT @duplicate2ndUOMUPCCode = @@ROWCOUNT;
+
+-- Remove the duplicate records in @valid2ndUOM
+;WITH deleteDuplicate2ndUOMLongUPC_CTE (
+	intEdiPricebookId
+	,strLongUPCCode
+	,dblDuplicateCount
+)
+AS (
+	
+	SELECT 
+		p.intEdiPricebookId
+		,p.strLongUPCCode
+		,dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
+	FROM 
+		@valid2ndUOM p
+)
+DELETE FROM deleteDuplicate2ndUOMLongUPC_CTE
+WHERE dblDuplicateCount > 1;
+
+-- Remove the duplicate records in @valid2ndUOM
+DELETE p 
+FROM 
+	tblICItemUOM iu RIGHT JOIN @valid2ndUOM p
+		ON iu.strLongUPCCode = p.strLongUPCCode COLLATE Latin1_General_CI_AS
+WHERE
+	iu.intItemUOMId IS NOT NULL 
+
+SELECT @duplicate2ndUOMUPCCode = ISNULL(@duplicate2ndUOMUPCCode, 0) - COUNT(1) 
+FROM  @valid2ndUOM
+
 -- Insert 2nd UOM
 INSERT INTO tblICItemUOM (			
 	intItemId
@@ -712,8 +876,24 @@ SELECT
 	,intDataSourceId = 2
 FROM 
 	tblICEdiPricebook p
+	INNER JOIN @valid2ndUOM v
+		ON p.intEdiPricebookId = v.intEdiPricebookId
+
 	LEFT JOIN tblICItemUOM u 
-		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+		--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+		ON (
+			ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+			OR u.intUpcCode = 
+				CASE 
+					WHEN p.strSellingUpcNumber IS NOT NULL 
+						AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+						AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+					THEN 
+						CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+					ELSE 
+						CAST(NULL AS BIGINT) 	
+				END		
+		)
 	OUTER APPLY (
 		SELECT TOP 1 
 			i.intItemId 
@@ -721,7 +901,7 @@ FROM
 			tblICItem i 
 		WHERE
 			i.intItemId = u.intItemId
-			OR i.strItemNo = p.strSellingUpcNumber
+			OR (i.strItemNo = p.strSellingUpcNumber AND u.intItemId IS NULL) 
 	) i			
 	OUTER APPLY (			
 		SELECT TOP 1 
@@ -739,7 +919,7 @@ FROM
 		WHERE
 			s.strSymbol = NULLIF(p.strOrderPackageDescription, '')
 		ORDER BY 
-			m.intUnitMeasureId 
+			s.intUnitMeasureId 
 	) s
 	OUTER APPLY (
 		SELECT TOP 1 
@@ -759,6 +939,14 @@ FROM
 			iu.intItemId = i.intItemId
 			AND iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
 	) existUOM
+	OUTER APPLY (
+		SELECT TOP 1 
+			iu.intItemUOMId
+		FROM 
+			tblICItemUOM iu
+		WHERE
+			iu.strLongUPCCode = p.strOrderCaseUpcNumber
+	) existUPCCode
 WHERE
 	p.strUniqueId = @UniqueId
 	AND i.intItemId IS NOT NULL 
@@ -767,8 +955,75 @@ WHERE
 	AND p.ysnAddOrderingUPC = 1
 	AND stockUnit.intItemUOMId IS NOT NULL 
 	AND existUOM.intItemUOMId IS NULL  
+	AND existUPCCode.intItemUOMId IS NULL 
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
+
+-- Insert the Product Sub Category if it does not exists 
+INSERT INTO tblSTSubcategory (
+	strSubcategoryType
+	,strSubcategoryId
+	,intConcurrencyId
+)
+SELECT 
+	DISTINCT 
+	strSubcategoryType = 'C'
+	,strSubcategoryId = CAST(p.strProductClass AS NVARCHAR(8)) 
+	,intConcurrencyId = 1	
+FROM 
+	tblICEdiPricebook p LEFT JOIN tblSTSubcategory sc 
+		ON sc.strSubcategoryId = CAST(NULLIF(p.strProductClass, '') AS NVARCHAR(8))
+		AND sc.strSubcategoryType = 'C'
+WHERE
+	sc.intSubcategoryId IS NULL 
+	AND NULLIF(p.strProductClass, '') IS NOT NULL 
+
+SET @insertedProductClass = ISNULL(@insertedProductClass, 0) + @@ROWCOUNT;
+
+-- Insert the Family Sub Category if it does not exists 
+INSERT INTO tblSTSubcategory (
+	strSubcategoryType
+	,strSubcategoryId
+	,intConcurrencyId
+)
+SELECT 
+	DISTINCT 
+	strSubcategoryType = 'F'
+	,strSubcategoryId = CAST(p.strProductFamily AS NVARCHAR(8)) 
+	,intConcurrencyId = 1	
+FROM 
+	tblICEdiPricebook p LEFT JOIN tblSTSubcategory sc 
+		ON sc.strSubcategoryId = CAST(NULLIF(p.strProductFamily, '') AS NVARCHAR(8))
+		AND sc.strSubcategoryType = 'F'
+WHERE
+	sc.intSubcategoryId IS NULL 
+	AND NULLIF(p.strProductFamily, '') IS NOT NULL 
+
+SET @insertedFamilyClass = ISNULL(@insertedFamilyClass, 0) + @@ROWCOUNT;
+
+-- Check if import is for all locations
+DECLARE @ValidLocations UdtCompanyLocations 
+IF EXISTS (SELECT TOP 1 1 FROM @Locations WHERE intCompanyLocationId = -1) 
+BEGIN 
+	INSERT INTO @ValidLocations (
+		intCompanyLocationId
+	) 
+	SELECT 
+		ss.intCompanyLocationId
+	FROM	
+		tblSTStore ss INNER JOIN tblSMCompanyLocation cl  
+			ON ss.intCompanyLocationId = cl.intCompanyLocationId
+END 
+ELSE
+BEGIN 
+	INSERT INTO @ValidLocations (
+		intCompanyLocationId
+	) 
+	SELECT 
+		intCompanyLocationId
+	FROM	
+		@Locations
+END 
 
 -- Upsert the Item Location 
 INSERT INTO #tmpICEdiImportPricebook_tblICItemLocation (
@@ -793,62 +1048,151 @@ FROM (
 			SELECT 
 				i.intItemId
 				,l.intItemLocationId
-				,intClassId = ISNULL(ISNULL(sc.intSubcategoryId, catLoc.intClassId), l.intClassId)
-				,intFamilyId = ISNULL(ISNULL(sf.intSubcategoryId, catLoc.intFamilyId), l.intFamilyId)
+				,intClassId = COALESCE(sc.intSubcategoryId, catLoc.intClassId, l.intClassId)
+				,intFamilyId = COALESCE(sf.intSubcategoryId, catLoc.intFamilyId, l.intFamilyId)
 				,ysnDepositRequired = ISNULL(CASE p.strDepositRequired WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.ysnDepositRequired)
 				,ysnPromotionalItem = ISNULL(CASE p.strPromotionalItem WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.ysnPromotionalItem)
 				,ysnPrePriced = ISNULL(ISNULL(CASE p.strPrePriced WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, catLoc.ysnPrePriced), l.ysnPrePriced)
 				,dblSuggestedQty = ISNULL(NULLIF(p.strSuggestedOrderQuantity, ''), l.dblSuggestedQty)
 				,dblMinOrder = ISNULL(NULLIF(p.strMinimumOrderQuantity, ''), l.dblMinOrder)
 				,intBottleDepositNo = ISNULL(NULLIF(p.strBottleDepositNumber, ''), l.intBottleDepositNo)
-				,ysnTaxFlag1 = ISNULL(l.ysnTaxFlag1, catLoc.ysnUseTaxFlag1)
-				,ysnTaxFlag2 = ISNULL(l.ysnTaxFlag2, catLoc.ysnUseTaxFlag2)
-				,ysnTaxFlag3 = ISNULL(l.ysnTaxFlag3, catLoc.ysnUseTaxFlag3)
-				,ysnTaxFlag4 = ISNULL(l.ysnTaxFlag4, catLoc.ysnUseTaxFlag4)
-				,ysnApplyBlueLaw1 = ISNULL(l.ysnApplyBlueLaw1, catLoc.ysnBlueLaw1)
-				,ysnApplyBlueLaw2 = ISNULL(l.ysnApplyBlueLaw2, catLoc.ysnBlueLaw2)
-				,intProductCodeId = ISNULL(l.intProductCodeId, catLoc.intProductCodeId)
-				,ysnFoodStampable = ISNULL(l.ysnFoodStampable, catLoc.ysnFoodStampable)
-				,ysnReturnable = ISNULL(l.ysnReturnable, catLoc.ysnReturnable)
-				,ysnSaleable = ISNULL(l.ysnSaleable, catLoc.ysnSaleable)
-				,ysnIdRequiredCigarette = ISNULL(l.ysnIdRequiredCigarette, catLoc.ysnIdRequiredCigarette)
-				,ysnIdRequiredLiquor = ISNULL(l.ysnIdRequiredLiquor, catLoc.ysnIdRequiredLiquor)
-				,intMinimumAge = ISNULL(l.intMinimumAge, catLoc.intMinimumAge)
+				,ysnTaxFlag1 = catLoc.ysnUseTaxFlag1--ISNULL(l.ysnTaxFlag1, catLoc.ysnUseTaxFlag1)
+				,ysnTaxFlag2 = catLoc.ysnUseTaxFlag2--ISNULL(l.ysnTaxFlag2, catLoc.ysnUseTaxFlag2)
+				,ysnTaxFlag3 = catLoc.ysnUseTaxFlag3--ISNULL(l.ysnTaxFlag3, catLoc.ysnUseTaxFlag3)
+				,ysnTaxFlag4 = catLoc.ysnUseTaxFlag4--ISNULL(l.ysnTaxFlag4, catLoc.ysnUseTaxFlag4)
+				,ysnApplyBlueLaw1 = catLoc.ysnBlueLaw1--ISNULL(l.ysnApplyBlueLaw1, catLoc.ysnBlueLaw1)
+				,ysnApplyBlueLaw2 = catLoc.ysnBlueLaw2--ISNULL(l.ysnApplyBlueLaw2, catLoc.ysnBlueLaw2)
+				,intProductCodeId = catLoc.intProductCodeId--ISNULL(l.intProductCodeId, catLoc.intProductCodeId)
+				,ysnFoodStampable = catLoc.ysnFoodStampable--ISNULL(l.ysnFoodStampable, catLoc.ysnFoodStampable)
+				,ysnReturnable = catLoc.ysnReturnable--ISNULL(l.ysnReturnable, catLoc.ysnReturnable)
+				,ysnSaleable = catLoc.ysnSaleable--ISNULL(l.ysnSaleable, catLoc.ysnSaleable)
+				,ysnIdRequiredCigarette = catLoc.ysnIdRequiredCigarette--ISNULL(l.ysnIdRequiredCigarette, catLoc.ysnIdRequiredCigarette)
+				,ysnIdRequiredLiquor = catLoc.ysnIdRequiredLiquor--ISNULL(l.ysnIdRequiredLiquor, catLoc.ysnIdRequiredLiquor)
+				,intMinimumAge = catLoc.intMinimumAge--ISNULL(l.intMinimumAge, catLoc.intMinimumAge)
 				,intCountGroupId = cg.intCountGroupId
-				,intLocationId = l.intCompanyLocationId 
+				,intLocationId = loc.intCompanyLocationId 
 				,p.ysnAddOrderingUPC
 				,p.ysnUpdateExistingRecords
 				,p.ysnAddNewRecords
 				,p.ysnUpdatePrice
+				,v.intEntityId
+				,intIssueUOMId = saleUOM.intItemUOMId
+				,intReceiveUOMId = receiveUOM.intItemUOMId
 			FROM tblICEdiPricebook p
 				INNER JOIN tblICItemUOM u 
-					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					ON (
+						ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+						OR u.intUpcCode = 
+							CASE 
+								WHEN p.strSellingUpcNumber IS NOT NULL 
+									AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+									AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+								THEN 
+									CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+								ELSE 
+									CAST(NULL AS BIGINT) 	
+							END		
+					)
 				INNER JOIN tblICItem i 
 					ON i.intItemId = u.intItemId
 				LEFT JOIN tblICCategory cat 
 					ON cat.intCategoryId = i.intCategoryId
 				LEFT JOIN tblSTSubcategory sc 
-					ON sc.strSubcategoryId = NULLIF(p.strProductClass, '')
+					ON sc.strSubcategoryId = CAST(NULLIF(p.strProductClass, '') AS NVARCHAR(8))
 					AND sc.strSubcategoryType = 'C'
 				LEFT JOIN tblSTSubcategory sf 
-					ON sf.strSubcategoryId = NULLIF(p.strProductFamily, '')
+					ON sf.strSubcategoryId = CAST(NULLIF(p.strProductFamily, '') AS NVARCHAR(8)) 
 					AND sf.strSubcategoryType = 'F'
 				LEFT JOIN tblICCountGroup cg
 					ON cg.strCountGroup = p.strInventoryGroup
 				OUTER APPLY (
 					SELECT 
-						loc.intCompanyLocationId 
-						,l.*
+						loc.intCompanyLocationId 					
 					FROM 						
-						@Locations loc INNER JOIN tblSMCompanyLocation cl 
+						@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 							ON loc.intCompanyLocationId = cl.intCompanyLocationId
-						LEFT JOIN tblICItemLocation l 
-							ON l.intItemId = i.intItemId
-							AND loc.intCompanyLocationId = l.intLocationId
+				) loc
+				OUTER APPLY (
+					SELECT TOP 1 
+						l.*
+					FROM 						
+						tblICItemLocation l 
+					WHERE
+						l.intItemId = i.intItemId
+						AND l.intLocationId = loc.intCompanyLocationId
 				) l
 				LEFT JOIN tblICCategoryLocation catLoc 
 					ON catLoc.intCategoryId = cat.intCategoryId
 					AND catLoc.intLocationId = l.intLocationId
+
+				-- Issue (Sale) UOM: strItemUnitOfMeasure 
+				OUTER APPLY (			
+					SELECT TOP 1 
+						m.*
+					FROM tblICUnitMeasure m 
+					WHERE
+						m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+					ORDER BY 
+						m.intUnitMeasureId 
+				) saleUnitMeasure
+				OUTER APPLY (
+					SELECT TOP 1 
+						s.*
+					FROM tblICUnitMeasure s 
+					WHERE
+						s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+					ORDER BY 
+						s.intUnitMeasureId 
+				) saleSymbol
+				OUTER APPLY (
+					SELECT TOP 1 
+						saleUOM.intItemUOMId					
+					FROM 
+						tblICItemUOM saleUOM
+					WHERE
+						saleUOM.intItemId = i.intItemId
+						AND saleUOM.intUnitMeasureId = ISNULL(saleUnitMeasure.intUnitMeasureId, saleSymbol.intUnitMeasureId) 
+				) saleUOM
+
+				-- Receive (Purchase) UOM: strOrderPackageDescription
+				OUTER APPLY (			
+					SELECT TOP 1 
+						m.*
+					FROM tblICUnitMeasure m 
+					WHERE
+						m.strUnitMeasure = NULLIF(p.strOrderPackageDescription, '')
+					ORDER BY 
+						m.intUnitMeasureId 
+				) receiveUnitMeasure
+				OUTER APPLY (
+					SELECT TOP 1 
+						s.*
+					FROM tblICUnitMeasure s 
+					WHERE
+						s.strSymbol = NULLIF(p.strOrderPackageDescription, '')
+					ORDER BY 
+						s.intUnitMeasureId 
+				) receiveSymbol
+				OUTER APPLY (
+					SELECT TOP 1 
+						receiveUOM.intItemUOMId					
+					FROM 
+						tblICItemUOM receiveUOM
+					WHERE
+						receiveUOM.intItemId = i.intItemId
+						AND receiveUOM.intUnitMeasureId = ISNULL(receiveUnitMeasure.intUnitMeasureId, receiveSymbol.intUnitMeasureId) 
+				) receiveUOM
+
+				OUTER APPLY (
+					SELECT TOP 1 
+						v.* 
+					FROM 
+						vyuAPVendor v
+					WHERE 
+						(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+						OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+				) v	
 			WHERE
 				p.strUniqueId = @UniqueId
 	) AS Source_Query  
@@ -883,6 +1227,9 @@ FROM (
 			, ItemLocation.intMinimumAge = Source_Query.intMinimumAge
 			, ItemLocation.intCountGroupId = Source_Query.intCountGroupId
 			, ItemLocation.intConcurrencyId = ItemLocation.intConcurrencyId + 1
+			, ItemLocation.intIssueUOMId = Source_Query.intIssueUOMId
+			, ItemLocation.intReceiveUOMId = Source_Query.intReceiveUOMId
+			, ItemLocation.intVendorId = Source_Query.intEntityId
 
 	-- If none is found, insert a new item location 
 	WHEN 
@@ -966,16 +1313,16 @@ FROM (
 		VALUES (
 			Source_Query.intItemId --intItemId
 			,Source_Query.intLocationId --,intLocationId
-			,DEFAULT--,intVendorId
+			,Source_Query.intEntityId --,intVendorId
 			,DEFAULT--,strDescription
 			,1--,intCostingMethod
 			,3--,intAllowNegativeInventory
 			,DEFAULT--,intSubLocationId
 			,DEFAULT--,intStorageLocationId
-			,DEFAULT--,intIssueUOMId
-			,DEFAULT--,intReceiveUOMId
+			,Source_Query.intIssueUOMId--,intIssueUOMId
+			,Source_Query.intReceiveUOMId--,intReceiveUOMId
 			,DEFAULT--,intGrossUOMId
-			,DEFAULT--,intFamilyId
+			,Source_Query.intFamilyId--,intFamilyId
 			,Source_Query.intClassId--,intClassId
 			,Source_Query.intProductCodeId--,intProductCodeId
 			,DEFAULT--,intFuelTankId
@@ -1025,7 +1372,7 @@ FROM (
 			,DEFAULT--,ysnCountedDaily
 			,1--,intAllowZeroCostTypeId
 			,DEFAULT--,ysnLockedInventory
-			,DEFAULT--,ysnStorageUnitRequired
+			,0--,ysnStorageUnitRequired
 			,DEFAULT--,strStorageUnitNo
 			,DEFAULT--,intCostAdjustmentType
 			,1--,ysnActive
@@ -1142,7 +1489,20 @@ FROM (
 			,p.ysnUpdatePrice
 		FROM tblICEdiPricebook p
 			INNER JOIN tblICItemUOM u 
-				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			INNER JOIN tblICItem i 
 				ON i.intItemId = u.intItemId
 			OUTER APPLY (
@@ -1150,7 +1510,7 @@ FROM (
 					loc.intCompanyLocationId 
 					,l.*
 				FROM 						
-					@Locations loc INNER JOIN tblSMCompanyLocation cl 
+					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 						ON loc.intCompanyLocationId = cl.intCompanyLocationId
 					INNER JOIN tblICItemLocation l 
 						ON l.intItemId = i.intItemId
@@ -1283,14 +1643,28 @@ FROM (
 			,p.ysnUpdatePrice
 
 		FROM tblICEdiPricebook p
-			INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+			INNER JOIN tblICItemUOM u 
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			INNER JOIN tblICItem i ON i.intItemId = u.intItemId
 			OUTER APPLY (
 				SELECT 
 					loc.intCompanyLocationId 
 					,l.*
 				FROM 						
-					@Locations loc INNER JOIN tblICItemLocation l 
+					@ValidLocations loc INNER JOIN tblICItemLocation l 
 						ON l.intItemId = i.intItemId
 						AND loc.intCompanyLocationId = l.intLocationId
 			) il
@@ -1417,14 +1791,27 @@ FROM (
 				i.intItemId 
 				,v.intEntityId 
 				,p.strSellingUpcNumber
-				,p.strVendorsItemNumberForOrdering
-				,p.strSellingUpcLongDescription
+				,strVendorsItemNumberForOrdering = CAST(p.strVendorsItemNumberForOrdering AS NVARCHAR(50)) 
+				,strSellingUpcLongDescription = CAST(p.strSellingUpcLongDescription AS NVARCHAR(250)) 
 				,u.intItemUOMId 
 				,u.dblUnitQty
 			FROM 
 				tblICEdiPricebook p 
 				INNER JOIN tblICItemUOM u 
-					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					ON (
+						ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+						OR u.intUpcCode = 
+							CASE 
+								WHEN p.strSellingUpcNumber IS NOT NULL 
+									AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+									AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+								THEN 
+									CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+								ELSE 
+									CAST(NULL AS BIGINT) 	
+							END		
+					)
 				INNER JOIN tblICItem i 
 					ON i.intItemId = u.intItemId
 				CROSS APPLY (
@@ -1447,7 +1834,7 @@ FROM (
 	WHEN MATCHED THEN 
 		UPDATE 
 		SET		
-			strVendorProduct = Source_Query.strVendorsItemNumberForOrdering
+			strVendorProduct = Source_Query.strVendorsItemNumberForOrdering  
 			,strProductDescription = Source_Query.strSellingUpcLongDescription
 
 	-- If none is found, insert a new vendor xref
@@ -1514,8 +1901,25 @@ BEGIN
 	SELECT @TotalRowsSkipped = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strStatus = 'Skipped'
 	SELECT @TotalRowsSkipped = @TotalRowsSkipped - 1 + @duplicatePricebookCount WHERE @duplicatePricebookCount <> 0 
 
-	SET @TotalRowsUpdated = @TotalRowsUpdated + @updatedItem + @updatedItemUOM + @updatedItemLocation + @updatedItemPricing + @updatedSpecialItemPricing + @updatedVendorXRef
-	SET @TotalRowsInserted = @TotalRowsInserted + @insertedItem + @insertedItemUOM + @insertedItemLocation + @insertedItemPricing + @insertedSpecialItemPricing + @insertedVendorXRef 
+	SET @TotalRowsUpdated = 
+			@TotalRowsUpdated 
+			+ @updatedItem 
+			+ @updatedItemUOM 
+			+ @updatedItemLocation 
+			+ @updatedItemPricing 
+			+ @updatedSpecialItemPricing 
+			+ @updatedVendorXRef
+	
+	SET @TotalRowsInserted = 
+			@TotalRowsInserted 
+			+ @insertedItem 
+			+ @insertedItemUOM 
+			+ @insertedProductClass
+			+ @insertedFamilyClass			
+			+ @insertedItemLocation 
+			+ @insertedItemPricing 
+			+ @insertedSpecialItemPricing 
+			+ @insertedVendorXRef 
 
 END 
 
@@ -1564,6 +1968,43 @@ BEGIN
 		WHERE 
 			@insertedItem <> 0 
 	END 
+
+	-- Log the records with duplicate records
+	INSERT INTO tblICImportLogDetail(
+		intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId
+	)
+	SELECT 
+		@LogId
+		, 'Warning'
+		, NULL
+		, NULL 
+		, NULL 
+		, dbo.fnFormatMessage(
+			'There are %i duplicate 2nd UPC Code(s) found in the file.'
+			,@duplicate2ndUOMUPCCode
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+		)
+		, 'Skipped'
+		, 'Record not imported.'
+		, 1
+	WHERE 
+		@duplicate2ndUOMUPCCode <> 0
 
 	-- Log the updated items. 
 	IF @updatedItem <> 0 
@@ -1620,6 +2061,62 @@ BEGIN
 		WHERE 
 			@insertedItemUOM <> 0 
 	END 
+
+	-- Log the created product class
+	IF @insertedProductClass <> 0 
+	BEGIN 
+		INSERT INTO tblICImportLogDetail(
+			intImportLogId
+			, strType
+			, intRecordNo
+			, strField
+			, strValue
+			, strMessage
+			, strStatus
+			, strAction
+			, intConcurrencyId
+		)
+		SELECT 
+			@LogId
+			, 'Info'
+			, NULL
+			, NULL 
+			, NULL 
+			, dbo.fnFormatMessage('%i Product class(es) are created.', @insertedProductClass,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT)
+			, 'Success'
+			, 'Updated'
+			, 1
+		WHERE 
+			@insertedProductClass <> 0 
+	END
+
+	-- Log the created family class
+	IF @insertedFamilyClass <> 0 
+	BEGIN 
+		INSERT INTO tblICImportLogDetail(
+			intImportLogId
+			, strType
+			, intRecordNo
+			, strField
+			, strValue
+			, strMessage
+			, strStatus
+			, strAction
+			, intConcurrencyId
+		)
+		SELECT 
+			@LogId
+			, 'Info'
+			, NULL
+			, NULL 
+			, NULL 
+			, dbo.fnFormatMessage('%i Family class(es) are created.', @insertedFamilyClass,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT)
+			, 'Success'
+			, 'Updated'
+			, 1
+		WHERE 
+			@insertedFamilyClass <> 0 
+	END
 
 	-- Log the updated item uom. 
 	IF @updatedItemUOM <> 0 

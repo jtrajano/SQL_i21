@@ -159,14 +159,53 @@ IF ISNULL(@intUserId, 0) = 0
 
 IF EXISTS(SELECT TOP 1 NULL FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1)
 	BEGIN
-		DECLARE @strErrorMsgOverpayment		NVARCHAR(500) = ''
-
-		SELECT TOP 1 @strErrorMsgOverpayment = 'Cannot process ' + strRecordNumber + ' to NSF. It has Overpayment (' + strInvoiceNumber + ') that was already used.'
-		FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1
-
-		DELETE FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId
-		RAISERROR(@strErrorMsgOverpayment, 16, 1) 
-		RETURN 0;
+		INSERT INTO @InvoiceEntries (
+			  [strTransactionType]
+			, [strType]
+			, [strSourceTransaction]
+			, [intSourceId]
+			, [strSourceId]
+			, [intEntityCustomerId]
+			, [intCompanyLocationId]			
+			, [intCurrencyId]
+			, [intEntityId]
+			, [dtmDate]
+			, [dtmDueDate]
+			, [dtmShipDate]
+			, [dtmPostDate]
+			, [strComments]
+			, [ysnPost]
+			, [intSalesAccountId]
+			, [ysnInventory]
+			, [strItemDescription]
+			, [dblQtyShipped]
+			, [dblPrice]
+			, [intTaxGroupId]
+			, [ysnRecomputeTax]
+		)
+		SELECT [strTransactionType]		= 'Invoice' 
+			 , [strType]				= 'Standard'
+			 , [strSourceTransaction]	= 'Direct'
+			 , [intSourceId]			= P.intTransactionId
+			 , [strSourceId]			= P.strTransactionNumber
+			 , [intEntityCustomerId]	= P.intEntityCustomerId
+			 , [intCompanyLocationId]	= P.intCompanyLocationId			 
+			 , [intCurrencyId]			= P.intCurrencyId
+			 , [intEntityId]			= @intUserId
+			 , [dtmDate]				= P.dtmDate
+			 , [dtmDueDate]				= P.dtmDate
+			 , [dtmShipDate]			= P.dtmDate
+			 , [dtmPostDate]			= P.dtmDate
+			 , [strComments]			= 'NSF Overpayment from ' + P.strTransactionNumber
+			 , [ysnPost]				= 1
+			 , [intSalesAccountId]		= P.intNSFAccountId
+			 , [ysnInventory]			= 0
+			 , [strItemDescription]		= 'NSF Overpayment from ' + P.strTransactionNumber
+			 , [dblQtyShipped]			= 1
+			 , [dblPrice]				= P.dblUnappliedAmount
+			 , [intTaxGroupId]			= NULL
+			 , [ysnRecomputeTax]		= 0
+		FROM #SELECTEDPAYMENTS P
 	END
 
 SET @InitTranCount = @@TRANCOUNT
@@ -577,7 +616,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #GROUPEDCHARGES)
 			END
 		ELSE
 			BEGIN
-				SET @strMessage = 'Failed to Create Bank Transaction Entry'
+				SET @strErrorMsg = 'Failed to Create Bank Transaction Entry'
 				GOTO Do_Rollback
 			END
 
@@ -624,7 +663,14 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARNSFStagingTableDetail WHERE intNSFTransac
 	END
 ELSE
 	BEGIN
-		SELECT @strMessage = 'Bank Deposit: ' + vyu.strTransactionId + ' and Cash/Receive Payment: ' +  vyu.strRecordNumber + ' are reversed'
+		DECLARE @strInvoiceMessageForOverpyment NVARCHAR(MAX) = ''
+
+		IF ISNULL(@strInvoiceNumbers, '') <> '' AND EXISTS(SELECT TOP 1 NULL FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1)
+		BEGIN
+			SET @strInvoiceMessageForOverpyment = ' and Invoice: ' + @strInvoiceNumbers + ' is created'
+		END
+		
+		SELECT @strMessage = 'Bank Deposit: ' + vyu.strTransactionId + ' and Cash/Receive Payment: ' +  vyu.strRecordNumber + ' are reversed' + @strInvoiceMessageForOverpyment
 		     , @intPaymentId = NSFDetail.intTransactionId
 		FROM vyuARPaymentBankTransaction vyu
 		INNER JOIN tblARNSFStagingTableDetail NSFDetail
@@ -725,8 +771,9 @@ Do_Rollback:
 
 IF @InitTranCount = 0
 	BEGIN
-		IF (XACT_STATE()) = -1 OR ISNULL(@strMessage, '') <> ''
+		IF (XACT_STATE()) = -1 OR ISNULL(@strErrorMsg, '') <> ''
 		BEGIN 
+			SET @strMessage = @strErrorMsg
 			ROLLBACK TRANSACTION
 		END
 
@@ -735,8 +782,9 @@ IF @InitTranCount = 0
 	END		
 ELSE
 	BEGIN
-		IF (XACT_STATE()) = -1 OR ISNULL(@strMessage, '') <> ''
+		IF (XACT_STATE()) = -1 OR ISNULL(@strErrorMsg, '') <> ''
 		BEGIN
+			SET @strMessage = @strErrorMsg
 			ROLLBACK TRANSACTION  @Savepoint
 		END
 	END	

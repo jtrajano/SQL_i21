@@ -26,7 +26,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @intEntityId AS INT
 DECLARE @startingNumberId_InventoryReceipt AS INT = 23;
@@ -933,6 +933,7 @@ BEGIN
 				,intLoadShipmentDetailId
 				,ysnAddPayable
 				,strImportDescription
+				,intComputeItemTotalOption
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -1032,6 +1033,7 @@ BEGIN
 				,RawData.intLoadShipmentDetailId
 				,ysnAddPayable					= RawData.ysnAddPayable
 				,strImportDescription			= RawData.strImportDescription
+				,intComputeItemTotalOption		= Item.intComputeItemTotalOption
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1467,6 +1469,7 @@ BEGIN
 				,intCreatedByUserId
 				,intLoadShipmentId
 				,intLoadShipmentCostId
+				,intSort
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1499,6 +1502,7 @@ BEGIN
 				,@intUserId
 				,intLoadShipmentId			= RawData.intLoadShipmentId
 				,intLoadShipmentCostId		= RawData.intLoadShipmentCostId
+				,intSort					= RawData.intSort
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1539,6 +1543,7 @@ BEGIN
 				) taxHierarcy 
 
 		WHERE RawHeaderData.intId = @intId
+		ORDER BY RawData.intSort, RawData.intId
 
 		-- Add the taxes into the receipt. 
 		BEGIN 
@@ -1961,7 +1966,7 @@ BEGIN
 				,[intProducerId] = ItemLot.intProducerId
 				,[strCertificateId] = ItemLot.strCertificateId
 				,[strTrackingNumber] = ItemLot.strTrackingNumber 
-				,[intSort] = 1
+				,[intSort] = ISNULL(ItemLot.intSort, 1) 
 				,[intConcurrencyId] = 1
 				,[dtmDateCreated] = GETDATE()
 				,[intCreatedByUserId] = @intUserId
@@ -1988,6 +1993,9 @@ BEGIN
 			WHERE
 				Receipt.intInventoryReceiptId = @inventoryReceiptId
 				AND i.strLotTracking != 'No'
+			ORDER BY 
+				ItemLot.intSort, ItemLot.intId
+				
 		END 
 
 		-- Calculate the tax per line item 
@@ -2011,7 +2019,37 @@ BEGIN
 		SET		dblLineTotal = 
 					ROUND(
 						--ISNULL(dblTax, 0) + 
-						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+						--CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+						--			dbo.fnMultiply(
+						--				ISNULL(ReceiptItem.dblNet, 0)
+						--				,dbo.fnMultiply(
+						--					dbo.fnDivide(
+						--						ISNULL(dblUnitCost, 0) 
+						--						,ISNULL(Receipt.intSubCurrencyCents, 1) 
+						--					)
+						--					,dbo.fnDivide(
+						--						GrossNetUOM.dblUnitQty
+						--						,CostUOM.dblUnitQty 
+						--					)
+						--				)
+						--			)								 
+						--		ELSE 
+						--			dbo.fnMultiply(
+						--				ISNULL(ReceiptItem.dblOpenReceive, 0)
+						--				,dbo.fnMultiply(
+						--					dbo.fnDivide(
+						--						ISNULL(dblUnitCost, 0) 
+						--						,ISNULL(Receipt.intSubCurrencyCents, 1) 
+						--					)
+						--					,dbo.fnDivide(
+						--						ReceiveUOM.dblUnitQty
+						--						,CostUOM.dblUnitQty 
+						--					)
+						--				)
+						--			)
+						--END 
+
+						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL AND ReceiptItem.intComputeItemTotalOption = 0 THEN 
 									dbo.fnMultiply(
 										ISNULL(ReceiptItem.dblNet, 0)
 										,dbo.fnMultiply(

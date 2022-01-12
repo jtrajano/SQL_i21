@@ -182,6 +182,8 @@ BEGIN TRY
 							,[intStorageLocationId]
 							,[intSubLocationId]
 							,[ysnStage]
+							,[intBookId]
+							,[intSubBookId]
 					)
 					SELECT 
 						GP.[intEntityVendorId]
@@ -239,6 +241,8 @@ BEGIN TRY
 						,GP.intStorageLocationId
 						,GP.intSubLocationId
 						,0
+						,GP.intBookId
+						,GP.intSubBookId
 					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1) GP
 
 					END 

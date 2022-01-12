@@ -22,7 +22,7 @@ BEGIN
 	SET @ysnHasPreviewReport = 1;
 
     SET @InitTranCount = @@TRANCOUNT
-	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTUpdateRetailPriceAdjustment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTBatchRetailAdjustment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
 	BEGIN TRY
 		
@@ -43,6 +43,40 @@ BEGIN
 		SET @strMessage = ''
 		
 				
+			-- ===========================================================================================================
+			-- START Create the filter tables
+			BEGIN
+				-- Create the temp table for the audit log. 
+				IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NULL  
+					CREATE TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog (
+						intItemId INT
+						,intItemPricingId INT 
+						,dblOldStandardCost NUMERIC(38, 20) NULL
+						,dblOldSalePrice NUMERIC(38, 20) NULL
+						,dblOldLastCost NUMERIC(38, 20) NULL
+						,dblNewStandardCost NUMERIC(38, 20) NULL
+						,dblNewSalePrice NUMERIC(38, 20) NULL
+						,dblNewLastCost NUMERIC(38, 20) NULL
+					)
+				;
+
+				-- Create the temp table for the audit log. 
+				IF OBJECT_ID('tempdb..#tmpEffectivePriceForCStore_AuditLog') IS NULL  
+					CREATE TABLE #tmpEffectivePriceForCStore_AuditLog (
+						intEffectiveItemPriceId INT
+						,intItemId INT
+						,intItemLocationId INT 
+						,dblOldPrice NUMERIC(38, 20) NULL
+						,dblNewPrice NUMERIC(38, 20) NULL
+						,dtmOldEffectiveDate DATETIME NULL
+						,dtmNewEffectiveDate DATETIME NULL
+						,strAction NVARCHAR(50) NULL
+					)
+				;
+			END
+			-- END Create the filter tables
+			-- ===========================================================================================================
+			
 			-- ===========================================================================================================
 			-- START Create the batch posting table
 			BEGIN
@@ -147,32 +181,13 @@ BEGIN
 			END
 			-- END Validate if there is any future effective date on RPA
 			-- ===========================================================================================================
-			
-			-- ===========================================================================================================
-			-- START BACK UP Create the filter tables
-			BEGIN
-				-- Create the temp table for the audit log. 
-				IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog_Backup') IS NULL  
-					CREATE TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog_Backup (
-						intItemId INT
-						,intItemPricingId INT 
-						,dblOldStandardCost NUMERIC(38, 20) NULL
-						,dblOldSalePrice NUMERIC(38, 20) NULL
-						,dblOldLastCost NUMERIC(38, 20) NULL
-						,dblNewStandardCost NUMERIC(38, 20) NULL
-						,dblNewSalePrice NUMERIC(38, 20) NULL
-						,dblNewLastCost NUMERIC(38, 20) NULL
-					)
-				;
-			END
-			-- END BACK UP Create the filter tables
-			-- ===========================================================================================================
+		
 
 
 
 			IF EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 				BEGIN
-
+				
 					DECLARE @intLocationId						INT = NULL
 						, @intStoreGroupId						INT = NULL
 						, @intVendorId							INT = NULL
@@ -198,25 +213,6 @@ BEGIN
 					WHILE EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 						BEGIN
 							
-							-- ===========================================================================================================
-							-- START Create the filter tables
-							BEGIN
-								-- Create the temp table for the audit log. 
-								IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NULL  
-									CREATE TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog (
-										intItemId INT
-										,intItemPricingId INT 
-										,dblOldStandardCost NUMERIC(38, 20) NULL
-										,dblOldSalePrice NUMERIC(38, 20) NULL
-										,dblOldLastCost NUMERIC(38, 20) NULL
-										,dblNewStandardCost NUMERIC(38, 20) NULL
-										,dblNewSalePrice NUMERIC(38, 20) NULL
-										,dblNewLastCost NUMERIC(38, 20) NULL
-									)
-								;
-							END
-							-- END Create the filter tables
-							-- ===========================================================================================================
 
 							-- Get Primary Id
 							SELECT TOP 1 
@@ -242,14 +238,13 @@ BEGIN
 
 							DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@dblRetailPrice AS NUMERIC(38, 20))
 							DECLARE @dblLastCostConv AS NUMERIC(38, 20) = CAST(@dblLastCostPrice AS NUMERIC(38, 20))
-							DECLARE @dtmEffectiveDateConv AS DATETIME = @dtmEffectiveDate
-							
-							SET @intCurrentUserId = ISNULL(@intCurrentUserId, @intSavedUserId)
+
+							SET @intCurrentUserId =  ISNULL(@intCurrentUserId, @intSavedUserId)
 
 							DECLARE @CursorTran AS CURSOR
 							SET @CursorTran = CURSOR FOR
 							SELECT DISTINCT I.intItemId
-								, itemPricing.intItemPricingId
+								, itemLoc.intItemLocationId
 								, UOM.strLongUPCCode
 								, I.strDescription
 								, itemPricing.dblStandardCost
@@ -257,7 +252,7 @@ BEGIN
 								, itemPricing.dblLastCost
 							FROM tblICItem I
 							INNER JOIN tblICItemLocation itemLoc ON itemLoc.intItemId = I.intItemId
-							INNER JOIN tblICItemPricing itemPricing ON I.intItemId	= itemPricing.intItemId
+							LEFT JOIN tblICItemPricing itemPricing ON I.intItemId	= itemPricing.intItemId
 								AND itemLoc.intItemLocationId = itemPricing.intItemLocationId
 							INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = itemLoc.intLocationId
 							INNER JOIN tblAPVendor Vendor ON Vendor.intEntityId = itemLoc.intVendorId
@@ -295,15 +290,41 @@ BEGIN
 									@dblRetailPriceConvCopy  AS NUMERIC(38, 20) = @dblRetailPriceConv
 
 							OPEN @CursorTran
-							FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessItemPricingId, @strProcessLongUpcCode, @strProcessDescription, @dblStandardCost, @dblSalePrice, @dblLastCost
+							FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessLocationId, @strProcessLongUpcCode, @strProcessDescription, @dblStandardCost, @dblSalePrice, @dblLastCost
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
 								-- ITEM PRICING
 								BEGIN TRY
 
-
 								SET @dblFactor = ISNULL(@dblFactor, 0);
-								SET @dblSalePrice = ROUND(@dblSalePrice, 2)
+
+								--Needed to change
+								SET @dblSalePrice = CASE WHEN (@dtmEffectiveDate > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
+																								WHERE EIP.intItemLocationId = @intProcessLocationId 
+																								AND @dtmEffectiveDate >= dtmEffectiveRetailPriceDate
+																								AND EIP.intItemId = @intProcessItemId
+																								ORDER BY dtmEffectiveRetailPriceDate ASC))
+																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
+																								WHERE EIP.intItemLocationId = @intProcessLocationId 
+																								AND @dtmEffectiveDate >= dtmEffectiveRetailPriceDate
+																								AND EIP.intItemId = @intProcessItemId
+																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
+																	ELSE ROUND(@dblSalePrice, 2)
+																END
+								SET @dblStandardCost = CASE WHEN (@dtmEffectiveDate > (SELECT TOP 1 dtmEffectiveCostDate FROM tblICEffectiveItemCost cost 
+																								WHERE cost.intItemLocationId = @intProcessLocationId 
+																								AND @dtmEffectiveDate >= dtmEffectiveCostDate
+																								AND cost.intItemId = @intProcessItemId
+																								ORDER BY dtmEffectiveCostDate ASC))
+																		THEN (SELECT TOP 1 dblCost FROM tblICEffectiveItemCost cost 
+																								WHERE cost.intItemLocationId = @intProcessLocationId 
+																								AND @dtmEffectiveDate >= dtmEffectiveCostDate
+																								AND cost.intItemId = @intProcessItemId
+																								ORDER BY dtmEffectiveCostDate ASC) --Effective Retail Price
+																	ELSE ROUND(@dblStandardCost, 2)
+																END
+
+								SET @dblLastCost = ISNULL(@dblLastCostConv, @dblLastCost)
 									
 								IF ISNULL(@dblRetailPriceConvCopy, 0) = 0
 									BEGIN
@@ -339,30 +360,32 @@ BEGIN
 											END
 									END
 
-
 									SET @dblRetailPriceConv = ROUND(@dblRetailPriceConv, 2)
-									EXEC [uspICUpdateItemPricingForCStore]
+									EXEC [uspICUpdateEffectivePricingForCStore]
 										-- filter params
 										@strUpcCode					= @strProcessLongUpcCode 
 										,@strDescription			= @strProcessDescription 
-										,@strScreen					= 'RetailPriceAdjustment' 
 										,@intItemId					= @intProcessItemId
-										,@intItemPricingId			= @intProcessItemPricingId 
+										,@intItemLocationId			= @intProcessLocationId 
+										,@strScreen					= 'RetailPriceAdjustment' 
 										-- update params
 										,@dblStandardCost			= NULL 
 										,@dblRetailPrice			= @dblRetailPriceConv
-										,@dblLastCost				= @dblLastCostConv
-										,@dtmEffectiveDate			= @dtmEffectiveDateConv
+										,@dtmEffectiveDate			= @dtmEffectiveDate
 										,@intEntityUserSecurityId	= @intCurrentUserId
 			
 									-- Check if Successfull
-									IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intProcessItemPricingId)
+									IF EXISTS(SELECT TOP 1 1 
+												FROM #tmpEffectivePriceForCStore_AuditLog 
+												WHERE intItemId = @intProcessItemId
+												AND intItemLocationId = @intProcessLocationId
+												AND dtmNewEffectiveDate = @dtmEffectiveDate)
 									BEGIN 
 										SET @intSuccessPostCount = @intSuccessPostCount + 1
 
-									
 										INSERT INTO #tmpbatchpostingretailadjustmentId (intItemId,intRetailPriceAdjustmentId, dblPrice ) 
 										VALUES (@intProcessItemId, @intRetailPriceAdjustmentId, @dblRetailPriceConv)
+										
 									END
 									ELSE
 									BEGIN
@@ -376,38 +399,16 @@ BEGIN
 									GOTO ExitWithRollback
 								END CATCH
 
-								FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessItemPricingId, @strProcessLongUpcCode, @strProcessDescription, @dblStandardCost, @dblSalePrice, @dblLastCost
+								FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessLocationId, @strProcessLongUpcCode, @strProcessDescription, @dblStandardCost, @dblSalePrice, @dblLastCost
 							END
 								
 							CLOSE @CursorTran  
 							DEALLOCATE @CursorTran
 							
-							-- UPDATE tblRetailPriceAdjustment
-							UPDATE rpa
-								SET rpa.dtmPostedDate	= GETUTCDATE(),
-									rpa.intEntityId		= @intCurrentUserId,
-									rpa.ysnPosted		= CAST(1 AS BIT)
-							FROM tblSTRetailPriceAdjustment rpa
-							WHERE rpa.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId 
-
+							
 							-- Flag as processed
 							DELETE FROM @tblRetailPriceAdjustmentDetailIds
 							WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
-
-							INSERT INTO #tmpUpdateItemPricingForCStore_ItemPricingAuditLog_Backup
-							SELECT * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
-							
-							-- Clean up 
-							BEGIN
-								IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
-									DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
-
-								IF OBJECT_ID('tempdb..#tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog') IS NOT NULL  
-									DROP TABLE #tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog 
-						
-								IF OBJECT_ID('tempdb..#tmpUpdateItemCostForCStoreEffectiveDate_AuditLog') IS NOT NULL  
-									DROP TABLE #tmpUpdateItemCostForCStoreEffectiveDate_AuditLog 
-							END
 						END
 						
 
@@ -434,7 +435,6 @@ BEGIN
 						intItemId					INT NULL
 						, intItemUOMId				INT NULL
 						, intItemLocationId			INT NULL
-						, intItemPricingId			INT NULL
 						, intCompanyLocationId		INT
 						, dtmDateModified			DATETIME NOT NULL
 						
@@ -447,6 +447,7 @@ BEGIN
 						, strPreviewNewData			NVARCHAR(MAX)
 					)
 			
+			
 					-- Generate Preview of records changes
 					BEGIN
 						INSERT INTO @tblPreview 
@@ -454,7 +455,6 @@ BEGIN
 							intItemId
 							, intItemUOMId
 							, intItemLocationId
-							, intItemPricingId
 							, intCompanyLocationId
 							, dtmDateModified
 							
@@ -470,61 +470,53 @@ BEGIN
 								intItemId						= item.intItemId
 								, intItemUOMId					= uom.intItemUOMId
 								, intItemLocationId				= itemLoc.intItemLocationId
-								, intItemPricingId				= itemPricing.intItemPricingId
 								, intCompanyLocationId			= companyLoc.intCompanyLocationId
-								, dtmDateModified				= itemPricing.dtmDateModified
+								, dtmDateModified				= ISNULL(itemPrice.dtmDateModified, '')
 							
 								, strItemNo						= item.strItemNo
 								, strItemDescription			= item.strDescription
 								, strLongUPCCode				= uom.strLongUPCCode
 								, strLocationName				= companyLoc.strLocationName
 								, strChangeDescription			= CASE
-																	WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
-																	WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Sale Price'
-																	WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
+																	WHEN [Changes].oldColumnName = 'strPrice_Original' THEN 'Sale Price'
 																END			
 								, strPreviewOldData				= ISNULL([Changes].strOldData, '')
 								, strPreviewNewData				= ISNULL([Changes].strNewData, '')
 						FROM 
 						(
-							SELECT DISTINCT intItemId, intItemPricingId, oldColumnName, strOldData, strNewData
+							SELECT DISTINCT intItemId, intItemLocationId, intEffectiveItemPriceId, oldColumnName, strOldData, strNewData
 							FROM 
 							(
 								SELECT intItemId
-									, intItemPricingId
-									, CAST(CAST(dblOldStandardCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strStandardCost_Original
-									, CAST(CAST(dblOldSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_Original
-									, CAST(CAST(dblOldLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_Original
-									, CAST(CAST(dblNewStandardCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strStandardCost_New
-									, CAST(CAST(dblNewSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_New
-									, CAST(CAST(dblNewLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_New
-								FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog_Backup
+									, intItemLocationId
+									, intEffectiveItemPriceId
+									, ISNULL(CAST(CAST(dblOldPrice AS DECIMAL(18,3))  AS NVARCHAR(50)), '') AS strPrice_Original
+									, CAST(CAST(dblNewPrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strPrice_New
+								FROM #tmpEffectivePriceForCStore_AuditLog
 							) t
 							unpivot
 							(
-								strOldData for oldColumnName in (strStandardCost_Original, strSalePrice_Original, strLastCost_Original)
+								strOldData for oldColumnName in (strPrice_Original)
 							) o
 							unpivot
 							(
-								strNewData for newColumnName in (strStandardCost_New, strSalePrice_New, strLastCost_New)
+								strNewData for newColumnName in (strPrice_New)
 							) n
 							WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
 						) [Changes]
 						INNER JOIN tblICItem item
 							ON [Changes].intItemId = item.intItemId
-						INNER JOIN tblICItemPricing itemPricing 
-							ON [Changes].intItemPricingId = itemPricing.intItemPricingId
-								AND [Changes].intItemId = itemPricing.intItemId
+						INNER JOIN tblICEffectiveItemPrice itemPrice 
+							ON [Changes].intEffectiveItemPriceId = itemPrice.intEffectiveItemPriceId
 						INNER JOIN tblICItemLocation itemLoc 
-							ON itemPricing.intItemLocationId = itemLoc.intItemLocationId 
-								AND itemPricing.intItemId = itemLoc.intItemId
+							ON itemPrice.intItemLocationId = itemLoc.intItemLocationId 
+								AND itemPrice.intItemId = itemLoc.intItemId
 						INNER JOIN tblSMCompanyLocation companyLoc 
 							ON itemLoc.intLocationId = companyLoc.intCompanyLocationId
 						LEFT JOIN tblICItemUOM uom 
-							ON itemPricing.intItemId = uom.intItemId
+							ON itemPrice.intItemId = uom.intItemId
 						WHERE uom.ysnStockUnit = CAST(1 AS BIT) 
 					END
-
 
 					-- Return Preview
 					SELECT DISTINCT tp.strItemDescription		AS strItemDescription
@@ -546,6 +538,14 @@ BEGIN
 			-- [END] IF HAS PREVIEW REPORT
 			-- ==============================================================================================
 				
+
+
+			-- Clean up 
+			BEGIN
+				IF OBJECT_ID('tempdb..#tmpEffectivePriceForCStore_AuditLog') IS NOT NULL  
+					DROP TABLE #tmpEffectivePriceForCStore_AuditLog 
+			END
+
 
 			IF(@ysnRecap = 0)
 				BEGIN

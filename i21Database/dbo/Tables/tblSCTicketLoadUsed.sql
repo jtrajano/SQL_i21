@@ -10,3 +10,8 @@
     CONSTRAINT [FK_tblSCTicketLoadUsed_tblCTContractDetail_intLoadDetailId] FOREIGN KEY (intLoadDetailId) REFERENCES [tblLGLoadDetail](intLoadDetailId),
 	CONSTRAINT [FK_tblSCTicketLoadUsed_tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES [tblEMEntity](intEntityId)
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSCTicketLoadUsed_intLoadDetailId]
+ON [dbo].[tblSCTicketLoadUsed] ([intLoadDetailId])
+GO

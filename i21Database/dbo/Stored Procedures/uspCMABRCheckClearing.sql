@@ -36,6 +36,11 @@ CROSS APPLY(
 	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
+	AND (
+		(dtmCheckPrinted IS NOT NULL AND strTransactionId NOT LIKE 'B%')
+	OR  (dtmCheckPrinted IS NULL AND strTransactionId LIKE 'B%') --exempt bank transactions
+	) 
+	AND dtmDateReconciled IS NULL
     AND ysnClr = 0
 	AND 1 = 
 	CASE WHEN  RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = '' AND LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
@@ -67,7 +72,8 @@ SELECT ROW_NUMBER() OVER(ORDER BY intABRActivityId) rowId,  intABRActivityId, in
 
 
 UPDATE CM
-SET ysnClr = 1
+SET ysnClr = 1,
+dtmClr = GETDATE()
 FROM
 tblCMBankTransaction CM JOIN
 ##tempActivityMatched T ON

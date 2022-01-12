@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuAPBillImport]
 as
 SELECT
-	TransactionType.strText strTransactionType,
-	Vendor.strName,
+	dbo.fnAPGetVoucherTransactionType2(A.intTransactionType) strTransactionType,
+	E.strName,
 	A.dtmBillDate,
 	A.strVendorOrderNumber,
 	A.ysnRecurring,
@@ -25,16 +25,7 @@ SELECT
 	A.intBillId
 FROM
 	dbo.tblAPBill A
-	OUTER APPLY(
-		SELECT TOP 1 C.strName FROM  [tblAPVendor] B 
-		LEFT JOIN dbo.[tblEMEntity] C ON C.intEntityId = B.intEntityId
-		
-		WHERE B.intEntityId = A.intEntityVendorId
-	) Vendor
-	OUTER APPLY (
-		SELECT TOP 1 strText from dbo.fnAPGetVoucherTransactionType() WHERE intId = A.intTransactionType
-	)TransactionType
-	
+	INNER JOIN (tblAPVendor V INNER JOIN tblEMEntity E ON E.intEntityId = V.intEntityId) ON V.intEntityId = A.intEntityVendorId
 	LEFT JOIN dbo.[tblGLAccount] C ON A.intAccountId = C.intAccountId
 	LEFT JOIN dbo.[tblSMCurrency] Currency ON Currency.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId

@@ -16,6 +16,10 @@
 	,@strTransactionForm NVARCHAR (255)
 	,@intEntityUserSecurityId INT
 	,@intSourceEntityId INT 
+	,@strSourceType NVARCHAR(100) = NULL 
+	,@strSourceNumber NVARCHAR(100) = NULL 
+	,@strBOLNumber NVARCHAR(100) = NULL 
+	,@intTicketId INT = NULL 
 	,@InventoryLotTransactionIdentityId INT OUTPUT 
 AS
 
@@ -23,7 +27,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 SET @InventoryLotTransactionIdentityId = NULL
 
@@ -49,6 +53,10 @@ INSERT INTO dbo.tblICInventoryLotTransaction (
 		,[intCreatedEntityId] 
 		,[intConcurrencyId] 
 		,[intSourceEntityId]
+		,[strSourceType]
+		,[strSourceNumber]
+		,[strBOLNumber]
+		,[intTicketId]
 )
 SELECT	[intItemId]					= @intItemId
 		,[intLotId]					= @intLotId
@@ -71,6 +79,10 @@ SELECT	[intItemId]					= @intItemId
 		,[intCreatedEntityId]		= @intEntityUserSecurityId
 		,[intConcurrencyId]			= 1
 		,[intSourceEntityId]		= @intSourceEntityId
+		,[strSourceType]			= @strSourceType
+		,[strSourceNumber]			= @strSourceNumber
+		,[strBOLNumber]				= @strBOLNumber
+		,[intTicketId]				= @intTicketId
 FROM	dbo.tblICItemLocation ItemLocation
 WHERE	intItemLocationId = @intItemLocationId
 		AND @intLotId IS NOT NULL

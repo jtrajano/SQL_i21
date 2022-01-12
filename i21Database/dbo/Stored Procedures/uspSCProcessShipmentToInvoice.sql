@@ -12,7 +12,7 @@ BEGIN
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
+	SET ANSI_WARNINGS ON
 
 	DECLARE @ErrorMessage NVARCHAR(4000);
 	DECLARE @ErrorSeverity INT;
@@ -25,6 +25,7 @@ BEGIN
 	DECLARE @intTicketContractDetailId INT
 	DECLARE @intTicketItemUOMId INT
 	DECLARE @dblNetUnits NUMERIC(18,6)
+	DECLARE @dblTicketDWGSpotPrice NUMERIC(18,6)
 
 
 	BEGIN TRY
@@ -36,6 +37,7 @@ BEGIN
 				,@intTicketContractDetailId = intContractId
 				,@intTicketItemUOMId = A.intItemUOMIdTo
 				, @dblNetUnits = A.dblNetUnits
+				,@dblTicketDWGSpotPrice = A.dblDWGSpotPrice
 			FROM tblSCTicket A
 			LEFT JOIN tblCTContractDetail B
 				ON A.intContractId = B.intContractDetailId
@@ -55,7 +57,7 @@ BEGIN
 
 					IF(ISNULL(@intInvoiceId,0) <> 0 AND @ysnDWG = 1)
 					BEGIN
-						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,0--@intTicketId
+						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,0,@dblTicketDWGSpotPrice--@intTicketId
 					END
 				END
 

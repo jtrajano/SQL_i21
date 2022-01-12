@@ -138,6 +138,7 @@ BEGIN TRY
 	SELECT @strPricingQuantity = strPricingQuantity FROM tblCTCompanyPreference
 
 	IF @intNewCompanyLocationId = 0 SET @intNewCompanyLocationId = NULL
+	DECLARE @strEntityName NVARCHAR(100)
 
 	IF @RowState  <> 'Added'
 	BEGIN
@@ -241,7 +242,7 @@ BEGIN TRY
 			SET @ErrMsg = 'UOM is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END
-		IF NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intItemUOMId = @intNewItemUOMId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intItemUOMId = @intNewItemUOMId)
 		BEGIN
 			SET @ErrMsg = 'Combination of item id and UOM id is not matching.'
 			RAISERROR(@ErrMsg,16,1)
@@ -291,40 +292,61 @@ BEGIN TRY
 		--Active check
 		IF ISNULL(@ysnSlice,0) = 0
 		BEGIN
-			IF	@intNewItemContractId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTItemContractView WHERE intItemContractId = @intNewItemContractId AND strStatus = 'Active' AND intLocationId = @intNewCompanyLocationId)
+			IF	@intNewItemContractId IS NOT NULL
 			BEGIN
-				SELECT @ErrMsg = strContractItemName FROM tblICItemContract WHERE intItemContractId = @intNewItemContractId
-				SET @ErrMsg = REPLACE(@ErrMsg,'%','%%')
-				SET @ErrMsg = 'Contract Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
-				RAISERROR(@ErrMsg,16,1)
+				IF NOT EXISTS(SELECT TOP 1 1 FROM vyuCTItemContractView WHERE intItemContractId = @intNewItemContractId AND strStatus = 'Active' AND intLocationId = @intNewCompanyLocationId)
+				BEGIN
+					SELECT @ErrMsg = strContractItemName FROM tblICItemContract WHERE intItemContractId = @intNewItemContractId
+					SET @ErrMsg = REPLACE(@ErrMsg,'%','%%')
+					SET @ErrMsg = 'Contract Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+					RAISERROR(@ErrMsg,16,1)
+				END
 			END
 
-			IF	@intNewFutureMonthId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId AND ISNULL(ysnExpired,0) = 0)
+			IF	@intNewFutureMonthId IS NOT NULL
 			BEGIN
-				SELECT @ErrMsg = strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId
-				SET @ErrMsg = 'Future Month ' + ISNULL(@ErrMsg,'selected') + ' is expired.'
-				RAISERROR(@ErrMsg,16,1)
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId AND ISNULL(ysnExpired,0) = 0)
+				BEGIN
+					SELECT @ErrMsg = strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId
+					SET @ErrMsg = 'Future Month ' + ISNULL(@ErrMsg,'selected') + ' is expired.'
+					RAISERROR(@ErrMsg,16,1)
+				END
 			END
 
-			IF	@intNewProducerId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intNewProducerId AND strEntityType = 'Producer' AND ysnActive = 1)
+			IF	@intNewProducerId IS NOT NULL
 			BEGIN
-				SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewProducerId
-				SET @ErrMsg = 'Producer ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
-				RAISERROR(@ErrMsg,16,1)
+				SET @strEntityName = NULL
+				SELECT TOP 1 @strEntityName = strEntityName FROM vyuCTActiveEntity WHERE intEntityId = @intNewProducerId AND strEntityType = 'Producer'
+				IF ISNULL(@strEntityName, '') = ''
+				BEGIN
+					SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewProducerId
+					SET @ErrMsg = 'Producer ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+					RAISERROR(@ErrMsg,16,1)
+				END
 			END
 
-			IF	@intNewShipperId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intNewShipperId AND strEntityType = 'Vendor' AND ysnActive = 1)
+			IF	@intNewShipperId IS NOT NULL
 			BEGIN
-				SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewShipperId
-				SET @ErrMsg = 'Shipper ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
-				RAISERROR(@ErrMsg,16,1)
+				SET @strEntityName = NULL
+				SELECT TOP 1 @strEntityName = strEntityName FROM vyuCTActiveEntity WHERE intEntityId = @intNewShipperId AND strEntityType = 'Vendor'
+				IF ISNULL(@strEntityName, '') = ''
+				BEGIN
+					SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewShipperId
+					SET @ErrMsg = 'Shipper ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+					RAISERROR(@ErrMsg,16,1)
+				END
 			END
 
-			IF	@intNewShippingLineId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intNewShippingLineId AND strEntityType = 'Vendor' AND ysnActive = 1)
+			IF	@intNewShippingLineId IS NOT NULL
 			BEGIN
-				SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewShippingLineId
-				SET @ErrMsg = 'Shipping Line ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
-				RAISERROR(@ErrMsg,16,1)
+				SET @strEntityName = NULL
+				SELECT TOP 1 @strEntityName = strEntityName FROM vyuCTActiveEntity WHERE intEntityId = @intNewShippingLineId AND strEntityType = 'Vendor'
+				IF ISNULL(@strEntityName, '') = ''
+				BEGIN
+					SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewShippingLineId
+					SET @ErrMsg = 'Shipping Line ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+					RAISERROR(@ErrMsg,16,1)
+				END
 			END
 		END
 		--End Active check
@@ -339,11 +361,14 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1) 
 		END
 
-		IF @intNewStatusId IN (2,3,5) AND @intOldStatusId NOT IN (2,3,5) AND dbo.fnAPContractHasUnappliedPrepaid(@intContractDetailId) = 1
+		IF (@intContractTypeId = 1)
 		BEGIN
-			SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
-			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as prepaid balance is associated with the contract.'
-			RAISERROR(@ErrMsg,16,1) 
+			IF @intNewStatusId IN (2,3,5) AND @intOldStatusId NOT IN (2,3,5) AND dbo.fnAPContractHasUnappliedPrepaid(@intContractDetailId) = 1
+			BEGIN
+				SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
+				SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as prepaid balance is associated with the contract.'
+				RAISERROR(@ErrMsg,16,1) 
+			END
 		END
 
 		IF @intNewStatusId IN (6) AND @intOldStatusId NOT IN (6) AND ISNULL(@dblAllocatedQty,0) > 0 AND
@@ -428,7 +453,7 @@ BEGIN TRY
 	ELSE IF @RowState  = 'Delete'
 	BEGIN
 		IF EXISTS	(	
-						SELECT * FROM tblICInventoryReceipt IR
+						SELECT TOP 1 1 FROM tblICInventoryReceipt IR
 						JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = IR.intInventoryReceiptId
 						WHERE IR.strReceiptType = 'Purchase Contract' AND RI.intLineNo = @intContractDetailId
 					)
@@ -443,7 +468,7 @@ BEGIN TRY
 		END
 
 		IF EXISTS	(	
-						SELECT * FROM tblICInventoryShipment SH
+						SELECT TOP 1 1 FROM tblICInventoryShipment SH
 						JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentId = SH.intInventoryShipmentId
 						WHERE SH.intOrderType = 4 AND SI.intLineNo = @intContractDetailId
 					)

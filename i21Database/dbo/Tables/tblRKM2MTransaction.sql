@@ -62,7 +62,7 @@
 	[strLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intMarketZoneId] INT NULL,
 	[strMarketZoneCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyId] INT NULL, 
+    [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKM2MTransaction] PRIMARY KEY ([intM2MTransactionId]), 
     CONSTRAINT [FK_tblRKM2MTransaction_tblRKM2MHeader] FOREIGN KEY ([intM2MHeaderId]) REFERENCES [tblRKM2MHeader]([intM2MHeaderId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblRKM2MTransaction_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]), 

@@ -303,7 +303,7 @@ BEGIN
 					, strMiscField)
 				SELECT 
 					  @strBatchId
-					, dtmCreatedDate
+					, dtmCreatedDate = GETUTCDATE()
 					, strBucketType
 					, intActionId = 56
 					, strAction = 'Updated Derivative'

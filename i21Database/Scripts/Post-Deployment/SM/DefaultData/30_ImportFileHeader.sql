@@ -5,14 +5,34 @@
 DECLARE @LayoutTitle NVARCHAR(100)
 	, @FileHeaderId INT = NULL
 	, @DetailId INT = NULL
+	, @OldFileHeaderId INT = NULL
 
 
 ------------------------------------------------------------
 -- Import File Headers for Transports - Import Rack Price --
 ------------------------------------------------------------
 
--- Rack Price - Marathon
+-- Marathon Rack Price Import
 SET @LayoutTitle = 'Rack Price - Marathon'
+IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+BEGIN
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - Marathon Rack Price Import')
+	BEGIN
+		SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - Marathon Rack Price Import'
+		SELECT @OldFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Rack Price - Marathon'
+
+		UPDATE tblTRImportRackPrice SET intFieldMappingId = @OldFileHeaderId WHERE intFieldMappingId = @FileHeaderId
+		UPDATE tblTRCompanyPreference set intRackPriceImportFormatId = @OldFileHeaderId WHERE intRackPriceImportFormatId = @FileHeaderId
+		UPDATE tblTRCompanyPreference set intRackPriceImportMappingId = @OldFileHeaderId WHERE intRackPriceImportMappingId = @FileHeaderId
+		-- Delete duplicate file header and details
+		DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileHeader WHERE intImportFileHeaderId = @FileHeaderId
+	END
+	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - Marathon Rack Price Import' WHERE strLayoutTitle = @LayoutTitle
+END
+
+SET @LayoutTitle = 'TR - Marathon Rack Price Import'
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
 	INSERT INTO tblSMImportFileHeader(strLayoutTitle
@@ -69,6 +89,26 @@ END
 
 -- Rack Price - DTN
 SET @LayoutTitle = 'Rack Price - DTN'
+IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+BEGIN
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - DTN Rack Price Import')
+	BEGIN
+		SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - DTN Rack Price Import'
+		SELECT @OldFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Rack Price - DTN'
+
+		UPDATE tblTRImportRackPrice SET intFieldMappingId = @OldFileHeaderId WHERE intFieldMappingId = @FileHeaderId
+		UPDATE tblTRCompanyPreference set intRackPriceImportFormatId = @OldFileHeaderId WHERE intRackPriceImportFormatId = @FileHeaderId
+		UPDATE tblTRCompanyPreference set intRackPriceImportMappingId = @OldFileHeaderId WHERE intRackPriceImportMappingId = @FileHeaderId
+		-- Delete duplicate file header and details
+		DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileHeader WHERE intImportFileHeaderId = @FileHeaderId
+	END
+	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - DTN Rack Price Import' WHERE strLayoutTitle = @LayoutTitle
+END
+
+
+SET @LayoutTitle = 'TR - DTN Rack Price Import'
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
 	INSERT INTO tblSMImportFileHeader(strLayoutTitle
@@ -333,12 +373,31 @@ GO
 DECLARE @LayoutTitle NVARCHAR(100)
 , @FileHeaderId INT = NULL
 , @DetailId INT = NULL
+, @OldFileHeaderId INT = NULL
 
 SET @LayoutTitle = 'Rack Price - iRely Enterprise'
+IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+BEGIN
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - iRely Enterprise Rack Price Import')
+	BEGIN
+		SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - iRely Enterprise Rack Price Import'
+		SELECT @OldFileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Rack Price - iRely Enterprise'
 
+		UPDATE tblTRImportRackPrice SET intFieldMappingId = @OldFileHeaderId WHERE intFieldMappingId = @FileHeaderId
+		UPDATE tblTRCompanyPreference set intRackPriceImportFormatId = @OldFileHeaderId WHERE intRackPriceImportFormatId = @FileHeaderId
+		UPDATE tblTRCompanyPreference set intRackPriceImportMappingId = @OldFileHeaderId WHERE intRackPriceImportMappingId = @FileHeaderId
+		-- Delete duplicate file header and details
+		DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileHeader WHERE intImportFileHeaderId = @FileHeaderId
+	END
+	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - iRely Enterprise Rack Price Import' WHERE strLayoutTitle = @LayoutTitle
+END
+
+SET @LayoutTitle = 'TR - iRely Enterprise Rack Price Import'
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
-	PRINT ('Deploying - Rack Price - iRely Enterprise')
+	PRINT ('Deploying - TR - iRely Enterprise Rack Price Import')
 
 	INSERT INTO tblSMImportFileHeader (strLayoutTitle
 		, strFileType

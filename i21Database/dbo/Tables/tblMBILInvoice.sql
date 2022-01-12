@@ -13,6 +13,8 @@ CREATE TABLE [dbo].[tblMBILInvoice](
 	[strVoidComments] NVARCHAR (400) COLLATE Latin1_General_CI_AS NULL,
 	[dblTotal] NUMERIC (18, 6) NULL,
 	[intTermId] INT NULL,
+	[intPaymentMethodId] INT NULL,
+	[strPaymentInfo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPosted]	BIT DEFAULT ((0)) NULL,
 	[ysnVoided]	BIT DEFAULT ((0)) NULL,
 	[dtmPostedDate] DATETIME NULL,
@@ -25,6 +27,6 @@ CREATE TABLE [dbo].[tblMBILInvoice](
     CONSTRAINT [FK_tblMBILInvoice_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblMBILInvoice_tblEMEntityDriver] FOREIGN KEY ([intDriverId]) REFERENCES [tblEMEntity]([intEntityId]), 
     CONSTRAINT [FK_tblMBILInvoice_tblMBILShift] FOREIGN KEY ([intShiftId]) REFERENCES [tblMBILShift]([intShiftId]), 
-    CONSTRAINT [FK_tblMBILInvoice_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
-	CONSTRAINT [FK_tblMBILInvoice_tblARInvoice] FOREIGN KEY ([inti21InvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId])
+    CONSTRAINT [FK_tblMBILInvoice_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])
+	--CONSTRAINT [FK_tblMBILInvoice_tblARInvoice] FOREIGN KEY ([inti21InvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId])
 )

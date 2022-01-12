@@ -125,9 +125,9 @@ BEGIN
 					begin
 						set @dblRequest = @dblRequest - 8;
 					end
-					else
+					if (sign(@dblRequest) = -1)
 					begin
-						set @intFixEightHours = @dblRequest;
+						set @dblRequest = @intFixEightHours;
 					end
 					begin
 						INSERT INTO [dbo].[tblHDTimeOffRequest]
@@ -145,7 +145,7 @@ BEGIN
 								   ,@strRequestId
 								   ,@dtmPRDate
 								   ,@strPRDayName
-								   ,@intFixEightHours
+								   ,@dblRequest
 								   ,@intNoOfDays
 								   ,1)
 					end
@@ -178,7 +178,16 @@ BEGIN
 					[intConcurrencyId] = [intConcurrencyId] + 1
 				WHERE 
 				intPRTimeOffRequestId = @intTimeOffRequestId
+				
+				--time off was edited from multiple days to 1, delete other days
+				Declare @count int
+				Set @count=(Select count(*) from tblHDTimeOffRequest where intPRTimeOffRequestId = @intTimeOffRequestId)-1
+				if (@count > 0)
+				begin
+					Delete top (@count) from tblHDTimeOffRequest where intPRTimeOffRequestId = @intTimeOffRequestId
+				end
 			end
+			
 			else if not exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId)
 			begin
 				INSERT INTO [dbo].[tblHDTimeOffRequest]

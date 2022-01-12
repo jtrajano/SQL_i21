@@ -71,7 +71,7 @@ FROM (
 		, dblFinalprice = dbo.fnCTConvertToSeqFXCurrency(cd.intContractDetailId, cd.intCurrencyId, cd.intPriceItemUOMId, cd.dblCashPrice)
 		, dblBilledQuantity = (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN ISNULL(sum(dbo.fnCTConvertQtyToTargetItemUOM(bd.intUnitOfMeasureId, cd.intItemUOMId, bd.dblQtyReceived)), 0) ELSE cd.dblQuantity END)
 		, intBilledLoad = (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN 0 ELSE ISNULL(COUNT(DISTINCT bd.intBillId), 0) END)
-		, intPriceItemUOMId = cd.intPriceItemUOMId
+		, intPriceItemUOMId = cd.intItemUOMId
 		, cd.intPricingTypeId
 		, cd.intFreightTermId
 		, cd.intCompanyLocationId
@@ -99,6 +99,7 @@ FROM (
 		, cd.intPricingTypeId
 		, cd.intFreightTermId
 		, cd.intCompanyLocationId
+		, cd.intItemUOMId
 ) tbl
 WHERE (tbl.dblQuantity - tbl.dblBilledQuantity) > 0
 	OR (tbl.dblLoadPriced - tbl.intBilledLoad) > 0

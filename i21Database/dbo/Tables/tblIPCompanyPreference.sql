@@ -11,5 +11,7 @@
 	strVendorInvoiceFilePath NVARCHAR(500) COLLATE Latin1_General_CI_AS,
 	intFinancingCostItemId int,
 	intFreightCostItemId int,
+	intMiscItemId int,
+	intWeightAdjItemId int,
 	CONSTRAINT [PK_tblIPCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

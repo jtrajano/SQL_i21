@@ -25,6 +25,7 @@ BEGIN TRY
 		,@strTransferNo NVARCHAR(50)
 		,@dtmTransferDate DATETIME
 		,@strShipVia NVARCHAR(50)
+		,@strPaymentMethod NVARCHAR(50)
 		,@strBolNumber NVARCHAR(50)
 		,@dtmBolDate DATETIME
 		,@dtmBolReceivedDate DATETIME
@@ -99,6 +100,7 @@ BEGIN TRY
 			,@strTransferNo = NULL
 			,@dtmTransferDate = NULL
 			,@strShipVia = NULL
+			,@strPaymentMethod = NULL
 			,@strBolNumber = NULL
 			,@dtmBolDate = NULL
 			,@dtmBolReceivedDate = NULL
@@ -123,12 +125,14 @@ BEGIN TRY
 			,@strTrailerId = IT.strTrailerId
 			,@strFromLocation = FCL.strLotOrigin
 			,@strToLocation = TCL.strLotOrigin
+			,@strPaymentMethod = PM.strPaymentMethod
 		FROM dbo.tblICInventoryTransfer IT
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(IT.intEntityId, IT.intCreatedUserId)
 		LEFT JOIN dbo.tblSMCompanyLocation FCL ON FCL.intCompanyLocationId = IT.intFromLocationId
 		LEFT JOIN dbo.tblSMCompanyLocation TCL ON TCL.intCompanyLocationId = IT.intToLocationId
 		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = IT.intShipViaId
 		LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = IT.intBrokerId
+		LEFT JOIN dbo.tblSMPaymentMethod PM ON PM.intPaymentMethodID = V.intPaymentMethodId
 		WHERE IT.intInventoryTransferId = @intInventoryTransferId
 
 		IF NOT EXISTS (
@@ -212,6 +216,8 @@ BEGIN TRY
 		SELECT @strXML += '<TransferDate>' + ISNULL(CONVERT(VARCHAR, @dtmTransferDate, 112), '') + '</TransferDate>'
 
 		SELECT @strXML += '<ShipVia>' + ISNULL(@strShipVia, '') + '</ShipVia>'
+
+		SELECT @strXML += '<Book>' + ISNULL(@strPaymentMethod, '') + '</Book>'
 
 		SELECT @strXML += '<BOLNumber>' + ISNULL(@strBolNumber, '') + '</BOLNumber>'
 

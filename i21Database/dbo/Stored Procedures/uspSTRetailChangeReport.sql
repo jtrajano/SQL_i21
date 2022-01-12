@@ -87,7 +87,7 @@ BEGIN
 			ON st.intCompanyLocationId = cl.intCompanyLocationId
 		WHERE st.intStoreId = @intStoreNo
 	) preview
-
+	WHERE preview.strOldData != preview.strNewData
 END
 
 

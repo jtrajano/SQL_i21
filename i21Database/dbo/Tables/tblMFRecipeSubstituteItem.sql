@@ -17,6 +17,8 @@
 	[intLastModifiedUserId] [int] NOT NULL,
 	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipeSubstituteItem_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFRecipeSubstituteItem_intConcurrencyId] DEFAULT 0,
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+	[intRowNumber] INT NULL,
     CONSTRAINT [PK_tblMFRecipeSubstituteItem_intRecipeSubstituteItemId] PRIMARY KEY ([intRecipeSubstituteItemId]),
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]), 

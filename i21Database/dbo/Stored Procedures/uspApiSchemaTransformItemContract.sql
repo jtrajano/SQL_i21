@@ -1,7 +1,11 @@
-CREATE PROCEDURE [dbo].[uspApiSchemaTransformItemContract] (@guiApiUniqueId UNIQUEIDENTIFIER)
+CREATE PROCEDURE [dbo].[uspApiSchemaTransformItemContract] (
+      @guiApiUniqueId UNIQUEIDENTIFIER
+    , @guiLogId UNIQUEIDENTIFIER
+)
 AS
 
-DECLARE @Date DATETIME = GETDATE()
+DECLARE @strI21Version NVARCHAR(200) = (SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC)
+DECLARE @Date DATETIME = GETUTCDATE()
 
 -- Validations
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
@@ -13,7 +17,7 @@ SELECT
 	strField = 'Location', 
 	strLogLevel = 'Error', 
 	strValue = sc.strLocation,
-	intLineNumber = NULL,
+	intLineNumber = sc.intRowNumber,
 	@guiApiUniqueId,
 	strIntegrationType = 'RESTfulAPI_CSV',
 	strTransactionType = 'Item Contracts',
@@ -29,11 +33,11 @@ INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 SELECT
 	NEWID(),
-	strError = CASE WHEN sc.strCustomerNo IS NULL THEN 'The Customer No is blank.' ELSE 'Cannot find the customer with Customer No.: ''' + sc.strCustomerNo + '''' END,
-	strField = 'Customer No', 
+	strError = CASE WHEN sc.strCustomerNo IS NULL THEN 'The Entity No/Customer No is blank.' ELSE 'Cannot find the customer with Entity No./Customer No.: ''' + sc.strCustomerNo + '''' END,
+	strField = 'Entity No/Customer No', 
 	strLogLevel = 'Error', 
 	strValue = sc.strCustomerNo,
-	intLineNumber = NULL,
+	intLineNumber = sc.intRowNumber,
 	@guiApiUniqueId,
 	strIntegrationType = 'RESTfulAPI_CSV',
 	strTransactionType = 'Item Contracts',
@@ -53,7 +57,7 @@ SELECT
 	strField = 'Salesperson', 
 	strLogLevel = 'Error', 
 	strValue = sc.strSalesperson,
-	intLineNumber = NULL,
+	intLineNumber = sc.intRowNumber,
 	@guiApiUniqueId,
 	strIntegrationType = 'RESTfulAPI_CSV',
 	strTransactionType = 'Item Contracts',
@@ -74,7 +78,7 @@ SELECT
 	strField = 'Currency', 
 	strLogLevel = 'Error', 
 	strValue = sc.strCurrency,
-	intLineNumber = NULL,
+	intLineNumber = sc.intRowNumber,
 	@guiApiUniqueId,
 	strIntegrationType = 'RESTfulAPI_CSV',
 	strTransactionType = 'Item Contracts',
@@ -94,7 +98,7 @@ SELECT
 	strField = 'Country', 
 	strLogLevel = 'Error', 
 	strValue = sc.strCurrency,
-	intLineNumber = NULL,
+	intLineNumber = sc.intRowNumber,
 	@guiApiUniqueId,
 	strIntegrationType = 'RESTfulAPI_CSV',
 	strTransactionType = 'Item Contracts',
@@ -115,7 +119,7 @@ SELECT
 	strField = 'Terms', 
 	strLogLevel = 'Error', 
 	strValue = sc.strTerms,
-	intLineNumber = NULL,
+	intLineNumber = sc.intRowNumber,
 	@guiApiUniqueId,
 	strIntegrationType = 'RESTfulAPI_CSV',
 	strTransactionType = 'Item Contracts',
@@ -136,7 +140,7 @@ SELECT
 	strField = 'Freight Term', 
 	strLogLevel = 'Error', 
 	strValue = sc.strTerms,
-	intLineNumber = NULL,
+	intLineNumber = sc.intRowNumber,
 	@guiApiUniqueId,
 	strIntegrationType = 'RESTfulAPI_CSV',
 	strTransactionType = 'Item Contracts',
@@ -157,8 +161,8 @@ SELECT
 	, sc.dtmDueDate
     , sc.strEntryContract
     , sc.strContract
-    , ISNULL(sc.ysnIsSigned, 0) ysnIsSigned
-    , ISNULL(sc.ysnIsPrinted, 0) ysnIsPrinted
+    , sc.ysnIsSigned
+    , sc.ysnIsPrinted
     , loc.intCompanyLocationId
     , currency.intCurrencyID
     , sp.intEntityId AS intSalespersonId
@@ -221,8 +225,8 @@ GROUP BY
 	, sc.dtmDueDate
     , sc.strEntryContract
     , sc.strContract
-    , ISNULL(sc.ysnIsSigned, 0)
-    , ISNULL(sc.ysnIsPrinted, 0)
+    , sc.ysnIsSigned
+    , sc.ysnIsPrinted
     , loc.intCompanyLocationId
     , currency.intCurrencyID
     , sp.intEntityId
@@ -352,7 +356,7 @@ BEGIN
         strField = 'Item No', 
         strLogLevel = 'Error', 
         strValue = sc.strItemNo,
-        intLineNumber = NULL,
+        intLineNumber = sc.intRowNumber,
         @guiApiUniqueId,
         strIntegrationType = 'RESTfulAPI_CSV',
         strTransactionType = 'Item Contracts',
@@ -388,7 +392,7 @@ BEGIN
         strField = 'UOM', 
         strLogLevel = 'Error', 
         strValue = sc.strUnitMeasure,
-        intLineNumber = NULL,
+        intLineNumber = sc.intRowNumber,
         @guiApiUniqueId,
         strIntegrationType = 'RESTfulAPI_CSV',
         strTransactionType = 'Item Contracts',
@@ -426,7 +430,7 @@ BEGIN
         strField = 'Tax Group', 
         strLogLevel = 'Error', 
         strValue = sc.strTaxGroup,
-        intLineNumber = NULL,
+        intLineNumber = sc.intRowNumber,
         @guiApiUniqueId,
         strIntegrationType = 'RESTfulAPI_CSV',
         strTransactionType = 'Item Contracts',
@@ -462,7 +466,7 @@ BEGIN
         strField = 'Status', 
         strLogLevel = 'Error', 
         strValue = sc.strStatus,
-        intLineNumber = NULL,
+        intLineNumber = sc.intRowNumber,
         @guiApiUniqueId,
         strIntegrationType = 'RESTfulAPI_CSV',
         strTransactionType = 'Item Contracts',
@@ -497,8 +501,7 @@ BEGIN
         , dblPrice
         , dtmDeliveryDate
         , intTaxGroupId
-        , strContractStatus
-		, intLineNo)
+        , strContractStatus)
     SELECT
           @intItemContractStagingId
         , i.intItemId
@@ -508,7 +511,6 @@ BEGIN
         , sc.dtmDeliveryDate
         , taxGroup.intTaxGroupId
         , s.intContractStatusId
-		, ROW_NUMBER() OVER(PARTITION BY @intItemContractStagingId ORDER BY @intItemContractStagingId)
     FROM tblRestApiSchemaItemContract sc
     INNER JOIN tblCTContractStatus s ON s.strContractStatus = sc.strStatus
     INNER JOIN tblICItem i ON i.strItemNo = sc.strItemNo
@@ -567,5 +569,44 @@ DEALLOCATE cur;
 EXEC dbo.uspApiImportItemContractsFromStaging @guiApiUniqueId
 
 DELETE FROM tblRestApiSchemaItemContract WHERE guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblApiImportLogDetail (
+      guiApiImportLogDetailId
+    , guiApiImportLogId
+    , strLogLevel
+    , strStatus
+    , strField
+    , strValue
+    , strMessage
+    , intRowNo
+)
+SELECT
+      NEWID()
+    , @guiLogId
+    , strLogLevel
+    , 'Failed'
+    , strField
+    , strValue
+    , strError
+    , intLineNumber
+FROM tblRestApiTransformationLog
+WHERE guiApiUniqueId = @guiApiUniqueId
+
+DECLARE @intTotalRowsImported INT
+SET @intTotalRowsImported = (
+    SELECT COUNT(*) 
+    FROM tblCTItemContractHeader h
+    INNER JOIN tblCTItemContractDetail d ON h.intItemContractHeaderId = d.intItemContractHeaderId 
+    WHERE h.guiApiUniqueId = @guiApiUniqueId
+)
+
+UPDATE tblApiImportLog
+SET 
+      strStatus = 'Completed'
+    , strResult = CASE WHEN @intTotalRowsImported = 0 THEN 'Failed' ELSE 'Success' END
+    , intTotalRecordsCreated = @intTotalRowsImported
+    , intTotalRowsImported = @intTotalRowsImported
+    , dtmImportFinishDateUtc = GETUTCDATE()
+WHERE guiApiImportLogId = @guiLogId
 
 SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId

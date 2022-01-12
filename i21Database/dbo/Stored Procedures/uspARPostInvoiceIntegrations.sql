@@ -3,6 +3,7 @@
 	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
 	,@IntegrationLogId	INT             = NULL
+	,@raiseError  	 	BIT  	 		= 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -10,6 +11,13 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
+
+--PARAMETER SNIFFING
+DECLARE @PostTemp           	BIT				= @Post
+	  , @BatchIdTemp           	NVARCHAR(40) 	= @BatchId
+      , @UserIdTemp            	INT				= @UserId
+	  , @IntegrationLogIdTemp	INT             = @IntegrationLogId
+	  , @raiseErrorTemp  		BIT   			= @raiseError
 
 DECLARE @ZeroDecimal	DECIMAL(18,6) = 0.000000
 DECLARE @OneDecimal		DECIMAL(18,6) = 1.000000
@@ -25,14 +33,17 @@ DECLARE  @InitTranCount				INT
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
-IF @InitTranCount = 0
-	BEGIN TRANSACTION
-ELSE
-	SAVE TRANSACTION @Savepoint
+IF ISNULL(@raiseErrorTemp,0) = 0
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 
 BEGIN TRY
 
-IF @Post = 1
+IF @PostTemp = 1
 BEGIN
     UPDATE ARI						
     SET ARI.ysnPosted					= 1
@@ -176,7 +187,7 @@ BEGIN
 		FROM @TankDeliveryForSync 
 		ORDER BY [intInvoiceId]
 
-		EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId, @UserId, @ResultLogForSync OUT
+		EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId, @UserIdTemp, @ResultLogForSync OUT
 												
 		DELETE FROM @TankDeliveryForSync WHERE [intInvoiceId] = @intInvoiceForSyncId																												
 	END
@@ -209,7 +220,7 @@ BEGIN
 		FROM @InvoicesWithPrepaids
 							
 		IF @strTransactionTypePrepaid <> 'Cash Refund'
-			EXEC dbo.uspARCreateRCVForCreditMemo @intInvoiceId = @intInvoiceIdWithPrepaid, @intUserId = @UserId
+			EXEC dbo.uspARCreateRCVForCreditMemo @intInvoiceId = @intInvoiceIdWithPrepaid, @intUserId = @UserIdTemp
 		ELSE
 			BEGIN
 
@@ -382,20 +393,20 @@ BEGIN
 			EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost] @InvoiceId	= @InvoiceIDP
 														  , @Post		= 1
 														  , @LoadId		= @LoadIDP
-														  , @UserId		= @UserId
+														  , @UserId		= @UserIdTemp
 		
 		--UNPOST AND CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnP, 0) = 1 AND @LoadIDP IS NOT NULL
 			BEGIN
 				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
 											   , @ysnPost				 	= 0
-											   , @intEntityUserSecurityId  	= @UserId
+											   , @intEntityUserSecurityId  	= @UserIdTemp
 
 				IF ISNULL(@intPurchaseSaleIDP, 0) <> 3
 					BEGIN
 						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
 														 , @ysnCancel				 = 1
-														 , @intEntityUserSecurityId  = @UserId
+														 , @intEntityUserSecurityId  = @UserIdTemp
 														 , @intShipmentType			 = 1
 					END
 			END
@@ -404,7 +415,7 @@ BEGIN
 	END
 END
 
-IF @Post = 0
+IF @PostTemp = 0
 BEGIN
 	--REVERSE BLEND FOR FINISHED GOODS
 	DECLARE @FinishedGoodItems AS TABLE (
@@ -711,7 +722,7 @@ BEGIN
 			EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost] @InvoiceId	= @InvoiceIDU
 														  , @Post		= 0
 														  , @LoadId		= @LoadIDU
-														  , @UserId		= @UserId
+														  , @UserId		= @UserIdTemp
 
 		--POST AND UN-CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnU, 0) = 1 AND @LoadIDU IS NOT NULL
@@ -720,13 +731,13 @@ BEGIN
 					BEGIN
 						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
 														 , @ysnCancel				 = 0
-														 , @intEntityUserSecurityId  = @UserId
+														 , @intEntityUserSecurityId  = @UserIdTemp
 														 , @intShipmentType			 = 1
 					END
 												 
 				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDU
 											   , @ysnPost				 	= 1
-											   , @intEntityUserSecurityId  	= @UserId
+											   , @intEntityUserSecurityId  	= @UserIdTemp
 				
 			END	
 
@@ -845,12 +856,12 @@ BEGIN
 		)	
 
 	UPDATE u
-	SET u.dblQty = CASE WHEN @Post = 1 THEN u.dblQty ELSE -u.dblQty END 
+	SET u.dblQty = CASE WHEN @PostTemp = 1 THEN u.dblQty ELSE -u.dblQty END 
 	FROM @UsageItems u
 
 	EXEC uspICIncreaseUsageQty 
 		@UsageItems	
-		,@UserId
+		,@UserIdTemp
 END 
 
 --UPDATE CUSTOMER CREDIT LIMIT REACHED
@@ -874,7 +885,7 @@ FROM tblARInvoice INV
 INNER JOIN ##ARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
 
 --UPDATE CONTRACT BALANCE
-EXEC dbo.uspARUpdateContractOnPost @UserId
+EXEC dbo.uspARUpdateContractOnPost @UserIdTemp
 
 --UPDATE CONTRACTS FINANCIAL STATUS
 DECLARE @tblContractsFinancial AS Id
@@ -947,7 +958,7 @@ INNER JOIN tblCTItemContractDetail ICD ON ID.intItemContractDetailId = ICD.intIt
 WHERE ID.intItemContractDetailId IS NOT NULL
   AND ISNULL(ID.strPricing, 'Inventory - Standard Pricing') <> 'Subsystem - Direct'
 
-EXEC dbo.uspCTItemContractInvoicePosted @tblItemContracts, @UserId
+EXEC dbo.uspCTItemContractInvoicePosted @tblItemContracts, @UserIdTemp
 
 --UPDATE INVENTORY ITEM COMMITTED
 EXEC dbo.[uspARUpdateCommitted]
@@ -964,7 +975,7 @@ INNER JOIN ##ARPostInvoiceHeader B ON A.intInvoiceId = B.intInvoiceId
 WHERE ysnApplied = 0
 
 --POST RESULT
-IF @IntegrationLogId IS NULL
+IF @IntegrationLogIdTemp IS NULL
 	BEGIN
 		INSERT INTO tblARPostResult(
 			  strMessage
@@ -985,8 +996,8 @@ DECLARE @tblInvoicesToUpdate	AS InvoiceId
 
 INSERT INTO @tblInvoicesToUpdate (intHeaderId, ysnPost, strTransactionType)
 SELECT DISTINCT intHeaderId	= intInvoiceId
-			  , ysnPost 	= @Post
-			  , strTransactionType	= (CASE WHEN @Post = 1 THEN 'Posted' ELSE 'Unposted' END)
+			  , ysnPost 	= @PostTemp
+			  , strTransactionType	= (CASE WHEN @PostTemp = 1 THEN 'Posted' ELSE 'Unposted' END)
 FROM ##ARPostInvoiceHeader
 
 --UPDATE GROSS MARGIN SUMMARY
@@ -995,10 +1006,27 @@ EXEC dbo.uspARInvoiceGrossMarginSummary @ysnRebuild = 0
 
 --INTER COMPANY PRE-STAGE
 EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdate
-									    , @intUserId		= @UserId		
+									    , @intUserId		= @UserIdTemp		
 
 --Create inventory receipt to another company
-EXEC [dbo].[uspARInterCompanyIntegrationSource] @BatchId = @BatchId, @Post = @Post
+EXEC [dbo].[uspARInterCompanyIntegrationSource] @BatchId = @BatchIdTemp, @Post = @PostTemp
+
+--SALES ANALYSIS REPORT
+EXEC dbo.uspARSalesAnalysisReport @tblTransactionIds 	= @tblInvoicesToUpdate
+							    , @ysnInvoice 			= 1
+								, @ysnRebuild 			= 0
+								, @ysnPost 				= @Post
+
+--SALES ANALYSIS REPORT
+EXEC dbo.uspARSalesAnalysisReport @tblTransactionIds 	= @tblInvoicesToUpdate
+							    , @ysnInvoice 			= 1
+								, @ysnRebuild 			= 0
+								, @ysnPost 				= @Post
+
+--DELETE FROM POSTING QUEUE
+DELETE PQ
+FROM tblARPostingQueue PQ
+INNER JOIN ##ARPostInvoiceHeader II ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
 
 --AUDIT LOG
 DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
@@ -1028,32 +1056,27 @@ SELECT DISTINCT
 	,[strDetails]				= NULL
 FROM ##ARPostInvoiceHeader
 
-EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserIdTemp
 
 END TRY
 BEGIN CATCH
     DECLARE @ErrorMerssage NVARCHAR(MAX)
-	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-    IF @InitTranCount = 0
-        IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION
-	ELSE
-		IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION @Savepoint
+	SELECT @ErrorMerssage = ERROR_MESSAGE()
+
+	IF @raiseErrorTemp = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
 												
 	RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
 END CATCH
-
-IF @InitTranCount = 0
-	BEGIN
-		IF (XACT_STATE()) = -1
-			ROLLBACK TRANSACTION
-		IF (XACT_STATE()) = 1
-			COMMIT TRANSACTION
-		RETURN 1;
-	END	
 
 Post_Exit:
 	RETURN 0;

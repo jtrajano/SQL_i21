@@ -29,12 +29,17 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@intBookId INT = NULL
 	,@intSubBookId INT = NULL
 	,@intOriginId INT = NULL
+	,@strContainerNo nvarchar(50)=NULL
+	,@strMarkings nvarchar(50)=NULL
+	,@intEntityVendorId int=NULL
+	,@strCondition NVARCHAR(50)=NULL
+	,@dtmExpiryDate Datetime=NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
@@ -52,7 +57,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@ItemsThatNeedLotId AS dbo.ItemLotTableType
 	,@strLifeTimeType NVARCHAR(50)
 	,@intLifeTime INT
-	,@dtmExpiryDate DATETIME
+	--,@dtmExpiryDate DATETIME
 	,@ItemsForPost AS ItemCostingTableType
 	,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 	,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
@@ -267,6 +272,9 @@ BEGIN
 	SELECT @ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
 	FROM tblMFCompanyPreference
 
+	if @dtmExpiryDate is null
+	Begin
+
 	IF @strLifeTimeType = 'Years'
 		SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmProductionDate)
 	ELSE IF @strLifeTimeType = 'Months'
@@ -283,7 +291,7 @@ BEGIN
 		SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmProductionDate)
 	ELSE
 		SET @dtmExpiryDate = DateAdd(yy, 1, @dtmProductionDate)
-
+	End
 	INSERT INTO @ItemsThatNeedLotId (
 		intLotId
 		,strLotNumber
@@ -316,6 +324,9 @@ BEGIN
 		,strParentLotNumber
 		,intBookId
 		,intSubBookId
+		,strContainerNo
+		,dblWeightPerQty
+		,strCondition
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -334,9 +345,9 @@ BEGIN
 		,strBOLNo = NULL
 		,strVessel = @strVessel
 		,strReceiptNumber = NULL
-		,strMarkings = NULL
+		,strMarkings = @strMarkings
 		,strNotes = @strNotes
-		,intEntityVendorId = NULL
+		,intEntityVendorId =@intEntityVendorId
 		,strVendorLotNo = @strVendorLotNo
 		,strGarden = NULL
 		,intDetailId = @intTransactionId
@@ -348,6 +359,9 @@ BEGIN
 		,strParentLotNumber = @strParentLotNumber
 		,intBookId = @intBookId
 		,intSubBookId = @intSubBookId
+		,strContainerNo = @strContainerNo
+		,dblWeightPerQty=@dblUnitQty
+		,strCondition=@strCondition
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
@@ -910,6 +924,23 @@ BEGIN
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
 	END
+
+	IF ISNULL(@ysnRecap, 0) = 0
+	BEGIN
+
+		UPDATE WRD
+		SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)
+			,WRD.dblActualAmount = (IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate
+			,WRD.dblDifference = CASE 
+				WHEN ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate) > 0
+					THEN IsNULL(dblEstimatedAmount,0) - ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate)
+				ELSE NULL
+				END
+		FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
+		JOIN dbo.tblLGWarehouseRateMatrixDetail RD ON RD.intWarehouseRateMatrixDetailId = WRD.intWarehouseRateMatrixDetailId
+		WHERE WRD.intWorkOrderId = @intWorkOrderId
+
+	End
 
 	IF ISNULL(@ysnRecap, 0) = 1
 	BEGIN

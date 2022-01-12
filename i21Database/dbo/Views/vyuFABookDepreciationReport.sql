@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuFABookDepreciationReport]
 AS 
 
-SELECT DISTINCT      
+SELECT      
     FA.intAssetId,   
     FA.strAssetId,   
     FA.strAssetDescription,  
@@ -33,7 +33,7 @@ SELECT DISTINCT
     strTaxDepreciationMethod = ISNULL(TaxBookDepreciation.strDepreciationMethodId, ''),
     dblTaxCost = ISNULL(TaxBookDepreciation.dblCost, 0),
     dblTaxSalvageValue = ISNULL(TaxBookDepreciation.dblSalvageValue, 0),
-    FFA.intFiscalPeriodId,
+    FiscalYear.intGLFiscalYearPeriodId intFiscalPeriodId,
     FA.intConcurrencyId  
 FROM 
     tblFAFixedAsset FA
@@ -43,27 +43,28 @@ FROM
     LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId        
     LEFT JOIN tblFADepreciationMethod DM on DM.intDepreciationMethodId = FA.intDepreciationMethodId
     LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = FA.intAssetGroupId
-    LEFT JOIN tblFAFiscalAsset FFA ON FFA.intAssetId = FA.intAssetId
+    CROSS JOIN tblGLFiscalYearPeriod FiscalYear
 
     OUTER APPLY (
 	    SELECT intDepreciationCount = ISNULL(COUNT(1), 0) FROM tblFAFixedAssetDepreciation 
 	    WHERE intAssetId = FA.intAssetId AND intBookId = 1 AND strTransaction IN ('Depreciation', 'Imported')
     ) BookDepCnt
-
-    OUTER APPLY(  
-        SELECT dblCost, dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation 
-        WHERE intAssetId = FA.intAssetId AND intBookId = 1 AND intDepreciationMethodId = DM.intDepreciationMethodId
+     OUTER APPLY(  
+        SELECT BD.dblCost, BD.dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation BD
+		 JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = BD.intDepreciationMethodId
+	     WHERE BD.intAssetId = FA.intAssetId AND intBookId = 1
     ) GAAPBookDepreciation
     OUTER APPLY(  
-         SELECT dblCost, dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation 
-        WHERE intAssetId = FA.intAssetId AND intBookId = 2 AND intDepreciationMethodId = DM.intDepreciationMethodId
+         SELECT BD.dblCost, BD.dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation BD
+		 JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = BD.intDepreciationMethodId
+	     WHERE BD.intAssetId = FA.intAssetId AND intBookId = 2
     ) TaxBookDepreciation
     OUTER APPLY (
         SELECT dbo.fnFAGetSumDepreciationCMAndYTD(FAD.intAssetId, 1, FY.dtmStartDate, FY.dtmEndDate, 0) dblDepreciationToDate
         FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FY
         WHERE 
 		    FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 1 AND 
-		    FY.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId AND 
+		    FY.intGLFiscalYearPeriodId = FiscalYear.intGLFiscalYearPeriodId AND 
 		    FAD.dtmDepreciationToDate BETWEEN FY.dtmStartDate AND FY.dtmEndDate
     ) GAAPDepreciationCurrentMonth
     OUTER APPLY (
@@ -71,22 +72,22 @@ FROM
         FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FY
         WHERE 
 		    FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 2 AND 
-		    FY.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId AND 
+		    FY.intGLFiscalYearPeriodId = FiscalYear.intGLFiscalYearPeriodId AND 
 		    FAD.dtmDepreciationToDate BETWEEN FY.dtmStartDate AND FY.dtmEndDate
     ) TaxDepreciationCurrentMonth
     OUTER APPLY (
         SELECT dbo.fnFAGetSumDepreciationCMAndYTD(FAD.intAssetId, 1, FY.dtmDateFrom, FYP.dtmEndDate, 1) dblDepreciationYTD
 	    FROM tblFAFixedAssetDepreciation FAD
-		LEFT JOIN tblGLFiscalYearPeriod FYP ON FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
-		JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = FYP.intFiscalYearId AND FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
-	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 1 AND FFA.intFiscalPeriodId = FYP.intGLFiscalYearPeriodId
+		LEFT JOIN tblGLFiscalYearPeriod FYP ON FYP.intGLFiscalYearPeriodId = FiscalYear.intGLFiscalYearPeriodId
+		JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = FYP.intFiscalYearId AND FYP.intGLFiscalYearPeriodId = FiscalYear.intGLFiscalYearPeriodId
+	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 1 AND FiscalYear.intGLFiscalYearPeriodId = FYP.intGLFiscalYearPeriodId
 	    AND FAD.dtmDepreciationToDate BETWEEN FY.dtmDateFrom AND FYP.dtmEndDate
     ) GAAPDepreciationYTD
     OUTER APPLY (
         SELECT dbo.fnFAGetSumDepreciationCMAndYTD(FAD.intAssetId, 2, FY.dtmDateFrom, FYP.dtmEndDate, 1) dblDepreciationYTD
 	    FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FYP
-		JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = FYP.intFiscalYearId AND FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
-	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 2 AND FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
+		JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = FYP.intFiscalYearId AND FYP.intGLFiscalYearPeriodId = FiscalYear.intGLFiscalYearPeriodId
+	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 2 AND FYP.intGLFiscalYearPeriodId = FiscalYear.intGLFiscalYearPeriodId
 	    AND FAD.dtmDepreciationToDate BETWEEN FY.dtmDateFrom AND FYP.dtmEndDate
     ) TaxDepreciationYTD
     OUTER APPLY (
@@ -95,7 +96,7 @@ FROM
 	    WHERE 
 			FAD.intAssetId = FA.intAssetId AND 
 			FAD.intBookId = 1 AND 
-			FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId AND
+			FYP.intGLFiscalYearPeriodId = FiscalYear.intGLFiscalYearPeriodId AND
 			FAD.dtmDepreciationToDate BETWEEN FAD.dtmDateInService AND FYP.dtmEndDate 
     ) GAAPDepreciationLTD
     OUTER APPLY (
@@ -104,7 +105,7 @@ FROM
 	    WHERE 
 			FAD.intAssetId = FA.intAssetId AND 
 			FAD.intBookId = 2 AND 
-			FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId AND
+			FYP.intGLFiscalYearPeriodId = FiscalYear.intGLFiscalYearPeriodId AND
 			FAD.dtmDepreciationToDate BETWEEN FAD.dtmDateInService AND FYP.dtmEndDate 
     ) TaxDepreciationLTD
 
@@ -112,9 +113,8 @@ WHERE
 	FAD.strTransaction IN ('Depreciation', 'Imported')
 
 GROUP BY 
-    FFA.intFiscalPeriodId, 
+    FiscalYear.intGLFiscalYearPeriodId, 
     FA.intAssetId, 
-    FFA.intBookId,
     FA.strAssetId,   
     FA.strAssetDescription,  
     FA.strSerialNumber,  

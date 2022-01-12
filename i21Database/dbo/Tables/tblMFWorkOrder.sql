@@ -73,7 +73,7 @@
 	dtmLastProducedDate datetime,
 	ysnFeedCloseWorkorder bit CONSTRAINT [DF_tblMFWorkOrder_ysnFeedCloseWorkorder] DEFAULT 0,
 	intTransactionFrom int CONSTRAINT [DF_tblMFWorkOrder_intTransactionFrom] DEFAULT 3,
-	strCostAdjustmentBatchId nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+	strCostAdjustmentBatchId nvarchar(40) COLLATE Latin1_General_CI_AS NULL,
 	intRecipeTypeId INT,
 	intCompanyId INT NULL,
 	dtmPostDate datetime,

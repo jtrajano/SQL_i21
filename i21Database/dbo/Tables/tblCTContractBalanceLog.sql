@@ -37,7 +37,7 @@
 	[intContractStatusId] INT NOT NULL,
 	[intBookId] INT NULL,
 	[intSubBookId] INT NULL,
-	[strNotes] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnNegated] BIT DEFAULT((0)) NULL,
 	[intRefContractBalanceId] INT NULL,
 	intUserId INT NULL, 
@@ -47,3 +47,7 @@
 	[ysnDeleted] BIT DEFAULT((0)) NULL,
     CONSTRAINT [PK_tblCTContractBalanceLog] PRIMARY KEY ([intContractBalanceLogId]) 
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTContractBalanceLog_intContractHeaderId] ON [dbo].[tblCTContractBalanceLog] ([intContractHeaderId])

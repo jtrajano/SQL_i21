@@ -144,6 +144,18 @@ SELECT l.intLotId
 	,LO.intLoadId
 	,LO.strLoadNumber
 	,Com.strCommodityCode
+	,l.strCondition
+	,l.dblQtyInTransit
+	,l.dblWeightInTransit
+	,l.ysnWeighed
+	,l.strSealNo
+	,CH.strContractNumber
+	,CD.intContractSeq
+	,CD.strERPPONumber
+	,CD.strERPItemNumber
+	,CD.strERPBatchNumber
+	,i.strExternalGroup
+	,PT.strPricingType
 FROM dbo.tblICLot l
 JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 JOIN dbo.tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -176,3 +188,6 @@ LEFT JOIN dbo.tblMFManufacturingProcess mp ON LI.intManufacturingProcessId = mp.
 LEFT JOIN dbo.tblMFCompanyPreference CP ON 1 = 1
 LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = LI.intWorkOrderId
 LEFT JOIN dbo.tblLGLoad LO ON LO.intLoadId = LI.intLoadId
+LEFT JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = l.intContractDetailId
+LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = l.intContractHeaderId
+LEFT JOIN dbo.tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId

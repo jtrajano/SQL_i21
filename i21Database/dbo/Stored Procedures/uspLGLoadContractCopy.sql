@@ -131,6 +131,7 @@ BEGIN TRY
 		,dtmStartDate
 		,dtmEndDate
 		,dtmPlannedAvailabilityDate
+		,dtmLoadExpiration
 		,strVessel1
 		,strOriginPort1
 		,strDestinationPort1
@@ -252,6 +253,7 @@ BEGIN TRY
 		,dtmStartDate
 		,dtmEndDate
 		,dtmPlannedAvailabilityDate
+		,dtmLoadExpiration
 		,strVessel1
 		,strOriginPort1
 		,strDestinationPort1

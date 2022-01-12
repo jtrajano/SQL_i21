@@ -19,5 +19,6 @@
 	dblGrossWeight NUMERIC(38, 20) NULL,
 	dblTareWeight NUMERIC(38, 20) NULL,
 	dblWeightPerQty NUMERIC(38, 20) NULL,
-	strWarehouseCargoNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	strWarehouseCargoNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intSort INT NULL 
 )

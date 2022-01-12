@@ -1,39 +1,89 @@
-CREATE PROCEDURE [dbo].[uspApiImportDollarContractsFromStaging] (@guiUniqueId UNIQUEIDENTIFIER)
+CREATE PROCEDURE [dbo].[uspApiImportDollarContractsFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
 
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
-
 -- Validations
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the location with a companyLocationId ''' + CAST(s.intCompanyLocationId AS NVARCHAR(50)) + '''', 'companyLocationId', 'Error', CAST(s.intCompanyLocationId AS NVARCHAR(50))
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the location with a companyLocationId ''' + CAST(s.intCompanyLocationId AS NVARCHAR(50)) + '''', 
+	strField = 'companyLocationId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intCompanyLocationId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Dollar Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = s.intCompanyLocationId
 WHERE c.intCompanyLocationId IS NULL
-	AND s.guiApiUniqueId = @guiUniqueId
+	AND s.guiApiUniqueId = @guiApiUniqueId
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the customer with an entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the customer with an entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 
+	strField = 'entityId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intCompanyLocationId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Dollar Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
 WHERE e.intEntityId IS NULL
-	AND s.guiApiUniqueId = @guiUniqueId
+	AND s.guiApiUniqueId = @guiApiUniqueId
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the category with a categoryId ''' + CAST(s.intCategoryId AS NVARCHAR(50)) + '''', 'categoryId', 'Error',  CAST(s.intCategoryId AS NVARCHAR(50))
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the category with a categoryId ''' + CAST(s.intCategoryId AS NVARCHAR(50)) + '''', 
+	strField = 'categoryId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intCategoryId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Dollar Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTApiDollarContractDetailStaging s
 INNER JOIN tblCTApiItemContractStaging c ON c.intApiItemContractStagingId = s.intApiItemContractStagingId
 LEFT JOIN tblICCategory e ON e.intCategoryId = s.intCategoryId
 WHERE e.intCategoryId IS NULL
-	AND c.guiApiUniqueId = @guiUniqueId
+	AND c.guiApiUniqueId = @guiApiUniqueId
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 'termId', 'Error',  CAST(s.intTermId AS NVARCHAR(50))
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 
+	strField = 'termId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intTermId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Dollar Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTApiItemContractStaging s
 INNER JOIN tblSMTerm t ON t.intTermID = s.intTermId
 WHERE t.intTermID IS NULL
-	AND s.guiApiUniqueId = @guiUniqueId
+	AND s.guiApiUniqueId = @guiApiUniqueId
 
-IF EXISTS(SELECT * FROM @Logs)
+IF EXISTS(SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId)
 	GOTO Logging
 
 -- Transformation
@@ -57,6 +107,7 @@ DECLARE @intLineOfBusinessId INT
 DECLARE @dtmDueDate DATETIME
 DECLARE @dblDollarValue NUMERIC(18,6)
 DECLARE @intStagingId INT
+DECLARE @intApiRowNumber INT
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
@@ -80,8 +131,9 @@ SELECT s.intApiItemContractStagingId
 	, s.intLineOfBusinessId
 	, s.dtmDueDate
 	, s.dblDollarValue
+	, s.intApiRowNumber
 FROM tblCTApiItemContractStaging s
-WHERE s.guiApiUniqueId = @guiUniqueId
+WHERE s.guiApiUniqueId = @guiApiUniqueId
 
 OPEN CUR
 
@@ -106,6 +158,7 @@ FETCH NEXT FROM cur INTO
 , @intLineOfBusinessId 
 , @dtmDueDate 
 , @dblDollarValue
+, @intApiRowNumber
 
 DECLARE @strDollarContractNumber NVARCHAR(3400)
 DECLARE @intItemContractHeaderId INT
@@ -138,7 +191,8 @@ BEGIN
 		, dblDollarValue
 		, dblRemainingDollarValue
 		, strContractNumber
-		, guiApiUniqueId)
+		, guiApiUniqueId
+		, intApiRowNumber)
 	SELECT 1
 		, @intContractType
 		, 'Dollar'
@@ -162,7 +216,8 @@ BEGIN
 		, @dblDollarValue
 		, @dblDollarValue
 		, @strDollarContractNumber
-		, @guiUniqueId
+		, @guiApiUniqueId
+		, @intApiRowNumber
 
 	SET @intItemContractHeaderId = SCOPE_IDENTITY()
 
@@ -192,6 +247,7 @@ BEGIN
 	, @intLineOfBusinessId 
 	, @dtmDueDate 
 	, @dblDollarValue
+	, @intApiRowNumber
 
 END
 
@@ -200,18 +256,31 @@ DEALLOCATE cur
 
 Logging:
 
-INSERT INTO @Logs (intLineNumber, dblTotalAmount, strLogLevel, strField)
-SELECT h.intItemContractHeaderId, h.dblDollarValue, 'Ids', h.strContractNumber
+INSERT INTO tblRestApiTransformationDelta (guiTransformationDeltaId,intTransactionId, strTransactionNo, dblTotalAmount,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	intTransactionId = h.intItemContractHeaderId,
+	strTransactionNo = h.strContractNumber, 
+	dblTotalAmount = ISNULL(h.dblDollarValue, 0),
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Dollar Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTItemContractHeader h
-WHERE h.guiApiUniqueId = @guiUniqueId
+LEFT JOIN tblCTItemContractDetail d ON d.intItemContractHeaderId = h.intItemContractHeaderId
+WHERE h.guiApiUniqueId = @guiApiUniqueId
+GROUP BY h.intItemContractHeaderId, h.strContractNumber, h.dblDollarValue
 
-SELECT * FROM @Logs
+SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId
 
 -- Cleanup
 DELETE d
 FROM tblCTApiDollarContractDetailStaging d
 INNER JOIN tblCTApiItemContractStaging s ON s.intApiItemContractStagingId = d.intApiItemContractStagingId
-WHERE s.guiApiUniqueId = @guiUniqueId
+WHERE s.guiApiUniqueId = @guiApiUniqueId
 
 DELETE FROM tblCTApiItemContractStaging
-WHERE guiApiUniqueId = @guiUniqueId
+WHERE guiApiUniqueId = @guiApiUniqueId
+GO

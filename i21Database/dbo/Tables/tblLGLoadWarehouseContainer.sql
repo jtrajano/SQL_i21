@@ -13,3 +13,11 @@ CONSTRAINT [PK_tblLGLoadWarehouseContainer] PRIMARY KEY ([intLoadWarehouseContai
 CONSTRAINT [FK_tblLGLoadWarehouseContainer_tblLGLoadWarehouse_intLoadWarehouseId] FOREIGN KEY ([intLoadWarehouseId]) REFERENCES [tblLGLoadWarehouse]([intLoadWarehouseId]) ON DELETE CASCADE,
 CONSTRAINT [FK_tblLGLoadWarehouseContainer_tblLGLoadContainer_intLoadContainerId] FOREIGN KEY ([intLoadContainerId]) REFERENCES [tblLGLoadContainer]([intLoadContainerId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadWarehouseContainer_intLoadContainerId] ON [dbo].[tblLGLoadWarehouseContainer]
+(
+	[intLoadContainerId] 
+	,[intLoadWarehouseId]
+)
+GO

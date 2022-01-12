@@ -21,5 +21,6 @@ CREATE TABLE dbo.tblCTApiItemContractStaging
 	intTermId INT NULL,
 	intLineOfBusinessId INT NULL,
 	dblDollarValue NUMERIC(18,6) NULL,
+	intApiRowNumber INT NULL,
 	CONSTRAINT PK_tblCTApiItemContractStaging_intApiItemContractStagingId PRIMARY KEY (intApiItemContractStagingId)
 )

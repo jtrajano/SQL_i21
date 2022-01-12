@@ -56,7 +56,7 @@ FROM (
 	
 	union all
 	select
-		dtmDate = CONVERT(VARCHAR(10),dtmCreatedDate,110)
+		dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
 		, strDistributionType
 		, dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
 		, dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END

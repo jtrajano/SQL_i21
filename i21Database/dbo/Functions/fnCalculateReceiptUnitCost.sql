@@ -15,6 +15,8 @@ CREATE FUNCTION [dbo].[fnCalculateReceiptUnitCost](
 	,@ysnSubCurrency AS BIT
 	,@intSubCurrencyCents AS INT 	
 	,@intStockUOMId AS INT
+	,@intComputeItemTotalOption AS TINYINT 
+	,@dblOpenReceive AS NUMERIC(18, 6)
 )
 RETURNS NUMERIC(38,20)
 AS 
@@ -42,7 +44,53 @@ BEGIN
 		
 		*/
 		CASE	
-				WHEN @intGrossUOMId IS NOT NULL THEN 
+				WHEN @intGrossUOMId IS NOT NULL AND @intComputeItemTotalOption = 1 THEN 
+
+					CASE	-- When item is NOT a Lot, use the unit cost from the line item. 
+							WHEN @intLotId IS NULL AND dbo.fnGetItemLotType(@intItemId) = 0 THEN 
+								-- Formula: Unit Cost = (Line Total) / (Net Qty) 
+								dbo.fnDivide(
+									dbo.fnMultiply(
+										dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intItemUOMId, @dblUnitCost) 
+										, ISNULL(@dblOpenReceive, 0)
+									)
+									,@dblItemNetWgtVolume
+								)
+													
+							WHEN @intLotId IS NOT NULL AND ISNULL(@dblItemNetWgtVolume, 0) <> ISNULL(@dblLotNetWgtVolume, 0) THEN 
+								/*
+								--------------------------------------------------------------------------------------------------------
+								-- Cleaned weight scenario. 
+								--------------------------------------------------------------------------------------------------------
+								When item is a LOT, recalculate the cost. 
+								Below is an example: 
+									1. Receive a stock at $1/LB. Net weight received is 100lb. So this means line total is $100. $1 x $100 = $100. 
+									2. Lot can be cleaned. So after a lot is cleaned, net weight on lot level is reduced to 80 lb. 
+									3. Value of the line total will still remain at $100. 
+									4. So this means, cost needs to be changed from $1/LB to $1.25/LB.
+									5. Receiving 80lbs @ $1.25/lb is $100. This will match the value of the line item with the lot item. 
+								*/
+								dbo.fnDivide(
+									dbo.fnMultiply(
+										dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intItemUOMId, @dblUnitCost) 
+										, ISNULL(@dblOpenReceive, 0)
+									)
+									,ISNULL(@dblLotNetWgtVolume, 1) 
+								)
+
+							ELSE
+								-- Formula: Unit Cost = (Line Total) / (Net Qty) 
+								dbo.fnDivide(
+									dbo.fnMultiply(
+										dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intItemUOMId, @dblUnitCost) 
+										, ISNULL(@dblOpenReceive, 0)
+									)
+									,@dblItemNetWgtVolume
+								)
+
+					END 
+				
+				WHEN @intGrossUOMId IS NOT NULL AND @intComputeItemTotalOption = 0 THEN 
 					-- Convert the Cost UOM to Gross/Net UOM. 
 
 					CASE	-- When item is NOT a Lot, use the unit cost from the line item. 

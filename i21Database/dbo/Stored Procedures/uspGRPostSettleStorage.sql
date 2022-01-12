@@ -8,6 +8,7 @@
 AS
 BEGIN TRY
 	SET NOCOUNT ON
+	SET ANSI_WARNINGS ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @EntityId INT
@@ -63,7 +64,9 @@ BEGIN TRY
 	DECLARE @dtmDate AS DATETIME
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3	
 	DECLARE @ItemsToStorage AS ItemCostingTableType
+	DECLARE @ItemsToStorageStaging AS ItemCostingTableType
 	DECLARE @ItemsToPost AS ItemCostingTableType
+	DECLARE @ItemsToPostStaging AS ItemCostingTableType
 	DECLARE @strBatchId AS NVARCHAR(40)
 	DECLARE @intReceiptId AS INT
 	DECLARE @intInventoryReceiptItemId AS INT
@@ -193,11 +196,47 @@ BEGIN TRY
 		3-Discount
 		4-Fee
    */
-	
-	---- Get the Batch Id 
-	--EXEC dbo.uspSMGetStartingNumber 
-	--	@STARTING_NUMBER_BATCH
-	--	,@strBatchId OUTPUT
+
+	DECLARE @tblGRCustomerOwnedSettleStorageVoucher AS TABLE 
+	(
+		intSettleStorageId INT
+		,strOrderType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,intCustomerStorageId INT
+		,intCompanyLocationId INT NULL
+		,intContractHeaderId INT NULL
+		,intContractDetailId INT NULL
+		,dblUnits DECIMAL(24, 10)
+		,dblCashPrice DECIMAL(24, 10) NULL
+		,intItemId INT NULL
+		,intItemType INT NULL
+		,IsProcessed BIT NULL
+		,intTicketDiscountId INT NULL
+		,intPricingTypeId INT NULL
+		,dblBasis DECIMAL(24, 10) NULL
+		,intContractUOMId INT NULL
+		,dblCostUnitQty DECIMAL(24, 10) NULL
+		,dblSettleContractUnits DECIMAL(24,10) NULL
+		,ysnDiscountFromGrossWeight BIT NULL
+		,ysnPercentChargeType BIT NULL
+		,dblCashPriceUsed DECIMAL(24,10) --to determine the cash price used in Percent discounts
+		,intSettleContractId int null
+		,ysnInventoryCost bit null
+	)	
+
+   DECLARE @tblCustomerOwnedSettleStorage AS TABLE 
+	(
+		intSettleStorageId INT
+		,dblSelectedUnits DECIMAL(24, 10)
+		,dblFutureMarketPrice DECIMAL(24, 10)
+	)
+
+	DECLARE @strContractNumber NVARCHAR(50)
+	DECLARE @intContractSeq INT
+
+	-- Get the Batch Id 
+	EXEC dbo.uspSMGetStartingNumber 
+		@STARTING_NUMBER_BATCH
+		,@strBatchId OUTPUT
 
 	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 	BEGIN 
@@ -1014,8 +1053,21 @@ BEGIN TRY
 						WHERE intSettleContractKey 	= @SettleContractKey
 
 						SELECT @intContractHeaderId = intContractHeaderId
+							,@intContractSeq		= intContractSeq
 						FROM tblCTContractDetail
 						WHERE intContractDetailId = @intContractDetailId
+
+						SELECT @strContractNumber = strContractNumber
+						FROM tblCTContractHeader
+						WHERE intContractHeaderId = @intContractHeaderId
+
+						IF(SELECT intContractStatusId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId) = 6 --SHORT-CLOSED
+						BEGIN
+							SET @ErrMsg = 'Contract '+ @strContractNumber +'-sequence '+ CAST(@intContractSeq AS NVARCHAR(50)) +' has been short-closed.  Please reopen contract sequence in order to post settle storage.'
+
+							RAISERROR(@ErrMsg,16,1,1)
+							RETURN;
+						END
 
 						IF @dblStorageUnits <= @dblContractUnits
 						BEGIN
@@ -1317,7 +1369,10 @@ BEGIN TRY
 					,ysnInventoryCost		
 				FROM @SettleVoucherCreate SVC
 				OUTER APPLY (
-					SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId AND intContractDetailId = SVC.intContractDetailId
+					SELECT GR.* FROM tblGRSettleContractPriceFixationDetail GR
+					INNER JOIN tblCTPriceFixationDetail CT
+						ON CT.intPriceFixationDetailId = GR.intPriceFixationDetailId
+					WHERE GR.intSettleStorageId = @intSettleStorageId AND GR.intContractDetailId = SVC.intContractDetailId
 				) A
 
 				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
@@ -1388,11 +1443,11 @@ BEGIN TRY
 				FROM @SettleVoucherCreate
 			END		
 
-
-				-- Get the Batch Id 
-				EXEC dbo.uspSMGetStartingNumber 
-					@STARTING_NUMBER_BATCH
-					,@strBatchId OUTPUT
+				-- Note: A single Batch ID will be used across multiple settle storage tickets.
+				-- -- Get the Batch Id 
+				-- EXEC dbo.uspSMGetStartingNumber 
+				-- 	@STARTING_NUMBER_BATCH
+				-- 	,@strBatchId OUTPUT
 
 				SET @intLotId = NULL
 				
@@ -1671,13 +1726,83 @@ BEGIN TRY
 				--Reduce the On-Storage Quantity
 				IF(@ysnFromPriceBasisContract = 0)		
 				BEGIN
-					EXEC uspICPostStorage 
-						 @ItemsToStorage
-						,@strBatchId
-						,@intCreatedUserId
+					-- EXEC uspICPostStorage 
+					-- 	 @ItemsToStorage
+					-- 	,@strBatchId
+					-- 	,@intCreatedUserId
 
-					IF @@ERROR <> 0
-						GOTO SettleStorage_Exit;
+					-- IF @@ERROR <> 0
+					-- 	GOTO SettleStorage_Exit;
+					INSERT INTO @ItemsToStorageStaging (
+						[intItemId]
+						,[intItemLocationId]
+						,[intItemUOMId]
+						,[dtmDate]
+						,[dblQty]
+						,[dblUOMQty]
+						,[dblCost]
+						,[dblValue]
+						,[dblSalesPrice]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[intTransactionId]
+						,[intTransactionDetailId]
+						,[strTransactionId]
+						,[intTransactionTypeId]
+						,[intLotId]
+						,[intSubLocationId]
+						,[intStorageLocationId]
+						,[ysnIsStorage]
+						,[strActualCostId]
+						,[intSourceTransactionId]
+						,[strSourceTransactionId]
+						,[intInTransitSourceLocationId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
+						,[intStorageScheduleTypeId]
+						,[dblUnitRetail]
+						,[intCategoryId]
+						,[dblAdjustCostValue]
+						,[dblAdjustRetailValue]
+						,[intCostingMethod]
+						,[ysnAllowVoucher]
+						,[intSourceEntityId]
+					)
+					SELECT
+						[intItemId]
+						,[intItemLocationId]
+						,[intItemUOMId]
+						,[dtmDate]
+						,[dblQty]
+						,[dblUOMQty]
+						,[dblCost]
+						,[dblValue]
+						,[dblSalesPrice]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[intTransactionId]
+						,[intTransactionDetailId]
+						,[strTransactionId]
+						,[intTransactionTypeId]
+						,[intLotId]
+						,[intSubLocationId]
+						,[intStorageLocationId]
+						,[ysnIsStorage]
+						,[strActualCostId]
+						,[intSourceTransactionId]
+						,[strSourceTransactionId]
+						,[intInTransitSourceLocationId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
+						,[intStorageScheduleTypeId]
+						,[dblUnitRetail]
+						,[intCategoryId]
+						,[dblAdjustCostValue]
+						,[dblAdjustRetailValue]
+						,[intCostingMethod]
+						,[ysnAllowVoucher]
+						,[intSourceEntityId]
+					FROM @ItemsToStorage
 				END
 
 				BEGIN
@@ -1696,172 +1821,271 @@ BEGIN TRY
 						IF @strOwnedPhysicalStock ='Customer' 
 						BEGIN
 							
-							DELETE FROM @DummyGLEntries
+							-- DELETE FROM @DummyGLEntries
 
-							INSERT INTO @DummyGLEntries 
-							(
-								[dtmDate] 
-								,[strBatchId]
-								,[intAccountId]
-								,[dblDebit]
-								,[dblCredit]
-								,[dblDebitUnit]
-								,[dblCreditUnit]
-								,[strDescription]
-								,[strCode]
-								,[strReference]
+							-- INSERT INTO @DummyGLEntries 
+							-- (
+							-- 	[dtmDate] 
+							-- 	,[strBatchId]
+							-- 	,[intAccountId]
+							-- 	,[dblDebit]
+							-- 	,[dblCredit]
+							-- 	,[dblDebitUnit]
+							-- 	,[dblCreditUnit]
+							-- 	,[strDescription]
+							-- 	,[strCode]
+							-- 	,[strReference]
+							-- 	,[intCurrencyId]
+							-- 	,[dblExchangeRate]
+							-- 	,[dtmDateEntered]
+							-- 	,[dtmTransactionDate]
+							-- 	,[strJournalLineDescription]
+							-- 	,[intJournalLineNo]
+							-- 	,[ysnIsUnposted]
+							-- 	,[intUserId]
+							-- 	,[intEntityId]
+							-- 	,[strTransactionId]
+							-- 	,[intTransactionId]
+							-- 	,[strTransactionType]
+							-- 	,[strTransactionForm]
+							-- 	,[strModuleName]
+							-- 	,[intConcurrencyId]
+							-- 	,[dblDebitForeign]	
+							-- 	,[dblDebitReport]	
+							-- 	,[dblCreditForeign]	
+							-- 	,[dblCreditReport]	
+							-- 	,[dblReportingRate]	
+							-- 	,[dblForeignRate]
+							-- 	,[strRateType]
+							-- 	,[intSourceEntityId] --MOD
+							-- 	,[intCommodityId]--MOD
+							-- )
+							-- EXEC @intReturnValue = dbo.uspICPostCosting  
+							-- 	@ItemsToPost  
+							-- 	,@strBatchId  
+							-- 	,'AP Clearing'
+							-- 	,@intCreatedUserId
+	
+							-- IF @intReturnValue < 0
+							-- 	GOTO SettleStorage_Exit;
+							INSERT INTO @ItemsToPostStaging (
+								[intItemId]
+								,[intItemLocationId]
+								,[intItemUOMId]
+								,[dtmDate]
+								,[dblQty]
+								,[dblUOMQty]
+								,[dblCost]
+								,[dblValue]
+								,[dblSalesPrice]
 								,[intCurrencyId]
 								,[dblExchangeRate]
-								,[dtmDateEntered]
-								,[dtmTransactionDate]
-								,[strJournalLineDescription]
-								,[intJournalLineNo]
-								,[ysnIsUnposted]
-								,[intUserId]
-								,[intEntityId]
-								,[strTransactionId]
 								,[intTransactionId]
-								,[strTransactionType]
-								,[strTransactionForm]
-								,[strModuleName]
-								,[intConcurrencyId]
-								,[dblDebitForeign]	
-								,[dblDebitReport]	
-								,[dblCreditForeign]	
-								,[dblCreditReport]	
-								,[dblReportingRate]	
-								,[dblForeignRate]
-								,[strRateType]
-								,[intSourceEntityId] --MOD
-								,[intCommodityId]--MOD
+								,[intTransactionDetailId]
+								,[strTransactionId]
+								,[intTransactionTypeId]
+								,[intLotId]
+								,[intSubLocationId]
+								,[intStorageLocationId]
+								,[ysnIsStorage]
+								,[strActualCostId]
+								,[intSourceTransactionId]
+								,[strSourceTransactionId]
+								,[intInTransitSourceLocationId]
+								,[intForexRateTypeId]
+								,[dblForexRate]
+								,[intStorageScheduleTypeId]
+								,[dblUnitRetail]
+								,[intCategoryId]
+								,[dblAdjustCostValue]
+								,[dblAdjustRetailValue]
+								,[intCostingMethod]
+								,[ysnAllowVoucher]
+								,[intSourceEntityId]
 							)
-							EXEC @intReturnValue = dbo.uspICPostCosting  
-								@ItemsToPost  
-								,@strBatchId  
-								,'AP Clearing'
-								,@intCreatedUserId
-	
-							IF @intReturnValue < 0
-								GOTO SettleStorage_Exit;
+							SELECT
+								[intItemId]
+								,[intItemLocationId]
+								,[intItemUOMId]
+								,[dtmDate]
+								,[dblQty]
+								,[dblUOMQty]
+								,[dblCost]
+								,[dblValue]
+								,[dblSalesPrice]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[intTransactionId]
+								,[intTransactionDetailId]
+								,[strTransactionId]
+								,[intTransactionTypeId]
+								,[intLotId]
+								,[intSubLocationId]
+								,[intStorageLocationId]
+								,[ysnIsStorage]
+								,[strActualCostId]
+								,[intSourceTransactionId]
+								,[strSourceTransactionId]
+								,[intInTransitSourceLocationId]
+								,[intForexRateTypeId]
+								,[dblForexRate]
+								,[intStorageScheduleTypeId]
+								,[dblUnitRetail]
+								,[intCategoryId]
+								,[dblAdjustCostValue]
+								,[dblAdjustRetailValue]
+								,[intCostingMethod]
+								,[ysnAllowVoucher]
+								,[intSourceEntityId]
+							FROM @ItemsToPost
 							
-							begin								
-								IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
-								BEGIN
-									UPDATE SC1
-									SET dblCost = (select top 1 IT.dblCost from tblICInventoryTransaction IT
-														where IT.intTransactionId = @intSettleStorageId
-															and IT.intTransactionTypeId = 44
-															and IT.intItemId = a.intItemId
-													)
-									FROM tblGRSettleContract SC1
-									INNER JOIN @SettleContract SC2
-										ON SC2.intSettleContractId = SC1.intSettleContractId
-									JOIN tblCTContractDetail a
-										on SC2.intContractDetailId = a.intContractDetailId
-								END
-							end
+							-- begin								
+							-- 	IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
+							-- 	BEGIN
+							-- 		UPDATE SC1
+							-- 		SET dblCost = (select top 1 IT.dblCost from tblICInventoryTransaction IT
+							-- 							where IT.intTransactionId = @intSettleStorageId
+							-- 								and IT.intTransactionTypeId = 44
+							-- 								and IT.intItemId = a.intItemId
+							-- 						)
+							-- 		FROM tblGRSettleContract SC1
+							-- 		INNER JOIN @SettleContract SC2
+							-- 			ON SC2.intSettleContractId = SC1.intSettleContractId
+							-- 		JOIN tblCTContractDetail a
+							-- 			on SC2.intContractDetailId = a.intContractDetailId
+							-- 	END
+							-- end
 
 							--INVENTORY items
-							DELETE FROM @GLEntries
-							INSERT INTO @GLEntries 
-							(
-								[dtmDate] 
-								,[strBatchId]
-								,[intAccountId]
-								,[dblDebit]
-								,[dblCredit]
-								,[dblDebitUnit]
-								,[dblCreditUnit]
-								,[strDescription]
-								,[strCode]
-								,[strReference]
-								,[intCurrencyId]
-								,[dblExchangeRate]
-								,[dtmDateEntered]
-								,[dtmTransactionDate]
-								,[strJournalLineDescription]
-								,[intJournalLineNo]
-								,[ysnIsUnposted]
-								,[intUserId]
-								,[intEntityId]
-								,[strTransactionId]
-								,[intTransactionId]
-								,[strTransactionType]
-								,[strTransactionForm]
-								,[strModuleName]
-								,[intConcurrencyId]
-								,[dblDebitForeign]	
-								,[dblDebitReport]	
-								,[dblCreditForeign]	
-								,[dblCreditReport]	
-								,[dblReportingRate]	
-								,[dblForeignRate]
-								,[strRateType]
-								--,[intSourceEntityId] --MOD
-								--,[intCommodityId] --MOD
-							)
-							EXEC dbo.uspGRCreateItemGLEntries
-								@strBatchId
-								,@SettleVoucherCreate2
-								,'AP Clearing'
-								,@intCreatedUserId
-								,@dblSelectedUnits = @dblSelectedUnits
-							IF @intReturnValue < 0
-								GOTO SettleStorage_Exit;
+							-- DELETE FROM @GLEntries
+							-- INSERT INTO @GLEntries 
+							-- (
+							-- 	[dtmDate] 
+							-- 	,[strBatchId]
+							-- 	,[intAccountId]
+							-- 	,[dblDebit]
+							-- 	,[dblCredit]
+							-- 	,[dblDebitUnit]
+							-- 	,[dblCreditUnit]
+							-- 	,[strDescription]
+							-- 	,[strCode]
+							-- 	,[strReference]
+							-- 	,[intCurrencyId]
+							-- 	,[dblExchangeRate]
+							-- 	,[dtmDateEntered]
+							-- 	,[dtmTransactionDate]
+							-- 	,[strJournalLineDescription]
+							-- 	,[intJournalLineNo]
+							-- 	,[ysnIsUnposted]
+							-- 	,[intUserId]
+							-- 	,[intEntityId]
+							-- 	,[strTransactionId]
+							-- 	,[intTransactionId]
+							-- 	,[strTransactionType]
+							-- 	,[strTransactionForm]
+							-- 	,[strModuleName]
+							-- 	,[intConcurrencyId]
+							-- 	,[dblDebitForeign]	
+							-- 	,[dblDebitReport]	
+							-- 	,[dblCreditForeign]	
+							-- 	,[dblCreditReport]	
+							-- 	,[dblReportingRate]	
+							-- 	,[dblForeignRate]
+							-- 	,[strRateType]
+							-- 	--,[intSourceEntityId] --MOD
+							-- 	--,[intCommodityId] --MOD
+							-- )
+							-- EXEC dbo.uspGRCreateItemGLEntries
+							-- 	@strBatchId
+							-- 	,@SettleVoucherCreate2
+							-- 	,'AP Clearing'
+							-- 	,@intCreatedUserId
+							-- 	,@dblSelectedUnits = @dblSelectedUnits
+							-- IF @intReturnValue < 0
+							-- 	GOTO SettleStorage_Exit;
+							INSERT INTO @tblCustomerOwnedSettleStorage
+							SELECT @intSettleStorageId, @dblSelectedUnits, @dblFutureMarketPrice
+
+							INSERT INTO @tblGRCustomerOwnedSettleStorageVoucher
+							SELECT
+								[intSettleStorageId] = @intSettleStorageId
+								,[strOrderType] = strOrderType
+								,[intCustomerStorageId] = intCustomerStorageId
+								,[intCompanyLocationId] = intCompanyLocationId
+								,[intContractHeaderId] = intContractHeaderId
+								,[intContractDetailId] = intContractDetailId
+								,[dblUnits] = dblUnits
+								,[dblCashPrice] = dblCashPrice
+								,[intItemId] = intItemId
+								,[intItemType] = intItemType
+								,[IsProcessed] = IsProcessed
+								,[intTicketDiscountId] = intTicketDiscountId
+								,[intPricingTypeId] = intPricingTypeId
+								,[dblBasis] = dblBasis
+								,[intContractUOMId] = intContractUOMId
+								,[dblCostUnitQty] = dblCostUnitQty
+								,[dblSettleContractUnits] = dblSettleContractUnits
+								,[ysnDiscountFromGrossWeight] = ysnDiscountFromGrossWeight
+								,[ysnPercentChargeType] = ysnPercentChargeType
+								,[dblCashPriceUsed] = dblCashPriceUsed
+								,[intSettleContractId] = intSettleContractId
+								,[ysnInventoryCost] = ysnInventoryCost
+							FROM @SettleVoucherCreate2
 
 							--DISCOUNTS AND CHARGES
-							INSERT INTO @GLEntries 
-							(
-								 [dtmDate] 
-								,[strBatchId]
-								,[intAccountId]
-								,[dblDebit]
-								,[dblCredit]
-								,[dblDebitUnit]
-								,[dblCreditUnit]
-								,[strDescription]
-								,[strCode]
-								,[strReference]
-								,[intCurrencyId]
-								,[dblExchangeRate]
-								,[dtmDateEntered]
-								,[dtmTransactionDate]
-								,[strJournalLineDescription]
-								,[intJournalLineNo]
-								,[ysnIsUnposted]
-								,[intUserId]
-								,[intEntityId]
-								,[strTransactionId]
-								,[intTransactionId]
-								,[strTransactionType]
-								,[strTransactionForm]
-								,[strModuleName]
-								,[intConcurrencyId]
-								,[dblDebitForeign]	
-								,[dblDebitReport]	
-								,[dblCreditForeign]	
-								,[dblCreditReport]	
-								,[dblReportingRate]	
-								,[dblForeignRate]
-								,[strRateType]
-							)
+						-- 	INSERT INTO @GLEntries 
+						-- 	(
+						-- 		 [dtmDate] 
+						-- 		,[strBatchId]
+						-- 		,[intAccountId]
+						-- 		,[dblDebit]
+						-- 		,[dblCredit]
+						-- 		,[dblDebitUnit]
+						-- 		,[dblCreditUnit]
+						-- 		,[strDescription]
+						-- 		,[strCode]
+						-- 		,[strReference]
+						-- 		,[intCurrencyId]
+						-- 		,[dblExchangeRate]
+						-- 		,[dtmDateEntered]
+						-- 		,[dtmTransactionDate]
+						-- 		,[strJournalLineDescription]
+						-- 		,[intJournalLineNo]
+						-- 		,[ysnIsUnposted]
+						-- 		,[intUserId]
+						-- 		,[intEntityId]
+						-- 		,[strTransactionId]
+						-- 		,[intTransactionId]
+						-- 		,[strTransactionType]
+						-- 		,[strTransactionForm]
+						-- 		,[strModuleName]
+						-- 		,[intConcurrencyId]
+						-- 		,[dblDebitForeign]	
+						-- 		,[dblDebitReport]	
+						-- 		,[dblCreditForeign]	
+						-- 		,[dblCreditReport]	
+						-- 		,[dblReportingRate]	
+						-- 		,[dblForeignRate]
+						-- 		,[strRateType]
+						-- 	)
 
 							
-							EXEC uspGRCreateGLEntries 
-							 'Storage Settlement'
-							,'OtherCharges'
-							,@intSettleStorageId
-							,@strBatchId
-							,@intCreatedUserId
-							,@dtmClientPostDate
-							,@ysnPosted
-							,@dblFutureMarketPrice
+						-- 	EXEC uspGRCreateGLEntries 
+						-- 	 'Storage Settlement'
+						-- 	,'OtherCharges'
+						-- 	,@intSettleStorageId
+						-- 	,@strBatchId
+						-- 	,@intCreatedUserId
+						-- 	,@dtmClientPostDate
+						-- 	,@ysnPosted
+						-- 	,@dblFutureMarketPrice
 
-							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
-							BEGIN 
-								EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
-							END
-						END
+						-- 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+						-- 	BEGIN 
+						-- 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
+						-- 	END
+						-- END
+					END
 				END
 			END
 
@@ -2193,11 +2417,9 @@ BEGIN TRY
 																WHEN (availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 and intItemType = 1) or (@ysnFromPriceBasisContract = 0 and availableQtyForVoucher.intPricingTypeIdHeader = 2 and availableQtyForVoucher.intPricingTypeId /*sequence*/ = 1 and intItemType = 1) 
 																then dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice) 
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice) 
-																--Dev Note ( Mon Gonzales)
-																--Added a.dblCashPriceUsed is not null and a.intContractUOMId is not null, spot settlement will have an issue here
-																--some discount might not get contract uom for spot settlements
-																ELSE case when (intItemType = 3 and ysnPercentChargeType = 1 and a.dblCashPriceUsed is not null and a.intContractUOMId is not null) then ROUND((a.dblCashPrice / a.dblCashPriceUsed) * dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice),6) 
-																else a.dblCashPrice end
+
+																ELSE case when (intItemType = 3 and ysnPercentChargeType = 1 and a.dblCashPriceUsed is not null and a.intContractUOMId is not null) then ROUND((a.dblCashPrice / a.dblCashPriceUsed) * dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, a.dblCashPriceUsed),6) 
+                												else a.dblCashPrice end
 															END
 														end					
 													END		
@@ -2400,9 +2622,19 @@ BEGIN TRY
 
 				
 						update  a set 
-								dblQuantityToBill = case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblQuantityToBill) end, 
-								dblNetWeight = case when b.ysnDiscountFromGrossWeight = 1 then dblNetWeight else isnull(@total_units_for_voucher, dblNetWeight) end,
-								dblOrderQty =  case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblOrderQty) end
+								dblQuantityToBill = case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblQuantityToBill)
+														else dblQuantityToBill
+													end,
+								dblNetWeight = 		case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblNetWeight)
+														else dblNetWeight
+													end,
+								dblOrderQty =  		case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblOrderQty)
+														when b.ysnDiscountFromGrossWeight = 1 then dblOrderQty
+														else isnull(@total_units_for_voucher, dblOrderQty)
+													end
 							from @voucherPayable a
 							join @SettleVoucherCreate b
 								on a.intItemId = b.intItemId
@@ -2671,8 +2903,9 @@ BEGIN TRY
 
 				DECLARE @dblVoucherTotalPrecision DECIMAL(18,6) = round(@dblVoucherTotal,2)
 
-				IF @dblVoucherTotalPrecision > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
-				BEGIN					
+				--IF @dblVoucherTotalPrecision > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
+				IF EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
+				BEGIN
 					update @voucherPayable set ysnStage = 0
 					EXEC uspAPCreateVoucher
 						@voucherPayables = @voucherPayable
@@ -2682,14 +2915,13 @@ BEGIN TRY
 						,@error = @ErrMsg
 						,@createdVouchersId = @createdVouchersId OUTPUT
 				END
-				ELSE 
-					IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory' and dblOrderQty <> 0))
-					BEGIN
-						BEGIN
-						RAISERROR('Unable to post settlement. Voucher will have an invalid amount.',16,1)
-						END
-					END
-
+				--ELSE 
+				--	IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory' and dblOrderQty <> 0))
+				--	BEGIN
+				--		BEGIN
+				--		RAISERROR('Unable to post settlement. Voucher will have an invalid amount.',16,1)
+				--		END
+				--	END
 				IF @createdVouchersId IS NOT NULL
 				BEGIN
 					SELECT @strVoucher = strBillId
@@ -2816,7 +3048,7 @@ BEGIN TRY
 										on a.intItemId = SettleVoucher.intItemId
 									where isnull(SettleVoucher.ysnInventoryCost, b.ysnInventoryCost) = 1 and strType = 'Other Charge'
 
-					IF ISNULL(@dblTotal,0) > 0
+					--IF ISNULL(@dblTotal,0) > 0
 					BEGIN							
 						UPDATE tblGRSettleStorage
 						SET intBillId = @createdVouchersId
@@ -3062,6 +3294,248 @@ BEGIN TRY
 		AND intSettleStorageId > @intSettleStorageId
 	END
 
+	-- Begin Single Batch Posting for Customer Owned Storages
+	IF(@ysnFromPriceBasisContract = 0) AND EXISTS(SELECT 1 FROM @ItemsToStorageStaging)
+	BEGIN
+		--Reduce the On-Storage Quantity
+		EXEC uspICPostStorage 
+			 @ItemsToStorageStaging
+			,@strBatchId
+			,@intCreatedUserId
+
+		IF @@ERROR <> 0
+			GOTO SettleStorage_Exit;
+		
+		-- IF @strOwnedPhysicalStock ='Customer'
+		BEGIN			
+			DELETE FROM @DummyGLEntries
+
+			INSERT INTO @DummyGLEntries 
+			(
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId] --MOD
+				,[intCommodityId]--MOD
+			)
+			EXEC @intReturnValue = dbo.uspICPostCosting  
+				@ItemsToPostStaging
+				,@strBatchId  
+				,'AP Clearing'
+				,@intCreatedUserId
+			
+			IF @intReturnValue < 0
+				GOTO SettleStorage_Exit;
+			
+			DELETE FROM @GLEntries
+			DECLARE C1 CURSOR FAST_FORWARD
+    		FOR SELECT * FROM @tblCustomerOwnedSettleStorage
+			OPEN C1
+			FETCH NEXT FROM C1 INTO @intSettleStorageId, @dblSelectedUnits, @dblFutureMarketPrice
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
+				BEGIN
+					UPDATE SC1
+					SET dblCost = (select top 1 IT.dblCost from tblICInventoryTransaction IT
+										where IT.intTransactionId = @intSettleStorageId
+											and IT.intTransactionTypeId = 44
+											and IT.intItemId = a.intItemId
+									)
+					FROM tblGRSettleContract SC1
+					INNER JOIN @SettleContract SC2
+						ON SC2.intSettleContractId = SC1.intSettleContractId
+					JOIN tblCTContractDetail a
+						on SC2.intContractDetailId = a.intContractDetailId
+				END
+
+				DELETE FROM @SettleVoucherCreate2
+				INSERT INTO @SettleVoucherCreate2
+				(
+					strOrderType
+					,intCustomerStorageId
+					,intCompanyLocationId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblUnits
+					,dblCashPrice
+					,intItemId
+					,intItemType
+					,IsProcessed
+					,intTicketDiscountId
+					,intPricingTypeId
+					,dblBasis
+					,intContractUOMId
+					,dblCostUnitQty
+					,dblSettleContractUnits
+					,ysnDiscountFromGrossWeight
+					,ysnPercentChargeType
+					,dblCashPriceUsed
+					,intSettleContractId
+					,ysnInventoryCost
+				)
+				SELECT 
+					strOrderType
+					,intCustomerStorageId
+					,intCompanyLocationId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblUnits
+					,dblCashPrice
+					,intItemId
+					,intItemType
+					,IsProcessed
+					,intTicketDiscountId
+					,intPricingTypeId                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+					,dblBasis
+					,intContractUOMId
+					,dblCostUnitQty
+					,dblSettleContractUnits
+					,ysnDiscountFromGrossWeight
+					,ysnPercentChargeType
+					,dblCashPriceUsed
+					,intSettleContractId
+					,ysnInventoryCost
+				FROM @tblGRCustomerOwnedSettleStorageVoucher
+				WHERE intSettleStorageId = @intSettleStorageId
+
+				--INVENTORY items		
+				-- DELETE FROM @GLEntries 		
+				INSERT INTO @GLEntries 
+				(
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
+					--,[intSourceEntityId] --MOD
+					--,[intCommodityId] --MOD
+				)
+				EXEC dbo.uspGRCreateItemGLEntries
+					@strBatchId
+					,@SettleVoucherCreate2
+					,'AP Clearing'
+					,@intCreatedUserId
+					,@dblSelectedUnits = @dblSelectedUnits
+					,@intSettleStorageId = @intSettleStorageId
+				IF @intReturnValue < 0
+					GOTO SettleStorage_Exit;
+
+				--DISCOUNTS AND CHARGES
+				INSERT INTO @GLEntries 
+				(
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
+				)				
+				EXEC uspGRCreateGLEntries 
+					'Storage Settlement'
+					,'OtherCharges'
+					,@intSettleStorageId
+					,@strBatchId
+					,@intCreatedUserId
+					,@dtmClientPostDate
+					,@ysnPosted
+					,@dblFutureMarketPrice
+				
+						
+
+				FETCH NEXT FROM C1 INTO @intSettleStorageId, @dblSelectedUnits, @dblFutureMarketPrice
+			END
+			CLOSE C1;
+			DEALLOCATE C1;		
+			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+			BEGIN 
+				EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
+			END
+		END
+	END
+
 	UPDATE tblGRSettleStorage
 	SET ysnPosted = 1
 	WHERE intSettleStorageId = @intParentSettleStorageId or  intParentSettleStorageId = @intParentSettleStorageId
@@ -3085,10 +3559,14 @@ BEGIN TRY
 	WHERE SS.intSettleStorageId = @intParentSettleStorageId
 
 	DECLARE @intVoucherId2 AS INT
+	DECLARE @VoucherId2 AS Id
+	DECLARE @VoucherIdError AS Id
 	IF (SELECT ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @EntityId) = 1
 	BEGIN
+		DELETE FROM @VoucherId2
+		DELETE FROM @VoucherIdError
 		WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
-		BEGIN 
+		BEGIN
 			SET @intVoucherId2 = NULL
 			SELECT TOP 1 @intVoucherId2 = intId FROM @VoucherIds
 			EXEC [dbo].[uspAPPostBill] 
@@ -3099,8 +3577,53 @@ BEGIN TRY
 				,@userId = @intCreatedUserId
 				,@transactionType = 'Settle Storage'
 				,@success = @success OUTPUT
+
+			IF EXISTS(SELECT 1 FROM tblAPPostResult WHERE intTransactionId = @intVoucherId2 AND strMessage = 'Posting of negative voucher is not allowed.')
+			BEGIN
+				INSERT INTO @VoucherId2
+				SELECT @intVoucherId2
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @VoucherIdError
+				SELECT intTransactionId FROM tblAPPostResult WHERE intTransactionId = @intVoucherId2 AND strMessage <> 'Posting of negative voucher is not allowed.'
+			END
+
 			DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
 		END
+	END
+
+	SELECT * FROM @VoucherId2
+	SELECT * FROM @VoucherIdError
+
+	DECLARE @VoucherNos NVARCHAR(100)
+	IF EXISTS(SELECT 1 FROM @VoucherId2)
+	BEGIN
+		SELECT @VoucherNos = STUFF((
+		SELECT ',' + (AP.strBillId)
+		FROM tblAPBill AP
+		INNER JOIN @VoucherId2 V
+			ON V.intId = AP.intBillId
+			-- AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
+		FOR XML PATH('')) COLLATE Latin1_General_CI_AS,1,1,'')
+
+		IF @VoucherNos LIKE '%,%'
+		BEGIN 
+			SET @ErrMsg = 'Unable to post vouchers. Vouchers will have negative amount. <br/> See Voucher No. <b>' + @VoucherNos + '</b> for details.'
+			RAISERROR (@ErrMsg, 16, 1);
+		END
+		ELSE
+		BEGIN
+			SET @ErrMsg = 'Unable to post voucher. Voucher will have a negative amount. <br/> See Voucher No. <b>' + @VoucherNos + '</b> for details.'
+			RAISERROR (@ErrMsg, 16, 1);
+		END		
+	END
+
+	IF EXISTS(SELECT 1 FROM @VoucherIdError)
+	BEGIN
+		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId IN (SELECT intId FROM @VoucherIdError) AND strMessage <> 'Transaction successfully posted.';
+		IF @ErrMsg <> ''
+		RAISERROR (@ErrMsg, 16, 1);
 	END
 
 	if isnull(@intVoucherId, 0) > 0 
@@ -3123,12 +3646,12 @@ BEGIN TRY
 	EXEC [dbo].[uspGRRiskSummaryLog2]
 		@StorageHistoryIds = @intStorageHistoryIds
 
-	IF(@success = 0)
-	BEGIN
-		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
-		RAISERROR (@ErrMsg, 16, 1);
-		GOTO SettleStorage_Exit;
-	END	
+	--IF(@success = 0)
+	--BEGIN
+	--	SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
+	--	RAISERROR (@ErrMsg, 16, 1);
+	--	GOTO SettleStorage_Exit;
+	--END	
 	
 	SettleStorage_Exit:
 END TRY

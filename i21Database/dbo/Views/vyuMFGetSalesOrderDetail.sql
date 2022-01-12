@@ -33,7 +33,7 @@ SELECT sh.intSalesOrderId
 	,um.strUnitMeasure AS strUOM
 	,sd.dblPrice
 	,sd.dblTotal
-	,C.strCurrency
+	,C1.strCurrency
 FROM tblSOSalesOrder sh
 JOIN tblSOSalesOrderDetail sd ON sh.intSalesOrderId = sd.intSalesOrderId
 JOIN tblICItem i ON sd.intItemId = i.intItemId
@@ -45,5 +45,5 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = sh.intFreightTermId
 LEFT JOIN tblEMEntity E ON E.intEntityId = sh.intEntityContactId
 LEFT JOIN tblSMUserSecurity US ON US.intEntityId = sh.intOrderedById
 JOIN tblSMTerm T ON T.intTermID = sh.intTermId
-JOIN tblSMCurrency C ON C.intCurrencyID = sh.intCurrencyId
+JOIN tblSMCurrency C1 ON C1.intCurrencyID = sh.intCurrencyId
 

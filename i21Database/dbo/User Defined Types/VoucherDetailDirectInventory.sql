@@ -14,5 +14,7 @@
 	[intInvoiceId]					INT             NULL,
     [intContractDetailId]           INT             NULL,
     [intLoadDetailId]               INT             NULL,
-	[intScaleTicketId]				INT				NULL
+	[intScaleTicketId]				INT				NULL,
+    intTicketDistributionAllocationId INT NULL
+    ,intPriceFixationDetailId    INT NULL
 )

@@ -39,6 +39,9 @@ BEGIN TRY
 		,@intTestedById INT
 		,@dtmLastModified DATETIME
 		,@intLastModifiedUserId INT
+		,@intSampleTypeId INT
+		,@intProductId INT
+		,@intTemplateLotStatusId INT
 	DECLARE @strOldComment NVARCHAR(MAX)
 		,@strOldSampleStatus NVARCHAR(30)
 		,@dtmOldTestedOn DATETIME
@@ -119,6 +122,9 @@ BEGIN TRY
 				,@intTestedById = NULL
 				,@dtmLastModified = NULL
 				,@intLastModifiedUserId = NULL
+				,@intSampleTypeId = NULL
+				,@intProductId = NULL
+				,@intTemplateLotStatusId = NULL
 
 			SELECT @strOldComment = NULL
 				,@strOldSampleStatus = NULL
@@ -143,6 +149,7 @@ BEGIN TRY
 
 			SELECT @intSampleId = t.intSampleId
 				,@intPreviousSampleStatusId = t.intSampleStatusId
+				,@intSampleTypeId = t.intSampleTypeId
 			FROM tblQMSample t WITH (NOLOCK)
 			WHERE t.strSampleNumber = @strSampleNumber
 
@@ -154,6 +161,10 @@ BEGIN TRY
 						,1
 						)
 			END
+
+			SELECT TOP 1 @intProductId = TR.intProductId
+			FROM tblQMTestResult TR WITH (NOLOCK)
+			WHERE TR.intSampleId = @intSampleId
 
 			IF @strSampleStatus = 'Passed'
 				SELECT @strSampleStatus = 'Approved'
@@ -192,6 +203,21 @@ BEGIN TRY
 				WHERE ET.strType = 'User'
 					AND t.strName = @strCuppedBy
 					--AND t.strEntityNo <> ''
+			END
+
+			IF ISNULL(@intCuppedUserId, 0) = 0
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblSMUserSecurity WITH (NOLOCK)
+						WHERE strUserName = 'irelyadmin'
+						)
+					SELECT TOP 1 @intCuppedUserId = intEntityId
+					FROM tblSMUserSecurity WITH (NOLOCK)
+					WHERE strUserName = 'irelyadmin'
+				ELSE
+					SELECT TOP 1 @intCuppedUserId = intEntityId
+					FROM tblSMUserSecurity WITH (NOLOCK)
 			END
 
 			IF ISNULL(@strUpdatedBy, '') <> ''
@@ -330,6 +356,34 @@ BEGIN TRY
 			-- Construct Approve / reject XML
 			IF @intPreviousSampleStatusId <> @intSampleStatusId
 			BEGIN
+				IF @intProductTypeId = 6
+					OR @intProductTypeId = 11
+				BEGIN
+					SELECT TOP 1 @intTemplateLotStatusId = (
+							CASE 
+								WHEN @strSampleStatus = 'Approved'
+									THEN ISNULL(P.intApprovalLotStatusId, ST.intApprovalLotStatusId)
+								WHEN @strSampleStatus = 'Rejected'
+									THEN ISNULL(P.intRejectionLotStatusId, ST.intRejectionLotStatusId)
+								ELSE NULL
+								END
+							)
+					FROM tblQMProduct P
+					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+						AND P.intProductId = @intProductId
+						AND PC.intSampleTypeId = @intSampleTypeId
+					LEFT JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
+
+					IF ISNULL(@intTemplateLotStatusId, 0) > 0
+					BEGIN
+						UPDATE tblQMSample
+						SET intLotStatusId = @intTemplateLotStatusId
+						WHERE intSampleId = @intSampleId
+
+						SELECT @intLotStatusId = @intTemplateLotStatusId
+					END
+				END
+
 				SELECT @strXml = '<root>'
 
 				SELECT @strXml += '<intSampleId>' + LTRIM(@intSampleId) + '</intSampleId>'

@@ -13,11 +13,27 @@
     ,@AccrueLicense     BIT             = 0
     ,@TransType         NVARCHAR(25)    = 'all'
     ,@UserId            INT				= 1
+
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
+
+--PARAMETER SNIFFING
+DECLARE @ParamTemp             NVARCHAR(MAX)	= @Param
+      , @BeginDateTemp         DATE				= @BeginDate
+      , @EndDateTemp           DATE				= @EndDate
+      , @BeginTransactionTemp  NVARCHAR(50)		= @BeginTransaction
+      , @EndTransactionTemp    NVARCHAR(50)		= @EndTransaction
+      , @IntegrationLogIdTemp  INT				= @IntegrationLogId
+      , @PostTemp              BIT				= @Post
+      , @RecapTemp             BIT				= @Recap
+      , @PostDateTemp          DATETIME			= @PostDate
+      , @BatchIdTemp           NVARCHAR(40)		= @BatchId
+      , @AccrueLicenseTemp     BIT				= @AccrueLicense
+      , @TransTypeTemp         NVARCHAR(25)		= @TransType
+      , @UserIdTemp            INT				= @UserId
 
 DECLARE	@DiscountAccountId          INT
        ,@DeferredRevenueAccountId   INT
@@ -44,8 +60,8 @@ SELECT TOP 1
     ,@ExcludeInvoiceFromPayment = ISNULL([ysnExcludePaymentInFinalInvoice], @ZeroBit)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
-SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
-SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
+SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserIdTemp)
+SET @Param2 = (CASE WHEN UPPER(@ParamTemp) = 'ALL' THEN '' ELSE @ParamTemp END)
 
 DECLARE @tblInvoiceIds InvoiceId
 DELETE FROM @tblInvoiceIds
@@ -55,20 +71,20 @@ INSERT INTO @tblInvoiceIds (intHeaderId)
 SELECT intInvoiceId
 FROM tblARInvoice ARI WITH (NOLOCK)
 WHERE ARI.ysnPosted = 0
-  AND UPPER(RTRIM(LTRIM(ISNULL(@Param,'')))) = 'ALL'
-  AND (UPPER(@TransType) = 'ALL' OR ARI.[strTransactionType] = @TransType)
-  AND (@BeginDate IS NULL OR ARI.dtmDate >= @BeginDate)
-  AND (@EndDate IS NULL OR ARI.dtmDate <= @EndDate)
-  AND (@BeginTransaction IS NULL OR ARI.intInvoiceId >= @BeginTransaction)
-  AND (@EndTransaction IS NULL OR ARI.intInvoiceId >= @EndTransaction)
+  AND UPPER(RTRIM(LTRIM(ISNULL(@ParamTemp,'')))) = 'ALL'
+  AND (UPPER(@TransTypeTemp) = 'ALL' OR ARI.[strTransactionType] = @TransTypeTemp)
+  AND (@BeginDateTemp IS NULL OR ARI.dtmDate >= @BeginDateTemp)
+  AND (@EndDateTemp IS NULL OR ARI.dtmDate <= @EndDateTemp)
+  AND (@BeginTransactionTemp IS NULL OR ARI.intInvoiceId >= @BeginTransactionTemp)
+  AND (@EndTransactionTemp IS NULL OR ARI.intInvoiceId >= @EndTransactionTemp)
 
 --FILTERED BY PARAM
-IF UPPER(RTRIM(LTRIM(ISNULL(@Param,'')))) <> 'ALL' AND RTRIM(LTRIM(ISNULL(@Param,''))) <> '' 
+IF UPPER(RTRIM(LTRIM(ISNULL(@ParamTemp,'')))) <> 'ALL' AND RTRIM(LTRIM(ISNULL(@ParamTemp,''))) <> '' 
 	BEGIN
 		INSERT INTO @tblInvoiceIds (intHeaderId)
 		SELECT intInvoiceId
 		FROM tblARInvoice ARI WITH (NOLOCK)
-		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@Param) DV ON DV.[intID] = ARI.[intInvoiceId]  		 		  
+		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@ParamTemp) DV ON DV.[intID] = ARI.[intInvoiceId]  		 		  
 	END
 
 --Header
@@ -228,7 +244,9 @@ INSERT ##ARPostInvoiceHeader
     ,[intInterCompanyId]
     ,[strReceiptNumber]
     ,[ysnInterCompany]
-    ,[intInterCompanyVendorId])
+    ,[intInterCompanyVendorId]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -276,7 +294,7 @@ SELECT
     ,[intFreightTermId]                 = ARI.[intFreightTermId]
     ,[strActualCostId]                  = ARI.[strActualCostId]
     ,[intPeriodsToAccrue]               = ISNULL(ARI.[intPeriodsToAccrue], 1)
-    ,[ysnAccrueLicense]                 = ISNULL(@AccrueLicense, @ZeroBit)
+    ,[ysnAccrueLicense]                 = ISNULL(@AccrueLicenseTemp, @ZeroBit)
     ,[intSplitId]                       = ARI.[intSplitId]
     ,[dblSplitPercent]                  = ARI.[dblSplitPercent]
     ,[ysnSplitted]                      = ARI.[ysnSplitted]
@@ -286,12 +304,12 @@ SELECT
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
     ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
-    ,[dtmDatePosted]                    = @PostDate
-    ,[strBatchId]                       = @BatchId
-    ,[ysnPost]                          = @Post
-    ,[ysnRecap]                         = @Recap
+    ,[dtmDatePosted]                    = @PostDateTemp
+    ,[strBatchId]                       = @BatchIdTemp
+    ,[ysnPost]                          = @PostTemp
+    ,[ysnRecap]                         = @RecapTemp
     ,[intEntityId]                      = ARI.[intEntityId]
-    ,[intUserId]                        = @UserId
+    ,[intUserId]                        = @UserIdTemp
     ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
     ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
@@ -389,6 +407,7 @@ SELECT
     ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
     ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
+    ,[strBOLNumber]						= ARI.strBOLNumber
 FROM tblARInvoice ARI
 INNER JOIN @tblInvoiceIds ID ON ARI.intInvoiceId = ID.intHeaderId
 INNER JOIN (
@@ -560,7 +579,9 @@ INSERT ##ARPostInvoiceHeader
     ,[intInterCompanyId]
     ,[strReceiptNumber]
     ,[ysnInterCompany]
-    ,[intInterCompanyVendorId])
+    ,[intInterCompanyVendorId]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -618,12 +639,12 @@ SELECT
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
     ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
-    ,[dtmDatePosted]                    = @PostDate
-    ,[strBatchId]                       = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARILD.[strBatchId],'')))) > 0 THEN ARILD.[strBatchId] ELSE @BatchId END
+    ,[dtmDatePosted]                    = @PostDateTemp
+    ,[strBatchId]                       = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARILD.[strBatchId],'')))) > 0 THEN ARILD.[strBatchId] ELSE @BatchIdTemp END
     ,[ysnPost]                          = ARILD.[ysnPost]
     ,[ysnRecap]                         = ARILD.[ysnRecap]
     ,[intEntityId]                      = ARI.[intEntityId]
-    ,[intUserId]                        = @UserId
+    ,[intUserId]                        = @UserIdTemp
     ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
     ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
@@ -721,15 +742,16 @@ SELECT
     ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
     ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
+    ,[strBOLNumber]						= ARI.strBOLNumber
 FROM
     (
     SELECT LD.[intInvoiceId], LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM tblARInvoiceIntegrationLogDetail LD
     WHERE 
-        LD.[intIntegrationLogId] = @IntegrationLogId
+        LD.[intIntegrationLogId] = @IntegrationLogIdTemp
         AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE LD.[intInvoiceId] = IH.[intInvoiceId])
         AND LD.[ysnHeader] = 1
-		AND ISNULL(LD.[ysnPosted],0) <> @Post
-        AND LD.[ysnPost] = @Post
+		AND ISNULL(LD.[ysnPosted],0) <> @PostTemp
+        AND LD.[ysnPost] = @PostTemp
     ) ARILD
 INNER JOIN
     tblARInvoice ARI
@@ -907,7 +929,9 @@ INSERT ##ARPostInvoiceHeader
     ,[intInterCompanyId]
     ,[strReceiptNumber]
     ,[ysnInterCompany]
-    ,[intInterCompanyVendorId])
+    ,[intInterCompanyVendorId]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -965,12 +989,12 @@ SELECT
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
     ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
-    ,[dtmDatePosted]                    = @PostDate
-    ,[strBatchId]                       = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARILD.[strBatchId],'')))) > 0 THEN ARILD.[strBatchId] ELSE @BatchId END
+    ,[dtmDatePosted]                    = @PostDateTemp
+    ,[strBatchId]                       = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARILD.[strBatchId],'')))) > 0 THEN ARILD.[strBatchId] ELSE @BatchIdTemp END
     ,[ysnPost]                          = ARILD.[ysnPost]
     ,[ysnRecap]                         = ARILD.[ysnRecap]
     ,[intEntityId]                      = ARI.[intEntityId]
-    ,[intUserId]                        = @UserId
+    ,[intUserId]                        = @UserIdTemp
     ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
     ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
@@ -1068,13 +1092,15 @@ SELECT
     ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
     ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
+	,[strBOLNumber]						= ARI.strBOLNumber
+    
 FROM
     (
     SELECT LD.[intHeaderId] AS 'intInvoiceId', LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM @InvoiceIds LD
     WHERE 
         NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE LD.[intHeaderId] = IH.[intInvoiceId])
 		AND LD.[ysnPost] IS NOT NULL 
-        AND LD.[ysnPost] = @Post
+        AND LD.[ysnPost] = @PostTemp
     ) ARILD
 INNER JOIN
     tblARInvoice ARI
@@ -1247,7 +1273,9 @@ INSERT ##ARPostInvoiceDetail
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -1400,6 +1428,7 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
+	,[strBOLNumber]						= ARI.strBOLNumber 
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1571,7 +1600,9 @@ INSERT ##ARPostInvoiceDetail
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -1783,6 +1814,7 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
+	,[strBOLNumber]						= ARI.strBOLNumber
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1956,7 +1988,9 @@ INSERT ##ARPostInvoiceDetail
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -2104,6 +2138,7 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
+	,[strBOLNumber]						= ARI.strBOLNumber
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]

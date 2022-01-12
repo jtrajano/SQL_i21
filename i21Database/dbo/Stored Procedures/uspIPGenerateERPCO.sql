@@ -241,7 +241,7 @@ BEGIN TRY
 			,@strFuturesMonth = FMO.strFutureMonth
 			,@intNoOfLots = ISNULL(CONVERT(INT, CD.dblNoOfLots), 0)
 			,@dblFuturesPrice = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, @intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblFutures, NULL), 0))
-			,@dblFXRate = ISNULL(CD.dblRate, 0)
+			,@dblFXRate = ISNULL(CD.dblRate, 1)
 			,@strFXCurrency = C.strCurrency
 			,@strRefFuturesMarket = RFM.strFutMarketName
 			,@strRefFuturesMonth = RFMO.strFutureMonth
@@ -450,6 +450,11 @@ BEGIN TRY
 				,strMessage = NULL
 				,strFeedStatus = 'Awt Ack'
 			WHERE intContractFeedId = @intContractFeedId
+
+			UPDATE tblCTContractHeader
+			SET ysnExported = 1
+				,dtmExported = GETDATE()
+			WHERE intContractHeaderId = @intContractHeaderId
 		END
 
 		NextPO:

@@ -48,6 +48,7 @@ BEGIN TRY
 		,intContractHeaderId INT
 		,intContractDetailId INT
 		,dblUnits DECIMAL(24, 10)
+		,intContractSeq INT
 	)
 
 	DECLARE @SettleStorages AS TABLE
@@ -61,6 +62,10 @@ BEGIN TRY
 		,ysnDPOwnedType BIT
 		,intContractDetailId INT NULL
 	)	
+
+	DECLARE @strContractNumber NVARCHAR(50)
+	DECLARE @intContractSeq INT
+	DECLARE @intContractHeaderId INT
 	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 	BEGIN
 		DECLARE @strUpdateRIDetail AS NVARCHAR(50)
@@ -164,6 +169,9 @@ BEGIN TRY
 
 	WHILE EXISTS(SELECT 1 FROM @SettleStorages)
 	BEGIN
+		--WE SHOULD CLEAR THE STORAGE HISTORY STAGING TABLE
+		DELETE FROM @StorageHistoryStagingTable
+
 		SET @intSettleStorageId = NULL
 		SET @intParentSettleStorageId = NULL
 		SET @TicketNo = NULL
@@ -242,6 +250,7 @@ BEGIN TRY
 				,intContractHeaderId
 				,intContractDetailId
 				,dblUnits
+				,intContractSeq
 			)
 			SELECT DISTINCT
 				intSettleStorageTicketId  = UH.intExternalId
@@ -250,6 +259,7 @@ BEGIN TRY
 				,intContractHeaderId	  = UH.intContractHeaderId 
 				,intContractDetailId      = UH.intContractDetailId 
 				,dblUnits                 = UH.dblTransactionQuantity
+				,intContractSeq			= CD.intContractSeq
 			FROM tblCTSequenceUsageHistory UH
 			JOIN tblGRSettleStorageTicket SST 
 				ON SST.intSettleStorageTicketId = UH.intExternalId 
@@ -276,14 +286,30 @@ BEGIN TRY
 				SET @intContractDetailId = NULL				
 				SET @dblUnits = NULL
 				SET @intItemUOMId = NULL
+				SET @intContractHeaderId = NULL
+				SET @intContractSeq = NULL
 
 				SELECT 
 					@intSettleStorageTicketId	= intSettleStorageTicketId
 					,@intPricingTypeId			= intPricingTypeId
 					,@intContractDetailId		= intContractDetailId
 					,@dblUnits					= dblUnits
+					,@intContractHeaderId		= intContractHeaderId
+					,@intContractSeq			= intContractSeq
 				FROM @tblContractIncrement
 				WHERE intDepletionKey = @intDepletionKey
+
+				SELECT @strContractNumber = strContractNumber
+				FROM tblCTContractHeader
+				WHERE intContractHeaderId = @intContractHeaderId
+
+				IF(SELECT intContractStatusId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId) = 6 --SHORT-CLOSED
+				BEGIN
+					SET @ErrMsg = 'Contract '+ @strContractNumber +'-sequence '+ CAST(@intContractSeq AS NVARCHAR(50)) +' has been short-closed.  Please reopen contract sequence in order to un-post settle storage.'
+
+					RAISERROR(@ErrMsg,16,1,1)
+					RETURN;
+				END
 
 				IF @intPricingTypeId = 5
 				BEGIN
@@ -578,7 +604,12 @@ BEGIN TRY
 			UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
 		END
-
+		-- Delete, the storage tickets that does not have units left
+		DELETE FROM tblGRSettleStorageTicket 
+			where intSettleStorageId = @intParentSettleStorageId 
+				and intCustomerStorageId = @intCustomerStorageId 
+				and dblUnits = 0
+				
 		--DELETE THE SETTLE STORAGE
 		UPDATE tblGRStorageHistory SET intSettleStorageId = NULL, intBillId = NULL WHERE intSettleStorageId = @intSettleStorageId
 		DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId

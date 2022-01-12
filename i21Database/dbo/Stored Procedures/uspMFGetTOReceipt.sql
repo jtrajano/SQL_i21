@@ -9,7 +9,7 @@ SELECT TD.intInventoryTransferDetailId
 	,sl.strName strStorageUnit
 	,subl.strSubLocationName strStorageLocation
 	,TD.intInventoryTransferDetailId AS intTaskId
-	,'ITEM # : ' + i.strItemNo + '<br />' + i.strDescription + '<br />' + 'QTY : ' + LTRIM(CONVERT(NUMERIC(38, 3), TD.dblQuantity )) + ' ' + um.strUnitMeasure + '<br />' + CASE 
+	,'ITEM # : ' + i.strItemNo + '<br />' + i.strDescription + '<br />' + 'QTY : ' + LTRIM(CONVERT(NUMERIC(38, 3), TD.dblQuantity)) + ' ' + um.strUnitMeasure + '<br />' + CASE 
 		WHEN sl.strName IS NULL
 			THEN ''
 		ELSE 'S-UNIT : ' + sl.strName + '<br />'
@@ -18,15 +18,21 @@ SELECT TD.intInventoryTransferDetailId
 			THEN ''
 		ELSE 'S-LOC : ' + strSubLocationName
 		END AS strTask
-FROM dbo.tblICInventoryTransfer  T
-JOIN dbo.tblICInventoryTransferDetail  TD ON TD.intInventoryTransferId = T.intInventoryTransferId
+FROM dbo.tblICInventoryTransfer T
+JOIN dbo.tblICInventoryTransferDetail TD ON TD.intInventoryTransferId = T.intInventoryTransferId
 JOIN dbo.tblICItem i ON i.intItemId = TD.intItemId
-JOIN dbo.tblICItemUOM iu ON iu.intItemUOMId = TD.intItemUOMId 
+JOIN dbo.tblICItemUOM iu ON iu.intItemUOMId = TD.intItemUOMId
 JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation subl ON subl.intCompanyLocationSubLocationId = TD.intToSubLocationId
 LEFT JOIN dbo.tblICStorageLocation sl ON sl.intStorageLocationId = TD.intToStorageLocationId
 WHERE T.strTransferNo = @strTransferOrderNumber
-	AND T.intFromLocationId = @intLocationId
+	AND T.intToLocationId = @intLocationId
+	AND T.ysnPosted = 1
+	AND T.ysnShipmentRequired = 1
+	AND (
+		T.intStatusId = 1
+		OR T.intStatusId = 2
+		)
 	AND NOT EXISTS (
 		SELECT 1
 		FROM tblMFTOReceiptDetail TOD

@@ -1,6 +1,121 @@
 CREATE PROCEDURE [dbo].[uspApiImportReceipt] (@guiUniqueId UNIQUEIDENTIFIER)
 AS
 
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
+
+-- Set Default Values
+UPDATE rs
+SET
+	rs.intCurrencyId = COALESCE(rs.intCurrencyId, v.intCurrencyId),
+	rs.intShipFromEntityId = COALESCE(rs.intShipFromEntityId, v.intEntityId),
+	rs.intShipFromLocationId = COALESCE(rs.intShipFromLocationId, x.intEntityLocationId),
+	rs.intFreightTermId = COALESCE(rs.intFreightTermId, x.intFreightTermId)
+FROM tblRestApiReceiptStaging rs
+JOIN tblAPVendor v ON v.intEntityId = rs.intEntityId
+JOIN tblEMEntity e ON e.intEntityId = v.intEntityId
+OUTER APPLY (
+	SELECT TOP 1 l.strLocationName, l.intEntityLocationId, l.intFreightTermId
+	FROM tblEMEntityLocation l
+	WHERE l.intEntityId = v.intEntityId
+	AND l.ysnDefaultLocation = 1
+) x
+WHERE rs.guiUniqueId = @guiUniqueId
+AND v.ysnPymtCtrlActive = 1
+AND e.ysnActive = 1
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging s
+LEFT JOIN tblEMEntity e ON s.intEntityId = e.intEntityId
+WHERE e.intEntityId IS NULL
+	AND s.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the locationId ''' + CAST(s.intLocationId AS NVARCHAR(50)) + '''', 'locationId', 'Error',  CAST(s.intLocationId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging s
+LEFT JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = s.intLocationId
+WHERE l.intCompanyLocationId IS NULL
+	AND s.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT CASE WHEN s.intCurrencyId IS NULL THEN 'currencyId is required.' ELSE 'Cannot find the currencyId ''' + CAST(s.intCurrencyId AS NVARCHAR(50)) + '''' END
+	, 'currencyId', 'Error',  CAST(s.intCurrencyId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging s
+LEFT JOIN tblSMCurrency c ON c.intCurrencyID = s.intCurrencyId
+WHERE c.intCurrencyID IS NULL
+	AND s.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT CASE WHEN s.intShipFromEntityId IS NULL THEN 'shipFromEntityId is required.' ELSE 'Cannot find the shipFromEntityId ''' + CAST(s.intShipFromEntityId AS NVARCHAR(50)) + '''' END
+	, 'shipFromEntityId', 'Error',  CAST(s.intShipFromEntityId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging s
+WHERE s.intShipFromEntityId IS NULL
+	AND s.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the freightTermId ''' + CAST(s.intFreightTermId AS NVARCHAR(50)) + '''', 'freightTermId', 'Error',  CAST(s.intFreightTermId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging s
+LEFT JOIN tblSMFreightTerms f ON f.intFreightTermId = s.intFreightTermId
+WHERE f.intFreightTermId IS NULL
+	AND s.guiUniqueId = @guiUniqueId
+	AND s.intFreightTermId IS NOT NULL
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the itemId ''' + CAST(ri.intItemId AS NVARCHAR(50)) + '''', 'itemId', 'Error',  CAST(ri.intItemId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging r
+INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
+LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
+WHERE i.intItemId IS NULL
+	AND r.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The itemId ''' + CAST(ri.intItemId AS NVARCHAR(50)) + ''' is not valid for the locationId ''' + CAST(r.intLocationId AS NVARCHAR(50)) + '''', 'itemId', 'Error',  CAST(ri.intItemId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging r
+INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
+LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
+LEFT JOIN tblICItemLocation il ON il.intLocationId = r.intLocationId
+	AND il.intItemId = i.intItemId
+WHERE i.intItemId IS NULL
+	AND r.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the chargeId ''' + CAST(ri.intChargeId AS NVARCHAR(50)) + '''', 'chargeId', 'Error',  CAST(ri.intChargeId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging r
+INNER JOIN tblRestApiReceiptChargeStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
+LEFT JOIN tblICItem i ON i.intItemId = ri.intChargeId
+WHERE i.intItemId IS NULL
+	AND r.guiUniqueId = @guiUniqueId
+	
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The chargeId ''' + CAST(ri.intChargeId AS NVARCHAR(50)) + ''' is not valid for the locationId ''' + CAST(r.intLocationId AS NVARCHAR(50)) + '''', 'chargeId', 'Error',  CAST(ri.intChargeId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging r
+INNER JOIN tblRestApiReceiptChargeStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
+LEFT JOIN tblICItem i ON i.intItemId = ri.intChargeId
+LEFT JOIN tblICItemLocation il ON il.intLocationId = r.intLocationId
+	AND il.intItemId = i.intItemId
+WHERE i.intItemId IS NULL
+	AND r.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The costUOMId ''' + CAST(ri.intCostUOMId AS NVARCHAR(50)) + ''' is not valid for the chargeId ''' + CAST(ri.intChargeId AS NVARCHAR(50)) + '''', 'costUOMId', 'Error',  CAST(ri.intChargeId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging r
+INNER JOIN tblRestApiReceiptChargeStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
+LEFT JOIN tblICItem i ON i.intItemId = ri.intChargeId
+LEFT JOIN tblICItemUOM uom ON uom.intItemUOMId = ri.intCostUOMId
+WHERE uom.intItemUOMId IS NULL
+	AND r.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT CASE WHEN s.strOrderType IS NULL THEN 'orderType is required.' ELSE 'Cannot find the orderType ''' + s.strOrderType + '''. Valid values are: Direct, Purchase Order, Purchase Contract, Transfer Order.' END
+	, 'orderType', 'Error',  strOrderType
+FROM tblRestApiReceiptStaging s
+WHERE s.guiUniqueId = @guiUniqueId
+	AND NULLIF(s.strOrderType, '') IS NOT NULL
+	AND s.strOrderType NOT IN ('Direct', 'Purchase Order', 'Purchase Contract', 'Transfer Order')
+
+IF EXISTS(SELECT * FROM @Logs)
+	GOTO Logging
+
 DECLARE @ReceiptEntries ReceiptStagingTable
 DECLARE @OtherCharges ReceiptOtherChargesTableType
 DECLARE @LotEntries ReceiptItemLotStagingTable
@@ -28,9 +143,16 @@ INSERT INTO @ReceiptEntries(
 	, intForexRateTypeId
 	, intCostUOMId
 	, dblUnitRetail
-	, strWarehouseRefNo)
+	, strWarehouseRefNo
+	, intPurchaseId
+	, intPurchaseDetailId
+	, intTicketId
+	, intInventoryTransferId
+	, intInventoryTransferDetailId
+	, intLoadShipmentId
+	, intLoadShipmentDetailId)
 SELECT 
-	  'Direct'
+	  ISNULL(r.strOrderType, 'Direct')
 	, 0
 	, r.dtmReceiptDate
 	, r.intEntityId
@@ -53,6 +175,13 @@ SELECT
 	, ri.intCostUOMId
 	, ri.dblUnitRetail
 	, r.strWarehouseRefNo
+	, ri.intPurchaseId
+	, ri.intPurchaseDetailId
+	, ri.intTicketId
+	, ri.intInventoryTransferId
+	, ri.intInventoryTransferDetailId
+	, ri.intLoadShipmentId
+	, ri.intLoadShipmentDetailId
 FROM tblRestApiReceiptStaging r
 	INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
 	INNER JOIN tblICItemLocation il ON il.intItemId = ri.intItemId
@@ -126,84 +255,6 @@ INNER JOIN tblICLot l ON l.intLotId = lot.intLotId
 INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
 WHERE r.guiUniqueId = @guiUniqueId
 	AND i.strLotTracking <> 'No'
-
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
-
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging s
-LEFT JOIN tblEMEntity e ON s.intEntityId = e.intEntityId
-WHERE e.intEntityId IS NULL
-	AND s.guiUniqueId = @guiUniqueId
-
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the locationId ''' + CAST(s.intLocationId AS NVARCHAR(50)) + '''', 'locationId', 'Error',  CAST(s.intLocationId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging s
-LEFT JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = s.intLocationId
-WHERE l.intCompanyLocationId IS NULL
-	AND s.guiUniqueId = @guiUniqueId
-
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the currencyId ''' + CAST(s.intCurrencyId AS NVARCHAR(50)) + '''', 'currencyId', 'Error',  CAST(s.intCurrencyId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging s
-LEFT JOIN tblSMCurrency c ON c.intCurrencyID = s.intCurrencyId
-WHERE c.intCurrencyID IS NULL
-	AND s.guiUniqueId = @guiUniqueId
-
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the freightTermId ''' + CAST(s.intFreightTermId AS NVARCHAR(50)) + '''', 'freightTermId', 'Error',  CAST(s.intFreightTermId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging s
-LEFT JOIN tblSMFreightTerms f ON f.intFreightTermId = s.intFreightTermId
-WHERE f.intFreightTermId IS NULL
-	AND s.guiUniqueId = @guiUniqueId
-
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the itemId ''' + CAST(ri.intItemId AS NVARCHAR(50)) + '''', 'itemId', 'Error',  CAST(ri.intItemId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging r
-INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
-LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
-WHERE i.intItemId IS NULL
-	AND r.guiUniqueId = @guiUniqueId
-
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'The itemId ''' + CAST(ri.intItemId AS NVARCHAR(50)) + ''' is not valid for the locationId ''' + CAST(r.intLocationId AS NVARCHAR(50)) + '''', 'itemId', 'Error',  CAST(ri.intItemId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging r
-INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
-LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
-LEFT JOIN tblICItemLocation il ON il.intLocationId = r.intLocationId
-	AND il.intItemId = i.intItemId
-WHERE i.intItemId IS NULL
-	AND r.guiUniqueId = @guiUniqueId
-
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the chargeId ''' + CAST(ri.intChargeId AS NVARCHAR(50)) + '''', 'chargeId', 'Error',  CAST(ri.intChargeId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging r
-INNER JOIN tblRestApiReceiptChargeStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
-LEFT JOIN tblICItem i ON i.intItemId = ri.intChargeId
-WHERE i.intItemId IS NULL
-	AND r.guiUniqueId = @guiUniqueId
-	
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'The chargeId ''' + CAST(ri.intChargeId AS NVARCHAR(50)) + ''' is not valid for the locationId ''' + CAST(r.intLocationId AS NVARCHAR(50)) + '''', 'chargeId', 'Error',  CAST(ri.intChargeId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging r
-INNER JOIN tblRestApiReceiptChargeStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
-LEFT JOIN tblICItem i ON i.intItemId = ri.intChargeId
-LEFT JOIN tblICItemLocation il ON il.intLocationId = r.intLocationId
-	AND il.intItemId = i.intItemId
-WHERE i.intItemId IS NULL
-	AND r.guiUniqueId = @guiUniqueId
-
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'The costUOMId ''' + CAST(ri.intCostUOMId AS NVARCHAR(50)) + ''' is not valid for the chargeId ''' + CAST(ri.intChargeId AS NVARCHAR(50)) + '''', 'costUOMId', 'Error',  CAST(ri.intChargeId AS NVARCHAR(50))
-FROM tblRestApiReceiptStaging r
-INNER JOIN tblRestApiReceiptChargeStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
-LEFT JOIN tblICItem i ON i.intItemId = ri.intChargeId
-LEFT JOIN tblICItemUOM uom ON uom.intItemUOMId = ri.intCostUOMId
-WHERE uom.intItemUOMId IS NULL
-	AND r.guiUniqueId = @guiUniqueId
-
-IF EXISTS(SELECT * FROM @Logs)
-	GOTO Logging
 
 IF EXISTS(SELECT TOP 1 1 FROM @ReceiptEntries)
 BEGIN

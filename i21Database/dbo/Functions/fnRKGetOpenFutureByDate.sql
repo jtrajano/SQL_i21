@@ -168,17 +168,17 @@ BEGIN
 		FROM (
 			--Futures Buy & Sell
 			SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-											ELSE History.dtmTransactionDate END
+											ELSE ISNULL(History.dtmTransactionDate, FOT.dtmTransactionDate) END
 				, FOT.intFutOptTransactionId
 				, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-										ELSE History.dblOpenContract END
+										ELSE ISNULL(History.dblOpenContract, FOT.dblOpenContract) END
 				, FOT.intCommodityId
 				, FOT.strCommodityCode
 				, FOT.strInternalTradeNo
 				, FOT.intLocationId
 				, FOT.strLocationName
 				, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
-										ELSE History.dblContractSize END
+										ELSE ISNULL(History.dblContractSize, FOT.dblContractSize) END
 				, FOT.intFutureMarketId
 				, strFutureMarket = FOT.strFutMarketName
 				, FOT.intFutureMonthId
@@ -240,17 +240,17 @@ BEGIN
 			UNION ALL
 			--Options Buy & Sell
 			SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-											ELSE History.dtmTransactionDate END
+											ELSE ISNULL(History.dtmTransactionDate, FOT.dtmTransactionDate) END
 				, FOT.intFutOptTransactionId
 				, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-										ELSE History.dblOpenContract END
+										ELSE ISNULL(History.dblOpenContract, FOT.dblOpenContract) END
 				, FOT.intCommodityId
 				, FOT.strCommodityCode
 				, FOT.strInternalTradeNo
 				, FOT.intLocationId
 				, FOT.strLocationName
 				, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
-										ELSE History.dblContractSize END
+										ELSE ISNULL(History.dblContractSize, FOT.dblContractSize) END
 				, FOT.intFutureMarketId
 				, FOT.strFutMarketName
 				, FOT.intFutureMonthId
@@ -315,48 +315,48 @@ BEGIN
 				, History.intFutOptTransactionId
 				, dblOpenContract = History.dblOpenContract
 				, intCommodityId
-				, History.strCommodity
-				, History.strInternalTradeNo
+				, History.strCommodity COLLATE Latin1_General_CI_AS
+				, History.strInternalTradeNo COLLATE Latin1_General_CI_AS
 				, intLocationId
-				, History.strLocationName
+				, History.strLocationName COLLATE Latin1_General_CI_AS
 				, History.dblContractSize
 				, intFutureMarketId
-				, History.strFutureMarket
+				, History.strFutureMarket COLLATE Latin1_General_CI_AS
 				, intFutureMonthId
-				, History.strFutureMonth
+				, History.strFutureMonth COLLATE Latin1_General_CI_AS
 				, intOptionMonthId
-				, History.strOptionMonth
-				, History.dblStrike
+				, History.strOptionMonth COLLATE Latin1_General_CI_AS
+				, History.dblStrike 
 				, History.dblPrice
-				, History.strOptionType
+				, History.strOptionType COLLATE Latin1_General_CI_AS
 				, intSelectedInstrumentTypeId = CASE WHEN strSelectedInstrumentType = 'Exchange Traded' THEN 1
 													WHEN strSelectedInstrumentType = 'OTC' THEN 2
 													WHEN strSelectedInstrumentType = 'OTC - Others' THEN 3 END
 				, intInstrumentTypeId = CASE WHEN strInstrumentType = 'Futures' THEN 1
 											WHEN strInstrumentType = 'Options' THEN 2
 											WHEN strInstrumentType = 'Currency Contract' THEN 3 END
-				, History.strInstrumentType
+				, History.strInstrumentType COLLATE Latin1_General_CI_AS
 				, intBrokerId
-				, History.strBrokerAccount
-				, History.strBroker
-				, strBuySell = History.strNewBuySell
+				, History.strBrokerAccount COLLATE Latin1_General_CI_AS
+				, History.strBroker COLLATE Latin1_General_CI_AS
+				, strBuySell = History.strNewBuySell  COLLATE Latin1_General_CI_AS
 				, intFutOptTransactionHeaderId
-				, strBrokerTradeNo
-				, History.strNotes
+				, strBrokerTradeNo COLLATE Latin1_General_CI_AS
+				, History.strNotes COLLATE Latin1_General_CI_AS
 				, History.ysnPreCrush
 				, ysnMonthExpired
 				, intBookId
-				, strBook
+				, History.strBook COLLATE Latin1_General_CI_AS
 				, intSubBookId
-				, strSubBook
+				, History.strSubBook COLLATE Latin1_General_CI_AS
 				, intEntityId
 				, intCurrencyId
 				, intRollingMonthId
-				, strRollingMonth
-				, strBroker
+				, strRollingMonth COLLATE Latin1_General_CI_AS
+				, strName = History.strBroker COLLATE Latin1_General_CI_AS
 				, dtmFilledDate
 				, intTraderId
-				, strSalespersonId
+				, History.strSalespersonId COLLATE Latin1_General_CI_AS
 				, dblMatchContract
 			FROM (
 				SELECT * FROM (

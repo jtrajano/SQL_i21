@@ -8,15 +8,34 @@ ISNULL(UserSecurityCompanyLocationRolePermission.intCompanyLocationId, 0) AS int
 Favorite.intSort,
 ISNULL(MasterMenu.strMenuName, Favorite.strMenuName) AS strMenuName,
 MasterMenu.strModuleName,
-CASE WHEN Favorite.ysnMenuLink = 1 THEN 'MenuLink' ELSE MasterMenu.strDescription END AS strDescription,
-CASE WHEN Favorite.ysnCustomView = 1 THEN 'Custom View' ELSE (CASE WHEN Favorite.ysnMenuLink = 1 THEN 'Screen' ELSE ISNULL(MasterMenu.strType, 'Folder') END) END AS strType,
-CASE WHEN Favorite.ysnCustomView = 1 THEN ('GlobalComponentEngine.view.SystemDashboard?id=' + CAST(Favorite.intCustomId AS NVARCHAR)) ELSE (CASE WHEN Favorite.ysnMenuLink = 1 THEN Favorite.strMenuLinkCommand ELSE MasterMenu.strCommand END) END AS strCommand,
+CASE 
+	WHEN Favorite.ysnMenuLink = 1 THEN 'MenuLink' 
+	WHEN Favorite.ysnPBIReport = 1 THEN 'Power BI Report'
+	ELSE MasterMenu.strDescription 
+	END 
+AS strDescription,
+CASE 
+	WHEN Favorite.ysnCustomView = 1 THEN 'Custom View' 
+	ELSE (
+		CASE WHEN Favorite.ysnMenuLink = 1 OR Favorite.ysnPBIReport = 1 THEN 'Screen' 
+		ELSE ISNULL(MasterMenu.strType, 'Folder') END
+	) 
+END AS strType,
+CASE 
+	WHEN Favorite.ysnCustomView = 1 THEN ('GlobalComponentEngine.view.SystemDashboard?id=' + CAST(Favorite.intCustomId AS NVARCHAR)) 
+	ELSE (
+		CASE WHEN Favorite.ysnMenuLink = 1 OR Favorite.ysnPBIReport = 1
+			THEN Favorite.strMenuLinkCommand 
+		ELSE MasterMenu.strCommand END
+	) 
+END AS strCommand,
 MasterMenu.strIcon,
 CASE WHEN (Favorite.ysnCustomView = 1 OR Favorite.ysnMenuLink = 1) THEN CAST(1 AS BIT) ELSE ISNULL(MasterMenu.ysnLeaf, 0) END AS ysnLeaf,
 ISNULL(MasterMenu.ysnIsLegacy, 0) AS ysnIsLegacy,
 ISNULL(Favorite.intParentEntityMenuFavoriteId, 0) AS intParentEntityMenuFavoriteId,
 Favorite.ysnCustomView as ysnCustomView,
 Favorite.ysnMenuLink as ysnMenuLink,
+Favorite.ysnPBIReport as ysnPBIReport,
 Favorite.intConcurrencyId
 FROM tblSMEntityMenuFavorite Favorite
 INNER JOIN

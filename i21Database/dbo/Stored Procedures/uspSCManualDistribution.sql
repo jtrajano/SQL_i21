@@ -11,7 +11,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
@@ -240,7 +240,11 @@ OPEN intListCursor;
 
 						END  
 						ELSE  
-						BEGIN  
+						BEGIN
+							
+							exec uspSCCheckContractStatus  @intContractDetailId = @intLoopContractId
+
+							
 							SET @ysnLoadContract = 0
 							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0)
 							FROM tblCTContractHeader A

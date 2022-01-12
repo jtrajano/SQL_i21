@@ -47,19 +47,13 @@ SELECT DE.intFutOptTransactionId
 										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLotsToSContract,0) <> 0 OR ISNULL(dblAssignedLotsToPContract,0) <>  0))
 										OR intFutOptTransactionId IN (SELECT DISTINCT intOrigSliceTradeId FROM tblRKFutOptTransaction WHERE intOrigSliceTradeId is not null))
 									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
-	, strHedgeType = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN 'Price Contract'
-							WHEN CF.intContractFuturesId IS NOT NULL THEN 'Contract Futures'
-							ELSE NULL END COLLATE Latin1_General_CI_AS
-	, intHedgeContractId = CASE WHEN PF.intPriceContractId IS NOT NULL THEN PF.intPriceContractId
-							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.intContractHeaderId
-							ELSE NULL END
-	, strHedgeContract = CASE WHEN PF.intPriceContractId IS NOT NULL THEN PriceHeader.strContractNumber + ISNULL('-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10)), '')
-							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + ISNULL('-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10)), '')
-							ELSE NULL END COLLATE Latin1_General_CI_AS
 	, dblAvailableContract = ISNULL(DE.dblPContractBalanceLots, 0.00)
 	, ysnSlicedTrade = ISNULL(DE.ysnSlicedTrade, CAST(0 AS BIT))
 	, DE.intOrigSliceTradeId
 	, strOriginalTradeNo = ST.strInternalTradeNo
+	, strHedgeType = 'Contract Futures' COLLATE Latin1_General_CI_AS
+	, intHedgeContractId = hedgecontractheader.intContractHeaderId 
+	, strHedgeContract = hedgecontractheader.strContractNumber + ISNULL('-' + CAST(hedgecontractdetail.intContractSeq AS NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -80,13 +74,6 @@ LEFT JOIN tblSMCurrencyExchangeRateType AS CurEx ON DE.intCurrencyExchangeRateTy
 LEFT JOIN tblRKAssignFuturesToContractSummary AS AD ON AD.intFutOptAssignedId = DE.intFutOptTransactionId
 LEFT JOIN tblCTContractHeader AS ch ON ch.intContractHeaderId = AD.intContractHeaderId
 LEFT JOIN tblCTContractDetail AS cd ON cd.intContractDetailId = AD.intContractDetailId
-LEFT JOIN tblCTPriceFixationDetail PFD ON PFD.intFutOptTransactionId = DE.intFutOptTransactionId
-LEFT JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
-LEFT JOIN tblCTContractDetail PriceDetail ON PriceDetail.intContractDetailId = PF.intContractDetailId
-LEFT JOIN tblCTContractHeader PriceHeader ON PriceHeader.intContractHeaderId = PF.intContractHeaderId
-LEFT JOIN tblCTContractFutures CF ON CF.intFutOptTransactionId = DE.intFutOptTransactionId
-LEFT JOIN tblCTContractDetail CFDetail ON CFDetail.intContractDetailId = CF.intContractDetailId
-LEFT JOIN tblCTContractHeader CFHeader ON CFHeader.intContractHeaderId = CFDetail.intContractHeaderId
 LEFT JOIN tblRKFutOptTransaction ST ON ST.intFutOptTransactionId = DE.intOrigSliceTradeId
 LEFT JOIN (
 	SELECT intFutOptTransactionId
@@ -95,3 +82,12 @@ LEFT JOIN (
 	FROM vyuRKGetOpenContract
 	GROUP BY intFutOptTransactionId
 ) GOC ON DE.intFutOptTransactionId = GOC.intFutOptTransactionId
+OUTER APPLY (
+	SELECT TOP 1 ftcs.intContractDetailId
+	FROM tblRKAssignFuturesToContractSummary ftcs
+	WHERE ftcs.intFutOptTransactionId = DE.intFutOptTransactionId
+) hedgecontract
+LEFT JOIN tblCTContractDetail hedgecontractdetail
+	ON hedgecontract.intContractDetailId = hedgecontractdetail.intContractDetailId
+LEFT JOIN tblCTContractHeader hedgecontractheader
+	ON hedgecontractdetail.intContractHeaderId = hedgecontractheader.intContractHeaderId

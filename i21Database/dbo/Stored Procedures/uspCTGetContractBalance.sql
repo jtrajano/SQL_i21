@@ -46,7 +46,7 @@ BEGIN
 		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY cb.intContractDetailId ORDER BY cb.dtmCreatedDate DESC)
 			, cb.intContractDetailId
 			, cb.intContractStatusId
-			, dblFutures = CASE WHEN cb.intPricingTypeId IN (1, 3) THEN ISNULL(cb.dblFutures, cd.dblFutures) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) END
+			, dblFutures = CASE WHEN cb.intPricingTypeId IN (1, 3) THEN ISNULL(cd.dblFutures, cb.dblFutures) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) END
 			, dblBasis = CASE WHEN cb.intPricingTypeId IN (1, 2, 8) THEN ISNULL(cb.dblBasis, cd.dblBasis) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblBasis END) END
 		FROM tblCTContractBalanceLog cb
 		join tblCTContractDetail cd on cd.intContractDetailId = cb.intContractDetailId
@@ -83,16 +83,16 @@ BEGIN
 		, strBasisUOM
 		, dblQuantity
 		, strQuantityUOM
-		, dblCashPrice 						= CASE WHEN intPricingTypeId = 1 THEN (ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)) ELSE NULL END
+		, dblCashPrice 						= CASE WHEN intPricingTypeId = 1 THEN (ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)) WHEN intPricingTypeId = 6 then dblCashPrice ELSE NULL END
 		, strPriceUOM
 		, strStockUOM
 		, dblAvailableQty
-		, dblAmount 						= CASE WHEN intPricingTypeId = 1 THEN round((ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)),@intPricingDecimals) * dblQuantity ELSE NULL END
+		, dblAmount 						= CASE WHEN intPricingTypeId = 1 THEN round((ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)),@intPricingDecimals) * dblQuantity WHEN intPricingTypeId = 6 then dblCashPrice * dblQuantity ELSE NULL END
 		, dblQtyinCommodityStockUOM
 		, dblFuturesinCommodityStockUOM 	= CASE WHEN intPricingTypeId IN (1, 3) THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), ISNULL(dblFutures, 0)), 0) ELSE NULL END
 		, dblBasisinCommodityStockUOM		= CASE WHEN intPricingTypeId <> 3 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), ISNULL(dblBasis, 0)), 0) ELSE NULL END
-		, dblCashPriceinCommodityStockUOM 	= CASE WHEN intPricingTypeId = 1 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), (ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0))), 0) ELSE NULL END
-		, dblAmountinCommodityStockUOM 		= CASE WHEN intPricingTypeId = 1 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), round((ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)),@intPricingDecimals)), 0) ELSE NULL END * dblQtyinCommodityStockUOM
+		, dblCashPriceinCommodityStockUOM 	= CASE WHEN intPricingTypeId = 1 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), (ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0))), 0) WHEN intPricingTypeId = 6 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), dblCashPrice), 0) ELSE NULL END
+		, dblAmountinCommodityStockUOM 		= CASE WHEN intPricingTypeId = 1 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), round((ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)),@intPricingDecimals)), 0) WHEN intPricingTypeId = 6 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), dblCashPrice), 0) ELSE NULL END * dblQtyinCommodityStockUOM
 		, strPrintOption
 		, intContractStatusId
 	FROM (
@@ -144,6 +144,7 @@ BEGIN
 			, dblQtyinCommodityStockUOM 		= CAST (SUM(dblQtyinCommodityStockUOM) AS NUMERIC(20,6))
 			, strPrintOption
 			, intContractStatusId				= Stat.intContractStatusId
+			, dblCashPrice
 		FROM (
 			SELECT intContractBalanceId			=	intContractBalanceLogId
 				, dtmTransactionDate			=	CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate', 0) END--dtmTransactionDate
@@ -189,13 +190,14 @@ BEGIN
 				, dblFutures					=	CASE WHEN CBL.intPricingTypeId IN (1, 3) AND CD.dblFutures IS NOT NULL THEN CD.dblFutures
 														ELSE (CASE WHEN CBL.intPricingTypeId = 1 THEN PF.dblPriceWORollArb ELSE NULL END) END  
 				, dblBasis						=	CASE WHEN CBL.intPricingTypeId = 3 THEN NULL ELSE CAST(isnull(CBL.dblBasis, 0) AS NUMERIC(20,6)) END
+				, CD.dblCashPrice
 			FROM tblCTContractBalanceLog		CBL
 			INNER JOIN tblICCommodity			CM			ON CM.intCommodityId = CBL.intCommodityId
 			INNER JOIN tblICCommodityUnitMeasure	C1		ON C1.intCommodityId = CBL.intCommodityId AND C1.ysnStockUnit = 1
 			INNER JOIN tblICUnitMeasure			UOM			ON UOM.intUnitMeasureId = C1.intUnitMeasureId
 			INNER JOIN tblICItem				IM			ON IM.intItemId = CBL.intItemId
 			INNER JOIN tblSMCompanyLocation		L			ON L.intCompanyLocationId = CBL.intLocationId
-			INNER JOIN vyuCTEntity				EY			ON EY.intEntityId = CBL.intEntityId AND EY.strEntityType = (CASE WHEN CBL.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+			INNER JOIN vyuCTEntity				EY			ON EY.intEntityId = CBL.intEntityId AND EY.strEntityType = (CASE WHEN CBL.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 			INNER JOIN tblCTContractHeader		CH			ON CH.intContractHeaderId = CBL.intContractHeaderId
 			INNER JOIN tblCTContractDetail		CD			ON CD.intContractDetailId = CBL.intContractDetailId
 			INNER JOIN tblICItemUOM				ItemUOM		ON ItemUOM.intItemUOMId = CD.intItemUOMId
@@ -249,7 +251,11 @@ BEGIN
 			,strStockUOM
 			,strPrintOption
 			,Stat.intContractStatusId
+			,dblCashPrice
 		HAVING SUM(dblQuantity) > 0
 	) tbl
 
 END
+
+
+select * from tblCTPricingType

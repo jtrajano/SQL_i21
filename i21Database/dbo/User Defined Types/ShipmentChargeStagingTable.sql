@@ -33,6 +33,8 @@
 	,intItemContractDetailId INT NULL
 	,ysnAddPayable BIT NULL
 
+	,intSort INT NULL
+
 	-- Fields for Internal Use Only
 	,intHeaderId INT NULL
 	,intShipmentId INT NULL

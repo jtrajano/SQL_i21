@@ -91,6 +91,7 @@ Tracks all stocks in a LIFO manner. Records are physically arranged in a LIFO ma
 		[intCreatedEntityId] INT NULL,
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
+		[dblStockAvailable] AS (ROUND(ISNULL(dblStockIn, 0) - ISNULL(dblStockOut, 0), 6)) PERSISTED,
 		CONSTRAINT [PK_tblICInventoryLIFO] PRIMARY KEY NONCLUSTERED ([intInventoryLIFOId]) )
 	GO
 
@@ -108,8 +109,13 @@ Tracks all stocks in a LIFO manner. Records are physically arranged in a LIFO ma
 		ON [dbo].[tblICInventoryLIFO]([strTransactionId] ASC, [intTransactionId] ASC, [ysnIsUnposted] ASC)
 		INCLUDE (dtmDate, intItemId, intItemLocationId, intItemUOMId, dblStockIn, dblStockOut, dblCost);
 	GO
-
+	
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_Posting]
+		ON [dbo].[tblICInventoryLIFO]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [dtmDate] DESC, [dblStockAvailable] ASC)
+		INCLUDE (intTransactionId, strTransactionId, dblCost);
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_Posting2]
 		ON [dbo].[tblICInventoryLIFO]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
-		INCLUDE (dblStockIn, dblStockOut, dtmDate);
+		INCLUDE (dblStockIn, dblStockOut);
 	GO

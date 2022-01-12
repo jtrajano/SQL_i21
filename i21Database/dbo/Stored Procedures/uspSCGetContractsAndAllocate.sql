@@ -164,6 +164,9 @@ BEGIN TRY
 
 	IF	ISNULL(@intContractDetailId,0) > 0
 	BEGIN
+
+		exec uspSCCheckContractStatus  @intContractDetailId = @intContractDetailId
+
 		SELECT	@ysnAllowedToShow	=	ysnAllowedToShow,
 				@strContractStatus	=	strContractStatus,
 				@ysnLoad			=	ysnLoad
@@ -282,7 +285,7 @@ BEGIN TRY
 			-- Get default futures market and month for the commodity
 			EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
 
-			IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
+			IF OBJECT_ID('tempdb..#FutureAndBasisPrice2') IS NOT NULL  						
 				DROP TABLE #FutureAndBasisPrice2
 
 			SELECT * INTO #FutureAndBasisPrice2 FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,@intFutureMarketId,@intFutureMonthId,@locationId,null,0,@intItemId,null)
@@ -822,7 +825,7 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 
-	IF	(
+	IF	((
 			EXISTS ( SELECT TOP 1 1 FROM @Processed )
 			AND 
 			(
@@ -832,7 +835,7 @@ BEGIN TRY
 					WHERE	ISNULL(ysnIgnore,0) <> 1) > 0	
 				OR NOT EXISTS(SELECT TOP 1 1 FROM @Processed WHERE ISNULL(ysnIgnore,0) <> 1)
 			)
-		) 
+		) OR NOT EXISTS(SELECT TOP 1 1 FROM @Processed))
 		AND @ysnAutoDistribution = 1
 	BEGIN
 		RAISERROR ('The entire ticket quantity cannot be applied to the contract.',16,1,'WITH NOWAIT') 

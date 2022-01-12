@@ -354,7 +354,7 @@ BEGIN
 			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GLAccnt.strDescription
+			,[strJournalLineDescription] = A.strMemo
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
@@ -392,7 +392,7 @@ BEGIN
 			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GLAccnt.strDescription
+			,[strJournalLineDescription] = A.strMemo
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
@@ -430,7 +430,7 @@ BEGIN
 			,[dblExchangeRate]		= CASE WHEN @ysnForeignTransaction = 0 THEN 1 ELSE B.dblExchangeRate END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GLAccnt.strDescription
+			,[strJournalLineDescription] = B.strDescription
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId

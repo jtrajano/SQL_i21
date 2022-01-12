@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @LotStatus_Active AS INT = 1
 		,@LotStatus_OnHold AS INT = 2
@@ -121,6 +121,8 @@ DECLARE
 	,@intContractDetailId		AS INT 
 	,@ysnWeighed				AS BIT 
 	,@strSealNo			AS NVARCHAR(100)
+	,@ysnProducePartialPacking BIT 
+
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
 		,@intEntityProducerId AS INT 
@@ -313,7 +315,18 @@ BEGIN
 	SET @strLotNumber = RTRIM(LTRIM(ISNULL(@strLotNumber, ''))) 
 
 	-- Get the type of lot (if manual or serialized)
-	SELECT @intLotTypeId = dbo.fnGetItemLotType(@intItemId);
+	--SELECT @intLotTypeId = dbo.fnGetItemLotType(@intItemId);
+	SELECT	
+			@intLotTypeId =  
+				CASE	WHEN Item.strLotTracking = 'Yes - Manual' THEN 1
+						WHEN Item.strLotTracking = 'Yes - Serial Number' THEN 2
+						WHEN Item.strLotTracking = 'Yes - Manual/Serial Number' THEN 3
+						ELSE 0 
+				END 
+			,@ysnProducePartialPacking = ysnProducePartialPacking
+			,@strItemNo = strItemNo
+	FROM	dbo.tblICItem Item
+	WHERE	Item.intItemId = @intItemId
 
 	-- Get the Item UOM Unit Type
 	SELECT @strUnitType = dbo.fnGetItemUnitType(@intItemUOMId);
@@ -326,9 +339,9 @@ BEGIN
 	-- Validate if the Manual lot item does not have a lot number. 
 	IF @strLotNumber = '' AND @intLotTypeId = @LotType_Manual
 	BEGIN 
-		SELECT	@strItemNo = strItemNo
-		FROM	dbo.tblICItem Item
-		WHERE	Item.intItemId = @intItemId
+		--SELECT	@strItemNo = strItemNo
+		--FROM	dbo.tblICItem Item
+		--WHERE	Item.intItemId = @intItemId
 
 		--Please specify the lot numbers for {Item}.
 		EXEC uspICRaiseError 80005, @strItemNo;
@@ -620,6 +633,7 @@ BEGIN
 		AND @intItemUOMId <> @intWeightUOMId
 		AND @dblQty % 1 <> 0 
 		AND @strUnitType NOT IN ('Weight','Volume') -- do not convert if Item UOM is Unit Type Weight/Volume
+		AND ISNULL(@ysnProducePartialPacking, 0) = 0 
 	BEGIN 
 		SET @intItemUOMId = @intWeightUOMId
 		SET	@dblQty = @dblWeight

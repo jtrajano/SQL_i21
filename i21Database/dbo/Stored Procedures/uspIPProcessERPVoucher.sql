@@ -80,7 +80,27 @@ BEGIN TRY
 		,@strVendorInvoiceFilePath NVARCHAR(500)
 		,@intFinancingCostItemId INT
 		,@intFreightCostItemId INT
+		,@intMiscItemId INT
 		,@intTermID INT
+		,@intInventoryReceiptId INT
+		,@intInventoryReceiptItemId INT
+		,@dblSubTotal INT
+		,@dblLiborAmount NUMERIC(18, 6)
+		,@strLiborCheck NVARCHAR(50)
+		,@dblLiborMax NUMERIC(18, 6)
+		,@strLiborMaxCheck NVARCHAR(50)
+		,@intContractEntityId INT
+		,@intWeightId INT
+		,@ysnPayablesOnShippedWeights BIT
+		,@intLoadDetailId INT
+		,@dblRMVoucherTotal NUMERIC(18, 6)
+		,@strLiborMsg NVARCHAR(MAX)
+		,@ysnMailReq BIT
+		,@intShipFromId INT
+		,@intShipFromEntityId INT
+		,@intPayToAddressId INT
+		,@dbli21VoucherTotal NUMERIC(18, 6)
+		,@intWeightAdjItemId INT
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -100,6 +120,8 @@ BEGIN TRY
 		,strOrderUnitMeasure NVARCHAR(50)
 		,intAccountId INT
 		,strCurrency NVARCHAR(50)
+		,intInventoryReceiptId INT
+		,intInventoryReceiptItemId INT
 		)
 	DECLARE @tblIPFinalInvoiceDetail TABLE (
 		intFinalInvoiceDetailId INT identity(1, 1)
@@ -121,6 +143,7 @@ BEGIN TRY
 		,intAccountId INT
 		,intCurrencyId INT
 		,ysnSubCurrency INT
+		,intInventoryReceiptItemId INT
 		)
 	DECLARE @tblIPBillStage TABLE (intBillStageId INT)
 
@@ -140,11 +163,13 @@ BEGIN TRY
 	SELECT @strVendorInvoiceFilePath = strVendorInvoiceFilePath
 		,@intFinancingCostItemId = intFinancingCostItemId
 		,@intFreightCostItemId = intFreightCostItemId
+		,@intMiscItemId = intMiscItemId
+		,@intWeightAdjItemId = intWeightAdjItemId
 	FROM tblIPCompanyPreference
 
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen
-	WHERE strNamespace = 'AccountsPayable.view.Voucher'
+	WHERE strNamespace = 'AccountsPayable.view.Bill'
 
 	UPDATE S
 	SET S.intStatusId = - 1
@@ -181,6 +206,10 @@ BEGIN TRY
 				,@dblMiscCharges = NULL
 				,@strMiscChargesDescription = NULL
 				,@strFileName = NULL
+				,@strErrorMessage = NULL
+				,@dblRMVoucherTotal = 0
+				,@strLiborMsg = NULL
+				,@ysnMailReq = NULL
 
 			SELECT @strVendorAccountNo = strVendorAccountNo
 				,@strVendorName = strVendorName
@@ -206,6 +235,8 @@ BEGIN TRY
 				,@strFileName = strFileName
 			FROM tblIPBillStage
 			WHERE intBillStageId = @intBillStageId
+
+			SELECT @dblRMVoucherTotal = @dblVoucherTotal - IsNULL(@dblFinanceChargeAmount, 0) - IsNULL(@dblMiscCharges, 0) - IsNULL(@dblFreightCharges, 0)
 
 			SELECT @intTermID = NULL
 
@@ -236,6 +267,79 @@ BEGIN TRY
 			FROM tblSMCurrency
 			WHERE strCurrency = @strCurrency
 
+			SELECT @strLiborCheck = dbo.[fnIPGetSAPIDOCTagValue]('Voucher', 'Libor Check')
+
+			IF @strLIBORrate IS NOT NULL
+				AND @strLIBORrate <> ''
+				AND @dblFinanceChargeAmount > 0
+				AND @strLiborCheck = '1'
+			BEGIN
+				SELECT @strLIBORrate = Replace(@strLIBORrate, '%', '')
+
+				IF ISNUMERIC(@strLIBORrate) = 1
+				BEGIN
+					SELECT @dblLiborAmount = NULL
+
+					SELECT @dblLiborAmount = ((1.75 + @strLIBORrate) * 90 / 360) * (@dblVoucherTotal - @dblFinanceChargeAmount) / 100
+
+					IF @dblLiborAmount <> @dblFinanceChargeAmount
+					BEGIN
+						SELECT @strLiborMsg = 'Incorrect financial charges ' + ltrim(@dblFinanceChargeAmount)
+
+						SELECT @ysnMailReq = 1
+					END
+				END
+				ELSE
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unable to process libor rate  ' + @strLIBORrate
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unable to process libor rate ' + @strLIBORrate
+					END
+				END
+			END
+
+			SELECT @strLiborMaxCheck = dbo.[fnIPGetSAPIDOCTagValue]('Voucher', 'Libor Max Check')
+
+			IF @strLIBORrate IS NOT NULL
+				AND @strLIBORrate <> ''
+				AND @dblFinanceChargeAmount > 0
+				AND @strLiborMaxCheck = '1'
+			BEGIN
+				SELECT @dblLiborMax = dbo.[fnIPGetSAPIDOCTagValue]('Voucher', 'Libor Max')
+
+				IF @dblFinanceChargeAmount > @dblLiborMax
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Financial charge ' + ltrim(@dblFinanceChargeAmount) + ' is more than maximum charge configured in the system.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Financial charge ' + ltrim(@dblFinanceChargeAmount) + ' is more than maximum charge configured in the system.'
+					END
+				END
+			END
+
+			SELECT @intEntityId = intEntityId
+			FROM tblAPVendor
+			WHERE strVendorAccountNum = @strVendorAccountNo
+
+			IF @intEntityId IS NULL
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Vendor is not available for the vendor account number ' + ltrim(@strVendorAccountNo)
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Vendor is not available for the vendor account number ' + ltrim(@strVendorAccountNo)
+				END
+			END
+
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -245,10 +349,6 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @intEntityId = intEntityId
-			FROM tblAPVendor
-			WHERE strVendorAccountNum = @strVendorAccountNo
-
 			IF EXISTS (
 					SELECT *
 					FROM tblAPBill
@@ -257,7 +357,8 @@ BEGIN TRY
 					)
 			BEGIN
 				UPDATE tblIPBillStage
-				SET intStatusId = - 2
+				SET intStatusId = 2
+					,strMessage = @strInvoiceNo + ' is already processed in i21.'
 				WHERE intBillStageId = @intBillStageId
 
 				GOTO ext
@@ -268,8 +369,8 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strCreatedBy
-				--AND CE.strEntityNo <> ''
 
+			--AND CE.strEntityNo <> ''
 			IF @intUserId IS NULL
 			BEGIN
 				IF EXISTS (
@@ -311,6 +412,8 @@ BEGIN TRY
 				,intLoadDetailId
 				,strOrderUnitMeasure
 				,strCurrency
+				,intInventoryReceiptId
+				,intInventoryReceiptItemId
 				)
 			SELECT strItemNo
 				,intContractHeaderId
@@ -328,6 +431,8 @@ BEGIN TRY
 				,intLoadDetailId
 				,strQuantityUOM
 				,strUnitRateCurrency
+				,intInventoryReceiptId
+				,intInventoryReceiptItemId
 			FROM tblIPBillDetailStage
 			WHERE intBillStageId = @intBillStageId
 				AND intSeqNo = 1
@@ -347,8 +452,11 @@ BEGIN TRY
 					,@strSubCurrency = NULL
 					,@dblTotalCost = 0
 					,@dblTotal = 0
-					,@intContractHeaderId=NULL
-					,@intContractDetailId=NULL
+					,@intContractHeaderId = NULL
+					,@intContractDetailId = NULL
+					,@intInventoryReceiptId = NULL
+					,@intInventoryReceiptItemId = NULL
+					,@intLoadDetailId = NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strUnitMeasure = strUnitMeasure
@@ -356,8 +464,11 @@ BEGIN TRY
 					,@strOrderUnitMeasure = strOrderUnitMeasure
 					,@strSubCurrency = strCurrency
 					,@dblTotal = dblTotal
-					,@intContractHeaderId=intContractHeaderId
-					,@intContractDetailId=intContractDetailId
+					,@intContractHeaderId = intContractHeaderId
+					,@intContractDetailId = intContractDetailId
+					,@intInventoryReceiptId = intInventoryReceiptId
+					,@intInventoryReceiptItemId = intInventoryReceiptItemId
+					,@intLoadDetailId = intLoadDetailId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -373,7 +484,7 @@ BEGIN TRY
 					END
 				END
 
-				IF @intContractHeaderId IS NULL
+				IF @intContractDetailId IS NULL
 				BEGIN
 					IF @strErrorMessage <> ''
 					BEGIN
@@ -382,6 +493,31 @@ BEGIN TRY
 					ELSE
 					BEGIN
 						SELECT @strErrorMessage = 'Contract Sequence cannot be blank.'
+					END
+				END
+
+				SELECT @intContractEntityId = NULL
+					,@intWeightId = NULL
+					,@ysnPayablesOnShippedWeights = NULL
+
+				SELECT @intContractEntityId = intEntityId
+					,@intWeightId = intWeightId
+				FROM tblCTContractHeader
+				WHERE intContractHeaderId = @intContractHeaderId
+
+				SELECT @ysnPayablesOnShippedWeights = ysnPayablesOnShippedWeights
+				FROM tblCTWeightGrade
+				WHERE intWeightGradeId = @intWeightId
+
+				IF @intContractEntityId <> @intEntityId
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Vendor is invalid.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Vendor is invalid.'
 					END
 				END
 
@@ -522,7 +658,6 @@ BEGIN TRY
 				END
 
 				SELECT @intLocationId = intCompanyLocationId
-					,@dblTotalCost = dblTotalCost
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 
@@ -546,6 +681,43 @@ BEGIN TRY
 					ELSE
 					BEGIN
 						SELECT @strErrorMessage = 'AP Clearing is not configured for the item ' + @strItemNo
+					END
+				END
+
+				IF @intInventoryReceiptItemId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unable to find the inventory receipt entry for the invoice no ' + @strInvoiceNo
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unable to find the inventory receipt entry for the invoice no ' + @strInvoiceNo
+					END
+				END
+
+				IF EXISTS (
+						SELECT 1
+						FROM dbo.tblICInventoryReceiptItem RI
+						JOIN dbo.tblAPBillDetail B ON B.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+						)
+				BEGIN
+					SELECT @strBillId = NULL
+
+					SELECT @strBillId = strBillId
+					FROM dbo.tblICInventoryReceiptItem RI
+					JOIN dbo.tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+					JOIN dbo.tblAPBill B ON B.intBillId = BD.intBillId
+					WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Voucher ' + @strBillId + ' is already created for the invoice no ' + @strInvoiceNo
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Voucher ' + @strBillId + ' is already created for the invoice no ' + @strInvoiceNo
 					END
 				END
 
@@ -583,6 +755,7 @@ BEGIN TRY
 					,intAccountId
 					,intCurrencyId
 					,ysnSubCurrency
+					,intInventoryReceiptItemId
 					)
 				SELECT @intItemId
 					,@intContractHeaderId
@@ -602,6 +775,7 @@ BEGIN TRY
 					,@intAccountId
 					,@intCurrencyId
 					,@ysnSubCurrency
+					,@intInventoryReceiptItemId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -613,7 +787,7 @@ BEGIN TRY
 			DELETE
 			FROM @voucherNonInvDetails
 
-			INSERT INTO @voucherNonInvDetails (
+			/*INSERT INTO @voucherNonInvDetails (
 				intEntityVendorId
 				,intTransactionType
 				,intShipToId
@@ -640,6 +814,9 @@ BEGIN TRY
 				,ysnSubCurrency
 				,dtmDueDate
 				,intTermId
+				,intCostCurrencyId
+				,intInventoryReceiptItemId
+				,intLocationId
 				)
 			SELECT @intEntityId
 				,1
@@ -667,7 +844,145 @@ BEGIN TRY
 				,ysnSubCurrency
 				,@dtmDueDate
 				,@intTermID
-			FROM @tblIPFinalInvoiceDetail FID
+				,intCurrencyId
+				,intInventoryReceiptItemId
+				,@intLocationId
+			FROM @tblIPFinalInvoiceDetail FID*/
+			INSERT INTO @voucherNonInvDetails (
+				[intEntityVendorId]
+				,[intTransactionType]
+				,[intLocationId]
+				,[intShipToId]
+				,[intShipFromId]
+				,[intShipFromEntityId]
+				,[intPayToAddressId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[strVendorOrderNumber]
+				,[strReference]
+				,[strSourceNumber]
+				,[intPurchaseDetailId]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[intContractSeqId]
+				,[intScaleTicketId]
+				,[intInventoryReceiptItemId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryShipmentItemId]
+				,[intInventoryShipmentChargeId]
+				,[strLoadShipmentNumber]
+				,[intLoadShipmentId]
+				,[intLoadShipmentDetailId]
+				,[intLoadShipmentCostId]
+				,[intItemId]
+				,[intPurchaseTaxGroupId]
+				,[strMiscDescription]
+				,[dblOrderQty]
+				,[dblOrderUnitQty]
+				,[intOrderUOMId]
+				,[dblQuantityToBill]
+				,[dblQtyToBillUnitQty]
+				,[intQtyToBillUOMId]
+				,[dblCost]
+				,[dblCostUnitQty]
+				,[intCostUOMId]
+				,[dblNetWeight]
+				,[dblWeightUnitQty]
+				,[intWeightUOMId]
+				,[intCostCurrencyId]
+				,[dblTax]
+				,[dblDiscount]
+				,[intCurrencyExchangeRateTypeId]
+				,[dblExchangeRate]
+				,[ysnSubCurrency]
+				,[intSubCurrencyCents]
+				,[intAccountId]
+				,[intShipViaId]
+				,[intTermId]
+				,[strBillOfLading]
+				,[ysnReturn]
+				,[dtmVoucherDate]
+				,[intStorageLocationId]
+				,[intSubLocationId]
+				,[intBookId]
+				,[intSubBookId]
+				,intPartitionId
+				,dtmDueDate
+				)
+			SELECT GP.[intEntityVendorId]
+				,GP.[intTransactionType]
+				,GP.[intLocationId]
+				,[intShipToId] = GP.intLocationId
+				,[intShipFromId] = GP.intShipFromId
+				,[intShipFromEntityId] = GP.intShipFromEntityId
+				,[intPayToAddressId] = GP.intPayToAddressId
+				,GP.[intCurrencyId]
+				,GP.dtmDate
+				,@strInvoiceNo
+				,GP.[strReference]
+				,GP.[strSourceNumber]
+				,GP.[intPurchaseDetailId]
+				,GP.[intContractHeaderId]
+				,GP.[intContractDetailId]
+				,[intContractSeqId] = NULL
+				,GP.[intScaleTicketId]
+				,GP.[intInventoryReceiptItemId]
+				,GP.[intInventoryReceiptChargeId]
+				,GP.[intInventoryShipmentItemId]
+				,GP.[intInventoryShipmentChargeId]
+				,GP.strLoadShipmentNumber
+				,GP.[intLoadShipmentId]
+				,GP.[intLoadShipmentDetailId]
+				,GP.[intLoadShipmentCostId]
+				,GP.[intItemId]
+				,GP.[intPurchaseTaxGroupId]
+				,GP.[strMiscDescription]
+				,GP.dblOrderQty --CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblOrderQty]	ELSE GP.dblOrderQty END
+				,[dblOrderUnitQty] = 0.00
+				,[intOrderUOMId] = NULL
+				,GP.[dblQuantityToBill] --CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblQuantityToBill]	ELSE GP.[dblQuantityToBill] END	
+				,GP.[dblQtyToBillUnitQty]
+				,GP.[intQtyToBillUOMId]
+				,[dblCost] = GP.dblUnitCost
+				,ISNULL(GP.[dblCostUnitQty], 1)
+				,GP.[intCostUOMId]
+				,GP.[dblNetWeight]
+				,ISNULL([dblWeightUnitQty], 1)
+				,GP.[intWeightUOMId]
+				,GP.[intCostCurrencyId]
+				,GP.[dblTax]
+				,GP.[dblDiscount]
+				,GP.[intCurrencyExchangeRateTypeId]
+				,[dblExchangeRate] = GP.dblRate
+				,GP.[ysnSubCurrency]
+				,GP.[intSubCurrencyCents]
+				,GP.[intAccountId]
+				,GP.[intShipViaId]
+				,GP.[intTermId]
+				,GP.[strBillOfLading]
+				,GP.[ysnReturn]
+				,@dtmInvoiceDate
+				,GP.intStorageLocationId
+				,GP.intSubLocationId
+				,GP.intBookId
+				,GP.intSubBookId
+				,1
+				,@dtmDueDate
+			FROM dbo.fnICGeneratePayables(@intInventoryReceiptId, 1, 1) GP
+
+			SELECT @intShipFromId = NULL
+				,@intShipFromEntityId = NULL
+				,@intPayToAddressId = NULL
+
+			SELECT @intShipFromId = [intShipFromId]
+				,@intShipFromEntityId = [intShipFromEntityId]
+				,@intPayToAddressId = [intPayToAddressId]
+			FROM @voucherNonInvDetails
+
+			SELECT @dblVoucherTotal = NULL
+
+			SELECT @dbli21VoucherTotal = SUM(ROUND((dblNetWeight * dblCost),2))
+			FROM @voucherNonInvDetails
 
 			IF @dblFinanceChargeAmount > 0
 			BEGIN
@@ -698,6 +1013,12 @@ BEGIN TRY
 					,ysnSubCurrency
 					,dtmDueDate
 					,intTermId
+					,intCostCurrencyId
+					,intLocationId
+					,intPartitionId
+					,intShipFromId
+					,intShipFromEntityId
+					,intPayToAddressId
 					)
 				SELECT @intEntityId
 					,1
@@ -705,9 +1026,9 @@ BEGIN TRY
 					,@intFinancingCostItemId
 					,NULL AS intContractHeaderId
 					,NULL AS intContractDetailId
-					,0 AS dblQtyOrdered
+					,1 AS dblQtyOrdered
 					,NULL AS intOrderItemUOMId
-					,0 AS dblQtyShipped
+					,1 AS dblQtyShipped
 					,NULL AS intUnitMeasureId
 					,@dblFinanceChargeAmount AS dblPrice
 					,0 AS dblShipmentNetWt
@@ -725,6 +1046,12 @@ BEGIN TRY
 					,ysnSubCurrency
 					,@dtmDueDate
 					,@intTermID
+					,intCurrencyId
+					,@intLocationId
+					,1
+					,@intShipFromId
+					,@intShipFromEntityId
+					,@intPayToAddressId
 				FROM @tblIPFinalInvoiceDetail FID
 			END
 
@@ -757,6 +1084,12 @@ BEGIN TRY
 					,ysnSubCurrency
 					,dtmDueDate
 					,intTermId
+					,intCostCurrencyId
+					,intLocationId
+					,intPartitionId
+					,intShipFromId
+					,intShipFromEntityId
+					,intPayToAddressId
 					)
 				SELECT @intEntityId
 					,1
@@ -764,9 +1097,9 @@ BEGIN TRY
 					,@intFreightCostItemId
 					,NULL AS intContractHeaderId
 					,NULL AS intContractDetailId
-					,0 AS dblQtyOrdered
+					,1 AS dblQtyOrdered
 					,NULL AS intOrderItemUOMId
-					,0 AS dblQtyShipped
+					,1 AS dblQtyShipped
 					,NULL AS intUnitMeasureId
 					,@dblFreightCharges AS dblPrice
 					,0 AS dblShipmentNetWt
@@ -784,13 +1117,187 @@ BEGIN TRY
 					,ysnSubCurrency
 					,@dtmDueDate
 					,@intTermID
+					,intCurrencyId
+					,@intLocationId
+					,1
+					,@intShipFromId
+					,@intShipFromEntityId
+					,@intPayToAddressId
 				FROM @tblIPFinalInvoiceDetail FID
 			END
+
+			IF @dblMiscCharges > 0
+			BEGIN
+				INSERT INTO @voucherNonInvDetails (
+					intEntityVendorId
+					,intTransactionType
+					,intShipToId
+					,intItemId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblOrderQty
+					,intOrderUOMId
+					,dblQuantityToBill
+					,intQtyToBillUOMId
+					,dblCost
+					,dblNetWeight
+					,dblWeight
+					,intWeightUOMId
+					,strVendorOrderNumber
+					,dtmVoucherDate
+					,intBillId
+					,ysnStage
+					,intLoadShipmentId
+					,intLoadShipmentDetailId
+					,intLineNo
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+					,dtmDueDate
+					,intTermId
+					,intCostCurrencyId
+					,intLocationId
+					,intPartitionId
+					,intShipFromId
+					,intShipFromEntityId
+					,intPayToAddressId
+					)
+				SELECT @intEntityId
+					,1
+					,@intLocationId
+					,@intMiscItemId
+					,NULL AS intContractHeaderId
+					,NULL AS intContractDetailId
+					,1 AS dblQtyOrdered
+					,NULL AS intOrderItemUOMId
+					,1 AS dblQtyShipped
+					,NULL AS intUnitMeasureId
+					,@dblMiscCharges AS dblPrice
+					,0 AS dblShipmentNetWt
+					,0 AS dblItemWeight
+					,NULL AS intWeightUnitMeasureId
+					,@strInvoiceNo
+					,@dtmInvoiceDate
+					,@intBillId
+					,0
+					,NULL AS intLoadId
+					,NULL AS intLoadDetailId
+					,NULL AS intFinalInvoiceDetailId
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+					,@dtmDueDate
+					,@intTermID
+					,intCurrencyId
+					,@intLocationId
+					,1
+					,@intShipFromId
+					,@intShipFromEntityId
+					,@intPayToAddressId
+				FROM @tblIPFinalInvoiceDetail FID
+			END
+
+			IF @dblRMVoucherTotal <> @dbli21VoucherTotal
+				AND @intWeightAdjItemId IS NOT NULL
+			BEGIN
+				INSERT INTO @voucherNonInvDetails (
+					intEntityVendorId
+					,intTransactionType
+					,intShipToId
+					,intItemId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblOrderQty
+					,intOrderUOMId
+					,dblQuantityToBill
+					,intQtyToBillUOMId
+					,dblCost
+					,dblNetWeight
+					,dblWeight
+					,intWeightUOMId
+					,strVendorOrderNumber
+					,dtmVoucherDate
+					,intBillId
+					,ysnStage
+					,intLoadShipmentId
+					,intLoadShipmentDetailId
+					,intLineNo
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+					,dtmDueDate
+					,intTermId
+					,intCostCurrencyId
+					,intLocationId
+					,intPartitionId
+					,intShipFromId
+					,intShipFromEntityId
+					,intPayToAddressId
+					)
+				SELECT @intEntityId
+					,1
+					,@intLocationId
+					,@intWeightAdjItemId
+					,NULL AS intContractHeaderId
+					,NULL AS intContractDetailId
+					,(
+						CASE 
+							WHEN @dblRMVoucherTotal - @dbli21VoucherTotal < 0
+								THEN - 1
+							ELSE 1
+							END
+						) AS dblQtyOrdered
+					,NULL AS intOrderItemUOMId
+					,(
+						CASE 
+							WHEN @dblRMVoucherTotal - @dbli21VoucherTotal < 0
+								THEN - 1
+							ELSE 1
+							END
+						) AS dblQtyShipped
+					,NULL AS intUnitMeasureId
+					,ABS(@dblRMVoucherTotal - @dbli21VoucherTotal) AS dblPrice
+					,0 AS dblShipmentNetWt
+					,0 AS dblItemWeight
+					,NULL AS intWeightUnitMeasureId
+					,@strInvoiceNo
+					,@dtmInvoiceDate
+					,@intBillId
+					,0
+					,NULL AS intLoadId
+					,NULL AS intLoadDetailId
+					,NULL AS intFinalInvoiceDetailId
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+					,@dtmDueDate
+					,@intTermID
+					,intCurrencyId
+					,@intLocationId
+					,1
+					,@intShipFromId
+					,@intShipFromEntityId
+					,@intPayToAddressId
+				FROM @tblIPFinalInvoiceDetail FID
+			END
+
+			SELECT @intBillInvoiceId = NULL
 
 			EXEC uspAPCreateVoucher @voucherPayables = @voucherNonInvDetails
 				,@userId = @intUserId
 				,@throwError = 1
 				,@createdVouchersId = @intBillInvoiceId OUT
+
+			IF @intBillInvoiceId IS NULL
+			BEGIN
+				SELECT @strErrorMessage = 'Unable to create a voucher entry for the invoice no ' + @strInvoiceNo
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
 
 			SELECT @strBillId = NULL
 
@@ -814,9 +1321,13 @@ BEGIN TRY
 			WHERE intBillId = @intBillInvoiceId
 
 			UPDATE tblAPBillDetail
-			SET dblCost = dblCost
-				,dblTotal = dblTotal
+			SET dblTotal = dblCost
 			WHERE intBillId = @intBillInvoiceId
+				AND intItemId IN (
+					IsNULL(@intMiscItemId, 0)
+					,IsNULL(@intFinancingCostItemId, 0)
+					,IsNULL(@intFreightCostItemId, 0)
+					)
 
 			--UPDATE HEADER TOTAL
 			UPDATE A
@@ -834,7 +1345,24 @@ BEGIN TRY
 				) DetailTotal
 			WHERE A.intBillId = @intBillInvoiceId
 
-			IF @dblTotalCost = @dblTotal
+			IF IsNULL(@ysnPayablesOnShippedWeights, 0) = 1
+			BEGIN
+				SELECT @dblSubTotal = NULL
+
+				SELECT @dblSubTotal = dblAmount
+				FROM tblLGLoadDetail
+				WHERE intLoadDetailId = @intLoadDetailId
+			END
+			ELSE
+			BEGIN
+				SELECT @dblSubTotal = NULL
+
+				SELECT @dblSubTotal = dblSubTotal
+				FROM tblICInventoryReceipt
+				WHERE intInventoryReceiptId = @intInventoryReceiptId
+			END
+
+			IF ABS(IsNULL(@dblSubTotal, 0) - @dblRMVoucherTotal) < 1
 			BEGIN
 				EXEC uspSMSubmitTransaction @type = 'AccountsPayable.view.Voucher'
 					,@recordId = @intBillInvoiceId
@@ -843,84 +1371,50 @@ BEGIN TRY
 					,@currentUserEntityId = @intUserId
 					,@amount = 0
 					,@approverConfiguration = @config
-					--SELECT intTransactionId = intTransactionId
-					--FROM tblSMTransaction
-					--WHERE intRecordId = @intBillInvoiceId
-					--	AND intScreenId = @intScreenId
-					--IF intTransactionId IS NULL
-					--BEGIN
-					--	INSERT INTO tblSMTransaction (
-					--		intScreenId
-					--		,intRecordId
-					--		,strTransactionNo
-					--		,intEntityId
-					--		,strApprovalStatus
-					--		,intConcurrencyId
-					--		)
-					--	SELECT @intScreenId
-					--		,intTransactionId
-					--		,@strBillId
-					--		,@intEntityId
-					--		,'Waiting for Submit'
-					--		,1
-					--	SELECT intTransactionId = SCOPE_IDENTITY()
-					--	INSERT INTO tblSMApproval (
-					--		dtmDate
-					--		,dblAmount
-					--		,dtmDueDate
-					--		,intSubmittedById
-					--		,strStatus
-					--		,ysnCurrent
-					--		,intScreenId
-					--		,ysnVisible
-					--		,intOrder
-					--		,intTransactionId
-					--		)
-					--	SELECT GETUTCDATE()
-					--		,0
-					--		,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
-					--		,@intUserId
-					--		,'Waiting for Submit'
-					--		,1
-					--		,@intScreenId
-					--		,1
-					--		,1
-					--		,intTransactionId
-					--END
 			END
+			ELSE
+			BEGIN
+				SELECT @intTransactionId = NULL
 
-			BEGIN TRY
-				SELECT @isPresent = 0
+				SELECT @intVoucherScreenId = intScreenId
+				FROM tblSMScreen
+				WHERE strNamespace = 'AccountsPayable.view.Voucher'
 
-				EXEC [uspSMCheckPendingAttachmentFileIfPresent] @fullFileName = @strFileName
-					,@isPresent = @isPresent OUTPUT
+				SELECT @intTransactionId = intTransactionId
+				FROM tblSMTransaction
+				WHERE intScreenId = @intVoucherScreenId
+					AND intRecordId = @intBillInvoiceId
 
-				SELECT @isPresent
+				UPDATE tblSMTransaction
+				SET strApprovalStatus = 'Waiting for Submit'
+					,strTransactionNo = @strBillId
+					,intEntityId = @intEntityId
+					,intConcurrencyId = intConcurrencyId + 1
+				WHERE intTransactionId = @intTransactionId
 
-				IF @isPresent = 1
-				BEGIN
-					SELECT @intTransactionId = intTransactionId
-					FROM tblSMTransaction
-					WHERE strTransactionNo = @strBillId
-						AND intScreenId = @intScreenId
-
-					EXEC [uspSMCreateAttachmentFromFile] @transactionId = @intTransactionId -- the intTransactionId
-						,@fileName = @strFileName -- file name
-						,@fileExtension = 'pdf' -- extension
-						,@filePath = @strVendorInvoiceFilePath -- path
-						,@screenNamespace = 'AccountsPayable.Bill' -- screen type or namespace
-						,@useDocumentWatcher = 1 -- flag if the file was uploaded using document wacther
-						,@throwError = 1
-						,@attachmentId = @newAttachmentId OUTPUT
-						,@error = @message OUTPUT
-
-					SELECT @newAttachmentId
-						,@message
-				END
-			END TRY
-
-			BEGIN CATCH
-			END CATCH
+				INSERT INTO tblSMApproval (
+					dtmDate
+					,dblAmount
+					,dtmDueDate
+					,intSubmittedById
+					,strStatus
+					,ysnCurrent
+					,intScreenId
+					,ysnVisible
+					,intOrder
+					,intTransactionId
+					)
+				SELECT GETUTCDATE()
+					,0
+					,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+					,@intUserId
+					,'Waiting for Submit'
+					,1
+					,@intVoucherScreenId
+					,1
+					,1
+					,@intTransactionId
+			END
 
 			ext:
 
@@ -928,6 +1422,12 @@ BEGIN TRY
 			SET intStatusId = 1
 				,intBillId = @intBillInvoiceId
 				,strVoucherNumber = @strBillId
+				,ysnMailReq = @ysnMailReq
+				,strMessage = CASE 
+					WHEN @ysnMailReq = 1
+						THEN @strLiborMsg
+					ELSE NULL
+					END
 			WHERE intBillStageId = @intBillStageId
 				AND intStatusId = - 1
 
@@ -945,6 +1445,7 @@ BEGIN TRY
 			UPDATE tblIPBillStage
 			SET intStatusId = 2
 				,strMessage = @ErrMsg
+				,ysnMailReq = 1
 			WHERE intBillStageId = @intBillStageId
 				AND intStatusId = - 1
 		END CATCH

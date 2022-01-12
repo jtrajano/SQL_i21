@@ -90,6 +90,7 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		[intCreatedEntityId] INT NULL,
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
+		[dblStockAvailable] AS (ROUND(ISNULL(dblStockIn, 0) - ISNULL(dblStockOut, 0), 6)) PERSISTED,
 		CONSTRAINT [PK_tblICInventoryFIFO] PRIMARY KEY NONCLUSTERED ([intInventoryFIFOId]) 
 	)
 	GO
@@ -115,6 +116,12 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_Posting]
-		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
-		INCLUDE (dblStockIn, dblStockOut, dtmDate);
+		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [dtmDate] ASC, [dblStockAvailable] ASC)
+		INCLUDE (intTransactionId, strTransactionId, dblCost);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_Posting2]
+		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
+		INCLUDE (dblStockIn, dblStockOut);
+	GO	
+	GO	

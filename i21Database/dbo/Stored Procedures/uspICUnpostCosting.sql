@@ -13,7 +13,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
 	DROP TABLE #tmpInventoryTransactionStockToReverse
@@ -350,6 +350,11 @@ BEGIN
 			,[strActualCostId]
 			,[intSourceEntityId]
 			,[intCompanyLocationId]
+			,[dtmDateCreated]
+			,[strSourceType]
+			,[strSourceNumber]
+			,[strBOLNumber]
+			,[intTicketId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -393,6 +398,11 @@ BEGIN
 			,[strActualCostId]						= ActualTransaction.strActualCostId
 			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 			,[intCompanyLocationId]					= ActualTransaction.intCompanyLocationId
+			,[dtmDateCreated]						= GETUTCDATE()
+			,[strSourceType]						= ActualTransaction.strSourceType
+			,[strSourceNumber]						= ActualTransaction.strSourceNumber
+			,[strBOLNumber]							= ActualTransaction.strBOLNumber
+			,[intTicketId]							= ActualTransaction.intTicketId
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId				
 	
@@ -423,6 +433,10 @@ BEGIN
 		,[intConcurrencyId] 
 		,[intCompanyId]
 		,[intSourceEntityId]
+		,[strSourceType]
+		,[strSourceNumber]
+		,[strBOLNumber]
+		,[intTicketId]
 	)
 	SELECT	[intItemId]					= ActualTransaction.intItemId
 			,[intLotId]					= ActualTransaction.intLotId
@@ -446,6 +460,10 @@ BEGIN
 			,[intConcurrencyId]			= 1
 			,[intCompanyId]				= ActualTransaction.intCompanyId
 			,[intSourceEntityId]		= ActualTransaction.intSourceEntityId
+			,[strSourceType]			= ActualTransaction.strSourceType
+			,[strSourceNumber]			= ActualTransaction.strSourceNumber
+			,[strBOLNumber]				= ActualTransaction.strBOLNumber
+			,[intTicketId]				= ActualTransaction.intTicketId
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 				AND ActualTransaction.intLotId IS NOT NULL 
@@ -475,7 +493,7 @@ BEGIN
 			AND RelatedLotTransactions.ysnIsUnposted = 0
 
 	------------------------------------------------------------
-	-- Update the Stock Quantity and Average Cost
+	-- Update the Stock Quantity
 	------------------------------------------------------------
 	BEGIN 
 		BEGIN 
@@ -585,24 +603,24 @@ BEGIN
 						--AND intInTransitSourceLocationId IS NULL 
 						--AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
-				-- Recalculate the average cost from the inventory transaction table. 
-				-- Except on Actual Costing. Do not compute the average cost when doing actual costing.
-				UPDATE	ItemPricing
-				SET		dblAverageCost = ISNULL(
-							dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
-							, dblAverageCost
-						) 
-						, ysnIsPendingUpdate = 1
-				FROM	dbo.tblICItemPricing ItemPricing	
-				WHERE	ItemPricing.intItemId = @intItemId
-						AND ItemPricing.intItemLocationId = @intItemLocationId
-						AND ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) <> @ACTUALCOST
-						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+				---- Recalculate the average cost from the inventory transaction table. 
+				---- Except on Actual Costing. Do not compute the average cost when doing actual costing.
+				--UPDATE	ItemPricing
+				--SET		dblAverageCost = ISNULL(
+				--			dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
+				--			, dblAverageCost
+				--		) 
+				--		, ysnIsPendingUpdate = 1
+				--FROM	dbo.tblICItemPricing ItemPricing	
+				--WHERE	ItemPricing.intItemId = @intItemId
+				--		AND ItemPricing.intItemLocationId = @intItemLocationId
+				--		AND ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) <> @ACTUALCOST
+				--		AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
-				-- Recalculate the item pricing because of the new average cost. 
-				EXEC uspICUpdateItemPricing
-					@intItemId
-					,@intItemLocationId
+				---- Recalculate the item pricing because of the new average cost. 
+				--EXEC uspICUpdateItemPricing
+				--	@intItemId
+				--	,@intItemLocationId
 
 				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
 				IF ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
@@ -645,6 +663,59 @@ BEGIN
 			DEALLOCATE loopItemsToUnpost;
 		END
 	END
+
+	-- Recalculate the average cost 
+	BEGIN 
+		DECLARE RecalculateAverageCostLoop CURSOR LOCAL FAST_FORWARD
+		FOR 
+		-- Recalculate the average cost from the inventory transaction table. 
+		-- Except on Actual Costing. Do not compute the average cost when doing actual costing.		
+		SELECT DISTINCT 
+			intItemId 
+			,intItemLocationId 
+		FROM	
+			@ItemsToUnpost 
+		WHERE
+			ISNULL(intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) <> @ACTUALCOST
+			AND ISNULL(intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+
+		OPEN RecalculateAverageCostLoop;	
+
+		-- Initial fetch attempt
+		FETCH NEXT FROM RecalculateAverageCostLoop INTO 
+			@intItemId
+			,@intItemLocationId;
+
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- Start of the loop
+		-----------------------------------------------------------------------------------------------------------------------------
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 
+				UPDATE	ItemPricing
+				SET		dblAverageCost = ISNULL(
+							dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
+							, dblAverageCost
+						) 
+						, ysnIsPendingUpdate = 1
+				FROM	dbo.tblICItemPricing ItemPricing	
+				WHERE	ItemPricing.intItemId = @intItemId
+						AND ItemPricing.intItemLocationId = @intItemLocationId												
+
+				-- Recalculate the item pricing because of the new average cost. 
+				EXEC uspICUpdateItemPricing
+					@intItemId
+					,@intItemLocationId
+
+			FETCH NEXT FROM RecalculateAverageCostLoop INTO 
+				@intItemId
+				,@intItemLocationId;
+		END;
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- End of the loop
+		-----------------------------------------------------------------------------------------------------------------------------
+		CLOSE RecalculateAverageCostLoop;
+		DEALLOCATE RecalculateAverageCostLoop;		
+	END 
 	
 	---------------------------------------------------------------------------------------
 	-- Create the AUTO-Negative if costing method is average costing
@@ -899,7 +970,7 @@ BEGIN
 	FROM	dbo.tblICInventoryStockMovement t 
 	WHERE	t.intRelatedTransactionId = @intTransactionId
 			AND t.strRelatedTransactionId = @strTransactionId
-			AND t.ysnIsUnposted = 0
+			--AND t.ysnIsUnposted = 0
 
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for the transaction
@@ -909,7 +980,7 @@ BEGIN
 	FROM	dbo.tblICInventoryStockMovement t 
 	WHERE	t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
-			AND t.ysnIsUnposted = 0
+			--AND t.ysnIsUnposted = 0
 END 
 
 -------------------------------------------
@@ -1013,6 +1084,15 @@ BEGIN
 		WHERE intId = @intIdSummaryValuation
 	END 
 
+END 
+
+-----------------------------------------
+-- Log the Daily Stock Quantity
+-----------------------------------------
+BEGIN 
+	EXEC uspICPostStockDailyQuantity 
+		@strBatchId = @strBatchId
+		,@strTransactionId = @strTransactionId
 END 
 
 -----------------------------------------

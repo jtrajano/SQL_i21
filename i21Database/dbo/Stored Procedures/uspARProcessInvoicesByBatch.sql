@@ -20,6 +20,7 @@
 																	-- 14 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]
 																    -- 15 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
                                                                     -- 16 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]
+																	-- 17 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory], [strPaymentInfo]
 	,@RaiseError					BIT								= 0
 	,@BatchId						NVARCHAR(40)					= NULL
 	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
@@ -71,7 +72,7 @@ BEGIN TRY
 	WHERE 
 		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 		OR
-		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct')) 
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct', 'CF Tran')) 
 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
@@ -87,6 +88,7 @@ BEGIN TRY
 		,[intShipViaId]					INT												NULL
 		,[strPONumber]					NVARCHAR (25)	COLLATE Latin1_General_CI_AS	NULL
 		,[strBOLNumber]					NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
+		,[strPaymentInfo]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
 		,[strComments]					NVARCHAR (500)  COLLATE Latin1_General_CI_AS	NULL
 		,[intAccountId]					INT												NULL
 		,[intFreightTermId]				INT												NULL
@@ -129,7 +131,8 @@ BEGIN TRY
 						WHEN @GroupingOption =13 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId]'
 						WHEN @GroupingOption =14 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]'
 						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]'
-						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]'
+						WHEN @GroupingOption =16 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]'
+						WHEN @GroupingOption =17 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory], [strPaymentInfo]'
 					END)
 					
 				
@@ -242,6 +245,7 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
+		,[strPaymentInfo]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -391,6 +395,7 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]	= IE.[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]						= IE.[strPONumber]
 		,[strBOLNumber]						= IE.[strBOLNumber]
+		,[strPaymentInfo]					= IE.[strPaymentInfo]
 		,[strComments]						= IE.[strComments]
 		,[intShipToLocationId]				= IE.[intShipToLocationId]
 		,[intBillToLocationId]				= IE.[intBillToLocationId]
@@ -610,6 +615,7 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
+			,[strPaymentInfo]
 			,[strComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
@@ -760,6 +766,7 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]		= ITG.[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]							= ARI.[strPONumber]
 			,[strBOLNumber]							= ARI.[strBOLNumber]
+			,[strPaymentInfo]						= ARI.[strPaymentInfo]
 			,[strComments]							= ARI.[strComments]
 			,[intShipToLocationId]					= ARI.[intShipToLocationId]
 			,[intBillToLocationId]					= ARI.[intBillToLocationId]
@@ -890,7 +897,7 @@ BEGIN
 			#EntriesForProcessing EFP WITH (NOLOCK)
 				ON (ISNULL(ITG.[intId], 0) = ISNULL(EFP.[intId], 0) OR @GroupingOption > 0)
 				AND (ISNULL(ITG.[intEntityCustomerId], 0) = ISNULL(EFP.[intEntityCustomerId], 0) OR (EFP.[intEntityCustomerId] IS NULL AND @GroupingOption < 1))
-				AND (ISNULL(ITG.[intSourceId], 0) = ISNULL(EFP.[intSourceId], 0) OR (EFP.[intSourceId] IS NULL AND (@GroupingOption < 2 OR ITG.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
+				AND (ISNULL(ITG.[intSourceId], 0) = ISNULL(EFP.[intSourceId], 0) OR (EFP.[intSourceId] IS NULL AND (@GroupingOption < 2 OR ITG.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy', 'CF Tran'))))
 				AND (ISNULL(ITG.[intCompanyLocationId], 0) = ISNULL(EFP.[intCompanyLocationId], 0) OR (EFP.[intCompanyLocationId] IS NULL AND @GroupingOption < 3))
 				AND (ISNULL(ITG.[intCurrencyId],0) = ISNULL(EFP.[intCurrencyId],0) OR (EFP.[intCurrencyId] IS NULL AND @GroupingOption < 4))
 				AND (CAST(ISNULL(ITG.[dtmDate], @DateNow) AS DATE) = CAST(ISNULL(EFP.[dtmDate], @DateNow) AS DATE) OR (EFP.[dtmDate] IS NULL AND @GroupingOption < 5))
@@ -905,6 +912,7 @@ BEGIN
 				AND (ISNULL(ITG.[intPaymentMethodId],0) = ISNULL(EFP.[intPaymentMethodId],0) OR (EFP.[intPaymentMethodId] IS NULL AND @GroupingOption < 14))            
 				AND (ISNULL(ITG.[strInvoiceOriginId],'') = ISNULL(EFP.[strInvoiceOriginId],'') OR (EFP.[strInvoiceOriginId] IS NULL AND @GroupingOption < 15))
 				AND (ISNULL(ITG.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(EFP.[ysnImpactInventory], CAST(1 AS BIT)) OR (EFP.[ysnImpactInventory] IS NULL AND @GroupingOption < 16))
+				AND (ISNULL(ITG.[strPaymentInfo],'') = ISNULL(EFP.[strPaymentInfo],'') OR (EFP.[strPaymentInfo] IS NULL AND @GroupingOption < 17))    
 		INNER JOIN
 			(SELECT
 				 [strTransactionType]
@@ -928,6 +936,7 @@ BEGIN
 				,[strInvoiceOriginId]
 				,[strPONumber]
 				,[strBOLNumber]
+				,[strPaymentInfo]
 				,[strComments]
 				,[intShipToLocationId]
 				,[intBillToLocationId]
@@ -1242,6 +1251,7 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
+		,[strPaymentInfo]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -1385,6 +1395,7 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]	= IE.[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]						= IE.[strPONumber]
 		,[strBOLNumber]						= IE.[strBOLNumber]
+		,[strPaymentInfo]					= IE.[strPaymentInfo]
 		,[strComments]						= IE.[strComments]
 		,[intShipToLocationId]				= IE.[intShipToLocationId]
 		,[intBillToLocationId]				= IE.[intBillToLocationId]
