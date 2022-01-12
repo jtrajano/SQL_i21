@@ -75,7 +75,6 @@ BEGIN
 	) LOBSegment
 
 
-	SELECT @intUnrealizedId unrealized, @intUnrealizedOffsetId offset, * FROM @tblAccountId
 	DECLARE
 		@intCurrentAccountId INT, 
 		@intCurrentUnrealizedId INT, 
