@@ -42,31 +42,50 @@ BEGIN TRY
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
+	DECLARE @tblIPStorageLocationStage TABLE (intStorageLocationStageId INT)
+
+	INSERT INTO @tblIPStorageLocationStage (intStorageLocationStageId)
+	SELECT intStorageLocationStageId
+	FROM dbo.tblIPStorageLocationStage
+	WHERE intStatusId IS NULL
+
 	SELECT @intStorageLocationStageId = MIN(intStorageLocationStageId)
-	FROM tblIPStorageLocationStage
+	FROM @tblIPStorageLocationStage
+
+	IF @intStorageLocationStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblIPStorageLocationStage
+	SET intStatusId = - 1
+	WHERE intStorageLocationStageId IN (
+			SELECT SL.intStorageLocationStageId
+			FROM @tblIPStorageLocationStage SL
+			)
 
 	SELECT @strInfo1 = ''
 
 	SELECT @strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strStorageUnit, '') + ', '
-	FROM tblIPStorageLocationStage
+	--SELECT @strInfo1 = @strInfo1 + ISNULL(strStorageUnit, '') + ', '
+	--FROM @tblIPStorageLocationStage
 
-	IF Len(@strInfo1) > 0
-	BEGIN
-		SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
-	END
+	--IF Len(@strInfo1) > 0
+	--BEGIN
+	--	SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
+	--END
 
-	SELECT @strInfo2 = @strInfo2 + ISNULL(strStorageLocation, '') + ', '
-	FROM (
-		SELECT DISTINCT strStorageLocation
-		FROM tblIPStorageLocationStage
-		) AS DT
+	--SELECT @strInfo2 = @strInfo2 + ISNULL(strStorageLocation, '') + ', '
+	--FROM (
+	--	SELECT DISTINCT strStorageLocation
+	--	FROM @tblIPStorageLocationStage
+	--	) AS DT
 
-	IF Len(@strInfo2) > 0
-	BEGIN
-		SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
-	END
+	--IF Len(@strInfo2) > 0
+	--BEGIN
+	--	SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
+	--END
 
 	WHILE (@intStorageLocationStageId IS NOT NULL)
 	BEGIN
@@ -286,7 +305,6 @@ BEGIN TRY
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
 				END
-				
 			END
 			ELSE IF @intActionId = 4
 			BEGIN
@@ -300,6 +318,7 @@ BEGIN TRY
 				FROM tblICStorageLocation
 				WHERE intStorageLocationId = @intStorageLocationId
 			END
+
 			MOVE_TO_ARCHIVE:
 
 			INSERT INTO dbo.tblIPInitialAck (
@@ -374,6 +393,7 @@ BEGIN TRY
 				,7 AS intMessageTypeId
 				,0 AS intStatusId
 				,@ErrMsg AS strStatusText
+
 			--Move to Error
 			INSERT INTO tblIPStorageLocationError (
 				intTrxSequenceNo
@@ -404,9 +424,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intStorageLocationStageId = MIN(intStorageLocationStageId)
-		FROM tblIPStorageLocationStage
+		FROM @tblIPStorageLocationStage
 		WHERE intStorageLocationStageId > @intStorageLocationStageId
 	END
+
+	UPDATE tblIPStorageLocationStage
+	SET intStatusId = NULL
+	WHERE intStorageLocationStageId IN (
+			SELECT SL.intStorageLocationStageId
+			FROM @tblIPStorageLocationStage SL
+			)
+		AND intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

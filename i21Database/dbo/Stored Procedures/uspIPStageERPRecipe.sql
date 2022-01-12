@@ -19,15 +19,26 @@ BEGIN TRY
 		,@strInputItemUpperTolerance NVARCHAR(50)
 		,@strOutputItemLowerTolerance NVARCHAR(50)
 		,@strOutputItemUpperTolerance NVARCHAR(50)
+	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 
-	SELECT @intRowNo = MIN(intIDOCXMLStageId)
+	INSERT INTO @tblIPIDOCXMLStage (intIDOCXMLStageId)
+	SELECT intIDOCXMLStageId
 	FROM tblIPIDOCXMLStage
 	WHERE strType = 'Recipe'
+	AND intStatusId IS NULL
+
+	SELECT @intRowNo = MIN(intIDOCXMLStageId)
+	FROM @tblIPIDOCXMLStage
 
 	IF @intRowNo IS NULL
 	BEGIN
 		RETURN
 	END
+
+	UPDATE S
+	SET S.intStatusId = -1
+	FROM tblIPIDOCXMLStage S
+	JOIN @tblIPIDOCXMLStage TS ON TS.intIDOCXMLStageId = S.intIDOCXMLStageId
 
 	SELECT @strInputItemLowerTolerance = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Input Item Lower Tolerance')
 
@@ -64,6 +75,9 @@ BEGIN TRY
 	BEGIN
 		SELECT @strOutputItemUpperTolerance = 0
 	END
+
+	DELETE FROM tblMFRecipeStage WHERE intStatusId=1
+	DELETE FROM tblMFRecipeItemStage WHERE intStatusId=1
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -316,10 +330,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
-		FROM tblIPIDOCXMLStage
+		FROM @tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Recipe'
 	END
+
+	UPDATE S
+	SET S.intStatusId = NULL
+	FROM tblIPIDOCXMLStage S
+	JOIN @tblIPIDOCXMLStage TS ON TS.intIDOCXMLStageId = S.intIDOCXMLStageId
+	WHERE S.intStatusId = - 1
 
 	IF (ISNULL(@strInfo1, '')) <> ''
 		SELECT @strInfo1 = LEFT(@strInfo1, LEN(@strInfo1) - 1)

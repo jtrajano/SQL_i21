@@ -11,4 +11,5 @@
 	,dblQuantity NUMERIC(18, 6)
 	,strQuantityUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmDemandDate DATETIME
+	,intStatusId int
 	)
