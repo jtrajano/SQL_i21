@@ -165,8 +165,11 @@ WHERE strTransactionId = @strTransactionId
   
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference      
 
-EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,3, @intBankTransferTypeId -- location
-EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,6, @intBankTransferTypeId -- company
+IF @ysnPost = 1 AND @ysnRecap = 0
+BEGIN
+  EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,3, @intBankTransferTypeId -- location
+  EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,6, @intBankTransferTypeId -- company
+END
 
   
 IF ((@intCurrencyIdFrom != @intDefaultCurrencyId) OR (@intCurrencyIdTo != @intDefaultCurrencyId ) )AND @ysnPost = 1

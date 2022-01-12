@@ -36,7 +36,7 @@ BEGIN
         GOTO _beginL
 
 
-    IF EXISTS (SELECT TOP 1 1 FROM tblCMCompanyPreferenceOption WHERE ysnAllowBetweenLocations_Forward = 0 AND @intBankTransferTypeId = 2)
+    IF EXISTS (SELECT TOP 1 1 FROM tblCMCompanyPreferenceOption WHERE ysnAllowBetweenLocations_InTransit = 0 AND @intBankTransferTypeId = 2)
         GOTO _beginL
 
 END
