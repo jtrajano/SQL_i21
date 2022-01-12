@@ -41,13 +41,13 @@ BEGIN
 	IF(@intReceivablesAccountId IS NULL OR @intPayablesAccountId IS NULL)
 	BEGIN
 		SET @strErrorMessage = 'Unable to find GL Account for Transaction: ' + @strTransactionId
-		RAISERROR (@strErrorMessage, 16, 1)
+		GOTO _raiserror
 	END
 
 	IF(@intUnrealizedId IS NULL OR @intUnrealizedOffsetId IS NULL)
 	BEGIN
-		SET @strErrorMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for Forwards transaction type.'
-		RAISERROR (@strErrorMessage, 16, 1)
+		SET @strErrorMessage = 'No Unrealized Gain or Loss Account setup in Company Configuration.'
+		GOTO _raiserror
 	END
 
 	INSERT INTO @tblAccountId
@@ -101,8 +101,7 @@ BEGIN
 			END TRY
 			BEGIN CATCH
 				SELECT  @strErrorMessage = ERROR_MESSAGE();
-				RAISERROR(@strErrorMessage, 16, 1)
-				RETURN
+				GOTO _raiserror
 			END CATCH
 		END
 
@@ -116,8 +115,7 @@ BEGIN
 			END TRY
 			BEGIN CATCH
 				SELECT  @strErrorMessage = ERROR_MESSAGE();
-				RAISERROR(@strErrorMessage, 16, 1)
-				RETURN
+				GOTO _raiserror
 			END CATCH
 		END
 
@@ -137,4 +135,12 @@ BEGIN
 	END
 
 	SELECT strModule, strType, intFinalAccountId AccountId, intOffset Offset FROM @tblAccountId GROUP BY strModule, strType, intFinalAccountId, intOffset
+	GOTO _end
+
+_raiserror:
+	RAISERROR (@strErrorMessage, 16, 1)
+	RETURN
+
+_end:
+
 END

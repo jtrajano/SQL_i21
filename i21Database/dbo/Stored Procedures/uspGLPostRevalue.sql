@@ -220,10 +220,13 @@ DECLARE @strMessage NVARCHAR(100)
 			AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS
 			AND f.Offset = A.OffSet
 		) BankTransferAccount
-		DECLARE @dtmReverseDate DATETIME, @missingAccountMessage NVARCHAR(150)
-		SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @missingAccountMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
+
+		DECLARE @dtmReverseDate DATETIME
+		SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
 		IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)
-				RAISERROR (  @missingAccountMessage ,11,1)
+		BEGIN
+			GOTO _raiserror
+		END
 		IF @ysnRecap = 0
 			BEGIN
 				DECLARE @strReverseRevalueId NVARCHAR(100)
@@ -552,6 +555,10 @@ DECLARE @strMessage NVARCHAR(100)
 			
 		END
 	SELECT @strPostBatchId PostBatchId--,	@strReversePostBatchId ReversePostBatchId
+	GOTO _end
 
 _raiserror:
-	RAISERROR (@strMessage ,11,1)
+	RAISERROR(@strMessage ,11,1)
+	RETURN
+
+_end:
