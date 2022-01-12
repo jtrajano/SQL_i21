@@ -145,6 +145,11 @@ BEGIN TRY
 
 		SELECT TOP 1 @strItem = strItemNo, @strDescription = REPLACE(strDescription, '%', '') FROM tblICItem where intItemId = @intItemId
 
+		SELECT TOP 1 @intStockUOMId = intStockUOMId
+		FROM vyuICGetItemStock
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intCompanyLocation
+
 		IF (ISNULL(@dblFreight, 0) > 0 AND ISNULL(@intFreightItemId, '') = '')
 		BEGIN
 				RAISERROR('Freight Item not found. Please setup in Company Configuration', 16, 1)
