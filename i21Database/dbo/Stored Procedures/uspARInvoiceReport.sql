@@ -7,18 +7,9 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 
-IF(OBJECT_ID('tempdb..#SELECTEDINVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #SELECTEDINVOICES
-END
-IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #INVOICES
-END
-IF(OBJECT_ID('tempdb..#LOCATIONS') IS NOT NULL)
-BEGIN
-    DROP TABLE #LOCATIONS
-END
+IF(OBJECT_ID('tempdb..#SELECTEDINVOICES') IS NOT NULL) DROP TABLE #SELECTEDINVOICES
+IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL) DROP TABLE #INVOICES
+IF(OBJECT_ID('tempdb..#LOCATIONS') IS NOT NULL) DROP TABLE #LOCATIONS
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
       , @blbStretchedLogo				VARBINARY (MAX) = NULL
@@ -168,7 +159,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTotalProvisional		= CAST(0 AS NUMERIC(18, 6))
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CAST(0 AS BIT))
-	 , strTicketNumbers			= CAST('' AS NVARCHAR(100))
+	 , strTicketNumbers			= CAST('' AS NVARCHAR(500))
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
@@ -336,7 +327,7 @@ CROSS APPLY (
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
 	WHERE intInvoiceId = I.intInvoiceId 
-	  AND ISNULL(ID.intSiteId, 0) <> 0
+	  AND ID.intSiteId IS NOT NULL
 ) CONSUMPTIONSITE
 WHERE I.strType = 'Tank Delivery'
 
@@ -391,9 +382,8 @@ CROSS APPLY (
 				 , strTicketNumber 
 			FROM dbo.tblSCTicket WITH(NOLOCK)
 		) T ON ID.intTicketId = T.intTicketId
-		WHERE ISNULL(ID.intTicketId, 0) <> 0
+		WHERE ID.intTicketId IS NOT NULL
 		  AND I.intInvoiceId = ID.intInvoiceId
-		--GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
 		FOR XML PATH ('')
 	) INV (strTicketNumber)
 ) SCALETICKETS
@@ -418,7 +408,7 @@ SET strComments				= dbo.fnEliminateHTMLTags(I.strComments, 0)
   , strInvoiceFooterComment	= ISNULL(FOOTER.strMessage, I.strFooterComments)
 FROM #INVOICES I
 OUTER APPLY (
-	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS NVARCHAR(MAX)) + '<html>'
+	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
 	FROM tblSMDocumentMaintenanceMessage H
 	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
 	WHERE H.strHeaderFooter = 'Header'
@@ -429,7 +419,7 @@ OUTER APPLY (
 		   , ISNULL(I.intCompanyLocationId, -100 * M.intDocumentMaintenanceId) DESC
 ) HEADER
 OUTER APPLY (
-	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS NVARCHAR(MAX)) + '<html>'
+	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
 	FROM tblSMDocumentMaintenanceMessage H
 	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
 	WHERE H.strHeaderFooter = 'Footer'

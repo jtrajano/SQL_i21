@@ -399,7 +399,7 @@ UPDATE C
 SET strStatementFooterComment	= FOOTER.strMessage
 FROM #CUSTOMERS C
 CROSS APPLY (
-	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS NVARCHAR(MAX)) + '<html>'
+	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
 	FROM tblSMDocumentMaintenanceMessage H
 	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
 	WHERE H.strHeaderFooter = 'Footer'
