@@ -68,15 +68,15 @@ begin
 	select @FinalReading = @FinalReading + strShortName + ':'+ cast(dblAverageReading as nvarchar) + '| ' from @FinalResult	
 
 	
-	if @intBinDetailUnitMeasureId is not null 
-		and @intBinUnitMeasureId is not null 
-		and @intItemId is not null
-		and @intBinDetailUnitMeasureId <> @intBinUnitMeasureId
-	begin
-		select @dblAvailable = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblAvailable), 2)
-			, @dblCapacityOutput = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblCapacityOutput), 2)
-			, @dblOccupiedOutput = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblOccupiedOutput), 2)
-	end
+	-- if @intBinDetailUnitMeasureId is not null 
+	-- 	and @intBinUnitMeasureId is not null 
+	-- 	and @intItemId is not null
+	-- 	and @intBinDetailUnitMeasureId <> @intBinUnitMeasureId
+	-- begin
+	-- 	select @dblAvailable = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblAvailable), 2)
+	-- 		, @dblCapacityOutput = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblCapacityOutput), 2)
+	-- 		, @dblOccupiedOutput = round(dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId, @intBinDetailUnitMeasureId, @intBinUnitMeasureId, @dblOccupiedOutput), 2)
+	-- end
 	
 	select @dblAvailableOutput = @dblAvailable
 		, @FinalReadingOutput = @FinalReading
