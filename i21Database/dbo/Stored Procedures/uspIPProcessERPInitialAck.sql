@@ -184,46 +184,63 @@ BEGIN TRY
 					FROM tblCTContractFeed
 					WHERE intContractFeedId = @TrxSequenceNo
 
-					UPDATE tblCTContractFeed
-					SET intStatusId = (
-							CASE 
-								WHEN @StatusId = 1
-									THEN 4
-								ELSE 3
-								END
+					IF IsNULL(@ERPCONumber, '') <> ''
+					BEGIN
+						UPDATE tblCTContractFeed
+						SET intStatusId = (
+								CASE 
+									WHEN @StatusId = 1
+										THEN 4
+									ELSE 3
+									END
+								)
+							,strMessage = @StatusText
+							,strFeedStatus = 'Ack Rcvd'
+							,strERPPONumber = @ERPCONumber
+						WHERE intContractFeedId = @TrxSequenceNo
+
+						--Update the PO Details in modified sequences
+						UPDATE tblCTContractFeed
+						SET strERPPONumber = @ERPCONumber
+						WHERE intContractDetailId = @intContractDetailId
+							AND intStatusId IS NULL
+
+						UPDATE tblCTContractDetail
+						SET strERPPONumber = @ERPCONumber
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intContractDetailId = @intContractDetailId
+
+						UPDATE tblCTContractHeader
+						SET intConcurrencyId = intConcurrencyId + 1
+						WHERE intContractHeaderId = @intContractHeaderId
+
+						INSERT INTO @tblMessage (
+							strMessageType
+							,strMessage
+							,strInfo1
+							,strInfo2
 							)
-						,strMessage = @StatusText
-						,strFeedStatus = 'Ack Rcvd'
-						,strERPPONumber = @ERPCONumber
-					WHERE intContractFeedId = @TrxSequenceNo
-
-					--Update the PO Details in modified sequences
-					UPDATE tblCTContractFeed
-					SET strERPPONumber = @ERPCONumber
-					WHERE intContractDetailId = @intContractDetailId
-						AND intStatusId IS NULL
-
-					UPDATE tblCTContractDetail
-					SET strERPPONumber = @ERPCONumber
-						,intConcurrencyId = intConcurrencyId + 1
-					WHERE intContractDetailId = @intContractDetailId
-
-					UPDATE tblCTContractHeader
-					SET intConcurrencyId = intConcurrencyId + 1
-					WHERE intContractHeaderId = @intContractHeaderId
-
-					INSERT INTO @tblMessage (
-						strMessageType
-						,strMessage
-						,strInfo1
-						,strInfo2
-						)
-					VALUES (
-						'Initial Ack'
-						,'Success'
-						,@strContractNo
-						,@ERPCONumber
-						)
+						VALUES (
+							'Initial Ack'
+							,'Success'
+							,@strContractNo
+							,@ERPCONumber
+							)
+					END
+					ELSE
+					BEGIN
+						UPDATE tblCTContractFeed
+						SET intStatusId = (
+								CASE 
+									WHEN @StatusId = 1
+										THEN 4
+									ELSE 3
+									END
+								)
+							,strMessage = @StatusText
+							,strFeedStatus = 'Ack Rcvd'
+						WHERE intContractFeedId = @TrxSequenceNo
+					END
 				END
 				ELSE IF @MessageTypeId = 2 -- PO
 				BEGIN

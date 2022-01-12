@@ -460,7 +460,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @dblCostAdjustment = NULL
 
-				SELECT @dblCostAdjustment = dblCost
+				SELECT @dblCostAdjustment = dblCost*dblQtyReceived 
 				FROM tblAPBillDetail
 				WHERE intBillId = @intBillId
 					AND intItemId = @intWeightAdjItemId
