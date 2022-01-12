@@ -145,6 +145,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 	GROUP BY
 		RateFilter.dblRateBucket1,
 		intCurrencyId,
@@ -194,6 +195,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 
 	-- Bucket 8 - 14
 	UNION ALL
@@ -239,6 +241,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 
 	-- Bucket 15 - 21
 	UNION ALL
@@ -284,6 +287,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 
 	-- Bucket 22 - 29
 	UNION ALL
@@ -329,6 +333,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 
 	-- Bucket 30 - 60
 	UNION ALL
@@ -374,6 +379,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 	
 	-- Bucket 60 - 90
 	UNION ALL
@@ -419,6 +425,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 
 	-- Bucket 90 - 120
 	UNION ALL
@@ -464,6 +471,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 
 	-- Bucket 120+
 	UNION ALL
@@ -509,6 +517,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
+		AND ysnPosted = 1
 
 	-- Get sum of each bucket
 	SELECT 
