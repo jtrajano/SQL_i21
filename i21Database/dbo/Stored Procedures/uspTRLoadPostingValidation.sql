@@ -152,6 +152,11 @@ BEGIN TRY
 
 		SELECT TOP 1 @strItem = strItemNo, @strDescription = REPLACE(strDescription, '%', '') FROM tblICItem where intItemId = @intItemId
 
+		SELECT TOP 1 @intStockUOMId = intStockUOMId
+		FROM vyuICGetItemStock
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intCompanyLocation
+
 		IF(@strFreightBilledBy = 'Other' AND (@dblFreight > 0 OR @dblSurcharge > 0))
 		BEGIN
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblAPVendor WHERE intEntityId = @intShipVia)
