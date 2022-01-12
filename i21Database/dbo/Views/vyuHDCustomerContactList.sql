@@ -25,7 +25,7 @@
 			from
 			  tblARCustomer c
 			  inner join tblEMEntity e on e.intEntityId = c.[intEntityId]
-			  inner join tblEMEntityToContact etc on etc.intEntityId = c.[intEntityId]
+			  inner join tblEMEntityToContact etc on etc.intEntityId = c.[intEntityId] and etc.ysnDefaultContact = 1
 			  inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 			  left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
 			  inner join tblEMEntityToContact etcc on etcc.intEntityContactId = ec.intEntityId
