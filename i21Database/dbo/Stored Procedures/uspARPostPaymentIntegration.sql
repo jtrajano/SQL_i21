@@ -4,6 +4,7 @@
     ,@BatchId               NVARCHAR(40)
 	,@UserId                INT
 	,@IntegrationLogId      INT = NULL
+    ,@RaiseError            BIT = 0
 AS
 BEGIN
 
@@ -613,7 +614,7 @@ ELSE
 			DECLARE @PaymentIdToAddPre int
 			SELECT TOP 1 @PaymentIdToAddPre = [intTransactionId] FROM #ARPostPrePayment
 					
-			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId, NULL, 1, 1 
+			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId, NULL, 1, 1, @RaiseError 
 					
 			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToAddPre
 		END				
