@@ -19,6 +19,7 @@
     [strTransRecalled]                       NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [strTransRollback]                       NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [strTransFuelPrepayCompletion]           NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
+    [strTransFuelPrepay]					 NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [intTermMsgSN]                           BIGINT          NULL,
     [strTermMsgSNtype]                       NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [intTermMsgSNterm]                       INT             NULL,
