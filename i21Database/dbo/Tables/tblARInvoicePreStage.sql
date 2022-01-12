@@ -8,3 +8,6 @@
 	dtmFeedDate						DATETIME CONSTRAINT DF_tblARInvoicePreStage_dtmFeedDate DEFAULT GETDATE(),
 	strMessage						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoicePreStage_intInvoiceId] 
+	ON [dbo].[tblARInvoicePreStage] ([intInvoiceId])
+GO

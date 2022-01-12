@@ -31,3 +31,6 @@ CREATE NONCLUSTERED INDEX [IDX_tblARPricingHistory_intSourceTransactionId_intTra
 	ON [dbo].[tblARPricingHistory] ([intSourceTransactionId], [intTransactionId]) 
 INCLUDE ([intTransactionDetailId])
 GO
+CREATE NONCLUSTERED INDEX [IDX_tblARPricingHistory_intTransactionId] 
+	ON [dbo].[tblARPricingHistory] ([intTransactionId])
+GO
