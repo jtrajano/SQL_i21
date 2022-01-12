@@ -353,8 +353,7 @@ CROSS APPLY (
 	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
 	WHERE H.strHeaderFooter = 'Footer'
 	  AND M.strSource = 'Statement Report'
-	  AND M.intEntityCustomerId = C.intEntityCustomerId
-	  AND M.intEntityCustomerId IS NOT NULL
+	  AND (M.intEntityCustomerId IS NULL OR (M.intEntityCustomerId IS NOT NULL AND M.intEntityCustomerId = C.intEntityCustomerId))
 	ORDER BY M.[intDocumentMaintenanceId] DESC
 		   , intEntityCustomerId DESC
 ) FOOTER
@@ -631,7 +630,7 @@ WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
 
 --SUBPAYMENTS
-IF @ysnPrintFromCF = 1
+IF @ysnPrintFromCF = 0
 BEGIN
 	INSERT INTO #PAYMENTSFORCF (
 		  intEntityCustomerId
