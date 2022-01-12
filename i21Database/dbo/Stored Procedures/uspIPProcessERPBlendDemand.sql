@@ -37,18 +37,31 @@ BEGIN TRY
 		,@strDemandType NVARCHAR(50)
 		,@intCounter INT = 1
 		,@intLineTrxSequenceNo BIGINT
+	DECLARE @tblIPBendDemandStage TABLE (intBendDemandStageId INT)
+
+	INSERT INTO @tblIPBendDemandStage (intBendDemandStageId)
+	SELECT intBendDemandStageId
+	FROM tblIPBendDemandStage
+	WHERE intStatusId IS NULL
 
 	SELECT @intBendDemandStageId = MIN(intBendDemandStageId)
-	FROM tblIPBendDemandStage
+	FROM @tblIPBendDemandStage
+
+	IF @intBendDemandStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblIPBendDemandStage
+	SET intStatusId = - 1
+	WHERE intBendDemandStageId IN (
+			SELECT BS.intBendDemandStageId
+			FROM @tblIPBendDemandStage BS
+			)
 
 	SELECT @strInfo1 = ''
 
 	SELECT @strInfo2 = ''
-
-	if @intBendDemandStageId is null
-	Begin
-		Return
-	End
 
 	WHILE @intBendDemandStageId IS NOT NULL
 	BEGIN
@@ -462,7 +475,7 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intBendDemandStageId = MIN(intBendDemandStageId)
-		FROM dbo.tblIPBendDemandStage
+		FROM @tblIPBendDemandStage
 		WHERE intBendDemandStageId > @intBendDemandStageId
 	END
 
@@ -504,6 +517,14 @@ BEGIN TRY
 			,1 AS intStatusId
 			,'Success' AS strStatusText
 	END
+
+	UPDATE tblIPBendDemandStage
+	SET intStatusId = NULL
+	WHERE intBendDemandStageId IN (
+			SELECT BS.intBendDemandStageId
+			FROM @tblIPBendDemandStage BS
+			)
+		AND intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (
