@@ -390,35 +390,35 @@ BEGIN TRY
 				AND intCommitmentPricingStageId < @intCommitmentPricingStageId
 				AND ysnPost = 1
 
-			INSERT INTO tblMFCommitmentPricingDetailStage (
-				intCommitmentPricingStageId
-				,intCommitmentPricingId
-				,intActionId
-				,intLineType
-				,strContractNo
-				,strCommodityOrderNo
-				,intSequenceNo
-				,strRowState
-				)
-			SELECT @intCommitmentPricingStageId
-				,@intCommitmentPricingId
-				,4
-				,1
-				,CPDS.strContractNo
-				,CPDS.strCommodityOrderNo
-				,CPDS.intSequenceNo
-				,'Delete'
-			FROM tblMFCommitmentPricingDetailStage CPDS
-			WHERE CPDS.intCommitmentPricingStageId = @intPrevCommitmentPricingStageId
-				AND CPDS.intLineType = 1
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblMFCommitmentPricingSales CPS
-					JOIN tblCTContractDetail CD ON CD.intContractDetailId = CPS.intContractDetailId
-						AND CPS.intCommitmentPricingId = @intCommitmentPricingId
-					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					WHERE CH.strContractNumber = CPDS.strContractNo
-					)
+			--INSERT INTO tblMFCommitmentPricingDetailStage (
+			--	intCommitmentPricingStageId
+			--	,intCommitmentPricingId
+			--	,intActionId
+			--	,intLineType
+			--	,strContractNo
+			--	,strCommodityOrderNo
+			--	,intSequenceNo
+			--	,strRowState
+			--	)
+			--SELECT @intCommitmentPricingStageId
+			--	,@intCommitmentPricingId
+			--	,4
+			--	,1
+			--	,CPDS.strContractNo
+			--	,CPDS.strCommodityOrderNo
+			--	,CPDS.intSequenceNo
+			--	,'Delete'
+			--FROM tblMFCommitmentPricingDetailStage CPDS
+			--WHERE CPDS.intCommitmentPricingStageId = @intPrevCommitmentPricingStageId
+			--	AND CPDS.intLineType = 1
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblMFCommitmentPricingSales CPS
+			--		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CPS.intContractDetailId
+			--			AND CPS.intCommitmentPricingId = @intCommitmentPricingId
+			--		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			--		WHERE CH.strContractNumber = CPDS.strContractNo
+			--		)
 
 			INSERT INTO tblMFCommitmentPricingDetailStage (
 				intCommitmentPricingStageId
