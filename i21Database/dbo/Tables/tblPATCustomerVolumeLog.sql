@@ -12,7 +12,8 @@
     CONSTRAINT [PK_tblPATCustomerVolumeLog] PRIMARY KEY ([intCustomerVolumeLogId]),
 	CONSTRAINT [FK_tblPATCustomerVolumeLog_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPATCustomerVolumeLog_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId]) ON DELETE CASCADE
-)
+);
+GO
 CREATE NONCLUSTERED INDEX [IX_tblPATCustomerVolumeLog_intInvoiceId]
 	ON [dbo].[tblPATCustomerVolumeLog] ([intInvoiceId])
 GO
