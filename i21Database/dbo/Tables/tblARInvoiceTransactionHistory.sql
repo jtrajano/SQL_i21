@@ -26,3 +26,6 @@
 	
     CONSTRAINT [FK_tblARInvoiceTransactionHistory_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
 )
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceTransactionHistory_intInvoiceId]
+	ON [dbo].[tblARInvoiceTransactionHistory] ([intInvoiceId])
+GO
