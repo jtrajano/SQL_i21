@@ -67,7 +67,7 @@ BEGIN
 		, @strReportByDate = strReportByDate FROM tblRKCompanyPreference
 
 	-- @strReportByDate - Default to Filled Date
-	IF (@strReportByDate IS NULL)
+	IF (ISNULL(@strReportByDate, '') = '')
 	BEGIN
 		SELECT @strReportByDate = 'Filled Date'
 	END
