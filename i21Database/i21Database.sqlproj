@@ -461,6 +461,7 @@
     <Build Include="dbo\User Defined Types\CMCashFlowReportFilterRateTypeTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateLGCashFlow.sql" />
     <Build Include="dbo\User Defined Types\CMCashFlowReportFilterRateType.sql" />
+    <Build Include="dbo\Tables\tblCTApprovalStatusTF.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

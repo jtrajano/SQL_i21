@@ -547,6 +547,11 @@ BEGIN TRY
 		, FL.dblLimit
 		, dblSublimit = FLD.dblLimit
 		, CD.strComments
+		, ISNULL(CD.ysnSubmittedToBank,0) ysnSubmittedToBank
+		, CD.dtmDateSubmitted
+		, ASTF.intApprovalStatusId
+		, ASTF.strApprovalStatus
+		, CD.dtmDateApproved
 		, CD.dblQualityPremium
 		, CD.dblOptionalityPremium
 	FROM #tmpContractDetail CD
@@ -568,6 +573,7 @@ BEGIN TRY
 	LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = CD.intBorrowingFacilityLimitDetailId
 	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intBankValuationRuleId
+	LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = CD.intApprovalStatusId
 
 	--SELECT * FROM tblCMBankLoan
 

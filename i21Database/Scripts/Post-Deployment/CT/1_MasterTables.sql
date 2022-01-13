@@ -775,6 +775,45 @@ END
 GO
 
 
+
+
+--tblCTApprovalStatusTF
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 1)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 1, 'Pending', 1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId =  2)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 2, 'Approved', 1
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 3)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 3, 'Rejected', 1
+END
+GO
+
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 4)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 4, 'Closed', 1
+END
+GO
+
+
+
+
 --=====================================================================================================================================
 -- 	MOVE CONTRACT BASIS TO FREIGHT TERMS
 ---------------------------------------------------------------------------------------------------------------------------------------
