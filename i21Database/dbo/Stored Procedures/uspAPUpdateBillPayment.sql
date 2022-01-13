@@ -66,8 +66,8 @@ BEGIN
 	(
 		SELECT 
 			SUM(B.dblPayment) dblPayment,
-			SUM(CASE WHEN (B.dblTotal - B.dblDiscount + B.dblInterest) = B.dblPayment THEN (B.dblDiscount) ELSE 0 END) dblDiscount,
-			SUM(CASE WHEN (B.dblTotal - B.dblDiscount + B.dblInterest) = B.dblPayment THEN (B.dblInterest) ELSE 0 END) dblInterest,
+			SUM(B.dblDiscount) dblDiscount,
+			SUM(B.dblInterest) dblInterest,
 			MIN(B.dblAmountDue) dblAmountDue,
 			B.intBillId 
 		FROM tblAPPaymentDetail B 
