@@ -44,34 +44,42 @@ BEGIN TRY
 		)
 	DECLARE @strLocationName NVARCHAR(50)
 	DECLARE @tblDeleteManufacturingCell TABLE (intManufacturingCellId INT)
+	DECLARE @tblIPItemRouteStage TABLE (intItemRouteStageId INT)
+
+	INSERT INTO @tblIPItemRouteStage (intItemRouteStageId)
+	SELECT intItemRouteStageId
+	FROM tblIPItemRouteStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intItemRouteStageId = MIN(intItemRouteStageId)
+	FROM @tblIPItemRouteStage
+
+	IF @intItemRouteStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPItemRouteStage S
+	JOIN @tblIPItemRouteStage TS ON TS.intItemRouteStageId = S.intItemRouteStageId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intItemRouteStageId = MIN(intItemRouteStageId)
-	FROM tblIPItemRouteStage
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strItemNo, '') + ', '
-	FROM tblIPItemRouteStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strItemNo, '') + ', '
+	FROM @tblIPItemRouteStage a
+	JOIN tblIPItemRouteStage b ON a.intItemRouteStageId = b.intItemRouteStageId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
 		SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
 	END
 
-	--SELECT @strInfo2 = @strInfo2 + ISNULL(strRateType, '') + ', '
-	--FROM (
-	--	SELECT DISTINCT strRateType
-	--	FROM tblIPItemRouteStage
-	--	) AS DT
-	--IF Len(@strInfo2) > 0
-	--BEGIN
-	--	SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
-	--END
 	WHILE (@intItemRouteStageId IS NOT NULL)
 	BEGIN
 		BEGIN TRY
@@ -579,9 +587,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intItemRouteStageId = MIN(intItemRouteStageId)
-		FROM tblIPItemRouteStage
+		FROM @tblIPItemRouteStage
 		WHERE intItemRouteStageId > @intItemRouteStageId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPItemRouteStage S
+	JOIN @tblIPItemRouteStage TS ON TS.intItemRouteStageId = S.intItemRouteStageId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

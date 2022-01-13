@@ -71,19 +71,36 @@ BEGIN TRY
 		,@dblForexRate NUMERIC(18,6)
 		,@intTransferDetailCurrencyId INT
 	DECLARE @InventoryTransferDetail TABLE (intInventoryTransferDetailId INT)
+	DECLARE @tblIPInvReceiptStage TABLE (intStageReceiptId INT)
+
+	INSERT INTO @tblIPInvReceiptStage (intStageReceiptId)
+	SELECT intStageReceiptId
+	FROM tblIPInvReceiptStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intStageReceiptId = MIN(intStageReceiptId)
+	FROM @tblIPInvReceiptStage
+
+	IF @intStageReceiptId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPInvReceiptStage S
+	JOIN @tblIPInvReceiptStage TS ON TS.intStageReceiptId = S.intStageReceiptId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intStageReceiptId = MIN(intStageReceiptId)
-	FROM tblIPInvReceiptStage WITH (NOLOCK)
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strERPReceiptNo, '') + ', '
-	FROM tblIPInvReceiptStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strERPReceiptNo, '') + ', '
+	FROM @tblIPInvReceiptStage a
+	JOIN tblIPInvReceiptStage b ON a.intStageReceiptId = b.intStageReceiptId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
@@ -92,8 +109,9 @@ BEGIN TRY
 
 	SELECT @strInfo2 = @strInfo2 + ISNULL(strTransferOrderNo, '') + ', '
 	FROM (
-		SELECT DISTINCT strTransferOrderNo
-		FROM tblIPInvReceiptStage
+		SELECT DISTINCT b.strTransferOrderNo
+		FROM @tblIPInvReceiptStage a
+		JOIN tblIPInvReceiptStage b ON a.intStageReceiptId = b.intStageReceiptId
 		) AS DT
 
 	IF Len(@strInfo2) > 0
@@ -1093,9 +1111,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intStageReceiptId = MIN(intStageReceiptId)
-		FROM tblIPInvReceiptStage
+		FROM @tblIPInvReceiptStage
 		WHERE intStageReceiptId > @intStageReceiptId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPInvReceiptStage S
+	JOIN @tblIPInvReceiptStage TS ON TS.intStageReceiptId = S.intStageReceiptId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (
