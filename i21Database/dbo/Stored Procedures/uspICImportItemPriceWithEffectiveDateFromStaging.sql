@@ -31,7 +31,7 @@ FROM
 		strItemNo,
 		strLocation,
 		strUnitMeasure,
-		ROW_NUMBER() OVER (PARTITION BY strItemNo, strLocation, dtmEffectiveDate
+		ROW_NUMBER() OVER (PARTITION BY strItemNo, strLocation, strUnitMeasure, dtmEffectiveDate
 							ORDER BY intImportStagingItemPriceWithEffectiveDateId) AS RowNumber 
 	FROM 
 		tblICImportStagingItemPriceWithEffectiveDate 
@@ -53,6 +53,8 @@ INNER JOIN
 		EffectiveItemPrice.strItemNo = ItemPriceWithEffectiveDate.strItemNo
 		AND
 		EffectiveItemPrice.strLocationName = ItemPriceWithEffectiveDate.strLocation
+		AND
+		EffectiveItemPrice.strUnitMeasure = ItemPriceWithEffectiveDate.strUnitMeasure
 		AND
 		EffectiveItemPrice.dtmEffectiveRetailPriceDate = ItemPriceWithEffectiveDate.dtmEffectiveDate
 		AND
@@ -175,6 +177,7 @@ USING
 ) AS source 
 	ON target.intItemId = source.intItemId
 	AND target.intItemLocationId = source.intItemLocationId
+	AND target.intItemUOMId = source.intItemUOMId
 	AND target.dtmEffectiveRetailPriceDate = source.dtmEffectiveDate
 WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 	UPDATE SET
