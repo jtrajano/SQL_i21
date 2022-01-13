@@ -137,4 +137,4 @@ v.intKey
 FROM vyuICGetItemStock v
 OUTER APPLY tblICTransactionSession tsession
 OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, DEFAULT) EffectiveCost
-OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, DEFAULT) EffectivePrice
+OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, COALESCE(v.intStockUOMId, v.intReceiveUOMId, v.intIssueUOMId, v.intGrossUOMId), DEFAULT) EffectivePrice
