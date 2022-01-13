@@ -199,6 +199,11 @@ OPEN intListCursor;
 							FROM tblLGLoadDetail 
 							WHERE intLoadDetailId = @intLoadDetailId 
 
+							if @intLoadContractDetailId > 0
+							begin
+								exec uspSCCheckContractStatus  @intContractDetailId = @intLoadContractDetailId
+							end
+
 							SET @ysnLoadContract = 0
 							SELECT TOP 1 
 								@ysnLoadContract = ISNULL(ysnLoad,0)
