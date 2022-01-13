@@ -28,27 +28,45 @@ BEGIN TRY
 		dblOldBalanceQty NUMERIC(18, 6)
 		,dblNewBalanceQty NUMERIC(18, 6)
 		)
+	DECLARE @tblIPCommitmentPricingBalQtyStage TABLE (intCommitmentPricingBalQtyStageId INT)
+
+	INSERT INTO @tblIPCommitmentPricingBalQtyStage (intCommitmentPricingBalQtyStageId)
+	SELECT intCommitmentPricingBalQtyStageId
+	FROM tblIPCommitmentPricingBalQtyStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intCommitmentPricingBalQtyStageId = MIN(intCommitmentPricingBalQtyStageId)
+	FROM @tblIPCommitmentPricingBalQtyStage
+
+	IF @intCommitmentPricingBalQtyStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPCommitmentPricingBalQtyStage S
+	JOIN @tblIPCommitmentPricingBalQtyStage TS ON TS.intCommitmentPricingBalQtyStageId = S.intCommitmentPricingBalQtyStageId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intCommitmentPricingBalQtyStageId = MIN(intCommitmentPricingBalQtyStageId)
-	FROM tblIPCommitmentPricingBalQtyStage
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strPricingNo, '') + ', '
-	FROM tblIPCommitmentPricingBalQtyStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strPricingNo, '') + ', '
+	FROM @tblIPCommitmentPricingBalQtyStage a
+	JOIN tblIPCommitmentPricingBalQtyStage b ON a.intCommitmentPricingBalQtyStageId = b.intCommitmentPricingBalQtyStageId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
 		SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
 	END
 
-	SELECT @strInfo2 = @strInfo2 + ISNULL(strERPRefNo, '') + ', '
-	FROM tblIPCommitmentPricingBalQtyStage
+	SELECT @strInfo2 = @strInfo2 + ISNULL(b.strERPRefNo, '') + ', '
+	FROM @tblIPCommitmentPricingBalQtyStage a
+	JOIN tblIPCommitmentPricingBalQtyStage b ON a.intCommitmentPricingBalQtyStageId = b.intCommitmentPricingBalQtyStageId
 
 	IF Len(@strInfo2) > 0
 	BEGIN
@@ -265,9 +283,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intCommitmentPricingBalQtyStageId = MIN(intCommitmentPricingBalQtyStageId)
-		FROM tblIPCommitmentPricingBalQtyStage
+		FROM @tblIPCommitmentPricingBalQtyStage
 		WHERE intCommitmentPricingBalQtyStageId > @intCommitmentPricingBalQtyStageId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPCommitmentPricingBalQtyStage S
+	JOIN @tblIPCommitmentPricingBalQtyStage TS ON TS.intCommitmentPricingBalQtyStageId = S.intCommitmentPricingBalQtyStageId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

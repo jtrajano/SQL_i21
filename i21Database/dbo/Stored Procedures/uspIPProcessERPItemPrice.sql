@@ -43,34 +43,42 @@ BEGIN TRY
 		,@dblNewStandardCost NUMERIC(18, 6)
 		,@dtmOldDateChanged DATETIME
 		,@dtmNewDateChanged DATETIME
+	DECLARE @tblIPItemPriceStage TABLE (intItemPriceStageId INT)
+
+	INSERT INTO @tblIPItemPriceStage (intItemPriceStageId)
+	SELECT intItemPriceStageId
+	FROM tblIPItemPriceStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intItemPriceStageId = MIN(intItemPriceStageId)
+	FROM @tblIPItemPriceStage
+
+	IF @intItemPriceStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPItemPriceStage S
+	JOIN @tblIPItemPriceStage TS ON TS.intItemPriceStageId = S.intItemPriceStageId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intItemPriceStageId = MIN(intItemPriceStageId)
-	FROM tblIPItemPriceStage
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strItemNo, '') + ', '
-	FROM tblIPItemPriceStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strItemNo, '') + ', '
+	FROM @tblIPItemPriceStage a
+	JOIN tblIPItemPriceStage b ON a.intItemPriceStageId = b.intItemPriceStageId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
 		SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
 	END
 
-	--SELECT @strInfo2 = @strInfo2 + ISNULL(strCurrency, '') + ', '
-	--FROM (
-	--	SELECT DISTINCT strCurrency
-	--	FROM tblIPItemPriceStage
-	--	) AS DT
-	--IF Len(@strInfo2) > 0
-	--BEGIN
-	--	SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
-	--END
 	WHILE (@intItemPriceStageId IS NOT NULL)
 	BEGIN
 		BEGIN TRY
@@ -500,9 +508,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intItemPriceStageId = MIN(intItemPriceStageId)
-		FROM tblIPItemPriceStage
+		FROM @tblIPItemPriceStage
 		WHERE intItemPriceStageId > @intItemPriceStageId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPItemPriceStage S
+	JOIN @tblIPItemPriceStage TS ON TS.intItemPriceStageId = S.intItemPriceStageId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

@@ -39,10 +39,26 @@ BEGIN TRY
 		,strInfo1 NVARCHAR(50)
 		,strInfo2 NVARCHAR(50)
 		)
+	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 
-	SELECT @intRowNo = MIN(intIDOCXMLStageId)
+	INSERT INTO @tblIPIDOCXMLStage (intIDOCXMLStageId)
+	SELECT intIDOCXMLStageId
 	FROM tblIPIDOCXMLStage
 	WHERE strType = 'Production Order Ack'
+		AND intStatusId IS NULL
+
+	SELECT @intRowNo = MIN(intIDOCXMLStageId)
+	FROM @tblIPIDOCXMLStage
+
+	IF @intRowNo IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPIDOCXMLStage S
+	JOIN @tblIPIDOCXMLStage TS ON TS.intIDOCXMLStageId = S.intIDOCXMLStageId
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -197,10 +213,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
-		FROM tblIPIDOCXMLStage
+		FROM @tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Production Order Ack'
 	END
+
+	UPDATE S
+	SET S.intStatusId = NULL
+	FROM tblIPIDOCXMLStage S
+	JOIN @tblIPIDOCXMLStage TS ON TS.intIDOCXMLStageId = S.intIDOCXMLStageId
+	WHERE S.intStatusId = - 1
 
 	SELECT strMessageType
 		,strMessage
