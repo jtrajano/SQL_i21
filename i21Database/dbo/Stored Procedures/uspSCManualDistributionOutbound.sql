@@ -239,6 +239,13 @@ OPEN intListCursor;
 							--get contract Detail Id of the load detail  
 							SELECT @intLoadContractDetailId = intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
 							
+
+							if @intLoadContractDetailId > 0
+							begin
+								exec uspSCCheckContractStatus  @intContractDetailId = @intLoadContractDetailId
+							end
+
+
 							IF(@intLoopContractId = @intLoadContractDetailId)  
 							BEGIN   
 
