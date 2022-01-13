@@ -18,7 +18,7 @@
 	strOrderCaseUpcNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strOrderPackageDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strCaseCost NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strPriceMultiple NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strCaseRetailPrice NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strRetailPrice NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strStoreDepartmentNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strProductFamily NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
