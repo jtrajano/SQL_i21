@@ -186,7 +186,7 @@ WHERE [intEntityEmployeeId] = @intEmployee
 DECLARE @intPaycheckEarningId INT      
 DECLARE @intEmployeeEarningId INT      
 DECLARE @intPayGroupDetailId INT      
-DECLARE @udtPRPaycheckEarningIn TABLE(intPaycheckEarningId INT, intPaygroupDetailId INT)      
+DECLARE @udtPRPaycheckEarningIn TABLE(intPaycheckEarningId INT, intPayGroupDetailId INT)      
       
 	SELECT      
 		@intPaycheckId PCId    
