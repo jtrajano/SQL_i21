@@ -30,6 +30,8 @@ RETURNS @returntable TABLE
 	, intContractHeaderId INT
 	, intOrigUOMId INT
 	, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	, intTicketId INT
+	, strTicketNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -59,6 +61,8 @@ BEGIN
 		, intContractHeaderId
 		, intOrigUOMId
 		, strNotes
+		, intTicketId 
+		, strTicketNumber 
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId, sl.intTransactionRecordHeaderId, sl.intContractHeaderId, sl.strInOut, sl.ysnNegate, sl.strTransactionType, sl.strTransactionNumber ORDER BY sl.intSummaryLogId DESC)
 			, sl.intSummaryLogId
@@ -85,6 +89,8 @@ BEGIN
 			, intContractHeaderId
 			, intOrigUOMId
 			, strNotes
+			, intTicketId 
+			, strTicketNumber 
 		FROM vyuRKGetSummaryLog sl
 		WHERE strBucketType = 'Delayed Pricing'
 			--AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
