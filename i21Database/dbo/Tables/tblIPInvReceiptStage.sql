@@ -25,6 +25,7 @@
 	strSessionId				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dtmTransactionDate			DATETIME DEFAULT(GETDATE()),
 	ysnMailSent					BIT DEFAULT 0,
+	intStatusId					INT,
 
 	CONSTRAINT [PK_tblIPInvReceiptStage_intStageReceiptId] PRIMARY KEY (intStageReceiptId)
 )

@@ -31,19 +31,36 @@ BEGIN TRY
 		strOldComment NVARCHAR(200)
 		,strNewComment NVARCHAR(200)
 		)
+	DECLARE @tblIPPaymentStatusStage TABLE (intPaymentStatusStageId INT)
+
+	INSERT INTO @tblIPPaymentStatusStage (intPaymentStatusStageId)
+	SELECT intPaymentStatusStageId
+	FROM tblIPPaymentStatusStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intPaymentStatusStageId = MIN(intPaymentStatusStageId)
+	FROM @tblIPPaymentStatusStage
+
+	IF @intPaymentStatusStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPPaymentStatusStage S
+	JOIN @tblIPPaymentStatusStage TS ON TS.intPaymentStatusStageId = S.intPaymentStatusStageId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intPaymentStatusStageId = MIN(intPaymentStatusStageId)
-	FROM tblIPPaymentStatusStage
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strVoucherNo, '') + ', '
-	FROM tblIPPaymentStatusStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strVoucherNo, '') + ', '
+	FROM @tblIPPaymentStatusStage a
+	JOIN tblIPPaymentStatusStage b ON a.intPaymentStatusStageId = b.intPaymentStatusStageId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
@@ -52,8 +69,9 @@ BEGIN TRY
 
 	SELECT @strInfo2 = @strInfo2 + ISNULL(strERPJournalNo, '') + ', '
 	FROM (
-		SELECT DISTINCT strERPJournalNo
-		FROM tblIPPaymentStatusStage
+		SELECT DISTINCT b.strERPJournalNo
+		FROM @tblIPPaymentStatusStage a
+		JOIN tblIPPaymentStatusStage b ON a.intPaymentStatusStageId = b.intPaymentStatusStageId
 		) AS DT
 
 	IF Len(@strInfo2) > 0
@@ -336,9 +354,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intPaymentStatusStageId = MIN(intPaymentStatusStageId)
-		FROM tblIPPaymentStatusStage
+		FROM @tblIPPaymentStatusStage
 		WHERE intPaymentStatusStageId > @intPaymentStatusStageId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPPaymentStatusStage S
+	JOIN @tblIPPaymentStatusStage TS ON TS.intPaymentStatusStageId = S.intPaymentStatusStageId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

@@ -103,19 +103,36 @@ BEGIN TRY
 		,ysnNewDefaultLocation BIT
 		)
 	DECLARE @intAuditDetailId INT
+	DECLARE @tblIPEntityStage TABLE (intStageEntityId INT)
+
+	INSERT INTO @tblIPEntityStage (intStageEntityId)
+	SELECT intStageEntityId
+	FROM tblIPEntityStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intStageEntityId = MIN(intStageEntityId)
+	FROM @tblIPEntityStage
+
+	IF @intStageEntityId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPEntityStage S
+	JOIN @tblIPEntityStage TS ON TS.intStageEntityId = S.intStageEntityId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intStageEntityId = MIN(intStageEntityId)
-	FROM tblIPEntityStage
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strAccountNo, '') + ', '
-	FROM tblIPEntityStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strAccountNo, '') + ', '
+	FROM @tblIPEntityStage a
+	JOIN tblIPEntityStage b ON a.intStageEntityId = b.intStageEntityId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
@@ -124,8 +141,9 @@ BEGIN TRY
 
 	SELECT @strInfo2 = @strInfo2 + ISNULL(strEntityType, '') + ', '
 	FROM (
-		SELECT DISTINCT strEntityType
-		FROM tblIPEntityStage
+		SELECT DISTINCT b.strEntityType
+		FROM @tblIPEntityStage a
+		JOIN tblIPEntityStage b ON a.intStageEntityId = b.intStageEntityId
 		) AS DT
 
 	IF Len(@strInfo2) > 0
@@ -1554,9 +1572,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intStageEntityId = MIN(intStageEntityId)
-		FROM tblIPEntityStage
+		FROM @tblIPEntityStage
 		WHERE intStageEntityId > @intStageEntityId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPEntityStage S
+	JOIN @tblIPEntityStage TS ON TS.intStageEntityId = S.intStageEntityId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (
