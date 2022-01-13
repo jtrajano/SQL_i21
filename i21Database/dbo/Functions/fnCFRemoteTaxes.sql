@@ -120,6 +120,10 @@ BEGIN
 	BEGIN 
 		SET @strStateForMessage = '(State not supplied)'
 	END
+	ELSE
+	BEGIN 
+		SET @strStateForMessage = @strTaxState
+	END
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
 			,@intItemCategoryId INT
