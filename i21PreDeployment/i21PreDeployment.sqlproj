@@ -426,4 +426,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\AddEffectiveItemPriceUOMColumn.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\UpdateEDIPricebookWithCaseRetailPrice.sql" />
+  </ItemGroup>
 </Project>
