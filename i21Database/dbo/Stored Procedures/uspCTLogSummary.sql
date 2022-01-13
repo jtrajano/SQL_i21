@@ -4868,7 +4868,7 @@ BEGIN TRY
 					BEGIN
 						IF (@TotalBasis < @dblOrigQty)
 						BEGIN
-							IF (@strTransactionType = 'Contract Balance' AND @strTransactionReference LIKE 'Inventory%') AND @TotalPriced = 0
+							IF (@strTransactionType = 'Contract Balance' AND @strTransactionReference LIKE 'Inventory%') AND @TotalPriced = 0 and @truePricingTypeId <> 1
 							BEGIN
 								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
 
