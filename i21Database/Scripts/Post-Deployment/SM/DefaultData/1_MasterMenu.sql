@@ -5007,9 +5007,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Invoice History', N'Card Fueling', @CardFuelingReportParentMenuId, N'Invoice History', N'Report', N'Screen', N'CardFueling.view.InvoiceProcessHistory', N'small-menu-report', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Invoice History', N'Card Fueling', @CardFuelingReportParentMenuId, N'Invoice History', N'Report', N'Screen', N'CardFueling.view.InvoiceHistory?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.InvoiceProcessHistory', intSort = 0 WHERE strMenuName = 'Invoice History' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.InvoiceHistory?showSearch=true', intSort = 0 WHERE strMenuName = 'Invoice History' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Summary' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
