@@ -14,6 +14,7 @@
 	,strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,dtmTransactionDate DATETIME DEFAULT(GETDATE())
 	,ysnMailSent BIT DEFAULT 0
+	,intStatusId INT
 	
 	,CONSTRAINT PK_tblIPPaymentStatusStage PRIMARY KEY (intPaymentStatusStageId)
 	)

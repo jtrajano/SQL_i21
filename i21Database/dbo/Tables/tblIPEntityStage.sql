@@ -27,6 +27,7 @@
 	intActionId INT,
 	strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strDefaultLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intStatusId INT,
 
 	CONSTRAINT [PK_tblIPEntityStage_intStageEntityId] PRIMARY KEY ([intStageEntityId])
 )
