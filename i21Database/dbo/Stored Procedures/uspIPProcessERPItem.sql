@@ -72,19 +72,36 @@ BEGIN TRY
 		intItemUOMId INT
 		,intUnitMeasureId INT
 		)
+	DECLARE @tblIPItemStage TABLE (intStageItemId INT)
+
+	INSERT INTO @tblIPItemStage (intStageItemId)
+	SELECT intStageItemId
+	FROM tblIPItemStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intStageItemId = MIN(intStageItemId)
+	FROM @tblIPItemStage
+
+	IF @intStageItemId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPItemStage S
+	JOIN @tblIPItemStage TS ON TS.intStageItemId = S.intStageItemId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intStageItemId = MIN(intStageItemId)
-	FROM tblIPItemStage
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strItemNo, '') + ', '
-	FROM tblIPItemStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strItemNo, '') + ', '
+	FROM @tblIPItemStage a
+	JOIN tblIPItemStage b ON a.intStageItemId = b.intStageItemId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
@@ -93,8 +110,9 @@ BEGIN TRY
 
 	SELECT @strInfo2 = @strInfo2 + ISNULL(strShortName, '') + ', '
 	FROM (
-		SELECT DISTINCT strShortName
-		FROM tblIPItemStage
+		SELECT DISTINCT b.strShortName
+		FROM @tblIPItemStage a
+		JOIN tblIPItemStage b ON a.intStageItemId = b.intStageItemId
 		) AS DT
 
 	IF Len(@strInfo2) > 0
@@ -1056,9 +1074,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intStageItemId = MIN(intStageItemId)
-		FROM tblIPItemStage
+		FROM @tblIPItemStage
 		WHERE intStageItemId > @intStageItemId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPItemStage S
+	JOIN @tblIPItemStage TS ON TS.intStageItemId = S.intStageItemId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

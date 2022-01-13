@@ -15,10 +15,26 @@ BEGIN TRY
 		,@strXml NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 	DECLARE @tblIPPaymentStatus TABLE (strVoucherNo NVARCHAR(50))
+	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 
-	SELECT @intRowNo = MIN(intIDOCXMLStageId)
+	INSERT INTO @tblIPIDOCXMLStage (intIDOCXMLStageId)
+	SELECT intIDOCXMLStageId
 	FROM tblIPIDOCXMLStage
 	WHERE strType = 'Payment Status'
+		AND intStatusId IS NULL
+
+	SELECT @intRowNo = MIN(intIDOCXMLStageId)
+	FROM @tblIPIDOCXMLStage
+
+	IF @intRowNo IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPIDOCXMLStage S
+	JOIN @tblIPIDOCXMLStage TS ON TS.intIDOCXMLStageId = S.intIDOCXMLStageId
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -151,10 +167,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
-		FROM tblIPIDOCXMLStage
+		FROM @tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Payment Status'
 	END
+
+	UPDATE S
+	SET S.intStatusId = NULL
+	FROM tblIPIDOCXMLStage S
+	JOIN @tblIPIDOCXMLStage TS ON TS.intIDOCXMLStageId = S.intIDOCXMLStageId
+	WHERE S.intStatusId = - 1
 
 	IF (ISNULL(@strInfo1, '')) <> ''
 		SELECT @strInfo1 = LEFT(@strInfo1, LEN(@strInfo1) - 1)

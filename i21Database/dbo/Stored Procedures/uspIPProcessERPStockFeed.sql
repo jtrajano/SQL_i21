@@ -48,19 +48,36 @@ BEGIN TRY
 		,intSubLocationId INT
 		,intStorageLocationId INT
 		)
+	DECLARE @tblIPLotStage TABLE (intStageLotId INT)
+
+	INSERT INTO @tblIPLotStage (intStageLotId)
+	SELECT intStageLotId
+	FROM tblIPLotStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intStageLotId = MIN(intStageLotId)
+	FROM @tblIPLotStage
+
+	IF @intStageLotId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPLotStage S
+	JOIN @tblIPLotStage TS ON TS.intStageLotId = S.intStageLotId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intStageLotId = MIN(intStageLotId)
-	FROM tblIPLotStage
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNumber, '') + ', '
-	FROM tblIPLotStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strLotNumber, '') + ', '
+	FROM @tblIPLotStage a
+	JOIN tblIPLotStage b ON a.intStageLotId = b.intStageLotId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
@@ -69,8 +86,9 @@ BEGIN TRY
 
 	SELECT @strInfo2 = @strInfo2 + ISNULL(strStorageLocationName, '') + ', '
 	FROM (
-		SELECT DISTINCT strStorageLocationName
-		FROM tblIPLotStage
+		SELECT DISTINCT b.strStorageLocationName
+		FROM @tblIPLotStage a
+		JOIN tblIPLotStage b ON a.intStageLotId = b.intStageLotId
 		) AS DT
 
 	IF Len(@strInfo2) > 0
@@ -489,9 +507,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intStageLotId = MIN(intStageLotId)
-		FROM tblIPLotStage
+		FROM @tblIPLotStage
 		WHERE intStageLotId > @intStageLotId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPLotStage S
+	JOIN @tblIPLotStage TS ON TS.intStageLotId = S.intStageLotId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

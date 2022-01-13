@@ -40,19 +40,36 @@ BEGIN TRY
 		)
 	DECLARE @dblOldRate NUMERIC(18, 6)
 		,@dblNewRate NUMERIC(18, 6)
+	DECLARE @tblIPCurrencyRateStage TABLE (intCurrencyRateStageId INT)
+
+	INSERT INTO @tblIPCurrencyRateStage (intCurrencyRateStageId)
+	SELECT intCurrencyRateStageId
+	FROM tblIPCurrencyRateStage
+	WHERE intStatusId IS NULL
+
+	SELECT @intCurrencyRateStageId = MIN(intCurrencyRateStageId)
+	FROM @tblIPCurrencyRateStage
+
+	IF @intCurrencyRateStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.intStatusId = - 1
+	FROM tblIPCurrencyRateStage S
+	JOIN @tblIPCurrencyRateStage TS ON TS.intCurrencyRateStageId = S.intCurrencyRateStageId
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intCurrencyRateStageId = MIN(intCurrencyRateStageId)
-	FROM tblIPCurrencyRateStage
-
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strFromCurrency, '') + ', '
-	FROM tblIPCurrencyRateStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strFromCurrency, '') + ', '
+	FROM @tblIPCurrencyRateStage a
+	JOIN tblIPCurrencyRateStage b ON a.intCurrencyRateStageId = b.intCurrencyRateStageId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
@@ -61,8 +78,9 @@ BEGIN TRY
 
 	SELECT @strInfo2 = @strInfo2 + ISNULL(strRateType, '') + ', '
 	FROM (
-		SELECT DISTINCT strRateType
-		FROM tblIPCurrencyRateStage
+		SELECT DISTINCT b.strRateType
+		FROM @tblIPCurrencyRateStage a
+		JOIN tblIPCurrencyRateStage b ON a.intCurrencyRateStageId = b.intCurrencyRateStageId
 		) AS DT
 
 	IF Len(@strInfo2) > 0
@@ -532,9 +550,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intCurrencyRateStageId = MIN(intCurrencyRateStageId)
-		FROM tblIPCurrencyRateStage
+		FROM @tblIPCurrencyRateStage
 		WHERE intCurrencyRateStageId > @intCurrencyRateStageId
 	END
+
+	UPDATE S
+	SET intStatusId = NULL
+	FROM tblIPCurrencyRateStage S
+	JOIN @tblIPCurrencyRateStage TS ON TS.intCurrencyRateStageId = S.intCurrencyRateStageId
+	WHERE S.intStatusId = - 1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

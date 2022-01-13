@@ -93,6 +93,7 @@
 		,strExternalGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,ysnOtherChargeItem BIT DEFAULT 0
+		,intStatusId INT
 
 		,CONSTRAINT [PK_tblIPItemStage_intStageItemId] PRIMARY KEY ([intStageItemId]) 
 )
