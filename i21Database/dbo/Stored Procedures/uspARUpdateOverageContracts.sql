@@ -89,6 +89,7 @@ SELECT intInvoiceId					= ID.intInvoiceId
 	 , strDocumentNumber			= ID.strDocumentNumber
 	 , dblDWGSpotPrice				= CASE WHEN @dblSpotPrice = 0 THEN ISNULL(T.dblDWGSpotPrice, 0) ELSE @dblSpotPrice END
 	 , intItemUOMIdTo				= T.intItemUOMIdTo
+	 , dblNetUnits					= dblNetUnits
 INTO #INVOICEDETAILS 
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
@@ -106,6 +107,13 @@ BEGIN
 	SELECT TOP 1 @intScaleUOMId = intItemUOMIdTo
 	FROM #INVOICEDETAILS
 	WHERE ISNULL(intItemUOMIdTo, 0) <> 0
+END
+
+IF ISNULL(@dblNetWeight, 0) = 0
+BEGIN
+	SELECT TOP 1 @dblNetWeight = dblNetUnits
+	FROM #INVOICEDETAILS
+	WHERE ISNULL(dblNetUnits, 0) <> 0
 END
 
 IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1 AND (ISNULL(@ysnFromSalesOrder, 0) = 1 OR ISNULL(@ysnFromImport, 0) = 1)
