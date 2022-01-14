@@ -353,6 +353,10 @@
     <Build Include="dbo\Views\vyuCTCombinePriceFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPEmail.sql" />
     <Build Include="dbo\Views\vyuMFLotDetailViewForDemand.sql" />
+	<Build Include="dbo\Tables\tblTRComboFreightShipVia.sql" />
+    <Build Include="dbo\Tables\tblTRComboFreightCustomer.sql" />
+    <Build Include="dbo\Views\vyuTRComboFreightCustomer.sql" />
+    <Build Include="dbo\Views\vyuTRComboFreightShipVia.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
