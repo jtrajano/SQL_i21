@@ -37,3 +37,4 @@ WHERE
 	BT.ysnPosted = 0
 	AND BT.ysnPostedInTransit = 1
 	AND RevalueOptions.ysnRevalue_Forward = 1
+	AND BT.intBankTransferTypeId = 3
