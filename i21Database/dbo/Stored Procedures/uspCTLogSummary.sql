@@ -4254,7 +4254,7 @@ BEGIN TRY
 						--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
 						IF (@TotalPriced <= @dblContractQty)
 						BEGIN
-							UPDATE @cbLogSpecific SET intPricingTypeId = @intHeaderPricingTypeId
+							UPDATE @cbLogSpecific SET intPricingTypeId = (case when isnull(@truePricingTypeId,0) = 1 and @total < 0 then intPricingTypeId else @intHeaderPricingTypeId end)
 						END
 					END 
 
