@@ -38,7 +38,6 @@ DECLARE @LotType_Manual AS INT = 1
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@strItemNo2 AS NVARCHAR(50) 
 
-DECLARE @intParentLotId AS INT = NULL
 DECLARE @intReturnCode AS INT = 0 
 
 -- Lot Number batch number in the starting numbers table. 
@@ -122,6 +121,7 @@ DECLARE
 	,@ysnWeighed				AS BIT 
 	,@strSealNo			AS NVARCHAR(100)
 	,@ysnProducePartialPacking BIT 
+	,@intParentLotId AS INT 
 
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
@@ -237,6 +237,7 @@ SELECT  intId
 		,intContractDetailId
 		,ysnWeighed
 		,strSealNo
+		,intParentLotId
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -304,6 +305,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intContractDetailId
 		,@ysnWeighed
 		,@strSealNo
+		,@intParentLotId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -1125,9 +1127,9 @@ BEGIN
 		END 
 
 		-- Insert the parent lot 
-		IF ISNULL(@intInsertedLotId, 0) <> 0 
+		IF	ISNULL(@intInsertedLotId, 0) <> 0
+			AND @intParentLotId IS NULL 
 		BEGIN 
-			SET @intParentLotId = NULL
 			SET @intReturnCode = 0
 
 			EXEC @intReturnCode = dbo.uspMFCreateUpdateParentLotNumber 
@@ -1315,6 +1317,7 @@ BEGIN
 		,@intContractDetailId
 		,@ysnWeighed
 		,@strSealNo
+		,@intParentLotId
 	;
 END
 
