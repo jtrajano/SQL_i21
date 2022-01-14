@@ -311,3 +311,133 @@ GO
 
 print('/*******************  END UPDATING INVENTORY AUDIT LOG FOR 21.2 *******************/')
 GO
+
+
+print('/*******************  BEGIN UPDATING RISK MANAGEMENT AUDIT LOG FOR 21.2 *******************/')
+GO
+
+BEGIN
+
+	--1. Update Derivative Entry 
+	UPDATE tblSMTransaction
+	SET strTransactionNo = ISNULL(C.intFutOptTransactionHeaderId, strTransactionNo),
+		strName = NULL,                         
+		strDescription = NULL,                             
+		dtmDate = C.dtmTransactionDate,                          
+		intEntityId = NULL                               
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN tblRKFutOptTransaction C ON A.intRecordId = C.intFutOptTransactionId            
+	WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'RiskManagement.view.DerivativeEntry'
+
+
+	--2. Update Basis Entry 
+	UPDATE tblSMTransaction
+	SET strTransactionNo = NULL,
+		strName = C.strPricingType, 
+		strDescription = NULL,
+		dtmDate = C.dtmM2MBasisDate,
+		intEntityId = NULL
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN tblRKM2MBasis C ON A.intRecordId = C.intM2MBasisId          
+	WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'RiskManagement.view.BasisEntry'
+
+	--3. Update Match Derivative 
+	UPDATE tblSMTransaction
+	SET strTransactionNo = ISNULL(C.intMatchNo, strTransactionNo), 
+		strName = C.strName,
+		strDescription = NULL,
+		dtmDate = C.dtmMatchDate,             
+		intEntityId = C.intEntityId                
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN vyuRKFuturesPSHeaderNotMapping C ON A.intRecordId = C.intMatchFuturesPSHeaderId    
+	WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'RiskManagement.view.MatchDerivatives' 
+
+	--4. Update Settlement Price
+	UPDATE tblSMTransaction
+	SET strTransactionNo = ISNULL(C.intFutureSettlementPriceId, strTransactionNo),  
+		strName = D.strFutMarketName,        
+		strDescription = NULL,        
+		dtmDate = C.dtmPriceDate,         
+		intEntityId = NULL     
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN tblRKFuturesSettlementPrice C ON A.intRecordId = C.intFutureSettlementPriceId 
+		LEFT JOIN vyuRKGetFutureSettlementPriceHeader D on A.intRecordId = D.intFutureSettlementPriceId
+	WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'RiskManagement.view.FuturesOptionsSettlementPrices' 
+
+	--5. Update Brokerage Account
+	UPDATE tblSMTransaction
+	SET strTransactionNo = ISNULL(C.strAccountNumber, strTransactionNo),
+		strName = D.strName,                  
+		strDescription = C.strDescription,  
+		dtmDate = NULL,    
+		intEntityId = C.intEntityId         
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN tblRKBrokerageAccount C ON A.intRecordId = C.intBrokerageAccountId 
+		LEFT JOIN vyuRKBrokerageAccount D ON A.intRecordId = C.intBrokerageAccountId 
+	WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'RiskManagement.view.BrokerageAccount' 
+
+	--6. Update Mark to Market
+	UPDATE tblSMTransaction
+	SET strTransactionNo = ISNULL(C.strRecordName, strTransactionNo),    
+		strName = NULL,   
+		strDescription = NULL,   
+		dtmDate = C.dtmEndDate,
+		intEntityId = NULL   
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN tblRKM2MHeader C ON A.intRecordId = C.intM2MHeaderId 
+	WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'RiskManagement.view.NewMarkToMarket' 
+
+	--7. Update Futures Trading Months
+	UPDATE tblSMTransaction
+	SET strTransactionNo = ISNULL(C.intFutureMonthId, strTransactionNo), 
+		strName = C.strFutMarketName,      
+		strDescription = NULL,
+		dtmDate = C.dtmLastTradingDate,   
+		intEntityId = NULL 
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN vyuRKGetFutureMonth C ON A.intRecordId = C.intFutureMonthId 
+	WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'RiskManagement.view.FuturesTradingMonths' 
+
+	--8. Update Collateral
+	UPDATE tblSMTransaction
+	SET strTransactionNo = ISNULL(C.strReceiptNo, strTransactionNo),  
+		strName = C.strType,     
+		strDescription = C.strComments,         
+		dtmDate = C.dtmOpenDate,      
+		dblAmount = C.dblOriginalQuantity,
+		intEntityId = NULL 
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN tblRKCollateral C ON A.intRecordId = C.intCollateralId 
+	WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'RiskManagement.view.Collateral' 
+
+
+	--9. Update Futures Market
+	UPDATE tblSMTransaction
+	SET strTransactionNo = ISNULL(C.intFutureMarketId, strTransactionNo), 
+		strName = C.strFutMarketName,
+		strDescription = NULL,
+		dtmDate = NULL, 
+		intEntityId = NULL 
+	FROM tblSMTransaction A
+		INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+		LEFT JOIN tblRKFutureMarket C ON A.intRecordId = C.intFutureMarketId 
+	WHERE ISNULL(strTransactionNo, '') = '' AND  B.strNamespace = 'RiskManagement.view.FuturesMarket' 
+
+END
+GO
+
+print('/*******************  END UPDATING RISK MANAGEMENT AUDIT LOG FOR 21.2 *******************/')
+GO
+
+
+
+
+
