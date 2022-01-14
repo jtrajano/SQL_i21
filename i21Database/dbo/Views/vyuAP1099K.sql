@@ -15,6 +15,10 @@ WITH K1099 (
 	,strState
 	,strZipState
 	,intYear
+	,intEntityVendorId
+	,strFilerType
+	,strTransactionType
+	,strMerchantCode
 	,dblJanuary
 	,dblFebruary
 	,dblMarch
@@ -27,10 +31,6 @@ WITH K1099 (
 	,dblOctober
 	,dblNovember
 	,dblDecember
-	,intEntityVendorId
-	,strFilerType
-	,strTransactionType
-	,strMerchantCode
 )
 AS
 (
@@ -56,6 +56,10 @@ AS
 		, A.strState
 		, A.strZipState
 		, A.intYear
+		, A.[intEntityId]
+		, C.strFilerType
+		, C.strTransactionType
+		, C.strMerchantCode
 		, CASE WHEN MONTH(A.dtmDate) = 1 THEN SUM(A.dbl1099K) ELSE NULL END AS dblJanuary
 		, CASE WHEN MONTH(A.dtmDate) = 2 THEN SUM(A.dbl1099K) ELSE NULL END AS dblFebruary
 		, CASE WHEN MONTH(A.dtmDate) = 3 THEN SUM(A.dbl1099K) ELSE NULL END AS dblMarch
@@ -68,10 +72,6 @@ AS
 		, CASE WHEN MONTH(A.dtmDate) = 10 THEN SUM(A.dbl1099K) ELSE NULL END AS dblOctober
 		, CASE WHEN MONTH(A.dtmDate) = 11 THEN SUM(A.dbl1099K) ELSE NULL END AS dblNovember
 		, CASE WHEN MONTH(A.dtmDate) = 12 THEN SUM(A.dbl1099K) ELSE NULL END AS dblDecember
-		, A.[intEntityId]
-		, C.strFilerType
-		, C.strTransactionType
-		, C.strMerchantCode
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B
 	CROSS JOIN tblAP1099Threshold C
@@ -101,19 +101,47 @@ AS
 (
 	SELECT
 		A.intEntityId AS intEntityVendorId,
-		CASE WHEN A.int1099Category = 1 THEN SUM(dbl1099) ELSE NULL END AS dblCardNotPresent,
-		CASE WHEN A.int1099Category = 2 THEN SUM(dbl1099) ELSE NULL END AS dblGrossThirdParty
+		CASE WHEN A.int1099Category = 1 THEN SUM(dbl1099K) ELSE NULL END AS dblCardNotPresent,
+		CASE WHEN A.int1099Category = 2 THEN SUM(dbl1099K) ELSE NULL END AS dblGrossThirdParty
 	FROM vyuAP1099 A
 	WHERE A.int1099Form = 6
 	GROUP BY A.intEntityId, A.int1099Category
 )
 
 SELECT
-	A.*,
-	SUM(B.dblCardNotPresent) AS dblCardNotPresent,
-	SUM(B.dblGrossThirdParty) AS dblGrossThirdParty,
-	0 AS dblFederalIncomeTax,
-	SUM(ISNULL(dblJanuary,0)
+	A.strEmployerAddress
+	,A.strCompanyName
+	,A.strEIN
+	,A.strFederalTaxId
+	,A.strAddress
+	,A.strVendorCompanyName
+	,A.strPayeeName
+	,A.strVendorId
+	,A.strZip
+	,A.strCity
+	,A.strState
+	,A.strZipState
+	,A.intYear
+	,A.intEntityVendorId
+	,A.strFilerType
+	,A.strTransactionType
+	,A.strMerchantCode
+	,B.dblCardNotPresent AS dblCardNotPresent
+	,B.dblGrossThirdParty AS dblGrossThirdParty
+	,0 AS dblFederalIncomeTax
+	,SUM(dblJanuary) dblJanuary
+	,SUM(dblFebruary) dblFebruary
+	,SUM(dblMarch) dblMarch
+	,SUM(dblApril) dblApril
+	,SUM(dblMay) dblMay
+	,SUM(dblJune) dblJune
+	,SUM(dblJuly) dblJuly
+	,SUM(dblAugust) dblAugust
+	,SUM(dblSeptember) dblSeptember
+	,SUM(dblOctober) dblOctober
+	,SUM(dblNovember) dblNovember
+	,SUM(dblDecember) dblDecember
+	,SUM(ISNULL(dblJanuary,0)
 		+ ISNULL(dblFebruary,0)
 		+ ISNULL(dblMarch,0)
 		+ ISNULL(dblApril,0)
@@ -144,18 +172,8 @@ GROUP BY A.intEntityVendorId
 	,strTransactionType
 	,strMerchantCode
 	,intYear
-	,dblJanuary
-	,dblFebruary
-	,dblMarch
-	,dblApril
-	,dblMay
-	,dblJune
-	,dblJuly
-	,dblAugust
-	,dblSeptember
-	,dblOctober
-	,dblNovember
-	,dblDecember
+	,dblCardNotPresent
+	,dblGrossThirdParty
 HAVING SUM(ISNULL(dblJanuary,0)
 		+ ISNULL(dblFebruary,0)
 		+ ISNULL(dblMarch,0)
