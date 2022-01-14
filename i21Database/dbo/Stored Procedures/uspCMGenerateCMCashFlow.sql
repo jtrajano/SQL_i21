@@ -452,7 +452,6 @@ BEGIN
 		WHERE 
 			intCashFlowReportId = @intCashFlowReportId
 			AND intCashFlowReportSummaryId IS NULL
-			AND strTransactionType NOT IN ('Bank Transfer With In transit (Deposit)', 'Bank Forward (Withdraw)', 'Bank Forward (Deposit)')
 
 		-- Insert sum of buckets to report summary table
 		INSERT INTO tblCMCashFlowReportSummary
