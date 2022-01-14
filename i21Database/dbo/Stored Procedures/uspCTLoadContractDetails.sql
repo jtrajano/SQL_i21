@@ -547,7 +547,8 @@ BEGIN TRY
 		, FL.dblLimit
 		, dblSublimit = FLD.dblLimit
 		, CD.strComments
-		, ISNULL(CD.ysnSubmittedToBank,0) ysnSubmittedToBank
+		, CD.ysnSubmittedToBank
+
 		, CD.dtmDateSubmitted
 		, ASTF.intApprovalStatusId
 		, ASTF.strApprovalStatus
