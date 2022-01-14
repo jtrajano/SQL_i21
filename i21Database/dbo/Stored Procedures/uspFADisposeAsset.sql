@@ -43,7 +43,7 @@ SELECT
 B.strAssetId,
 A.intAssetId,
 D.dtmDepreciationToDate,
-F.ysnOpenPeriod,
+ISNULL(F.ysnOpenPeriod, 0),
 0,
 NULL
 FROM #AssetID A 
