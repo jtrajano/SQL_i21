@@ -163,7 +163,11 @@ SELECT intPaymentId
 	 , intPaymentMethodId
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN ##ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
-LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
+LEFT JOIN (
+	SELECT intTransactionId, dtmDate, strTransactionType
+	FROM dbo.tblARNSFStagingTableDetail
+	GROUP BY intTransactionId, dtmDate, strTransactionType
+) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE P.ysnPosted = 1
   AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
   AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
