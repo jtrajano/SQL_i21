@@ -7,11 +7,26 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
-	DELETE
-	FROM tblMFCommitmentPricingStage
-	WHERE intCommitmentPricingId = @intCommitmentPricingId
-		AND ysnPost = @ysnPost
-		AND ISNULL(intStatusId, 1) = 1
+	IF EXISTS (
+			SELECT 1
+			FROM tblMFCommitmentPricingStage
+			WHERE intCommitmentPricingId = @intCommitmentPricingId
+				AND ISNULL(intStatusId, 1) <> 1
+			)
+	BEGIN
+		DELETE
+		FROM tblMFCommitmentPricingStage
+		WHERE intCommitmentPricingId = @intCommitmentPricingId
+			AND ysnPost = @ysnPost
+			AND ISNULL(intStatusId, 1) = 1
+	END
+	ELSE
+	BEGIN
+		DELETE
+		FROM tblMFCommitmentPricingStage
+		WHERE intCommitmentPricingId = @intCommitmentPricingId
+			AND ISNULL(intStatusId, 1) = 1
+	END
 
 	INSERT INTO tblMFCommitmentPricingStage (
 		intCommitmentPricingId
