@@ -63,18 +63,18 @@ INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, st
 SELECT
       guiApiImportLogDetailId = NEWID()
     , guiApiImportLogId = @guiLogId
-    , strField = 'Portal User Role'
+    , strField = 'Location Name'
     , strValue = SC.strLocationName
-    , strLogLevel = 'Info'
-    , strStatus = ''
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
     , intRowNo = SC.intRowNumber
     , strMessage = 'The Location Name of ' + SC.strLocationName + ' was not found.'
 FROM tblApiSchemaEMEntity SC
 WHERE guiApiUniqueId = @guiApiUniqueId
-AND strPortalUserRole   IN  (SELECT TOP 1 strLocationName 
+AND SC.strLocationName NOT IN  (SELECT TOP 1 strLocationName 
     FROM tblEMEntityLocation
-    where intEntityId = intEntityId
-          and rtrim(ltrim(lower(SC.strLocationName))) = rtrim(ltrim(lower(strLocationName))))
+    where intEntityId = intEntityId and 
+	rtrim(ltrim(lower(SC.strLocationName))) = rtrim(ltrim(lower(strLocationName)))) AND SC.strLocationName <> ''
 
 
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -166,7 +166,8 @@ BEGIN
 	DECLARE @NewEntityId INT,@intRow INT
 	WHILE EXISTS (SELECT TOP 1 NULL FROM #tblContact)  
     BEGIN  
-	
+	   
+    SET @NewEntityId = 0 
 		
 	 SELECT TOP 1 @intRow    = intRow
      FROM #tblContact  
@@ -195,7 +196,7 @@ BEGIN
            strDepartment,
            strNotes,
            ISNULL(intEntityRank, 1),
-           ysnActive,
+           ISNULL(ysnActive, 1),
            strContactMethod,
            strEmailDistributionOption,
 		   ''
@@ -216,7 +217,13 @@ BEGIN
            L.intEntityLocationId
 		FROM #tblContact A
 		INNER JOIN tblARCustomer C ON A.strEntityNo = C.strCustomerNumber
-		LEFT JOIN tblEMEntityLocation L ON A.strLocationName = L.strLocationName
+		OUTER APPLY(
+			SELECT TOP 1 intEntityLocationId 
+		FROM tblEMEntityLocation
+		where intEntityId = intEntityId and 
+		rtrim(ltrim(lower(A.strLocationName))) = rtrim(ltrim(lower(strLocationName))) AND A.strLocationName <> ''
+		)L
+
 		WHERE A.guiApiUniqueId = @guiApiUniqueId   AND intRow= @intRow
 
      INSERT INTO tblEMEntityPhoneNumber
@@ -226,17 +233,19 @@ BEGIN
         )
         SELECT @NewEntityId,
                strPhone
-	 FROM tblApiSchemaEMEntity   WHERE guiApiUniqueId = @guiApiUniqueId  AND strPhone <> ''
+	 FROM #tblContact   WHERE guiApiUniqueId = @guiApiUniqueId  AND strPhone <> '' AND intRow= @intRow
 
 
 	    INSERT INTO tblEMEntityMobileNumber
         (
             intEntityId,
-            strPhone
+            strPhone,
+            intCountryId
         )
         SELECT @NewEntityId,
-               strMobile
-	 FROM tblApiSchemaEMEntity   WHERE guiApiUniqueId = @guiApiUniqueId  AND strMobile <> ''
+               strMobile,
+               NULL
+	  FROM #tblContact   WHERE guiApiUniqueId = @guiApiUniqueId  AND strMobile <> '' AND intRow= @intRow
 
 	  DELETE FROM #tblContact WHERE intRow = @intRow  
 
