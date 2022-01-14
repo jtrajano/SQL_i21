@@ -356,6 +356,10 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerPricing.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
     <Build Include="dbo\Views\vyuICGetEffectiveItemPrice.sql" />
+    <Build Include="dbo\Tables\tblTRComboFreightShipVia.sql" />
+    <Build Include="dbo\Tables\tblTRComboFreightCustomer.sql" />
+    <Build Include="dbo\Views\vyuTRComboFreightCustomer.sql" />
+    <Build Include="dbo\Views\vyuTRComboFreightShipVia.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
