@@ -291,7 +291,7 @@ BEGIN TRY
 				,@dblHistoryTotal		= ISNULL(dblHistoryTotalUnits,0)
 			FROM [dbo].[fnGRCheckStorageBalance](@intId, NULL)
 
-			IF (@dblSettlementTotal + @dblTransferTotal) > @dblHistoryTotal OR ABS(@dblSettlementTotal - @dblHistoryTotal) > 0.1
+			IF (@dblSettlementTotal + @dblTransferTotal) > @dblHistoryTotal OR (@dblSettlementTotal - @dblHistoryTotal) > 0.1
 			BEGIN
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
