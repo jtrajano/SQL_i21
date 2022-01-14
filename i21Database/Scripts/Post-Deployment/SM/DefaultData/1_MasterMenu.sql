@@ -5947,6 +5947,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Group
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.OverrideTaxGroup', intSort = 1 WHERE strMenuName = 'Tax Group Override' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Combo Freight' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Combo Freight', N'Transports', @TransportsMaintenanceParentMenuId, N'Combo Freight', N'Maintenance', N'Screen', N'Transports.view.ComboFreight', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ComboFreight', intSort = 4 WHERE strMenuName = 'Combo Freight' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Rack Price' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
