@@ -22,4 +22,4 @@ intEntityId
 FROM tblCMBankTransfer BTransfer
 WHERE
 	(ISNULL(ysnPosted, 0) = 0) 
-	AND BTransfer.intBankTransferTypeId <> 3
+	AND BTransfer.intBankTransferTypeId NOT IN (2 ,3)

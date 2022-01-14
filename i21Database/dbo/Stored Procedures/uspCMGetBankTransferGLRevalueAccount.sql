@@ -34,8 +34,14 @@ BEGIN
 	WHERE strTransactionId = @strTransactionId
 
 	SELECT TOP 1
-		@intUnrealizedId = CASE WHEN @strModule = 'CM Forwards' THEN intGainOnForwardUnrealizedId ELSE NULL END,
-		@intUnrealizedOffsetId = CASE WHEN @strModule = 'CM Forwards' THEN intGainOnForwardOffsetId ELSE NULL END
+		@intUnrealizedId = CASE 
+							WHEN @strModule = 'CM Forwards' THEN intGainOnForwardUnrealizedId 
+							WHEN @strModule = 'CM In-Transit' THEN intCashManagementUnrealizedId
+							ELSE NULL END,
+		@intUnrealizedOffsetId = CASE 
+							WHEN @strModule = 'CM Forwards' THEN intGainOnForwardOffsetId
+							WHEN @strModule = 'CM In-Transit' THEN intCashManagementOffsetId
+							ELSE NULL END
 	FROM tblSMMultiCurrency
 
 	IF(@intReceivablesAccountId IS NULL OR @intPayablesAccountId IS NULL)
@@ -49,13 +55,18 @@ BEGIN
 		SET @strErrorMessage = 'No Unrealized Gain or Loss Account setup in Company Configuration.'
 		GOTO _raiserror
 	END
-
-	INSERT INTO @tblAccountId
-	VALUES  (@intPayablesAccountId,		@intUnrealizedId,		@intBankTransferTypeId, @strModule, 'Payables',		0, NULL, NULL, NULL, 0),
-			(@intPayablesAccountId,		@intUnrealizedOffsetId, @intBankTransferTypeId, @strModule, 'Payables',		1, NULL, NULL, NULL, 0),
-			(@intReceivablesAccountId,	@intUnrealizedId,		@intBankTransferTypeId, @strModule, 'Receivables',	0, NULL, NULL, NULL, 0),
-			(@intReceivablesAccountId,	@intUnrealizedOffsetId, @intBankTransferTypeId, @strModule, 'Receivables',	1, NULL, NULL, NULL, 0)
-
+	
+	IF (@strModule = 'CM Forwards')
+		INSERT INTO @tblAccountId
+		VALUES  (@intPayablesAccountId,		@intUnrealizedId,		@intBankTransferTypeId, @strModule, 'Payables',		0, NULL, NULL, NULL, 0),
+				(@intPayablesAccountId,		@intUnrealizedOffsetId, @intBankTransferTypeId, @strModule, 'Payables',		1, NULL, NULL, NULL, 0),
+				(@intReceivablesAccountId,	@intUnrealizedId,		@intBankTransferTypeId, @strModule, 'Receivables',	0, NULL, NULL, NULL, 0),
+				(@intReceivablesAccountId,	@intUnrealizedOffsetId, @intBankTransferTypeId, @strModule, 'Receivables',	1, NULL, NULL, NULL, 0)
+	ELSE IF (@strModule = 'CM In-Transit')
+		INSERT INTO @tblAccountId
+		VALUES	(@intReceivablesAccountId,	@intUnrealizedId,		@intBankTransferTypeId, @strModule, 'Receivables',	0, NULL, NULL, NULL, 0),
+				(@intReceivablesAccountId,	@intUnrealizedOffsetId, @intBankTransferTypeId, @strModule, 'Receivables',	1, NULL, NULL, NULL, 0)
+			
 	UPDATE A
 	SET
 		A.ysnHasLocationSegment = CAST((CASE WHEN LocationSegment.intCount > 0 THEN 1 ELSE 0 END) AS BIT),

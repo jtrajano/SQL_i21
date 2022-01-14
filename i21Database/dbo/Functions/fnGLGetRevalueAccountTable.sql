@@ -13,6 +13,7 @@ RETURN
 	SELECT 'FA'		strModule,'Receivables' strType, [intFixedAssetsUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Forwards'	strModule, 'Payables' strType, [intGainOnForwardUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Forwards'	strModule, 'Receivables' strType, [intGainOnForwardUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
+	SELECT 'CM In-Transit'	strModule, 'Receivables' strType, [intCashManagementUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 
 	SELECT 'AP'		strModule,'Payables' strType, [intAccountsPayableOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'AR'		strModule,'Receivables' strType, [intAccountsReceivableOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
@@ -23,5 +24,6 @@ RETURN
 	SELECT 'CM'		strModule,'Receivables' strType, intCashManagementOffsetId AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'FA'		strModule,'Receivables' strType, [intFixedAssetsOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Forwards'	strModule,'Payables' strType, [intGainOnForwardOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
-	SELECT 'CM Forwards'	strModule,'Receivables' strType, [intGainOnForwardOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency
+	SELECT 'CM Forwards'	strModule,'Receivables' strType, [intGainOnForwardOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
+	SELECT 'CM In-Transit'	strModule,'Receivables' strType, [intCashManagementOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency
 )
