@@ -24,6 +24,7 @@ BEGIN
 		NULL AS strCorrected, 
 		NULL AS strYear, 
 		*,
+		
 		NULL AS strCorrected2,
 		NULL AS strYear2,
 		NULL AS strEmployerAddress2, 
@@ -45,7 +46,30 @@ BEGIN
 		0 AS dblDirectSalesNEC2, 
 		0 AS dblFederalIncomeNEC2, 
 		0 AS dblStateNEC2, 
-		0 AS dblTotalPayment2 
+		0 AS dblTotalPayment2,
+
+		NULL AS strCorrected3,
+		NULL AS strYear3,
+		NULL AS strEmployerAddress3, 
+		NULL AS strCompanyName3, 
+		NULL AS strEIN3, 
+		NULL AS strFederalTaxId3, 
+		NULL AS strAddress3, 
+		NULL AS strVendorCompanyName3, 
+		NULL AS strPayeeName3, 
+		NULL AS strVendorId3, 
+		NULL AS strZip3, 
+		NULL AS strCity3, 
+		NULL AS strState3, 
+		NULL AS strZipState3, 
+		0 AS intYear3, 
+		NULL AS intEntityVendorId3, 
+		0 AS dblNonemployeeCompensationNEC3, 
+		NULL AS strDirectSalesXTotal3, 
+		0 AS dblDirectSalesNEC3, 
+		0 AS dblFederalIncomeNEC3, 
+		0 AS dblStateNEC3, 
+		0 AS dblTotalPayment3
 	FROM vyuAP1099NEC WHERE intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
 	RETURN;
 END
@@ -128,7 +152,7 @@ WITH NEC1099 (
 AS 
 (
 	SELECT 
-		int1099MISCId = ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+		int1099NECId = ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 		,(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected
 		,(SELECT RIGHT(@yearParam,2)) AS strYear
 		,A.* 
@@ -177,38 +201,62 @@ SELECT
 	NEC1099Top.dblFederalIncomeNEC, 
 	NEC1099Top.dblStateNEC, 
 	NEC1099Top.dblTotalPayment,
-	NEC1099Bottom.strCorrected AS strCorrected2, 
-	NEC1099Bottom.strYear AS strYear2,
-	NEC1099Bottom.strEmployerAddress AS strEmployerAddress2, 
-	NEC1099Bottom.strCompanyName AS strCompanyName2, 
-	NEC1099Bottom.strEIN AS strEIN2, 
-	NEC1099Bottom.strFederalTaxId AS strFederalTaxId2, 
-	NEC1099Bottom.strAddress AS strAddress2, 
-	NEC1099Bottom.strVendorCompanyName AS strVendorCompanyName2, 
-	NEC1099Bottom.strPayeeName AS strPayeeName2, 
-	NEC1099Bottom.strVendorId AS strVendorId2, 
-	NEC1099Bottom.strZip AS strZip2, 
-	NEC1099Bottom.strCity AS strCity2, 
-	NEC1099Bottom.strState AS strState2, 
-	NEC1099Bottom.strZipState AS strZipState2, 
-	NEC1099Bottom.intYear AS intYear2, 
-	NEC1099Bottom.intEntityVendorId AS intEntityVendorId2, 
-	NEC1099Bottom.dblNonemployeeCompensationNEC AS dblNonemployeeCompensationNEC2, 
-	NEC1099Bottom.strDirectSalesXTotal AS strDirectSalesXTotal2, 
-	NEC1099Bottom.dblDirectSalesNEC AS dblDirectSalesNEC2, 
-	NEC1099Bottom.dblFederalIncomeNEC AS dblFederalIncomeNEC2, 
-	NEC1099Bottom.dblStateNEC AS dblStateNEC2, 
-	NEC1099Bottom.dblTotalPayment AS dblTotalPayment2 
+	NEC1099Middle.strCorrected AS strCorrected2, 
+	NEC1099Middle.strYear AS strYear2,
+	NEC1099Middle.strEmployerAddress AS strEmployerAddress2, 
+	NEC1099Middle.strCompanyName AS strCompanyName2, 
+	NEC1099Middle.strEIN AS strEIN2, 
+	NEC1099Middle.strFederalTaxId AS strFederalTaxId2, 
+	NEC1099Middle.strAddress AS strAddress2, 
+	NEC1099Middle.strVendorCompanyName AS strVendorCompanyName2, 
+	NEC1099Middle.strPayeeName AS strPayeeName2, 
+	NEC1099Middle.strVendorId AS strVendorId2, 
+	NEC1099Middle.strZip AS strZip2, 
+	NEC1099Middle.strCity AS strCity2, 
+	NEC1099Middle.strState AS strState2, 
+	NEC1099Middle.strZipState AS strZipState2, 
+	NEC1099Middle.intYear AS intYear2, 
+	NEC1099Middle.intEntityVendorId AS intEntityVendorId2, 
+	NEC1099Middle.dblNonemployeeCompensationNEC AS dblNonemployeeCompensationNEC2, 
+	NEC1099Middle.strDirectSalesXTotal AS strDirectSalesXTotal2, 
+	NEC1099Middle.dblDirectSalesNEC AS dblDirectSalesNEC2, 
+	NEC1099Middle.dblFederalIncomeNEC AS dblFederalIncomeNEC2, 
+	NEC1099Middle.dblStateNEC AS dblStateNEC2, 
+	NEC1099Middle.dblTotalPayment AS dblTotalPayment2,
+	NEC1099Bottom.strCorrected AS strCorrected3, 
+	NEC1099Bottom.strYear AS strYear3,
+	NEC1099Bottom.strEmployerAddress AS strEmployerAddress3, 
+	NEC1099Bottom.strCompanyName AS strCompanyName3, 
+	NEC1099Bottom.strEIN AS strEIN3, 
+	NEC1099Bottom.strFederalTaxId AS strFederalTaxId3, 
+	NEC1099Bottom.strAddress AS strAddress3, 
+	NEC1099Bottom.strVendorCompanyName AS strVendorCompanyName3, 
+	NEC1099Bottom.strPayeeName AS strPayeeName3, 
+	NEC1099Bottom.strVendorId AS strVendorId3, 
+	NEC1099Bottom.strZip AS strZip3, 
+	NEC1099Bottom.strCity AS strCity3, 
+	NEC1099Bottom.strState AS strState3, 
+	NEC1099Bottom.strZipState AS strZipState3, 
+	NEC1099Bottom.intYear AS intYear3, 
+	NEC1099Bottom.intEntityVendorId AS intEntityVendorId3, 
+	NEC1099Bottom.dblNonemployeeCompensationNEC AS dblNonemployeeCompensationNEC3, 
+	NEC1099Bottom.strDirectSalesXTotal AS strDirectSalesXTotal3, 
+	NEC1099Bottom.dblDirectSalesNEC AS dblDirectSalesNEC3, 
+	NEC1099Bottom.dblFederalIncomeNEC AS dblFederalIncomeNEC3, 
+	NEC1099Bottom.dblStateNEC AS dblStateNEC3, 
+	NEC1099Bottom.dblTotalPayment AS dblTotalPayment3
 FROM (
-	SELECT
-	*
+	SELECT *
 	FROM NEC1099 A
-	WHERE A.int1099NECId % 2 = 1
+	WHERE ROUND(((A.int1099NECId / 3.00) % 1), 2) = .33
 ) NEC1099Top
 OUTER APPLY (
-	SELECT
-	*
+	SELECT *
 	FROM NEC1099 A
-	WHERE A.int1099NECId % 2 = 0
-	AND A.int1099NECId = (NEC1099Top.int1099NECId + 1)
+	WHERE A.int1099NECId = (NEC1099Top.int1099NECId + 1)
+) NEC1099Middle
+OUTER APPLY (
+	SELECT *
+	FROM NEC1099 A
+	WHERE A.int1099NECId = (NEC1099Middle.int1099NECId + 1)
 ) NEC1099Bottom

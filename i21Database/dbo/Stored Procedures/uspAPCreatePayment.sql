@@ -150,7 +150,14 @@ BEGIN
 			SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId AND intCurrencyId = @currency AND ysnActive = 1
 		END
 	END
-
+	ELSE
+	BEGIN
+		--USE THE BANK ACCOUNT PROVIDED
+		SELECT TOP 1   
+		@intGLBankAccountId = intGLAccountId  
+		,@intBankAccountId = intBankAccountId  
+		FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId
+	END
 	--if no cash account setup on location, just look for the bank account on same currency
 	IF @intGLBankAccountId IS NULL OR @intBankAccountId IS NULL
 	BEGIN
@@ -372,21 +379,24 @@ BEGIN
 				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
 				[dblAmountDue]	= ISNULL(C.dblPayment, A.dblAmountDue
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
-								),
+								) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[dblPayment]	= ISNULL(C.dblPayment,
 									((A.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - A.dblPaymentTemp)
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
-								  ),
+								  ) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[dblInterest]	= A.dblInterest,
-				[dblTotal]		= ISNULL(C.dblPayment, A.dblTotal),
+				[dblTotal]		= ISNULL(C.dblPayment, A.dblTotal) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[ysnOffset]		= CAST
 									(
-										CASE 
-										WHEN A.intTransactionType = 1  THEN 0
-										WHEN A.intTransactionType = 14 THEN 0
-										WHEN A.intTransactionType = 2 AND A.ysnPrepayHasPayment = 0 THEN 0
-										WHEN A.intTransactionType = 13 AND A.ysnPrepayHasPayment = 0 THEN 0
-										ELSE 1 END
+										CASE WHEN A.intTransactionType IN (1, 14) THEN 0
+										ELSE
+											(
+												CASE WHEN A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 0
+													THEN 0
+												ELSE 1
+												END
+											)
+										END
 									AS BIT),
 				[intPayScheduleId]= C.intId
 			FROM tblAPBill A
