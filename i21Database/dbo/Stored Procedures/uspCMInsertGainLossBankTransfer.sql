@@ -8,8 +8,8 @@
 AS
 BEGIN
 	SET NOCOUNT ON;
-	
-	
+	DECLARE @strErrorMessage NVARCHAR(100)
+
 	IF @intRealizedGainAccountId is NULL
 	BEGIN
 		SELECT TOP 1 @intRealizedGainAccountId= intCashManagementRealizedId FROM tblSMMultiCurrency
@@ -26,10 +26,14 @@ BEGIN
 	IF @gainLoss <> 0
 	BEGIN
 
-	EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,3, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
-	IF @@ERROR <> 0 GOTO _end
-	EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,6, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
-	IF @@ERROR <> 0 GOTO _end
+	BEGIN TRY
+		EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,3, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
+		EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,6, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
+	END TRY
+	BEGIN CATCH
+		SET @strErrorMessage = ERROR_MESSAGE()
+		GOTO _raiserror
+	END CATCH
 
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
@@ -91,6 +95,11 @@ BEGIN
 		SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
 	)GL
 	END
+
+	GOTO _end
+
+	_raiserror:
+	RAISERROR(@strErrorMessage,16,1 )
 
 	_end:
 
