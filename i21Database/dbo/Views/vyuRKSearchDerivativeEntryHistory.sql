@@ -56,6 +56,11 @@ FROM (
 		, intRollingMonthId
 		, intTraderId
 		, strSalespersonId
+		, strBuyBankName 
+		, strBuyBankAccountNo 
+		, strBankTransferNo 
+		, dtmBankTransferDate 
+		, ysnBankTransferPosted 
 	FROM vyuRKGetFutOptTransactionHistory
 
 	UNION ALL SELECT *
@@ -111,6 +116,11 @@ FROM (
 			, Derivative.intRollingMonthId
 			, Derivative.intTraderId
 			, Derivative.strSalespersonId
+			, strBuyBankName = NULL
+			, strBuyBankAccountNo  = NULL
+			, strBankTransferNo  = NULL
+			, dtmBankTransferDate  = NULL
+			, ysnBankTransferPosted  = NULL
 		FROM (
 			SELECT DISTINCT intFutOptTransactionId = mf.intLFutOptTransactionId
 				, strType = 'Options'

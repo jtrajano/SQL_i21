@@ -37,5 +37,10 @@
 	[strNotes] [NVARCHAR](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPreCrush] [BIT] NULL,
 	[dtmCreateDateTime] [datetime] NULL DEFAULT(GETDATE()),
+	[intBuyBankId] INT NULL,
+	[intBuyBankAccountId] INT NULL,
+	[intBankTransferId] INT NULL,
+	[dblFinanceForwardRate]  NUMERIC(18, 6) NULL,
+	[dblContractRate]  NUMERIC(18, 6) NULL,
 	CONSTRAINT [PK_tblRKFutOptTransactionHistory_intFutOptTransactionHistoryId] PRIMARY KEY CLUSTERED (intFutOptTransactionHistoryId ASC)
 )

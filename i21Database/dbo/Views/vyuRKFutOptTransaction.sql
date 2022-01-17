@@ -18,7 +18,9 @@ FROM (
 		, ft.intInstrumentTypeId
 		, strInstrumentType = CASE WHEN (ft.[intInstrumentTypeId] = 1) THEN N'Futures'
 								WHEN (ft.[intInstrumentTypeId] = 2) THEN N'Options'
-								WHEN (ft.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
+								WHEN (ft.[intInstrumentTypeId] = 3) THEN N'Spot'
+								WHEN (ft.[intInstrumentTypeId] = 4) THEN N'Forward'
+								WHEN (ft.[intInstrumentTypeId] = 5) THEN N'Swap'END COLLATE Latin1_General_CI_AS
 		, ft.dblStrike
 		, ft.strInternalTradeNo
 		, ft.intEntityId
@@ -38,14 +40,16 @@ FROM (
 		, sc.strCommodityCode
 		, ft.intLocationId
 		, cl.strLocationName
-		, ft.strStatus
+		, strStatus	= CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
+							WHEN ISNULL(ft.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' THEN approval.strApprovalStatus
+							ELSE ft.strStatus END
 		, ft.intBookId
 		, sb.strBook
 		, ft.intSubBookId
 		, ssb.strSubBook
 		, dtmFilledDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ft.dtmFilledDate, 110), 110)
 		, ft.intCommodityId
-		, strBankName
+		, b.strBankName
 		, strBankAccountNo
 		, ft.intSelectedInstrumentTypeId
 		, strSelectedInstrumentType = (CASE WHEN ft.intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' 
@@ -99,10 +103,20 @@ LEFT OUTER JOIN tblICUnitMeasure AS um ON [fot].[intUnitMeasureId] = um.[intUnit
 LEFT OUTER JOIN tblICCommodity AS sc ON ft.[intCommodityId] = sc.[intCommodityId]
 LEFT OUTER JOIN tblSMCompanyLocation AS cl ON ft.[intLocationId] = cl.[intCompanyLocationId]
 LEFT OUTER JOIN tblCMBank AS b ON ft.[intBankId] = b.[intBankId]
-LEFT OUTER JOIN tblCMBankAccount AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
+LEFT OUTER JOIN vyuCMBankAccount AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ft.intContractHeaderId
 LEFT OUTER JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ft.intContractDetailId
 LEFT JOIN tblRKFutOptTransaction ST ON ST.intFutOptTransactionId = ft.intOrigSliceTradeId
+OUTER APPLY (
+	SELECT TOP 1 intScreenId FROM tblSMScreen 
+	WHERE strModule = 'Risk Management' 
+	AND strScreenName = 'Derivative Entry'
+) approvalScreen
+LEFT JOIN tblSMTransaction approval
+	ON ft.intFutOptTransactionId = approval.intRecordId
+	AND ft.intInstrumentTypeId = 4						-- OTC Forwards Only
+	AND approval.intScreenId = approvalScreen.intScreenId
+	AND approval.strApprovalStatus IN ('Waiting for Approval', 'Waiting for Submit', 'Approved')
 )t 
 ORDER BY intFutOptTransactionId ASC

@@ -16,7 +16,9 @@ SELECT DE.intFutOptTransactionId
 	, strSalespersonId = Trader.strName
 	, strInstrumentType = CASE WHEN DE.intInstrumentTypeId = 1 THEN 'Futures'
 						WHEN DE.intInstrumentTypeId = 2 THEN 'Options'
-						WHEN DE.intInstrumentTypeId = 3 THEN 'Currency Contract' END COLLATE Latin1_General_CI_AS
+						WHEN DE.intInstrumentTypeId = 3 THEN 'Spot'						
+						WHEN DE.intInstrumentTypeId = 4 THEN 'Forward'						
+						WHEN DE.intInstrumentTypeId = 5 THEN 'Swap' END COLLATE Latin1_General_CI_AS
 	, dblGetNoOfContract = CASE WHEN DE.strBuySell = 'Sell' THEN - DE.dblNoOfContract ELSE DE.dblNoOfContract END
 	, dblHedgeQty = CASE WHEN DE.strBuySell = 'Sell' THEN - (FMarket.dblContractSize * GOC.dblSumOpenContract)
 						ELSE (FMarket.dblContractSize * GOC.dblSumOpenContract) END
@@ -54,6 +56,14 @@ SELECT DE.intFutOptTransactionId
 	, strHedgeType = 'Contract Futures' COLLATE Latin1_General_CI_AS
 	, intHedgeContractId = hedgecontractheader.intContractHeaderId 
 	, strHedgeContract = hedgecontractheader.strContractNumber + ISNULL('-' + CAST(hedgecontractdetail.intContractSeq AS NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS
+	, strBuyBankName = BuyBank.strBankName COLLATE Latin1_General_CI_AS
+	, strBuyBankAccountNo = BuyBankAcct.strBankAccountNo COLLATE Latin1_General_CI_AS
+	, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
+	, dtmBankTransferDate = BT.dtmDate	
+	, ysnBankTransferPosted = BT.ysnPosted
+	, strApprovalStatus = CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
+							WHEN ISNULL(DE.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' THEN approval.strApprovalStatus
+							ELSE DE.strStatus END
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -74,6 +84,9 @@ LEFT JOIN tblSMCurrencyExchangeRateType AS CurEx ON DE.intCurrencyExchangeRateTy
 LEFT JOIN tblRKAssignFuturesToContractSummary AS AD ON AD.intFutOptAssignedId = DE.intFutOptTransactionId
 LEFT JOIN tblCTContractHeader AS ch ON ch.intContractHeaderId = AD.intContractHeaderId
 LEFT JOIN tblCTContractDetail AS cd ON cd.intContractDetailId = AD.intContractDetailId
+LEFT JOIN tblCMBank AS BuyBank ON DE.intBuyBankId = BuyBank.intBankId
+LEFT JOIN vyuCMBankAccount AS BuyBankAcct ON DE.intBuyBankAccountId = BuyBankAcct.intBankAccountId
+LEFT JOIN tblCMBankTransfer BT ON BT.intTransactionId = DE.intBankTransferId
 LEFT JOIN tblRKFutOptTransaction ST ON ST.intFutOptTransactionId = DE.intOrigSliceTradeId
 LEFT JOIN (
 	SELECT intFutOptTransactionId
@@ -91,3 +104,13 @@ LEFT JOIN tblCTContractDetail hedgecontractdetail
 	ON hedgecontract.intContractDetailId = hedgecontractdetail.intContractDetailId
 LEFT JOIN tblCTContractHeader hedgecontractheader
 	ON hedgecontractdetail.intContractHeaderId = hedgecontractheader.intContractHeaderId
+OUTER APPLY (
+	SELECT TOP 1 intScreenId FROM tblSMScreen 
+	WHERE strModule = 'Risk Management' 
+	AND strScreenName = 'Derivative Entry'
+) approvalScreen
+LEFT JOIN tblSMTransaction approval
+	ON DE.intFutOptTransactionId = approval.intRecordId
+	AND DE.intInstrumentTypeId = 4						-- OTC Forwards Only
+	AND approval.intScreenId = approvalScreen.intScreenId
+	AND approval.strApprovalStatus IN ('Waiting for Approval', 'Waiting for Submit', 'Approved')
