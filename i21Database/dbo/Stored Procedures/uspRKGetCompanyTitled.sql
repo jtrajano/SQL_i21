@@ -386,6 +386,38 @@ BEGIN
 					Inv.strTransactionType = 'Inventory Receipt'
 			) t
 			UNION ALL
+			SELECT --INVENTORY RECEIPT WITH PARTIAL VOUCHER
+				dtmDate
+				,dblUnpaidIncrease = dblQtyReceived
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = dblQtyReceived
+				,dblPaidBalance = 0
+				,strTransactionId = strReceiptNumber
+				,intTransactionId = intInventoryReceiptId
+				,strDistribution
+				,strTransactionType
+			FROM (
+				select
+					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyReceived = Inv.dblTotal - dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId, BD.dblQtyReceived)
+					,IR.strReceiptNumber
+					,IR.intInventoryReceiptId
+					,strDistribution =  ISNULL(ST.strStorageTypeCode,ISNULL(TV.strDistributionOption, ''))
+					,strTransactionType = Inv.strTransactionType 
+				from @InventoryStock Inv
+				inner join tblICInventoryReceipt IR on Inv.intTransactionId = IR.intInventoryReceiptId
+				inner join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId 
+						AND BD.intInventoryReceiptChargeId IS NULL
+				left join tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
+					AND ISNULL(CS.intStorageTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
+				left join tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
+				left join vyuSCTicketView TV on BD.intScaleTicketId = TV.intTicketId
+				left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
+				left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
+				where Inv.strTransactionType = 'Inventory Receipt'
+				AND Inv.dblTotal > dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId, BD.dblQtyReceived)
+			) t
+			UNION ALL
 			SELECT --INVENTORY RECEIPT W/O VOUCHER (NOT DELIVERY SHEET)
 				dtmDate
 				,dblUnpaidIncrease = dblTotal
@@ -453,7 +485,7 @@ BEGIN
 					--AND BD.intBillDetailId IS NULL
 					--AND ISNULL(ST.intStorageScheduleTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
 					--AND CS.intDeliverySheetId IS NOT NULL
-			) t
+			) t			
 			UNION ALL
 			SELECT
 				dtmDate

@@ -33,7 +33,7 @@ FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 WHERE  SELECTEDINV.strType IN ('Transport Delivery','Tank Delivery')
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
 INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
 	 , strCompanyAddress

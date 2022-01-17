@@ -18,7 +18,6 @@ strPropertyName = 'Overwrite'
 
 DECLARE @tblFilteredVendorSetup TABLE(
 	intKey INT NOT NULL,
-	guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
     intRowNumber INT NULL,
 	strVendor NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
 	strExportFileType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -40,7 +39,6 @@ DECLARE @tblFilteredVendorSetup TABLE(
 INSERT INTO @tblFilteredVendorSetup
 (
 	intKey,
-	guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strExportFileType,
@@ -61,7 +59,6 @@ INSERT INTO @tblFilteredVendorSetup
 )
 SELECT 
 	intKey,
-	guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strExportFileType,

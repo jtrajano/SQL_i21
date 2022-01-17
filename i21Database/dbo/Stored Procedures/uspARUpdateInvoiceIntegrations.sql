@@ -138,7 +138,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, @FromPosting, @Post
 	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId	
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
-	IF @Post = 0 EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
+	IF @FromPosting = 0 EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
 	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 	IF @ForDelete = 1 AND @InvoiceDetailId IS NULL EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
@@ -159,9 +159,13 @@ BEGIN TRY
 		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
 
 	IF @ForDelete = 1
-		BEGIN
-			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId			
-		END
+	BEGIN
+		EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId
+		
+		DELETE FROM tblARPricingHistory 
+		WHERE intTransactionId = @InvoiceId
+		AND intSourceTransactionId = 2
+	END
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 

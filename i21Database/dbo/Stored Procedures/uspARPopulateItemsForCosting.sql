@@ -54,6 +54,9 @@ INSERT INTO ##ARItemsForCosting
 	,[strType]
 	,[ysnAutoBlend] 
 	,[ysnGLOnly]
+	,[strBOLNumber]
+	,[intTicketId]
+	,[intSourceEntityId]
 )
 
 SELECT 
@@ -67,7 +70,7 @@ SELECT
 										ELSE ARID.[dblQtyShipped] * (CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END) END 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN ARIDL.[dblQuantityShipped]
-										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
+										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ISNULL(NULLIF(ARIDL.[dblWeightPerQty], 0), 1))
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END
@@ -117,6 +120,9 @@ SELECT
 	,[strType]					= ARID.[strType]
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0) THEN @ZeroBit ELSE @OneBit END
+	,[strBOLNumber]				= ARID.strBOLNumber 
+	,[intTicketId]				= ARID.intTicketId
+	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -187,6 +193,9 @@ INSERT INTO ##ARItemsForCosting
 	,[dblAdjustRetailValue]
 	,[strType]
 	,[ysnAutoBlend]
+	,[strBOLNumber] 
+	,[intTicketId]
+	,[intSourceEntityId]
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
@@ -224,6 +233,9 @@ SELECT
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
+	,[strBOLNumber]				= ARID.strBOLNumber 
+	,[intTicketId]				= ARID.intTicketId
+	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
@@ -249,8 +261,8 @@ WHERE
 	AND ARID.[intItemId] IS NOT NULL
 	AND ISNULL(ARIC.[intBundleItemId],0) <> 0
 	AND ARID.[strTransactionType] <> 'Debit Memo'	
-	AND ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
-	AND ICI.[strType] NOT IN ('Non-Inventory')
+	AND ARID.[strItemType] = 'Bundle'
+	AND ICI.[strType] <> 'Non-Inventory'
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 
@@ -282,6 +294,9 @@ INSERT INTO ##ARItemsForCosting
 	,[dblAdjustRetailValue]
 	,[strType]
 	,[ysnAutoBlend]
+	,[strBOLNumber] 
+	,[intTicketId]
+	,[intSourceEntityId]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -310,6 +325,9 @@ SELECT
 	,ARIC.[dblAdjustRetailValue]
 	,ARID.[strType]
 	,ARID.[ysnAutoBlend]
+	,ARID.[strBOLNumber] 
+	,ARID.[intTicketId]
+	,ARID.[intEntityCustomerId]
 FROM ##ARItemsForCosting ARIC
 INNER JOIN ##ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
@@ -317,5 +335,14 @@ INNER JOIN tblARInvoiceDetail ARIDP
 ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
 WHERE ARID.[intSourceId] = 2
 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0) OR (ARID.[dblQtyShipped] < ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))
+
+UPDATE IC
+SET strSourceType = 'Transport'
+  , strSourceNumber	= LH.strTransaction
+FROM ##ARItemsForCosting IC
+INNER JOIN tblARInvoice I ON IC.intTransactionId = I.intInvoiceId AND IC.strTransactionId = I.strInvoiceNumber
+INNER JOIN tblTRLoadDistributionHeader DH ON I.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId 
+INNER JOIN tblTRLoadHeader LH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+WHERE IC.strType = 'Transport Delivery'
 
 RETURN 1

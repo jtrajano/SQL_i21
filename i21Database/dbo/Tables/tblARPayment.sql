@@ -48,7 +48,7 @@
 	CONSTRAINT [FK_tblARPayment_tblEMEntityCardInformation_intEntityCardInfoId] FOREIGN KEY ([intEntityCardInfoId]) REFERENCES [dbo].[tblEMEntityCardInformation] ([intEntityCardInfoId]),
 	CONSTRAINT [FK_tblARPayment_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
-
+--INDEXES
 GO
 CREATE NONCLUSTERED INDEX [NC_Index_tblARPayment]
 	ON [dbo].[tblARPayment]([intEntityCustomerId], [ysnPosted], [ysnProcessedToNSF]) 
@@ -107,6 +107,7 @@ BEGIN
 END
 GO
 
+--TRIGGERS BEFORE DELETE
 CREATE TRIGGER trg_tblARPaymentDelete
 ON dbo.tblARPayment
 INSTEAD OF DELETE 
@@ -116,7 +117,6 @@ BEGIN
 
 	DECLARE @strRecordNumber 	NVARCHAR(50) = NULL
 		  , @strError 			NVARCHAR(500) = NULL
-		  , @strPaidInvoice 	NVARCHAR(MAX) = NULL
 		  , @intPaymentId 		INT = NULL
 		  , @ysnPosted			BIT = 0		  
 
@@ -125,22 +125,11 @@ BEGIN
 		 , @ysnPosted		= ysnPosted 
 	FROM DELETED 
 
-	SELECT @strPaidInvoice = COALESCE(@strPaidInvoice + ', ' + I.strInvoiceNumber, I.strInvoiceNumber)
-	FROM tblARPaymentDetail PD
-	INNER JOIN DELETED D ON PD.intPaymentId = D.intPaymentId
-	INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
-	WHERE D.ysnPosted = 0
-	  AND I.ysnPaid = 1
-	GROUP BY I.strInvoiceNumber
-
 	IF EXISTS (SELECT TOP 1 NULL FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strCode = 'AR' AND intTransactionId = @intPaymentId AND strTransactionId = @strRecordNumber)
 		SET @strError = 'You cannot delete payment ' + @strRecordNumber + '. It has existing posted GL entries.';
 
 	IF @ysnPosted = 1
 		SET @strError = 'You cannot delete posted payment (' + @strRecordNumber + ')';
-
-	IF @strPaidInvoice <> ''
-		SET @strError = 'Invoice (' + @strPaidInvoice + ') has been fully paid. This payment may not be deleted.';
 
 	IF ISNULL(@strError, '') <> ''
 		RAISERROR(@strError, 16, 1);
@@ -151,6 +140,7 @@ BEGIN
 END
 GO
 
+--TRIGGERS BEFORE UPDATE
 CREATE TRIGGER trg_tblARPaymentUpdate
 ON dbo.tblARPayment
 INSTEAD OF UPDATE
@@ -217,6 +207,7 @@ BEGIN
 		RAISERROR('Cannot update posted payment',16,1)		
 END
 
+--TRIGGERS AFTER DELETE
 GO
 CREATE TRIGGER trgForDeleteARPayment
     ON dbo.tblARPayment
@@ -232,6 +223,7 @@ BEGIN
 		END
 END
 
+--TRIGGERS AFTER UPDATE
 GO
 CREATE TRIGGER trgForUpdatePayment 
 	ON dbo.tblARPayment

@@ -91,6 +91,16 @@ BEGIN TRY
 		,@intCustomerEntityId INT
 		,@ysnPosted BIT
 		,@ysnParent BIT
+		,@intSContractSeq INT
+		,@strAuditDescription NVARCHAR(50)
+		,@dblQuantity NUMERIC(18, 6)
+		,@dblNewQuantity NUMERIC(18, 6)
+		,@intNewLoadDetailId INT
+		,@dblScheduleQtyToUpdate NUMERIC(18, 6)
+		,@dblLoadQuantity NUMERIC(18, 6)
+		,@dblContractQuantity NUMERIC(18, 6)
+		,@intNewContractDetailId INT
+		,@intNewSContractDetailId INT
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -235,6 +245,11 @@ BEGIN TRY
 	DECLARE @tblIPContractDetail TABLE (intContractDetailId INT)
 	DECLARE @tblLGDeleteLoadWarehouse TABLE (intLoadWarehouseId INT)
 	DECLARE @tblLGDeleteLoadContainer TABLE (intLoadContainerId INT)
+	DECLARE @tblLGDeleteLoadDetailContainerLink TABLE (
+		intLoadDetailContainerLinkId INT
+		,strContainerNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,ysnSampleExists BIT
+		)
 
 	SELECT @intCompanyRefId = intCompanyId
 		,@ysnParent = ysnParent
@@ -396,6 +411,26 @@ BEGIN TRY
 			END
 
 			SELECT @intLoadRefId = @intLoadId
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strLogXML
+
+			SELECT @strAuditUserName = NULL
+
+			SELECT @strAuditUserName = strName
+			FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(100) Collate Latin1_General_CI_AS)
+
+			SELECT @intAuditLogUserId = NULL
+
+			SELECT @intAuditLogUserId = CE.intEntityId
+			FROM tblEMEntity CE
+			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+			WHERE ET1.strType = 'User'
+				AND CE.strName = @strAuditUserName
+
+			SELECT @intUserId = @intAuditLogUserId
+
+			EXEC sp_xml_removedocument @idoc
 
 			------------------Header------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -867,13 +902,6 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @intUserId = CE.intEntityId
-			FROM tblEMEntity CE
-			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
-			WHERE ET1.strType = 'User'
-				AND CE.strName = @strUserName
-
-			--AND CE.strEntityNo <> ''
 			IF @intUserId IS NULL
 			BEGIN
 				IF EXISTS (
@@ -905,41 +933,45 @@ BEGIN TRY
 				AND intBookId = @intBookId
 				AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 
+			IF @ysnPosted IS NULL
+			BEGIN
+				SELECT @ysnPosted = 0
+			END
+
 			SELECT @intTransactionCount = @@TRANCOUNT
 
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
 
-			IF @intNewLoadId IS NOT NULL
-				AND IsNULL(@ysnPosted, 0) = 0
-			BEGIN
-				IF (
-						@ysnParent = 0
-						AND EXISTS (
-							SELECT *
-							FROM tblLGLoad L
-							JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-								AND L.intLoadId = @intNewLoadId
-							JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-							WHERE CD.intContractStatusId = 1
-							)
-						)
-					OR (
-						@ysnParent = 1
-						AND EXISTS (
-							SELECT *
-							FROM tblLGLoad L
-							JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-								AND L.intLoadId = @intNewLoadId
-							JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
-							WHERE CD.intContractStatusId = 1
-							)
-						)
-				BEGIN
-					EXEC uspIPUpdateContractQty @intLoadId = @intNewLoadId
-				END
-			END
-
+			--IF @intNewLoadId IS NOT NULL
+			--	AND IsNULL(@ysnPosted, 0) = 0
+			--BEGIN
+			--	IF (
+			--			@ysnParent = 0
+			--			AND EXISTS (
+			--				SELECT *
+			--				FROM tblLGLoad L
+			--				JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			--					AND L.intLoadId = @intNewLoadId
+			--				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			--				WHERE CD.intContractStatusId = 1
+			--				)
+			--			)
+			--		OR (
+			--			@ysnParent = 1
+			--			AND EXISTS (
+			--				SELECT *
+			--				FROM tblLGLoad L
+			--				JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			--					AND L.intLoadId = @intNewLoadId
+			--				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+			--				WHERE CD.intContractStatusId = 1
+			--				)
+			--			)
+			--	BEGIN
+			--		EXEC uspIPUpdateContractQty @intLoadId = @intNewLoadId
+			--	END
+			--END
 			IF @strRowState = 'Delete'
 			BEGIN
 				SELECT @intHBookId = intBookId
@@ -1790,6 +1822,7 @@ BEGIN TRY
 					,@strShipTo = NULL
 					,@strInboundTaxGroup = NULL
 					,@strOutboundTaxGroup = NULL
+					,@dblNewQuantity = NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strItemUOM = strItemUOM
@@ -1802,6 +1835,7 @@ BEGIN TRY
 					,@strShipTo = strShipTo
 					,@strInboundTaxGroup = strInboundTaxGroup
 					,@strOutboundTaxGroup = strOutboundTaxGroup
+					,@dblNewQuantity = dblQuantity
 				FROM OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 						intLoadDetailId INT
 						,[strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -1815,6 +1849,7 @@ BEGIN TRY
 						,strShipTo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strInboundTaxGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strOutboundTaxGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,dblQuantity NUMERIC(18, 6)
 						)
 				WHERE intLoadDetailId = @intLoadDetailId
 
@@ -2133,14 +2168,19 @@ BEGIN TRY
 				DELETE
 				FROM @tblIPContractDetail
 
-				IF NOT EXISTS (
-						SELECT *
-						FROM tblLGLoadDetail LD
-						JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-						WHERE intLoadDetailRefId = @intLoadDetailId
-							AND L.intBookId = @intBookId
-							AND IsNULL(L.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
-						)
+				SELECT @intNewLoadDetailId = NULL
+					,@dblQuantity = NULL
+
+				SELECT @intNewLoadDetailId = LD.intLoadDetailId
+					,@dblQuantity = LD.dblQuantity
+				FROM tblLGLoadDetail LD
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+				WHERE intLoadDetailRefId = @intLoadDetailId
+					AND L.intBookId = @intBookId
+					AND IsNULL(L.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					AND LD.intLoadId = @intNewLoadId
+
+				IF @intNewLoadDetailId IS NULL
 				BEGIN
 					INSERT INTO tblLGLoadDetail (
 						[intConcurrencyId]
@@ -2328,6 +2368,8 @@ BEGIN TRY
 						AND IsNULL(SCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IsNULL(PCD.intContractHeaderId, SCD.intContractHeaderId)
 					WHERE x.intLoadDetailId = @intLoadDetailId
+
+					SELECT @intNewLoadDetailId = SCOPE_IDENTITY()
 				END
 				ELSE
 				BEGIN
@@ -2364,11 +2406,35 @@ BEGIN TRY
 								THEN @intSACompanyLocationId
 							ELSE @intSCompanyLocationId
 							END
-						,[dblQuantity] = x.[dblQuantity]
+						,[dblQuantity] = (
+							CASE 
+								WHEN @ysnPosted = 0
+									THEN x.[dblQuantity]
+								ELSE LD.[dblQuantity]
+								END
+							)
 						,[intItemUOMId] = @intItemUOMId
-						,[dblGross] = x.[dblGross]
-						,[dblTare] = x.[dblTare]
-						,[dblNet] = x.[dblNet]
+						,[dblGross] = (
+							CASE 
+								WHEN @ysnPosted = 0
+									THEN x.[dblGross]
+								ELSE LD.[dblGross]
+								END
+							)
+						,[dblTare] = (
+							CASE 
+								WHEN @ysnPosted = 0
+									THEN x.[dblTare]
+								ELSE LD.[dblTare]
+								END
+							)
+						,[dblNet] = (
+							CASE 
+								WHEN @ysnPosted = 0
+									THEN x.[dblNet]
+								ELSE LD.[dblNet]
+								END
+							)
 						,[intWeightItemUOMId] = @intWeightItemUOMId
 						,[strPriceStatus] = x.[strPriceStatus]
 						,[dblUnitPrice] = x.[dblUnitPrice]
@@ -2459,7 +2525,8 @@ BEGIN TRY
 							,[ysnNoClaim] BIT
 							,[intLoadDetailRefId] INT
 							,intLoadDetailId INT
-							) x ON x.intLoadDetailId = LD.intLoadDetailRefId AND LD.intLoadId =@intNewLoadId 
+							) x ON x.intLoadDetailId = LD.intLoadDetailRefId
+						AND LD.intLoadId = @intNewLoadId
 					LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
 						AND PCD.intBookId = @intBookId
 						AND IsNULL(PCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
@@ -2468,7 +2535,150 @@ BEGIN TRY
 						AND IsNULL(SCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IsNULL(PCD.intContractHeaderId, SCD.intContractHeaderId)
 					WHERE x.intLoadDetailId = @intLoadDetailId
-						
+				END
+
+				IF @ysnParent = 0
+				BEGIN
+					SELECT @intNewContractDetailId = NULL
+
+					SELECT @intNewContractDetailId = intContractDetailId
+					FROM @tblIPContractDetail
+
+					SELECT @dblLoadQuantity = NULL
+
+					SELECT @dblLoadQuantity = SUM(LD.dblQuantity)
+					FROM tblLGLoadDetail LD
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					WHERE LD.intPContractDetailId = @intNewContractDetailId
+						AND L.intShipmentType = 1
+
+					SELECT @dblContractQuantity = NULL
+
+					SELECT @dblContractQuantity = SUM(dblQuantity)
+					FROM tblCTContractDetail
+					WHERE intContractDetailId = @intNewContractDetailId
+
+					IF IsNULL(@dblLoadQuantity, 0) > (IsNULL(@dblContractQuantity, 0) + IsNULL(@dblContractQuantity, 0) * .1)
+					BEGIN
+						SELECT @strErrorMessage = 'Load shipment quantity cannot be more than contract quantity.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @dblLoadQuantity = NULL
+
+					SELECT @dblLoadQuantity = SUM(LD.dblQuantity)
+					FROM tblLGLoadDetail LD
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					WHERE LD.intPContractDetailId = @intNewContractDetailId
+						AND L.intShipmentType = 2
+
+					IF IsNULL(@dblLoadQuantity, 0) > (IsNULL(@dblContractQuantity, 0) + IsNULL(@dblContractQuantity, 0) * .1)
+					BEGIN
+						SELECT @strErrorMessage = 'Shipping instruction quantity cannot be more than contract quantity.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+				END
+				ELSE
+				BEGIN
+					SELECT @intNewContractDetailId = NULL
+						,@intNewSContractDetailId = NULL
+
+					SELECT @intNewContractDetailId = intContractDetailId
+					FROM @tblIPContractDetail
+
+					SELECT @intNewSContractDetailId = AD.intSContractDetailId
+					FROM tblLGAllocationDetail AD
+					WHERE AD.intPContractDetailId = @intNewContractDetailId
+
+					SELECT @dblLoadQuantity = NULL
+
+					SELECT @dblLoadQuantity = SUM(LD.dblQuantity)
+					FROM tblLGLoadDetail LD
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					WHERE LD.intPContractDetailId = @intNewSContractDetailId
+						AND L.intShipmentType = 1
+
+					SELECT @dblContractQuantity = NULL
+
+					SELECT @dblContractQuantity = SUM(dblQuantity)
+					FROM tblCTContractDetail
+					WHERE intContractDetailId = @intNewSContractDetailId
+
+					IF IsNULL(@dblLoadQuantity, 0) > (IsNULL(@dblContractQuantity, 0) + IsNULL(@dblContractQuantity, 0) * .1)
+					BEGIN
+						SELECT @strErrorMessage = 'Load shipment quantity cannot be more than contract quantity.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @dblLoadQuantity = NULL
+
+					SELECT @dblLoadQuantity = SUM(LD.dblQuantity)
+					FROM tblLGLoadDetail LD
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					WHERE LD.intPContractDetailId = @intNewSContractDetailId
+						AND L.intShipmentType = 2
+
+					IF IsNULL(@dblLoadQuantity, 0) > (IsNULL(@dblContractQuantity, 0) + IsNULL(@dblContractQuantity, 0) * .1)
+					BEGIN
+						SELECT @strErrorMessage = 'Shipping instruction quantity cannot be more than contract quantity.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+				END
+
+				IF IsNULL(@ysnPosted, 0) = 0
+				BEGIN
+					IF (
+							@ysnParent = 0
+							AND EXISTS (
+								SELECT 1
+								FROM tblLGLoadDetail LD
+								JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+								WHERE LD.intLoadId = @intNewLoadId
+									AND LD.intLoadDetailId = @intNewLoadDetailId
+									AND CD.intContractStatusId = 1
+								)
+							)
+						OR (
+							@ysnParent = 1
+							AND EXISTS (
+								SELECT 1
+								FROM tblLGLoadDetail LD
+								JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+								WHERE LD.intLoadId = @intNewLoadId
+									AND LD.intLoadDetailId = @intNewLoadDetailId
+									AND CD.intContractStatusId = 1
+								)
+							)
+						AND IsNULL(@dblQuantity, 0) <> @dblNewQuantity
+					BEGIN
+						SELECT @dblScheduleQtyToUpdate = NULL
+
+						SELECT @dblScheduleQtyToUpdate = @dblNewQuantity - IsNULL(@dblQuantity, 0)
+
+						EXEC dbo.uspLGUpdateContractQty @intLoadId = @intNewLoadId
+							,@intLoadDetailId = @intNewLoadDetailId
+							,@dblScheduleQtyToUpdate = @dblScheduleQtyToUpdate
+					END
 				END
 
 				IF EXISTS (
@@ -2481,6 +2691,8 @@ BEGIN TRY
 					SELECT @intContractDetailId = NULL
 						,@dtmETAPOD = NULL
 						,@strDestinationPort = NULL
+						,@intSContractSeq = NULL
+						,@strAuditDescription = NULL
 
 					SELECT @dtmETAPOD = dtmETAPOD
 						,@strDestinationPort = strDestinationPort
@@ -2510,6 +2722,7 @@ BEGIN TRY
 
 					SELECT @intContractHeaderId = intContractHeaderId
 						,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
+						,@intSContractSeq = intContractSeq
 					FROM tblCTContractDetail
 					WHERE intContractDetailId = @intContractDetailId
 
@@ -2519,6 +2732,17 @@ BEGIN TRY
 						SET dtmUpdatedAvailabilityDate = @dtmNewETAPOD
 							,dtmPlannedAvailabilityDate = @dtmETAPOD
 						WHERE intContractDetailId = @intContractDetailId
+
+						SET @strAuditDescription = 'Sequence - ' + CAST(@intSContractSeq AS VARCHAR(20)) + ', Updated Availability Date'
+
+						EXEC dbo.uspSMAuditLog @keyValue = @intContractHeaderId
+							,@screenName = 'ContractManagement.view.Contract'
+							,@entityId = @intUserId
+							,@actionType = 'Updated (from Inter Company Feed)'
+							,@actionIcon = 'small-tree-modified'
+							,@changeDescription = @strAuditDescription
+							,@fromValue = @dtmUpdatedAvailabilityDate
+							,@toValue = @dtmNewETAPOD
 
 						SELECT TOP 1 @intApprovedById = intApprovedById
 						FROM tblCTApprovedContract
@@ -2737,7 +2961,8 @@ BEGIN TRY
 							,[strWarehouseCargoNumber] = x.[strWarehouseCargoNumber]
 							,[intConcurrencyId] = LD.[intConcurrencyId] + 1
 						FROM tblLGLoadDetailLot LD
-						JOIN tblLGLoadDetail LD2 on LD2.intLoadDetailId=LD.intLoadDetailId AND LD2.intLoadId =@intNewLoadId 
+						JOIN tblLGLoadDetail LD2 ON LD2.intLoadDetailId = LD.intLoadDetailId
+							AND LD2.intLoadId = @intNewLoadId
 						JOIN OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 								[intLoadDetailId] INT
 								,[dblLotQuantity] NUMERIC(38, 20)
@@ -3021,25 +3246,6 @@ BEGIN TRY
 				EXEC sp_xml_removedocument @idoc
 			END
 
-			--IF @strLoadDetailContainerLink IS NOT NULL
-			--BEGIN
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadDetailContainerLink
-
-			DELETE LDCL
-			FROM tblLGLoadDetailContainerLink LDCL
-			WHERE LDCL.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH ([intLoadDetailContainerLinkId] INT) x
-					WHERE LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
-					)
-
-			EXEC sp_xml_removedocument @idoc
-
-			--END
-			--IF @strLoadContainer IS NOT NULL
-			--BEGIN
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strLoadContainer
 
@@ -3234,11 +3440,35 @@ BEGIN TRY
 			UPDATE LD
 			SET [intConcurrencyId] = LD.[intConcurrencyId] + 1
 				,[strContainerNumber] = x.[strContainerNumber]
-				,[dblQuantity] = x.[dblQuantity]
+				,[dblQuantity] = (
+					CASE 
+						WHEN @ysnPosted = 0
+							THEN x.[dblQuantity]
+						ELSE LD.[dblQuantity]
+						END
+					)
 				,[intUnitMeasureId] = UM.[intUnitMeasureId]
-				,[dblGrossWt] = x.[dblGrossWt]
-				,[dblTareWt] = x.[dblTareWt]
-				,[dblNetWt] = x.[dblNetWt]
+				,[dblGrossWt] = (
+					CASE 
+						WHEN @ysnPosted = 0
+							THEN x.[dblGrossWt]
+						ELSE LD.[dblGrossWt]
+						END
+					)
+				,[dblTareWt] = (
+					CASE 
+						WHEN @ysnPosted = 0
+							THEN x.[dblTareWt]
+						ELSE LD.[dblTareWt]
+						END
+					)
+				,[dblNetWt] = (
+					CASE 
+						WHEN @ysnPosted = 0
+							THEN x.[dblNetWt]
+						ELSE LD.[dblNetWt]
+						END
+					)
 				,[intWeightUnitMeasureId] = WUM.[intUnitMeasureId]
 				,[strComments] = x.[strComments]
 				,[strSealNumber] = x.[strSealNumber]
@@ -3334,6 +3564,9 @@ BEGIN TRY
 			LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strStaticValueCurrency
 			LEFT JOIN tblSMCurrency ACU ON ACU.strCurrency = x.strAmountCurrency
 
+			DELETE
+			FROM @tblLGDeleteLoadContainer
+
 			INSERT INTO @tblLGDeleteLoadContainer (intLoadContainerId)
 			SELECT LC.intLoadContainerId
 			FROM tblLGLoadContainer LC
@@ -3346,7 +3579,6 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
-			--END
 			IF @strLoadDetailContainerLink IS NOT NULL
 			BEGIN
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -3469,12 +3701,36 @@ BEGIN TRY
 						WHERE intLoadDetailRefId = x.intLoadDetailId
 							AND intLoadId = @intNewLoadId
 						)
-					,[dblQuantity] = x.[dblQuantity]
+					,[dblQuantity] = (
+						CASE 
+							WHEN @ysnPosted = 0
+								THEN x.[dblQuantity]
+							ELSE LDCL.[dblQuantity]
+							END
+						)
 					,[intItemUOMId] = IU.[intItemUOMId]
 					,[dblReceivedQty] = x.[dblReceivedQty]
-					,[dblLinkGrossWt] = x.[dblLinkGrossWt]
-					,[dblLinkTareWt] = x.[dblLinkTareWt]
-					,[dblLinkNetWt] = x.[dblLinkNetWt]
+					,[dblLinkGrossWt] = (
+						CASE 
+							WHEN @ysnPosted = 0
+								THEN x.[dblLinkGrossWt]
+							ELSE LDCL.[dblLinkGrossWt]
+							END
+						)
+					,[dblLinkTareWt] = (
+						CASE 
+							WHEN @ysnPosted = 0
+								THEN x.[dblLinkTareWt]
+							ELSE LDCL.[dblLinkTareWt]
+							END
+						)
+					,[dblLinkNetWt] = (
+						CASE 
+							WHEN @ysnPosted = 0
+								THEN x.[dblLinkNetWt]
+							ELSE LDCL.[dblLinkNetWt]
+							END
+						)
 					,[dblUnitCost] = x.[dblUnitCost]
 					,[strIntegrationOrderNumber] = x.[strIntegrationOrderNumber]
 					,[dblIntegrationOrderPrice] = x.[dblIntegrationOrderPrice]
@@ -3518,8 +3774,17 @@ BEGIN TRY
 							AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
 						)
 
-				DELETE LDCL
+				DELETE
+				FROM @tblLGDeleteLoadDetailContainerLink
+
+				INSERT INTO @tblLGDeleteLoadDetailContainerLink (
+					intLoadDetailContainerLinkId
+					,strContainerNumber
+					)
+				SELECT LDCL.intLoadDetailContainerLinkId
+					,strContainerNumber
 				FROM tblLGLoadDetailContainerLink LDCL
+				JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 				WHERE LDCL.intLoadId = @intNewLoadId
 					AND NOT EXISTS (
 						SELECT *
@@ -4143,6 +4408,43 @@ BEGIN TRY
 			FROM @tblLGDeleteLoadWarehouse DLW
 			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = DLW.intLoadWarehouseId
 
+			IF EXISTS (
+					SELECT *
+					FROM @tblLGDeleteLoadDetailContainerLink LDC
+					JOIN tblQMSample S ON LDC.intLoadDetailContainerLinkId = S.intLoadDetailContainerLinkId
+						AND S.intBookId = @intBookId
+						AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+						AND S.intLoadId = @intNewLoadId
+					)
+				AND @ysnParent = 0
+			BEGIN
+				UPDATE LDC
+				SET ysnSampleExists = 1
+				FROM @tblLGDeleteLoadDetailContainerLink LDC
+				JOIN tblQMSample S ON LDC.intLoadDetailContainerLinkId = S.intLoadDetailContainerLinkId
+					AND S.intBookId = @intBookId
+					AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					AND S.intLoadId = @intNewLoadId
+
+				UPDATE S
+				SET S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					,S.intLoadContainerId = LC.intLoadContainerId
+				FROM @tblLGDeleteLoadDetailContainerLink LDC
+				JOIN tblQMSample S ON LDC.intLoadDetailContainerLinkId = S.intLoadDetailContainerLinkId
+					AND ysnSampleExists = 1
+					AND S.intBookId = @intBookId
+					AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					AND S.intLoadId = @intNewLoadId
+				JOIN tblLGLoadContainer LC ON LC.strContainerNumber = LDC.strContainerNumber
+					AND LC.intLoadId = @intNewLoadId
+				JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+					AND LDCL.intLoadId = @intNewLoadId
+			END
+
+			DELETE LDC
+			FROM @tblLGDeleteLoadDetailContainerLink DLDC
+			JOIN tblLGLoadDetailContainerLink LDC ON LDC.intLoadDetailContainerLinkId = DLDC.intLoadDetailContainerLinkId
+
 			DELETE LC
 			FROM @tblLGDeleteLoadContainer DLC
 			JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = DLC.intLoadContainerId
@@ -4156,35 +4458,34 @@ BEGIN TRY
 					WHERE LD.intLoadDetailRefId = x.intLoadDetailId
 					)
 
-			IF IsNULL(@ysnPosted, 0) = 0
-			BEGIN
-				IF (
-						@ysnParent = 0
-						AND EXISTS (
-							SELECT *
-							FROM tblLGLoad L
-							JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-								AND L.intLoadId = @intNewLoadId
-							JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-							WHERE CD.intContractStatusId = 1
-							)
-						)
-					OR (
-						@ysnParent = 1
-						AND EXISTS (
-							SELECT *
-							FROM tblLGLoad L
-							JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-								AND L.intLoadId = @intNewLoadId
-							JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
-							WHERE CD.intContractStatusId = 1
-							)
-						)
-				BEGIN
-					EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
-				END
-			END
-
+			--IF IsNULL(@ysnPosted, 0) = 0
+			--BEGIN
+			--	IF (
+			--			@ysnParent = 0
+			--			AND EXISTS (
+			--				SELECT *
+			--				FROM tblLGLoad L
+			--				JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			--					AND L.intLoadId = @intNewLoadId
+			--				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			--				WHERE CD.intContractStatusId = 1
+			--				)
+			--			)
+			--		OR (
+			--			@ysnParent = 1
+			--			AND EXISTS (
+			--				SELECT *
+			--				FROM tblLGLoad L
+			--				JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			--					AND L.intLoadId = @intNewLoadId
+			--				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+			--				WHERE CD.intContractStatusId = 1
+			--				)
+			--			)
+			--	BEGIN
+			--		EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
+			--	END
+			--END
 			IF @ysnReplication = 1
 			BEGIN
 				SELECT @strHeaderCondition = 'intLoadId = ' + LTRIM(@intNewLoadId)

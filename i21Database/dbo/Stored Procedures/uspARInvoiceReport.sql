@@ -22,6 +22,7 @@ DECLARE @blbLogo						VARBINARY (MAX) = NULL
 	  , @strCountry						NVARCHAR(200) = NULL
 	  , @strPhone						NVARCHAR(200) = NULL
 	  , @strEmail						NVARCHAR(200) = NULL
+	  , @intMaxInvoiceDetailId	        INT			  = 0
 
 --LOGO
 SELECT TOP 1 @blbLogo = U.blbFile 
@@ -54,6 +55,7 @@ SELECT TOP 1 @strCompanyName = strCompanyName
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
+SET @intMaxInvoiceDetailId= ISNULL((select MAX(intInvoiceDetailId) FROM tblARInvoiceDetail),0)
 
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE	(intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein'))
@@ -215,7 +217,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
 	 , dblTaxExempt				= ISNULL(INVOICEDETAIL.dblTaxExempt, 0)
-	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
+	 , dblInvoiceTotal			= ((dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END) - ISNULL(CREDITSTOTAL.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= ISNULL(INVOICEDETAIL.intInvoiceDetailId, 0)
@@ -319,6 +321,7 @@ INNER JOIN (
 	FROM dbo.tblSMTerm WITH (NOLOCK)
 ) TERM ON INV.intTermId = TERM.intTermID
 LEFT JOIN (
+	SELECT * FROM(
 	SELECT intInvoiceId				= ID.intInvoiceId
 	     , intInvoiceDetailId		= ID.intInvoiceDetailId
 		 , intCommentTypeId			= ID.intCommentTypeId
@@ -472,7 +475,65 @@ LEFT JOIN (
 		WHERE intTransactionDetailId = ID.intInvoiceDetailId
 		AND intTransactionId = ID.intInvoiceId
 	) TER
+
+	UNION ALL
+
+	SELECT intInvoiceId				 = Credits.intInvoiceId
+	     , intInvoiceDetailId		= ROW_NUMBER() OVER(ORDER BY Credits.intInvoiceId) + @intMaxInvoiceDetailId
+		 , intCommentTypeId			= NULL
+		 , dblTotalTax				= NULL
+		 , dblQtyShipped			= NULL
+		 , dblQtyOrdered			= NULL
+		 , dblDiscount				= NULL
+		 , dblComputedGrossPrice	= NULL	
+		 , dblPrice                 = NULL
+		 , dblTotal					= Credits.dblInvoiceTotal * -1
+		 , strVFDDocumentNumber		= NULL		 
+		 , strUnitMeasure			= NULL
+		 , intContractSeq			= NULL
+		 , dblBalance				= NULL
+		 , strContractNumber		= NULL
+		 , strCustomerContract		= NULL
+		 , strItemNo				= CASE WHEN strInvoiceFormat IN('Standard','Format 3 - Swink') THEN strPrepaymentNumber ELSE '' END
+		 , strInvoiceComments		= NULL
+		 , strItemType				= NULL
+		 , strItemDescription    	= CASE WHEN strInvoiceFormat='Format 2 - Mcintosh' THEN strPrepaymentNumber + ' - ' + 'Applied Payment'  ELSE 'Applied Payment' END
+		 , strBOLNumber				= NULL
+		 , ysnListBundleSeparately	= NULL
+		 , intRecipeId				= NULL
+		 , intOneLinePrintId		= NULL
+		 , intSiteID				= NULL
+		 , strSiteNumber			= NULL
+		 , dblEstimatedPercentLeft	= NULL
+		 , strTicketNumber			= CASE WHEN strInvoiceFormat IN('Standard','Format 3 - Swink') THEN '' ELSE strPrepaymentNumber END
+		 , strTicketNumberDate		= strPrepaymentNumber
+		 , strTrailerNumber			= NULL
+		 , strSealNumber			= NULL
+		 , strCustomerReference		= NULL
+		 , strSalesReference		= NULL
+	 	 , strPurchaseReference		= NULL
+		 , strLoadNumber			= NULL
+		 , strTruckName				= NULL
+		 , dblPercentFull			= NULL
+		 , strAddonDetailKey		= NULL
+		 , ysnAddonParent			= NULL
+		 , strBOLNumberDetail		= NULL
+		 , strLotNumber				= NULL
+		 , strSubFormula			= NULL
+		 , dblTaxExempt				= NULL
+		 , strSCInvoiceNumber		= NULL
+		 , dtmDateSC				= NULL
+		 , dtmToCalculate			= NULL
+	FROM dbo.vyuARGetPrepaidsAndCreditMemos Credits WITH (NOLOCK)
+	INNER JOIN @tblInvoiceReport SELECTEDINV ON Credits.intInvoiceId = SELECTEDINV.intInvoiceId
+	)InvoiceDetailwithCredits
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
+LEFT JOIN (
+	SELECT intInvoiceId		= intInvoiceId
+	     , dblInvoiceTotal	= SUM(dblInvoiceTotal)
+	FROM vyuARGetPrepaidsAndCreditMemos 
+	GROUP BY intInvoiceId
+) CREDITSTOTAL ON CREDITSTOTAL.intInvoiceId=INV.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
 		 , strCurrency

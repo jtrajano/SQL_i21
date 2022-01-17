@@ -18,7 +18,6 @@ strPropertyName = 'Overwrite'
 
 DECLARE @tblFilteredRebateProgram TABLE(
 	intKey INT NOT NULL,
-    guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
     intRowNumber INT NULL,
 	strVendor NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -40,7 +39,6 @@ DECLARE @tblFilteredRebateProgram TABLE(
 INSERT INTO @tblFilteredRebateProgram
 (
 	intKey,
-    guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strVendorProgram,
@@ -61,7 +59,6 @@ INSERT INTO @tblFilteredRebateProgram
 )
 SELECT 
 	intKey,
-	guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strVendorProgram,
@@ -531,7 +528,7 @@ FilteredRebateProgram.strVendorCategory IS NOT NULL
 UNION
 SELECT -- Invalid Rebate by
 	FilteredRebateProgram.strRebateBy,
-	'Rebate by: ' + ISNULL(FilteredRebateProgram.strRebateBy, '') + ' of rebate item: ' + ISNULL(FilteredRebateProgram.strItemNo, '') + ' does not exist.', 
+	'Rebate by: ' + FilteredRebateProgram.strRebateBy + ' of rebate item: ' + FilteredRebateProgram.strItemNo + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
 	9
 FROM
@@ -543,10 +540,10 @@ SELECT -- Invalid Rebate UOM
 	ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM),
 	CASE
 		WHEN ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
-		THEN 'Rebate UOM: ' + ISNULL(ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM), '') + ' of rebate category: ' + 
-			COALESCE(Category.strCategoryCode, FilteredRebateProgram.strVendorCategory, FilteredRebateProgram.strCategory, '') + ' does not exist or not configured.'
-		ELSE 'Rebate UOM: ' + ISNULL(ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM), '') + ' of rebate item: ' + 
-			COALESCE(Item.strItemNo, FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, '') + ' does not exist or not configured.'
+		THEN 'Rebate UOM: ' + ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM) + ' of rebate category: ' + 
+			COALESCE(Category.strCategoryCode, FilteredRebateProgram.strVendorCategory, FilteredRebateProgram.strCategory) + ' does not exist or not configured.'
+		ELSE 'Rebate UOM: ' + ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM) + ' of rebate item: ' + 
+			COALESCE(Item.strItemNo, FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) + ' does not exist or not configured.'
 	END,
 	FilteredRebateProgram.intRowNumber,
 	10

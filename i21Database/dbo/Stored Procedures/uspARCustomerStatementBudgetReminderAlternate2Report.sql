@@ -367,6 +367,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
 	 , ysnImportedFromOrigin	= I.ysnImportedFromOrigin
 	 , dtmDateCreated			= I.dtmDateCreated
+	 , ysnServiceChargeCredit	= I.ysnServiceChargeCredit
 INTO #POSTEDINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -436,7 +437,7 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , strCustomerName				= C.strCustomerName
 	 , strInvoiceNumber				= TRANSACTIONS.strInvoiceNumber
 	 , strRecordNumber				= TRANSACTIONS.strRecordNumber
-	 , strTransactionType			= TRANSACTIONS.strTransactionType
+	 , strTransactionType			= CASE WHEN ISNULL(TRANSACTIONS.ysnServiceChargeCredit, 0) = 1 THEN 'Forgiven Service Charge' ELSE TRANSACTIONS.strTransactionType END
 	 , strType						= TRANSACTIONS.strType
 	 , strPaymentInfo				= TRANSACTIONS.strPaymentInfo
 	 , strFullAddress				= C.strFullAddress
@@ -477,6 +478,7 @@ LEFT JOIN (
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
 		 , dtmDateCreated		= I.dtmDateCreated
+		 , ysnServiceChargeCredit = I.ysnServiceChargeCredit
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
 
@@ -497,6 +499,7 @@ LEFT JOIN (
 		 , dtmDatePaid			= CPP.dtmDate
 		 , strType				= CPP.strType
 		 , dtmDateCreated		= CPP.dtmDateCreated
+		 , ysnServiceChargeCredit = NULL
 	FROM #APPLIEDPPREPAYMENTS CPP
 
 	UNION ALL
@@ -516,6 +519,7 @@ LEFT JOIN (
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= 'Payment'
 		 , dtmDateCreated		= P.dtmDateCreated
+		 , ysnServiceChargeCredit = NULL
 	FROM #POSTEDARPAYMENTS P
 	WHERE P.ysnInvoicePrepayment = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
@@ -538,6 +542,7 @@ LEFT JOIN (
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= 'Applied Payment'
 		 , dtmDateCreated		= P.dtmDateCreated
+		 , ysnServiceChargeCredit = NULL
 	FROM #POSTEDARPAYMENTS P
 	INNER JOIN (
 		SELECT intPaymentId		= PD.intPaymentId

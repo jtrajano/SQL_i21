@@ -93,24 +93,25 @@ RETURNS TABLE AS RETURN
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
+	LEFT JOIN tblICInventoryReceiptItem D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 	WHERE
-		A.intTransactionType IN (1, 3)
-		AND
-		(
+	A.intTransactionType IN (1, 3) AND
+	ISNULL(D.ysnAddPayable, 1) <> 0 AND
+	(
 		B.intPurchaseDetailId > 0
-	OR	B.intInventoryReceiptItemId > 0
-	OR 	B.intInventoryReceiptChargeId > 0
-	OR	B.intContractCostId > 0
-	OR	B.intContractDetailId > 0
-	OR	B.intLoadDetailId > 0
-	OR	B.intLoadShipmentCostId > 0
-	OR	B.intWeightClaimDetailId > 0
-	OR	B.intCustomerStorageId > 0
-	OR	B.intSettleStorageId > 0
-	OR	B.intPaycheckHeaderId > 0
-	OR	B.intBuybackChargeId > 0
-	OR	B.intScaleTicketId > 0
-	OR	B.intInventoryShipmentChargeId > 0
-		)
+		OR	B.intInventoryReceiptItemId > 0
+		OR 	B.intInventoryReceiptChargeId > 0
+		OR	B.intContractCostId > 0
+		OR	B.intContractDetailId > 0
+		OR	B.intLoadDetailId > 0
+		OR	B.intLoadShipmentCostId > 0
+		OR	B.intCustomerStorageId > 0
+		OR	B.intSettleStorageId > 0
+		OR	B.intPaycheckHeaderId > 0
+		OR	B.intBuybackChargeId > 0
+		OR	B.intScaleTicketId > 0
+		OR	B.intInventoryShipmentChargeId > 0
+		OR	B.intPriceFixationDetailId > 0
+	)
 )
 

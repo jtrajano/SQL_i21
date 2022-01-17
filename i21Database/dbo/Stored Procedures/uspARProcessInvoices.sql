@@ -315,6 +315,7 @@ DECLARE  @Id									INT
 		,@ItemAddOnQuantity                     NUMERIC(38, 20)
 		,@ItemContractHeaderId					INT
 		,@ItemContractDetailId					INT
+		,@NewInvoiceNumber						NVARCHAR(50) = ''
 
 --INSERT
 BEGIN TRY
@@ -627,6 +628,17 @@ BEGIN
 		END
 
 	SET @NewSourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
+
+	IF ISNULL(@NewSourceId, 0) = 16
+	BEGIN
+		SELECT TOP 1 @NewInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intLoadId = @LoadId
+		IF (@NewInvoiceNumber <> '')
+		BEGIN
+			SET @ErrorMessage = 'Invoice (' + @NewInvoiceNumber + ') was already created for ' + ISNULL(ISNULL(@SourceNumber, @ItemDocumentNumber), '')
+
+			RAISERROR(@ErrorMessage, 16, 1);
+		END
+	END
 
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -1227,16 +1239,6 @@ BEGIN
 		AND (ISNULL(I.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventoryTop1, CAST(1 AS BIT)) OR (@ImpactInventoryTop1 IS NULL AND @GroupingOption < 16))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
-		
-	IF ISNULL(@NewSourceId, 0) = 16
-	BEGIN
-		EXEC uspARPostInvoice 
-				 @post=1
-				,@recap=1
-				,@param=@NewInvoiceId
-				,@raiseError=@RaiseError
-				,@userId=@EntityId
-	END
 END
 
 END TRY

@@ -261,7 +261,7 @@ LEFT JOIN (
 	  AND strType = 'Service Charge'	  
 	  AND YEAR(dtmPostDate) = DATEPART(YEAR, @dtmDate)
 	  GROUP BY intEntityCustomerId
-) YTDSERVICECHARGE ON YTDSERVICECHARGE.intEntityCustomerId = PENDINGPAYMENT.intEntityCustomerId 
+) YTDSERVICECHARGE ON CUSTOMER.intEntityCustomerId = YTDSERVICECHARGE.intEntityCustomerId 
 WHERE @intEntityCustomerId IS NULL OR CUSTOMER.intEntityCustomerId = @intEntityCustomerId
 
 UPDATE CI
@@ -319,7 +319,7 @@ CROSS APPLY (
 	AND strType <> 'CF Tran'
 	AND intEntityCustomerId = CI.intEntityCustomerId
 	AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, @dtmDate)) > 0
-	ORDER BY DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, @dtmDate)) DESC
+	ORDER BY I.dblInvoiceTotal DESC
 ) HIGHESTDUEAR
 
 UPDATE #CUSTOMERINQUIRY

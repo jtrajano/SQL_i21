@@ -157,6 +157,7 @@ END
 				,[int1099Form]
 				,[int1099Category]
 				,[dbl1099]
+				,[ysnStage]
 		)
 		SELECT	EquityPay.intEquityPaySummaryId
 				,EquityPay.intCustomerPatronId
@@ -179,6 +180,7 @@ END
 								WHEN EquityPay.ysnQualified = 1 THEN ROUND(EquityPay.dblEquityPaid, 2)
 								ELSE 0
 							END
+				,0
 		FROM #tempEquityPayments EquityPay
 
 		EXEC [dbo].[uspAPCreateVoucher]

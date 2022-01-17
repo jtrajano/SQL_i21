@@ -148,6 +148,7 @@
 :r .\11_IC\FixFKItemPricingLevel.sql 
 :r .\11_IC\ImproveValuationReport.sql
 :r .\11_IC\DropIndexes.sql
+:r .\11_IC\RenameAndAlterCashRegisterDepartment.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
@@ -209,6 +210,7 @@
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
+:r .\20_CF\CardFuelingDeleteObject.sql
 
 --PR
 :r .\21_PR\1_1620_to_1630.sql

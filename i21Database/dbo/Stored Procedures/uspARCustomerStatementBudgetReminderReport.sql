@@ -339,6 +339,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmDueDate				= I.dtmDueDate
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
 	 , ysnImportedFromOrigin	= I.ysnImportedFromOrigin
+	 , ysnServiceChargeCredit	= I.ysnServiceChargeCredit
 INTO #POSTEDINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -387,7 +388,7 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , strCustomerName				= C.strCustomerName
 	 , strInvoiceNumber				= TRANSACTIONS.strInvoiceNumber
 	 , strRecordNumber				= TRANSACTIONS.strRecordNumber
-	 , strTransactionType			= TRANSACTIONS.strTransactionType
+	 , strTransactionType			= CASE WHEN ISNULL(TRANSACTIONS.ysnServiceChargeCredit, 0) = 1 THEN 'Forgiven Service Charge' ELSE TRANSACTIONS.strTransactionType END
 	 , strType						= TRANSACTIONS.strType
 	 , strPaymentInfo				= TRANSACTIONS.strPaymentInfo
 	 , strFullAddress				= C.strFullAddress
@@ -423,6 +424,7 @@ LEFT JOIN (
 		 , dtmDueDate			= I.dtmDueDate
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
+		 , ysnServiceChargeCredit = I.ysnServiceChargeCredit
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
 
@@ -442,6 +444,7 @@ LEFT JOIN (
 		 , dtmDueDate			= NULL
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= NULL
+		 , ysnServiceChargeCredit = NULL
 	FROM #POSTEDARPAYMENTS P
 	INNER JOIN (
 		SELECT intPaymentId		= PD.intPaymentId

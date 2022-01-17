@@ -32,6 +32,7 @@
 	[ysnStretchLogo]						BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnStretchLogo] DEFAULT ((0)),
 	[ysnPOSBatchProcess]					BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPOSBatchProcess] DEFAULT ((1)),
 	[ysnIncludeInvoiceAttachments]			BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnIncludeInvoiceAttachments] DEFAULT ((0)),
+	[ysnLogPerformanceRuntime]				BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnLogPerformanceRuntime] DEFAULT((0)),
 	[strCreditOverridePassword] 			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]						INT NOT NULL DEFAULT 1,
 	[strServiceChargeFormat]				NVARCHAR (100) NULL,

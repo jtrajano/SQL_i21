@@ -98,13 +98,18 @@ BEGIN
 			, @intPricingTypeId = CD.intPricingTypeId
 			, @strContractNumber = CH.strContractNumber
 			, @strContractSeq = LTRIM(CD.intContractSeq)
-			, @dblAvailableQty = CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN ISNULL(dblBalance, 0) - (ISNULL(dblScheduleQty, 0) - @dblOrigInvoiceQty) ELSE ISNULL(dblBalanceLoad, 0) - (ISNULL(dblScheduleLoad, 0) - 1) END
+			, @dblAvailableQty = CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN ISNULL(dblBalance, 0) - (ISNULL(dblScheduleQty, 0) - case when CD.dblQuantity > @dblOrigInvoiceQty then @dblOrigInvoiceQty  else CD.dblQuantity end) ELSE ISNULL(dblBalanceLoad, 0) - (ISNULL(dblScheduleLoad, 0) - 1) END
 			, @intCommodityUnitMeasureId = CH.intCommodityUOMId
 			, @intItemUOMId = intItemUOMId
 			, @ysnLoad = CH.ysnLoad
 		FROM tblCTContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE intContractDetailId = @intContractDetailId
+
+		if (@dblScheduleQty < 0)
+		begin
+			set @dblScheduleQty = 0;
+		end
 		
 		IF @dblScheduleQty + @dblInvoiceQty > @dblBalance
 		BEGIN

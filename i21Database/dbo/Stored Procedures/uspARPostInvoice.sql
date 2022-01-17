@@ -395,7 +395,7 @@ BEGIN TRY
 
 		SELECT @intInvoiceForIntegration = intId FROM @InvoicesForIntegration
 
-		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intInvoiceForIntegration, @ForDelete = 0, @UserId = @userId, @Post = @post, @Recap = @recap
+		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intInvoiceForIntegration, @ForDelete = 0, @UserId = @userId, @Post = @post, @Recap = @recap, @FromPosting = 1
 
 		DELETE FROM @InvoicesForIntegration WHERE intId = @intInvoiceForIntegration
 	END
@@ -566,7 +566,7 @@ BEGIN TRY
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
     DECLARE @invalidGLCount INT
-	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
+	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT [strTransactionId]) FROM @InvalidGLEntries WHERE [strTransactionId] IS NOT NULL), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
 	SET @totalRecords = @totalRecords - @invalidGLCount
 
