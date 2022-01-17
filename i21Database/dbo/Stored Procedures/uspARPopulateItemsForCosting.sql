@@ -65,7 +65,7 @@ SELECT
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
-										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
+										WHEN ARIDL.[intLotId] IS NULL THEN CASE WHEN ysnSeparateStockForUOMs = 0 THEN dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIUOM_STOCK.intItemUOMId, ARID.[dblQtyShipped]) ELSE ARID.[dblQtyShipped] END  
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ISNULL(NULLIF(ARIDL.[dblWeightPerQty], 0), 1))
