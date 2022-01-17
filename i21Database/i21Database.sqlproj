@@ -469,6 +469,7 @@
     <Build Include="dbo\Views\vyuCMInTransitMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Tables\tblTRFTradeFinance.sql" />
     <Build Include="dbo\Tables\tblTRFTradeFinanceHistory.sql" />
+    <Build Include="dbo\Views\vyuRKFutOptOtcApproval.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
