@@ -190,7 +190,7 @@ DECLARE @strMessage NVARCHAR(100)
 		SELECT 
 			 [strTransactionId]		
 			,[intTransactionId]		
-			,[intAccountId]	= CASE WHEN A.strModule = 'CM Forwards' THEN BankTransferAccount.AccountId ELSE G.AccountId	END
+			,[intAccountId]	= CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit') THEN BankTransferAccount.AccountId ELSE G.AccountId	END
 			,[strDescription]		
 			,[dtmTransactionDate]	
 			,[dblDebit]				
@@ -434,7 +434,7 @@ DECLARE @strMessage NVARCHAR(100)
 					SELECT
 						[strTransactionId]
 						,[intTransactionId]
-						,[intAccountId] = CASE WHEN A.strModule = 'CM Forwards' THEN BankTransferAccount.AccountId ELSE G.AccountId	END
+						,[intAccountId] = CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit') THEN BankTransferAccount.AccountId ELSE G.AccountId	END
 						,[strDescription]
 						,[dtmTransactionDate]
 						,[dblDebit]  
