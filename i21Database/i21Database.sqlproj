@@ -4023,6 +4023,7 @@
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferDiffEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferIntransitPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferForwardPostEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferSwapLongPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferSwapShortPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferFeesEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferPostEntries.sql" />

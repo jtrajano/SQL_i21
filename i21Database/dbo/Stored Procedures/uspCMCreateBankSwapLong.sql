@@ -29,14 +29,25 @@ intGLAccountIdFrom,
 intGLAccountIdTo, 
 intCurrencyIdAmountFrom,
 intCurrencyIdAmountTo,
---dblAmount, 
---dblAmountFrom, 
+dblAmountTo,
+dblAmountForeignTo,
+dblRateAmountTo,
+
 dblAmountForeignFrom,
---dblRateAmountFrom,
---intRateTypeIdAmountFrom,
+dblAmountFrom, 
+dblRateAmountFrom,
+
+intRateTypeIdAmountFrom,
+--dblAmount, 
+
+
+
+
 dtmDate, 
 dtmInTransit,
 intBankTransactionTypeId, 
+dblCrossRate,
+dblReverseRate,
 -- dblAmountForeignTo,
 -- dblAmountTo,
 -- dblRateAmountTo,
@@ -52,14 +63,24 @@ intGLAccountIdTo,
 intGLAccountIdFrom,
 intCurrencyIdAmountTo,
 intCurrencyIdAmountFrom,
+dblAmountTo = dblAmountFrom,
+dblAmountForeignTo = dblAmountForeignFrom,
+dblRateAmountFrom,
+
+GLDetail.dblCreditForeign,
+GLDetail.dblCredit,
+GLDetail.dblExchangeRate,
+intRateTypeIdAmountFrom = GLDetail.intCurrencyExchangeRateTypeId,
 --dblAmount = GLDetail.dblCredit,
---dblAmountFrom = GLDetail.dblCredit,
-dblAmountForeignFrom = GLDetail.dblCreditForeign,
---dblRateAmountFrom =GLDetail.dblExchangeRate,
---intRateTypeIdAmountFrom = GLDetail.intCurrencyExchangeRateTypeId,
+
+
+
+
 DATEADD(DAY, 1, dtmDate),
 DATEADD(DAY, 1, dtmDate), 
 4,
+ROUND(dblAmountFrom/dblAmountTo,6),
+ROUND(dblAmountTo/dblAmountFrom,6),
 -- dblAmountForeignTo = GLDetail1.dblDebitForeign,
 -- dblAmountTo = GLDetail1.dblDebit,
 -- dblRateAmountTo=GLDetail1.dblExchangeRate,
