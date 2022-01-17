@@ -467,6 +467,8 @@
     <Build Include="dbo\Views\vyuTRComboFreightCustomer.sql" />
     <Build Include="dbo\Views\vyuTRComboFreightShipVia.sql" />
     <Build Include="dbo\Views\vyuCMInTransitMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Tables\tblTRFTradeFinance.sql" />
+    <Build Include="dbo\Tables\tblTRFTradeFinanceHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
