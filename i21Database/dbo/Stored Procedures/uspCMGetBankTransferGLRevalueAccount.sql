@@ -108,7 +108,7 @@ BEGIN
 		IF(ISNULL(@ysnHasLocationSegment, 0) = 1)
 		BEGIN
 			BEGIN TRY
-				EXEC dbo.uspGLGetOverrideGLAccount @intCurrentAccountId, @intCurrentUnrealizedId, 3, @intBankTransferTypeId, @intAccountOverridden
+				EXEC dbo.uspGLGetOverrideGLAccount @intCurrentAccountId, @intCurrentUnrealizedId, 3, @intBankTransferTypeId, @intAccountOverridden OUTPUT
 			END TRY
 			BEGIN CATCH
 				SELECT  @strErrorMessage = ERROR_MESSAGE();
@@ -116,13 +116,13 @@ BEGIN
 			END CATCH
 		END
 
-		IF(ISNULL(@ysnHasLocationSegment, 0) = 1)
+		IF(ISNULL(@ysnHasLOBSegment, 0) = 1)
 		BEGIN
 			BEGIN TRY
 				IF(@intAccountOverridden IS NULL)
 					SET @intAccountOverridden = @intCurrentUnrealizedId
 
-				EXEC dbo.uspGLGetOverrideGLAccount @intCurrentAccountId, @intCurrentUnrealizedId, 6, @intBankTransferTypeId, @intAccountOverridden
+				EXEC dbo.uspGLGetOverrideGLAccount @intCurrentAccountId, @intCurrentUnrealizedId, 6, @intBankTransferTypeId, @intAccountOverridden OUTPUT
 			END TRY
 			BEGIN CATCH
 				SELECT  @strErrorMessage = ERROR_MESSAGE();
