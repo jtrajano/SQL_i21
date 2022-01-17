@@ -11,7 +11,7 @@ CREATE TABLE [dbo].[tblTRFTradeFinanceHistory]
 	strBankReferenceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strLimitType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strSublimitType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	ysnSubmmitedToBank NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	ysnSubmittedToBank NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	dtmDateSubmitted DATETIME NULL,
 	strApprovalStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
 	dtmDateApproved DATETIME NULL,

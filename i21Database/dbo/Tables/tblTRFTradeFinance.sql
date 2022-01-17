@@ -9,7 +9,7 @@ CREATE TABLE [dbo].[tblTRFTradeFinance]
 	intBorrowingFacilityId INT NULL,
 	intLimitTypeId INT NULL,
 	intSublimitTypeId INT NULL,
-	ysnSubmmitedToBank BIT NULL, 
+	ysnSubmittedToBank BIT NULL, 
 	dtmDateSubmitted DATETIME NULL,
 	strApprovalStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
 	dtmDateApproved DATETIME NULL,
