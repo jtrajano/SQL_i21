@@ -45,9 +45,11 @@ DECLARE @strMessage NVARCHAR(100)
 			Offset INT
 		)
 
-		DECLARE @strAccountErrorMessage NVARCHAR(255)
-		
-		IF ((SELECT strTransactionType FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId) = 'CM Forwards')
+		DECLARE @strAccountErrorMessage NVARCHAR(255), @strTransactionType NVARCHAR(255)
+
+		SELECT @strTransactionType = strTransactionType FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
+
+		IF (@strTransactionType IN ('CM Forwards', 'CM In-Transit'))
 		BEGIN
 			DECLARE @tblTransactions TABLE (
 				strTransactionId NVARCHAR(100)
@@ -62,7 +64,7 @@ DECLARE @strMessage NVARCHAR(100)
 			BEGIN
 				SELECT TOP 1 @strCurrentTransaction = strTransactionId FROM @tblTransactions
 				BEGIN TRY
-					INSERT @tblBankTransferAccounts EXEC dbo.uspCMGetBankTransferGLRevalueAccount @strCurrentTransaction, 'CM Forwards'
+					INSERT @tblBankTransferAccounts EXEC dbo.uspCMGetBankTransferGLRevalueAccount @strCurrentTransaction, @strTransactionType
 				END TRY
 				BEGIN CATCH
 					SELECT  @strMessage = ERROR_MESSAGE(); 
@@ -525,7 +527,7 @@ DECLARE @strMessage NVARCHAR(100)
 		BEGIN
 			UPDATE tblGLRevalue SET ysnPosted = 1 WHERE intConsolidationId in ( @intConsolidationId, @intReverseID)
 			
-			DECLARE @intGLFiscalYearPeriodId INT, @strTransactionType NVARCHAR(4)
+			DECLARE @intGLFiscalYearPeriodId INT
 			SELECT @intGLFiscalYearPeriodId= intGLFiscalYearPeriodId ,@strTransactionType = strTransactionType  FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
 
 			
