@@ -378,7 +378,7 @@ BEGIN
 				EXEC [dbo].[uspAPDeleteVoucher]
 					@intBillId = @intBillId
 					,@UserId = @userId
-					,@callerModule = 9
+					--,@callerModule = 9
 			END
 			ELSE
 			BEGIN
