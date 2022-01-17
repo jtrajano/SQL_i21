@@ -116,8 +116,8 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strR
 		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
 		VALUES (@strReportLogId, GETDATE())
 	END
-ELSE
-	RETURN	
+--ELSE
+--	RETURN	
 
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
