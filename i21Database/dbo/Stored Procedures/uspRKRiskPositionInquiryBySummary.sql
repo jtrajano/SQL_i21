@@ -306,7 +306,6 @@ AS
 		AND ISNULL(ot.intBookId, 0) = ISNULL(@intBookId, ISNULL(ot.intBookId, 0))
 		AND ISNULL(ot.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(ot.intSubBookId, 0))
 		AND ISNULL(ot.intLocationId, 0) = ISNULL(@intCompanyLocationId, ISNULL(ot.intLocationId, 0))
-		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= @dtmToDate
 		AND strNewBuySell = 'Buy'
 		AND ot.intSelectedInstrumentTypeId IN (1, 3) AND ot.intInstrumentTypeId = 1
 	
@@ -1414,7 +1413,7 @@ AS
 				AND ft.intLocationId = ISNULL(@intCompanyLocationId, ft.intLocationId)
 				AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
 				AND ISNULL(ft.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(ft.intSubBookId, 0))
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ft.dtmFilledDate, 110), 110) <= @dtmToDate AND CONVERT(DATETIME, '01 ' + strFutureMonth) >= @dtmFutureMonthsDate  
+				AND CONVERT(DATETIME, '01 ' + strFutureMonth) >= @dtmFutureMonthsDate  
 		) t
 	) t1
 	WHERE dblNoOfContract <> 0
