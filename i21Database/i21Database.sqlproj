@@ -7857,7 +7857,6 @@
     <Build Include="dbo\Stored Procedures\uspAPCreate1099KFile.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileKPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfK.sql" />
-</ItemGroup>
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
   </ItemGroup>
   <ItemGroup>
