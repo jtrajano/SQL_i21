@@ -367,10 +367,10 @@ FROM (
 		FROM dbo.tblARCustomerBudget CB WITH (NOLOCK)
 		INNER JOIN (
 			SELECT C.intEntityId
-				, strCustomerNumber
-				, intPaymentMethodId
-				, intCurrencyId
-				, intTermsId
+				, C.strCustomerNumber
+				, C.intPaymentMethodId
+				, C.intCurrencyId
+				, C.intTermsId
 				, C.strAccountNumber
 			FROM dbo.tblARCustomer C WITH (NOLOCK)
 			INNER JOIN dbo.tblEMEntityEFTInformation EFT WITH (NOLOCK) ON C.intEntityId = EFT.intEntityId
