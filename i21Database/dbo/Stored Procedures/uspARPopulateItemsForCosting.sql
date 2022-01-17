@@ -1,4 +1,4 @@
-﻿ CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
+﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -55,16 +55,14 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnAutoBlend] 
 	,[ysnGLOnly]
 )
-
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= CASE WHEN ysnSeparateStockForUOMs = 0 THEN ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) ELSE  ARID.[intItemUOMId] END
+	,[intItemUOMId]				= CASE WHEN ysnSeparateStockForUOMs = 0 THEN ICIUOM_STOCK.[intItemUOMId] ELSE ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) END
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
-										WHEN ARIDL.[intLotId] IS NULL THEN  CASE WHEN ysnSeparateStockForUOMs = 1 THEN  ARID.[dblQtyShipped]
-										ELSE ARID.[dblQtyShipped] * (CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END) END 
+										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
@@ -134,12 +132,17 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
-LEFT OUTER JOIN 
-	(SELECT intUnitMeasureId,intItemUOMId,ysnSeparateStockForUOMs FROM tblICItemUOM ICUOM  WITH (NOLOCK)
-		INNER JOIN tblICItem ITEM ON ICUOM.intItemId=ITEM.intItemId
-		) ICIUOM
-		ON ARID.intItemUOMId = ICIUOM.intItemUOMId
-
+LEFT OUTER JOIN (
+	SELECT intUnitMeasureId, intItemUOMId, ysnSeparateStockForUOMs FROM tblICItemUOM ICUOM  WITH (NOLOCK)
+	INNER JOIN tblICItem ITEM ON ICUOM.intItemId=ITEM.intItemId
+) ICIUOM
+ON ARID.intItemUOMId = ICIUOM.intItemUOMId
+CROSS APPLY (
+	SELECT intItemUOMId 
+	FROM tblICItemUOM WITH (NOLOCK)
+	WHERE intItemId = ARID.intItemId
+	AND ysnStockUnit = 1
+) ICIUOM_STOCK
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
