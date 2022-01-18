@@ -230,6 +230,7 @@ FROM (
 		, Trans.intContractDetailId
 		, Trans.intContractHeaderId
 		, intUserId = secUser.intEntityId
+		, History.dtmCreateDateTime
 		, strBuyBankName = BuyBank.strBankName COLLATE Latin1_General_CI_AS
 		, strBuyBankAccountNo = BuyBankAcct.strBankAccountNo COLLATE Latin1_General_CI_AS
 		, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
