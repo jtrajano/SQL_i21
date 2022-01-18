@@ -312,6 +312,17 @@ SELECT a.intContractDetailId
 	--, b.ysnStrategic
 	, strStrategic = (case when isnull(b.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
 	, strEntitySelectedLocation = ESL.strLocationName -- CT-5315
+	-- Trade Finance
+	, BK.strBankName
+	, BA.strBankAccountNo
+	, FA.strBorrowingFacilityId
+	, FA.strBankReferenceNo
+	, FL.strBorrowingFacilityLimit
+	, FLD.strLimitDescription
+	, a.ysnSubmittedToBank
+	, a.dtmDateSubmitted
+	, ASTF.strApprovalStatus
+	, a.dtmDateApproved
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId
@@ -329,6 +340,16 @@ LEFT JOIN tblSMCompanyLocation n WITH(NOLOCK) ON n.intCompanyLocationId = a.intC
 LEFT JOIN tblSMCurrency o WITH(NOLOCK) ON o.intCurrencyID = a.intCurrencyId
 LEFT JOIN tblCTContractStatus p WITH(NOLOCK) ON p.intContractStatusId = a.intContractStatusId
 LEFT JOIN shipmentstatus r ON r.intContractDetailId = a.intContractDetailId
+
+	-- Trade Finance
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = a.intBankAccountId
+	LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
+	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = a.intBorrowingFacilityId
+	LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = a.intBorrowingFacilityLimitId
+	LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = a.intBorrowingFacilityLimitDetailId
+	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = a.intBankValuationRuleId
+	LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = a.intApprovalStatusId
+
 OUTER APPLY (
     SELECT TOP 1 intContractDetailId
     FROM tblAPBillDetail WITH(NOLOCK)
