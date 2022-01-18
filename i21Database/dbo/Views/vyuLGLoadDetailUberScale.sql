@@ -33,6 +33,7 @@ SELECT
   ,Item.intCommodityId  
   ,strSFarmNumber = SEF.strFarmNumber  
   ,strPFarmNumber = PEF.strFarmNumber    
+  ,intDriverEntityId = Load.intDriverEntityId
 FROM tblLGLoadDetail LoadDetail    
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId     
 LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LoadDetail.intVendorEntityId    
