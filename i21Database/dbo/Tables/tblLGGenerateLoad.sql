@@ -37,6 +37,7 @@
 
 [intEquipmentTypeId] INT NULL,
 [intHaulerEntityId] INT NULL,
+[intDriverEntityId] INT NULL,
 [intItemId] INT NULL,
 [dtmShipDate] DATETIME NULL,
 [dtmEndDate] DATETIME NULL,

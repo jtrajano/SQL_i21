@@ -54,6 +54,8 @@ SELECT GL.intGenerateLoadId
 	  ,ET.strEquipmentType						AS strEquipmentType
 	  ,EH.intEntityId							AS intHaulerEntityId
 	  ,EH.strName								AS strHaulerName
+	  ,EH.intEntityId							AS intDriverEntityId
+	  ,EH.strName								AS strDriverName
 	  ,GL.dblFreightRate
 	  ,GL.intFreightCurrencyId
 	  ,CUR.strCurrency							AS strFreightCurrency
@@ -132,6 +134,7 @@ LEFT JOIN tblLGAllocationHeader	AH		ON		AH.intAllocationHeaderId	=	AD.intAllocat
 LEFT JOIN tblICItem				I		ON		GL.intItemId				=	I.intItemId
 LEFT JOIN tblLGEquipmentType	ET		ON		ET.intEquipmentTypeId		=	GL.intEquipmentTypeId
 LEFT JOIN tblEMEntity			EH		ON		EH.intEntityId				=	GL.intHaulerEntityId
+LEFT JOIN tblEMEntity			DV		ON		DV.intEntityId				=	GL.intDriverEntityId
 LEFT JOIN tblSMCurrency			CUR		ON		CUR.intCurrencyID			=	GL.intFreightCurrencyId 
 LEFT JOIN tblICItemUOM			FUOM	ON		FUOM.intItemUOMId			=	GL.intFreightUOMId
 LEFT JOIN tblICUnitMeasure		FUM		ON		FUOM.intUnitMeasureId		=	FUM.intUnitMeasureId
