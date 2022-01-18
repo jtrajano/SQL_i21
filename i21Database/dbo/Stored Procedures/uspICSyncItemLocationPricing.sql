@@ -11,9 +11,14 @@ SET ANSI_WARNINGS ON
 
 IF @intUserId IS NULL
 BEGIN
-    SELECT @intUserId = intEntityId FROM tblSMUserSecurity where strUserName = 'irelyadmin'
-    IF @intUserId IS NULL
-        SET @intUserId = 1
+    SELECT TOP 1 
+		@intUserId = intEntityId 
+	FROM 
+		tblSMUserSecurity 		
+	WHERE 
+		strUserName IN ('irelyadmin', 'aussup')
+    
+	IF @intUserId IS NULL SET @intUserId = 1
 END
 
 DECLARE @Pricing TABLE (intItemId INT, intItemLocationId INT)
