@@ -7,18 +7,115 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 
-IF(OBJECT_ID('tempdb..#SELECTEDINVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #SELECTEDINVOICES
-END
-IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #INVOICES
-END
-IF(OBJECT_ID('tempdb..#LOCATIONS') IS NOT NULL)
-BEGIN
-    DROP TABLE #LOCATIONS
-END
+IF(OBJECT_ID('tempdb..#SELECTEDINVOICES') IS NOT NULL) DROP TABLE #SELECTEDINVOICES
+IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL) DROP TABLE #INVOICES
+IF(OBJECT_ID('tempdb..#LOCATIONS') IS NOT NULL) DROP TABLE #LOCATIONS
+
+CREATE TABLE #INVOICES (
+	   intInvoiceId					INT				NOT NULL
+	 , intCompanyLocationId			INT				NOT NULL
+	 , intEntityCustomerId			INT				NOT NULL
+	 , strCompanyName				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strCompanyAddress			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
+	 , strCompanyInfo				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
+	 , strCompanyPhoneNumber		NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strCompanyEmail				NVARCHAR(75)	COLLATE Latin1_General_CI_AS NULL
+	 , strType						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL DEFAULT 'Standard'
+     , strCustomerName				NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL
+	 , strCustomerNumber			NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
+	 , strLocationName				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , dtmDate						DATETIME		NOT NULL
+	 , dtmPostDate					DATETIME		NOT NULL
+	 , strCurrency					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strInvoiceNumber				NVARCHAR(25)	COLLATE Latin1_General_CI_AS NULL
+	 , strBillToLocationName		NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strBillTo					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strShipTo					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strSalespersonName			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strPONumber					NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
+	 , strBOLNumber					NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
+	 , strShipVia					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strTerm						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , dtmShipDate					DATETIME		NULL
+	 , dtmDueDate					DATETIME		NOT NULL
+	 , strFreightTerm				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strDeliverPickup				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strComments					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
+	 , strInvoiceHeaderComment		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
+	 , strInvoiceFooterComment		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
+	 , dblInvoiceSubtotal			NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblShipping					NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblTax						NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblInvoiceTotal				NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblAmountDue					NUMERIC(18, 6)	NULL DEFAULT 0
+	 , strItemNo					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , intInvoiceDetailId			INT				NULL
+	 , dblContractBalance			NUMERIC(18, 6)	NULL DEFAULT 0
+	 , strContractNumber			NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
+	 , strContractNoSeq				NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
+	 , strItem						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strItemDescription			NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL
+	 , strUnitMeasure				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , dblQtyShipped				NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblQtyOrdered				NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblDiscount					NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblTotalTax					NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblPrice						NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblItemPrice					NUMERIC(18, 6)	NULL DEFAULT 0
+	 , strPaid						NVARCHAR(10)	COLLATE Latin1_General_CI_AS NULL
+	 , strPosted					NVARCHAR(10)	COLLATE Latin1_General_CI_AS NULL
+	 , strTransactionType			NVARCHAR(25)	COLLATE Latin1_General_CI_AS NOT NULL
+	 , intRecipeId					INT				NULL
+	 , intOneLinePrintId			INT				NULL
+	 , strInvoiceComments			NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strPaymentComments			NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strCustomerComments			NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strItemType					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , dblTotalWeight				NUMERIC(18, 6)	NULL DEFAULT 0
+	 , strVFDDocumentNumber			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , ysnHasEmailSetup				BIT				NULL
+	 , ysnHasRecipeItem				BIT				NULL
+	 , ysnHasVFDDrugItem			BIT				NULL
+	 , ysnHasProvisional			BIT				NULL
+	 , strProvisional				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , dblTotalProvisional			NUMERIC(18, 6)	NULL DEFAULT 0
+	 , ysnPrintInvoicePaymentDetail BIT				NULL
+	 , ysnListBundleSeparately		BIT				NULL
+	 , strTicketNumbers				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
+	 , strSiteNumber				NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , dblEstimatedPercentLeft		NUMERIC(18, 6)	NULL DEFAULT 0
+	 , dblPercentFull				NUMERIC(18, 6)	NULL DEFAULT 0
+	 , strCustomerContract			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strTicketNumber 				NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strTicketNumberDate			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strCustomerReference			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strSalesReference			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strPurchaseReference			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strLoadNumber				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strTruckDriver				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strTrailer					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strSeals						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strLotNumber					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , blbLogo						VARBINARY(MAX)	NULL
+	 , strAddonDetailKey			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , strBOLNumberDetail			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , ysnHasAddOnItem				BIT				NULL
+	 , intEntityUserId				INT				NULL
+	 , strRequestId					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strInvoiceFormat				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , blbSignature					VARBINARY(MAX)	NULL
+	 , ysnStretchLogo				BIT				NULL
+	 , strSubFormula				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , dtmCreated					DATETIME		NULL
+	 , strServiceChargeItem			NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL
+	 , intDaysOld					INT				NULL
+	 , strServiceChareInvoiceNumber NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	 , dtmDateSC					DATETIME		NULL
+	 , intSiteId					INT				NULL
+	 , ysnIncludeEntityName			BIT				NULL
+	 , strFooterComments			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
+	 , intOriginalInvoiceId			INT				NULL
+)
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
       , @blbStretchedLogo				VARBINARY (MAX) = NULL
@@ -86,6 +183,111 @@ OR		dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0)
 OR		dtmCreated IS NULL
 
 --MAIN QUERY
+INSERT INTO #INVOICES WITH (TABLOCK) (
+	   intInvoiceId
+	 , intCompanyLocationId
+	 , intEntityCustomerId
+	 , strCompanyName
+	 , strCompanyAddress
+	 , strCompanyInfo
+	 , strCompanyPhoneNumber
+	 , strCompanyEmail
+	 , strType
+     , strCustomerName
+	 , strCustomerNumber
+	 , strLocationName
+	 , dtmDate
+	 , dtmPostDate
+	 , strCurrency
+	 , strInvoiceNumber
+	 , strBillToLocationName
+	 , strBillTo
+	 , strShipTo
+	 , strSalespersonName
+	 , strPONumber
+	 , strBOLNumber
+	 , strShipVia
+	 , strTerm
+	 , dtmShipDate
+	 , dtmDueDate
+	 , strFreightTerm
+	 , strDeliverPickup
+	 , strComments
+	 , strInvoiceHeaderComment
+	 , strInvoiceFooterComment
+	 , dblInvoiceSubtotal
+	 , dblShipping
+	 , dblTax
+	 , dblInvoiceTotal
+	 , dblAmountDue
+	 , strItemNo
+	 , intInvoiceDetailId
+	 , dblContractBalance
+	 , strContractNumber
+	 , strContractNoSeq
+	 , strItem
+	 , strItemDescription
+	 , strUnitMeasure
+	 , dblQtyShipped
+	 , dblQtyOrdered
+	 , dblDiscount
+	 , dblTotalTax
+	 , dblPrice
+	 , dblItemPrice
+	 , strPaid
+	 , strPosted
+	 , strTransactionType
+	 , intRecipeId
+	 , intOneLinePrintId
+	 , strInvoiceComments
+	 , strPaymentComments
+	 , strCustomerComments
+	 , strItemType
+	 , dblTotalWeight
+	 , strVFDDocumentNumber
+	 , ysnHasEmailSetup
+	 , ysnHasRecipeItem
+	 , ysnHasVFDDrugItem
+	 , ysnHasProvisional
+	 , strProvisional
+	 , dblTotalProvisional
+	 , ysnPrintInvoicePaymentDetail
+	 , ysnListBundleSeparately
+	 , strTicketNumbers
+	 , strSiteNumber
+	 , dblEstimatedPercentLeft
+	 , dblPercentFull
+	 , strCustomerContract
+	 , strTicketNumber
+	 , strTicketNumberDate
+	 , strCustomerReference
+	 , strSalesReference
+	 , strPurchaseReference
+	 , strLoadNumber
+	 , strTruckDriver
+	 , strTrailer
+	 , strSeals
+	 , strLotNumber
+	 , blbLogo
+	 , strAddonDetailKey
+	 , strBOLNumberDetail
+	 , ysnHasAddOnItem
+	 , intEntityUserId
+	 , strRequestId
+	 , strInvoiceFormat
+	 , blbSignature
+	 , ysnStretchLogo
+	 , strSubFormula
+	 , dtmCreated
+	 , strServiceChargeItem
+	 , intDaysOld
+	 , strServiceChareInvoiceNumber
+	 , dtmDateSC
+	 , intSiteId
+	 , ysnIncludeEntityName
+	 , strFooterComments
+	 , intOriginalInvoiceId
+)
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
 	 , intEntityCustomerId		= INV.intEntityCustomerId
@@ -168,7 +370,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTotalProvisional		= CAST(0 AS NUMERIC(18, 6))
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CAST(0 AS BIT))
-	 , strTicketNumbers			= CAST('' AS NVARCHAR(100))
+	 , strTicketNumbers			= CAST('' AS NVARCHAR(500))
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
@@ -208,7 +410,6 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnIncludeEntityName		= CAST(0 AS BIT)
 	 , strFooterComments		= INV.strFooterComments
 	 , intOriginalInvoiceId		= INV.intOriginalInvoiceId
-INTO #INVOICES
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -336,7 +537,7 @@ CROSS APPLY (
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
 	WHERE intInvoiceId = I.intInvoiceId 
-	  AND ISNULL(ID.intSiteId, 0) <> 0
+	  AND ID.intSiteId IS NOT NULL
 ) CONSUMPTIONSITE
 WHERE I.strType = 'Tank Delivery'
 
@@ -391,9 +592,8 @@ CROSS APPLY (
 				 , strTicketNumber 
 			FROM dbo.tblSCTicket WITH(NOLOCK)
 		) T ON ID.intTicketId = T.intTicketId
-		WHERE ISNULL(ID.intTicketId, 0) <> 0
+		WHERE ID.intTicketId IS NOT NULL
 		  AND I.intInvoiceId = ID.intInvoiceId
-		--GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
 		FOR XML PATH ('')
 	) INV (strTicketNumber)
 ) SCALETICKETS
@@ -413,12 +613,17 @@ WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer
 
 --COMMENTS
 UPDATE I
-SET strComments				= dbo.fnEliminateHTMLTags(I.strComments, 0)
-  , strInvoiceHeaderComment	= ISNULL(HEADER.strMessage, I.strComments)
-  , strInvoiceFooterComment	= ISNULL(FOOTER.strMessage, I.strFooterComments)
+SET strComments	= dbo.fnEliminateHTMLTags(I.strComments, 0)
 FROM #INVOICES I
-OUTER APPLY (
-	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS NVARCHAR(MAX)) + '<html>'
+WHERE I.strComments IS NOT NULL
+  AND I.strComments <> ''
+
+--HEADER COMMENT
+UPDATE I
+SET strInvoiceHeaderComment	= ISNULL(HEADER.strMessage, I.strComments)
+FROM #INVOICES I
+CROSS APPLY (
+	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
 	FROM tblSMDocumentMaintenanceMessage H
 	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
 	WHERE H.strHeaderFooter = 'Header'
@@ -428,8 +633,13 @@ OUTER APPLY (
 		   , ISNULL(I.intEntityCustomerId, -10 * M.intDocumentMaintenanceId) DESC
 		   , ISNULL(I.intCompanyLocationId, -100 * M.intDocumentMaintenanceId) DESC
 ) HEADER
-OUTER APPLY (
-	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS NVARCHAR(MAX)) + '<html>'
+
+--FOOTER COMMENT
+UPDATE I
+SET strInvoiceFooterComment	= ISNULL(FOOTER.strMessage, I.strFooterComments)
+FROM #INVOICES I
+CROSS APPLY (
+	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
 	FROM tblSMDocumentMaintenanceMessage H
 	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
 	WHERE H.strHeaderFooter = 'Footer'
@@ -439,6 +649,8 @@ OUTER APPLY (
 		   , ISNULL(I.intEntityCustomerId, -10 * M.intDocumentMaintenanceId) DESC
 		   , ISNULL(I.intCompanyLocationId, -100 * M.intDocumentMaintenanceId) DESC
 ) FOOTER
+
+
 
 --EMAIL COUNT
 UPDATE I
