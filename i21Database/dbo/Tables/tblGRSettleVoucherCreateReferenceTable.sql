@@ -19,5 +19,6 @@
 	,dblCostUnitQty DECIMAL(24, 10) NULL
 	,dblSettleContractUnits DECIMAL(24,10) NULL
 	,ysnDiscountFromGrossWeight BIT NULL
-	,ysnItemInventoryCost BIT NULL
+	,ysnItemInventoryCost BIT NULL,
+	,intTransactionId INT NULL
 )
