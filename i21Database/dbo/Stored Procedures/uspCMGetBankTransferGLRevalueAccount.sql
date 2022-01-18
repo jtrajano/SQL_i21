@@ -22,7 +22,7 @@ BEGIN
 		intOffset BIT,
 		intFinalAccountId INT,
 		ysnHasLocationSegment BIT NULL,
-		ysnHasLOBSegment BIT NULL,
+		ysnHasCompanySegment BIT NULL,
 		ysnProcessed BIT
 	)
 
@@ -70,21 +70,24 @@ BEGIN
 	UPDATE A
 	SET
 		A.ysnHasLocationSegment = CAST((CASE WHEN LocationSegment.intCount > 0 THEN 1 ELSE 0 END) AS BIT),
-		A.ysnHasLOBSegment = CAST((CASE WHEN LOBSegment.intCount > 0 THEN 1 ELSE 0 END) AS BIT)
+		A.ysnHasCompanySegment = CAST((CASE WHEN CompanySegment.intCount > 0 THEN 1 ELSE 0 END) AS BIT)
 	FROM @tblAccountId A
 	OUTER APPLY (
 		SELECT COUNT(1) intCount FROM tblGLAccountSegment Segment
 		JOIN tblGLAccountSegmentMapping SegmentMapping
 			ON SegmentMapping.intAccountSegmentId = Segment.intAccountSegmentId
-		WHERE SegmentMapping.intAccountId = A.intAccountId AND Segment.intAccountStructureId = 3
+		JOIN tblGLAccountStructure Structure
+			ON Structure.intAccountStructureId = Segment.intAccountStructureId
+		WHERE SegmentMapping.intAccountId = A.intAccountId AND Structure.intStructureType = 3
 	) LocationSegment
 	OUTER APPLY (
 		SELECT COUNT(1) intCount FROM tblGLAccountSegment Segment
 		JOIN tblGLAccountSegmentMapping SegmentMapping
 			ON SegmentMapping.intAccountSegmentId = Segment.intAccountSegmentId
-		WHERE SegmentMapping.intAccountId = A.intAccountId AND Segment.intAccountStructureId = 6
-	) LOBSegment
-
+		JOIN tblGLAccountStructure Structure
+			ON Structure.intAccountStructureId = Segment.intAccountStructureId
+		WHERE SegmentMapping.intAccountId = A.intAccountId AND Structure.intStructureType = 6
+	) CompanySegment
 
 	DECLARE
 		@intCurrentAccountId INT, 
@@ -92,7 +95,7 @@ BEGIN
 		@intCurrentBankTransferTypeId INT, 
 		@intAccountOverridden INT,
 		@ysnHasLocationSegment BIT, 
-		@ysnHasLOBSegment BIT
+		@ysnHasCompanySegment BIT
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tblAccountId WHERE ysnProcessed = 0)
 	BEGIN
@@ -102,7 +105,7 @@ BEGIN
 			@intCurrentUnrealizedId = intUnrealizedId,
 			@intCurrentBankTransferTypeId = intBankTransferTypeId,
 			@ysnHasLocationSegment = ysnHasLocationSegment,
-			@ysnHasLOBSegment = ysnHasLOBSegment
+			@ysnHasCompanySegment = ysnHasCompanySegment
 		FROM @tblAccountId  WHERE ysnProcessed = 0
 
 		IF(ISNULL(@ysnHasLocationSegment, 0) = 1)
@@ -116,13 +119,13 @@ BEGIN
 			END CATCH
 		END
 
-		IF(ISNULL(@ysnHasLOBSegment, 0) = 1)
+		IF(ISNULL(@ysnHasCompanySegment, 0) = 1)
 		BEGIN
 			BEGIN TRY
 				IF(@intAccountOverridden IS NULL)
 					SET @intAccountOverridden = @intCurrentUnrealizedId
 
-				EXEC dbo.uspGLGetOverrideGLAccount @intCurrentAccountId, @intCurrentUnrealizedId, 6, @intBankTransferTypeId, @intAccountOverridden OUTPUT
+				EXEC dbo.uspGLGetOverrideGLAccount @intCurrentAccountId, @intAccountOverridden, 6, @intBankTransferTypeId, @intAccountOverridden OUTPUT
 			END TRY
 			BEGIN CATCH
 				SELECT  @strErrorMessage = ERROR_MESSAGE();
