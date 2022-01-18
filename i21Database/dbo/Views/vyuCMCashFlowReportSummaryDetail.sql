@@ -27,7 +27,8 @@ SELECT
 	Detail.intAccountId,
 	GLAccount.strAccountId,
 	Detail.intBankAccountId,
-	dbo.fnAESDecryptASym(BankAccount.strBankAccountNo) + ' - ' + Bank.strBankName  strBankAccountId,
+	dbo.fnAESDecryptASym(BankAccount.strBankAccountNo) strBankAccountId,
+	Bank.strBankName,
 	Detail.intCompanyLocationId,
 	CompanyLocation.strLocationName strCompanyLocation,
 	Detail.intConcurrencyId
