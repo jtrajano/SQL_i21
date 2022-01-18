@@ -45,16 +45,16 @@ GO
 
 UPDATE tblCMBankAccount
 SET
-	intBankAccountTypeId = 3
+	intBankAccountTypeId = 2
 WHERE
-	intBankAccountTypeId = 2 OR intBankAccountTypeId IS NULL
+	(intBankAccountTypeId = 3 AND intBrokerageAccountId IS NULL) OR (ISNULL(intBankAccountTypeId, 0) = 0)
 GO
 
 UPDATE tblCMBankAccount
 SET
-	intBankAccountTypeId = 2
+	intBankAccountTypeId = 3
 WHERE
-	intBankAccountTypeId IN (0, 1) OR intBankAccountTypeId IS NULL
+	intBrokerageAccountId IS NOT NULL
 GO
 
 
