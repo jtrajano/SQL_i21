@@ -1547,7 +1547,108 @@ FROM (
 				AND price.intItemLocationId = il.intItemLocationId
 		WHERE
 			p.strUniqueId = @UniqueId
-		UNION
+	) AS Source_Query  
+		ON ItemPricing.intItemPricingId = Source_Query.intItemPricingId 
+	   
+	-- If matched, update the existing item pricing
+	WHEN MATCHED 
+		AND Source_Query.ysnUpdatePrice = 1	
+	THEN 
+		UPDATE 
+		SET   
+			ItemPricing.dblSalePrice = Source_Query.dblSalePrice
+			,ItemPricing.dblStandardCost = Source_Query.dblStandardCost
+			,ItemPricing.dblLastCost = Source_Query.dblLastCost
+			,ItemPricing.dblAverageCost = Source_Query.dblAverageCost
+			,ItemPricing.dtmDateChanged = GETDATE()
+			,ItemPricing.dtmDateModified = GETDATE()
+			,ItemPricing.intModifiedByUserId = @intUserId
+
+	-- If none is found, insert a new item pricing
+	WHEN NOT MATCHED 
+		AND Source_Query.intItemId IS NOT NULL 
+		AND Source_Query.intItemLocationId IS NOT NULL 
+		AND Source_Query.ysnAddNewRecords = 1	
+	THEN 
+		INSERT (		
+			intItemId
+			,intItemLocationId
+			,dblAmountPercent
+			,dblSalePrice
+			,dblMSRPPrice
+			,strPricingMethod
+			,dblLastCost
+			,dblStandardCost
+			,dblAverageCost
+			,dblEndMonthCost
+			,dblDefaultGrossPrice
+			,intSort
+			,ysnIsPendingUpdate
+			,dtmDateChanged
+			,intConcurrencyId
+			,dtmDateCreated
+			,dtmDateModified
+			,intCreatedByUserId
+			,intModifiedByUserId
+			,intDataSourceId
+			,intImportFlagInternal
+			,ysnAvgLocked
+		)
+		VALUES (
+			Source_Query.intItemId--intItemId
+			,Source_Query.intItemLocationId--,intItemLocationId
+			,DEFAULT--,dblAmountPercent
+			,Source_Query.dblSalePrice--,dblSalePrice
+			,DEFAULT--,dblMSRPPrice
+			,'None'--,strPricingMethod
+			,Source_Query.dblLastCost--,dblLastCost
+			,Source_Query.dblStandardCost--,dblStandardCost
+			,Source_Query.dblAverageCost--,dblAverageCost
+			,DEFAULT--,dblEndMonthCost
+			,DEFAULT--,dblDefaultGrossPrice
+			,DEFAULT--,intSort
+			,DEFAULT--,ysnIsPendingUpdate
+			,DEFAULT--,dtmDateChanged
+			,1--,intConcurrencyId
+			,GETDATE()--,dtmDateCreated
+			,DEFAULT--,dtmDateModified
+			,@intUserId--,intCreatedByUserId
+			,DEFAULT--,intModifiedByUserId
+			,2--,intDataSourceId
+			,DEFAULT--,intImportFlagInternal
+			,DEFAULT--,ysnAvgLocked
+		)
+
+		OUTPUT 
+			$action
+			, inserted.intItemId 
+			, inserted.intItemLocationId			
+			, inserted.intItemPricingId
+
+) AS [Changes] (
+	strAction
+	, intItemId 
+	, intItemLocationId 
+	, intItemPricingId
+);
+
+INSERT INTO #tmpICEdiImportPricebook_tblICItemPricing (
+	strAction
+	,intItemId
+	,intItemLocationId	
+	,intItemPricingId
+)
+SELECT 
+	[Changes].strAction
+	,[Changes].intItemId
+	,[Changes].intItemLocationId 	
+	,[Changes].intItemPricingId 	
+FROM (
+	MERGE	
+	INTO	dbo.tblICItemPricing
+	WITH	(HOLDLOCK) 
+	AS		ItemPricing
+	USING (
 		SELECT 
 			intItemId = i.intItemId
 			,intItemLocationId = il.intItemLocationId
