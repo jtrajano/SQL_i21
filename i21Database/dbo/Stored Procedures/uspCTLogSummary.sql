@@ -4475,7 +4475,17 @@ BEGIN TRY
 					-- DP Update Balance
 					UPDATE @cbLogSpecific
 					SET strTransactionType = 'Contract Balance'
-						, intActionId = CASE WHEN intContractTypeId = 1 THEN 49 ELSE 50 END
+						, intActionId = CASE
+							WHEN intContractTypeId = 1
+							THEN (
+								case
+								when strTransactionReference = 'Transfer Storage'
+								then 58
+								else 49 
+								end
+							)
+							ELSE 50
+							END
 						, dblQty = dblQty * -1
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					
