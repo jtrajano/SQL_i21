@@ -11,6 +11,7 @@
 	,intHeaderBookId INT
 	,intContractStatusId INT
 	,dtmUpdatedAvailabilityDate DATETIME
+	,intSubBookId INT
 
 	,CONSTRAINT [PK_tblIPContractFeedLog_intContractFeedLogId] PRIMARY KEY CLUSTERED (intContractFeedLogId ASC)
 	)
