@@ -360,6 +360,7 @@
     <Build Include="dbo\Tables\tblTRComboFreightCustomer.sql" />
     <Build Include="dbo\Views\vyuTRComboFreightCustomer.sql" />
     <Build Include="dbo\Views\vyuTRComboFreightShipVia.sql" />
+    <Build Include="dbo\Stored Procedures\uspUBSCreateDriverEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
