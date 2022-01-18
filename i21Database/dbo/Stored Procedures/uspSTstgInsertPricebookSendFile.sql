@@ -313,7 +313,8 @@ BEGIN
 							[intITTDataPriceMethodCode]				INT											NULL,
 							[strITTDataReceiptDescription]			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL,
 							[ysnITTDataFoodStampableFlg]			BIT											NULL,
-							[ysnITTDataQuantityRequiredFlg]			BIT											NULL
+							[ysnITTDataQuantityRequiredFlg]			BIT											NULL,
+							[dblTransactionQtyLimit]				DECIMAL(18, 2)								NULL					--ST-1871 Jull Requirements
 						)
 
 
@@ -346,7 +347,8 @@ BEGIN
 							[intITTDataPriceMethodCode],
 							[strITTDataReceiptDescription],
 							[ysnITTDataFoodStampableFlg],
-							[ysnITTDataQuantityRequiredFlg]
+							[ysnITTDataQuantityRequiredFlg],
+							[dblTransactionQtyLimit]
 						)
 						SELECT DISTINCT
 							[strTHRegisterVersion]				= register.strXmlVersion,
@@ -432,7 +434,8 @@ BEGIN
 																	ELSE item.strDescription
 																END,
 							[ysnITTDataFoodStampableFlg]		= ISNULL(IL.ysnFoodStampable, 0),
-							[ysnITTDataQuantityRequiredFlg]		= ISNULL(IL.ysnQuantityRequired, 0)
+							[ysnITTDataQuantityRequiredFlg]		= ISNULL(IL.ysnQuantityRequired, 0),
+							[dblTransactionQtyLimit]			= IL.dblTransactionQtyLimit													--ST-1871 Jull Requirements
 						FROM tblICItem item
 						INNER JOIN tblICCategory Cat 
 							ON Cat.intCategoryId = item.intCategoryId
@@ -545,7 +548,20 @@ BEGIN
 																		ITTData.intITTDataPriceMethodCode			AS [PriceMethodCode],
 																		ITTData.strITTDataReceiptDescription		AS [ReceiptDescription],
 																		ITTData.ysnITTDataFoodStampableFlg			AS [FoodStampableFlg],
-																		ITTData.ysnITTDataQuantityRequiredFlg		AS [QuantityRequiredFlg]
+																		ITTData.ysnITTDataQuantityRequiredFlg		AS [QuantityRequiredFlg],
+																		(
+																			SELECT
+																				ItemTransactionLimit.dblTransactionQtyLimit		AS [TransactionLimit]
+																			FROM 
+																			(
+																				SELECT DISTINCT
+																					[strICPOSCode],
+																					[dblTransactionQtyLimit]
+																				FROM @tblTempPassportITT
+																			) ItemTransactionLimit
+																			WHERE ItemTransactionLimit.strICPOSCode = ITTDetail.strICPOSCode
+																			FOR XML PATH('SalesRestriction'), TYPE
+																		)
 																	FROM 
 																	(
 																		SELECT DISTINCT
@@ -562,7 +578,8 @@ BEGIN
 																			[intITTDataPriceMethodCode],
 																			[strITTDataReceiptDescription],
 																			[ysnITTDataFoodStampableFlg],
-																			[ysnITTDataQuantityRequiredFlg]
+																			[ysnITTDataQuantityRequiredFlg],
+																			[dblTransactionQtyLimit]
 																		FROM @tblTempPassportITT
 																	) ITTData
 																	WHERE ITTData.strICPOSCode = ITTDetail.strICPOSCode
