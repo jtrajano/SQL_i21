@@ -53,6 +53,7 @@ BEGIN TRY
 		,@intCompanyLocationId INT
 		,@intContractStatusId INT
 		,@dtmUpdatedAvailabilityDate DATETIME
+		,@intSubBookId INT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intContractFeedId INT
@@ -62,6 +63,8 @@ BEGIN TRY
 		,strERPPONumber NVARCHAR(100)
 		)
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
+
+	EXEC uspIPValidateERPOtherFieldsContractFeed
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -150,6 +153,7 @@ BEGIN TRY
 			,@intCompanyLocationId = NULL
 			,@intContractStatusId = NULL
 			,@dtmUpdatedAvailabilityDate = NULL
+			,@intSubBookId = NULL
 
 		SELECT @intContractDetailId = intContractDetailId
 			,@intContractHeaderId = intContractHeaderId
@@ -163,6 +167,7 @@ BEGIN TRY
 
 		SELECT @intBookId = intBookId
 			,@strCustomerContract = strCustomerContract
+			,@intSubBookId = intSubBookId
 		FROM dbo.tblCTContractHeader
 		WHERE intContractHeaderId = @intContractHeaderId
 
@@ -431,6 +436,7 @@ BEGIN TRY
 					,intHeaderBookId
 					,intContractStatusId
 					,dtmUpdatedAvailabilityDate
+					,intSubBookId
 					)
 				SELECT @intContractHeaderId
 					,@intContractDetailId
@@ -441,6 +447,7 @@ BEGIN TRY
 					,@intBookId
 					,@intContractStatusId
 					,@dtmUpdatedAvailabilityDate
+					,@intSubBookId
 			END
 			ELSE
 			BEGIN

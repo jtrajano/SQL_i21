@@ -18,6 +18,7 @@ BEGIN
 		,@intBookId INT
 		,@intContractStatusId INT
 		,@dtmUpdatedAvailabilityDate DATETIME
+		,@intSubBookId INT
 		,@intContractFeedId INT
 	--,@intOrgContractFeedId INT
 	DECLARE @tblCTContractDetail TABLE (
@@ -53,6 +54,7 @@ BEGIN
 		AND CD.intContractStatusId = 1
 	WHERE ISNULL(L.strCustomerContract, '') <> ISNULL(CH.strCustomerContract, '')
 		OR ISNULL(L.dtmUpdatedAvailabilityDate, 0) <> ISNULL(CD.dtmUpdatedAvailabilityDate, 0)
+		OR ISNULL(L.intSubBookId, 0) <> ISNULL(CH.intSubBookId, 0)
 
 	SELECT @intContractDetailId = NULL
 
@@ -80,6 +82,7 @@ BEGIN
 			,@intBookId = NULL
 			,@intContractStatusId = NULL
 			,@dtmUpdatedAvailabilityDate = NULL
+			,@intSubBookId = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 		FROM tblIPContractFeedLog
@@ -211,6 +214,7 @@ BEGIN
 		SELECT @strContractNumber = strContractNumber
 			,@strVendorRefNo = strCustomerContract
 			,@intBookId = intBookId
+			,@intSubBookId = intSubBookId
 		FROM tblCTContractHeader WITH (NOLOCK)
 		WHERE intContractHeaderId = @intContractHeaderId
 
@@ -229,6 +233,7 @@ BEGIN
 			,intHeaderBookId
 			,intContractStatusId
 			,dtmUpdatedAvailabilityDate
+			,intSubBookId
 			)
 		SELECT @intContractHeaderId
 			,@intContractDetailId
@@ -240,6 +245,7 @@ BEGIN
 			,@intBookId
 			,@intContractStatusId
 			,@dtmUpdatedAvailabilityDate
+			,@intSubBookId
 
 		SELECT @strInfo1 = @strContractNumber + ' / ' + ISNULL(@strContractSeq, '')
 
