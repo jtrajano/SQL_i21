@@ -107,6 +107,8 @@ BEGIN TRY
 
 	SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 
+	EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'FutOptTransaction', @intUserId, 'ADD', 0
+
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
