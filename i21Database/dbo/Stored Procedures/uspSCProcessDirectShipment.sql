@@ -836,8 +836,7 @@ BEGIN TRY
 			END
 						
 				
-			---Create GL Entries
-			EXEC uspSCCreateDirectInGLEntries @intTicketId, 1, @intUserId 
+			
 
 			--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
 			BEGIN
@@ -881,6 +880,9 @@ BEGIN TRY
 				WHERE A.intTicketId = @intTicketId
 					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
 			END
+
+			---Create GL Entries
+			EXEC uspSCCreateDirectInGLEntries @intTicketId, 1, @intUserId 
 
 			--Create Voucher
 			EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
