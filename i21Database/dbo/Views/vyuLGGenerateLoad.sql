@@ -54,8 +54,8 @@ SELECT GL.intGenerateLoadId
 	  ,ET.strEquipmentType						AS strEquipmentType
 	  ,EH.intEntityId							AS intHaulerEntityId
 	  ,EH.strName								AS strHaulerName
-	  ,EH.intEntityId							AS intDriverEntityId
-	  ,EH.strName								AS strDriverName
+	  ,DV.intEntityId							AS intDriverEntityId
+	  ,DV.strName								AS strDriverName
 	  ,GL.dblFreightRate
 	  ,GL.intFreightCurrencyId
 	  ,CUR.strCurrency							AS strFreightCurrency
