@@ -33,7 +33,7 @@ DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@intSubLocationId INT
 	,@strUpdateTolerance NVARCHAR(50)
 	,@ysnVirtualRecipe BIT
-DECLARE @tblIPInitialAck TABLE (intTrxSequenceNo BIGINT);
+
 
 --Recipe Delete
 IF @strImportType = 'Recipe Delete'
@@ -604,7 +604,7 @@ BEGIN
 					SELECT @intRecipeId = intRecipeId
 					FROM tblMFRecipe
 					WHERE strERPRecipeNo = @strERPRecipeNo
-					AND intLocationId = @intLocationId
+						AND intLocationId = @intLocationId
 				END
 				ELSE
 				BEGIN
@@ -880,41 +880,6 @@ BEGIN
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 		AND ysnImport = 1
-
-	DELETE
-	FROM @tblIPInitialAck
-
-	INSERT INTO dbo.tblIPInitialAck (
-		intTrxSequenceNo
-		,strCompanyLocation
-		,dtmCreatedDate
-		,strCreatedBy
-		,intMessageTypeId
-		,intStatusId
-		,strStatusText
-		)
-	OUTPUT INSERTED.intTrxSequenceNo
-	INTO @tblIPInitialAck
-	SELECT intTrxSequenceNo
-		,CL.strLotOrigin AS CompanyLocation
-		,NULL AS CreatedDate
-		,NULL AS CreatedBy
-		,4 AS intMessageTypeId
-		,CASE 
-			WHEN strMessage = 'Success'
-				THEN 1
-			ELSE 0
-			END AS intStatusId
-		,strMessage
-	FROM tblMFRecipeStage R
-	JOIN tblSMCompanyLocation CL ON CL.strLocationName = R.strLocationName
-	WHERE R.ysnInitialAckSent IS NULL
-		AND strSessionId = @strSessionId
-
-	UPDATE R
-	SET ysnInitialAckSent = 1
-	FROM tblMFRecipeStage R
-	JOIN @tblIPInitialAck IA ON IA.intTrxSequenceNo = R.intTrxSequenceNo
 END
 
 --Recipe Item
@@ -1756,7 +1721,7 @@ BEGIN
 		AND ISNULL(strMessage, '') = ''
 		AND ysnImport = 1
 
-	DELETE
+	/*DELETE
 	FROM @tblIPInitialAck
 
 	INSERT INTO dbo.tblIPInitialAck (
@@ -1789,7 +1754,8 @@ BEGIN
 	UPDATE RI
 	SET ysnInitialAckSent = 1
 	FROM tblMFRecipeItemStage RI
-	JOIN @tblIPInitialAck IA ON IA.intTrxSequenceNo = RI.intTrxSequenceNo
+	JOIN @tblIPInitialAck IA ON IA.intTrxSequenceNo = RI.intTrxSequenceNo*/
+	
 END
 
 --Recipe Substitute Item
