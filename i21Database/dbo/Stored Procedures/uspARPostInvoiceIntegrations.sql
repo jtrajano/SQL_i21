@@ -1016,6 +1016,12 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesToUpdate)
 		DELETE FROM @tblInvoicesToUpdate WHERE intId = @intInvoiceId
 	END
 
+--SALES ANALYSIS REPORT
+EXEC dbo.uspARSalesAnalysisReport @tblTransactionIds     = @tblInvoicesToUpdate
+                                , @ysnInvoice            = 1
+                                , @ysnRebuild            = 0
+                                , @ysnPost               = @Post
+
 --AUDIT LOG
 DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
 DELETE FROM @InvoiceLog

@@ -9209,7 +9209,9 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
     <Build Include="dbo\Tables\tblARPerformanceLog.sql" />
     <Build Include="dbo\Views\vyuARPerformanceLog.sql" />
-    <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />    
+    <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
+    <Build Include="dbo\Tables\tblARSalesAnalysisStagingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
