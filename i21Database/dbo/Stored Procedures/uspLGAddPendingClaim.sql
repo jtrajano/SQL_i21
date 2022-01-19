@@ -124,7 +124,7 @@ BEGIN
 						JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 						JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 						JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
-						JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+						JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId AND WG.dblFranchise IS NOT NULL
 						JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1
 						LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 						LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
@@ -275,7 +275,7 @@ BEGIN
 							JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 							JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 							JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
-							JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+							JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId AND WG.dblFranchise IS NOT NULL
 							LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 							LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 							LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
@@ -411,7 +411,7 @@ BEGIN
 					JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
-					JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+					JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId AND WG.dblFranchise IS NOT NULL
 					LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 					LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 					LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
