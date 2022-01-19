@@ -8,6 +8,8 @@ CREATE PROCEDURE [dbo].[uspRKCreateOtcForwardFromCT]
 	, @dblContractRate NUMERIC(24, 10)
 	, @intLocationId INT
 	, @intUserId INT
+	, @intContractHeaderId INT
+	, @intContractDetailId INT
 	, @intFutOptTransactionHeaderId INT OUTPUT
 	, @intFutOptTransactionId INT OUTPUT
 	, @strInternalTradeNo NVARCHAR(200) OUTPUT
@@ -80,6 +82,8 @@ BEGIN TRY
 		, dtmMaturityDate
 		, dblContractRate
 		, dtmCreateDateTime
+		, intContractHeaderId
+		, intContractDetailId
 	)
 	SELECT 
 		intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
@@ -98,6 +102,8 @@ BEGIN TRY
 		, dtmMaturityDate = @dtmMaturityDate
 		, dblContractRate = @dblContractRate
 		, dtmCreateDateTime = GETDATE()
+		, intContractHeaderId = @intContractHeaderId
+		, intContractDetailId = @intContractDetailId
 
 	SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 
