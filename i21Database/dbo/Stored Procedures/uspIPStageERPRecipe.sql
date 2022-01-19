@@ -76,8 +76,8 @@ BEGIN TRY
 		SELECT @strOutputItemUpperTolerance = 0
 	END
 
-	DELETE FROM tblMFRecipeStage WHERE intStatusId=1
-	DELETE FROM tblMFRecipeItemStage WHERE intStatusId=1
+	DELETE FROM tblMFRecipeStage WHERE intStatusId=1 AND ysnInitialAckSent =1
+	DELETE FROM tblMFRecipeItemStage WHERE intStatusId=1 AND ysnInitialAckSent =1
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN

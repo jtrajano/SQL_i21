@@ -399,7 +399,10 @@ BEGIN TRY
 				AND intStorageLocationId = @intStorageLocationId
 
 			IF @intLotId IS NULL
-				AND @intTransactionTypeId <> 10
+				AND @intTransactionTypeId NOT IN (
+					8
+					,10
+					)
 			BEGIN
 				SELECT @strError = 'Lot ' + @strLotNo + ' is not available in the storage unit ' + @strStorageUnit + '.'
 
@@ -414,7 +417,10 @@ BEGIN TRY
 
 			IF @intTransactionTypeId = 20
 			BEGIN
-				SELECT @dblQuantity = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
+				IF @dblWeightPerQty > 0
+				BEGIN
+					SELECT @dblQuantity = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
+				END
 
 				SELECT @intItemUOMId = @intLotItemUOMId
 
@@ -478,20 +484,20 @@ BEGIN TRY
 						,@strContainerNo = NULL
 						,@strMarkings = NULL
 						,@intEntityVendorId = NULL
-						,@strCondition=NULL 
-						,@intInventoryReceiptId=NULL
+						,@strCondition = NULL
+						,@intInventoryReceiptId = NULL
 
-					SELECT Top 1 @intParentLotId = intParentLotId
+					SELECT TOP 1 @intParentLotId = intParentLotId
 						,@dblWeightPerQty = dblWeightPerQty
 						,@intLotItemUOMId = intItemUOMId
 						,@strContainerNo = strContainerNo
 						,@strMarkings = strMarkings
 						,@intEntityVendorId = intEntityVendorId
-						,@strCondition=strCondition 
+						,@strCondition = strCondition
 					FROM tblICLot
 					WHERE intItemId = @intItemId
 						AND strLotNumber = @strLotNo
-						Order by intLotId 
+					ORDER BY intLotId
 
 					IF @intParentLotId IS NULL
 					BEGIN
@@ -543,11 +549,10 @@ BEGIN TRY
 						,NULL
 						,NULL
 						,NULL
-						,@strContainerNo 
-						,@strMarkings 
+						,@strContainerNo
+						,@strMarkings
 						,@intEntityVendorId
 						,@strCondition
-
 				END
 				ELSE
 				BEGIN
@@ -635,7 +640,6 @@ BEGIN TRY
 							,@intPurchaseSale = 1
 							,@intLoadContainerId = @intLoadContainerId
 							,@ysnAddClaim = 1
-
 					END
 					ELSE
 					BEGIN
@@ -670,12 +674,123 @@ BEGIN TRY
 							,@intPurchaseSale = 1
 							,@intLoadContainerId = @intLoadContainerId
 							,@ysnAddClaim = 1
-
 					END
 				END
 			END
 			ELSE IF @intTransactionTypeId = 8
 			BEGIN
+				IF @intLotId IS NULL
+				BEGIN
+					EXEC uspMFGeneratePatternId @intCategoryId = NULL
+						,@intItemId = NULL
+						,@intManufacturingId = NULL
+						,@intSubLocationId = NULL
+						,@intLocationId = @intCompanyLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 33 -- Transaction Batch Id
+						,@ysnProposed = 0
+						,@strPatternString = @intBatchId OUTPUT
+
+					SELECT @intItemLocationId = NULL
+
+					SELECT @intItemLocationId = intItemLocationId
+					FROM tblICItemLocation
+					WHERE intItemId = @intItemId
+						AND intLocationId = @intCompanyLocationId
+
+					SELECT @dblStandardCost = NULL
+
+					SELECT @dblStandardCost = t.dblStandardCost
+					FROM tblICItemPricing t WITH (NOLOCK)
+					WHERE t.intItemId = @intItemId
+						AND t.intItemLocationId = @intItemLocationId
+
+					SELECT @intParentLotId = NULL
+						,@dblWeightPerQty = NULL
+						,@intLotItemUOMId = NULL
+						,@strParentLotNumber = NULL
+						,@strContainerNo = NULL
+						,@strMarkings = NULL
+						,@intEntityVendorId = NULL
+						,@strCondition = NULL
+						,@intInventoryReceiptId = NULL
+
+					SELECT TOP 1 @intParentLotId = intParentLotId
+						,@dblWeightPerQty = dblWeightPerQty
+						,@intLotItemUOMId = intItemUOMId
+						,@strContainerNo = strContainerNo
+						,@strMarkings = strMarkings
+						,@intEntityVendorId = intEntityVendorId
+						,@strCondition = strCondition
+					FROM tblICLot
+					WHERE intItemId = @intItemId
+						AND strLotNumber = @strLotNo
+					ORDER BY intLotId
+
+					IF @intParentLotId IS NULL
+					BEGIN
+						SELECT @dblWeightPerQty = 1
+
+						SELECT @dblNoOfPack = @dblQuantity
+
+						SELECT @intLotItemUOMId = @intItemUOMId
+					END
+					ELSE
+					BEGIN
+						SELECT @dblNoOfPack = NULL
+
+						SELECT @dblNoOfPack = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
+					END
+
+					SELECT @strParentLotNumber = strParentLotNumber
+					FROM tblICParentLot
+					WHERE intParentLotId = @intParentLotId
+
+					EXEC uspMFPostProduction 1
+						,0
+						,NULL
+						,@intItemId
+						,@intUserId
+						,NULL
+						,@intStorageLocationId
+						,@dblQuantity
+						,@intItemUOMId
+						,@dblWeightPerQty
+						,@dblNoOfPack
+						,@intLotItemUOMId
+						,@strLotNo
+						,@strLotNo
+						,@intBatchId
+						,@intLotId OUTPUT
+						,NULL
+						,NULL
+						,@strParentLotNumber --Parent Lot Number
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,@dblStandardCost
+						,'Created from external system'
+						,1
+						,NULL
+						,NULL
+						,NULL
+						,@strContainerNo
+						,@strMarkings
+						,@intEntityVendorId
+						,@strCondition
+
+					SELECT @dblLastCost = dblLastCost
+						,@intLotItemUOMId = intItemUOMId
+						,@dblWeightPerQty = dblWeightPerQty
+						,@dblQty = dblQty
+					FROM tblICLot
+					WHERE intLotId=@intLotId
+				END
+
 				EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 					,@intItemId = @intItemId
 					,@intManufacturingId = NULL
@@ -737,7 +852,7 @@ BEGIN TRY
 					,intItemUOMId = @intItemUOMId
 					,dtmDate = @dtmDate
 					,dblQty = - @dblQuantity
-					,dblUOMQty = @intItemUOMId
+					,dblUOMQty = 1
 					,dblCost = @dblLastCost
 					,dblSalesPrice = 0
 					,intCurrencyId = NULL
