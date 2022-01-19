@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuSTTranslogDetails]
 AS
 
-SELECT 
-	strUniqueId 
+SELECT intTranslogId AS intId
+	, strUniqueId 
 	, intTrlDeptNumber
 	, strTrlDept
 	, strTrlNetwCode
@@ -56,7 +56,8 @@ SELECT
 	--, ROW_NUMBER() OVER (ORDER BY intTermMsgSN ASC) AS intId
 FROM
 (   SELECT --DISTINCT  -- update 09/08
-        CAST(TR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TR.intStoreId AS NVARCHAR(MAX)) 
+        intTranslogId
+		, CAST(TR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TR.intStoreId AS NVARCHAR(MAX)) 
                 --+ CAST(USec.intEntityId AS NVARCHAR(MAX)) 
                 COLLATE Latin1_General_CI_AS AS strUniqueId
        , TR.intTrlDeptNumber
@@ -128,8 +129,8 @@ FROM
 		,TR.strTrlMatchLineTrlMatchName  -- Added 09/26/2021
 
        FROM tblSTTranslogRebates TR 
-        WHERE  (strTransRollback IS NULL AND strTransType NOT LIKE '%suspended%' AND strTransType NOT LIKE '%void%' AND strTrLineType<>'preFuel' AND strTransFuelPrepayCompletion IS NULL) 
-		OR     (strTransRollback IS NULL AND strTransType NOT LIKE '%suspended%' AND strTransType NOT LIKE '%void%' AND strTrLineType='postFuel' AND strTransFuelPrepayCompletion IS NOT NULL)
+        WHERE  (strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE '%suspended%' AND strTransType NOT LIKE '%void%' AND strTrLineType<>'preFuel' AND strTransFuelPrepayCompletion IS NULL) 
+		OR     (strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE '%suspended%' AND strTransType NOT LIKE '%void%' AND strTrLineType='postFuel' AND strTransFuelPrepayCompletion IS NOT NULL)
        	   
 ) x
 GO
