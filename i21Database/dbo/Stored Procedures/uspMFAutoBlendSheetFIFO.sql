@@ -88,6 +88,11 @@ BEGIN TRY
 		,@dblItemRequiredQty NUMERIC(38, 20)
 		,@intSeq INT
 		,@dblTotalPickedQty NUMERIC(38, 20)
+		,@dblSuggestedCeilingQty DECIMAL(38, 20)
+		,@dblSuggestedFloorQty DECIMAL(38, 20)
+		,@dblCeilingQtyDiff DECIMAL(38, 20)
+		,@dblFloorQtyDiff DECIMAL(38, 20)
+		,@dblOrgRequiredQty DECIMAL(38, 20)
 	DECLARE @tblInputItemSeq TABLE (
 		intItemId INT
 		,intSeq INT
@@ -1671,8 +1676,17 @@ BEGIN TRY
 					AND @intIssuedUOMTypeId = 2
 					GOTO LOOP_END
 
-				IF @intIssuedUOMTypeId = 2 --'BAG' 
-					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty)
+				IF @intIssuedUOMTypeId = 2
+				BEGIN
+					IF @dblWeightPerQty - (@dblAvailableQty % @dblWeightPerQty) < 0.01
+					BEGIN
+						SET @dblAvailableQty = @dblAvailableQty
+					END
+					ELSE
+					BEGIN
+						SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty)
+					END
+				END
 
 				IF @intIssuedUOMTypeId = 3
 					AND @ysnMinorIngredient = 0 --Weight and Pack 
@@ -1772,36 +1786,44 @@ BEGIN TRY
 
 						IF @intIssuedUOMTypeId = 2
 						BEGIN
-							IF (
-									Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty), 0) * @dblWeightPerQty) BETWEEN @dblLowerToleranceQty
-										AND @dblUpperToleranceQty
+							SELECT @dblPickedQty = NULL
+
+							SELECT @dblPickedQty = dblPickedQty
+							FROM @tblInputItem
+							WHERE intItemId = @intRawItemId
+
+							SELECT @dblSuggestedCeilingQty = 0
+
+							SELECT @dblSuggestedCeilingQty = Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty)) * @dblWeightPerQty)
+
+							SELECT @dblSuggestedFloorQty = 0
+
+							SELECT @dblSuggestedFloorQty = Convert(NUMERIC(38, 20), Floor(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty)) * @dblWeightPerQty)
+
+							SELECT @dblCeilingQtyDiff = @dblOriginalRequiredQty - (@dblPickedQty + @dblSuggestedCeilingQty)
+
+							SELECT @dblFloorQtyDiff = @dblOriginalRequiredQty - (@dblPickedQty + @dblSuggestedFloorQty)
+
+							IF abs(@dblFloorQtyDiff) > abs(@dblCeilingQtyDiff)
+								AND @dblSuggestedCeilingQty + @dblPickedQty BETWEEN @dblLowerToleranceQty
+									AND @dblUpperToleranceQty
+								AND (
+									@dblAvailableQty >= @dblSuggestedCeilingQty
+									OR @dblSuggestedCeilingQty - @dblAvailableQty < 0.01
 									)
-								AND @dblAvailableQty >= Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty), 0) * @dblWeightPerQty)
 							BEGIN
-								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty), 0) * @dblWeightPerQty)
-									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty), 0))
-							END
-							ELSE IF (
-									Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty)) * @dblWeightPerQty) BETWEEN @dblLowerToleranceQty
-										AND @dblUpperToleranceQty
-									)
-								AND @dblAvailableQty >= Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty)) * @dblWeightPerQty)
-							BEGIN
-								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty)) * @dblWeightPerQty)
+								SELECT @dblQuantity = @dblSuggestedCeilingQty
 									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty)))
 							END
-							--ELSE IF Convert(NUMERIC(38, 20), Floor(@dblRequiredQty / @dblWeightPerQty) * @dblWeightPerQty) BETWEEN @dblLowerToleranceQty
-							--		AND @dblUpperToleranceQty
 							ELSE
 							BEGIN
-								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Floor(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty)) * @dblWeightPerQty)
-									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Floor(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty)))
+								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty),0)*@dblWeightPerQty)
+									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty),0))
 							END
-							--ELSE
-							--BEGIN
-							--	SELECT @dblQuantity = @dblRequiredQty
-							--		,@dblIssuedQuantity = Convert(NUMERIC(38, 20), @dblRequiredQty / @dblWeightPerQty)
-							--END
+
+							UPDATE @tblInputItem
+							SET dblPickedQty = dblPickedQty + @dblQuantity
+							WHERE intItemId = @intRawItemId
 						END
 
 						IF @intIssuedUOMTypeId = 3
@@ -1815,14 +1837,14 @@ BEGIN TRY
 							BEGIN
 								SELECT @dblQuantity = @dblRequiredQty
 									,@dblIssuedQuantity = @dblRequiredQty
-									,@intItemIssuedUOMId=@intItemUOMId
+									,@intItemIssuedUOMId = @intItemUOMId
 							END
 
 							IF @dblQuantity = 0
 							BEGIN
 								SELECT @dblQuantity = @dblRequiredQty
 									,@dblIssuedQuantity = @dblRequiredQty
-									,@intItemIssuedUOMId=@intItemUOMId
+									,@intItemIssuedUOMId = @intItemUOMId
 
 								UPDATE @tblInputItem
 								SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1882,7 +1904,7 @@ BEGIN TRY
 
 											SELECT @dblQuantity = @dblRequiredQty
 												,@dblIssuedQuantity = @dblRequiredQty
-												,@intItemIssuedUOMId=@intItemUOMId
+												,@intItemIssuedUOMId = @intItemUOMId
 
 											UPDATE @tblInputItem
 											SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1897,7 +1919,7 @@ BEGIN TRY
 
 										SELECT @dblQuantity = @dblRequiredQty
 											,@dblIssuedQuantity = @dblRequiredQty
-											,@intItemIssuedUOMId=@intItemUOMId
+											,@intItemIssuedUOMId = @intItemUOMId
 
 										UPDATE @tblInputItem
 										SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1912,7 +1934,7 @@ BEGIN TRY
 
 									SELECT @dblQuantity = @dblRequiredQty
 										,@dblIssuedQuantity = @dblRequiredQty
-									,@intItemIssuedUOMId=@intItemUOMId
+										,@intItemIssuedUOMId = @intItemUOMId
 
 									UPDATE @tblInputItem
 									SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1921,42 +1943,45 @@ BEGIN TRY
 							END
 						END
 
-						INSERT INTO #tblBlendSheetLot (
-							intParentLotId
-							,intItemId
-							,dblQuantity
-							,intItemUOMId
-							,dblIssuedQuantity
-							,intItemIssuedUOMId
-							,intRecipeItemId
-							,intStorageLocationId
-							,dblWeightPerQty
-							,dblUnitCost
-							)
-						SELECT @intParentLotId
-							,@intItemId
-							,@dblQuantity
-							,@intItemUOMId
-							,@dblIssuedQuantity
-							,@intItemIssuedUOMId
-							,@intRecipeItemId
-							,@intStorageLocationId
-							,@dblWeightPerQty
-							,@dblUnitCost
-
-						IF ISNULL(@intPartialQuantitySubLocationId, 0) > 0
-							AND @intIssuedUOMTypeId = 2
+						IF @dblQuantity > 0
 						BEGIN
-							SET @dblRequiredQty = @dblRequiredQty - Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty), 0) * @dblWeightPerQty
+							INSERT INTO #tblBlendSheetLot (
+								intParentLotId
+								,intItemId
+								,dblQuantity
+								,intItemUOMId
+								,dblIssuedQuantity
+								,intItemIssuedUOMId
+								,intRecipeItemId
+								,intStorageLocationId
+								,dblWeightPerQty
+								,dblUnitCost
+								)
+							SELECT @intParentLotId
+								,@intItemId
+								,@dblQuantity
+								,@intItemUOMId
+								,@dblIssuedQuantity
+								,@intItemIssuedUOMId
+								,@intRecipeItemId
+								,@intStorageLocationId
+								,@dblWeightPerQty
+								,@dblUnitCost
 
-							IF @dblRequiredQty = 0
+							IF ISNULL(@intPartialQuantitySubLocationId, 0) > 0
+								AND @intIssuedUOMTypeId = 2
+							BEGIN
+								SET @dblRequiredQty = @dblRequiredQty - Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty), 0) * @dblWeightPerQty
+
+								IF @dblRequiredQty = 0
+									GOTO LOOP_END;
+							END
+							ELSE
+							BEGIN
+								SET @dblRequiredQty = 0
+
 								GOTO LOOP_END;
-						END
-						ELSE
-						BEGIN
-							SET @dblRequiredQty = 0
-
-							GOTO LOOP_END;
+							END
 						END
 					END
 					ELSE
@@ -2038,36 +2063,44 @@ BEGIN TRY
 
 						IF @intIssuedUOMTypeId = 2
 						BEGIN
-							IF (
-									Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty), 0) * @dblWeightPerQty) BETWEEN @dblLowerToleranceQty
-										AND @dblUpperToleranceQty
+							SELECT @dblPickedQty = NULL
+
+							SELECT @dblPickedQty = dblPickedQty
+							FROM @tblInputItem
+							WHERE intItemId = @intRawItemId
+
+							SELECT @dblSuggestedCeilingQty = 0
+
+							SELECT @dblSuggestedCeilingQty = Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty)) * @dblWeightPerQty)
+
+							SELECT @dblSuggestedFloorQty = 0
+
+							SELECT @dblSuggestedFloorQty = Convert(NUMERIC(38, 20), Floor(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty)) * @dblWeightPerQty)
+
+							SELECT @dblCeilingQtyDiff = @dblOriginalRequiredQty - (@dblPickedQty + @dblSuggestedCeilingQty)
+
+							SELECT @dblFloorQtyDiff = @dblOriginalRequiredQty - (@dblPickedQty + @dblSuggestedFloorQty)
+
+							IF abs(@dblFloorQtyDiff) > abs(@dblCeilingQtyDiff)
+								AND @dblSuggestedCeilingQty + @dblPickedQty BETWEEN @dblLowerToleranceQty
+									AND @dblUpperToleranceQty
+								AND (
+									@dblAvailableQty >= @dblSuggestedCeilingQty
+									OR @dblSuggestedCeilingQty - @dblAvailableQty < 0.01
 									)
-								AND @dblAvailableQty >= Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty), 0) * @dblWeightPerQty)
 							BEGIN
-								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty), 0) * @dblWeightPerQty)
-									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty), 0))
-							END
-							ELSE IF (
-									Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty)) * @dblWeightPerQty) BETWEEN @dblLowerToleranceQty
-										AND @dblUpperToleranceQty
-									)
-								AND @dblAvailableQty >= Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty)) * @dblWeightPerQty)
-							BEGIN
-								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty)) * @dblWeightPerQty)
+								SELECT @dblQuantity = @dblSuggestedCeilingQty
 									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty)))
 							END
-							--ELSE IF Convert(NUMERIC(38, 20), Floor(@dblAvailableQty / @dblWeightPerQty) * @dblWeightPerQty) BETWEEN @dblLowerToleranceQty
-							--		AND @dblUpperToleranceQty
 							ELSE
 							BEGIN
-								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Floor(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty)) * @dblWeightPerQty)
-									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Floor(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty)))
+								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty),0)*@dblWeightPerQty)
+									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty),0))
 							END
-							--ELSE
-							--BEGIN
-							--	SELECT @dblQuantity = @dblAvailableQty
-							--		,@dblIssuedQuantity = Convert(NUMERIC(38, 20), @dblAvailableQty / @dblWeightPerQty)
-							--END
+
+							UPDATE @tblInputItem
+							SET dblPickedQty = dblPickedQty + @dblQuantity
+							WHERE intItemId = @intRawItemId
 						END
 
 						IF @intIssuedUOMTypeId = 3
@@ -2082,14 +2115,14 @@ BEGIN TRY
 							BEGIN
 								SELECT @dblQuantity = @dblAvailableQty
 									,@dblIssuedQuantity = @dblAvailableQty
-									,@intItemIssuedUOMId=@intItemUOMId
+									,@intItemIssuedUOMId = @intItemUOMId
 							END
 
 							IF @dblQuantity = 0
 							BEGIN
 								SELECT @dblQuantity = @dblAvailableQty
 									,@dblIssuedQuantity = @dblAvailableQty
-									,@intItemIssuedUOMId=@intItemUOMId
+									,@intItemIssuedUOMId = @intItemUOMId
 
 								UPDATE @tblInputItem
 								SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -2149,7 +2182,7 @@ BEGIN TRY
 
 											SELECT @dblQuantity = @dblAvailableQty
 												,@dblIssuedQuantity = @dblAvailableQty
-												,@intItemIssuedUOMId=@intItemUOMId
+												,@intItemIssuedUOMId = @intItemUOMId
 
 											UPDATE @tblInputItem
 											SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -2164,7 +2197,7 @@ BEGIN TRY
 
 										SELECT @dblQuantity = @dblAvailableQty
 											,@dblIssuedQuantity = @dblAvailableQty
-											,@intItemIssuedUOMId=@intItemUOMId
+											,@intItemIssuedUOMId = @intItemUOMId
 
 										UPDATE @tblInputItem
 										SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -2179,7 +2212,7 @@ BEGIN TRY
 
 									SELECT @dblQuantity = @dblAvailableQty
 										,@dblIssuedQuantity = @dblAvailableQty
-											,@intItemIssuedUOMId=@intItemUOMId
+										,@intItemIssuedUOMId = @intItemUOMId
 
 									UPDATE @tblInputItem
 									SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -2188,41 +2221,43 @@ BEGIN TRY
 							END
 						END
 
-						INSERT INTO #tblBlendSheetLot (
-							intParentLotId
-							,intItemId
-							,dblQuantity
-							,intItemUOMId
-							,dblIssuedQuantity
-							,intItemIssuedUOMId
-							,intRecipeItemId
-							,intStorageLocationId
-							,dblWeightPerQty
-							,dblUnitCost
-							)
-						SELECT @intParentLotId
-							,@intItemId
-							,@dblQuantity
-							,@intItemUOMId
-							,@dblIssuedQuantity
-							,@intItemIssuedUOMId
-							,@intRecipeItemId
-							,@intStorageLocationId
-							,@dblWeightPerQty
-							,@dblUnitCost
-
-						UPDATE @tblInputItem
-						SET dblPickedQty = dblPickedQty + @dblQuantity
-						WHERE intItemId = @intRawItemId
-
-						SET @dblRequiredQty = @dblRequiredQty - @dblQuantity
-
-						IF @intIssuedUOMTypeId = 2
-							AND Round(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty), 0) * @dblWeightPerQty = 0
+						IF @dblQuantity > 0
 						BEGIN
-							SELECT @dblRequiredQty = 0
+							INSERT INTO #tblBlendSheetLot (
+								intParentLotId
+								,intItemId
+								,dblQuantity
+								,intItemUOMId
+								,dblIssuedQuantity
+								,intItemIssuedUOMId
+								,intRecipeItemId
+								,intStorageLocationId
+								,dblWeightPerQty
+								,dblUnitCost
+								)
+							SELECT @intParentLotId
+								,@intItemId
+								,@dblQuantity
+								,@intItemUOMId
+								,@dblIssuedQuantity
+								,@intItemIssuedUOMId
+								,@intRecipeItemId
+								,@intStorageLocationId
+								,@dblWeightPerQty
+								,@dblUnitCost
 
-							GOTO LOOP_END;
+							--UPDATE @tblInputItem
+							--SET dblPickedQty = dblPickedQty + @dblQuantity
+							--WHERE intItemId = @intRawItemId
+							SET @dblRequiredQty = @dblRequiredQty - @dblQuantity
+
+							IF @intIssuedUOMTypeId = 2
+								AND Round(dbo.[fnDivide](@dblAvailableQty, @dblWeightPerQty), 0) * @dblWeightPerQty = 0
+							BEGIN
+								SELECT @dblRequiredQty = 0
+
+								GOTO LOOP_END;
+							END
 						END
 					END
 				END

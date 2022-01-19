@@ -202,7 +202,7 @@ BEGIN
 						FROM tblLGLoadDetailContainerLink
 						WHERE intLoadDetailId = LD.intLoadDetailId
 							AND intLoadContainerId = LC.intLoadContainerId
-							AND ISNULL(dblReceivedQty, 0) >= dblQuantity
+							--AND ISNULL(dblReceivedQty, 0) >= dblQuantity
 						GROUP BY intLoadContainerId
 						) CLNW
 					CROSS APPLY (

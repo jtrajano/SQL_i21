@@ -45,6 +45,8 @@ BEGIN TRY
 		,@intParentLotId INT
 		,@strChildLotNumber NVARCHAR(50)
 		,@ysnEnableParentLot BIT
+		,@intSampleTypeId INT
+		,@strMarks NVARCHAR(100)
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -83,6 +85,8 @@ BEGIN TRY
 		,@strApprovalBase = ISNULL(ST.strApprovalBase, '')
 		,@strContainerNumber = S.strContainerNumber
 		,@strChildLotNumber = strChildLotNumber
+		,@intSampleTypeId = ST.intSampleTypeId
+		,@strMarks=S.strMarks 
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	WHERE S.intSampleId = @intSampleId
@@ -273,6 +277,7 @@ BEGIN TRY
 	IF (
 			@intProductTypeId = 6
 			OR @intProductTypeId = 11
+			OR @intProductTypeId = 9
 			)
 		AND (@strApprovalBase <> '')
 	BEGIN
@@ -491,8 +496,8 @@ BEGIN TRY
 					,L.intStorageLocationId
 					,L.intLotStatusId
 				FROM tblICLot L
-				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-				WHERE RIL.strContainerNo = @strContainerNumber
+				WHERE L.strContainerNo = @strContainerNumber
+				AND IsNULL(L.strMarkings,'')=IsNULL(@strMarks,'')
 			END
 		END
 		ELSE IF @strApprovalBase = 'Work Order'
@@ -604,6 +609,12 @@ BEGIN TRY
 					AND intControlPointId = @intSampleControlPointId
 					AND ysnApprove = 0
 			END
+			IF @intProductTypeId=9
+			BEGIN
+				SELECT @intLotStatusId = intRejectionLotStatusId
+				FROM tblQMSampleType
+				WHERE intSampleTypeId = @intSampleTypeId
+			END
 
 			IF @intCurrentLotStatusId <> @intLotStatusId
 				AND @intSampleControlPointId <> 14
@@ -627,6 +638,7 @@ BEGIN TRY
 			CASE 
 				WHEN @intProductTypeId IN (
 						6
+						,9
 						,11
 						)
 					THEN @intLotStatusId

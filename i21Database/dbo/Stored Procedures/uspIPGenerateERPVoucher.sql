@@ -65,6 +65,7 @@ BEGIN TRY
 		,@intWeightAdjItemId INT
 		,@dblCostAdjustment NUMERIC(18, 6)
 		,@intNoOfItem INT
+		,@intLocationId int
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
 	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -142,6 +143,7 @@ BEGIN TRY
 			,@dblTotal = NULL
 			,@strRemarks = NULL
 			,@strERPVoucherNo = NULL
+			,@intLocationId=NULL
 
 		SELECT @intBillDetailId = NULL
 			,@strDetailXML = ''
@@ -196,6 +198,7 @@ BEGIN TRY
 			,@dblTax = CONVERT(NUMERIC(18, 6), A.dblTax)
 			,@dblTotal = CONVERT(NUMERIC(18, 6), A.dblTotal)
 			,@strRemarks = A.strRemarks
+			,@intLocationId=A.intStoreLocationId 
 		FROM dbo.tblAPBill A
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(@intUserId, A.intEntityId)
 		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = A.intEntityVendorId
@@ -538,12 +541,13 @@ BEGIN TRY
 			--AND MD.intItemId = BD.intItemId
 			WHERE BD.intBillDetailId = @intBillDetailId
 
-			IF @intOrgTransactionType <> 1
+			IF @intOrgTransactionType <> 1 and ISNULL(@strType, '') <> 'Other Charge'
 			BEGIN
 				SELECT TOP 1 @strMapItemNo = I.strItemNo
 				FROM tblIPBillItem BI
 				JOIN tblICItem I ON I.intItemId = BI.intItemId
 				WHERE BI.intTransactionType = @intOrgTransactionType
+				AND BI.intLocationId =@intLocationId 
 
 				IF ISNULL(@strMapItemNo, '') <> ''
 					SELECT @strItemNo = @strMapItemNo
