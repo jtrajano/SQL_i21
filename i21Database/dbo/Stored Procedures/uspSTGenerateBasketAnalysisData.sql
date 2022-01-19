@@ -46,11 +46,13 @@ FROM tblSTTranslogRebates AS trans
 INNER JOIN tblSTStore AS store
 ON trans.intStoreId = store.intStoreId
 INNER JOIN tblICItemUOM uom
-ON CAST(strTrlUPCwithoutCheckDigit AS FLOAT) = LEFT(uom.intUpcCode, LEN(uom.intUpcCode) - 1)
+ON CAST(strTrlUPCwithoutCheckDigit AS FLOAT) = uom.intUpcCode
 INNER JOIN tblICItem item
 ON uom.intItemId = item.intItemId
 INNER JOIN tblICCategory cat
-ON item.intCategoryId = cat.intCategoryId'
+ON item.intCategoryId = cat.intCategoryId
+WHERE ((strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE ''%suspended%'' AND strTransType NOT LIKE ''%void%'' AND strTrLineType<>''preFuel'' AND strTransFuelPrepayCompletion IS NULL) 
+OR     (strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE ''%suspended%'' AND strTransType NOT LIKE ''%void%'' AND strTrLineType=''postFuel'' AND strTransFuelPrepayCompletion IS NOT NULL)) '
 
 --DEFAULT VALUES--
 DECLARE @ValueMinDate NVARCHAR(MAX) = '1000-01-01 12:00:00'
@@ -147,7 +149,7 @@ END
 
 IF(ISNULL(@Where,'') != '')
 BEGIN
-	SET @Where = @CharWhere + @CharSpace + @Where
+	SET @Where = @CharAnd + @CharSpace + @Where
 END
 
 
