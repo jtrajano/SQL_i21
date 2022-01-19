@@ -37,10 +37,12 @@ BEGIN
 		@intUnrealizedId = CASE 
 							WHEN @strModule = 'CM Forwards' THEN intGainOnForwardUnrealizedId 
 							WHEN @strModule = 'CM In-Transit' THEN intCashManagementUnrealizedId
+							WHEN @strModule = 'CM Swaps' THEN intGainOnSwapUnrealizedId
 							ELSE NULL END,
 		@intUnrealizedOffsetId = CASE 
 							WHEN @strModule = 'CM Forwards' THEN intGainOnForwardOffsetId
 							WHEN @strModule = 'CM In-Transit' THEN intCashManagementOffsetId
+							WHEN @strModule = 'CM Swaps' THEN intGainOnSwapOffsetId
 							ELSE NULL END
 	FROM tblSMMultiCurrency
 
@@ -56,7 +58,7 @@ BEGIN
 		GOTO _raiserror
 	END
 	
-	IF (@strModule = 'CM Forwards')
+	IF (@strModule IN ('CM Forwards', 'CM Swaps'))
 		INSERT INTO @tblAccountId
 		VALUES  (@intPayablesAccountId,		@intUnrealizedId,		@intBankTransferTypeId, @strModule, 'Payables',		0, NULL, NULL, NULL, 0),
 				(@intPayablesAccountId,		@intUnrealizedOffsetId, @intBankTransferTypeId, @strModule, 'Payables',		1, NULL, NULL, NULL, 0),

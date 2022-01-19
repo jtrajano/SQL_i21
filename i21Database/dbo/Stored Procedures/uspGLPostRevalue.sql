@@ -49,7 +49,7 @@ DECLARE @strMessage NVARCHAR(100)
 
 		SELECT @strTransactionType = strTransactionType FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
 
-		IF (@strTransactionType IN ('CM Forwards', 'CM In-Transit'))
+		IF (@strTransactionType IN ('CM Forwards', 'CM In-Transit', 'CM Swaps'))
 		BEGIN
 			DECLARE @tblTransactions TABLE (
 				strTransactionId NVARCHAR(100)
@@ -190,7 +190,7 @@ DECLARE @strMessage NVARCHAR(100)
 		SELECT 
 			 [strTransactionId]		
 			,[intTransactionId]		
-			,[intAccountId]	= CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit') THEN BankTransferAccount.AccountId ELSE G.AccountId	END
+			,[intAccountId]	= CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit', 'CM Swaps') THEN BankTransferAccount.AccountId ELSE G.AccountId	END
 			,[strDescription]		
 			,[dtmTransactionDate]	
 			,[dblDebit]				
@@ -434,7 +434,7 @@ DECLARE @strMessage NVARCHAR(100)
 					SELECT
 						[strTransactionId]
 						,[intTransactionId]
-						,[intAccountId] = CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit') THEN BankTransferAccount.AccountId ELSE G.AccountId	END
+						,[intAccountId] = CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit', 'CM Swaps') THEN BankTransferAccount.AccountId ELSE G.AccountId	END
 						,[strDescription]
 						,[dtmTransactionDate]
 						,[dblDebit]  

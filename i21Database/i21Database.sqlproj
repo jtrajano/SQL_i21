@@ -470,6 +470,10 @@
     <Build Include="dbo\Tables\tblTRFTradeFinance.sql" />
     <Build Include="dbo\Tables\tblTRFTradeFinanceHistory.sql" />
     <Build Include="dbo\Views\vyuRKFutOptOtcApproval.sql" />
+    <Build Include="dbo\Views\vyuCMSwapOutReceivablesMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuCMSwapInPayablesMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuCMSwapInReceivablesMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuCMSwapInReceivablesInTransitMultiCurrencyRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
