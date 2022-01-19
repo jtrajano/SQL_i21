@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblGLRevalueDetails](
 	[intConsolidationDetailId] [int] IDENTITY(1,1) NOT NULL,
 	[intConsolidationId] [int] NOT NULL,
-	[strTransactionType] [nvarchar](30) COLLATE Latin1_General_CI_AS,
+	[strTransactionType] [nvarchar](50) COLLATE Latin1_General_CI_AS,
 	[strTransactionId] [nvarchar](30) COLLATE Latin1_General_CI_AS,
 	[dtmDate] [date] NULL,
 	[dtmDueDate] [date] NULL,

@@ -20,7 +20,7 @@ SELECT DISTINCT
 	strForexRateType		=	RateType.strCurrencyExchangeRateType,
 	dblForexRate			=	BT.dblRateAmountTo,
 	dblHistoricAmount		=	BT.dblAmountTo,
-	dblAmountDifference		=	BT.dblDifference,
+	dblAmountDifference		=	ISNULL(BT.dblDifference, 0),
 	dblNewForexRate         =   0, -- Calcuate By GL
     dblNewAmount            =   0, -- Calcuate By GL
     dblUnrealizedDebitGain  =   0, -- Calcuate By GL
