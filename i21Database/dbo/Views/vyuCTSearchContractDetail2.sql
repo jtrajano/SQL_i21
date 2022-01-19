@@ -108,6 +108,14 @@ WITH shipmentstatus AS (
 		, dblReservedQuantity = ISNULL(SUM(dblReservedQuantity), 0)
 	FROM tblLGReservation WITH(NOLOCK)
 	GROUP BY intContractDetailId)
+	
+, CTECert AS (
+			select
+			cr.intContractDetailId
+			,ce.strCertificationName
+		from
+			tblCTContractCertification cr
+			left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId)
 
 
 SELECT a.intContractDetailId
@@ -323,6 +331,13 @@ SELECT a.intContractDetailId
 	, a.dtmDateSubmitted
 	, ASTF.strApprovalStatus
 	, a.dtmDateApproved
+	, strCertificateName = (
+				select
+					STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'
+				FROM
+					CTECert where intContractDetailId = a.intContractDetailId
+				FOR XML PATH('')),' #!',', '), 1, 2, '')
+			)
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId
