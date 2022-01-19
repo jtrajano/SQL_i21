@@ -1653,7 +1653,7 @@ FROM (
 			intItemId = i.intItemId
 			,intItemLocationId = il.intItemLocationId
 			,intItemPricingId = price.intItemPricingId
-			,dblSalePrice = CAST(p.strCaseRetailPrice AS NUMERIC(38, 20)) 
+			,dblSalePrice = CAST(p.strRetailPrice AS NUMERIC(38, 20)) 
 			,dblStandardCost = price.dblStandardCost
 			,dblLastCost = price.dblLastCost
 			,dblAverageCost = price.dblAverageCost
