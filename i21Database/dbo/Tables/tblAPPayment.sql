@@ -43,6 +43,7 @@
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
 	[ysnEFTImported] BIT NULL DEFAULT 0,
 	[ysnNewFlag] BIT NOT NULL DEFAULT 0,
+	[intInstructionCode] INT NULL,
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
     CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]),
 	CONSTRAINT [FK_tblAPPayment_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
