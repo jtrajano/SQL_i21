@@ -476,6 +476,7 @@
     <Build Include="dbo\Views\vyuCMSwapInReceivablesInTransitMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCreateOtcForwardFromCT.sql" />
     <Build Include="dbo\Views\vyuRKGetOtcForwards.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadForwardCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
