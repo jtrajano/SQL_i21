@@ -43,6 +43,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 DECLARE @strCompanyFullAddress	NVARCHAR(500) = NULL
 	  , @strCompanyName			NVARCHAR(100) = NULL
 	  , @strSalesOrderIds		NVARCHAR(MAX) = NULL
+	  , @strRequestId			NVARCHAR(200) = NULL
 	  , @blbLogo				VARBINARY(MAX) = NULL
 	  , @dtmDateFrom			DATETIME = NULL
 	  , @dtmDateTo				DATETIME = NULL
@@ -51,6 +52,9 @@ DECLARE @strCompanyFullAddress	NVARCHAR(500) = NULL
 	  , @xmlDocumentId			INT = NULL
 	  , @strEmail				NVARCHAR(100) = NULL
 	  , @strPhone				NVARCHAR(100) = NULL
+	  , @intPerformanceLogId	INT = NULL
+	  , @intEntityUserId		INT = NULL
+	  , @strReportLogId			NVARCHAR(MAX)
 
 --PREPARE XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
@@ -86,6 +90,28 @@ WHERE [fieldname] = 'intSalesOrderId'
 SELECT @strSalesOrderIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM #XMLTABLE
 WHERE [fieldname] = 'strSalesOrderIds'
+
+SELECT	@intEntityUserId = [from]
+FROM #XMLTABLE
+WHERE [fieldname] = 'intSrCurrentUserId'
+
+SELECT @strRequestId = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM #XMLTABLE
+WHERE [fieldname] = 'strRequestId'
+
+SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM #XMLTABLE
+WHERE [fieldname] = 'strReportLogId'
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	BEGIN
+		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+		VALUES (@strReportLogId, GETDATE())
+	END
+ELSE
+	RETURN
+
+EXEC dbo.uspARLogPerformanceRuntime 'Sales Order Report', 'uspARSalesOrderReport', @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -543,3 +569,5 @@ SELECT intSalesOrderId
 FROM #SALESORDERS
 
 SELECT * FROM tblARSalesOrderReportStagingTable
+
+EXEC dbo.uspARLogPerformanceRuntime 'Sales Order Report', 'uspARSalesOrderReport', @strRequestId, 0, @intEntityUserId, @intPerformanceLogId, NULL
