@@ -209,8 +209,8 @@ DECLARE	 @Price							NUMERIC(18,6)
 				IF ISNULL(@UOMQuantity,0) = 0
 					SET @UOMQuantity = 1
 
-				SELECT @Price = @UOMQuantity * ep.dblRetailPrice
-				FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, DEFAULT) ep
+				SELECT @Price = ep.dblRetailPrice
+				FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, @ItemUOMId, DEFAULT) ep
 
 				IF ISNULL(@Price, 0) = 0
 				BEGIN
@@ -723,8 +723,8 @@ DECLARE	 @Price							NUMERIC(18,6)
 		END	
 	
 	SET @dblCalculatedExchangeRate = ISNULL(@dblCalculatedExchangeRate, 1)
-	SELECT @Price = @UOMQuantity * ep.dblRetailPrice
-	FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, DEFAULT) ep
+	SELECT @Price = ep.dblRetailPrice
+	FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, @ItemUOMId, DEFAULT) ep
 
 	IF ISNULL(@Price, 0) = 0
 	BEGIN

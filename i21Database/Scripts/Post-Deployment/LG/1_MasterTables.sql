@@ -354,7 +354,7 @@ BEGIN
 				JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
-				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId AND WG.dblFranchise IS NOT NULL
 				OUTER APPLY (SELECT TOP 1 ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 0) FROM tblLGCompanyPreference) CP
 				LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1 AND CP.ysnWeightClaimsByContainer = 1
 				LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
@@ -381,15 +381,21 @@ BEGIN
 									AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType = ''Inventory Return'') IRN
 				WHERE 
 					L.intShipmentType = 1 AND L.intPurchaseSale IN (1, 3)
-					AND ((L.intPurchaseSale = 1 AND (CP.ysnWeightClaimsByContainer = 1 OR (L.intShipmentStatus = 4 AND NOT EXISTS(SELECT 1 from tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId AND ISNULL(dblReceivedQty, 0) = 0))))
-						OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
+					AND ((L.intPurchaseSale = 1 
+						AND ((ISNULL(CP.ysnWeightClaimsByContainer, 0) = 1 AND L.intShipmentStatus IN (3, 4) AND RI.dblGross <> 0
+							AND CASE WHEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
+										THEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100))
+										ELSE (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
+									END <> 0)
+						 OR (ISNULL(CP.ysnWeightClaimsByContainer, 0) = 0 AND L.intShipmentStatus = 4 
+							AND NOT EXISTS(SELECT 1 from tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId AND ISNULL(dblReceivedQty, 0) = 0))))
+					 OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
 					AND WC.intWeightClaimId IS NULL
 					AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 1
 										AND (LC.intLoadContainerId IS NULL OR (LC.intLoadContainerId IS NOT NULL AND intLoadContainerId = LC.intLoadContainerId)))
 					
-
-			UNION ALL
+		UNION ALL
 
 			SELECT
 				intPurchaseSale = 2
@@ -432,7 +438,7 @@ BEGIN
 				JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
-				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId AND WG.dblFranchise IS NOT NULL
 				LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 				LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 				LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId

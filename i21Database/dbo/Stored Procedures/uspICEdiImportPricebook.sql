@@ -31,6 +31,8 @@ DECLARE
 	,@insertedItemUOM AS INT = 0 	
 	,@updatedItemPricing AS INT = 0
 	,@insertedItemPricing AS INT = 0
+	,@updatedEffectiveItemPricing AS INT = 0
+	,@insertedEffectiveItemPricing AS INT = 0
 	,@updatedSpecialItemPricing AS INT = 0
 	,@insertedSpecialItemPricing AS INT = 0
 	,@updatedVendorXRef AS INT = 0
@@ -191,6 +193,17 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemPricing') IS NULL
 		intItemId INT
 		,intItemLocationId INT 
 		,intItemPricingId INT 
+		,strAction NVARCHAR(50) NULL
+	)
+;
+
+
+-- Create the temp table for the audit log. 
+IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICEffectiveItemPrice') IS NULL  
+	CREATE TABLE #tmpICEdiImportPricebook_tblICEffectiveItemPrice (
+		intItemId INT
+		,intItemLocationId INT 
+		,intEffectiveItemPriceId INT 
 		,strAction NVARCHAR(50) NULL
 	)
 ;
@@ -1619,8 +1632,272 @@ FROM (
 	, intItemPricingId
 );
 
+INSERT INTO #tmpICEdiImportPricebook_tblICItemPricing (
+	strAction
+	,intItemId
+	,intItemLocationId	
+	,intItemPricingId
+)
+SELECT 
+	[Changes].strAction
+	,[Changes].intItemId
+	,[Changes].intItemLocationId 	
+	,[Changes].intItemPricingId 	
+FROM (
+	MERGE	
+	INTO	dbo.tblICItemPricing
+	WITH	(HOLDLOCK) 
+	AS		ItemPricing
+	USING (
+		SELECT 
+			intItemId = i.intItemId
+			,intItemLocationId = il.intItemLocationId
+			,intItemPricingId = price.intItemPricingId
+			,dblSalePrice = CAST(p.strRetailPrice AS NUMERIC(38, 20)) 
+			,dblStandardCost = price.dblStandardCost
+			,dblLastCost = price.dblLastCost
+			,dblAverageCost = price.dblAverageCost
+			,ysnAddOrderingUPC = p.ysnAddOrderingUPC
+			,ysnUpdateExistingRecords = p.ysnUpdateExistingRecords
+			,ysnAddNewRecords = p.ysnAddNewRecords
+			,ysnUpdatePrice = p.ysnUpdatePrice
+		FROM tblICEdiPricebook p
+		INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(p.strSellingUpcNumber))) 
+		OUTER APPLY (
+			SELECT 
+				loc.intCompanyLocationId 					
+			FROM 						
+				@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
+					ON loc.intCompanyLocationId = cl.intCompanyLocationId
+		) loc
+		INNER JOIN tblICItemLocation il ON il.intLocationId = loc.intCompanyLocationId
+			AND il.intItemId = i.intItemId
+		LEFT JOIN tblICItemPricing price 
+				ON price.intItemId = i.intItemId
+				AND price.intItemLocationId = il.intItemLocationId
+		WHERE
+			p.strUniqueId = @UniqueId
+			AND
+			p.strCaseRetailPrice IS NOT NULL
+	) AS Source_Query  
+		ON ItemPricing.intItemPricingId = Source_Query.intItemPricingId 
+	   
+	-- If matched, update the existing item pricing
+	WHEN MATCHED 
+		AND Source_Query.ysnUpdatePrice = 1	
+	THEN 
+		UPDATE 
+		SET   
+			ItemPricing.dblSalePrice = Source_Query.dblSalePrice
+			,ItemPricing.dblStandardCost = Source_Query.dblStandardCost
+			,ItemPricing.dblLastCost = Source_Query.dblLastCost
+			,ItemPricing.dblAverageCost = Source_Query.dblAverageCost
+			,ItemPricing.dtmDateChanged = GETDATE()
+			,ItemPricing.dtmDateModified = GETDATE()
+			,ItemPricing.intModifiedByUserId = @intUserId
+
+	-- If none is found, insert a new item pricing
+	WHEN NOT MATCHED 
+		AND Source_Query.intItemId IS NOT NULL 
+		AND Source_Query.intItemLocationId IS NOT NULL 
+		AND Source_Query.ysnAddNewRecords = 1	
+	THEN 
+		INSERT (		
+			intItemId
+			,intItemLocationId
+			,dblAmountPercent
+			,dblSalePrice
+			,dblMSRPPrice
+			,strPricingMethod
+			,dblLastCost
+			,dblStandardCost
+			,dblAverageCost
+			,dblEndMonthCost
+			,dblDefaultGrossPrice
+			,intSort
+			,ysnIsPendingUpdate
+			,dtmDateChanged
+			,intConcurrencyId
+			,dtmDateCreated
+			,dtmDateModified
+			,intCreatedByUserId
+			,intModifiedByUserId
+			,intDataSourceId
+			,intImportFlagInternal
+			,ysnAvgLocked
+		)
+		VALUES (
+			Source_Query.intItemId--intItemId
+			,Source_Query.intItemLocationId--,intItemLocationId
+			,DEFAULT--,dblAmountPercent
+			,Source_Query.dblSalePrice--,dblSalePrice
+			,DEFAULT--,dblMSRPPrice
+			,'None'--,strPricingMethod
+			,Source_Query.dblLastCost--,dblLastCost
+			,Source_Query.dblStandardCost--,dblStandardCost
+			,Source_Query.dblAverageCost--,dblAverageCost
+			,DEFAULT--,dblEndMonthCost
+			,DEFAULT--,dblDefaultGrossPrice
+			,DEFAULT--,intSort
+			,DEFAULT--,ysnIsPendingUpdate
+			,DEFAULT--,dtmDateChanged
+			,1--,intConcurrencyId
+			,GETDATE()--,dtmDateCreated
+			,DEFAULT--,dtmDateModified
+			,@intUserId--,intCreatedByUserId
+			,DEFAULT--,intModifiedByUserId
+			,2--,intDataSourceId
+			,DEFAULT--,intImportFlagInternal
+			,DEFAULT--,ysnAvgLocked
+		)
+
+		OUTPUT 
+			$action
+			, inserted.intItemId 
+			, inserted.intItemLocationId			
+			, inserted.intItemPricingId
+
+) AS [Changes] (
+	strAction
+	, intItemId 
+	, intItemLocationId 
+	, intItemPricingId
+);
+
 SELECT @updatedItemPricing = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemPricing WHERE strAction = 'UPDATE'
 SELECT @insertedItemPricing = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemPricing WHERE strAction = 'INSERT'
+
+-- Upsert the Effective	Item Pricing
+INSERT INTO #tmpICEdiImportPricebook_tblICEffectiveItemPrice (
+	strAction
+	,intItemId
+	,intItemLocationId	
+	,intEffectiveItemPriceId
+)
+SELECT 
+	[Changes].strAction
+	,[Changes].intItemId
+	,[Changes].intItemLocationId 	
+	,[Changes].intEffectiveItemPriceId 	
+FROM (
+	MERGE	
+	INTO	dbo.tblICEffectiveItemPrice
+	WITH	(HOLDLOCK) 
+	AS		EffectiveItemPrice
+	USING (
+		SELECT 
+			i.intItemId
+			,il.intItemLocationId
+			,iu.intItemUOMId
+			,intCompanyLocationId = loc.intCompanyLocationId 
+			,dblRetailPrice = CAST(p.strCaseRetailPrice AS NUMERIC(38, 20)) 
+			,dtmEffectiveDate = GETUTCDATE()
+			,dtmDateCreated = GETUTCDATE()		
+			,intCreatedByUserId	= @intUserId
+			,ysnUpdatePrice = p.ysnUpdatePrice
+		FROM tblICEdiPricebook p
+			INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(p.strSellingUpcNumber))) 
+			OUTER APPLY (
+				SELECT 
+					loc.intCompanyLocationId 					
+				FROM 						
+					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
+						ON loc.intCompanyLocationId = cl.intCompanyLocationId
+			) loc
+			INNER JOIN tblICItemLocation il ON il.intLocationId = loc.intCompanyLocationId
+				AND il.intItemId = i.intItemId
+			INNER JOIN vyuICGetItemUOM iu ON i.intItemId = iu.intItemId AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strOrderPackageDescription)))
+		WHERE
+			p.strUniqueId = @UniqueId
+			AND
+			p.strCaseRetailPrice IS NOT NULL
+		UNION
+		SELECT 
+			i.intItemId
+			,il.intItemLocationId
+			,iu.intItemUOMId
+			,intCompanyLocationId = loc.intCompanyLocationId 
+			,dblRetailPrice = CAST(p.strRetailPrice AS NUMERIC(38, 20)) 
+			,dtmEffectiveDate = CAST(GETUTCDATE() AS DATE)
+			,dtmDateCreated = GETUTCDATE()		
+			,intCreatedByUserId	= @intUserId
+			,ysnUpdatePrice = p.ysnUpdatePrice
+		FROM tblICEdiPricebook p
+			INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(p.strSellingUpcNumber))) 
+			OUTER APPLY (
+				SELECT 
+					loc.intCompanyLocationId 					
+				FROM 						
+					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
+						ON loc.intCompanyLocationId = cl.intCompanyLocationId
+			) loc
+			INNER JOIN tblICItemLocation il ON il.intLocationId = loc.intCompanyLocationId
+				AND il.intItemId = i.intItemId
+			INNER JOIN vyuICGetItemUOM iu ON i.intItemId = iu.intItemId AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strItemUnitOfMeasure)))
+		WHERE
+			p.strUniqueId = @UniqueId
+			AND
+			p.strRetailPrice IS NOT NULL
+	) AS Source_Query  
+		ON 
+		EffectiveItemPrice.intItemId = Source_Query.intItemId
+		AND 
+		EffectiveItemPrice.intItemLocationId = Source_Query.intItemLocationId
+		AND 
+		EffectiveItemPrice.intItemUOMId = Source_Query.intItemUOMId
+		AND 
+		EffectiveItemPrice.dtmEffectiveRetailPriceDate = Source_Query.dtmEffectiveDate 
+	-- If matched, update the existing effective item pricing
+	WHEN MATCHED 
+		AND Source_Query.ysnUpdatePrice = 1	
+	THEN
+		UPDATE 
+		SET   
+			EffectiveItemPrice.dblRetailPrice = Source_Query.dblRetailPrice
+			,EffectiveItemPrice.dtmDateModified = GETDATE()
+			,EffectiveItemPrice.intModifiedByUserId = @intUserId
+
+	-- If none is found, insert a new item pricing
+	WHEN NOT MATCHED 
+	THEN 
+		INSERT (		
+			intItemId				
+			, intItemLocationId	
+			, intItemUOMId	
+			, dblRetailPrice		
+			, dtmEffectiveRetailPriceDate
+			, dtmDateCreated		
+			, intCreatedByUserId
+			, intDataSourceId
+			, intImportFlagInternal
+		)
+		VALUES (
+			Source_Query.intItemId				
+			, Source_Query.intItemLocationId	
+			, Source_Query.intItemUOMId	
+			, Source_Query.dblRetailPrice		
+			, Source_Query.dtmEffectiveDate			
+			, Source_Query.dtmDateCreated		
+			, Source_Query.intCreatedByUserId
+			, 2
+			, DEFAULT
+		)
+
+		OUTPUT 
+			$action
+			, inserted.intItemId 
+			, inserted.intItemLocationId			
+			, inserted.intEffectiveItemPriceId
+
+) AS [Changes] (
+	strAction
+	, intItemId 
+	, intItemLocationId 
+	, intEffectiveItemPriceId
+);
+
+SELECT @updatedEffectiveItemPricing = COUNT(1) FROM #tmpICEdiImportPricebook_tblICEffectiveItemPrice WHERE strAction = 'UPDATE'
+SELECT @insertedEffectiveItemPricing = COUNT(1) FROM #tmpICEdiImportPricebook_tblICEffectiveItemPrice WHERE strAction = 'INSERT'
 	
 -- Upsert the Item Special Pricing
 INSERT INTO #tmpICEdiImportPricebook_tblICItemSpecialPricing (
@@ -1919,7 +2196,8 @@ BEGIN
 			+ @updatedItem 
 			+ @updatedItemUOM 
 			+ @updatedItemLocation 
-			+ @updatedItemPricing 
+			+ @updatedItemPricing
+			+ @updatedEffectiveItemPricing 
 			+ @updatedSpecialItemPricing 
 			+ @updatedVendorXRef
 	
@@ -1930,7 +2208,8 @@ BEGIN
 			+ @insertedProductClass
 			+ @insertedFamilyClass			
 			+ @insertedItemLocation 
-			+ @insertedItemPricing 
+			+ @insertedItemPricing
+			+ @insertedEffectiveItemPricing 
 			+ @insertedSpecialItemPricing 
 			+ @insertedVendorXRef 
 
@@ -2269,6 +2548,33 @@ BEGIN
 			, 1
 		WHERE 
 			@updatedItemPricing <> 0 
+	END
+
+	IF @updatedEffectiveItemPricing <> 0 
+	BEGIN 
+		INSERT INTO tblICImportLogDetail(
+			intImportLogId
+			, strType
+			, intRecordNo
+			, strField
+			, strValue
+			, strMessage
+			, strStatus
+			, strAction
+			, intConcurrencyId
+		)
+		SELECT 
+			@LogId
+			, 'Info'
+			, NULL
+			, NULL 
+			, NULL 
+			, dbo.fnFormatMessage('%i effective item pricing record(s) are updated.', @updatedEffectiveItemPricing,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT)
+			, 'Success'
+			, 'Updated'
+			, 1
+		WHERE 
+			@updatedEffectiveItemPricing <> 0 
 	END
 
 	-- Log the created item special pricing. 
