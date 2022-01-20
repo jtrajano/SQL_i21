@@ -84,6 +84,8 @@ BEGIN TRY
 		, dtmCreateDateTime
 		, intContractHeaderId
 		, intContractDetailId
+		, dblContractAmount
+		, dblMatchAmount
 	)
 	SELECT 
 		intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
@@ -104,6 +106,8 @@ BEGIN TRY
 		, dtmCreateDateTime = GETDATE()
 		, intContractHeaderId = @intContractHeaderId
 		, intContractDetailId = @intContractDetailId
+		, dblContractAmount = @dblBuyAmount
+		, dblMatchAmount = @dblSellAmount
 
 	SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 
