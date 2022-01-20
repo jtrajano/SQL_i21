@@ -1002,10 +1002,11 @@ GO
 		VALUES (N'Derivative Entry', N'Derivative Entry', N'RiskManagement.view.DerivativeEntry', N'Risk Management', NULL, 1, N'Risk Management')
 	END
 	ELSE
+	BEGIN
 		UPDATE tblSMScreen
         SET  ysnApproval = 1
         WHERE strNamespace = 'RiskManagement.view.DerivativeEntry'
-	BEGIN
+	END
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.AssignFuturesToContracts') 
 	BEGIN
