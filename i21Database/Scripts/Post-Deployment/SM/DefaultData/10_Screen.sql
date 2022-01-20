@@ -1003,9 +1003,7 @@ GO
 	END
 	ELSE
 	BEGIN
-		UPDATE tblSMScreen
-        SET  ysnApproval = 1
-        WHERE strNamespace = 'RiskManagement.view.DerivativeEntry'
+		UPDATE [dbo].[tblSMScreen] SET [ysnApproval] = 1 WHERE strNamespace = N'RiskManagement.view.DerivativeEntry'
 	END
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.AssignFuturesToContracts') 
