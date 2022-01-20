@@ -429,4 +429,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\UpdateEDIPricebookWithCaseRetailPrice.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\RenameAndAlterCashRegisterDepartment.sql" />
+  </ItemGroup>
 </Project>

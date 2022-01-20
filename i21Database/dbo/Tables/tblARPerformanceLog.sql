@@ -4,8 +4,9 @@ CREATE TABLE [dbo].[tblARPerformanceLog](
 	[strScreenName]             NVARCHAR(200) NULL,
 	[strProcedureName]          NVARCHAR(200) NULL,
     [strBuildNumber]            NVARCHAR(50) NULL,
+	[strRequestId]				NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dtmStartDateTime]          DATETIME NULL,
-    [dtmEndDateTime]            DATETIME NULL,
+    [dtmEndDateTime]            DATETIME NULL,	
 	[intUserId]                 INT NULL,
 	CONSTRAINT [PK_tblARPerformanceLog_intPerformanceLogId] PRIMARY KEY CLUSTERED ([intPerformanceLogId] ASC)
 );

@@ -43,6 +43,7 @@ DECLARE @intTicketCommodityId INT
 DECLARE @intFutureMarketId INT
 DECLARE @intFutureMonthId INT
 DECLARE @intTicketStorageScheduleTypeId INT
+DECLARE @dblTicketNetUnits NUMERIC(36,20)
 
 DECLARE @_dblQty NUMERIC(36,20)
 DECLARE @_intTicketContractUsed INT
@@ -52,6 +53,7 @@ DECLARE @_intBillDetailId INT
 DECLARE @_intPriceFixationDetailId INT
 DECLARE @_intTicketLoadUsedId INT
 DECLARE @_intLoadDetailId INT
+
 
 DECLARE @contractBasisPriceTable TABLE(
 		intContractDetailId int
@@ -63,9 +65,11 @@ DECLARE @contractBasisPriceTable TABLE(
 BEGIN TRY
 
 	SELECT TOP 1
-		 @intTicketStorageScheduleTypeId =  intStorageScheduleTypeId
-	FROM tblSCTicket
+		 @intTicketStorageScheduleTypeId =  A.intStorageScheduleTypeId
+		 ,@dblTicketNetUnits = dblNetUnits
+	FROM tblSCTicket A
 	WHERE intTicketId = @intTicketId
+	
 
 	--FOR LINE ITEM
 	BEGIN
@@ -924,7 +928,9 @@ BEGIN TRY
 											END) * -1
 					,dblUnitQty				= SC.dblUnitQty
 					,dblDiscount			= 0
-					,dblCost				= SC.dblFreightRate
+					,dblCost				= ROUND((CASE WHEN IC.strCostMethod = 'Per Unit' THEN 
+												SC.dblFreightRate
+											ELSE (SC.dblQuantity / @dblTicketNetUnits) *  SC.dblFreightRate END),2)
 					,intTaxGroupId			= SC.intTaxGroupId
 					,intInvoiceId			= null
 					,intScaleTicketId		= SC.intScaleTicketId
@@ -944,52 +950,55 @@ BEGIN TRY
 		END
 
 		--FOR FEE CHARGES
-		INSERT INTO @voucherDetailDirectInventory(
-			[intAccountId],
-			[intItemId],
-			[strMiscDescription],
-			[dblQtyReceived], 
-			[dblUnitQty],
-			[dblDiscount], 
-			[dblCost], 
-			[intTaxGroupId],
-			[intInvoiceId],
-			[intScaleTicketId],
-			[intUnitOfMeasureId],
-			[intCostUOMId],
-			[dblCostUnitQty],
-			[intContractDetailId],
-			[intLoadDetailId]
-			,intTicketDistributionAllocationId
-		)
-		SELECT 
-			intAccountId			= NULL
-			,intItemId				= IC.intItemId
-			,strMiscDescription		= IC.strDescription
-			,dblQtyReceived			= CASE WHEN IC.strCostMethod = 'Per Unit' THEN
-										CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 
-											THEN SC.dblQuantity 
-											ELSE (SC.dblQuantity) * -1 
-										END
-									ELSE 1 END
-			,dblUnitQty				= SC.dblUnitQty 
-			,dblDiscount			= 0
-			,dblCost				= SC.dblTicketFees
-			,intTaxGroupId			= SC.intTaxGroupId
-			,intInvoiceId			= null
-			,intScaleTicketId		= SC.intScaleTicketId
-			,intUnitOfMeasureId		= SC.intUnitOfMeasureId
-			,intCostUOMId			= SC.intCostUOMId
-			,dblCostUnitQty			= SC.dblCostUnitQty
-			,intContractDetailId	= SC.intContractDetailId
-			,intLoadDetailId		= SC.intLoadDetailId
-			,SC.intTicketDistributionAllocationId
-		FROM @ScaleToVoucherStagingTable SC
-		LEFT JOIN tblICItem IC ON IC.intItemId = SC.intTicketFeesItemId
-		WHERE SC.intScaleTicketId = @intTicketId 
-			AND SC.dblTicketFees > 0
-			AND SC.ysnCusVenPaysFees = 1
-
+		BEGIN
+			INSERT INTO @voucherDetailDirectInventory(
+				[intAccountId],
+				[intItemId],
+				[strMiscDescription],
+				[dblQtyReceived], 
+				[dblUnitQty],
+				[dblDiscount], 
+				[dblCost], 
+				[intTaxGroupId],
+				[intInvoiceId],
+				[intScaleTicketId],
+				[intUnitOfMeasureId],
+				[intCostUOMId],
+				[dblCostUnitQty],
+				[intContractDetailId],
+				[intLoadDetailId]
+				,intTicketDistributionAllocationId
+			)
+			SELECT 
+				intAccountId			= NULL
+				,intItemId				= IC.intItemId
+				,strMiscDescription		= IC.strDescription
+				,dblQtyReceived			= CASE WHEN IC.strCostMethod = 'Per Unit' THEN
+											CASE WHEN ISNULL(SC.ysnCusVenPaysFees,0) = 0 
+												THEN SC.dblQuantity 
+												ELSE (SC.dblQuantity) * -1 
+											END
+										ELSE 1 END
+				,dblUnitQty				= SC.dblUnitQty 
+				,dblDiscount			= 0
+				,dblCost				= ROUND((CASE WHEN IC.strCostMethod = 'Per Unit' THEN 
+												SC.dblTicketFees
+											ELSE (SC.dblQuantity / @dblTicketNetUnits) *  SC.dblTicketFees END),2)
+				,intTaxGroupId			= SC.intTaxGroupId
+				,intInvoiceId			= null
+				,intScaleTicketId		= SC.intScaleTicketId
+				,intUnitOfMeasureId		= SC.intUnitOfMeasureId
+				,intCostUOMId			= SC.intCostUOMId
+				,dblCostUnitQty			= SC.dblCostUnitQty
+				,intContractDetailId	= SC.intContractDetailId
+				,intLoadDetailId		= SC.intLoadDetailId
+				,SC.intTicketDistributionAllocationId
+			FROM @ScaleToVoucherStagingTable SC
+			LEFT JOIN tblICItem IC ON IC.intItemId = SC.intTicketFeesItemId
+			WHERE SC.intScaleTicketId = @intTicketId 
+				AND SC.dblTicketFees > 0
+				AND SC.ysnCusVenPaysFees = 1
+		END
 		--FOR DISCOUNT
 		INSERT INTO @voucherDetailDirectInventory(
 			[intAccountId],
