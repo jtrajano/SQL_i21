@@ -281,7 +281,7 @@ SELECT
 	cat.strDescription
 FROM @tblSTGroupByUPC
 INNER JOIN tblICItemUOM uom
-	ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
+	ON CONVERT(NUMERIC(32, 0),CAST(LEFT(strTrlUPC, LEN(strTrlUPC) - 1) AS FLOAT)) = uom.intUpcCode
 INNER JOIN tblICItem item
 	ON uom.intItemId = item.intItemId
 INNER JOIN tblICCategory cat
