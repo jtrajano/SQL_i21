@@ -483,6 +483,7 @@
     <Build Include="dbo\Stored Procedures\uspTRFCreateTFRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFTradeFinanceHistory.sql" />
     <Build Include="dbo\User Defined Types\TRFTradeFinance.sql" />
+	<Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

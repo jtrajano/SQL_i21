@@ -28,10 +28,11 @@ BEGIN TRY
 	  , @intSurchargeItemId		INT
 	  , @ysnItemizeSurcharge	BIT
 	  , @HasBlend BIT = 0
+	  , @ysnComboFreight BIT
 
 	SELECT @intFreightItemId = intFreightItemId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
-	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
+	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0) FROM tblTRCompanyPreference
 
 	BEGIN TRANSACTION
 
@@ -157,6 +158,7 @@ BEGIN TRY
 		,strBOLNumberDetail  = DD.strBillOfLading
 		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
 		,dblMinimumUnits						= DD.dblMinimumUnits
+		,dblComboFreightRate					= DD.dblComboFreightRate
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -705,8 +707,17 @@ BEGIN TRY
 		,[dblQtyOrdered]						= IE.dblQtyOrdered
 		,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN IE.dblMinimumUnits ELSE IE.dblQtyShipped END
 		,[dblDiscount]							= 0
-		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 THEN ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
-													WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1  THEN ISNULL(IE.[dblFreightRate],0) END 
+		,[dblPrice]								= CASE WHEN @ysnComboFreight = 1 AND IE.[dblComboFreightRate] > 0 THEN
+														(CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 
+														THEN ISNULL(IE.[dblComboFreightRate],0) + (ISNULL(IE.[dblComboFreightRate],0) * (IE.dblSurcharge / 100))
+														WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1 
+														THEN ISNULL(IE.[dblComboFreightRate],0) END)
+													ELSE 
+														(CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 
+														THEN ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
+														WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1 
+														THEN ISNULL(IE.[dblFreightRate],0) END)
+													END
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= IE.strMaintenanceType
 		,[strFrequency]							= IE.strFrequency
@@ -742,7 +753,8 @@ BEGIN TRY
 		,[ysnBlended]							= IE.ysnBlended
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
-	WHERE ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1
+	WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1)
+		OR (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1 AND @ysnComboFreight = 1)
 
 	INSERT INTO @EntriesForInvoice(
 		 [strSourceTransaction]
@@ -911,6 +923,7 @@ BEGIN TRY
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
 	DECLARE @FreightSurchargeEntries AS InvoiceIntegrationStagingTable
+
 	--Surcharge Item
 	IF @ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0
 	BEGIN
@@ -1032,8 +1045,16 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END 
-			,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END 
+			,[dblQtyOrdered]						= CASE WHEN @ysnComboFreight = 1 AND IE.dblComboFreightRate > 0 THEN 
+															(CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END)
+														ELSE
+															(CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END)
+														END
+			,[dblQtyShipped]						= CASE WHEN @ysnComboFreight = 1 AND IE.dblComboFreightRate > 0 THEN 
+															(CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END)
+														ELSE
+															(CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END)
+														END
 			,[dblDiscount]							= 0
 			,[dblPrice]								= ISNULL(IE.dblSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
@@ -1070,7 +1091,7 @@ BEGIN TRY
 			,[ysnBlended]							= IE.ysnBlended
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
-		WHERE ISNULL(IE.dblFreightRate, 0) != 0
+		WHERE ISNULL(IE.dblFreightRate, 0) != 0 OR (ISNULL(IE.dblComboFreightRate, 0) != 0 AND @ysnComboFreight = 1)
 	END
 
 	--Group and Summarize Freight and Surcharge Entries before adding to Invoice Entries
@@ -1189,7 +1210,7 @@ BEGIN TRY
 		,[dblQtyOrdered]						= SUM(IE.dblQtyOrdered)
 		,[dblQtyShipped]						= SUM(IE.dblQtyShipped)
 		,[dblDiscount]							= SUM(IE.dblDiscount)
-		,[dblPrice]								= MIN(dblPrice)
+		,[dblPrice]								= dblPrice
 		,[ysnRefreshPrice]						= IE.ysnRefreshPrice
 		,[strMaintenanceType]					= IE.strMaintenanceType
 		,[strFrequency]							= IE.strFrequency
@@ -1255,6 +1276,7 @@ BEGIN TRY
 		,[strItemDescription]
 		,[intOrderUOMId]
 		,[intItemUOMId]
+		,[dblPrice]
 		,[ysnRefreshPrice]
 		,[strMaintenanceType]
 		,[strFrequency]
