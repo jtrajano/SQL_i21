@@ -66,9 +66,10 @@ BEGIN TRY
 		RETURN;
 	END
   
-   IF  EXISTS(SELECT 1 FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
+   IF  EXISTS(SELECT 1 FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail 
 				ON PO.intPurchaseId = PODetail.intPurchaseId
-				AND PODetail.intPurchaseId = @poId WHERE intUnitOfMeasureId IS NULL AND intItemId IS NOT NULL)
+				INNER JOIN dbo.tblICItem itm ON PODetail.intItemId = itm.intItemId
+				AND PODetail.intPurchaseId = @poId WHERE intUnitOfMeasureId IS NULL AND PODetail.intItemId IS NOT NULL AND itm.strType IN ('Inventory','Finished Good','Raw Material'))
 	BEGIN
 		RAISERROR('Cannot process to receipt, Item UOM is missing.', 16, 1);
 		RETURN;
