@@ -17,6 +17,7 @@
 	[ysnBlendedItem] BIT NOT NULL DEFAULT((0)),
 	[intConcurrencyId] INT NOT NULL,
 	[dblMinimumUnits] DECIMAL(18, 6) NULL,
+	[dblComboFreightRate] DECIMAL(18, 6) NULL,
 	CONSTRAINT [PK_tblTRLoadDistributionDetail] PRIMARY KEY ([intLoadDistributionDetailId]),
 	CONSTRAINT [FK_tblTRLoadDistributionDetail_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [dbo].[tblTRLoadDistributionHeader] ([intLoadDistributionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRLoadDistributionDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),	

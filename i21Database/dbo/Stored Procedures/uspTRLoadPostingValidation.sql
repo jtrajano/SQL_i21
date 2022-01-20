@@ -41,6 +41,7 @@ BEGIN TRY
 		, @dblGross DECIMAL(18, 6) = 0
 		, @dblUnitCost DECIMAL(18, 6) = 0
 		, @dblFreight DECIMAL(18, 6) = 0
+		, @dblComboFreightRate DECIMAL(18, 6) = 0
 		, @dblSurcharge DECIMAL(18, 6) = 0
 		, @GrossorNet NVARCHAR(50)
 		, @intDistributionItemId INT
@@ -64,6 +65,7 @@ BEGIN TRY
 		, @dblNonBlendedDistributedQuantity DECIMAL(18, 6) = 0
 		, @strFreightCostMethod NVARCHAR(20) = NULL
 		, @strFreightBilledBy NVARCHAR(30) = NULL
+		, @ysnComboFreight BIT
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -93,7 +95,7 @@ BEGIN TRY
 	END
 
 
-	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
+	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0) FROM tblTRCompanyPreference
 	SELECT @strFreightBilledBy = strFreightBilledBy FROM tblSMShipVia where intEntityId = @intShipVia
 
 	--IF (NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId) AND @intSurchargeItemId IS NOT NULL)
@@ -434,6 +436,7 @@ BEGIN TRY
 		, dblSurcharge = DD.dblDistSurcharge
 		, DD.strReceiptLink
 		, DD.ysnBlendedItem
+		, dblComboFreightRate = DD.dblComboFreightRate
 	INTO #DistributionDetailTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -451,6 +454,7 @@ BEGIN TRY
 			, @dblSurcharge = DD.dblSurcharge
 			, @ReceiptLink = DD.strReceiptLink
 			, @BlendedItem = DD.ysnBlendedItem
+			, @dblComboFreightRate = DD.dblComboFreightRate
 		FROM #DistributionDetailTable DD
 		WHERE intLoadHeaderId = @intLoadHeaderId
 		
@@ -486,7 +490,7 @@ BEGIN TRY
 			BEGIN
 				RAISERROR('Freight Item not found. Please setup in Company Configuration', 16, 1)
 			END
-			ELSE IF (ISNULL(@dblFreight, 0) = 0  AND ISNULL(@intFreightItemId, '') != '')
+			ELSE IF (ISNULL(@dblFreight, 0) = 0  AND ISNULL(@intFreightItemId, '') != '' AND ISNULL(@dblComboFreightRate, 0) = 0) OR (@ysnComboFreight = 1 AND (ISNULL(@dblComboFreightRate, 0) = 0  AND ISNULL(@intFreightItemId, '') != ''))
 			BEGIN
 				IF (ISNULL(@dblSurcharge, 0) > 0 )
 				BEGIN
