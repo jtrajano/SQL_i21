@@ -89,6 +89,16 @@ BEGIN TRY
 			END
 		END
 
+		/* Auto-correct Weight UOMs */
+		UPDATE LD
+		SET intWeightItemUOMId = WUOM.intItemUOMId
+		FROM tblLGLoadDetail LD
+			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
+			LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemId = LD.intItemId AND WUOM.intUnitMeasureId = ISNULL(L.intWeightUnitMeasureId, IUOM.intUnitMeasureId)
+		WHERE L.intLoadId = @intLoadId AND ISNULL(intWeightItemUOMId, 0) <> WUOM.intItemUOMId
+
+		/* Build In-Transit Costing parameter */
 		INSERT INTO @ItemsToPost (
 			intItemId
 			,intItemLocationId
@@ -223,48 +233,6 @@ BEGIN TRY
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)))
 						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intLoadId
-		GROUP BY LD.intItemId
-			,IL.intItemLocationId
-			,LD.intItemUOMId
-			,LD.dblQuantity
-			,LD.dblNet
-			,IU.dblUnitQty
-			,WU.dblUnitQty
-			,AD.dblSeqPrice
-			,AD.intSeqPriceUOMId
-			,L.intLoadId
-			,L.intCurrencyId
-			,AD.dblNetWtToPriceUOMConvFactor
-			,LD.intLoadDetailId
-			,L.strLoadNumber
-			,FP.intFobPointId
-			,AD.dblQtyToPriceUOMConvFactor
-			,AD.ysnSeqSubCurrency
-			,CD.intContractDetailId
-			,CD.intInvoiceCurrencyId
-			,CD.intRateTypeId
-			,CD.dblRate
-			,AD.ysnValidFX
-			,LD.strPriceStatus
-			,LD.intWeightItemUOMId
-			,LD.intPriceUOMId
-			,LD.dblUnitPrice
-			,LSC.intMainCurrencyId
-			,LSC.intCurrencyID
-			,LSC.ysnSubCurrency
-			,LSC.intCent
-			,LD.intForexRateTypeId
-			,LD.dblForexRate
-			,LD.intForexCurrencyId
-			,LD.dblAmount
-			,L.intPurchaseSale
-			,CD.dblTotalCost
-			,CD.dblCashPrice
-			,AD.intSeqCurrencyId
-			,SC.intMainCurrencyId
-			,SC.intCurrencyID
-			,FX.intForexRateTypeId
-			,FX.dblFXRate
 
 		BEGIN
 			INSERT INTO @GLEntries (
