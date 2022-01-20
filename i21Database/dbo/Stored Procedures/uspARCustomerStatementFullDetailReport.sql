@@ -656,6 +656,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , strItemDescription
 			 , strFullAddress
 			 , strStatementFooterComment
+			 , strPaymentMethod
 		)
 		SELECT intEntityCustomerId		= C.intEntityCustomerId
 			 , intInvoiceId				= CB.intCustomerBudgetId
