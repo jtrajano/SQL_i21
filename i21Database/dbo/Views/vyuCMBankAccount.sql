@@ -1,6 +1,6 @@
 ﻿-- Create a stub view that can be used if the Origin Integration is not established. 
 
-CREATE VIEW [dbo].vyuCMBankAccount
+ALTER VIEW [dbo].vyuCMBankAccount
 WITH SCHEMABINDING
 AS 
 
@@ -103,6 +103,7 @@ SELECT	i21.intBankAccountId
 		,i21.strCbkNo
 		,i21.intConcurrencyId
 		,i21.intPayToDown
+		,i21.strACHClientId
 		,i21.intResponsibleEntityId
 		,strResponsibleEntity = E.strName
 		--Advanced Bank Recon
@@ -145,7 +146,7 @@ LEFT JOIN dbo.tblRKBrokerageAccount Brokerage ON Brokerage.intBrokerageAccountId
 GO
 --Create trigger that will insert on the main table
 
-CREATE TRIGGER trg_insert_vyuCMBankAccount
+ALTER TRIGGER trg_insert_vyuCMBankAccount
 			ON [dbo].vyuCMBankAccount
 			INSTEAD OF INSERT
 			AS
@@ -242,6 +243,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intConcurrencyId
 						,strCbkNo
 						,intPayToDown
+						,strACHClientId
 						,intResponsibleEntityId
 						,ysnABREnable
 						,intABRDaysNoRef
@@ -329,6 +331,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intConcurrencyId					= i.intConcurrencyId
 						,strCbkNo							= i.strCbkNo
 						,intPayToDown						= i.intPayToDown
+						,strACHClientId						= i.strACHClientId
 						,intResponsibleEntityId				= i.intResponsibleEntityId
 						,ysnABREnable						= i.ysnABREnable
 						,intABRDaysNoRef					= i.intABRDaysNoRef
@@ -342,7 +345,7 @@ END
 
 GO
  --Create trigger that will update the record on the main table
-CREATE TRIGGER trg_update_vyuCMBankAccount
+ALTER TRIGGER trg_update_vyuCMBankAccount
 		ON [dbo].vyuCMBankAccount
 		INSTEAD OF UPDATE
 		AS
@@ -439,6 +442,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,strACHClientId						= i.strACHClientId
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
