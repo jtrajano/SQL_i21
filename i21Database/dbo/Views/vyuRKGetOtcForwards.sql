@@ -9,22 +9,23 @@ SELECT
 	, strInstrumentType = 'Forward' COLLATE Latin1_General_CI_AS
 	, strCommodityCode
 	, strLocationName
-	, strSellBankName = bank.strBankName
-	, strSellBankAccountNo = bankacct.strBankAccountNo
-	, strBuyBankName = buybank.strBankName
-	, strBuyBankAccountNo = buybankacct.strBankAccountNo
-	, strBuyCurrency = strFromCurrency
-	, strSellCurrency = strToCurrency
+	, strSellBankName = bank.strBankName COLLATE Latin1_General_CI_AS
+	, strSellBankAccountNo = bankacct.strBankAccountNo COLLATE Latin1_General_CI_AS
+	, strBuyBankName = buybank.strBankName COLLATE Latin1_General_CI_AS
+	, strBuyBankAccountNo = buybankacct.strBankAccountNo COLLATE Latin1_General_CI_AS
+	, strBuyCurrency = strFromCurrency COLLATE Latin1_General_CI_AS
+	, strSellCurrency = strToCurrency COLLATE Latin1_General_CI_AS
 	, strBuySell
 	, dtmMaturityDate
 	, dtmTradeDate = der.dtmTransactionDate
 	, dblBuyAmount = dblContractAmount
 	, dblSellAmount = dblMatchAmount
+	, dblContractRate
 	, strCurrencyPair = CurEx.strCurrencyExchangeRateType
 	, strBaseCurrency = strFromCurrency COLLATE Latin1_General_CI_AS
 	, strMatchCurrency = strToCurrency COLLATE Latin1_General_CI_AS
 	, dblExchangeRate
-	, strApprovalStatus = ISNULL(approval.strApprovalStatus, 'No Need for Approval')
+	, strApprovalStatus = ISNULL(approval.strApprovalStatus, 'No Need for Approval') COLLATE Latin1_General_CI_AS
 	, intSubmittedById = smapprove.intSubmittedById
 	, dblApprovalAmount = smapprove.dblAmount
 	, dtmDueDate = smapprove.dtmDueDate
