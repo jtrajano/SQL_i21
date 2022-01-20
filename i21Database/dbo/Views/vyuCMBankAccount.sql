@@ -1,6 +1,6 @@
 ﻿-- Create a stub view that can be used if the Origin Integration is not established. 
 
-ALTER VIEW [dbo].vyuCMBankAccount
+CREATE VIEW [dbo].vyuCMBankAccount
 WITH SCHEMABINDING
 AS 
 
@@ -146,7 +146,7 @@ LEFT JOIN dbo.tblRKBrokerageAccount Brokerage ON Brokerage.intBrokerageAccountId
 GO
 --Create trigger that will insert on the main table
 
-ALTER TRIGGER trg_insert_vyuCMBankAccount
+CREATE TRIGGER trg_insert_vyuCMBankAccount
 			ON [dbo].vyuCMBankAccount
 			INSTEAD OF INSERT
 			AS
@@ -345,7 +345,7 @@ END
 
 GO
  --Create trigger that will update the record on the main table
-ALTER TRIGGER trg_update_vyuCMBankAccount
+CREATE TRIGGER trg_update_vyuCMBankAccount
 		ON [dbo].vyuCMBankAccount
 		INSTEAD OF UPDATE
 		AS
