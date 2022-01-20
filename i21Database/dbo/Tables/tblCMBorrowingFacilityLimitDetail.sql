@@ -20,6 +20,7 @@ GO
 ALTER TABLE [dbo].[tblCMBorrowingFacilityLimitDetail] ADD  CONSTRAINT [FK_tblCMBorrowingFacilityLimitDetail_tblCMBorrowingFacilityLimit] 
 FOREIGN KEY(intBorrowingFacilityLimitId)
 REFERENCES [dbo].[tblCMBorrowingFacilityLimit] (intBorrowingFacilityLimitId)
+ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblCMBorrowingFacilityLimitDetail] CHECK CONSTRAINT [FK_tblCMBorrowingFacilityLimitDetail_tblCMBorrowingFacilityLimit] 
