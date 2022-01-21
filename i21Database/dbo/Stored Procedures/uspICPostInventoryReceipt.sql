@@ -334,6 +334,59 @@ BEGIN
 		END
 	END
 
+	-- Do not allow post if total lot Qty does not match receive Qty
+	BEGIN 
+		SET @strItemNo = NULL 
+		SET @intItemId = NULL 
+
+		DECLARE @OpenReceiveQty AS NUMERIC(38,20)
+		DECLARE @LotQty AS NUMERIC(38,20)
+		DECLARE @OpenReceiveQtyInItemUOM AS NUMERIC(38,20)
+		DECLARE @LotQtyInItemUOM AS NUMERIC(38,20)
+
+
+		SELECT	TOP 1 
+				@strItemNo					= Item.strItemNo
+				,@intItemId					= Item.intItemId
+				,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+				,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
+				,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
+				,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblOpenReceive
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+				OUTER APPLY (
+					SELECT  TotalLotQtyInItemUOM = SUM(
+								dbo.fnCalculateQtyBetweenUOM(
+									ISNULL(AggregrateLot.intItemUnitMeasureId, ri.intUnitMeasureId)
+									,ri.intUnitMeasureId
+									,AggregrateLot.dblQuantity
+								)
+							)
+							,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantity, 0))
+					FROM	tblICInventoryReceiptItemLot AggregrateLot INNER JOIN dbo.tblICInventoryReceiptItem ri
+								ON AggregrateLot.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+					WHERE	
+						AggregrateLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId 
+				) ItemLot					
+		WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
+				AND Receipt.strReceiptNumber = @strTransactionId
+				AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
+				AND Item.strType IN ('Inventory', 'Bundle')
+			
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			IF ISNULL(@strItemNo, '') = '' 
+				SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+			-- 'The Qty to Receive for {Item} is {Open Receive Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
+			DECLARE @difference AS NUMERIC(38, 20) = ABS(@OpenReceiveQty - @LotQtyInItemUOM);
+			EXEC uspICRaiseError 80267, @strItemNo, @OpenReceiveQty, @LotQtyInItemUOM, @difference
+			GOTO With_Rollback_Exit; 
+		END 
+	END 
+
 	-- Check if receipt items and lots have gross/net UOM and have gross qty and net qty when the items have Lot Weights Required enabled in Item setup.	
 	BEGIN 
 		SET @intItemId = NULL
