@@ -74,6 +74,20 @@ WITH (
 	, [datatype]   NVARCHAR(50)
 )
 
+INSERT INTO #XMLTABLE
+SELECT *
+FROM OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)
+WITH (
+	  [fieldname]  NVARCHAR(50)
+	, [condition]  NVARCHAR(20)
+	, [from]	   NVARCHAR(MAX)
+	, [to]		   NVARCHAR(MAX)
+	, [join]	   NVARCHAR(10)
+	, [begingroup] NVARCHAR(50)
+	, [endgroup]   NVARCHAR(50)
+	, [datatype]   NVARCHAR(50)
+)
+
 --GATHER PARAMS FROM XML TABLE
 SELECT @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	 , @dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
@@ -108,8 +122,8 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strR
 		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
 		VALUES (@strReportLogId, GETDATE())
 	END
-ELSE
-	RETURN
+--ELSE
+--	RETURN
 
 EXEC dbo.uspARLogPerformanceRuntime 'Sales Order Report', 'uspARSalesOrderReport', @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 
