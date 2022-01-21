@@ -55,6 +55,8 @@ BEGIN TRY
 		,@dblCeilingQtyDiff DECIMAL(38, 20)
 		,@dblFloorQtyDiff DECIMAL(38, 20)
 		,@dblOriginalRequiredQty DECIMAL(38, 20)
+		,@dblQty1 DECIMAL(38, 20)
+		,@intRowNo INT
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -108,6 +110,21 @@ BEGIN TRY
 		,intItemUOMId INT
 		,intUserId INT
 		,intPlannedShiftId INT
+		)
+	DECLARE @tblPreItem TABLE (
+		intRowNo INT Identity(1, 1)
+		,intItemId INT
+		,dblReqQty NUMERIC(38, 20)
+		,ysnIsSubstitute BIT
+		,intConsumptionMethodId INT
+		,intConsumptionStoragelocationId INT
+		,intParentItemId INT
+		,dblUpperToleranceQty NUMERIC(38, 20)
+		,dblLowerToleranceQty NUMERIC(38, 20)
+		,ysnComplianceItem BIT
+		,dblCompliancePercent NUMERIC(38, 20)
+		,dblPickedQty NUMERIC(38, 20)
+		,ysnMinorIngredient BIT
 		)
 	DECLARE @tblItem TABLE (
 		intRowNo INT Identity(1, 1)
@@ -576,7 +593,7 @@ BEGIN TRY
 	--Missing Item Check / Required Qty Check
 	IF @ysnAllInputItemsMandatory = 1
 	BEGIN
-		INSERT INTO @tblItem (
+		INSERT INTO @tblPreItem (
 			intItemId
 			,dblReqQty
 			,ysnIsSubstitute
@@ -646,6 +663,9 @@ BEGIN TRY
 		JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
 		WHERE rs.intRecipeId = @intRecipeId
 			AND rs.intRecipeItemTypeId = 1
+		ORDER BY 2 DESC
+			,ysnIsSubstitute
+			,ysnMinorIngredient
 
 		DECLARE @intMinMissingItem INT
 		DECLARE @intConsumptionMethodId INT
@@ -655,7 +675,7 @@ BEGIN TRY
 		DECLARE @dblUpperToleranceQty NUMERIC(38, 20)
 
 		SELECT @intMinMissingItem = Min(intRowNo)
-		FROM @tblItem
+		FROM @tblPreItem
 
 		WHILE (@intMinMissingItem IS NOT NULL)
 		BEGIN
@@ -667,7 +687,7 @@ BEGIN TRY
 				,@intConsumptionMethodId = intConsumptionMethodId
 				,@dblLowerToleranceQty = dblLowerToleranceQty
 				,@dblUpperToleranceQty = dblUpperToleranceQty
-			FROM @tblItem
+			FROM @tblPreItem
 			WHERE intRowNo = @intMinMissingItem
 				AND ysnIsSubstitute = 0
 
@@ -807,7 +827,7 @@ BEGIN TRY
 			END
 
 			SELECT @intMinMissingItem = Min(intRowNo)
-			FROM @tblItem
+			FROM @tblPreItem
 			WHERE intRowNo > @intMinMissingItem
 				AND ysnIsSubstitute = 0
 		END
@@ -873,6 +893,7 @@ BEGIN TRY
 			)
 	BEGIN
 		SET @intWorkOrderId = NULL
+		SELECT @ysnPercResetRequired = 0
 
 		--Calculate Required Quantity by Item
 		IF (@dblQtyToProduce > @PerBlendSheetQty)
@@ -971,6 +992,7 @@ BEGIN TRY
 			WHERE rs.intRecipeId = @intRecipeId
 				AND rs.intRecipeItemTypeId = 1
 			ORDER BY 2 DESC
+				,ysnMinorIngredient
 
 			UPDATE @tblItem
 			SET dblPickedQty = dblReqQty
@@ -1014,7 +1036,7 @@ BEGIN TRY
 					BEGIN
 						SELECT @sRequiredQty = NULL
 
-						SELECT @sRequiredQty = SUM(@dblReqQty)
+						SELECT @sRequiredQty = SUM(dblReqQty)
 						FROM @tblItem
 						WHERE ysnMinorIngredient = 0
 
@@ -1086,7 +1108,6 @@ BEGIN TRY
 							BEGIN
 								SET @dblQty = @dblQty - (@dblQty % @dblWeightPerUnit)
 							END
-							
 						END
 					END
 
@@ -1131,18 +1152,20 @@ BEGIN TRY
 								SELECT @dblFloorQtyDiff = @dblOriginalRequiredQty - (@dblPickedQty + @dblSuggestedFloorQty)
 
 								IF abs(@dblFloorQtyDiff) > abs(@dblCeilingQtyDiff)
-								AND @dblSuggestedCeilingQty+@dblPickedQty BETWEEN @dblLowerToleranceQty
-									AND @dblUpperToleranceQty
-								AND (@dblQty >= @dblSuggestedCeilingQty
-									Or @dblSuggestedCeilingQty-@dblQty <0.01)
+									AND @dblSuggestedCeilingQty + @dblPickedQty BETWEEN @dblLowerToleranceQty
+										AND @dblUpperToleranceQty
+									AND (
+										@dblQty >= @dblSuggestedCeilingQty
+										OR @dblSuggestedCeilingQty - @dblQty < 0.01
+										)
 								BEGIN
 									SELECT @dblQuantity = @dblSuggestedCeilingQty
 										,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblReqQty, @dblWeightPerUnit)))
 								END
 								ELSE
 								BEGIN
-									SELECT @dblQuantity = Convert(NUMERIC(38, 20), ROUND(dbo.[fnDivide](@dblReqQty, @dblWeightPerUnit),0)*@dblWeightPerUnit)
-										,@dblIssuedQuantity = Convert(NUMERIC(38, 20), ROUND(dbo.[fnDivide](@dblReqQty, @dblWeightPerUnit),0))
+									SELECT @dblQuantity = Convert(NUMERIC(38, 20), ROUND(dbo.[fnDivide](@dblReqQty, @dblWeightPerUnit), 0) * @dblWeightPerUnit)
+										,@dblIssuedQuantity = Convert(NUMERIC(38, 20), ROUND(dbo.[fnDivide](@dblReqQty, @dblWeightPerUnit), 0))
 								END
 
 								UPDATE @tblItem
@@ -1178,8 +1201,9 @@ BEGIN TRY
 									WHERE intItemId = @intItemId
 
 									IF (
-											@dblPickedQty BETWEEN @dblLowerToleranceQty
-												AND @dblUpperToleranceQty
+											--@dblPickedQty BETWEEN @dblLowerToleranceQty
+											--	AND @dblUpperToleranceQty
+											@dblPickedQty <= @dblUpperToleranceQty
 											)
 										AND @dblLowerToleranceQty > 0
 										AND @dblUpperToleranceQty > 0
@@ -1203,7 +1227,13 @@ BEGIN TRY
 										FROM @tblInputItemSeq
 										WHERE intItemId = @intItemId
 
-										IF @intMinRowNo = @intSeq
+										SELECT @intRowNo = NULL
+
+										SELECT @intRowNo = intRowNo
+										FROM @tblPreItem
+										WHERE intItemId = @intItemId
+
+										IF @intRowNo = @intSeq
 										BEGIN
 											SELECT @dblTotalPickedQty = NULL
 
@@ -1218,8 +1248,7 @@ BEGIN TRY
 												WHERE intItemId = @intItemId
 
 												SELECT @dblQuantity = @dblReqQty
-													,@dblIssuedQuantity = @dblReqQty
-													,@intItemIssuedUOMId = @intItemUOMId
+													,@dblIssuedQuantity = dbo.[fnDivide](@dblReqQty, @dblWeightPerUnit)
 
 												UPDATE @tblItem
 												SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1233,8 +1262,7 @@ BEGIN TRY
 											WHERE intItemId = @intItemId
 
 											SELECT @dblQuantity = @dblReqQty
-												,@dblIssuedQuantity = @dblReqQty
-												,@intItemIssuedUOMId = @intItemUOMId
+												,@dblIssuedQuantity = dbo.[fnDivide](@dblReqQty, @dblWeightPerUnit)
 
 											UPDATE @tblItem
 											SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1248,8 +1276,7 @@ BEGIN TRY
 										WHERE intItemId = @intItemId
 
 										SELECT @dblQuantity = @dblReqQty
-											,@dblIssuedQuantity = @dblReqQty
-											,@intItemIssuedUOMId = @intItemUOMId
+											,@dblIssuedQuantity = dbo.[fnDivide](@dblReqQty, @dblWeightPerUnit)
 
 										UPDATE @tblItem
 										SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1332,18 +1359,20 @@ BEGIN TRY
 							SELECT @dblFloorQtyDiff = @dblOriginalRequiredQty - (@dblPickedQty + @dblSuggestedFloorQty)
 
 							IF abs(@dblFloorQtyDiff) > abs(@dblCeilingQtyDiff)
-							AND @dblSuggestedCeilingQty+@dblPickedQty BETWEEN @dblLowerToleranceQty
+								AND @dblSuggestedCeilingQty + @dblPickedQty BETWEEN @dblLowerToleranceQty
 									AND @dblUpperToleranceQty
-								AND (@dblQty >= @dblSuggestedCeilingQty
-									OR @dblSuggestedCeilingQty-@dblQty<0.01)
+								AND (
+									@dblQty >= @dblSuggestedCeilingQty
+									OR @dblSuggestedCeilingQty - @dblQty < 0.01
+									)
 							BEGIN
 								SELECT @dblQuantity = @dblSuggestedCeilingQty
 									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Ceiling(dbo.[fnDivide](@dblQty, @dblWeightPerUnit)))
 							END
 							ELSE
 							BEGIN
-								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblQty, @dblWeightPerUnit),0)*@dblWeightPerUnit)
-									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblQty, @dblWeightPerUnit),0))
+								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblQty, @dblWeightPerUnit), 0) * @dblWeightPerUnit)
+									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblQty, @dblWeightPerUnit), 0))
 							END
 
 							UPDATE @tblItem
@@ -1353,8 +1382,15 @@ BEGIN TRY
 
 						IF @intIssuedUOMTypeId = 3
 						BEGIN
+							SELECT @dblQty1 = 0
+
+							SELECT @dblQty1 = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblQty, @dblWeightPerUnit), 0))
+
 							IF @ysnMinorIngredient = 0
-								AND @dblQty >= Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblQty, @dblWeightPerUnit), 0) * @dblWeightPerUnit)
+								AND (
+									@dblQty >= @dblQty1
+									OR @dblQty1 - @dblQty < 0.01
+									)
 							BEGIN
 								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblQty, @dblWeightPerUnit), 0) * @dblWeightPerUnit)
 									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblQty, @dblWeightPerUnit), 0))
@@ -1389,8 +1425,9 @@ BEGIN TRY
 								WHERE intItemId = @intItemId
 
 								IF (
-										@dblPickedQty BETWEEN @dblLowerToleranceQty
-											AND @dblUpperToleranceQty
+										--@dblPickedQty BETWEEN @dblLowerToleranceQty
+										--	AND @dblUpperToleranceQty
+										@dblPickedQty <= @dblUpperToleranceQty
 										)
 									AND @dblLowerToleranceQty > 0
 									AND @dblUpperToleranceQty > 0
@@ -1414,7 +1451,13 @@ BEGIN TRY
 									FROM @tblInputItemSeq
 									WHERE intItemId = @intItemId
 
-									IF @intMinRowNo = @intSeq
+									SELECT @intRowNo = NULL
+
+									SELECT @intRowNo = intRowNo
+									FROM @tblPreItem
+									WHERE intItemId = @intItemId
+
+									IF @intRowNo = @intSeq
 									BEGIN
 										SELECT @dblTotalPickedQty = NULL
 
@@ -1428,9 +1471,17 @@ BEGIN TRY
 											SET dblPickedQty = dblPickedQty - @dblQuantity
 											WHERE intItemId = @intItemId
 
-											SELECT @dblQuantity = @dblQty
-												,@dblIssuedQuantity = @dblQty
-												,@intItemIssuedUOMId = @intItemUOMId
+											IF @ysnMinorIngredient = 1
+											BEGIN
+												SELECT @dblQuantity = @dblQty
+													,@dblIssuedQuantity = @dblQty
+													,@intItemIssuedUOMId = @intItemUOMId
+											END
+											ELSE
+											BEGIN
+												SELECT @dblQuantity = @dblQty
+													,@dblIssuedQuantity = dbo.[fnDivide](@dblQty, @dblWeightPerUnit)
+											END
 
 											UPDATE @tblItem
 											SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1443,9 +1494,17 @@ BEGIN TRY
 										SET dblPickedQty = dblPickedQty - @dblQuantity
 										WHERE intItemId = @intItemId
 
-										SELECT @dblQuantity = @dblQty
-											,@dblIssuedQuantity = @dblQty
-											,@intItemIssuedUOMId = @intItemUOMId
+										IF @ysnMinorIngredient = 1
+										BEGIN
+											SELECT @dblQuantity = @dblQty
+												,@dblIssuedQuantity = @dblQty
+												,@intItemIssuedUOMId = @intItemUOMId
+										END
+										ELSE
+										BEGIN
+											SELECT @dblQuantity = @dblQty
+												,@dblIssuedQuantity = dbo.[fnDivide](@dblQty, @dblWeightPerUnit)
+										END
 
 										UPDATE @tblItem
 										SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -1458,9 +1517,17 @@ BEGIN TRY
 									SET dblPickedQty = dblPickedQty - @dblQuantity
 									WHERE intItemId = @intItemId
 
-									SELECT @dblQuantity = @dblQty
-										,@dblIssuedQuantity = @dblQty
-										,@intItemIssuedUOMId = @intItemUOMId
+									IF @ysnMinorIngredient = 1
+									BEGIN
+										SELECT @dblQuantity = @dblQty
+											,@dblIssuedQuantity = @dblQty
+											,@intItemIssuedUOMId = @intItemUOMId
+									END
+									ELSE
+									BEGIN
+										SELECT @dblQuantity = @dblQty
+											,@dblIssuedQuantity = dbo.[fnDivide](@dblQty, @dblWeightPerUnit)
+									END
 
 									UPDATE @tblItem
 									SET dblPickedQty = dblPickedQty + @dblQuantity
