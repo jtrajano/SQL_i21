@@ -295,7 +295,11 @@ BEGIN
 		,intStorageLocationId = cl.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
-		,strActualCostId = BlendItems.strActualCostId
+		,strActualCostId = (
+								SELECT TOP 1 BlendItems.strActualCostId
+								FROM #tmpBlendIngredients BlendItems
+								WHERE BlendItems.intItemId = cl.intItemId
+							)
 	FROM dbo.tblMFWorkOrderConsumedLot cl
 	JOIN dbo.tblICItem i ON cl.intItemId = i.intItemId
 	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
@@ -305,7 +309,7 @@ BEGIN
 		AND IP.intItemLocationId = il.intItemLocationId
 	JOIN dbo.tblICItemUOM IU ON i.intItemId = IU.intItemId
 		AND IU.ysnStockUnit = 1
-	LEFT JOIN #tmpBlendIngredients BlendItems ON BlendItems.intItemId = cl.intItemId
+	--LEFT JOIN #tmpBlendIngredients BlendItems ON BlendItems.intItemId = cl.intItemId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND ISNULL(cl.intLotId, 0) = 0
 

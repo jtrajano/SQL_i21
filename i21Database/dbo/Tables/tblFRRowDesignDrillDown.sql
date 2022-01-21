@@ -29,3 +29,6 @@
     [intConcurrencyId]			INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRRowDesignDrillDown] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC)
 );
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblFRRowDesignDrillDown_intRowId] ON [dbo].[tblFRRowDesignDrillDown] ([intRowId] asc)

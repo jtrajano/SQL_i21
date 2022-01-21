@@ -43,7 +43,10 @@ INSERT INTO ##ARItemsForInTransitCosting
 	,[intInTransitSourceLocationId]
 	,[intForexRateTypeId]
 	,[dblForexRate]
-	,[intLinkedItem])
+	,[intLinkedItem]
+	,[strBOLNumber]
+    ,[intSourceEntityId]
+)
 --INVENTORY SHIPMENT NON-LOTTED
 SELECT
 	 [intItemId]					= ICIT.[intItemId]
@@ -70,6 +73,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
@@ -131,6 +136,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]
@@ -190,7 +197,9 @@ SELECT
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	--,[dblQty]                       = - ROUND(ARID.dblQtyShipped/ CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
-	,[dblQty]                       = - (CAST(ARID.dblQtyShipped AS NUMERIC(18, 10))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
+	,[dblQty]                       = - (CAST(ARID.dblQtyShipped AS NUMERIC(18, 10))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 
+										THEN CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 AND ICS.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId = 1 THEN CTD.dblQuantity 
+										ELSE ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) END ELSE ICS.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -210,6 +219,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
 INNER JOIN (	
@@ -234,6 +245,11 @@ LEFT JOIN (
 		 , [intInvoiceDetailId]
 	FROM tblARInvoiceDetailLot ARIDL	
 ) ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+LEFT JOIN(
+	SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
+	INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
+)CTD ON CTD.intContractDetailId =ARID.intContractDetailId
+
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
@@ -270,6 +286,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
@@ -351,6 +369,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -401,7 +421,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ICIT.[dblQty] * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END
+	,[dblQty]						= (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ARID.[dblShipmentNetWt] * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -421,6 +441,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -509,6 +531,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= NULL
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -579,6 +603,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= NULL
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -645,6 +671,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM 
 (SELECT 
 	ARPID.intInvoiceId
@@ -669,6 +697,8 @@ FROM
 	, ARPID.intItemWeightUOMId
 	, INVD.dblShipmentNetWt
 	, ARPID.strType
+	, ARPID.strBOLNumber
+	, ARPID.intEntityCustomerId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -745,6 +775,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM 
 (SELECT 
 	ARPID.intInvoiceId
@@ -771,6 +803,8 @@ FROM
 	, dblShipmentNetWtProvisional = INVD.dblShipmentNetWt
 	, INVD.intOrderUOMId
 	, ARPID.strType
+	, ARPID.strBOLNumber 
+	, ARPID.intEntityCustomerId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -847,6 +881,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM 
 (SELECT 
 	INVD.intInvoiceId
@@ -869,6 +905,8 @@ FROM
 	, INVD.intTicketId
 	, ARPID.ysnFromProvisional
 	, ARPID.ysnProvisionalWithGL
+	, ARPID.strBOLNumber 
+	, ARPID.intEntityCustomerId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -934,6 +972,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM 
 (SELECT 
 	INVD.intInvoiceId
@@ -957,6 +997,8 @@ FROM
 	, INVD.intTicketId
 	, ARPID.ysnFromProvisional
 	, ARPID.ysnProvisionalWithGL
+	, ARPID.strBOLNumber 
+	, ARPID.intEntityCustomerId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -1022,6 +1064,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]
@@ -1109,6 +1153,8 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
+	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]

@@ -162,6 +162,8 @@
 	[dtmDateCreatedUtc] DATETIME2 NULL,
 	[dtmDateModifiedUtc] DATETIME2 NULL,
 	[dtmDateLastUpdatedUtc] AS COALESCE(dtmDateModifiedUtc, dtmDateCreatedUtc),
+    [dblDWGSpotPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+    [intFreightCostUOMId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -230,6 +232,10 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intLoadDetailId]
 ON [dbo].[tblSCTicket] ([intLoadDetailId])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intInvoiceId]
+ON [dbo].[tblSCTicket] ([intInvoiceId])
 GO
 
 EXEC sp_addextendedproperty @name = N'MS_Description',

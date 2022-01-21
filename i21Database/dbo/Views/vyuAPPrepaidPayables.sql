@@ -314,7 +314,7 @@ FROM dbo.tblARPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strRecordNumber = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2)

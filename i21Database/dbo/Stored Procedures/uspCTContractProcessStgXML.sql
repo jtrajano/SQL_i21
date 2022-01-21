@@ -2559,7 +2559,7 @@ BEGIN TRY
 						,x.dblTotalCost
 						,@intCurrencyID
 						,@intUnitMeasureId
-						,x.dblAvailableNetWeight
+						,x.dblNetWeight
 						,@intItemWeightUOMId
 						,GETDATE()
 						,@intCompanyLocationId
@@ -2705,6 +2705,7 @@ BEGIN TRY
 							,dblOriginalBasis NUMERIC(18, 6)
 							,strFixationBy NVARCHAR(50)
 							,dblConvertedBasis NUMERIC(18, 6)
+							,dblNetWeight NUMERIC(18, 6)
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -3095,7 +3096,7 @@ BEGIN TRY
 									THEN CD.intContractStatusId
 								ELSE (
 										CASE 
-											WHEN CD1.intContractStatusId = 3--Cancelled
+											WHEN CD1.intContractStatusId = 3 --Cancelled
 												THEN CD1.intContractStatusId
 											ELSE CD.intContractStatusId
 											END
@@ -3164,20 +3165,18 @@ BEGIN TRY
 									THEN CD.intItemUOMId
 								ELSE CD1.intItemUOMId
 								END
-							,dblOriginalQty = CD1.dblOriginalQty
-							,dblBalance = (CASE 
-											WHEN CD1.intContractStatusId not in (5,6)  Then CD1.dblBalance Else CD.dblBalance End)
-							,dblIntransitQty = CD1.dblIntransitQty
-							--,dblScheduleQty = CD1.dblScheduleQty
-							,dblBalanceLoad = CD1.dblBalanceLoad
-							,dblScheduleLoad = CD1.dblScheduleLoad
-							,dblShippingInstructionQty = CD1.dblShippingInstructionQty
+							,dblBalance = (
+								CASE 
+									WHEN CD.dblQuantity <> CD1.dblQuantity
+										AND CD.intItemUOMId = CD1.intItemUOMId
+										THEN ISNULL(CD.dblBalance, 0) + (CD1.dblQuantity - CD.dblQuantity)
+									ELSE CD1.dblQuantity
+									END
+								)
 							,dblNetWeight = CD1.dblNetWeight
 							,intNetWeightUOMId = CD1.intNetWeightUOMId
 							,intUnitMeasureId = CD1.intUnitMeasureId
 							,intCategoryUOMId = CD1.intCategoryUOMId
-							,intNoOfLoad = CD1.intNoOfLoad
-							,dblQuantityPerLoad = CD1.dblQuantityPerLoad
 							,intIndexId = CD1.intIndexId
 							,dblAdjustment = CD1.dblAdjustment
 							,intAdjItemUOMId = CD1.intAdjItemUOMId
@@ -3298,11 +3297,8 @@ BEGIN TRY
 							,intLoadingPortId = CD1.intLoadingPortId
 							,strDestinationPointType = CD1.strDestinationPointType
 							,intDestinationPortId = CD1.intDestinationPortId
-							--,strShippingTerm = CD1.strShippingTerm
-							--,intShippingLineId = CD1.intShippingLineId
 							,strVessel = CD1.strVessel
 							,intDestinationCityId = CD1.intDestinationCityId
-							--,intShipperId = CD1.intShipperId
 							,strRemark = CD1.strRemark
 							,intSubLocationId = CD1.intSubLocationId
 							,intStorageLocationId = CD1.intStorageLocationId
@@ -3367,10 +3363,6 @@ BEGIN TRY
 							,ysnClaimsToProducer = CD1.ysnClaimsToProducer
 							,ysnRiskToProducer = CD1.ysnRiskToProducer
 							,ysnBackToBack = CD1.ysnBackToBack
-							,dblAllocatedQty = CD1.dblAllocatedQty
-							,dblReservedQty = CD1.dblReservedQty
-							,dblAllocationAdjQty = CD1.dblAllocationAdjQty
-							,dblInvoicedQty = CD1.dblInvoicedQty
 							,ysnPriceChanged = CD1.ysnPriceChanged
 							,ysnStockSale = CD1.ysnStockSale
 							,strCertifications = CD1.strCertifications
@@ -3378,13 +3370,9 @@ BEGIN TRY
 							,intShippingLineId = CD1.intShippingLineId
 							,intShipperId = CD1.intShipperId
 							,strShippingTerm = CD1.strShippingTerm
-							--,dblOriginalBasis = CD1.dblOriginalBasis
-							--,intBasisUOMId = CD1.intBasisUOMId
-							--,intBasisCurrencyId = CD1.intBasisCurrencyId
 							,intFreightBasisUOMId = CD1.intFreightBasisUOMId
 							,intFreightBasisBaseUOMId = CD1.intFreightBasisBaseUOMId
-						--,strFixationBy = CD1.strFixationBy
-						--,intConvPriceCurrencyId = CD1.intConvPriceCurrencyId
+							,CD.intContractDetailRefId = CD1.intContractDetailRefId
 						FROM tblCTContractDetail CD
 						JOIN #tmpContractDetail CD1 ON CD.intContractSeq = CD1.intContractSeq
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
@@ -3908,6 +3896,10 @@ BEGIN TRY
 				--			,1
 				--			)
 				--END
+				DELETE
+				FROM tblCTContractDocument
+				WHERE intContractHeaderId = @intNewContractHeaderId
+
 				INSERT INTO tblCTContractDocument (
 					intContractHeaderId
 					,intDocumentId
@@ -3923,7 +3915,8 @@ BEGIN TRY
 						,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
 						) x
 				JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-				WHERE NOT EXISTS (
+
+				/*WHERE NOT EXISTS (
 						SELECT *
 						FROM tblCTContractDocument CD
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
@@ -3947,8 +3940,7 @@ BEGIN TRY
 						SELECT *
 						FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (intContractDocumentId INT) x
 						WHERE CD.intContractDocumentRefId = x.intContractDocumentId
-						)
-
+						)*/
 				EXEC sp_xml_removedocument @idoc
 
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -4533,8 +4525,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
-						,@screenId=@intContractScreenId
-						,@populatedByInterCompany=1
+						,@screenId = @intContractScreenId
+						,@populatedByInterCompany = 1
 				END
 
 				--------------------------------------------------------------------------------------------------------------------------

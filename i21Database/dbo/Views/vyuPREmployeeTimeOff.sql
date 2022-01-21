@@ -52,11 +52,18 @@ INNER JOIN(
 		SELECT E.intEntityId  
 			  ,dblHoursUsedYTD = SUM(
 										CASE WHEN PCTimeOff.intYear IS NOT NULL AND (T.strAwardPeriod = 'Anniversary Date') THEN 
-													CASE WHEN (PCTimeOff.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  
-															AND PCTimeOff.dtmDateFrom > ISNULL(T.dtmLastAward, E.dtmDateHired)  
-															) THEN dblHours
+													CASE WHEN (PCTimeOff.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)  
+														AND (PCTimeOff.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  OR YEAR(PCTimeOff.dtmDateFrom) =  YEAR(GETDATE()) )
+														) THEN dblHours
 													ELSE 0
 
+													END
+											WHEN TOR.intYear IS NOT NULL AND  (T.strAwardPeriod = 'Anniversary Date') THEN 
+													CASE WHEN (TOR.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)  
+														AND (TOR.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  OR YEAR(TOR.dtmDateFrom) =  YEAR(GETDATE()) )
+														) THEN TOR.dblHoursTOR
+													ELSE 
+														0
 													END
                                             WHEN TOR.intYear IS NOT NULL AND (T.strAwardPeriod = 'End of Year') THEN   
                                                 CASE WHEN (  TOR.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)    

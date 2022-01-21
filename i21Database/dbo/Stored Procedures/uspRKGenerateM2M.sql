@@ -647,7 +647,7 @@ BEGIN TRY
 				WHERE dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) <= @dtmEndDate
 				AND CBL.intCommodityId = ISNULL(@intCommodityId, CBL.intCommodityId)
 				AND CBL.strTransactionType = 'Contract Balance'
-				AND CBL.dblBasis IS NOT NULL
+				AND (CBL.dblBasis IS NOT NULL OR CBL.intPricingTypeId = 3)
 			) t
 			WHERE intRowNum = 1
 		) z
@@ -1192,6 +1192,7 @@ BEGIN TRY
 			, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
 			, temp.intCurrencyId
 			, temp.intCommodityId
+			, temp.intMarketZoneId
 		INTO #tmpM2MBasisDetail
 		FROM tblRKM2MBasisDetail temp
 		LEFT JOIN tblSMCurrency c ON temp.intCurrencyId=c.intCurrencyID
@@ -1494,7 +1495,8 @@ BEGIN TRY
 					AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 													THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
 												ELSE tmp.strPeriodTo END
-					AND tmp.strContractInventory = 'Contract') basisDetail
+					AND tmp.strContractInventory = 'Contract'
+					AND tmp.intMarketZoneId = ISNULL(cd.intMarketZoneId, tmp.intMarketZoneId) ) basisDetail
 			LEFT JOIN tblCTContractHeader cth
 				ON cd.intContractHeaderId = cth.intContractHeaderId
 			OUTER APPLY (

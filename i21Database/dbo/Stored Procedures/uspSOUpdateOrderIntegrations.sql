@@ -46,9 +46,16 @@ BEGIN
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
     									   , @intPickListId
     									   , 34
+
+	DELETE FROM tblARPricingHistory 
+	WHERE intTransactionId = @SalesOrderId
+	AND intSourceTransactionId = 1
+END
+ELSE 
+BEGIN
+	EXEC dbo.[uspARUpdatePricingHistory] 1, @intSalesOrderId, @intUserId
 END
 
-EXEC dbo.[uspARUpdatePricingHistory] 1, @intSalesOrderId, @intUserId
 EXEC dbo.[uspSOUpdateItemComponent] @intSalesOrderId, 0
 EXEC dbo.[uspSOUpdateCommitted] @intSalesOrderId, @ysnForDelete
 EXEC dbo.[uspSOUpdateItemComponent] @intSalesOrderId, 1

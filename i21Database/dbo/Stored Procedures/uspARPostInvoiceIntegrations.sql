@@ -1001,6 +1001,12 @@ EXEC dbo.uspARInvoiceGrossMarginSummary @ysnRebuild = 0
 EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdate
 									    , @intUserId		= @UserId		
 
+--SALES ANALYSIS REPORT
+EXEC dbo.uspARSalesAnalysisReport @tblTransactionIds 	= @tblInvoicesToUpdate
+							    , @ysnInvoice 			= 1
+								, @ysnRebuild 			= 0
+								, @ysnPost 				= @Post
+
 --DELETE FROM POSTING QUEUE
 DELETE PQ
 FROM tblARPostingQueue PQ

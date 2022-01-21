@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSettleStorage]
 AS     
-SELECT DISTINCT
+SELECT
 	 intSettleStorageId			= SS.intSettleStorageId
 	,intEntityId				= SS.intEntityId
 	,strEntityName				= E.strName
@@ -62,6 +62,11 @@ SELECT DISTINCT
 										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
 										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol
 								END
+	,strUnitsOnly                   =  CASE
+										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits)))
+										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) 
+								END
+	,strUnitsMeasurementOnly                   =  UOM.strSymbol								
 	,intTransactionId			= CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN 99999999
 									ELSE
@@ -104,9 +109,10 @@ SELECT DISTINCT
 	, strCommodityCode
 	, strCategoryCode	= Category.strCategoryCode
 FROM tblGRSettleStorage SS
-JOIN tblGRSettleStorageTicket ST
+LEFT JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
-JOIN tblGRCustomerStorage CS
+	AND SS.intParentSettleStorageId IS NOT NULL
+LEFT JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = ST.intCustomerStorageId
 JOIN tblEMEntity E 
 	ON E.intEntityId = SS.intEntityId
@@ -169,7 +175,7 @@ CROSS APPLY (
 ) AS _strContractIds
 OUTER APPLY (
 	SELECT 
-		SUM(CD.dblCashPrice) AS dblCashPrice
+		dblCashPrice = SUM(CD.dblCashPrice) / COUNT(*)
 	FROM tblCTContractDetail CD
 	INNER JOIN tblGRSettleContract SC
 		ON CD.intContractDetailId = SC.intContractDetailId
@@ -182,7 +188,7 @@ OUTER APPLY (
 	SELECT dblCashPrice = SUM(_son.dblCashPrice)
 	FROM (
 		SELECT 
-			dblCashPrice = SUM(CD.dblCashPrice * SC.dblUnits)
+			dblCashPrice = SUM(CD.dblCashPrice * SC.dblUnits) / COUNT(*)
 		FROM tblGRSettleContract SC
 		JOIN tblGRSettleStorage SSS
 			ON SC.intSettleStorageId = SSS.intSettleStorageId 
@@ -192,7 +198,7 @@ OUTER APPLY (
 		WHERE CD.intPricingTypeId <> 2
 			AND SS.intParentSettleStorageId IS NULL		
 		UNION ALL
-		SELECT dblCashPrice  = SUM(TSS.dblSpotUnits * TSS.dblCashPrice)
+		SELECT dblCashPrice  = SUM(TSS.dblSpotUnits * TSS.dblCashPrice) / COUNT(*)
 		FROM tblGRSettleStorageTicket T
 		JOIN tblGRSettleStorage TSS
 			ON T.intSettleStorageId = TSS.intSettleStorageId

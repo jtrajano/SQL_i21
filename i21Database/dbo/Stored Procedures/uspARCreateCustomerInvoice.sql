@@ -24,6 +24,7 @@
 	,@MobileBillingShiftNo			NVARCHAR(50)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
+	,@PaymentInfo					NVARCHAR(50)	= ''
 	,@Comment						NVARCHAR(MAX)	= ''
 	,@FooterComment					NVARCHAR(MAX)	= ''
 	,@ShipToLocationId				INT				= NULL
@@ -272,6 +273,15 @@ IF @ARAccountId IS NOT NULL AND @TransactionType = 'Cash Refund' AND NOT EXISTS 
 		RETURN 0;
 	END
 
+IF (@TransactionType IN ('Cash Refund', 'Customer Prepayment') AND NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ISNULL(intSalesAdvAcct, 0) <> 0))
+	BEGIN		
+		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR('There is no Customer Prepaid account setup under Company Location - %s.', 16, 1, @CompanyLocation);
+		SET @ErrorMessage = [dbo].[fnARFormatMessage]('There is no Customer Prepaid account setup under Company Location - %s.', @CompanyLocation, DEFAULT) 
+		RETURN 0;
+	END
+
 IF @ARAccountId IS NULL AND @TransactionType = 'Customer Prepayment'
 	BEGIN		
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
@@ -443,6 +453,7 @@ BEGIN TRY
 		,[strMobileBillingShiftNo]
 		,[strPONumber]
 		,[strBOLNumber]
+		,[strPaymentInfo]
 		,[strComments]
 		,[strFooterComments]
 		,[intShipToLocationId]
@@ -523,6 +534,7 @@ BEGIN TRY
 		,[strMobileBillingShiftNo]		= @MobileBillingShiftNo
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
+		,[strPaymentInfo]				= @PaymentInfo
 		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
 		,[strFooterComments]			= CASE WHEN ISNULL(@FooterComment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0) ELSE @FooterComment END
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))

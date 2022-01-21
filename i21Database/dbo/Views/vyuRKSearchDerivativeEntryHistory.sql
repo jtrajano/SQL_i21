@@ -134,7 +134,7 @@ FROM (
 				, 'Futures'
 				, 'Buy'
 				, dtmMatchDate = CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME)
-				, SUM(mf.dblMatchQty)
+				, - SUM(mf.dblMatchQty)
 			FROM tblRKMatchDerivativesHistory mf
 			GROUP BY mf.intLFutOptTransactionId
 				, CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME)
@@ -143,7 +143,7 @@ FROM (
 				, 'Futures'
 				, 'Sell'
 				, dtmMatchDate = CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME)
-				, - SUM(mf.dblMatchQty)
+				, SUM(mf.dblMatchQty)
 			FROM tblRKMatchDerivativesHistory mf
 			GROUP BY mf.intSFutOptTransactionId
 				, CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME)

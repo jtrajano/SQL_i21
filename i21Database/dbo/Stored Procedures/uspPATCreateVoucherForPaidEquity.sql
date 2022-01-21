@@ -25,7 +25,8 @@ CREATE TABLE #tempEquityPayments(
 	[ysnQualified] BIT,
 	[strName] NVARCHAR(100),
 	[ysnVendor] BIT,
-	[dblEquityPaid] NUMERIC(18,6)
+	[dblEquityPaid] NUMERIC(18,6),
+	[ysnPriorYear] BIT
 )
 
 CREATE TABLE #tempVoucherReference(
@@ -36,15 +37,16 @@ CREATE TABLE #tempVoucherReference(
 IF(@equityPaymentIds = 'all')
 BEGIN
 	INSERT INTO #tempEquityPayments
-	SELECT	EP.intEquityPayId,
-			EP.strPaymentNumber,
-			EP.dtmPaymentDate,
-			EPS.intEquityPaySummaryId,
-			EPS.intCustomerPatronId,
-			EPS.ysnQualified,
-			EM.strName,
-			ysnVendor = APV.Vendor,
-			EPS.dblEquityPaid
+	SELECT	 EP.intEquityPayId
+			,EP.strPaymentNumber
+			,EP.dtmPaymentDate
+			,EPS.intEquityPaySummaryId
+			,EPS.intCustomerPatronId
+			,EPS.ysnQualified
+			,EM.strName
+			,ysnVendor = APV.Vendor
+			,EPS.dblEquityPaid
+			,ysnPriorYear =	CASE WHEN CAST(GLFYP.strFiscalYear AS INT) > CAST(GLFY.strFiscalYear AS INT) THEN 1 ELSE 0 END
 	FROM tblPATEquityPay EP
 	INNER JOIN tblPATEquityPaySummary EPS
 		ON EPS.intEquityPayId = EP.intEquityPayId
@@ -52,21 +54,32 @@ BEGIN
 		ON EM.intEntityId = EPS.intCustomerPatronId
 	LEFT OUTER JOIN vyuEMEntityType APV 
 		ON APV.intEntityId = EPS.intCustomerPatronId
+	OUTER APPLY (
+		SELECT TOP 1 strFiscalYear
+		FROM tblGLFiscalYear
+		WHERE intFiscalYearId = EP.intFiscalYearId
+	) GLFY
+	OUTER APPLY (
+		SELECT TOP 1 strFiscalYear
+		FROM tblGLFiscalYear
+		WHERE EP.dtmPaymentDate BETWEEN dtmDateFrom AND dtmDateTo
+	) GLFYP
 	WHERE EP.intEquityPayId = @equityPay
 		AND EPS.intBillId IS NULL
 END
 ELSE
 BEGIN
 	INSERT INTO #tempEquityPayments
-	SELECT	EP.intEquityPayId,
-			EP.strPaymentNumber,
-			EP.dtmPaymentDate,
-			EPS.intEquityPaySummaryId,
-			EPS.intCustomerPatronId,
-			EPS.ysnQualified,
-			EM.strName,
-			ysnVendor = APV.Vendor,
-			EPS.dblEquityPaid
+	SELECT	 EP.intEquityPayId
+			,EP.strPaymentNumber
+			,EP.dtmPaymentDate
+			,EPS.intEquityPaySummaryId
+			,EPS.intCustomerPatronId
+			,EPS.ysnQualified
+			,EM.strName
+			,ysnVendor = APV.Vendor
+			,EPS.dblEquityPaid
+			,ysnPriorYear =	CASE WHEN CAST(GLFYP.strFiscalYear AS INT) > CAST(GLFY.strFiscalYear AS INT) THEN 1 ELSE 0 END
 	FROM tblPATEquityPay EP
 	INNER JOIN tblPATEquityPaySummary EPS
 		ON EPS.intEquityPayId = EP.intEquityPayId
@@ -74,6 +87,16 @@ BEGIN
 		ON EM.intEntityId = EPS.intCustomerPatronId
 	LEFT OUTER JOIN vyuEMEntityType APV 
 		ON APV.intEntityId = EPS.intCustomerPatronId
+	OUTER APPLY (
+		SELECT TOP 1 strFiscalYear
+		FROM tblGLFiscalYear
+		WHERE intFiscalYearId = EP.intFiscalYearId
+	) GLFY
+	OUTER APPLY (
+		SELECT TOP 1 strFiscalYear
+		FROM tblGLFiscalYear
+		WHERE EP.dtmPaymentDate BETWEEN dtmDateFrom AND dtmDateTo
+	) GLFYP
 	WHERE EPS.intEquityPaySummaryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@equityPaymentIds)) 
 		AND EPS.intBillId IS NULL
 END
@@ -134,6 +157,7 @@ END
 				,[int1099Form]
 				,[int1099Category]
 				,[dbl1099]
+				,[ysnStage]
 		)
 		SELECT	EquityPay.intEquityPaySummaryId
 				,EquityPay.intCustomerPatronId
@@ -145,17 +169,18 @@ END
 				,dblQtyToBill = 1
 				,dblCost = ROUND(EquityPay.dblEquityPaid, 2)
 				,int1099Form = CASE 
-									WHEN EquityPay.ysnQualified = 1 THEN 4
+									WHEN EquityPay.ysnQualified = 1 AND EquityPay.ysnPriorYear = 0 THEN 4
 									ELSE 0
 								END
 				,int1099Category = CASE 
-									WHEN EquityPay.ysnQualified = 1 THEN 5
+									WHEN EquityPay.ysnQualified = 1 AND EquityPay.ysnPriorYear = 0 THEN 5
 									ELSE 0
 								END
 				,dbl1099 = CASE 
 								WHEN EquityPay.ysnQualified = 1 THEN ROUND(EquityPay.dblEquityPaid, 2)
 								ELSE 0
 							END
+				,0
 		FROM #tempEquityPayments EquityPay
 
 		EXEC [dbo].[uspAPCreateVoucher]

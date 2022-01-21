@@ -5,10 +5,7 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
-IF(OBJECT_ID('tempdb..##ARPostInvoiceHeader') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARPostInvoiceHeader
-END
+IF(OBJECT_ID('tempdb..##ARPostInvoiceHeader') IS NOT NULL) DROP TABLE ##ARPostInvoiceHeader
 CREATE TABLE ##ARPostInvoiceHeader (
      [intInvoiceId]                         INT             NOT NULL PRIMARY KEY
     ,[strInvoiceNumber]                     NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL UNIQUE NONCLUSTERED
@@ -163,12 +160,10 @@ CREATE TABLE ##ARPostInvoiceHeader (
     ,[strSourceType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strPostingMessage]                    NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strDescription]                       NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
 )
 
-IF(OBJECT_ID('tempdb..##ARPostInvoiceDetail') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARPostInvoiceDetail
-END
+IF(OBJECT_ID('tempdb..##ARPostInvoiceDetail') IS NOT NULL) DROP TABLE ##ARPostInvoiceDetail
 CREATE TABLE ##ARPostInvoiceDetail (
      [intInvoiceId]                         INT             NOT NULL
     ,[strInvoiceNumber]                     NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
@@ -323,12 +318,10 @@ CREATE TABLE ##ARPostInvoiceDetail (
     ,[strSourceType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strPostingMessage]                    NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strDescription]                       NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
 )
 
-IF(OBJECT_ID('tempdb..##ARInvoiceItemAccount') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARInvoiceItemAccount
-END
+IF(OBJECT_ID('tempdb..##ARInvoiceItemAccount') IS NOT NULL) DROP TABLE ##ARInvoiceItemAccount
 CREATE TABLE ##ARInvoiceItemAccount (
 	 [intItemId]                         INT                                             NOT NULL
     ,[strItemNo]                         NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
@@ -346,10 +339,7 @@ CREATE TABLE ##ARInvoiceItemAccount (
 	,PRIMARY KEY CLUSTERED ([intItemId], [intLocationId])
 )
 
-IF(OBJECT_ID('tempdb..##ARInvalidInvoiceData') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARInvalidInvoiceData
-END
+IF(OBJECT_ID('tempdb..##ARInvalidInvoiceData') IS NOT NULL) DROP TABLE ##ARInvalidInvoiceData
 CREATE TABLE ##ARInvalidInvoiceData (
       [intInvoiceId]			INT				NOT NULL
 	, [strInvoiceNumber]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
@@ -360,10 +350,7 @@ CREATE TABLE ##ARInvalidInvoiceData (
 	, [strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
 )
 
-IF(OBJECT_ID('tempdb..##ARItemsForCosting') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARItemsForCosting
-END
+IF(OBJECT_ID('tempdb..##ARItemsForCosting') IS NOT NULL) DROP TABLE ##ARItemsForCosting
 CREATE TABLE ##ARItemsForCosting (
 	  [intItemId]						INT NOT NULL
 	, [intItemLocationId]				INT NULL
@@ -396,13 +383,15 @@ CREATE TABLE ##ARItemsForCosting (
 	, [dblAdjustCostValue]				NUMERIC(38, 20) NULL
 	, [dblAdjustRetailValue]			NUMERIC(38, 20) NULL
 	, [strType]                         NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , [ysnAutoBlend]                    BIT NULL
     , [ysnGLOnly]						BIT NULL
+	, [strBOLNumber]					NVARCHAR(100) NULL 
+    , [strSourceType]                   NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , [strSourceNumber]                 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , [intSourceEntityId]				INT NULL
 )
 
-IF(OBJECT_ID('tempdb..##ARItemsForInTransitCosting') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARItemsForInTransitCosting
-END
+IF(OBJECT_ID('tempdb..##ARItemsForInTransitCosting') IS NOT NULL) DROP TABLE ##ARItemsForInTransitCosting
 CREATE TABLE ##ARItemsForInTransitCosting (
 	  [intItemId]						INT NOT NULL
 	, [intItemLocationId]				INT NULL
@@ -429,12 +418,11 @@ CREATE TABLE ##ARItemsForInTransitCosting (
 	, [dblForexRate]					NUMERIC(38, 20) NULL DEFAULT 1
 	, [intLinkedItem]					INT NULL
 	, [intLinkedItemId]					INT NULL
+	, [strBOLNumber]					NVARCHAR(100) NULL 
+    , [intSourceEntityId]				INT NULL
 )
 
-IF(OBJECT_ID('tempdb..##ARItemsForStorageCosting') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARItemsForStorageCosting
-END
+IF(OBJECT_ID('tempdb..##ARItemsForStorageCosting') IS NOT NULL) DROP TABLE ##ARItemsForStorageCosting
 CREATE TABLE ##ARItemsForStorageCosting (
 	  [intItemId]						INT NOT NULL
 	, [intItemLocationId]				INT NULL
@@ -466,12 +454,10 @@ CREATE TABLE ##ARItemsForStorageCosting (
 	, [intCategoryId]					INT NULL 
 	, [dblAdjustCostValue]				NUMERIC(38, 20) NULL
 	, [dblAdjustRetailValue]			NUMERIC(38, 20) NULL
+	, [strBOLNumber]					NVARCHAR(100) NULL 
 )
 
-IF(OBJECT_ID('tempdb..##ARItemsForContracts') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARItemsForContracts
-END
+IF(OBJECT_ID('tempdb..##ARItemsForContracts') IS NOT NULL) DROP TABLE ##ARItemsForContracts
 CREATE TABLE ##ARItemsForContracts (
 	  [intInvoiceId]					INT NOT NULL
 	, [intInvoiceDetailId]				INT NOT NULL
@@ -495,10 +481,7 @@ CREATE TABLE ##ARItemsForContracts (
 	, [ysnFromReturn]					BIT NULL
 )
 
-IF(OBJECT_ID('tempdb..##ARInvoiceGLEntries') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARInvoiceGLEntries
-END
+IF(OBJECT_ID('tempdb..##ARInvoiceGLEntries') IS NOT NULL) DROP TABLE ##ARInvoiceGLEntries
 CREATE TABLE ##ARInvoiceGLEntries (
 	  [dtmDate]							DATETIME         NOT NULL
 	, [strBatchId]						NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL

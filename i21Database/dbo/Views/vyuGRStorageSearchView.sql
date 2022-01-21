@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRStorageSearchView]
 AS    
-SELECT DISTINCT 
+SELECT 
 	intCustomerStorageId		  	= CS.intCustomerStorageId
 	,intTransactionId			  	= CASE 
 										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intDeliverySheetId

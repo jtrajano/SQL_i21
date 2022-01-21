@@ -120,7 +120,7 @@ BEGIN
 		,[intItemUOMId] 
 		,dbo.fnRemoveTimeOnDate(t.dtmDate) 
 	ORDER BY
-		dbo.fnRemoveTimeOnDate(t.dtmDate)  DESC 
+		dbo.fnRemoveTimeOnDate(t.dtmDate) ASC
 
 	-- insert as zero record. 
 	INSERT INTO tblICInventoryStockAsOfDate 
@@ -271,7 +271,7 @@ BEGIN
 		,[intItemUOMId] 
 		,[dtmDate] 
 
-	-- insert as zero record. 
+	-- insert a new record if it does not exists. 
 	INSERT INTO tblICInventoryStockAsOfDate 
 	(
 		[intItemId]
@@ -285,13 +285,26 @@ BEGIN
 		,s.intItemLocationId
 		,s.intItemUOMId
 		,s.dtmDate
-		,[dblQty] = 0 
+		,[dblQty] = ISNULL(carryOverStock.dblQty, 0)  
 	FROM 
 		tblICInventoryStockAsOfDate asOfDate RIGHT JOIN @stock s
 			ON asOfDate.[intItemId] = s.intItemId 
 			AND asOfDate.[intItemLocationId] = s.intItemLocationId 
 			AND asOfDate.[intItemUOMId] = s.intItemUOMId 
 			AND asOfDate.[dtmDate] = s.dtmDate 
+		OUTER APPLY (
+			SELECT TOP 1
+				t.dblQty
+			FROM 
+				tblICInventoryStockAsOfDate t
+			WHERE
+				t.intItemId = s.intItemId
+				AND t.intItemLocationId = s.intItemLocationId
+				AND t.intItemUOMId = s.intItemUOMId	
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(s.dtmDate AS FLOAT))
+			ORDER BY
+				t.intId DESC 
+		) carryOverStock
 	WHERE
 		asOfDate.intId IS NULL 
 		 

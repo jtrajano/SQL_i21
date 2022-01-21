@@ -176,7 +176,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,strPriceUOMInfo = '/'+ LTRIM(isnull(rtPRUTranslation.strTranslation,PRU.strUnitMeasure))
 	,WCD.dblClaimAmount
 	,strClaimCurrency = CASE WHEN CU.ysnSubCurrency = 1 THEN MCU.strCurrency ELSE CU.strCurrency END
-	,strTotalAmountInfo = LTRIM(CASE WHEN CU.ysnSubCurrency = 1 THEN MCU.strCurrency ELSE CU.strCurrency END) + ' ' + dbo.fnRemoveTrailingZeroes(ROUND(WCD.dblClaimAmount,2))
+	,strTotalAmountInfo = ISNULL(LTRIM(CASE WHEN CU.ysnSubCurrency = 1 THEN MCU.strCurrency ELSE CU.strCurrency END),'') + ' ' + FORMAT(WCD.dblClaimAmount,'N2')
 	,I.strItemNo
 	,strItemDescription = isnull(rtITranslation.strTranslation,I.strDescription)
 	,INV.strPONumber

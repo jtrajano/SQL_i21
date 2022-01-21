@@ -9,6 +9,7 @@ CREATE PROCEDURE [dbo].[uspGRCreateItemGLEntries]
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@dblSelectedUnits AS DECIMAL(24,10) = null
+	,@intSettleStorageId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -221,7 +222,7 @@ END
 ;
 
 if @ysnForRebuild = 0
-	exec uspGRHandleSettleVoucherCreateReferenceTable  @strBatchId, @SettleVoucherCreate
+	exec uspGRHandleSettleVoucherCreateReferenceTable  @strBatchId, @SettleVoucherCreate, @intSettleStorageId
 ;
 
 SELECT @dblGrossUnits = dblUnits FROM @SettleVoucherCreate WHERE ysnDiscountFromGrossWeight = 1
@@ -308,11 +309,13 @@ AS
 				and SV2.intItemType = 3
 		WHERE SV2.strBatchId = t.strBatchId
 			AND isnull(SV2.ysnItemInventoryCost,I.ysnInventoryCost) = 1
+			AND ISNULL(SV2.intTransactionId ,0) = ISNULL(@intSettleStorageId,0)
 	) DiscountCost
 	WHERE t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp.
+		AND t.intTransactionId = ISNULL(@intSettleStorageId, t.intTransactionId)
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 

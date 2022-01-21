@@ -99,7 +99,7 @@ BEGIN
 														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
 												WHERE P.ysnPosted = 1
 													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
-													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= GETDATE() 
+													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward --AND P.dtmDateTo <= GETDATE() 
 													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
 								ELSE 0
 							END * dblRate * dblRateFactor

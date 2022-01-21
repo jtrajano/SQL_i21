@@ -53,7 +53,8 @@ IF @strLocationNameLocal IS NOT NULL
 		) C (intCompanyLocationId)
 	END
 
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom 					= @dtmAsOfDateFrom
+										, @dtmDateTo 					= @dtmAsOfDate
 										, @intEntityUserId 				= @intEntityUserId
 										, @strCompanyLocationIds		= @strCompanyLocationIdsLocal
 										, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal

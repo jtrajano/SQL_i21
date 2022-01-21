@@ -530,8 +530,29 @@ END
 		,[intChargeId]						= IC.intItemId
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
-												WHEN IC.strCostMethod = 'Per Unit' THEN  (QM.dblDiscountAmount * -1)
-												WHEN IC.strCostMethod = 'Amount' THEN 0
+												WHEN IC.strCostMethod = 'Per Unit'  OR  ISNULL(CNT.intPricingTypeId, 0) = 5 THEN 
+													
+													(
+														(
+																CASE WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0))    
+																	ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice))  
+																END
+															) / SE.dblQuantity
+														) * - 1--CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END
+													
+												WHEN IC.strCostMethod = 'Amount' THEN --0
+													CASE
+														WHEN SE.intOwnershipType = 2 THEN 0
+														WHEN SE.intOwnershipType = 1 THEN
+															CASE 
+																WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0))    
+																ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice))  
+															END 
+															* - 1 --CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END
+
+															
+													END
+												ELSE 0
 											END
 		,[intCostUOMId]						= CASE
 												WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
@@ -539,17 +560,21 @@ END
 											END
 		,[intOtherChargeEntityVendorId]		= NULL
 		,[dblAmount]						= CASE
-													WHEN IC.strCostMethod = 'Per Unit' THEN 0
-													WHEN IC.strCostMethod = 'Amount' THEN 
-													CASE
+												WHEN IC.strCostMethod = 'Per Unit' AND CNT.intPricingTypeId <> 5 THEN 0
+												WHEN IC.strCostMethod = 'Amount' OR CNT.intPricingTypeId = 5 THEN 
+													ROUND(
+													CASE 
 														WHEN SE.intOwnershipType = 2 THEN 0
-														WHEN SE.intOwnershipType = 1 THEN 
-														CASE
-															WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0) * -1)
-															ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice) * -1)
-														END
-													END 
-												END
+														WHEN SE.intOwnershipType = 1 THEN
+															CASE WHEN @splitDistribution = 'SPL' THEN 
+																(dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0))
+															ELSE 
+																(dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice))
+															END
+															* -1
+
+													END,2)
+											END
 		,[ysnAccrue]						= 0
 		,[ysnPrice]							= 1
 		,[strChargesLink]					= SE.strChargesLink
@@ -562,7 +587,14 @@ END
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 		LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
+		LEFT JOIN (
+			SELECT intContractHeaderId
+			,intContractDetailId
+			,intPricingTypeId
+			FROM tblCTContractDetail 
+		) CNT ON CNT.intContractDetailId = SE.intLineNo
 		WHERE SE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
+
 
 		--INSERT RECORD FOR FEES
 		INSERT INTO @ShipmentChargeStagingTable
@@ -738,6 +770,9 @@ END
 																			ELSE 1 END
 									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblLGLoadDetail LoadDetail
+									JOIN tblSCTicketLoadUsed TicketUsed
+										on LoadDetail.intLoadDetailId = TicketUsed.intLoadDetailId
+											and TicketUsed.intTicketId = @intTicketId
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
 									LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -809,6 +844,9 @@ END
 																			ELSE 1 END
 									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblLGLoadDetail LoadDetail
+									JOIN tblSCTicketLoadUsed TicketUsed
+										on LoadDetail.intLoadDetailId = TicketUsed.intLoadDetailId
+											and TicketUsed.intTicketId = @intTicketId
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 									LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId

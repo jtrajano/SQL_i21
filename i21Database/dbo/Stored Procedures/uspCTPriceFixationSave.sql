@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCTPriceFixationSave]
+﻿/*Test commit to trigger the release*/
+CREATE PROCEDURE [dbo].[uspCTPriceFixationSave]
 	
 	@intPriceFixationId INT,
 	@strAction			NVARCHAR(50),
@@ -607,7 +608,8 @@ BEGIN TRY
 					CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE null END,
 					CD.dblCashPrice			=	NULL,	
 					CD.dblTotalCost			=	NULL,
-					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
+					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
+					CD.dblBasis 			=	CASE WHEN CH.intPricingTypeId = 3 THEN null ELSE CD.dblBasis END
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intContractDetailId, CD.intSplitFromId)

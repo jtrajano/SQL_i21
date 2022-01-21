@@ -3,7 +3,7 @@
 	,@Post					AS BIT				= 0	
 	,@UserId				AS INT				= 1
 	,@IsSuccess				AS BIT				= 0		OUTPUT
-	,@BatchIdUsed			AS NVARCHAR(20)		= NULL	OUTPUT
+	,@BatchIdUsed			AS NVARCHAR(40)		= NULL	OUTPUT
 	,@SuccessfulCount		AS INT				= 0		OUTPUT
 	,@InvalidCount			AS INT				= 0		OUTPUT
 	,@DocumentMaintenanceId AS INT				= NULL

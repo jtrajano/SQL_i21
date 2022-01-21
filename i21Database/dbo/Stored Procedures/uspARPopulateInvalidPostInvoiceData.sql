@@ -17,9 +17,9 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
--- --IC Reserve Stock
--- IF @Recap = @ZeroBit	
--- 	EXEC dbo.uspARPostItemResevation
+ --IC Reserve Stock
+IF @Recap = @ZeroBit	
+	EXEC dbo.uspARPostItemResevation
 
 DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
 DECLARE @ItemsForContracts					[InvoicePostingTable]
@@ -1761,7 +1761,7 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[dtmDate]
-		,CASE WHEN [strType] IN ('CF Tran') THEN ABS([dblQty]) ELSE [dblQty] END
+		,CASE WHEN [strType] IN ('CF Tran', 'POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -1783,61 +1783,7 @@ BEGIN
 		,[intForexRateTypeId]
 		,[dblForexRate]
 	FROM ##ARItemsForCosting
-
-	-- IC Costing Zero Cost
-	INSERT INTO @ItemsForCosting
-		([intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,[dblQty]
-		,[dblUOMQty]
-		,[dblCost]
-		,[dblValue]
-		,[dblSalesPrice]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[strSourceTransactionId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate])
-	SELECT
-		 [intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,CASE WHEN [strType] IN ('POS') THEN ABS([dblQty]) ELSE [dblQty] END
-		,[dblUOMQty]
-		,[dblCost]
-		,[dblValue]
-		,[dblSalesPrice]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[strSourceTransactionId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate]
-	FROM ##ARItemsForCosting
+	WHERE ISNULL([ysnAutoBlend], 0) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2103,23 +2049,17 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-	select
-		 [intInvoiceId]			= c.[intInvoiceId]
-		,[strInvoiceNumber]		= c.[strInvoiceNumber]		
-		,[strTransactionType]	= c.[strTransactionType]
-		,[intInvoiceDetailId]	= c.[intInvoiceDetailId]
-		,[intItemId]			= c.[intItemId]
-		,[strBatchId]			= c.[strBatchId]
-		,[strPostingError]		= 'You cannot unpost an Invoice with Service Charge Invoice created-' + b.strInvoiceNumber +  '.'
-
-		from (select intInvoiceDetailId, intItemId, 
-					intSCInvoiceId, intInvoiceId from 
-						tblARInvoiceDetail) a
-			join (select intInvoiceId, strInvoiceNumber,
-					strTransactionType from tblARInvoice with (nolock)
-				) b on a.intInvoiceId = b.intInvoiceId
-			join ##ARPostInvoiceHeader c
-				on a.intSCInvoiceId = c.intInvoiceId
+	SELECT [intInvoiceId]			= C.[intInvoiceId]
+		, [strInvoiceNumber]		= C.[strInvoiceNumber]		
+		, [strTransactionType]		= C.[strTransactionType]
+		, [intInvoiceDetailId]		= C.[intInvoiceDetailId]
+		, [intItemId]				= C.[intItemId]
+		, [strBatchId]				= C.[strBatchId]
+		, [strPostingError]			= 'You cannot unpost an Invoice with Service Charge Invoice created-' + B.strInvoiceNumber +  '.'
+	FROM ##ARPostInvoiceHeader C
+	INNER JOIN tblARInvoiceDetail A ON C.intInvoiceId = A.intSCInvoiceId
+	INNER JOIN tblARInvoice B ON A.intInvoiceId = B.intInvoiceId
+	WHERE A.intSCInvoiceId IS NOT NULL
 			
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]

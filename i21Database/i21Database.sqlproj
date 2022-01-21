@@ -9075,10 +9075,17 @@
     <Build Include="dbo\Tables\tblICInventoryDailyTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStockDailyQuantity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryDailyValuation.sql" />
+    <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Tables\tblICInventoryStockAsOfDate.sql" />
     <Build Include="dbo\Tables\tblICInventoryStorageAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketInOutReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketInOutSubReport.sql" />
+    <Build Include="dbo\Views\vyuSCTicketInOutReport.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployeeDeduction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployeeDirectDeposit.sql" />
@@ -9093,6 +9100,21 @@
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
+    <Build Include="dbo\Tables\tblSCTicketOnProcess.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
+    <Build Include="dbo\Views\vyuICShipmentInTransit.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDirectBasisContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTicketWithBasisContract.sql" />
+    <Build Include="dbo\Functions\fnGRCheckStorageBalance.sql" />
+    <Build Include="dbo\Functions\fnGRFindOriginalCustomerStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9373,6 +9395,15 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
+    <Build Include="dbo\Tables\tblARPerformanceLog.sql" />
+    <Build Include="dbo\Views\vyuARPerformanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
+    <Build Include="dbo\Tables\tblARSalesAnalysisStagingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
+    <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

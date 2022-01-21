@@ -36,11 +36,28 @@
 	CONSTRAINT [FK_tblARPaymentDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 	--CONSTRAINT [FK_tblARPaymentDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId])
 );
-
+--INDEXES
 GO
 CREATE NONCLUSTERED INDEX [NC_Index_tblARPaymentDetail]
-ON [dbo].[tblARPaymentDetail]([intPaymentId]) INCLUDE ([dblDiscount], [dblInterest], [dblPayment], [intInvoiceId]);
+	ON [dbo].[tblARPaymentDetail]([intPaymentId]) INCLUDE ([dblDiscount], [dblInterest], [dblPayment], [intInvoiceId]);
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARPaymentDetail_intInvoiceId]
+	ON [dbo].[tblARPaymentDetail] ([intInvoiceId])
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARPaymentDetail_intPaymentId]
+	ON [dbo].[tblARPaymentDetail] ([intPaymentId])
+INCLUDE ([intInvoiceId],[dblInvoiceTotal],[dblPayment])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARPaymentDetail_intBillId]
+	ON [dbo].[tblARPaymentDetail] ([intBillId])
+INCLUDE ([intPaymentId])
+GO
+CREATE NONCLUSTERED INDEX [NC_tblARPaymentDetail_AgingSummary]
+ON [dbo].[tblARPaymentDetail] ([intInvoiceId])
+INCLUDE ([intPaymentId],[dblWriteOffAmount],[dblPayment])
+GO
 
+--TRIGGERS UPDATE
 GO
 CREATE TRIGGER trg_tblARPaymentDetailUpdate
 ON dbo.tblARPaymentDetail
@@ -93,16 +110,4 @@ BEGIN
 END
 GO
 
-GO
-CREATE NONCLUSTERED INDEX [PIndex_tblARPaymentDetail_intInvoiceId]
-ON [dbo].[tblARPaymentDetail] ([intInvoiceId])
 
-GO
-CREATE NONCLUSTERED INDEX [PIndex_tblARPaymentDetail_intPaymentId]
-ON [dbo].[tblARPaymentDetail] ([intPaymentId])
-INCLUDE ([intInvoiceId],[dblInvoiceTotal],[dblPayment])
-
-GO
-CREATE NONCLUSTERED INDEX [IX_tblARPaymentDetail_intBillId]
-ON [dbo].[tblARPaymentDetail] ([intBillId])
-INCLUDE ([intPaymentId])

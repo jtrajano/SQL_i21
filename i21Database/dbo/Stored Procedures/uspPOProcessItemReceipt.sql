@@ -66,9 +66,10 @@ BEGIN TRY
 		RETURN;
 	END
   
-   IF  EXISTS(SELECT 1 FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
+   IF  EXISTS(SELECT 1 FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail 
 				ON PO.intPurchaseId = PODetail.intPurchaseId
-				AND PODetail.intPurchaseId = @poId WHERE intUnitOfMeasureId IS NULL AND intItemId IS NOT NULL)
+				INNER JOIN dbo.tblICItem itm ON PODetail.intItemId = itm.intItemId
+				AND PODetail.intPurchaseId = @poId WHERE intUnitOfMeasureId IS NULL AND PODetail.intItemId IS NOT NULL AND itm.strType IN ('Inventory','Finished Good','Raw Material'))
 	BEGIN
 		RAISERROR('Cannot process to receipt, Item UOM is missing.', 16, 1);
 		RETURN;
@@ -465,7 +466,7 @@ END
 					ON i.intItemId = POD.intItemId
 		WHERE	PO.intPurchaseId = @poId  
 				AND POD.intItemId IS NOT NULL			--DO NOT UPDATE MISC ENTRY
-				AND i.strType NOT IN ('Other Charge')   --DOT NOT UPDATE OTHER CHARGES TYPE     
+				AND i.strType NOT IN ('Other Charge','Comment')   --DOT NOT UPDATE OTHER CHARGES TYPE     
 
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty 

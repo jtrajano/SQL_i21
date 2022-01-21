@@ -74,6 +74,7 @@ SELECT
 		,strEODNumber = ''  COLLATE Latin1_General_CI_AS  
 		,strEODDrawer = '' COLLATE Latin1_General_CI_AS   
 		,ysnEODComplete = NULL
+		,strPaymentInfo = '' COLLATE Latin1_General_CI_AS
 		,b.intCurrencyId
 		
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
@@ -107,6 +108,7 @@ UNION SELECT DISTINCT
 	strEODNumber,
 	strEODDrawer = strDrawerName ,		
     ysnEODComplete = ysnCompleted ,
+	v.strPaymentInfo,
 	v.intCurrencyId
 FROM vyuARUndepositedPayment v
 
@@ -136,6 +138,7 @@ INSERT INTO tblCMUndepositedFund (
 		,strEODNumber
 		,strEODDrawer
     	,ysnEODComplete
+		,strReferenceNo
 		,intCurrencyId
 )
 SELECT 
@@ -156,6 +159,7 @@ SELECT
 		,strEODNumber
 		,strEODDrawer
     	,ysnEODComplete 
+		,strPaymentInfo
 		,intCurrencyId
 		
 FROM CTE
