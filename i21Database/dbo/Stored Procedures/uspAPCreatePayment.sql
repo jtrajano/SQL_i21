@@ -64,6 +64,7 @@ BEGIN
 	DECLARE @lienExists BIT = 0;
 	DECLARE @payee NVARCHAR(300);
 	DECLARE @lien NVARCHAR(300);
+	DECLARE @instructionCode INT;
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -297,6 +298,9 @@ BEGIN
 		SET @lienExists = 1;
 	END
 
+	--GET DEFAULT COMPANY CONFIGURATIONS
+	SELECT @instructionCode = intInstructionCode FROM tblAPCompanyPreference
+
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
 		[intAccountId],
@@ -319,7 +323,8 @@ BEGIN
 		[dblWithheld],
 		[intEntityId],
 		[ysnLienExists],
-		[intConcurrencyId])
+		[intConcurrencyId],
+		[intInstructionCode])
 	SELECT
 		[intAccountId]			= @bankGLAccountId,
 		[intBankAccountId]		= @bankAccount,
@@ -341,7 +346,8 @@ BEGIN
 		[dblWithheld]			= CAST(ISNULL(@withholdAmount,0) AS DECIMAL(18,2)),
 		[intEntityId]			= @userId,
 		[ysnLienExists]			= @lienExists,
-		[intConcurrencyId]		= 0
+		[intConcurrencyId]		= 0,
+		[intInstructionCode]	= @instructionCode
 	
 	SELECT @paymentId = SCOPE_IDENTITY()'
 
@@ -438,6 +444,7 @@ BEGIN
 	 @currency INT,
 	 @lienExists BIT,
 	 @location INT,
+	 @instructionCode INT,
 	 @paymentId INT OUTPUT',
 	 @location = @location,
 	 @userId = @userId,
@@ -459,6 +466,7 @@ BEGIN
 	 @currency = @currency,
 	 @payee = @payee,
 	 @lienExists = @lienExists,
+	 @instructionCode = @instructionCode,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 
