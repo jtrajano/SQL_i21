@@ -31,6 +31,8 @@ SELECT	i21.intBankAccountId
 		,i21.strEmail
 		,i21.strIBAN
 		,i21.strSWIFT
+		,i21.strBICCode
+		,i21.strBranchCode
 		,i21.intCheckStartingNo
 		,i21.intCheckEndingNo
 		,i21.intCheckNextNo
@@ -182,6 +184,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEmail
 						,strIBAN
 						,strSWIFT
+						,strBICCode
+						,strBranchCode
 						,intCheckStartingNo
 						,intCheckEndingNo
 						,intCheckNextNo
@@ -270,6 +274,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEmail							= i.strEmail
 						,strIBAN							= i.strIBAN
 						,strSWIFT							= i.strSWIFT
+						,strBICCode							= i.strBICCode
+						,strBranchCode						= i.strBranchCode
 						,intCheckStartingNo					= i.intCheckStartingNo
 						,intCheckEndingNo					= i.intCheckEndingNo
 						,intCheckNextNo						= i.intCheckNextNo
@@ -381,6 +387,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strEmail							= i.strEmail
 					,strIBAN							= i.strIBAN
 					,strSWIFT							= i.strSWIFT
+					,strBICCode							= i.strBICCode
+					,strBranchCode						= i.strBranchCode
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
