@@ -280,6 +280,7 @@ BEGIN
 		WHEN @msgId = 80264 THEN 'The item type for %s is not "stockable". Costing is not allowed.'
 		WHEN @msgId = 80265 THEN 'Cost adjustment for %s is missing. Stock rebuild will abort.'
 		WHEN @msgId = 80266 THEN 'Invoice Control Total and Receipt Total does not match. Unable to post.'
+		WHEN @msgId = 80267 THEN 'The Receipt Qty for %s is %f. Total Lot Quantity is %f. The difference is %f.'
 	END 
 
 	RETURN @msg
