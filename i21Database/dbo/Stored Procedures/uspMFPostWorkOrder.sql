@@ -45,6 +45,18 @@ BEGIN TRY
 		,@dblNewValue NUMERIC(38, 20)
 		,@dblVariance NUMERIC(38, 20)
 		,@intTransactionDetailId INT
+		,@strConsumeSourceLocation NVARCHAR(50)
+		,@intRecipeId INT
+		,@dblQuantity NUMERIC(38, 20)
+	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
+	DECLARE @intDayOfYear INT = DATEPART(dy, @dtmDate)
+	DECLARE @tblItem TABLE (
+		intRowNo INT Identity(1, 1)
+		,intItemId INT
+		,dblReqQty NUMERIC(38, 20)
+		,dblUpperToleranceQty NUMERIC(38, 20)
+		,dblLowerToleranceQty NUMERIC(38, 20)
+		)
 
 	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
 	FROM tblMFCompanyPreference
@@ -125,6 +137,18 @@ BEGIN TRY
 		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strConsumeSourceLocation = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 124
+
+	IF @strConsumeSourceLocation = ''
+		OR @strConsumeSourceLocation IS NULL
+	BEGIN
+		SELECT @strConsumeSourceLocation = 'False'
+	END
 
 	SELECT @intUnitMeasureId = intUnitMeasureId
 	FROM tblICItemUOM
@@ -211,6 +235,124 @@ BEGIN TRY
 				,@intPatternCode = 33
 				,@ysnProposed = 0
 				,@strPatternString = @intBatchId OUTPUT
+
+			IF @strConsumeSourceLocation = 'True'
+			BEGIN
+				INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+					intWorkOrderId
+					,intItemId
+					,intLotId
+					,dblQuantity
+					,intItemUOMId
+					,dblIssuedQuantity
+					,intItemIssuedUOMId
+					,intBatchId
+					,intSequenceNo
+					,dtmCreated
+					,intCreatedUserId
+					,dtmLastModified
+					,intLastModifiedUserId
+					,intShiftId
+					,dtmActualInputDateTime
+					,intStorageLocationId
+					,intSubLocationId
+					)
+				SELECT WI.intWorkOrderId
+					,WI.intItemId
+					,WI.intLotId
+					,WI.dblQuantity
+					,WI.intItemUOMId
+					,WI.dblIssuedQuantity
+					,WI.intItemIssuedUOMId
+					,@intBatchId
+					,WI.intSequenceNo
+					,@dtmCurrentDateTime
+					,@intUserId
+					,@dtmCurrentDateTime
+					,@intUserId
+					,WI.intBusinessShiftId
+					,WI.dtmBusinessDate
+					,WI.intStorageLocationId
+					,S.intSubLocationId
+				FROM tblMFWorkOrderInputLot WI
+				JOIN tblICStorageLocation S ON S.intStorageLocationId = WI.intStorageLocationId
+				WHERE WI.intWorkOrderId = @intWorkOrderId
+					AND IsNULL(WI.ysnConsumptionReversed, 0) = 0
+
+				SELECT @dblQuantity = NULL
+
+				SELECT @dblQuantity = dblQuantity
+				FROM dbo.tblMFWorkOrderProducedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND ysnProductionReversed = 0
+
+				SELECT @intRecipeId = NULL
+
+				SELECT @intRecipeId = intRecipeId
+				FROM tblMFWorkOrderRecipe a
+				WHERE intWorkOrderId = @intWorkOrderId
+
+				DELETE
+				FROM @tblItem
+
+				INSERT INTO @tblItem (
+					intItemId
+					,dblReqQty
+					,dblUpperToleranceQty
+					,dblLowerToleranceQty
+					)
+				SELECT ri.intItemId
+					,(ri.dblCalculatedQuantity * (@dblQuantity / r.dblQuantity)) AS RequiredQty
+					,(ri.dblCalculatedUpperTolerance * (@dblQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+					,(ri.dblCalculatedLowerTolerance * (@dblQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+				FROM tblMFRecipeItem ri
+				JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+				WHERE ri.intRecipeId = @intRecipeId
+					AND ri.intRecipeItemTypeId = 1
+					AND (
+						(
+							ri.ysnYearValidationRequired = 1
+							AND @dtmDate BETWEEN ri.dtmValidFrom
+								AND ri.dtmValidTo
+							)
+						OR (
+							ri.ysnYearValidationRequired = 0
+							AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+								AND DATEPART(dy, ri.dtmValidTo)
+							)
+						)
+					AND ri.intConsumptionMethodId IN (
+						1
+						,2
+						,3
+						)
+				
+				UNION
+				
+				SELECT rs.intSubstituteItemId
+					,(rs.dblQuantity * (@dblQuantity / r.dblQuantity)) AS RequiredQty
+					,(ri.dblCalculatedUpperTolerance * (@dblQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+					,(ri.dblCalculatedLowerTolerance * (@dblQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+				FROM tblMFRecipeSubstituteItem rs
+				JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
+				JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+				WHERE rs.intRecipeId = @intRecipeId
+					AND rs.intRecipeItemTypeId = 1
+
+				UPDATE tblMFProductionSummary
+				SET dblRequiredQty = I.dblReqQty
+					,dblConsumedQuantity = (
+						CASE 
+							WHEN PS.dblInputQuantity < I.dblReqQty
+								THEN PS.dblInputQuantity
+							ELSE I.dblReqQty
+							END
+						)
+					,dblYieldQuantity = PS.dblInputQuantity - I.dblReqQty
+				FROM tblMFProductionSummary PS
+				JOIN @tblItem I ON I.intItemId = PS.intItemId
+				WHERE intWorkOrderId = @intWorkOrderId
+			END
 
 			DECLARE @tblMFMachine TABLE (intMachineId INT)
 			DECLARE @intMachineId INT
@@ -497,9 +639,12 @@ BEGIN TRY
 		END
 	END
 
-	EXEC dbo.uspMFCalculateYield @intWorkOrderId = @intWorkOrderId
-		,@ysnYieldAdjustmentAllowed = @ysnNegativeQtyAllowed
-		,@intUserId = @intUserId
+	IF @strConsumeSourceLocation = 'False'
+	BEGIN
+		EXEC dbo.uspMFCalculateYield @intWorkOrderId = @intWorkOrderId
+			,@ysnYieldAdjustmentAllowed = @ysnNegativeQtyAllowed
+			,@intUserId = @intUserId
+	END
 
 	IF @dblProduceQty > 0
 	BEGIN
@@ -892,8 +1037,8 @@ BEGIN TRY
 				,[strTransactionId] = W.strWorkOrderNo
 				,[intTransactionTypeId] = 9
 				,[intLotId] = IsNULL(PL.intProducedLotId, PL.intLotId)
-				,[intSubLocationId] = IsNULL(L.intSubLocationId,SL.intSubLocationId)
-				,[intStorageLocationId] =IsNULL(L.intStorageLocationId,PL.intStorageLocationId)
+				,[intSubLocationId] = IsNULL(L.intSubLocationId, SL.intSubLocationId)
+				,[intStorageLocationId] = IsNULL(L.intStorageLocationId, PL.intStorageLocationId)
 				,[ysnIsStorage] = NULL
 				,[strActualCostId] = NULL
 				,[intSourceTransactionId] = intBatchId
@@ -905,7 +1050,7 @@ BEGIN TRY
 			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId
 				AND IU.intUnitMeasureId = @intUnitMeasureId
 			LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
-			Left JOIN tblICStorageLocation SL ON SL.intStorageLocationId = PL.intStorageLocationId
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = PL.intStorageLocationId
 			LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 				AND RI.intItemId = PL.intItemId
 				AND RI.intRecipeItemTypeId = 2
@@ -1052,8 +1197,8 @@ BEGIN TRY
 			UPDATE PS
 			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
 								SELECT TOP 1 CM.intFutureMarketId
-								FROM tblRKCommodityMarketMapping CM 
-								CROSS APPLY  [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
+								FROM tblRKCommodityMarketMapping CM
+								CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
 								JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
 									AND CA.strType = 'ProductType'
 								WHERE CA.intCommodityAttributeId = I.intProductTypeId
@@ -1064,18 +1209,18 @@ BEGIN TRY
 								AND dtmSpotDate <= @dtmCurrentDateTime
 								AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
 										SELECT TOP 1 CM.intFutureMarketId
-										FROM tblRKCommodityMarketMapping CM 
+										FROM tblRKCommodityMarketMapping CM
 										CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
 										JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
-										AND CA.strType = 'ProductType'
+											AND CA.strType = 'ProductType'
 										WHERE CA.intCommodityAttributeId = I.intProductTypeId
 										))
 							ORDER BY intFutureMonthId DESC
 							), @dtmCurrentDateTime), 0)
 				,intMarketRatePerUnitId = IsNULL((
 						SELECT TOP 1 FM.intUnitMeasureId
-						FROM tblRKCommodityMarketMapping CM 
-						CROSS APPLY  [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
+						FROM tblRKCommodityMarketMapping CM
+						CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
 						JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
 							AND CA.strType = 'ProductType'
 						JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CM.intFutureMarketId
@@ -1089,8 +1234,8 @@ BEGIN TRY
 			UPDATE PS
 			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
 								SELECT TOP 1 CM.intFutureMarketId
-								FROM tblRKCommodityMarketMapping CM 
-								CROSS APPLY  [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
+								FROM tblRKCommodityMarketMapping CM
+								CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
 								JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
 									AND CA.strType = 'ProductType'
 								WHERE CA.intCommodityAttributeId = I.intProductTypeId
@@ -1101,10 +1246,10 @@ BEGIN TRY
 								AND dtmSpotDate <= @dtmCurrentDateTime
 								AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
 										SELECT TOP 1 CM.intFutureMarketId
-										FROM tblRKCommodityMarketMapping CM 
-										CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2 
+										FROM tblRKCommodityMarketMapping CM
+										CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
 										JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
-										AND CA.strType = 'ProductType'
+											AND CA.strType = 'ProductType'
 										WHERE CA.intCommodityAttributeId = I.intProductTypeId
 										))
 							ORDER BY intFutureMonthId DESC
@@ -1113,10 +1258,10 @@ BEGIN TRY
 				,dblCoEfficient = 0
 				,intMarketRatePerUnitId = IsNULL((
 						SELECT TOP 1 FM.intUnitMeasureId
-						FROM tblRKCommodityMarketMapping CM 
-						CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2 
+						FROM tblRKCommodityMarketMapping CM
+						CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
 						JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
-						AND CA.strType = 'ProductType'
+							AND CA.strType = 'ProductType'
 						JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CM.intFutureMarketId
 						WHERE CA.intCommodityAttributeId = I.intProductTypeId
 						), FM1.intUnitMeasureId)
@@ -1308,7 +1453,8 @@ BEGIN TRY
 
 			SELECT @dblVariance = IsNULL(@dblNewCost, 0) - IsNULL(@dblNewValue, 0)
 
-			IF @dblVariance < 1 and @strCostingByCoEfficient = 'False'
+			IF @dblVariance < 1
+				AND @strCostingByCoEfficient = 'False'
 			BEGIN
 				SELECT TOP 1 @intTransactionDetailId = intTransactionDetailId
 				FROM @adjustedEntries
@@ -1409,28 +1555,27 @@ BEGIN TRY
 				BEGIN
 					EXEC dbo.uspGLBookEntries @GLEntries
 						,1
-
-					----**************************************
-					----GL Post Valiation
-					----**************************************
-					--IF EXISTS (
-					--		SELECT 1
-					--		FROM tblGLDetail gd
-					--		JOIN tblGLAccount ga ON gd.intAccountId = ga.intAccountId
-					--		JOIN tblGLAccountSegmentMapping gs ON gs.intAccountId = ga.intAccountId
-					--		JOIN tblGLAccountSegment gm ON gm.intAccountSegmentId = gs.intAccountSegmentId
-					--		JOIN tblGLAccountCategory ac ON ac.intAccountCategoryId = gm.intAccountCategoryId
-					--		WHERE ac.strAccountCategory IN ('Work In Progress')
-					--			AND gd.strTransactionId = @strWorkOrderNo
-					--		HAVING abs(sum(gd.dblDebit - gd.dblCredit)) > 1
-					--		)
-					--BEGIN
-					--	RAISERROR (
-					--			'Mismatch in debit and credit amount for WIP account.'
-					--			,11
-					--			,1
-					--			)
-					--END
+						----**************************************
+						----GL Post Valiation
+						----**************************************
+						--IF EXISTS (
+						--		SELECT 1
+						--		FROM tblGLDetail gd
+						--		JOIN tblGLAccount ga ON gd.intAccountId = ga.intAccountId
+						--		JOIN tblGLAccountSegmentMapping gs ON gs.intAccountId = ga.intAccountId
+						--		JOIN tblGLAccountSegment gm ON gm.intAccountSegmentId = gs.intAccountSegmentId
+						--		JOIN tblGLAccountCategory ac ON ac.intAccountCategoryId = gm.intAccountCategoryId
+						--		WHERE ac.strAccountCategory IN ('Work In Progress')
+						--			AND gd.strTransactionId = @strWorkOrderNo
+						--		HAVING abs(sum(gd.dblDebit - gd.dblCredit)) > 1
+						--		)
+						--BEGIN
+						--	RAISERROR (
+						--			'Mismatch in debit and credit amount for WIP account.'
+						--			,11
+						--			,1
+						--			)
+						--END
 				END
 			END
 		END
