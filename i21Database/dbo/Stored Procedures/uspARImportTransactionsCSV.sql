@@ -9,8 +9,6 @@
 	,@UserEntityId			INT	= NULL
 AS
 
-BEGIN
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -22,9 +20,13 @@ DECLARE @ZeroDecimal		NUMERIC(18, 6)
 	  , @DefaultAccountId	INT
 	  , @CreatedIvoices		NVARCHAR(MAX)
 	  , @BOLNumber			NVARCHAR(50)
+	  , @intInvoiceLogId	INT = NULL
+	  , @FailedCount        INT
 
-DECLARE @InvoicesForImport AS TABLE(intImportLogDetailId INT UNIQUE)
-DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+DECLARE @InvoicesForImport AS 
+TABLE(intImportLogDetailId INT UNIQUE,strTransactionType NVARCHAR(50),ysnImported BIT,ysnSuccess BIT,ysnRecap BIT)
+
+DECLARE @EntriesForInvoice AS InvoiceStagingTable
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 
 DECLARE @IMPORTFORMAT_STANDARD NVARCHAR(50) = 'Standard'
@@ -35,195 +37,910 @@ SET @DateNow = CAST(GETDATE() AS DATE)
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 SET @DefaultAccountId = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference)
 
+DECLARE	@EntityCustomerId			INT
+,@Date							DATETIME
+,@CompanyLocationId				INT
+,@LocationSalesAccountId		INT
+,@LocationName					NVARCHAR(500)	= ''
+,@EntityId						INT
+,@NewTransactionId				INT				= NULL		
+,@ErrorMessage					NVARCHAR(250)	= NULL
+,@TermId						INT				= NULL
+,@EntitySalespersonId			INT				= NULL
+,@EntityContactId				INT				= NULL
+,@DueDate						DATETIME		= NULL		
+,@ShipDate						DATETIME		= NULL
+,@CalculatedDate				DATETIME		= NULL
+,@PostDate						DATETIME		= NULL
+,@TransactionType				NVARCHAR(50)	= 'Invoice'
+,@Type							NVARCHAR(200)	= 'Standard'
+,@Comment						NVARCHAR(500)	= ''
+,@OriginId						NVARCHAR(16)	= ''
+,@PONumber						NVARCHAR(50)	= ''		
+,@FreightTermId					INT				= NULL
+,@ShipViaId						INT				= NULL		
+,@DiscountAmount				NUMERIC(18,6)   = @ZeroDecimal
+,@DiscountPercentage			NUMERIC(18,6)	= @ZeroDecimal
+,@ItemQtyShipped				NUMERIC(18,6)	= @ZeroDecimal
+,@ItemPrice						NUMERIC(18,6)	= @ZeroDecimal
+,@ItemId						INT				= NULL
+,@ItemDescription				NVARCHAR(500)	= NULL
+,@TaxGroupId					INT				= NULL
+,@TaxClassId					INT				= NULL
+,@AmountDue						NUMERIC(18,6)	= @ZeroDecimal
+,@TaxAmount						NUMERIC(18,6)	= @ZeroDecimal
+,@Total							NUMERIC(18,6)	= @ZeroDecimal
+,@SiteId						INT				= NULL
+,@PerformerId					INT				= NULL
+,@PercentFull					NUMERIC(18,6)   = @ZeroDecimal
+,@NewMeterReading				NUMERIC(18,6)   = @ZeroDecimal
+,@PreviousMeterReading			NUMERIC(18,6)   = @ZeroDecimal
+,@ConversionFactor				NUMERIC(18,6)   = @ZeroDecimal	
+,@BillingBy						NVARCHAR(50)	= NULL
+,@COGSAmount					NUMERIC(18,6)   = @ZeroDecimal
+,@CustomerNumber				NVARCHAR(100)	= ''
+,@ItemCategory					NVARCHAR(100)	= NULL
+,@intItemLocationId				INT				= NULL
+,@ysnAllowNegativeStock			BIT				= 0
+,@intStockUnit					INT				= NULL
+,@intCostingMethod				INT				= NULL
+,@ysnOrigin						BIT				= 0
+,@ysnRecap						BIT			 	= 0
+,@ysnImpactInventory			BIT			 	= 1
+
+BEGIN TRY
+--VALIDATE
+IF EXISTS (SELECT top 1 1 FROM tblARInvoice I 
+			INNER JOIN tblARImportLogDetail ILD  ON I.strInvoiceOriginId = ILD.strTransactionNumber  
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			WHERE  IL.intImportLogId = @ImportLogId AND LEN(RTRIM(LTRIM(ISNULL(strInvoiceOriginId,'')))) > 0)
+BEGIN 	
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'Invoice:' + RTRIM(LTRIM(ISNULL(INV.strInvoiceOriginId,''))) + ' was already imported! (' + strInvoiceNumber + '). '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARInvoice INV  ON INV.strInvoiceOriginId = ILD.strTransactionNumber  
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	WHERE  IL.intImportLogId = @ImportLogId AND LEN(RTRIM(LTRIM(ISNULL(strInvoiceOriginId,'')))) > 0 
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARInvoice INV  ON INV.strInvoiceOriginId = ILD.strTransactionNumber  
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND LEN(RTRIM(LTRIM(ISNULL(strInvoiceOriginId,'')))) > 0 ) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT top 1 1 FROM tblSOSalesOrder SO
+			INNER JOIN tblARImportLogDetail ILD  ON SO.strSalesOrderOriginId = ILD.strTransactionNumber  AND LEN(RTRIM(LTRIM(ISNULL(SO.strSalesOrderOriginId,'')))) > 0
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			WHERE  IL.intImportLogId = @ImportLogId)
+BEGIN 	
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'Sales Order:' + RTRIM(LTRIM(ISNULL(SO.strSalesOrderOriginId,''))) + ' was already imported! (' + SO.strSalesOrderNumber + '). '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblSOSalesOrder SO  ON SO.strSalesOrderOriginId = ILD.strTransactionNumber  AND LEN(RTRIM(LTRIM(ISNULL(SO.strSalesOrderOriginId,'')))) > 0 
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	WHERE  IL.intImportLogId = @ImportLogId
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblSOSalesOrder SO  ON SO.strSalesOrderOriginId = ILD.strTransactionNumber  AND LEN(RTRIM(LTRIM(ISNULL(SO.strSalesOrderOriginId,'')))) > 0 
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+WHERE strTransactionType NOT IN ('Invoice', 'Sales Order', 'Credit Memo', 'Tank Delivery', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment') AND IL.intImportLogId = @ImportLogId)
+BEGIN 
+
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The Transaction Type provided does not exists. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	WHERE  IL.intImportLogId = @ImportLogId AND strTransactionType NOT IN ('Invoice', 'Sales Order', 'Credit Memo', 'Tank Delivery', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment')
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0  AND strTransactionType NOT IN ('Invoice', 'Sales Order', 'Credit Memo', 'Tank Delivery', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment')) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) = 0 AND ILD.strCustomerNumber <> '')
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The Customer Number provided does not exists. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId  AND ISNULL(C.intEntityId, 0) = 0
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ISNULL(C.intEntityId, 0) = 0) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = ILD.strLocationName
+WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(L.intCompanyLocationId, 0) = 0)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The Location Name provided does not exists. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = ILD.strLocationName 
+	WHERE  IL.intImportLogId = @ImportLogId  AND ISNULL(L.intCompanyLocationId, 0) = 0
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = ILD.strLocationName
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ISNULL(L.intCompanyLocationId, 0) = 0) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = ILD.strLocationName
+WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(L.intSalesAccount, 0) = 0 AND ISNULL(L.intCompanyLocationId, 0) > 0)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= CASE WHEN intSalesAccount IS NULL THEN 'The Sales account of Company Location ' + L.strLocationName + ' is not valid. ' ELSE 'The Sales account of Company Location ' + L.strLocationName + ' was not set. ' END
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = ILD.strLocationName 
+	WHERE  IL.intImportLogId = @ImportLogId  AND ISNULL(L.intSalesAccount, 0) = 0 AND ISNULL(L.intCompanyLocationId, 0) > 0
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = ILD.strLocationName
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ISNULL(L.intSalesAccount, 0) = 0 AND ISNULL(L.intCompanyLocationId, 0) > 0) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF  EXISTS (SELECT * FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblSMTerm T ON T.strTerm = ILD.strTerms 
+WHERE  IL.intImportLogId = @ImportLogId  AND T.intTermID IS NULL AND ILD.strTerms <> '')
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The Term Code provided does not exists. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	INNER JOIN tblSMTerm T ON T.strTerm = ILD.strTerms  
+	WHERE  IL.intImportLogId = @ImportLogId AND T.intTermID IS NULL
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	INNER JOIN tblSMTerm T ON T.strTerm = ILD.strTerms 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND T.intTermID IS NULL)
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND ISNULL(C.intTermsId, 0) = 0 AND @IsTank = 0)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The customer provided doesn''t have default terms. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId  AND ISNULL(C.intEntityId, 0) > 0 AND ISNULL(C.intTermsId, 0) = 0
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ISNULL(C.intEntityId, 0) > 0 AND ISNULL(C.intTermsId, 0) = 0) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblSMFreightTerms F ON ILD.strFreightTerm = F.strFreightTerm
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
+WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND EL.ysnDefaultLocation=1 and ISNULL(F.intFreightTermId, 0) = 0 AND ILD.strFreightTerm <> '')
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The Freight Term provided does not exists. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMFreightTerms F ON ILD.strFreightTerm = F.strFreightTerm
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+	LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND EL.ysnDefaultLocation=1 and ISNULL(F.intFreightTermId, 0) = 0
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMFreightTerms F ON ILD.strFreightTerm = F.strFreightTerm
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+	LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND EL.ysnDefaultLocation=1 and ISNULL(F.intFreightTermId, 0) = 0) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
+WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0  AND ysnDefaultLocation = 1 AND ISNULL(EL.intShipViaId,0) = 0)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The Ship Via provided does not exists. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+	LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0  AND ysnDefaultLocation = 1 AND ISNULL(EL.intShipViaId,0) = 0
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+	LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0  AND ysnDefaultLocation = 1 AND ISNULL(EL.intShipViaId,0) = 0) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+LEFT JOIN tblARSalesperson S on ILD.strSalespersonNumber=S.strSalespersonId
+WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND ISNULL(intSalespersonId, 0) = 0 AND ILD.strSalespersonNumber <> '')
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The Salesperson provided does not exists. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+	LEFT JOIN tblARSalesperson S on ILD.strSalespersonNumber=S.strSalespersonId
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND ISNULL(intSalespersonId, 0) = 0 AND ILD.strSalespersonNumber <> ''
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+	LEFT JOIN tblARSalesperson S on ILD.strSalespersonNumber=S.strSalespersonId
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND ISNULL(intSalespersonId, 0) = 0 AND ILD.strSalespersonNumber <> '') 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = ILD.strTaxGroup
+LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
+WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ILD.strTaxGroup, '') <> '' AND ISNULL(TAX.intTaxGroupId,0) = 0)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST
+									THEN 'Category ' + ISNULL(ICC.strCategoryCode, '') + ' - ' + ISNULL(ICC.strDescription, '') + ' doesn''t have default tax class set up.'
+									ELSE 'The Tax Group provided does not exists. '
+								END		
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = ILD.strTaxGroup
+	LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+	LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ILD.strTaxGroup, '') <> '' AND ISNULL(TAX.intTaxGroupId,0) = 0
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = ILD.strTaxGroup
+	LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+	LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ILD.strTaxGroup, '') <> '' AND ISNULL(TAX.intTaxGroupId,0) = 0)
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF @ImportFormat = @IMPORTFORMAT_CARQUEST
+BEGIN 
+	IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '')
+	BEGIN 
+		UPDATE ILD
+			SET [ysnImported]		= 0
+			   ,[ysnSuccess]        = 0
+			   ,[strEventResult]	= 'Item is required.'	
+			FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> ''
+
+			SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '')
+	
+			UPDATE tblARImportLog 
+			SET [intSuccessCount]	= intSuccessCount - @FailedCount
+			  , [intFailedCount]	= intFailedCount + @FailedCount
+			WHERE [intImportLogId]  = @ImportLogId
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = ILD.strTaxGroup
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ILD.strTaxGroup, '') <> '' AND ISNULL(TAX.intTaxGroupId,0) = 0 AND NOT EXISTS (SELECT NULL FROM tblSMTaxGroupCode WHERE intTaxGroupId = TAX.intTaxGroupId))
+	BEGIN 
+		UPDATE ILD
+		SET [ysnImported]		= 0
+		   ,[ysnSuccess]        = 0
+		   ,[strEventResult]	= 'Tax Group must have atleast (1) one Tax Code setup.'	
+		FROM tblARImportLogDetail ILD
+		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+		LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = ILD.strTaxGroup
+		WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ILD.strTaxGroup, '') <> '' AND ISNULL(TAX.intTaxGroupId,0) = 0 AND NOT EXISTS (SELECT NULL FROM tblSMTaxGroupCode WHERE intTaxGroupId = TAX.intTaxGroupId)
+
+		SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+		LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = ILD.strTaxGroup
+		WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ILD.strTaxGroup, '') <> '' AND ISNULL(TAX.intTaxGroupId,0) = 0 AND NOT EXISTS (SELECT NULL FROM tblSMTaxGroupCode WHERE intTaxGroupId = TAX.intTaxGroupId))
+	
+		UPDATE tblARImportLog 
+		SET [intSuccessCount]	= intSuccessCount - @FailedCount
+		  , [intFailedCount]	= intFailedCount + @FailedCount
+		WHERE [intImportLogId]  = @ImportLogId
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+	CROSS APPLY (SELECT TOP 1 intCategoryId, intTaxClassId FROM tblICCategoryTax  WHERE intCategoryId = ICI.intCategoryId ) CATEGORYTAX
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND ISNULL(CATEGORYTAX.intTaxClassId, 0) = 0)
+	BEGIN 
+		UPDATE ILD
+			SET [ysnImported]		= 0
+			   ,[ysnSuccess]        = 0
+			   ,[strEventResult]	= 'Item Category doesn''t have default tax class set up.'	
+			FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			CROSS APPLY (SELECT TOP 1 intCategoryId, intTaxClassId FROM tblICCategoryTax  WHERE intCategoryId = ICI.intCategoryId ) CATEGORYTAX
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND ISNULL(CATEGORYTAX.intTaxClassId, 0) = 0
+
+			SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			CROSS APPLY (SELECT TOP 1 intCategoryId, intTaxClassId FROM tblICCategoryTax  WHERE intCategoryId = ICI.intCategoryId ) CATEGORYTAX
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND ISNULL(CATEGORYTAX.intTaxClassId, 0) = 0)
+	
+			UPDATE tblARImportLog 
+			SET [intSuccessCount]	= intSuccessCount - @FailedCount
+			  , [intFailedCount]	= intFailedCount + @FailedCount
+			WHERE [intImportLogId]  = @ImportLogId
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+	LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND ISNULL(ICIL.intItemLocationId, 0) = 0)
+	BEGIN 
+		UPDATE ILD
+			SET [ysnImported]		= 0
+			   ,[ysnSuccess]        = 0
+			   ,[strEventResult]	= 'Item Location for the selected item is required.'	
+			FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND ISNULL(ICIL.intItemLocationId, 0) = 0
+
+			SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND ISNULL(ICIL.intItemLocationId, 0) = 0)
+	
+			UPDATE tblARImportLog 
+			SET [intSuccessCount]	= intSuccessCount - @FailedCount
+			  , [intFailedCount]	= intFailedCount + @FailedCount
+			WHERE [intImportLogId]  = @ImportLogId
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+	LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> ''AND ISNULL(ICIL.intItemLocationId, 0) <> 0 AND  ISNULL(ICIL.intAllowNegativeInventory, 0) = 0)
+	BEGIN 
+		UPDATE ILD
+			SET [ysnImported]		= 0
+			   ,[ysnSuccess]        = 0
+			   ,[strEventResult]	= 'Item should allow negative stock.'	
+			FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> ''AND ISNULL(ICIL.intItemLocationId, 0) <> 0 AND  ISNULL(ICIL.intAllowNegativeInventory, 0) = 0
+
+			SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> ''AND ISNULL(ICIL.intItemLocationId, 0) <> 0 AND  ISNULL(ICIL.intAllowNegativeInventory, 0) = 0)
+	
+			UPDATE tblARImportLog 
+			SET [intSuccessCount]	= intSuccessCount - @FailedCount
+			  , [intFailedCount]	= intFailedCount + @FailedCount
+			WHERE [intImportLogId]  = @ImportLogId
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+	LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = ICI.intItemId AND ICUOM.ysnStockUnit = 1
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND  ISNULL(ICUOM.intItemUOMId,0) =0)
+	BEGIN 
+		UPDATE ILD
+			SET [ysnImported]		= 0
+			   ,[ysnSuccess]        = 0
+			   ,[strEventResult]	= 'Item''s stock unit should not be null.'	
+			FROM tblARImportLogDetail ILD
+				INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = ICI.intItemId AND ICUOM.ysnStockUnit = 1
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND  ISNULL(ICUOM.intItemUOMId,0) =0
+
+			SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = ICI.intItemId AND ICUOM.ysnStockUnit = 1
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> '' AND  ISNULL(ICUOM.intItemUOMId,0) =0)
+	
+			UPDATE tblARImportLog 
+			SET [intSuccessCount]	= intSuccessCount - @FailedCount
+			  , [intFailedCount]	= intFailedCount + @FailedCount
+			WHERE [intImportLogId]  = @ImportLogId
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+	LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> ''AND ISNULL(ICIL.intItemLocationId, 0) <> 0 AND  ISNULL(ICIL.intCostingMethod,0) = 0)
+	BEGIN 
+		UPDATE ILD
+			SET [ysnImported]		= 0
+			   ,[ysnSuccess]        = 0
+			   ,[strEventResult]	= 'Item''s location costing method should be either FIFO or LIFO.'	
+			FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> ''AND ISNULL(ICIL.intItemLocationId, 0) <> 0 AND  ISNULL(ICIL.intCostingMethod,0) = 0
+
+			SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			LEFT JOIN tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+			LEFT JOIN tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+			WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(ICI.intItemId,0) = 0 AND ISNULL(@ImportItemId,'') <> ''AND ISNULL(ICIL.intItemLocationId, 0) <> 0 AND  ISNULL(ICIL.intCostingMethod,0) = 0)
+	
+			UPDATE tblARImportLog 
+			SET [intSuccessCount]	= intSuccessCount - @FailedCount
+			  , [intFailedCount]	= intFailedCount + @FailedCount
+			WHERE [intImportLogId]  = @ImportLogId
+	END
+
+END
+
 INSERT INTO @InvoicesForImport
-SELECT intImportLogDetailId FROM tblARImportLogDetail
-WHERE intImportLogId = @ImportLogId
+SELECT ILD.intImportLogDetailId,ILD.strTransactionType,ysnImported,ILD.ysnSuccess,IL.ysnRecap FROM tblARImportLogDetail ILD
+INNER JOIN tblARImportLog  IL ON ILD.intImportLogId=IL.intImportLogId
+WHERE ILD.intImportLogId = @ImportLogId
 	AND ISNULL(ysnSuccess,0) = 1
 	AND ISNULL(ysnImported,0) = 0
 ORDER BY intImportLogDetailId
-	
-WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
-	BEGIN
-		DECLARE @ImportLogDetailId INT
-		SELECT TOP 1 @ImportLogDetailId = intImportLogDetailId FROM @InvoicesForImport ORDER BY intImportLogDetailId
-		
-		DELETE FROM @EntriesForInvoice
 
-		DECLARE	@EntityCustomerId			INT
-			,@Date							DATETIME
-			,@CompanyLocationId				INT
-			,@LocationSalesAccountId		INT
-			,@LocationName					NVARCHAR(500)	= ''
-			,@EntityId						INT
-			,@NewTransactionId				INT				= NULL		
-			,@ErrorMessage					NVARCHAR(250)	= NULL
-			,@TermId						INT				= NULL
-			,@EntitySalespersonId			INT				= NULL
-			,@EntityContactId				INT				= NULL
-			,@DueDate						DATETIME		= NULL		
-			,@ShipDate						DATETIME		= NULL
-			,@CalculatedDate				DATETIME		= NULL
-			,@PostDate						DATETIME		= NULL
-			,@TransactionType				NVARCHAR(50)	= 'Invoice'
-			,@Type							NVARCHAR(200)	= 'Standard'
-			,@Comment						NVARCHAR(500)	= ''
-			,@OriginId						NVARCHAR(16)	= ''
-			,@PONumber						NVARCHAR(50)	= ''		
-			,@FreightTermId					INT				= NULL
-			,@ShipViaId						INT				= NULL		
-			,@DiscountAmount				NUMERIC(18,6)   = @ZeroDecimal
-			,@DiscountPercentage			NUMERIC(18,6)	= @ZeroDecimal
-			,@ItemQtyShipped				NUMERIC(18,6)	= @ZeroDecimal
-			,@ItemPrice						NUMERIC(18,6)	= @ZeroDecimal
-			,@ItemId						INT				= NULL
-			,@ItemDescription				NVARCHAR(500)	= NULL
-			,@TaxGroupId					INT				= NULL
-			,@TaxClassId					INT				= NULL
-			,@AmountDue						NUMERIC(18,6)	= @ZeroDecimal
-			,@TaxAmount						NUMERIC(18,6)	= @ZeroDecimal
-			,@Total							NUMERIC(18,6)	= @ZeroDecimal
-			,@SiteId						INT				= NULL
-			,@PerformerId					INT				= NULL
-			,@PercentFull					NUMERIC(18,6)   = @ZeroDecimal
-			,@NewMeterReading				NUMERIC(18,6)   = @ZeroDecimal
-			,@PreviousMeterReading			NUMERIC(18,6)   = @ZeroDecimal
-			,@ConversionFactor				NUMERIC(18,6)   = @ZeroDecimal	
-			,@BillingBy						NVARCHAR(50)	= NULL
-			,@COGSAmount					NUMERIC(18,6)   = @ZeroDecimal
-			,@CustomerNumber				NVARCHAR(100)	= ''
-			,@ItemCategory					NVARCHAR(100)	= NULL
-			,@intItemLocationId				INT				= NULL
-			,@ysnAllowNegativeStock			BIT				= 0
-			,@intStockUnit					INT				= NULL
-			,@intCostingMethod				INT				= NULL
-			,@ysnOrigin						BIT				= 0
-			,@ysnRecap						BIT			 	= 0
-			,@ysnImpactInventory			BIT			 	= 1
-
-		IF @IsTank = 1
-			BEGIN
-				SELECT 
-					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblARCustomer WHERE strCustomerNumber = D.strCustomerNumber)
-					,@Date							= D.dtmDate
-					,@ShipDate						= D.dtmDate		
-					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
-					,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])				
-					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN (SELECT TOP 1 [intEntityId] FROM tblARSalesperson WHERE intEntityId = CONVERT(INT, D.strSalespersonNumber)) END
-					,@TransactionType				= 'Invoice'
-					,@Type							= 'Tank Delivery'
-					,@Comment						= D.strTransactionNumber
-					,@OriginId						= D.strTransactionNumber
-					,@BOLNumber						= D.strBOLNumber
-					,@DiscountAmount				= ISNULL(D.dblDiscount, @ZeroDecimal)
-					,@DiscountPercentage			= (CASE WHEN ISNULL(D.dblDiscount, @ZeroDecimal) > 0 
+IF EXISTS  (SELECT TOP 1 NULL FROM @InvoicesForImport  where strTransactionType <> 'Sales Order' AND ISNULL(ysnImported, 0) = 0 AND ISNULL(ysnSuccess, 0) = 1 AND ISNULL(ysnRecap, 0) = 0)
+BEGIN 
+	INSERT INTO @EntriesForInvoice(
+				[intId]
+			, [strSourceTransaction]
+			,[strTransactionType]
+			,[intSourceId]
+			,[strSourceId]
+			,[intInvoiceId]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dtmDate]
+			,[dtmDueDate]
+			,[dtmShipDate]
+			,[dtmCalculated]
+			,[dtmPostDate]
+			,[intEntitySalespersonId]
+			,[intFreightTermId]
+			,[intShipViaId]
+			,[intPaymentMethodId]
+			,[strInvoiceOriginId]
+			,[strPONumber]
+			,[strBOLNumber]
+			,[strComments]
+			,[intShipToLocationId]
+			,[intBillToLocationId]
+			,[ysnTemplate]
+			,[ysnForgiven]
+			,[ysnCalculated]
+			,[ysnSplitted]
+			,[intPaymentId]
+			,[intSplitId]
+			,[intLoadDistributionHeaderId]
+			,[intLoadId]
+			,[strActualCostId]
+			,[intShipmentId]
+			,[intTransactionId]
+			,[intEntityId]
+			,[ysnResetDetails]
+			,[ysnPost]
+			,[ysnImportedFromOrigin]
+			,[ysnImportedAsPosted]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[ysnInventory]
+			,[strItemDescription]
+			,[intOrderUOMId]
+			,[dblQtyOrdered]
+			,[intItemUOMId]
+			,[dblQtyShipped]
+			,[dblDiscount]
+			,[dblPrice]
+			,[ysnRefreshPrice]
+			,[strMaintenanceType]
+			,[strFrequency]
+			,[dtmMaintenanceDate]
+			,[dblMaintenanceAmount]
+			,[dblLicenseAmount]
+			,[intTaxGroupId]
+			,[ysnRecomputeTax]
+			,[intSCInvoiceId]
+			,[strSCInvoiceNumber]
+			,[intInventoryShipmentItemId]
+			,[strShipmentNumber]
+			,[intSalesOrderDetailId]
+			,[strSalesOrderNumber]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[intShipmentPurchaseSalesContractId]
+			,[intTicketId]
+			,[intTicketHoursWorkedId]
+			,[intSiteId]
+			,[strBillingBy]
+			,[dblPercentFull]
+			,[dblNewMeterReading]
+			,[dblPreviousMeterReading]
+			,[dblConversionFactor]
+			,[intPerformerId]
+			,[ysnLeaseBilling]
+			,[ysnVirtualMeterReading]
+			,[strImportFormat]
+			,[dblCOGSAmount]
+			,[intTempDetailIdForTaxes]
+			,[intConversionAccountId]
+			,[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateId]
+			,[dblCurrencyExchangeRate]
+			,[intSubCurrencyId]
+			,[dblSubCurrencyRate]
+			,[ysnUseOriginIdAsInvoiceNumber]
+			,[ysnImpactInventory]
+			)
+			SELECT 
+			D.intImportLogDetailId
+			, [strSourceTransaction]		= 'Import'
+			,[strTransactionType]		= 'Invoice'
+			,[intSourceId]				= D.intImportLogDetailId
+			,[strSourceId]				= CAST(D.intImportLogDetailId AS NVARCHAR(250))
+			,[intInvoiceId]				= NULL
+			,[intEntityCustomerId]		= C.intEntityId
+			,[intCompanyLocationId]		= L.intCompanyLocationId
+			,[intCurrencyId]			= @DefaultCurrencyId
+			,[intTermId]				= S.intDeliveryTermID
+			,[dtmDate]					= D.dtmDate
+			,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(D.dtmDate, S.intDeliveryTermID) AS DATE)
+			,[dtmShipDate]				= D.dtmDate
+			,[dtmCalculated]			= NULL
+			,[dtmPostDate]				= NULL
+			,[intEntitySalespersonId]	= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
+			,[intFreightTermId]			= NULL
+			,[intShipViaId]				= NULL
+			,[intPaymentMethodId]		= NULL
+			,[strInvoiceOriginId]		= D.strTransactionNumber
+			,[strPONumber]				= NULL
+			,[strBOLNumber]				= D.strBOLNumber
+			,[strComments]				= D.strTransactionNumber
+			,[intShipToLocationId]		= NULL
+			,[intBillToLocationId]		= NULL
+			,[ysnTemplate]				= 0
+			,[ysnForgiven]				= 0
+			,[ysnCalculated]			= CASE WHEN D.dtmCalculated IS NULL THEN 0 ELSE 1 END
+			,[ysnSplitted]				= 0
+			,[intPaymentId]				= NULL
+			,[intSplitId]				= NULL
+			,[intLoadDistributionHeaderId]	= NULL
+			,[intLoadId]				= NULL
+			,[strActualCostId]			= NULL
+			,[intShipmentId]			= NULL
+			,[intTransactionId]			= NULL
+			,[intEntityId]				= H.intEntityId
+			,[ysnResetDetails]			= 1
+			,[ysnPost]					= CASE WHEN isnull(D.ysnOrigin, 0) = 1 
+											THEN NULL
+											ELSE  
+												CASE WHEN @TransactionType IN ('Customer Prepayment', 'Overpayment') THEN 0
+												ELSE CASE WHEN D.dtmPostDate IS NULL THEN 0 
+													 ELSE 1 
+											    END
+											END
+										  END 
+			,[ysnImportedFromOrigin]	= CASE WHEN D.ysnOrigin = 1 THEN 1 ELSE 0 END
+			,[ysnImportedAsPosted]		= CASE WHEN D.ysnOrigin = 1 THEN 1 ELSE 0 END
+			,[intInvoiceDetailId]		= NULL
+			,[intItemId]				= CASE WHEN @IsTank = 1 OR @ImportFormat = @IMPORTFORMAT_CARQUEST THEN TMS.intProduct ELSE NULL END
+			,[ysnInventory]				= CASE WHEN @IsTank = 1 OR @ImportFormat = @IMPORTFORMAT_CARQUEST AND ISNULL(TMS.intProduct, 0) > 0 THEN 
+											CASE WHEN TMS.strType = 'Inventory' THEN 1 ELSE 0 END
+										  ELSE 0 END
+			,[strItemDescription]		= TMS.strDescription
+			,[intOrderUOMId]			= NULL
+			,[dblQtyOrdered]			= ISNULL(D.dblQuantity, @ZeroDecimal)
+			,[intItemUOMId]				= NULL
+			,[dblQtyShipped]			= ISNULL(D.dblQuantity, @ZeroDecimal)
+			,[dblDiscount]				= (CASE WHEN ISNULL(D.dblDiscount, @ZeroDecimal) > 0 
 															THEN (1 - ((ABS(D.dblTotal) - ISNULL(D.dblDiscount, @ZeroDecimal)) / ABS(D.dblTotal))) * 100
 															ELSE @ZeroDecimal
 													   END)
-					,@ItemQtyShipped				= ISNULL(D.dblQuantity, @ZeroDecimal)
-					,@ItemPrice						= ISNULL(D.dblSubtotal, @ZeroDecimal)				
-					,@ItemId						= CASE WHEN @IsFromOldVersion = 1 THEN
-															(SELECT TOP 1 intItemId FROM tblICItem WHERE intItemId = CONVERT(INT,D.strItemNumber))															
-														ELSE
-															(SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = D.strItemNumber)
-													  END
-					,@TaxGroupId					= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.strTaxGroup) ELSE 0 END
-					,@AmountDue						= CASE WHEN D.strTransactionType <> 'Sales Order' THEN ISNULL(D.dblAmountDue, @ZeroDecimal) ELSE @ZeroDecimal END
-					,@Total							= ISNULL(D.dblQuantity, @ZeroDecimal) * ISNULL(D.dblSubtotal, @ZeroDecimal)
-					,@SiteId						= (SELECT TOP 1 intSiteID FROM tblTMSite WHERE intSiteNumber = CONVERT(INT, D.strSiteNumber))
-					,@PerformerId					= NULL
-					,@PercentFull					= ISNULL(D.dblPercentFull, @ZeroDecimal)
-					,@NewMeterReading				= ISNULL(D.dblNewMeterReading, @ZeroDecimal)
-					,@ysnRecap						= H.ysnRecap	
-				FROM
-					[tblARImportLogDetail] D
-				INNER JOIN
-					[tblARImportLog] H
-						ON D.[intImportLogId] = H.[intImportLogId] 
-				WHERE
-					[intImportLogDetailId] = @ImportLogDetailId
-
-				IF @SiteId IS NULL
-					SET @ErrorMessage = 'The Site Number provided does not exists. '
-				ELSE
-					BEGIN
-						SELECT TOP 1 @TermId = intDeliveryTermID FROM tblTMSite WHERE intSiteID = @SiteId
-						SELECT @DueDate = CAST(dbo.fnGetDueDateBasedOnTerm(@Date, @TermId) AS DATE)
-						SELECT TOP 1 @TaxGroupId = ISNULL(intTaxGroupId, 0) FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1					
-						SELECT TOP 1 @BillingBy				= TMS.strBillingBy
-									,@ItemId				= TMS.intProduct 
-									,@ItemDescription		= I.strDescription
-									,@PreviousMeterReading	= CCS.dblLastMeterReading
-									,@ConversionFactor		= CCS.dblConversionFactor
+			,[dblPrice]					= ISNULL(D.dblSubtotal, @ZeroDecimal)	
+			,[ysnRefreshPrice]			= 0
+			,[strMaintenanceType]		= NULL
+			,[strFrequency]				= NULL
+			,[dtmMaintenanceDate]		= NULL
+			,[dblMaintenanceAmount]		= NULL
+			,[dblLicenseAmount]			= NULL
+			,[intTaxGroupId]			= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN TAX.intTaxGroupId ELSE 0 END
+			,[ysnRecomputeTax]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST 
+											   THEN 0 
+											   ELSE CASE WHEN ISNULL(TAX.intTaxGroupId, 0) > 0 THEN 1 ELSE 0 END
+										  END
+			,[intSCInvoiceId]			= NULL
+			,[strSCInvoiceNumber]		= NULL
+			,[intInventoryShipmentItemId] = NULL
+			,[strShipmentNumber]		= NULL
+			,[intSalesOrderDetailId]	= NULL
+			,[strSalesOrderNumber]		= NULL
+			,[intContractHeaderId]		= NULL
+			,[intContractDetailId]		= NULL
+			,[intShipmentPurchaseSalesContractId]	= NULL
+			,[intTicketId]				= NULL
+			,[intTicketHoursWorkedId]	= NULL
+			,[intSiteId]				= S.intSiteID
+			,[strBillingBy]				= TMS.strBillingBy
+			,[dblPercentFull]			= ISNULL(D.dblPercentFull, @ZeroDecimal)
+			,[dblNewMeterReading]		= ISNULL(D.dblNewMeterReading, @ZeroDecimal)
+			,[dblPreviousMeterReading]	= TMS.dblLastMeterReading
+			,[dblConversionFactor]		= TMS.dblConversionFactor
+			,[intPerformerId]			= NULL
+			,[ysnLeaseBilling]			= NULL
+			,[ysnVirtualMeterReading]	= CASE WHEN TMS.strBillingBy = 'Virtual Meter' THEN 1 ELSE 0 END
+			,[strImportFormat]			= @ImportFormat
+			,[dblCOGSAmount]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @COGSAmount ELSE NULL END
+			,[intTempDetailIdForTaxes]  = D.intImportLogDetailId
+			,[intConversionAccountId]	= NULL
+			,[intCurrencyExchangeRateTypeId]	= NULL
+			,[intCurrencyExchangeRateId]		= NULL
+			,[dblCurrencyExchangeRate]	= 1.000000
+			,[intSubCurrencyId]			= NULL
+			,[dblSubCurrencyRate]		= 1.000000
+			,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(D.strTransactionNumber, '') <> '' AND  D.strCustomerNumber <> '9998' THEN 1 ELSE 0 END
+			,[ysnImpactInventory]		= 1
+			 FROM
+			[tblARImportLogDetail] D
+			INNER JOIN [tblARImportLog] H ON D.[intImportLogId] = H.[intImportLogId] 
+			LEFT JOIN tblARCustomer C ON C.strCustomerNumber=D.strCustomerNumber
+			LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = D.strLocationName
+			LEFT JOIN tblTMSite S ON S.intSiteNumber=D.strSiteNumber
+			LEFT JOIN tblARSalesperson SP ON CONVERT(INT, D.strSalespersonNumber) = SP.intEntityId
+			LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = D.strTaxGroup
+			LEFT JOIN (
+				SELECT TOP 1 		 TMS.strBillingBy
+									, TMS.intProduct 
+									, I.strDescription
+									, CCS.dblLastMeterReading
+									, CCS.dblConversionFactor
+									, TMS.intSiteID
+									, I.strType
 						FROM tblTMSite TMS 
 							INNER JOIN vyuARCustomerConsumptionSite CCS ON TMS.intSiteID = CCS.intSiteID
 							LEFT JOIN tblICItem I ON TMS.intProduct = I.intItemId
-						WHERE TMS.intSiteID = @SiteId
+			) TMS ON TMS.intSiteID = S.intSiteID
 
-						IF @IsFromOldVersion = 0
-							BEGIN
-								SELECT TOP 1 @EntitySalespersonId = intDriverID FROM tblTMDispatch WHERE intSiteID = @SiteId
-								SELECT @EntitySalespersonId = (SELECT ISNULL(@EntitySalespersonId, 0))
-							END
-
-						IF @BillingBy = 'Tank'
-							BEGIN
-								SET @NewMeterReading	= NULL						
-								SET @PerformerId		= NULL
-							END
-						ELSE IF @BillingBy IN ('Flow Meter', 'Virtual Meter')
-							BEGIN
-								SET @PercentFull		= NULL						
-								SET @PerformerId		= NULL
-							END
-						ELSE IF @BillingBy = 'Service'
-							BEGIN
-								SET @NewMeterReading	= NULL
-								SET @PercentFull		= NULL
-							END
-					END
-
-				UPDATE tblARImportLogDetail SET dblTotal = @Total, strTransactionType = 'Invoice' WHERE intImportLogDetailId = @ImportLogDetailId
-			END
-		ELSE IF @ImportFormat = @IMPORTFORMAT_CARQUEST
-			BEGIN
-				SELECT 
-					  @EntityCustomerId				= C.[intEntityId]
-					, @CustomerNumber				= C.strCustomerNumber
-					, @Date							= ILD.dtmDate
-					, @PostDate						= NULL
-					, @ShipDate						= ILD.dtmShipDate
-					, @CompanyLocationId			= CL.intCompanyLocationId
-					, @EntityId						= ISNULL(@UserEntityId, IL.intEntityId)
-					, @EntitySalespersonId			= SP.[intEntityId]
-					, @TermId						= C.intTermsId
-					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId)
-					, @TransactionType				= ILD.strTransactionType
-					, @Type							= ISNULL(ILD.strSourceType,@Type)
-					, @Comment						= @IMPORTFORMAT_CARQUEST + ' ' + ILD.strTransactionType + ' ' + ILD.strTransactionNumber
-					, @OriginId						= ILD.strTransactionNumber
-					, @DiscountAmount				= ISNULL(ABS(ILD.dblDiscount), @ZeroDecimal)
-					, @DiscountPercentage			= (CASE WHEN ISNULL(ILD.dblDiscount, @ZeroDecimal) > 0 
-															THEN (1 - ((ABS(ILD.dblTotal) - ISNULL(ILD.dblDiscount, @ZeroDecimal)) / ABS(ILD.dblTotal))) * 100
-															ELSE @ZeroDecimal
-													   END)
-					, @ItemQtyShipped				= 1
-					, @ItemId						= ICI.intItemId
-					, @ItemPrice					= ABS(ISNULL(ILD.dblSubtotal, @ZeroDecimal))
-					, @ItemDescription				= ICI.strDescription
-					, @TaxGroupId					= TGC.intTaxGroupId
-					, @TaxClassId					= CATEGORYTAX.intTaxClassId
-					, @ItemCategory                 = ISNULL(ICC.strCategoryCode, '') + ' - ' + ISNULL(ICC.strDescription, '')
-					, @Total						= ABS(ILD.dblTotal)
-					, @COGSAmount					= ABS(ILD.dblCOGSAmount)
-					, @FreightTermId				= ISNULL(EL.intFreightTermId, 0)
-					, @ShipViaId					= ISNULL(EL.intShipViaId, 0)
-					, @TaxAmount					= ABS(ILD.dblTax)
-					, @intItemLocationId			= ICIL.intItemLocationId
-					, @ysnAllowNegativeStock		= (CASE WHEN ICIL.intAllowNegativeInventory = 1 THEN 1 ELSE 0 END)
-					, @intStockUnit					= ICUOM.intItemUOMId
-					, @intCostingMethod				= ICIL.intCostingMethod
-					, @ysnRecap						= H.ysnRecap
-					, @ysnImpactInventory			= 0
+			WHERE @IsTank = 1 AND H.intImportLogId=@ImportLogId AND ISNULL(ysnImported, 0) = 0 AND ISNULL(ysnSuccess, 0) = 1
+	
+			UNION ALL
+			SELECT 
+						ILD.intImportLogDetailId
+				 ,[strSourceTransaction]		= 'Import'
+				,[strTransactionType]		= 'Invoice'
+				,[intSourceId]				= ILD.intImportLogDetailId
+				,[strSourceId]				= CAST(ILD.intImportLogDetailId AS NVARCHAR(250))
+				,[intInvoiceId]				= NULL
+				,[intEntityCustomerId]		= C.intEntityId
+				,[intCompanyLocationId]		= CL.intCompanyLocationId
+				,[intCurrencyId]			= @DefaultCurrencyId
+				,[intTermId]				= C.intTermsId
+				,[dtmDate]					= ILD.dtmDate
+				,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId) AS DATE)
+				,[dtmShipDate]				= ILD.dtmDate
+				,[dtmCalculated]			= NULL
+				,[dtmPostDate]				= NULL
+				,[intEntitySalespersonId]	= CASE WHEN ISNULL(ILD.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
+				,[intFreightTermId]			= NULL
+				,[intShipViaId]				= NULL
+				,[intPaymentMethodId]		= NULL
+				,[strInvoiceOriginId]		= ILD.strTransactionNumber
+				,[strPONumber]				= NULL
+				,[strBOLNumber]				= ILD.strBOLNumber
+				,[strComments]				= ILD.strTransactionNumber
+				,[intShipToLocationId]		= NULL
+				,[intBillToLocationId]		= NULL
+				,[ysnTemplate]				= 0
+				,[ysnForgiven]				= 0
+				,[ysnCalculated]			= CASE WHEN ILD.dtmCalculated IS NULL THEN 0 ELSE 1 END
+				,[ysnSplitted]				= 0
+				,[intPaymentId]				= NULL
+				,[intSplitId]				= NULL
+				,[intLoadDistributionHeaderId]	= NULL
+				,[intLoadId]				= NULL
+				,[strActualCostId]			= NULL
+				,[intShipmentId]			= NULL
+				,[intTransactionId]			= NULL
+				,[intEntityId]				= H.intEntityId
+				,[ysnResetDetails]			= 1
+				,[ysnPost]					= CASE WHEN isnull(ILD.ysnOrigin, 0) = 1 
+												THEN NULL
+												ELSE  
+													CASE WHEN @TransactionType IN ('Customer Prepayment', 'Overpayment') THEN 0
+													ELSE CASE WHEN ILD.dtmPostDate IS NULL THEN 0 
+														 ELSE 1 
+													END
+												END
+											  END 
+				,[ysnImportedFromOrigin]	= CASE WHEN ILD.ysnOrigin = 1 THEN 1 ELSE 0 END
+				,[ysnImportedAsPosted]		= CASE WHEN ILD.ysnOrigin = 1 THEN 1 ELSE 0 END
+				,[intInvoiceDetailId]		= NULL
+				,[intItemId]				= ICI.intItemId
+				,[ysnInventory]				= 0
+				,[strItemDescription]		= ICI.strDescription
+				,[intOrderUOMId]			= NULL
+				,[dblQtyOrdered]			= 1
+				,[intItemUOMId]				= NULL
+				,[dblQtyShipped]			= 1
+				,[dblDiscount]				= ISNULL(ABS(ILD.dblDiscount), @ZeroDecimal)
+				,[dblPrice]					= ABS(ISNULL(ILD.dblSubtotal, @ZeroDecimal))	
+				,[ysnRefreshPrice]			= 0
+				,[strMaintenanceType]		= NULL
+				,[strFrequency]				= NULL
+				,[dtmMaintenanceDate]		= NULL
+				,[dblMaintenanceAmount]		= NULL
+				,[dblLicenseAmount]			= NULL
+				,[intTaxGroupId]			= TGC.intTaxGroupId
+				,[ysnRecomputeTax]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST 
+												   THEN 0 
+												   ELSE CASE WHEN ISNULL(TGC.intTaxGroupId, 0) > 0 THEN 1 ELSE 0 END
+											  END
+				,[intSCInvoiceId]			= NULL
+				,[strSCInvoiceNumber]		= NULL
+				,[intInventoryShipmentItemId] = NULL
+				,[strShipmentNumber]		= NULL
+				,[intSalesOrderDetailId]	= NULL
+				,[strSalesOrderNumber]		= NULL
+				,[intContractHeaderId]		= NULL
+				,[intContractDetailId]		= NULL
+				,[intShipmentPurchaseSalesContractId]	= NULL
+				,[intTicketId]				= NULL
+				,[intTicketHoursWorkedId]	= NULL
+				,[intSiteId]				= NULL
+				,[strBillingBy]				= NULL
+				,[dblPercentFull]			= ISNULL(ILD.dblPercentFull, @ZeroDecimal)
+				,[dblNewMeterReading]		= ISNULL(ILD.dblNewMeterReading, @ZeroDecimal)
+				,[dblPreviousMeterReading]	= NULL
+				,[dblConversionFactor]		= NULL
+				,[intPerformerId]			= NULL
+				,[ysnLeaseBilling]			= NULL
+				,[ysnVirtualMeterReading]	= 0
+				,[strImportFormat]			= @ImportFormat
+				,[dblCOGSAmount]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @COGSAmount ELSE NULL END
+				,[intTempDetailIdForTaxes]  = ILD.intImportLogDetailId
+				,[intConversionAccountId]	= NULL
+				,[intCurrencyExchangeRateTypeId]	= NULL
+				,[intCurrencyExchangeRateId]		= NULL
+				,[dblCurrencyExchangeRate]	= 1.000000
+				,[intSubCurrencyId]			= NULL
+				,[dblSubCurrencyRate]		= 1.000000
+				,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(ILD.strTransactionNumber, '') <> '' AND  ILD.strCustomerNumber <> '9998' THEN 1 ELSE 0 END
+				,[ysnImpactInventory]		= 1
 				FROM
 					tblARImportLogDetail ILD
 				INNER JOIN
@@ -275,12 +992,299 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					tblICItemUOM ICUOM
 						ON ICUOM.intItemId = ICI.intItemId						
 						AND ICUOM.ysnStockUnit = 1
-				WHERE 
-					ILD.intImportLogDetailId = @ImportLogDetailId
-			END
-		ELSE
+
+				WHERE @ImportFormat = @IMPORTFORMAT_CARQUEST  AND H.intImportLogId=@ImportLogId AND ISNULL(ysnImported, 0) = 0 AND ISNULL(ysnSuccess, 0) = 1
+
+			UNION ALL
+			SELECT 
+				  D.intImportLogDetailId
+				 ,[strSourceTransaction]		= 'Import'
+				,[strTransactionType]		= 'Invoice'
+				,[intSourceId]				= D.intImportLogDetailId
+				,[strSourceId]				= CAST(D.intImportLogDetailId AS NVARCHAR(250))
+				,[intInvoiceId]				= NULL
+				,[intEntityCustomerId]		= C.intEntityId
+				,[intCompanyLocationId]		= L.intCompanyLocationId
+				,[intCurrencyId]			= @DefaultCurrencyId
+				,[intTermId]				= T.intTermID
+				,[dtmDate]					= D.dtmDate
+				,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(D.dtmDate, C.intTermsId) AS DATE)
+				,[dtmShipDate]				= D.dtmDate
+				,[dtmCalculated]			= NULL
+				,[dtmPostDate]				= NULL
+				,[intEntitySalespersonId]	= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
+				,[intFreightTermId]			= NULL
+				,[intShipViaId]				= NULL
+				,[intPaymentMethodId]		= NULL
+				,[strInvoiceOriginId]		= D.strTransactionNumber
+				,[strPONumber]				= NULL
+				,[strBOLNumber]				= D.strBOLNumber
+				,[strComments]				= D.strTransactionNumber
+				,[intShipToLocationId]		= NULL
+				,[intBillToLocationId]		= NULL
+				,[ysnTemplate]				= 0
+				,[ysnForgiven]				= 0
+				,[ysnCalculated]			= CASE WHEN D.dtmCalculated IS NULL THEN 0 ELSE 1 END
+				,[ysnSplitted]				= 0
+				,[intPaymentId]				= NULL
+				,[intSplitId]				= NULL
+				,[intLoadDistributionHeaderId]	= NULL
+				,[intLoadId]				= NULL
+				,[strActualCostId]			= NULL
+				,[intShipmentId]			= NULL
+				,[intTransactionId]			= NULL
+				,[intEntityId]				= H.intEntityId
+				,[ysnResetDetails]			= 1
+				,[ysnPost]					= CASE WHEN isnull(D.ysnOrigin, 0) = 1 
+												THEN NULL
+												ELSE  
+													CASE WHEN @TransactionType IN ('Customer Prepayment', 'Overpayment') THEN 0
+													ELSE CASE WHEN D.dtmPostDate IS NULL THEN 0 
+														 ELSE 1 
+													END
+												END
+											  END 
+				,[ysnImportedFromOrigin]	= CASE WHEN D.ysnOrigin = 1 THEN 1 ELSE 0 END
+				,[ysnImportedAsPosted]		= CASE WHEN D.ysnOrigin = 1 THEN 1 ELSE 0 END
+				,[intInvoiceDetailId]		= NULL
+				,[intItemId]				= NULL
+				,[ysnInventory]				= 0
+				,[strItemDescription]		= NULL
+				,[intOrderUOMId]			= NULL
+				,[dblQtyOrdered]			= 1
+				,[intItemUOMId]				= NULL
+				,[dblQtyShipped]			= 1
+				,[dblDiscount]				= ISNULL(ABS(D.dblDiscount), @ZeroDecimal)
+				,[dblPrice]					= ABS(ISNULL(D.dblSubtotal, @ZeroDecimal))	
+				,[ysnRefreshPrice]			= 0
+				,[strMaintenanceType]		= NULL
+				,[strFrequency]				= NULL
+				,[dtmMaintenanceDate]		= NULL
+				,[dblMaintenanceAmount]		= NULL
+				,[dblLicenseAmount]			= NULL
+				,[intTaxGroupId]			= TAX.intTaxGroupId
+				,[ysnRecomputeTax]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST 
+												   THEN 0 
+												   ELSE CASE WHEN ISNULL(TAX.intTaxGroupId, 0) > 0 THEN 1 ELSE 0 END
+											  END
+				,[intSCInvoiceId]			= NULL
+				,[strSCInvoiceNumber]		= NULL
+				,[intInventoryShipmentItemId] = NULL
+				,[strShipmentNumber]		= NULL
+				,[intSalesOrderDetailId]	= NULL
+				,[strSalesOrderNumber]		= NULL
+				,[intContractHeaderId]		= NULL
+				,[intContractDetailId]		= NULL
+				,[intShipmentPurchaseSalesContractId]	= NULL
+				,[intTicketId]				= NULL
+				,[intTicketHoursWorkedId]	= NULL
+				,[intSiteId]				= NULL
+				,[strBillingBy]				= NULL
+				,[dblPercentFull]			= ISNULL(D.dblPercentFull, @ZeroDecimal)
+				,[dblNewMeterReading]		= ISNULL(D.dblNewMeterReading, @ZeroDecimal)
+				,[dblPreviousMeterReading]	= NULL
+				,[dblConversionFactor]		= NULL
+				,[intPerformerId]			= NULL
+				,[ysnLeaseBilling]			= NULL
+				,[ysnVirtualMeterReading]	= 0
+				,[strImportFormat]			= @ImportFormat
+				,[dblCOGSAmount]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @COGSAmount ELSE NULL END
+				,[intTempDetailIdForTaxes]  = D.intImportLogDetailId
+				,[intConversionAccountId]	= NULL
+				,[intCurrencyExchangeRateTypeId]	= NULL
+				,[intCurrencyExchangeRateId]		= NULL
+				,[dblCurrencyExchangeRate]	= 1.000000
+				,[intSubCurrencyId]			= NULL
+				,[dblSubCurrencyRate]		= 1.000000
+				,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(D.strTransactionNumber, '') <> '' AND  D.strCustomerNumber <> '9998' THEN 1 ELSE 0 END
+				,[ysnImpactInventory]		= 1
+				FROM
+				 [tblARImportLogDetail] D
+				 INNER JOIN [tblARImportLog] H ON D.[intImportLogId] = H.[intImportLogId] 
+				 LEFT JOIN tblARCustomer C ON C.strCustomerNumber=D.strCustomerNumber
+				 LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = D.strLocationName
+				 LEFT JOIN tblTMSite S ON S.intSiteNumber=D.strSiteNumber
+				 LEFT JOIN tblARSalesperson SP ON CONVERT(INT, D.strSalespersonNumber) = SP.intEntityId
+				 LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = D.strTaxGroup
+				 LEFT JOIN tblSMTerm T ON T.strTerm = D.strTerms
+				 WHERE @ImportFormat <> @IMPORTFORMAT_CARQUEST AND @IsTank = 0   AND H.intImportLogId=@ImportLogId AND ISNULL(ysnImported, 0) = 0 AND ISNULL(ysnSuccess, 0) = 1
+
+			IF @IsTank = 1
 			BEGIN
-				SELECT 
+			UPDATE ILD
+			SET dblTotal = @Total, strTransactionType = 'Invoice'
+			FROM  tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId=IL.intImportLogId
+			END
+
+			IF @ImportFormat = @IMPORTFORMAT_CARQUEST
+							BEGIN
+								INSERT INTO @TaxDetails(
+									[intDetailId] 
+								  , [intTaxGroupId]
+								  , [intTaxCodeId]
+								  , [intTaxClassId]
+								  , [strTaxableByOtherTaxes]
+								  , [strCalculationMethod]
+								  , [dblRate]
+								  , [intTaxAccountId]
+								  , [dblTax]
+								  , [dblAdjustedTax]
+								  , [ysnTaxAdjusted]
+								  , [ysnSeparateOnInvoice]
+								  , [ysnCheckoffTax]
+								  , [ysnTaxExempt]
+								  , [ysnTaxOnly]
+								  , [strNotes]
+								  , [intTempDetailIdForTaxes])
+								SELECT  
+								    [intDetailId]				= NULL
+								  , [intTaxGroupId]				= TGC.intTaxGroupId
+								  , [intTaxCodeId]				= TGC.intTaxCodeId
+								  , [intTaxClassId]				= TC.intTaxClassId
+								  , [strTaxableByOtherTaxes]	= TC.strTaxableByOtherTaxes
+								  , [strCalculationMethod]		= TCR.strCalculationMethod
+								  , [dblRate]					= TCR.dblRate
+								  , [intTaxAccountId]			= TC.intSalesTaxAccountId
+								  , [dblTax]					= 0
+								  , [dblAdjustedTax]			= @TaxAmount
+								  , [ysnTaxAdjusted]			= 1
+								  , [ysnSeparateOnInvoice]		= 0 
+								  , [ysnCheckoffTax]			= TC.ysnCheckoffTax
+								  , [ysnTaxExempt]				= CASE WHEN ISNULL(@TaxAmount, 0) > 0 THEN 0 ELSE 1 END
+								  , [ysnTaxOnly]				= TC.ysnTaxOnly
+								  , [strNotes]					= NULL
+								  , [intTempDetailIdForTaxes]	= ILD.intImportLogDetailId
+								FROM tblSMTaxGroupCode TGC
+									
+									INNER JOIN tblSMTaxCode TC
+										ON TGC.intTaxCodeId = TC.intTaxCodeId
+									INNER JOIN tblSMTaxCodeRate TCR
+										ON TC.intTaxCodeId = TCR.intTaxCodeId
+									INNER JOIN  [tblARImportLogDetail] ILD ON ILD.strTaxGroup = TC.strTaxCode
+								WHERE TGC.intTaxGroupId = @TaxGroupId 
+								  AND TC.intTaxClassId = @TaxClassId
+							END
+
+
+							select ysnPost,ysnImportedFromOrigin,* from @EntriesForInvoice
+	--PROCESS TO INVOICE
+			EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
+											, @LineItemTaxEntries	= @TaxDetails
+											, @UserId				= @UserEntityId
+											, @GroupingOption		= 11
+											, @RaiseError			= 0
+											, @ErrorMessage			= @ErrorMessage OUT
+											, @LogId				= @intInvoiceLogId OUT
+
+						UPDATE
+						ARI
+						SET
+
+						ARI.dblBaseDiscountAvailable = T.[Discount],	
+						ARI.dblDiscountAvailable = T.[Discount],
+						ARI.dblInvoiceTotal = ARI.dblInvoiceTotal +T.[Discount] ,
+						ARI.dblBaseInvoiceTotal = ARI.dblInvoiceTotal + T.[Discount],
+						ARI.dblAmountDue	= ARI.dblInvoiceTotal + T.[Discount],
+						ARI.dblBaseAmountDue = ARI.dblInvoiceTotal + T.[Discount],
+						ARI.dblInvoiceSubtotal   =  ARI.dblInvoiceSubtotal +  T.[Discount],
+						ARI.dblBaseInvoiceSubtotal  =  ARI.dblBaseInvoiceSubtotal + T.[Discount],
+						ARI.ysnImportFromCSV = 1
+
+						FROM tblARInvoice ARI
+						INNER JOIN tblARInvoiceIntegrationLogDetail I ON ARI.intInvoiceId= I.intSourceId AND ARI.strInvoiceNumber = I.strSourceId
+						INNER JOIN (
+								SELECT  dblPrice - dblTotal [Discount],
+										ID.intInvoiceId
+							FROM
+								tblARInvoiceDetail ID
+								INNER JOIN tblARInvoiceIntegrationLogDetail I ON ID.intInvoiceId= I.intSourceId
+							WHERE
+								ID.[intInvoiceId] =  I.intInvoiceId
+						)T ON T.[intInvoiceId]  = ARI.[intInvoiceId] 
+
+						WHERE I.intIntegrationLogId	= @intInvoiceLogId
+
+				 		UPDATE
+						ARID
+						SET 
+						ARID.dblTotal  = ARID.dblTotal  + ARI.dblDiscountAvailable,
+						ARID.dblBaseTotal = ARID.dblBaseTotal  + ARI.dblDiscountAvailable
+						FROM tblARInvoiceDetail ARID
+						INNER JOIN tblARInvoiceIntegrationLogDetail I ON ARID.intInvoiceId= I.intSourceId 
+						INNER JOIN tblARInvoice ARI  ON ARI.intInvoiceId = I.intInvoiceId
+						WHERE I.intIntegrationLogId	= @intInvoiceLogId
+
+						UPDATE
+						ARID
+						SET dblDiscount = @ZeroDecimal
+						FROM tblARInvoiceDetail ARID
+						INNER JOIN tblARInvoiceIntegrationLogDetail I ON ARID.intInvoiceId= I.intSourceId 
+						WHERE I.intIntegrationLogId	= @intInvoiceLogId
+
+						
+						UPDATE
+						ARI
+						
+						SET intEntitySalespersonId = S.intEntityId
+						, strType = CASE WHEN @IsTank = 1 THEN 'Tank Delivery' ELSE ISNULL(ILD.strSourceType, 'Standard') END
+
+						FROM tblARInvoice ARI
+						INNER JOIN tblARInvoiceIntegrationLogDetail I ON ARI.intInvoiceId= I.intSourceId AND ARI.strInvoiceNumber = I.strSourceId
+						INNER JOIN tblARImportLogDetail ILD ON ARI.strInvoiceOriginId = ILD.strTransactionNumber 
+						LEFT JOIN tblARSalesperson S ON ILD.strSalespersonNumber=S.strSalespersonId
+						WHERE I.intIntegrationLogId	= @intInvoiceLogId
+
+
+						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
+							BEGIN
+
+							UPDATE  PRICING
+							SET dblLastCost = ILD.dblCOGSAmount 
+							FROM tblICItemPricing PRICING
+							INNER JOIN tblARImportLog IL ON   IL.intImportLogId = @ImportLogId
+							INNER JOIN tblARImportLogDetail ILD ON IL.intImportLogId=ILD.intImportLogId
+							LEFT JOIN  tblICItem ICI ON ICI.intItemId = @ImportItemId AND ICI.strType = 'Inventory'
+							LEFT JOIN  tblICItemLocation ICIL ON ICIL.intItemId = ICI.intItemId  AND ICIL.intLocationId = @ImportLocationId 
+							WHERE ICI.intItemId = @ImportItemId  AND ICIL.intItemLocationId = PRICING.intItemLocationId
+
+							END
+
+
+			UPDATE ILD
+			SET [intConversionAccountId] = @ConversionAccountId
+			FROM  tblARImportLogDetail ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId=IL.intImportLogId
+
+			IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			WHERE  IL.intImportLogId = @ImportLogId  AND ILD.strEventResult = 'Unable to find an open fiscal year period to match the transaction date.')
+			BEGIN 	
+				UPDATE ILD
+				SET [ysnImported]		= 0
+				   ,[ysnSuccess]        = 0
+				   ,[strEventResult]	= CASE WHEN ILD.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment') AND @ErrorMessage = 'Unable to find an open fiscal year period to match the transaction date.'
+														THEN
+															ARI.strTransactionType + ':' + ARI.strInvoiceNumber + ' Imported. But unable to post due to: ' + @ErrorMessage
+														ELSE
+															ARI.strTransactionType + ':' + ARI.strInvoiceNumber + ' Imported.'
+													END
+				FROM tblARImportLogDetail ILD
+				INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+				INNER JOIN tblARInvoice ARI ON ARI.strInvoiceOriginId = ILD.strTransactionNumber 
+				INNER JOIN tblARInvoiceIntegrationLogDetail I ON ARI.intInvoiceId= I.intSourceId AND ARI.strInvoiceNumber = I.strSourceId 
+				WHERE  IL.intImportLogId = @ImportLogId  AND ILD.strEventResult = 'Unable to find an open fiscal year period to match the transaction date.'
+
+			END
+END
+
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport  where strTransactionType = 'Sales Order')
+			BEGIN
+
+			DECLARE @ImportLogDetailId INT
+			SELECT TOP 1 @ImportLogDetailId = intImportLogDetailId FROM @InvoicesForImport ORDER BY intImportLogDetailId
+
+			SELECT 
 					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblARCustomer WHERE strCustomerNumber = D.strCustomerNumber)
 					,@Date							= D.dtmDate
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
@@ -320,411 +1324,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						ON D.[intImportLogId] = H.[intImportLogId] 
 				WHERE
 					[intImportLogDetailId] = @ImportLogDetailId
-			END
 
-		IF @TransactionType <> 'Sales Order'
-			BEGIN
-				SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strInvoiceNumber + '). ' FROM tblARInvoice WHERE RTRIM(LTRIM(ISNULL(strInvoiceOriginId,''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) 
-				AND @EntityCustomerId = intEntityCustomerId  AND @CompanyLocationId	= intCompanyLocationId 
-				AND @Date = dtmDate AND @TransactionType = strTransactionType AND LEN(RTRIM(LTRIM(ISNULL(strInvoiceOriginId,'')))) > 0
-			END
-		ELSE
-			BEGIN
-				SELECT @ErrorMessage = 'Sales Order:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strSalesOrderNumber + '). ' FROM tblSOSalesOrder WHERE RTRIM(LTRIM(ISNULL(strSalesOrderOriginId,''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL(strSalesOrderOriginId,'')))) > 0
-			END
-					
-		IF ISNULL(@TransactionType, '') = '' OR @TransactionType NOT IN('Invoice', 'Sales Order', 'Credit Memo', 'Tank Delivery', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment')
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Transaction Type provided does not exists. '
 
-		IF ISNULL(@EntityCustomerId, 0) = 0
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Customer Number provided does not exists. '
-
-		IF ISNULL(@CompanyLocationId, 0) = 0
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Location Name provided does not exists. '
-
-		SELECT TOP 1 @LocationSalesAccountId = intSalesAccount, @LocationName = strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId =  ISNULL(@CompanyLocationId, 0)
-
-		IF ISNULL(@LocationSalesAccountId, 0) = 0
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + CASE WHEN @LocationSalesAccountId IS NULL THEN 'The Sales account of Company Location ' + @LocationName + ' is not valid. ' ELSE 'The Sales account of Company Location ' + @LocationName + ' was not set. ' END
-	
-		IF @TermId IS NULL
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
-		ELSE IF @TermId = 0 AND @IsTank = 0
-			BEGIN
-				SELECT TOP 1 @TermId = intTermsId FROM [tblARCustomer] WHERE [intEntityId] = @EntityCustomerId  
-				IF ISNULL(@TermId, 0) = 0
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The customer provided doesn''t have default terms. '				
-			END
-	
-		IF @FreightTermId IS NULL AND @IsTank = 0
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Freight Term provided does not exists. '
-		ELSE IF @FreightTermId = 0
-			SELECT TOP 1 @FreightTermId = intFreightTermId FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
-
-		IF @ShipViaId IS NULL AND @IsTank = 0
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Ship Via provided does not exists. '
-		ELSE IF @ShipViaId = 0
-			SELECT TOP 1 @ShipViaId = intShipViaId FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
-
-		IF @EntitySalespersonId IS NULL
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Salesperson provided does not exists. '
-		ELSE IF @EntitySalespersonId = 0
-			SELECT TOP 1 @EntitySalespersonId = intSalespersonId FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId
-
-		IF @TaxGroupId IS NULL
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 
-								CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST
-									THEN 'Category ' + @ItemCategory + ' doesn''t have default tax class set up.'
-									ELSE 'The Tax Group provided does not exists. '
-								END									
-		ELSE IF @TaxGroupId = 0
-			SET @TaxGroupId = NULL
-			
-		IF @ImportFormat = @IMPORTFORMAT_CARQUEST
-			BEGIN
-				IF ISNULL(@ItemId, 0) = 0
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item is required.'
-
-				IF ISNULL(@TaxGroupId, 0) > 0 AND NOT EXISTS (SELECT NULL FROM tblSMTaxGroupCode WHERE intTaxGroupId = @TaxGroupId)
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Tax Group must have atleast (1) one Tax Code setup.'
-				
-				IF ISNULL(@TaxClassId, 0) = 0
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item Category doesn''t have default tax class set up.'
-
-				IF ISNULL(@intItemLocationId, 0) = 0
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item Location for the selected item is required.'
-
-				IF ISNULL(@ysnAllowNegativeStock, 0) = 0
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item should allow negative stock.'
-
-				IF ISNULL(@intStockUnit, 0) = 0
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s stock unit should not be null.'
-
-				IF ISNULL(@intCostingMethod, 0) = 0
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s location costing method should be either FIFO or LIFO.'
-			END
-
-		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE [intEntityId] = @EntityCustomerId
-
-		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1 and @ysnRecap = 0
-			BEGIN TRY
-				IF @TransactionType <> 'Sales Order'
-					BEGIN
-						INSERT INTO @EntriesForInvoice(
-							 [strSourceTransaction]
-							,[strTransactionType]
-							,[intSourceId]
-							,[strSourceId]
-							,[intInvoiceId]
-							,[intEntityCustomerId]
-							,[intCompanyLocationId]
-							,[intCurrencyId]
-							,[intTermId]
-							,[dtmDate]
-							,[dtmDueDate]
-							,[dtmShipDate]
-							,[dtmCalculated]
-							,[dtmPostDate]
-							,[intEntitySalespersonId]
-							,[intFreightTermId]
-							,[intShipViaId]
-							,[intPaymentMethodId]
-							,[strInvoiceOriginId]
-							,[strPONumber]
-							,[strBOLNumber]
-							,[strComments]
-							,[intShipToLocationId]
-							,[intBillToLocationId]
-							,[ysnTemplate]
-							,[ysnForgiven]
-							,[ysnCalculated]
-							,[ysnSplitted]
-							,[intPaymentId]
-							,[intSplitId]
-							,[intLoadDistributionHeaderId]
-							,[intLoadId]
-							,[strActualCostId]
-							,[intShipmentId]
-							,[intTransactionId]
-							,[intEntityId]
-							,[ysnResetDetails]
-							,[ysnPost]
-							,[ysnImportedFromOrigin]
-							,[ysnImportedAsPosted]
-							,[intInvoiceDetailId]
-							,[intItemId]
-							,[ysnInventory]
-							,[strItemDescription]
-							,[intOrderUOMId]
-							,[dblQtyOrdered]
-							,[intItemUOMId]
-							,[dblQtyShipped]
-							,[dblDiscount]
-							,[dblPrice]
-							,[ysnRefreshPrice]
-							,[strMaintenanceType]
-							,[strFrequency]
-							,[dtmMaintenanceDate]
-							,[dblMaintenanceAmount]
-							,[dblLicenseAmount]
-							,[intTaxGroupId]
-							,[ysnRecomputeTax]
-							,[intSCInvoiceId]
-							,[strSCInvoiceNumber]
-							,[intInventoryShipmentItemId]
-							,[strShipmentNumber]
-							,[intSalesOrderDetailId]
-							,[strSalesOrderNumber]
-							,[intContractHeaderId]
-							,[intContractDetailId]
-							,[intShipmentPurchaseSalesContractId]
-							,[intTicketId]
-							,[intTicketHoursWorkedId]
-							,[intSiteId]
-							,[strBillingBy]
-							,[dblPercentFull]
-							,[dblNewMeterReading]
-							,[dblPreviousMeterReading]
-							,[dblConversionFactor]
-							,[intPerformerId]
-							,[ysnLeaseBilling]
-							,[ysnVirtualMeterReading]
-							,[strImportFormat]
-							,[dblCOGSAmount]
-							,[intTempDetailIdForTaxes]
-							,[intConversionAccountId]
-							,[intCurrencyExchangeRateTypeId]
-							,[intCurrencyExchangeRateId]
-							,[dblCurrencyExchangeRate]
-							,[intSubCurrencyId]
-							,[dblSubCurrencyRate]
-							,[ysnUseOriginIdAsInvoiceNumber]
-							,[ysnImpactInventory]
-						)
-						SELECT 
-							 [strSourceTransaction]		= 'Import'
-							,[strTransactionType]		= @TransactionType
-							,[intSourceId]				= @ImportLogDetailId
-							,[strSourceId]				= CAST(@ImportLogDetailId AS NVARCHAR(250))
-							,[intInvoiceId]				= NULL
-							,[intEntityCustomerId]		= @EntityCustomerId
-							,[intCompanyLocationId]		= @CompanyLocationId
-							,[intCurrencyId]			= @DefaultCurrencyId
-							,[intTermId]				= @TermId
-							,[dtmDate]					= @Date
-							,[dtmDueDate]				= @DueDate
-							,[dtmShipDate]				= @ShipDate
-							,[dtmCalculated]			= @CalculatedDate
-							,[dtmPostDate]				= @PostDate
-							,[intEntitySalespersonId]	= @EntitySalespersonId
-							,[intFreightTermId]			= @FreightTermId
-							,[intShipViaId]				= @ShipViaId
-							,[intPaymentMethodId]		= NULL
-							,[strInvoiceOriginId]		= @OriginId
-							,[strPONumber]				= @PONumber
-							,[strBOLNumber]				= @BOLNumber
-							,[strComments]				= @Comment
-							,[intShipToLocationId]		= NULL
-							,[intBillToLocationId]		= NULL
-							,[ysnTemplate]				= 0
-							,[ysnForgiven]				= 0
-							,[ysnCalculated]			= CASE WHEN @CalculatedDate IS NULL THEN 0 ELSE 1 END
-							,[ysnSplitted]				= 0
-							,[intPaymentId]				= NULL
-							,[intSplitId]				= NULL
-							,[intLoadDistributionHeaderId]	= NULL
-							,[intLoadId]				= NULL
-							,[strActualCostId]			= NULL
-							,[intShipmentId]			= NULL
-							,[intTransactionId]			= NULL
-							,[intEntityId]				= @EntityId
-							,[ysnResetDetails]			= 1
-							,[ysnPost]					= CASE WHEN isnull(@ysnOrigin, 0) = 1 
-															THEN NULL
-															ELSE  
-																CASE WHEN @TransactionType IN ('Customer Prepayment', 'Overpayment') THEN 0
-																ELSE CASE WHEN @PostDate IS NULL THEN 0 
-																	 ELSE 1 
-															    END
-															END
-														  END 
-							,[ysnImportedFromOrigin]	= CASE WHEN @ysnOrigin = 1 THEN 1 ELSE 0 END
-							,[ysnImportedAsPosted]		= CASE WHEN @ysnOrigin = 1 THEN 1 ELSE 0 END
-							,[intInvoiceDetailId]		= NULL
-							,[intItemId]				= CASE WHEN @IsTank = 1 OR @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @ItemId ELSE NULL END
-							,[ysnInventory]				= CASE WHEN @IsTank = 1 OR @ImportFormat = @IMPORTFORMAT_CARQUEST AND ISNULL(@ItemId, 0) > 0 THEN 
-															CASE WHEN (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @ItemId) = 'Inventory' THEN 1 ELSE 0 END
-														  ELSE 0 END
-							,[strItemDescription]		= @ItemDescription
-							,[intOrderUOMId]			= NULL
-							,[dblQtyOrdered]			= @ItemQtyShipped
-							,[intItemUOMId]				= NULL
-							,[dblQtyShipped]			= @ItemQtyShipped
-							,[dblDiscount]				= @DiscountPercentage
-							,[dblPrice]					= @ItemPrice
-							,[ysnRefreshPrice]			= 0
-							,[strMaintenanceType]		= NULL
-							,[strFrequency]				= NULL
-							,[dtmMaintenanceDate]		= NULL
-							,[dblMaintenanceAmount]		= NULL
-							,[dblLicenseAmount]			= NULL
-							,[intTaxGroupId]			= @TaxGroupId
-							,[ysnRecomputeTax]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST 
-															   THEN 0 
-															   ELSE CASE WHEN ISNULL(@TaxGroupId, 0) > 0 THEN 1 ELSE 0 END
-														  END
-							,[intSCInvoiceId]			= NULL
-							,[strSCInvoiceNumber]		= NULL
-							,[intInventoryShipmentItemId] = NULL
-							,[strShipmentNumber]		= NULL
-							,[intSalesOrderDetailId]	= NULL
-							,[strSalesOrderNumber]		= NULL
-							,[intContractHeaderId]		= NULL
-							,[intContractDetailId]		= NULL
-							,[intShipmentPurchaseSalesContractId]	= NULL
-							,[intTicketId]				= NULL
-							,[intTicketHoursWorkedId]	= NULL
-							,[intSiteId]				= @SiteId
-							,[strBillingBy]				= @BillingBy
-							,[dblPercentFull]			= @PercentFull
-							,[dblNewMeterReading]		= @NewMeterReading
-							,[dblPreviousMeterReading]	= @PreviousMeterReading
-							,[dblConversionFactor]		= @ConversionFactor
-							,[intPerformerId]			= @PerformerId
-							,[ysnLeaseBilling]			= NULL
-							,[ysnVirtualMeterReading]	= CASE WHEN @BillingBy = 'Virtual Meter' THEN 1 ELSE 0 END
-							,[strImportFormat]			= @ImportFormat
-							,[dblCOGSAmount]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @COGSAmount ELSE NULL END
-							,[intTempDetailIdForTaxes]  = @ImportLogDetailId
-							,[intConversionAccountId]	= @ConversionAccountId
-							,[intCurrencyExchangeRateTypeId]	= NULL
-							,[intCurrencyExchangeRateId]		= NULL
-							,[dblCurrencyExchangeRate]	= 1.000000
-							,[intSubCurrencyId]			= NULL
-							,[dblSubCurrencyRate]		= 1.000000
-							,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(@OriginId, '') <> '' AND  @CustomerNumber <> '9998' THEN 1 ELSE 0 END
-							,[ysnImpactInventory]		= @ysnImpactInventory
-						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
-							BEGIN
-								INSERT INTO @TaxDetails(
-									[intDetailId] 
-								  , [intTaxGroupId]
-								  , [intTaxCodeId]
-								  , [intTaxClassId]
-								  , [strTaxableByOtherTaxes]
-								  , [strCalculationMethod]
-								  , [dblRate]
-								  , [intTaxAccountId]
-								  , [dblTax]
-								  , [dblAdjustedTax]
-								  , [ysnTaxAdjusted]
-								  , [ysnSeparateOnInvoice]
-								  , [ysnCheckoffTax]
-								  , [ysnTaxExempt]
-								  , [ysnTaxOnly]
-								  , [strNotes]
-								  , [intTempDetailIdForTaxes])
-								SELECT  TOP 1
-								    [intDetailId]				= NULL
-								  , [intTaxGroupId]				= TGC.intTaxGroupId
-								  , [intTaxCodeId]				= TGC.intTaxCodeId
-								  , [intTaxClassId]				= TC.intTaxClassId
-								  , [strTaxableByOtherTaxes]	= TC.strTaxableByOtherTaxes
-								  , [strCalculationMethod]		= TCR.strCalculationMethod
-								  , [dblRate]					= TCR.dblRate
-								  , [intTaxAccountId]			= TC.intSalesTaxAccountId
-								  , [dblTax]					= 0
-								  , [dblAdjustedTax]			= @TaxAmount
-								  , [ysnTaxAdjusted]			= 1
-								  , [ysnSeparateOnInvoice]		= 0 
-								  , [ysnCheckoffTax]			= TC.ysnCheckoffTax
-								  , [ysnTaxExempt]				= CASE WHEN ISNULL(@TaxAmount, 0) > 0 THEN 0 ELSE 1 END
-								  , [ysnTaxOnly]				= TC.ysnTaxOnly
-								  , [strNotes]					= NULL
-								  , [intTempDetailIdForTaxes]	= @ImportLogDetailId
-								FROM tblSMTaxGroupCode TGC
-									INNER JOIN tblSMTaxCode TC
-										ON TGC.intTaxCodeId = TC.intTaxCodeId
-									INNER JOIN tblSMTaxCodeRate TCR
-										ON TC.intTaxCodeId = TCR.intTaxCodeId
-								WHERE TGC.intTaxGroupId = @TaxGroupId 
-								  AND TC.intTaxClassId = @TaxClassId
-							END
-						
-						EXEC [dbo].[uspARProcessInvoices]
-							 @InvoiceEntries	 = @EntriesForInvoice
-							,@LineItemTaxEntries = @TaxDetails
-							,@UserId			 = @EntityId
-		 					,@GroupingOption	 = 11
-							,@FromImportTransactionCSV = 1
-							,@RaiseError		 = 1
-							,@ErrorMessage		 = @ErrorMessage OUTPUT
-							,@CreatedIvoices	 = @CreatedIvoices OUTPUT
-
-						UPDATE
-						ARI
-						SET
-
-						ARI.dblBaseDiscountAvailable = T.[Discount],	
-						ARI.dblDiscountAvailable = T.[Discount],
-						ARI.dblInvoiceTotal = ARI.dblInvoiceTotal +T.[Discount] ,
-						ARI.dblBaseInvoiceTotal = ARI.dblInvoiceTotal + T.[Discount],
-						ARI.dblAmountDue	= ARI.dblInvoiceTotal + T.[Discount],
-						ARI.dblBaseAmountDue = ARI.dblInvoiceTotal + T.[Discount],
-						ARI.dblInvoiceSubtotal   =  ARI.dblInvoiceSubtotal +  T.[Discount],
-						ARI.dblBaseInvoiceSubtotal  =  ARI.dblBaseInvoiceSubtotal + T.[Discount],
-						ARI.ysnImportFromCSV = 1
-
-						FROM tblARInvoice ARI
-						INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON ARI.intInvoiceId = I.intID
-						INNER JOIN (
-								SELECT  dblPrice - dblTotal [Discount],
-										intInvoiceId
-							FROM
-								tblARInvoiceDetail
-								INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON intInvoiceId = I.intID
-							WHERE
-								[intInvoiceId] =  I.intID
-						)T ON T.[intInvoiceId]  = ARI.[intInvoiceId] 
-
-				 		UPDATE
-						ARID
-						SET 
-						ARID.dblTotal  = ARID.dblTotal  + ARI.dblDiscountAvailable,
-						ARID.dblBaseTotal = ARID.dblBaseTotal  + ARI.dblDiscountAvailable
-						FROM tblARInvoiceDetail ARID
-						INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON ARID.intInvoiceId = I.intID
-						INNER JOIN tblARInvoice ARI  ON ARI.intInvoiceId = I.intID
-
-						UPDATE
-						ARID
-						SET dblDiscount = @ZeroDecimal
-						FROM tblARInvoiceDetail ARID
-						INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON ARID.intInvoiceId = I.intID
-			
-						SET @NewTransactionId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
-
-						IF ISNULL(@NewTransactionId, 0) > 0
-							BEGIN
-								UPDATE tblARInvoice 
-								SET intEntitySalespersonId = @EntitySalespersonId
-								  , strType = CASE WHEN @IsTank = 1 THEN 'Tank Delivery' ELSE @Type END
-								WHERE intInvoiceId = @NewTransactionId
-
-								IF @ImportFormat = @IMPORTFORMAT_CARQUEST
-									BEGIN
-										DECLARE @invoiceToPost	NVARCHAR(MAX)
-										SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewTransactionId)
-
-										UPDATE tblICItemPricing SET dblLastCost = @COGSAmount WHERE intItemId = @ImportItemId AND intItemLocationId = @intItemLocationId
-
-										EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserEntityId
-									END
-							END
-					END
-				ELSE
-					BEGIN
-						DECLARE @computedDueDate DATETIME
+			DECLARE @computedDueDate DATETIME
 							  , @shipToId		 INT
 							  , @shipToName		 NVARCHAR(50)
 							  , @shipToAddress	 NVARCHAR(300)
@@ -745,7 +1347,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
 						SET @DueDate = ISNULL(@DueDate, @computedDueDate)
 
-						INSERT INTO tblSOSalesOrder 
+
+			INSERT INTO tblSOSalesOrder 
 							([strSalesOrderOriginId]
 							,[intEntityCustomerId]
 							,[dtmDate]
@@ -852,56 +1455,24 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							 , @ItemPrice
 							 , @TaxAmount
 							 , @Total
-					END
-			END TRY
-			BEGIN CATCH
-				SET @ErrorMessage = ERROR_MESSAGE();
-			END CATCH
-	
-		DECLARE @isValidFiscalYear BIT = 1
-	
-		SELECT @isValidFiscalYear = CASE WHEN @TransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment') THEN dbo.isOpenAccountingDateByModule(@Date, 'Accounts Receivable') ELSE 1 END
 
-		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) > 0 AND @ErrorMessage <> 'Unable to find an open fiscal year period to match the transaction date.'
+			IF(ISNULL(@NewTransactionId,0) <> 0) OR @ErrorMessage = 'Unable to find an open fiscal year period to match the transaction date.'
 			BEGIN
-				UPDATE tblARImportLogDetail
-				SET [ysnImported]		= 0
-				   ,[ysnSuccess]        = 0
-				   ,[strEventResult]	= @ErrorMessage
-				WHERE [intImportLogDetailId] = @ImportLogDetailId
-
-				UPDATE tblARImportLog 
-				SET [intSuccessCount]	= intSuccessCount - 1
-				  , [intFailedCount]	= intFailedCount + 1
-				WHERE [intImportLogId]  = @ImportLogId
-			END
-		ELSE IF(ISNULL(@NewTransactionId,0) <> 0) OR @ErrorMessage = 'Unable to find an open fiscal year period to match the transaction date.'
-			BEGIN
-				IF @TransactionType <> 'Sales Order'
-					BEGIN
-						UPDATE tblARImportLogDetail
-						SET [ysnImported]		= 1
-						   ,[strEventResult]	= CASE WHEN @TransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash',  'Cash Refund', 'Overpayment', 'Customer Prepayment') AND @ErrorMessage = 'Unable to find an open fiscal year period to match the transaction date.'
-														THEN
-															(SELECT TOP 1 strTransactionType + ':' + strInvoiceNumber FROM tblARInvoice ORDER BY intInvoiceId DESC) + ' Imported. But unable to post due to: ' + @ErrorMessage
-														ELSE
-															(SELECT strTransactionType + ':' + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewTransactionId) + ' Imported.'
-													END
-						WHERE [intImportLogDetailId] = @ImportLogDetailId
-					END
-				ELSE
-					BEGIN
-						UPDATE tblARImportLogDetail
-						SET [ysnImported]		= 1
-						   ,[strEventResult]	= (SELECT strTransactionType + ':' + strSalesOrderNumber FROM tblSOSalesOrder WHERE intSalesOrderId = @NewTransactionId) + ' Imported.'
-						WHERE [intImportLogDetailId] = @ImportLogDetailId
-					END			
+							UPDATE tblARImportLogDetail
+							SET [ysnImported]		= 1
+							   ,[strEventResult]	= (SELECT strTransactionType + ':' + strSalesOrderNumber FROM tblSOSalesOrder WHERE intSalesOrderId = @NewTransactionId) + ' Imported.'
+							WHERE [intImportLogDetailId] = @ImportLogDetailId
 			END
 
-		UPDATE tblARImportLogDetail SET [intConversionAccountId] = @ConversionAccountId  WHERE intImportLogDetailId = @ImportLogDetailId
+
+
+			 UPDATE tblARImportLogDetail SET [intConversionAccountId] = @ConversionAccountId  WHERE intImportLogDetailId = @ImportLogDetailId
 		
-		DELETE FROM @InvoicesForImport WHERE [intImportLogDetailId] = @ImportLogDetailId
+			 DELETE FROM @InvoicesForImport WHERE [intImportLogDetailId] = @ImportLogDetailId
 
-	END
+			END
+END TRY
 
-END
+BEGIN CATCH
+		SET @ErrorMessage = ERROR_MESSAGE();
+END CATCH
