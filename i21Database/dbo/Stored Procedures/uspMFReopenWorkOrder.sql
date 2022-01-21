@@ -77,6 +77,7 @@ BEGIN TRY
 	SET intStatusId = 10
 		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = GETDATE()
+		,intCountStatusId=(Case When @strCycleCount = 'False' then 1 else intCountStatusId End)
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	IF @strCostAdjustmentBatchId IS NOT NULL
