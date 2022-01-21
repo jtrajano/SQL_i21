@@ -5134,7 +5134,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 										BEGIN
 
 											-- SELECT * FROM tblARPaymentIntegrationLogDetail
-											SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+											SET @ErrorMessage = (SELECT TOP 1 ISNULL(strPostingMessage, strMessage) FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
 											SET @strStatusMsg = 'Receive Payments was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
 											-- ROLLBACK
