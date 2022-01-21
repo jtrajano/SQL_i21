@@ -30,7 +30,8 @@ SELECT
 	strEmail			=	ISNULL(contactEntity.strEmail,''),
 	strWebsite			=	ISNULL(contactEntity.strWebsite,''),
 	strCountry			=	ISNULL(entityLocation.strCountry, ''),
-	vendor.ysnTransportTerminal,
+	CAST(CASE terminal.ysnTransportTerminal WHEN 1 THEN 1 ELSE 0 END AS BIT) ysnTransportTerminal,
+	CAST(CASE WHEN ISNULL(terminal.ysnTransportTerminal, 0) = 0 AND vendor.ysnTransportTerminal = 1 THEN 1 ELSE 0 END AS BIT) ysnSupplier,
 	entityLocation.intShipViaId,
 	shipVia.strShipVia
 FROM tblAPVendor vendor
@@ -46,6 +47,13 @@ LEFT JOIN tblEMEntityLocation shipFromLocation ON shipFromLocation.intEntityLoca
 	AND shipFromLocation.intEntityId = vendor.intEntityId
 LEFT JOIN tblEMEntityPhoneNumber phoneNumber ON phoneNumber.intEntityId = contactEntity.intEntityId
 LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = entityLocation.intShipViaId
+OUTER APPLY (
+	SELECT TOP 1 CAST(1 AS BIT) AS ysnTransportTerminal
+	FROM vyuApiTransportTerminals t
+	WHERE t.intEntityId = vendor.intEntityId
+) terminal
 --ORDER BY v.strName ASC, v.ysnActive DESC, v.dtmOriginationDate ASC
 
 GO
+
+
