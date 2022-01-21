@@ -17,7 +17,7 @@ SET ANSI_WARNINGS ON
 -- Inventory/Item data migration from agitmmst origin table to tblICItem i21 table 
 -- Section 1
 --------------------------------------------------------------------------------------------------------------------------------------------
-	INSERT INTO tblICItem (
+INSERT INTO tblICItem (
 	strItemNo
 	,strType
 	,strShortName
@@ -77,7 +77,7 @@ FROM
 --** Items with physical count set to 'Obsolete' is classified as 'Status' = Discontinued and 
 --   Items with physical count set to 'Yes' or 'No' is classified as 'Status' = Active. **
 	,'Active' ItemStatus
-	,'Item Level' InvValuation
+	,case rtrim(min(agitm_lot_yns)) when 'Y' then 'Lot Level' else 'Item Level' end InvValuation
 	,case rtrim(min(agitm_lot_yns)) when 'Y' then 'Yes - Manual' else 'No' end LotTracking
 	,(
 		SELECT TOP 1 min(intCategoryId)
@@ -198,6 +198,9 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo COLLATE SQL_Latin
 --SET strType = 'Other Charge'
 --WHERE strDescription LIKE '%CHARGES%'
 
+UPDATE tblICItem 
+SET strInventoryTracking = 'Lot Level'
+WHERE ISNULL(strLotTracking, '') <> 'No'
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- Item UOM data migration from agitmmst origin table to tblICItemUOM i21 table 
