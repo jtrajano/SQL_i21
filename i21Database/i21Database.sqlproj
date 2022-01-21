@@ -483,7 +483,7 @@
     <Build Include="dbo\Stored Procedures\uspTRFCreateTFRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFTradeFinanceHistory.sql" />
     <Build Include="dbo\User Defined Types\TRFTradeFinance.sql" />
-	<Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10479,6 +10479,7 @@
     <None Include="Scripts\Post-Deployment\DB\7_RiskDemoData.sql" />
     <None Include="Scripts\Post-Deployment\GL\02_UpdateGeneralJournalDetailCurrency.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
+    <Build Include="dbo\Functions\fnCTCashFlowTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
