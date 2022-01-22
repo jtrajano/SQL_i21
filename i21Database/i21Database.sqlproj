@@ -484,6 +484,7 @@
     <Build Include="dbo\Stored Procedures\uspTRFTradeFinanceHistory.sql" />
     <Build Include="dbo\User Defined Types\TRFTradeFinance.sql" />
     <Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCISGetTicketBinHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

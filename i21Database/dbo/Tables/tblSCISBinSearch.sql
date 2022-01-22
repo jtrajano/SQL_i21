@@ -25,7 +25,7 @@
 	,[dblBuFtB] DECIMAL(24, 10) NULL
 	,[dblBasePackB] DECIMAL(24, 10) NULL
 	
-
+	,[ysnDefaultBinHistoryEstimate] BIT DEFAULT(0) NOT NULL
 
 
 	,intConcurrencyId int default(1) not null
