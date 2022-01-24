@@ -64,8 +64,8 @@ as
 			,dblLoadPriced = pfd.dblLoadPriced
 			,dblLoadApplied = pfd.dblLoadApplied
 			,dblLoadAppliedAndPriced = pfd.dblLoadAppliedAndPriced 
-			,dblCorrectQuantityAppliedAndPriced = isnull(applied.dblQuantityApplied,0.00)--pfd.dblQuantityAppliedAndPriced
-			,dblCorrectLoadAppliedAndPriced = case when @ysnLoad = 1 then isnull(applied.dblLoadApplied,0.00) else 0 end--pfd.dblLoadAppliedAndPriced 
+			,dblCorrectQuantityAppliedAndPriced = 0.00
+			,dblCorrectLoadAppliedAndPriced = 0.00
 		from
 			tblCTPriceFixation pf
 			join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
@@ -109,8 +109,8 @@ as
 					end
 					else
 					begin
-						update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = case when isnull(dblCorrectQuantityAppliedAndPriced,0) = 0 then @dblSequenceAppliedQuantity else dblCorrectQuantityAppliedAndPriced end where intPriceFixationDetailId = @intActivePriceFixationDetailId;
-						select @dblSequenceAppliedQuantity = 0;
+						update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = case when isnull(dblCorrectQuantityAppliedAndPriced,0) = 0 then (case when @dblSequenceAppliedQuantity > @dblPricedQuantity then @dblPricedQuantity else @dblSequenceAppliedQuantity end) else dblCorrectQuantityAppliedAndPriced end where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						select @dblSequenceAppliedQuantity = case when @dblSequenceAppliedQuantity - @dblPricedQuantity < 0 then 0 else @dblSequenceAppliedQuantity - @dblPricedQuantity end;
 					end
 				end
 				else
