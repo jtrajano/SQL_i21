@@ -3349,10 +3349,9 @@ BEGIN TRY
 
 	DECLARE @currentContractDetalId INT,
 			@cbLogSpecific AS CTContractBalanceLog,
-			@intId INT,
-			@dblRunningQty NUMERIC(24, 10) = 0,
 			@ysnAddToLogSpecific BIT = 1,
-			@intNegatedCount int = 0
+			@intNegatedCount int = 0,
+			@intId INT
 
 	SELECT @intId = MIN(intId) FROM @cbLogCurrent
 	WHILE @intId > 0--EXISTS(SELECT TOP 1 1 FROM @cbLogCurrent)
@@ -4248,9 +4247,10 @@ BEGIN TRY
 					IF EXISTS (SELECT TOP 1 1 FROM @cbLogSpecific WHERE intActionId = 43)  
 					BEGIN
 						--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
-						IF (@TotalPriced <= @dblContractQty)
+						IF (@TotalOrigPriced <= @dblContractQty)
+						--IF (@TotalPriced <= @dblContractQty)
 						BEGIN
-							UPDATE @cbLogSpecific SET intPricingTypeId = (case when isnull(@truePricingTypeId,0) = 1 and @total < 0 then intPricingTypeId else @intHeaderPricingTypeId end)
+							UPDATE @cbLogSpecific SET intPricingTypeId = @intHeaderPricingTypeId
 						END
 					END 
 
@@ -4268,10 +4268,8 @@ BEGIN TRY
 				, @dblRemainingQty NUMERIC(18, 6)
 				, @dblQuantityAppliedAndPriced NUMERIC(18, 6)
 				, @dblCurrentQty NUMERIC(18, 6)
-				, @tmpTotal NUMERIC(18, 6)
 
-			SELECT @dblRunningQty += @dblOrigQty
-				, @dblRemainingQty = 0
+			SELECT @dblRemainingQty = 0
 				
 			SELECT TOP 1 @prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
 				, @qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
@@ -4316,48 +4314,37 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-			IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
+				IF (@qtyDiff <> 0)
 				BEGIN
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					-- Qty Changed
+					SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
+										ELSE @dblCurrentQty - @prevOrigQty END
 				END
-				ELSE IF @strNotes = 'Change Futures Price'
+				ELSE
 				BEGIN
+					-- New Price or No change
+					SET @FinalQty = @dblQty
+				END
+				
+				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
+				BEGIN
+					-- Decrease Priced
+					UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 				ELSE
 				BEGIN
-					IF (@qtyDiff <> 0)
+					-- If Reassign prices, do not bring back Basis qty
+					IF (@ysnReassign = 0)
 					BEGIN
-						-- Qty Changed
-						SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
-											ELSE @dblCurrentQty - @prevOrigQty END
-					END
-					ELSE
-					BEGIN
-						-- New Price or No change
-						SET @FinalQty = @dblQty
-					END
-				
-					IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
-					BEGIN
-						-- Decrease Priced
-						UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
+						-- Increase basis, qtyDiff is negative so multiply to -1
+						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
-					ELSE
-					BEGIN
-						-- If Reassign prices, do not bring back Basis qty
-						IF (@ysnReassign = 0)
-						BEGIN
-							-- Increase basis, qtyDiff is negative so multiply to -1
-							UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
-							EXEC uspCTLogContractBalance @cbLogSpecific, 0
-						END
 
-						-- Decrease Priced
-						UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0
-					END
+					-- Decrease Priced
+					UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 			END
 		END
@@ -4721,29 +4708,29 @@ BEGIN TRY
 						END
 
 						-- Increase SBD upon creation of IS
-						IF (@strTransactionReference = 'Inventory Shipment')
+						IF (@strTransactionReference = 'Inventory Shipment' AND @currPricingTypeId <> 3)
 						BEGIN
-							if (@currPricingTypeId = 1)
-							begin
-								if (isnull(@ysnWithPriceFix,0) = 1 )
-								begin
-									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = case when intActionId = 18 then 46 else intActionId end
+							IF (@currPricingTypeId = 1)
+							BEGIN
+								IF (ISNULL(@ysnWithPriceFix, 0) = 1 )
+								BEGIN
+									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END
 									EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-								end
-							end
-							else
-							begin
-								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = case when intActionId = 18 then 46 else intActionId end
+								END
+							END
+							ELSE
+							BEGIN
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-							end
+							END
 						END
-						ELSE IF (@strTransactionReference = 'Inventory Receipt')  
+						ELSE IF (@strTransactionReference = 'Inventory Receipt' AND @currPricingTypeId <> 3)
 						BEGIN  
-							if (@currPricingTypeId = 1 and isnull(@ysnWithPriceFix,0) = 1)  
-							begin  
+							IF (@currPricingTypeId = 1 and isnull(@ysnWithPriceFix, 0) = 1)  
+							BEGIN  
 								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0   
-							end  
+							END
 							ELSE
                             BEGIN
                                 UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'
