@@ -4,7 +4,8 @@
 	@strFileName NVARCHAR(100) = NULL,
 	@strProcessType NVARCHAR(50) = NULL,
 	@intBankFileFormatId INT = NULL,
-	@intEntityId INT = NULL
+	@intEntityId INT = NULL,
+	@intBatchId INT =NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -12,10 +13,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
-DECLARE @intBatchId INT = 0
-SELECT TOP 1 @intBatchId =  ISNULL(MAX(intBatchId),0) + 1 from tblCMBankFileGenerationLog
-
 
 IF (@strProcessType = 'ACH From Customer')
 BEGIN
