@@ -56,10 +56,10 @@ BEGIN TRY
 	DECLARE @OpenLoad TABLE (intContractDetailId INT
 		, ysnOpenLoad BIT)
 
-	SELECT *
-	INTO #tmpContractDetail
-	FROM tblCTContractDetail WITH (NOLOCK)
-	WHERE intContractHeaderId = @intContractHeaderId;
+	-- SELECT *
+	-- INTO #tmpContractDetail
+	-- FROM tblCTContractDetail WITH (NOLOCK)
+	-- WHERE intContractHeaderId = @intContractHeaderId;
 	
 	INSERT INTO @tblShipment (intContractHeaderId
 		, intContractDetailId
@@ -71,7 +71,7 @@ BEGIN TRY
 		, dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId, CD.intItemUOMId, CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ISNULL(ShipmentItem.dblDestinationNet, ShipmentItem.dblQuantity) ELSE 0 END )), 0)
 	FROM tblICInventoryShipmentItem ShipmentItem WITH (NOLOCK)
 	JOIN tblICInventoryShipment Shipment WITH (NOLOCK) ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1
-	JOIN #tmpContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId
 	LEFT JOIN (
 		SELECT DISTINCT ID.intInventoryShipmentItemId
 			, IV.ysnPosted
@@ -99,7 +99,7 @@ BEGIN TRY
 	FROM tblICInventoryReceiptItem ReceiptItem WITH (NOLOCK)
 	JOIN tblICInventoryReceipt Receipt WITH (NOLOCK) ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		AND Receipt.strReceiptType = 'Purchase Contract'
-	JOIN #tmpContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
 		AND CD.intContractHeaderId = ReceiptItem.intOrderId
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 	GROUP BY ReceiptItem.intLineNo
@@ -109,68 +109,69 @@ BEGIN TRY
 		, ysnOpenLoad = CAST(LD.intLoadDetailId AS BIT)
 	FROM tblLGLoad LO
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = LO.intLoadId
-	JOIN #tmpContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intSContractDetailId, LD.intPContractDetailId)
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intSContractDetailId, LD.intPContractDetailId)
 	WHERE intTicketId IS NULL
 		AND LO.intShipmentStatus NOT IN(4, 10)
 		AND LO.intShipmentType <> 2
 		AND CD.intContractHeaderId = @intContractHeaderId;
 	
-	WITH CTE1 AS (
-		SELECT CD.intContractDetailId
-			, AD.intSeqCurrencyId
-			, AD.strSeqCurrency
-			, AD.ysnSeqSubCurrency
-			, AD.intSeqPriceUOMId
-			, AD.strSeqPriceUOM
-			, AD.dblSeqPrice
-			, ysnLoadAvailable = CAST(ISNULL(LG.intLoadDetailId, 0) AS BIT)
-			, CQ.dblBulkQuantity
-			, CQ.dblBagQuantity
-			, CQ.strContainerType
-			, CQ.strContainerUOM
-			, FI.dblQuantityPriceFixed
-			, dblUnpricedQty = CD.dblQuantity - ISNULL(FI.dblQuantityPriceFixed, 0)
-			, FI.dblPFQuantityUOMId
-			, FI.[dblTotalLots]
-			, FI.[dblLotsFixed]
-			, dblUnpricedLots = CD.dblNoOfLots - ISNULL(FI.[dblLotsFixed], 0)
-			, FI.intPriceFixationId
-			, FI.intPriceContractId
-			, FI.ysnSpreadAvailable
-			, FI.ysnFixationDetailAvailable
-			, FI.ysnMultiPricingDetail
-			, QA.strContainerNumber
-			, QA.strSampleTypeName
-			, QA.strSampleStatus
-			, QA.dtmTestingEndDate
-			, QA.dblApprovedQty
-			, WO.intWashoutId
-			, WO.strSourceNumber
-			, WO.strWashoutNumber
-			, WO.dblSourceCashPrice
-			, WO.dblWTCashPrice
-			, WO.strBillInvoice
-			, WO.intBillInvoiceId
-			, WO.strDocType
-			, WO.strAdjustmentType
-			, intHeaderPricingTypeId = CH.intPricingTypeId
-			, CH.intCommodityId
-			, CH.intContractTypeId
-			, CH.ysnLoad
-			, CH.intCommodityUOMId
-		FROM #tmpContractDetail CD
-		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		OUTER APPLY (
-			SELECT TOP 1 intLoadDetailId
-			FROM tblLGLoadDetail
-			WHERE CD.intContractDetailId = CASE WHEN CH.intContractTypeId = 1 THEN intPContractDetailId ELSE intSContractDetailId END
-			ORDER BY intLoadDetailId DESC
-		) LG
-		OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
-		OUTER APPLY dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
-		OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId, CD.intContainerTypeId, dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin')) CQ
-		OUTER APPLY dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId) WO
-		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD)
+	-- WITH CTE1 AS (
+	-- 	SELECT CD.intContractDetailId
+	-- 		, AD.intSeqCurrencyId
+	-- 		, AD.strSeqCurrency
+	-- 		, AD.ysnSeqSubCurrency
+	-- 		, AD.intSeqPriceUOMId
+	-- 		, AD.strSeqPriceUOM
+	-- 		, AD.dblSeqPrice
+	-- 		, ysnLoadAvailable = CAST(ISNULL(LG.intLoadDetailId, 0) AS BIT)
+	-- 		, CQ.dblBulkQuantity
+	-- 		, CQ.dblBagQuantity
+	-- 		, CQ.strContainerType
+	-- 		, CQ.strContainerUOM
+	-- 		, FI.dblQuantityPriceFixed
+	-- 		, dblUnpricedQty = CD.dblQuantity - ISNULL(FI.dblQuantityPriceFixed, 0)
+	-- 		, FI.dblPFQuantityUOMId
+	-- 		, FI.[dblTotalLots]
+	-- 		, FI.[dblLotsFixed]
+	-- 		, dblUnpricedLots = CD.dblNoOfLots - ISNULL(FI.[dblLotsFixed], 0)
+	-- 		, FI.intPriceFixationId
+	-- 		, FI.intPriceContractId
+	-- 		, FI.ysnSpreadAvailable
+	-- 		, FI.ysnFixationDetailAvailable
+	-- 		, FI.ysnMultiPricingDetail
+	-- 		, QA.strContainerNumber
+	-- 		, QA.strSampleTypeName
+	-- 		, QA.strSampleStatus
+	-- 		, QA.dtmTestingEndDate
+	-- 		, QA.dblApprovedQty
+	-- 		, WO.intWashoutId
+	-- 		, WO.strSourceNumber
+	-- 		, WO.strWashoutNumber
+	-- 		, WO.dblSourceCashPrice
+	-- 		, WO.dblWTCashPrice
+	-- 		, WO.strBillInvoice
+	-- 		, WO.intBillInvoiceId
+	-- 		, WO.strDocType
+	-- 		, WO.strAdjustmentType
+	-- 		, intHeaderPricingTypeId = CH.intPricingTypeId
+	-- 		, CH.intCommodityId
+	-- 		, CH.intContractTypeId
+	-- 		, CH.ysnLoad
+	-- 		, CH.intCommodityUOMId
+	-- 	FROM #tmpContractDetail CD
+	-- 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	-- 	OUTER APPLY (
+	-- 		SELECT TOP 1 intLoadDetailId
+	-- 		FROM tblLGLoadDetail
+	-- 		WHERE CD.intContractDetailId = CASE WHEN CH.intContractTypeId = 1 THEN intPContractDetailId ELSE intSContractDetailId END
+	-- 		ORDER BY intLoadDetailId DESC
+	-- 	) LG
+	-- 	OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
+	-- 	OUTER APPLY dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
+	-- 	OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId, CD.intContainerTypeId, dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin')) CQ
+	-- 	OUTER APPLY dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId) WO
+	-- 	OUTER APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+	-- 	)
 	
 	SELECT DISTINCT CD.intContractDetailId
 		, CD.intSplitFromId
@@ -212,7 +213,7 @@ BEGIN TRY
 		, CD.intFutureMarketId
 		, CD.intFutureMonthId
 		, intPricingTypeId = CASE WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval') THEN CD.intPricingTypeId
-								WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus <> 'Approved' AND AP.strApprovalStatus <> 'No Need for Approval') THEN CT.intHeaderPricingTypeId
+								WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus <> 'Approved' AND AP.strApprovalStatus <> 'No Need for Approval') THEN CH.intPricingTypeId
 								ELSE CD.intPricingTypeId END
 		, dblFutures = CASE WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval') THEN CD.dblFutures
 							WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus <> 'Approved' AND AP.strApprovalStatus <> 'No Need for Approval') THEN NULL
@@ -351,7 +352,7 @@ BEGIN TRY
 		, strIndex = dbo.[fnCTGetSeqDisplayField](CD.intIndexId, 'tblCTIndex')
 		, CS.strContractStatus
 		, strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open')
-		, strFinancialStatus = CASE WHEN CT.intContractTypeId = 1 THEN CASE WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
+		, strFinancialStatus = CASE WHEN CH.intContractTypeId = 1 THEN CASE WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
 														WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
 														ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END END
 				ELSE CD.strFinancialStatus END
@@ -359,7 +360,7 @@ BEGIN TRY
 		, strFutureMonth = REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ')
 		, dblConversionFactor = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, CM.intItemUOMId, 1)
 		, strUOM = dbo.[fnCTGetSeqDisplayField](CD.intItemUOMId, 'tblICItemUOM')
-		, dblAppliedQty = CASE WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END
+		, dblAppliedQty = CASE WHEN CH.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END
 		/*
 		, dblAppliedLoadQty = CASE WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity
 									WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
@@ -372,7 +373,7 @@ BEGIN TRY
 									WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
 									ELSE
 										CASE
-										WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
+										WHEN CH.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
 										ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)
 										END
 										* CD.dblQuantityPerLoad
@@ -418,47 +419,48 @@ BEGIN TRY
 		, strConvertedUOM = dbo.[fnCTGetSeqDisplayField](CD.intConvPriceUOMId, 'tblICItemUOM')
 		, ysnMultiAllocation = [dbo].[fnCTIsMultiAllocationExists](CD.intContractDetailId)
 		, ysnMultiDerivatives = [dbo].[fnCTIsMultiDerivativesExists](CD.intContractDetailId)
-		, CT.intSeqCurrencyId
-		, CT.strSeqCurrency
-		, CT.ysnSeqSubCurrency
-		, CT.intSeqPriceUOMId
-		, CT.strSeqPriceUOM
-		, CT.dblSeqPrice
-		, CT.ysnLoadAvailable
-		, CT.dblBulkQuantity
-		, CT.dblBagQuantity
-		, CT.strContainerType
-		, CT.strContainerUOM
+		, ADR.intSeqCurrencyId
+		, ADR.strSeqCurrency
+		, ADR.ysnSeqSubCurrency
+		, ADR.intSeqPriceUOMId
+		, ADR.strSeqPriceUOM
+		, ADR.dblSeqPrice
+		-- , CT.ysnLoadAvailable
+        ,ysnLoadAvailable = CAST(ISNULL(LG.intLoadDetailId, 0) AS BIT)
+		, CQ.dblBulkQuantity
+		, CQ.dblBagQuantity
+		, CQ.strContainerType
+		, CQ.strContainerUOM
 		, dblQuantityPriceFixed = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN CD.dblQuantity
-										ELSE CT.dblQuantityPriceFixed END
+										ELSE FI.dblQuantityPriceFixed END
 		, dblUnpricedQty = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN NULL
-								ELSE CT.dblUnpricedQty END
-		, CT.dblPFQuantityUOMId
+								ELSE CD.dblQuantity - ISNULL(FI.dblQuantityPriceFixed, 0) END
+		, FI.dblPFQuantityUOMId
 		, dblTotalLots = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN CD.dblNoOfLots
-								ELSE CT.[dblTotalLots] END
+								ELSE FI.[dblTotalLots] END
 		, dblLotsFixed = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN CD.dblNoOfLots
-								ELSE CT.[dblLotsFixed] END
+								ELSE FI.[dblLotsFixed] END
 		, dblUnpricedLots = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN NULL
-								ELSE CT.dblUnpricedLots END
-		, CT.intPriceFixationId
-		, CT.intPriceContractId
-		, CT.ysnSpreadAvailable
-		, CT.ysnFixationDetailAvailable
-		, CT.ysnMultiPricingDetail
-		, CT.strContainerNumber
-		, CT.strSampleTypeName
-		, CT.strSampleStatus
-		, CT.dtmTestingEndDate
-		, CT.dblApprovedQty
-		, CT.intWashoutId
-		, CT.strSourceNumber
-		, CT.strWashoutNumber
-		, CT.dblSourceCashPrice
-		, CT.dblWTCashPrice
-		, CT.strBillInvoice
-		, CT.intBillInvoiceId
-		, CT.strDocType
-		, CT.strAdjustmentType
+								ELSE CD.dblNoOfLots - ISNULL(FI.[dblLotsFixed], 0) END
+		, FI.intPriceFixationId
+		, FI.intPriceContractId
+		, FI.ysnSpreadAvailable
+		, FI.ysnFixationDetailAvailable
+		, FI.ysnMultiPricingDetail
+		, QA.strContainerNumber
+		, QA.strSampleTypeName
+		, QA.strSampleStatus
+		, QA.dtmTestingEndDate
+		, QA.dblApprovedQty
+		, WO.intWashoutId
+		, WO.strSourceNumber
+		, WO.strWashoutNumber
+		, WO.dblSourceCashPrice
+		, WO.dblWTCashPrice
+		, WO.strBillInvoice
+		, WO.intBillInvoiceId
+		, WO.strDocType
+		, WO.strAdjustmentType
 		, dblShipmentQuantity = Shipment.dblQuantity
 		, dblBillQty = Bill.dblQuantity
 		, ysnOpenLoad = ISNULL(OL.ysnOpenLoad, 0)
@@ -466,13 +468,21 @@ BEGIN TRY
         , ysnContractAllocated = CAST(CASE WHEN isnull(AD.dblAllocatedQty,0) > 0 THEN 1 ELSE 0 END AS BIT)
 		, strFreightBasisUOM = FBUM.strUnitMeasure
 		, strFreightBasisBaseUOM = FBBUM.strUnitMeasure
-		, ysnWithPriceFix = case when isnull(CT.intPriceContractId,0) = 0 then convert(bit,0) else convert(bit,1) end
+		, ysnWithPriceFix = case when isnull(FI.intPriceContractId,0) = 0 then convert(bit,0) else convert(bit,1) end
         ,dblAllocatedQty = AD.dblAllocatedQty
-	FROM #tmpContractDetail CD
-	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
+	-- FROM #tmpContractDetail CD
+    FROM tblCTContractDetail CD
+	-- JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
+    JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	OUTER APPLY (
+		SELECT TOP 1 intLoadDetailId
+		FROM tblLGLoadDetail
+		WHERE CD.intContractDetailId = CASE WHEN CH.intContractTypeId = 1 THEN intPContractDetailId ELSE intSContractDetailId END
+		ORDER BY intLoadDetailId DESC
+	) LG
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
 	LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
-	LEFT JOIN tblCTPricingType PTH ON PTH.intPricingTypeId = CT.intHeaderPricingTypeId
+	LEFT JOIN tblCTPricingType PTH ON PTH.intPricingTypeId = CH.intPricingTypeId
 	LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 	LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
@@ -490,14 +500,13 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
-	LEFT JOIN tblICCommodityUnitMeasure CO ON CO.intCommodityUnitMeasureId =  CT.intCommodityUOMId
+    LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblICCommodityUnitMeasure CO ON CO.intCommodityUnitMeasureId =  CH.intCommodityUOMId
 	LEFT JOIN tblICItemUOM CM ON CM.intItemId = CD.intItemId AND CM.intUnitMeasureId = CO.intUnitMeasureId
 	LEFT JOIN @tblShipment Shipment ON Shipment.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN @tblBill Bill ON Bill.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN @OpenLoad OL ON OL.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN @tblInvoice Invoice ON Invoice.intContractDetailId = CD.intContractDetailId
-	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
-	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId
 	--LEFT JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
     outer apply (
         select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
@@ -519,9 +528,16 @@ BEGIN TRY
 			AND CASE WHEN b.ysnMultiplePriceFixation = 1 AND a.intContractDetailId = CD.intContractDetailId THEN 1 ELSE 1 END = 1
 		ORDER BY c.intTransactionId DESC
 	) AP
+	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
+    OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
+	OUTER APPLY dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
+	OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId, CD.intContainerTypeId, dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin')) CQ
+	OUTER APPLY dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId) WO
+	OUTER APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) ADR
+    WHERE CH.intContractHeaderId = @intContractHeaderId
 	ORDER BY CD.intContractSeq
 
-	DROP TABLE #tmpContractDetail
+	-- DROP TABLE #tmpContractDetail
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
