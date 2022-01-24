@@ -273,7 +273,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 UPDATE #INVOICETABLE SET strInvoiceFormat = 'Format 3 - Swink' WHERE strInvoiceFormat = 'Format 1 - Swink'
 
 INSERT INTO #MCPINVOICES
-SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
+SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
 
 IF EXISTS (SELECT TOP 1 NULL FROM #MCPINVOICES) AND @strCompanyName IS NULL
 	EXEC dbo.[uspARInvoiceMCPReport] @intEntityUserId, @strRequestId
@@ -281,7 +281,7 @@ ELSE IF EXISTS (SELECT TOP 1 NULL FROM #MCPINVOICES)
 	EXEC dbo.[uspARInvoiceMCPReportCustom] @intEntityUserId, @strRequestId
 
 INSERT INTO #STANDARDINVOICES
-SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
+SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
 
 IF EXISTS (SELECT TOP 1 NULL FROM #STANDARDINVOICES)
 	EXEC dbo.[uspARInvoiceReport] @intEntityUserId, @strRequestId
