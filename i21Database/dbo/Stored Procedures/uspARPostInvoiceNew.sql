@@ -596,6 +596,8 @@ BEGIN TRY
         ,[intErrorCode]     INT
         ,[strModuleName]    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL)
 
+	IF  EXISTS (SELECT TOP  1 NULL FROM @GLEntries)
+	BEGIN
     INSERT INTO @InvalidGLEntries (
 		  [strTransactionId]
         , [strText]
@@ -608,6 +610,7 @@ BEGIN TRY
         , [intErrorCode]
         , [strModuleName]
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @Post)
+	END
 
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
