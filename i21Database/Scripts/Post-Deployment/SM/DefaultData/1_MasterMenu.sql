@@ -9,7 +9,7 @@
 	END
 GO
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Switch Position' AND strModuleName = 'Risk Management')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Documents (Portal)' AND strModuleName = 'Accounts Receivable') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -7297,6 +7297,20 @@ BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @EMBalanceInquiryMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@EMBalanceInquiryMenuId, 1)
 END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Documents (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId) 
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Customer Documents (Portal)', N'Accounts Receivable', @AccountPortalParentMenuId, N'Customer Documents (Portal)', N'Account', N'Screen', N'AccountsReceivable.view.CustomerDocument', N'small-menu-account', 1, 0, 0, 1, 7, 1) 
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'AccountsReceivable.view.CustomerDocument' WHERE strMenuName = 'Customer Documents (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId 
+ 
+DECLARE @ARCustomerDocumentsMenuId INT 
+SELECT  @ARCustomerDocumentsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Customer Documents (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId 
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Customer Documents (Portal)' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountPortalParentMenuId) 
+BEGIN 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ARCustomerDocumentsMenuId) 
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@ARCustomerDocumentsMenuId, 1) 
+END 
 
 /* Transactions */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transactions (Portal)' AND strModuleName = 'System Manager' AND intParentMenuID = 0)
