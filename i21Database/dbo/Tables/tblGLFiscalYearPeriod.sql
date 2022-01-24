@@ -18,6 +18,9 @@
 	[ysnCTRevalued]				BIT				DEFAULT 0 NULL,
     [ysnCMRevalued]				BIT				DEFAULT 0 NULL,
     [ysnFARevalued]				BIT				DEFAULT 0 NULL,
+    [ysnCMForwardsRevalued]		BIT				DEFAULT 0 NULL,
+    [ysnCMInTransitRevalued]	BIT				DEFAULT 0 NULL,
+    [ysnCMSwapsRevalued]		BIT				DEFAULT 0 NULL,
 	[ysnConsolidated]			BIT				DEFAULT 0 NULL,
     [intConcurrencyId]			INT				DEFAULT 1 NOT NULL,
    CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED 

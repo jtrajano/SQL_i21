@@ -45,12 +45,85 @@ DECLARE @strMessage NVARCHAR(100)
 			Offset INT
 		)
 
-		DECLARE @strAccountErrorMessage NVARCHAR(255), @strTransactionType NVARCHAR(255)
+		DECLARE 
+			@strAccountErrorMessage NVARCHAR(255),
+			@strTransactionType NVARCHAR(255),
+			@intGLFiscalYearPeriodId INT
 
-		SELECT @strTransactionType = strTransactionType FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
+		SELECT 
+			@intGLFiscalYearPeriodId = intGLFiscalYearPeriodId,
+			@strTransactionType = strTransactionType
+		FROM tblGLRevalue 
+		WHERE intConsolidationId = @intConsolidationId
+
+		
+		DECLARE 
+			@ysnCMForwardsRevalued BIT,
+			@ysnCMInTransitRevalued BIT,
+			@ysnCMSwapsRevalued BIT,
+			@ysnRevalue_Forward BIT,
+			@ysnRevalue_InTransit BIT,
+			@ysnRevalue_Swap BIT
+
+		-- Validate CM transaction type
+		-- Make sure all other CM transaction types were revalued (if revaluation was enabled)
+		IF @strTransactionType = 'CM'
+		BEGIN
+			SELECT TOP 1 
+				@ysnRevalue_Forward = ysnRevalue_Forward,
+				@ysnRevalue_InTransit = ysnRevalue_InTransit,
+				@ysnRevalue_Swap = ysnRevalue_Swap
+			FROM tblCMCompanyPreferenceOption
+
+			SELECT 
+				@ysnCMForwardsRevalued = ysnCMForwardsRevalued, 
+				@ysnCMInTransitRevalued = ysnCMInTransitRevalued, 
+				@ysnCMSwapsRevalued = ysnCMSwapsRevalued 
+			FROM tblGLFiscalYearPeriod 
+			WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+
+			IF ISNULL(@ysnCMForwardsRevalued, 0) = 0 AND ISNULL(@ysnRevalue_Forward, 0) = 1
+			BEGIN
+				SET @strMessage = '''Forwards'' Transaction Type must be revalued.'
+				GOTO _raiserror
+			END
+			IF ISNULL(@ysnCMInTransitRevalued, 0) = 0 AND ISNULL(@ysnRevalue_InTransit, 0) = 1
+			BEGIN
+				SET @strMessage = '''In-Transit'' Transaction Type must be revalued.'
+				GOTO _raiserror
+			END
+			IF ISNULL(@ysnCMSwapsRevalued, 0) = 0 AND ISNULL(@ysnRevalue_Swap, 0) = 1
+			BEGIN
+				SET @strMessage = '''Swaps'' Transaction Type must be revalued.'
+				GOTO _raiserror
+			END
+		END
 
 		IF (@strTransactionType IN ('CM Forwards', 'CM In-Transit', 'CM Swaps'))
 		BEGIN
+			SELECT 
+				@ysnCMForwardsRevalued = ysnCMForwardsRevalued, 
+				@ysnCMInTransitRevalued = ysnCMInTransitRevalued, 
+				@ysnCMSwapsRevalued = ysnCMSwapsRevalued 
+			FROM tblGLFiscalYearPeriod 
+			WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+
+			IF @strTransactionType = 'CM Forwards' AND ISNULL(@ysnCMForwardsRevalued, 0) = 1
+			BEGIN
+				SET @strMessage = '''Forwards'' Transaction Type already revalued.'
+				GOTO _raiserror
+			END
+			IF @strTransactionType = 'CM In-Transit' AND ISNULL(@ysnCMInTransitRevalued, 0) = 1
+			BEGIN
+				SET @strMessage = '''In-Transit'' Transaction Type already revalued.'
+				GOTO _raiserror
+			END
+			IF @strTransactionType = 'CM Swaps' AND ISNULL(@ysnCMSwapsRevalued, 0) = 1
+			BEGIN
+				SET @strMessage = '''Swaps'' Transaction Type already revalued.'
+				GOTO _raiserror
+			END
+			
 			DECLARE @tblTransactions TABLE (
 				strTransactionId NVARCHAR(100)
 			)
@@ -527,9 +600,7 @@ DECLARE @strMessage NVARCHAR(100)
 		BEGIN
 			UPDATE tblGLRevalue SET ysnPosted = 1 WHERE intConsolidationId in ( @intConsolidationId, @intReverseID)
 			
-			DECLARE @intGLFiscalYearPeriodId INT
-			SELECT @intGLFiscalYearPeriodId= intGLFiscalYearPeriodId ,@strTransactionType = strTransactionType  FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
-
+			
 			
 			IF @strTransactionType = 'AR' 
 				UPDATE tblGLFiscalYearPeriod SET ysnARRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
@@ -543,6 +614,12 @@ DECLARE @strMessage NVARCHAR(100)
 				UPDATE tblGLFiscalYearPeriod SET ysnCMRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'FA' 
 				UPDATE tblGLFiscalYearPeriod SET ysnFARevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'CM Forwards'
+				UPDATE tblGLFiscalYearPeriod SET ysnCMForwardsRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'CM In-Transit'
+				UPDATE tblGLFiscalYearPeriod SET ysnCMInTransitRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'CM Swaps'
+				UPDATE tblGLFiscalYearPeriod SET ysnCMSwapsRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			IF @strTransactionType = 'All' 
 				UPDATE tblGLFiscalYearPeriod SET 
@@ -551,7 +628,10 @@ DECLARE @strMessage NVARCHAR(100)
 					ysnINVRevalued =	1,
 					ysnCTRevalued =		1,
 					ysnCMRevalued =		1,
-					ysnFARevalued =     1
+					ysnFARevalued =     1,
+					ysnCMForwardsRevalued =		1,
+					ysnCMInTransitRevalued =	1,
+					ysnCMSwapsRevalued =		1
 				WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			
