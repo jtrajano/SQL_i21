@@ -46,8 +46,43 @@ BEGIN
 	)
     BEGIN
 
+		SELECT	
+				@intPriceFixationId	=	pf.intPriceFixationId
+		FROM
+			tblCTContractDetail cd
+			join tblCTContractHeader ch
+				on ch.intContractHeaderId = cd.intContractHeaderId
+			join tblCTPriceFixation pf
+				on pf.intContractHeaderId = ch.intContractHeaderId
+				and isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end)
+		WHERE
+			cd.intContractDetailId = @intContractDetailId 
+			GROUP BY pf.dblTotalLots, pf.intPriceFixationId, pf.intPriceContractId 
+
+		IF EXISTS(
+			SELECT top 1 1
+			FROM
+				tblCTContractDetail cd
+				join tblCTContractHeader ch
+					on ch.intContractHeaderId = cd.intContractHeaderId
+				join tblCTPriceFixation pf
+					on pf.intContractHeaderId = ch.intContractHeaderId
+					and isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end)
+				join  tblSMTransaction t on t.intRecordId = pf.intPriceContractId and t.intScreenId = 119 and t.strApprovalStatus in 	('Waiting for Approval', 'Waiting for Submit')
+			WHERE
+				cd.intContractDetailId = @intContractDetailId
+		)BEGIN
+
+			SELECT @intMaxFixationDetailId = MAX(intPriceFixationDetailId) 
+			FROM tblCTPriceFixationDetail
+			WHERE	 intPriceFixationId		=   @intPriceFixationId
+
+		END
+
+
+
 		SELECT	@dblTotalLots		=	pf.dblTotalLots,
-				@dblLotsFixed		=	pf.dblLotsFixed,
+				@dblLotsFixed		=	sum(pfd.dblNoOfLots),
 				@intPriceFixationId	=	pf.intPriceFixationId,
 				@intPriceContractId =	pf.intPriceContractId 
 		FROM
@@ -57,29 +92,12 @@ BEGIN
 			join tblCTPriceFixation pf
 				on pf.intContractHeaderId = ch.intContractHeaderId
 				and isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end)
+			LEFT JOIN tblCTPriceFixationDetail pfd 
+				on pfd.intPriceFixationId = pf.intPriceFixationId
 		WHERE
-			cd.intContractDetailId = @intContractDetailId
-
-		IF EXISTS(
+			cd.intContractDetailId = @intContractDetailId and pfd.intPriceFixationDetailId NOT IN (ISNULL(@intMaxFixationDetailId,0))
+				GROUP BY pf.dblTotalLots, pf.intPriceFixationId, pf.intPriceContractId 
 		
-		SELECT top 1 1
-		FROM
-			tblCTContractDetail cd
-			join tblCTContractHeader ch
-				on ch.intContractHeaderId = cd.intContractHeaderId
-			join tblCTPriceFixation pf
-				on pf.intContractHeaderId = ch.intContractHeaderId
-				and isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end)
-			join  tblSMTransaction t on t.intRecordId = pf.intPriceContractId and t.intScreenId = 119 and t.strApprovalStatus in 	('Waiting for Approval', 'Waiting for Submit')
-		WHERE
-			cd.intContractDetailId = @intContractDetailId
-		)BEGIN
-
-			SELECT @intMaxFixationDetailId = MAX(intPriceFixationDetailId) 
-			FROM tblCTPriceFixationDetail
-			WHERE	 intPriceFixationId		=   @intPriceFixationId
-
-		END
 
 		SELECT	 @intPFDCount			=   COUNT(intPriceFixationDetailId) 
 				,@dblQuantityPriceFixed =   SUM(dblQuantity) 
