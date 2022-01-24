@@ -1,5 +1,6 @@
 CREATE TYPE [dbo].[TRFTradeFinance] AS TABLE (
 	  intId INT IDENTITY PRIMARY KEY CLUSTERED
+	, intTradeFinanceId INT NULL
 	, strTradeFinanceNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

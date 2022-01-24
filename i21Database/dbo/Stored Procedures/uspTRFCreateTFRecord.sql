@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspTRFCreateTFRecord]
 	  @records TRFTradeFinance READONLY
 	  , @intUserId INT = NULL
+	  , @dtmTransactionDate DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -25,6 +26,7 @@ BEGIN
 		, dtmDateApproved
 		, strRefNo
 		, intOverrideFacilityValuation
+		, strApprovalStatus
 		, strCommnents
 		, dtmCreatedDate
 		, intConcurrencyId
@@ -44,6 +46,7 @@ BEGIN
 		, dtmDateApproved
 		, strRefNo
 		, intOverrideFacilityValuation
+		, strApprovalStatus
 		, strCommnents
 		, dtmCreatedDate
 		, intConcurrencyId
@@ -59,7 +62,7 @@ BEGIN
 	BEGIN
 		SELECT TOP 1 @strTradeFinanceNumber = strTradeFinanceNumber FROM #tmpTradeFinance
 		
-		EXEC uspTRFTradeFinanceHistory NULL, @strTradeFinanceNumber, @intUserId, 'ADD'
+		EXEC uspTRFTradeFinanceHistory NULL, @strTradeFinanceNumber, @intUserId, 'ADD', @dtmTransactionDate
 
 		DELETE FROM #tmpTradeFinance
 		WHERE strTradeFinanceNumber = @strTradeFinanceNumber

@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspTRFTradeFinanceHistory]
 	, @strTradeFinanceNumber NVARCHAR(200) = NULL
 	, @intUserId INT = NULL
 	, @action NVARCHAR(20)
+	, @dtmTransactionDate DATETIME = NULL
 
 AS
 
@@ -52,6 +53,7 @@ BEGIN TRY
 		, dtmCreatedDate
 		, intConcurrencyId
 		, strUserName
+		, dtmTransactionDate
 	)
 	SELECT tf.intTradeFinanceId
 		, tf.strTradeFinanceNumber
@@ -76,6 +78,7 @@ BEGIN TRY
 		, tf.dtmCreatedDate
 		, intConcurrencyId = @intUserId
 		, strUserName = @strUserName
+		, dtmTransactionDate = @dtmTransactionDate
 	
 	FROM #tmpTradeFinanceHistory tf
 	LEFT JOIN tblCMBank bank
