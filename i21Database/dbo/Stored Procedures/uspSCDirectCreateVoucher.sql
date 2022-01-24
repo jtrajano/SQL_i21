@@ -978,7 +978,12 @@ BEGIN TRY
 												THEN SC.dblQuantity 
 												ELSE (SC.dblQuantity) * -1 
 											END
-										ELSE 1 END
+										ELSE  
+											CASE WHEN ISNULL(SC.ysnCusVenPaysFees,0) = 0 
+												THEN 1 
+												ELSE -1 
+											END
+										END
 				,dblUnitQty				= SC.dblUnitQty 
 				,dblDiscount			= 0
 				,dblCost				= ROUND((CASE WHEN IC.strCostMethod = 'Per Unit' THEN 
@@ -999,6 +1004,7 @@ BEGIN TRY
 				AND SC.dblTicketFees > 0
 				AND SC.ysnCusVenPaysFees = 1
 		END
+
 		--FOR DISCOUNT
 		INSERT INTO @voucherDetailDirectInventory(
 			[intAccountId],
