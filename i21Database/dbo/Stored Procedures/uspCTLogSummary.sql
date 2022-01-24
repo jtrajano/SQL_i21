@@ -4832,7 +4832,7 @@ BEGIN TRY
 								IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
 								BEGIN
 									UPDATE @cbLogSpecific SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
-																						WHEN @intHeaderPricingTypeId = 1 THEN 1
+																						WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 																						ELSE 2 END, intActionId = (CASE WHEN intActionId = 46 AND @currPricingTypeId <> 3 THEN 18 ELSE intActionId END)
 								END
 							END
@@ -4848,7 +4848,7 @@ BEGIN TRY
 							IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
 							BEGIN
 								UPDATE @cbLogSpecific SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1 
-																					WHEN @intHeaderPricingTypeId = 1 THEN 1
+																					WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 																					ELSE 2 END, intActionId = (CASE WHEN intActionId = 46 AND @currPricingTypeId <> 3 THEN 18 ELSE intActionId END)
 							END
 						END
