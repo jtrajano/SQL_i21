@@ -5,7 +5,5 @@
     [intEntityContactId] INT NULL, 
     [strEmailAddress] NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strRecipientType] NVARCHAR(5) COLLATE Latin1_General_CI_AS NOT NULL, 
-	[intConcurrencyId] INT NOT NULL DEFAULT 1,
-
-	CONSTRAINT [FK_tblSMEmailRecipien_tblSMActivity] FOREIGN KEY ([intEmailId]) REFERENCES [tblSMActivity]([intActivityId]) ON DELETE CASCADE
+	[intConcurrencyId] INT NOT NULL DEFAULT 1
 )
