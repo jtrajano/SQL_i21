@@ -944,6 +944,16 @@ BEGIN TRY
 							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 						END
 
+					--ST-2074
+					IF ISNULL(@Description, '') != ''
+					BEGIN
+						SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Description</b></p>'
+							
+						SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + @Description + '</p>'
+					
+						--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+					END
+
 					-- ===================================================================================
 					-- [END] Filter Criteria
 					-- ===================================================================================
