@@ -8,12 +8,23 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 -- ++++++ CLEAN-OUT DRIVER's ORDER LIST ++++++ --
+DECLARE @tmpOrderItem as table(intOrderitemId int)    
 IF (ISNULL(@intShiftId, '') != '')
 BEGIN
+	INSERT INTO @tmpOrderItem    
+	SELECT intOrderItemId FROM tblMBILOrderItem WHERE intOrderId in (SELECT intOrderId FROM tblMBILOrder WHERE intShiftId = @intShiftId)    
+		
+	DELETE tblMBILOrderItem WHERE intOrderId in (Select intOrderItemId from @tmpOrderItem)    
+	DELETE tblMBILOrderTaxCode WHERE intOrderItemId in (Select intOrderItemId from @tmpOrderItem)    
 	DELETE tblMBILOrder WHERE intShiftId = @intShiftId
 END
 ELSE
 BEGIN
+	INSERT INTO @tmpOrderItem    
+	SELECT intOrderItemId FROM tblMBILOrderItem WHERE intOrderId NOT IN (SELECT intOrderId FROM tblMBILInvoice WHERE intOrderId IS NOT NULL AND intDriverId = @intDriverId)    
+		
+	DELETE tblMBILOrderItem WHERE intOrderId in (Select intOrderItemId from @tmpOrderItem)    
+	DELETE tblMBILOrderTaxCode WHERE intOrderItemId in (Select intOrderItemId from @tmpOrderItem)    
 	DELETE tblMBILOrder WHERE intDriverId = @intDriverId and intOrderId NOT IN (select intOrderId from tblMBILInvoice)
 END
 
