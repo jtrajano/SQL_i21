@@ -466,7 +466,7 @@ END
 					ON i.intItemId = POD.intItemId
 		WHERE	PO.intPurchaseId = @poId  
 				AND POD.intItemId IS NOT NULL			--DO NOT UPDATE MISC ENTRY
-				AND i.strType NOT IN ('Other Charge','Comment')   --DOT NOT UPDATE OTHER CHARGES TYPE     
+				AND i.strType NOT IN ('Other Charge')   --DOT NOT UPDATE OTHER CHARGES TYPE     
 
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty 
