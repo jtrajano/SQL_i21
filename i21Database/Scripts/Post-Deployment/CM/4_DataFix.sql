@@ -232,15 +232,5 @@ GO
 PRINT ('Finished removing Grid Layouts in Process Payments archive grid without batch id column')
 GO
 
---RESET ACH BATCH ID
-PRINT ('Start resetting ACH batch Id sequence')
-DECLARE @i INT, @s NVARCHAR(500)
-SELECT @i = max(intBatchId)+ 1 FROM tblCMBankFileGenerationLog
-SET @s = 'alter sequence [sqCMACHBatchId] minvalue ' + CAST(@i AS NVARCHAR(9)) + ' restart with ' + CAST(@i AS NVARCHAR(9));
-EXEC (@s);
-PRINT ('Finished resetting ACH batch Id sequence')
-
-
-
 PRINT('/*******************  END Cash Management Data Fixess *******************/')
 GO

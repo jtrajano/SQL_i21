@@ -335,7 +335,6 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroupAll.sql" />
     <Build Include="dbo\Stored Procedures\uspCMSyncCashFlowReportRateType.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorSetup.sql" />
-    <Build Include="dbo\Sequences\sqCMACHBatchId.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformVendorSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRebateProgram.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformRebateProgram.sql" />
