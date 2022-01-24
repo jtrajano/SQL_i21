@@ -485,8 +485,8 @@ BEGIN
 							,@intUserId = @intUserId;  
 					end  
 
-					if (@strPriceFixationDetailState = 'update')  
-					begin  
+					if (@strPriceFixationDetailState = 'update' and exists (select top 1 1 from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId and dblQuantity <> @dblTransactionQuantity))
+					begin
 						exec uspCTProcessSummaryLogOnPriceUpdate
 							@intPriceFixationDetailId = @intPriceFixationDetailId
 							,@dblTransactionQuantity = @dblTransactionQuantity
