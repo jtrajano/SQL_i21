@@ -161,6 +161,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	-- Trade Finance Fields
 	strFinanceTradeNo NVARCHAR(50) NULL,
 	intBankAccountId INT NULL,
+	intBankId INT NULL,
 	intBorrowingFacilityId INT NULL,
 	intBorrowingFacilityLimitId INT NULL,
 	intBorrowingFacilityLimitDetailId INT NULL,

@@ -569,7 +569,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	-- Trade Finance
 	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
-	LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
+	LEFT JOIN tblCMBank BK ON BK.intBankId = CD.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intBorrowingFacilityId
 	LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = CD.intBorrowingFacilityLimitDetailId
