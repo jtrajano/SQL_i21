@@ -26,7 +26,8 @@ BEGIN
 			,intTransactionType 
 			,intContractDetailId
 			,intItemId
-			,intLoadShipmentDetailId				
+			,intLoadShipmentDetailId
+			,intTicketDistributionAllocationId										
 	)
 	SELECT 
 		[intEntityVendorId]	= intEntityVendorId		
@@ -35,6 +36,7 @@ BEGIN
 		,intContractDetailId = intContractDetailId
 		,intItemId	= intItemId
 		,intLoadShipmentDetailId = intLoadDetailId
+		,intTicketDistributionAllocationId						
 	FROM tblSCTicketDirectAddPayable 
 	WHERE intTicketId = @intTicketId 
 
