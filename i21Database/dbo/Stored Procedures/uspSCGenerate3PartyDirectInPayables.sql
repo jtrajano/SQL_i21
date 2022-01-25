@@ -405,6 +405,7 @@ BEGIN
 		,[intItemId]
 		,[intContractDetailId]
 		,[intLoadDetailId] 
+		,intTicketDistributionAllocationId
 	)
 	SELECT
 		[intTicketId] = A.intScaleTicketId
@@ -412,6 +413,7 @@ BEGIN
 		,[intItemId] = A.intItemId
 		,[intContractDetailId] = A.intContractDetailId
 		,[intLoadDetailId] = intLoadShipmentDetailId
+		,intTicketDistributionAllocationId
 	FROM @voucherPayable A
 		
 END
