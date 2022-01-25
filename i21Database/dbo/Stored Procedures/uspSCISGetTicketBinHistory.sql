@@ -2,11 +2,14 @@
 	@intBinSearchId int
 	,@ysnGetHeader bit = 0
 	,@strTransactionId nvarchar(200) = ''
+	,@dtmStartDate date = '1910/01/01'
+	,@dtmEndDate date = '1910/01/01'
 	
 AS
-
 begin
-	
+
+	set @dtmEndDate = DATEADD(day, 1 , @dtmEndDate)
+
 	declare @ysnDefaultBinHistoryEstimate bit
 	declare @intStorageLocationId int 
 
@@ -63,6 +66,8 @@ begin
 					StockMovement.[strCommodity] AS [strCommodity], 
 					
 					StockMovement.[dtmDate] AS [dtmDate], 
+					StockMovement.[dtmDate] AS [dtmStartDate], 
+					StockMovement.[dtmDate] AS [dtmEndDate], 
 					
 					StockMovement.[dblQuantity] AS [dblQuantity], 
 					StockMovement.[strUOM] AS [strUOM], 
@@ -74,11 +79,11 @@ begin
 					, InventoryTransaction.strSourceType
 					, BinSearch.intBinSearchId
 					, @@REPLACE_WITH_ACTUAL_COLUMNS@@
-		
+					
 		FROM tblSCISBinSearch BinSearch
 			join [dbo].[vyuICGetStockMovement] AS StockMovement
 				on BinSearch.intStorageLocationId = StockMovement.intStorageLocationId 
-				
+					and ( StockMovement.dtmDate >=''' + cast(@dtmStartDate as nvarchar) + ''' and StockMovement.dtmDate < ''' + cast(@dtmEndDate as nvarchar) + ''')
 			join tblICInventoryTransaction InventoryTransaction
 				on StockMovement.intInventoryTransactionId = InventoryTransaction.intInventoryTransactionId
 
@@ -118,6 +123,11 @@ begin
 			select @Columns = substring(@Columns, 1, len(@Columns) - 1)
 		end
 
+		if(isnull(@Columns, '') = '')
+		begin
+			set @Columns = 'strFiller'	
+		end
+
 		set @sql_command  = REPLACE(@sql_command, '@@REPLACE_WITH_ACTUAL_COLUMNS@@', @Columns)
 		set @sql_command  = REPLACE(@sql_command, '@@REPLACE_WITH_PIVOT_QUERY@@', 'select * from 
 							(	select 			
@@ -141,13 +151,13 @@ begin
 										join tblGRDiscountScheduleCode DiscountCode
 											on Discount.intDiscountScheduleCodeId = DiscountCode.intDiscountScheduleCodeId
 
-										join tblSCISBinSearchDiscountHeader BinSearchDiscount
+										left join tblSCISBinSearchDiscountHeader BinSearchDiscount
 											on BinSearch.intBinSearchId = BinSearchDiscount.intBinSearchId
 												and BinSearchDiscount.intItemId = DiscountCode.intItemId
-										join tblSCISBinDiscountHeader DiscountHeader
+										left join tblSCISBinDiscountHeader DiscountHeader
 											on BinSearchDiscount.intBinDiscountHeaderId = DiscountHeader.intBinDiscountHeaderId
 
-										join tblICItem Item
+										left join tblICItem Item
 											on DiscountCode.intItemId = Item.intItemId
 									where Ticket.intStorageLocationId = '+ cast(@intStorageLocationId as nvarchar) + '
 							) F
@@ -173,10 +183,13 @@ begin
 		IF len(@Columns) > 0 
 		begin
 			select @Columns = substring(@Columns, 1, len(@Columns) - 1)
+		end		
+		
+		if(isnull(@Columns, '') = '')
+		begin
+			set @Columns = 'strFiller'	
 		end
 
-
-		
 		set @sql_command  = REPLACE(@sql_command, '@@REPLACE_WITH_ACTUAL_COLUMNS@@', @Columns)
 		set @sql_command  = REPLACE(@sql_command, '@@REPLACE_WITH_PIVOT_QUERY@@', 'select * from 
 									(	select 
@@ -209,7 +222,5 @@ begin
 
 
 	end
-
-	
 
 end

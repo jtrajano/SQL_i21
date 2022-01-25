@@ -160,6 +160,7 @@ begin
 							end as dblCapacity
 						, Bin.strComBinNotesColor
 						, Bin.strComBinNotesBackgroundColor
+						,dtmTrackingDate
 					from tblSCISBinSearch Bin 
 						left join tblSCISBinSearchDiscountHeader BinDiscount
 							on Bin.intBinSearchId = BinDiscount.intBinSearchId
