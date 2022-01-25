@@ -104,6 +104,7 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 									WHERE
 										AD.intContractDetailId = @intContractDetailId
 										and isnull(AD.intInventoryShipmentChargeId,0) = 0
+										and isnull(AD.ysnReturned,0) = 0
 								)
 							else
 								(
@@ -114,6 +115,7 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 										JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
 									WHERE
 										AA.intPriceFixationDetailId = @intPriceFixationDetailId
+										and isnull(AD.ysnReturned,0) = 0
 								)
 							end
 					end
@@ -132,12 +134,13 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 									WHERE
 										AD.intContractDetailId = @intContractDetailId
 										and isnull(AD.intInventoryShipmentChargeId,0) = 0
+										and isnull(AD.ysnReturned,0) = 0
 								)
 							else
 								(
 									select count(*) from
 									(
-										select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId
+										select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId and isnull(ysnReturn,0) = 0
 									) uniqueInvoice
 								)
 							end
