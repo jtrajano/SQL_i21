@@ -198,6 +198,31 @@ SELECT
 	,L.dblFreightRate
 	,L.dblSurcharge
 	,L.intTermId
+	/*Trade Finance*/
+	,L.strTradeFinanceNo
+	,L.intBankAccountId
+	,L.intBorrowingFacilityId
+	,L.intBorrowingFacilityLimitId
+	,L.intBorrowingFacilityLimitDetailId
+	,L.strTradeFinanceReferenceNo
+	,L.dblLoanAmount
+	,L.intBankValuationRuleId
+	,L.strBankReferenceNo
+	,L.strTradeFinanceComments
+	,L.intFacilityId
+	,L.intLoanLimitId
+	,L.intOverrideFacilityId
+	,L.ysnSubmittedToBank
+	,L.dtmDateSubmitted
+	,L.intApprovalStatusId
+	,L.dtmDateApproved
+	,BA.intBankId
+	,strBankName = BN.strBankName
+	,strBankAccountNo = BA.strBankAccountNo
+	,strFacility = FA.strBorrowingFacilityId
+	,strLoanLimit = BL.strBankLoanId
+	,strLoanReferenceNo = BL.strLimitDescription
+	,strOverrideFacility = BVR.strBankValuationRule
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -231,6 +256,11 @@ LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
 LEFT JOIN tblSMTerm TM ON TM.intTermID = L.intTermId
+LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
+LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
+LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = L.intFacilityId
+LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = L.intLoanLimitId
+LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = L.intOverrideFacilityId
 OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
 				WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD

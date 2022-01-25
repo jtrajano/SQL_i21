@@ -284,6 +284,31 @@ SELECT -- Load Header
 	,L.ysnAllowReweighs
 	,L.dblFreightRate
 	,L.dblSurcharge
+	/*Trade Finance*/
+	,L.strTradeFinanceNo
+	,L.intBankAccountId
+	,L.intBorrowingFacilityId
+	,L.intBorrowingFacilityLimitId
+	,L.intBorrowingFacilityLimitDetailId
+	,L.strTradeFinanceReferenceNo
+	,L.dblLoanAmount
+	,L.intBankValuationRuleId
+	,L.strBankReferenceNo
+	,L.strTradeFinanceComments
+	,L.intFacilityId
+	,L.intLoanLimitId
+	,L.intOverrideFacilityId
+	,L.ysnSubmittedToBank
+	,L.dtmDateSubmitted
+	,L.intApprovalStatusId
+	,L.dtmDateApproved
+	,BA.intBankId
+	,strBankName = BN.strBankName
+	,strBankAccountNo = BA.strBankAccountNo
+	,strFacility = FA.strBorrowingFacilityId
+	,strLoanLimit = BL.strBankLoanId
+	,strLoanReferenceNo = BL.strLimitDescription
+	,strOverrideFacility = BVR.strBankValuationRule
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -315,6 +340,11 @@ LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReas
 LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
 LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
+LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
+LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
+LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = L.intFacilityId
+LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = L.intLoanLimitId
+LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = L.intOverrideFacilityId
 OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
 						 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
