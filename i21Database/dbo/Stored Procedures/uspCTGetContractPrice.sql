@@ -115,7 +115,7 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 										JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
 									WHERE
 										AA.intPriceFixationDetailId = @intPriceFixationDetailId
-                                        and isnull(AA.ysnReturn,0) = 0
+										and isnull(AD.ysnReturned,0) = 0
 								)
 							end
 					end
