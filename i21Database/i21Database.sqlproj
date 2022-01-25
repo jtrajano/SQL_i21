@@ -8995,6 +8995,7 @@
     <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuRestApiVendors.sql" />
     <Build Include="dbo\Views\vyuApiTransportTerminals.sql" />
+    <Build Include="dbo\Views\vyuAPIOpportunity.sql" />
     <Build Include="dbo\Views\vyuRestApiVoucherChecks.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTickets.sql" />
