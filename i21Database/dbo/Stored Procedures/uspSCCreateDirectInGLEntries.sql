@@ -547,8 +547,8 @@ BEGIN
                     dtmDate						= A.dtmTicketDateTime
                     ,strBatchId					= @strBatchId
                     ,intAccountId				= @intInventoryInTransitAccountId
-                    ,dblDebit					= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
-                    ,dblCredit					= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
+                    ,dblDebit					= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
+                    ,dblCredit					= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
                     ,dblDebitUnit				= 0
                     ,dblCreditUnit				= 0
                     ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - ' + B.strAllocationType
@@ -569,9 +569,9 @@ BEGIN
                     ,strTransactionForm			= 'Scale Ticket'
                     ,strModuleName				= 'Scale'
                     ,intConcurrencyId			= 1
-                    ,dblDebitForeign			= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
+                    ,dblDebitForeign			= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
                     ,dblDebitReport				= NULL 
-                    ,dblCreditForeign			= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
+                    ,dblCreditForeign			= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
                     ,dblCreditReport			= NULL 
                     ,dblReportingRate			= NULL 
                     ,dblForeignRate				= 1		
@@ -626,8 +626,8 @@ BEGIN
                     dtmDate						= A.dtmTicketDateTime
                     ,strBatchId					= @strBatchId
                     ,intAccountId				= @intAPClearingAccountId
-                    ,dblDebit					= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
-                    ,dblCredit					= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
+                    ,dblDebit					= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
+                    ,dblCredit					= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
                     ,dblDebitUnit				= 0
                     ,dblCreditUnit				= 0
                     ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - ' + B.strAllocationType
@@ -648,9 +648,9 @@ BEGIN
                     ,strTransactionForm			= 'Scale Ticket'
                     ,strModuleName				= 'Scale'
                     ,intConcurrencyId			= 1
-                    ,dblDebitForeign			= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
+                    ,dblDebitForeign			= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
                     ,dblDebitReport				= NULL 
-                    ,dblCreditForeign			= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
+                    ,dblCreditForeign			= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
                     ,dblCreditReport			= NULL 
                     ,dblReportingRate			= NULL 
                     ,dblForeignRate				= 1		
@@ -745,8 +745,8 @@ BEGIN
                                 dtmDate						= A.dtmTicketDateTime
                                 ,strBatchId					= @strBatchId
                                 ,intAccountId				= @intInventoryInTransitAccountId
-                                ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
-                                ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
+                                ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
+                                ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
                                 ,dblDebitUnit				= 0
                                 ,dblCreditUnit				= 0
                                 ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - Fee'
@@ -767,9 +767,9 @@ BEGIN
                                 ,strTransactionForm			= 'Scale Ticket'
                                 ,strModuleName				= 'Scale'
                                 ,intConcurrencyId			= 1
-                                ,dblDebitForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
+                                ,dblDebitForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
                                 ,dblDebitReport				= NULL 
-                                ,dblCreditForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
+                                ,dblCreditForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
                                 ,dblCreditReport			= NULL 
                                 ,dblReportingRate			= NULL 
                                 ,dblForeignRate				= 1		
@@ -824,8 +824,8 @@ BEGIN
                                 dtmDate						= A.dtmTicketDateTime
                                 ,strBatchId					= @strBatchId
                                 ,intAccountId				= @intAPClearingAccountId
-                                ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
-                                ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
+                                ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
+                                ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
                                 ,dblDebitUnit				= 0
                                 ,dblCreditUnit				= 0
                                 ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - Fee'
@@ -846,9 +846,9 @@ BEGIN
                                 ,strTransactionForm			= 'Scale Ticket'
                                 ,strModuleName				= 'Scale'
                                 ,intConcurrencyId			= 1
-                                ,dblDebitForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
+                                ,dblDebitForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
                                 ,dblDebitReport				= NULL 
-                                ,dblCreditForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
+                                ,dblCreditForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
                                 ,dblCreditReport			= NULL 
                                 ,dblReportingRate			= NULL 
                                 ,dblForeignRate				= 1		
@@ -906,8 +906,8 @@ BEGIN
                         dtmDate						= A.dtmTicketDateTime
                         ,strBatchId					= @strBatchId
                         ,intAccountId				= @intInventoryInTransitAccountId
-                        ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
-                        ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
+                        ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
+                        ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
                         ,dblDebitUnit				= 0
                         ,dblCreditUnit				= 0
                         ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - Fee'
@@ -928,9 +928,9 @@ BEGIN
                         ,strTransactionForm			= 'Scale Ticket'
                         ,strModuleName				= 'Scale'
                         ,intConcurrencyId			= 1
-                        ,dblDebitForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
+                        ,dblDebitForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
                         ,dblDebitReport				= NULL 
-                        ,dblCreditForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
+                        ,dblCreditForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
                         ,dblCreditReport			= NULL 
                         ,dblReportingRate			= NULL 
                         ,dblForeignRate				= 1		
@@ -984,8 +984,8 @@ BEGIN
                         dtmDate						= A.dtmTicketDateTime
                         ,strBatchId					= @strBatchId
                         ,intAccountId				= @intAPClearingAccountId
-                        ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
-                        ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
+                        ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
+                        ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
                         ,dblDebitUnit				= 0
                         ,dblCreditUnit				= 0
                         ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - Fee'
@@ -1006,9 +1006,9 @@ BEGIN
                         ,strTransactionForm			= 'Scale Ticket'
                         ,strModuleName				= 'Scale'
                         ,intConcurrencyId			= 1
-                        ,dblDebitForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
+                        ,dblDebitForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
                         ,dblDebitReport				= NULL 
-                        ,dblCreditForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
+                        ,dblCreditForeign			= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
                         ,dblCreditReport			= NULL 
                         ,dblReportingRate			= NULL 
                         ,dblForeignRate				= 1		
