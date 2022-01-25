@@ -1049,7 +1049,7 @@ BEGIN
 				,[intInvoiceDetailId]		= NULL
 				,[intItemId]				= NULL
 				,[ysnInventory]				= 0
-				,[strItemDescription]		= NULL
+				,[strItemDescription]		= D.strItemDescription
 				,[intOrderUOMId]			= NULL
 				,[dblQtyOrdered]			= 1
 				,[intItemUOMId]				= NULL
