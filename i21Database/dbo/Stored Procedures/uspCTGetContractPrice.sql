@@ -87,33 +87,58 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 
 					if (@ysnLoad = 0)
 					begin
-						set @dblInvoicedPricedQuantity = (
-													SELECT
-														SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,@intItemUOMId,dblQtyShipped))
-													FROM
-														tblCTPriceFixationDetailAPAR AA
-														JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
-													WHERE
-														AA.intPriceFixationDetailId = @intPriceFixationDetailId
-														and isnull(AA.ysnReturn,0) = 0
-												 )
+						set @dblInvoicedPricedQuantity = 
+							case
+							when isnull(@intPriceFixationDetailId,0) = 0
+							then
+								(
+									SELECT
+										SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,@intItemUOMId,AD.dblQtyShipped))
+									FROM
+										tblARInvoiceDetail AD
+									WHERE
+										AD.intContractDetailId = @intContractDetailId
+										and isnull(AD.intInventoryShipmentChargeId,0) = 0
+										and isnull(AD.ysnReturned,0) = 0
+								)
+							else
+								(
+									SELECT
+										SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,@intItemUOMId,AD.dblQtyShipped))
+									FROM
+										tblCTPriceFixationDetailAPAR AA
+										JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
+									WHERE
+										AA.intPriceFixationDetailId = @intPriceFixationDetailId
+										and isnull(AD.ysnReturned,0) = 0
+								)
+							end
 					end
 					else
 					begin
-						set @dblInvoicedPricedQuantity = (
-													select count(*) from
-													(
-														select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId and isnull(ysnReturn,0) = 0
-													) uniqueInvoice
-													/*
-													SELECT
-														count(*)
-													FROM
-														tblCTPriceFixationDetailAPAR AA
-													WHERE
-														intPriceFixationDetailId = @intPriceFixationDetailId
-													*/
-												 )
+						set @dblInvoicedPricedQuantity =
+							case
+							when
+								isnull(@intPriceFixationDetailId,0) = 0
+							then
+								(
+									SELECT
+										count(AD.intInvoiceDetailId)
+									FROM
+										tblARInvoiceDetail AD
+									WHERE
+										AD.intContractDetailId = @intContractDetailId
+										and isnull(AD.intInventoryShipmentChargeId,0) = 0
+										and isnull(AD.ysnReturned,0) = 0
+								)
+							else
+								(
+									select count(*) from
+									(
+										select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId and isnull(ysnReturn,0) = 0
+									) uniqueInvoice
+								)
+							end
 					end
 
 					
