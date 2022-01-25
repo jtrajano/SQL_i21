@@ -14,7 +14,7 @@ IF @intStructureType = 3
 IF NOT EXISTS( 
 		SELECT 1 FROM tblCMCompanyPreferenceOption WHERE ysnOverrideLocationSegment_InTransit = 1 AND @intBankTransferTypeId = 2 UNION 
 		SELECT 1 FROM tblCMCompanyPreferenceOption WHERE ysnOverrideLocationSegment_Forward = 1 AND @intBankTransferTypeId = 3 UNION
-		SELECT 1 FROM tblCMCompanyPreferenceOption WHERE ysnOverrideLocationSegment_Swap = 1 AND @intBankTransferTypeId = 5 
+		SELECT 1 FROM tblCMCompanyPreferenceOption WHERE ysnOverrideLocationSegment_Swap = 1 AND @intBankTransferTypeId IN (4, 5) 
 	)
     BEGIN
     SET @intAccountOverride =@intAccountId1
@@ -25,7 +25,7 @@ IF @intStructureType = 6
 IF NOT EXISTS( 
 		SELECT 1 FROM tblCMCompanyPreferenceOption WHERE ysnOverrideCompanySegment_InTransit = 1 AND @intBankTransferTypeId = 2 UNION 
 		SELECT 1 FROM tblCMCompanyPreferenceOption WHERE ysnOverrideCompanySegment_Forward = 1 AND @intBankTransferTypeId = 3 UNION
-		SELECT 1 FROM tblCMCompanyPreferenceOption WHERE ysnOverrideCompanySegment_Swap = 1 AND @intBankTransferTypeId = 5 
+		SELECT 1 FROM tblCMCompanyPreferenceOption WHERE ysnOverrideCompanySegment_Swap = 1 AND @intBankTransferTypeId IN (4, 5)
 	)
     BEGIN
     SET @intAccountOverride =@intAccountId1
