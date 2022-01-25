@@ -10027,6 +10027,7 @@
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
