@@ -26,6 +26,8 @@
 	[strIntermediaryBank]								NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strIntermediarySwiftCode]							NVARCHAR (11) COLLATE Latin1_General_CI_AS NULL,
 	[strIntermediaryIBAN]								NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strIntermediaryBicCode]							NVARCHAR (8)  COLLATE Latin1_General_CI_AS NULL,
+	[strNationalBankIdentifier]							NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strComment]										NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strDetailsOfCharges]								NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strFiftySevenFormat]								NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
