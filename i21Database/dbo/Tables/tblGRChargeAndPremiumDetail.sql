@@ -7,6 +7,7 @@ CREATE TABLE [dbo].[tblGRChargeAndPremiumDetail]
 	[intInventoryItemId] INT NULL,
 	[intOtherChargeItemId] INT NULL,
 	[dblRate] DECIMAL(38,20) NULL DEFAULT ((0)),
+	[strRateType] NVARCHAR(30) NULL,
 	[dtmDateCreated] DATETIME NULL DEFAULT(GETDATE()),
 	[intConcurrencyId] INT NULL DEFAULT ((1)),
 	CONSTRAINT [PK_tblGRChargeAndPremiumDetail_intChargeAndPremiumDetailId] PRIMARY KEY ([intChargeAndPremiumDetailId]),
