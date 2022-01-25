@@ -31,6 +31,39 @@ AS
 			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId
 		WHERE Item.strType = 'Other Charge'			
+
+		UNION ALL
+		-- This will include other charges from applied vendor prepayments and debit memos
+		select 
+			intPaymentId				= PYMT.intPaymentId
+			,strId						= Bill.strBillId
+			,intBillId					= BillDtl.intBillId
+			,intItemId					= BillDtl.intItemId
+			,strDiscountCode			= Item.strShortName 
+			,strDiscountCodeDescription = Item.strItemNo
+			,dblDiscountAmount			= round(BillDtl.dblCost, 2)-- * BillDtl.dblQtyReceived
+			,dblAmount					= BillDtl.dblTotal --+ BillDtl.dblTax
+			,dblTax						= BillDtl.dblTax
+			,Net						= ISNULL(PYMTDTL.dblTotal,0)
+			,intCustomerStorageId		= BillDtl.intCustomerStorageId 
+			,intInventoryReceiptChargeId = BillDtl.intInventoryReceiptChargeId
+		FROM tblAPPayment PYMT
+			JOIN tblAPPaymentDetail PYMTDTL 
+				ON PYMT.intPaymentId = PYMTDTL.intPaymentId					
+					and PYMTDTL.dblPayment <> 0
+			JOIN tblAPBill Bill	
+				ON PYMTDTL.intBillId = Bill.intBillId --and intTransactionType = 1
+			JOIN tblAPAppliedPrepaidAndDebit APAD
+				ON Bill.intBillId = APAD.intBillId
+				AND Bill.intTransactionType NOT IN (13, 3)
+				AND APAD.ysnApplied = 1
+			JOIN tblAPBill BillAPAD
+				ON BillAPAD.intBillId = APAD.intTransactionId
+			JOIN tblAPBillDetail BillDtl
+				ON BillDtl.intBillId = BillAPAD.intBillId
+			JOIN tblICItem Item
+				ON BillDtl.intItemId = Item.intItemId
+		WHERE Item.strType = 'Other Charge'
 	)
 		SELECT 
 			intPaymentId
