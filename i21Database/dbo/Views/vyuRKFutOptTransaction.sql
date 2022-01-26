@@ -42,7 +42,10 @@ FROM (
 		, cl.strLocationName
 		, strStatus	= CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
 							WHEN ISNULL(ft.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' THEN approval.strApprovalStatus
-							ELSE ft.strStatus END
+							ELSE ISNULL(ft.strStatus, 
+										CASE WHEN ft.intSelectedInstrumentTypeId = 2 AND ft.intInstrumentTypeId = 4 THEN 'No Need for Approval' 
+										ELSE '' END) 
+							END
 		, ft.intBookId
 		, sb.strBook
 		, ft.intSubBookId
@@ -88,6 +91,10 @@ FROM (
 		, ysnSlicedTrade = ISNULL(ft.ysnSlicedTrade, CAST(0 AS BIT))
 		, ft.intOrigSliceTradeId
 		, strOriginalTradeNo = ST.strInternalTradeNo
+		, strOrderType = (CASE WHEN ft.intOrderTypeId = 1 THEN 'GTC'
+							WHEN ft.intOrderTypeId = 2 THEN 'Limit'
+							WHEN ft.intOrderTypeId = 3 THEN 'Market'
+							ELSE '' END)
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN tblEMEntity sp ON sp.intEntityId = ft.intTraderId
