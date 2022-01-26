@@ -40,7 +40,7 @@ OUTER APPLY (
 	SELECT Item FROM [dbo].[fnSplitStringWithTrim](RateType.strCashFlows, ',')
 ) Bucket
 WHERE 
-	TRIM(strCashFlows) IS NOT NULL 
+	RTRIM(LTRIM(strCashFlows)) IS NOT NULL 
 	AND NULLIF(strCashFlows, '') IS NOT NULL
 	AND Rate.intToCurrencyId = @intReportingCurrencyId
 
