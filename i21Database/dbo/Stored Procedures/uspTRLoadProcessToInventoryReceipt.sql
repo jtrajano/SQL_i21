@@ -26,8 +26,7 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@intFreightItemId as int,
 		@SurchargeUOMId as int,
 		@FreightUOMId as int,
-		@FreightCostAllocationMethod AS INT,
-		@ysnComboFreight BIT
+		@FreightCostAllocationMethod AS INT
 
 SELECT	TOP 1 @defaultCurrency = CP.intDefaultCurrencyId		
 											FROM	dbo.tblSMCompanyPreference CP
@@ -110,6 +109,9 @@ END
 		,strFreightBilledBy			= MIN(ShipVia.strFreightBilledBy)
 		,dblMinimumUnits			= MIN(TR.dblMinimumUnits)
 		,dblComboFreightRate		= MIN(TR.dblComboFreightRate)
+		,ysnComboFreight			= CAST(MIN(CAST(TR.ysnComboFreight AS INT)) AS BIT)
+		,dblComboMinimumUnits		= MIN(TR.dblComboMinimumUnits)
+		,dblComboSurcharge			= MIN(TR.dblComboSurcharge)
 	INTO #tmpReceipts
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId			
@@ -243,7 +245,7 @@ END
 	-- 	SELECT TOP 1 @SurchargeUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intSurchargeItemId AND ysnStockUnit = 1
 
 	-- Get Freight Cost Allocation Method from Company Preferences
-	SELECT TOP 1 @FreightCostAllocationMethod = intFreightCostAllocationMethod, @ysnComboFreight = ISNULL(ysnComboFreight, 0) FROM tblTRCompanyPreference
+	SELECT TOP 1 @FreightCostAllocationMethod = intFreightCostAllocationMethod FROM tblTRCompanyPreference
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
@@ -269,7 +271,7 @@ END
 			,[strChargesLink]
 			,[dblQuantity]
 	) 	
-   SELECT	[intEntityVendorId]				= RE.intEntityVendorId
+	SELECT	DISTINCT [intEntityVendorId]	= RE.intEntityVendorId
 			,[strBillOfLadding]				= RE.strBillOfLadding
 			,[strReceiptType]				= RE.strReceiptType
 			,[intLocationId]				= RE.intLocationId
@@ -281,8 +283,8 @@ END
 													WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
 													ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END) END)
-			,[strCostMethod]				= CASE WHEN dblQty <= dblMinimumUnits THEN 'Custom Unit' ELSE @strCostMethodFreight END
-			,[dblRate]						= CASE WHEN @ysnComboFreight = 1 AND RE.dblComboFreightRate > 0 THEN RE.dblComboFreightRate ELSE RE.dblFreightRate END
+			,[strCostMethod]				= CASE WHEN dblQty <= dblMinimumUnits THEN 'Custom Unit' WHEN dblQty <= dblComboMinimumUnits AND ysnComboFreight = 1 THEN 'Custom Unit' ELSE @strCostMethodFreight END
+			,[dblRate]						= CASE WHEN ysnComboFreight = 1 AND RE.dblComboFreightRate > 0 THEN RE.dblComboFreightRate ELSE RE.dblFreightRate END
 			,[intCostUOMId]					= @FreightUOMId
 			,[intOtherChargeEntityVendorId]	= CASE	WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
 													WHEN RE.strFreightBilledBy = 'Internal' THEN NULL
@@ -296,45 +298,45 @@ END
 													WHEN RE.strFreightBilledBy = 'Internal' THEN 0
 													WHEN RE.strFreightBilledBy = 'Other' THEN 1
 													ELSE 0 END
-			,strChargesLink					= RE.strChargesLink
-			,[dblQuantity]					= CASE WHEN dblQty <= dblMinimumUnits THEN dblMinimumUnits ELSE dblQty END
-    FROM	#tmpReceipts RE 
-	WHERE RE.dblFreightRate != 0  OR (RE.dblComboFreightRate != 0  AND @ysnComboFreight = 1)
-
+			,strChargesLink					= CASE WHEN ysnComboFreight = 1 THEN NULL ELSE RE.strChargesLink END
+			,[dblQuantity]					= CASE WHEN dblQty <= dblMinimumUnits THEN dblMinimumUnits WHEN dblQty <= dblComboMinimumUnits AND ysnComboFreight = 1 THEN dblComboMinimumUnits ELSE dblQty END
+	FROM	#tmpReceipts RE 
+	WHERE RE.dblFreightRate != 0  OR (RE.dblComboFreightRate != 0  AND ysnComboFreight = 1)
 	--Fuel Surcharge
 	UNION ALL 
-	SELECT	[intEntityVendorId]				= RE.intEntityVendorId
-			,[strBillOfLadding]				= RE.strBillOfLadding
-			,[strReceiptType]				= RE.strReceiptType
-			,[intLocationId]				= RE.intLocationId
-			,[intShipViaId]					= RE.intShipViaId
-			,[intShipFromId]				= RE.intShipFromId
-			,[intCurrencyId]  				= RE.intCurrencyId
-			,[intChargeId]					= @intSurchargeItemId
-			,[ysnInventoryCost]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
-													WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
-													ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
-																ELSE CAST(0 AS BIT) END) END)
-			,[strCostMethod]				= @strCostMethodSurcharge
-			,[dblRate]						= RE.dblSurcharge
-			,[intCostUOMId]					= @SurchargeUOMId
-			,[intOtherChargeEntityVendorId]	= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
-													WHEN RE.strFreightBilledBy = 'Internal' THEN NULL
-													WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId
-													ELSE NULL END
-			,[dblAmount]					= 0
-			,[strAllocateCostBy]			= CASE WHEN RE.dblCost = 0 THEN 'Unit' ELSE 'Cost' END
-			,[intContractHeaderId]			= RE.intContractHeaderId
-			,[intContractDetailId]			= RE.intContractDetailId
-			,[ysnAccrue]					= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN 1
-													WHEN RE.strFreightBilledBy = 'Internal' THEN 0
-													WHEN RE.strFreightBilledBy = 'Other' THEN 1
-													ELSE 0 END
+	SELECT DISTINCT	[intEntityVendorId]			= RE.intEntityVendorId
+				,[strBillOfLadding]				= RE.strBillOfLadding
+				,[strReceiptType]				= RE.strReceiptType
+				,[intLocationId]				= RE.intLocationId
+				,[intShipViaId]					= RE.intShipViaId
+				,[intShipFromId]				= RE.intShipFromId
+				,[intCurrencyId]  				= RE.intCurrencyId
+				,[intChargeId]					= @intSurchargeItemId
+				,[ysnInventoryCost]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
+														WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
+														ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
+																	ELSE CAST(0 AS BIT) END) END)
+				,[strCostMethod]				= @strCostMethodSurcharge
+				,[dblRate]						= CASE WHEN ysnComboFreight = 1 AND RE.dblComboSurcharge > 0 THEN RE.dblComboSurcharge ELSE RE.dblSurcharge END
+				,[intCostUOMId]					= @SurchargeUOMId
+				,[intOtherChargeEntityVendorId]	= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
+														WHEN RE.strFreightBilledBy = 'Internal' THEN NULL
+														WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId
+														ELSE NULL END
+				,[dblAmount]					= 0
+				,[strAllocateCostBy]			= CASE WHEN RE.dblCost = 0 THEN 'Unit' ELSE 'Cost' END
+				,[intContractHeaderId]			= RE.intContractHeaderId
+				,[intContractDetailId]			= RE.intContractDetailId
+				,[ysnAccrue]					= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN 1
+														WHEN RE.strFreightBilledBy = 'Internal' THEN 0
+														WHEN RE.strFreightBilledBy = 'Other' THEN 1
+														ELSE 0 END
 
-			,strChargesLink					= RE.strChargesLink
-			,dblQuantity					= NULL
-    FROM	#tmpReceipts RE 
-	WHERE	RE.dblSurcharge != 0 
+				,strChargesLink					= CASE WHEN ysnComboFreight = 1 THEN NULL ELSE RE.strChargesLink END
+				,dblQuantity					= NULL
+	FROM	#tmpReceipts RE 
+	WHERE	RE.dblSurcharge != 0  OR (RE.dblComboSurcharge != 0  AND ysnComboFreight = 1)
+
 
 	DROP TABLE #tmpReceipts
 
