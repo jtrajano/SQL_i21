@@ -55,7 +55,7 @@ BEGIN
 				, intLocationId = intCompanyLocationId
 				, intMarketZoneId
 				, ysnByProducer
-				, dtmPostDate = dtmPostedDateTime
+				, dtmPostDate = dtmGLPostDate
 				, dtmReverseDate = dtmGLReverseDate
 				, dtmLastReversalDate = dtmLastReversalPostDate
 				, ysnPosted = ysnPost
