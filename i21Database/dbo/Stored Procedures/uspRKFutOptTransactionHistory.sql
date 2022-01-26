@@ -62,6 +62,7 @@ BEGIN TRY
 			, intBankTransferId
 			, dblFinanceForwardRate
 			, dblContractRate
+			, strOrderType
 			, strUserName
 			, strAction)
 		SELECT H.intFutOptTransactionHeaderId
@@ -105,6 +106,10 @@ BEGIN TRY
 			, intBankTransferId
 			, dblFinanceForwardRate
 			, dblContractRate
+			, strOrderType = (CASE WHEN T.intOrderTypeId = 1 THEN 'GTC'
+								   WHEN T.intOrderTypeId = 2 THEN 'Limit'
+								   WHEN T.intOrderTypeId = 3 THEN 'Market'
+								   ELSE '' END)
 			, strUserName = @strUserName
 			, 'DELETE'
 		FROM tblRKFutOptTransaction T
@@ -193,6 +198,7 @@ BEGIN TRY
 			, intBankTransferId
 			, dblFinanceForwardRate
 			, dblContractRate
+			, strOrderType
 			, strUserName
 			, strAction)
 		SELECT H.intFutOptTransactionHeaderId
@@ -236,6 +242,10 @@ BEGIN TRY
 			, intBankTransferId
 			, dblFinanceForwardRate
 			, dblContractRate
+			, strOrderType = (CASE WHEN T.intOrderTypeId = 1 THEN 'GTC'
+								   WHEN T.intOrderTypeId = 2 THEN 'Limit'
+								   WHEN T.intOrderTypeId = 3 THEN 'Market'
+								   ELSE '' END)
 			, strUserName = @strUserName
 			, @action
 		FROM tblRKFutOptTransaction T

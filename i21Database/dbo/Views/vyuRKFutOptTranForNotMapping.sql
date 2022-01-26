@@ -63,7 +63,14 @@ SELECT DE.intFutOptTransactionId
 	, ysnBankTransferPosted = BT.ysnPosted
 	, strApprovalStatus = CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
 							WHEN ISNULL(DE.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' THEN approval.strApprovalStatus
-							ELSE DE.strStatus END
+							ELSE ISNULL(DE.strStatus, 
+										CASE WHEN DE.intSelectedInstrumentTypeId = 2 AND DE.intInstrumentTypeId = 4 THEN 'No Need for Approval' 
+										ELSE '' END) 
+							END
+	, strOrderType = (CASE WHEN DE.intOrderTypeId = 1 THEN 'GTC'
+							WHEN DE.intOrderTypeId = 2 THEN 'Limit'
+							WHEN DE.intOrderTypeId = 3 THEN 'Market'
+							ELSE '' END)
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
