@@ -209,7 +209,7 @@ LEFT JOIN (
 		 , strSalespersonName	= A.strName
 	FROM tblEMEntity A WITH(NOLOCK)
 	JOIN tblARSalesperson B WITH(NOLOCK) ON A.intEntityId = B.intEntityId
-) SPER ON ISNULL(INV.intEntitySalespersonId, INV.intPerformerId) = SPER.intEntityId
+) SPER ON INV.intEntitySalespersonId = SPER.intEntityId
 LEFT JOIN (
 	SELECT intEntityId			= A.intEntityId
 		 , strSalespersonId		= CASE WHEN B.strSalespersonId = '' THEN A.strEntityNo ELSE B.strSalespersonId END

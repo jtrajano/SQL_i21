@@ -96,6 +96,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 :r .\SM\2010_UpdateLicenseAgreement.sql
+:r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
 
 
 -- Canned Report
