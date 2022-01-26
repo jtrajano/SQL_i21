@@ -124,6 +124,13 @@ BEGIN TRY
 					intClassId INT 
 				)
 			END
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Description') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemPricingForCStore_Description (
+					intItemId INT 
+				)
+			END
 			
 		-- Create the temp table for the audit log. 
 		IF OBJECT_ID('tempdb..#tmpEffectiveCostForCStore_AuditLog') IS NULL  
@@ -214,6 +221,15 @@ BEGIN TRY
 				)
 				SELECT [intID] AS intClassId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
+			END
+
+		IF(@Description IS NOT NULL AND @Description != '')
+			BEGIN
+				INSERT INTO #tmpUpdateItemPricingForCStore_Description (
+					intItemId
+				)
+				SELECT intItemId as intItemId FROM
+				tblICItem WHERE strDescription LIKE '%' + @Description + '%'
 			END
 	END
 
