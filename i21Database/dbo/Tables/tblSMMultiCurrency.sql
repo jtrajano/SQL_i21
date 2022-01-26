@@ -22,6 +22,8 @@
 	[intFixedAssetsUnrealizedId]					INT NULL,
 	[intGainOnForwardUnrealizedId]					INT NULL,
 	[intGainOnSwapUnrealizedId]						INT NULL,
+	[intGainOnGLUnrealizedId]						INT NULL,
+
 	/* Offset */
 	[ysnRevalue]									BIT NULL DEFAULT 0,
 	[intAccountsPayableOffsetId]					INT NULL,
@@ -36,6 +38,7 @@
 	[intFixedAssetsOffsetId]						INT NULL,
 	[intGainOnForwardOffsetId]						INT NULL,
 	[intGainOnSwapOffsetId]							INT NULL,
+	[intGainOnGLUnrealizedOffsetId]					INT NULL,
 	/* Offset */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
