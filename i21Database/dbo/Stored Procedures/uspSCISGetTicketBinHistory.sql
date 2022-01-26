@@ -84,9 +84,14 @@ begin
 			join [dbo].[vyuICGetStockMovement] AS StockMovement
 				on BinSearch.intStorageLocationId = StockMovement.intStorageLocationId 
 					and ( StockMovement.dtmDate >=''' + cast(@dtmStartDate as nvarchar) + ''' and StockMovement.dtmDate < ''' + cast(@dtmEndDate as nvarchar) + ''')
-			join tblICInventoryTransaction InventoryTransaction
-				on StockMovement.intInventoryTransactionId = InventoryTransaction.intInventoryTransactionId
-
+			join 
+				(
+					select strSourceNumber,strSourceType,intInventoryTransactionId, intTicketId, ''Own'' as strOwnership from tblICInventoryTransaction 
+					union all 
+					select strSourceNumber,strSourceType,intInventoryTransactionStorageId as intInventoryTransactionId, intTicketId, ''Storage'' as strOwnership from tblICInventoryTransactionStorage
+				) InventoryTransaction
+				on case when StockMovement.strOwnership = ''Own'' then  StockMovement.intInventoryTransactionId else StockMovement.intInventoryTransactionStorageId end = InventoryTransaction.intInventoryTransactionId
+					and StockMovement.strOwnership = InventoryTransaction.strOwnership
 			inner join #tmpTransactionIdFilter transactionFilter
 				on StockMovement.intInventoryValuationKeyId = transactionFilter.intInventoryValuationKeyId
 					or transactionFilter.intInventoryValuationKeyId IS NULL 
