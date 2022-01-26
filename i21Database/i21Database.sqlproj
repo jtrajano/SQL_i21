@@ -9081,6 +9081,7 @@
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
+    <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
