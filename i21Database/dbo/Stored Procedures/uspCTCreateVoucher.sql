@@ -27,7 +27,7 @@ begin try
         ,@voucherPayableTax = @voucherPayableTax    
         ,@userId = @userId    
         ,@throwError = @throwError  
-        ,@error = @error    
+        ,@error = @error output  
         ,@createdVouchersId  = @createdVouchersId out  
 
         goto _return;
