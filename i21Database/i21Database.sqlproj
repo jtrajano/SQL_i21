@@ -487,6 +487,7 @@
     <Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
     <Build Include="dbo\Stored Procedures\uspSCISGetTicketBinHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFModifyTFRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGenerateCTCashFlow.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
