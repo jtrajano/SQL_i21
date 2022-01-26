@@ -8032,6 +8032,7 @@
     <Build Include="dbo\Views\vyuSMFreightTerms.sql" />
     <Build Include="dbo\Views\vyuCMBankLoan.sql" />
     <Build Include="dbo\Views\vyuCMBankLoanDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBTForAccrualPosting.sql" />
     <Build Include="tblICItemBook.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeInvoiceDelete.sql" />
     <Build Include="dbo\Tables\tblHDTimeOffRequest.sql" />

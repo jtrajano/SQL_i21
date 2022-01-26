@@ -1553,5 +1553,30 @@ WHERE
 		, [strNamespace] = 'Inventory.view.InventoryReceipt?showSearch=true&searchCommand=reminderSearchConfig'
 		, [intSort] = ISNULL(@intMaxSortOrder, 0) + 1
 END 
+
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMReminderList WHERE strReminder='Unposted' AND strType='Forex Bank Transfer')
+BEGIN
+	DECLARE @intMaxSortOrder INT 
+	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	INSERT INTO tblSMReminderList(strQuery, strReminder,strType, strMessage, strParameter,intSort, strNamespace)
+	VALUES('SELECT intTransactionId from vyuCMBTForAccrualPosting  where intEntityId={0}'
+	,'Unposted'
+	,'Forex Bank Transfer'
+	,'{0} {1} {2} Unposted'
+	,'intEntityId'
+	,@intMaxSortOrder
+	,'CashManagement.view.BankTransfer?activeTab=For Accrual Posting&showSearch=true&intEntityId={0}')
+END
+ELSE
+	UPDATE tblSMReminderList
+	set strQuery = 'select intTransactionId from vyuCMBTForAccrualPosting where intEntityId={0}'
+	, strReminder = 'Unposted'
+	, strType = 'Forex Bank Transfer'
+	, strMessage = '{0} {1} {2} Unposted'
+	, strParameter = 'intEntityId'
+	, strNamespace = 'CashManagement.view.BankTransfer?activeTab=For Accrual Posting&showSearch=true&intEntityId={0}'
+
 GO
 -- END Inventory Reminders
