@@ -18,12 +18,33 @@ AS
 	
 		LEFT    JOIN	tblCTPriceFixation				PF WITH (NOLOCK) ON	CD.intContractDetailId				=		PF.intContractDetailId		
 		LEFT    JOIN	(
-							SELECT	 intPriceFixationId,
-									 COUNT(intPriceFixationDetailId) intPFDCount,
+							--SELECT	 intPriceFixationId,
+							--		 COUNT(intPriceFixationDetailId) intPFDCount,
+							--		 SUM(dblQuantity) dblQuantityPriceFixed,
+							--		 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
+							--FROM	 tblCTPriceFixationDetail WITH (NOLOCK)
+							--GROUP BY intPriceFixationId
+							SELECT	 PF.intPriceFixationId,
+									 COUNT(PF.intPriceFixationDetailId) intPFDCount,
 									 SUM(dblQuantity) dblQuantityPriceFixed,
-									 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
-							FROM	 tblCTPriceFixationDetail WITH (NOLOCK)
-							GROUP BY intPriceFixationId
+									 MAX(intQtyItemUOMId) dblPFQuantityUOMId,
+									 SUM(PF.dblNoOfLots) dblNoOfLots
+							FROM	 tblCTPriceFixationDetail PF WITH (NOLOCK)
+							LEFT JOIN (
+									SELECT PFD.intPriceFixationId, MAX(PFD.intPriceFixationDetailId) intPriceFixationDetailId
+												FROM
+									tblCTContractDetail cd
+									join tblCTContractHeader ch
+										on ch.intContractHeaderId = cd.intContractHeaderId
+									join tblCTPriceFixation pf
+										on pf.intContractHeaderId = ch.intContractHeaderId
+										and isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end)
+									left join tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = pf.intPriceFixationId
+									join  tblSMTransaction t on t.intRecordId = pf.intPriceContractId and t.intScreenId = 119 and t.strApprovalStatus in 	('Waiting for Approval', 'Waiting for Submit')
+									group By PFD.intPriceFixationId
+							) T ON T.intPriceFixationId = PF.intPriceFixationId and T.intPriceFixationDetailId = PF.intPriceFixationDetailId
+							WHERE T.intPriceFixationId IS NULL
+							GROUP BY PF.intPriceFixationId
 						)								PD	ON	PD.intPriceFixationId				=		PF.intPriceFixationId
 		where CH.intPricingTypeId <> 3
 	),
@@ -273,9 +294,9 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					strLocationName,
 					CD.intItemId,
 					CD.intItemUOMId,
-					intFutureMarketId,
+					CD.intFutureMarketId,
 					strFutMarketName,
-					intFutureMonthId,
+					CD.intFutureMonthId,
 					strFutureMonthYear AS strFutureMonth,
 					CD.dblBasis,
 					CD.dblFutures,
@@ -286,15 +307,16 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					intSalespersonId,
 					intCurrencyId,
 					intCompanyLocationId,
-					CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL([dblLotsFixed],0) = 0 
+					CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END),0) = 0 
 							THEN 'Fully Priced' 
-							WHEN ISNULL([dblLotsFixed],0) = 0 THEN 'Unpriced'
+							WHEN ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END),0) = 0 THEN 'Unpriced'
 							ELSE 'Partially Priced' 
 					END		COLLATE Latin1_General_CI_AS AS strStatus,
-					PF.[dblLotsFixed],
-					PF.[dblTotalLots]-[dblLotsFixed] AS dblBalanceNoOfLots,
-					PF.intLotsHedged,
-					PF.dblFinalPrice,
+					SUM(CASE WHEN (T.intPriceFixationId) IS NOT NULL THEN 0 ELSE PFD.dblNoOfLots END) [dblLotsFixed],
+					PF.[dblTotalLots]-SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END) AS dblBalanceNoOfLots,
+					CASE WHEN ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END),0) = 0 THEN 0 ELSE PF.intLotsHedged END intLotsHedged,
+					MAX(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN null ELSE PFD.dblFinalPrice END) dblFinalPrice,
+				
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
 					CD.intDiscountScheduleCodeId,
 					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId,
@@ -324,7 +346,80 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId		=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
 		--WHERE		intPricingTypeId = 2 
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
-		AND			CD.intContractStatusId <> 3
+		AND			CD.intContractStatusId <> 3 
+		LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
+		LEFT JOIN (
+			
+									SELECT PFD.intPriceFixationId, MAX(PFD.intPriceFixationDetailId) intPriceFixationDetailId
+												FROM
+									tblCTContractDetail cd
+									join tblCTContractHeader ch
+										on ch.intContractHeaderId = cd.intContractHeaderId
+									join tblCTPriceFixation pf
+										on pf.intContractHeaderId = ch.intContractHeaderId
+										and isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end)
+									left join tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = pf.intPriceFixationId
+									join  tblSMTransaction t on t.intRecordId = pf.intPriceContractId and t.intScreenId = 119 and t.strApprovalStatus in 	('Waiting for Approval', 'Waiting for Submit')
+									group By PFD.intPriceFixationId
+		) T on T.intPriceFixationId = PF.intPriceFixationId  and T.intPriceFixationDetailId = PFD.intPriceFixationDetailId
+		
+		GROUP BY
+		PF.intPriceContractId,
+					PF.intPriceFixationId,
+					PF.intContractDetailId, 
+					PF.intContractHeaderId,
+					strContractNumber,
+					intContractSeq,
+					intContractTypeId,
+					strContractType,
+					intEntityId,
+					strEntityName,
+					CD.intCommodityId,
+					strCommodityDescription,
+					ysnMultiplePriceFixation,
+					CD.dblQuantity,
+					strItemUOM ,
+					PF.[dblTotalLots] ,
+					strLocationName,
+					CD.intItemId,
+					CD.intItemUOMId,
+					CD.intFutureMarketId,
+					strFutMarketName,
+					CD.intFutureMonthId,
+					strFutureMonthYear,
+					CD.dblBasis,
+					CD.dblFutures,
+					CD.dblCashPrice,
+					intPriceItemUOMId,
+					intBookId,
+					intSubBookId,
+					intSalespersonId,
+					intCurrencyId,
+					intCompanyLocationId,
+					PF.[dblTotalLots]-[dblLotsFixed] ,
+					PF.intLotsHedged,
+					PF.dblFinalPrice,
+					CU.intCommodityUnitMeasureId ,
+					CD.intDiscountScheduleCodeId,
+					PU.intCommodityUnitMeasureId ,
+					CD.strEntityContract,
+					CD.dtmStartDate,
+					CD.dtmEndDate,
+					CD.strBook,
+					CD.strSubBook,
+					CD.strPriceUOM,
+					PC.strPriceContractNo,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency,
+					CD.strPricingType,
+					CD.strItemNo,
+					CD.strItemDescription,
+					CD.strShortName,
+					intHeaderBookId,
+					intHeaderSubBookId,
+					intDetailBookId,
+					intDetailSubBookId
 
 		UNION ALL
 		
