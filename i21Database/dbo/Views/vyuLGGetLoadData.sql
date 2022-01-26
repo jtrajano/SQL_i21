@@ -223,6 +223,7 @@ SELECT
 	,strLoanLimit = BL.strBankLoanId
 	,strLoanReferenceNo = BL.strLimitDescription
 	,strOverrideFacility = BVR.strBankValuationRule
+	,strApprovalStatus = ASTF.strApprovalStatus
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -261,6 +262,7 @@ LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
 LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = L.intFacilityId
 LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = L.intLoanLimitId
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = L.intOverrideFacilityId
+LEFT JOIN tblCTApprovalStatusTF ASTF ON ASTF.intApprovalStatusId = L.intApprovalStatusId
 OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
 				WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
