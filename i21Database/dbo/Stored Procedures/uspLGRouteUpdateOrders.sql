@@ -79,16 +79,18 @@ SET ANSI_WARNINGS OFF
 				,strComments
 			)
 			SELECT 
-				RO.intDispatchID, 
-				NULL, 
-				NULL, 
-				0, 
-				0, 
-				NULL, 
-				NULL 
+				intOrderId = RO.intDispatchID
+				,intRouteId = NULL
+				,intDriverEntityId = S.intDriverID
+				,dblLatitude = 0
+				,dblLongitude = 0
+				,intSequence = NULL 
+				,strComments = NULL 
 			FROM tblLGRouteOrder RO 
 				JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
-			WHERE RO.intRouteId = @intRouteId AND R.intSourceType = 2 AND IsNull(intDispatchID, 0) <> 0 ORDER BY RO.intSequence ASC
+				JOIN tblTMDispatch D ON D.intDispatchID = RO.intDispatchID
+				LEFT JOIN tblTMSite S ON S.intSiteID = D.intSiteID
+			WHERE RO.intRouteId = @intRouteId AND R.intSourceType = 2 AND IsNull(RO.intDispatchID, 0) <> 0 ORDER BY RO.intSequence ASC
 			
 			Exec dbo.uspTMUpdateRouteSequence @OrdersFromRouting
 
