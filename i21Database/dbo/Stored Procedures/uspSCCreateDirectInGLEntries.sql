@@ -1754,6 +1754,188 @@ BEGIN
                 END
             END
 
+            ---Contract Cost
+            BEGIN
+                SELECT	
+                    dblAmount = ROUND((CTDC.dblRate * B.dblQuantity),2)
+                    ,A.intTicketId
+                INTO #tmpComputedTicketInfoContractCost
+                FROM tblSCTicket A
+                INNER JOIN @ticketDistributionAllocation B
+                    ON 1 = 1
+                LEFT JOIN tblSCScaleSetup C
+                    ON A.intScaleSetupId = C.intScaleSetupId
+                INNER JOIN tblCTContractDetail CTD
+                    ON B.intContractDetailId = CTD.intContractDetailId
+                INNER JOIN tblCTContractCost CTDC
+                    ON CTD.intContractDetailId = CTDC.intContractDetailId
+                WHERE A.intTicketId = @intTicketId
+                    AND B.intContractDetailId IS NOT NULL
+                    AND B.intContractDetailId > 0
+                    AND CTDC.ysnPrice = 1
+                    AND (C.intDefaultFeeItemId IS NULL OR (C.intDefaultFeeItemId  <> CTDC.intItemId))
+	                AND (C.intFreightItemId IS NULL OR (C.intFreightItemId  <> CTDC.intItemId))
+                    AND CTDC.dblRate IS NOT NULL
+                    AND CTDC.dblRate <> 0
+
+                 -- General Account
+                INSERT INTO @GLEntries 
+                (
+                    [dtmDate]
+                    ,[strBatchId]
+                    ,[intAccountId]
+                    ,[dblDebit]
+                    ,[dblCredit]
+                    ,[dblDebitUnit]
+                    ,[dblCreditUnit]
+                    ,[strDescription]
+                    ,[strCode]
+                    ,[strReference]
+                    ,[intCurrencyId]
+                    ,[dblExchangeRate]
+                    ,[dtmDateEntered]
+                    ,[dtmTransactionDate]
+                    ,[strJournalLineDescription]
+                    ,[intJournalLineNo]
+                    ,[ysnIsUnposted]
+                    ,[intUserId]
+                    ,[intEntityId]
+                    ,[strTransactionId]
+                    ,[intTransactionId]
+                    ,[strTransactionType]
+                    ,[strTransactionForm]
+                    ,[strModuleName]
+                    ,[intConcurrencyId]
+                    ,[dblDebitForeign]
+                    ,[dblDebitReport]
+                    ,[dblCreditForeign]
+                    ,[dblCreditReport]
+                    ,[dblReportingRate]
+                    ,[dblForeignRate]			
+                )
+                SELECT	
+                    dtmDate						= A.dtmTicketDateTime
+                    ,strBatchId					= @strBatchId
+                    ,intAccountId				= @intInventoryInTransitAccountId
+                    ,dblDebit					= ROUND(ISNULL(B.dblAmount,0),2)
+                    ,dblCredit					= 0
+                    ,dblDebitUnit				= 0
+                    ,dblCreditUnit				= 0
+                    ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - Contract Cost'
+                    ,strCode					= 'SCTKT'
+                    ,strReference				= '' 
+                    ,intCurrencyId				= A.intCurrencyId
+                    ,dblExchangeRate			= 1
+                    ,dtmDateEntered				= GETDATE()
+                    ,dtmTransactionDate			= A.dtmTicketDateTime
+                    ,strJournalLineDescription  = '' 
+                    ,intJournalLineNo			= 52
+                    ,ysnIsUnposted				= 0
+                    ,intUserId					= @intUserId
+                    ,intEntityId				= NULL 
+                    ,strTransactionId			= A.strTicketNumber
+                    ,intTransactionId			= A.intTicketId 
+                    ,strTransactionType			= 'Scale Ticket'
+                    ,strTransactionForm			= 'Scale Ticket'
+                    ,strModuleName				= 'Scale'
+                    ,intConcurrencyId			= 1
+                    ,dblDebitForeign			= ROUND(ISNULL(B.dblAmount,0),2)
+                    ,dblDebitReport				= NULL 
+                    ,dblCreditForeign			= 0
+                    ,dblCreditReport			= NULL 
+                    ,dblReportingRate			= NULL 
+                    ,dblForeignRate				= 1		
+                FROM tblSCTicket A
+                INNER JOIN #tmpComputedTicketInfoContractCost B
+                    ON A.intTicketId = B.intTicketId 
+                OUTER APPLY (
+                    SELECT TOP 1
+                        strDescription
+                    FROM tblGLAccount
+                    WHERE intAccountId = @intInventoryInTransitAccountId
+                ) GLAccount
+                WHERE A.intTicketId = @intTicketId
+
+
+                -- AP Clearing 
+                INSERT INTO @GLEntries 
+                (
+                    [dtmDate]
+                    ,[strBatchId]
+                    ,[intAccountId]
+                    ,[dblDebit]
+                    ,[dblCredit]
+                    ,[dblDebitUnit]
+                    ,[dblCreditUnit]
+                    ,[strDescription]
+                    ,[strCode]
+                    ,[strReference]
+                    ,[intCurrencyId]
+                    ,[dblExchangeRate]
+                    ,[dtmDateEntered]
+                    ,[dtmTransactionDate]
+                    ,[strJournalLineDescription]
+                    ,[intJournalLineNo]
+                    ,[ysnIsUnposted]
+                    ,[intUserId]
+                    ,[intEntityId]
+                    ,[strTransactionId]
+                    ,[intTransactionId]
+                    ,[strTransactionType]
+                    ,[strTransactionForm]
+                    ,[strModuleName]
+                    ,[intConcurrencyId]
+                    ,[dblDebitForeign]
+                    ,[dblDebitReport]
+                    ,[dblCreditForeign]
+                    ,[dblCreditReport]
+                    ,[dblReportingRate]
+                    ,[dblForeignRate]			
+                )
+                SELECT	
+                    dtmDate						= A.dtmTicketDateTime
+                    ,strBatchId					= @strBatchId
+                    ,intAccountId				= @intAPClearingAccountId
+                    ,dblDebit					= 0
+                    ,dblCredit					= ROUND(ISNULL(B.dblAmount,0),2)
+                    ,dblDebitUnit				= 0
+                    ,dblCreditUnit				= 0
+                    ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - Contract Cost'
+                    ,strCode					= 'SCTKT'
+                    ,strReference				= '' 
+                    ,intCurrencyId				= A.intCurrencyId
+                    ,dblExchangeRate			= 1
+                    ,dtmDateEntered				= GETDATE()
+                    ,dtmTransactionDate			= A.dtmTicketDateTime
+                    ,strJournalLineDescription  = '' 
+                    ,intJournalLineNo			= 52
+                    ,ysnIsUnposted				= 0
+                    ,intUserId					= @intUserId
+                    ,intEntityId				= NULL 
+                    ,strTransactionId			= A.strTicketNumber
+                    ,intTransactionId			= A.intTicketId 
+                    ,strTransactionType			= 'Scale Ticket'
+                    ,strTransactionForm			= 'Scale Ticket'
+                    ,strModuleName				= 'Scale'
+                    ,intConcurrencyId			= 1
+                    ,dblDebitForeign			= 0
+                    ,dblDebitReport				= NULL 
+                    ,dblCreditForeign			= ROUND(ISNULL(B.dblAmount,0),2)
+                    ,dblCreditReport			= NULL 
+                    ,dblReportingRate			= NULL 
+                    ,dblForeignRate				= 1		
+                FROM tblSCTicket A
+                INNER JOIN #tmpComputedTicketInfoContractCost B
+                    ON A.intTicketId = B.intTicketId 
+                OUTER APPLY (
+                    SELECT TOP 1
+                        strDescription
+                    FROM tblGLAccount
+                    WHERE intAccountId = @intAPClearingAccountId
+                ) GLAccount
+                WHERE A.intTicketId = @intTicketId
+
+            END
 
             IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)
                 EXEC uspGLBookEntries @GLEntries, 1	
