@@ -760,6 +760,8 @@ BEGIN
 
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/@HundredDecimal));
+			ELSE IF(@CalculationMethod = 'Percentage of Tax Only')
+				SET @ItemTaxAmount = (@OtherTaxAmount * @Rate);
 			ELSE
 				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
