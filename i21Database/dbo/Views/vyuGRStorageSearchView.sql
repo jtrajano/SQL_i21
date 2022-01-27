@@ -110,11 +110,15 @@ SELECT
 	,CS.dblSettlementPrice
 	--,intTicketPricingTypeId = ISNULL(CH.intPricingTypeId, -99)
 	,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
+	,CAP.intChargeAndPremiumId
+	,CAP.strChargeAndPremiumId
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
 LEFT JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
+LEFT JOIN tblGRChargeAndPremiumId CAP
+	ON CAP.intChargeAndPremiumId = CS.intChargeAndPremiumId
 JOIN tblICItem Item 
 	ON Item.intItemId = CS.intItemId
 JOIN tblICCommodity Commodity
