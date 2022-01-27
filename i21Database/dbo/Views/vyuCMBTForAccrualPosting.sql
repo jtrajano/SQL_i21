@@ -6,5 +6,5 @@ FROM tblCMCompanyPreferenceOption)o
 WHERE dtmDate BETWEEN DATEADD(day, isnull(o._days,0),dbo.fnRemoveTimeOnDate(GETDATE()))
 AND dbo.fnRemoveTimeOnDate(GETDATE())
 AND o._days IS NOT NULL AND  ISNULL(ysnPostedInTransit,0) = 0
-AND intBankTransferTypeId in(2,3)
+AND intBankTransferTypeId in(1,2,3)
 
