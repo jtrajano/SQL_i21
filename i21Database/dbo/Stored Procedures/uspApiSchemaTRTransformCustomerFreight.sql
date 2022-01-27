@@ -212,6 +212,9 @@ BEGIN
 		,@ysnFreightInPrice BIT = NULL
 		,@dblMinimumUnit NUMERIC (18, 6) = NULL
 		,@intRowNumber INT = NULL
+		,@dblFreightRateIn NUMERIC (18, 6) = NULL
+		,@dblMinimumUnitsIn NUMERIC (18, 6) = NULL
+		,@dblSurchargeOut NUMERIC (18, 6) = NULL
 
 	 DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
      FOR 
@@ -228,6 +231,9 @@ BEGIN
 		, CF.dblFreightMile
 		, ISNULL(CF.ysnFreightInPrice, 0) AS ysnFreightInPrice
 		, CF.dblMinimumUnit
+		, CF.dblFreightRateIn
+		, CF.dblMinimumUnitsIn
+		, CF.dblSurchargeOut
 		, CF.intRowNumber
 	FROM tblApiSchemaTRCustomerFreight CF
 		INNER JOIN tblEMEntity E ON E.strEntityNo = CF.strCustomerEntityNo
@@ -249,7 +255,7 @@ BEGIN
 		--AND CFX.intFreightXRefId IS NULL
 
 	 OPEN DataCursor
-	 FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @intRowNumber
+	 FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @dblFreightRateIn, @dblMinimumUnitsIn, @dblSurchargeOut, @intRowNumber
 	 WHILE @@FETCH_STATUS = 0
      BEGIN
 		DECLARE @intFreightXRefId INT = NULL
@@ -288,7 +294,10 @@ BEGIN
 				, dblMinimumUnits
 				, intConcurrencyId
 				, guiApiUniqueId
-				, intEntityTariffTypeId)
+				, intEntityTariffTypeId
+				, dblFreightRateIn
+				, dblMinimumUnitsIn
+				, dblSurchargeOut)
 			VALUES(@intCustomerEntityId
 				, @intCustomerEntityLocationId
 				, @strSupplierZipCode
@@ -304,6 +313,9 @@ BEGIN
 				, 1
 				, @guiApiUniqueId
 				, @intEntityTariffTypeId
+				, ISNULL(@dblFreightRateIn, 0)
+				, ISNULL(@dblMinimumUnitsIn, 0)
+				, ISNULL(@dblSurchargeOut, 0)
 			)
 
 			-- INSERT LOGS
@@ -338,6 +350,9 @@ BEGIN
 				, ysnFreightInPrice = @ysnFreightInPrice
 				, dblMinimumUnits = ISNULL(@dblMinimumUnit, 0)
 				, guiApiUniqueId = @guiApiUniqueId
+				, dblFreightRateIn = ISNULL(@dblFreightRateIn, 0)
+				, dblMinimumUnitsIn = ISNULL(@dblMinimumUnitsIn, 0)
+				, dblSurchargeOut = ISNULL(@dblSurchargeOut, 0)
 			WHERE intFreightXRefId = @intFreightXRefId
 	 
 			-- INSERT LOGS
@@ -361,7 +376,7 @@ BEGIN
 				, strMessage = 'Successfully updated'	
 		END
    	 	
-	 	FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @intRowNumber
+	 	FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @dblFreightRateIn, @dblMinimumUnitsIn, @dblSurchargeOut, @intRowNumber
 	 END
 	 CLOSE DataCursor
 	 DEALLOCATE DataCursor
