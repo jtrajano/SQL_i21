@@ -299,7 +299,7 @@ END
 													WHEN RE.strFreightBilledBy = 'Other' THEN 1
 													ELSE 0 END
 			,strChargesLink					= CASE WHEN ysnComboFreight = 1 THEN NULL ELSE RE.strChargesLink END
-			,[dblQuantity]					= CASE WHEN dblQty <= dblMinimumUnits THEN dblMinimumUnits WHEN dblQty <= dblComboMinimumUnits AND ysnComboFreight = 1 THEN dblComboMinimumUnits ELSE dblQty END
+			,[dblQuantity]					= CASE WHEN dblQty <= dblComboMinimumUnits AND ysnComboFreight = 1 THEN dblComboMinimumUnits ELSE dblQty END
 	FROM	#tmpReceipts RE 
 	WHERE RE.dblFreightRate != 0  OR (RE.dblComboFreightRate != 0  AND ysnComboFreight = 1)
 	--Fuel Surcharge
