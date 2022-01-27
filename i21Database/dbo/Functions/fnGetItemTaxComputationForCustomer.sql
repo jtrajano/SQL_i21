@@ -334,6 +334,8 @@ BEGIN
 			DECLARE @ItemTaxAmount NUMERIC(18,6) = @ZeroDecimal
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/@HundredDecimal));
+			ELSE IF(@CalculationMethod = 'Percentage of Tax Only')
+				SET @ItemTaxAmount = (@OtherTaxAmount * @Rate);
 			ELSE
 				SET @ItemTaxAmount = (@QtyShipped * @Rate);
 				
