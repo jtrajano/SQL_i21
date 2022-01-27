@@ -136,5 +136,9 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[dblRatio]						NUMERIC(38, 20) NULL DEFAULT(1) ,
 	/*Book Inf*/
 	[intBookId]						INT NULL,
-	[intSubBookId]					INT NULL
+	[intSubBookId]					INT NULL,
+	/*Payment Info*/
+	[intDisbursementBank]			INT NULL, --DEFAULT DISBURSEMENT OR BANK ACCOUNT
+	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --MODULE OR PROCESS WHERE THE INFORMATION CAME FROM E.G. LOGISTICS
+	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --TRANSACTION WHERE THE INFORMATION CAME FORM E.G. LS-0001
 )

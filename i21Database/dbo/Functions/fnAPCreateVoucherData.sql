@@ -43,7 +43,10 @@ RETURNS @returntable TABLE
 	[intBookId]				INT NULL ,
 	[intSubBookId]			INT NULL ,
     [intCurrencyId]			INT NOT NULL,
-	[intSubCurrencyCents]	INT NOT NULL DEFAULT 1
+	[intSubCurrencyCents]	INT NOT NULL DEFAULT 1,
+	[intDisbursementBank]			INT NULL,
+	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -144,7 +147,10 @@ BEGIN
 		[intBookId]				,
 		[intSubBookId]			,
 		[intCurrencyId]			,
-		[intSubCurrencyCents]	
+		[intSubCurrencyCents]	,
+		[intDisbursementBank]	,
+		[strFinancingSourcedFrom],
+		[strFinancingTransactionNumber]
 	)
 	SELECT
 		[intPartitionId]		=	A.intPartitionId,
@@ -223,7 +229,10 @@ BEGIN
 		[intCurrencyId]			=	CASE WHEN A.intCurrencyId > 0 THEN A.intCurrencyId 
 									ELSE vendor.intCurrencyId END,
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
-									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END
+									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END,
+		[intDisbursementBank]	= A.intDisbursementBank,
+		[strFinancingSourcedFrom] = A.strFinancingSourcedFrom,
+		[strFinancingTransactionNumber] = A.strFinancingTransactionNumber
 	FROM voucherPayables A
 	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.intEntityId
 	-- LEFT JOIN tblEMEntityLocation B ON vendor.intEntityId = B.intEntityId AND B.ysnDefaultLocation = 1--vendor default location

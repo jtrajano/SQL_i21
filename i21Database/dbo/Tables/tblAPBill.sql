@@ -95,7 +95,12 @@
 	[dblPaymentTemp] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[ysnInPayment] BIT NULL DEFAULT 0,
 	[ysnOverrideCashFlow] BIT NULL DEFAULT 0,
-	[dtmCashFlowDate] DATETIME NULL
+	[dtmCashFlowDate] DATETIME NULL,
+	[intDefaultDisbursementBank] INT NULL,
+	[strFinancingSourcedFrom] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[ysnOverrideDisbursementBank] BIT NULL DEFAULT 0,
+	[intDisbursementBank] INT NULL,
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     -- CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
