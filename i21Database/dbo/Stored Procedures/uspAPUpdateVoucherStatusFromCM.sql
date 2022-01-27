@@ -1,6 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspAPUpdatePrepayStatus]
-	@paymentIds Id READONLY
+﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherStatusFromCM]
+	@paymentRecordIds NVARCHAR(MAX)
 AS
+	
 
 BEGIN
 
@@ -17,7 +18,8 @@ INSERT INTO @billIds
 SELECT
 	A.intBillId
 FROM tblAPPaymentDetail A
-INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
+INNER JOIN tblAPPayment A2 ON A.intPaymentId = A2.intPaymentId
+INNER JOIN dbo.fnARGetRowsFromDelimitedValues(@paymentRecordIds) B ON A2.strPaymentRecordNum = B.strValues COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
 WHERE C.intTransactionType IN (2,13)
 
@@ -44,6 +46,8 @@ OUTER APPLY
 	--AND pay.ysnPrepay = 1
 	AND A.intTransactionType IN (2,13)
 	AND pay.ysnPosted = 1
+	--IF CHECK OR ACH PAYMENT METHOD, IT SHOULD BE PRINTED
+	AND 1 = (CASE WHEN pay.intPaymentMethodId IN (2,7) AND E.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 ) prepayment
 
 
