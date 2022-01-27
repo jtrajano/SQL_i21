@@ -53,10 +53,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
 --INCLUDE PO NON-INVENTORY PAYABLES THAT IS NO LONGER IN tblAPVoucherPayable IN THE COUNT
-SELECT @recordCountDeleted = COUNT(*)
-FROM @voucherPayable P
-LEFT JOIN tblAPVoucherPayable VP ON VP.intPurchaseDetailId = P.intPurchaseDetailId
-WHERE VP.intVoucherPayableId IS NULL
+-- SELECT @recordCountDeleted = COUNT(*)
+-- FROM @voucherPayable P
+-- LEFT JOIN tblAPVoucherPayable VP ON VP.intPurchaseDetailId = P.intPurchaseDetailId
+-- WHERE VP.intVoucherPayableId IS NULL
 
 IF EXISTS(SELECT TOP 1 1 FROM @voucherPayable)
 BEGIN
