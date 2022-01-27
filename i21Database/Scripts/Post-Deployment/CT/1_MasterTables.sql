@@ -814,6 +814,42 @@ GO
 
 
 
+--tblCTOrderTypeFX
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOrderTypeFX WHERE intOrderTypeId = 1)
+BEGIN
+	INSERT INTO tblCTOrderTypeFX
+	select 1, 'GTC', 1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOrderTypeFX WHERE intOrderTypeId =  2)
+BEGIN
+	INSERT INTO tblCTOrderTypeFX
+	select 2, 'Limit', 1
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOrderTypeFX WHERE intOrderTypeId = 3)
+BEGIN
+	INSERT INTO tblCTOrderTypeFX
+	select 3, 'Market', 1
+END
+GO
+
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 4)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 4, 'Closed', 1
+END
+GO
+
+
+
 --=====================================================================================================================================
 -- 	MOVE CONTRACT BASIS TO FREIGHT TERMS
 ---------------------------------------------------------------------------------------------------------------------------------------
