@@ -18,30 +18,33 @@ BEGIN
 		IF(@strComboFreightType = 'Receipt')
 		BEGIN
 			-- RECEIPT
-			DECLARE @intCategoryId INT = NULL
-			DECLARE @intComboFreightShipViaId INT = NULL	
-			SELECT TOP 1 @intComboFreightShipViaId = intComboFreightShipViaId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit
-			FROM tblTRComboFreightShipVia 
-			WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
-				AND dblMinimumUnit >= @dblMinimumUnit
-				AND intShipViaEntityId = @intShipViaEntityId
-			ORDER BY dtmEffectiveDateTime DESC
-
-			IF(@intComboFreightShipViaId IS NULL)
+			IF EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE intEntityId = @intShipViaEntityId AND strFreightBilledBy = 'Other')
 			BEGIN
-				SELECT TOP 1 @intComboFreightShipViaId = intComboFreightShipViaId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit 
+				DECLARE @intCategoryId INT = NULL
+				DECLARE @intComboFreightShipViaId INT = NULL	
+				SELECT TOP 1 @intComboFreightShipViaId = intComboFreightShipViaId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit
 				FROM tblTRComboFreightShipVia 
 				WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
 					AND dblMinimumUnit >= @dblMinimumUnit
+					AND intShipViaEntityId = @intShipViaEntityId
 				ORDER BY dtmEffectiveDateTime DESC
-			END
 
-			IF(@strFreightRateType = 'Category' AND ISNULL(@strItemId, '') != '')
-			BEGIN
-				SELECT TOP 1 @intItemId = intItemId FROM tblICItem WHERE intItemId IN (
-					SELECT CONVERT(INT,Item) 
-					FROM dbo.fnTRSplit(@strItemId,','))
-				AND intCategoryId = @intCategoryId	
+				IF(@intComboFreightShipViaId IS NULL)
+				BEGIN
+					SELECT TOP 1 @intComboFreightShipViaId = intComboFreightShipViaId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit 
+					FROM tblTRComboFreightShipVia 
+					WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
+						AND dblMinimumUnit >= @dblMinimumUnit
+					ORDER BY dtmEffectiveDateTime DESC
+				END
+
+				IF(@strFreightRateType = 'Category' AND ISNULL(@strItemId, '') != '')
+				BEGIN
+					SELECT TOP 1 @intItemId = intItemId FROM tblICItem WHERE intItemId IN (
+						SELECT CONVERT(INT,Item) 
+						FROM dbo.fnTRSplit(@strItemId,','))
+					AND intCategoryId = @intCategoryId	
+				END
 			END
 		END
 		ELSE IF(@strComboFreightType = 'Invoice')
