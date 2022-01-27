@@ -9943,7 +9943,6 @@
     <Build Include="dbo\Tables\tblSCTicketDirectBasisContract.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTicketWithBasisContract.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
->>>>>>> 78513f0df21... AP-10133
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
