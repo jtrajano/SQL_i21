@@ -10166,6 +10166,7 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherStatusFromCM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
