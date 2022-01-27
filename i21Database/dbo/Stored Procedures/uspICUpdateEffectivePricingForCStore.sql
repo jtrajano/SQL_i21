@@ -340,7 +340,7 @@ BEGIN
 					)
 					AND (
 						@strDescription IS NULL 
-						OR i.strDescription = @strDescription 
+						OR i.strDescription LIKE '%' + @strDescription + '%'	--ST-2074
 					)
 					AND (
 						@intItemLocationId IS NULL 
