@@ -38,6 +38,7 @@
 	[dblRegularHours] NUMERIC (18, 6) DEFAULT ((0)) NULL,
 	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
 	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
+    [intDefaultTimeEntryJobCode] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
