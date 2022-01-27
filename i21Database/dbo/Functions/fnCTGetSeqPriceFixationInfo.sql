@@ -47,7 +47,8 @@ BEGIN
     BEGIN
 
 		SELECT	
-				@intPriceFixationId	=	pf.intPriceFixationId
+				@intPriceFixationId	=	pf.intPriceFixationId,
+				@intPriceContractId =	pf.intPriceContractId 
 		FROM
 			tblCTContractDetail cd
 			join tblCTContractHeader ch
@@ -82,9 +83,7 @@ BEGIN
 
 
 		SELECT	@dblTotalLots		=	pf.dblTotalLots,
-				@dblLotsFixed		=	sum(pfd.dblNoOfLots),
-				@intPriceFixationId	=	pf.intPriceFixationId,
-				@intPriceContractId =	pf.intPriceContractId 
+				@dblLotsFixed		=	sum(pfd.dblNoOfLots)
 		FROM
 			tblCTContractDetail cd
 			join tblCTContractHeader ch
