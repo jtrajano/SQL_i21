@@ -48,6 +48,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@endgroup						AS NVARCHAR(50)
 		,@datatype						AS NVARCHAR(50)
 		,@intPerformanceLogId			AS INT = NULL
+		,@strRequestId			        AS  NVARCHAR(200) = NEWID()
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -196,7 +197,7 @@ SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 IF CHARINDEX('''', @strCustomerName) > 0 
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 
-EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, 'uspARCustomerStatementReport', 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
+EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, 'uspARCustomerStatementReport', @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 	
 IF @strStatementFormat = 'Balance Forward'
 	BEGIN
@@ -349,4 +350,4 @@ SELECT @strCustomerName
 
 SELECT * FROM @temp_SOA_table
 
-EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, 'uspARCustomerStatementReport', 0, @intEntityUserId, @intPerformanceLogId, NULL
+EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, 'uspARCustomerStatementReport', @strRequestId, 0, @intEntityUserId, @intPerformanceLogId, NULL
