@@ -52,6 +52,8 @@ SELECT
 	,ysnDeliverySheetPosted = ISNULL(DeliverySheet.ysnPost,1)
 	,CS.dblBasis
 	,CS.dblSettlementPrice
+	,CS.intChargeAndPremiumId
+	,CAP.strChargeAndPremiumId
 FROM tblGRCustomerStorage CS
 INNER JOIN tblSMCompanyLocation CL
 	ON CS.intCompanyLocationId = CL.intCompanyLocationId
@@ -73,3 +75,5 @@ LEFT JOIN tblGRDiscountSchedule DS
 	ON CS.intDiscountScheduleId = DS.intDiscountScheduleId
 LEFT JOIN tblSCDeliverySheet DeliverySheet
 	ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
+LEFT JOIN tblGRChargeAndPremiumId CAP
+	ON CAP.intChargeAndPremiumId = CS.intChargeAndPremiumId
