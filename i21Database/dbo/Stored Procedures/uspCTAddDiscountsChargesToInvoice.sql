@@ -3,6 +3,7 @@
 	,@intInventoryShipmentId int
 	,@UserId int
 	,@intInvoiceDetailId int
+	,@dblQuantityToCharge numeric(18,6)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -93,8 +94,10 @@ declare @ChargesDiscounts table (
 
 begin try
 
+	if (isnull(@dblQuantityToCharge,0) = 0) return;
+
 	select
-		@dblQuantity = di.dblQtyShipped
+		@dblQuantity = case when isnull(@dblQuantityToCharge,0) = 0 then di.dblQtyShipped else @dblQuantityToCharge end
 		,@intInvoiceId = di.intInvoiceId
 		,@dblISTotalQuantity = isnull(si.dblDestinationQuantity,si.dblQuantity)
 		,@strChargesLink = si.strChargesLink
