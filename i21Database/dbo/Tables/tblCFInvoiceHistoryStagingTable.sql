@@ -161,6 +161,15 @@
     [ysnPageBreakByPrimarySortOrder]		BIT             NULL,
 	[ysnSummaryByDeptDriverPinProd]			BIT             NULL,
     [strDepartmentGrouping]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strProductDescriptionForTotals]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [dblDiscountedCalculatedTotalPrice]     NUMERIC(18,6) NULL,
+    [dblDiscountedCalculatedNetPrice]       NUMERIC(18,6) NULL,
+    [dblDiscountedCalculatedGrossPrice]     NUMERIC(18,6) NULL,
+    [dblDiscountedTotalGrossAmount]         NUMERIC(18,6) NULL,
+    [dblDiscountedTotalNetAmount]	        NUMERIC(18,6) NULL,
+    [dblDiscountedTotalAmount]		        NUMERIC(18,6) NULL,
+    [dblDiscountedTotalTaxAmount]	        NUMERIC(18,6) NULL,
+    [dblAccountTotalLessAllDiscount]	    NUMERIC(18,6) NULL
     CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC) WITH (FILLFACTOR = 70),
 	CONSTRAINT [PK_tblCFInvoiceHistoryStagingTable] PRIMARY KEY CLUSTERED ([intInvoiceHistoryStagingId] ASC)
 );
