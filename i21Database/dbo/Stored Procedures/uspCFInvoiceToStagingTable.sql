@@ -329,6 +329,12 @@ BEGIN TRY
 	,ysnPageBreakByPrimarySortOrder
 	,ysnSummaryByDeptDriverPinProd
 	,strDepartmentGrouping
+	,dblDiscountedCalculatedTotalPrice	
+	,dblDiscountedCalculatedNetPrice	
+	,dblDiscountedCalculatedGrossPrice	
+	,dblDiscountedTotalGrossAmount 		
+	,dblDiscountedTotalNetAmount		
+	,dblDiscountedTotalAmount			
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -619,6 +625,12 @@ BEGIN TRY
 	,ysnPageBreakByPrimarySortOrder
 	,ysnSummaryByDeptDriverPinProd
 	,strDepartmentGrouping
+	,ISNULL(dblCalculatedTotalAmount,0)
+	,ISNULL(dblCalculatedNetAmount,0) 
+	,ISNULL(dblCalculatedGrossAmount,0) 
+	,ISNULL(dblTotalGrossAmount,0)
+	,ISNULL(dblTotalNetAmount,0) 
+	,ISNULL(dblTotalAmount,0) 
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 
@@ -668,6 +680,21 @@ BEGIN TRY
 	--) AS cfMiscOdom
 	-----------------------------------------------------------
 	WHERE cfInvRpt.strUserId = @UserId 
+
+	--ADD PRICE DISCOUNT IN STAGING TABLE--
+	UPDATE tblCFInvoiceStagingTable 
+	SET
+	 dblDiscountedCalculatedTotalPrice = ISNULL(tblCFInvoiceStagingTable.dblCalculatedTotalAmount,0) + ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount,0)
+	,dblDiscountedCalculatedNetPrice = ISNULL(tblCFInvoiceStagingTable.dblCalculatedNetAmount,0) - ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate,0)
+	,dblDiscountedCalculatedGrossPrice = ISNULL(tblCFInvoiceStagingTable.dblCalculatedGrossAmount,0) - ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate,0)
+	,dblDiscountedTotalGrossAmount 	=  ISNULL(tblCFInvoiceStagingTable.dblTotalGrossAmount,0) - ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate,0) 
+	,dblDiscountedTotalNetAmount	=  ISNULL(tblCFInvoiceStagingTable.dblTotalNetAmount,0) + ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount,0)
+	,dblDiscountedTotalAmount		=  ISNULL(tblCFInvoiceStagingTable.dblTotalAmount,0) + ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount,0)
+
+	FROM 
+	tblCFInvoiceReportTieredUnitDiscountTempTable
+	WHERE tblCFInvoiceReportTieredUnitDiscountTempTable.strUserId = tblCFInvoiceStagingTable.strUserId
+	AND tblCFInvoiceReportTieredUnitDiscountTempTable.[intTransactionId] = tblCFInvoiceStagingTable.[intTransactionId]
 
 
 
