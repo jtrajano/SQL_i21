@@ -230,8 +230,9 @@ BEGIN
 									ELSE vendor.intCurrencyId END,
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
 									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END,
-		[intDisbursementBank]	= A.intDisbursementBank,
-		[strFinancingSourcedFrom] = A.strFinancingSourcedFrom,
+		[intDisbursementBank]	= ISNULL(A.intDisbursementBank, vendor.intVendorCurrencyAccountId),
+		[strFinancingSourcedFrom] = CASE WHEN A.intDisbursementBank > 0 THEN ISNULL(A.strFinancingSourcedFrom, 'Not Provided')
+									ELSE CASE WHEN vendor.intVendorCurrencyAccountId > 0 THEN 'Vendor Default' ELSE 'None' END END,
 		[strFinancingTransactionNumber] = A.strFinancingTransactionNumber
 	FROM voucherPayables A
 	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.intEntityId
