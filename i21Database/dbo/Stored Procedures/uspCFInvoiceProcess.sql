@@ -517,7 +517,7 @@ BEGIN TRY
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
 		,strDepartmentGrouping
-		,[strProductDescriptionForTotals]       
+		--,[strProductDescriptionForTotals]       
 		,[dblDiscountedCalculatedTotalPrice]    
 		,[dblDiscountedCalculatedNetPrice]      
 		,[dblDiscountedCalculatedGrossPrice]    
@@ -688,7 +688,7 @@ BEGIN TRY
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
 		,strDepartmentGrouping
-		,[strProductDescriptionForTotals]       
+		--,[strProductDescriptionForTotals]       
 		,[dblDiscountedCalculatedTotalPrice]    
 		,[dblDiscountedCalculatedNetPrice]      
 		,[dblDiscountedCalculatedGrossPrice]    
