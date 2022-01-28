@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnCTCashFlowTransactions]
 (
-	 @dtmDateFrom datetime
-	 ,@dtmDateTo  datetime
+	 @dtmDateFrom datetime = null
+	 ,@dtmDateTo  datetime = null
 )
 RETURNS @CTCashFlowTransactions TABLE(
 	intTransactionId INT,
@@ -46,13 +46,12 @@ BEGIN
 		left join tblSMCurrency cu on cu.intCurrencyID = cd.intCurrencyId
 		left join tblSMCurrency cm on cm.intCurrencyID = cu.intMainCurrencyId
 	where
-		cd.dtmCashFlowDate is not null
-		and cd.intContractStatusId in (1,4)
+		cd.intContractStatusId in (1,4)
 		and cd.dblCashPrice is not null
 		and isnull(txn.strApprovalStatus,'Approved') in ('Approved','No Need for Approval','Approved with Modifications')
 		and cd.dblBalance - isnull(dblScheduleQty,0) > 0
-		and cd.dtmCashFlowDate >= @dtmDateFrom
-		and cd.dtmCashFlowDate <= @dtmDateTo
+		and isnull(cd.dtmCashFlowDate,cd.dtmEndDate) >= isnull(@dtmDateFrom,isnull(cd.dtmCashFlowDate,cd.dtmEndDate))
+		and isnull(cd.dtmCashFlowDate,cd.dtmEndDate) <= isnull(@dtmDateTo,isnull(cd.dtmCashFlowDate,cd.dtmEndDate))
 
 	 RETURN  	
 END

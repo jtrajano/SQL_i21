@@ -135,7 +135,11 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 
 			-- Fixed Asset Unrealized Gain or Loss
 			SELECT id = 160, name = 'Unrealized Gain or Loss Fixed Asset' UNION ALL --GL-8450
-			SELECT id = 161, name = 'Unrealized Gain or Loss Offset Fixed Asset' --GL-8450
+			SELECT id = 161, name = 'Unrealized Gain or Loss Offset Fixed Asset' UNION ALL--GL-8450
+			
+			-- GL Revalue Accounts
+			SELECT id = 162, name = 'General Ledger Unrealized Gain or Loss' UNION ALL--GL-8450
+			SELECT id = 163, name = 'General Ledger Unrealized Gain or Loss Offset' --GL-8450
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id

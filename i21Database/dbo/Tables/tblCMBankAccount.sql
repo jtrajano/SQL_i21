@@ -19,7 +19,7 @@
     [strFax]                           NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [strWebsite]                       NVARCHAR (125) COLLATE Latin1_General_CI_AS NULL,
     [strEmail]                         NVARCHAR (225) COLLATE Latin1_General_CI_AS NULL,
-	[strIBAN]                          NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
+	[strIBAN]                          NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
 	[strSWIFT]                         NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
     [strBICCode]                       NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
 	[strBranchCode]                    NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,

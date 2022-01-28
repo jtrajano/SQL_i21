@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCMGenerateLGCashFlow]
+﻿CREATE PROCEDURE [dbo].[uspCMGenerateCTCashFlow]
 (
 	@tblRateTypeFilters CMCashFlowReportFilterRateTypeTable READONLY,
 	@tblRateFilters CMCashFlowReportFilterRateTable READONLY,
@@ -23,13 +23,13 @@ BEGIN
 		@dblBucket7 DECIMAL(18, 6) = 0,
 		@dblBucket8 DECIMAL(18, 6) = 0,
 		@dblBucket9 DECIMAL(18, 6) = 0,
-		@strTransactionType NVARCHAR(20)
+		@strContractType NVARCHAR(20)
 
-	SET @strTransactionType = 'Outbound Shipment'
+	SET @strContractType = 'Sale'
 
 	START_PROCESS:
 
-	IF @strTransactionType IS NULL
+	IF @strContractType IS NULL
 		GOTO END_PROCESS
 
 	INSERT INTO tblCMCashFlowReportSummaryDetail (
@@ -63,7 +63,7 @@ BEGIN
 		strTransactionId,
 		strTransactionType,
 		@dtmReportDate,
-		dblAmount * RateFilter.dblRateBucket1,
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket1) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
 		0,
@@ -80,7 +80,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](NULL, @dtmReportDate)
+	FROM [dbo].[fnCTCashFlowTransactions](NULL, @dtmReportDate)
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -99,8 +99,8 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
+
 
 	-- Bucket 1 - 7
 	UNION ALL
@@ -111,7 +111,7 @@ BEGIN
 		strTransactionType,
 		dtmDate,
 		0,
-		(dblAmount * RateFilter.dblRateBucket2),
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket2) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
 		0,
@@ -127,7 +127,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 1, @dtmReportDate), DATEADD(DAY, 7, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 1, @dtmReportDate), DATEADD(DAY, 7, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -146,8 +146,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
 
 	-- Bucket 8 - 14
 	UNION ALL
@@ -159,7 +158,7 @@ BEGIN
 		dtmDate,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket3),
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket3) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
 		0,
@@ -174,7 +173,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 8, @dtmReportDate), DATEADD(DAY, 14, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 8, @dtmReportDate), DATEADD(DAY, 14, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -193,8 +192,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
 
 	-- Bucket 15 - 21
 	UNION ALL
@@ -207,7 +205,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket4),
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket4) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
 		0,
@@ -221,7 +219,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 15, @dtmReportDate), DATEADD(DAY, 21, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 15, @dtmReportDate), DATEADD(DAY, 21, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -240,8 +238,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
 
 	-- Bucket 22 - 29
 	UNION ALL
@@ -255,7 +252,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket5),
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket5) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
 		0,
@@ -268,7 +265,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 22, @dtmReportDate), DATEADD(DAY, 29, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 22, @dtmReportDate), DATEADD(DAY, 29, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -287,8 +284,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
 
 	-- Bucket 30 - 60
 	UNION ALL
@@ -303,7 +299,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket6),
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket6) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
 		0,
@@ -315,7 +311,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 30, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 30, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -334,8 +330,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
 	
 	-- Bucket 60 - 90
 	UNION ALL
@@ -351,7 +346,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket7),
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket7) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
 		intCurrencyId,
@@ -362,7 +357,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -381,8 +376,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
 
 	-- Bucket 90 - 120
 	UNION ALL
@@ -399,7 +393,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket8),
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket8) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		intCurrencyId,
 		@intReportingCurrencyId,
@@ -409,7 +403,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -428,8 +422,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
 
 	-- Bucket 120+
 	UNION ALL
@@ -447,7 +440,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket9),
+		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket9) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		intCurrencyId,
 		@intReportingCurrencyId,
 		RateTypeFilter.intRateTypeBucket9,
@@ -456,7 +449,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -475,8 +468,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND ysnPosted = 1
-		AND strTransactionType = @strTransactionType
+		AND strTransactionType = @strContractType
 
 	-- Get sum of each bucket
 	SELECT 
@@ -514,7 +506,7 @@ BEGIN
 		intConcurrencyId
 	)
 	VALUES (
-			@dtmReportDate
+		@dtmReportDate
 		,@intReportingCurrencyId
 		,@intBankAccountId
 		,@intCompanyLocationId
@@ -529,7 +521,7 @@ BEGIN
 		,@dblBucket8
 		,@dblBucket9
 		,@intCashFlowReportId
-		,CASE WHEN @strTransactionType = 'Outbound Shipment' THEN 4 ELSE 5 END -- Report Code = 4 Total Sales Logistics Shipments; 5 = Total Purchase Logistics Shipments
+		,CASE WHEN @strContractType = 'Sale' THEN 6 ELSE 7 END -- Report Code = 6-> Total Sales Contracts; 7 -> Total Purchase Contracts
 		,1
 	)
 		
@@ -541,7 +533,7 @@ BEGIN
 	SET
 		intCashFlowReportSummaryId = @intCashFlowReportSummaryId
 	WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
-
+	
 	SET @dblBucket1 = 0
 	SET @dblBucket2 = 0
 	SET @dblBucket3 = 0
@@ -552,10 +544,10 @@ BEGIN
 	SET @dblBucket8 = 0
 	SET @dblBucket9 = 0
 
-	IF @strTransactionType = 'Outbound Shipment'
-		SET @strTransactionType = 'Inbound Shipments'
+	IF @strContractType = 'Sale'
+		SET @strContractType = 'Purchase'
 	ELSE 
-		SET @strTransactionType = NULL -- this will end the loop
+		SET @strContractType = NULL -- this will end the loop
 
 	GOTO START_PROCESS
 

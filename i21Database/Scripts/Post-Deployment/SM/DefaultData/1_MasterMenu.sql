@@ -8,8 +8,9 @@
 		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
 	END
 GO
-
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Documents (Portal)' AND strModuleName = 'Accounts Receivable') 
+	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Charges and Premiums' AND strModuleName = 'Ticket Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -121,6 +122,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 		VALUES (49, N'Financial Reports', N'Financial Report Designer', 0, N'Financial Reports', NULL, N'Folder', N'FinancialReportDesigner', N'small-folder', 1, 0, 0, 0, 5, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 		VALUES (50, N'Financial Report Viewer', N'Financial Report Designer', 49, N'Financial Report Viewer', N'Activity', N'Screen', N'FinancialReportDesigner.view.FinancialReports', N'small-menu-activity', 0, 0, 0, 1, NULL, 1)
+		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+		VALUES (51, N'Financial Report Generator', N'Financial Report Designer', 49, N'Financial Report Generator', N'Activity', N'Screen', N'FinancialReportDesigner.view.FinancialReportsGenerator', N'small-menu-activity', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 		VALUES (52, N'Row Designer', N'Financial Report Designer', 49, N'Row Designer', N'Maintenance', N'Screen', N'FinancialReportDesigner.view.RowDesigner', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -1290,6 +1293,9 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @FinancialReportsMaintenanceParentM
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Financial Report Viewer' AND strModuleName = N'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'FinancialReportDesigner.view.FinancialReports' WHERE strMenuName = N'Financial Report Viewer' AND strModuleName = N'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Financial Report Generator' AND strModuleName = N'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId)
+UPDATE tblSMMasterMenu SET strCommand = N'FinancialReportDesigner.view.FinancialReportsGenerator' WHERE strMenuName = N'Financial Report Generator' AND strModuleName = N'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId
 
 /* START OF RENAMING  */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Budget Maintenance' AND strModuleName = 'Financial Report Designer' AND intParentMenuID = @FinancialReportsMaintenanceParentMenuId)
@@ -4025,6 +4031,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Po
 	VALUES (N'Ticket Pools', N'Ticket Management', @TicketManagementMaintenanceParentMenuId, N'Ticket Pools', N'Maintenance', N'Screen', N'Grain.view.TicketPool?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.TicketPool?showSearch=true', intSort = 8 WHERE strMenuName = 'Ticket Pools' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Charges and Premiums' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Charges and Premiums', N'Ticket Management', @TicketManagementMaintenanceParentMenuId, N'Charges and Premiums', N'Maintenance', N'Screen', N'Grain.view.ChargeAndPremium?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ChargeAndPremium?showSearch=true', intSort = 9 WHERE strMenuName = 'Charges and Premiums' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
+
 --disconnec
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Disconnected Process' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])

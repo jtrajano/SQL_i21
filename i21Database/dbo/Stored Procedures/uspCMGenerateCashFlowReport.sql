@@ -11,7 +11,8 @@ DECLARE
 	@intReportingCurrencyId INT,
 	@intBankId INT,
 	@intBankAccountId INT,
-	@intCompanyLocationId INT
+	@intCompanyLocationId INT,
+	@strError NVARCHAR(MAX)
 
 	-- Get Filters
 	SELECT 
@@ -60,41 +61,77 @@ DECLARE
 	FROM tblCMCashFlowReportRateType
 	WHERE intCashFlowReportId = @intCashFlowReportId
 
-	-- Total Cash
-	EXEC [dbo].[uspCMGenerateCMCashFlow]
-		@tblRateTypeFilters = @tblRateTypeFilters,
-		@tblRateFilters = @tblRateFilters,
-		@intCashFlowReportId = @intCashFlowReportId, 
-		@dtmReportDate = @dtmReportDate, 
-		@intReportingCurrencyId = @intReportingCurrencyId, 
-		@intBankId = @intBankId, 
-		@intBankAccountId = @intBankAccountId, 
-		@intCompanyLocationId = @intCompanyLocationId
+	BEGIN TRY
+		-- Total Cash
+		EXEC [dbo].[uspCMGenerateCMCashFlow]
+			@tblRateTypeFilters = @tblRateTypeFilters,
+			@tblRateFilters = @tblRateFilters,
+			@intCashFlowReportId = @intCashFlowReportId, 
+			@dtmReportDate = @dtmReportDate, 
+			@intReportingCurrencyId = @intReportingCurrencyId, 
+			@intBankId = @intBankId, 
+			@intBankAccountId = @intBankAccountId, 
+			@intCompanyLocationId = @intCompanyLocationId
+	END TRY
+	BEGIN CATCH
+		SELECT @strError = ERROR_MESSAGE();
+		GOTO _RAISERROR
+	END CATCH
 
-	-- Total AP
-	EXEC [dbo].[uspCMGenerateAPCashFlow]
-		@tblRateTypeFilters = @tblRateTypeFilters,
-		@tblRateFilters = @tblRateFilters,
-		@intCashFlowReportId = @intCashFlowReportId, 
-		@dtmReportDate = @dtmReportDate, 
-		@intReportingCurrencyId = @intReportingCurrencyId, 
-		@intBankId = @intBankId, 
-		@intBankAccountId = @intBankAccountId, 
-		@intCompanyLocationId = @intCompanyLocationId
+	BEGIN TRY
+		-- Total AP
+		EXEC [dbo].[uspCMGenerateAPCashFlow]
+			@tblRateTypeFilters = @tblRateTypeFilters,
+			@tblRateFilters = @tblRateFilters,
+			@intCashFlowReportId = @intCashFlowReportId, 
+			@dtmReportDate = @dtmReportDate, 
+			@intReportingCurrencyId = @intReportingCurrencyId, 
+			@intBankId = @intBankId, 
+			@intBankAccountId = @intBankAccountId, 
+			@intCompanyLocationId = @intCompanyLocationId
+	END TRY
+	BEGIN CATCH
+		SELECT @strError = ERROR_MESSAGE();
+		GOTO _RAISERROR
+	END CATCH
 
-	-- Total AR
-	EXEC [dbo].[uspCMGenerateARCashFlow]
-		@tblRateTypeFilters = @tblRateTypeFilters,
-		@tblRateFilters = @tblRateFilters,
-		@intCashFlowReportId = @intCashFlowReportId, 
-		@dtmReportDate = @dtmReportDate, 
-		@intReportingCurrencyId = @intReportingCurrencyId, 
-		@intBankId = @intBankId, 
-		@intBankAccountId = @intBankAccountId, 
-		@intCompanyLocationId = @intCompanyLocationId
+	BEGIN TRY
+		-- Total AR
+		EXEC [dbo].[uspCMGenerateARCashFlow]
+			@tblRateTypeFilters = @tblRateTypeFilters,
+			@tblRateFilters = @tblRateFilters,
+			@intCashFlowReportId = @intCashFlowReportId, 
+			@dtmReportDate = @dtmReportDate, 
+			@intReportingCurrencyId = @intReportingCurrencyId, 
+			@intBankId = @intBankId, 
+			@intBankAccountId = @intBankAccountId, 
+			@intCompanyLocationId = @intCompanyLocationId
+	END TRY
+	BEGIN CATCH
+		SELECT @strError = ERROR_MESSAGE();
+		GOTO _RAISERROR
+	END CATCH
 
-	-- Logistics Shipments
-	EXEC [dbo].[uspCMGenerateLGCashFlow]
+	BEGIN TRY
+		-- Logistics Shipments
+		EXEC [dbo].[uspCMGenerateLGCashFlow]
+			@tblRateTypeFilters = @tblRateTypeFilters,
+			@tblRateFilters = @tblRateFilters,
+			@intCashFlowReportId = @intCashFlowReportId, 
+			@dtmReportDate = @dtmReportDate, 
+			@intReportingCurrencyId = @intReportingCurrencyId, 
+			@intBankId = @intBankId, 
+			@intBankAccountId = @intBankAccountId, 
+			@intCompanyLocationId = @intCompanyLocationId
+	END TRY
+	BEGIN CATCH
+		SELECT @strError = ERROR_MESSAGE();
+		GOTO _RAISERROR
+	END CATCH
+
+	BEGIN TRY
+	-- Contracts: Sales Contracts and Purchase Contracts
+	EXEC [dbo].[uspCMGenerateCTCashFlow]
 		@tblRateTypeFilters = @tblRateTypeFilters,
 		@tblRateFilters = @tblRateFilters,
 		@intCashFlowReportId = @intCashFlowReportId, 
@@ -103,4 +140,18 @@ DECLARE
 		@intBankId = @intBankId, 
 		@intBankAccountId = @intBankAccountId, 
 		@intCompanyLocationId = @intCompanyLocationId
+	END TRY
+	BEGIN CATCH
+		SELECT @strError = ERROR_MESSAGE();
+		GOTO _RAISERROR
+	END CATCH
+
+GOTO _EXIT_PROCESS
+
+_RAISERROR:
+	RAISERROR(@strError, 16, 1)
+	RETURN
+
+_EXIT_PROCESS:
+
  END

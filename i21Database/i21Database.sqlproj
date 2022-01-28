@@ -487,6 +487,8 @@
     <Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
     <Build Include="dbo\Stored Procedures\uspSCISGetTicketBinHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFModifyTFRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGenerateCTCashFlow.sql" />
+    <Build Include="dbo\Tables\tblCTOrderTypeFX.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -5640,6 +5642,7 @@
     <Build Include="dbo\Views\vyuICItemSubLocations.sql" />
     <Build Include="dbo\Views\vyuICItemLot.sql" />
     <Build Include="dbo\Views\vyuGLMulticurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuGLMulticurrencyRevalueGJ.sql" />
     <Build Include="dbo\Views\vyuGLSearchMulticurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuAPMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
@@ -8031,6 +8034,8 @@
     <Build Include="dbo\Views\vyuSMFreightTerms.sql" />
     <Build Include="dbo\Views\vyuCMBankLoan.sql" />
     <Build Include="dbo\Views\vyuCMBankLoanDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBTForAccrualPosting.sql" />
+    <Build Include="dbo\Views\vyuCMBTForAccrualSwapPosting.sql" />
     <Build Include="tblICItemBook.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeInvoiceDelete.sql" />
     <Build Include="dbo\Tables\tblHDTimeOffRequest.sql" />
@@ -10167,6 +10172,8 @@
     <Build Include="dbo\Functions\fnGRFindOriginalCustomerStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
+    <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherStatusFromCM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10490,6 +10497,7 @@
     <None Include="Scripts\Post-Deployment\GL\02_UpdateGeneralJournalDetailCurrency.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <Build Include="dbo\Functions\fnCTCashFlowTransactions.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

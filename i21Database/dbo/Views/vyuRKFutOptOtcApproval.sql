@@ -25,6 +25,10 @@ SELECT  intFutOptTransactionId
 	, dblApprovalAmount = smapprove.dblAmount
 	, dtmDueDate = smapprove.dtmDueDate
 	, intApprovalEntityId = approval.intEntityId
+	, strOrderType = (CASE WHEN der.intOrderTypeId = 1 THEN 'GTC'
+							WHEN der.intOrderTypeId = 2 THEN 'Limit'
+							WHEN der.intOrderTypeId = 3 THEN 'Market'
+							ELSE '' END)
 FROM  tblSMTransaction approval
 INNER JOIN tblRKFutOptTransaction der
 	ON der.intFutOptTransactionId = approval.intRecordId

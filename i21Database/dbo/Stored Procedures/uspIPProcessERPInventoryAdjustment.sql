@@ -788,132 +788,134 @@ BEGIN TRY
 						,@dblWeightPerQty = dblWeightPerQty
 						,@dblQty = dblQty
 					FROM tblICLot
-					WHERE intLotId=@intLotId
+					WHERE intLotId = @intLotId
 				END
-
-				EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-					,@intItemId = @intItemId
-					,@intManufacturingId = NULL
-					,@intSubLocationId = NULL
-					,@intLocationId = @intCompanyLocationId
-					,@intOrderTypeId = NULL
-					,@intBlendRequirementId = NULL
-					,@intPatternCode = 33
-					,@ysnProposed = 0
-					,@strPatternString = @intTransactionId OUTPUT
-
-				SELECT @intItemLocationId = NULL
-
-				SELECT @intItemLocationId = intItemLocationId
-				FROM tblICItemLocation
-				WHERE intItemId = @intItemId
-					AND intLocationId = @intCompanyLocationId
-
-				EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
-					,@strBatchId OUTPUT
-
-				SELECT @dtmDate = dbo.fnGetBusinessDate(GETDATE(), @intCompanyLocationId)
-
-				IF @dblLastCost IS NULL
+				ELSE
 				BEGIN
-					SELECT @dblLastCost = t.dblStandardCost
-					FROM tblICItemPricing t WITH (NOLOCK)
-					WHERE t.intItemId = @intItemId
-						AND t.intItemLocationId = @intItemLocationId
+					EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+						,@intItemId = @intItemId
+						,@intManufacturingId = NULL
+						,@intSubLocationId = NULL
+						,@intLocationId = @intCompanyLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 33
+						,@ysnProposed = 0
+						,@strPatternString = @intTransactionId OUTPUT
+
+					SELECT @intItemLocationId = NULL
+
+					SELECT @intItemLocationId = intItemLocationId
+					FROM tblICItemLocation
+					WHERE intItemId = @intItemId
+						AND intLocationId = @intCompanyLocationId
+
+					EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+						,@strBatchId OUTPUT
+
+					SELECT @dtmDate = dbo.fnGetBusinessDate(GETDATE(), @intCompanyLocationId)
+
+					IF @dblLastCost IS NULL
+					BEGIN
+						SELECT @dblLastCost = t.dblStandardCost
+						FROM tblICItemPricing t WITH (NOLOCK)
+						WHERE t.intItemId = @intItemId
+							AND t.intItemLocationId = @intItemLocationId
+					END
+
+					DELETE
+					FROM @ItemsForPost
+
+					--Lot Tracking
+					INSERT INTO @ItemsForPost (
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId
+						,intSourceTransactionId
+						,strSourceTransactionId
+						)
+					SELECT intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,intItemUOMId = @intItemUOMId
+						,dtmDate = @dtmDate
+						,dblQty = - @dblQuantity
+						,dblUOMQty = 1
+						,dblCost = @dblLastCost
+						,dblSalesPrice = 0
+						,intCurrencyId = NULL
+						,dblExchangeRate = 1
+						,intTransactionId = @intTransactionId
+						,intTransactionDetailId = @intTransactionId
+						,strTransactionId = @intTrxSequenceNo
+						,intTransactionTypeId = 8
+						,intLotId = @intLotId
+						,intSubLocationId = @intCompanyLocationSubLocationId
+						,intStorageLocationId = @intStorageLocationId
+						,intSourceTransactionId = 8
+						,strSourceTransactionId = @intTransactionId
+
+					DELETE
+					FROM @GLEntries
+
+					-- Call the post routine 
+					INSERT INTO @GLEntries (
+						[dtmDate]
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+						,[strRateType]
+						,[intSourceEntityId]
+						,[intCommodityId]
+						)
+					EXEC dbo.uspICPostCosting @ItemsForPost
+						,@strBatchId
+						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+						,@intUserId
+
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
 				END
-
-				DELETE
-				FROM @ItemsForPost
-
-				--Lot Tracking
-				INSERT INTO @ItemsForPost (
-					intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,dtmDate
-					,dblQty
-					,dblUOMQty
-					,dblCost
-					,dblSalesPrice
-					,intCurrencyId
-					,dblExchangeRate
-					,intTransactionId
-					,intTransactionDetailId
-					,strTransactionId
-					,intTransactionTypeId
-					,intLotId
-					,intSubLocationId
-					,intStorageLocationId
-					,intSourceTransactionId
-					,strSourceTransactionId
-					)
-				SELECT intItemId = @intItemId
-					,intItemLocationId = @intItemLocationId
-					,intItemUOMId = @intItemUOMId
-					,dtmDate = @dtmDate
-					,dblQty = - @dblQuantity
-					,dblUOMQty = 1
-					,dblCost = @dblLastCost
-					,dblSalesPrice = 0
-					,intCurrencyId = NULL
-					,dblExchangeRate = 1
-					,intTransactionId = @intTransactionId
-					,intTransactionDetailId = @intTransactionId
-					,strTransactionId = @intTrxSequenceNo
-					,intTransactionTypeId = 8
-					,intLotId = @intLotId
-					,intSubLocationId = @intCompanyLocationSubLocationId
-					,intStorageLocationId = @intStorageLocationId
-					,intSourceTransactionId = 8
-					,strSourceTransactionId = @intTransactionId
-
-				DELETE
-				FROM @GLEntries
-
-				-- Call the post routine 
-				INSERT INTO @GLEntries (
-					[dtmDate]
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]
-					,[dblDebitReport]
-					,[dblCreditForeign]
-					,[dblCreditReport]
-					,[dblReportingRate]
-					,[dblForeignRate]
-					,[strRateType]
-					,[intSourceEntityId]
-					,[intCommodityId]
-					)
-				EXEC dbo.uspICPostCosting @ItemsForPost
-					,@strBatchId
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@intUserId
-
-				EXEC dbo.uspGLBookEntries @GLEntries
-					,1
 			END
 
 			MOVE_TO_ARCHIVE:

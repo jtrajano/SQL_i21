@@ -62,7 +62,8 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@strType NVARCHAR(50)
 		,@strReceiptNumber NVARCHAR(50)
-		,@intWeightAdjItemId int
+		,@intNoOfReceipt INT
+		,@intWeightAdjItemId INT
 		,@dblCostAdjustment NUMERIC(18, 6)
 		,@intNoOfItem INT
 		,@intLocationId int
@@ -389,6 +390,7 @@ BEGIN TRY
 				,@intContractDetailId = NULL
 				,@strType = NULL
 				,@strReceiptNumber = NULL
+				,@intNoOfReceipt = NULL
 
 			SELECT @intItemId = BD.intItemId
 			FROM dbo.tblAPBillDetail BD
@@ -504,6 +506,34 @@ BEGIN TRY
 					AND BD.intContractDetailId IS NOT NULL
 					AND BD.intBillDetailId = @intBillDetailId
 				JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+			END
+
+			IF ISNULL(@strReceiptNumber, '') = ''
+			BEGIN
+				SELECT @intNoOfReceipt = COUNT(1)
+				FROM tblLGLoad L WITH (NOLOCK)
+				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+					AND L.intShipmentType = 1
+					AND LD.intPContractDetailId = @intContractDetailId
+					AND L.intShipmentStatus <> 10
+					AND LD.intItemId = @intItemId
+				JOIN tblICInventoryReceiptItem RI WITH (NOLOCK) ON RI.intSourceId = LD.intLoadDetailId
+					AND RI.intLineNo = LD.intPContractDetailId
+				JOIN tblICInventoryReceipt R WITH (NOLOCK) ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+
+				IF ISNULL(@intNoOfReceipt, 0) = 1
+				BEGIN
+					SELECT TOP 1 @strReceiptNumber = R.strReceiptNumber
+					FROM tblLGLoad L WITH (NOLOCK)
+					JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+						AND L.intShipmentType = 1
+						AND LD.intPContractDetailId = @intContractDetailId
+						AND L.intShipmentStatus <> 10
+						AND LD.intItemId = @intItemId
+					JOIN tblICInventoryReceiptItem RI WITH (NOLOCK) ON RI.intSourceId = LD.intLoadDetailId
+						AND RI.intLineNo = LD.intPContractDetailId
+					JOIN tblICInventoryReceipt R WITH (NOLOCK) ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+				END
 			END
 
 			IF ISNULL(@strType, '') = 'Other Charge'

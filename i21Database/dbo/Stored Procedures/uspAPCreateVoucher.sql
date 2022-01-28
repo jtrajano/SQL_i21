@@ -444,7 +444,11 @@ BEGIN TRY
 		[intBookId]				,
 		[intSubBookId]			,
 		[intCurrencyId]			,
-		[intSubCurrencyCents]
+		[intSubCurrencyCents]	,
+		[intDefaultDisbursementBank],
+		[intDisbursementBank]	,
+		[strFinancingSourcedFrom],
+		[strFinancingTransactionNumber]
 	)
 	VALUES (
 		[intTermsId]			,
@@ -485,7 +489,11 @@ BEGIN TRY
 		[intBookId]				,
 		[intSubBookId]			,
 		[intCurrencyId]			,
-		[intSubCurrencyCents]
+		[intSubCurrencyCents]	,
+		[intDisbursementBank]	,
+		[intDisbursementBank]	,
+		[strFinancingSourcedFrom],
+		[strFinancingTransactionNumber]
 	)
 	OUTPUT 
 		inserted.intBillId 

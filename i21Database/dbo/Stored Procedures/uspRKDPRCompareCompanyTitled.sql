@@ -273,8 +273,10 @@ FROM (
 		, a.strTicketNumber
 		, a.intTicketId
 	FROM #tempFinalFirstRun a
-	INNER JOIN #tempFinalSecondRun b ON b.strTransactionReferenceId = a.strTransactionReferenceId
-	AND (a.dblTotal - b.dblTotal) <> 0
+	INNER JOIN #tempFinalSecondRun b 
+		ON b.strTransactionReferenceId = a.strTransactionReferenceId
+		AND a.intTransactionReferenceDetailId = b.intTransactionReferenceDetailId
+
 
 	UNION ALL
 	SELECT 
@@ -323,6 +325,7 @@ FROM (
 	WHERE b.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFinalFirstRun)
 ) t
 LEFT JOIN #tempPivotTable PT ON PT.strTransactionReferenceId = t.strTransactionReferenceId
+WHERE  ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0) <> 0
 
 
 DROP TABLE #FirstRun
