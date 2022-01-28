@@ -410,11 +410,16 @@ BEGIN
 					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
 					 ORDER BY intFromQty DESC), 0)
-				,ROUND((ISNULL(
+				,(ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
 					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
-					 ORDER BY intFromQty DESC), 0) * dblQuantity),2)
+					 ORDER BY intFromQty DESC), 0) * dblQuantity)
+				--,ROUND((ISNULL(
+				--(SELECT TOP 1 ISNULL(dblRate, 0)
+				--FROM @tblCFDiscountschedule
+				--WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
+				--ORDER BY intFromQty DESC), 0) * dblQuantity),2)
 				,dblTotalAmount	
 				,dblDiscountEP		
 				,dblAPR			
@@ -539,11 +544,16 @@ BEGIN
 					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
 					 ORDER BY intFromQty DESC), 0)
-				,ROUND((ISNULL(
+				,(ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
 					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
-					 ORDER BY intFromQty DESC), 0) * dblQuantity),2)
+					 ORDER BY intFromQty DESC), 0) * dblQuantity)
+				--,ROUND((ISNULL(
+				--(SELECT TOP 1 ISNULL(dblRate, 0)
+				--FROM @tblCFDiscountschedule
+				--WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
+				--ORDER BY intFromQty DESC), 0) * dblQuantity),2)
 				,dblTotalAmount	
 				,dblDiscountEP		
 				,dblAPR			
