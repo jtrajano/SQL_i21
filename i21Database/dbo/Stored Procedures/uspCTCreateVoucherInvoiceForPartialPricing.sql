@@ -3,8 +3,7 @@
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
 	@ysnDoUpdateCost		BIT = 0,
-	@intTransactionId		INT = NULL,
-	@strCreatedVoucherInvoiceIds NVARCHAR(1000) = '' OUTPUT
+	@intTransactionId		INT = NULL
 	
 AS
 
@@ -145,11 +144,6 @@ BEGIN TRY
 						,@intUserId
 						,@intNewBillId OUTPUT
 
-					if (isnull(@intNewBillId,0) > 0)
-					begin
-						set @strCreatedVoucherInvoiceIds = @strCreatedVoucherInvoiceIds + ',' + convert(nvarchar(20),@intNewBillId);
-					end
-
 					if (@intPricingTypeId = 2)
 					begin
 						update tblICInventoryReceiptItem set ysnAllowVoucher = 0 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
@@ -165,7 +159,6 @@ BEGIN TRY
 		exec uspCTCreateInvoice
 			@intContractDetailId = @intContractDetailId
 			,@intUserId = @intUserId
-			,@strCreatedVoucherInvoiceIds = @strCreatedVoucherInvoiceIds output
 
 	END
 
