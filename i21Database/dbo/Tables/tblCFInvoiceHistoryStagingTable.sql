@@ -161,7 +161,6 @@
     [ysnPageBreakByPrimarySortOrder]		BIT             NULL,
 	[ysnSummaryByDeptDriverPinProd]			BIT             NULL,
     [strDepartmentGrouping]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strProductDescriptionForTotals]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblDiscountedCalculatedTotalPrice]     NUMERIC(18,6) NULL,
     [dblDiscountedCalculatedNetPrice]       NUMERIC(18,6) NULL,
     [dblDiscountedCalculatedGrossPrice]     NUMERIC(18,6) NULL,
