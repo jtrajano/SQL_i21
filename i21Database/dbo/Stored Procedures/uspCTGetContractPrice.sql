@@ -101,10 +101,12 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 										SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,@intItemUOMId,AD.dblQtyShipped))
 									FROM
 										tblARInvoiceDetail AD
+										join tblARInvoice I on I.intInvoiceId = AD.intInvoiceId
 									WHERE
 										AD.intContractDetailId = @intContractDetailId
 										and isnull(AD.intInventoryShipmentChargeId,0) = 0
 										and isnull(AD.ysnReturned,0) = 0
+										and I.strTransactionType = 'Invoice'
 								)
 							else
 								(
@@ -113,9 +115,11 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 									FROM
 										tblCTPriceFixationDetailAPAR AA
 										JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
+										join tblARInvoice I on I.intInvoiceId = AD.intInvoiceId
 									WHERE
 										AA.intPriceFixationDetailId = @intPriceFixationDetailId
 										and isnull(AD.ysnReturned,0) = 0
+										and I.strTransactionType = 'Invoice'
 								)
 							end
 					end
@@ -131,10 +135,12 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 										count(AD.intInvoiceDetailId)
 									FROM
 										tblARInvoiceDetail AD
+										join tblARInvoice I on I.intInvoiceId = AD.intInvoiceId
 									WHERE
 										AD.intContractDetailId = @intContractDetailId
 										and isnull(AD.intInventoryShipmentChargeId,0) = 0
                                         and isnull(AD.ysnReturned,0) = 0
+										and I.strTransactionType = 'Invoice'
 								)
 							else
 								(
