@@ -67,8 +67,8 @@ BEGIN TRY
 		 +'<DestinationLotNo>'+ IsNULL(strDestinationLotNo,'')  +'</DestinationLotNo>'  
 		 +'<Quantity>'+ ltrim(dblQuantity)  +'</Quantity>'  
 		 +'<QuantityUOM>'+ IsNULL(strQuantityUOM,'')  +'</QuantityUOM>'  
-		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  
-		 +'<Notes>'+ IsNULL(strNotes,'')  +'</Notes>'  
+		 +'<ReasonCode>'+ dbo.fnEscapeXML(IsNULL(strReasonCode,''))  +'</ReasonCode>'  
+		 +'<Notes>'+ dbo.fnEscapeXML(IsNULL(strNotes,''))  +'</Notes>'  
 		FROM tblIPLotMergeFeed
 		WHERE intLotMergeFeedId = @intLotMergeFeedId
 
