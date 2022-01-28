@@ -9595,6 +9595,13 @@
     <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuRestApiVendors.sql" />
     <Build Include="dbo\Views\vyuApiTransportTerminals.sql" />
+    <Build Include="dbo\Views\vyuApiApproval.sql" />
+    <Build Include="dbo\Views\vyuApiActivity.sql" />
+    <Build Include="dbo\Views\vyuApiAttachment.sql" />
+    <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessage.sql" />
+    <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessages.sql" />
+    <Build Include="dbo\Views\vyuApiSalesOrder.sql" />
+    <Build Include="dbo\Views\vyuApiSalesOrderDetailr.sql" />
     <Build Include="dbo\Views\vyuRestApiVoucherChecks.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTickets.sql" />
