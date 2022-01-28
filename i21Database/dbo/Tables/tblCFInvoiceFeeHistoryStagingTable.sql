@@ -24,7 +24,6 @@
     [dtmStartDate]                  DATETIME        NULL,
     [dtmEndDate]                    DATETIME        NULL,
     [strInvoiceNumberHistory]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [dblTieredDiscountFeeAmount]    NUMERIC (18, 6) NULL,
-    [strFeeProfileDescription]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [dblTieredDiscountFeeAmount]    NUMERIC (18, 6) NULL
 );
 

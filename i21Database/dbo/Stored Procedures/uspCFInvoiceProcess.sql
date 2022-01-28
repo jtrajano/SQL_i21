@@ -517,7 +517,7 @@ BEGIN TRY
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
 		,strDepartmentGrouping
-		--,[strProductDescriptionForTotals]       
+		,[strProductDescriptionForTotals]       
 		,[dblDiscountedCalculatedTotalPrice]    
 		,[dblDiscountedCalculatedNetPrice]      
 		,[dblDiscountedCalculatedGrossPrice]    
@@ -688,7 +688,7 @@ BEGIN TRY
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
 		,strDepartmentGrouping
-		--,[strProductDescriptionForTotals]       
+		,[strProductDescriptionForTotals]       
 		,[dblDiscountedCalculatedTotalPrice]    
 		,[dblDiscountedCalculatedNetPrice]      
 		,[dblDiscountedCalculatedGrossPrice]    
@@ -932,7 +932,6 @@ BEGIN TRY
 		,dtmEndDate
 		,strInvoiceNumberHistory
 		,dblTieredDiscountFeeAmount
-		,strFeeProfileDescription
 	)
 	SELECT 
 		intFeeLoopId
@@ -961,7 +960,6 @@ BEGIN TRY
 		,dtmEndDate
 		,strInvoiceReportNumber
 		,dblTieredDiscountFeeAmount
-		,strFeeProfileDescription
 	FROM
 	tblCFInvoiceFeeStagingTable
 	WHERE strUserId = @username
