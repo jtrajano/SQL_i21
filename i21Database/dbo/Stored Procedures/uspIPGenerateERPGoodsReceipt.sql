@@ -271,7 +271,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<VendorAccountNo>' + ISNULL(@strVendorAccountNum, '') + '</VendorAccountNo>'
 
-		SELECT @strXML += '<VendorRefNo>' + ISNULL(@strVendorRefNo, '') + '</VendorRefNo>'
+		SELECT @strXML += '<VendorRefNo>' + dbo.fnEscapeXML(ISNULL(@strVendorRefNo, '')) + '</VendorRefNo>'
 
 		SELECT @strXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + '</ReceiptNo>'
 
@@ -279,7 +279,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<BOLNo>' + ISNULL(@strBillOfLading, '') + '</BOLNo>'
 
-		SELECT @strXML += '<WarehouseRefNo>' + ISNULL(@strWarehouseRefNo, '') + '</WarehouseRefNo>'
+		SELECT @strXML += '<WarehouseRefNo>' + dbo.fnEscapeXML(ISNULL(@strWarehouseRefNo, '')) + '</WarehouseRefNo>'
 
 		SELECT @strXML += '<TransferOrderNo>' + ISNULL(@strTransferNo, '') + '</TransferOrderNo>'
 
@@ -526,7 +526,7 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<StorageUnit>' + ISNULL(@strStorageLocation, '') + '</StorageUnit>'
 
-			SELECT @strItemXML += '<ContainerNo>' + ISNULL(@strContainerNumber, '') + '</ContainerNo>'
+			SELECT @strItemXML += '<ContainerNo>' + dbo.fnEscapeXML(ISNULL(@strContainerNumber, '')) + '</ContainerNo>'
 
 			SELECT @strItemXML += '<ERPPONumber>' + ISNULL(@strERPPONumber, '') + '</ERPPONumber>'
 
@@ -659,8 +659,8 @@ BEGIN TRY
 				+ '<Condition>' + ISNULL(RIL.strCondition, '') + '</Condition>'
 				+ '<Markings>' + ISNULL(RIL.strMarkings, '') + '</Markings>'
 				+ '<Origin>' + ISNULL(O.strCountry, '') + '</Origin>'
-				+ '<LotAlias>' + ISNULL(RIL.strLotAlias, '') + '</LotAlias>'
-				+ '<Garden>' + ISNULL(RIL.strGarden, '') + '</Garden>'
+				+ '<LotAlias>' + dbo.fnEscapeXML(ISNULL(RIL.strLotAlias, '')) + '</LotAlias>'
+				+ '<Garden>' + dbo.fnEscapeXML(ISNULL(RIL.strGarden, '')) + '</Garden>'
 				+ '</detail>'
 			FROM tblICInventoryReceiptItemLot RIL
 			JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
