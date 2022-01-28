@@ -405,7 +405,7 @@ DECLARE @intEntityId			INT
 	   ,@intRackItemId			INT
 	   ,@intEntityLocationId	INT
 	   ,@intRackLocationId		INT
-	   ,@intCustomerLocationId	INT
+	   ,@intCustomerLocationId	INT = NULL
 	   ,@intCategoryId			INT				
 	   ,@intCurrencyId			INT	
 	   ,@intProgramId			INT
@@ -500,9 +500,28 @@ BEGIN
 
 	IF @intEntityId IS NULL
 	BEGIN
+		--@intCustomerLocationId
+		SELECT TOP 1 @intCustomerLocationId = EL.intEntityLocationId 
+		FROM tblEMEntity E
+			INNER JOIN tblEMEntityLocation EL 
+		ON E.intEntityId = EL.intEntityId
+		WHERE E.strName = @strCustomerName AND
+			RTRIM(LTRIM(LOWER(EL.strLocationName))) = RTRIM(LTRIM(LOWER(@strCustomerLocation)))
+
 		SELECT TOP 1 @intEntityId = E.intEntityId
 		FROM tblEMEntity E
 		WHERE E.strName = @strCustomerName
+	END
+	ELSE
+	BEGIN
+		--@intCustomerLocationId
+		SELECT TOP 1 @intCustomerLocationId = EL.intEntityLocationId 
+		FROM tblEMEntity E
+			INNER JOIN tblEMEntityLocation EL 
+		ON E.intEntityId = EL.intEntityId
+		WHERE E.strEntityNo = @strEntityNo AND
+			RTRIM(LTRIM(LOWER(EL.strLocationName))) = RTRIM(LTRIM(LOWER(@strCustomerLocation)))
+
 	END
 
 	--@intEntityVendorId
@@ -541,14 +560,6 @@ BEGIN
 	SELECT TOP 1 @intRackLocationId = EL.intEntityLocationId 
 	FROM tblEMEntityLocation EL
 	WHERE RTRIM(LTRIM(LOWER(EL.strLocationName))) = RTRIM(LTRIM(LOWER(@strRackLocation)))
-
-	--@intCustomerLocationId
-	SELECT TOP 1 @intCustomerLocationId = EL.intEntityLocationId 
-	FROM tblEMEntity E
-		INNER JOIN tblEMEntityLocation EL 
-	ON E.intEntityId = EL.intEntityId
-	WHERE E.strEntityNo = @strEntityNo AND
-		RTRIM(LTRIM(LOWER(EL.strLocationName))) = RTRIM(LTRIM(LOWER(@strCustomerLocation)))
 
 	--@intCategoryId
 	SELECT TOP 1 @intCategoryId = I.intCategoryId 
