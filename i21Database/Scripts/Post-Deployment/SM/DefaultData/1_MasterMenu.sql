@@ -410,6 +410,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'System Dashboard' AND strModule
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Dashboard Distribution' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Distribution Burst Group' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Schedule' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardMaintenanceParentMenuId
 /* END OF DELETING */
 
 /* SYSTEM MANAGER */
@@ -983,6 +984,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Log
 	VALUES (N'Email Log', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Email Log', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.EmailHistory?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 17, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.EmailHistory?showSearch=true', intSort = 17 WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Power BI Reports', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Power BI Reports', N'Maintenance', N'Screen', N'i21.view.PowerBIReport?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 18, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PowerBIReport?showSearch=true', intSort = 18 WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 
 /* Start Delete */
