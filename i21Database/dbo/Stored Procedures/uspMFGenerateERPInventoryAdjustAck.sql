@@ -90,7 +90,7 @@ BEGIN TRY
 			+'<StorageUnit>'+	@strStorageUnit   +'</StorageUnit>'
 			+'<AdjustmentNo>'+	IsNULL(@strAdjustmentNo,'')    +'</AdjustmentNo>'
 			+'<StatusId>'+	ltrim(@intStatusId)     +'</StatusId>'
-			+'<StatusText>'+	IsNULL(@strStatusText,'')     +'</StatusText>'
+			+'<StatusText>'+	dbo.fnEscapeXML(IsNULL(@strStatusText,''))     +'</StatusText>'
 			+ '</header>'
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN

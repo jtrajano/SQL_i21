@@ -334,7 +334,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<DueDate>' + ISNULL(CONVERT(VARCHAR, @dtmDueDate, 112), '') + '</DueDate>'
 
-		SELECT @strXML += '<ReferenceNo>' + ISNULL(@strReference, '') + '</ReferenceNo>'
+		SELECT @strXML += '<ReferenceNo>' + dbo.fnEscapeXML(ISNULL(@strReference, '')) + '</ReferenceNo>'
 
 		SELECT @strXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
 
@@ -344,7 +344,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<VoucherTotal>' + LTRIM(ISNULL(@dblTotal, 0)) + '</VoucherTotal>'
 
-		SELECT @strXML += '<Remarks>' + ISNULL(@strRemarks, '') + '</Remarks>'
+		SELECT @strXML += '<Remarks>' + dbo.fnEscapeXML(ISNULL(@strRemarks, '')) + '</Remarks>'
 
 		SELECT @strXML += '<ERPVoucherNo>' + ISNULL(@strERPVoucherNo, '') + '</ERPVoucherNo>'
 

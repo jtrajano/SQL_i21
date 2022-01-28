@@ -66,8 +66,8 @@ BEGIN TRY
 		 +'<AdjustmentNo>'+ IsNULL(strAdjustmentNo,'')  +'</AdjustmentNo>'  
 		 +'<NewExpiryDate>'+ IsNULL(convert(VARCHAR, dtmNewExpiryDate,112),'')  +'</NewExpiryDate>'  
 		 +'<NewStatus>'+ IsNULL(strNewStatus,'')  +'</NewStatus>'  
-		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  
-		 +'<Notes>'+ IsNULL(strNotes,'')  +'</Notes>'  
+		 +'<ReasonCode>'+ dbo.fnEscapeXML(IsNULL(strReasonCode,''))  +'</ReasonCode>'  
+		 +'<Notes>'+ dbo.fnEscapeXML(IsNULL(strNotes,''))  +'</Notes>'  
 		FROM tblIPLotPropertyFeed
 		WHERE intLotPropertyFeedId = @intLotPropertyFeedId
 
