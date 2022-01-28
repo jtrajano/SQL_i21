@@ -3,8 +3,7 @@
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
 	@ysnDoUpdateCost		BIT = 0,
-	@intTransactionId		INT = NULL,
-	@strCreatedVoucherInvoiceIds NVARCHAR(1000) = '' OUTPUT
+	@intTransactionId		INT = NULL
 	
 AS
 
@@ -327,11 +326,6 @@ BEGIN TRY
 						@intInventoryReceiptId
 						,@intUserId
 						,@intNewBillId OUTPUT
-
-					if (isnull(@intNewBillId,0) > 0)
-					begin
-						set @strCreatedVoucherInvoiceIds = @strCreatedVoucherInvoiceIds + ',' + convert(nvarchar(20),@intNewBillId);
-					end
 
 					if (@intPricingTypeId = 2)
 					begin
@@ -977,8 +971,6 @@ BEGIN TRY
 	IF (@intContractTypeId = 2)
 	BEGIN
 
-		declare @CreatedInvoiceDetails as table (intInvoiceId int not null, intInvoiceDetailId int not null);
-
 		if (@ysnLoad = 1)
 		begin
 
@@ -1253,7 +1245,11 @@ BEGIN TRY
 									,@dblQuantity = @dblQuantityForInvoice
 									,@strScreen = 'Invoice'
 
-									insert into @CreatedInvoiceDetails select intInvoiceId = @intNewInvoiceId, intInvoiceDetailId = @intInvoiceDetailId;
+									exec uspCTAddDiscountsChargesToInvoice
+										@intContractDetailId  = @intContractDetailId
+										,@intInventoryShipmentId = @intInventoryShipmentId
+										,@UserId = @intUserId
+										,@intInvoiceDetailId = @intInvoiceDetailId
 							END
 
 							insert into @PricedShipment (intInventoryShipmentId)
@@ -1646,7 +1642,11 @@ BEGIN TRY
 									,@dblQuantity = @dblQuantityForInvoice
 									,@strScreen = 'Invoice'
 
-									insert into @CreatedInvoiceDetails select intInvoiceId = @intNewInvoiceId, intInvoiceDetailId = @intInvoiceDetailId;
+									exec uspCTAddDiscountsChargesToInvoice
+										@intContractDetailId  = @intContractDetailId
+										,@intInventoryShipmentId = @intInventoryShipmentId
+										,@UserId = @intUserId
+										,@intInvoiceDetailId = @intInvoiceDetailId
 
 							END
 
@@ -1714,7 +1714,11 @@ BEGIN TRY
 								,@dblQuantity = @dblQuantityForInvoice
 								,@strScreen = 'Invoice'
 
-							insert into @CreatedInvoiceDetails select intInvoiceId = @intInvoiceId, intInvoiceDetailId = @intInvoiceDetailId;
+							exec uspCTAddDiscountsChargesToInvoice
+								@intContractDetailId  = @intContractDetailId
+								,@intInventoryShipmentId = @intInventoryShipmentId
+								,@UserId = @intUserId
+								,@intInvoiceDetailId = @intInvoiceDetailId
 							
 							--Deduct the quantity from @dblPricedForInvoice and @dblShippedForInvoice
 							set @dblPricedForInvoice = (@dblPricedForInvoice - @dblQuantityForInvoice);
@@ -1763,49 +1767,6 @@ BEGIN TRY
 			/*---End Loop Shipment---*/
 
 		end
-
-		/*Code here to process Invoice discounts/charges*/
-
-		if exists (select top 1 1 from @CreatedInvoiceDetails)
-		begin
-			declare @dblDiscountChargeQty numeric(18,6);
-
-			while exists (select top 1 1 from @CreatedInvoiceDetails)
-			begin
-				select top 1 @intInvoiceId = intInvoiceId, @intInvoiceDetailId = intInvoiceDetailId from @CreatedInvoiceDetails;
-
-				set @strCreatedVoucherInvoiceIds = @strCreatedVoucherInvoiceIds + ',' + convert(nvarchar(20),@intInvoiceId);
-
-				select
-					@intInventoryShipmentId = shipment.intInventoryShipmentId
-					,@dblDiscountChargeQty = case when sum(di.dblQtyShipped) > shipment.dblTotalShipped then shipment.dblTotalShipped else sum(di.dblQtyShipped) end
-				from
-					tblARInvoiceDetail di
-					join @CreatedInvoiceDetails dip on dip.intInvoiceId = di.intInvoiceId
-					cross apply (
-						select top 1 intInventoryShipmentId = intInventoryShipmentId, dblTotalShipped = isnull(si.dblDestinationQuantity,si.dblQuantity) from tblICInventoryShipmentItem si where si.intInventoryShipmentItemId = di.intInventoryShipmentItemId
-					) shipment
-				where
-					di.intInvoiceId = @intInvoiceId
-					and di.intInvoiceDetailId = dip.intInvoiceDetailId
-					and di.intInventoryShipmentChargeId is null
-				group by
-					shipment.intInventoryShipmentId
-					,shipment.dblTotalShipped;
-
-
-				exec uspCTAddDiscountsChargesToInvoice
-					@intContractDetailId  = @intContractDetailId
-					,@intInventoryShipmentId = @intInventoryShipmentId
-					,@UserId = @intUserId
-					,@intInvoiceDetailId = @intInvoiceDetailId
-					,@dblQuantityToCharge = @dblDiscountChargeQty
-
-				delete from @CreatedInvoiceDetails where intInvoiceId = @intInvoiceId;
-			end
-
-		end
-
 	END
 
 
