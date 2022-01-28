@@ -3610,7 +3610,7 @@ BEGIN TRY
 					,[intLoadDetailId]
 					,[dblQuantity]
 					,[intItemUOMId]
-					,[dblReceivedQty]
+					--,[dblReceivedQty]
 					,[dblLinkGrossWt]
 					,[dblLinkTareWt]
 					,[dblLinkNetWt]
@@ -3640,7 +3640,7 @@ BEGIN TRY
 						)
 					,x.[dblQuantity]
 					,IU.[intItemUOMId]
-					,x.[dblReceivedQty]
+					--,x.[dblReceivedQty]
 					,x.[dblLinkGrossWt]
 					,x.[dblLinkTareWt]
 					,x.[dblLinkNetWt]
@@ -3709,7 +3709,7 @@ BEGIN TRY
 							END
 						)
 					,[intItemUOMId] = IU.[intItemUOMId]
-					,[dblReceivedQty] = x.[dblReceivedQty]
+					--,[dblReceivedQty] = x.[dblReceivedQty]
 					,[dblLinkGrossWt] = (
 						CASE 
 							WHEN @ysnPosted = 0
