@@ -291,7 +291,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<PricingDate>' + ISNULL(CONVERT(VARCHAR, @dtmPricingDate, 112), '') + '</PricingDate>'
 
-		SELECT @strXML += '<Comments>' + ISNULL(@strComment, '') + '</Comments>'
+		SELECT @strXML += '<Comments>' + dbo.fnEscapeXML(ISNULL(@strComment, '')) + '</Comments>'
 
 		SELECT @strXML += '<MarketArb>' + LTRIM(ISNULL(@dblMarketArbitrage, 0)) + '</MarketArb>'
 

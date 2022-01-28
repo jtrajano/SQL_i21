@@ -68,8 +68,8 @@ BEGIN TRY
 		 +'<SplitLotNo>'+ IsNULL(strSplitLotNo,'')  +'</SplitLotNo>'  
 		 +'<Quantity>'+ ltrim(dblQuantity)  +'</Quantity>'  
 		 +'<QuantityUOM>'+ IsNULL(strQuantityUOM,'')  +'</QuantityUOM>'  
-		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  
-		 +'<Notes>'+ IsNULL(strNotes,'')  +'</Notes>'  
+		 +'<ReasonCode>'+ dbo.fnEscapeXML(IsNULL(strReasonCode,''))  +'</ReasonCode>'  
+		 +'<Notes>'+ dbo.fnEscapeXML(IsNULL(strNotes,''))  +'</Notes>'  
 		FROM tblIPLotSplitFeed
 		WHERE intLotSplitFeedId = @intLotSplitFeedId
 
