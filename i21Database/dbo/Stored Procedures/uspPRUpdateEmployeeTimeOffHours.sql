@@ -173,15 +173,15 @@ BEGIN
     
   --Update Earned Hours    
   UPDATE tblPREmployeeTimeOff    
-   SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN          
-                            CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN          
-								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover > dblMaxBalance) THEN
+      SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN          
+                            CASE WHEN ((dblHoursEarned + T.dblEarnedHours) >= dblMaxEarned) THEN          
+								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover >= dblMaxBalance) THEN
 									T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)
 								ELSE
 									T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned)
 								END
                             ELSE          
-								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL AND Carryover + T.dblEarnedHours > dblMaxBalance) THEN          
+								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL AND Carryover + T.dblEarnedHours >= dblMaxBalance) THEN          
 									T.dblEarnedHours - ((T.dblEarnedHours + Carryover) - dblMaxBalance)  
 								ELSE          
 									(dblHoursEarned + T.dblEarnedHours)          
@@ -189,7 +189,7 @@ BEGIN
                             END          
 						Else          
 							dblHoursEarned      
-                        END     
+                        END  
             
     ,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END     
     ,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN    
