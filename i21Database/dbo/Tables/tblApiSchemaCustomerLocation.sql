@@ -1,0 +1,57 @@
+﻿CREATE TABLE [dbo].[tblApiSchemaCustomerLocation] (
+
+	[guiApiUniqueId]            UNIQUEIDENTIFIER NOT NULL,
+    [intRowNumber]              INT NULL,
+    [intKey]                    INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
+	[strEntityNo]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strLocationName]           NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
+	[strAddress]                NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
+	[strCity]                   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strCountry]                NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strCounty]		            NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strState]                  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strZipCode]                NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strPhone]                  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strFax]                    NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strPricingLevel]           NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strNotes]                  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strOregonFacilityNumber]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strShipVia]                NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strTerms]                  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strWarehouse]              NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strSalesperson]            NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+	[strDefaultLocation]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+	[strFreightTerm]	        NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strCountyTaxCode]          NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+	[strTaxGroup]			    NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strTaxClass]			    NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strActive]				    NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+    [strLongitude]              NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strLatitude]               NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,	
+    [strTimezone]               NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+    [strCheckPayeeName]         NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+	[strDefaultCurrency]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strVendorLink]             NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+	[strLocationDescription]	NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
+    [strLocationType]           NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+    --Start Farm Fields     
+    [strFarmFieldNumber]        NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
+    [strFarmFieldDescription]	NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+    [strFarmFSANumber]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strFarmSplitNumber]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,   
+    [strFarmSplitType]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+    [strFarmAcres]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strFieldMapFile]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+    --End Farm Fields
+	--Start 1099 Override
+    [strPrint1099]              NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+    [str1099Name]               NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [str1099Form]               NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [str1099Type]               NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strFederalTaxId]           NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+    [strW9Signed]               NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL, 
+	--End 1099 Override
+    --This will link the customer to a entity location
+    [strOriginLinkCustomer]     NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+
+);
