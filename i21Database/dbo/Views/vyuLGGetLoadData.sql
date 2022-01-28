@@ -216,13 +216,13 @@ SELECT
 	,L.dtmDateSubmitted
 	,L.intApprovalStatusId
 	,L.dtmDateApproved
-	,BA.intBankId
-	,strBankName = BN.strBankName
+	,intBankId = BA.intBankId
+	,strBankName = BK.strBankName
 	,strBankAccountNo = BA.strBankAccountNo
-	,strFacility = FA.strBorrowingFacilityId
-	,strLoanLimit = BL.strBankLoanId
-	,strLoanReferenceNo = BL.strLimitDescription
-	,strOverrideFacility = BVR.strBankValuationRule
+	,strBorrowingFacilityId = FA.strBorrowingFacilityId
+	,strBorrowingFacilityLimit = FL.strBorrowingFacilityLimit
+	,strLimitDescription = FLD.strLimitDescription
+	,strBankValuationRule = BVR.strBankValuationRule
 	,strApprovalStatus = ASTF.strApprovalStatus
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
@@ -258,11 +258,12 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
 LEFT JOIN tblSMTerm TM ON TM.intTermID = L.intTermId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
-LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
-LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = L.intFacilityId
-LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = L.intLoanLimitId
-LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = L.intOverrideFacilityId
-LEFT JOIN tblCTApprovalStatusTF ASTF ON ASTF.intApprovalStatusId = L.intApprovalStatusId
+LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
+LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = L.intBorrowingFacilityId
+LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = L.intBorrowingFacilityLimitId
+LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = L.intBorrowingFacilityLimitDetailId
+LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = L.intBankValuationRuleId
+LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = L.intApprovalStatusId
 OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
 				WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
