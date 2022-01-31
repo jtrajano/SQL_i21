@@ -4283,7 +4283,7 @@ BEGIN TRY
 				SET @FinalQty = CASE
 					WHEN @intContractStatusId IN (1, 4)
 					THEN
-						case when @dblCurrentQty < @dblPriced then @dblCurrentQty else @dblPriced end
+						case when @dblCurrentQty < @TotalPriced then @dblCurrentQty else @TotalPriced end
 					ELSE 0
 				END
 				
@@ -4329,7 +4329,7 @@ BEGIN TRY
 					IF (@qtyDiff <> 0)
 					BEGIN
 						--If reducing the price and the remaining priced qty is less than the Final Qty, use the remaining priced qty.
-						select @FinalQty = case when @FinalQty < 0  and abs(@FinalQty) > @dblPriced then @dblPriced * -1 else @FinalQty end;
+						select @FinalQty = case when @FinalQty < 0  and abs(@FinalQty) > @TotalPriced then @TotalPriced * -1 else @FinalQty end;
 					END
 					ELSE
 					BEGIN
