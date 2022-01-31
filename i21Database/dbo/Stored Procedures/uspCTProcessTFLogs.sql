@@ -109,7 +109,7 @@ BEGIN
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
 			cross apply (
-				select max(intTradeFinanceId) from tblTRFTradeFinance where intTradeFinanceId = 7346
+				select max(intTradeFinanceId) from tblTRFTradeFinance where intTransactionDetailId = tf.intContractDetailId
 			) et
 		;
 
