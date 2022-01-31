@@ -54,7 +54,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeTimeOff)
 	BEGIN
 		SELECT TOP 1 
-			 @strEmployeeId			= intEntityNo
+			 @strEmployeeId			= LTRIM(RTRIM(intEntityNo))
 			,@intEntityNo			= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(intEntityNo)))
 			,@strTimeOffId			= strTimeOffId
 			,@strTimeOffDesc		= strTimeOffDesc
