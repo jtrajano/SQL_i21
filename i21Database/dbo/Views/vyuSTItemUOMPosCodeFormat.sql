@@ -111,7 +111,7 @@ SELECT Item.intItemId
 	   END COLLATE Latin1_General_CI_AS AS strUPCwthOrwthOutCheckDigit
 
 	   , UOM.ysnHasCheckDigit
-	   , UOM.intCheckDigit AS intCheckDigit
+	   , UOM.intCheckDigit COLLATE Latin1_General_CI_AS AS intCheckDigit
 	   , CASE
 			WHEN UOM.dblUPCwthOrwthOutCheckDigit <= 99999
 				THEN 'plu'
