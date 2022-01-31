@@ -20,6 +20,9 @@ Type the overview for the table here.
 		[intWeightUOMId] INT NULL,
 		[strUpcCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strLongUPCCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+        [intCheckDigit] INT NULL,
+        [strUPCDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+        [intModifier] INT NULL,
 		[ysnStockUnit] BIT NULL DEFAULT ((0)),
 		[ysnAllowPurchase] BIT NULL DEFAULT ((0)),
 		[ysnAllowSale] BIT NULL DEFAULT ((0)),
@@ -54,6 +57,8 @@ Type the overview for the table here.
 			) PERSISTED,
         [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
+        CONSTRAINT [CHK_tblICItemUOM_intModifier] CHECK (intModifier >= 0 AND intModifier <= 999),
+        CONSTRAINT [CHK_tblICItemUOM_intCheckDigit] CHECK (intCheckDigit >= 0 AND intCheckDigit <= 9),
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItemUOM_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
@@ -84,6 +89,10 @@ Type the overview for the table here.
 		INCLUDE(intUpcCode, intItemUOMId)
 		WHERE [strLongUPCCode] IS NOT NULL;
 	GO
+        CREATE UNIQUE INDEX [UQ_tblICItemUOM_strLongUPCCode_intModifier]
+        ON tblICItemUOM([strLongUPCCode], [intModifier])
+        WHERE strLongUPCCode IS NOT NULL AND intModifier IS NOT NULL;
+    GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

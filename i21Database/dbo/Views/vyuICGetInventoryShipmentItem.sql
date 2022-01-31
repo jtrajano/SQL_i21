@@ -24,7 +24,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.dblTare
 	, dblNet = ShipmentItem.dblNet
 	, Item.strItemNo
-	, strItemDescription = Item.strDescription
+	, strItemDescription = COALESCE(ItemUOM.strUPCDescription, Item.strDescription)
 	, Item.strLotTracking
 	, Item.intCommodityId
 	, strCommodity = Commodity.strCommodityCode
