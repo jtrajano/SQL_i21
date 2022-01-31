@@ -4287,7 +4287,12 @@ BEGIN TRY
 				-- 	1.1. Decrease available priced quantities
 				-- 	1.2. Increase available basis quantities
 				--  1.3. Increase basis deliveries if DWG
-				SET @FinalQty = CASE WHEN @intContractStatusId IN (1, 4) THEN @dblCurrentQty - @dblQuantityAppliedAndPriced ELSE 0 END
+				SET @FinalQty = CASE
+					WHEN @intContractStatusId IN (1, 4)
+					THEN
+						case when @dblCurrentQty < @dblPriced then @dblCurrentQty else @dblPriced end
+					ELSE 0
+				END
 
 				-- Negate all the priced quantities
 				-- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
@@ -4330,6 +4335,10 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
+					
+					--If reducing the price and the remaining priced qty is less than the Final Qty, use the remaining priced qty.
+					select @FinalQty = case when @FinalQty < 0  and abs(@FinalQty) > @dblPriced then @dblPriced * -1 else @FinalQty end;
+					
 					-- If Reassign prices, do not bring back Basis qty
 					IF (@ysnReassign = 0)
 					BEGIN
