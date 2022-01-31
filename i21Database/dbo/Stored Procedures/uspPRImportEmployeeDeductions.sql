@@ -13,6 +13,7 @@ DECLARE @NewId AS INT
 DECLARE @EmployeeEntityNo AS INT
 
 DECLARE @intEntityNo AS INT
+DECLARE @strEmployeeId AS NVARCHAR(100)
 DECLARE @strDeductionDesc  AS NVARCHAR(50)
 DECLARE @strDeductionId AS NVARCHAR(50)
 DECLARE @ysnDefault  AS BIT

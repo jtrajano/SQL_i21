@@ -12,6 +12,7 @@ DECLARE @NewId AS INT
 
 DECLARE @EmployeeEntityNo AS INT
 DECLARE @intEntityNo AS INT
+DECLARE @strEmployeeId AS NVARCHAR(100)
 DECLARE @strEarningId AS NVARCHAR(50)
 DECLARE @dblEarningAmount AS FLOAT(50)
 DECLARE @ysnEarningDefault AS BIT

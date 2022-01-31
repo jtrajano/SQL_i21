@@ -19,6 +19,7 @@ DECLARE @TaxLocalId as INT
 DECLARE @NewId AS INT
 
 DECLARE @intEntityEmployeeId AS INT
+DECLARE @strEmployeeId AS NVARCHAR(100)
 DECLARE @strCalculationType  AS NVARCHAR(100)
 DECLARE @strFilingStatus  AS NVARCHAR(100)
 DECLARE @intTypeTaxStateId AS INT
