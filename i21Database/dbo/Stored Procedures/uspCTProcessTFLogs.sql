@@ -1,14 +1,13 @@
-﻿CREATE PROCEDURE [dbo].[uspCTProcessTFLogs]
+﻿
+Create PROCEDURE [dbo].[uspCTProcessTFLogs]
 	@strXML    NVARCHAR(MAX),
 	@intUserId INT
 AS    
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
 BEGIN 
 
 	begin try
@@ -17,8 +16,10 @@ BEGIN
 			@strErrorMessage nvarchar(max)
 			,@xmlDocumentId INT
 			,@TRFLog TRFLog
+			,@TRFTradeFinance TRFTradeFinance
 			,@TFTransNo nvarchar(50)
 			,@intActiveContractDetailId int = 0
+			,@strAction nvarchar(20)
 			;
 
 		DECLARE @TFXML TABLE(
@@ -55,7 +56,7 @@ BEGIN
 			select top 1 @intActiveContractDetailId = min(intContractDetailId) from @TFXML where intContractDetailId > @intActiveContractDetailId;
 		end
 
-
+		
 
 		insert into @TRFLog
 		select
@@ -96,6 +97,63 @@ BEGIN
 		begin
 			exec uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
 		end
+
+
+
+
+		select
+			 (case when et.intTradeFinanceLogId is null then 'Created' else 'Updated' end)
+		from
+			#TFXML tf
+			join tblCTContractDetail cd on cd.intContractDetailId = tf.intContractDetailId
+			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
+			cross apply (
+				select max(intTradeFinanceId) from tblTRFTradeFinance where intTradeFinanceId = 7346
+			) et
+		;
+
+		insert into @TRFTradeFinance
+		select
+			intTradeFinanceId = null
+			,strTradeFinanceNumber = isnull(cd.strFinanceTradeNo,tf.strFinanceTradeNo)
+			,strTransactionType = 'Contract'
+			,strTransactionNumber = ch.strContractNumber + '-' + convert(nvarchar(20),cd.intContractSeq)
+			, intTransactionHeaderId = cd.intContractHeaderId
+			, intTransactionDetailId = tf.intContractDetailId
+			, intBankId = cd.intBankId
+			, intBankAccountId = cd.intBankAccountId
+			, intBorrowingFacilityId = cd.intBorrowingFacilityId
+			, intLimitTypeId = cd.intBorrowingFacilityLimitId
+			, intSublimitTypeId = cd.intBorrowingFacilityLimitDetailId
+			, ysnSubmittedToBank = cd.ysnSubmittedToBank
+			, dtmDateSubmitted = cd.dtmDateSubmitted
+			, strApprovalStatus = ap.strApprovalStatus
+			, dtmDateApproved = cd.dtmDateApproved
+			, strRefNo = cd.strReferenceNo
+			, intOverrideFacilityValuation = cd.intBankValuationRuleId
+			, strCommnents = cd.strComments
+			, dtmCreatedDate = GETDATE()
+			, intConcurrencyId = 1
+		from
+			@TFXML tf
+			join tblCTContractDetail cd on cd.intContractDetailId = tf.intContractDetailId
+			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			left join tblCTApprovalStatusTF ap on ap.intApprovalStatusId = cd.intApprovalStatusId
+			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
+			
+		;
+	
+		If @strAction = 'Created'
+		BEGIN
+			EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId
+		END	
+		ELSE
+		BEGIN
+			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = 'UPDATE'
+		END
+
+
 
 
 	end try
