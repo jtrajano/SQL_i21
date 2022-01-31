@@ -28,8 +28,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Lot Item Change'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblIPLotItemChangeFeed (intLotItemChangeFeedId)
-	SELECT TOP 20 intLotItemChangeFeedId
+	SELECT TOP (@tmp) intLotItemChangeFeedId
 	FROM dbo.tblIPLotItemChangeFeed
 	WHERE strCompanyLocation = @strCompanyLocation
 	AND intStatusId IS NULL

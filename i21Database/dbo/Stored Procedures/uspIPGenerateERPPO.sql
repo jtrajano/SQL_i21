@@ -65,6 +65,16 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'PO'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	DELETE
 	FROM @tblCTContractFeed
 
@@ -85,7 +95,7 @@ BEGIN TRY
 	WHERE strLotOrigin = @strCompanyLocation
 
 	INSERT INTO @tblCTContractFeed (intContractFeedId)
-	SELECT TOP 50 CF.intContractFeedId
+	SELECT TOP (@tmp) CF.intContractFeedId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CF.intStatusId IS NULL
