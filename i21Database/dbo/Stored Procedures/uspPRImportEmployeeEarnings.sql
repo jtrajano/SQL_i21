@@ -51,7 +51,7 @@ DECLARE @EmployeeCount AS INT
 	   ,intRowNo		= SE.intRowNumber
 	   ,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	   FROM tblApiSchemaEmployeeEarnings SE
-	   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = SE.intEntityNo
+	   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
 	   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 	   AND SE.intEntityNo IS NULL
 
@@ -408,7 +408,7 @@ DECLARE @EmployeeCount AS INT
 			, intRowNo = SE.intRowNumber
 			, strMessage = 'The employee earnings has been successfully imported to i21.'
 		FROM tblApiSchemaEmployeeEarnings SE
-		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
+		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
 		   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strEarningDesc = @strEarningId
 
