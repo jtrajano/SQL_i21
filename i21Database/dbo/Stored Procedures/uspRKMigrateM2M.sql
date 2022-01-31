@@ -600,4 +600,71 @@ BEGIN
 
 		DELETE FROM #tmpOldM2MData WHERE intM2MInquiryId = @intM2MInquiryId
 	END
+
+
+	--=================================
+	-- FIX THE AUDIT LOG
+	--=================================
+
+	--insert the new screen Mark To Market in the SM Screen table
+	IF NOT EXISTS (SELECT * FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket')
+	BEGIN
+		INSERT INTO tblSMScreen
+		(
+			strScreenId
+			,strScreenName
+			,strNamespace
+			,strModule
+			,ysnSearch
+			,intConcurrencyId
+			,ysnAvailable
+
+		)
+		VALUES (
+			'NewMarkToMarket'
+			,'NewMarkToMarket'
+			,'RiskManagement.view.NewMarkToMarket'
+			,'Risk Management'
+			,0
+			,2
+			,0
+		)
+	END
+
+	SELECT * 
+	INTO #tmpM2MHeader
+	FROM tblRKM2MHeader
+
+	--loop thru m2m records to create sm transaction and update the sm log to point it to the newly created sm transaction
+	DECLARE @output INT
+			,@intLogId INT
+
+	WHILE EXISTS (SELECT TOP 1 * FROM #tmpM2MHeader)
+	BEGIN
+		SELECT TOP 1 
+			@intM2MHeaderId = intM2MHeaderId
+			,@strRecordName = strRecordName
+		FROM #tmpM2MHeader
+		ORDER BY intM2MHeaderId
+
+	
+		EXEC uspSMInsertTransaction 'RiskManagement.view.NewMarkToMarket', @strRecordName,NULL,@intM2MHeaderId,NULL,@output OUT
+
+		SET @intLogId = 0
+	
+		SELECT @intLogId = L.intLogId
+		FROM tblRKM2MInquiry I
+		INNER JOIN tblSMTransaction T ON T.intRecordId = I.intM2MInquiryId
+		INNER JOIN tblSMLog L ON L.intTransactionId = T.intTransactionId
+		INNER JOIN tblSMScreen S ON S.intScreenId = T.intScreenId AND S.strScreenName = 'Mark To Market'
+		WHERE I.strRecordName = @strRecordName
+
+		UPDATE tblSMLog SET intTransactionId = @output 
+		WHERE intLogId = @intLogId
+
+		DELETE FROM #tmpM2MHeader WHERE intM2MHeaderId = @intM2MHeaderId
+	END
+
+	DROP TABLE #tmpM2MHeader
+
 END
