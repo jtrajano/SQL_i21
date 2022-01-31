@@ -28,8 +28,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Lot Property'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblIPLotPropertyFeed (intLotPropertyFeedId)
-	SELECT TOP 20 intLotPropertyFeedId
+	SELECT TOP (@tmp) intLotPropertyFeedId
 	FROM dbo.tblIPLotPropertyFeed
 	WHERE strCompanyLocation = @strCompanyLocation
 	AND intStatusId IS NULL

@@ -37,17 +37,33 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
+	
+	DECLARE @tmp INT
+		,@FirstCount INT = 0
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Production Order'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
 
 	INSERT INTO @tblMFWorkOrderPreStage (intWorkOrderPreStageId)
-	SELECT TOP 20 PS.intWorkOrderPreStageId
+	SELECT TOP (@tmp) PS.intWorkOrderPreStageId
 	FROM dbo.tblMFWorkOrderPreStage PS
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PS.intWorkOrderId
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	WHERE PS.intStatusId IS NULL
 		AND CL.strLotOrigin = @strCompanyLocation
 
+	SELECT @FirstCount = COUNT(1)
+	FROM @tblMFWorkOrderPreStage
+
+	SELECT @tmp = @tmp - ISNULL(@FirstCount, 0)
+
 	INSERT INTO @tblMFWorkOrderPreStage (intWorkOrderPreStageId)
-	SELECT TOP 20 PS.intWorkOrderPreStageId
+	SELECT TOP (@tmp) PS.intWorkOrderPreStageId
 	FROM dbo.tblMFWorkOrderPreStage PS
 	WHERE PS.intStatusId IS NULL
 		AND PS.strCompanyLocation = @strCompanyLocation
