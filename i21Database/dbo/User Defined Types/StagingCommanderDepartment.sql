@@ -1,17 +1,22 @@
 ﻿CREATE TYPE StagingCommanderDepartment AS TABLE
 (
-	[intRowCount] 								INT					NULL,
-	[dblDeptInfoGrossSale]                     	NUMERIC(18,6)		NULL,
-	[dblDeptInfoPercentOfSale]                  NUMERIC(18,6)		NULL,
-	[strSysId] 								    NVARCHAR(MAX)		NULL,
-	[intNetSaleCount]                           INT					NULL,
-	[dblNetSaleAmount]                          NUMERIC(18,6)		NULL,
-	[dblNetSaleItemCount]                       NUMERIC(18,6)		NULL,
-	[intRefundCount]							INT					NULL,
-	[dblRefundAmount]                           NUMERIC(18,6)		NULL,
-	[intTotalCount]                             INT					NULL,
-	[dblTotalAmount]                            NUMERIC(18,6)		NULL,
-	[intPromotionCount]                         INT					NULL,
-	[dblPromotionAmount]                        NUMERIC(18,6)		NULL
+	[intRowCount] [int] NULL,
+	[dblDeptInfoGrossSale] [numeric](18, 6) NULL,
+	[dblDeptInfoPercentOfSale] [numeric](18, 6) NULL,
+	[strSysId] [nvarchar](max) NULL,
+	[intNetSaleCount] [int] NULL,
+	[dblNetSaleAmount] [numeric](18, 6) NULL,
+	[dblNetSaleItemCount] [numeric](18, 6) NULL,
+	[intRefundCount] [int] NULL,
+	[dblRefundAmount] [numeric](18, 6) NULL,
+	[intTotalCount] [int] NULL,
+	[dblTotalAmount] [numeric](18, 6) NULL,
+	[intPromotionCount] [int] NULL,
+	[dblPromotionAmount] [numeric](18, 6) NULL,
+	[strCashierName] [nvarchar](max) NULL,
+	[dblCashierRefundAmount] [numeric](18, 6) NULL,
+	[intCashierRefundCount] [numeric](18, 6) NULL,
+	[intCashierSaleCount] [int] NULL,
+	[dblCashierSaleAmount] [int] NULL
 )
 
