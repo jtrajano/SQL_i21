@@ -266,3 +266,88 @@ UPDATE tblIPItemArchive
 SET ysnMailSent = 0
 WHERE ysnMailSent IS NULL
 GO
+
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'CO' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'CO','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Commitment Pricing' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Commitment Pricing','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Goods Receipt' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Goods Receipt','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Lot Item Change' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Lot Item Change','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Lot Merge' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Lot Merge','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Lot Property' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Lot Property','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Lot Split' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Lot Split','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'PO' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'PO','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Transfer Order' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Transfer Order','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Voucher' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Voucher','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Inventory Adjust Ack' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Inventory Adjust Ack','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Production' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Production','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Production Order' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Production Order','','Count',50
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblIPSAPIDOCTag WHERE strMessageType = 'Service Order' and strTag = 'Count')
+BEGIN
+    INSERT INTO tblIPSAPIDOCTag (strMessageType,strTagType,strTag,strValue)
+	SELECT 'Service Order','','Count',50
+END
+GO

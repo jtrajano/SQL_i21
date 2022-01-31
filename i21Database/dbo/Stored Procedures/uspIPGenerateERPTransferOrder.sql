@@ -63,11 +63,21 @@ BEGIN TRY
 		,strERPTransferOrderNo NVARCHAR(50)
 		)
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Transfer Order'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	DELETE
 	FROM @tblICInventoryTransfer
 
 	INSERT INTO @tblICInventoryTransfer (intInventoryTransferId)
-	SELECT DISTINCT IT.intInventoryTransferId
+	SELECT DISTINCT TOP (@tmp) IT.intInventoryTransferId
 	FROM tblICInventoryTransfer IT
 	JOIN tblICInventoryTransferDetail ITD ON ITD.intInventoryTransferId = IT.intInventoryTransferId
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = IT.intFromLocationId

@@ -42,8 +42,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Production'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblMFProductionPreStage (intProductionPreStageId)
-	SELECT TOP 20 PS.intProductionPreStageId
+	SELECT TOP (@tmp) PS.intProductionPreStageId
 	FROM dbo.tblMFProductionPreStage PS
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PS.intWorkOrderId
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
