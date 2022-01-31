@@ -69,11 +69,25 @@ BEGIN TRY
 		,strTransferNo NVARCHAR(50)
 		)
 
+	DECLARE @tmp INT
+		,@tmp1 INT
+		,@FirstCount INT = 0
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Goods Receipt'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
+	SELECT @tmp1 = @tmp
+
 	DELETE
 	FROM @tblICInventoryReceipt
 
 	INSERT INTO @tblICInventoryReceipt (intInventoryReceiptId)
-	SELECT DISTINCT R.intInventoryReceiptId
+	SELECT DISTINCT TOP (@tmp) R.intInventoryReceiptId
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
@@ -85,8 +99,13 @@ BEGIN TRY
 		AND RI.ysnExported IS NULL
 		AND ISNULL(CD.strERPPONumber, '') <> ''
 
+	SELECT @FirstCount = COUNT(1)
+	FROM @tblICInventoryReceipt
+
+	SELECT @tmp = @tmp1 - ISNULL(@FirstCount, 0)
+
 	INSERT INTO @tblICInventoryReceipt (intInventoryReceiptId)
-	SELECT DISTINCT R.intInventoryReceiptId
+	SELECT DISTINCT TOP (@tmp) R.intInventoryReceiptId
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
@@ -96,8 +115,13 @@ BEGIN TRY
 		AND R.ysnPosted = 1
 		AND RI.ysnExported IS NULL
 
+	SELECT @FirstCount = COUNT(1)
+	FROM @tblICInventoryReceipt
+
+	SELECT @tmp = @tmp1 - ISNULL(@FirstCount, 0)
+
 	INSERT INTO @tblICInventoryReceipt (intInventoryReceiptId)
-	SELECT DISTINCT R.intInventoryReceiptId
+	SELECT DISTINCT TOP (@tmp) R.intInventoryReceiptId
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId

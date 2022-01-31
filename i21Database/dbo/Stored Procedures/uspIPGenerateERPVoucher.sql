@@ -87,11 +87,21 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Voucher'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	DELETE
 	FROM @tblAPBillPreStage
 
 	INSERT INTO @tblAPBillPreStage (intBillPreStageId)
-	SELECT TOP 50 BPS.intBillPreStageId
+	SELECT TOP (@tmp) BPS.intBillPreStageId
 	FROM tblAPBillPreStage BPS
 	JOIN tblAPBill B ON B.intBillId = BPS.intBillId
 		AND B.intTransactionType IN (
