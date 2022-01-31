@@ -46,6 +46,7 @@ DECLARE @EmployeeGlLocation3 as NVARCHAR(50)
 DECLARE @EmployeeGlLocationPercentage3 as FLOAT (50)
 
 DECLARE @strName as NVARCHAR(50)
+DECLARE @strLocationName as NVARCHAR(50)
 DECLARE @strEmail as NVARCHAR(50)
 DECLARE @ysnPrint1099 as BIT
 DECLARE @strContactNumber as NVARCHAR(50)
@@ -260,10 +261,10 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					,strEntityNo
 				)
 				SELECT 
-					 EME.strName
+					 EME.strContactNumber
 					,EME.strEmail
 					,EME.ysn1099Employee
-					,EME.strContactNumber
+					,''
 					,EME.strEMPhone
 					,EME.strPhone
 					,EME.strTimezone
@@ -282,8 +283,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				DECLARE @ysnDefault BIT
 				SET @ysnDefault = 1
 
-				--INSERT [dbo].[tblEMEntity] ([strName], strNickName, strTitle, strContactNumber,strMobile)
-				--SELECT strName,strName,strTitle,strContactNumber,strEMPhone FROM #TempEmployeeDetails CT WHERE CT.strEmployeeId = @EmployeeID
+				INSERT [dbo].[tblEMEntity] ([strName], strNickName, strTitle, strContactNumber,strMobile)
+				SELECT strName,strName,strTitle,strContactNumber,strEMPhone FROM #TempEmployeeDetails CT WHERE CT.strEmployeeId = @EmployeeID
 
 				DECLARE @EntityPhoneID AS NVARCHAR(50)
 				SET @EntityPhoneID = SCOPE_IDENTITY()
@@ -293,14 +294,14 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				--select * from tblEMEntityPhoneNumber where intEntityId = 2434
 
 
-				INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
-				select top 1 @ContactId, strEMPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
+				--INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
+				--select top 1 @ContactId, strEMPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
 
 				INSERT INTO tblEMEntityMobileNumber(intEntityId, strPhone, intCountryId)
 				select top 1 @ContactId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
 
 				INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strState], [strCountry], [strZipCode],[strTimezone], [ysnDefaultLocation],[strCheckPayeeName],[strPhone])
-				SELECT @NewId, strName, strAdress,strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName, strEMPhone
+				SELECT @NewId, strLocationName, strAdress,strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName, strEMPhone
 				FROM #TempEmployeeDetails LC WHERE LC.strEmployeeId = @EmployeeID
 
 				DECLARE @EntityLocationId INT
@@ -367,8 +368,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					ysn1099Employee,
 					ysnStatutoryEmployee,
 					ysnThirdPartySickPay,
-					ysnRetirementPlan,
-					guiApiUniqueId
+					ysnRetirementPlan
+					--,
+					--guiApiUniqueId
 				)
 				SELECT 
 					@NewId,
@@ -404,8 +406,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					ysn1099Employee,
 					ysnStatutoryEmployee,
 					ysnThirdPartySickPay,
-					ysnRetirementPlan,
-					@guiApiUniqueId
+					ysnRetirementPlan
+					--,
+					--@guiApiUniqueId
 					FROM #TempEmployeeDetails PRST
 					WHERE PRST.strEmployeeId = @EmployeeID
 
@@ -650,6 +653,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						,@strZipCode =strZipCode
 						,@dtmOriginationDate = dtmOriginationDate
 						,@strAddress = strAdress
+						,@strLocationName = strLocationName
 
 						,@strNameSuffix = strNameSuffix
 						,@strSuffix = strSuffix
@@ -696,7 +700,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,strSuffix = @strNameSuffix
 				,strEmail = @strEmail
 				,ysnPrint1099 = @ysnPrint1099
-				,strContactNumber = @strContactNumber
+				,strContactNumber = ''
 				,strTitle = @strTitle
 				,strPhone = @strPhone
 				,strEmail2 = @strEmail
@@ -714,7 +718,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					 strName = @strName
 					,strEmail = @strEmail
 					,ysnPrint1099 = @ysn1099Employee
-					,strContactNumber = @strContactNumber
+					,strContactNumber = ''
 					,strMobile = @strEmPhone
 					,strPhone = @strPhone
 					,strTimezone = @strTimezone
@@ -773,7 +777,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					END
 
 				UPDATE tblEMEntityLocation SET 
-				[strLocationName] = @strName
+				 [strLocationName] = @strLocationName
 				,[strAddress] = @strAddress
 				,[strCity] = @strCity
 				,[strState] = @strState
