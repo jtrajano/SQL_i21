@@ -36,8 +36,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Inventory Adjust Ack'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblIPInventoryAdjustmentAck (intInventoryAdjustmentAckId)
-	SELECT TOP 20 intInventoryAdjustmentAckId
+	SELECT TOP (@tmp) intInventoryAdjustmentAckId
 	FROM dbo.tblIPInventoryAdjustmentAck
 	WHERE strCompanyLocation = @strCompanyLocation
 	AND ysnInProgress is NULL

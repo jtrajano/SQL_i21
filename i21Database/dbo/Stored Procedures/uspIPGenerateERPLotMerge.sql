@@ -28,8 +28,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Lot Merge'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblIPLotMergeFeed (intLotMergeFeedId)
-	SELECT TOP 20 intLotMergeFeedId
+	SELECT TOP (@tmp) intLotMergeFeedId
 	FROM dbo.tblIPLotMergeFeed
 	WHERE strCompanyLocation = @strCompanyLocation
 

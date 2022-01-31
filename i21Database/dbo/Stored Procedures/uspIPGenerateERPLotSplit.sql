@@ -28,8 +28,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Lot Split'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblIPLotSplitFeed (intLotSplitFeedId)
-	SELECT TOP 20 intLotSplitFeedId
+	SELECT TOP (@tmp) intLotSplitFeedId
 	FROM dbo.tblIPLotSplitFeed
 	WHERE strCompanyLocation = @strCompanyLocation
 	AND intStatusId IS NULL

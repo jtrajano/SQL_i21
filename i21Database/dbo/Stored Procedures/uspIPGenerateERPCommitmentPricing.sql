@@ -70,11 +70,21 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Commitment Pricing'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	DELETE
 	FROM @tblMFCommitmentPricingStage
 
 	INSERT INTO @tblMFCommitmentPricingStage (intCommitmentPricingStageId)
-	SELECT TOP 50 CPS.intCommitmentPricingStageId
+	SELECT TOP (@tmp) CPS.intCommitmentPricingStageId
 	FROM tblMFCommitmentPricingStage CPS
 	JOIN tblMFCommitmentPricing CP ON CP.intCommitmentPricingId = CPS.intCommitmentPricingId
 		AND CPS.intStatusId IS NULL
