@@ -180,16 +180,16 @@ FROM
 					THEN CAST(1 AS BIT)
 		   END AS ysnHasCheckDigit
 
-		   , CASE 
-				WHEN LEN(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')) = 6
-					THEN CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1))
+		  -- , CASE 
+				--WHEN LEN(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')) = 6
+				--	THEN CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1))
 
-				WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) <= 99999
-					THEN NULL
+				--WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) <= 99999
+				--	THEN NULL
 
-				WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) > 99999
-					THEN CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1))
-		   END AS intCheckDigit
+				--WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) > 99999
+				--	THEN CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1))
+		  -- END AS intCheckDigit
 
 		   , U.* 
 	FROM tblICItemUOM U
