@@ -489,6 +489,7 @@
     <Build Include="dbo\Stored Procedures\uspTRFModifyTFRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCTCashFlow.sql" />
     <Build Include="dbo\Tables\tblCTOrderTypeFX.sql" />
+    <Build Include="dbo\Views\vyuLGGetContractTradeFinance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
