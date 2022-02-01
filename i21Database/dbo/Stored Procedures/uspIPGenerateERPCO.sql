@@ -75,11 +75,21 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'CO'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	DELETE
 	FROM @tblCTContractFeed
 
 	INSERT INTO @tblCTContractFeed (intContractFeedId)
-	SELECT TOP 50 CF.intContractFeedId
+	SELECT TOP (@tmp) CF.intContractFeedId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CF.intStatusId IS NULL

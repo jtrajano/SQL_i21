@@ -22,7 +22,15 @@ BEGIN
 		@dblBucket6 DECIMAL(18, 6) = 0,
 		@dblBucket7 DECIMAL(18, 6) = 0,
 		@dblBucket8 DECIMAL(18, 6) = 0,
-		@dblBucket9 DECIMAL(18, 6) = 0
+		@dblBucket9 DECIMAL(18, 6) = 0,
+		@strTransactionType NVARCHAR(20)
+
+	SET @strTransactionType = 'Outbound Shipment'
+
+	START_PROCESS:
+
+	IF @strTransactionType IS NULL
+		GOTO END_PROCESS
 
 	INSERT INTO tblCMCashFlowReportSummaryDetail (
 		[intCashFlowReportId]
@@ -51,11 +59,11 @@ BEGIN
 	-- Bucket Current
 	SELECT
 		@intCashFlowReportId,
-		-1, -- no specific transactions for Current bucket - it can be thousands/millions of records.
-		'Current',
-		NULL,
+		intTransactionId,
+		strTransactionId,
+		strTransactionType,
 		@dtmReportDate,
-		ISNULL(SUM(dblAmount), 0) * RateFilter.dblRateBucket1,
+		dblAmount * RateFilter.dblRateBucket1,
 		0,
 		0,
 		0,
@@ -68,9 +76,9 @@ BEGIN
 		@intReportingCurrencyId,
 		RateTypeFilter.intRateTypeBucket1,
 		RateFilter.dblRateBucket1,
-		NULL,
-		NULL,
-		@intCompanyLocationId,
+		intGLAccountId,
+		intBankAccountId,
+		intCompanyLocationId,
 		1
 	FROM [dbo].[fnLGCashFlowTransactions](NULL, @dtmReportDate)
 	JOIN @tblRateFilters RateFilter
@@ -92,10 +100,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
-	GROUP BY
-		RateFilter.dblRateBucket1,
-		intCurrencyId,
-		RateTypeFilter.intRateTypeBucket1
+		AND strTransactionType = @strTransactionType
 
 	-- Bucket 1 - 7
 	UNION ALL
@@ -142,6 +147,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
+		AND strTransactionType = @strTransactionType
 
 	-- Bucket 8 - 14
 	UNION ALL
@@ -188,6 +194,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
+		AND strTransactionType = @strTransactionType
 
 	-- Bucket 15 - 21
 	UNION ALL
@@ -234,6 +241,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
+		AND strTransactionType = @strTransactionType
 
 	-- Bucket 22 - 29
 	UNION ALL
@@ -280,6 +288,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
+		AND strTransactionType = @strTransactionType
 
 	-- Bucket 30 - 60
 	UNION ALL
@@ -326,6 +335,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
+		AND strTransactionType = @strTransactionType
 	
 	-- Bucket 60 - 90
 	UNION ALL
@@ -372,6 +382,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
+		AND strTransactionType = @strTransactionType
 
 	-- Bucket 90 - 120
 	UNION ALL
@@ -418,6 +429,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
+		AND strTransactionType = @strTransactionType
 
 	-- Bucket 120+
 	UNION ALL
@@ -464,6 +476,7 @@ BEGIN
 				END
 		) = 1
 		AND ysnPosted = 1
+		AND strTransactionType = @strTransactionType
 
 	-- Get sum of each bucket
 	SELECT 
@@ -516,7 +529,7 @@ BEGIN
 		,@dblBucket8
 		,@dblBucket9
 		,@intCashFlowReportId
-		,8 -- Report Code = 8 Logistics Shipments
+		,CASE WHEN @strTransactionType = 'Outbound Shipment' THEN 4 ELSE 5 END -- Report Code = 4 Total Sales Logistics Shipments; 5 = Total Purchase Logistics Shipments
 		,1
 	)
 		
@@ -528,6 +541,25 @@ BEGIN
 	SET
 		intCashFlowReportSummaryId = @intCashFlowReportSummaryId
 	WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
+
+	SET @dblBucket1 = 0
+	SET @dblBucket2 = 0
+	SET @dblBucket3 = 0
+	SET	@dblBucket4 = 0
+	SET @dblBucket5 = 0
+	SET @dblBucket6 = 0
+	SET @dblBucket7 = 0
+	SET @dblBucket8 = 0
+	SET @dblBucket9 = 0
+
+	IF @strTransactionType = 'Outbound Shipment'
+		SET @strTransactionType = 'Inbound Shipments'
+	ELSE 
+		SET @strTransactionType = NULL -- this will end the loop
+
+	GOTO START_PROCESS
+
+END_PROCESS:
 
 END
 RETURN 0

@@ -57,11 +57,11 @@ BEGIN
 	-- Bucket Current
 	SELECT
 		@intCashFlowReportId,
-		-1, -- no specific transactions for Current bucket - it can be thousands/millions of records.
-		'Current',
-		NULL,
+		intTransactionId,
+		strTransactionId,
+		strTransactionType,
 		@dtmReportDate,
-		ISNULL(SUM(dblAmount), 0) * RateFilter.dblRateBucket1 * -1,
+		(dblAmount * RateFilter.dblRateBucket1) * -1,
 		0,
 		0,
 		0,
@@ -74,9 +74,9 @@ BEGIN
 		@intReportingCurrencyId,
 		RateTypeFilter.intRateTypeBucket1,
 		RateFilter.dblRateBucket1,
-		NULL,
-		NULL,
-		@intCompanyLocationId,
+		intGLAccountId,
+		NULL, --intBankAccountId,
+		intCompanyLocationId,
 		1
 	FROM [dbo].[fnAPCashFlowTransactions](NULL, NULL)
 	JOIN @tblRateFilters RateFilter
@@ -91,10 +91,6 @@ BEGIN
 				END
 		) = 1
 		AND dtmDate <= @dtmReportDate
-	GROUP BY
-		RateFilter.dblRateBucket1,
-		intCurrencyId,
-		RateTypeFilter.intRateTypeBucket1
 
 	-- Bucket 1 - 7
 	UNION ALL
@@ -452,7 +448,7 @@ BEGIN
 			,@dblBucket8
 			,@dblBucket9
 			,@intCashFlowReportId
-			,5 -- Report Code = 5 for Total AP
+			,3 -- Report Code = 3 for Total AP
 			,1
 		)
 		

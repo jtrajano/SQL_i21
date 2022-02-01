@@ -56,6 +56,8 @@ SELECT
  ,Rte.ysnLeakCheckRequired
  ,Rte.dblPercentLeft
  ,Rte.dblARBalance
-
+ ,Rte.intDeliveryStatus
+ ,Rte.dtmDeliveryStart
+ ,Rte.dtmDeliveryEnd
 FROM tblLGRouteOrder Rte
 JOIN vyuLGRoute R ON R.intRouteId = Rte.intRouteId

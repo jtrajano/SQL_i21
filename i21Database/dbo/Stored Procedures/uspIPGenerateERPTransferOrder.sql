@@ -63,11 +63,21 @@ BEGIN TRY
 		,strERPTransferOrderNo NVARCHAR(50)
 		)
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Transfer Order'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	DELETE
 	FROM @tblICInventoryTransfer
 
 	INSERT INTO @tblICInventoryTransfer (intInventoryTransferId)
-	SELECT DISTINCT IT.intInventoryTransferId
+	SELECT DISTINCT TOP (@tmp) IT.intInventoryTransferId
 	FROM tblICInventoryTransfer IT
 	JOIN tblICInventoryTransferDetail ITD ON ITD.intInventoryTransferId = IT.intInventoryTransferId
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = IT.intFromLocationId
@@ -225,9 +235,9 @@ BEGIN TRY
 
 		SELECT @strXML += '<BOLReceivedDate>' + ISNULL(CONVERT(VARCHAR, @dtmBolReceivedDate, 112), '') + '</BOLReceivedDate>'
 
-		SELECT @strXML += '<Broker>' + ISNULL(@strBroker, '') + '</Broker>'
+		SELECT @strXML += '<Broker>' + dbo.fnEscapeXML(ISNULL(@strBroker, '')) + '</Broker>'
 
-		SELECT @strXML += '<TrailerId>' + ISNULL(@strTrailerId, '') + '</TrailerId>'
+		SELECT @strXML += '<TrailerId>' + dbo.fnEscapeXML(ISNULL(@strTrailerId, '')) + '</TrailerId>'
 
 		SELECT @strXML += '<FromLocation>' + ISNULL(@strFromLocation, '') + '</FromLocation>'
 
@@ -432,15 +442,15 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<DeliveryDate>' + ISNULL(CONVERT(VARCHAR, @dtmDeliveryDate, 112), '') + '</DeliveryDate>'
 
-			SELECT @strItemXML += '<ContainerNo>' + ISNULL(@strContainerNumber, '') + '</ContainerNo>'
+			SELECT @strItemXML += '<ContainerNo>' + dbo.fnEscapeXML(ISNULL(@strContainerNumber, '')) + '</ContainerNo>'
 
-			SELECT @strItemXML += '<Marks>' + ISNULL(@strMarks, '') + '</Marks>'
+			SELECT @strItemXML += '<Marks>' + dbo.fnEscapeXML(ISNULL(@strMarks, '')) + '</Marks>'
 
 			SELECT @strItemXML += '<TransferPrice>' + LTRIM(ISNULL(@dblTransferPrice, 0)) + '</TransferPrice>'
 
 			SELECT @strItemXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
 
-			SELECT @strItemXML += '<Comments>' + ISNULL(@strComment, '') + '</Comments>'
+			SELECT @strItemXML += '<Comments>' + dbo.fnEscapeXML(ISNULL(@strComment, '')) + '</Comments>'
 
 			SELECT @strItemXML += '<GrossWeight>' + LTRIM(ISNULL(@dblGross, 0)) + '</GrossWeight>'
 

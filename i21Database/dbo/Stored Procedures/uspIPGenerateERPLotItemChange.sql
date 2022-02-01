@@ -28,8 +28,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Lot Item Change'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblIPLotItemChangeFeed (intLotItemChangeFeedId)
-	SELECT TOP 20 intLotItemChangeFeedId
+	SELECT TOP (@tmp) intLotItemChangeFeedId
 	FROM dbo.tblIPLotItemChangeFeed
 	WHERE strCompanyLocation = @strCompanyLocation
 	AND intStatusId IS NULL
@@ -64,8 +74,8 @@ BEGIN TRY
 		 +'<MotherLotNo>'+ IsNULL(strMotherLotNo,'')  +'</MotherLotNo>'  
 		 +'<LotNo>'+ IsNULL(strLotNo,'')  +'</LotNo>'  
 		 +'<StorageUnit>'+ IsNULL(strStorageUnit,'')  +'</StorageUnit>'  
-		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  
-		 +'<Notes>'+ IsNULL(strNotes,'')  +'</Notes>'  
+		 +'<ReasonCode>'+ dbo.fnEscapeXML(IsNULL(strReasonCode,''))  +'</ReasonCode>'  
+		 +'<Notes>'+ dbo.fnEscapeXML(IsNULL(strNotes,''))  +'</Notes>'  
 		  +'<AdjustmentNo>'+ IsNULL(strAdjustmentNo,'')  +'</AdjustmentNo>'  
 		FROM tblIPLotItemChangeFeed
 		WHERE intLotItemChangeFeedId = @intLotItemChangeFeedId

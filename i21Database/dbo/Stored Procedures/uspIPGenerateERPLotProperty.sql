@@ -28,8 +28,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Lot Property'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblIPLotPropertyFeed (intLotPropertyFeedId)
-	SELECT TOP 20 intLotPropertyFeedId
+	SELECT TOP (@tmp) intLotPropertyFeedId
 	FROM dbo.tblIPLotPropertyFeed
 	WHERE strCompanyLocation = @strCompanyLocation
 	AND intStatusId IS NULL
@@ -66,8 +76,8 @@ BEGIN TRY
 		 +'<AdjustmentNo>'+ IsNULL(strAdjustmentNo,'')  +'</AdjustmentNo>'  
 		 +'<NewExpiryDate>'+ IsNULL(convert(VARCHAR, dtmNewExpiryDate,112),'')  +'</NewExpiryDate>'  
 		 +'<NewStatus>'+ IsNULL(strNewStatus,'')  +'</NewStatus>'  
-		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  
-		 +'<Notes>'+ IsNULL(strNotes,'')  +'</Notes>'  
+		 +'<ReasonCode>'+ dbo.fnEscapeXML(IsNULL(strReasonCode,''))  +'</ReasonCode>'  
+		 +'<Notes>'+ dbo.fnEscapeXML(IsNULL(strNotes,''))  +'</Notes>'  
 		FROM tblIPLotPropertyFeed
 		WHERE intLotPropertyFeedId = @intLotPropertyFeedId
 

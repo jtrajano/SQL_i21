@@ -487,6 +487,9 @@
     <Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
     <Build Include="dbo\Stored Procedures\uspSCISGetTicketBinHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFModifyTFRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGenerateCTCashFlow.sql" />
+    <Build Include="dbo\Tables\tblCTOrderTypeFX.sql" />
+    <Build Include="dbo\Views\vyuLGGetContractTradeFinance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -8032,6 +8035,8 @@
     <Build Include="dbo\Views\vyuSMFreightTerms.sql" />
     <Build Include="dbo\Views\vyuCMBankLoan.sql" />
     <Build Include="dbo\Views\vyuCMBankLoanDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBTForAccrualPosting.sql" />
+    <Build Include="dbo\Views\vyuCMBTForAccrualSwapPosting.sql" />
     <Build Include="tblICItemBook.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeInvoiceDelete.sql" />
     <Build Include="dbo\Tables\tblHDTimeOffRequest.sql" />
@@ -9940,6 +9945,13 @@
     <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuRestApiVendors.sql" />
     <Build Include="dbo\Views\vyuApiTransportTerminals.sql" />
+    <Build Include="dbo\Views\vyuApiApproval.sql" />
+    <Build Include="dbo\Views\vyuApiActivity.sql" />
+    <Build Include="dbo\Views\vyuApiAttachment.sql" />
+    <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessage.sql" />
+    <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessages.sql" />
+    <Build Include="dbo\Views\vyuApiSalesOrder.sql" />
+    <Build Include="dbo\Views\vyuApiSalesOrderDetail.sql" />
     <Build Include="dbo\Views\vyuRestApiVoucherChecks.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTickets.sql" />
@@ -10161,6 +10173,8 @@
     <Build Include="dbo\Functions\fnGRFindOriginalCustomerStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
+    <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherStatusFromCM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

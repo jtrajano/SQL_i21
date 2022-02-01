@@ -65,6 +65,16 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'PO'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	DELETE
 	FROM @tblCTContractFeed
 
@@ -85,7 +95,7 @@ BEGIN TRY
 	WHERE strLotOrigin = @strCompanyLocation
 
 	INSERT INTO @tblCTContractFeed (intContractFeedId)
-	SELECT TOP 50 CF.intContractFeedId
+	SELECT TOP (@tmp) CF.intContractFeedId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CF.intStatusId IS NULL
@@ -303,9 +313,9 @@ BEGIN TRY
 				'<VendorAccountNo>' + @strVendorAccountNum + '</VendorAccountNo>' + 
 				'<Book>' + @strBook + '</Book>' + 
 				'<Commodity>' + @strCommodityCode + '</Commodity>' + 
-				'<VendorRefNo>' + ISNULL(@strCustomerContract, '') + '</VendorRefNo>' + 
+				'<VendorRefNo>' + dbo.fnEscapeXML(ISNULL(@strCustomerContract, '')) + '</VendorRefNo>' + 
 				'<TermsCode>' + ISNULL(CF.strTermCode, '') + '</TermsCode>' + 
-				'<INCOTerm>' + ISNULL(CF.strContractBasis, '') + '</INCOTerm>' + 
+				'<INCOTerm>' + dbo.fnEscapeXML(ISNULL(CF.strContractBasis, '')) + '</INCOTerm>' + 
 				'<INCOTermLocation>' + ISNULL(C.strCity, '') + '</INCOTermLocation>' + 
 				'<Position>' + ISNULL(P.strPosition, '') + '</Position>' + 
 				'<WeightTerm>' + ISNULL(W1.strWeightGradeDesc, '') + '</WeightTerm>' + 
@@ -402,7 +412,7 @@ BEGIN TRY
 					'<Origin>' + ISNULL(CF.strOrigin, '') + '</Origin>' + 
 					'<LoadingPort>' + ISNULL(CF.strLoadingPoint, '') + '</LoadingPort>' + 
 					'<DestinationPort>' + ISNULL(DP.strCity, '') + '</DestinationPort>' + 
-					'<Shipper>' + ISNULL(S.strName, '') + '</Shipper>' + 
+					'<Shipper>' + dbo.fnEscapeXML(ISNULL(S.strName, '')) + '</Shipper>' + 
 					'<Certificate>' + ISNULL(@strCertificate, '') + '</Certificate>' + 
 					'<ERPPONumber>' + ISNULL(CF.strERPPONumber, '') + '</ERPPONumber>' + 
 					'<ERPPOlineNo>' + ISNULL(CF.strERPItemNumber, '') + '</ERPPOlineNo>' + 

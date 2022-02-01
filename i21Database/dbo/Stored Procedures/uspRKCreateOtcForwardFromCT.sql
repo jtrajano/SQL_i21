@@ -13,6 +13,7 @@ CREATE PROCEDURE [dbo].[uspRKCreateOtcForwardFromCT]
 	, @intFutOptTransactionHeaderId INT OUTPUT
 	, @intFutOptTransactionId INT OUTPUT
 	, @strInternalTradeNo NVARCHAR(200) OUTPUT
+	, @intOrderTypeId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -77,6 +78,8 @@ BEGIN TRY
 		, intBankId
 		, intBankAccountId
 		, intSelectedInstrumentTypeId
+		, intFromCurrencyId
+		, intToCurrencyId
 		, strFromCurrency
 		, strToCurrency
 		, dtmMaturityDate
@@ -86,6 +89,7 @@ BEGIN TRY
 		, intContractDetailId
 		, dblContractAmount
 		, dblMatchAmount
+		, intOrderTypeId
 	)
 	SELECT 
 		intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
@@ -99,6 +103,8 @@ BEGIN TRY
 		, intBankId = NULL
 		, intBankAccountId = NULL 
 		, intSelectedInstrumentTypeId = 2 -- 2 = OTC
+		, intFromCurrencyId = @intBuyCurrencyId
+		, intToCurrencyId = @intSellCurrencyId
 		, strFromCurrency = @strBuyCurrency
 		, strToCurrency = @strSellCurrency
 		, dtmMaturityDate = @dtmMaturityDate
@@ -108,6 +114,7 @@ BEGIN TRY
 		, intContractDetailId = @intContractDetailId
 		, dblContractAmount = @dblBuyAmount
 		, dblMatchAmount = @dblSellAmount
+		, intOrderTypeId = @intOrderTypeId
 
 	SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 

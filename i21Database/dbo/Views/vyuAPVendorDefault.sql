@@ -40,7 +40,9 @@ SELECT
 	intSubBookId,
 	strSubBook,
 	B.intShipFromId,
-	SF.strLocationName as strShipFromName
+	SF.strLocationName as strShipFromName,
+	B.intVendorCurrencyAccountId,
+	GA.strAccountId strVendorCurrencyAccountId
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -83,6 +85,7 @@ FROM
 		INNER JOIN tblCTSubBook ctsubbook ON bookEntity.intSubBookId = ctsubbook.intSubBookId
 		WHERE bookEntity.intEntityId = A.intEntityId
 	) ctBookEntities
+	LEFT JOIN tblGLAccount GA ON GA.intAccountId = B.intVendorCurrencyAccountId
 
 GO
 

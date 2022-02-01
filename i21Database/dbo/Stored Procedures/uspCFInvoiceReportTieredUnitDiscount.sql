@@ -200,7 +200,8 @@ BEGIN
 		,[intFeeProfileId]
 		,[dblQuantity]
 		,[dblAmount]
-		,[intFeeId]				
+		,[intFeeId]			
+		,[intTransactionId]	
 	) 
 	SELECT 
 		 [strGuid]
@@ -216,6 +217,7 @@ BEGIN
 		,[dblQuantity]
 		,0
 		,[intFeeId]	
+		,[intTransactionId]
 	FROM tblCFInvoiceReportTempTable AS cfInv
 	INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount 
 	ON cfInv.intAccountId = cfCardAccount.intAccountId 
@@ -275,9 +277,8 @@ BEGIN
 
 
 	UPDATE tblCFInvoiceReportTieredUnitDiscountTempTable
-	SET tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount = ABS(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate * tblCFInvoiceReportTieredUnitDiscountTempTable.dblQuantity) * -1
+	SET tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount = ABS(ROUND(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate * tblCFInvoiceReportTieredUnitDiscountTempTable.dblQuantity,2)) * -1
 	FROM tblCFInvoiceReportTieredUnitDiscountTempTable
-
 
 	
 	SELECT * FROM tblCFInvoiceReportTieredUnitDiscountTempTable

@@ -28,8 +28,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Lot Merge'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	INSERT INTO @tblIPLotMergeFeed (intLotMergeFeedId)
-	SELECT TOP 20 intLotMergeFeedId
+	SELECT TOP (@tmp) intLotMergeFeedId
 	FROM dbo.tblIPLotMergeFeed
 	WHERE strCompanyLocation = @strCompanyLocation
 
@@ -67,8 +77,8 @@ BEGIN TRY
 		 +'<DestinationLotNo>'+ IsNULL(strDestinationLotNo,'')  +'</DestinationLotNo>'  
 		 +'<Quantity>'+ ltrim(dblQuantity)  +'</Quantity>'  
 		 +'<QuantityUOM>'+ IsNULL(strQuantityUOM,'')  +'</QuantityUOM>'  
-		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  
-		 +'<Notes>'+ IsNULL(strNotes,'')  +'</Notes>'  
+		 +'<ReasonCode>'+ dbo.fnEscapeXML(IsNULL(strReasonCode,''))  +'</ReasonCode>'  
+		 +'<Notes>'+ dbo.fnEscapeXML(IsNULL(strNotes,''))  +'</Notes>'  
 		FROM tblIPLotMergeFeed
 		WHERE intLotMergeFeedId = @intLotMergeFeedId
 

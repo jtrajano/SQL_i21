@@ -62,7 +62,8 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@strType NVARCHAR(50)
 		,@strReceiptNumber NVARCHAR(50)
-		,@intWeightAdjItemId int
+		,@intNoOfReceipt INT
+		,@intWeightAdjItemId INT
 		,@dblCostAdjustment NUMERIC(18, 6)
 		,@intNoOfItem INT
 		,@intLocationId int
@@ -86,11 +87,21 @@ BEGIN TRY
 		RETURN
 	END
 
+	DECLARE @tmp INT
+
+	SELECT @tmp = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Voucher'
+		AND strTag = 'Count'
+
+	IF ISNULL(@tmp, 0) = 0
+		SELECT @tmp = 50
+
 	DELETE
 	FROM @tblAPBillPreStage
 
 	INSERT INTO @tblAPBillPreStage (intBillPreStageId)
-	SELECT TOP 50 BPS.intBillPreStageId
+	SELECT TOP (@tmp) BPS.intBillPreStageId
 	FROM tblAPBillPreStage BPS
 	JOIN tblAPBill B ON B.intBillId = BPS.intBillId
 		AND B.intTransactionType IN (
@@ -333,7 +344,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<DueDate>' + ISNULL(CONVERT(VARCHAR, @dtmDueDate, 112), '') + '</DueDate>'
 
-		SELECT @strXML += '<ReferenceNo>' + ISNULL(@strReference, '') + '</ReferenceNo>'
+		SELECT @strXML += '<ReferenceNo>' + dbo.fnEscapeXML(ISNULL(@strReference, '')) + '</ReferenceNo>'
 
 		SELECT @strXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
 
@@ -343,7 +354,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<VoucherTotal>' + LTRIM(ISNULL(@dblTotal, 0)) + '</VoucherTotal>'
 
-		SELECT @strXML += '<Remarks>' + ISNULL(@strRemarks, '') + '</Remarks>'
+		SELECT @strXML += '<Remarks>' + dbo.fnEscapeXML(ISNULL(@strRemarks, '')) + '</Remarks>'
 
 		SELECT @strXML += '<ERPVoucherNo>' + ISNULL(@strERPVoucherNo, '') + '</ERPVoucherNo>'
 
@@ -389,6 +400,7 @@ BEGIN TRY
 				,@intContractDetailId = NULL
 				,@strType = NULL
 				,@strReceiptNumber = NULL
+				,@intNoOfReceipt = NULL
 
 			SELECT @intItemId = BD.intItemId
 			FROM dbo.tblAPBillDetail BD
@@ -504,6 +516,34 @@ BEGIN TRY
 					AND BD.intContractDetailId IS NOT NULL
 					AND BD.intBillDetailId = @intBillDetailId
 				JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+			END
+
+			IF ISNULL(@strReceiptNumber, '') = ''
+			BEGIN
+				SELECT @intNoOfReceipt = COUNT(1)
+				FROM tblLGLoad L WITH (NOLOCK)
+				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+					AND L.intShipmentType = 1
+					AND LD.intPContractDetailId = @intContractDetailId
+					AND L.intShipmentStatus <> 10
+					AND LD.intItemId = @intItemId
+				JOIN tblICInventoryReceiptItem RI WITH (NOLOCK) ON RI.intSourceId = LD.intLoadDetailId
+					AND RI.intLineNo = LD.intPContractDetailId
+				JOIN tblICInventoryReceipt R WITH (NOLOCK) ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+
+				IF ISNULL(@intNoOfReceipt, 0) = 1
+				BEGIN
+					SELECT TOP 1 @strReceiptNumber = R.strReceiptNumber
+					FROM tblLGLoad L WITH (NOLOCK)
+					JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+						AND L.intShipmentType = 1
+						AND LD.intPContractDetailId = @intContractDetailId
+						AND L.intShipmentStatus <> 10
+						AND LD.intItemId = @intItemId
+					JOIN tblICInventoryReceiptItem RI WITH (NOLOCK) ON RI.intSourceId = LD.intLoadDetailId
+						AND RI.intLineNo = LD.intPContractDetailId
+					JOIN tblICInventoryReceipt R WITH (NOLOCK) ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+				END
 			END
 
 			IF ISNULL(@strType, '') = 'Other Charge'

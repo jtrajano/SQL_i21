@@ -4280,7 +4280,12 @@ BEGIN TRY
 				-- 	1.1. Decrease available priced quantities
 				-- 	1.2. Increase available basis quantities
 				--  1.3. Increase basis deliveries if DWG
-				SET @FinalQty = CASE WHEN @intContractStatusId IN (1, 4) THEN @dblCurrentQty - @dblQuantityAppliedAndPriced ELSE 0 END
+				SET @FinalQty = CASE
+					WHEN @intContractStatusId IN (1, 4)
+					THEN
+						case when @dblCurrentQty < @TotalPriced then @dblCurrentQty else @TotalPriced end
+					ELSE 0
+				END
 				
 				-- Negate all the priced quantities
                 -- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
@@ -4320,11 +4325,11 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
+
 					IF (@qtyDiff <> 0)
 					BEGIN
-						-- Qty Changed
-						SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
-											ELSE @dblCurrentQty - @prevOrigQty END
+						--If reducing the price and the remaining priced qty is less than the Final Qty, use the remaining priced qty.
+						select @FinalQty = case when @FinalQty < 0  and abs(@FinalQty) > @TotalPriced then @TotalPriced * -1 else @FinalQty end;
 					END
 					ELSE
 					BEGIN
@@ -4826,9 +4831,12 @@ BEGIN TRY
 
 								IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
 								BEGIN
-									UPDATE @cbLogSpecific SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
-																						WHEN @intHeaderPricingTypeId = 1 THEN 1
-																						ELSE 2 END, intActionId = (CASE WHEN intActionId = 46 AND @currPricingTypeId <> 3 THEN 18 ELSE intActionId END)
+									UPDATE @cbLogSpecific
+									SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
+																WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
+																ELSE 2 END
+										, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
+															ELSE intActionId END
 								END
 							END
 							ELSE
@@ -4842,9 +4850,12 @@ BEGIN TRY
 
 							IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
 							BEGIN
-								UPDATE @cbLogSpecific SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1 
-																					WHEN @intHeaderPricingTypeId = 1 THEN 1
-																					ELSE 2 END, intActionId = (CASE WHEN intActionId = 46 AND @currPricingTypeId <> 3 THEN 18 ELSE intActionId END)
+								UPDATE @cbLogSpecific
+								SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
+															WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
+															ELSE 2 END
+									, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
+															ELSE intActionId END
 							END
 						END
 					END

@@ -1,5 +1,6 @@
 CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	intCompanyPreferenceOptionId int IDENTITY(1,1) NOT NULL,
+	intBTPostReminderDays INT NULL,
 	intUTCOffset int NULL,
 	intBTForwardFromFXGLAccountId int NULL, -- receivable
 	intBTForwardToFXGLAccountId int NULL, -- payable

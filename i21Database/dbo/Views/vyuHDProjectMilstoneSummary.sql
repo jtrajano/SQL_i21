@@ -37,7 +37,7 @@
 			--,dblQuotedHours = isnull(sum(b.dblQuotedHours),0.00)
 			,dblQuotedHours = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
 			,dblActualHours = isnull(sum(b.dblActualHours),0.00)
-			,dblOverShort = isnull(sum(b.dblActualHours),0.00) - isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
+			,dblOverShort = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00) - isnull(sum(b.dblActualHours),0.00)
 		from
 			tblHDMilestone a
 			join tblHDTicket b on b.intMilestoneId = a.intMilestoneId
