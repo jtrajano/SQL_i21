@@ -159,6 +159,22 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 				DELETE FROM #TempEmployeeTimeOff WHERE LTRIM(RTRIM(intEntityNo)) =LTRIM(RTRIM(@strEmployeeId))  AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
 			END
 
+			INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+			SELECT TOP 1
+				  NEWID()
+				, guiApiImportLogId = @guiLogId
+				, strField = 'Employee Time Off'
+				, strValue = SE.strTimeOffId
+				, strLogLevel = 'Info'
+				, strStatus = 'Success'
+				, intRowNo = SE.intRowNumber
+				, strMessage = 'The employee time off has been successfully imported.'
+			FROM tblApiSchemaEmployeeTimeOff SE
+			LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+			WHERE SE.guiApiUniqueId = @guiApiUniqueId
+			AND SE.strTimeOffId = @strTimeOffId
+			AND SE.strTimeOffDesc = @strTimeOffDesc
+
 	END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeTimeOff')) 
