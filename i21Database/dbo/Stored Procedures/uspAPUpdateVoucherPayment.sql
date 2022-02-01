@@ -47,6 +47,7 @@ BEGIN TRY
 			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1
 		) paySched
 		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
+		AND PD.dblPayment != 0
 
 		UPDATE tblAPBill 
 		SET
@@ -98,6 +99,7 @@ BEGIN TRY
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND (B.ysnPrepayHasPayment = 0 OR B.intTransactionType NOT IN (2, 13))
+		AND PD.dblPayment != 0
 	END
 	ELSE IF @post = 0
 	BEGIN
@@ -113,6 +115,7 @@ BEGIN TRY
 			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1 AND P2.intPaymentId <> PD.intPaymentId
 		) paySched
 		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
+		AND PD.dblPayment != 0
 
 		UPDATE tblAPBill 
 		SET
@@ -164,6 +167,7 @@ BEGIN TRY
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND (B.ysnPrepayHasPayment = 0 OR B.intTransactionType NOT IN (2, 13))
+		AND PD.dblPayment != 0
 	END
 
 	--SELECT NULLED BILLS
