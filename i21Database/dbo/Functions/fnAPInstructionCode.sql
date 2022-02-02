@@ -7,7 +7,8 @@ AS
 BEGIN
 	DECLARE @strInstructionCode NVARCHAR(10);
 
-	SELECT @strInstructionCode = CASE WHEN @instructionCode = 2 THEN 'CHQB'
+	SELECT @strInstructionCode = CASE WHEN @instructionCode = 1 THEN 'URGP'
+									  WHEN @instructionCode = 2 THEN 'CHQB'
 									  WHEN @instructionCode = 3 THEN 'CMSW'
 									  WHEN @instructionCode = 4 THEN 'CMTO'
 									  WHEN @instructionCode = 5 THEN 'CMZB'
@@ -19,7 +20,7 @@ BEGIN
 									  WHEN @instructionCode = 11 THEN 'PHON'
 									  WHEN @instructionCode = 12 THEN 'REPA'
 									  WHEN @instructionCode = 13 THEN 'RTGS'
-									  ELSE 'URGP' END
+									  ELSE NULL END
 
 	RETURN @strInstructionCode
 END
