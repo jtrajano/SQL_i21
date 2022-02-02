@@ -88,6 +88,7 @@
     [intPayToDown]                     INT            DEFAULT 0 NULL,
     [strACHClientId]                   NVARCHAR(30)   COLLATE Latin1_General_CI_AS NULL,
     [intResponsibleEntityId]           INT            NULL,
+    [strPaymentInstructions]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     --Advance Bank Recon fields
     [ysnABREnable]                     BIT            NULL,
     [intABRDaysNoRef]                  INT            NULL,

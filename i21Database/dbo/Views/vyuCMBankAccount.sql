@@ -111,6 +111,7 @@ SELECT	i21.intBankAccountId
 		--Advanced Bank Recon
 		,i21.ysnABREnable
 		,i21.intABRDaysNoRef
+		,i21.strPaymentInstructions
 		--Advanced Bank Recon
 		
 		-- The following fields are from the origin system		
@@ -251,6 +252,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intResponsibleEntityId
 						,ysnABREnable
 						,intABRDaysNoRef
+						,strPaymentInstructions
 				)
 				OUTPUT 	inserted.intBankAccountId
 				SELECT	intBankId							= i.intBankId
@@ -341,6 +343,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intResponsibleEntityId				= i.intResponsibleEntityId
 						,ysnABREnable						= i.ysnABREnable
 						,intABRDaysNoRef					= i.intABRDaysNoRef
+						,strPaymentInstructions				= i.strPaymentInstructions
 				FROM	inserted i 
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
@@ -454,6 +457,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
+					,strPaymentInstructions				= i.strPaymentInstructions
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
