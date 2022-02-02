@@ -47,15 +47,7 @@ UPDATE tblCMBankAccount
 SET
 	intBankAccountTypeId = 2
 WHERE
-	(intBankAccountTypeId = 3 AND intBrokerageAccountId IS NULL) OR (ISNULL(intBankAccountTypeId, 0) = 0)
+	ISNULL(intBankAccountTypeId, 0) = 0
 GO
-
-UPDATE tblCMBankAccount
-SET
-	intBankAccountTypeId = 3
-WHERE
-	intBrokerageAccountId IS NOT NULL
-GO
-
 
 PRINT 'Finish updating old zero-valued bank account type'
