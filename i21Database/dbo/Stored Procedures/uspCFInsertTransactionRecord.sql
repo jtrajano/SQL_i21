@@ -891,6 +891,38 @@ BEGIN
 			END
 		END
 	END
+
+	DECLARE @ysnSkipTransactionOnImport BIT 
+	SELECT TOP 1 @ysnSkipTransactionOnImport = ysnSkipTransactionOnImport FROM tblCFSite WHERE intSiteId = @intSiteId
+
+	IF(ISNULL(@ysnSkipTransactionOnImport,0) = 1)
+	BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, 0, 'Skipped transaction')
+
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason)
+			VALUES (0, 'Skipped transaction')
+
+
+			--INSERT INTO tblCFTransactionPrice
+			--(
+			--	 intTransactionId
+			--	,strTransactionPriceId
+			--	,dblOriginalAmount
+			--	,dblCalculatedAmount
+			--)
+			--VALUES 
+			-- (@Pk,'Gross Price',@dblOriginalGrossPrice,0.0)
+			--,(@Pk,'Net Price',0.0,0.0)
+			--,(@Pk,'Total Amount',0.0,0.0)
+
+			
+			COMMIT TRANSACTION
+			RETURN;
+
+	END
+
+
 	
 	--FIND CARD--
 	
