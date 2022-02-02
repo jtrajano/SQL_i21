@@ -13,7 +13,7 @@ DECLARE @NewId AS INT
 DECLARE @EmployeeEntityNo AS INT
 
 DECLARE @intEntityNo AS INT
-DECLARE @strEmployeeId AS NVARCHAR(100)
+DECLARE @strEmployeeId  AS NVARCHAR(50)
 DECLARE @strDeductionDesc  AS NVARCHAR(50)
 DECLARE @strDeductionId AS NVARCHAR(50)
 DECLARE @ysnDefault  AS BIT
@@ -386,7 +386,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 						END
 					END
 
-				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @intEntityNo  AND strDeductionId = @strDeductionId
+				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId
 			END
 
 		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
