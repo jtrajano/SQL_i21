@@ -66,10 +66,10 @@ SET	@dblMinimumUnitsOut = 0
 					@dblFreightRateIn = ISNULL(CF.dblFreightRateIn, 0),
 	           		@dblFreightRateOut = ISNULL(CF.dblFreightRate, 0),
 	           		@ysnFreightInPrice = CF.ysnFreightInPrice, 
-					@dblMinimumUnitsIn = CF.dblMinimumUnitsIn,
-	           		@dblMinimumUnitsOut = CF.dblMinimumUnits,
+					@dblMinimumUnitsIn =  ISNULL(CF.dblMinimumUnitsIn, 0),
+	           		@dblMinimumUnitsOut = ISNULL(CF.dblMinimumUnits, 0),
 					@intTariffType  = CF.intEntityTariffTypeId,
-					@dblSurchargeRateOut = CF.dblSurchargeOut
+					@dblSurchargeRateOut = ISNULL(CF.dblSurchargeOut, 0)
 	    from tblARCustomerFreightXRef CF 
 			join tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
 	            where CF.intEntityCustomerId = @intEntityCustomerId 
@@ -86,10 +86,10 @@ SET	@dblMinimumUnitsOut = 0
 					@dblFreightRateIn = ISNULL(BPF.dblFreightRateIn, 0),
 	           		@dblFreightRateOut = ISNULL(BPF.dblFreightRate, 0),
 	           		@ysnFreightInPrice = convert(bit,0), 
-					@dblMinimumUnitsIn = BPF.dblMinimumUnitsIn,
-	           		@dblMinimumUnitsOut = BPF.dblMinimumUnits,
+					@dblMinimumUnitsIn = ISNULL(BPF.dblMinimumUnitsIn, 0),
+	           		@dblMinimumUnitsOut = ISNULL(BPF.dblMinimumUnits, 0),
 					@intTariffType   = BPF.intEntityTariffTypeId,
-					@dblSurchargeRateOut = BPF.dblSurchargeOut
+					@dblSurchargeRateOut = ISNULL(BPF.dblSurchargeOut, 0)
 	    from tblTRBulkPlantFreight BPF 
 	            where BPF.strZipCode = @strZipCode
 	           			and BPF.intCategoryId = @intCategoryid
