@@ -886,11 +886,9 @@ BEGIN
 
 	IF(ISNULL(@ysnSkipTransactionOnImport,0) = 1)
 	BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, 0, 'Skipped transaction')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason)
-			VALUES (0, 'Skipped transaction')
+			VALUES (0, 'Skipped transaction of Site ' + @strSiteId + ' - ' + @strSiteName)
 
 
 			--INSERT INTO tblCFTransactionPrice
