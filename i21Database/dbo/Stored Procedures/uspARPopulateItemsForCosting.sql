@@ -55,11 +55,11 @@ INSERT INTO ##ARItemsForCosting
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= CASE WHEN ysnSeparateStockForUOMs = 0 THEN ICIUOM_STOCK.[intItemUOMId] ELSE ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) END
+	,[intItemUOMId]				= CASE WHEN ITEM.ysnSeparateStockForUOMs = 0 THEN ICIUOM.[intItemUOMId] ELSE ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) END
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ARID.[intInventoryShipmentItemId] IS NOT NULL AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ARID.[intLoadDetailId] IS NOT NULL AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
-										WHEN ARIDL.[intLotId] IS NULL THEN CASE WHEN ysnSeparateStockForUOMs = 0 THEN dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIUOM_STOCK.intItemUOMId, ARID.[dblQtyShipped]) ELSE ARID.[dblQtyShipped] END 
+										WHEN ARIDL.[intLotId] IS NULL THEN CASE WHEN ITEM.ysnSeparateStockForUOMs = 0 THEN dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIUOM.intItemUOMId, ARID.[dblQtyShipped]) ELSE ARID.[dblQtyShipped] END 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
@@ -121,6 +121,13 @@ LEFT OUTER JOIN tblICLot LOT WITH (NOLOCK) ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]
 LEFT OUTER JOIN tblSCTicket T WITH (NOLOCK) ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARID.intItemUOMId = ICIUOM.intItemUOMId
+INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
+CROSS APPLY (
+    SELECT intItemUOMId 
+    FROM tblICItemUOM WITH (NOLOCK)
+    WHERE intItemId = ARID.intItemId
+    AND ysnStockUnit = 1
+) ICIUOM_STOCK
 WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
     AND ARID.[ysnImpactInventory] = @OneBit
