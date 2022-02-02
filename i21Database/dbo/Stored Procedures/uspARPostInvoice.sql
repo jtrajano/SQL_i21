@@ -374,21 +374,18 @@ BEGIN TRY
     END
 
 	IF @post = 1 AND @recap = 1
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-			  @ysnPost	  	= 1
-			, @ysnRecap	  	= 1
-			, @dtmDatePost	= @PostDate
-			, @strBatchId	= @batchIdUsed
-			, @intUserId	= @userId
+		EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+				  @ysnPost	  	= 1
+				, @ysnRecap	  	= 1
+				, @dtmDatePost	= @PostDate
+				, @strBatchId	= @batchIdUsed
+				, @intUserId	= @userId
 
 	IF @recap = 0
-	BEGIN
-		-- Log to inventory sub-ledger	
 		EXEC [dbo].[uspARLogInventorySubLedger] @post, @userId
-	END
 
 	IF @post = 1
-    EXEC [dbo].[uspARPrePostInvoiceIntegration]	
+    	EXEC [dbo].[uspARPrePostInvoiceIntegration]	
 
 	DECLARE @InvoicesForIntegration Id
 
