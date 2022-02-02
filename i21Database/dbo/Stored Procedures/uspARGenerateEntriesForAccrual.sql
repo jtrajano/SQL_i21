@@ -1015,7 +1015,7 @@ BEGIN
 END
 
 --DEBIT/CREDIT AR TAX DETAILS
-INSERT INTO @GLEntries WITH (TABLOCK)
+INSERT INTO @GLEntries
     ([dtmDate]
     ,[strBatchId]
     ,[intAccountId]
