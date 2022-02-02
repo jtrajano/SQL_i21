@@ -60,17 +60,19 @@ SELECT DE.intFutOptTransactionId
 	, strBuyBankAccountNo = BuyBankAcct.strBankAccountNo COLLATE Latin1_General_CI_AS
 	, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
 	, dtmBankTransferDate = BT.dtmDate	
-	, ysnBankTransferPosted = BT.ysnPosted
+	, ysnBankTransferPosted = CASE WHEN ISNULL(DE.intBankTransferId, 0) <> 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	, strApprovalStatus = CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
-							WHEN ISNULL(DE.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' THEN approval.strApprovalStatus
+							WHEN ISNULL(DE.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' 
+								THEN CASE WHEN ISNULL(DE.intBankTransferId, 0) <> 0 THEN 'Posted' ELSE 'Approved and not Posted' END
 							ELSE ISNULL(DE.strStatus, 
 										CASE WHEN DE.intSelectedInstrumentTypeId = 2 AND DE.intInstrumentTypeId = 4 THEN 'No Need for Approval' 
 										ELSE '' END) 
-							END
+							END COLLATE Latin1_General_CI_AS
 	, strOrderType = (CASE WHEN DE.intOrderTypeId = 1 THEN 'GTC'
 							WHEN DE.intOrderTypeId = 2 THEN 'Limit'
 							WHEN DE.intOrderTypeId = 3 THEN 'Market'
-							ELSE '' END)
+							ELSE '' END) COLLATE Latin1_General_CI_AS
+	, strDerivativeContractNumber = CASE WHEN ISNULL(contractH.intContractHeaderId, 0) <> 0 THEN contractH.strContractNumber + ' - ' + CAST(contractD.intContractSeq AS NVARCHAR(50)) ELSE NULL END COLLATE Latin1_General_CI_AS 
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -121,3 +123,7 @@ LEFT JOIN tblSMTransaction approval
 	AND DE.intInstrumentTypeId = 4						-- OTC Forwards Only
 	AND approval.intScreenId = approvalScreen.intScreenId
 	AND approval.strApprovalStatus IN ('Waiting for Approval', 'Waiting for Submit', 'Approved')
+LEFT JOIN tblCTContractHeader contractH
+	ON contractH.intContractHeaderId = DE.intContractHeaderId
+LEFT JOIN tblCTContractDetail contractD
+	ON contractD.intContractDetailId = DE.intContractDetailId

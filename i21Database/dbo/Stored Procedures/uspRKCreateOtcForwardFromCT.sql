@@ -14,6 +14,9 @@ CREATE PROCEDURE [dbo].[uspRKCreateOtcForwardFromCT]
 	, @intFutOptTransactionId INT OUTPUT
 	, @strInternalTradeNo NVARCHAR(200) OUTPUT
 	, @intOrderTypeId INT = NULL
+	, @dblLimitRate NUMERIC(24, 10) = NULL
+	, @dtmMarketDate DATETIME = NULL
+	, @ysnGTC BIT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -26,10 +29,27 @@ BEGIN TRY
 	DECLARE @intCommodityId INT
 		, @strBuyCurrency NVARCHAR(200)
 		, @strSellCurrency NVARCHAR(200)
+		, @intCurrencyPair INT = NULL
 		, @ErrMsg NVARCHAR(MAX) = NULL
-
-	SELECT @strSellCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSellCurrencyId
+		
 	SELECT @strBuyCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intBuyCurrencyId
+	SELECT @strSellCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSellCurrencyId
+	
+	SELECT @intCurrencyPair = intRateTypeId 
+	FROM 
+	(
+		SELECT TOP 1 intRateTypeId
+		FROM tblSMCurrencyExchangeRateDetail fxRateDetail
+		CROSS APPLY (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate fxr
+			WHERE fxr.intFromCurrencyId = @intBuyCurrencyId 
+			AND fxr.intToCurrencyId = @intSellCurrencyId 
+			AND fxr.intCurrencyExchangeRateId = fxRateDetail.intCurrencyExchangeRateId
+		) fxRate
+		WHERE dtmValidFromDate <= GETDATE()
+		ORDER BY dtmValidFromDate DESC
+	) t
+	JOIN tblSMCurrencyExchangeRateType fxRateType
+	ON fxRateType.intCurrencyExchangeRateTypeId = t.intRateTypeId
 
 	SELECT TOP 1 @intCommodityId = intCommodityId FROM tblICCommodity
 	WHERE strCommodityCode = 'Currency'
@@ -90,6 +110,10 @@ BEGIN TRY
 		, dblContractAmount
 		, dblMatchAmount
 		, intOrderTypeId
+		, intCurrencyExchangeRateTypeId
+		, dblLimitRate
+		, dtmMarketDate
+		, ysnGTC
 	)
 	SELECT 
 		intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
@@ -115,6 +139,10 @@ BEGIN TRY
 		, dblContractAmount = @dblBuyAmount
 		, dblMatchAmount = @dblSellAmount
 		, intOrderTypeId = @intOrderTypeId
+		, intCurrencyExchangeRateTypeId = @intCurrencyPair
+		, dblLimitRate = @dblLimitRate 
+		, dtmMarketDate = @dtmMarketDate 
+		, ysnGTC = @ysnGTC 
 
 	SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 
