@@ -32,5 +32,5 @@ LEFT JOIN vyuICGetItemStock st ON st.intItemId = i.intItemId
     AND st.intStorageLocationId IS NULL
     AND st.intIssueUOMId = vd.intItemUOMId
     AND st.intLocationId = o.intCompanyLocationId
-    AND st.ysnActive = 1
+    AND 1 = 1 -- st.ysnActive = 1 mon note commented this one so we can have a build
     AND (NOT ((N'Discontinued' = st.[strStatus]) AND (st.[strStatus] IS NOT NULL)))
