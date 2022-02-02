@@ -136,6 +136,7 @@ BEGIN
 			, dtmCreatedDate = GETDATE()
 			, intConcurrencyId = 1
 		from
+
 			@TFXML tf
 			join tblCTContractDetail cd on cd.intContractDetailId = tf.intContractDetailId
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -152,6 +153,7 @@ BEGIN
 		BEGIN
 			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = 'UPDATE'
 		END
+
 
 
 
