@@ -104,7 +104,7 @@ BEGIN
 		select
 			 (case when et.intTradeFinanceLogId is null then 'Created' else 'Updated' end)
 		from
-			#TFXML tf
+			@TFXML tf
 			join tblCTContractDetail cd on cd.intContractDetailId = tf.intContractDetailId
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
