@@ -357,62 +357,65 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 			END
 
 		--INSERT INVOICE
-		INSERT INTO @tblPaymentEntries (
-			  intId
-			, strSourceTransaction
-			, intSourceId
-			, strSourceId
-			, intEntityCustomerId
-			, intCompanyLocationId
-			, intCurrencyId
-			, dtmDatePaid
-			, intPaymentMethodId
-			, strPaymentMethod
-			, strNotes
-			, strPaymentInfo
-			, intBankAccountId
-			, dblAmountPaid
-			, intEntityId
-			, intInvoiceId
-			, strTransactionType
-			, strTransactionNumber
-			, intTermId
-			, intInvoiceAccountId
-			, dblInvoiceTotal
-			, dblBaseInvoiceTotal
-			, dblPayment
-			, dblAmountDue
-			, strInvoiceReportNumber
-			, ysnPost
-		)
-		SELECT intId						= I.intInvoiceId
-			, strSourceTransaction			= 'Direct'
-			, intSourceId					= I.intInvoiceId
-			, strSourceId					= I.strInvoiceNumber
-			, intEntityCustomerId			= I.intEntityCustomerId
-			, intCompanyLocationId			= I.intCompanyLocationId
-			, intCurrencyId					= I.intCurrencyId
-			, dtmDatePaid					= I.dtmPostDate
-			, intPaymentMethodId			= @intPaymentMethodId
-			, strPaymentMethod				= @strPaymentMethod
-			, strNotes						= 'Auto Apply Prepaid and Credits for ' + I.strInvoiceNumber 
-			, strPaymentInfo				= NULL
-			, intBankAccountId				= NULL
-			, dblAmountPaid					= 0
-			, intEntityId					= @intEntityUserId
-			, intInvoiceId					= I.intInvoiceId
-			, strTransactionType			= I.strTransactionType
-			, strTransactionNumber			= I.strInvoiceNumber
-			, intTermId						= I.intTermId
-			, intInvoiceAccountId			= I.intAccountId
-			, dblInvoiceTotal				= I.dblInvoiceTotal
-			, dblBaseInvoiceTotal			= I.dblBaseInvoiceTotal
-			, dblPayment					= I.dblAppliedPayment
-			, dblAmountDue					= I.dblAmountDue
-			, strInvoiceReportNumber		= I.strInvoiceNumber
-			, ysnPost						= 1
-		FROM #AAPINVOICES I
-		WHERE I.intInvoiceId = @intInvoiceId		
+		IF EXISTS (SELECT TOP 1 NULL FROM @tblPaymentEntries WHERE intId = @intInvoiceId)
+            BEGIN                
+                INSERT INTO @tblPaymentEntries (
+                      intId
+                    , strSourceTransaction
+                    , intSourceId
+                    , strSourceId
+                    , intEntityCustomerId
+                    , intCompanyLocationId
+                    , intCurrencyId
+                    , dtmDatePaid
+                    , intPaymentMethodId
+                    , strPaymentMethod
+                    , strNotes
+                    , strPaymentInfo
+                    , intBankAccountId
+                    , dblAmountPaid
+                    , intEntityId
+                    , intInvoiceId
+                    , strTransactionType
+                    , strTransactionNumber
+                    , intTermId
+                    , intInvoiceAccountId
+                    , dblInvoiceTotal
+                    , dblBaseInvoiceTotal
+                    , dblPayment
+                    , dblAmountDue
+                    , strInvoiceReportNumber
+                    , ysnPost
+                )
+                SELECT intId                        = I.intInvoiceId
+                    , strSourceTransaction          = 'Direct'
+                    , intSourceId                   = I.intInvoiceId
+                    , strSourceId                   = I.strInvoiceNumber
+                    , intEntityCustomerId           = I.intEntityCustomerId
+                    , intCompanyLocationId          = I.intCompanyLocationId
+                    , intCurrencyId                 = I.intCurrencyId
+                    , dtmDatePaid                   = I.dtmPostDate
+                    , intPaymentMethodId            = @intPaymentMethodId
+                    , strPaymentMethod              = @strPaymentMethod
+                    , strNotes                      = 'Auto Apply Prepaid and Credits for ' + I.strInvoiceNumber 
+                    , strPaymentInfo                = NULL
+                    , intBankAccountId              = NULL
+                    , dblAmountPaid                 = 0
+                    , intEntityId                   = @intEntityUserId
+                    , intInvoiceId                  = I.intInvoiceId
+                    , strTransactionType            = I.strTransactionType
+                    , strTransactionNumber          = I.strInvoiceNumber
+                    , intTermId                     = I.intTermId
+                    , intInvoiceAccountId           = I.intAccountId
+                    , dblInvoiceTotal               = I.dblInvoiceTotal
+                    , dblBaseInvoiceTotal           = I.dblBaseInvoiceTotal
+                    , dblPayment                    = I.dblAppliedPayment
+                    , dblAmountDue                  = I.dblAmountDue
+                    , strInvoiceReportNumber        = I.strInvoiceNumber
+                    , ysnPost                       = 1
+                FROM #AAPINVOICES I
+                WHERE I.intInvoiceId = @intInvoiceId
+            END
 
 		IF NOT EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment)
 			BEGIN
