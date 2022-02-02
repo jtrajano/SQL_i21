@@ -17,7 +17,7 @@ SELECT
     , vd.strTaxGroup
     , vd.strSubLocation strStorageLocation
     , vd.strStorageLocation strStorageUnit
-    , vd.dblStandardWeight
+    , 0 dblStandardWeight
     , vd.dblTotal
     , st.dblUnitOnHand
     , st.dblOrderCommitted
