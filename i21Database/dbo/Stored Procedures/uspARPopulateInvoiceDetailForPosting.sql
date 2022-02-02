@@ -30,6 +30,7 @@ DECLARE	@DiscountAccountId          INT
        ,@OneDecimal                 DECIMAL(18,6)
        ,@OneHundredDecimal          DECIMAL(18,6)
        ,@Param2                     NVARCHAR(MAX)
+	   ,@Precision					INT = 2
 
 SET @ZeroDecimal = 0.000000
 SET @OneDecimal = 1.000000
@@ -43,36 +44,97 @@ SELECT TOP 1
 	,@ImpactForProvisional      = ISNULL([ysnImpactForProvisional], @ZeroBit)
     ,@ExcludeInvoiceFromPayment = ISNULL([ysnExcludePaymentInFinalInvoice], @ZeroBit)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+ORDER BY intCompanyPreferenceId 
 
+SET @Precision = dbo.fnARGetDefaultDecimal()
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
 SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
+SET @Param = UPPER(RTRIM(LTRIM(ISNULL(@Param,''))))
 
-DECLARE @tblInvoiceIds InvoiceId
-DELETE FROM @tblInvoiceIds
+IF(OBJECT_ID('tempdb..#tblInvoiceIds') IS NOT NULL) DROP TABLE #tblInvoiceIds
+CREATE TABLE #tblInvoiceIds (
+	  intInvoiceId		INT NOT NULL PRIMARY KEY
+	, ysnPost			BIT DEFAULT 1
+	, ysnRecap			BIT DEFAULT 0
+	, ysnAccrueLicense	BIT DEFAULT 0
+	, strBatchId		NVARCHAR(40) COLLATE Latin1_General_CI_AS    NULL	
+)
 
 --FILTERED BY ALL
-INSERT INTO @tblInvoiceIds (intHeaderId)
-SELECT intInvoiceId
-FROM tblARInvoice ARI WITH (NOLOCK)
-WHERE ARI.ysnPosted = 0
-  AND UPPER(RTRIM(LTRIM(ISNULL(@Param,'')))) = 'ALL'
-  AND (UPPER(@TransType) = 'ALL' OR ARI.[strTransactionType] = @TransType)
-  AND (@BeginDate IS NULL OR ARI.dtmDate >= @BeginDate)
-  AND (@EndDate IS NULL OR ARI.dtmDate <= @EndDate)
-  AND (@BeginTransaction IS NULL OR ARI.intInvoiceId >= @BeginTransaction)
-  AND (@EndTransaction IS NULL OR ARI.intInvoiceId >= @EndTransaction)
-
---FILTERED BY PARAM
-IF UPPER(RTRIM(LTRIM(ISNULL(@Param,'')))) <> 'ALL' AND RTRIM(LTRIM(ISNULL(@Param,''))) <> '' 
+IF @Param = 'ALL'
 	BEGIN
-		INSERT INTO @tblInvoiceIds (intHeaderId)
-		SELECT intInvoiceId
+		INSERT INTO #tblInvoiceIds WITH (TABLOCK) (
+			  intInvoiceId
+			, ysnPost
+			, ysnRecap
+			, ysnAccrueLicense
+			, strBatchId
+		)
+		SELECT intInvoiceId		= ARI.intInvoiceId
+			, ysnPost			= @Post
+			, ysnRecap			= @Recap
+			, ysnAccrueLicense	= @AccrueLicense
+			, strBatchId		= @BatchId
 		FROM tblARInvoice ARI WITH (NOLOCK)
-		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@Param) DV ON DV.[intID] = ARI.[intInvoiceId]  		 		  
+		WHERE ARI.ysnPosted = 0
+		  AND (UPPER(@TransType) = 'ALL' OR ARI.[strTransactionType] = @TransType)
+		  AND (@BeginDate IS NULL OR ARI.dtmDate >= @BeginDate)
+		  AND (@EndDate IS NULL OR ARI.dtmDate <= @EndDate)
+		  AND (@BeginTransaction IS NULL OR ARI.intInvoiceId >= @BeginTransaction)
+		  AND (@EndTransaction IS NULL OR ARI.intInvoiceId >= @EndTransaction)
+	END
+ELSE
+	BEGIN 
+		IF(OBJECT_ID('tempdb..#TEMPINVOICES') IS NOT NULL) DROP TABLE #TEMPINVOICES 
+		CREATE TABLE #TEMPINVOICES (intInvoiceId INT NOT NULL PRIMARY KEY)
+
+		INSERT INTO #TEMPINVOICES
+		SELECT DISTINCT intID
+		FROM fnGetRowsFromDelimitedValues(@Param)
+
+		--FILTERED BY PARAM
+		INSERT INTO #tblInvoiceIds WITH (TABLOCK) (
+			  intInvoiceId
+			, ysnPost
+			, ysnRecap
+			, ysnAccrueLicense
+			, strBatchId
+		)
+		SELECT intInvoiceId		= ARI.intInvoiceId
+			, ysnPost			= @Post
+			, ysnRecap			= @Recap
+			, ysnAccrueLicense	= @AccrueLicense
+			, strBatchId		= @BatchId
+		FROM tblARInvoice ARI WITH (NOLOCK)
+		INNER JOIN #TEMPINVOICES DV ON DV.intInvoiceId = ARI.[intInvoiceId]
+
+		UNION
+
+		SELECT intInvoiceId		= LD.intInvoiceId
+			, ysnPost			= @Post
+			, ysnRecap			= @Recap
+			, ysnAccrueLicense	= @AccrueLicense
+			, strBatchId		= @BatchId
+		FROM tblARInvoiceIntegrationLogDetail LD
+		WHERE LD.[intIntegrationLogId] = @IntegrationLogId
+          AND LD.[ysnHeader] = 1
+		  AND LD.[ysnPosted] <> @Post
+          AND LD.[ysnPost] = @Post
+		  
+		UNION
+
+		SELECT intInvoiceId		= LD.intHeaderId
+			, ysnPost			= @Post
+			, ysnRecap			= @Recap
+			, ysnAccrueLicense	= @AccrueLicense
+			, strBatchId		= @BatchId
+		FROM @InvoiceIds LD
+		WHERE LD.[ysnPost] IS NOT NULL 
+          AND LD.[ysnPost] = @Post
 	END
 
---Header
-INSERT ##ARPostInvoiceHeader
+--HEADER
+INSERT ##ARPostInvoiceHeader WITH (TABLOCK)
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -135,93 +197,15 @@ INSERT ##ARPostInvoiceHeader
     ,[ysnRecap]
     ,[intEntityId]
     ,[intUserId]
-    ,[ysnUserAllowedToPostOtherTrans]
-    ,[ysnWithinAccountingDate]
-    ,[ysnForApproval]
+    ,[ysnUserAllowedToPostOtherTrans]    
     ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
-    ,[ysnIsInvoicePositive]
-
-    ,[intInvoiceDetailId]
-    ,[intItemId]
-    ,[strItemNo]
-    ,[strItemType]
-    ,[strItemManufactureType]
-    ,[strItemDescription]
-    ,[intItemUOMId]
-    ,[intItemWeightUOMId]
-    ,[intItemAccountId]
-    ,[intServiceChargeAccountId]
-    ,[intSalesAccountId]
-    ,[intCOGSAccountId]
-    ,[intInventoryAccountId]
-    ,[intLicenseAccountId]
-    ,[intMaintenanceAccountId]
-    ,[intConversionAccountId]
-    ,[dblQtyShipped]
-    ,[dblUnitQtyShipped]
-    ,[dblShipmentNetWt]
-    ,[dblUnitQty]
-    ,[dblUnitOnHand]
-    ,[intAllowNegativeInventory]
-    ,[ysnStockTracking]
-    ,[intItemLocationId]
-    ,[dblLastCost]
-    ,[intCategoryId]
-    ,[ysnRetailValuation]
-    ,[dblPrice]
-    ,[dblBasePrice]
-    ,[dblUnitPrice]
-    ,[dblBaseUnitPrice]
-    ,[strPricing]
-    ,[dblDiscount]
-    ,[dblDiscountAmount]
-    ,[dblBaseDiscountAmount]
-    ,[dblTotal]
-    ,[dblBaseTotal]
-    ,[dblLineItemGLAmount]
-    ,[dblBaseLineItemGLAmount]
-    ,[intCurrencyExchangeRateTypeId]
-    ,[dblCurrencyExchangeRate]
-    ,[strCurrencyExchangeRateType]
-    ,[intLotId]
-    ,[intOriginalInvoiceDetailId]
-    ,[strMaintenanceType]
-    ,[strFrequency]
-    ,[dtmMaintenanceDate]
-    ,[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]
-    ,[dblLicenseGLAmount]
-    ,[dblBaseLicenseGLAmount]
-    ,[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]
-    ,[dblMaintenanceGLAmount]
-    ,[dblBaseMaintenanceGLAmount]
-    ,[ysnTankRequired]
-    ,[ysnLeaseBilling]
-    ,[intSiteId]
-    ,[intPerformerId]
-    ,[intContractHeaderId]
-    ,[intContractDetailId]
-    ,[intInventoryShipmentItemId]
-    ,[intInventoryShipmentChargeId]
-    ,[intSalesOrderDetailId]
-    ,[intLoadDetailId]
-    ,[intShipmentId]
-    ,[intTicketId]
+    ,[ysnCancelled]
+    ,[ysnPaid]
+    ,[strPONumber]
+    
     ,[intDiscountAccountId]
-    ,[intCustomerStorageId]
-    ,[intStorageScheduleTypeId]
-    ,[intSubLocationId]
-    ,[intStorageLocationId]
-    ,[ysnAutoBlend]
-    ,[ysnBlended]
-    ,[dblQuantity]
-    ,[dblMaxQuantity]
-    ,[strOptionType]
-    ,[strSourceType]
-    ,[strPostingMessage]
     ,[strDescription]
 	,[strBOLNumber]
 )
@@ -253,14 +237,14 @@ SELECT
     ,[dblBaseInvoiceTotal]              = ARI.[dblBaseInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
-    ,[dblTax]                           = ISNULL(ARI.[dblTax], @ZeroDecimal)
-    ,[dblBaseTax]                       = ISNULL(ARI.[dblBaseTax], @ZeroDecimal)
+    ,[dblTax]                           = ARI.[dblTax]
+    ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
     ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
-    ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
-    ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
-    ,[dblProvisionalAmount]             = ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
-    ,[dblBaseProvisionalAmount]         = ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
+    ,[dblPayment]                       = ARI.[dblPayment]
+    ,[dblBasePayment]                   = ARI.[dblBasePayment]
+    ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
+    ,[dblBaseProvisionalAmount]         = ARI.[dblBaseProvisionalAmount]
     ,[strComments]                      = ARI.[strComments]
     ,[strImportFormat]                  = ARI.[strImportFormat]
     ,[intSourceId]                      = ARI.[intSourceId]
@@ -271,131 +255,57 @@ SELECT
     ,[intLoadId]                        = ARI.[intLoadId]
     ,[intFreightTermId]                 = ARI.[intFreightTermId]
     ,[strActualCostId]                  = ARI.[strActualCostId]
-    ,[intPeriodsToAccrue]               = ISNULL(ARI.[intPeriodsToAccrue], 1)
-    ,[ysnAccrueLicense]                 = ISNULL(@AccrueLicense, @ZeroBit)
+    ,[intPeriodsToAccrue]               = ARI.[intPeriodsToAccrue]
+    ,[ysnAccrueLicense]                 = ID.ysnAccrueLicense
     ,[intSplitId]                       = ARI.[intSplitId]
     ,[dblSplitPercent]                  = ARI.[dblSplitPercent]
     ,[ysnSplitted]                      = ARI.[ysnSplitted]
     ,[ysnPosted]                        = ARI.[ysnPosted]
     ,[ysnRecurring]                     = ARI.[ysnRecurring]
-    ,[ysnImpactInventory]               = ISNULL(ARI.[ysnImpactInventory], CAST(1 AS BIT))
+    ,[ysnImpactInventory]               = ARI.[ysnImpactInventory]
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
-    ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
+    ,[ysnFromProvisional]               = ARI.[ysnFromProvisional]
     ,[dtmDatePosted]                    = @PostDate
-    ,[strBatchId]                       = @BatchId
-    ,[ysnPost]                          = @Post
-    ,[ysnRecap]                         = @Recap
+    ,[strBatchId]                       = ID.strBatchId
+    ,[ysnPost]                          = ID.ysnPost
+    ,[ysnRecap]                         = ID.ysnRecap
     ,[intEntityId]                      = ARI.[intEntityId]
     ,[intUserId]                        = @UserId
-    ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
-    ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
-    ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
+    ,[ysnUserAllowedToPostOtherTrans]	= @AllowOtherUserToPost    
     ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
-    ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
-    ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
-    ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = @OneDecimal THEN @OneBit ELSE @ZeroBit END)
-
-    ,[intInvoiceDetailId]               = NULL
-    ,[intItemId]                        = NULL
-    ,[strItemNo]                        = NULL
-    ,[strItemType]                      = NULL
-    ,[strItemManufactureType]           = NULL
-    ,[strItemDescription]               = NULL
-    ,[intItemUOMId]                     = NULL
-    ,[intItemWeightUOMId]               = NULL
-    ,[intItemAccountId]                 = NULL
-    ,[intServiceChargeAccountId]        = NULL
-    ,[intSalesAccountId]                = NULL
-    ,[intCOGSAccountId]                 = NULL
-    ,[intInventoryAccountId]            = NULL
-    ,[intLicenseAccountId]              = NULL
-    ,[intMaintenanceAccountId]          = NULL
-    ,[intConversionAccountId]           = NULL
-    ,[dblQtyShipped]                    = @ZeroDecimal
-    ,[dblUnitQtyShipped]                = @ZeroDecimal
-    ,[dblShipmentNetWt]                 = @ZeroDecimal
-    ,[dblUnitQty]                       = @ZeroDecimal
-    ,[dblUnitOnHand]                    = @ZeroDecimal
-    ,[intAllowNegativeInventory]        = NULL
-    ,[ysnStockTracking]					= @ZeroBit
-    ,[intItemLocationId]                = NULL
-    ,[dblLastCost]                      = @ZeroDecimal
-    ,[intCategoryId]                    = NULL
-    ,[ysnRetailValuation]				= @ZeroBit
-    ,[dblPrice]                         = @ZeroDecimal
-    ,[dblBasePrice]                     = @ZeroDecimal
-    ,[dblUnitPrice]                     = @ZeroDecimal
-    ,[dblBaseUnitPrice]                 = @ZeroDecimal
-    ,[strPricing]                       = NULL
-    ,[dblDiscount]                      = @ZeroDecimal
-    ,[dblDiscountAmount]				= @ZeroDecimal
-    ,[dblBaseDiscountAmount]            = @ZeroDecimal
-    ,[dblTotal]                         = @ZeroDecimal
-    ,[dblBaseTotal]                     = @ZeroDecimal
-    ,[dblLineItemGLAmount]              = @ZeroDecimal
-    ,[dblBaseLineItemGLAmount]          = @ZeroDecimal
-    ,[intCurrencyExchangeRateTypeId]    = NULL
-    ,[dblCurrencyExchangeRate]          = @OneDecimal
-    ,[strCurrencyExchangeRateType]      = NULL
-    ,[intLotId]                         = NULL
-    ,[intOriginalInvoiceDetailId]       = NULL
-    ,[strMaintenanceType]               = NULL
-    ,[strFrequency]                     = NULL
-    ,[dtmMaintenanceDate]               = @ZeroDecimal
-    ,[dblLicenseAmount]                 = @ZeroDecimal
-    ,[dblBaseLicenseAmount]             = @ZeroDecimal
-    ,[dblLicenseGLAmount]               = @ZeroDecimal
-    ,[dblBaseLicenseGLAmount]           = @ZeroDecimal
-    ,[dblMaintenanceAmount]             = @ZeroDecimal
-    ,[dblBaseMaintenanceAmount]         = @ZeroDecimal
-    ,[dblMaintenanceGLAmount]           = @ZeroDecimal
-    ,[dblBaseMaintenanceGLAmount]       = @ZeroDecimal
-    ,[ysnTankRequired]                  = @ZeroBit
-    ,[ysnLeaseBilling]                  = @ZeroBit
-    ,[intSiteId]                        = NULL
-    ,[intPerformerId]                   = NULL
-    ,[intContractHeaderId]              = NULL
-    ,[intContractDetailId]              = NULL
-    ,[intInventoryShipmentItemId]       = NULL
-    ,[intInventoryShipmentChargeId]     = NULL
-    ,[intSalesOrderDetailId]            = NULL
-    ,[intLoadDetailId]                  = NULL
-    ,[intShipmentId]                    = NULL
-    ,[intTicketId]                      = NULL
+    ,[ysnExcludeInvoiceFromPayment]     = @ExcludeInvoiceFromPayment
+    ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
+    ,[ysnCancelled]                     = ARI.[ysnCancelled]
+    ,[ysnPaid]                          = ARI.[ysnPaid]
+    ,[strPONumber]                      = ARI.[strPONumber]
+    
     ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
-    ,[intCustomerStorageId]             = NULL
-    ,[intStorageScheduleTypeId]         = NULL
-    ,[intSubLocationId]                 = NULL
-    ,[intStorageLocationId]             = NULL
-    ,[ysnAutoBlend]                     = @ZeroBit
-    ,[ysnBlended]                       = @ZeroBit
-    ,[dblQuantity]                      = @ZeroDecimal
-    ,[dblMaxQuantity]                   = @ZeroDecimal
-    ,[strOptionType]                    = NULL
-    ,[strSourceType]                    = NULL
-    ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @ImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1, 255)
-                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
-                                                ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
+    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @ImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + EM.[strName]),'')), 1, 255)
+                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + EM.[strName]),'')), 1 , 255)
+                                                ELSE ARI.[strTransactionType] + ' for ' + ISNULL(EM.strName, '')
                                             END		
     ,[strBOLNumber]						= ARI.strBOLNumber
 FROM tblARInvoice ARI
-INNER JOIN @tblInvoiceIds ID ON ARI.intInvoiceId = ID.intHeaderId
-INNER JOIN (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH(NoLock)
-    INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
-) ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
-INNER JOIN (
-    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount], [intSalesDiscounts] FROM tblSMCompanyLocation  WITH(NoLock)
-) SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN (
-    SELECT [intTransactionId] FROM vyuARForApprovalTransction  WITH (NOLOCK) WHERE [strScreenName] = 'Invoice'
-) FAT ON ARI.[intInvoiceId] = FAT.[intTransactionId]
-WHERE
-	NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE IH.[intInvoiceId] = ARI.[intInvoiceId])    
+INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
+INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
+INNER JOIN tblEMEntity EM ON ARC.intEntityId = EM.intEntityId 
+INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 
-INSERT ##ARPostInvoiceHeader
+UPDATE ##ARPostInvoiceHeader
+SET ysnIsInvoicePositive = CAST(0 AS BIT)  
+WHERE strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+
+UPDATE HEADER
+SET ysnForApproval = CAST(1 AS BIT)
+  , strDescription = FAT.strApprovalStatus
+FROM ##ARPostInvoiceHeader HEADER
+INNER JOIN vyuARForApprovalTransction FAT ON HEADER.intInvoiceId = FAT.intTransactionId
+WHERE FAT.strScreenName = 'Invoice'
+
+--DETAIL
+--INVENTORY
+INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -465,6 +375,9 @@ INSERT ##ARPostInvoiceHeader
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnCancelled]
+    ,[ysnPaid]
+    ,[strPONumber]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -520,8 +433,7 @@ INSERT ##ARPostInvoiceHeader
     ,[dblMaintenanceAmount]
     ,[dblBaseMaintenanceAmount]
     ,[dblMaintenanceGLAmount]
-    ,[dblBaseMaintenanceGLAmount]
-    ,[ysnTankRequired]
+    ,[dblBaseMaintenanceGLAmount]    
     ,[ysnLeaseBilling]
     ,[intSiteId]
     ,[intPerformerId]
@@ -540,687 +452,6 @@ INSERT ##ARPostInvoiceHeader
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
     ,[ysnBlended]
-    ,[dblQuantity]
-    ,[dblMaxQuantity]
-    ,[strOptionType]
-    ,[strSourceType]
-    ,[strPostingMessage]
-    ,[strDescription]
-	,[strBOLNumber]
-)
-SELECT 
-     [intInvoiceId]                     = ARI.[intInvoiceId]
-    ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
-    ,[strTransactionType]               = ARI.[strTransactionType]
-    ,[strType]                          = ARI.[strType]
-    ,[dtmDate]                          = ARI.[dtmDate]
-    ,[dtmPostDate]                      = ARI.[dtmPostDate]
-    ,[dtmShipDate]                      = ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
-    ,[intEntityCustomerId]              = ARI.[intEntityCustomerId]
-    ,[strCustomerNumber]                = ARC.[strCustomerNumber]
-    ,[ysnCustomerActive]                = ARC.[ysnActive]
-    ,[dblCustomerCreditLimit]           = ARC.[dblCreditLimit]
-    ,[intCompanyLocationId]             = ARI.[intCompanyLocationId]
-    ,[strCompanyLocationName]           = SMCL.[strLocationName]
-    ,[intAccountId]                     = ARI.[intAccountId]
-    ,[intAPAccount]                     = SMCL.[intAPAccount]
-    ,[intFreightIncome]                 = SMCL.[intFreightIncome]
-    ,[intDeferredRevenueAccountId]      = @DeferredRevenueAccountId
-    ,[intUndepositedFundsId]			= SMCL.[intUndepositedFundsId]
-    ,[intProfitCenter]                  = SMCL.[intProfitCenter]
-    ,[intLocationSalesAccountId]        = SMCL.[intSalesAccount]
-    ,[intCurrencyId]                    = ARI.[intCurrencyId]
-    ,[dblAverageExchangeRate]           = ARI.[dblCurrencyExchangeRate]
-    ,[intTermId]                        = ARI.[intTermId]
-    ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ARI.[dblBaseInvoiceTotal]
-    ,[dblShipping]                      = ARI.[dblShipping]
-    ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
-    ,[dblTax]                           = ISNULL(ARI.[dblTax], @ZeroDecimal)
-    ,[dblBaseTax]                       = ISNULL(ARI.[dblBaseTax], @ZeroDecimal)
-    ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
-    ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
-    ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
-    ,[dblProvisionalAmount]             = ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
-    ,[dblBaseProvisionalAmount]         = ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
-    ,[strComments]                      = ARI.[strComments]
-    ,[strImportFormat]                  = ARI.[strImportFormat]
-    ,[intSourceId]                      = ARI.[intSourceId]
-    ,[intOriginalInvoiceId]             = ARI.[intOriginalInvoiceId]
-    ,[strInvoiceOriginId]               = ARI.[strInvoiceOriginId]
-    ,[intDistributionHeaderId]          = ARI.[intDistributionHeaderId]
-    ,[intLoadDistributionHeaderId]      = ARI.[intLoadDistributionHeaderId]
-    ,[intLoadId]                        = ARI.[intLoadId]
-    ,[intFreightTermId]                 = ARI.[intFreightTermId]
-    ,[strActualCostId]                  = ARI.[strActualCostId]
-    ,[intPeriodsToAccrue]               = ISNULL(ARI.[intPeriodsToAccrue], 1)
-    ,[ysnAccrueLicense]                 = ISNULL([ysnAccrueLicense], @ZeroBit)
-    ,[intSplitId]                       = ARI.[intSplitId]
-    ,[dblSplitPercent]                  = ARI.[dblSplitPercent]
-    ,[ysnSplitted]                      = ARI.[ysnSplitted]
-    ,[ysnPosted]                        = ARI.[ysnPosted]
-    ,[ysnRecurring]                     = ARI.[ysnRecurring]
-    ,[ysnImpactInventory]               = ISNULL(ARI.[ysnImpactInventory], CAST(1 AS BIT))
-    ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
-	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
-    ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
-    ,[dtmDatePosted]                    = @PostDate
-    ,[strBatchId]                       = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARILD.[strBatchId],'')))) > 0 THEN ARILD.[strBatchId] ELSE @BatchId END
-    ,[ysnPost]                          = ARILD.[ysnPost]
-    ,[ysnRecap]                         = ARILD.[ysnRecap]
-    ,[intEntityId]                      = ARI.[intEntityId]
-    ,[intUserId]                        = @UserId
-    ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
-    ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
-    ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
-    ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
-    ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
-    ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
-    ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
-
-    ,[intInvoiceDetailId]               = NULL
-    ,[intItemId]                        = NULL
-    ,[strItemNo]                        = NULL
-    ,[strItemType]                      = NULL
-    ,[strItemManufactureType]           = NULL
-    ,[strItemDescription]               = NULL
-    ,[intItemUOMId]                     = NULL
-    ,[intItemWeightUOMId]               = NULL
-    ,[intItemAccountId]                 = NULL
-    ,[intServiceChargeAccountId]        = NULL
-    ,[intSalesAccountId]                = NULL
-    ,[intCOGSAccountId]                 = NULL
-    ,[intInventoryAccountId]            = NULL
-    ,[intLicenseAccountId]              = NULL
-    ,[intMaintenanceAccountId]          = NULL
-    ,[intConversionAccountId]           = NULL
-    ,[dblQtyShipped]                    = @ZeroDecimal
-    ,[dblUnitQtyShipped]                = @ZeroDecimal
-    ,[dblShipmentNetWt]                 = @ZeroDecimal
-    ,[dblUnitQty]                       = @ZeroDecimal
-    ,[dblUnitOnHand]                    = @ZeroDecimal
-    ,[intAllowNegativeInventory]        = NULL
-    ,[ysnStockTracking]					= @ZeroBit
-    ,[intItemLocationId]                = NULL
-    ,[dblLastCost]                      = @ZeroDecimal
-    ,[intCategoryId]                    = NULL
-    ,[ysnRetailValuation]				= @ZeroBit
-    ,[dblPrice]                         = @ZeroDecimal
-    ,[dblBasePrice]                     = @ZeroDecimal
-    ,[dblUnitPrice]                     = @ZeroDecimal
-    ,[dblBaseUnitPrice]                 = @ZeroDecimal
-    ,[strPricing]                       = NULL
-    ,[dblDiscount]                      = @ZeroDecimal
-    ,[dblDiscountAmount]				= @ZeroDecimal
-    ,[dblBaseDiscountAmount]            = @ZeroDecimal
-    ,[dblTotal]                         = @ZeroDecimal
-    ,[dblBaseTotal]                     = @ZeroDecimal
-    ,[dblLineItemGLAmount]              = @ZeroDecimal
-    ,[dblBaseLineItemGLAmount]          = @ZeroDecimal
-    ,[intCurrencyExchangeRateTypeId]    = NULL
-    ,[dblCurrencyExchangeRate]          = @OneDecimal
-    ,[strCurrencyExchangeRateType]      = NULL
-    ,[intLotId]                         = NULL
-    ,[intOriginalInvoiceDetailId]       = NULL
-    ,[strMaintenanceType]               = NULL
-    ,[strFrequency]                     = NULL
-    ,[dtmMaintenanceDate]               = @ZeroDecimal
-    ,[dblLicenseAmount]                 = @ZeroDecimal
-    ,[dblBaseLicenseAmount]             = @ZeroDecimal
-    ,[dblLicenseGLAmount]               = @ZeroDecimal
-    ,[dblBaseLicenseGLAmount]           = @ZeroDecimal
-    ,[dblMaintenanceAmount]             = @ZeroDecimal
-    ,[dblBaseMaintenanceAmount]         = @ZeroDecimal
-    ,[dblMaintenanceGLAmount]           = @ZeroDecimal
-    ,[dblBaseMaintenanceGLAmount]       = @ZeroDecimal
-    ,[ysnTankRequired]                  = @ZeroBit
-    ,[ysnLeaseBilling]                  = @ZeroBit
-    ,[intSiteId]                        = NULL
-    ,[intPerformerId]                   = NULL
-    ,[intContractHeaderId]              = NULL
-    ,[intContractDetailId]              = NULL
-    ,[intInventoryShipmentItemId]       = NULL
-    ,[intInventoryShipmentChargeId]     = NULL
-    ,[intSalesOrderDetailId]            = NULL
-    ,[intLoadDetailId]                  = NULL
-    ,[intShipmentId]                    = NULL
-    ,[intTicketId]                      = NULL
-    ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
-    ,[intCustomerStorageId]             = NULL
-    ,[intStorageScheduleTypeId]         = NULL
-    ,[intSubLocationId]                 = NULL
-    ,[intStorageLocationId]             = NULL
-    ,[ysnAutoBlend]                     = @ZeroBit
-    ,[ysnBlended]                       = @ZeroBit
-    ,[dblQuantity]                      = @ZeroDecimal
-    ,[dblMaxQuantity]                   = @ZeroDecimal
-    ,[strOptionType]                    = NULL
-    ,[strSourceType]                    = NULL
-    ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @ImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1, 255)
-                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
-                                                ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
-                                            END		
-    ,[strBOLNumber]						= ARI.strBOLNumber
-FROM
-    (
-    SELECT LD.[intInvoiceId], LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM tblARInvoiceIntegrationLogDetail LD
-    WHERE 
-        LD.[intIntegrationLogId] = @IntegrationLogId
-        AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE LD.[intInvoiceId] = IH.[intInvoiceId])
-        AND LD.[ysnHeader] = 1
-		AND ISNULL(LD.[ysnPosted],0) <> @Post
-        AND LD.[ysnPost] = @Post
-    ) ARILD
-INNER JOIN
-    tblARInvoice ARI
-        ON ARILD.[intInvoiceId] = ARI.[intInvoiceId]
-INNER JOIN
-    (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH (NOLOCK)
-    INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
-    ) ARC
-        ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
-LEFT OUTER JOIN
-    (
-    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount], [intSalesDiscounts] FROM tblSMCompanyLocation  WITH(NoLock)
-    ) SMCL
-        ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN
-    (
-    SELECT [intTransactionId] FROM vyuARForApprovalTransction  WITH (NOLOCK) WHERE [strScreenName] = 'Invoice'
-    ) FAT
-        ON ARI.[intInvoiceId] = FAT.[intTransactionId]
-
-INSERT ##ARPostInvoiceHeader
-    ([intInvoiceId]
-    ,[strInvoiceNumber]
-    ,[strTransactionType]
-    ,[strType]
-    ,[dtmDate]
-    ,[dtmPostDate]
-    ,[dtmShipDate]
-    ,[intEntityCustomerId]
-    ,[strCustomerNumber]
-    ,[ysnCustomerActive]
-    ,[dblCustomerCreditLimit]
-    ,[intCompanyLocationId]
-    ,[strCompanyLocationName]
-    ,[intAccountId]
-    ,[intAPAccount]
-    ,[intFreightIncome]
-    ,[intDeferredRevenueAccountId]
-    ,[intUndepositedFundsId]
-    ,[intProfitCenter]
-    ,[intLocationSalesAccountId]
-    ,[intCurrencyId]
-    ,[dblAverageExchangeRate]
-    ,[intTermId]
-    ,[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]
-    ,[dblShipping]
-    ,[dblBaseShipping]
-    ,[dblTax]
-    ,[dblBaseTax]
-    ,[dblAmountDue]
-    ,[dblBaseAmountDue]
-    ,[dblPayment]
-    ,[dblBasePayment]
-    ,[dblProvisionalAmount]
-    ,[dblBaseProvisionalAmount]
-    ,[strComments]
-    ,[strImportFormat]
-    ,[intSourceId]
-    ,[intOriginalInvoiceId]
-    ,[strInvoiceOriginId]
-    ,[intDistributionHeaderId]
-    ,[intLoadDistributionHeaderId]
-    ,[intLoadId]
-    ,[intFreightTermId]
-    ,[strActualCostId]
-    ,[intPeriodsToAccrue]
-    ,[ysnAccrueLicense]
-    ,[intSplitId]
-    ,[dblSplitPercent]
-    ,[ysnSplitted]
-    ,[ysnPosted]
-    ,[ysnRecurring]
-    ,[ysnImpactInventory]
-    ,[ysnImportedAsPosted]
-	,[ysnImportedFromOrigin]
-    ,[ysnFromProvisional]
-    ,[dtmDatePosted]
-    ,[strBatchId]
-    ,[ysnPost]
-    ,[ysnRecap]
-    ,[intEntityId]
-    ,[intUserId]
-    ,[ysnUserAllowedToPostOtherTrans]
-    ,[ysnWithinAccountingDate]
-    ,[ysnForApproval]
-    ,[ysnProvisionalWithGL]
-    ,[ysnExcludeInvoiceFromPayment]
-    ,[ysnRefundProcessed]
-    ,[ysnIsInvoicePositive]
-
-    ,[intInvoiceDetailId]
-    ,[intItemId]
-    ,[strItemNo]
-    ,[strItemType]
-    ,[strItemManufactureType]
-    ,[strItemDescription]
-    ,[intItemUOMId]
-    ,[intItemWeightUOMId]
-    ,[intItemAccountId]
-    ,[intServiceChargeAccountId]
-    ,[intSalesAccountId]
-    ,[intCOGSAccountId]
-    ,[intInventoryAccountId]
-    ,[intLicenseAccountId]
-    ,[intMaintenanceAccountId]
-    ,[intConversionAccountId]
-    ,[dblQtyShipped]
-    ,[dblUnitQtyShipped]
-    ,[dblShipmentNetWt]
-    ,[dblUnitQty]
-    ,[dblUnitOnHand]
-    ,[intAllowNegativeInventory]
-    ,[ysnStockTracking]
-    ,[intItemLocationId]
-    ,[dblLastCost]
-    ,[intCategoryId]
-    ,[ysnRetailValuation]
-    ,[dblPrice]
-    ,[dblBasePrice]
-    ,[dblUnitPrice]
-    ,[dblBaseUnitPrice]
-    ,[strPricing]
-    ,[dblDiscount]
-    ,[dblDiscountAmount]
-    ,[dblBaseDiscountAmount]
-    ,[dblTotal]
-    ,[dblBaseTotal]
-    ,[dblLineItemGLAmount]
-    ,[dblBaseLineItemGLAmount]
-    ,[intCurrencyExchangeRateTypeId]
-    ,[dblCurrencyExchangeRate]
-    ,[strCurrencyExchangeRateType]
-    ,[intLotId]
-    ,[intOriginalInvoiceDetailId]
-    ,[strMaintenanceType]
-    ,[strFrequency]
-    ,[dtmMaintenanceDate]
-    ,[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]
-    ,[dblLicenseGLAmount]
-    ,[dblBaseLicenseGLAmount]
-    ,[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]
-    ,[dblMaintenanceGLAmount]
-    ,[dblBaseMaintenanceGLAmount]
-    ,[ysnTankRequired]
-    ,[ysnLeaseBilling]
-    ,[intSiteId]
-    ,[intPerformerId]
-    ,[intContractHeaderId]
-    ,[intContractDetailId]
-    ,[intInventoryShipmentItemId]
-    ,[intInventoryShipmentChargeId]
-    ,[intSalesOrderDetailId]
-    ,[intLoadDetailId]
-    ,[intShipmentId]
-    ,[intTicketId]
-    ,[intDiscountAccountId]
-    ,[intCustomerStorageId]
-    ,[intStorageScheduleTypeId]
-    ,[intSubLocationId]
-    ,[intStorageLocationId]
-    ,[ysnAutoBlend]
-    ,[ysnBlended]
-    ,[dblQuantity]
-    ,[dblMaxQuantity]
-    ,[strOptionType]
-    ,[strSourceType]
-    ,[strPostingMessage]
-    ,[strDescription]
-	,[strBOLNumber]
-)
-SELECT 
-     [intInvoiceId]                     = ARI.[intInvoiceId]
-    ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
-    ,[strTransactionType]               = ARI.[strTransactionType]
-    ,[strType]                          = ARI.[strType]
-    ,[dtmDate]                          = ARI.[dtmDate]
-    ,[dtmPostDate]                      = ARI.[dtmPostDate]
-    ,[dtmShipDate]                      = ISNULL(ARI.[dtmShipDate], ARI.[dtmPostDate])
-    ,[intEntityCustomerId]              = ARI.[intEntityCustomerId]
-    ,[strCustomerNumber]                = ARC.[strCustomerNumber]
-    ,[ysnCustomerActive]                = ARC.[ysnActive]
-    ,[dblCustomerCreditLimit]           = ARC.[dblCreditLimit]
-    ,[intCompanyLocationId]             = ARI.[intCompanyLocationId]
-    ,[strCompanyLocationName]           = SMCL.[strLocationName]
-    ,[intAccountId]                     = ARI.[intAccountId]
-    ,[intAPAccount]                     = SMCL.[intAPAccount]
-    ,[intFreightIncome]                 = SMCL.[intFreightIncome]
-    ,[intDeferredRevenueAccountId]      = @DeferredRevenueAccountId
-    ,[intUndepositedFundsId]			= SMCL.[intUndepositedFundsId]
-    ,[intProfitCenter]                  = SMCL.[intProfitCenter]
-    ,[intLocationSalesAccountId]        = SMCL.[intSalesAccount]
-    ,[intCurrencyId]                    = ARI.[intCurrencyId]
-    ,[dblAverageExchangeRate]           = ARI.[dblCurrencyExchangeRate]
-    ,[intTermId]                        = ARI.[intTermId]
-    ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ARI.[dblBaseInvoiceTotal]
-    ,[dblShipping]                      = ARI.[dblShipping]
-    ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
-    ,[dblTax]                           = ISNULL(ARI.[dblTax], @ZeroDecimal)
-    ,[dblBaseTax]                       = ISNULL(ARI.[dblBaseTax], @ZeroDecimal)
-    ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
-    ,[dblPayment]                       = ISNULL(ARI.[dblPayment], @ZeroDecimal)
-    ,[dblBasePayment]                   = ISNULL(ARI.[dblBasePayment], @ZeroDecimal)
-    ,[dblProvisionalAmount]             = ISNULL(ARI.[dblProvisionalAmount], @ZeroDecimal)
-    ,[dblBaseProvisionalAmount]         = ISNULL(ARI.[dblBaseProvisionalAmount], @ZeroDecimal)
-    ,[strComments]                      = ARI.[strComments]
-    ,[strImportFormat]                  = ARI.[strImportFormat]
-    ,[intSourceId]                      = ARI.[intSourceId]
-    ,[intOriginalInvoiceId]             = ARI.[intOriginalInvoiceId]
-    ,[strInvoiceOriginId]               = ARI.[strInvoiceOriginId]
-    ,[intDistributionHeaderId]          = ARI.[intDistributionHeaderId]
-    ,[intLoadDistributionHeaderId]      = ARI.[intLoadDistributionHeaderId]
-    ,[intLoadId]                        = ARI.[intLoadId]
-    ,[intFreightTermId]                 = ARI.[intFreightTermId]
-    ,[strActualCostId]                  = ARI.[strActualCostId]
-    ,[intPeriodsToAccrue]               = ISNULL(ARI.[intPeriodsToAccrue], 1)
-    ,[ysnAccrueLicense]                 = ISNULL([ysnAccrueLicense], @ZeroBit)
-    ,[intSplitId]                       = ARI.[intSplitId]
-    ,[dblSplitPercent]                  = ARI.[dblSplitPercent]
-    ,[ysnSplitted]                      = ARI.[ysnSplitted]
-    ,[ysnPosted]                        = ARI.[ysnPosted]
-    ,[ysnRecurring]                     = ARI.[ysnRecurring]
-    ,[ysnImpactInventory]               = ISNULL(ARI.[ysnImpactInventory], CAST(1 AS BIT))
-    ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
-	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
-    ,[ysnFromProvisional]               = ISNULL(ARI.[ysnFromProvisional], @ZeroBit)
-    ,[dtmDatePosted]                    = @PostDate
-    ,[strBatchId]                       = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARILD.[strBatchId],'')))) > 0 THEN ARILD.[strBatchId] ELSE @BatchId END
-    ,[ysnPost]                          = ARILD.[ysnPost]
-    ,[ysnRecap]                         = ARILD.[ysnRecap]
-    ,[intEntityId]                      = ARI.[intEntityId]
-    ,[intUserId]                        = @UserId
-    ,[ysnUserAllowedToPostOtherTrans]	= ISNULL(@AllowOtherUserToPost, @ZeroBit)
-    ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ISNULL(ARI.[dtmPostDate], ARI.[dtmDate])), @ZeroBit)
-    ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
-    ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
-    ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
-    ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
-    ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
-
-    ,[intInvoiceDetailId]               = NULL
-    ,[intItemId]                        = NULL
-    ,[strItemNo]                        = NULL
-    ,[strItemType]                      = NULL
-    ,[strItemManufactureType]           = NULL
-    ,[strItemDescription]               = NULL
-    ,[intItemUOMId]                     = NULL
-    ,[intItemWeightUOMId]               = NULL
-    ,[intItemAccountId]                 = NULL
-    ,[intServiceChargeAccountId]        = NULL
-    ,[intSalesAccountId]                = NULL
-    ,[intCOGSAccountId]                 = NULL
-    ,[intInventoryAccountId]            = NULL
-    ,[intLicenseAccountId]              = NULL
-    ,[intMaintenanceAccountId]          = NULL
-    ,[intConversionAccountId]           = NULL
-    ,[dblQtyShipped]                    = @ZeroDecimal
-    ,[dblUnitQtyShipped]                = @ZeroDecimal
-    ,[dblShipmentNetWt]                 = @ZeroDecimal
-    ,[dblUnitQty]                       = @ZeroDecimal
-    ,[dblUnitOnHand]                    = @ZeroDecimal
-    ,[intAllowNegativeInventory]        = NULL
-    ,[ysnStockTracking]					= @ZeroBit
-    ,[intItemLocationId]                = NULL
-    ,[dblLastCost]                      = @ZeroDecimal
-    ,[intCategoryId]                    = NULL
-    ,[ysnRetailValuation]				= @ZeroBit
-    ,[dblPrice]                         = @ZeroDecimal
-    ,[dblBasePrice]                     = @ZeroDecimal
-    ,[dblUnitPrice]                     = @ZeroDecimal
-    ,[dblBaseUnitPrice]                 = @ZeroDecimal
-    ,[strPricing]                       = NULL
-    ,[dblDiscount]                      = @ZeroDecimal
-    ,[dblDiscountAmount]				= @ZeroDecimal
-    ,[dblBaseDiscountAmount]            = @ZeroDecimal
-    ,[dblTotal]                         = @ZeroDecimal
-    ,[dblBaseTotal]                     = @ZeroDecimal
-    ,[dblLineItemGLAmount]              = @ZeroDecimal
-    ,[dblBaseLineItemGLAmount]          = @ZeroDecimal
-    ,[intCurrencyExchangeRateTypeId]    = NULL
-    ,[dblCurrencyExchangeRate]          = @OneDecimal
-    ,[strCurrencyExchangeRateType]      = NULL
-    ,[intLotId]                         = NULL
-    ,[intOriginalInvoiceDetailId]       = NULL
-    ,[strMaintenanceType]               = NULL
-    ,[strFrequency]                     = NULL
-    ,[dtmMaintenanceDate]               = @ZeroDecimal
-    ,[dblLicenseAmount]                 = @ZeroDecimal
-    ,[dblBaseLicenseAmount]             = @ZeroDecimal
-    ,[dblLicenseGLAmount]               = @ZeroDecimal
-    ,[dblBaseLicenseGLAmount]           = @ZeroDecimal
-    ,[dblMaintenanceAmount]             = @ZeroDecimal
-    ,[dblBaseMaintenanceAmount]         = @ZeroDecimal
-    ,[dblMaintenanceGLAmount]           = @ZeroDecimal
-    ,[dblBaseMaintenanceGLAmount]       = @ZeroDecimal
-    ,[ysnTankRequired]                  = @ZeroBit
-    ,[ysnLeaseBilling]                  = @ZeroBit
-    ,[intSiteId]                        = NULL
-    ,[intPerformerId]                   = NULL
-    ,[intContractHeaderId]              = NULL
-    ,[intContractDetailId]              = NULL
-    ,[intInventoryShipmentItemId]       = NULL
-    ,[intInventoryShipmentChargeId]     = NULL
-    ,[intSalesOrderDetailId]            = NULL
-    ,[intLoadDetailId]                  = NULL
-    ,[intShipmentId]                    = NULL
-    ,[intTicketId]                      = NULL
-    ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
-    ,[intCustomerStorageId]             = NULL
-    ,[intStorageScheduleTypeId]         = NULL
-    ,[intSubLocationId]                 = NULL
-    ,[intStorageLocationId]             = NULL
-    ,[ysnAutoBlend]                     = @ZeroBit
-    ,[ysnBlended]                       = @ZeroBit
-    ,[dblQuantity]                      = @ZeroDecimal
-    ,[dblMaxQuantity]                   = @ZeroDecimal
-    ,[strOptionType]                    = NULL
-    ,[strSourceType]                    = NULL
-    ,[strPostingMessage]                = NULL
-    ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @ImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1, 255)
-                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
-                                                ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName , '')
-                                            END		
-	,[strBOLNumber]						= ARI.strBOLNumber
-    
-FROM
-    (
-    SELECT LD.[intHeaderId] AS 'intInvoiceId', LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM @InvoiceIds LD
-    WHERE 
-        NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE LD.[intHeaderId] = IH.[intInvoiceId])
-		AND LD.[ysnPost] IS NOT NULL 
-        AND LD.[ysnPost] = @Post
-    ) ARILD
-INNER JOIN
-    tblARInvoice ARI
-        ON ARILD.[intInvoiceId] = ARI.[intInvoiceId]
-INNER JOIN
-    (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH (NOLOCK)
-    INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
-    ) ARC
-        ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
-LEFT OUTER JOIN
-    (
-    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount], [intSalesDiscounts] FROM tblSMCompanyLocation  WITH(NoLock)
-    ) SMCL
-        ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN
-    (
-    SELECT [intTransactionId] FROM vyuARForApprovalTransction  WITH (NOLOCK) WHERE [strScreenName] = 'Invoice'
-    ) FAT
-        ON ARI.[intInvoiceId] = FAT.[intTransactionId]
-
---Detail
-INSERT ##ARPostInvoiceDetail
-    ([intInvoiceId]
-    ,[strInvoiceNumber]
-    ,[strTransactionType]
-    ,[strType]
-    ,[dtmDate]
-    ,[dtmPostDate]
-    ,[dtmShipDate]
-    ,[intEntityCustomerId]
-    ,[strCustomerNumber]
-    ,[ysnCustomerActive]
-    ,[dblCustomerCreditLimit]
-    ,[intCompanyLocationId]
-    ,[strCompanyLocationName]
-    ,[intAccountId]
-    ,[intAPAccount]
-    ,[intFreightIncome]
-    ,[intDeferredRevenueAccountId]
-    ,[intUndepositedFundsId]
-    ,[intProfitCenter]
-    ,[intLocationSalesAccountId]
-    ,[intCurrencyId]
-    ,[dblAverageExchangeRate]
-    ,[intTermId]
-    ,[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]
-    ,[dblShipping]
-    ,[dblBaseShipping]
-    ,[dblTax]
-    ,[dblBaseTax]
-    ,[dblAmountDue]
-    ,[dblBaseAmountDue]
-    ,[dblPayment]
-    ,[dblBasePayment]
-    ,[dblProvisionalAmount]
-    ,[dblBaseProvisionalAmount]
-    ,[strComments]
-    ,[strImportFormat]
-    ,[intSourceId]
-    ,[intOriginalInvoiceId]
-    ,[strInvoiceOriginId]
-    ,[intDistributionHeaderId]
-    ,[intLoadDistributionHeaderId]
-    ,[intLoadId]
-    ,[intFreightTermId]
-    ,[strActualCostId]
-    ,[intPeriodsToAccrue]
-    ,[ysnAccrueLicense]
-    ,[intSplitId]
-    ,[dblSplitPercent]
-    ,[ysnSplitted]
-    ,[ysnPosted]
-    ,[ysnRecurring]
-    ,[ysnImpactInventory]
-    ,[ysnImportedAsPosted]
-	,[ysnImportedFromOrigin]
-    ,[ysnFromProvisional]
-    ,[dtmDatePosted]
-    ,[strBatchId]
-    ,[ysnPost]
-    ,[ysnRecap]
-    ,[intEntityId]
-    ,[intUserId]
-    ,[ysnUserAllowedToPostOtherTrans]
-    ,[ysnWithinAccountingDate]
-    ,[ysnForApproval]
-    ,[ysnProvisionalWithGL]
-    ,[ysnExcludeInvoiceFromPayment]
-    ,[ysnRefundProcessed]
-    ,[ysnIsInvoicePositive]
-
-    ,[intInvoiceDetailId]
-    ,[intItemId]
-    ,[strItemNo]
-    ,[strItemType]
-    ,[strItemManufactureType]
-    ,[strItemDescription]
-    ,[intItemUOMId]
-    ,[intItemWeightUOMId]
-    ,[intItemAccountId]
-    ,[intServiceChargeAccountId]
-    ,[intSalesAccountId]
-    ,[intCOGSAccountId]
-    ,[intInventoryAccountId]
-    ,[intLicenseAccountId]
-    ,[intMaintenanceAccountId]
-    ,[intConversionAccountId]
-    ,[dblQtyShipped]
-    ,[dblUnitQtyShipped]
-    ,[dblShipmentNetWt]
-    ,[dblUnitQty]
-    ,[dblUnitOnHand]
-    ,[intAllowNegativeInventory]
-    ,[ysnStockTracking]
-    ,[intItemLocationId]
-    ,[dblLastCost]
-    ,[intCategoryId]
-    ,[ysnRetailValuation]
-    ,[dblPrice]
-    ,[dblBasePrice]
-    ,[dblUnitPrice]
-    ,[dblBaseUnitPrice]
-    ,[strPricing]
-    ,[dblDiscount]
-    ,[dblDiscountAmount]
-    ,[dblBaseDiscountAmount]
-    ,[dblTotal]
-    ,[dblBaseTotal]
-    ,[dblLineItemGLAmount]
-    ,[dblBaseLineItemGLAmount]
-    ,[intCurrencyExchangeRateTypeId]
-    ,[dblCurrencyExchangeRate]
-    ,[strCurrencyExchangeRateType]
-    ,[intLotId]
-    ,[intOriginalInvoiceDetailId]
-    ,[strMaintenanceType]
-    ,[strFrequency]
-    ,[dtmMaintenanceDate]
-    ,[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]
-    ,[dblLicenseGLAmount]
-    ,[dblBaseLicenseGLAmount]
-    ,[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]
-    ,[dblMaintenanceGLAmount]
-    ,[dblBaseMaintenanceGLAmount]
-    ,[ysnTankRequired]
-    ,[ysnLeaseBilling]
-    ,[intSiteId]
-    ,[intPerformerId]
-    ,[intContractHeaderId]
-    ,[intContractDetailId]
-    ,[intInventoryShipmentItemId]
-    ,[intInventoryShipmentChargeId]
-    ,[intSalesOrderDetailId]
-    ,[intLoadDetailId]
-    ,[intShipmentId]
-    ,[intTicketId]
-    ,[intDiscountAccountId]
-    ,[intCustomerStorageId]
-    ,[intStorageScheduleTypeId]
-    ,[intSubLocationId]
-    ,[intStorageLocationId]
-    ,[ysnAutoBlend]
-    ,[ysnBlended]
-    ,[dblQuantity]
-    ,[dblMaxQuantity]
-    ,[strOptionType]
-    ,[strSourceType]
-    ,[strPostingMessage]
     ,[strDescription]
 	,[strBOLNumber]
 )
@@ -1277,7 +508,7 @@ SELECT
     ,[ysnSplitted]                      = ARI.[ysnSplitted]
     ,[ysnPosted]                        = ARI.[ysnPosted]
     ,[ysnRecurring]                     = ARI.[ysnRecurring]
-    ,[ysnImpactInventory]               = ISNULL(ARI.[ysnImpactInventory], CAST(1 AS BIT))
+    ,[ysnImpactInventory]               = ARI.[ysnImpactInventory]
     ,[ysnImportedAsPosted]              = ARI.[ysnImportedAsPosted]
 	,[ysnImportedFromOrigin]            = ARI.[ysnImportedFromOrigin]
     ,[ysnFromProvisional]               = ARI.[ysnFromProvisional]
@@ -1294,6 +525,9 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
+    ,[ysnCancelled]                     = ARI.[ysnCancelled]
+    ,[ysnPaid]                          = ARI.[ysnPaid]
+    ,[strPONumber]                      = ARI.[strPONumber]
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
     ,[intItemId]                        = ARID.[intItemId]
@@ -1313,10 +547,9 @@ SELECT
     ,[intConversionAccountId]           = ARID.[intConversionAccountId]
     ,[dblQtyShipped]                    = ARID.[dblQtyShipped]
     ,[dblUnitQtyShipped]                = ISNULL(dbo.fnARCalculateQtyBetweenUOM(ARID.[intItemUOMId], ICSUOM.[intItemUOMId], ARID.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)
-    --,[dblUnitQtyShipped]                = ISNULL(ARID.[dblQtyShipped], @ZeroDecimal)
     ,[dblShipmentNetWt]                 = ARID.[dblShipmentNetWt]
     ,[dblUnitQty]                       = ICIU.[dblUnitQty]
-    ,[dblUnitOnHand]                    = ISNULL(ICIS.[dblUnitOnHand], @ZeroDecimal)
+    ,[dblUnitOnHand]                    = ICIS.[dblUnitOnHand]
     ,[intAllowNegativeInventory]        = ICIL.[intAllowNegativeInventory]
     ,[ysnStockTracking]					= @OneBit
     ,[intItemLocationId]                = ICIL.[intItemLocationId]
@@ -1329,12 +562,12 @@ SELECT
     ,[dblBaseUnitPrice]                 = ARID.[dblBaseUnitPrice]
     ,[strPricing]                       = ARID.[strPricing]
     ,[dblDiscount]                      = ARID.[dblDiscount]
-    ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal)
-    ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal)
+    ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision), @ZeroDecimal)
+    ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
-    ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+    ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -1350,8 +583,7 @@ SELECT
     ,[dblMaintenanceAmount]             = ARID.[dblMaintenanceAmount]
     ,[dblBaseMaintenanceAmount]         = ARID.[dblBaseMaintenanceAmount]
     ,[dblMaintenanceGLAmount]           = ARID.[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceGLAmount]       = ARID.[dblBaseMaintenanceAmount]
-    ,[ysnTankRequired]                  = NULL --ARID.[ysnTankRequired]
+    ,[dblBaseMaintenanceGLAmount]       = ARID.[dblBaseMaintenanceAmount]    
     ,[ysnLeaseBilling]                  = ARID.[ysnLeaseBilling]
     ,[intSiteId]                        = ARID.[intSiteId]
     ,[intPerformerId]                   = ARID.[intPerformerId]
@@ -1368,13 +600,9 @@ SELECT
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
     ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId]) END))
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
-    ,[ysnAutoBlend]                     = ISNULL(ICI.[ysnAutoBlend], @ZeroBit)
-    ,[ysnBlended]                       = ISNULL(ARID.[ysnBlended], @ZeroBit)
-    ,[dblQuantity]                      = NULL
-    ,[dblMaxQuantity]                   = NULL
-    ,[strOptionType]                    = NULL
-    ,[strSourceType]                    = NULL
-    ,[strPostingMessage]                = NULL
+    ,[ysnAutoBlend]                     = ICI.[ysnAutoBlend]
+    ,[ysnBlended]                       = ARID.[ysnBlended]
+ 
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
 	,[strBOLNumber]						= ARI.strBOLNumber 
 FROM ##ARPostInvoiceHeader ARI
@@ -1396,9 +624,9 @@ LEFT OUTER JOIN tblICItemStock ICIS WITH(NOLOCK) ON ICIL.[intItemId] = ICIS.[int
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH(NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE ICI.strType IN ('Inventory', 'Finished Good', 'Raw Material')
---WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 1
 
-INSERT ##ARPostInvoiceDetail
+--NON-INVENTORY
+INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1468,6 +696,9 @@ INSERT ##ARPostInvoiceDetail
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnCancelled]
+    ,[ysnPaid]
+    ,[strPONumber]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -1524,7 +755,6 @@ INSERT ##ARPostInvoiceDetail
     ,[dblBaseMaintenanceAmount]
     ,[dblMaintenanceGLAmount]
     ,[dblBaseMaintenanceGLAmount]
-    ,[ysnTankRequired]
     ,[ysnLeaseBilling]
     ,[intSiteId]
     ,[intPerformerId]
@@ -1542,12 +772,7 @@ INSERT ##ARPostInvoiceDetail
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
-    ,[ysnBlended]
-    ,[dblQuantity]
-    ,[dblMaxQuantity]
-    ,[strOptionType]
-    ,[strSourceType]
-    ,[strPostingMessage]
+    ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
 )
@@ -1621,6 +846,9 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
+    ,[ysnCancelled]                     = ARI.[ysnCancelled]
+    ,[ysnPaid]                          = ARI.[ysnPaid]
+    ,[strPONumber]                      = ARI.[strPONumber]
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
     ,[intItemId]                        = ARID.[intItemId]
@@ -1639,7 +867,7 @@ SELECT
     ,[intMaintenanceAccountId]          = ARID.[intMaintenanceAccountId]
     ,[intConversionAccountId]           = ARID.[intConversionAccountId]
     ,[dblQtyShipped]                    = ARID.[dblQtyShipped]
-    ,[dblUnitQtyShipped]                = ISNULL(ARID.[dblQtyShipped], @ZeroDecimal) --ISNULL(dbo.fnARCalculateQtyBetweenUOM(ARID.[intItemUOMId], ICSUOM.[intItemUOMId], ARID.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)
+    ,[dblUnitQtyShipped]                = ARID.[dblQtyShipped]
     ,[dblShipmentNetWt]                 = ARID.[dblShipmentNetWt]
     ,[dblUnitQty]                       = ICIU.[dblUnitQty]
     ,[dblUnitOnHand]                    = @ZeroDecimal
@@ -1655,12 +883,12 @@ SELECT
     ,[dblBaseUnitPrice]                 = ARID.[dblBaseUnitPrice]
     ,[strPricing]                       = ARID.[strPricing]
     ,[dblDiscount]                      = ARID.[dblDiscount]
-    ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal)
-    ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal)
+    ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision), @ZeroDecimal)
+    ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
-    ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+    ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -1672,72 +900,71 @@ SELECT
     ,[dblLicenseAmount]                 = ARID.[dblLicenseAmount]
     ,[dblBaseLicenseAmount]             = ARID.[dblBaseLicenseAmount]
     ,[dblLicenseGLAmount]               = (CASE WHEN ARID.[strMaintenanceType] = 'License Only'
-                                                      THEN ISNULL(ARID.[dblTotal], @ZeroDecimal) + (CASE WHEN (ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0) THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+                                                      THEN ISNULL(ARID.[dblTotal], @ZeroDecimal) + (CASE WHEN (ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0) THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision) END)
                                                       ELSE
                                                             (CASE WHEN ISNULL(ARID.[dblDiscount], @ZeroDecimal) > @ZeroDecimal 
 																THEN
-																	[dbo].fnRoundBanker(ARID.[dblTotal] * ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblTotal]) * @OneHundredDecimal, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ @OneHundredDecimal), dbo.fnARGetDefaultDecimal()) 
+																	[dbo].fnRoundBanker(ARID.[dblTotal] * ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblTotal]) * @OneHundredDecimal, @Precision), @Precision)/ @OneHundredDecimal), @Precision) 
 																	+
 																	(CASE WHEN ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0  
 																	      THEN @ZeroDecimal 
 																		  ELSE [dbo].fnRoundBanker(
-																	                 ([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()))
+																	                 ([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision))
 																		             *
-																					 ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblTotal]) * @OneHundredDecimal, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ @OneHundredDecimal)
-																			   , dbo.fnARGetDefaultDecimal()) 
+																					 ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblTotal]) * @OneHundredDecimal, @Precision), @Precision)/ @OneHundredDecimal)
+																			   , @Precision) 
 																     END) 
 																ELSE
-																	[dbo].fnRoundBanker((ISNULL(ARID.[dblLicenseAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), dbo.fnARGetDefaultDecimal())		
+																	[dbo].fnRoundBanker((ISNULL(ARID.[dblLicenseAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), @Precision)		
                                                             END)
                                                 END)
     ,[dblBaseLicenseGLAmount]           = (CASE WHEN ARID.[strMaintenanceType] = 'License Only'
-                                                      THEN ISNULL(ARID.[dblBaseTotal], @ZeroDecimal) + (CASE WHEN (ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0) THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+                                                      THEN ISNULL(ARID.[dblBaseTotal], @ZeroDecimal) + (CASE WHEN (ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0) THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision) END)
                                                       ELSE
                                                             (CASE WHEN ISNULL(ARID.[dblDiscount], @ZeroDecimal) > @ZeroDecimal 
 																THEN
-																	[dbo].fnRoundBanker(ARID.[dblBaseTotal] * ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ @OneHundredDecimal), dbo.fnARGetDefaultDecimal()) 
+																	[dbo].fnRoundBanker(ARID.[dblBaseTotal] * ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, @Precision), @Precision)/ @OneHundredDecimal), @Precision) 
 																	+
 																	(CASE WHEN ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0  
 																	      THEN @ZeroDecimal 
 																		  ELSE [dbo].fnRoundBanker(
-																	                 ([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()))
+																	                 ([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision))
 																		             *
-																					 ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ @OneHundredDecimal)
-																			   , dbo.fnARGetDefaultDecimal()) 
+																					 ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, @Precision), @Precision)/ @OneHundredDecimal)
+																			   , @Precision) 
 																     END) 
 																ELSE
-																	[dbo].fnRoundBanker((ISNULL(ARID.[dblBaseLicenseAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), dbo.fnARGetDefaultDecimal())		
+																	[dbo].fnRoundBanker((ISNULL(ARID.[dblBaseLicenseAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), @Precision)		
                                                             END)
                                                 END)
     ,[dblMaintenanceAmount]             = ARID.[dblMaintenanceAmount]
     ,[dblBaseMaintenanceAmount]         = ARID.[dblBaseMaintenanceAmount]
     ,[dblMaintenanceGLAmount]             = (CASE WHEN ARID.[strMaintenanceType] IN ('Maintenance Only', 'SaaS')
-                                                      THEN ISNULL(ARID.[dblTotal], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+                                                      THEN ISNULL(ARID.[dblTotal], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.dblPrice), @Precision)), @Precision)
                                                       ELSE
                                                            (CASE WHEN ISNULL(ARID.[dblDiscount], @ZeroDecimal) > @ZeroDecimal 
                                                                THEN
-                                                                   [dbo].fnRoundBanker(ARID.[dblTotal] * ([dbo].fnRoundBanker(((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblTotal]) * @OneHundredDecimal, dbo.fnARGetDefaultDecimal())/ @OneHundredDecimal), dbo.fnARGetDefaultDecimal()) 
+                                                                   [dbo].fnRoundBanker(ARID.[dblTotal] * ([dbo].fnRoundBanker(((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblTotal]) * @OneHundredDecimal, @Precision)/ @OneHundredDecimal), @Precision) 
 																         + 
-																         [dbo].fnRoundBanker(([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(ARID.dblBaseMaintenanceAmount, @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblTotal]) * @OneHundredDecimal, dbo.fnARGetDefaultDecimal())/ @OneHundredDecimal)
-																   , dbo.fnARGetDefaultDecimal()) 
+																         [dbo].fnRoundBanker(([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision)) * ([dbo].fnRoundBanker(((ISNULL(ARID.dblBaseMaintenanceAmount, @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblTotal]) * @OneHundredDecimal, @Precision)/ @OneHundredDecimal)
+																   , @Precision) 
                                                                ELSE
-                                                                   [dbo].fnRoundBanker((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), dbo.fnARGetDefaultDecimal())		
+                                                                   [dbo].fnRoundBanker((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), @Precision)		
                                                            END)
                                           END)
     ,[dblBaseMaintenanceGLAmount]         = (CASE WHEN ARID.[strMaintenanceType] IN ('Maintenance Only', 'SaaS')
-                                                      THEN ISNULL(ARID.[dblBaseTotal], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+                                                      THEN ISNULL(ARID.[dblBaseTotal], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.dblBasePrice), @Precision)), @Precision)
                                                       ELSE
                                                            (CASE WHEN ISNULL(ARID.[dblDiscount], @ZeroDecimal) > @ZeroDecimal 
                                                                THEN
-                                                                   [dbo].fnRoundBanker(ARID.[dblBaseTotal] * ([dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, dbo.fnARGetDefaultDecimal())/ @OneHundredDecimal), dbo.fnARGetDefaultDecimal()) 
+                                                                   [dbo].fnRoundBanker(ARID.[dblBaseTotal] * ([dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, @Precision)/ @OneHundredDecimal), @Precision) 
 																         + 
-																         [dbo].fnRoundBanker(([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(ARID.dblBaseMaintenanceAmount, @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, dbo.fnARGetDefaultDecimal())/ @OneHundredDecimal)
-																   , dbo.fnARGetDefaultDecimal()) 
+																         [dbo].fnRoundBanker(([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision)) * ([dbo].fnRoundBanker(((ISNULL(ARID.dblBaseMaintenanceAmount, @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, @Precision)/ @OneHundredDecimal)
+																   , @Precision) 
                                                                ELSE
-                                                                   [dbo].fnRoundBanker((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), dbo.fnARGetDefaultDecimal())		
+                                                                   [dbo].fnRoundBanker((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), @Precision)		
                                                            END)
                                           END)
-    ,[ysnTankRequired]                  = NULL --ARID.[ysnTankRequired]
     ,[ysnLeaseBilling]                  = ARID.[ysnLeaseBilling]
     ,[intSiteId]                        = ARID.[intSiteId]
     ,[intPerformerId]                   = ARID.[intPerformerId]
@@ -1754,43 +981,24 @@ SELECT
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
     ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId]) END))
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
-    ,[ysnAutoBlend]                     = ISNULL(ICI.[ysnAutoBlend], @ZeroBit)
-    ,[ysnBlended]                       = ISNULL(ARID.[ysnBlended], @ZeroBit)
-    ,[dblQuantity]                      = NULL
-    ,[dblMaxQuantity]                   = NULL
-    ,[strOptionType]                    = NULL
-    ,[strSourceType]                    = NULL
-    ,[strPostingMessage]                = NULL
+    ,[ysnAutoBlend]                     = ICI.[ysnAutoBlend]
+    ,[ysnBlended]                       = ARID.[ysnBlended]    
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-INNER JOIN (
-    SELECT [intItemId], [strItemNo], [strType], [strManufactureType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
-) ICI ON ARID.[intItemId] = ICI.[intItemId]
-LEFT OUTER JOIN (
-    SELECT [intCategoryId], [ysnRetailValuation] FROM tblICCategory WITH(NoLock)
-) ICC ON ICI.[intCategoryId] = ICC.[intCategoryId]
-LEFT OUTER JOIN (
-    SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NoLock)
-) ICIL ON ICI.[intItemId] = ICIL.[intItemId]
-      AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
-LEFT OUTER JOIN (
-    SELECT [intItemId], [intItemLocationId], [dblLastCost] FROM tblICItemPricing  WITH(NoLock)
-) ICIP ON ICI.[intItemId] = ICIP.[intItemId]
-      AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
-LEFT OUTER JOIN (
-    SELECT [intItemId], [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NoLock)
-) ICIU ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
-LEFT OUTER JOIN (
-    SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
-) SMCERT ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
+LEFT OUTER JOIN tblICCategory ICC WITH (NOLOCK) ON ICI.[intCategoryId] = ICC.[intCategoryId]
+LEFT OUTER JOIN tblICItemLocation ICIL WITH (NOLOCK) ON ICI.[intItemId] = ICIL.[intItemId] AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
+LEFT OUTER JOIN tblICItemPricing ICIP WITH (NOLOCK) ON ICI.[intItemId] = ICIP.[intItemId] AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
+LEFT OUTER JOIN tblICItemUOM ICIU WITH (NOLOCK) ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
+LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH (NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
---WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 0
 WHERE ICI.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material')
 
-INSERT ##ARPostInvoiceDetail
+--MISC ITEMS
+INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1860,6 +1068,9 @@ INSERT ##ARPostInvoiceDetail
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnCancelled]
+    ,[ysnPaid]
+    ,[strPONumber]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -1912,7 +1123,6 @@ INSERT ##ARPostInvoiceDetail
     ,[dblBaseLicenseAmount]
     ,[dblMaintenanceAmount]
     ,[dblBaseMaintenanceAmount]
-    ,[ysnTankRequired]
     ,[ysnLeaseBilling]
     ,[intSiteId]
     ,[intPerformerId]
@@ -1930,12 +1140,7 @@ INSERT ##ARPostInvoiceDetail
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
-    ,[ysnBlended]
-    ,[dblQuantity]
-    ,[dblMaxQuantity]
-    ,[strOptionType]
-    ,[strSourceType]
-    ,[strPostingMessage]
+    ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
 )
@@ -2009,6 +1214,9 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
+    ,[ysnCancelled]                     = ARI.[ysnCancelled]
+    ,[ysnPaid]                          = ARI.[ysnPaid]
+    ,[strPONumber]                      = ARI.[strPONumber]
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
     ,[intItemId]                        = NULL
@@ -2043,12 +1251,12 @@ SELECT
     ,[dblBaseUnitPrice]                 = ARID.[dblBaseUnitPrice]
     ,[strPricing]                       = ARID.[strPricing]
     ,[dblDiscount]                      = ARID.[dblDiscount]
-    ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal)
-    ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()), @ZeroDecimal)
+    ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision), @ZeroDecimal)
+    ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
-    ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+    ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -2061,7 +1269,6 @@ SELECT
     ,[dblBaseLicenseAmount]             = ARID.[dblBaseLicenseAmount]
     ,[dblMaintenanceAmount]             = ARID.[dblMaintenanceAmount]
     ,[dblBaseMaintenanceAmount]         = ARID.[dblBaseMaintenanceAmount]
-    ,[ysnTankRequired]                  = @ZeroBit
     ,[ysnLeaseBilling]                  = ARID.[ysnLeaseBilling]
     ,[intSiteId]                        = ARID.[intSiteId]
     ,[intPerformerId]                   = ARID.[intPerformerId]
@@ -2080,11 +1287,6 @@ SELECT
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = @ZeroBit
     ,[ysnBlended]                       = @ZeroBit
-    ,[dblQuantity]                      = NULL
-    ,[dblMaxQuantity]                   = NULL
-    ,[strOptionType]                    = NULL
-    ,[strSourceType]                    = NULL
-    ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
 FROM ##ARPostInvoiceHeader ARI
@@ -2114,6 +1316,5 @@ INNER JOIN (
     ) TAXES
     GROUP BY ID.intInvoiceDetailId
 ) IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
-
 
 RETURN 1

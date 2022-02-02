@@ -13,6 +13,7 @@ UPDATE tblARInvoice SET dblInvoiceTotal = 0 WHERE dblInvoiceTotal IS NULL
 UPDATE tblARInvoice SET dblAmountDue = 0 WHERE dblAmountDue IS NULL
 UPDATE tblARInvoice SET dblDiscount = 0 WHERE dblDiscount IS NULL
 UPDATE tblARInvoice SET dblInterest = 0 WHERE dblInterest IS NULL
+UPDATE tblARInvoice SET dblShipping = 0 WHERE dblShipping IS NULL
 UPDATE tblARInvoice SET dtmDate = CAST(dtmDate AS DATE) WHERE CAST(dtmDate AS TIME) <> '00:00:00.0000000'
 UPDATE tblARInvoice SET dtmPostDate = CAST(dtmPostDate AS DATE) WHERE CAST(dtmPostDate AS TIME) <> '00:00:00.0000000'
 

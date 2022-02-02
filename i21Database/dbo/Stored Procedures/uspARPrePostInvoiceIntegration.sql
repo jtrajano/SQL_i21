@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARPrePostInvoiceIntegration]     
+﻿CREATE PROCEDURE [dbo].[uspARPrePostInvoiceIntegration]
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -36,6 +36,7 @@ DECLARE @FinishedGoodItems TABLE
     ,[intStorageLocationId] INT
     ,[intUserId]            INT
     ,[dtmDate]              DATETIME)
+
 INSERT INTO @FinishedGoodItems
 SELECT
      [intInvoiceDetailId]   = [intInvoiceDetailId]
@@ -48,14 +49,11 @@ SELECT
     ,[intUserId]            = [intUserId]
     ,[dtmDate]              = [dtmPostDate] 
 FROM ##ARPostInvoiceDetail
-WHERE
-    [ysnBlended] = 0
-    AND [ysnAutoBlend] = 1
-    AND [strTransactionType] NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
-    AND [strType] NOT IN ('Transport Delivery')
-    AND [ysnImpactInventory] = 1
-    --AND [dblUnitOnHand] = @ZeroDecimal
-    --AND [intAllowNegativeInventory] = 3
+WHERE [ysnBlended] = 0
+  AND [ysnAutoBlend] = 1
+  AND [strTransactionType] NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
+  AND [strType] NOT IN ('Transport Delivery')
+  AND [ysnImpactInventory] = 1
 
 WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 BEGIN
@@ -118,14 +116,9 @@ BEGIN
 END
 
 UPDATE ARI
-SET
-    ARI.[ysnProvisionalWithGL] = ARI1.[ysnProvisionalWithGL]
-FROM
-    tblARInvoice ARI
-INNER JOIN
-    ##ARPostInvoiceHeader ARI1
-		ON ARI.[intInvoiceId] = ARI1.[intInvoiceId]
-		AND ARI.[strType] = 'Provisional'
+SET ARI.[ysnProvisionalWithGL] = ARI1.[ysnProvisionalWithGL]
+FROM tblARInvoice ARI
+INNER JOIN ##ARPostInvoiceHeader ARI1 ON ARI.[intInvoiceId] = ARI1.[intInvoiceId] AND ARI.[strType] = 'Provisional'
 
 END TRY
 BEGIN CATCH

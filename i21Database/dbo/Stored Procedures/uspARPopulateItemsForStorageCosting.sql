@@ -45,12 +45,12 @@ INSERT INTO ##ARItemsForStorageCosting
 	,[strActualCostId]
 ) 
 SELECT 
-	 [intItemId]					= ARID.[intItemId]  
-	,[intItemLocationId]			= ARID.[intItemLocationId]
-	,[intItemUOMId]					= ARID.[intItemUOMId]
-	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= (ARID.[dblQtyShipped] * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]					= ARID.[dblUnitQty]
+	 [intItemId]				= ARID.[intItemId]  
+	,[intItemLocationId]		= ARID.[intItemLocationId]
+	,[intItemUOMId]				= ARID.[intItemUOMId]
+	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+	,[dblQty]					= (ARID.[dblQtyShipped] * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
+	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -76,33 +76,29 @@ SELECT
 															END
 															,ARID.[dblUnitQty]
 														),@ZeroDecimal)
-	,[dblSalesPrice]				= ARID.[dblPrice] 
-	,[intCurrencyId]				= ARID.[intCurrencyId]
+	,[dblSalesPrice]			= ARID.[dblPrice] 
+	,[intCurrencyId]			= ARID.[intCurrencyId]
 	,[dblExchangeRate]			= 1.00
 	,[intTransactionId]			= ARID.[intInvoiceId]
-	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
+	,[intTransactionDetailId]	= ARID.[intInvoiceDetailId]
 	,[strTransactionId]			= ARID.[strInvoiceNumber] 
 	,[intTransactionTypeId]		= CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN @CREDIT_MEMO_INVOICE_TYPE ELSE @INVENTORY_INVOICE_TYPE END
 	,[intLotId]					= NULL 
 	,[intSubLocationId]			= ARID.[intSubLocationId]
 	,[intStorageLocationId]		= ARID.[intStorageLocationId]
 	,[strActualCostId]			= CASE WHEN (ISNULL(ARID.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARID.[intLoadDistributionHeaderId],0) <> 0) THEN ARID.[strActualCostId] ELSE NULL END
-FROM 
-	##ARPostInvoiceDetail ARID
-LEFT OUTER JOIN
-    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
-		ON LGL.[intLoadId] = ARID.[intLoadId]
-WHERE	
-	ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') AND ISNULL(ARID.[intPeriodsToAccrue],0) <= 1 
-	AND ARID.[ysnImpactInventory] = @OneBit			
-	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
-	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
-	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
-	AND ARID.[intItemId] IS NOT NULL
-	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ARID.[ysnBlended] = @OneBit))
-	AND ARID.[strTransactionType] <> 'Debit Memo'
-	--AND ( ARID.[intStorageScheduleTypeId] IS NULL OR (ARID.[intStorageScheduleTypeId] IS NOT NULL AND ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0) )
-	AND (ARID.[intStorageScheduleTypeId] IS NOT NULL AND ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0)
-	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
+FROM ##ARPostInvoiceDetail ARID
+LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]
+WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') 
+  AND ARID.[intPeriodsToAccrue] <= 1 
+  AND ARID.[ysnImpactInventory] = @OneBit			
+  AND ((ARID.[strImportFormat] <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
+  AND ARID.[intInventoryShipmentItemId] IS NULL
+  AND ARID.[intLoadDetailId] IS NULL
+  AND ARID.[intItemId] IS NOT NULL
+  AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ARID.[ysnBlended] = @OneBit))
+  AND ARID.[strTransactionType] <> 'Debit Memo'
+  AND ARID.[intStorageScheduleTypeId] IS NOT NULL
+  AND LGL.[intPurchaseSale] NOT IN (2, 3)
 
 RETURN 1

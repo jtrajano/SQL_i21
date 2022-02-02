@@ -55,10 +55,10 @@ BEGIN
 	INNER JOIN tblSOSalesOrderDetail SOTD ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
 	INNER JOIN tblICItemUOM ICIUOM ON ICIUOM.[intItemUOMId] = SOTD.[intItemUOMId]	
 	WHERE ARID.strItemType = 'Inventory'
-	AND ARID.[strTransactionType] IN ('Invoice', 'Cash')
-	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
-	AND ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0
-	AND ISNULL(ARID.[intLoadDetailId], 0) = 0 
+	  AND ARID.[strTransactionType] IN ('Invoice', 'Cash')
+	  AND ARID.[intInventoryShipmentItemId] IS NULL
+	  AND ARID.[intSalesOrderDetailId] IS NOT NULL
+	  AND ARID.[intLoadDetailId] IS NULL
 
 	UNION ALL
 	--SO shipped > ordered		--Component
@@ -88,10 +88,10 @@ BEGIN
 	INNER JOIN tblSOSalesOrderDetail SOTD ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
 	INNER JOIN tblICItem ITEM ON ARIDC.[intComponentItemId] = ITEM.intItemId
 	WHERE ITEM.strItemType = 'Inventory'
-	AND ARID.[strTransactionType] IN ('Invoice', 'Cash')
-	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
-	AND ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0
-	AND ISNULL(ARID.[intLoadDetailId], 0) = 0 
+	  AND ARID.[strTransactionType] IN ('Invoice', 'Cash')
+	  AND ARID.[intInventoryShipmentItemId] IS NULL
+	  AND ARID.[intSalesOrderDetailId] IS NOT NULL
+	  AND ARID.[intLoadDetailId] IS NULL
 
 	IF EXISTS(SELECT TOP 1 NULL FROM @items)
 		EXEC uspICIncreaseOrderCommitted @items
