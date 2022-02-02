@@ -1817,8 +1817,8 @@ BEGIN
                     dtmDate						= A.dtmTicketDateTime
                     ,strBatchId					= @strBatchId
                     ,intAccountId				= @intInventoryInTransitAccountId
-                    ,dblDebit					= ROUND(ISNULL(B.dblAmount,0),2)
-                    ,dblCredit					= 0
+                    ,dblDebit					= 0
+                    ,dblCredit					= ROUND(ISNULL(B.dblAmount,0),2)
                     ,dblDebitUnit				= 0
                     ,dblCreditUnit				= 0
                     ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - Contract Cost'
@@ -1839,9 +1839,9 @@ BEGIN
                     ,strTransactionForm			= 'Scale Ticket'
                     ,strModuleName				= 'Scale'
                     ,intConcurrencyId			= 1
-                    ,dblDebitForeign			= ROUND(ISNULL(B.dblAmount,0),2)
+                    ,dblDebitForeign			= 0
                     ,dblDebitReport				= NULL 
-                    ,dblCreditForeign			= 0
+                    ,dblCreditForeign			= ROUND(ISNULL(B.dblAmount,0),2)
                     ,dblCreditReport			= NULL 
                     ,dblReportingRate			= NULL 
                     ,dblForeignRate				= 1		
@@ -1896,8 +1896,8 @@ BEGIN
                     dtmDate						= A.dtmTicketDateTime
                     ,strBatchId					= @strBatchId
                     ,intAccountId				= @intAPClearingAccountId
-                    ,dblDebit					= 0
-                    ,dblCredit					= ROUND(ISNULL(B.dblAmount,0),2)
+                    ,dblDebit					= ROUND(ISNULL(B.dblAmount,0),2)
+                    ,dblCredit					= 0
                     ,dblDebitUnit				= 0
                     ,dblCreditUnit				= 0
                     ,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - Contract Cost'
@@ -1918,9 +1918,9 @@ BEGIN
                     ,strTransactionForm			= 'Scale Ticket'
                     ,strModuleName				= 'Scale'
                     ,intConcurrencyId			= 1
-                    ,dblDebitForeign			= 0
+                    ,dblDebitForeign			= ROUND(ISNULL(B.dblAmount,0),2)
                     ,dblDebitReport				= NULL 
-                    ,dblCreditForeign			= ROUND(ISNULL(B.dblAmount,0),2)
+                    ,dblCreditForeign			= 0
                     ,dblCreditReport			= NULL 
                     ,dblReportingRate			= NULL 
                     ,dblForeignRate				= 1		
