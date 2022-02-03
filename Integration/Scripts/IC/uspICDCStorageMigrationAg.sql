@@ -17,31 +17,81 @@ SET ANSI_WARNINGS OFF
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 --create sublocation for each location. i21 requires a sublocation to be created if there are storage locations
 --origin does not have sublocations
-insert into tblSMCompanyLocationSubLocation
-(intCompanyLocationId, strSubLocationName, strSubLocationDescription, strClassification, intConcurrencyId)
-select distinct intCompanyLocationId, strLocationName, strLocationName strDescription, 'Inventory' strClassification, 1 Concurrencyid
-from tblSMCompanyLocation L 
-join agitmmst os on os.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
-where agitm_binloc is not null
-
+--do not import if it already exists. 
+INSERT INTO tblSMCompanyLocationSubLocation(
+	intCompanyLocationId
+	, strSubLocationName
+	, strSubLocationDescription
+	, strClassification
+	, intConcurrencyId
+)
+SELECT DISTINCT 
+	L.intCompanyLocationId
+	, L.strLocationName
+	, L.strLocationName strDescription
+	, 'Inventory' strClassification
+	, 1 Concurrencyid
+FROM 
+	tblSMCompanyLocation L LEFT JOIN agitmmst os 
+		ON os.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
+	LEFT JOIN tblSMCompanyLocationSubLocation sub
+		ON sub.intCompanyLocationId = L.intCompanyLocationId
+		AND sub.strSubLocationName = L.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS
+		AND sub.strClassification = 'Inventory'
+WHERE 
+	os.agitm_binloc IS NOT NULL
+	AND sub.intCompanyLocationSubLocationId IS NULL 
 
 ----====================================STEP 1=============================================
 --import storage locations from origin and update the sub location required for i21 
+MERGE tblICStorageLocation as [Target]
+USING
+(
+	SELECT 
+		os.agitm_binloc
+		, os.agitm_binloc
+		, L.intCompanyLocationId
+		, SL.intCompanyLocationSubLocationId
+		, 1 concurrencyid
+	FROM (
+		SELECT 
+			agitm_loc_no
+			, agitm_binloc 
+		FROM 
+			agitmmst 
+		WHERE 
+			agitm_binloc is not null 
+		GROUP BY agitm_loc_no, agitm_binloc
+	) os 
+	JOIN tblSMCompanyLocation L 
+		ON os.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
+	JOIN tblSMCompanyLocationSubLocation SL 
+		ON L.intCompanyLocationId = SL.intCompanyLocationId
+) 
+AS [Source] (
+	strName
+	, strDescription
+	, intLocationId
+	, intSubLocationId
+	, intConcurrencyId
+)
+ON 
+	[Target].strName = [Source].strName COLLATE SQL_Latin1_General_CP1_CS_AS
+	AND [Target].intLocationId = [Source].intLocationId
+	AND [Target].intSubLocationId = [Source].intSubLocationId
 
-
-Merge tblICStorageLocation as [Target]
-using
-(select os.agitm_binloc, os.agitm_binloc, L.intCompanyLocationId, SL.intCompanyLocationSubLocationId, 1 concurrencyid
-from 
-(select agitm_loc_no, agitm_binloc from agitmmst where agitm_binloc is not null group by agitm_loc_no, agitm_binloc) os 
-join tblSMCompanyLocation L on os.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
-join tblSMCompanyLocationSubLocation SL on L.intCompanyLocationId = SL.intCompanyLocationId
-) as [Source] (strName, strDescription, intLocationId, intSubLocationId, intConcurrencyId)
-ON [Target].strName = [Source].strName COLLATE SQL_Latin1_General_CP1_CS_AS
-and [Target].intLocationId = [Source].intLocationId
-and [Target].intSubLocationId = [Source].intSubLocationId
-When Not Matched then
-Insert (strName, strDescription, intLocationId, intSubLocationId, intConcurrencyId)
-values ([Source].strName, [Source].strDescription, [Source].intLocationId, [Source].intSubLocationId, [Source].intConcurrencyId);
-
-
+WHEN NOT MATCHED THEN
+	INSERT (
+		strName
+		, strDescription
+		, intLocationId
+		, intSubLocationId
+		, intConcurrencyId
+	)
+	VALUES (
+		[Source].strName
+		, [Source].strDescription
+		, [Source].intLocationId
+		, [Source].intSubLocationId
+		, [Source].intConcurrencyId
+	);

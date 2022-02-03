@@ -220,9 +220,12 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
     ,@UserId            = @userId
 
 IF @post = 1 AND @recap = 0
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-         @PostDate    = @PostDate
-        ,@UserId      = @userId
+    EXEC [dbo].[uspARProcessSplitOnInvoicePost]         
+		  @ysnPost	  	= 1
+		, @ysnRecap	  	= 0
+		, @dtmDatePost	= @PostDate
+		, @strBatchId	= @batchIdUsed
+		, @intUserId	= @userId
 
 --Removed excluded Invoices to post/unpost
 IF(@exclude IS NOT NULL)
@@ -367,8 +370,11 @@ BEGIN TRY
 
 	IF @post = 1 AND @recap = 1
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-			@PostDate        = @PostDate
-		   ,@UserId          = @userId
+			  @ysnPost	  	= 1
+			, @ysnRecap	  	= 1
+			, @dtmDatePost	= @PostDate
+			, @strBatchId	= @batchIdUsed
+			, @intUserId	= @userId
 
 	IF @post = 1
     EXEC [dbo].[uspARPrePostInvoiceIntegration]	

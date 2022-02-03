@@ -1,405 +1,436 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAutoApplyPrepaids]
-	@tblInvoiceIds	Id	READONLY
+	@intEntityUserId	INT
 AS
 
-DECLARE @tblPayments			Id
+DECLARE @tblPaymentEntries	PaymentIntegrationStagingTable
+
 DECLARE @ysnAutoApplyPrepaids	BIT = 0
 	  , @intPaymentMethodId		INT = NULL
 	  , @intDefaultCurrencyId	INT = NULL
 	  , @strPaymentMethod		NVARCHAR(50)
 
-DECLARE @tblPrepaids TABLE (
-	intInvoiceId	INT
-  , dblAmountDue	NUMERIC(18, 6)
-  , dtmPostDate		DATETIME
+IF(OBJECT_ID('tempdb..#AAPPREPAIDS') IS NOT NULL) DROP TABLE #AAPPREPAIDS
+IF(OBJECT_ID('tempdb..#AAPINVOICES') IS NOT NULL) DROP TABLE #AAPINVOICES
+
+CREATE TABLE #AAPINVOICES (
+	  intInvoiceId			INT PRIMARY KEY
+	, intEntityCustomerId	INT NOT NULL
+	, intCompanyLocationId	INT NOT NULL
+	, intCurrencyId			INT NOT NULL
+	, intTermId				INT NULL
+	, intAccountId			INT NULL
+	, intEntityUserId		INT NULL
+	, dblAmountDue			NUMERIC(18,6) DEFAULT 0
+	, dblInvoiceTotal		NUMERIC(18,6) DEFAULT 0
+	, dblBaseInvoiceTotal	NUMERIC(18,6) DEFAULT 0
+	, dblAppliedPayment		NUMERIC(18,6) DEFAULT 0
+	, dtmPostDate			DATETIME NULL
+	, strInvoiceNumber		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
+	, strTransactionType	NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
+	, ysnProcessed			BIT NULL DEFAULT 0
+)
+CREATE TABLE #AAPPREPAIDS (
+	  intInvoiceId			INT PRIMARY KEY
+	, intEntityCustomerId	INT NOT NULL
+	, intCompanyLocationId	INT NOT NULL
+	, intCurrencyId			INT NOT NULL
+	, intTermId				INT NULL
+	, intAccountId			INT NULL
+	, intEntityUserId		INT NULL
+	, dblAmountDue			NUMERIC(18,6) DEFAULT 0
+	, dblInvoiceTotal		NUMERIC(18,6) DEFAULT 0
+	, dblBaseInvoiceTotal	NUMERIC(18,6) DEFAULT 0
+	, dblAppliedPayment		NUMERIC(18,6) DEFAULT 0
+	, dtmPostDate			DATETIME NULL
+	, strInvoiceNumber		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
+	, strTransactionType	NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
+	, ysnProcessed			BIT NULL DEFAULT 0
 )
 
-DECLARE @tblPrepaidsWithContract TABLE (
-	intInvoiceId	INT
-  , dblAmountDue	NUMERIC(18, 6)
-  , dtmPostDate		DATETIME
-)
+SELECT TOP 1 @ysnAutoApplyPrepaids = ysnAutoApplyPrepaids 
+FROM dbo.tblARCompanyPreference 
+ORDER BY intCompanyPreferenceId
 
-DECLARE @tblInvoices TABLE (
-	intInvoiceId				INT
-  , intEntityCustomerId			INT
-  , intCurrencyId				INT
-  , intCompanyLocationId		INT
-  , intEntityUserId				INT
-  , dblInvoiceTotal				NUMERIC(18, 6)
-  , dblDiscountAvailable		NUMERIC(18, 6)
-  ,	dtmPostDate					DATETIME
-)
+IF @ysnAutoApplyPrepaids <> 1
+	RETURN;
 
-SET @intPaymentMethodId = (SELECT TOP 1 intPaymentMethodID FROM dbo.tblSMPaymentMethod WHERE strPaymentMethod = 'Manual Credit Card')
-SET @strPaymentMethod = (SELECT TOP 1 strPaymentMethod FROM dbo.tblSMPaymentMethod WHERE strPaymentMethod = 'Manual Credit Card')
-SET @ysnAutoApplyPrepaids = ISNULL((SELECT TOP 1 ysnAutoApplyPrepaids FROM dbo.tblARCompanyPreference WITH (NOLOCK)), 0)
-SET @intDefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0)
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId 
+FROM tblSMCompanyPreference 
+WHERE intDefaultCurrencyId IS NOT NULL
+ORDER BY intCompanyPreferenceId
 
-IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
+--GET DEFAULT PAYMENT METHOD
+SELECT TOP 1 @intPaymentMethodId 	= intPaymentMethodID
+		   , @strPaymentMethod		= strPaymentMethod
+FROM tblSMPaymentMethod 
+WHERE strPaymentMethod = 'Debit Memos and Payments'
+
+IF ISNULL(@intPaymentMethodId, 0) = 0
 	BEGIN
-		--GET POSTED INVOICES
-		INSERT INTO @tblInvoices
-		SELECT intInvoiceId
-			 , intEntityCustomerId
-			 , intCurrencyId
-			 , intCompanyLocationId
-			 , intEntityId
-			 , dblInvoiceTotal
-			 , dblDiscountAvailable
-			 , dtmPostDate
-		FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
-		INNER JOIN @tblInvoiceIds IDS ON IDS.intId = INVOICE.intInvoiceId
-		WHERE INVOICE.ysnPosted = 1
-		  AND INVOICE.ysnCancelled = 0
-		  AND INVOICE.ysnPaid = 0
-		  AND INVOICE.strTransactionType IN ('Invoice', 'Debit Memo')
+		INSERT INTO tblSMPaymentMethod (
+			strPaymentMethod
+			, intNumber
+			, ysnActive
+			, intSort
+			, intConcurrencyId
+		)
+		SELECT strPaymentMethod = 'Debit Memos and Payments'
+			, intNumber		 	= 1
+			, ysnActive			= 1
+			, intSort			= 0
+			, intConcurrencyId	= 1
+
+		SELECT TOP 1 @intPaymentMethodId 	= intPaymentMethodID
+					, @strPaymentMethod		= strPaymentMethod
+		FROM tblSMPaymentMethod 
+		WHERE strPaymentMethod = 'Debit Memos and Payments'
+	END
+
+--GET INVOICES TO POST
+INSERT INTO #AAPINVOICES WITH (TABLOCK) (
+	  intInvoiceId
+	, intEntityCustomerId
+	, intCompanyLocationId
+	, intCurrencyId
+	, intTermId
+	, intAccountId
+	, intEntityUserId
+	, dblAmountDue
+	, dblInvoiceTotal
+	, dblBaseInvoiceTotal
+	, dtmPostDate
+	, strInvoiceNumber
+	, strTransactionType
+)
+SELECT intInvoiceId			= I.intInvoiceId
+	, intEntityCustomerId	= I.intEntityCustomerId
+	, intCompanyLocationId	= I.intCompanyLocationId
+	, intCurrencyId			= I.intCurrencyId
+	, intTermId				= I.intTermId
+	, intAccountId			= I.intAccountId
+	, intEntityUserId		= @intEntityUserId
+	, dblAmountDue			= I.dblAmountDue
+	, dblInvoiceTotal		= I.dblInvoiceTotal
+	, dblBaseInvoiceTotal	= I.dblBaseInvoiceTotal
+	, dtmPostDate			= I.dtmPostDate
+	, strInvoiceNumber		= I.strInvoiceNumber
+	, strTransactionType	= I.strTransactionType
+FROM ##ARPostInvoiceHeader I
+WHERE I.ysnCancelled = 0
+  AND I.ysnPaid = 0
+  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
+
+--GET AVAILABLE CREDITS AND PREPAIDS FOR CUSTOMERS
+INSERT INTO #AAPPREPAIDS WITH (TABLOCK) (
+	  intInvoiceId
+	, intEntityCustomerId
+	, intCompanyLocationId
+	, intCurrencyId
+	, intTermId
+	, intAccountId
+	, intEntityUserId
+	, dblAmountDue
+	, dblInvoiceTotal
+	, dblBaseInvoiceTotal
+	, dtmPostDate
+	, strInvoiceNumber
+	, strTransactionType
+)
+SELECT intInvoiceId			= C.intInvoiceId
+	, intEntityCustomerId	= C.intEntityCustomerId
+	, intCompanyLocationId	= C.intCompanyLocationId
+	, intCurrencyId			= C.intCurrencyId
+	, intTermId				= C.intTermId
+	, intAccountId			= C.intAccountId
+	, intEntityUserId		= @intEntityUserId
+	, dblAmountDue			= C.dblAmountDue
+	, dblInvoiceTotal		= C.dblInvoiceTotal
+	, dblBaseInvoiceTotal	= C.dblBaseInvoiceTotal
+	, dtmPostDate			= C.dtmPostDate
+	, strInvoiceNumber		= C.strInvoiceNumber
+	, strTransactionType	= C.strTransactionType
+FROM tblARInvoice C WITH (NOLOCK)
+INNER JOIN (
+	SELECT DISTINCT intEntityCustomerId
+	FROM #AAPINVOICES
+) CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
+LEFT JOIN (
+	SELECT intPaymentId
+	FROM dbo.tblARPayment WITH (NOLOCK)
+	WHERE ysnPosted = 1
+	AND ysnProcessedToNSF = 0
+) PREPAY ON C.intPaymentId = PREPAY.intPaymentId
+WHERE C.ysnPosted = 1
+  AND C.ysnCancelled = 0
+  AND C.ysnPaid = 0
+  AND C.dblAmountDue > 0
+  AND ((C.strTransactionType  IN ('Customer Prepayment', 'Overpayment') AND PREPAY.intPaymentId IS NOT NULL) OR C.strTransactionType = 'Credit Memo')
+ORDER BY C.dtmPostDate, C.intInvoiceId
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM #AAPPREPAIDS) 
+	RETURN;
+
+WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
+	BEGIN
+		DECLARE @intInvoiceId	INT
+
+		SELECT TOP 1 @intInvoiceId = intInvoiceId
+		FROM #AAPINVOICES
+		WHERE ysnProcessed = 0
+
+		--INSERT CREDITS
+		INSERT INTO @tblPaymentEntries (
+			  intId
+			, strSourceTransaction
+			, intSourceId
+			, strSourceId
+			, intEntityCustomerId
+			, intCompanyLocationId
+			, intCurrencyId
+			, dtmDatePaid
+			, intPaymentMethodId
+			, strPaymentMethod
+			, strNotes
+			, strPaymentInfo
+			, intBankAccountId
+			, dblAmountPaid
+			, intEntityId
+			, intInvoiceId
+			, strTransactionType
+			, strTransactionNumber
+			, intTermId
+			, intInvoiceAccountId
+			, dblInvoiceTotal
+			, dblBaseInvoiceTotal
+			, dblPayment
+			, dblAmountDue
+			, strInvoiceReportNumber
+			, ysnPost
+		)
+		SELECT intId						= I.intInvoiceId
+			, strSourceTransaction			= 'Direct'
+			, intSourceId					= I.intInvoiceId
+			, strSourceId					= I.strInvoiceNumber
+			, intEntityCustomerId			= I.intEntityCustomerId
+			, intCompanyLocationId			= I.intCompanyLocationId
+			, intCurrencyId					= I.intCurrencyId
+			, dtmDatePaid					= I.dtmPostDate
+			, intPaymentMethodId			= @intPaymentMethodId
+			, strPaymentMethod				= @strPaymentMethod
+			, strNotes						= 'Auto Apply Prepaid and Credits for ' + I.strInvoiceNumber
+			, strPaymentInfo				= NULL
+			, intBankAccountId				= NULL
+			, dblAmountPaid					= 0
+			, intEntityId					= @intEntityUserId
+			, intInvoiceId					= CREDITS.intInvoiceId
+			, strTransactionType			= CREDITS.strTransactionType
+			, strTransactionNumber			= CREDITS.strInvoiceNumber
+			, intTermId						= CREDITS.intTermId
+			, intInvoiceAccountId			= CREDITS.intAccountId
+			, dblInvoiceTotal				= CREDITS.dblInvoiceTotal
+			, dblBaseInvoiceTotal			= CREDITS.dblBaseInvoiceTotal
+			, dblPayment					= CREDITS.dblAmountDue - CREDITS.dblAppliedPayment
+			, dblAmountDue					= CREDITS.dblAmountDue
+			, strInvoiceReportNumber		= CREDITS.strInvoiceNumber
+			, ysnPost						= 1
+		FROM #AAPINVOICES I
+		INNER JOIN (
+			SELECT P.*
+				 , dblRunningTotal = SUM(P.dblAmountDue - dblAppliedPayment) OVER (ORDER BY P.dtmPostDate, P.intInvoiceId)
+			FROM #AAPPREPAIDS P
+			WHERE P.dblAppliedPayment <> P.dblAmountDue
+		) CREDITS
+		ON CREDITS.intEntityCustomerId = I.intEntityCustomerId
+		WHERE I.dtmPostDate >= CREDITS.dtmPostDate
+		  AND I.dblInvoiceTotal >= CREDITS.dblRunningTotal
+		  AND I.intInvoiceId = @intInvoiceId
+		  
+		UPDATE P
+		SET dblAppliedPayment = dblAppliedPayment + E.dblPayment
+		FROM #AAPPREPAIDS P 
+		CROSS APPLY (
+			SELECT intInvoiceId
+				 , dblPayment		= SUM(dblPayment)
+			FROM @tblPaymentEntries E
+			WHERE P.intInvoiceId = E.intInvoiceId
+			  AND E.intSourceId = @intInvoiceId
+			  AND P.strTransactionType NOT IN ('Invoice', 'Debit Memo')
+			GROUP BY intInvoiceId
+		) E 
 		
-		WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoices)
+		UPDATE I
+		SET dblAppliedPayment = E.dblPayment
+		FROM #AAPINVOICES I
+		CROSS APPLY (
+			SELECT intSourceId	= intSourceId
+				 , dblPayment	= SUM(dblPayment)
+			FROM @tblPaymentEntries P
+			WHERE I.intInvoiceId = P.intSourceId
+			  AND I.intInvoiceId <> P.intInvoiceId
+			  AND P.strTransactionType NOT IN ('Invoice', 'Debit Memo')
+			GROUP BY intSourceId
+		) E
+		WHERE I.intInvoiceId = @intInvoiceId
+
+		--INSERT CREDITS IF HAS AVAILABLE AND INVOICE AMOUNT DUE IS NOT YET ZERO
+		IF EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment) AND EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE dblInvoiceTotal <> dblAppliedPayment)
 			BEGIN
-				--CLEAR PREPAIDS TEMP TABLE
-				DELETE FROM @tblPrepaids
-				DELETE FROM @tblPrepaidsWithContract
+				INSERT INTO @tblPaymentEntries (
+					  intId
+					, strSourceTransaction
+					, intSourceId
+					, strSourceId
+					, intEntityCustomerId
+					, intCompanyLocationId
+					, intCurrencyId
+					, dtmDatePaid
+					, intPaymentMethodId
+					, strPaymentMethod
+					, strNotes
+					, strPaymentInfo
+					, intBankAccountId
+					, dblAmountPaid
+					, intEntityId
+					, intInvoiceId
+					, strTransactionType
+					, strTransactionNumber
+					, intTermId
+					, intInvoiceAccountId
+					, dblInvoiceTotal
+					, dblBaseInvoiceTotal
+					, dblPayment
+					, dblAmountDue
+					, strInvoiceReportNumber
+					, ysnPost
+				)
+				SELECT intId						= I.intInvoiceId
+					, strSourceTransaction			= 'Direct'
+					, intSourceId					= I.intInvoiceId
+					, strSourceId					= I.strInvoiceNumber
+					, intEntityCustomerId			= I.intEntityCustomerId
+					, intCompanyLocationId			= I.intCompanyLocationId
+					, intCurrencyId					= I.intCurrencyId
+					, dtmDatePaid					= I.dtmPostDate
+					, intPaymentMethodId			= @intPaymentMethodId
+					, strPaymentMethod				= @strPaymentMethod
+					, strNotes						= 'Auto Apply Prepaid and Credits for ' + I.strInvoiceNumber
+					, strPaymentInfo				= NULL
+					, intBankAccountId				= NULL
+					, dblAmountPaid					= 0
+					, intEntityId					= @intEntityUserId
+					, intInvoiceId					= CREDITS.intInvoiceId
+					, strTransactionType			= CREDITS.strTransactionType
+					, strTransactionNumber			= CREDITS.strInvoiceNumber
+					, intTermId						= CREDITS.intTermId
+					, intInvoiceAccountId			= CREDITS.intAccountId
+					, dblInvoiceTotal				= CREDITS.dblInvoiceTotal
+					, dblBaseInvoiceTotal			= CREDITS.dblBaseInvoiceTotal
+					, dblPayment					= I.dblInvoiceTotal - I.dblAppliedPayment
+					, dblAmountDue					= CREDITS.dblAmountDue
+					, strInvoiceReportNumber		= CREDITS.strInvoiceNumber
+					, ysnPost						= 1
+				FROM #AAPINVOICES I
+				INNER JOIN #AAPPREPAIDS CREDITS ON CREDITS.intEntityCustomerId = I.intEntityCustomerId
+				WHERE I.dtmPostDate >= CREDITS.dtmPostDate				  
+				  AND I.intInvoiceId = @intInvoiceId
+				  AND CREDITS.dblAppliedPayment <> CREDITS.dblAmountDue
+				  AND I.dblInvoiceTotal <> I.dblAppliedPayment
 
-				DECLARE @intInvoiceId			INT = NULL
-					  , @intEntityCustomerId	INT = NULL
-					  , @intCurrencyId			INT = NULL
-					  , @intCompanyLocationId	INT = NULL
-					  , @intEntityUserId		INT = NULL
-					  , @intPaymentId			INT = NULL
-					  , @dblInvoiceTotal		NUMERIC(18, 6) = 0
-					  , @dblDiscountAvailable	NUMERIC(18, 6) = 0
-					  , @dblAmountDue			NUMERIC(18, 6) = 0
-					  , @dblPayment				NUMERIC(18, 6) = 0
-					  , @dtmPostDate			DATETIME = NULL
-					  , @ysnHasContract			BIT = 0
+				UPDATE P
+				SET dblAppliedPayment = E.dblPayment
+				FROM #AAPPREPAIDS P
+				INNER JOIN @tblPaymentEntries E ON P.intInvoiceId = E.intInvoiceId
 
-				SELECT TOP 1 @intInvoiceId			= intInvoiceId 
-						   , @intEntityCustomerId	= intEntityCustomerId
-						   , @intCurrencyId			= intCurrencyId
-						   , @intCompanyLocationId	= intCompanyLocationId
-						   , @intEntityUserId		= intEntityUserId						   
-						   , @dblInvoiceTotal		= dblInvoiceTotal
-						   , @dblAmountDue			= dblInvoiceTotal
-						   , @dblDiscountAvailable	= dblDiscountAvailable
-						   , @dtmPostDate			= dtmPostDate
-				FROM @tblInvoices ORDER BY intInvoiceId
-
-				IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND ISNULL(intContractDetailId, 0) <> 0)
-					BEGIN
-						SET @ysnHasContract = 1
-					END
-
-				--GET AVAILABLE CREDITS OF CUSTOMER WITHOUT CONTRACTS
-				INSERT INTO @tblPrepaids
-				SELECT intInvoiceId
-					 , dblAmountDue
-					 , dtmPostDate
-				FROM dbo.tblARInvoice CREDITS WITH (NOLOCK)
-				OUTER APPLY (
-					SELECT intContractCount = COUNT(*) 
-					FROM dbo.tblARInvoiceDetail ID
-					WHERE CREDITS.intInvoiceId = ID.intInvoiceId
-					  AND ISNULL(ID.intContractDetailId, 0) <> 0
-				) CD
-				LEFT JOIN (
-					SELECT intPaymentId
-					FROM dbo.tblARPayment WITH (NOLOCK)
-					WHERE ysnPosted = 1
-					AND ysnProcessedToNSF = 0
-				) PREPAY ON CREDITS.intPaymentId = PREPAY.intPaymentId
-				WHERE CREDITS.ysnPosted = 1
-				  AND CREDITS.ysnCancelled = 0
-				  AND CREDITS.ysnPaid = 0
-				  AND CREDITS.dblAmountDue > 0
-				  AND CREDITS.strTransactionType IN ('Customer Prepayment', 'Credit Memo', 'Overpayment')
-				  AND ((CREDITS.strTransactionType = 'Customer Prepayment' AND ISNULL(PREPAY.intPaymentId, 0) <> 0) OR CREDITS.strTransactionType IN ('Credit Memo', 'Overpayment'))
-				  AND CREDITS.intEntityCustomerId = @intEntityCustomerId
-				  AND CREDITS.dtmPostDate <= @dtmPostDate
-				  AND ISNULL(CD.intContractCount, 0) = 0
-				ORDER BY CREDITS.dtmPostDate
-
-				--GET AVAILABLE CREDITS OF CUSTOMER WITH CONTRACTS
-				INSERT INTO @tblPrepaidsWithContract
-				SELECT intInvoiceId
-					 , dblAmountDue
-					 , dtmPostDate
-				FROM dbo.tblARInvoice CREDITS WITH (NOLOCK)
+				UPDATE I
+				SET dblAppliedPayment = E.dblPayment
+				FROM #AAPINVOICES I
 				CROSS APPLY (
-					SELECT intContractCount = COUNT(*) 
-					FROM dbo.tblARInvoiceDetail ID
-					WHERE CREDITS.intInvoiceId = ID.intInvoiceId
-					  AND ID.intContractDetailId IN (SELECT intContractDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
-				) CD
-				LEFT JOIN (
-					SELECT intPaymentId
-					FROM dbo.tblARPayment WITH (NOLOCK)
-					WHERE ysnPosted = 1
-					AND ysnProcessedToNSF = 0
-				) PREPAY ON CREDITS.intPaymentId = PREPAY.intPaymentId
-				WHERE CREDITS.ysnPosted = 1
-				  AND CREDITS.ysnCancelled = 0
-				  AND CREDITS.ysnPaid = 0
-				  AND CREDITS.dblAmountDue > 0
-				  AND CREDITS.strTransactionType IN ('Customer Prepayment', 'Credit Memo', 'Overpayment')
-				  AND ((CREDITS.strTransactionType = 'Customer Prepayment' AND ISNULL(PREPAY.intPaymentId, 0) <> 0) OR CREDITS.strTransactionType IN ('Credit Memo', 'Overpayment'))
-				  AND CREDITS.intEntityCustomerId = @intEntityCustomerId
-				  AND CREDITS.dtmPostDate <= @dtmPostDate
-				  AND ISNULL(CD.intContractCount, 0) > 0
-				ORDER BY CREDITS.dtmPostDate
-
-				--INSERT PAYMENT HEADER
-				IF (EXISTS (SELECT TOP 1 NULL FROM @tblPrepaids) OR EXISTS (SELECT TOP 1 NULL FROM @tblPrepaidsWithContract))
-					BEGIN
-						INSERT INTO [tblARPayment]
-							([intEntityCustomerId]
-							,[intCurrencyId]
-							,[dtmDatePaid]
-							,[intAccountId]
-							,[intBankAccountId]
-							,[intPaymentMethodId]
-							,[intLocationId]
-							,[dblAmountPaid]
-							,[dblBaseAmountPaid]
-							,[dblUnappliedAmount]
-							,[dblBaseUnappliedAmount]
-							,[dblOverpayment]
-							,[dblBaseOverpayment]
-							,[dblBalance]
-							,[dblExchangeRate]
-							,[strRecordNumber]
-							,[strPaymentInfo]
-							,[strNotes]
-							,[ysnApplytoBudget]
-							,[ysnApplyOnAccount]
-							,[intEntityId]
-							,[ysnInvoicePrepayment]
-							,[strPaymentMethod]
-							,[intWriteOffAccountId]
-							,[intConcurrencyId])
-						SELECT
-							 [intEntityCustomerId]			= @intEntityCustomerId
-							,[intCurrencyId]				= ISNULL(@intCurrencyId, @intDefaultCurrencyId)
-							,[dtmDatePaid]					= @dtmPostDate
-							,[intAccountId]					= NULL
-							,[intBankAccountId]				= NULL
-							,[intPaymentMethodId]			= @intPaymentMethodId
-							,[intLocationId]				= @intCompanyLocationId
-							,[dblAmountPaid]				= 0.000000
-							,[dblBaseAmountPaid]			= 0.000000
-							,[dblUnappliedAmount]			= 0.000000
-							,[dblBaseUnappliedAmount]		= 0.000000
-							,[dblOverpayment]				= 0.000000
-							,[dblBaseOverpayment]			= 0.000000
-							,[dblBalance]					= 0.000000
-							,[dblExchangeRate]				= 1.000000
-							,[strRecordNumber]				= NULL
-							,[strPaymentInfo]				= NULL
-							,[strNotes]						= 'Auto Apply Prepaids'
-							,[ysnApplytoBudget]				= 0
-							,[ysnApplyOnAccount]			= 0
-							,[intEntityId]					= @intEntityUserId
-							,[ysnInvoicePrepayment]			= 0
-							,[strPaymentMethod]				= @strPaymentMethod
-							,[intWriteOffAccountId]			= NULL
-							,[intConcurrencyId]				= 0		
-						FROM	
-							tblARCustomer ARC	
-						WHERE ARC.[intEntityId] = @intEntityCustomerId
-	
-						SET @intPaymentId = SCOPE_IDENTITY()
-					END
-
-				--INSERT PAYMENT DETAILS WITH CONTRACTS
-				IF @ysnHasContract = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblPrepaidsWithContract) AND ISNULL(@intPaymentId, 0) <> 0
-					BEGIN
-						WHILE EXISTS (SELECT TOP 1 NULL FROM @tblPrepaidsWithContract)
-							BEGIN
-								DECLARE @intPrepaidContractInvoiceId	INT = NULL
-									  , @dblCreditsContract				NUMERIC(18, 6) = 0
-									  , @dblAmountToApplyContract		NUMERIC(18, 6) = 0
-
-								SELECT TOP 1 @intPrepaidContractInvoiceId	= intInvoiceId
-										   , @dblCreditsContract			= dblAmountDue 
-								FROM @tblPrepaidsWithContract ORDER BY dtmPostDate
-
-								IF (@dblAmountDue > @dblCreditsContract)
-									SET @dblAmountToApplyContract = @dblCreditsContract
-								ELSE IF (@dblAmountDue <= @dblCreditsContract)
-									SET @dblAmountToApplyContract = @dblAmountDue
-
-								--INSERT CREDITS IN PAYMENT DETAIL
-								INSERT INTO tblARPaymentDetail
-									([intPaymentId]
-									,[intInvoiceId]
-									,[strTransactionNumber]
-									,[intTermId]
-									,[intAccountId]
-									,[dblInvoiceTotal]
-									,[dblBaseInvoiceTotal]
-									,[dblDiscount]
-									,[dblBaseDiscount]
-									,[dblDiscountAvailable]
-									,[dblBaseDiscountAvailable]
-									,[dblAmountDue]
-									,[dblBaseAmountDue]
-									,[dblPayment]
-									,[dblBasePayment]
-									,[dblCurrencyExchangeRate]
-									,[intConcurrencyId])
-								SELECT [intPaymentId]			= @intPaymentId
-									,[intInvoiceId]				= intInvoiceId
-									,[strTransactionNumber]		= strInvoiceNumber
-									,[intTermId]				= intTermId
-									,[intAccountId]				= intAccountId
-									,[dblInvoiceTotal]			= dblInvoiceTotal * -1
-									,[dblBaseInvoiceTotal]		= dblBaseInvoiceTotal * -1
-									,[dblDiscount]				= 0.00
-									,[dblBaseDiscount]			= 0.00
-									,[dblDiscountAvailable]		= 0.00
-									,[dblBaseDiscountAvailable] = 0.00
-									,[dblAmountDue]				= (dblAmountDue - @dblAmountToApplyContract) * -1
-									,[dblBaseAmountDue]			= (dblAmountDue - @dblAmountToApplyContract) * -1
-									,[dblPayment]				= @dblAmountToApplyContract * -1
-									,[dblBasePayment]			= @dblAmountToApplyContract * -1
-									,[dblCurrencyExchangeRate]	= 1
-									,[intConcurrencyId]			= 1
-								FROM dbo.tblARInvoice
-								WHERE intInvoiceId = @intPrepaidContractInvoiceId
-								
-								SET @dblAmountDue = @dblAmountDue - @dblAmountToApplyContract
-								SET @dblPayment	= @dblPayment + @dblAmountToApplyContract
-
-								DELETE FROM @tblPrepaidsWithContract WHERE intInvoiceId = @intPrepaidContractInvoiceId
-
-								IF @dblAmountDue = 0
-									BREAK
-							END
-					END
-
-				--INSERT PAYMENT DETAILS WITHOUT CONTRACTS
-				IF EXISTS (SELECT TOP 1 NULL FROM @tblPrepaids) AND @dblAmountDue > 0 AND ISNULL(@intPaymentId, 0) <> 0
-					BEGIN						
-						WHILE EXISTS (SELECT TOP 1 NULL FROM @tblPrepaids)
-							BEGIN
-								DECLARE @intPrepaidInvoiceId	INT = NULL
-									  , @dblCredits				NUMERIC(18, 6) = 0
-									  , @dblAmountToApply		NUMERIC(18, 6) = 0
-
-								SELECT TOP 1 @intPrepaidInvoiceId	= intInvoiceId
-											, @dblCredits			= dblAmountDue 
-								FROM @tblPrepaids ORDER BY dtmPostDate
-
-								IF (@dblAmountDue > @dblCredits)
-									SET @dblAmountToApply = @dblCredits
-								ELSE IF (@dblAmountDue <= @dblCredits)
-									SET @dblAmountToApply = @dblAmountDue
-
-								--INSERT CREDITS IN PAYMENT DETAIL
-								INSERT INTO tblARPaymentDetail
-									([intPaymentId]
-									,[intInvoiceId]
-									,[strTransactionNumber]
-									,[intTermId]
-									,[intAccountId]
-									,[dblInvoiceTotal]
-									,[dblBaseInvoiceTotal]
-									,[dblDiscount]
-									,[dblBaseDiscount]
-									,[dblDiscountAvailable]
-									,[dblBaseDiscountAvailable]
-									,[dblAmountDue]
-									,[dblBaseAmountDue]
-									,[dblPayment]
-									,[dblBasePayment]
-									,[dblCurrencyExchangeRate]
-									,[intConcurrencyId])
-								SELECT [intPaymentId]			= @intPaymentId
-									,[intInvoiceId]				= intInvoiceId
-									,[strTransactionNumber]		= strInvoiceNumber
-									,[intTermId]				= intTermId
-									,[intAccountId]				= intAccountId
-									,[dblInvoiceTotal]			= dblInvoiceTotal * -1
-									,[dblBaseInvoiceTotal]		= dblBaseInvoiceTotal * -1
-									,[dblDiscount]				= 0.00
-									,[dblBaseDiscount]			= 0.00
-									,[dblDiscountAvailable]		= 0.00
-									,[dblBaseDiscountAvailable] = 0.00
-									,[dblAmountDue]				= (dblAmountDue - @dblAmountToApply) * -1
-									,[dblBaseAmountDue]			= (dblAmountDue - @dblAmountToApply) * -1
-									,[dblPayment]				= @dblAmountToApply * -1
-									,[dblBasePayment]			= @dblAmountToApply * -1
-									,[dblCurrencyExchangeRate]	= 1
-									,[intConcurrencyId]			= 1
-								FROM dbo.tblARInvoice
-								WHERE intInvoiceId = @intPrepaidInvoiceId
-								
-								SET @dblAmountDue = @dblAmountDue - @dblAmountToApply
-								SET @dblPayment	= @dblPayment + @dblAmountToApply										
-
-								DELETE FROM @tblPrepaids WHERE intInvoiceId = @intPrepaidInvoiceId
-
-								IF @dblAmountDue = 0
-									BREAK
-							END						
-					END
-
-				--INSERT INVOICE IN PAYMENT DETAIL
-				IF ISNULL(@intPaymentId, 0) <> 0
-					BEGIN
-						INSERT INTO tblARPaymentDetail
-							([intPaymentId]
-							,[intInvoiceId]
-							,[strTransactionNumber]
-							,[intTermId]
-							,[intAccountId]
-							,[dblInvoiceTotal]
-							,[dblBaseInvoiceTotal]
-							,[dblDiscount]
-							,[dblBaseDiscount]
-							,[dblDiscountAvailable]
-							,[dblBaseDiscountAvailable]
-							,[dblAmountDue]
-							,[dblBaseAmountDue]
-							,[dblPayment]
-							,[dblBasePayment]
-							,[dblCurrencyExchangeRate]
-							,[intConcurrencyId])
-						SELECT [intPaymentId]			= @intPaymentId
-							,[intInvoiceId]				= intInvoiceId
-							,[strTransactionNumber]		= strInvoiceNumber
-							,[intTermId]				= intTermId
-							,[intAccountId]				= intAccountId
-							,[dblInvoiceTotal]			= dblInvoiceTotal
-							,[dblBaseInvoiceTotal]		= dblBaseInvoiceTotal
-							,[dblDiscount]				= 0.00
-							,[dblBaseDiscount]			= 0.00
-							,[dblDiscountAvailable]		= dblDiscountAvailable
-							,[dblBaseDiscountAvailable] = dblBaseDiscountAvailable
-							,[dblAmountDue]				= @dblAmountDue
-							,[dblBaseAmountDue]			= @dblAmountDue
-							,[dblPayment]				= @dblPayment
-							,[dblBasePayment]			= @dblPayment
-							,[dblCurrencyExchangeRate]	= 1
-							,[intConcurrencyId]			= 1
-						FROM dbo.tblARInvoice
-						WHERE intInvoiceId = @intInvoiceId
-
-						--INSERT PAYMENTS TO POST
-						INSERT INTO @tblPayments
-						SELECT @intPaymentId
-					END
-
-				DELETE FROM @tblInvoices WHERE intInvoiceId = @intInvoiceId
+					SELECT intSourceId	= intSourceId
+						 , dblPayment	= SUM(dblPayment)
+					FROM @tblPaymentEntries P
+					WHERE I.intInvoiceId = P.intSourceId
+					  AND I.intInvoiceId <> P.intInvoiceId
+					  AND P.strTransactionType NOT IN ('Invoice', 'Debit Memo')
+					GROUP BY intSourceId
+				) E
+				WHERE I.intInvoiceId = @intInvoiceId
 			END
-		
-		--POST PAYMENTS GENERATED
-		IF EXISTS (SELECT TOP 1 NULL FROM @tblPayments)
+
+		--INSERT INVOICE
+		INSERT INTO @tblPaymentEntries (
+			  intId
+			, strSourceTransaction
+			, intSourceId
+			, strSourceId
+			, intEntityCustomerId
+			, intCompanyLocationId
+			, intCurrencyId
+			, dtmDatePaid
+			, intPaymentMethodId
+			, strPaymentMethod
+			, strNotes
+			, strPaymentInfo
+			, intBankAccountId
+			, dblAmountPaid
+			, intEntityId
+			, intInvoiceId
+			, strTransactionType
+			, strTransactionNumber
+			, intTermId
+			, intInvoiceAccountId
+			, dblInvoiceTotal
+			, dblBaseInvoiceTotal
+			, dblPayment
+			, dblAmountDue
+			, strInvoiceReportNumber
+			, ysnPost
+		)
+		SELECT intId						= I.intInvoiceId
+			, strSourceTransaction			= 'Direct'
+			, intSourceId					= I.intInvoiceId
+			, strSourceId					= I.strInvoiceNumber
+			, intEntityCustomerId			= I.intEntityCustomerId
+			, intCompanyLocationId			= I.intCompanyLocationId
+			, intCurrencyId					= I.intCurrencyId
+			, dtmDatePaid					= I.dtmPostDate
+			, intPaymentMethodId			= @intPaymentMethodId
+			, strPaymentMethod				= @strPaymentMethod
+			, strNotes						= 'Auto Apply Prepaid and Credits for ' + I.strInvoiceNumber 
+			, strPaymentInfo				= NULL
+			, intBankAccountId				= NULL
+			, dblAmountPaid					= 0
+			, intEntityId					= @intEntityUserId
+			, intInvoiceId					= I.intInvoiceId
+			, strTransactionType			= I.strTransactionType
+			, strTransactionNumber			= I.strInvoiceNumber
+			, intTermId						= I.intTermId
+			, intInvoiceAccountId			= I.intAccountId
+			, dblInvoiceTotal				= I.dblInvoiceTotal
+			, dblBaseInvoiceTotal			= I.dblBaseInvoiceTotal
+			, dblPayment					= I.dblAppliedPayment
+			, dblAmountDue					= I.dblAmountDue
+			, strInvoiceReportNumber		= I.strInvoiceNumber
+			, ysnPost						= 1
+		FROM #AAPINVOICES I
+		WHERE I.intInvoiceId = @intInvoiceId		
+
+		IF NOT EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment)
 			BEGIN
-				DECLARE @intPaymentIds NVARCHAR(MAX)
-
-				SELECT @intPaymentIds = COALESCE(@intPaymentIds + ', ', '') + RTRIM(LTRIM(intId)) FROM @tblPayments
-
-				EXEC dbo.uspARPostPayment @post = 1, @recap = 0, @param = @intPaymentIds
+				UPDATE #AAPINVOICES SET ysnProcessed = 1
 			END
+		ELSE
+			BEGIN
+				UPDATE #AAPINVOICES
+				SET ysnProcessed = 1
+				WHERE intInvoiceId = @intInvoiceId
+			END
+	END
+
+--CREATE AND POST PAYMENTS
+IF EXISTS (SELECT TOP 1 NULL FROM @tblPaymentEntries)
+	BEGIN
+		EXEC dbo.uspARProcessPayments @PaymentEntries	= @tblPaymentEntries
+									, @UserId			= @intEntityUserId
+									, @GroupingOption	= 7
+									, @RaiseError		= 0
 	END

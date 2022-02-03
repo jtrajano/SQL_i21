@@ -215,6 +215,11 @@ CREATE NONCLUSTERED INDEX [NC_tblARInvoice_AgingDetail]
 ON [dbo].[tblARInvoice] ([intAccountId],[ysnPosted],[ysnCancelled],[dtmPostDate])
 INCLUDE ([strInvoiceNumber],[strTransactionType],[strType],[intEntityCustomerId],[intCompanyLocationId],[dtmDate],[dtmDueDate],[dblInvoiceTotal],[dblDiscount],[dblInterest],[dblAmountDue],[intEntitySalespersonId],[ysnForgiven],[intPaymentId],[dtmForgiveDate])
 GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmPostDate]
+	ON [dbo].[tblARInvoice] ([dtmPostDate])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmDate]
+	ON [dbo].[tblARInvoice] ([dtmDate])
 
 
 --TRIGGERS INSERT

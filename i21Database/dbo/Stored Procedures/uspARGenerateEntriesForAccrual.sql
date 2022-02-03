@@ -8,14 +8,11 @@ DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
 DECLARE @GLEntries AS RecapTableType
-DECLARE @ZeroDecimal DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000
-DECLARE @OneDecimal DECIMAL(18,6)
-SET @OneDecimal = 1.000000
-DECLARE @OneHundredDecimal DECIMAL(18,6)
-SET @OneHundredDecimal = 100.000000
+DECLARE @ZeroDecimal DECIMAL(18,6) = 0
+DECLARE @OneDecimal DECIMAL(18,6) = 1
+DECLARE @OneHundredDecimal DECIMAL(18,6) = 100
 
-EXEC dbo.[uspARInsertDefaultAccrual]  
+EXEC dbo.[uspARUpdateInvoiceAccruals]  
 
 WHILE EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.[intTransactionId],0) = 0)
 BEGIN
@@ -34,12 +31,9 @@ BEGIN
 
     SELECT TOP 1 @InvoiceId = I.[intInvoiceId] FROM ##ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.intTransactionId,0) = 0
 
-    SELECT
-        @AccrualPeriod = [intPeriodsToAccrue]
-    FROM
-        ##ARPostInvoiceHeader
-    WHERE
-        [intInvoiceId] = @InvoiceId 
+    SELECT @AccrualPeriod = [intPeriodsToAccrue]
+    FROM ##ARPostInvoiceHeader
+    WHERE [intInvoiceId] = @InvoiceId 
 
     --DEBIT AR
 	INSERT INTO ##ARInvoiceGLEntries
@@ -1020,15 +1014,13 @@ BEGIN
 	DELETE FROM @InvoiceDetail WHERE intInvoiceDetailId = @InvoiceDetailId
 END
 
---DEBIT AR
+--DEBIT/CREDIT AR TAX DETAILS
 INSERT INTO @GLEntries
     ([dtmDate]
     ,[strBatchId]
     ,[intAccountId]
     ,[dblDebit]
     ,[dblCredit]
-    ,[dblDebitUnit]
-    ,[dblCreditUnit]
     ,[strDescription]
     ,[strCode]
     ,[strReference]
@@ -1054,24 +1046,13 @@ INSERT INTO @GLEntries
     ,[dblReportingRate]
     ,[dblForeignRate]
     ,[strRateType]
-    ,[strDocument]
-    ,[strComments]
-    ,[strSourceDocumentId]
-    ,[intSourceLocationId]
-    ,[intSourceUOMId]
-    ,[dblSourceUnitDebit]
-    ,[dblSourceUnitCredit]
-    ,[intCommodityId]
-    ,[intSourceEntityId]
-    ,[ysnRebuild])	
+)	
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = I.[intDeferredRevenueAccountId]    
 	,dblDebit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN ARITD.dblBaseAdjustedTax ELSE @ZeroDecimal END
 	,dblCredit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN @ZeroDecimal ELSE ARITD.dblBaseAdjustedTax END		
-    ,[dblDebitUnit]                 = @ZeroDecimal
-    ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strComments]
@@ -1096,34 +1077,11 @@ SELECT
     ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARITD.[dblAdjustedTax] END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
-    ,[strRateType]                  = I.[strCurrencyExchangeRateType]
-    ,[strDocument]                  = NULL
-    ,[strComments]                  = NULL
-    ,[strSourceDocumentId]          = NULL
-    ,[intSourceLocationId]          = NULL
-    ,[intSourceUOMId]               = NULL
-    ,[dblSourceUnitDebit]           = NULL
-    ,[dblSourceUnitCredit]          = NULL
-    ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
-    ,[ysnRebuild]                   = NULL
-FROM
-    (
-    SELECT
-	     [intTaxCodeId]
-		,[intInvoiceDetailId]
-		,[intInvoiceDetailTaxId]
-		,[intSalesTaxAccountId]
-		,[dblAdjustedTax]
-		,[dblBaseAdjustedTax]
-    FROM tblARInvoiceDetailTax WITH (NOLOCK)
-	) ARITD
-INNER JOIN
-    ##ARPostInvoiceDetail I
-        ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
-WHERE
-    I.[intInvoiceId] = @InvoiceId
-    AND ARITD.[dblBaseAdjustedTax] <> @ZeroDecimal
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+FROM tblARInvoiceDetailTax ARITD WITH (NOLOCK)
+INNER JOIN ##ARPostInvoiceDetail I ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
+WHERE I.[intInvoiceId] = @InvoiceId
+  AND ARITD.[dblBaseAdjustedTax] <> @ZeroDecimal
 		
 UNION ALL
 	
@@ -1132,9 +1090,7 @@ SELECT
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = ARITD.[intSalesTaxAccountId]
     ,dblDebit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN @ZeroDecimal ELSE ARITD.dblBaseAdjustedTax END
-	,dblCredit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN ARITD.dblBaseAdjustedTax ELSE @ZeroDecimal END		
-	,[dblDebitUnit]                 = @ZeroDecimal
-    ,[dblCreditUnit]                = @ZeroDecimal
+	,dblCredit						= CASE WHEN I.[ysnIsInvoicePositive] = 1  THEN ARITD.dblBaseAdjustedTax ELSE @ZeroDecimal END			
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strComments]
@@ -1159,34 +1115,11 @@ SELECT
     ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN (ARITD.[dblAdjustedTax]) ELSE @ZeroDecimal END 
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
-    ,[strRateType]                  = I.[strCurrencyExchangeRateType]
-    ,[strDocument]                  = NULL
-    ,[strComments]                  = NULL
-    ,[strSourceDocumentId]          = NULL
-    ,[intSourceLocationId]          = NULL
-    ,[intSourceUOMId]               = NULL
-    ,[dblSourceUnitDebit]           = NULL
-    ,[dblSourceUnitCredit]          = NULL
-    ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
-    ,[ysnRebuild]                   = NULL
-FROM
-    (
-    SELECT
-	     [intTaxCodeId]
-		,[intInvoiceDetailId]
-		,[intInvoiceDetailTaxId]
-		,[intSalesTaxAccountId]
-		,[dblAdjustedTax]
-		,[dblBaseAdjustedTax]
-    FROM tblARInvoiceDetailTax WITH (NOLOCK)
-	) ARITD
-INNER JOIN
-    ##ARPostInvoiceDetail I
-        ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
-WHERE
-    I.[intInvoiceId] = @InvoiceId
-    AND ARITD.[dblBaseAdjustedTax] <> @ZeroDecimal
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+FROM tblARInvoiceDetailTax ARITD WITH (NOLOCK)
+INNER JOIN ##ARPostInvoiceDetail I ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
+WHERE I.[intInvoiceId] = @InvoiceId 
+  AND ARITD.[dblBaseAdjustedTax] <> @ZeroDecimal
 
     IF NOT EXISTS(SELECT TOP 1 NULL FROM @GLEntries)
 	BEGIN
@@ -1194,7 +1127,7 @@ WHERE
 	END
 END
 
-INSERT INTO ##ARInvoiceGLEntries
+INSERT INTO ##ARInvoiceGLEntries WITH (TABLOCK)
 	([dtmDate]
 	,[strBatchId]
 	,[intAccountId]
@@ -1280,8 +1213,7 @@ SELECT
    ,[intCommodityId]               = GLEntries.[intCommodityId]
    ,[intSourceEntityId]            = GLEntries.[intSourceEntityId]
    ,[ysnRebuild]                   = GLEntries.[ysnRebuild]
-FROM
-	@GLEntries GLEntries
+FROM @GLEntries GLEntries
 CROSS APPLY dbo.fnGetDebitUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) DebitUnit
 CROSS APPLY dbo.fnGetCreditUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) CreditUnit
 
