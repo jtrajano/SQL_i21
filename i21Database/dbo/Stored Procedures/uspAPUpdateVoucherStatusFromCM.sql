@@ -22,6 +22,18 @@ INNER JOIN tblAPPayment A2 ON A.intPaymentId = A2.intPaymentId
 INNER JOIN dbo.fnARGetRowsFromDelimitedValues(@paymentRecordIds) B ON A2.strPaymentRecordNum = B.strValues COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
 WHERE C.intTransactionType IN (2,13)
+AND A2.intPaymentMethodId = 7
+
+INSERT INTO @billIds
+SELECT
+	A.intBillId
+FROM tblAPPaymentDetail A
+INNER JOIN tblAPPayment A2 ON A.intPaymentId = A2.intPaymentId
+INNER JOIN tblCMBankTransaction A3 ON A2.strPaymentRecordNum = A3.strTransactionId
+INNER JOIN dbo.fnARGetRowsFromDelimitedValues(@paymentRecordIds) B ON A3.intTransactionId = B.strValues
+INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
+WHERE C.intTransactionType IN (2,13)
+AND A2.intPaymentMethodId = 2
 
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
@@ -29,7 +41,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 --Check if there are still payment(PAY) for prepaid transaction
 --If none, set ysnPrepayHasPayment to false
 UPDATE A
-	SET A.ysnPrepayHasPayment = CASE WHEN prepayment.intPaymentId IS NOT NULL THEN 1 ELSE 0 END
+SET 
+	A.ysnPrepayHasPayment = CASE WHEN prepayment.intPaymentId IS NOT NULL THEN 1 ELSE 0 END,
+	A.ysnInPayment = 0
 FROM tblAPBill A
 INNER JOIN @billIds B ON A.intBillId = B.intId
 OUTER APPLY
