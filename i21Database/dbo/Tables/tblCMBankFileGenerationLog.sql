@@ -14,4 +14,9 @@
     [intConcurrencyId]           INT            CONSTRAINT [DF_tblCMBankFileGenerationLog_intConcurrencyId] DEFAULT ((1)) NOT NULL,
     CONSTRAINT [PK_tblCMBankFileGenerationLog] PRIMARY KEY CLUSTERED ([intBankFileGenerationLogId] ASC)
 );
+GO
 
+CREATE NONCLUSTERED INDEX IX_NC_tblCMBankFileGenerationLog ON [dbo].[tblCMBankFileGenerationLog] ([intTransactionId],[strProcessType]) 
+INCLUDE ([dtmGenerated],[intBatchId],[strFileName])
+
+GO
