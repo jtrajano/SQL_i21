@@ -265,6 +265,9 @@ BEGIN TRY
 				,@dblSlicedCashPrice numeric(18,6);
 
 			SELECT @dblLotsFixed =  round(dblLotsFixed,(case when @intHeaderPricingTypeId in (2,8) then 6 else 2 end)), @dblSlicedFutures = dblFinalPrice - dblOriginalBasis, @dblSlicedCashPrice = dblFinalPrice FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId;
+			
+			select @dblNoOfLots=round(@dblNoOfLots,5),@dblLotsFixed=round(@dblLotsFixed,5);
+
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
 				UPDATE	@CDTableUpdate
