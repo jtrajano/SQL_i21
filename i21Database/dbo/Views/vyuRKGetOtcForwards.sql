@@ -20,7 +20,7 @@ SELECT
 	, dtmTradeDate = der.dtmTransactionDate
 	, dblBuyAmount = dblContractAmount
 	, dblSellAmount = dblMatchAmount
-	, dblContractRate = CASE WHEN ISNULL(approval.strApprovalStatus, 'Approved') = 'Approved' -- No Need for Approval and Approved uses Finance Forward Rate
+	, dblContractRate = CASE WHEN ISNULL(approval.strApprovalStatus, 'Approved') = 'Approved' OR ISNULL(der.intBankTransferId, 0) <> 0 -- Posted, No Need for Approval and Approved uses Finance Forward Rate
 								THEN der.dblFinanceForwardRate -- Approved Forward Rate
 								ELSE der.dblContractRate END -- Requested Forward Rate
 	, strCurrencyPair = CurEx.strCurrencyExchangeRateType
