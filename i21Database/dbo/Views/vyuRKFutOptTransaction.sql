@@ -40,13 +40,16 @@ FROM (
 		, sc.strCommodityCode
 		, ft.intLocationId
 		, cl.strLocationName
-		, strStatus	= CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
+		, strStatus	= CASE WHEN ISNULL(ft.intBankTransferId, 0) <> 0 AND ft.intInstrumentTypeId = 4 THEN 'Posted' 
+						ELSE CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' 
+							THEN approval.strApprovalStatus
 							WHEN ISNULL(ft.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' 
-								THEN CASE WHEN ISNULL(ft.intBankTransferId, 0) <> 0 THEN 'Posted' ELSE 'Approved and Not Posted' END
+								THEN 'Approved and Not Posted' 
 							ELSE ISNULL(ft.strStatus, 
 										CASE WHEN ft.intSelectedInstrumentTypeId = 2 AND ft.intInstrumentTypeId = 4 THEN 'No Need for Approval' 
 										ELSE '' END) 
 							END
+						END
 		, ft.intBookId
 		, sb.strBook
 		, ft.intSubBookId

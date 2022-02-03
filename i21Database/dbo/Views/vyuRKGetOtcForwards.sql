@@ -27,9 +27,11 @@ SELECT
 	, strBaseCurrency = strFromCurrency COLLATE Latin1_General_CI_AS
 	, strMatchCurrency = strToCurrency COLLATE Latin1_General_CI_AS
 	, dblExchangeRate
-	, strApprovalStatus = CASE WHEN approval.strApprovalStatus = 'Approved' 
-								THEN	CASE WHEN ISNULL(der.intBankTransferId, 0) <> 0 THEN 'Approved and Not Posted' ELSE 'Posted' END
+	, strApprovalStatus = CASE WHEN ISNULL(der.intBankTransferId, 0) <> 0 THEN 'Posted' 
+							ELSE CASE WHEN approval.strApprovalStatus = 'Approved' 
+								THEN  'Approved and Not Posted'
 								ELSE  ISNULL(approval.strApprovalStatus, 'No Need for Approval') END 
+							END
 								COLLATE Latin1_General_CI_AS 
 	, intSubmittedById = smapprove.intSubmittedById
 	, dblApprovalAmount = smapprove.dblAmount
