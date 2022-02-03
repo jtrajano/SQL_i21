@@ -63,7 +63,7 @@ SELECT DE.intFutOptTransactionId
 	, ysnBankTransferPosted = CASE WHEN ISNULL(DE.intBankTransferId, 0) <> 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	, strApprovalStatus = CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
 							WHEN ISNULL(DE.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' 
-								THEN CASE WHEN ISNULL(DE.intBankTransferId, 0) <> 0 THEN 'Posted' ELSE 'Approved and not Posted' END
+								THEN CASE WHEN ISNULL(DE.intBankTransferId, 0) <> 0 THEN 'Posted' ELSE 'Approved and Not Posted' END
 							ELSE ISNULL(DE.strStatus, 
 										CASE WHEN DE.intSelectedInstrumentTypeId = 2 AND DE.intInstrumentTypeId = 4 THEN 'No Need for Approval' 
 										ELSE '' END) 

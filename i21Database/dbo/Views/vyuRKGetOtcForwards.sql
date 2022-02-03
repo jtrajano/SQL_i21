@@ -20,7 +20,9 @@ SELECT
 	, dtmTradeDate = der.dtmTransactionDate
 	, dblBuyAmount = dblContractAmount
 	, dblSellAmount = dblMatchAmount
-	, dblContractRate
+	, dblContractRate = CASE WHEN ISNULL(approval.strApprovalStatus, 'Approved') = 'Approved' -- No Need for Approval and Approved uses Finance Forward Rate
+								THEN der.dblFinanceForwardRate -- Approved Forward Rate
+								ELSE der.dblContractRate END -- Requested Forward Rate
 	, strCurrencyPair = CurEx.strCurrencyExchangeRateType
 	, strBaseCurrency = strFromCurrency COLLATE Latin1_General_CI_AS
 	, strMatchCurrency = strToCurrency COLLATE Latin1_General_CI_AS
