@@ -285,6 +285,7 @@ SELECT -- Load Header
 	,L.dblFreightRate
 	,L.dblSurcharge
 	/*Trade Finance*/
+	,L.intContractDetailId
 	,L.strTradeFinanceNo
 	,L.intBankAccountId
 	,L.intBorrowingFacilityId

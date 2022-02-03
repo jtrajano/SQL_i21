@@ -180,15 +180,15 @@
 [dblSurcharge] NUMERIC(18, 6) NULL,
 
 /*Trade Finance*/
-[strTradeFinanceNo] NVARCHAR(50) NULL,
+[strTradeFinanceNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 [intBankAccountId] INT NULL,
 [intBorrowingFacilityId] INT NULL,
 [intBorrowingFacilityLimitId] INT NULL,
 [intBorrowingFacilityLimitDetailId] INT NULL,
-[strTradeFinanceReferenceNo] NVARCHAR(100) NULL,
+[strTradeFinanceReferenceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [dblLoanAmount] NUMERIC(18, 6) NULL,
 [intBankValuationRuleId] INT NULL,
-[strBankReferenceNo] NVARCHAR(100) NULL,
+[strBankReferenceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strTradeFinanceComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [intFacilityId] INT NULL,
 [intLoanLimitId] INT NULL,

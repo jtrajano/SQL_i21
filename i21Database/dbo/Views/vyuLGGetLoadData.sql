@@ -199,6 +199,7 @@ SELECT
 	,L.dblSurcharge
 	,L.intTermId
 	/*Trade Finance*/
+	,L.intContractDetailId
 	,L.strTradeFinanceNo
 	,L.intBankAccountId
 	,L.intBorrowingFacilityId
