@@ -8999,6 +8999,7 @@
     <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessages.sql" />
     <Build Include="dbo\Views\vyuApiSalesOrder.sql" />
     <Build Include="dbo\Views\vyuApiSalesOrderDetail.sql" />
+    <Build Include="dbo\Views\vyuApiIRelyUser.sql" />
     <Build Include="dbo\Views\vyuRestApiVoucherChecks.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTickets.sql" />
