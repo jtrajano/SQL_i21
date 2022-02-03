@@ -16,7 +16,7 @@ BEGIN
 			')
 		END
     END
-	IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[vyuICCategoryLocation]') AND type in (N'U')) 
+	IF EXISTS (SELECT TOP 1 1 FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[vyuICCategoryLocation]')) 
 	BEGIN
 		EXEC('DROP VIEW vyuICCategoryLocation')
 

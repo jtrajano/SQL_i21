@@ -38,7 +38,7 @@ BEGIN
 	LEFT JOIN tblSMFreightTerms FT ON ID.intFreightTermId = FT.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 	WHERE (T.intTicketTypeId = 9 OR (T.intTicketType = 6 AND T.strInOutFlag = 'O'))
-	  AND ISNULL(ID.intTicketId, 0) <> 0 
+	  AND ID.intTicketId IS NOT NULL
 					
 	IF EXISTS(SELECT TOP 1 NULL FROM @ItemsToIncreaseInTransitDirect)
 		EXEC dbo.uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect

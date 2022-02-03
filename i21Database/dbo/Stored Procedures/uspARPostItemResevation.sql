@@ -37,6 +37,7 @@ INNER JOIN tblICStockReservation ICSR ON ARID.[intInvoiceId] = ICSR.[intTransact
                                      AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
                                      AND ARID.[intItemId] = ICSR.[intItemId]
 WHERE ICSR.[ysnPosted] <> ARID.[ysnPost]
+  AND ICSR.intInventoryTransactionType = @TransactionTypeId
 
 UNION
 
@@ -48,6 +49,7 @@ INNER JOIN tblICStockReservation ICSR ON ARID.[intInvoiceId] = ICSR.[intTransact
                                      AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
                                      AND BDL.[intBundleItemId] = ICSR.[intItemId]
 WHERE ICSR.[ysnPosted] <> ARID.[ysnPost]
+  AND ICSR.intInventoryTransactionType = @TransactionTypeId
 
 WHILE EXISTS(SELECT NULL FROM @InvoiceIds)
 BEGIN

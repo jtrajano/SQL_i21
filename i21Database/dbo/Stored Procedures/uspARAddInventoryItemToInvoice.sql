@@ -517,20 +517,10 @@ BEGIN TRY
 				,[ysnAddonParent]					= @ItemAddonParent
 				,[dblAddOnQuantity]					= @ItemAddOnQuantity
 				,[intConcurrencyId]					= 0
-			FROM
-				tblICItem IC
-			INNER JOIN
-				tblICItemLocation IL
-					ON IC.intItemId = IL.intItemId
-			--No need for this; accounts are being updated during posting (uspARUpdateTransactionAccounts)
-			--And this has been causing performance issue
-			--LEFT OUTER JOIN
-			--	vyuARGetItemAccount Acct
-			--		ON IC.[intItemId] = Acct.[intItemId]
-			--		AND IL.[intLocationId] = Acct.[intLocationId]
-			WHERE
-				IC.[intItemId] = @ItemId
-				AND IL.[intLocationId] = @CompanyLocationId
+			FROM tblICItem IC
+			INNER JOIN tblICItemLocation IL ON IC.intItemId = IL.intItemId
+			WHERE IC.[intItemId] = @ItemId
+			  AND IL.[intLocationId] = @CompanyLocationId
 		END
 			
 END TRY
