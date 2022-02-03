@@ -6,3 +6,4 @@ AS
 	WHERE intTransactionDetailId = @intContractDetailId
 
 
+
