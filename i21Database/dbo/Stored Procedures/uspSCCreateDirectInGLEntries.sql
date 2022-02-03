@@ -66,8 +66,8 @@ BEGIN
 
             --Get the Accounts
             SELECT 
-                @intAPClearingAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intTicketProcessingLocation, @ACCOUNT_CATEGORY_AP_Clearing) 
-                ,@intInventoryInTransitAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intTicketProcessingLocation, @ACCOUNT_CATEGORY_InventoryInTransit) 
+                @intAPClearingAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_AP_Clearing) 
+                ,@intInventoryInTransitAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) 
             
             
             -- Get the functional currency
