@@ -1301,8 +1301,11 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @FinancialReportsMaintenanceParentM
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Financial Report Viewer' AND strModuleName = N'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'FinancialReportDesigner.view.FinancialReports' WHERE strMenuName = N'Financial Report Viewer' AND strModuleName = N'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Financial Report Generator' AND strModuleName = N'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = N'FinancialReportDesigner.view.FinancialReportsGenerator' WHERE strMenuName = N'Financial Report Generator' AND strModuleName = N'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Financial Report Generator' AND strModuleName = 'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Financial Report Generator', N'Financial Report Designer', @FinancialReportsActivitiesParentMenuId, N'Financial Report Generator', N'Activity', N'Screen', N'FinancialReportDesigner.view.FinancialReportsGenerator', N'small-menu-activity', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'FinancialReportDesigner.view.FinancialReportsGenerator' WHERE strMenuName = 'Financial Report Generator' AND strModuleName = 'Financial Report Designer' AND intParentMenuID = @FinancialReportsActivitiesParentMenuId
 
 /* START OF RENAMING  */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Budget Maintenance' AND strModuleName = 'Financial Report Designer' AND intParentMenuID = @FinancialReportsMaintenanceParentMenuId)
