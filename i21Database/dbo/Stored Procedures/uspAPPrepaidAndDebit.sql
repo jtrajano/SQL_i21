@@ -127,6 +127,7 @@ AND A.dblAmountDue != 0										   --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NULL --GET ONLY THE PREPAYMENT FOR CONTRACT WITHOUT ITEM
 AND B.ysnRestricted = 1
 AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
+AND A.ysnPrepayHasPayment = 1
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -233,6 +234,7 @@ AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NOT NULL --GET ONLY THE PREPAYMENT FOR CONTRACT W/ ITEM
 AND B.ysnRestricted = 1
 AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
+AND A.ysnPrepayHasPayment = 1
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -332,6 +334,7 @@ AND A.dblAmountDue != 0										   --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NULL --GET ONLY THE PREPAYMENT FOR CONTRACT WITHOUT ITEM
 AND B.ysnRestricted = 0
 AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
+AND A.ysnPrepayHasPayment = 1
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -434,6 +437,7 @@ AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NOT NULL --GET ONLY THE PREPAYMENT FOR CONTRACT W/ ITEM
 AND B.ysnRestricted = 0
 AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
+AND A.ysnPrepayHasPayment = 1
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -565,6 +569,7 @@ AND ISNULL(B.intItemId,0) <= 0
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0
 AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
+AND A.ysnPrepayHasPayment = 1
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -661,6 +666,7 @@ AND B.ysnRestricted = 0
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0
 AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
+AND A.ysnPrepayHasPayment = 1
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -759,6 +765,7 @@ AND B.intContractDetailId IS NULL
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0
 AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
+AND A.ysnPrepayHasPayment = 1
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
@@ -815,6 +822,7 @@ AND A.intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
 AND A.intCurrencyId = @intCurrencyId --GET ONLY THE TRANS W/ SAME CURRENCY
 AND CurrentBillDetails.intLoadDetailId > 0
+AND A.ysnPrepayHasPayment = 1
 AND EXISTS
 (
 	--get prepayment record only if it has payment posted
