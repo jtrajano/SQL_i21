@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Charges and Premiums' AND strModuleName = 'Ticket Management')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Financial Report Generator' AND strModuleName = 'Financial Report Designer')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
