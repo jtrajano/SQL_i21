@@ -49,7 +49,7 @@ LEFT JOIN tblLGRouteOrder L ON K.intRouteId = L.intRouteId AND Dispatch.intDispa
 LEFT JOIN tblICItem Item ON Item.intItemId = Site.intProduct
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblARCustomer Customer ON Customer.intEntityId =  C.intEntityId
-WHERE Dispatch.strOrderNumber NOT IN (select strOrderNumber from tblMBILOrder)
+--WHERE Dispatch.strOrderNumber NOT IN (select strOrderNumber from tblMBILOrder)
 
 -- ++++++ CREATE DRIVER's ORDER LIST ++++++ --
 INSERT INTO tblMBILOrder(intDispatchId
