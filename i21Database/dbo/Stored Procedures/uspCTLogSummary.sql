@@ -451,6 +451,8 @@ BEGIN TRY
 			, dblQty NUMERIC(18, 6)
 			, dblOrigQty NUMERIC(18, 6)
 			, dblDynamicQty NUMERIC(18, 6)
+			, dblQtyPriced NUMERIC(18, 6)
+			, dblQtyUnpriced NUMERIC(18, 6)
 			, intQtyUOMId INT
 			, intPricingTypeId INT
 			, strPricingType NVARCHAR(50)
@@ -488,6 +490,8 @@ BEGIN TRY
 			, dblQty
 			, dblOrigQty
 			, dblDynamicQty
+			, dblQtyPriced
+			, dblQtyUnpriced
 			, intQtyUOMId
 			, intPricingTypeId
 			, strPricingType
@@ -524,6 +528,8 @@ BEGIN TRY
 			, dblQty = sh.dblBalance
 			, dblOrigQty = sh.dblBalance
 			, dblDynamicQty = sh.dblBalance - ISNULL(sh.dblOldBalance, 0)
+			, dblQtyPriced = CASE WHEN sh.dblQtyPriced > 0 THEN ABS((sh.dblQuantity - sh.dblBalance) - sh.dblQtyPriced) ELSE 0 END
+			, dblQtyUnpriced = CASE WHEN sh.dblQtyUnpriced > 0 THEN ABS(sh.dblBalance - CASE WHEN sh.dblQtyPriced > 0 THEN ABS((sh.dblQuantity - sh.dblBalance) - sh.dblQtyPriced) ELSE 0 END) ELSE 0 END
 			, intQtyUOMId = cd.intCommodityUOMId
 			, sh.intPricingTypeId
 			, sh.strPricingType
@@ -714,6 +720,8 @@ BEGIN TRY
 			
 			DECLARE @prevStatus INT
 				, @dblBalanceChange NUMERIC(18, 6) = 0
+				, @dblQtyPriced NUMERIC(18, 6)
+				, @dblQtyUnPriced NUMERIC(18, 6)
 
 			SELECT TOP 1 @prevStatus = intContractStatusId
 			FROM @cbLogPrev
@@ -721,8 +729,12 @@ BEGIN TRY
 				AND intContractDetailId = @intContractDetailId
 			ORDER BY intId DESC
 
-			SELECT TOP 1 @dblBalanceChange = dblDynamicQty FROM @sequenceHistory WHERE Row_Num = 1
-			
+			SELECT TOP 1 @dblBalanceChange = dblDynamicQty
+				, @dblQtyPriced = ISNULL(dblQtyPriced, 0)
+				, @dblQtyUnPriced = ISNULL(dblQtyUnpriced, 0)
+			FROM @sequenceHistory
+			WHERE Row_Num = 1
+
 			IF (ISNULL(@prevStatus, 0) NOT IN (0, 4))
 			BEGIN
 				INSERT INTO @cbLogCurrent (strBatchId
@@ -779,7 +791,7 @@ BEGIN TRY
 					, o.intCommodityId
 					, o.intItemId
 					, o.intLocationId
-					, price.intPricingTypeId
+					, ISNULL(b.intPricingTypeId, o.intPricingTypeId)
 					, o.intFutureMarketId
 					, o.intFutureMonthId
 					, o.dblBasis
@@ -791,8 +803,8 @@ BEGIN TRY
 					, o.intPriceUOMId
 					, o.dtmStartDate
 					, o.dtmEndDate
-					, o.dblQty
-					, o.dblOrigQty
+					, ISNULL(b.dblQty, o.dblQty) * - 1
+					, ABS(ISNULL(b.dblQty, o.dblOrigQty))
 					, intContractStatusId = 4
 					, o.intBookId
 					, o.intSubBookId
@@ -800,14 +812,13 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId = 61
 					, strProcess = @strProcess
-				FROM tblCTContractBalanceLog  o WITH (UPDLOCK)
-				cross apply (select top 1 p.intPricingTypeId from tblCTContractBalanceLog p where p.intContractHeaderId = o.intContractHeaderId and p.intContractDetailId = ISNULL(@intContractDetailId, o.intContractDetailId) order by p.intContractBalanceLogId desc) price
-				WHERE o.intTransactionReferenceId = @intHeaderId
-				AND o.intTransactionReferenceDetailId = @intDetailId
-				AND o.intContractHeaderId = @intContractHeaderId
-				AND o.intContractDetailId = ISNULL(@intContractDetailId, o.intContractDetailId)
-				AND o.intContractStatusId IN (3,6)
-				ORDER BY o.dtmCreatedDate DESC
+				FROM @cbLogTemp o
+				LEFT JOIN (
+					SELECT * FROM (
+						SELECT intContractDetailId = @intContractDetailId, intPricingTypeId = 1, dblQty = @dblQtyPriced
+						UNION ALL SELECT intContractDetailId = @intContractDetailId, intPricingTypeId = 2, dblQty = @dblQtyUnPriced
+					) tbl WHERE dblQty > 0
+				) b ON b.intContractDetailId = o.intContractDetailId
 
 				UPDATE CBL SET strNotes = 'Re-opened'
 				FROM tblCTContractBalanceLog CBL
