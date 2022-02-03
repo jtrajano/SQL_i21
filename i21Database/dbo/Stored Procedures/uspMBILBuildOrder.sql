@@ -14,7 +14,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	DELETE tblMBILOrder WHERE intDriverId = @intDriverId and intOrderId NOT IN (select intOrderId from tblMBILInvoice)
+	DELETE tblMBILOrder WHERE intDriverId = @intDriverId AND intOrderId NOT IN (SELECT intOrderId FROM tblMBILInvoice WHERE intOrderId IS NOT NULL)
 END
 
 SELECT intDispatchId = Dispatch.intDispatchID
@@ -49,7 +49,7 @@ LEFT JOIN tblLGRouteOrder L ON K.intRouteId = L.intRouteId AND Dispatch.intDispa
 LEFT JOIN tblICItem Item ON Item.intItemId = Site.intProduct
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblARCustomer Customer ON Customer.intEntityId =  C.intEntityId
-WHERE Dispatch.strOrderNumber NOT IN (select strOrderNumber from tblMBILOrder)
+--WHERE Dispatch.strOrderNumber NOT IN (select strOrderNumber from tblMBILOrder)
 
 -- ++++++ CREATE DRIVER's ORDER LIST ++++++ --
 INSERT INTO tblMBILOrder(intDispatchId
@@ -79,7 +79,7 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
-WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Generated','Dispatched','Routed')
+WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Dispatched','Routed')
 		AND intTermId IN (SELECT intTermID from tblSMTerm)
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --

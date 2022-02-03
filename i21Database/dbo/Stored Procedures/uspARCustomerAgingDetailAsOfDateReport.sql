@@ -228,6 +228,7 @@ INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	 , dtmPostDate
 	 , dtmDueDate
 	 , dtmDate
+	 , ysnPaid
 )
 SELECT intInvoiceId				= I.intInvoiceId
 	 , intEntityCustomerId		= I.intEntityCustomerId
@@ -245,22 +246,27 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmPostDate				= I.dtmPostDate
 	 , dtmDueDate				= DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate)
 	 , dtmDate					= CAST(I.dtmDate AS DATE)
+	 , ysnPaid					= I.ysnPaid
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
-WHERE ysnPosted = 1
-	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
-	AND ysnCancelled = 0
-	AND strTransactionType <> 'Cash Refund'
-	AND ( 
+WHERE I.ysnPosted = 1  
+  AND I.ysnCancelled = 0
+  AND I.strTransactionType <> 'Cash Refund'
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+  AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
 		SC.intInvoiceId IS NOT NULL
-	)
-	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
-	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+	)	
+
+IF @ysnPaidInvoice = 0
+	DELETE FROM ##POSTEDINVOICES WHERE ysnPaid = 1
+
+IF @strSourceTransactionLocal IS NOT NULL
+	DELETE FROM ##POSTEDINVOICES WHERE strType <> @strSourceTransactionLocal
 
 --##CASHREFUNDS
 INSERT INTO ##CASHREFUNDS (

@@ -177,6 +177,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 			, [intSiteId] 
 			, [strInvoiceOriginId]
 			, [ysnUseOriginIdAsInvoiceNumber]
+			, [intPerformerId]
 		)
 	SELECT 
 		 [intInvoiceId]
@@ -218,6 +219,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 		,[intSiteId] = InvoiceItem.intSiteId
 		,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
 		,[ysnUseOriginIdAsInvoiceNumber] = 1
+		,[intPerformerId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
 
 	FROM vyuMBILInvoiceItem InvoiceItem
 	WHERE (inti21InvoiceId IS NULL OR inti21InvoiceId NOT IN (SELECT intInvoiceId FROM tblARInvoice)) AND intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)

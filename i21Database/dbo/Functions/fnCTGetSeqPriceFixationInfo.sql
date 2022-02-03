@@ -114,5 +114,5 @@ BEGIN
     INSERT INTO @returntable (dblTotalLots,dblLotsFixed,intPriceFixationId,intPriceContractId,dblQuantityPriceFixed,dblPFQuantityUOMId,ysnSpreadAvailable,ysnFixationDetailAvailable,ysnMultiPricingDetail)
     SELECT @dblTotalLots,@dblLotsFixed,@intPriceFixationId,@intPriceContractId,@dblQuantityPriceFixed,@dblPFQuantityUOMId,@ysnSpreadAvailable,@ysnFixationDetailAvailable,@ysnMultiPricingDetail
 
-    RETURN;
+    RETURN ;
 END

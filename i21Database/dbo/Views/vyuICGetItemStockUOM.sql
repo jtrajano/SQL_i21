@@ -5,7 +5,7 @@ SELECT
 	StockUOM.intItemStockUOMId,
 	StockUOM.intItemId,
 	Item.strItemNo,
-	strItemDescription = Item.strDescription,
+	strItemDescription = COALESCE(ItemUOM.strUPCDescription, Item.strDescription),
 	strType = Item.strType,
 	Item.strBundleType,
 	Item.intCategoryId,
