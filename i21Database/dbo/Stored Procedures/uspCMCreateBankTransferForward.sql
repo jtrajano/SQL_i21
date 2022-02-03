@@ -36,7 +36,7 @@ SELECT
 ,dblAmountTo =dblAmountForeignTo * BAT.dblRate
 ,dtmCreated = GETDATE()
 ,intConcurrencyId = 1
-FROM @bankTransfer BT
+FROM @BankTransfer BT
 OUTER APPLY (
     SELECT TOP 1 intCurrencyId, intGLAccountId, B.dblRate FROM tblCMBankAccount 
     OUTER APPLY dbo.fnSMGetForexRate(intCurrencyId, BT.intCurrencyExchangeRateTypeId, BT.dtmAccrual) B
