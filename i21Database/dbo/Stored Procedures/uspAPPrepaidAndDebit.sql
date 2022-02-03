@@ -134,7 +134,6 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment F INNER JOIN tblAPPaymentDetail G ON F.intPaymentId = G.intPaymentId
 	INNER JOIN tblCMBankTransaction H ON F.strPaymentRecordNum = H.strTransactionId
 	WHERE G.intBillId = A.intBillId AND F.ysnPosted = 1 AND H.ysnCheckVoid = 0
-	AND 1 = (CASE WHEN F.intPaymentMethodId IN (2,7) AND H.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 )
 UNION ALL
 --================================================
@@ -242,7 +241,6 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment F INNER JOIN tblAPPaymentDetail G ON F.intPaymentId = G.intPaymentId
 	INNER JOIN tblCMBankTransaction H ON F.strPaymentRecordNum = H.strTransactionId
 	WHERE G.intBillId = A.intBillId AND F.ysnPosted = 1 AND H.ysnCheckVoid = 0
-	AND 1 = (CASE WHEN F.intPaymentMethodId IN (2,7) AND H.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 )
 UNION ALL 
 --=========================================================
@@ -343,7 +341,6 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment F INNER JOIN tblAPPaymentDetail G ON F.intPaymentId = G.intPaymentId
 	INNER JOIN tblCMBankTransaction H ON F.strPaymentRecordNum = H.strTransactionId
 	WHERE G.intBillId = A.intBillId AND F.ysnPosted = 1 AND H.ysnCheckVoid = 0
-	AND 1 = (CASE WHEN F.intPaymentMethodId IN (2,7) AND H.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 )
 UNION ALL
 --=========================================================
@@ -447,7 +444,6 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment F INNER JOIN tblAPPaymentDetail G ON F.intPaymentId = G.intPaymentId
 	INNER JOIN tblCMBankTransaction H ON F.strPaymentRecordNum = H.strTransactionId
 	WHERE G.intBillId = A.intBillId AND F.ysnPosted = 1 AND H.ysnCheckVoid = 0
-	AND 1 = (CASE WHEN F.intPaymentMethodId IN (2,7) AND H.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 )
 UNION ALL
 --=========================================================
@@ -580,7 +576,6 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment B INNER JOIN tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
 	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
-	AND 1 = (CASE WHEN B.intPaymentMethodId IN (2,7) AND D.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 )
 UNION ALL
 --=========================================================
@@ -678,7 +673,6 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment B INNER JOIN tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
 	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
-	AND 1 = (CASE WHEN B.intPaymentMethodId IN (2,7) AND D.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 )
 UNION ALL
 --=========================================================
@@ -778,7 +772,6 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment B INNER JOIN tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
 	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
-	AND 1 = (CASE WHEN B.intPaymentMethodId IN (2,7) AND D.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 )
 UNION ALL
 --=========================================================
@@ -836,7 +829,6 @@ AND EXISTS
 	SELECT 1 FROM tblAPPayment F INNER JOIN tblAPPaymentDetail G ON F.intPaymentId = G.intPaymentId
 	INNER JOIN tblCMBankTransaction H ON F.strPaymentRecordNum = H.strTransactionId
 	WHERE G.intBillId = A.intBillId AND F.ysnPosted = 1 AND H.ysnCheckVoid = 0
-	AND 1 = (CASE WHEN F.intPaymentMethodId IN (2,7) AND H.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 )
 -- UNION ALL
 --=========================================================
