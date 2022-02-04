@@ -11,6 +11,8 @@ DECLARE @intUnitMeasureId			INT
 	  , @intTicketForDiscountId		INT
 	  , @strUnitMeasure				NVARCHAR(100)
 	  , @strInvalidItem				NVARCHAR(500)
+	  , @dblQtyOverAged				NUMERIC(18, 6) = 0
+	  , @dblDWGSpotPrice			NUMERIC(18, 6) = 0
 
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#INVOICEDETAILS') IS NOT NULL)
@@ -72,7 +74,7 @@ INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
 
-IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
+IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1 AND ISNULL(@ysnFromSalesOrder, 0) = 1 
 	BEGIN
 		DECLARE @intContractHeaderIdToCompute	INT
 
@@ -149,6 +151,21 @@ IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0
 		RETURN;
 	END
 
+IF ISNULL(@ysnFromSalesOrder, 0) = 0 --AND ISNULL(@ysnFromImport, 0) = 0
+BEGIN
+	SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN IDD.dblQtyShipped
+	ELSE 
+	CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId IN (1, 6) THEN CTD.dblQuantity ELSE IDD.dblQtyShipped END END)
+	FROM tblARInvoiceDetail ID
+	INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
+	INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+	LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
+	LEFT JOIN(
+		SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
+	INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
+	) CTD ON CTD.intContractDetailId =ID.intContractDetailId
+END 
+
 WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 	BEGIN
 		DECLARE @intInvoiceDetailId			INT	= NULL
@@ -161,9 +178,11 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 			  , @intContractSeq				INT = NULL
 			  , @intInventoryShipmentItemId	INT = NULL
 			  , @intTicketId				INT = NULL
-			  , @dblQtyOverAged				NUMERIC(18, 6) = 0
+			  --, @dblQtyOverAged				NUMERIC(18, 6) = 0
 			  , @dtmDate					DATETIME = NULL
 			  , @strDocumentNumber			NVARCHAR(100) = NULL
+			  , @dblSalesOrderNetWeight		NUMERIC(18, 6)
+			  , @dblTotalSaleOrdeQty		NUMERIC(18, 6)
 
 		SELECT TOP 1 @intInvoiceDetailId			= intInvoiceDetailId
 				   , @intCompanyLocationId			= intCompanyLocationId
@@ -179,18 +198,33 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				   , @strDocumentNumber				= strDocumentNumber
 		FROM #INVOICEDETAILS
 
-		--UPDATE INVOICE DETAIL QTY SHIPPED = AVAILABLE CONTRACT QTY
-		IF ISNULL(@ysnFromSalesOrder, 0) = 0
-			BEGIN		
-				UPDATE ID
-				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
-				  , dblUnitQuantity	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
-				  , @dblQtyOverAged	= @dblNetWeight - ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
-				FROM tblARInvoiceDetail ID
-				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
-				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
-				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
-			END
+		IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND ISNULL(@intTicketId, 0) > 0
+		BEGIN
+
+			SELECT @dblTotalSaleOrdeQty = SUM(ISNULL(SOD.dblQtyOrdered, 0))
+			FROM  tblSOSalesOrderDetail SOD WITH (NOLOCK)
+			INNER JOIN dbo.tblARInvoice ARI WITH (NOLOCK)
+			ON SOD.intSalesOrderId = ARI.intSalesOrderId
+			INNER JOIN (
+				SELECT	 I.intItemId
+						,IUOM.intUnitMeasureId
+				FROM	dbo.tblICItem I WITH (NOLOCK)
+				INNER JOIN (
+					SELECT	 intItemId
+							,intUnitMeasureId
+					FROM dbo.tblICItemUOM WITH (NOLOCK)
+					WHERE ysnStockUnit = 1
+				) IUOM ON I.intItemId = IUOM.intItemId
+				WHERE I.ysnUseWeighScales = 1
+			) I ON SOD.intItemId = I.intItemId
+			WHERE ARI.intInvoiceId = @intInvoiceId
+
+			SELECT @dblSalesOrderNetWeight = @dblNetWeight * (SOD.dblQtyOrdered / @dblTotalSaleOrdeQty)
+			FROM tblSOSalesOrderDetail SOD
+			LEFT JOIN tblARInvoiceDetail ID ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
+			WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+				AND (ISNULL(SOD.strAddonDetailKey, '') = '' OR SOD.ysnAddonParent = 1)
+		END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
 				DECLARE @intContractCount	INT = 0
