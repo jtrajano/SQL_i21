@@ -69,7 +69,17 @@ DECLARE @EmployeeCount AS INT
 			,@dblEarningAmount			= dblEarningAmount
 			,@ysnEarningDefault			= ysnEarningDefault
 			,@strPayGroup				= LTRIM(RTRIM(strPayGroup))
-			,@strCalculationType		= LTRIM(RTRIM(strCalculationType))
+			,@strCalculationType		= CASE WHEN LTRIM(RTRIM(strCalculationType)) <> '' AND LTRIM(RTRIM(strCalculationType)) 
+													IN(
+														'Shift Differential'
+													   ,'Fixed Amount'
+													   ,'Hourly Rate'
+													   ,'Overtime'
+													   ,'Rate Factor'
+													   ,'Fringe Benefit'
+													   ,'Reimbursement'
+													   ,'Tip'
+													) THEN LTRIM(RTRIM(strCalculationType)) ELSE '' END
 			,@strLinkedEarning			= LTRIM(RTRIM(strLinkedEarning))
 			,@dblAmount					= dblAmount
 			,@dblDefaultHours			= dblDefaultHours
@@ -129,7 +139,7 @@ DECLARE @EmployeeCount AS INT
 					SELECT
 						(SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(@strEmployeeId))) 
 					   ,(SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = strEarningDesc)
-					   ,strCalculationType
+					   ,@strCalculationType
 					   ,CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
 								THEN dblEarningAmount --this is rate factor
 							 ELSE dblAmount END
@@ -256,7 +266,7 @@ DECLARE @EmployeeCount AS INT
 			BEGIN
 				UPDATE tblPREmployeeEarning SET
 					 intTypeEarningId				= (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId)
-					,strCalculationType				= strCalculationType
+					,strCalculationType				= @strCalculationType
 					,dblAmount						= CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
 														THEN @dblEarningAmount
 													  ELSE @dblAmount END

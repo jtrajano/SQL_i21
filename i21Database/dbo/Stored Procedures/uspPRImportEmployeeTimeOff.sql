@@ -55,7 +55,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeTimeOff)
 	BEGIN
 		SELECT TOP 1 
-			 @strEmployeeId			= intEntityNo
+			 @strEmployeeId			= LTRIM(RTRIM(intEntityNo))
 			,@intEntityNo			= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(intEntityNo)))
 			,@strTimeOffId			= strTimeOffId
 			,@strTimeOffDesc		= strTimeOffDesc
@@ -64,7 +64,19 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			,@dblPerPeriod			= dblPerPeriod
 			,@strPeriod				= strPeriod
 			,@dblRateFactor			= dblRateFactor
-			,@strAwardOn			= strAwardOn
+			,@strAwardOn			= CASE WHEN strAwardOn <> '' AND strAwardOn 
+										IN(
+											'Start of Week',
+											'End of Week',
+											'Start of Month',
+											'End of Month',
+											'Start of Quarter',
+											'End of Quarter',
+											'Start of Year',
+											'End of Year',
+											'Anniversary Date',
+											'Paycheck'
+										) THEN strAwardOn ELSE '' END
 			,@dblMaxEarned			= dblMaxEarned
 			,@dblMaxCarryOver		= dblMaxCarryOver
 			,@dblMaxBalance			= dblMaxBalance
@@ -159,21 +171,21 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 				DELETE FROM #TempEmployeeTimeOff WHERE LTRIM(RTRIM(intEntityNo)) =LTRIM(RTRIM(@strEmployeeId))  AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
 			END
 
-		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-		SELECT TOP 1
-			  NEWID()
-			, guiApiImportLogId = @guiLogId
-			, strField = 'Employee Time Off'
-			, strValue = SE.strTimeOffId
-			, strLogLevel = 'Info'
-			, strStatus = 'Success'
-			, intRowNo = SE.intRowNumber
-			, strMessage = 'The employee time off has been successfully imported.'
-		FROM tblApiSchemaEmployeeTimeOff SE
-		LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = @intEntityNo
-		WHERE SE.guiApiUniqueId = @guiApiUniqueId
-		AND SE.strTimeOffId = @strTimeOffId
-		AND SE.strTimeOffDesc = @strTimeOffDesc
+			INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+			SELECT TOP 1
+				  NEWID()
+				, guiApiImportLogId = @guiLogId
+				, strField = 'Employee Time Off'
+				, strValue = SE.strTimeOffId
+				, strLogLevel = 'Info'
+				, strStatus = 'Success'
+				, intRowNo = SE.intRowNumber
+				, strMessage = 'The employee time off has been successfully imported.'
+			FROM tblApiSchemaEmployeeTimeOff SE
+			LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+			WHERE SE.guiApiUniqueId = @guiApiUniqueId
+			AND SE.strTimeOffId = @strTimeOffId
+			AND SE.strTimeOffDesc = @strTimeOffDesc
 
 	END
 
