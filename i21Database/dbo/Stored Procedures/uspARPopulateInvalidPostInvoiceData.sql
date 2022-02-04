@@ -551,7 +551,7 @@ BEGIN
 		,[strPostingError]		= ISNULL(SMT.strApprovalStatus, 'Not Yet Approved')
 	FROM ##ARPostInvoiceHeader I 
 	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
-	INNER JOIN tblARCustomer CUS ON I.intEntityCustomerId = CUST.intEntityId
+	INNER JOIN tblARCustomer CUS ON I.intEntityCustomerId = CUS.intEntityId
 	INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
 	INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
 	WHERE SMT.strApprovalStatus IN  ('Waiting for Approval', 'Waiting for Submit')
