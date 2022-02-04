@@ -1403,6 +1403,7 @@
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMergeSegmentAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLMulticurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspGLValidateSubsidiarySetting.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMergeGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateSubsidiaryAccountMapping.sql" />
