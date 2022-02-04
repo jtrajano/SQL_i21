@@ -243,7 +243,7 @@ BEGIN
 	FROM ##ARPostInvoiceHeader I					
 	WHERE I.[dblInvoiceTotal] = @ZeroDecimal
 	  AND I.[strTransactionType] <> 'Cash Refund'
-	  AND I.[strImportFormat] <> 'CarQuest'		
+	  AND (I.[strImportFormat] IS NULL OR I.[strImportFormat] <> 'CarQuest')
 	  AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.[intItemId] IS NOT NULL)		
 
 	INSERT INTO ##ARInvalidInvoiceData
