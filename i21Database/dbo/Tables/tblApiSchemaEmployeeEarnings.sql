@@ -2,7 +2,7 @@ CREATE TABLE tblApiSchemaEmployeeEarnings(
     guiApiUniqueId UNIQUEIDENTIFIER NOT NULL                                    --Required
     ,intRowNumber INT NULL
     ,intKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY                              --Required
-    ,intEntityNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL                                                   --Required
+    ,intEntityNo INT NOT NULL                                                   --Required
     ,strEarningDesc NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,dblEarningAmount	FLOAT(50) NULL
     ,ysnEarningDefault BIT  NULL         --values should be "Y" and "N" only
