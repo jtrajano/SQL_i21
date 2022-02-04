@@ -180,7 +180,7 @@ BEGIN TRANSACTION
 		,intConcurrencyId
 		,strForeignCardId
 		,ysnDuplicate
-		,NULL
+		,dtmInvoiceDate
 		,@newDate
 		,strOriginalProductNumber
 		,intOverFilledTransactionId
