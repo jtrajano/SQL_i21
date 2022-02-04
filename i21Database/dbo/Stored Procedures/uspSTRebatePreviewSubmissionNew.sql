@@ -225,16 +225,18 @@ BEGIN
 									, NULL as dblMFGDealDiscountAmountTWO
 									, '' as strMFGDealNameTHREE
 									, NULL as dblMFGDealDiscountAmountTHREE
-
-									, ((TR.dblTrlLineTot) - (CASE WHEN DEPT.ysnTobacco = 1  
-																	AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-																	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-																	AND TR.dblTrlQty >= 2
-																		THEN TR.dblTrlMatchLineTrlPromoAmount
-																WHEN TR.strTrpPaycode IN ('LOTTERY PO', 'COUPONS')
-																	THEN TR.dblTrpAmt
-																ELSE 0
-															 END)) as dblFinalSalesPrice
+									, CASE WHEN DEPT.ysnTobacco = 1   
+											AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+											AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+											AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
+											WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+											AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
+											WHEN TR.strTrpPaycode IN ('COUPONS')
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrpAmt))
+											ELSE dblTrlUnitPrice * TR.dblTrlQty
+										END as  dblFinalSalesPrice
 
 									-- Optional Fields
 									, NULL AS intStoreTelephone
