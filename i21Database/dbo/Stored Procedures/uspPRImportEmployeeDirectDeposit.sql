@@ -68,11 +68,11 @@ DECLARE @BankCount AS INT
 			,@intEntityNo = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE LTRIM(RTRIM(strEmployeeId)) = LTRIM(RTRIM(intEntityNo))) 
 			,@strBankName = strBankName
 			,@strAccountNumber = strAccountNumber
-			,@strAccountType = strAccountType
-			,@strClassification = strClassification
+			,@strAccountType = CASE WHEN strAccountType <> '' AND strAccountType IN('Checking','Savings') THEN strAccountType ELSE '' END
+			,@strClassification = CASE WHEN strClassification <> '' AND strClassification IN('Personal','Corporate') THEN strClassification ELSE '' END
 			,@dtmEffectiveDate	= dtmEffectiveDate
 			,@ysnPreNoteSent = ysnPreNoteSent
-			,@strDistributionType = strDistributionType
+			,@strDistributionType = CASE WHEN strDistributionType <> '' AND strDistributionType IN('Fixed Amount','Percent','Remainder') THEN strDistributionType ELSE '' END
 			,@dblAmount	= dblAmount
 			,@intOrder	= intOrder
 			,@ysnActive	= ysnActive

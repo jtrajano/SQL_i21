@@ -10,7 +10,6 @@ BEGIN
 --DECLARE @guiApiUniqueId AS UNIQUEIDENTIFIER = N'6703E376-141D-4C67-B14A-B2CA86B3F502'
 --DECLARE @guiLogId AS UNIQUEIDENTIFIER = NEWID()
 DECLARE @EntityNo AS INT
-DECLARE @strEmployeeId  AS NVARCHAR(100)
 DECLARE @EmployeeTaxId AS INT
 DECLARE @TypeTaxId AS INT
 DECLARE @TaxId AS NVARCHAR(100)
@@ -20,6 +19,7 @@ DECLARE @TaxLocalId as INT
 DECLARE @NewId AS INT
 
 DECLARE @intEntityEmployeeId AS INT
+DECLARE @strEmployeeId AS NVARCHAR(100)
 DECLARE @strCalculationType  AS NVARCHAR(100)
 DECLARE @strFilingStatus  AS NVARCHAR(100)
 DECLARE @intTypeTaxStateId AS INT
@@ -68,8 +68,21 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@TaxId								= LTRIM(RTRIM(strTaxId))
 			,@TaxTaxDesc						= strTaxDescription
 			,@intEntityEmployeeId				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(intEntityNo))) 
-			,@strCalculationType				= strCalculationType
-			,@strFilingStatus					= strFilingStatus
+			,@strCalculationType				= CASE WHEN strCalculationType <> '' AND strCalculationType 
+													IN(
+														'USA Social Security'
+													   ,'USA Medicare'
+													   ,'USA State Disability'
+													   ,'USA FUTA','USA SUTA'
+													   ,'USA Federal Tax'
+													   ,'USA State'
+													   ,'USA Local'
+													   ,'Fixed Amount'
+													   ,'Percent'
+													   ,'Hourly Amount'
+													   ,'Hourly Percent'
+													) THEN strCalculationType ELSE '' END
+			,@strFilingStatus					= CASE WHEN strFilingStatus <> '' AND strFilingStatus IN('Single','Married') THEN strFilingStatus ELSE '' END
 			,@intSupplementalCalc				= (CASE WHEN strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
 			,@dblAmount							= dblAmount
 			,@dblExtraWithholding				= dblExtraWithholding
@@ -137,8 +150,8 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 							SELECT TOP 1
 								 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = EMT.intEntityNo)
 								,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
-								,EMT.strCalculationType
-								,EMT.strFilingStatus
+								,@strCalculationType
+								,@strFilingStatus
 								,(SELECT TOP 1 intTypeTaxStateId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
 								,(SELECT TOP 1 intTypeTaxLocalId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
 								,(CASE WHEN EMT.strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
@@ -214,8 +227,6 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 		WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strTaxId = @TaxId
 	END
-
-	
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeTaxes')) 
 	DROP TABLE #TempEmployeeTaxes
