@@ -30,7 +30,7 @@ SELECT
 FROM tblAPPaymentDetail A
 INNER JOIN tblAPPayment A2 ON A.intPaymentId = A2.intPaymentId
 INNER JOIN tblCMBankTransaction A3 ON A2.strPaymentRecordNum = A3.strTransactionId
-INNER JOIN dbo.fnARGetRowsFromDelimitedValues(@paymentRecordIds) B ON A3.intTransactionId = B.strValues
+INNER JOIN dbo.fnGetRowsFromDelimitedValues(@paymentRecordIds) B ON A3.intTransactionId = B.intID
 INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
 WHERE C.intTransactionType IN (2,13)
 AND A2.intPaymentMethodId = 2
