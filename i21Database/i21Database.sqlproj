@@ -449,7 +449,6 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
-    <None Include="Scripts\Post-Deployment\ST\40_Rename_And_Alter_int_trl_dept_number.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
     <None Include="Scripts\Post-Deployment\IC\30_InventoryValuationAccountIds.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
@@ -8508,6 +8507,7 @@
     <Build Include="dbo\Tables\tblAPImportPaidVouchersForPayment.sql" />
     <None Include="Scripts\Post-Deployment\ST\35_RegisterSetupEntries.sql" />
     <None Include="Scripts\Post-Deployment\ST\39_FileFieldMapping_Passport_TPM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\40_Rename_And_Alter_int_trl_dept_number.sql" />
     <None Include="Scripts\Post-Deployment\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql" />
     <None Include="Scripts\Post-Deployment\ST\26_FileFieldMapping_Commander_Department.sql" />
     <None Include="Scripts\Post-Deployment\ST\27_FileFieldMapping_Commander_FPHose.sql" />
