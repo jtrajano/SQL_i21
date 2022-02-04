@@ -131,7 +131,7 @@ CROSS APPLY (
 WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
     AND ARID.[ysnImpactInventory] = @OneBit
-	AND ((ARID.[strImportFormat] <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 		
+	AND (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 		
 	AND (
 		(ARID.[intInventoryShipmentItemId] IS NULL AND ARID.[intLoadDetailId] IS NULL AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR 
@@ -223,7 +223,7 @@ LEFT OUTER JOIN
 		ON ARIC.[intBundleItemId] = IST.[intItemId]
 		AND ARID.[intCompanyLocationId] = IST.[intLocationId]	
 LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]				 				 
-WHERE ((ARID.[strImportFormat] <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
+WHERE (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
 	AND (
 		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0) AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR

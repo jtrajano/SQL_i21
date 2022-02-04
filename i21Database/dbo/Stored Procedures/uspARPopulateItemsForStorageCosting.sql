@@ -92,7 +92,7 @@ LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId
 WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') 
   AND ARID.[intPeriodsToAccrue] <= 1 
   AND ARID.[ysnImpactInventory] = @OneBit			
-  AND ((ARID.[strImportFormat] <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
+  AND (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intLoadDetailId] IS NULL
   AND ARID.[intItemId] IS NOT NULL
