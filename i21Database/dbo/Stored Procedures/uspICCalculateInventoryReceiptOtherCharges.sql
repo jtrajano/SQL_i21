@@ -729,9 +729,6 @@ BEGIN
 										1
 							END 
 						, 2)	
-
-			,dblQuantity = ISNULL(NULLIF(CalculatedCharges.dblQty, 0), 1) 
-
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge 	
 				ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
@@ -748,6 +745,25 @@ BEGIN
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			AND Item.intOnCostTypeId IS NULL
 			AND ReceiptCharge.strCostMethod NOT IN (@COST_METHOD_AMOUNT, @COST_METHOD_CUSTOM_UNIT)
+
+	UPDATE	ReceiptCharge
+	SET		dblQuantity = ISNULL(NULLIF(CalculatedCharges.dblQty, 0), 1) 
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge 	
+				ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item 
+				ON Item.intItemId = ReceiptCharge.intChargeId		
+			LEFT JOIN (
+					SELECT	dblAmount = SUM(dblCalculatedAmount)
+							,dblQty = SUM(ISNULL(dblCalculatedQty, 0))
+							,intInventoryReceiptChargeId
+					FROM	dbo.tblICInventoryReceiptChargePerItem
+					WHERE	intInventoryReceiptId = @intInventoryReceiptId
+					GROUP BY intInventoryReceiptChargeId
+			) CalculatedCharges
+				ON CalculatedCharges.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND Item.intOnCostTypeId IS NULL
+			AND ReceiptCharge.strCostMethod NOT IN (@COST_METHOD_CUSTOM_UNIT)
 END 
 
 -- Exit point
