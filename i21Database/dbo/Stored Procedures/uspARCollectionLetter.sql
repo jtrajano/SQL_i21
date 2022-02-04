@@ -1036,6 +1036,14 @@ BEGIN
 								DECLARE @Colunm1	VARCHAR(MAX)
 										,@DataType1	VARCHAR(MAX)
 										,@SetQuery		VARCHAR(MAX)
+										,@ColumnHeader VARCHAR(MAX)
+
+								SELECT TOP 1 
+									@ColumnHeader = strValues
+								FROM 
+								    #TempTableColumnHeaders
+								WHERE 
+								   RowId = @ColumnCounter1
 
 								SELECT TOP 1						 
 									@Colunm1 = strValues	
@@ -1074,7 +1082,7 @@ BEGIN
 								SET 												
 									strField = CONVERT(varchar, CAST(strField AS money), 1)
 								WHERE 
-									ISNUMERIC(strField) = 1						
+									ISNUMERIC(strField) = 1	AND @ColumnHeader <> ''Invoice Number''						
 												
 								DECLARE @isNumeric BIT 
 								SET  @isNumeric = 0 
@@ -1083,7 +1091,7 @@ BEGIN
 								FROM 
 									#Field 
 								WHERE
-									ISNUMERIC(strField) = 1		
+									ISNUMERIC(strField) = 1	AND @ColumnHeader <> ''Invoice Number''		
 
 								IF  (@isNumeric = 1)
 								BEGIN
