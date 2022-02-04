@@ -5,11 +5,12 @@
 AS
 BEGIN 
 	DECLARE @TRFTradeFinance TRFTradeFinance
+			,@TRFLog TRFLog
 			,@intTradeFinanceId INT = NULL
 	
 	IF (@strAction = 'ADD')
 	BEGIN
-		/* If Creating New entry, generate new Trade Finance No if blank */
+		/* If Creating New entry, generate Trade Finance No if blank */
 		DECLARE @strTradeFinanceNumber NVARCHAR(100)
 		IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(strTradeFinanceNo, '') <> '')
 		BEGIN
@@ -73,5 +74,48 @@ BEGIN
 		EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = @strAction
 	END
 
+	/* Construct Trade Finance Log SP parameter */
+	SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
+	FROM tblTRFTradeFinance WHERE strTransactionType = 'Logistics' AND intTransactionHeaderId = @intLoadId
+
+	INSERT INTO @TRFLog
+	SELECT
+		strAction = CASE WHEN (@strAction = 'ADD') THEN 'Created ' ELSE 'Updated ' END
+					+ CASE WHEN (L.intShipmentType = 2) THEN 'Shipping Instruction' ELSE 'Shipment' END
+		,strTransactionType = 'Logistics'
+		,intTradeFinanceTransactionId = @intTradeFinanceId
+		,strTradeFinanceTransaction = L.strTradeFinanceNo
+		,intTransactionHeaderId = L.intLoadId
+		,intTransactionDetailId = LD.intLoadDetailId
+		,strTransactionNumber = L.strLoadNumber
+		,dtmTransactionDate = GETDATE()
+		,intBankTransactionId = null
+		,strBankTransactionId = null
+		,dblTransactionAmountAllocated = CD.dblLoanAmount
+		,dblTransactionAmountActual = CD.dblLoanAmount
+		,intLoanLimitId = L.intLoanLimitId
+		,strLoanLimitNumber = BL.strBankLoanId
+		,strLoanLimitType = BL.strLimitDescription
+		,dtmAppliedToTransactionDate = GETDATE()
+		,intStatusId = CASE WHEN L.intShipmentStatus = 4 THEN 2 ELSE 1 END
+		,intWarrantId = null
+		,strWarrantId = null
+		,intUserId = @intUserId
+		,intConcurrencyId = 1
+		,intContractHeaderId = CD.intContractHeaderId
+		,intContractDetailId = L.intContractDetailId
+	FROM tblLGLoad L
+		CROSS APPLY (SELECT TOP 1 intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = L.intContractDetailId) LD
+		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = L.intContractDetailId
+		INNER JOIN tblCTContractHeader CH on CH.intContractHeaderId = CD.intContractHeaderId
+		LEFT JOIN tblCMBankLoan BL on BL.intBankLoanId = L.intLoanLimitId
+	WHERE intLoadId = @intLoadId
+
+	IF EXISTS (SELECT 1 FROM @TRFLog)
+	BEGIN
+		EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
+	END
 
 END
+
+GO
