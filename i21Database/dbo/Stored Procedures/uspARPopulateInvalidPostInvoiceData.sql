@@ -831,31 +831,6 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-	--Sales Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Sales account of Company Location ' + I.[strCompanyLocationName] + ' is not valid.' ELSE 'The Sales account of Company Location ' + I.[strCompanyLocationName] + ' was not set.' END
-	FROM ##ARPostInvoiceDetail I
-	LEFT OUTER JOIN tblGLAccount  GLA ON I.[intLocationSalesAccountId] = GLA.[intAccountId]			
-	WHERE (I.[intLocationSalesAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
-	  AND I.[intServiceChargeAccountId] IS NULL
-	  AND I.[intSalesAccountId] IS NULL
-	  AND I.[intItemId] IS NULL
-	  AND I.[dblTotal] <> @ZeroDecimal
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
 	--Accrual Not in Fiscal Year
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
@@ -1234,60 +1209,7 @@ BEGIN
 	LEFT OUTER JOIN tblGLAccount GLA ON Acct.intOtherChargeIncomeAccountId = GLA.[intAccountId]
 	WHERE I.[strItemType] = 'Other Charge'
 	  AND (Acct.[intOtherChargeIncomeAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--Sales Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= I.[strItemNo] + ' at ' + SMCL.strLocationName + ' is missing a GL account setup for Sales account category.'
-	FROM ##ARPostInvoiceDetail I
-	LEFT OUTER JOIN ##ARInvoiceItemAccount Acct ON I.[intCompanyLocationId] = Acct.[intLocationId] AND I.[intItemId] = Acct.[intItemId] 	
-	LEFT OUTER JOIN tblGLAccount GLA ON Acct.[intSalesAccountId] = GLA.[intAccountId]
-	LEFT OUTER JOIN tblSMCompanyLocation SMCL ON I.[intCompanyLocationId] = SMCL.[intCompanyLocationId] 
-	WHERE I.[dblTotal] <> @ZeroDecimal 
-	  AND I.[intItemId] IS NOT NULL
-	  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
-	  AND (I.[strTransactionType] <> 'Debit Memo' OR (I.[strTransactionType] = 'Debit Memo' AND ISNULL(I.[strType],'') IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
-	  AND I.[intPeriodsToAccrue] <= 1
-	  AND (Acct.[intSalesAccountId] IS NULL OR GLA.[intAccountId] IS NULL)			
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--Sales Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Sales Account of line item - ' + I.[strItemDescription] + ' is not valid.' ELSE 'The Sales Account of line item - ' + I.[strItemDescription] + ' was not specified.' END
-	FROM ##ARPostInvoiceDetail I
-	LEFT OUTER JOIN tblGLAccount GLA ON I.[intSalesAccountId] = GLA.[intAccountId]
-	WHERE I.[dblTotal] <> @ZeroDecimal 
-	  AND I.[strTransactionType] = 'Debit Memo'
-	  AND I.[strType] NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
-	  AND I.[intPeriodsToAccrue] <= 1
-	  AND (I.[intSalesAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
-
+	
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
@@ -1335,178 +1257,6 @@ BEGIN
 	WHERE ARIDT.[dblAdjustedTax] <> @ZeroDecimal
 	  AND SMTC.[ysnAddToCost] = 1
 	  AND SMTC.[intSalesTaxExemptionAccountId] IS NULL
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--COGS Account -- SHIPPED
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The COGS Account of item - ' + I.[strItemNo] + ' is not valid.' ELSE 'The COGS Account of item - ' + I.[strItemNo] + ' was not specified.' END
-	FROM ##ARPostInvoiceDetail I
-	LEFT OUTER JOIN ##ARInvoiceItemAccount IST ON I.[intItemId] = IST.[intItemId] AND I.[intCompanyLocationId] = IST.[intLocationId] 			
-	INNER JOIN tblICInventoryShipmentItem ISD ON I.[intInventoryShipmentItemId] = ISD.[intInventoryShipmentItemId]
-	INNER JOIN tblICInventoryShipment ISH ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
-	INNER JOIN tblICInventoryTransaction ICT ON ISD.[intInventoryShipmentItemId] = ICT.[intTransactionDetailId] AND ISH.[intInventoryShipmentId] = ICT.[intTransactionId] AND ISH.[strShipmentNumber] = ICT.[strTransactionId]
-	LEFT OUTER JOIN tblGLAccount GLA ON IST.[intCOGSAccountId] = GLA.[intAccountId]
-	WHERE I.[dblTotal] <> @ZeroDecimal
-	  AND I.[intItemId] IS NOT NULL
-	  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-	  AND I.[strTransactionType] <> 'Debit Memo'
-	  AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL)
-	  AND (IST.[intCOGSAccountId] IS NULL OR GLA.[intAccountId] IS NULL)			
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--Inventory In-Transit Account Account -- SHIPPED
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Inventory In-Transit Account of item - ' + I.[strItemNo] + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + I.[strItemNo] + ' was not specified.' END	
-	FROM ##ARPostInvoiceDetail I
-	LEFT OUTER JOIN ##ARInvoiceItemAccount IST ON I.[intItemId] = IST.[intItemId] AND I.[intCompanyLocationId] = IST.[intLocationId]
-	INNER JOIN tblICInventoryShipmentItem ISD ON I.[intInventoryShipmentItemId] = ISD.[intInventoryShipmentItemId]
-	INNER JOIN tblICInventoryShipment ISH ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
-	INNER JOIN tblICInventoryTransaction ICT ON ISD.[intInventoryShipmentItemId] = ICT.[intTransactionDetailId] AND ISH.[intInventoryShipmentId] = ICT.[intTransactionId] AND ISH.[strShipmentNumber] = ICT.[strTransactionId]
-	LEFT OUTER JOIN tblGLAccount GLA ON IST.[intInventoryInTransitAccountId] = GLA.[intAccountId]
-	WHERE I.[dblTotal] <> @ZeroDecimal
-	  AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL)
-	  AND I.[intItemId] IS NOT NULL
-	  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-	  AND I.[strTransactionType] <> 'Debit Memo'	
-	  AND (IST.[intInventoryInTransitAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--COGS Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The COGS Account of item - ' + I.[strItemNo] + ' is not valid.' ELSE 'The COGS Account of item - ' + I.[strItemNo] + ' was not specified.' END
-	FROM ##ARPostInvoiceDetail I
-	LEFT OUTER JOIN ##ARInvoiceItemAccount ARIA ON I.[intItemId] = ARIA.[intItemId] AND I.[intCompanyLocationId] = ARIA.[intLocationId] 
-	LEFT OUTER JOIN tblGLAccount GLA ON ARIA.[intCOGSAccountId] = GLA.[intAccountId]	
-	WHERE I.[dblTotal] <> @ZeroDecimal
-	  AND I.[intInventoryShipmentItemId] IS NULL
-	  AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL)
-	  AND I.[intItemId] IS NOT NULL
-	  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-	  AND I.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note')	
-	  AND (ARIA.[intCOGSAccountId] IS NULL OR GLA.[intAccountId] IS NULL)			
-						
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--COGS Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The COGS Account of component - ' + ARIA.[strItemNo] + ' is not valid.' ELSE 'The COGS Account of component - ' + ARIA.[strItemNo] + ' was not specified.' END	
-	FROM tblICItemBundle ARIC
-	INNER JOIN ##ARPostInvoiceDetail I ON ARIC.[intItemId] = I.[intItemId]			
-	INNER JOIN tblICItem ICI ON ARIC.[intBundleItemId] = ICI.[intItemId]
-	LEFT OUTER JOIN ##ARInvoiceItemAccount ARIA ON ARIC.[intBundleItemId] = ARIA.[intItemId] AND I.[intCompanyLocationId] = ARIA.[intLocationId] 	
-	LEFT OUTER JOIN tblGLAccount GLA ON ARIA.[intCOGSAccountId] = GLA.[intAccountId]	 
-	WHERE I.[dblTotal] <> @ZeroDecimal
-	  AND I.[intInventoryShipmentItemId] IS NULL
-	  AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL)
-	  AND I.[intItemId] IS NOT NULL
-	  AND I.[strTransactionType] <> 'Debit Memo'			
-	  AND (ARIA.[intCOGSAccountId] IS NULL OR GLA.[intAccountId] IS NULL)			
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--Inventory In-Transit Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Inventory In-Transit Account of item - ' + I.[strItemNo] + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + I.[strItemNo] + ' was not specified.' END
-	FROM ##ARPostInvoiceDetail I
-	LEFT OUTER JOIN ##ARInvoiceItemAccount ARIA ON I.[intItemId] = ARIA.[intItemId] AND I.[intCompanyLocationId] = ARIA.[intLocationId] 
-	LEFT OUTER JOIN tblGLAccount GLA ON ARIA.[intInventoryInTransitAccountId] = GLA.[intAccountId]
-	WHERE I.[dblTotal] <> @ZeroDecimal
-	  AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL)
-	  AND I.[intItemId] IS NOT NULL
-	  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-	  AND I.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note')	
-	  AND (ARIA.[intInventoryInTransitAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--Inventory In-Transit Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Inventory In-Transit Account of item - ' + ARIA.[strItemNo] + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + ARIA.[strItemNo] + ' was not specified.' END	
-	FROM tblICItemBundle ARIC
-	INNER JOIN ##ARPostInvoiceDetail I ON ARIC.[intItemId] = I.[intItemId]
-	INNER JOIN tblICItem ICI ON ARIC.[intBundleItemId] = ICI.[intItemId]
-	LEFT OUTER JOIN ##ARInvoiceItemAccount ARIA ON ARIC.[intBundleItemId] = ARIA.[intItemId] AND I.[intCompanyLocationId] = ARIA.[intLocationId]
-	LEFT OUTER JOIN tblGLAccount GLA ON ARIA.[intInventoryInTransitAccountId] = GLA.[intAccountId] 		 		 
-	WHERE I.[dblTotal] <> @ZeroDecimal
-	  AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL)
-	  AND I.[intItemId] IS NOT NULL
-	  AND I.[strTransactionType] <> 'Debit Memo'
-	  AND (ARIA.[intInventoryInTransitAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2109,6 +1859,28 @@ BEGIN
 		, strAccountCategory	= 'Inventory'
 	FROM @ItemsForCosting IC
 	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory') IS NULL	
+
+	UNION ALL
+	
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Cost of Goods'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Cost of Goods') IS NULL
+
+	UNION ALL
+	
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Sales Account'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Sales Account') IS NULL
 
 	UNION ALL
 
