@@ -2,7 +2,7 @@ CREATE TABLE tblApiSchemaEmployeeDeduction(
      guiApiUniqueId UNIQUEIDENTIFIER NOT NULL
     ,intRowNumber INT NULL
     ,intKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY
-    ,intEntityNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL                                                   --Required
+    ,intEntityNo INT NOT NULL                                                   --Required
     ,strDeductionId NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,strDeductionDesc NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,dblDeductionRate FLOAT(50) NULL

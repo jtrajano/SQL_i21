@@ -13,7 +13,6 @@ DECLARE @NewId AS INT
 DECLARE @EmployeeEntityNo AS INT
 
 DECLARE @intEntityNo AS INT
-DECLARE @strEmployeeId  AS NVARCHAR(50)
 DECLARE @strDeductionDesc  AS NVARCHAR(50)
 DECLARE @strDeductionId AS NVARCHAR(50)
 DECLARE @ysnDefault  AS BIT
@@ -44,7 +43,6 @@ DECLARE @strDeductionTaxId6  AS NVARCHAR(50)
 DECLARE @strDeductionTaxDesc6  AS NVARCHAR(50)
 DECLARE @strDeductionTaxId7  AS NVARCHAR(50)
 DECLARE @strDeductionTaxDesc7  AS NVARCHAR(50)
-DECLARE @EmployeeCount AS INT
 
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
 SELECT
@@ -57,7 +55,7 @@ SELECT
    ,intRowNo		= SE.intRowNumber
    ,strMessage		= 'Cannot find the Employee Entity No: '+  CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
    FROM tblApiSchemaEmployeeDeduction SE
-   LEFT JOIN tblPREmployeeDeduction E ON E.intEmployeeDeductionId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
+   LEFT JOIN tblPREmployeeDeduction E ON E.intEmployeeDeductionId = SE.intEntityNo 
    WHERE SE.guiApiUniqueId = @guiApiUniqueId
    AND SE.intEntityNo IS NULL
 
@@ -69,10 +67,9 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeDeductions)
 	BEGIN
 		SELECT TOP 1 
-			 @strEmployeeId = LTRIM(RTRIM(intEntityNo))
-			,@intEntityNo = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(intEntityNo)))
-			,@strDeductionDesc  = LTRIM(RTRIM(strDeductionDesc))
-			,@strDeductionId = LTRIM(RTRIM(strDeductionId))
+			 @intEntityNo = CAST(ISNULL(intEntityNo, 0) AS INT) 
+			,@strDeductionDesc  = strDeductionDesc
+			,@strDeductionId = strDeductionId
 			,@ysnDefault  = ysnDefault
 			,@strCategory  = strCategory
 			,@strPaidBy  = strPaidBy
@@ -104,164 +101,160 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 		FROM #TempEmployeeDeductions
 
 		SELECT TOP 1 
-			@EmployeeEntityNo = COUNT(intEntityEmployeeId) 
+			@EmployeeEntityNo = intEntityEmployeeId 
 		FROM tblPREmployeeDeduction
 		WHERE intEntityEmployeeId = @intEntityNo
-		  AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId)
+		  AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 
-		IF @EmployeeEntityNo = 0
+		IF @EmployeeEntityNo IS NULL
 			BEGIN
-				SELECT TOP 1 @EmployeeCount = COUNT(intEntityId) FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId
+				INSERT INTO tblPREmployeeDeduction
+				(
+					 intEntityEmployeeId
+					,intTypeDeductionId
+					,strDeductFrom
+					,strCalculationType
+					,dblAmount
+					,dblLimit
+					,dblPaycheckMax
+					,dtmBeginDate
+					,dtmEndDate
+					,intAccountId
+					,intExpenseAccountId
+					,ysnUseLocationDistribution
+					,ysnUseLocationDistributionExpense
+					,strPaidBy
+					,ysnDefault
+					,intSort
+					,intConcurrencyId
+				)
+				SELECT
+					 ISNULL((SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @intEntityNo),0)
+					,(SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
+					,@strDeductFromType
+					,@strRateCalcType
+					,dblRateCalc
+					,dblAnnualLimit
+					,@dblDeductFrom
+					,@dtmBeginDate
+					,@dtmEndDate
+					,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId)
+					,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strExpenseAccountId)
+					,ISNULL(@ysnAccountGLSplit,0)
+					,ISNULL(@ysnExpenseGLSplit,0)
+					,(SELECT TOP 1 strPaidBy FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
+					,ysnDefault
+					,1
+					,1
+				FROM #TempEmployeeDeductions
+				WHERE intEntityNo = @intEntityNo
+				AND strDeductionDesc = (SELECT TOP 1 strDescription FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 
-				IF(@EmployeeCount != 0)
-				BEGIN
-					INSERT INTO tblPREmployeeDeduction
-					(
-						 intEntityEmployeeId
-						,intTypeDeductionId
-						,strDeductFrom
-						,strCalculationType
-						,dblAmount
-						,dblLimit
-						,dblPaycheckMax
-						,dtmBeginDate
-						,dtmEndDate
-						,intAccountId
-						,intExpenseAccountId
-						,ysnUseLocationDistribution
-						,ysnUseLocationDistributionExpense
-						,strPaidBy
-						,ysnDefault
-						,intSort
-						,intConcurrencyId
-					)
-					SELECT
-						 ISNULL((SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @intEntityNo),0)
-						,(SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId)
-						,@strDeductFromType
-						,@strRateCalcType
-						,dblRateCalc
-						,dblAnnualLimit
-						,@dblDeductFrom
-						,@dtmBeginDate
-						,@dtmEndDate
-						,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId)
-						,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strExpenseAccountId)
-						,ISNULL(@ysnAccountGLSplit,0)
-						,ISNULL(@ysnExpenseGLSplit,0)
-						,(SELECT TOP 1 strPaidBy FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId)
-						,ysnDefault
-						,1
-						,1
-					FROM #TempEmployeeDeductions
-					WHERE intEntityNo = @strEmployeeId
-					AND strDeductionDesc = (SELECT TOP 1 strDescription FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId)
+				SET @NewId = SCOPE_IDENTITY()
 
-					SET @NewId = SCOPE_IDENTITY()
-
-					IF @strDeductionTaxId1 IS NOT NULL
+				IF @strDeductionTaxId1 IS NOT NULL
+					BEGIN
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1 AND strDescription = @strDeductionTaxDesc1)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1)
+							IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
+								and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1 AND strDescription = @strDeductionTaxDesc1))
 							BEGIN
-								IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
-									and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1))
-								BEGIN
-									INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
-									VALUES (
-									(SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId)
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1)
-									,1
-									,1)
-								END
+								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
+								VALUES (
+								(SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId)
+								,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1 AND strDescription = @strDeductionTaxDesc1)
+								,1
+								,1)
+							END
 							
-							END
 						END
+					END
 
-					IF @strDeductionTaxId2 IS NOT NULL
+				IF @strDeductionTaxId2 IS NOT NULL
+					BEGIN
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2 AND strDescription = @strDeductionTaxDesc2)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2)
+							IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
+								and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2 AND strDescription = @strDeductionTaxDesc2))
 							BEGIN
-								IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
-									and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2))
-								BEGIN
-									INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
-									VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2),1,1)
-								END
+								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
+								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2 AND strDescription = @strDeductionTaxDesc2),1,1)
 							END
 						END
+					END
 
-					IF @strDeductionTaxId3 IS NOT NULL
+				IF @strDeductionTaxId3 IS NOT NULL
+					BEGIN
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3 AND strDescription = @strDeductionTaxDesc3)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3)
+							IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
+								and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3 AND strDescription = @strDeductionTaxDesc3))
 							BEGIN
-								IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
-									and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3))
-								BEGIN
-									INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
-									VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3),1,1)
-								END
+								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
+								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3 AND strDescription = @strDeductionTaxDesc3),1,1)
 							END
 						END
+					END
 
-					IF @strDeductionTaxId4 IS NOT NULL
+				IF @strDeductionTaxId4 IS NOT NULL
+					BEGIN
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4 AND strDescription = @strDeductionTaxDesc4)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4 )
+							IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
+								and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4 AND strDescription = @strDeductionTaxDesc4))
 							BEGIN
-								IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
-									and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4))
-								BEGIN
-									INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
-									VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4),1,1)
-								END
+								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
+								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4 AND strDescription = @strDeductionTaxDesc4),1,1)
 							END
 						END
+					END
 
-					IF @strDeductionTaxId5 IS NOT NULL
+				IF @strDeductionTaxId5 IS NOT NULL
+					BEGIN
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5 AND strDescription = @strDeductionTaxDesc5)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5)
+							IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
+								and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5 AND strDescription = @strDeductionTaxDesc5))
 							BEGIN
-								IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
-									and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5))
-								BEGIN
-									INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
-									VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5),1,1)
-								END
+								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
+								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5 AND strDescription = @strDeductionTaxDesc5),1,1)
 							END
 						END
+					END
 
-					IF @strDeductionTaxId6 IS NOT NULL
+				IF @strDeductionTaxId6 IS NOT NULL
+					BEGIN
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6 AND strDescription = @strDeductionTaxDesc6)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6)
+							IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
+								and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6 AND strDescription = @strDeductionTaxDesc6))
 							BEGIN
-								IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
-									and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6 ))
-								BEGIN
-									INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
-									VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6),1,1)
-								END
+								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
+								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6 AND strDescription = @strDeductionTaxDesc6),1,1)
 							END
 						END
+					END
 
-					IF @strDeductionTaxId7 IS NOT NULL
+				IF @strDeductionTaxId7 IS NOT NULL
+					BEGIN
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7 AND strDescription = @strDeductionTaxDesc7)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7)
+							IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
+								and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7 AND strDescription = @strDeductionTaxDesc7))
 							BEGIN
-								IF NOT EXISTS (select * from tblPREmployeeDeductionTax where intEmployeeDeductionId = @NewId 
-									and intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7))
-								BEGIN
-									INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
-									VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7),1,1)
-								END
+								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
+								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7 AND strDescription = @strDeductionTaxDesc7),1,1)
 							END
 						END
-				END
-				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId
+					END
+
+				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @intEntityNo AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
 
 			END
 		ELSE
 			BEGIN
 				UPDATE tblPREmployeeDeduction SET
-					 intTypeDeductionId					= (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId)
+					 intTypeDeductionId					= (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 					,strDeductFrom						= @strDeductFromType
 					,strCalculationType					= @strRateCalcType
 					,dblAmount							= @dblRateCalc
@@ -271,85 +264,85 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 					,dtmEndDate							= @dtmEndDate
 					,intAccountId						= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId)
 					,intExpenseAccountId				= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strExpenseAccountId)
-					,strPaidBy							= (SELECT TOP 1 strPaidBy FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId)
+					,strPaidBy							= (SELECT TOP 1 strPaidBy FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 					,ysnDefault							= @ysnDefault
 					,ysnUseLocationDistribution			= ISNULL(@ysnAccountGLSplit,0)
 					,ysnUseLocationDistributionExpense	= ISNULL(@ysnExpenseGLSplit,0)
 				WHERE intEntityEmployeeId = @intEntityNo
-					AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId )
+					AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 
 				IF @strDeductionTaxId1 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1 AND strDescription = @strDeductionTaxDesc1)
 						BEGIN
-							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))  
-								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1))
+							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))  
+								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1 AND strDescription = @strDeductionTaxDesc1))
 							BEGIN
 								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
 								VALUES (
 								(SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo
-									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))
-								,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1 ),1,1)
+									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))
+								,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId1 AND strDescription = @strDeductionTaxDesc1),1,1)
 							END
 						END
 					END
 
 				IF @strDeductionTaxId2 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2 AND strDescription = @strDeductionTaxDesc2)
 						BEGIN
-							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))  
-								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2))
+							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))  
+								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2 AND strDescription = @strDeductionTaxDesc2))
 							BEGIN
 								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
 								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo
-									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2),1,1)
+									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId2 AND strDescription = @strDeductionTaxDesc2),1,1)
 							END
 						END
 					END
 
 				IF @strDeductionTaxId3 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3 AND strDescription = @strDeductionTaxDesc3)
 						BEGIN
-							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))  
-								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3))
+							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))  
+								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3 AND strDescription = @strDeductionTaxDesc3))
 							BEGIN
 								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
 								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo
-									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3),1,1)
+									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId3 AND strDescription = @strDeductionTaxDesc3),1,1)
 							END
 						END
 					END
 
 				IF @strDeductionTaxId4 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4 AND strDescription = @strDeductionTaxDesc4)
 						BEGIN
-							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))  
-								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4))
+							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))  
+								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4 AND strDescription = @strDeductionTaxDesc4))
 							BEGIN
 								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
 								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo
-									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4),1,1)
+									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId4 AND strDescription = @strDeductionTaxDesc4),1,1)
 							END
 						END
 					END
 
 				IF @strDeductionTaxId5 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5 AND strDescription = @strDeductionTaxDesc5)
 						BEGIN
-							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))  
-								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5))
+							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))  
+								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5 AND strDescription = @strDeductionTaxDesc5))
 							BEGIN
 								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
 								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo
-									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5),1,1)
+									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId5 AND strDescription = @strDeductionTaxDesc5),1,1)
 							END
 							
 						END
@@ -357,15 +350,15 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 
 				IF @strDeductionTaxId6 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6 AND strDescription = @strDeductionTaxDesc6)
 						BEGIN
-							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))  
-								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6))
+							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))  
+								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6 AND strDescription = @strDeductionTaxDesc6))
 							BEGIN
 								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
 								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo
-									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6),1,1)
+									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId6 AND strDescription = @strDeductionTaxDesc6),1,1)
 							END
 							
 						END
@@ -373,36 +366,21 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 
 				IF @strDeductionTaxId7 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7 AND strDescription = @strDeductionTaxDesc7)
 						BEGIN
-							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))  
-								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7))
+							IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEntityNo AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))  
+								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7 AND strDescription = @strDeductionTaxDesc7))
 							BEGIN
 								INSERT INTO tblPREmployeeDeductionTax(intEmployeeDeductionId,intTypeTaxId,intSort,intConcurrencyId)
 								VALUES ((SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @intEntityNo
-									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7),1,1)
+									AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeductionTaxId7 AND strDescription = @strDeductionTaxDesc7),1,1)
 							END
 						END
 					END
 
-				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId
+				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @intEntityNo  AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
 			END
-
-		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-		SELECT TOP 1
-			  NEWID()
-			, guiApiImportLogId = @guiLogId
-			, strField = 'Employee Deductions'
-			, strValue = SE.strDeductionId
-			, strLogLevel = 'Info'
-			, strStatus = 'Success'
-			, intRowNo = SE.intRowNumber
-			, strMessage = 'The employee deduction has been successfully imported.'
-		FROM tblApiSchemaEmployeeDeduction SE
-		LEFT JOIN tblPREmployeeDeduction E ON E.intEmployeeDeductionId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
-		WHERE SE.guiApiUniqueId = @guiApiUniqueId
-		AND SE.strDeductionId = @strDeductionId
 
 
 	END
@@ -411,4 +389,5 @@ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempE
 DROP TABLE #TempEmployeeDeductions
 
 END
+
 GO
