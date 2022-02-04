@@ -264,8 +264,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					,EME.strEmail
 					,EME.ysn1099Employee
 					,EME.strContactNumber
-					,EME.strPhone
 					,EME.strEMPhone
+					,EME.strPhone
 					,EME.strTimezone
 					,1
 					,EME.ysnActive
@@ -287,6 +287,11 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 
 				DECLARE @EntityPhoneID AS NVARCHAR(50)
 				SET @EntityPhoneID = SCOPE_IDENTITY()
+
+				--select * from tblEMEntityMobileNumber where intEntityId = 2434
+
+				--select * from tblEMEntityPhoneNumber where intEntityId = 2434
+
 
 				INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
 				select top 1 @ContactId, strEMPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
@@ -693,7 +698,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,ysnPrint1099 = @ysnPrint1099
 				,strContactNumber = @strContactNumber
 				,strTitle = @strTitle
-				,strPhone = @strEmPhone
+				,strPhone = @strPhone
 				,strEmail2 = @strEmail
 				,strTimezone = @strTimezone
 				,strEntityNo = @strEntityNo
@@ -702,7 +707,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,intEntityRank = @intEntityRank
 				,strDepartment = @strDepartment
 				,dtmOriginationDate = @dtmOriginationDate
-				,strMobile = @strPhone
+				,strMobile = @strEmPhone
 				WHERE intEntityId = @EntityId
 
 				UPDATE tblEMEntity SET
@@ -710,8 +715,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					,strEmail = @strEmail
 					,ysnPrint1099 = @ysn1099Employee
 					,strContactNumber = @strContactNumber
-					,strMobile =  @strPhone
-					,strPhone = @strEmPhone
+					,strMobile = @strEmPhone
+					,strPhone = @strPhone
 					,strTimezone = @strTimezone
 					,intLanguageId = 1
 					,ysnActive = @ysnActive
@@ -1084,21 +1089,6 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					END
 			END
 			DELETE FROM #TempEmployeeDetails WHERE strEmployeeId = @EmployeeID
-
-		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-		SELECT TOP 1
-			  NEWID()
-			, guiApiImportLogId = @guiLogId
-			, strField = 'Entity and Employee'
-			, strValue = CAST(ISNULL(SE.strEmployeeId, '') AS NVARCHAR(100))
-			, strLogLevel = 'Info'
-			, strStatus = 'Success'
-			, intRowNo = SE.intRowNumber
-			, strMessage = 'The entity and employee record has been successfully imported.'
-		FROM tblApiSchemaEmployee SE
-		LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId
-		WHERE SE.guiApiUniqueId = @guiApiUniqueId
-		AND SE.strEmployeeId = @EmployeeID
 	END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDetails')) 
