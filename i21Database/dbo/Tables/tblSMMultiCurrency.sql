@@ -38,7 +38,7 @@
 	[intFixedAssetsOffsetId]						INT NULL,
 	[intGainOnForwardOffsetId]						INT NULL,
 	[intGainOnSwapOffsetId]							INT NULL,
-	[intGainOnGLUnrealizedOffsetId]					INT NULL,
+	[intGainOnGLOffsetId]							INT NULL,
 	/* Offset */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
