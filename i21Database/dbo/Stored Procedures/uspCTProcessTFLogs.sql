@@ -7,7 +7,6 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 BEGIN 
 
 	begin try
@@ -20,6 +19,7 @@ BEGIN
 			,@TFTransNo nvarchar(50)
 			,@intActiveContractDetailId int = 0
 			,@strAction nvarchar(20)
+			,@intTradeFinanceId int = 0;
 			;
 
 		DECLARE @TFXML TABLE(
@@ -102,7 +102,8 @@ BEGIN
 
 
 		select
-			 (case when et.intTradeFinanceLogId is null then 'Created' else 'Updated' end)
+			 @strAction = (case when et.intTradeFinanceLogId is null then 'Created' else 'Updated' end)
+			 ,@intTradeFinanceId = et.intTradeFinanceLogId
 		from
 			@TFXML tf
 			join tblCTContractDetail cd on cd.intContractDetailId = tf.intContractDetailId
@@ -115,7 +116,7 @@ BEGIN
 
 		insert into @TRFTradeFinance
 		select
-			intTradeFinanceId = null
+			intTradeFinanceId = @intTradeFinanceId
 			,strTradeFinanceNumber = isnull(cd.strFinanceTradeNo,tf.strFinanceTradeNo)
 			,strTransactionType = 'Contract'
 			,strTransactionNumber = ch.strContractNumber + '-' + convert(nvarchar(20),cd.intContractSeq)
