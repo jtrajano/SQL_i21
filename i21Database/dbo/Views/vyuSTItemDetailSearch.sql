@@ -92,7 +92,7 @@ LEFT JOIN
 				intItemLocationId,
 				dtmEffectiveRetailPriceDate,
 				dblRetailPrice,
-				ROW_NUMBER() OVER (PARTITION BY intItemId ORDER BY dtmEffectiveRetailPriceDate DESC) AS intRowNum
+				ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveRetailPriceDate DESC) AS intRowNum
 		FROM tblICEffectiveItemPrice
 		WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveRetailPriceDate
 	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
@@ -107,7 +107,7 @@ LEFT JOIN
 				intItemLocationId,
 				dtmEffectiveCostDate,
 				dblCost,
-				ROW_NUMBER() OVER (PARTITION BY intItemId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
+				ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
 		FROM tblICEffectiveItemCost
 		WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
 	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
@@ -124,7 +124,7 @@ LEFT JOIN
 				dtmEndDate,
 				dblUnitAfterDiscount,
 				dblCost,
-				row_number() over (partition by intItemId order by intItemLocationId asc) as intRowNum
+				row_number() over (partition by intItemId, intItemLocationId order by intItemLocationId asc) as intRowNum
 		FROM tblICItemSpecialPricing
 		WHERE CAST(GETDATE() AS DATE) BETWEEN dtmBeginDate AND dtmEndDate
 	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1

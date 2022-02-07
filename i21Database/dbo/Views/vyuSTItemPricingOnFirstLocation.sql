@@ -17,13 +17,8 @@ SELECT
 				THEN effectiveCost.dblCost --Effective Cost
 			ELSE tblICItemPricing.dblStandardCost
 		END AS dblStandardCost,
-		CASE
-			WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
-				THEN SplPrc.dblUnitAfterDiscount 
-			WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
-				THEN effectivePrice.dblRetailPrice --Effective Retail Price
-			ELSE tblICItemPricing.dblSalePrice
-		END AS dblSalePrice,
+		tblICUnitMeasure.strUnitMeasure,
+		itemPricing.dblSalePrice,
 		strItemNoAndDescription = ISNULL(tblICItem.strItemNo,'') + '-' + ISNULL(tblICItem.strDescription,''),
 		tblICCategory.strCategoryCode,
 		strCategoryDescription = tblICCategory.strDescription,
@@ -71,21 +66,6 @@ SELECT
 			SELECT 
 				 intItemId,
 				 intItemLocationId,
-				 dtmEffectiveRetailPriceDate,
-				 dblRetailPrice,
-				 ROW_NUMBER() OVER (PARTITION BY intItemId ORDER BY dtmEffectiveRetailPriceDate DESC) AS intRowNum
-			FROM tblICEffectiveItemPrice
-			WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveRetailPriceDate
-		) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
-	) AS effectivePrice
-		ON tblICItem.intItemId = effectivePrice.intItemId
-		AND effectivePrice.intItemLocationId = tblICItemLocation.intItemLocationId
-	LEFT JOIN 
-	(
-		SELECT * FROM (
-			SELECT 
-				 intItemId,
-				 intItemLocationId,
 				 dtmEffectiveCostDate,
 				 dblCost,
 				 ROW_NUMBER() OVER (PARTITION BY intItemId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
@@ -97,7 +77,12 @@ SELECT
 		AND effectiveCost.intItemLocationId = tblICItemLocation.intItemLocationId
 	LEFT JOIN tblICItemUOM 
 		ON tblICItemUOM.intItemId = tblICItem.intItemId
-		AND tblICItemUOM.ysnStockUnit = 1
+	JOIN tblICUnitMeasure 
+		ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
+	JOIN vyuSTItemHierarchyPricing itemPricing
+		ON tblICItem.intItemId = itemPricing.intItemId
+		AND tblICItemLocation.intItemLocationId = itemPricing.intItemLocationId
+		AND tblICItemUOM.intItemUOMId = itemPricing.intItemUOMId
 	LEFT JOIN tblICCategory
 		ON tblICCategory.intCategoryId = tblICItem.intCategoryId
 	LEFT JOIN tblEMEntity 

@@ -202,5 +202,4 @@ WHERE Item.ysnFuelItem = CAST(0 AS BIT)
 	AND UOM.strLongUPCCode	IS NOT NULL
 	AND UOM.strLongUPCCode	NOT LIKE '%[^0-9]%'
 	AND LEN(UOM.strLongUPCCode)		<= 13     -- ST-1366 (Max Upc length is 13 without check digit, we should skip upc that has more than 13 digits)
-	AND UOM.ysnStockUnit = CAST(1 AS BIT)
 	AND ISNULL(SUBSTRING(UOM.strLongUPCCode, PATINDEX('%[^0]%',UOM.strLongUPCCode), LEN(UOM.strLongUPCCode)), 0) NOT IN ('')

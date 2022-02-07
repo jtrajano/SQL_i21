@@ -8,6 +8,7 @@ SELECT
 	 , intStoreId
 	 , intStoreNo
 	 , strLocationName
+	 , strUnitMeasure
 	 , dblRetailPrice
 	 , CAST(dtmEffectiveRetailPriceDate AS DATE) AS dtmEffectiveRetailPriceDate
 	 , strType
@@ -23,6 +24,7 @@ FROM
 		, Store.intStoreId
 		, Store.intStoreNo
 		, CompanyLoc.strLocationName
+		, UM.strUnitMeasure
 		, retail.dblRetailPrice
 		, retail.dtmEffectiveRetailPriceDate
 		, 'R' AS strType
@@ -35,6 +37,10 @@ FROM
 		ON ItemLoc.intLocationId = CompanyLoc.intCompanyLocationId
 	INNER JOIN tblSTStore Store
 		ON CompanyLoc.intCompanyLocationId = Store.intCompanyLocationId
+	INNER JOIN tblICItemUOM UOM
+		ON UOM.intItemUOMId = retail.intItemUOMId
+	INNER JOIN tblICUnitMeasure UM
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	UNION
 	SELECT 
 		NULL AS intEffectiveItemPriceId
@@ -44,6 +50,7 @@ FROM
 		, Store.intStoreId
 		, Store.intStoreNo
 		, ISNULL(CompanyLoc.strLocationName, '') AS strLocationName
+		, UM.strUnitMeasure
 		, sp.dblUnitAfterDiscount
 		, sp.dtmBeginDate
 		, 'P' AS strType
@@ -56,5 +63,9 @@ FROM
 		ON ItemLoc.intLocationId = CompanyLoc.intCompanyLocationId
 	LEFT JOIN tblSTStore Store
 		ON CompanyLoc.intCompanyLocationId = Store.intCompanyLocationId
+	INNER JOIN tblICItemUOM UOM
+		ON UOM.intItemUOMId = sp.intItemUnitMeasureId
+	INNER JOIN tblICUnitMeasure UM
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	WHERE sp.dblUnitAfterDiscount != 0
 ) effective

@@ -8308,6 +8308,7 @@
     <Build Include="dbo\Views\vyuCTItemContractReportPrepay.sql" />
     <Build Include="dbo\Tables\tblSTLotteryGame.sql" />
     <Build Include="dbo\Views\vyuSTItemPricingAndUOM.sql" />
+    <Build Include="dbo\Views\vyuSTItemHierarchyPricing.sql" />
     <Build Include="dbo\Views\vyuSTItemPricingStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCommodityActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspICCommodityPositionDetailReport.sql" />

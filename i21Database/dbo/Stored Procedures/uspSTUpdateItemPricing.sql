@@ -27,6 +27,7 @@ BEGIN TRY
 			@District           NVARCHAR(6),
 			@State              NVARCHAR(2),
 			@intItemUOMId       INT, --NVARCHAR(MAX),
+			@intUOM       INT, --NVARCHAR(MAX),
 			@StandardCost       DECIMAL (18,6),
 			@RetailPrice        DECIMAL (18,6),
 			@SalesPrice         DECIMAL (18,6),
@@ -53,6 +54,7 @@ BEGIN TRY
 			@District        =   District,
 			@State           =   States,
 			@intItemUOMId    =   UPCCode,
+			@intUOM			 =	 UOM,
 			@StandardCost 	 = 	 Cost,
 			@RetailPrice   	 =	 Retail,
 			@SalesPrice		 =	 SalesPrice,
@@ -82,6 +84,7 @@ BEGIN TRY
 			SalesPrice       		DECIMAL (18,6),
 			PromotionalCost      	DECIMAL (18,6),
 			EffectiveDate			NVARCHAR(50),
+			UOM			            INT,
 			SalesStartingDate		NVARCHAR(50),
 			SalesEndingDate			NVARCHAR(50),
 			ysnPreview				NVARCHAR(1),
@@ -156,6 +159,7 @@ BEGIN TRY
 				intItemId INT
 				,intEffectiveItemPriceId INT
 				,intItemLocationId INT 
+				,intItemUOMId INT 
 				,dblOldPrice NUMERIC(38, 20) NULL
 				,dblNewPrice NUMERIC(38, 20) NULL
 				,dtmOldEffectiveDate DATETIME NULL
@@ -324,6 +328,7 @@ BEGIN TRY
 	DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@RetailPrice AS NUMERIC(38, 20))
 	DECLARE @dtmEffectiveDateConv AS DATE = CAST(@EffectiveDate AS DATE)
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
+	DECLARE @intItemUOM AS INT = CAST(@intUOM AS INT)
 
 	IF @dtmEffectiveDateConv IS NOT NULL
 	BEGIN
@@ -338,6 +343,7 @@ BEGIN TRY
 				, @dblRetailPrice			= @dblRetailPriceConv
 				, @intEntityUserSecurityId	= @intCurrentUserIdConv
 				, @dtmEffectiveDate			= @dtmEffectiveDateConv
+				, @intUOM					= @intItemUOM
 		END TRY
 		BEGIN CATCH
 			SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
