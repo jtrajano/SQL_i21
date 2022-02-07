@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGProcessTradeFinance]
 	@intLoadId INT,
-	@strAction NVARCHAR(20),
+	@strAction NVARCHAR(20), /* 'ADD' or 'UPDATE' */
 	@intUserId INT
 AS
 BEGIN 
@@ -8,28 +8,23 @@ BEGIN
 			,@TRFLog TRFLog
 			,@intTradeFinanceId INT = NULL
 	
-	IF (@strAction = 'ADD')
+	/* Generate Trade Finance No if blank */
+	IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(strTradeFinanceNo, '') <> '')
 	BEGIN
-		/* If Creating New entry, generate Trade Finance No if blank */
-		DECLARE @strTradeFinanceNumber NVARCHAR(100)
-		IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(strTradeFinanceNo, '') <> '')
-		BEGIN
-			EXEC uspSMGetStartingNumber 166, @strTradeFinanceNumber OUT
+		DECLARE @strTradeFinanceNumber NVARCHAR(100)	
+		EXEC uspSMGetStartingNumber 166, @strTradeFinanceNumber OUT
 
-			UPDATE tblLGLoad
-			SET strTradeFinanceNo = @strTradeFinanceNumber
-			WHERE intLoadId = @intLoadId
-		END
+		UPDATE tblLGLoad
+		SET strTradeFinanceNo = @strTradeFinanceNumber
+		WHERE intLoadId = @intLoadId
 	END
-	ELSE
-	BEGIN 
-		/* If Modiying or Deleting, get intTradeFinanceId*/
-		SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
-		FROM tblTRFTradeFinance TRF
-		INNER JOIN tblLGLoad L ON L.strTradeFinanceNo = TRF.strTradeFinanceNumber 
-			AND TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = L.intLoadId
-		WHERE L.intLoadId = @intLoadId
-	END
+
+	/* Get intTradeFinanceId */
+	SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
+	FROM tblTRFTradeFinance TRF
+	INNER JOIN tblLGLoad L ON L.strTradeFinanceNo = TRF.strTradeFinanceNumber 
+		AND TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = L.intLoadId
+	WHERE L.intLoadId = @intLoadId
 
 	/* Construct Trade Finance SP parameter */
 	INSERT INTO @TRFTradeFinance
@@ -65,7 +60,7 @@ BEGIN
 	WHERE intLoadId = @intLoadId
 	
 	/* Execute Trade Finance SP */
-	If @strAction = 'ADD'
+	If (@strAction = 'ADD' OR @intTradeFinanceId IS NULL)
 	BEGIN
 		EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId
 	END	
