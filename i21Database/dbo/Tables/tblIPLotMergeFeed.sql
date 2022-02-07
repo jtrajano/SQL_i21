@@ -19,5 +19,7 @@
 	,strNotes NVARCHAR(2048) COLLATE Latin1_General_CI_AS
 	,intStatusId int
 	,strMessage NVARCHAR(2048) COLLATE Latin1_General_CI_AS
+	,ysnMailSent BIT CONSTRAINT DF_tblIPLotMergeFeed_ysnMailSent DEFAULT 0
+
 	,CONSTRAINT PK_tblIPLotMergeFeed PRIMARY KEY (intLotMergeFeedId)
 	)
