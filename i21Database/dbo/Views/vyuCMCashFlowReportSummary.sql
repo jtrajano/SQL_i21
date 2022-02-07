@@ -32,6 +32,7 @@ SELECT
 	S.dblBucket8,
 	S.dblBucket9,
 	S.dblTotal,
+	ysnHasZeroAmountTransaction = CAST((CASE WHEN ISNULL(SummaryDetail.intCount, 0) > 0 THEN 1 ELSE 0 END)AS BIT),
 	S.intConcurrencyId
 FROM tblCMCashFlowReportSummary S
 LEFT JOIN tblCMCashFlowReportSummaryCode C
@@ -48,3 +49,16 @@ LEFT JOIN tblSMCurrency RC
 	ON RC.intCurrencyID = S.intReportingCurrencyId
 LEFT JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = S.intCompanyLocationId
+OUTER APPLY (
+	SELECT COUNT(1) intCount FROM tblCMCashFlowReportSummaryDetail SD
+	WHERE SD.intCashFlowReportSummaryId = S.intCashFlowReportSummaryId
+		AND SD.dblBucket1 = 0
+		AND SD.dblBucket2 = 0
+		AND SD.dblBucket3 = 0
+		AND SD.dblBucket4 = 0
+		AND SD.dblBucket5 = 0
+		AND SD.dblBucket6 = 0
+		AND SD.dblBucket7 = 0
+		AND SD.dblBucket8 = 0
+		AND SD.dblBucket9 = 0
+) SummaryDetail
