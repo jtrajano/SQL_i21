@@ -432,4 +432,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\RenameAndAlterCashRegisterDepartment.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\RemoveUPCIndependentUniqueIndexes.sql" />
+  </ItemGroup>
 </Project>
