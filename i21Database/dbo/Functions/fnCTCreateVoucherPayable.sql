@@ -128,6 +128,7 @@ RETURNS TABLE AS RETURN
 		SELECT TOP 1 intEntityVendorId 
 		FROM tblAPVoucherPayable
 		WHERE CASE 
+			WHEN @type = 'header' AND intContractHeaderId = @id THEN 1
 			WHEN @type = 'cost' AND intContractCostId = @id THEN 1
 			ELSE 0
 		END = 1
@@ -148,4 +149,6 @@ RETURNS TABLE AS RETURN
 	END = 1 
 	AND CASE WHEN @accrue = 0 AND payable.intEntityVendorId IS NOT NULL THEN 1 ELSE @accrue END = 1
 	AND ISNULL(CC.ysnBasis, 0) <> 1
+	and 1 = case when @remove = 1 and @type = 'header' and payable.intEntityVendorId is null then 0 else 1 end
+
 )
