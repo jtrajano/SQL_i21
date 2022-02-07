@@ -366,6 +366,7 @@
 	  <Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerLocation.sql" />
+    <Build Include="dbo\Functions\fnICIsUpcExists2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
