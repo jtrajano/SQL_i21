@@ -9,20 +9,15 @@ SELECT
 		tblICItemUOM.strUpcCode,
 		tblICItemPricing.dblLastCost,
 		tblICItemPricing.dblAverageCost,
-		tblICItemPricing.dblStandardCost,
-		itemPricing.dblSalePrice as dblSalePrice,
-		-- CASE
-		-- 	WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
-		-- 		THEN effectiveCost.dblCost --Effective Cost
-		-- 	ELSE tblICItemPricing.dblStandardCost
-		-- END AS dblStandardCost,
-		-- CASE
-		-- 	WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
-		-- 		THEN SplPrc.dblUnitAfterDiscount 
-		-- 	WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
-		-- 		THEN effectivePrice.dblRetailPrice --Effective Retail Price
-		-- 	ELSE tblICItemPricing.dblSalePrice
-		-- END AS dblSalePrice,
+		CASE
+			WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+				THEN SplPrc.dblCost 
+			WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+				THEN effectiveCost.dblCost --Effective Cost
+			ELSE tblICItemPricing.dblStandardCost
+		END AS dblStandardCost,
+		tblICUnitMeasure.strUnitMeasure,
+		itemPricing.dblSalePrice,
 		strItemNoAndDescription = ISNULL(tblICItem.strItemNo,'') + '-' + ISNULL(tblICItem.strDescription,''),
 		tblICCategory.strCategoryCode,
 		strCategoryDescription = tblICCategory.strDescription,
@@ -91,9 +86,4 @@ SELECT
 		ON tblICCategory.intCategoryId = tblICItem.intCategoryId
 	LEFT JOIN tblEMEntity 
 		ON tblEMEntity.intEntityId = tblICItemLocation.intVendorId
-	--Price Hierarchy--
-	INNER JOIN vyuSTItemHierarchyPricing itemPricing
-	ON tblICItem.intItemId = itemPricing.intItemId
-	AND tblICItemLocation.intItemLocationId = itemPricing.intItemLocationId
-	AND tblICItemUOM.intItemUOMId = itemPricing.intItemUOMId
 
