@@ -170,6 +170,45 @@ BEGIN TRY
 		FROM dbo.tblCTContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
+		;WITH CTE
+		AS (
+			SELECT strFeedStatus
+				,strMessage
+				,RN = ROW_NUMBER() OVER (
+					PARTITION BY intContractDetailId ORDER BY intContractFeedId DESC
+					)
+					,ysnMailSent
+					,intStatusId
+			FROM dbo.tblCTContractFeed CF
+			WHERE CF.intContractHeaderId = @intContractHeaderId
+				AND CF.intContractDetailId = @intContractDetailId
+				AND CF.intStatusId IS NULL
+				AND CF.strRowState = @strRowState
+			)
+		UPDATE CTE
+		SET strFeedStatus = 'IGNORE'
+			,intStatusId = 7
+			,strMessage = 'Duplicate Entry.'
+			,ysnMailSent = 1
+		WHERE RN > 1
+
+		-- Send Create Feed only Once
+		IF @strRowState = 'ADDED'
+			AND (
+				SELECT TOP 1 UPPER(strRowState)
+				FROM tblCTContractFeed
+				WHERE intContractDetailId = @intContractDetailId
+					AND intContractFeedId < @intContractFeedId
+				ORDER BY intContractFeedId
+				) = 'ADDED'
+		BEGIN
+			UPDATE dbo.tblCTContractFeed
+			SET strRowState = 'Modified'
+			WHERE intContractFeedId = @intContractFeedId
+
+			GOTO NextPO
+		END
+
 		SELECT @intBookId = intBookId
 			,@strCustomerContract = strCustomerContract
 		FROM dbo.tblCTContractHeader
