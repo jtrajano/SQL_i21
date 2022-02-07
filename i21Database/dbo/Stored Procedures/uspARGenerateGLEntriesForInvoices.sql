@@ -151,8 +151,8 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intAccountId]                 = I.[intAccountId]
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
-    ,[dblCreditUnit]                = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+    ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') AND I.strType <> 'Tax Adjustment' THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+    ,[dblCreditUnit]                = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') AND I.strType <> 'Tax Adjustment' THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]
@@ -811,6 +811,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
   AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
+  AND I.strType <> 'Tax Adjustment'
 
 --FINAL INVOICE CREDIT
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (

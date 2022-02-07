@@ -659,8 +659,8 @@ BEGIN
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The debit and credit amounts are not balanced.'
 	FROM ##ARPostInvoiceHeader I			 
-	WHERE
-		I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM ##ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId]) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0))
+	WHERE (I.strType <> 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM ##ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId]) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0)))
+	   OR (I.strType = 'Tax Adjustment' AND I.[dblInvoiceTotal] <> (SELECT SUM([dblTax]) FROM ##ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId]))
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
