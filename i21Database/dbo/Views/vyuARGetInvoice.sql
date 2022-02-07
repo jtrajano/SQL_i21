@@ -166,6 +166,20 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , strInterCompanyName					= INTERCOMPANY.strCompanyName
      , ysnOverrideCashFlow                  = INV.ysnOverrideCashFlow
      , dtmCashFlowDate                      = INV.dtmCashFlowDate
+	 , intDisbursementBankAccountId			= ISNULL(INV.intDisbursementBankAccountId, 0)
+	 , strDisbursementBankAccountNo			= DBA.strBankAccountNo
+	 , intPayToCashBankAccountId			= ISNULL(INV.intPayToCashBankAccountId, 0)
+	 , strPayToCashBankAccountNo			= PFCBA.strBankAccountNo
+	 , strSourceOfPayTo						= INV.strSourceOfPayTo
+	 , strPaymentInstructions				= INV.strPaymentInstructions
+	 , strTradeFinanceNo					= INV.strTradeFinanceNo
+	 , intFacilityId						= INV.intFacilityId
+	 , intLoanLimitId						= INV.intLoanLimitId
+	 , strTradeFinanceReferenceNo			= INV.strTradeFinanceReferenceNo
+	 , strBankReferenceNo					= INV.strBankReferenceNo
+	 , dblLoanAmount						= INV.dblLoanAmount
+	 , intOverrideFacilityId				= INV.intOverrideFacilityId
+	 , strTradeFinanceComments				= INV.strTradeFinanceComments
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -365,4 +379,6 @@ OUTER APPLY(
 LEFT JOIN
 (
 	SELECT  ysnReturned,intInvoiceId FROM tblARInvoice  WITH (NOLOCK) 
-)ReturnInvoice ON ReturnInvoice.intInvoiceId = INV.intOriginalInvoiceId
+) ReturnInvoice ON ReturnInvoice.intInvoiceId = INV.intOriginalInvoiceId
+LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDisbursementBankAccountId, 0)
+LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId, 0)
