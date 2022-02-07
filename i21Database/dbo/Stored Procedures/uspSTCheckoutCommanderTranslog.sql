@@ -91,7 +91,7 @@ BEGIN
 				-- ==================================================================================================================
 				-- START - Validate if Store has department setup for rebate
 				-- ==================================================================================================================
-				IF EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
 					BEGIN
 
 						INSERT INTO tblSTCheckoutErrorLogs
