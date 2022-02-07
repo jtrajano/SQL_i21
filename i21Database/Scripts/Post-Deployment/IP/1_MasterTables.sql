@@ -351,3 +351,20 @@ BEGIN
 	SELECT 'Service Order','','Count',50
 END
 GO
+
+UPDATE tblIPLotItemChangeFeed
+SET ysnMailSent = 0
+WHERE ysnMailSent IS NULL
+GO
+UPDATE tblIPLotMergeFeed
+SET ysnMailSent = 0
+WHERE ysnMailSent IS NULL
+GO
+UPDATE tblIPLotPropertyFeed
+SET ysnMailSent = 0
+WHERE ysnMailSent IS NULL
+GO
+UPDATE tblIPLotSplitFeed
+SET ysnMailSent = 0
+WHERE ysnMailSent IS NULL
+GO
