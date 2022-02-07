@@ -65,7 +65,7 @@ GO
 	UPDATE tblGLJournalDetail set intCompanyId = @intMultCompanyId WHERE intCompanyId IS NULL
 
 
-	UPDATE tblGLDetail SET strCode = 'GJ' WHERE strTransactionType = 'Origin Journal' AND strModule = 'General Ledger' AND ISNULL(strCode,'') = ''
+	UPDATE tblGLDetail SET strCode = 'GJ' WHERE strTransactionType = 'Origin Journal' AND strModuleName = 'General Ledger' AND ISNULL(strCode,'') = ''
 GO
 
 
