@@ -255,7 +255,9 @@ BEGIN TRY
 					 @dblReceiptSurchargeRate = NULL,
 					 @dblInvoiceSurchargeRate = @SurchargeRate OUTPUT,
 					 @ysnFreightInPrice = NULL,
-					 @ysnFreightOnly = NULL
+					 @ysnFreightOnly = NULL,
+					 @dblMinimumUnitsIn = NULL,
+					 @dblMinimumUnitsOut = NULL
 
 				SET @QuotePrice = @RackPrice + @DeviationAmount + @FreightRate
 				SET @Margin = @QuotePrice - @RackPrice
