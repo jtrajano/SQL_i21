@@ -649,8 +649,14 @@ END
 				,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
 				,[dblRate]					= cfTransactionTax.dblTaxRate
 				,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-				,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount)
-				,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount)--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+				,[dblTax]					= (case
+								when (cfTransaction.dblQuantity < 0 OR cfTransaction.dblCalculatedNetPrice < 0)  then cfTransactionTax.dblTaxCalculatedAmount * -1
+								else cfTransactionTax.dblTaxCalculatedAmount
+								end)
+				,[dblAdjustedTax]			= (case
+								when (cfTransaction.dblQuantity < 0 OR cfTransaction.dblCalculatedNetPrice < 0)  then cfTransactionTax.dblTaxCalculatedAmount * -1
+								else cfTransactionTax.dblTaxCalculatedAmount
+								end)--(cfTransactionTax.dblTaxCalculate
 				,[ysnTaxAdjusted]			= 0
 				,[ysnSeparateOnInvoice]		= 0 
 				,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
