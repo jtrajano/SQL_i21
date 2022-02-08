@@ -9597,6 +9597,10 @@
     <Build Include="dbo\Views\vyuApiTransportTerminals.sql" />
     <Build Include="dbo\Views\vyuApiApproval.sql" />
     <Build Include="dbo\Views\vyuApiActivity.sql" />
+    <Build Include="dbo\Views\vyuApiActivityAttendee.sql" />
+    <Build Include="dbo\Views\vyuApiActivityHoursWorked.sql" />
+    <Build Include="dbo\Views\vyuApiCrmActivity.sql" />
+    <Build Include="dbo\Views\vyuApiJiraIssue.sql" />
     <Build Include="dbo\Views\vyuApiAttachment.sql" />
     <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessage.sql" />
     <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessages.sql" />
