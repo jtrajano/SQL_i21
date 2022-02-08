@@ -193,7 +193,7 @@ BEGIN TRY
 		WHERE RN > 1
 
 		-- Send Create Feed only Once
-		IF @strRowState = 'ADDED'
+		IF @strRowState = 'Added'
 			AND (
 				SELECT TOP 1 UPPER(strRowState)
 				FROM tblCTContractFeed
@@ -207,6 +207,16 @@ BEGIN TRY
 			WHERE intContractFeedId = @intContractFeedId
 
 			GOTO NextPO
+		END
+
+		IF @strRowState = 'Added'
+			AND ISNULL(@strERPPONumber, '') <> ''
+		BEGIN
+			SELECT @strRowState = 'Modified'
+
+			UPDATE dbo.tblCTContractFeed
+			SET strRowState = 'Modified'
+			WHERE intContractFeedId = @intContractFeedId
 		END
 
 		SELECT @intBookId = intBookId
