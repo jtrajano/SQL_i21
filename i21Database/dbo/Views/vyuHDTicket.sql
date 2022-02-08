@@ -73,7 +73,7 @@ AS
 							  end) COLLATE Latin1_General_CI_AS
 		,tic.dblActualHours
 		,tic.dblNonBillableHours
-		,x.dblEstimatedHours
+		,dblEstimatedHours = isnull(x.dblEstimatedHours, 0)
 		,ut.intUpgradeTypeId
 		,strUpgradeType = ut.strType
 		,tic.strUpgradeEnvironmentId
