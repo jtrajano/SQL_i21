@@ -360,22 +360,22 @@ BEGIN
 		SELECT	@dblOutTaxCalculatedAmount = ISNULL(SUM(dblTaxCalculatedAmount),0)	FROM tblCFTransactionTaxType
 
 
-		IF(LOWER(ISNULL(@strOutPriceBasis,'')) IN ('index cost','index retail','index fixed'))
-		BEGIN
-			SET @ysnHavePriceIndex = 1
-		END
-		ELSE
-		BEGIN
-			SET @ysnHavePriceIndex = 0
-		END
+		--IF(LOWER(ISNULL(@strOutPriceBasis,'')) IN ('index cost','index retail','index fixed'))
+		--BEGIN
+		--	SET @ysnHavePriceIndex = 1
+		--END
+		--ELSE
+		--BEGIN
+		--	SET @ysnHavePriceIndex = 0
+		--END
 
-		IF(@loopSiteType = 'Local/Network' AND ISNULL(@ysnHavePriceIndex,0) = 0)
-		BEGIN
-			--FOR LOCAL SITE EXCLUDE ITEM THAT DOESNT HAVE PRICE INDEX--
-			--JIRA CF-1820--
-			print 'skip'	
-		END
-		ELSE IF((ISNULL(@networkCost,0) != 0 OR ISNULL(@ysnHavePriceIndex,0) = 1) AND ISNULL(@dblOutNetTaxCalculatedAmount,0) > 0)
+		--IF(@loopSiteType = 'Local/Network' AND ISNULL(@ysnHavePriceIndex,0) = 0)
+		--BEGIN
+		--	--FOR LOCAL SITE EXCLUDE ITEM THAT DOESNT HAVE PRICE INDEX--
+		--	--JIRA CF-1820--
+		--	print 'skip'	
+		--END
+		IF((ISNULL(@networkCost,0) != 0 OR ISNULL(@ysnHavePriceIndex,0) = 1) AND ISNULL(@dblOutNetTaxCalculatedAmount,0) > 0)
 		BEGIN
 			
 				--DEBUGGER--
