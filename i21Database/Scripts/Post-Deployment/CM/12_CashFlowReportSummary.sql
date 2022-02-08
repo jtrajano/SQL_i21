@@ -8,13 +8,13 @@ SET  IDENTITY_INSERT tblCMCashFlowReportSummaryGroup ON
 	WITH	(HOLDLOCK) 
 	AS		SummaryGroupTable
 	USING	(
-			SELECT id = 1,  summaryGroup = 'Total Cash', sort = 1000 UNION ALL 
-			SELECT id = 2,  summaryGroup = 'Total AR', sort = 1001  UNION ALL
-			SELECT id = 3,  summaryGroup = 'Total AP', sort = 1002  UNION ALL
-			SELECT id = 4,  summaryGroup = 'Total Sales Logistics Shipments', sort = 1003  UNION ALL
-			SELECT id = 5,  summaryGroup = 'Total Purchase Logistics Shipments', sort = 1004  UNION ALL
-			SELECT id = 6,  summaryGroup = 'Total Sales Contracts', sort = 1005  UNION ALL
-			SELECT id = 7,  summaryGroup = 'Total Purchase Contracts', sort = 1006
+			SELECT id = 1,  summaryGroup = '1: Total Cash', sort = 1000 UNION ALL 
+			SELECT id = 2,  summaryGroup = '2: Total AR', sort = 1001  UNION ALL
+			SELECT id = 3,  summaryGroup = '3: Total AP', sort = 1002  UNION ALL
+			SELECT id = 4,  summaryGroup = '4: Total Sales Logistics Shipments', sort = 1003  UNION ALL
+			SELECT id = 5,  summaryGroup = '5: Total Purchase Logistics Shipments', sort = 1004  UNION ALL
+			SELECT id = 6,  summaryGroup = '6: Total Sales Contracts', sort = 1005  UNION ALL
+			SELECT id = 7,  summaryGroup = '7: Total Purchase Contracts', sort = 1006
 
 	) AS SummaryGroupHardCodedValues
 		ON  SummaryGroupTable.intCashFlowReportSummaryGroupId = SummaryGroupHardCodedValues.id
