@@ -11,6 +11,7 @@
 	, @ysnInclude120Days		BIT = 0
 	, @ysnExcludeAccountStatus	BIT = 0
 	, @intGracePeriod			INT = 0
+	, @ysnOverrideCashFlow  	BIT = 0
 	, @strReportLogId			NVARCHAR(MAX) = NULL
 AS
 
@@ -28,7 +29,8 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strCompanyName				NVARCHAR(100) = NULL,
 		@strCompanyAddress			NVARCHAR(500) = NULL,
 		@intEntityUserIdLocal		INT = NULL,
-		@intGracePeriodLocal		INT = 0
+		@intGracePeriodLocal		INT = 0,
+		@ysnOverrideCashFlowLocal  	BIT = 0
 
 --DROP TEMP TABLES
 EXEC uspARInitializeTempTableForAging
@@ -42,9 +44,10 @@ SET @strCompanyLocationIdsLocal	= NULLIF(@strCompanyLocationIds, '')
 SET @strAccountStatusIdsLocal	= NULLIF(@strAccountStatusIds, '')
 SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
 SET @intGracePeriodLocal		= ISNULL(@intGracePeriod, 0)
+SET @ysnOverrideCashFlowLocal  	= ISNULL(@ysnOverrideCashFlow, 0)
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
-SET @strReportLogId				= NULLIF(@strReportLogId, NEWID())
+SET @strReportLogId				= NULLIF(@strReportLogId, CAST(NEWID() AS NVARCHAR(100)))
 
 SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
@@ -192,24 +195,6 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
 
---##FORGIVENSERVICECHARGE
-INSERT INTO ##FORGIVENSERVICECHARGE (
-	   intInvoiceId
-	 , strInvoiceNumber
-)
-SELECT SC.intInvoiceId
-	 , SC.strInvoiceNumber
-FROM tblARInvoice I
-INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
-INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
-WHERE I.strInvoiceOriginId IS NOT NULL 
-  AND I.strTransactionType = 'Credit Memo' 
-  AND I.strType = 'Standard'
-  AND SC.strTransactionType = 'Invoice'
-  AND SC.strType = 'Service Charge'
-  AND SC.ysnForgiven = 1
-
 --##POSTEDINVOICES
 INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	   intInvoiceId
@@ -244,7 +229,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dblDiscount				= I.dblDiscount
 	 , dblInterest				= I.dblInterest
 	 , dtmPostDate				= I.dtmPostDate
-	 , dtmDueDate				= DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate)
+	 , dtmDueDate				= CASE WHEN I.ysnOverrideCashFlow = 1 AND @ysnOverrideCashFlowLocal = 1 THEN I.dtmCashFlowDate ELSE DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate) END 
 	 , dtmDate					= CAST(I.dtmDate AS DATE)
 	 , ysnPaid					= I.ysnPaid
 FROM dbo.tblARInvoice I WITH (NOLOCK)
