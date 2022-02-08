@@ -19,6 +19,7 @@ DECLARE @tblInvalidStockUnitQuantities TABLE(strItemNo NVARCHAR(200), strUOM NVA
 DECLARE @tblMissingUOMs TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200))
 DECLARE @tblMissingItems TABLE (strItemNo NVARCHAR(200))
 DECLARE @tblDuplicateUPCImported TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR(200))
+DECLARE @tblInvalidModifier TABLE(strItemNo NVARCHAR(200), intModifier INT)
 
 
 --Validate Records
@@ -39,9 +40,12 @@ FROM
 	strUPCCode,
 	ROW_NUMBER() OVER (PARTITION BY strUPCCode
 						ORDER BY strUPCCode) AS RowNumber 
-FROM tblICImportStagingUOM 
+	FROM tblICImportStagingUOM 
+	WHERE intModifier IS NULL
 ) AS ROWS
-WHERE RowNumber > 1 AND strUPCCode IS NOT NULL
+WHERE RowNumber > 1 
+AND 
+strUPCCode IS NOT NULL
 
 --Make Imported UPC duplicates NULL
 
@@ -51,11 +55,63 @@ FROM
 (
 	SELECT
 	strUPCCode,
+	intModifier,
 	ROW_NUMBER() OVER (PARTITION BY strUPCCode
 						ORDER BY strUPCCode) AS RowNumber 
 	FROM tblICImportStagingUOM
+	WHERE intModifier IS NULL
 ) UOM
-WHERE UOM.RowNumber > 1 AND UOM.strUPCCode IS NOT NULL
+WHERE 
+UOM.RowNumber > 1 
+AND 
+UOM.strUPCCode IS NOT NULL
+
+--Check Imported UPC and Modifier duplicates
+
+INSERT INTO @tblDuplicateUPCImported (
+	strItemNo,
+	strUPCCode
+)
+SELECT 
+	strItemNo,
+	strUPCCode
+FROM
+(
+	SELECT
+	strItemNo,
+	strUPCCode,
+	intModifier,
+	ROW_NUMBER() OVER (PARTITION BY strUPCCode, intModifier
+						ORDER BY strUPCCode) AS RowNumber 
+FROM tblICImportStagingUOM 
+) AS ROWS
+WHERE RowNumber > 1 
+AND 
+strUPCCode IS NOT NULL
+AND
+intModifier IS NOT NULL
+
+--Make Imported UPC and Modifier duplicates NULL
+
+UPDATE UOM
+SET 
+	UOM.strUPCCode = NULL,
+	UOM.intModifier = NULL
+FROM
+(
+	SELECT
+	strUPCCode,
+	intModifier,
+	ROW_NUMBER() OVER (PARTITION BY strUPCCode, intModifier
+						ORDER BY strUPCCode) AS RowNumber 
+	FROM tblICImportStagingUOM
+) UOM
+WHERE 
+UOM.RowNumber > 1 
+AND 
+UOM.strUPCCode IS NOT NULL
+AND
+UOM.intModifier IS NOT NULL
 
 --Check Imported Short UPC duplicates
 
@@ -73,9 +129,13 @@ FROM
 	strShortUPCCode,
 	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode
 						ORDER BY strShortUPCCode) AS RowNumber 
-FROM tblICImportStagingUOM 
+	FROM tblICImportStagingUOM 
+	WHERE intModifier IS NULL
 ) AS ROWS
-WHERE RowNumber > 1 AND strShortUPCCode IS NOT NULL
+WHERE 
+RowNumber > 1 
+AND 
+strShortUPCCode IS NOT NULL
 
 --Make Imported Short UPC duplicates NULL
 
@@ -85,11 +145,65 @@ FROM
 (
 	SELECT
 	strShortUPCCode,
-	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode
+	intModifier,
+	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode, intModifier
 						ORDER BY strShortUPCCode) AS RowNumber 
 	FROM tblICImportStagingUOM
 ) UOM
-WHERE UOM.RowNumber > 1 AND UOM.strShortUPCCode IS NOT NULL
+WHERE 
+UOM.RowNumber > 1 
+AND 
+UOM.strShortUPCCode IS NOT NULL
+AND
+UOM.intModifier IS NULL
+
+--Check Imported Short UPC and Modifier duplicates
+
+INSERT INTO @tblDuplicateUPCImported (
+	strItemNo,
+	strUPCCode
+)
+SELECT 
+	strItemNo,
+	strShortUPCCode
+FROM
+(
+	SELECT
+	strItemNo,
+	strShortUPCCode,
+	intModifier,
+	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode, intModifier
+						ORDER BY strShortUPCCode) AS RowNumber 
+FROM tblICImportStagingUOM 
+) AS ROWS
+WHERE 
+RowNumber > 1 
+AND 
+strShortUPCCode IS NOT NULL
+AND
+intModifier IS NOT NULL
+
+--Make Imported Short UPC duplicates NULL
+
+UPDATE UOM
+SET 
+	UOM.strShortUPCCode = NULL,
+	UOM.intModifier = NULL
+FROM
+(
+	SELECT
+	strShortUPCCode,
+	intModifier,
+	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode, intModifier
+						ORDER BY strShortUPCCode) AS RowNumber 
+	FROM tblICImportStagingUOM
+) UOM
+WHERE 
+UOM.RowNumber > 1 
+AND 
+UOM.strShortUPCCode IS NOT NULL
+AND
+UOM.intModifier IS NOT NULL
 
 --Check missing Items
 
@@ -128,47 +242,36 @@ SELECT
 	x.strItemNo,
 	x.strUPCCode,
 	i.strDescription
-FROM tblICImportStagingUOM x
-INNER JOIN tblICItem i 
-ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(x.strItemNo) COLLATE Latin1_General_CI_AS
-OUTER APPLY (
-	SELECT TOP 1 intUpcCode, intUnitMeasureId, intItemId
-	FROM tblICItemUOM
-	WHERE 
-		intUpcCode = CASE 
-						WHEN x.strUPCCode IS NOT NULL AND isnumeric(rtrim(ltrim(strUPCCode)))=(1) 
-						AND NOT (x.strUPCCode like '%.%' OR x.strUPCCode like '%e%' OR x.strUPCCode like '%E%') 
-							THEN CONVERT([bigint],rtrim(ltrim(x.strUPCCode)),0) 
-						ELSE CONVERT([bigint],NULL,0) 
-					END
-) upc
-OUTER APPLY (
-	SELECT TOP 1 shortUPC.strUpcCode, shortUPC.intUnitMeasureId, shortUPC.intItemId
-	FROM tblICItemUOM shortUPC
-	INNER JOIN tblICItem iUPC 
-	ON shortUPC.intItemId = iUPC.intItemId
-	WHERE iUPC.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
-) shortUPC
+FROM
+	tblICImportStagingUOM x
+LEFT JOIN
+	tblICItem i
+	ON
+		i.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
+LEFT JOIN
+	tblICItemUOM longUPCMathces
+	ON
+		longUPCMathces.strLongUPCCode = x.strUPCCode
+		AND
+		ISNULL(NULLIF(longUPCMathces.intModifier, x.intModifier), NULLIF(x.intModifier, longUPCMathces.intModifier)) IS NULL
+LEFT JOIN
+	tblICItemUOM shortUPCMathces
+	ON
+		shortUPCMathces.strUpcCode = x.strShortUPCCode
+		AND
+		ISNULL(NULLIF(shortUPCMathces.intModifier, x.intModifier), NULLIF(x.intModifier, shortUPCMathces.intModifier)) IS NULL
 LEFT JOIN @tblMissingUOMs missingUOM ON missingUOM.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
 LEFT JOIN @tblMissingItems missingItem ON missingItem.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
-WHERE 
-(
+WHERE
 	(
-		upc.intUpcCode IS NOT NULL 
-		AND 
-		i.intItemId <> upc.intItemId
+		longUPCMathces.intItemId <> i.intItemId
+		OR
+		shortUPCMathces.intItemId <> i.intItemId
 	)
-	OR
-	(
-		shortUPC.strUpcCode IS NOT NULL 
-		AND 
-		i.intItemId <> shortUPC.intItemId
-	)
-)
-AND 
-missingUOM.strItemNo IS NULL
-AND
-missingItem.strItemNo IS NULL
+	AND 
+	missingUOM.strItemNo IS NULL
+	AND
+	missingItem.strItemNo IS NULL
 
 --Check invalid Stock Unit quantities
 
@@ -195,12 +298,25 @@ WHERE
 	missingUOM.strItemNo IS NULL AND
 	missingItem.strItemNo IS NULL
 
+INSERT INTO @tblInvalidModifier (strItemNo, intModifier)
+SELECT
+	x.strItemNo,
+	x.intModifier
+FROM tblICImportStagingUOM x
+WHERE
+	x.intModifier < 0
+	AND 
+	x.intModifier > 999
+
 CREATE TABLE #tmp (
 	  intId INT IDENTITY(1, 1) PRIMARY KEY
 	, intItemId INT NULL
 	, intUnitMeasureId INT NULL
 	, strLongUPCCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, strUpcCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, intCheckDigit INT NULL
+	, strUPCDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, intModifier INT NULL
 	, dblUnitQty NUMERIC(38, 20) NULL
 	, dblHeight NUMERIC(38, 20) NULL
 	, dblWidth NUMERIC(38, 20) NULL
@@ -221,6 +337,9 @@ INSERT INTO #tmp (
 	intUnitMeasureId, 
 	strLongUPCCode,
 	strUpcCode,
+	intCheckDigit,
+	strUPCDescription,
+	intModifier,
 	dblUnitQty,
 	dblHeight,
 	dblWidth,
@@ -248,6 +367,13 @@ SELECT
 							THEN NULL
 							ELSE x.strShortUPCCode 
 						END
+	, dbo.fnICCalculateCheckDigit(CASE 
+							WHEN v3.strUPCCode IS NOT NULL AND v3.strUPCCode COLLATE Latin1_General_CI_AS = x.strUPCCode COLLATE Latin1_General_CI_AS
+							THEN NULL
+							ELSE x.strUPCCode 
+						END)
+	, x.strUPCDescription
+	, x.intModifier
 	, x.dblUnitQty
 	, x.dblHeight
 	, x.dblWidth
@@ -279,15 +405,21 @@ FROM tblICImportStagingUOM x
 	) stock
 	LEFT JOIN @tblMissingItems v1 ON v1.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo  COLLATE Latin1_General_CI_AS	
 	LEFT JOIN @tblMissingUOMs v2 ON v2.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
+	LEFT JOIN @tblInvalidModifier v4 ON v4.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
 	LEFT JOIN @tblDuplicateUPCCodes v3 ON v3.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
 WHERE x.strImportIdentifier = @strIdentifier
 AND v1.strItemNo IS NULL 
 AND v2.strItemNo IS NULL
+AND v3.strItemNo IS NULL
+AND v4.strItemNo IS NULL
 
 DECLARE @intItemId INT 
 DECLARE @intUnitMeasureId INT 
 DECLARE @strLongUPCCode NVARCHAR(200)
 DECLARE @strUpcCode NVARCHAR(200)
+DECLARE @intCheckDigit INT
+DECLARE @strUPCDescription NVARCHAR(200)
+DECLARE @intModifier INT
 DECLARE @dblUnitQty NUMERIC(38, 20) 
 DECLARE @dblHeight NUMERIC(38, 20) 
 DECLARE @dblWidth NUMERIC(38, 20) 
@@ -310,6 +442,9 @@ SELECT
 	,intUnitMeasureId
 	,strLongUPCCode
 	,strUpcCode
+	,intCheckDigit
+	,strUPCDescription
+	,intModifier
 	,dblUnitQty
 	,dblHeight
 	,dblWidth
@@ -331,6 +466,9 @@ FETCH NEXT FROM uom_cursor INTO
 	,@intUnitMeasureId
 	,@strLongUPCCode
 	,@strUpcCode
+	,@intCheckDigit
+	,@strUPCDescription
+	,@intModifier
 	,@dblUnitQty
 	,@dblHeight
 	,@dblWidth
@@ -355,6 +493,9 @@ BEGIN
 		,intUnitMeasureId = @intUnitMeasureId
 		,strLongUPCCode = @strLongUPCCode
 		,strUpcCode = @strUpcCode
+		,intCheckDigit = @intCheckDigit
+		,strUPCDescription = @strUPCDescription
+		,intModifier = @intModifier
 		,dblUnitQty = @dblUnitQty
 		,dblHeight = @dblHeight
 		,dblWidth = @dblWidth
@@ -376,6 +517,8 @@ BEGIN
 			AND 
 			@strLongUPCCode IS NOT NULL
 			AND
+			ISNULL(NULLIF(intModifier, @intModifier), NULLIF(@intModifier, intModifier)) IS NULL
+			AND
 			intItemId = @intItemId
 		)
 		OR
@@ -383,6 +526,8 @@ BEGIN
 			RTRIM(LTRIM(strUpcCode)) COLLATE Latin1_General_CI_AS = LTRIM(@strUpcCode) COLLATE Latin1_General_CI_AS 
 			AND 
 			@strUpcCode IS NOT NULL
+			AND
+			ISNULL(NULLIF(intModifier, @intModifier), NULLIF(@intModifier, intModifier)) IS NULL
 			AND
 			intItemId = @intItemId
 		)
@@ -398,6 +543,9 @@ BEGIN
 			intUnitMeasureId, 
 			strLongUPCCode,
 			strUpcCode,
+			intCheckDigit,
+			strUPCDescription,
+			intModifier,
 			dblUnitQty,
 			dblHeight,
 			dblWidth,
@@ -418,6 +566,9 @@ BEGIN
 			RowItem.intUnitMeasureId, 
 			RowItem.strLongUPCCode,
 			RowItem.strUpcCode,
+			RowItem.intCheckDigit,
+			RowItem.strUPCDescription,
+			RowItem.intModifier,
 			RowItem.dblUnitQty,
 			RowItem.dblHeight,
 			RowItem.dblWidth,
@@ -439,6 +590,9 @@ BEGIN
 			,intUnitMeasureId = @intUnitMeasureId
 			,strLongUPCCode = @strLongUPCCode
 			,strUpcCode = @strUpcCode
+			,intCheckDigit = @intCheckDigit
+			,strUPCDescription = @strUPCDescription
+			,intModifier = @intModifier
 			,dblUnitQty = @dblUnitQty
 			,dblHeight = @dblHeight
 			,dblWidth = @dblWidth
@@ -475,6 +629,9 @@ BEGIN
 		,@intUnitMeasureId
 		,@strLongUPCCode
 		,@strUpcCode
+		,@intCheckDigit
+		,@strUPCDescription
+		,@intModifier
 		,@dblUnitQty
 		,@dblHeight
 		,@dblWidth
@@ -502,12 +659,14 @@ BEGIN
 	DECLARE @intTotalInvalidStockUnit INT
 	DECLARE @intTotalMissingItem INT
 	DECLARE @intTotalMissingUOM INT
+	DECLARE @intTotalInvalidModifier INT
 
 	SELECT @intTotalUPCCodeDuplicates = COUNT(*) FROM @tblDuplicateUPCCodes 
 	SELECT @intTotalUPCImportDuplicates = COUNT(*) FROM @tblDuplicateUPCImported 
 	SELECT @intTotalInvalidStockUnit = COUNT(*) FROM @tblInvalidStockUnitQuantities
 	SELECT @intTotalMissingUOM = COUNT(*) FROM @tblMissingUOMs
 	SELECT @intTotalUPCImportDuplicates = COUNT(*) FROM @tblDuplicateUPCImported 
+	SELECT @intTotalInvalidModifier = COUNT(*) FROM @tblInvalidModifier
 
 	SELECT 
 		@intRowsSkipped = COUNT(1) - ISNULL(@intRowsImported, 0) - ISNULL(@intRowsUpdated, 0) 
@@ -530,7 +689,7 @@ BEGIN
 		,intRowsUpdated = ISNULL(@intRowsUpdated, 0) 
 		,intRowsSkipped = ISNULL(@intRowsSkipped, 0)
 		,intTotalWarnings = ISNULL(ISNULL(@intTotalUPCCodeDuplicates, 0) + ISNULL(@intTotalUPCImportDuplicates, 0) + ISNULL(@intTotalInvalidStockUnit, 0), 0)
-		,intTotalErrors = @intTotalMissingItem + @intTotalMissingUOM
+		,intTotalErrors = @intTotalMissingItem + @intTotalMissingUOM + @intTotalInvalidModifier
 	-- Log Detail for missing items and uoms
 	INSERT INTO tblICImportLogDetailFromStaging(
 		strUniqueId
@@ -568,13 +727,25 @@ BEGIN
 		@tblMissingUOMs
 	UNION ALL
 	SELECT 
+		@strIdentifier
+		, 'Modifier'
+		, 'Import Failed.'
+		, intModifier
+		, 'Invalid modifier.'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM
+		@tblInvalidModifier
+	UNION ALL
+	SELECT 
 			@strIdentifier,
 			'UPC Code',
-			'Import Finished.',
+			'Import Failed.',
 			Codes.strUPCCode,
-			'Duplicate UPC Code - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' - ' + Codes.strDescription + ' and still uploaded UOM with empty UPC Code.',
-			'Success',
-			'Warning',
+			'Duplicate UPC Code - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' - ' + Codes.strDescription + '.',
+			'Failed',
+			'Error',
 			1
 	FROM 
 		@tblDuplicateUPCCodes Codes

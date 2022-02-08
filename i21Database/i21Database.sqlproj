@@ -367,6 +367,7 @@
     <Build Include="dbo\Tables\tblApiSchemaCustomerLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerLocation.sql" />
     <Build Include="dbo\Functions\fnICIsUpcExists2.sql" />
+    <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
