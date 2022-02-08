@@ -27,6 +27,7 @@ SELECT A.*
 	, GL20.strAccountId strUnrealizedLossOnInventoryIOSId
 	, GL21.strAccountId strFuturesGainOrLossRealizedId
 	, GL22.strAccountId strFuturesGainOrLossRealizedOffsetId
+	, GL23.strAccountId strCommissionExpenseId
 	, strDefaultInstrument = CASE WHEN intDefaultInstrumentId = 1 THEN 'Exchange Traded'
 								WHEN intDefaultInstrumentId = 2 THEN 'OTC'
 								WHEN intDefaultInstrumentId = 3 THEN 'OTC - Others' END COLLATE Latin1_General_CI_AS
@@ -65,5 +66,6 @@ LEFT JOIN tblGLAccount GL19 ON GL19.intAccountId = A.intUnrealizedGainOnInventor
 LEFT JOIN tblGLAccount GL20 ON GL20.intAccountId = A.intUnrealizedLossOnInventoryIOSId
 LEFT JOIN tblGLAccount GL21 ON GL21.intAccountId = A.intFuturesGainOrLossRealizedId
 LEFT JOIN tblGLAccount GL22 ON GL22.intAccountId = A.intFuturesGainOrLossRealizedOffsetId
+LEFT JOIN tblGLAccount GL23 ON GL23.intAccountId = A.intCommissionExpenseId
 LEFT JOIN tblRKRiskView rv ON rv.intRiskViewId = A.intRiskViewId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = A.intTonnageUOMId
