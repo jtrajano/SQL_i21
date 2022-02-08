@@ -74,12 +74,36 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 			,@strDeductionDesc  = LTRIM(RTRIM(strDeductionDesc))
 			,@strDeductionId = LTRIM(RTRIM(strDeductionId))
 			,@ysnDefault  = ysnDefault
-			,@strCategory  = strCategory
+			,@strCategory  = CASE WHEN strCategory <> '' AND strCategory 
+								IN(
+									'Child Support',
+									'Federal Garnishment',
+									'State Garnishment',
+									'Retirement Plan Loan',
+									'401(k)',
+									'403(b)',
+									'408(k) SEP',
+									'408(p) SIMPLE',
+									'457(b)',
+									'501(c)',
+									'Loan Repayment',
+									'Dependent Care',
+									'Pension Plan',
+									'Archer MSA',
+									'HSA',
+									'Pre-Tax Insurance',
+									'Post-Tax Insurance',
+									'Roth 401(k)',
+									'Roth 403(b)',
+									'Special Tax',
+									'Voluntary',
+									'Union Dues'
+								) THEN strCategory ELSE '' END
 			,@strPaidBy  = strPaidBy
 			,@dblRateCalc = dblRateCalc
-			,@strRateCalcType  = strRateCalcType
+			,@strRateCalcType  = CASE WHEN strRateCalcType <> '' AND strRateCalcType IN('Fixed Amount','Percent') THEN strRateCalcType ELSE '' END
 			,@dblDeductFrom = dblDeductFrom
-			,@strDeductFromType  = strDeductFromType
+			,@strDeductFromType  = CASE WHEN strDeductFromType <> '' AND strDeductFromType IN('Net Pay','Gross Pay') THEN strDeductFromType ELSE '' END
 			,@dblAnnualLimit	 = dblAnnualLimit
 			,@dtmBeginDate = CAST(ISNULL(dtmBeginDate, null) AS DATETIME) 
 			,@dtmEndDate	= CAST(ISNULL(dtmEndDate, null) AS DATETIME)  
@@ -386,7 +410,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 						END
 					END
 
-				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @intEntityNo  AND strDeductionId = @strDeductionId
+				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId
 			END
 
 		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
