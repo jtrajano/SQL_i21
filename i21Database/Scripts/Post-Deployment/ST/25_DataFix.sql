@@ -101,4 +101,52 @@ IF EXISTS(SELECT intCheckoutId FROM tblSTCheckoutHeader
 -- [END]: Update tblSTCheckoutHeader.dblTotalToDeposit additional of ATM Replenished to the computation of Total To Deposit
 ----------------------------------------------------------------------------------------------------------------------------------
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Update tblSTLotteryGame - Add default intItemUOMId with stock unit of Item UOM
+----------------------------------------------------------------------------------------------------------------------------------
+      
+IF EXISTS(SELECT intItemUOMId FROM tblSTLotteryGame WHERE intItemUOMId IS NULL)
+			BEGIN
+				UPDATE tblSTLotteryGame 
+					SET intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = intItemId AND ysnStockUnit = 1)
+			END
+			
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Update tblSTLotteryGame - Add default intItemUOMId with stock unit of Item UOM
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Update tblSTPumpItem - Add default strUnitMeasure with stock unit of Item UOM
+----------------------------------------------------------------------------------------------------------------------------------
+      
+IF EXISTS(SELECT strUnitMeasure FROM tblSTPumpItem WHERE strUnitMeasure IS NULL)
+			BEGIN
+				UPDATE tblSTPumpItem 
+					SET strUnitMeasure = (SELECT TOP 1 strUnitMeasure FROM tblICUnitMeasure um 
+																		JOIN tblICItemUOM uom
+																			ON um.intUnitMeasureId = uom.intUnitMeasureId
+																		WHERE intItemUOMId = tblSTPumpItem.intItemUOMId AND uom.ysnStockUnit = 1)
+			END
+			
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Update tblSTPumpItem - Add default strUnitMeasure with stock unit of Item UOM
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Update tblSTLotteryBook - Add default intItemUOMId with stock unit of Item UOM
+----------------------------------------------------------------------------------------------------------------------------------
+      
+IF EXISTS(SELECT intItemUOMId FROM tblSTLotteryBook WHERE intItemUOMId IS NULL)
+			BEGIN
+				UPDATE tblSTLotteryBook 
+					SET intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblSTLotteryGame WHERE intLotteryGameId = tblSTLotteryBook.intLotteryGameId)
+			END
+			
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Update tblSTLotteryBook - Add default intItemUOMId with stock unit of Item UOM
+----------------------------------------------------------------------------------------------------------------------------------
+
 GO

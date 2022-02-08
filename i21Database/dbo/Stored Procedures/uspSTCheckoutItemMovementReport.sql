@@ -22,6 +22,7 @@ SELECT
 	 , EM.strName AS strVendorName
 	 , tblIMQty.dtmCheckoutDateMin
 	 , tblIMQty.dtmCheckoutDateMax
+	 , tblIMQty.strUnitMeasure
 	 , tblIMQty.strLongUPCCode
 	 , tblIMQty.strItemNo
 	 , tblIMQty.strItemDescription
@@ -62,6 +63,7 @@ FROM
 	      ST.intStoreId
 		, UOM.intItemUOMId
 		, UOM.strLongUPCCode
+		, UM.strUnitMeasure
 		, Item.intItemId
 		, Item.strItemNo
 		, Item.strDescription AS strItemDescription
@@ -84,6 +86,8 @@ FROM
 		ON ST.intCompanyLocationId = CL.intCompanyLocationId
 	INNER JOIN dbo.tblICItemUOM UOM 
 		ON UOM.intItemUOMId = IM.intItemUPCId
+	INNER JOIN dbo.tblICUnitMeasure UM 
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	INNER JOIN tblICItem Item
 		ON UOM.intItemId = Item.intItemId
 	INNER JOIN tblICItemLocation IL
@@ -165,6 +169,7 @@ FROM
 			)
 	GROUP BY  ST.intStoreId
 			, UOM.intItemUOMId
+			, UM.strUnitMeasure
 			, UOM.strLongUPCCode
 			, Item.intItemId
 			, Item.strDescription

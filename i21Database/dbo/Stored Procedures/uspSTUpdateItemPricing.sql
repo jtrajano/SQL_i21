@@ -556,7 +556,6 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
 				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 			)
-			AND UOM.ysnStockUnit = 1
 
 		
 		-- Effective item PRICE pricing
@@ -683,7 +682,6 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
 				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 			)
-			AND UOM.ysnStockUnit = 1
 
 
 
@@ -814,7 +812,6 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
 				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 			)
-			AND UOM.ysnStockUnit = 1
 	END
 
 
