@@ -72,9 +72,11 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, strEntityType = CASE WHEN entityType.Prospect = 1 THEN 'Prospect' ELSE 'Customer' END COLLATE Latin1_General_CI_AS
 	, ysnHasCustomerCreditApprover	= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 	, CUSTOMER.ysnApplySalesTax
-	, dblShipToLongitude			= shipLocation.dblLongitude
+	, dblShipToLongitude		= shipLocation.dblLongitude
 	, dblShipToLatitude			= shipLocation.dblLatitude
 	, strAccountType = NULLIF(CUSTOMER.strType, '')
+	, intDisbursementBankAccountId = CUSTOMER.intDisbursementBankAccountId
+	, strDisbursementBankAccountNo = CUSTOMER.strDisbursementBankAccountNo
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
