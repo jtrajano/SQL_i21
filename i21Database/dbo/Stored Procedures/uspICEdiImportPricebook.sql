@@ -1790,7 +1790,7 @@ FROM (
 			,il.intItemLocationId
 			,iu.intItemUOMId
 			,intCompanyLocationId = loc.intCompanyLocationId 
-			,dblRetailPrice = CAST(ISNULL(NULLIF(p.strCaseRetailPrice, ''), 0) AS NUMERIC(38, 20)) 
+			,dblRetailPrice = CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) 
 			,dtmEffectiveDate = GETUTCDATE()
 			,dtmDateCreated = GETUTCDATE()		
 			,intCreatedByUserId	= @intUserId
@@ -1817,7 +1817,7 @@ FROM (
 			,il.intItemLocationId
 			,iu.intItemUOMId
 			,intCompanyLocationId = loc.intCompanyLocationId 
-			,dblRetailPrice = CAST(ISNULL(NULLIF(p.strRetailPrice, ''),0) AS NUMERIC(38, 20)) 
+			,dblRetailPrice = CAST(NULLIF(p.strRetailPrice, '') AS NUMERIC(38, 20)) 
 			,dtmEffectiveDate = CAST(GETUTCDATE() AS DATE)
 			,dtmDateCreated = GETUTCDATE()		
 			,intCreatedByUserId	= @intUserId
