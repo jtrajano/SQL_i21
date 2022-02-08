@@ -751,7 +751,8 @@ FROM (
 			,strUpcCode = dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
 			,intModifiedByUserId = @intUserId 
 			,intConcurrencyId = ItemUOM.intConcurrencyId + 1
-
+			,intCheckDigit = dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
+			,intModifier = CAST(Source_Query.strUpcModifierNumber AS INT)
 	-- If not found and it is allowed, insert a new item uom record.
 	WHEN 
 		NOT MATCHED 
@@ -765,6 +766,8 @@ FROM (
 			,dblUnitQty
 			,strUpcCode
 			,strLongUPCCode
+			,intCheckDigit
+			,intModifier
 			,ysnStockUnit
 			,ysnAllowPurchase
 			,ysnAllowSale
@@ -779,6 +782,8 @@ FROM (
 			,1--,dblUnitQty
 			,dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
 			,Source_Query.strSellingUpcNumber--,strLongUPCCode
+			,dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)--,intCheckDigit
+			,CAST(Source_Query.strUpcModifierNumber AS INT)--,intModifier
 			,Source_Query.ysnStockUnit--,ysnStockUnit
 			,1--,ysnAllowPurchase
 			,1--,ysnAllowSale
