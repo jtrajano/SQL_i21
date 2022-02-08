@@ -1009,22 +1009,21 @@ INSERT INTO #STATEMENTTABLE (
 	, strStatementFooterComment
 	, dblInvoiceTotal
 )
-SELECT DISTINCT
-	  intEntityCustomerId		= ISNULL(BALANCEFORWARD.intEntityCustomerId, STATEMENTFORWARD.intEntityCustomerId)
-	, strCustomerName			= ISNULL(BALANCEFORWARD.strCustomerName, STATEMENTFORWARD.strCustomerName)
-	, strCustomerNumber			= ISNULL(BALANCEFORWARD.strEntityNo, STATEMENTFORWARD.strCustomerNumber)
+SELECT intEntityCustomerId		= ISNULL(BALANCEFORWARD.intEntityCustomerId, C.intEntityCustomerId)
+	, strCustomerName			= ISNULL(BALANCEFORWARD.strCustomerName, C.strCustomerName)
+	, strCustomerNumber			= ISNULL(BALANCEFORWARD.strEntityNo, C.strCustomerNumber)
 	, strTransactionType		= 'Balance Forward'
-	, dblCreditLimit			= ISNULL(BALANCEFORWARD.dblCreditLimit, STATEMENTFORWARD.dblCreditLimit)
+	, dblCreditLimit			= ISNULL(BALANCEFORWARD.dblCreditLimit, C.dblCreditLimit)
 	, dtmDate					= @dtmBalanceForwardDateLocal
 	, dtmDatePaid				= '01/01/1900'
 	, intInvoiceId				= 1
 	, dblBalance				= ISNULL(BALANCEFORWARD.dblTotalAR, 0)
 	, dblPayment				= 0
-	, strFullAddress			= STATEMENTFORWARD.strFullAddress
-	, strStatementFooterComment	= STATEMENTFORWARD.strStatementFooterComment
+	, strFullAddress			= C.strFullAddress
+	, strStatementFooterComment	= C.strStatementFooterComment
 	, dblInvoiceTotal			= ISNULL(BALANCEFORWARD.dblTotalAR, 0)
-FROM #STATEMENTTABLE STATEMENTFORWARD
-LEFT JOIN #BALANCEFORWARDTABLE BALANCEFORWARD ON STATEMENTFORWARD.intEntityCustomerId = BALANCEFORWARD.intEntityCustomerId    
+FROM #BALANCEFORWARDTABLE BALANCEFORWARD
+INNER JOIN #CUSTOMERS C ON C.intEntityCustomerId = BALANCEFORWARD.intEntityCustomerId    
 
 MERGE INTO tblARStatementOfAccount AS Target
 USING (SELECT strCustomerNumber, @dtmDateToLocal, SUM(ISNULL(dblBalance, 0))
