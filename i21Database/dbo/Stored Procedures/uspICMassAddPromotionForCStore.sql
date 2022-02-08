@@ -192,6 +192,7 @@ BEGIN
 						AND specialpricing.intItemId = Source_Query.intItemId
 						AND specialpricing.dtmBeginDate = Source_Query.dtmBeginDate
 						AND specialpricing.dtmEndDate = Source_Query.dtmEndDate
+						AND specialpricing.intItemUnitMeasureId = Source_Query.intItemUnitMeasureId
 					
 					-- If matched, update the Standard Cost and Retail Price. 
 					WHEN MATCHED THEN 
@@ -221,10 +222,12 @@ BEGIN
 						AND (1 NOT IN  (SELECT 1 FROM tblICItemSpecialPricing 
 									WHERE intItemLocationId = Source_Query.intItemLocationId
 									AND intItemId = Source_Query.intItemId
+									AND intItemUnitMeasureId = Source_Query.intItemUnitMeasureId
 									AND Source_Query.dtmBeginDate <= dtmEndDate)) 
 						AND (1 NOT IN  (SELECT 1 FROM tblICItemSpecialPricing 
 									WHERE intItemLocationId = Source_Query.intItemLocationId
 									AND intItemId = Source_Query.intItemId
+									AND intItemUnitMeasureId = Source_Query.intItemUnitMeasureId
 									AND Source_Query.dtmEndDate <= dtmBeginDate)) 
 						THEN 
 						INSERT (
