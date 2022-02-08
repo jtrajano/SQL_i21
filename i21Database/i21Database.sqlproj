@@ -342,6 +342,17 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessPriceFixationMultiplePrice.sql" />
     <Build Include="dbo\Views\vyuCTCombinePriceFixation.sql" />
     <Build Include="dbo\Views\vyuCTCombinePriceFixationDetail.sql" />
+    <Build Include="dbo\Views\vyuMBILLoadSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILLoadSchedule.sql" />
+    <Build Include="dbo\Tables\tblMBILLoadSchedule.sql" />
+    <Build Include="dbo\Views\vyuMBILDeliveryDetail.sql" />
+    <Build Include="dbo\Views\vyuMBILDeliveryHeader.sql" />
+    <Build Include="dbo\Views\vyuMBILPickupDetail.sql" />
+    <Build Include="dbo\Views\vyuMBILPickupHeader.sql" />
+    <Build Include="dbo\Tables\tblMBILPickupDetail.sql" />
+    <Build Include="dbo\Tables\tblMBILPickupHeader.sql" />
+    <Build Include="dbo\Tables\tblMBILDeliveryHeader.sql" />
+    <Build Include="dbo\Tables\tblMBILDeliveryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

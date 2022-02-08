@@ -1,241 +1,175 @@
-CREATE Procedure [dbo].[uspMBILLoadSchedule]                 
- @intDriverId as int                 
-as                 
-begin             
-  
-      
-Delete from tblMBILLoadSchedule Where intLoadId not in (Select intLoadId from tblMBILLongTruckHeader where intDriverEntityId = @intDriverId) and intDriverEntityId = @intDriverId      
-      
-insert into                
-  tblMBILLoadSchedule(                
-        intLoadId,                
-        intLoadDetailId,                
-  intDriverEntityId,                
-        strLoadNumber,       
-  strTrailerNo,    
-        strType,      
-        intItemId,                
-        strItemNo,                
-        strItemDescription,                
-        dblQuantity,                
-        strItemUOM,                
-        dblGross,                
-        dblTare,                
-        dblNet,                
-        strWeightItemUOM,                
-        intEntityId,                
-        strName,                
-        intEntityLocationId,                
-        strShipName,                
-        strAddress,                
-        strCity,                
-        strCountry,                
-        strState,                
-        strZipCode,                
-        strEmail,                
-        strPhone,                
-        strMobile,                
-        intCompanyLocationId,                
-        strCompanyLocationName,                
-        strCompanyLocationAddress,                
-  strCompanyLocationCity,                
-        strCompanyLocationCountry,                
-        strCompanyLocationState,                
-        strCompanyLocationZipCode,                
-        strCompanyLocationMail,                
-        strCompanyLocationPhone,                
-        dtmSchedulePullDate,                
-        dtmScheduleDeliveryDate,                
-        strBOL,                
-        strPONumber,                
-  dblCompanyLocationLongitude,                
-  dblCompanyLocationLatitude,                
-  dblLongitude,                
-  dblLatitude,              
-  strTruckNo,  
-  intTruckId,  
-  strCompanyName                
-    )                
-Select                
-    v.*,b.strCompanyName                
-from                
-    (                
-        Select                
-            intLoadId,                
-            intLoadDetailId,                
-   intDriverEntityId,                
-            strLoadNumber,      
-   strTrailerNo1,    
-            strType = 'Inbound',                
-            intItemId,                
-            strItemNo,                
-            strItemDescription,                
-            dblQuantity,                
-            strItemUOM,                
-            dblGross,                
-            dblTare,                
-            dblNet,                
-            strWeightItemUOM,                
-            intEntityId = intVendorEntityId,                
-            strName = strVendor,                
-            intEntityLocationId = intVendorEntityLocationId,                
-            strShipName = strShipFrom,                
-            strAddress = strShipFromAddress,                
-            strCity = strShipFromCity,                
-            strCountry = strShipFromCountry,                
-            strState = strShipFromState,                
-            strZipCode = strShipFromZipCode,                
-            strEmail = strVendorEmail,                
-            strPhone = strVendorPhone,                
-            strMobile = strVendorMobile,                
-            intCompanyLocationId = intPCompanyLocationId,                
-            strCompanyLocationName = strPLocationName,                
-            strCompanyLocationAddress = strPLocationAddress,                
-      strCompanyLocationCity = strPLocationCity,                
-            strCompanyLocationCountry = strPLocationCountry,                
-            strCompanyLocationState = strPLocationState,                
-            strCompanyLocationZipCode = strPLocationZipCode,                
-            strCompanyLocationMail = strPLocationMail,                
-            strCompanyLocationPhone = strPLocationPhone,              
-            dtmSchedulePullDate = (Select dtmETAPOL from tblLGLoad eta Where a.intLoadId = eta.intLoadId),                
-            dtmSCheduleDeliveryDate = (Select dtmETAPOD from tblLGLoad pod Where a.intLoadId = pod.intLoadId),                
-            strBOL = '',                
-            strPONumber = isnull(a.strExternalLoadNumber,a.strDetailVendorReference),                
-    dblCompanyLocationLongitude = b.dblLongitude,                
-    dblCompanyLocationLatitude = b.dblLatitude,                
-    c.dblLongitude,                
-    c.dblLatitude  ,          
-    strTruckNo,          
- intTruckId = d.intTruckDriverReferenceId  
-   From vyuLGLoadDetailView a                
-  Left Join tblSMCompanyLocation b on a.intPCompanyLocationId = b.intCompanyLocationId                
-  Left Join tblEMEntityLocation c on a.intVendorEntityLocationId = c.intEntityLocationId                
-  Left Join tblSCTruckDriverReference d on a.strTruckNo = d.strData  
-     where                
-            isnull(ysnDispatched, 0) = 1                
-            and intPurchaseSale = 1                
-            and ysnInProgress = 0                
-            and ISNULL(dblDeliveredQuantity, 0.000000) <= 0                
-            and strTransUsedBy = 'Transport Load'                
-                
-        Union All                
-                
-        Select                
-            intLoadId,                
-            intLoadDetailId,                
-   intDriverEntityId,                
-            strLoadNumber,       
-   strTrailerNo1,    
-            strType = 'Outbound',               
-            intItemId,                
-            strItemNo,                
-            strItemDescription,                
-            dblQuantity,                
-            strItemUOM,                
-            dblGross,                
-            dblTare,                
-            dblNet,                
-            strWeightItemUOM,                
-   intCustomerEntityId,                
-            strCustomer,                
-            intCustomerEntityLocationId,                
-            strShipTo,                
-            strShipToAddress,                
-            strShipToCity,                
-            strShipToCountry,                
-            strShipToState,                
-            strShipToZipCode,                
-            strCustomerEmail,                
-            strCustomerPhone,                
-            strCustomerMobile,                
-            intSCompanyLocationId,                
-            strSLocationName,                
-            strSLocationAddress,                
-   strSLocationCity,                
-            strSLocationCountry,                
-            strSLocationState,                
-            strSLocationZipCode,                
-            strSLocationMail,                
-            strSLocationPhone,                
-            dtmSchedulePullDate = (Select dtmETAPOL from tblLGLoad eta Where a.intLoadId = eta.intLoadId),                
-            dtmSCheduleDeliveryDate = (Select dtmETAPOD from tblLGLoad pod Where a.intLoadId = pod.intLoadId),                
-            strBOL = '',                
-            strPONumber = isnull(a.strDetailCustomerReference,a.strCustomerReference),               
-     dblCompanyLocationLongitude = b.dblLongitude,                
-     dblCompanyLocationLatitude = b.dblLatitude,                
-     c.dblLongitude,               
-     c.dblLatitude,          
-     strTruckNo,  
-  intTruckId = d.intTruckDriverReferenceId  
-        From vyuLGLoadDetailView a                
-  left join tblSMCompanyLocation b on a.intSCompanyLocationId = b.intCompanyLocationId                
-  Left join tblEMEntityLocation c on a.intCustomerEntityLocationId = c.intEntityLocationId                
-  Left join tblSCTruckDriverReference d on a.strTruckNo = d.strData  
-        Where intPurchaseSale = 2                
-            and isnull(ysnDispatched, 0) = 1                
-            and ysnInProgress = 0                
-            and ISNULL(dblDeliveredQuantity, 0.000000) <= 0                
-            and strTransUsedBy = 'Transport Load'                
-union all            
-                
-        Select                
-            intLoadId,                
-            intLoadDetailId,                
-   intDriverEntityId,                
-            strLoadNumber,     
-   strTrailerNo1,    
-            strType = 'DropShip',               
-            intItemId,                
-            strItemNo,                
-            strItemDescription,                
-            dblQuantity,                
-            strItemUOM,                
-            dblGross,                
-            dblTare,                
-            dblNet,                
-            strWeightItemUOM,         
-   intEntityId = intVendorEntityId,                
-            strName = strVendor,                
-            intEntityLocationId = intVendorEntityLocationId,                
-            strShipName = strShipFrom,                
-            strAddress = strShipFromAddress,                
-            strCity = strShipFromCity,                
-            strCountry = strShipFromCountry,                
-            strState = strShipFromState,                
-            strZipCode = strShipFromZipCode,                
-            strEmail = strVendorEmail,                
-            strPhone = strVendorPhone,                
-   strMobile = strVendorMobile,            
-   intCustomerEntityLocationId,                
-            strCustomer,               
-            strShipToAddress,                
-            strShipToCity,                
-            strShipToCountry,                
-            strShipToState,                
-            strShipToZipCode,                
-            strCustomerEmail,                
-            strCustomerPhone,               
-            dtmSchedulePullDate = (Select dtmETAPOL from tblLGLoad eta Where a.intLoadId = eta.intLoadId),                
-            dtmSCheduleDeliveryDate = (Select dtmETAPOD from tblLGLoad pod Where a.intLoadId = pod.intLoadId),                
-            strBOL = '',                
-            strPONumber = isnull(a.strExternalLoadNumber,a.strDetailVendorReference),           
-   dblCompanyLocationLongitude = b.dblLongitude,            
-   dblCompanyLocationLatitude = b.dblLatitude,                
-   c.dblLongitude,                
-   c.dblLatitude  ,          
-   strTruckNo        ,  
-   intTruckId = intTruckDriverReferenceId  
-   From vyuLGLoadDetailView a                
-  left join tblSMCompanyLocation b on a.intSCompanyLocationId = b.intCompanyLocationId                
-  Left join tblEMEntityLocation c on a.intCustomerEntityLocationId = c.intEntityLocationId                
-  Left join tblSCTruckDriverReference d on a.strTruckNo = d.strData  
-        Where intPurchaseSale = 3                
-            and isnull(ysnDispatched, 0) = 1                
-            and ysnInProgress = 0                
-            and ISNULL(dblDeliveredQuantity, 0.000000) <= 0                
-            and strTransUsedBy = 'Transport Load'                
-    ) v                
-left join tblSMCompanySetup b on 1 = 1                
-Where intLoadId not in(select intLoadId from tblMBILLongTruckHeader)                 
-end             
-      
+CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]
+    @intDriverId AS INT
+AS
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+BEGIN
+    DELETE FROM tblMBILPickupDetail
+    DELETE FROM tblMBILDeliveryDetail
+    DELETE FROM tblMBILPickupHeader
+    DELETE FROM tblMBILDeliveryHeader
+
+    SELECT *
+    INTO #loadSchedule
+    FROM vyuMBILLoadSchedule
+    WHERE intDriverEntityId = @intDriverId AND intLoadId NOT IN (SELECT intLoadId
+        FROM tblMBILPickupHeader)
+
+    DECLARE @tblLoadId AS TABLE(intLoadId int)
+
+    INSERT INTO @tblLoadId
+    SELECT DISTINCT intLoadId
+    FROM #loadSchedule
+    WHERE intDriverEntityId = @intDriverId AND intLoadId NOT in(Select intLoadId
+        FROM tblMBILPickupHeader)
+
+    WHILE (SELECT count(1)
+    FROM @tblLoadId) <> 0     
+BEGIN
+
+        DECLARE @intLoadId AS int = (SELECT TOP 1
+            intLoadId
+        FROM @tblLoadId
+        ORDER BY 1 asc)
+        --//INSERT PICKUP HEADER    
+
+        INSERT INTO tblMBILPickupHeader
+            (intLoadId,
+            intDriverEntityId,
+            strLoadNumber,
+            strType,
+            intEntityId,
+            intEntityLocationId,
+            intCompanyLocationId,
+            dtmSchedulePullDate,
+            dtmStartTime,
+            dtmEndTime,
+            strPONumber)
+        SELECT intLoadId,
+            intDriverEntityId,
+            strLoadNumber,
+            strType,
+            intEntityId,
+            intEntityLocationId,
+            intCompanyLocationId,
+            dtmSchedulePullDate,
+            NULL dtmStartTime,
+            NULL dtmEndTime,
+            strPONumber
+        FROM #loadSchedule
+        WHERE intLoadId = @intLoadId
+        GROUP BY    intLoadId,    
+    intDriverEntityId,    
+    strLoadNumber,    
+    strType,    
+    intEntityId ,    
+    intEntityLocationId ,    
+    intCompanyLocationId,    
+    dtmSchedulePullDate,      
+    strPONumber
+        --DECLARE @pickupheaderId as int = (SELECT IDENT_CURRENT('tblMBILPickupHeader'))      
+        DECLARE @pickupheaderId AS int = @@IDENTITY
+
+        --//INSERT  DELIVERY HEADER    
+        INSERT INTO tblMBILDeliveryHeader
+            (intLoadId,
+            intDriverEntityId,
+            strLoadNumber,
+            strType,
+            intEntityId,
+            intEntityLocationId,
+            intCompanyLocationId,
+            dtmScheduleDeliveryDate)
+        SELECT intLoadId,
+            intDriverEntityId,
+            strLoadNumber,
+            strType,
+            intCustomerId ,
+            intCustomerLocationId ,
+            intCompanyDeliveryLocationId,
+            dtmDeliveryDate
+        FROM #loadSchedule
+        WHERE intLoadId = @intLoadId
+        GROUP BY intLoadId,    
+                intDriverEntityId,    
+                strLoadNumber,    
+                strType,    
+                intCustomerId ,    
+                intCustomerLocationId ,    
+                intCompanyDeliveryLocationId ,    
+                dtmDeliveryDate
+
+        --DECLARE @intDeliveryHeaderId as int = (SELECT IDENT_CURRENT('tblMBILDeliveryHeader'))      
+        DECLARE @intDeliveryHeaderId AS int = @@IDENTITY
+
+        --//INSERT PICKUP DETAIL    
+        DECLARE @tblPickupDetail AS TABLE    
+        (
+            intpickupheaderId int,
+            intEntityId int,
+            intEntityLocationId int,
+            intCompanyLocationId int,
+            intLoadId int,
+            intItemId int ,
+            dblQuantity numeric(18,6)    
+        )
+
+        INSERT INTO @tblPickupDetail
+            (intpickupheaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intLoadId,intItemId,dblQuantity)
+        SELECT @pickupheaderId,
+            intEntityId,
+            intEntityLocationId,
+            intCompanyLocationId,
+            intLoadId,
+            intItemId,
+            sum(dblQuantity)dblQuantity
+        FROM #loadSchedule
+        WHERE intLoadId = @intLoadId
+        GROUP BY intEntityId,    
+                 intEntityLocationId,    
+                 intCompanyLocationId,    
+                 intLoadId,    
+                 intItemId
+        WHILE (SELECT count(1)
+        FROM @tblPickupDetail) <> 0    
+ begin
+
+            DECLARE @intItemId AS INT = (SELECT TOP 1
+                intItemId
+            FROM @tblPickupDetail)
+            INSERT INTO tblMBILPickupDetail
+                (intPickupHeaderId,intItemId,dblQuantity)
+            SELECT TOP 1
+                @pickupheaderId, intItemId, dblQuantity
+            FROM @tblPickupDetail a
+            WHERE intItemId = @intItemId
+
+            --DECLARE @intPickupDetailId as int = (SELECT IDENT_CURRENT('tblMBILPickupDetail'))      
+            DECLARE @intPickupDetailId AS INT = @@IDENTITY
+
+            INSERT INTO tblMBILDeliveryDetail
+                (intDeliveryHeaderId,intItemId,dblQuantity,intPickupDetailId)
+            SELECT @intDeliveryHeaderId,
+                intItemId,
+                sum(dblQuantity)dblQuantity,
+                @intPickupDetailId
+            FROM #loadSchedule
+            WHERE intLoadId = @intLoadId AND intItemId = @intItemId
+            GROUP BY intEntityId,    
+     intCustomerId,    
+     intCustomerLocationId,    
+     intCompanyDeliveryLocationId,    
+     intLoadId,    
+     intItemId
+
+
+
+            DELETE FROM @tblPickupDetail WHERE intItemId = @intItemId
+        END
+        DELETE FROM @tblLoadId WHERE intLoadId = @intLoadId
+    END
+
+END
