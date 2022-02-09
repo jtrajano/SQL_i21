@@ -45,47 +45,18 @@ BEGIN TRY
 	SET @BatchIdUsed = @BatchId
 	SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 	SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 intAccountsReceivableRateTypeId FROM tblSMMultiCurrency)
+	
+	EXEC dbo.uspARGenerateGLEntries @Post		= @Post
+								  , @Recap		= 1
+								  , @PostDate	= @PostDate
+								  , @BatchId	= @BatchIdUsed
+								  , @UserId		= @UserId 
 
-	EXEC [dbo].[uspARPostItemResevation]
-
-	IF @Post = 1
-		BEGIN
-			EXEC [dbo].[uspARProcessSplitOnInvoicePost] @ysnPost	  	= @Post
-													  , @ysnRecap	  	= @Recap
-													  , @dtmDatePost	= @PostDate
-													  , @strBatchId		= @BatchIdUsed
-													  , @intUserId		= @UserId
-			EXEC [dbo].[uspARPrePostInvoiceIntegration]
-			EXEC [dbo].[uspARUpdateTransactionAccountOnPost]  
-			EXEC [dbo].uspARGenerateEntriesForAccrual  
-			EXEC [dbo].[uspARGenerateGLEntries] @Post     = @Post
-											  , @Recap    = @Recap
-											  , @PostDate = @PostDate
-											  , @BatchId  = @BatchIdUsed
-											  , @UserId   = @UserId
-		END
-END TRY
-BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-    IF @InitTranCount = 0
-        IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION
-	ELSE
-		IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION @Savepoint
-												
-	RAISERROR(@ErrorMerssage, 11, 1)
-		
-	GOTO Post_Exit
-END CATCH
-
-IF @InitTranCount = 0
-	ROLLBACK TRANSACTION
-ELSE
-	ROLLBACK TRANSACTION @Savepoint
-
-BEGIN TRY	
-    DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchId
+    DELETE  Q
+    FROM tblARPostingQueue Q
+    INNER JOIN ##ARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
+							  
+    DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchIdUsed
 		 
 	INSERT INTO tblGLPostRecap WITH (TABLOCK) (
 		 [strTransactionId]
@@ -163,13 +134,20 @@ BEGIN TRY
 		INNER JOIN tblSMCurrencyExchangeRateType SMCERT WITH (NOLOCK) ON SMCERT.intCurrencyExchangeRateTypeId = ID.intCurrencyExchangeRateTypeId
 		WHERE I.strInvoiceNumber = A.strTransactionId 
 			AND I.intInvoiceId = A.intTransactionId
-	) RATETYPE
-				
-
+	) RATETYPE  	
 END TRY
 BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()
+	SELECT @ErrorMerssage = ERROR_MESSAGE()					
+    IF @InitTranCount = 0
+        IF (XACT_STATE()) <> 0
+			ROLLBACK TRANSACTION
+	ELSE
+		IF (XACT_STATE()) <> 0
+			ROLLBACK TRANSACTION @Savepoint
+												
 	RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
 END CATCH
 
 RETURN 1;
