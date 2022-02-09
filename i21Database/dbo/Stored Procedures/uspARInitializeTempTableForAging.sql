@@ -32,11 +32,11 @@ CREATE TABLE ##ADCUSTOMERS (
 	  , dblCreditLimit				NUMERIC(18, 6)
 )
 CREATE TABLE ##POSTEDINVOICES (
-	   intInvoiceId					INT	NOT NULL PRIMARY KEY
-	 , intEntityCustomerId			INT	NOT NULL
-	 , intPaymentId					INT	NULL	 
-	 , intCompanyLocationId			INT	NULL
-	 , intEntitySalespersonId		INT	NULL
+	   intInvoiceId					INT												NOT NULL PRIMARY KEY
+	 , intEntityCustomerId			INT												NOT NULL
+	 , intPaymentId					INT												NULL	 
+	 , intCompanyLocationId			INT												NULL
+	 , intEntitySalespersonId		INT												NULL
 	 , strTransactionType			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NOT NULL
 	 , strType						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL DEFAULT 'Standard' 
      , strBOLNumber					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
@@ -51,6 +51,10 @@ CREATE TABLE ##POSTEDINVOICES (
 	 , dtmForgiveDate				DATETIME										NULL
 	 , ysnForgiven					BIT												NULL
 	 , ysnPaid						BIT												NULL
+	 , dblBaseInvoiceTotal			NUMERIC(18, 6)									NULL DEFAULT 0
+	 , strCurrency					NVARCHAR(40)									NULL
+	 , dblCurrencyExchangeRate		NUMERIC(18, 6)									NULL DEFAULT 0
+	 , dblCurrencyRevalueRate		NUMERIC(18, 6)									NULL DEFAULT 0
 )
 CREATE NONCLUSTERED INDEX [NC_Index_##POSTEDINVOICES_intEntityCustomerId] ON [##POSTEDINVOICES]([intEntityCustomerId])
 CREATE NONCLUSTERED INDEX [NC_Index_##POSTEDINVOICES_strTransactionType] ON [##POSTEDINVOICES]([strTransactionType])
@@ -71,16 +75,19 @@ CREATE TABLE ##GLACCOUNTS (
 CREATE TABLE ##INVOICETOTALPREPAYMENTS (
 	  intInvoiceId					INT												NULL
 	, dblPayment					NUMERIC(18, 6)									NULL DEFAULT 0
+	, dblBasePayment				NUMERIC(18, 6)									NULL DEFAULT 0
 )
 CREATE TABLE ##CASHREFUNDS (
 	   intOriginalInvoiceId			INT												NULL
 	 , strDocumentNumber			NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
 	 , dblRefundTotal				NUMERIC(18, 6)									NULL DEFAULT 0
+	 , dblBaseRefundTotal			NUMERIC(18, 6)									NULL DEFAULT 0
 )
 CREATE TABLE ##CASHRETURNS (
       intInvoiceId					INT												NOT NULL PRIMARY KEY
 	, intOriginalInvoiceId			INT												NULL
 	, dblInvoiceTotal				NUMERIC(18, 6)									NULL DEFAULT 0
+	, dblBaseInvoiceTotal			NUMERIC(18, 6)									NULL DEFAULT 0
 	, strInvoiceOriginId			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
     , strInvoiceNumber				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	, dtmPostDate					DATETIME										NULL

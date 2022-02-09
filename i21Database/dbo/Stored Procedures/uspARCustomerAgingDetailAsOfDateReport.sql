@@ -30,7 +30,8 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strCompanyAddress			NVARCHAR(500) = NULL,
 		@intEntityUserIdLocal		INT = NULL,
 		@intGracePeriodLocal		INT = 0,
-		@ysnOverrideCashFlowLocal  	BIT = 0
+		@ysnOverrideCashFlowLocal  	BIT = 0,
+		@intFunctionalCurrency		INT = 0
 
 --DROP TEMP TABLES
 EXEC uspARInitializeTempTableForAging
@@ -53,6 +54,9 @@ SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
+
+SELECT TOP 1 @intFunctionalCurrency	= intDefaultCurrencyId
+FROM dbo.tblSMCompanyPreference WITH (NOLOCK)
 
 IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	BEGIN
@@ -155,9 +159,11 @@ WHERE P.ysnPosted = 1
 INSERT INTO ##INVOICETOTALPREPAYMENTS (
 	  intInvoiceId
 	, dblPayment
+	, dblBasePayment
 )
 SELECT intInvoiceId = PD.intInvoiceId
-	 , dblPayment	= SUM(PD.dblPayment) + SUM(PD.dblWriteOffAmount)
+	 , dblPayment		= SUM(PD.dblPayment) + SUM(PD.dblWriteOffAmount)
+	 , dblBasePayment	= SUM(PD.dblBasePayment) + SUM(PD.dblBaseWriteOffAmount)
 FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
 INNER JOIN ##ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId AND P.ysnInvoicePrepayment = 0
 INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
@@ -214,6 +220,10 @@ INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	 , dtmDueDate
 	 , dtmDate
 	 , ysnPaid
+	 , dblBaseInvoiceTotal
+	 , strCurrency
+	 , dblCurrencyExchangeRate
+	 , dblCurrencyRevalueRate
 )
 SELECT intInvoiceId				= I.intInvoiceId
 	 , intEntityCustomerId		= I.intEntityCustomerId
@@ -232,11 +242,30 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmDueDate				= CASE WHEN I.ysnOverrideCashFlow = 1 AND @ysnOverrideCashFlowLocal = 1 THEN I.dtmCashFlowDate ELSE DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate) END 
 	 , dtmDate					= CAST(I.dtmDate AS DATE)
 	 , ysnPaid					= I.ysnPaid
+	 , dblBaseInvoiceTotal		= I.dblBaseInvoiceTotal
+	 , strCurrency				= CUR.strCurrency
+	 , dblCurrencyExchangeRate	= I.dblCurrencyExchangeRate
+	 , dblCurrencyRevalueRate	= ISNULL(GLR.dblForexRate, I.dblCurrencyExchangeRate)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
+LEFT JOIN (
+	SELECT intCurrencyID
+		 , strCurrency 
+	FROM tblSMCurrency WITH (NOLOCK)  
+) CUR ON I.intCurrencyId = CUR.intCurrencyID
+CROSS APPLY dbo.fnGLGetFiscalPeriod(I.dtmPostDate) FP
+LEFT JOIN (
+	SELECT intGLFiscalYearPeriodId
+		 , intFunctionalCurrencyId
+		 , intTransactionCurrencyId
+		 , dblForexRate 
+	FROM tblGLRevalue WITH (NOLOCK) 
+	WHERE intFunctionalCurrencyId = @intFunctionalCurrency
+) GLR ON FP.intGLFiscalYearPeriodId = GLR.intGLFiscalYearPeriodId
+AND I.intCurrencyId = GLR.intTransactionCurrencyId
 WHERE I.ysnPosted = 1  
   AND I.ysnCancelled = 0
   AND I.strTransactionType <> 'Cash Refund'
@@ -258,10 +287,12 @@ INSERT INTO ##CASHREFUNDS (
 	   intOriginalInvoiceId
 	 , strDocumentNumber
 	 , dblRefundTotal
+	 , dblBaseRefundTotal
 )
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 	 , strDocumentNumber	= ID.strDocumentNumber
 	 , dblRefundTotal		= SUM(ID.dblTotal)
+	 , dblBaseRefundTotal	= SUM(ID.dblBaseTotal)
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -277,6 +308,7 @@ INSERT INTO ##CASHRETURNS (
 	   intInvoiceId
 	 , intOriginalInvoiceId
 	 , dblInvoiceTotal
+	 , dblBaseInvoiceTotal
 	 , strInvoiceOriginId
 	 , strInvoiceNumber
 	 , dtmPostDate
@@ -284,6 +316,7 @@ INSERT INTO ##CASHRETURNS (
 SELECT I.intInvoiceId
 	 , I.intOriginalInvoiceId
 	 , I.dblInvoiceTotal
+	 , I.dblBaseInvoiceTotal
 	 , I.strInvoiceOriginId
 	 , I.strInvoiceNumber
 	 , I.dtmPostDate
@@ -352,6 +385,11 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Detail'
 	 , strReportLogId		= @strReportLogId
+	 , strCurrency			= AGING.strCurrency
+	 , dblHistoricRate		= AGING.dblCurrencyExchangeRate
+	 , dblHistoricAmount	= ISNULL(AGING.dblBaseTotalAR, 0)
+	 , dblEndOfMonthRate	= ISNULL(AGING.dblCurrencyRevalueRate, AGING.dblCurrencyExchangeRate)
+	 , dblEndOfMonthAmount	= [dbo].[fnRoundBanker](ISNULL(AGING.dblTotalDue, 0) * ISNULL(AGING.dblCurrencyRevalueRate, AGING.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
 INTO ##AGINGSTAGING
 FROM
 (SELECT A.strInvoiceNumber
@@ -360,25 +398,29 @@ FROM
 	 , B.intPaymentId	 
 	 , A.strBOLNumber
 	 , A.intEntityCustomerId
-	 , dblTotalAR			= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
-	 , dblFuture			= B.dblFuture
-	 , dbl0Days				= B.dbl0Days
-	 , dbl10Days			= B.dbl10Days
-	 , dbl30Days			= B.dbl30Days
-	 , dbl60Days			= B.dbl60Days
-	 , dbl90Days			= B.dbl90Days
-	 , dbl120Days			= B.dbl120Days
-	 , dbl121Days			= B.dbl121Days
-	 , dblTotalDue			= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
-	 , dblAmountPaid		= B.dblAmountPaid
-	 , dblInvoiceTotal		= A.dblInvoiceTotal
-	 , dblCredits			= B.dblAvailableCredit * -1
-	 , dblPrepayments		= B.dblPrepayments * -1	 
-	 , dtmDate				= ISNULL(B.dtmDatePaid, A.dtmDate)
+	 , dblTotalAR				= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
+	 , dblFuture				= B.dblFuture
+	 , dbl0Days					= B.dbl0Days
+	 , dbl10Days				= B.dbl10Days
+	 , dbl30Days				= B.dbl30Days
+	 , dbl60Days				= B.dbl60Days
+	 , dbl90Days				= B.dbl90Days
+	 , dbl120Days				= B.dbl120Days
+	 , dbl121Days				= B.dbl121Days
+	 , dblTotalDue				= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
+	 , dblAmountPaid			= B.dblAmountPaid
+	 , dblInvoiceTotal			= A.dblInvoiceTotal
+	 , dblCredits				= B.dblAvailableCredit * -1
+	 , dblPrepayments			= B.dblPrepayments * -1	 
+	 , dtmDate					= ISNULL(B.dtmDatePaid, A.dtmDate)
 	 , dtmDueDate	 
 	 , intCompanyLocationId
 	 , strType
 	 , strTransactionType
+	 , dblBaseTotalAR			= B.dblBaseTotalDue - B.dblBaseAvailableCredit - B.dblBasePrepayments
+	 , strCurrency				= A.strCurrency
+	 , dblCurrencyExchangeRate	= A.dblCurrencyExchangeRate
+	 , dblCurrencyRevalueRate	= A.dblCurrencyRevalueRate
 FROM
 (SELECT dtmDate				= I.dtmDate
 	 , I.strInvoiceNumber
@@ -389,7 +431,10 @@ FROM
 	 , I.intEntityCustomerId
 	 , I.dtmDueDate
 	 , I.strType
-	 , I.strTransactionType    
+	 , I.strTransactionType
+	 , I.strCurrency
+	 , I.dblCurrencyExchangeRate
+	 , I.dblCurrencyRevalueRate
 	 , strAge = CASE WHEN I.strType = 'CF Tran' THEN 'Future'
 				ELSE CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 0 THEN 'Current'
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 10 THEN '1 - 10 Days'
@@ -409,9 +454,12 @@ LEFT JOIN
   , intPaymentId
   , dblAmountPaid
   , dtmDatePaid
-  , dblTotalDue		= dblInvoiceTotal - dblAmountPaid
+  , dblTotalDue			= dblInvoiceTotal - dblAmountPaid
+  , dblBaseTotalDue		= dblBaseInvoiceTotal - dblBaseAmountPaid
   , dblAvailableCredit
+  , dblBaseAvailableCredit
   , dblPrepayments
+  , dblBasePrepayments
   , strRecordNumber
   , CASE WHEN strType = 'CF Tran' 
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dblFuture
@@ -428,17 +476,21 @@ LEFT JOIN
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 90 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) <= 120 AND strType <> 'CF Tran'
   			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl120Days
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 120 AND strType <> 'CF Tran'
-  			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl121Days 
+  			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl121Days
 FROM
 (SELECT I.intInvoiceId
 	  , intPaymentId			= NULL
       , dblAmountPaid			= 0
-      , dblInvoiceTotal			= ISNULL(dblInvoiceTotal,0)	  
+	  , dblBaseAmountPaid		= 0
+      , dblInvoiceTotal			= ISNULL(dblInvoiceTotal,0)
+	  , dblBaseInvoiceTotal		= ISNULL(dblBaseInvoiceTotal,0)
 	  , I.dtmDueDate
 	  , dtmDatePaid				= NULL
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit		= 0
+	  , dblBaseAvailableCredit	= 0
 	  , dblPrepayments			= 0
+	  , dblBasePrepayments		= 0
 	  , I.strType
 	  , strRecordNumber			= NULL
 FROM ##POSTEDINVOICES I WITH (NOLOCK)
@@ -447,14 +499,18 @@ WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
 UNION ALL
 
 SELECT I.intInvoiceId
-	 , intPaymentId			= P.intPaymentId
-     , dblAmountPaid		= 0
-     , dblInvoiceTotal		= 0
-	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
-	 , dtmDatePaid			= NULL
+	 , intPaymentId				= P.intPaymentId
+     , dblAmountPaid			= 0
+	 , dblBaseAmountPaid		= 0
+     , dblInvoiceTotal			= 0
+	 , dblBaseInvoiceTotal		= 0
+	 , dtmDueDate				= ISNULL(P.dtmDatePaid, I.dtmDueDate)
+	 , dtmDatePaid				= NULL
 	 , I.intEntityCustomerId
-	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
-	 , dblPrepayments		= 0
+	 , dblAvailableCredit		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
+	 , dblBaseAvailableCredit	= ISNULL(I.dblBaseInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
+	 , dblPrepayments			= 0
+	 , dblBasePrepayments		= 0
 	 , I.strType
 	 , strRecordNumber		= P.strRecordNumber
 FROM ##POSTEDINVOICES I WITH (NOLOCK)
@@ -472,14 +528,18 @@ WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 UNION ALL
 
 SELECT I.intInvoiceId
-	 , intPaymentId			= P.intPaymentId
-     , dblAmountPaid		= 0
-     , dblInvoiceTotal		= 0
-	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
-	 , dtmDatePaid			= P.dtmDatePaid
+	 , intPaymentId				= P.intPaymentId
+     , dblAmountPaid			= 0
+	 , dblBaseAmountPaid		= 0
+     , dblInvoiceTotal			= 0
+	 , dblBaseInvoiceTotal		= 0
+	 , dtmDueDate				= ISNULL(P.dtmDatePaid, I.dtmDueDate)
+	 , dtmDatePaid				= P.dtmDatePaid
 	 , I.intEntityCustomerId
-	 , dblAvailableCredit	= 0
-	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
+	 , dblAvailableCredit		= 0
+	 , dblBaseAvailableCredit	= 0
+	 , dblPrepayments			= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
+	 , dblBasePrepayments		= ISNULL(I.dblBaseInvoiceTotal, 0) + ISNULL(PD.dblBasePayment, 0) - ISNULL(CR.dblBaseRefundTotal, 0)
 	 , I.strType
 	 , strRecordNumber		= P.strRecordNumber
 FROM ##POSTEDINVOICES I WITH (NOLOCK)
@@ -493,14 +553,18 @@ UNION ALL
       
 SELECT DISTINCT
 	I.intInvoiceId
-  , intPaymentId		= PAYMENT.intPaymentId
-  , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
-  , dblInvoiceTotal		= 0
-  , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
-  , dtmDatePaid			= PAYMENT.dtmDatePaid
+  , intPaymentId			= PAYMENT.intPaymentId
+  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
+  , dblBaseAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblBaseTotalPayment, 0) END
+  , dblInvoiceTotal			= 0
+  , dblBaseInvoiceTotal		= 0
+  , dtmDueDate				= ISNULL(I.dtmDueDate, GETDATE())
+  , dtmDatePaid				= PAYMENT.dtmDatePaid
   , I.intEntityCustomerId
-  , dblAvailableCredit	= 0
-  , dblPrepayments		= 0
+  , dblAvailableCredit		= 0
+  , dblBaseAvailableCredit	= 0
+  , dblPrepayments			= 0
+  , dblBasePrepayments		= 0
   , I.strType
   , strRecordNumber		= PAYMENT.strRecordNumber
 FROM ##POSTEDINVOICES I WITH (NOLOCK)
@@ -509,7 +573,8 @@ LEFT JOIN (
 		 , P.intPaymentId
 		 , P.strRecordNumber
 		 , P.dtmDatePaid
-		 , dblTotalPayment	= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) + ISNULL(dblWriteOffAmount, 0) - ISNULL(dblInterest, 0)
+		 , dblTotalPayment		= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) + ISNULL(dblWriteOffAmount, 0) - ISNULL(dblInterest, 0)
+		 , dblBaseTotalPayment	= ISNULL(dblBasePayment, 0) + ISNULL(dblBaseDiscount, 0) + ISNULL(dblBaseWriteOffAmount, 0) - ISNULL(dblBaseInterest, 0)
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN ##ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId
 
@@ -519,7 +584,8 @@ LEFT JOIN (
 		 , P.intPaymentId
 		 , strRecordNumber	= strPaymentRecordNum
 		 , P.dtmDatePaid
-		 , dblTotalPayment	= ABS((ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)))
+		 , dblTotalPayment		= ABS((ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)))
+		 , dblBaseTotalPayment	= ABS((ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)))
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
@@ -538,6 +604,7 @@ LEFT JOIN (
 		 , strRecordNumber		= strInvoiceNumber
 		 , dtmDatePaid			= dtmPostDate
 		 , dblTotalPayment		= dblInvoiceTotal
+		 , dblBaseTotalPayment	= dblBaseInvoiceTotal
 	FROM ##CASHRETURNS	
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
@@ -553,45 +620,50 @@ INNER JOIN ##ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEnt
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
-		  strCustomerName
-		, strCustomerNumber
-		, strCustomerInfo
-		, strInvoiceNumber
-		, strRecordNumber
-		, intInvoiceId
-		, intPaymentId
-		, strBOLNumber
-		, intEntityCustomerId
-		, intEntityUserId
-		, dblCreditLimit
-		, dblTotalAR
-		, dblTotalCustomerAR
-		, dblFuture
-		, dbl0Days
-		, dbl10Days
-		, dbl30Days
-		, dbl60Days
-		, dbl90Days
-		, dbl120Days
-		, dbl121Days
-		, dblTotalDue
-		, dblAmountPaid
-		, dblInvoiceTotal
-		, dblCredits
-		, dblPrepayments
-		, dblPrepaids
-		, dtmDate
-		, dtmDueDate
-		, dtmAsOfDate
-		, strSalespersonName
-		, intCompanyLocationId
-		, strSourceTransaction
-		, strType
-		, strTransactionType
-		, strCompanyName
-		, strCompanyAddress
-		, strAgingType
-		, strReportLogId
+	  strCustomerName
+	, strCustomerNumber
+	, strCustomerInfo
+	, strInvoiceNumber
+	, strRecordNumber
+	, intInvoiceId
+	, intPaymentId
+	, strBOLNumber
+	, intEntityCustomerId
+	, intEntityUserId
+	, dblCreditLimit
+	, dblTotalAR
+	, dblTotalCustomerAR
+	, dblFuture
+	, dbl0Days
+	, dbl10Days
+	, dbl30Days
+	, dbl60Days
+	, dbl90Days
+	, dbl120Days
+	, dbl121Days
+	, dblTotalDue
+	, dblAmountPaid
+	, dblInvoiceTotal
+	, dblCredits
+	, dblPrepayments
+	, dblPrepaids
+	, dtmDate
+	, dtmDueDate
+	, dtmAsOfDate
+	, strSalespersonName
+	, intCompanyLocationId
+	, strSourceTransaction
+	, strType
+	, strTransactionType
+	, strCompanyName
+	, strCompanyAddress
+	, strAgingType
+	, strReportLogId
+	, strCurrency
+	, dblHistoricRate
+	, dblHistoricAmount
+	, dblEndOfMonthRate
+	, dblEndOfMonthAmount
 )
 SELECT AGING.* 
 FROM ##AGINGSTAGING AGING

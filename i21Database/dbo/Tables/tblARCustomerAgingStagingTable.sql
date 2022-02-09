@@ -37,10 +37,15 @@
     [dblAmountPaid]				NUMERIC(18, 6) NULL, 
     [dblInvoiceTotal]			NUMERIC(18, 6) NULL, 
     [dblCredits]				NUMERIC(18, 6) NULL, 
-    [dblPrepayments]			NUMERIC(18, 6) NULL, 
+    [dblPrepayments]			NUMERIC(18, 6) NULL,
     [dblPrepaids]				NUMERIC(18, 6) NULL,
     [dblTotalCustomerAR]        NUMERIC(18, 6) NULL,
-    [strReportLogId]			NVARCHAR(MAX)
+    [strReportLogId]			NVARCHAR(MAX),
+    [strCurrency]               NVARCHAR(40),
+    [dblHistoricRate]			NUMERIC(18, 6) NULL,
+    [dblHistoricAmount]			NUMERIC(18, 6) NULL,
+    [dblEndOfMonthRate]			NUMERIC(18, 6) NULL,
+    [dblEndOfMonthAmount]		NUMERIC(18, 6) NULL
 );
 
 GO
