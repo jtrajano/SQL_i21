@@ -8,5 +8,6 @@ CREATE TABLE [dbo].[tblMBILPickupDetail]
 	[strItemUOM] [nvarchar](100) NULL,
 	[strRack] [nvarchar](100) NULL,
 	[intConcurrencyId] [int] NULL,
- CONSTRAINT [PK_tblMBILPickupDetail] PRIMARY KEY CLUSTERED ([intPickupDetailId])
+ CONSTRAINT [PK_tblMBILPickupDetail] PRIMARY KEY CLUSTERED ([intPickupDetailId]),
+ CONSTRAINT [FK_tblMBILPickupDetail_tblMBILPickupHeader] FOREIGN KEY ([intPickupHeaderId]) REFERENCES [tblMBILPickupHeader]([intPickupHeaderId])
 )

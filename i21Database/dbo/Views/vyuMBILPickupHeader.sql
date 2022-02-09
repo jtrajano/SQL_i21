@@ -23,7 +23,8 @@ Select pickup.intPickupHeaderId,
     strVendorLocationName = location.strLocationName,    
     strVendorPhone = entity.strPhone,    
     strVendorEmail = entity.strEmail,    
-    pickup.dtmSchedulePullDate ,  
+	pickup.dtmPickupFrom,
+	pickup.dtmPickupTo,
 	pickup.strPONumber  
 From tblMBILPickupHeader pickup    
 left join tblEMEntity entity on pickup.intEntityId = entity.intEntityId    

@@ -11,11 +11,12 @@ AS
 		 intCustomerId = intCustomerEntityId,    
 		 intCustomerLocationId = intCustomerEntityLocationId,    
 		 intItemId,    
-		 dblQuantity,    
-		 dtmSchedulePullDate = (Select dtmETAPOL from tblLGLoad eta Where a.intLoadId = eta.intLoadId),    
-		 dtmDeliveryDate = (Select dtmETAPOD from tblLGLoad eta Where a.intLoadId = eta.intLoadId),    
-		 startime = null,    
-		 endtime = null,    
+		 dblQuantity, 
+		 dtmPickUpFrom,    
+		 dtmPickUpTo,
+		 dtmDeliveryFrom,
+		 dtmDeliveryTo,    
+		 strDetailTerminalReference,
 		 strPONumber = case strType when 'Outbound' then isnull(a.strDetailCustomerReference,a.strCustomerReference) else  isnull(a.strExternalLoadNumber,a.strDetailVendorReference) end    
   From vyuLGLoadDetailView a                  
   LEFT JOIN tblSMCompanyLocation b on a.intPCompanyLocationId = b.intCompanyLocationId                  
@@ -24,4 +25,5 @@ AS
         and ysnInProgress = 0                  
         and ISNULL(dblDeliveredQuantity, 0.000000) <= 0                  
         and strTransUsedBy = 'Transport Load'  
-  and intLoadId not in(Select intLoadId from tblMBILPickupHeader) 
+  and intLoadId not in(Select intLoadId from tblMBILPickupHeader)
+

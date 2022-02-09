@@ -22,8 +22,10 @@ SELECT delivery.intDeliveryHeaderId,
     strCustomerCountry = location.strCountry,        
     strCustomerLocation = location.strLocationName,        
     strCustomerPhone = location.strPhone,        
-    strCustomerEmail = entity.strEmail,        
-    delivery.dtmScheduleDeliveryDate        
+    strCustomerEmail = entity.strEmail,
+	delivery.dtmDeliveryFrom,
+	delivery.dtmDeliveryTo,
+	delivery.dtmActualDelivery
 FROM tblMBILDeliveryHeader delivery        
 LEFT JOIN tblEMEntity entity ON delivery.intEntityId = entity.intEntityId        
 LEFT JOIN tblEMEntityLocation location ON delivery.intEntityLocationId = location.intEntityLocationId and delivery.intEntityId = location.intEntityId        

@@ -9,8 +9,9 @@ CREATE TABLE [dbo].[tblMBILDeliveryHeader]
 	[intEntityId] [int] NULL,
 	[intEntityLocationId] [int] NULL,
 	[intCompanyLocationId] [int] NULL,
-	[dtmScheduleDeliveryDate] [datetime] NULL,
-	[dtmActualDeliveryDate] [datetime] NULL,
+	[dtmDeliveryFrom] [datetime] null,
+	[dtmDeliveryTo] [datetime] null,
+	[dtmActualDelivery] [datetime] null,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblMBILDeliveryHeader] PRIMARY KEY CLUSTERED([intDeliveryHeaderId])
 )
