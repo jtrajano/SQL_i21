@@ -51,6 +51,10 @@ BEGIN TRY
 								  , @PostDate	= @PostDate
 								  , @BatchId	= @BatchIdUsed
 								  , @UserId		= @UserId 
+
+    DELETE  Q
+    FROM tblARPostingQueue Q
+    INNER JOIN ##ARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
 							  
     DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchIdUsed
 		 
