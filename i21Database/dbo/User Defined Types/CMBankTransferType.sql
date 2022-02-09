@@ -23,6 +23,7 @@ CREATE TYPE [dbo].[CMBankTransferType] AS TABLE(
 	[dblAmountTo] [decimal](18, 6) NULL,
 	[intRateTypeIdAmountFrom] [int] NULL,
 	[intRateTypeIdAmountTo] [int] NULL,
+	[strDerivativeIdId] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyExchangeRateTypeId] INT	NULL
 )
  
