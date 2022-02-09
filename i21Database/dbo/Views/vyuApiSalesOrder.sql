@@ -30,8 +30,14 @@ SELECT
 	, so.dblShipping
 	, lb.strLineOfBusiness
 	, tr.strTerm
-FROM vyuCRMSalesOrderSearch vso
-JOIN tblSOSalesOrder so ON so.intSalesOrderId = vso.intSalesOrderId
+	, so.strTransactionType
+	, so.ysnPreliminaryQuote
+	, op.strName strOpportunityName
+	, CASE WHEN so.strQuoteType = 'Price Only' THEN 1 ELSE 0 END ysnPriceOnly
+	, CASE WHEN so.strQuoteType = 'Price Quantity' THEN 1 ELSE 0 END ysnPriceAndQuantity
+FROM vyuSOSalesOrderSearch vso
+LEFT JOIN tblSOSalesOrder so ON so.intSalesOrderId = vso.intSalesOrderId
+LEFT JOIN tblCRMOpportunity op ON op.intOpportunityId = so.intOpportunityId
 LEFT JOIN tblSMShipVia via ON via.intEntityId = so.intShipViaId
 LEFT JOIN tblEMEntity applicator ON applicator.intEntityId = so.intEntityApplicatorId
 LEFT JOIN tblSMFreightTerms ft ON ft.intFreightTermId = so.intFreightTermId
