@@ -1236,6 +1236,31 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
+	--Tax Adjustment Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Tax Adjustment account of Tax Code - ' + SMTC.[strTaxCode] + ' is not valid.' ELSE 'The Tax Adjustment account of Tax Code - ' + SMTC.[strTaxCode] + ' was not set.' END
+	FROM tblARInvoiceDetailTax ARIDT
+	INNER JOIN ##ARPostInvoiceDetail I ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]		
+	LEFT OUTER JOIN tblSMTaxCode SMTC ON ARIDT.[intTaxCodeId] = SMTC.[intTaxCodeId]
+	LEFT OUTER JOIN tblGLAccount GLA ON ISNULL(ARIDT.[intSalesTaxAccountId], SMTC.[intSalesTaxAccountId]) = GLA.[intAccountId]	
+	WHERE ARIDT.[dblAdjustedTax] <> @ZeroDecimal
+	  AND (SMTC.[intTaxAdjustmentAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
+	  AND I.strType = 'Tax Adjustment'
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
 	--Sales Tax Exempt Account
 	SELECT
 		[intInvoiceId]			= I.[intInvoiceId]
