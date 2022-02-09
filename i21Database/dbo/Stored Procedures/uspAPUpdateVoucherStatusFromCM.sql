@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherStatusFromCM]
+﻿CREATE  PROCEDURE [dbo].[uspAPUpdateVoucherStatusFromCM]
 	@paymentRecordIds NVARCHAR(MAX)
 AS
 	
@@ -14,6 +14,7 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @billIds Id
+
 INSERT INTO @billIds
 SELECT
 	A.intBillId
@@ -22,6 +23,23 @@ INNER JOIN tblAPPayment A2 ON A.intPaymentId = A2.intPaymentId
 INNER JOIN dbo.fnARGetRowsFromDelimitedValues(@paymentRecordIds) B ON A2.strPaymentRecordNum = B.strValues COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
 WHERE C.intTransactionType IN (2,13)
+AND A2.intPaymentMethodId = 7
+
+--PROCESS ACH IF PAYMENT METHOD IS NOT A CHECK
+--EMPTY BILLIDS MEANS, IT IS NOT CHECK PAYMENT METHOD
+IF NOT (EXISTS(SELECT 1 FROM @billIds))
+BEGIN
+	INSERT INTO @billIds
+	SELECT
+		A.intBillId
+	FROM tblAPPaymentDetail A
+	INNER JOIN tblAPPayment A2 ON A.intPaymentId = A2.intPaymentId
+	INNER JOIN tblCMBankTransaction A3 ON A2.strPaymentRecordNum = A3.strTransactionId
+	INNER JOIN dbo.fnGetRowsFromDelimitedValues(@paymentRecordIds) B ON A3.intTransactionId = B.intID
+	INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
+	WHERE C.intTransactionType IN (2,13)
+	AND A2.intPaymentMethodId = 2
+END
 
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
@@ -29,7 +47,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 --Check if there are still payment(PAY) for prepaid transaction
 --If none, set ysnPrepayHasPayment to false
 UPDATE A
-	SET A.ysnPrepayHasPayment = CASE WHEN prepayment.intPaymentId IS NOT NULL THEN 1 ELSE 0 END
+SET 
+	A.ysnPrepayHasPayment = CASE WHEN prepayment.intPaymentId IS NOT NULL THEN 1 ELSE 0 END,
+	A.ysnInPayment = 0
 FROM tblAPBill A
 INNER JOIN @billIds B ON A.intBillId = B.intId
 OUTER APPLY
