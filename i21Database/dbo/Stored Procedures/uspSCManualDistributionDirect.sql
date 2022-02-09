@@ -414,7 +414,7 @@ BEGIN TRY
 							,intGradeId = D.intGradeId
 							,intCropYearId = D.intCropYearId
 							,strLoadNumber = E.strLoadNumber
-							,strCustomerReference = E.strCustomerReference
+							,strCustomerReference = isnull(E.strCustomerReference, '')
 							,intFreightCostUOMId = @intTicketFreightCostUOMId
 					FROM tblSCTicket A
 					INNER JOIN tblLGLoadDetail B
