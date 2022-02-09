@@ -36,6 +36,8 @@ SELECT
 ,dblAmountFrom = dblAmountForeignFrom * BAF.dblRate
 ,dblAmountTo =dblAmountForeignTo * BAT.dblRate
 ,strDerivativeId
+,intFutOptTransactionId
+,intFutOptTransactionHeaderId
 ,dtmCreated = GETDATE()
 ,intConcurrencyId = 1
 FROM @BankTransfer BT
@@ -79,6 +81,8 @@ INSERT INTO tblCMBankTransfer(
 ,dblDifference
 ,dtmCreated
 ,strDerivativeId
+,intFutOptTransactionId
+,intFutOptTransactionHeaderId
 ,intConcurrencyId
 )
 SELECT 
@@ -109,6 +113,8 @@ SELECT
 ,dblDifference = dblAmountTo - dblAmountFrom
 ,dtmCreated
 ,strDerivativeId
+,intFutOptTransactionId
+,intFutOptTransactionHeaderId
 ,intConcurrencyId
 FROM CTE BT
 

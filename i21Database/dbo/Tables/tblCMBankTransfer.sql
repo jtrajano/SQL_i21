@@ -61,8 +61,12 @@
     [intRateTypeIdFeesTo]      INT            NULL,
     [intBankLoanIdFrom]        INT            NULL,
     [intBankLoanIdTo]          INT            NULL,
-    [strDerivativeId]          NVARCHAR(30)   COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]         INT            DEFAULT 1 NOT NULL,
+    --Trade Finance
+    [strDerivativeId]          NVARCHAR(30)   COLLATE Latin1_General_CI_AS NULL,
+    [intFutOptTransactionId] [int] NULL,
+	[intFutOptTransactionHeaderId] [int] NULL,
+    
     CONSTRAINT [PK_tblCMBankTransfer] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_From] FOREIGN KEY ([intBankAccountIdFrom]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_To] FOREIGN KEY ([intBankAccountIdTo]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
