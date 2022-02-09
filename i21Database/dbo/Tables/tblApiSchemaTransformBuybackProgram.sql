@@ -11,6 +11,7 @@ CREATE TABLE [dbo].[tblApiSchemaTransformBuybackProgram] (
 	strVendorCustomerLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The buyback program rate customer location vendor custom name.
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The buyback program rate item number.
 	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The buyback program rate item vendor custom name.
+	strItemName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The buyback program rate item name.
 	strUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The buyback program rate unit of measure.
 	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The buyback program rate unit of measure vendor custom name.
 	dtmBeginDate DATETIME NOT NULL, -- The buyback program rate begin date.
