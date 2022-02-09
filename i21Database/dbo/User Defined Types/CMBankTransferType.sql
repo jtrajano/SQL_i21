@@ -27,6 +27,6 @@ CREATE TYPE [dbo].[CMBankTransferType] AS TABLE(
 	--Trade Finance
 	[intFutOptTransactionId] [int] NULL,
 	[intFutOptTransactionHeaderId] [int] NULL,
-	[strDerivativeIdId] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
+	[strDerivativeId] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
 )
  
