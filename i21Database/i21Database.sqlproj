@@ -497,6 +497,7 @@
     <Build Include="dbo\Stored Procedures\uspRKOTCForwardPostBankTransfer.sql" />
     <Build Include="dbo\Views\vyuRKGetCurrencyPair.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinance.sql" />
+    <Build Include="dbo\Views\vyuAPEntityEFTInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
