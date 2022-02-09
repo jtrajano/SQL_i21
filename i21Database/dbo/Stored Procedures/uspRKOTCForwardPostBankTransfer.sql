@@ -35,6 +35,9 @@ BEGIN TRY
 	, dtmDate
 	, dblAmountForeignFrom
 	, dblAmountForeignTo
+	, intFutOptTransactionId
+	, intFutOptTransactionHeaderId
+	, strDerivativeId
 	)
 
 	SELECT 
@@ -49,6 +52,9 @@ BEGIN TRY
 	, dtmDate = otc.dtmMaturityDate
 	, dblAmountForeignFrom = otc.dblContractAmount -- Buy Amount
 	, dblAmountForeignTo = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate
+	, intFutOptTransactionId = otc.intFutOptTransactionId
+	, intFutOptTransactionHeaderId = otc.intFutOptTransactionHeaderId
+	, strDerivativeId = otc.strInternalTradeNo
 
 	FROM #tmpOTCToPost otc
 	LEFT JOIN vyuCMBankAccount buyBA
