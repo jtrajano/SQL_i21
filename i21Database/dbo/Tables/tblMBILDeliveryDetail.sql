@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[tblMBILDeliveryDetail]
 	[dblWaterInches] [numeric](18, 6) NULL,
 	[dblQuantity] [numeric](10, 6) NULL,
 	[dblDeliveredQty] [numeric](10, 6) NULL,
+	[ysnDelivered] bit default 0,
 	[intConcurrencyId] [int] NULL,
- CONSTRAINT [PK_tblMBILLoadDeliveryDetail] PRIMARY KEY CLUSTERED ([intDeliveryDetailId])
+ CONSTRAINT [PK_tblMBILLoadDeliveryDetail] PRIMARY KEY CLUSTERED ([intDeliveryDetailId]),
+ CONSTRAINT [FK_tblMBILLoadDeliveryDetail_tblMBILDeliveryHeader] FOREIGN KEY ([intDeliveryHeaderId]) REFERENCES [tblMBILDeliveryHeader]([intDeliveryHeaderId])
 )

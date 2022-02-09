@@ -11,31 +11,25 @@ BEGIN
     DELETE FROM tblMBILDeliveryDetail
     DELETE FROM tblMBILPickupHeader
     DELETE FROM tblMBILDeliveryHeader
-
+	
     SELECT *
-    INTO #loadSchedule
+	INTO #loadSchedule
     FROM vyuMBILLoadSchedule
-    WHERE intDriverEntityId = @intDriverId AND intLoadId NOT IN (SELECT intLoadId
-        FROM tblMBILPickupHeader)
+    WHERE intDriverEntityId = @intDriverId AND intLoadId NOT IN (SELECT intLoadId FROM tblMBILPickupHeader)
 
-    DECLARE @tblLoadId AS TABLE(intLoadId int)
+    DECLARE @tblLoadId AS TABLE(rownum int, intLoadId int, intEntityId int)
 
     INSERT INTO @tblLoadId
-    SELECT DISTINCT intLoadId
-    FROM #loadSchedule
-    WHERE intDriverEntityId = @intDriverId AND intLoadId NOT in(Select intLoadId
-        FROM tblMBILPickupHeader)
+    SELECT ROW_NUMBER() OVER (ORDER BY intLoadId) rownum,intLoadId, intEntityId
+    FROM vyuMBILLoadSchedule
+    WHERE intDriverEntityId = @intDriverId AND intLoadId NOT in(Select intLoadId FROM tblMBILPickupHeader)
+	Group by intLoadId, intEntityId
 
-    WHILE (SELECT count(1)
-    FROM @tblLoadId) <> 0     
+    WHILE (SELECT count(1) FROM @tblLoadId) <> 0     
 BEGIN
 
-        DECLARE @intLoadId AS int = (SELECT TOP 1
-            intLoadId
-        FROM @tblLoadId
-        ORDER BY 1 asc)
+        DECLARE @rownum AS int = (SELECT TOP 1 rownum FROM @tblLoadId ORDER BY rownum asc)
         --//INSERT PICKUP HEADER    
-
         INSERT INTO tblMBILPickupHeader
             (intLoadId,
             intDriverEntityId,
@@ -44,32 +38,32 @@ BEGIN
             intEntityId,
             intEntityLocationId,
             intCompanyLocationId,
-            dtmSchedulePullDate,
-            dtmStartTime,
-            dtmEndTime,
+            dtmPickupFrom,
+            dtmPickupTo,
             strPONumber)
-        SELECT intLoadId,
-            intDriverEntityId,
-            strLoadNumber,
-            strType,
-            intEntityId,
-            intEntityLocationId,
-            intCompanyLocationId,
-            dtmSchedulePullDate,
-            NULL dtmStartTime,
-            NULL dtmEndTime,
-            strPONumber
-        FROM #loadSchedule
-        WHERE intLoadId = @intLoadId
-        GROUP BY    intLoadId,    
-    intDriverEntityId,    
-    strLoadNumber,    
-    strType,    
-    intEntityId ,    
-    intEntityLocationId ,    
-    intCompanyLocationId,    
-    dtmSchedulePullDate,      
-    strPONumber
+        SELECT a.intLoadId,
+            a.intDriverEntityId,
+            a.strLoadNumber,
+            a.strType,
+            a.intEntityId,
+            a.intEntityLocationId,
+            a.intCompanyLocationId,
+            a.dtmPickUpFrom,
+            a.dtmPickUpTo,
+            a.strPONumber
+        FROM #loadSchedule a
+		INNER JOIN @tblLoadId b on a.intLoadId = b.intLoadId and a.intEntityId = b.intEntityId 
+        WHERE rownum = @rownum
+        GROUP BY    a.intLoadId,    
+					a.intDriverEntityId,    
+					a.strLoadNumber,    
+					a.strType,    
+					a.intEntityId ,    
+					a.intEntityLocationId ,    
+					a.intCompanyLocationId,    
+					a.dtmPickUpFrom,
+					a.dtmPickUpTo,     
+					a.strPONumber
         --DECLARE @pickupheaderId as int = (SELECT IDENT_CURRENT('tblMBILPickupHeader'))      
         DECLARE @pickupheaderId AS int = @@IDENTITY
 
@@ -82,25 +76,29 @@ BEGIN
             intEntityId,
             intEntityLocationId,
             intCompanyLocationId,
-            dtmScheduleDeliveryDate)
-        SELECT intLoadId,
+			dtmDeliveryFrom,
+			dtmDeliveryTo)
+        SELECT a.intLoadId,
             intDriverEntityId,
             strLoadNumber,
             strType,
             intCustomerId ,
             intCustomerLocationId ,
             intCompanyDeliveryLocationId,
-            dtmDeliveryDate
-        FROM #loadSchedule
-        WHERE intLoadId = @intLoadId
-        GROUP BY intLoadId,    
+			dtmDeliveryFrom,
+			dtmDeliveryTo
+        FROM #loadSchedule a
+		INNER JOIN @tblLoadId b on a.intLoadId = b.intLoadId
+        WHERE rownum = @rownum
+        GROUP BY a.intLoadId,    
                 intDriverEntityId,    
                 strLoadNumber,    
                 strType,    
                 intCustomerId ,    
                 intCustomerLocationId ,    
-                intCompanyDeliveryLocationId ,    
-                dtmDeliveryDate
+                intCompanyDeliveryLocationId , 
+				dtmDeliveryFrom,
+				dtmDeliveryTo
 
         --DECLARE @intDeliveryHeaderId as int = (SELECT IDENT_CURRENT('tblMBILDeliveryHeader'))      
         DECLARE @intDeliveryHeaderId AS int = @@IDENTITY
@@ -117,59 +115,55 @@ BEGIN
             dblQuantity numeric(18,6)    
         )
 
-        INSERT INTO @tblPickupDetail
-            (intpickupheaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intLoadId,intItemId,dblQuantity)
+        INSERT INTO @tblPickupDetail(intpickupheaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intLoadId,intItemId,dblQuantity)
         SELECT @pickupheaderId,
-            intEntityId,
+            a.intEntityId,
             intEntityLocationId,
             intCompanyLocationId,
-            intLoadId,
+            a.intLoadId,
             intItemId,
             sum(dblQuantity)dblQuantity
-        FROM #loadSchedule
-        WHERE intLoadId = @intLoadId
-        GROUP BY intEntityId,    
+        FROM  #loadSchedule a
+		INNER JOIN @tblLoadId b on a.intLoadId = b.intLoadId and a.intEntityId = b.intEntityId 
+        WHERE rownum = @rownum
+        GROUP BY a.intEntityId,    
                  intEntityLocationId,    
                  intCompanyLocationId,    
-                 intLoadId,    
+                 a.intLoadId,    
                  intItemId
-        WHILE (SELECT count(1)
-        FROM @tblPickupDetail) <> 0    
- begin
-
-            DECLARE @intItemId AS INT = (SELECT TOP 1
-                intItemId
-            FROM @tblPickupDetail)
-            INSERT INTO tblMBILPickupDetail
-                (intPickupHeaderId,intItemId,dblQuantity)
-            SELECT TOP 1
-                @pickupheaderId, intItemId, dblQuantity
+        WHILE (SELECT count(1) FROM @tblPickupDetail) <> 0    
+		begin
+            DECLARE @intItemId AS INT = (SELECT TOP 1 intItemId FROM @tblPickupDetail)
+            INSERT INTO tblMBILPickupDetail (intPickupHeaderId,intItemId,dblQuantity)
+            SELECT TOP 1 @pickupheaderId, intItemId, dblQuantity
             FROM @tblPickupDetail a
             WHERE intItemId = @intItemId
 
             --DECLARE @intPickupDetailId as int = (SELECT IDENT_CURRENT('tblMBILPickupDetail'))      
             DECLARE @intPickupDetailId AS INT = @@IDENTITY
 
-            INSERT INTO tblMBILDeliveryDetail
-                (intDeliveryHeaderId,intItemId,dblQuantity,intPickupDetailId)
+            INSERT INTO tblMBILDeliveryDetail(
+				   intDeliveryHeaderId,
+				   intItemId,
+				   dblQuantity,
+				   intPickupDetailId)
             SELECT @intDeliveryHeaderId,
-                intItemId,
-                sum(dblQuantity)dblQuantity,
-                @intPickupDetailId
-            FROM #loadSchedule
-            WHERE intLoadId = @intLoadId AND intItemId = @intItemId
-            GROUP BY intEntityId,    
-     intCustomerId,    
-     intCustomerLocationId,    
-     intCompanyDeliveryLocationId,    
-     intLoadId,    
-     intItemId
-
-
+				   intItemId,
+				   sum(dblQuantity)dblQuantity,
+				   @intPickupDetailId
+            FROM #loadSchedule a
+			INNER JOIN @tblLoadId b on a.intLoadId = b.intLoadId and a.intEntityId = b.intEntityId 
+			WHERE rownum = @rownum  AND intItemId = @intItemId
+            GROUP BY a.intEntityId,    
+					 intCustomerId,    
+					 intCustomerLocationId,    
+					 intCompanyDeliveryLocationId,    
+					 a.intLoadId,    
+					 intItemId
 
             DELETE FROM @tblPickupDetail WHERE intItemId = @intItemId
         END
-        DELETE FROM @tblLoadId WHERE intLoadId = @intLoadId
+        DELETE FROM @tblLoadId WHERE  rownum = @rownum
     END
 
 END

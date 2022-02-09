@@ -4,7 +4,7 @@ SELECT detail.intDeliveryDetailId
       ,detail.intDeliveryHeaderId  
 	  ,detail.intItemId  
 	  ,item.strDescription  
-	  ,item.strItemNo  
+	  ,item.strItemNo
 	  ,detail.dblQuantity  
 	  ,detail.dblDeliveredQty  
 	  ,detail.strTank  

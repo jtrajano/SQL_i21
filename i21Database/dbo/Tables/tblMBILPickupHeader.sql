@@ -7,12 +7,12 @@ CREATE TABLE [dbo].[tblMBILPickupHeader](
 	[intEntityId] [int] NULL,
 	[intEntityLocationId] [int] NULL,
 	[intCompanyLocationId] [int] NULL,
-	[dtmSchedulePullDate] [datetime] NULL,
-	[dtmStartTime] [datetime] NULL,
-	[dtmEndTime] [datetime] NULL,
+	[dtmPickupFrom] [datetime] NULL,
+	[dtmPickupTo] [datetime] NULL,
 	[strPONumber] [nvarchar](100) NULL,
 	[strBOL] [nvarchar](100) NULL,
 	[strNote] [nvarchar](150) NULL,
+	[ysnPickup] bit default 0,
 	[intConcurrencyId] [int] NULL
  CONSTRAINT [PK_tblMBILPickupHeader] PRIMARY KEY CLUSTERED ([intPickupHeaderId] ASC)
 )
