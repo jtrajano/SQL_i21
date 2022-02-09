@@ -3,6 +3,9 @@ CREATE PROCEDURE [dbo].[uspGLMulticurrencyRevalue]
 @dtmDate DATETIME 
 AS
 
+DECLARE @intDefaultCurrencyId INT 
+SELECT @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
+
 IF @strModule = 'AP'
 BEGIN
 SELECT 
@@ -11,9 +14,11 @@ SELECT
 	strLineOfBusiness  COLLATE Latin1_General_CI_AS strLineOfBusiness,strLocation  COLLATE Latin1_General_CI_AS strLocation,strTicket  COLLATE Latin1_General_CI_AS strTicket,
 	strContractNumber  COLLATE Latin1_General_CI_AS strContractId,strItemId  COLLATE Latin1_General_CI_AS strItemId,dblQuantity,dblUnitPrice, 
 	dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, strForexRateType  COLLATE Latin1_General_CI_AS strForexRateType,
-	dblForexRate dblHistoricForexRate ,dblHistoricAmount, dblAmountDifference = 0, strModule = 'AP'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
-FROM vyuAPMultiCurrencyRevalue -- 'AP'
+	dblForexRate dblHistoricForexRate ,dblHistoricAmount, dblAmountDifference = 0, strModule = 'AP'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS,
+	strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuAPMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CT'
@@ -24,9 +29,11 @@ SELECT
 	strLocation  COLLATE Latin1_General_CI_AS ,strTicket  COLLATE Latin1_General_CI_AS strTicket,strContractNumber  COLLATE Latin1_General_CI_AS strContractId,
 	strItemId  COLLATE Latin1_General_CI_AS ,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'CT', 
-	strType = CASE WHEN strTransactionType = 'Purchase' THEN 'Payables' ELSE CASE WHEN  strTransactionType = 'Sales' THEN 'Receivables' END END  COLLATE Latin1_General_CI_AS
-FROM vyuCTMultiCurrencyRevalue
+	strType = CASE WHEN strTransactionType = 'Purchase' THEN 'Payables' ELSE CASE WHEN  strTransactionType = 'Sales' THEN 'Receivables' END END  COLLATE Latin1_General_CI_AS,
+	strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuCTMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
  END
 IF @strModule = 'AR' 
 BEGIN
@@ -36,9 +43,11 @@ SELECT
 	strLineOfBusiness  COLLATE Latin1_General_CI_AS strLineOfBusiness,strLocation  COLLATE Latin1_General_CI_AS strLocation,strTicket  COLLATE Latin1_General_CI_AS strTicket,
 	strContractNumber  COLLATE Latin1_General_CI_AS strContractId,strItemId  COLLATE Latin1_General_CI_AS strItemId,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,
 	intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, strForexRateType  COLLATE Latin1_General_CI_AS strForexRateType,dblForexRate dblHistoricForexRate,
-	dblHistoricAmount, dblAmountDifference = 0, strModule = 'AR'  COLLATE Latin1_General_CI_AS , strType= 'Receivables'  COLLATE Latin1_General_CI_AS
-FROM vyuARMultiCurrencyRevalue
+	dblHistoricAmount, dblAmountDifference = 0, strModule = 'AR'  COLLATE Latin1_General_CI_AS , strType= 'Receivables'  COLLATE Latin1_General_CI_AS,
+	strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuARMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'INV'
@@ -91,11 +100,14 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnReceivable = 1
 )
-SELECT * FROM cte WHERE dtmDate <= @dtmDate
+SELECT A.*, strCurrency FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
+WHERE dtmDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM'
 BEGIN
+
 SELECT 
 	strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,strTransactionId  COLLATE Latin1_General_CI_AS strTransactionId, 
 	strTransactionDate dtmDate,strTransactionDueDate dtmDueDate,strVendorName  COLLATE Latin1_General_CI_AS strVendorName,
@@ -103,9 +115,12 @@ SELECT
 	strLocation COLLATE Latin1_General_CI_AS strLocation,strTicket  COLLATE Latin1_General_CI_AS strTicket,strContractNumber COLLATE Latin1_General_CI_AS strContractId,
 	strItemId  COLLATE Latin1_General_CI_AS strItemId,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType COLLATE Latin1_General_CI_AS strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0,
-	strModule = 'CM'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
-FROM vyuCMMultiCurrencyRevalue
+	strModule = 'CM'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS,
+	strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuCMMultiCurrencyRevalue A
+LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'FA'
@@ -117,9 +132,11 @@ SELECT
 	strLocation COLLATE Latin1_General_CI_AS strLocation,strTicket  COLLATE Latin1_General_CI_AS strTicket,strContractNumber COLLATE Latin1_General_CI_AS strContractId,
 	strItemId  COLLATE Latin1_General_CI_AS strItemId,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType COLLATE Latin1_General_CI_AS strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0,
-	strModule = 'FA'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
-FROM vyuFAMultiCurrencyRevalue
+	strModule = 'FA'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS,
+	strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuFAMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM Forwards'
@@ -145,7 +162,10 @@ SELECT
 	strModule = 'CM Forwards' COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 FROM vyuCMForwardReceivablesMultiCurrencyRevalue
 )
-SELECT * FROM cte WHERE dtmDate <= @dtmDate AND dtmDueDate > @dtmDate
+SELECT *, strCurrency FROM cte 
+A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
+WHERE dtmDate <= @dtmDate AND dtmDueDate > @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM In-Transit'
@@ -157,9 +177,11 @@ SELECT
 	strLocation COLLATE Latin1_General_CI_AS strLocation, strTicket COLLATE Latin1_General_CI_AS strTicket,strContractNumber COLLATE Latin1_General_CI_AS strContractId,
 	strItemId COLLATE Latin1_General_CI_AS strItemId, dblQuantity, dblUnitPrice, dblAmount dblTransactionAmount, intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType COLLATE Latin1_General_CI_AS strForexRateType, dblForexRate dblHistoricForexRate, dblHistoricAmount, dblAmountDifference,
-	strModule = 'CM In-Transit' COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
-FROM vyuCMInTransitMultiCurrencyRevalue
+	strModule = 'CM In-Transit' COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS,
+	strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuCMInTransitMultiCurrencyRevalue  A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM Swaps'
@@ -205,7 +227,9 @@ SELECT
 	strModule = 'CM Swaps' COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 FROM vyuCMSwapInReceivablesInTransitMultiCurrencyRevalue
 )
-SELECT * FROM cte WHERE dtmDate <= @dtmDate
+SELECT A.*, strCurrency FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
+WHERE dtmDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'GL'
@@ -216,7 +240,9 @@ SELECT
 	strLocation  COLLATE Latin1_General_CI_AS ,strTicket  COLLATE Latin1_General_CI_AS strTicket,strContractNumber  COLLATE Latin1_General_CI_AS strContractId,
 	strItemId  COLLATE Latin1_General_CI_AS ,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'GL'  COLLATE Latin1_General_CI_AS, 
-	strType = 'General Ledger'  COLLATE Latin1_General_CI_AS
-FROM vyuGLMulticurrencyRevalueGJ
+	strType = 'General Ledger'  COLLATE Latin1_General_CI_AS,
+	strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuGLMulticurrencyRevalueGJ A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
 END

@@ -5,6 +5,7 @@
     [dtmStartDate]				DATETIME		DEFAULT (CONVERT([datetime],CONVERT([char](4),datepart(year,getdate()),(0))+'/01/01',(0))) NULL,
     [dtmEndDate]				DATETIME		DEFAULT (CONVERT([datetime],CONVERT([char](4),datepart(year,getdate()),(0))+'/12/31',(0))) NULL,
     [ysnOpen]					BIT				DEFAULT 1 NULL,
+    [ysnRevalued]				BIT				DEFAULT 1 NULL,
 	[ysnAPOpen]					BIT				DEFAULT 1 NULL,
 	[ysnAROpen]					BIT				DEFAULT 1 NULL,
 	[ysnINVOpen]				BIT				DEFAULT 1 NULL,

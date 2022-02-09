@@ -11,7 +11,7 @@ UNION SELECT TOP 1 'AR Already Revalued.'  FROM tblGLFiscalYearPeriod WHERE intG
 UNION SELECT TOP 1 'CM Already Revalued.'  FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalPeriodId AND ysnCMRevalued = 1 
 UNION SELECT TOP 1 'INV Already Revalued.'  FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalPeriodId AND ysnINVRevalued = 1 
 UNION SELECT TOP 1 'CT Already Revalued.'  FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalPeriodId AND ysnCTRevalued = 1 
-UNION SELECT TOP 1 'GL Already Consolidated.'  FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalPeriodId AND ysnConsolidated = 1 
+UNION SELECT TOP 1 'GL Already Revalued.'  FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalPeriodId AND ysnRevalued = 1 
 	
 DECLARE @ErrorMessage NVARCHAR(100)
 IF EXISTS(SELECT TOP 1 strDescription  FROM @tbl)

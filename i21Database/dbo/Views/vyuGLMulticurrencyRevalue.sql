@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGLMulticurrencyRevalue]
 AS
+WITH CTE AS(
 SELECT 
 	strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,strTransactionId  COLLATE Latin1_General_CI_AS strTransactionId,strTransactionDate dtmDate,
 	strTransactionDueDate dtmDueDate,strVendorName  COLLATE Latin1_General_CI_AS strVendorName,strCommodity  COLLATE Latin1_General_CI_AS strCommodity,
@@ -172,3 +173,5 @@ SELECT
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'GL'  COLLATE Latin1_General_CI_AS, 
 	strType = 'General Ledger'  COLLATE Latin1_General_CI_AS
 FROM vyuGLMulticurrencyRevalueGJ
+)
+SELECT A.*, strCurrency FROM CTE A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
