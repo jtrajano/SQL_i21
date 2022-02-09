@@ -794,10 +794,6 @@ BEGIN
 
 			LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM 
 				on SC.intTicketId = INVRCPTITEM.intSourceId
-			
-			LEFT JOIN tblICInventoryReceipt InventoryReceipt
-				on INVRCPTITEM.intInventoryReceiptId = InventoryReceipt.intInventoryReceiptId
-
 			LEFT JOIN tblEMEntitySplit EM 
 				ON EM.intSplitId = SC.intSplitId 
 					AND SC.intSplitId <> 0
@@ -874,7 +870,6 @@ BEGIN
 			WHERE BNKTRN.intBankAccountId = @intBankAccountId
 				AND BNKTRN.strTransactionId = @strPaymentNo
 				and INVRCPTITEM.intInventoryReceiptItemId is null
-				--and InventoryReceipt.intSourceType = 1
 			/*--------------------------------------------------------
 			*******************FROM SETTLE STORAGE********************
 			--------------------------------------------------------*/			
@@ -1986,11 +1981,6 @@ BEGIN
 
 			LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM 
 				on SC.intTicketId = INVRCPTITEM.intSourceId
-			
-			LEFT JOIN tblICInventoryReceipt InventoryReceipt
-				on INVRCPTITEM.intInventoryReceiptId = InventoryReceipt.intInventoryReceiptId
-
-
 			LEFT JOIN tblEMEntitySplit EM 
 				ON EM.intSplitId = SC.intSplitId 
 					AND SC.intSplitId <> 0
