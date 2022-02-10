@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspICCreateUpdateLotNumber]
+﻿CREATE PROCEDURE [dbo].[uspICCreateUpdateLotNumber]
 	@ItemsForLot ItemLotTableType READONLY 
 	,@intEntityUserSecurityId AS INT 
 	,@intLotStatusId AS INT = NULL -- (1: is Active, 2: is On Hold, 3: Quarantine) 
