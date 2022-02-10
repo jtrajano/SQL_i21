@@ -10345,6 +10345,7 @@
     <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
     <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <None Include="Scripts\Utility\GR\uspGRGrainStorageDiagnostics.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDuplicateChargeAndPremium.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
