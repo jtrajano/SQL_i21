@@ -246,14 +246,18 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dblBaseInvoiceTotal		= I.dblBaseInvoiceTotal
 	 , strCurrency				= CUR.strCurrency
 	 , dblCurrencyExchangeRate	= I.dblCurrencyExchangeRate
-	 , dblCurrencyRevalueRate	= ISNULL(ARMCR.dblNewForexRate, 0)
-	 , dblCurrencyRevalueAmount	= ISNULL(ARMCR.dblNewAmount, 0)
+	 , dblCurrencyRevalueRate	= ISNULL(GLRD.dblNewForexRate, 0)
+	 , dblCurrencyRevalueAmount	= ISNULL(GLRD.dblNewAmount, 0)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
-LEFT JOIN vyuARMultiCurrencyRevalue ARMCR ON I.strInvoiceNumber = ARMCR.strTransactionId 
+LEFT JOIN (
+	SELECT strTransactionId, dblNewForexRate, dblNewAmount
+	FROM vyuGLRevalueDetails
+	GROUP BY strTransactionId, dblNewForexRate, dblNewAmount
+) GLRD ON I.strInvoiceNumber = GLRD.strTransactionId 
 LEFT JOIN (
 	SELECT intCurrencyID
 		 , strCurrency 
