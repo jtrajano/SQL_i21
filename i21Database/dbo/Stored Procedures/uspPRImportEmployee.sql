@@ -362,8 +362,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					ysn1099Employee,
 					ysnStatutoryEmployee,
 					ysnThirdPartySickPay,
-					ysnRetirementPlan,
-					guiApiUniqueId
+					ysnRetirementPlan
+					--,
+					--guiApiUniqueId
 				)
 				SELECT 
 					@NewId,
@@ -399,8 +400,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					ysn1099Employee,
 					ysnStatutoryEmployee,
 					ysnThirdPartySickPay,
-					ysnRetirementPlan,
-					@guiApiUniqueId
+					ysnRetirementPlan
+					--,
+					--@guiApiUniqueId
 					FROM #TempEmployeeDetails PRST
 					WHERE PRST.strEmployeeId = @EmployeeID
 
