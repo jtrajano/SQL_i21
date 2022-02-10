@@ -38,6 +38,9 @@ BEGIN
             intEntityId,
             intEntityLocationId,
             intCompanyLocationId,
+			intSellerId,
+			intSalespersonId,
+			strTerminalRefNo,
             dtmPickupFrom,
             dtmPickupTo,
             strPONumber)
@@ -48,6 +51,9 @@ BEGIN
             a.intEntityId,
             a.intEntityLocationId,
             a.intCompanyLocationId,
+			a.intSellerId,
+			a.intSalespersonId,
+			a.strTerminalRefNo,
             a.dtmPickUpFrom,
             a.dtmPickUpTo,
             a.strPONumber
@@ -63,7 +69,10 @@ BEGIN
 					a.intCompanyLocationId,    
 					a.dtmPickUpFrom,
 					a.dtmPickUpTo,     
-					a.strPONumber
+					a.strPONumber,
+					a.intSellerId,
+					a.intSalespersonId,
+					a.strTerminalRefNo
         --DECLARE @pickupheaderId as int = (SELECT IDENT_CURRENT('tblMBILPickupHeader'))      
         DECLARE @pickupheaderId AS int = @@IDENTITY
 

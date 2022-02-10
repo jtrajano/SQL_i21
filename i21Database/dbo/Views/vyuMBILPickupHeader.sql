@@ -25,9 +25,17 @@ Select pickup.intPickupHeaderId,
     strVendorEmail = entity.strEmail,    
 	pickup.dtmPickupFrom,
 	pickup.dtmPickupTo,
-	pickup.strPONumber  
+	strSeller = Seller.strName,
+	strSalesPerson = Salesperson.strName,
+	pickup.strTerminalRefNo,
+	pickup.strPONumber  ,
+	pickup.strNote,
+	pickup.strBOL,
+	ysnPickup
 From tblMBILPickupHeader pickup    
 left join tblEMEntity entity on pickup.intEntityId = entity.intEntityId    
+LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = pickup.intSellerId  
+LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = pickup.intSalespersonId  
 left join tblEMEntityLocation location on pickup.intEntityLocationId = location.intEntityLocationId and pickup.intEntityId = location.intEntityId    
 left join tblSMCompanyLocation companylocation on pickup.intCompanyLocationId = companylocation.intCompanyLocationId    
-left join tblSMCompanySetup company on 1=1 
+left join tblSMCompanySetup company on 1=1

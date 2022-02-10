@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblMBILDeliveryDetail]
 	[intDeliveryHeaderId] [int] NULL,
 	[intPickupDetailId] [int] NULL,
 	[intItemId] [int] NULL,
-	[strTank] [nvarchar](150) NULL,
+	[strTank] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
 	[dblStickStartReading] [numeric](18, 6) NULL,
 	[dblStickEndReading] [numeric](18, 6) NULL,
 	[dblWaterInches] [numeric](18, 6) NULL,
