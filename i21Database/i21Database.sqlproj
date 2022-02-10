@@ -9173,6 +9173,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDuplicateChargeAndPremium.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
