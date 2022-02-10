@@ -38,7 +38,7 @@ BEGIN
 					ORDER BY dtmEffectiveDateTime DESC
 				END
 
-				IF(@strFreightRateType = 'Category' AND ISNULL(@strItemId, '') != '')
+				IF(@strFreightRateType = 'By Category' AND ISNULL(@strItemId, '') != '')
 				BEGIN
 					SELECT TOP 1 @intItemId = intItemId FROM tblICItem WHERE intItemId IN (
 						SELECT CONVERT(INT,Item) 
@@ -80,7 +80,7 @@ BEGIN
 				END
 			END
 
-			IF(@strFreightRateType = 'Category' AND ISNULL(@strItemId, '') != '')
+			IF(@strFreightRateType = 'By Category' AND ISNULL(@strItemId, '') != '')
 			BEGIN
 				SELECT TOP 1 @intItemId = intItemId FROM tblICItem WHERE intItemId IN (
 					SELECT CONVERT(INT,Item) 
