@@ -6,6 +6,7 @@ SELECT
 	,CAPD.intChargeAndPremiumId
 	,CAP_ITEM.strItemNo AS strChargeAndPremiumItemNo
 	,CAP_ITEM.intItemId AS intChargeAndPremiumItemId
+	,CAP_ITEM.strDescription AS strChargeAndPremiumItemDescription
 	,CT.intCalculationTypeId
 	,CT.strCalculationType
 	,DISC_ITEM.strItemNo AS strOtherChargeItemNo
@@ -14,6 +15,8 @@ SELECT
 	,INV_ITEM.intItemId AS intInventoryItemId
 	,CAPD.dblRate
 	,CAPD.strRateType
+	,CAPD.dtmEffectivityDate
+	,CAPD.intConcurrencyId
 FROM tblGRChargeAndPremiumDetail CAPD
 INNER JOIN tblGRChargeAndPremiumId CAP
 	ON CAP.intChargeAndPremiumId = CAPD.intChargeAndPremiumId

@@ -9156,6 +9156,7 @@
     <None Include="Scripts\Utility\IC\DPR\uspICDPRDiagnostics.sql" />
     <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
     <None Include="Scripts\Utility\GR\uspGRGrainStorageDiagnostics.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDuplicateChargeAndPremium.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
