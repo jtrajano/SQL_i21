@@ -25,8 +25,10 @@ DECLARE @tblFilteredVendorSetup TABLE(
 	strCompany1Id NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCompany2Id NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strCustomerName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strItemName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -46,8 +48,10 @@ INSERT INTO @tblFilteredVendorSetup
 	strCompany1Id,
 	strCompany2Id,
 	strCustomer,
+	strCustomerName,
 	strVendorCustomer,
 	strItemNo,
+	strItemName,
 	strVendorItemNo,
 	strUnitMeasure,
 	strVendorUnitMeasure,
@@ -66,8 +70,10 @@ SELECT
 	strCompany1Id,
 	strCompany2Id,
 	strCustomer,
+	strCustomerName,
 	strVendorCustomer,
 	strItemNo,
+	strItemName,
 	strVendorItemNo,
 	strUnitMeasure,
 	strVendorUnitMeasure,
@@ -175,8 +181,8 @@ FilteredVendorSetup.strExportFileType IS NOT NULL
 UNION
 ------------------------- Customer Xref Logs -------------------------
 SELECT -- Invalid Customer
-	FilteredVendorSetup.strCustomer,
-	'Customer: ' + FilteredVendorSetup.strCustomer + ' does not exist.',
+	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
+	'Customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' does not exist.',
 	FilteredVendorSetup.intRowNumber,
 	4
 FROM
@@ -184,17 +190,17 @@ FROM
 LEFT JOIN
 	vyuARCustomer Customer
 	ON
-		FilteredVendorSetup.strCustomer = Customer.strName
+		ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = Customer.strName
 		AND
 		Customer.ysnActive = 1
 WHERE
 Customer.intEntityId IS NULL
 AND
-FilteredVendorSetup.strCustomer IS NOT NULL
+ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NOT NULL
 UNION
 SELECT -- Duplicate Customer Name
-	FilteredVendorSetup.strCustomer,
-	'Customer: ' + FilteredVendorSetup.strCustomer + ' has duplicate name matches.',
+	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
+	'Customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' has duplicate name matches.',
 	FilteredVendorSetup.intRowNumber,
 	5
 FROM
@@ -206,7 +212,7 @@ OUTER APPLY
 	FROM 
 		vyuARCustomer 
 	WHERE 
-		strName = FilteredVendorSetup.strCustomer 
+		strName = ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) 
 ) Customer
 WHERE
 Customer.intMatchCount > 1
@@ -219,10 +225,10 @@ SELECT -- Duplicate imported customer
 FROM
 (
 	SELECT 
-		FilteredVendorSetup.strCustomer,
+		strCustomer = ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
 		FilteredVendorSetup.strVendor,
 		FilteredVendorSetup.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, FilteredVendorSetup.strCustomer ORDER BY FilteredVendorSetup.intRowNumber)
+		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) ORDER BY FilteredVendorSetup.intRowNumber)
 	FROM 
 		@tblFilteredVendorSetup FilteredVendorSetup
 ) AS DuplicateVendorSetup
@@ -231,8 +237,8 @@ AND
 DuplicateVendorSetup.strCustomer IS NOT NULL
 UNION
 SELECT -- Customer already exists
-	FilteredVendorSetup.strCustomer,
-	'Customer: ' + FilteredVendorSetup.strCustomer + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
+	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
+	'Customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	7
 FROM
@@ -240,7 +246,7 @@ FROM
 LEFT JOIN
 	vyuARCustomer Customer
 	ON
-		FilteredVendorSetup.strCustomer = Customer.strName
+		ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = Customer.strName
 LEFT JOIN
 	vyuAPVendor Vendor
 	ON
@@ -260,16 +266,16 @@ WHERE
 UNION
 SELECT -- Customer Xref incomplete
 	CASE
-		WHEN FilteredVendorSetup.strCustomer IS NOT NULL AND FilteredVendorSetup.strVendorCustomer IS NULL
-		THEN FilteredVendorSetup.strCustomer
-		WHEN FilteredVendorSetup.strCustomer IS NULL AND FilteredVendorSetup.strVendorCustomer IS NOT NULL
+		WHEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NOT NULL AND FilteredVendorSetup.strVendorCustomer IS NULL
+		THEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName)
+		WHEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NULL AND FilteredVendorSetup.strVendorCustomer IS NOT NULL
 		THEN FilteredVendorSetup.strVendorCustomer
 		ELSE NULL
 	END,
 	CASE
-		WHEN FilteredVendorSetup.strCustomer IS NOT NULL AND FilteredVendorSetup.strVendorCustomer IS NULL
-		THEN 'Vendor cross reference is missing for customer: ' + FilteredVendorSetup.strCustomer + '.'
-		WHEN FilteredVendorSetup.strCustomer IS NULL AND FilteredVendorSetup.strVendorCustomer IS NOT NULL
+		WHEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NOT NULL AND FilteredVendorSetup.strVendorCustomer IS NULL
+		THEN 'Vendor cross reference is missing for customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + '.'
+		WHEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NULL AND FilteredVendorSetup.strVendorCustomer IS NOT NULL
 		THEN 'Customer is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorCustomer + '.'
 		ELSE NULL
 	END,
@@ -279,21 +285,21 @@ FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 WHERE
 (
-	FilteredVendorSetup.strCustomer IS NOT NULL 
+	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NOT NULL 
 	AND 
 	FilteredVendorSetup.strVendorCustomer IS NULL
 )
 OR
 (
-	FilteredVendorSetup.strCustomer IS NULL 
+	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NULL 
 	AND 
 	FilteredVendorSetup.strVendorCustomer IS NOT NULL
 )
 UNION
 --------------------------- Item Xref Logs ---------------------------
 SELECT -- Invalid Item
-	FilteredVendorSetup.strItemNo,
-	'Item: ' + FilteredVendorSetup.strItemNo + ' does not exist.',
+	ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName),
+	'Item: ' + ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) + ' does not exist.',
 	FilteredVendorSetup.intRowNumber,
 	9
 FROM
@@ -301,13 +307,13 @@ FROM
 LEFT JOIN
 	tblICItem Item
 	ON
-		FilteredVendorSetup.strItemNo = Item.strItemNo
+		ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) = Item.strItemNo
 		AND
 		Item.strType NOT LIKE '%Comment%'
 WHERE
 Item.intItemId IS NULL
 AND
-FilteredVendorSetup.strItemNo IS NOT NULL
+ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NOT NULL
 UNION
 SELECT -- Duplicate imported item
 	DuplicateVendorSetup.strItemNo,
@@ -317,10 +323,10 @@ SELECT -- Duplicate imported item
 FROM
 (
 	SELECT 
-		FilteredVendorSetup.strItemNo,
+		strItemNo = ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName),
 		FilteredVendorSetup.strVendor,
 		FilteredVendorSetup.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, FilteredVendorSetup.strItemNo ORDER BY FilteredVendorSetup.intRowNumber)
+		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) ORDER BY FilteredVendorSetup.intRowNumber)
 	FROM 
 		@tblFilteredVendorSetup FilteredVendorSetup
 ) AS DuplicateVendorSetup
@@ -329,8 +335,8 @@ AND
 DuplicateVendorSetup.strItemNo IS NOT NULL
 UNION
 SELECT  -- Item already exists
-	FilteredVendorSetup.strItemNo,
-	'Item: ' + FilteredVendorSetup.strItemNo + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
+	ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName),
+	'Item: ' + ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	11
 FROM
@@ -338,7 +344,7 @@ FROM
 LEFT JOIN
 	tblICItem Item
 	ON
-		FilteredVendorSetup.strItemNo = Item.strItemNo
+		ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) = Item.strItemNo
 LEFT JOIN
 	vyuAPVendor Vendor
 	ON
@@ -358,16 +364,16 @@ WHERE
 UNION
 SELECT -- Item Xref incomplete
 	CASE
-		WHEN FilteredVendorSetup.strItemNo IS NOT NULL AND FilteredVendorSetup.strVendorItemNo IS NULL
-		THEN FilteredVendorSetup.strItemNo
-		WHEN FilteredVendorSetup.strItemNo IS NULL AND FilteredVendorSetup.strVendorItemNo IS NOT NULL
+		WHEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NOT NULL AND FilteredVendorSetup.strVendorItemNo IS NULL
+		THEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName)
+		WHEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NULL AND FilteredVendorSetup.strVendorItemNo IS NOT NULL
 		THEN FilteredVendorSetup.strVendorItemNo
 		ELSE NULL
 	END,
 	CASE
-		WHEN FilteredVendorSetup.strItemNo IS NOT NULL AND FilteredVendorSetup.strVendorItemNo IS NULL
-		THEN 'Vendor cross reference is missing for item: ' + FilteredVendorSetup.strItemNo + '.'
-		WHEN FilteredVendorSetup.strItemNo IS NULL AND FilteredVendorSetup.strVendorItemNo IS NOT NULL
+		WHEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NOT NULL AND FilteredVendorSetup.strVendorItemNo IS NULL
+		THEN 'Vendor cross reference is missing for item: ' + ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) + '.'
+		WHEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NULL AND FilteredVendorSetup.strVendorItemNo IS NOT NULL
 		THEN 'Item is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorItemNo + '.'
 		ELSE NULL
 	END,
@@ -377,13 +383,13 @@ FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 WHERE
 (
-	FilteredVendorSetup.strItemNo IS NOT NULL 
+	ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NOT NULL 
 	AND 
 	FilteredVendorSetup.strVendorItemNo IS NULL
 )
 OR
 (
-	FilteredVendorSetup.strItemNo IS NULL 
+	ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NULL 
 	AND 
 	FilteredVendorSetup.strVendorItemNo IS NOT NULL
 )
@@ -803,7 +809,7 @@ USING
 	INNER JOIN
 		vyuARCustomer Customer
 		ON
-			FilteredVendorSetup.strCustomer = Customer.strName
+			ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = Customer.strName
 			AND
 			Customer.ysnActive = 1
 	INNER JOIN
@@ -866,7 +872,7 @@ USING
 	INNER JOIN
 		tblICItem Item
 		ON
-			FilteredVendorSetup.strItemNo = Item.strItemNo
+			ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) = Item.strItemNo
 			AND
 			Item.strType NOT LIKE '%Comment%'
 	INNER JOIN
