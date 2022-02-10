@@ -214,6 +214,29 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
 
+--##CREDITMEMOPAIDREFUNDED
+INSERT INTO ##CREDITMEMOPAIDREFUNDED (
+	   intInvoiceId
+	 , strInvoiceNumber
+	 , strDocumentNumber
+)
+SELECT I.intInvoiceId,I.strInvoiceNumber,REFUND.strDocumentNumber
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN(
+	SELECT ID.strDocumentNumber from tblARInvoice INV
+	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
+	where   strTransactionType='Cash Refund' and ysnPosted = 1
+)REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
+WHERE I.ysnPosted = 1 
+	AND I.ysnPaid = 1
+	AND ysnCancelled = 0
+	AND I.strTransactionType <> 'Cash Refund'
+	AND I.strTransactionType = 'Credit Memo'
+	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
 --##POSTEDINVOICES
 INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	   intInvoiceId
@@ -324,6 +347,9 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
+
+DELETE FROM  ##POSTEDINVOICES
+WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM ##CASHREFUNDS CF INNER  JOIN ##CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber)
 
 --##CASHRETURNS
 INSERT INTO ##CASHRETURNS (
