@@ -475,8 +475,9 @@ LEFT JOIN (
 	FROM tblARPrepaidAndCredit WITH (NOLOCK)    
 	WHERE ysnApplied = 1    
 	GROUP BY intPrepaymentId   
-) PC ON I.intInvoiceId = PC.intPrepaymentId   
-WHERE I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0'
+) PC ON I.intInvoiceId = PC.intPrepaymentId  ' + 
+'WHERE (' + CAST(@ysnPrintZeroBalanceLocal AS NVARCHAR(1)) + ' = 0 AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0) OR ' + CAST(@ysnPrintZeroBalanceLocal AS NVARCHAR(1)) + ' = 1'
+--WHERE I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0'
 
 EXEC sp_executesql @query
 
