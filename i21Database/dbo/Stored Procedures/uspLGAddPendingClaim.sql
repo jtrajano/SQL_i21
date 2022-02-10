@@ -285,11 +285,12 @@ BEGIN
 							WHERE 
 								L.intLoadId = @intLoadId
 								AND L.intPurchaseSale IN (1, 3)
-								AND ((L.intPurchaseSale = 1 AND L.intShipmentStatus = 4) OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
+								AND ((L.intPurchaseSale = 1 AND L.intShipmentStatus = 4
+										AND NOT EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId AND ISNULL(dblReceivedQty, 0) = 0)) 
+									OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
 								AND WC.intWeightClaimId IS NULL
 								AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 								AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = @intPurchaseSale)
-								AND (L.intPurchaseSale = 1 AND NOT EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId AND ISNULL(dblReceivedQty, 0) = 0))
 							) LI
 						END
 			END
