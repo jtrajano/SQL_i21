@@ -24,6 +24,7 @@ DECLARE @tblFilteredRebateProgram TABLE(
 	strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	ysnActive BIT NULL,
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strItemName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strRebateBy NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strRebateUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -34,6 +35,7 @@ DECLARE @tblFilteredRebateProgram TABLE(
 	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strCustomerName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 INSERT INTO @tblFilteredRebateProgram
@@ -45,6 +47,7 @@ INSERT INTO @tblFilteredRebateProgram
 	strDescription,
 	ysnActive,
 	strItemNo,
+	strItemName,
 	strVendorItemNo,
 	strRebateBy,
 	strRebateUOM,
@@ -55,6 +58,7 @@ INSERT INTO @tblFilteredRebateProgram
 	strCategory,
 	strVendorCategory,
 	strCustomer,
+	strCustomerName,
 	strVendorCustomer
 )
 SELECT 
@@ -65,6 +69,7 @@ SELECT
 	strDescription,
 	ysnActive,
 	strItemNo,
+	strItemName,
 	strVendorItemNo,
 	strRebateBy,
 	strRebateUOM,
@@ -75,6 +80,7 @@ SELECT
 	strCategory,
 	strVendorCategory,
 	strCustomer,
+	strCustomerName,
 	strVendorCustomer
 FROM
 tblApiSchemaTransformRebateProgram
@@ -97,6 +103,11 @@ WHERE guiApiUniqueId = @guiApiUniqueId;
 -- Rebate Customer Logs
 -- 12 - Invalid Rebate Customer
 -- 13 - Invalid Customer Xref
+-- Required Logs
+-- 14 - Item Required
+-- 15 - Rebate UOM Required
+-- 16 - Category Required
+-- 17 - Customer Required
 
 
 DECLARE @tblLogRebateProgram TABLE(
@@ -151,25 +162,25 @@ SELECT -- Duplicate or overlapping imported rebate program item effectivity dura
 FROM
 (
 	SELECT 
-		strItemNo = ISNULL(MIN(FilteredItem.strItemNo), MIN(FilteredRebateProgram.strItemNo)),
+		strItemNo = COALESCE(MIN(FilteredItem.strItemNo), MIN(FilteredRebateProgram.strItemNo), MIN(FilteredRebateProgram.strItemName)),
 		strVendorItemNo = MIN(FilteredRebateProgram.strVendorItemNo),
 		strCategory = ISNULL(MIN(FilteredCategory.strCategoryCode), MIN(FilteredRebateProgram.strCategory)),
 		strVendorCategory = MIN(FilteredRebateProgram.strVendorCategory),
 		strVendor = MIN(FilteredRebateProgram.strVendor),
 		FilteredRebateProgram.intRowNumber,
 		Error = CASE
-			WHEN MIN(FilteredRebateProgram.strItemNo) IS NULL AND MIN(FilteredRebateProgram.strVendorItemNo) IS NULL
+			WHEN COALESCE(MIN(FilteredRebateProgram.strItemNo), MIN(FilteredRebateProgram.strItemName)) IS NULL AND MIN(FilteredRebateProgram.strVendorItemNo) IS NULL
 			THEN 'Category'
 			ELSE 'Item'
 		END,
 		RowNumber = CASE
-			WHEN MIN(FilteredRebateProgram.strItemNo) IS NULL AND MIN(FilteredRebateProgram.strVendorItemNo) IS NULL
+			WHEN COALESCE(MIN(FilteredRebateProgram.strItemNo), MIN(FilteredRebateProgram.strItemName)) IS NULL AND MIN(FilteredRebateProgram.strVendorItemNo) IS NULL
 			THEN ROW_NUMBER() OVER(PARTITION BY 
 					MIN(FilteredRebateProgram.strVendor), 
 					ISNULL(MIN(FilteredCategory.strCategoryCode), MIN(FilteredRebateProgram.strCategory)) ORDER BY FilteredRebateProgram.intRowNumber)
 			ELSE ROW_NUMBER() OVER(PARTITION BY 
 					MIN(FilteredRebateProgram.strVendor), 
-					ISNULL(MIN(FilteredItem.strItemNo), MIN(FilteredRebateProgram.strItemNo)) ORDER BY FilteredRebateProgram.intRowNumber)
+					COALESCE(MIN(FilteredItem.strItemNo), MIN(FilteredRebateProgram.strItemNo), MIN(FilteredRebateProgram.strItemName)) ORDER BY FilteredRebateProgram.intRowNumber)
 		END
 	FROM 
 		@tblFilteredRebateProgram FilteredRebateProgram
@@ -243,7 +254,7 @@ FROM
 			AND
 			(
 				(
-					ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+					COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 					AND
 					ISNULL(FilteredRebateProgram.strVendorCategory, FilteredRebateProgram.strCategory) IS NOT NULL
 					AND
@@ -251,9 +262,9 @@ FROM
 				)
 				OR
 				(
-					ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NOT NULL
+					COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NOT NULL
 					AND
-					ISNULL(FilteredItem.strItemNo, FilteredRebateProgram.strItemNo) = ISNULL(ComparedItem.strItemNo, ComparedRebateProgram.strItemNo)	
+					COALESCE(FilteredItem.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) = COALESCE(ComparedItem.strItemNo, ComparedRebateProgram.strItemNo, ComparedRebateProgram.strItemName)	
 				)
 			)
 			AND
@@ -268,14 +279,14 @@ WHERE DuplicateRebateProgram.RowNumber > 1
 UNION
 SELECT -- Overlapping existing record on rebate program item effectivity duration
 	CASE
-		WHEN ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		WHEN COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 		THEN ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory)
-		ELSE ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo)
+		ELSE COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName)
 	END,
 	CASE
-		WHEN ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		WHEN COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 		THEN 'Rebate item category: ' + ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' overlaps effectivity date of existing record.'
-		ELSE 'Rebate item: ' + ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' overlaps effectivity date of existing record.'
+		ELSE 'Rebate item: ' + COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' overlaps effectivity date of existing record.'
 	END,
 	FilteredRebateProgram.intRowNumber,
 	3
@@ -294,7 +305,7 @@ INNER JOIN
 LEFT JOIN
 	tblICCategoryVendor CategoryXref
 	ON
-		ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 		AND
 		FilteredRebateProgram.strVendorCategory IS NOT NULL
 		AND
@@ -320,7 +331,7 @@ INNER JOIN
 		AND
 		(
 			(
-				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+				COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 				AND
 				ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) IS NOT NULL
 				AND
@@ -334,9 +345,9 @@ INNER JOIN
 			)
 			OR
 			(
-				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NOT NULL
+				COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NOT NULL
 				AND
-				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) = RebateItem.strItemNumber
+				COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) = RebateItem.strItemNumber
 			)
 		)
 WHERE
@@ -352,14 +363,14 @@ AND
 UNION
 SELECT -- Rebate program item effectivity duration already exist and overwrite is not enabled
 	CASE
-		WHEN ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		WHEN COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 		THEN ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory)
-		ELSE ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo)
+		ELSE COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName)
 	END,
 	CASE
-		WHEN ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		WHEN COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 		THEN 'Rebate item category: ' + ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' with this effectivity date already exist and overwrite is not enabled.'
-		ELSE 'Rebate item: ' + ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' with this effectivity date already exist and overwrite is not enabled.'
+		ELSE 'Rebate item: ' + COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' with this effectivity date already exist and overwrite is not enabled.'
 	END,
 	FilteredRebateProgram.intRowNumber,
 	4
@@ -378,7 +389,7 @@ INNER JOIN
 LEFT JOIN
 	tblICCategoryVendor CategoryXref
 	ON
-		ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 		AND
 		FilteredRebateProgram.strVendorCategory IS NOT NULL
 		AND
@@ -404,7 +415,7 @@ INNER JOIN
 		AND
 		(
 			(
-				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+				COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 				AND
 				ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) IS NOT NULL
 				AND
@@ -418,9 +429,9 @@ INNER JOIN
 			)
 			OR
 			(
-				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NOT NULL
+				COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NOT NULL
 				AND
-				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) = RebateItem.strItemNumber
+				COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) = RebateItem.strItemNumber
 			)
 		)
 WHERE
@@ -431,8 +442,8 @@ AND
 @ysnAllowOverwrite = 0
 UNION
 SELECT -- Invalid Item No
-	FilteredRebateProgram.strItemNo,
-	'Rebate item: ' + FilteredRebateProgram.strItemNo + ' does not exist.', 
+	COALESCE(FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName),
+	'Rebate item: ' + COALESCE(FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
 	5
 FROM
@@ -440,11 +451,11 @@ FROM
 LEFT JOIN
 	tblICItem Item
 	ON
-		FilteredRebateProgram.strItemNo = Item.strItemNo
+		COALESCE(FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) = Item.strItemNo
 WHERE
 Item.intItemId IS NULL
 AND
-FilteredRebateProgram.strItemNo IS NOT NULL
+COALESCE(FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NOT NULL
 UNION
 SELECT -- Invalid Category
 	FilteredRebateProgram.strCategory,
@@ -460,7 +471,7 @@ LEFT JOIN
 WHERE
 Category.intCategoryId IS NULL
 AND
-FilteredRebateProgram.strItemNo IS NULL
+COALESCE(FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 AND
 FilteredRebateProgram.strVendorItemNo IS NULL
 AND
@@ -520,7 +531,7 @@ LEFT JOIN
 WHERE
 CategoryXref.intCategoryVendorId IS NULL
 AND
-FilteredRebateProgram.strItemNo IS NULL
+COALESCE(FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 AND
 FilteredRebateProgram.strVendorItemNo IS NULL
 AND
@@ -528,7 +539,7 @@ FilteredRebateProgram.strVendorCategory IS NOT NULL
 UNION
 SELECT -- Invalid Rebate by
 	FilteredRebateProgram.strRebateBy,
-	'Rebate by: ' + FilteredRebateProgram.strRebateBy + ' of rebate item: ' + FilteredRebateProgram.strItemNo + ' does not exist.', 
+	'Rebate by: ' + FilteredRebateProgram.strRebateBy + ' of rebate item: ' + COALESCE(FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
 	9
 FROM
@@ -539,11 +550,11 @@ UNION
 SELECT -- Invalid Rebate UOM
 	ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM),
 	CASE
-		WHEN ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		WHEN COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 		THEN 'Rebate UOM: ' + ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM) + ' of rebate category: ' + 
 			COALESCE(Category.strCategoryCode, FilteredRebateProgram.strVendorCategory, FilteredRebateProgram.strCategory) + ' does not exist or not configured.'
 		ELSE 'Rebate UOM: ' + ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM) + ' of rebate item: ' + 
-			COALESCE(Item.strItemNo, FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) + ' does not exist or not configured.'
+			COALESCE(Item.strItemNo, FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) + ' does not exist or not configured.'
 	END,
 	FilteredRebateProgram.intRowNumber,
 	10
@@ -562,7 +573,7 @@ LEFT JOIN
 LEFT JOIN
 	tblICCategoryVendor CategoryXref
 	ON
-		ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 		AND
 		FilteredRebateProgram.strVendorCategory IS NOT NULL
 		AND
@@ -596,15 +607,15 @@ LEFT JOIN
 	ON
 		(
 			(
-				ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+				COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 				AND
 				ItemUOM.strCategoryCode = ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory)
 			)
 			OR
 			(
-				ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NOT NULL
+				COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NOT NULL
 				AND
-				ItemUOM.strItemNo = ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo)
+				ItemUOM.strItemNo = COALESCE(Item.strItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName)
 			)
 		)
 		AND
@@ -688,6 +699,47 @@ WHERE
 CustomerXref.intCustomerXrefId IS NULL
 AND
 FilteredRebateProgram.strVendorCustomer IS NOT NULL
+--------------------------- Required Logs ---------------------------
+UNION
+SELECT -- Item Required
+	FilteredRebateProgram.strVendor,
+	'Item Name is required if Vendor''s Item and Item No is blank',
+	FilteredRebateProgram.intRowNumber,
+	14
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+WHERE
+	COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
+UNION
+SELECT -- Rebate UOM Required
+	FilteredRebateProgram.strVendor,
+	'Rebate UOM is required if Vendor''s Rebate UOM is blank',
+	FilteredRebateProgram.intRowNumber,
+	15
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+WHERE
+	ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM) IS NULL
+UNION
+SELECT -- Category Required
+	FilteredRebateProgram.strVendor,
+	'Category is required if Vendor''s Category is blank',
+	FilteredRebateProgram.intRowNumber,
+	16
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+WHERE
+	COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName, FilteredRebateProgram.strVendorCategory, FilteredRebateProgram.strCategory) IS NULL
+UNION
+SELECT -- Customer Required
+	FilteredRebateProgram.strVendor,
+	'Cusomer Name is required if Vendor''s Customer and Customer No is blank',
+	FilteredRebateProgram.intRowNumber,
+	17
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+WHERE
+	COALESCE(FilteredRebateProgram.strVendorCustomer, FilteredRebateProgram.strCustomer, FilteredRebateProgram.strCustomerName) IS NULL
 
 --Validate Records
 
@@ -706,7 +758,7 @@ SELECT
 	guiApiImportLogDetailId = NEWID(),
 	guiApiImportLogId = @guiLogId,
 	strField = CASE
-		WHEN LogRebateProgram.intLogType IN (1,2,3,4)
+		WHEN LogRebateProgram.intLogType IN (1,2,3,4,14,15,16,17)
 		THEN 'Vendor'
 		WHEN LogRebateProgram.intLogType = 5
 		THEN 'Item No'
@@ -738,7 +790,7 @@ SELECT
 	intRowNo = LogRebateProgram.intRowNumber,
 	strMessage = LogRebateProgram.strMessage
 FROM @tblLogRebateProgram LogRebateProgram
-WHERE LogRebateProgram.intLogType BETWEEN 1 AND 13
+WHERE LogRebateProgram.intLogType BETWEEN 1 AND 17
 
 --Rebate Program Transform logic
 
@@ -859,7 +911,7 @@ USING
 		ON
 			FilteredRebateProgram.intRowNumber = LogRebateProgram.intRowNumber
 			AND
-			LogRebateProgram.intLogType IN (1,2,3,4,5,6,7,8,9,10,11)
+			LogRebateProgram.intLogType IN (1,2,3,4,5,6,7,8,9,10,11,14,15,16)
 	INNER JOIN
 	(
 		vyuAPVendor Vendor
@@ -873,11 +925,11 @@ USING
 	LEFT JOIN 
 		tblICItem Item
 		ON
-			FilteredRebateProgram.strItemNo = Item.strItemNo
+			ISNULL(FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) = Item.strItemNo
 	LEFT JOIN
 		tblICCategory Category
 		ON
-			ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+			COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 			AND
 			FilteredRebateProgram.strCategory = Category.strCategoryCode
 	LEFT JOIN
@@ -895,7 +947,7 @@ USING
 	LEFT JOIN
 		tblICCategoryVendor CategoryXref
 		ON
-			ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+			COALESCE(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo, FilteredRebateProgram.strItemName) IS NULL
 			AND
 			FilteredRebateProgram.strVendorCategory IS NOT NULL
 			AND
@@ -919,7 +971,7 @@ USING
 		SELECT TOP 1 intProgramId FROM tblVRProgram WHERE intVendorSetupId = VendorSetup.intVendorSetupId ORDER BY intProgramId DESC	
 	) Program
 	WHERE 
-	LogRebateProgram.intLogType NOT IN (1,2,3,4,5,6,7,8,9,10,11) OR LogRebateProgram.intLogType IS NULL
+	LogRebateProgram.intLogType NOT IN (1,2,3,4,5,6,7,8,9,10,11,14,15,16) OR LogRebateProgram.intLogType IS NULL
 ) AS SOURCE
 ON 
 TARGET.intProgramId = SOURCE.intProgramId
@@ -989,7 +1041,7 @@ LEFT JOIN
 	ON
 		FilteredRebateProgram.intRowNumber = LogRebateProgram.intRowNumber
 		AND
-		LogRebateProgram.intLogType IN (1,12,13)
+		LogRebateProgram.intLogType IN (1,12,13,17)
 INNER JOIN
 (
 	vyuAPVendor Vendor
@@ -1007,7 +1059,7 @@ OUTER APPLY
 LEFT JOIN 
 	tblEMEntity Customer
 	ON
-		FilteredRebateProgram.strCustomer = Customer.strName
+		ISNULL(FilteredRebateProgram.strCustomer, FilteredRebateProgram.strCustomerName) = Customer.strName
 LEFT JOIN
 	tblVRCustomerXref CustomerXref
 	ON
@@ -1026,10 +1078,10 @@ LEFT JOIN
 		ProgramCustomer.intEntityId = ISNULL(CustomerXref.intEntityId, Customer.intEntityId)
 WHERE 
 (
-	LogRebateProgram.intLogType NOT IN (1,12,13) 
+	LogRebateProgram.intLogType NOT IN (1,12,13,17) 
 	OR 
 	LogRebateProgram.intLogType IS NULL
 )
 AND
 ProgramCustomer.intProgramCustomerId IS NULL
-GROUP BY ISNULL(VendorCustomer.strName, FilteredRebateProgram.strCustomer)
+GROUP BY ISNULL(VendorCustomer.strName, ISNULL(FilteredRebateProgram.strCustomer, FilteredRebateProgram.strCustomerName))
