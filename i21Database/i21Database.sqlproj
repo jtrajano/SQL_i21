@@ -9955,7 +9955,6 @@
     <Build Include="dbo\Tables\tblSCTicketDirectBasisContract.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTicketWithBasisContract.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherStatusFromCM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
