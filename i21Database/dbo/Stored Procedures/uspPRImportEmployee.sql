@@ -264,8 +264,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					,EME.strEmail
 					,EME.ysn1099Employee
 					,EME.strContactNumber
-					,EME.strEMPhone
 					,EME.strPhone
+					,EME.strEMPhone
 					,EME.strTimezone
 					,1
 					,EME.ysnActive
@@ -287,11 +287,6 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 
 				DECLARE @EntityPhoneID AS NVARCHAR(50)
 				SET @EntityPhoneID = SCOPE_IDENTITY()
-
-				--select * from tblEMEntityMobileNumber where intEntityId = 2434
-
-				--select * from tblEMEntityPhoneNumber where intEntityId = 2434
-
 
 				INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
 				select top 1 @ContactId, strEMPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
@@ -367,9 +362,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					ysn1099Employee,
 					ysnStatutoryEmployee,
 					ysnThirdPartySickPay,
-					ysnRetirementPlan
-					--,
-					--guiApiUniqueId
+					ysnRetirementPlan,
+					guiApiUniqueId
 				)
 				SELECT 
 					@NewId,
@@ -405,9 +399,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					ysn1099Employee,
 					ysnStatutoryEmployee,
 					ysnThirdPartySickPay,
-					ysnRetirementPlan
-					--,
-					--@guiApiUniqueId
+					ysnRetirementPlan,
+					@guiApiUniqueId
 					FROM #TempEmployeeDetails PRST
 					WHERE PRST.strEmployeeId = @EmployeeID
 
@@ -700,7 +693,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,ysnPrint1099 = @ysnPrint1099
 				,strContactNumber = @strContactNumber
 				,strTitle = @strTitle
-				,strPhone = @strPhone
+				,strPhone = @strEmPhone
 				,strEmail2 = @strEmail
 				,strTimezone = @strTimezone
 				,strEntityNo = @strEntityNo
@@ -709,7 +702,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,intEntityRank = @intEntityRank
 				,strDepartment = @strDepartment
 				,dtmOriginationDate = @dtmOriginationDate
-				,strMobile = @strEmPhone
+				,strMobile = @strPhone
 				WHERE intEntityId = @EntityId
 
 				UPDATE tblEMEntity SET
@@ -717,8 +710,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					,strEmail = @strEmail
 					,ysnPrint1099 = @ysn1099Employee
 					,strContactNumber = @strContactNumber
-					,strMobile = @strEmPhone
-					,strPhone = @strPhone
+					,strMobile =  @strPhone
+					,strPhone = @strEmPhone
 					,strTimezone = @strTimezone
 					,intLanguageId = 1
 					,ysnActive = @ysnActive
