@@ -9098,7 +9098,6 @@
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherStatusFromCM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
