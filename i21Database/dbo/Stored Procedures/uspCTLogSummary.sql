@@ -816,7 +816,8 @@ BEGIN TRY
 				LEFT JOIN (
 					SELECT * FROM (
 						SELECT intContractDetailId = @intContractDetailId, intPricingTypeId = 1, dblQty = @dblQtyPriced
-						UNION ALL SELECT intContractDetailId = @intContractDetailId, intPricingTypeId = 2, dblQty = @dblQtyUnPriced
+						UNION ALL
+						SELECT top 1 intContractDetailId = @intContractDetailId, intPricingTypeId = tm.intHeaderPricingTypeId, dblQty = @dblQtyUnPriced from @tmpContractDetail tm
 					) tbl WHERE dblQty > 0
 				) b ON b.intContractDetailId = o.intContractDetailId
 
