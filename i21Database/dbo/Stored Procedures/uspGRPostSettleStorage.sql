@@ -2546,7 +2546,11 @@ BEGIN TRY
 					,[dtmDate]						= @dtmClientPostDate
 					,[dtmVoucherDate]				= @dtmClientPostDate
 
-					, intLinkingId		= isnull(a.intSettleContractId, -90)
+					, intLinkingId		= case when a.intSettleContractId is not null then 
+											isnull(availableQtyForVoucher.intPriceFixationDetailId, a.intSettleContractId)
+										else 
+											-90
+										end
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 

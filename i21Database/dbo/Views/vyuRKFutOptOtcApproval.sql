@@ -24,7 +24,8 @@ SELECT  intFutOptTransactionId
 	, intSubmittedById = smapprove.intSubmittedById
 	, dblApprovalAmount = smapprove.dblAmount
 	, dtmDueDate = smapprove.dtmDueDate
-	, intApprovalEntityId = approval.intEntityId
+	, intApproverId = smapprove.intApproverId
+	, intGroupApproverId = approvalGroup.intApproverId
 	, strOrderType = (CASE WHEN der.intOrderTypeId = 1 THEN 'GTC'
 							WHEN der.intOrderTypeId = 2 THEN 'Limit'
 							WHEN der.intOrderTypeId = 3 THEN 'Market'
@@ -56,6 +57,8 @@ LEFT JOIN tblCMBank buybank
 LEFT JOIN vyuCMBankAccount AS buybankacct 
 	ON der.intBuyBankAccountId = buybankacct.intBankAccountId
 LEFT JOIN tblSMCurrencyExchangeRateType AS CurEx ON der.intCurrencyExchangeRateTypeId = CurEx.intCurrencyExchangeRateTypeId
+LEFT OUTER JOIN tblSMApproverConfigurationForApprovalGroup approvalGroup
+	ON smapprove.intApprovalId = approvalGroup.intApprovalId   
 
 WHERE screen.strModule = 'Risk Management' 
 AND screen.strScreenName = 'Derivative Entry'

@@ -36,6 +36,8 @@ DECLARE @dtmDateTo						DATETIME
 	  , @ysnOverrideCashFlow			BIT = 0
 	  , @intEntityUserId				INT
 	  , @strReportLogId					NVARCHAR(MAX)
+	  , @intNewPerformanceLogId			INT 
+	  , @strRequestId 					NVARCHAR(200) = NEWID()
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -273,6 +275,14 @@ WHERE [fieldname] = 'strReportLogId'
 
 IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 BEGIN
+	EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Customer Aging Detail Report'
+									  , @strProcedureName       = 'uspARCustomerAgingDetailReport'
+									  , @strRequestId			= @strRequestId
+									  , @ysnStart		        = 1
+									  , @intUserId	            = 1
+									  , @intPerformanceLogId    = NULL
+									  , @intNewPerformanceLogId = @intNewPerformanceLogId OUT
+
 	INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
 	VALUES (@strReportLogId, GETDATE())
 
@@ -573,6 +583,16 @@ BEGIN
 				FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 			) COMPANY
 		END
+
+	IF ISNULL(@intNewPerformanceLogId, 0) <> 0
+	BEGIN
+		EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Customer Aging Detail Report'
+										  , @strProcedureName       = 'uspARCustomerAgingDetailReport'
+										  , @strRequestId			= @strRequestId
+										  , @ysnStart		        = 0
+										  , @intUserId	            = 1
+										  , @intPerformanceLogId    = @intNewPerformanceLogId
+	END
 END
 
 SELECT AGING.* 

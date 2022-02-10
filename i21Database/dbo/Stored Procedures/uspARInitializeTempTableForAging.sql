@@ -55,6 +55,7 @@ CREATE TABLE ##POSTEDINVOICES (
 	 , strCurrency					NVARCHAR(40)									NULL
 	 , dblCurrencyExchangeRate		NUMERIC(18, 6)									NULL DEFAULT 0
 	 , dblCurrencyRevalueRate		NUMERIC(18, 6)									NULL DEFAULT 0
+	 , dblCurrencyRevalueAmount		NUMERIC(18, 6)									NULL DEFAULT 0
 )
 CREATE NONCLUSTERED INDEX [NC_Index_##POSTEDINVOICES_intEntityCustomerId] ON [##POSTEDINVOICES]([intEntityCustomerId])
 CREATE NONCLUSTERED INDEX [NC_Index_##POSTEDINVOICES_strTransactionType] ON [##POSTEDINVOICES]([strTransactionType])
