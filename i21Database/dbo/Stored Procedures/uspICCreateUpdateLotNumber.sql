@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICCreateUpdateLotNumber]
+﻿ALTER PROCEDURE [dbo].[uspICCreateUpdateLotNumber]
 	@ItemsForLot ItemLotTableType READONLY 
 	,@intEntityUserSecurityId AS INT 
 	,@intLotStatusId AS INT = NULL -- (1: is Active, 2: is On Hold, 3: Quarantine) 
@@ -728,6 +728,7 @@ BEGIN
 						,intContractDetailId = @intContractDetailId
 						,ysnWeighed = @ysnWeighed
 						,strSealNo = @strSealNo
+						,intParentLotId = @intParentLotId 
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -953,6 +954,8 @@ BEGIN
 											ELSE 
 												LotMaster.strTrackingNumber 
 										END
+				,intParentLotId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intParentLotId ELSE LotMaster.intParentLotId END
+							
 
 				-- The following field are returned from the lot master if:
 				-- 1. It is editing from the source transaction id
@@ -1054,6 +1057,7 @@ BEGIN
 				,intContractDetailId
 				,ysnWeighed
 				,strSealNo
+				,intParentLotId 
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -1116,6 +1120,7 @@ BEGIN
 				,@intContractDetailId
 				,@ysnWeighed
 				,@strSealNo
+				,@intParentLotId 
 			)
 		;
 	
