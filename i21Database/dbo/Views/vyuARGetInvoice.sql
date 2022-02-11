@@ -172,13 +172,20 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , strPayToCashBankAccountNo			= PFCBA.strBankAccountNo
 	 , strSourceOfPayTo						= INV.strSourceOfPayTo
 	 , strPaymentInstructions				= INV.strPaymentInstructions
-	 , strTradeFinanceNo					= INV.strTradeFinanceNo
-	 , intFacilityId						= INV.intFacilityId
-	 , intLoanLimitId						= INV.intLoanLimitId
-	 , strTradeFinanceReferenceNo			= INV.strTradeFinanceReferenceNo
+	 , strTransactionNo						= INV.strTransactionNo
+	 , intBankId							= INV.intBankId
+	 , strBankName							= B.strBankName
+	 , intBankAccountId						= INV.intBankAccountId
+	 , strBankAccountNo						= BA.strBankAccountNo
+	 , intBorrowingFacilityId				= INV.intBorrowingFacilityId
+	 , strBorrowingFacility					= BF.strBorrowingFacilityId
+	 , intBorrowingFacilityLimitId			= INV.intBorrowingFacilityLimitId
+	 , strBorrowingFacilityLimit			= BFL.strBorrowingFacilityLimit
 	 , strBankReferenceNo					= INV.strBankReferenceNo
+	 , strBankTransactionId					= INV.strBankTransactionId
 	 , dblLoanAmount						= INV.dblLoanAmount
-	 , intOverrideFacilityId				= INV.intOverrideFacilityId
+	 , intBankValuationRuleId				= INV.intBankValuationRuleId
+	 , strBankValuationRule					= BVR.strBankValuationRule
 	 , strTradeFinanceComments				= INV.strTradeFinanceComments
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
@@ -382,3 +389,8 @@ LEFT JOIN
 ) ReturnInvoice ON ReturnInvoice.intInvoiceId = INV.intOriginalInvoiceId
 LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDisbursementBankAccountId, 0)
 LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId, 0)
+LEFT JOIN vyuCMBankAccount B ON B.intBankAccountId = ISNULL(INV.intBankId, 0)
+LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccountId, 0)
+LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId, 0)
+LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId, 0)
+LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId, 0)
