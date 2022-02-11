@@ -83,7 +83,7 @@ BEGIN
 			, Item.intProductTypeId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1
-		CROSS APPLY (SELECT dblReceivedQty = SUM(ISNULL(dblReceivedQty, 0)) FROM tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId) LDCL
+		OUTER APPLY (SELECT dblReceivedQty = SUM(ISNULL(dblReceivedQty, 0)) FROM tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId) LDCL
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
