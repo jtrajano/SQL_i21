@@ -283,7 +283,7 @@ END
 													WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
 													ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END) END)
-			,[strCostMethod]				= CASE WHEN dblQty <= dblMinimumUnits THEN 'Custom Unit' WHEN dblQty <= dblComboMinimumUnits AND ysnComboFreight = 1 THEN 'Custom Unit' ELSE @strCostMethodFreight END
+			,[strCostMethod]				= CASE  WHEN dblQty <= dblComboMinimumUnits AND ysnComboFreight = 1 THEN 'Custom Unit' WHEN dblQty <= dblMinimumUnits AND ysnComboFreight = 0 THEN 'Custom Unit' ELSE @strCostMethodFreight END
 			,[dblRate]						= CASE WHEN ysnComboFreight = 1 AND RE.dblComboFreightRate > 0 THEN RE.dblComboFreightRate ELSE RE.dblFreightRate END
 			,[intCostUOMId]					= @FreightUOMId
 			,[intOtherChargeEntityVendorId]	= CASE	WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
@@ -299,7 +299,7 @@ END
 													WHEN RE.strFreightBilledBy = 'Other' THEN 1
 													ELSE 0 END
 			,strChargesLink					= CASE WHEN ysnComboFreight = 1 THEN NULL ELSE RE.strChargesLink END
-			,[dblQuantity]					= CASE WHEN dblQty <= dblComboMinimumUnits AND ysnComboFreight = 1 THEN dblComboMinimumUnits ELSE dblQty END
+			,[dblQuantity]					= CASE WHEN dblQty <= dblComboMinimumUnits AND ysnComboFreight = 1 THEN dblComboMinimumUnits WHEN dblQty <= dblMinimumUnits AND ysnComboFreight = 0 THEN dblMinimumUnits ELSE dblQty END
 	FROM	#tmpReceipts RE 
 	WHERE RE.dblFreightRate != 0  OR (RE.dblComboFreightRate != 0  AND ysnComboFreight = 1)
 	--Fuel Surcharge
