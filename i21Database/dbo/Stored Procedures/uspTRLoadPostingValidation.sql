@@ -66,6 +66,7 @@ BEGIN TRY
 		, @strFreightCostMethod NVARCHAR(20) = NULL
 		, @strFreightBilledBy NVARCHAR(30) = NULL
 		, @ysnComboFreight BIT
+		, @dblComboSurcharge DECIMAL(18, 6) = 0
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -444,6 +445,7 @@ BEGIN TRY
 		, DD.strReceiptLink
 		, DD.ysnBlendedItem
 		, dblComboFreightRate = DD.dblComboFreightRate
+		, DD.dblComboSurcharge
 	INTO #DistributionDetailTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -462,6 +464,7 @@ BEGIN TRY
 			, @ReceiptLink = DD.strReceiptLink
 			, @BlendedItem = DD.ysnBlendedItem
 			, @dblComboFreightRate = DD.dblComboFreightRate
+			, @dblComboSurcharge = DD.dblComboSurcharge
 		FROM #DistributionDetailTable DD
 		WHERE intLoadHeaderId = @intLoadHeaderId
 		
@@ -497,9 +500,16 @@ BEGIN TRY
 			BEGIN
 				RAISERROR('Freight Item not found. Please setup in Company Configuration', 16, 1)
 			END
-			ELSE IF (ISNULL(@dblFreight, 0) = 0  AND ISNULL(@intFreightItemId, '') != '' AND ISNULL(@dblComboFreightRate, 0) = 0) OR (@ysnComboFreight = 1 AND (ISNULL(@dblComboFreightRate, 0) = 0  AND ISNULL(@intFreightItemId, '') != ''))
+			ELSE IF (ISNULL(@dblFreight, 0) = 0  AND ISNULL(@intFreightItemId, '') != '')
 			BEGIN
 				IF (ISNULL(@dblSurcharge, 0) > 0 )
+				BEGIN
+					RAISERROR('Transports Load has a Surcharge. You must input the Freight rate or zero-out the Surcharge in both Receipt and Distribution Detail.', 16, 1)
+				END
+			END
+			ELSE IF(ISNULL(@dblComboFreightRate, 0) = 0  AND ISNULL(@intFreightItemId, '') != '')
+			BEGIN
+				IF (ISNULL(@dblComboSurcharge, 0) > 0 )
 				BEGIN
 					RAISERROR('Transports Load has a Surcharge. You must input the Freight rate or zero-out the Surcharge in both Receipt and Distribution Detail.', 16, 1)
 					--RAISERROR('Transport load has surcharge. You must input freight rate or zero out the surcharge.', 16, 1)

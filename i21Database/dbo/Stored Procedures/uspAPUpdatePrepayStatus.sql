@@ -44,8 +44,6 @@ OUTER APPLY
 	--AND pay.ysnPrepay = 1
 	AND A.intTransactionType IN (2,13)
 	AND pay.ysnPosted = 1
-	--IF CHECK OR ACH PAYMENT METHOD, IT SHOULD BE PRINTED
-	AND 1 = (CASE WHEN pay.intPaymentMethodId IN (2,7) AND E.dtmCheckPrinted IS NULL THEN 0 ELSE 1 END)
 ) prepayment
 
 

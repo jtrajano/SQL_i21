@@ -183,7 +183,8 @@ AND RIGHT(RTRIM(strCommodityAttributeId),1) = ','
 GO
 
 --- Cleaned up/delete the account ids in the GL Account Set up of Risk Management for 18.1 Customer  RM-1312
-IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.1)
+-- UPDATED CHECKING OF VERSION - Will force version to 22.1 if strVersionNo is blank due to changes in SM-5355
+IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CASE WHEN ISNULL(strVersionNo,'') <> '' THEN CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) ELSE 22.1 END FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.1)
 BEGIN 
 	UPDATE tblRKCompanyPreference
 	SET intUnrealizedGainOnBasisId = NULL
@@ -373,7 +374,7 @@ END
 
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MInquiryBasisDetail' AND COLUMN_NAME = 'intM2MBasisDetailId')
 BEGIN
-	UPDATE tblRKM2MInquiryBasisDetail
+	UPDATE tblRKM2MInquiryBasisDetail 
 	SET intM2MBasisDetailId  = tblPatch.intM2MBasisDetailId
 	FROM (
 		SELECT ibd.intM2MInquiryBasisDetailId
