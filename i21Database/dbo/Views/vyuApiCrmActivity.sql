@@ -4,7 +4,6 @@ SELECT
       ac.intActivityId
 	, ac.strType
 	, ac.strActivityNo
-	, cl.strLocationName
 	, ac.dtmCreated
 	, a.ysnBillable
 	, ac.ysnPrivate
@@ -18,12 +17,7 @@ SELECT
 	, a.ysnAllDayEvent
 	, a.ysnRemind
 	, a.strReminder
-	, Contact.strTimezone
 	, ac.strContactName
-	, Contact.strEmail
-	, Contact.strPhone
-	, Contact.strMobile
-	, EntityLocation.strLocationName strEntityLocation
 	, a.strShowTimeAs
 	, a.strRelatedTo
 	, a.strRecordNo
@@ -35,14 +29,26 @@ SELECT
 	, a.strDetails
 	, sa.intTransactionId
 	, a.intRecordId
+	, sa.intAssignedTo intAssignedToId
 	, cl.strLocationName strCompanyLocation
+	, C.strTimezone
+	, C.strEmail
+	, C.strPhone
+	, C.strMobile
+	, cl.strLocationName
+	, C.strLocationName strEntityLocation
+	, CASE WHEN C.intEntityId IS NULL THEN 0 ELSE 1 END ysnIsContact
+	, ac.intEntityId
 FROM vyuCRMActivitySearch2 ac
 JOIN vyuApiActivity a ON a.intActivityId = ac.intActivityId
 JOIN tblSMActivity sa ON sa.intActivityId = a.intActivityId
 LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = sa.intCompanyLocationId
-LEFT JOIN tblEMEntityToContact EntityContact ON EntityContact.intEntityId = sa.intEntityId
-LEFT JOIN tblEMEntity Contact ON EntityContact.intEntityContactId = Contact.intEntityId
-LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityId = EntityContact.intEntityId
-	AND EntityLocation.intEntityLocationId = EntityContact.intEntityLocationId
-LEFT JOIN tblEMEntityType EntityType ON EntityType.intEntityId = EntityContact.intEntityId
-WHERE EntityContact.ysnDefaultContact = 1
+OUTER APPLY (
+	SELECT TOP 1 EntityContact.intEntityId, Contact.strTimezone, Contact.strEmail, Contact.strPhone, Contact.strMobile, EntityLocation.strLocationName
+	FROM tblEMEntityToContact EntityContact
+	LEFT JOIN tblEMEntity Contact ON EntityContact.intEntityContactId = Contact.intEntityId
+	LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityId = EntityContact.intEntityId
+		AND EntityLocation.intEntityLocationId = EntityContact.intEntityLocationId
+	LEFT JOIN tblEMEntityType EntityType ON EntityType.intEntityId = EntityContact.intEntityId
+	WHERE EntityContact.intEntityId = sa.intEntityId
+) C
