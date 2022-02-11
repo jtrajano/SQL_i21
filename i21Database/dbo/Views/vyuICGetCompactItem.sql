@@ -69,6 +69,7 @@ SELECT
 	, Item.ysnDisplayInHelpdesk
 	, Module.strModule
 	, Item.strManufactureType
+	, Item.strRemarks
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
