@@ -629,6 +629,467 @@ BEGIN TRY
 	END
 
 
+	-- Incoming ERP Feeds
+
+	IF @strMessageType = 'Blend Demand'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Order No</th>
+							<th>&nbsp;Item No</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPBendDemandError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strOrderNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strItem, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPBendDemandError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPBendDemandError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Commitment Pricing Bal Qty'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Pricing No</th>
+							<th>&nbsp;Quantity</th>
+							<th>&nbsp;ERP Ref No</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPCommitmentPricingBalQtyError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strPricingNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, t.dblBalanceQty), '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strERPRefNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPCommitmentPricingBalQtyError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPCommitmentPricingBalQtyError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Raw Demand Forecast'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Demand Name</th>
+							<th>&nbsp;Item No</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPDemandError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strDemandName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strItemNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPDemandError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPDemandError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Exchange Rate'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;From Currency</th>
+							<th>&nbsp;To Currency</th>
+							<th>&nbsp;Rate</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPCurrencyRateError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strFromCurrency, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strToCurrency, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, t.dblRate), '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPCurrencyRateError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPCurrencyRateError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Transfer Goods Receipt'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;ERP Receipt No</th>
+							<th>&nbsp;BOL No</th>
+							<th>&nbsp;Transfer No</th>
+							<th>&nbsp;ERP Transfer No</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPInvReceiptError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strERPReceiptNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strBLNumber, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strTransferOrderNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strERPTransferOrderNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPInvReceiptError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPInvReceiptError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Inventory Adjustment'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Type</th>
+							<th>&nbsp;Lot No</th>
+							<th>&nbsp;Item No</th>
+							<th>&nbsp;Storage Unit</th>
+							<th>&nbsp;Notes</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPInventoryAdjustmentError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + CASE 
+						WHEN t.intTransactionTypeId = 8
+							THEN 'Consumption'
+						WHEN t.intTransactionTypeId = 10
+							THEN 'Quantity Adj'
+						WHEN t.intTransactionTypeId = 20
+							THEN 'Lot Move'
+						ELSE ''
+						END + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strLotNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strItemNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strStorageUnit, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strNotes, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPInventoryAdjustmentError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPInventoryAdjustmentError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Item Standard Price'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Item No</th>
+							<th>&nbsp;Price</th>
+							<th>&nbsp;Currency</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPItemPriceError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strItemNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, t.dblStandardCost), '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strCurrency, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPItemPriceError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPItemPriceError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Payment Status'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Voucher No</th>
+							<th>&nbsp;ERP Voucher No</th>
+							<th>&nbsp;ERP Journal No</th>
+							<th>&nbsp;ERP Payment No</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPPaymentStatusError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strVoucherNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strERPVoucherNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strERPJournalNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strERPPaymentReferenceNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPPaymentStatusError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPPaymentStatusError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Recipe'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Recipe Name</th>
+							<th>&nbsp;Item No</th>
+							<th>&nbsp;Location</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblMFRecipeStage t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+				AND intStatusId = 2 --1--Processed/2--Failed
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strRecipeName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strItemNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strLocationName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblMFRecipeStage t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+				AND intStatusId = 2 --1--Processed/2--Failed
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblMFRecipeStage t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+				AND intStatusId = 2 --1--Processed/2--Failed
+		END
+	END
+
+	IF @strMessageType = 'Route'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Item No</th>
+							<th>&nbsp;Manufacturing Cell</th>
+							<th>&nbsp;Storage Unit</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPItemRouteError t WITH (NOLOCK)
+			JOIN tblIPItemRouteDetailError RD WITH (NOLOCK) ON RD.intItemRouteStageId = t.intItemRouteStageId
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strItemNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(RD.strManufacturingCell, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(RD.strStorageLocation, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPItemRouteError t WITH (NOLOCK)
+			JOIN tblIPItemRouteDetailError RD WITH (NOLOCK) ON RD.intItemRouteStageId = t.intItemRouteStageId
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPItemRouteError t WITH (NOLOCK)
+			JOIN tblIPItemRouteDetailError RD WITH (NOLOCK) ON RD.intItemRouteStageId = t.intItemRouteStageId
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Stock Feed'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Lot No</th>
+							<th>&nbsp;Item No</th>
+							<th>&nbsp;Storage Location</th>
+							<th>&nbsp;Storage Unit</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPLotError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strLotNumber, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strItemNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strSubLocationName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strStorageLocationName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPLotError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPLotError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Storage Unit'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Storage Location</th>
+							<th>&nbsp;Storage Unit</th>
+							<th>&nbsp;Storage Unit Type</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPStorageLocationError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strStorageLocation, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strStorageUnit, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strStorageUnitType, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPStorageLocationError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPStorageLocationError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Vendor'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Name</th>
+							<th>&nbsp;Account No</th>
+							<th>&nbsp;Term</th>
+							<th>&nbsp;Currency</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPEntityError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strAccountNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strTerm, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strCurrency, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPEntityError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPEntityError t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+		END
+	END
+
+	IF @strMessageType = 'Voucher Feed'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Vendor Name</th>
+							<th>&nbsp;Account No</th>
+							<th>&nbsp;Invoice No</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPBillStage t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+				AND t.intStatusId = 2
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strVendorName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strVendorAccountNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strInvoiceNo, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(t.strMessage, '') + '</td>' + 
+			'</tr>'
+			FROM tblIPBillStage t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+				AND t.intStatusId = 2
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPBillStage t WITH (NOLOCK)
+			WHERE ISNULL(t.ysnMailSent, 0) = 0
+				AND t.intStatusId = 2
+		END
+	END
+
 
 	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
 	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))
