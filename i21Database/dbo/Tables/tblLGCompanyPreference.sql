@@ -19,6 +19,7 @@
 [intHaulerEntityId] INT NULL,
 [intDefaultFreightItemId] INT NULL,
 [intDefaultSurchargeItemId] INT NULL,
+[intDefaultInsuranceItemId] INT NULL,
 [intDefaultShipmentType] INT NULL,
 [strShippingInstructionText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [strInvoiceText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -92,6 +93,7 @@ CONSTRAINT [FK_tblLGCompanyPreference_tblCTPosition_intDefaultPositionId] FOREIG
 CONSTRAINT [FK_tblLGCompanyPreference_tblEMEntity_intEntityId] FOREIGN KEY ([intHaulerEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intFreighItemId] FOREIGN KEY ([intDefaultFreightItemId]) REFERENCES [tblICItem]([intItemId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intSurchargeItemId] FOREIGN KEY ([intDefaultSurchargeItemId]) REFERENCES [tblICItem]([intItemId]),
+CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intInsuranceItemId] FOREIGN KEY ([intDefaultInsuranceItemId]) REFERENCES [tblICItem]([intItemId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCategory_intPnLReportReserveACategoryId] FOREIGN KEY ([intPnLReportReserveACategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCategory_intPnLReportReserveBCategoryId] FOREIGN KEY ([intPnLReportReserveBCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intPurchaseContractBasisItemI] FOREIGN KEY ([intPurchaseContractBasisItemId]) REFERENCES [tblICItem]([intItemId])

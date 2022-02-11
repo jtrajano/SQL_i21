@@ -74,6 +74,8 @@ SELECT CP.intCompanyPreferenceId
 	,strFreightItem = FI.strItemNo
 	,CP.intDefaultSurchargeItemId
 	,strSurchargeItem = SI.strItemNo
+	,CP.intDefaultInsuranceItemId
+	,strInsuranceItem = II.strItemNo
 	,CP.intDefaultShipmentType
 	,strDefaultShipmentType = CASE CP.intDefaultShipmentType
 		WHEN 1 THEN 'Shipment'
@@ -200,6 +202,7 @@ LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CP.intCompanyLoca
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CP.intDefaultFreightTermId
 LEFT JOIN tblICItem FI ON CP.intDefaultFreightItemId = FI.intItemId
 LEFT JOIN tblICItem SI ON CP.intDefaultSurchargeItemId = SI.intItemId
+LEFT JOIN tblICItem II ON CP.intDefaultInsuranceItemId = II.intItemId
 LEFT JOIN tblICCategory RA ON RA.intCategoryId = CP.intPnLReportReserveACategoryId
 LEFT JOIN tblICCategory RB ON RB.intCategoryId = CP.intPnLReportReserveBCategoryId
 LEFT JOIN tblICItem PCBI ON PCBI.intItemId = CP.intPurchaseContractBasisItemId
