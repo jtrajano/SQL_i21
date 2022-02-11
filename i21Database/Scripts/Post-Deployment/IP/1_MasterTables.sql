@@ -368,3 +368,8 @@ UPDATE tblIPLotSplitFeed
 SET ysnMailSent = 0
 WHERE ysnMailSent IS NULL
 GO
+
+UPDATE tblIPBillStage
+SET ysnMailSent = 0
+WHERE ysnMailSent IS NULL
+GO
