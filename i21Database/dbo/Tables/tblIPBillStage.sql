@@ -29,5 +29,7 @@
 	,strFileName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,intDocAttached INT
 	,ysnMailReq BIT
+	,ysnMailSent BIT CONSTRAINT DF_tblIPBillStage_ysnMailSent DEFAULT 0
+
 	,CONSTRAINT [PK_tblIPBillStage] PRIMARY KEY (intBillStageId)
 	)
