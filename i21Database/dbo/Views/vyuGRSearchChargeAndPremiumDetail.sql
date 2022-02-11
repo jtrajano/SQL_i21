@@ -15,7 +15,8 @@ SELECT
 	,INV_ITEM.intItemId AS intInventoryItemId
 	,CAPD.dblRate
 	,CAPD.strRateType
-	,CAPD.dtmEffectivityDate
+	,CAPD.dtmEffectiveDate
+	,CAPD.dtmTerminationDate
 	,CAPD.intConcurrencyId
 FROM tblGRChargeAndPremiumDetail CAPD
 INNER JOIN tblGRChargeAndPremiumId CAP
