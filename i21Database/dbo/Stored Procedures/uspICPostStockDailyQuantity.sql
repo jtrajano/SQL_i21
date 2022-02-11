@@ -308,7 +308,7 @@ BEGIN
 				AND t.intItemUOMId = s.intItemUOMId	
 				AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(s.dtmDate AS FLOAT))
 			ORDER BY
-				t.intId DESC 
+				t.dtmDate DESC 
 		) carryOverStock
 	WHERE
 		asOfDate.intId IS NULL 
