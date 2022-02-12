@@ -148,7 +148,7 @@ BEGIN TRY
 			,@strInsert = strInsert
 			,@strUpdate = strUpdate
 			,@strDelete = strDelete
-			,@intToCompanyLocationId = intCompanyLocationId
+			,@intToCompanyLocationId = CTC.intCompanyLocationId
 			,@intToBookId = intToBookId
 			,@intToSubBookId = @intToSubBookId
 		FROM tblSMInterCompanyTransactionConfiguration CTC

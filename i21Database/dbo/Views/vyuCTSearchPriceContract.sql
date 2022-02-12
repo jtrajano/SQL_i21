@@ -206,7 +206,7 @@ AS
 					CH.intSubBookId,
 					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
-					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
+					MAX(CD.intCompanyLocationId)	AS	intCompanyLocationId,
 					'Unpriced' COLLATE Latin1_General_CI_AS AS strStatus,
 					CAST(0 AS INT) AS intLotsFixed,
 					CH.dblNoOfLots AS dblBalanceNoOfLots,
@@ -460,7 +460,7 @@ cross apply (select * from cpHTA) hta
 					CH.intSubBookId,
 					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
-					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
+					MAX(CD.intCompanyLocationId)	AS	intCompanyLocationId,
 					CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL(PF.[dblLotsFixed],0) = 0 
 							THEN 'Fully Priced' 
 							WHEN ISNULL([dblLotsFixed],0) = 0 THEN 'Unpriced'
