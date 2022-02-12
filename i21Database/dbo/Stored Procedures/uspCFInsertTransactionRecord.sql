@@ -1114,19 +1114,8 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		AND intNetworkId = @intNetworkId
-		AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+		AND (intSiteId = @intSiteId)
 	END
-
-	-- IF(@intProductId = 0)
-	-- BEGIN
-	-- 	SELECT TOP 1 
-	-- 		 @intProductId = intItemId
-	-- 		,@intARItemId = intARItemId
-	-- 	FROM tblCFItem 
-	-- 	WHERE strProductNumber = @strProductId
-	-- 	AND intNetworkId = @intNetworkId
-	-- 	AND (intSiteId = 0 OR intSiteId IS NULL)
-	-- END
 
 	IF(@intProductId = 0)
 	BEGIN
@@ -1136,7 +1125,7 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = RTRIM(LTRIM(@strProductId))
 		AND intNetworkId = @intNetworkId
-		AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+		AND (intSiteId = @intSiteId)
 	END
 
 	IF(@intProductId = 0)
@@ -1156,7 +1145,50 @@ BEGIN
 			FROM #tempProduct 
 			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
 			AND intNetworkId = @intNetworkId
+			AND (intSiteId = @intSiteId )
+		END
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = @strProductId
+		AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = RTRIM(LTRIM(@strProductId))
+		AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+
+		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
+		BEGIN
+
+			SELECT * INTO #tempProduct FROM tblCFItem 
+			WHERE intNetworkId = @intNetworkId
 			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+			AND ISNUMERIC(strProductNumber) = 1 
+
+			SELECT TOP 1 
+				@intProductId = intItemId
+				,@intARItemId = intARItemId
+			FROM #tempProduct 
+			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
+			AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
 		END
 	END
 
