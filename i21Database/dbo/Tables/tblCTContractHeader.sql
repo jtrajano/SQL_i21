@@ -11,6 +11,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intCommodityId] [int] NULL,
 	[dblQuantity] [numeric](18, 6) NOT NULL,
 	[intCommodityUOMId] INT NULL, 
+	[intCompanyLocationId] [int] NULL,
 	[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmContractDate] [datetime] NOT NULL,
 	[strCustomerContract] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
@@ -127,7 +128,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMonth_intFutureMonthId] FOREIGN KEY (intFutureMonthId) REFERENCES tblRKFuturesMonth(intFutureMonthId),
 	CONSTRAINT [FK_tblCTContractHeader_tblSMCountry_intCountryId] FOREIGN KEY (intCountryId) REFERENCES tblSMCountry(intCountryID),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intBrokerId_intEntityId] FOREIGN KEY ([intBrokerId]) REFERENCES tblEMEntity([intEntityId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId])
+	CONSTRAINT [FK_tblCTContractHeader_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 
 )
 

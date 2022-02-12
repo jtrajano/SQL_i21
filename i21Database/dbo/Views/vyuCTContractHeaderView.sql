@@ -43,7 +43,9 @@ AS
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId) COLLATE Latin1_General_CI_AS AS	strStatuses,
 			SP.intAttachmentSignatureId, -- CT-5315
 			CH.intEntitySelectedLocationId, -- CT-5315
-			NM.strEntitySelectedLocation -- CT-5315
+			NM.strEntitySelectedLocation, -- CT-5315
+			CH.intCompanyLocationId,
+			NM.strLocationName
 			
 	FROM	tblCTContractHeader					CH
 	cross apply (select * from tblCTCompanyPreference) CP
