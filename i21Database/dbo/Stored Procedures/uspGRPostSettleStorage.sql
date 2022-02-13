@@ -129,6 +129,9 @@ BEGIN TRY
 	DECLARE @strSettleTicket NVARCHAR(40)
 
 	DECLARE @intStorageHistoryIds AS Id
+	DECLARE @tblQMDiscountIds Id
+	DECLARE @strMissingUOMItemNo NVARCHAR(20)
+	DECLARE @strMissingUOM NVARCHAR(30)
 
 	DECLARE @SettleStorage AS TABLE 
 	(
@@ -2260,7 +2263,152 @@ BEGIN TRY
 					-- 		ON CS.intCustomerStorageId = SVC.intCustomerStorageId
 					-- 	WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
 					-- END
+				
+				IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intChargeAndPremiumId IS NOT NULL AND intCustomerStorageId = @intCustomerStorageId)
+				BEGIN
+					-- Calculate and Store the Charges and Premium for the current storage ticket
+					DELETE FROM @tblQMDiscountIds
+					-- Get storage ticket discounts
+					INSERT INTO @tblQMDiscountIds
+					SELECT QM.intTicketDiscountId
+					FROM tblQMTicketDiscount QM
+					WHERE QM.intTicketFileId = @intCustomerStorageId
+					AND QM.strSourceType IN ('Storage', 'Delivery Sheet')
+				
+					-- For Charges/Premiums with Rate Type of 'Per Unit', there must be a similar UOM conversion with the inventory item in order to calculate the units correctly.
+					-- Throw an error if there's no matching UOM conversion in the Charge/Premium item.
+					SET @strMissingUOMItemNo = NULL
+					SET @strMissingUOM = NULL
+
+					SELECT TOP 1
+						@strMissingUOMItemNo = CAP.strChargeAndPremiumItemNo
+						,@strMissingUOM = ISNULL(FROM_UOM.strUnitMeasure, TO_UOM.strUnitMeasure)
+					FROM @SettleVoucherCreate SVC
+					INNER JOIN tblGRCustomerStorage CS
+						ON CS.intCustomerStorageId = SVC.intCustomerStorageId
+					OUTER APPLY (
+						SELECT *
+						FROM dbo.fnGRCalculateChargeAndPremium(
+							CS.intChargeAndPremiumId --Charge And Premium Header Id
+							,CS.intItemId --Inventory Item Id
+							,CS.intCompanyLocationId --Copany Location Id
+							,SVC.dblUnits --Net Units
+							,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							,@dblTotalUnits --Transaction/Voucher Total Units
+							,@tblQMDiscountIds --Storage Ticket Discount Ids
+							,SVC.dblCashPrice --Inventory Item Cash Price
+						) CAP
+					) CAP
+					LEFT JOIN tblICItemUOM SPOT_UOM
+						ON CS.intItemId = SPOT_UOM.intItemId
+						AND SPOT_UOM.intItemUOMId = @intCashPriceUOMId
+					LEFT JOIN tblICUnitMeasure FROM_UOM
+						ON FROM_UOM.intUnitMeasureId = CS.intUnitMeasureId
+					LEFT JOIN tblICUnitMeasure TO_UOM
+						ON TO_UOM.intUnitMeasureId = (CASE WHEN @origdblSpotUnits > 0 THEN SPOT_UOM.intUnitMeasureId ELSE CS.intUnitMeasureId END)
+					LEFT JOIN tblICItemUOM CAP_UOM_FROM
+						ON CAP_UOM_FROM.intItemId = CAP.intChargeAndPremiumItemId
+						AND CAP_UOM_FROM.intUnitMeasureId = CS.intUnitMeasureId
+					LEFT JOIN tblICItemUOM CAP_UOM_TO
+						ON CAP_UOM_TO.intItemId = CAP.intChargeAndPremiumItemId
+						AND CAP_UOM_TO.intUnitMeasureId = CASE WHEN @origdblSpotUnits > 0 THEN SPOT_UOM.intUnitMeasureId ELSE CS.intUnitMeasureId END
+					WHERE SVC.intItemType = 1 --Inventory Item
+					AND CAP.strRateType = 'Per Unit'
+					AND CAP.dblAmount <> 0
+					AND (CAP_UOM_FROM.intItemUOMId IS NULL OR CAP_UOM_TO.intItemUOMId IS NULL)
+
+					IF @strMissingUOMItemNo IS NOT NULL
+					BEGIN
+						SET @ErrMsg = 'Charge/Premium Item ' + @strMissingUOMItemNo + ' has a missing conversion for UOM ' + @strMissingUOM + '.'
+						RAISERROR (@ErrMsg, 16, 1);
+					END
+
+					-- Insert records to the applied charges and premium for this transaction
+					INSERT INTO tblGRAppliedChargeAndPremium (
+						[intTransactionId],
+						[intTransactionDetailId],
+						[strTransactionType],
+						[intChargeAndPremiumId],
+						[strChargeAndPremiumId],
+						[intChargeAndPremiumDetailId],
+						[intChargeAndPremiumItemId],
+						[intCalculationTypeId],
+						[dblRate],
+						[strRateType],
+						[dblQty],
+						[intChargeAndPremiumItemUOMId],
+						[dblCost],
+						[intOtherChargeItemId],
+						[intInventoryItemId],
+						[dblInventoryItemNetUnits],
+						[dblInventoryItemGrossUnits]
+					)
+					SELECT
+						[intTransactionId]				= @intSettleStorageId
+						,[intTransactionDetailId]		= @intSettleStorageTicketId
+						,[strTransactionType]			= 'Settlement'
+						,[intChargeAndPremiumId]		= CAP.intChargeAndPremiumId
+						,[strChargeAndPremiumId]		= CAP.strChargeAndPremiumId
+						,[intChargeAndPremiumDetailId]	= CAP.intChargeAndPremiumDetailId
+						,[intChargeAndPremiumItemId]	= CAP.intChargeAndPremiumItemId
+						,[intCalculationTypeId]			= CAP.intCalculationTypeId
+						,[dblRate]						= CAP.dblRate
+						,[strRateType]					= CAP.strRateType
+						,[dblQty]						= 	CASE WHEN CAP.strRateType = 'Per Unit'
+																THEN dbo.fnCalculateQtyBetweenUOM(CAP_UOM_FROM.intItemUOMId, CAP_UOM_TO.intItemUOMId, CAP.dblQty)
+																ELSE CAP.dblQty
+															END
+						,[intChargeAndPremiumItemUOMId]	=	CASE WHEN CAP.strRateType = 'Per Unit'
+																THEN CAP_UOM_TO.intItemUOMId
+																ELSE CAP.intChargeAndPremiumItemUOMId
+															END
+						,[dblCost]						= CASE WHEN CAP.strRateType = 'Per Unit'
+																THEN dbo.fnCalculateQtyBetweenUOM(CAP_UOM_TO.intItemUOMId, CAP_UOM_FROM.intItemUOMId, CAP.dblCost)
+																ELSE CAP.dblCost
+															END  
+						,[intOtherChargeItemId]			= CAP.intOtherChargeItemId
+						,[intInventoryItemId]			= CAP.intInventoryItemId
+						,[dblInventoryItemNetUnits]		= SVC.dblUnits
+						,[dblInventoryItemGrossUnits]	= SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits)
+					FROM (
+						SELECT
+							[dblUnits]			= SUM(SVC.dblUnits)
+							,[dblTotalAmount]	= SUM(SVC.dblUnits * SVC.dblCashPrice)
+							,SVC.intCustomerStorageId
+						FROM @SettleVoucherCreate SVC
+						WHERE SVC.intItemType = 1
+						GROUP BY SVC.intCustomerStorageId
+					) SVC
+					INNER JOIN tblGRCustomerStorage CS
+						ON CS.intCustomerStorageId = SVC.intCustomerStorageId
+					OUTER APPLY (
+						SELECT *
+						FROM dbo.fnGRCalculateChargeAndPremium (
+							CS.intChargeAndPremiumId --Charge And Premium Header Id
+							,CS.intItemId --Inventory Item Id
+							,CS.intCompanyLocationId --Company Location Id
+							,SVC.dblUnits --Net Units
+							,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							,SVC.dblUnits --Transaction/Voucher Total Units
+							,@tblQMDiscountIds --Storage Ticket Discount Ids
+							,SVC.dblTotalAmount / SVC.dblUnits --Inventory Item Cost
+						) CAP
+					) CAP
+					LEFT JOIN tblICItemUOM SPOT_UOM
+						ON CS.intItemId = SPOT_UOM.intItemId
+						AND SPOT_UOM.intItemUOMId = @intCashPriceUOMId
+					LEFT JOIN tblICItemUOM CAP_UOM_FROM
+						ON CAP_UOM_FROM.intItemId = CAP.intChargeAndPremiumItemId
+						AND CAP_UOM_FROM.intUnitMeasureId = CS.intUnitMeasureId
+					LEFT JOIN tblICItemUOM CAP_UOM_TO
+						ON CAP_UOM_TO.intItemId = CAP.intChargeAndPremiumItemId
+						AND CAP_UOM_TO.intUnitMeasureId = CASE WHEN @origdblSpotUnits > 0 THEN SPOT_UOM.intUnitMeasureId ELSE CS.intUnitMeasureId END
+					WHERE CAP.dblAmount <> 0
+
+					SELECT * FROM tblGRAppliedChargeAndPremium
+					WHERE intTransactionId = @intSettleStorageId
 					
+				END
 				
 				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
 				IF @ysnFromPriceBasisContract = 0 AND @ysnDPOwnedType = 1 AND @ysnDeliverySheet = 1
@@ -2619,6 +2767,99 @@ BEGIN TRY
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType
 				 
+				-- Charge and Premium
+				INSERT INTO @voucherPayable
+				(
+					[intEntityVendorId]
+					,[intPayToAddressId]
+					,[intTransactionType]
+					,[intLocationId]
+					,[intShipToId]
+					,[intShipFromId]
+					,[intShipFromEntityId]
+					,[strVendorOrderNumber]
+					,[strMiscDescription]
+					,[intItemId]
+					,[intAccountId]					
+					,[intContractHeaderId]
+					,[intContractDetailId]
+					,[intInventoryReceiptItemId]
+					,[intInventoryReceiptChargeId]
+					,[intCustomerStorageId]
+					,[intSettleStorageId]
+					,[dblOrderQty]
+					,[dblOrderUnitQty]
+					,[intOrderUOMId]	
+					,[dblQuantityToBill]
+					,[intQtyToBillUOMId]
+					,[dblCost]
+					,[dblOldCost]
+					,[dblCostUnitQty]
+					,[intCostUOMId]
+					,[dblNetWeight]
+					,[dblWeightUnitQty]
+					,[intWeightUOMId]					
+					,[intPurchaseTaxGroupId]
+					,[dtmDate]
+					,[dtmVoucherDate]
+					,intLinkingId
+				 )
+				SELECT 
+					[intEntityVendorId]				= @EntityId
+					,[intPayToAddressId]			= @intPayToEntityId
+					,[intTransactionType]			= 1
+					,[intLocationId]				= @LocationId
+					,[intShipToId]					= @LocationId
+					,[intShipFromId]				= @intShipFrom	
+					,[intShipFromEntityId]			= @shipFromEntityId
+					,[strVendorOrderNumber]			= @TicketNo
+					,[strMiscDescription]			= ITEM.[strItemNo]
+					,[intItemId]					= ITEM.[intItemId]
+					,[intAccountId]					= [dbo].[fnGetItemGLAccount](ITEM.intItemId,@ItemLocationId, 'Other Charge Expense')
+					,[intContractHeaderId]			= NULL
+					,[intContractDetailId]			= NULL
+					,[intInventoryReceiptItemId]	= NULL
+					,[intInventoryReceiptChargeId]	= NULL
+					,[intCustomerStorageId]			= CS.[intCustomerStorageId]
+					,[intSettleStorageId]			= @intSettleStorageId
+					,[dblOrderQty]					= ACAP.dblQty
+					,[dblOrderUnitQty]				= 1
+					,[intOrderUOMId]				= ACAP.intChargeAndPremiumItemUOMId
+					,[dblQuantityToBill]			= ACAP.dblQty
+					,[intQtyToBillUOMId]			= ACAP.intChargeAndPremiumItemUOMId
+					,[dblCost]						= ACAP.dblCost
+					,[dblOldCost]					= NULL
+					,[dblCostUnitQty]				= 1
+					,[intCostUOMId]					= ACAP.intChargeAndPremiumItemUOMId
+					,[dblNetWeight]					= ACAP.dblQty
+					,[dblWeightUnitQty]				= 1
+					,[intWeightUOMId]				= NULL--CAP.intChargeAndPremiumItemUOMId
+					,[intPurchaseTaxGroupId]		= dbo.fnGetTaxGroupIdForVendor(
+															CASE WHEN @shipFromEntityId != @EntityId THEN @shipFromEntityId ELSE @EntityId END,
+															@LocationId,
+															ACAP.intChargeAndPremiumItemId,
+															coalesce(@intShipFrom, EM.intEntityLocationId),
+															EM.intFreightTermId
+														)
+					,[dtmDate]						= @dtmClientPostDate
+					,[dtmVoucherDate]				= @dtmClientPostDate
+					,intLinkingId					= -90--isnull(SVC.intSettleContractId, -90)
+				FROM tblGRAppliedChargeAndPremium ACAP
+				INNER JOIN tblGRSettleStorageTicket SST
+					ON SST.intSettleStorageTicketId = ACAP.intTransactionDetailId
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = SST.intSettleStorageId
+					AND ACAP.intTransactionId = SS.intSettleStorageId
+				INNER JOIN tblGRCustomerStorage CS
+					ON CS.intCustomerStorageId = SST.intCustomerStorageId				
+				LEFT JOIN tblEMEntityLocation EM 
+					ON EM.intEntityId = @EntityId AND EM.ysnDefaultLocation = 1
+				LEFT JOIN tblICItem ITEM 
+					ON ITEM.intItemId = ACAP.intChargeAndPremiumItemId
+				WHERE ACAP.intTransactionId = @intSettleStorageId
+					AND ACAP.intTransactionDetailId = @intSettleStorageTicketId
+				ORDER BY SST.intSettleStorageTicketId
+				
 				update @voucherPayable set dblOldCost = null where dblCost = dblOldCost
 				 ---we should delete priced contracts that has a voucher already
 					delete from @voucherPayable 
