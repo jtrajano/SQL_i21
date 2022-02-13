@@ -448,7 +448,17 @@ BEGIN TRY
 		[intDefaultDisbursementBank],
 		[intDisbursementBank]	,
 		[strFinancingSourcedFrom],
-		[strFinancingTransactionNumber]
+		[strFinancingTransactionNumber],
+		[strFinanceTradeNo]					,
+		[intBankId]							,
+		[intBankAccountId]					,
+		[intBorrowingFacilityId]			,
+		[strBankReferenceNo]				,
+		[intBorrowingFacilityLimitId]		,
+		[intBorrowingFacilityLimitDetailId]	,
+		[strReferenceNo]					,
+		[intBankValuationRuleId]			,
+		[strComments]
 	)
 	VALUES (
 		[intTermsId]			,
@@ -493,7 +503,17 @@ BEGIN TRY
 		[intDisbursementBank]	,
 		[intDisbursementBank]	,
 		[strFinancingSourcedFrom],
-		[strFinancingTransactionNumber]
+		[strFinancingTransactionNumber],
+		[strFinanceTradeNo]					,
+		[intBankId]							,
+		[intBankAccountId]					,
+		[intBorrowingFacilityId]			,
+		[strBankReferenceNo]				,
+		[intBorrowingFacilityLimitId]		,
+		[intBorrowingFacilityLimitDetailId]	,
+		[strReferenceNo]					,
+		[intBankValuationRuleId]			,
+		[strComments]
 	)
 	OUTPUT 
 		inserted.intBillId 

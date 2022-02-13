@@ -44,9 +44,21 @@ RETURNS @returntable TABLE
 	[intSubBookId]			INT NULL ,
     [intCurrencyId]			INT NOT NULL,
 	[intSubCurrencyCents]	INT NOT NULL DEFAULT 1,
+	--Payment Info
 	[intDisbursementBank]			INT NULL,
 	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
+	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	--Trade Finance Info
+	[strFinanceTradeNo] 				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBankId] 						INT NULL,
+	[intBankAccountId] 					INT NULL,
+	[intBorrowingFacilityId] 			INT NULL,
+	[strBankReferenceNo] 				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBorrowingFacilityLimitId] 		INT NULL,
+	[intBorrowingFacilityLimitDetailId] INT NULL,
+	[strReferenceNo] 					NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBankValuationRuleId] 			INT NULL,
+	[strComments] 						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -150,7 +162,17 @@ BEGIN
 		[intSubCurrencyCents]	,
 		[intDisbursementBank]	,
 		[strFinancingSourcedFrom],
-		[strFinancingTransactionNumber]
+		[strFinancingTransactionNumber]		,
+		[strFinanceTradeNo]					,
+		[intBankId]							,
+		[intBankAccountId]					,
+		[intBorrowingFacilityId]			,
+		[strBankReferenceNo]				,
+		[intBorrowingFacilityLimitId]		,
+		[intBorrowingFacilityLimitDetailId]	,
+		[strReferenceNo]					,
+		[intBankValuationRuleId]			,
+		[strComments]
 	)
 	SELECT
 		[intPartitionId]		=	A.intPartitionId,
@@ -233,7 +255,17 @@ BEGIN
 		[intDisbursementBank]	= ISNULL(A.intDisbursementBank, vendor.intVendorCurrencyAccountId),
 		[strFinancingSourcedFrom] = CASE WHEN A.intDisbursementBank > 0 THEN ISNULL(A.strFinancingSourcedFrom, 'Not Provided')
 									ELSE CASE WHEN vendor.intVendorCurrencyAccountId > 0 THEN 'Vendor Default' ELSE 'None' END END,
-		[strFinancingTransactionNumber] = A.strFinancingTransactionNumber
+		[strFinancingTransactionNumber] = A.strFinancingTransactionNumber,
+		[strFinanceTradeNo]					= A.strFinanceTradeNo,
+		[intBankId]							= A.intBankId,
+		[intBankAccountId]					= A.intBankAccountId,
+		[intBorrowingFacilityId]			= A.intBorrowingFacilityId,
+		[strBankReferenceNo]				= A.strBankReferenceNo,
+		[intBorrowingFacilityLimitId]		= A.intBorrowingFacilityLimitId,
+		[intBorrowingFacilityLimitDetailId]	= A.intBorrowingFacilityLimitDetailId,
+		[strReferenceNo]					= A.strReferenceNo,
+		[intBankValuationRuleId]			= A.intBankValuationRuleId,
+		[strComments]						= A.strComments 
 	FROM voucherPayables A
 	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.intEntityId
 	-- LEFT JOIN tblEMEntityLocation B ON vendor.intEntityId = B.intEntityId AND B.ysnDefaultLocation = 1--vendor default location

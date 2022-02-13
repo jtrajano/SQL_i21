@@ -138,7 +138,18 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intBookId]						INT NULL,
 	[intSubBookId]					INT NULL,
 	/*Payment Info*/
-	[intDisbursementBank]			INT NULL, --DEFAULT DISBURSEMENT OR BANK ACCOUNT
+	[intDisbursementBank]			INT NULL, --DEFAULT DISBURSEMENT BANK
 	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --MODULE OR PROCESS WHERE THE INFORMATION CAME FROM E.G. LOGISTICS
 	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --TRANSACTION WHERE THE INFORMATION CAME FORM E.G. LS-0001
+	/*Trade Finance Info*/
+	[strFinanceTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --TRANSACTION NUMBER
+	[intBankId] INT NULL, --BANK NAME
+	[intBankAccountId] INT NULL, --BANK ACCOUNT NO.
+	[intBorrowingFacilityId] INT NULL, --FACILITY
+	[strBankReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --BANK REFERENCE NO.
+	[intBorrowingFacilityLimitId] INT NULL, --LIMIT
+	[intBorrowingFacilityLimitDetailId] INT NULL, --SUBLIMIT
+	[strReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --BANK TRADE REFERENCE NO.
+	[intBankValuationRuleId] INT NULL, --OVERRIDE FACILITY VALUATION
+	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --COMMENTS
 )
