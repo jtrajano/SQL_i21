@@ -10400,6 +10400,12 @@
     <Build Include="dbo\Tables\tblGRChargeAndPremiumDetail.sql" />
     <Build Include="dbo\Tables\tblGRChargeAndPremiumDetailRange.sql" />
     <Build Include="dbo\Tables\tblGRChargeAndPremiumDetailLocation.sql" />
+    <Build Include="dbo\Tables\tblGRAppliedChargeAndPremium.sql" />
+    <Build Include="dbo\Views\vyuGRSearchChargeAndPremiumDetail.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateChargeAndPremium.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCalculateSettlementChargeAndPremium.sql" />
+    <Build Include="dbo\User Defined Types\SettleContract.sql" />
+    <Build Include="dbo\User Defined Types\SettleStorageTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
