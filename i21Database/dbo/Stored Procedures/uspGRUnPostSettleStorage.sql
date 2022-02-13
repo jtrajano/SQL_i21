@@ -577,6 +577,13 @@ BEGIN TRY
 				,@intAction = 2
 		END
 
+		--5. Delete applied charges and premiums
+		BEGIN
+			DELETE FROM tblGRAppliedChargeAndPremium
+			WHERE intTransactionId = @intSettleStorageId
+			AND strTransactionType = 'Settlement'
+		END
+
 		--get first the parent settle storage id before the deletion
 		IF @isParentSettleStorage = 0
 		BEGIN
@@ -635,7 +642,7 @@ BEGIN TRY
 		DELETE FROM @SettleStorages WHERE intId = @intSettleStorageId
 	END
 
-	--5. Voucher deletion
+	--6. Voucher deletion
 	BEGIN
 		WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
 		BEGIN
