@@ -147,7 +147,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
     AND (ID.[strItemType] IS NOT NULL AND ID.[strItemType] <> 'Other Charge')
 	AND (RI.[intInvoiceId] IS NULL OR (RI.[intInvoiceId] IS NOT NULL AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
 	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
-	AND (W.strWhereFinalized IS NOT NULL AND G.strWhereFinalized IS NOT NULL AND W.strWhereFinalized <> 'Destination' AND G.strWhereFinalized <> 'Destination')
+	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
 	AND ID.intContractDetailId IS NOT NULL
 
 --DESTINATION WEIGHTS/GRADES
