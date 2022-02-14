@@ -183,6 +183,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strItemContractCategory				= ARICNS.strContractCategoryId
 	 , strItemContractCategoryCode			= ARICNS.strCategory
 	 , intTicketLoadDetailId				= ISNULL(TICKET.intLoadDetailId, 0)
+	 , dblRounding							= INV.dblRounding
+	 , dblBaseRounding						= INV.dblBaseRounding
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
