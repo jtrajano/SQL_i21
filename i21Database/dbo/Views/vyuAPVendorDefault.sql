@@ -42,7 +42,9 @@ SELECT
 	B.intShipFromId,
 	SF.strLocationName as strShipFromName,
 	B.intVendorCurrencyAccountId,
-	GA.strAccountId strVendorCurrencyAccountId
+	GA.strAccountId strVendorCurrencyAccountId,
+	EFT.intEntityEFTInfoId,
+	EFT.strAccountNumber
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -86,7 +88,7 @@ FROM
 		WHERE bookEntity.intEntityId = A.intEntityId
 	) ctBookEntities
 	LEFT JOIN tblGLAccount GA ON GA.intAccountId = B.intVendorCurrencyAccountId
-
+	LEFT JOIN vyuAPEntityEFTInformation EFT ON EFT.intEntityId = B.intEntityId AND EFT.intCurrencyId = ISNULL(C.intDefaultCurrencyId, B.intCurrencyId) AND EFT.ysnDefaultAccount = 1
 GO
 
 
