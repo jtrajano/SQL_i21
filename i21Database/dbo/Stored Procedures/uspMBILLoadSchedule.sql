@@ -7,15 +7,43 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 BEGIN
-    DELETE FROM tblMBILPickupDetail
-    DELETE FROM tblMBILDeliveryDetail
-    DELETE FROM tblMBILPickupHeader
-    DELETE FROM tblMBILDeliveryHeader
+
+	Select intLoadId into #forDeleteMBILLoad from tblMBILPickupHeader where ysnPickup = 1 and intDriverEntityId = @intDriverId
+    DELETE FROM tblMBILPickupDetail Where intPickupHeaderId not in(Select intPickupHeaderId from tblMBILPickupHeader where intLoadId in(Select intLoadId from #forDeleteMBILLoad))
+    DELETE FROM tblMBILDeliveryDetail Where intDeliveryHeaderId not in(Select intDeliveryHeaderId from tblMBILDeliveryHeader where intLoadId in(Select intLoadId from #forDeleteMBILLoad))
+    DELETE FROM tblMBILPickupHeader where intLoadId not in(Select intLoadId From #forDeleteMBILLoad)
+    DELETE FROM tblMBILDeliveryHeader where intLoadId not in(Select intLoadId From #forDeleteMBILLoad)
 	
+
+	Declare @LoadSchedule as table
+	(
+		intLoadId int,
+		intDriverEntityId int,
+		strLoadNumber nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+		strType varchar,
+		intEntityId int,
+		intEntityLocationId int,
+		intCompanyLocationId int,
+		intCompanyDeliveryLocationId int,
+		intCustomerId int,
+		intCustomerLocationId int,
+		intSellerId int,
+		intSalespersonId int,
+		strTerminalRefNo nvarchar(200) COLLATE Latin1_General_CI_AS NULL,
+		intItemId int,
+		dblQuantity numeric(18,6),
+		dtmPickUpFrom datetime NULL,
+		dtmPickUpTo datetime NULL,
+		dtmDeliveryFrom datetime NULL,
+		dtmDeliveryTo datetime NULL,
+		strPONumber nvarchar(200) COLLATE Latin1_General_CI_AS NULL
+	)
+
+	INSERT INTO @LoadSchedule
     SELECT *
-	INTO #loadSchedule
     FROM vyuMBILLoadSchedule
     WHERE intDriverEntityId = @intDriverId AND intLoadId NOT IN (SELECT intLoadId FROM tblMBILPickupHeader)
+	and cast(case strType  when 'Outbound' then dtmDeliveryFrom else dtmPickUpFrom end as date) = cast(getdate() as date)
 
     DECLARE @tblLoadId AS TABLE(rownum int, intLoadId int, intEntityId int)
 
@@ -57,7 +85,7 @@ BEGIN
             a.dtmPickUpFrom,
             a.dtmPickUpTo,
             a.strPONumber
-        FROM #loadSchedule a
+        FROM @LoadSchedule a
 		INNER JOIN @tblLoadId b on a.intLoadId = b.intLoadId and a.intEntityId = b.intEntityId 
         WHERE rownum = @rownum
         GROUP BY    a.intLoadId,    
@@ -96,7 +124,7 @@ BEGIN
             intCompanyDeliveryLocationId,
 			dtmDeliveryFrom,
 			dtmDeliveryTo
-        FROM #loadSchedule a
+        FROM @LoadSchedule a
 		INNER JOIN @tblLoadId b on a.intLoadId = b.intLoadId
         WHERE rownum = @rownum
         GROUP BY a.intLoadId,    
@@ -132,7 +160,7 @@ BEGIN
             a.intLoadId,
             intItemId,
             sum(dblQuantity)dblQuantity
-        FROM  #loadSchedule a
+        FROM  @LoadSchedule a
 		INNER JOIN @tblLoadId b on a.intLoadId = b.intLoadId and a.intEntityId = b.intEntityId 
         WHERE rownum = @rownum
         GROUP BY a.intEntityId,    
@@ -160,7 +188,7 @@ BEGIN
 				   intItemId,
 				   sum(dblQuantity)dblQuantity,
 				   @intPickupDetailId
-            FROM #loadSchedule a
+            FROM @LoadSchedule a
 			INNER JOIN @tblLoadId b on a.intLoadId = b.intLoadId and a.intEntityId = b.intEntityId 
 			WHERE rownum = @rownum  AND intItemId = @intItemId
             GROUP BY a.intEntityId,    
@@ -176,3 +204,6 @@ BEGIN
     END
 
 END
+
+
+
