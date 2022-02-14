@@ -283,11 +283,12 @@ BEGIN
 
 	DECLARE @GLAccountSetupIsValid INT = 0
 
-	SELECT	@GLAccountSetupIsValid = COUNT(1),	@ysnBankAccountActive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
-	FROM	tblCMBankAccount CM JOIN vyuGLAccountDetail GL 
-	ON GL.intAccountId = CM.intGLAccountId
+	SELECT TOP 1 @GLAccountSetupIsValid= 1,	@ysnBankAccountActive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
+	FROM	tblCMBankAccount CM 
+	OUTER APPLY(
+	SELECT TOP 1 ysnActive from vyuGLAccountDetail 
+	where intAccountId = CM.intGLAccountId) GL
 	WHERE	intBankAccountId = @intBankAccountId
-	GROUP BY intBankAccountId, CM.ysnActive, GL.ysnActive
 
 	IF @ysnBankAccountActive = 0
 	BEGIN
