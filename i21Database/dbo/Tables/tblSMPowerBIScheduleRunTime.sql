@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblSMPowerBIScheduleRunTime]
 (
 	[intPowerBIScheduleRunTimeId]		INT IDENTITY (1, 1) NOT NULL,
-	[intPowerBIDatasetId]				INT NOT NULL,
+	[intPowerBIDatasetId]				INT NULL,
+	[intPowerBIReportId]				INT NULL,
 	[dtmRunTime]						DATETIME NULL,
 	[intConcurrencyId]					[int] DEFAULT 1,
 
