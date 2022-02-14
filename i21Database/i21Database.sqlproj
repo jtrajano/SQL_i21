@@ -498,6 +498,7 @@
     <Build Include="dbo\Views\vyuRKGetCurrencyPair.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinance.sql" />
     <Build Include="dbo\Views\vyuAPEntityEFTInformation.sql" />
+    <Build Include="dbo\Views\vyuCMBankTransactionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
