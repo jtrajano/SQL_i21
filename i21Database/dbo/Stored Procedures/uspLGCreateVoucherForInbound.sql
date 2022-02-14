@@ -162,7 +162,18 @@ BEGIN TRY
 			,[ysnReturn]
 			,[ysnStage]
 			,[intSubLocationId]
-			,[intStorageLocationId])
+			,[intStorageLocationId]
+			/* Trade Finance */
+			,[strFinanceTradeNo]
+			,[intBankId]
+			,[intBankAccountId]
+			,[intBorrowingFacilityId]
+			,[strBankReferenceNo]
+			,[intBorrowingFacilityLimitId]
+			,[intBorrowingFacilityLimitDetailId]
+			,[strReferenceNo]
+			,[intBankValuationRuleId]
+			,[strComments])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -221,6 +232,17 @@ BEGIN TRY
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 			,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
+			/* Trade Finance */
+			,[strFinanceTradeNo] = L.strTradeFinanceNo
+			,[intBankId] = BA.intBankId
+			,[intBankAccountId] = BA.intBankAccountId
+			,[intBorrowingFacilityId] = L.intBorrowingFacilityId 
+			,[strBankReferenceNo] = L.strBankReferenceNo
+			,[intBorrowingFacilityLimitId] = L.intBorrowingFacilityLimitId
+			,[intBorrowingFacilityLimitDetailId] = L.intBorrowingFacilityLimitDetailId
+			,[strReferenceNo] = L.strTradeFinanceReferenceNo
+			,[intBankValuationRuleId] = L.intBankValuationRuleId
+			,[strComments] = L.strTradeFinanceComments
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -259,6 +281,7 @@ BEGIN TRY
 									OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)))
 							ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 		WHERE L.intLoadId = @intLoadId
 			AND (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)) > 0
 
@@ -361,7 +384,18 @@ BEGIN TRY
 				,[ysnReturn]
 				,[ysnStage]
 				,[intSubLocationId]
-				,[intStorageLocationId])
+				,[intStorageLocationId]
+				/* Trade Finance */
+				,[strFinanceTradeNo]
+				,[intBankId]
+				,[intBankAccountId]
+				,[intBorrowingFacilityId]
+				,[strBankReferenceNo]
+				,[intBorrowingFacilityLimitId]
+				,[intBorrowingFacilityLimitDetailId]
+				,[strReferenceNo]
+				,[intBankValuationRuleId]
+				,[strComments])
 			SELECT
 				[intEntityVendorId]
 				,[intTransactionType]
@@ -407,6 +441,17 @@ BEGIN TRY
 				,[ysnStage]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				/* Trade Finance */
+				,[strFinanceTradeNo]
+				,[intBankId]
+				,[intBankAccountId]
+				,[intBorrowingFacilityId]
+				,[strBankReferenceNo]
+				,[intBorrowingFacilityLimitId]
+				,[intBorrowingFacilityLimitDetailId]
+				,[strReferenceNo]
+				,[intBankValuationRuleId]
+				,[strComments]
 			FROM @voucherPayable
 			WHERE intEntityVendorId = @intVendorEntityId
 
