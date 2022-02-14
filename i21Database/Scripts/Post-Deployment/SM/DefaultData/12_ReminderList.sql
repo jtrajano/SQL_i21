@@ -1564,7 +1564,7 @@ BEGIN
 	DECLARE @intMaxSortOrder INT 
 	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 	INSERT INTO tblSMReminderList(strQuery, strReminder,strType, strMessage, strParameter,intSort, strNamespace)
-	VALUES('SELECT intTransactionId from vyuCMBTForAccrualPosting  where intEntityId={0}'
+	VALUES('SELECT intTransactionId from vyuCMBTNotifyPosting  where intEntityId={0}'
 	,'Unposted'
 	,'Forex Bank Transfer'
 	,'{0} {1} {2} Unposted'
@@ -1574,7 +1574,7 @@ BEGIN
 END
 ELSE
 	UPDATE tblSMReminderList
-	set strQuery = 'select intTransactionId from vyuCMBTForAccrualPosting where intEntityId={0}'
+	set strQuery = 'select intTransactionId from vyuCMBTNotifyPosting where intEntityId={0}'
 	, strReminder = 'Unposted'
 	, strType = 'Forex Bank Transfer'
 	, strMessage = '{0} {1} {2} Unposted'
@@ -1589,7 +1589,7 @@ BEGIN
 	DECLARE @intMaxSortOrder INT 
 	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 	INSERT INTO tblSMReminderList(strQuery, strReminder,strType, strMessage, strParameter,intSort, strNamespace)
-	VALUES('SELECT intBankSwapId from vyuCMBTForAccrualSwapPosting  where intEntityId={0}'
+	VALUES('SELECT intBankSwapId from vyuCMBTNotifySwapPosting  where intEntityId={0}'
 	,'Unposted'
 	,'Forex Bank Transfer Swap'
 	,'{0} {1} {2} Unposted'
@@ -1600,7 +1600,7 @@ BEGIN
 END
 ELSE
 	UPDATE tblSMReminderList
-	set strQuery = 'select intBankSwapId from vyuCMBTForAccrualSwapPosting where intEntityId={0}'
+	set strQuery = 'select intBankSwapId from vyuCMBTNotifySwapPosting where intEntityId={0}'
 	, strReminder = 'Unposted'
 	, strType = 'Forex Bank Transfer Swap'
 	, strMessage = '{0} {1} {2} Unposted'
