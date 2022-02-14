@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCMPostBankTransfer]    
+﻿alter PROCEDURE [dbo].[uspCMPostBankTransfer]    
  @ysnPost      BIT  = 0    
  ,@ysnRecap      BIT  = 0    
  ,@strTransactionId  NVARCHAR(40) = NULL     
@@ -844,7 +844,7 @@ BEGIN
               
               
         
-            IF @intBankTransferTypeId = 4
+            IF @intBankTransferTypeId = 4 AND ISNULL(@ysnPostedInTransit,0) =1
               EXEC uspCMCreateBankSwapLong @intTransactionId
         END  -- @ysnPostedInTransit = 1
       END    -- @ysnPost =1
