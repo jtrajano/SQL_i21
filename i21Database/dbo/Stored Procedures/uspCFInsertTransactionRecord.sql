@@ -1104,7 +1104,7 @@ BEGIN
 		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
 		BEGIN
 
-			SELECT * INTO #tempProduct FROM tblCFItem 
+			SELECT * INTO #tempProduct1 FROM tblCFItem 
 			WHERE intNetworkId = @intNetworkId
 			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
 			AND ISNUMERIC(strProductNumber) = 1 
@@ -1112,7 +1112,7 @@ BEGIN
 			SELECT TOP 1 
 				@intProductId = intItemId
 				,@intARItemId = intARItemId
-			FROM #tempProduct 
+			FROM #tempProduct1 
 			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
 			AND intNetworkId = @intNetworkId
 			AND (intSiteId = @intSiteId )
@@ -1147,7 +1147,7 @@ BEGIN
 		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
 		BEGIN
 
-			SELECT * INTO #tempProduct FROM tblCFItem 
+			SELECT * INTO #tempProduct2 FROM tblCFItem 
 			WHERE intNetworkId = @intNetworkId
 			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
 			AND ISNUMERIC(strProductNumber) = 1 
@@ -1155,7 +1155,7 @@ BEGIN
 			SELECT TOP 1 
 				@intProductId = intItemId
 				,@intARItemId = intARItemId
-			FROM #tempProduct 
+			FROM #tempProduct2 
 			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
 			AND intNetworkId = @intNetworkId
 			AND (intSiteId = 0 OR intSiteId IS NULL)
