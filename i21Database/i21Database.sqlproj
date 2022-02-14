@@ -499,6 +499,7 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinance.sql" />
     <Build Include="dbo\Views\vyuAPEntityEFTInformation.sql" />
     <Build Include="dbo\Views\vyuCMBankTransactionDetail.sql" />
+    <Build Include="dbo\Views\vyuCMUnassignedBrokerageAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
