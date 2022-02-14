@@ -187,6 +187,8 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , intBankValuationRuleId				= INV.intBankValuationRuleId
 	 , strBankValuationRule					= BVR.strBankValuationRule
 	 , strTradeFinanceComments				= INV.strTradeFinanceComments
+	 , dblRoundingTotal						= INV.dblRoundingTotal	
+	 , dblBaseRoundingTotal					= INV.dblBaseRoundingTotal
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
