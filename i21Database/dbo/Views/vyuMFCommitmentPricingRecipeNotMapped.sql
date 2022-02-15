@@ -24,6 +24,7 @@ SELECT CPR.intCommitmentPricingRecipeId
 	,VRI.intItemId AS intVirtualItemId
 	,ARI.intItemId AS intActualItemId
 	,CA.strDescription AS strItemProductType
+	,VRM.intVirtualRecipeMapId
 FROM tblMFCommitmentPricingRecipe CPR
 LEFT JOIN tblMFRecipe VR ON VR.intRecipeId = CPR.intVirtualRecipeId
 LEFT JOIN tblMFRecipe AR ON AR.intRecipeId = CPR.intActualRecipeId
@@ -31,6 +32,8 @@ LEFT JOIN tblICItem VRItem ON VRItem.intItemId = VR.intItemId
 LEFT JOIN tblICItem ARItem ON ARItem.intItemId = AR.intItemId
 LEFT JOIN tblMFRecipeItem VRI ON VRI.intRecipeItemId = CPR.intVirtualRecipeItemId
 LEFT JOIN tblMFRecipeItem ARI ON ARI.intRecipeItemId = CPR.intActualRecipeItemId
+LEFT JOIN tblMFVirtualRecipeMap VRM ON VRM.intRecipeId = CPR.intActualRecipeId
+	AND VRM.intVirtualRecipeId = CPR.intVirtualRecipeId
 LEFT JOIN tblICItem VI ON VI.intItemId = VRI.intItemId
 LEFT JOIN tblICItem AI ON AI.intItemId = ARI.intItemId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = ISNULL(VI.intCommodityId,AI.intCommodityId )

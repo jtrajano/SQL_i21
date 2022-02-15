@@ -14,6 +14,7 @@ SELECT VR.intRecipeId AS intVirtualRecipeId
 	,CLSL.strSubLocationName
 	,AR.dtmValidFrom
 	,AR.dtmValidTo
+	,RM.intVirtualRecipeMapId
 FROM tblMFVirtualRecipeMap RM
 JOIN tblMFRecipe VR ON VR.intRecipeId = RM.intVirtualRecipeId
 JOIN tblICItem VI ON VI.intItemId = VR.intItemId

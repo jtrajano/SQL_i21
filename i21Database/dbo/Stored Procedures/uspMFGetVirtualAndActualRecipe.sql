@@ -94,6 +94,7 @@ BEGIN TRY
 		,intRecipeItemTypeId INT
 		,dblCalculatedQuantity NUMERIC(18, 6)
 		,intVirtualRecipeId INT
+		,intVirtualRecipeMapId INT
 		)
 
 	INSERT INTO @tblMFRecipeItem (
@@ -103,6 +104,7 @@ BEGIN TRY
 		,intRecipeItemTypeId
 		,dblCalculatedQuantity
 		,intVirtualRecipeId
+		,intVirtualRecipeMapId
 		)
 	SELECT VA.intRecipeId
 		,RI.intItemId
@@ -110,9 +112,10 @@ BEGIN TRY
 		,RI.intRecipeItemTypeId
 		,RI.dblCalculatedQuantity
 		,VA.intVirtualRecipeId
+		,VA.intVirtualRecipeMapId
 	FROM dbo.tblMFVirtualRecipeMap VA
 	JOIN tblMFRecipeItem RI ON RI.intRecipeId = VA.intRecipeId
-	WHERE VA.intVirtualRecipeId IN (
+	WHERE VA.intVirtualRecipeMapId IN (
 			SELECT Item COLLATE Latin1_General_CI_AS
 			FROM [dbo].[fnSplitString](@strVirtualRecipe, ',')
 			)
@@ -196,6 +199,7 @@ BEGIN TRY
 			) AS dblActualTotalCost
 		,intRecipeItemTypeId
 		,strProductType AS strItemProductType
+		,intVirtualRecipeMapId
 	FROM (
 		SELECT ROW_NUMBER() OVER (
 				ORDER BY IsNULL(VRI.intRecipeId, ARI.intVirtualRecipeId)
@@ -250,10 +254,11 @@ BEGIN TRY
 			,C.dblCost5 AS dblCost5
 			,ISNULL(VRI.intRecipeItemTypeId, ARI.intRecipeItemTypeId) AS intRecipeItemTypeId
 			,CA.strDescription AS strProductType
+			,IsNULL(VA.intVirtualRecipeMapId,ARI.intVirtualRecipeMapId) AS intVirtualRecipeMapId
 		FROM dbo.tblMFVirtualRecipeMap VA
 		JOIN dbo.tblMFRecipeItem VRI ON VRI.intRecipeId = VA.intVirtualRecipeId
 		JOIN dbo.tblICItem VI ON VI.intItemId = VRI.intItemId
-		JOIN [dbo].[fnSplitString](@strVirtualRecipe, ',') VR ON VR.Item = VA.intVirtualRecipeId
+		JOIN [dbo].[fnSplitString](@strVirtualRecipe, ',') VR ON VR.Item = VA.intVirtualRecipeMapId
 		FULL OUTER JOIN @tblMFRecipeItem ARI ON ARI.intRecipeId = VA.intRecipeId
 			AND ARI.intItemId = VRI.intItemId
 		LEFT JOIN dbo.tblICItem AI ON AI.intItemId = ARI.intItemId
@@ -264,7 +269,7 @@ BEGIN TRY
 		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = ISNULL(VI.intCommodityId, AI.intCommodityId)
 			AND CA.intCommodityAttributeId = ISNULL(VI.intProductTypeId, AI.intProductTypeId)
 		) AS DT
-	ORDER BY ISNULL(DT.intVirtualRecipeId, DT.intActualRecipeId)
+	ORDER BY DT.intVirtualRecipeMapId,ISNULL(DT.intVirtualRecipeId, DT.intActualRecipeId)
 		,DT.intRecipeItemTypeId DESC
 		,DT.intVirtualRecipeItemId DESC
 END TRY
