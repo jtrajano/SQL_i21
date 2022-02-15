@@ -97,12 +97,12 @@
 	[ysnOverrideCashFlow] BIT NULL DEFAULT 0,
 	[dtmCashFlowDate] DATETIME NULL,
 	--Payment Info
-	[intDefaultDisbursementBank] INT NULL,
+	[intDefaultDisbursementBankId] INT NULL,
 	[strFinancingSourcedFrom] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnOverrideDisbursementBank] BIT NULL DEFAULT 0,
-	[intDisbursementBank] INT NULL,
-	[intPayToCashAccount] INT NULL,
+	[intPayFromBankAccountId] INT NULL,
+	[intPayToBankAccountId] INT NULL,
 	--Trade Finance Info
 	[strFinanceTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intBankId] INT NULL,

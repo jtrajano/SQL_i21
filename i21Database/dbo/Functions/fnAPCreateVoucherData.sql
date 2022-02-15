@@ -45,7 +45,7 @@ RETURNS @returntable TABLE
     [intCurrencyId]			INT NOT NULL,
 	[intSubCurrencyCents]	INT NOT NULL DEFAULT 1,
 	--Payment Info
-	[intDisbursementBank]			INT NULL,
+	[intDisbursementBankId]		INT NULL,
 	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	--Trade Finance Info
@@ -160,7 +160,7 @@ BEGIN
 		[intSubBookId]			,
 		[intCurrencyId]			,
 		[intSubCurrencyCents]	,
-		[intDisbursementBank]	,
+		[intDisbursementBankId],
 		[strFinancingSourcedFrom],
 		[strFinancingTransactionNumber]		,
 		[strFinanceTradeNo]					,
@@ -252,9 +252,9 @@ BEGIN
 									ELSE vendor.intCurrencyId END,
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
 									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END,
-		[intDisbursementBank]	= ISNULL(A.intDisbursementBank, vendor.intVendorCurrencyAccountId),
-		[strFinancingSourcedFrom] = CASE WHEN A.intDisbursementBank > 0 THEN ISNULL(A.strFinancingSourcedFrom, 'Not Provided')
-									ELSE CASE WHEN vendor.intVendorCurrencyAccountId > 0 THEN 'Vendor Default' ELSE 'None' END END,
+		[intDisbursementBankId]	= ISNULL(A.intDisbursementBankId, vendor.intDisbursementBankId),
+		[strFinancingSourcedFrom] = CASE WHEN A.intDisbursementBankId > 0 THEN ISNULL(A.strFinancingSourcedFrom, 'Not Provided')
+									ELSE CASE WHEN vendor.intDisbursementBankId > 0 THEN 'Vendor Default' ELSE 'None' END END,
 		[strFinancingTransactionNumber] = A.strFinancingTransactionNumber,
 		[strFinanceTradeNo]					= A.strFinanceTradeNo,
 		[intBankId]							= A.intBankId,
