@@ -10,15 +10,6 @@ SET @locationNumber = ''
 DECLARE @parameters VARCHAR(150)
 SET @parameters = ''
 
---TODO: consolidate above
-IF @intStartingNumberId = 30 -- Inventory Adjustment
-BEGIN
-		SELECT	top 1 @strID = strPrefix + str(CONVERT(float, GETDATE()),16,15)
-		FROM	tblSMStartingNumber WITH (NOLOCK)
-		WHERE	intStartingNumberId = @intStartingNumberId
-		return
-END
-
 IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId AND strModule = 'Contract Management' AND ysnResetNumber = 1 AND CAST(dtmResetDate AS DATE) <> CAST(SYSDATETIME() AS DATE))
 BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId AND ysnUseLocation = 1)
