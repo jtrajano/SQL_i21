@@ -29,13 +29,24 @@ FROM tblCMBankTransaction A
 OUTER APPLY (  
  SELECT SUM(ISNULL(dblDebit,0)) dblDebit, SUM(ISNULL(dblCredit,0)) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = A.intTransactionId  
 )Detail  
-outer apply (  
- SELECT TOP 1 intEntityId, ysnActive, ysnPrenoteSent,strAccountType, BANK.strBankName, strAccountNumber, strRTN, strAccountClassification, intEntityEFTInfoId, dtmEffectiveDate, ysnDefaultAccount 
+OUTER APPLY (  
+ SELECT TOP 1 intEntityId, ysnActive, ysnPrenoteSent,strAccountType, BANK.strBankName, strAccountNumber, 
+ strRTN, strAccountClassification, intEntityEFTInfoId, dtmEffectiveDate, ysnDefaultAccount 
  FROM [tblEMEntityEFTInformation] E   
  LEFT JOIN vyuCMBank BANK ON E.intBankId = BANK.intBankId  
   WHERE ysnActive = 1    
-  AND ysnDefaultAccount = 1  
-  and intEntityId = intPayeeId
+  AND intEntityId = intPayeeId
+  AND intBankTransactionTypeId NOT IN(22,122)
   ORDER BY dtmEffectiveDate desc  
-
+  UNION 
+  SELECT TOP 1 intEntityId, E.ysnActive, ysnPrenoteSent,strAccountType, BANK.strBankName, strAccountNumber, 
+  strRTN, strAccountClassification, intEntityEFTInfoId, dtmEffectiveDate, ysnDefaultAccount 
+  FROM [tblEMEntityEFTInformation] E   
+  LEFT JOIN vyuCMBankAccount BANK ON E.intBankId = BANK.intBankId  
+  WHERE E.ysnActive = 1    
+  AND (intBankTransactionTypeId = 22 or intBankTransactionTypeId =122)
+  AND intEntityId = intPayeeId
+  AND BANK.intBankAccountId = intPayToBankAccountId
+  ORDER BY dtmEffectiveDate desc  
 )EFT
+

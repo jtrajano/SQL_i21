@@ -22,6 +22,7 @@ SET ANSI_WARNINGS OFF
 --  CREATE THE BANK TRANSACTION ENTRIES TO THE tblCMBankTransaction table.    
 --------------------------------------------------------------------------------------------------------------------------------------    
 BEGIN     
+
  -- Add the Bank Transaction entries from the temporary table to the permanent table (tblCMBankTransaction)    
  INSERT INTO tblCMBankTransaction(    
   [strTransactionId],    
@@ -58,6 +59,7 @@ BEGIN
   [intLastModifiedUserId],    
   [dtmLastModified],    
   [intAPPaymentId],
+  [intPayToBankAccountId],
   [intConcurrencyId]    
  )    
  SELECT     
@@ -95,6 +97,7 @@ BEGIN
   [intLastModifiedUserId],    
   [dtmLastModified],    
   [intAPPaymentId],
+  [intPayToBankAccountId],
   [intConcurrencyId]    
  FROM @BankTransactionEntries BankTransactionEntries    
  CROSS APPLY dbo.fnGLGetFiscalPeriod([dtmDate]) F  -- remove this in 20.1    
@@ -146,6 +149,7 @@ BEGIN
  FROM @BankTransactionDetailEntries BankTransactionDetailEntries    
 END    
 ;    
+
 --=====================================================================================================================================    
 --  EXIT ROUTINES     
 ---------------------------------------------------------------------------------------------------------------------------------------    
