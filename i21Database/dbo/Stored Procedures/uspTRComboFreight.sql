@@ -38,7 +38,16 @@ BEGIN
 					ORDER BY dtmEffectiveDateTime DESC
 				END
 
-				IF(@strFreightRateType = 'Category' AND ISNULL(@strItemId, '') != '')
+				IF(@intComboFreightShipViaId IS NULL)
+				BEGIN
+					SELECT TOP 1 @intComboFreightShipViaId = intComboFreightShipViaId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit 
+					FROM tblTRComboFreightShipVia 
+					WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
+						AND intShipViaEntityId = @intShipViaEntityId
+					ORDER BY dtmEffectiveDateTime DESC
+				END
+
+				IF(@strFreightRateType = 'By Category' AND ISNULL(@strItemId, '') != '')
 				BEGIN
 					SELECT TOP 1 @intItemId = intItemId FROM tblICItem WHERE intItemId IN (
 						SELECT CONVERT(INT,Item) 
@@ -80,7 +89,17 @@ BEGIN
 				END
 			END
 
-			IF(@strFreightRateType = 'Category' AND ISNULL(@strItemId, '') != '')
+			IF(@intComboFreightCustomerId IS NULL)
+			BEGIN
+				SELECT TOP 1 @intComboFreightCustomerId = intComboFreightCustomerId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit 
+				FROM tblTRComboFreightCustomer
+				WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
+					AND intCustomerEntityId = @intCustomerEntityId
+					AND intCustomerLocationId = @intCustomerLocationId
+				ORDER BY dtmEffectiveDateTime DESC
+			END
+
+			IF(@strFreightRateType = 'By Category' AND ISNULL(@strItemId, '') != '')
 			BEGIN
 				SELECT TOP 1 @intItemId = intItemId FROM tblICItem WHERE intItemId IN (
 					SELECT CONVERT(INT,Item) 
