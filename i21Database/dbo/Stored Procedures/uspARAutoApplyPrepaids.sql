@@ -175,6 +175,7 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 							,[intEntityId]
 							,[ysnInvoicePrepayment]
 							,[strPaymentMethod]
+							,[strReceivePaymentType]
 							,[intWriteOffAccountId]
 							,[intConcurrencyId])
 						SELECT
@@ -201,6 +202,7 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 							,[intEntityId]					= @intEntityUserId
 							,[ysnInvoicePrepayment]			= 0
 							,[strPaymentMethod]				= @strPaymentMethod
+							,[strReceivePaymentType]		= 'Cash Receipts'
 							,[intWriteOffAccountId]			= NULL
 							,[intConcurrencyId]				= 0		
 						FROM	
