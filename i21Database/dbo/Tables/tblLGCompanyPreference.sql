@@ -85,6 +85,7 @@
 [intExpirationDays] INT NULL,
 [intExpirationDateBasis] INT NULL,
 [strFullCalendarKey] [nvarchar](400) COLLATE Latin1_General_CI_AS NULL,
+[ysnReverseRoute] BIT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
