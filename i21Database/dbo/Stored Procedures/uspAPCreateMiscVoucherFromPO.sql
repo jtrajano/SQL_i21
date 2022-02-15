@@ -57,7 +57,7 @@ DECLARE @vouchers AS Id
 INSERT INTO @vouchers SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdVouchersId)
 
 SELECT TOP 1
-    @voucherCreated = intID
+    @voucherCreated = intId
 FROM @vouchers
 
 IF @transCount = 0 COMMIT TRANSACTION;
