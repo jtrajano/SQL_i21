@@ -118,6 +118,73 @@ BEGIN
 					-- LOG UPDATE HISTORY
 					EXEC uspTRFTradeFinanceHistory @intTradeFinanceId, NULL, @intUserId, 'UPDATE', @dtmTransactionDate
 				END
+				ELSE IF (@strAction = 'UPDATE REJECTED') -- UPDATE REJECTED, PREVENT ADD NEW HISTORY RECORD. UPDATE ONLY MOST RECENT HISTORY
+				BEGIN
+					UPDATE tblTRFTradeFinance 
+					SET 
+						  strTransactionType = ISNULL(@strTransactionType, strTransactionType)
+						, strTransactionNumber = ISNULL(@strTransactionNumber, strTransactionNumber)
+						, intTransactionHeaderId = CASE WHEN @intTransactionHeaderId = 0 THEN NULL ELSE ISNULL(@intTransactionHeaderId, intTransactionHeaderId) END
+						, intTransactionDetailId = CASE WHEN @intTransactionDetailId = 0 THEN NULL ELSE ISNULL(@intTransactionDetailId, intTransactionDetailId) END
+						, intBankId = CASE WHEN @intBankId = 0 THEN NULL ELSE ISNULL(@intBankId, intBankId) END
+						, intBankAccountId = CASE WHEN @intBankAccountId = 0 THEN NULL ELSE ISNULL(@intBankAccountId, intBankAccountId) END
+						, intBorrowingFacilityId = CASE WHEN @intBorrowingFacilityId = 0 THEN NULL ELSE ISNULL(@intBorrowingFacilityId, intBorrowingFacilityId) END
+						, intLimitTypeId = CASE WHEN @intLimitTypeId = 0 THEN NULL ELSE ISNULL(@intLimitTypeId, intLimitTypeId) END
+						, intSublimitTypeId = CASE WHEN @intSublimitTypeId = 0 THEN NULL ELSE ISNULL(@intSublimitTypeId, intSublimitTypeId) END
+						, ysnSubmittedToBank = ISNULL(@ysnSubmittedToBank, ysnSubmittedToBank)
+						, dtmDateSubmitted = ISNULL(@dtmDateSubmitted, dtmDateSubmitted)
+						, dtmDateApproved = ISNULL(@dtmDateApproved, dtmDateApproved)
+						, strRefNo = ISNULL(@strRefNo, strRefNo)
+						, intOverrideFacilityValuation = CASE WHEN @intOverrideFacilityValuation = 0 THEN NULL ELSE ISNULL(@intOverrideFacilityValuation, intOverrideFacilityValuation) END
+						, strApprovalStatus = ISNULL(@strApprovalStatus, strApprovalStatus)
+						, strCommnents = ISNULL(@strCommnents, strCommnents)
+						, intConcurrencyId = CASE WHEN @intConcurrencyId = 0 THEN NULL ELSE ISNULL(@intConcurrencyId, intConcurrencyId) END
+					WHERE intTradeFinanceId = @intTradeFinanceId
+
+					DECLARE @intTradeFinanceHistoryId INT = NULL
+
+					SELECT TOP 1 @intTradeFinanceHistoryId = intTradeFinanceHistoryId 
+					FROM tblTRFTradeFinanceHistory
+					WHERE intTradeFinanceId = @intTradeFinanceId
+					ORDER BY intTradeFinanceHistoryId DESC
+
+					UPDATE hist 
+					SET   hist.strTransactionType = tf.strTransactionType
+						, hist.strTransactionNumber = tf.strTransactionNumber
+						, hist.intTransactionHeaderId = tf.intTransactionHeaderId
+						, hist.intTransactionDetailId = tf.intTransactionDetailId
+						, hist.strBankName = bank.strBankName
+						, hist.strBankAccount = bankAccount.strBankAccountNo
+						, hist.strBorrowingFacility = facility.strBorrowingFacilityId
+						, hist.strBankReferenceNo = facility.strBankReferenceNo
+						, hist.strLimitType = limit.strBorrowingFacilityLimit
+						, hist.strSublimitType = sublimit.strLimitDescription
+						, hist.ysnSubmittedToBank = tf.ysnSubmittedToBank
+						, hist.dtmDateSubmitted = tf.dtmDateSubmitted
+						, hist.strApprovalStatus = tf.strApprovalStatus
+						, hist.dtmDateApproved = tf.dtmDateApproved
+						, hist.strRefNo = tf.strRefNo
+						, hist.strOverrideFacilityValuation = valuation.strBankValuationRule
+						, hist.strCommnents = tf.strCommnents
+						, hist.dtmCreatedDate = tf.dtmCreatedDate
+						, hist.intConcurrencyId = tf.intConcurrencyId
+					FROM tblTRFTradeFinanceHistory hist
+					LEFT JOIN tblTRFTradeFinance tf
+						ON tf.intTradeFinanceId = hist.intTradeFinanceId
+					LEFT JOIN tblCMBank bank
+						ON bank.intBankId = tf.intBankId
+					LEFT JOIN vyuCMBankAccount bankAccount
+						ON bankAccount.intBankAccountId = tf.intBankAccountId
+					LEFT JOIN tblCMBorrowingFacility facility
+						ON facility.intBorrowingFacilityId = tf.intBorrowingFacilityId
+					LEFT JOIN tblCMBorrowingFacilityLimit limit
+						ON limit.intBorrowingFacilityLimitId = intLimitTypeId
+					LEFT JOIN tblCMBorrowingFacilityLimitDetail sublimit
+						ON sublimit.intBorrowingFacilityLimitDetailId = tf.intSublimitTypeId
+					LEFT JOIN tblCMBankValuationRule valuation
+						ON valuation.intBankValuationRuleId = tf.intOverrideFacilityValuation
+					WHERE hist.intTradeFinanceHistoryId = @intTradeFinanceHistoryId
+				END
 			END
 
 			DELETE FROM #tmpTRFModified
