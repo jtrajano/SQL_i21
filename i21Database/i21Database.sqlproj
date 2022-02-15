@@ -8523,6 +8523,7 @@
     <None Include="Scripts\Post-Deployment\ST\31_FileFieldMapping_Commander_uPLUs.sql" />
     <None Include="Scripts\Post-Deployment\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql" />
     <None Include="Scripts\Post-Deployment\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql" />
+    <None Include="Scripts\Post-Deployment\ST\41_Checkout_Radiant_POSJournal.sql" />
     <Build Include="dbo\Views\vyuSTRegisterSetupDetail.sql" />
     <Build Include="dbo\Views\vyuSCUberGetLoadDistributionOption.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildCleanUp.sql" />
@@ -10191,6 +10192,8 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
