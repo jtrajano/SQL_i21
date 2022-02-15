@@ -361,6 +361,7 @@ BEGIN TRY
 	DECLARE @dblPromotionalCostConv AS DECIMAL(18, 6) = CAST(@PromotionalCost AS DECIMAL(18, 6))
 	DECLARE @dtmSalesStartingDateConv AS DATE = CAST(@SalesStartDate AS DATE)
 	DECLARE @dtmSalesEndingDateConv AS DATE = CAST(@SalesEndDate AS DATE)
+
 	IF @dtmSalesStartingDateConv IS NOT NULL AND @dtmSalesEndingDateConv IS NOT NULL
 	BEGIN
 		BEGIN TRY
@@ -368,6 +369,7 @@ BEGIN TRY
 			EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 				 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
 				,@dblPromotionalCost			= @dblPromotionalCostConv 
+				,@intUnitMeasureId				= @intUOM
 				,@dtmBeginDate					= @dtmSalesStartingDateConv
 				,@dtmEndDate					= @dtmSalesEndingDateConv 
 				,@strUpcCode					= @strUpcCode
@@ -424,6 +426,7 @@ BEGIN TRY
 			, strUpc					NVARCHAR(50)
 			, strItemDescription		NVARCHAR(250)
 			, strChangeDescription		NVARCHAR(100)
+			, strUnitMeasure			NVARCHAR(250)
 			, strPreviewOldData			NVARCHAR(MAX)
 			, strPreviewNewData			NVARCHAR(MAX)
 			, strOldDataPreview			NVARCHAR(MAX)
@@ -453,6 +456,7 @@ BEGIN TRY
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
+			, strUnitMeasure
 			, strPreviewOldData
 			, strPreviewNewData
 			, strOldDataPreview
@@ -473,7 +477,7 @@ BEGIN TRY
 				, intChildId					= NULL
 				, intCurrentEntityUserId		= @currentUserId
 				, intItemId						= I.intItemId
-				, intItemUOMId					= UOM.intItemUOMId
+				, intItemUOMId					= NULL
 				, intItemLocationId				= IL.intItemLocationId 
 				, intEffectiveItemCostId		= tic.intEffectiveItemCostId
 				, intItemSpecialPricingId		= NULL
@@ -486,6 +490,7 @@ BEGIN TRY
 				, strChangeDescription			= CASE
 													WHEN [Changes].oldColumnName = 'strCost_Original' THEN 'Cost'
 												END
+				, strUnitMeasure				= NULL
 				, strPreviewOldData				= CASE WHEN [Changes].strOldData = ''
 													THEN CAST((SELECT TOP 1 CAST(dblCost AS DECIMAL(10,3))
 																					FROM tblICEffectiveItemCost getCost
@@ -536,7 +541,9 @@ BEGIN TRY
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
 		INNER JOIN tblICItemUOM UOM 
-			ON I.intItemId = UOM.intItemId
+			ON I.intItemId = UOM.intItemId AND ysnStockUnit = 1
+		INNER JOIN tblICUnitMeasure UM 
+			ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		INNER JOIN tblICEffectiveItemCost tic 
 			ON I.intItemId = tic.intItemId 
 				AND [Changes].intItemLocationId = tic.intItemLocationId 
@@ -579,6 +586,7 @@ BEGIN TRY
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
+			, strUnitMeasure
 			, strPreviewOldData
 			, strPreviewNewData
 			, strOldDataPreview
@@ -612,6 +620,7 @@ BEGIN TRY
 				, strChangeDescription			= CASE
 													WHEN [Changes].oldColumnName = 'strPrice_Original' THEN 'Retail Price'
 												END
+				, strUnitMeasure				= UM.strUnitMeasure
 				, strPreviewOldData				= CASE WHEN [Changes].strOldData = ''
 													THEN CAST((SELECT TOP 1 CAST(dblRetailPrice AS DECIMAL(10,3))
 																					FROM tblICEffectiveItemPrice getPrice
@@ -638,12 +647,13 @@ BEGIN TRY
 				, ysnForRevert					= 1
 		FROM 
 		(
-			SELECT DISTINCT intEffectiveItemPriceId, intItemId, intItemLocationId, oldColumnName, strOldData, strNewData, strAction
+			SELECT DISTINCT intEffectiveItemPriceId, intItemId, intItemLocationId, intItemUOMId, oldColumnName, strOldData, strNewData, strAction
 			FROM 
 			(
 				SELECT intEffectiveItemPriceId
 				   , intItemId
 				   , intItemLocationId
+				   , intItemUOMId
 				   , ISNULL(CAST(CAST(dblOldPrice AS DECIMAL(18,3)) AS NVARCHAR(50)),'') AS strPrice_Original
 				   , CAST(CAST(dblNewPrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strPrice_New
 				   , strAction
@@ -662,10 +672,13 @@ BEGIN TRY
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
 		INNER JOIN tblICItemUOM UOM 
-			ON I.intItemId = UOM.intItemId
+			ON I.intItemId = UOM.intItemId AND UOM.intItemUOMId = [Changes].intItemUOMId
+		INNER JOIN tblICUnitMeasure UM 
+			ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		INNER JOIN tblICEffectiveItemPrice tip 
 			ON I.intItemId = tip.intItemId 
 				AND [Changes].intItemLocationId = tip.intItemLocationId 
+				AND [Changes].intItemUOMId = tip.intItemUOMId 
 				AND tip.dtmEffectiveRetailPriceDate = @dtmEffectiveDateConv
 		INNER JOIN tblICItemLocation IL 
 			ON tip.intItemLocationId = IL.intItemLocationId 
@@ -707,6 +720,7 @@ BEGIN TRY
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
+			, strUnitMeasure
 			, strPreviewOldData
 			, strPreviewNewData
 			, strOldDataPreview
@@ -748,6 +762,7 @@ BEGIN TRY
 											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
 											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
 										END
+			, strUnitMeasure			= UM.strUnitMeasure
 			, strPreviewOldData			= CASE WHEN [Changes].strOldData = ''
 												THEN NULL
 											ELSE
@@ -796,7 +811,9 @@ BEGIN TRY
 		INNER JOIN tblICItemSpecialPricing ISP 
 			ON [Changes].intItemSpecialPricingId = ISP.intItemSpecialPricingId
 		INNER JOIN tblICItemUOM UOM 
-			ON ISP.intItemId = UOM.intItemId
+			ON ISP.intItemId = UOM.intItemId AND ISP.intItemUnitMeasureId = UOM.intItemUOMId
+		INNER JOIN tblICUnitMeasure UM 
+			ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		INNER JOIN tblICItemLocation IL 
 			ON ISP.intItemLocationId = IL.intItemLocationId 
 			AND I.intItemId = IL.intItemId
@@ -836,6 +853,7 @@ BEGIN TRY
 				strUpc,
 				strDescription,
 				strChangeDescription,
+				strUnitMeasure,
 				strOldData,
 				strNewData,
 				strActionType,
@@ -855,6 +873,7 @@ BEGIN TRY
 			 	, strUpc
 				, strItemDescription
 				, strChangeDescription
+				, strUnitMeasure
 				, strPreviewOldData
 				, strPreviewNewData
 				, strAction
@@ -969,6 +988,16 @@ BEGIN TRY
 						SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Description</b></p>'
 							
 						SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + @Description + '</p>'
+					
+						--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+					END
+					
+					IF ISNULL(@intUOM, '') != ''
+					BEGIN
+						SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UOM</b></p>'
+							
+						SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + strUnitMeasure + '</p>'
+						FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUOM
 					
 						--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 					END
@@ -1139,6 +1168,7 @@ BEGIN TRY
 	SELECT DISTINCT 
 	          strLocation
 			  , strUpc
+			  , strUnitMeasure
 			  , strItemDescription
 			  , strChangeDescription
 			  , strPreviewOldData AS strOldData

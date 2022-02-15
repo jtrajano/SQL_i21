@@ -687,6 +687,7 @@ BEGIN TRY
 				,intLotteryGameId
 				,dtmReceiptDate
 				,dblQuantityRemaining
+				,intItemUOMId
 				,strStatus
 				,intConcurrencyId
 			)
@@ -697,6 +698,7 @@ BEGIN TRY
 			intLotteryGameId,
 			dtmReceiptDate,
 			intTicketPerPack,
+			intItemUOMId,
 			'Inactive',
 			1
 			FROM tblSTReceiveLottery

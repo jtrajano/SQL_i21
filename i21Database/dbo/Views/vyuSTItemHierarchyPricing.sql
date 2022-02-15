@@ -42,7 +42,7 @@ LEFT JOIN
 				dtmEndDate,
 				dblUnitAfterDiscount,
 				dblCost,
-				row_number() over (partition by intItemId, intItemLocationId order by intItemLocationId asc) as intRowNum
+				row_number() over (partition by intItemId, intItemLocationId, intItemUnitMeasureId order by intItemLocationId asc) as intRowNum
 		FROM tblICItemSpecialPricing
 		WHERE CAST(GETDATE() AS DATE) BETWEEN dtmBeginDate AND dtmEndDate
 	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
