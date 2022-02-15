@@ -147,14 +147,23 @@ BEGIN
 			,@userId = @userId
 			,@success = @success OUTPUT
 
-			IF EXISTS(SELECT TOP 1 1 FROM @Voucher1099K)
+			IF(@success = 1)
 			BEGIN
-				EXEC [dbo].[uspAPCreateVoucher] 
-				@voucherPayables = @Voucher1099K
-				,@userId = @userId
-				,@error = @errorMessage OUTPUT
-				,@createdVouchersId = @created1099KVouchersId OUTPUT
+				IF EXISTS(SELECT TOP 1 1 FROM @Voucher1099K)
+				BEGIN
+					EXEC [dbo].[uspAPCreateVoucher] 
+					@voucherPayables = @Voucher1099K
+					,@userId = @userId
+					,@error = @errorMessage OUTPUT
+					,@createdVouchersId = @created1099KVouchersId OUTPUT
+				END
 			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @errorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @createdVouchersId ORDER BY intId DESC
+				RAISERROR(@errorMessage,16,1)
+			END
+
 		END
 		ELSE
 		BEGIN
