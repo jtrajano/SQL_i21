@@ -20,6 +20,7 @@ SET ANSI_WARNINGS OFF
 				@intLotId						INT,
 				@intSourceId					INT,
 				@intContainerId					INT,
+				@dblReceiptItemQty				INT,
 				@intShipmentId					INT,
 				@dblQty							NUMERIC(18,6),
 				@dblContractQty					NUMERIC(18,6),
@@ -45,11 +46,16 @@ SET ANSI_WARNINGS OFF
 		SELECT @intItemId = NULL
 				,@intSourceId = NULL
 				,@intContainerId = NULL
+				,@dblReceiptItemQty = NULL
 				,@dblQtyDifference = NULL
 
 		SELECT @intItemId = intItemId
 				,@intSourceId = intSourceId
 				,@intContainerId = intContainerId
+		FROM @ItemsFromInventoryReceipt 
+		WHERE intInventoryReceiptDetailId = @intReceiptDetailId
+
+		SELECT @dblReceiptItemQty = SUM(dblQty)
 		FROM @ItemsFromInventoryReceipt 
 		WHERE intInventoryReceiptDetailId = @intReceiptDetailId
 
@@ -136,24 +142,6 @@ SET ANSI_WARNINGS OFF
 
 				IF @ysnReverse = 0
 				BEGIN
-					--CHECK IF ALLOW REWEIGHS
-					IF EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnAllowReweighs, 0) = 1)
-					BEGIN
-						SELECT @dblQtyDifference = (dblQuantity - @dblQty) * -1 FROM tblLGLoadContainer WHERE intLoadContainerId = @intContainerId AND dblQuantity <> @dblQty
-						
-						IF (@dblQtyDifference <> 0)
-						BEGIN
-							EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblQtyDifference, @intUserId, @intSourceId, 'Load Schedule', @intItemUOMId
-
-							UPDATE tblLGLoadContainer SET dblQuantity = @dblQty WHERE intLoadContainerId = @intContainerId
-							UPDATE tblLGLoadDetailContainerLink SET dblQuantity = @dblQty WHERE intLoadContainerId = @intContainerId
-							UPDATE tblLGLoadDetail
-								SET dblQuantity = (SELECT SUM(dblQuantity) FROM tblLGLoadContainer WHERE intLoadId = @intLoadId)
-							WHERE intLoadId = @intLoadId AND intLoadDetailId = @intSourceId
-
-						END
-					END
-
 					--Change LS status to "Received"
 					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
@@ -283,6 +271,24 @@ SET ANSI_WARNINGS OFF
 				ELSE
 					EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
 			END	
+		END
+
+		--CHECK IF ALLOW REWEIGHS
+		IF (@ysnReverse = 0 AND EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnAllowReweighs, 0) = 1))
+		BEGIN
+			SELECT @dblQtyDifference = (dblQuantity - @dblReceiptItemQty) * -1 FROM tblLGLoadContainer WHERE intLoadContainerId = @intContainerId AND dblQuantity <> @dblReceiptItemQty
+						
+			IF (@dblQtyDifference <> 0)
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblQtyDifference, @intUserId, @intSourceId, 'Load Schedule', @intItemUOMId
+
+				UPDATE tblLGLoadContainer SET dblQuantity = @dblReceiptItemQty WHERE intLoadContainerId = @intContainerId
+				UPDATE tblLGLoadDetailContainerLink SET dblQuantity = @dblReceiptItemQty WHERE intLoadContainerId = @intContainerId
+				UPDATE tblLGLoadDetail
+					SET dblQuantity = (SELECT SUM(dblQuantity) FROM tblLGLoadContainer WHERE intLoadId = @intLoadId)
+				WHERE intLoadId = @intLoadId AND intLoadDetailId = @intSourceId
+
+			END
 		END
 
 		SELECT @intReceiptDetailId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt WHERE intInventoryReceiptDetailId > @intReceiptDetailId
