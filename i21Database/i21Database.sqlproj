@@ -500,6 +500,8 @@
     <Build Include="dbo\Views\vyuAPEntityEFTInformation.sql" />
     <Build Include="dbo\Views\vyuCMBankTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuCMUnassignedBrokerageAccount.sql" />
+    <Build Include="dbo\Functions\fnRKIsUserOTCApprover.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKValidateOTCRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
