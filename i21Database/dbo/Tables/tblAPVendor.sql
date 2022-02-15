@@ -4,7 +4,7 @@
     [intDefaultLocationId]       INT            NULL,
     [intDefaultContactId]        INT            NULL,
     [intCurrencyId]             INT            NULL,
-	[intVendorCurrencyAccountId]     INT            NULL ,
+	[intDisbursementBankId]     INT            NULL ,
     [strVendorPayToId]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intPaymentMethodId]        INT            NULL,
     [intTaxCodeId]              INT            NULL,
