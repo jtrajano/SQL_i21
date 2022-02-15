@@ -26,14 +26,6 @@ BEGIN
 	IF @gainLoss <> 0
 	BEGIN
 
-	BEGIN TRY
-		EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,3, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
-		EXEC dbo.uspGLGetOverrideGLAccount @intGLAccountIdTo, @intRealizedGainAccountId,6, @intBankTransferTypeId,  @intRealizedGainAccountId OUT
-	END TRY
-	BEGIN CATCH
-		SET @strErrorMessage = ERROR_MESSAGE()
-		GOTO _raiserror
-	END CATCH
 
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]

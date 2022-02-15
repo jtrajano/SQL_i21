@@ -565,6 +565,10 @@ END
 --IF @isSuccessful = 0 GOTO Post_Rollback    
 IF @ysnRecap = 0    
 BEGIN    
+EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
+  IF @@ERROR <> 0 GOTO Post_Rollback    
+
+
  INSERT INTO @GLEntries(    
    [strTransactionId]    
    ,[intTransactionId]    
@@ -628,7 +632,6 @@ BEGIN
         
     DECLARE @PostResult INT    
     EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1    
-          
     IF @@ERROR <> 0 OR @PostResult <> 0 GOTO Post_Rollback    
 
 
@@ -905,6 +908,10 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------    
 IF @ysnRecap = 1     
 BEGIN     
+
+EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
+  IF @@ERROR <> 0 GOTO Post_Rollback    
+
   
  -- INSERT THE DATA FROM #tmpGLDetail TO @RecapTable    
  INSERT INTO @RecapTable (    
@@ -967,6 +974,7 @@ BEGIN
    ,[intConcurrencyId]    
  FROM #tmpGLDetail    
  IF @@ERROR <> 0 GOTO Post_Rollback    
+
       
  GOTO Recap_Rollback    
 END    
