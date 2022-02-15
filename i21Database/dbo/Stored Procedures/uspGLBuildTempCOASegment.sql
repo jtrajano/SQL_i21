@@ -91,6 +91,17 @@ BEGIN
 	END
 	IF (@tblGLTempCOAExist=0)
 		ALTER TABLE dbo.[tblGLTempCOASegment] ADD CONSTRAINT [PK_tblGLTempCOASegment] PRIMARY KEY ([intAccountId])
+	
+	--this will ensure there is company column in tblGLTempCOASegment
+	IF NOT EXISTS(
+
+		SELECT 1 
+          FROM   INFORMATION_SCHEMA.COLUMNS
+          WHERE  TABLE_NAME = 'tblGLTempCOASegment'
+                 AND COLUMN_NAME = 'Company'
+	)
+
+	ALTER TABLE tblGLTempCOASegment ADD [Company] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
 			
 			
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLDetailView') 

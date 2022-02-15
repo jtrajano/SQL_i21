@@ -4,7 +4,8 @@ CREATE TABLE [dbo].[tblGLTempCOASegment](
 	[strAccountId] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,
 	[Location] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[Primary Account] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
-	[LOB] [nvarchar](20) NULL,
+	[LOB] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+	[Company] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblGLTempCOASegment] PRIMARY KEY CLUSTERED 
 (
 	[intAccountId] ASC
