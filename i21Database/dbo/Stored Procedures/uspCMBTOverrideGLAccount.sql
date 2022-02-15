@@ -130,14 +130,9 @@ BEGIN
         WHERE A.intAccountId = @intAccountIdLoop
     END
 
-
-
     DELETE FROM @GLEntries WHERE intAccountId = @intAccountIdLoop
 
-
 END
-
-SELECT * FROM #tmpGLDetail
 
 IF @msg <> ''
 BEGIN
