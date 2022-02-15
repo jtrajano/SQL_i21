@@ -4,20 +4,11 @@
 
 -- BP Format
 SET @LayoutTitle = 'TR - Electronic BOL – TPVision'
-UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - Electronic BOL – TPVision' WHERE strLayoutTitle = 'TR - Electronic BOL Format'
+UPDATE tblSMImportFileHeader SET strLayoutTitle = @LayoutTitle WHERE strLayoutTitle = 'TR - Electronic BOL Format'
 
-IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - TPVision BOL Import')
 BEGIN
-	IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - TPVision BOL Import')
-	BEGIN
-		SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - TPVision BOL Import'
-
-		-- Delete duplicate file header and details
-		DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId
-		DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId
-		DELETE FROM tblSMImportFileHeader WHERE intImportFileHeaderId = @FileHeaderId
-	END
-	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - TPVision BOL Import' WHERE strLayoutTitle = @LayoutTitle
+	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - TPVision BOL Import' WHERE strLayoutTitle = 'TR - Electronic BOL – TPVision'
 END
 
 SET @LayoutTitle = 'TR - TPVision BOL Import'
