@@ -43,6 +43,6 @@
     [ysnPOS]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
     [intAPPaymentId]           INT              NULL, 
-    [intPayToBankAccountId]           INT              NULL,
+    [intEFTInfoId]             INT              NULL,
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
 )

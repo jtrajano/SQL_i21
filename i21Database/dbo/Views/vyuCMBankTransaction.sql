@@ -2,7 +2,7 @@
 AS
 SELECT   
 A.*,  
-EFT.intEntityEFTInfoId,  
+intEntityEFTInfoId = ISNULL(A.intEFTInfoId, EFT.intEntityEFTInfoId),  
 EFT.ysnDefaultAccount,  
 strBankTransactionTypeName = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = A.intBankTransactionTypeId),  
 ysnPayeeEFTInfoActive =ISNULL(EFT.ysnActive,0),  
@@ -36,17 +36,8 @@ OUTER APPLY (
  LEFT JOIN vyuCMBank BANK ON E.intBankId = BANK.intBankId  
   WHERE ysnActive = 1    
   AND intEntityId = intPayeeId
-  AND intBankTransactionTypeId NOT IN(22,122)
   ORDER BY dtmEffectiveDate desc  
-  UNION 
-  SELECT TOP 1 intEntityId, E.ysnActive, ysnPrenoteSent,strAccountType, BANK.strBankName, strAccountNumber, 
-  strRTN, strAccountClassification, intEntityEFTInfoId, dtmEffectiveDate, ysnDefaultAccount 
-  FROM [tblEMEntityEFTInformation] E   
-  LEFT JOIN vyuCMBankAccount BANK ON E.intBankId = BANK.intBankId  
-  WHERE E.ysnActive = 1    
-  AND (intBankTransactionTypeId = 22 or intBankTransactionTypeId =122)
-  AND intEntityId = intPayeeId
-  AND BANK.intBankAccountId = intPayToBankAccountId
-  ORDER BY dtmEffectiveDate desc  
+  
+
 )EFT
 

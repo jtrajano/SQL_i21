@@ -52,7 +52,7 @@
     [intFiscalPeriodId]        INT              NULL,
     [intTaskId]                INT              NULL,
     [intAPPaymentId]           INT              NULL, 
-    [intPayToBankAccountId]           INT              NULL, 
+    [intEFTInfoId]             INT              NULL, 
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
 	CONSTRAINT [PK_tblCMBankTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
