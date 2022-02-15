@@ -79,6 +79,7 @@
 [intDefaultPickType] INT NULL,
 [ysnIncludeOpenContractsOnInventoryView] BIT NULL DEFAULT ((0)),
 [ysnWeightClaimsByContainer] BIT NULL DEFAULT ((0)),
+[ysnReverseRoute] BIT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
