@@ -102,7 +102,7 @@ BEGIN
 
 
 		select
-			 @strAction = (case when et.intTradeFinanceLogId is null then 'Created' else 'Updated' end)
+			  @strAction = (case when et.intTradeFinanceLogId is null then 'Created' else  'UPDATE REJECTED' end)
 			 ,@intTradeFinanceId = et.intTradeFinanceLogId
 		from
 			@TFXML tf
@@ -145,6 +145,17 @@ BEGIN
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
 			
 		;
+
+		Declare @strCurrentStatus  nvarchar(20)
+		SELECT @strCurrentStatus = strApprovalStatus 
+		FROM tblTRFTradeFinance 
+		WHERE intTradeFinanceId = @intTradeFinanceId
+
+
+		IF  (@strCurrentStatus = 'Rejected')
+		BEGIN
+			SET @strAction = 'UPDATE'
+		END
 	
 		If @strAction = 'Created'
 		BEGIN
@@ -152,7 +163,27 @@ BEGIN
 		END	
 		ELSE
 		BEGIN
-			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = 'UPDATE'
+			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = @strAction
+
+			UPDATE tblCTContractDetail
+			SET intBankAccountId = null
+				,intBankId = null
+				,intBorrowingFacilityId = null
+				,intBorrowingFacilityLimitId = null
+				,intBorrowingFacilityLimitDetailId = null
+				,strReference = null
+				,dblLoanAmount = null
+				,intBankValuationRuleId = null
+				,strBankReferenceNo = null
+				,strComments = null
+				,intFacilityId = null
+				,intLoanLimitId = null
+				,intOverrideFacilityId = null
+				,ysnSubmittedToBank = null
+				,dtmDateSubmitted = null
+				,intApprovalStatusId = null
+				,dtmDateApproved = null
+			WHERE intApprovalStatusId = 3 and intContractDetailId = @intActiveContractDetailId
 		END
 
 
