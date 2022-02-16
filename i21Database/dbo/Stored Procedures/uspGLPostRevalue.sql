@@ -64,7 +64,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 
 		-- Validate CM revaluation
 		SELECT @strMessage = dbo.fnCMValidateCMRevaluation(@intGLFiscalYearPeriodId, @strTransactionType, @ysnPost)
-		IF @strMessage <> '' OR @strMessage IS NOT NULL
+		IF @strMessage IS NOT NULL
 			GOTO _raiserror
 
 		IF (@strTransactionType IN ('CM Forwards', 'CM In-Transit', 'CM Swaps'))
