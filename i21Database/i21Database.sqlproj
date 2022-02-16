@@ -9124,9 +9124,6 @@
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherStatusFromCM.sql" />
-    <Build Include="dbo\Views\vyuPRPaycheckDeductionYTD.sql" />
-    <Build Include="dbo\Views\vyuPRPaycheckEarningYTD.sql" />
-    <Build Include="dbo\Views\vyuPRPaycheckTaxYTD.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
