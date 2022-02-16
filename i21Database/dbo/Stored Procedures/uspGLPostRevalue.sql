@@ -58,7 +58,8 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 
 		SELECT 
 			@intGLFiscalYearPeriodId = intGLFiscalYearPeriodId,
-			@strTransactionType = strTransactionType
+			@strTransactionType = strTransactionType,
+			@strConsolidationNumber = strConsolidationNumber
 		FROM tblGLRevalue 
 		WHERE intConsolidationId = @intConsolidationId
 
@@ -305,13 +306,11 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 		IF @ysnRecap = 0 
 		BEGIN
 
-				DECLARE @strReverseRevalueId NVARCHAR(100)
-				EXEC [dbo].uspGLGetNewID 3, @strReversePostBatchId OUTPUT 		
+			DECLARE @strReverseRevalueId NVARCHAR(100)
+			EXEC [dbo].uspGLGetNewID 3, @strReversePostBatchId OUTPUT 		
 				--EXEC [dbo].uspGLGetNewID 116, @strReverseRevalueId OUTPUT 	
 			IF (@ysnPost = 1)
 			BEGIN
-
-				
 				INSERT INTO [dbo].[tblGLRevalue]
 				   ([strConsolidationNumber]
 				   ,[intGLFiscalYearPeriodId]
@@ -404,14 +403,15 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				UPDATE @PostGLEntries set intTransactionId = @intReverseID 
 				WHERE [strTransactionType]	= 'Revalue Currency Reversal'
 			END
-
-			EXEC uspGLBookEntries @PostGLEntries, @ysnPost
-			IF @ysnPost = 0
+			ELSE
 			BEGIN
-				UPDATE GL SET ysnIsUnposted = 1 
-				from tblGLDetail GL
+				UPDATE GL SET ysnIsUnposted = 1
+				FROM tblGLDetail GL
 				WHERE strTransactionId in (@strConsolidationNumber , @strConsolidationNumber +'-R')
+				DELETE FROM tblGLRevalue WHERE strConsolidationNumber = @strConsolidationNumber +'-R'
 			END		
+			
+			EXEC uspGLBookEntries @PostGLEntries, @ysnPost
 
 		END
 		ELSE
