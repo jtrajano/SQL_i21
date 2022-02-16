@@ -25,17 +25,22 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 
 
 
-		IF @ysnRecap = 0
+		IF @ysnRecap = 0 
+		BEGIN
+			IF @ysnPost = 1
 			BEGIN
 				IF EXISTS(SELECT TOP 1 1 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)
 				BEGIN
 					SET @strMessage ='The transaction is already posted.'
 					GOTO _raiserror
 				END
-			EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT
+				EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT
 			END
-		ELSE
-			SELECT @strPostBatchId =  NEWID()
+			ELSE
+			BEGIN
+				SELECT @strPostBatchId =  NEWID()
+			END
+		END
 
 		-- For Bank Transfer Accounts
 		DECLARE @tblBankTransferAccounts TABLE
@@ -367,6 +372,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			IF (@ysnPost = 1)
 			BEGIN
 
+				
 				INSERT INTO [dbo].[tblGLRevalue]
 				   ([strConsolidationNumber]
 				   ,[intGLFiscalYearPeriodId]
