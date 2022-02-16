@@ -15,6 +15,8 @@
 	[intW2EFileFormatId] INT NULL, 
 	[strNAICSCode] [nvarchar](50) NULL,
 	[strCentralRegistrationNo] [nvarchar](50) NULL,
+	[strOvertimeCalculation] [nvarchar](50) NULL,
+	[dblRegularHoursThreshold] NUMERIC (18, 6) DEFAULT ((0)) NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRCompanyPreference] PRIMARY KEY CLUSTERED 
 (
