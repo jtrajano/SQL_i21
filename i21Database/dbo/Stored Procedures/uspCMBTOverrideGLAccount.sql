@@ -84,7 +84,7 @@ INSERT INTO @GLEntries(
       ,[strModuleName]      
     FROM #tmpGLDetail  
 
-DECLARE @strAccountId NVARCHAR(30) ,@strAccountId1 NVARCHAR(30) , @msg NVARCHAR(100) = ''
+DECLARE @strAccountId NVARCHAR(30) ,@strAccountId1 NVARCHAR(30) , @msg NVARCHAR(MAX) = ''
 SELECT @strAccountId = strAccountId from tblGLAccount where intAccountId = @intAccountId
 
 
@@ -115,7 +115,7 @@ BEGIN
     ELSE
     IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount WHERE strAccountId = @newStrAccountId)
     BEGIN
-	    SET @msg += '<li>' + @newStrAccountId + ' is a  non-existing account for override.</li>' 
+        SET @msg += '<li>' + @newStrAccountId + ' is a  non-existing account for override</li>' 
     END
     ELSE
     IF @newStrAccountId = @strAccountId
@@ -136,7 +136,7 @@ END
 
 IF @msg <> ''
 BEGIN
-    SET @msg = '<ul>' + @msg + '</ul>'
+    SET @msg = '<ul style="text-indent:-40px">' + @msg + '</ul>'
 	RAISERROR (@msg ,16,1)
 END
 
