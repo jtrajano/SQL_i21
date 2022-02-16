@@ -44,7 +44,11 @@ BEGIN
 															(
 																SELECT 
 																	CASE WHEN dblQtyReceived >= dblQtyOrdered THEN 1 ELSE 0 END AS ysnFull
-																 FROM tblPOPurchaseDetail WHERE intPurchaseId = A.intPurchaseId
+																 FROM tblPOPurchaseDetail poDetail 
+																 LEFT JOIN tblICItem itm ON poDetail.intItemId = itm.intItemId
+																 WHERE 
+																 	poDetail.intPurchaseId = A.intPurchaseId
+																AND	(itm.strType != 'Comment' OR itm.intItemId IS NULL)
 															) PODetails WHERE ysnFull = 0
 														)
 											THEN 3 --Closed
