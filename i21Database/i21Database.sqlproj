@@ -2819,7 +2819,7 @@
     <Build Include="dbo\Tables\tblWHContainerInboundOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStagedContainer.sql" />
     <Build Include="dbo\Tables\tblWHPickPreference.sql" />
-    <Build Include="dbo\Functions\fnARGetCustomerBudget.sql" />    
+    <Build Include="dbo\Functions\fnARGetCustomerBudget.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Views\vyuETExportCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
@@ -3542,7 +3542,7 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementPaymentActivityReport.sql" />
     <Build Include="dbo\Tables\tblTRTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLogTransactionDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql" />    
+    <Build Include="dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql" />
     <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARStatementofAccountReport.sql" />
     <Build Include="dbo\Views\vyuAROrderUOM.sql" />
@@ -6335,7 +6335,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateLotTareWeight.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrderByPlannedDate.sql" />
     <Build Include="dbo\Functions\fnICFormatNumber.sql" />
-    <Build Include="dbo\Views\vyuCRMSalesOrderSearch.sql" />    
+    <Build Include="dbo\Views\vyuCRMSalesOrderSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateDocumentMaintenance.sql" />
     <Build Include="dbo\Views\vyuARBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
@@ -8749,7 +8749,7 @@
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
-    <Build Include="dbo\Views\vyuARCustomerAging_DashBoard.sql" />    
+    <Build Include="dbo\Views\vyuARCustomerAging_DashBoard.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCheckDPContract.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
@@ -9123,6 +9123,10 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherStatusFromCM.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckDeductionYTD.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckEarningYTD.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckTaxYTD.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9399,7 +9403,7 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceiptLSM.sql" />
-    <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />    
+    <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
     <Build Include="dbo\Tables\tblARPerformanceLog.sql" />
