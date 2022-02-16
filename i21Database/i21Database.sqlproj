@@ -9129,6 +9129,11 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
+    <Build Include="dbo\Views\vyuApiSalesperson.sql" />
+    <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
+    <Build Include="dbo\Views\vyuApiTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

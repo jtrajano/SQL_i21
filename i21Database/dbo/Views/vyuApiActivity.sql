@@ -31,8 +31,24 @@ SELECT
 	, a.strRelatedTo
 	, a.strRecordNo
 	, a.ysnBillable
+	, created.dtmDate dtmDateCreated
+	, COALESCE(updated.dtmDate, created.dtmDate, a.dtmCreated) dtmDateLastUpdated
 FROM tblSMActivity a
 LEFT JOIN tblEMEntity e ON e.intEntityId = a.intCreatedBy
 LEFT JOIN tblEMEntity ea ON ea.intEntityId = a.intAssignedTo
 LEFT JOIN tblSMTransaction t ON t.intTransactionId = a.intTransactionId
 LEFT JOIN tblSMScreen s ON s.intScreenId = t.intScreenId
+OUTER APPLY (
+	SELECT TOP 1 au.dtmDate
+	FROM vyuApiRecordAudit au
+	WHERE au.intRecordId = a.intActivityId
+		AND au.strAction = 'Created'
+		AND au.strNamespace = 'GlobalComponentEngine.view.Activity'
+) created
+OUTER APPLY (
+	SELECT TOP 1 au.dtmDate
+	FROM vyuApiRecordAudit au
+	WHERE au.intRecordId = a.intActivityId
+		AND au.strAction = 'Updated'
+		AND au.strNamespace = 'GlobalComponentEngine.view.Activity'
+) updated
