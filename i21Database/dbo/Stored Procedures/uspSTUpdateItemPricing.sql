@@ -497,6 +497,7 @@ BEGIN TRY
 																					WHERE dtmEffectiveCostDate < @dtmEffectiveDateConv
 																					AND intItemId = tic.intItemId
 																					AND intItemLocationId = tic.intItemLocationId 
+																					AND intItemLocationId = tic.intItemLocationId 
 																					ORDER BY dtmEffectiveCostDate DESC) AS VARCHAR(50))
 													ELSE
 														[Changes].strOldData
@@ -557,11 +558,6 @@ BEGIN TRY
 			(
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-			)
-			AND 
-			(
-				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 			)
 
 		
@@ -627,6 +623,7 @@ BEGIN TRY
 																					WHERE dtmEffectiveRetailPriceDate < @dtmEffectiveDateConv
 																					AND intItemId = tip.intItemId
 																					AND intItemLocationId = tip.intItemLocationId 
+																					AND intItemUOMId = tip.intItemUOMId 
 																					ORDER BY dtmEffectiveRetailPriceDate DESC) AS VARCHAR(50))
 													ELSE
 														[Changes].strOldData
@@ -638,6 +635,7 @@ BEGIN TRY
 																					WHERE dtmEffectiveRetailPriceDate < @dtmEffectiveDateConv
 																					AND intItemId = tip.intItemId
 																					AND intItemLocationId = tip.intItemLocationId 
+																					AND intItemUOMId = tip.intItemUOMId 
 																					ORDER BY dtmEffectiveRetailPriceDate DESC) AS VARCHAR(50))
 													ELSE
 														[Changes].strOldData
@@ -689,11 +687,6 @@ BEGIN TRY
 			(
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-			)
-			AND 
-			(
-				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 			)
 
 
@@ -823,11 +816,6 @@ BEGIN TRY
 			(
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-			)
-			AND 
-			(
-				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 			)
 	END
 

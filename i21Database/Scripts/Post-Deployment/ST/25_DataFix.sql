@@ -109,7 +109,7 @@ IF EXISTS(SELECT intCheckoutId FROM tblSTCheckoutHeader
 IF EXISTS(SELECT intItemUOMId FROM tblSTLotteryGame WHERE intItemUOMId IS NULL)
 			BEGIN
 				UPDATE tblSTLotteryGame 
-					SET intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = intItemId AND ysnStockUnit = 1)
+					SET intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE tblSTLotteryGame.intItemId = tblICItemUOM.intItemId AND ysnStockUnit = 1)
 			END
 			
 ----------------------------------------------------------------------------------------------------------------------------------
