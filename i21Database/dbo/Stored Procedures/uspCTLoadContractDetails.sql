@@ -528,6 +528,7 @@ BEGIN TRY
 		, intDestinationLeadTime = ISNULL(DestinationPort.intLeadTime, 0)
 		, intDestinationLeadTimeSource = ISNULL(DestinationPort.intLeadTimeAtSource, 0)
 		, intFreightRateMatrixLeadTime = ISNULL(FRM.intLeadTime, 0)
+
 		, CD.strFinanceTradeNo
 		, CD.intBankAccountId
 		, BA.intBankId
@@ -548,11 +549,11 @@ BEGIN TRY
 		, dblSublimit = FLD.dblLimit
 		, CD.strComments
 		, CD.ysnSubmittedToBank
-
-		, CD.dtmDateSubmitted
+		, dtmDateSubmitted = CASE WHEN CD.dtmDateSubmitted = '1900-01-01' THEN NULL ELSE CD.dtmDateSubmitted END 
 		, ASTF.intApprovalStatusId
 		, ASTF.strApprovalStatus
-		, CD.dtmDateApproved
+		, dtmDateApproved  = CASE WHEN CD.dtmDateApproved = '1900-01-01' THEN NULL ELSE CD.dtmDateApproved END 
+
 		, CD.dblQualityPremium
 		, CD.dblOptionalityPremium
 	FROM #tmpContractDetail CD
