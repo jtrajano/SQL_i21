@@ -10,7 +10,12 @@ SELECT DISTINCT
 	salesAccount.strAccountId, 
 	unitMeasure.strUnitMeasure,  
 	CASE WHEN item.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') THEN 'N' ELSE 'Y' END as strType,
-	item.intCategoryId
+	item.intCategoryId,
+	ICT.strTagNumber,
+	ICT.strMessage as strTagMessage,
+	ICT.strDescription as strTagDescription,
+	ICT.strType  as strTagType,
+	ICT.ysnHazMat
 
 FROM tblICItem item    
 INNER JOIN tblICItemLocation itemLocation ON itemLocation.intItemId = item.intItemId    
@@ -30,5 +35,6 @@ LEFT JOIN (
  ) salesAccount ON salesAccount.intItemId = item.intItemId    
 LEFT OUTER JOIN tblETExportFilterItem exportItem ON item.intItemId = exportItem.intItemId    
 LEFT OUTER JOIN tblETExportFilterCategory exportCategory ON item.intCategoryId = exportCategory.intCategoryId    
-WHERE item.strStatus = 'Active'    
+LEFT JOIN tblICTag ICT ON item.intHazmatTag = ICT.intTagId AND ICT.strType = 'Hazmat Message'
+WHERE item.strStatus = 'Active'
  AND (item.intItemId = exportItem.intItemId OR item.intCategoryId = exportCategory.intCategoryId)
