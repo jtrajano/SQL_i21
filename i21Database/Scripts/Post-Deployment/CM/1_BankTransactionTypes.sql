@@ -39,6 +39,8 @@ GO
 			SELECT id = 22,		name = 'ACH'					,debitCredit ='D'	UNION ALL 
 			SELECT id = 23,		name = 'Direct Deposit'			,debitCredit ='D'	UNION ALL 
 			SELECT id = 24,		name = 'Write Off'				,debitCredit = NULL	UNION ALL 
+			SELECT id = 25,		name = 'Broker Settlement'		,debitCredit ='D' UNION ALL 
+			SELECT id = 26,		name = 'Broker Commission'		,debitCredit ='D' UNION ALL 
 			SELECT id = 103,	name = 'Void Misc Check'		,debitCredit ='C'	UNION ALL 
 			SELECT id = 116,	name = 'Void AP Payment'		,debitCredit ='C'	UNION ALL 
 			SELECT id = 121,	name = 'Void Paycheck'			,debitCredit ='C'	UNION ALL 
