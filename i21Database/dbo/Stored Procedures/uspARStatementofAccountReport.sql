@@ -200,7 +200,7 @@ BEGIN
 	SET @strStatementSP = CASE WHEN @strStatementFormat = 'Balance Forward' THEN 'uspARCustomerStatementBalanceForwardReport'
 							   WHEN @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer') THEN 'uspARCustomerStatementReport'
 							   WHEN @strStatementFormat = 'Payment Activity' THEN 'uspARCustomerStatementPaymentActivityReport'
-							   WHEN @strStatementFormat = 'Full Details - No Card Lock' THEN 'uspARCustomerStatementFullDetailReport'
+							   WHEN @strStatementFormat IN ('Full Details - No Card Lock', 'AR Detail Statement') THEN 'uspARCustomerStatementFullDetailReport'
 							   WHEN @strStatementFormat = 'Budget Reminder' THEN 'uspARCustomerStatementBudgetReminderReport'
 							   WHEN @strStatementFormat = 'Budget Reminder Alternate 2' THEN 'uspARCustomerStatementBudgetReminderAlternate2Report'
 							   WHEN @strStatementFormat = 'Honstein Oil' THEN 'uspARCustomerStatementHonsteinReport'
@@ -287,7 +287,7 @@ BEGIN
 				, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
 		END
-	ELSE IF @strStatementFormat = 'Full Details - No Card Lock'
+	ELSE IF @strStatementFormat IN ('Full Details - No Card Lock', 'AR Detail Statement')
 		BEGIN
 			EXEC dbo.uspARCustomerStatementFullDetailReport
 				  @dtmDateTo					= @dtmDateTo
@@ -305,6 +305,7 @@ BEGIN
 				, @ysnEmailOnly					= @ysnEmailOnly
 				, @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
+				, @strStatementFormat			= @strStatementFormat
 		END
 	ELSE IF @strStatementFormat = 'Budget Reminder'
 		BEGIN
