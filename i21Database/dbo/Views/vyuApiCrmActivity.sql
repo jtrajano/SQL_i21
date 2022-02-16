@@ -39,6 +39,8 @@ SELECT
 	, C.strLocationName strEntityLocation
 	, CASE WHEN C.intEntityId IS NULL THEN 0 ELSE 1 END ysnIsContact
 	, ac.intEntityId
+	, a.dtmDateCreated
+	, a.dtmDateLastUpdated
 FROM vyuCRMActivitySearch2 ac
 JOIN vyuApiActivity a ON a.intActivityId = ac.intActivityId
 JOIN tblSMActivity sa ON sa.intActivityId = a.intActivityId
