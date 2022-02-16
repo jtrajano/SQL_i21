@@ -10200,6 +10200,7 @@
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
