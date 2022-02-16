@@ -171,7 +171,8 @@ SELECT
 	strLocation  COLLATE Latin1_General_CI_AS ,strTicket  COLLATE Latin1_General_CI_AS strTicket,strContractNumber  COLLATE Latin1_General_CI_AS strContractId,
 	strItemId  COLLATE Latin1_General_CI_AS ,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'GL'  COLLATE Latin1_General_CI_AS, 
-	strType = 'General Ledger'  COLLATE Latin1_General_CI_AS
+	strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 FROM vyuGLMulticurrencyRevalueGJ
 )
 SELECT A.*, strCurrency FROM CTE A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
+WHERE ISNULL(dblHistoricForexRate,1) <> 1

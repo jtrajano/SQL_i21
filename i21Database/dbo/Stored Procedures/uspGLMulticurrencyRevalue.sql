@@ -18,7 +18,7 @@ SELECT
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuAPMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblForexRate, 1) <> 1
 END
 
 IF @strModule = 'CT'
@@ -33,7 +33,7 @@ SELECT
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCTMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblForexRate, 1) <> 1
  END
 IF @strModule = 'AR' 
 BEGIN
@@ -47,7 +47,7 @@ SELECT
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuARMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblForexRate, 1) <> 1
 END
 
 IF @strModule = 'INV'
@@ -102,7 +102,7 @@ FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnReceivable = 1
 )
 SELECT A.*, strCurrency FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblHistoricForexRate, 1) <> 1
 END
 
 IF @strModule = 'CM'
@@ -120,7 +120,7 @@ SELECT
 FROM vyuCMMultiCurrencyRevalue A
 LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblForexRate, 1) <> 1
 END
 
 IF @strModule = 'FA'
@@ -136,7 +136,7 @@ SELECT
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuFAMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblForexRate, 1) <> 1
 END
 
 IF @strModule = 'CM Forwards'
@@ -165,7 +165,7 @@ FROM vyuCMForwardReceivablesMultiCurrencyRevalue
 SELECT *, strCurrency FROM cte 
 A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate AND dtmDueDate > @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblHistoricForexRate, 1) <> 1
 END
 
 IF @strModule = 'CM In-Transit'
@@ -181,7 +181,7 @@ SELECT
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCMInTransitMultiCurrencyRevalue  A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblForexRate, 1) <> 1
 END
 
 IF @strModule = 'CM Swaps'
@@ -229,7 +229,7 @@ FROM vyuCMSwapInReceivablesInTransitMultiCurrencyRevalue
 )
 SELECT A.*, strCurrency FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblHistoricForexRate, 1) <> 1
 END
 
 IF @strModule = 'GL'
@@ -240,9 +240,9 @@ SELECT
 	strLocation  COLLATE Latin1_General_CI_AS ,strTicket  COLLATE Latin1_General_CI_AS strTicket,strContractNumber  COLLATE Latin1_General_CI_AS strContractId,
 	strItemId  COLLATE Latin1_General_CI_AS ,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'GL'  COLLATE Latin1_General_CI_AS, 
-	strType = 'General Ledger'  COLLATE Latin1_General_CI_AS,
+	strType = 'Receivables'  COLLATE Latin1_General_CI_AS,
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuGLMulticurrencyRevalueGJ A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(intCurrencyId, @intDefaultCurrencyId) <> @intDefaultCurrencyId
+AND ISNULL(dblForexRate, 1) <> 1
 END
