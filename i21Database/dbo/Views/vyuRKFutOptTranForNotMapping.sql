@@ -61,15 +61,17 @@ SELECT DE.intFutOptTransactionId
 	, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
 	, dtmBankTransferDate = BT.dtmDate	
 	, ysnBankTransferPosted = CASE WHEN ISNULL(DE.intBankTransferId, 0) <> 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-	, strApprovalStatus = CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
-							WHEN ISNULL(DE.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' 
-								THEN CASE WHEN ISNULL(DE.intBankTransferId, 0) <> 0 THEN 'Posted' ELSE 'Approved and Not Posted' END
-							ELSE ISNULL(DE.strStatus, 
-										CASE WHEN DE.intSelectedInstrumentTypeId = 2 AND DE.intInstrumentTypeId = 4 THEN 'No Need for Approval' 
-										ELSE '' END) 
-							END COLLATE Latin1_General_CI_AS
-	, strOrderType = (CASE WHEN DE.intOrderTypeId = 1 THEN 'GTC'
-							WHEN DE.intOrderTypeId = 2 THEN 'Limit'
+	, strApprovalStatus = CASE WHEN DE.intSelectedInstrumentTypeId = 2 AND DE.intInstrumentTypeId = 4 -- OTC Forward
+								THEN CASE WHEN ISNULL(DE.intBankTransferId, 0) <> 0 THEN 'Posted'
+										WHEN approval.strApprovalStatus = 'Approved' THEN 'Approved and Not Posted'
+										ELSE CASE WHEN ISNULL(approval.strApprovalStatus,'') <> '' 
+											THEN  approval.strApprovalStatus
+											ELSE 'No Need for Approval'
+											END
+										END
+								ELSE DE.strStatus
+								END COLLATE Latin1_General_CI_AS
+	, strOrderType = (CASE WHEN DE.intOrderTypeId = 2 THEN 'Limit'
 							WHEN DE.intOrderTypeId = 3 THEN 'Market'
 							ELSE '' END) COLLATE Latin1_General_CI_AS
 	, strDerivativeContractNumber = CASE WHEN ISNULL(contractH.intContractHeaderId, 0) <> 0 THEN contractH.strContractNumber + ' - ' + CAST(contractD.intContractSeq AS NVARCHAR(50)) ELSE NULL END COLLATE Latin1_General_CI_AS 
@@ -120,7 +122,7 @@ OUTER APPLY (
 ) approvalScreen
 LEFT JOIN tblSMTransaction approval
 	ON DE.intFutOptTransactionId = approval.intRecordId
-	AND DE.intInstrumentTypeId = 4						-- OTC Forwards Only
+	AND DE.intInstrumentTypeId = 4 -- OTC Forwards Only
 	AND approval.intScreenId = approvalScreen.intScreenId
 	AND approval.strApprovalStatus IN ('Waiting for Approval', 'Waiting for Submit', 'Approved')
 LEFT JOIN tblCTContractHeader contractH
