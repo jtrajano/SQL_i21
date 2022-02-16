@@ -529,42 +529,42 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 		END
 		if @ysnRecap = 0
 		BEGIN
-			UPDATE tblGLRevalue SET ysnPosted = 1 WHERE intConsolidationId in ( @intConsolidationId, @intReverseID)
+			UPDATE tblGLRevalue SET ysnPosted = @ysnPost WHERE intConsolidationId in ( @intConsolidationId, @intReverseID)
 			
 			
 			IF @strTransactionType = 'GL' 
-				UPDATE tblGLFiscalYearPeriod SET ysnRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'AR' 
-				UPDATE tblGLFiscalYearPeriod SET ysnARRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnARRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'AP' 
-				UPDATE tblGLFiscalYearPeriod SET ysnAPRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnAPRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'INV' 
-				UPDATE tblGLFiscalYearPeriod SET ysnINVRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnINVRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'CT' 
-				UPDATE tblGLFiscalYearPeriod SET ysnCTRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnCTRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'CM' 
-				UPDATE tblGLFiscalYearPeriod SET ysnCMRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnCMRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'FA' 
-				UPDATE tblGLFiscalYearPeriod SET ysnFARevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnFARevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'CM Forwards'
-				UPDATE tblGLFiscalYearPeriod SET ysnCMForwardsRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnCMForwardsRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'CM In-Transit'
-				UPDATE tblGLFiscalYearPeriod SET ysnCMInTransitRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnCMInTransitRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'CM Swaps'
-				UPDATE tblGLFiscalYearPeriod SET ysnCMSwapsRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+				UPDATE tblGLFiscalYearPeriod SET ysnCMSwapsRevalued = @ysnPost WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			IF @strTransactionType = 'All' 
 				UPDATE tblGLFiscalYearPeriod SET 
-					ysnRevalued 	=	1,
-					ysnARRevalued =		1,
-					ysnAPRevalued =		1,
-					ysnINVRevalued =	1,
-					ysnCTRevalued =		1,
-					ysnCMRevalued =		1,
-					ysnFARevalued =     1,
-					ysnCMForwardsRevalued =		1,
-					ysnCMInTransitRevalued =	1,
-					ysnCMSwapsRevalued =		1
+					ysnRevalued 	=	@ysnPost,
+					ysnARRevalued =		@ysnPost,
+					ysnAPRevalued =		@ysnPost,
+					ysnINVRevalued =	@ysnPost,
+					ysnCTRevalued =		@ysnPost,
+					ysnCMRevalued =		@ysnPost,
+					ysnFARevalued =     @ysnPost,
+					ysnCMForwardsRevalued =		@ysnPost,
+					ysnCMInTransitRevalued =	@ysnPost,
+					ysnCMSwapsRevalued =		@ysnPost
 				WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			
