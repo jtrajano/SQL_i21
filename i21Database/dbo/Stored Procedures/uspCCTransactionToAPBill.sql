@@ -215,6 +215,12 @@ BEGIN
 			,@error = @errorMessage OUTPUT
 			,@createdVouchersId = @createdVouchersId OUTPUT
 
+			IF(ISNULL(@errorMessage, '') != '')
+			BEGIN
+				SET @success = 0
+				RAISERROR(@errorMessage,16,1)			
+			END	
+
 			EXEC [dbo].[uspAPPostBill]
 			@post = @post
 			,@recap = @recap
@@ -224,23 +230,35 @@ BEGIN
 			,@userId = @userId
 			,@success = @success OUTPUT
 
-			IF EXISTS(SELECT TOP 1 1 FROM @Voucher1099K)
+			IF(@success = 1)
 			BEGIN
-				EXEC [dbo].[uspAPCreateVoucher] 
-				@voucherPayables = @Voucher1099K
-				,@userId = @userId
-				,@error = @errorMessage OUTPUT
-				,@createdVouchersId = @created1099KVouchersId OUTPUT
-			END
-			
-			IF(ISNULL(@errorMessage, '') = '')
-			BEGIN
-				SET @errorMessage = @strNo1099Setup	
+				IF EXISTS(SELECT TOP 1 1 FROM @Voucher1099K)
+				BEGIN
+					EXEC [dbo].[uspAPCreateVoucher] 
+					@voucherPayables = @Voucher1099K
+					,@userId = @userId
+					,@error = @errorMessage OUTPUT
+					,@createdVouchersId = @created1099KVouchersId OUTPUT
+				END
+
+				IF(ISNULL(@errorMessage, '') = '')
+				BEGIN
+					SET @errorMessage = @strNo1099Setup	
+				END
+				ELSE
+				BEGIN
+					SET @errorMessage = @errorMessage + ' ' + @strNo1099Setup	
+				END
 			END
 			ELSE
 			BEGIN
-				SET @errorMessage = @errorMessage + ' ' + @strNo1099Setup	
-			END		
+				SELECT TOP 1 @errorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @createdVouchersId ORDER BY intId DESC
+			END
+
+			IF(ISNULL(@errorMessage, '') != '')
+			BEGIN
+				RAISERROR(@errorMessage,16,1)
+			END			
 		END
 		ELSE
 		BEGIN
