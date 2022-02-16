@@ -601,7 +601,8 @@ DECLARE @strMessage NVARCHAR(100)
 			UPDATE tblGLRevalue SET ysnPosted = 1 WHERE intConsolidationId in ( @intConsolidationId, @intReverseID)
 			
 			
-			
+			IF @strTransactionType = 'GL' 
+				UPDATE tblGLFiscalYearPeriod SET ysnRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'AR' 
 				UPDATE tblGLFiscalYearPeriod SET ysnARRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'AP' 
@@ -623,6 +624,7 @@ DECLARE @strMessage NVARCHAR(100)
 
 			IF @strTransactionType = 'All' 
 				UPDATE tblGLFiscalYearPeriod SET 
+					ysnRevalued 	=	1,
 					ysnARRevalued =		1,
 					ysnAPRevalued =		1,
 					ysnINVRevalued =	1,
