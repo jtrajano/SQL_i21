@@ -582,6 +582,13 @@ BEGIN TRY
 	) Invoices
 
 	--Freight Items
+
+	-- Sum for Combo Freight Only
+	DECLARE @dblSumQtyShipped DECIMAL(18,6) = 0,
+		@dblSumQtyOrdered DECIMAL(18,6) = 0
+	SELECT @dblSumQtyOrdered = SUM(ISNULL(dblQtyOrdered, 0)), @dblSumQtyShipped = SUM(ISNULL(dblQtyShipped, 0)) FROM #tmpSourceTableFinal
+	WHERE (ISNULL(dblComboFreightRate, 0) != 0 AND ysnFreightInPrice != 1 AND ysnComboFreight = 1)
+
 	INSERT INTO #tmpSourceTableFinal(
 		[intId] 
 		,[strSourceTransaction]
@@ -797,8 +804,8 @@ BEGIN TRY
 		,[strItemDescription]					= Item.strDescription
 		,[intOrderUOMId]						= @intFreightItemUOMId
 		,[intItemUOMId]							= @intFreightItemUOMId
-		,[dblQtyOrdered]						= (SELECT SUM(dblQtyOrdered) FROM #tmpSourceTableFinal WHERE ysnComboFreight = 1)
-		,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblComboMinimumUnits AND ysnComboFreight = 1 THEN IE.dblComboMinimumUnits ELSE IE.dblQtyShipped END
+		,[dblQtyOrdered]						= @dblSumQtyOrdered
+		,[dblQtyShipped]						= CASE WHEN @dblSumQtyShipped <= IE.dblComboMinimumUnits AND ysnComboFreight = 1 THEN IE.dblComboMinimumUnits ELSE @dblSumQtyShipped END
 		,[dblDiscount]							= 0
 		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 
 													THEN ISNULL(IE.[dblComboFreightRate],0) + (ISNULL(IE.[dblComboFreightRate],0) * (IE.dblSurcharge / 100))
