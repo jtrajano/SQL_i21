@@ -15,5 +15,5 @@ tblCMBankSwap S
 	
 
 ) BTS
-WHERE datediff( DAY, BTS.dtmInTransit, dbo.fnRemoveTimeOnDate(GETDATE()) ) BETWEEN 0 AND isnull(intBTPostReminderDays,0)
+WHERE datediff( DAY,dbo.fnRemoveTimeOnDate(GETDATE()), BTS.dtmInTransit  ) BETWEEN 0 AND isnull(intBTPostReminderDays,0)
 
