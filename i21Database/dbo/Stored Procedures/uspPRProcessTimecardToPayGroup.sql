@@ -37,6 +37,14 @@ WHERE ysnApproved = 1
  DECLARE @intDateFirst int      
  SELECT @intDateFirst  = ISNULL(intFirstDayOfWorkWeek,@@DATEFIRST) FROM tblPRCompanyPreference      
  SET DATEFIRST @intDateFirst        
+
+ DECLARE @strOvertimeCalculation NVARCHAR(50)
+ DECLARE @dblRegularHoursThreshold NUMERIC(5, 2)
+ 
+ SELECT @strOvertimeCalculation  = ISNULL(strOvertimeCalculation,'Weekly') FROM tblPRCompanyPreference      
+ SELECT @dblRegularHoursThreshold  = ISNULL(dblRegularHoursThreshold, CASE WHEN (@strOvertimeCalculation = 'Weekly') THEN 40 ELSE 0 END) FROM tblPRCompanyPreference
+ 
+  
         
 /* Insert Timecards to Temp Table for iteration */        
 SELECT         
@@ -44,13 +52,13 @@ SELECT
  ,T.intEmployeeEarningId        
  ,T.intEmployeeDepartmentId        
  ,T.intWorkersCompensationId      
- ,dblRegularHours =  CASE WHEN (SUM(T.dblHours) > 40)        
-       THEN 40      
+ ,dblRegularHours =  CASE WHEN (SUM(T.dblHours) > @dblRegularHoursThreshold)        
+       THEN @dblRegularHoursThreshold      
       ELSE         
        SUM(T.dblHours)        
       END        
- ,dblOvertimeHours = CASE WHEN (SUM(T.dblHours) > 40)        
-       THEN SUM(T.dblHours) - 40      
+ ,dblOvertimeHours = CASE WHEN (SUM(T.dblHours) > @dblRegularHoursThreshold)        
+       THEN SUM(T.dblHours) - @dblRegularHoursThreshold      
       ELSE         
        0        
       END          
@@ -73,7 +81,7 @@ GROUP BY
  ,T.intEmployeeDepartmentId        
  ,T.intWorkersCompensationId      
  ,E.dblDefaultHours      
- ,DATEADD(DD, 7 - DATEPART(dw, dtmDate), dtmDate)       
+ ,CASE WHEN (@strOvertimeCalculation = 'Weekly') THEN  DATEADD(DD, 7 - DATEPART(dw, dtmDate), dtmDate)    ELSE dtmDate END
         
 DECLARE @intEmployeeEarningId INT        
 DECLARE @intEmployeeDepartmentId INT        
