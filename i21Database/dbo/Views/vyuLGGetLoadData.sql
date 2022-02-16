@@ -58,10 +58,12 @@ SELECT
     ,L.intForwardingAgentEntityId
     ,L.strForwardingAgentRef
     ,L.intInsurerEntityId
+	,L.intInsuranceItemId
     ,L.strInsurancePolicyRefNo
     ,L.dblInsuranceValue
     ,L.dblInsurancePremiumPercentage
     ,L.intInsuranceCurrencyId
+	,L.dtmInsuranceDeclaration
     ,L.dtmDocsToBroker
     ,L.strMarks
     ,L.strMarkingInstructions
@@ -180,6 +182,7 @@ SELECT
 	,strTerminal = Terminal.strName
 	,strForwardingAgent = ForwardingAgent.strName
 	,strInsurer = Insurer.strName
+	,strInsuranceItem = INS.strItemNo
 	,strInsuranceCurrency = Currency.strCurrency
 	,strBLDraftToBeSent = BLDraftToBeSent.strName
 	,strDocPresentationVal = NP.strName 
@@ -264,6 +267,7 @@ LEFT JOIN tblICUnitMeasure DischargeUnit ON DischargeUnit.intUnitMeasureId = L.i
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
+LEFT JOIN tblICItem INS ON INS.intItemId = L.intInsuranceItemId
 LEFT JOIN tblSMTerm TM ON TM.intTermID = L.intTermId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId

@@ -199,9 +199,12 @@ SELECT -- Load Header
 	,L.strForwardingAgentRef
 	,L.intInsurerEntityId
 	,strInsurer = Insurer.strName
+	,L.intInsuranceItemId
+	,strInsuranceItem = INS.strItemNo
 	,L.dblInsuranceValue
 	,L.intInsuranceCurrencyId
 	,strInsuranceCurrency = InsCur.strCurrency
+	,L.dtmInsuranceDeclaration
 	,L.dtmDocsToBroker
 	,L.strMarks
 	,L.strMarkingInstructions
@@ -349,6 +352,7 @@ LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReas
 LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
 LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
+LEFT JOIN tblICItem INS ON INS.intItemId = L.intInsuranceItemId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
 LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = L.intBorrowingFacilityId

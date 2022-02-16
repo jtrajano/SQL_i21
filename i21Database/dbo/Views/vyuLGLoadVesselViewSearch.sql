@@ -31,6 +31,7 @@ SELECT  L.intLoadId
 	   ,L.dtmISFFiledDate
 	   ,L.dtmStuffingDate
 	   ,L.dtmDocsToBroker
+	   ,L.dtmInsuranceDeclaration
 	   ,L.ysnArrivedInPort
 	   ,L.ysnDocumentsApproved
 	   ,L.ysnCustomsReleased
@@ -42,6 +43,7 @@ SELECT  L.intLoadId
 	   ,[strShippingLine] =  ShippingLine.strName
 	   ,[strForwardingAgent] = ForwardingAgent.strName
 	   ,[strInsurer] = Insurer.strName
+	   ,[strInsuranceItem] = INS.strItemNo
 	   ,[strInsuranceCurrency] = Currency.strCurrency
 	   ,[strContainerType] = CT.strContainerType
 	   ,L.intLoadShippingInstructionId
@@ -105,6 +107,7 @@ LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLi
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
 LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
+LEFT JOIN tblICItem INS ON INS.intItemId = L.intInsuranceItemId
 LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
