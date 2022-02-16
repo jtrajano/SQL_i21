@@ -166,23 +166,23 @@ BEGIN
 			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = @strAction
 
 			UPDATE tblCTContractDetail
-			SET intBankAccountId = null
-				,intBankId = null
-				,intBorrowingFacilityId = null
-				,intBorrowingFacilityLimitId = null
-				,intBorrowingFacilityLimitDetailId = null
-				,strReference = null
-				,dblLoanAmount = null
-				,intBankValuationRuleId = null
-				,strBankReferenceNo = null
-				,strComments = null
-				,intFacilityId = null
-				,intLoanLimitId = null
-				,intOverrideFacilityId = null
-				,ysnSubmittedToBank = null
-				,dtmDateSubmitted = null
-				,intApprovalStatusId = null
-				,dtmDateApproved = null
+			SET intBankAccountId = 0
+				,intBankId = 0
+				,intBorrowingFacilityId = 0
+				,intBorrowingFacilityLimitId = 0
+				,intBorrowingFacilityLimitDetailId = 0
+				,strReference = ''
+				,dblLoanAmount = 0
+				,intBankValuationRuleId = 0
+				,strBankReferenceNo = ''
+				,strComments = ''
+				,intFacilityId = 0
+				,intLoanLimitId = 0
+				,intOverrideFacilityId = 0
+				,ysnSubmittedToBank = 0
+				,dtmDateSubmitted = '1/1/1900'
+				,intApprovalStatusId = 0
+				,dtmDateApproved = '1/1/1900'
 			WHERE intApprovalStatusId = 3 and intContractDetailId = @intActiveContractDetailId
 		END
 
