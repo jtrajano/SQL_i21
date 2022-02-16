@@ -12,6 +12,6 @@ CREATE TABLE [dbo].[tblMBILDeliveryHeader]
 	[dtmDeliveryFrom] [datetime] null,
 	[dtmDeliveryTo] [datetime] null,
 	[dtmActualDelivery] [datetime] null,
-	[intConcurrencyId] [int] NULL,
+	[intConcurrencyId] [int] DEFAULT(1) NULL,
  CONSTRAINT [PK_tblMBILDeliveryHeader] PRIMARY KEY CLUSTERED([intDeliveryHeaderId])
 )
