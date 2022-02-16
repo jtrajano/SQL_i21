@@ -183,7 +183,7 @@ BEGIN
 				,dtmDateSubmitted = '1/1/1900'
 				,intApprovalStatusId = 0
 				,dtmDateApproved = '1/1/1900'
-			WHERE intApprovalStatusId = 3 and intContractDetailId = @intActiveContractDetailId
+			WHERE intApprovalStatusId = 3
 		END
 
 
