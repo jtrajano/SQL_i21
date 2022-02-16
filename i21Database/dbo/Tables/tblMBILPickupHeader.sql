@@ -15,9 +15,7 @@ CREATE TABLE [dbo].[tblMBILPickupHeader](
 	[strPONumber] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strBOL] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strNote] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
-	[ysnPickup] bit default 0,
-	[intConcurrencyId] [int] NULL
+	[ysnPickup] bit default 0 NULL,
+	[intConcurrencyId] [int] DEFAULT(1) NULL,
  CONSTRAINT [PK_tblMBILPickupHeader] PRIMARY KEY CLUSTERED ([intPickupHeaderId] ASC)
 )
-
-
