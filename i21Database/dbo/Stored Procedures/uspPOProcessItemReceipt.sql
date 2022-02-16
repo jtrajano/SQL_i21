@@ -483,7 +483,7 @@ FROM	tblPOPurchase po INNER JOIN tblPOPurchaseDetail pod
 				ON i.intItemId = pod.intItemId
 WHERE	po.intPurchaseId = @poId 
 		AND pod.intItemId IS NOT NULL				--DO NOT UPDATE MISC ENTRY
-		AND i.strType NOT IN ('Other Charge')		--DOT NOT UPDATE OTHER CHARGES TYPE
+		AND i.strType NOT IN ('Other Charge','Comment')		--DOT NOT UPDATE OTHER CHARGES TYPE
 	
 -- Update the PO Status 
 EXEC dbo.uspPOUpdateStatus @poId
