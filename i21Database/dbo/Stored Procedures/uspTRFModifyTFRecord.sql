@@ -106,8 +106,8 @@ BEGIN
 						, intLimitTypeId = CASE WHEN @intLimitTypeId = 0 THEN NULL ELSE ISNULL(@intLimitTypeId, intLimitTypeId) END
 						, intSublimitTypeId = CASE WHEN @intSublimitTypeId = 0 THEN NULL ELSE ISNULL(@intSublimitTypeId, intSublimitTypeId) END
 						, ysnSubmittedToBank = ISNULL(@ysnSubmittedToBank, ysnSubmittedToBank)
-						, dtmDateSubmitted = ISNULL(@dtmDateSubmitted, dtmDateSubmitted)
-						, dtmDateApproved = ISNULL(@dtmDateApproved, dtmDateApproved)
+						, dtmDateSubmitted = CASE WHEN @dtmDateSubmitted = '1/1/1900' THEN NULL ELSE ISNULL(@dtmDateSubmitted, dtmDateSubmitted) END
+						, dtmDateApproved = CASE WHEN @dtmDateApproved = '1/1/1900' THEN NULL ELSE ISNULL(@dtmDateApproved, dtmDateApproved) END
 						, strRefNo = ISNULL(@strRefNo, strRefNo)
 						, intOverrideFacilityValuation = CASE WHEN @intOverrideFacilityValuation = 0 THEN NULL ELSE ISNULL(@intOverrideFacilityValuation, intOverrideFacilityValuation) END
 						, strApprovalStatus = ISNULL(@strApprovalStatus, strApprovalStatus)
@@ -132,8 +132,8 @@ BEGIN
 						, intLimitTypeId = CASE WHEN @intLimitTypeId = 0 THEN NULL ELSE ISNULL(@intLimitTypeId, intLimitTypeId) END
 						, intSublimitTypeId = CASE WHEN @intSublimitTypeId = 0 THEN NULL ELSE ISNULL(@intSublimitTypeId, intSublimitTypeId) END
 						, ysnSubmittedToBank = ISNULL(@ysnSubmittedToBank, ysnSubmittedToBank)
-						, dtmDateSubmitted = ISNULL(@dtmDateSubmitted, dtmDateSubmitted)
-						, dtmDateApproved = ISNULL(@dtmDateApproved, dtmDateApproved)
+						, dtmDateSubmitted = CASE WHEN @dtmDateSubmitted = '1/1/1900' THEN NULL ELSE ISNULL(@dtmDateSubmitted, dtmDateSubmitted) END
+						, dtmDateApproved = CASE WHEN @dtmDateApproved = '1/1/1900' THEN NULL ELSE ISNULL(@dtmDateApproved, dtmDateApproved) END
 						, strRefNo = ISNULL(@strRefNo, strRefNo)
 						, intOverrideFacilityValuation = CASE WHEN @intOverrideFacilityValuation = 0 THEN NULL ELSE ISNULL(@intOverrideFacilityValuation, intOverrideFacilityValuation) END
 						, strApprovalStatus = ISNULL(@strApprovalStatus, strApprovalStatus)
