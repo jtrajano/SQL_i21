@@ -502,6 +502,11 @@
     <Build Include="dbo\Views\vyuCMUnassignedBrokerageAccount.sql" />
     <Build Include="dbo\Functions\fnRKIsUserOTCApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspRKValidateOTCRecords.sql" />
+    <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
+    <Build Include="dbo\Views\vyuApiSalesperson.sql" />
+    <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
+    <Build Include="dbo\Views\vyuApiTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
