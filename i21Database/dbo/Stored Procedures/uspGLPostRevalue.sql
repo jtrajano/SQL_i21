@@ -62,74 +62,13 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 		FROM tblGLRevalue 
 		WHERE intConsolidationId = @intConsolidationId
 
-		
-		DECLARE 
-			@ysnCMForwardsRevalued BIT,
-			@ysnCMInTransitRevalued BIT,
-			@ysnCMSwapsRevalued BIT,
-			@ysnRevalue_Forward BIT,
-			@ysnRevalue_InTransit BIT,
-			@ysnRevalue_Swap BIT
-
-		-- Validate CM transaction type
-		-- Make sure all other CM transaction types were revalued (if revaluation was enabled)
-		IF @strTransactionType = 'CM'
-		BEGIN
-			SELECT TOP 1 
-				@ysnRevalue_Forward = ysnRevalue_Forward,
-				@ysnRevalue_InTransit = ysnRevalue_InTransit,
-				@ysnRevalue_Swap = ysnRevalue_Swap
-			FROM tblCMCompanyPreferenceOption
-
-			SELECT 
-				@ysnCMForwardsRevalued = ysnCMForwardsRevalued, 
-				@ysnCMInTransitRevalued = ysnCMInTransitRevalued, 
-				@ysnCMSwapsRevalued = ysnCMSwapsRevalued 
-			FROM tblGLFiscalYearPeriod 
-			WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
-
-			IF ISNULL(@ysnCMForwardsRevalued, 0) = 0 AND ISNULL(@ysnRevalue_Forward, 0) = 1
-			BEGIN
-				SET @strMessage = '''Forwards'' Transaction Type must be revalued.'
-				GOTO _raiserror
-			END
-			IF ISNULL(@ysnCMInTransitRevalued, 0) = 0 AND ISNULL(@ysnRevalue_InTransit, 0) = 1
-			BEGIN
-				SET @strMessage = '''In-Transit'' Transaction Type must be revalued.'
-				GOTO _raiserror
-			END
-			IF ISNULL(@ysnCMSwapsRevalued, 0) = 0 AND ISNULL(@ysnRevalue_Swap, 0) = 1
-			BEGIN
-				SET @strMessage = '''Swaps'' Transaction Type must be revalued.'
-				GOTO _raiserror
-			END
-		END
+		-- Validate CM revaluation
+		SELECT @strMessage = dbo.fnCMValidateCMRevaluation(@intGLFiscalYearPeriodId, @strTransactionType, @ysnPost)
+		IF @strMessage <> '' OR @strMessage IS NOT NULL
+			GOTO _raiserror
 
 		IF (@strTransactionType IN ('CM Forwards', 'CM In-Transit', 'CM Swaps'))
 		BEGIN
-			SELECT 
-				@ysnCMForwardsRevalued = ysnCMForwardsRevalued, 
-				@ysnCMInTransitRevalued = ysnCMInTransitRevalued, 
-				@ysnCMSwapsRevalued = ysnCMSwapsRevalued 
-			FROM tblGLFiscalYearPeriod 
-			WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
-
-			IF @strTransactionType = 'CM Forwards' AND ISNULL(@ysnCMForwardsRevalued, 0) = 1
-			BEGIN
-				SET @strMessage = '''Forwards'' Transaction Type already revalued.'
-				GOTO _raiserror
-			END
-			IF @strTransactionType = 'CM In-Transit' AND ISNULL(@ysnCMInTransitRevalued, 0) = 1
-			BEGIN
-				SET @strMessage = '''In-Transit'' Transaction Type already revalued.'
-				GOTO _raiserror
-			END
-			IF @strTransactionType = 'CM Swaps' AND ISNULL(@ysnCMSwapsRevalued, 0) = 1
-			BEGIN
-				SET @strMessage = '''Swaps'' Transaction Type already revalued.'
-				GOTO _raiserror
-			END
-			
 			DECLARE @tblTransactions TABLE (
 				strTransactionId NVARCHAR(100)
 			)
