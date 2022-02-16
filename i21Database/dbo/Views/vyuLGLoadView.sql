@@ -303,6 +303,8 @@ SELECT -- Load Header
 	,L.dtmDateSubmitted
 	,L.intApprovalStatusId
 	,L.dtmDateApproved
+	,L.strWarrantNo
+	,L.intWarrantStatus
 	,intBankId = BA.intBankId
 	,strBankName = BK.strBankName
 	,strBankAccountNo = BA.strBankAccountNo
@@ -311,6 +313,11 @@ SELECT -- Load Header
 	,strLimitDescription = FLD.strLimitDescription
 	,strBankValuationRule = BVR.strBankValuationRule
 	,strApprovalStatus = ASTF.strApprovalStatus
+	,strWarrantStatus = CASE L.intWarrantStatus
+		WHEN 1 THEN 'Pledged'
+		WHEN 2 THEN 'Partially Released'
+		WHEN 3 THEN 'Released'
+		END COLLATE Latin1_General_CI_AS
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
