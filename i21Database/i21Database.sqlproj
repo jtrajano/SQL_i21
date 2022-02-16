@@ -9126,6 +9126,7 @@
     <Build Include="dbo\Views\vyuPRPaycheckDeductionYTD.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarningYTD.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckTaxYTD.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
