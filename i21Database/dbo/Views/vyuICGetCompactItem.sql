@@ -70,6 +70,9 @@ SELECT
 	, Module.strModule
 	, Item.strManufactureType
 	, Item.strRemarks
+	, Certification.strCertificationName
+	, Item.dblGAShrinkFactor
+	, Item.strMarketValuation
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -111,3 +114,5 @@ LEFT JOIN (
 	AND mfgWeightUOM.intUnitMeasureId = Item.intWeightUOMId
 LEFT JOIN tblSMModule Module
 	ON Module.intModuleId = Item.intModuleId
+LEFT JOIN tblICCertification Certification
+	ON Certification.intCertificationId = Item.intCertificationId

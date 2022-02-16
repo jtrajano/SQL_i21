@@ -117,6 +117,7 @@ Type the overview for the table here.
 		[intProductLineId] INT NULL, 
 		[intGradeId] INT NULL,
 		[strMarketValuation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intCertificationId] INT NULL,
 		[strRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 		[ysnInventoryCost] BIT NULL DEFAULT ((1)),
 		[ysnAccrue] BIT NULL DEFAULT ((1)),
