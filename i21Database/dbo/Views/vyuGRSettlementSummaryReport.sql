@@ -220,7 +220,7 @@ FROM
 		union 
 		select 
 			ap.intBillId,
-			[dblVendorPrepayment] = (ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
+			[dblVendorPrepayment] = pay.dblPayment --(ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
 		from 
 		tblAPBill ap
 		inner join tblAPPaymentDetail pay
