@@ -16,6 +16,7 @@
 	, @intEntityUserId				AS INT				= NULL
 	, @strStatementFormat			AS NVARCHAR(MAX)	= 'Full Details - No Card Lock'
 	, @strCurrency					AS NVARCHAR(40)		= NULL
+	, @strReportComment				AS NVARCHAR(MAX)	= NULL
 AS
 
 SET ANSI_NULLS ON
@@ -45,6 +46,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @dblTotalAR							AS NUMERIC(18,6)    = 0
 	  , @strStatementFormatLocal			AS NVARCHAR(MAX)	= 'Full Details - No Card Lock'
 	  , @strCurrencyLocal					AS NVARCHAR(40)		= NULL
+	  , @strReportCommentLocal				AS NVARCHAR(MAX)	= NULL
 
 SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -63,6 +65,7 @@ SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 SET @dtmBalanceForwardDateLocal			= DATEADD(DAYOFYEAR, -1, @dtmDateFromLocal)
 SET @strStatementFormatLocal			= NULLIF(@strStatementFormat, 'Full Details - No Card Lock')
 SET @strCurrencyLocal					= NULLIF(@strCurrency, '')
+SET @strReportCommentLocal				= NULLIF(@strReportComment, '')
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyName	= strCompanyName
@@ -1001,6 +1004,7 @@ INNER JOIN #SORTEDCUSTOMER SORTED ON STAGING.strCustomerNumber = SORTED.strCusto
 UPDATE tblARCustomerStatementStagingTable
 SET strCompanyName		= @strCompanyName
   , strCompanyAddress	= @strCompanyAddress
+  , strComment			= @strReportCommentLocal
 WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = @strStatementFormatLocal
 
 IF @ysnPrintCreditBalanceLocal = 0
