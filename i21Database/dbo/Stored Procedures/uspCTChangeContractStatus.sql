@@ -22,7 +22,8 @@ BEGIN TRY
 			@intItemUOMId			INT,
 			@intCommodityUnitMeasureId INT,
 			@IntFromUnitMeasureId	INT,
-			@intToUnitMeasureId		INT
+			@intToUnitMeasureId		INT,
+			@dblAllocatedQty		NUMERIC(18,6)
 
 	DECLARE @ids TABLE (intId INT)
 
@@ -46,7 +47,8 @@ BEGIN TRY
 				@dblBalance				=	dblBalance,
 				@dblScheduleQty			=	dblScheduleQty,
 				@intItemId				=	intItemId,
-				@intItemUOMId			=	intItemUOMId
+				@intItemUOMId			=	intItemUOMId,
+				@dblAllocatedQty		=	dblAllocatedQty
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId		=	@intId
 
@@ -62,6 +64,10 @@ BEGIN TRY
 			IF ISNULL(@dblQuantity,0) <> ISNULL(@dblBalance,0) OR ISNULL(@dblScheduleQty,0) > 0
 			BEGIN
 				RAISERROR('Cannot change status of the sequence to cancel as it is used.',16,1)
+			END
+			if (isnull(@dblAllocatedQty,0) > 0)
+			BEGIN
+				RAISERROR('Cannot Cancel the sequence. The contract is already allocated.',16,1)
 			END
 
 			SELECT	@IntFromUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId
