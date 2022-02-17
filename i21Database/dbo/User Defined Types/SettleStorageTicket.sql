@@ -1,5 +1,6 @@
 CREATE TYPE [dbo].[SettleStorageTicket] AS TABLE 
 (
-    [intCustomerStorageId] INT NULL,
-	[dblUnits] DECIMAL(24, 10) NULL
+    [intCustomerStorageId] INT,
+    [intChargeAndPremiumId] INT,
+	[dblUnits] DECIMAL(24, 10)
 )
