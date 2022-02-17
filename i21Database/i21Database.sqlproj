@@ -7807,6 +7807,7 @@
     <Build Include="dbo\Tables\tblICBackupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
