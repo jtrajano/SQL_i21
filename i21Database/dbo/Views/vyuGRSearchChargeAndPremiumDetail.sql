@@ -18,6 +18,7 @@ SELECT
 	,CAPD.dtmEffectiveDate
 	,CAPD.dtmTerminationDate
 	,CAPD.intConcurrencyId
+	,CAPD.ysnDeductVendor
 FROM tblGRChargeAndPremiumDetail CAPD
 INNER JOIN tblGRChargeAndPremiumId CAP
 	ON CAP.intChargeAndPremiumId = CAPD.intChargeAndPremiumId
