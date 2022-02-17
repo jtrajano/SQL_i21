@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[tblGRChargeAndPremiumDetail]
 	[dtmTerminationDate] DATETIME NULL,	
 	[dtmDateCreated] DATETIME NULL DEFAULT(GETDATE()),
 	[intConcurrencyId] INT NULL DEFAULT ((1)),
+	[ysnDeductVendor] BIT DEFAULT ((0)),
 	CONSTRAINT [PK_tblGRChargeAndPremiumDetail_intChargeAndPremiumDetailId] PRIMARY KEY ([intChargeAndPremiumDetailId]),
 	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intChargeAndPremiumId] FOREIGN KEY ([intChargeAndPremiumId]) REFERENCES [tblGRChargeAndPremiumId]([intChargeAndPremiumId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intChargeAndPremiumItemId] FOREIGN KEY ([intChargeAndPremiumItemId]) REFERENCES [tblICItem]([intItemId]),
