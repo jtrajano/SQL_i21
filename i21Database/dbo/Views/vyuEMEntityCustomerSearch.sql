@@ -75,8 +75,8 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, dblShipToLongitude		= shipLocation.dblLongitude
 	, dblShipToLatitude			= shipLocation.dblLatitude
 	, strAccountType = NULLIF(CUSTOMER.strType, '')
-	, intDisbursementBankAccountId = CUSTOMER.intDisbursementBankAccountId
-	, strDisbursementBankAccountNo = CUSTOMER.strDisbursementBankAccountNo
+	, intDefaultPayFromBankAccountId = CUSTOMER.intDefaultPayFromBankAccountId
+	, strDefaultPayFromBankAccountNo = CUSTOMER.strDefaultPayFromBankAccountNo
 	, strPaymentInstructions		= CMBA.strPaymentInstructions
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
@@ -126,6 +126,6 @@ LEFT JOIN (
 		AND SC.strScreenName = 'Invoice'
 	GROUP BY ARC.intEntityId 
 ) CUSTOMERCREDITAPPROVER ON CUSTOMERCREDITAPPROVER.intEntityId = CUSTOMER.intEntityId
-LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId = ISNULL(CUSTOMER.intDisbursementBankAccountId, 0)
+LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId = ISNULL(CUSTOMER.intDefaultPayFromBankAccountId, 0)
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO

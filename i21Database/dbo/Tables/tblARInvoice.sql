@@ -137,7 +137,7 @@
 	[ysnOverrideCashFlow]   			BIT               								NULL		CONSTRAINT [DF_tblARInvoice_ysnOverrideCashFlow] DEFAULT ((0)),
  	[dtmCashFlowDate]     				DATETIME          								NULL,
 	[guiApiUniqueId]					UNIQUEIDENTIFIER								NULL,
-	[intDisbursementBankAccountId]		INT												NULL,
+	[intDefaultPayFromBankAccountId]	INT												NULL,
 	[intPayToCashBankAccountId]			INT												NULL,
 	[strSourceOfPayTo]					NVARCHAR(15)									NULL		DEFAULT('None'),
 	[strPaymentInstructions]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
