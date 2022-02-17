@@ -8,7 +8,6 @@
     [intItem]			  INT             NULL,
     [strItem]			  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblItemPrice]		  NUMERIC (18, 6) NULL,
-    [dblBestPrice]        NUMERIC (18, 6) NULL,  
     [intEntityCustomerId] INT             NULL,
 	[dtmEffectiveDate]	  DATETIME		  NULL,
 	[intEntityUserId]	  INT			  NULL,
