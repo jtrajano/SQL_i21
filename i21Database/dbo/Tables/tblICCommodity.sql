@@ -41,6 +41,7 @@ Type the overview for the table here.
 		[intCompanyId] INT NULL, 
 		[intLineOfBusinessId] INT NULL, 
 		[ysnMarkToMarket] BIT NULL DEFAULT((1)),
+		[ysnCheckMissingStandardPriceInContract] BIT NULL DEFAULT((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[dtmDateCreated] DATETIME NULL,
 		[dtmDateModified] DATETIME NULL,
