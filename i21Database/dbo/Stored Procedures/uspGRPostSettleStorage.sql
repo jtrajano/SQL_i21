@@ -132,6 +132,7 @@ BEGIN TRY
 	DECLARE @tblQMDiscountIds Id
 	DECLARE @strMissingUOMItemNo NVARCHAR(20)
 	DECLARE @strMissingUOM NVARCHAR(30)
+	DECLARE @dtmCalculateChargeAndPremiumOn DATETIME
 
 	DECLARE @SettleStorage AS TABLE 
 	(
@@ -370,6 +371,7 @@ BEGIN TRY
 			,@origdblSpotUnits				= dblSpotUnits
 			,@dblSelectedUnits				= dblSelectedUnits
 			,@strSettleTicket				= strStorageTicket
+			,@dtmCalculateChargeAndPremiumOn= dtmCalculateChargeAndPremiumOn
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 	
@@ -2278,14 +2280,17 @@ BEGIN TRY
 
 					SELECT TOP 1
 						@strMissingUOMItemNo = CAP.strChargeAndPremiumItemNo
-						,@strMissingUOM = ISNULL(FROM_UOM.strUnitMeasure, TO_UOM.strUnitMeasure)
+						,@strMissingUOM = ISNULL(TO_UOM.strUnitMeasure, FROM_UOM.strUnitMeasure)
 					FROM @SettleVoucherCreate SVC
 					INNER JOIN tblGRCustomerStorage CS
 						ON CS.intCustomerStorageId = SVC.intCustomerStorageId
+					INNER JOIN tblGRSettleStorageTicket SST
+						ON SST.intCustomerStorageId = CS.intCustomerStorageId
+						AND SST.intSettleStorageTicketId = @intSettleStorageTicketId
 					OUTER APPLY (
 						SELECT *
 						FROM dbo.fnGRCalculateChargeAndPremium(
-							CS.intChargeAndPremiumId --Charge And Premium Header Id
+							SST.intChargeAndPremiumId --Charge And Premium Header Id
 							,CS.intItemId --Inventory Item Id
 							,CS.intCompanyLocationId --Copany Location Id
 							,SVC.dblUnits --Net Units
@@ -2293,6 +2298,7 @@ BEGIN TRY
 							,@dblTotalUnits --Transaction/Voucher Total Units
 							,@tblQMDiscountIds --Storage Ticket Discount Ids
 							,SVC.dblCashPrice --Inventory Item Cash Price
+							,@dtmCalculateChargeAndPremiumOn --Calculate On
 						) CAP
 					) CAP
 					LEFT JOIN tblICItemUOM SPOT_UOM
@@ -2315,7 +2321,7 @@ BEGIN TRY
 
 					IF @strMissingUOMItemNo IS NOT NULL
 					BEGIN
-						SET @ErrMsg = 'Charge/Premium Item ' + @strMissingUOMItemNo + ' has a missing conversion for UOM ' + @strMissingUOM + '.'
+						SET @ErrMsg = 'Charge/Premium Item ' + @strMissingUOMItemNo + ' has a missing conversion to UOM ' + @strMissingUOM + '.'
 						RAISERROR (@ErrMsg, 16, 1);
 					END
 
@@ -2377,10 +2383,13 @@ BEGIN TRY
 					) SVC
 					INNER JOIN tblGRCustomerStorage CS
 						ON CS.intCustomerStorageId = SVC.intCustomerStorageId
+					INNER JOIN tblGRSettleStorageTicket SST
+						ON SST.intCustomerStorageId = CS.intCustomerStorageId
+						AND SST.intSettleStorageTicketId = @intSettleStorageTicketId
 					OUTER APPLY (
 						SELECT *
 						FROM dbo.fnGRCalculateChargeAndPremium (
-							CS.intChargeAndPremiumId --Charge And Premium Header Id
+							SST.intChargeAndPremiumId --Charge And Premium Header Id
 							,CS.intItemId --Inventory Item Id
 							,CS.intCompanyLocationId --Company Location Id
 							,SVC.dblUnits --Net Units
@@ -2388,6 +2397,7 @@ BEGIN TRY
 							,SVC.dblUnits --Transaction/Voucher Total Units
 							,@tblQMDiscountIds --Storage Ticket Discount Ids
 							,SVC.dblTotalAmount / SVC.dblUnits --Inventory Item Cost
+							,@dtmCalculateChargeAndPremiumOn
 						) CAP
 					) CAP
 					LEFT JOIN tblICItemUOM SPOT_UOM
@@ -2400,9 +2410,6 @@ BEGIN TRY
 						ON CAP_UOM_TO.intItemId = CAP.intChargeAndPremiumItemId
 						AND CAP_UOM_TO.intUnitMeasureId = CASE WHEN @origdblSpotUnits > 0 THEN SPOT_UOM.intUnitMeasureId ELSE CS.intUnitMeasureId END
 					WHERE CAP.dblAmount <> 0
-
-					SELECT * FROM tblGRAppliedChargeAndPremium
-					WHERE intTransactionId = @intSettleStorageId
 					
 				END
 				

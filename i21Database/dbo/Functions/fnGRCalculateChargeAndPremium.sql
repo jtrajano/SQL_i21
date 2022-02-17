@@ -2,11 +2,12 @@ CREATE FUNCTION [dbo].[fnGRCalculateChargeAndPremium](
 	@intChargeAndPremiumId INT
 	,@intInventoryItemId INT
 	,@intCompanyLocationId INT
-	,@dblNetUnits DECIMAL(38, 20)
-	,@dblGrossUnits DECIMAL(38, 20)
-    ,@dblTransactionUnits DECIMAL(38, 20)
+	,@dblNetUnits DECIMAL(18, 6)
+	,@dblGrossUnits DECIMAL(18, 6)
+    ,@dblTransactionUnits DECIMAL(18, 6)
     ,@tblQMDiscountIds Id READONLY
-    ,@dblCost DECIMAL(38, 20)
+    ,@dblCost DECIMAL(18, 6)
+    ,@dtmCalculateOn DATETIME
 )
 RETURNS @tblChargeAndPremium TABLE
 (
@@ -28,6 +29,7 @@ RETURNS @tblChargeAndPremium TABLE
 	,[strOtherChargeItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     ,[intInventoryItemId] INT NULL
 	,[strInventoryItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+    ,[ysnDeductVendor] BIT
 )
 AS
 BEGIN
@@ -50,14 +52,15 @@ BEGIN
                                                     ELSE 0
                                                 END
         ,[strRateType]                      =   CAPD.strRateType
-        ,[dblQty]                           =   CASE CAPD.intCalculationTypeId
+        ,[dblQty]                           =   (CASE CAPD.intCalculationTypeId
                                                     WHEN 5 THEN ISNULL(FIXED_RATE.dblQty, 0)
                                                     WHEN 4 THEN ISNULL(PERCENTAGE_BY_DISCOUNT.dblQty, 0)
                                                     WHEN 3 THEN ISNULL(PERCENTAGE_BY_ITEM.dblQty, 0)
                                                     WHEN 2 THEN ISNULL(RANGE_BY_GRADEREADING.dblQty, 0)
                                                     WHEN 1 THEN ISNULL(RANGE_BY_UNITS.dblQty, 0)
                                                     ELSE ISNULL(@dblNetUnits, 0)
-                                                END
+                                                END)
+                                                * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END)
         ,[intChargeAndPremiumItemUOMId]     =   CAP_ITEM_UOM.intItemUOMId
         ,[strChargeAndPremiumUnitMeasure]   =   UOM.strUnitMeasure
         ,[dblCost]                          =   CASE CAPD.intCalculationTypeId
@@ -69,17 +72,18 @@ BEGIN
                                                     ELSE 0
                                                 END
         ,[dblAmount]                        =   CASE CAPD.intCalculationTypeId
-                                                    WHEN 5 THEN ISNULL(FIXED_RATE.dblCost, 0) * ISNULL(FIXED_RATE.dblQty, 0)
-                                                    WHEN 4 THEN ISNULL(PERCENTAGE_BY_DISCOUNT.dblCost, 0) * ISNULL(PERCENTAGE_BY_DISCOUNT.dblQty, 0)
-                                                    WHEN 3 THEN ISNULL(PERCENTAGE_BY_ITEM.dblCost, 0) * ISNULL(PERCENTAGE_BY_ITEM.dblQty, 0)
-                                                    WHEN 2 THEN ISNULL(RANGE_BY_GRADEREADING.dblCost, 0) * ISNULL(RANGE_BY_GRADEREADING.dblQty, 0)
-                                                    WHEN 1 THEN ISNULL(RANGE_BY_UNITS.dblCost, 0) * ISNULL(RANGE_BY_UNITS.dblQty, 0)
+                                                    WHEN 5 THEN ISNULL(FIXED_RATE.dblCost, 0) * ISNULL(FIXED_RATE.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
+                                                    WHEN 4 THEN ISNULL(PERCENTAGE_BY_DISCOUNT.dblCost, 0) * ISNULL(PERCENTAGE_BY_DISCOUNT.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
+                                                    WHEN 3 THEN ISNULL(PERCENTAGE_BY_ITEM.dblCost, 0) * ISNULL(PERCENTAGE_BY_ITEM.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
+                                                    WHEN 2 THEN ISNULL(RANGE_BY_GRADEREADING.dblCost, 0) * ISNULL(RANGE_BY_GRADEREADING.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
+                                                    WHEN 1 THEN ISNULL(RANGE_BY_UNITS.dblCost, 0) * ISNULL(RANGE_BY_UNITS.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
                                                     ELSE 0
                                                 END
         ,[intOtherChargeItemId]             =   OC_ITEM.intItemId
         ,[strOtherChargeItemNo]             =   OC_ITEM.strItemNo
         ,[intInventoryItemId]               =   INV_ITEM.intItemId
         ,[strInventoryItemNo]               =   INV_ITEM.strItemNo
+        ,[ysnDeductVendor]                  =   CAPD.ysnDeductVendor
     FROM tblGRChargeAndPremiumId CAP
     INNER JOIN tblGRChargeAndPremiumDetail CAPD
         ON CAPD.intChargeAndPremiumId = CAP.intChargeAndPremiumId
@@ -215,6 +219,13 @@ BEGIN
     ) PERCENTAGE_BY_ITEM
 
     WHERE CAP.intChargeAndPremiumId = @intChargeAndPremiumId
+    AND (
+        (CAPD.dtmEffectiveDate IS NULL AND CAPD.dtmTerminationDate IS NULL)
+        OR (
+            CAPD.dtmEffectiveDate IS NOT NULL AND CAPD.dtmTerminationDate IS NOT NULL
+            AND @dtmCalculateOn BETWEEN CAPD.dtmEffectiveDate AND CAPD.dtmTerminationDate
+        )
+    )
 
     RETURN
 END
