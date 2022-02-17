@@ -115,15 +115,29 @@ AS
 			,CP.ysnCompanyLocationInContractHeader
 			,CP.ysnCalculateQualityPremium
 			,CP.ysnOptionalityPremiumDiscount
-			,CP.ysnDefaultShipperCargillFrontingDetails
-	FROM	tblCTCompanyPreference		CP LEFT
-	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId		LEFT
-	JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId	LEFT
-	JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId		=	CP.intDefContractStatusId	LEFT
-	JOIN	tblLGContainerType			CT	ON	CT.intContainerTypeId		=	CP.intDefContainerTypeId	LEFT
-	JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CP.intDefSalespersonId		LEFT
-	JOIN	tblICItem					VI	ON	VI.intItemId				=	CP.intVoucherItemId			LEFT
-	JOIN	tblICItem					II	ON	II.intItemId				=	CP.intInvoiceItemId			LEFT
-	JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId	LEFT    
-	JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule LEFT
-	JOIN	tblICItem					FB	ON	FB.intItemId				=	CP.intFreightBasisCostItemId
+			,CP.ysnDefaultShipperCargillFrontingDetails			
+			,CP.ysnFreightTermCost
+			,CP.ysnAutoCalculateFreightTermCost
+			,CP.intDefaultFreightId
+			,strFreightItem = FI.strItemNo
+			,CP.intDefaultInsuranceId
+			,strInsuranceItem = II.strItemNo
+			,CP.intDefaultTHCId
+			,strTHCItem = THC.strItemNo
+			,CP.intDefaultStorageId
+			,strStorageItem = SI.strItemNo
+	FROM	tblCTCompanyPreference		CP
+	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
+	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId
+	LEFT JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId		=	CP.intDefContractStatusId
+	LEFT JOIN	tblLGContainerType			CT	ON	CT.intContainerTypeId		=	CP.intDefContainerTypeId
+	LEFT JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CP.intDefSalespersonId
+	LEFT JOIN	tblICItem					VI	ON	VI.intItemId				=	CP.intVoucherItemId
+	LEFT JOIN	tblICItem					II	ON	II.intItemId				=	CP.intInvoiceItemId
+	LEFT JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId
+	LEFT JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule
+	LEFT JOIN	tblICItem					FB	ON	FB.intItemId				=	CP.intFreightBasisCostItemId
+	LEFT JOIN	tblICItem					FI	ON	FI.intItemId				=	CP.intDefaultFreightId
+	LEFT JOIN	tblICItem					INS	ON	INS.intItemId				=	CP.intDefaultInsuranceId
+	LEFT JOIN	tblICItem					THC	ON	THC.intItemId				=	CP.intDefaultTHCId
+	LEFT JOIN	tblICItem					SI	ON	SI.intItemId				=	CP.intDefaultStorageId

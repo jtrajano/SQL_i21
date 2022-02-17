@@ -79,6 +79,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     intLoadingPortId INT NULL, 
 	strDestinationPointType nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
     intDestinationPortId INT NULL, 
+	intCostTermId INT NULL,
     strShippingTerm NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
     intShippingLineId INT NULL, 
 	strVessel NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 

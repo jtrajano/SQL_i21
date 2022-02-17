@@ -556,6 +556,7 @@ BEGIN TRY
 
 		, CD.dblQualityPremium
 		, CD.dblOptionalityPremium
+		, strCostTerm = CostTerm.strFreightTerm
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -568,6 +569,7 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure MU ON MU.intUnitMeasureId = MA.intUnitMeasureId
 	LEFT JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
 	-- Trade Finance
 	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
 	LEFT JOIN tblCMBank BK ON BK.intBankId = CD.intBankId

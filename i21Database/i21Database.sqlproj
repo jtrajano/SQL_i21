@@ -508,6 +508,7 @@
     <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Functions\fnCMValidateCMRevaluation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetFreightTermCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
