@@ -185,6 +185,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intTicketLoadDetailId				= ISNULL(TICKET.intLoadDetailId, 0)
 	 , dblRounding							= INV.dblRounding
 	 , dblBaseRounding						= INV.dblBaseRounding
+	 , dblQualityPremium					= INV.dblQualityPremium
+	 , dblOptionalityPremium				= INV.dblOptionalityPremium
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
