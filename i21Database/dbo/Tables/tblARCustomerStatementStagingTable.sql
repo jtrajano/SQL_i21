@@ -95,6 +95,7 @@
     [dtmDateCreated]               DATETIME        NULL,
     [strCurrency]                  NVARCHAR(40)    NULL,
     [strContractNumber]            NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
+    [strCompanyVatNo]              NVARCHAR(20)    COLLATE Latin1_General_CI_AS NULL,
 );
 GO
 CREATE NONCLUSTERED INDEX [NC_Index_tblARCustomerStatementStagingTable_StatementReport]

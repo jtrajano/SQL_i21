@@ -50,6 +50,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@intPerformanceLogId			AS INT = NULL
 		,@strReportLogId				AS NVARCHAR(MAX)
 		,@blbLogo						AS VARBINARY(MAX)
+		,@strCurrency					AS NVARCHAR(40)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -173,6 +174,10 @@ WHERE [fieldname] = 'strReportLogId'
 SELECT @strRequestId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strRequestId'
+
+SELECT @strCurrency = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strCurrency'
 
 IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 BEGIN
@@ -306,6 +311,7 @@ BEGIN
 				, @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
 				, @strStatementFormat			= @strStatementFormat
+				, @strCurrency					= @strCurrency
 		END
 	ELSE IF @strStatementFormat = 'Budget Reminder'
 		BEGIN
