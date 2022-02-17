@@ -2,9 +2,10 @@
 CREATE PROCEDURE [dbo].[uspGRCalculateSettlementChargeAndPremium]
 	@SettleStorageTicketInput AS SettleStorageTicket READONLY,
     @SettleContractInput AS SettleContract READONLY,
-    @dblSpotUnits DECIMAL(18,6) NULL = 0,
-    @dblSpotCashPrice DECIMAL(18,6) NULL = 0,
-    @intSpotCashPriceUOMId INT NULL
+    @dblSpotUnits DECIMAL(18,6),
+    @dblSpotCashPrice DECIMAL(18,6),
+    @intSpotCashPriceUOMId INT,
+    @dtmCalculateOn DATETIME
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -495,10 +496,12 @@ BEGIN TRY
             @strMissingUOMItemNo = CAP.strChargeAndPremiumItemNo
             ,@strMissingUOM = ISNULL(TO_UOM.strUnitMeasure, FROM_UOM.strUnitMeasure)
         FROM tblGRCustomerStorage CS
+        INNER JOIN @SettleStorageTicketInput SSTI
+            ON SSTI.intCustomerStorageId = CS.intCustomerStorageId
         OUTER APPLY (
             SELECT *
             FROM dbo.fnGRCalculateChargeAndPremium (
-                CS.intChargeAndPremiumId --Charge And Premium Header Id
+                SSTI.intChargeAndPremiumId --Charge And Premium Header Id
                 ,CS.intItemId --Inventory Item Id
                 ,CS.intCompanyLocationId --Company Location Id
                 ,@dblVoucherUnits --Net Units
@@ -506,6 +509,7 @@ BEGIN TRY
                 ,@dblVoucherUnits --Transaction/Voucher Total Units
                 ,@tblQMDiscountIds --Storage Ticket Discount Ids
                 ,@dblVoucherAmount / @dblVoucherUnits --Inventory Item Cost
+                ,@dtmCalculateOn --Calculate On
             ) CAP
         ) CAP
         LEFT JOIN tblICItemUOM SPOT_UOM
@@ -528,27 +532,9 @@ BEGIN TRY
 
         IF @strMissingUOMItemNo IS NOT NULL
         BEGIN
-            SET @ErrMsg = 'Charge/Premium Item ' + @strMissingUOMItemNo + ' has a missing conversion for UOM ' + @strMissingUOM + '.'
+            SET @ErrMsg = 'Charge/Premium Item ' + @strMissingUOMItemNo + ' has a missing conversion to UOM ' + @strMissingUOM + '.'
             RAISERROR (@ErrMsg, 16, 1);
         END
-
-        -- SELECT CAP.*
-        -- FROM tblGRCustomerStorage CS
-        -- OUTER APPLY (
-        --     SELECT * FROM
-        --     dbo.fnGRCalculateChargeAndPremium (
-        --     CS.intChargeAndPremiumId --Charge And Premium Header Id
-        --     ,CS.intItemId --Inventory Item Id
-        --     ,CS.intCompanyLocationId --Company Location Id
-        --     ,@dblVoucherUnits --Net Units
-        --     ,@dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits) --Gross Units
-        --     ,@dblVoucherUnits --Transaction/Voucher Total Units
-        --     ,@tblQMDiscountIds --Storage Ticket Discount Ids
-        --     ,@dblVoucherAmount / @dblVoucherUnits --Inventory Item Cost
-        --     ) R
-        -- ) CAP
-        -- WHERE CS.intCustomerStorageId = @intCustomerStorageId
-        -- AND CAP.dblAmount <> 0
 
         INSERT INTO @Result
         (
@@ -616,10 +602,12 @@ BEGIN TRY
             ,[dblInventoryItemNetUnits]		= @dblVoucherUnits
             ,[dblInventoryItemGrossUnits]	= @dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits)
         FROM tblGRCustomerStorage CS
+        INNER JOIN @SettleStorageTicketInput SSTI
+            ON SSTI.intCustomerStorageId = CS.intCustomerStorageId
         OUTER APPLY (
             SELECT *
             FROM dbo.fnGRCalculateChargeAndPremium (
-                CS.intChargeAndPremiumId --Charge And Premium Header Id
+                SSTI.intChargeAndPremiumId --Charge And Premium Header Id
                 ,CS.intItemId --Inventory Item Id
                 ,CS.intCompanyLocationId --Company Location Id
                 ,@dblVoucherUnits --Net Units
@@ -627,6 +615,7 @@ BEGIN TRY
                 ,@dblVoucherUnits --Transaction/Voucher Total Units
                 ,@tblQMDiscountIds --Storage Ticket Discount Ids
                 ,@dblVoucherAmount / @dblVoucherUnits --Inventory Item Cost
+                ,@dtmCalculateOn --Calculate On
             ) CAP
         ) CAP
         LEFT JOIN tblICItemUOM SPOT_UOM
