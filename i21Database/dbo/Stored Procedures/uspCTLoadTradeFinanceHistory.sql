@@ -27,7 +27,6 @@ AS
 			,dtmTransactionDate
 			,dtmCreatedDate
 			,intConcurrencyId
-
 	FROM [tblTRFTradeFinanceHistory]
 	WHERE intTransactionDetailId = @intContractDetailId
 

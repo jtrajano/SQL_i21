@@ -578,7 +578,6 @@ BEGIN TRY
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = CD.intBorrowingFacilityLimitDetailId
 	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intBankValuationRuleId
 	LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = CD.intApprovalStatusId
-
 	--SELECT * FROM tblCMBankLoan
 
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId

@@ -187,10 +187,6 @@ BEGIN
 		END
 
 
-
-
-
-
 	end try
 	begin catch
 		SET @strErrorMessage = ERROR_MESSAGE()
