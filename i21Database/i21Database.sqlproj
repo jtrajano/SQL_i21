@@ -3474,7 +3474,7 @@
     <Build Include="dbo\User Defined Types\StagingRadiantFGM.sql" />
     <Build Include="dbo\User Defined Types\StagingRadiantISM.sql" />
     <Build Include="dbo\User Defined Types\StagingRadiantMCM.sql" />
-    <Build Include="dbo\User Defined Types\StagingRadiantMCM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantMSM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantISM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantFGM.sql" />
