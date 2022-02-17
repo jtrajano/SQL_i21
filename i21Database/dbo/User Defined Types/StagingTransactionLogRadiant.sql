@@ -1,4 +1,4 @@
--CREATE TYPE [dbo].[StagingTransactionLogRadiant] AS TABLE(
+CREATE TYPE [dbo].[StagingTransactionLogRadiant] AS TABLE(
 	[intRowCount] [int] NOT NULL,
 	[strNAXMLPOSJournalVersion] [nvarchar](40) NULL,
 	[intTransmissionHeaderStoreLocationID] [int] NULL,
@@ -100,4 +100,3 @@
 	[dblTransactionTotalGrandAmount] [decimal](18, 6) NULL,
 	[strTransactionTotalGrandAmountDirection] [nvarchar](40) NULL
 )
-GO
