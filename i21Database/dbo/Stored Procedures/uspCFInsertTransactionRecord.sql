@@ -62,6 +62,7 @@
 	,@TaxValue8						NUMERIC(18,6)	= 0.000000
 	,@TaxValue9						NUMERIC(18,6)	= 0.000000
 	,@TaxValue10					NUMERIC(18,6)	= 0.000000
+	
 
 	-------------SITE RELATED-------------
 	,@strSiteId						NVARCHAR(MAX)
