@@ -85,12 +85,13 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[intProducerId]				INT	NULL,
 		[strCertificateId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
 		[strTrackingNumber]			NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
-		[strCargoNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-		[strWarrantNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[strCargoNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[strWarrantNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intContractHeaderId]		INT NULL, -- Contract Header Id
 		[intContractDetailId]		INT NULL, -- Contract Detail Id
 		[ysnWeighed]				BIT DEFAULT((0)),
-		[strSealNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+		[strSealNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+		[intWarrantStatus]			TINYINT NULL, 
 		[intConcurrencyId]			INT NULL DEFAULT ((1)),
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,

@@ -79,9 +79,10 @@ SELECT
 	,receiptItem.intCommodityId
 	,receiptItemLot.strCargoNo
 	,receiptItemLot.strWarrantNo
+	,receiptItemLot.intWarrantStatus
 	, fiscal.strPeriod strAccountingPeriod
 	,receiptItem.intBookId
-	,receiptItem.intSubBookId
+	,receiptItem.intSubBookId	
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceiptItem rItem ON rItem.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
