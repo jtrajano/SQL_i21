@@ -19,6 +19,7 @@ RETURNS TABLE AS RETURN
 		,forPay.ysnReadyForPayment
 		,forPay.dtmDueDate
 		,forPay.dtmDate
+		,forPay.dtmCashFlowDate
 		,forPay.dtmBillDate
 		,forPay.intAccountId
 		,forPay.strAccountId
@@ -76,11 +77,14 @@ RETURNS TABLE AS RETURN
 		,forPay.ysnOffset
 		,entityGroup.strEntityGroupName
 		,forPay.strPaymentScheduleNumber
+		,voucher.intPayFromBankAccountId
+		,account.strBankAccountNo strPayFromBankAccount
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail
 		ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
+	LEFT JOIN vyuCMBankAccount account ON account.intBankAccountId = voucher.intPayFromBankAccountId
 	OUTER APPLY (
 		SELECT TOP 1
 			eg.strEntityGroupName,
