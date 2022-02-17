@@ -1,37 +1,115 @@
-﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantFGM]
-@intCheckoutId INT,
-@strStatusMsg NVARCHAR(250) OUTPUT,
-@intCountRows INT OUTPUT
+CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantFGM]
+	@intCheckoutId Int,
+	@UDT_FGM	StagingRadiantFGM		READONLY,
+	@strStatusMsg NVARCHAR(250) OUTPUT,
+	@intCountRows int OUTPUT
 AS
 BEGIN
 	BEGIN TRY
 		
-		--------------------------------------------------------------------------------------------  
-		-- Create Save Point.  
-		--------------------------------------------------------------------------------------------    
-		-- Create a unique transaction name. 
-		DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutRadiantFGM' + CAST(NEWID() AS NVARCHAR(100)); 
-		BEGIN TRAN @TransactionName
-		SAVE TRAN @TransactionName --> Save point
-		--------------------------------------------------------------------------------------------  
-		-- END Create Save Point.  
-		-------------------------------------------------------------------------------------------- 
+		BEGIN TRANSACTION 
+
 
 
 		DECLARE @intStoreId Int
 		Select @intStoreId = intStoreId from dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
 
-		--Update values that are '' empty
-		Update #tempCheckoutInsert
-		Set FuelGradeSalesVolume = 1
-		WHERE FuelGradeSalesVolume IS NULL OR FuelGradeSalesVolume = '' OR FuelGradeSalesVolume = '0'
 
-		Select * FROM #tempCheckoutInsert
+		-- ==================================================================================================================  
+		-- Start Validate if FGM xml file matches the Mapping from i21 
+		-- ------------------------------------------------------------------------------------------------------------------
+		IF NOT EXISTS(SELECT TOP 1 1 FROM @UDT_FGM)
+			BEGIN
+					-- Add to error logging
+					INSERT INTO tblSTCheckoutErrorLogs 
+					(
+						strErrorType
+						, strErrorMessage 
+						, strRegisterTag
+						, strRegisterTagValue
+						, intCheckoutId
+						, intConcurrencyId
+					)
+					VALUES
+					(
+						'XML LAYOUT MAPPING'
+						, 'Radiant FGM XML file did not match the layout mapping'
+						, ''
+						, ''
+						, @intCheckoutId
+						, 1
+					)
+
+					SET @intCountRows = 0
+					SET @strStatusMsg = 'Radiant FGM XML file did not match the layout mapping'
+
+					-- ROLLBACK
+					GOTO ExitWithCommit
+			END
+		-- ------------------------------------------------------------------------------------------------------------------
+		-- End Validate if FGM xml file matches the Mapping from i21   
+		-- ==================================================================================================================  
+		
+		
+
+
+
+
+		-- ================================================================================================================== 
+		-- Get Error logs. Check Register XML that is not configured in i21
+		-- Compare <intFuelGradeID> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
+		-- ------------------------------------------------------------------------------------------------------------------ 
+		INSERT INTO tblSTCheckoutErrorLogs 
+		(
+			strErrorType
+			, strErrorMessage 
+			, strRegisterTag
+			, strRegisterTagValue
+			, intCheckoutId
+			, intConcurrencyId
+		)
+		SELECT DISTINCT
+			'NO MATCHING TAG' as strErrorType
+			, 'No Matching Fuel Grade in Inventory' as strErrorMessage
+			, 'FuelGradeId' as strRegisterTag
+			, ISNULL(Chk.intFuelGradeID, '') AS strRegisterTagValue
+			, @intCheckoutId
+			, 1
+		FROM @UDT_FGM Chk
+		WHERE ISNULL(Chk.intFuelGradeID, '') NOT IN
+		(
+			SELECT DISTINCT 
+				tbl.strXmlRegisterFuelGradeID
+			FROM
+			(
+				SELECT DISTINCT
+					Chk.intFuelGradeID AS strXmlRegisterFuelGradeID
+				FROM @UDT_FGM Chk
+				JOIN dbo.tblICItemLocation IL 
+					ON ISNULL(Chk.intFuelGradeID, '')  IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+				JOIN dbo.tblICItem I 
+					ON I.intItemId = IL.intItemId
+				JOIN dbo.tblICItemUOM UOM 
+					ON UOM.intItemId = I.intItemId
+				JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				WHERE S.intStoreId = @intStoreId
+				AND ISNULL(Chk.intFuelGradeID, '') != ''
+			) AS tbl
+		)
+		AND ISNULL(Chk.intFuelGradeID, '') != ''
+		-- ------------------------------------------------------------------------------------------------------------------  
+		-- END Get Error logs. Check Register XML that is not configured in i21.  
+		-- ==================================================================================================================
 
 		-- Company Currency Decimal
 		DECLARE @intCompanyCurrencyDecimal INT
 		SET @intCompanyCurrencyDecimal = 0
-		SELECT @intCompanyCurrencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+
+		SELECT @intCompanyCurrencyDecimal = intCurrencyDecimal 
+		FROM tblSMCompanyPreference
 
 		DECLARE @SQL NVARCHAR(MAX) = ''
 
@@ -40,93 +118,61 @@ BEGIN
 		IF NOT EXISTS (SELECT COUNT(intCheckoutId) FROM dbo.tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 			BEGIN
 
-				--SET @SQL = 'INSERT INTO dbo.tblSTCheckoutPumpTotals(' + CHAR(13)
-				--		   + ' [intCheckoutId]' + CHAR(13)
-				--		   + ' , [intPumpCardCouponId]' + CHAR(13)
-				--		   + ' , [intCategoryId]' + CHAR(13)
-				--		   + ' , [strDescription]' + CHAR(13)
-				--		   + ' , [dblPrice]' + CHAR(13)
-				--		   + ' , [dblQuantity]' + CHAR(13)
-				--		   + ' , [dblAmount]' + CHAR(13)
-				--		   + ' , [intConcurrencyId]' + CHAR(13)
-				--		   + ')' + CHAR(13)
-				--           + ' SELECT ' + CHAR(13)
-				--		   + '  [intCheckoutId]			    = ' + CAST(@intCheckoutId AS NVARCHAR(50)) + CHAR(13)
-				--		   + ', [intPumpCardCouponId]		= UOM.intItemUOMId' + CHAR(13)
-				--		   + ', [intCategoryId]			    = I.intCategoryId' + CHAR(13)
-				--		   + ', [strDescription]			= I.strDescription' + CHAR(13)
-				--		   + ', [dblPrice]					= CAST((ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-				--		   + ', [dblQuantity]				= ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0)' + CHAR(13)
-				--		   + ', [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,' + @CompanyCurrencyDecimal + '))) * (ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0))) AS DECIMAL(18,' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-				--		   + ', [intConcurrencyId]			= 0' + CHAR(13)
-				--		   + ' FROM #tempCheckoutInsert Chk' + CHAR(13)
-				--		   + ' JOIN dbo.tblICItemLocation IL ON RIGHT(Chk.FuelGradeID, 3) COLLATE Latin1_General_CI_AS = CASE WHEN ISNULL(IL.strPassportFuelId1, '''') <> '''' THEN IL.strPassportFuelId1' + CHAR(13)
-				--		   + '		WHEN ISNULL(IL.strPassportFuelId2, '''') <> '''' THEN IL.strPassportFuelId2' + CHAR(13)
-				--		   + '		WHEN ISNULL(IL.strPassportFuelId3, '''') <> '''' THEN IL.strPassportFuelId3' + CHAR(13)
-				--		   + '		END' + CHAR(13)
-				--		   + ' JOIN dbo.tblICItem I ON I.intItemId = IL.intItemId' + CHAR(13)
-				--		   + ' JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = I.intItemId' + CHAR(13)
-				--		   + ' JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId' + CHAR(13)
-				--		   + ' JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId' + CHAR(13)
-				--		   + ' WHERE S.intStoreId = ' + CAST(@intStoreId AS NVARCHAR(50)) + '' + CHAR(13)
-				-- EXEC(@SQL)
-
-				-- SQL Param
-				SET @SQL = N'INSERT INTO dbo.tblSTCheckoutPumpTotals(' + CHAR(13)
-						   + ' [intCheckoutId]' + CHAR(13)
-						   + ' , [intPumpCardCouponId]' + CHAR(13)
-						   + ' , [intCategoryId]' + CHAR(13)
-						   + ' , [strDescription]' + CHAR(13)
-						   + ' , [dblPrice]' + CHAR(13)
-						   + ' , [dblQuantity]' + CHAR(13)
-						   + ' , [dblAmount]' + CHAR(13)
-						   + ' , [intConcurrencyId]' + CHAR(13)
-						   + ')' + CHAR(13)
-						   + ' SELECT ' + CHAR(13)
-						   + '  [intCheckoutId]			    = @CheckoutId' + CHAR(13)
-						   + ', [intPumpCardCouponId]		= UOM.intItemUOMId' + CHAR(13)
-						   + ', [intCategoryId]			    = I.intCategoryId' + CHAR(13)
-						   + ', [strDescription]			= I.strDescription' + CHAR(13)
-						   + ', [dblPrice]					= CAST((ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))' + CHAR(13)
-						   + ', [dblQuantity]				= ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0)' + CHAR(13)
-						   + ', [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0))) AS DECIMAL(18,6))' + CHAR(13)
-						   + ', [intConcurrencyId]			= 0' + CHAR(13)
-						   + ' FROM #tempCheckoutInsert Chk' + CHAR(13)
-						   + ' JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE WHEN ISNULL(IL.strPassportFuelId1, '''') <> '''' THEN IL.strPassportFuelId1' + CHAR(13)
-						   + '		WHEN ISNULL(IL.strPassportFuelId2, '''') <> '''' THEN IL.strPassportFuelId2' + CHAR(13)
-						   + '		WHEN ISNULL(IL.strPassportFuelId3, '''') <> '''' THEN IL.strPassportFuelId3' + CHAR(13)
-						   + '		END' + CHAR(13)
-						   + ' JOIN dbo.tblICItem I ON I.intItemId = IL.intItemId' + CHAR(13)
-						   + ' JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = I.intItemId' + CHAR(13)
-						   + ' JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId' + CHAR(13)
-						   + ' JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId' + CHAR(13)
-						   + ' WHERE ([S.intStoreId] = @StoreId)' + CHAR(13)
-
-				EXEC sp_executesql @SQL
-								 , N'@CheckoutId INT, @StoreId INT'
-								 , @CheckoutId = @intCheckoutId
-								 , @StoreId = @intStoreId
-	
+				INSERT INTO dbo.tblSTCheckoutPumpTotals(
+					 [intCheckoutId]
+					 , [intPumpCardCouponId]
+					 , [intCategoryId]
+					 , [strDescription]
+					 , [dblPrice]
+					 , [dblQuantity]
+					 , [dblAmount]
+					 , [intConcurrencyId]
+				)
+				 SELECT 
+					  [intCheckoutId]			    = @intCheckoutId
+					, [intPumpCardCouponId]			= UOM.intItemUOMId
+					, [intCategoryId]			    = I.intCategoryId
+					, [strDescription]				= I.strDescription
+					, [dblPrice]					= CAST((ISNULL(CAST(Chk.dblFuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.dblFuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))
+					, [dblQuantity]					= ISNULL(CAST(Chk.dblFuelGradeSalesVolume as decimal(18,6)), 0)
+					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.dblFuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.dblFuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.dblFuelGradeSalesVolume as decimal(18,6)), 0))) AS DECIMAL(18,6))
+					, [intConcurrencyId]			= 0
+				 FROM @UDT_FGM Chk
+				 JOIN dbo.tblICItemLocation IL 
+						ON ISNULL(Chk.intFuelGradeID, '') IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					AND Chk.dblFuelGradeSalesAmount <> '0'
+			     JOIN dbo.tblICItem I 
+					ON I.intItemId = IL.intItemId
+				 JOIN dbo.tblICItemUOM UOM 
+					ON UOM.intItemId = I.intItemId
+				 JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				 JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				 WHERE S.intStoreId = @intStoreId
 			END
 		ELSE
 			BEGIN
-				UPDATE dbo.tblSTCheckoutPumpTotals
-						 SET [dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
-							, [dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
-							, [dblAmount] = (CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
-					 FROM #tempCheckoutInsert Chk
-					 JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = 
-							CASE WHEN ISNULL(IL.strPassportFuelId1, '') <> '' THEN IL.strPassportFuelId1
-								WHEN ISNULL(IL.strPassportFuelId2, '') <> '' THEN IL.strPassportFuelId2
-								WHEN ISNULL(IL.strPassportFuelId3, '') <> '' THEN IL.strPassportFuelId3
-							END
-					 JOIN dbo.tblICItem I ON I.intItemId = IL.intItemId
-					 JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = I.intItemId
-					 JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
-					 JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
-					 WHERE intCheckoutId = @intCheckoutId
-					 AND intPumpCardCouponId = UOM.intItemUOMId
-					 AND S.intStoreId = @intStoreId
+					UPDATE CPT
+					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.dblFuelGradeSalesAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblFuelGradeSalesVolume AS DECIMAL(18,6)),0),0)
+						, CPT.[dblQuantity] = CAST(ISNULL(Chk.dblFuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+						, CPT.[dblAmount] = (ISNULL(NULLIF(CAST(Chk.dblFuelGradeSalesAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblFuelGradeSalesVolume AS DECIMAL(18,6)),0),0)) * CAST(ISNULL(Chk.dblFuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+					FROM dbo.tblSTCheckoutPumpTotals CPT
+					INNER JOIN tblSTCheckoutHeader CH
+						ON CPT.intCheckoutId = CH.intCheckoutId
+					INNER JOIN tblSTStore ST
+						ON CH.intStoreId = ST.intStoreId
+					INNER JOIN tblICItemUOM UOM
+						ON CPT.intPumpCardCouponId = UOM.intItemUOMId
+					INNER JOIN tblICItem Item
+						ON UOM.intItemId = Item.intItemId
+					INNER JOIN dbo.tblICItemLocation IL 
+						ON Item.intItemId = IL.intItemId
+						AND ST.intCompanyLocationId = IL.intLocationId
+					INNER JOIN @UDT_FGM Chk
+						ON ISNULL(Chk.intFuelGradeID, '') IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						AND Chk.dblFuelGradeSalesAmount <> '0'
+					WHERE CPT.intCheckoutId = @intCheckoutId
 			END
 
 
@@ -134,18 +180,36 @@ BEGIN
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
-		-- IF SUCCESS Commit Transaction
-		COMMIT TRAN @TransactionName
-
+		-- COMMIT
+		GOTO ExitWithCommit
 	END TRY
 
 	BEGIN CATCH
-		-- IF HAS Error Rollback Transaction
-		ROLLBACK TRAN @TransactionName	
-
 		SET @intCountRows = 0
 		SET @strStatusMsg = ERROR_MESSAGE()
 
-		COMMIT TRAN @TransactionName
+		-- ROLLBACK
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+	
+		
+ExitPost:
+
+
+
