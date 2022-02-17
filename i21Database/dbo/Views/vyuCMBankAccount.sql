@@ -357,8 +357,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
-					,strBankAccountNo                    = CASE WHEN i.strBankAccountNo = B.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END
-					,strRTN                                = CASE WHEN i.strRTN = B.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+					,strBankAccountNo                   = CASE WHEN i.strBankAccountNo = B.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END
+					,strRTN                  			= CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
 					,strAddress							= i.strAddress
 					,strZipCode							= i.strZipCode
 					,strCity							= i.strCity
