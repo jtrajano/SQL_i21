@@ -75,7 +75,7 @@ BEGIN
 
 		IF	ISNULL(@intFutureMarketId,0) > 0
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent, MY.intCurrencyID as intMainCurrencyId
 			FROM		tblRKFutureMarket M 
 			LEFT JOIN	tblICUnitMeasure	MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemId		=	@intItemId 
@@ -87,7 +87,7 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent, MY.intCurrencyID as intMainCurrencyId
 			FROM		tblRKFutureMarket			M 
 			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblRKCommodityMarketMapping C	ON	C.intFutureMarketId =	M.intFutureMarketId 
