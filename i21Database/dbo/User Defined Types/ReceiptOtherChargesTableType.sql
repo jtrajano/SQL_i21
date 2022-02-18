@@ -41,4 +41,5 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[intLoadShipmentId] INT NULL
 	,[intLoadShipmentCostId] INT NULL
 	,[intSort] INT NULL
+	,[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0))										-- Used if Cost method used is 'Custom Unit'. This is usually used with the 'Minimum Units' that goes with the other charges.
 )

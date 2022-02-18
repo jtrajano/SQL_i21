@@ -389,6 +389,7 @@ BEGIN
 			IF(@strCardId LIKE '%X%')
 			BEGIN
 				SET @strTransactionType = 'Foreign Sale'
+				SET @dblTransferCost = @dblOriginalGrossPrice
 				SET @dblOriginalGrossPrice = @dblTransferCost
 				SET @intCustomerId = @intForeignCustomerId
 			END
@@ -1083,19 +1084,8 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		AND intNetworkId = @intNetworkId
-		AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+		AND (intSiteId = @intSiteId)
 	END
-
-	-- IF(@intProductId = 0)
-	-- BEGIN
-	-- 	SELECT TOP 1 
-	-- 		 @intProductId = intItemId
-	-- 		,@intARItemId = intARItemId
-	-- 	FROM tblCFItem 
-	-- 	WHERE strProductNumber = @strProductId
-	-- 	AND intNetworkId = @intNetworkId
-	-- 	AND (intSiteId = 0 OR intSiteId IS NULL)
-	-- END
 
 	IF(@intProductId = 0)
 	BEGIN
@@ -1105,7 +1095,7 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = RTRIM(LTRIM(@strProductId))
 		AND intNetworkId = @intNetworkId
-		AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+		AND (intSiteId = @intSiteId)
 	END
 
 	IF(@intProductId = 0)
@@ -1114,7 +1104,7 @@ BEGIN
 		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
 		BEGIN
 
-			SELECT * INTO #tempProduct FROM tblCFItem 
+			SELECT * INTO #tempProduct1 FROM tblCFItem 
 			WHERE intNetworkId = @intNetworkId
 			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
 			AND ISNUMERIC(strProductNumber) = 1 
@@ -1122,10 +1112,53 @@ BEGIN
 			SELECT TOP 1 
 				@intProductId = intItemId
 				,@intARItemId = intARItemId
-			FROM #tempProduct 
+			FROM #tempProduct1 
 			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
 			AND intNetworkId = @intNetworkId
+			AND (intSiteId = @intSiteId )
+		END
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = @strProductId
+		AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = RTRIM(LTRIM(@strProductId))
+		AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+
+		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
+		BEGIN
+
+			SELECT * INTO #tempProduct2 FROM tblCFItem 
+			WHERE intNetworkId = @intNetworkId
 			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+			AND ISNUMERIC(strProductNumber) = 1 
+
+			SELECT TOP 1 
+				@intProductId = intItemId
+				,@intARItemId = intARItemId
+			FROM #tempProduct2 
+			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
+			AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
 		END
 	END
 

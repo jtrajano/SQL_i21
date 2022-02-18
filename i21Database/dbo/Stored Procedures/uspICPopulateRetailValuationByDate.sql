@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [uspICPopulateRetailValuationByDate]
 	@dtmDateFrom AS DATETIME
 	,@dtmDateTo AS DATETIME 
+	,@intUserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,6 +15,23 @@ DECLARE @dtmCreated AS DATETIME = GETDATE()
 -- Clean the contents of retail valuation table. 
 BEGIN 
 	TRUNCATE TABLE [tblICRetailValuation]
+END 
+
+-- Check if there is a Location Restriction for the user. 
+DECLARE @hasPermissionSetup AS BIT = 0 
+
+IF EXISTS (
+	SELECT TOP 1 * 
+	FROM 
+		tblSMUserSecurity su INNER JOIN tblSMUserRole r 
+			ON r.intUserRoleID = su.intUserRoleID
+		INNER JOIN tblSMUserSecurityCompanyLocationRolePermission cr 
+			ON cr.intEntityUserSecurityId = su.intEntityId
+	WHERE
+		su.intEntityId = @intUserId
+)
+BEGIN
+	SET @hasPermissionSetup = 1
 END 
 
 -- Do nothing if date range is invalid. 
@@ -66,7 +84,15 @@ FROM 	dbo.fnDateRange(@dtmDateFrom, @dtmDateTo, 'DD', 1) dateRange LEFT JOIN tbl
 			ON category.intCategoryId = categoryLocation.intCategoryId
 		LEFT JOIN tblSMCompanyLocation companyLocation
 			ON categoryLocation.intLocationId = companyLocation.intCompanyLocationId
-WHERE	category.ysnRetailValuation = 1
+		LEFT JOIN vyuICUserCompanyLocations permission 
+			ON permission.intCompanyLocationId = categoryLocation.intLocationId
+			AND permission.intEntityId = @intUserId
+WHERE	
+	category.ysnRetailValuation = 1
+	AND (
+		permission.intEntityId IS NOT NULL 
+		OR @hasPermissionSetup = 0 
+	)
 ORDER BY
 	category.strCategoryCode ASC
 	,companyLocation.strLocationName ASC	

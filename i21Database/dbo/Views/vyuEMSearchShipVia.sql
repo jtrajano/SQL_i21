@@ -17,7 +17,8 @@
 	A.ysnCompanyOwnedCarrier,
 	A.strFreightBilledBy,
 	A.ysnActive,
-	A.intSort
+	A.intSort,
+	B.strEntityNo
 	from 
 		tblSMShipVia A
 			JOIN tblEMEntity B

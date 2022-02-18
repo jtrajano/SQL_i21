@@ -72,10 +72,19 @@ BEGIN
 		END
 	ELSE
 		BEGIN
-			SELECT @intCompanyLocationId = intPaymentsLocationId
+			DECLARE @strCreditCardConvenienceFee NVARCHAR(100) = NULL
+				   ,@intPaymentsLocationId INT = NULL
+
+			SELECT @intPaymentsLocationId = intPaymentsLocationId,
+				   @strCreditCardConvenienceFee = strCreditCardConvenienceFee
 			FROM tblSMCompanyPreference
 
-			IF ISNULL(@intCompanyLocationId, 0) = 0
+			IF @intPaymentsLocationId IS NOT NULL
+			BEGIN
+				SET @intCompanyLocationId = @intPaymentsLocationId
+			END
+
+			IF ISNULL(@intPaymentsLocationId, 0) = 0 AND ISNULL(@strCreditCardConvenienceFee, '') != 'None'
 				BEGIN
 					SET @ErrorMessage = 'Payments Location is required when processing Credit Card!'
 					RAISERROR(@ErrorMessage, 16, 1);

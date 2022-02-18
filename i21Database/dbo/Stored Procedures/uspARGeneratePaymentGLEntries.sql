@@ -1130,8 +1130,8 @@ BEGIN
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = P.[intCreditCardFeeAccountId]
-		,[dblDebit]                     = CASE WHEN P.[dblBaseCreditCardFee] < @ZeroDecimal THEN P.[dblBaseCreditCardFee] ELSE @ZeroDecimal END
-		,[dblCredit]                    = CASE WHEN P.[dblBaseCreditCardFee] > @ZeroDecimal THEN P.[dblBaseCreditCardFee] ELSE @ZeroDecimal END
+		,[dblDebit]                     = @ZeroDecimal
+		,[dblCredit]                    = P.[dblBaseCreditCardFee]
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
 		,[strDescription]               = 'Convenience Fee for ' + P.strTransactionNumber
@@ -1152,10 +1152,10 @@ BEGIN
 		,[strTransactionForm]           = @SCREEN_NAME
 		,[strModuleName]                = @MODULE_NAME
 		,[intConcurrencyId]             = 1
-		,[dblDebitForeign]              = CASE WHEN P.[dblCreditCardFee] < @ZeroDecimal THEN P.[dblCreditCardFee] ELSE @ZeroDecimal END
-		,[dblDebitReport]               = CASE WHEN P.[dblBaseCreditCardFee] < @ZeroDecimal THEN P.[dblCreditCardFee] ELSE @ZeroDecimal END
-		,[dblCreditForeign]             = CASE WHEN P.[dblCreditCardFee] > @ZeroDecimal THEN P.[dblCreditCardFee] ELSE @ZeroDecimal END
-		,[dblCreditReport]              = CASE WHEN P.[dblBaseCreditCardFee] > @ZeroDecimal THEN P.[dblCreditCardFee] ELSE @ZeroDecimal END
+		,[dblDebitForeign]              = @ZeroDecimal
+		,[dblDebitReport]               = @ZeroDecimal
+		,[dblCreditForeign]             = P.[dblCreditCardFee]
+		,[dblCreditReport]              = P.[dblBaseCreditCardFee]
 		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
 		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
 		,[strRateType]                  = P.[strRateType]

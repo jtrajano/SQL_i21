@@ -134,7 +134,7 @@ BEGIN
 	DISTINCT RecordKey = tblCFBatchUnpostStagingTable.intTransactionId 
 	FROM tblCFBatchUnpostStagingTable
 	INNER JOIN tblCFTransaction 
-	ON tblCFBatchUnpostStagingTable.intTransactionId = tblCFBatchUnpostStagingTable.intTransactionId
+	ON tblCFBatchUnpostStagingTable.intTransactionId = tblCFTransaction.intTransactionId
 	WHERE tblCFTransaction.strTransactionType != 'Foreign Sale' 
 
 	INSERT INTO @tmpForeignTransactionId

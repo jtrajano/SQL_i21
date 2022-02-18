@@ -13,9 +13,12 @@
 	[strFreightType] NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,			-- Freight Type
 	[strShipViaName] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,				-- Ship Via Name
 	[dblFreightAmount] NUMERIC(18,6) NULL,											-- Freight Amount [Format: #,##0.##]
-	[dblFreightRate] NUMERIC(18,6) NULL,											-- Freight Rate [Format: #,##0.######]
+	[dblFreightRate] NUMERIC(18,6) NULL,											-- Freight Rate-Out [Format: #,##0.######]
 	[dblFreightMile] NUMERIC(18,6) NULL,											-- Freight Mile [Format: #,##0.######]
 	[ysnFreightInPrice] BIT NULL,													-- Freight In Price [1 or 0]
-	[dblMinimumUnit] NUMERIC(18,6) NULL,											-- Minimum Unit [Format: #,##0.######]
+	[dblMinimumUnit] NUMERIC(18,6) NULL,											-- Minimum Unit-Out [Format: #,##0.######]
+	[dblFreightRateIn] NUMERIC(18,6) NULL,											-- Freight Rate-In [Format: #,##0.######]
+	[dblMinimumUnitsIn] NUMERIC(18,6) NULL,											-- Minimum Unit-In [Format: #,##0.######]
+	[dblSurchargeOut] NUMERIC(18,6) NULL,											-- Surcharge-Out [Format: #,##0.######]
 	CONSTRAINT [PK_tblApiSchemaTRCustomerFreight] PRIMARY KEY ([intCustomerFreightId])
 )

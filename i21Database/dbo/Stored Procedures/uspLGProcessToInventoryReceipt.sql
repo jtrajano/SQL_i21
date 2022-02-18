@@ -163,9 +163,11 @@ BEGIN TRY
 		WHERE L.intLoadId = @intLoadId
 			AND 1 = (CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NULL AND LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) > 0)
 							OR (LDCL.intLoadDetailContainerLinkId IS NOT NULL 
-								AND CAST((CASE WHEN ISNULL(LDCL.dblReceivedQty, 0) = 0 THEN 0 ELSE 1 END) AS BIT) = 0
 								AND ISNULL(LC.ysnRejected, 0) <> 1 
-								AND ISNULL(LDCL.dblReceivedQty,0) = 0) 
+								AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
+												INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+												WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 2)
+								) 
 						THEN 1  ELSE 0 END)
 		ORDER BY LDCL.intLoadDetailContainerLinkId
 	
@@ -175,7 +177,7 @@ BEGIN TRY
 						INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
 						WHERE ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadId = @intLoadId)
 			BEGIN
-				SET @strErrorMessage = 'All the containers in the inbound shipment has already been received.'
+				SET @strErrorMessage = 'Receipt already exists for all the containers in the inbound shipment.'
 			END
 			ELSE 
 			BEGIN
@@ -630,8 +632,10 @@ BEGIN TRY
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)))
 						ORDER BY RD.dtmValidFromDate DESC) FX
 			WHERE L.intLoadId = @intLoadId
-				AND (ISNULL(LDCL.dblQuantity, 0) - ISNULL(LDCL.dblReceivedQty, 0)) > 0
 				AND ISNULL(LC.ysnRejected, 0) <> 1
+				AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
+								INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+								WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 2)
 			ORDER BY LDCL.intLoadDetailContainerLinkId
 		END
 		ELSE
@@ -772,7 +776,7 @@ BEGIN TRY
 						INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
 						WHERE ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadId = @intLoadId)
 			BEGIN
-				SET @strErrorMessage = 'All the containers in the inbound shipment has already been received.'
+				SET @strErrorMessage = 'Receipt already exists for all the containers in the inbound shipment.'
 			END
 			ELSE 
 			BEGIN

@@ -160,42 +160,42 @@ BEGIN
 	AND CF.guiApiUniqueId = @guiApiUniqueId
 
 	-- CHECK IF ALREADY EXISTS IN CUSTOMER SETUP
-	INSERT INTO tblApiImportLogDetail (
-		guiApiImportLogDetailId
-		, guiApiImportLogId
-		, strField
-		, strValue
-		, strLogLevel
-		, strStatus
-		, intRowNo
-		, strMessage
-	)
-	SELECT guiApiImportLogDetailId = NEWID()
-		, guiApiImportLogId = @guiLogId
-		, strField = ''
-		, strValue = CF.strCustomerEntityNo + ', ' + CF.strTariffType + ', ' + CF.strCustomerLocation + ', ' + CF.strCategory + ', ' + CF.strFreightType + ', ' + ISNULL(CF.strShipViaName, '')
-		, strLogLevel = 'Error'
-		, strStatus = 'Failed'
-		, intRowNo = CF.intRowNumber
-		, strMessage = 'Data is already exist in i21 Customer Tariffs'	
-	FROM tblApiSchemaTRCustomerFreight CF
-	INNER JOIN tblEMEntity E ON E.strEntityNo = CF.strCustomerEntityNo
-	INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
-	INNER JOIN tblEMEntityTariffType T ON T.strTariffType = CF.strTariffType
-	INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId AND EL.strLocationName = CF.strCustomerLocation
-	INNER JOIN tblICCategory CA ON CA.strCategoryCode = CF.strCategory
-	INNER JOIN @tmpFreightType F ON F.strFreightType = CF.strFreightType
-	LEFT JOIN tblSMShipVia S ON S.strShipVia = CF.strShipViaName
-	LEFT JOIN tblARCustomerFreightXRef CFX ON CFX.intEntityCustomerId = C.intEntityId 
-		AND CFX.intEntityLocationId = EL.intEntityLocationId
-		AND CFX.intEntityTariffTypeId = T.intEntityTariffTypeId
-		AND CFX.strZipCode = CF.strSupplierZipCode 
-		AND CFX.intCategoryId = CA.intCategoryId
-		AND CFX.strFreightType = F.strFreightType		
-		AND ISNULL(CFX.intShipViaId, 0) = ISNULL(S.intEntityId, 0)
-	WHERE (ISNULL(CF.strShipViaName, '') = '' OR (S.intEntityId IS NOT NULL AND ISNULL(CF.strShipViaName, '') != '')) 
-	AND CF.guiApiUniqueId = @guiApiUniqueId
-	AND CFX.intFreightXRefId IS NOT NULL
+	-- INSERT INTO tblApiImportLogDetail (
+	-- 	guiApiImportLogDetailId
+	-- 	, guiApiImportLogId
+	-- 	, strField
+	-- 	, strValue
+	-- 	, strLogLevel
+	-- 	, strStatus
+	-- 	, intRowNo
+	-- 	, strMessage
+	-- )
+	-- SELECT guiApiImportLogDetailId = NEWID()
+	-- 	, guiApiImportLogId = @guiLogId
+	-- 	, strField = ''
+	-- 	, strValue = CF.strCustomerEntityNo + ', ' + CF.strTariffType + ', ' + CF.strCustomerLocation + ', ' + CF.strCategory + ', ' + CF.strFreightType + ', ' + ISNULL(CF.strShipViaName, '')
+	-- 	, strLogLevel = 'Error'
+	-- 	, strStatus = 'Failed'
+	-- 	, intRowNo = CF.intRowNumber
+	-- 	, strMessage = 'Data is already existing in i21 Customer Freight'	
+	-- FROM tblApiSchemaTRCustomerFreight CF
+	-- INNER JOIN tblEMEntity E ON E.strEntityNo = CF.strCustomerEntityNo
+	-- INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
+	-- INNER JOIN tblEMEntityTariffType T ON T.strTariffType = CF.strTariffType
+	-- INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId AND EL.strLocationName = CF.strCustomerLocation
+	-- INNER JOIN tblICCategory CA ON CA.strCategoryCode = CF.strCategory
+	-- INNER JOIN @tmpFreightType F ON F.strFreightType = CF.strFreightType
+	-- LEFT JOIN tblSMShipVia S ON S.strShipVia = CF.strShipViaName
+	-- LEFT JOIN tblARCustomerFreightXRef CFX ON CFX.intEntityCustomerId = C.intEntityId 
+	-- 	AND CFX.intEntityLocationId = EL.intEntityLocationId
+	-- 	AND CFX.intEntityTariffTypeId = T.intEntityTariffTypeId
+	-- 	AND CFX.strZipCode = CF.strSupplierZipCode 
+	-- 	AND CFX.intCategoryId = CA.intCategoryId
+	-- 	AND CFX.strFreightType = F.strFreightType		
+	-- 	AND ISNULL(CFX.intShipViaId, 0) = ISNULL(S.intEntityId, 0)
+	-- WHERE (ISNULL(CF.strShipViaName, '') = '' OR (S.intEntityId IS NOT NULL AND ISNULL(CF.strShipViaName, '') != '')) 
+	-- AND CF.guiApiUniqueId = @guiApiUniqueId
+	-- AND CFX.intFreightXRefId IS NOT NULL
 
 	-- PROCESS
 	DECLARE @intCustomerEntityId INT = NULL
@@ -212,6 +212,9 @@ BEGIN
 		,@ysnFreightInPrice BIT = NULL
 		,@dblMinimumUnit NUMERIC (18, 6) = NULL
 		,@intRowNumber INT = NULL
+		,@dblFreightRateIn NUMERIC (18, 6) = NULL
+		,@dblMinimumUnitsIn NUMERIC (18, 6) = NULL
+		,@dblSurchargeOut NUMERIC (18, 6) = NULL
 
 	 DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
      FOR 
@@ -228,6 +231,9 @@ BEGIN
 		, CF.dblFreightMile
 		, ISNULL(CF.ysnFreightInPrice, 0) AS ysnFreightInPrice
 		, CF.dblMinimumUnit
+		, CF.dblFreightRateIn
+		, CF.dblMinimumUnitsIn
+		, CF.dblSurchargeOut
 		, CF.intRowNumber
 	FROM tblApiSchemaTRCustomerFreight CF
 		INNER JOIN tblEMEntity E ON E.strEntityNo = CF.strCustomerEntityNo
@@ -246,30 +252,32 @@ BEGIN
 			AND ISNULL(CFX.intShipViaId, 0) = ISNULL(S.intEntityId, 0)
 		WHERE CF.guiApiUniqueId = @guiApiUniqueId
 		AND (ISNULL(CF.strShipViaName, '') = '' OR (S.intEntityId IS NOT NULL AND ISNULL(CF.strShipViaName, '') != ''))
-		AND CFX.intFreightXRefId IS NULL
+		--AND CFX.intFreightXRefId IS NULL
 
 	 OPEN DataCursor
-	 FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @intRowNumber
+	 FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @dblFreightRateIn, @dblMinimumUnitsIn, @dblSurchargeOut, @intRowNumber
 	 WHILE @@FETCH_STATUS = 0
      BEGIN
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomerFreightXRef WHERE intEntityCustomerId = @intCustomerEntityId 
+		DECLARE @intFreightXRefId INT = NULL
+		PRINT(1)
+
+		SELECT @intFreightXRefId = intFreightXRefId FROM tblARCustomerFreightXRef WHERE intEntityCustomerId = @intCustomerEntityId 
 			AND intEntityLocationId = @intCustomerEntityLocationId 
 			AND ISNULL(strZipCode, '') = ISNULL(@strSupplierZipCode, '')
 			AND intCategoryId = @intCategoryId
-			AND strFreightType = @strFreightType
-			AND ISNULL(intEntityTariffTypeId, 0) = @intEntityTariffTypeId
+			--AND strFreightType = @strFreightType
+			AND ISNULL(intEntityTariffTypeId, 0) = ISNULL(@intEntityTariffTypeId, 0)
 			AND ISNULL(intShipViaId, 0) = ISNULL(@intShipViaEntityId, 0)
-			AND ISNULL(dblFreightAmount, 0) = ISNULL(@dblFreightAmount, 0)
-			AND ISNULL(dblFreightRate, 0) = ISNULL(@dblFreightRate, 0) 
-			AND ISNULL(dblFreightMiles, 0) = ISNULL(@dblFreightMile, 0) 
-			AND ISNULL(dblMinimumUnits, 0) = ISNULL(@dblMinimumUnit, 0) 
-			AND ISNULL(ysnFreightOnly, 0) = ISNULL(@ysnFreightOnly, 0)
-			AND ISNULL(ysnFreightInPrice, 0) = ISNULL(@ysnFreightInPrice, 0)) 
-		BEGIN
+			--AND ISNULL(dblFreightAmount, 0) = ISNULL(@dblFreightAmount, 0)
+			--AND ISNULL(dblFreightRate, 0) = ISNULL(@dblFreightRate, 0) 
+			--AND ISNULL(dblFreightMiles, 0) = ISNULL(@dblFreightMile, 0) 
+			--AND ISNULL(dblMinimumUnits, 0) = ISNULL(@dblMinimumUnit, 0) 
+			--AND ISNULL(ysnFreightOnly, 0) = ISNULL(@ysnFreightOnly, 0)
+			--AND ISNULL(ysnFreightInPrice, 0) = ISNULL(@ysnFreightInPrice, 0)
 
+		IF (@intFreightXRefId IS NULL) 
+		BEGIN
 			-- INSERT FREIGHT TYPE IN CUSTOMER
-			--UPDATE tblARCustomer SET intEntityTariffTypeId = @intEntityTariffTypeId
-			--WHERE intEntityId = @intCustomerEntityId
 
 			-- INSERT FREIGHT SETUP
 			INSERT INTO tblARCustomerFreightXRef (intEntityCustomerId
@@ -286,7 +294,10 @@ BEGIN
 				, dblMinimumUnits
 				, intConcurrencyId
 				, guiApiUniqueId
-				, intEntityTariffTypeId)
+				, intEntityTariffTypeId
+				, dblFreightRateIn
+				, dblMinimumUnitsIn
+				, dblSurchargeOut)
 			VALUES(@intCustomerEntityId
 				, @intCustomerEntityLocationId
 				, @strSupplierZipCode
@@ -302,6 +313,9 @@ BEGIN
 				, 1
 				, @guiApiUniqueId
 				, @intEntityTariffTypeId
+				, ISNULL(@dblFreightRateIn, 0)
+				, ISNULL(@dblMinimumUnitsIn, 0)
+				, ISNULL(@dblSurchargeOut, 0)
 			)
 
 			-- INSERT LOGS
@@ -322,10 +336,25 @@ BEGIN
 				, strLogLevel = 'Success'
 				, strStatus = 'Success'
 				, intRowNo = @intRowNumber
-				, strMessage = 'Successfully processed'	
+				, strMessage = 'Successfully added'	
 		END
 		ELSE
 		BEGIN
+
+			UPDATE tblARCustomerFreightXRef SET ysnFreightOnly = @ysnFreightOnly
+				, strFreightType = @strFreightType
+				--, intShipViaId = @intShipViaEntityId
+				, dblFreightAmount = ISNULL(@dblFreightAmount, 0)
+				, dblFreightRate = ISNULL(@dblFreightRate, 0)
+				, dblFreightMiles = ISNULL(@dblFreightMile, 0)
+				, ysnFreightInPrice = @ysnFreightInPrice
+				, dblMinimumUnits = ISNULL(@dblMinimumUnit, 0)
+				, guiApiUniqueId = @guiApiUniqueId
+				, dblFreightRateIn = ISNULL(@dblFreightRateIn, 0)
+				, dblMinimumUnitsIn = ISNULL(@dblMinimumUnitsIn, 0)
+				, dblSurchargeOut = ISNULL(@dblSurchargeOut, 0)
+			WHERE intFreightXRefId = @intFreightXRefId
+	 
 			-- INSERT LOGS
 			INSERT INTO tblApiImportLogDetail (
 				guiApiImportLogDetailId
@@ -341,16 +370,15 @@ BEGIN
 				, guiApiImportLogId = @guiLogId
 				, strField = ''
 				, strValue = '' 
-				, strLogLevel = 'Info'
-				, strStatus = 'Skipped'
+				, strLogLevel = 'Success'
+				, strStatus = 'Success'
 				, intRowNo = @intRowNumber
-				, strMessage = 'Already exist in Customer Freight'	
+				, strMessage = 'Successfully updated'	
 		END
    	 	
-	 	FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @intRowNumber
+	 	FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @dblFreightRateIn, @dblMinimumUnitsIn, @dblSurchargeOut, @intRowNumber
 	 END
 	 CLOSE DataCursor
 	 DEALLOCATE DataCursor
 
 END
-

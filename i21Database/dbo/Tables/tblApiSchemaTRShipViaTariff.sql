@@ -7,7 +7,6 @@
 	strShipViaName				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,	-- Ship Via Name			| Required
 	strTariffDescription		NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,		-- Tariff Description		| Required
 	strTariffType				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,	-- Tariff Type				| Required
-	strFreightType				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,		-- Freight Type				| Required
 	strCategory					NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			-- Category					| Optional
 	dblSurcharge				NUMERIC(18, 6) NULL,									-- Surcharge Rate			| Optional
 	dtmShipViaEffectiveDate		DATETIME NOT NULL,										-- Ship Via Effective Date	| Required

@@ -1261,7 +1261,7 @@ BEGIN
 		SELECT TOP 1 
 				@valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData   
-		WHERE	RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount', 'gross unit')
+		WHERE	RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount', 'gross unit', 'custom unit')
 		ORDER BY RawData.strCostMethod ASC
 
 		IF @valueChargeId IS NOT NULL
@@ -1285,7 +1285,7 @@ BEGIN
 		FROM	@OtherCharges RawData LEFT JOIN tblICItemUOM iu
 					ON RawData.intCostUOMId = iu.intItemUOMId
 		WHERE	iu.intItemUOMId IS NULL
-				AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) IN ('per unit', 'gross unit')
+				AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) IN ('per unit', 'gross unit', 'custom unit')
 
 		IF @valueChargeId IS NOT NULL
 		BEGIN
@@ -1470,6 +1470,7 @@ BEGIN
 				,intLoadShipmentId
 				,intLoadShipmentCostId
 				,intSort
+				,dblQuantity
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1503,6 +1504,7 @@ BEGIN
 				,intLoadShipmentId			= RawData.intLoadShipmentId
 				,intLoadShipmentCostId		= RawData.intLoadShipmentCostId
 				,intSort					= RawData.intSort
+				,dblQuantity				= RawData.dblQuantity 
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 

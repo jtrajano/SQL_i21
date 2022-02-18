@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuTRCustomerFreightRate]
 AS
-SELECT CF.intFreightXRefId
+SELECT DISTINCT CF.intFreightXRefId
 , C.intEntityId AS intCustomerId
 , EM.strName AS strCustomerName
 , CF.intEntityLocationId AS inCustomerLocationId
@@ -21,6 +21,7 @@ SELECT CF.intFreightXRefId
 , CF.dblFreightMiles AS dblFreightMiles
 , CF.ysnFreightInPrice AS ysnFreightInPrice
 , SMLOB.strLineOfBusiness AS strLineOfBusiness
+, TCN.strTerminalControlNumber
 FROM tblARCustomerFreightXRef CF
 INNER JOIN tblARCustomer C ON C.intEntityId = CF.intEntityCustomerId
 INNER JOIN tblEMEntity EM ON EM.intEntityId = C.intEntityId
@@ -34,3 +35,10 @@ LEFT JOIN tblEMEntity EMSV ON EMSV.intEntityId = SV.intEntityId
 LEFT JOIN tblICCategory CC ON CC.intCategoryId = CF.intCategoryId
 LEFT JOIN tblSMShipVia FSV ON FSV.intEntityId = CF.intShipViaId
 LEFT JOIN tblEMEntity EMFSV ON EMFSV.intEntityId = FSV.intEntityId
+LEFT JOIN (
+    SELECT DISTINCT CN.strTerminalControlNumber, ELV.strZipCode FROM tblAPVendor V
+    INNER JOIN tblEMEntityLocation ELV ON ELV.intEntityId = V.intEntityId
+    INNER JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = ELV.intEntityLocationId AND SP.intEntityVendorId = V.intEntityId
+    INNER JOIN tblTFTerminalControlNumber CN ON CN.intTerminalControlNumberId = SP.intTerminalControlNumberId
+    WHERE V.ysnTransportTerminal = 1
+) TCN ON TCN.strZipCode = CF.strZipCode

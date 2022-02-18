@@ -67,6 +67,8 @@ BEGIN
 				CASE 
 					WHEN ReceiptCharge.strCostMethod = 'Percentage' THEN 
 						1
+					WHEN ReceiptCharge.strCostMethod = 'Custom Unit' THEN 
+						ReceiptCharge.dblQuantity
 					ELSE 
 						ISNULL(NULLIF(ComputedCharges.dblCalculatedQty, 0), 1) 
 				END 

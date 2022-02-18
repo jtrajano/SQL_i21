@@ -20,6 +20,7 @@ SET ANSI_WARNINGS OFF
 				@intLotId						INT,
 				@intSourceId					INT,
 				@intContainerId					INT,
+				@dblReceiptItemQty				NUMERIC(18,6),
 				@intShipmentId					INT,
 				@dblQty							NUMERIC(18,6),
 				@dblContractQty					NUMERIC(18,6),
@@ -45,6 +46,7 @@ SET ANSI_WARNINGS OFF
 		SELECT @intItemId = NULL
 				,@intSourceId = NULL
 				,@intContainerId = NULL
+				,@dblReceiptItemQty = NULL
 				,@dblQtyDifference = NULL
 
 		SELECT @intItemId = intItemId
@@ -69,10 +71,11 @@ SET ANSI_WARNINGS OFF
 						@dblNetWeight					=	NULL,
 						@dblContainerQty				=	NULL
 				
-				SELECT	@dblQty							=	dblQty,
+				SELECT	@dblQty							=	dbo.fnCalculateQtyBetweenUOM(IRI.intItemUOMId, LD.intItemUOMId, IRI.dblQty),
 						@intLotId						=	intLotId,
 						@dblNetWeight					=	dblNetWeight
-				FROM	@ItemsFromInventoryReceipt 
+				FROM	@ItemsFromInventoryReceipt IRI
+					LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId
 				WHERE	intLotId						=	@intLotId
 					AND intInventoryReceiptDetailId		=	@intReceiptDetailId
 		
@@ -113,7 +116,8 @@ SET ANSI_WARNINGS OFF
 					RAISERROR(@ErrMsg,16,1)
 				END
 
-				UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight WHERE intLoadDetailId = @intSourceId
+				UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight 
+				WHERE intLoadDetailId = @intSourceId
 	
 				/*Update Pick Containers*/
 				IF EXISTS (SELECT TOP 1 1 FROM tblLGPickLotDetail PLC LEFT JOIN tblLGPickLotHeader PL ON PL.intPickLotHeaderId = PLC.intPickLotHeaderId 
@@ -131,29 +135,12 @@ SET ANSI_WARNINGS OFF
 				END
 
 				SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
+				SET @dblReceiptItemQty = ISNULL(@dblReceiptItemQty, 0) + @dblQty
 
 				SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
 
 				IF @ysnReverse = 0
 				BEGIN
-					--CHECK IF ALLOW REWEIGHS
-					IF EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnAllowReweighs, 0) = 1)
-					BEGIN
-						SELECT @dblQtyDifference = (dblQuantity - @dblQty) * -1 FROM tblLGLoadContainer WHERE intLoadContainerId = @intContainerId AND dblQuantity <> @dblQty
-						
-						IF (@dblQtyDifference <> 0)
-						BEGIN
-							EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblQtyDifference, @intUserId, @intSourceId, 'Load Schedule', @intItemUOMId
-
-							UPDATE tblLGLoadContainer SET dblQuantity = @dblQty WHERE intLoadContainerId = @intContainerId
-							UPDATE tblLGLoadDetailContainerLink SET dblQuantity = @dblQty WHERE intLoadContainerId = @intContainerId
-							UPDATE tblLGLoadDetail
-								SET dblQuantity = (SELECT SUM(dblQuantity) FROM tblLGLoadContainer WHERE intLoadId = @intLoadId)
-							WHERE intLoadId = @intLoadId AND intLoadDetailId = @intSourceId
-
-						END
-					END
-
 					--Change LS status to "Received"
 					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
@@ -200,10 +187,11 @@ SET ANSI_WARNINGS OFF
 					@dblNetWeight					=	NULL,
 					@dblContainerQty				=	NULL
 				
-			SELECT	@dblQty							=	dblQty,
+			SELECT	@dblQty							=	dbo.fnCalculateQtyBetweenUOM(IRI.intItemUOMId, LD.intItemUOMId, IRI.dblQty),
 					@intLotId						=	intLotId,
 					@dblNetWeight					=	dblNetWeight
-			FROM	@ItemsFromInventoryReceipt 
+			FROM	@ItemsFromInventoryReceipt IRI
+				LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId
 			WHERE	intInventoryReceiptDetailId		=	@intReceiptDetailId
 
 			IF ISNULL(@intContainerId,0) <> -1
@@ -242,6 +230,7 @@ SET ANSI_WARNINGS OFF
 			UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight WHERE intLoadDetailId = @intSourceId
 	
 			SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
+			SET @dblReceiptItemQty = ISNULL(@dblReceiptItemQty, 0) + @dblQty
 
 			SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
 
@@ -285,8 +274,29 @@ SET ANSI_WARNINGS OFF
 			END	
 		END
 
+		--CHECK IF ALLOW REWEIGHS
+		IF (@ysnReverse = 0 AND EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnAllowReweighs, 0) = 1))
+		BEGIN
+			SELECT @dblQtyDifference = (dblQuantity - @dblReceiptItemQty) * -1 FROM tblLGLoadContainer WHERE intLoadContainerId = @intContainerId AND dblQuantity <> @dblReceiptItemQty
+						
+			IF (@dblQtyDifference <> 0)
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblQtyDifference, @intUserId, @intSourceId, 'Load Schedule', @intItemUOMId
+
+				UPDATE tblLGLoadContainer SET dblQuantity = @dblReceiptItemQty WHERE intLoadContainerId = @intContainerId
+				UPDATE tblLGLoadDetailContainerLink SET dblQuantity = @dblReceiptItemQty WHERE intLoadContainerId = @intContainerId
+			END
+		END
+
 		SELECT @intReceiptDetailId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt WHERE intInventoryReceiptDetailId > @intReceiptDetailId
 	END
+
+	--CHECK IF ALLOW REWEIGHS
+	IF (@ysnReverse = 0 AND EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnAllowReweighs, 0) = 1))
+		UPDATE tblLGLoadDetail
+			SET dblQuantity = (SELECT SUM(dblQuantity) FROM tblLGLoadContainer WHERE intLoadId = @intLoadId)
+		WHERE intLoadId = @intLoadId AND intLoadDetailId = @intSourceId
+
 	
 	-- Reduce the Inbound In-Transit Qty when posting an IR. 
 	-- Or Increase it back when unposting the IR. 
