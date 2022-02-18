@@ -14,6 +14,7 @@ CREATE PROCEDURE [dbo].[uspICUpdateEffectivePricingForCStore]
 	,@dblStandardCost AS NUMERIC(38, 20) = NULL 
 	,@dblRetailPrice AS NUMERIC(38, 20) = NULL 
 	,@dtmEffectiveDate AS DATETIME = NULL
+	,@intUOM AS INT = NULL
 	,@intEntityUserSecurityId AS INT 
 AS
 
@@ -69,6 +70,7 @@ IF OBJECT_ID('tempdb..#tmpEffectivePriceForCStore_AuditLog') IS NULL
 		intEffectiveItemPriceId INT
 		,intItemId INT
 		,intItemLocationId INT 
+		,intItemUOMId INT
 		,dblOldPrice NUMERIC(38, 20) NULL
 		,dblNewPrice NUMERIC(38, 20) NULL
 		,dtmOldEffectiveDate DATETIME NULL
@@ -113,10 +115,13 @@ BEGIN
 		WITH	(HOLDLOCK) 
 		AS		e
 		USING (
-			SELECT	i.intItemId, il.intItemLocationId, @dtmEffectiveDate AS dtmEffectiveDate, @dblStandardCost AS dblNewStandardCost
+			SELECT	i.intItemId, 
+					il.intItemLocationId, 
+					@dtmEffectiveDate AS dtmEffectiveDate, 
+					@dblStandardCost AS dblNewStandardCost
 			FROM	tblICItemLocation il								
 						INNER JOIN tblICItem i
-							ON i.intItemId = il.intItemId 									
+							ON i.intItemId = il.intItemId						
 			WHERE	
 					i.intItemId = ISNULL(@intItemId, i.intItemId)
 					AND (
@@ -292,6 +297,7 @@ BEGIN
 		, intEffectiveItemPriceId 
 		, intItemId 
 		, intItemLocationId
+		, intItemUOMId
 		, dblOldPrice
 		, dblNewPrice
 		, dtmOldEffectiveDate
@@ -302,6 +308,7 @@ BEGIN
 		, intEffectiveItemPriceId 
 		, intItemId 
 		, intItemLocationId
+		, intItemUOMId
 		, dblOldPrice
 		, dblNewPrice
 		, dblOldEffectiveDate
@@ -312,12 +319,19 @@ BEGIN
 		WITH	(HOLDLOCK) 
 		AS		e
 		USING (
-			SELECT	i.intItemId, il.intItemLocationId, @dtmEffectiveDate AS dtmEffectiveDate, @dblRetailPrice AS dblNewSalePrice
+			SELECT	i.intItemId, 
+					il.intItemLocationId, 
+					iu.intItemUOMId, 
+					@dtmEffectiveDate AS dtmEffectiveDate, 
+					@dblRetailPrice AS dblNewSalePrice
 			FROM	tblICItemLocation il								
 						INNER JOIN tblICItem i
-							ON i.intItemId = il.intItemId 									
+							ON i.intItemId = il.intItemId 				
+						INNER JOIN tblICItemUOM iu
+							ON i.intItemId = iu.intItemId 								
 			WHERE	
 					i.intItemId = ISNULL(@intItemId, i.intItemId)
+					AND iu.intUnitMeasureId = ISNULL(@intUOM, iu.intUnitMeasureId)
 					AND (
 						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = il.intLocationId) 			
@@ -358,6 +372,7 @@ BEGIN
 		) AS u
 			ON e.intItemId = u.intItemId
 			AND e.intItemLocationId = u.intItemLocationId
+			AND e.intItemUOMId = u.intItemUOMId
 			AND CONVERT(DATE, e.dtmEffectiveRetailPriceDate) = CONVERT(DATE, u.dtmEffectiveDate)
 			AND e.intEffectiveItemPriceId = ISNULL(@intEffectiveItemPriceId, e.intEffectiveItemPriceId)
 
@@ -374,6 +389,7 @@ BEGIN
 			INSERT (
 				intItemId
 				, intItemLocationId
+				, intItemUOMId
 				, dblRetailPrice
 				, dtmDateCreated
 				, dtmEffectiveRetailPriceDate
@@ -383,6 +399,7 @@ BEGIN
 			VALUES (
 				u.intItemId
 				, u.intItemLocationId
+				, u.intItemUOMId
 				, u.dblNewSalePrice
 				, GETUTCDATE()
 				, @dtmEffectiveDate
@@ -395,6 +412,7 @@ BEGIN
 			, inserted.intEffectiveItemPriceId 
 			, inserted.intItemId 
 			, inserted.intItemLocationId 
+			, inserted.intItemUOMId 
 			, deleted.dblRetailPrice 
 			, inserted.dblRetailPrice
 			, deleted.dtmEffectiveRetailPriceDate
@@ -404,6 +422,7 @@ BEGIN
 			, intEffectiveItemPriceId 
 			, intItemId 
 			, intItemLocationId
+			, intItemUOMId
 			, dblOldPrice
 			, dblNewPrice 
 			, dblOldEffectiveDate

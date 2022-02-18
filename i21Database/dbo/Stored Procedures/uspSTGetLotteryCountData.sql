@@ -32,6 +32,7 @@ DECLARE @tblSTOuputTable TABLE
 	,strCategoryDescription	NVARCHAR(MAX)
 	,intItemUOMId			INT
 	,strSoldOut				NVARCHAR(MAX)
+	,strUnitMeasure			NVARCHAR(MAX)
 )
 
 -- DECLARE @shiftNo INT 
@@ -81,6 +82,7 @@ INSERT INTO @tblSTOuputTable
 	,strCategoryDescription	
 	,intItemUOMId			
 	,strSoldOut				
+	,strUnitMeasure			
 )
 SELECT 
  intBeginCount			
@@ -123,6 +125,7 @@ CASE WHEN LOWER(strStatus) = 'sold'
 				END
 		END
 	END
+,strUnitMeasure
 FROM
 (
 SELECT 
@@ -162,6 +165,7 @@ intBeginCount = CASE
 ,strCategoryCode	
 ,strCategoryDescription	
 ,intItemUOMId
+,strUnitMeasure
 FROM (
 
 SELECT 
@@ -210,7 +214,8 @@ SELECT
 	vyuSTItemPricingOnFirstLocation.intCategoryId,
 	vyuSTItemPricingOnFirstLocation.strCategoryCode,
 	vyuSTItemPricingOnFirstLocation.strCategoryDescription,
-	vyuSTItemPricingOnFirstLocation.intItemUOMId
+	vyuSTItemPricingOnFirstLocation.intItemUOMId,
+	vyuSTItemPricingOnFirstLocation.strUnitMeasure
 	FROM tblSTLotteryBook
 	LEFT JOIN tblSTLotteryGame 
 	ON tblSTLotteryGame.intLotteryGameId = tblSTLotteryBook.intLotteryGameId

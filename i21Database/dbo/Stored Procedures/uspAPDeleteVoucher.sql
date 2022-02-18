@@ -116,7 +116,7 @@ BEGIN TRY
 		
 		EXEC [dbo].[uspAPUpdateIntegrationPayableAvailableQty]
 			@billDetailIds = @voucherBillDetailIds,
-			@decrease = 0
+			@decrease = 0 --decrease what we added before, we will call this again after deletion
 	END
 
 	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
@@ -131,6 +131,17 @@ BEGIN TRY
 	END
 
 	EXEC uspAPAddTransactionLinks 1, @intBillId, 2
+	
+	--UPDATE PO STATUS
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPurchaseId')) DROP TABLE #tmpPurchaseId
+	
+	SELECT DISTINCT
+		B.intPurchaseId
+	INTO #tmpPurchaseId
+	FROM tblAPBillDetail A 
+	INNER JOIN tblPOPurchaseDetail B 
+		ON A.[intPurchaseDetailId] = B.intPurchaseDetailId	
+	WHERE A.intBillId = @intBillId
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
@@ -151,6 +162,16 @@ BEGIN TRY
 
 	--Update the tblAPBillBatch
 	EXEC uspAPUpdateBillBatch @billBatchId = @billBatchId
+	
+	DECLARE @purchaseId INT;
+	WHILE EXISTS(SELECT 1 FROM #tmpPurchaseId)
+	BEGIN
+		SELECT TOP(1) 
+			@purchaseId = intPurchaseId
+		FROM #tmpPurchaseId
+		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
+		DELETE FROM #tmpPurchaseId WHERE intPurchaseId = @purchaseId
+	END
 
 	--Removed - FRM-9293
 	--DELETE FROM dbo.tblSMTransaction

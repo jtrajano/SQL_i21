@@ -261,6 +261,7 @@ BEGIN
 		) AS u
 			ON e.intItemId = u.intItemId
 			AND e.intItemLocationId = u.intItemLocationId
+			AND e.intItemUOMId = u.intItemUOMId
 			AND e.dtmEffectiveRetailPriceDate = @dtmEffectiveDate
 
 		-- If matched, update the effective price.

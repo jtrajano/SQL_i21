@@ -7,6 +7,8 @@ CREATE TABLE [dbo].[tblICImportStagingUOM] (
 	[strWeightUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strUPCCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strShortUPCCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strUPCDescription] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[intModifier] [int] NULL,
 	[ysnIsStockUnit] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAllowPurchase] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAllowSale] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,

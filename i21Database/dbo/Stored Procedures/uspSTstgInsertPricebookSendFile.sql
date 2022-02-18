@@ -223,7 +223,6 @@ BEGIN
 			AND uom.strLongUPCCode <> ''
 			AND uom.strLongUPCCode <> '0'
 			AND uom.strLongUPCCode NOT LIKE '%[^0-9]%'
-			AND uom.ysnStockUnit = CAST(1 AS BIT)
 			AND LEN(uom.strLongUPCCode) > 13
 			AND (
 					(
@@ -1096,22 +1095,12 @@ BEGIN
 					, [intItemLocationId]			=	ItemLoc.intItemLocationId
 					, [strSource]					=	'keyboard'
 					, [strUpc]						=	PCF.strUPCwthOrwthOutCheckDigit -- IF COMMANDER/SAPPHIRE include check digit
-					, [strUpcModifier]				=	CAST(ISNULL(mo.intModifier, '000') AS VARCHAR(100))
-					, [strDescription]				=	LEFT(  REPLACE(REPLACE(REPLACE(REPLACE(Item.strDescription, '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
+					, [strUpcModifier]				=	CAST(ISNULL(UOM.intModifier, '000') AS VARCHAR(100))
+					, [strDescription]				=	LEFT(REPLACE(REPLACE(REPLACE(REPLACE(ISNULL(NULLIF(UOM.strUPCDescription, ''), Item.strDescription), '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
 					, [strDepartment]				=	CAST(CategoryLoc.strCashRegisterDepartment AS NVARCHAR(50))
 					, [strFee]						=	CAST(ItemLoc.intBottleDepositNo AS NVARCHAR(10)) -- CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
 					, [strPCode]					=	ISNULL(StorePCode.strRegProdCode, '') -- ISNULL(StorePCode.strRegProdCode, '')
-					, [dblPrice]					=	ISNULL(CASE  WHEN GETDATE() BETWEEN spPrice.dtmBeginDate AND spPrice.dtmEndDate THEN spPrice.dblUnitAfterDiscount 
-																	 WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = ItemLoc.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = ItemLoc.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-																		ELSE ItemPrice.dblSalePrice
-																		END, 0)
+					, [dblPrice]					=	itemPricing.dblSalePrice
 					, [dblTransactionQtyLimit]		=	ItemLoc.dblTransactionQtyLimit
 					, [strFlagColumnType]			=	UNPIVOTItemLoc.strColumnName
 					, [intFlagSysid]				=	CASE
@@ -1159,9 +1148,6 @@ BEGIN
 					ON Item.intItemId = tempItem.intItemId
 				INNER JOIN tblICItemUOM UOM
 					ON Item.intItemId = UOM.intItemId
-					AND UOM.ysnStockUnit = 1
-				LEFT JOIN tblSTModifier mo
-					ON UOM.intItemUOMId = mo.intItemUOMId
 				INNER JOIN tblICCategory Category
 					ON Item.intCategoryId = Category.intCategoryId
 				INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
@@ -1243,12 +1229,10 @@ BEGIN
 					ON Item.intItemId = PCF.intItemId
 					AND UOM.intItemUOMId = PCF.intItemUOMId
 					AND ItemLoc.intLocationId = PCF.intLocationId
-				INNER JOIN tblICItemPricing ItemPrice
-					ON Item.intItemId = ItemPrice.intItemId
-					AND ItemLoc.intItemLocationId = ItemPrice.intItemLocationId
-				LEFT JOIN tblICItemSpecialPricing spPrice
-					ON Item.intItemId = spPrice.intItemId
-					AND ItemLoc.intItemLocationId = spPrice.intItemLocationId
+				JOIN vyuSTItemHierarchyPricing itemPricing
+					ON Item.intItemId = itemPricing.intItemId
+					AND ItemLoc.intItemLocationId = itemPricing.intItemLocationId
+					AND UOM.intItemUOMId = itemPricing.intItemUOMId
 				WHERE Store.intStoreId = @intStoreId
 					AND UOM.strLongUPCCode IS NOT NULL
 					AND UOM.strLongUPCCode NOT LIKE '%[^0-9]%'
@@ -1270,6 +1254,7 @@ BEGIN
 							strActionType,
 							strUpcCode,
 							strDescription,
+							strUnitMeasure,
 							dblSalePrice,
 							ysnSalesTaxed,
 							ysnIdRequiredLiquor,
@@ -1284,6 +1269,7 @@ BEGIN
 							strActionType = t1.strActionType,
 							strUpcCode = t1.strUpcCode,
 							strDescription = t1.strDescription,
+							strUnitMeasure = t1.strUnitMeasure,
 							dblSalePrice = t1.dblSalePrice,
 							ysnSalesTaxed = t1.ysnSalesTaxed,
 							ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
@@ -1294,7 +1280,7 @@ BEGIN
 						FROM  
 						(
 							SELECT *,
-									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId, t.strUnitMeasure ORDER BY (SELECT NULL))
 							FROM 
 							(
 								SELECT DISTINCT

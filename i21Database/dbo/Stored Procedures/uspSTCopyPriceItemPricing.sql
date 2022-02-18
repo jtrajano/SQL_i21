@@ -45,6 +45,11 @@ BEGIN
 		BEGIN
 
 			DECLARE @dtmEffectiveDate DATETIME = (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice WHERE intEffectiveItemPriceId = @intPrimaryId)
+			DECLARE @intUnitMeasureId INT = (SELECT TOP 1 intUnitMeasureId 
+												FROM tblICEffectiveItemPrice eip
+													JOIN tblICItemUOM uom
+														ON eip.intItemUOMId = uom.intItemUOMId
+												WHERE intEffectiveItemPriceId = @intPrimaryId)
 
 			-- ITEM PRICING AuditLog temp table
 			BEGIN
@@ -159,6 +164,7 @@ BEGIN
 											@intItemId					= @intLoopItemId_TO 
 											, @intItemLocationId		= @intLoopItemLocationId_TO 
 											, @dtmEffectiveDate			= @dtmEffectiveDate
+											, @intUOM					= @intUnitMeasureId
 
 											-- update params
 											, @dblRetailPrice			= @dblRetailPrice_FROM 

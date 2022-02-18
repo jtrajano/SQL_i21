@@ -509,6 +509,9 @@
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Functions\fnCMValidateCMRevaluation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetFreightTermCost.sql" />
+    <Build Include="dbo\Functions\fnICIsUpcExists2.sql" />
+    <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1784,7 +1787,6 @@
     <Build Include="dbo\Views\vyuICGetLot.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMassAddLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateModifier.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTDuplicateModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridCostAndPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridUpdateCostAndPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridCostAndPricePreview.sql" />
@@ -3993,6 +3995,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDragAndDropWorkOrder.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutRegisterHourlyActivity.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantFGM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantISM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantMCM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantMSM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantISM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantFGM.sql" />
@@ -6903,7 +6909,6 @@
     <Build Include="dbo\Views\vyuSTItemsToRegister.sql" />
     <Build Include="dbo\Tables\tblSTGridCostAndPricePreview.sql" />
     <Build Include="dbo\Tables\tblSTUpdateRegisterNotification.sql" />
-    <Build Include="dbo\Tables\tblSTModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
     <Build Include="dbo\Tables\tblHDCallDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateCallDetail.sql" />
@@ -8476,6 +8481,7 @@
     <Build Include="dbo\Views\vyuCTItemContractReportPrepay.sql" />
     <Build Include="dbo\Tables\tblSTLotteryGame.sql" />
     <Build Include="dbo\Views\vyuSTItemPricingAndUOM.sql" />
+    <Build Include="dbo\Views\vyuSTItemHierarchyPricing.sql" />
     <Build Include="dbo\Views\vyuSTItemPricingStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCommodityActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspICCommodityPositionDetailReport.sql" />
