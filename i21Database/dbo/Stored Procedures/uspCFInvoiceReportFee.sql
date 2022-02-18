@@ -279,6 +279,7 @@ BEGIN
 				,intARLocationId			INT
 				,intFeeProfileId			INT
 				,strFeeProfileDescription	NVARCHAR(MAX)
+				,dblTieredDiscountFeeAmount NUMERIC(18,6)
 			)
 
 			-------------VARIABLES------------
@@ -799,7 +800,8 @@ BEGIN
 
 
 						
-
+						
+			SELECT * FROM @tblCFInvoiceFeeOutput
 
 					INSERT INTO @tblCFInvoiceFeeOutput(
 						 intFeeLoopId	
@@ -970,13 +972,28 @@ BEGIN
 				END
 				
 			END
-			
+
+
 
 			UPDATE @tblCFInvoiceFeeOutput 
 			SET  dblFeeRate = tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate
-				,dblFeeAmount = (ABS(tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount) * -1 )
-				,dblQuantity = tblCFInvoiceReportTieredUnitDiscountTempTable.dblQuantity
-			FROM tblCFInvoiceReportTieredUnitDiscountTempTable
+				,dblFeeAmount = (ABS(tblCFInvoiceReportTieredUnitDiscountTempTable.dblTotalFeeAmount) * -1 )
+				,dblQuantity = tblCFInvoiceReportTieredUnitDiscountTempTable.dblTotalQuantity
+				,dblTieredDiscountFeeAmount = (ABS(tblCFInvoiceReportTieredUnitDiscountTempTable.dblTotalFeeAmount) * -1 )
+			FROM (
+			
+					SELECT 
+						 dblTotalFeeAmount =  SUM(dblAmount)
+						,dblTotalQuantity  =  SUM(dblQuantity)  
+						,intAccountId
+						,dblRate
+						,intFeeId
+					FROM tblCFInvoiceReportTieredUnitDiscountTempTable 
+					GROUP BY intAccountId	
+					,intFeeId
+					,intFeeProfileId
+					,dblRate	
+			) as tblCFInvoiceReportTieredUnitDiscountTempTable
 			WHERE [@tblCFInvoiceFeeOutput].intAccountId  = tblCFInvoiceReportTieredUnitDiscountTempTable.intAccountId
 			AND [@tblCFInvoiceFeeOutput].intFeeLoopId = tblCFInvoiceReportTieredUnitDiscountTempTable.intFeeId
 
@@ -990,6 +1007,19 @@ BEGIN
 			----------------------------------
 			---**END DISCOUNT CALCULATION**---
 			----------------------------------
+
+			--SELECT * FROM @tblCFInvoiceFeeOutput
+
+			--SELECT dblFeeTotalAmount =  ROUND(SUM(dblFeeAmount),2)  , intAccountId
+			--FROM @tblCFInvoiceFeeOutput 
+			--GROUP BY intAccountId	
+			--,intAccountId	
+
+			--SELECT dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2))  , intAccountId
+			--FROM @tblCFInvoiceFeeOutput 
+			--GROUP BY intAccountId	
+			--,intAccountId	
+
 
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
 			INSERT INTO tblCFInvoiceFeeStagingTable
@@ -1019,6 +1049,7 @@ BEGIN
 				,intFeeProfileId			
 				,strFeeProfileDescription		
 				,strUserId
+				,dblTieredDiscountFeeAmount
 			)
 			SELECT
 			 tbl1.intFeeLoopId			
@@ -1046,10 +1077,11 @@ BEGIN
 			,tbl1.intFeeProfileId			
 			,tbl1.strFeeProfileDescription
 			,@UserId
+			,ISNULL(dblTieredDiscountFeeAmount,0)
 			FROM @tblCFInvoiceFeeOutput AS tbl1
 			inner join 
 			(
-			SELECT dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2))  , intAccountId
+			SELECT dblFeeTotalAmount = (SELECT SUM(dblFeeAmount))  , intAccountId
 			FROM @tblCFInvoiceFeeOutput 
 			GROUP BY intAccountId	
 			,intAccountId	

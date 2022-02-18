@@ -116,6 +116,8 @@ BEGIN
 				,*
 			from tblCTContractBalanceLog
 			where dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))
+			and strTransactionType IN ('Contract Balance')  
+			and ISNULL(intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(intCommodityId, 0))   
 		) t
 		WHERE intRowNum = 1
 	)

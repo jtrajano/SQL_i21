@@ -27,6 +27,7 @@ BEGIN TRY
 			@District           NVARCHAR(6),
 			@State              NVARCHAR(2),
 			@intItemUOMId       INT, --NVARCHAR(MAX),
+			@intUOM       INT, --NVARCHAR(MAX),
 			@StandardCost       DECIMAL (18,6),
 			@RetailPrice        DECIMAL (18,6),
 			@SalesPrice         DECIMAL (18,6),
@@ -53,6 +54,7 @@ BEGIN TRY
 			@District        =   District,
 			@State           =   States,
 			@intItemUOMId    =   UPCCode,
+			@intUOM			 =	 UOM,
 			@StandardCost 	 = 	 Cost,
 			@RetailPrice   	 =	 Retail,
 			@SalesPrice		 =	 SalesPrice,
@@ -82,6 +84,7 @@ BEGIN TRY
 			SalesPrice       		DECIMAL (18,6),
 			PromotionalCost      	DECIMAL (18,6),
 			EffectiveDate			NVARCHAR(50),
+			UOM			            INT,
 			SalesStartingDate		NVARCHAR(50),
 			SalesEndingDate			NVARCHAR(50),
 			ysnPreview				NVARCHAR(1),
@@ -128,6 +131,13 @@ BEGIN TRY
 					intClassId INT 
 				)
 			END
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Description') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemPricingForCStore_Description (
+					intItemId INT 
+				)
+			END
 			
 		-- Create the temp table for the audit log. 
 		IF OBJECT_ID('tempdb..#tmpEffectiveCostForCStore_AuditLog') IS NULL  
@@ -149,6 +159,7 @@ BEGIN TRY
 				intItemId INT
 				,intEffectiveItemPriceId INT
 				,intItemLocationId INT 
+				,intItemUOMId INT 
 				,dblOldPrice NUMERIC(38, 20) NULL
 				,dblNewPrice NUMERIC(38, 20) NULL
 				,dtmOldEffectiveDate DATETIME NULL
@@ -236,6 +247,15 @@ BEGIN TRY
 				SELECT [intID] AS intClassId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
 			END
+
+		IF(@Description IS NOT NULL AND @Description != '')
+			BEGIN
+				INSERT INTO #tmpUpdateItemPricingForCStore_Description (
+					intItemId
+				)
+				SELECT intItemId as intItemId FROM
+				tblICItem WHERE strDescription LIKE '%' + @Description + '%'
+			END
 	END
 
 
@@ -308,6 +328,7 @@ BEGIN TRY
 	DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@RetailPrice AS NUMERIC(38, 20))
 	DECLARE @dtmEffectiveDateConv AS DATE = CAST(@EffectiveDate AS DATE)
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
+	DECLARE @intItemUOM AS INT = CAST(@intUOM AS INT)
 
 	IF @dtmEffectiveDateConv IS NOT NULL
 	BEGIN
@@ -322,6 +343,7 @@ BEGIN TRY
 				, @dblRetailPrice			= @dblRetailPriceConv
 				, @intEntityUserSecurityId	= @intCurrentUserIdConv
 				, @dtmEffectiveDate			= @dtmEffectiveDateConv
+				, @intUOM					= @intItemUOM
 		END TRY
 		BEGIN CATCH
 			SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
@@ -339,6 +361,7 @@ BEGIN TRY
 	DECLARE @dblPromotionalCostConv AS DECIMAL(18, 6) = CAST(@PromotionalCost AS DECIMAL(18, 6))
 	DECLARE @dtmSalesStartingDateConv AS DATE = CAST(@SalesStartDate AS DATE)
 	DECLARE @dtmSalesEndingDateConv AS DATE = CAST(@SalesEndDate AS DATE)
+
 	IF @dtmSalesStartingDateConv IS NOT NULL AND @dtmSalesEndingDateConv IS NOT NULL
 	BEGIN
 		BEGIN TRY
@@ -346,6 +369,7 @@ BEGIN TRY
 			EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 				 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
 				,@dblPromotionalCost			= @dblPromotionalCostConv 
+				,@intUnitMeasureId				= @intUOM
 				,@dtmBeginDate					= @dtmSalesStartingDateConv
 				,@dtmEndDate					= @dtmSalesEndingDateConv 
 				,@strUpcCode					= @strUpcCode
@@ -402,6 +426,7 @@ BEGIN TRY
 			, strUpc					NVARCHAR(50)
 			, strItemDescription		NVARCHAR(250)
 			, strChangeDescription		NVARCHAR(100)
+			, strUnitMeasure			NVARCHAR(250)
 			, strPreviewOldData			NVARCHAR(MAX)
 			, strPreviewNewData			NVARCHAR(MAX)
 			, strOldDataPreview			NVARCHAR(MAX)
@@ -431,6 +456,7 @@ BEGIN TRY
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
+			, strUnitMeasure
 			, strPreviewOldData
 			, strPreviewNewData
 			, strOldDataPreview
@@ -451,7 +477,7 @@ BEGIN TRY
 				, intChildId					= NULL
 				, intCurrentEntityUserId		= @currentUserId
 				, intItemId						= I.intItemId
-				, intItemUOMId					= UOM.intItemUOMId
+				, intItemUOMId					= NULL
 				, intItemLocationId				= IL.intItemLocationId 
 				, intEffectiveItemCostId		= tic.intEffectiveItemCostId
 				, intItemSpecialPricingId		= NULL
@@ -464,11 +490,13 @@ BEGIN TRY
 				, strChangeDescription			= CASE
 													WHEN [Changes].oldColumnName = 'strCost_Original' THEN 'Cost'
 												END
+				, strUnitMeasure				= NULL
 				, strPreviewOldData				= CASE WHEN [Changes].strOldData = ''
 													THEN CAST((SELECT TOP 1 CAST(dblCost AS DECIMAL(10,3))
 																					FROM tblICEffectiveItemCost getCost
 																					WHERE dtmEffectiveCostDate < @dtmEffectiveDateConv
 																					AND intItemId = tic.intItemId
+																					AND intItemLocationId = tic.intItemLocationId 
 																					AND intItemLocationId = tic.intItemLocationId 
 																					ORDER BY dtmEffectiveCostDate DESC) AS VARCHAR(50))
 													ELSE
@@ -514,7 +542,9 @@ BEGIN TRY
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
 		INNER JOIN tblICItemUOM UOM 
-			ON I.intItemId = UOM.intItemId
+			ON I.intItemId = UOM.intItemId AND ysnStockUnit = 1
+		INNER JOIN tblICUnitMeasure UM 
+			ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		INNER JOIN tblICEffectiveItemCost tic 
 			ON I.intItemId = tic.intItemId 
 				AND [Changes].intItemLocationId = tic.intItemLocationId 
@@ -529,12 +559,6 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 			)
-			AND 
-			(
-				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
-			)
-			AND UOM.ysnStockUnit = 1
 
 		
 		-- Effective item PRICE pricing
@@ -558,6 +582,7 @@ BEGIN TRY
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
+			, strUnitMeasure
 			, strPreviewOldData
 			, strPreviewNewData
 			, strOldDataPreview
@@ -591,12 +616,14 @@ BEGIN TRY
 				, strChangeDescription			= CASE
 													WHEN [Changes].oldColumnName = 'strPrice_Original' THEN 'Retail Price'
 												END
+				, strUnitMeasure				= UM.strUnitMeasure
 				, strPreviewOldData				= CASE WHEN [Changes].strOldData = ''
 													THEN CAST((SELECT TOP 1 CAST(dblRetailPrice AS DECIMAL(10,3))
 																					FROM tblICEffectiveItemPrice getPrice
 																					WHERE dtmEffectiveRetailPriceDate < @dtmEffectiveDateConv
 																					AND intItemId = tip.intItemId
 																					AND intItemLocationId = tip.intItemLocationId 
+																					AND intItemUOMId = tip.intItemUOMId 
 																					ORDER BY dtmEffectiveRetailPriceDate DESC) AS VARCHAR(50))
 													ELSE
 														[Changes].strOldData
@@ -608,6 +635,7 @@ BEGIN TRY
 																					WHERE dtmEffectiveRetailPriceDate < @dtmEffectiveDateConv
 																					AND intItemId = tip.intItemId
 																					AND intItemLocationId = tip.intItemLocationId 
+																					AND intItemUOMId = tip.intItemUOMId 
 																					ORDER BY dtmEffectiveRetailPriceDate DESC) AS VARCHAR(50))
 													ELSE
 														[Changes].strOldData
@@ -617,12 +645,13 @@ BEGIN TRY
 				, ysnForRevert					= 1
 		FROM 
 		(
-			SELECT DISTINCT intEffectiveItemPriceId, intItemId, intItemLocationId, oldColumnName, strOldData, strNewData, strAction
+			SELECT DISTINCT intEffectiveItemPriceId, intItemId, intItemLocationId, intItemUOMId, oldColumnName, strOldData, strNewData, strAction
 			FROM 
 			(
 				SELECT intEffectiveItemPriceId
 				   , intItemId
 				   , intItemLocationId
+				   , intItemUOMId
 				   , ISNULL(CAST(CAST(dblOldPrice AS DECIMAL(18,3)) AS NVARCHAR(50)),'') AS strPrice_Original
 				   , CAST(CAST(dblNewPrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strPrice_New
 				   , strAction
@@ -641,10 +670,13 @@ BEGIN TRY
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
 		INNER JOIN tblICItemUOM UOM 
-			ON I.intItemId = UOM.intItemId
+			ON I.intItemId = UOM.intItemId AND UOM.intItemUOMId = [Changes].intItemUOMId
+		INNER JOIN tblICUnitMeasure UM 
+			ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		INNER JOIN tblICEffectiveItemPrice tip 
 			ON I.intItemId = tip.intItemId 
 				AND [Changes].intItemLocationId = tip.intItemLocationId 
+				AND [Changes].intItemUOMId = tip.intItemUOMId 
 				AND tip.dtmEffectiveRetailPriceDate = @dtmEffectiveDateConv
 		INNER JOIN tblICItemLocation IL 
 			ON tip.intItemLocationId = IL.intItemLocationId 
@@ -656,12 +688,6 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 			)
-			AND 
-			(
-				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
-			)
-			AND UOM.ysnStockUnit = 1
 
 
 
@@ -687,6 +713,7 @@ BEGIN TRY
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
+			, strUnitMeasure
 			, strPreviewOldData
 			, strPreviewNewData
 			, strOldDataPreview
@@ -728,6 +755,7 @@ BEGIN TRY
 											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
 											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
 										END
+			, strUnitMeasure			= UM.strUnitMeasure
 			, strPreviewOldData			= CASE WHEN [Changes].strOldData = ''
 												THEN NULL
 											ELSE
@@ -776,7 +804,9 @@ BEGIN TRY
 		INNER JOIN tblICItemSpecialPricing ISP 
 			ON [Changes].intItemSpecialPricingId = ISP.intItemSpecialPricingId
 		INNER JOIN tblICItemUOM UOM 
-			ON ISP.intItemId = UOM.intItemId
+			ON ISP.intItemId = UOM.intItemId AND ISP.intItemUnitMeasureId = UOM.intItemUOMId
+		INNER JOIN tblICUnitMeasure UM 
+			ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		INNER JOIN tblICItemLocation IL 
 			ON ISP.intItemLocationId = IL.intItemLocationId 
 			AND I.intItemId = IL.intItemId
@@ -787,12 +817,6 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 			)
-			AND 
-			(
-				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
-			)
-			AND UOM.ysnStockUnit = 1
 	END
 
 
@@ -817,6 +841,7 @@ BEGIN TRY
 				strUpc,
 				strDescription,
 				strChangeDescription,
+				strUnitMeasure,
 				strOldData,
 				strNewData,
 				strActionType,
@@ -836,6 +861,7 @@ BEGIN TRY
 			 	, strUpc
 				, strItemDescription
 				, strChangeDescription
+				, strUnitMeasure
 				, strPreviewOldData
 				, strPreviewNewData
 				, strAction
@@ -943,6 +969,26 @@ BEGIN TRY
 
 							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 						END
+
+					--ST-2074
+					IF ISNULL(@Description, '') != ''
+					BEGIN
+						SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Description</b></p>'
+							
+						SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + @Description + '</p>'
+					
+						--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+					END
+					
+					IF ISNULL(@intUOM, '') != ''
+					BEGIN
+						SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UOM</b></p>'
+							
+						SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + strUnitMeasure + '</p>'
+						FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUOM
+					
+						--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+					END
 
 					-- ===================================================================================
 					-- [END] Filter Criteria
@@ -1110,6 +1156,7 @@ BEGIN TRY
 	SELECT DISTINCT 
 	          strLocation
 			  , strUpc
+			  , strUnitMeasure
 			  , strItemDescription
 			  , strChangeDescription
 			  , strPreviewOldData AS strOldData

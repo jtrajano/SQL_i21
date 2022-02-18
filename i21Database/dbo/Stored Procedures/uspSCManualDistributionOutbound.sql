@@ -171,6 +171,18 @@ WHERE strDistributionOption <> @strTicketDistributionOption
 
 
 
+if @strTicketDistributionOption = 'CNT' and not exists ( select top 1 1 
+															from #tmpManualDistributionLineItem
+																where strDistributionOption = @strTicketDistributionOption 
+																	and intTransactionDetailId = @intTicketContractDetailId)
+begin
+
+	exec uspSCCheckContractStatus  @intContractDetailId = @intTicketContractDetailId
+
+end
+
+
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher, intLoadDetailId
@@ -227,6 +239,13 @@ OPEN intListCursor;
 							--get contract Detail Id of the load detail  
 							SELECT @intLoadContractDetailId = intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
 							
+
+							if @intLoadContractDetailId > 0
+							begin
+								exec uspSCCheckContractStatus  @intContractDetailId = @intLoadContractDetailId
+							end
+
+
 							IF(@intLoopContractId = @intLoadContractDetailId)  
 							BEGIN   
 

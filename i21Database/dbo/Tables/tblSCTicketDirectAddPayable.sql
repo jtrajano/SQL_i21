@@ -6,6 +6,7 @@
     [intItemId] INT NOT NULL, 
     [intContractDetailId] INT NULL, 
     [intLoadDetailId] INT NULL,
+    [intTicketDistributionAllocationId] INT NULL
     
     CONSTRAINT [PK_tblSCTicketDirectAddPayable_intTicketDirectAddPayableId] PRIMARY KEY (intTicketDirectAddPayableId), 
 )

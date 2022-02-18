@@ -6,6 +6,7 @@
 	[strActionType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[strUpcCode] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	[strUnitMeasure] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[dblSalePrice] DECIMAL(18, 6) NULL,
 	[ysnSalesTaxed] BIT,
 	[ysnIdRequiredLiquor] BIT,

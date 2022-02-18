@@ -20,6 +20,7 @@
 	[strPurchaserSignedStatementNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intFreightItemId] INT NULL,
 	[intUserId] INT NULL,
+	[intLongTruckLoadId] INT NULL,
     CONSTRAINT [PK_tblTRLoadHeader] PRIMARY KEY ([intLoadHeaderId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intSellerId] FOREIGN KEY ([intSellerId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),

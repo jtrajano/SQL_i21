@@ -20,7 +20,7 @@ BEGIN
 	FROM tblCTContractBalanceLog cbLog
 	JOIN tblCTPriceFixation pf ON pf.intPriceFixationId = cbLog.intTransactionReferenceId
 	CROSS APPLY (
-		SELECT pfd.intPriceFixationDetailId FROM tblCTPriceFixationDetail pfd WHERE pfd.intPriceFixationId = pf.intPriceFixationId AND pfd.dtmFixationDate = cbLog.dtmTransactionDate
+		SELECT pfd.intPriceFixationDetailId FROM tblCTPriceFixationDetail pfd WHERE pfd.intPriceFixationId = pf.intPriceFixationId AND convert(nvarchar(10),pfd.dtmFixationDate,101) = convert(nvarchar(10),cbLog.dtmTransactionDate,101)
 	) pfd
 	WHERE cbLog.intActionId = 1
 		AND cbLog.strTransactionReference = 'Price Fixation' 

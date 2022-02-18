@@ -102,6 +102,7 @@ BEGIN
 										 , @UserId = @intUserId
 									--	 , @intShipToLocationId = @intContractShipToLocationId
 										 , @NewInvoiceId = @intNewInvoiceId OUT
+										 , @intTicketId = @intTicketId
 		END
 	ELSE
 	--INSERT TO EXISTING INVOICE
@@ -199,14 +200,14 @@ BEGIN
 	--RECOMPUTE OVERAGE CONTRACTS
 		BEGIN
 			IF ISNULL(@intTicketId, 0) > 0
-				BEGIN
-					UPDATE ID
-					SET intTicketId = @intTicketId
-					FROM tblARInvoiceDetail ID
-					INNER JOIN tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-					WHERE SOD.intSalesOrderId = @intSalesOrderId
-				END
-				
+			BEGIN
+				UPDATE ID
+				SET intTicketId = @intTicketId
+				FROM tblARInvoiceDetail ID
+				INNER JOIN tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+				WHERE SOD.intSalesOrderId = @intSalesOrderId
+			END
+
 			EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 		= @intNewInvoiceId
 											   , @intScaleUOMId		= @intScaleUOMId
 											   , @intUserId			= @intUserId
@@ -214,7 +215,19 @@ BEGIN
 											   , @ysnFromSalesOrder = 1
 										  --   , @intTicketId		= @intTicketId
 
-			
+			IF ISNULL(@intTicketId, 0) > 0
+			BEGIN
+				DELETE FROM tblARInvoiceDetail 
+				WHERE intInvoiceId = @intNewInvoiceId
+				AND dblQtyShipped = 0
+
+				EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId	= @intNewInvoiceId
+											  , @ForDelete			= 0    
+											  , @UserId			    = @intUserId
+											  , @InvoiceDetailId 	= NULL
+											  , @ysnLogRisk			= 0
+			END
+
 			UPDATE SO 
 			SET SO.strOrderStatus = CASE WHEN SOD.dblQtyShipped >= SOD.dblQtyOrdered THEN 'Closed' ELSE 'Short Closed' END
 			FROM tblSOSalesOrder SO

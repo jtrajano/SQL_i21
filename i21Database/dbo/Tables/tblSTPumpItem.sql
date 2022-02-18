@@ -3,6 +3,7 @@
 	[intStorePumpItemId] INT NOT NULL IDENTITY, 
 	[intStoreId] INT NOT NULL, 
     [intItemUOMId] INT NOT NULL, 
+	[strUnitMeasure] VARCHAR(200) NULL,
     [dblPrice] NUMERIC(18, 6) NULL  DEFAULT 0, 
     [intTaxGroupId] int NULL,
 	[intCategoryId] int NULL,
@@ -14,5 +15,3 @@
 	CONSTRAINT [FK_tblSTPumpItem_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblSTPumpItem_tblICCategory_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId])
 )
-
-

@@ -32,4 +32,31 @@
 	, strMiscFields NVARCHAR(MAX) NULL
 	, intActionId INT NULL
 	, strInOut NVARCHAR(50)
+	, intOptionMonthId INT NULL
+	, strOptionMonth NVARCHAR(20) NULL
+	, dblStrike DECIMAL(24, 10) NULL
+	, strOptionType NVARCHAR(10) NULL
+	, strInstrumentType NVARCHAR(30) NULL
+	, intBrokerageAccountId INT NULL
+	, strBrokerAccount NVARCHAR(50) NULL
+	, strBroker NVARCHAR(50) NULL
+	, strBuySell NVARCHAR(10) NULL
+	, ysnPreCrush BIT NULL
+	, strBrokerTradeNo NVARCHAR(50) NULL
+	, intMatchNo INT NULL
+	, intMatchDerivativesHeaderId INT NULL
+	, intMatchDerivativesDetailId INT NULL
+	, strStorageTypeCode NVARCHAR(3) NULL
+	, ysnReceiptedStorage BIT NULL
+	, intTypeId INT NULL
+	, strStorageType NVARCHAR(50) NULL
+	, intDeliverySheetId INT NULL
+	, strTicketStatus NVARCHAR(50) NULL
+	, strOwnedPhysicalStock NVARCHAR(50) NULL
+	, strStorageTypeDescription NVARCHAR(50) NULL
+	, ysnActive BIT NULL
+	, ysnExternal BIT NULL
+	, intStorageHistoryId INT NULL
+	, intInventoryReceiptItemId INT NULL
+	, intLoadDetailId INT NULL
 )

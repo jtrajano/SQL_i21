@@ -32,8 +32,9 @@ IF @strTransactionType = 'Invoice'
 			FROM tblARInvoiceDetail ID
 			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 			LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-			WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
-			  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+			WHERE ID.intSalesOrderDetailId IS NOT NULL
+			  AND ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+			  AND ID.intInventoryShipmentItemId IS NULL
 			  AND ID.intInvoiceId = @intTransactionId
 			  AND ((ISNULL(SOD.strMaintenanceType, '') = 'Maintenance Only' AND I.ysnRecurring = 1) OR (ISNULL(SOD.strMaintenanceType, '') <> 'Maintenance Only' AND I.ysnRecurring = 0))
 			GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
@@ -41,13 +42,13 @@ IF @strTransactionType = 'Invoice'
 		OUTER APPLY (
 			SELECT dblQtyShipped = SUM(ISNULL(ITEMS.dblQtyShipped, 0))
 			FROM (
-
 				SELECT dblQtyShipped = CASE WHEN ID.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ID.intItemUOMId, UOM.intItemUOMId), SUM(ID.dblQtyShipped)), 0) ELSE SUM(ID.dblQtyShipped) END
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 				LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-				WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
-				  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+				WHERE ID.intSalesOrderDetailId IS NOT NULL
+			      AND ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+				  AND ID.intInventoryShipmentItemId IS NULL
 				  AND ID.intInvoiceId <> @intTransactionId
 				  AND ((ISNULL(SOD.strMaintenanceType, '') = 'Maintenance Only' AND I.ysnRecurring = 1) OR (ISNULL(SOD.strMaintenanceType, '') <> 'Maintenance Only' AND I.ysnRecurring = 0))
 				GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
@@ -57,8 +58,10 @@ IF @strTransactionType = 'Invoice'
 				SELECT dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId, ISNULL(ISI.intItemUOMId, UOM.intItemUOMId), SUM(ISI.dblQuantity)), 0)
 				FROM tblICInventoryShipmentItem ISI
 				LEFT JOIN tblICItemUOM UOM ON ISI.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-				WHERE ISNULL(ISI.intOrderId, 0) = SOD.intSalesOrderId
-				  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
+				WHERE ISI.intOrderId IS NOT NULL
+				  AND ISI.intLineNo IS NOT NULL
+				  AND ISI.intOrderId = SOD.intSalesOrderId
+				  AND ISI.intLineNo = SOD.intSalesOrderDetailId
 				  AND ISI.intInventoryShipmentId <> @intTransactionId
 				GROUP BY ISI.intItemUOMId, UOM.intItemUOMId
 			) ITEMS
@@ -78,8 +81,10 @@ ELSE IF @strTransactionType = 'Inventory'
 			SELECT dblQuantity = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId, ISNULL(ISI.intItemUOMId, UOM.intItemUOMId), SUM(ISI.dblQuantity)), 0)
 			FROM tblICInventoryShipmentItem ISI
 			LEFT JOIN tblICItemUOM UOM ON ISI.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-			WHERE ISNULL(ISI.intOrderId, 0) = SOD.intSalesOrderId
-			  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
+			WHERE ISI.intOrderId IS NOT NULL 
+			  AND ISI.intLineNo IS NOT NULL
+			  AND ISI.intOrderId = SOD.intSalesOrderId
+			  AND ISI.intLineNo = SOD.intSalesOrderDetailId
 			  AND ISI.intInventoryShipmentId = @intTransactionId
 			GROUP BY ISI.intItemUOMId, UOM.intItemUOMId  
 		) SHIPPEDITEMS	
@@ -89,8 +94,10 @@ ELSE IF @strTransactionType = 'Inventory'
 				SELECT dblQuantity = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId, ISNULL(ISI.intItemUOMId, UOM.intItemUOMId), SUM(ISI.dblQuantity)), 0)
 				FROM tblICInventoryShipmentItem ISI
 				LEFT JOIN tblICItemUOM UOM ON ISI.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-				WHERE ISNULL(ISI.intOrderId, 0) = SOD.intSalesOrderId
-				  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
+				WHERE ISI.intOrderId IS NOT NULL 
+				  AND ISI.intLineNo IS NOT NULL
+				  AND ISI.intOrderId = SOD.intSalesOrderId
+				  AND ISI.intLineNo = SOD.intSalesOrderDetailId
 				  AND ISI.intInventoryShipmentId <> @intTransactionId
 				GROUP BY ISI.intItemUOMId, UOM.intItemUOMId
 			
@@ -100,8 +107,9 @@ ELSE IF @strTransactionType = 'Inventory'
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 				LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-				WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
-				  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+				WHERE ID.intSalesOrderDetailId IS NOT NULL
+				  AND ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+				  AND ID.intInventoryShipmentItemId IS NULL
 				  AND ID.intInvoiceId <> @intTransactionId
 				  AND ((ISNULL(SOD.strMaintenanceType, '') = 'Maintenance Only' AND I.ysnRecurring = 1) OR (ISNULL(SOD.strMaintenanceType, '') <> 'Maintenance Only' AND I.ysnRecurring = 0))
 				GROUP BY ID.intItemUOMId, UOM.intItemUOMId
@@ -134,8 +142,9 @@ ELSE
 			FROM tblARInvoiceDetail ID
 			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 			LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-			WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
-			  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+			WHERE ID.intSalesOrderDetailId IS NOT NULL
+			  AND ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+			  AND ID.intInventoryShipmentItemId IS NULL
 			  AND ((ISNULL(SOD.strMaintenanceType, '') = 'Maintenance Only' AND I.ysnRecurring = 1) OR (ISNULL(SOD.strMaintenanceType, '') <> 'Maintenance Only' AND I.ysnRecurring = 0))
 			GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
 		) INVOICEITEMS
@@ -143,8 +152,10 @@ ELSE
 			SELECT dblQuantity = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId, ISNULL(ISI.intItemUOMId, UOM.intItemUOMId), SUM(ISI.dblQuantity)), 0)
 			FROM tblICInventoryShipmentItem ISI
 			LEFT JOIN tblICItemUOM UOM ON ISI.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-			WHERE ISNULL(ISI.intOrderId, 0) = SOD.intSalesOrderId
-			  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
+			WHERE ISI.intOrderId IS NOT NULL
+			  AND ISI.intLineNo IS NOT NULL
+		      AND ISI.intOrderId = SOD.intSalesOrderId
+			  AND ISI.intLineNo = SOD.intSalesOrderDetailId
 			GROUP BY ISI.intItemUOMId, UOM.intItemUOMId  
 		) SHIPPEDITEMS
 		WHERE intSalesOrderId = @intTransactionId

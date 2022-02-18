@@ -1,6 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessSplitOnInvoicePost]
-     @PostDate DATETIME
-    ,@UserId  INT
+      @ysnPost			BIT = 1
+	, @ysnRecap			BIT = 0
+	, @dtmDatePost		DATETIME = NULL
+	, @strBatchId		NVARCHAR(40) = NULL
+	, @intUserId		INT = 1
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -22,283 +25,274 @@ ELSE
 	SAVE TRANSACTION @Savepoint
 
 BEGIN TRY
+	DECLARE @InvoiceEntries		AS InvoiceStagingTable
+	DECLARE @LineItemTaxEntries	AS LineItemTaxDetailStagingTable
+	DECLARE @InvoiceIds			AS InvoiceId
+	DECLARE @intLogId			INT = NULL
 
-DECLARE @ForInsertion NVARCHAR(MAX)
-DECLARE @ForDeletion NVARCHAR(MAX)
+	IF(OBJECT_ID('tempdb..#SPLITINVOICEDETAILS') IS NOT NULL) DROP TABLE #SPLITINVOICEDETAILS	
+	CREATE TABLE #SPLITINVOICEDETAILS (
+		  intInvoiceId			INT NOT NULL		
+		, intUserId				INT NULL
+		, intSplitEntityId		INT NULL
+		, intSplitId			INT NOT NULL
+		, dtmDate				DATETIME NULL
+		, dblSplitPercent		NUMERIC(18,6) NULL DEFAULT 0
+		, strTransactionType	NVARCHAR(25) NULL
+	)
+	IF(OBJECT_ID('tempdb..#EXCLUDEDSPLIT') IS NOT NULL) DROP TABLE #EXCLUDEDSPLIT
+	CREATE TABLE #EXCLUDEDSPLIT (
+		  intInvoiceId			INT NOT NULL		
+		, intUserId				INT NULL
+		, intSplitEntityId		INT NULL
+		, intSplitId			INT NOT NULL
+		, dtmDate				DATETIME NULL
+		, dblSplitPercent		NUMERIC(18,6) NULL DEFAULT 0
+		, strTransactionType	NVARCHAR(25) NULL
+	)
 
-DECLARE @SplitInvoiceData [InvoicePostingTable]
-INSERT INTO @SplitInvoiceData
-SELECT 
-	[intInvoiceId]
-	,[strInvoiceNumber]
-	,[strTransactionType]
-	,[strType]
-	,[dtmDate]
-	,[dtmPostDate]
-	,[dtmShipDate]
-	,[intEntityCustomerId]
-	,[strCustomerNumber]
-	,[ysnCustomerActive]
-	,[dblCustomerCreditLimit]
-	,[intCompanyLocationId]
-	,[strCompanyLocationName]
-	,[intAccountId]
-	,[intAPAccount]
-	,[intFreightIncome]
-	,[intDeferredRevenueAccountId]
-	,[intUndepositedFundsId]
-	,[intProfitCenter]
-	,[intLocationSalesAccountId]
-	,[intCurrencyId]
-	,[dblAverageExchangeRate]
-	,[intTermId]
-	,[dblInvoiceTotal]
-	,[dblBaseInvoiceTotal]
-	,[dblShipping]
-	,[dblBaseShipping]
-	,[dblTax]
-	,[dblBaseTax]
-	,[dblAmountDue]
-	,[dblBaseAmountDue]
-	,[dblPayment]
-	,[dblBasePayment]
-	,[dblProvisionalAmount]
-	,[dblBaseProvisionalAmount]
-	,[strComments]
-	,[strImportFormat]
-	,[intSourceId]
-	,[intOriginalInvoiceId]
-	,[strInvoiceOriginId]
-	,[intDistributionHeaderId]
-	,[intLoadDistributionHeaderId]
-	,[intLoadId]
-	,[intFreightTermId]
-	,[strActualCostId]
-	,[intPeriodsToAccrue]
-	,[ysnAccrueLicense]
-	,[intSplitId]
-	,[dblSplitPercent]
-	,[ysnSplitted]
-	,[ysnPosted]
-	,[ysnRecurring]
-	,[ysnImpactInventory]
-	,[ysnImportedAsPosted]
-	,[ysnImportedFromOrigin]
-	,[dtmDatePosted]
-	,[strBatchId]
-	,[ysnPost]
-	,[ysnRecap]
-	,[intEntityId]
-	,[intUserId]
-	,[ysnUserAllowedToPostOtherTrans]
-	,[ysnWithinAccountingDate]
-	,[ysnForApproval]
-	,[ysnFromProvisional]
-	,[ysnProvisionalWithGL]
-	,[ysnExcludeInvoiceFromPayment]
-	,[ysnRefundProcessed]
-	,[ysnIsInvoicePositive]
-	,[ysnFromReturn]
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[strItemNo]
-	,[strItemType]
-	,[strItemManufactureType]
-	,[strItemDescription]
-	,[intItemUOMId]
-	,[intItemWeightUOMId]
-	,[intItemAccountId]
-	,[intServiceChargeAccountId]
-	,[intSalesAccountId]
-	,[intCOGSAccountId]
-	,[intInventoryAccountId]
-	,[intLicenseAccountId]
-	,[intMaintenanceAccountId]
-	,[intConversionAccountId]
-	,[dblQtyShipped]
-	,[dblUnitQtyShipped]
-	,[dblShipmentNetWt]
-	,[dblUnitQty]
-	,[dblUnitOnHand]
-	,[intAllowNegativeInventory]
-	,[ysnStockTracking]
-	,[intItemLocationId]
-	,[dblLastCost]
-	,[intCategoryId]
-	,[ysnRetailValuation]
-	,[dblPrice]
-	,[dblBasePrice]
-	,[dblUnitPrice]
-	,[dblBaseUnitPrice]
-	,[strPricing]
-	,[dblDiscount]
-	,[dblDiscountAmount]
-	,[dblBaseDiscountAmount]
-	,[dblTotal]
-	,[dblBaseTotal]
-	,[dblLineItemGLAmount]
-	,[dblBaseLineItemGLAmount]
-	,[intCurrencyExchangeRateTypeId]
-	,[dblCurrencyExchangeRate]
-	,[strCurrencyExchangeRateType]
-	,[intLotId]
-	,[intOriginalInvoiceDetailId]
-	,[strMaintenanceType]
-	,[strFrequency]
-	,[dtmMaintenanceDate]
-	,[dblLicenseAmount]
-	,[dblBaseLicenseAmount]
-	,[dblLicenseGLAmount]
-	,[dblBaseLicenseGLAmount]
-	,[dblMaintenanceAmount]
-	,[dblBaseMaintenanceAmount]
-	,[dblMaintenanceGLAmount]
-	,[dblBaseMaintenanceGLAmount]
-	,[dblTaxesAddToCost]
-	,[dblBaseTaxesAddToCost]
-	,[ysnTankRequired]
-	,[ysnLeaseBilling]
-	,[intSiteId]
-	,[intPerformerId]
-	,[intContractHeaderId]
-	,[intContractDetailId]
-	,[intInventoryShipmentItemId]
-	,[intInventoryShipmentChargeId]
-	,[intSalesOrderDetailId]
-	,[intLoadDetailId]
-	,[intShipmentId]
-	,[intTicketId]
-	,[intDiscountAccountId]
-	,[intCustomerStorageId]
-	,[intStorageScheduleTypeId]
-	,[intSubLocationId]
-	,[intStorageLocationId]
-	,[ysnAutoBlend]
-	,[ysnBlended]
-	,[dblQuantity]
-	,[dblMaxQuantity]
-	,[strOptionType]
-	,[strSourceType]
-	,[strPostingMessage]
-	,[strDescription]
-	,[strInterCompanyVendorId]
-	,[strInterCompanyLocationId]
-	,[intInterCompanyId]
-	,[strReceiptNumber]
-	,[ysnInterCompany]
-FROM
-    ##ARPostInvoiceHeader
-WHERE
-	[ysnSplitted] = 0
-    AND ISNULL([intSplitId], 0) > 0
-    AND [strTransactionType] IN ('Invoice', 'Cash', 'Debit Memo')
+	SET @ysnPost = 1	
+	
+	--GET ALL INVOICES TO SPLIT	
+	INSERT INTO #SPLITINVOICEDETAILS (
+		  intInvoiceId
+		, intUserId
+		, intSplitEntityId
+		, intSplitId
+		, dtmDate
+		, dblSplitPercent
+		, strTransactionType
+	)
+	SELECT intInvoiceId			= I.intInvoiceId
+		 , intUserId			= I.intEntityId
+		 , intSplitEntityId		= SD.intEntityId
+		 , intSplitId			= I.intSplitId
+		 , dtmDate				= I.dtmDate
+		 , dblSplitPercent		= CASE WHEN SD.dblSplitPercent > 0 THEN SD.dblSplitPercent/100 ELSE 1 END
+		 , strTransactionType	= I.strTransactionType
+	FROM ##ARPostInvoiceHeader I 
+	INNER JOIN tblEMEntitySplitDetail SD ON I.intSplitId = SD.intSplitId
+	WHERE I.intSplitId IS NOT NULL
+	  AND I.intDistributionHeaderId IS NULL 
+	  AND I.strType <> 'Transport Delivery'
+	  AND ((I.strTransactionType IN ('Invoice', 'Credit Memo') AND I.strType = 'Standard') OR I.strTransactionType NOT IN ('Invoice', 'Credit Memo'))
 
-WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
-BEGIN
-    DECLARE  @invoicesToAdd     NVARCHAR(MAX) = NULL
-            ,@intSplitInvoiceId INT
-            ,@Post              BIT
-            ,@Recap             BIT
-            ,@BatchId           NVARCHAR(40)
-            ,@AccrueLicense     BIT
+	IF NOT EXISTS(SELECT TOP 1 NULL FROM #SPLITINVOICEDETAILS)
+		RETURN;
 
-    SELECT TOP 1 
-         @intSplitInvoiceId	= [intInvoiceId]
-        ,@Post              = [ysnPost]
-        ,@Recap             = [ysnRecap]
-        ,@BatchId           = [strBatchId]          
-        ,@AccrueLicense     = [ysnAccrueLicense]
-    FROM
-        @SplitInvoiceData
-    ORDER BY
-        [intInvoiceId]
+	--GET INVOICE FROM SPLIT TO UPDATE
+	INSERT INTO #EXCLUDEDSPLIT (
+		  intInvoiceId
+		, intUserId
+		, intSplitEntityId
+		, intSplitId
+		, dtmDate
+		, dblSplitPercent
+		, strTransactionType
+	)
+	SELECT intInvoiceId			= SD.intInvoiceId
+		, intUserId				= SD.intUserId
+		, intSplitEntityId		= SD.intSplitEntityId
+		, intSplitId			= SD.intSplitId
+		, dtmDate				= SD.dtmDate
+		, dblSplitPercent		= SD.dblSplitPercent
+		, strTransactionType	= SD.strTransactionType
+	FROM #SPLITINVOICEDETAILS SD
+	INNER JOIN (
+		SELECT intInvoiceId		= SDD.intInvoiceId
+			 , intSplitEntityId	= MIN(SDD.intSplitEntityId)
+		FROM #SPLITINVOICEDETAILS SDD
+		GROUP BY SDD.intInvoiceId
+	) SDO ON SD.intInvoiceId = SDO.intInvoiceId AND SD.intSplitEntityId = SDO.intSplitEntityId
 
-    EXEC dbo.uspARProcessSplitInvoice @intSplitInvoiceId, @UserId, @invoicesToAdd OUT
+	--REMOVE INVOICE TO UPDATE
+	DELETE SD
+	FROM #SPLITINVOICEDETAILS SD
+	INNER JOIN #EXCLUDEDSPLIT SP ON SD.intInvoiceId = SP.intInvoiceId AND SD.intSplitEntityId = SP.intSplitEntityId
+	
+	--CREATE INVOICES FROM #SPLITINVOICEDETAILS
+	INSERT INTO @InvoiceEntries (
+		  intId
+		, intSourceId
+		, strTransactionType
+		, strType
+		, strSourceTransaction
+		, strSourceId
+		, intEntityCustomerId
+		, intCompanyLocationId
+		, intEntityId
+		, intTermId
+		, dtmDate		
+		, dtmShipDate
+		, dtmPostDate
+		, strInvoiceOriginId
+		, strComments
+		, ysnImpactInventory
+		, intSplitId
+		, intOriginalInvoiceId
+		, strPONumber
+		, strBOLNumber
 
-    SELECT @ForDeletion = ISNULL(@ForDeletion, '') + ISNULL(CONVERT(NVARCHAR(20), @intSplitInvoiceId), '') + ','
-	SELECT @ForInsertion = ISNULL(@ForInsertion, '') + ISNULL(CONVERT(NVARCHAR(20), @invoicesToAdd), '') + ','
+		, intItemId
+		, intItemUOMId
+		, strItemDescription
+		, dblQtyOrdered
+		, dblQtyShipped
+		, dblDiscount
+		, dblPrice
+		, ysnRecomputeTax
+	)
+	SELECT intId				= I.intInvoiceId
+		, intSourceId			= I.intInvoiceId
+		, strTransactionType	= I.strTransactionType
+		, strType				= I.strType
+		, strSourceTransaction	= 'Store Charge'
+		, strSourceId			= I.strInvoiceNumber
+		, intEntityCustomerId	= SD.intSplitEntityId
+		, intCompanyLocationId	= I.intCompanyLocationId
+		, intEntityId			= I.intEntityId
+		, intTermId				= I.intTermId
+		, dtmDate				= I.dtmDate		
+		, dtmShipDate			= I.dtmShipDate
+		, dtmPostDate			= I.dtmPostDate
+		, strInvoiceOriginId	= I.strInvoiceNumber
+		, strComments			= I.strComments + ' Split: ' + I.strInvoiceNumber
+		, ysnImpactInventory	= I.ysnImpactInventory
+		, intSplitId			= I.intSplitId
+		, intOriginalInvoiceId	= I.intInvoiceId
+		, strPONumber			= NULL--I.strPONumber
+		, strBOLNumber			= I.strBOLNumber
 
-	DECLARE @TempInvoiceIds AS [InvoiceId]
-	DELETE FROM @TempInvoiceIds
+		, intItemId				= I.intItemId
+		, intItemUOMId			= I.intItemUOMId
+		, strItemDescription	= I.strItemDescription
+		, dblQtyOrdered			= CASE WHEN I.intInventoryShipmentItemId IS NOT NULL OR I.intSalesOrderDetailId IS NOT NULL THEN I.dblQtyShipped * SD.dblSplitPercent ELSE 0 END
+		, dblQtyShipped			= I.dblQtyShipped * SD.dblSplitPercent
+		, dblDiscount			= I.dblDiscount
+		, dblPrice				= I.dblPrice
+		, ysnRecomputeTax		= 1
+	FROM #SPLITINVOICEDETAILS SD
+	INNER JOIN ##ARPostInvoiceDetail I ON I.intInvoiceId = SD.intInvoiceId
+	WHERE I.intContractDetailId IS NULL
+	
+	EXEC uspARProcessInvoicesByBatch @InvoiceEntries		= @InvoiceEntries
+								   , @LineItemTaxEntries	= @LineItemTaxEntries
+								   , @UserId				= @intUserId
+								   , @GroupingOption		= 10
+								   , @RaiseError			= 1
+								   , @LogId					= @intLogId OUT
+	
+	--UPDATE CURRENT INVOICE FROM #EXCLUDEDSPLIT		
+	UPDATE I 
+	SET ysnSplitted				= 1
+	  , intSplitId				= I.intSplitId
+	  , strInvoiceOriginId		= I.strInvoiceNumber
+	  , intEntityCustomerId		= II.intSplitEntityId
+	  , intShipToLocationId		= SPLITENTITY.intShipToId
+	  , intBillToLocationId		= SPLITENTITY.intBillToId
+	  , intTermId				= SPLITENTITY.intTermsId
+	  , intEntityContactId		= SPLITENTITY.intEntityContactId
+	  , intEntitySalespersonId	= SPLITENTITY.intSalespersonId
+	  , dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(I.dtmDate, SPLITENTITY.intTermsId)
+	  , dblAmountDue			= dblAmountDue * II.dblSplitPercent	  
+	  , dblInvoiceSubtotal		= dblInvoiceSubtotal * II.dblSplitPercent
+	  , dblInvoiceTotal			= dblInvoiceTotal * II.dblSplitPercent
+	  , dblTax					= dblTax * II.dblSplitPercent
+	  , dblSplitPercent			= II.dblSplitPercent
+	  , strShipToLocationName	= SPLITENTITY.strShipToLocationName
+	  , strShipToAddress		= SPLITENTITY.strShipToAddress
+	  , strShipToCity			= SPLITENTITY.strShipToCity
+	  , strShipToState			= SPLITENTITY.strShipToState
+	  , strShipToZipCode		= SPLITENTITY.strShipToZipCode
+	  , strShipToCountry		= SPLITENTITY.strShipToCountry
+	  , strBillToLocationName	= SPLITENTITY.strBillToLocationName
+	  , strBillToAddress		= SPLITENTITY.strBillToAddress
+	  , strBillToCity			= SPLITENTITY.strBillToCity
+	  , strBillToState			= SPLITENTITY.strBillToState
+	  , strBillToZipCode		= SPLITENTITY.strBillToZipCode
+	  , strBillToCountry		= SPLITENTITY.strBillToCountry
+	FROM tblARInvoice I
+	INNER JOIN #EXCLUDEDSPLIT II ON I.intInvoiceId = II.intInvoiceId
+	INNER JOIN (
+		SELECT intEntityCustomerId
+			 , intTermsId
+			 , intSalespersonId
+			 , intBillToId
+			 , intShipToId
+			 , intFreightTermId
+			 , intEntityContactId
+			 , strShipToLocationName
+			 , strShipToAddress
+			 , strShipToCity
+			 , strShipToState
+			 , strShipToZipCode
+			 , strShipToCountry
+			 , strBillToLocationName
+			 , strBillToAddress
+			 , strBillToCity
+			 , strBillToState
+			 , strBillToZipCode
+			 , strBillToCountry
+		FROM vyuARCustomerSearch
+	) SPLITENTITY ON SPLITENTITY.intEntityCustomerId = II.intSplitEntityId
 
-	INSERT INTO @TempInvoiceIds
-		([intHeaderId]
-		,[ysnPost]
-		,[ysnRecap]
-		,[strBatchId]
-		,[ysnAccrueLicense])
-	SELECT
-		[intHeaderId]   = ARI.[intInvoiceId]
-		,[ysnPost]          = @Post
-		,[ysnRecap]         = @Recap
-		,[strBatchId]       = @BatchId
-		,[ysnAccrueLicense]	= @AccrueLicense
-	FROM
-	tblARInvoice ARI
-	WHERE
-		ARI.intInvoiceId <> @intSplitInvoiceId
-		AND EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@ForInsertion) DV WHERE DV.[intID] = ARI.[intInvoiceId])
+	--UPDATE CURRENT INVOICE DETAILS FROM #EXCLUDEDSPLIT
+	UPDATE ID 
+	SET dblQtyOrdered	= CASE WHEN I.strTransactionType = 'Invoice' AND (intInventoryShipmentItemId IS NOT NULL OR intSalesOrderDetailId IS NOT NULL) THEN dblQtyShipped * II.dblSplitPercent  ELSE 0 END
+	  , dblQtyShipped	= dblQtyShipped * II.dblSplitPercent
+	FROM tblARInvoiceDetail ID
+	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+	INNER JOIN #EXCLUDEDSPLIT II ON I.intInvoiceId = II.intInvoiceId
+	
+	--UPDATE CURRENT INVOICE DETAIL TAX FROM #EXCLUDEDSPLIT			
+	UPDATE IDT 
+	SET dblTax			= IDT.dblTax * II.dblSplitPercent
+	  , dblAdjustedTax	= IDT.dblAdjustedTax * II.dblSplitPercent
+	FROM tblARInvoiceDetailTax IDT
+	INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
+	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+	INNER JOIN #EXCLUDEDSPLIT II ON I.intInvoiceId = II.intInvoiceId
 
-	WHILE EXISTS(SELECT NULL FROM @TempInvoiceIds)
-	BEGIN
-		DECLARE @TempInvoiceId INT
-		SELECT TOP 1 @TempInvoiceId = [intHeaderId] FROM @TempInvoiceIds
-		EXEC dbo.[uspSOUpdateOrderShipmentStatus] @TempInvoiceId, 'Invoice', 1
-		DELETE FROM @TempInvoiceIds WHERE [intHeaderId] = @TempInvoiceId
-	END
+	--DELETE UPDATED INVOICE FROM CURRENT POSTING DETAILS AND HEADER
+	DELETE IH
+	FROM ##ARPostInvoiceHeader IH
+	INNER JOIN #EXCLUDEDSPLIT ES ON IH.intInvoiceId = ES.intInvoiceId
 
-	DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
-END
+	DELETE ID
+	FROM ##ARPostInvoiceDetail ID 	
+	INNER JOIN #EXCLUDEDSPLIT ES ON ID.intInvoiceId = ES.intInvoiceId
 
-IF (ISNULL(@ForDeletion, '') <> '')
-	BEGIN
-        DELETE FROM ##ARPostInvoiceHeader
-        WHERE 
-            [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
-        DELETE FROM ##ARPostInvoiceDetail
-        WHERE 
-            [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
-	END
+	INSERT INTO @InvoiceIds (
+		  intHeaderId
+		, strTransactionType
+		, ysnPost
+	)
+	SELECT DISTINCT 
+		  intHeaderId			= intInvoiceId
+		, strTransactionType	= strTransactionType
+		, ysnPost				= @ysnPost
+	FROM #EXCLUDEDSPLIT
 
-IF (ISNULL(@ForInsertion, '') <> '')
-	BEGIN
-		DECLARE @InvoiceIds AS [InvoiceId]
-        DELETE FROM @InvoiceIds
+	--RECOMPUTE AMOUNTS AND TAXES
+	EXEC dbo.uspARReComputeInvoicesTaxes @InvoiceIds	
+	EXEC dbo.uspARInsertTransactionDetails @InvoiceIds
 
-        INSERT INTO @InvoiceIds
-            ([intHeaderId]
-            ,[ysnPost]
-            ,[ysnRecap]
-            ,[strBatchId]
-            ,[ysnAccrueLicense])
-        SELECT
-             [intHeaderId]   = ARI.[intInvoiceId]
-            ,[ysnPost]          = @Post
-            ,[ysnRecap]         = @Recap
-            ,[strBatchId]       = @BatchId
-            ,[ysnAccrueLicense]	= @AccrueLicense
-        FROM
-            tblARInvoice ARI
-        WHERE
-            EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@ForInsertion) DV WHERE DV.[intID] = ARI.[intInvoiceId])
-            AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
-
-		EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
-			 @Param             = NULL
-			,@BeginDate         = NULL
-			,@EndDate           = NULL
-			,@BeginTransaction  = NULL
-			,@EndTransaction    = NULL
-			,@IntegrationLogId  = NULL
-			,@InvoiceIds        = @InvoiceIds
-			,@Post              = @Post
-			,@Recap             = @Recap
-			,@PostDate          = @PostDate
-			,@BatchId           = @BatchId
-			,@AccrueLicense     = 0
-			,@TransType         = NULL
-			,@UserId            = @UserId	
-	END
+	--RE-POPULATE INVOICE DETAILS FOR POSTING
+	INSERT INTO @InvoiceIds (
+		  intHeaderId
+		, strTransactionType
+		, ysnPost
+	)
+	SELECT intHeaderId			= I.intInvoiceId
+		 , strTransactionType	= I.strTransactionType
+		 , ysnPost				= @ysnPost
+	FROM tblARInvoice I	
+	INNER JOIN tblARInvoiceIntegrationLogDetail L ON I.intInvoiceId = L.intInvoiceId
+	WHERE intIntegrationLogId = @intLogId 
+	  AND ysnSuccess = 1
+      AND ysnHeader = 1
+			
+	EXEC dbo.uspARPopulateInvoiceDetailForPosting @InvoiceIds = @InvoiceIds, @Post = @ysnPost, @Recap = @ysnRecap, @PostDate = @dtmDatePost, @BatchId = @strBatchId
 
 END TRY
 BEGIN CATCH

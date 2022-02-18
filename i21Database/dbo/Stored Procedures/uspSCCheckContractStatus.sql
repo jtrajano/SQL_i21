@@ -23,7 +23,7 @@ AS
 			, @intContractSeq = intContractSeq
 			, @strContractNumber = strContractNumber 
 			from vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId
-	IF ISNULL(@intContractStatusId, 0) != 1 AND ISNULL(@intContractStatusId, 0) != 4
+	IF ISNULL(@intContractStatusId, 0) = 6--!= 1 AND ISNULL(@intContractStatusId, 0) != 4
 	BEGIN
 		SET @ErrorMessage = 'Contract ' + @strContractNumber +'-Seq.' + CAST(@intContractSeq AS nvarchar) + ' is ' + @strContractStatus +'. Please Open contract sequence in order to use it.';
 		RAISERROR(@ErrorMessage, 11, 1);

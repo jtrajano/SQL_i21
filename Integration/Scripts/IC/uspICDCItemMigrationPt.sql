@@ -130,6 +130,10 @@ WHERE NOT EXISTS(SELECT TOP 1 * FROM tblICItem where strItemNo = i.strItemNo)
 --** Items allocated for some charges are considered as non item and we classify it as 'Other Charge' Type.
  --  We validate this thru strDescription. If it contains any charges in it then that item is marked as type 'Other Charge'. **  
 
+UPDATE tblICItem 
+SET strInventoryTracking = 'Lot Level'
+WHERE ISNULL(strLotTracking, '') <> 'No'
+
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- ItemUOM data migration from ptitmmst origin table to tblICItemUOM i21 table 
 -- Section 2

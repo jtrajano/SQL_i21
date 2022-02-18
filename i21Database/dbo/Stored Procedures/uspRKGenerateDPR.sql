@@ -430,6 +430,7 @@ BEGIN TRY
 		, intContractHeaderId
 		, intTransactionRecordId
 		, strTransactionNumber
+		, intTransactionRecordHeaderId
 	INTO #tblCustomerOwned
 	FROM #tblCustomerOwnedAll
 	--WHERE ISNULL(ysnExternal, 0) = 0
@@ -1005,8 +1006,8 @@ BEGIN TRY
 		, intCommodityId = @intCommodityId
 		, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 		, intCompanyLocationId = intLocationId
-		, strTransactionNumber
-		, intTransactionRecordId
+		, strReceiptNumber = strTransactionNumber
+		, intInventoryReceiptId = CASE WHEN strTransactionType = 'Transfer Storage' THEN intTransactionRecordHeaderId ELSE intTransactionRecordId END
 		, strDistributionType
 		, strContractEndMonth
 		, strDeliveryDate
@@ -1125,8 +1126,8 @@ BEGIN TRY
 		, dtmTransactionDate
 		, intContractHeaderId
 		, strContractNumber
-		, intTransactionRecordId
-		, strTransactionNumber
+		, intInventoryReceiptId = CASE WHEN strTransactionType = 'Transfer Storage' THEN intTransactionRecordHeaderId ELSE intTransactionRecordId END
+		, strReceiptNumber = strTransactionNumber
 	FROM #tblCustomerOwned s
 		
 	INSERT INTO @ListInventory(intSeqId
@@ -1311,8 +1312,8 @@ BEGIN TRY
 		, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 		, intLocationId
 		, dtmTransactionDate
-		, intTransactionRecordId
-		, strTransactionNumber
+		, intInventoryReceiptId = CASE WHEN strTransactionType = 'Transfer Storage' THEN intTransactionRecordHeaderId ELSE intTransactionRecordId END
+		, strReceiptNumber = strTransactionNumber
 	FROM #tblCustomerOwned s
 		
 	IF (@ysnDisplayAllStorage = 1)
@@ -1379,7 +1380,7 @@ BEGIN TRY
 			, r.strTransactionType
 			, strTicketNumber
 			, dtmTransactionDate
-			, intInventoryReceiptId = intTransactionRecordId
+			, intInventoryReceiptId = CASE WHEN strTransactionType = 'Transfer Storage' THEN intTransactionRecordHeaderId ELSE intTransactionRecordId END
 			, strReceiptNumber = strTransactionNumber
 		FROM #tblCustomerOwned r
 		WHERE ysnReceiptedStorage = 0
@@ -1613,12 +1614,12 @@ BEGIN TRY
 		, strCategoryCode
 		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmTransactionDate, 106), 8) COLLATE Latin1_General_CI_AS
 		, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmTransactionDate, 106), 8) COLLATE Latin1_General_CI_AS
-		, strTicketNumber = strTransactionNumber
+		, strTicketNumber
 		, strCustomerName = strEntityName
 		, intFromCommodityUnitMeasureId = intOrigUOMId
 		, intCommodityUnitMeasureId = @intCommodityUnitMeasureId
 		, intLocationId
-		, intTicketId = intTransactionRecordId
+		, intTicketId
 		, dtmTransactionDate
 		, strTransactionType
 		, strTransactionNumber
@@ -1655,7 +1656,9 @@ BEGIN TRY
 		, intTransactionRecordHeaderId
 		, intTransactionRecordId
 		, intContractHeaderId
-		, strContractNumber)
+		, strContractNumber
+		, intInventoryReceiptId
+		, strReceiptNumber)
 	SELECT DISTINCT * FROM (
 		SELECT intSeqId = 12
 			, strDistributionType
@@ -1682,6 +1685,8 @@ BEGIN TRY
 			, intTransactionRecordId
 			, intContractHeaderId
 			, strContractNumber
+			, intInventoryReceiptId = CASE WHEN strTransactionType = 'Transfer Storage' THEN intTransactionRecordHeaderId ELSE intTransactionRecordId END
+			, strReceiptNumber = strTransactionNumber
 		FROM #tblDelayedPricing r
 	)t WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 

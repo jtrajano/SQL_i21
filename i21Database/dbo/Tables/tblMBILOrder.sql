@@ -19,6 +19,6 @@
     CONSTRAINT [FK_tblMBILOrder_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]), 
     CONSTRAINT [FK_tblMBILOrder_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]), 
     CONSTRAINT [FK_tblMBILOrder_tblEMEntityDriver] FOREIGN KEY ([intDriverId]) REFERENCES [tblEMEntity]([intEntityId]), 
-    CONSTRAINT [FK_tblMBILOrder_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [tblLGRoute]([intRouteId]),
+    CONSTRAINT [FK_tblMBILOrder_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [tblLGRoute]([intRouteId]) ON DELETE SET NULL,
 	CONSTRAINT [FK_tblMBILOrder_tblMBILShift] FOREIGN KEY ([intShiftId]) REFERENCES [tblMBILShift]([intShiftId])
 )

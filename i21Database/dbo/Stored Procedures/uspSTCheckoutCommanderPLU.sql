@@ -391,7 +391,14 @@ BEGIN
 			  -- , dblRefundAmount     = Chk.RefundAmount
 			  , dblGrossSales		= (TempChk.SalesAmount)
 			  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
-			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
+			  , dblItemStandardCost = ISNULL(CAST(
+												CASE
+													WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+														THEN effectiveCost.dblCost --Effective Retail Price
+													ELSE P.dblStandardCost 
+												END 
+											AS DECIMAL(18,6))
+										,0)
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM #tblTempForCalculation TempChk
@@ -408,6 +415,21 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing P 
 				ON IL.intItemLocationId = P.intItemLocationId 
 				AND I.intItemId = P.intItemId
+			LEFT JOIN 
+			(
+				SELECT * FROM (
+					SELECT 
+							intItemId,
+							intItemLocationId,
+							dtmEffectiveCostDate,
+							dblCost,
+							ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
+					FROM tblICEffectiveItemCost
+					WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
+				) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+			) AS effectiveCost
+				ON P.intItemId = effectiveCost.intItemId
+				AND P.intItemLocationId = effectiveCost.intItemLocationId
 			WHERE S.intStoreId = @intStoreId
 				AND ISNULL(TempChk.POSCode, '') != ''
 
@@ -450,7 +472,14 @@ BEGIN
 			  -- , dblRefundAmount     = Chk.RefundAmount
 			  , dblGrossSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
 			  , dblTotalSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
-			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
+			  , dblItemStandardCost = ISNULL(CAST(
+												CASE
+													WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+														THEN effectiveCost.dblCost --Effective Retail Price
+													ELSE P.dblStandardCost 
+												END 
+											AS DECIMAL(18,6))
+										,0)
 			  , intConcurrencyId	= 1
 			  , intCalculationId	=TempChk.intCalculationId
 			FROM #tblTempForCalculation TempChk
@@ -467,6 +496,21 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing P 
 				ON IL.intItemLocationId = P.intItemLocationId 
 				AND I.intItemId = P.intItemId
+			LEFT JOIN 
+			(
+				SELECT * FROM (
+					SELECT 
+							intItemId,
+							intItemLocationId,
+							dtmEffectiveCostDate,
+							dblCost,
+							ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
+					FROM tblICEffectiveItemCost
+					WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
+				) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+			) AS effectiveCost
+				ON P.intItemId = effectiveCost.intItemId
+				AND P.intItemLocationId = effectiveCost.intItemLocationId
 			WHERE S.intStoreId = @intStoreId
 				AND TempChk.RefundCount > 0 -- Only Items with REFUND
 				AND ISNULL(TempChk.POSCode, '') != ''
@@ -578,61 +622,162 @@ BEGIN
 					[dblRetailUnit]			= (CASE 
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN CASE
-															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePrice > ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END
+																									, 0) 
 																THEN (TempChk.dblAveragePrice)
-															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePrice < ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
 																THEN (TempChk.dblAveragePrice)
 														END
 												WHEN @strAllowMarkUpDown = 'D'
 													THEN CASE
-															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
 																THEN (TempChk.dblAveragePriceWthDiscounts)
-															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
 																THEN (TempChk.dblAveragePriceWthDiscounts)
 														END
 											END),
 					[dblAmount]				= (CASE 
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN CASE
-															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePrice > ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
 																THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
-															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePrice < ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
 																THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
 														END
 												WHEN @strAllowMarkUpDown = 'D'
 													THEN CASE
-															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
 																THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
-															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
 																THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
 														END
 											END),
 					[dblShrink]				= (CASE 
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN CASE
-															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
-																THEN CAST((TempChk.dblAveragePrice - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
-															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
-																THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePrice) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePrice > ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
+																THEN CAST((TempChk.dblAveragePrice - ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0)) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePrice < ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
+																THEN CAST((ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) - TempChk.dblAveragePrice) AS DECIMAL(18,6))
 														END
 												WHEN @strAllowMarkUpDown = 'D'
 													THEN CASE
-															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
-																THEN CAST((TempChk.dblAveragePriceWthDiscounts - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
-															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0)
-																THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) 
+																THEN CAST((TempChk.dblAveragePriceWthDiscounts - ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0)) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0)
+																THEN CAST((ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) - TempChk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
 														END
 											END),
 					[strUpDownNotes]		= (CASE 
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN CASE
-															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
-															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
+															WHEN TempChk.dblAveragePrice > ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) THEN 'Mark Up'
+															WHEN TempChk.dblAveragePrice < ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) THEN 'Mark Down' 
 														END
 												WHEN @strAllowMarkUpDown = 'D'
 													THEN CASE
-															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
-															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) THEN 'Mark Up'
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(CASE
+																									WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																										THEN SplPrc.dblUnitAfterDiscount 
+																									WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+																										THEN effectivePrice.dblRetailPrice --Effective Retail Price
+																									ELSE P.dblSalePrice END, 0) THEN 'Mark Down' 
 														END
 											END),
 					[intConcurrencyId]		= 1
@@ -649,6 +794,37 @@ BEGIN
 				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
+				LEFT JOIN 
+				(
+					SELECT * FROM (
+						SELECT 
+								intItemId,
+								intItemLocationId,
+								dtmEffectiveRetailPriceDate,
+								dblRetailPrice,
+								ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveRetailPriceDate DESC) AS intRowNum
+						FROM tblICEffectiveItemPrice
+						WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveRetailPriceDate
+					) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+				) AS effectivePrice
+					ON P.intItemId = effectivePrice.intItemId
+					AND P.intItemLocationId = effectivePrice.intItemLocationId
+				LEFT JOIN 
+				(
+					SELECT * FROM (
+						SELECT 
+								intItemId,
+								intItemLocationId,
+								dtmBeginDate,
+								dtmEndDate,
+								dblUnitAfterDiscount,
+								row_number() over (partition by intItemId, intItemLocationId order by intItemLocationId asc) as intRowNum
+						FROM tblICItemSpecialPricing
+						WHERE CAST(GETDATE() AS DATE) BETWEEN dtmBeginDate AND dtmEndDate
+					) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+				) AS SplPrc
+					ON P.intItemId = SplPrc.intItemId
+					AND P.intItemLocationId = SplPrc.intItemLocationId
 				INNER JOIN dbo.tblSMCompanyLocation CL 
 					ON CL.intCompanyLocationId = IL.intLocationId
 				INNER JOIN dbo.tblICCategory IC 
@@ -666,7 +842,12 @@ BEGIN
 								WHEN @strAllowMarkUpDown = 'D'
 									THEN TempChk.dblAveragePriceWthDiscounts
 							END
-					AND P.dblSalePrice != CASE
+					AND (CASE
+							WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+								THEN SplPrc.dblUnitAfterDiscount 
+							WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+								THEN effectivePrice.dblRetailPrice --Effective Retail Price
+							ELSE P.dblSalePrice END) != CASE
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN TempChk.dblAveragePrice
 												WHEN @strAllowMarkUpDown = 'D'

@@ -11,6 +11,7 @@ BEGIN
 	WHERE
 		ltrim(rtrim(tblHDTicketJIRAIssue.strKey)) <> ''
 		and tblHDTicketJIRAIssue.intTicketId = @intTicketId
+		and strKey = strJiraKey
 
 	return @strJiraKeys
 

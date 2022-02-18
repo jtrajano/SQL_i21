@@ -67,3 +67,7 @@ CREATE TABLE [dbo].[tblARSalesAnalysisStagingReport](
     [strAccountingPeriod]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblARSalesAnalysisStagingReport_intSalesAnalysisStagingReportId] PRIMARY KEY CLUSTERED ([intSalesAnalysisStagingReportId] ASC)
 );
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARSalesAnalysisStagingReport_strRecordNumber]
+	ON [dbo].[tblARSalesAnalysisStagingReport] ([strRecordNumber])
+GO

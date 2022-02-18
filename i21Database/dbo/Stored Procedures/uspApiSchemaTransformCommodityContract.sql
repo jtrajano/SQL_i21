@@ -96,6 +96,25 @@ WHERE sc.guiApiUniqueId = @guiApiUniqueId
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT NEWID()
     , guiApiImportLogId = @guiLogId 
+    , strField = 'Terms'
+    , strValue = sc.strPaymentTerms
+    , strLogLevel = 'Warning'
+    , strStatus = 'Ignored'
+    , intRowNo = sc.intRowNumber
+    , strMessage = 'The Terms ' + ISNULL(sc.strPaymentTerms, '') + ' does not exist.'
+FROM tblApiSchemaCommodityContract sc
+OUTER APPLY (
+  SELECT TOP 1 * 
+  FROM tblSMTerm xc
+  WHERE xc.strTerm = sc.strPaymentTerms
+) c
+WHERE sc.guiApiUniqueId = @guiApiUniqueId
+  AND c.intTermID IS NULL
+  AND NULLIF(sc.strPaymentTerms, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT NEWID()
+    , guiApiImportLogId = @guiLogId 
     , strField = 'Futures Mn/Yr'
     , strValue = sc.strFuturesMonth
     , strLogLevel = 'Warning'
@@ -182,7 +201,8 @@ INSERT INTO tblCTContractHeader (
     , ysnPrinted
     , intPositionId
     , intCropYearId
-    , intFreightTermId)
+    , intFreightTermId
+    , intTermId)
 SELECT DISTINCT
     @guiApiUniqueId
   , MIN(sc.intRowNumber)
@@ -202,6 +222,7 @@ SELECT DISTINCT
   , pos.intPositionId
   , cr.intCropYearId
   , ft.intFreightTermId
+  , tr.intTermID
 FROM tblApiSchemaCommodityContract sc
 CROSS APPLY (
   SELECT TOP 1 *
@@ -219,6 +240,11 @@ OUTER APPLY (
   FROM tblSMFreightTerms xt
   WHERE xt.strFreightTerm = sc.strFreightTerm OR xt.strDescription = sc.strFreightTerm
 ) ft
+OUTER APPLY (
+  SELECT TOP 1 xt.intTermID
+  FROM tblSMTerm xt
+  WHERE xt.strTerm = sc.strPaymentTerms
+) tr
 JOIN tblICCommodity c ON c.strCommodityCode = sc.strCommodity
 JOIN tblCTPricingType pt ON pt.strPricingType = sc.strPricingType
   AND pt.intPricingTypeId != 6
@@ -249,6 +275,7 @@ GROUP BY
   , c.intCommodityId
   , cu.intCommodityUnitMeasureId
   , ft.intFreightTermId
+  , tr.intTermID
 
  -- Validate details
   INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)

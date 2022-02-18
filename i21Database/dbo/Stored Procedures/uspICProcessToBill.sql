@@ -31,34 +31,6 @@ BEGIN
 END 
 ELSE IF @receiptType <> 'Transfer Order'
 BEGIN 
-	-- Check if the item is "Basis" priced and futures price is not blank. 
-	BEGIN 
-
-		SELECT	TOP 1
-				@invalidItemNo = i.strItemNo
-				,@invalidItemId = i.intItemId 
-		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-				INNER JOIN tblCTContractDetail cd
-					ON cd.intContractDetailId = ri.intLineNo
-					AND cd.intContractHeaderId = ri.intOrderId
-					AND cd.intItemId = ri.intItemId
-				INNER JOIN tblICItem i
-					ON i.intItemId = ri.intItemId
-		WHERE	r.strReceiptType = 'Purchase Contract'
-				AND r.intInventoryReceiptId = @intReceiptId
-				AND cd.intPricingTypeId = 2 -- 2 is Basis. 
-				AND ISNULL(cd.dblFutures, 0) = 0
-				AND ISNULL(ri.ysnAllowVoucher, 1) = 1
-
-		IF @invalidItemId IS NOT NULL 
-		BEGIN 
-			-- 'Pricing type for {Item No} is a Basis and its Futures needs a price. Please add it at Contract Management -> Price Contract.'
-			EXEC uspICRaiseError 80218, @invalidItemNo; 		
-			SET @intReturnValue = -80218;
-			GOTO Post_Exit;
-		END 
-	END 
 
 	EXEC @intReturnValue = uspICConvertReceiptToVoucher
 		@intReceiptId 

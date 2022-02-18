@@ -53,10 +53,13 @@ IF @strLocationNameLocal IS NOT NULL
 		) C (intCompanyLocationId)
 	END
 
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom 					= @dtmAsOfDateFrom
+										, @dtmDateTo 					= @dtmAsOfDate
 										, @intEntityUserId 				= @intEntityUserId
 										, @strCompanyLocationIds		= @strCompanyLocationIdsLocal
 										, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal
+
+DELETE FROM  tblARCustomerAgingStagingTable WHERE dblFuture <> 0 and ISNULL(@strStatementFormat, 'Open Item') = 'Open Item'
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (

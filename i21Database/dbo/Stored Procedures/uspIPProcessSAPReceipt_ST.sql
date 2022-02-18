@@ -65,8 +65,10 @@ BEGIN TRY
 		,@intLoadContainerId INT
 		,@dblReceivedQty NUMERIC(18, 6)
 		,@ysnPosted BIT
-	DECLARE @strDescription AS NVARCHAR(MAX)
 	DECLARE @intNewStageReceiptId INT
+	DECLARE @ReceiptStagingTable ReceiptStagingTable
+	DECLARE @OtherCharges ReceiptOtherChargesTableType
+	DECLARE @LotEntries ReceiptItemLotStagingTable
 
 	SELECT @intMinRowNo = Min(intStageReceiptId)
 	FROM tblIPInvReceiptStage WITH (NOLOCK)
@@ -88,8 +90,6 @@ BEGIN TRY
 
 			SELECT @intInventoryReceiptId = NULL
 				,@strReceiptNo = NULL
-
-			SELECT @strDescription = NULL
 
 			SELECT @strCompCode = strCompCode
 				,@strReceiptNumber = strReceiptNumber
@@ -142,6 +142,12 @@ BEGIN TRY
 			WHERE strUserName = 'IRELYADMIN'
 
 			BEGIN TRAN
+
+			DELETE
+			FROM @ReceiptStagingTable
+
+			DELETE
+			FROM @LotEntries
 
 			SELECT @intStageReceiptItemId = MIN(intStageReceiptItemId)
 			FROM tblIPInvReceiptItemStage WITH (NOLOCK)
@@ -229,7 +235,6 @@ BEGIN TRY
 				--			,1
 				--			)
 				--END
-
 				SELECT @intItemId = t.intItemId
 				FROM tblICItem t WITH (NOLOCK)
 				WHERE t.strItemNo = @strItemNo
@@ -517,134 +522,103 @@ BEGIN TRY
 							,1
 							)
 				END
-				IF @intInventoryReceiptId IS NULL
-				BEGIN
-					EXEC dbo.uspSMGetStartingNumber 23
-						,@strReceiptNo OUTPUT
 
-					--Re-check if the receipt no is already used. If yes, then regenerate the receipt no. 
-					IF EXISTS (
-							SELECT TOP 1 1
-							FROM tblICInventoryReceipt WITH (NOLOCK)
-							WHERE strReceiptNumber = @strReceiptNo
-							)
-						EXEC dbo.uspSMGetStartingNumber 23
-							,@strReceiptNo OUTPUT
-
-					--Receipt
-					INSERT INTO tblICInventoryReceipt (
-						strReceiptType
-						,intSourceType
-						,intEntityVendorId
-						,intLocationId
-						,strReceiptNumber
-						,dtmReceiptDate
-						,strVendorRefNo
-						,intFreightTermId
-						,intCurrencyId
-						,intReceiverId
-						,dblInvoiceAmount
-						,ysnPrepaid
-						,ysnInvoicePaid
-						,intShipFromId
-						,strBillOfLading
-						,intCreatedUserId
-						,intEntityId
-						,intBookId
-						,intSubBookId
-						,intConcurrencyId
-						)
-					SELECT TOP 1 'Purchase Contract'
-						,2
-						,LD.intVendorEntityId
-						,@intLocationId
-						,@strReceiptNo
-						,@dtmReceiptDate
-						,@strReceiptNumber
-						,L.intFreightTermId
-						,L.intCurrencyId
-						,@intEntityId
-						,0.0
-						,0
-						,0
-						,EL.intEntityLocationId
-						,ISNULL(@strBLNumber, L.strBLNumber)
-						,@intEntityId
-						,@intEntityId
-						,L.intBookId
-						,L.intSubBookId
-						,1
-					FROM tblIPInvReceiptItemStage RI
-					JOIN tblICItem I ON RI.strItemNo = I.strItemNo
-						AND RI.intStageReceiptItemId = @intStageReceiptItemId
-					JOIN tblLGLoadDetail LD ON LD.intItemId = I.intItemId
-						AND LD.intLoadDetailId = @intLoadDetailId
-					JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId
-					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-						AND L.intLoadId = @intLoadId
-
-					SET @intInventoryReceiptId = SCOPE_IDENTITY();
-				END
-
-				--Receipt Items
-				INSERT INTO tblICInventoryReceiptItem (
-					intInventoryReceiptId
-					,intLineNo
-					,intOrderId
-					,intSourceId
+				INSERT INTO @ReceiptStagingTable (
+					strReceiptType
+					,intEntityVendorId
+					,intShipFromId
+					,intLocationId
+					,strBillOfLadding
 					,intItemId
-					,intContainerId
-					,intSubLocationId
-					,dblOrderQty
-					,dblOpenReceive
-					,intStorageLocationId
-					,intOwnershipType
-					,intUnitMeasureId
-					,intWeightUOMId
-					,dblUnitCost
-					,dblGross
-					,dblNet
-					,intConcurrencyId
-					,dblLineTotal
-					,dblUnitRetail
-					,intCostUOMId
-					,ysnSubCurrency
+					,intItemLocationId
+					,intItemUOMId
 					,intContractHeaderId
 					,intContractDetailId
+					,dtmDate
+					,intShipViaId
+					,dblQty
+					,intGrossNetUOMId
+					,dblGross
+					,dblNet
+					,dblCost
+					,intCostUOMId
+					,intCurrencyId
+					,intSubCurrencyCents
+					,dblExchangeRate
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId
+					,ysnIsStorage
+					,intSourceId
+					,intSourceType
+					,strSourceId
+					,strSourceScreenName
+					,ysnSubCurrency
+					,intForexRateTypeId
+					,dblForexRate
+					,intContainerId
+					,intFreightTermId
+					,intBookId
+					,intSubBookId
+					,intSort
+					,intLoadShipmentId
+					,intLoadShipmentDetailId
+					,strVendorRefNo
+					,dblUnitRetail
 					)
-				SELECT @intInventoryReceiptId
-					,CT.intContractDetailId
-					,CT.intContractHeaderId
-					,LD.intLoadDetailId
-					,I.intItemId
-					,CL.intLoadContainerId
-					,CSL.intCompanyLocationSubLocationId
-					,CL.dblQuantity
-					,CL.dblQuantity
-					,SL.intStorageLocationId
-					,1
-					,CL.intItemUOMId
-					,IU.intItemUOMId
-					,@dblCost
-					,RI.dblNetWeight + ISNULL(C.dblTareWt, 0)
-					,RI.dblNetWeight
-					,1
-					,(dbo.[fnCTConvertQtyToTargetItemUOM](IU.intItemUOMId, @intCostItemUOMId, RI.dblNetWeight)) * (
-						@dblCost / CASE 
+				SELECT TOP 1 strReceiptType = 'Purchase Contract'
+					,intEntityVendorId = LD.intVendorEntityId
+					,intShipFromId = EL.intEntityLocationId
+					,intLocationId = CD.intCompanyLocationId
+					,strBillOfLadding = ISNULL(@strBLNumber, L.strBLNumber)
+					,intItemId = LD.intItemId
+					,intItemLocationId = CD.intCompanyLocationId
+					,intItemUOMId = CL.intItemUOMId
+					,intContractHeaderId = CD.intContractHeaderId
+					,intContractDetailId = LD.intPContractDetailId
+					,dtmDate = @dtmReceiptDate
+					,intShipViaId = CD.intShipViaId
+					,dblQty = CL.dblQuantity
+					,intGrossNetUOMId = IU.intItemUOMId
+					,dblGross = RI.dblNetWeight + ISNULL(C.dblTareWt, 0)
+					,dblNet = RI.dblNetWeight
+					,dblCost = @dblCost
+					,intCostUOMId = @intCostItemUOMId
+					,intCurrencyId = L.intCurrencyId
+					,intSubCurrencyCents = (
+						CASE 
 							WHEN ISNULL(@ysnSubCurrency, 0) = 1
 								THEN 100
 							ELSE 1
 							END
 						)
-					,@dblCost
-					,@intCostItemUOMId
-					,CASE 
-						WHEN ISNULL(@ysnSubCurrency, 0) = 1
-							THEN 1
-						ELSE 0
-						END
-					,CT.intContractHeaderId
-					,CT.intContractDetailId
+					,dblExchangeRate = 1
+					,intLotId = NULL
+					,intSubLocationId = CSL.intCompanyLocationSubLocationId
+					,intStorageLocationId = SL.intStorageLocationId
+					,ysnIsStorage = 0
+					,intSourceId = LD.intLoadDetailId
+					,intSourceType = 2
+					,strSourceId = L.strLoadNumber
+					,strSourceScreenName = 'External System'
+					,ysnSubCurrency = (
+						CASE 
+							WHEN ISNULL(@ysnSubCurrency, 0) = 1
+								THEN 1
+							ELSE 0
+							END
+						)
+					,intForexRateTypeId = NULL
+					,dblForexRate = NULL
+					,intContainerId = CL.intLoadContainerId
+					,intFreightTermId = L.intFreightTermId
+					,intBookId = L.intBookId
+					,intSubBookId = L.intSubBookId
+					,intSort = NULL
+					,intLoadShipmentId = L.intLoadId
+					,intLoadShipmentDetailId = LD.intLoadDetailId
+					,strVendorRefNo = @strReceiptNumber
+					,dblUnitRetail = @dblCost
 				FROM tblIPInvReceiptItemStage RI
 				JOIN tblICItem I ON I.strItemNo = RI.strItemNo
 					AND RI.intStageReceiptItemId = @intStageReceiptItemId
@@ -659,66 +633,87 @@ BEGIN TRY
 					AND SL.intSubLocationId = CSL.intCompanyLocationSubLocationId
 				JOIN tblLGLoadDetail LD ON LD.intItemId = I.intItemId
 					AND LD.intLoadDetailId = @intLoadDetailId
-				JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
+				JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					AND L.intLoadId = @intLoadId
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 				JOIN tblLGLoadDetailContainerLink CL ON CL.intLoadDetailId = LD.intLoadDetailId
 					AND CL.intLoadContainerId = @intLoadContainerId
 				JOIN tblLGLoadContainer C ON C.intLoadContainerId = CL.intLoadContainerId
-				--Join tblSMCurrency cr on ct.intCurrencyId=cr.intCurrencyID
-				WHERE RI.intStageReceiptItemId = @intStageReceiptItemId
 
-				UPDATE RH
-				SET RH.intSubCurrencyCents = (
-						CASE 
-							WHEN ISNULL(RI.ysnSubCurrency, 0) = 1
-								THEN 100
-							ELSE 1
-							END
+				IF NOT EXISTS (
+						SELECT 1
+						FROM @ReceiptStagingTable
 						)
-				FROM tblICInventoryReceipt RH
-				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = RH.intInventoryReceiptId
-				WHERE RH.intInventoryReceiptId = @intInventoryReceiptId
+				BEGIN
+					RAISERROR (
+							'Receipt Staging Table entries not inserted. '
+							,16
+							,1
+							)
+				END
 
-				--Lots
-				INSERT INTO tblICInventoryReceiptItemLot (
-					intInventoryReceiptItemId
+				INSERT INTO @LotEntries (
+					intLotId
 					,strLotNumber
+					,strLotAlias
 					,intSubLocationId
 					,intStorageLocationId
-					,dblQuantity
+					,intContractHeaderId
+					,intContractDetailId
 					,intItemUnitMeasureId
-					,dblCost
+					,intItemId
+					,dblQuantity
 					,dblGrossWeight
 					,dblTareWeight
-					,intConcurrencyId
+					,dblCost
 					,strContainerNo
+					,intSort
+					,strMarkings
 					,strCondition
-					,dtmDateCreated
-					,intCreatedByUserId
+					,intEntityVendorId
+					,strReceiptType
+					,intLocationId
+					,intShipViaId
+					,intShipFromId
+					,intCurrencyId
+					,intSourceType
+					,strBillOfLadding
 					)
-				SELECT RI.intInventoryReceiptItemId
-					,C.strContainerNumber
-					,RI.intSubLocationId
-					,RI.intStorageLocationId
-					,RI.dblOrderQty
-					,RI.intUnitMeasureId
-					,RI.dblUnitCost
-					,RI.dblGross
-					,ISNULL(C.dblTareWt, 0)
-					,1
-					,C.strContainerNumber
-					,(
+				SELECT intLotId = NULL
+					,strLotNumber = C.strContainerNumber
+					,strLotAlias = NULL
+					,intSubLocationId = RI.intSubLocationId
+					,intStorageLocationId = RI.intStorageLocationId
+					,intContractHeaderId = RI.intContractHeaderId
+					,intContractDetailId = RI.intContractDetailId
+					,intItemUnitMeasureId = RI.intItemUOMId
+					,intItemId = RI.intItemId
+					,dblQuantity = RI.dblQty
+					,dblGrossWeight = RI.dblGross
+					,dblTareWeight = ISNULL(C.dblTareWt, 0)
+					,dblCost = RI.dblCost
+					,strContainerNo = C.strContainerNumber
+					,intSort = NULL
+					,strMarkings = C.strMarks
+					,strCondition = (
 						CASE 
 							WHEN RI.dblNet > C.dblNetWt
 								THEN 'Clean Wgt'
 							ELSE NULL
 							END
 						)
-					,GETUTCDATE()
-					,@intEntityId
-				FROM tblICInventoryReceiptItem RI
+					,intEntityVendorId = RI.intEntityVendorId
+					,strReceiptType = RI.strReceiptType
+					,intLocationId = RI.intLocationId
+					,intShipViaId = RI.intShipViaId
+					,intShipFromId = RI.intShipFromId
+					,intCurrencyId = RI.intCurrencyId
+					,intSourceType = RI.intSourceType
+					,strBillOfLadding = RI.strBillOfLadding
+				FROM @ReceiptStagingTable RI
 				JOIN tblLGLoadContainer C ON C.intLoadContainerId = RI.intContainerId
 					AND RI.intContainerId = @intLoadContainerId
-				WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
 
 				SELECT @intStageReceiptItemId = MIN(intStageReceiptItemId)
 				FROM tblIPInvReceiptItemStage WITH (NOLOCK)
@@ -726,27 +721,51 @@ BEGIN TRY
 					AND intStageReceiptItemId > @intStageReceiptItemId
 			END
 
-			SET @strInfo1 = ISNULL(@strReceiptNo, '') + ' / ' + ISNULL(@strReceiptNumber, '')
-
-			-- Audit Log
-			IF (@intInventoryReceiptId > 0)
+			IF EXISTS (
+					SELECT 1
+					FROM @ReceiptStagingTable
+					)
 			BEGIN
-				SELECT @strDescription = 'Receipt created from external system. '
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tempdb..sysobjects
+						WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')
+						)
+				BEGIN
+					CREATE TABLE #tmpAddItemReceiptResult (
+						intSourceId INT
+						,intInventoryReceiptId INT
+						)
+				END
 
-				EXEC uspSMAuditLog @keyValue = @intInventoryReceiptId
-					,@screenName = 'Inventory.view.InventoryReceipt'
-					,@entityId = @intEntityId
-					,@actionType = 'Created'
-					,@actionIcon = 'small-new-plus'
-					,@changeDescription = @strDescription
-					,@fromValue = ''
-					,@toValue = @strReceiptNo
+				-- Create IR with lots
+				EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
+					,@OtherCharges = @OtherCharges
+					,@intUserId = @intEntityId
+					,@LotEntries = @LotEntries
 
-				--Post Receipt
-				EXEC uspICPostInventoryReceipt 1
-					,0
-					,@strReceiptNo
-					,@intEntityId
+				SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
+				FROM #tmpAddItemReceiptResult
+
+				-- If IR is created, Post the Receipt
+				IF (@intInventoryReceiptId IS NOT NULL)
+				BEGIN
+					SELECT @strReceiptNo = strReceiptNumber
+					FROM tblICInventoryReceipt
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+					SET @strInfo1 = ISNULL(@strReceiptNo, '') + ' / ' + ISNULL(@strReceiptNumber, '')
+
+					--Post Receipt
+					EXEC uspICPostInventoryReceipt 1
+						,0
+						,@strReceiptNo
+						,@intEntityId
+
+					DELETE
+					FROM #tmpAddItemReceiptResult
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+				END
 			END
 
 			--Move to Archive

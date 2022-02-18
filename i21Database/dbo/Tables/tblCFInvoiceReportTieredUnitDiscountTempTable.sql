@@ -13,5 +13,6 @@
 		[dblQuantity]														NUMERIC(18,6) NULL,
 		[dblAmount]															NUMERIC(18,6) NULL,
 		[intFeeProfileId]													INT	NULL,
-		[intFeeId]															INT	NULL
+		[intFeeId]															INT	NULL,
+		[intTransactionId]													INT	NULL
 	)

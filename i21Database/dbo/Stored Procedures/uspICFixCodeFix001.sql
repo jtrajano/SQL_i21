@@ -41,7 +41,9 @@ DECLARE
 	,@intEntityUserSecurityId AS INT 
 	,@intLocationId AS INT 
 
-SELECT @intEntityUserSecurityId = intEntityId FROM tblSMUserSecurity WHERE strUserName = 'IRELYADMIN'
+SELECT TOP 1 @intEntityUserSecurityId = intEntityId 
+FROM tblSMUserSecurity 
+WHERE strUserName IN ('IRELYADMIN', 'AUSSUP') 
 
 BEGIN TRY
 

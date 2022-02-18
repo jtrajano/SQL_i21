@@ -331,8 +331,11 @@ BEGIN TRY
 		,ysnPrintLoadDirections
 		,strVendorReference
 		,strCustomerReference
+		,strTerminalReference
 		,intAllocationDetailId
 		,intPickLotDetailId
+		,intSellerId
+		,intSalespersonId
 		,intPSubLocationId
 		,intSSubLocationId
 		,strExternalShipmentItemNumber
@@ -370,8 +373,11 @@ BEGIN TRY
 		,ysnPrintLoadDirections
 		,strVendorReference
 		,strCustomerReference
+		,strTerminalReference
 		,intAllocationDetailId
 		,intPickLotDetailId
+		,intSellerId
+		,intSalespersonId
 		,@intNewContractSubLocationId
 		,intSSubLocationId
 		,NULL

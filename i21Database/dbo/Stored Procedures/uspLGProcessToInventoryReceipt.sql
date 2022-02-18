@@ -909,6 +909,10 @@ BEGIN TRY
 			,[intCurrencyId]
 			,[intSourceType]
 			,[strBillOfLadding]
+			,[strCertificate]
+			,[intProducerId]
+			,[strCertificateId]
+			,[strTrackingNumber]
 			)
 		SELECT [intLotId] = NULL
 			,[strLotNumber] = NULL
@@ -934,11 +938,17 @@ BEGIN TRY
 			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 			,[intSourceType] = 2
 			,[strBillOfLadding] = L.strBLNumber
-		FROM tblLGLoad L  
+			,[strCertificate] = CF.strCertificationName
+			,[intProducerId] = CC.intProducerId
+			,[strCertificateId] = CC.strCertificationId
+			,[strTrackingNumber] = CC.strTrackingNumber
+		FROM tblLGLoad L 
 		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
 		JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1 
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
+		LEFT JOIN tblICCertification CF ON CF.intCertificationId = CC.intCertificationId
 		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId

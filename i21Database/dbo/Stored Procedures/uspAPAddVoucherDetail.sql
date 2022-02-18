@@ -291,7 +291,7 @@ OUTER APPLY (
 ) prepayRec
 LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
-LEFT JOIN tblAP1099KCategory category1099K ON entity.str1099Type = category1099K.strCategory
+LEFT JOIN tblAP1099KCategory category1099K ON LTRIM(entity.str1099Type) = category1099K.strCategory
 LEFT JOIN tblAP1099PATRCategory categoryPATR ON entity.str1099Type = categoryPATR.strCategory
 LEFT JOIN tblAP1099DIVCategory categoryDIV ON entity.str1099Type = categoryDIV.strCategory
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId

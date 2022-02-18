@@ -15,3 +15,4 @@ ON ACS.intAccountStatusId = CAS.intAccountStatusId
 RIGHT JOIN 
 	vyuARCustomerSearch CS
 ON CAS.intEntityCustomerId = CS.intEntityCustomerId
+WHERE CS.ysnActive = 1

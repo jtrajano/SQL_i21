@@ -91,7 +91,7 @@ BEGIN
 				-- ==================================================================================================================
 				-- START - Validate if Store has department setup for rebate
 				-- ==================================================================================================================
-				IF EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
 					BEGIN
 
 						INSERT INTO tblSTCheckoutErrorLogs
@@ -200,6 +200,7 @@ BEGIN
 							[strTransRecalled],
 							[strTransRollback],
 							[strTransFuelPrepayCompletion],
+							[strTransFuelPrepay],
 							-- trHeader
 							[intTermMsgSN],
 							[strTermMsgSNtype],
@@ -312,7 +313,7 @@ BEGIN
 							[strTrlFlagsTrlMatch],
 
 							[strTrlDept],
-							[intTrlDeptNumber],
+							[strTrlDeptNumber],
 							[strTrlDeptType],
 							[strTrlCat],
 							[intTrlCatNumber],
@@ -432,6 +433,7 @@ BEGIN
 							[strTransRecalled]					= strTransRecalled,
 							[strTransRollback]					= strTransRollback,
 							[strTransFuelPrepayCompletion]		= strTransFuelPrepayCompletion,
+							[strTransFuelPrepay]				= strTransFuelPrepay,
 							-- trHeader
 							[intTermMsgSN]						= intTermMsgSN,
 							[strTermMsgSNtype]					= strTermMsgSNtype,
@@ -544,7 +546,7 @@ BEGIN
 							[strTrlFlagsTrlMatch]				= strTrlFlagsTrlMatch,
 
 							[strTrlDept]						= strTrlDept,
-							[intTrlDeptNumber]					= intTrlDeptNumber,
+							[strTrlDeptNumber]					= intTrlDeptNumber,
 							[strTrlDeptType]					= strTrlDeptType,
 							[strTrlCat]							= strTrlCat,
 							[intTrlCatNumber]					= intTrlCatNumber,

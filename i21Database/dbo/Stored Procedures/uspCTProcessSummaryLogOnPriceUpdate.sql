@@ -25,7 +25,8 @@ BEGIN TRY
 		left join tblCTWeightGrade w on w.intWeightGradeId = ch.intWeightId and w.strWhereFinalized = 'Destination'
 		left join tblCTWeightGrade g on g.intWeightGradeId = ch.intGradeId and g.strWhereFinalized = 'Destination'
 	where
-		pfd.intPriceFixationDetailId = @intPriceFixationDetailId;
+		ch.intContractTypeId = 2
+		and pfd.intPriceFixationDetailId = @intPriceFixationDetailId;
 
 	update tblCTPriceFixationDetail set dblPreviousQty = dblQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
 

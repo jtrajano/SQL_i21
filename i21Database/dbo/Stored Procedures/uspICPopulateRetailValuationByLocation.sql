@@ -64,7 +64,8 @@ SELECT	(CAST(ROW_NUMBER() OVER(ORDER BY category.intCategoryId ASC) AS INT))
 		,category.intCategoryId
 		,categoryLocation.intCategoryLocationId
 		,intLocationId = categoryLocation.intLocationId 
-		,categoryLocation.intRegisterDepartmentId
+		-- ,categoryLocation.intRegisterDepartmentId
+		,CAST(categoryLocation.strCashRegisterDepartment AS INT)
 		,companyLocation.strLocationName
 		,category.strCategoryCode	
 		,strCategoryDescription		= category.strDescription	

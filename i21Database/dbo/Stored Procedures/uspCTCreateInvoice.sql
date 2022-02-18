@@ -40,9 +40,6 @@ BEGIN TRY
 		,@dblShippedForInvoice numeric(18,6)
 		,@dblInvoicedPriced numeric(18,6)
 		,@dblPricedForInvoice numeric(18,6)
-		,@dblQuantityForSpot numeric(18,6)
-		,@dblRemainingPricedQuantityForInvoice numeric(18,6)
-		,@NewInvoiceSpotDetailId int
 		,@intInvoiceId int
 
 		,@ysnMultiPrice bit
@@ -754,23 +751,6 @@ BEGIN TRY
 						set @dblQuantityForInvoice = @dblShippedForInvoice;	
 					end
 
-					select @dblQuantityForSpot = 0; 
-  
-					select
-						@dblRemainingPricedQuantityForInvoice = isnull((sum(pfd.dblQuantity) - isnull(sum(di.dblQtyShipped),0)),0)
-					from
-						tblCTPriceFixation pf
-						join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
-						left join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId and isnull(ar.ysnReturn,0) = 0
-						left join tblARInvoiceDetail di on di.intInvoiceDetailId = ar.intInvoiceDetailId and isnull(di.intInventoryShipmentChargeId,0) = 0
-					where
-						pf.intPriceFixationId = @intPriceFixationId
-
-					if (isnull(@ysnDestinationWeightsGrades,0) = 1 and @intPricingTypeId = 1 and @dblRemainingPricedQuantityForInvoice = @dblPricedForInvoice and @dblPricedForInvoice < @dblShippedForInvoice)
-					begin
-						select @dblQuantityForSpot = @dblShippedForInvoice - @dblPricedForInvoice;
-					end
-
 					--Check if Shipment Item has unposted Invoice
 					if not exists (
 									select
@@ -861,19 +841,16 @@ BEGIN TRY
 
 						END
 
-						if (isnull(@dblQuantityForSpot,0) > 0)
+						if (isnull(@ysnDestinationWeightsGrades,0) = 1)
 						begin
-							exec uspCTCreateInvoiceDetail
-								@intInvoiceDetailId = @intInvoiceDetailId
-								,@intInventoryShipmentId = @intInventoryShipmentId
-								,@intInventoryShipmentItemId = @intInventoryShipmentItemId
-								,@dblQty = @dblQuantityForSpot
-								,@dblPrice = 0.00
-								,@intUserId = @intUserId
-								,@intContractHeaderId = null
-								,@intContractDetailId = null
-								,@NewInvoiceDetailId = @NewInvoiceSpotDetailId
-								,@intPriceFixationDetailId = @intPriceFixationDetailId;
+							exec uspARUpdateOverageContracts
+								@intInvoiceId = @intNewInvoiceId
+								, @intScaleUOMId = default
+								, @intUserId = @intUserId
+								, @dblNetWeight =  default
+								, @ysnFromSalesOrder =  default
+								, @ysnFromImport =  default
+								, @dblSpotPrice =  default
 						end
 
 						--Update the load applied and priced
@@ -934,21 +911,6 @@ BEGIN TRY
 							,@intInventoryShipmentId = @intInventoryShipmentId
 							,@UserId = @intUserId
 							,@intInvoiceDetailId = @intInvoiceDetailId
-
-						if (isnull(@dblQuantityForSpot,0) > 0)
-						begin
-							exec uspCTCreateInvoiceDetail
-								@intInvoiceDetailId = @intInvoiceDetailId
-								,@intInventoryShipmentId = @intInventoryShipmentId
-								,@intInventoryShipmentItemId = @intInventoryShipmentItemId
-								,@dblQty = @dblQuantityForSpot
-								,@dblPrice = 0.00
-								,@intUserId = @intUserId
-								,@intContractHeaderId = null
-								,@intContractDetailId = null
-								,@NewInvoiceDetailId = @NewInvoiceSpotDetailId
-								,@intPriceFixationDetailId = @intPriceFixationDetailId;
-						end
 							
 						--Deduct the quantity from @dblPricedForInvoice and @dblShippedForInvoice
 						set @dblPricedForInvoice = (@dblPricedForInvoice - @dblQuantityForInvoice);

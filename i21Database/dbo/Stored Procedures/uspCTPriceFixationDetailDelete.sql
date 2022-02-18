@@ -298,16 +298,11 @@ BEGIN TRY
 
 		IF OBJECT_ID('tempdb..#tmpPriceFixationDetailMultiplePrice') IS NOT NULL DROP TABLE #tmpPriceFixationDetailMultiplePrice
 
-		IF EXISTS 
-		(
-			select top 1 1 
-			from tblCTContractHeader ch
-			inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
-			and wg.strWhereFinalized = 'Destination'
-			where intContractHeaderId = @intContractHeaderId
-		)
+		IF EXISTS (SELECT TOP 1 1 FROM tblCTContractHeader ch
+					INNER JOIN tblCTWeightGrade wg ON wg.intWeightGradeId IN (ch.intWeightId, ch.intGradeId) AND wg.strWhereFinalized = 'Destination'
+					WHERE intContractHeaderId = @intContractHeaderId AND intContractTypeId = 2)
 		BEGIN
-			declare @QtyToDeleteNegative numeric(18,6) = @QtyToDelete * -1;
+			DECLARE @QtyToDeleteNegative NUMERIC(18, 6) = @QtyToDelete * -1;
 			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
 								@intContractDetailId 	= 	@intContractDetailId,
 								@strSource			 	= 	'Pricing',
@@ -320,29 +315,23 @@ BEGIN TRY
 	END
 
 	IF ISNULL(@intPriceFixationDetailId,0) = 0 AND ISNULL(@intPriceFixationId, 0) <> 0
-	begin
-
+	BEGIN
 		SELECT @intContractHeaderId = intContractHeaderId
 			, @intContractDetailId = intContractDetailId
 		FROM tblCTPriceFixation WHERE intPriceFixationId = @intPriceFixationId
 
-		IF EXISTS 
-		(
-			select top 1 1 
-			from tblCTContractHeader ch
-			inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
-			and wg.strWhereFinalized = 'Destination'
-			where intContractHeaderId = @intContractHeaderId
-		)
+		IF EXISTS (SELECT TOP 1 1 FROM tblCTContractHeader ch
+					INNER JOIN tblCTWeightGrade wg ON wg.intWeightGradeId IN (ch.intWeightId, ch.intGradeId) AND wg.strWhereFinalized = 'Destination'
+					WHERE intContractHeaderId = @intContractHeaderId AND intContractTypeId = 2)
 		BEGIN
-			declare @intPriceFixationDetailIdToDelete int = 0;
+			DECLARE @intPriceFixationDetailIdToDelete int = 0;
+			SELECT @intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
 			
-			SELECT	@intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
-			WHILE	ISNULL(@intPriceFixationDetailIdToDelete,0) > 0
+			WHILE ISNULL(@intPriceFixationDetailIdToDelete,0) > 0
 			BEGIN
-				select @QtyToDelete = dblQuantity from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailIdToDelete;
+				SELECT @QtyToDelete = dblQuantity FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intPriceFixationDetailIdToDelete;
+				SELECT @QtyToDeleteNegative = @QtyToDelete * -1;
 
-				select @QtyToDeleteNegative = @QtyToDelete * -1;
 				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
 									@intContractDetailId 	= 	@intContractDetailId,
 									@strSource			 	= 	'Pricing',
@@ -352,20 +341,15 @@ BEGIN TRY
 									@intTransactionId		= 	@intPriceFixationDetailIdToDelete,
 									@dblTransactionQty		= 	@QtyToDeleteNegative
 				 
-				SELECT	@intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailIdToDelete
+				SELECT @intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailIdToDelete
 			END
 		END
-
-
-
-	end
+	END
 	
-	declare @strInvoiceDiscountsChargesIds nvarchar(500);
-	declare @InvoiceDiscountsChargesIds table (
-		intId nvarchar(20)
-	)
-	declare @intActiveId int = 0;
-
+	DECLARE @strInvoiceDiscountsChargesIds nvarchar(500);
+	DECLARE @InvoiceDiscountsChargesIds TABLE (intId NVARCHAR(20))
+	DECLARE @intActiveId int = 0;
+	
 	if EXISTS (select top 1 1 from #ItemInvoice)
 	select @DetailId = MIN(DetailId) FROM #ItemInvoice
 	while (@DetailId is not null)
