@@ -54,13 +54,16 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 		DECLARE 
 			@strAccountErrorMessage NVARCHAR(255),
 			@strTransactionType NVARCHAR(255),
-			@intGLFiscalYearPeriodId INT
+			@intGLFiscalYearPeriodId INT,
+			@strPeriod NVARCHAR(30)
 
 		SELECT 
-			@intGLFiscalYearPeriodId = intGLFiscalYearPeriodId,
+			@intGLFiscalYearPeriodId = A.intGLFiscalYearPeriodId,
 			@strTransactionType = strTransactionType,
-			@strConsolidationNumber = strConsolidationNumber
-		FROM tblGLRevalue 
+			@strConsolidationNumber = strConsolidationNumber,
+			@strPeriod = strPeriod
+		FROM tblGLRevalue A JOIN
+		tblGLFiscalYearPeriod P on A.intGLFiscalYearPeriodId = P.intGLFiscalYearPeriodId
 		WHERE intConsolidationId = @intConsolidationId
 
 		-- Validate CM revaluation
@@ -118,7 +121,6 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			,[dtmDateEntered]		= @dateNow
 			,[strBatchId]			= @strPostBatchId
 			,[strCode]				= 'REVAL'
-			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intConsolidationDetailId]			
 			,[strTransactionType]	= 'Revalue Currency'
 			,[strTransactionForm]	= 'Revalue Currency'
@@ -147,7 +149,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				,[dtmDateEntered]		
 				,strBatchId
 				,[strCode]				
-				,[strJournalLineDescription] 
+				,[strJournalLineDescription] = 'Revalue '+ @strTransactionType + ' '  + @strPeriod 
 				,[intJournalLineNo]		
 				,[strTransactionType]	
 				,[strTransactionForm]
@@ -164,7 +166,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				,[dtmTransactionDate]	
 				,[dblDebit]				= dblCredit				
 				,[dblCredit]			= dblDebit			
-				,[dtmDate]				
+				,[dtmDate]				= dtmReverseDate	
 				,[ysnIsUnposted]		
 				,[intConcurrencyId]		
 				,[intCurrencyId]		
@@ -173,7 +175,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				,[dtmDateEntered]	
 				,strBatchId	
 				,[strCode]				
-				,[strJournalLineDescription] 
+				,[strJournalLineDescription] = 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod 
 				,[intJournalLineNo]		
 				,[strTransactionType]	
 				,[strTransactionForm]	
