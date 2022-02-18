@@ -40,16 +40,16 @@ FROM (
 		, sc.strCommodityCode
 		, ft.intLocationId
 		, cl.strLocationName
-		, strStatus	= CASE WHEN ISNULL(ft.intBankTransferId, 0) <> 0 AND ft.intInstrumentTypeId = 4 THEN 'Posted' 
-						ELSE CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' 
-							THEN approval.strApprovalStatus
-							WHEN ISNULL(ft.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' 
-								THEN 'Approved and Not Posted' 
-							ELSE ISNULL(ft.strStatus, 
-										CASE WHEN ft.intSelectedInstrumentTypeId = 2 AND ft.intInstrumentTypeId = 4 THEN 'No Need for Approval' 
-										ELSE '' END) 
-							END
-						END
+		, strStatus	= CASE WHEN ft.intSelectedInstrumentTypeId = 2 AND ft.intInstrumentTypeId = 4 -- OTC Forward
+							THEN CASE WHEN ISNULL(ft.intBankTransferId, 0) <> 0 THEN 'Posted' 
+									WHEN approval.strApprovalStatus = 'Approved' THEN 'Approved and Not Posted'
+									ELSE CASE WHEN ISNULL(approval.strApprovalStatus,'') <> '' 
+											THEN  approval.strApprovalStatus
+											ELSE 'No Need for Approval'
+											END
+									END
+							ELSE ft.strStatus
+							END COLLATE Latin1_General_CI_AS
 		, ft.intBookId
 		, sb.strBook
 		, ft.intSubBookId
@@ -95,8 +95,7 @@ FROM (
 		, ysnSlicedTrade = ISNULL(ft.ysnSlicedTrade, CAST(0 AS BIT))
 		, ft.intOrigSliceTradeId
 		, strOriginalTradeNo = ST.strInternalTradeNo
-		, strOrderType = (CASE WHEN ft.intOrderTypeId = 1 THEN 'GTC'
-							WHEN ft.intOrderTypeId = 2 THEN 'Limit'
+		, strOrderType = (CASE WHEN ft.intOrderTypeId = 2 THEN 'Limit'
 							WHEN ft.intOrderTypeId = 3 THEN 'Market'
 							ELSE '' END)
 FROM tblRKFutOptTransaction AS ft

@@ -18,10 +18,14 @@ BEGIN TRY
 						, intBankId INT NULL
 						, intBankAccountId INT NULL
 						, intBuyBankAccountId INT NULL
-						, dblExchangeRate INT NULL
-						, dblFinanceForwardRate INT NULL
+						, dblExchangeRate NUMERIC(24, 10) NULL
+						, dblFinanceForwardRate NUMERIC(24, 10) NULL
 						, intCurrencyExchangeRateTypeId INT NULL
 						, intBankTransferId INT NULL
+						, dblBuyAmount NUMERIC(24, 10) NULL
+						, dblSellAmount NUMERIC(24, 10) NULL
+						, intFromCurrencyId INT NULL
+						, intToCurrencyId INT NULL
 						)
 
 	DECLARE @sql_xml XML = Cast('<root><U>'+ Replace(@intFutOptTransactionIds, ',', '</U><U>')+ '</U></root>' AS XML)
@@ -39,6 +43,10 @@ BEGIN TRY
 		, dblFinanceForwardRate
 		, intCurrencyExchangeRateTypeId
 		, intBankTransferId
+		, intFromCurrencyId
+		, intToCurrencyId
+		, dblBuyAmount
+		, dblSellAmount
 	)
 	SELECT intFutOptTransactionId
 		, strInternalTradeNo
@@ -49,6 +57,10 @@ BEGIN TRY
 		, dblFinanceForwardRate
 		, intCurrencyExchangeRateTypeId 
 		, intBankTransferId
+		, intFromCurrencyId
+		, intToCurrencyId
+		, dblBuyAmount = dblContractAmount
+		, dblSellAmount = dblMatchAmount
 	FROM tblRKFutOptTransaction
 	WHERE intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM @derivativeTable)
 	ORDER BY strInternalTradeNo
@@ -68,15 +80,51 @@ BEGIN TRY
 				, @strInternalTradeNo = strInternalTradeNo 
 				, @intBankTransferId = intBankTransferId FROM @validateTable
 								
-		IF @strAction = 'POST' AND ISNULL(@intBankTransferId, 0) <> 0
+		IF @strAction = 'POST' 
 		BEGIN
-			SELECT @ErrMsg += @strInternalTradeNo + ' already has posted Bank Transfer.' + '<br>'
-			SELECT @intRecordsWithErr += 1
+			IF ISNULL(@intBankTransferId, 0) <> 0
+			BEGIN 
+				SELECT @ErrMsg += @strInternalTradeNo + ' already has posted Bank Transfer.' + '<br>'
+				SELECT @intRecordsWithErr += 1
 				
-			DELETE FROM @validateTable
-			WHERE intFutOptTransactionId = @intFutOptTransactionId
+				DELETE FROM @validateTable
+				WHERE intFutOptTransactionId = @intFutOptTransactionId
 
-			CONTINUE;
+				CONTINUE;
+			END
+
+			-- CHECKING IF NOT YET APPROVED
+			IF NOT EXISTS (SELECT TOP 1 '' FROM vyuRKFutOptTranForNotMapping 
+							WHERE intFutOptTransactionId = @intFutOptTransactionId 
+							AND strApprovalStatus IN ('Approved and Not Posted', 'No Need for Approval') 
+						)
+			BEGIN 
+				SELECT @ErrMsg += @strInternalTradeNo + ' needs to be Approved first.' + '<br>'
+				SELECT @intRecordsWithErr += 1
+				
+				DELETE FROM @validateTable
+				WHERE intFutOptTransactionId = @intFutOptTransactionId
+
+				CONTINUE;
+			END
+		END
+
+		IF @strAction = 'APPROVE' OR @strAction = 'REJECT' 
+		BEGIN
+			-- CHECKING IF WAITING FOR APPROVAL
+			IF NOT EXISTS (SELECT TOP 1 '' FROM vyuRKFutOptTranForNotMapping 
+							WHERE intFutOptTransactionId = @intFutOptTransactionId 
+							AND strApprovalStatus IN ('Waiting for Approval') 
+						)
+			BEGIN 
+				SELECT @ErrMsg += @strInternalTradeNo + ' is not subject for Approval.' + '<br>'
+				SELECT @intRecordsWithErr += 1
+				
+				DELETE FROM @validateTable
+				WHERE intFutOptTransactionId = @intFutOptTransactionId
+
+				CONTINUE;
+			END
 		END
 			
 		DECLARE @derivativeError NVARCHAR(MAX) = ''
@@ -125,6 +173,34 @@ BEGIN TRY
 		BEGIN
 			SET @derivativeError += CASE WHEN @intErrorCounter > 0 THEN ', ' ELSE '' END
 			SET @derivativeError += 'Finance Forward Rate'
+			SET @intErrorCounter += 1
+		END
+
+		IF EXISTS (SELECT TOP 1 '' FROM @validateTable WHERE intFutOptTransactionId = @intFutOptTransactionId AND ISNULL(intFromCurrencyId, 0) = 0)
+		BEGIN
+			SET @derivativeError += CASE WHEN @intErrorCounter > 0 THEN ', ' ELSE '' END
+			SET @derivativeError += 'Buy Currency'
+			SET @intErrorCounter += 1
+		END
+		
+		IF EXISTS (SELECT TOP 1 '' FROM @validateTable WHERE intFutOptTransactionId = @intFutOptTransactionId AND ISNULL(intToCurrencyId, 0) = 0)
+		BEGIN
+			SET @derivativeError += CASE WHEN @intErrorCounter > 0 THEN ', ' ELSE '' END
+			SET @derivativeError += 'Sell Currency'
+			SET @intErrorCounter += 1
+		END
+		
+		IF EXISTS (SELECT TOP 1 '' FROM @validateTable WHERE intFutOptTransactionId = @intFutOptTransactionId AND ISNULL(dblBuyAmount, 0) <= 0)
+		BEGIN
+			SET @derivativeError += CASE WHEN @intErrorCounter > 0 THEN ', ' ELSE '' END
+			SET @derivativeError += 'Buy Amount be greater than 0'
+			SET @intErrorCounter += 1
+		END
+
+		IF EXISTS (SELECT TOP 1 '' FROM @validateTable WHERE intFutOptTransactionId = @intFutOptTransactionId AND ISNULL(dblSellAmount, 0) <= 0)
+		BEGIN
+			SET @derivativeError += CASE WHEN @intErrorCounter > 0 THEN ', ' ELSE '' END
+			SET @derivativeError += 'Sell Amount be greater than 0'
 			SET @intErrorCounter += 1
 		END
 
