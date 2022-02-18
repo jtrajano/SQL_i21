@@ -54,6 +54,7 @@ UPDATE A
 	,A.intEntityId = @userId
 	,strReference = A.strReference + ' Duplicate of ' + A.strBillId
 	,A.dblDiscount = CASE WHEN A.intTransactionType > 1 THEN 0 ELSE A.dblDiscount END
+	,A.ysnOrigin = 0 --once duplicated, it should be origin false
 FROM #tmpDuplicateBill A
 
 IF @reset = 1
