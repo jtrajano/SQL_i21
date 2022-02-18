@@ -23,7 +23,8 @@ CREATE TABLE #AssetID(
 			[intAssetId] [int] NOT NULL,
 			[ysnProcessed] [bit] NULL
 		)
-INSERT INTO #AssetID SELECT intId, 0 FROM @Id
+
+INSERT INTO #AssetID SELECT DISTINCT intAssetId = intId, ysnProcessed = 0 FROM @Id
 
 --IF (ISNULL(@Param, '') <> '') 
 --	INSERT INTO #AssetID EXEC (@Param)
@@ -74,18 +75,16 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
 
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
-		
-		DECLARE @GLEntries RecapTableType
-		
-		-- ASSET ACCOUNT
-		DELETE FROM @GLEntries
-
 		WHILE EXISTS(SELECT TOP 1 1 FROM #AssetID WHERE ysnProcessed = 0)
 		BEGIN	
 			SELECT TOP 1 @intCurrentAssetId = intAssetId FROM #AssetID WHERE ysnProcessed = 0
 			
 			EXEC uspSMGetStartingNumber @intStartingNumberId = 112, @strID = @strCurrentTransactionId OUT
-
+			
+			DECLARE @GLEntries RecapTableType
+			DELETE FROM @GLEntries
+			
+			-- ASSET ACCOUNT
 			INSERT INTO @GLEntries (
 				 [strTransactionId]
 				,[intTransactionId]
