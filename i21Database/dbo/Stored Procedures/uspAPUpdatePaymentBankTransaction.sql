@@ -69,6 +69,7 @@ BEGIN
 		,[dtmLastModified]          
 		,[intConcurrencyId]    					
 		,[intAPPaymentId]     
+		,[intEFTInfoId]
 	)
 	SELECT
 		[strTransactionId] = A.strPaymentRecordNum,
@@ -105,7 +106,8 @@ BEGIN
 		[intLastModifiedUserID] = NULL,
 		[dtmLastModified] = GETDATE(),
 		[intConcurrencyId] = 1,
-		[intAPPaymentId] = A.intPaymentId
+		[intAPPaymentId] = A.intPaymentId,
+		[intEFTInfoId] = C.intEntityEFTInfoId
 	FROM tblAPPayment A
 		INNER JOIN tblAPVendor B
 			ON A.[intEntityVendorId] = B.[intEntityId]
@@ -125,6 +127,13 @@ BEGIN
 		--	INNER JOIN tblEMEntityLocation E ON D.intPayToAddressId = E.intEntityLocationId AND D.intEntityVendorId = E.intEntityId
 		--	WHERE C.intPaymentId = A.intPaymentId
 		--) PayTo
+		OUTER APPLY (
+			SELECT TOP 1 EFT.intEntityEFTInfoId
+			FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+			INNER JOIN tblEMEntityEFTInformation EFT ON EFT.intEntityEFTInfoId = B.intPayToBankAccountId
+			WHERE PD.intPaymentId = A.intPaymentId
+		) C
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	EXEC uspCMCreateBankTransactionEntries @BankTransactionEntries = @bankTransaction
