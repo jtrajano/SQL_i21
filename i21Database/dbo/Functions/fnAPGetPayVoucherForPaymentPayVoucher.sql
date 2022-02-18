@@ -65,7 +65,6 @@ RETURNS TABLE AS RETURN
 		,forPay.strTempPaymentInfo
 		,forPay.strReference
 		,forPay.intCurrencyId
-		,currency.strCurrency
 		,forPay.ysnPosted
 		,forPay.ysnDiscountOverride
 		,forPay.intPaymentMethodId
@@ -97,8 +96,7 @@ RETURNS TABLE AS RETURN
 		ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	LEFT JOIN vyuCMBankAccount account ON account.intBankAccountId = voucher.intPayFromBankAccountId
-	LEFT JOIN vyuAPEntityEFTInformation eft ON eft.intEntityEFTInfoId = voucher.intPayToBankAccountId
-	LEFT JOIN tblSMCurrency currency ON currency.intCurrencyID = voucher.intCurrencyId
+	LEFT JOIN vyuAPEntityEFTInformation eft on eft.intEntityEFTInfoId = voucher.intPayToBankAccountId
 	OUTER APPLY (
 		SELECT TOP 1
 			eg.strEntityGroupName,
