@@ -121,7 +121,7 @@ AS
 			,CP.intDefaultFreightId
 			,strFreightItem = FI.strItemNo
 			,CP.intDefaultInsuranceId
-			,strInsuranceItem = II.strItemNo
+			,strInsuranceItem = INS.strItemNo
 			,CP.intDefaultTHCId
 			,strTHCItem = THC.strItemNo
 			,CP.intDefaultStorageId

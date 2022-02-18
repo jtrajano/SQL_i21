@@ -556,6 +556,7 @@ BEGIN TRY
 
 		, CD.dblQualityPremium
 		, CD.dblOptionalityPremium
+		, CD.intCostTermId
 		, strCostTerm = CostTerm.strFreightTerm
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
