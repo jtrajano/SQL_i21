@@ -47,33 +47,36 @@ END
 	DECRYPTION BY CERTIFICATE i21EncryptionCert
 	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
-	UPDATE Bank SET strRTN = ISNULL(dbo.fnAESDecrypt(strRTN),strRTN) 
-	FROM tblCMBank Bank 
-	WHERE LEN(LTRIM(RTRIM(strRTN))) < @intEncryptCheckLength
-
-
-	-- Correct the length of bank with <9 routing number
+	-- Correct the length of bank with <9 routing number 
 	UPDATE B SET strRTN =  
-	dbo.fnAESEncryptASym( REPLICATE('0',  9 - LEN(SUBSTRING(A.strRTN, PATINDEX('%[^0]%', A.strRTN), 10))) + 
-	SUBSTRING(A.strRTN, PATINDEX('%[^0]%', A.strRTN), 10) )
-	FROM vyuCMBank A JOIN tblCMBank B ON A.intBankId = B.intBankId
-	WHERE LEN(A.strRTN) < 9
+	dbo.fnAESEncryptASym( REPLICATE('0',  9 - LEN(SUBSTRING(strRTN, PATINDEX('%[^0]%', strRTN), 10))) + 
+	SUBSTRING(strRTN, PATINDEX('%[^0]%', strRTN), 10) )
+	FROM tblCMBank B
+	WHERE LEN(strRTN) < 9
+
+	UPDATE B SET strRTN =  
+	dbo.fnAESEncryptASym(strRTN)
+	FROM tblCMBank B
+	WHERE LEN(strRTN) = 9
+
+
+	UPDATE B SET strRTN =  
+	dbo.fnAESEncryptASym( REPLICATE('0',  9 - LEN(SUBSTRING(strRTN, PATINDEX('%[^0]%', strRTN), 10))) + 
+	SUBSTRING(strRTN, PATINDEX('%[^0]%', strRTN), 10) )
+	FROM tblCMBankAccount B
+	WHERE LEN(strRTN) < 9
+
+	UPDATE B SET strRTN =  
+	dbo.fnAESEncryptASym(strRTN)
+	FROM tblCMBankAccount B
+	WHERE LEN(strRTN) = 9
+	
 
 	UPDATE BankAccount SET strBankAccountNo = ISNULL(dbo.fnAESDecrypt(strBankAccountNo),strBankAccountNo)
 	FROM tblCMBankAccount BankAccount
 	WHERE LEN(LTRIM(RTRIM(strBankAccountNo))) < @intEncryptCheckLength
 	
-	UPDATE BankAccount SET strRTN = ISNULL(dbo.fnAESDecrypt(strRTN),strRTN)
-	FROM tblCMBankAccount BankAccount
-	WHERE LEN(LTRIM(RTRIM(strRTN))) < @intEncryptCheckLength
-
-	-- Correct the length of bank account with <9 routing number
-	UPDATE B SET strRTN =  
-	dbo.fnAESEncryptASym( REPLICATE('0',  9 - LEN(SUBSTRING(A.strRTN, PATINDEX('%[^0]%', A.strRTN), 10))) + 
-	SUBSTRING(A.strRTN, PATINDEX('%[^0]%', A.strRTN), 10) )
-	FROM vyuCMBankAccount A JOIN tblCMBankAccount B ON A.intBankAccountId = B.intBankAccountId
-	WHERE LEN(A.strRTN) < 9
-
+	
 	UPDATE BankAccount SET strMICRBankAccountNo = ISNULL(dbo.fnAESDecrypt(strMICRBankAccountNo),strMICRBankAccountNo)
 	FROM tblCMBankAccount BankAccount
 	WHERE LEN(LTRIM(RTRIM(strMICRBankAccountNo))) < @intEncryptCheckLength
