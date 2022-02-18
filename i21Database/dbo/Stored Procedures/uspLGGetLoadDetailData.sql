@@ -46,6 +46,7 @@ BEGIN
 		,dblWeightPerUnit = IsNull(dbo.fnLGGetItemUnitConversion (LoadDetail.intItemId, LoadDetail.intItemUOMId, ISNULL(L.intWeightUnitMeasureId, WeightUOM.intUnitMeasureId)), 0.0)
 		,dblUnMatchedQty = CASE WHEN (SELECT COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId) > 0 THEN 0 ELSE LoadDetail.dblQuantity END
 		,strOrigin = CO.strCountry
+		,strCropYear = CPY.strCropYear
 		,intCommodityAttributeId = CA.intCommodityAttributeId
 		,intCommodityId = Item.intCommodityId
 		,strExternalShipmentNumber
@@ -68,6 +69,7 @@ BEGIN
 	LEFT JOIN tblCTContractHeader				SHeader			ON		SHeader.intContractHeaderId = SDetail.intContractHeaderId
 	LEFT JOIN tblCTPricingType					PTP				ON		PTP.intPricingTypeId = PDetail.intPricingTypeId
 	LEFT JOIN tblCTPricingType					PTS				ON		PTS.intPricingTypeId = SDetail.intPricingTypeId
+	LEFT JOIN tblCTCropYear						CPY				ON		CPY.intCropYearId = LD.intCropYearId
 	LEFT JOIN tblEMEntity						VEN				ON		VEN.intEntityId = LoadDetail.intVendorEntityId
 	LEFT JOIN tblEMEntityLocation				VEL				ON		VEL.intEntityLocationId = LoadDetail.intVendorEntityLocationId
 	LEFT JOIN tblEMEntity						CEN				ON		CEN.intEntityId = LoadDetail.intCustomerEntityId

@@ -95,6 +95,10 @@ SELECT CD.intContractDetailId
 	,SB.strSubBook
 	,dblSeqPrice = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.dblCashPrice ELSE AD.dblSeqPrice END
 	,PT.strPricingType
+	,CH.intCropYearId
+	,CPY.strCropYear
+	,CD.dblOptionalityPremium
+	,CD.dblQualityPremium
 	,intSeqCurrencyId = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END
 	,strSeqCurrency = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CPCU.strCurrency ELSE AD.strSeqCurrency END
 	,intSeqPriceUOMId = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intPriceItemUOMId ELSE AD.intSeqPriceUOMId END
@@ -140,6 +144,7 @@ LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLoca
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblCTWeightGrade WW ON WW.intWeightGradeId = CH.intWeightId
+LEFT JOIN tblCTCropYear CPY ON CPY.intCropYearId = CH.intCropYearId
 LEFT JOIN tblCTPosition CTP ON CTP.intPositionId = CH.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
