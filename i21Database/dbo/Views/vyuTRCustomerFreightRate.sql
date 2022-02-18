@@ -23,6 +23,10 @@ SELECT DISTINCT CF.intFreightXRefId
 , SMLOB.strLineOfBusiness AS strLineOfBusiness
 , TCN.strTerminalControlNumber
 , CF.dblFreightRateIn AS dblFreightRateIn
+, EM.strEntityNo AS strCustomerEntityNo
+, CF.dblMinimumUnits AS dblMinimumUnits
+, CF.dblMinimumUnitsIn AS dblMinimumUnitsIn
+, CF.dblSurchargeOut AS dblSurchargeOut
 FROM tblARCustomerFreightXRef CF
 INNER JOIN tblARCustomer C ON C.intEntityId = CF.intEntityCustomerId
 INNER JOIN tblEMEntity EM ON EM.intEntityId = C.intEntityId
