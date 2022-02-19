@@ -116,6 +116,7 @@ SELECT CD.intContractDetailId
 	,intHeaderBookId = CH.intBookId
 	,intHeaderSubBookId = CH.intSubBookId
 	,ysnAllowReweighs = WW.ysnPayablesOnShippedWeights
+	,ysnShowOptionality = CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CD.intContractDetailId) THEN 1 ELSE 0 END
 	,CH.intTermId
 FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 CROSS JOIN tblCTContractHeader CH

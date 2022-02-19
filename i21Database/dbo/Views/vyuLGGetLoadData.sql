@@ -198,6 +198,7 @@ SELECT
 	,SB.strSubBook
 	,INC.intInsuranceCalculatorId
 	,L.ysnAllowReweighs
+	,L.ysnShowOptionality
 	,L.dblFreightRate
 	,L.dblSurcharge
 	,L.intTermId

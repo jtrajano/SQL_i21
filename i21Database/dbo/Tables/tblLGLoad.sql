@@ -178,6 +178,7 @@
 [intLoadRefId] INT NULL,
 [ysnLoadBased] BIT NULL DEFAULT ((0)),
 [ysnAllowReweighs] BIT NULL DEFAULT ((0)),
+[ysnShowOptionality] BIT NULL DEFAULT ((0)),
 [dblFreightRate] NUMERIC(18, 6) NULL,
 [dblSurcharge] NUMERIC(18, 6) NULL,
 

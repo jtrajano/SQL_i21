@@ -285,6 +285,7 @@ SELECT -- Load Header
 	,L.intBookId
 	,L.intSubBookId
 	,L.ysnAllowReweighs
+	,L.ysnShowOptionality
 	,L.dblFreightRate
 	,L.dblSurcharge
 	/*Trade Finance*/
