@@ -219,6 +219,8 @@ SELECT LD.intLoadDetailId
 	, strDetailVendorReference = LD.strVendorReference 
 	, strDetailCustomerReference = LD.strCustomerReference
 	, strDetailTerminalReference = LD.strTerminalReference
+	, LD.intCropYearId
+	, strCropYear = CPY.strCropYear
 
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -244,6 +246,7 @@ LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPCo
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
 LEFT JOIN tblCTPricingType PPricingType ON PPricingType.intPricingTypeId = PDetail.intPricingTypeId
 LEFT JOIN tblCTIndex PIndex ON PIndex.intIndexId = PDetail.intIndexId
+LEFT JOIN tblCTCropYear CPY ON CPY.intCropYearId = LD.intCropYearId
 LEFT JOIN tblTRSupplyPoint PSP ON PSP.intEntityVendorId = PIndex.intVendorId AND PSP.intEntityLocationId = PIndex.intVendorLocationId
 LEFT JOIN tblICItem	IM ON IM.intItemId = PDetail.intItemId
 LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = PDetail.intContractDetailId
