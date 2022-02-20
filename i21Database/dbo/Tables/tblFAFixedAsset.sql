@@ -5,6 +5,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[intCompanyLocationId]		INT NULL,
 	[strSerialNumber]			NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
 	[strNotes]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strDepartment]				NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateAcquired]			DATETIME NULL,			
 	[dtmDateInService]			DATETIME NULL,
 	[dblCost]					NUMERIC (18, 6) NULL DEFAULT ((0)),
