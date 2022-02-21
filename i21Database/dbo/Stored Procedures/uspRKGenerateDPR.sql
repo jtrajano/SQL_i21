@@ -15,7 +15,7 @@
 AS
 
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IDENTIFIER OFF 
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -391,6 +391,7 @@ BEGIN TRY
 		, ysnExternal
 		, intTransactionRecordId
 		, strTransactionNumber
+		, intTransactionRecordHeaderId
 	INTO #tblCustomerOwnedAll
 	FROM dbo.fnRKGetBucketCustomerOwned(@dtmToDate, @intCommodityId, @intVendorId) t
 	LEFT JOIN tblSCTicket SC ON t.intTicketId = SC.intTicketId
