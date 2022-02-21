@@ -87,11 +87,11 @@ DECLARE @BankCount AS INT
 		  AND dbo.fnAESDecryptASym(strAccountNumber) = @strAccountNumber
 
 
-		IF (@strBankName IS NOT NULL OR @strBankName != '')
+		IF (@strBankName IS NOT NULL AND @strBankName != '')
 		BEGIN
-			IF (@strAccountType IS NOT NULL OR @strAccountType != '')
+			IF (@strAccountType IS NOT NULL AND @strAccountType != '')
 			BEGIN
-				IF (@strAccountNumber IS NOT NULL OR @strAccountNumber != '')
+				IF (@strAccountNumber IS NOT NULL AND @strAccountNumber != '')
 					BEGIN
 						IF (@EmployeeEntityNo = 0)
 							BEGIN
