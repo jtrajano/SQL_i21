@@ -511,7 +511,7 @@ BEGIN
 			UPDATE
 			SET 
 				dtmReceiptDate			= ISNULL(IntegrationData.dtmDate, GETDATE())
-				,intEntityVendorId		= IntegrationData.intEntityVendorId
+				,intEntityVendorId		= NULLIF(IntegrationData.intEntityVendorId, -1) 
 				,strReceiptType			= IntegrationData.strReceiptType
 				,intSourceType          = IntegrationData.intSourceType
 				,intBlanketRelease		= NULL
@@ -519,7 +519,7 @@ BEGIN
 				,strVendorRefNo			= dbo.fnSMGetVendorRefNoPrefix(IntegrationData.intLocationId, IntegrationData.strVendorRefNo) 
 				,strBillOfLading		= IntegrationData.strBillOfLadding
 				,intShipViaId			= IntegrationData.intShipViaId
-				,intShipFromId			= IntegrationData.intShipFromId
+				,intShipFromId			= NULLIF(IntegrationData.intShipFromId, -1) 
 				,intReceiverId			= @intUserId 
 				,intCurrencyId			= ISNULL(IntegrationData.intCurrencyId, @intFunctionalCurrencyId)
 				,intSubCurrencyCents	= IntegrationData.intSubCurrencyCents
@@ -549,7 +549,7 @@ BEGIN
 				,dtmDateModified		= GETDATE()
 				,intModifiedByUserId 	= @intUserId
 				,strDataSource			= ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType)
-				,intShipFromEntityId	= ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
+				,intShipFromEntityId	= ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -597,7 +597,7 @@ BEGIN
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
 				/*dtmReceiptDate*/				,ISNULL(IntegrationData.dtmDate, GETDATE())
-				/*intEntityVendorId*/			,IntegrationData.intEntityVendorId
+				/*intEntityVendorId*/			,NULLIF(IntegrationData.intEntityVendorId, -1)
 				/*strReceiptType*/				,IntegrationData.strReceiptType
 				/*intSourceType*/				,IntegrationData.intSourceType
 				/*intBlanketRelease*/			,NULL
@@ -605,7 +605,7 @@ BEGIN
 				/*strVendorRefNo*/				,dbo.fnSMGetVendorRefNoPrefix(IntegrationData.intLocationId, IntegrationData.strVendorRefNo)
 				/*strBillOfLading*/				,IntegrationData.strBillOfLadding
 				/*intShipViaId*/				,IntegrationData.intShipViaId
-				/*intShipFromId*/				,IntegrationData.intShipFromId
+				/*intShipFromId*/				,NULLIF(IntegrationData.intShipFromId, -1) 
 				/*intReceiverId*/				,@intUserId 
 				/*intCurrencyId*/				,ISNULL(IntegrationData.intCurrencyId, @intFunctionalCurrencyId) 
 				/*intSubCurrencyCents*/			,IntegrationData.intSubCurrencyCents
@@ -635,7 +635,7 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				/*strDataSource*/				,ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType) 
-				/*intShipFromEntityId*/			,ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
+				/*intShipFromEntityId*/			,ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
 			)
 		;
 				
@@ -1801,6 +1801,7 @@ BEGIN
 						AND ItemLot.intParentLotId = l.intParentLotId
 			WHERE	ItemLot.intParentLotId IS NOT NULL 
 					AND l.intParentLotId IS NULL 
+					AND ItemLot.intLotId IS NOT NULL 
 
 			IF @valueLotRecordParentLotId > 0
 			BEGIN
