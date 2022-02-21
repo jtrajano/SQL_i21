@@ -512,6 +512,7 @@
     <Build Include="dbo\Functions\fnICIsUpcExists2.sql" />
     <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
+    <Build Include="dbo\Functions\fnLGCalculateOptionalityPremium.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
