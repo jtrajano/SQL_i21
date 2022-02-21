@@ -3,9 +3,9 @@
 as
 begin
 	if @intBillDetailId is null 
-		select * from vyuGRSettlementSubNoTaxClassReport where 1 = 0
+		select * from vyuGRSettlementSubReport where 1 = 0
 	else
-		select * from vyuGRSettlementSubNoTaxClassReport where intBillDetailId = @intBillDetailId
+		select * from vyuGRSettlementSubReport where intBillDetailId = @intBillDetailId
 end
 
 

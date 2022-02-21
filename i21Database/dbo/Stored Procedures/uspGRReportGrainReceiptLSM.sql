@@ -384,10 +384,10 @@ SELECT
 ,@strReceiptNumber AS strReceiptNumber
 ,EY.strEntityName AS strEntityName
 ,imgCompanyLogo  = dbo.fnSMGetCompanyLogo('Header')  --@blbCompanyLogo
-,SC.dblGrossWeight AS 'Weight(MT)'
-,SC.dblTareWeight AS 'Vehicle Weight'
+,cast(cast(SC.dblGrossWeight as decimal(18, 2 )) as varchar) + ' ' + ItemUnitMeasure.strSymbol AS 'Weight(MT)'
+,cast(cast(SC.dblTareWeight as decimal(18,2)) as varchar) + ' ' + ItemUnitMeasure.strSymbol AS 'Vehicle Weight'
 ,[dbo].[fnRemoveTrailingZeroes](@dblUnloadedGrain) + ' ' + @strItemStockUOMSymbol AS strUnloadedGrain
-,[dbo].[fnRemoveTrailingZeroes](@dblDockage) AS dblDockage
+,cast([dbo].[fnRemoveTrailingZeroes](@dblDockage)  as varchar) + ' ' + @strItemStockUOMSymbol AS dblDockage
 ,[dbo].[fnRemoveTrailingZeroes](dblUnitPrice) AS dblUnitPrice
 ,[dbo].[fnRemoveTrailingZeroes](@dblDockagePercent) AS dblDockagePercent    
 ,[dbo].[fnRemoveTrailingZeroes](@dblCheckOff) AS dblCheckOff
@@ -410,8 +410,8 @@ SELECT
    END        
   + ' ' + @strItemStockUOM AS strNetWeightInWords
 ,ISNULL(CT.strContractNumber,'') AS strContractNumber
-,@dblComputedNetWeight as dblNetAfterDeduct
-,@GRRMarketingFee as dblMarketingFee
+,cast(cast(isnull(@dblComputedNetWeight, 0) as decimal(18,2))  as varchar) + ' ' + @strItemStockUOMSymbol as dblNetAfterDeduct
+,cast(Cast(isnull(@GRRMarketingFee, 0) as decimal(18,2)) as varchar) + ' ' + ItemToUnitMeasure.strSymbol as dblMarketingFee
 ,@GRRTestWeight as dblTestWeight
 ,@GRRCCFM as dblCCFM
 ,@GRRGrade as dblGrade
@@ -425,8 +425,12 @@ SELECT
 
 ,@SettleStorageTickets as strSettleTickets
 ,SC.strCustomerReference as strReference 
+
+
+
   FROM tblSCTicket SC
   INNER JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId
+	AND EY.strEntityType = CASE WHEN SC.strInOutFlag = 'I' THEN 'Vendor' ELSE 'Customer' end
   LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SC.intFarmFieldId
   LEFT JOIN  tblEMEntitySplit SP ON SP.intSplitId = SC.intSplitId
   LEFT JOIN tblEMEntitySplitDetail SPD ON SPD.intSplitId = SP.intSplitId AND SPD.intEntityId = SC.intEntityId
@@ -434,6 +438,20 @@ SELECT
   left join tblCTContractDetail ContractDetail
 		on SC.intContractId = ContractDetail.intContractDetailId
   LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = ContractDetail.intContractHeaderId
+
+  left join tblICItemUOM ItemUOM
+	on SC.intItemUOMIdFrom = ItemUOM.intItemUOMId
+		and SC.intItemId = ItemUOM.intItemId
+	left join tblICUnitMeasure ItemUnitMeasure
+		on ItemUOM.intUnitMeasureId = ItemUnitMeasure.intUnitMeasureId
+
+  left join tblICItemUOM ItemToUOM
+	on SC.intItemUOMIdTo = ItemToUOM.intItemUOMId
+		and SC.intItemId = ItemToUOM.intItemId
+	left join tblICUnitMeasure ItemToUnitMeasure
+		on ItemToUOM.intUnitMeasureId = ItemToUnitMeasure.intUnitMeasureId
+
+
   WHERE SC.intTicketId = @intScaleTicketId
 
 END TRY

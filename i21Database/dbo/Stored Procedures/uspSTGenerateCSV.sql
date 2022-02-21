@@ -119,7 +119,13 @@ BEGIN
 				strStoreContactEmail nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 				strProductGroupingCode nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 				strProductGroupingName nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
-				strLoyaltyIDRewardsNumber nvarchar(20) COLLATE Latin1_General_CI_AS NULL
+				strLoyaltyIDRewardsNumber nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+				--ST-2075
+				[intAdultTobaccoConsumerMobilePhoneNumber] int NULL,
+				[strAgeValidationMethod] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+				[strManufacturerOfferName] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+				[dblManufacturerOfferAmount] numeric(20, 2) NULL,
+				[strPurchaseType] nvarchar(20) COLLATE Latin1_General_CI_AS NULL
 		)
 
 
@@ -292,6 +298,11 @@ BEGIN
 								,strProductGroupingCode
 								,strProductGroupingName
 								,strLoyaltyIDRewardsNumber
+								,intAdultTobaccoConsumerMobilePhoneNumber
+								,strAgeValidationMethod
+								,strManufacturerOfferName
+								,dblManufacturerOfferAmount
+								,strPurchaseType
 							FROM (
 							SELECT DISTINCT intScanTransactionId
 											, @intVendorAccountNumber intRCN   --STRT.intRetailAccountNumber AS intRCN
@@ -448,10 +459,15 @@ BEGIN
 											--Optional Fields
 											, NULL AS intStoreTelephone
 											, '' AS strStoreContactName
-											, '' strStoreContactEmail
-											, '' strProductGroupingCode
-											, '' strProductGroupingName
-											, '' strLoyaltyIDRewardsNumber
+											, '' AS strStoreContactEmail
+											, '' AS strProductGroupingCode
+											, '' AS strProductGroupingName
+											, '' AS strLoyaltyIDRewardsNumber
+											, NULL AS intAdultTobaccoConsumerMobilePhoneNumber
+											, '' AS strAgeValidationMethod
+											, '' AS strManufacturerOfferName
+											, NULL AS dblManufacturerOfferAmount
+											, '' AS strPurchaseType
 							FROM 
 							(
 								SELECT * FROM

@@ -4,6 +4,8 @@ AS
 	-- We are using this view to directly insert table to an API Export table
 	-- If there are changes in the view please update the insert in uspGRAPISettlementReportExport as well
 	-- any modification here should be applied to vyuGRSettlementSubReport as well
+	--
+	-- will not be used in the report after code review
 
 SELECT 
 	intBillDetailId

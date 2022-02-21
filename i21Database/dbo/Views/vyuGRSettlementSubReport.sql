@@ -244,6 +244,7 @@ FROM
 			ON INVRCPT.intInventoryReceiptId = INVRCPTCHR.intInventoryReceiptId
 		LEFT JOIN tblGRStorageHistory StrgHstry 
 			ON StrgHstry.intBillId = Bill.intBillId	
+				and (BillDtl.intContractHeaderId is null or (BillDtl.intContractHeaderId = isnull(StrgHstry.intContractHeaderId, 0) ) )
 		LEFT JOIN (
 					SELECT 
 						QM.intTicketId
