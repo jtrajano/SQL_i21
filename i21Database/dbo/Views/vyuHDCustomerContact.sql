@@ -47,15 +47,6 @@ with arhd as
 		  inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 		  inner join tblEMEntity e on e.intEntityId = c.[intEntityId]
 		  left outer join tblEMEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
-		  left outer join tblEMEntityToContact etcc on etcc.intEntityContactId = etc.intEntityContactId
-		  left outer join tblEMEntityLocation elc on elc.intEntityLocationId = etcc.intEntityLocationId
+		  left outer join tblEMEntityLocation elc on elc.intEntityLocationId = etc.intEntityLocationId
 		  left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
 		  left join tblEMEntityMobileNumber mob on ec.intEntityId = mob.intEntityId
-		  /*
-		  left join tblARCustomerProductVersion cpv on cpv.intCustomerId = c.intEntityId
-		  left join tblHDModule m on m.intModuleId = cpv.intModuleId
-		  left join tblHDVersion v on v.intVersionId = cpv.intVersionId
-		  left join tblHDTicketProduct p on p.intTicketProductId = cpv.intProductId
-		  left join tblHDGroupUserConfig gu on gu.intTicketGroupId = m.intTicketGroupId and gu.ysnOwner = convert(bit,1)
-		  left join tblEMEntity ow on ow.intEntityId = gu.intUserSecurityEntityId
-		  */
