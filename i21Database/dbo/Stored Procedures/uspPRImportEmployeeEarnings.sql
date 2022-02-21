@@ -108,7 +108,7 @@ DECLARE @EmployeeCount AS INT
 		WHERE intEntityEmployeeId = @intEntityNo
 		  AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE LTRIM(RTRIM(strEarning)) = LTRIM(RTRIM(@strEarningId)))
 	
-		IF(@strCalculationType IS NOT NULL OR @strCalculationType != '')
+		IF(@strCalculationType IS NOT NULL AND @strCalculationType != '')
 				BEGIN
 					IF (@EmployeeEntityNo = 0)
 					BEGIN
