@@ -209,4 +209,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
     ,[ysnAddonParent]                       BIT                                             NULL
     ,[dblAddOnQuantity]                     NUMERIC(38, 20)                                 NULL
 	,[intPriceFixationDetailId]				INT												NULL
+	,[dblQualityPremium]					NUMERIC(18, 6)									NULL		-- tblLGLoadDetail.[dblQualityPremium] Logistics
+	,[dblOptionalityPremium]				NUMERIC(18, 6)									NULL		-- tblLGLoadDetail.[dblOptionalityPremium] Logistics
 )
