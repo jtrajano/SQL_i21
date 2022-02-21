@@ -93,10 +93,10 @@ ELSE
  SELECT 
  @strItemStockUOM = UnitMeasure.strUnitMeasure,  
  @strItemStockUOMSymbol = UnitMeasure.strSymbol,
- @dblUnloadedGrain =  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)),3)
- ,@dblDockage = ROUND(SC.dblShrink,3)
+ @dblUnloadedGrain =  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)),4)
+ ,@dblDockage = ROUND(SC.dblShrink,4)
  ,@dblDockagePercent = ROUND((SC.dblShrink*100.0/(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)))),2)  
- ,@dblNetWeight=ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight))-SC.dblShrink,3) 
+ ,@dblNetWeight=ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight))-SC.dblShrink,4) 
 
  ,@intInventoryReceiptId = SC.intInventoryReceiptId
  ,@intFeeItemId = SS.intDefaultFeeItemId
@@ -108,7 +108,7 @@ ELSE
  JOIN   tblICItemUOM ItemUOM1 ON ItemUOM1.intUnitMeasureId=SS.intUnitMeasureId AND  ItemUOM1.intItemId=SC.intItemId    
  WHERE  SC.intTicketId = @intScaleTicketId
 
-  SET @GrainUnloadedDecimal=ROUND(@dblUnloadedGrain-FLOOR(@dblUnloadedGrain),3)    
+  SET @GrainUnloadedDecimal=ROUND(@dblUnloadedGrain-FLOOR(@dblUnloadedGrain),4)    
  
    SELECT TOP 1  
     @dblCheckOff = RI.dblTax  
@@ -303,13 +303,13 @@ select
 
 )
 select 
-	@GRRTestWeight = TestWeight.dblGradeReading
-	,@GRRCCFM = CCFM.dblGradeReading
-	,@GRRGrade = Grade.dblGradeReading
-	,@GRRFactor = Factor.dblGradeReading
-	,@GRRProtein = Protein.dblGradeReading
-	,@GRRMoisture = Moisture.dblGradeReading
-	,@GRRSplit = Split.dblGradeReading
+	@GRRTestWeight = isnull(TestWeight.dblGradeReading, 0)
+	,@GRRCCFM = isnull(CCFM.dblGradeReading, 0)
+	,@GRRGrade = isnull(Grade.dblGradeReading, 0)
+	,@GRRFactor = isnull(Factor.dblGradeReading, 0)
+	,@GRRProtein = isnull(Protein.dblGradeReading, 0)
+	,@GRRMoisture = isnull(Moisture.dblGradeReading, 0)
+	,@GRRSplit = isnull(Split.dblGradeReading, 0)
 
 from tblSCGrainReceiptDiscountMapping Preference
 	--left join TicketDiscountInfo MarketingFee
@@ -384,15 +384,17 @@ SELECT
 ,@strReceiptNumber AS strReceiptNumber
 ,EY.strEntityName AS strEntityName
 ,imgCompanyLogo  = dbo.fnSMGetCompanyLogo('Header')  --@blbCompanyLogo
-,cast(cast(SC.dblGrossWeight as decimal(18, 2 )) as varchar) + ' ' + ItemUnitMeasure.strSymbol AS 'Weight(MT)'
-,cast(cast(SC.dblTareWeight as decimal(18,2)) as varchar) + ' ' + ItemUnitMeasure.strSymbol AS 'Vehicle Weight'
-,[dbo].[fnRemoveTrailingZeroes](@dblUnloadedGrain) + ' ' + @strItemStockUOMSymbol AS strUnloadedGrain
-,cast([dbo].[fnRemoveTrailingZeroes](@dblDockage)  as varchar) + ' ' + @strItemStockUOMSymbol AS dblDockage
+,ItemUnitMeasure.strSymbol  as [FromUOM]
+,@strItemStockUOMSymbol as [ToUOM]
+,cast(SC.dblGrossWeight as decimal(18, 4 )) AS 'Weight(MT)'
+,cast(SC.dblTareWeight as decimal(18,4)) AS 'Vehicle Weight'
+,cast(@dblUnloadedGrain as decimal(18,4))  dblUnloadedGrain
+,cast(@dblDockage as decimal(18,4)) AS dblDockage
 ,[dbo].[fnRemoveTrailingZeroes](dblUnitPrice) AS dblUnitPrice
 ,[dbo].[fnRemoveTrailingZeroes](@dblDockagePercent) AS dblDockagePercent    
 ,[dbo].[fnRemoveTrailingZeroes](@dblCheckOff) AS dblCheckOff
 ,[dbo].[fnRemoveTrailingZeroes](@dblNetAmtPayable) AS dblNetAmtPayable
-, CAST((ISNULL(dblUnitPrice,0) * ISNULL(dblNetUnits,0)) AS DECIMAL(18,2)) AS dblTotalPurchasePrice
+, CAST((ISNULL(dblUnitPrice,0) * ISNULL(dblNetUnits,0)) AS DECIMAL(18,4)) AS dblTotalPurchasePrice
 , EL.strLocationName AS strFarmName
 , EL.strFarmFieldNumber as strFarmFieldNumber
 , @GRRSplit as dblSplitPercent -- [dbo].[fnRemoveTrailingZeroes](SPD.dblSplitPercent) AS dblSplitPercent
@@ -410,8 +412,8 @@ SELECT
    END        
   + ' ' + @strItemStockUOM AS strNetWeightInWords
 ,ISNULL(CT.strContractNumber,'') AS strContractNumber
-,cast(cast(isnull(@dblComputedNetWeight, 0) as decimal(18,2))  as varchar) + ' ' + @strItemStockUOMSymbol as dblNetAfterDeduct
-,cast(Cast(isnull(@GRRMarketingFee, 0) as decimal(18,2)) as varchar) + ' ' + ItemToUnitMeasure.strSymbol as dblMarketingFee
+,cast(isnull(@dblComputedNetWeight, 0) as decimal(18,4))  as dblNetAfterDeduct
+,cast(isnull(@GRRMarketingFee, 0) as decimal(18,4)) as dblMarketingFee
 ,@GRRTestWeight as dblTestWeight
 ,@GRRCCFM as dblCCFM
 ,@GRRGrade as dblGrade
