@@ -314,3 +314,47 @@ BEGIN
 END
 
 GO
+
+declare
+	@intPriceContractId int,
+	@intNumber int,
+	@strPriceContractNo nvarchar(50),
+	@strPrefix nvarchar(10),
+	@strTradeNo nvarchar(10)
+	;
+
+select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Contract' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;;
+
+if (isnull(@strPrefix,'') <> '')
+begin
+	select @strPriceContractNo = max(strPriceContractNo) from tblCTPriceContract where strPriceContractNo like @strPrefix + '%';
+	select @intNumber = convert(int,replace(isnull(@strPriceContractNo,'0'),@strPrefix,''));
+end
+else
+begin
+	select @intNumber = max(convert(int,isnull(strPriceContractNo,0))) from tblCTPriceContract
+end
+
+select @intNumber += 1;
+
+update tblSMStartingNumber set intNumber = case when intNumber < @intNumber then @intNumber else intNumber end where strModule = 'Contract Management' and strTransactionType = 'Price Contract' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;;
+
+if (isnull(@strPrefix,'') <> '')
+begin
+	select @strTradeNo = max(strTradeNo) from tblCTPriceFixationDetail where strTradeNo like @strPrefix + '%';
+	select @intNumber = convert(int,replace(isnull(@strTradeNo,'0'),@strPrefix,''));
+end
+else
+begin
+	select @intNumber = max(convert(int,isnull(strTradeNo,0))) from tblCTPriceFixationDetail
+end
+
+select @intNumber += 1;
+
+update tblSMStartingNumber set intNumber = case when intNumber < @intNumber then @intNumber else intNumber end where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;
+
+GO
