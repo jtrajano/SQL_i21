@@ -16,6 +16,8 @@ SELECT
 ,intBankTransferTypeId = @intBankTransferTypeId
 ,strTransactionId = @BankTransferID
 ,strDescription
+,strReferenceFrom
+,strReferenceTo
 ,intBankAccountIdFrom
 ,intBankAccountIdTo
 ,intGLAccountIdFrom = BAF.intGLAccountId
@@ -59,6 +61,8 @@ INSERT INTO tblCMBankTransfer(
 ,intBankTransferTypeId
 ,strTransactionId
 ,strDescription
+,strReferenceFrom,
+,strReferenceTo
 ,intBankAccountIdFrom
 ,intBankAccountIdTo
 ,intGLAccountIdFrom
@@ -91,6 +95,8 @@ SELECT
 ,intBankTransferTypeId
 ,strTransactionId
 ,strDescription
+,strReferenceFrom,
+,strReferenceTo
 ,intBankAccountIdFrom
 ,intBankAccountIdTo
 ,intGLAccountIdFrom
