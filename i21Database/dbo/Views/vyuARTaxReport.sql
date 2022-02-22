@@ -133,7 +133,7 @@ INNER JOIN (
 		 , intSalesTaxAccountId		= IDT.intSalesTaxAccountId
 		 , intPurchaseTaxAccountId	= TAXCODE.intPurchaseTaxAccountId
 		 , intCategoryId			= ITEM.intCategoryId
-		 , intTaxCodeCount			= ISNULL(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount)
+		 , intTaxCodeCount			= COALESCE(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount, TAXCLASSTOTALBYINVOICEDETAIL.intTaxClassCount)
 		 , intTonnageTaxUOMId		= ITEM.intTonnageTaxUOMId
 		 , dblQtyTonShipped			= CASE WHEN ITEM.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ITEMUOMSETUP.intItemUOMId, ID.intItemUOMId), ID.dblQtyShipped)) ELSE ID.dblQtyShipped END
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
@@ -175,6 +175,13 @@ INNER JOIN (
 		WHERE TCT_ID.intItemId = ITEM.intItemId
 		  AND IDT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE ID.intTaxGroupId IS NOT NULL AND TGC.intTaxGroupId = ID.intTaxGroupId OR ID.intTaxGroupId IS NULL)
 		GROUP BY TCT_ID.intCategoryId
+	) TAXCLASSTOTALBYINVOICEDETAIL
+	CROSS APPLY (
+		SELECT intTaxClassCount	= COUNT(*)
+		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
+		WHERE ICT.intCategoryId = ITEM.intCategoryId
+		  AND ICT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE ID.intTaxGroupId IS NOT NULL AND TGC.intTaxGroupId = ID.intTaxGroupId OR ID.intTaxGroupId IS NULL)
+		GROUP BY intCategoryId
 	) TAXCLASSTOTAL
 	LEFT JOIN (
 		SELECT intItemUOMId
