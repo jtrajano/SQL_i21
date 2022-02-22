@@ -316,6 +316,8 @@ DECLARE  @Id									INT
 		,@ItemContractHeaderId					INT
 		,@ItemContractDetailId					INT
 		,@NewInvoiceNumber						NVARCHAR(50) = ''
+		,@ItemQualityPremium					NUMERIC(18, 6)
+		,@ItemOptionalityPremium				NUMERIC(18, 6)
 
 --INSERT
 BEGIN TRY
@@ -515,6 +517,8 @@ BEGIN
         ,@ItemAddonDetailKey            = (CASE WHEN @GroupingOption = 0 THEN [strAddonDetailKey] ELSE NULL END)
         ,@ItemAddonParent               = (CASE WHEN @GroupingOption = 0 THEN [ysnAddonParent] ELSE NULL END)
         ,@ItemAddOnQuantity             = (CASE WHEN @GroupingOption = 0 THEN [dblAddOnQuantity] ELSE NULL END)
+		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
+		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -771,7 +775,7 @@ BEGIN
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@ItemConversionAccountId		= @ItemConversionAccountId
 			,@ItemSalesAccountId			= @ItemSalesAccountId
-			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -782,7 +786,8 @@ BEGIN
             ,@ItemAddonDetailKey            = @ItemAddonDetailKey
             ,@ItemAddonParent               = @ItemAddonParent
             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
-			
+			,@ItemQualityPremium			= @ItemQualityPremium
+			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -964,6 +969,8 @@ BEGIN
 					,@ItemAddonDetailKey            = [strAddonDetailKey]
                     ,@ItemAddonParent               = [ysnAddonParent]
                     ,@ItemAddOnQuantity             = [dblAddOnQuantity]
+					,@ItemQualityPremium            = [dblQualityPremium]
+					,@ItemOptionalityPremium        = [dblOptionalityPremium]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1064,6 +1071,8 @@ BEGIN
                         ,@ItemAddonDetailKey            = @ItemAddonDetailKey
                         ,@ItemAddonParent               = @ItemAddonParent
                         ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+						,@ItemQualityPremium            = @ItemQualityPremium
+						,@ItemOptionalityPremium        = @ItemOptionalityPremium
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1743,6 +1752,8 @@ BEGIN TRY
                         ,@ItemAddonDetailKey            = [strAddonDetailKey]
                         ,@ItemAddonParent               = [ysnAddonParent]
                         ,@ItemAddOnQuantity             = [dblAddOnQuantity]
+						,@ItemQualityPremium            = [dblQualityPremium]
+                        ,@ItemOptionalityPremium        = [dblOptionalityPremium]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1835,6 +1846,8 @@ BEGIN TRY
                             ,@ItemAddonDetailKey            = @ItemAddonDetailKey
                             ,@ItemAddonParent               = @ItemAddonParent
                             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+							,@ItemQualityPremium            = @ItemQualityPremium
+							,@ItemOptionalityPremium        = @ItemOptionalityPremium
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
