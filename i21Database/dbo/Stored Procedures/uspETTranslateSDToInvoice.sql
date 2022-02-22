@@ -573,7 +573,23 @@ BEGIN
 		
 						
 			BEGIN TRY
-			    UPDATE tblARInvoiceDetail SET intTaxGroupId = @intTaxGroupId WHERE intInvoiceDetailId = @intNewInvoiceDetailId --WORKAROUND : AR currently dont have way to set tax group id when doing manual insert of tax details.
+			    
+				IF(ISNULL(@intTaxGroupId, 0)  <> 0)
+				BEGIN
+					--Validate tax group id if exists before updating
+					IF EXISTS(SELECT TOP 1 1 FROM tblSMTaxGroup WHERE intTaxGroupId = @intTaxGroupId)
+						BEGIN
+						UPDATE tblARInvoiceDetail SET intTaxGroupId = @intTaxGroupId WHERE intInvoiceDetailId = @intNewInvoiceDetailId --WORKAROUND : AR currently dont have way to set tax group id when doing manual insert of tax details.
+						END
+					ELSE
+						BEGIN
+							IF CHARINDEX('Tax Group not found',@strStatus) <= 0
+							BEGIN
+								SET @strStatus = @strStatus + ', Tax Group not found'
+							END
+						END
+				END
+
 				EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
 				EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
 
