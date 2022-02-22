@@ -95,6 +95,7 @@
     [strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnExportDataProcessEnabled]					BIT NOT NULL DEFAULT 0,
 	[strExportFilePath]								NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[ysnUseAzureBlob]								BIT NOT NULL DEFAULT 0,
     [intConcurrencyId]								INT NOT NULL DEFAULT 1,
 	[strApiHostUrl] 								NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 )
