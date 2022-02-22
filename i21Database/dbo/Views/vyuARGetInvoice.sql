@@ -391,8 +391,8 @@ LEFT JOIN
 ) ReturnInvoice ON ReturnInvoice.intInvoiceId = INV.intOriginalInvoiceId
 LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayFromBankAccountId, 0)
 LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId, 0)
-LEFT JOIN vyuCMBankAccount B ON B.intBankAccountId = ISNULL(INV.intBankId, 0)
-LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccountId, 0)
+LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId, 0)
+LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccountId, 0)
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId, 0)
 LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId, 0)
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId, 0)
