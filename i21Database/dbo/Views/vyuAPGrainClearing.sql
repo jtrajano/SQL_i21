@@ -128,7 +128,7 @@ SELECT --'b',
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS DECIMAL(18,4)) as dblVoucherTotal	
+		END * (CASE WHEN bill.intTransactionType = 1 THEN 1 ELSE -1 END) AS DECIMAL(18,4)) as dblVoucherTotal	
     ,CAST(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -139,7 +139,7 @@ SELECT --'b',
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS DECIMAL(18,4)) AS dblVoucherQty
+		END * (CASE WHEN bill.intTransactionType = 1 THEN 1 ELSE -1 END) AS DECIMAL(18,4)) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
@@ -278,7 +278,7 @@ SELECT DISTINCT --'d',
 	,billDetail.intItemId
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal AS dblVoucherTotal
+	,billDetail.dblTotal * (CASE WHEN bill.intTransactionType = 1 THEN 1 ELSE -1 END) AS dblVoucherTotal
     ,CAST(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -289,7 +289,7 @@ SELECT DISTINCT --'d',
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS DECIMAL(18,2)) AS dblVoucherQty
+		END * (CASE WHEN bill.intTransactionType = 1 THEN 1 ELSE -1 END) AS DECIMAL(18,2)) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
@@ -477,7 +477,7 @@ SELECT DISTINCT --'f',
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END), 2) AS dblVoucherQty
+		END) * (CASE WHEN bill.intTransactionType = 1 THEN 1 ELSE -1 END), 2) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
