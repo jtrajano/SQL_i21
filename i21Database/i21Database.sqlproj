@@ -513,6 +513,7 @@
     <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
     <Build Include="dbo\Functions\fnLGCalculateOptionalityPremium.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFilteredOTCBank.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
