@@ -31,6 +31,7 @@ SELECT  intFutOptTransactionId
 							WHEN der.intOrderTypeId = 3 THEN 'Market'
 							ELSE '' END)
 	, strDerivativeContractNumber = CASE WHEN ISNULL(cth.intContractHeaderId, 0) <> 0 THEN cth.strContractNumber + ' - ' + CAST(ctd.intContractSeq AS NVARCHAR(50)) ELSE NULL END COLLATE Latin1_General_CI_AS 
+	, strOTCSource = CASE WHEN ISNULL(der.strSource, '') <> '' THEN der.strSource ELSE 'Manual' END COLLATE Latin1_General_CI_AS
 FROM  tblSMTransaction approval
 INNER JOIN tblRKFutOptTransaction der
 	ON der.intFutOptTransactionId = approval.intRecordId
