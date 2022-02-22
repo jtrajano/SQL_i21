@@ -219,7 +219,8 @@ SELECT LD.intLoadDetailId
 	, strDetailVendorReference = LD.strVendorReference 
 	, strDetailCustomerReference = LD.strCustomerReference
 	, strDetailTerminalReference = LD.strTerminalReference
-
+	, LD.intSellerId
+	, LD.intSalespersonId
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
