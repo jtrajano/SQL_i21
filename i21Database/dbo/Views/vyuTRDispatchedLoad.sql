@@ -48,7 +48,7 @@ SELECT LG.intLoadId
 	, LG.dtmDispatchedDate
 	, dtmDeliveredDate = ISNULL(LG.dtmDeliveredDate, LG.dtmScheduledDate)
 	, intShipViaId = CASE WHEN LG.intHaulerEntityId IS NULL THEN Config.intShipViaId ELSE LG.intHaulerEntityId END
-	, Config.intSellerId
+	, CASE WHEN LG.intSellerId IS NULL THEN Config.intSellerId ELSE LG.intSellerId END intSellerId
 	, intDriverId = LG.intDriverEntityId
 	, strDriver = LG.strDriver
 	, strTractor = LG.strTruckNo
@@ -84,6 +84,7 @@ SELECT LG.intLoadId
 	, ysnClosed = CASE WHEN (ISNULL(LG.dblDeliveredQuantity, 0.000000) <= 0) THEN CAST(0 AS BIT)
 						ELSE CAST(1 AS BIT) END
 	, LG.strTransUsedBy
+	, LG.intSalespersonId
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
