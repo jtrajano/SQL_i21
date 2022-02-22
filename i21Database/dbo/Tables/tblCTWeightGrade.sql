@@ -11,6 +11,7 @@ CREATE TABLE [dbo].[tblCTWeightGrade]
     [ysnSample] BIT NULL, 
     [ysnPayablesOnShippedWeights] BIT NULL, 
 	intAccountId INT,
+	strRemarks [nvarchar](MAX) COLLATE Latin1_General_CI_AS  NULL,
 	CONSTRAINT [PK_tblCTWeightGrade_intWeightGradeId] PRIMARY KEY CLUSTERED ([intWeightGradeId] ASC), 	
 	CONSTRAINT [UQ_tblCTWeightGrade_strWeightGradeDesc] UNIQUE ([strWeightGradeDesc]),
 	CONSTRAINT [FK_tblCTWeightGrade_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
