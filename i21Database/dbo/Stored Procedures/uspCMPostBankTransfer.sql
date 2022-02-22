@@ -565,8 +565,9 @@ END
 --IF @isSuccessful = 0 GOTO Post_Rollback    
 IF @ysnRecap = 0    
 BEGIN    
-EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
-  IF @@ERROR <> 0 GOTO Post_Rollback    
+IF @ysnPost = 1
+  EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
+    IF @@ERROR <> 0 GOTO Post_Rollback    
 
 
  INSERT INTO @GLEntries(    
@@ -909,8 +910,9 @@ END
 IF @ysnRecap = 1     
 BEGIN     
 
-EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
-  IF @@ERROR <> 0 GOTO Post_Rollback    
+IF @ysnPost = 1
+  EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
+    IF @@ERROR <> 0 GOTO Post_Rollback    
 
   
  -- INSERT THE DATA FROM #tmpGLDetail TO @RecapTable    
