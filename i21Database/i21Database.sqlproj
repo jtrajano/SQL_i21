@@ -641,6 +641,7 @@
     <Build Include="dbo\Tables\tblCMBankTransaction.sql" />
     <Build Include="dbo\Tables\tblCMBankTransactionDetail.sql" />
     <Build Include="dbo\Tables\tblCMBankTransactionType.sql" />
+    <Build Include="dbo\Tables\tblCMBankTransactionAdjustment.sql" />
     <Build Include="dbo\Tables\tblCMBankTransfer.sql" />
     <Build Include="dbo\Tables\tblCMCheckNumberAudit.sql" />
     <Build Include="dbo\Tables\tblCMCheckPrintJobSpool.sql" />
