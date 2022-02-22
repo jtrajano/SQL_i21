@@ -2137,11 +2137,11 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyReceived / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyReceived / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyReceived / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
-				,InboundNetWeight				= BillDtl.dblQtyOrdered
+				,InboundNetWeight				= BillDtl.dblQtyReceived
 				,OutboundNetWeight				= 0 
 				,InboundGrossDollars			= BillDtl.dblTotal 
 				,OutboundGrossDollars			= 0 
@@ -2298,7 +2298,7 @@ BEGIN
 				LEFT JOIN (
 						SELECT 
 							A.intBillId
-							,SUM(dblQtyOrdered) AS dblTotalQty
+							,SUM(dblQtyReceived) AS dblTotalQty
 						FROM tblAPBillDetail A
 						JOIN tblICItem B 
 							ON A.intItemId = B.intItemId
