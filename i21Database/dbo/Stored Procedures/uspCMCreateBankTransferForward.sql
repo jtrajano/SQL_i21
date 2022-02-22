@@ -61,7 +61,7 @@ INSERT INTO tblCMBankTransfer(
 ,intBankTransferTypeId
 ,strTransactionId
 ,strDescription
-,strReferenceFrom,
+,strReferenceFrom
 ,strReferenceTo
 ,intBankAccountIdFrom
 ,intBankAccountIdTo
@@ -95,7 +95,7 @@ SELECT
 ,intBankTransferTypeId
 ,strTransactionId
 ,strDescription
-,strReferenceFrom,
+,strReferenceFrom
 ,strReferenceTo
 ,intBankAccountIdFrom
 ,intBankAccountIdTo
