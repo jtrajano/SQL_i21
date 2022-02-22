@@ -238,6 +238,7 @@ SELECT LD.intLoadDetailId
 	, strTMOrderNumber = TMD.strOrderNumber
 	, LD.intTMSiteId
 	, strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
+	, LD.intSalespersonId
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
