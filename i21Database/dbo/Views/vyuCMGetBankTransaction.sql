@@ -14,7 +14,7 @@ CASE WHEN Related.strType = 'Parent' THEN (ISNULL(Related.dblAmount,0) +  BT.dbl
 CASE WHEN Related.strType = 'Parent' THEN Related.strAccountId  ELSE '' END strAccountIdFees,
 BTT.strBankTransactionTypeName,
 BL.strBankLoanId,
-Related.strTransactionId strRelated
+Related.strTransactionId strRelatedId
 FROM tblCMBankTransaction BT 
 OUTER APPLY(
     SELECT TOP 1 
