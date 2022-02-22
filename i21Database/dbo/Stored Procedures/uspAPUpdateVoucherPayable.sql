@@ -26,7 +26,7 @@ DECLARE @transCount INT = @@TRANCOUNT;
 MERGE INTO @voucherPayables AS destination
 USING
 (
-	SELECT * FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds, 0)
+	SELECT * FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
 	WHERE ysnStage = 1
 ) AS SourceData
 ON (1=0)

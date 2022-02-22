@@ -1,7 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPCreateVoucherPayableFromDetail]
 (
-	@voucherDetailIds AS Id READONLY,
-	@integrationUpdate AS BIT = 0
+	@voucherDetailIds AS Id READONLY
 )
 RETURNS TABLE AS RETURN
 (
@@ -95,9 +94,7 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblICInventoryReceiptItem D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 	WHERE
 	A.intTransactionType IN (1, 3) AND
-	1 = (CASE WHEN @integrationUpdate = 1 THEN 1 ELSE --ALWAYS INCLUDE VOUCHER DETAIL FOR INTEGRATION UPDATE
-			(CASE WHEN ISNULL(D.ysnAddPayable, 1) <> 0 THEN 1 ELSE 0 END) 
-		END) AND
+	ISNULL(D.ysnAddPayable, 1) <> 0 AND
 	(
 		B.intPurchaseDetailId > 0
 		OR	B.intInventoryReceiptItemId > 0

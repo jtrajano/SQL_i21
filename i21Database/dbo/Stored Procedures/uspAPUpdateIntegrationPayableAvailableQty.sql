@@ -172,7 +172,7 @@ SELECT
 	,[dblFranchiseAmount]				
 	,[dblActual]						
 	,[dblDifference]
-FROM dbo.fnAPCreateVoucherPayableFromDetail(@billDetailIds, 1)
+FROM dbo.fnAPCreateVoucherPayableFromDetail(@billDetailIds)
 --WHERE ysnStage = 1
 
 IF @transCount = 0 BEGIN TRANSACTION
