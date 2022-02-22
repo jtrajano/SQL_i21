@@ -623,7 +623,7 @@ BEGIN TRY
 		   ,@UserId  = @userId
 		   ,@raiseError = @raiseError
 
---LOG PERFORMANCE START
+--LOG PERFORMANCE END
 IF @transType <> 'all'
 	EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Batch Invoice Posting Screen'
 									  , @strProcedureName       = 'uspARPostInvoice'
