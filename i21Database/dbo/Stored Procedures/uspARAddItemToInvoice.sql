@@ -96,6 +96,8 @@
 	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
 	,@ItemAddonParent				BIT				= NULL
 	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
+	,@ItemQualityPremium			NUMERIC(18, 6)	= 0.000000
+	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0.000000
 AS
 BEGIN
 
@@ -238,7 +240,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
-			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -251,6 +253,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemAddonDetailKey			= @ItemAddonDetailKey
 			,@ItemAddonParent				= @ItemAddonParent
 			,@ItemAddOnQuantity				= @ItemAddOnQuantity
+			,@ItemQualityPremium			= @ItemQualityPremium
+			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
