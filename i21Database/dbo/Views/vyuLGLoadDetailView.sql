@@ -74,6 +74,8 @@ SELECT LD.intLoadDetailId
 	, strPLocationMail = PCL.strEmail
 	, strPLocationFax = PCL.strFax
 	, strPLocationPhone = PCL.strPhone
+	, strPContractLoadingPort = PLPort.strCity
+	, strPContractDestinationPort = PDPort.strCity
 
 -- Customer Info
 	, LD.intCustomerEntityId
@@ -127,6 +129,9 @@ SELECT LD.intLoadDetailId
 	, strSLocationMail = SCL.strEmail
 	, strSLocationFax = SCL.strFax
 	, strSLocationPhone = SCL.strPhone
+	, strSContractLoadingPort = SLPort.strCity
+	, strSContractDestinationPort = SDPort.strCity
+	, strSContractCropYear = SCY.strCropYear
 
 -- Schedule, L Directions
 	, LD.strScheduleInfoMsg
@@ -245,7 +250,10 @@ LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = LD.intSalesperson
 LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
 LEFT JOIN tblCTPricingType PPricingType ON PPricingType.intPricingTypeId = PDetail.intPricingTypeId
+LEFT JOIN tblCTCropYear PCY ON PCY.intCropYearId = PHeader.intCropYearId
 LEFT JOIN tblCTIndex PIndex ON PIndex.intIndexId = PDetail.intIndexId
+LEFT JOIN tblSMCity PLPort ON PLPort.intCityId = PDetail.intLoadingPortId
+LEFT JOIN tblSMCity PDPort ON PDPort.intCityId = PDetail.intDestinationPortId
 LEFT JOIN tblCTCropYear CPY ON CPY.intCropYearId = LD.intCropYearId
 LEFT JOIN tblTRSupplyPoint PSP ON PSP.intEntityVendorId = PIndex.intVendorId AND PSP.intEntityLocationId = PIndex.intVendorLocationId
 LEFT JOIN tblICItem	IM ON IM.intItemId = PDetail.intItemId
@@ -255,7 +263,10 @@ LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
 LEFT JOIN tblCTPricingType SPricingType ON SPricingType.intPricingTypeId = SDetail.intPricingTypeId
+LEFT JOIN tblCTCropYear SCY ON SCY.intCropYearId = SHeader.intCropYearId
 LEFT JOIN tblCTIndex SIndex ON SIndex.intIndexId = SDetail.intIndexId
+LEFT JOIN tblSMCity SLPort ON SLPort.intCityId = SDetail.intLoadingPortId
+LEFT JOIN tblSMCity SDPort ON SDPort.intCityId = SDetail.intDestinationPortId
 LEFT JOIN tblTRSupplyPoint SSP ON SSP.intEntityVendorId = SIndex.intVendorId AND SSP.intEntityLocationId = SIndex.intVendorLocationId
 LEFT JOIN tblICItem	IMS ON IMS.intItemId = SDetail.intItemId
 LEFT JOIN vyuLGAdditionalColumnForContractDetailView ADS ON AD.intContractDetailId = SDetail.intContractDetailId
