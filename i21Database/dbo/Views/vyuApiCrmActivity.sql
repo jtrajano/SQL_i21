@@ -41,6 +41,7 @@ SELECT
 	, ac.intEntityId
 	, a.dtmDateCreated
 	, a.dtmDateLastUpdated
+	, sa.intConcurrencyId
 FROM vyuCRMActivitySearch2 ac
 JOIN vyuApiActivity a ON a.intActivityId = ac.intActivityId
 JOIN tblSMActivity sa ON sa.intActivityId = a.intActivityId
