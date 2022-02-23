@@ -7,6 +7,7 @@
     [intOptimizedSize]          INT              NULL,
     [dtmDateUploaded]           DATETIME         NOT NULL,
     [ysnIsUploadedToAzureBlob]  BIT              NOT NULL DEFAULT 0,
+    [dtmDateUploadedToAzureBlob] DATETIME         NULL,
     [intConcurrencyId]          INT              NOT NULL,
     CONSTRAINT [PK_tblUpload] PRIMARY KEY CLUSTERED ([intUploadId] ASC),
     CONSTRAINT [FK_tblSMUpload_tblSMAttachment] FOREIGN KEY ([intAttachmentId]) REFERENCES [dbo].[tblSMAttachment] ([intAttachmentId]) ON DELETE CASCADE
