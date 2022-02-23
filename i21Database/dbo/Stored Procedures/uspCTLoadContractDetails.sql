@@ -561,6 +561,12 @@ BEGIN TRY
 		, strShippingLine2 = SL2.strName
 		, CD.intShippingLineId3
 		, strShippingLine3 = SL3.strName
+		, ICC.strProductType
+		, ICC.strGrade AS strGradeCommodity
+		, ICC.strRegion
+		, ICC.strSeason
+		, ICC.strClass
+		, ICC.strProductLine
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -634,6 +640,8 @@ BEGIN TRY
 			AND ISNULL(a.intContractDetailId, 0) = CASE WHEN CT.ysnMultiplePriceFixation = 1 THEN ISNULL(a.intContractDetailId, 0) ELSE ISNULL(CD.intContractDetailId, 0) END
 		ORDER BY c.intTransactionId DESC
 	) AP
+	-- Commodity Attributes
+	LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
 	ORDER BY CD.intContractSeq
 
 	DROP TABLE #tmpContractDetail
