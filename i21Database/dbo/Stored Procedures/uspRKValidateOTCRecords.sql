@@ -126,6 +126,15 @@ BEGIN TRY
 				CONTINUE;
 			END
 		END
+
+		-- DO NOT VALIDATE FURTHER IF REJECT
+		IF @strAction = 'REJECT' 
+		BEGIN
+			DELETE FROM @validateTable
+			WHERE intFutOptTransactionId = @intFutOptTransactionId
+
+			CONTINUE;
+		END
 			
 		DECLARE @derivativeError NVARCHAR(MAX) = ''
 			, @intErrorCounter INT = 0
