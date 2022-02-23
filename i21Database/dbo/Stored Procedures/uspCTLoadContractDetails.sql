@@ -553,11 +553,14 @@ BEGIN TRY
 		, ASTF.intApprovalStatusId
 		, ASTF.strApprovalStatus
 		, dtmDateApproved  = CASE WHEN CD.dtmDateApproved = '1900-01-01' THEN NULL ELSE CD.dtmDateApproved END 
-
 		, CD.dblQualityPremium
 		, CD.dblOptionalityPremium
 		, CD.intCostTermId
 		, strCostTerm = CostTerm.strFreightTerm
+		, CD.intShippingLineId2
+		, strShippingLine2 = SL2.strName
+		, CD.intShippingLineId3
+		, strShippingLine3 = SL3.strName
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -588,6 +591,8 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = CD.intConvPriceCurrencyId
 	LEFT JOIN tblSMCurrency IY ON IY.intCurrencyID = CD.intInvoiceCurrencyId
 	LEFT JOIN tblSMCurrency MY ON MY.intCurrencyID = MA.intCurrencyId
+	LEFT JOIN tblEMEntity SL2 ON SL2.intEntityId = CD.intShippingLineId2
+	LEFT JOIN tblEMEntity SL3 ON SL3.intEntityId = CD.intShippingLineId3
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 	LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intDestinationPortId
 	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId

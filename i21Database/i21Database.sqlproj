@@ -515,6 +515,7 @@
     <Build Include="dbo\Functions\fnLGCalculateOptionalityPremium.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFilteredOTCBank.sql" />
     <Build Include="dbo\Views\vyuLGGetContractOptionality.sql" />
+    <None Include="Scripts\Post-Deployment\CT\DefaultData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
