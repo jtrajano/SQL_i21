@@ -187,6 +187,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , dblBaseRounding						= INV.dblBaseRounding
 	 , dblQualityPremium					= INV.dblQualityPremium
 	 , dblOptionalityPremium				= INV.dblOptionalityPremium
+	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
+	 , strReasonablenessComment				= INV.strReasonablenessComment
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
