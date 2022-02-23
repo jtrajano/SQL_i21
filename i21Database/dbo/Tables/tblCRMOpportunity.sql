@@ -55,10 +55,6 @@
 	[strWinLossDidWrong] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strWinLossActionItem] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intLostToCompetitorId] [int] null,
-    [intIndustrySegmentId] INT NULL,
-    [intOpportunityTypeId] INT NULL,
-    [strOpportunityDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    [intVolume] INT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),
@@ -78,9 +74,7 @@
     CONSTRAINT [FK_tblCRMOpportunity_tblCRMMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblCRMMilestone] ([intMilestoneId]),
     --CONSTRAINT [FK_tblCRMOpportunity_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblCRMIndustrySegment_intIndustrySegmentId] FOREIGN KEY ([intIndustrySegmentId]) REFERENCES [dbo].[tblCRMIndustrySegment] ([intIndustrySegmentId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblCRMOpportunityType_intIndustrySegmentId] FOREIGN KEY ([intOpportunityTypeId]) REFERENCES [dbo].[tblCRMOpportunityType] ([intOpportunityTypeId])
+    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 
 GO

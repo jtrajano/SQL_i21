@@ -514,8 +514,6 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
     <Build Include="dbo\Functions\fnLGCalculateOptionalityPremium.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFilteredOTCBank.sql" />
-    <Build Include="dbo\Tables\tblCRMIndustrySegment.sql" />
-    <Build Include="dbo\Tables\tblCRMOpportunityType.sql" />
     <Build Include="dbo\Views\vyuLGGetContractOptionality.sql" />
   </ItemGroup>
   <ItemGroup>
