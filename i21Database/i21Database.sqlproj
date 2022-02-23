@@ -10022,6 +10022,20 @@
     <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
+
+    <Build Include="dbo\User Defined Types\CustomerTaxGroupParam.sql" />
+    <Build Include="dbo\User Defined Types\CustomerTaxGroupIdParam.sql" />
+    <Build Include="dbo\User Defined Types\TaxCodeRateParam.sql" />
+    <Build Include="dbo\User Defined Types\ItemTaxComputationForCustomerParam.sql" />
+    <Build Include="dbo\User Defined Types\CustomerTaxCodeExemptionParam.sql" />
+    <Build Include="dbo\User Defined Types\ConstructLineItemTaxDetailParam.sql" />
+
+    <Build Include="dbo\Stored Procedures\uspARConstructLineItemTaxDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetCustomerTaxCodeExemption.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetItemTaxComputationForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetTaxCodeRateDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetTaxGroupIdForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetTaxGroupTaxCodesForCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
