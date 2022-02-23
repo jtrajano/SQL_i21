@@ -5,7 +5,11 @@ WITH GetNextForDepreciate AS(
  dtmNextDepreciation = 
  CASE 
    WHEN dtmDepreciationToDate IS NULL 
-      THEN  B.dtmDateInService 
+      THEN 
+        CASE WHEN(ISNULL(B.ysnImported, 0) = 1 AND B.dtmCreateAssetPostDate IS NOT NULL)
+            THEN B.dtmCreateAssetPostDate
+            ELSE B.dtmDateInService 
+        END
    WHEN dtmDepreciationToDate = B.dtmDateInService   
       THEN  DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1 , B.dtmDateInService)),0))
    ELSE DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1 , dtmDepreciationToDate))+1,0))
