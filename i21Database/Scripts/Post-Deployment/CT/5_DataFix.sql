@@ -299,6 +299,7 @@ GO
 
 declare
 	@intPriceContractId int,
+	@intPriceFixationDetailId int,
 	@intNumber int,
 	@strPriceContractNo nvarchar(50),
 	@strPrefix nvarchar(10),
@@ -310,11 +311,20 @@ select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = '
 if (isnull(@strPrefix,'') <> '')
 begin
 	select @strPriceContractNo = max(strPriceContractNo) from tblCTPriceContract where strPriceContractNo like @strPrefix + '%';
-	select @intNumber = convert(int,replace(isnull(@strPriceContractNo,'0'),@strPrefix,''));
+	if (isnull(@strPriceContractNo,'') = '')
+	begin
+		select @intPriceContractId = max(intPriceContractId) from tblCTPriceContract
+		select @intNumber = convert(int,isnull(strPriceContractNo,'0')) from tblCTPriceContract where intPriceContractId = @intPriceContractId
+	end
+	else
+	begin
+		select @intNumber = convert(int,replace(isnull(@strPriceContractNo,'0'),@strPrefix,''));
+	end
 end
 else
 begin
-	select @intNumber = max(convert(int,isnull(strPriceContractNo,0))) from tblCTPriceContract
+	select @intPriceContractId = max(intPriceContractId) from tblCTPriceContract
+	select @intNumber = convert(int,isnull(strPriceContractNo,'0')) from tblCTPriceContract where intPriceContractId = @intPriceContractId
 end
 
 select @intNumber += 1;
@@ -323,16 +333,25 @@ update tblSMStartingNumber set intNumber = case when intNumber < @intNumber then
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;;
+select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;
 
 if (isnull(@strPrefix,'') <> '')
 begin
 	select @strTradeNo = max(strTradeNo) from tblCTPriceFixationDetail where strTradeNo like @strPrefix + '%';
-	select @intNumber = convert(int,replace(isnull(@strTradeNo,'0'),@strPrefix,''));
+	if (isnull(@strTradeNo,'') = '')
+	begin
+		select @intPriceFixationDetailId = max(intPriceFixationDetailId) from tblCTPriceFixationDetail
+		select @intNumber = convert(int,isnull(strTradeNo,'0')) from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId
+	end
+	else
+	begin
+		select @intNumber = convert(int,replace(isnull(@strTradeNo,'0'),@strPrefix,''));
+	end
 end
 else
 begin
-	select @intNumber = max(convert(int,isnull(strTradeNo,0))) from tblCTPriceFixationDetail
+	select @intPriceFixationDetailId = max(intPriceFixationDetailId) from tblCTPriceFixationDetail
+	select @intNumber = convert(int,isnull(strTradeNo,'0')) from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId
 end
 
 select @intNumber += 1;
