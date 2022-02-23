@@ -176,7 +176,11 @@ BEGIN
       SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN          
                             CASE WHEN ((dblHoursEarned + T.dblEarnedHours) >= dblMaxEarned) THEN          
 								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover >= dblMaxBalance) THEN
-									T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)
+									CASE WHEN (T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)) >= dblMaxEarned
+										THEN dblMaxEarned
+									ELSE
+										T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)
+									END
 								ELSE
 									T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned)
 								END
