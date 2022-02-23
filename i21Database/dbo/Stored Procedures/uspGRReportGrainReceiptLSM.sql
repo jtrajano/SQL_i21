@@ -125,7 +125,7 @@ ELSE
    END    
   ,@strAddress =     
    CASE     
-   WHEN LTRIM(RTRIM(strAddress)) = ''THEN NULL    
+   WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL    
    ELSE LTRIM(RTRIM(strAddress))    
    END    
   ,@strCounty =     
@@ -166,6 +166,8 @@ ELSE
 	,@TotalDiscount decimal(24, 10) = 0
 	,@TotalPremiumDiscount decimal(24, 10) = 0
 	, @GRRMarketingFee DECIMAL(24,10) = 0
+	, @dblMarketingUnits DECIMAL(24,10) = 0
+	, @dblDockageLessMarketingUnits DECIMAL(24,10) = 0
 	, @intMarketingFeeId int 
  if exists(select top 1 1from tblSCTicket Ticket
 			join tblGRStorageType StorageType
@@ -181,6 +183,7 @@ end
 
 select 
 		@intMarketingFeeId = DiscountCode.intItemId
+		, @dblMarketingUnits = case when Discount.strShrinkWhat = 'Net Weight' then Ticket.dblNetUnits else Ticket.dblGrossUnits end * (Discount.dblShrinkPercent  / 100)
 	from tblSCTicket Ticket			
 		join tblQMTicketDiscount Discount
 			on Ticket.intTicketId = Discount.intTicketId
@@ -209,6 +212,7 @@ begin
 			on Ticket.intTicketId = TicketDiscount.intTicketId	
 		join tblGRDiscountScheduleCode DiscountCode
 			on TicketDiscount.intDiscountScheduleCodeId = DiscountCode.intDiscountScheduleCodeId
+
 		join tblICInventoryReceiptCharge ReceiptCharge
 			on Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				and DiscountCode.intItemId = ReceiptCharge.intChargeId
@@ -330,13 +334,13 @@ from tblSCGrainReceiptDiscountMapping Preference
 		on Preference.[intSplitId] = Split.intItemId
 where Preference.intCommodityId = @intCommodityId
 		
-
+--+ @GRRMarketingFee
 declare @dblComputedNetWeight decimal(24,10)
-set @dblComputedNetWeight = @dblUnloadedGrain - (@dblDockage + @GRRMarketingFee)
+set @dblComputedNetWeight = @dblUnloadedGrain - (@dblDockage )
 
 SET @NetWeightDecimal=ROUND(@dblComputedNetWeight-FLOOR(@dblComputedNetWeight),3)    
 
-
+set @dblDockageLessMarketingUnits = @dblDockage - @dblMarketingUnits
 SELECT 
     -- @strCompanyName +     
     --+ CHAR(13) + CHAR(10)     
@@ -346,8 +350,8 @@ SELECT
     AS strCompanyAddress    
   ,LTRIM(RTRIM(EY.strEntityName)) +   ' ' +  
   + CHAR(13) + CHAR(10)     
-  + ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') +    
-  + CHAR(13) + CHAR(10)     
+  + ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') + 
+	+ ' '     
   + ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '')     
   + ISNULL(', '     
      + CASE     
@@ -363,6 +367,7 @@ SELECT
        '')        
     AS strEntityAddress
 ,ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') +      
+	+ ' '
   + ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '')     
   + ISNULL(', '     
      + CASE     
@@ -390,10 +395,10 @@ SELECT
 ,cast(SC.dblTareWeight as decimal(18,4)) AS 'Vehicle Weight'
 ,cast(@dblUnloadedGrain as decimal(18,4))  dblUnloadedGrain
 ,cast(@dblDockage as decimal(18,4)) AS dblDockage
-,[dbo].[fnRemoveTrailingZeroes](dblUnitPrice) AS dblUnitPrice
-,[dbo].[fnRemoveTrailingZeroes](@dblDockagePercent) AS dblDockagePercent    
-,[dbo].[fnRemoveTrailingZeroes](@dblCheckOff) AS dblCheckOff
-,[dbo].[fnRemoveTrailingZeroes](@dblNetAmtPayable) AS dblNetAmtPayable
+,dblUnitPrice AS dblUnitPrice
+,@dblDockagePercent AS dblDockagePercent    
+,@dblCheckOff AS dblCheckOff
+,@dblNetAmtPayable AS dblNetAmtPayable
 , CAST((ISNULL(dblUnitPrice,0) * ISNULL(dblNetUnits,0)) AS DECIMAL(18,4)) AS dblTotalPurchasePrice
 , EL.strLocationName AS strFarmName
 , EL.strFarmFieldNumber as strFarmFieldNumber
@@ -414,6 +419,8 @@ SELECT
 ,ISNULL(CT.strContractNumber,'') AS strContractNumber
 ,cast(isnull(@dblComputedNetWeight, 0) as decimal(18,4))  as dblNetAfterDeduct
 ,cast(isnull(@GRRMarketingFee, 0) as decimal(18,4)) as dblMarketingFee
+,cast(isnull(@dblMarketingUnits, 0) as decimal(18,4)) as dblMarketingUnits
+,cast(isnull(@dblDockageLessMarketingUnits, 0) as decimal(18,4)) as dblDockageLessMarketingUnits
 ,@GRRTestWeight as dblTestWeight
 ,@GRRCCFM as dblCCFM
 ,@GRRGrade as dblGrade
@@ -427,8 +434,8 @@ SELECT
 
 ,@SettleStorageTickets as strSettleTickets
 ,SC.strCustomerReference as strReference 
-
-
+,SC.strTicketComment as strComment
+,SC.strDiscountComment as strDiscountComment
 
   FROM tblSCTicket SC
   INNER JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId
