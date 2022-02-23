@@ -218,7 +218,7 @@ BEGIN
                     BD.dblCost - BD.dblSalvageValue,  
                     BD.dtmPlacedInService,
                     NULL,  
-                    BD.dtmPlacedInService,  
+                    CASE WHEN ISNULL(F.ysnImported, 0) = 1 AND F.dtmCreateAssetPostDate IS NOT NULL THEN F.dtmCreateAssetPostDate ELSE BD.dtmPlacedInService END,  
                     0,
                     BD.dblSalvageValue,  
                     'Place in service',  
@@ -401,7 +401,7 @@ BEGIN
           SELECT   
           [strTransactionId]  = B.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intDepreciationAccountId]  
+          ,[intAccountId]   = CASE WHEN B.strTransaction = 'Imported' THEN A.[intExpenseAccountId] ELSE A.[intDepreciationAccountId] END
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
