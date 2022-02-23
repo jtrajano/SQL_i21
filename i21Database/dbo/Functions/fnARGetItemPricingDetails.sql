@@ -1,39 +1,39 @@
 ﻿CREATE FUNCTION [dbo].[fnARGetItemPricingDetails]
 (
-	 @ItemId					INT
-	,@CustomerId				INT	
-	,@LocationId				INT
-	,@ItemUOMId					INT
-	,@CurrencyId				INT
-	,@TransactionDate			DATETIME
-	,@Quantity					NUMERIC(18,6)
-	,@ContractHeaderId			INT
-	,@ContractDetailId			INT	
-	,@ContractNumber			NVARCHAR(50)
-	,@ContractSeq				INT
-	,@ItemContractHeaderId		INT
-	,@ItemContractDetailId		INT
-	,@ItemContractNumber		NVARCHAR(50)
-	,@ItemContractSeq			INT
-	,@AvailableQuantity			NUMERIC(18,6)
-	,@UnlimitedQuantity			BIT
-	,@OriginalQuantity			NUMERIC(18,6)
-	,@CustomerPricingOnly		BIT
-	,@ItemPricingOnly			BIT
-	,@ExcludeContractPricing	BIT
-	,@VendorId					INT
-	,@SupplyPointId				INT
-	,@LastCost					NUMERIC(18,6)
-	,@ShipToLocationId			INT
-	,@VendorLocationId			INT
-	,@PricingLevelId			INT
-	,@AllowQtyToExceed			BIT
-	,@InvoiceType				NVARCHAR(200)
-	,@TermId					INT
-	,@GetAllAvailablePricing	BIT
-	,@CurrencyExchangeRate		NUMERIC(18,6)
-	,@CurrencyExchangeRateTypeId INT
-	,@ysnFromItemSelection		BIT = 0
+	 @ItemId						INT
+	,@CustomerId					INT	
+	,@LocationId					INT
+	,@ItemUOMId						INT
+	,@CurrencyId					INT
+	,@TransactionDate				DATETIME
+	,@Quantity						NUMERIC(18,6)
+	,@ContractHeaderId				INT
+	,@ContractDetailId				INT	
+	,@ContractNumber				NVARCHAR(50)
+	,@ContractSeq					INT
+	,@ItemContractHeaderId			INT
+	,@ItemContractDetailId			INT
+	,@ItemContractNumber			NVARCHAR(50)
+	,@ItemContractSeq				INT
+	,@AvailableQuantity				NUMERIC(18,6)
+	,@UnlimitedQuantity				BIT
+	,@OriginalQuantity				NUMERIC(18,6)
+	,@CustomerPricingOnly			BIT
+	,@ItemPricingOnly				BIT
+	,@ExcludeContractPricing		BIT
+	,@VendorId						INT
+	,@SupplyPointId					INT
+	,@LastCost						NUMERIC(18,6)
+	,@ShipToLocationId				INT
+	,@VendorLocationId				INT
+	,@PricingLevelId				INT
+	,@AllowQtyToExceed				BIT
+	,@InvoiceType					NVARCHAR(200)
+	,@TermId						INT
+	,@GetAllAvailablePricing		BIT
+	,@CurrencyExchangeRate			NUMERIC(18,6)
+	,@CurrencyExchangeRateTypeId	INT
+	,@ysnFromItemSelection				BIT = 0
 )
 RETURNS @returntable TABLE
 (
@@ -236,7 +236,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 
 			END
 
-			IF ISNULL(@ContractPricingLevelId,0) <> 0 --AND (ISNULL(@IsMaxPrice,0) = 0 OR @Pricing <> @ContractPricing + '-Max Price')
+			IF ISNULL(@ContractPricingLevelId,0) <> 0
 			BEGIN 
 				SELECT TOP 1
 					 @Price				= dblPrice
@@ -344,7 +344,6 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@PricingType					= NULL
 		,@CurrencyExchangeRateTypeId	= NULL
 		,@CurrencyExchangeRateType		= ''
-		,@CurrencyExchangeRate			= 1.000000
 		,@PriceUOMQuantity				= 1.000000
 		,@ContractUOMId					= @ItemUOMId 
 		,@ContractUOM					= ''
@@ -355,7 +354,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 
 	IF @ItemPricingOnly = 0								
 	BEGIN
-	--Customer Special Pricing		
+		--Customer Special Pricing		
 		IF ISNULL(@ShipToLocationId, 0) = 0 AND @CustomerId IS NOT NULL
 			BEGIN
 				SELECT @ShipToLocationId = intShipToId
@@ -669,9 +668,9 @@ DECLARE	 @Price							NUMERIC(18,6)
 	IF ISNULL(@UOMQuantity,0) = 0
 		SET @UOMQuantity = 1
 
-	SELECT TOP 1 @CurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
-			   , @CurrencyExchangeRate		 = dblCurrencyExchangeRate
-			   , @CurrencyExchangeRateType	 = strCurrencyExchangeRateType
+	SELECT TOP 1 @CurrencyExchangeRateTypeId = CASE WHEN ISNULL(@CurrencyExchangeRateTypeId, 0) = 0 THEN intCurrencyExchangeRateTypeId ELSE @CurrencyExchangeRateTypeId END
+			   , @CurrencyExchangeRate		 = CASE WHEN ISNULL(@CurrencyExchangeRate, 0) = 0 THEN dblCurrencyExchangeRate ELSE @CurrencyExchangeRate END
+			   , @CurrencyExchangeRateType	 = CASE WHEN ISNULL(@CurrencyExchangeRateType, 0) = 0 THEN strCurrencyExchangeRateType ELSE @CurrencyExchangeRateType END
 	FROM dbo.fnARGetDefaultForexRate(@TransactionDate, @CurrencyId, NULL)
 
 	DECLARE @dblCalculatedExchangeRate		NUMERIC(18, 6) = ISNULL(@CurrencyExchangeRate, 1)
@@ -679,49 +678,15 @@ DECLARE	 @Price							NUMERIC(18,6)
 		  , @intDefaultCurrencyId			INT = (SELECT TOP 1 [intDefaultCurrencyId] FROM tblSMCompanyPreference)
 
 	IF @CurrencyExchangeRateTypeId IS NOT NULL AND ISNULL(@dblCalculatedExchangeRate, 0.000000) <> 1.000000
-		BEGIN
-			SET @ysnToBse = 1
-			SELECT TOP 1
-				@dblCalculatedExchangeRate =  SMCERD.[dblRate]
-			FROM			
-				tblSMCurrencyExchangeRateType SMCERT
-			INNER JOIN
-				tblSMCurrencyExchangeRateDetail SMCERD
-					ON SMCERT.[intCurrencyExchangeRateTypeId] = SMCERD.[intRateTypeId]
-			INNER JOIN
-				tblSMCurrencyExchangeRate SMCER
-					ON SMCERD.[intCurrencyExchangeRateId] = SMCER.[intCurrencyExchangeRateId]
-			WHERE
-				SMCERT.[intCurrencyExchangeRateTypeId] = @CurrencyExchangeRateTypeId
-				AND dbo.fnDateLessThanEquals(SMCERD.[dtmValidFromDate], @TransactionDate) = 1
-				AND SMCER.[intToCurrencyId] = @intDefaultCurrencyId
-				AND SMCER.[intFromCurrencyId] = @CurrencyId
-			ORDER BY
-				SMCERD.[dtmValidFromDate] DESC
+	BEGIN
+		SET @ysnToBse = 1
 
-			IF @dblCalculatedExchangeRate IS NULL
-				BEGIN
-					SET @ysnToBse = 0
-					SELECT TOP 1
-						@dblCalculatedExchangeRate =  SMCERD.[dblRate]
-					FROM			
-						tblSMCurrencyExchangeRateType SMCERT
-					INNER JOIN
-						tblSMCurrencyExchangeRateDetail SMCERD
-							ON SMCERT.[intCurrencyExchangeRateTypeId] = SMCERD.[intRateTypeId]
-					INNER JOIN
-						tblSMCurrencyExchangeRate SMCER
-							ON SMCERD.[intCurrencyExchangeRateId] = SMCER.[intCurrencyExchangeRateId]
-					WHERE
-						SMCERT.[intCurrencyExchangeRateTypeId] = @CurrencyExchangeRateTypeId
-						AND dbo.fnDateLessThanEquals(SMCERD.[dtmValidFromDate], @TransactionDate) = 1
-						AND SMCER.[intToCurrencyId] = @CurrencyId
-						AND SMCER.[intFromCurrencyId] = @intDefaultCurrencyId
-					ORDER BY
-						SMCERD.[dtmValidFromDate] DESC
-				END
-		END	
-	
+		IF @dblCalculatedExchangeRate IS NULL
+		BEGIN
+			SET @ysnToBse = 0
+		END
+	END	
+
 	SET @dblCalculatedExchangeRate = ISNULL(@dblCalculatedExchangeRate, 1)
 	SELECT @Price = ep.dblRetailPrice
 	FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, @ItemUOMId, DEFAULT) ep
@@ -730,47 +695,47 @@ DECLARE	 @Price							NUMERIC(18,6)
 	BEGIN
 		SET @Price = @UOMQuantity *	(SELECT	P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
 	END
-
+	
 	SET @Price = (CASE WHEN @ysnToBse = 1 THEN @Price / @dblCalculatedExchangeRate ELSE @Price * @dblCalculatedExchangeRate END)
 	SELECT @OriginalGrossPrice = @UOMQuantity * P.dblDefaultGrossPrice
 	FROM tblICItemPricing P
 	WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
-
+	
 	SET @OriginalGrossPrice = (CASE WHEN @ysnToBse = 1 THEN @OriginalGrossPrice / @dblCalculatedExchangeRate ELSE @OriginalGrossPrice * @dblCalculatedExchangeRate END)
 
 	IF(@Price IS NOT NULL)
+	BEGIN
+		DECLARE @DefaultCurrencyExchangeRateTypeId INT
+		SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 [intAccountsReceivableRateTypeId] FROM tblSMMultiCurrency)
+
+		DECLARE @FunctionalCurrencyId INT
+		SET @FunctionalCurrencyId = (SELECT TOP 1 [intDefaultCurrencyId] FROM tblSMCompanyPreference)
+
+		IF @FunctionalCurrencyId <> @CurrencyId AND @DefaultCurrencyExchangeRateTypeId IS NOT NULL AND (@CurrencyExchangeRateTypeId IS NULL OR @CurrencyExchangeRate = 0.000000)
 		BEGIN
-			DECLARE @DefaultCurrencyExchangeRateTypeId INT
-			SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 [intAccountsReceivableRateTypeId] FROM tblSMMultiCurrency)
+			SELECT TOP 1
+					@Price							= @Price / (CASE WHEN ISNULL([dblRate], 0.000000) = 0.000000 THEN 1.000000 ELSE [dblRate] END)
+				,@CurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId
+				,@CurrencyExchangeRateType		= strCurrencyExchangeRateType
+				,@CurrencyExchangeRate			= CASE WHEN ISNULL(@CurrencyExchangeRate, 0) = 0 THEN (CASE WHEN ISNULL([dblRate], 0.000000) = 0.000000 THEN 1.000000 ELSE [dblRate] END) ELSE @CurrencyExchangeRate END
+			FROM
+				[vyuSMForex]
+			WHERE
+				[intCurrencyExchangeRateTypeId] = @DefaultCurrencyExchangeRateTypeId
+				AND [intFromCurrencyId] = @CurrencyId 
+				AND [intToCurrencyId] = @FunctionalCurrencyId 
+				AND CAST([dtmValidFromDate] AS DATE) < = CAST(@TransactionDate AS DATE)
+			ORDER BY
+				[dtmValidFromDate] DESC	
+		END
 
-			DECLARE @FunctionalCurrencyId INT
-			SET @FunctionalCurrencyId = (SELECT TOP 1 [intDefaultCurrencyId] FROM tblSMCompanyPreference)
-
-			IF @FunctionalCurrencyId <> @CurrencyId AND @DefaultCurrencyExchangeRateTypeId IS NOT NULL AND (@CurrencyExchangeRateTypeId IS NULL OR @CurrencyExchangeRate = 0.000000)
-			BEGIN
-				SELECT TOP 1
-					 @Price							= @Price / (CASE WHEN ISNULL([dblRate], 0.000000) = 0.000000 THEN 1.000000 ELSE [dblRate] END)
-					,@CurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId
-					,@CurrencyExchangeRateType		= strCurrencyExchangeRateType
-					,@CurrencyExchangeRate			= (CASE WHEN ISNULL([dblRate], 0.000000) = 0.000000 THEN 1.000000 ELSE [dblRate] END)
-				FROM
-					[vyuSMForex]
-				WHERE
-					[intCurrencyExchangeRateTypeId] = @DefaultCurrencyExchangeRateTypeId
-					AND [intFromCurrencyId] = @CurrencyId 
-					AND [intToCurrencyId] = @FunctionalCurrencyId 
-					AND CAST([dtmValidFromDate] AS DATE) < = CAST(@TransactionDate AS DATE)
-				ORDER BY
-					[dtmValidFromDate] DESC	
-			END
-
-			SET @CurrencyExchangeRate = (CASE WHEN ISNULL(@CurrencyExchangeRate, 0.000000) = 0.000000 THEN 1.000000 ELSE @CurrencyExchangeRate END)					
-			SET @Pricing = 'Inventory - Standard Pricing'
-			SET @Sort = 1100
-				INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
-				SELECT @Price, @Price, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
-			IF @GetAllAvailablePricing = 0 RETURN
-		END	
+		SET @CurrencyExchangeRate = (CASE WHEN ISNULL(@CurrencyExchangeRate, 0.000000) = 0.000000 THEN 1.000000 ELSE @CurrencyExchangeRate END)					
+		SET @Pricing = 'Inventory - Standard Pricing'
+		SET @Sort = 1100
+			INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
+			SELECT @Price, @Price, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
+		IF @GetAllAvailablePricing = 0 RETURN
+	END	
 	
 	IF @GetAllAvailablePricing = 1 RETURN			
 	SET @Sort = 1000
@@ -778,5 +743,3 @@ DECLARE	 @Price							NUMERIC(18,6)
 	SELECT @Price, @UnitPrice, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
 	RETURN				
 END
-
-
