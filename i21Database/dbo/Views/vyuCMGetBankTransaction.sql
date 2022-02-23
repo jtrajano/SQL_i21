@@ -25,7 +25,7 @@ OUTER APPLY(
     strMemo,
 	strType
     FROM tblCMBankTransaction A JOIN tblCMBankTransactionAdjustment B
-	ON A.intTransactionId =		B.intRelatedId 
+	ON A.intTransactionId =	B.intRelatedId 
 	JOIN tblCMBankTransactionDetail BTD ON
 	BTD.intTransactionId = A.intTransactionId
 	JOIN tblGLAccount GL ON GL.intAccountId = BTD.intGLAccountId	
