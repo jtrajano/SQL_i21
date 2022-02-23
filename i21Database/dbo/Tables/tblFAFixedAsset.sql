@@ -45,6 +45,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[dblImportGAAPDepToDate]	DECIMAL(18,6) NULL,
 	[dblImportTaxDepToDate]	DECIMAL(18,6) NULL,
 	[intParentAssetId]			INT NULL,
+	[dtmCreateAssetPostDate]	DATETIME NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFAFixedAsset_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

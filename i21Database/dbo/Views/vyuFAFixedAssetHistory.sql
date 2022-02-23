@@ -9,8 +9,10 @@ WITH FA AS (
 		,intDepreciationMethodId
 		,dblCost
 		,dblSalvageValue
+		,dtmCreateAssetPostDate
+		,ysnImported
 	FROM tblFAFixedAsset
-	GROUP BY intAssetId, strAssetId, dtmDateInService, intDepreciationMethodId, dblForexRate, dblCost, dblSalvageValue
+	--GROUP BY intAssetId, strAssetId, dtmDateInService, intDepreciationMethodId, dblForexRate, dblCost, dblSalvageValue
 ),
 G AS(
 	SELECT 
@@ -21,7 +23,7 @@ G AS(
 	GROUP BY dtmDepreciationToDate,intAssetId,strTransaction
 )
 SELECT
-	FA.dtmDateInService dtmDepreciationToDate,
+	dtmDepreciationToDate = CASE WHEN ISNULL(FA.ysnImported, 0) = 1 AND FA.dtmCreateAssetPostDate IS NOT NULL THEN FA.dtmCreateAssetPostDate ELSE FA.dtmDateInService END,
 	0 dblDepreciationToDate,
 	0 dblFunctionalDepreciationToDate,
 	0 dblDepreciation,
@@ -59,6 +61,8 @@ SELECT
  WHERE GL.strTransactionType = 'Purchase' AND GL.ysnIsUnposted = 0
  GROUP BY 
 	FA.intAssetId, 
+	FA.dtmCreateAssetPostDate,
+	FA.ysnImported,
 	GL.strTransactionType, 
 	GL.strTransactionId, 
 	FA.dblCost,
