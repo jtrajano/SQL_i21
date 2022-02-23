@@ -41,8 +41,8 @@ SELECT
 	strSubBook,
 	B.intShipFromId,
 	SF.strLocationName as strShipFromName,
-	B.intDisbursementBankId,
-	BA.strBankAccountNo strDisbursementBank,
+	B.intPayFromBankAccountId,
+	BA.strBankAccountNo strPayFromBankAccount,
 	EFT.intEntityEFTInfoId,
 	EFT.strAccountNumber
 FROM
@@ -87,7 +87,7 @@ FROM
 		INNER JOIN tblCTSubBook ctsubbook ON bookEntity.intSubBookId = ctsubbook.intSubBookId
 		WHERE bookEntity.intEntityId = A.intEntityId
 	) ctBookEntities
-	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intDisbursementBankId
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intPayFromBankAccountId
 	LEFT JOIN vyuAPEntityEFTInformation EFT ON EFT.intEntityId = B.intEntityId AND EFT.intCurrencyId = ISNULL(C.intDefaultCurrencyId, B.intCurrencyId) AND EFT.ysnDefaultAccount = 1
 GO
 
