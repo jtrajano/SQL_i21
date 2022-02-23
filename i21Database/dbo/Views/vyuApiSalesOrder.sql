@@ -37,6 +37,7 @@ SELECT
 	, CAST(CASE WHEN so.strQuoteType = 'Price Quantity' THEN 1 ELSE 0 END AS BIT) ysnPriceAndQuantity
 	, created.dtmDate dtmDateCreated
 	, COALESCE(updated.dtmDate, created.dtmDate) dtmDateLastUpdated
+	, so.intConcurrencyId
 FROM vyuSOSalesOrderSearch vso
 LEFT JOIN tblSOSalesOrder so ON so.intSalesOrderId = vso.intSalesOrderId
 LEFT JOIN tblCRMOpportunity op ON op.intOpportunityId = so.intOpportunityId
