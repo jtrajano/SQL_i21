@@ -1897,8 +1897,7 @@ FROM (
 			INNER JOIN vyuICGetItemUOM iu ON i.intItemId = iu.intItemId AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strItemUnitOfMeasure)))
 		WHERE
 			p.strUniqueId = @UniqueId
-			AND
-			p.strRetailPrice IS NOT NULL
+			AND p.strRetailPrice IS NOT NULL
 	) AS Source_Query  
 		ON 
 		EffectiveItemPrice.intItemId = Source_Query.intItemId
