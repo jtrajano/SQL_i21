@@ -150,8 +150,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, Transporter.strName AS strTransporterName
-					, Transporter.strFederalTaxId AS strTransporterFederalTaxId
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strCompanyName ELSE Transporter.strName END) AS strTransporterName
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strEin ELSE Transporter.strFederalTaxId END) AS strTransporterFederalTaxId
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFederalTaxId
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
@@ -357,8 +357,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, Transporter.strName AS strTransporterName
-					, Transporter.strFederalTaxId AS strTransporterFederalTaxId
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strCompanyName ELSE Transporter.strName END) AS strTransporterName
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strEin ELSE Transporter.strFederalTaxId END) AS strTransporterFederalTaxId
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFederalTaxId
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
