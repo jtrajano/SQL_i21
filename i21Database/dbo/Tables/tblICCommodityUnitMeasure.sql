@@ -31,7 +31,7 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICCommodityUnitMeasure] PRIMARY KEY ([intCommodityUnitMeasureId]), 
 		CONSTRAINT [FK_tblICCommodityUnitMeasure_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]) ON DELETE CASCADE,
 		CONSTRAINT [FK_tblICCommodityUnitMeasure_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-		CONSTRAINT [AK_tblICCommodityUnitMeasure] UNIQUE ([intCommodityId], [intUnitMeasureId]) 
+		CONSTRAINT [AK_tblICCommodityUnitMeasure] UNIQUE ([intCommodityId], [intUnitMeasureId]), 
 		CONSTRAINT [CHK_tblICCommodityUnitMeasure_CurrencyPerUOM] CHECK ((COALESCE(NULLIF(dblPremiumDiscount, 0), intCurrencyId, intPriceUnitMeasureId) IS NULL) OR (dblPremiumDiscount IS NOT NULL AND intCurrencyId IS NOT NULL AND intPriceUnitMeasureId IS NOT NULL))
 	)
 
