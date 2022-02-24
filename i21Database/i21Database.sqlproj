@@ -10041,8 +10041,7 @@
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
-    <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
+
     <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
   </ItemGroup>
