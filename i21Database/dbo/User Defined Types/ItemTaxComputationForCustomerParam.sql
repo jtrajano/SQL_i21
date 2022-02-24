@@ -45,7 +45,7 @@ CREATE TYPE dbo.ItemTaxComputationForCustomerParam AS TABLE (
 	, ysnTaxOnly					BIT NULL DEFAULT 0
 	, ysnInvalidSetup				BIT NULL DEFAULT 0
 	, strTaxGroup					NVARCHAR(100) NULL
-	, strNotes						NVARCHAR(100) NULL
+	, strNotes						NVARCHAR(500) NULL
 	, intUnitMeasureId				INT NULL
 	, ysnAddToCost					BIT NULL DEFAULT 0
 )
