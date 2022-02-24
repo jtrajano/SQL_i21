@@ -30,8 +30,7 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strCompanyAddress			NVARCHAR(500) = NULL,
 		@intEntityUserIdLocal		INT = NULL,
 		@intGracePeriodLocal		INT = 0,
-		@ysnOverrideCashFlowLocal  	BIT = 0,
-		@intFunctionalCurrency		INT = 0
+		@ysnOverrideCashFlowLocal  	BIT = 0
 
 --DROP TEMP TABLES
 EXEC uspARInitializeTempTableForAging
@@ -54,9 +53,6 @@ SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
-
-SELECT TOP 1 @intFunctionalCurrency	= intDefaultCurrencyId
-FROM dbo.tblSMCompanyPreference WITH (NOLOCK)
 
 IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	BEGIN
