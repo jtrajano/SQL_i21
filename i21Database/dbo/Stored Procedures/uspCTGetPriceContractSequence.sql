@@ -91,6 +91,13 @@ BEGIN TRY
 				, CD.intContractStatusId
 				, CH.ysnReadOnlyInterCoContract
 				, dblFX = CD.dblRate
+				, CD.strOrigin
+				, CD.strProductType
+				, CD.strGrade
+				, CD.strRegion
+				, CD.strSeason
+				, CD.strClass
+				, CD.strProductLine
 			FROM tblCTContractHeader			CH	
 			JOIN tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
 			JOIN tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
@@ -101,7 +108,7 @@ BEGIN TRY
 			 									AND CU.intUnitMeasureId		=	MA.intUnitMeasureId
 			JOIN tblRKFuturesMonth			MO	ON	MO.intFutureMonthId		=	CH.intFutureMonthId
 			JOIN tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
-			JOIN tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	MA.intUnitMeasureId			
+			JOIN tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	MA.intUnitMeasureId		
 			CROSS APPLY (
 				SELECT TOP 1 CDetail.intCurrencyId
 					, ysnSubCurrency = CAST(ISNULL(CU.intMainCurrencyId, 0) AS BIT)
@@ -120,6 +127,13 @@ BEGIN TRY
 					, intPriceCommodityUOMId = CUOM.intCommodityUnitMeasureId
 					, strPriceUOM = UOM.strUnitMeasure
 					, CDetail.dblRate
+					, ICC.strOrigin
+					, ICC.strProductType
+					, ICC.strGrade
+					, ICC.strRegion
+					, ICC.strSeason
+					, ICC.strClass
+					, ICC.strProductLine
 				FROM tblCTContractDetail CDetail
 				JOIN tblCTContractHeader header ON header.intContractHeaderId = CDetail.intContractHeaderId
 				LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CDetail.intCurrencyId
@@ -129,6 +143,7 @@ BEGIN TRY
 				LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = CDetail.intPriceItemUOMId
 				LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
 				LEFT JOIN tblICCommodityUnitMeasure CUOM ON CUOM.intCommodityId = header.intCommodityId AND CUOM.intUnitMeasureId = IUOM.intUnitMeasureId
+				LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CDetail.intItemId	
 				WHERE CDetail.intContractHeaderId IN (SELECT CONVERT(INT, ISNULL(Item, '0')) FROM dbo.fnSplitString(@intContractHeaderId, ','))
 			) CD
 			LEFT	JOIN	tblCTBook					BK	ON	BK.intBookId			=	CH.intBookId
@@ -214,6 +229,13 @@ BEGIN TRY
 				, CD.intContractStatusId
 				, CD.ysnReadOnlyInterCoContract
 				, dblFX = CD.dblRate
+				, ICC.strOrigin
+				, ICC.strProductType
+				, ICC.strGrade
+				, ICC.strRegion
+				, ICC.strSeason
+				, ICC.strClass
+				, ICC.strProductLine
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 			JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
@@ -226,6 +248,7 @@ BEGIN TRY
 			 									AND BU.intUnitMeasureId =	CD.intBasisUnitMeasureId
 			LEFT JOIN tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
 			LEFT JOIN tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
+			LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId	
 			OUTER APPLY (
 				SELECT SUM(dblNoOfLots) dblNoOfLots
 				FROM (

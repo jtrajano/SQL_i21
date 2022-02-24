@@ -161,8 +161,14 @@ BEGIN TRY
 				CD.dblFutures,
 				CD.intContractStatusId,
 				ysnLoad = isnull(CH.ysnLoad	,0),
-				intHeaderPricingTypeId = CH.intPricingTypeId
-		
+				intHeaderPricingTypeId = CH.intPricingTypeId,
+				ICC.strOrigin,
+				ICC.strProductType,
+				ICC.strGrade,
+				ICC.strRegion,
+				ICC.strSeason,
+				ICC.strClass,
+				ICC.strProductLine
 		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -170,11 +176,11 @@ BEGIN TRY
 		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId		=	MA.intUnitMeasureId	
-LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CD.intCommodityId 
+		LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CD.intCommodityId 
 												AND BU.intUnitMeasureId		=	CD.intBasisUnitMeasureId
-LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
-LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
-
+		LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
+		LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
+		LEFT	JOIN	vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
 
 		--INSERT INTO @temp 
 
@@ -246,8 +252,14 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CD.dblFutures,
 				CD.intContractStatusId,
 				ysnLoad = isnull(CH.ysnLoad	,0),
-				intHeaderPricingTypeId = CH.intPricingTypeId
-
+				intHeaderPricingTypeId = CH.intPricingTypeId,
+				ICC.strOrigin,
+				ICC.strProductType,
+				ICC.strGrade,
+				ICC.strRegion,
+				ICC.strSeason,
+				ICC.strClass,
+				ICC.strProductLine
 		INTO	#MultiPriceFixation
 		FROM	#tblCTPriceFixation			PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
@@ -266,6 +278,7 @@ LEFT	JOIN	tblCTBook					BK	ON	BK.intBookId			=	CH.intBookId
 LEFT	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId			=	CH.intSubBookId	
 LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
 LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
+		LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = SI.intItemId
 		WHERE	ISNULL(CH.ysnMultiplePriceFixation,0) = 1
 	
 	SELECT * FROM #NonMultiPriceFixation
