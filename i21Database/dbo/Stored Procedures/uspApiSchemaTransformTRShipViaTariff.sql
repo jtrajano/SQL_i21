@@ -102,6 +102,7 @@ BEGIN
 		LEFT JOIN tblEMEntityTariff ET ON ET.intEntityId = E.intEntityId
 			AND ET.intEntityTariffTypeId = ETT.intEntityTariffTypeId
 			AND SVT.strTariffDescription = ET.strDescription
+			AND SVT.dtmShipViaEffectiveDate = ET.dtmEffectiveDate
 	WHERE --ET.intEntityTariffId IS NULL
 		--AND 
 		SVT.guiApiUniqueId = @guiApiUniqueId
