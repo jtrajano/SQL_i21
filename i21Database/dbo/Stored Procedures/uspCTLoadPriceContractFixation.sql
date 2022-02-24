@@ -111,6 +111,8 @@ BEGIN TRY
 				PF.dblFinalPrice,
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
+				PF.dblFX,
+				PF.dblSequenceFX,
 
 				(SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE CD.intContractDetailId IN (intContractDetailId)) AS dblQuantity, -- ,intSplitFromId
 				CD.strPriceUOM,
@@ -203,6 +205,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				PF.dblFinalPrice,
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
+				PF.dblFX,
+				PF.dblSequenceFX,
 
 				CH.dblQuantity,
 				PM.strUnitMeasure		AS	strPriceUOM,

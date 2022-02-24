@@ -124,6 +124,7 @@ BEGIN TRY
 			,FD.ysnToBeDeleted
 			,FD.dblPreviousQty
 			,FD.intConcurrencyId
+			,FD.dblFX
 			,PM.strUnitMeasure	AS strPricingUOM,
 			strHedgeCurrency = case when FD.ysnHedge = 1 then CY.strCurrency else null end,
 			strHedgeUOM = case when FD.ysnHedge = 1 then UM.strUnitMeasure	else null end,

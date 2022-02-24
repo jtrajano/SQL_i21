@@ -90,6 +90,7 @@ BEGIN TRY
 				, intDetailSubBookId = NULL
 				, CD.intContractStatusId
 				, CH.ysnReadOnlyInterCoContract
+				, dblFX = CD.dblRate
 			FROM tblCTContractHeader			CH	
 			JOIN tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
 			JOIN tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
@@ -118,6 +119,7 @@ BEGIN TRY
 					, CDetail.intContractStatusId
 					, intPriceCommodityUOMId = CUOM.intCommodityUnitMeasureId
 					, strPriceUOM = UOM.strUnitMeasure
+					, CDetail.dblRate
 				FROM tblCTContractDetail CDetail
 				JOIN tblCTContractHeader header ON header.intContractHeaderId = CDetail.intContractHeaderId
 				LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CDetail.intCurrencyId
@@ -211,6 +213,7 @@ BEGIN TRY
 				, intDetailSubBookId = CD.intSubBookId
 				, CD.intContractStatusId
 				, CD.ysnReadOnlyInterCoContract
+				, dblFX = CD.dblRate
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 			JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 

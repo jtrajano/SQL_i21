@@ -128,6 +128,7 @@ AS
 			,strStorageItem = SI.strItemNo
 			,CP.ysnAllowCropYearOverlap
 			,CP.ysnEnableRankShippingLine
+			,CP.ysnEnableFXFieldInContractPricing
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
 	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId

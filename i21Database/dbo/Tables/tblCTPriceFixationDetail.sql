@@ -43,6 +43,7 @@
 	[intAssignFuturesToContractSummaryId] INT NULL,
 	[dblPreviousQty]				NUMERIC(18,6) NULL,
 	[intConcurrencyId]				INT NOT NULL,
+	[dblFX]							NUMERIC(18,6) null,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),
 	CONSTRAINT [UK_tblCTPackingDescriptionDetail_strTradeNo] UNIQUE ([strTradeNo]),
