@@ -1050,8 +1050,9 @@ BEGIN
 							20	Inventory Adjustment - Lot Move	Inventory Adjustment
 						*/
 						WHEN t.intTransactionTypeId IN (12, 13, 14, 15, 17, 19, 20) THEN 4 
-						WHEN dblQty > 0 AND t.strTransactionForm IN ('Produce') THEN 4
-						WHEN dblValue <> 0 AND t.strTransactionForm IN ('Produce') THEN 4
+						WHEN t.strTransactionForm IN ('Produce', 'Consume') THEN 4
+						--WHEN dblQty > 0 AND t.strTransactionForm IN ('Produce') THEN 4
+						--WHEN dblValue <> 0 AND t.strTransactionForm IN ('Produce') THEN 4
 						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
 						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
 						WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 6
@@ -1127,8 +1128,9 @@ BEGIN
 					20	Inventory Adjustment - Lot Move	Inventory Adjustment
 				*/
 				WHEN t.intTransactionTypeId IN (12, 13, 14, 15, 17, 19, 20) THEN 4 
-				WHEN dblQty > 0 AND t.strTransactionForm IN ('Produce') THEN 4
-				WHEN dblValue <> 0 AND t.strTransactionForm IN ('Produce') THEN 4
+				WHEN t.strTransactionForm IN ('Produce', 'Consume') THEN 4
+				--WHEN dblQty > 0 AND t.strTransactionForm IN ('Produce') THEN 4
+				--WHEN dblValue <> 0 AND t.strTransactionForm IN ('Produce') THEN 4
 				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo') THEN 3 
 				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
 				WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 6
