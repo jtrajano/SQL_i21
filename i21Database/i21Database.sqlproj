@@ -9001,6 +9001,7 @@
     <Build Include="dbo\Views\vyuApiActivityAttendee.sql" />
     <Build Include="dbo\Views\vyuApiActivityHoursWorked.sql" />
     <Build Include="dbo\Views\vyuApiCrmActivity.sql" />
+    <Build Include="dbo\Views\vyuApiLineOfBusiness.sql" />
     <Build Include="dbo\Views\vyuApiJiraIssue.sql" />
     <Build Include="dbo\Views\vyuApiAttachment.sql" />
     <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessage.sql" />
@@ -9424,6 +9425,7 @@
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
