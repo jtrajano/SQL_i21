@@ -23,7 +23,8 @@ CREATE TABLE #AssetID(
 			[intAssetId] [int] NOT NULL,
 			[ysnProcessed] [bit] NULL
 		)
-INSERT INTO #AssetID SELECT intId, 0 FROM @Id
+
+INSERT INTO #AssetID SELECT DISTINCT intAssetId = intId, ysnProcessed = 0 FROM @Id
 
 --IF (ISNULL(@Param, '') <> '') 
 --	INSERT INTO #AssetID EXEC (@Param)
@@ -96,11 +97,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			WHERE F.[intAssetId] = @intCurrentAssetId AND BD.intBookId = 1 
 
 			EXEC uspSMGetStartingNumber @intStartingNumberId = 112, @strID = @strCurrentTransactionId OUT
-
-			DECLARE @GLEntries RecapTableType				
-		
-			-- ASSET ACCOUNT
+			
+			DECLARE @GLEntries RecapTableType
 			DELETE FROM @GLEntries
+			
+			-- ASSET ACCOUNT
 			INSERT INTO @GLEntries (
 				 [strTransactionId]
 				,[intTransactionId]
