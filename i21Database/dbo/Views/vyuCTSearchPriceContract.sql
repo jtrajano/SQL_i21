@@ -1,7 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuCTSearchPriceContract]
 
 AS 
-	with CTEGridContractDetail AS
+	with cpHTA as (
+		select top 1 intPricingTypeId = (case when isnull(ysnEnableHTAMultiplePricing,0) = 1 then 3 else 0 end) from tblCTCompanyPreference
+	),
+	CTEGridContractDetail AS
 	(
 		SELECT	CD.intContractDetailId,
 				CD.intContractHeaderId,
@@ -25,7 +28,8 @@ AS
 							FROM	 tblCTPriceFixationDetail WITH (NOLOCK)
 							GROUP BY intPriceFixationId
 						)								PD	ON	PD.intPriceFixationId				=		PF.intPriceFixationId
-		where CH.intPricingTypeId <> 3
+		cross apply (select intPricingTypeId from cpHTA) hta
+		where CH.intPricingTypeId <> case when hta.intPricingTypeId = 3 then 0 else 3 end
 	),
 	x as 
 	(
@@ -140,7 +144,8 @@ AS
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
 		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
-		WHERE		intPricingTypeId IN (2, 8)
+		cross apply (select * from cpHTA) hta
+		WHERE		CD.intPricingTypeId IN (2, 8, hta.intPricingTypeId)
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 		AND			intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
 		AND			CD.intContractStatusId <> 3
@@ -216,10 +221,11 @@ AS
 													AND CU.intUnitMeasureId				=	PU.intUnitMeasureId 
 LEFT	JOIN		tblCTBook					BK	ON	BK.intBookId					=	CH.intBookId						
 LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId	
+cross apply (select * from cpHTA) hta
 		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
 		AND			CD.intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation)
 		AND			CD.intContractStatusId NOT IN (2,3)
-		AND			CH.intPricingTypeId = 2
+		AND			CH.intPricingTypeId  in (2,hta.intPricingTypeId)
 		GROUP BY	CD.intContractHeaderId,
 					CD.strContractNumber,
 					CD.intContractTypeId,

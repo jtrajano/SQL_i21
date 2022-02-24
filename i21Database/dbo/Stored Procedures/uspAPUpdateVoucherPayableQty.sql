@@ -126,6 +126,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
+				AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 		AND NOT EXISTS(
@@ -147,6 +148,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
+				AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 	BEGIN

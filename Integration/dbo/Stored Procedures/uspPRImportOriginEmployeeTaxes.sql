@@ -13,8 +13,7 @@ EXEC('
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 
-	DECLARE @strPrefix NVARCHAR(10)
-	SET @strPrefix = ''E''
+	
 
 		SELECT DISTINCT
 			intEntityEmployeeId = iEMP.intEntityEmployeeId
@@ -106,7 +105,7 @@ EXEC('
 						where prtax_year = (select max(prtax_year) from prtaxmst)) oTAX
 				ON oEMT.premt_code = oTAX.prtax_code
 			INNER JOIN (select intEntityEmployeeId = intEntityId, strEmployeeId, strMaritalStatus from tblPREmployee) iEMP
-				ON iEMP.strEmployeeId = (@strPrefix + LTRIM(RTRIM(oEMT.premt_emp))) COLLATE Latin1_General_CI_AS
+				ON iEMP.strEmployeeId = (LTRIM(RTRIM(oEMT.premt_emp))) COLLATE Latin1_General_CI_AS
 			INNER JOIN tblPRTypeTax iTAX
 				ON iTAX.strTax = premt_code COLLATE Latin1_General_CI_AS
 		WHERE NOT EXISTS (

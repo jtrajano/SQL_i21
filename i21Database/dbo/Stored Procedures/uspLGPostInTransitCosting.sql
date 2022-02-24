@@ -91,6 +91,16 @@ BEGIN TRY
 			END
 		END
 
+		/* Auto-correct Weight UOMs */
+		UPDATE LD
+		SET intWeightItemUOMId = WUOM.intItemUOMId
+		FROM tblLGLoadDetail LD
+			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
+			LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemId = LD.intItemId AND WUOM.intUnitMeasureId = ISNULL(L.intWeightUnitMeasureId, IUOM.intUnitMeasureId)
+		WHERE L.intLoadId = @intLoadId AND ISNULL(intWeightItemUOMId, 0) <> WUOM.intItemUOMId
+
+		/* Build In-Transit Costing parameter */
 		INSERT INTO @ItemsToPost (
 			intItemId
 			,intItemLocationId

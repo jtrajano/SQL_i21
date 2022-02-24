@@ -1495,7 +1495,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql"/>
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocation.sql" />
@@ -1708,6 +1708,9 @@
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchHeader.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointRackPriceEquation.sql" />
     <Build Include="dbo\Tables\tblApiUserAccount.sql" />
+    <Build Include="dbo\Tables\tblApiImportLog.sql" />
+    <Build Include="dbo\Tables\tblApiImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformProperty.sql" />
     <Build Include="dbo\Tables\tblApiMonthlyRequestUsage.sql" />
     <Build Include="dbo\Tables\tblApiMonthlyRequestUsageStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiMonthlyRequestUsageStagingTransform.sql" />
@@ -1720,6 +1723,7 @@
     <Build Include="dbo\Tables\tblEMEntityPreferences.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItem.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentItem.sql" />
+    <Build Include="dbo\Views\vyuApiTicketSplits.sql" />
     <Build Include="dbo\Views\vyuEMEntity.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
@@ -3468,6 +3472,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDragAndDropWorkOrder.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutRegisterHourlyActivity.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantFGM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantISM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantMCM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantMSM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantISM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantFGM.sql" />
@@ -9007,6 +9015,21 @@
     <Build Include="dbo\Views\vyuRestApiEntityUsers.sql" />
     <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuRestApiVendors.sql" />
+    <Build Include="dbo\Views\vyuApiTransportTerminals.sql" />
+    <Build Include="dbo\Views\vyuAPIOpportunity.sql" />
+    <Build Include="dbo\Views\vyuApiApproval.sql" />
+    <Build Include="dbo\Views\vyuApiActivity.sql" />
+    <Build Include="dbo\Views\vyuApiActivityAttendee.sql" />
+    <Build Include="dbo\Views\vyuApiActivityHoursWorked.sql" />
+    <Build Include="dbo\Views\vyuApiCrmActivity.sql" />
+    <Build Include="dbo\Views\vyuApiLineOfBusiness.sql" />
+    <Build Include="dbo\Views\vyuApiJiraIssue.sql" />
+    <Build Include="dbo\Views\vyuApiAttachment.sql" />
+    <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessage.sql" />
+    <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessages.sql" />
+    <Build Include="dbo\Views\vyuApiSalesOrder.sql" />
+    <Build Include="dbo\Views\vyuApiSalesOrderDetail.sql" />
+    <Build Include="dbo\Views\vyuApiIRelyUser.sql" />
     <Build Include="dbo\Views\vyuRestApiVoucherChecks.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTickets.sql" />
@@ -9091,6 +9114,7 @@
     <Build Include="dbo\Tables\tblICInventoryStorageAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
+<<<<<<< HEAD
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
@@ -9098,6 +9122,53 @@
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+=======
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStockAsOfDate.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStorageAsOfDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketInOutReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketInOutSubReport.sql" />
+    <Build Include="dbo\Views\vyuSCTicketInOutReport.sql" />
+    <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeDeduction.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeEarnings.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeTaxes.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployee.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDeductions.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
+    <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
+    <Build Include="dbo\Tables\tblSCTicketOnProcess.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
+    <Build Include="dbo\Views\vyuICShipmentInTransit.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDirectBasisContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTicketWithBasisContract.sql" />
+    <Build Include="dbo\Functions\fnGRCheckStorageBalance.sql" />
+    <Build Include="dbo\Functions\fnGRFindOriginalCustomerStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
+    <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
+    <Build Include="dbo\Views\vyuApiSalesperson.sql" />
+    <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
+    <Build Include="dbo\Views\vyuApiTerm.sql" />
+>>>>>>> 20.1Prod
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9382,7 +9453,15 @@
     <Build Include="dbo\Views\vyuARPerformanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
+    <Build Include="dbo\Tables\tblARPerformanceLog.sql" />
+    <Build Include="dbo\Views\vyuARPerformanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
+    <Build Include="dbo\Tables\tblARSalesAnalysisStagingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
+    <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
   </ItemGroup>
   <ItemGroup>

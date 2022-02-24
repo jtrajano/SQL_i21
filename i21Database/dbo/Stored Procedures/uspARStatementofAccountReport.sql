@@ -2,11 +2,9 @@
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
-SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -25,6 +23,8 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@strCustomerIds				AS NVARCHAR(MAX)
 		,@strCustomerNumber				AS NVARCHAR(MAX)
 		,@strStatementFormat			AS NVARCHAR(50)
+		,@strStatementSP 				AS NVARCHAR(50)
+		,@strRequestId					AS NVARCHAR(200)
 		,@strAccountStatusCode			AS NVARCHAR(5)
 		,@strLocationName				AS NVARCHAR(50)
 		,@ysnPrintZeroBalance			AS BIT
@@ -49,6 +49,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@datatype						AS NVARCHAR(50)
 		,@intPerformanceLogId			AS INT = NULL
 		,@strReportLogId				AS NVARCHAR(MAX)
+		,@blbLogo						AS VARBINARY(MAX)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -169,6 +170,10 @@ SELECT @strReportLogId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strReportLogId'
 
+SELECT @strRequestId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strRequestId'
+
 IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 BEGIN
 	INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
@@ -192,7 +197,36 @@ BEGIN
 	IF CHARINDEX('''', @strCustomerName) > 0 
 		SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 
-	EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, 'uspARCustomerStatementReport', 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
+	SET @strStatementSP = CASE WHEN @strStatementFormat = 'Balance Forward' THEN 'uspARCustomerStatementBalanceForwardReport'
+							   WHEN @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer') THEN 'uspARCustomerStatementReport'
+							   WHEN @strStatementFormat = 'Payment Activity' THEN 'uspARCustomerStatementPaymentActivityReport'
+							   WHEN @strStatementFormat = 'Full Details - No Card Lock' THEN 'uspARCustomerStatementFullDetailReport'
+							   WHEN @strStatementFormat = 'Budget Reminder' THEN 'uspARCustomerStatementBudgetReminderReport'
+							   WHEN @strStatementFormat = 'Budget Reminder Alternate 2' THEN 'uspARCustomerStatementBudgetReminderAlternate2Report'
+							   WHEN @strStatementFormat = 'Honstein Oil' THEN 'uspARCustomerStatementHonsteinReport'
+						  END
+
+	EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, @strStatementSP, @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
+
+	--SETUP LOGO
+	SELECT @blbLogo = CASE WHEN CP.ysnStretchLogo = 1 THEN S.blbFile ELSE A.blbFile END
+	FROM tblARCompanyPreference CP 	
+	OUTER APPLY (
+		SELECT TOP 1 U.blbFile
+		FROM tblSMUpload U
+		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+		WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+		  AND A.strComment = 'Header'
+		ORDER BY A.intAttachmentId DESC
+	) A 
+	OUTER APPLY (
+		SELECT TOP 1 U.blbFile
+		FROM tblSMUpload U
+		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+		WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+		  AND A.strComment = 'Stretch Header'
+		ORDER BY A.intAttachmentId DESC
+	) S
 	
 	IF @strStatementFormat = 'Balance Forward'
 		BEGIN
@@ -330,27 +364,48 @@ BEGIN
 				, @intEntityUserId				= @intEntityUserId
 		END
 
+	--LOGO
+	UPDATE tblARCustomerStatementStagingTable
+	SET blbLogo = @blbLogo
+	WHERE intEntityUserId = @intEntityUserId
+	  AND strStatementFormat = @strStatementFormat
+
 	DELETE FROM tblARCustomerStatementOfAccountStagingTable
 	WHERE intEntityUserId = @intEntityUserId
 	AND strReportLogId <> @strReportLogId
 
-	INSERT INTO tblARCustomerStatementOfAccountStagingTable
-	SELECT @strCustomerName
-		 , @strAccountStatusCode
-		 , @strLocationName
-		 , ISNULL(@ysnPrintZeroBalance, 0)
-		 , ISNULL(@ysnPrintCreditBalance, 1)
-		 , ISNULL(@ysnIncludeBudget, 0)
-		 , ISNULL(@ysnPrintOnlyPastDue, 0)
-		 , @strStatementFormat
-		 , @dtmDateFrom
-	 	 , @dtmDateTo
-		 , @intEntityUserId
-		 , @strReportLogId
+	INSERT INTO tblARCustomerStatementOfAccountStagingTable (
+		  strCustomerName
+		, strAccountStatusCode
+		, strLocationName
+		, ysnPrintZeroBalance
+		, ysnPrintCreditBalance
+		, ysnIncludeBudget
+		, ysnPrintOnlyPastDue
+		, strStatementFormat
+		, dtmDateFrom
+		, dtmDateTo
+		, intEntityUserId
+		, strReportLogId
+		, blbLogo
+	)
+	SELECT strCustomerName			= @strCustomerName
+		 , strAccountStatusCode		= @strAccountStatusCode
+		 , strLocationName			= @strLocationName
+		 , ysnPrintZeroBalance		= ISNULL(@ysnPrintZeroBalance, 0)
+		 , ysnPrintCreditBalance	= ISNULL(@ysnPrintCreditBalance, 1)
+		 , ysnIncludeBudget			= ISNULL(@ysnIncludeBudget, 0)
+		 , ysnPrintOnlyPastDue		= ISNULL(@ysnPrintOnlyPastDue, 0)
+		 , strStatementFormat		= @strStatementFormat
+		 , dtmDateFrom				= @dtmDateFrom
+	 	 , dtmDateTo				= @dtmDateTo
+		 , intEntityUserId			= @intEntityUserId
+		 , strReportLogId			= @strReportLogId
+		 , blbLogo					= @blbLogo
 END
 
 SELECT * 
 FROM tblARCustomerStatementOfAccountStagingTable
 WHERE strReportLogId = @strReportLogId
 
-EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, 'uspARCustomerStatementReport', 0, @intEntityUserId, @intPerformanceLogId, NULL
+EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, @strStatementSP, @strRequestId, 0, @intEntityUserId, @intPerformanceLogId, NULL

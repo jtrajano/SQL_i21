@@ -460,6 +460,7 @@ BEGIN
 			JOIN tblAPBillDetail BillDtl 
 				ON Bill.intBillId = BillDtl.intBillId 
 					AND BillDtl.intInventoryReceiptChargeId IS NULL
+					AND BillDtl.intSettleStorageId IS NULL
 			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId
 			LEFT JOIN tblICCommodity Commodity 
@@ -1947,6 +1948,7 @@ BEGIN
 			JOIN tblAPBillDetail BillDtl 
 				ON Bill.intBillId = BillDtl.intBillId 
 					AND BillDtl.intInventoryReceiptChargeId IS NULL
+					AND BillDtl.intSettleStorageId IS NULL
 			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId
 					AND Item.strType = 'Inventory'

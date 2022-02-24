@@ -179,6 +179,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strBinNumber							= INV.strBinNumber
 	 , strGroupNumber						= INV.strGroupNumber
 	 , strFeedDiet							= INV.strFeedDiet
+	 , intTicketLoadDetailId				= ISNULL(TICKET.intLoadDetailId, 0)
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -299,7 +300,8 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intTicketId
 		 , strTicketNumber
-		, strCustomerReference		
+		 , strCustomerReference
+		 , intLoadDetailId
 	FROM tblSCTicket WITH(NOLOCK)
 ) TICKET ON INV.intTicketId = TICKET.intTicketId
 LEFT JOIN (

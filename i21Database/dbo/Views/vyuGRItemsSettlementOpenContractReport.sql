@@ -4,7 +4,7 @@ SELECT A.ItemName
 	 , PivotColumn = CONVERT(NVARCHAR,A.PivotColumn)
 	 , CONVERT(NVARCHAR, CONVERT(DECIMAL(18,2), ISNULL(SUM(A.Amount),0))) COLLATE Latin1_General_CI_AS as Amount
 	 , A.UnitMeasure
-	 , CONVERT(NVARCHAR,A.intEntityId)  COLLATE Latin1_General_CI_AS as intEntityId
+	 , A.intEntityId
 	 , PivotColumnId = CASE 
 						WHEN A.PivotColumn = 'Purchase' THEN 111
 						ELSE 222

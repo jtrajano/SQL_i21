@@ -1,258 +1,407 @@
-﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantMSM]
-@intCheckoutId INT,
-@strStatusMsg NVARCHAR(250) OUTPUT,
-@intCountRows INT OUTPUT
+CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantMSM]
+	@intCheckoutId INT,
+	@UDT_MSM	StagingRadiantMSM		READONLY,
+	@strStatusMsg NVARCHAR(250) OUTPUT,
+	@intCountRows INT OUTPUT
 AS
 BEGIN
-	
+
 	--SET NOCOUNT ON
     SET XACT_ABORT ON
-
-	BEGIN TRY
-		
-		--------------------------------------------------------------------------------------------  
-		-- Create Save Point.  
-		--------------------------------------------------------------------------------------------    
-		-- Create a unique transaction name. 
-		DECLARE @SavedPointTransaction AS VARCHAR(500) = 'CheckoutRadiantMSM' + CAST(NEWID() AS NVARCHAR(100)); 
-		DECLARE @intTransactionCount INT = @@TRANCOUNT;
-
-		IF(@intTransactionCount = 0)
-			BEGIN
-				BEGIN TRAN @SavedPointTransaction
-			END
-		ELSE
-			BEGIN
-				SAVE TRAN @SavedPointTransaction --> Save point
-			END
-		--------------------------------------------------------------------------------------------  
-		-- END Create Save Point.  
-		-------------------------------------------------------------------------------------------- 
-
-
-		DECLARE @intStoreId int
-		SELECT @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
-
-	 --   Update dbo.tblSTCheckoutPaymentOptions
-	 --   SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)a
-	 --   , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
-		--, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-	 --   FROM #tempCheckoutInsert chk
-	 --   JOIN tblSTPaymentOption PO ON PO.strRegisterMop = chk.TenderSubCode
-	 --   JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
-	 --   WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId AND tblSTCheckoutPaymentOptions.intPaymentOptionId = PO.intPaymentOptionId
        
-		----Update tblSTCheckoutPaymentOptions
-		Update dbo.tblSTCheckoutPaymentOptions
-		SET dblRegisterAmount = s.TotalSummaryAmount
-		, intRegisterCount = s.TotalSummaryCount
-		, dblAmount = s.TotalSummaryAmount
-		FROM #tempCheckoutInsert ST
-		JOIN (
-				SELECT ISNULL(CAST(TenderSubCode as int) ,0) as TenderSubCode,
-					   SUM(ISNULL(CAST(MiscellaneousSummaryCount as money) ,0)) as TotalSummaryCount,
-					   SUM(ISNULL(CAST(MiscellaneousSummaryAmount as money) ,0)) as TotalSummaryAmount
-				FROM #tempCheckoutInsert
-				GROUP BY TenderSubCode
-			 ) s ON ST.TenderSubCode = s.TenderSubCode
-		JOIN tblSTPaymentOption PO ON PO.strRegisterMop = ST.TenderSubCode
-		JOIN tblSTStore Store ON Store.intStoreId = PO.intStoreId
-		JOIN tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
-		WHERE Store.intStoreId = @intStoreId AND ST.TenderSubCode <> ''
-		AND intCheckoutId = @intCheckoutId
+	   BEGIN TRY
+              
+				BEGIN TRANSACTION
 
-		Update dbo.tblSTCheckoutPaymentOptions
-		SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-		, intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
-		, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-		FROM #tempCheckoutInsert chk
-		WHERE intCheckoutId = @intCheckoutId AND chk.MiscellaneousSummaryCode = 4 AND chk.MiscellaneousSummarySubCode IN (5,6)
-		AND intPaymentOptionId IN (SELECT intLotteryWinnersMopId FROM dbo.tblSTRegister Where intStoreId = @intStoreId)
-       
-		Update dbo.tblSTCheckoutPaymentOptions
-		SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-		, intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
-		, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-		FROM #tempCheckoutInsert chk
-		WHERE intCheckoutId = @intCheckoutId AND chk.MiscellaneousSummaryCode = 19 AND chk.MiscellaneousSummarySubCodeModifier = 1550
-		AND intPaymentOptionId IN (SELECT intPaymentOptionId FROM dbo.tblSTPaymentOption Where strRegisterMop = MiscellaneousSummarySubCodeModifier )
 
-       
-		IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
-		BEGIN
-				DECLARE @tbl TABLE (intCnt int, intAccountId int, strAccountId nvarchar(100), intItemId INT, strItemNo NVARCHAR(100), strItemDescription NVARCHAR(100))
-				INSERT into @tbl
-				EXEC uspSTGetSalesTaxTotalsPreload 0
+				DECLARE @intStoreId INT
+					  , @intCustomerChargeMopId INT
+					  , @intCashTransctionMopId INT
 
-				INSERT INTO dbo.tblSTCheckoutSalesTaxTotals
+				SELECT @intStoreId			  = ch.intStoreId
+					 , @intCustomerChargeMopId = st.intCustomerChargeMopId
+					 , @intCashTransctionMopId = st.intCashTransctionMopId
+				FROM dbo.tblSTCheckoutHeader ch
+				INNER JOIN dbo.tblSTStore st
+					ON ch.intStoreId = st.intStoreId
+				WHERE ch.intCheckoutId = @intCheckoutId
+
+				-- ==================================================================================================================  
+				-- [START] Validate if MSM xml file matches the Mapping on i21 
+				-- ================================================================================================================== 
+				IF NOT EXISTS(SELECT TOP 1 1 FROM @UDT_MSM)
+					BEGIN
+							-- Add to error logging
+							INSERT INTO tblSTCheckoutErrorLogs 
+							(
+								strErrorType
+								, strErrorMessage 
+								, strRegisterTag
+								, strRegisterTagValue
+								, intCheckoutId
+								, intConcurrencyId
+							)
+							VALUES
+							(
+								'XML LAYOUT MAPPING'
+								, 'Radiant MSM XML file did not match the layout mapping'
+								, ''
+								, ''
+								, @intCheckoutId
+								, 1
+							)
+
+							SET @intCountRows = 0
+							SET @strStatusMsg = 'Radiant MSM XML file did not match the layout mapping'
+
+							GOTO ExitWithCommit
+					END
+				-- ================================================================================================================== 
+				-- [END] Validate if MSM xml file matches the Mapping on i21   
+				-- ==================================================================================================================
+
+
+
+				-- ================================================================================================================== 
+				-- [START] Get Error logs. Check Register XML that is not configured in i21
+				-- Compare <MiscellaneousSummarySubCodeModifier> tag of (RegisterXML) and (Store -> Store -> Payment Option(Tab) -> 'Register Mop'(strRegisterMopId))
+				-- ------------------------------------------------------------------------------------------------------------------ 
+				IF(@intCustomerChargeMopId IS NULL AND @intCashTransctionMopId IS NULL)
+					BEGIN
+						INSERT INTO tblSTCheckoutErrorLogs 
+						(
+							strErrorType
+							, strErrorMessage 
+							, strRegisterTag
+							, strRegisterTagValue
+							, intCheckoutId
+							, intConcurrencyId
+						)
+						SELECT DISTINCT
+							'NO MATCHING TAG' as strErrorType
+							, 'No Matching Register MOP in Payment Options' as strErrorMessage
+							, 'MiscellaneousSummarySubCodeModifier' as strRegisterTag
+							, ISNULL(Chk.strMiscellaneousSummarySubCodeModifier, '') AS strRegisterTagValue
+							, @intCheckoutId
+							, 1
+						FROM @UDT_MSM Chk
+						WHERE ISNULL(Chk.strMiscellaneousSummarySubCodeModifier, '') NOT IN
+						(
+							SELECT DISTINCT 
+								tbl.strXmlRegisterMiscellaneousSummarySubCodeModifier
+							FROM
+							(
+								SELECT DISTINCT
+									Chk.strMiscellaneousSummarySubCodeModifier AS strXmlRegisterMiscellaneousSummarySubCodeModifier
+								FROM @UDT_MSM Chk
+								JOIN tblSTPaymentOption PO 
+									ON ISNULL(Chk.strMiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
+								JOIN tblSTStore Store 
+									ON Store.intStoreId = PO.intStoreId
+								JOIN tblSTCheckoutPaymentOptions CPO 
+									ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+								WHERE Store.intStoreId = @intStoreId
+								AND Chk.strMiscellaneousSummaryCode = 'sales' 
+								AND Chk.strMiscellaneousSummarySubCode = 'MOP'
+								AND ISNULL(Chk.strMiscellaneousSummarySubCodeModifier, '') != ''
+							) AS tbl
+						)
+						AND Chk.strMiscellaneousSummaryCode = 'sales' 
+						AND Chk.strMiscellaneousSummarySubCode = 'MOP'
+						AND ISNULL(Chk.strMiscellaneousSummarySubCodeModifier, '') != ''
+					END	
+				-- ------------------------------------------------------------------------------------------------------------------  
+				-- [END] Get Error logs. Check Register XML that is not configured in i21.  
+				-- ==================================================================================================================
+
+
+				-- ======================================================================================================================
+				-- [START] - Create list of excluded MOP Id
+				-- ======================================================================================================================
+				DECLARE @tempExcludedMOPid TABLE
 				(
-					intCheckoutId
-					, strTaxNo
-					, dblTotalTax
-					, dblTaxableSales
-					, dblTaxExemptSales
-					, intSalesTaxAccount
-					, intConcurrencyId
+					intPaymentOptionId INT
+				)
+
+				INSERT INTO @tempExcludedMOPid
+				(
+					intPaymentOptionId
 				)
 				SELECT 
-					@intCheckoutId
-					, intCnt
-					, NULL
-					, NULL
-					, NULL
-					, intAccountId
-					, 0 
-				FROM @tbl
-		END
-       
-		UPDATE dbo.tblSTCheckoutSalesTaxTotals
-		SET dblTaxableSales = CASE WHEN strTaxNo = '1' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																							WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =1
-																							AND MiscellaneousSummarySubCodeModifier = 1
-																							)
-														WHEN strTaxNo = '2' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																							WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =1
-																							AND MiscellaneousSummarySubCodeModifier = 2
-																							)
-														WHEN strTaxNo = '3' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																							WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =1
-																							AND MiscellaneousSummarySubCodeModifier = 3
-																							)
-														WHEN strTaxNo = '4' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																							WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =1
-																							AND MiscellaneousSummarySubCodeModifier = 4
-																							)
-												END
-		, dblTotalTax = CASE WHEN strTaxNo = '1' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																							WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =3
-																							AND MiscellaneousSummarySubCodeModifier = 1
-																							)
-														WHEN strTaxNo = '2' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																							WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =3
-																							AND MiscellaneousSummarySubCodeModifier = 2
-																							)
-														WHEN strTaxNo = '3' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																							WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =3
-																							AND MiscellaneousSummarySubCodeModifier = 3
-																							)
-														WHEN strTaxNo = '4' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																							WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =3
-																							AND MiscellaneousSummarySubCodeModifier = 4
-																							)
-												END
-		WHERE intCheckoutId = @intCheckoutId AND strTaxNo IN ('1', '2', '3', '4')
-
-		--UPDATE dbo.tblSTCheckoutHeader 
-		--SET dblCustomerCount = (SELECT SUM(CAST(TenderTransactionsCount as int)) FROM #tempCheckoutInsert) 
-		--WHERE intCheckoutId = @intCheckoutId
+					stpo.intPaymentOptionId
+				FROM tblSTStore st
+				INNER JOIN tblSTPaymentOption stpo
+					ON st.intStoreId = stpo.intStoreId
+					AND stpo.intPaymentOptionId IN (st.intCashTransctionMopId, st.intCustomerChargeMopId)
+				WHERE st.intStoreId = @intStoreId
+				-- ======================================================================================================================
+				-- [END] - Create list of excluded MOP Id
+				-- ======================================================================================================================
+			
 
 
-		--Update TenderTransactionsCount
-		Update dbo.tblSTCheckoutHeader
-		SET dblCustomerCount = (S.TenderTransactionsCount)
-		FROM
-		(SELECT 
-			SUM(CAST(TenderTransactionsCount as int)) as TenderTransactionsCount
-		FROM #tempCheckoutInsert ST
-		JOIN dbo.tblSTPaymentOption PO ON PO.strRegisterMop = ST.TenderSubCode
-		JOIN dbo.tblSTStore Store ON Store.intStoreId = PO.intStoreId
-		JOIN dbo.tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
-		WHERE ST.TenderSubCode <> ''
-		AND Store.intStoreId = @intStoreId  
-		AND intCheckoutId = @intCheckoutId) as S
-       
-
-		UPDATE dbo.tblSTCheckoutHeader 
-		SET dblTotalNoSalesCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =4) 
-		WHERE intCheckoutId = @intCheckoutId
-       
-		UPDATE dbo.tblSTCheckoutHeader 
-		SET dblFuelAdjustmentCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =12) 
-		WHERE intCheckoutId = @intCheckoutId
-       
-		UPDATE dbo.tblSTCheckoutHeader 
-		SET dblFuelAdjustmentAmount = (SELECT SUM(CAST(MiscellaneousSummaryAmount as decimal(18,6))) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =12) 
-		WHERE intCheckoutId = @intCheckoutId
-       
-		UPDATE dbo.tblSTCheckoutHeader 
-		SET dblTotalRefundCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 3 AND MiscellaneousSummarySubCode =0) 
-		WHERE intCheckoutId = @intCheckoutId
-       
-		UPDATE dbo.tblSTCheckoutHeader 
-		SET dblTotalRefundAmount = (SELECT SUM(CAST(MiscellaneousSummaryAmount as decimal(18,6))) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 3 AND MiscellaneousSummarySubCode =0) 
-		WHERE intCheckoutId = @intCheckoutId
-       
-		UPDATE dbo.tblSTCheckoutHeader 
-		SET dblTotalPaidOuts = (SELECT SUM(CAST(MiscellaneousSummaryAmount as decimal(18,6))) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 4 AND MiscellaneousSummarySubCode =0) 
-		WHERE intCheckoutId = @intCheckoutId
-
-
-       
-		DECLARE @intCnt int, @intMaxCnt int
-		SET @intCnt = 1
-		SELECT @intMaxCnt = 23 --MAX(MiscellaneousSummarySubCodeModifier) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 21 AND (MiscellaneousSummarySubCode =1 OR MiscellaneousSummarySubCode =2 OR MiscellaneousSummarySubCode =3)
-												--AND MiscellaneousSummarySubCodeModifier <> 0
-		WHILE(@intCnt <= @intMaxCnt)
-		BEGIN
-				INSERT INTO dbo.tblSTCheckoutRegisterHourlyActivity ([intCheckoutId]
-			,[intHourNo]) VALUES (@intCheckoutId, @intCnt)
+				-- ======================================================================================================================
+				-- [START] - DELETE Payment Option that is not included
+				-- ======================================================================================================================
+				DELETE FROM dbo.tblSTCheckoutPaymentOptions
+				WHERE intCheckoutId = @intCheckoutId
+					AND intPaymentOptionId IN (SELECT DISTINCT intPaymentOptionId FROM @tempExcludedMOPid)
+				-- ======================================================================================================================
+				-- [END] - DELETE Payment Option that is not included
+				-- ======================================================================================================================
               
-				UPDATE  dbo.tblSTCheckoutRegisterHourlyActivity 
-				SET intFuelMerchandiseCustomerCount = (SELECT CAST(MiscellaneousSummaryCount as int) FROM #tempCheckoutInsert 
-																					WHERE MiscellaneousSummaryCode = 21 AND MiscellaneousSummarySubCode  = 1
-																					AND MiscellaneousSummarySubCodeModifier = @intCnt),
-						dblFuelMerchandiseCustomerSalesAmount = (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																					WHERE MiscellaneousSummaryCode = 21 AND MiscellaneousSummarySubCode  = 1
-																					AND MiscellaneousSummarySubCodeModifier = @intCnt)
-				WHERE intCheckoutId = @intCheckoutId AND intHourNo = @intCnt
-              
-				UPDATE  dbo.tblSTCheckoutRegisterHourlyActivity 
-				SET intMerchandiseCustomerCount = (SELECT CAST(MiscellaneousSummaryCount as int) FROM #tempCheckoutInsert 
-																					WHERE MiscellaneousSummaryCode = 21 AND MiscellaneousSummarySubCode  = 2
-																					AND MiscellaneousSummarySubCodeModifier = @intCnt),
-						dblMerchandiseCustomerSalesAmount = (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																					WHERE MiscellaneousSummaryCode = 21 AND MiscellaneousSummarySubCode  = 2
-																					AND MiscellaneousSummarySubCodeModifier = @intCnt)
-				WHERE intCheckoutId = @intCheckoutId AND intHourNo = @intCnt
-              
-				UPDATE  dbo.tblSTCheckoutRegisterHourlyActivity 
-				SET intFuelOnlyCustomersCount = (SELECT CAST(MiscellaneousSummaryCount as int) FROM #tempCheckoutInsert 
-																					WHERE MiscellaneousSummaryCode = 21 AND MiscellaneousSummarySubCode  = 3
-																					AND MiscellaneousSummarySubCodeModifier = @intCnt),
-						dblFuelOnlyCustomersSalesAmount = (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
-																					WHERE MiscellaneousSummaryCode = 21 AND MiscellaneousSummarySubCode  = 3
-																					AND MiscellaneousSummarySubCodeModifier = @intCnt)
-				WHERE intCheckoutId = @intCheckoutId AND intHourNo = @intCnt
+      
+				----Update tblSTCheckoutPaymentOptions
+				Update dbo.tblSTCheckoutPaymentOptions
+				SET dblRegisterAmount = ISNULL(chk.dblMiscellaneousSummaryAmount, 0)
+                     , intRegisterCount = ISNULL(chk.intMiscellaneousSummaryCount, 0)
+                     , dblAmount = ISNULL(chk.dblMiscellaneousSummaryAmount, 0)
+				FROM @UDT_MSM chk
+				INNER JOIN tblSTPaymentOption PO 
+					ON ISNULL(chk.strMiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
+					-- ON PO.strRegisterMop COLLATE DATABASE_DEFAULT = ISNULL(chk.MiscellaneousSummarySubCodeModifier, '')
+				INNER JOIN tblSTStore Store 
+					ON Store.intStoreId = PO.intStoreId
+				INNER JOIN tblSTCheckoutPaymentOptions CPO 
+					ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+				WHERE Store.intStoreId = @intStoreId
+					AND chk.strMiscellaneousSummaryCode = 'sales' 
+					AND chk.strMiscellaneousSummarySubCode = 'MOP'
+					AND intCheckoutId = @intCheckoutId
+					AND (
+							(
+									(EXISTS((SELECT TOP 1 1 FROM @tempExcludedMOPid)))
+									AND
+									(
+										PO.intPaymentOptionId NOT IN (SELECT DISTINCT intPaymentOptionId FROM @tempExcludedMOPid)
+									)
+									OR
+									(NOT EXISTS((SELECT TOP 1 1 FROM @tempExcludedMOPid)))
+									AND
+									(
+										1=1
+									)
+							)
+						)
 
-              
+			   -------------------------------------------------------------------------------------------------------------
+			   ---------------------------------------- CUSTOMER COUNT -----------------------------------------------------
+			   -------------------------------------------------------------------------------------------------------------
+			   --UPDATE dbo.tblSTCheckoutHeader
+			   --SET dblCustomerCount = (
+						--				   SELECT SUM(CAST(ISNULL(intMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6))) 
+						--				   FROM @UDT_MSM
+						--				   WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'totalizer' 
+						--				   AND ISNULL(strMiscellaneousSummarySubCode, '') = 'sales'
+						--				   AND ISNULL(strMiscellaneousSummarySubCodeModifier, '') = 'sales'
+						--				 )
+			   --WHERE intCheckoutId = @intCheckoutId
 
-				SET @intCnt = @intCnt + 1
-		END
+			   UPDATE dbo.tblSTCheckoutHeader
+			   SET dblCustomerCount = (
+										   SELECT SUM(CAST(ISNULL(intRegisterCount, 0) AS DECIMAL(18, 6))) 
+										   FROM tblSTCheckoutPaymentOptions
+										   WHERE intCheckoutId  = @intCheckoutId
+										 )
+			   WHERE intCheckoutId = @intCheckoutId
+			   -------------------------------------------------------------------------------------------------------------
+			   -------------------------------------- END CUSTOMER COUNT ---------------------------------------------------
+               -------------------------------------------------------------------------------------------------------------
 
-		SET @intCountRows = 1
-		SET @strStatusMsg = 'Success'
 
-		PRINT 'SUCCESS'
 
-		-- IF SUCCESS Commit Transaction
-		IF(@intTransactionCount = 0)
-			BEGIN
-				COMMIT TRANSACTION @SavedPointTransaction
-			END
+			  -------------------------------------------------------------------------------------------------------------
+			  ---------------------------------------- TOTAL TAX ----------------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
+			  UPDATE dbo.tblSTCheckoutHeader 
+			  SET dblTotalTax = (
+									SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+									FROM @UDT_MSM 
+									WHERE ISNULL(strMiscellaneousSummaryCode, '') = 'totalizer' 
+									AND ISNULL(strMiscellaneousSummarySubCode, '') = 'tax' 
+									AND ISNULL(strMiscellaneousSummarySubCodeModifier, '') = 'taxColl'
+								)  
+			  WHERE intCheckoutId = @intCheckoutId
+			  -------------------------------------------------------------------------------------------------------------
+			  ---------------------------------------- END TOTAL TAX ------------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
 
-	END TRY
 
-	BEGIN CATCH
-        SET @intCountRows = 0
-        SET @strStatusMsg = ERROR_MESSAGE()
 
-		PRINT ERROR_MESSAGE()
+			  -------------------------------------------------------------------------------------------------------------
+			  ------------------------------------------ NO SALES ---------------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
+			  UPDATE dbo.tblSTCheckoutHeader
+			  SET dblTotalNoSalesCount = (
+											SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+											FROM @UDT_MSM 
+											WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
+											AND ISNULL(strMiscellaneousSummarySubCode, '') = 'noSales'
+										 ) 
+			  WHERE intCheckoutId = @intCheckoutId
+			  -------------------------------------------------------------------------------------------------------------
+			  ---------------------------------------- END NO SALES -------------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
 
-		-- IF HAS Error Rollback Transaction
-		IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0)) 
-			BEGIN
-				ROLLBACK TRANSACTION @SavedPointTransaction;
-				--THROW;
-			END
-    END CATCH
+
+
+			  -------------------------------------------------------------------------------------------------------------
+			  ---------------------------------------- FUEL ADJUSTMENTS ---------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
+			  UPDATE dbo.tblSTCheckoutHeader
+			  SET dblFuelAdjustmentCount = (
+											 SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+											 FROM @UDT_MSM 
+											 WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
+											 AND ISNULL(strMiscellaneousSummarySubCode, '') = 'driveOffs'
+										   ) 
+			  WHERE intCheckoutId = @intCheckoutId
+      
+			  UPDATE dbo.tblSTCheckoutHeader
+			  SET dblFuelAdjustmentAmount = (
+											  SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18,6)))
+											  FROM @UDT_MSM 
+											  WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
+											  AND ISNULL(strMiscellaneousSummarySubCode, '') = 'driveOffs'
+											)
+			  WHERE intCheckoutId = @intCheckoutId
+			  -------------------------------------------------------------------------------------------------------------
+			  --------------------------------------- END FUEL ADJUSTMENTS ------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
+
+
+
+			  -------------------------------------------------------------------------------------------------------------
+			  ------------------------------------------- REFUND ----------------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
+			  UPDATE dbo.tblSTCheckoutHeader
+			  SET dblTotalRefundCount = (
+											SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18,6)))
+											FROM @UDT_MSM 
+											WHERE ISNULL(strMiscellaneousSummaryCode, '') = 'refunds' 
+											AND ISNULL(strMiscellaneousSummarySubCode, '') ='total'
+										) 
+			  WHERE intCheckoutId = @intCheckoutId
+		   
+			  UPDATE dbo.tblSTCheckoutHeader
+			  SET dblTotalRefundAmount = (
+										   SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18,6)))
+										   FROM @UDT_MSM 
+										   WHERE ISNULL(strMiscellaneousSummaryCode, '') = 'refunds' 
+										   AND ISNULL(strMiscellaneousSummarySubCode, '') ='total'
+										 )
+			  WHERE intCheckoutId = @intCheckoutId
+			  -------------------------------------------------------------------------------------------------------------
+			  ------------------------------------------ END REFUND -------------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
+
+
+
+			  -------------------------------------------------------------------------------------------------------------
+			  ------------------------------------------ PAID OUTS --------------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
+			  UPDATE dbo.tblSTCheckoutHeader
+			  SET dblTotalPaidOuts = (
+										SELECT SUM(CAST(dblMiscellaneousSummaryAmount as decimal(18,6))) 
+										FROM @UDT_MSM 
+										WHERE ISNULL(strMiscellaneousSummaryCode, '') = 'payouts' 
+										AND ISNULL(strMiscellaneousSummarySubCode, '') ='total'
+									 ) 
+			  WHERE intCheckoutId = @intCheckoutId
+			  -------------------------------------------------------------------------------------------------------------
+			  ----------------------------------------- END PAID OUTS -----------------------------------------------------
+			  -------------------------------------------------------------------------------------------------------------
+				
+			  
+
+
+
+			  -------------------------------------------------------------------------------------------------------------
+			  -- [START] - METRICS TAB 
+			  -------------------------------------------------------------------------------------------------------------
+			  BEGIN
+					-- intRegisterImportFieldId
+					-- 1 = Department Item Sold
+					-- 2 = Fuel Customer Count
+					-- 3 = Inside Customer Count
+					-- 4 = Customer Count
+					-- 5 = Manual
+					-- 6 = No Sales
+					 
+					DECLARE @intCustomerCount	INT = 4
+					       ,@intNoSales			INT = 6
+
+					-- NO SALES COUNT METRIC
+					IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMetrics WHERE intCheckoutId = @intCheckoutId AND intRegisterImportFieldId = @intNoSales)
+						BEGIN
+							UPDATE chkMet
+								SET chkMet.dblAmount = (		
+														-- SELECT SUM(CAST(dblMiscellaneousSummaryAmount AS DECIMAL(18, 6)))										
+														SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+														FROM @UDT_MSM 
+														WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
+															AND ISNULL(strMiscellaneousSummarySubCode, '') = 'noSales'									 
+												       )
+							FROM tblSTCheckoutMetrics chkMet
+							WHERE chkMet.intCheckoutId = @intCheckoutId 
+								AND chkMet.intRegisterImportFieldId = @intNoSales
+						END
+
+					-- CUSTOMER COUNT METRIC
+					IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMetrics WHERE intCheckoutId = @intCheckoutId AND intRegisterImportFieldId = @intCustomerCount)
+						BEGIN
+							UPDATE chkMet
+								SET chkMet.dblAmount = (		
+														SELECT SUM(CAST(ISNULL(intRegisterCount, 0) AS DECIMAL(18, 6))) 
+														   FROM tblSTCheckoutPaymentOptions
+														   WHERE intCheckoutId  = @intCheckoutId
+												       )
+							FROM tblSTCheckoutMetrics chkMet
+							WHERE chkMet.intCheckoutId = @intCheckoutId 
+								AND chkMet.intRegisterImportFieldId = @intCustomerCount
+						END
+			  END
+			  -------------------------------------------------------------------------------------------------------------
+			  -- [END] - METRICS TAB 
+			  -------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+              SET @intCountRows = 1
+              SET @strStatusMsg = 'Success'
+
+			  -- COMMIT
+			  GOTO ExitWithCommit
+       END TRY
+
+       BEGIN CATCH
+			SET @intCountRows = 0
+			SET @strStatusMsg = ERROR_MESSAGE()
+		
+
+			-- ROLLBACK
+			GOTO ExitWithRollback
+	END CATCH
 END
+
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+ExitPost:
+
+
+

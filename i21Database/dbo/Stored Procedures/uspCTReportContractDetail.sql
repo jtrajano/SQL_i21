@@ -136,7 +136,7 @@ BEGIN TRY
 			 									+ dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/' + BUM.strUnitMeasure
 			 									+ ' at ' + CD.strFixationBy + '''s option prior to FND of '
 			 									+ DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
-			 									+ ' or on presentation of documents,whichever is earlier.'
+			 									+ ' or prior to presentation of documents,whichever is earlier.'
 			 								ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
 			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),

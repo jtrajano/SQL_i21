@@ -34,6 +34,8 @@ BEGIN
 		intUserId,
 		intTicketId,
 		strMiscFields,
+		intInventoryReceiptItemId,
+		intLoadDetailId,
 		intActionId
 	)
 	SELECT 
@@ -64,7 +66,9 @@ BEGIN
 		, intEntityId = C.intEntityVendorId
 		, intUserId = B.intEntityId
 		, intTicketId = D.intScaleTicketId
-		, strMiscFields = '{intInventoryReceiptItemId = "'+ CAST(ISNULL(D.intInventoryReceiptItemId,'') AS NVARCHAR) +'"} {intLoadDetailId = "' + CAST(ISNULL(D.intLoadDetailId,'') AS NVARCHAR) +'"}'
+		, strMiscFields = NULL
+		, D.intInventoryReceiptItemId
+		, D.intLoadDetailId
 		, intActionId = 15
 	FROM tblAPPaymentDetail A
 	INNER JOIN @payVoucherDetailIds A2 ON A.intPaymentDetailId = A2.intId
