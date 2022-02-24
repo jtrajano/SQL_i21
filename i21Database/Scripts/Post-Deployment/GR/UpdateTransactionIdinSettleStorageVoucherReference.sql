@@ -9,7 +9,13 @@ IF EXISTS(
 		)
 BEGIN
 
-IF EXISTS(SELECT TOP 1 1 FROM tblGRSettleVoucherCreateReferenceTable WHERE intTransactionId IS NULL)
+IF EXISTS(
+			SELECT TOP 1 1 
+			FROM tblGRSettleVoucherCreateReferenceTable SVC
+			INNER JOIN tblICInventoryTransaction IT
+				ON IT.strBatchId = SVC.strBatchId 
+			WHERE SVC.intTransactionId IS NULL
+		)
 BEGIN
 	UPDATE SVC
 	SET intTransactionId = IT.intTransactionId
