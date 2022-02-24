@@ -25,6 +25,7 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	ysnAllowBetweenCompanies_Forward BIT NULL,
 	ysnOverrideLocationSegment_Forward BIT NULL,
 	ysnOverrideCompanySegment_Forward BIT NULL,
+	ysnShowFeeColumns_BankRecon BIT NULL,
 	intConcurrencyId int NULL,
  CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (

@@ -20,17 +20,15 @@ RETURN (
 				AND ISNULL(A.strSourceType,'') <> 'AA'
 				AND ISNULL(A.strJournalType,'') NOT IN('Origin Journal','Adjusted Origin Journal')
 				UNION 
-				SELECT DISTINCT A.intJournalId,'Unable to post. Account id:' + B.strAccountId + ' is under the ' + C.strAccountCategory + ' category. Please remove it from the transaction detail.' AS strMessage
-					FROM tblGLJournalDetail A JOIN vyuGLAccountDetail B
-					ON A.intAccountId = B.intAccountId
-					JOIN tblGLJournal J
-					ON A.intJournalId = J.intJournalId
-					JOIN tblGLAccountCategory C
-					ON B.intAccountCategoryId = C.intAccountCategoryId
-					WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds)	
-					AND ISNULL(C.strAccountCategory,'') in ('AR Account','Cash Account','AP Account','Inventory')  
-					AND J.strJournalType NOT IN('Origin Journal','Adjusted Origin Journal','Historical Journal','Imported Journal')
-					GROUP BY A.intJournalId	,B.strAccountId,C.strAccountCategory
+			
+				SELECT 
+				A.intJournalId,'Unable to post. Account id:' + B.strAccountId + ' is under the ' + B.strAccountCategory + ' category. Please remove it from the transaction detail.'AS strMessage
+				FROM vyuGLJournalDetail A
+				JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
+				JOIN @JournalIds C on C.intJournalId = A.intJournalId
+				WHERE ISNULL(B.strAccountCategory,'') in ('AR Account','Cash Account','AP Account','Inventory')  
+				AND A.strJournalType NOT IN('Origin Journal','Adjusted Origin Journal','Historical Journal','Imported Journal')
+				GROUP BY A.intJournalId	,B.strAccountId,B.strAccountCategory
 				--REGION @ysnPost = 1
 				UNION
 				SELECT DISTINCT A.intJournalId,
