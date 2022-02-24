@@ -1,7 +1,12 @@
 ﻿CREATE VIEW vyuRKAssignFuturesToContractSummary
 			
 AS
-SELECT * FROM (
+SELECT tbl.*
+	, strPricingStatus = CASE WHEN cdd.intPricingStatus = 0 THEN 'Unpriced' WHEN cdd.intPricingStatus = 1 THEN 'Partially Priced' WHEN cdd.intPricingStatus = 2 THEN 'Priced' END
+	, dblNoOfLots = ISNULL(cdd.dblNoOfLots, 0)
+	, dblLotsPriced = ISNULL(vCD.dblLotsFixed, 0) 
+	, dblLotsUnpriced = (ISNULL(vCD.dblTotalLots, 0) - ISNULL(vCD.dblLotsFixed, 0)) 
+FROM (
 SELECT cs.intAssignFuturesToContractSummaryId,
 		ch.strContractNumber,
 		ct.strContractType,  
@@ -31,7 +36,7 @@ SELECT cs.intAssignFuturesToContractSummaryId,
 		fot.intFutOptTransactionId,
 		cs.ysnIsHedged,
 		fot.intFutOptTransactionHeaderId,
-		fot.dtmCreateDateTime   	
+		fot.dtmCreateDateTime
 FROM tblRKAssignFuturesToContractSummary cs
 JOIN tblCTContractDetail cd ON  cs.intContractDetailId=cd.intContractDetailId  
 join tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
@@ -101,3 +106,5 @@ LEFT JOIN tblCTBook b1 on b1.intBookId = (select top 1 intBookId from tblCTContr
 LEFT JOIN tblCTSubBook sb1 on sb1.intSubBookId = (select top 1 intSubBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
 where isnull(ch.ysnMultiplePriceFixation,0) = 1
 )tbl
+INNER JOIN tblCTContractDetail cdd ON cdd.intContractDetailId = tbl.intContractDetailId
+INNER JOIN vyuCTGridContractDetail vCD ON vCD.intContractDetailId = tbl.intContractDetailId
