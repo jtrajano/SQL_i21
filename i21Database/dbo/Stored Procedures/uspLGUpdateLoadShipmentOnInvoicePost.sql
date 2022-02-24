@@ -151,7 +151,7 @@ BEGIN TRY
 
 		IF ISNULL(@Post,0) = 1
 		BEGIN
-			IF(@strInvoiceType = 'Standard')
+			IF(@strInvoiceType IN ('Provisional', 'Standard'))
 			BEGIN
 				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId
 			END

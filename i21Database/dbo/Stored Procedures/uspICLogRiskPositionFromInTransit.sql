@@ -133,8 +133,8 @@ BEGIN
 			,intFutureMarketId = NULL
 			,intFutureMonthId = NULL
 			,dblNoOfLots = NULL
-			,dblQty = t.dblQty
-			,dblPrice = t.dblCost
+			,dblQty = v.dblQuantityInStockUOM --t.dblQty
+			,dblPrice = v.dblCostInStockUOM --t.dblCost
 			,intEntityId = v.intEntityId
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
@@ -184,10 +184,10 @@ BEGIN
 		FROM	
 			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
 				ON t.intInventoryTransactionId = v.intInventoryTransactionId
-			INNER JOIN tblICItemUOM iu
-				ON iu.intItemUOMId = t.intItemUOMId
-			INNER JOIN tblICUnitMeasure u
-				ON u.intUnitMeasureId = iu.intUnitMeasureId
+			--INNER JOIN tblICItemUOM iu
+			--	ON iu.intItemUOMId = t.intItemUOMId
+			--INNER JOIN tblICUnitMeasure u
+			--	ON u.intUnitMeasureId = iu.intUnitMeasureId
 			CROSS APPLY (
 				SELECT TOP 1 
 					commodityUOM.* 
@@ -195,7 +195,7 @@ BEGIN
 					tblICCommodityUnitMeasure commodityUOM
 				WHERE 
 					commodityUOM.intCommodityId = v.intCommodityId 
-					AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
+					AND commodityUOM.intUnitMeasureId = v.intUnitMeasureStockUOM
 			) commodityUOM
 
 			OUTER APPLY (

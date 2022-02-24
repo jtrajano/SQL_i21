@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnAPCreateVoucherPayableFromDetail]
 (
-	@voucherDetailIds AS Id READONLY
+	@voucherDetailIds AS Id READONLY,
+	@integrationUpdate AS BIT = 0
 )
 RETURNS TABLE AS RETURN
 (
@@ -91,23 +92,27 @@ RETURNS TABLE AS RETURN
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
+	LEFT JOIN tblICInventoryReceiptItem D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 	WHERE
-		A.intTransactionType IN (1, 3)
-		AND
-		(
+	A.intTransactionType IN (1, 3) AND
+	1 = (CASE WHEN @integrationUpdate = 1 THEN 1 ELSE --ALWAYS INCLUDE VOUCHER DETAIL FOR INTEGRATION UPDATE
+			(CASE WHEN ISNULL(D.ysnAddPayable, 1) <> 0 THEN 1 ELSE 0 END) 
+		END) AND
+	(
 		B.intPurchaseDetailId > 0
-	OR	B.intInventoryReceiptItemId > 0
-	OR 	B.intInventoryReceiptChargeId > 0
-	OR	B.intContractCostId > 0
-	OR	B.intContractDetailId > 0
-	OR	B.intLoadDetailId > 0
-	OR	B.intLoadShipmentCostId > 0
-	OR	B.intCustomerStorageId > 0
-	OR	B.intSettleStorageId > 0
-	OR	B.intPaycheckHeaderId > 0
-	OR	B.intBuybackChargeId > 0
-	OR	B.intScaleTicketId > 0
-	OR	B.intInventoryShipmentChargeId > 0
-		)
+		OR	B.intInventoryReceiptItemId > 0
+		OR 	B.intInventoryReceiptChargeId > 0
+		OR	B.intContractCostId > 0
+		OR	B.intContractDetailId > 0
+		OR	B.intLoadDetailId > 0
+		OR	B.intLoadShipmentCostId > 0
+		OR	B.intCustomerStorageId > 0
+		OR	B.intSettleStorageId > 0
+		OR	B.intPaycheckHeaderId > 0
+		OR	B.intBuybackChargeId > 0
+		OR	B.intScaleTicketId > 0
+		OR	B.intInventoryShipmentChargeId > 0
+		OR	B.intPriceFixationDetailId > 0
+	)
 )
 

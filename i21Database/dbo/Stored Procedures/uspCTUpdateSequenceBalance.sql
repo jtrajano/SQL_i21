@@ -231,6 +231,10 @@ BEGIN TRY
 			@strProcess 				= 	@process,
 			@intUserId					= 	@intUserId
 
+	exec uspCTUpdateAppliedAndPrice
+		@intContractDetailId = @intContractDetailId
+		,@dblBalance = @dblNewBalance
+
 END TRY
 
 BEGIN CATCH

@@ -46,13 +46,14 @@ BEGIN
 	SELECT intContractDetailId, intContractStatusId, dblFutures, dblBasis
 	FROM
 	(
-		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreatedDate DESC)
-			, intContractDetailId
-			, intContractStatusId
-			, dblFutures = CASE WHEN strNotes LIKE '%Priced Quantity is%' OR strNotes LIKE '%Priced Load is%' THEN NULL ELSE dblFutures END
-			, dblBasis = CASE WHEN strNotes LIKE '%Priced Quantity is%' OR strNotes LIKE '%Priced Load is%' THEN NULL ELSE dblBasis END
-		FROM tblCTContractBalanceLog
-		WHERE dbo.fnRemoveTimeOnDate((case when @IntLocalTimeOffset is not null then dateadd(minute,@IntLocalTimeOffset,DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmTransactionDate)) else dtmTransactionDate end)) <= @dtmEndDate
+		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY CBL.intContractDetailId ORDER BY dtmCreatedDate DESC)
+			, CBL.intContractDetailId
+			, CBL.intContractStatusId
+			, dblFutures = CASE WHEN CD.dblFutures IS NOT NULL THEN CD.dblFutures ELSE CASE WHEN strNotes LIKE '%Priced Quantity is%' OR strNotes LIKE '%Priced Load is%' THEN NULL ELSE CBL.dblFutures END END
+			, dblBasis = CASE WHEN CD.dblBasis IS NOT NULL THEN CD.dblBasis ELSE CASE WHEN strNotes LIKE '%Priced Quantity is%' OR strNotes LIKE '%Priced Load is%' THEN NULL ELSE CBL.dblBasis END END
+		FROM tblCTContractBalanceLog CBL
+		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = CBL.intContractDetailId
+		WHERE dbo.fnRemoveTimeOnDate((case when @IntLocalTimeOffset is not null then dateadd(minute,@IntLocalTimeOffset,DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @IntLocalTimeOffset)) else CBL.dtmTransactionDate end)) <= @dtmEndDate
 	) tbl
 	WHERE intRowNumber = 1
 
@@ -325,8 +326,8 @@ BEGIN
 				, intFutureMonthId
 				, strDeliveryMonth
 				, strFutureMonth
-				, dblFutures 						= CASE WHEN MAX(Stat.dblFutures) IS NOT NULL THEN MAX(Stat.dblFutures) ELSE round((CASE WHEN ISNULL(MAX(cb.dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(cb.dblFutures, 0) <> 0 THEN cb.dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END),2) END
-				, dblBasis 							= CASE WHEN MAX(Stat.dblBasis) IS NOT NULL THEN MAX(Stat.dblBasis) ELSE round((CASE WHEN ISNULL(MAX(cb.dblBasis), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(cb.dblBasis, 0) <> 0 THEN cb.dblBasis * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END),2) END
+				, dblFutures 						= CASE WHEN MAX(Stat.dblFutures) IS NOT NULL THEN MAX(Stat.dblFutures) ELSE ((CASE WHEN ISNULL(MAX(cb.dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(cb.dblFutures, 0) <> 0 THEN cb.dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END)) END
+				, dblBasis 							= CASE WHEN MAX(Stat.dblBasis) IS NOT NULL THEN MAX(Stat.dblBasis) ELSE ((CASE WHEN ISNULL(MAX(cb.dblBasis), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(cb.dblBasis, 0) <> 0 THEN cb.dblBasis * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END)) END
 				, strBasisUOM
 				, dblQuantity 						= CAST (SUM(dblQuantity) AS NUMERIC(20,6))
 				, strQuantityUOM
@@ -377,8 +378,7 @@ BEGIN
 					, strPrintOption				= 	@strPrintOption
 					, CBL.intContractTypeId
 					, CBL.intEntityId
-					, dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Load is%' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
-										ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Quantity is%' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
+					, dblOrigQty = CBL.dblOrigQty
 					, dblFutures					=	CASE WHEN CBL.intPricingTypeId IN (1, 3) AND CD.dblFutures IS NOT NULL THEN CD.dblFutures
 															ELSE (CASE WHEN CBL.intPricingTypeId = 1 THEN PF.dblPriceWORollArb ELSE NULL END) END  
 					, dblBasis						=	CASE WHEN CBL.intPricingTypeId = 3 THEN NULL ELSE CAST(isnull(CBL.dblBasis, 0) AS NUMERIC(20,6)) END

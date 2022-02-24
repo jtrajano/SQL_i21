@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblARSalesOrderReportStagingTable] (
+CREATE TABLE [dbo].[tblARSalesOrderReportStagingTable] (
     [intSalesOrderId]      				INT             NULL,
 	[intCompanyLocationId]				INT             NULL,
 	[intEntityCustomerId]				INT             NULL,

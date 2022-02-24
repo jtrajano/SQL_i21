@@ -9,7 +9,7 @@ BEGIN
 
 
 
-IF EXISTS(SELECT TOP 1 * FROM vyuRKSearchDPRSummaryLog
+IF EXISTS(SELECT TOP 1 * FROM tblRKSummaryLog
 	WHERE intContractDetailId = @intContractDetailId
 	AND strBucketType = @strBucketType
 	AND @intTransactionRecordId = (case when strTransactionType = 'Settle Storage' then intTransactionRecordHeaderId else intTransactionRecordId end))--AND intTransactionRecordId  = @intTransactionRecordId )

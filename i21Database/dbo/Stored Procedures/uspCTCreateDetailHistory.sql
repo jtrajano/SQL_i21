@@ -7,9 +7,10 @@
 	, @strSource NVARCHAR(50)
 	, @strProcess NVARCHAR(50)
 	, @intUserId INT
+
 AS
 
-BEGIN TRY
+BEGIN TRY	
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		, @intApprovalListId INT
 		, @intLastModifiedById INT
@@ -32,6 +33,7 @@ BEGIN TRY
         , @ysnStayAsDraftContractUntilApproved BIT
         , @ysnAddAmendmentForNonDraftContract BIT = 0
         , @ysnPricingAsAmendment BIT = 1
+		, @ysnAmendmentForCashFuture BIT = 0
 		;
 	
 	DECLARE @tblHeader AS TABLE (intContractHeaderId INT
@@ -149,7 +151,7 @@ BEGIN TRY
 						WHERE intContractHeaderId = @intContractHeaderId
 		) t WHERE intRowNum = 1
 	) t1;
-	
+
 	INSERT INTO tblCTSequenceHistory (intContractHeaderId
 		, intContractDetailId
 		, intContractTypeId
@@ -218,7 +220,7 @@ BEGIN TRY
 		, CD.intFutureMarketId
 		, CD.intFutureMonthId
 		, intCurrencyId
-		, CASE WHEN CD.intUnitMeasureId IS NULL THEN QU.intCommodityUnitMeasureId ELSE NULL END
+		, QU.intCommodityUnitMeasureId
 		, CD.intUnitMeasureId
 		, CD.intCurrencyExchangeRateId
 		, dtmStartDate
@@ -228,18 +230,18 @@ BEGIN TRY
 		, CD.dblFutures
 		, dblBasis
 		, CASE WHEN CD.intPricingTypeId = 1 THEN CD.dblNoOfLots
-				WHEN @strComment = 'Pricing Delete' THEN 0
+				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN 0
 				ELSE ISNULL(PF.dblLotsFixed, 0) END
 		, CASE WHEN CD.intPricingTypeId = 1 THEN 0
-				WHEN @strComment = 'Pricing Delete' THEN CD.dblNoOfLots
+				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN CD.dblNoOfLots
 				ELSE CD.dblNoOfLots - ISNULL(PF.dblLotsFixed, 0) END
 		, CASE WHEN CD.intPricingTypeId = 1 THEN CD.dblQuantity
-				WHEN @strComment = 'Pricing Delete' THEN 0
+				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN 0
 				ELSE ISNULL(FD.dblQuantity, 0) END
 		, CASE WHEN CD.intPricingTypeId = 1 THEN 0
-				WHEN @strComment = 'Pricing Delete' THEN CD.dblQuantity
+				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN CD.dblQuantity
 				ELSE CD.dblQuantity - ISNULL(FD.dblQuantity, 0) END
-		, dblFinalPrice
+		, CASE WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN NULL ELSE dblFinalPrice END
 		, dtmFXValidFrom
 		, dtmFXValidTo
 		, dblRate
@@ -252,10 +254,11 @@ BEGIN TRY
 		, CD.dblScheduleQty
 		, CASE WHEN @ysnUseContractDate = 1 THEN ISNULL(CD.dtmCreated, CH.dtmCreated) ELSE GETDATE() END
 		, dblCashPrice
-		, CASE WHEN CD.intPricingTypeId = 1 THEN 'Fully Priced'
-				WHEN ISNULL(CD.dblNoOfLots, 0) = ISNULL(PF.dblLotsFixed, 0) AND CD.intPricingTypeId NOT IN(2, 8) THEN 'Fully Priced'
-				WHEN ISNULL(CD.dblNoOfLots, 0) - ISNULL(PF.dblLotsFixed, 0) > 0 AND PF.intPriceFixationId IS NOT NULL THEN 'Partially Priced'
-				ELSE 'Unpriced' END
+		, CASE WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN 'Unpriced'
+			ELSE CASE WHEN CD.intPricingTypeId = 1 THEN 'Fully Priced'
+					WHEN ISNULL(CD.dblNoOfLots, 0) = ISNULL(PF.dblLotsFixed, 0) AND CD.intPricingTypeId NOT IN(2, 8) THEN 'Fully Priced'
+					WHEN ISNULL(CD.dblNoOfLots, 0) - ISNULL(PF.dblLotsFixed, 0) > 0 AND PF.intPriceFixationId IS NOT NULL THEN 'Partially Priced'
+					ELSE 'Unpriced' END END
 		, intContractBasisId = CH.intContractBasisId
 		, intGradeId = CH.intGradeId
 		, intItemUOMId = CD.intItemUOMId
@@ -309,59 +312,59 @@ BEGIN TRY
 			DROP TABLE #tempSequenceHistoryCompare;
 		end
 
-		select top 2
-		intContractStatusId
-		,intCompanyLocationId
-		,intPricingTypeId
-		,intFutureMarketId
-		,intFutureMonthId
-		,intCurrencyId
-		,intDtlQtyInCommodityUOMId
-		,intDtlQtyUnitMeasureId
-		,intCurrencyExchangeRateId
-		,intBookId
-		,intSubBookId
-		,dtmStartDate
-		,dtmEndDate
-		,dblQuantity
-		,dblBalance
-		,dblScheduleQty
-		,dblFutures
-		,dblBasis
-		,dblCashPrice
-		,dblLotsPriced
-		,dblLotsUnpriced
-		,dblQtyPriced
-		,dblQtyUnpriced
-		,dblFinalPrice
-		,dblRatio
-		,dtmFXValidFrom
-		,dtmFXValidTo
-		,dblRate
-		,strPricingType
-		,strPricingStatus
-		,strCurrencypair
-		,strBook
-		,strSubBook
-		,intPriceItemUOMId
-		into #tempSequenceHistoryCompare
-		from tblCTSequenceHistory where intContractDetailId = @intContractDetailId order by intSequenceHistoryId desc
+		SELECT TOP 2 intContractStatusId
+			, intCompanyLocationId
+			, intPricingTypeId
+			, intFutureMarketId
+			, intFutureMonthId
+			, intCurrencyId
+			, intDtlQtyInCommodityUOMId
+			, intDtlQtyUnitMeasureId
+			, intCurrencyExchangeRateId
+			, intBookId
+			, intSubBookId
+			, dtmStartDate
+			, dtmEndDate
+			, dblQuantity
+			, dblBalance
+			, dblScheduleQty
+			, dblFutures
+			, dblBasis
+			, dblCashPrice
+			, dblLotsPriced
+			, dblLotsUnpriced
+			, dblQtyPriced
+			, dblQtyUnpriced
+			, dblFinalPrice
+			, dblRatio
+			, dtmFXValidFrom
+			, dtmFXValidTo
+			, dblRate
+			, strPricingType
+			, strPricingStatus
+			, strCurrencypair
+			, strBook
+			, strSubBook
+			, intPriceItemUOMId
+			, intSequenceUsageHistoryId = CASE WHEN intContractStatusId IN (1, 4) THEN null ELSE intSequenceUsageHistoryId END
+			, ysnIsClosed = CASE WHEN intContractStatusId IN (1, 4) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+		INTO #tempSequenceHistoryCompare
+		FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId ORDER BY intSequenceHistoryId DESC
 
-		select @intSequenceHistoryCount = count(*) from #tempSequenceHistoryCompare
+		SELECT @intSequenceHistoryCount = COUNT(*) FROM #tempSequenceHistoryCompare
 
-		select @intValidSequenceHistoryCount = count(*) from (
-			select distinct * from #tempSequenceHistoryCompare
+		SELECT @intValidSequenceHistoryCount = COUNT(*) FROM (
+			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
 
-		if (@intSequenceHistoryCount = 2 and @intValidSequenceHistoryCount = 1)
-		begin
+		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1)
+		BEGIN
 			DELETE
 			FROM tblCTSequenceHistory
 			WHERE intSequenceHistoryId = @intSequenceHistoryId;
-		end
-		else
-		begin
-			
+		END
+		ELSE
+		BEGIN			
 			SELECT @intPrevHistoryId = MAX(intSequenceHistoryId)
 			FROM tblCTSequenceHistory WITH(NOLOCK)
 			WHERE intSequenceHistoryId < @intSequenceHistoryId
@@ -429,20 +432,57 @@ BEGIN TRY
 					WHERE intSequenceHistoryId = @intSequenceHistoryId;
 				END;
 			END
-				
+
 			EXEC uspCTLogSummary @intContractHeaderId = @intContractHeaderId
 				, @intContractDetailId = @intContractDetailId
 				, @strSource = @strSource
 				, @strProcess = @strProcess
 				, @contractDetail = @contractDetails
 				, @intUserId = @intUserId;
-
-		end
+		END
 		
 		SELECT @intSequenceHistoryId = MIN(intSequenceHistoryId)
 		FROM @SCOPE_IDENTITY
 		WHERE intSequenceHistoryId > @intSequenceHistoryId;
 	END;
+	
+	IF EXISTS(
+		SELECT
+		TOP 1 1
+		FROM tblCTSequenceHistory	CurrentRow
+			JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
+			JOIN @tblDetail				PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0) OR ISNULL(CurrentRow.dblCashPrice,0)   <> ISNULL(PreviousRow.dblCashPrice,0) 
+		WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId 
+			 AND (CurrentRow.dblOldFutures IS NOT NULL OR CurrentRow.dblOldCashPrice IS NOT NULL)	
+			 AND @ysnPricingAsAmendment <> 1
+	)
+
+	BEGIN
+		SET @ysnAmendmentForCashFuture = 1
+	END
+
+
+
+
+
+	
+	IF EXISTS(
+		SELECT
+		TOP 1 1
+		FROM tblCTSequenceHistory	CurrentRow
+			JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
+			JOIN @tblDetail				PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0) OR ISNULL(CurrentRow.dblCashPrice,0)   <> ISNULL(PreviousRow.dblCashPrice,0) 
+		WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId 
+			 AND (CurrentRow.dblOldFutures IS NOT NULL OR CurrentRow.dblOldCashPrice IS NOT NULL)	
+			 AND @ysnPricingAsAmendment <> 1
+	)
+
+	BEGIN
+		SET @ysnAmendmentForCashFuture = 1
+	END
+
+
+
 
     if exists (
         select
@@ -754,7 +794,7 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY NewRecords ON NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail PreviousRow ON ISNULL(CurrentRow.dblFutures, 0) <> ISNULL(PreviousRow.dblFutures, 0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-			and @ysnPricingAsAmendment = 1
+			and (@ysnPricingAsAmendment = 1 OR @ysnAmendmentForCashFuture = 1)
 			
 			--Basis
 			UNION ALL SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -785,7 +825,7 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY NewRecords ON NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail PreviousRow ON ISNULL(CurrentRow.dblCashPrice, 0) <> ISNULL(PreviousRow.dblCashPrice, 0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-			and @ysnPricingAsAmendment = 1
+			and (@ysnPricingAsAmendment = 1 OR @ysnAmendmentForCashFuture = 1)
 			
 			--Cash Price UOM
 			UNION ALL SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId

@@ -5,6 +5,7 @@
 	, @dblNetWeight			NUMERIC(18, 6) = 0
 	, @ysnFromSalesOrder	BIT = 0
 	, @ysnFromImport		BIT = 0
+	, @dblSpotPrice			NUMERIC(18, 6) = 0
 AS
 
 DECLARE @tblInvoiceIds				InvoiceId
@@ -13,6 +14,7 @@ DECLARE @intUnitMeasureId			INT
 	  , @strUnitMeasure				NVARCHAR(100)
 	  , @strInvalidItem				NVARCHAR(500)
 	  , @dblQtyOverAged				NUMERIC(18, 6) = 0
+	  , @dblDWGSpotPrice			NUMERIC(18, 6) = 0
 
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#INVOICEDETAILS') IS NOT NULL)
@@ -84,7 +86,10 @@ SELECT intInvoiceId					= ID.intInvoiceId
 	 , intEntityId					= I.intEntityId
 	 , intInventoryShipmentItemId	= ID.intInventoryShipmentItemId
 	 , intTicketId					= ID.intTicketId
-	 , strDocumentNumber			= ID.strDocumentNumber			
+	 , strDocumentNumber			= ID.strDocumentNumber
+	 , dblDWGSpotPrice				= CASE WHEN @dblSpotPrice = 0 THEN ISNULL(T.dblDWGSpotPrice, 0) ELSE @dblSpotPrice END
+	 , intItemUOMIdTo				= T.intItemUOMIdTo
+	 , dblNetUnits					= dblNetUnits
 INTO #INVOICEDETAILS 
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
@@ -96,6 +101,20 @@ WHERE I.intInvoiceId = @intInvoiceId
   AND ISNULL(CH.ysnLoad, 0) = 0
   AND (ISNULL(T.strDistributionOption, '') <> 'LOD' OR (ISNULL(T.strDistributionOption, '') = 'LOD' AND ISNULL(CH.intPricingTypeId, 0) <> 1))
   AND ITEM.strType = 'Inventory'
+
+IF ISNULL(@intScaleUOMId, 0) = 0
+BEGIN
+	SELECT TOP 1 @intScaleUOMId = intItemUOMIdTo
+	FROM #INVOICEDETAILS
+	WHERE ISNULL(intItemUOMIdTo, 0) <> 0
+END
+
+IF ISNULL(@dblNetWeight, 0) = 0
+BEGIN
+	SELECT TOP 1 @dblNetWeight = dblNetUnits
+	FROM #INVOICEDETAILS
+	WHERE ISNULL(dblNetUnits, 0) <> 0
+END
 
 IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1 AND (ISNULL(@ysnFromSalesOrder, 0) = 1 OR ISNULL(@ysnFromImport, 0) = 1)
 	BEGIN
@@ -180,17 +199,13 @@ IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0 AND I
 
 IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 BEGIN
-	SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN IDD.dblQtyShipped
-	ELSE 
-	CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId IN (1, 6) THEN CTD.dblQuantity ELSE ISI.dblDestinationQuantity END END)
+	SELECT @dblQtyOverAged = @dblNetWeight - ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
+						  -- @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN IDD.dblQtyOrdered ELSE ISI.dblQuantity END)
 	FROM tblARInvoiceDetail ID
 	INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 	INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+	INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId 
 	LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
-	LEFT JOIN(
-		SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
-	INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
-	) CTD ON CTD.intContractDetailId =ID.intContractDetailId
 END 
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
@@ -222,6 +237,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				   , @intTicketId					= intTicketId
 				   , @dtmDate						= dtmDate
 				   , @strDocumentNumber				= strDocumentNumber
+				   , @dblDWGSpotPrice				= dblDWGSpotPrice
 		FROM #INVOICEDETAILS
 
 		IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0 AND @intContractDetailId IS NOT NULL AND @dblQtyOverAged > 0
@@ -667,7 +683,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 									 , ysnCharge			= CAST(1 AS BIT)
 								FROM #SHIPMENTCHARGES
 							END
-					END				
+					END
 
 				--ADD INVOICE DETAIL LINE WITHOUT CONTRACT AND INVENTORY SHIPMENT LINK
 				IF @dblQtyOverAged > 0
@@ -680,7 +696,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 							 , intItemId			= @intItemId
 							 , intItemUOMId			= @intItemUOMId
 							 , dblQtyShipped		= @dblQtyOverAged
-							 , dblPrice				= 0
+							 , dblPrice				= @dblDWGSpotPrice
 							 , ysnCharge			= CAST(0 AS BIT)
 
 						INSERT INTO #INVOICEDETAILSTOADD (intInvoiceDetailId, intContractDetailId, intContractHeaderId, intTicketId, intItemId, intItemUOMId, dblQtyShipped, dblPrice, ysnCharge)
@@ -900,6 +916,3 @@ WHERE ID.intInvoiceId = @intInvoiceId
   AND PRICE.ysnProcessed = 1
   AND ID.intInventoryShipmentItemId IS NOT NULL
   AND ID.intInventoryShipmentChargeId IS NULL
-  select *
-from tblARInvoiceDetail
-where intInvoiceId = @intInvoiceId

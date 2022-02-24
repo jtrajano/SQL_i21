@@ -84,7 +84,7 @@ BEGIN
 			, dtmCreatedDate
 			, dtmTransactionDate
 			, strDistributionType
-			, a.strStorageTypeCode
+			, strStorageTypeCode
 			, dblTotal = sl.dblOrigQty
 			, intEntityId
 			, strEntityName
@@ -115,34 +115,6 @@ BEGIN
 			, ysnExternal = ISNULL(ysnExternal, 0)
 			, intTicketId
 		FROM vyuRKGetSummaryLog sl
-		CROSS APPLY (
-			SELECT strStorageTypeCode
-				, ysnReceiptedStorage
-				, intTypeId
-				, strStorageType
-				, intDeliverySheetId
-				, strTicketStatus
-				, strOwnedPhysicalStock
-				, strStorageTypeDescription
-				, ysnActive
-				, ysnExternal
-			FROM (
-				SELECT * FROM dbo.fnRKGetMiscFieldTable(sl.strMiscField)
-			) t
-			PIVOT (
-				MIN(strValue)
-				FOR strFieldName IN (strStorageTypeCode
-					, ysnReceiptedStorage
-					, intTypeId
-					, strStorageType
-					, intDeliverySheetId
-					, strTicketStatus
-					, strOwnedPhysicalStock
-					, strStorageTypeDescription
-					, ysnActive
-					, ysnExternal)
-			) AS pt
-		) a
 		WHERE strBucketType = 'Customer Owned'
 			--AND sl.dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)

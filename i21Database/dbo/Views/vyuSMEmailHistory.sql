@@ -13,6 +13,6 @@ FROM tblSMActivity Activity
 INNER JOIN tblSMEmailRecipient Recipient on Activity.intActivityId = Recipient.intEmailId
 LEFT JOIN tblEMEntity Entity on Recipient.intEntityContactId = Entity.intEntityId
 LEFT JOIN tblSMActivityEmailResult Result on Activity.intActivityId = Result.intActivityId
-LEFT JOIN tblEMEntity EntityFrom on Activity.intEntityId = EntityFrom.intEntityId
+LEFT JOIN tblEMEntity EntityFrom on Activity.intCreatedBy = EntityFrom.intEntityId
 WHERE strType = 'Email'
 GROUP BY Activity.intActivityId, dtmModified, strSubject, strDetails, strResult, dtmTransactionDate, EntityFrom.strName

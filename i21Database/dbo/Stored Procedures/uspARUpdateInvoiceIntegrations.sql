@@ -152,9 +152,13 @@ BEGIN TRY
 		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
 
 	IF @ForDelete = 1
-		BEGIN
-			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId			
-		END
+	BEGIN
+		EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId
+		
+		DELETE FROM tblARPricingHistory 
+		WHERE intTransactionId = @InvoiceId
+		AND intSourceTransactionId = 2
+	END
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 

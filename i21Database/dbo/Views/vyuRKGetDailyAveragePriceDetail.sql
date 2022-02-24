@@ -29,6 +29,7 @@ SELECT Detail.intDailyAveragePriceDetailId
 	, Detail.intConcurrencyId
 	, Month.ysnExpired
 	, dblTonnage = dbo.fnCTConvertQuantityToTargetCommodityUOM(fUOM.intCommodityUnitMeasureId, tUOM.intCommodityUnitMeasureId, Detail.dblNoOfLots * Market.dblContractSize)
+	, ysnRemoveInDetail = CAST(ISNULL(dapTrans.ysnRemoveInDetail, 0) AS bit) 
 FROM tblRKDailyAveragePriceDetail Detail
 LEFT JOIN vyuRKGetDailyAveragePrice Header ON Header.intDailyAveragePriceId = Detail.intDailyAveragePriceId
 LEFT JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = Detail.intFutureMarketId
@@ -38,4 +39,16 @@ LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommo
 LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = Detail.intBrokerId
 CROSS JOIN (SELECT TOP 1 * FROM tblRKCompanyPreference) CP
 LEFT JOIN tblICCommodityUnitMeasure fUOM ON fUOM.intCommodityId = Detail.intCommodityId AND fUOM.intUnitMeasureId = Market.intUnitMeasureId
-LEFT JOIN tblICCommodityUnitMeasure tUOM ON tUOM.intCommodityId = Detail.intCommodityId AND tUOM.intUnitMeasureId = CP.intTonnageUOMId
+LEFT JOIN tblICCommodityUnitMeasure tUOM ON tUOM.intCommodityId = Detail.intCommodityId AND tUOM.intUnitMeasureId = CP.intTonnageUOMId 
+OUTER APPLY ( 
+		SELECT TOP 1 ysnRemoveInDetail = 1  FROM  tblRKDailyAveragePriceDetailTransaction trans
+		WHERE trans.intDailyAveragePriceDetailId = Detail.intDailyAveragePriceDetailId 
+		AND Detail.dblNoOfLots = 0
+		AND trans.strInstrumentType = 'Options'
+		AND NOT EXISTS (
+				SELECT TOP 1 '' FROM  tblRKDailyAveragePriceDetailTransaction trans
+				WHERE trans.intDailyAveragePriceDetailId = Detail.intDailyAveragePriceDetailId 
+				AND Detail.dblNoOfLots = 0
+				AND trans.strInstrumentType = 'Futures'
+			)
+	) dapTrans

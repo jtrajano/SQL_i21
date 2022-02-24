@@ -24,8 +24,9 @@ BEGIN
 		  , @filterValue			VARCHAR(MAX)	
 		  , @intSourceLetterId		INT
 		  , @intEntityUserId		INT
-		  , @strTableSource VARCHAR(MAX)
-		  , @dtmDateFrom			DATETIME = NULL;
+		  , @strTableSource 		VARCHAR(MAX)
+		  , @dtmDateFrom			DATETIME = NULL
+		  , @strReportLogId			NVARCHAR(MAX)
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 	DECLARE @temp_params TABLE (
@@ -85,6 +86,17 @@ BEGIN
 		
 	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
 
+	SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
+	FROM @temp_params
+	WHERE [fieldname] = 'strReportLogId'
+
+	IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+		BEGIN
+			INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+			VALUES (@strReportLogId, GETDATE())
+		END
+	ELSE
+		RETURN
 
 	SELECT @intSourceLetterId = intSourceLetterId FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
 	IF (@intSourceLetterId IS NULL OR @intSourceLetterId = '')

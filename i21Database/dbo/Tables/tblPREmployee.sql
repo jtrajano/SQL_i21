@@ -41,7 +41,7 @@
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
 	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
     CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEntityId]),
-    CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
+    -- CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
 	CONSTRAINT [FK_tblPREmployee_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId]),

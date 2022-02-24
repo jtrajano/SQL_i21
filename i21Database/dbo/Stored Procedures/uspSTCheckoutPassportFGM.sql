@@ -85,7 +85,7 @@ BEGIN
 					Chk.FGMDetailFuelGradeID AS strXmlRegisterFuelGradeID
 				FROM #tempCheckoutInsert Chk
 				JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.FGMDetailFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					ON CAST(ISNULL(Chk.FGMDetailFuelGradeID, '') AS INT) IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 				JOIN dbo.tblICItem I 
 					ON I.intItemId = IL.intItemId
 				JOIN dbo.tblICItemUOM UOM 
@@ -148,7 +148,7 @@ BEGIN
 					, [intConcurrencyId]			= 0
 				 FROM #tempCheckoutInsert Chk
 				 JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.FGMDetailFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					ON CAST(ISNULL(Chk.FGMDetailFuelGradeID, '') AS INT) IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 					AND Chk.FGMSalesTotalsFuelGradeSalesAmount <> '0'
 				 --JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE 
 					--																							WHEN ISNULL(IL.strPassportFuelId1, '') <> '' 
@@ -190,7 +190,7 @@ BEGIN
 						ON Item.intItemId = IL.intItemId
 						AND ST.intCompanyLocationId = IL.intLocationId
 					INNER JOIN #tempCheckoutInsert Chk
-						ON ISNULL(Chk.FGMDetailFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					ON CAST(ISNULL(Chk.FGMDetailFuelGradeID, '') AS INT) IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 						AND Chk.FGMSalesTotalsFuelGradeSalesAmount <> '0'
 					WHERE CPT.intCheckoutId = @intCheckoutId
 
