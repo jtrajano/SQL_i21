@@ -59,6 +59,31 @@ BEGIN
 		
 
 		insert into @TRFLog
+		(
+			strAction
+			, strTransactionType
+			, intTradeFinanceTransactionId
+			, strTradeFinanceTransaction
+			, intTransactionHeaderId
+			, intTransactionDetailId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intBankTransactionId
+			, strBankTransactionId
+			, dblTransactionAmountAllocated
+			, dblTransactionAmountActual
+			, intLoanLimitId
+			, strLoanLimitNumber
+			, strLoanLimitType
+			, dtmAppliedToTransactionDate
+			, intStatusId
+			, intWarrantId
+			, strWarrantId
+			, intUserId
+			, intConcurrencyId
+			, intContractHeaderId
+			, intContractDetailId
+			)
 		select
 			strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' else 'Updated Contract' end)
 			, strTransactionType = 'Contract'
