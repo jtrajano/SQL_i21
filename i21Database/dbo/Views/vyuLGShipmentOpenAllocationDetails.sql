@@ -75,6 +75,7 @@ FROM (
 		,strDestinationCity = ISNULL(SDC.strCity, PDC.strCity)
 		,intShippingLineEntityId = ISNULL(CDP.intShippingLineId, CDS.intShippingLineId)
 		,strShippingLine = ISNULL(ESLP.strName, ESLS.strName)
+		,ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CDS.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 		,intShipmentType = 1
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -235,6 +236,7 @@ FROM (
 		,strDestinationCity = ISNULL(SDC.strCity, PDC.strCity)
 		,intShippingLineEntityId = ISNULL(CDP.intShippingLineId, CDS.intShippingLineId)
 		,strShippingLine = ISNULL(ESLP.strName, ESLS.strName)
+		,ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CDS.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 		,intShipmentType = 2
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
