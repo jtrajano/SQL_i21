@@ -19,6 +19,9 @@ Type the overview for the table here.
 		[ysnStockUnit] BIT NULL DEFAULT ((0)), 
 		[ysnDefault] BIT NULL DEFAULT ((0)),
 		[ysnStockUOM] BIT NULL, 
+		[dblPremiumDiscount] NUMERIC(38,20) NULL,
+		[intCurrencyId] INT NULL,
+		[intPriceUnitMeasureId] INT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,
@@ -29,6 +32,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICCommodityUnitMeasure_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]) ON DELETE CASCADE,
 		CONSTRAINT [FK_tblICCommodityUnitMeasure_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [AK_tblICCommodityUnitMeasure] UNIQUE ([intCommodityId], [intUnitMeasureId]) 
+		CONSTRAINT [CHK_tblICCommodityUnitMeasure_CurrencyPerUOM] CHECK ((COALESCE(NULLIF(dblPremiumDiscount, 0), intCurrencyId, intPriceUnitMeasureId) IS NULL) OR (dblPremiumDiscount IS NOT NULL AND intCurrencyId IS NOT NULL AND intPriceUnitMeasureId IS NOT NULL))
 	)
 
 	GO
