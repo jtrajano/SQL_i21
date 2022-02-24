@@ -137,8 +137,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[dblDebitUnit]			= 0
 				,[dblCreditUnit]		= 0
 				,[dtmDate]				= CASE WHEN ISNULL(A.ysnImported, 0) = 1
-											THEN ISNULL(A.dtmCreateAssetPostDate, ISNULL(A.[dtmDateInService], GETDATE()))
-											ELSE ISNULL(A.[dtmDateInService], GETDATE())
+											THEN ISNULL(A.dtmCreateAssetPostDate, ISNULL(A.[dtmDateAcquired], GETDATE()))
+											ELSE ISNULL(A.[dtmDateAcquired], GETDATE())
 											END
 				,[ysnIsUnposted]		= 0 
 				,[intConcurrencyId]		= 1
@@ -179,8 +179,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[dblDebitUnit]			= 0
 				,[dblCreditUnit]		= 0
 				,[dtmDate]				= CASE WHEN ISNULL(A.ysnImported, 0) = 1
-											THEN ISNULL(A.dtmCreateAssetPostDate, ISNULL(A.[dtmDateInService], GETDATE()))
-											ELSE ISNULL(A.[dtmDateInService], GETDATE())
+											THEN ISNULL(A.dtmCreateAssetPostDate, ISNULL(A.[dtmDateAcquired], GETDATE()))
+											ELSE ISNULL(A.[dtmDateAcquired], GETDATE())
 											END
 				,[ysnIsUnposted]		= 0 
 				,[intConcurrencyId]		= 1
@@ -235,8 +235,8 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 IF EXISTS(SELECT TOP 1 1 FROM (SELECT TOP 1 A.intAssetId FROM tblFAFixedAsset A 
 						WHERE A.[intAssetId] IN (SELECT intAssetId From #AssetID WHERE ysnProcessed = 1) 
 								AND ISNULL([dbo].isOpenAccountingDate(CASE WHEN ISNULL(A.ysnImported, 0) = 1
-								THEN ISNULL(A.dtmCreateAssetPostDate, A.dtmDateInService)
-								ELSE A.dtmDateInService END), 0) = 0) TBL)
+								THEN ISNULL(A.dtmCreateAssetPostDate, A.[dtmDateAcquired])
+								ELSE A.[dtmDateAcquired] END), 0) = 0) TBL)
 BEGIN
 	GOTO Post_Rollback
 END
