@@ -1851,7 +1851,7 @@ FROM (
 			,il.intItemLocationId
 			,iu.intItemUOMId
 			,intCompanyLocationId = loc.intCompanyLocationId 
-			,dblRetailPrice = CAST(p.strCaseRetailPrice AS NUMERIC(38, 20)) 
+			,dblRetailPrice = CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) 
 			,dtmEffectiveDate = GETUTCDATE()
 			,dtmDateCreated = GETUTCDATE()		
 			,intCreatedByUserId	= @intUserId
@@ -1878,7 +1878,7 @@ FROM (
 			,il.intItemLocationId
 			,iu.intItemUOMId
 			,intCompanyLocationId = loc.intCompanyLocationId 
-			,dblRetailPrice = CAST(p.strRetailPrice AS NUMERIC(38, 20)) 
+			,dblRetailPrice = CAST(NULLIF(p.strRetailPrice, '') AS NUMERIC(38, 20)) 
 			,dtmEffectiveDate = CAST(GETUTCDATE() AS DATE)
 			,dtmDateCreated = GETUTCDATE()		
 			,intCreatedByUserId	= @intUserId
@@ -1897,8 +1897,7 @@ FROM (
 			INNER JOIN vyuICGetItemUOM iu ON i.intItemId = iu.intItemId AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strItemUnitOfMeasure)))
 		WHERE
 			p.strUniqueId = @UniqueId
-			AND
-			p.strRetailPrice IS NOT NULL
+			AND p.strRetailPrice IS NOT NULL
 	) AS Source_Query  
 		ON 
 		EffectiveItemPrice.intItemId = Source_Query.intItemId
