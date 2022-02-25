@@ -695,6 +695,7 @@ BEGIN TRY
 	tblCFInvoiceReportTieredUnitDiscountTempTable
 	WHERE tblCFInvoiceReportTieredUnitDiscountTempTable.strUserId = tblCFInvoiceStagingTable.strUserId
 	AND tblCFInvoiceReportTieredUnitDiscountTempTable.[intTransactionId] = tblCFInvoiceStagingTable.[intTransactionId]
+	AND tblCFInvoiceReportTieredUnitDiscountTempTable.strUserId = @UserId 
 
 
 
