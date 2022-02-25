@@ -339,7 +339,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				SET dblQtyShipped 	= CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) ELSE ID.[dblQtyShipped] END
 				  , dblUnitQuantity = CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) ELSE ID.[dblQtyShipped] END
 				  , dblQtyOrdered 	= CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) ELSE ID.[dblQtyShipped] END
-				  , @dblQtyOverAged = CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ID.[dblQtyShipped] - ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) ELSE 0 END
+				  , @dblQtyOverAged = CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ID.[dblQtyShipped] - (ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)) ELSE 0 END
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
