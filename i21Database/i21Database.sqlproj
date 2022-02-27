@@ -521,6 +521,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetInventoryView.sql" />
     <Build Include="dbo\Views\vyuRKInventoryView.sql" />
     <Build Include="dbo\Views\vyuRKSwitchPositionDerivatives.sql" />
+    <Build Include="dbo\Tables\tblFRHierarchySchedule.sql" />
+    <Build Include="dbo\Views\vyuFRDHierarcySchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
