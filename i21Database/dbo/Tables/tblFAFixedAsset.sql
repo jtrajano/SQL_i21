@@ -5,7 +5,6 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[intCompanyLocationId]		INT NULL,
 	[strSerialNumber]			NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
 	[strNotes]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strDepartment]				NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateAcquired]			DATETIME NULL,			
 	[dtmDateInService]			DATETIME NULL,
 	[dblCost]					NUMERIC (18, 6) NULL DEFAULT ((0)),
@@ -40,6 +39,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[dblImportGAAPDepToDate]	DECIMAL(18,6) NULL,
 	[dblImportTaxDepToDate]	DECIMAL(18,6) NULL,
 	[dtmCreateAssetPostDate]	DATETIME NULL,
+	[intAssetDepartmentId]		INT NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -47,6 +47,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount3] FOREIGN KEY ([intDepreciationAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount4] FOREIGN KEY ([intAccumulatedAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblFADepreciationMethod] FOREIGN KEY([intDepreciationMethodId]) REFERENCES [dbo].[tblFADepreciationMethod] ([intDepreciationMethodId]),
-	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetGroup] FOREIGN KEY([intAssetGroupId]) REFERENCES [dbo].[tblFAFixedAssetGroup] ([intAssetGroupId])
+	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetGroup] FOREIGN KEY([intAssetGroupId]) REFERENCES [dbo].[tblFAFixedAssetGroup] ([intAssetGroupId]),
+	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetDepartment] FOREIGN KEY([intAssetDepartmentId]) REFERENCES [dbo].[tblFAFixedAssetDepartment] ([intAssetDepartmentId])
 );
 
