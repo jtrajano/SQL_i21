@@ -523,6 +523,7 @@
     <Build Include="dbo\Views\vyuRKSwitchPositionDerivatives.sql" />
     <Build Include="dbo\Tables\tblFRHierarchySchedule.sql" />
     <Build Include="dbo\Views\vyuFRDHierarcySchedule.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

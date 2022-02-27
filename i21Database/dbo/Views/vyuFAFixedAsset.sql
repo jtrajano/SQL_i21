@@ -61,6 +61,7 @@ DM.strDepreciationType,
 AssetGroup.intAssetGroupId,
 AssetGroup.strGroupCode,
 AssetGroup.strGroupDescription,
+Department.strDepartmentName,
 GLAsset.strAccountId strAssetAccountId,        
 GLExpense.strAccountId strExpenseAccountId,        
 GLDepreciation.strAccountId strDepreciationAccountId,        
@@ -101,6 +102,7 @@ LEFT JOIN tblSMCurrencyExchangeRateType RateType ON RateType.intCurrencyExchange
 LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId        
 LEFT JOIN tblFADepreciationMethod DM on DM.intDepreciationMethodId = FA.intDepreciationMethodId
 LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = FA.intAssetGroupId
+LEFT JOIN tblFAFixedAssetDepartment Department ON Department.intAssetDepartmentId = FA.intAssetDepartmentId
 OUTER APPLY(  
     SELECT COUNT(*) Cnt FROM tblFABookDepreciation   
     WHERE intAssetId = FA.intAssetId  
