@@ -525,6 +525,7 @@
     <Build Include="dbo\Tables\tblFRReportHierarchySchedule.sql" />
     <Build Include="dbo\Views\vyuFRDHierarcySchedule.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
