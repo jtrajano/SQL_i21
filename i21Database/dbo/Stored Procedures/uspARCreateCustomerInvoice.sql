@@ -146,6 +146,15 @@
 	,@PaidCPP						BIT				= 0
 	,@ItemQualityPremium			NUMERIC(18, 6)	= 0
 	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0
+	,@BankId						INT
+	,@BankAccountId					INT
+	,@BorrowingFacilityId			INT
+	,@BorrowingFacilityLimitId		INT
+	,@BankReferenceNo				NVARCHAR(100)
+	,@BankTransactionId				NVARCHAR(100)
+	,@LoanAmount					NUMERIC(18, 6)
+	,@BankValuationRuleId			INT
+	,@TradeFinanceComments			NVARCHAR(MAX)
 AS
 
 BEGIN
@@ -504,7 +513,16 @@ BEGIN TRY
 		,[intConcurrencyId]
 		,[intLineOfBusinessId]
 		,[intICTId]
-		,[intSalesOrderId])
+		,[intSalesOrderId]
+		,[intBankId]
+		,[intBankAccountId]
+		,[intBorrowingFacilityId]
+		,[intBorrowingFacilityLimitId]
+		,[strBankReferenceNo]
+		,[strBankTransactionId]
+		,[dblLoanAmount]
+		,[intBankValuationRuleId]
+		,[strTradeFinanceComments])
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
 		,[strType]						= @Type
@@ -590,6 +608,15 @@ BEGIN TRY
 		,[intLineOfBusinessId]			= @intLineOfBusinessId
 		,[intICTId]						= @intICTId
 		,[intSalespersonId]				= @intSalesOrderId
+		,[intBankId]					= @BankId
+		,[intBankAccountId]				= @BankAccountId
+		,[intBorrowingFacilityId]		= @BorrowingFacilityId
+		,[intBorrowingFacilityLimitId]	= @BorrowingFacilityLimitId
+		,[strBankReferenceNo]			= @BankReferenceNo
+		,[strBankTransactionId]			= @BankTransactionId
+		,[dblLoanAmount]				= @LoanAmount
+		,[intBankValuationRuleId]		= @BankValuationRuleId
+		,[strTradeFinanceComments]		= @TradeFinanceComments
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN

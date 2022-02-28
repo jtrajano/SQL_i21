@@ -223,6 +223,15 @@ DECLARE  @Id									INT
 		,@UpdateAvailableDiscount				BIT
 		,@ServiceChargeCredit					BIT
 		,@ImportFormat							NVARCHAR(50)
+		,@BankId								INT
+		,@BankAccountId							INT
+		,@BorrowingFacilityId					INT
+		,@BorrowingFacilityLimitId				INT
+		,@BankReferenceNo						NVARCHAR(100)
+		,@BankTransactionId						NVARCHAR(100)
+		,@LoanAmount							NUMERIC(18, 6)
+		,@BankValuationRuleId					INT
+		,@TradeFinanceComments					NVARCHAR(MAX)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -430,6 +439,15 @@ BEGIN
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ServiceChargeCredit			= ISNULL([ysnServiceChargeCredit],0)
 		,@ImportFormat					= [strImportFormat]
+		,@BankId						= intBankId
+		,@BankAccountId					= intBankAccountId
+		,@BorrowingFacilityId			= intBorrowingFacilityId
+		,@BorrowingFacilityLimitId		= intBorrowingFacilityLimitId
+		,@BankReferenceNo				= strBankReferenceNo
+		,@BankTransactionId				= strBankTransactionId
+		,@LoanAmount					= dblLoanAmount
+		,@BankValuationRuleId			= intBankValuationRuleId
+		,@TradeFinanceComments			= strTradeFinanceComments
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -700,6 +718,15 @@ BEGIN
 			,@ImportFormat					= @ImportFormat
 			,@TruckDriverId					= @TruckDriverId
 			,@TruckDriverReferenceId		= @TruckDriverReferenceId
+			,@BankId						= @BankId
+			,@BankAccountId					= @BankAccountId
+			,@BorrowingFacilityId			= @BorrowingFacilityId
+			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
+			,@BankReferenceNo				= @BankReferenceNo
+			,@BankTransactionId				= @BankTransactionId
+			,@LoanAmount					= @LoanAmount
+			,@BankValuationRuleId			= @BankValuationRuleId
+			,@TradeFinanceComments			= @TradeFinanceComments
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
