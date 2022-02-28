@@ -485,7 +485,7 @@ SELECT
 ,cast(SC.dblTareWeight as decimal(18,4)) AS 'Vehicle Weight'
 ,cast(@dblUnloadedGrain as decimal(18,4))  dblUnloadedGrain
 ,cast(@dblDockage as decimal(18,4)) AS dblDockage
-,dblUnitPrice AS dblUnitPrice
+,dblUnitPrice + dblUnitBasis AS dblUnitPrice
 ,@dblDockagePercent AS dblDockagePercent    
 ,@dblCheckOff AS dblCheckOff
 ,@dblNetAmtPayable AS dblNetAmtPayable
