@@ -3,7 +3,7 @@ AS
 
 SELECT intTranslogId AS intId
 	, strUniqueId 
-	, strTrlDeptNumber
+	, intTrlDeptNumber
 	, strTrlDept
 	, strTrlNetwCode
 	, strTrlUPC
@@ -60,7 +60,7 @@ FROM
 		, CAST(TR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TR.intStoreId AS NVARCHAR(MAX)) 
                 --+ CAST(USec.intEntityId AS NVARCHAR(MAX)) 
                 COLLATE Latin1_General_CI_AS AS strUniqueId
-       , TR.strTrlDeptNumber
+       , TR.intTrlDeptNumber
        , TR.strTrlDept
        , TR.strTrlNetwCode
        , TR.strTrlUPC

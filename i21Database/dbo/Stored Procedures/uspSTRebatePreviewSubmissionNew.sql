@@ -284,7 +284,7 @@ BEGIN
 					INNER JOIN (
 						SELECT DISTINCT intStoreId = Rebates.intStoreId
 							,ysnTobacco = Rebates.ysnTobacco
-							,strCashRegisterDepartment = CatLoc.strCashRegisterDepartment
+							,intRegisterDepartmentId = CatLoc.intRegisterDepartmentId
 						FROM tblSTStoreRebates Rebates
 						INNER JOIN tblSTStore Store
 							ON Rebates.intStoreId = Store.intStoreId
@@ -293,7 +293,7 @@ BEGIN
 						INNER JOIN tblICCategoryLocation CatLoc
 							ON Category.intCategoryId = CatLoc.intCategoryId
 							AND Store.intCompanyLocationId = CatLoc.intLocationId
-					) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS
+					) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.intRegisterDepartmentId = TR.intTrlDeptNumber
 
 					 WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL)
 						AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
@@ -398,7 +398,7 @@ BEGIN
 				, CAST(intScanTransactionId AS NVARCHAR(20)) as strScanTransactionId
 				, CAST(intTrTickNumPosNum AS NVARCHAR(50)) as strRegisterId
 				, dblTrlQty as intQuantity
-				,CASE WHEN TR.intTrlDeptNumber IN (SELECT strCashRegisterDepartment FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
+				,CASE WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 							AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 							AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
 							AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
@@ -549,7 +549,7 @@ BEGIN
 			INNER JOIN (
 				SELECT DISTINCT intStoreId = Rebates.intStoreId
 					,ysnTobacco = Rebates.ysnTobacco
-					,strCashRegisterDepartment = CatLoc.strCashRegisterDepartment
+					,intRegisterDepartmentId = CatLoc.intRegisterDepartmentId
 				FROM tblSTStoreRebates Rebates
 				INNER JOIN tblSTStore Store
 					ON Rebates.intStoreId = Store.intStoreId
@@ -558,7 +558,7 @@ BEGIN
 				INNER JOIN tblICCategoryLocation CatLoc
 					ON Category.intCategoryId = CatLoc.intCategoryId
 					AND Store.intCompanyLocationId = CatLoc.intLocationId
-			) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS
+			) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.intRegisterDepartmentId = TR.intTrlDeptNumber
 			LEFT JOIN (
 				SELECT 
 					intTermMsgSN,
