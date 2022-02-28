@@ -28,6 +28,7 @@ DECLARE @tblFilteredBuybackProgram TABLE(
 	strVendorCustomerLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strItemName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	dtmBeginDate DATETIME NOT NULL,
@@ -47,6 +48,7 @@ INSERT INTO @tblFilteredBuybackProgram
 	strVendorCustomerLocation,
 	strItemNo,
 	strVendorItemNo,
+	strItemName,
 	strUnitMeasure,
 	strVendorUnitMeasure,
 	dtmBeginDate,
@@ -65,6 +67,7 @@ SELECT
 	strVendorCustomerLocation,
 	strItemNo,
 	strVendorItemNo,
+	strItemName,
 	strUnitMeasure,
 	strVendorUnitMeasure,
 	dtmBeginDate,
@@ -86,6 +89,9 @@ WHERE guiApiUniqueId = @guiApiUniqueId;
 -- 7 - Invalid Item Xref
 -- 8 - Invalid Unit of Measure
 -- 9 - Invalid Unit of Measure Xref
+-- 10 - Location Required
+-- 11 - Item Required
+-- 12 - UOM Required
 
 DECLARE @tblLogBuybackProgram TABLE(
 	strFieldValue NVARCHAR(100) COLLATE Latin1_General_CI_AS,
@@ -523,7 +529,36 @@ WHERE
 UOMXref.intUOMXrefId IS NULL
 AND
 FilteredBuybackProgram.strVendorUnitMeasure IS NOT NULL
-
+UNION
+SELECT -- Location Required
+	FilteredBuybackProgram.strVendor,
+	'Customer Location is required if Vendor''s Customer Location is blank',
+	FilteredBuybackProgram.intRowNumber,
+	10
+FROM
+	@tblFilteredBuybackProgram FilteredBuybackProgram
+WHERE
+	ISNULL(FilteredBuybackProgram.strVendorCustomerLocation, FilteredBuybackProgram.strCustomerLocation) IS NULL
+UNION
+SELECT -- Item Required
+	FilteredBuybackProgram.strVendor,
+	'Item Name is required if Vendor''s Item and Item No is blank',
+	FilteredBuybackProgram.intRowNumber,
+	11
+FROM
+	@tblFilteredBuybackProgram FilteredBuybackProgram
+WHERE
+	COALESCE(FilteredBuybackProgram.strVendorItemNo, FilteredBuybackProgram.strItemNo, FilteredBuybackProgram.strItemName) IS NULL
+UNION
+SELECT -- UOM Required
+	FilteredBuybackProgram.strVendor,
+	'UOM is required if Vendor''s UOM is blank',
+	FilteredBuybackProgram.intRowNumber,
+	12
+FROM
+	@tblFilteredBuybackProgram FilteredBuybackProgram
+WHERE
+	ISNULL(FilteredBuybackProgram.strVendorUnitMeasure, FilteredBuybackProgram.strUnitMeasure) IS NULL
 --Validate Records
 
 INSERT INTO tblApiImportLogDetail 
@@ -541,7 +576,7 @@ SELECT
 	guiApiImportLogDetailId = NEWID(),
 	guiApiImportLogId = @guiLogId,
 	strField = CASE
-		WHEN LogBuybackProgram.intLogType IN (1,2,3)
+		WHEN LogBuybackProgram.intLogType IN (1,2,3,10,11,12)
 		THEN 'Vendor'
 		WHEN LogBuybackProgram.intLogType = 4
 		THEN 'Customer Location'
@@ -569,7 +604,7 @@ SELECT
 	intRowNo = LogBuybackProgram.intRowNumber,
 	strMessage = LogBuybackProgram.strMessage
 FROM @tblLogBuybackProgram LogBuybackProgram
-WHERE LogBuybackProgram.intLogType BETWEEN 1 AND 9
+WHERE LogBuybackProgram.intLogType BETWEEN 1 AND 12
 
 --Buyback Program Transform logic
 
@@ -760,7 +795,7 @@ USING
 		ON
 			FilteredBuybackProgram.intRowNumber = LogBuybackProgram.intRowNumber
 			AND
-			LogBuybackProgram.intLogType IN (1,2,3,4,5,6,7,8,9)
+			LogBuybackProgram.intLogType IN (1,2,3,4,5,6,7,8,9,10,11,12)
 	INNER JOIN
 	(
 		tblEMEntity Vendor
@@ -795,7 +830,7 @@ USING
 	LEFT JOIN 
 		tblICItem Item
 		ON
-			FilteredBuybackProgram.strItemNo = Item.strItemNo
+			ISNULL(FilteredBuybackProgram.strItemNo, FilteredBuybackProgram.strItemName) = Item.strItemNo
 	LEFT JOIN
 		tblICUnitMeasure UnitMeasure
 		ON
@@ -819,7 +854,7 @@ USING
 			AND
 			FilteredBuybackProgram.strVendorUnitMeasure = UOMXref.strVendorUOM
 	WHERE 
-	LogBuybackProgram.intLogType NOT IN (1,2,3,4,5,6,7,8,9) OR LogBuybackProgram.intLogType IS NULL
+	LogBuybackProgram.intLogType NOT IN (1,2,3,4,5,6,7,8,9,10,11,12) OR LogBuybackProgram.intLogType IS NULL
 ) AS SOURCE
 ON 
 TARGET.intProgramChargeId = SOURCE.intProgramChargeId

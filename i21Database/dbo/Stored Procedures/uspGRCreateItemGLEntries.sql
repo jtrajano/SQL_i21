@@ -222,7 +222,7 @@ END
 ;
 
 if @ysnForRebuild = 0
-	exec uspGRHandleSettleVoucherCreateReferenceTable  @strBatchId, @SettleVoucherCreate
+	exec uspGRHandleSettleVoucherCreateReferenceTable  @strBatchId, @SettleVoucherCreate, @intSettleStorageId
 ;
 
 SELECT @dblGrossUnits = dblUnits FROM @SettleVoucherCreate WHERE ysnDiscountFromGrossWeight = 1
@@ -309,6 +309,7 @@ AS
 				and SV2.intItemType = 3
 		WHERE SV2.strBatchId = t.strBatchId
 			AND isnull(SV2.ysnItemInventoryCost,I.ysnInventoryCost) = 1
+			AND ISNULL(SV2.intTransactionId ,0) = ISNULL(@intSettleStorageId,0)
 	) DiscountCost
 	WHERE t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 

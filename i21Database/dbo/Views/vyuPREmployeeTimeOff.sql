@@ -1,6 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuPREmployeeTimeOff]
-AS 
-
+﻿CREATE VIEW [dbo].[vyuPREmployeeTimeOff]  
+AS   
+  
 SELECT ETO.intEntityEmployeeId
 	,ET.intEntityId
 	,ETO.intEmployeeTimeOffId
@@ -26,7 +26,7 @@ SELECT ETO.intEntityEmployeeId
 	,EMP.intRank
 	,dblHoursUsed = ISNULL(TOYTD.dblHoursUsedYTD,0)
 	,dblBalance = (ETO.dblHoursCarryover + ETO.dblHoursEarned) - ETO.dblHoursUsed - ISNULL(TOYTD.dblHoursUsedYTD,0)
-	,ETO.dblHoursCarryover  
+	,ETO.dblHoursCarryover 
 	,dblAdjustments =  ETO.dblHoursUsed 
 FROM tblPREmployeeTimeOff ETO
 LEFT JOIN(
@@ -136,6 +136,7 @@ INNER JOIN(
    			LEFT JOIN (	SELECT
 						intYear  = YEAR(dtmDateFrom)
 						,dtmDateFrom
+						,dtmDateTo
 						,intEntityEmployeeId
 						,intTypeTimeOffId
 						,dblHoursTOR = dblRequest
@@ -144,11 +145,12 @@ INNER JOIN(
 				)TOR
 				ON E.intEntityId = TOR.intEntityEmployeeId
 				AND T.intTypeTimeOffId = TOR.intTypeTimeOffId
-
+				AND PCTimeOff.intYear = YEAR(TOR.dtmDateTo) 
    			GROUP BY 
 			E.intEntityId
 			,T.intTypeTimeOffId   
 ) TOYTD 
 	ON ETO.intEntityEmployeeId = TOYTD.intEntityId 
-		AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId
+	AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId
+  
 GO

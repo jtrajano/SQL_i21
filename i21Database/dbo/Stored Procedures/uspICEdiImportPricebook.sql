@@ -77,6 +77,62 @@ AS (
 DELETE FROM deleteDuplicate_CTE
 WHERE dblDuplicateCount > 1;
 
+-- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
+DELETE p
+FROM 
+	tblICEdiPricebook p
+	LEFT JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	OUTER APPLY (
+		SELECT TOP 1 
+			i.intItemId 
+		FROM
+			tblICItem i 
+		WHERE
+			i.intItemId = u.intItemId
+			OR i.strItemNo = p.strSellingUpcNumber
+	) i		
+	OUTER APPLY (			
+		SELECT TOP 1 
+			m.*
+		FROM tblICUnitMeasure m 
+		WHERE
+			m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+		ORDER BY 
+			m.intUnitMeasureId 
+	) m
+	OUTER APPLY (
+		SELECT TOP 1 
+			s.*
+		FROM tblICUnitMeasure s 
+		WHERE
+			s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+		ORDER BY 
+			m.intUnitMeasureId 
+	) s
+	OUTER APPLY (
+		SELECT TOP 1 
+			iu.intItemUOMId 
+		FROM 
+			tblICItemUOM iu
+		WHERE
+			iu.intItemId = i.intItemId
+			AND iu.ysnStockUnit = 1 
+	) stockUnit
+	OUTER APPLY (
+		SELECT TOP 1 
+			*
+		FROM 
+			tblICItemUOM dup
+		WHERE
+			dup.intItemId = i.intItemId
+			AND dup.intItemUOMId <> u.intItemUOMId
+			AND dup.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)
+	) dup
+WHERE
+	p.strUniqueId = @UniqueId
+	AND dup.intItemUOMId IS NOT NULL 
+
 -- Get the duplicate count. 
 SELECT @duplicatePricebookCount = ISNULL(@originalPricebookCount, 0) - COUNT(1) 
 FROM 
@@ -565,9 +621,9 @@ FROM (
 		UPDATE 
 		SET	
 			intBrandId = Source_Query.intBrandId
-			,strDescription = Source_Query.strDescription
-			,strShortName = Source_Query.strShortName
-			,strItemNo = Source_Query.strSellingUpcNumber
+			,strDescription = LEFT(Source_Query.strDescription, 250)
+			,strShortName = LEFT(Source_Query.strShortName, 50)
+			,strItemNo = LEFT(Source_Query.strSellingUpcNumber, 50)
 			,dtmDateModified = GETDATE()
 			,intModifiedByUserId = @intUserId
 			,intConcurrencyId = Item.intConcurrencyId + 1
@@ -592,10 +648,10 @@ FROM (
 			,intConcurrencyId
 		)
 		VALUES ( 
-			Source_Query.strSellingUpcNumber --strItemNo
-			,Source_Query.strShortName --,strShortName
+			LEFT(Source_Query.strSellingUpcNumber, 50) --strItemNo
+			,LEFT(Source_Query.strShortName, 50) --,strShortName
 			,'Inventory'--,strType
-			,Source_Query.strDescription --,strDescription
+			,LEFT(Source_Query.strDescription, 250) --,strDescription
 			,Source_Query.intManufacturerId --,intManufacturerId
 			,Source_Query.intBrandId--,intBrandId
 			,Source_Query.intCategoryId--,intCategoryId
@@ -1056,7 +1112,7 @@ FROM (
 				,ysnPrePriced = ISNULL(ISNULL(CASE p.strPrePriced WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, catLoc.ysnPrePriced), l.ysnPrePriced)
 				,dblSuggestedQty = ISNULL(NULLIF(p.strSuggestedOrderQuantity, ''), l.dblSuggestedQty)
 				,dblMinOrder = ISNULL(NULLIF(p.strMinimumOrderQuantity, ''), l.dblMinOrder)
-				,intBottleDepositNo = ISNULL(NULLIF(p.strBottleDepositNumber, ''), l.intBottleDepositNo)
+				,intBottleDepositNo = ISNULL(CASE p.strBottleDepositNumber WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.intBottleDepositNo) 
 				,ysnTaxFlag1 = catLoc.ysnUseTaxFlag1--ISNULL(l.ysnTaxFlag1, catLoc.ysnUseTaxFlag1)
 				,ysnTaxFlag2 = catLoc.ysnUseTaxFlag2--ISNULL(l.ysnTaxFlag2, catLoc.ysnUseTaxFlag2)
 				,ysnTaxFlag3 = catLoc.ysnUseTaxFlag3--ISNULL(l.ysnTaxFlag3, catLoc.ysnUseTaxFlag3)

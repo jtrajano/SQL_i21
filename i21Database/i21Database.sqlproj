@@ -283,6 +283,7 @@
     <Build Include="dbo\Views\vyuApiSalesperson.sql" />
     <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
     <Build Include="dbo\Views\vyuApiTerm.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3067,7 +3068,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetStagedContainer.sql" />
     <Build Include="dbo\Tables\tblWHPickPreference.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerBudget.sql" />
-    <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Views\vyuETExportCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
@@ -3730,6 +3730,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDragAndDropWorkOrder.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutRegisterHourlyActivity.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantFGM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantISM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantMCM.sql" />
+    <Build Include="dbo\User Defined Types\StagingRadiantMSM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantISM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantFGM.sql" />
@@ -3805,7 +3809,6 @@
     <Build Include="dbo\Tables\tblTRTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql" />
-    <Build Include="dbo\Stored Procedures\uspARSplitInvoice.sql" />
     <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARStatementofAccountReport.sql" />
     <Build Include="dbo\Views\vyuAROrderUOM.sql" />
@@ -6616,7 +6619,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrderByPlannedDate.sql" />
     <Build Include="dbo\Functions\fnICFormatNumber.sql" />
     <Build Include="dbo\Views\vyuCRMSalesOrderSearch.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInsertDefaultAccrual.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateDocumentMaintenance.sql" />
     <Build Include="dbo\Views\vyuARBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
@@ -8246,6 +8248,7 @@
     <None Include="Scripts\Post-Deployment\ST\31_FileFieldMapping_Commander_uPLUs.sql" />
     <None Include="Scripts\Post-Deployment\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql" />
     <None Include="Scripts\Post-Deployment\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql" />
+    <None Include="Scripts\Post-Deployment\ST\41_Checkout_Radiant_POSJournal.sql" />
     <Build Include="dbo\Views\vyuSTRegisterSetupDetail.sql" />
     <Build Include="dbo\Views\vyuSCUberGetLoadDistributionOption.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildCleanUp.sql" />
@@ -9060,7 +9063,6 @@
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
     <Build Include="dbo\Views\vyuARCustomerAging_DashBoard.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCheckDPContract.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
@@ -9735,6 +9737,16 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
+    <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
+    <Build Include="dbo\Views\vyuApiSalesperson.sql" />
+    <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
+    <Build Include="dbo\Views\vyuApiTerm.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10031,8 +10043,7 @@
     <None Include="Scripts\Post-Deployment\LG\3_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\ET\01_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\PAT\6_CleanupObjects.sql" />
-    <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />    
     <Build Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
@@ -10047,6 +10058,9 @@
     <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

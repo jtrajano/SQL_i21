@@ -216,6 +216,29 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
 
+--##CREDITMEMOPAIDREFUNDED
+INSERT INTO ##CREDITMEMOPAIDREFUNDED (
+	   intInvoiceId
+	 , strInvoiceNumber
+	 , strDocumentNumber
+)
+SELECT I.intInvoiceId,I.strInvoiceNumber,REFUND.strDocumentNumber
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN(
+	SELECT ID.strDocumentNumber from tblARInvoice INV
+	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
+	where   strTransactionType='Cash Refund' and ysnPosted = 1
+)REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
+WHERE I.ysnPosted = 1 
+	AND I.ysnPaid = 1
+	AND ysnCancelled = 0
+	AND I.strTransactionType <> 'Cash Refund'
+	AND I.strTransactionType = 'Credit Memo'
+	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
 --##POSTEDINVOICES
 INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	   intInvoiceId
@@ -258,16 +281,21 @@ INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
-WHERE ysnPosted = 1
-  AND ysnCancelled = 0	
-  AND strTransactionType <> 'Cash Refund'
+WHERE I.ysnPosted = 1
+  AND I.ysnCancelled = 0	
+  AND I.strTransactionType <> 'Cash Refund'
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
 		SC.intInvoiceId IS NOT NULL
-  )
-  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
-  AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+  )  
+
+IF @strSourceTransactionLocal IS NOT NULL
+	DELETE FROM ##POSTEDINVOICES WHERE strType <> @strSourceTransactionLocal
+
+IF @ysnIncludeCreditsLocal = 0
+	DELETE FROM ##POSTEDINVOICES WHERE strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash Refund')
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
@@ -326,6 +354,9 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
+
+DELETE FROM  ##POSTEDINVOICES
+WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM ##CASHREFUNDS CF INNER  JOIN ##CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber)
 
 --##CASHRETURNS
 INSERT INTO ##CASHRETURNS (
@@ -432,7 +463,6 @@ FROM
 	    			       WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 THEN 'Over 90' END
 				 END
 FROM ##POSTEDINVOICES I WITH (NOLOCK)
-WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
 ) AS A  
 
@@ -492,7 +522,7 @@ FROM ##POSTEDINVOICES I WITH (NOLOCK)
 		GROUP BY PD.intInvoiceId
 	) PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN ##CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
-WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
+WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
     AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 UNION ALL
@@ -510,7 +540,7 @@ FROM ##POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN ##ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN ##INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN ##CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
-WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
+WHERE I.strTransactionType = 'Customer Prepayment'
     AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	                                          
 UNION ALL
@@ -552,7 +582,6 @@ LEFT JOIN (
 		 , dblTotalPayment		= dblInvoiceTotal
 	FROM ##CASHRETURNS
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
-WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
 ) AS TBL) AS B
           

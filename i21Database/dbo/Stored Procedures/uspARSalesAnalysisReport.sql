@@ -7,22 +7,10 @@ AS
 
 DECLARE @strRequestId NVARCHAR(200) = NEWID()
 
-IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #INVOICES
-END
-IF(OBJECT_ID('tempdb..#ORDERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #ORDERS
-END
-IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #CUSTOMERS
-END
-IF(OBJECT_ID('tempdb..#TRANSACTIONS') IS NOT NULL)
-BEGIN
-    DROP TABLE #TRANSACTIONS
-END
+IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL) DROP TABLE #INVOICES
+IF(OBJECT_ID('tempdb..#ORDERS') IS NOT NULL) DROP TABLE #ORDERS
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
+IF(OBJECT_ID('tempdb..#TRANSACTIONS') IS NOT NULL) DROP TABLE #TRANSACTIONS
 
 DECLARE @intNewPerformanceLogId	INT = NULL
 
@@ -115,7 +103,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 				  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 			END
 
-		INSERT INTO #TRANSACTIONS (
+		INSERT INTO #TRANSACTIONS WITH (TABLOCK) (
 			  [strRecordNumber]
 			, [strInvoiceOriginId]
 			, [intSourceId]
@@ -691,7 +679,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 -- 	END	
 
 --CUSTOMERS
-INSERT INTO #CUSTOMERS (
+INSERT INTO #CUSTOMERS WITH (TABLOCK) (
 	  intEntityCustomerId
 	, strCustomerName
 	, strCustomerNumber

@@ -113,6 +113,18 @@ BEGIN TRY
 					,EKORG NVARCHAR(6)
 					) x
 			JOIN @tblVendor v ON x.LIFNR = v.strAccountNo
+			WHERE x.EKORG = '730'
+
+			UPDATE @tblVendor
+			SET strTerm = x.ZTERM
+				,strCurrency = x.WAERS
+			FROM OPENXML(@idoc, 'CREMAS05/IDOC/E1LFA1M/E1LFM1M', 2) WITH (
+					LIFNR NVARCHAR(50) COLLATE Latin1_General_CI_AS '../LIFNR'
+					,ZTERM NVARCHAR(100)
+					,WAERS NVARCHAR(50)
+					,EKORG NVARCHAR(6)
+					) x
+			JOIN @tblVendor v ON x.LIFNR = v.strAccountNo
 			WHERE x.EKORG = '130'
 
 			UPDATE @tblVendor
@@ -171,6 +183,7 @@ BEGIN TRY
 			WHERE ISNULL(x.EKORG, '') IN (
 					'130'
 					,'100'
+					,'730'
 					)
 
 			-- Vendor Name data manipulation
