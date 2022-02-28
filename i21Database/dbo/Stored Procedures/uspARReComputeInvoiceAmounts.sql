@@ -117,7 +117,8 @@ SET
 	,[dblBaseMaintenanceAmount]			= ISNULL(ISNULL([dblMaintenanceAmount], @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
 FROM tblARInvoiceDetail ARID
 LEFT JOIN vyuLGAdditionalColumnForContractDetailView LGACFDDV ON LGACFDDV.intContractDetailId = ARID.intContractDetailId
-WHERE [intInvoiceId] = @InvoiceIdLocal	
+WHERE
+	[intInvoiceId] = @InvoiceIdLocal
 	
 UPDATE tblARInvoice
 SET  [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
