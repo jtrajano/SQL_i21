@@ -871,35 +871,7 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-	--Sales Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Sales account of Company Location ' + I.[strCompanyLocationName] + ' is not valid.' ELSE 'The Sales account of Company Location ' + I.[strCompanyLocationName] + ' was not set.' END
-	FROM 
-		##ARPostInvoiceDetail I				 
-	LEFT OUTER JOIN tblGLAccount  GLA
-			ON I.[intLocationSalesAccountId] = GLA.[intAccountId]			
-	WHERE
-		(ISNULL(I.[intLocationSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
-		AND ISNULL(I.[intServiceChargeAccountId],0) = 0
-		AND ISNULL(I.[intSalesAccountId], 0) = 0
-		AND I.[intItemId] IS NULL
-		AND I.[dblTotal] <> @ZeroDecimal
-
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
+	
 	--Accrual Not in Fiscal Year
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
@@ -2181,6 +2153,28 @@ BEGIN
 		, strAccountCategory	= 'Inventory'
 	FROM @ItemsForCosting IC
 	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory') IS NULL	
+
+	UNION ALL
+
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Cost of Goods'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Cost of Goods') IS NULL
+
+	UNION ALL
+	
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Sales Account'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Sales Account') IS NULL
 
 	UNION ALL
 
