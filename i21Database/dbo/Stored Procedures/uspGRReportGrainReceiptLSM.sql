@@ -181,16 +181,106 @@ begin
 	set @GetDiscountFromIR = 1
 end
 
+
+--- Client side discount computation
+
+	Declare @TotalWetShrink decimal(24, 10)
+	Declare @TotalNetShrink decimal(24, 10)
+	Declare @TotalGrossShrink decimal(24, 10)
+	
+	Declare @TicketGrossWeight decimal(24,10)
+	Declare @TicketGrossWeight1 decimal(24,10)
+	Declare @TicketGrossWeight2 decimal(24,10)
+
+
+	Declare @TicketComputedGross decimal(24,10)
+	Declare @TicketComputedWet decimal(24,10)
+	Declare @TicketComputedNet decimal(24,10)
+	
+	Declare @FinalGrossWeight decimal(24,10)
+	Declare @ConvertUOM decimal(24,10)
+
+	Declare @ysnMultipleWeight bit
+	declare @ysnMarketingFeeComputeGross bit
+
+
+
+
+	select @TotalGrossShrink  = sum (Discount.dblShrinkPercent)
+	from tblSCTicket Ticket			
+		join tblQMTicketDiscount Discount
+			on Ticket.intTicketId = Discount.intTicketId		
+	where Ticket.intTicketId = @intScaleTicketId
+		and strShrinkWhat = 'Gross Weight' or strShrinkWhat = 'P'
+				
+	select @TotalNetShrink  = sum (Discount.dblShrinkPercent)
+	from tblSCTicket Ticket			
+		join tblQMTicketDiscount Discount
+			on Ticket.intTicketId = Discount.intTicketId		
+	where Ticket.intTicketId = @intScaleTicketId
+		and strShrinkWhat = 'Net Weight' or strShrinkWhat = 'N'
+				
+
+	select @TotalWetShrink  = sum (Discount.dblShrinkPercent)
+	from tblSCTicket Ticket			
+		join tblQMTicketDiscount Discount
+			on Ticket.intTicketId = Discount.intTicketId		
+	where Ticket.intTicketId = @intScaleTicketId
+		and strShrinkWhat = 'Wet Weight' or strShrinkWhat = 'W'
+				
+	---
+	select @TotalGrossShrink = isnull(@TotalGrossShrink, 0)
+	select @TotalNetShrink = isnull(@TotalNetShrink, 0)
+	select @TotalWetShrink = isnull(@TotalWetShrink, 0)
+
+
 select 
 		@intMarketingFeeId = DiscountCode.intItemId
-		, @dblMarketingUnits = case when Discount.strShrinkWhat = 'Net Weight' then Ticket.dblNetUnits else Ticket.dblGrossUnits end * (Discount.dblShrinkPercent  / 100)
+		, @dblMarketingUnits = Discount.dblShrinkPercent 		
+		, @ysnMarketingFeeComputeGross = case when strShrinkWhat = 'Gross Weight' or strShrinkWhat = 'P' then 1 else 0 end
+		
+
+		, @TicketGrossWeight = Ticket.dblGrossWeight - Ticket.dblTareWeight
+		, @TicketGrossWeight1 = isnull(Ticket.dblGrossWeight1, 0) - isnull(Ticket.dblTareWeight1, 0)
+		, @TicketGrossWeight2 = isnull(Ticket.dblGrossWeight2, 0) - isnull(Ticket.dblTareWeight2, 0)
+		
+
+		, @ysnMultipleWeight = ScaleSetup.ysnMultipleWeights
+		, @ConvertUOM = Ticket.dblConvertedUOMQty
+	
 	from tblSCTicket Ticket			
 		join tblQMTicketDiscount Discount
 			on Ticket.intTicketId = Discount.intTicketId
 		join tblGRDiscountScheduleCode DiscountCode
 			on Discount.intDiscountScheduleCodeId = DiscountCode.intDiscountScheduleCodeId
 				and DiscountCode.ysnMarketingFee = 1		
+		join tblSCScaleSetup ScaleSetup
+			on Ticket.intScaleSetupId = ScaleSetup.intScaleSetupId
 	where Ticket.intTicketId = @intScaleTicketId
+
+
+	if @ysnMultipleWeight = 0
+	begin
+		select @TicketGrossWeight1 = 0, @TicketGrossWeight2 = 0
+	end
+
+	select @FinalGrossWeight = @TicketGrossWeight + @TicketGrossWeight1 + @TicketGrossWeight2
+	
+
+	select @TicketComputedGross = @FinalGrossWeight * (@TotalGrossShrink/ 100)
+	select @TicketComputedWet = (@FinalGrossWeight - @TicketComputedGross) * (@TotalWetShrink / 100)
+	select @TicketComputedNet = (@FinalGrossWeight - @TicketComputedGross - @TicketComputedWet) * (@TotalNetShrink / 100) 
+		
+
+		
+	--select @FinalGrossWeight, @TotalGrossShrink, @TotalNetShrink, @TotalWetShrink, @TicketComputedGross, @TicketComputedWet, @TicketComputedNet, @ConvertUOM --, (@TicketComputedNet * @ConvertUOM)  * (@dblMarketingUnits / @TotalNetShrink)
+		
+
+	set @dblMarketingUnits = round(isnull( (case when @ysnMarketingFeeComputeGross = 1 then @TicketComputedGross else @TicketComputedNet end  * @ConvertUOM)  * (@dblMarketingUnits / case when @ysnMarketingFeeComputeGross = 1 then isnull(nullif(@TotalGrossShrink, 0), 1) else isnull(nullif(@TotalNetShrink, 0), 1) end ), 0), 4)
+	
+	
+	
+
 
 
 if @GetDiscountFromIR = 1 
