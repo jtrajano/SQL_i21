@@ -75,7 +75,7 @@ WHERE
 	
 	
 UPDATE
-	tblARInvoiceDetail
+	ARID
 SET
 	 [dblQtyOrdered]					= ISNULL([dblQtyOrdered], @ZeroDecimal)
 	,[dblQtyShipped]					= ISNULL([dblQtyShipped], @ZeroDecimal)
@@ -87,7 +87,10 @@ SET
 	,[dblShipmentNetWt]					= ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal)		
 	,[dblPrice]							= ISNULL([dblPrice], @ZeroDecimal)
 	,[dblBasePrice]						= ISNULL(ISNULL([dblPrice], @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
-	,[dblUnitPrice] 					= ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal)
+	,[dblUnitPrice] 					= CASE WHEN ISNULL([dblOptionalityPremium], 0) <> 0 OR ISNULL([dblQualityPremium], 0) <> 0 
+											   THEN (ISNULL([dblPrice], @ZeroDecimal) + ISNULL([dblOptionalityPremium], @ZeroDecimal) + ISNULL([dblQualityPremium], @ZeroDecimal)) * dbo.fnCalculateQtyBetweenUOM([intItemWeightUOMId], ISNULL(LGACFDDV.[intSeqPriceUOMId], [intPriceUOMId]), 1) 
+											   ELSE ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal)
+										  END
 	,[dblBaseUnitPrice]					= ISNULL(ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
 	,[intPriceUOMId]					= CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN ISNULL([intPriceUOMId], [intItemWeightUOMId]) ELSE ISNULL([intPriceUOMId], [intItemUOMId]) END
 	,[dblUnitQuantity]					= CASE WHEN (ISNULL([dblUnitQuantity],@ZeroDecimal) <> @ZeroDecimal) THEN [dblUnitQuantity] ELSE (CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal) ELSE ISNULL([dblQtyShipped], @ZeroDecimal) END) END
@@ -125,6 +128,8 @@ SET
 	,[dblBaseLicenseAmount]				= ISNULL(ISNULL([dblLicenseAmount], @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
 	,[dblMaintenanceAmount]				= ISNULL([dblMaintenanceAmount], @ZeroDecimal)
 	,[dblBaseMaintenanceAmount]			= ISNULL(ISNULL([dblMaintenanceAmount], @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
+FROM tblARInvoiceDetail ARID
+LEFT JOIN vyuLGAdditionalColumnForContractDetailView LGACFDDV ON LGACFDDV.intContractDetailId = ARID.intContractDetailId
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	
@@ -319,24 +324,3 @@ WHERE
 	ARI.[intInvoiceId] = @InvoiceIdLocal
 
 END
-
---IF ISNULL(@OriginalInvoiceId, 0) <> 0
---	BEGIN
---		DECLARE @dblProvisionalAmt	NUMERIC(18,6)
---				,@dblBaseProvisionalAmt	NUMERIC(18,6)
-
---		SELECT TOP 1 
---			 @dblProvisionalAmt = dblAmountDue 
---			,@dblBaseProvisionalAmt = dblBaseAmountDue 
---		FROM dbo.tblARInvoice WITH (NOLOCK)
---		WHERE intInvoiceId = @OriginalInvoiceId
---		  AND ysnProcessed = 1
---		  AND strType = 'Provisional'
-
---		UPDATE tblARInvoice
---		SET dblAmountDue		= dblAmountDue - ISNULL(@dblProvisionalAmt, @ZeroDecimal)
---		  , dblBaseAmountDue	= dblAmountDue - ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
---		  , dblPayment			= ISNULL(@dblProvisionalAmt, @ZeroDecimal)
---		  , dblBasePayment		= ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
---		WHERE intInvoiceId = @OriginalInvoiceId
---	END
