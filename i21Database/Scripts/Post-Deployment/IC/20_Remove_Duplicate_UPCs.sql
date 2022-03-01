@@ -17,7 +17,7 @@ BEGIN
     ;WITH CTE
     AS
     (
-        SELECT intItemUOMId, intUpcCode, strLongUPCCode, ROW_NUMBER() OVER (PARTITION BY intUpcCode ORDER BY intUpcCode) AS rc
+        SELECT intItemUOMId, intUpcCode, strLongUPCCode, ROW_NUMBER() OVER (PARTITION BY intUpcCode, intModifier ORDER BY intUpcCode, intModifier) AS rc
         FROM tblICItemUOM
         WHERE intUpcCode IS NOT NULL
     )

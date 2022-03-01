@@ -36,7 +36,8 @@ BEGIN TRY
 			@FirstApprovalSign			VARBINARY(MAX),
 			@InterCompApprovalSign		VARBINARY(MAX),
 			@intScreenId				INT,
-			@intTransactionId			INT			
+			@intTransactionId			INT,
+			@ysnEnableFXFieldInContractPricing BIT = 0
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -188,6 +189,8 @@ BEGIN TRY
 	declare @Lotstobefixed nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Lots to be fixed'),'Lots to be fixed');
 	declare @bags nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'bags'),'bags');
 
+	select top 1 @ysnEnableFXFieldInContractPricing = ysnEnableFXFieldInContractPricing from tblCTCompanyPreference;
+
 	SELECT	 DISTINCT 
 			PF.intPriceFixationId,
 			PF.intContractHeaderId,
@@ -279,8 +282,8 @@ BEGIN TRY
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
 			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
-			strCurrencyExchangeRate = FY.strCurrency + '/' + TY.strCurrency,
-			CD.dblRate,
+			strCurrencyExchangeRate = isnull((FY.strCurrency + '/' + TY.strCurrency), IY.strCurrency),
+			dblRate = (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end),
 			strFXFinalPrice = LTRIM(
 									dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)*
 									dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)/CASE WHEN CY.ysnSubCurrency = 1 THEN ISNULL(CY.intCent,1) ELSE 1 END
@@ -337,6 +340,7 @@ BEGIN TRY
 		   ,dtmContractDate						= CH.dtmContractDate
 		   ,CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END AS BuyerSign
 		   ,CASE WHEN CH.intContractTypeId = 2 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END AS SellerSign
+		   ,ysnEnableFXFieldInContractPricing = @ysnEnableFXFieldInContractPricing
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId

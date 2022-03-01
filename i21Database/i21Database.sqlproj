@@ -504,6 +504,7 @@
     <Build Include="dbo\Stored Procedures\uspRKValidateOTCRecords.sql" />
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
+    <Build Include="dbo\Views\vyuApiRecordAuditPivot.sql" />
     <Build Include="dbo\Views\vyuApiSalesperson.sql" />
     <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
     <Build Include="dbo\Views\vyuApiTerm.sql" />
@@ -512,6 +513,21 @@
     <Build Include="dbo\Functions\fnICIsUpcExists2.sql" />
     <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
+    <Build Include="dbo\Functions\fnLGCalculateOptionalityPremium.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFilteredOTCBank.sql" />
+    <Build Include="dbo\Views\vyuLGGetContractOptionality.sql" />
+    <None Include="Scripts\Post-Deployment\CT\DefaultData.sql" />
+    <Build Include="dbo\Views\vyuICGetCommodityUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblRKSwitchPosition.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetInventoryView.sql" />
+    <Build Include="dbo\Views\vyuRKInventoryView.sql" />
+    <Build Include="dbo\Views\vyuRKSwitchPositionDerivatives.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchySchedule.sql" />
+    <Build Include="dbo\Views\vyuFRDHierarcySchedule.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
+    <Build Include="dbo\Views\vyuARAccountDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -637,6 +653,7 @@
     <Build Include="dbo\Tables\tblCMBankTransaction.sql" />
     <Build Include="dbo\Tables\tblCMBankTransactionDetail.sql" />
     <Build Include="dbo\Tables\tblCMBankTransactionType.sql" />
+    <Build Include="dbo\Tables\tblCMBankTransactionAdjustment.sql" />
     <Build Include="dbo\Tables\tblCMBankTransfer.sql" />
     <Build Include="dbo\Tables\tblCMCheckNumberAudit.sql" />
     <Build Include="dbo\Tables\tblCMCheckPrintJobSpool.sql" />
@@ -9628,6 +9645,7 @@
     <Build Include="dbo\Views\vyuMFGetExternalGroupItem.sql" />
     <Build Include="dbo\Views\vyuMFGetItemList.sql" />
     <None Include="Scripts\Post-Deployment\AP\InsertClearingTransactionsToClearingTable.sql" />
+    <None Include="Scripts\Post-Deployment\AP\PopulateVoucherPayToBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAdditionalBasisError.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateAdditionalBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspMFImportAdditionalBasis.sql" />
@@ -9976,6 +9994,7 @@
     <Build Include="dbo\Views\vyuApiActivityAttendee.sql" />
     <Build Include="dbo\Views\vyuApiActivityHoursWorked.sql" />
     <Build Include="dbo\Views\vyuApiCrmActivity.sql" />
+    <Build Include="dbo\Views\vyuApiLineOfBusiness.sql" />
     <Build Include="dbo\Views\vyuApiJiraIssue.sql" />
     <Build Include="dbo\Views\vyuApiAttachment.sql" />
     <Build Include="dbo\Views\vyuApiDocumentMaintenanceMessage.sql" />
@@ -10532,6 +10551,7 @@
     <Build Include="dbo\Functions\fnCTCashFlowTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBTOverrideGLAccount.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -2,8 +2,15 @@
 
 AS
 
-SELECT intRowNum = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY intContractDetailId))
-	, *
+SELECT intRowNum = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY t1.intContractDetailId))
+	, t1.*
+	, strPricingStatus = CASE WHEN cdd.intPricingStatus = 0 THEN 'Unpriced' WHEN cdd.intPricingStatus = 1 THEN 'Partially Priced' WHEN cdd.intPricingStatus = 2 THEN 'Priced' END
+	, dblLotsPriced = CASE WHEN vCD.intPricingTypeId = 1 THEN ISNULL(cdd.dblQuantity - ISNULL(vCD.dblQuantityPriceFixed, 0), 0) / M.dblContractSize
+							WHEN vCD.intPricingTypeId = 2 THEN ISNULL(vCD.dblQuantityPriceFixed, 0) / M.dblContractSize
+							ELSE ISNULL(vCD.dblQuantityPriceFixed, 0) / M.dblContractSize END
+	, dblLotsUnpriced = CASE WHEN vCD.intPricingTypeId = 2 THEN ISNULL(cdd.dblQuantity - ISNULL(vCD.dblQuantityPriceFixed, 0), 0) / M.dblContractSize
+							WHEN vCD.intPricingTypeId = 1 THEN ISNULL(vCD.dblQuantityPriceFixed, 0) / M.dblContractSize
+							ELSE ISNULL(cdd.dblQuantity - ISNULL(vCD.dblQuantityPriceFixed, 0), 0) / M.dblContractSize END
 FROM (
 	SELECT *
 		, dblToBeHedgedLots = dblNoOfLots - dblHedgedLots
@@ -100,4 +107,7 @@ FROM (
 			AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
 	) t
 )t1
-WHERE intContractStatusId NOT IN (3, 5, 6)
+INNER JOIN tblCTContractDetail cdd ON cdd.intContractDetailId = t1.intContractDetailId
+INNER JOIN vyuCTGridContractDetail vCD ON vCD.intContractDetailId = t1.intContractDetailId
+INNER JOIN tblRKFutureMarket M ON M.intFutureMarketId = vCD.intFutureMarketId
+WHERE t1.intContractStatusId NOT IN (3, 5, 6) AND t1.intContractDetailId IS NOT NULL

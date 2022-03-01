@@ -2,33 +2,48 @@
 
 AS
 
-SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC) 
-	, dtmCreatedDate
-	, strAction
-	, strTransactionType
-	, strTradeFinanceTransaction
-	, intTransactionHeaderId
-	, intTransactionDetailId
-	, strTransactionNumber
+SELECT intRowNumber  = row_number() OVER(ORDER BY tf.dtmCreatedDate DESC) 
+	, tf.dtmCreatedDate
+	, tf.strAction
+	, tf.strTransactionType
+	, tf.strTradeFinanceTransaction
+	, tf.intTransactionHeaderId
+	, tf.intTransactionDetailId
+	, tf.strTransactionNumber
 	, tf.dtmTransactionDate
-	, intBankTransactionId
-	, strBankTransactionId
-	, dblTransactionAmountAllocated
-	, dblTransactionAmountActual
-	, intLoanLimitId
-	, strLoanLimitNumber
-	, strLoanLimitType
-	, dtmAppliedToTransactionDate
-	, intStatusId
-	, strStatus = CASE WHEN intStatusId = 1 THEN 'Active' ELSE 'Completed' END
-	, intWarrantId
-	, strWarrantId
+	, tf.intBankTransactionId
+	, tf.strBankTransactionId
+	, tf.dblTransactionAmountAllocated
+	, tf.dblTransactionAmountActual
+	, tf.intLoanLimitId
+	, tf.strLoanLimitNumber
+	, tf.strLoanLimitType
+	, tf.dtmAppliedToTransactionDate
+	, tf.intStatusId
+	, strStatus = CASE WHEN  tf.intStatusId = 1 THEN 'Active' 
+						WHEN tf.intStatusId = 2 THEN 'Completed'
+						WHEN tf.intStatusId = 0 THEN 'Cancelled'
+						ELSE '' END
+	, tf.intWarrantId
+	, tf.strWarrantId
 	, strUserName = U.strName
 	, der.intFutOptTransactionHeaderId
 	, der.strInternalTradeNo
 	, sold_to.intContractHeaderId
 	, sold_to.strContractNumber
 	, tf.intConcurrencyId
+	, tf.strBank
+	, tf.strBankAccount
+	, tf.strBorrowingFacility
+	, tf.strBorrowingFacilityBankRefNo
+	, tf.strLimit
+	, tf.dblLimit
+	, tf.strSublimit
+	, tf.dblSublimit
+	, tf.strBankTradeReference
+	, tf.dblFinanceQty
+	, tf.dblFinancedAmount
+	, tf.strBankApprovalStatus
 FROM tblTRFTradeFinanceLog tf
 LEFT JOIN tblEMEntity U ON U.intEntityId = tf.intUserId
 

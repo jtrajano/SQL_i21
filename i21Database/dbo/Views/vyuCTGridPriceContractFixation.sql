@@ -74,19 +74,25 @@ AS
 				CD.dblAppliedQty,
 				CD.strBook,
 				CD.strSubBook,
-				CD.dblFutures
-
+				CD.dblFutures,
+				ICC.strOrigin,
+				ICC.strProductType,
+				ICC.strGrade,
+				ICC.strRegion,
+				ICC.strSeason,
+				ICC.strClass,
+				ICC.strProductLine
 		FROM	tblCTPriceFixation	PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId		=	MA.intUnitMeasureId	
-LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CD.intCommodityId 
+		LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CD.intCommodityId 
 												AND BU.intUnitMeasureId		=	CD.intBasisUnitMeasureId
-LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
-LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
-
+		LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
+		LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
+		LEFT	JOIN	vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
 		UNION ALL
 
 		SELECT	PF.intPriceFixationId,
@@ -147,8 +153,14 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CD.dblAppliedQty,
 				BK.strBook,
 				SB.strSubBook,
-				CD.dblFutures
-
+				CD.dblFutures,
+				ICC.strOrigin,
+				ICC.strProductType,
+				ICC.strGrade,
+				ICC.strRegion,
+				ICC.strSeason,
+				ICC.strClass,
+				ICC.strProductLine
 		FROM	tblCTPriceFixation	PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
 		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	CU.intUnitMeasureId
@@ -162,9 +174,10 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 		JOIN	tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
 		JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId
 		CROSS APPLY fnCTGetTopOneSequence(CH.intContractHeaderId,0)	CD
-LEFT	JOIN	tblCTBook					BK	ON	BK.intBookId			=	CH.intBookId						
-LEFT	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId			=	CH.intSubBookId	
-LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
-LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
+		LEFT	JOIN	tblCTBook					BK	ON	BK.intBookId			=	CH.intBookId						
+		LEFT	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId			=	CH.intSubBookId	
+		LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
+		LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
+		LEFT	JOIN	vyuICGetCompactItem ICC ON ICC.intItemId = SC.intItemId
 		WHERE	ISNULL(CH.ysnMultiplePriceFixation,0) = 1
 	)t

@@ -44,6 +44,8 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[dblImportGAAPDepToDate]	DECIMAL(18,6) NULL,
 	[dblImportTaxDepToDate]	DECIMAL(18,6) NULL,
 	[intParentAssetId]			INT NULL,
+	[dtmCreateAssetPostDate]	DATETIME NULL,
+	[intAssetDepartmentId]		INT NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFAFixedAsset_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -56,6 +58,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetGroup] FOREIGN KEY([intAssetGroupId]) REFERENCES [dbo].[tblFAFixedAssetGroup] ([intAssetGroupId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrency] FOREIGN KEY([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrency2] FOREIGN KEY([intFunctionalCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
-	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrencyExchangeRateType] FOREIGN KEY([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
+	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrencyExchangeRateType] FOREIGN KEY([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetDepartment] FOREIGN KEY([intAssetDepartmentId]) REFERENCES [dbo].[tblFAFixedAssetDepartment] ([intAssetDepartmentId])
 );
 

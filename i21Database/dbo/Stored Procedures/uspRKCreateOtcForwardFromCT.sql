@@ -114,6 +114,7 @@ BEGIN TRY
 		, dblLimitRate
 		, dtmMarketDate
 		, ysnGTC
+		, strSource
 	)
 	SELECT 
 		intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
@@ -143,6 +144,7 @@ BEGIN TRY
 		, dblLimitRate = @dblLimitRate 
 		, dtmMarketDate = @dtmMarketDate 
 		, ysnGTC = @ysnGTC 
+		, strSource = 'Contract'
 
 	SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 

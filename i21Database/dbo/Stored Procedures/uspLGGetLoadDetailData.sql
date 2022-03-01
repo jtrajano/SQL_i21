@@ -14,6 +14,9 @@ BEGIN
 		,intPPricingTypeId = PDetail.intPricingTypeId
 		,ysnPLoad = PHeader.ysnLoad
 		,dblPQuantityPerLoad = PDetail.dblQuantityPerLoad
+		,strPCropYear = PCY.strCropYear
+		,strPLoadingPort = PLP.strCity
+		,strPDestinationPort = PDP.strCity
 		,strSContractNumber = SHeader.strContractNumber
 		,intSContractSeq = SDetail.intContractSeq
 		,intPPricingTypeId = PDetail.intPricingTypeId
@@ -22,6 +25,9 @@ BEGIN
 		,strSPricingType = PTS.strPricingType
 		,ysnSLoad = SHeader.ysnLoad
 		,dblSQuantityPerLoad = SDetail.dblQuantityPerLoad
+		,strSCropYear = SCY.strCropYear
+		,strSLoadingPort = SLP.strCity
+		,strSDestinationPort = SDP.strCity
 		,strVendor = VEN.strName
 		,strCustomer = CEN.strName
 		,strShipFrom = VEL.strLocationName
@@ -69,7 +75,13 @@ BEGIN
 	LEFT JOIN tblCTContractHeader				SHeader			ON		SHeader.intContractHeaderId = SDetail.intContractHeaderId
 	LEFT JOIN tblCTPricingType					PTP				ON		PTP.intPricingTypeId = PDetail.intPricingTypeId
 	LEFT JOIN tblCTPricingType					PTS				ON		PTS.intPricingTypeId = SDetail.intPricingTypeId
+	LEFT JOIN tblCTCropYear						PCY				ON		PCY.intCropYearId = PHeader.intCropYearId
+	LEFT JOIN tblCTCropYear						SCY				ON		SCY.intCropYearId = SHeader.intCropYearId
 	LEFT JOIN tblCTCropYear						CPY				ON		CPY.intCropYearId = LoadDetail.intCropYearId
+	LEFT JOIN tblSMCity							PLP				ON		PLP.intCityId = PDetail.intLoadingPortId
+	LEFT JOIN tblSMCity							PDP				ON		PDP.intCityId = PDetail.intDestinationPortId
+	LEFT JOIN tblSMCity							SLP				ON		SLP.intCityId = SDetail.intLoadingPortId
+	LEFT JOIN tblSMCity							SDP				ON		SDP.intCityId = SDetail.intDestinationPortId
 	LEFT JOIN tblEMEntity						VEN				ON		VEN.intEntityId = LoadDetail.intVendorEntityId
 	LEFT JOIN tblEMEntityLocation				VEL				ON		VEL.intEntityLocationId = LoadDetail.intVendorEntityLocationId
 	LEFT JOIN tblEMEntity						CEN				ON		CEN.intEntityId = LoadDetail.intCustomerEntityId

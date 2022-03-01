@@ -17,7 +17,7 @@ Type the overview for the table here.
 		[strType]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS NOT NULL,
 		[strItemType]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL, -- Temporary field that holds the original strType IC-2011
 		[strBundleType]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
-		[strDescription]            NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+		[strDescription]            NVARCHAR (350)  COLLATE Latin1_General_CI_AS NULL,
 		[intManufacturerId]         INT             NULL,
 		[strManufactureType]        NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
 		[intBrandId]                INT             NULL,

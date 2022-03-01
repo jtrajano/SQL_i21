@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Financial Report Generator' AND strModuleName = 'Financial Report Designer')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Aging Revaluation' AND strModuleName = 'Accounts Receivable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -2539,6 +2539,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer 
 	VALUES ( N'Customer Aging Detail Revaluation', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Aging Detail Revaluation', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=CustomerAgingDetailRevaluation&direct=true', N'small-menu-report', 0, 0, 0, 1, 4, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Reporting.view.ReportManager?group=Sales&report=CustomerAgingDetailRevaluation&direct=true' WHERE strMenuName = 'Customer Aging Detail Revaluation' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Aging Revaluation' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES ( N'Customer Aging Revaluation', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Aging Revaluation', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=CustomerAgingRevaluation&direct=true', N'small-menu-report', 0, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Reporting.view.ReportManager?group=Sales&report=CustomerAgingRevaluation&direct=true' WHERE strMenuName = 'Customer Aging Revaluation' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Aging' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])

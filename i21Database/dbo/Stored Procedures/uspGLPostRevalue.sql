@@ -99,6 +99,10 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 
 	IF @ysnPost =1 
 	BEGIN
+		DECLARE @defaultType NVARCHAR(20) 
+		SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable() f 
+		WHERE f.strModule COLLATE Latin1_General_CI_AS = @strTransactionType;
+		
 		WITH cte as(
 			SELECT 
 			 [strTransactionId]		= B.strConsolidationNumber
@@ -106,12 +110,12 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			,[strDescription]		= A.strTransactionId
 			
 			,[dtmTransactionDate]	= B.dtmDate
-			,[dblDebit]				= CASE	WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)
+			,[dblDebit]				= ISNULL(CASE	WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)
 											WHEN dblUnrealizedLoss < 0 THEN 0
-											ELSE dblUnrealizedLoss END 
-			,[dblCredit]			= CASE	WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)
+											ELSE dblUnrealizedLoss END,0)
+			,[dblCredit]			= ISNULL(CASE	WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)
 											WHEN dblUnrealizedGain < 0 THEN 0
-											ELSE dblUnrealizedGain END	
+											ELSE dblUnrealizedGain END,0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
@@ -128,7 +132,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			,strModule = B.strTransactionType
 			,A.strType
 			,Offset = 0
-		FROM [dbo].tblGLRevalueDetails A INNER JOIN [dbo].tblGLRevalue B 
+		FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B 
 			ON A.intConsolidationId = B.intConsolidationId
 			WHERE B.intConsolidationId = @intConsolidationId
 		),cte1 AS
@@ -155,7 +159,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				,[strTransactionForm]
 				,strModule	
 				,OffSet = 0
-				,strType
+				,strType = ISNULL(strType,@defaultType)
 			FROM
 			cte 
 			UNION ALL
@@ -181,7 +185,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				,[strTransactionForm]	
 				,strModule
 				,OffSet = 1
-				,strType
+				,strType = ISNULL(strType,@defaultType)
 			FROM
 			cte 
 		)
@@ -246,12 +250,18 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			AND f.Offset = A.OffSet
 		) BankTransferAccount
 
+
+	
+
+
 		DECLARE @dtmReverseDate DATETIME
 		SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
 		IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)
 		BEGIN
 			GOTO _raiserror
 		END
+
+
 	END
 	ELSE
 	BEGIN
@@ -300,9 +310,9 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			,[strTransactionType]	
 			,[strTransactionForm]
 			,strModuleName
-		FROM tblGLDetail A
-		
+		FROM tblGLDetail A	
 		WHERE strTransactionId IN(@strConsolidationNumber ,@strConsolidationNumber + '-R' )
+		AND ysnIsUnposted = 0
 
 	END
 		IF @ysnRecap = 0 
@@ -410,10 +420,11 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				UPDATE GL SET ysnIsUnposted = 1
 				FROM tblGLDetail GL
 				WHERE strTransactionId in (@strConsolidationNumber , @strConsolidationNumber +'-R')
+				AND ysnIsUnposted = 0
 				DELETE FROM tblGLRevalue WHERE strConsolidationNumber = @strConsolidationNumber +'-R'
 			END		
 			
-			EXEC uspGLBookEntries @PostGLEntries, @ysnPost
+			EXEC uspGLBookEntries @PostGLEntries, @ysnPost, 1
 
 		END
 		ELSE

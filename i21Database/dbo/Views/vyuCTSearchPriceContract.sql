@@ -133,7 +133,7 @@ AS
 					intBookId,
 					intSubBookId,
 					intSalespersonId,
-					intCurrencyId,
+					CD.intCurrencyId,
 					intCompanyLocationId,
 					'Unpriced' COLLATE Latin1_General_CI_AS AS strStatus,
 					CAST(0 AS INT) AS dblLotsFixed,
@@ -205,7 +205,7 @@ AS
 					CH.intBookId,
 					CH.intSubBookId,
 					CD.intSalespersonId,
-					MAX(intCurrencyId)			AS	intCurrencyId,
+					MAX(CD.intCurrencyId)			AS	intCurrencyId,
 					MAX(CD.intCompanyLocationId)	AS	intCompanyLocationId,
 					'Unpriced' COLLATE Latin1_General_CI_AS AS strStatus,
 					CAST(0 AS INT) AS intLotsFixed,
@@ -311,7 +311,7 @@ cross apply (select * from cpHTA) hta
 					intBookId,
 					intSubBookId,
 					intSalespersonId,
-					intCurrencyId,
+					CD.intCurrencyId,
 					intCompanyLocationId,
 					CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END),0) = 0 
 							THEN 'Fully Priced' 
@@ -400,7 +400,7 @@ cross apply (select * from cpHTA) hta
 					intBookId,
 					intSubBookId,
 					intSalespersonId,
-					intCurrencyId,
+					CD.intCurrencyId,
 					intCompanyLocationId,
 					PF.[dblTotalLots]-[dblLotsFixed] ,
 					PF.intLotsHedged,
@@ -459,7 +459,7 @@ cross apply (select * from cpHTA) hta
 					CH.intBookId,
 					CH.intSubBookId,
 					CD.intSalespersonId,
-					MAX(intCurrencyId)			AS	intCurrencyId,
+					MAX(CD.intCurrencyId)			AS	intCurrencyId,
 					MAX(CD.intCompanyLocationId)	AS	intCompanyLocationId,
 					CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL(PF.[dblLotsFixed],0) = 0 
 							THEN 'Fully Priced' 

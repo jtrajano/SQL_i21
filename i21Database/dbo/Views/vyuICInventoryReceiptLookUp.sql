@@ -6,7 +6,7 @@ SELECT
 	, strVendorName = Vendor.strName
 	, Receipt.intEntityId
 	, FreightTerm.strFobPoint
-	, Location.strLocationName
+	, [Location].strLocationName
 	, Currency.strCurrency
 	, strFromLocation = FromLocation.strLocationName
 	, UserSecurity.strUserName
@@ -16,10 +16,16 @@ SELECT
 	, Book.strBook
 	, SubBook.strSubBook
 	, strShipFromEntity = ShipFromEntity.strName
+	, bank.strBankName
+	, bankAccount.strBankAccountNo
+	, borrowingFacility.strBorrowingFacilityId
+	, strLimit = limit.strBorrowingFacilityLimit
+	, strSublimit = sublimit.strLimitDescription
+	, strOverrideFacilityValuation = overrideFacilityValuation.strBankValuationRule
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
-	LEFT JOIN tblSMCompanyLocation Location 
-		ON Location.intCompanyLocationId = Receipt.intLocationId
+	LEFT JOIN tblSMCompanyLocation [Location] 
+		ON [Location].intCompanyLocationId = Receipt.intLocationId
 	LEFT JOIN tblSMFreightTerms FreightTerm 
 		ON FreightTerm.intFreightTermId = Receipt.intFreightTermId
 	LEFT JOIN tblSMCurrency Currency
@@ -38,6 +44,18 @@ FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor
 		ON SubBook.intSubBookId = Receipt.intSubBookId
 	LEFT JOIN vyuAPVendor ShipFromEntity 
 		ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId
+	LEFT JOIN tblCMBank bank 
+		ON bank.intBankId = Receipt.intBankId
+	LEFT JOIN vyuCMBankAccount bankAccount
+		ON bankAccount.intBankAccountId = Receipt.intBankAccountId
+	LEFT JOIN tblCMBorrowingFacility borrowingFacility
+		ON borrowingFacility.intBorrowingFacilityId = Receipt.intBorrowingFacilityId
+	LEFT JOIN tblCMBorrowingFacilityLimit limit 
+		ON limit.intBorrowingFacilityLimitId = Receipt.intLimitTypeId
+	LEFT JOIN tblCMBorrowingFacilityLimitDetail sublimit 
+		ON sublimit.intBorrowingFacilityLimitDetailId = Receipt.intSublimitTypeId
+	LEFT JOIN tblCMBankValuationRule overrideFacilityValuation
+		ON overrideFacilityValuation.intBankValuationRuleId = Receipt.intOverrideFacilityValuation
 
 	--LEFT JOIN tblSMCompanyLocation Transferor 
 	--	ON Transferor.intCompanyLocationId = Receipt.intTransferorId

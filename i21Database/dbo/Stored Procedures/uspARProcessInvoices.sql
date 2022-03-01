@@ -223,6 +223,15 @@ DECLARE  @Id									INT
 		,@UpdateAvailableDiscount				BIT
 		,@ServiceChargeCredit					BIT
 		,@ImportFormat							NVARCHAR(50)
+		,@BankId								INT
+		,@BankAccountId							INT
+		,@BorrowingFacilityId					INT
+		,@BorrowingFacilityLimitId				INT
+		,@BankReferenceNo						NVARCHAR(100)
+		,@BankTransactionId						NVARCHAR(100)
+		,@LoanAmount							NUMERIC(18, 6)
+		,@BankValuationRuleId					INT
+		,@TradeFinanceComments					NVARCHAR(MAX)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -316,6 +325,8 @@ DECLARE  @Id									INT
 		,@ItemContractHeaderId					INT
 		,@ItemContractDetailId					INT
 		,@NewInvoiceNumber						NVARCHAR(50) = ''
+		,@ItemQualityPremium					NUMERIC(18, 6)
+		,@ItemOptionalityPremium				NUMERIC(18, 6)
 
 --INSERT
 BEGIN TRY
@@ -428,6 +439,15 @@ BEGIN
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ServiceChargeCredit			= ISNULL([ysnServiceChargeCredit],0)
 		,@ImportFormat					= [strImportFormat]
+		,@BankId						= intBankId
+		,@BankAccountId					= intBankAccountId
+		,@BorrowingFacilityId			= intBorrowingFacilityId
+		,@BorrowingFacilityLimitId		= intBorrowingFacilityLimitId
+		,@BankReferenceNo				= strBankReferenceNo
+		,@BankTransactionId				= strBankTransactionId
+		,@LoanAmount					= dblLoanAmount
+		,@BankValuationRuleId			= intBankValuationRuleId
+		,@TradeFinanceComments			= strTradeFinanceComments
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -515,6 +535,8 @@ BEGIN
         ,@ItemAddonDetailKey            = (CASE WHEN @GroupingOption = 0 THEN [strAddonDetailKey] ELSE NULL END)
         ,@ItemAddonParent               = (CASE WHEN @GroupingOption = 0 THEN [ysnAddonParent] ELSE NULL END)
         ,@ItemAddOnQuantity             = (CASE WHEN @GroupingOption = 0 THEN [dblAddOnQuantity] ELSE NULL END)
+		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
+		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -696,6 +718,15 @@ BEGIN
 			,@ImportFormat					= @ImportFormat
 			,@TruckDriverId					= @TruckDriverId
 			,@TruckDriverReferenceId		= @TruckDriverReferenceId
+			,@BankId						= @BankId
+			,@BankAccountId					= @BankAccountId
+			,@BorrowingFacilityId			= @BorrowingFacilityId
+			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
+			,@BankReferenceNo				= @BankReferenceNo
+			,@BankTransactionId				= @BankTransactionId
+			,@LoanAmount					= @LoanAmount
+			,@BankValuationRuleId			= @BankValuationRuleId
+			,@TradeFinanceComments			= @TradeFinanceComments
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -771,7 +802,7 @@ BEGIN
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@ItemConversionAccountId		= @ItemConversionAccountId
 			,@ItemSalesAccountId			= @ItemSalesAccountId
-			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -782,7 +813,8 @@ BEGIN
             ,@ItemAddonDetailKey            = @ItemAddonDetailKey
             ,@ItemAddonParent               = @ItemAddonParent
             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
-			
+			,@ItemQualityPremium			= @ItemQualityPremium
+			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -964,6 +996,8 @@ BEGIN
 					,@ItemAddonDetailKey            = [strAddonDetailKey]
                     ,@ItemAddonParent               = [ysnAddonParent]
                     ,@ItemAddOnQuantity             = [dblAddOnQuantity]
+					,@ItemQualityPremium            = [dblQualityPremium]
+					,@ItemOptionalityPremium        = [dblOptionalityPremium]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1064,6 +1098,8 @@ BEGIN
                         ,@ItemAddonDetailKey            = @ItemAddonDetailKey
                         ,@ItemAddonParent               = @ItemAddonParent
                         ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+						,@ItemQualityPremium            = @ItemQualityPremium
+						,@ItemOptionalityPremium        = @ItemOptionalityPremium
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1743,6 +1779,8 @@ BEGIN TRY
                         ,@ItemAddonDetailKey            = [strAddonDetailKey]
                         ,@ItemAddonParent               = [ysnAddonParent]
                         ,@ItemAddOnQuantity             = [dblAddOnQuantity]
+						,@ItemQualityPremium            = [dblQualityPremium]
+                        ,@ItemOptionalityPremium        = [dblOptionalityPremium]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1835,6 +1873,8 @@ BEGIN TRY
                             ,@ItemAddonDetailKey            = @ItemAddonDetailKey
                             ,@ItemAddonParent               = @ItemAddonParent
                             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+							,@ItemQualityPremium            = @ItemQualityPremium
+							,@ItemOptionalityPremium        = @ItemOptionalityPremium
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN

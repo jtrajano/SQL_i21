@@ -5,7 +5,10 @@
 	,@dblAmount NUMERIC(18,6)
 	,@strDescription NVARCHAR(255)
 	,@intUserId INT
+	,@intBankTransactionTypeId INT
+    ,@intParentTransId INT = NULL -- FOR FEE
 	,@isAddSuccessful BIT = 0 OUTPUT
+	,@createdTransId NVARCHAR(20) = 0 OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -18,6 +21,7 @@ BEGIN TRANSACTION
 
 DECLARE @BANK_DEPOSIT INT = 1
 		,@BANK_WITHDRAWAL INT = 2
+		,@BANK_FEE INT = 27
 		,@MISC_CHECKS INT = 3
 		,@BANK_TRANSFER INT = 4
 		,@BANK_TRANSACTION INT = 5
@@ -38,7 +42,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@STARTING_NUMBER_BANK_TRANSACTION AS NVARCHAR(100) = 'Bank Transaction'
 		
 		-- Local variables:
-		,@strTransactionId NVARCHAR(40)
+	
 		,@intTransactionId INT
 		,@msg_id INT
 		,@intStartingNumberId INT
@@ -47,9 +51,17 @@ DECLARE @BANK_DEPOSIT INT = 1
 --SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
 --FROM	dbo.tblSMStartingNumber
 --WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
-SELECT	@intStartingNumberId = intStartingNumberId FROM	dbo.tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
-EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUTPUT
-IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
+IF @intBankTransactionTypeId = @BANK_FEE
+BEGIN
+	SELECT @createdTransId = strTransactionId + '-F' FROM tblCMBankTransaction WHERE intTransactionId = @intParentTransId
+END
+ELSE
+BEGIN
+	SELECT	@intStartingNumberId = intStartingNumberId FROM	dbo.tblSMStartingNumber 
+	WHERE strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+	EXEC uspSMGetStartingNumber @intStartingNumberId, @createdTransId OUTPUT
+	IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
+END
 
 -- Increment the next transaction number
 --UPDATE	dbo.tblSMStartingNumber
@@ -58,9 +70,9 @@ IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 --IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
 -- Check for duplicate transaction id. 
-IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankTransaction] WHERE strTransactionId = @strTransactionId)
+IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankTransaction] WHERE strTransactionId = @createdTransId)
 BEGIN
-	RAISERROR('The transaction id %s already exists. Please ask your local administrator to check the starting numbers setup.', 11, 1, @strTransactionId)
+	RAISERROR('The transaction id %s already exists. Please ask your local administrator to check the starting numbers setup.', 11, 1, @createdTransId)
 	GOTO uspCMAddPayment_Rollback
 END
 
@@ -98,8 +110,8 @@ INSERT INTO tblCMBankTransaction(
 	,dtmLastModified
 	,intConcurrencyId
 )
-SELECT	strTransactionId			= @strTransactionId
-		,intBankTransactionTypeId	= @BANK_TRANSACTION
+SELECT	strTransactionId			= @createdTransId
+		,intBankTransactionTypeId	= @intBankTransactionTypeId
 		,intBankAccountId			= @intBankAccountId
 		,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId)
 		,dblExchangeRate			= 1
@@ -165,17 +177,27 @@ FROM	tblGLAccount
 WHERE	intAccountId = @intGLAccountId
 IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
+
+
 -- Post the transaction 
 BEGIN TRY
 	EXEC dbo.uspCMPostBankTransaction
 			@ysnPost = 1
 			,@ysnRecap = 0
-			,@strTransactionId = @strTransactionId
+			,@strTransactionId = @createdTransId
 			,@intUserId = @intUserId
 			,@isSuccessful = @isAddSuccessful OUTPUT
 			,@message_id = @msg_id OUTPUT
 			
 	IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback	
+
+	IF @intBankTransactionTypeId = @BANK_FEE
+	BEGIN -- LINKING THE TRANSACTION
+		INSERT INTO  tblCMBankTransactionAdjustment (intRelatedId,intTransactionId, strType)
+        SELECT @intTransactionId   ,@intParentTransId ,'Parent' UNION 
+        SELECT @intParentTransId   ,@intTransactionId , 'Bank Fee'
+	END
+
 	GOTO uspCMAddPayment_Commit
 END TRY
 BEGIN CATCH

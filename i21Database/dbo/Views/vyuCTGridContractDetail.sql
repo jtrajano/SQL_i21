@@ -271,7 +271,13 @@ AS
 			RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure,
 			ysnWithPriceFix = convert(bit, isnull(PF.intPriceFixationId,0)),
 			CD.dblQualityPremium,
-			CD.dblOptionalityPremium
+			CD.dblOptionalityPremium,
+			ICC.strProductType,
+			ICC.strGrade AS strGradeCommodity,
+			ICC.strRegion,
+			ICC.strSeason,
+			ICC.strClass,
+			ICC.strProductLine
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
@@ -413,3 +419,5 @@ AS
 	--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 	LEFT	JOIN	tblAPBillDetail						BD ON	BD.intContractDetailId = CD.intContractDetailId
 	LEFT	JOIN	tblLGAllocationDetail		AD		ON AD.intPContractDetailId = CD.intContractDetailId
+	-- Commodity Attributes
+	LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId

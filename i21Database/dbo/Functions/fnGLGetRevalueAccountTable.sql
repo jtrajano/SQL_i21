@@ -16,7 +16,7 @@ RETURN
 	SELECT 'CM In-Transit'	strModule, 'Receivables' strType, [intCashManagementUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Swaps'		strModule, 'Payables' strType, [intGainOnSwapUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Swaps'		strModule, 'Receivables' strType, [intGainOnSwapUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
-	SELECT 'GL'		strModule, 'General Ledger' strType, [intGainOnGLUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
+	SELECT 'GL'		strModule, 'Receivables' strType, [intGainOnGLUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 
 	SELECT 'AP'		strModule,'Payables' strType, [intAccountsPayableOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'AR'		strModule,'Receivables' strType, [intAccountsReceivableOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
@@ -31,5 +31,5 @@ RETURN
 	SELECT 'CM In-Transit'	strModule,'Receivables' strType, [intCashManagementOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Swaps'		strModule,'Payables' strType, [intGainOnSwapOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Swaps'		strModule,'Receivables' strType, [intGainOnSwapOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
-	SELECT 'GL'		strModule, 'General Ledger' strType, [intGainOnGLOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency
+	SELECT 'GL'		strModule, 'Receivables' strType, [intGainOnGLOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency
 )

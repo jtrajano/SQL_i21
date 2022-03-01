@@ -27,7 +27,27 @@ BEGIN
 	WHERE L.intLoadId = @intLoadId
 
 	/* Construct Trade Finance SP parameter */
-	INSERT INTO @TRFTradeFinance
+	INSERT INTO @TRFTradeFinance 
+		(intTradeFinanceId
+		,strTradeFinanceNumber
+		,strTransactionType
+		,strTransactionNumber
+		,intTransactionHeaderId
+		,intTransactionDetailId
+		,intBankId
+		,intBankAccountId
+		,intBorrowingFacilityId
+		,intLimitTypeId
+		,intSublimitTypeId
+		,ysnSubmittedToBank
+		,dtmDateSubmitted
+		,strApprovalStatus
+		,dtmDateApproved
+		,strRefNo
+		,intOverrideFacilityValuation
+		,strCommnents
+		,dtmCreatedDate
+		,intConcurrencyId)
 	SELECT
 		intTradeFinanceId = @intTradeFinanceId
 		,strTradeFinanceNumber = L.strTradeFinanceNo
@@ -74,6 +94,29 @@ BEGIN
 	FROM tblTRFTradeFinance WHERE strTransactionType = 'Logistics' AND intTransactionHeaderId = @intLoadId
 
 	INSERT INTO @TRFLog
+		(strAction
+		,strTransactionType
+		,intTradeFinanceTransactionId
+		,strTradeFinanceTransaction
+		,intTransactionHeaderId
+		,intTransactionDetailId
+		,strTransactionNumber
+		,dtmTransactionDate
+		,intBankTransactionId
+		,strBankTransactionId
+		,dblTransactionAmountAllocated
+		,dblTransactionAmountActual
+		,intLoanLimitId
+		,strLoanLimitNumber
+		,strLoanLimitType
+		,dtmAppliedToTransactionDate
+		,intStatusId
+		,intWarrantId
+		,strWarrantId
+		,intUserId
+		,intConcurrencyId
+		,intContractHeaderId
+		,intContractDetailId)
 	SELECT
 		strAction = CASE WHEN (@strAction = 'ADD') THEN 'Created ' ELSE 'Updated ' END
 					+ CASE WHEN (L.intShipmentType = 2) THEN 'Shipping Instruction' ELSE 'Shipment' END
@@ -94,7 +137,7 @@ BEGIN
 		,dtmAppliedToTransactionDate = GETDATE()
 		,intStatusId = CASE WHEN L.intShipmentStatus = 4 THEN 2 ELSE 1 END
 		,intWarrantId = null
-		,strWarrantId = null
+		,strWarrantId = L.strWarrantNo
 		,intUserId = @intUserId
 		,intConcurrencyId = 1
 		,intContractHeaderId = CD.intContractHeaderId

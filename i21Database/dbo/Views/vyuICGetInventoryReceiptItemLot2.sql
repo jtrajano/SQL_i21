@@ -68,7 +68,8 @@ SELECT
 		,com.intCommodityId
 		,receiptItemLot.strCargoNo
 		,receiptItemLot.strWarrantNo
-		, fiscal.strPeriod strAccountingPeriod
+		,receiptItemLot.intWarrantStatus
+		, fiscal.strPeriod strAccountingPeriod		
 FROM	tblICInventoryReceiptItemLot receiptItemLot
 		INNER JOIN tblICInventoryReceiptItem item 
 			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId

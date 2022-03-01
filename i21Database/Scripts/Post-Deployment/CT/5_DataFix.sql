@@ -263,24 +263,6 @@ WHERE dblOrigQty IS NULL
 	AND dblQty IS NOT NULL)
 BEGIN
 	UPDATE tblCTContractBalanceLog
-	SET dblOrigQty = (CAST(REPLACE(strNotes, 'Priced Quantity is ', '') AS NUMERIC(18, 6)))
-	WHERE dblOrigQty IS NULL
-		AND dblQty IS NOT NULL
-		AND strNotes LIKE '%Priced Quantity is %'
-
-	UPDATE tblCTContractBalanceLog
-	SET dblOrigQty = (CAST(REPLACE(strNotes, 'Priced Load is ', '') AS NUMERIC(18, 6)))
-	WHERE dblOrigQty IS NULL
-		AND dblQty IS NOT NULL
-		AND strNotes LIKE '%Priced Load is %'
-
-	UPDATE tblCTContractBalanceLog
-	SET dblOrigQty = (CAST(REPLACE(REPLACE(strNotes, 'Invoiced Quantity is ', ''), ',', '') AS NUMERIC(18, 6)))
-	WHERE dblOrigQty IS NULL
-		AND dblQty IS NOT NULL
-		AND strNotes LIKE '%Invoiced Quantity is %'
-
-	UPDATE tblCTContractBalanceLog
 	SET dblOrigQty = dblQty
 	WHERE dblOrigQty IS NULL
 		AND dblQty IS NOT NULL
@@ -312,5 +294,68 @@ IF EXISTS (SELECT TOP 1 1 FROM tblCTSequenceHistory WHERE ISNULL(intDtlQtyInComm
 BEGIN
 	EXEC uspCTFixCBLogAfterRebuild
 END
+
+GO
+
+declare
+	@intPriceContractId int,
+	@intPriceFixationDetailId int,
+	@intNumber int,
+	@strPriceContractNo nvarchar(50),
+	@strPrefix nvarchar(10),
+	@strTradeNo nvarchar(10)
+	;
+
+select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Contract' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;;
+
+if (isnull(@strPrefix,'') <> '')
+begin
+	select @strPriceContractNo = max(strPriceContractNo) from tblCTPriceContract where strPriceContractNo like @strPrefix + '%';
+	if (isnull(@strPriceContractNo,'') = '')
+	begin
+		select @intPriceContractId = max(intPriceContractId) from tblCTPriceContract
+		select @intNumber = convert(int,isnull(strPriceContractNo,'0')) from tblCTPriceContract where intPriceContractId = @intPriceContractId
+	end
+	else
+	begin
+		select @intNumber = convert(int,replace(isnull(@strPriceContractNo,'0'),@strPrefix,''));
+	end
+end
+else
+begin
+	select @intPriceContractId = max(intPriceContractId) from tblCTPriceContract
+	select @intNumber = convert(int,isnull(strPriceContractNo,'0')) from tblCTPriceContract where intPriceContractId = @intPriceContractId
+end
+
+select @intNumber += 1;
+
+update tblSMStartingNumber set intNumber = case when intNumber < @intNumber then @intNumber else intNumber end where strModule = 'Contract Management' and strTransactionType = 'Price Contract' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;
+
+if (isnull(@strPrefix,'') <> '')
+begin
+	select @strTradeNo = max(strTradeNo) from tblCTPriceFixationDetail where strTradeNo like @strPrefix + '%';
+	if (isnull(@strTradeNo,'') = '')
+	begin
+		select @intPriceFixationDetailId = max(intPriceFixationDetailId) from tblCTPriceFixationDetail
+		select @intNumber = convert(int,isnull(strTradeNo,'0')) from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId
+	end
+	else
+	begin
+		select @intNumber = convert(int,replace(isnull(@strTradeNo,'0'),@strPrefix,''));
+	end
+end
+else
+begin
+	select @intPriceFixationDetailId = max(intPriceFixationDetailId) from tblCTPriceFixationDetail
+	select @intNumber = convert(int,isnull(strTradeNo,'0')) from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId
+end
+
+select @intNumber += 1;
+
+update tblSMStartingNumber set intNumber = case when intNumber < @intNumber then @intNumber else intNumber end where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;
 
 GO

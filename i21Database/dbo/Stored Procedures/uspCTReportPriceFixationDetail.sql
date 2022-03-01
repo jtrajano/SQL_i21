@@ -20,7 +20,8 @@ BEGIN TRY
 			@intLaguageId			INT = null,
 			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
 			@strMonthLabelName		NVARCHAR(50) = 'Month',
-			@intPriceFixationId		INT;
+			@intPriceFixationId		INT,
+			@ysnEnableFXFieldInContractPricing BIT = 0;
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -66,6 +67,8 @@ BEGIN TRY
 	declare @per nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'per'),'per');
 	declare @at nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'at'),'at');
 	declare @Lotsfixed nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Lot(s) fixed'),'Lot(s) fixed');
+
+	select top 1 @ysnEnableFXFieldInContractPricing = ysnEnableFXFieldInContractPricing from tblCTCompanyPreference;
 			
 	SELECT	DISTINCT 
 			PD.intPriceFixationDetailId,
@@ -84,7 +87,9 @@ BEGIN TRY
 			isnull(rtrt.strTranslation,MA.strFutMarketName) +  ' '  + case when MO.dtmFutureMonthsDate is null then '' else isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,MO.dtmFutureMonthsDate)),DATENAME(mm,MO.dtmFutureMonthsDate)) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) end + ' '+@at+' ' + 
 			dbo.fnRemoveTrailingZeroes(PD.dblFutures) + CY.strCurrency + '-' + isnull(rtrt2.strTranslation,CM.strUnitMeasure)	AS strGABPrice,
 			CD.dblRatio,
-			dbo.fnRemoveTrailingZeroes(PD.dblQuantity) + ' ' + CD.strItemUOM AS strQtyWithUOM
+			dbo.fnRemoveTrailingZeroes(PD.dblQuantity) + ' ' + CD.strItemUOM AS strQtyWithUOM,
+			PD.dblFX
+		   ,ysnEnableFXFieldInContractPricing = @ysnEnableFXFieldInContractPricing
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId

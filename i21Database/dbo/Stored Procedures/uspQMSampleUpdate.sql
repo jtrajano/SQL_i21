@@ -15,7 +15,8 @@ BEGIN TRY
 
 	DECLARE @intSampleId INT
 	DECLARE @strMarks NVARCHAR(100)
-	DECLARE @intPreviousSampleStatusId INT
+	DECLARE @intPreviousSampleStatusId INT -- New Sample Status Id
+	DECLARE @intCurrentSampleStatusId INT
 	DECLARE @intShipperEntityId INT
 	DECLARE @ysnEnableParentLot BIT
 			,@intSampleTypeId INT
@@ -207,6 +208,7 @@ BEGIN TRY
 	SELECT @dblOldSampleQty = dblSampleQty
 		,@intCurrentConcurrencyId = intConcurrencyId
 		,@ysnOldImpactPricing = ISNULL(ysnImpactPricing, 0)
+		,@intCurrentSampleStatusId = intSampleStatusId
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
 
@@ -372,6 +374,19 @@ BEGIN TRY
 		SET dtmTestedOn = NULL
 			,intTestedById = NULL
 		WHERE intSampleId = @intSampleId
+	END
+
+	-- If current sample status is Approved / Rejected and new sample status is not Approved / Rejected, then it is reversal
+	-- Reverse the lot status
+	IF @intCurrentSampleStatusId IN (3, 4)
+		AND @intPreviousSampleStatusId NOT IN (3, 4)
+	BEGIN
+		UPDATE tblQMSample
+		SET intLotStatusId = 3 -- Quarantine
+		WHERE intSampleId = @intSampleId
+			AND intLotStatusId IS NOT NULL
+
+		EXEC uspQMSetLotStatus @intSampleId
 	END
 
 	-- Sample Detail Create, Update, Delete

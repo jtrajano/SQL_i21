@@ -291,7 +291,9 @@ DECLARE
 			,[intCurrencyExchangeRateId]
 			,[dblCurrencyExchangeRate]
 			,[intSubCurrencyId]
-			,[dblSubCurrencyRate])
+			,[dblSubCurrencyRate]
+			,[dblQualityPremium]
+			,[dblOptionalityPremium])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -414,6 +416,8 @@ DECLARE
 															THEN CU.intCent
 														ELSE 1.000000
 														END
+			,[dblQualityPremium]					= LD.dblQualityPremium
+			,[dblOptionalityPremium]				= LD.dblOptionalityPremium
 		FROM tblLGLoad L
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -565,7 +569,9 @@ DECLARE
 			,[intCurrencyExchangeRateId]
 			,[dblCurrencyExchangeRate]
 			,[intSubCurrencyId]
-			,[dblSubCurrencyRate])
+			,[dblSubCurrencyRate]
+			,[dblQualityPremium]
+			,[dblOptionalityPremium])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -675,7 +681,10 @@ DECLARE
 			,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate] 
 			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
+			,[dblQualityPremium]					= LD.dblQualityPremium
+			,[dblOptionalityPremium]				= LD.dblOptionalityPremium
 		FROM vyuARShippedItems ARSI
+			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARSI.intLoadDetailId
 			OUTER APPLY (
 				SELECT cp.* 
 					,dblPrevRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice prcp

@@ -338,6 +338,11 @@ SELECT a.intContractDetailId
 					CTECert where intContractDetailId = a.intContractDetailId
 				FOR XML PATH('')),' #!',', '), 1, 2, '')
 			)
+	, ICC.strGrade AS strGradeCommodity
+	, ICC.strRegion
+	, ICC.strSeason
+	, ICC.strClass
+	, ICC.strProductLine
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId
@@ -446,6 +451,7 @@ LEFT JOIN tblICUnitMeasure cn WITH(NOLOCK) ON cn.intUnitMeasureId = cm.intUnitMe
 LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
 LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = a.intShipToId -- CT-5315
 --OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
+LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = a.intItemId
 LEFT JOIN (
     SELECT *
     FROM

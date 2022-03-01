@@ -60,7 +60,8 @@ SELECT DISTINCT (SELECT COUNT(*) FROM tblLGPickLotDetail WHERE intPickLotHeaderI
   L.strLoadNumber,
   ysnDelivered = CONVERT(BIT,(CASE WHEN ISNULL(L.strLoadNumber,'') = '' THEN 0 ELSE 1 END)),
   intSaleItemUOMId = (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intSaleUnitMeasureId),
-  intPurchaseItemUOMId = (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intLotUnitMeasureId)
+  intPurchaseItemUOMId = (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intLotUnitMeasureId),
+  ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = SCD.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId

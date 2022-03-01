@@ -948,7 +948,7 @@ BEGIN TRY
 		SELECT dblRatio
 			, dblMarketBasis = (ISNULL(dblBasisOrDiscount, 0) + ISNULL(dblCashOrFuture, 0)) / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
 			, intMarketBasisUOM = intCommodityUnitMeasureId
-			, intMarketBasisCurrencyId = intCurrencyId
+			, intMarketBasisCurrencyId = temp.intCurrencyId
 			, intFutureMarketId = temp.intFutureMarketId
 			, intItemId = temp.intItemId
 			, intContractTypeId = temp.intContractTypeId

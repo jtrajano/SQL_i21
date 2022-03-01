@@ -50,7 +50,9 @@ BEGIN TRY
 		, intFutOptTransactionId
 		, intFutOptTransactionHeaderId
 		, strDerivativeId
-		)
+		, strReferenceFrom
+		, strReferenceTo
+		) 
 
 		SELECT 
 			intEntityId = 1
@@ -67,6 +69,8 @@ BEGIN TRY
 		, intFutOptTransactionId = otc.intFutOptTransactionId
 		, intFutOptTransactionHeaderId = otc.intFutOptTransactionHeaderId
 		, strDerivativeId = otc.strInternalTradeNo
+		, strReferenceFrom = otc.strBrokerTradeNo
+		, strReferenceTo = otc.strBrokerTradeNo
 
 		FROM #tmpOTCToPost otc
 		LEFT JOIN vyuCMBankAccount buyBA

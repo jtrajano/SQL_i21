@@ -30,6 +30,11 @@ GO
 		INSERT [dbo].tblSMIDPFieldMappingField ([intScreenId], [strField], [strFieldDataIndex]) 
 		VALUES (@intScreenId, 'Invoice No', 'strVendorOrderNumber')
 	END
+	IF ISNULL(@intScreenId, 0) <> 0 AND NOT EXISTS (SELECT TOP 1 1 FROM tblSMIDPFieldMappingField WHERE intScreenId = @intScreenId AND strField = 'Invoice Ctrl Total')
+	BEGIN
+		INSERT [dbo].tblSMIDPFieldMappingField ([intScreenId], [strField], [strFieldDataIndex]) 
+		VALUES (@intScreenId, 'Invoice Ctrl Total', 'dblTotalController')
+	END
 	IF ISNULL(@intScreenId, 0) <> 0 AND NOT EXISTS (SELECT TOP 1 1 FROM tblSMIDPFieldMappingField WHERE intScreenId = @intScreenId AND strField = 'Ship Via')
 	BEGIN
 		INSERT [dbo].tblSMIDPFieldMappingField ([intScreenId], [strField], [strFieldDataIndex]) 

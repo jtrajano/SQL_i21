@@ -56,7 +56,8 @@ AS
 			intLoadingPortId,
 			CD.intProducerId,
 			CD.intItemContractId,
-			CH.ysnReadOnlyInterCoContract
+			CH.ysnReadOnlyInterCoContract,
+			CD.dblRate
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId

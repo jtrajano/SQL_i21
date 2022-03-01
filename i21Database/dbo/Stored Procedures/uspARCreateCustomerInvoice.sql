@@ -144,6 +144,17 @@
 	,@ItemAddonParent				BIT				= NULL
 	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
 	,@PaidCPP						BIT				= 0
+	,@ItemQualityPremium			NUMERIC(18, 6)	= 0
+	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0
+	,@BankId						INT				= NULL
+	,@BankAccountId					INT				= NULL
+	,@BorrowingFacilityId			INT				= NULL
+	,@BorrowingFacilityLimitId		INT				= NULL
+	,@BankReferenceNo				NVARCHAR(100)	= NULL
+	,@BankTransactionId				NVARCHAR(100)	= NULL
+	,@LoanAmount					NUMERIC(18, 6)	= NULL
+	,@BankValuationRuleId			INT				= NULL
+	,@TradeFinanceComments			NVARCHAR(MAX)	= NULL
 AS
 
 BEGIN
@@ -502,7 +513,16 @@ BEGIN TRY
 		,[intConcurrencyId]
 		,[intLineOfBusinessId]
 		,[intICTId]
-		,[intSalesOrderId])
+		,[intSalesOrderId]
+		,[intBankId]
+		,[intBankAccountId]
+		,[intBorrowingFacilityId]
+		,[intBorrowingFacilityLimitId]
+		,[strBankReferenceNo]
+		,[strBankTransactionId]
+		,[dblLoanAmount]
+		,[intBankValuationRuleId]
+		,[strTradeFinanceComments])
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
 		,[strType]						= @Type
@@ -588,6 +608,15 @@ BEGIN TRY
 		,[intLineOfBusinessId]			= @intLineOfBusinessId
 		,[intICTId]						= @intICTId
 		,[intSalespersonId]				= @intSalesOrderId
+		,[intBankId]					= @BankId
+		,[intBankAccountId]				= @BankAccountId
+		,[intBorrowingFacilityId]		= @BorrowingFacilityId
+		,[intBorrowingFacilityLimitId]	= @BorrowingFacilityLimitId
+		,[strBankReferenceNo]			= @BankReferenceNo
+		,[strBankTransactionId]			= @BankTransactionId
+		,[dblLoanAmount]				= @LoanAmount
+		,[intBankValuationRuleId]		= @BankValuationRuleId
+		,[strTradeFinanceComments]		= @TradeFinanceComments
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
@@ -643,40 +672,6 @@ BEGIN CATCH
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
-
-
-
---IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND [ysnPORequired] = 1 AND LEN(LTRIM(RTRIM(ISNULL(@PONumber,'')))) <= 0)
---	BEGIN
---		DECLARE  @ShipToId	INT
---				,@NewPONumber	NVARCHAR(200)
---		SET @ShipToId = (SELECT [intShipToLocationId] FROM tblARInvoice WHERE intInvoiceId = @NewId)
-		
---		BEGIN TRY
---		EXEC dbo.[uspARGetPONumber]  
---			 @ShipToId  
---			,@CompanyLocationId
---			,@InvoiceDate
---			,@NewPONumber OUT
-			
---		UPDATE
---			tblARInvoice
---		SET
---			[strPONumber] = @NewPONumber
---		WHERE
---			[intInvoiceId] = @NewId
-			
---		END TRY
---		BEGIN CATCH
---			IF ISNULL(@RaiseError,0) = 0
---				ROLLBACK TRANSACTION
---			SET @ErrorMessage = ERROR_MESSAGE();
---			IF ISNULL(@RaiseError,0) = 1
---				RAISERROR(@ErrorMessage, 16, 1);
---			RETURN 0;
---		END CATCH
-				
---	END
 
 BEGIN TRY
 	EXEC [dbo].[uspARAddItemToInvoice]
@@ -766,9 +761,11 @@ BEGIN TRY
         ,@ItemAddonDetailKey            = @ItemAddonDetailKey
         ,@ItemAddonParent               = @ItemAddonParent
         ,@ItemAddOnQuantity             = @ItemAddOnQuantity
-		,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
-		,@ItemCurrencyExchangeRateId		= @ItemCurrencyExchangeRateId
-		,@ItemCurrencyExchangeRate			= @ItemCurrencyExchangeRate
+		,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
+		,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
+		,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
+		,@ItemQualityPremium			= @ItemQualityPremium
+		,@ItemOptionalityPremium		= @ItemOptionalityPremium
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

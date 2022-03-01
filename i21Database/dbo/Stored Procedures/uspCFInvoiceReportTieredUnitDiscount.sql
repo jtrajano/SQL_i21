@@ -279,9 +279,10 @@ BEGIN
 	UPDATE tblCFInvoiceReportTieredUnitDiscountTempTable
 	SET tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount = ABS(ROUND(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate * tblCFInvoiceReportTieredUnitDiscountTempTable.dblQuantity,2)) * -1
 	FROM tblCFInvoiceReportTieredUnitDiscountTempTable
+	WHERE strUserId = @UserId
 
 	
-	SELECT * FROM tblCFInvoiceReportTieredUnitDiscountTempTable
+	SELECT * FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId
 
 
 

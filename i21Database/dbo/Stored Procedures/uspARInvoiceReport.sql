@@ -25,7 +25,7 @@ CREATE TABLE #INVOICES (
 	 , strCustomerNumber			NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
 	 , strLocationName				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 	 , dtmDate						DATETIME		NOT NULL
-	 , dtmPostDate					DATETIME		NOT NULL
+	 , dtmPostDate					DATETIME		NULL
 	 , strCurrency					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 	 , strInvoiceNumber				NVARCHAR(25)	COLLATE Latin1_General_CI_AS NULL
 	 , strBillToLocationName		NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL

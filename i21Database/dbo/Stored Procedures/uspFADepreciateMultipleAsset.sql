@@ -742,7 +742,7 @@ BEGIN
           SELECT   
           [strTransactionId]  = B.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intDepreciationAccountId]  
+          ,[intAccountId]   = CASE WHEN B.strTransaction = 'Imported' THEN A.[intExpenseAccountId] ELSE A.[intDepreciationAccountId] END
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = FAD.dtmDepreciationToDate

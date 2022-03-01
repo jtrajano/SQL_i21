@@ -93,6 +93,8 @@
 	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
 	,@ItemAddonParent				BIT				= NULL
 	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
+	,@ItemQualityPremium			NUMERIC(18, 6)	= 0.000000
+	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0.000000
 AS
 
 BEGIN
@@ -180,17 +182,6 @@ IF NOT EXISTS(	SELECT NULL
 			RETURN 0;
 		end
 	END
-
-
---IF EXISTS(	SELECT	NULL 
---			FROM	tblICItem IC 
---			WHERE	IC.[intItemId] = @ItemId AND ISNULL(IC.[strLotTracking], 'No') <> 'No'
---		)
---	BEGIN		
---		IF ISNULL(@RaiseError,0) = 1
---			RAISERROR(120076, 16, 1);
---		RETURN 0;
---	END
 	
 IF ISNULL(@RaiseError,0) = 0	
 BEGIN
@@ -397,7 +388,9 @@ BEGIN TRY
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
 				,[dblAddOnQuantity]
-				,[intConcurrencyId])
+				,[intConcurrencyId]
+				,[dblQualityPremium]
+				,[dblOptionalityPremium])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
 				,[intItemId]						= IC.[intItemId]
@@ -517,6 +510,8 @@ BEGIN TRY
 				,[ysnAddonParent]					= @ItemAddonParent
 				,[dblAddOnQuantity]					= @ItemAddOnQuantity
 				,[intConcurrencyId]					= 0
+				,[dblQualityPremium]				= @ItemQualityPremium
+				,[dblOptionalityPremium]			= @ItemOptionalityPremium
 			FROM tblICItem IC
 			INNER JOIN tblICItemLocation IL ON IC.intItemId = IL.intItemId
 			WHERE IC.[intItemId] = @ItemId

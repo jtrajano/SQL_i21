@@ -170,14 +170,14 @@ BEGIN TRY
 		DECLARE @txtVendorAccountNoId INT
 		SELECT @txtVendorAccountNoId = intControlId FROM tblSMControl WHERE intScreenId = @entityVendorId AND strControlId = 'txtVendorAccountNo'
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleControlPermission WHERE intUserRoleId = @UserRoleID AND intControlId = @txtVendorAccountNoId)
-		BEGIN
-			IF @txtVendorAccountNoId IS NOT NULL
-			BEGIN
-				INSERT INTO tblSMUserRoleControlPermission ([intUserRoleId],[intControlId],[strPermission], [ysnRequired])
-				VALUES (@UserRoleID, @txtVendorAccountNoId, 'Editable', 1)
-			END
-		END
+		--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleControlPermission WHERE intUserRoleId = @UserRoleID AND intControlId = @txtVendorAccountNoId)
+		--BEGIN
+		--	IF @txtVendorAccountNoId IS NOT NULL
+		--	BEGIN
+		--		INSERT INTO tblSMUserRoleControlPermission ([intUserRoleId],[intControlId],[strPermission], [ysnRequired])
+		--		VALUES (@UserRoleID, @txtVendorAccountNoId, 'Editable', 1)
+		--	END
+		--END
 	END
 	
 	---- Iterate through all affected user securities and apply Master Menus

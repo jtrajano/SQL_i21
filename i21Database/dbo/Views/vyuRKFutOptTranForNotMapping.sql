@@ -75,6 +75,9 @@ SELECT DE.intFutOptTransactionId
 							WHEN DE.intOrderTypeId = 3 THEN 'Market'
 							ELSE '' END) COLLATE Latin1_General_CI_AS
 	, strDerivativeContractNumber = CASE WHEN ISNULL(contractH.intContractHeaderId, 0) <> 0 THEN contractH.strContractNumber + ' - ' + CAST(contractD.intContractSeq AS NVARCHAR(50)) ELSE NULL END COLLATE Latin1_General_CI_AS 
+	, strOTCSource = CASE WHEN DE.intSelectedInstrumentTypeId = 2 
+							THEN CASE WHEN ISNULL(DE.strSource, '') <> '' THEN DE.strSource ELSE 'Manual' END 
+							ELSE '' END COLLATE Latin1_General_CI_AS
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId

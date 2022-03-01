@@ -1,5 +1,5 @@
 CREATE FUNCTION [dbo].[fnICCalculateCheckDigit] (
-	@UPC NVARCHAR(MAX)
+	@UPC NVARCHAR(50)
 )
 RETURNS INT 
 AS
@@ -7,7 +7,7 @@ BEGIN
 	DECLARE @intOddTotal AS INT = 0
     DECLARE @intEvenTotal AS INT = 0
     DECLARE @intTotal AS INT = 0
-	DECLARE @intCheckDigit AS INT
+	DECLARE @intCheckDigit AS INT 
 
     IF (LEN(@UPC) = 11 AND ISNUMERIC(@UPC) = 1)
     BEGIN
@@ -48,8 +48,12 @@ BEGIN
 
         SET @intOddTotal = @intOddTotal * 3
         SET @intTotal = @intOddTotal + @intEvenTotal
+		SET @intCheckDigit = (@intTotal % 10)
 
-        SET @intCheckDigit = 10 - (@intTotal % 10)
+		IF @intCheckDigit <> 0 
+		BEGIN
+			SET @intCheckDigit = 10 - @intCheckDigit
+		END 
     END
 
 	RETURN @intCheckDigit

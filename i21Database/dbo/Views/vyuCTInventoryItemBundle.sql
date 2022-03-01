@@ -26,7 +26,13 @@ AS
 			IM.ysnInventoryCost,
 			IM.ysnBasisContract,
 			NULL AS	intBundleId, 
-			NULL as intBundleItemId
+			NULL as intBundleItemId,
+			ICC.strProductType,
+			ICC.strGrade,
+			ICC.strRegion,
+			ICC.strSeason,
+			ICC.strClass,
+			ICC.strProductLine
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT
 	JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	LEFT
@@ -34,7 +40,9 @@ AS
 	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId
 										AND	CA.strType					=	'Origin'			LEFT
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		LEFT
-	JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId		
+	JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId LEFT 
+	JOIN	 vyuICGetCompactItem ICC ON ICC.intItemId = IM.intItemId
+			
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material')
 
 
@@ -62,7 +70,13 @@ AS
 			IM.ysnInventoryCost,
 			IM.ysnBasisContract,
 			null AS	intBundleId, 
-			null as intBundleItemId
+			null as intBundleItemId,
+			ICC.strProductType,
+			ICC.strGrade,
+			ICC.strRegion,
+			ICC.strSeason,
+			ICC.strClass,
+			ICC.strProductLine
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -70,7 +84,8 @@ AS
 	LEFT JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId
 										AND	CA.strType					=	'Origin'			
 	LEFT JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
-	LEFT JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId			
+	LEFT JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId		
+	LEFT JOIN	 vyuICGetCompactItem ICC ON ICC.intItemId = IM.intItemId	
 	WHERE	IM.strType IN ('Bundle')
 
 	UNION ALL
@@ -97,7 +112,13 @@ AS
 			IM.ysnInventoryCost,
 			IM.ysnBasisContract,
 			BI.intItemId AS	intBundleId, 
-			NULL as intBundleItemId
+			NULL as intBundleItemId,
+			ICC.strProductType,
+			ICC.strGrade,
+			ICC.strRegion,
+			ICC.strSeason,
+			ICC.strClass,
+			ICC.strProductLine
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -107,6 +128,7 @@ AS
 	LEFT JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
 	LEFT JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId		
 	JOIN	vyuICGetBundleItem		BI	ON	BI.intBundleItemId			=	IM.intItemId 
+	LEFT  JOIN	 vyuICGetCompactItem ICC ON ICC.intItemId = IM.intItemId
 	--LEFT JOIN	vyuICGetBundleItem		B2	ON	B2.intItemId				=	IM.intItemId
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material','Bundle')
 	
@@ -134,7 +156,13 @@ AS
 			IM.ysnInventoryCost,
 			IM.ysnBasisContract,
 			NULL AS	intBundleId, 
-			B2.intBundleItemId as intBundleItemId
+			B2.intBundleItemId as intBundleItemId,
+			ICC.strProductType,
+			ICC.strGrade,
+			ICC.strRegion,
+			ICC.strSeason,
+			ICC.strClass,
+			ICC.strProductLine
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -144,6 +172,7 @@ AS
 	LEFT JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
 	LEFT JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId		
 	JOIN	vyuICGetBundleItem		B2	ON	B2.intItemId				=	IM.intItemId
+	LEFT  JOIN	 vyuICGetCompactItem ICC ON ICC.intItemId = IM.intItemId
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material','Bundle')
 
 

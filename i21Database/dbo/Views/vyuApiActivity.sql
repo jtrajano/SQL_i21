@@ -31,7 +31,7 @@ SELECT
 	, a.strRelatedTo
 	, a.strRecordNo
 	, a.ysnBillable
-	, created.dtmDate dtmDateCreated
+	, COALESCE(created.dtmDate, a.dtmCreated) dtmDateCreated
 	, COALESCE(updated.dtmDate, created.dtmDate, a.dtmCreated) dtmDateLastUpdated
 FROM tblSMActivity a
 LEFT JOIN tblEMEntity e ON e.intEntityId = a.intCreatedBy

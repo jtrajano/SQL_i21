@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetFreightTermCost]
 	@intContractTypeId INT
 	, @intCommodityId INT
-	, @intItemContractId INT = NULL
 	, @intFromPortId INT
 	, @intToPortId INT
 	, @intFromTermId INT
@@ -17,7 +16,7 @@ BEGIN TRY
 		, @ysnAutoCalc BIT
 		, @intDefaultFreightId INT
 		, @intDefaultInsuranceId INT
-		, @@intDefaultTHCId INT
+		, @intDefaultTHCId INT
 		, @intDefaultStorageId INT
 		, @intFreightRateMatrixId INT
 		, @strFreightItem NVARCHAR(100)
@@ -36,7 +35,7 @@ BEGIN TRY
 		, @ysnAutoCalc = ISNULL(ysnAutoCalculateFreightTermCost, 0)
 		, @intDefaultFreightId = intDefaultFreightId
 		, @intDefaultInsuranceId = intDefaultInsuranceId
-		, @@intDefaultTHCId = intDefaultTHCId
+		, @intDefaultTHCId = intDefaultTHCId
 		, @intDefaultStorageId = intDefaultStorageId
 		, @strFreightItem = strFreightItem
 		, @strInsuranceItem = strInsuranceItem
@@ -109,6 +108,28 @@ BEGIN TRY
 	--	WHERE ctq.intCommodityId = @intCommodityId
 	--		AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
 	--END
+
+	IF (ISNULL(@intDefaultTHCId, 0) <> 0)
+	BEGIN
+		INSERT INTO @CostItems
+		SELECT @intDefaultTHCId
+			, @strTHCItem
+			, NULL
+			, NULL
+			, dblRate = 0
+			, dblAmount = 0
+	END
+
+	IF (ISNULL(@intDefaultStorageId, 0) <> 0)
+	BEGIN
+		INSERT INTO @CostItems
+		SELECT @intDefaultStorageId
+			, @strStorageItem
+			, NULL
+			, NULL
+			, dblRate = 0
+			, dblAmount = 0
+	END
 
 
 	IF EXISTS (SELECT TOP 1 1 FROM @CostItems WHERE ISNULL(dblRate, 0) <> 0)
