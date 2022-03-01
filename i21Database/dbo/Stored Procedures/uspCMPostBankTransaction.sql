@@ -545,6 +545,12 @@ BEGIN
 	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
 	WHERE	strTransactionId = @strTransactionId
 	
+	--DELETE FEES ON UNPOSTING
+	IF @ysnPost =0
+	BEGIN
+		DELETE FROM tblGLDetail WHERE strTransactionId = strTransactionId + '-F'
+		DELETE FROM tblCMBankTransaction WHERE strTransactionId = strTransactionId + '-F'
+	END
 
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END --@ysnRecap = 0

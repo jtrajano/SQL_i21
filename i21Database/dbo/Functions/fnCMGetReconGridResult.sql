@@ -51,10 +51,10 @@ BEGIN
 			, dtmDate
 			, convert(DATETIME,convert(VARCHAR,dtmDateReconciled,101)) dtmDateReconciled
 			, intBankAccountId
-			, intBankTransactionTypeId
+			, v.intBankTransactionTypeId
 			, intTransactionId
 			, intBankLoanId 
-			, strBankTransactionTypeName
+			, t.strBankTransactionTypeName
 			, strMemo
 			, strPayee
 			, strReferenceNo
@@ -62,8 +62,9 @@ BEGIN
 			, ysnClr ysnClrOrig
 			, ysnCheckVoid ysnCheckVoidOrig
 			, ysnPosted
-		FROM [dbo].[vyuCMBankTransaction] v
-		WHERE intBankAccountId = @intBankAccountId AND intBankTransactionTypeId IN(2,3,9, 12,13,14,15,16,20,21,22,23,51,52,124)
+		FROM [dbo].[tblCMBankTransaction] v
+		JOIN tblCMBankTransactionType t ON v.intBankTransactionTypeId = t.intBankTransactionTypeId
+		WHERE intBankAccountId = @intBankAccountId AND strDebitCredit = 'D'
 		AND @ysnPayment = 1
 		UNION
 				--DEPOSIT
@@ -74,10 +75,10 @@ BEGIN
 			, dtmDate
 			, convert(DATETIME,convert(VARCHAR,dtmDateReconciled,101)) dtmDateReconciled
 			, intBankAccountId
-			, intBankTransactionTypeId
+			, v.intBankTransactionTypeId
 			, intTransactionId
 			, intBankLoanId 
-			, strBankTransactionTypeName
+			, t.strBankTransactionTypeName
 			, strMemo
 			, strPayee
 			, strReferenceNo
@@ -85,8 +86,9 @@ BEGIN
 			, ysnClr ysnClrOrig
 			, ysnCheckVoid ysnCheckVoidOrig
 			, ysnPosted
-		FROM [dbo].[vyuCMBankTransaction] v
-		WHERE intBankAccountId = @intBankAccountId AND intBankTransactionTypeId IN(1,10,11,18,19,103,116,121,122,123)
+		FROM [dbo].[tblCMBankTransaction] v
+		JOIN tblCMBankTransactionType t ON v.intBankTransactionTypeId = t.intBankTransactionTypeId
+		WHERE intBankAccountId = @intBankAccountId AND strDebitCredit = 'C'
 		AND @ysnPayment = 0
 		UNION
 				--PAYMENT
@@ -97,10 +99,10 @@ BEGIN
 			, dtmDate 
 			, convert(DATETIME,convert(VARCHAR,dtmDateReconciled,101)) dtmDateReconciled
 			, intBankAccountId
-			, intBankTransactionTypeId
+			, v.intBankTransactionTypeId
 			, intTransactionId
 			, intBankLoanId 
-			, strBankTransactionTypeName
+			, t.strBankTransactionTypeName
 			, strMemo
 			, strPayee
 			, strReferenceNo
@@ -108,8 +110,9 @@ BEGIN
 			, ysnClr ysnClrOrig
 			, ysnCheckVoid ysnCheckVoidOrig
 			, ysnPosted
-		FROM [dbo].[vyuCMBankTransaction] v
-		WHERE intBankAccountId = @intBankAccountId AND intBankTransactionTypeId = 5 AND @ysnPayment = 1 AND dblAmount < 0
+		FROM [dbo].[tblCMBankTransaction] v
+		JOIN tblCMBankTransactionType t ON v.intBankTransactionTypeId = t.intBankTransactionTypeId
+		WHERE intBankAccountId = @intBankAccountId AND v.intBankTransactionTypeId = 5 AND @ysnPayment = 1 AND dblAmount < 0
 		UNION
 				--DEPOSIT
 		SELECT
@@ -119,10 +122,10 @@ BEGIN
 			, dtmDate
 			, convert(DATETIME,convert(VARCHAR,dtmDateReconciled,101)) dtmDateReconciled
 			, intBankAccountId
-			, intBankTransactionTypeId
+			, v.intBankTransactionTypeId
 			, intTransactionId
 			, intBankLoanId 
-			, strBankTransactionTypeName
+			, t.strBankTransactionTypeName
 			, strMemo
 			, strPayee
 			, strReferenceNo
@@ -130,8 +133,9 @@ BEGIN
 			, ysnClr ysnClrOrig
 			, ysnCheckVoid ysnCheckVoidOrig
 			, ysnPosted
-		FROM [dbo].[vyuCMBankTransaction] v
-		WHERE intBankAccountId = @intBankAccountId AND intBankTransactionTypeId = 5
+		FROM [dbo].[tblCMBankTransaction] v
+		JOIN tblCMBankTransactionType t ON v.intBankTransactionTypeId = t.intBankTransactionTypeId
+		WHERE intBankAccountId = @intBankAccountId AND v.intBankTransactionTypeId = 5
 		AND ISNULL(@ysnPayment,0) = 0 AND dblAmount > 0
 		),
 
