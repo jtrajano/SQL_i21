@@ -259,6 +259,22 @@ DECLARE @EmployeeCount AS INT
 									END
 								END
 						END
+
+						INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+						SELECT TOP 1
+							NEWID()
+							, guiApiImportLogId = @guiLogId
+							, strField = 'Employee Earnings'
+							, strValue = SE.strEarningDesc
+							, strLogLevel = 'Info'
+							, strStatus = 'Success'
+							, intRowNo = SE.intRowNumber
+							, strMessage = 'The employee earnings has been successfully imported to i21.'
+						FROM tblApiSchemaEmployeeEarnings SE
+						LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
+						WHERE SE.guiApiUniqueId = @guiApiUniqueId
+						AND SE.strEarningDesc = @strEarningId
+
 						DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @strEmployeeId AND strEarningDesc = @strEarningId
 
 					END
@@ -437,23 +453,23 @@ DECLARE @EmployeeCount AS INT
 									END
 								END
 
+							INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+							SELECT TOP 1
+								NEWID()
+								, guiApiImportLogId = @guiLogId
+								, strField = 'Employee Earnings'
+								, strValue = SE.strEarningDesc
+								, strLogLevel = 'Info'
+								, strStatus = 'Success'
+								, intRowNo = SE.intRowNumber
+								, strMessage = 'The employee earnings has been successfully updated to i21.'
+							FROM tblApiSchemaEmployeeEarnings SE
+							LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
+							WHERE SE.guiApiUniqueId = @guiApiUniqueId
+							AND SE.strEarningDesc = @strEarningId
+
 							DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @strEmployeeId AND strEarningDesc = @strEarningId
 					END
-
-				INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-				SELECT TOP 1
-					NEWID()
-					, guiApiImportLogId = @guiLogId
-					, strField = 'Employee Earnings'
-					, strValue = SE.strEarningDesc
-					, strLogLevel = 'Info'
-					, strStatus = 'Success'
-					, intRowNo = SE.intRowNumber
-					, strMessage = 'The employee earnings has been successfully imported to i21.'
-				FROM tblApiSchemaEmployeeEarnings SE
-				LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
-				WHERE SE.guiApiUniqueId = @guiApiUniqueId
-				AND SE.strEarningDesc = @strEarningId
 				END
 			ELSE
 				BEGIN
@@ -466,11 +482,13 @@ DECLARE @EmployeeCount AS INT
 						, strLogLevel = 'Info'
 						, strStatus = 'Success'
 						, intRowNo = SE.intRowNumber
-						, strMessage = 'Cannot fint the value '+ @strCalculationType +'. Please try again.'
+						, strMessage = 'Wrong input/format for Calculation Type. Please try again.'
 					FROM tblApiSchemaEmployeeEarnings SE
 					LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
 					WHERE SE.guiApiUniqueId = @guiApiUniqueId
 					AND SE.strEarningDesc = @strEarningId
+
+					DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @strEmployeeId AND strEarningDesc = @strEarningId
 				END
 				
 
