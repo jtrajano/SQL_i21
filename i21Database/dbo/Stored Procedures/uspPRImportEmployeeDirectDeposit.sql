@@ -146,25 +146,23 @@ DECLARE @BankCount AS INT
 										SET @NewId = SCOPE_IDENTITY()
 								END
 
-								SELECT TOP 1 @BankCount = COUNT(*) FROM tblEMEntityEFTInformation WHERE intEntityEFTInfoId = @NewId
-								IF(@BankCount >= 1)
-								BEGIN
-									INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-									SELECT TOP 1
-										  NEWID()
-										, guiApiImportLogId = @guiLogId
-										, strField = 'Employee Direct Deposit'
-										, strValue = SE.strBankName + ' - ' + SE.strAccountNumber
-										, strLogLevel = 'Info'
-										, strStatus = 'Success'
-										, intRowNo = SE.intRowNumber
-										, strMessage = 'The employee direct deposit has been successfully imported.'
-									FROM tblApiSchemaEmployeeDirectDeposit SE
-									LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
-									WHERE SE.guiApiUniqueId = @guiApiUniqueId
-									AND SE.strBankName = @strBankName
-									AND SE.strAccountNumber = @strAccountNumber
-								END
+								INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+								SELECT TOP 1
+										NEWID()
+									, guiApiImportLogId = @guiLogId
+									, strField = 'Employee Direct Deposit'
+									, strValue = SE.strBankName + ' - ' + SE.strAccountNumber
+									, strLogLevel = 'Info'
+									, strStatus = 'Success'
+									, intRowNo = SE.intRowNumber
+									, strMessage = 'The employee direct deposit has been successfully imported.'
+								FROM tblApiSchemaEmployeeDirectDeposit SE
+								LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
+								WHERE SE.guiApiUniqueId = @guiApiUniqueId
+								AND SE.strBankName = @strBankName
+								AND SE.strAccountNumber = @strAccountNumber
+
+
 								DELETE FROM #TempEmployeeDirectDeposit WHERE LTRIM(RTRIM(intEntityNo)) = LTRIM(RTRIM(@strEmployeeId)) AND LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)) AND LTRIM(RTRIM(strAccountNumber)) = LTRIM(RTRIM(@strAccountNumber))
 							END
 					ELSE
@@ -234,6 +232,8 @@ DECLARE @BankCount AS INT
 					WHERE SE.guiApiUniqueId = @guiApiUniqueId
 					AND SE.strBankName = @strBankName
 					AND SE.strAccountNumber = @strAccountNumber
+
+					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
 				END
 			END
 
@@ -254,6 +254,8 @@ DECLARE @BankCount AS INT
 				WHERE SE.guiApiUniqueId = @guiApiUniqueId
 				AND SE.strBankName = @strBankName
 				AND SE.strAccountNumber = @strAccountNumber
+
+				DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
 			END
 		END
 		ELSE
@@ -268,61 +270,14 @@ DECLARE @BankCount AS INT
 			   ,strStatus		= 'Failed'
 			   ,intRowNo		= SE.intRowNumber
 			   ,strMessage		= 'Cannot find Bank Details. Bank name is invalid.'
-			   FROM tblApiSchemaEmployeeDirectDeposit SE
-			   LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
-			   WHERE SE.guiApiUniqueId = @guiApiUniqueId
-			   AND SE.intEntityNo IS NULL
+				FROM tblApiSchemaEmployeeDirectDeposit SE
+				LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = @intEntityNo
+				WHERE SE.guiApiUniqueId = @guiApiUniqueId
+				AND SE.strBankName = @strBankName
+				AND SE.strAccountNumber = @strAccountNumber
+
+			   DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
 		END
-			BEGIN
-					--======================Open symmetric code snipet=====================
-						 OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
-						 DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
-						 WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
-
-						 UPDATE tblEMEntityEFTInformation SET
-							intBankId = (SELECT TOP 1 intBankId FROM tblCMBank where strBankName = @strBankName), 
-							strBankName = @strBankName, 
-							strAccountNumber = dbo.fnAESEncryptASym(@strAccountNumber), 
-							strAccountType = @strAccountType,
-							strAccountClassification = @strClassification, 
-							dtmEffectiveDate = CAST(@dtmEffectiveDate as date),
-							ysnActive = @ysnActive,
-							ysnPrenoteSent = @ysnPreNoteSent,
-							ysnPrintNotifications = 0,
-							dblAmount = @dblAmount, 
-							intOrder = @intOrder,
-							ysnPullTaxSeparately = 0,
-							ysnRefundBudgetCredits = 0,
-							strDistributionType = @strDistributionType
-						WHERE intEntityId = @intEntityNo 
-							AND intBankId = (SELECT TOP 1 intBankId FROM tblCMBank where strBankName = @strBankName)
-							AND dbo.fnAESDecryptASym(strAccountNumber) = @strAccountNumber
-							AND strAccountType = @strAccountType
-
-						--======================Close symmetric code snnipet=====================
-						CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
-					
-					INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-					SELECT TOP 1
-						  NEWID()
-						, guiApiImportLogId = @guiLogId
-						, strField = 'Employee Direct Deposit'
-						, strValue = SE.strBankName + ' - ' + SE.strAccountNumber
-						, strLogLevel = 'Info'
-						, strStatus = 'Success'
-						, intRowNo = SE.intRowNumber
-						, strMessage = 'The employee direct deposit has been successfully imported.'
-					FROM tblApiSchemaEmployeeDirectDeposit SE
-					LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
-					WHERE SE.guiApiUniqueId = @guiApiUniqueId
-					AND SE.strBankName = @strBankName
-					AND SE.strAccountNumber = @strAccountNumber
-					
-					DELETE FROM #TempEmployeeDirectDeposit WHERE LTRIM(RTRIM(intEntityNo)) = LTRIM(RTRIM(@strEmployeeId)) AND LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)) AND LTRIM(RTRIM(strAccountNumber)) = LTRIM(RTRIM(@strAccountNumber))
-			END
-
-		
-
 
 	END
 
