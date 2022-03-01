@@ -9645,6 +9645,7 @@
     <Build Include="dbo\Views\vyuMFGetExternalGroupItem.sql" />
     <Build Include="dbo\Views\vyuMFGetItemList.sql" />
     <None Include="Scripts\Post-Deployment\AP\InsertClearingTransactionsToClearingTable.sql" />
+    <None Include="Scripts\Post-Deployment\AP\PopulateVoucherPayToBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAdditionalBasisError.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateAdditionalBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspMFImportAdditionalBasis.sql" />
