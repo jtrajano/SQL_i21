@@ -6,6 +6,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
+SET ANSI_WARNINGS ON
 
 BEGIN	
 	DECLARE @intId INT
@@ -20,9 +21,9 @@ BEGIN
 		, @intBankTransactionId INT
 		, @strBankTransactionId NVARCHAR(100)
 		, @intBankId INT
-		, @strBank NVARCHAR(200)
+		, @strBank NVARCHAR(500)
 		, @intBankAccountId INT
-		, @strBankAccount NVARCHAR(200)
+		, @strBankAccount NVARCHAR(MAX)
 		, @intBorrowingFacilityId INT
 		, @strBorrowingFacility NVARCHAR(200) 
 		, @strBorrowingFacilityBankRefNo NVARCHAR(100) 
@@ -55,7 +56,7 @@ BEGIN
 		  strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, intTradeFinanceTransactionId INT NULL
-		, strTradeFinanceTransaction NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		, strTradeFinanceTransaction NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		, intTransactionHeaderId INT NULL
 		, intTransactionDetailId INT NULL
 		, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -63,9 +64,9 @@ BEGIN
 		, intBankTransactionId INT NULL
 		, strBankTransactionId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		, intBankId INT NULL
-		, strBank NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+		, strBank NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 		, intBankAccountId INT NULL
-		, strBankAccount NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+		, strBankAccount NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		, intBorrowingFacilityId INT NULL
 		, strBorrowingFacility NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 		, strBorrowingFacilityBankRefNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

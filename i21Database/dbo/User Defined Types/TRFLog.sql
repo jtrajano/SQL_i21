@@ -11,9 +11,9 @@ CREATE TYPE [dbo].[TRFLog] AS TABLE (
 	, intBankTransactionId INT NULL
 	, strBankTransactionId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, intBankId INT NULL
-	, strBank NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strBank NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 	, intBankAccountId INT NULL
-	, strBankAccount NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strBankAccount NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	, intBorrowingFacilityId INT NULL
 	, strBorrowingFacility NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, strBorrowingFacilityBankRefNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
