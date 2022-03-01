@@ -140,7 +140,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,CH.strCustomerContract
 	,CH.dblQuantity
 	,strCommodityUnitMeasure = CMUM.strUnitMeasure
-	,strContractQuantityInfo = LTRIM(dbo.fnRemoveTrailingZeroes(CH.dblQuantity)) + ' ' + CMUM.strUnitMeasure
+	,strContractQuantityInfo = LTRIM(dbo.fnRemoveTrailingZeroes(LD.dblQuantity)) + ' ' + CMUM.strUnitMeasure
 	,CD.strERPPONumber
 	,dblTotalClaimAmount = ROUND(SUM(WCD.dblClaimAmount), 2) 
 	,strMemoType = CASE 
@@ -208,6 +208,7 @@ JOIN (
 		,LOD.intItemUOMId
 		,LOD.intWeightItemUOMId
 		,LOD.intLoadDetailId
+		,LOD.dblQuantity
 	FROM tblLGLoadDetail LOD
 	WHERE LOD.intLoadId = @intLoadId
 	) LD ON WCD.intContractDetailId = LD.intSContractDetailId
@@ -230,7 +231,7 @@ LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 LEFT JOIN tblSMCurrency MCU ON MCU.intCurrencyID = CU.intMainCurrencyId
 OUTER APPLY (SELECT TOP 1 i1.strInvoiceNumber FROM tblARInvoice i1 
 			INNER JOIN tblARInvoiceDetail i2 ON i1.intInvoiceId = i2.intInvoiceId 
-			WHERE i2.intContractDetailId = CD.intContractDetailId
+			WHERE i2.intLoadDetailId = LD.intLoadDetailId
 			AND i1.strTransactionType <> 'Credit Memo') OINV
 
 left join tblSMCountry				rtELCountry on lower(rtrim(ltrim(rtELCountry.strCountry))) = lower(rtrim(ltrim(EL.strCountry)))
@@ -287,6 +288,7 @@ GROUP BY WC.intWeightClaimId
 	,WCD.dblToNet
 	,WUOM.strUnitMeasure
 	,WUOM.strSymbol
+	,LD.dblQuantity
 	,LD.dblGross
 	,LD.dblTare
 	,LD.dblNet
