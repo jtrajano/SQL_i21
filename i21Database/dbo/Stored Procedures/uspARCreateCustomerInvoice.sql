@@ -146,15 +146,15 @@
 	,@PaidCPP						BIT				= 0
 	,@ItemQualityPremium			NUMERIC(18, 6)	= 0
 	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0
-	,@BankId						INT
-	,@BankAccountId					INT
-	,@BorrowingFacilityId			INT
-	,@BorrowingFacilityLimitId		INT
-	,@BankReferenceNo				NVARCHAR(100)
-	,@BankTransactionId				NVARCHAR(100)
-	,@LoanAmount					NUMERIC(18, 6)
-	,@BankValuationRuleId			INT
-	,@TradeFinanceComments			NVARCHAR(MAX)
+	,@BankId						INT				= NULL
+	,@BankAccountId					INT				= NULL
+	,@BorrowingFacilityId			INT				= NULL
+	,@BorrowingFacilityLimitId		INT				= NULL
+	,@BankReferenceNo				NVARCHAR(100)	= NULL
+	,@BankTransactionId				NVARCHAR(100)	= NULL
+	,@LoanAmount					NUMERIC(18, 6)	= NULL
+	,@BankValuationRuleId			INT				= NULL
+	,@TradeFinanceComments			NVARCHAR(MAX)	= NULL
 AS
 
 BEGIN
