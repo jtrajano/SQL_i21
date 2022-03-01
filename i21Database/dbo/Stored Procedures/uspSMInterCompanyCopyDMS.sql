@@ -188,7 +188,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
   
 		-----------------------------------------END QUOTE-------------------------------------------------------------------  
 		--work around on blob  
-		SET @smUploadSQL = N'INSERT INTO [@db].[dbo].[tblSMUpload](strFileIdentifier, blbFile, dtmDateUploaded, intConcurrencyId) values((select strFileIdentifier FROM tblSMUpload WHERE intUploadId = @intUploadId), (select blbFile FROM tblSMUpload WHERE intUploadId = @intUploadId), GETUTCDATE(), 1) ' +  
+		SET @smUploadSQL = N'INSERT INTO [@db].[dbo].[tblSMUpload](strFileIdentifier, blbFile, dtmDateUploaded, intConcurrencyId) values(NEWID(), (select blbFile FROM tblSMUpload WHERE intUploadId = @intUploadId), GETUTCDATE(), 1) ' +  
 		'SET @id = (SELECT SCOPE_IDENTITY()) '  
        
 		SET @smUploadSQL = (REPLACE(REPLACE(REPLACE(@smUploadSQL,'@blbFile',@blbFile),'@db',@strDestinationDatabaseName),'@intUploadId', @intUploadId))  
