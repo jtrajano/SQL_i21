@@ -528,6 +528,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
     <Build Include="dbo\Views\vyuARAccountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMClearCashFlowReportRates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
