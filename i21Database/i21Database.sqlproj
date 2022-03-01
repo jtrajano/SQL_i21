@@ -527,6 +527,7 @@
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
+    <Build Include="dbo\Views\vyuARAccountDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
