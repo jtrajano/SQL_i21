@@ -153,6 +153,7 @@
 	[strTradeFinanceComments]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS		NULL,
 	[dblRoundingTotal]					NUMERIC(18, 6)									NULL		DEFAULT ((0)),
 	[dblBaseRoundingTotal]				NUMERIC(18, 6)									NULL		DEFAULT ((0)),
+	[ysnIntraCompany]					BIT												NOT NULL	CONSTRAINT [DF_tblARCompanyPreference_ysnIntraCompany] DEFAULT((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),

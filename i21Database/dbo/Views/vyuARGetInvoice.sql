@@ -191,6 +191,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , dblBaseRoundingTotal					= INV.dblBaseRoundingTotal
 	 , intLocationAccountSegmentId			= GLSEGMENT.intLocationAccountSegmentId
 	 , intCompanyAccountSegmentId			= GLSEGMENT.intCompanyAccountSegmentId
+	 , ysnIntraCompany						= INV.ysnIntraCompany
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
