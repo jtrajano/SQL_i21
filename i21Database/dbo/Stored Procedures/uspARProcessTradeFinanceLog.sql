@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessTradeFinanceLog]
 	  @PaymentStaging	PaymentIntegrationStagingTable READONLY
 	 ,@UserId			INT
-	 ,@Post			BIT
+	 ,@Post				BIT
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -65,6 +65,10 @@ INNER JOIN @PaymentStaging PS ON PS.intInvoiceId = ARID.intInvoiceId
 LEFT JOIN tblCTContractDetail CTCD on CTCD.intContractDetailId = ARID.intContractDetailId
 LEFT JOIN tblCTContractHeader CTCH on CTCH.intContractHeaderId = CTCD.intContractHeaderId
 LEFT JOIN tblCMBorrowingFacilityLimit CMBFL ON ARI.intBorrowingFacilityLimitId = CMBFL.intBorrowingFacilityLimitId
+WHERE ISNULL(ARI.intBankId, 0) <> 0
+  AND ISNULL(ARI.intBankAccountId, 0) <> 0
+  AND ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
+  AND ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
 
 EXEC uspTRFLogTradeFinance @TradeFinanceLogs
 
