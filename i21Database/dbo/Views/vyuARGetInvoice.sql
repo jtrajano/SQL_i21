@@ -189,6 +189,8 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , strTradeFinanceComments				= INV.strTradeFinanceComments
 	 , dblRoundingTotal						= INV.dblRoundingTotal	
 	 , dblBaseRoundingTotal					= INV.dblBaseRoundingTotal
+	 , intLocationAccountSegmentId			= GLSEGMENT.intLocationAccountSegmentId
+	 , intCompanyAccountSegmentId			= GLSEGMENT.intCompanyAccountSegmentId
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -396,3 +398,8 @@ LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccount
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId, 0)
 LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId, 0)
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId, 0)
+OUTER APPLY(
+	SELECT TOP 1 intLocationAccountSegmentId, intCompanyAccountSegmentId
+	FROM dbo.vyuARAccountDetail
+	WHERE intAccountId = INV.intAccountId
+) GLSEGMENT
