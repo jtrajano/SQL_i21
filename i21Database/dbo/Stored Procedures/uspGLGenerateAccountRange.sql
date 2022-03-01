@@ -40,6 +40,7 @@ AS
 	WHEN MATCHED THEN 
 		UPDATE 
 		SET RangeTable.intAccountGroupId = RangeHardCodedValues.intAccountGroupId
+
 	WHEN NOT MATCHED THEN
 		INSERT (
 			strAccountType
@@ -71,6 +72,8 @@ AS
 	SET intMinRange = B.intMinRange , intMaxRange =B.intMaxRange
 	FROM tblGLAccountRange A 
 	JOIN R1 B ON A.strAccountType = B.strAccountType
+	WHERE A.intMinRange IS NULL AND A.intMaxRange IS NULL
+
 		SET @result = 'SUCCESS'
 	END TRY
 	BEGIN CATCH
