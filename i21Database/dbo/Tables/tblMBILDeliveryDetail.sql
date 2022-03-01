@@ -1,6 +1,7 @@
 CREATE TABLE [dbo].[tblMBILDeliveryDetail]
 (
 	[intDeliveryDetailId] [int] IDENTITY(1,1) NOT NULL,
+	[intLoadDetailId] [int] null,
 	[intDeliveryHeaderId] [int] NULL,
 	[intPickupDetailId] [int] NULL,
 	[intItemId] [int] NULL,

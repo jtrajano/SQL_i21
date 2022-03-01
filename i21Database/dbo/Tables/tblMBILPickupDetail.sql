@@ -1,13 +1,31 @@
 CREATE TABLE [dbo].[tblMBILPickupDetail]
 (
 	[intPickupDetailId] [int] IDENTITY(1,1) NOT NULL,
-	[intPickupHeaderId] [int] NOT NULL,
+	[intLoadDetailId] [int] null,
+	[intLoadHeaderId] [int] NOT NULL,
+	[intSellerId] [int] NULL,
+	[intSalespersonId] [int] NULL,
+	[strTerminalRefNo] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strType] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[intEntityId] [int] NULL,
+	[intEntityLocationId] [int] NULL,
+	[intCompanyLocationId] [int] NULL,
+	[intContractDetailId] [int] NULL,
+	[intTaxGroupId] [int] NULL,
+	[dtmPickupFrom] [datetime] NULL,
+	[dtmPickupTo] [datetime] NULL,
+	[dtmActualPickupFrom] [datetime] NULL,
+	[dtmActualPickupTo] [datetime] NULL,
+	[strPONumber] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strBOL] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strNote] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] [int] NULL,
 	[dblQuantity] [numeric](18, 6) NULL,
 	[dblPickupQuantity] [numeric](18, 6) NULL,
 	[strItemUOM] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[strRack] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
-	[intConcurrencyId] [int] DEFAULT(1) NULL,
- CONSTRAINT [PK_tblMBILPickupDetail] PRIMARY KEY CLUSTERED ([intPickupDetailId]),
- CONSTRAINT [FK_tblMBILPickupDetail_tblMBILPickupHeader] FOREIGN KEY ([intPickupHeaderId]) REFERENCES [tblMBILPickupHeader]([intPickupHeaderId])
+	[ysnPickup] bit default 0 NULL,
+	[intConcurrencyId] [int] DEFAULT(1) NULL
+ CONSTRAINT [PK_tblMBILPickupDetail] PRIMARY KEY CLUSTERED (intPickupDetailId),
+ CONSTRAINT [FK_tblMBILPickupDetail_tblMBILLoadHeader] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [tblMBILLoadHeader]([intLoadHeaderId])
 )

@@ -1,168 +1,138 @@
-CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]   
-    @intDriverId AS INT    
-AS    
-SET QUOTED_IDENTIFIER OFF    
-SET ANSI_NULLS ON    
-SET NOCOUNT ON    
-SET XACT_ABORT ON    
-SET ANSI_WARNINGS OFF    
-BEGIN    
-    
- Select intLoadId into #forDeleteMBILLoad From tblMBILPickupHeader WHERE ysnPickup = 1 and intDriverEntityId = @intDriverId    
-    DELETE FROM tblMBILPickupDetail WHERE intPickupHeaderId not in(Select intPickupHeaderId from tblMBILPickupHeader where intLoadId in(Select intLoadId from #forDeleteMBILLoad))    
-    DELETE FROM tblMBILDeliveryDetail WHERE intDeliveryHeaderId not in(Select intDeliveryHeaderId from tblMBILDeliveryHeader where intLoadId in(Select intLoadId from #forDeleteMBILLoad))    
-    DELETE FROM tblMBILPickupHeader WHERE intLoadId not in(Select intLoadId From #forDeleteMBILLoad)    
-    DELETE FROM tblMBILDeliveryHeader WHERE intLoadId not in(Select intLoadId From #forDeleteMBILLoad)    
-     
-  CREATE TABLE #loadOrder     
-  (    
-   intLoadId int,  
-   intDriverEntityId int,    
-   strLoadNumber nvarchar(100) COLLATE Latin1_General_CI_AS NULL,    
-   strType varchar(100) COLLATE Latin1_General_CI_AS NULL,    
-   intEntityId int NULL,    
-   intEntityLocationId int NULL,    
-   intCompanyLocationId int NULL,    
-   intCompanyDeliveryLocationId int NULL,    
-   intCustomerId int NULL,    
-   intCustomerLocationId int NULL,    
-   intSellerId int NULL,    
-   intSalespersonId int NULL,    
-   strTerminalRefNo nvarchar(200) COLLATE Latin1_General_CI_AS NULL,    
-   intItemId int NULL,    
-   dblQuantity numeric(18,6) NULL,    
-   dtmPickUpFrom datetime NULL,    
-   dtmPickUpTo datetime NULL,    
-   dtmDeliveryFrom datetime NULL,    
-   dtmDeliveryTo datetime NULL,    
-   strPONumber nvarchar(200) COLLATE Latin1_General_CI_AS NULL    
-  )    
-    
- INSERT INTO #loadOrder    
-    SELECT *  
-    FROM vyuMBILLoadSchedule    
-    WHERE intDriverEntityId = @intDriverId AND intLoadId NOT IN (SELECT intLoadId FROM tblMBILPickupHeader)    
-   
-   INSERT INTO tblMBILPickupHeader(  
-    intLoadId    
-            ,intDriverEntityId    
-            ,strLoadNumber    
-            ,strType    
-            ,intEntityId    
-            ,intEntityLocationId    
-            ,intCompanyLocationId    
-   ,intSellerId    
-   ,intSalespersonId    
-   ,strTerminalRefNo    
-            ,dtmPickupFrom    
-            ,dtmPickupTo    
-            ,strPONumber  
-  )  
-   SELECT  a.intLoadId    
-    ,a.intDriverEntityId  
-    ,a.strLoadNumber  
-    ,a.strType   
-    ,a.intEntityId  
-    ,a.intEntityLocationId  
-    ,a.intCompanyLocationId  
-    ,a.intSellerId   
-    ,a.intSalespersonId    
-    ,a.strTerminalRefNo    
-    ,a.dtmPickUpFrom   
-    ,a.dtmPickUpTo   
-    ,a.strPONumber    
-        FROM #loadOrder a  
-        GROUP BY a.intLoadId    
-    ,a.intDriverEntityId  
-    ,a.strLoadNumber  
-    ,a.strType   
-    ,a.intEntityId  
-    ,a.intEntityLocationId  
-    ,a.intCompanyLocationId  
-    ,a.intSellerId   
-    ,a.intSalespersonId    
-    ,a.strTerminalRefNo    
-    ,a.dtmPickUpFrom   
-    ,a.dtmPickUpTo   
-    ,a.strPONumber   
-  
-  INSERT INTO tblMBILDeliveryHeader(  
-    intLoadId    
-            ,intDriverEntityId    
-   ,strLoadNumber    
-            ,strType    
-            ,intEntityId    
-            ,intEntityLocationId    
-            ,intCompanyLocationId    
-      ,dtmDeliveryFrom    
-      ,dtmDeliveryTo  
-  )  
-        SELECT   a.intLoadId    
-    ,intDriverEntityId    
-    ,strLoadNumber    
-    ,strType    
-    ,a.intCustomerId    
-    ,intCustomerLocationId  
-    ,intCompanyLocationId   
-    ,dtmDeliveryFrom    
-    ,dtmDeliveryTo  
-        FROM #loadOrder a  
-        GROUP BY a.intLoadId    
-    ,intDriverEntityId    
-    ,strLoadNumber    
-    ,strType    
-    ,a.intCustomerId    
-    ,intCustomerLocationId  
-    ,intCompanyLocationId    
-    ,dtmDeliveryFrom    
-    ,dtmDeliveryTo  
-  
-  INSERT INTO tblMBILPickupDetail(intPickupHeaderId,intItemId,dblQuantity)  
-  SELECT    b.intPickupHeaderId  
-    ,intItemId  
-                ,sum(dblQuantity)dblQuantity    
-        FROM #loadOrder a  
-  INNER JOIN tblMBILPickupHeader b on a.intLoadId = b.intLoadId and isnull(a.intEntityLocationId,a.intCompanyLocationId) = isnull(b.intEntityLocationId,b.intCompanyLocationId) and a.intDriverEntityId = @intDriverId  
-        --WHERE a.intLoadId = 1026  
-        GROUP BY  b.intPickupHeaderId  
-     ,a.intEntityId  
-    ,a.intEntityLocationId  
-    ,a.intCompanyLocationId  
-    ,a.intLoadId    
-    ,intItemId  
-  
-  INSERT INTO tblMBILDeliveryDetail(    
-    intDeliveryHeaderId  
-    ,intItemId    
-    ,dblQuantity    
-  )    
-  SELECT  b.intDeliveryHeaderId  
-    ,intItemId  
-                ,sum(dblQuantity)dblQuantity    
-        FROM #loadOrder a  
-  INNER JOIN tblMBILDeliveryHeader b on a.intLoadId = b.intLoadId and isnull(a.intCustomerLocationId,a.intCompanyDeliveryLocationId) = isnull(b.intEntityLocationId,b.intCompanyLocationId) and a.intDriverEntityId = @intDriverId  
-        GROUP BY  b.intDeliveryHeaderId  
-     ,a.intEntityId  
-    ,a.intEntityLocationId  
-    ,a.intCompanyLocationId  
-    ,a.intLoadId    
-    ,intItemId  
-  
-  update tblMBILDeliveryDetail  
-  set intPickupDetailId = b.intPickupDetailId  
-  from  
-  tblMBILDeliveryHeader h  
-  inner join tblMBILDeliveryDetail d on h.intDeliveryHeaderId = d.intDeliveryHeaderId  
-  inner join (  
-   SELECT a.intLoadId  
-    ,c.intPickupDetailId  
-    ,a.intItemId  
-    ,intCustomerLocationId = isnull(a.intCustomerLocationId,a.intCompanyDeliveryLocationId)  
-    FROM #loadOrder a  
-    INNER JOIN tblMBILPickupHeader b on a.intLoadId = b.intLoadId and isnull(a.intEntityLocationId,a.intCompanyLocationId) = isnull(b.intEntityLocationId,b.intCompanyLocationId) and a.intDriverEntityId = 915  
-    Inner Join tblMBILPickupDetail c on b.intPickupHeaderId = c.intPickupHeaderId and a.intItemId = c.intItemId  
-    ) b on h.intLoadId = b.intLoadId and d.intItemId = b.intItemId and isnull(h.intEntityLocationId,h.intCompanyLocationId) = b.intCustomerLocationId  
-    
-END    
-    
-    
+CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]  
+    @intDriverId AS INT,  
+    @forDeleteId NVARCHAR(MAX) = ''  
+AS                  
+SET QUOTED_IDENTIFIER OFF                  
+SET ANSI_NULLS ON                  
+SET NOCOUNT ON                  
+SET XACT_ABORT ON                  
+SET ANSI_WARNINGS OFF                  
+BEGIN                  
+ IF @forDeleteId <> ''  
+ BEGIN  
+   Declare @DeleteQuery as NVARCHAR(MAX) = N'Select intLoadHeaderId,intLoadDetailId into #tmp from tblMBILPickupDetail where intLoadHeaderId in('+ @forDeleteId +')  
+           DELETE FROM tblMBILPickupDetail  where intLoadHeaderId in(select intLoadHeaderId from #tmp)  
+           DELETE FROM tblMBILDeliveryDetail where intLoadDetailId in(select intLoadDetailId from #tmp)         
+           DELETE FROM tblMBILDeliveryHeader where intLoadHeaderId in(select intLoadHeaderId from #tmp)                   
+           DELETE FROM tblMBILLoadHeader Where intLoadHeaderId in(Select intLoadHeaderId from #tmp)'   
+ EXEC(@DeleteQuery)  
+  END  
+           
+ CREATE TABLE #loadOrder                     
+ (                    
+ intLoadId int,            
+ intLoadDetailId int,              
+ intDriverEntityId int,                    
+ strLoadNumber nvarchar(100) COLLATE Latin1_General_CI_AS NULL,                    
+ strType varchar(100) COLLATE Latin1_General_CI_AS NULL,                    
+ intEntityId int NULL,                    
+ intEntityLocationId int NULL,                    
+ intPCompanyLocationId INT NULL,        
+ intSCompanyLocationId INT NULL,        
+ intPSubLocationId INT NULL,        
+ intSSubLocationId INT NULL,        
+ intCustomerId int NULL,                    
+ intCustomerLocationId int NULL,                    
+ intSellerId int NULL,                    
+ intSalespersonId int NULL,                    
+ strTerminalRefNo nvarchar(200) COLLATE Latin1_General_CI_AS NULL,                    
+ intItemId int NULL,                    
+ dblQuantity numeric(18,6) NULL,                    
+ dtmPickUpFrom datetime NULL,                    
+ dtmPickUpTo datetime NULL,                    
+ dtmDeliveryFrom datetime NULL,                    
+ dtmDeliveryTo datetime NULL,                    
+ intTruckId nvarchar(200) COLLATE Latin1_General_CI_AS NULL,                   
+ strTrailerNo nvarchar(200) COLLATE Latin1_General_CI_AS NULL,                
+ strPONumber nvarchar(200) COLLATE Latin1_General_CI_AS NULL,          
+ intHaulerId int,         
+ dtmScheduledDate datetime,        
+ intPContractDetailId INT NULL,        
+ intSContractDetailId INT NULL,        
+ intOutboundTaxGroupId INT NULL,        
+ intInboundTaxGroupId INT NULL        
+ )                 
+        
+ INSERT INTO #loadOrder                    
+ SELECT *                  
+ FROM vyuMBILLoadSchedule                    
+ WHERE intDriverEntityId = @intDriverId AND intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)                    
+        
+   INSERT INTO tblMBILLoadHeader(intLoadId,strLoadNumber,strType,intTruckId,strTrailerNo,intDriverId,intHaulerId,dtmScheduledDate)                
+   SELECT DISTINCT intLoadId,strLoadNumber,strType,intTruckId,strTrailerNo,intDriverEntityId,intHaulerId,dtmScheduledDate from #loadOrder                
+           
+ INSERT INTO tblMBILPickupDetail(        
+        [intLoadDetailId]        
+    ,[intLoadHeaderId]         
+    ,[intSellerId]         
+    ,[intSalespersonId]         
+    ,[strTerminalRefNo]        
+    ,[intEntityId]         
+    ,[intEntityLocationId]         
+    ,[intCompanyLocationId]         
+    ,[intContractDetailId]         
+    ,[intTaxGroupId]         
+    ,[dtmPickupFrom]         
+    ,[dtmPickupTo]         
+    ,[strPONumber]         
+    ,[intItemId]         
+    ,[dblQuantity]        
+    )         
+   SELECT  distinct         
+    intLoadDetailId        
+           ,[intLoadHeaderId]         
+    ,[intSellerId]         
+    ,[intSalespersonId]         
+    ,[strTerminalRefNo]        
+    ,[intEntityId]         
+    ,[intEntityLocationId]         
+    ,isnull([intPCompanyLocationId],intSCompanyLocationId)        
+    ,isnull(intPContractDetailId,intSContractDetailId)        
+    ,isnull(intOutboundTaxGroupId,intInboundTaxGroupId)        
+    ,[dtmPickUpFrom]         
+    ,[dtmPickUpTo]         
+    ,[strPONumber]         
+    ,[intItemId]         
+    ,[dblQuantity]            
+    FROM #loadOrder a                  
+ INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId            
+         
+ INSERT INTO tblMBILDeliveryHeader(intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId,dtmDeliveryFrom,dtmDeliveryTo,intSalesPersonId)        
+ Select load.intLoadHeaderId        
+    ,intCustomerId        
+    ,intCustomerLocationId        
+    ,isnull([intPCompanyLocationId],intSCompanyLocationId)        
+    ,dtmDeliveryFrom        
+    ,dtmDeliveryTo        
+    ,intSalespersonId        
+ FROM #loadOrder a                  
+ inner join tblMBILLoadHeader load on a.intLoadId = load.intLoadId        
+  Group by  load.intLoadHeaderId        
+   ,intCustomerId        
+   ,intCustomerLocationId        
+   ,isnull([intPCompanyLocationId],intSCompanyLocationId)        
+   ,dtmDeliveryFrom        
+   ,dtmDeliveryTo        
+   ,intSalespersonId        
+        
+   INSERT INTO tblMBILDeliveryDetail(        
+      intLoadDetailId                    
+     ,intDeliveryHeaderId                  
+     ,intItemId                    
+     ,dblQuantity    
+  ,intPickupDetailId)                    
+    SELECT a.intLoadDetailId           
+     ,intDeliveryHeaderId            
+     ,a.intItemId                  
+     ,a.dblQuantity        
+  ,pickupdetail.intPickupDetailId    
+ FROM #loadOrder a                  
+ INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId            
+ INNER JOIN tblMBILDeliveryHeader delivery on load.intLoadHeaderId = delivery.intLoadHeaderId and         
+              isnull(a.intCustomerId,0) = isnull(delivery.intEntityId,0) and         
+              isnull(a.intCustomerLocationId,0) = isnull(delivery.intEntityLocationId,0) and        
+              isnull(a.intPCompanyLocationId,a.intSCompanyLocationId) = delivery.intCompanyLocationId        
+ left join tblMBILPickupDetail pickupdetail on a.intLoadDetailId = pickupdetail.intLoadDetailId    
+ Where a.intDriverEntityId = @intDriverId        
+        
+END 
