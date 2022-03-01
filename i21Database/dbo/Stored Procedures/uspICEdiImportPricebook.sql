@@ -953,7 +953,7 @@ SELECT
 	,strLongUPCCode = p.strOrderCaseUpcNumber
 	,ysnStockUnit = 0
 	,ysnAllowPurchase = 1
-	,ysnAllowSale = 1
+	,ysnAllowSale = CASE WHEN CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) <> 0 THEN 1 ELSE 0 END 
 	,intConcurrencyId = 1
 	,dtmDateCreated = GETDATE()
 	,intCreatedByUserId = @intUserId
@@ -1865,13 +1865,16 @@ FROM (
 					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 						ON loc.intCompanyLocationId = cl.intCompanyLocationId
 			) loc
-			INNER JOIN tblICItemLocation il ON il.intLocationId = loc.intCompanyLocationId
+			INNER JOIN tblICItemLocation il 
+				ON il.intLocationId = loc.intCompanyLocationId
 				AND il.intItemId = i.intItemId
-			INNER JOIN vyuICGetItemUOM iu ON i.intItemId = iu.intItemId AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strOrderPackageDescription)))
+			INNER JOIN vyuICGetItemUOM iu 
+				ON i.intItemId = iu.intItemId 
+				AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strOrderPackageDescription)))
 		WHERE
 			p.strUniqueId = @UniqueId
-			AND
-			p.strCaseRetailPrice IS NOT NULL
+			AND p.strCaseRetailPrice IS NOT NULL
+			AND CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) <> 0
 		UNION
 		SELECT 
 			i.intItemId
@@ -1892,21 +1895,21 @@ FROM (
 					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 						ON loc.intCompanyLocationId = cl.intCompanyLocationId
 			) loc
-			INNER JOIN tblICItemLocation il ON il.intLocationId = loc.intCompanyLocationId
+			INNER JOIN tblICItemLocation il 
+				ON il.intLocationId = loc.intCompanyLocationId
 				AND il.intItemId = i.intItemId
-			INNER JOIN vyuICGetItemUOM iu ON i.intItemId = iu.intItemId AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strItemUnitOfMeasure)))
+			INNER JOIN vyuICGetItemUOM iu 
+				ON i.intItemId = iu.intItemId 
+				AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strItemUnitOfMeasure)))
 		WHERE
 			p.strUniqueId = @UniqueId
 			AND p.strRetailPrice IS NOT NULL
 	) AS Source_Query  
 		ON 
 		EffectiveItemPrice.intItemId = Source_Query.intItemId
-		AND 
-		EffectiveItemPrice.intItemLocationId = Source_Query.intItemLocationId
-		AND 
-		EffectiveItemPrice.intItemUOMId = Source_Query.intItemUOMId
-		AND 
-		EffectiveItemPrice.dtmEffectiveRetailPriceDate = Source_Query.dtmEffectiveDate 
+		AND EffectiveItemPrice.intItemLocationId = Source_Query.intItemLocationId
+		AND EffectiveItemPrice.intItemUOMId = Source_Query.intItemUOMId
+		AND EffectiveItemPrice.dtmEffectiveRetailPriceDate = Source_Query.dtmEffectiveDate 
 	-- If matched, update the existing effective item pricing
 	WHEN MATCHED 
 		AND Source_Query.ysnUpdatePrice = 1	
