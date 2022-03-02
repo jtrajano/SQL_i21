@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @LotEntries ReceiptItemLotStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
+	DECLARE @ReceiptTradeFinance ReceiptTradeFinance
 	DECLARE @intPContractDetailId INT
 	DECLARE @intPEntityId INT
 	DECLARE @intPItemId INT
@@ -346,6 +347,69 @@ BEGIN TRY
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
 		WHERE LD.intLoadId = @intLoadId
 
+
+		INSERT INTO @ReceiptTradeFinance (
+			[strTradeFinanceNumber]
+			,[intBankId]
+			,[intBankAccountId] 
+			,[intBorrowingFacilityId] 
+			,[strBankReferenceNo] 
+			,[intLimitTypeId] 
+			,[intSublimitTypeId] 
+			,[ysnSubmittedToBank]
+			,[dtmDateSubmitted] 
+			,[strApprovalStatus] 
+			,[dtmDateApproved] 
+			,[strWarrantNo] 
+			,[intWarrantStatus] 
+			,[strReferenceNo] 
+			,[intOverrideFacilityValuation] 
+			,[strComments] 
+			
+			,[intEntityVendorId]
+			,[strReceiptType]
+			,[intLocationId]
+			,[intShipViaId]
+			,[intShipFromId]
+			,[intCurrencyId]
+			,[intSourceType]
+			,[strBillOfLadding]
+			)
+		SELECT 
+			[strTradeFinanceNumber] = L.strTradeFinanceNo
+			,[intBankId] = ba.intBankId
+			,[intBankAccountId] = L.intBankAccountId
+			,[intBorrowingFacilityId] = L.intBorrowingFacilityId
+			,[strBankReferenceNo] = L.strBankReferenceNo
+			,[intLimitTypeId] = L.intBorrowingFacilityLimitId
+			,[intSublimitTypeId] = L.intBorrowingFacilityLimitDetailId
+			,[ysnSubmittedToBank] = L.ysnSubmittedToBank
+			,[dtmDateSubmitted] = L.dtmDateSubmitted
+			,[strApprovalStatus] = approvalStatus.strApprovalStatus
+			,[dtmDateApproved] = L.dtmDateApproved
+			,[strWarrantNo] = L.strWarrantNo
+			,[intWarrantStatus] = L.intWarrantStatus
+			,[strReferenceNo] = L.strTradeFinanceReferenceNo
+			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
+			,[strComments] = L.strTradeFinanceComments
+
+			,[intEntityVendorId] = LD.intVendorEntityId
+			,[strReceiptType] = 'Direct'
+			,[intLocationId] = LD.intPCompanyLocationId
+			,[intShipViaId] = NULL
+			,[intShipFromId] = EL.intEntityLocationId
+			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
+			,[intSourceType] = 0
+			,[strBillOfLadding] = L.strBLNumber
+		FROM tblLGLoad L  
+			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1 
+			LEFT JOIN tblCMBankAccount ba ON ba.intBankAccountId = L.intBankAccountId
+			LEFT JOIN tblCTApprovalStatusTF approvalStatus ON approvalStatus.intApprovalStatusId = L.intApprovalStatusId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
+		WHERE 
+			L.intLoadId = @intLoadId
+
 		IF NOT EXISTS (SELECT 1 FROM @ReceiptStagingTable)
 		BEGIN
 			RETURN
@@ -355,6 +419,7 @@ BEGIN TRY
 									,@OtherCharges = @OtherCharges
 									,@intUserId = @intEntityUserSecurityId
 									,@LotEntries = @LotEntries
+									,@ReceiptTradeFinance = @ReceiptTradeFinance
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 		FROM #tmpAddItemReceiptResult
@@ -956,6 +1021,72 @@ BEGIN TRY
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 		WHERE LD.intLoadId = @intLoadId
 
+		INSERT INTO @ReceiptTradeFinance (
+			[strTradeFinanceNumber]
+			,[intBankId]
+			,[intBankAccountId] 
+			,[intBorrowingFacilityId] 
+			,[strBankReferenceNo] 
+			,[intLimitTypeId] 
+			,[intSublimitTypeId] 
+			,[ysnSubmittedToBank]
+			,[dtmDateSubmitted] 
+			,[strApprovalStatus] 
+			,[dtmDateApproved] 
+			,[strWarrantNo] 
+			,[intWarrantStatus] 
+			,[strReferenceNo] 
+			,[intOverrideFacilityValuation] 
+			,[strComments] 
+			
+			,[intEntityVendorId]
+			,[strReceiptType]
+			,[intLocationId]
+			,[intShipViaId]
+			,[intShipFromId]
+			,[intCurrencyId]
+			,[intSourceType]
+			,[strBillOfLadding]
+			)
+		SELECT 
+			[strTradeFinanceNumber] = L.strTradeFinanceNo
+			,[intBankId] = ba.intBankId
+			,[intBankAccountId] = L.intBankAccountId
+			,[intBorrowingFacilityId] = L.intBorrowingFacilityId
+			,[strBankReferenceNo] = L.strBankReferenceNo
+			,[intLimitTypeId] = L.intBorrowingFacilityLimitId
+			,[intSublimitTypeId] = L.intBorrowingFacilityLimitDetailId
+			,[ysnSubmittedToBank] = L.ysnSubmittedToBank
+			,[dtmDateSubmitted] = L.dtmDateSubmitted
+			,[strApprovalStatus] = approvalStatus.strApprovalStatus
+			,[dtmDateApproved] = L.dtmDateApproved
+			,[strWarrantNo] = L.strWarrantNo
+			,[intWarrantStatus] = L.intWarrantStatus
+			,[strReferenceNo] = L.strTradeFinanceReferenceNo
+			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
+			,[strComments] = L.strTradeFinanceComments
+
+			,[intEntityVendorId] = LD.intVendorEntityId
+			,[strReceiptType] = 'Purchase Contract'
+			,[intLocationId] = CD.intCompanyLocationId
+			,[intShipViaId] = NULL
+			,[intShipFromId] = EL.intEntityLocationId
+			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+			,[intSourceType] = 2
+			,[strBillOfLadding] = L.strBLNumber
+		FROM tblLGLoad L  
+			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1 
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			LEFT JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
+			LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+			LEFT JOIN tblCMBankAccount ba ON ba.intBankAccountId = L.intBankAccountId
+			LEFT JOIN tblCTApprovalStatusTF approvalStatus ON approvalStatus.intApprovalStatusId = L.intApprovalStatusId
+		WHERE 
+			L.intLoadId = @intLoadId
+
 		IF NOT EXISTS (
 				SELECT 1
 				FROM @ReceiptStagingTable
@@ -968,6 +1099,7 @@ BEGIN TRY
 									,@OtherCharges = @OtherCharges
 									,@intUserId = @intEntityUserSecurityId
 									,@LotEntries = @LotEntries
+									,@ReceiptTradeFinance = @ReceiptTradeFinance
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 		FROM #tmpAddItemReceiptResult

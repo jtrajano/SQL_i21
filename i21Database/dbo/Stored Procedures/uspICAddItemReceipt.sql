@@ -3,6 +3,7 @@
 	,@OtherCharges ReceiptOtherChargesTableType READONLY 
 	,@intUserId AS INT	
 	,@LotEntries ReceiptItemLotStagingTable READONLY
+	,@ReceiptTradeFinance ReceiptTradeFinance READONLY
 AS
 
 /*
@@ -652,6 +653,45 @@ BEGIN
 			EXEC uspICRaiseError 80004; 
 			RETURN;
 		END
+
+		-- Update the Trade Finance Record for the Receipt
+		UPDATE r
+		SET
+			[strTradeFinanceNumber] = tf.strTradeFinanceNumber
+			,[intBankId] = tf.intBankId
+			,[intBankAccountId] = tf.intBankAccountId
+			,[intBorrowingFacilityId] = tf.intBorrowingFacilityId
+			,[strBankReferenceNo] = tf.strBankReferenceNo
+			,[intLimitTypeId] = tf.intLimitTypeId
+			,[intSublimitTypeId] = tf.intSublimitTypeId
+			,[ysnSubmittedToBank] = tf.ysnSubmittedToBank
+			,[dtmDateSubmitted] = tf.dtmDateSubmitted
+			,[strApprovalStatus] = tf.strApprovalStatus
+			,[dtmDateApproved] = tf.dtmDateApproved
+			,[strWarrantNo] = tf.strWarrantNo
+			,[intWarrantStatus] = tf.intWarrantStatus
+			,[strReferenceNo] = tf.strReferenceNo
+			,[intOverrideFacilityValuation] = tf.intOverrideFacilityValuation
+			,[strComments] = tf.strComments
+		FROM 
+			tblICInventoryReceipt r CROSS APPLY (
+				SELECT TOP 1 
+					tf.* 
+				FROM 
+					@ReceiptTradeFinance tf
+				WHERE
+					ISNULL(tf.intEntityVendorId, 0) = ISNULL(r.intEntityVendorId, 0)
+					AND ISNULL(tf.strBillOfLadding,0) = ISNULL(r.strBillOfLading,0) 
+					AND ISNULL(tf.intCurrencyId, @intFunctionalCurrencyId) = ISNULL(r.intCurrencyId, @intFunctionalCurrencyId)
+					AND ISNULL(tf.intLocationId,0) = ISNULL(r.intLocationId,0)
+					AND ISNULL(tf.strReceiptType,0) = ISNULL(r.strReceiptType,0)
+					AND ISNULL(tf.intShipFromId,0) = ISNULL(r.intShipFromId,0)
+					AND ISNULL(tf.intShipViaId,0) = ISNULL(r.intShipViaId,0)
+					AND ISNULL(dbo.fnSMGetVendorRefNoPrefix(tf.intLocationId, tf.strVendorRefNo),'') = ISNULL(dbo.fnSMGetVendorRefNoPrefix(r.intLocationId, r.strVendorRefNo),'')	
+					AND COALESCE(tf.intShipFromEntityId,tf.intEntityVendorId,0) = ISNULL(r.intShipFromEntityId,0)	
+			) tf
+		WHERE
+			r.intInventoryReceiptId = @inventoryReceiptId		
 
 		-----------------------------------------------
 		----- Validate Receipt Item Detail Fields -----

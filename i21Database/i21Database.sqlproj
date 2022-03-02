@@ -535,6 +535,7 @@
     <Build Include="dbo\Tables\tblFRReportHierarchyScheduleDetails.sql" />
     <Build Include="dbo\Tables\tblLGLoadShippingLineRank.sql" />
     <Build Include="dbo\Views\vyuLGLoadShippingLineRank.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptTradeFinance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
