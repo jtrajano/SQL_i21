@@ -9750,6 +9750,7 @@
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
