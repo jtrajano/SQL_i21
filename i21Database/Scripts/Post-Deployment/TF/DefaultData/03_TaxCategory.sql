@@ -595,3 +595,35 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MO', @TaxCategories = @TaxCa
 DELETE @TaxCategoryMO
 
 GO
+
+
+
+
+
+
+
+PRINT ('Deploying VA Tax Category')
+GO
+
+DECLARE @TaxCategoryVA AS TFTaxCategory
+
+INSERT INTO @TaxCategoryVA(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Gasoline', intMasterId = 460001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Alternative Fuels', intMasterId = 460002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Undyed Diesel', intMasterId = 460003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Aviation Jet Fuel', intMasterId = 460004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Aviation Gasoline', intMasterId = 460005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Dyed Diesel', intMasterId = 460006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Kerosene', intMasterId = 460007
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Heating Oil', intMasterId = 460008
+
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'VA', @TaxCategories = @TaxCategoryVA
+
+DELETE @TaxCategoryVA
+GO
