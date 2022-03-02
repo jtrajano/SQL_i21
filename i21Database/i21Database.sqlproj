@@ -532,6 +532,7 @@
     <Build Include="dbo\Tables\tblCRMIndustrySegment.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityType.sql" />
     <Build Include="dbo\Tables\tblGRUOMRounding.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchyScheduleDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
