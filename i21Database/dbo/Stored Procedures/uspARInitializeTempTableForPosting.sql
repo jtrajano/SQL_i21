@@ -386,6 +386,7 @@ CREATE TABLE ##ARItemsForCosting (
     , [ysnAutoBlend]                    BIT NULL
     , [ysnGLOnly]						BIT NULL
 	, [strBOLNumber]					NVARCHAR(100) NULL 
+    , [intTicketId]                     INT NULL
     , [strSourceType]                   NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [strSourceNumber]                 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [intSourceEntityId]				INT NULL
@@ -419,6 +420,7 @@ CREATE TABLE ##ARItemsForInTransitCosting (
 	, [intLinkedItem]					INT NULL
 	, [intLinkedItemId]					INT NULL
 	, [strBOLNumber]					NVARCHAR(100) NULL 
+    , [intTicketId]                     INT NULL
     , [intSourceEntityId]				INT NULL
 )
 

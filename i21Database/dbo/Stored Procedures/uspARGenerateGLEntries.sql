@@ -58,6 +58,7 @@ INSERT INTO @ItemsForPost
     ,[intCategoryId]
     ,[dblAdjustRetailValue]
 	,[strBOLNumber]
+	,[intTicketId]
 	,[strSourceNumber]
 	,[strSourceType]
 	,[intSourceEntityId]
@@ -93,6 +94,7 @@ SELECT
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strBOLNumber]
+	,[intTicketId]
 	,[strSourceNumber]
 	,[strSourceType]
 	,[intSourceEntityId]
@@ -176,6 +178,7 @@ INSERT INTO @InTransitItems
     ,[intForexRateTypeId]
     ,[dblForexRate]
 	,[strBOLNumber]	
+	,[intTicketId]
 	,[intSourceEntityId]
 )
 SELECT
@@ -203,6 +206,7 @@ SELECT
     ,[intForexRateTypeId]
     ,[dblForexRate]
 	,[strBOLNumber]
+    ,[intTicketId]
 	,[intSourceEntityId]
 FROM ##ARItemsForInTransitCosting
 
