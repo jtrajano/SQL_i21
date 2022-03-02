@@ -13,4 +13,4 @@ ON T0.intReportHierarchyId  = T2.intReportHierarchyId
 INNER  JOIN tblFRReport T3   
 ON T0.intReportId = T3.intReportId  
 GROUP BY T0.intHierarchyScheduleId,T0.intReportId,T3.strReportName,T3.strDescription,
-T0.intReportHierarchyId,T2.strReportHierarchyName,T0.dtmAsOfDate,T0.dtmScheduleDate
+T0.intReportHierarchyId,T2.strReportHierarchyName,T0.dtmAsOfDate,T0.dtmScheduleDate,ysnReportIsSuccess
