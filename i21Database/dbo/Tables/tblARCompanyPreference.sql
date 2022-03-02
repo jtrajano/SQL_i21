@@ -46,6 +46,7 @@
 	[intAttachmentRetention]				INT NOT NULL DEFAULT 7,
 	[ysnAllowIntraCompanyEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraCompanyEntries] DEFAULT((1)),
 	[ysnAllowIntraLocationEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraLocationEntries] DEFAULT((1)),
+	[ysnAllowSingleLocationEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowSingleLocationEntries] DEFAULT((0)),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
