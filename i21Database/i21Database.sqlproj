@@ -531,6 +531,7 @@
     <Build Include="dbo\Stored Procedures\uspCMClearCashFlowReportRates.sql" />
     <Build Include="dbo\Tables\tblCRMIndustrySegment.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityType.sql" />
+    <Build Include="dbo\Tables\tblGRUOMRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
