@@ -47,6 +47,8 @@
 	[ysnAllowIntraCompanyEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraCompanyEntries] DEFAULT((1)),
 	[ysnAllowIntraLocationEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraLocationEntries] DEFAULT((1)),
 	[ysnAllowSingleLocationEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowSingleLocationEntries] DEFAULT((0)),
+	[intDueToAccountId]						INT NULL, 
+    [intDueFromAccountId]					INT NULL,
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -54,5 +56,7 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDeferredRevenueAccountId] FOREIGN KEY ([intDeferredRevenueAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intServiceChargeAccountId] FOREIGN KEY ([intServiceChargeAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intConversionAccountId] FOREIGN KEY ([intConversionAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblSMTerm_intServiceChargeTermId] FOREIGN KEY ([intServiceChargeTermId]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
+	CONSTRAINT [FK_tblARCompanyPreference_tblSMTerm_intServiceChargeTermId] FOREIGN KEY ([intServiceChargeTermId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueToAccountId] FOREIGN KEY ([intDueToAccountId]) REFERENCES [dbo].[tblGLAccount] ([intDueToAccountId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueFromAccountId] FOREIGN KEY ([intDueFromAccountId]) REFERENCES [dbo].[tblGLAccount] ([intDueFromAccountId])
 )
