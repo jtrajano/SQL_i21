@@ -30,7 +30,7 @@ INSERT INTO @voucherPayables(
     ,intPurchaseDetailId
 )
 SELECT
-	intPartitionId				= ROW_NUMBER() OVER(ORDER BY A.intEntityVendorId) --1 voucher per 1 vendor
+	intPartitionId				= 1--ROW_NUMBER() OVER(PARTITION BY A.intEntityVendorId ORDER BY A.intEntityVendorId) --1 voucher per 1 vendor
 	,intTransactionType			= 1
 	,intEntityVendorId			= A.intEntityVendorId
 	,intShipToId				= A.intShipToId
