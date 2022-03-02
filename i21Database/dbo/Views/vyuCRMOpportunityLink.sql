@@ -95,6 +95,12 @@
 			,strLostToCompetitor = q.strName
 			,strDirectionEntityType = (case when a.strDirection = 'Purchase' then 'Vendor' else 'Customer' end) COLLATE Latin1_General_CI_AS
 			,strLOBType = (select top 1 r.strType from tblSMLineOfBusiness r, tblCRMOpportunityLob s where r.strType = 'Software' and r.intLineOfBusinessId = s.intLineOfBusinessId and s.intOpportunityId = a.intOpportunityId)
+			,a.intIndustrySegmentId
+			,a.intOpportunityTypeId
+			,a.intVolume
+			,a.strOpportunityDescription
+			,t.strIndustrySegment
+			,u.strOpportunityType
 		from
 			tblCRMOpportunity a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
@@ -115,3 +121,5 @@
 			left join tblEMEntity q on q.intEntityId = a.intLostToCompetitorId
 			left join closed r on r.intRecordId = a.intOpportunityId
 			left join notclosed s on s.intRecordId = a.intOpportunityId
+			left join tblCRMIndustrySegment t on t.intIndustrySegmentId = a.intIndustrySegmentId
+			left join tblCRMOpportunityType u on u.intOpportunityTypeId = a.intOpportunityTypeId

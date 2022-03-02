@@ -529,6 +529,8 @@
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
     <Build Include="dbo\Views\vyuARAccountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCMClearCashFlowReportRates.sql" />
+    <Build Include="dbo\Tables\tblCRMIndustrySegment.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
