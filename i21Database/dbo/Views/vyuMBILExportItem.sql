@@ -15,7 +15,7 @@ SELECT DISTINCT
 	ICT.strMessage as strTagMessage,
 	ICT.strDescription as strTagDescription,
 	ICT.strType  as strTagType,
-	ICT.ysnHazMat
+	item.ysnHazardMaterial as ysnHazMat
 
 FROM tblICItem item    
 INNER JOIN tblICItemLocation itemLocation ON itemLocation.intItemId = item.intItemId    
