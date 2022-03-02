@@ -50,6 +50,7 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnAutoBlend] 
 	,[ysnGLOnly]
 	,[strBOLNumber]
+	,[intTicketId]
 	,[intSourceEntityId]
 )
 SELECT 
@@ -113,6 +114,7 @@ SELECT
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ARID.[intTicketId] IS NOT NULL) OR ARID.[intTicketId] IS NULL) THEN @ZeroBit ELSE @OneBit END
 	,[strBOLNumber]				= ARID.strBOLNumber 
+	,[intTicketId]				= ARID.intTicketId
 	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN tblARInvoiceDetailLot ARIDL WITH (NOLOCK) ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
@@ -173,6 +175,7 @@ INSERT INTO ##ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
+	,[intTicketId]
 	,[ysnAutoBlend]
 	,[intSourceEntityId]
 )
@@ -211,6 +214,7 @@ SELECT
 	,[intCategoryId]			= IST.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
+	,[intTicketId]				= ARID.intTicketId
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
@@ -265,6 +269,7 @@ INSERT INTO ##ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
+	,[intTicketId]
 	,[intSourceEntityId]
 ) 
 SELECT
@@ -293,6 +298,7 @@ SELECT
 	,ARIC.[intCategoryId]
 	,ARIC.[dblAdjustRetailValue]
 	,ARID.[strType]
+	,ARID.[intTicketId]
 	,ARID.[intEntityCustomerId]
 FROM ##ARItemsForCosting ARIC
 INNER JOIN ##ARPostInvoiceDetail ARID ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
