@@ -230,6 +230,7 @@ INSERT ##ARPostInvoiceHeader WITH (TABLOCK)
     ,[ysnInterCompany]
     ,[intInterCompanyVendorId]
 	,[strBOLNumber]
+    ,[ysnIntraCompany]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -314,6 +315,7 @@ SELECT
     ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 	,[strBOLNumber]						= ARI.[strBOLNumber]
+    ,[ysnIntraCompany]                  = ARI.[ysnIntraCompany]
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -482,6 +484,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]
     ,[strDescription]
 	,[strBOLNumber]
+    ,[ysnIntraCompany]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -632,7 +635,8 @@ SELECT
     ,[ysnBlended]                       = ARID.[ysnBlended]
  
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
-	,[strBOLNumber]						= ARI.strBOLNumber 
+	,[strBOLNumber]						= ARI.strBOLNumber
+    ,[ysnIntraCompany]                  = ARI.ysnIntraCompany
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -803,6 +807,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
+    ,[ysnIntraCompany]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1013,6 +1018,7 @@ SELECT
     ,[ysnBlended]                       = ARID.[ysnBlended]    
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
+    ,[ysnIntraCompany]                  = ARI.ysnIntraCompany
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1171,6 +1177,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
+    ,[ysnIntraCompany]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1317,6 +1324,7 @@ SELECT
     ,[ysnBlended]                       = @ZeroBit
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
+    ,[ysnIntraCompany]                  = ARI.ysnIntraCompany
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
