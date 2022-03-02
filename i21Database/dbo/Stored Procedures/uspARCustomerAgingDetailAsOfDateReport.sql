@@ -214,7 +214,7 @@ INNER JOIN(
 )REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
 WHERE I.ysnPosted = 1 
 	AND I.ysnPaid = 1
-	AND ysnCancelled = 0
+	--AND ysnCancelled = 0
 	AND I.strTransactionType <> 'Cash Refund'
 	AND I.strTransactionType = 'Credit Memo'
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
@@ -283,7 +283,7 @@ LEFT JOIN (
 	FROM tblSMCurrency WITH (NOLOCK)  
 ) CUR ON I.intCurrencyId = CUR.intCurrencyID
 WHERE I.ysnPosted = 1  
-  AND I.ysnCancelled = 0
+  --AND I.ysnCancelled = 0
   AND I.strTransactionType <> 'Cash Refund'
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND ( 
