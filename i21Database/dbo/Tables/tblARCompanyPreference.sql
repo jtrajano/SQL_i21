@@ -57,6 +57,6 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intServiceChargeAccountId] FOREIGN KEY ([intServiceChargeAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intConversionAccountId] FOREIGN KEY ([intConversionAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMTerm_intServiceChargeTermId] FOREIGN KEY ([intServiceChargeTermId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueToAccountId] FOREIGN KEY ([intDueToAccountId]) REFERENCES [dbo].[tblGLAccount] ([intDueToAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueFromAccountId] FOREIGN KEY ([intDueFromAccountId]) REFERENCES [dbo].[tblGLAccount] ([intDueFromAccountId])
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueToAccountId] FOREIGN KEY ([intDueToAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueFromAccountId] FOREIGN KEY ([intDueFromAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
