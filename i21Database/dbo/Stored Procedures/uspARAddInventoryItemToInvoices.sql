@@ -141,6 +141,26 @@ AND NOT EXISTS(	SELECT NULL
 				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
 				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
 	
+UNION ALL
+
+SELECT
+	 [intId]				= IT.[intId]
+	,[strMessage]			= 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(IT.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.'
+	,[strTransactionType]	= IT.[strTransactionType]
+	,[strType]				= IT.[strType]
+	,[strSourceTransaction]	= IT.[strSourceTransaction]
+	,[intSourceId]			= IT.[intSourceId]
+	,[strSourceId]			= IT.[strSourceId]
+	,[intInvoiceId]			= IT.[intInvoiceId]
+FROM @ItemEntries IT
+INNER JOIN tblCTContractDetail CTD ON IT.intContractDetailId = CTD.intContractDetailId
+INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+WHERE IT.strTransactionType = 'Invoice'
+  AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
+
+DELETE I
+FROM tblARInvoice I
+INNER JOIN @InvalidRecords IR ON IR.intInvoiceId = I.intInvoiceId
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
@@ -1300,64 +1320,64 @@ VALUES(
 	IF ISNULL(@IntegrationLogId, 0) <> 0
 		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 
-	DECLARE @tblInvoicesContracts TABLE (
-		  intInvoiceId 			INT
-		, intContractSeq		INT NULL
-		, strContractNumber		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
-		, dblBalance			NUMERIC(18, 6)
-		, dblScheduleQty		NUMERIC(18, 6)
-		, dblQtyShipped			NUMERIC(18, 6)
-	)
+	-- DECLARE @tblInvoicesContracts TABLE (
+	-- 	  intInvoiceId 			INT
+	-- 	, intContractSeq		INT NULL
+	-- 	, strContractNumber		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
+	-- 	, dblBalance			NUMERIC(18, 6)
+	-- 	, dblScheduleQty		NUMERIC(18, 6)
+	-- 	, dblQtyShipped			NUMERIC(18, 6)
+	-- )
 
-	INSERT INTO @tblInvoicesContracts
-	SELECT intInvoiceId			= ID.intInvoiceId
-		 , intContractSeq		= CTD.intContractSeq
-		 , strContractNumber	= CTH.strContractNumber
-		 , dblBalance			= ISNULL(CTD.dblBalance, 0)
-		 , dblScheduleQty		= ISNULL(CTD.dblScheduleQty, 0)
-		 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
-	FROM tblARInvoice I 
-	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-	INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ILD.intInvoiceId = I.intInvoiceId AND ID.intInvoiceDetailId = ILD.intInvoiceDetailId	
-	INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
-	INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
-	WHERE ILD.intIntegrationLogId = @IntegrationLogId
-	  AND ID.intContractDetailId IS NOT NULL
-	  AND I.strTransactionType = 'Invoice'
-	  AND I.strType = 'Tank Delivery'
-	  AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
+	-- INSERT INTO @tblInvoicesContracts
+	-- SELECT intInvoiceId			= ID.intInvoiceId
+	-- 	 , intContractSeq		= CTD.intContractSeq
+	-- 	 , strContractNumber	= CTH.strContractNumber
+	-- 	 , dblBalance			= ISNULL(CTD.dblBalance, 0)
+	-- 	 , dblScheduleQty		= ISNULL(CTD.dblScheduleQty, 0)
+	-- 	 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
+	-- FROM tblARInvoice I 
+	-- INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+	-- INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ILD.intInvoiceId = I.intInvoiceId AND ID.intInvoiceDetailId = ILD.intInvoiceDetailId	
+	-- INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
+	-- INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+	-- WHERE ILD.intIntegrationLogId = @IntegrationLogId
+	--   AND ID.intContractDetailId IS NOT NULL
+	--   AND I.strTransactionType = 'Invoice'
+	--   AND I.strType = 'Tank Delivery'
+	--   AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
 
-	WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesContracts) 
-		BEGIN
-			DECLARE @intInvoiceId 		INT = NULL
-				  , @intContractSeq		INT = NULL
-				  , @strContractNumber  NVARCHAR(100) = NULL
-				  , @dblBalance			NUMERIC(18, 6) = 0
-				  , @dblScheduleQty		NUMERIC(18, 6) = 0
-				  , @dblQtyShipped		NUMERIC(18, 6) = 0
+	-- WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesContracts) 
+	-- 	BEGIN
+	-- 		DECLARE @intInvoiceId 		INT = NULL
+	-- 			  , @intContractSeq		INT = NULL
+	-- 			  , @strContractNumber  NVARCHAR(100) = NULL
+	-- 			  , @dblBalance			NUMERIC(18, 6) = 0
+	-- 			  , @dblScheduleQty		NUMERIC(18, 6) = 0
+	-- 			  , @dblQtyShipped		NUMERIC(18, 6) = 0
 
-			SELECT TOP 1 @intInvoiceId	 	= intInvoiceId 
-					  , @intContractSeq		= intContractSeq
-		 			  , @strContractNumber	= strContractNumber
-		 			  , @dblBalance			= dblBalance
-		 			  , @dblScheduleQty		= dblScheduleQty
-		 			  , @dblQtyShipped		= dblQtyShipped
-			FROM @tblInvoicesContracts
+	-- 		SELECT TOP 1 @intInvoiceId	 	= intInvoiceId 
+	-- 				  , @intContractSeq		= intContractSeq
+	-- 	 			  , @strContractNumber	= strContractNumber
+	-- 	 			  , @dblBalance			= dblBalance
+	-- 	 			  , @dblScheduleQty		= dblScheduleQty
+	-- 	 			  , @dblQtyShipped		= dblQtyShipped
+	-- 		FROM @tblInvoicesContracts
 
-			EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 			= @intInvoiceId
-											   , @intScaleUOMId 		= NULL
-											   , @intUserId 			= @UserId
-											   , @dblNetWeight 			= 0
-											   , @ysnFromSalesOrder 	= 0
-											   , @ysnFromImport			= 1
+	-- 		EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 			= @intInvoiceId
+	-- 										   , @intScaleUOMId 		= NULL
+	-- 										   , @intUserId 			= @UserId
+	-- 										   , @dblNetWeight 			= 0
+	-- 										   , @ysnFromSalesOrder 	= 0
+	-- 										   , @ysnFromImport			= 1
 
-			UPDATE tblARInvoiceIntegrationLogDetail
-			SET strMessage = 'Available quantity for the contract ' + @strContractNumber + ' and sequence ' + CAST(@intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(@dblBalance, 0) - ISNULL(@dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(@dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '. Overfill was implemented on this transaction.'  
-			WHERE intIntegrationLogId = @IntegrationLogId
-			  AND intInvoiceId = @intInvoiceId
+	-- 		UPDATE tblARInvoiceIntegrationLogDetail
+	-- 		SET strMessage = 'Available quantity for the contract ' + @strContractNumber + ' and sequence ' + CAST(@intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(@dblBalance, 0) - ISNULL(@dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(@dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '. Overfill was implemented on this transaction.'  
+	-- 		WHERE intIntegrationLogId = @IntegrationLogId
+	-- 		  AND intInvoiceId = @intInvoiceId
 
-			DELETE FROM @tblInvoicesContracts WHERE intInvoiceId = @intInvoiceId
-		END
+	-- 		DELETE FROM @tblInvoicesContracts WHERE intInvoiceId = @intInvoiceId
+	-- 	END
 
 END TRY
 BEGIN CATCH
