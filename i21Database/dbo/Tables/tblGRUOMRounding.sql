@@ -3,6 +3,7 @@
 	[intUnitOfMeasureFromId] [int] NOT NULL,
 	[intUnitOfMeasureToId] [int] NOT NULL,
 	[intDecimalAdjustment] [int] NOT NULL  DEFAULT 0,
+	[ysnFixRounding] [bit] NOT NULL  DEFAULT 0,
 	[intConcurrencyId] [int] NOT NULL  DEFAULT 0
 ) ON [PRIMARY]
 GO
@@ -17,11 +18,11 @@ GO
 CREATE NONCLUSTERED INDEX [tblGRUOMRounding_intUnitOfMeasureToId] ON [dbo].[tblGRUOMRounding]
 (
 	[intUnitOfMeasureToId] ASC
-)
+)INCLUDE (intDecimalAdjustment,ysnFixRounding)
 GO
 
 CREATE NONCLUSTERED INDEX [tblGRUOMRounding_intUnitOfMeasureFromId] ON [dbo].[tblGRUOMRounding]
 (
 	[intUnitOfMeasureFromId] ASC
-)
+)INCLUDE (intDecimalAdjustment,ysnFixRounding)
 GO
