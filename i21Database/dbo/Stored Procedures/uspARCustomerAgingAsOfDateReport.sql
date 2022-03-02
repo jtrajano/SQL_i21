@@ -233,7 +233,7 @@ INNER JOIN(
 )REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
 WHERE I.ysnPosted = 1 
 	AND I.ysnPaid = 1
-	AND ysnCancelled = 0
+	--AND ysnCancelled = 0
 	AND I.strTransactionType <> 'Cash Refund'
 	AND I.strTransactionType = 'Credit Memo'
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
@@ -282,7 +282,7 @@ INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 WHERE ysnPosted = 1
-  AND ysnCancelled = 0	
+  --AND ysnCancelled = 0	
   AND strTransactionType <> 'Cash Refund'
   AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
