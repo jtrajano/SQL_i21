@@ -10037,6 +10037,7 @@
     <Build Include="dbo\Stored Procedures\uspARGetTaxCodeRateDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetTaxGroupTaxCodesForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
