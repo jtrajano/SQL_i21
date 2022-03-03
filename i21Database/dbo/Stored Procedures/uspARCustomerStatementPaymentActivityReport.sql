@@ -46,6 +46,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @blbLogo							AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
+	  , @strCustomerAgingBy					NVARCHAR(250)		= NULL
 
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -132,6 +133,9 @@ SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 SELECT TOP 1 @strCompanyName = strCompanyName
 		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+
+SELECT TOP 1  @strCustomerAgingBy = strCustomerAgingBy
+FROM tblARCompanyPreference WITH (NOLOCK)
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
@@ -490,7 +494,7 @@ IF @ysnIncludeBudgetLocal = 1
 
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN        
-		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0
+		DELETE FROM temp_statement_table WHERE DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN dtmDate ELSE dtmDueDate END ), @dtmDateToLocal) <= 0
 		UPDATE tblARCustomerAgingStagingTable
 		SET dbl0Days = 0
 		WHERE intEntityUserId = @intEntityUserIdLocal

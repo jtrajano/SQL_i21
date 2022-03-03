@@ -59,6 +59,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @blbStretchedLogo					AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
+	  , @strCustomerAgingBy					AS NVARCHAR(250)	= NULL
 
 DECLARE @temp_aging_table TABLE(
      [strCustomerName]          NVARCHAR(100)
@@ -185,6 +186,7 @@ SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + '''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo
+           , @strCustomerAgingBy = @strCustomerAgingBy
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -840,7 +842,7 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN
-        DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'
+        DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN dtmDate ELSE dtmDueDate END ), @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'
 		UPDATE @temp_aging_table
 		SET dblFuture 	= 0
 		  , dbl0Days 	= 0
