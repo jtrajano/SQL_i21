@@ -111,11 +111,14 @@ LEFT JOIN (
         --         AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
         WHERE 
             rctTax.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId 
-        AND EXISTS (
-            SELECT 1 FROM tblAPBillDetailTax billDetailTax
-            INNER JOIN tblAPBillDetail billDetail ON billDetailTax.intBillDetailId = billDetail.intBillDetailId
-            WHERE billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
-            AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
+        AND (
+                EXISTS (
+                    SELECT 1 FROM tblAPBillDetailTax billDetailTax
+                    INNER JOIN tblAPBillDetail billDetail ON billDetailTax.intBillDetailId = billDetail.intBillDetailId
+                    WHERE billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
+                    AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
+                ) OR
+                billDetail.intBillDetailId IS NULL
         )
         -- AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
         --         ELSE (
