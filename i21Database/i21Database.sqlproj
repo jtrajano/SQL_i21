@@ -536,6 +536,7 @@
     <Build Include="dbo\Tables\tblLGLoadShippingLineRank.sql" />
     <Build Include="dbo\Views\vyuLGLoadShippingLineRank.sql" />
     <Build Include="dbo\User Defined Types\ReceiptTradeFinance.sql" />
+    <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
