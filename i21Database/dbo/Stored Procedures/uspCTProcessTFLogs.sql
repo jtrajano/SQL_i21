@@ -44,7 +44,7 @@ BEGIN
 		while (@intActiveContractDetailId is not null)
 		begin
 
-				select @TFTransNo = max(strTradeFinanceTransaction) from tblTRFTradeFinanceLog where intContractDetailId = @intActiveContractDetailId ;
+			select @TFTransNo = strFinanceTradeNo from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId;
 			if (@TFTransNo is null)
 			begin
 				EXEC uspSMGetStartingNumber 166, @TFTransNo OUTPUT;
@@ -83,15 +83,6 @@ BEGIN
 			, intConcurrencyId
 			, intContractHeaderId
 			, intContractDetailId
-			, intBankId
-			, intBankAccountId
-			, intBorrowingFacilityId
-			, intLimitId
-			, intSublimitId
-			, strBankTradeReference
-			, strBankApprovalStatus
-			, dblLimit
-			, dblSublimit
 			)
 		select
 			strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' else 'Updated Contract' end)
@@ -117,24 +108,11 @@ BEGIN
 			, intConcurrencyId = 1
 			, intContractHeaderId = cd.intContractHeaderId
 			, intContractDetailId = tf.intContractDetailId
-			, intBankId = cd.intBankId
-			, intBankAccountId = cd.intBankAccountId
-			, intBorrowingFacilityId = cd.intBorrowingFacilityId
-			, intLimitId = cd.intBorrowingFacilityLimitId
-			, intSublimitId = cd.intBorrowingFacilityLimitDetailId
-			, strBankTradeReference = cd.strBankReferenceNo
-			, strBankApprovalStatus = STF.strApprovalStatus
-			, dblLimit = limit.dblLimit
-			, dblSublimit = sublimit.dblLimit
-			
 		from
 			@TFXML tf
 			join tblCTContractDetail cd on cd.intContractDetailId = tf.intContractDetailId
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
-			left join tblCTApprovalStatusTF STF on STF.intApprovalStatusId = cd.intApprovalStatusId
-			left join tblCMBorrowingFacilityLimit limit on limit.intBorrowingFacilityLimitId = cd.intBorrowingFacilityLimitId
-			left join tblCMBorrowingFacilityLimitDetail sublimit on sublimit.intBorrowingFacilityLimitDetailId = cd.intBorrowingFacilityLimitDetailId
 			cross apply (
 				select intTradeFinanceLogId = max(intTradeFinanceLogId) from tblTRFTradeFinanceLog where intContractDetailId = tf.intContractDetailId
 			) et
