@@ -537,6 +537,7 @@
     <Build Include="dbo\Views\vyuLGLoadShippingLineRank.sql" />
     <Build Include="dbo\User Defined Types\ReceiptTradeFinance.sql" />
     <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptTradeFinanceHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
