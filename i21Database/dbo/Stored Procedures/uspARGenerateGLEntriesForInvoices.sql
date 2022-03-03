@@ -6,14 +6,23 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @MODULE_NAME		NVARCHAR(25) = 'Accounts Receivable'
-	  , @SCREEN_NAME		NVARCHAR(25) = 'Invoice'
-	  , @CODE				NVARCHAR(25) = 'AR'
-	  , @POSTDESC			NVARCHAR(10) = 'Posted '
-	  , @ZeroDecimal		DECIMAL(18,6) = 0
-	  , @OneDecimal			DECIMAL(18,6) = 1
-	  , @OneHundredDecimal	DECIMAL(18,6) = 100
-	  , @PostDate			DATETIME = CAST(GETDATE() AS DATE)
+DECLARE @MODULE_NAME		        NVARCHAR(25) = 'Accounts Receivable'
+	  , @SCREEN_NAME		        NVARCHAR(25) = 'Invoice'
+	  , @CODE				        NVARCHAR(25) = 'AR'
+	  , @POSTDESC			        NVARCHAR(10) = 'Posted '
+	  , @ZeroDecimal		        DECIMAL(18,6) = 0
+	  , @OneDecimal			        DECIMAL(18,6) = 1
+	  , @OneHundredDecimal	        DECIMAL(18,6) = 100
+	  , @PostDate			        DATETIME = CAST(GETDATE() AS DATE)
+      , @AllowSingleLocationEntries BIT
+      , @DueToAccountId             INT
+      , @DueFromAccountId           INT
+
+SELECT TOP 1
+      @AllowSingleLocationEntries   = ISNULL([ysnAllowSingleLocationEntries], 0)
+    , @DueToAccountId               = ISNULL([intDueToAccountId], 0)
+    , @DueFromAccountId             = ISNULL([intDueFromAccountId], 0)
+FROM tblARCompanyPreference
 
 --REVERSE PROVISIONAL INVOICE
 INSERT INTO ##ARInvoiceGLEntries WITH (TABLOCK) (
@@ -736,6 +745,86 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[strItemType] = 'Software'
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
 
+--DUE FROM ACCOUNT DEBIT
+INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = @DueFromAccountId
+    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
+    ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+    ,[dblCreditUnit]                = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = I.[strItemDescription]
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]    
+FROM ##ARPostInvoiceDetail I
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.[ysnFromProvisional] = 0
+  AND I.[intItemId] IS NOT NULL
+  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+  AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
+  AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
+  AND I.strType <> 'Tax Adjustment'
+  AND (@AllowSingleLocationEntries = 0 OR I.[ysnIntraCompany] = 1)
+  AND @DueFromAccountId <> 0
+
 --SOFTWARE MAINTENANCE/SAAS CREDIT
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
      [dtmDate]
@@ -813,6 +902,86 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
   AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
   AND I.strType <> 'Tax Adjustment'
+
+-- DUE TO ACCOUNT CREDIT
+INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = @DueToAccountId
+    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
+    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
+    ,[dblCreditUnit]                = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = I.[strItemDescription]
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]    
+FROM ##ARPostInvoiceDetail I
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.[ysnFromProvisional] = 0
+  AND I.[intItemId] IS NOT NULL
+  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+  AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
+  AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
+  AND I.strType <> 'Tax Adjustment'
+  AND (@AllowSingleLocationEntries = 0 OR I.[ysnIntraCompany] = 1)
+  AND @DueToAccountId <> 0
 
 --FINAL INVOICE CREDIT
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (

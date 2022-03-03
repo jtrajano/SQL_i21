@@ -171,6 +171,7 @@ CREATE TABLE ##ARPostInvoiceHeader (
 	,[intInterCompanyVendorId]				INT				NULL
 	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
     ,[ysnIntraCompany]                      BIT             NULL DEFAULT 0
+    ,[ysnAllowSingleLocationEntries]        BIT             NULL DEFAULT 0
 )
 
 IF(OBJECT_ID('tempdb..##ARPostInvoiceDetail') IS NOT NULL) DROP TABLE ##ARPostInvoiceDetail
@@ -339,6 +340,7 @@ CREATE TABLE ##ARPostInvoiceDetail (
 	,[intInterCompanyVendorId]				INT				NULL
 	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
     ,[ysnIntraCompany]                      BIT             NULL DEFAULT 0
+    ,[ysnAllowSingleLocationEntries]        BIT             NULL DEFAULT 0
 )
 
 IF(OBJECT_ID('tempdb..##ARInvoiceItemAccount') IS NOT NULL) DROP TABLE ##ARInvoiceItemAccount
