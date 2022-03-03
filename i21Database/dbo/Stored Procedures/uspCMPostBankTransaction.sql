@@ -548,8 +548,9 @@ BEGIN
 	--DELETE FEES ON UNPOSTING
 	IF @ysnPost =0
 	BEGIN
-		DELETE FROM tblGLDetail WHERE strTransactionId = strTransactionId + '-F'
-		DELETE FROM tblCMBankTransaction WHERE strTransactionId = strTransactionId + '-F'
+		DELETE FROM tblGLDetail WHERE strTransactionId = @strTransactionId + '-F'
+		DELETE FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId + '-F'
+		DELETE FROM tblCMBankTransactionAdjustment WHERE intTransactionId = @intTransactionId OR intRelatedId = @intTransactionId
 	END
 
 	IF @@ERROR <> 0	GOTO Post_Rollback
