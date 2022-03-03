@@ -46,6 +46,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 	  , @dblTotalAR							NUMERIC(18,6)		= NULL
+	  , @strCustomerAgingBy				    NVARCHAR(250)		= NULL
 
 IF(OBJECT_ID('tempdb..#ADCUSTOMERS') IS NOT NULL) DROP TABLE #ADCUSTOMERS	  
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
@@ -75,7 +76,8 @@ SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + '''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 --LOGO
-SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo
+SELECT TOP 1  @ysnStretchLogo = ysnStretchLogo
+			, @strCustomerAgingBy = strCustomerAgingBy
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 --RUNNING BALANCE QUERY
@@ -334,7 +336,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 SELECT intEntityCustomerId		= I.intEntityCustomerId
 	, intInvoiceId				= I.intInvoiceId
 	, intCompanyLocationId		= L.intCompanyLocationId
-	, intDaysDue				= DATEDIFF(DAY, I.dtmDueDate, @dtmDateToLocal)
+	, intDaysDue				= DATEDIFF(DAY, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ), @dtmDateToLocal)
 	, strTransactionType		= CASE WHEN I.strType = 'Service Charge' THEN 'Service Charge' ELSE I.strTransactionType END
 	, strType					= I.strType
 	, strInvoiceNumber			= CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 THEN I.strInvoiceNumber ELSE ISNULL(I.strInvoiceOriginId, I.strInvoiceNumber) END
@@ -344,7 +346,7 @@ SELECT intEntityCustomerId		= I.intEntityCustomerId
 	, dtmPostDate				= I.dtmPostDate
 	, dtmDueDate				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo') THEN NULL ELSE I.dtmDueDate END
 	, ysnImportedFromOrigin		= I.ysnImportedFromOrigin
-	, ysnPastDue				= CASE WHEN @dtmDateToLocal > I.dtmDueDate AND I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE 0 END
+	, ysnPastDue				= CASE WHEN @dtmDateToLocal > ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ) AND I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE 0 END
 	, strLocationName			= L.strLocationName
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
