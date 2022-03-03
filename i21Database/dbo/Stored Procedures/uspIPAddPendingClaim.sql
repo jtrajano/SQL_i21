@@ -59,6 +59,7 @@ BEGIN
 					,[ysnSeqSubCurrency]
 					,[dblSeqPriceInWeightUOM]
 					,[dblSeqPriceConversionFactoryWeightUOM]
+					,[dtmReceiptDate]
 					,[dtmDateAdded]
 					)
 				SELECT [intPurchaseSale] = 1
@@ -110,6 +111,7 @@ BEGIN
 					,[ysnSeqSubCurrency]
 					,[dblSeqPriceInWeightUOM]
 					,[dblSeqPriceConversionFactoryWeightUOM]
+					,[dtmReceiptDate]
 					,[dtmDateAdded] = GETDATE()
 				FROM (
 					SELECT intEntityId = EM.intEntityId
@@ -156,6 +158,7 @@ BEGIN
 						,intItemId = LD.intItemId
 						,intContractDetailId = CD.intContractDetailId
 						,dblSeqPriceConversionFactoryWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty)
+						,dtmReceiptDate = IRD.dtmReceiptDate
 					FROM tblLGLoad L
 					JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 					JOIN tblCTContractDetail CD ON CD.intContractDetailId = intPContractDetailId
@@ -163,6 +166,7 @@ BEGIN
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 					JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+						AND WG.dblFranchise IS NOT NULL
 					JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId
 						AND L.intPurchaseSale = 1
 					LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
@@ -196,6 +200,17 @@ BEGIN
 						JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 						WHERE LW.intLoadId = L.intLoadId
 						) SL
+					OUTER APPLY (
+						SELECT TOP 1 IR.dtmReceiptDate
+						FROM tblICInventoryReceipt IR
+						INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+						WHERE IR.ysnPosted = 1
+							AND IRI.intLineNo = CD.intContractDetailId
+							AND IRI.intOrderId = CH.intContractHeaderId
+							AND IR.strReceiptType <> 'Inventory Return'
+							AND IRI.intContainerId = LC.intLoadContainerId
+						ORDER BY IR.dtmReceiptDate DESC
+						) IRD
 					CROSS APPLY (
 						SELECT intLoadContainerId
 							,dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0))
@@ -292,6 +307,7 @@ BEGIN
 					,[ysnSeqSubCurrency]
 					,[dblSeqPriceInWeightUOM]
 					,[dblSeqPriceConversionFactoryWeightUOM]
+					,[dtmReceiptDate]
 					,[dtmDateAdded]
 					)
 				SELECT [intPurchaseSale] = 1
@@ -342,6 +358,7 @@ BEGIN
 					,[ysnSeqSubCurrency]
 					,[dblSeqPriceInWeightUOM]
 					,[dblSeqPriceConversionFactoryWeightUOM]
+					,[dtmReceiptDate]
 					,[dtmDateAdded] = GETDATE()
 				FROM (
 					SELECT intEntityId = EM.intEntityId
@@ -447,6 +464,7 @@ BEGIN
 						,intItemId = LD.intItemId
 						,intContractDetailId = CD.intContractDetailId
 						,dblSeqPriceConversionFactoryWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty)
+						,dtmReceiptDate = IRD.dtmReceiptDate
 					FROM tblLGLoad L
 					JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 					JOIN tblCTContractDetail CD ON CD.intContractDetailId = intPContractDetailId
@@ -454,6 +472,7 @@ BEGIN
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 					JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+						AND WG.dblFranchise IS NOT NULL
 					LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 					LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 					LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
@@ -489,6 +508,16 @@ BEGIN
 						FROM tblLGLoadDetailContainerLink
 						WHERE intLoadDetailId = LD.intLoadDetailId
 						) CLNW
+					OUTER APPLY (
+						SELECT TOP 1 IR.dtmReceiptDate
+						FROM tblICInventoryReceipt IR
+						INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+						WHERE IR.ysnPosted = 1
+							AND IRI.intLineNo = CD.intContractDetailId
+							AND IRI.intOrderId = CH.intContractHeaderId
+							AND IR.strReceiptType <> 'Inventory Return'
+						ORDER BY IR.dtmReceiptDate DESC
+						) IRD
 					CROSS APPLY (
 						SELECT dblNet = SUM(ISNULL(IRI.dblNet, 0))
 							,dblGross = SUM(ISNULL(IRI.dblGross, 0))
@@ -518,6 +547,12 @@ BEGIN
 							(
 								L.intPurchaseSale = 1
 								AND L.intShipmentStatus = 4
+								AND NOT EXISTS (
+									SELECT 1
+									FROM tblLGLoadDetailContainerLink
+									WHERE intLoadId = @intLoadId
+										AND ISNULL(dblReceivedQty, 0) = 0
+									)
 								)
 							OR (
 								L.intPurchaseSale <> 1
@@ -701,6 +736,7 @@ BEGIN
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+					AND WG.dblFranchise IS NOT NULL
 				LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 				LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 				LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId

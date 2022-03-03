@@ -26,7 +26,7 @@ BEGIN TRY
 		,@strTerm NVARCHAR(50)
 		,@strEntityType NVARCHAR(50)
 		,@strCurrency NVARCHAR(50)
-		,@strDefaultLocation NVARCHAR(50)
+		,@strDefaultLocation NVARCHAR(100)
 		,@strTaxNo NVARCHAR(50)
 	DECLARE @intCompanyLocationId INT
 		,@intEntityId INT

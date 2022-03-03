@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspIPGenerateERPVoucher (
+﻿CREATE PROCEDURE [dbo].[uspIPGenerateERPVoucher] (
 	@strCompanyLocation NVARCHAR(6) = NULL
 	,@ysnUpdateFeedStatus BIT = 1
 	)
@@ -15,6 +15,8 @@ BEGIN TRY
 		,@strItemXML NVARCHAR(MAX) = ''
 		,@strDetailXML NVARCHAR(MAX) = ''
 		,@intUserId INT
+		,@intMaxRecordId int
+		,@intCurrentRecordId int
 	DECLARE @strQuantityUOM NVARCHAR(50)
 		,@strDefaultCurrency NVARCHAR(40)
 		,@intCurrencyId INT
@@ -67,8 +69,9 @@ BEGIN TRY
 		,@dblCostAdjustment NUMERIC(18, 6)
 		,@intNoOfItem INT
 		,@intLocationId int
+		,@dblResidue NUMERIC(18, 6)
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
-	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
+	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT,intRecordId int identity(1,1),strType nvarchar(50))
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intBillId INT
@@ -302,7 +305,7 @@ BEGIN TRY
 			IF ISNULL(@strERPVoucherNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
-				
+
 				UPDATE tblAPBillPreStage
 				SET strMessage = @strError
 					,intStatusId = 1
@@ -361,12 +364,12 @@ BEGIN TRY
 		DELETE
 		FROM @tblAPBillDetail
 
-		INSERT INTO @tblAPBillDetail (intBillDetailId)
-		SELECT BD.intBillDetailId
+		INSERT INTO @tblAPBillDetail (intBillDetailId,strType)
+		SELECT BD.intBillDetailId,I.strType
 		FROM tblAPBillDetail BD
+		JOIN tblICItem I ON I.intItemId = BD.intItemId
 		WHERE BD.intBillId = @intBillId
-		AND intItemId <> @intWeightAdjItemId
-
+			AND BD.intItemId <> @intWeightAdjItemId
 
 		SELECT @intBillDetailId = MIN(intBillDetailId)
 		FROM @tblAPBillDetail
@@ -467,15 +470,21 @@ BEGIN TRY
 			WHERE BD.intBillDetailId = @intBillDetailId
 
 			IF EXISTS (
-				SELECT *
-				FROM tblAPBillDetail
-				WHERE intBillId = @intBillId
-					AND intItemId = @intWeightAdjItemId
-			)
+					SELECT *
+					FROM tblAPBillDetail
+					WHERE intBillId = @intBillId
+						AND intItemId = @intWeightAdjItemId
+					)
+				AND EXISTS (
+					SELECT 1
+					FROM tblAPBillDetail
+					WHERE intBillDetailId = @intBillDetailId
+						AND intInventoryReceiptItemId IS NOT NULL
+					)
 			BEGIN
 				SELECT @dblCostAdjustment = NULL
 
-				SELECT @dblCostAdjustment = dblCost*dblQtyReceived 
+				SELECT @dblCostAdjustment = dblTotal--dblCost*dblQtyReceived 
 				FROM tblAPBillDetail
 				WHERE intBillId = @intBillId
 					AND intItemId = @intWeightAdjItemId
@@ -491,10 +500,27 @@ BEGIN TRY
 					SELECT @intNoOfItem = 1
 
 				SELECT @dblDetailTotal = @dblDetailTotal + (@dblCostAdjustment / @intNoOfItem)
+					--SELECT @dblDetailQuantity = @dblDetailTotal / @dblDetailCost
 
-				SELECT @dblDetailQuantity = @dblDetailTotal / @dblDetailCost
+				SELECT @intMaxRecordId =NULL
+				SELECT @intCurrentRecordId=NULL
+				SELECT @intMaxRecordId = Max(intRecordId)
+				FROM @tblAPBillDetail
+				WHERE strType<>'Other Charge'
+
+				SELECT @intCurrentRecordId = intRecordId
+				FROM @tblAPBillDetail
+				WHERE intBillDetailId = @intBillDetailId
+				AND strType<>'Other Charge'
+
+				IF @intCurrentRecordId = @intMaxRecordId and @intNoOfItem>1
+				BEGIN
+					SELECT @dblResidue = @dblCostAdjustment - (Convert(decimal(18,6),dbo.fnDivide (@dblCostAdjustment , @intNoOfItem)) * @intNoOfItem)
+
+					SELECT @dblDetailTotal = @dblDetailTotal + @dblResidue
+				END
+
 			END
-
 
 			SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
 
@@ -589,7 +615,7 @@ BEGIN TRY
 				IF ISNULL(@strMapItemNo, '') <> ''
 					SELECT @strItemNo = @strMapItemNo
 			END
-			
+
 			IF ISNULL(@strItemNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'Item No cannot be blank. '

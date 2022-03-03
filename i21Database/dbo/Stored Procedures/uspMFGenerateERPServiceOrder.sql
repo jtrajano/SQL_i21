@@ -111,6 +111,10 @@ BEGIN TRY
 
 		IF @strRowState = 'Deleted'
 		BEGIN
+			IF IsNULL(@strERPOrderNo, '') = ''
+			BEGIN
+				GOTO NextPO
+			END;
 			SELECT @strXML = @strXML + '<header TrxSequenceNo="' + ltrim(@intWorkOrderPreStageId) + '">'
 				+'<TrxSequenceNo>'+ltrim(@intWorkOrderPreStageId) +'</TrxSequenceNo>'
 				+'<CompanyLocation>'+@strCompanyLocation +'</CompanyLocation>'
