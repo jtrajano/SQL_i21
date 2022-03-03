@@ -9,6 +9,8 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strXML NVARCHAR(MAX) = ''
 		,@intLotPropertyFeedId INT
+		,@intLotId INT
+		,@intTransactionTypeId INT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intLotPropertyFeedId INT
@@ -61,6 +63,26 @@ BEGIN TRY
 
 	WHILE @intLotPropertyFeedId IS NOT NULL
 	BEGIN
+		SELECT @intLotId = NULL,@intTransactionTypeId =NULL
+
+		SELECT @intLotId = intLotId,@intTransactionTypeId=intTransactionTypeId
+		FROM tblIPLotPropertyFeed
+		WHERE intLotPropertyFeedId = @intLotPropertyFeedId
+
+		IF @intTransactionTypeId = 16
+		BEGIN
+			IF EXISTS (
+					SELECT *
+					FROM tblICInventoryReceiptItem RI
+					JOIN tblICInventoryReceiptItemLot RL ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
+					WHERE RL.intLotId = @intLotId
+						AND IsNULL(RI.ysnExported, 0) = 0
+					) AND @intLotId IS NOT NULL
+			BEGIN
+				GOTO NextPO
+			END
+		END
+
 		SELECT @strXML = @strXML + '<header id="' + ltrim(@intLotPropertyFeedId) + '">'  
 		 +'<TrxSequenceNo>'+ltrim(@intLotPropertyFeedId) +'</TrxSequenceNo>'  
 		 +'<CompanyLocation>'+strCompanyLocation +'</CompanyLocation>'  
@@ -70,7 +92,7 @@ BEGIN TRY
 		  --+'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
 		 +'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
 		 +'<ItemNo>'+ IsNULL(strItemNo,'')  +'</ItemNo>'  
-		 +'<MotherLotNo>'+ IsNULL(strMotherLotNo,'')  +'</MotherLotNo>'  
+		 +'<MotherLotNo>'+ dbo.fnEscapeXML(IsNULL(strMotherLotNo,''))  +'</MotherLotNo>'  
 		 +'<LotNo>'+ IsNULL(strLotNo,'')  +'</LotNo>'  
 		 +'<StorageUnit>'+ IsNULL(strStorageUnit,'')  +'</StorageUnit>'  
 		 +'<AdjustmentNo>'+ IsNULL(strAdjustmentNo,'')  +'</AdjustmentNo>'  

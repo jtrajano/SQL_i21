@@ -99,7 +99,7 @@ BEGIN TRY
 					,TermsCode NVARCHAR(50)
 					,EntityType NVARCHAR(50)
 					,Currency NVARCHAR(50)
-					,DefaultLocation NVARCHAR(50)
+					,DefaultLocation NVARCHAR(100)
 					,TaxNo NVARCHAR(50)
 					) x
 

@@ -56,6 +56,7 @@ BEGIN TRY
 		,@intTransactionFrom INT
 		,@strItemNo nvarchar(50)
 		,@intMCSubLocationId INT
+		,@strProductionDateByCurrentDate NVARCHAR(50)
 
 	DECLARE @tblQuantityBreakup AS Table
 	(
@@ -155,6 +156,22 @@ BEGIN TRY
 	WHERE pa.intManufacturingProcessId = @intManufacturingProcessId
 		AND pa.intLocationId = @intLocationId
 		AND at.strAttributeName = 'Produce Lot Status'
+
+	SELECT @strProductionDateByCurrentDate = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute pa
+	WHERE pa.intManufacturingProcessId = @intManufacturingProcessId
+		AND pa.intLocationId = @intLocationId
+		AND pa.intAttributeId=126
+
+	IF @strProductionDateByCurrentDate IS NULL OR @strProductionDateByCurrentDate = ''
+	BEGIN
+		SELECT @strProductionDateByCurrentDate = 'False'
+	END
+
+	 IF @strProductionDateByCurrentDate = 'True'
+	 BEGIN
+		SELECT @dtmProductionDate=GETDATE()
+	 END 
 
 	IF @intLotStatusId = 0
 		OR @intLotStatusId IS NULL

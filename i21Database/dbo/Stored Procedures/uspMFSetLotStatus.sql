@@ -268,6 +268,7 @@ BEGIN TRY
 			,strNewStatus
 			,strReasonCode
 			,strNotes
+			,intLotId
 			)
 		SELECT strCompanyLocation = @strLotOrigin
 			,intActionId = 1
@@ -283,6 +284,7 @@ BEGIN TRY
 			,strNewStatus = @strSecondaryStatus
 			,strReasonCode = @strReasonCode
 			,strNotes = @strNotes
+			,intLotId=@intLotId
 
 		SELECT @intLotRecordId = MIN(intLotRecordId)
 		FROM @tblLotsWithSameParentLot

@@ -142,7 +142,7 @@ END
 ELSE
 BEGIN
 	DECLARE @tblMFPickLot TABLE (
-		intRecordId INT identity(1, 1) 
+		intRecordId INT identity(1, 1)
 		,intItemId INT
 		,intParentLotId INT
 		,intLotId INT
@@ -151,7 +151,7 @@ BEGIN
 		,intStorageLocationId INT
 		)
 	DECLARE @tblMFPickedLot TABLE (
-				intWorkOrderId int
+		intWorkOrderId INT
 		,intItemId INT
 		,intParentLotId INT
 		,intLotId INT
@@ -164,9 +164,9 @@ BEGIN
 		,@dblReqQuantity NUMERIC(18, 6)
 		,@LotQty NUMERIC(18, 6)
 		,@intLotId INT
-		,@intItemId int
-			,@intItemUOMId int
-			,@intStorageLocationId int
+		,@intItemId INT
+		,@intItemUOMId INT
+		,@intStorageLocationId INT
 
 	INSERT INTO @tblMFPickLot (
 		intItemId
@@ -221,7 +221,7 @@ BEGIN
 				,@intLotId = intLotId
 			FROM tblICLot L
 			WHERE intParentLotId = @intParentLotId
-				AND intLocationId=@intLocationId
+				AND intLocationId = @intLocationId
 				AND (
 					CASE 
 						WHEN intWeightUOMId IS NULL
@@ -233,6 +233,11 @@ BEGIN
 						FROM tblICStockReservation SR
 						WHERE SR.intLotId = L.intLotId
 						), 0) > 0
+				AND NOT EXISTS (
+					SELECT *
+					FROM @tblMFPickedLot PL
+					WHERE PL.intLotId = L.intLotId
+					)
 
 			IF @dblReqQuantity > @LotQty
 			BEGIN
@@ -245,8 +250,7 @@ BEGIN
 					,intItemUOMId
 					,intStorageLocationId
 					)
-				SELECT 
-					@intWorkOrderId
+				SELECT @intWorkOrderId
 					,@intItemId
 					,@intParentLotId
 					,@intLotId
@@ -267,8 +271,7 @@ BEGIN
 					,intItemUOMId
 					,intStorageLocationId
 					)
-				SELECT 
-					@intWorkOrderId
+				SELECT @intWorkOrderId
 					,@intItemId
 					,@intParentLotId
 					,@intLotId
@@ -298,7 +301,7 @@ BEGIN
 		,intTransactionId
 		,strTransactionId
 		,intInventoryTransactionType
-		,intLotId 
+		,intLotId
 		)
 	SELECT intItemId = wcl.intItemId
 		,@intLocationId AS intLocationId
@@ -310,7 +313,7 @@ BEGIN
 		,intTransactionId = wcl.intWorkOrderId
 		,strTransactionId = w.strWorkOrderNo
 		,intTransactionTypeId = @intInventoryTransactionType
-		,intLotId=wcl.intLotId
+		,intLotId = wcl.intLotId
 	FROM @tblMFPickedLot wcl
 	JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
 	JOIN tblICItemLocation il ON wcl.intItemId = il.intItemId
