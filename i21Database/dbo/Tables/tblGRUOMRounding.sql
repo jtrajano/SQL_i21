@@ -4,7 +4,8 @@
 	[intUnitOfMeasureToId] [int] NOT NULL,
 	[intDecimalAdjustment] [int] NOT NULL  DEFAULT 0,
 	[ysnFixRounding] [bit] NOT NULL  DEFAULT 0,
-	[intConcurrencyId] [int] NOT NULL  DEFAULT 0
+	[intConcurrencyId] [int] NOT NULL  DEFAULT 0, 
+    CONSTRAINT [PK_tblGRUOMRounding] PRIMARY KEY ([intUOMRoundingId])
 ) ON [PRIMARY]
 GO
 
