@@ -7,5 +7,6 @@
     [dtmScheduleDate]			    DATETIME        NULL,
     [intConcurrencyId]			    INT            DEFAULT 1 NOT NULL,
     [ysnRepeatMonthly]				BIT             NULL,
+    [strJobsId]		                NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblFRReportHierarchySchedule] PRIMARY KEY CLUSTERED ([intHierarchyScheduleId] ASC )
 );
