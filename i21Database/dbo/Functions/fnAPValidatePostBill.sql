@@ -561,7 +561,7 @@ BEGIN
 			A2.dblTax <> ISNULL(taxDetails.dblTaxTotal,0)
 		)
 
-		
+		--VALIDATE COST
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			ISNULL(C.strItemNo, A2.strMiscDescription) + ' has incorrect cost. Cost cannot be negative.',
@@ -575,6 +575,21 @@ BEGIN
 		WHERE 
 			A.intBillId IN (SELECT intBillId FROM @tmpBills) 
 		AND A2.dblCost < 0
+
+		--VALIDATE PAY TO BANK ACCOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Pay To Bank Account is required.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			37
+		FROM tblAPBill A
+		INNER JOIN vyuAPVendor B ON B.intEntityId = A.intEntityVendorId
+		WHERE 
+			A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND A.intPayToBankAccountId IS NULL
+		AND B.intPaymentMethodId = 2 --ACH
 
 	END
 	ELSE
