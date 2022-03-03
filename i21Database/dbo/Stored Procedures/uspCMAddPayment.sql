@@ -196,6 +196,10 @@ BEGIN TRY
 		INSERT INTO  tblCMBankTransactionAdjustment (intRelatedId,intTransactionId, strType)
         SELECT @intTransactionId   ,@intParentTransId ,'Parent' UNION 
         SELECT @intParentTransId   ,@intTransactionId , 'Bank Fee'
+		IF EXISTS(
+		SELECT  1 FROM tblCMBankTransaction WHERE intTransactionId = @intParentTransId AND ysnClr = 1)
+		UPDATE tblCMBankTransaction SET ysnClr = 1 WHERE intTransactionId = @intTransactionId
+
 	END
 
 	GOTO uspCMAddPayment_Commit
