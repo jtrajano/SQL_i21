@@ -424,7 +424,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				DELETE FROM tblGLRevalue WHERE strConsolidationNumber = @strConsolidationNumber +'-R'
 			END		
 			
-			EXEC uspGLBookEntries @PostGLEntries, @ysnPost, 1
+			EXEC uspGLBookEntries @PostGLEntries, @ysnPost
 
 		END
 		ELSE

@@ -71,7 +71,10 @@ BEGIN
 						,60004 intErrorCode
 						,GLEntries.strModuleName
 				FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate
-				WHERE ISNULL(strCode, '') <>'AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
+				WHERE 
+				ISNULL(strCode, '') <>'AA' 
+				AND ISNULL(strCode, '') <>'REVAL'
+				AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 				WHERE	dbo.isOpenAccountingDate(dtmDate) = 0
 		
 				UNION ALL 
@@ -89,7 +92,12 @@ BEGIN
 						,GLEntries.strModuleName strText
 						,60009 intErrorCode
 						,strModuleName
-				FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') <>'AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
+				FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName 
+				FROM @GLEntriesToValidate 
+				WHERE
+				ISNULL(strCode, '') <>'AA' 
+				AND ISNULL(strCode, '') <>'REVAL' 
+				AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 				WHERE	dbo.isOpenAccountingDateByModule(dtmDate,strModuleName) = 0
 		
 				UNION ALL 
