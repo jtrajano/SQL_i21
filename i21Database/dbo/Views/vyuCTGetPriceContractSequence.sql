@@ -1,5 +1,4 @@
 ﻿CREATE VIEW [dbo].[vyuCTGetPriceContractSequence]
-
 AS
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractSeq ASC) AS INT) intUniqueId,
@@ -77,8 +76,8 @@ AS
 				ICC.strRegion,
 				ICC.strSeason,
 				ICC.strClass,
-				ICC.strProductLine
-
+				ICC.strProductLine,
+				ICC.strItemNo
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 												AND	CD.dblNoOfLots IS NOT NULL		 
@@ -139,7 +138,8 @@ LEFT	JOIN	vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
 				ICC.strRegion,
 				ICC.strSeason,
 				ICC.strClass,
-				ICC.strProductLine
+				ICC.strProductLine,
+				ICC.strItemNo
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
 												AND	ISNULL(ysnMultiplePriceFixation,0) = 1

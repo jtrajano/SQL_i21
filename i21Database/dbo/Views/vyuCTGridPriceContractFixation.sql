@@ -81,7 +81,8 @@ AS
 				ICC.strRegion,
 				ICC.strSeason,
 				ICC.strClass,
-				ICC.strProductLine
+				ICC.strProductLine,
+				ICC.strItemNo
 		FROM	tblCTPriceFixation	PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
@@ -160,7 +161,8 @@ AS
 				ICC.strRegion,
 				ICC.strSeason,
 				ICC.strClass,
-				ICC.strProductLine
+				ICC.strProductLine,
+				ICC.strItemNo
 		FROM	tblCTPriceFixation	PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
 		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	CU.intUnitMeasureId

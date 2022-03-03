@@ -91,6 +91,7 @@ BEGIN TRY
 				, CD.intContractStatusId
 				, CH.ysnReadOnlyInterCoContract
 				, dblFX = CD.dblRate
+				, CD.strItemNo
 				, CD.strOrigin
 				, CD.strProductType
 				, CD.strGrade
@@ -127,6 +128,7 @@ BEGIN TRY
 					, intPriceCommodityUOMId = CUOM.intCommodityUnitMeasureId
 					, strPriceUOM = UOM.strUnitMeasure
 					, CDetail.dblRate
+					, ICC.strItemNo
 					, ICC.strOrigin
 					, ICC.strProductType
 					, ICC.strGrade
@@ -229,6 +231,7 @@ BEGIN TRY
 				, CD.intContractStatusId
 				, CD.ysnReadOnlyInterCoContract
 				, dblFX = CD.dblRate
+				, ICC.strItemNo
 				, ICC.strOrigin
 				, ICC.strProductType
 				, ICC.strGrade
