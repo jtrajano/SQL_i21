@@ -19,6 +19,9 @@ BEGIN TRY
 		,@strInputItemUpperTolerance NVARCHAR(50)
 		,@strOutputItemLowerTolerance NVARCHAR(50)
 		,@strOutputItemUpperTolerance NVARCHAR(50)
+		,@strIgnoreShrinkageCommodity NVARCHAR(50)
+		,@intCommodityId int
+
 	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 
 	INSERT INTO @tblIPIDOCXMLStage (intIDOCXMLStageId)
@@ -47,6 +50,12 @@ BEGIN TRY
 	SELECT @strOutputItemLowerTolerance = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Output Item Lower Tolerance')
 
 	SELECT @strOutputItemUpperTolerance = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Output Item Upper Tolerance')
+
+	SELECT @strIgnoreShrinkageCommodity = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Ignore Shrinkage Commodity')
+
+	Select @intCommodityId =intCommodityId 
+	from tblICCommodity 
+	Where strCommodityCode =@strIgnoreShrinkageCommodity
 
 	IF @strInputItemLowerTolerance IS NULL
 		OR @strInputItemLowerTolerance = ''
@@ -259,6 +268,16 @@ BEGIN TRY
 				,strValidTo = R.strValidTo
 			FROM tblMFRecipeStage R
 			JOIN tblMFRecipeItemStage RI ON RI.intParentTrxSequenceNo = R.intTrxSequenceNo
+
+			IF @intCommodityId IS NOT NULL
+			BEGIN
+				UPDATE RI
+				SET strShrinkage = 0
+				FROM tblMFRecipeItemStage RI
+				JOIN tblICItem I ON I.strItemNo = RI.strRecipeHeaderItemNo
+				JOIN tblMFRecipe R ON R.intItemId = I.intItemId
+				JOIN tblMFVirtualRecipeMap VR ON VR.intRecipeId = R.intRecipeId
+			END
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (

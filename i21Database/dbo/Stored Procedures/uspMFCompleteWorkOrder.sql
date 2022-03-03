@@ -1037,6 +1037,8 @@ BEGIN TRY
 				,@ysnPostConsumption = @ysnPostConsumption
 				,@ysnRecap = @ysnRecap
 				,@dtmDate = @dtmPlannedDate
+				,@intManufacturingProcessId =@intManufacturingProcessId
+				,@intLocationId =@intLocationId
 		END
 		ELSE
 		BEGIN
@@ -1092,6 +1094,8 @@ BEGIN TRY
 				,@ysnPostConsumption = @ysnPostConsumption
 				,@ysnRecap = @ysnRecap
 				,@dtmDate = @dtmPlannedDate
+				,@intManufacturingProcessId =@intManufacturingProcessId
+				,@intLocationId =@intLocationId
 		END
 
 		EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
@@ -1397,6 +1401,8 @@ BEGIN TRY
 							,@ysnPostConsumption = @ysnPostConsumption
 							,@ysnRecap = @ysnRecap
 							,@dtmDate = @dtmPlannedDate
+							,@intManufacturingProcessId =@intManufacturingProcessId
+							,@intLocationId =@intLocationId
 
 						SELECT @ysnPostProduction = 0
 					END

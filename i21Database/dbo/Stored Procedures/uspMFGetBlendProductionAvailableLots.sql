@@ -15,6 +15,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ysnEnableParentLot BIT = 0
 DECLARE @strRecipeItemUOM NVARCHAR(50)
 DECLARE @strSourceLocationIds NVARCHAR(MAX)
+	,@strSourceWarehouseIds NVARCHAR(MAX)
 
 SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 FROM tblMFCompanyPreference
@@ -31,6 +32,13 @@ WHERE intManufacturingProcessId = @intManufacturingProcessId
 	AND intLocationId = @intLocationId
 	AND at.strAttributeName = 'Source Location'
 
+SELECT @strSourceWarehouseIds = ISNULL(pa.strAttributeValue, '')
+FROM tblMFManufacturingProcessAttribute pa
+JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId
+	AND intLocationId = @intLocationId
+	AND at.strAttributeName = 'Source Warehouse'
+
 DECLARE @tblSourceStorageLocation AS TABLE (intStorageLocationId INT)
 
 IF Ltrim(ISNULL(@strSourceLocationIds, '')) <> ''
@@ -38,6 +46,18 @@ BEGIN
 	INSERT INTO @tblSourceStorageLocation
 	SELECT *
 	FROM dbo.fnCommaSeparatedValueToTable(@strSourceLocationIds)
+END
+ELSE IF Ltrim(ISNULL(@strSourceLocationIds, '')) <> ''
+BEGIN
+	INSERT INTO @tblSourceStorageLocation
+	SELECT intStorageLocationId
+	FROM tblICStorageLocation
+	WHERE intLocationId = @intLocationId
+		AND ISNULL(ysnAllowConsume, 0) = 1
+		AND intSubLocationId IN (
+			SELECT [value]
+			FROM dbo.fnCommaSeparatedValueToTable(@strSourceWarehouseIds)
+			)
 END
 ELSE
 BEGIN

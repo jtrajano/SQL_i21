@@ -428,7 +428,7 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<FromStorageUnit>' + ISNULL(@strFromStorageUnit, '') + '</FromStorageUnit>'
 
-			SELECT @strItemXML += '<MotherLotNo>' + ISNULL(@strParentLotNumber, '') + '</MotherLotNo>'
+			SELECT @strItemXML += '<MotherLotNo>' + dbo.fnEscapeXML(ISNULL(@strParentLotNumber, '')) + '</MotherLotNo>'
 
 			SELECT @strItemXML += '<LotNo>' + ISNULL(@strLotNumber, '') + '</LotNo>'
 
