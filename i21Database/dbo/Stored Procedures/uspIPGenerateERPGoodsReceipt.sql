@@ -573,6 +573,16 @@ BEGIN TRY
 			IF @intActionId = 1
 				AND UPPER(@strCommodityCode) = 'COFFEE'
 			BEGIN
+				UPDATE LP
+				SET LP.intStatusId = 7 -->IGNORE
+				FROM tblICInventoryReceiptItemLot RIL
+				JOIN tblIPLotPropertyFeed LP ON LP.intLotId = RIL.intLotId
+				JOIN tblICLot L ON L.intLotId = RIL.intLotId
+				JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+				WHERE RIL.intInventoryReceiptItemId = @intInventoryReceiptItemId
+					AND LP.intStatusId IS NULL
+					AND LS.strPrimaryStatus='Active'
+
 				INSERT INTO @tblICInventoryReceiptItemParentLot (intParentLotId)
 				SELECT DISTINCT RIL.intParentLotId
 				FROM tblICInventoryReceiptItemLot RIL
