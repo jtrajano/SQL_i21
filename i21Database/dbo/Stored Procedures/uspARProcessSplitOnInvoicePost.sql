@@ -8,19 +8,6 @@ SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 SET XACT_ABORT ON  
 
-DECLARE  @InitTranCount				INT
-		,@CurrentTranCount			INT
-		,@Savepoint					NVARCHAR(32)
-		,@CurrentSavepoint			NVARCHAR(32)
-
-SET @InitTranCount = @@TRANCOUNT
-SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
-
-IF @InitTranCount = 0
-	BEGIN TRANSACTION
-ELSE
-	SAVE TRANSACTION @Savepoint
-
 BEGIN TRY
 
 DECLARE @ForInsertion NVARCHAR(MAX)
@@ -304,28 +291,11 @@ END TRY
 BEGIN CATCH
     DECLARE @ErrorMerssage NVARCHAR(MAX)
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-    IF @InitTranCount = 0
-        IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION
-	ELSE
-		IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION @Savepoint
-												
+    											
 	RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
 END CATCH
-
-
-IF @InitTranCount = 0
-	BEGIN
-		IF (XACT_STATE()) = -1
-			ROLLBACK TRANSACTION
-		IF (XACT_STATE()) = 1
-			COMMIT TRANSACTION
-		RETURN 1;
-	END	
-
 
 Post_Exit:
 	RETURN 0;
