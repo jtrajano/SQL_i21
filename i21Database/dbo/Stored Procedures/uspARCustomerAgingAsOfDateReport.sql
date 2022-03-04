@@ -62,7 +62,7 @@ SELECT TOP 1 @strCompanyName	= strCompanyName
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 SELECT TOP 1 @strCustomerAgingBy = strCustomerAgingBy
-FROM tblARCompanyPreference
+FROM tblARCompanyPreference WITH (NOLOCK)
 
 --CUSTOMER FILTER
 IF @strCustomerIdsLocal IS NOT NULL
