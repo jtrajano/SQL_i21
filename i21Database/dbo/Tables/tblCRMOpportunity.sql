@@ -60,6 +60,7 @@
     [intOpportunityTypeId] INT NULL,
     [intVolume] INT NULL,
     [strOpportunityDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strBrand] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 
 	CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),
 	--CONSTRAINT [UQ_tblCRMOpportunity_strName] UNIQUE ([strName]),
