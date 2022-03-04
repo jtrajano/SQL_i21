@@ -404,6 +404,7 @@ CREATE TABLE ##ARItemsForCosting (
     , [ysnAutoBlend]                    BIT NULL DEFAULT 0
     , [ysnGLOnly]						BIT NULL DEFAULT 0
 	, [strBOLNumber]					NVARCHAR(100) NULL 
+    , [intTicketId]                     INT NULL
     , [strSourceType]                   NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [strSourceNumber]                 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [intTicketId]                     INT NULL
