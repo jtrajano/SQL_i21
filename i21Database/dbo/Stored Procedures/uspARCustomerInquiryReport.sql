@@ -69,7 +69,11 @@ CREATE TABLE #CUSTOMERINQUIRY (
 	, dtmHighestDueARDate			DATETIME NULL
 )
 
-DECLARE @strCustomerIds NVARCHAR(100) = NULL
+DECLARE @strCustomerIds				NVARCHAR(100) = NULL,
+	    @strCustomerAgingBy			NVARCHAR(250) = NULL
+
+SELECT TOP 1 @strCustomerAgingBy = strCustomerAgingBy
+FROM tblARCompanyPreference WITH (NOLOCK)
 
 SET @intEntityCustomerId = NULLIF(@intEntityCustomerId, 0)
 SET @intEntityUserId 	 = ISNULL(@intEntityUserId, 1)
@@ -318,7 +322,7 @@ CROSS APPLY (
 	AND strTransactionType IN ('Invoice', 'Debit Memo')
 	AND strType <> 'CF Tran'
 	AND intEntityCustomerId = CI.intEntityCustomerId
-	AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, @dtmDate)) > 0
+	AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), ISNULL(PD.dtmDatePaid, @dtmDate)) > 0
 	ORDER BY I.dblInvoiceTotal DESC
 ) HIGHESTDUEAR
 
