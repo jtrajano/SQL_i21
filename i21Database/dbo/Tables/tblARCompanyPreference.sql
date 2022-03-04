@@ -44,6 +44,7 @@
 	[strSOBMMessage]						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[strSOCSMessage]						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[intAttachmentRetention]				INT NOT NULL DEFAULT 7,
+	[strCustomerAgingBy]					NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Invoice Due Date', 
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
