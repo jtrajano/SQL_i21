@@ -376,6 +376,7 @@
     <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
