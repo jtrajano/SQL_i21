@@ -174,7 +174,16 @@ BEGIN
  BEGIN    
   SELECT TOP 1     
    @intEmployeeId = [intEntityId]    
-  FROM #tmpEmployees     
+  FROM #tmpEmployees 
+
+   --Update Hours earned > max earned
+  UPDATE #tmpEmployees    
+   SET dblEarnedHours = CASE WHEN dblEarnedHours >= T.dblMaxEarned THEN T.dblMaxEarned ELSE dblEarnedHours END    
+  FROM    
+  tblPREmployeeTimeOff T    
+  WHERE intEntityId = @intEmployeeId    
+    AND T.intEntityEmployeeId = @intEmployeeId    
+    AND intTypeTimeOffId = @intTypeTimeOffId     
     
   --Update Accrued Hours    
   UPDATE tblPREmployeeTimeOff    
@@ -188,8 +197,8 @@ BEGIN
   --Update Earned Hours    
   UPDATE tblPREmployeeTimeOff    
       SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN          
-                            CASE WHEN ((dblHoursEarned + T.dblEarnedHours) >= dblMaxEarned) THEN          
-								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover >= dblMaxBalance) THEN
+                            CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN          
+								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover > dblMaxBalance) THEN
 									T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)
 								ELSE
 									T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned)

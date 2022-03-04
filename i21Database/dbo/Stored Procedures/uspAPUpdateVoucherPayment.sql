@@ -74,15 +74,27 @@ BEGIN TRY
 		OUTER APPLY 
 		(
 			SELECT
-				PD.intBillId,
-				SUM(PD.dblPayment) dblPayment,
-				SUM(PD.dblDiscount) dblDiscount,
-				SUM(PD.dblInterest) dblInterest
-			FROM tblAPPaymentDetail PD
-			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
-			WHERE 
-				PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
-			GROUP BY PD.intBillId
+				intBillId,
+				SUM(dblPayment) dblPayment,
+				SUM(dblDiscount) dblDiscount,
+				SUM(dblInterest) dblInterest
+			FROM
+			(
+				SELECT
+					PD.dblPayment,
+					CASE WHEN PD.dblPayment + PD.dblDiscount = PD.dblAmountDue THEN PD.dblDiscount 
+					WHEN B.ysnDiscountOverride = 1 THEN PD.dblDiscount ELSE 0 END
+					AS dblDiscount,
+					CASE WHEN PD.dblPayment - PD.dblInterest = PD.dblAmountDue THEN PD.dblInterest 
+					ELSE 0 END
+					AS dblInterest,
+					PD.intBillId
+				FROM tblAPPaymentDetail PD
+				INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
+				WHERE 
+					PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
+			) tmpPayDetails
+			GROUP BY intBillId
 		) payDetails 
 		OUTER APPLY (
 			SELECT 

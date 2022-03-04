@@ -115,11 +115,9 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 		WHERE strTax = @TaxId
 		group by T.intTypeTaxId,T.intTypeTaxStateId,T.intTypeTaxLocalId,PRTE.intEmployeeTaxId
 
-		IF(@strCalculationType IS NOT NULL OR @strCalculationType != '')
-			BEGIN
-				IF(@strFilingStatus IS NOT NULL OR @strFilingStatus != '')
+		IF(@strFilingStatus IS NOT NULL AND @strFilingStatus != '')
 					BEGIN
-						IF(@intSupplementalCalc IS NOT NULL OR @intSupplementalCalc != 2)
+						IF(@intSupplementalCalc IS NOT NULL AND @intSupplementalCalc != 2)
 							BEGIN
 								IF (@EmployeeTaxId = 0)
 									BEGIN
@@ -185,6 +183,21 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 														SET @NewId = SCOPE_IDENTITY()
 													END
 											END
+
+										INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+										SELECT TOP 1
+											  NEWID()
+											, guiApiImportLogId = @guiLogId
+											, strField = 'Employee Taxes'
+											, strValue = SE.strTaxId
+											, strLogLevel = 'Info'
+											, strStatus = 'Success'
+											, intRowNo = SE.intRowNumber
+											, strMessage = 'The employee taxes has been successfully imported.'
+										FROM tblApiSchemaEmployeeTaxes SE
+										LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+										WHERE SE.guiApiUniqueId = @guiApiUniqueId
+										AND SE.strTaxId = @TaxId
 				
 										DELETE FROM #TempEmployeeTaxes WHERE LTRIM(RTRIM(intEntityNo)) = @strEmployeeId AND LTRIM(RTRIM(strTaxId)) = LTRIM(RTRIM(@TaxId))
 
@@ -219,22 +232,6 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 										DELETE FROM #TempEmployeeTaxes WHERE LTRIM(RTRIM(intEntityNo)) = @strEmployeeId AND LTRIM(RTRIM(strTaxId)) = LTRIM(RTRIM(@TaxId))
 				
 									END
-
-								INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-								SELECT TOP 1
-									  NEWID()
-									, guiApiImportLogId = @guiLogId
-									, strField = 'Employee Taxes'
-									, strValue = SE.strTaxId
-									, strLogLevel = 'Info'
-									, strStatus = 'Success'
-									, intRowNo = SE.intRowNumber
-									, strMessage = 'The employee taxes has been successfully imported.'
-								FROM tblApiSchemaEmployeeTaxes SE
-								LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
-								WHERE SE.guiApiUniqueId = @guiApiUniqueId
-								AND SE.strTaxId = @TaxId
-								AND SE.strTaxDescription = @TaxTaxDesc
 							END
 						ELSE
 							BEGIN
@@ -247,12 +244,13 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 									, strLogLevel = 'Error'
 									, strStatus = 'Failed'
 									, intRowNo = SE.intRowNumber
-									, strMessage = 'Cannot fint the value '+ SE.strSupplimentalCalc +'. Please try again.'
+									, strMessage = 'Wrong input/format for Supplemental Calculation. Please try again.'
 								FROM tblApiSchemaEmployeeTaxes SE
 								LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
 								WHERE SE.guiApiUniqueId = @guiApiUniqueId
 								AND SE.strTaxId = @TaxId
-								AND SE.strTaxDescription = @TaxTaxDesc
+
+								DELETE FROM #TempEmployeeTaxes WHERE LTRIM(RTRIM(intEntityNo)) = @strEmployeeId AND LTRIM(RTRIM(strTaxId)) = LTRIM(RTRIM(@TaxId))
 							END
 					END
 				ELSE
@@ -266,32 +264,14 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 							, strLogLevel = 'Error'
 							, strStatus = 'Failed'
 							, intRowNo = SE.intRowNumber
-							, strMessage = 'Cannot fint the value '+ @strFilingStatus +'. Please try again.'
+							, strMessage = 'Wrong input/format for Filling Status. Please try again.'
 						FROM tblApiSchemaEmployeeTaxes SE
 						LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
 						WHERE SE.guiApiUniqueId = @guiApiUniqueId
 						AND SE.strTaxId = @TaxId
-						AND SE.strTaxDescription = @TaxTaxDesc
+
+						DELETE FROM #TempEmployeeTaxes WHERE LTRIM(RTRIM(intEntityNo)) = @strEmployeeId AND LTRIM(RTRIM(strTaxId)) = LTRIM(RTRIM(@TaxId))
 					END
-			END
-		ELSE
-			BEGIN
-				INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-				SELECT TOP 1
-					  NEWID()
-					, guiApiImportLogId = @guiLogId
-					, strField = 'Employee Taxes'
-					, strValue = @strCalculationType
-					, strLogLevel = 'Error'
-					, strStatus = 'Failed'
-					, intRowNo = SE.intRowNumber
-					, strMessage = 'Cannot fint the value '+ @strCalculationType +'. Please try again.'
-				FROM tblApiSchemaEmployeeTaxes SE
-				LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
-				WHERE SE.guiApiUniqueId = @guiApiUniqueId
-				AND SE.strTaxId = @TaxId
-				AND SE.strTaxDescription = @TaxTaxDesc
-			END
 	END
 
 	

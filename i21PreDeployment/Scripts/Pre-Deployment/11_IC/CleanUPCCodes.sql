@@ -6,12 +6,43 @@ BEGIN
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICItemUOM' AND [COLUMN_NAME] = 'intModifier')
 	BEGIN
 		EXEC ('
-		UPDATE tblICItemUOM set strUpcCode = NULL 
-		WHERE strUpcCode = '''' OR strUpcCode = ''0'' OR
-			strUpcCode IN (SELECT strUpcCode
+		UPDATE UOM
+		SET UOM.strUpcCode = NULL
+		FROM
+		(
+			SELECT
+			strUpcCode,
+			intModifier,
+			ROW_NUMBER() OVER (PARTITION BY strUpcCode, intModifier
+								ORDER BY strUpcCode) AS RowNumber 
 			FROM tblICItemUOM
-			GROUP BY strUpcCode
-			HAVING (COUNT(strUpcCode) > 1))		
+		) UOM
+		WHERE 
+		UOM.RowNumber > 1 
+		AND 
+		UOM.strUpcCode IS NOT NULL
+		AND
+		UOM.intModifier IS NULL
+
+		UPDATE UOM
+		SET 
+			UOM.strUpcCode = NULL,
+			UOM.intModifier = NULL
+		FROM
+		(
+			SELECT
+			strUpcCode,
+			intModifier,
+			ROW_NUMBER() OVER (PARTITION BY strUpcCode, intModifier
+								ORDER BY strUpcCode) AS RowNumber 
+			FROM tblICItemUOM
+		) UOM
+		WHERE 
+		UOM.RowNumber > 1 
+		AND 
+		UOM.strUpcCode IS NOT NULL
+		AND
+		UOM.intModifier IS NOT NULL		
 		')
 	END
 	
@@ -19,12 +50,42 @@ BEGIN
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICItemUOM' AND [COLUMN_NAME] = 'intModifier')
 	BEGIN
 		EXEC ('
-		UPDATE tblICItemUOM set strLongUPCCode = NULL 
-		WHERE strLongUPCCode = '''' OR strLongUPCCode = ''0'' OR
-			strLongUPCCode IN (SELECT strLongUPCCode
+		UPDATE UOM
+		SET UOM.strLongUPCCode = NULL
+		FROM
+		(
+			SELECT
+			strLongUPCCode,
+			intModifier,
+			ROW_NUMBER() OVER (PARTITION BY strLongUPCCode
+								ORDER BY strLongUPCCode) AS RowNumber 
 			FROM tblICItemUOM
-			GROUP BY strLongUPCCode
-			HAVING (COUNT(strLongUPCCode) > 1))
+			WHERE intModifier IS NULL
+		) UOM
+		WHERE 
+		UOM.RowNumber > 1 
+		AND 
+		UOM.strLongUPCCode IS NOT NULL
+
+		UPDATE UOM
+		SET 
+			UOM.strLongUPCCode = NULL,
+			UOM.intModifier = NULL
+		FROM
+		(
+			SELECT
+			strLongUPCCode,
+			intModifier,
+			ROW_NUMBER() OVER (PARTITION BY strLongUPCCode, intModifier
+								ORDER BY strLongUPCCode) AS RowNumber 
+			FROM tblICItemUOM
+		) UOM
+		WHERE 
+		UOM.RowNumber > 1 
+		AND 
+		UOM.strLongUPCCode IS NOT NULL
+		AND
+		UOM.intModifier IS NOT NULL
 		')
 	END
 END

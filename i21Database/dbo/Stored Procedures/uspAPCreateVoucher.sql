@@ -626,6 +626,61 @@ BEGIN TRY
 	DELETE FROM @tmpBillDetailDelete WHERE intBillId = @billId
 	END
 
+	--Check for approval
+	DECLARE @vendorId INT
+	DECLARE @locationId INT
+	DECLARE @Total DECIMAL(18,2)
+	DECLARE @DueDate DATETIME
+	DECLARE @currencyId INT
+	DECLARE @requireApproval BIT = 0
+	DECLARE @generatedBillRecordId NVARCHAR(250)
+
+	DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+	FOR
+
+		SELECT intId FROM @voucherIds
+	
+	OPEN c;
+
+	FETCH c INTO @billId
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		SELECT
+			@vendorId = A.intEntityVendorId
+			,@locationId = A.intShipToId
+			,@currencyId = A.intCurrencyId
+			,@Total = A.dblTotal
+			,@DueDate = A.dtmDueDate
+			,@generatedBillRecordId = A.strBillId
+		FROM tblAPBill A
+		WHERE A.intBillId = @billId
+
+		EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+			@type = N'AccountsPayable.view.Voucher',
+			@transactionEntityId = @vendorId,
+			@currentUserEntityId = @userId,
+			@locationId = @locationId,
+			@amount = @Total,
+			@requireApproval = @requireApproval OUTPUT
+
+		IF @requireApproval = 1
+		BEGIN
+			EXEC uspSMSubmitTransaction
+				@type = 'AccountsPayable.view.Voucher',
+				@recordId = @billId,
+				@transactionNo = @generatedBillRecordId,
+				@transactionEntityId = @vendorId,
+				@currentUserEntityId = @userId,
+				@amount = @Total, 
+				@dueDate = @DueDate,
+				@currencyId = @currencyId
+		END
+		FETCH c INTO @billId
+	END
+
+	CLOSE c; DEALLOCATE c;
+
 	EXEC uspAPAddTransactionLinks 1, @createdVouchersId, 1
 
 	IF @transCount = 0 COMMIT TRANSACTION;

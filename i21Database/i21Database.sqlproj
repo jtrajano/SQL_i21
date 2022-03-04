@@ -2001,7 +2001,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql"/>
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
@@ -10221,6 +10221,8 @@
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
+    <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Tables\tblSCTicketOnProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
@@ -10239,6 +10241,20 @@
     <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
+    <Build Include="dbo\User Defined Types\CustomerTaxGroupParam.sql" />
+    <Build Include="dbo\User Defined Types\CustomerTaxGroupIdParam.sql" />
+    <Build Include="dbo\User Defined Types\TaxCodeRateParam.sql" />
+    <Build Include="dbo\User Defined Types\ItemTaxComputationForCustomerParam.sql" />
+    <Build Include="dbo\User Defined Types\CustomerTaxCodeExemptionParam.sql" />
+    <Build Include="dbo\User Defined Types\ConstructLineItemTaxDetailParam.sql" />
+    <Build Include="dbo\Stored Procedures\uspARConstructLineItemTaxDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetCustomerTaxCodeExemption.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetItemTaxComputationForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetTaxCodeRateDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetTaxGroupIdForCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetTaxGroupTaxCodesForCustomer.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
   </ItemGroup>
   <ItemGroup>

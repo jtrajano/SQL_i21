@@ -25,11 +25,16 @@ BEGIN
 						THEN 
 							CASE WHEN B.intPayScheduleId IS NULL
 							THEN
+							--unposting need to recalculate the discount
+							--discount may not be applicable if unposted because of terms
 							dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, 
 								(
 									--GET THE AMOUNT DUE ON VOUCHER FOR ACCURACY OF VALUE
 									(C.dblAmountDue * (CASE WHEN B.ysnOffset = 1 THEN -1 ELSE 1 END)) 
-									+ B.dblPayment + B.dblDiscount - B.dblInterest)
+									+ B.dblPayment - B.dblInterest
+									+ (CASE WHEN C.ysnDiscountOverride = 1 THEN B.dblDiscount --DISCOUNT IS VALID BECAUSE IT IS OVERRIDE
+											WHEN C.dblAmountDue = 0 THEN B.dblDiscount --DISCOUNT IS VALID BECAUSE AMOUNT DUE IS 0
+											ELSE 0 END))
 								)
 							ELSE B.dblDiscount
 							END
