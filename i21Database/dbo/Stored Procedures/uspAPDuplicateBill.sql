@@ -312,7 +312,7 @@ EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
 
 IF @requireApproval = 1
 BEGIN
-	EXEC uspSMSubmitTransaction
+	EXEC uspSMUnSubmitTransaction
 		@type = 'AccountsPayable.view.Voucher',
 		@recordId = @billCreatedId,
 		@transactionNo = @generatedBillRecordId,
