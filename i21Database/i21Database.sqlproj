@@ -359,6 +359,7 @@
     <Build Include="dbo\Views\vyuTRComboFreightShipVia.sql" />
 	<Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
