@@ -378,6 +378,7 @@
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
