@@ -99,6 +99,7 @@
 			,a.intOpportunityTypeId
 			,a.intVolume
 			,a.strOpportunityDescription
+			,a.strBrand
 			,t.strIndustrySegment
 			,u.strOpportunityType
 		from
