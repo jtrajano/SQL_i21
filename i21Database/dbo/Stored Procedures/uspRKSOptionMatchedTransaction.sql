@@ -58,6 +58,7 @@ FROM (
 		, t.intFutureMarketId
 		, t.intCommodityId
 		, t.intOptionMonthId
+		, m.strMatchingType
 	FROM tblRKOptionsMatchPnS m
 	join tblRKFutOptTransaction t on m.intLFutOptTransactionId= t.intFutOptTransactionId
 	Join tblEMEntity e on e.intEntityId=t.intEntityId

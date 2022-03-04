@@ -20,6 +20,7 @@
     [ysnPosted] BIT NULL, 
 	[intCompanyId] INT NULL,
 	[strRollNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strMatchingType] NVARCHAR(10) COLLATE Latin1_General_CI_AS DEFAULT (N'Manual'),
     CONSTRAINT [PK_tblRKMatchFuturesPSHeader_intMatchFuturesPSHeaderId] PRIMARY KEY (intMatchFuturesPSHeaderId), 
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
