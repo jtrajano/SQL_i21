@@ -680,10 +680,10 @@ BEGIN TRY
 			,strContractPrintSignOff			    = SQ.strContractPrintSignOff
 			,strEntityName							= LTRIM(RTRIM(EY.strEntityName))
 			,strApprovalText					    = @strApprovalText
-			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
-			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
-			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalName ELSE NULL END
-			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalName ELSE NULL END
+			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode LIKE '%Coffee%' THEN @FirstApprovalSign  ELSE NULL END
+			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode LIKE '%Coffee%' THEN @SecondApprovalSign ELSE NULL END
+			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode LIKE '%Coffee%' THEN @FirstApprovalName ELSE NULL END
+			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode LIKE '%Coffee%' THEN @SecondApprovalName ELSE NULL END
 			,StraussContractApproverSignature		=  @StraussContractApproverSignature
 			--,StraussContractSubmitSignature			=  @StraussContractSubmitSignature
 			,StraussContractSubmitSignature   		=  (case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then null else @StraussContractSubmitSignature  end)
@@ -857,8 +857,8 @@ BEGIN TRY
 	)										EB ON EB.intContractHeaderId = CH.intContractHeaderId											
 	LEFT JOIN	tblCTCropYear				CY	WITH (NOLOCK) ON	CY.intCropYearId				=	CH.intCropYearId			
 	LEFT JOIN	tblSMFreightTerms			CB	WITH (NOLOCK) ON	CB.intFreightTermId				=	CH.intFreightTermId		
-	LEFT JOIN	tblCTWeightGrade			W1	WITH (NOLOCK) ON	W1.intWeightGradeId				=	CH.intWeightId				
-	LEFT JOIN	tblCTWeightGrade			W2	WITH (NOLOCK) ON	W2.intWeightGradeId				=	CH.intGradeId				
+	RIGHT JOIN	tblCTWeightGrade			W1	WITH (NOLOCK) ON	W1.intWeightGradeId				=	CH.intWeightId			
+	RIGHT JOIN	tblCTWeightGrade			W2	WITH (NOLOCK) ON	W2.intWeightGradeId				=	CH.intGradeId		
 	LEFT JOIN	tblCTContractText			TX	WITH (NOLOCK) ON	TX.intContractTextId			=	CH.intContractTextId		
 	LEFT JOIN	tblCTAssociation			AN	WITH (NOLOCK) ON	AN.intAssociationId				=	CH.intAssociationId			
 	LEFT JOIN	tblSMTerm					TM	WITH (NOLOCK) ON	TM.intTermID					=	CH.intTermId				
@@ -871,8 +871,8 @@ BEGIN TRY
 	LEFT JOIN	tblAPVendor					VR	WITH (NOLOCK) ON	VR.intEntityId					=	CH.intEntityId				
 	LEFT JOIN	tblARCustomer				CR	WITH (NOLOCK) ON	CR.intEntityId					=	CH.intEntityId					
 	LEFT JOIN	tblSMCity					CT	WITH (NOLOCK) ON	CT.intCityId					=	CH.intINCOLocationTypeId	
-	LEFT JOIN	tblICCommodityUnitMeasure	CU	WITH (NOLOCK) ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		
-	LEFT JOIN	tblICUnitMeasure			UM	WITH (NOLOCK) ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId			
+	INNER JOIN	tblICCommodityUnitMeasure	CU	WITH (NOLOCK) ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		
+	INNER JOIN	tblICUnitMeasure			UM	WITH (NOLOCK) ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId			
 	LEFT JOIN	tblSMCompanyLocationSubLocation		SL	WITH (NOLOCK) ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId 
 	LEFT JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
