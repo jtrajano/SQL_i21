@@ -36,7 +36,10 @@ DECLARE @BANK_DEPOSIT AS INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
-
+		,@IMPORT_STATUS_UNPROCESSED AS INT = 0
+        ,@IMPORT_STATUS_MATCHFOUND AS INT = 1
+        ,@IMPORT_STATUS_NOMATCHFOUND AS INT = 2
+		,@IMPORT_STATUS_MULTIPLEENTRY AS INT = 3
 		-- Declare the local variables. 
 		,@dtmLog AS DATETIME 
 		
@@ -129,7 +132,12 @@ SET dtmDateReconciled =  @dtmDate
 FROM  tblCMABRActivityMatched t 
 JOIN @Id i on i.intId = t.intTransactionId
 
-
+--MOVED TO DELETE
+IF EXISTS(SELECT 1 FROM tblCMBankAccount WHERE @intBankAccountId = intBankAccountId AND ysnABREnable = 1)
+BEGIN
+	UPDATE tblCMABRActivity SET intImportStatus = @IMPORT_STATUS_UNPROCESSED  
+	WHERE dtmDate<=@dtmDate AND intBankAccountId=@intBankAccountId AND intImportStatus = @IMPORT_STATUS_NOMATCHFOUND
+END
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 		
 --=====================================================================================================================================
