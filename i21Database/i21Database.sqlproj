@@ -10259,6 +10259,7 @@
     <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
+    <Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
