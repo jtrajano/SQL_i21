@@ -540,6 +540,7 @@
     <Build Include="dbo\Views\vyuICGetReceiptTradeFinanceHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDerivativesAutoMatching.sql" />
     <Build Include="dbo\Views\vyuRKOpenDerivativesForAutoMatching.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
