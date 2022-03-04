@@ -150,5 +150,4 @@ RETURNS TABLE AS RETURN
 	AND CASE WHEN @accrue = 0 AND payable.intEntityVendorId IS NOT NULL THEN 1 ELSE @accrue END = 1
 	AND ISNULL(CC.ysnBasis, 0) <> 1
 	and 1 = case when @remove = 1 and @type = 'header' and payable.intEntityVendorId is null then 0 else 1 end
-
 )

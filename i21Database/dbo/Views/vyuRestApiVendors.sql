@@ -31,8 +31,7 @@ SELECT
 	strWebsite			=	ISNULL(contactEntity.strWebsite,''),
 	strCountry			=	ISNULL(entityLocation.strCountry, ''),
 	CAST(CASE terminal.ysnTransportTerminal WHEN 1 THEN 1 ELSE 0 END AS BIT) ysnTransportTerminal,
-	-- CAST(CASE WHEN ISNULL(terminal.ysnTransportTerminal, 0) = 0 AND vendor.ysnTransportTerminal = 1 THEN 1 ELSE 0 END AS BIT) ysnSupplier,
-	vendor.ysnTransportTerminal ysnSupplier,
+	CAST(CASE WHEN ISNULL(terminal.ysnTransportTerminal, 0) = 0 AND vendor.ysnTransportTerminal = 1 THEN 1 ELSE 0 END AS BIT) ysnSupplier,
 	entityLocation.intShipViaId,
 	shipVia.strShipVia
 FROM tblAPVendor vendor

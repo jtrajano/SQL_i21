@@ -464,6 +464,26 @@ BEGIN TRY
 
 
 
+
+	
+	IF EXISTS(
+		SELECT
+		TOP 1 1
+		FROM tblCTSequenceHistory	CurrentRow
+			JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
+			JOIN @tblDetail				PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0) OR ISNULL(CurrentRow.dblCashPrice,0)   <> ISNULL(PreviousRow.dblCashPrice,0) 
+		WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId 
+			 AND (CurrentRow.dblOldFutures IS NOT NULL OR CurrentRow.dblOldCashPrice IS NOT NULL)	
+			 AND @ysnPricingAsAmendment <> 1
+	)
+
+	BEGIN
+		SET @ysnAmendmentForCashFuture = 1
+	END
+
+
+
+
     if exists (
         select
             top 1 1

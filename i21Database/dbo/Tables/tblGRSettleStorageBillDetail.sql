@@ -14,7 +14,3 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblGRSettleStorageBillDetail_intBillId]
 ON [dbo].[tblGRSettleStorageBillDetail] ([intBillId])
 GO
-
-CREATE NONCLUSTERED INDEX [IX_tblGRSettleStorageBillDetail_intSettleStorageId]
-ON [dbo].[tblGRSettleStorageBillDetail] ([intSettleStorageId])
-GO

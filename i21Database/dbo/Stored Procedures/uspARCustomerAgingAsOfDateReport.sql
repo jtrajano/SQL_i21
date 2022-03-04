@@ -29,8 +29,7 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@strCompanyAddress				NVARCHAR(500)	= NULL,
 		@ysnIncludeCreditsLocal			BIT				= 1,
 		@ysnIncludeWriteOffPaymentLocal BIT				= 1,
-		@ysnPrintFromCFLocal			BIT				= 0,
-		@strCustomerAgingBy			    NVARCHAR(250)	= NULL
+		@ysnPrintFromCFLocal			BIT				= 0
 
 --DROP TEMP TABLES
 EXEC uspARInitializeTempTableForAging
@@ -55,9 +54,6 @@ SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
-
-SELECT TOP 1 @strCustomerAgingBy = strCustomerAgingBy
-FROM tblARCompanyPreference
 
 --CUSTOMER FILTER
 IF ISNULL(@strCustomerIdsLocal, '') <> ''
@@ -235,7 +231,7 @@ INNER JOIN(
 )REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
 WHERE I.ysnPosted = 1 
 	AND I.ysnPaid = 1
-	--AND ysnCancelled = 0
+	AND ysnCancelled = 0
 	AND I.strTransactionType <> 'Cash Refund'
 	AND I.strTransactionType = 'Credit Memo'
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
@@ -283,21 +279,16 @@ INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
-WHERE I.ysnPosted = 1
-  --AND I.ysnCancelled = 0	
-  AND I.strTransactionType <> 'Cash Refund'
-  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+WHERE ysnPosted = 1
+  AND ysnCancelled = 0	
+  AND strTransactionType <> 'Cash Refund'
   AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
 		SC.intInvoiceId IS NOT NULL
-  )  
-
-IF @strSourceTransactionLocal IS NOT NULL
-	DELETE FROM ##POSTEDINVOICES WHERE strType <> @strSourceTransactionLocal
-
-IF @ysnIncludeCreditsLocal = 0
-	DELETE FROM ##POSTEDINVOICES WHERE strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash Refund')
+  )
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
+  AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
@@ -457,14 +448,15 @@ FROM
 (SELECT I.intInvoiceId
       , I.intEntityCustomerId
 	  , strAge = CASE WHEN I.strType = 'CF Tran' THEN 'Future'
-				 ELSE CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 0 THEN 'Current'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 10 THEN '1 - 10 Days'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 30 THEN '11 - 30 Days'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 60 THEN '31 - 60 Days'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 90 THEN '61 - 90 Days'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 90 THEN 'Over 90' END
+				 ELSE CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 0 THEN 'Current'
+	    			       WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 10 THEN '1 - 10 Days'
+	    			       WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 30 THEN '11 - 30 Days'
+	    			       WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 60 THEN '31 - 60 Days'
+	    			       WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 90 THEN '61 - 90 Days'
+	    			       WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 THEN 'Over 90' END
 				 END
 FROM ##POSTEDINVOICES I WITH (NOLOCK)
+WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
 ) AS A  
 
@@ -479,25 +471,24 @@ LEFT JOIN
 	, dblPrepayments
 	, CASE WHEN strType = 'CF Tran' 
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dblFuture
-    , CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 0 AND strType <> 'CF Tran'
+    , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) <= 0 AND strType <> 'CF Tran'
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl0Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 10 AND strType <> 'CF Tran'
+	, CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) <= 10 AND strType <> 'CF Tran'
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl10Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 30 AND strType <> 'CF Tran'
+	, CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) <= 30 AND strType <> 'CF Tran'
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl30Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 60 AND strType <> 'CF Tran'
+	, CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) <= 60 AND strType <> 'CF Tran'
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl60Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 90 AND strType <> 'CF Tran'
+	, CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) <= 90 AND strType <> 'CF Tran'
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl90Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 90 AND strType <> 'CF Tran'
+	, CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateToLocal) > 90 AND strType <> 'CF Tran'
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl91Days
 FROM
 (SELECT I.intInvoiceId
       , dblAmountPaid		= 0
       , dblInvoiceTotal		= ISNULL(dblInvoiceTotal,0)
       , dblAmountDue		= 0    
-      , I.dtmDueDate  
-	  , I.dtmDate  
+      , I.dtmDueDate    
       , I.intEntityCustomerId
       , dblAvailableCredit	= 0
 	  , dblPrepayments		= 0
@@ -512,7 +503,6 @@ SELECT I.intInvoiceId
      , dblInvoiceTotal		= CASE WHEN I.strType = 'CF Tran' THEN (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)) * -1 ELSE 0 END
      , dblAmountDue			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
-	 , dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
      , I.intEntityCustomerId
      , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0) END
 	 , dblPrepayments		= 0
@@ -526,7 +516,7 @@ FROM ##POSTEDINVOICES I WITH (NOLOCK)
 		GROUP BY PD.intInvoiceId
 	) PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN ##CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
-WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
     AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 UNION ALL
@@ -536,7 +526,6 @@ SELECT I.intInvoiceId
      , dblInvoiceTotal		= 0
      , dblAmountDue			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
-	 , dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
      , I.intEntityCustomerId
      , dblAvailableCredit	= 0
 	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
@@ -545,7 +534,7 @@ FROM ##POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN ##ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN ##INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN ##CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
-WHERE I.strTransactionType = 'Customer Prepayment'
+WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
     AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	                                          
 UNION ALL
@@ -555,7 +544,6 @@ SELECT I.intInvoiceId
     , dblInvoiceTotal		= 0
     , dblAmountDue			= 0
     , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
-	, dtmDate				= ISNULL(I.dtmDate, GETDATE())
     , I.intEntityCustomerId
     , dblAvailableCredit	= 0
 	, dblPrepayments		= 0
@@ -588,6 +576,7 @@ LEFT JOIN (
 		 , dblTotalPayment		= dblInvoiceTotal
 	FROM ##CASHRETURNS
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
+WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
 ) AS TBL) AS B
           
