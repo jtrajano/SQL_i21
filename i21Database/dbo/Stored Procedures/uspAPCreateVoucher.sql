@@ -666,7 +666,7 @@ BEGIN TRY
 
 		IF @requireApproval = 1
 		BEGIN
-			EXEC uspSMSubmitTransaction
+			EXEC uspSMUnSubmitTransaction
 				@type = 'AccountsPayable.view.Voucher',
 				@recordId = @billId,
 				@transactionNo = @generatedBillRecordId,
