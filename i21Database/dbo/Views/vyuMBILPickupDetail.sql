@@ -22,6 +22,7 @@ SELECT  detail.intPickupDetailId
        ,detail.dtmActualPickupTo        
        ,detail.ysnPickup    
        ,detail.strPONumber    
+	   ,detail.intShiftId
 FROM tblMBILPickupDetail detail              
 INNER JOIN tblMBILLoadHeader load on detail.intLoadHeaderId = load.intLoadHeaderId        
 INNER JOIN tblICItem item on detail.intItemId = item.intItemId        
