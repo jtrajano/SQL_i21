@@ -538,6 +538,8 @@
     <Build Include="dbo\User Defined Types\ReceiptTradeFinance.sql" />
     <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptTradeFinanceHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDerivativesAutoMatching.sql" />
+    <Build Include="dbo\Views\vyuRKOpenDerivativesForAutoMatching.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
