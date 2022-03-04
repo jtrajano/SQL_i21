@@ -293,6 +293,7 @@ FROM #TBLTOPROCESS
 WHERE (
 	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
    OR (ysnDestWtGrd = 1 AND strPricing = 'Subsystem - Direct')
+   OR intTicketId IS NULL
 )
 
 --CONTRACT SCHEDULED
@@ -336,6 +337,7 @@ FROM #TBLTOPROCESS
 WHERE (
 	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
    OR (ysnDestWtGrd = 1 AND strPricing = 'Subsystem - Direct')
+   OR intTicketId IS NULL
 )
 AND ysnFromReturn = 0
 AND (intLoadDetailId IS NULL OR (intLoadDetailId IS NOT NULL AND intPurchaseSale = 3))
