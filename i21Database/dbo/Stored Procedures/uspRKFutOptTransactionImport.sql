@@ -106,7 +106,7 @@ BEGIN TRY
 					, dtmMarketDate = CASE WHEN ISNULL(ti.strMarketDate, '') <> '' THEN CONVERT(DATETIME, ti.strMarketDate, @ConvertYear) ELSE NULL END 
 					, dtmMaturityDate = CASE WHEN ISNULL(ti.strMaturityDate, '') <> '' THEN CONVERT(DATETIME, ti.strMaturityDate, @ConvertYear) ELSE NULL END
 					, ysnGTC = ti.ysnGTC
-					, strSource = CASE WHEN instrument2.intInstrumentTypeId = 4 THEN 'Import' ELSE NULL END COLLATE Latin1_General_CI_AS
+					, strSource = 'Import' COLLATE Latin1_General_CI_AS
 				FROM tblRKFutOptTransactionImport ti
 				JOIN tblICCommodity c ON c.strCommodityCode = ti.strCommodityCode
 				JOIN tblSMCompanyLocation l ON l.strLocationName = ti.strLocationName
