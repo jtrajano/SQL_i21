@@ -114,8 +114,8 @@ CREATE TABLE #STATEMENTREPORT (
 	, strPONumber				NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
 	, strItemNo					NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
 	, strItemDescription		NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
-	, strFullAddress			NVARCHAR(500) COLLATE Latin1_General_CI_AS	NULL
-	, strStatementFooterComment	NVARCHAR(500) COLLATE Latin1_General_CI_AS	NULL
+	, strFullAddress			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
+	, strStatementFooterComment	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	, strPaymentMethod			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, strStatementFormat        NVARCHAR(50) COLLATE Latin1_General_CI_AS   NULL
 	, strCurrency				NVARCHAR(40)								NULL
