@@ -622,7 +622,7 @@ WHERE I.strComments IS NOT NULL
 UPDATE I
 SET strInvoiceHeaderComment	= ISNULL(HEADER.strMessage, I.strComments)
 FROM #INVOICES I
-CROSS APPLY (
+OUTER APPLY (
 	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
 	FROM tblSMDocumentMaintenanceMessage H
 	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
@@ -638,7 +638,7 @@ CROSS APPLY (
 UPDATE I
 SET strInvoiceFooterComment	= ISNULL(FOOTER.strMessage, I.strFooterComments)
 FROM #INVOICES I
-CROSS APPLY (
+OUTER APPLY (
 	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
 	FROM tblSMDocumentMaintenanceMessage H
 	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
