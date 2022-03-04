@@ -8932,6 +8932,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
   	<Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
+  	<Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
