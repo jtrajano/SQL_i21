@@ -326,16 +326,20 @@ BEGIN
 				,dblReceivedGrossWt = (RI.dblGross - ISNULL(IRN.dblIRGross, 0))
 				,dblFranchisePercent = WG.dblFranchise
 				,dblFranchise = WG.dblFranchise / 100
-				,dblFranchiseWt = CASE WHEN (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) <> 0.0
-									THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
-								ELSE 0.0 END
+				,dblFranchiseWt = CASE WHEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) * WG.dblFranchise / 100) <> 0.0
+										THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) * WG.dblFranchise / 100)
+									ELSE 0.0 END
 				,dblWeightLoss = CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
 									THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
-								ELSE (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) END
-				,dblClaimableWt = CASE WHEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-									THEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100))
-									ELSE (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
-								END
+								ELSE (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - RI.dblNet) END
+				,dblClaimableWt = CASE WHEN (ABS((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)) > (LD.dblNet * WG.dblFranchise / 100))
+									THEN
+										CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
+											THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)
+										ELSE 
+											(CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - RI.dblNet) - (LD.dblNet * WG.dblFranchise / 100)
+										END
+									ELSE 0.0 END
 				,dblSeqPrice = AD.dblSeqPrice
 				,strSeqCurrency = AD.strSeqCurrency
 				,strSeqPriceUOM = AD.strSeqPriceUOM
@@ -348,6 +352,7 @@ BEGIN
 				,intItemId = LD.intItemId
 				,intContractDetailId = CD.intContractDetailId
 				,dblSeqPriceConversionFactoryWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty)
+				,ysnDropShip = CAST(CASE WHEN (L.intPurchaseSale = 3) THEN 1 ELSE 0 END AS BIT)
 			FROM tblLGLoad L
 				JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 				JOIN tblCTContractDetail CD ON CD.intContractDetailId = intPContractDetailId
@@ -425,6 +430,7 @@ BEGIN
 				,intItemId = CD.intItemId
 				,intContractDetailId = CD.intContractDetailId
 				,dblSeqPriceConversionFactoryWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty)
+				,ysnDropShip = CAST(CASE WHEN (L.intPurchaseSale = 3) THEN 1 ELSE 0 END AS BIT)
 			FROM tblLGLoad L
 				JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 				JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
@@ -452,6 +458,7 @@ BEGIN
 					AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 2)
 				) LI
+			WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1
 	')
 END
 GO
