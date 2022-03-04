@@ -25,5 +25,20 @@
 	[strSubBook] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] int,
 	[strErrorMsg] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
-	[strCreateDateTime] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
+	[strCreateDateTime] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[strSelectedInstrumentType] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+	[strCurrencyExchangeRateTypeId] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+	[strBank] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+	[strBuyBankAccount] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+	[strBankAccount] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+	[strOrderType] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+	[dblLimitRate] decimal(24,10),
+	[strMarketDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[ysnGTC] BIT,
+	[strTransactionDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[strMaturityDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblExchangeRate] decimal(24,10),
+	[dblContractAmount] decimal(24,10),
+	[dblMatchAmount] decimal(24,10),
+	[dblFinanceForwardRate] decimal(24,10)
 )
