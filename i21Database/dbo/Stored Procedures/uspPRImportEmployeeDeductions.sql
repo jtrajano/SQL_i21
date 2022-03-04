@@ -133,11 +133,9 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 		WHERE intEntityEmployeeId = @intEntityNo
 		  AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId)
 
-		IF(@strCategory IS NOT NULL OR @strCategory != '')
-			BEGIN
-				IF(@strRateCalcType IS NOT NULL OR @strRateCalcType != '')
+		IF(@strRateCalcType IS NOT NULL AND @strRateCalcType != '')
 					BEGIN
-						IF(@strDeductFromType IS NOT NULL OR @strDeductFromType != '')
+						IF(@strDeductFromType IS NOT NULL AND @strDeductFromType != '')
 							BEGIN
 								IF @EmployeeEntityNo = 0
 									BEGIN
@@ -185,7 +183,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 													,1
 												FROM #TempEmployeeDeductions
 												WHERE intEntityNo = @strEmployeeId
-												AND strDeductionDesc = (SELECT TOP 1 strDescription FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId)
+												AND strDeductionId = @strDeductionId
 
 												SET @NewId = SCOPE_IDENTITY()
 
@@ -285,8 +283,22 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 														END
 													END
 											END
+										INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+										SELECT TOP 1
+											  NEWID()
+											, guiApiImportLogId = @guiLogId
+											, strField = 'Employee Deductions'
+											, strValue = SE.strDeductionId
+											, strLogLevel = 'Info'
+											, strStatus = 'Success'
+											, intRowNo = SE.intRowNumber
+											, strMessage = 'The employee deduction has been successfully imported.'
+										FROM tblApiSchemaEmployeeDeduction SE
+										LEFT JOIN tblPREmployeeDeduction E ON E.intEntityEmployeeId = @intEntityNo
+										WHERE SE.guiApiUniqueId = @guiApiUniqueId
+										AND SE.strDeductionId = @strDeductionId
 
-										DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
+										DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId
 
 									END
 								ELSE
@@ -417,24 +429,23 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 												END
 											END
 
+										INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+										SELECT TOP 1
+											  NEWID()
+											, guiApiImportLogId = @guiLogId
+											, strField = 'Employee Deductions'
+											, strValue = SE.strDeductionId
+											, strLogLevel = 'Info'
+											, strStatus = 'Success'
+											, intRowNo = SE.intRowNumber
+											, strMessage = 'The employee deduction has been updated imported.'
+										FROM tblApiSchemaEmployeeDeduction SE
+										LEFT JOIN tblPREmployeeDeduction E ON E.intEntityEmployeeId = @intEntityNo
+										WHERE SE.guiApiUniqueId = @guiApiUniqueId
+										AND SE.strDeductionId = @strDeductionId
+
 										DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId
 									END
-
-								INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-								SELECT TOP 1
-									  NEWID()
-									, guiApiImportLogId = @guiLogId
-									, strField = 'Employee Deductions'
-									, strValue = SE.strDeductionId
-									, strLogLevel = 'Info'
-									, strStatus = 'Success'
-									, intRowNo = SE.intRowNumber
-									, strMessage = 'The employee deduction has been successfully imported.'
-								FROM tblApiSchemaEmployeeDeduction SE
-								LEFT JOIN tblPREmployeeDeduction E ON E.intEntityEmployeeId = @intEntityNo
-								WHERE SE.guiApiUniqueId = @guiApiUniqueId
-								AND SE.strDeductionId = @strDeductionId
-								AND SE.strDeductionDesc = @strDeductionDesc
 							END
 						ELSE
 							BEGIN
@@ -447,12 +458,13 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 									, strLogLevel = 'Error'
 									, strStatus = 'Failed'
 									, intRowNo = SE.intRowNumber
-									, strMessage = 'Cannot fint the value '+ @strDeductFromType +'. Please try again.'
+									, strMessage = 'Wrong input/format for Deduct From. Please try again.'
 								FROM tblApiSchemaEmployeeDeduction SE
 								LEFT JOIN tblPREmployeeDeduction E ON E.intEntityEmployeeId = @intEntityNo
 								WHERE SE.guiApiUniqueId = @guiApiUniqueId
 								AND SE.strDeductionId = @strDeductionId
-								AND SE.strDeductionDesc = @strDeductionDesc
+
+								DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId
 							END
 					END
 				ELSE
@@ -466,32 +478,14 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 							, strLogLevel = 'Error'
 							, strStatus = 'Failed'
 							, intRowNo = SE.intRowNumber
-							, strMessage = 'Cannot fint the value '+ @strRateCalcType +'. Please try again.'
+							, strMessage = 'Wrong input/format for Rate Calculation Type. Please try again.'
 						FROM tblApiSchemaEmployeeDeduction SE
 						LEFT JOIN tblPREmployeeDeduction E ON E.intEntityEmployeeId = @intEntityNo
 						WHERE SE.guiApiUniqueId = @guiApiUniqueId
 						AND SE.strDeductionId = @strDeductionId
-						AND SE.strDeductionDesc = @strDeductionDesc
+
+						DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId
 					END
-			END
-		ELSE
-			BEGIN
-				INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-				SELECT TOP 1
-					  NEWID()
-					, guiApiImportLogId = @guiLogId
-					, strField = 'Employee Deductions'
-					, strValue = @strCategory
-					, strLogLevel = 'Error'
-					, strStatus = 'Failed'
-					, intRowNo = SE.intRowNumber
-					, strMessage = 'Cannot fint the value '+ @strCategory +'. Please try again.'
-				FROM tblApiSchemaEmployeeDeduction SE
-				LEFT JOIN tblPREmployeeDeduction E ON E.intEntityEmployeeId = @intEntityNo
-				WHERE SE.guiApiUniqueId = @guiApiUniqueId
-				AND SE.strDeductionId = @strDeductionId
-				AND SE.strDeductionDesc = @strDeductionDesc
-			END
 
 
 	END

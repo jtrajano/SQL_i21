@@ -41,6 +41,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 	  , @dblTotalAR							AS NUMERIC(18,6)    = 0
+	  , @strCustomerAgingBy					AS NVARCHAR(250)	= NULL
 
 SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -63,6 +64,9 @@ SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
+
+SELECT TOP 1  @strCustomerAgingBy = strCustomerAgingBy
+FROM tblARCompanyPreference WITH (NOLOCK)
 
 IF (@@version NOT LIKE '%2008%')
 	BEGIN
@@ -725,7 +729,7 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 --ADDITIONAL FILTERS
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN
-        DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Beginning Balance'
+        DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN dtmDate ELSE dtmDueDate END ), @dtmDateToLocal) <= 0 AND strTransactionType <> 'Beginning Balance'
 		UPDATE #AGINGSUMMARY 
 		SET dblFuture 	= 0
 		  , dbl0Days 	= 0

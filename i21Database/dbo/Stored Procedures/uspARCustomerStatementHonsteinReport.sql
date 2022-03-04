@@ -46,6 +46,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 	  , @dblTotalAR							NUMERIC(18,6)		= NULL
+	  , @strCustomerAgingBy					AS NVARCHAR(250)	= NULL
 
 IF(OBJECT_ID('tempdb..#ADCUSTOMERS') IS NOT NULL) DROP TABLE #ADCUSTOMERS
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
@@ -171,6 +172,9 @@ SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo FROM tblARCompanyPreference WITH (
 SELECT TOP 1 @strCompanyName = strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+
+SELECT TOP 1  @strCustomerAgingBy = strCustomerAgingBy
+FROM tblARCompanyPreference WITH (NOLOCK)
 
 --FILTER CUSTOMERS
 IF @strCustomerNumberLocal IS NOT NULL
@@ -464,11 +468,11 @@ SELECT strReferenceNumber			= CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 T
 	 , intEntityCustomerId			= C.intEntityCustomerId
 	 , dtmDueDate					= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo') THEN NULL ELSE I.dtmDueDate END
 	 , dtmDate						= I.dtmDate
-	 , intDaysDue					= DATEDIFF(DAY, I.[dtmDueDate], @dtmDateToLocal)
+	 , intDaysDue					= DATEDIFF(DAY, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ), @dtmDateToLocal)
 	 , dblTotalAmount				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , dblAmountPaid				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(TOTALPAYMENT.dblPayment, 0) * -1 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
 	 , dblAmountDue					= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
-	 , dblPastDue					= CASE WHEN @dtmDateToLocal > I.[dtmDueDate] AND I.strTransactionType IN ('Invoice', 'Debit Memo')
+	 , dblPastDue					= CASE WHEN @dtmDateToLocal > ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ) AND I.strTransactionType IN ('Invoice', 'Debit Memo')
 	 										THEN I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0)
 	 									ELSE 0
 	 								END

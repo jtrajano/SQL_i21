@@ -1889,6 +1889,28 @@ BEGIN
 		, intItemId				= IC.intItemId
 		, intItemLocationId		= IC.intItemLocationId
 		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Cost of Goods'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Cost of Goods') IS NULL
+
+	UNION ALL
+	
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Sales Account'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Sales Account') IS NULL
+
+	UNION ALL
+
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
 		, strAccountCategory	= 'Inventory In-Transit'
 	FROM @ItemsForInTransitCosting IC
 	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory In-Transit') IS NULL	
