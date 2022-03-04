@@ -40,7 +40,8 @@ DECLARE @freight decimal(18,6),
 		@dblSurchargeRateOut decimal(18,6),
 		@dblMinimumUnits decimal(18,6),
 		@dblCostRatePerUnit decimal(18,6),
-		@dblInvoiceRatePerUnit decimal(18,6);
+		@dblInvoiceRatePerUnit decimal(18,6),
+		@intFreightXRefId int = NULL;
 
 BEGIN TRY
 set @dblInvoiceFreightRate = 0;
@@ -59,7 +60,8 @@ SET	@dblMinimumUnitsOut = 0
 
 	 IF @ysnToBulkPlant = 0
 	 BEGIN
-	    select top 1 @ysnFreightOnly = CF.ysnFreightOnly,
+	    select top 1 @intFreightXRefId = CF.intFreightXRefId,
+					@ysnFreightOnly = CF.ysnFreightOnly,
 	                @strFreightType = CF.strFreightType,
 	           		@intEntityShipViaId = CF.intShipViaId,
 	           		@intMiles = convert(int,CF.dblFreightMiles),
@@ -71,12 +73,36 @@ SET	@dblMinimumUnitsOut = 0
 					@intTariffType  = CF.intEntityTariffTypeId,
 					@dblSurchargeRateOut = ISNULL(CF.dblSurchargeOut, 0)
 	    from tblARCustomerFreightXRef CF 
+		join tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
+	    where CF.intEntityCustomerId = @intEntityCustomerId 
+	      	and CF.strZipCode = @strZipCode
+	        and CF.intCategoryId = @intCategoryid
+            and CF.intEntityLocationId = @intShipToId	
+			and CF.intShipViaId = @intShipViaId
+
+		IF(@intFreightXRefId IS NULL)
+		BEGIN
+			select top 1 @intFreightXRefId = CF.intFreightXRefId,
+					@ysnFreightOnly = CF.ysnFreightOnly,
+	                @strFreightType = CF.strFreightType,
+	           		@intEntityShipViaId = CF.intShipViaId,
+	           		@intMiles = convert(int,CF.dblFreightMiles),
+					@dblFreightRateIn = ISNULL(CF.dblFreightRateIn, 0),
+	           		@dblFreightRateOut = ISNULL(CF.dblFreightRate, 0),
+	           		@ysnFreightInPrice = CF.ysnFreightInPrice, 
+					@dblMinimumUnitsIn =  ISNULL(CF.dblMinimumUnitsIn, 0),
+	           		@dblMinimumUnitsOut = ISNULL(CF.dblMinimumUnits, 0),
+					@intTariffType  = CF.intEntityTariffTypeId,
+					@dblSurchargeRateOut = ISNULL(CF.dblSurchargeOut, 0)
+	    	from tblARCustomerFreightXRef CF 
 			join tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
-	            where CF.intEntityCustomerId = @intEntityCustomerId 
-	      	   	    and CF.strZipCode = @strZipCode
-	           			and CF.intCategoryId = @intCategoryid
-                        and CF.intEntityLocationId = @intShipToId			  
-        END
+	        where CF.intEntityCustomerId = @intEntityCustomerId 
+	      	   	and CF.strZipCode = @strZipCode
+	           	and CF.intCategoryId = @intCategoryid
+                and CF.intEntityLocationId = @intShipToId
+				and CF.intShipViaId IS NULL
+		END
+    END
 	 ELSE
 	 BEGIN
 	    select top 1 @ysnFreightOnly = convert(bit,0),
