@@ -420,15 +420,16 @@ BEGIN TRY
 						)
 				ORDER BY ABS(ITD.dblNet - @dblNetWeight)
 
-				--SELECT TOP 1 @dblCost = dblCost
-				SELECT @dblCost = SUM(dblCost)
+				IF @strLotCondition = ''
+					SELECT @strLotCondition = 'Sound/Full'
+
+				SELECT @dblCost = dbo.fnDivide(SUM(dbo.fnMultiply(dblQty, dblCost)), SUM(dblQty))
 				FROM tblICInventoryTransaction WITH (NOLOCK)
 				WHERE intTransactionTypeId = 13
 					AND intTransactionId = @intInventoryTransferId
 					AND intTransactionDetailId = @intInventoryTransferDetailId
 					AND ysnIsUnposted = 0
 					AND dblQty > 0
-				--ORDER BY intInventoryTransactionId DESC
 
 				IF ISNULL(@intLotId, 0) = 0
 				BEGIN
