@@ -640,7 +640,6 @@ SELECT
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = ICI.[ysnAutoBlend]
     ,[ysnBlended]                       = ARID.[ysnBlended]
- 
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
 	,[strBOLNumber]						= ARI.strBOLNumber
     ,[ysnIntraCompany]                  = ARI.ysnIntraCompany

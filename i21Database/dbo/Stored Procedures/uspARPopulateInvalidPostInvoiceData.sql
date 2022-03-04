@@ -221,7 +221,7 @@ BEGIN
 	WHERE I.[intSiteId] IS NULL
 	  AND I.[strType] = 'Tank Delivery'
 	  AND I.[ysnTankRequired] = @OneBit
-	  AND I.[strItemType] <> 'Comment'		
+	  AND I.[strItemType] <> 'Comment'
 		
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1978,6 +1978,70 @@ BEGIN
 	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	-- Due From Account For Location
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account.'
+	FROM ##ARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intDueFromAccountId
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT TOP 1 GLAS.intAccountSegmentId
+		FROM tblGLAccountSegmentMapping GLASM
+		INNER JOIN tblGLAccountSegment GLAS
+		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+		WHERE intAccountStructureId = 3
+		AND intAccountId = I.[intSalesAccountId]
+	) GLSEGMENT
+	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(ARCP.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	-- Due To Account For Location
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account.'
+	FROM ##ARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intDueToAccountId
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT TOP 1 GLAS.intAccountSegmentId
+		FROM tblGLAccountSegmentMapping GLASM
+		INNER JOIN tblGLAccountSegment GLAS
+		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+		WHERE intAccountStructureId = 3
+		AND intAccountId = I.[intAccountId]
+	) GLSEGMENT
+	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(ARCP.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
 END
 
 IF @Post = @ZeroBit
