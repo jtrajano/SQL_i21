@@ -11,10 +11,10 @@ IF(OBJECT_ID('tempdb..##ARItemsForStorageCosting') IS NOT NULL) DROP TABLE ##ARI
 IF(OBJECT_ID('tempdb..##ARItemsForContracts') IS NOT NULL) DROP TABLE ##ARItemsForContracts
 IF(OBJECT_ID('tempdb..##ARInvoiceGLEntries') IS NOT NULL) DROP TABLE ##ARInvoiceGLEntries
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'uspARInitializeTempTableForPosting')
-BEGIN
-	EXEC [dbo].[uspARInitializeTempTableForPosting]
-END
+-- IF EXISTS ( SELECT * FROM sys.objects WHERE type = 'P' AND name = 'uspARInitializeTempTableForPosting')
+-- BEGIN
+-- 	EXEC [dbo].[uspARInitializeTempTableForPosting]
+-- END
 
 IF(OBJECT_ID('tempdb..##ARPOSTEDPAYMENT') IS NOT NULL) DROP TABLE ##ARPOSTEDPAYMENT
 IF(OBJECT_ID('tempdb..##INVOICETOTALPREPAYMENTS') IS NOT NULL) DROP TABLE ##INVOICETOTALPREPAYMENTS
