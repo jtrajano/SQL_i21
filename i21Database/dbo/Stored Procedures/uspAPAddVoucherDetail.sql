@@ -150,7 +150,7 @@ SELECT TOP 100 PERCENT
 												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
 											ELSE A.dblCostUnitQty END
 	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
-	,dblCost							=	A.dblCost
+	,dblCost							=	A.dblCost + ISNULL(A.dblQualityPremium, 0) + ISNULL(dblOptionalityPremium, 0)
 	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 	-- 											THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
 	-- 													THEN ctDetail.dblSeqPrice
@@ -261,6 +261,9 @@ SELECT TOP 100 PERCENT
 	,dblBundleUnitQty					=	0
 	,intFreightTermId					=	A.intFreightTermId
 	,ysnStage							=	A.ysnStage
+	,dblCashPrice 						= 	A.dblCost
+	,dblQualityPremium					=	A.dblQualityPremium
+	,dblOptionalityPremium				= 	A.dblOptionalityPremium
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -472,7 +475,10 @@ INSERT
 	,dblQtyBundleReceived				
 	,dblBundleUnitQty		
 	,intFreightTermId	
-	,ysnStage		
+	,ysnStage	
+	,dblCashPrice
+	,dblQualityPremium
+	,dblOptionalityPremium
 )
 VALUES
 (
@@ -568,6 +574,9 @@ VALUES
 	,dblBundleUnitQty		
 	,intFreightTermId
 	,ysnStage
+	,dblCashPrice
+	,dblQualityPremium
+	,dblOptionalityPremium
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
 

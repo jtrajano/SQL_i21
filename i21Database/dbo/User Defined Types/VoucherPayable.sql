@@ -151,5 +151,8 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intBorrowingFacilityLimitDetailId] INT NULL, --SUBLIMIT
 	[strReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --BANK TRADE REFERENCE NO.
 	[intBankValuationRuleId] INT NULL, --OVERRIDE FACILITY VALUATION
-	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --COMMENTS
+	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --COMMENTS
+	/*Quality and Optionality Premium*/
+	[dblQualityPremium] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+ 	[dblOptionalityPremium] DECIMAL(18, 6) NOT NULL DEFAULT 0
 )
