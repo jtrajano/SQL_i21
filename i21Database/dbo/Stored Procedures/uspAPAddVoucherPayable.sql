@@ -278,6 +278,8 @@ BEGIN
 			,[intLineNo]						=	A.intLineNo
 			,[intBookId]						=	A.intBookId
 			,[intSubBookId]						=	A.intSubBookId
+			,[intPayFromBankAccountId]			=	A.intPayFromBankAccountId
+			,[strPayFromBankAccount]			=	bankAccount.strBankAccountNo
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -314,6 +316,7 @@ BEGIN
 		LEFT JOIN tblICStorageLocation storageLoc ON storageLoc.intStorageLocationId = A.intStorageLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc ON subLoc.intCompanyLocationSubLocationId = A.intSubLocationId
 		LEFT JOIN tblSMTaxGroup taxGroup ON taxGroup.intTaxGroupId = A.intPurchaseTaxGroupId
+		LEFT JOIN vyuCMBankAccount bankAccount ON bankAccount.intBankAccountId = A.intPayFromBankAccountId
 		WHERE A.ysnStage = 1
 	) AS SourceData
 	 ON (1=0)
@@ -407,6 +410,8 @@ BEGIN
 		,[strSubLocationName]
 		,[intBookId]
 		,[intSubBookId]
+		,[intPayFromBankAccountId]
+		,[strPayFromBankAccount]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -497,6 +502,8 @@ BEGIN
 		,[strSubLocationName]
 		,[intBookId]
 		,[intSubBookId]
+		,[intPayFromBankAccountId]
+		,[strPayFromBankAccount]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,
