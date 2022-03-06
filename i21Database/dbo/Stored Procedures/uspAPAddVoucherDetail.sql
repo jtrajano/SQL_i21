@@ -150,7 +150,7 @@ SELECT TOP 100 PERCENT
 												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
 											ELSE A.dblCostUnitQty END
 	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
-	,dblCost							=	A.dblCost + ISNULL(A.dblQualityPremium, 0) + ISNULL(dblOptionalityPremium, 0)
+	,dblCost							=	A.dblCost + ISNULL(A.dblQualityPremium, 0) + ISNULL(A.dblOptionalityPremium, 0)
 	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 	-- 											THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
 	-- 													THEN ctDetail.dblSeqPrice
