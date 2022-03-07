@@ -10,9 +10,9 @@ FROM (
 		,CD.dtmEndDate
 		,CD.intFreightTermId
 		,CD.intShipViaId
-		,CD.dblNetWeight
+		,dblNetWeight = CD.dblNetWeight * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,strWeightUOM = WUM.strUnitMeasure
-		,dblDetailQuantity = CD.dblQuantity
+		,dblDetailQuantity = CD.dblQuantity * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,strItemUOM = U1.strUnitMeasure
 		,CD.dblFutures
 		,CD.dblBasis
@@ -34,9 +34,9 @@ FROM (
 		,strBundleItemNo = BI.strItemNo
 		,CL.strLocationName
 		,CS.strContractStatus
-		,dblReservedQuantity = ISNULL(RSV.dblReservedQty, 0)
-		,dblUnReservedQuantity = ISNULL(CD.dblQuantity, 0) - ISNULL(RSV.dblReservedQty, 0)
-		,dblAllocatedQty = ISNULL(CD.dblAllocatedQty, 0)
+		,dblReservedQuantity = ISNULL(RSV.dblReservedQty, 0) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,dblUnReservedQuantity = ISNULL(CD.dblQuantity, 0) - ISNULL(RSV.dblReservedQty, 0) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,dblAllocatedQty = ISNULL(CD.dblAllocatedQty, 0) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,dblUnAllocatedQty = (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,CH.intContractHeaderId
 		,CH.intContractTypeId
