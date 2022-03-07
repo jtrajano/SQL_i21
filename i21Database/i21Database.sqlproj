@@ -9153,6 +9153,7 @@
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
+	<Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
