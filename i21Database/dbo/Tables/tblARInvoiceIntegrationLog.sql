@@ -20,3 +20,5 @@
     [intConcurrencyId]					INT NOT NULL CONSTRAINT [DF_tblARInvoiceIntegrationLog_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoiceIntegrationLog_intIntegrationLogId] PRIMARY KEY CLUSTERED ([intIntegrationLogId] ASC)
 )
+GO
+CREATE INDEX [idx_tblARInvoiceIntegrationLog] ON [dbo].[tblARInvoiceIntegrationLog] (intIntegrationLogId)
