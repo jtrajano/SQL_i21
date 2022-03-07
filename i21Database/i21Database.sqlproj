@@ -542,6 +542,7 @@
     <Build Include="dbo\Views\vyuRKOpenDerivativesForAutoMatching.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspLGBatchUpdateDates.sql" />
+    <Build Include="dbo\Functions\fnRKGetOTCAllowedBankAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
