@@ -34,7 +34,6 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@strCustomerNumber			AS NVARCHAR(MAX)
 		,@conditionCustomerNumber   AS NVARCHAR(20)
 		,@ysnEmailOnly				AS BIT
-		,@strCustomerAgingBy		AS NVARCHAR(250) = NULL
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -82,8 +81,6 @@ DECLARE @temp_statement_table TABLE(
 	,[ysnStatementCreditLimit]		BIT
 )
 
-SELECT TOP 1  @strCustomerAgingBy = strCustomerAgingBy
-FROM tblARCompanyPreference WITH (NOLOCK)
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -369,11 +366,11 @@ FROM (
 		, intEntityCustomerId		= I.intEntityCustomerId
 		, dtmDueDate				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
 		, dtmPostDate				= I.dtmPostDate
-		, intDaysDue				= DATEDIFF(DAY, ( CASE WHEN @strCustomerAgingBy = ''Invoice Create Date'' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ), ' + @strDateTo + ')
+		, intDaysDue				= DATEDIFF(DAY, I.[dtmDueDate], ' + @strDateTo + ')
 		, dblTotalAmount			= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 		, dblAmountPaid				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
 		, dblAmountDue				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
-		, dblPastDue				= CASE WHEN ' + @strDateTo + ' > ( CASE WHEN @strCustomerAgingBy = ''Invoice Create Date'' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ) AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
+		, dblPastDue				= CASE WHEN ' + @strDateTo + ' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
 										THEN ISNULL(I.dblAmountDue, 0)
 										ELSE 0
 									END
