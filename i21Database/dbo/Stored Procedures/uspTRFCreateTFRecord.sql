@@ -2,6 +2,7 @@ CREATE PROCEDURE [dbo].[uspTRFCreateTFRecord]
 	  @records TRFTradeFinance READONLY
 	  , @intUserId INT = NULL
 	  , @dtmTransactionDate DATETIME = NULL
+	  , @intTradeFinanceId INT = NULL OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -11,7 +12,7 @@ SET XACT_ABORT ON
 
 BEGIN	
 	DECLARE @strTradeFinanceNumber NVARCHAR(200) = NULL 
-		, @intTradeFinanceId INT = NULL
+	SET @intTradeFinanceId = NULL
 
 	-- SUPPORTS ONLY 1 RECORD CREATION AT A TIME
 	IF ((SELECT COUNT('') FROM @records) = 1)

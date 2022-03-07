@@ -29,6 +29,8 @@ DECLARE @SourceType_DeliverySheet AS INT = 5
 DECLARE @SourceType_PurchaseOrder AS INT = 6
 DECLARE @SourceType_Store AS INT = 7
 
+
+
 DECLARE @ErrMsg NVARCHAR(MAX)
 		,@intReturnValue AS INT 
 
@@ -39,14 +41,18 @@ DECLARE @Id INT = NULL,
 		@intPurchaseDetailId		INT = NULL,
 		@intFromItemUOMId			INT = NULL,
 		@intToItemUOMId				INT = NULL,
-		@dblQty						NUMERIC(18,6) = 0
+		@dblQty						NUMERIC(18,6) = 0,
+		@dtmDate					DATETIME,
+		@intTradeFinanceId			INT = NULL 
+
+DECLARE @TRFTradeFinance AS TRFTradeFinance
 
 -- Initialize the variables
 BEGIN
 	IF (@ForDelete = 1)
 	BEGIN
 		SELECT	@ReceiptType = intOrderType
-				,@SourceType = intSourceType 
+				,@SourceType = intSourceType
 		FROM	tblICTransactionDetailLog
 		WHERE	intTransactionId = @ReceiptId
 				AND strTransactionType = 'Inventory Receipt'		
@@ -61,6 +67,7 @@ BEGIN
 						WHEN strReceiptType = 'Inventory Return' THEN @ReceiptType_InventoryReturn
 					END 
 				,@SourceType = intSourceType 
+				,@dtmDate = dtmReceiptDate
 		FROM	tblICInventoryReceipt
 		WHERE	intInventoryReceiptId = @ReceiptId
 	END
@@ -170,6 +177,114 @@ BEGIN
 		--		 WHEN ISNULL(TransactionDetail.strItemType, '') <> '' THEN 0
 		--		 ELSE 1
 		--	END 
+
+
+	-- Create or update the Trade Finance record. 
+	BEGIN 
+		INSERT INTO @TRFTradeFinance (
+			intTradeFinanceId 
+			, strTradeFinanceNumber 
+			, strTransactionType 
+			, strTransactionNumber 
+			, intTransactionHeaderId 
+			, intTransactionDetailId 
+			, intBankId 
+			, intBankAccountId 
+			, intBorrowingFacilityId 
+			, intLimitTypeId 
+			, intSublimitTypeId 
+			, ysnSubmittedToBank 
+			, dtmDateSubmitted 
+			, strApprovalStatus 
+			, dtmDateApproved 
+			, strRefNo 
+			, intOverrideFacilityValuation 
+			, strCommnents 
+		)
+		SELECT TOP 1 
+			tf.intTradeFinanceId 
+			, r.strTradeFinanceNumber 
+			, strTransactionType = CASE WHEN @ReceiptType = @ReceiptType_InventoryReturn THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
+			, strTransactionNumber = r.strReceiptNumber
+			, intTransactionHeaderId = r.intInventoryReceiptId
+			, intTransactionDetailId = NULL 
+			, intBankId = r.intBankId
+			, intBankAccountId = r.intBankAccountId
+			, intBorrowingFacilityId = r.intBorrowingFacilityId
+			, intLimitTypeId = r.intLimitTypeId
+			, intSublimitTypeId = r.intSublimitTypeId
+			, ysnSubmittedToBank = r.ysnSubmittedToBank
+			, dtmDateSubmitted = r.dtmDateSubmitted
+			, strApprovalStatus = r.strApprovalStatus
+			, dtmDateApproved = r.dtmDateApproved
+			, strRefNo = r.strBankReferenceNo
+			, intOverrideFacilityValuation = r.intOverrideFacilityValuation
+			, strCommnents = r.strComments
+		FROM 
+			tblICInventoryReceipt r LEFT JOIN tblTRFTradeFinance tf
+				ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
+		WHERE
+			r.intInventoryReceiptId = @ReceiptId
+
+		-- Update an existing trade finance record. 
+		IF EXISTS (SELECT TOP 1 1 FROM @TRFTradeFinance WHERE intTradeFinanceId IS NOT NULL)
+		BEGIN 
+			EXEC [uspTRFModifyTFRecord]
+				@records = @TRFTradeFinance
+				, @intUserId = @UserId
+				, @strAction = 'UPDATE'
+				, @dtmTransactionDate = @dtmDate 
+		END 
+		-- Create a new trade finance record. 
+		ELSE IF EXISTS (
+			SELECT TOP 1 1 
+			FROM 
+				@TRFTradeFinance 
+			WHERE 
+				intTradeFinanceId IS NULL
+				AND strTradeFinanceNumber IS NULL -- If strTradeFinanceNumber has a value, it means the TF record was deleted. Do not auto-create it. 
+				AND (
+					intBankId IS NOT NULL 
+					OR intBankAccountId IS NOT NULL 
+					OR intBorrowingFacilityId IS NOT NULL 
+					OR intLimitTypeId IS NOT NULL 
+					OR intSublimitTypeId IS NOT NULL 
+					OR ysnSubmittedToBank IS NOT NULL 
+					OR dtmDateSubmitted IS NOT NULL 
+					OR strApprovalStatus IS NOT NULL 
+					OR dtmDateApproved IS NOT NULL 
+					OR strRefNo IS NOT NULL 
+					OR intOverrideFacilityValuation IS NOT NULL 
+					OR strCommnents IS NOT NULL 
+				)
+		)
+		BEGIN 
+			-- Get the trade finance id. 
+			DECLARE @strTradeFinanceNumber NVARCHAR(100)	
+			EXEC uspSMGetStartingNumber 166, @strTradeFinanceNumber OUT
+
+			UPDATE @TRFTradeFinance 
+			SET strTradeFinanceNumber = @strTradeFinanceNumber
+
+			EXEC uspTRFCreateTFRecord
+			  @records = @TRFTradeFinance
+			  , @intUserId = @UserId
+			  , @dtmTransactionDate = @dtmDate
+			  , @intTradeFinanceId = @intTradeFinanceId OUTPUT 
+
+			IF @intTradeFinanceId IS NOT NULL 
+			BEGIN 
+				UPDATE r
+				SET 
+					r.strTradeFinanceNumber = @strTradeFinanceNumber
+				FROM 
+					tblICInventoryReceipt r
+				WHERE 
+					r.intInventoryReceiptId = @ReceiptId
+					AND @strTradeFinanceNumber IS NOT NULL 
+			END 
+		END 
+	END 
 		
 END 
 
@@ -212,6 +327,63 @@ BEGIN
 	-- Call the quality sp when deleting the receipt.
 	EXEC uspQMInspectionDeleteResult @ReceiptId
 	IF @@ERROR <> 0 GOTO _Exit 
+
+
+	---- Call the Trade Finance sp when deleting the receipt
+	--BEGIN 		
+	--	INSERT INTO @TRFTradeFinance (
+	--		intTradeFinanceId 
+	--		, strTradeFinanceNumber 
+	--		, strTransactionType 
+	--		, strTransactionNumber 
+	--		, intTransactionHeaderId 
+	--		, intTransactionDetailId 
+	--		, intBankId 
+	--		, intBankAccountId 
+	--		, intBorrowingFacilityId 
+	--		, intLimitTypeId 
+	--		, intSublimitTypeId 
+	--		, ysnSubmittedToBank 
+	--		, dtmDateSubmitted 
+	--		, strApprovalStatus 
+	--		, dtmDateApproved 
+	--		, strRefNo 
+	--		, intOverrideFacilityValuation 
+	--		, strCommnents 
+	--	)
+	--	SELECT TOP 1 
+	--		tf.intTradeFinanceId 
+	--		, r.strTradeFinanceNumber 
+	--		, strTransactionType = CASE WHEN @ReceiptType = @ReceiptType_InventoryReturn THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
+	--		, strTransactionNumber = r.strTransactionId 
+	--		, intTransactionHeaderId = r.intTransactionId
+	--		, intTransactionDetailId = r.intTransactionDetailId
+	--		, intBankId = r.intBankId
+	--		, intBankAccountId = r.intBankAccountId
+	--		, intBorrowingFacilityId = r.intBorrowingFacilityId
+	--		, intLimitTypeId = r.intLimitTypeId
+	--		, intSublimitTypeId = r.intSublimitTypeId
+	--		, ysnSubmittedToBank = r.ysnSubmittedToBank
+	--		, dtmDateSubmitted = r.dtmDateSubmitted
+	--		, strApprovalStatus = r.strApprovalStatus
+	--		, dtmDateApproved = r.dtmDateApproved
+	--		, strRefNo = r.strBankReferenceNo
+	--		, intOverrideFacilityValuation = r.intOverrideFacilityValuation
+	--		, strCommnents = r.strComments
+	--	FROM 
+	--		tblICTransactionDetailLog r INNER JOIN tblTRFTradeFinance tf
+	--			ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
+	--	WHERE
+	--		r.intTransactionId = @ReceiptId
+	--		AND r.strTransactionType IN ('Inventory Receipt', 'Inventory Return')
+
+	--	EXEC [uspTRFModifyTFRecord]
+	--		@records = @TRFTradeFinance
+	--		, @intUserId = @UserId
+	--		, @strAction = 'DELETE'
+	--		, @dtmTransactionDate = @dtmDate 
+	--END
+
 END 
 
 -- Call the integration with contracts. 

@@ -51,6 +51,24 @@ BEGIN
 				,dblNet
 				,dblGross
 				,intSourceInventoryDetailId
+				,[strTransactionId]
+				,[dtmReceiptDate] 
+				,[strTradeFinanceNumber] 
+				,[intBankId] 
+				,[intBankAccountId] 
+				,[intBorrowingFacilityId] 
+				,[strBankReferenceNo] 
+				,[intLimitTypeId] 
+				,[intSublimitTypeId] 
+				,[ysnSubmittedToBank] 
+				,[dtmDateSubmitted] 
+				,[strApprovalStatus] 
+				,[dtmDateApproved] 
+				,[strWarrantNo] 
+				,[intWarrantStatus] 
+				,[strReferenceNo] 
+				,[intOverrideFacilityValuation] 
+				,[strComments] 		
 			)
 			SELECT 'Inventory Receipt',
 				ReceiptItem.intInventoryReceiptId, 
@@ -77,7 +95,25 @@ BEGIN
 				ReceiptItem.intLoadReceive,
 				ReceiptItem.dblNet,
 				ReceiptItem.dblGross, 
-				ReceiptItem.intSourceInventoryReceiptItemId 
+				ReceiptItem.intSourceInventoryReceiptItemId
+				,[strTransactionId]  = Receipt.strReceiptNumber
+				,[dtmReceiptDate] = Receipt.dtmReceiptDate
+				,[strTradeFinanceNumber] = Receipt.strTradeFinanceNumber
+				,[intBankId] = Receipt.intBankId
+				,[intBankAccountId] = Receipt.intBankAccountId
+				,[intBorrowingFacilityId] = Receipt.intBorrowingFacilityId
+				,[strBankReferenceNo] = Receipt.strBankReferenceNo
+				,[intLimitTypeId] = Receipt.intLimitTypeId
+				,[intSublimitTypeId] = Receipt.intSublimitTypeId
+				,[ysnSubmittedToBank] = Receipt.ysnSubmittedToBank
+				,[dtmDateSubmitted] = Receipt.dtmDateSubmitted
+				,[strApprovalStatus] = Receipt.strApprovalStatus
+				,[dtmDateApproved] = Receipt.dtmDateApproved
+				,[strWarrantNo] = Receipt.strWarrantNo
+				,[intWarrantStatus] = Receipt.intWarrantStatus
+				,[strReferenceNo] = Receipt.strReferenceNo
+				,[intOverrideFacilityValuation] = Receipt.intOverrideFacilityValuation
+				,[strComments] = Receipt.strComments
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -109,6 +145,24 @@ BEGIN
 				ReceiptItem.dblNet,
 				ReceiptItem.dblGross, 
 				ReceiptItem.intSourceInventoryReceiptItemId 
+				,[strTransactionId]  = Receipt.strReceiptNumber
+				,[dtmReceiptDate] = Receipt.dtmReceiptDate
+				,[strTradeFinanceNumber] = Receipt.strTradeFinanceNumber
+				,[intBankId] = Receipt.intBankId
+				,[intBankAccountId] = Receipt.intBankAccountId
+				,[intBorrowingFacilityId] = Receipt.intBorrowingFacilityId
+				,[strBankReferenceNo] = Receipt.strBankReferenceNo
+				,[intLimitTypeId] = Receipt.intLimitTypeId
+				,[intSublimitTypeId] = Receipt.intSublimitTypeId
+				,[ysnSubmittedToBank] = Receipt.ysnSubmittedToBank
+				,[dtmDateSubmitted] = Receipt.dtmDateSubmitted
+				,[strApprovalStatus] = Receipt.strApprovalStatus
+				,[dtmDateApproved] = Receipt.dtmDateApproved
+				,[strWarrantNo] = Receipt.strWarrantNo
+				,[intWarrantStatus] = Receipt.intWarrantStatus
+				,[strReferenceNo] = Receipt.strReferenceNo
+				,[intOverrideFacilityValuation] = Receipt.intOverrideFacilityValuation
+				,[strComments] = Receipt.strComments
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
