@@ -19,6 +19,7 @@ CREATE TABLE [dbo].[tblFRArchive] (
 	[intHierarchyConcurrencyId]	INT NULL,
 	[intEntityId]		INT NULL,
 	[intConcurrencyId]	INT NOT NULL,
+	[ysnIsPublished]			BIT             NULL,
     CONSTRAINT [PK_tblFRArchive] PRIMARY KEY CLUSTERED ([intArchiveId] ASC)
 );
 
