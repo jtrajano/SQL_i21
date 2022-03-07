@@ -403,5 +403,17 @@ BEGIN
 
 END
 
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKMatchFuturesPSHeader' AND COLUMN_NAME = 'strMatchingType')
+BEGIN
+	UPDATE tblRKMatchFuturesPSHeader set strMatchingType = 'Manual' WHERE strMatchingType IS NULL
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKOptionsMatchPnS' AND COLUMN_NAME = 'strMatchingType')
+BEGIN
+	UPDATE tblRKOptionsMatchPnS set strMatchingType = 'Manual' WHERE strMatchingType IS NULL
+END
+
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
