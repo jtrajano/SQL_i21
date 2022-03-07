@@ -333,6 +333,9 @@ BEGIN TRY
 					, @strBuyCurrency NVARCHAR(100)
 					, @strSellCurrency NVARCHAR(100)
 					, @intBankId INT = NULL
+					, @intLocationId INT = NULL
+
+				SELECT TOP 1 @intLocationId = intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = @strLocationName
 
 				SELECT TOP 1 @intCurrencyPairId = intCurrencyExchangeRateTypeId
 					, @intBuyCurrencyId = intFromCurrencyId
@@ -365,11 +368,19 @@ BEGIN TRY
 					ELSE
 					BEGIN
 						INSERT INTO @tmpOTCBank
-						EXEC uspRKGetFilteredOTCBank @intBuyCurrencyId, @intSellCurrencyId
+						EXEC uspRKGetFilteredOTCBank @intBuyCurrencyId, @intSellCurrencyId, @intLocationId, @strInstrumentType
 
 						IF NOT EXISTS (SELECT TOP 1 '' FROM @tmpOTCBank WHERE strBank = @strBank)
 						BEGIN
-							SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'Bank should have Bank Accounts with currencies for both ' + @strBuyCurrency + ' and ' + @strSellCurrency + '.'
+							IF EXISTS (SELECT TOP 1 '' FROM tblCMBankAccount WHERE intBankId = @intBankId AND intCurrencyId = @intBuyCurrencyId) AND
+								EXISTS (SELECT TOP 1 '' FROM tblCMBankAccount WHERE intBankId = @intBankId AND intCurrencyId = @intSellCurrencyId)
+							BEGIN
+								SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'Bank should have Bank Accounts with same GL Account Location as the Location selected and should have Bank Accounts with currencies for both ' + @strBuyCurrency + ' and ' + @strSellCurrency + '.'
+							END
+							ELSE
+							BEGIN
+								SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'Bank should have Bank Accounts with currencies for both ' + @strBuyCurrency + ' and ' + @strSellCurrency + '.'
+							END
 						END
 						ELSE
 						BEGIN
