@@ -37,7 +37,7 @@ FROM (
 		,dblReservedQuantity = ISNULL(RSV.dblReservedQty, 0)
 		,dblUnReservedQuantity = ISNULL(CD.dblQuantity, 0) - ISNULL(RSV.dblReservedQty, 0)
 		,dblAllocatedQty = ISNULL(CD.dblAllocatedQty, 0)
-		,dblUnAllocatedQty = ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)
+		,dblUnAllocatedQty = (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,CH.intContractHeaderId
 		,CH.intContractTypeId
 		,CT.strContractType
@@ -114,5 +114,5 @@ FROM (
 	LEFT JOIN tblICUnitMeasure U6 ON U6.intUnitMeasureId = SAL.intSUnitMeasureId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
-	) tbl
-WHERE dblUnAllocatedQty > 0
+	WHERE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0) > 0
+) tbl
