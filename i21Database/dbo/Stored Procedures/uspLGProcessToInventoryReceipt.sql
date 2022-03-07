@@ -1060,8 +1060,8 @@ BEGIN TRY
 			,[dtmDateSubmitted] = L.dtmDateSubmitted
 			,[strApprovalStatus] = approvalStatus.strApprovalStatus
 			,[dtmDateApproved] = L.dtmDateApproved
-			,[strWarrantNo] = L.strWarrantNo
-			,[intWarrantStatus] = L.intWarrantStatus
+			,[strWarrantNo] = NULL
+			,[intWarrantStatus] = NULL
 			,[strReferenceNo] = L.strTradeFinanceReferenceNo
 			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
 			,[strComments] = L.strTradeFinanceComments
