@@ -146,4 +146,6 @@ GROUP BY
     TaxBookDepreciation.strDepreciationMethodId,
     TaxBookDepreciation.dblCost,
     TaxBookDepreciation.dblSalvageValue,
+    TaxBookDepreciation.dblBonusDepreciation,
+    TaxBookDepreciation.dblSection179,
     FA.intConcurrencyId
