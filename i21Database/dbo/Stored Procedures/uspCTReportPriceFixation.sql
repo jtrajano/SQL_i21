@@ -204,7 +204,7 @@ BEGIN TRY
 			
 			/* CT-5744 */
 			--strFinalPrice = dbo.fnCTChangeNumericScale(dbo.fnCTConvertToBaseCurrency(CD.intCurrencyId,dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,CU.intUnitMeasureId, FU.intUnitMeasureId,PF.dblFinalPrice)),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,  
-			strFinalPrice = CAST(dbo.fnCTChangeNumericScale(ROUND(dbo.fnCTConvertToBaseCurrency(CD.intCurrencyId,dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,CU.intUnitMeasureId, FU.intUnitMeasureId,PF.dblFinalPrice)),2),2) as varchar(50) ) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,  
+			strFinalPrice = CAST(dbo.fnCTChangeNumericScale(ROUND(dbo.fnCTConvertToBaseCurrency(CD.intCurrencyId,dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,CU.intUnitMeasureId, ISNULL(FU.intUnitMeasureId,CD.intPriceItemUOMId),PF.dblFinalPrice)),2),2) as varchar(50) ) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,  
 
 			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(ROUND(
 								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
