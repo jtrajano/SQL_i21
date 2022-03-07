@@ -92,6 +92,8 @@
 	[ysnReturn]						BIT NULL,
 	[intBookId]						INT NULL,
 	[intSubBookId]					INT NULL,
+	[intPayFromBankAccountId] 		INT NULL,
+	[strPayFromBankAccount]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO

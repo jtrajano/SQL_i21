@@ -541,6 +541,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDerivativesAutoMatching.sql" />
     <Build Include="dbo\Views\vyuRKOpenDerivativesForAutoMatching.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGBatchUpdateDates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -2002,7 +2003,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql"/>
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />

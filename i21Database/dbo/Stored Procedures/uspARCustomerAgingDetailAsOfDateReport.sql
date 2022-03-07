@@ -56,7 +56,7 @@ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
 SELECT TOP 1 @strCustomerAgingBy = strCustomerAgingBy
-FROM tblARCompanyPreference
+FROM tblARCompanyPreference WITH (NOLOCK)
 
 IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	BEGIN

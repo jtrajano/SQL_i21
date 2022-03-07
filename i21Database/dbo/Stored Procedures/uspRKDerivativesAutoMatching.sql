@@ -74,6 +74,7 @@ DECLARE @tempMatchDerivativeHeader AS TABLE (
 	,intSubBookId INT
 	,intSelectedInstrumentTypeId INT
 	,strType NVARCHAR(10)
+	,strMatchingType NVARCHAR(10)
 	--,intCurrencyExchangeRateTypeId INT
 	--,intBankId INT
 	--,intBankAccountId INT
@@ -238,12 +239,22 @@ BEGIN
 								WHILE EXISTS(SELECT TOP 1 * FROM #tempSellForMatching)
 								BEGIN
 
+									IF @dblBuyLot < 1
+									BEGIN
+										BREAK
+									END
+
 									SELECT TOP 1 
 										@dblSellLot = dblBalanceLot
 										,@intSFutOptTranactionId = intFutOptTransactionId
 										,@intSFutOptTranactionHeaderId = intFutOptTransactionHeaderId
 									FROM #tempSellForMatching 
 									ORDER BY dtmFilledDate ASC, dblPrice ASC
+
+									IF @dblSellLot < 1
+									BEGIN
+										BREAK
+									END
 
 									IF @dblBuyLot <= @dblSellLot
 									BEGIN
@@ -328,6 +339,7 @@ BEGIN
 								,intSubBookId 
 								,intSelectedInstrumentTypeId 
 								,strType
+								,strMatchingType
 							)
 							SELECT
 								@intMatchNo
@@ -342,6 +354,7 @@ BEGIN
 								,intSubBookId = NULL
 								,@intSelectedInstrumentTypeId
 								,strType = 'Realize'
+								,strMatchingType = 'Auto'
 
 							
 							INSERT INTO tblRKMatchFuturesPSHeader(
@@ -357,6 +370,7 @@ BEGIN
 								,intSubBookId 
 								,intSelectedInstrumentTypeId 
 								,strType
+								,strMatchingType
 								,intConcurrencyId
 								
 							)
@@ -372,6 +386,7 @@ BEGIN
 								,intSubBookId 
 								,intSelectedInstrumentTypeId 
 								,strType
+								,strMatchingType
 								,intConcurrencyId = 1
 							FROM @tempMatchDerivativeHeader
 
@@ -563,6 +578,7 @@ BEGIN
 											, dblMatchQty
 											, intLFutOptTransactionId
 											, intSFutOptTransactionId
+											, strMatchingType
 											, intConcurrencyId)
 										SELECT @intOptionsMatchPnSHeaderId 
 											, @strTranNo + ROW_NUMBER() OVER (ORDER BY intLFutOptTransactionId)
@@ -570,6 +586,7 @@ BEGIN
 											, dblMatchQty
 											, intLFutOptTransactionId
 											, intSFutOptTransactionId
+											, strMatchingType = 'Auto'
 											, 1 as intConcurrencyId
 										FROM @tempMatchDerivativesDetail
 
@@ -638,12 +655,13 @@ BEGIN
 			DELETE FROM #tempLocations WHERE intLocationId = @intCompanyLocationId
 
 			DROP TABLE #tempBroker
+			DROP TABLE #tempBuy
+			DROP TABLE #tempSell
 		END
 
 		DELETE FROM #tempCommodities WHERE intCommodityId = @intCommodityId
 
-		DROP TABLE #tempBuy
-		DROP TABLE #tempSell
+		
 		DROP TABLE #tempLocations
 
 	END

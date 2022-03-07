@@ -408,12 +408,13 @@ CREATE TABLE ##ARItemsForCosting (
     , [ysnAutoBlend]                    BIT NULL DEFAULT 0
     , [ysnGLOnly]						BIT NULL DEFAULT 0
 	, [strBOLNumber]					NVARCHAR(100) NULL 
-    , [intTicketId]                     INT NULL
     , [strSourceType]                   NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [strSourceNumber]                 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-    , [intTicketId]                     INT NULL
+    --, [intTicketId]                     INT NULL
     , [intSourceEntityId]				INT NULL
 )
+IF(OBJECT_ID('tempdb..##ARItemsForCosting') IS NOT NULL) AND COL_LENGTH('tempdb..##ARItemsForCosting', 'intTicketId') IS NULL
+    ALTER TABLE ##ARItemsForCosting ADD [intTicketId] INT NULL
 
 IF(OBJECT_ID('tempdb..##ARItemsForInTransitCosting') IS NOT NULL) DROP TABLE ##ARItemsForInTransitCosting
 CREATE TABLE ##ARItemsForInTransitCosting (

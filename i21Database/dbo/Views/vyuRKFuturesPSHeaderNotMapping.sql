@@ -47,6 +47,7 @@ GROUP BY mh.intMatchFuturesPSHeaderId
 	, mh.intSubBookId
 	, mh.intSelectedInstrumentTypeId
 	, mh.strType COLLATE Latin1_General_CI_AS
+	, mh.strMatchingType COLLATE Latin1_General_CI_AS
 	, mh.intCurrencyExchangeRateTypeId
 	, mh.intConcurrencyId
 	, mh.intBankId

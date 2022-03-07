@@ -170,7 +170,7 @@ BEGIN
 			, intTransactionHeaderId = cd.intContractHeaderId
 			, intTransactionDetailId = tf.intContractDetailId
 			, intBankId = isnull(cd.intBankId,0)
-			, intBankAccountId = isnull(cd.intBankAccountId, 0)
+			, intBankAccountId = CASE WHEN @strAction = 'Created' then cd.intBankAccountId else isnull(cd.intBankAccountId, 0) end
 			, intBorrowingFacilityId = isnull(cd.intBorrowingFacilityId, 0)
 			, intLimitTypeId = isnull(cd.intBorrowingFacilityLimitId, 0)
 			, intSublimitTypeId = isnull(cd.intBorrowingFacilityLimitDetailId, 0)

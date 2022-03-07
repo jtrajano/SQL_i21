@@ -53,7 +53,6 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 	  , @dblTotalAR							NUMERIC(18,6)		= NULL
-	  , @strCustomerAgingBy				    NVARCHAR(250)
 
 DECLARE @temp_statement_table TABLE(
 	 [intTempId]					INT IDENTITY(1,1)		
@@ -131,7 +130,6 @@ SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + '''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 SELECT TOP 1  @ysnStretchLogo = ysnStretchLogo
-			, @strCustomerAgingBy = strCustomerAgingBy
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')

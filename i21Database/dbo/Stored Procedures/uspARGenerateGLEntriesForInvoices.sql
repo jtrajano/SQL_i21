@@ -745,7 +745,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[strItemType] = 'Software'
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
 
---DUE FROM ACCOUNT DEBIT
+--DUE FROM ACCOUNT DEBIT FOR LOCATION
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
      [dtmDate]
     ,[strBatchId]
@@ -783,7 +783,7 @@ INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = @DueFromAccountId
+    ,[intAccountId]                 = DUEACCOUNT.intDueFromAccountId
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
@@ -815,6 +815,22 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]    
 FROM ##ARPostInvoiceDetail I
+OUTER APPLY (
+	SELECT TOP 1 intDueFromAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+	AND intAccountId = I.[intSalesAccountId]
+) DUEACCOUNT
+OUTER APPLY (
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](I.[intAccountId], ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+	AND intAccountId = I.[intSalesAccountId]
+) ARACCOUNTSEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[intItemId] IS NOT NULL
@@ -824,6 +840,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strType <> 'Tax Adjustment'
   AND (@AllowSingleLocationEntries = 0 OR I.[ysnIntraCompany] = 1)
   AND @DueFromAccountId <> 0
+  AND ARACCOUNTSEGMENT.intAccountId <> I.[intAccountId]
 
 --SOFTWARE MAINTENANCE/SAAS CREDIT
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
@@ -903,7 +920,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
   AND I.strType <> 'Tax Adjustment'
 
--- DUE TO ACCOUNT CREDIT
+-- DUE TO ACCOUNT CREDIT FOR LOCATION
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
      [dtmDate]
     ,[strBatchId]
@@ -941,7 +958,7 @@ INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = @DueToAccountId
+    ,[intAccountId]                 = DUEACCOUNT.intDueToAccountId
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
@@ -973,6 +990,22 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]    
 FROM ##ARPostInvoiceDetail I
+OUTER APPLY (
+	SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+	AND intAccountId = I.[intAccountId]
+) DUEACCOUNT
+OUTER APPLY (
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](I.[intAccountId], ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+	AND intAccountId = I.[intSalesAccountId]
+) ARACCOUNTSEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[intItemId] IS NOT NULL
@@ -982,6 +1015,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strType <> 'Tax Adjustment'
   AND (@AllowSingleLocationEntries = 0 OR I.[ysnIntraCompany] = 1)
   AND @DueToAccountId <> 0
+  AND ARACCOUNTSEGMENT.intAccountId <> I.[intAccountId]
 
 --FINAL INVOICE CREDIT
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (

@@ -74,7 +74,10 @@ CM.strReferenceNo,
 CM.strTransactionId,
 CM.ysnCheckVoid,
 CM.ysnClr,
-CM.strPeriod
+CM.strPeriod,
+dblAmountFees = ABS(CM.dblAmountFees),
+dblTotalPayment =CASE WHEN  Ordered.dblPayment > 0 THEN  ABS(CM.dblTotalAmount) ELSE 0 END,
+dblTotalDeposit = CASE WHEN  Ordered.dblDeposit > 0 THEN CM.dblTotalAmount ELSE 0 END
 FROM vyuCMGetBankTransaction CM 
 JOIN cteOrdered Ordered ON CM.intTransactionId= Ordered.intTransactionId
 JOIN cteRunningTotal Total ON Ordered.rowId = Total.rowId AND Total.intBankAccountId = Ordered.intBankAccountId

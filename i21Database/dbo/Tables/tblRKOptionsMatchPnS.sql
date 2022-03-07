@@ -13,6 +13,7 @@ CREATE TABLE [dbo].[tblRKOptionsMatchPnS]
 	[dtmPostDate] DATETIME NULL,
 	[intMatchNo] INT NULL,
 	[intMatchOptionsPnSRefId] INT NULL,
+	[strMatchingType] NVARCHAR(10) COLLATE Latin1_General_CI_AS DEFAULT (N'Manual'),
     CONSTRAINT [PK_tblRKOptionsMatchPnS_intMatchOptionsPnSId] PRIMARY KEY (intMatchOptionsPnSId), 
 	CONSTRAINT [FK_tblRKOptionsMatchPnS_tblRKOptionsMatchPnSHeader_intOptionsMatchPnSHeaderId] FOREIGN KEY ([intOptionsMatchPnSHeaderId]) REFERENCES [tblRKOptionsMatchPnSHeader]([intOptionsMatchPnSHeaderId]),	
     CONSTRAINT [FK_tblRKOptionsMatchPnS_tblRKFutOptTransaction_intLFutOptTransactionId] FOREIGN KEY ([intLFutOptTransactionId]) REFERENCES [tblRKFutOptTransaction]([intFutOptTransactionId]),

@@ -9,7 +9,8 @@ SELECT
     FA.strNotes,  
     FA.dtmDateAcquired,  
     FA.intAssetAccountId,  
-    FA.intDepreciationAccountId,  
+    FA.intDepreciationAccountId,
+    FA.dtmDateInService,  
     AssetGroup.intAssetGroupId,
     AssetGroup.strGroupCode,
     AssetGroup.strGroupDescription,
@@ -33,6 +34,8 @@ SELECT
     strTaxDepreciationMethod = ISNULL(TaxBookDepreciation.strDepreciationMethodId, ''),
     dblTaxCost = ISNULL(TaxBookDepreciation.dblCost, 0),
     dblTaxSalvageValue = ISNULL(TaxBookDepreciation.dblSalvageValue, 0),
+    dblBonusDepreciation = ISNULL(TaxBookDepreciation.dblBonusDepreciation, 0),
+    dblSection179 = ISNULL(TaxBookDepreciation.dblSection179, 0),
     FiscalYear.intGLFiscalYearPeriodId intFiscalPeriodId,
     FA.intConcurrencyId  
 FROM 
@@ -55,7 +58,7 @@ FROM
 	     WHERE BD.intAssetId = FA.intAssetId AND intBookId = 1
     ) GAAPBookDepreciation
     OUTER APPLY(  
-         SELECT BD.dblCost, BD.dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation BD
+         SELECT BD.dblCost, BD.dblSalvageValue, DM.strDepreciationMethodId, BD.dblBonusDepreciation, BD.dblSection179 FROM tblFABookDepreciation BD
 		 JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = BD.intDepreciationMethodId
 	     WHERE BD.intAssetId = FA.intAssetId AND intBookId = 2
     ) TaxBookDepreciation
@@ -122,6 +125,7 @@ GROUP BY
     FA.dtmDateAcquired,  
     FA.intAssetAccountId,  
     FA.intDepreciationAccountId,  
+    FA.dtmDateInService,
     AssetGroup.intAssetGroupId,
     AssetGroup.strGroupCode,
     AssetGroup.strGroupDescription,
@@ -142,4 +146,6 @@ GROUP BY
     TaxBookDepreciation.strDepreciationMethodId,
     TaxBookDepreciation.dblCost,
     TaxBookDepreciation.dblSalvageValue,
+    TaxBookDepreciation.dblBonusDepreciation,
+    TaxBookDepreciation.dblSection179,
     FA.intConcurrencyId

@@ -72,4 +72,5 @@ INSERT INTO #tmpGLDetail (
     FROM [dbo].tblCMBankTransfer A CROSS APPLY(
         SELECT strDescription FROM [dbo].tblGLAccount WHERE @intDiffAccountId = intAccountId) GLAccnt 
     WHERE A.strTransactionId = @strTransactionId    
+    AND dblDifference <> 0
 

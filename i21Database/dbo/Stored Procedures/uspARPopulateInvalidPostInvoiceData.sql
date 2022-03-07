@@ -221,7 +221,7 @@ BEGIN
 	WHERE I.[intSiteId] IS NULL
 	  AND I.[strType] = 'Tank Delivery'
 	  AND I.[ysnTankRequired] = @OneBit
-	  AND I.[strItemType] <> 'Comment'		
+	  AND I.[strItemType] <> 'Comment'
 		
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1978,6 +1978,78 @@ BEGIN
 	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	-- Due From Account For Location
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUEFROM.strAccountId) + ' to the chart of accounts.'
+	FROM ##ARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intDueFromAccountId, GLA.strAccountId
+		FROM tblARCompanyPreference ARCP
+		LEFT JOIN tblGLAccount GLA
+		ON ARCP.intDueFromAccountId = GLA.intAccountId
+	) DUEFROM
+	OUTER APPLY (
+		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
+		FROM tblGLAccountSegmentMapping GLASM
+		INNER JOIN tblGLAccountSegment GLAS
+		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+		LEFT JOIN tblGLAccount GLA
+		ON GLASM.intAccountId = GLA.intAccountId
+		WHERE GLAS.intAccountStructureId = 3
+		AND GLASM.intAccountId = I.[intSalesAccountId]
+	) GLSEGMENT
+	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	-- Due To Account For Location
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUETO.strAccountId) + ' to the chart of accounts.'
+	FROM ##ARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 ARCP.intDueToAccountId, GLA.strAccountId
+		FROM tblARCompanyPreference ARCP
+		LEFT JOIN tblGLAccount GLA
+		ON ARCP.intDueToAccountId = GLA.intAccountId
+	) DUETO
+	OUTER APPLY (
+		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
+		FROM tblGLAccountSegmentMapping GLASM
+		INNER JOIN tblGLAccountSegment GLAS
+		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+		LEFT JOIN tblGLAccount GLA
+		ON GLASM.intAccountId = GLA.intAccountId
+		WHERE GLAS.intAccountStructureId = 3
+		AND GLASM.intAccountId = I.[intAccountId]
+	) GLSEGMENT
+	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
 END
 
 IF @Post = @ZeroBit
