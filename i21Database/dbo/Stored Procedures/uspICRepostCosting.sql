@@ -379,7 +379,7 @@ BEGIN
 					AND dbo.fnDateGreaterThanEquals(@dtmDate, dtmDate) = 1
 		)
 		BEGIN 
-			SELECT @intCostingMethod = ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)) 
+			SELECT @intCostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) 
 
 			IF @intCostingMethod = @AVERAGECOST
 			BEGIN 
