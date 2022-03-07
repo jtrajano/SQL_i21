@@ -10054,6 +10054,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
     <Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
+    <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
