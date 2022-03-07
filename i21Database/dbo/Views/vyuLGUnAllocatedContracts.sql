@@ -11,9 +11,9 @@ FROM (
 		,CD.intFreightTermId
 		,CD.intShipViaId
 		,CD.dblNetWeight
-		,WUM.strUnitMeasure AS strWeightUOM
-		,CD.dblQuantity AS dblDetailQuantity
-		,U1.strUnitMeasure AS strItemUOM
+		,strWeightUOM = WUM.strUnitMeasure
+		,dblDetailQuantity = CD.dblQuantity
+		,strItemUOM = U1.strUnitMeasure
 		,CD.dblFutures
 		,CD.dblBasis
 		,CD.dblCashPrice
@@ -30,38 +30,30 @@ FROM (
 		,CD.intShippingLineId
 		,CD.strVessel
 		,IM.strItemNo
-		,IM.strDescription AS strItemDescription
+		,strItemDescription = IM.strDescription
 		,strBundleItemNo = BI.strItemNo
 		,CL.strLocationName
 		,CS.strContractStatus
-		,(
-			SELECT SUM(dblReservedQuantity)
-			FROM tblLGReservation RES
-			WHERE RES.intContractDetailId = CD.intContractDetailId
-			) AS dblReservedQuantity
-		,ISNULL(CD.dblQuantity, 0) - ISNULL((
-				SELECT SUM(dblReservedQuantity)
-				FROM tblLGReservation RES
-				WHERE RES.intContractDetailId = CD.intContractDetailId
-				), 0) AS dblUnReservedQuantity
-		,ISNULL(CD.dblAllocatedQty, 0) AS dblAllocatedQty
-		,ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)  AS dblUnAllocatedQty
+		,dblReservedQuantity = ISNULL(RSV.dblReservedQty, 0)
+		,dblUnReservedQuantity = ISNULL(CD.dblQuantity, 0) - ISNULL(RSV.dblReservedQty, 0)
+		,dblAllocatedQty = ISNULL(CD.dblAllocatedQty, 0)
+		,dblUnAllocatedQty = ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)
 		,CH.intContractHeaderId
 		,CH.intContractTypeId
 		,CT.strContractType
 		,CH.intCommodityId
 		,CY.strCommodityCode
-		,CY.strDescription AS strCommodityDescription
+		,strCommodityDescription = CY.strDescription
 		,CH.strContractNumber
 		,CH.dtmContractDate
 		,CH.strCustomerContract
-		,CH.strCustomerContract AS strEntityContract
-		,EY.strName AS strEntityName
+		,strEntityContract = CH.strCustomerContract
+		,strEntityName = EY.strName
 		,CD.intBookId
 		,BO.strBook
 		,CD.intSubBookId
 		,SB.strSubBook
-		,CASE 
+		,strPriceFixStatus = CASE 
 			WHEN CD.intPricingTypeId = 1
 				THEN 'Priced'
 			WHEN ISNULL(CD.dblNoOfLots, 0) - ISNULL([dblLotsFixed], 0) = 0
@@ -69,46 +61,45 @@ FROM (
 			WHEN ISNULL([dblLotsFixed], 0) = 0
 				THEN 'Unpriced'
 			ELSE 'Partially Priced'
-			END COLLATE Latin1_General_CI_AS AS strPriceFixStatus
-		,CB.strContractBasis AS strIncoTerms
-		,CO.strCountry AS strOrigin
+			END COLLATE Latin1_General_CI_AS
+		,strIncoTerms = CB.strContractBasis
 		,FMA.strFutMarketName
 		,FMO.strFutureMonth
-		,ISNULL(AD.strSeqCurrency, '') + '/' + ISNULL(AD.strSeqPriceUOM, '') strPriceBasis
-		,PT.strDescription AS strProductType
+		,strPriceBasis = ISNULL(AD.strSeqCurrency, '') + '/' + ISNULL(AD.strSeqPriceUOM, '')
 		,CR.strCropYear
-		,W1.strWeightGradeDesc AS strGrade
-		,W2.strWeightGradeDesc AS strWeight
+		,strGrade = W1.strWeightGradeDesc
+		,strWeight = W2.strWeightGradeDesc
 		,TM.strTerm
 		,CD.strItemSpecification
-		,dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId, CD.intFutureMonthId, GETDATE()) AS dblLatestClosingPrice
+		,dblLatestClosingPrice = dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId, CD.intFutureMonthId, GETDATE())
+		,CD.dtmUpdatedAvailabilityDate
+		,IM.dblGAShrinkFactor
+		,strOrigin = ISNULL(CO.strCountry, GIC.strOrigin)
+		,strProductType = GIC.strProductType
+		,strRegion = GIC.strRegion 
+		,strSeason = GIC.strSeason
+		,strClass = GIC.strClassVariety
+		,strProductLine = GIC.strProductLine
+		,IM.strMarketValuation
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
 	JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId
+	OUTER APPLY (SELECT dblReservedQty = SUM(dblReservedQuantity) FROM tblLGReservation RES WHERE RES.intContractDetailId = CD.intContractDetailId) RSV
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblCTPriceFixation PF ON PF.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
 	LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
-	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
-	LEFT JOIN tblICItemContract ICI ON ICI.intItemId = IM.intItemId
-		AND CD.intItemContractId = ICI.intItemContractId
+	LEFT JOIN vyuICGetItemCommodity GIC ON GIC.intItemId = IM.intItemId
+	LEFT JOIN tblICItemContract ICI ON ICI.intItemId = IM.intItemId AND CD.intItemContractId = ICI.intItemContractId
 	LEFT JOIN tblICItem BI ON BI.intItemId = CD.intItemBundleId
-	LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
-			CASE 
-				WHEN ISNULL(ICI.intCountryId, 0) = 0
-					THEN ISNULL(CA.intCountryID, 0)
-				ELSE ICI.intCountryId
-				END
-			)
+	LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 	LEFT JOIN tblRKFutureMarket FMA ON FMA.intFutureMarketId = CD.intFutureMarketId
 	LEFT JOIN tblRKFuturesMonth FMO ON FMO.intFutureMonthId = CD.intFutureMonthId
-	LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = IM.intProductTypeId
-		AND PT.strType = 'ProductType'
 	LEFT JOIN tblCTCropYear CR ON CR.intCropYearId = CH.intCropYearId
 	LEFT JOIN tblCTWeightGrade W1 ON W1.intWeightGradeId = CH.intGradeId
 	LEFT JOIN tblCTWeightGrade W2 ON W2.intWeightGradeId = CH.intWeightId
@@ -123,70 +114,5 @@ FROM (
 	LEFT JOIN tblICUnitMeasure U6 ON U6.intUnitMeasureId = SAL.intSUnitMeasureId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
-	GROUP BY CD.intContractDetailId
-		,CD.intContractSeq
-		,CD.intCompanyLocationId
-		,CD.dtmStartDate
-		,CD.intItemId
-		,CD.dtmEndDate
-		,CD.intFreightTermId
-		,CD.intShipViaId
-		,CD.dblNetWeight
-		,CD.dblQuantity
-		,CD.dblFutures
-		,CD.dblBasis
-		,CD.dblCashPrice
-		,CD.strBuyerSeller
-		,CD.strFobBasis
-		,CD.dblBalance
-		,CD.dblAllocatedQty
-		,CD.dblIntransitQty
-		,CD.dblScheduleQty
-		,CD.strPackingDescription
-		,CD.intPriceItemUOMId
-		,CD.intLoadingPortId
-		,CD.intDestinationPortId
-		,CD.strShippingTerm
-		,CD.intShippingLineId
-		,CD.strVessel
-		,IM.strItemNo
-		,IM.strDescription
-		,BI.strItemNo
-		,U1.strUnitMeasure
-		,CL.strLocationName
-		,CS.strContractStatus
-		,CH.intContractHeaderId
-		,CH.intContractTypeId
-		,CT.strContractType
-		,CH.intCommodityId
-		,CY.strCommodityCode
-		,CY.strDescription
-		,CH.strContractNumber
-		,CH.dtmContractDate
-		,CH.strCustomerContract
-		,EY.strName
-		,CD.intBookId
-		,BO.strBook
-		,CD.intSubBookId
-		,SB.strSubBook
-		,PF.dblTotalLots
-		,PF.dblLotsFixed
-		,CB.strContractBasis
-		,CO.strCountry
-		,FMA.strFutMarketName
-		,FMO.strFutureMonth
-		,AD.strSeqCurrency
-		,AD.strSeqPriceUOM
-		,PT.strDescription
-		,CR.strCropYear
-		,W1.strWeightGradeDesc
-		,W2.strWeightGradeDesc
-		,TM.strTerm
-		,CD.strItemSpecification
-		,WUM.strUnitMeasure 
-		,CD.intFutureMarketId
-		,CD.intFutureMonthId
-		,CD.dblNoOfLots
-		,CD.intPricingTypeId
 	) tbl
 WHERE dblUnAllocatedQty > 0
