@@ -91,6 +91,7 @@
 	[dblCashPrice] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblQualityPremium] DECIMAL(18, 6) NOT NULL DEFAULT 0,
  	[dblOptionalityPremium] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[dblRounding] DECIMAL (18, 6) NOT NULL DEFAULT 0,
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
