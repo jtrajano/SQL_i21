@@ -61,7 +61,6 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnStretchLogo						AS BIT				= 0
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
-	  , @strCustomerAgingBy					AS NVARCHAR(250)	= NULL
 
 SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -241,7 +240,6 @@ CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTPAYMENTFORCF_A1] ON [#PAYMENTSFORC
 CREATE TABLE #DELCUSTOMERS (intEntityCustomerId	INT NOT NULL PRIMARY KEY)
 
 SELECT TOP 1 @ysnStretchLogo	= ysnStretchLogo
-		   , @strCustomerAgingBy = @strCustomerAgingBy
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 --COMPANY INFO
@@ -1041,7 +1039,7 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN
-        DELETE FROM #STATEMENTTABLE WHERE DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN dtmDate ELSE dtmDueDate END ), @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'
+        DELETE FROM #STATEMENTTABLE WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'
 		UPDATE #AGINGTABLE
 		SET dblFuture 	= 0
 		  , dbl0Days 	= 0

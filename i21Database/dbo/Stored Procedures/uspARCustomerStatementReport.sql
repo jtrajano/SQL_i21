@@ -53,7 +53,6 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 	  , @dblTotalAR							NUMERIC(18,6)		= NULL
-	  , @strCustomerAgingBy				    NVARCHAR(250)
 
 DECLARE @temp_statement_table TABLE(
 	 [intTempId]					INT IDENTITY(1,1)		
@@ -131,7 +130,6 @@ SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + '''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 SELECT TOP 1  @ysnStretchLogo = ysnStretchLogo
-			, @strCustomerAgingBy = strCustomerAgingBy
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -296,11 +294,11 @@ FROM (
 		 , intEntityCustomerId			= C.intEntityId
 		 , dtmDueDate					= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
 		 , dtmDate						= I.dtmDate
-		 , intDaysDue					= DATEDIFF(DAY, ( CASE WHEN ' + '''' + @strCustomerAgingBy + '''' + '= ''Invoice Create Date'' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ), '+ @strDateTo +')
+		 , intDaysDue					= DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
 		 , dblTotalAmount				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 		 , dblAmountPaid				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(TOTALPAYMENT.dblPayment, 0) * -1 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
 		 , dblAmountDue					= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
-		 , dblPastDue					= CASE WHEN '+ @strDateTo +' > ( CASE WHEN ' + '''' + @strCustomerAgingBy + '''' + '= ''Invoice Create Date'' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ) AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
+		 , dblPastDue					= CASE WHEN '+ @strDateTo +' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
 												 THEN I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0)
 											   ELSE 0
 										  END
