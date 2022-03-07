@@ -4238,7 +4238,7 @@ BEGIN
 
 					WHILE EXISTS (SELECT TOP 1 * FROM #tblSTTempReceiveLottery )
 					BEGIN
-
+						-- VALIDATE IF VALID ITEMS BEFORE CREATING IR
 						SELECT TOP 1 @loopId = intReceiveLotteryId FROM #tblSTTempReceiveLottery
 
 						-- Validate if there is Item UOM setup
@@ -4253,6 +4253,38 @@ BEGIN
 						BEGIN
 							-- SET @Success = CAST(0 AS BIT)
 							SET @strStatusMsg = 'Missing Sale UOM setup on Item Location.'
+							GOTO ExitWithRollback
+							RETURN
+						END
+
+						DECLARE @strErrorItem AS VARCHAR(250) = (SELECT TOP 1 tblSTLotteryGame.strGame FROM tblSTReceiveLottery
+									INNER JOIN tblSTStore 
+									ON tblSTReceiveLottery.intStoreId = tblSTStore.intStoreId
+									INNER JOIN tblSTLotteryGame 
+									ON tblSTReceiveLottery.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+									INNER JOIN tblICItemLocation 
+									ON tblICItemLocation.intLocationId = tblSTStore.intCompanyLocationId
+										AND tblSTLotteryGame.intItemId = tblICItemLocation.intItemId
+									INNER JOIN tblICItemPricing
+										ON tblICItemPricing.intItemLocationId = tblICItemLocation.intItemLocationId
+										AND tblICItemPricing.intItemId = tblICItemLocation.intItemId
+									LEFT JOIN tblAPVendor 
+									ON tblAPVendor.intEntityId = tblICItemLocation.intVendorId
+									LEFT JOIN tblICItemUOM 
+									ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+									LEFT JOIN tblSMCompanyLocation
+									ON tblSTStore.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
+									WHERE tblSTReceiveLottery.intCheckoutId = @intCheckoutId
+									AND (SELECT intShipFromId FROM tblAPVendor WHERE intEntityId = tblICItemLocation.intVendorId) IS NULL)
+
+
+
+
+						-- Validate if there is Item setup for Vendor
+						IF @strErrorItem IS NOT NULL
+						BEGIN
+							-- SET @Success = CAST(0 AS BIT)
+							SET @strStatusMsg = 'Item of Game ' + @strErrorItem + ' is missing Vendor on Item Location setup.'
 							GOTO ExitWithRollback
 							RETURN
 						END
