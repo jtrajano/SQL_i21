@@ -45,7 +45,6 @@ DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @queryRowId							AS NVARCHAR(MAX)	= NULL
 	  , @orderRowId							AS NVARCHAR(MAX)	= NULL
 	  , @strEntityUserIdLocal				AS NVARCHAR(MAX)	= NULL
-	  , @strCustomerAgingBy				    AS NVARCHAR(250)	= NULL
 
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
@@ -57,9 +56,6 @@ SET @strEntityUserIdLocal		= CAST(@intEntityUserIdLocal AS NVARCHAR(MAX))
 SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-
-SELECT TOP 1  @strCustomerAgingBy = strCustomerAgingBy
-FROM tblARCompanyPreference WITH (NOLOCK)
 
 IF(OBJECT_ID('tempdb..#ADCUSTOMERS') IS NOT NULL) DROP TABLE #ADCUSTOMERS
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
@@ -785,7 +781,7 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 --ADDITIONAL FILTERS
 IF @ysnPrintOnlyPastDueLocal = 1
-	DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN dtmDate ELSE dtmDueDate END ), @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'        
+	DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'        
 
 SELECT @ARBalance = SUM(dblTotalAR) FROM #BALANCEFORWARDAGING
 
