@@ -136,7 +136,7 @@ JOIN @Id i on i.intId = t.intTransactionId
 IF EXISTS(SELECT 1 FROM tblCMBankAccount WHERE @intBankAccountId = intBankAccountId AND ysnABREnable = 1)
 BEGIN
 	UPDATE tblCMABRActivity SET intImportStatus = @IMPORT_STATUS_UNPROCESSED  
-	WHERE dtmDate<=@dtmDate AND intBankAccountId=@intBankAccountId AND intImportStatus = @IMPORT_STATUS_NOMATCHFOUND
+	WHERE dtmClear<=@dtmDate AND intBankAccountId=@intBankAccountId AND intImportStatus = @IMPORT_STATUS_NOMATCHFOUND
 END
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 		
