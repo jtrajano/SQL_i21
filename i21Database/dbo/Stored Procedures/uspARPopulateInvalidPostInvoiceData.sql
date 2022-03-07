@@ -1995,21 +1995,25 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account.'
+		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUEFROM.strAccountId) + ' to the chart of accounts.'
 	FROM ##ARPostInvoiceDetail I
 	OUTER APPLY (
-		SELECT TOP 1 intDueFromAccountId
-		FROM tblARCompanyPreference
-	) ARCP
+		SELECT TOP 1 intDueFromAccountId, GLA.strAccountId
+		FROM tblARCompanyPreference ARCP
+		LEFT JOIN tblGLAccount GLA
+		ON ARCP.intDueFromAccountId = GLA.intAccountId
+	) DUEFROM
 	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId
+		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
 		FROM tblGLAccountSegmentMapping GLASM
 		INNER JOIN tblGLAccountSegment GLAS
 		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		WHERE intAccountStructureId = 3
-		AND intAccountId = I.[intSalesAccountId]
+		LEFT JOIN tblGLAccount GLA
+		ON GLASM.intAccountId = GLA.intAccountId
+		WHERE GLAS.intAccountStructureId = 3
+		AND GLASM.intAccountId = I.[intSalesAccountId]
 	) GLSEGMENT
-	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(ARCP.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2027,21 +2031,25 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account.'
+		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUETO.strAccountId) + ' to the chart of accounts.'
 	FROM ##ARPostInvoiceDetail I
 	OUTER APPLY (
-		SELECT TOP 1 intDueToAccountId
-		FROM tblARCompanyPreference
-	) ARCP
+		SELECT TOP 1 ARCP.intDueToAccountId, GLA.strAccountId
+		FROM tblARCompanyPreference ARCP
+		LEFT JOIN tblGLAccount GLA
+		ON ARCP.intDueToAccountId = GLA.intAccountId
+	) DUETO
 	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId
+		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
 		FROM tblGLAccountSegmentMapping GLASM
 		INNER JOIN tblGLAccountSegment GLAS
 		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		WHERE intAccountStructureId = 3
-		AND intAccountId = I.[intAccountId]
+		LEFT JOIN tblGLAccount GLA
+		ON GLASM.intAccountId = GLA.intAccountId
+		WHERE GLAS.intAccountStructureId = 3
+		AND GLASM.intAccountId = I.[intAccountId]
 	) GLSEGMENT
-	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(ARCP.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
 END
 
 IF @Post = @ZeroBit
