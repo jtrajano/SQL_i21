@@ -28,7 +28,6 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@strCompanyName			AS NVARCHAR(100) = NULL
 	    ,@strCompanyAddress			AS NVARCHAR(500) = NULL
 		,@ysnEmailOnly				AS BIT
-		,@strCustomerAgingBy		AS NVARCHAR(250) = NULL
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -115,9 +114,6 @@ SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
 FROM tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
-
-SELECT TOP 1  @strCustomerAgingBy = strCustomerAgingBy
-FROM tblARCompanyPreference WITH (NOLOCK)
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -506,11 +502,11 @@ SELECT strReferenceNumber			= I.strInvoiceNumber
 	 , dtmDate						= I.dtmDate
 	 , dtmDueDate					= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo') THEN NULL ELSE I.dtmDueDate END    
 	 , dtmPostDate					= I.dtmPostDate    
-	 , intDaysDue					= DATEDIFF(DAY, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ), @dtmDateTo)    
+	 , intDaysDue					= DATEDIFF(DAY, I.[dtmDueDate], @dtmDateTo)    
 	 , dblTotalAmount				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END    
 	 , dblAmountPaid				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END    
 	 , dblAmountDue					= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END    
-	 , dblPastDue					= CASE WHEN @dtmDateTo > ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.[dtmDate] ELSE I.[dtmDueDate] END ) AND I.strTransactionType IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0) ELSE 0 END    
+	 , dblPastDue					= CASE WHEN @dtmDateTo > I.[dtmDueDate] AND I.strTransactionType IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0) ELSE 0 END    
 	 , dblMonthlyBudget				= I.dblMonthlyBudget
 	 , strDescription				= CASE WHEN I.strType = 'Service Charge' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE ITEM.strDescription END    
 	 , strItemNo					= ITEM.strItemNo    
