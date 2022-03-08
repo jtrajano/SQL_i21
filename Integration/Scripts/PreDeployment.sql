@@ -229,6 +229,7 @@
 :r "..\dbo\Stored Procedures\uspARImportCustomerContacts.sql"
 :r "..\dbo\Stored Procedures\uspEMImportCustomerEFTInfo.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoice.sql"
+:r "..\dbo\Stored Procedures\uspARImportInvoiceFromPTTICMST.sql"
 :r "..\dbo\Stored Procedures\uspARImportTaxAuthority.sql"
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
