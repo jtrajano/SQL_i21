@@ -5,6 +5,17 @@
 AS
 BEGIN
 	
+	DECLARE @intNewPerformanceLogId	INT = NULL,
+			@strRequestId NVARCHAR(200) = NEWID()
+
+	EXEC dbo.uspSMLogPerformanceRuntime @strScreenName			= NULL
+									  , @strProcedureName       = 'uspSMIncreaseECConcurrency'
+									  , @strRequestId			= @strRequestId
+									  , @ysnStart		        = 1
+									  , @intUserId	            = NULL
+									  , @intPerformanceLogId    = NULL
+									  , @intNewPerformanceLogId = @intNewPerformanceLogId OUT
+
 	IF @entity = 1
 	BEGIN
 		UPDATE t SET intConcurrencyId = (t.intConcurrencyId + 1)
@@ -72,4 +83,10 @@ BEGIN
 		FROM tblEMEntityCredential t
 	END
 
+	EXEC dbo.uspSMLogPerformanceRuntime @strScreenName			= NULL
+									  , @strProcedureName       = 'uspSMIncreaseECConcurrency'
+									  , @strRequestId			= @strRequestId
+									  , @ysnStart		        = 0
+									  , @intUserId	            = NULL
+									  , @intPerformanceLogId    = @intNewPerformanceLogId
 END
