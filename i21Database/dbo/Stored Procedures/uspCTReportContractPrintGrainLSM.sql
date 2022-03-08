@@ -309,12 +309,15 @@ BEGIN TRY
 		   ,LGMContractSubmitByParentSignature	= @blbParentSubmitSignature
 		   ,LGMContractSubmitSignature			= @blbChildSubmitSignature
 		   ,blbSalesContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  IN (1,2) THEN @FirstApprovalSign ELSE NULL END
-		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @SecondApprovalSign ELSE NULL END 
+		   --OLD
+		   --,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @SecondApprovalSign ELSE NULL END 
+		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN SMU.blbFile ELSE NULL END 
 		   ,blbPurchaseContractFirstApproverSignature	= NULL--CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @FirstApprovalSign END
 		   ,blbPurchaseParentApproveSignature		= NULL-- CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END 
 	FROM	vyuCTContractHeaderView CH
-	LEFT
-	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
+	LEFT JOIN tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
+	LEFT JOIN tblSMAttachment			SMA on SMA.intEntityId = CH.intSalespersonId
+	LEFT JOIN tblSMUpload				SMU on SMA.intAttachmentId = SMU.intAttachmentId
 	WHERE	CH.intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	
 	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
