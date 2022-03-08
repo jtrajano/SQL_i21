@@ -116,7 +116,7 @@ SELECT
 	INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = A.pttic_cus_no COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = A.pttic_slsmn_id COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(pttic_itm_no  COLLATE Latin1_General_CI_AS)
-	INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = Cus.intEntityId
+	INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = Cus.intEntityId AND LOC.ysnDefaultLocation =1
 	LEFT JOIN tblSMTerm Term ON Term.strTermCode COLLATE Latin1_General_CI_AS = CONVERT(NVARCHAR(10),CONVERT(INT,A.pttic_terms_code)) COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblARInvoice 
 		ON A.pttic_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
