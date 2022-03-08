@@ -692,7 +692,11 @@ GO
 
 GO
 UPDATE tblCTAmendmentApproval SET ysnBulkChangeReadOnly =1 WHERE strDataIndex NOT IN (
-SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitString('intItemId,dblQuantity,intItemUOMId,dblBasis,intBookId,intSubBookId,dblRatio',','))
+SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitString('intItemId,dblQuantity,intItemUOMId,dblBasis,intBookId,intSubBookId,dblRatio,intFutureMonthId,dblFutures',','))
+GO
+
+UPDATE tblCTAmendmentApproval SET ysnBulkChangeReadOnly = 0 WHERE strDataIndex IN (
+SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitString('intFutureMonthId,dblFutures',','))
 GO
 
 IF EXISTS(SELECT 1 FROM tblCTCompanyPreference WHERE ISNULL(strDefaultAmendmentReport,'')='')
