@@ -24,6 +24,7 @@
 	[strBranchCode]										NVARCHAR (3)  COLLATE Latin1_General_CI_AS NULL,
 	[ysnDefaultAccount]									BIT            NULL,
 	[strIntermediaryBank]								NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strIntermediaryBankAddress]						NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,
 	[strIntermediarySwiftCode]							NVARCHAR (11) COLLATE Latin1_General_CI_AS NULL,
 	[strIntermediaryIBAN]								NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strIntermediaryBicCode]							NVARCHAR (8)  COLLATE Latin1_General_CI_AS NULL,
@@ -33,7 +34,6 @@
 	[strFiftySevenFormat]								NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strFiftySixFormat]									NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyId]										INT				NULL,
-
 
 	[intConcurrencyId]         INT            NOT NULL,
 
