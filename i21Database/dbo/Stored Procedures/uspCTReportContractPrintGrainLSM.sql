@@ -284,7 +284,7 @@ BEGIN TRY
 	FROM	vyuCTContractHeaderView CH
 	LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
-	LEFT JOIN tblSMAttachment			SMA on SMA.intEntityId = CH.intSalespersonId
+	LEFT JOIN tblSMAttachment			SMA on SMA.strRecordNo = CH.intSalespersonId
 	LEFT JOIN tblSMUpload				SMU on SMA.intAttachmentId = SMU.intAttachmentId
 	WHERE	intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	
