@@ -497,6 +497,12 @@
     <Build Include="dbo\Stored Procedures\uspRKOTCForwardPostBankTransfer.sql" />
     <Build Include="dbo\Views\vyuRKGetCurrencyPair.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinance.sql" />
+    <Build Include="dbo\Tables\tblSCISLoadOutBin.sql" />
+    <Build Include="dbo\Tables\tblSCISLoadOutBinIn.sql" />
+    <Build Include="dbo\Tables\tblSCISLoadOutBinOut.sql" />
+    <Build Include="dbo\Tables\tblSCISLoadOutBinDeduct.sql" />
+    <Build Include="dbo\Views\vyuSCISLoadOutHistory.sql" />
+    <Build Include="dbo\Views\vyuSCISLoadOutLoadIn.sql" />
     <Build Include="dbo\Views\vyuAPEntityEFTInformation.sql" />
     <Build Include="dbo\Views\vyuCMBankTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuCMUnassignedBrokerageAccount.sql" />
