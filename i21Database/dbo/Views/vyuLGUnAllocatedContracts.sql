@@ -13,6 +13,7 @@ FROM (
 		,dblNetWeight = CD.dblNetWeight * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,strWeightUOM = WUM.strUnitMeasure
 		,dblDetailQuantity = CD.dblQuantity * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,intItemUOMId = CD.intItemUOMId
 		,strItemUOM = U1.strUnitMeasure
 		,CD.dblFutures
 		,CD.dblBasis
