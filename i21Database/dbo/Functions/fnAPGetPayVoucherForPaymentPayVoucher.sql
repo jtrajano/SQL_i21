@@ -6,7 +6,8 @@
 	@showDeferred BIT,
 	@vendorId INT = NULL,
 	@payToAddress INT = 0,
-	@paymentId INT = 0
+	@paymentId INT = 0,
+	@bankAccountId INT = 0
 )
 RETURNS TABLE AS RETURN
 (
@@ -134,5 +135,8 @@ RETURNS TABLE AS RETURN
 					ELSE 1 END)
 	AND 1 = (CASE WHEN @paymentId = 0
 					THEN (CASE WHEN forPay.ysnInPaymentSched = 0 THEN 1 ELSE 0 END)
+					ELSE 1 END)
+	AND 1 = (CASE WHEN @bankAccountId > 0 AND voucher.intPayFromBankAccountId > 0
+					THEN (CASE WHEN @bankAccountId = voucher.intPayFromBankAccountId THEN 1 ELSE 0 END)
 					ELSE 1 END)
 )
