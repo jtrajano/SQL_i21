@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspRKFutOptTransactionImportValidate
-
+	@intEntityUserId INT = NULL
 AS
 
 BEGIN TRY
@@ -55,6 +55,14 @@ BEGIN TRY
 		intBankId INT,
 		strBank NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	)
+
+	-- Checking for User Location Access.
+	SELECT locationPermission.intCompanyLocationId 
+	INTO #tmpRKUserSecurityLocations
+	FROM tblSMUserSecurity userSecurity
+	LEFT OUTER JOIN tblSMUserSecurityCompanyLocationRolePermission locationPermission
+		ON locationPermission.intEntityId = userSecurity.intEntityId
+	WHERE userSecurity.intEntityId = @intEntityUserId
 
 	SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
 
@@ -319,6 +327,15 @@ BEGIN TRY
 				IF NOT EXISTS(SELECT TOP 1 '' FROM tblSMCompanyLocation WHERE strLocationName = @strLocationName)
 				BEGIN
 					SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + ' Location Name does not exists in the system.'
+				END
+				ELSE 
+				BEGIN
+					IF NOT EXISTS (SELECT TOP 1 '' FROM #tmpRKUserSecurityLocations securityLocations 
+									WHERE intCompanyLocationId IN (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = @strLocationName)
+								)
+					BEGIN
+						SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'User does not have access in the selected Location.'
+					END
 				END
 				
 				IF @strBuySell NOT IN('Buy','Sell')
@@ -752,6 +769,15 @@ BEGIN TRY
 				BEGIN
 					SET @ErrMsg = @ErrMsg + ' Location Name does not exists in the system.'
 				END
+				ELSE 
+				BEGIN
+					IF NOT EXISTS (SELECT TOP 1 '' FROM #tmpRKUserSecurityLocations securityLocations 
+									WHERE intCompanyLocationId IN (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = @strLocationName)
+								)
+					BEGIN
+						SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'User does not have access in the selected Location.'
+					END
+				END
 
 				IF NOT EXISTS(SELECT * FROM vyuHDSalesPerson WHERE strName = @strSalespersonId)
 				BEGIN
@@ -990,6 +1016,8 @@ BEGIN TRY
 		, dblFinanceForwardRate
 	FROM tblRKFutOptTransactionImport_ErrLog
 	ORDER BY intFutOptTransactionErrLogId
+
+	DROP TABLE #tmpRKUserSecurityLocations
 	
 	DELETE FROM tblRKFutOptTransactionImport_ErrLog
 END TRY
