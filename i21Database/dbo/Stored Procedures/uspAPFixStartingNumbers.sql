@@ -30,13 +30,13 @@ BEGIN
 	BEGIN 
 		-- Retrieve the Max transaction id. 
 		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(CAST(REPLACE(strBillBatchNumber, @strPrefix, '') AS INT))			
+		SELECT	@strTransactionId = MAX(TRY_CAST(REPLACE(strBillBatchNumber, @strPrefix, '') AS INT))			
 		FROM	dbo.tblAPBillBatch
 		
 		IF (@strTransactionId IS NOT NULL)	
 		BEGIN 	
 			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
+			SET @intNumber = TRY_CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
 			
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
@@ -66,14 +66,14 @@ BEGIN
 	BEGIN 
 		-- Retrieve the Max transaction id. 
 		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(CAST(REPLACE(strBillId, @strPrefix, '') AS INT))			
+		SELECT	@strTransactionId = MAX(TRY_CAST(REPLACE(strBillId, @strPrefix, '') AS INT))			
 		FROM	dbo.tblAPBill
 		WHERE intTransactionType = 1
 		
 		IF (@strTransactionId IS NOT NULL)	
 		BEGIN 	
 			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
+			SET @intNumber = TRY_CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
 			
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
@@ -103,13 +103,13 @@ BEGIN
 	BEGIN 
 		-- Retrieve the Max transaction id. 
 		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(CAST(REPLACE(REPLACE(strPaymentRecordNum, @strPrefix, ''),'V','') AS INT))			
+		SELECT	@strTransactionId = MAX(TRY_CAST(REPLACE(REPLACE(strPaymentRecordNum, @strPrefix, ''),'V','') AS INT))			
 		FROM	dbo.tblAPPayment
 		
 		IF (@strTransactionId IS NOT NULL)	
 		BEGIN 	
 			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
+			SET @intNumber = TRY_CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
 			
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
@@ -139,14 +139,14 @@ BEGIN
 	BEGIN 
 		-- Retrieve the Max transaction id. 
 		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(CAST(REPLACE(strBillId, @strPrefix, '') AS INT))			
+		SELECT	@strTransactionId = MAX(TRY_CAST(REPLACE(strBillId, @strPrefix, '') AS INT))			
 		FROM	dbo.tblAPBill
 		WHERE intTransactionType = 9
 		
 		IF (@strTransactionId IS NOT NULL)	
 		BEGIN 	
 			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
+			SET @intNumber = TRY_CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
 			
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
