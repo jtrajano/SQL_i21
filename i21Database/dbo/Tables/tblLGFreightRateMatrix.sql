@@ -6,6 +6,7 @@
 	 [dtmDate] DATETIME,
 	 [dtmValidFrom] DATETIME,
 	 [dtmValidTo] DATETIME,
+	 [ysnDefault] BIT NULL,
 	 [strOriginPort] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	 [strDestinationCity] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	 [intLeadTime] INT NULL DEFAULT ((0)),
