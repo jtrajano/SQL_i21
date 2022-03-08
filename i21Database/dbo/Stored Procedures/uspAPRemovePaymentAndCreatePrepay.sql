@@ -107,6 +107,13 @@ BEGIN
 		WHERE prepayDetail.intBillId = @prepayCreated AND prepayDetail.intBillDetailId != details.intBillDetailId
 	END
 
+	--DELETE VOUCHER TAXES IN tblAPBillDetailTax
+	DELETE BT
+	FROM tblAPBill B
+	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+	INNER JOIN tblAPBillDetailTax BT ON BT.intBillDetailId = BD.intBillDetailId
+	WHERE B.intBillId = @prepayCreated
+
 	UPDATE prepayDetail
 		SET prepayDetail.intPrepayTypeId = 1
 		,prepayDetail.intInventoryReceiptItemId = NULL
