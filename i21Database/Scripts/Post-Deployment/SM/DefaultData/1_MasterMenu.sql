@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Charges and Premiums' AND strModuleName = 'Ticket Management')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Departments' AND strModuleName = 'Fixed Assets')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6488,12 +6488,14 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsActivitiesParentMenuId 
 UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsMaintenanceParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Maintenance'
 UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsReportsParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Reports'
 
+--ACTIVITIES
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Fixed Assets', N'Fixed Assets', @FixedAssetsActivitiesParentMenuId, N'Fixed Assets', N'Activity', N'Screen', N'FixedAssets.view.FixedAssets?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssets?showSearch=true' WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsActivitiesParentMenuId
 
+--MAINTENANCE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Depreciation Methods' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Depreciation Methods', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Depreciation Methods', N'Maintenance', N'Screen', N'FixedAssets.view.DepreciationMethods?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
@@ -6506,11 +6508,20 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Ass
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssetGroups' WHERE strMenuName = 'Fixed Asset Groups' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Departments' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Departments', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Departments', N'Maintenance', N'Screen', N'FixedAssets.view.FixedAssetDepartments', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssetDepartments' WHERE strMenuName = 'Departments' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
+
+--REPORTS
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax vs Book' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsReportsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Tax vs Book', N'Fixed Assets', @FixedAssetsReportsParentMenuId, N'Tax vs Book', N'Maintenance', N'Screen', N'FixedAssets.view.BookDepreciationReport?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.BookDepreciationReport?showSearch=true' WHERE strMenuName = 'Tax vs Book' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsReportsParentMenuId
+
+
 
 
 /* VENDOR REBATES */
