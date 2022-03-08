@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspSMLogPerformanceRuntime]
-	  @strScreenName            NVARCHAR(200)
+      @strModuleName            NVARCHAR(200)
+	, @strScreenName            NVARCHAR(200)
     , @strProcedureName         NVARCHAR(200)
     , @strRequestId             NVARCHAR(500)
     , @ysnStart		            BIT = 1
@@ -31,14 +32,16 @@ BEGIN
             ORDER BY intVersionID DESC
 
             INSERT INTO tblSMPerformanceLog (
-                  strScreenName
+                  strModuleName
+                , strScreenName
                 , strProcedureName
                 , strBuildNumber
                 , strRequestId
                 , dtmStartDateTime
                 , intUserId
             )
-            SELECT strScreenName		= @strScreenName
+            SELECT strModuleName        = @strModuleName 
+                , strScreenName		    = @strScreenName
                 , strProcedureName		= @strProcedureName
                 , strBuildNumber		= @strBuildNumber
                 , strRequestId          = @strRequestId

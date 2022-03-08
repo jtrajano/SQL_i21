@@ -8,7 +8,8 @@ BEGIN
 	DECLARE @intNewPerformanceLogId	INT = NULL,
 			@strRequestId NVARCHAR(200) = NEWID()
 
-	EXEC dbo.uspSMLogPerformanceRuntime @strScreenName			= NULL
+	EXEC dbo.uspSMLogPerformanceRuntime @strModuleName			= 'System Manager'
+									  , @strScreenName			= NULL
 									  , @strProcedureName       = 'uspSMIncreaseECConcurrency'
 									  , @strRequestId			= @strRequestId
 									  , @ysnStart		        = 1
@@ -83,7 +84,8 @@ BEGIN
 		FROM tblEMEntityCredential t
 	END
 
-	EXEC dbo.uspSMLogPerformanceRuntime @strScreenName			= NULL
+	EXEC dbo.uspSMLogPerformanceRuntime @strModuleName			= 'System Manager'
+									  , @strScreenName			= NULL
 									  , @strProcedureName       = 'uspSMIncreaseECConcurrency'
 									  , @strRequestId			= @strRequestId
 									  , @ysnStart		        = 0

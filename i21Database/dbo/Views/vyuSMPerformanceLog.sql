@@ -1,6 +1,7 @@
 CREATE VIEW dbo.vyuSMPerformanceLog
 AS
 SELECT intPerformanceLogId	= PL.intPerformanceLogId
+	 , strModuleName		= PL.strModuleName
 	 , strScreenName		= PL.strScreenName
 	 , strProcedureName		= PL.strProcedureName
 	 , strBuildNumber		= PL.strBuildNumber

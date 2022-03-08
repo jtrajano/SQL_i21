@@ -1,6 +1,7 @@
 
 CREATE TABLE [dbo].[tblSMPerformanceLog](
 	[intPerformanceLogId]       INT IDENTITY(1,1) NOT NULL,
+	[strModuleName]				NVARCHAR(50) NULL,
 	[strScreenName]             NVARCHAR(200) NULL,
 	[strProcedureName]          NVARCHAR(200) NULL,
     [strBuildNumber]            NVARCHAR(50) NULL,
