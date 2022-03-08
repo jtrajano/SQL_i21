@@ -379,6 +379,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUpdatePlannedAvailabilityDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
