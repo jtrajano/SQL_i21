@@ -456,7 +456,7 @@ SELECT
 	,dblOnHand = OH.dblUnitOnHand
 	,dblOrderedQty = 0.0
 	,dblQuantity = ITD.dblQuantity
-	,dblStandardWeight = ROUND(ITD.dblQuantity * ITD.dblStandardWeight, 2)
+	,dblStandardWeight = ROUND(ITD.dblStandardWeight, 2)
 	,strCustomerReference = NULL
 	,strOrderComments = ITD.strComment
 	,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
