@@ -79,7 +79,7 @@ INSERT INTO @EntriesForInvoice
 )
 SELECT
 	[intId] = A4GLIdentity,
-	[strInvoiceOriginId] = pttic_ivc_no,
+	[strInvoiceOriginId] = 'O' + '-' + pttic_ivc_no,
 	[intEntityCustomerId] = Cus.intEntityId,
 	[dtmDate] = (CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),
 	[dtmDueDate] = (CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN DATEADD(day,Term.intBalanceDue,CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112)) ELSE GETDATE() END),
@@ -127,7 +127,9 @@ SELECT
 		pttic_type NOT IN ('O','X')
 		AND pttic_line_no = 1
 		AND tblARInvoice.strInvoiceOriginId IS NULL 
-	
+
+EXEC [dbo].[uspARPopulateTaxFromOrigin]
+
 --PROCESS TO INVOICE
 EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
 									, @LineItemTaxEntries	= @TaxDetails
@@ -136,6 +138,91 @@ EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
 									, @RaiseError			= 1
 									, @ErrorMessage			= @strErrorMsg OUT
 									, @LogId				= @intInvoiceLogId OUT
+
+
+INSERT INTO [tblARInvoiceDetailTax]
+	([intInvoiceDetailId]
+	,[intTaxGroupId]
+	,[intTaxCodeId]
+	,[intTaxClassId]
+	,[intSalesTaxAccountId]
+	,[strTaxableByOtherTaxes]
+	,[strCalculationMethod]
+	,[dblRate]
+	,[dblTax]
+	,[dblAdjustedTax]
+	,[ysnTaxAdjusted]
+	,[ysnSeparateOnInvoice]
+	,[ysnCheckoffTax]
+	,[ysnTaxOnly]			
+	,[strNotes]
+	)		
+	SELECT DISTINCT 
+	intInvoiceDetailId,
+	TAXGROUP.intTaxGroupId,
+	TAXGROUP.intTaxCodeId,
+	TAXGROUP.intTaxClassId,
+	TAXGROUP.intSalesTaxAccountId,
+	NULL,
+	TAXR.strCalculationMethod,
+	TAXR.dblRate,
+	origin.dblTaxAMount,
+	origin.dblTaxAMount,
+	0,
+	0,
+	TAXGROUP.ysnCheckoffTax,
+	TAXGROUP.[ysnTaxOnly],
+	''
+	FROM ##ORIGINTAXES origin
+	INNER JOIN 
+	(
+			select C.intTaxGroupId,C.strTaxGroup,B.* from tblSMTaxGroupCode A
+				INNER JOIN tblSMTaxCode B ON A.intTaxCodeId = B.intTaxCodeId
+				INNER JOIN tblSMTaxGroup C ON A.intTaxGroupId=C.intTaxGroupId
+	)TAXGROUP  ON strTaxGroup COLLATE SQL_Latin1_General_CP1_CI_AS= origin.strOriginTaxGroup
+	INNER JOIN
+	(
+		select  CAT.*,TR.strOrgItemNo,TR.strOrgState,TR.strOrgLocal1,TR.strOrgTaxType,C.strOriginTaxType from tblSMTaxXRef TR
+		INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = TR.strOrgItemNo  COLLATE Latin1_General_CI_AS
+		INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId
+		INNER JOIN tblSMTaxClass C ON C.intTaxClassId = CAT.intTaxClassId
+
+	)TAX ON TAXGROUP.intTaxClassId= TAX.intTaxClassId  
+	INNER JOIN tblSMTaxCodeRate TAXR ON TAXR.intTaxCodeId=TAXGROUP.intTaxCodeId
+	AND TAX.strOrgItemNo COLLATE Latin1_General_CI_AS=origin.strOriginItemNumber  
+	and TAX.strOrgState  COLLATE Latin1_General_CI_AS=origin.strOriginState 
+	and TAX.strOrgLocal1  COLLATE Latin1_General_CI_AS= origin.strOriginTaxKey  
+	AND TAX.strOriginTaxType COLLATE Latin1_General_CI_AS = origin.strTaxType
+	INNER JOIN(
+		SELECT c.intInvoiceDetailId,SUBSTRING(strInvoiceOriginId,3,7)[strInvoiceOriginId] FROM tblARInvoiceIntegrationLogDetail a    
+		INNER JOIN tblARInvoice  b ON b.intInvoiceId=a.intInvoiceId
+		INNER JOIN tblARInvoiceDetail  c ON c.intInvoiceId=a.intInvoiceId
+		WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 1
+	)InvoiceLog ON InvoiceLog.strInvoiceOriginId COLLATE SQL_Latin1_General_CP1_CI_AS=origin.strOriginInvoiceNumber 
+
+
+
+	DECLARE @RecomputeAmountIds InvoiceId	
+	DELETE FROM @RecomputeAmountIds
+
+	INSERT INTO @RecomputeAmountIds(
+			 [intHeaderId]
+			,[ysnUpdateAvailableDiscountOnly]
+			,[intDetailId])
+		SELECT 
+			 [intHeaderId]						= Invoice.[intInvoiceId]
+			,[ysnUpdateAvailableDiscountOnly]	= 0
+			,[intDetailId]						= Invoice.[intInvoiceDetailId]
+		 FROM (
+		 SELECT c.intInvoiceDetailId,b.intInvoiceId,ysnSuccess FROM tblARInvoiceIntegrationLogDetail a    
+						INNER JOIN tblARInvoice  b ON b.intInvoiceId=a.intInvoiceId
+						INNER JOIN tblARInvoiceDetail  c ON c.intInvoiceId=a.intInvoiceId
+		 )Invoice 
+		 WHERE
+			Invoice.[ysnSuccess] = 1
+
+
+		EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @RecomputeAmountIds
 
 ----UPDATE THE intInvoiceId of tblARptticmst
 UPDATE A
