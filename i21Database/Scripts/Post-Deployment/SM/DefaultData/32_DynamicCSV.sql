@@ -462,6 +462,11 @@ UPDATE tblSMCSVDynamicImport SET
 		declare @taxgroupId							int
 		declare @lobid								int
 
+		if ISNULL(@entityno, '''') = '''' AND ISNULL(@detailcustomerno, '''') <> ''''
+		begin
+			SET @entityno = @detailcustomerno
+		end
+		
 		if @entityno <> '''' 
 		begin
 			if exists(select top 1 intEntityId from tblEMEntity where strEntityNo = @entityno)
