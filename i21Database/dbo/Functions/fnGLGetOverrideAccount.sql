@@ -1,4 +1,7 @@
-CREATE FUNCTION fnGLGetOverrideAccount(@intStructureType INT, @strAccountId NVARCHAR(40), @strAccountId1 NVARCHAR(40) )        
+CREATE FUNCTION fnGLGetOverrideAccount(
+    @intStructureType INT, 
+    @strAccountId NVARCHAR(40), -- used to override
+    @strAccountId1 NVARCHAR(40) )  -- will be overriden      
 RETURNS NVARCHAR(40)
 AS
 BEGIN

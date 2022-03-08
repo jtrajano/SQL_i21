@@ -26,6 +26,9 @@ SELECT DISTINCT
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
+	,intOverrideLocationAccountId = GL.intAccountId
+	,intOverrideLOBAccountId = ISNULL(ARID.intSalesAccountId, ARID.intAccountId)
+
 FROM 
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -58,6 +61,14 @@ LEFT JOIN
 LEFT JOIN 
 	tblSMCurrency SMC 
 		ON  ARI.intCurrencyId = SMC.intCurrencyID
+
+OUTER APPLY(
+	SELECT TOP 1 intAccountId from tblGLAccountSegmentMapping A join
+	tblSMCompanyLocation B on A.intAccountSegmentId = B.intProfitCenter
+	AND ARI.intCompanyLocationId = B.intCompanyLocationId
+) GL
 WHERE
 	ARI.ysnPosted = 1 
 	AND ARI.ysnPaid = 0
+
+

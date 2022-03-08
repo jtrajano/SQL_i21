@@ -42,7 +42,11 @@
 	[dblSourceUnitCredit]		NUMERIC (18, 6)  NULL,
 	[intCommodityId]			INT NULL,
 	intSourceEntityId INT NULL,
-	ysnRebuild BIT NULL
+	ysnRebuild BIT NULL,
 	-- new columns GL-3550
+
+	-- For Posting AR Revalue override
+	intOverrideLocationAccountId INT NULL,
+	intOverrideLOBAccountId INT NULL
 )
 

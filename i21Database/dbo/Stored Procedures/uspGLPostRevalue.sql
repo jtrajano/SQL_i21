@@ -107,8 +107,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			SELECT 
 			 [strTransactionId]		= B.strConsolidationNumber
 			,[intTransactionId]		= B.intConsolidationId
-			,[strDescription]		= A.strTransactionId
-			
+			,[strDescription]		= A.strTransactionId	
 			,[dtmTransactionDate]	= B.dtmDate
 			,[dblDebit]				= ISNULL(CASE	WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)
 											WHEN dblUnrealizedLoss < 0 THEN 0
@@ -132,6 +131,8 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			,strModule = B.strTransactionType
 			,A.strType
 			,Offset = 0
+			,A.intOverrideLocationAccountId
+			,A.intOverrideLOBAccountId
 		FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B 
 			ON A.intConsolidationId = B.intConsolidationId
 			WHERE B.intConsolidationId = @intConsolidationId
@@ -160,6 +161,8 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				,strModule	
 				,OffSet = 0
 				,strType = ISNULL(strType,@defaultType)
+				,intOverrideLocationAccountId
+				,intOverrideLOBAccountId
 			FROM
 			cte 
 			UNION ALL
@@ -186,6 +189,8 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 				,strModule
 				,OffSet = 1
 				,strType = ISNULL(strType,@defaultType)
+				,intOverrideLocationAccountId
+				,intOverrideLOBAccountId
 			FROM
 			cte 
 		)
@@ -213,6 +218,8 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			,[strTransactionType]
 			,[strTransactionForm]
 			,strModuleName
+			,intOverrideLocationAccountId
+			,intOverrideLOBAccountId
 			)			
 		SELECT 
 			 [strTransactionId]		
@@ -236,6 +243,8 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			,[strTransactionType]	
 			,[strTransactionForm]
 			,'General Ledger'
+			,intOverrideLocationAccountId
+			,intOverrideLOBAccountId
 		FROM cte1 A
 		OUTER APPLY (
 			SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable() f 
@@ -250,9 +259,20 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			AND f.Offset = A.OffSet
 		) BankTransferAccount
 
-
-	
-
+		BEGIN TRY
+			UPDATE A  SET intAccountId = intNewGLAccountId
+			FROM  @PostGLEntries A JOIN dbo.fnCMOverrideARRevalueAccounts(@PostGLEntries) B ON 
+			A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
+			AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
+			AND A.intAccountId = B.intOrigAccountId
+		END TRY
+		BEGIN CATCH
+			SELECT @strMessage = ERROR_MESSAGE()
+			DECLARE  @s nvarchar(100) = 'Conversion failed when converting the nvarchar value '''
+			DECLARE @s1 NVARCHAR(20) = ''' to data type int'
+			SELECT @strMessage = REPLACE( REPLACE(@strMessage, @s,''),@s1,'')
+			GOTO _raiserror
+		END CATCH
 
 		DECLARE @dtmReverseDate DATETIME
 		SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
