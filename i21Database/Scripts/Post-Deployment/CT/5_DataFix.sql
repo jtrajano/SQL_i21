@@ -257,6 +257,14 @@ GO
 	print 'End fixing SM Transaction records associated to wrong Pricing Screen ID';
 GO
 
+update
+	tblSMGridLayout
+set
+	strGridLayoutFields = replace(strGridLayoutFields,'"strFieldName":"strContractType"','"strFieldName":"strContractType","required":true')
+where
+	strScreen like 'ContractManagement.view.Contract%'
+	and strGridLayoutFields like '%"strFieldName":"strContractType",%'
+
 
 IF EXISTS (SELECT TOP 1 1 FROM tblCTContractBalanceLog
 WHERE dblOrigQty IS NULL
