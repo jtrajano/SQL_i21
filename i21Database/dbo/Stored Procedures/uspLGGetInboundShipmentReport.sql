@@ -298,6 +298,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strWarehouseClassification = WH.strClassification,
 			strWarehouseState = WH.strState,
 			strWarehouseZipCode = WH.strZipCode,
+			strInStoreLetter = CP.strReleaseOrderText,
 
 			WI.intWarehouseInstructionHeaderId,
 			LW.intLoadWarehouseId,
@@ -743,6 +744,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strWarehouseClassification = WH.strClassification,
 			strWarehouseState = WH.strState,
 			strWarehouseZipCode = WH.strZipCode,
+			strInStoreLetter = CP.strReleaseOrderText,
 
 			WI.intWarehouseInstructionHeaderId,
 			LW.intLoadWarehouseId,
