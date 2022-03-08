@@ -27,14 +27,32 @@ CREATE FUNCTION [dbo].[fnGetItemGLAccount] (
 RETURNS INT
 AS 
 BEGIN 
-	DECLARE @intGLAccountId AS INT
+	DECLARE @intGLAccountId_LocationSegment AS INT
+			,@intGLAccountId_CompanySegment AS INT 
 
-	SELECT	@intGLAccountId = dbo.fnGetGLAccountIdFromProfitCenter(
-				dbo.fnGetItemBaseGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
-				,dbo.fnGetItemProfitCenter(tblICItemLocation.intLocationId)
-			)	
+
+	-- Generate the gl account id based on "location" segment. 
+	SELECT	@intGLAccountId_LocationSegment = 
+				dbo.fnGetGLAccountIdFromProfitCenter(
+					dbo.fnGetItemBaseGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
+					,dbo.fnGetItemProfitCenter(tblICItemLocation.intLocationId)
+				)	
 	FROM	dbo.tblICItemLocation
 	WHERE	intItemLocationId = @intItemLocationId
 
-	RETURN @intGLAccountId
+	-- Generate the gl account id based on "company" segment. 
+	SELECT	@intGLAccountId_CompanySegment = 			
+				dbo.fnGetGLAccountIdFromProfitCenter(
+					@intGLAccountId_LocationSegment
+					,dbo.fnGetItemCompanySegment(tblICItemLocation.intLocationId)
+				)
+	FROM	dbo.tblICItemLocation
+	WHERE
+			intItemLocationId = @intItemLocationId
+			AND @intGLAccountId_LocationSegment IS NOT NULL 
+
+	IF @intGLAccountId_CompanySegment IS NOT NULL 
+		RETURN @intGLAccountId_CompanySegment
+	
+	RETURN @intGLAccountId_LocationSegment
 END 

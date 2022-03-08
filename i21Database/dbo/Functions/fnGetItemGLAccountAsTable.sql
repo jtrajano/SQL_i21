@@ -6,7 +6,7 @@
 RETURNS TABLE 
 RETURN (
 
-	SELECT tblGLAccount.intAccountId	
+	SELECT intAccountId	= ISNULL(CompanySegment.intAccountId, LocationSegment.intAccountId) 
 	FROM	(
 				-- Re-create the strAccountId (Original Account + Account Structure to modify)
 				SELECT strAccountId = STUFF(
@@ -79,10 +79,10 @@ RETURN (
 																			ON CategoryLevel.intAccountId = CategoryLevel.intAccountId
 																		FULL JOIN (
 																			-- Get the base account at the Company Location level																			
-                                                                            SELECT    intAccountId = dbo.fnGetGLAccountFromCompanyLocation (tblICItemLocation.intLocationId, @strAccountCategory)
-                                                                            FROM    tblICItemLocation 
-                                                                            WHERE    tblICItemLocation.intItemLocationId = @intItemLocationId
-                                                                                    AND tblICItemLocation.intItemId = @intItemId
+																			SELECT    intAccountId = dbo.fnGetGLAccountFromCompanyLocation (tblICItemLocation.intLocationId, @strAccountCategory)
+																			FROM    tblICItemLocation 
+																			WHERE    tblICItemLocation.intItemLocationId = @intItemLocationId
+																					AND tblICItemLocation.intItemId = @intItemId
 																		) AS CompanyLocationLevel
 																			ON CompanyLocationLevel.intAccountId = CompanyLocationLevel.intAccountId
 
@@ -90,10 +90,10 @@ RETURN (
 																ON SegmentMap.intAccountId = ItemBaseGLAccountId.intAccountId
 															
 															-- Join in this table will get the profit center (value of intAccountSegmentId as stored in tblSMCompanyLocation.intProfitCenter)
-                                                            INNER JOIN tblICItemLocation 
-                                                                ON tblICItemLocation.intItemLocationId = @intItemLocationId
-                                                            INNER JOIN tblSMCompanyLocation
-                                                                ON tblSMCompanyLocation.intCompanyLocationId = tblICItemLocation.intLocationId
+															INNER JOIN tblICItemLocation 
+																ON tblICItemLocation.intItemLocationId = @intItemLocationId
+															INNER JOIN tblSMCompanyLocation
+																ON tblSMCompanyLocation.intCompanyLocationId = tblICItemLocation.intLocationId
 																
 													WHERE	Structure.strType <> 'Divider'
 												) AS TemplateStructure 
@@ -111,7 +111,62 @@ RETURN (
 									, 1 -- We expect the divider used in COA setup is always one character. 
 									, '' 
 							)	
-			) AS RecreatedAccount LEFT JOIN tblGLAccount 
+			) AS RecreatedAccount LEFT JOIN tblGLAccount LocationSegment
 				-- To be sure, cross reference the re-created account id with the tblGLAccount table
-				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId COLLATE Latin1_General_CI_AS
+				ON RecreatedAccount.strAccountId = LocationSegment.strAccountId COLLATE Latin1_General_CI_AS
+
+			OUTER APPLY (
+
+				-- Re-create the strAccountId (Original Account + Account Structure to modify)
+				SELECT strAccountId = STUFF(
+									(	
+										SELECT	Divider.strMask + RecreateStructure.strCode
+										FROM	tblGLAccountSegment RecreateStructure INNER JOIN (
+													SELECT	intAccountSegmentId = 
+																CASE	WHEN EXISTS (
+																			-- Get the structure id for tblSMCompanyLocation.intCompanySegment. if it matches, use it as the override. 
+																			SELECT	B.intAccountStructureId
+																			FROM	tblGLAccountSegment A INNER JOIN tblGLAccountStructure B
+																						ON A.intAccountStructureId = B.intAccountStructureId
+																			WHERE	A.intAccountSegmentId = tblSMCompanyLocation.intCompanySegment
+																					AND B.intAccountStructureId = Structure.intAccountStructureId
+																		) 
+																		THEN 
+																			tblSMCompanyLocation.intCompanySegment 
+																		ELSE 
+																			SegmentMap.intAccountSegmentId 
+																END 
+															,Structure.intSort 
+													FROM	tblGLAccountStructure Structure INNER JOIN tblGLAccountSegment Segment
+																ON Structure.intAccountStructureId = Segment.intAccountStructureId
+															INNER JOIN tblGLAccountSegmentMapping SegmentMap
+																ON Segment.intAccountSegmentId = SegmentMap.intAccountSegmentId
+																AND SegmentMap.intAccountId = LocationSegment.intAccountId
+															
+															-- Join in this table will get the Company Segment (value of intAccountSegmentId as stored in tblSMCompanyLocation.intCompanySegment)
+															INNER JOIN tblICItemLocation 
+																ON tblICItemLocation.intItemLocationId = @intItemLocationId
+															INNER JOIN tblSMCompanyLocation
+																ON tblSMCompanyLocation.intCompanyLocationId = tblICItemLocation.intLocationId
+																
+													WHERE	Structure.strType <> 'Divider'
+												) AS TemplateStructure 
+													ON RecreateStructure.intAccountSegmentId = TemplateStructure.intAccountSegmentId
+												,(
+													SELECT TOP 1 
+															strMask = ISNULL(strMask, '')
+													FROM	tblGLAccountStructure
+													WHERE	strType = 'Divider'
+												) AS Divider							
+										ORDER BY TemplateStructure.intSort
+										FOR XML PATH('')
+									)
+									, 1
+									, 1 -- We expect the divider used in COA setup is always one character. 
+									, '' 
+							)				
+			
+			) RecreatedAccountUsingCompanySegment LEFT JOIN tblGLAccount CompanySegment 
+				-- To be sure, cross reference the re-created account id with the tblGLAccount table
+				ON RecreatedAccountUsingCompanySegment.strAccountId = CompanySegment.strAccountId COLLATE Latin1_General_CI_AS
 )

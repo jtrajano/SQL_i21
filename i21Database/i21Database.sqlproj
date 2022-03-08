@@ -549,6 +549,7 @@
     <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspLGBatchUpdateDates.sql" />
     <Build Include="dbo\Functions\fnRKGetOTCAllowedBankAccounts.sql" />
+    <Build Include="dbo\Functions\fnGetItemCompanySegment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
