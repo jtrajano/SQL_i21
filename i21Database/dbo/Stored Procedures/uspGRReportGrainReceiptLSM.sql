@@ -434,12 +434,10 @@ set @dblDockageLessMarketingUnits = @dblDockage - @dblMarketingUnits
 SELECT 
     -- @strCompanyName +     
     --+ CHAR(13) + CHAR(10)     
-    ISNULL(@strAddress, '') +     
-    + CHAR(13) + CHAR(10)     
+    ISNULL(@strAddress, '') +         
     + ISNULL(@strCity, '') + ISNULL(', ' + @strState, '') +' '+ISNULL(@strZip, '')    
     AS strCompanyAddress    
-  ,LTRIM(RTRIM(EY.strEntityName)) +   ' ' +  
-  + CHAR(13) + CHAR(10)     
+  ,LTRIM(RTRIM(EY.strEntityName)) +   ' '  
   + ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') + 
 	+ ' '     
   + ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '')     
