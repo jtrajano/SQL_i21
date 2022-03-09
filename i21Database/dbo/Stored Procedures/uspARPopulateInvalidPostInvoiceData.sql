@@ -2014,6 +2014,7 @@ BEGIN
 		AND GLASM.intAccountId = I.[intSalesAccountId]
 	) GLSEGMENT
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+	AND I.[ysnAllowSingleLocationEntries] = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2050,6 +2051,7 @@ BEGIN
 		AND GLASM.intAccountId = I.[intAccountId]
 	) GLSEGMENT
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+	AND I.[ysnAllowSingleLocationEntries] = 0
 END
 
 IF @Post = @ZeroBit
