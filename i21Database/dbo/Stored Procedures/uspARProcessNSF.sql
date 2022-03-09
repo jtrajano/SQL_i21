@@ -289,8 +289,7 @@ WHERE I.ysnPosted = 1
 
 --UPDATE OVERPAYMENTS
 UPDATE I
-SET ysnPosted 			= 0
-  , ysnProcessedToNSF 	= 1
+SET ysnProcessedToNSF 	= 1
   , strComments 		= 'NSF Processed'
 FROM tblARInvoice I
 INNER JOIN #NSFWITHOVERPAYMENTS NSF ON I.intInvoiceId = NSF.intInvoiceId
