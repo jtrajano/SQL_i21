@@ -1251,20 +1251,20 @@ BEGIN
 	WHERE	dbo.fnGetCostingMethod(tp.intItemId, tp.intItemLocationId) = @AVERAGECOST
 			AND tp.dblQty > 0 
 
-	SET @intInventoryTransactionId = NULL 
+	--SET @intInventoryTransactionId = NULL 
 
-	SELECT	TOP 1 
-			@intInventoryTransactionId	= intInventoryTransactionId
-			--,@intCurrencyId				= intCurrencyId
-			,@dtmDate					= dtmDate
-			--,@dblExchangeRate			= dblExchangeRate
-			,@intTransactionId			= intTransactionId
-			,@strTransactionId			= strTransactionId
-			,@strTransactionForm		= strTransactionForm
-			,@intSourceEntityId			= intSourceEntityId
-	FROM	dbo.tblICInventoryTransaction
-	WHERE	strBatchId = @strBatchId
-			AND ISNULL(ysnIsUnposted, 0) = 0 
+	--SELECT	TOP 1 
+	--		@intInventoryTransactionId	= intInventoryTransactionId
+	--		--,@intCurrencyId				= intCurrencyId
+	--		,@dtmDate					= dtmDate
+	--		--,@dblExchangeRate			= dblExchangeRate
+	--		,@intTransactionId			= intTransactionId
+	--		,@strTransactionId			= strTransactionId
+	--FROM	dbo.tblICInventoryTransaction
+	--WHERE	strBatchId = @strBatchId
+	--		AND ISNULL(ysnIsUnposted, 0) = 0 
+	--ORDER BY 
+	--		intInventoryTransactionId DESC	
 
 	DECLARE 
 		@dblAutoVariance AS NUMERIC(18, 6) 
@@ -1280,6 +1280,9 @@ BEGIN
 				,@intSubLocationId		= intSubLocationId
 				,@intStorageLocationId	= intStorageLocationId
 				,@intLotId				= intLotId
+				,@intTransactionId		= intTransactionId
+				,@strTransactionId		= strTransactionId
+				,@dtmDate				= dtmDate
 		FROM	@ItemsForAutoNegative
 	
 		SET @dblAutoVariance = NULL 
