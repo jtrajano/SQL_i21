@@ -10,7 +10,7 @@ FROM (
 		,CD.dtmEndDate
 		,CD.intFreightTermId
 		,CD.intShipViaId
-		,dblNetWeight = CD.dblNetWeight * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,dblNetWeight = CD.dblNetWeight * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,strWeightUOM = WUM.strUnitMeasure
 		,dblDetailQuantity = CD.dblQuantity * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,intItemUOMId = CD.intItemUOMId
@@ -35,10 +35,10 @@ FROM (
 		,strBundleItemNo = BI.strItemNo
 		,CL.strLocationName
 		,CS.strContractStatus
-		,dblReservedQuantity = ISNULL(RSV.dblReservedQty, 0) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
-		,dblUnReservedQuantity = ISNULL(CD.dblQuantity, 0) - ISNULL(RSV.dblReservedQty, 0) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
-		,dblAllocatedQty = ISNULL(CD.dblAllocatedQty, 0) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
-		,dblUnAllocatedQty = (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)) * CASE WHEN (CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,dblReservedQuantity = ISNULL(RSV.dblReservedQty, 0) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,dblUnReservedQuantity = ISNULL(CD.dblQuantity, 0) - ISNULL(RSV.dblReservedQty, 0) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,dblAllocatedQty = ISNULL(CD.dblAllocatedQty, 0) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,dblUnAllocatedQty = (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,CH.intContractHeaderId
 		,CH.intContractTypeId
 		,CT.strContractType
@@ -115,5 +115,6 @@ FROM (
 	LEFT JOIN tblICUnitMeasure U6 ON U6.intUnitMeasureId = SAL.intSUnitMeasureId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
+	OUTER APPLY (SELECT TOP 1 ysnDisplaySalesContractAsNegative = ISNULL(ysnDisplaySalesContractAsNegative, 0) FROM tblLGCompanyPreference) CP
 	WHERE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0) > 0
 ) tbl
