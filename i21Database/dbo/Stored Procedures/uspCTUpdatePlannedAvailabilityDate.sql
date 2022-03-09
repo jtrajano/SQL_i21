@@ -107,7 +107,7 @@ as
 				@keyValue = @intContractHeaderId 
 				,@screenName = 'ContractManagement.view.Contract'
 				,@entityId = @intUserId
-				,@actionType = 'Updated (from Feed)'
+				,@actionType = 'Updated (from Scheduler)'
 				,@actionIcon = 'small-tree-modified'
 				,@changeDescription = @strAuditDescription
 				,@fromValue = @dtmCurrentPlannedAvailabilityDate
