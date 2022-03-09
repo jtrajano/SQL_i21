@@ -225,7 +225,9 @@ BEGIN
 		,HeaderDistItem.intCompanyLocationId
 		,HeaderDistItem.dtmInvoiceDateTime
 		,strActualCostId = (
-			CASE 
+			CASE WHEN Receipt.strOrigin = 'Terminal'
+				AND HeaderDistItem.strDestination = 'Location'
+					THEN NULL
 				WHEN Receipt.strOrigin = 'Terminal'
 					THEN LoadHeader.strTransaction
 				WHEN Receipt.strOrigin = 'Location'
@@ -239,7 +241,11 @@ BEGIN
 				WHEN Receipt.strOrigin = 'Location'
 					AND HeaderDistItem.strDestination = 'Location'
 					AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
-					THEN LoadHeader.strTransaction
+					THEN NULL
+				WHEN Receipt.strOrigin = 'Location'
+					AND HeaderDistItem.strDestination = 'Location'
+					AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+					THEN NULL
 				END
 			)
 	INTO #tmpBlendIngredients
