@@ -929,11 +929,11 @@ BEGIN
 	BEGIN
 
 		UPDATE WRD
-		SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)
-			,WRD.dblActualAmount = (IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate
+		SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)
+			,WRD.dblActualAmount = (IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)) * dblUnitRate
 			,WRD.dblDifference = CASE 
-				WHEN ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate) > 0
-					THEN IsNULL(dblEstimatedAmount,0) - ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate)
+				WHEN ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)) * dblUnitRate) > 0
+					THEN IsNULL(dblEstimatedAmount,0) - ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)) * dblUnitRate)
 				ELSE NULL
 				END
 		FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
