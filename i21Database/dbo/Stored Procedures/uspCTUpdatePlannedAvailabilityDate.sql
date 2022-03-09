@@ -65,20 +65,21 @@ as
 		where
 			cd.intContractDetailId = @intContractDetailId;
 
-		select top 1
-			@intFreightRateMatrixLeadTime = intLeadTime
-		from
-			tblLGFreightRateMatrix
-		where
-			intType = 2
-			and strOriginPort = @strLoadingPort
-			and strDestinationCity = @strDestinationPort
-		order by
-			intFreightRateMatrixId desc;
+		if exists (select top 1 1 from tblLGFreightRateMatrix where intType = 2 and strOriginPort = @strLoadingPort and strDestinationCity = @strDestinationPort)
+		begin
 
-		set @intTotalLeadTime = isnull(@intFreightRateMatrixLeadTime,0) + isnull(@intDestinationPortLeadTime,0) + isnull(@intLeadTimeAtSource,0);
+			select top 1
+				@intFreightRateMatrixLeadTime = intLeadTime
+			from
+				tblLGFreightRateMatrix
+			where
+				intType = 2
+				and strOriginPort = @strLoadingPort
+				and strDestinationCity = @strDestinationPort
 
-		if (isnull(@intLoadingPortId,0) = 0 and isnull(@intDestinationPortId,0) = 0)
+			set @intTotalLeadTime = isnull(@intFreightRateMatrixLeadTime,0) + isnull(@intDestinationPortLeadTime,0) + isnull(@intLeadTimeAtSource,0);		
+		end
+		else
 		begin
 			select @intTotalLeadTime = isnull(intNoOfDays,0) from tblCTPosition where intPositionId = @intPositionId;
 		end
