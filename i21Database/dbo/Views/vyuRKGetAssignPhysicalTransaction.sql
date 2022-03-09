@@ -4,13 +4,9 @@ AS
 
 SELECT intRowNum = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY t1.intContractDetailId))
 	, t1.*
-	, strPricingStatus = CASE WHEN cdd.intPricingStatus = 0 THEN 'Unpriced' WHEN cdd.intPricingStatus = 1 THEN 'Partially Priced' WHEN cdd.intPricingStatus = 2 THEN 'Priced' END
-	, dblLotsPriced = CASE WHEN vCD.intPricingTypeId = 1 THEN ISNULL(cdd.dblQuantity - ISNULL(vCD.dblQuantityPriceFixed, 0), 0) / M.dblContractSize
-							WHEN vCD.intPricingTypeId = 2 THEN ISNULL(vCD.dblQuantityPriceFixed, 0) / M.dblContractSize
-							ELSE ISNULL(vCD.dblQuantityPriceFixed, 0) / M.dblContractSize END
-	, dblLotsUnpriced = CASE WHEN vCD.intPricingTypeId = 2 THEN ISNULL(cdd.dblQuantity - ISNULL(vCD.dblQuantityPriceFixed, 0), 0) / M.dblContractSize
-							WHEN vCD.intPricingTypeId = 1 THEN ISNULL(vCD.dblQuantityPriceFixed, 0) / M.dblContractSize
-							ELSE ISNULL(cdd.dblQuantity - ISNULL(vCD.dblQuantityPriceFixed, 0), 0) / M.dblContractSize END
+	, strPricingStatus = CASE WHEN CDD.intPricingStatus = 0 THEN 'Unpriced' WHEN CDD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CDD.intPricingStatus = 2 THEN 'Priced' END
+	, dblLotsPriced = CASE WHEN CDD.intPricingTypeId = 1 THEN (CDD.dblQuantity / M.dblContractSize)  ELSE ISNULL(PFD.dblQuantity, 0) / M.dblContractSize END
+	, dblLotsUnpriced = CASE WHEN CDD.intPricingTypeId = 1 THEN 0 ELSE ((CDD.dblQuantity - ISNULL(PFD.dblQuantity, 0)) / M.dblContractSize) END
 FROM (
 	SELECT *
 		, dblToBeHedgedLots = dblNoOfLots - dblHedgedLots
@@ -107,7 +103,10 @@ FROM (
 			AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
 	) t
 )t1
-INNER JOIN tblCTContractDetail cdd ON cdd.intContractDetailId = t1.intContractDetailId
+INNER JOIN tblCTContractDetail CDD ON CDD.intContractDetailId = t1.intContractDetailId
+INNER JOIN tblCTContractHeader CHD ON CHD.intContractHeaderId = t1.intContractHeaderId
 INNER JOIN vyuCTGridContractDetail vCD ON vCD.intContractDetailId = t1.intContractDetailId
 INNER JOIN tblRKFutureMarket M ON M.intFutureMarketId = vCD.intFutureMarketId
+LEFT JOIN tblCTPriceFixation PF on PF.intContractDetailId = CDD.intContractDetailId
+LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
 WHERE t1.intContractStatusId NOT IN (3, 5, 6) AND t1.intContractDetailId IS NOT NULL
