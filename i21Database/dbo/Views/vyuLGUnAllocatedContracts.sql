@@ -36,7 +36,7 @@ FROM (
 		,CL.strLocationName
 		,CS.strContractStatus
 		,dblReservedQuantity = ISNULL(RSV.dblReservedQty, 0) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
-		,dblUnReservedQuantity = ISNULL(CD.dblQuantity, 0) - ISNULL(RSV.dblReservedQty, 0) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
+		,dblUnReservedQuantity = (ISNULL(CD.dblQuantity, 0) - ISNULL(RSV.dblReservedQty, 0)) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,dblAllocatedQty = ISNULL(CD.dblAllocatedQty, 0) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,dblUnAllocatedQty = (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)) * CASE WHEN (CP.ysnDisplaySalesContractAsNegative = 1 AND CH.intContractTypeId = 2) THEN -1 ELSE 1 END
 		,CH.intContractHeaderId
