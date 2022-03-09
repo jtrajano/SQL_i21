@@ -553,6 +553,7 @@
     <Build Include="dbo\Functions\fnGetItemCompanySegment.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUpdatePlannedAvailabilityDate.sql" />
     <Build Include="dbo\Tables\tblCRMBrand.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRFBankLoanLineActivityReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
