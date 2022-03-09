@@ -9,8 +9,8 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Departments' AND strModuleName = 'Fixed Assets')
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Load Out Bin' AND strModuleName = 'Ticket Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -4157,6 +4157,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Estimated
 	VALUES (N'Estimated Grade Source', N'Ticket Management', @TicketManagementISiteParentMenuId, N'Estimated Grade Source', N'iSite', N'Screen', N'Grain.view.BinSiteEstimatedGradesSource', N'small-menu-create', 0, 0, 0, 1, 0, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Grain.view.BinSiteEstimatedGradesSource' WHERE strMenuName = 'Estimated Grade Source' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Load Out Bin' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Load Out Bin', N'Ticket Management', @TicketManagementISiteParentMenuId, N'Load Out Bin', N'iSite', N'Screen', N'Grain.view.LoadOutBin?showSearch=true', N'small-menu-create', 0, 0, 0, 1, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Grain.view.LoadOutBin?showSearch=true' WHERE strMenuName = 'Load Out Bin' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName IN('Discount Tables','Discount Schedules')
