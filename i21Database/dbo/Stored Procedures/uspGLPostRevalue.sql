@@ -263,7 +263,7 @@ BEGIN TRANSACTION
 			AND f.Offset = A.OffSet
 		) BankTransferAccount
 
-	
+		--BEGIN TODO : transfer this on this procedure
 		DECLARE  @tbl TABLE(
 			intId int IDENTITY(1,1),
 			intOverrideLocationAccountId INT,
@@ -292,12 +292,12 @@ BEGIN TRANSACTION
 			GOTO _raiserror
 		END
 		ELSE
-
 			UPDATE A  SET intAccountId = intNewGLAccountId
-			FROM  @PostGLEntries A JOIN dbo.fnCMOverrideARRevalueAccounts(@PostGLEntries) B ON 
+			FROM  @PostGLEntries A JOIN @tbl B ON 
 			A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
 			AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
 			AND A.intAccountId = B.intOrigAccountId
+		--BEGIN TODO : transfer this on this procedure
 
 		DECLARE @dtmReverseDate DATETIME
 		SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
