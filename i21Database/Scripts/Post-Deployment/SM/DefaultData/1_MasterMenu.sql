@@ -5736,6 +5736,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Industry 
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'CRM.view.IndustrySegment', strDescription = N'Industry Segments' WHERE strMenuName = 'Industry Segments' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Brands' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId) 
+ INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+ VALUES (N'Brands', N'CRM', @CRMMaintenanceParentMenuId, N'Brands', N'Maintenance', N'Screen', N'CRM.view.Brand', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1) 
+ELSE 
+ UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'CRM.view.Brand', strDescription = N'Brands' WHERE strMenuName = 'Brands' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId 
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMActivitiesParentMenuId
