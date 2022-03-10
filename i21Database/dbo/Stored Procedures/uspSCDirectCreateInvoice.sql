@@ -1947,6 +1947,21 @@ BEGIN TRY
 		
 		IF ISNULL(@recCount,0) > 0
 		BEGIN
+
+			declare @intEntitySalespersonId int
+
+			select @intEntitySalespersonId = ContractHeader.intSalespersonId from tblSCTicket Ticket
+				join tblCTContractDetail ContractDetail
+					on Ticket.intContractId = ContractDetail.intContractDetailId
+				join tblCTContractHeader ContractHeader
+					on ContractDetail.intContractHeaderId = ContractHeader.intContractHeaderId
+				where intTicketId = @intTicketId
+			
+			
+			if @intEntitySalespersonId is not null
+				update @invoiceIntegrationStagingTable set intEntitySalespersonId = @intEntitySalespersonId
+
+
 			EXEC [dbo].[uspARProcessInvoices] 
 				@InvoiceEntries = @invoiceIntegrationStagingTable
 				,@UserId = @intUserId
