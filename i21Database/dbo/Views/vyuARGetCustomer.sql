@@ -107,6 +107,7 @@ SELECT intEntityId							= C.intEntityId
      , strStockStatus						= C.strStockStatus
      , dtmDeceasedDate						= C.dtmDeceasedDate
      , ysnHDBillableSupport					= C.ysnHDBillableSupport
+     , ysnUAP								= C.ysnUAP
      , strScreenConnectLink					= C.strScreenConnectLink
      , intTaxCodeId							= C.intTaxCodeId
      , intContractGroupId					= C.intContractGroupId

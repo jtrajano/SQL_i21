@@ -68,6 +68,7 @@
     [strPatronClass]                  CHAR (1)        COLLATE Latin1_General_CI_AS NULL,
     [dtmDeceasedDate]                 DATETIME        NULL,
 	[ysnHDBillableSupport]			  BIT             DEFAULT ((0)) NOT NULL,
+    [ysnUAP]			              BIT             DEFAULT ((0)) NOT NULL,
     [strScreenConnectLink]			  NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[intTaxCodeId]					  INT			  NULL,
 	[intContractGroupId]			  INT			  NULL,
