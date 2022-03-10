@@ -321,6 +321,7 @@ SELECT a.intContractDetailId
 	, strStrategic = (case when isnull(b.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
 	, strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 	-- Trade Finance
+	, a.strFinanceTradeNo
 	, BK.strBankName
 	, BA.strBankAccountNo
 	, FA.strBorrowingFacilityId
