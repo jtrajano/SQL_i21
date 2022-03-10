@@ -22,6 +22,12 @@ SELECT L.strLoadNumber
 	  ,CLSL.strSubLocationName
 	  ,strStorageLocation = SL.strName
 	  ,LDL.intConcurrencyId
+	  ,strWarrantNo = ISNULL(ReceiptLot.strWarrantNo, Receipt.strWarrantNo)
+	  ,strWarrantStatus = CASE WHEN ISNULL(ReceiptLot.intWarrantStatus, Receipt.intWarrantStatus) = 2 THEN 'Released' ELSE 'Pledged' END COLLATE Latin1_General_CI_AS
+	  ,Receipt.strTradeFinanceNumber
+	  ,Receipt.strBankReferenceNo
+	  ,Receipt.strReferenceNo
+	  ,strSourceLoadNumber = PL.strLoadNumber
 FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
@@ -35,3 +41,5 @@ FROM tblLGLoad L
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = LOT.intLotId
 	LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+	LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = ReceiptItem.intSourceId
+	LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
