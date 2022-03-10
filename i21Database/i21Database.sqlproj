@@ -10828,4 +10828,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
+  </ItemGroup>
 </Project>
