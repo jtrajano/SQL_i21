@@ -468,6 +468,31 @@ DECLARE
 			END
 		END
 
+		IF EXISTS (SELECT TOP 1 1 FROM 
+					tblLGLoadDetailLot LDL 
+					JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+					LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LDL.intLotId
+					LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
+					LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+					WHERE L.intLoadId = @intLoadId AND COALESCE(IRIL.intWarrantStatus, IR.intWarrantStatus, 0) = 1)
+		BEGIN
+			DECLARE @ErrorMessageWarrant NVARCHAR(250)
+			SELECT TOP 1
+				@ErrorMessageWarrant = 'Warrant for Lot ''' + IRIL.strLotNumber + ''' is not Released. Unable to create Direct Invoice.'
+			FROM 
+				tblLGLoadDetailLot LDL 
+				JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LDL.intLotId
+				LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
+				LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+				WHERE L.intLoadId = @intLoadId AND COALESCE(IRIL.intWarrantStatus, IR.intWarrantStatus, 0) = 1
+
+			RAISERROR(@ErrorMessageWarrant, 16, 1);
+			RETURN 0;
+		END
+
 		INSERT INTO @EntriesForInvoice
 			([strTransactionType]
 			,[strType]
@@ -571,7 +596,21 @@ DECLARE
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
 			,[dblQualityPremium]
-			,[dblOptionalityPremium])
+			,[dblOptionalityPremium]
+			,[intBankId]
+			,[intBankAccountId]
+			,[intBorrowingFacilityId]
+			,[intBorrowingFacilityLimitId]
+			,[strTradeFinanceNo]
+			,[intFacilityId]
+			,[intLoanLimitId]
+			,[strBankReferenceNo]
+			,[strBankTransactionId]
+			,[dblLoanAmount]
+			,[intBankValuationRuleId]
+			,[strTradeFinanceComments]
+			,[strGoodsStatus]
+			)
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -683,6 +722,19 @@ DECLARE
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 			,[dblQualityPremium]					= LD.dblQualityPremium
 			,[dblOptionalityPremium]				= LD.dblOptionalityPremium
+			,[intBankId]							= TF.intBankId				
+			,[intBankAccountId]						= TF.intBankAccountId
+			,[intBorrowingFacilityId]				= TF.intBorrowingFacilityId	
+			,[intBorrowingFacilityLimitId]			= TF.intBorrowingFacilityLimitId
+			,[strTradeFinanceNo]					= TF.strTradeFinanceNo
+			,[intFacilityId]						= TF.intFacilityId
+			,[intLoanLimitId]						= TF.intLoanLimitId
+			,[strBankReferenceNo]					= TF.strBankReferenceNo
+			,[strBankTransactionId]					= NULL
+			,[dblLoanAmount]						= TF.dblLoanAmount
+			,[intBankValuationRuleId]				= TF.intBankValuationRuleId
+			,[strTradeFinanceComments]				= TF.strTradeFinanceComments
+			,[strGoodsStatus]						= TF.strGoodsStatus
 		FROM vyuARShippedItems ARSI
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARSI.intLoadDetailId
 			OUTER APPLY (
@@ -695,6 +747,27 @@ DECLARE
 												AND cp.intContractDetailId = ARSI.intContractDetailId)
 				FROM #tmpLGContractPrice cp
 				WHERE cp.intContractDetailId = ARSI.intContractDetailId) CP
+			OUTER APPLY (
+				SELECT TOP 1
+					[intBankId]							= IR.intBankId				
+					,[intBankAccountId]						= IR.intBankAccountId
+					,[intBorrowingFacilityId]				= IR.intBorrowingFacilityId	
+					,[intBorrowingFacilityLimitId]			= IR.intLimitTypeId
+					,[strTradeFinanceNo]					= IR.strTradeFinanceNumber
+					,[intFacilityId]						= IR.intOverrideFacilityValuation
+					,[intLoanLimitId]						= PL.intLoanLimitId
+					,[strBankReferenceNo]					= IR.strBankReferenceNo
+					,[dblLoanAmount]						= PL.dblLoanAmount
+					,[intBankValuationRuleId]				= PL.intBankValuationRuleId		
+					,[strTradeFinanceComments]				= IR.strComments
+					,[strGoodsStatus]						= CASE (PL.intWarrantStatus) WHEN 1 THEN 'Pledged' WHEN 2 THEN 'Released' ELSE NULL END COLLATE Latin1_General_CI_AS 
+				FROM tblLGLoadDetailLot LDL
+				LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LDL.intLotId
+				LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
+				LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+				LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = IRI.intSourceId 
+				LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
+				WHERE LDL.intLoadDetailId = ARSI.intLoadDetailId) TF
 		WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 		  AND ARSI.[intLoadId] = @intLoadId
 	
