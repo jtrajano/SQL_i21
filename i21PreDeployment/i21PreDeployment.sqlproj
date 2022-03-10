@@ -410,10 +410,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\14_CT\DropIndexes.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\7_AR\14_RefreshARTempTable.sql" />
-  </ItemGroup>
+  </ItemGroup>  
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql" />
   </ItemGroup>
