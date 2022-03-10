@@ -1,7 +1,7 @@
-﻿PRINT '********************** BEGIN - Refresh AR TEMPORARY TABLES **********************'
+PRINT '********************** BEGIN - Refresh AR TEMPORARY TABLES **********************'
 GO
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'uspARInitializeTempTableForPosting')
+IF EXISTS ( SELECT * FROM sys.objects WHERE type = 'P' AND name = 'uspARInitializeTempTableForPosting')
 BEGIN
 	EXEC [dbo].[uspARInitializeTempTableForPosting]
 END
