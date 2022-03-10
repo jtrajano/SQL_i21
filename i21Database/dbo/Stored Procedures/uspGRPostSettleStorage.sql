@@ -133,6 +133,7 @@ BEGIN TRY
 	DECLARE @strMissingUOMItemNo NVARCHAR(20)
 	DECLARE @strMissingUOM NVARCHAR(30)
 	DECLARE @dtmCalculateChargeAndPremiumOn DATETIME
+	DECLARE @SettleStorageChargeAndPremium SettleStorageChargeAndPremium
 
 	DECLARE @SettleStorage AS TABLE 
 	(
@@ -2269,7 +2270,8 @@ BEGIN TRY
 					-- 	WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
 					-- END
 				
-				IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intChargeAndPremiumId IS NOT NULL AND intCustomerStorageId = @intCustomerStorageId)
+				--IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intChargeAndPremiumId IS NOT NULL AND intCustomerStorageId = @intCustomerStorageId)
+				IF EXISTS(SELECT 1 FROM tblGRSettleStorageChargeAndPremium WHERE intCustomerStorageId = @intCustomerStorageId)
 				BEGIN
 					-- Calculate and Store the Charges and Premium for the current storage ticket
 					DELETE FROM @tblQMDiscountIds
@@ -2278,8 +2280,20 @@ BEGIN TRY
 					SELECT QM.intTicketDiscountId
 					FROM tblQMTicketDiscount QM
 					WHERE QM.intTicketFileId = @intCustomerStorageId
-					AND QM.strSourceType IN ('Storage', 'Delivery Sheet')
-				
+					AND QM.strSourceType = 'Storage'
+					
+					DELETE FROM @SettleStorageChargeAndPremium
+					INSERT INTO @SettleStorageChargeAndPremium
+					SELECT intParentSettleStorageId
+						,intCustomerStorageId
+						,intChargeAndPremiumDetailId
+						,dblRate
+						,dblUnits
+						,dblCost
+						,ysnOverride
+					FROM tblGRSettleStorageChargeAndPremium
+					WHERE intParentSettleStorageId = @intParentSettleStorageId
+
 					-- For Charges/Premiums with Rate Type of 'Per Unit', there must be a similar UOM conversion with the inventory item in order to calculate the units correctly.
 					-- Throw an error if there's no matching UOM conversion in the Charge/Premium item.
 					SET @strMissingUOMItemNo = NULL
@@ -2306,8 +2320,13 @@ BEGIN TRY
 							,@tblQMDiscountIds --Storage Ticket Discount Ids
 							,SVC.dblCashPrice --Inventory Item Cash Price
 							,@dtmCalculateChargeAndPremiumOn --Calculate On
+							,@SettleStorageChargeAndPremium
+							,CS.intCustomerStorageId
 						) CAP
 					) CAP
+					LEFT JOIN @SettleStorageChargeAndPremium SSCP
+						ON SSCP.intCustomerStorageId = CS.intCustomerStorageId
+							AND SSCP.intChargeAndPremiumDetailId = CAP.intChargeAndPremiumDetailId
 					LEFT JOIN tblICItemUOM SPOT_UOM
 						ON CS.intItemId = SPOT_UOM.intItemId
 						AND SPOT_UOM.intItemUOMId = @intCashPriceUOMId
@@ -2332,7 +2351,6 @@ BEGIN TRY
 						RAISERROR (@ErrMsg, 16, 1);
 					END
 
-					-- Insert records to the applied charges and premium for this transaction
 					INSERT INTO tblGRAppliedChargeAndPremium (
 						[intTransactionId],
 						[intTransactionDetailId],
@@ -2405,8 +2423,13 @@ BEGIN TRY
 							,@tblQMDiscountIds --Storage Ticket Discount Ids
 							,SVC.dblTotalAmount / SVC.dblUnits --Inventory Item Cost
 							,@dtmCalculateChargeAndPremiumOn
+							,@SettleStorageChargeAndPremium
+							,CS.intCustomerStorageId
 						) CAP
 					) CAP
+					LEFT JOIN @SettleStorageChargeAndPremium SSCP
+						ON SSCP.intCustomerStorageId = CS.intCustomerStorageId
+							AND SSCP.intChargeAndPremiumDetailId = CAP.intChargeAndPremiumDetailId
 					LEFT JOIN tblICItemUOM SPOT_UOM
 						ON CS.intItemId = SPOT_UOM.intItemId
 						AND SPOT_UOM.intItemUOMId = @intCashPriceUOMId
@@ -2417,7 +2440,6 @@ BEGIN TRY
 						ON CAP_UOM_TO.intItemId = CAP.intChargeAndPremiumItemId
 						AND CAP_UOM_TO.intUnitMeasureId = CASE WHEN @origdblSpotUnits > 0 THEN SPOT_UOM.intUnitMeasureId ELSE CS.intUnitMeasureId END
 					WHERE CAP.dblAmount <> 0
-					
 				END
 				
 				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
