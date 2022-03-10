@@ -1,10 +1,10 @@
 CREATE VIEW [dbo].[vyuMBILDeliveryHeader]    
 AS    
 SELECT delivery.intDeliveryHeaderId,       
- delivery.intLoadHeaderId,            
-    intDriverEntityId = load.intDriverId,            
-    load.strType,            
- load.strLoadNumber,    
+	   delivery.intLoadHeaderId,            
+	   intDriverEntityId = load.intDriverId,            
+	   load.strType,            
+	   load.strLoadNumber,    
     delivery.intCompanyLocationId,            
     strCompanyName = case when strType = 'Inbound' then company.strCompanyName else null end,            
     strCompanyLocationName = companylocation.strLocationName,            
@@ -23,9 +23,11 @@ SELECT delivery.intDeliveryHeaderId,
     strCustomerLocation = location.strLocationName,            
     strCustomerPhone = location.strPhone,            
     strCustomerEmail = entity.strEmail,    
- delivery.dtmDeliveryFrom,    
- delivery.dtmDeliveryTo,    
- delivery.dtmActualDelivery    
+	delivery.dtmDeliveryFrom,    
+	delivery.dtmDeliveryTo,    
+	delivery.dtmActualDelivery
+	,dblLongitude = case when strType = 'Inbound' then companylocation.dblLongitude else location.dblLongitude end
+	,dblLatitude =  case when strType = 'Inbound' then companylocation.dblLatitude else location.dblLatitude end
 FROM tblMBILDeliveryHeader delivery            
 INNER JOIN tblMBILLoadHeader load on delivery.intLoadHeaderId = load.intLoadHeaderId    
 LEFT JOIN tblEMEntity entity ON delivery.intEntityId = entity.intEntityId            

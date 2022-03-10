@@ -10,16 +10,7 @@ SELECT Distinct
    ,strCiy = case when load.strType = 'Outbound' then companylocation.strCity else location.strCity end       
    ,strZipCode = case when load.strType = 'Outbound' then companylocation.strZipPostalCode else location.strZipCode end       
    ,strEmail = case when load.strType = 'Outbound' then company.strEmail else entity.strEmail end       
-   ,strPhone = case when load.strType = 'Outbound' then company.strPhone else entity.strPhone end       
-   --,strVendorNo = entity.strEntityNo        
-   --,strVendorName = entity.strName        
-   --,strVendorZipCode = location.strZipCode        
-   --,strVendorAddress = location.strAddress        
-   --,strVendorCity = location.strCity        
-   --,strVendorCountry = location.strCountry        
-   --,strVendorLocationName = location.strLocationName        
-   --,strVendorPhone = entity.strPhone        
-   --,strVendorEmail = entity.strEmail      
+   ,strPhone = case when load.strType = 'Outbound' then company.strPhone else entity.strPhone end
    ,load.strType        
    ,load.strLoadNumber    
    ,detail.strPONumber      
@@ -32,7 +23,9 @@ SELECT Distinct
    ,detail.dtmPickupTo        
    ,detail.dtmActualPickupFrom        
    ,detail.dtmActualPickupTo        
-   ,load.intDriverId        
+   ,load.intDriverId    
+   ,dblLongitude = case when detail.strType = 'Outbound' then companylocation.dblLongitude else location.dblLongitude end
+   ,dblLatitude =  case when detail.strType = 'Outbound' then companylocation.dblLatitude else location.dblLatitude end        
 FROM tblMBILPickupDetail detail              
 INNER JOIN tblMBILLoadHeader load on detail.intLoadHeaderId = load.intLoadHeaderId        
 INNER JOIN tblICItem item on detail.intItemId = item.intItemId        
