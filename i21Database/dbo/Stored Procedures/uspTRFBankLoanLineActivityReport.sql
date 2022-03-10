@@ -18,6 +18,11 @@ BEGIN
  		SET @intApprovalStatusId = NULL
  	END
 
+	IF ISNULL(@intBankId, 0) = 0
+ 	BEGIN
+ 		SET @intBankId = NULL
+ 	END
+
 	SELECT 
 		  intRowNumber = ROW_NUMBER() OVER (ORDER BY dtmCreatedDate, strTradeFinanceTransaction, strBank, strLimit, strSublimit)
 		, dtmCreatedDate
