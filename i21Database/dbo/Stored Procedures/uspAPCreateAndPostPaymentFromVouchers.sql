@@ -46,6 +46,7 @@ BEGIN
 	DECLARE @totalPostedPayment INT = 0;
 	DECLARE @script NVARCHAR(MAX);
 	DECLARE @clientSort NVARCHAR(500) = @sort;
+	DECLARE @instructionCode INT;
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchers') IS NOT NULL DROP TABLE #tmpMultiVouchers
 	CREATE TABLE #tmpMultiVouchers
@@ -250,6 +251,9 @@ BEGIN
 			ALTER TABLE tblAPPayment DROP CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum];
 		END
 
+		--GET DEFAULT COMPANY CONFIGURATIONS
+		SELECT @instructionCode = intInstructionCode FROM tblAPCompanyPreference
+
 		MERGE INTO tblAPPayment AS destination
 		USING
 		(
@@ -281,6 +285,7 @@ BEGIN
 				[intEntityId]						= 	@currentUser,
 				[intConcurrencyId]					= 	0,
 				[strBatchId]						=	@batchId,
+				[intInstructionCode]				= 	@instructionCode,
 				[intPaymentId]						=	vouchersPay.intPaymentId,
 				[intPartitionId]					=	vouchersPay.intPartitionId
 				-- [strBillIds]						=	STUFF((
@@ -329,7 +334,8 @@ BEGIN
 			[dblWithheld],
 			[intEntityId],
 			[intConcurrencyId],
-			[strBatchId]
+			[strBatchId],
+			[intInstructionCode]
 		)
 		VALUES(
 			[intAccountId],
@@ -355,7 +361,8 @@ BEGIN
 			[dblWithheld],
 			[intEntityId],
 			[intConcurrencyId],
-			[strBatchId]
+			[strBatchId],
+			[intInstructionCode]
 		)
 		OUTPUT SourceData.intPartitionId, inserted.intPaymentId INTO #tmpMultiVouchersCreatedPayment;
 

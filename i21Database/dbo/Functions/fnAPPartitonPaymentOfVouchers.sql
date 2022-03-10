@@ -6,24 +6,26 @@ RETURNS TABLE AS RETURN
 (
 	SELECT
 		partitionedVouchers.*
-		,DENSE_RANK() OVER(ORDER BY intEntityVendorId, intPayToAddressId, intPaymentId) intPartitionId
+		,DENSE_RANK() OVER(ORDER BY intEntityVendorId, intPayToAddressId, intPayFromBankAccountId, intPayToBankAccountId, intPaymentId) intPartitionId
 	FROM (
 		SELECT
 			voucher.intBillId
-			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
-			,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
+			,voucher.intPayToAddressId
+			,voucher.intPayFromBankAccountId
+			,voucher.intPayToBankAccountId
+			,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId, voucher.intPayFromBankAccountId, voucher.intPayToBankAccountId DESC) AS intPaymentId
 			,SUM(ISNULL((CASE WHEN (voucher.intTransactionType NOT IN (1, 2, 13, 14) OR (voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 1))
 							THEN -ISNULL(payScheds.dblPayment, voucher.dblTempPayment) --use the payment sched payment amount to compute the total payment
 							ELSE ISNULL(payScheds.dblPayment, voucher.dblTempPayment)
 						END), 0))
-						OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempPayment
+						OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId, voucher.intPayFromBankAccountId, voucher.intPayToBankAccountId) AS dblTempPayment
 			,SUM(ISNULL((CASE WHEN (voucher.intTransactionType NOT IN (1, 2, 13, 14) OR (voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 1))
 							THEN 
 								-voucher.dblTempWithheld 
 							ELSE voucher.dblTempWithheld 
 							END), 0))
-					OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempWithheld
+					OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId, voucher.intPayFromBankAccountId, voucher.intPayToBankAccountId) AS dblTempWithheld
 			,voucher.strTempPaymentInfo
 		FROM tblAPBill voucher
 		INNER JOIN @voucherIds ids 
@@ -67,8 +69,10 @@ RETURNS TABLE AS RETURN
 		--ALL TRANSACTIONS WHICH VENDOR IS ONE BILL PER PAYMENT
 		SELECT
 			voucher.intBillId
-			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
+			,voucher.intPayToAddressId
+			,voucher.intPayFromBankAccountId
+			,voucher.intPayToBankAccountId
 			,ROW_NUMBER() OVER(ORDER BY voucher.intEntityVendorId DESC) AS intPaymentId
 			,ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) 
 					THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0) AS dblTempPayment
