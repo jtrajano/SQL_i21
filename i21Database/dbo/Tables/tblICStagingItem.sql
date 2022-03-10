@@ -18,6 +18,6 @@ CREATE TABLE [dbo].[tblICStagingItem] (
 	, strCategoryCode NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strBrandCode NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strManufacturer NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	, dtmDateLastUpdated DATETIME NULL,
+	, dtmDateLastUpdated DATETIME NULL
 	, CONSTRAINT PK_tblICStagingItem_intStagingItemId PRIMARY KEY (intStagingItemId)
 )
