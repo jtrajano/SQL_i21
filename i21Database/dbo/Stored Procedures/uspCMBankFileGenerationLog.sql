@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMBankFileGenerationLog]
 	@intBankAccountId INT = NULL,
-	@strTransactionIds NVARCHAR(MAX) = NULL,
+	@strTransactionIds NVARCHAR(MAX) = NULL, -- intTransactionIds in string
 	@strFileName NVARCHAR(100) = NULL,
 	@strProcessType NVARCHAR(50) = NULL,
 	@intBankFileFormatId INT = NULL,
@@ -50,6 +50,8 @@ BEGIN
 	FROM tblCMUndepositedFund
 	WHERE intUndepositedFundId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
 
+	EXEC uspCMProcessTradeFinanceLog @strTransactionIds, 'ACH Generated', @intEntityId
+
 END
 ELSE
 BEGIN
@@ -93,6 +95,7 @@ BEGIN
 		UPDATE tblCMBankTransaction SET dtmCheckPrinted = GETDATE()
 		WHERE  intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
 		AND dtmCheckPrinted IS NULL
+
 
 	END
 	ELSE
@@ -227,3 +230,4 @@ BEGIN
 
 	END
 END
+
