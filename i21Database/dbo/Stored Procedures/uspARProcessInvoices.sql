@@ -232,6 +232,7 @@ DECLARE  @Id									INT
 		,@LoanAmount							NUMERIC(18, 6)
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
+		,@GoodsStatus							NVARCHAR(100)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -448,6 +449,7 @@ BEGIN
 		,@LoanAmount					= dblLoanAmount
 		,@BankValuationRuleId			= intBankValuationRuleId
 		,@TradeFinanceComments			= strTradeFinanceComments
+		,@GoodsStatus					= strGoodsStatus
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -727,6 +729,7 @@ BEGIN
 			,@LoanAmount					= @LoanAmount
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
+			,@GoodsStatus					= @GoodsStatus
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
