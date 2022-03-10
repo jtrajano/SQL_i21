@@ -170,7 +170,6 @@ CREATE TABLE ##ARPostInvoiceHeader (
 	,[ysnInterCompany]                      BIT             NULL
 	,[intInterCompanyVendorId]				INT				NULL
 	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
-    ,[ysnIntraCompany]                      BIT             NULL DEFAULT 0
     ,[ysnAllowSingleLocationEntries]        BIT             NULL DEFAULT 0
 )
 
@@ -339,7 +338,6 @@ CREATE TABLE ##ARPostInvoiceDetail (
 	,[ysnInterCompany]                      BIT             NULL
 	,[intInterCompanyVendorId]				INT				NULL
 	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
-    ,[ysnIntraCompany]                      BIT             NULL DEFAULT 0
     ,[ysnAllowSingleLocationEntries]        BIT             NULL DEFAULT 0
 )
 

@@ -191,7 +191,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , dblBaseRoundingTotal					= INV.dblBaseRoundingTotal
 	 , intLocationAccountSegmentId			= GLSEGMENT.intLocationAccountSegmentId
 	 , intCompanyAccountSegmentId			= GLSEGMENT.intCompanyAccountSegmentId
-	 , ysnIntraCompany						= INV.ysnIntraCompany
+	 , ysnIntraCompany						= CASE WHEN ISNULL(INV.ysnIntraCompany, 0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries, 0) END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -404,3 +404,7 @@ OUTER APPLY(
 	FROM dbo.vyuARAccountDetail
 	WHERE intAccountId = INV.intAccountId
 ) GLSEGMENT
+OUTER APPLY(
+	SELECT TOP 1 ysnAllowIntraCompanyEntries
+	FROM tblARCompanyPreference
+) ARCOMPANYPREFERENCE
