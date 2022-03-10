@@ -157,6 +157,7 @@ INNER JOIN tblCTContractDetail CTD ON IT.intContractDetailId = CTD.intContractDe
 INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
 WHERE IT.strTransactionType = 'Invoice'
   AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
+  AND IT.strType = 'Tank Delivery'
 
 DELETE I
 FROM tblARInvoice I
