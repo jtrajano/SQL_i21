@@ -265,6 +265,14 @@ where
 	strScreen like 'ContractManagement.view.Contract%'
 	and strGridLayoutFields like '%"strFieldName":"strContractType",%'
 
+update
+	tblSMGridLayout
+set
+	strGridLayoutFields = replace(strGridLayoutFields,'"strFieldName":"intEntityId"','"strFieldName":"intEntityId","required":true')
+where
+	strScreen like 'ContractManagement.view.Contract%'
+	and strGridLayoutFields like '%"strFieldName":"intEntityId",%'
+
 
 IF EXISTS (SELECT TOP 1 1 FROM tblCTContractBalanceLog
 WHERE dblOrigQty IS NULL
