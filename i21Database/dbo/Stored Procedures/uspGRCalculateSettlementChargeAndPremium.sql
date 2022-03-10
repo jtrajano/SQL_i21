@@ -2,6 +2,7 @@
 CREATE PROCEDURE [dbo].[uspGRCalculateSettlementChargeAndPremium]
 	@SettleStorageTicketInput AS SettleStorageTicket READONLY,
     @SettleContractInput AS SettleContract READONLY,
+	@SettleStorageChargeAndPremium AS SettleStorageChargeAndPremium READONLY,
     @dblSpotUnits DECIMAL(18,6),
     @dblSpotCashPrice DECIMAL(18,6),
     @intSpotCashPriceUOMId INT,
@@ -485,7 +486,7 @@ BEGIN TRY
         SELECT QM.intTicketDiscountId
         FROM tblQMTicketDiscount QM
         WHERE QM.intTicketFileId = @intCustomerStorageId
-        AND QM.strSourceType IN ('Storage', 'Delivery Sheet')
+        AND QM.strSourceType = 'Storage'
 
         -- For Charges/Premiums with Rate Type of 'Per Unit', there must be a similar UOM conversion with the inventory item in order to calculate the units correctly.
         -- Throw an error if there's no matching UOM conversion in the Charge/Premium item.
@@ -510,8 +511,13 @@ BEGIN TRY
                 ,@tblQMDiscountIds --Storage Ticket Discount Ids
                 ,@dblVoucherAmount / @dblVoucherUnits --Inventory Item Cost
                 ,@dtmCalculateOn --Calculate On
+				,@SettleStorageChargeAndPremium
+				,CS.intCustomerStorageId
             ) CAP
         ) CAP
+		LEFT JOIN @SettleStorageChargeAndPremium SSCP
+			ON SSCP.intCustomerStorageId = SSTI.intCustomerStorageId
+				AND SSCP.intChargeAndPremiumDetailId = CAP.intChargeAndPremiumDetailId
         LEFT JOIN tblICItemUOM SPOT_UOM
             ON CS.intItemId = SPOT_UOM.intItemId
             AND SPOT_UOM.intItemUOMId = @intSpotCashPriceUOMId
@@ -603,7 +609,7 @@ BEGIN TRY
             ,[dblInventoryItemGrossUnits]	= @dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits)
         FROM tblGRCustomerStorage CS
         INNER JOIN @SettleStorageTicketInput SSTI
-            ON SSTI.intCustomerStorageId = CS.intCustomerStorageId
+            ON SSTI.intCustomerStorageId = CS.intCustomerStorageId		
         OUTER APPLY (
             SELECT *
             FROM dbo.fnGRCalculateChargeAndPremium (
@@ -616,8 +622,13 @@ BEGIN TRY
                 ,@tblQMDiscountIds --Storage Ticket Discount Ids
                 ,@dblVoucherAmount / @dblVoucherUnits --Inventory Item Cost
                 ,@dtmCalculateOn --Calculate On
+				,@SettleStorageChargeAndPremium
+				,CS.intCustomerStorageId
             ) CAP
         ) CAP
+		LEFT JOIN @SettleStorageChargeAndPremium SSCP
+			ON SSCP.intCustomerStorageId = SSTI.intCustomerStorageId
+				AND SSCP.intChargeAndPremiumDetailId = CAP.intChargeAndPremiumDetailId
         LEFT JOIN tblICItemUOM SPOT_UOM
             ON CS.intItemId = SPOT_UOM.intItemId
             AND SPOT_UOM.intItemUOMId = @intSpotCashPriceUOMId
