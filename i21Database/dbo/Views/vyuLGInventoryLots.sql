@@ -17,7 +17,10 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.intItemId
 	,Lot.strWarehouseRefNo
 	,strWarrantNo = ISNULL(IRIL.strWarrantNo, IR.strWarrantNo)
-	,strWarrantStatus = CASE WHEN ISNULL(IRIL.intWarrantStatus, IR.intWarrantStatus) = 2 THEN 'Released' ELSE 'Pledged' END COLLATE Latin1_General_CI_AS
+	,strWarrantStatus = CASE ISNULL(IRIL.intWarrantStatus, IR.intWarrantStatus)
+		WHEN 1 THEN 'Pledged' 
+		WHEN 2 THEN 'Released'
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,IR.strTradeFinanceNumber
 	,IR.strBankReferenceNo
 	,IR.strReferenceNo

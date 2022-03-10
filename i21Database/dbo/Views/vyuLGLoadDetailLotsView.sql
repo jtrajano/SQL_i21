@@ -23,7 +23,10 @@ SELECT L.strLoadNumber
 	  ,strStorageLocation = SL.strName
 	  ,LDL.intConcurrencyId
 	  ,strWarrantNo = ISNULL(ReceiptLot.strWarrantNo, Receipt.strWarrantNo)
-	  ,strWarrantStatus = CASE WHEN ISNULL(ReceiptLot.intWarrantStatus, Receipt.intWarrantStatus) = 2 THEN 'Released' ELSE 'Pledged' END COLLATE Latin1_General_CI_AS
+	  ,strWarrantStatus = CASE ISNULL(ReceiptLot.intWarrantStatus, Receipt.intWarrantStatus)
+			WHEN 1 THEN 'Pledged' 
+			WHEN 2 THEN 'Released'
+			ELSE '' END COLLATE Latin1_General_CI_AS
 	  ,Receipt.strTradeFinanceNumber
 	  ,Receipt.strBankReferenceNo
 	  ,Receipt.strReferenceNo
