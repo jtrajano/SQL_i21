@@ -9,6 +9,10 @@ RETURNS
     intOverrideLOBAccountId INT,
     intOrigAccountId INT,
     intNewGLAccountId INT NULL,
+    strMessage NVARCHAR(MAX),
+     strOverrideLocationAccountId NVARCHAR(40),
+     strOverrideLOBAccountId NVARCHAR(40),
+     strOrigAccountId NVARCHAR(40),
     ysnOverriden BIT
 )
 AS
@@ -21,61 +25,67 @@ SELECT @ysnHasLOB = 1 FROM tblGLAccountStructure A join tblGLSegmentType B on A.
 IF NOT EXISTS (SELECT 1 FROM @PostGLEntries WHERE intOverrideLocationAccountId IS NOT NULL AND (intOverrideLOBAccountId IS NOT NULL AND @ysnHasLOB = 1))
     RETURN
 
-INSERT INTO @tbl (intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, ysnOverriden )
-SELECT intOverrideLocationAccountId,intOverrideLOBAccountId,intAccountId , 0
-FROM @PostGLEntries WHERE intOverrideLocationAccountId IS NOT NULL AND (intOverrideLOBAccountId IS NOT NULL AND @ysnHasLOB = 1)
-GROUP BY intOverrideLocationAccountId, intOverrideLOBAccountId,intAccountId
-
-DECLARE @strMessage NVARCHAR(MAX)
-DECLARE @intId INT,@strOverrideLocationAccountId NVARCHAR(30),@strGLAccountOverrideId NVARCHAR(30), @strOrigAccountId NVARCHAR(30), @newStrAccountId NVARCHAR(30)
-WHILE EXISTS (SELECT 1 FROM @tbl WHERE intNewGLAccountId IS NULL)
-BEGIN
-    SELECT TOP 1 
-    @intId=intId,
-    @strOverrideLocationAccountId = X.strAccountId,
-    @strGLAccountOverrideId=Y.strAccountId,
-    @strOrigAccountId = Z.strAccountId 
-    FROM @tbl A
-    OUTER APPLY(
+INSERT INTO @tbl (intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, ysnOverriden, strOverrideLocationAccountId,strOverrideLOBAccountId,strOrigAccountId )
+SELECT intOverrideLocationAccountId,intOverrideLOBAccountId,intAccountId , 0,
+X.strAccountId,CASE WHEN @ysnHasLOB =1 THEN Y.strAccountId ELSE '' END,Z.strAccountId
+FROM @PostGLEntries A
+ OUTER APPLY(
         SELECT TOP 1 strAccountId from tblGLAccount WHERE intAccountId = A.intOverrideLocationAccountId
     ) X
         OUTER APPLY(
         SELECT TOP 1 strAccountId from tblGLAccount WHERE intAccountId = A.intOverrideLOBAccountId
     ) Y
         OUTER APPLY(
-        SELECT TOP 1 strAccountId from tblGLAccount WHERE intAccountId = A.intOrigAccountId
+        SELECT TOP 1 strAccountId from tblGLAccount WHERE intAccountId = A.intAccountId
     ) Z
+ WHERE intOverrideLocationAccountId IS NOT NULL AND (intOverrideLOBAccountId IS NOT NULL AND @ysnHasLOB = 1)
+GROUP BY intOverrideLocationAccountId, intOverrideLOBAccountId,intAccountId, X.strAccountId, Y.strAccountId, Z.strAccountId
+
+DECLARE @strMessage NVARCHAR(MAX)=''
+DECLARE @intId INT,@strOverrideLocationAccountId NVARCHAR(30),@strOverrideLOBAccountId NVARCHAR(30), @strOrigAccountId NVARCHAR(30), @newStrAccountId NVARCHAR(30),
+@intOverrideLocationAccountId INT, @intOverrideLOBAccountId INT, @intOrigAccountId INT
+WHILE EXISTS (SELECT 1 FROM @tbl WHERE ysnOverriden = 0)
+BEGIN
+    SELECT TOP 1 
+    @intId=intId,
+    @strOverrideLocationAccountId = strOverrideLocationAccountId,
+    @strOverrideLOBAccountId=strOverrideLocationAccountId,
+    @strOrigAccountId = strOrigAccountId ,
+    @intOverrideLocationAccountId = A.intOverrideLocationAccountId,
+    @intOverrideLOBAccountId = A.intOverrideLOBAccountId,
+    @intOrigAccountId= A.intOrigAccountId
+    FROM @tbl A
+    WHERE ysnOverriden =0
 
     SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(3,@strOverrideLocationAccountId,@strOrigAccountId)
 
     IF @newStrAccountId IS NULL 
-        SELECT @strMessage = '<li> Error overriding ' + @strOrigAccountId + ' using ' + @strOverrideLocationAccountId + '</li>'
+        UPDATE @tbl SET strMessage = 'Error overriding ' + @strOrigAccountId + ' using ' + @strOverrideLocationAccountId , ysnOverriden = 1
+              WHERE intId = @intId
     ELSE
     BEGIN
         IF @ysnHasLOB = 1 AND @newStrAccountId IS NOT NULL
-            SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(5,@strGLAccountOverrideId,@newStrAccountId)
+            SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(5,@strOverrideLOBAccountId,@newStrAccountId)
         
         IF @newStrAccountId IS NULL
-            SELECT @strMessage = '<li> Error overriding ' + @strOrigAccountId + ' using ' + @strOverrideLocationAccountId + '</li>'
+             UPDATE @tbl SET strMessage = 'Error overriding ' + @strOrigAccountId + ' using ' + @strOverrideLOBAccountId , ysnOverriden = 1
+              WHERE intId = @intId
     END
 
     IF NOT EXISTS(SELECT 1 FROM tblGLAccount WHERE strAccountId = @newStrAccountId)
     BEGIN
-        SELECT @strMessage = '<li>' + @newStrAccountId + 'is not an existing Account Id for override </li>'
+        UPDATE @tbl SET strMessage = @newStrAccountId + ' is not an existing Account Id for override', ysnOverriden = 1   WHERE intId = @intId
+        
     END
     ELSE
-        UPDATE @tbl SET intNewGLAccountId =  (SELECT intAccountId from tblGLAccount WHERE strAccountId = @newStrAccountId)
-        WHERE intId = @intId
+    BEGIN
+        IF @strMessage <> ''
+            UPDATE @tbl SET intNewGLAccountId =  (SELECT intAccountId from tblGLAccount WHERE strAccountId = @newStrAccountId),
+            ysnOverriden = 1 
+            WHERE intId = @intId
+    END
 END
 
-
-IF @strMessage <> ''
-BEGIN
-    SET @strMessage = '<ul style="text-indent:-40px">' + @strMessage + '</ul>'
-	DECLARE @i int 
-	SELECT @i = CAST (@strMessage  AS INT)
-	
-END
 RETURN
 
 END

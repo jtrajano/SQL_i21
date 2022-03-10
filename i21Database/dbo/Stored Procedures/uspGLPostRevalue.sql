@@ -4,15 +4,20 @@
 	@ysnRecap					AS BIT = 0,
 	@intEntityId				AS INT = 1
 AS
-
 DECLARE @PostGLEntries RecapTableType
 DECLARE @ReversePostGLEntries RecapTableType
 DECLARE @strPostBatchId NVARCHAR(100) = ''
 DECLARE @strReversePostBatchId NVARCHAR(100) = ''
-DECLARE @strMessage NVARCHAR(100)
+DECLARE @strMessage NVARCHAR(MAX)
 DECLARE @intReverseID INT
 DECLARE @strConsolidationNumber NVARCHAR(30)
+DECLARE @tblPostError TABLE(
+	strPostBatchId NVARCHAR(40),
+	strMessage NVARCHAR(MAX),
+	strTransactionId NVARCHAR(40)
+)
 
+BEGIN TRANSACTION
 
 		DECLARE @errorNum INT
 		DECLARE @dateNow DATETIME
@@ -23,10 +28,9 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 		IF @strMessage <> ''
 			GOTO _raiserror
 
-
-
-		IF @ysnRecap = 0 
-		BEGIN
+		IF @ysnRecap = 1
+			SELECT @strPostBatchId =  NEWID()
+		ELSE
 			IF @ysnPost = 1
 			BEGIN
 				IF EXISTS(SELECT TOP 1 1 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)
@@ -40,7 +44,7 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			BEGIN
 				SELECT @strPostBatchId =  NEWID()
 			END
-		END
+		
 
 		-- For Bank Transfer Accounts
 		DECLARE @tblBankTransferAccounts TABLE
@@ -259,20 +263,41 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 			AND f.Offset = A.OffSet
 		) BankTransferAccount
 
-		BEGIN TRY
-			UPDATE A  SET intAccountId = intNewGLAccountId
-			FROM  @PostGLEntries A JOIN dbo.fnCMOverrideARRevalueAccounts(@PostGLEntries) B ON 
+		--BEGIN TODO : transfer this on this procedure
+		DECLARE  @tbl TABLE(
+			intId int IDENTITY(1,1),
+			intOverrideLocationAccountId INT,
+			intOverrideLOBAccountId INT,
+			intOrigAccountId INT,
+			intNewGLAccountId INT NULL,
+			strMessage NVARCHAR(MAX),
+			ysnOverriden BIT,
+			strOverrideLocationAccountId NVARCHAR(40),
+			strOverrideLOBAccountId NVARCHAR(40),
+			strOrigAccountId NVARCHAR(40)
+		)
+		INSERT into @tbl (intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage)
+		SELECT intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage FROM 
+		dbo.fnCMOverrideARRevalueAccounts(@PostGLEntries)
+		IF EXISTS(SELECT 1 FROM @tbl WHERE ISNULL(strMessage,'') <> ''  OR intNewGLAccountId is null)
+		BEGIN
+			INSERT INTO @tblPostError(strTransactionId, strMessage)
+			SELECT A.strDescription, strMessage
+			FROM @tbl B JOIN   @PostGLEntries A 
+			ON 
 			A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
 			AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
 			AND A.intAccountId = B.intOrigAccountId
-		END TRY
-		BEGIN CATCH
-			SELECT @strMessage = ERROR_MESSAGE()
-			DECLARE  @s nvarchar(100) = 'Conversion failed when converting the nvarchar value '''
-			DECLARE @s1 NVARCHAR(20) = ''' to data type int'
-			SELECT @strMessage = REPLACE( REPLACE(@strMessage, @s,''),@s1,'')
+			WHERE ISNULL(strMessage,'') <> '' OR intNewGLAccountId is null
 			GOTO _raiserror
-		END CATCH
+		END
+		ELSE
+			UPDATE A  SET intAccountId = intNewGLAccountId
+			FROM  @PostGLEntries A JOIN @tbl B ON 
+			A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
+			AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
+			AND A.intAccountId = B.intOrigAccountId
+		--BEGIN TODO : transfer this on this procedure
 
 		DECLARE @dtmReverseDate DATETIME
 		SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
@@ -280,7 +305,6 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 		BEGIN
 			GOTO _raiserror
 		END
-
 
 	END
 	ELSE
@@ -541,12 +565,31 @@ DECLARE @strConsolidationNumber NVARCHAR(30)
 
 			
 		END
+	
+
 	SELECT @strPostBatchId PostBatchId
+
+	COMMIT TRANSACTION
 	GOTO _end
 
 _raiserror:
-	RAISERROR(@strMessage ,11,1)
-	RETURN
-
+	IF XACT_STATE() <> 0
+		ROLLBACK TRANSACTION
+	
+	IF EXISTS(SELECT 1 FROM  @tblPostError)
+	BEGIN
+		TRUNCATE TABLE tblGLRevaluePostError
+		INSERT INTO tblGLRevaluePostError( strPostBatchId, strTransactionId , strMessage)
+		SELECT @strPostBatchId, strTransactionId, strMessage FROM @tblPostError
+	END
+	ELSE
+		INSERT INTO tblGLRevaluePostError(strPostBatchId , strMessage)
+		SELECT @strPostBatchId, @strMessage
+	
+	IF @@ROWCOUNT > 1
+		RAISERROR( 'Error occurred. Please check post error tab for details',11,1)
+	ELSE
+		RAISERROR( @strMessage,11,1)
+		
 _end:
 

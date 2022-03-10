@@ -26,6 +26,7 @@ BEGIN TRY
 			@InterCompApprovalSign  VARBINARY(MAX),
 			@FirstApprovalName      NVARCHAR(MAX),
 			@SecondApprovalName     NVARCHAR(MAX),
+			@CreatorSign		VARBINARY(MAX),
 			@intApproverGroupId		INT,
 			@IsFullApproved			BIT = 0,
 			@LGMContractSubmitId INT,
@@ -181,6 +182,7 @@ BEGIN TRY
 
 	END
 
+	--CONTRACT APPROVERS SIGNATORIES
 	select top 1
 		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
 	from
@@ -232,6 +234,18 @@ BEGIN TRY
 		left join tblSMSignature l  on l.intEntityId = k.intEntityId and l.intSignatureId = k.intElectronicSignatureId
 		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
 		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId 
+
+	--CONTRACT CREATOR SIGNATORIES
+	SELECT @CreatorSign = sms.blbDetail
+	FROM
+		(
+		SELECT		
+			intCreatedById = a.intCreatedById
+		FROM
+			tblCTContractHeader a WHERE a.intContractHeaderId = @intContractHeaderId
+		) t
+	LEFT join tblEMEntitySignature ems on ems.intEntityId = t.intCreatedById
+	LEFT join tblSMSignature sms  on sms.intEntityId = ems.intEntityId and sms.intSignatureId = ems.intElectronicSignatureId 
 
 	if exists (select top 1 1 from tblCTCompanyPreference where isnull(ysnListAllCustomerVendorLocations,0) = 1) and isnull(@intContractDetailId,0) > 0
 	begin
@@ -311,13 +325,11 @@ BEGIN TRY
 		   ,blbSalesContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  IN (1,2) THEN @FirstApprovalSign ELSE NULL END
 		   --OLD
 		   --,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @SecondApprovalSign ELSE NULL END 
-		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN SMU.blbFile ELSE NULL END 
+		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @CreatorSign ELSE NULL END 
 		   ,blbPurchaseContractFirstApproverSignature	= NULL--CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @FirstApprovalSign END
 		   ,blbPurchaseParentApproveSignature		= NULL-- CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END 
 	FROM	vyuCTContractHeaderView CH
 	LEFT JOIN tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
-	LEFT JOIN tblSMAttachment			SMA on SMA.intEntityId = CH.intSalespersonId
-	LEFT JOIN tblSMUpload				SMU on SMA.intAttachmentId = SMU.intAttachmentId
 	WHERE	CH.intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	
 	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))

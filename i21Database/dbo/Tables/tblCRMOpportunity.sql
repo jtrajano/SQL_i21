@@ -60,7 +60,7 @@
     [intOpportunityTypeId] INT NULL,
     [intVolume] INT NULL,
     [strOpportunityDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    [strBrand] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intBrandId] INT NULL,
 
 	CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),
 	--CONSTRAINT [UQ_tblCRMOpportunity_strName] UNIQUE ([strName]),
@@ -81,7 +81,8 @@
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblCRMIndustrySegment_intIndustrySegmentId] FOREIGN KEY ([intIndustrySegmentId]) REFERENCES [dbo].[tblCRMIndustrySegment] ([intIndustrySegmentId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblCRMOpportunityType_intIndustrySegmentId] FOREIGN KEY ([intOpportunityTypeId]) REFERENCES [dbo].[tblCRMOpportunityType] ([intOpportunityTypeId])
+    CONSTRAINT [FK_tblCRMOpportunity_tblCRMOpportunityType_intOpportunityTypeId] FOREIGN KEY ([intOpportunityTypeId]) REFERENCES [dbo].[tblCRMOpportunityType] ([intOpportunityTypeId]),
+    CONSTRAINT [FK_tblCRMOpportunity_tblCRMBrand_intBrandId] FOREIGN KEY ([intBrandId]) REFERENCES [dbo].[tblCRMBrand] ([intBrandId])
 )
 
 GO

@@ -13,6 +13,7 @@ BEGIN TRY
      ,@strCompanyName NVARCHAR(500)
 	 ,@strPhone NVARCHAR(200)
 	 ,@strFax NVARCHAR(200)
+	 ,@strStateTaxID NVARCHAR(50)
 	 ,@xmlDocumentId INT    
      ,@intScaleTicketId INT
 	 ,@strReceiptNumber NVARCHAR(30)
@@ -157,7 +158,8 @@ ELSE
    WHEN LTRIM(RTRIM(strFax)) = '' THEN NULL    
    ELSE LTRIM(RTRIM(strFax)) 
    END
-   ,@blbCompanyLogo = imgCompanyLogo
+  ,@strStateTaxID= LTRIM(RTRIM(strStateTaxID)) 
+  ,@blbCompanyLogo = imgCompanyLogo
  FROM tblSMCompanySetup     
  
 
@@ -473,6 +475,7 @@ SELECT
 ,@strCompanyName AS strCompanyName
 ,@strPhone AS strPhone
 ,@strFax AS strFax
+,@strStateTaxID as strStateTaxID
 ,SC.strTicketNumber
 ,@strReceiptNumber AS strReceiptNumber
 ,EY.strEntityName AS strEntityName

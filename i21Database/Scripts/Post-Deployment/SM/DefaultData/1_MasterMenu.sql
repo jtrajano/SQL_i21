@@ -9,8 +9,8 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Departments' AND strModuleName = 'Fixed Assets')
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Load Out Bin' AND strModuleName = 'Ticket Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -4158,6 +4158,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Estimated
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Grain.view.BinSiteEstimatedGradesSource' WHERE strMenuName = 'Estimated Grade Source' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Load Out Bin' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Load Out Bin', N'Ticket Management', @TicketManagementISiteParentMenuId, N'Load Out Bin', N'iSite', N'Screen', N'Grain.view.LoadOutBin?showSearch=true', N'small-menu-create', 0, 0, 0, 1, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Grain.view.LoadOutBin?showSearch=true' WHERE strMenuName = 'Load Out Bin' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName IN('Discount Tables','Discount Schedules')
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'OffSite' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
@@ -5729,6 +5735,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Industry 
 	VALUES (N'Industry Segments', N'CRM', @CRMMaintenanceParentMenuId, N'Industry Segments', N'Maintenance', N'Screen', N'CRM.view.IndustrySegment', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'CRM.view.IndustrySegment', strDescription = N'Industry Segments' WHERE strMenuName = 'Industry Segments' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Brands' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId) 
+ INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+ VALUES (N'Brands', N'CRM', @CRMMaintenanceParentMenuId, N'Brands', N'Maintenance', N'Screen', N'CRM.view.Brand', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1) 
+ELSE 
+ UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'CRM.view.Brand', strDescription = N'Brands' WHERE strMenuName = 'Brands' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId 
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMActivitiesParentMenuId

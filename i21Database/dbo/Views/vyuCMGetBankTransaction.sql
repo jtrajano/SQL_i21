@@ -14,7 +14,8 @@ CASE WHEN CHARINDEX ('-F', Related.strTransactionId) > 0 THEN (ISNULL(Related.db
 CASE WHEN CHARINDEX ('-F', Related.strTransactionId) > 0 THEN Related.strAccountId  ELSE '' END strAccountIdFees,
 BTT.strBankTransactionTypeName,
 BL.strBankLoanId,
-Related.strTransactionId strRelatedId
+strRelatedId = Related.strTransactionId,
+intRelatedBankTypeId = Related.intBankTransactionTypeId
 FROM tblCMBankTransaction BT 
 OUTER APPLY(
     SELECT TOP 1 
@@ -23,14 +24,14 @@ OUTER APPLY(
     ysnPosted, 
     dblAmount,
     strMemo,
-	strType
+	strType,
+	intBankTransactionTypeId
     FROM tblCMBankTransaction A JOIN tblCMBankTransactionAdjustment B
-	ON A.intTransactionId =	B.intRelatedId 
-	JOIN tblCMBankTransactionDetail BTD ON
+	ON A.intTransactionId =	B.intRelatedId
+	LEFT JOIN tblCMBankTransactionDetail BTD ON
 	BTD.intTransactionId = A.intTransactionId
-	JOIN tblGLAccount GL ON GL.intAccountId = BTD.intGLAccountId	
+	LEFT JOIN tblGLAccount GL ON GL.intAccountId = BTD.intGLAccountId	
 	WHERE
-	
 	BT.intTransactionId = 
 	B.intTransactionId
 

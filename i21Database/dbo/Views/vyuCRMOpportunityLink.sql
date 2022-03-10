@@ -99,9 +99,10 @@
 			,a.intOpportunityTypeId
 			,a.intVolume
 			,a.strOpportunityDescription
-			,a.strBrand
+			,a.intBrandId
 			,t.strIndustrySegment
 			,u.strOpportunityType
+			,v.strBrand
 		from
 			tblCRMOpportunity a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
@@ -124,3 +125,4 @@
 			left join notclosed s on s.intRecordId = a.intOpportunityId
 			left join tblCRMIndustrySegment t on t.intIndustrySegmentId = a.intIndustrySegmentId
 			left join tblCRMOpportunityType u on u.intOpportunityTypeId = a.intOpportunityTypeId
+			left join tblCRMBrand v on v.intBrandId = a.intBrandId

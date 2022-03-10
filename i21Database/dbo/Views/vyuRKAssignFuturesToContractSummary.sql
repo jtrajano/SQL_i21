@@ -2,10 +2,10 @@
 			
 AS
 SELECT tbl.*
-	, strPricingStatus = CASE WHEN cdd.intPricingStatus = 0 THEN 'Unpriced' WHEN cdd.intPricingStatus = 1 THEN 'Partially Priced' WHEN cdd.intPricingStatus = 2 THEN 'Priced' END
-	, dblNoOfLots = ISNULL(cdd.dblNoOfLots, 0)
-	, dblLotsPriced = ISNULL(vCD.dblLotsFixed, 0) 
-	, dblLotsUnpriced = (ISNULL(vCD.dblTotalLots, 0) - ISNULL(vCD.dblLotsFixed, 0)) 
+	, strPricingStatus = CASE WHEN CDD.intPricingStatus = 0 THEN 'Unpriced' WHEN CDD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CDD.intPricingStatus = 2 THEN 'Priced' END
+	, dblNoOfLots = ISNULL(CDD.dblNoOfLots, 0)
+	, dblLotsPriced = CASE WHEN CDD.intPricingTypeId = 1 THEN (CDD.dblQuantity / M.dblContractSize) ELSE ISNULL(PFD.dblQuantity, 0) / M.dblContractSize END
+	, dblLotsUnpriced = CASE WHEN CDD.intPricingTypeId = 1 THEN 0 ELSE ((CDD.dblQuantity - ISNULL(PFD.dblQuantity, 0)) / M.dblContractSize) END
 FROM (
 SELECT cs.intAssignFuturesToContractSummaryId,
 		ch.strContractNumber,
@@ -106,5 +106,9 @@ LEFT JOIN tblCTBook b1 on b1.intBookId = (select top 1 intBookId from tblCTContr
 LEFT JOIN tblCTSubBook sb1 on sb1.intSubBookId = (select top 1 intSubBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
 where isnull(ch.ysnMultiplePriceFixation,0) = 1
 )tbl
-INNER JOIN tblCTContractDetail cdd ON cdd.intContractDetailId = tbl.intContractDetailId
+INNER JOIN tblCTContractDetail CDD ON CDD.intContractDetailId = tbl.intContractDetailId
 INNER JOIN vyuCTGridContractDetail vCD ON vCD.intContractDetailId = tbl.intContractDetailId
+INNER JOIN tblRKFutureMarket M ON M.intFutureMarketId = vCD.intFutureMarketId
+INNER JOIN tblCTContractHeader CHD ON CHD.intContractHeaderId = tbl.intContractHeaderId
+LEFT JOIN tblCTPriceFixation PF on PF.intContractDetailId = CDD.intContractDetailId
+LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId

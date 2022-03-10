@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGRUOMRounding](
 	[intUOMRoundingId] [int] IDENTITY(1,1) NOT NULL,
+	[intItemId] [int] NOT NULL,
 	[intUnitOfMeasureFromId] [int] NOT NULL,
 	[intUnitOfMeasureToId] [int] NOT NULL,
 	[intDecimalAdjustment] [int] NOT NULL  DEFAULT 0,
@@ -26,4 +27,10 @@ CREATE NONCLUSTERED INDEX [tblGRUOMRounding_intUnitOfMeasureFromId] ON [dbo].[tb
 (
 	[intUnitOfMeasureFromId] ASC
 )INCLUDE (intDecimalAdjustment,ysnFixRounding)
+GO
+
+CREATE NONCLUSTERED INDEX [tblGRUOMRounding_intItemId] ON [dbo].[tblGRUOMRounding]
+(
+	[intItemId] ASC
+)INCLUDE (intUnitOfMeasureToId,intUnitOfMeasureFromId,intDecimalAdjustment,ysnFixRounding)
 GO

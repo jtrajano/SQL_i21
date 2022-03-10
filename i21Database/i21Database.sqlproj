@@ -550,8 +550,12 @@
     <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspLGBatchUpdateDates.sql" />
     <Build Include="dbo\Functions\fnRKGetOTCAllowedBankAccounts.sql" />
+    <Build Include="dbo\Tables\tblEMEntityEFTHeader.sql" />
     <Build Include="dbo\Functions\fnGetItemCompanySegment.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUpdatePlannedAvailabilityDate.sql" />
+    <Build Include="dbo\Tables\tblCRMBrand.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRFBankLoanLineActivityReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptPayablesRevaluationAging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -4803,6 +4807,7 @@
     <Build Include="dbo\Tables\tblCMBankTransactionBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspCMTransactionBatchEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspCMTransactionBatchEntryBatchPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMProcessTradeFinanceLog.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionBatchDetailTable.sql" />
     <Build Include="dbo\Views\vyuCMBankTransactionBatchDetail.sql" />
     <Build Include="dbo\Tables\tblLGRouteDirection.sql" />

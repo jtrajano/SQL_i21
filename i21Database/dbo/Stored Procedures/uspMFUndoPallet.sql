@@ -751,6 +751,17 @@ BEGIN TRY
 		,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 		,@intWorkOrderId = @intWorkOrderId
 
+		UPDATE WRD
+		SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, RD.intItemUOMId, @dblQuantity ), 0)
+			,WRD.dblActualAmount = (IsNULL(WRD.dblProcessedQty, 0)- IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, RD.intItemUOMId, @dblQuantity), 0)) * dblUnitRate
+			,WRD.dblDifference = CASE 
+				WHEN ((IsNULL(WRD.dblProcessedQty, 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, RD.intItemUOMId, @dblQuantity), 0)) * dblUnitRate) > 0
+					THEN IsNULL(dblEstimatedAmount,0) - ((IsNULL(WRD.dblProcessedQty, 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, RD.intItemUOMId, @dblQuantity), 0)) * dblUnitRate)
+				ELSE NULL
+				END
+		FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
+		JOIN dbo.tblLGWarehouseRateMatrixDetail RD ON RD.intWarehouseRateMatrixDetailId = WRD.intWarehouseRateMatrixDetailId
+		WHERE WRD.intWorkOrderId = @intWorkOrderId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

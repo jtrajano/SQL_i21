@@ -66,6 +66,7 @@ BEGIN
 			FROM tblGRUOMRounding
 			WHERE intUnitOfMeasureFromId = @intUnitMeasureFromId
 				AND intUnitOfMeasureToId = @intUnitMeasureToId
+				AND intItemId = @intItemId
 		END
 	END
 

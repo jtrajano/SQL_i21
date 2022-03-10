@@ -171,6 +171,9 @@ BEGIN
 			,LDCL.dblLinkGrossWt AS dblContainerLinkGrossWt
 			,LDCL.dblLinkNetWt AS dblContainerLinkNetWt
 			,LV.intPurchaseSale
+			,LW.dtmDeliveryDate
+			,SMC.strCountry 
+			,CH.strContractNumber
 		FROM vyuLGLoadDetailView LDV
 		JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
@@ -186,6 +189,7 @@ BEGIN
 		LEFT JOIN tblICItemContract ITM ON ITM.intItemContractId = CD.intItemContractId
 		LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LDV.intLoadDetailId AND LV.intPurchaseSale = 2
 		LEFT JOIN tblICLot ICL ON ICL.intLotId = LDL.intLotId
+		LEFT JOIN tblSMCountry SMC ON ITM.intCountryId = SMC.intCountryID
 		WHERE LDV.strLoadNumber = @xmlParam
 			AND (@ysnHasPickContainer = 0
 				 OR (@ysnHasPickContainer = 1 AND LC.intLoadContainerId IN 
@@ -237,6 +241,9 @@ BEGIN
 			,LDV.strPContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberWithSeq
 			,LDV.strSContractNumber + '/' + CONVERT(NVARCHAR, LDV.intSContractSeq) AS strSContractNumberWithSeq
 			,IC.strCommodityCode
+			,LW.dtmDeliveryDate
+			,SMC.strCountry
+			,LDV.strVendor
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseContainer WC ON WC.intLoadWarehouseId = LW.intLoadWarehouseId
@@ -249,6 +256,7 @@ BEGIN
 		LEFT JOIN tblCTApprovalBasis AB ON AB.intApprovalBasisId = CH.intApprovalBasisId
 		LEFT JOIN tblICCommodity IC ON IC.intCommodityId = CH.intCommodityId
 		LEFT JOIN tblICItemContract ITM ON ITM.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblSMCountry SMC ON ITM.intCountryId = SMC.intCountryID
 		WHERE LW.intLoadWarehouseId = @xmlParam
 	END
 END
