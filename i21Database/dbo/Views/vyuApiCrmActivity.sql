@@ -41,6 +41,13 @@ SELECT
 	, ac.intEntityId
 	, a.dtmDateCreated
 	, a.dtmDateLastUpdated
+	, a.strAddress
+	, a.strCity
+	, a.strCountry
+	, a.strState
+	, a.strZipCode
+	, a.dblLongitude
+	, a.dblLatitude
 	, sa.intConcurrencyId
 FROM vyuCRMActivitySearch2 ac
 JOIN vyuApiActivity a ON a.intActivityId = ac.intActivityId
