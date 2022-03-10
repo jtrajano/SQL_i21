@@ -20,9 +20,9 @@ BEGIN TRY
 						+ ' ' + UM.strUnitMeasure,  
 		strPrice =	CASE
 						WHEN CD.intPricingTypeId IN (1,6)
-						THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net'   
+						THEN dbo.fnCTChangeNumericScale(dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 6))),4) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net'   
 						WHEN  CD.intPricingTypeId = 2
-						THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth +
+						THEN dbo.fnCTChangeNumericScale(dbo.fnRemoveTrailingZeroes(CD.dblBasis),4) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth +
 							CASE
 							WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0
 							THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)'
