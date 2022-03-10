@@ -9143,6 +9143,8 @@
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDuplicateChargeAndPremium.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorageChargeAndPremium.sql" />
+    <Build Include="dbo\User Defined Types\SettleStorageChargeAndPremium.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
