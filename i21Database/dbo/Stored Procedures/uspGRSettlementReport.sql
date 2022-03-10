@@ -75,6 +75,8 @@ DECLARE @Settlement AS TABLE
 	,strDiscountReadings				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,lblFarmField						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strFarmField						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strDriverName						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strTruckName						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,dtmDate							DATETIME NULL
 	,dblGrossWeight					DECIMAL(24,10)
 	,dblTareWeight					DECIMAL(24,10)
@@ -231,6 +233,8 @@ BEGIN
 				,strDiscountReadings				
 				,lblFarmField						
 				,strFarmField						
+				,strDriverName
+				,strTruckName					
 				,dtmDate							
 				,dblGrossWeight					
 				,dblTareWeight					
@@ -338,6 +342,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)													
@@ -643,6 +649,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
@@ -928,6 +936,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField				 	= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate					 	= Bill.dtmDate
 				,dblGrossWeight				 	= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight				 	=  ISNULL(SC.dblTareWeight, 0)
@@ -1224,6 +1234,8 @@ BEGIN
 													ELSE NULL 
 												END 		
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= NULL
+				,strTruckName					= NULL
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight					= ISNULL(SC.dblTareWeight, 0)
@@ -1539,6 +1551,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)													
@@ -1831,6 +1845,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
@@ -2114,6 +2130,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField				 	= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate					 	= Bill.dtmDate
 				,dblGrossWeight				 	= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight				 	=  ISNULL(SC.dblTareWeight, 0)
@@ -2403,6 +2421,8 @@ BEGIN
 													ELSE NULL 
 												END 		
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= NULL
+				,strTruckName					= NULL
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight					= ISNULL(SC.dblTareWeight, 0)
