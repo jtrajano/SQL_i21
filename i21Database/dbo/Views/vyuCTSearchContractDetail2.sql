@@ -343,6 +343,7 @@ SELECT a.intContractDetailId
 	, ICC.strSeason
 	, ICC.strClass
 	, ICC.strProductLine
+	, a.dblInterestRate
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId

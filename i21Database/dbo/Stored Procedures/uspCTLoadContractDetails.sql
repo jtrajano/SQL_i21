@@ -567,6 +567,7 @@ BEGIN TRY
 		, ICC.strSeason
 		, ICC.strClass
 		, ICC.strProductLine
+		, CD.dblInterestRate
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId

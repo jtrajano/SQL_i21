@@ -121,6 +121,7 @@ AS
 			case when CH.strHeaderPricingType = 'Basis' then CD.dblQuantity - ISNULL(FI.dblQuantityPriceFixed, 0) else null end AS dblUnPricedQty
 			,strDetailFreightTerm = CDFT.strFreightTerm
 			,intDetailFreightTermId = CDFT.intFreightTermId
+			,CD.dblInterestRate
 
 	FROM	tblCTContractDetail				CD LEFT	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
