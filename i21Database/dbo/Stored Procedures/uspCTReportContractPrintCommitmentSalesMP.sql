@@ -412,7 +412,7 @@ BEGIN TRY
 			WITH (NOLOCK)ON ETC.intEntityId = CH.intEntityId
 		INNER JOIN dbo.tblEMEntity PC
 			WITH (NOLOCK) ON ETC.intEntityContactId = PC.[intEntityId] AND ETC.ysnDefaultContact = 1
-		INNER JOIN dbo.tblEMEntityPhoneNumber PN
+		LEFT JOIN dbo.tblEMEntityPhoneNumber PN
 			WITH (NOLOCK) ON PN.[intEntityId] = PC.[intEntityId]
 		LEFT JOIN	tblICCommodityUnitMeasure	CU	
 			WITH (NOLOCK) ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		
