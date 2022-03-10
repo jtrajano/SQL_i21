@@ -31,6 +31,13 @@ SELECT
 	, a.strRelatedTo
 	, a.strRecordNo
 	, a.ysnBillable
+	, a.strAddress
+	, a.strCity
+	, a.strCountry
+	, a.strState
+	, a.strZipCode
+	, a.dblLongitude
+	, a.dblLatitude
 	, COALESCE(created.dtmDate, a.dtmCreated) dtmDateCreated
 	, COALESCE(updated.dtmDate, created.dtmDate, a.dtmCreated) dtmDateLastUpdated
 FROM tblSMActivity a
