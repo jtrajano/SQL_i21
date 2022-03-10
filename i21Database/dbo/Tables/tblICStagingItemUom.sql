@@ -11,5 +11,6 @@ CREATE TABLE [dbo].[tblICStagingItemUom] (
 	, ysnAllowPurchase BIT NULL
 	, ysnAllowSale BIT NULL
 	, dblMaxQty NUMERIC(18,6) NULL
+	, dtmDateLastUpdated DATETIME NULL,
 	, CONSTRAINT PK_tblICStagingItemUom_intStagingItemUomId PRIMARY KEY (intStagingItemUomId)
 )
