@@ -11,6 +11,6 @@ SELECT
     , a.strComment
     , CAST(a.strRecordNo AS INT) intTransactionId
     , a.intEntityId
-    , e.strName strEntityname
+    , e.strName strEntityName
 FROM tblSMAttachment a
 LEFT JOIN tblEMEntity e ON e.intEntityId = a.intEntityId
