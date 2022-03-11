@@ -9141,6 +9141,9 @@
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
+    <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9431,6 +9434,7 @@
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

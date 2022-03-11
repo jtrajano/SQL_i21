@@ -362,7 +362,7 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 			, strFederalTaxId				= TAX.strFederalTaxId
 			, strStateTaxId					= TAX.strStateTaxId
 			, blbCompanyLogo				= dbo.fnSMGetCompanyLogo('Header')
-		FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
+		FROM dbo.vyuARSalesTaxReport TAX WITH (NOLOCK)
 		INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
 		INNER JOIN #INVOICES I ON TAX.intInvoiceId = I.intInvoiceId
@@ -428,7 +428,7 @@ ELSE
 			, dblStateSalesTax		 		= SUM(CASE WHEN TRT.strType = 'State Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END)
 			, dblTonnageTax			 		= SUM(CASE WHEN TRT.strType = 'Tonnage Tax' THEN TAX.dblTaxAmount ELSE 0 END)
 			, blbCompanyLogo				= dbo.fnSMGetCompanyLogo('Header')
-		FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
+		FROM dbo.vyuARSalesTaxReport TAX WITH (NOLOCK)
 		LEFT JOIN tblSMTaxClass TCLASS ON TAX.intTaxClassId = TCLASS.intTaxClassId
 		LEFT JOIN tblSMTaxReportType TRT ON TCLASS.intTaxReportTypeId = TRT.intTaxReportTypeId
 		INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
