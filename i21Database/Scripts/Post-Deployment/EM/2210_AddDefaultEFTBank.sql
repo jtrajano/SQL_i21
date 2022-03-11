@@ -89,6 +89,7 @@
 			END
 		END
 		ELSE IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityEFTHeader WHERE intEntityId = @intEntityId)
+			AND EXISTS(SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @intEntityId)
 		BEGIN
 			UPDATE tblEMEntityEFTInformation 
 			SET 
