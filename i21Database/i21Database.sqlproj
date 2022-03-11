@@ -557,6 +557,7 @@
     <Build Include="dbo\Stored Procedures\uspTRFBankLoanLineActivityReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesRevaluationAging.sql" />
     <Build Include="dbo\Tables\tblCTDefaultTradeFinance.sql" />
+    <Build Include="dbo\Views\vyuCTOptionalityValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
