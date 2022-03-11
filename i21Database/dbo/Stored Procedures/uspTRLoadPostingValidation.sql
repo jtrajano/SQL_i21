@@ -562,6 +562,36 @@ BEGIN TRY
 		
 		DELETE FROM #DistributionDetailTable WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
 	END
+	
+	-- Validate Different Combo Freight Rate - Receipt
+	DECLARE @receiptRowCount INT = NULL
+	SELECT dblComboFreightRate 
+	FROM tblTRLoadHeader LH
+	INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = LH.intLoadHeaderId
+	WHERE LH.intLoadHeaderId = @intLoadHeaderId
+	AND LH.ysnCombo 
+	GROUP BY dblComboFreightRate
+
+	SET @receiptRowCount = @@ROWCOUNT;
+	IF(@receiptRowCount > 1)
+	BEGIN
+		RAISERROR('Receipt Combo Freight Rate should be the same!', 16, 1)
+	END
+
+	-- Validate Different Combo Freight Rate - Distribution
+	DECLARE @distributionRowCount INT = NULL
+	SELECT dblComboFreightRate 
+	FROM tblTRLoadHeader LH
+	INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+	INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	WHERE LH.intLoadHeaderId = @intLoadHeaderId
+	GROUP BY dblComboFreightRate
+
+	SET @distributionRowCount = @@ROWCOUNT;
+	IF(@distributionRowCount > 1)
+	BEGIN
+		RAISERROR('Distribution Combo Freight Rate should be the same!', 16, 1)
+	END
 
 	-- Validate the BOL of Receipt and Distribution
 	IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader LH
