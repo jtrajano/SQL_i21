@@ -292,7 +292,7 @@ BEGIN TRY
 								' '+@per+' ' + isnull(rtrt5.strTranslation,FM.strUnitMeasure),
 			strFXFinalPriceLabel = CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE @FinalPrice END,
 			strQuantityDesc = CASE 
-								WHEN ISNULL(ysnMultiplePriceFixation,0)=0 THEN
+								WHEN ISNULL(CH.ysnMultiplePriceFixation,0)=0 THEN
 									CASE 
 										WHEN UM.strUnitType='Quantity' THEN LTRIM(FLOOR(CD.dblQuantity)) + ' ' + @bags + '/ ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure)+CASE WHEN CD.dblNetWeight IS NOT NULL THEN  ' (' ELSE '' END + ISNULL(LTRIM(FLOOR(CD.dblNetWeight)),'')+ ' '+ ISNULL(isnull(rtrt4.strTranslation,U7.strUnitMeasure),'') +CASE WHEN isnull(rtrt4.strTranslation,U7.strUnitMeasure) IS NOT NULL THEN   ')' ELSE '' END  
 										ELSE ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(isnull(rtrt4.strTranslation,U7.strUnitMeasure),'') 
@@ -341,7 +341,10 @@ BEGIN TRY
 		   ,CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END AS BuyerSign
 		   ,CASE WHEN CH.intContractTypeId = 2 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END AS SellerSign
 		   ,ysnEnableFXFieldInContractPricing = @ysnEnableFXFieldInContractPricing
-
+		   ,strFixPriceLabel = (CASE WHEN SPC.strStatus = 'Fully Priced' THEN 'Final Contract Price'
+									 WHEN SPC.strStatus = 'Partially Priced' THEN 'Average Fixed Price'
+								ELSE 'Average Fixed Price' END)
+			
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	CROSS	APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) SQ
@@ -407,7 +410,7 @@ BEGIN TRY
 
 	LEFT JOIN tblSMCountry				rtc10 on lower(rtrim(ltrim(rtc10.strCountry))) = lower(rtrim(ltrim(EY.strEntityCountry)))
 	LEFT JOIN tblSMCountry				rtc12 on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
-
+	INNER JOIN vyuCTPriceContractStatus	SPC ON  SPC.intContractHeaderId = PF.intContractHeaderId
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 
