@@ -355,6 +355,8 @@
     <Build Include="dbo\Tables\tblTMRoute.sql" />
     <Build Include="dbo\Tables\tblTMSeasonResetArchive.sql" />
     <Build Include="dbo\Tables\tblTMSite.sql">
+	<Build Include="dbo\Tables\tblTMOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
       <SuppressTSqlWarnings>
       </SuppressTSqlWarnings>
     </Build>
