@@ -68,7 +68,7 @@ FROM (
 		,FMO.strFutureMonth
 		,strPriceBasis = ISNULL(AD.strSeqCurrency, '') + '/' + ISNULL(AD.strSeqPriceUOM, '')
 		,CR.strCropYear
-		,strGrade = W1.strWeightGradeDesc
+		,strApprovalBasis = W1.strWeightGradeDesc
 		,strWeight = W2.strWeightGradeDesc
 		,TM.strTerm
 		,CD.strItemSpecification
@@ -77,6 +77,7 @@ FROM (
 		,IM.dblGAShrinkFactor
 		,strOrigin = ISNULL(CO.strCountry, GIC.strOrigin)
 		,strProductType = GIC.strProductType
+		,strGrade = GIC.strGrade
 		,strRegion = GIC.strRegion 
 		,strSeason = GIC.strSeason
 		,strClass = GIC.strClassVariety
@@ -95,7 +96,8 @@ FROM (
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
 	LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
-	LEFT JOIN vyuICGetItemCommodity GIC ON GIC.intItemId = IM.intItemId
+	OUTER APPLY (SELECT TOP 1 strOrigin, strProductType, strGrade, strRegion, strSeason, strClassVariety, strProductLine 
+				FROM vyuICGetItemCommodity WHERE intItemId = IM.intItemId) GIC
 	LEFT JOIN tblICItemContract ICI ON ICI.intItemId = IM.intItemId AND CD.intItemContractId = ICI.intItemContractId
 	LEFT JOIN tblICItem BI ON BI.intItemId = CD.intItemBundleId
 	LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
