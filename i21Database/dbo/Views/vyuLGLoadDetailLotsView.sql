@@ -25,7 +25,8 @@ SELECT L.strLoadNumber
 	  ,strWarrantNo = ISNULL(ReceiptLot.strWarrantNo, Receipt.strWarrantNo)
 	  ,strWarrantStatus = CASE ISNULL(ReceiptLot.intWarrantStatus, Receipt.intWarrantStatus)
 			WHEN 1 THEN 'Pledged' 
-			WHEN 2 THEN 'Released'
+			WHEN 2 THEN 'Partially Released'
+			WHEN 3 THEN 'Released'
 			ELSE '' END COLLATE Latin1_General_CI_AS
 	  ,Receipt.strTradeFinanceNumber
 	  ,Receipt.strBankReferenceNo
