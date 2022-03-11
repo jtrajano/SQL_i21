@@ -468,7 +468,7 @@ BEGIN TRY
 
 			SELECT @strXML += '<Book>' + ISNULL(@strBook, '') + '</Book>'
 
-			SELECT @strXML += '<Sub-Book>' + ISNULL(@strSubBook, '') + '</Sub-Book>'
+			SELECT @strXML += '<Sub-Book>' + dbo.fnEscapeXML(ISNULL(@strSubBook, '')) + '</Sub-Book>'
 
 			SELECT @strXML += '<QuantityPerLot>' + LTRIM(@dblQuantityPerLot) + '</QuantityPerLot>'
 
