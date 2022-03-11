@@ -12,7 +12,6 @@
 	[ysnHistoricalJournalImported] BIT NULL,
 	[ysnShowAccountingPeriod] BIT NULL,
 	[ysnRequireLocation] BIT NULL,
-	[ysnHistoricalJournalImported] BIT NULL,
 	[strSubsidiaryCompanyJson] NVARCHAR(MAX),
 	/*Override RE Settings*/
 	[ysnREOverride] BIT NULL,
