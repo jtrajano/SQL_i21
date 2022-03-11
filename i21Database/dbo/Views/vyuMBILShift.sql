@@ -20,6 +20,7 @@ SELECT Shift.intShiftId
 	, Items.dblFuelSales
 	, Shift.strTrailerNo   
 	, Shift.intConcurrencyId
+	, Shift.intLongTruckId
 FROM tblMBILShift Shift
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Shift.intDriverId
 LEFT JOIN tblSMTruck Truck ON Truck.intTruckId = Shift.intTruckId

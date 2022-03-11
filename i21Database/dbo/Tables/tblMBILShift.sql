@@ -14,6 +14,7 @@
     [dblFuelGallonsDelievered] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblFuelSales] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [strTrailerNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [intLongTruckId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblMBILShift] PRIMARY KEY ([intShiftId])
 )
