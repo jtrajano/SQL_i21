@@ -286,6 +286,8 @@
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
+    <Build Include="dbo\Tables\tblTMOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
