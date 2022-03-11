@@ -16,6 +16,7 @@ SELECT
 	U.strType  COLLATE Latin1_General_CI_AS strType,
 	U.strStructureName  COLLATE Latin1_General_CI_AS strStructureName,
 	ISNULL(Mapping.c,0)  ysnUsed,
+	S.dtmObsoleteDate,
 	S.intConcurrencyId
 FROM            
 	dbo.tblGLAccountSegment AS S LEFT OUTER JOIN
