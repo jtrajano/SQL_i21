@@ -558,6 +558,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesRevaluationAging.sql" />
     <Build Include="dbo\Tables\tblCTDefaultTradeFinance.sql" />
     <Build Include="dbo\Views\vyuCTOptionalityValue.sql" />
+    <Build Include="dbo\Functions\fnARCompareAccountSegment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
