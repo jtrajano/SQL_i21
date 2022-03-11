@@ -51,7 +51,11 @@ CREATE TABLE ##POSTEDINVOICES (
 	 , dtmDate						DATETIME										NULL
 	 , dtmForgiveDate				DATETIME										NULL
 	 , ysnForgiven					BIT												NULL
+	 , ysnPaid						BIT												NULL
 )
+CREATE NONCLUSTERED INDEX [NC_Index_##POSTEDINVOICES_intEntityCustomerId] ON [##POSTEDINVOICES]([intEntityCustomerId])
+CREATE NONCLUSTERED INDEX [NC_Index_##POSTEDINVOICES_strTransactionType] ON [##POSTEDINVOICES]([strTransactionType])
+CREATE NONCLUSTERED INDEX [NC_Index_##POSTEDINVOICES_dtmPostDate] ON [##POSTEDINVOICES]([dtmPostDate])
 CREATE TABLE ##ARPOSTEDPAYMENT (
 	   intPaymentId					INT												NOT NULL PRIMARY KEY
 	 , dtmDatePaid					DATETIME										NULL

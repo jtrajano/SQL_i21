@@ -30,21 +30,14 @@ SET ANSI_WARNINGS OFF
 DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
-DECLARE @PostDate AS DATETIME
-SET @PostDate = GETDATE()
-DECLARE @DateNow AS DATETIME
-SET @PostDate = CAST(@PostDate AS DATE)
-
-DECLARE @ZeroDecimal DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000
-DECLARE @OneDecimal DECIMAL(18,6)
-SET @OneDecimal = 1.000000
-DECLARE @OneHundredDecimal DECIMAL(18,6)
-SET @OneHundredDecimal = 100.000000
-DECLARE @ZeroBit BIT
-SET @ZeroBit = CAST(0 AS BIT)
-DECLARE @OneBit BIT
-SET @OneBit = CAST(1 AS BIT)
+DECLARE @PostDate AS DATETIME = CAST(GETDATE() AS DATE)
+DECLARE @ZeroDecimal DECIMAL(18,6) = 0.000000
+DECLARE @OneDecimal DECIMAL(18,6) = 1.000000
+DECLARE @OneHundredDecimal DECIMAL(18,6) = 100.000000
+DECLARE @ZeroBit BIT = CAST(0 AS BIT)
+DECLARE @OneBit BIT = CAST(1 AS BIT)
+DECLARE @intNewPerformanceLogId	INT = NULL
+DECLARE @strRequestId NVARCHAR(200) = NEWID()
 
 DECLARE  @InitTranCount				INT
 		,@CurrentTranCount			INT
@@ -75,6 +68,16 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber 3, @batchId OUT
 END
 SET @batchIdUsed = @batchId
+
+--LOG PERFORMANCE START
+IF @transType <> 'all'
+	EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Batch Payment Posting Screen'
+									  , @strProcedureName       = 'uspARPostPayment'
+									  , @strRequestId			= @strRequestId
+									  , @ysnStart		        = 1
+									  , @intUserId	            = @userId
+									  , @intPerformanceLogId    = NULL
+									  , @intNewPerformanceLogId = @intNewPerformanceLogId OUT
 
 IF(OBJECT_ID('tempdb..#ARPostPaymentHeader') IS NOT NULL)
 BEGIN
@@ -827,11 +830,15 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
 	SET @successfulCount = ISNULL((SELECT COUNT(DISTINCT [strTransactionId]) FROM @GLEntries),0)
 	IF @successfulCount = 0
 		SET @success = @ZeroBit
-	--SELECT @successfulCount = COUNT(*) 
-	--FROM tblARPostResult 
-	--WHERE strBatchNumber = @batchId 
-	--  AND strTransactionType = 'Receive Payment'
-	--  AND strMessage IN ('Transaction successfully posted.', 'Transaction successfully unposted.')
+	
+	--LOG PERFORMANCE END
+	IF @transType <> 'all'
+		EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Batch Payment Posting Screen'
+										  , @strProcedureName       = 'uspARPostInvoice'
+										  , @strRequestId			= @strRequestId
+										  , @ysnStart		        = 0
+										  , @intUserId	            = @userId
+										  , @intPerformanceLogId    = @intNewPerformanceLogId
 
 END TRY
 BEGIN CATCH

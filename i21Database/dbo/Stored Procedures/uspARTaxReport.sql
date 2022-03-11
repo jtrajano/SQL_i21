@@ -48,7 +48,10 @@ DECLARE @dtmDateFrom			DATETIME
 	  , @begingroup				NVARCHAR(50)
 	  , @endgroup				NVARCHAR(50)
 	  , @datatype				NVARCHAR(50)
-		
+	  , @strReportLogId			NVARCHAR(MAX)
+	  , @intNewPerformanceLogId	INT 
+	  , @strRequestId 			NVARCHAR(200) = NEWID()
+
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -74,6 +77,19 @@ WITH (
 	, [condition]  NVARCHAR(20)
 	, [from]	   NVARCHAR(100)
 	, [to]		   NVARCHAR(100)
+	, [join]	   NVARCHAR(10)
+	, [begingroup] NVARCHAR(50)
+	, [endgroup]   NVARCHAR(50)
+	, [datatype]   NVARCHAR(50)
+)
+UNION ALL
+SELECT *
+FROM OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)
+WITH (
+	  [fieldname]  NVARCHAR(50)
+	, [condition]  NVARCHAR(20)
+	, [from]	   NVARCHAR(MAX)
+	, [to]		   NVARCHAR(MAX)
 	, [join]	   NVARCHAR(10)
 	, [begingroup] NVARCHAR(50)
 	, [endgroup]   NVARCHAR(50)
@@ -131,6 +147,18 @@ SELECT @ysnTaxExemptOnly = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnTaxExemptOnly'
 
+SELECT @strReportLogId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strReportLogId'
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	BEGIN
+		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+		VALUES (@strReportLogId, GETDATE())
+	END
+ELSE
+	RETURN
+
 SELECT  @dtmDateFrom	= CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmDateTo		= CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
        ,@conditionDate	= [condition]
@@ -138,22 +166,24 @@ FROM @temp_xml_table
 WHERE [fieldname] = 'dtmDate'
 
 -- SANITIZE THE DATE AND REMOVE THE TIME.
-IF @dtmDateTo IS NOT NULL
-	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
-ELSE 			  
-	SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+SET @dtmDateTo = CAST(ISNULL(@dtmDateTo, GETDATE()) AS DATE)
+SET @dtmDateFrom = CAST(ISNULL(@dtmDateFrom, '01/01/1900') AS DATE)
 
-IF @dtmDateFrom IS NOT NULL
-	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
-ELSE 			  
-	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
+IF(OBJECT_ID('tempdb..#COMPANYLOCATIONS') IS NOT NULL) DROP TABLE #COMPANYLOCATIONS
+IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL) DROP TABLE #INVOICES
 
-IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #CUSTOMERS
-END
+CREATE TABLE #CUSTOMERS (intEntityCustomerId INT NOT NULL PRIMARY KEY) 
+CREATE TABLE #INVOICES (intInvoiceId INT NOT NULL PRIMARY KEY)
+CREATE TABLE #COMPANYLOCATIONS (intCompanyLocationId INT NOT NULL PRIMARY KEY)
 
-CREATE TABLE #CUSTOMERS (intEntityCustomerId INT) 
+EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Tax Report'
+								  , @strProcedureName       = 'uspARTaxReport'
+								  , @strRequestId			= @strRequestId
+								  , @ysnStart		        = 1
+								  , @intUserId	            = 1
+								  , @intPerformanceLogId    = NULL
+								  , @intNewPerformanceLogId = @intNewPerformanceLogId OUT
 
 IF (@conditionCustomer IS NOT NULL AND UPPER(@conditionCustomer) = 'BETWEEN' AND ISNULL(@strCustomerNameFrom, '') <> '')
 	BEGIN
@@ -184,13 +214,6 @@ ELSE
 		FROM tblARCustomer C WITH (NOLOCK) 
 	END
 
-IF(OBJECT_ID('tempdb..#COMPANYLOCATIONS') IS NOT NULL)
-BEGIN
-    DROP TABLE #COMPANYLOCATIONS
-END
-
-CREATE TABLE #COMPANYLOCATIONS (intCompanyLocationId INT)
-
 IF (@conditionLocation IS NOT NULL AND UPPER(@conditionLocation) = 'BETWEEN' AND ISNULL(@strLocationNameFrom, '') <> '')
 	BEGIN
 		INSERT INTO #COMPANYLOCATIONS
@@ -211,13 +234,6 @@ ELSE
 		SELECT intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 	END
-
-IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #INVOICES
-END
-
-CREATE TABLE #INVOICES (intInvoiceId INT)
 
 IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND ISNULL(@strInvoiceNumberFrom, '') <> '')
 	BEGIN
@@ -244,7 +260,7 @@ TRUNCATE TABLE tblARTaxStagingTable
 
 IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 	BEGIN
-		INSERT INTO tblARTaxStagingTable (
+		INSERT INTO tblARTaxStagingTable WITH (TABLOCK) (
 			intEntityCustomerId
 			, intEntitySalespersonId
 			, intCurrencyId
@@ -376,7 +392,7 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 	END
 ELSE
 	BEGIN
-		INSERT INTO tblARTaxStagingTable (
+		INSERT INTO tblARTaxStagingTable WITH (TABLOCK) (
 			  intEntityCustomerId
 			, strDisplayName
 			, strTaxNumber
@@ -462,3 +478,13 @@ IF ISNULL(@ysnTaxExemptOnly, 0) = 1
 	DELETE FROM tblARTaxStagingTable WHERE ysnTaxExempt = 0
 
 SELECT strTaxReportType = ISNULL(@strTaxReportType, 'Tax Detail')
+
+IF ISNULL(@intNewPerformanceLogId, 0) <> 0
+	BEGIN
+		EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Tax Report'
+										  , @strProcedureName       = 'uspARTaxReport'
+										  , @strRequestId			= @strRequestId
+										  , @ysnStart		        = 0
+										  , @intUserId	            = 1
+										  , @intPerformanceLogId    = @intNewPerformanceLogId
+	END

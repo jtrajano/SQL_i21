@@ -129,7 +129,7 @@ SET @strDateTo							= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
-SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo
+SELECT TOP 1  @ysnStretchLogo = ysnStretchLogo
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')

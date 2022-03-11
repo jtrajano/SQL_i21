@@ -78,17 +78,18 @@ BEGIN
 		UNION ALL SELECT strType = 'In-Transit'
 			, L.intBookId
 			, L.intSubBookId
-			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](LD.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, LD.dblQuantity), 0))
+			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](LD.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, LD.dblQuantity - ISNULL(LDCL.dblReceivedQty, LD.dblDeliveredQuantity)), 0))
 			, CH.intCommodityId
 			, Item.intProductTypeId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1
+		OUTER APPLY (SELECT dblReceivedQty = SUM(ISNULL(dblReceivedQty, 0)) FROM tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId) LDCL
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 		WHERE L.ysnPosted = 1
-			AND L.intShipmentStatus = 3
+			AND L.intShipmentStatus IN (3, 4)
 			AND L.intShipmentType = 1
 			AND ISNULL(CH.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 			--AND CAST(FLOOR(CAST(L.dtmDispatchedDate AS FLOAT)) AS DATETIME) <= @Date

@@ -1,9 +1,11 @@
-﻿CREATE VIEW [dbo].[vyuGRSettlementSubReport]
+﻿CREATE VIEW [dbo].[vyuGRSettlementSubNoTaxClassReport]
 AS
 
 	-- We are using this view to directly insert table to an API Export table
 	-- If there are changes in the view please update the insert in uspGRAPISettlementReportExport as well
-	-- any modification here should be applied to vyuGRSettlementSubNoTaxReport as well
+	-- any modification here should be applied to vyuGRSettlementSubReport as well
+	--
+	-- will not be used in the report after code review
 
 SELECT 
 	intBillDetailId
@@ -11,7 +13,7 @@ SELECT
 	,intItemId
 	,strDiscountCode
 	,strDiscountCodeDescription
-	,strTaxClass
+	,'' as strTaxClass
 	,(dblDiscountAmount) dblDiscountAmount
 	,(dblShrinkPercent) dblShrinkPercent
 	,ISNULL(dblGradeReading,'N/A') dblGradeReading
@@ -35,7 +37,7 @@ FROM
 		,t3.intContractDetailId
 		,t3.dblTax * (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
 		,t3.dblNetTotal * (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
-		,t3.strTaxClass
+		
 	FROM (
 			 SELECT 
 				 BillDtl.intBillDetailId
@@ -96,17 +98,12 @@ FROM
 				,dblAmount					= BillDtl.dblTotal
 				,intContractDetailId		= ISNULL(BillDtl.intContractDetailId, 0)
 				,dblTax						= BillDtl.dblTax
-				,dblNetTotal				= BillDtl.dblTotal + BillDtl.dblTax
-				,strTaxClass = TaxClass.strTaxClass
+				,dblNetTotal				= BillDtl.dblTotal + BillDtl.dblTax				
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
 			ON BillDtl.intBillId = Bill.intBillId --and Bill.intTransactionType = 1
 		JOIN tblICItem Item 
-			ON BillDtl.intItemId = Item.intItemId
-		LEFT JOIN vyuAPBillDetailTax Tax 
-			ON BillDtl.intBillDetailId = Tax.intBillDetailId
-		LEFT JOIN tblSMTaxClass TaxClass 
-			ON Tax.intTaxClassId = TaxClass.intTaxClassId
+			ON BillDtl.intItemId = Item.intItemId		
 		LEFT JOIN tblICInventoryReceiptCharge INVRCPTCHR 
 			ON INVRCPTCHR.intInventoryReceiptChargeId = BillDtl.intInventoryReceiptChargeId	
 		LEFT JOIN tblICInventoryReceipt INVRCPT 
@@ -159,8 +156,7 @@ FROM
 			,dblAmount	
 			,intContractDetailId
 			,dblTax
-			,dblNetTotal
-			,strTaxClass
+			,dblNetTotal			
 	) t3 
 		ON t3.intBillId = t2.intBillId 
 			AND t3.intBillId = t1.intBillId
@@ -183,7 +179,7 @@ FROM
 		,t3.intContractDetailId
 		,t3.dblTax --* (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
 		,t3.dblNetTotal --* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
-		,t3.strTaxClass
+		
 	FROM (
 			 SELECT 
 				 strId						= Bill.strBillId
@@ -215,8 +211,7 @@ FROM
 				,dblAmount					= BillDtl2.dblTotal
 				,intContractDetailId		= ISNULL(BillDtl2.intContractDetailId, 0)
 				,dblTax						= BillDtl2.dblTax
-				,dblNetTotal				= BillDtl2.dblTotal + BillDtl2.dblTax
-				,strTaxClass = TaxClass.strTaxClass
+				,dblNetTotal				= BillDtl2.dblTotal + BillDtl2.dblTax				
 				,BillDtl2.intInventoryReceiptItemId
 				,BillDtl2.intLinkingId
 		FROM tblAPBillDetail BillDtl
@@ -233,11 +228,7 @@ FROM
 		LEFT JOIN tblAPBill Bill2 
 			ON BillDtl2.intBillId = Bill2.intBillId --and Bill.intTransactionType = 1
 		LEFT JOIN tblICItem Item2 
-			ON BillDtl2.intItemId = Item2.intItemId
-		LEFT JOIN vyuAPBillDetailTax Tax 
-			ON BillDtl2.intBillDetailId = Tax.intBillDetailId
-		LEFT JOIN tblSMTaxClass TaxClass 
-			ON Tax.intTaxClassId = TaxClass.intTaxClassId
+			ON BillDtl2.intItemId = Item2.intItemId		
 		LEFT JOIN tblICInventoryReceiptCharge INVRCPTCHR 
 			ON INVRCPTCHR.intInventoryReceiptChargeId = BillDtl2.intInventoryReceiptChargeId	
 		LEFT JOIN tblICInventoryReceipt INVRCPT 

@@ -47,6 +47,7 @@ BEGIN TRY
 			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1
 		) paySched
 		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
+		AND PD.dblPayment != 0
 
 		UPDATE tblAPBill 
 		SET
@@ -71,15 +72,27 @@ BEGIN TRY
 		OUTER APPLY 
 		(
 			SELECT
-				PD.intBillId,
-				SUM(PD.dblPayment) dblPayment,
-				SUM(PD.dblDiscount) dblDiscount,
-				SUM(PD.dblInterest) dblInterest
-			FROM tblAPPaymentDetail PD
-			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
-			WHERE 
-				PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
-			GROUP BY PD.intBillId
+				intBillId,
+				SUM(dblPayment) dblPayment,
+				SUM(dblDiscount) dblDiscount,
+				SUM(dblInterest) dblInterest
+			FROM
+			(
+				SELECT
+					PD.dblPayment,
+					CASE WHEN PD.dblPayment + PD.dblDiscount = PD.dblAmountDue THEN PD.dblDiscount 
+					WHEN B.ysnDiscountOverride = 1 THEN PD.dblDiscount ELSE 0 END
+					AS dblDiscount,
+					CASE WHEN PD.dblPayment - PD.dblInterest = PD.dblAmountDue THEN PD.dblInterest 
+					ELSE 0 END
+					AS dblInterest,
+					PD.intBillId
+				FROM tblAPPaymentDetail PD
+				INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
+				WHERE 
+					PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
+			) tmpPayDetails
+			GROUP BY intBillId
 		) payDetails 
 		OUTER APPLY (
 			SELECT 
@@ -98,6 +111,7 @@ BEGIN TRY
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND (B.ysnPrepayHasPayment = 0 OR B.intTransactionType NOT IN (2, 13))
+		AND PD.dblPayment != 0
 	END
 	ELSE IF @post = 0
 	BEGIN
@@ -113,6 +127,7 @@ BEGIN TRY
 			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1 AND P2.intPaymentId <> PD.intPaymentId
 		) paySched
 		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
+		AND PD.dblPayment != 0
 
 		UPDATE tblAPBill 
 		SET
@@ -164,6 +179,7 @@ BEGIN TRY
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND (B.ysnPrepayHasPayment = 0 OR B.intTransactionType NOT IN (2, 13))
+		AND PD.dblPayment != 0
 	END
 
 	--SELECT NULLED BILLS

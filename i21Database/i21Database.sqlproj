@@ -1495,7 +1495,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql"/>
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocation.sql" />
@@ -2820,7 +2820,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetStagedContainer.sql" />
     <Build Include="dbo\Tables\tblWHPickPreference.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerBudget.sql" />
-    <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Views\vyuETExportCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
@@ -3548,7 +3547,6 @@
     <Build Include="dbo\Tables\tblTRTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql" />
-    <Build Include="dbo\Stored Procedures\uspARSplitInvoice.sql" />
     <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARStatementofAccountReport.sql" />
     <Build Include="dbo\Views\vyuAROrderUOM.sql" />
@@ -6342,7 +6340,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrderByPlannedDate.sql" />
     <Build Include="dbo\Functions\fnICFormatNumber.sql" />
     <Build Include="dbo\Views\vyuCRMSalesOrderSearch.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInsertDefaultAccrual.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateDocumentMaintenance.sql" />
     <Build Include="dbo\Views\vyuARBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
@@ -8757,7 +8754,6 @@
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
     <Build Include="dbo\Views\vyuARCustomerAging_DashBoard.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCheckDPContract.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
@@ -9134,8 +9130,10 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
+    <Build Include="dbo\Views\vyuApiRecordAuditPivot.sql" />
     <Build Include="dbo\Views\vyuApiSalesperson.sql" />
     <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
     <Build Include="dbo\Views\vyuApiTerm.sql" />
@@ -9143,7 +9141,11 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
+    <Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9421,7 +9423,6 @@
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceiptLSM.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
     <Build Include="dbo\Tables\tblARPerformanceLog.sql" />

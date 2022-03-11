@@ -296,7 +296,7 @@ BEGIN TRY
 		   ,blbPurchaseContractFirstApproverSignature	= NULL--CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @FirstApprovalSign END
 		   ,blbPurchaseParentApproveSignature		= NULL-- CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END
 	FROM	vyuCTContractHeaderView CH
-	LEFT JOIN tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
+	LEFT JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
 	WHERE	intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	
 	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
