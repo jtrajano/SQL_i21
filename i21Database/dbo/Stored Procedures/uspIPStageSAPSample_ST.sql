@@ -17,6 +17,9 @@ BEGIN TRY
 	DECLARE @tblSample TABLE (
 		strERPPONumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strERPItemNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strContractNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strSAPPONumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strContainerNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strSampleNumber NVARCHAR(30) COLLATE Latin1_General_CI_AS
 		,strSampleTypeName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -78,6 +81,9 @@ BEGIN TRY
 			INSERT INTO @tblSample (
 				strERPPONumber
 				,strERPItemNumber
+				,strContractNumber
+				,strSAPPONumber
+				,strContainerNumber
 				,strSampleNumber
 				,strSampleTypeName
 				,strItemNo
@@ -101,6 +107,9 @@ BEGIN TRY
 				)
 			SELECT PO_NUMBER
 				,PO_LINE_ITEM_NO
+				,SO_NUMBER
+				,ERP_PO_NUMBER
+				,CONTAINER_NO
 				,SAMPLE_NO
 				,SAMPLE_TYPE
 				,ITEM_NO
@@ -133,6 +142,9 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'ROOT/HEADER', 2) WITH (
 					PO_NUMBER NVARCHAR(50)
 					,PO_LINE_ITEM_NO NVARCHAR(50)
+					,SO_NUMBER NVARCHAR(50)
+					,ERP_PO_NUMBER NVARCHAR(100)
+					,CONTAINER_NO NVARCHAR(100)
 					,SAMPLE_NO NVARCHAR(30)
 					,SAMPLE_TYPE NVARCHAR(50)
 					,ITEM_NO NVARCHAR(50)
@@ -186,6 +198,9 @@ BEGIN TRY
 			INSERT INTO tblIPSampleStage (
 				strERPPONumber
 				,strERPItemNumber
+				,strContractNumber
+				,strSAPPONumber
+				,strContainerNumber
 				,strSampleNumber
 				,strSampleTypeName
 				,strItemNo
@@ -209,6 +224,9 @@ BEGIN TRY
 				)
 			SELECT strERPPONumber
 				,strERPItemNumber
+				,strContractNumber
+				,strSAPPONumber
+				,strContainerNumber
 				,strSampleNumber
 				,strSampleTypeName
 				,strItemNo
