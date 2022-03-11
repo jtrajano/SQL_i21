@@ -153,7 +153,8 @@ AS
 			NM.strEntitySelectedLocation, -- CT-5315
 			ysnContractRequiresApproval = (case when ue.countValue > 0 then convert(bit,1) else convert(bit,0) end),
 			CH.intCompanyLocationId,
-			NM.strLocationName
+			NM.strLocationName,
+			CH.intDaysForFinance
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY

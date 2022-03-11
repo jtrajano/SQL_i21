@@ -7700,4 +7700,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmValidFrom" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4b17dd2f-eb7a-4b43-a6c5-314ddd32ffc2" ChangeDateTime="03/11/2022 03:32:27">
+    <Property Name="ElementName" Value="[dbo].[tblCTCompanyPreference].[intFinanceCost]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFinanceCostId" />
+  </Operation>
 </Operations>
