@@ -74,7 +74,8 @@
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 
-		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityEFTHeader WHERE intEntityId = @intEntityId)
+		IF ISNULL(@intEntityId, 0) <> 0 AND EXISTS(SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @intEntityId)
+			AND NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityEFTHeader WHERE intEntityId = @intEntityId)
 		BEGIN
 			INSERT INTO [tblEMEntityEFTHeader] ([intEntityId], [intConcurrencyId])
 			VALUES (@intEntityId, 1)
@@ -87,7 +88,7 @@
 				SET [intEntityEFTHeaderId] = @intNewHeaderId WHERE intEntityEFTInfoId = @intEntityEFTInfoId
 			END
 		END
-		ELSE
+		ELSE IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityEFTHeader WHERE intEntityId = @intEntityId)
 		BEGIN
 			UPDATE tblEMEntityEFTInformation 
 			SET 
