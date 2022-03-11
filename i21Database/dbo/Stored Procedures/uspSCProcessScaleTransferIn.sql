@@ -104,7 +104,7 @@ BEGIN TRY
 			--Detail
 			,intItemId					= SC.intItemId
 			,intItemLocationId			= SC.intProcessingLocationId
-			,intItemUOMId				= ICTran.intItemUOMId
+			,intItemUOMId				= SC.intItemUOMIdTo
 			,intGrossNetUOMId			= CASE
 											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
 											ELSE SC.intItemUOMIdTo
