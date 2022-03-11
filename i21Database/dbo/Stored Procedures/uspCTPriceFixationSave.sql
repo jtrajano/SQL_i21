@@ -603,6 +603,10 @@ BEGIN TRY
 			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
+			exec uspCTUpdateSequenceCostRate
+				@intContractDetailId = @intContractDetailId,
+				@intUserId = @intUserId
+
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
 				UPDATE	CH
