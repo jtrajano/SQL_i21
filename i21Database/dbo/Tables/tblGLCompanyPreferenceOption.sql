@@ -13,6 +13,12 @@
 	[ysnShowAccountingPeriod] BIT NULL,
 	[ysnRequireLocation] BIT NULL,
 	[strSubsidiaryCompanyJson] NVARCHAR(MAX),
+	/*Override RE Settings*/
+	[ysnREOverride] BIT NULL,
+	[ysnREOverrideLocation] BIT NULL,
+	[ysnREOverrideLOB] BIT NULL,
+	[ysnREOverrideCompany] BIT NULL,
+	[intIncomeSummaryAccountId] INT NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO

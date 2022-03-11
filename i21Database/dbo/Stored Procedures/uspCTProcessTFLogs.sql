@@ -92,6 +92,8 @@ BEGIN
 				, strBankApprovalStatus
 				, dblLimit
 				, dblSublimit
+				, dblFinanceQty
+				, dblFinancedAmount
 				)
 			select
 				strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' else 'Updated Contract' end)
@@ -126,6 +128,8 @@ BEGIN
 				, strBankApprovalStatus = STF.strApprovalStatus
 				, dblLimit = limit.dblLimit
 				, dblSublimit = sublimit.dblLimit
+				, dblFinanceQty = cd.dblQuantity
+				, dblFinancedAmount = cd.dblTotalCost
 			
 			from
 				@TFXML tf

@@ -556,6 +556,10 @@
     <Build Include="dbo\Tables\tblCRMBrand.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFBankLoanLineActivityReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesRevaluationAging.sql" />
+    <Build Include="dbo\Tables\tblCTDefaultTradeFinance.sql" />
+    <Build Include="dbo\Views\vyuCTOptionalityValue.sql" />
+    <Build Include="dbo\Functions\fnARCompareAccountSegment.sql" />
+    <Build Include="dbo\Views\vyuCTPriceContractStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10277,6 +10281,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
     <Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
+    <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10605,6 +10610,7 @@
     <None Include="Scripts\Post-Deployment\EM\2210_AddDefaultEFTBank.sql" />
     <Build Include="dbo\Views\vyuARGetCustomer.sql" />
     <Build Include="dbo\Views\vyuARGetEntityLocation.sql" />
+    <Build Include="dbo\Functions\fnAPInstructionCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -10826,5 +10832,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
   </ItemGroup>
 </Project>

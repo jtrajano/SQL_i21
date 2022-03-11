@@ -3096,7 +3096,7 @@ BEGIN TRY
 									THEN CD.intContractStatusId
 								ELSE (
 										CASE 
-											WHEN CD1.intContractStatusId = 3 --Cancelled
+											WHEN CD1.intContractStatusId in (3,6) --Cancelled & Short Close
 												THEN CD1.intContractStatusId
 											ELSE CD.intContractStatusId
 											END

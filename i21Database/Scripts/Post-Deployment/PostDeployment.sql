@@ -301,6 +301,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
+:r .\AR\DefaultData\97_RefreshARTempTable.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -539,6 +540,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\1810_Set_Default_Language.sql
 :r .\EM\1810_Fix_Check_Payee_Name.sql
 :r .\EM\1910_Set_Contact_Location.sql
+:r .\EM\2210_AddDefaultEFTBank.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

@@ -7693,4 +7693,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="fnCMCashFlowTransactions" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="803be954-da98-4f43-b4fe-8ccc88ff1df3" ChangeDateTime="03/10/2022 01:22:18">
+    <Property Name="ElementName" Value="[dbo].[tblLGInsurancePremiumFactor].[dtmDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGInsurancePremiumFactor]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmValidFrom" />
+  </Operation>
 </Operations>

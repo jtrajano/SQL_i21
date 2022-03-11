@@ -1,9 +1,16 @@
 ﻿CREATE TABLE tblLGInsurancePremiumFactor
 (
-	[intInsurancePremiumFactorId]  INT NOT NULL PRIMARY KEY IDENTITY (1, 1),
+	[intInsurancePremiumFactorId] INT NOT NULL IDENTITY (1, 1),
 	[intEntityId] INT NOT NULL,
 	[intConcurrencyId] INT NOT NULL, 
-	[dtmDate] DATETIME NULL,
+	[dtmValidFrom] DATETIME NULL,
 
-	CONSTRAINT [FK_tblLGInsurancePremiumFactor_tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId])
+	strPolicyNumber NVARCHAR(50) NOT NULL,
+	dblSalesPercent NUMERIC(18, 6) NULL DEFAULT((0)),
+	dblPurchasePercent NUMERIC(18, 6) NULL DEFAULT((0)),
+	dblInboundWarehouse NUMERIC(18, 6) NULL DEFAULT((0)),	
+	dtmValidTo DATETIME NULL,
+
+	CONSTRAINT [FK_tblLGInsurancePremiumFactor_tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]), 
+    CONSTRAINT [PK_tblLGInsurancePremiumFactor] PRIMARY KEY ([intInsurancePremiumFactorId])
 )

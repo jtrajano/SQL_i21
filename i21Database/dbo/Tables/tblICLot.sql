@@ -123,3 +123,8 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		ON [dbo].[tblICLot](strLotNumber ASC);
 
 	GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblICLot_strCondition]
+		ON [dbo].[tblICLot](intItemId ASC, intLocationId ASC, strCondition ASC, strLotNumber ASC);
+
+	GO 

@@ -806,7 +806,10 @@ BEGIN
 END
 GO
 
-
+IF EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed')
+BEGIN
+	DELETE  FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed'
+END
 
 
 

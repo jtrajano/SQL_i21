@@ -192,6 +192,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , intLocationAccountSegmentId			= GLSEGMENT.intLocationAccountSegmentId
 	 , intCompanyAccountSegmentId			= GLSEGMENT.intCompanyAccountSegmentId
 	 , ysnIntraCompany						= CASE WHEN ISNULL(INV.ysnIntraCompany, 0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries, 0) END
+	 , strGoodsStatus						= INV.strGoodsStatus
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId

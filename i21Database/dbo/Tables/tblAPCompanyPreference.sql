@@ -21,6 +21,11 @@
     [strVoucherImportTemplate]      NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Standard', 
     [intImportTypeId]               INT NOT NULL DEFAULT 5,
     [intInstructionCode]            INT NOT NULL DEFAULT 1,
-    [intConcurrencyId]              INT NOT NULL DEFAULT 0
+    [intConcurrencyId]              INT NOT NULL DEFAULT 0,
+    [ysnAllowIntraCompanyEntries]	BIT NOT NULL DEFAULT(0),
+	[ysnAllowIntraLocationEntries]	BIT NOT NULL DEFAULT(0),
+	[ysnAllowSingleLocationEntries]	BIT NOT NULL DEFAULT(1),
+	[intDueToAccountId]				INT NOT NULL DEFAULT(0), 
+    [intDueFromAccountId]			INT NOT NULL DEFAULT(0)
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );

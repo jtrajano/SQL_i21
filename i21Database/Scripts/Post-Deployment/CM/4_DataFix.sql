@@ -238,6 +238,7 @@ GO
 
 declare @i int, @s nvarchar(500)
 select @i = max(intBatchId)+ 1 from tblCMBankFileGenerationLog
+select @i = ISNULL(@i, 1)
 
 if not exists(select 1  from sys.sequences where name = 'sqCMACHBatchId')
 begin 

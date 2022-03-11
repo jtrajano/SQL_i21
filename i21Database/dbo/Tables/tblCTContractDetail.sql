@@ -178,6 +178,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dtmDateSubmitted DATETIME NULL,
 	intApprovalStatusId INT NULL,
 	dtmDateApproved DATETIME NULL,
+	dblInterestRate numeric(18, 6) NULL,
 
 	 
 	-- Quality/Optionality

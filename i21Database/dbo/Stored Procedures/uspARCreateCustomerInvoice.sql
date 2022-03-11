@@ -155,6 +155,7 @@
 	,@LoanAmount					NUMERIC(18, 6)	= NULL
 	,@BankValuationRuleId			INT				= NULL
 	,@TradeFinanceComments			NVARCHAR(MAX)	= NULL
+	,@GoodsStatus					NVARCHAR(100)	= NULL
 AS
 
 BEGIN
@@ -522,7 +523,8 @@ BEGIN TRY
 		,[strBankTransactionId]
 		,[dblLoanAmount]
 		,[intBankValuationRuleId]
-		,[strTradeFinanceComments])
+		,[strTradeFinanceComments]
+		,[strGoodsStatus])
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
 		,[strType]						= @Type
@@ -617,6 +619,7 @@ BEGIN TRY
 		,[dblLoanAmount]				= @LoanAmount
 		,[intBankValuationRuleId]		= @BankValuationRuleId
 		,[strTradeFinanceComments]		= @TradeFinanceComments
+		,[strGoodsStatus]				= @GoodsStatus
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN

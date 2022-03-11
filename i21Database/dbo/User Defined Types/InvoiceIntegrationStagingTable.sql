@@ -223,4 +223,5 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[dblLoanAmount]						NUMERIC(18, 6)									NULL
 	,[intBankValuationRuleId]				INT												NULL
 	,[strTradeFinanceComments]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS		NULL
+	,[strGoodsStatus]						NVARCHAR(100) COLLATE Latin1_General_CI_AS		NULL
 )
