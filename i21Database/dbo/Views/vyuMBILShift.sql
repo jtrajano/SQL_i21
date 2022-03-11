@@ -18,6 +18,7 @@ SELECT Shift.intShiftId
 	, Shift.intEndOdometer
 	, Items.dblFuelGallonsDelievered
 	, Items.dblFuelSales
+	, Shift.strTrailerNo   
 	, Shift.intConcurrencyId
 FROM tblMBILShift Shift
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Shift.intDriverId
