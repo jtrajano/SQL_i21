@@ -504,7 +504,7 @@ LEFT JOIN (
 	INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
 	INNER JOIN tblSMTaxClass TCLASS ON IDT.intTaxClassId = TCLASS.intTaxClassId
 	WHERE ((IDT.ysnTaxExempt = 1 AND ISNULL(ID.dblComputedGrossPrice, 0) <> 0) OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
-	  AND ID.intItemId <> @intItemForFreightId
+	  AND (@intItemForFreightId IS NULL OR ID.intItemId <> @intItemForFreightId)
 	GROUP BY ID.intInvoiceId
 ) TOTALTAX ON TOTALTAX.intInvoiceId = INV.intInvoiceId
 
