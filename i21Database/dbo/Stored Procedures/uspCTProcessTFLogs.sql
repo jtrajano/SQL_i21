@@ -16,6 +16,7 @@ BEGIN
 			,@xmlDocumentId INT
 			,@TRFLog TRFLog
 			,@TRFTradeFinance TRFTradeFinance
+			,@TRFTradeFinanceFinal TRFTradeFinance
 			,@TFTransNo nvarchar(50)
 			,@intActiveContractDetailId int = 0
 			,@strAction nvarchar(20)
@@ -167,7 +168,7 @@ BEGIN
 
 		insert into @TRFTradeFinance
 		select
-			intTradeFinanceId = @intTradeFinanceId
+			intTradeFinanceId = isnull(tff.intTradeFinanceId, 0)
 			,strTradeFinanceNumber = isnull(cd.strFinanceTradeNo,tf.strFinanceTradeNo)
 			,strTransactionType = 'Contract'
 			,strTransactionNumber = ch.strContractNumber + '-' + convert(nvarchar(20),cd.intContractSeq)
@@ -194,6 +195,7 @@ BEGIN
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			left join tblCTApprovalStatusTF ap on ap.intApprovalStatusId = cd.intApprovalStatusId
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
+			left join tblTRFTradeFinance tff on tff.intTransactionDetailId = tf.intContractDetailId
 			
 		;
 
@@ -208,33 +210,67 @@ BEGIN
 			SET @strAction = 'UPDATE'
 		END
 	
-		If @strAction = 'Created'
+		DECLARE @Counter INT 
+		SET @Counter= (SELECT Count(1) From @TRFTradeFinance)
+		WHILE ( 1 <= @Counter)
 		BEGIN
-			EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId
-		END	
-		ELSE
-		BEGIN
-			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = @strAction
+			INSERT INTO @TRFTradeFinanceFinal
+			select  intTradeFinanceId	
+					,strTradeFinanceNumber	
+					,strTransactionType	
+					,strTransactionNumber	
+					,intTransactionHeaderId	
+					,intTransactionDetailId	
+					,intBankId	
+					,intBankAccountId	
+					,intBorrowingFacilityId	
+					,intLimitTypeId	
+					,intSublimitTypeId	
+					,ysnSubmittedToBank	
+					,dtmDateSubmitted	
+					,strApprovalStatus	
+					,dtmDateApproved	
+					,strRefNo	
+					,intOverrideFacilityValuation	
+					,strCommnents	
+					,dtmCreatedDate	
+					,intConcurrencyId
+			FROM @TRFTradeFinance where intId = @Counter
+			select * from @TRFTradeFinanceFinal
+			If @strAction = 'Created'
+			BEGIN
+				EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinanceFinal, @intUserId = @intUserId
+			END
+			ELSE
+			BEGIN
+			
+				EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinanceFinal, @intUserId = @intUserId, @strAction = @strAction
 
-			UPDATE tblCTContractDetail
-			SET intBankAccountId = 0
-				,intBankId = 0
-				,intBorrowingFacilityId = 0
-				,intBorrowingFacilityLimitId = 0
-				,intBorrowingFacilityLimitDetailId = 0
-				,strReference = ''
-				,dblLoanAmount = 0
-				,intBankValuationRuleId = 0
-				,strBankReferenceNo = ''
-				,strComments = ''
-				,intFacilityId = 0
-				,intLoanLimitId = 0
-				,intOverrideFacilityId = 0
-				,ysnSubmittedToBank = 0
-				,dtmDateSubmitted = '1/1/1900'
-				,intApprovalStatusId = 0
-				,dtmDateApproved = '1/1/1900'
-			WHERE intApprovalStatusId = 3
+				UPDATE tblCTContractDetail
+				SET intBankAccountId = 0
+					,intBankId = 0
+					,intBorrowingFacilityId = 0
+					,intBorrowingFacilityLimitId = 0
+					,intBorrowingFacilityLimitDetailId = 0
+					,strReferenceNo = ''
+					,dblLoanAmount = 0
+					,intBankValuationRuleId = 0
+					,strBankReferenceNo = ''
+					,strComments = ''
+					,intFacilityId = 0
+					,intLoanLimitId = 0
+					,intOverrideFacilityId = 0
+					,ysnSubmittedToBank = 0
+					,dtmDateSubmitted = '1/1/1900'
+					,intApprovalStatusId = 0
+					,dtmDateApproved = '1/1/1900'
+				WHERE intApprovalStatusId = 3
+			END
+
+
+			
+			SET @Counter  = @Counter  - 1
+			DELETE FROM @TRFTradeFinanceFinal
 		END
 
 
