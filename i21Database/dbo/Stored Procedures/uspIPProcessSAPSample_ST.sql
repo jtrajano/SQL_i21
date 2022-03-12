@@ -15,6 +15,9 @@ BEGIN TRY
 		,@intUserId INT
 	DECLARE @strERPPONumber NVARCHAR(100)
 		,@strERPItemNumber NVARCHAR(100)
+		,@strContractNumber NVARCHAR(50)
+		,@strSAPPONumber NVARCHAR(100)
+		,@strContainerNumber NVARCHAR(100)
 		,@strSampleNumber NVARCHAR(30)
 		,@strSampleTypeName NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
@@ -64,6 +67,10 @@ BEGIN TRY
 		,@intPreviousSampleStatusId INT
 		,@intControlPointId INT
 		,@ysnPartyMandatory BIT
+		,@intLoadId INT
+		,@intLoadDetailId INT
+		,@intLoadContainerId INT
+		,@intLoadDetailContainerLinkId INT
 	DECLARE @intNewStageSampleId INT
 	DECLARE @intValidDate INT
 	DECLARE @strDescription AS NVARCHAR(MAX)
@@ -86,6 +93,9 @@ BEGIN TRY
 		,@strOldCourierRef NVARCHAR(50)
 		,@strOldComment NVARCHAR(MAX)
 		,@strNewContractNumber NVARCHAR(50)
+		,@strOldShipmentNumber NVARCHAR(50)
+		,@strNewShipmentNumber NVARCHAR(50)
+		,@strOldContainerNumber NVARCHAR(50)
 	DECLARE @tblQMTestResultChanges TABLE (
 		strOldPropertyValue NVARCHAR(MAX)
 		,strOldComment NVARCHAR(MAX)
@@ -115,6 +125,9 @@ BEGIN TRY
 
 			SELECT @strERPPONumber = NULL
 				,@strERPItemNumber = NULL
+				,@strContractNumber = NULL
+				,@strSAPPONumber = NULL
+				,@strContainerNumber = NULL
 				,@strSampleNumber = NULL
 				,@strSampleTypeName = NULL
 				,@strItemNo = NULL
@@ -165,6 +178,10 @@ BEGIN TRY
 				,@intPreviousSampleStatusId = NULL
 				,@intControlPointId = NULL
 				,@ysnPartyMandatory = NULL
+				,@intLoadId = NULL
+				,@intLoadDetailId = NULL
+				,@intLoadContainerId = NULL
+				,@intLoadDetailContainerLinkId = NULL
 
 			SELECT @strDescription = NULL
 
@@ -187,9 +204,15 @@ BEGIN TRY
 				,@strOldCourierRef = NULL
 				,@strOldComment = NULL
 				,@strNewContractNumber = NULL
+				,@strOldShipmentNumber = NULL
+				,@strNewShipmentNumber = NULL
+				,@strOldContainerNumber = NULL
 
 			SELECT @strERPPONumber = ISNULL(strERPPONumber, '')
 				,@strERPItemNumber = strERPItemNumber
+				,@strContractNumber = strContractNumber
+				,@strSAPPONumber = strSAPPONumber
+				,@strContainerNumber = strContainerNumber
 				,@strSampleNumber = strSampleNumber
 				,@strSampleTypeName = strSampleTypeName
 				,@strItemNo = strItemNo
@@ -326,6 +349,108 @@ BEGIN TRY
 				SELECT @intBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'BOOK_ID')
 
 				SELECT @intSubBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'SUB_BOOK_ID')
+			END
+			ELSE IF CHARINDEX('arrival', LOWER(@strSampleTypeName)) > 0 -- Only for Arrival sample type
+			BEGIN
+				IF ISNULL(@strContractNumber, '') = ''
+				BEGIN
+					RAISERROR (
+							'Invalid Contract No. '
+							,16
+							,1
+							)
+				END
+
+				IF ISNULL(@strSAPPONumber, '') = ''
+				BEGIN
+					RAISERROR (
+							'Invalid SAP PO No. '
+							,16
+							,1
+							)
+				END
+
+				SELECT @intContractHeaderId = CH.intContractHeaderId
+				FROM tblCTContractHeader CH WITH (NOLOCK)
+				WHERE strContractNumber = @strContractNumber
+
+				IF ISNULL(@intContractHeaderId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid Contract. '
+							,16
+							,1
+							)
+				END
+
+				SELECT @intContractDetailId = intContractDetailId
+				FROM tblCTContractDetail WITH (NOLOCK)
+				WHERE strERPPONumber = @strSAPPONumber
+					AND intContractHeaderId = @intContractHeaderId
+
+				IF ISNULL(@intContractDetailId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid Contract Sequence. '
+							,16
+							,1
+							)
+				END
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblCTContractDetail t WITH (NOLOCK)
+						WHERE t.intContractDetailId = @intContractDetailId
+							AND t.intItemId = @intItemId
+						)
+				BEGIN
+					RAISERROR (
+							'Item No is not matching with Contract Sequence Item. '
+							,16
+							,1
+							)
+				END
+
+				IF ISNULL(@strContainerNumber, '') <> ''
+				BEGIN
+					SELECT @intLoadId = L.intLoadId
+						,@intLoadDetailId = LD.intLoadDetailId
+						,@intLoadContainerId = LC.intLoadContainerId
+						,@intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					FROM tblLGLoad L WITH (NOLOCK)
+					JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+						AND L.intShipmentType = 1
+						AND LD.intPContractDetailId = @intContractDetailId
+						AND L.intShipmentStatus <> 10
+					JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+					JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+						AND LC.strContainerNumber = @strContainerNumber
+				END
+
+				IF @intLoadDetailContainerLinkId IS NOT NULL
+				BEGIN
+					SELECT @intProductTypeId = 9 -- Container Line Item  
+						,@intProductValueId = @intLoadDetailContainerLinkId
+				END
+				ELSE
+				BEGIN
+					SELECT @intProductTypeId = 8 -- Contract Line Item
+						,@intProductValueId = @intContractDetailId
+				END
+
+				SELECT @intLocationId = CD.intCompanyLocationId
+					,@intItemContractId = CD.intItemContractId
+					,@intItemBundleId = CD.intItemBundleId
+					,@intCountryID = ISNULL(CA.intCountryID, IC.intCountryId)
+					,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
+					,@intBookId = CD.intBookId
+					,@intSubBookId = CD.intSubBookId
+				FROM tblCTContractDetail CD WITH (NOLOCK)
+				JOIN tblICItem IM WITH (NOLOCK) ON IM.intItemId = CD.intItemId
+					AND CD.intContractDetailId = @intContractDetailId
+				LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
+				LEFT JOIN tblICItemContract IC WITH (NOLOCK) ON IC.intItemContractId = CD.intItemContractId
+				LEFT JOIN tblSMCountry CG WITH (NOLOCK) ON CG.intCountryID = IC.intCountryId
 			END
 			ELSE
 			BEGIN
@@ -597,6 +722,9 @@ BEGIN TRY
 			SET @strInfo1 = ISNULL(@strSampleNumber, '') + ' / ' + ISNULL(@strERPPONumber, '')
 			SET @strInfo2 = ISNULL(@strItemNo, '')
 
+			IF ISNULL(@strContractNumber, '') <> ''
+				SELECT @strInfo1 = ISNULL(@strSampleNumber, '') + ' / ' + ISNULL(@strContractNumber, '')
+
 			SELECT @intUserId = intEntityId
 			FROM tblSMUserSecurity WITH (NOLOCK)
 			WHERE strUserName = 'IRELYADMIN'
@@ -650,6 +778,11 @@ BEGIN TRY
 					,strMarks
 					,intCompanyLocationSubLocationId
 					,strCountry
+					,strContainerNumber
+					,intLoadId
+					,intLoadDetailId
+					,intLoadContainerId
+					,intLoadDetailContainerLinkId
 					,dtmBusinessDate
 					,intShiftId
 					,intLocationId
@@ -694,6 +827,11 @@ BEGIN TRY
 					,@strMarks
 					,@intCompanyLocationSubLocationId
 					,@strCountry
+					,@strContainerNumber
+					,@intLoadId
+					,@intLoadDetailId
+					,@intLoadContainerId
+					,@intLoadDetailContainerLinkId
 					,@dtmBusinessDate
 					,@intShiftId
 					,@intLocationId
@@ -836,6 +974,7 @@ BEGIN TRY
 					,@strOldCourier = S.strCourier
 					,@strOldCourierRef = S.strCourierRef
 					,@strOldComment = S.strComment
+					,@strOldContainerNumber = S.strContainerNumber
 				FROM tblQMSample S WITH (NOLOCK)
 				WHERE S.intSampleId = @intSampleId
 
@@ -846,6 +985,7 @@ BEGIN TRY
 					,@strOldQuantityUOM = S.strRepresentingUOM
 					,@strOldSampleStatus = S.strSampleStatus
 					,@strOldSubLocationName = S.strSubLocationName
+					,@strOldShipmentNumber = S.strLoadNumber
 				FROM vyuQMSampleNotMapped S WITH (NOLOCK)
 				WHERE S.intSampleId = @intSampleId
 
@@ -853,6 +993,7 @@ BEGIN TRY
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intSampleTypeId = @intSampleTypeId
 					--,strSampleRefNo = @strSampleRefNo
+					,intProductTypeId = @intProductTypeId
 					,intProductValueId = @intProductValueId
 					,intSampleStatusId = @intSampleStatusId
 					,intPreviousSampleStatusId = @intPreviousSampleStatusId
@@ -869,6 +1010,11 @@ BEGIN TRY
 					,strMarks = @strMarks
 					,intCompanyLocationSubLocationId = @intCompanyLocationSubLocationId
 					,strCountry = @strCountry
+					,strContainerNumber = @strContainerNumber
+					,intLoadId = @intLoadId
+					,intLoadDetailId = @intLoadDetailId
+					,intLoadContainerId = @intLoadContainerId
+					,intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
 					,dtmBusinessDate = @dtmBusinessDate
 					,intShiftId = @intShiftId
 					,intLocationId = @intLocationId
@@ -882,9 +1028,11 @@ BEGIN TRY
 				WHERE intSampleId = @intSampleId
 
 				SELECT @strNewContractNumber = CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq)
+					,@strNewShipmentNumber = L.strLoadNumber
 				FROM tblQMSample S WITH (NOLOCK)
 				LEFT JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = S.intContractDetailId
 				LEFT JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+				LEFT JOIN tblLGLoad L WITH (NOLOCK) ON L.intLoadId = S.intLoadId
 				WHERE S.intSampleId = @intSampleId
 			END
 
@@ -990,6 +1138,12 @@ BEGIN TRY
 						IF (@strOldContractNumber <> @strNewContractNumber)
 							SET @strDetails += '{"change":"strSequenceNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldContractNumber) + '","to":"' + LTRIM(@strNewContractNumber) + '","leaf":true,"changeDescription":"Contract Number"},'
 
+						IF (ISNULL(@strOldShipmentNumber, '') <> ISNULL(@strNewShipmentNumber, ''))
+							SET @strDetails += '{"change":"strLoadNumber","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldShipmentNumber, '')) + '","to":"' + LTRIM(ISNULL(@strNewShipmentNumber, '')) + '","leaf":true,"changeDescription":"Shipment Number"},'
+
+						IF (@strOldContainerNumber <> @strContainerNumber)
+							SET @strDetails += '{"change":"strContainerNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldContainerNumber) + '","to":"' + LTRIM(@strContainerNumber) + '","leaf":true,"changeDescription":"Container Number"},'
+
 						IF (@strOldItemNo <> @strItemNo)
 							SET @strDetails += '{"change":"strItemNo","iconCls":"small-gear","from":"' + LTRIM(@strOldItemNo) + '","to":"' + LTRIM(@strItemNo) + '","leaf":true,"changeDescription":"Item No"},'
 
@@ -1010,7 +1164,6 @@ BEGIN TRY
 
 						--IF (@strOldSampleRefNo <> @strSampleRefNo)
 						--	SET @strDetails += '{"change":"strSampleRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleRefNo) + '","to":"' + LTRIM(@strSampleRefNo) + '","leaf":true,"changeDescription":"Sample Ref No"},'
-
 						IF (@strOldSampleNote <> @strSampleNote)
 							SET @strDetails += '{"change":"strSampleNote","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleNote) + '","to":"' + LTRIM(@strSampleNote) + '","leaf":true,"changeDescription":"Sample Note"},'
 
@@ -1219,6 +1372,9 @@ BEGIN TRY
 			INSERT INTO tblIPSampleArchive (
 				strERPPONumber
 				,strERPItemNumber
+				,strContractNumber
+				,strSAPPONumber
+				,strContainerNumber
 				,strSampleNumber
 				,strSampleTypeName
 				,strItemNo
@@ -1244,6 +1400,9 @@ BEGIN TRY
 				)
 			SELECT strERPPONumber
 				,strERPItemNumber
+				,strContractNumber
+				,strSAPPONumber
+				,strContainerNumber
 				,strSampleNumber
 				,strSampleTypeName
 				,strItemNo
@@ -1307,6 +1466,9 @@ BEGIN TRY
 			INSERT INTO tblIPSampleError (
 				strERPPONumber
 				,strERPItemNumber
+				,strContractNumber
+				,strSAPPONumber
+				,strContainerNumber
 				,strSampleNumber
 				,strSampleTypeName
 				,strItemNo
@@ -1332,6 +1494,9 @@ BEGIN TRY
 				)
 			SELECT strERPPONumber
 				,strERPItemNumber
+				,strContractNumber
+				,strSAPPONumber
+				,strContainerNumber
 				,strSampleNumber
 				,strSampleTypeName
 				,strItemNo
