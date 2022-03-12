@@ -146,6 +146,7 @@
 	,@PaidCPP						BIT				= 0
 	,@ItemQualityPremium			NUMERIC(18, 6)	= 0
 	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0
+	,@TransactionNo					NVARCHAR(50)	= NULL
 	,@BankId						INT				= NULL
 	,@BankAccountId					INT				= NULL
 	,@BorrowingFacilityId			INT				= NULL
@@ -515,6 +516,7 @@ BEGIN TRY
 		,[intLineOfBusinessId]
 		,[intICTId]
 		,[intSalesOrderId]
+		,[strTransactionNo]
 		,[intBankId]
 		,[intBankAccountId]
 		,[intBorrowingFacilityId]
@@ -610,6 +612,7 @@ BEGIN TRY
 		,[intLineOfBusinessId]			= @intLineOfBusinessId
 		,[intICTId]						= @intICTId
 		,[intSalespersonId]				= @intSalesOrderId
+		,[strTransactionNo]				= @TransactionNo
 		,[intBankId]					= @BankId
 		,[intBankAccountId]				= @BankAccountId
 		,[intBorrowingFacilityId]		= @BorrowingFacilityId
