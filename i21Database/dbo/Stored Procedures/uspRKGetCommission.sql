@@ -2,25 +2,36 @@
 	@intBrokerageAccountId INT
 	, @intFutureMarketId INT
 	, @dtmTransactionDate DATETIME
-	, @intInstrymentTypeId INT
-	, @dblCommission NUMERIC(18,6) OUTPUT
-	, @intBrokerageCommissionId INT OUTPUT
+	, @intInstrumentTypeId INT
 
 AS
 
 BEGIN
-	SELECT @dblCommission = ISNULL(dblFutCommission, 0) * -1
-		, @intBrokerageCommissionId = intBrokerageCommissionId
-	FROM (
-		SELECT CASE WHEN @intInstrymentTypeId = 1 THEN ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END
-					WHEN @intInstrymentTypeId = 2 THEN ISNULL(bc.dblOptCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END AS dblFutCommission
-			, intBrokerageCommissionId
+	
+	IF  @intInstrumentTypeId = 2 
+	BEGIN
+
+		SELECT TOP 1 dblCommissionRate = ISNULL(ISNULL(bc.dblOptCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END,0)
+			,strCommissionRateType =  CASE WHEN bc.intOptionsRateType = 1 THEN 'Half-turn' ELSE '' END
+			,intBrokerageCommissionId
 		FROM tblRKBrokerageCommission bc
 		LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = bc.intFutCurrencyId
 		WHERE bc.intFutureMarketId = @intFutureMarketId
 			AND bc.intBrokerageAccountId = @intBrokerageAccountId
 			AND @dtmTransactionDate BETWEEN bc.dtmEffectiveDate AND isnull(bc.dtmEndDate,getdate())
-	) tbl
+	END
+	ELSE
+	BEGIN
+		
+		SELECT TOP 1 dblCommissionRate = CASE WHEN bc.intFuturesRateType = 1 THEN ISNULL((ISNULL(bc.dblFutCommission, 0) / 2) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END,0)
+											ELSE ISNULL(ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END,0) END 
+			,strCommissionRateType = CASE WHEN bc.intFuturesRateType = 1 THEN 'Round-turn' ELSE 'Half-turn' END 
+			,intBrokerageCommissionId
+		FROM tblRKBrokerageCommission bc
+		LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = bc.intFutCurrencyId
+		WHERE bc.intFutureMarketId = @intFutureMarketId
+			AND bc.intBrokerageAccountId = @intBrokerageAccountId
+			AND @dtmTransactionDate BETWEEN bc.dtmEffectiveDate AND isnull(bc.dtmEndDate,getdate())
+	END
 	
-	SET @dblCommission = ISNULL(@dblCommission,0)
 END
