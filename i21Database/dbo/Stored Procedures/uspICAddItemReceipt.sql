@@ -1823,6 +1823,7 @@ BEGIN
 						AND ItemLot.strParentLotNumber = parentLot.strParentLotNumber
 			WHERE	ItemLot.intParentLotId IS NOT NULL 
 					AND parentLot.intParentLotId IS NULL 
+					AND RTRIM(LTRIM(LOWER(ItemLot.ReceiptType))) <> 'transfer order'
 
 			IF @valueLotRecordNo IS NOT NULL
 			BEGIN
