@@ -217,7 +217,7 @@ BEGIN
 			, dtmDateSubmitted = r.dtmDateSubmitted
 			, strApprovalStatus = r.strApprovalStatus
 			, dtmDateApproved = r.dtmDateApproved
-			, strRefNo = r.strBankReferenceNo
+			, strRefNo = r.strReferenceNo
 			, intOverrideFacilityValuation = r.intOverrideFacilityValuation
 			, strCommnents = r.strComments
 		FROM 
@@ -367,7 +367,7 @@ BEGIN
 	--		, dtmDateSubmitted = r.dtmDateSubmitted
 	--		, strApprovalStatus = r.strApprovalStatus
 	--		, dtmDateApproved = r.dtmDateApproved
-	--		, strRefNo = r.strBankReferenceNo
+	--		, strRefNo = r.strReferenceNo
 	--		, intOverrideFacilityValuation = r.intOverrideFacilityValuation
 	--		, strCommnents = r.strComments
 	--	FROM 
