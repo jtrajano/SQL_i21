@@ -77,7 +77,7 @@ SELECT
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
 	, Receipt.dtmCreated 
-	, Receipt.strInternalComments
+	, Receipt.strRemarks
 	, fiscal.strPeriod strAccountingPeriod
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt

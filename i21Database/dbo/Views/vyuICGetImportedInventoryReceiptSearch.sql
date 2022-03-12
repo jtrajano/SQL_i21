@@ -71,7 +71,7 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
 	, Receipt.dtmCreated 
-	, Receipt.strInternalComments
+	, Receipt.strRemarks
 	, fiscal.strPeriod strAccountingPeriod
 	, Receipt.intBookId
 	, Receipt.intSubBookId
