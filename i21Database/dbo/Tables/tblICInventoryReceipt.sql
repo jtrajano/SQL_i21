@@ -82,9 +82,13 @@ Type the overview for the table here.
 
 		[dblGrandTotal] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dblTotalGross] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblTotalTare] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblTotalLotTare] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dblTotalNet] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dblTotalTax] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dblTotalCharges] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblTotalLotQty] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblTotalAvgTarePerQty] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dtmLastCalculateTotals] DATETIME NULL,
 		[dtmDateCreated] DATETIME NULL,
         [dtmDateModified] DATETIME NULL,

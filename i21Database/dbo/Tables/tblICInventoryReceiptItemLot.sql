@@ -23,6 +23,7 @@ Type the overview for the table here.
 		[dblQuantity] NUMERIC(38, 15) NULL DEFAULT ((0)), 		
 		[dblGrossWeight] NUMERIC(38, 15) NULL DEFAULT ((0)), 
 		[dblTareWeight] NUMERIC(38, 15) NULL DEFAULT ((0)), 
+		[dblTarePerQuantity] NUMERIC(38, 15) NULL DEFAULT ((0)),
 		[dblCost] NUMERIC(38, 15) NULL DEFAULT ((0)), 
 		[intNoPallet] INT NULL DEFAULT ((0)),
 		[intUnitPallet] INT NULL DEFAULT ((0)), 
