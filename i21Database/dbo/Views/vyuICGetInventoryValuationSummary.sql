@@ -4,9 +4,15 @@ AS
 SELECT 
 	s.* 
 	,sl.dtmLastRun
+	,Certification.intCertificationId
+	,Certification.strCertificationName
 FROM
 	tblICInventoryValuationSummary s LEFT JOIN tblICInventoryValuationSummaryLog sl
 		ON s.strPeriod = sl.strPeriod
+	LEFT JOIN tblICItem i
+		ON i.intItemId = s.intItemId
+	LEFT JOIN tblICCertification Certification
+		ON Certification.intCertificationId = i.intCertificationId
 
 
 --CREATE VIEW [dbo].[vyuICGetInventoryValuationSummary]

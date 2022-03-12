@@ -62,6 +62,9 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,intUnitMeasureStockUOM		= stockUnitMeasure.intUnitMeasureId
 		,t.strAccountIdInventory
 		,t.strAccountIdInTransit
+
+		,i.intCertificationId
+		,Certification.strCertificationName
 FROM 	tblICInventoryTransaction t 
 		INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
@@ -115,6 +118,8 @@ FROM 	tblICInventoryTransaction t
 		LEFT JOIN tblEMEntity e 
 			ON e.intEntityId = t.intSourceEntityId 
 
+		LEFT JOIN tblICCertification Certification
+			ON Certification.intCertificationId = i.intCertificationId
 WHERE	i.strType NOT IN (
 			'Other Charge'
 			,'Non-Inventory'
