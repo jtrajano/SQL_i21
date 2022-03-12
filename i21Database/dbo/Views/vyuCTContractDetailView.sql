@@ -185,6 +185,8 @@ AS
 		, strOverrideFacility = BVR.strBankValuationRule
 		, CD.strBankReferenceNo
 		, CD.dblInterestRate
+		, CD.dtmPrepaymentDate
+		, CD.dblPrepaymentAmount
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
