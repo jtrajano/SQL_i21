@@ -560,6 +560,7 @@
     <Build Include="dbo\Views\vyuCTOptionalityValue.sql" />
     <Build Include="dbo\Functions\fnARCompareAccountSegment.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractStatus.sql" />
+    <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
