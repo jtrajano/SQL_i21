@@ -252,10 +252,22 @@ BEGIN
 									ELSE vendor.intCurrencyId END,
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
 									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END,
-		[intPayFromBankAccountId]	= ISNULL(A.intPayFromBankAccountId, vendor.intPayFromBankAccountId),
-		[strFinancingSourcedFrom] = CASE WHEN A.intPayFromBankAccountId > 0 THEN ISNULL(A.strFinancingSourcedFrom, 'Not Provided')
-									ELSE CASE WHEN vendor.intPayFromBankAccountId > 0 THEN 'Vendor Default' ELSE 'None' END END,
+
+		[intPayFromBankAccountId]	= ISNULL(A.intPayFromBankAccountId, ISNULL(vendor.intPayFromBankAccountId, payFrom.intBankAccountId)),
+		[strFinancingSourcedFrom] = CASE 
+										WHEN A.intPayFromBankAccountId > 0 THEN ISNULL(A.strFinancingSourcedFrom, 'Not Provided')
+									ELSE 
+										CASE 
+											WHEN vendor.intPayFromBankAccountId > 0 THEN 'Vendor Default' 
+											ELSE
+												CASE
+													WHEN payFrom.intBankAccountId > 0 THEN 'Company Default'
+													ELSE 'None'
+												END
+										END 
+									END,
 		[strFinancingTransactionNumber] = A.strFinancingTransactionNumber,
+		
 		[strFinanceTradeNo]					= A.strFinanceTradeNo,
 		[intBankId]							= A.intBankId,
 		[intBankAccountId]					= A.intBankAccountId,
@@ -277,6 +289,7 @@ BEGIN
 	LEFT JOIN tblSMUserSecurity userData ON userData.intEntityId = @userId
 	LEFT JOIN tblSMCompanyLocation userCompLoc ON userData.intCompanyLocationId = userCompLoc.intCompanyLocationId
 	LEFT JOIN tblSMCurrency subCur ON subCur.intMainCurrencyId = A.intCurrencyId AND subCur.ysnSubCurrency = 1
+	LEFT JOIN tblAPDefaultPayFromBankAccount payFrom ON payFrom.intCurrencyId = A.intCurrencyId
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM (
