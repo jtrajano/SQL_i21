@@ -131,6 +131,7 @@ AS
 			,CP.ysnEnableFXFieldInContractPricing
 			,CP.ysnEnableItemQualityFields
 			,CP.intFinanceCostId
+			,CP.ysnEnableFXForwardRequestOnSequence
 			,strFinanceCost = FCI.strItemNo
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
