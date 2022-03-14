@@ -315,21 +315,19 @@ OUTER APPLY (
 	  AND ysnProcessed = 1
 	  AND intInvoiceId = INV.intOriginalInvoiceId
 ) PROVISIONAL
-OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
+LEFT JOIN (
+	SELECT intInvoiceId		= ID.intInvoiceId
+		 , strTicketNumbers = STRING_AGG(T.strTicketNumber, ', ')
 	FROM (
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
-		INNER JOIN (
-			SELECT intTicketId
-				 , strTicketNumber 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intInvoiceId = INV.intInvoiceId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
-		FOR XML PATH ('')
-	) INV (strTicketNumber)
-) SCALETICKETS
+		SELECT DISTINCT ID.intInvoiceId
+			 , ID.intTicketId 
+		FROM tblARInvoiceDetail ID
+		WHERE ID.intTicketId IS NOT NULL
+		GROUP BY ID.intInvoiceId, ID.intTicketId
+	) ID
+	INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
+	GROUP BY ID.intInvoiceId
+) SCALETICKETS ON SCALETICKETS.intInvoiceId = INV.intInvoiceId
 LEFT JOIN(
 	SELECT intInvoiceId, strAddonDetailKey 
 	FROM dbo.tblARInvoiceDetail WITH(NOLOCK)
