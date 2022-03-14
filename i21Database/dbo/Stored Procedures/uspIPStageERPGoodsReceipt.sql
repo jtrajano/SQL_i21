@@ -180,6 +180,7 @@ BEGIN TRY
 				,dblTareWeight
 				,dblNetWeight
 				,strWeightUOM
+				,strLotPrimaryStatus
 				)
 			SELECT (
 					SELECT TOP 1 intStageReceiptId
@@ -196,6 +197,7 @@ BEGIN TRY
 				,TareWeight
 				,NetWeight
 				,WeightUOM
+				,LotStatus
 			FROM OPENXML(@idoc, 'root/data/header/line/detail', 2) WITH (
 					ERPReceiptNo NVARCHAR(50) COLLATE Latin1_General_CI_AS '../../ERPReceiptNo'
 					,TrxSequenceNo BIGINT
@@ -208,6 +210,7 @@ BEGIN TRY
 					,TareWeight NUMERIC(18, 6)
 					,NetWeight NUMERIC(18, 6)
 					,WeightUOM NVARCHAR(50)
+					,LotStatus NVARCHAR(50)
 					) x
 
 			UPDATE RIL

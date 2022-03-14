@@ -52,6 +52,8 @@ BEGIN TRY
 		,@dblGross NUMERIC(18, 6)
 		,@dblTare NUMERIC(18, 6)
 		,@dblNet NUMERIC(18, 6)
+		,@strPrimaryStatus NVARCHAR(50)
+		,@strContractNumber NVARCHAR(50)
 	DECLARE @tblICInventoryTransfer TABLE (intInventoryTransferId INT)
 	DECLARE @tblICInventoryTransferDetail TABLE (intInventoryTransferDetailId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -281,6 +283,8 @@ BEGIN TRY
 				,@dblGross = NULL
 				,@dblTare = NULL
 				,@dblNet = NULL
+				,@strPrimaryStatus = NULL
+				,@strContractNumber = NULL
 
 			SELECT @intItemId = ITD.intItemId
 			FROM dbo.tblICInventoryTransferDetail ITD
@@ -338,17 +342,21 @@ BEGIN TRY
 				,@dblGross = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblGross), 0))
 				,@dblTare = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblTare), 0))
 				,@dblNet = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblNet), 0))
+				,@strPrimaryStatus = LS.strPrimaryStatus
+				,@strContractNumber = CH.strContractNumber
 			FROM tblICInventoryTransferDetail ITD
 			JOIN tblICItem I ON I.intItemId = ITD.intItemId
 			LEFT JOIN tblSMCompanyLocationSubLocation FSL ON FSL.intCompanyLocationSubLocationId = ITD.intFromSubLocationId
 			LEFT JOIN tblICStorageLocation FSU ON FSU.intStorageLocationId = ITD.intFromStorageLocationId
 			LEFT JOIN tblICLot L ON L.intLotId = ITD.intLotId
+			LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 			LEFT JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ITD.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
 			LEFT JOIN tblSMCompanyLocationSubLocation TSL ON TSL.intCompanyLocationSubLocationId = ITD.intToSubLocationId
 			LEFT JOIN tblICStorageLocation TSU ON TSU.intStorageLocationId = ITD.intToStorageLocationId
 			LEFT JOIN tblSMCurrency C ON C.intCurrencyID = ITD.intCurrencyId
+			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
 			WHERE ITD.intInventoryTransferDetailId = @intInventoryTransferDetailId
 
 			IF ISNULL(@strItemNo, '') = ''
@@ -374,6 +382,11 @@ BEGIN TRY
 			IF ISNULL(@strLotNumber, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'Lot No cannot be blank. '
+			END
+
+			IF ISNULL(@strPrimaryStatus, '') = 'On Hold'
+			BEGIN
+				SELECT @strError = @strError + 'Lot Status is "On Hold". '
 			END
 
 			IF ISNULL(@dblQuantity, 0) = 0
@@ -459,6 +472,10 @@ BEGIN TRY
 			SELECT @strItemXML += '<NetWeight>' + LTRIM(ISNULL(@dblNet, 0)) + '</NetWeight>'
 
 			SELECT @strItemXML += '<WeightUOM>' + ISNULL(@strQuantityUOM, '') + '</WeightUOM>'
+
+			SELECT @strItemXML += '<LotStatus>' + ISNULL(@strPrimaryStatus, '') + '</LotStatus>'
+
+			SELECT @strItemXML += '<ContractNumber>' + ISNULL(@strContractNumber, '') + '</ContractNumber>'
 
 			SELECT @strItemXML += '</line>'
 
