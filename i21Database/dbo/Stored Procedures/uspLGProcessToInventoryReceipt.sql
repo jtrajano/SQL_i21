@@ -311,7 +311,7 @@ BEGIN TRY
 			,[intSourceType]
 			,[strBillOfLadding]
 			)
-		SELECT [intLotId] = NULL
+		SELECT DISTINCT [intLotId] = NULL
 			,[strLotNumber] = NULL
 			,[strLotAlias] = NULL
 			,[intSubLocationId] = ISNULL(LW.intSubLocationId,LD.intPSubLocationId)
