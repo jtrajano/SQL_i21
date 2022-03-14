@@ -560,6 +560,8 @@
     <Build Include="dbo\Views\vyuCTOptionalityValue.sql" />
     <Build Include="dbo\Functions\fnARCompareAccountSegment.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractStatus.sql" />
+    <Build Include="dbo\Functions\fnFRDSplitString.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDUnnaturalAccoutAmount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
