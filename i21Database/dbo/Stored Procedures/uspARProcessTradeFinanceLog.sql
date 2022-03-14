@@ -66,9 +66,10 @@ LEFT JOIN tblCTContractDetail CTCD on CTCD.intContractDetailId = ARID.intContrac
 LEFT JOIN tblCTContractHeader CTCH on CTCH.intContractHeaderId = CTCD.intContractHeaderId
 LEFT JOIN tblCMBorrowingFacilityLimit CMBFL ON ARI.intBorrowingFacilityLimitId = CMBFL.intBorrowingFacilityLimitId
 WHERE ISNULL(ARI.intBankId, 0) <> 0
-  AND ISNULL(ARI.intBankAccountId, 0) <> 0
-  AND ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
-  AND ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
+   OR ISNULL(ARI.intBankAccountId, 0) <> 0
+   OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
+   OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
+   OR ISNULL(ARI.strBankReferenceNo, '') <> ''
 
 EXEC uspTRFLogTradeFinance @TradeFinanceLogs
 
