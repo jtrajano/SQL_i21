@@ -75,6 +75,7 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.intBookId
 	, Receipt.intSubBookId
 	--, WeightLoss.dblClaimableWt
+	, Receipt.strRemarks
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation Transferor ON Transferor.intCompanyLocationId = Receipt.intTransferorId

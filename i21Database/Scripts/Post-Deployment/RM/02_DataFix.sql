@@ -414,6 +414,14 @@ BEGIN
 	UPDATE tblRKOptionsMatchPnS set strMatchingType = 'Manual' WHERE strMatchingType IS NULL
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKFutOptTransaction' AND COLUMN_NAME = 'ysnCommissionExempt')
+AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for Derivatives Commission Exempt')
+BEGIN
+	UPDATE tblRKFutOptTransaction SET ysnCommissionExempt = 1 ,dblCommission = NULL
+
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Derivatives Commission Exempt','1')
+END
+
 
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

@@ -36,6 +36,8 @@ Type the overview for the table here.
 		[dblLineTotal] NUMERIC(38, 15) NULL DEFAULT ((0)), 
 		[intGradeId] INT NULL,		
 		[dblGross] NUMERIC(38, 15) NULL DEFAULT ((0)),
+		[dblTare] NUMERIC(38, 15) NULL DEFAULT ((0)),
+		[dblTarePerQuantity] NUMERIC(38, 15) NULL DEFAULT ((0)),
 		[dblNet] NUMERIC(38, 15) NULL DEFAULT ((0)),
 		[dblTax] NUMERIC(38, 15) NULL DEFAULT ((0)),
 		[intDiscountSchedule] INT NULL,

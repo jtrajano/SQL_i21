@@ -88,10 +88,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,A.dblSubtotal = CAST((DetailTotal.dblTotal)  AS DECIMAL(18,2)) 
 		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
 		,A.dblTax = DetailTotal.dblTotalTax
+		,A.dblAverageExchangeRate = DetailTotal.dblTotalUSD
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (
-		SELECT SUM(dblTax) dblTotalTax, SUM(dblTotal) dblTotal FROM tblAPBillDetail C WHERE C.intBillId = B.intId
+		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM ((dblTotal + dblTax) * dblRate) dblTotalUSD FROM tblAPBillDetail C WHERE C.intBillId = B.intId
 	) DetailTotal
 	WHERE DetailTotal.dblTotal IS NOT NULL
 

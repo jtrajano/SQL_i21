@@ -4,6 +4,7 @@
 	[intLoadingPortId] INT NOT NULL,
 	[intDestinationPortId] INT NOT NULL,
 	[intProductTypeId] INT NULL,
+	[intCommodityId] INT NULL,
 	[intExtensionId] INT NULL,
 	[intBankId] INT not NULL,
 	[dblInterestRate] numeric(18,6) not NULL,

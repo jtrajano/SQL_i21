@@ -130,6 +130,9 @@ AS
 			,CP.ysnEnableRankShippingLine
 			,CP.ysnEnableFXFieldInContractPricing
 			,CP.ysnEnableItemQualityFields
+			,CP.intFinanceCostId
+			,CP.ysnEnableFXForwardRequestOnSequence
+			,strFinanceCost = FCI.strItemNo
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
 	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId
@@ -145,3 +148,4 @@ AS
 	LEFT JOIN	tblICItem					INS	ON	INS.intItemId				=	CP.intDefaultInsuranceId
 	LEFT JOIN	tblICItem					THC	ON	THC.intItemId				=	CP.intDefaultTHCId
 	LEFT JOIN	tblICItem					SI	ON	SI.intItemId				=	CP.intDefaultStorageId
+	LEFT JOIN	tblICItem					FCI	ON	FCI.intItemId				=	CP.intFinanceCostId

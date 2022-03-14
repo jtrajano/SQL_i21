@@ -110,7 +110,7 @@ BEGIN TRY
 											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
 											ELSE SC.intItemUOMIdTo
 										END
-			,intCostUOMId				= SC.intItemUOMIdTo
+			,intCostUOMId				= ICTran.intItemUOMId
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime

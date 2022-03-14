@@ -332,6 +332,7 @@ SELECT a.intContractDetailId
 	, a.dtmDateSubmitted
 	, ASTF.strApprovalStatus
 	, a.dtmDateApproved
+	, BVR.strBankValuationRule
 	, strCertificateName = (
 				select
 					STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'

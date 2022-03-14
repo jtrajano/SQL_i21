@@ -354,6 +354,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\NonEmployeeCompensationTo1099NEC.sql
 :r .\AP\InsertClearingTransactionsToClearingTable.sql
 :r .\AP\PopulateVoucherPayToBankAccount.sql
+:r .\AP\PopulateVoucherAverageExchangeRate.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

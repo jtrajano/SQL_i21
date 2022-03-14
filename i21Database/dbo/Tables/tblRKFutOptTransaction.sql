@@ -73,6 +73,11 @@
 	[dtmMarketDate] DATETIME NULL, 
 	[ysnGTC] BIT NULL DEFAULT (0),
 	[strSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strCommissionRateType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblBrokerageRate] NUMERIC(18, 6) NULL,
+	[ysnCommissionExempt] BIT NOT NULL DEFAULT (0),
+	[ysnCommissionOverride] BIT NOT NULL DEFAULT (0),
+	[ysnPosted] BIT NOT NULL DEFAULT (0),
     CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
@@ -95,75 +100,5 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankTransfer_intBankTransferId] FOREIGN KEY ([intBankTransferId]) REFERENCES [tblCMBankTransfer]([intTransactionId])
 );
 
-GO
-
-CREATE TRIGGER trgAfterInsertDerivativeEntry
-   ON  tblRKFutOptTransaction
-   AFTER  INSERT
-AS 
-
-DECLARE @intFutOptTransactionId AS INT,
-		@intBrokerageAccountId AS INT,
-		@intFutureMarketId AS INT,
-		@dtmTransactionDate AS DATETIME,
-		@intInstrumentTypeId AS INT,
-		@dblCommission AS NUMERIC(18,6),
-		@intBrokerageCommissionId AS INT
-BEGIN
-	
-	SET NOCOUNT ON;
-
-    SELECT 
-		 @intFutOptTransactionId = intFutOptTransactionId
-		,@intBrokerageAccountId = intBrokerageAccountId
-		,@intFutureMarketId = intFutureMarketId
-		,@dtmTransactionDate = dtmTransactionDate
-		,@intInstrumentTypeId = intInstrumentTypeId
-	 FROM inserted
-
-	 EXEC uspRKGetCommission @intBrokerageAccountId, @intFutureMarketId, @dtmTransactionDate, @intInstrumentTypeId, @dblCommission OUT, @intBrokerageCommissionId OUT
-
-	 UPDATE tblRKFutOptTransaction SET 
-		 dblCommission = @dblCommission
-		,intBrokerageCommissionId = @intBrokerageCommissionId
-	WHERE intFutOptTransactionId = @intFutOptTransactionId
-
-
-END
-
-GO
-CREATE TRIGGER trgAfterUpdateDerivativeEntry
-   ON  tblRKFutOptTransaction
-   AFTER  UPDATE
-AS 
-
-DECLARE @intFutOptTransactionId AS INT,
-		@intBrokerageAccountId AS INT,
-		@intFutureMarketId AS INT,
-		@dtmTransactionDate AS DATETIME,
-		@intInstrumentTypeId AS INT,
-		@dblCommission AS NUMERIC(18,6),
-		@intBrokerageCommissionId AS INT
-BEGIN
-	
-	SET NOCOUNT ON;
-
-    SELECT 
-		 @intFutOptTransactionId = intFutOptTransactionId
-		,@intBrokerageAccountId = intBrokerageAccountId
-		,@intFutureMarketId = intFutureMarketId
-		,@dtmTransactionDate = dtmTransactionDate
-		,@intInstrumentTypeId = intInstrumentTypeId
-	 FROM inserted
-
-	 EXEC uspRKGetCommission @intBrokerageAccountId, @intFutureMarketId, @dtmTransactionDate, @intInstrumentTypeId, @dblCommission OUT, @intBrokerageCommissionId OUT
-
-	 UPDATE tblRKFutOptTransaction SET 
-		 dblCommission = @dblCommission
-		,intBrokerageCommissionId = @intBrokerageCommissionId
-	WHERE intFutOptTransactionId = @intFutOptTransactionId
-
-
-END
 GO
 

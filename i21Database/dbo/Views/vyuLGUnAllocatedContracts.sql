@@ -75,13 +75,13 @@ FROM (
 		,dblLatestClosingPrice = dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId, CD.intFutureMonthId, GETDATE())
 		,CD.dtmUpdatedAvailabilityDate
 		,IM.dblGAShrinkFactor
-		,strOrigin = ISNULL(CO.strCountry, GIC.strOrigin)
-		,strProductType = GIC.strProductType
-		,strGrade = GIC.strGrade
-		,strRegion = GIC.strRegion 
-		,strSeason = GIC.strSeason
-		,strClass = GIC.strClassVariety
-		,strProductLine = GIC.strProductLine
+		,strOrigin = ISNULL(CO.strCountry, Origin.strDescription)
+		,strProductType = ProductType.strDescription
+		,strGrade = Grade.strDescription
+		,strRegion = Region.strDescription
+		,strSeason = Season.strDescription
+		,strClass = Class.strDescription
+		,strProductLine = ProductLine.strDescription
 		,IM.strMarketValuation
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
@@ -96,8 +96,13 @@ FROM (
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
 	LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
-	OUTER APPLY (SELECT TOP 1 strOrigin, strProductType, strGrade, strRegion, strSeason, strClassVariety, strProductLine 
-				FROM vyuICGetItemCommodity WHERE intItemId = IM.intItemId) GIC
+	LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = IM.intOriginId
+	LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId
+	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = IM.intGradeId
+	LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = IM.intRegionId
+	LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = IM.intSeasonId
+	LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = IM.intClassVarietyId
+	LEFT JOIN tblICCommodityAttribute ProductLine ON ProductLine.intCommodityAttributeId = IM.intProductLineId
 	LEFT JOIN tblICItemContract ICI ON ICI.intItemId = IM.intItemId AND CD.intItemContractId = ICI.intItemContractId
 	LEFT JOIN tblICItem BI ON BI.intItemId = CD.intItemBundleId
 	LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId

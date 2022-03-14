@@ -841,13 +841,6 @@ END
 GO
 
 
-GO
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 4)
-BEGIN
-	INSERT INTO tblCTApprovalStatusTF
-	select 4, 'Closed', 1
-END
-GO
 
 
 

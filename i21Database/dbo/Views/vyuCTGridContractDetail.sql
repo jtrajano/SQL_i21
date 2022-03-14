@@ -277,7 +277,9 @@ AS
 			ICC.strRegion,
 			ICC.strSeason,
 			ICC.strClass,
-			ICC.strProductLine
+			ICC.strProductLine,
+			CD.dtmPrepaymentDate,
+			CD.dblPrepaymentAmount
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
