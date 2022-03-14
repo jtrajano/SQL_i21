@@ -479,19 +479,18 @@ WHERE I.intPaymentId IS NOT NULL
 UPDATE I
 SET strTicketNumbers = SCALETICKETS.strTicketNumbers
 FROM #INVOICES I
-INNER JOIN (
-	SELECT intInvoiceId		= ID.intInvoiceId
-		 , strTicketNumbers = STRING_AGG(T.strTicketNumber, ', ')
-	FROM (
-		SELECT DISTINCT ID.intInvoiceId
-			, ID.intTicketId 
-		FROM tblARInvoiceDetail ID
-		WHERE ID.intTicketId IS NOT NULL
-		GROUP BY ID.intInvoiceId, ID.intTicketId
-	) ID
-	INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
-	GROUP BY ID.intInvoiceId
-) SCALETICKETS ON SCALETICKETS.intInvoiceId = I.intInvoiceId
+CROSS APPLY (     
+	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)     
+	FROM (      
+		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '      
+		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)        
+		INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId	
+		WHERE ID.intInvoiceId = I.intInvoiceId
+		  AND ID.intTicketId IS NOT NULL
+		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber      
+		FOR XML PATH ('')     
+	) INV (strTicketNumber)
+) SCALETICKETS
 
 --LOCATION FILTER
 IF @strLocationNameLocal IS NOT NULL
