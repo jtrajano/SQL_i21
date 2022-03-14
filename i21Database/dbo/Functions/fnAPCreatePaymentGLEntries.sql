@@ -239,7 +239,7 @@ BEGIN
 											CAST(
 												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-														- B.dblInterest, voucher.dblTotal) * voucherRate.dblExchangeRate
+														- B.dblInterest, voucher.dblTotal) * voucher.dblAverageExchangeRate
 												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -276,7 +276,7 @@ BEGIN
 			INNER JOIN tblAPBill voucher ON voucher.intBillId = B.intBillId
 			-- INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON voucher.intBillId = paymentForex.intBillId
 			-- INNER JOIN tblAPBillDetail voucherDetail ON voucherDetail.intBillId = voucher.intBillId
-			INNER JOIN dbo.fnAPGetVoucherAverageRate() voucherRate ON voucher.intBillId = voucherRate.intBillId
+			--INNER JOIN dbo.fnAPGetVoucherAverageRate() voucherRate ON voucher.intBillId = voucherRate.intBillId
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
@@ -291,7 +291,7 @@ BEGIN
 											CAST(
 												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
 													+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-													- B.dblInterest, voucher.dblTotal) * voucherRate.dblExchangeRate
+													- B.dblInterest, voucher.dblTotal) * voucher.dblAverageExchangeRate
 												AS DECIMAL(18,2))) != 0
 	-- GROUP BY A.[strPaymentRecordNum],
 	-- A.dblExchangeRate,
@@ -421,7 +421,7 @@ BEGIN
 															- B.dblInterest, voucher.dblTotal)
 															END
 													)
-														*  ISNULL(NULLIF(voucherRate.dblExchangeRate,0),1))
+														*  ISNULL(NULLIF(voucher.dblAverageExchangeRate,0),1))
 											AS DECIMAL(18,2))) * (
 																CASE WHEN (voucher.intTransactionType NOT IN (1,2,13,14) AND A.ysnPrepay = 0)
 																			OR
@@ -438,7 +438,7 @@ BEGIN
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherRate.dblExchangeRate,
+		[dblExchangeRate]				=	voucher.dblAverageExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	(SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId),
@@ -476,14 +476,14 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	voucherRate.dblExchangeRate,
+		[dblForeignRate]				=	voucher.dblAverageExchangeRate,
 		[strRateType]					=	rateType.strCurrencyExchangeRateType
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
 			INNER JOIN tblAPBill voucher ON voucher.intBillId = B.intBillId
 			--INNER JOIN tblAPBillDetail voucherDetail ON voucherDetail.intBillId = voucher.intBillId
-			INNER JOIN dbo.fnAPGetVoucherAverageRate() voucherRate ON voucher.intBillId = voucherRate.intBillId
+			--INNER JOIN dbo.fnAPGetVoucherAverageRate() voucherRate ON voucher.intBillId = voucherRate.intBillId
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
@@ -496,7 +496,7 @@ BEGIN
 	voucher.intTransactionType,
 	voucher.ysnPrepayHasPayment,
 	--voucherDetail.dblRate,
-	voucherRate.dblExchangeRate,
+	voucher.dblAverageExchangeRate,
 	B.intBillId,
 	B.ysnOffset,
 	D.strVendorId,

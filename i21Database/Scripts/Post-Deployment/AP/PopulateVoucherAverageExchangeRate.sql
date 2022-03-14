@@ -1,10 +1,10 @@
 ﻿PRINT N'START: POPULATING VOUCHER AVERAGE EXCHANGE RATE'
 --POPULATE EMPTY VOUCHER AVERAGE EXCHANGE RATE
 UPDATE B
-SET B.dblAverageExchangeRate = (BD.dblUSDTotal / B.dblTotal)
+SET B.dblAverageExchangeRate = (BD.dblTotalUSD / B.dblTotal)
 FROM tblAPBill B
 OUTER APPLY (
-	SELECT COUNT(*) intDetailCount, SUM((dblTotal + dblTax)) dblTotal, SUM((dblTotal + dblTax) * dblRate) dblUSDTotal
+	SELECT COUNT(*) intDetailCount, SUM((dblTotal + dblTax)) dblTotal, SUM((dblTotal + dblTax) * dblRate) dblTotalUSD
 	FROM tblAPBillDetail
 	WHERE intBillId = B.intBillId
 	
