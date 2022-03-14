@@ -129,6 +129,7 @@ SELECT
     ,L.strDischargePerUnit
     ,L.intShipmentType
     ,L.intLoadShippingInstructionId
+	,L.intOrigPurchaseSale
     ,L.strExternalShipmentNumber
     ,L.ysn4cRegistration
     ,L.ysnInvoice
