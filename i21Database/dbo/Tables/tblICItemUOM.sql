@@ -78,19 +78,19 @@ Type the overview for the table here.
 		ON [dbo].[tblICItemUOM]([intItemId] ASC, intUnitMeasureId ASC, ysnStockUnit ASC)
 		INCLUDE (dblUnitQty); 
 	GO
-        CREATE UNIQUE NONCLUSTERED INDEX [UQ_tblICItemUOM_strLongUPCCode]
+        CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strLongUPCCode]
         ON tblICItemUOM([strLongUPCCode])
         WHERE strLongUPCCode IS NOT NULL AND intModifier IS NULL;
     GO
-        CREATE UNIQUE NONCLUSTERED INDEX [UQ_tblICItemUOM_strUpcCode]
+        CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strUpcCode]
         ON tblICItemUOM([strUpcCode])
         WHERE strUpcCode IS NOT NULL AND intModifier IS NULL;
     GO
-        CREATE UNIQUE NONCLUSTERED INDEX [UQ_tblICItemUOM_strLongUPCCode_intModifier]
+        CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strLongUPCCode_intModifier]
         ON tblICItemUOM([strLongUPCCode], [intModifier])
         WHERE strLongUPCCode IS NOT NULL AND intModifier IS NOT NULL;
     GO
-        CREATE UNIQUE NONCLUSTERED INDEX [UQ_tblICItemUOM_strUpcCode_intModifier]
+        CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strUpcCode_intModifier]
         ON tblICItemUOM([strUpcCode], [intModifier])
         WHERE strUpcCode IS NOT NULL AND intModifier IS NOT NULL;
     GO
