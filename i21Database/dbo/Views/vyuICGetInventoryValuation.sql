@@ -65,6 +65,13 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 
 		,i.intCertificationId
 		,Certification.strCertificationName
+		,strGrade					= Grade.strDescription
+		,strOrigin 					= Origin.strDescription
+		,strProductType				= ProductType.strDescription
+		,strRegion 					= Region.strDescription
+		,strSeason 					= Season.strDescription
+		,strClass 					= Class.strDescription
+		,strProductLine 			= ProductLine.strDescription
 FROM 	tblICInventoryTransaction t 
 		INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
@@ -120,6 +127,20 @@ FROM 	tblICInventoryTransaction t
 
 		LEFT JOIN tblICCertification Certification
 			ON Certification.intCertificationId = i.intCertificationId
+		LEFT JOIN tblICCommodityAttribute Grade 
+			ON Grade.intCommodityAttributeId = i.intGradeId
+		LEFT JOIN tblICCommodityAttribute Origin 
+			ON Origin.intCommodityAttributeId = i.intOriginId
+		LEFT JOIN tblICCommodityAttribute ProductType
+			ON ProductType.intCommodityAttributeId = i.intProductTypeId
+		LEFT JOIN tblICCommodityAttribute Region
+			ON Region.intCommodityAttributeId = i.intRegionId
+		LEFT JOIN tblICCommodityAttribute Season
+			ON Season.intCommodityAttributeId = i.intSeasonId
+		LEFT JOIN tblICCommodityAttribute Class
+			ON Class.intCommodityAttributeId = i.intClassVarietyId
+		LEFT JOIN tblICCommodityProductLine ProductLine
+			ON ProductLine.intCommodityProductLineId = i.intProductLineId
 WHERE	i.strType NOT IN (
 			'Other Charge'
 			,'Non-Inventory'
