@@ -102,7 +102,7 @@ FROM (
 	LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = IM.intRegionId
 	LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = IM.intSeasonId
 	LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = IM.intClassVarietyId
-	LEFT JOIN tblICCommodityAttribute ProductLine ON ProductLine.intCommodityAttributeId = IM.intProductLineId
+	LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = IM.intProductLineId
 	LEFT JOIN tblICItemContract ICI ON ICI.intItemId = IM.intItemId AND CD.intItemContractId = ICI.intItemContractId
 	LEFT JOIN tblICItem BI ON BI.intItemId = CD.intItemBundleId
 	LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
