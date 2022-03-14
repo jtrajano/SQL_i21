@@ -58,10 +58,7 @@ CREATE NONCLUSTERED INDEX [NC_tblARPaymentDetail_AgingSummary]
 ON [dbo].[tblARPaymentDetail] ([intInvoiceId])
 INCLUDE ([intPaymentId],[dblWriteOffAmount],[dblPayment])
 GO
-CREATE NONCLUSTERED INDEX [NC_tblARPaymentDetail_PaymentSearch]
-ON [dbo].[tblARPaymentDetail] ([dblDiscount])
-INCLUDE ([intPaymentId])
-GO
+
 --TRIGGERS UPDATE
 GO
 CREATE TRIGGER trg_tblARPaymentDetailUpdate
