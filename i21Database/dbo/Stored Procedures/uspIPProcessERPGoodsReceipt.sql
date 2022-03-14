@@ -46,6 +46,8 @@ BEGIN TRY
 		,@strStorageLocationName NVARCHAR(50)
 		,@strContainerNumber NVARCHAR(100)
 		,@strLotNo NVARCHAR(50)
+		,@strLotPrimaryStatus NVARCHAR(50)
+		,@strOrgLotStatus NVARCHAR(50)
 	DECLARE @intStageReceiptItemLotId INT
 		,@intItemId INT
 		,@intSubLocationId INT
@@ -351,6 +353,8 @@ BEGIN TRY
 					,@strStorageLocationName = NULL
 					,@strContainerNumber = NULL
 					,@strLotNo = NULL
+					,@strLotPrimaryStatus = NULL
+					,@strOrgLotStatus = NULL
 
 				SELECT @intItemId = NULL
 					,@intSubLocationId = NULL
@@ -384,6 +388,7 @@ BEGIN TRY
 					,@strCurrency = RIS.strCostCurrency
 					,@strContainerNumber = RIS.strContainerNumber
 					,@strLotNo = RILS.strLotNo
+					,@strLotPrimaryStatus = RILS.strLotPrimaryStatus
 					,@dblGrossWeight = ISNULL(RILS.dblGrossWeight, 0)
 					,@dblTareWeight = ISNULL(RILS.dblTareWeight, 0)
 					,@dblNetWeight = ISNULL(RILS.dblNetWeight, 0)
@@ -451,11 +456,24 @@ BEGIN TRY
 
 				SELECT @dtmExpiryDate = L.dtmExpiryDate
 					,@intLotStatusId = L.intLotStatusId
+					,@strOrgLotStatus = LS.strPrimaryStatus
 					,@intParentLotId = L.intParentLotId
 					,@strParentLotNumber = PL.strParentLotNumber
 				FROM tblICLot L
 				JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+				JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				WHERE L.intLotId = @intLotId
+
+				IF ISNULL(@strLotPrimaryStatus, '') <> @strOrgLotStatus
+				BEGIN
+					SELECT @strError = 'Lot Status is not matching with i21.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
 
 				SELECT @intItemId = t.intItemId
 				FROM tblICItem t WITH (NOLOCK)
@@ -981,6 +999,7 @@ BEGIN TRY
 				,dblTareWeight
 				,dblNetWeight
 				,strWeightUOM
+				,strLotPrimaryStatus
 				)
 			SELECT @intNewStageReceiptId
 				,intTrxSequenceNo
@@ -993,6 +1012,7 @@ BEGIN TRY
 				,dblTareWeight
 				,dblNetWeight
 				,strWeightUOM
+				,strLotPrimaryStatus
 			FROM tblIPInvReceiptItemLotStage
 			WHERE intStageReceiptId = @intStageReceiptId
 
@@ -1118,6 +1138,7 @@ BEGIN TRY
 				,dblTareWeight
 				,dblNetWeight
 				,strWeightUOM
+				,strLotPrimaryStatus
 				)
 			SELECT @intNewStageReceiptId
 				,intTrxSequenceNo
@@ -1130,6 +1151,7 @@ BEGIN TRY
 				,dblTareWeight
 				,dblNetWeight
 				,strWeightUOM
+				,strLotPrimaryStatus
 			FROM tblIPInvReceiptItemLotStage
 			WHERE intStageReceiptId = @intStageReceiptId
 
