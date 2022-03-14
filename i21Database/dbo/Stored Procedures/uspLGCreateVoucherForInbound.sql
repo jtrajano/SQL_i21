@@ -145,6 +145,8 @@ BEGIN TRY
 			,[dblQtyToBillUnitQty]
 			,[intQtyToBillUOMId]
 			,[dblCost]
+			,[dblOptionalityPremium]
+			,[dblQualityPremium]
 			,[dblCostUnitQty]
 			,[intCostUOMId]
 			,[dblNetWeight]
@@ -201,6 +203,8 @@ BEGIN TRY
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
 			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
+			,[dblOptionalityPremium] = LD.dblOptionalityPremium
+			,[dblQualityPremium] = LD.dblQualityPremium
 			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
 			,[dblNetWeight] = LD.dblNet - ISNULL(B.dblNetWeight, 0)
@@ -367,6 +371,8 @@ BEGIN TRY
 				,[dblQtyToBillUnitQty]
 				,[intQtyToBillUOMId]
 				,[dblCost]
+				,[dblOptionalityPremium]
+				,[dblQualityPremium]
 				,[dblCostUnitQty]
 				,[intCostUOMId]
 				,[dblNetWeight]
@@ -423,6 +429,8 @@ BEGIN TRY
 				,[dblQtyToBillUnitQty]
 				,[intQtyToBillUOMId]
 				,[dblCost]
+				,[dblOptionalityPremium]
+				,[dblQualityPremium]
 				,[dblCostUnitQty]
 				,[intCostUOMId]
 				,[dblNetWeight]
