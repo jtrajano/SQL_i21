@@ -5,7 +5,7 @@ SELECT intPaymentId				= P.intPaymentId
 	 , intEntityId				= P.intEntityId
 	 , intEntityCustomerId		= P.intEntityCustomerId
 	 , intBankAccountId			= P.intBankAccountId
-	 , strBankName				= LTRIM(RTRIM(BA.strBankName))
+	 , strBankName				= LTRIM(RTRIM(B.strBankName))
 	 , strBankAccountNo			= dbo.fnAESDecryptASym(BA.strBankAccountNo)
 	 , strBankAccountNoEncrypt  = ISNULL(LTRIM(RTRIM(BA.strBankAccountNo)), '')
 	 , strCustomerName			= LTRIM(RTRIM(E.strName))
@@ -32,157 +32,65 @@ SELECT intPaymentId				= P.intPaymentId
 	 , strPaymentInfo			= P.strPaymentInfo
 	 , ysnProcessedToNSF		= P.ysnProcessedToNSF
 	 , strTransactionId			= ISNULL(ARP.strTransactionId, '')
-	 , strAccountingPeriod      = AccPeriod.strAccountingPeriod
-FROM (
-	SELECT intPaymentId
-		 , strRecordNumber 
-		 , intEntityId
-		 , intEntityCustomerId
-		 , intBankAccountId
-		 , dtmDatePaid
-		 , intPaymentMethodId
-		 , dblAmountPaid
-		 , ysnPosted
-		 , intLocationId
-		 , intAccountId 
-		 , intCurrencyId
-		 , dtmBatchDate
-		 , intPostedById
-		 , strBatchId
-		 , strPaymentInfo
-		 , ysnProcessedToNSF
-		 , intPeriodId
-	FROM dbo.tblARPayment WITH (NOLOCK)
-) P 
+	 , strAccountingPeriod      = AccPeriod.strPeriod
+FROM tblARPayment P WITH (NOLOCK)
+INNER JOIN tblEMEntity E WITH (NOLOCK) ON P.intEntityCustomerId = E.intEntityId
+LEFT JOIN tblEMEntity EM WITH (NOLOCK) ON P.intEntityId = EM.intEntityId
+LEFT JOIN tblSMPaymentMethod PM WITH (NOLOCK) ON P.intPaymentMethodId = PM.intPaymentMethodID
+LEFT JOIN tblARCustomer C WITH (NOLOCK) ON E.intEntityId = C.intEntityId
+LEFT JOIN tblCMBankAccount BA WITH (NOLOCK) ON P.intBankAccountId = BA.intBankAccountId
+LEFT JOIN tblCMBank B WITH (NOLOCK) ON B.intBankId = BA.intBankId
+LEFT JOIN tblSMCompanyLocation CL WITH (NOLOCK) ON P.intLocationId = CL.intCompanyLocationId
+LEFT JOIN tblEMEntity POSTEDBY WITH (NOLOCK) ON P.intPostedById = POSTEDBY.intEntityId
+LEFT JOIN tblSMCurrency SMC WITH (NOLOCK) ON P.intCurrencyId = SMC.intCurrencyID
+LEFT JOIN tblGLFiscalYearPeriod AccPeriod ON P.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
+LEFT JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId AND ARP.strRecordNumber = P.strRecordNumber	
 LEFT JOIN (
      SELECT intPaymentId
-          , dblDiscount = SUM(ISNULL(dblDiscount, 0))
+          , dblDiscount = SUM(dblDiscount)
      FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-     WHERE ISNULL(dblDiscount, 0) <> 0
+     WHERE dblDiscount <> 0
      GROUP BY intPaymentId
 ) PD ON P.intPaymentId = PD.intPaymentId
-LEFT OUTER JOIN (
-	SELECT intEntityId
-		 , strName 
-	FROM dbo.tblEMEntity WITH (NOLOCK)
-) EM ON P.intEntityId = EM.intEntityId
-LEFT OUTER JOIN (
-	SELECT intPaymentMethodID
-		 , strPaymentMethod 
-	FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
-) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
-INNER JOIN (
-	SELECT intEntityId 
-		 , strEntityNo
-		 , strName 
-	FROM dbo.tblEMEntity WITH (NOLOCK)
-) E ON P.intEntityCustomerId = E.intEntityId
-LEFT OUTER JOIN (
-	SELECT intEntityId
-		 , strCustomerNumber 
-	FROM dbo.tblARCustomer WITH (NOLOCK)
-) C ON E.intEntityId = C.intEntityId
-LEFT OUTER JOIN (
-	SELECT intBankAccountId
-		 , BA.intBankId
-		 , strBankAccountNo
-		 , B.strBankName 
-	FROM dbo.tblCMBankAccount BA WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intBankId
-			 , strBankName 
-		FROM dbo.tblCMBank WITH (NOLOCK)
-	) B ON B.intBankId = BA.intBankId
-) BA ON P.intBankAccountId = BA.intBankAccountId
-LEFT OUTER JOIN (
-	SELECT intCompanyLocationId
-		 , strLocationName 
-	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) CL ON P.intLocationId = CL.intCompanyLocationId
-LEFT OUTER JOIN (
-	SELECT intEntityId
-		 , strName
-	FROM dbo.tblEMEntity WITH (NOLOCK)
-) POSTEDBY ON P.intPostedById = POSTEDBY.intEntityId
-LEFT OUTER JOIN (
-	SELECT intCurrencyID
-		 , strCurrency
-		 , strDescription 
-	FROM dbo.tblSMCurrency WITH (NOLOCK)
-) SMC ON P.intCurrencyId = SMC.intCurrencyID
-LEFT OUTER JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId
-											   AND ARP.strRecordNumber = P.strRecordNumber	
-OUTER APPLY (
-	SELECT strTransactionId = LEFT(strTransactionId, LEN(strTransactionId) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strTransactionId AS VARCHAR(200))  + ', '
-		FROM (
-			SELECT strTransactionId = strInvoiceNumber
-			FROM dbo.tblARInvoice I WITH(NOLOCK)
-			INNER JOIN (
-				SELECT intInvoiceId
-				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-				WHERE intPaymentId = P.intPaymentId
-				  AND intInvoiceId IS NOT NULL
-				  AND dblPayment <> 0
-			) ARDETAILS ON I.intInvoiceId = ARDETAILS.intInvoiceId
-
-			UNION ALL
-
-			SELECT strTransactionId = strBillId
-			FROM dbo.tblAPBill BILL WITH(NOLOCK)
-			INNER JOIN (
-				SELECT intBillId
-				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-				WHERE intPaymentId = P.intPaymentId
-				  AND intBillId IS NOT NULL
-				  AND dblPayment <> 0
-			) BILLDETAILS ON BILL.intBillId = BILLDETAILS.intBillId
-		) T		
-		FOR XML PATH ('')
-	) TRANS (strTransactionId)
-) TRANSACTIONS
-OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
-		INNER JOIN (
-			SELECT intInvoiceId
-			FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-			WHERE intPaymentId = P.intPaymentId
-		) DETAILS ON ID.intInvoiceId = DETAILS.intInvoiceId
-		INNER JOIN (
-			SELECT intTicketId
-				 , strTicketNumber 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-		) T ON ID.intTicketId = T.intTicketId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
-		FOR XML PATH ('')
-	) INV (strTicketNumber)
-) SCALETICKETS
-OUTER APPLY (
-	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
-		INNER JOIN (
-			SELECT intInvoiceId
-			FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-			WHERE intPaymentId = P.intPaymentId
-		) DETAILS ON ID.intInvoiceId = DETAILS.intInvoiceId
-		INNER JOIN (
-			SELECT intTicketId
-				 , strCustomerReference 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-			WHERE ISNULL(strCustomerReference, '') <> ''
-		) T ON ID.intTicketId = T.intTicketId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
-		FOR XML PATH ('')
-	) INV (strCustomerReference)
-) CUSTOMERREFERENCES
 LEFT JOIN (
-	SELECT intGLFiscalYearPeriodId
-		 , strAccountingPeriod = P.strPeriod
-	FROM tblGLFiscalYearPeriod P	
-) AccPeriod ON P.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
+	SELECT intPaymentId		= PD.intPaymentId
+		 , strTransactionId	= STRING_AGG(CAST(PD.strTransactionNumber AS NVARCHAR(MAX)), ', ')
+	FROM tblARPaymentDetail PD
+	WHERE PD.dblPayment <> 0 
+	  AND PD.strTransactionNumber <> ''
+	  AND PD.strTransactionNumber IS NOT NULL
+	GROUP BY PD.intPaymentId
+) TRANSACTIONS ON TRANSACTIONS.intPaymentId = P.intPaymentId
+LEFT JOIN (
+	SELECT intPaymentId		= PD.intPaymentId
+		 , strTicketNumbers	= STRING_AGG(ID.strTicketNumber, ', ')
+	FROM tblARPaymentDetail PD
+	INNER JOIN (
+		SELECT DISTINCT ID.intInvoiceId
+			          , T.strTicketNumber 
+		FROM tblARInvoiceDetail ID
+		INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
+		WHERE T.strTicketNumber IS NOT NULL
+		  AND T.strTicketNumber <> ''
+		  AND ID.intTicketId IS NOT NULL
+		GROUP BY ID.intInvoiceId, T.strTicketNumber
+	) ID ON PD.intInvoiceId = ID.intInvoiceId	
+	GROUP BY PD.intPaymentId
+) SCALETICKETS ON SCALETICKETS.intPaymentId = P.intPaymentId
+LEFT JOIN (
+	SELECT intPaymentId				= PD.intPaymentId
+		 , strCustomerReferences	= STRING_AGG(ID.strCustomerReference, ', ')
+	FROM tblARPaymentDetail PD
+	INNER JOIN (
+		SELECT DISTINCT ID.intInvoiceId
+			          , T.strCustomerReference 
+		FROM tblARInvoiceDetail ID
+		INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
+		WHERE T.strCustomerReference IS NOT NULL
+		  AND T.strCustomerReference <> ''
+		  AND ID.intTicketId IS NOT NULL
+		GROUP BY ID.intInvoiceId, T.strCustomerReference
+	) ID ON PD.intInvoiceId = ID.intInvoiceId	
+	GROUP BY PD.intPaymentId
+) CUSTOMERREFERENCES ON CUSTOMERREFERENCES.intPaymentId = P.intPaymentId
+
