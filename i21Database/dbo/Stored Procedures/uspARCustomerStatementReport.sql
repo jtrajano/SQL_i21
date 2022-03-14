@@ -336,21 +336,19 @@ FROM (
 			 , strTicketNumbers	= SCALETICKETS.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId
-		OUTER APPLY (
-			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+		LEFT JOIN (
+			SELECT intInvoiceId		= ID.intInvoiceId
+				, strTicketNumbers = STRING_AGG(T.strTicketNumber, '', '')
 			FROM (
-				SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + '', ''
-				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
-				INNER JOIN (
-					SELECT intTicketId
-						 , strTicketNumber 
-					FROM dbo.tblSCTicket WITH(NOLOCK)
-				) T ON ID.intTicketId = T.intTicketId
-				WHERE ID.intInvoiceId = I.intInvoiceId
-				GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
-				FOR XML PATH ('''')
-			) INV (strTicketNumber)
-		) SCALETICKETS
+				SELECT DISTINCT ID.intInvoiceId
+					, ID.intTicketId 
+				FROM tblARInvoiceDetail ID
+				WHERE ID.intTicketId IS NOT NULL
+				GROUP BY ID.intInvoiceId, ID.intTicketId
+			) ID
+			INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
+			GROUP BY ID.intInvoiceId
+		) SCALETICKETS ON SCALETICKETS.intInvoiceId = I.intInvoiceId
 		WHERE ysnPosted  = 1		
 		  AND ysnCancelled = 0
 		  AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
