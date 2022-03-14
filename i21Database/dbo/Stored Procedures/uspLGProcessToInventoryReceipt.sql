@@ -1086,6 +1086,7 @@ BEGIN TRY
 			LEFT JOIN tblCTApprovalStatusTF approvalStatus ON approvalStatus.intApprovalStatusId = L.intApprovalStatusId
 		WHERE 
 			L.intLoadId = @intLoadId
+			AND ISNULL(L.strTradeFinanceNo, '') <> ''
 
 		IF NOT EXISTS (
 				SELECT 1
