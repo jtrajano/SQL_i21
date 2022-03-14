@@ -497,7 +497,7 @@ SET @query = '
 		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,CUR.strCurrency
-		,AVERAGERATE.dblRate as dblHistoricRate
+		,A.dblAverageExchangeRate as dblHistoricRate
 		,tmpAgingSummaryTotal.dblAmountDue as dblHistoricAmount
 		,ISNULL(GLRD.dblNewForexRate, 0) as dblCurrencyRevalueRate
 		,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
@@ -539,12 +539,7 @@ SET @query = '
 			SELECT strTransactionId, dblNewForexRate, dblNewAmount
 			FROM vyuGLRevalueDetails
 			GROUP BY strTransactionId, dblNewForexRate, dblNewAmount
-		) GLRD ON A.strBillId = GLRD.strTransactionId 
-		OUTER APPLY (
-			SELECT dblRate = ROUND(SUM(dblRate) / CASE WHEN COUNT(dblRate) = 0 THEN 1 ELSE COUNT(dblRate) END, 2)
-			FROM tblAPBillDetail
-			WHERE intBillId = A.intBillId
-		) AVERAGERATE
+		) GLRD ON A.strBillId = GLRD.strTransactionId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL --voided deleted voucher
 		SELECT
@@ -564,7 +559,7 @@ SET @query = '
 		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,CUR.strCurrency
-		,AVERAGERATE.dblRate as dblHistoricRate
+		,A.dblAverageExchangeRate as dblHistoricRate
 		,tmpAgingSummaryTotal.dblAmountDue as dblHistoricAmount
 		,ISNULL(GLRD.dblNewForexRate, 0) as dblCurrencyRevalueRate
 		,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
@@ -596,11 +591,6 @@ SET @query = '
 			FROM vyuGLRevalueDetails
 			GROUP BY strTransactionId, dblNewForexRate, dblNewAmount
 		) GLRD ON A.strBillId = GLRD.strTransactionId 
-		OUTER APPLY (
-			SELECT dblRate = ROUND(SUM(dblRate) / CASE WHEN COUNT(dblRate) = 0 THEN 1 ELSE COUNT(dblRate) END, 2)
-			FROM tblAPBillDetail
-			WHERE intBillId = A.intBillId
-		) AVERAGERATE
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL
 		SELECT
