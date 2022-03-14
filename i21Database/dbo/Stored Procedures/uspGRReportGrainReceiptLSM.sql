@@ -527,7 +527,7 @@ SELECT
 ,SC.strCustomerReference as strReference 
 ,SC.strTicketComment as strComment
 ,SC.strDiscountComment as strDiscountComment
-
+,isnull(SC.dblTicketFees, 0) as dblTicketFees
   FROM tblSCTicket SC
   INNER JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId
 	AND EY.strEntityType = CASE WHEN SC.strInOutFlag = 'I' THEN 'Vendor' ELSE 'Customer' end
