@@ -286,7 +286,8 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	 , dtmDueDate      
 	 , dtmShipDate
 	 , dtmPostDate
-	 , ysnImportedFromOrigin      
+	 , ysnImportedFromOrigin
+	 , strTicketNumbers
 )
 SELECT intInvoiceId				= I.intInvoiceId      
 	 , intEntityCustomerId		= I.intEntityCustomerId
@@ -307,6 +308,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmShipDate				= I.dtmShipDate
 	 , dtmPostDate				= I.dtmPostDate
 	 , ysnImportedFromOrigin    = I.ysnImportedFromOrigin
+	 , strTicketNumbers			= I.strTicketNumbers
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #COMPANYLOCATIONS CL ON I.intCompanyLocationId = CL.intCompanyLocationId
