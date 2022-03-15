@@ -93,7 +93,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 					@ysnForceReversedExpense	= [ysnForceReversedExpense],
 					@ysnOverrideFormula			= [ysnOverrideFormula],
 					@ysnOverrideColumnFormula	= [ysnOverrideColumnFormula],
-					@intSort					= [intSort]
+					@intSort					= [intSort],
+					@intSubRowDetailId			= [intRowDetailId]  
 				
 					FROM #tempRowDesignPrintEach ORDER BY [intSort]
 				
