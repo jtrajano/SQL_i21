@@ -370,7 +370,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTotalProvisional		= CAST(0 AS NUMERIC(18, 6))
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CAST(0 AS BIT))
-	 , strTicketNumbers			= CAST('' AS NVARCHAR(500))
+	 , strTicketNumbers			= INV.strTicketNumbers
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
@@ -577,26 +577,6 @@ INNER JOIN (
 	GROUP BY intInvoiceId
 	HAVING COUNT(*) > 0
 ) VFDDRUGITEM ON VFDDRUGITEM.intInvoiceId = I.intInvoiceId
-
---SCALE TICKETS
-UPDATE I
-SET strTicketNumbers = SCALETICKETS.strTicketNumbers
-FROM #INVOICES I
-CROSS APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
-	FROM (
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
-		INNER JOIN (
-			SELECT intTicketId
-				 , strTicketNumber 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intTicketId IS NOT NULL
-		  AND I.intInvoiceId = ID.intInvoiceId
-		FOR XML PATH ('')
-	) INV (strTicketNumber)
-) SCALETICKETS
 	 
 --UPDATE NEGATIVE AMOUNTS
 UPDATE I

@@ -59,8 +59,8 @@ SELECT
 	,strUserEntered					= USERENTERED.strName
 	,intEntityContactId				= I.intEntityContactId
 	,strContactName					= EC.strName
-	,strTicketNumbers				= SCALETICKETS.strTicketNumbers
-	,strCustomerReferences			= CUSTOMERREFERENCES.strCustomerReferences
+	,strTicketNumbers				= I.strTicketNumbers
+	,strCustomerReferences			= I.strCustomerReferences
 	,ysnHasEmailSetup				= EMAILSETUP.ysnHasEmailSetup --CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrencyDescription			= CUR.strDescription
 	,dblWithholdingTax				= CASE WHEN (I.strTransactionType  IN ('Credit Memo','Customer Prepayment', 'Overpayment'))
@@ -199,38 +199,6 @@ LEFT JOIN (
 	  AND SMA.strStatus = 'Sent'
 	GROUP by SMT.intRecordId
 ) EMAILSTATUS ON I.intInvoiceId = EMAILSTATUS.intRecordId
-OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM (SELECT intTicketId, intInvoiceId FROM dbo.tblARInvoiceDetail WITH(NOLOCK) WHERE intTicketId IS NOT NULL) ID 		
-		INNER JOIN (
-			SELECT intTicketId
-				 , strTicketNumber 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intInvoiceId = I.intInvoiceId 
-		  AND ID.intTicketId IS NOT NULL
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
-		FOR XML PATH ('')
-	) INV (strTicketNumber)
-) SCALETICKETS
-OUTER APPLY (
-	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
-		FROM (SELECT intTicketId, intInvoiceId FROM dbo.tblARInvoiceDetail WITH(NOLOCK) WHERE intTicketId IS NOT NULL) ID 		
-		INNER JOIN (
-			SELECT intTicketId
-				 , strCustomerReference 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-			WHERE ISNULL(strCustomerReference, '') <> ''
-		) T ON ID.intTicketId = T.intTicketId 
-		WHERE ID.intInvoiceId = I.intInvoiceId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
-		FOR XML PATH ('')
-	) INV (strCustomerReference)
-) CUSTOMERREFERENCES
 LEFT JOIN (
 	SELECT intTicketId	= MIN(ID.intTicketId)
 		 , intInvoiceId	= ID.intInvoiceId
