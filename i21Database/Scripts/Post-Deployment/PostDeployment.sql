@@ -284,6 +284,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
 :r .\AR\DefaultData\97_RefreshARTempTable.sql
+:r .\AR\DefaultData\96_RebuildReportFields.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

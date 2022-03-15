@@ -154,6 +154,7 @@ BEGIN TRY
 		 , strBatchId 	= @strBatchId	
 
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
+	EXEC dbo.[uspARUpdateInvoiceReportFields] @InvoiceIds, 0
 	
 	IF ISNULL(@ysnLogRisk, 0) = 1
 		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
