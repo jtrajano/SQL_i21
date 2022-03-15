@@ -77,7 +77,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
-		 , intSalespersonId		= NULL
+		 , intSalespersonId
 		 , intCurrencyId
 		 , intTermsId
 		 , intShipToId
