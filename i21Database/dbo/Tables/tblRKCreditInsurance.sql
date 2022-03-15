@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblRKCreditInsurance]
 (
-	[intCreditInsuranceId] INT NOT NULL PRIMARY KEY, 
+	[intCreditInsuranceId] INT IDENTITY(1,1) NOT NULL, 
     [intEntityId] INT NOT NULL, 
     [strEntityName] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NOT NULL, 
     [strPolicyNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NOT NULL, 
