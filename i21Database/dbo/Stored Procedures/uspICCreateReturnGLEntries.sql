@@ -279,9 +279,9 @@ BEGIN
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 END 
 ;
-
+	
 -- Generate the G/L Entries for Inventory Transactions 
-WITH ForGLEntries_CTE (
+;WITH ForGLEntries_CTE (
 	dtmDate
 	,intItemId
 	,intItemLocationId
@@ -630,7 +630,7 @@ AS
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 
 	WHERE	
-			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 
+			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 	
 
 	-- Load the Inventory-Adjustment
 	UNION ALL 
@@ -682,7 +682,118 @@ AS
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock			
 			)
 
+	-- Discrepancy between the line total and valuation. 
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId 
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblQty = ISNULL(ri.dblLineTotalFunctional, 0) - ISNULL(valuation.dblTotalFunctional, 0)
+			,dblUOMQty = ISNULL(ri.dblLineTotalForeign, 0) -  ISNULL(valuation.dblTotalValueForeign, 0) 
+			,dblCost = 0 
+			,dblValue = 0
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = t.strTransactionType
+			,t.strTransactionForm 
+			,strDescription = 
+				dbo.fnFormatMessage(
+					'Resolve the decimal discrepancy for %s.'
+					,ri.strItemNo
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,dblForexRate = t.dblForexRate
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
+			,ri.strItemNo
+			,dblReceiptUnitCost = NULL 
+			,dblReturnUnitCostInFunctionalCurrency = NULL 
+			,t.intSourceEntityId
+			,ri.intCommodityId
+			,intReference = CAST(4 AS TINYINT)
+	FROM	
+			
+			(
+				SELECT
+					r.strReceiptNumber
+					,ri.intInventoryReceiptId
+					,ri.intInventoryReceiptItemId
+					,i.strItemNo
+					,i.intCommodityId
+					,dblLineTotalForeign = SUM(ri.dblLineTotal)
+					,dblLineTotalFunctional = SUM(ROUND(dbo.fnMultiply(ri.dblLineTotal, ISNULL(ri.dblForexRate, 1)), 2))						
+				FROM 
+					tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					INNER JOIN tblICItem i 
+						ON ri.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+					INNER JOIN tblICInventoryTransaction t 
+						ON t.intTransactionId = r.intInventoryReceiptId
+						AND t.strTransactionId = r.strReceiptNumber
+						AND t.intTransactionDetailId = ri.intInventoryReceiptItemId			
+				WHERE
+					t.strBatchId = @strBatchId						
+				GROUP BY
+					r.strReceiptNumber
+					,ri.intInventoryReceiptId
+					,ri.intInventoryReceiptItemId					
+					,i.strItemNo
+					,i.intCommodityId
+			) ri
 
+			CROSS APPLY (
+				SELECT 
+					dblTotalFunctional = SUM (
+						ROUND(dbo.fnMultiply(-t.dblQty, t.dblCost), 2) 
+					)
+					,dblTotalValueForeign = 						
+						SUM (
+							ROUND(dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), ISNULL(t.dblForexRate, 1)), 2) 
+						)
+				FROM 
+					tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+						ON t.intTransactionTypeId = ty.intTransactionTypeId
+				WHERE
+					t.strTransactionId = ri.strReceiptNumber
+					AND t.intTransactionId = ri.intInventoryReceiptId
+					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+					AND ty.strName = 'Inventory Return'
+			) valuation
+
+			CROSS APPLY (
+				SELECT TOP 1 
+					t.* 
+					,strTransactionType = ty.strName
+				FROM 
+					tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+						ON t.intTransactionTypeId = ty.intTransactionTypeId
+				WHERE
+					t.strTransactionId = ri.strReceiptNumber
+					AND t.intTransactionId = ri.intInventoryReceiptId
+					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+					AND ty.strName = 'Inventory Return'
+				ORDER BY t.intInventoryTransactionId DESC 
+			) t
+
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+
+	WHERE	
+			ISNULL(ri.dblLineTotalFunctional, 0) - ISNULL(valuation.dblTotalFunctional, 0) <> 0 
+			OR ISNULL(ri.dblLineTotalForeign, 0) -  ISNULL(valuation.dblTotalValueForeign, 0)  <> 0 
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
@@ -829,38 +940,17 @@ FROM	ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount 
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(
-			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)), 2)
-			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
+			ForGLEntries_CTE.dblQty
 		) Debit
 		CROSS APPLY dbo.fnGetCredit(
-			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)), 2)
-			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2) 
+			ForGLEntries_CTE.dblQty
 		) Credit
-		CROSS APPLY dbo.fnGetDebitForeign(
-			(
-				ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0) ), 2)
-				- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
-			)
-			,ForGLEntries_CTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,ForGLEntries_CTE.dblForexRate
-		) DebitForeign
-		CROSS APPLY dbo.fnGetCreditForeign(
-			(
-				ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)),2)
-				- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
-			)
-			,ForGLEntries_CTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,ForGLEntries_CTE.dblForexRate
+		CROSS APPLY dbo.fnGetDebit(
+			ForGLEntries_CTE.dblUOMQty
+		) DebitForeign 
+		CROSS APPLY dbo.fnGetCredit(
+			ForGLEntries_CTE.dblUOMQty
 		) CreditForeign
-		CROSS APPLY dbo.fnGetDebitUnit(
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
-		) DebitUnit
-		CROSS APPLY dbo.fnGetCreditUnit(
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
-		) CreditUnit 
-
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			@InventoryTransactionTypeId_WriteOffSold
@@ -869,10 +959,10 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		)
 		AND (
-			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)), 2)
-			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2) 	
-		) <> 0
-		AND ForGLEntries_CTE.intReference = 1
+			ForGLEntries_CTE.dblQty <> 0
+			OR ForGLEntries_CTE.dblUOMQty <> 0		
+		) 		
+		AND ForGLEntries_CTE.intReference = 4
 
 -- Inventory 
 UNION ALL 
