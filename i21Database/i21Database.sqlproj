@@ -9760,6 +9760,7 @@
     <Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
