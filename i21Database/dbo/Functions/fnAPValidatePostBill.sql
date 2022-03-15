@@ -591,6 +591,68 @@ BEGIN
 		AND A.intPayToBankAccountId IS NULL
 		AND B.intPaymentMethodId = 2 --ACH
 
+		--You cannot post intra-location transaction without due to account. 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'Unable to find the due to account that matches the location of the AP Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUETO.strAccountId) + ' to the chart of accounts.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			2
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		OUTER APPLY (
+			SELECT TOP 1 APCP.intDueToAccountId, GLA.strAccountId, APCP.ysnAllowSingleLocationEntries
+			FROM tblAPCompanyPreference APCP
+			LEFT JOIN tblGLAccount GLA
+			ON APCP.intDueToAccountId = GLA.intAccountId
+		) DUETO
+		OUTER APPLY (
+			SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
+			FROM tblGLAccountSegmentMapping GLASM
+			INNER JOIN tblGLAccountSegment GLAS
+			ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+			LEFT JOIN tblGLAccount GLA
+			ON GLASM.intAccountId = GLA.intAccountId
+			WHERE GLAS.intAccountStructureId = 3
+			AND GLASM.intAccountId = B.[intAccountId]
+		) GLSEGMENT
+		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+		AND DUETO.[ysnAllowSingleLocationEntries] = 0
+		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
+
+		--You cannot post intra-location transaction without due from account. 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'Unable to find the due from account that matches the location of the Payables Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUEFROM.strAccountId) + ' to the chart of accounts.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			2
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		OUTER APPLY (
+			SELECT TOP 1 APCP.intDueFromAccountId, GLA.strAccountId, APCP.ysnAllowSingleLocationEntries
+			FROM tblAPCompanyPreference APCP
+			LEFT JOIN tblGLAccount GLA
+			ON APCP.intDueFromAccountId = GLA.intAccountId
+		) DUEFROM
+		OUTER APPLY (
+			SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
+			FROM tblGLAccountSegmentMapping GLASM
+			INNER JOIN tblGLAccountSegment GLAS
+			ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+			LEFT JOIN tblGLAccount GLA
+			ON GLASM.intAccountId = GLA.intAccountId
+			WHERE GLAS.intAccountStructureId = 3
+			AND GLASM.intAccountId = A.[intAccountId]
+		) GLSEGMENT
+		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		  AND ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+		  AND DUEFROM.[ysnAllowSingleLocationEntries] = 0
+		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
+
 	END
 	ELSE
 	BEGIN

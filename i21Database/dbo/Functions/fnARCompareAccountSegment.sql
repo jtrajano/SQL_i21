@@ -12,7 +12,7 @@ BEGIN
 	FROM (
 		SELECT intAccountSegmentId
 		FROM vyuGLLocationAccountId
-		WHERE intAccountId IN (47, 38734)
+		WHERE intAccountId IN (@AccountId1, @AccountId2)
 		GROUP BY intAccountSegmentId
 	) GLLAI
 
