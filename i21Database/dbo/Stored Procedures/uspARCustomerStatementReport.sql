@@ -333,24 +333,9 @@ FROM (
 			 , dtmPostDate
 			 , dtmDueDate
 			 , ysnImportedFromOrigin
-			 , strTicketNumbers	= SCALETICKETS.strTicketNumbers
+			 , strTicketNumbers	= I.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
-		INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId
-		OUTER APPLY (
-			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
-			FROM (
-				SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + '', ''
-				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
-				INNER JOIN (
-					SELECT intTicketId
-						 , strTicketNumber 
-					FROM dbo.tblSCTicket WITH(NOLOCK)
-				) T ON ID.intTicketId = T.intTicketId
-				WHERE ID.intInvoiceId = I.intInvoiceId
-				GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
-				FOR XML PATH ('''')
-			) INV (strTicketNumber)
-		) SCALETICKETS
+		INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId		
 		WHERE ysnPosted  = 1		
 		  AND ysnCancelled = 0
 		  AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
