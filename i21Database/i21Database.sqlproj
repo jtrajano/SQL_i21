@@ -565,6 +565,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDUnnaturalAccoutAmount.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryLocationBinsReport.sql" />
     <Build Include="dbo\Views\vyuICStagingDailyStockPosition.sql" />
+    <Build Include="dbo\Tables\tblRKCreditInsurance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

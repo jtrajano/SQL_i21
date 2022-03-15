@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[tblRKCreditInsurance]
+(
+	[intCreditInsuranceId] INT NOT NULL PRIMARY KEY, 
+    [intEntityId] INT NOT NULL, 
+    [strEntityName] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NOT NULL, 
+    [strPolicyNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NOT NULL, 
+    [dblInsuranceCoverage] NUMERIC(18, 6) NULL, 
+    [dblReimbursementDays] NUMERIC(18, 6) NULL, 
+    [dblDaysToClaim] NUMERIC(18, 6) NULL, 
+    [intCommodityAttributeId] INT NOT NULL, 
+    [strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [dblPremiumPercent] NUMERIC(18, 6) NULL, 
+    [dtmValidFrom] DATETIME NULL, 
+    [dtmValidTo] DATETIME NULL, 
+    [ysnSingleBuyer] BIT NULL DEFAULT 0, 
+    [ysnMultipleBuyer] BIT NULL DEFAULT 0, 
+    [ysnFactoring] BIT NULL DEFAULT 0, 
+    [intCommodityId] INT NOT NULL, 
+    [strCommodityCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [dblAggregatedPolicyAmount] NUMERIC(18, 6) NULL, 
+    [strRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+    [intConcurrencyId] INT NOT NULL DEFAULT 1,
+
+    CONSTRAINT [PK_tblRKCreditInsurance_intCreditInsuranceId] PRIMARY KEY ([intCreditInsuranceId]),
+	CONSTRAINT [FK_tblRKCreditInsurance_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
+	CONSTRAINT [FK_tblRKCreditInsurance_tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblRKCreditInsurance_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES tblICCommodityAttribute([intCommodityAttributeId]),
+)
