@@ -1,4 +1,4 @@
-CREATE FUNCTION fnCMOverrideARRevalueAccounts
+CREATE FUNCTION fnCMOverridePostAccounts
  (
      @PostGLEntries RecapTableType READONLY
  )
@@ -13,6 +13,7 @@ RETURNS
      strOverrideLocationAccountId NVARCHAR(40),
      strOverrideLOBAccountId NVARCHAR(40),
      strOrigAccountId NVARCHAR(40),
+      strNewAccountId NVARCHAR(40),
     ysnOverriden BIT
 )
 AS
@@ -74,8 +75,7 @@ BEGIN
 
     IF NOT EXISTS(SELECT 1 FROM tblGLAccount WHERE strAccountId = @newStrAccountId)
     BEGIN
-        UPDATE @tbl SET strMessage = @newStrAccountId + ' is not an existing Account Id for override', ysnOverriden = 1   WHERE intId = @intId
-        
+        UPDATE @tbl SET strNewAccountId =@newStrAccountId, strMessage = @newStrAccountId + ' is not an existing Account Id for override', ysnOverriden = 1   WHERE intId = @intId
     END
     ELSE
     BEGIN
