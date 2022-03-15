@@ -37,7 +37,8 @@ BEGIN TRY
 			@InterCompApprovalSign		VARBINARY(MAX),
 			@intScreenId				INT,
 			@intTransactionId			INT,
-			@ysnEnableFXFieldInContractPricing BIT = 0
+			@ysnEnableFXFieldInContractPricing BIT = 0,
+			@strFinalCurrency nvarchar(50)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -121,9 +122,11 @@ BEGIN TRY
 	FROM	tblCTContractDetail 
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	
-	SELECT	@intLastModifiedUserId	=	ISNULL(intLastModifiedById,intCreatedById) 
+	SELECT	@intLastModifiedUserId	=	ISNULL(intLastModifiedById,intCreatedById),
+			@strFinalCurrency = PCC.strCurrency
 	FROM	tblCTPriceContract PC
-	JOIN	tblCTPriceFixation PF	ON	PF.intPriceContractId	=	PC.intPriceContractId 
+	JOIN	tblCTPriceFixation PF	ON	PF.intPriceContractId	=	PC.intPriceContractId
+	LEFT JOIN tblSMCurrency PCC on PCC.intCurrencyID = PC.intFinalCurrencyId
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 	SELECT	@intReportLogoHeight = intReportLogoHeight,
@@ -282,7 +285,7 @@ BEGIN TRY
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
 			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
-			strCurrencyExchangeRate = isnull((FY.strCurrency + '/' + TY.strCurrency), IY.strCurrency),
+			strCurrencyExchangeRate = isnull((FY.strCurrency + '/' + TY.strCurrency), @strFinalCurrency),
 			dblRate = (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end),
 			strFXFinalPrice = LTRIM(
 									dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)*
