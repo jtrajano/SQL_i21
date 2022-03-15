@@ -563,6 +563,8 @@
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Functions\fnFRDSplitString.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDUnnaturalAccoutAmount.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryLocationBinsReport.sql" />
+    <Build Include="dbo\Views\vyuICStagingDailyStockPosition.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
