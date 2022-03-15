@@ -97,9 +97,10 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 					@ysnOverrideFormula			= [ysnOverrideFormula],
 					@ysnOverrideColumnFormula	= [ysnOverrideColumnFormula],
 					@intSort					= [intSort],
-					@ysnShowCurrencies  = [ysnShowCurrencies]  ,  
-					@intCurrencyID = [intCurrencyID],  
-					@strCurrency = [strCurrency]  
+					@ysnShowCurrencies			= [ysnShowCurrencies]  ,  
+					@intCurrencyID				= [intCurrencyID],  
+					@strCurrency				= [strCurrency],  
+					@intSubRowDetailId			= [intRowDetailId]  
 				
 					FROM #tempRowDesignPrintEach ORDER BY [intSort]
 				
