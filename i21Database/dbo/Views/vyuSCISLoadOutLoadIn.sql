@@ -10,7 +10,7 @@
 		,BinIn.intStorageLocationId
 		,StorageUnit.strName as strStorageUnit
 		,BinIn.intUnitMeasureId
-		,UnitMeasure.strUnitMeasure
+		,BinInUnitMeasure.strUnitMeasure
 		,BinIn.dblUnits
 		,BinIn.dtmTransactionDate
 		,BinIn.intConcurrencyId
@@ -18,8 +18,8 @@
 		,case when BinIn.intUnitMeasureId is not null and BinIn.intUnitMeasureId != UnitMeasure.intUnitMeasureId then 
 				dbo.fnGRConvertQuantityToTargetItemUOM(
 					LoadOutBin.intItemId
+					, BinIn.intUnitMeasureId
 					, UnitMeasure.intUnitMeasureId
-					, LoadOutBin.intUnitMeasureId
 					, BinIn.dblUnits) 
 			else 
 				BinIn.dblUnits
@@ -32,7 +32,14 @@
 	join tblICUnitMeasure UnitMeasure
 		on LoadOutBin.intUnitMeasureId = UnitMeasure.intUnitMeasureId
 	join tblICStorageLocation StorageUnit
-		on BinIn.intStorageLocationId = StorageUnit.intStorageLocationId
+		on BinIn.intStorageLocationId = StorageUnit.intStorageLocationId		
+	join tblICUnitMeasure BinInUnitMeasure
+		on BinIn.intUnitMeasureId = BinInUnitMeasure.intUnitMeasureId
+	
+
+	
+	
+
 	
 
 	
