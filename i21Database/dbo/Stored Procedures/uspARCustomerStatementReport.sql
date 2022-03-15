@@ -330,6 +330,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	, ysnImportedFromOrigin
 	, ysnPastDue
 	, strLocationName
+	, strTicketNumbers
 )
 SELECT intEntityCustomerId		= I.intEntityCustomerId
 	, intInvoiceId				= I.intInvoiceId
@@ -346,6 +347,7 @@ SELECT intEntityCustomerId		= I.intEntityCustomerId
 	, ysnImportedFromOrigin		= I.ysnImportedFromOrigin
 	, ysnPastDue				= CASE WHEN @dtmDateToLocal > I.dtmDueDate AND I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE 0 END
 	, strLocationName			= L.strLocationName
+	, strTicketNumbers			= I.strTicketNumbers
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId
@@ -354,23 +356,6 @@ WHERE ysnPosted  = 1
   AND ysnCancelled = 0      
   AND ((I.strType = 'Service Charge' AND ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND ysnForgiven = 0)))      
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-
---INVOICE_SCALETICKET
-UPDATE I
-SET strTicketNumbers = SCALETICKETS.strTicketNumbers
-FROM #INVOICES I
-CROSS APPLY (     
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)     
-	FROM (      
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '      
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)        
-		INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId	
-		WHERE ID.intInvoiceId = I.intInvoiceId
-		  AND ID.intTicketId IS NOT NULL
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber      
-		FOR XML PATH ('')     
-	) INV (strTicketNumber)
-) SCALETICKETS
 
 --MONTHLY BUDGET
 UPDATE I

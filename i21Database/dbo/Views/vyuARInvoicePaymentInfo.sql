@@ -12,8 +12,8 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , intTermId				= I.intTermId
 	 , strTerm					= T.strTerm
 	 , strBOLNumber				= I.strBOLNumber
-	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
-	 , strCustomerReferences	= CUSTOMERREFERENCES.strCustomerReferences
+	 , strTicketNumbers			= I.strTicketNumbers
+	 , strCustomerReferences	= I.strCustomerReferences
 	 , dtmDate					= I.dtmDate
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
 	 , dtmDueDate				= I.dtmDueDate
@@ -97,35 +97,6 @@ INNER JOIN (
 			, dblWithholdPercent
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) L ON I.intCompanyLocationId  = L.intCompanyLocationId  
-OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
-		INNER JOIN (
-			SELECT intTicketId, strTicketNumber 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intInvoiceId = I.intInvoiceId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
-		FOR XML PATH ('')
-	) INV (strTicketNumber)
-) SCALETICKETS
-OUTER APPLY (
-	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
-		INNER JOIN (
-			SELECT intTicketId, strCustomerReference 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-			WHERE ISNULL(strCustomerReference, '') <> ''
-		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intInvoiceId = I.intInvoiceId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
-		FOR XML PATH ('')
-	) INV (strCustomerReference)
-) CUSTOMERREFERENCES
 LEFT OUTER JOIN (
 	SELECT intEntityId
 		 , strName 
