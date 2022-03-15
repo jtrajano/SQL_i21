@@ -212,10 +212,52 @@ AS
 					strContractType,
 					intEntityId,
 					strEntityName,
+					CD.intCommodityId,
+					strCommodityDescription,
 					ysnMultiplePriceFixation,
-					PFD.dblNoOfLots,
-					PF.[dblTotalLots]
-				
+					CD.dblQuantity,
+					strItemUOM ,
+					PF.[dblTotalLots] ,
+					strLocationName,
+					CD.intItemId,
+					CD.intItemUOMId,
+					CD.intFutureMarketId,
+					strFutMarketName,
+					CD.intFutureMonthId,
+					strFutureMonthYear,
+					CD.dblBasis,
+					CD.dblFutures,
+					CD.dblCashPrice,
+					intPriceItemUOMId,
+					intBookId,
+					intSubBookId,
+					intSalespersonId,
+					CD.intCurrencyId,
+					intCompanyLocationId,
+					PF.[dblTotalLots]-[dblLotsFixed] ,
+					PF.intLotsHedged,
+					PF.dblFinalPrice,
+					CU.intCommodityUnitMeasureId ,
+					CD.intDiscountScheduleCodeId,
+					PU.intCommodityUnitMeasureId ,
+					CD.strEntityContract,
+					CD.dtmStartDate,
+					CD.dtmEndDate,
+					CD.strBook,
+					CD.strSubBook,
+					CD.strPriceUOM,
+					PC.strPriceContractNo,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency,
+					CD.strPricingType,
+					CD.strItemNo,
+					CD.strItemDescription,
+					CD.strShortName,
+					intHeaderBookId,
+					intHeaderSubBookId,
+					intDetailBookId,
+					intDetailSubBookId
 				
 
 		UNION ALL
@@ -254,14 +296,39 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					strContractType,
 					CD.intEntityId,
 					strEntityName,
+					CD.intCommodityId,
+					strCommodityDescription,
 					CD.ysnMultiplePriceFixation,
-					PF.intPriceContractId,
-					PF.intPriceFixationId,
+					CH.dblQuantity,
+					QM.strUnitMeasure,
+					CD.intSalespersonId,
+					PF.[dblLotsFixed],
 					PF.[dblTotalLots],
-					PF.[dblLotsFixed]
+					PF.intLotsHedged,
+					PF.intPriceFixationId,
+					CU.intCommodityUnitMeasureId,
+					CD.strEntityContract,
+					PF.intPriceContractId,
+					BK.strBook,
+					SB.strSubBook,
+					CH.intBookId,
+					CH.intSubBookId,
+					CD.strPriceUOM,
+					PC.strPriceContractNo,
+					strCurrency,
+					ysnSubCurrency,
+					strMainCurrency,
+					CD.strPricingType,
+					intHeaderBookId,
+					intHeaderSubBookId,
+					intDetailBookId,
+					intDetailSubBookId
 				
 				
 	)t
 	LEFT JOIN x ON x.intContractHeaderId = t.intContractHeaderId AND ISNULL(t.ysnMultiplePriceFixation,0) = 0
 	where 
 	 ISNULL(t.intContractDetailId,0) = CASE WHEN t.ysnMultiplePriceFixation = 1 THEN ISNULL(t.intContractDetailId,0) ELSE x.intContractDetailId END
+GO
+
+
