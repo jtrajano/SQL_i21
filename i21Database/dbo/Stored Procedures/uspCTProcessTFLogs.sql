@@ -95,6 +95,7 @@ BEGIN
 				, dblSublimit
 				, dblFinanceQty
 				, dblFinancedAmount
+				, strBorrowingFacilityBankRefNo
 				)
 			select
 				strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' else 'Updated Contract' end)
@@ -125,12 +126,13 @@ BEGIN
 				, intBorrowingFacilityId = cd.intBorrowingFacilityId
 				, intLimitId = cd.intBorrowingFacilityLimitId
 				, intSublimitId = cd.intBorrowingFacilityLimitDetailId
-				, strBankTradeReference = cd.strBankReferenceNo
+				, strBankTradeReference = cd.strReferenceNo
 				, strBankApprovalStatus = STF.strApprovalStatus
 				, dblLimit = limit.dblLimit
 				, dblSublimit = sublimit.dblLimit
 				, dblFinanceQty = cd.dblQuantity
 				, dblFinancedAmount = cd.dblTotalCost
+				, strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
 			
 			from
 				@TFXML tf
