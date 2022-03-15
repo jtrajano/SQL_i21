@@ -10373,6 +10373,7 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
     <Build Include="dbo\Views\vyuARGetCustomer.sql" />
     <Build Include="dbo\Views\vyuARGetEntityLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -10597,5 +10598,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />
   </ItemGroup>
 </Project>
