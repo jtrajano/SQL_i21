@@ -54,7 +54,7 @@ BEGIN
   SET dtmNextAward = CASE WHEN (strAwardPeriod = 'Start of Week') THEN    
                             CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE)    
                     WHEN (strAwardPeriod = 'End of Week') THEN    
-                        CASE WHEN (dtmLastAward) < CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE) THEN    
+                        CASE WHEN (dtmLastAward) <= CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE) THEN    
                          DATEADD(DD, -7, CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE))    
                         ELSE     
                          CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())) + 7, GETDATE()) AS DATE)    
