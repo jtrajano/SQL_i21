@@ -927,6 +927,7 @@
     <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Stored Procedures\uspGLBuildRetainedEarningsAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginCOA.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
