@@ -342,7 +342,7 @@ BEGIN TRY
 		, CD.intInvoiceCurrencyId
 		, CD.dtmFXValidFrom
 		, CD.dtmFXValidTo
-		, CD.dblRate
+		, dblRate = isnull(CD.dblRate,1)
 		, CD.dblFXPrice
 		, CD.ysnUseFXPrice
 		, CD.intFXPriceUOMId
