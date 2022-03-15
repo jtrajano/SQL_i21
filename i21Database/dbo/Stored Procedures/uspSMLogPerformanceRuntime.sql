@@ -45,7 +45,7 @@ BEGIN
                 , strProcedureName		= @strProcedureName
                 , strBuildNumber		= @strBuildNumber
                 , strRequestId          = @strRequestId
-                , dtmStartDateTime		= GETDATE()
+                , dtmStartDateTime		= GETUTCDATE()
                 , intUserId				= @intUserId
 
             SET @intNewPerformanceLogId = SCOPE_IDENTITY()
@@ -53,7 +53,7 @@ BEGIN
     ELSE
         BEGIN
             UPDATE tblSMPerformanceLog
-            SET dtmEndDateTime = GETDATE()
+            SET dtmEndDateTime = GETUTCDATE()
             WHERE intPerformanceLogId = @intPerformanceLogId
         END
 END
