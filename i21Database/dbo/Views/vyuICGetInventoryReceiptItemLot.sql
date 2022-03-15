@@ -33,6 +33,7 @@ SELECT
 	,receiptItemLot.dblGrossWeight
 	,receiptItemLot.dblTareWeight
 	,dblNetWeight = ISNULL(receiptItemLot.dblGrossWeight, 0) - ISNULL(receiptItemLot.dblTareWeight, 0)
+	,receiptItemLot.dblTarePerQuantity
 	,receiptItemLot.dblCost
 	,receiptItemLot.intUnitPallet
 	,receiptItemLot.dblStatedGrossPerUnit

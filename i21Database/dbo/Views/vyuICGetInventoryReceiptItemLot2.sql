@@ -12,6 +12,7 @@ SELECT
 		,receiptItemLot.dblQuantity
 		,receiptItemLot.dblGrossWeight
 		,receiptItemLot.dblTareWeight
+		,receiptItemLot.dblTarePerQuantity
 		,receiptItemLot.dblCost
 		,receiptItemLot.intNoPallet
 		,receiptItemLot.intUnitPallet
