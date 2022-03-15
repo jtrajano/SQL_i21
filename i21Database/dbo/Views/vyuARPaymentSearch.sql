@@ -145,39 +145,22 @@ OUTER APPLY (
 OUTER APPLY (
 	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
-		INNER JOIN (
-			SELECT intInvoiceId
-			FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-			WHERE intPaymentId = P.intPaymentId
-		) DETAILS ON ID.intInvoiceId = DETAILS.intInvoiceId
-		INNER JOIN (
-			SELECT intTicketId
-				 , strTicketNumber 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-		) T ON ID.intTicketId = T.intTicketId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+		SELECT CAST(I.strTicketNumbers AS VARCHAR(200))  + ', '
+		FROM tblARPaymentDetail PD WITH(NOLOCK)
+		INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+		WHERE PD.intPaymentId = P.intPaymentId
+		  AND I.strTicketNumbers IS NOT NULL
 		FOR XML PATH ('')
 	) INV (strTicketNumber)
 ) SCALETICKETS
 OUTER APPLY (
 	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
-		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
-		INNER JOIN (
-			SELECT intInvoiceId
-			FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-			WHERE intPaymentId = P.intPaymentId
-		) DETAILS ON ID.intInvoiceId = DETAILS.intInvoiceId
-		INNER JOIN (
-			SELECT intTicketId
-				 , strCustomerReference 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-			WHERE ISNULL(strCustomerReference, '') <> ''
-		) T ON ID.intTicketId = T.intTicketId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
+		SELECT CAST(I.strCustomerReferences AS VARCHAR(200))  + ', '
+		FROM tblARPaymentDetail PD WITH(NOLOCK)
+		INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+		WHERE PD.intPaymentId = P.intPaymentId
+		  AND I.strCustomerReferences IS NOT NULL
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
