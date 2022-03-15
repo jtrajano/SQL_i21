@@ -4870,7 +4870,9 @@ BEGIN TRY
 															WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 															ELSE 2 END
 									, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
-															ELSE intActionId END
+														 ELSE 
+														 	(CASE WHEN intActionId = 46 THEN 18 ELSE intActionId END)
+														 END
 							END
 						END
 					END
