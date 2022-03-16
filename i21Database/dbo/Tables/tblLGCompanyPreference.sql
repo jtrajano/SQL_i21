@@ -41,6 +41,7 @@
 [ysnUpdateVesselInfo] [bit] NULL,
 [ysnValidateExternalPONo] [bit] NULL,
 [ysnValidateExternalShipmentNo] [bit] NULL,
+[ysnValidateTransportModeAgainstPosition] [bit] NULL,
 [ysnETAMandatory] [bit] NULL,
 [ysnPOETAFeedToERP] [bit] NULL,
 [ysnFeedETAToUpdatedAvailabilityDate] [bit] NULL,

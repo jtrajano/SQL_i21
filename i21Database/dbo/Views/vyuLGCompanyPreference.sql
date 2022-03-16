@@ -55,6 +55,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnAlertApprovedQty
 	,CP.ysnUpdateVesselInfo
 	,CP.ysnValidateExternalPONo
+	,CP.ysnValidateTransportModeAgainstPosition
 	,CP.ysnETAMandatory
 	,CP.ysnPOETAFeedToERP
 	,CP.ysnFeedETAToUpdatedAvailabilityDate
