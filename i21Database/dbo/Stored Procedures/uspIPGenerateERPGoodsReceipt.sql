@@ -22,6 +22,7 @@ BEGIN TRY
 		,@intUnitMeasureId INT
 		,@intItemId INT
 		,@intItemUOMId INT
+		,@strCertificationName nvarchar(100)
 	DECLARE @intInventoryReceiptId INT
 		,@intActionId INT
 		,@strVendorAccountNum NVARCHAR(50)
@@ -457,6 +458,31 @@ BEGIN TRY
 					IF @intPricingTypeId <> 1
 					BEGIN
 						SELECT @strError = @strError + 'Contract Seq is not yet priced. '
+					END
+					IF NOT EXISTS (
+							SELECT *
+							FROM tblICInventoryReceiptItemLot RL
+							WHERE RL.intInventoryReceiptItemId = @intInventoryReceiptItemId
+								AND RL.strCertificate IN (
+									SELECT C.strCertificationName 
+									FROM tblICItemCertification IC
+									JOIN tblICCertification C ON C.intCertificationId = IC.intCertificationId
+									WHERE intItemId = @intItemId
+									) AND RL.strCertificateId <>''
+							)
+						AND EXISTS (
+								SELECT *
+								FROM tblICItemCertification IC
+								WHERE intItemId = @intItemId
+								)
+					BEGIN
+						SELECT @strCertificationName =NULL
+						SELECT @strCertificationName =C.strCertificationName
+						FROM tblICItemCertification IC
+						JOIN tblICCertification C ON C.intCertificationId = IC.intCertificationId
+						WHERE IC.intItemId = @intItemId
+
+						SELECT @strError = @strError + 'Certification/Document '+@strCertificationName+' is missing. '
 					END
 				END
 			END
