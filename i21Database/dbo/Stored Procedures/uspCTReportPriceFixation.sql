@@ -413,7 +413,7 @@ BEGIN TRY
 
 	LEFT JOIN tblSMCountry				rtc10 on lower(rtrim(ltrim(rtc10.strCountry))) = lower(rtrim(ltrim(EY.strEntityCountry)))
 	LEFT JOIN tblSMCountry				rtc12 on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
-	INNER JOIN vyuCTPriceContractStatus	SPC ON  SPC.intContractHeaderId = PF.intContractHeaderId
+	INNER JOIN vyuCTPriceContractStatus	SPC ON  SPC.intContractHeaderId = PF.intContractHeaderId AND SPC.intPriceFixationId = @intPriceFixationId
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 
