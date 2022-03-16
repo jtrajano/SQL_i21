@@ -230,6 +230,7 @@
         FROM tblGRCustomerStorage GRCS2
         WHERE GRCS2.intTicketId = SC.intTicketId
         AND GRCS2.intEntityId = EM.intEntityId
+		AND GRCS2.ysnTransferStorage = 0
     ) STORAGE_TICKET
     OUTER APPLY(
 		SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 
