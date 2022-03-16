@@ -109,7 +109,7 @@ BEGIN TRY
 	WHERE intDeliverySheetId = @intDeliverySheetId
 
 	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
-	SET @currencyDecimal = 20
+	SET @currencyDecimal = 4
 
 	INSERT INTO @splitTable(
 		[intEntityId]
