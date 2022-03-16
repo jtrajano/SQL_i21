@@ -569,7 +569,6 @@ BEGIN TRY
 	FROM tblTRLoadHeader LH
 	INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = LH.intLoadHeaderId
 	WHERE LH.intLoadHeaderId = @intLoadHeaderId
-	AND LH.ysnCombo 
 	GROUP BY dblComboFreightRate
 
 	SET @receiptRowCount = @@ROWCOUNT;
