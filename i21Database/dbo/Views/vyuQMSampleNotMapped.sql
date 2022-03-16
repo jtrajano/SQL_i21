@@ -13,7 +13,9 @@ SELECT S.intSampleId
 	,IC.strContractItemName
 	,I.strItemNo
 	,I1.strItemNo AS strBundleItemNo
+	,E.intEntityId AS intPartyName
 	,E.strName AS strPartyName
+	,ETC.intEntityContactId AS intPartyContactId
 	,W.strWorkOrderNo
 	,LS.strSecondaryStatus AS strLotStatus
 	,UOM.strUnitMeasure AS strSampleUOM
@@ -63,3 +65,4 @@ LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
 LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
+LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId

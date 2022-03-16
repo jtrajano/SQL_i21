@@ -4,6 +4,7 @@ SELECT S.intSampleId
 	,S.strSampleNumber
 	,S.strSampleRefNo
 	,ST.strSampleTypeName
+	,CH.intContractHeaderId
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
 	,CH1.strContractNumber AS strContract
 	,dbo.fnQMGetAssignedSequences(S.intSampleId) COLLATE Latin1_General_CI_AS AS strAssignedSequences
@@ -20,7 +21,9 @@ SELECT S.intSampleId
 	,SS.strStatus
 	,S.dtmSampleReceivedDate
 	,S.strSampleNote
+	,E.intEntityId AS intPartyName
 	,E.strName AS strPartyName
+	,ETC.intEntityContactId AS intPartyContactId
 	,S.strRefNo
 	,S.strSamplingMethod
 	,S.dtmTestedOn
@@ -122,3 +125,4 @@ LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
+LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
