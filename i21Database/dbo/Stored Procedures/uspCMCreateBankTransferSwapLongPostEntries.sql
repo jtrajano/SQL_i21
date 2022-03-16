@@ -258,9 +258,9 @@ END
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTForwardToFXGLAccountId
         ,[dblCredit]              = 0
-        ,[dblDebit]             = dblAmountFrom
+        ,[dblDebit]               = dblAmountFrom
         ,[dblDebitForeign]       = 0
-        ,[dblCreditForeign]      = dblAmountFrom/dblRateAmountFrom  
+        ,[dblCreditForeign]      =  dblAmountForeignFrom
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
@@ -287,8 +287,8 @@ END
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTForwardFromFXGLAccountId
-        ,[dblCredit]              = dblAmountTo
-        ,[dblDebit]             = 0
+        ,[dblCredit]             = dblAmountSettlementTo
+        ,[dblDebit]				 = 0
         ,[dblDebitForeign]       = dblAmountForeignTo
         ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      

@@ -14,6 +14,8 @@ SELECT TOP 1
     FROM tblCMCompanyPreferenceOption  
 
 DECLARE @dblCreditForeign DECIMAL(18,6)
+DECLARE @defaultCurrencyId INT
+SELECT @defaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 
 
 SELECT TOP 1 strTransactionId FROM tblCMBankTransfer where intTransactionId = @intSwapShortId
@@ -32,26 +34,17 @@ intCurrencyIdAmountTo,
 dblAmountTo,
 dblAmountForeignTo,
 dblRateAmountTo,
-
 dblAmountForeignFrom,
 dblAmountFrom, 
 dblRateAmountFrom,
-
 intRateTypeIdAmountFrom,
---dblAmount, 
-
-
-
-
 dtmDate, 
 dtmInTransit,
 intBankTransactionTypeId, 
 dblCrossRate,
 dblReverseRate,
--- dblAmountForeignTo,
--- dblAmountTo,
--- dblRateAmountTo,
--- intRateTypeIdAmountTo,
+dblAmountSettlementFrom,
+dblRateAmountSettlementFrom,
 intConcurrencyId
 )
 select 
@@ -66,25 +59,17 @@ intCurrencyIdAmountFrom,
 dblAmountTo = dblAmountFrom,
 dblAmountForeignTo = dblAmountForeignFrom,
 dblRateAmountFrom,
-
 GLDetail.dblCreditForeign,
 GLDetail.dblCredit,
 GLDetail.dblExchangeRate,
 intRateTypeIdAmountFrom = GLDetail.intCurrencyExchangeRateTypeId,
---dblAmount = GLDetail.dblCredit,
-
-
-
-
 DATEADD(DAY, 1, dtmDate),
 DATEADD(DAY, 1, dtmDate), 
 4,
 ROUND(dblAmountFrom/dblAmountTo,6),
 ROUND(dblAmountTo/dblAmountFrom,6),
--- dblAmountForeignTo = GLDetail1.dblDebitForeign,
--- dblAmountTo = GLDetail1.dblDebit,
--- dblRateAmountTo=GLDetail1.dblExchangeRate,
--- intRateTypeIdAmountTo = GLDetail1.intCurrencyExchangeRateTypeId,
+dblAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN GLDetail.dblCreditForeign ELSE 0 END,
+dblRateAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN 1 ELSE 0 END,
 1
 from tblCMBankTransfer  A
 OUTER APPLY(
@@ -99,4 +84,3 @@ where intTransactionId = @intSwapShortId
 
 SET @intSwapLongId = SCOPE_IDENTITY()
 UPDATE tblCMBankSwap set intSwapLongId =@intSwapLongId, ysnLockLong = 0 WHERE intBankSwapId = @intBankSwapId
-
