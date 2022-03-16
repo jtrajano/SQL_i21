@@ -73,6 +73,7 @@ SELECT
 	, Certification.strCertificationName
 	, Item.dblGAShrinkFactor
 	, Item.strMarketValuation
+	, Item.intValuationGroupId
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

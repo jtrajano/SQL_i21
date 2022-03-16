@@ -33,6 +33,7 @@ SELECT -- Load Header
 		WHEN 1 THEN 'Truck'
 		WHEN 2 THEN 'Ocean Vessel'
 		WHEN 3 THEN 'Rail'
+		WHEN 4 THEN 'Multimodal'
 		END COLLATE Latin1_General_CI_AS
 	,L.intTransUsedBy
 	,strTransUsedBy = CASE L.intTransUsedBy
@@ -123,6 +124,7 @@ SELECT -- Load Header
 			WHEN 1 THEN '(T)'
 			WHEN 2 THEN '(V)'
 			WHEN 3 THEN '(R)' 
+			WHEN 4 THEN '(M)' 
 			END +  ' - ' 
 		+ CASE L.intPurchaseSale 
 			WHEN 1 THEN 'Inbound'

@@ -61,6 +61,7 @@ SELECT Item.intItemId
 , Item.strBundleType
 , Item.ysnListBundleSeparately
 , Item.strManufactureType
+, Item.intValuationGroupId
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
