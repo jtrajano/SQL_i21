@@ -4,7 +4,6 @@ SELECT S.intSampleId
 	,S.strSampleNumber
 	,S.strSampleRefNo
 	,ST.strSampleTypeName
-	,CH.intContractHeaderId
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
 	,CH1.strContractNumber AS strContract
 	,dbo.fnQMGetAssignedSequences(S.intSampleId) COLLATE Latin1_General_CI_AS AS strAssignedSequences
