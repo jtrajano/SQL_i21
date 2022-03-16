@@ -55,13 +55,19 @@ SELECT TR.intTestResultId
 	,CE.strName AS strCreatedUserName
 	,S.dtmLastModified AS dtmLastUpdated
 	,UE.strName AS strUpdatedUserName
+	,I.strOrigin 
+	,I.strProductType
+	,I.strGrade,strRegion
+	,I.strSeason
+	,I.strClass
+	,I.strProductLine
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
-LEFT JOIN dbo.tblICItem AS I ON I.intItemId = S.intItemId
+LEFT JOIN dbo.vyuICSearchItem AS I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 LEFT JOIN dbo.tblEMEntity AS E ON E.intEntityId = S.intEntityId

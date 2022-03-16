@@ -86,6 +86,12 @@ SELECT S.intSampleId
 	,S.dtmLastModified AS dtmLastUpdated
 	,UE.strName AS strUpdatedUserName
 	,S.ysnImpactPricing
+	,I.strOrigin 
+	,I.strProductType
+	,I.strGrade,strRegion
+	,I.strSeason
+	,I.strClass
+	,I.strProductLine
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -94,7 +100,7 @@ LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContrac
 LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 LEFT JOIN dbo.tblCTContractHeader CH1 ON CH1.intContractHeaderId = S.intContractHeaderId
 LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
-LEFT JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+LEFT JOIN dbo.vyuICSearchItem I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN dbo.tblLGLoadContainer C ON C.intLoadContainerId = S.intLoadContainerId
 LEFT JOIN dbo.tblLGLoad SH ON SH.intLoadId = S.intLoadId
