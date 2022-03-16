@@ -95,6 +95,8 @@ SELECT GL.intGenerateLoadId
 			THEN 'Ocean Vessel'
 		WHEN 3
 			THEN 'Rail'
+		WHEN 4
+			THEN 'Multimodal'
 		END COLLATE Latin1_General_CI_AS AS strTransportationMode	 
 	  ,GL.intAllocationDetailId
 	  ,AH.strAllocationNumber

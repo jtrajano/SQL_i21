@@ -38,6 +38,7 @@ SELECT CH.strContractNumber
 		WHEN 1 THEN 'Truck'
 		WHEN 2 THEN 'Ocean Vessel'
 		WHEN 3 THEN 'Rail'
+		WHEN 4 THEN 'Multimodal'
 		END COLLATE Latin1_General_CI_AS
 	,L.intTransUsedBy
 	,strTransUsedBy = CASE L.intTransUsedBy
