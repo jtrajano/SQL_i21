@@ -53,6 +53,9 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 				   ,[strWebsite]
 				   ,[strEmail]
 				   ,[strRTN]
+				   ,[strIBAN]
+				   ,[strSwiftCode]
+				   ,[strBICCode]
 				   ,[intCreatedUserId]
 				   ,[dtmCreated]
 				   ,[intLastModifiedUserId]
@@ -74,6 +77,9 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 						,[strWebsite]			= i.strWebsite
 						,[strEmail]				= i.strEmail
 						,[strRTN]               = CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+						,[strIBAN]				= i.strIBAN	
+				   		,[strSwiftCode]			= i.strSwiftCode
+				   		,[strBICCode]			= i.strBICCode
 						,[intCreatedUserId]		= i.intCreatedUserId
 						,[dtmCreated]			= i.dtmCreated
 						,[intLastModifiedUserId]= i.intLastModifiedUserId
@@ -105,25 +111,28 @@ BEGIN
 	-- WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
     UPDATE tblCMBank SET
-    strBankName           = i.strBankName
-    ,strContact              = i.strContact
-    ,strAddress              = i.strAddress
-    ,strZipCode              = i.strZipCode
-    ,strCity              = i.strCity
-    ,strState              = i.strState
-    ,strCountry              = i.strCountry
-    ,strPhone              = i.strPhone
-    ,strFax                  = i.strFax
-    ,strWebsite              = i.strWebsite
-    ,strEmail              = i.strEmail
-    ,strRTN                  = CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
-    ,intCreatedUserId      = i.intCreatedUserId
-    ,dtmCreated              = i.dtmCreated
-    ,intLastModifiedUserId= i.intLastModifiedUserId
-    ,dtmLastModified      = i.dtmLastModified
+    strBankName           	= i.strBankName
+    ,strContact             = i.strContact
+    ,strAddress             = i.strAddress
+    ,strZipCode             = i.strZipCode
+    ,strCity              	= i.strCity
+    ,strState              	= i.strState
+    ,strCountry             = i.strCountry
+    ,strPhone              	= i.strPhone
+    ,strFax                 = i.strFax
+    ,strWebsite             = i.strWebsite
+    ,strEmail              	= i.strEmail
+    ,strRTN                 = CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+	,[strIBAN]				= i.strIBAN	
+	,[strSwiftCode]			= i.strSwiftCode
+	,[strBICCode]			= i.strBICCode
+    ,intCreatedUserId      	= i.intCreatedUserId
+    ,dtmCreated             = i.dtmCreated
+    ,intLastModifiedUserId	= i.intLastModifiedUserId
+    ,dtmLastModified      	= i.dtmLastModified
     ,ysnDelete              = i.ysnDelete
-    ,dtmDateDeleted          = i.dtmDateDeleted
-    ,intConcurrencyId      = i.intConcurrencyId
+    ,dtmDateDeleted         = i.dtmDateDeleted
+    ,intConcurrencyId      	= i.intConcurrencyId
     FROM inserted i
     WHERE tblCMBank.intBankId = i.intBankId
 
@@ -139,6 +148,7 @@ BEGIN
     ,strWebsite = i.strWebsite
     ,strEmail   = i.strEmail
 	,strRTN     = CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+	
     FROM inserted i
     WHERE tblCMBankAccount.intBankId = i.intBankId
 
