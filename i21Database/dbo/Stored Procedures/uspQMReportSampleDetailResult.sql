@@ -35,7 +35,10 @@ BEGIN TRY
 	FROM tblQMTestResult TR
 	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 		AND TR.intSampleId = @intSampleId
+	
 	JOIN tblQMTest T ON T.intTestId = TR.intTestId
+	JOIN tblQMProductProperty PP ON PP.intProductId = TR.intProductId AND PP.intPropertyId = TR.intPropertyId
+	WHERE ISNULL(PP.ysnDocumentPrint,0) = 1
 	ORDER BY TR.intSequenceNo
 END TRY
 
