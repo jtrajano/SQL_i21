@@ -14,12 +14,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 
 DECLARE @ysnLogPerformanceRuntime BIT = 0
+DECLARE @dtmPerformanceLoggingEffectivity DATETIME = NULL
 
-SELECT TOP 1 @ysnLogPerformanceRuntime = ISNULL(ysnLogPerformanceRuntime, 0)
+SELECT TOP 1 @ysnLogPerformanceRuntime = ISNULL(ysnLogPerformanceRuntime, 0), @dtmPerformanceLoggingEffectivity = DATEADD(dd, 0, DATEDIFF(dd, 0, dtmPerformanceLoggingEffectivity))
 FROM tblSMCompanyPreference
 ORDER BY intCompanyPreferenceId DESC
 
-IF @ysnLogPerformanceRuntime = 0
+IF @ysnLogPerformanceRuntime = 0 OR (@ysnLogPerformanceRuntime = 1 AND @dtmPerformanceLoggingEffectivity < DATEADD(dd, 0, DATEDIFF(dd, 0, GETUTCDATE())))
     RETURN
 
 BEGIN
