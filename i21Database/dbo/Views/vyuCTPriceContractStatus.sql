@@ -329,6 +329,7 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 	LEFT JOIN x ON x.intContractHeaderId = t.intContractHeaderId AND ISNULL(t.ysnMultiplePriceFixation,0) = 0
 	where 
 	 ISNULL(t.intContractDetailId,0) = CASE WHEN t.ysnMultiplePriceFixation = 1 THEN ISNULL(t.intContractDetailId,0) ELSE x.intContractDetailId END
+	 AND t.strStatus IN ('Partially Priced', 'Fully Priced')
 GO
 
 
