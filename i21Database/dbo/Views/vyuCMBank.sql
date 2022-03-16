@@ -22,5 +22,8 @@ intBankId
 ,dtmLastModified
 ,ysnDelete
 ,dtmDateDeleted
+,strIBAN
+,strSwiftCode
+,strBICCode
 ,intConcurrencyId
 FROM dbo.tblCMBank
