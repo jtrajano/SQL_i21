@@ -280,6 +280,197 @@ BEGIN
 END 
 ;
 
+DECLARE @ReturnValuation AS TABLE (
+	intInventoryReceiptId INT
+	,intInventoryReceiptItemId INT 
+	,intInventoryTransactionId INT
+	,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,dblQty NUMERIC(38, 20)
+	,dblReturnUnitCost NUMERIC(38, 20)
+	,dblReturnUnitCostInFunctionalCurrency NUMERIC(38, 20)
+)
+
+-- Load the Inventory Returns
+INSERT INTO @ReturnValuation (
+	intInventoryReceiptId
+	,intInventoryReceiptItemId 
+	,intInventoryTransactionId 
+	,strReceiptNumber 
+	,dblQty 
+	,dblReturnUnitCost 
+	--,dblReturnUnitCostInFunctionalCurrency 
+)
+SELECT
+	intInventoryReceiptId = r.intInventoryReceiptId
+	,intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+	,intInventoryTransactionId = t.intInventoryTransactionId
+	,strReceiptNumber = r.strReceiptNumber
+	,dblQty = t.dblQty	
+	,dblReturnUnitCost = 
+				(
+					dbo.fnCalculateReceiptUnitCost(
+						ri.intItemId
+						,ri.intUnitMeasureId		
+						,ri.intCostUOMId
+						,ri.intWeightUOMId
+						,ri.dblUnitCost
+						,ri.dblNet
+						,t.intLotId
+						,t.intItemUOMId
+						,AggregrateItemLots.dblTotalNet
+						,ri.ysnSubCurrency
+						,r.intSubCurrencyCents
+						,t.intItemUOMId
+						,ri.intComputeItemTotalOption
+						,ri.dblOpenReceive
+					)
+				)
+	--,dblReturnUnitCostInFunctionalCurrency = 
+	--		CASE 
+	--			WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
+	--				dbo.fnMultiply(
+	--					(
+	--						dbo.fnCalculateReceiptUnitCost(
+	--							ri.intItemId
+	--							,ri.intUnitMeasureId		
+	--							,ri.intCostUOMId
+	--							,ri.intWeightUOMId
+	--							,ri.dblUnitCost
+	--							,ri.dblNet
+	--							,t.intLotId
+	--							,t.intItemUOMId
+	--							,AggregrateItemLots.dblTotalNet
+	--							,ri.ysnSubCurrency
+	--							,r.intSubCurrencyCents
+	--							,t.intItemUOMId
+	--							,ri.intComputeItemTotalOption
+	--							,ri.dblOpenReceive
+	--						)
+	--					)
+	--					,ri.dblForexRate
+	--				)
+	--			ELSE 
+	--				(
+	--					dbo.fnCalculateReceiptUnitCost(
+	--						ri.intItemId
+	--						,ri.intUnitMeasureId		
+	--						,ri.intCostUOMId
+	--						,ri.intWeightUOMId
+	--						,ri.dblUnitCost
+	--						,ri.dblNet
+	--						,t.intLotId
+	--						,t.intItemUOMId
+	--						,AggregrateItemLots.dblTotalNet
+	--						,ri.ysnSubCurrency
+	--						,r.intSubCurrencyCents
+	--						,t.intItemUOMId
+	--						,ri.intComputeItemTotalOption
+	--						,ri.dblOpenReceive
+	--					)
+	--				)
+	--		END 
+FROM	tblICInventoryReceipt r INNER JOIN (
+			tblICInventoryReceiptItem ri LEFT JOIN tblICInventoryReceiptItemLot ril
+				ON ri.intInventoryReceiptItemId  = ril.intInventoryReceiptItemId
+		)
+			ON  r.intInventoryReceiptId = ri.intInventoryReceiptId				
+
+		CROSS APPLY (
+			SELECT	dblQty = -rtn.dblQtyReturned
+					,dblUOMQty = t.dblUOMQty 
+					,rtn.dblCost
+					,rtn.strBatchId
+					,rtn.intTransactionId
+					,rtn.intTransactionDetailId
+					,rtn.strTransactionId
+					,rtn.intTransactionTypeId
+					,t.intInventoryTransactionId
+					,cb.intLotId
+					,cb.intItemId
+					,cb.intItemUOMId
+					,cb.intItemLocationId
+					,t.intSourceEntityId
+			FROM	tblICInventoryReturned rtn 
+					OUTER APPLY (
+						SELECT	cbLot.intItemId
+								,cbLot.intItemLocationId
+								,cbLot.intLotId
+								,cbLot.intItemUOMId
+								,dblUOMQty = uom.dblUnitQty
+						FROM	tblICInventoryLot cbLot LEFT JOIN tblICItemUOM uom
+									ON cbLot.intItemUOMId = uom.intItemUOMId 
+						WHERE	cbLot.intInventoryLotId = rtn.intInventoryLotId
+								AND rtn.intInventoryLotId IS NOT NULL
+						UNION ALL 
+						SELECT	cbFifo.intItemId
+								,cbFifo.intItemLocationId
+								,intLotId = CAST(NULL AS INT) 
+								,cbFifo.intItemUOMId
+								,dblUOMQty = uom.dblUnitQty
+						FROM	tblICInventoryFIFO cbFifo LEFT JOIN tblICItemUOM uom
+									ON cbFifo.intItemUOMId = uom.intItemUOMId 
+						WHERE	cbFifo.intInventoryFIFOId = rtn.intInventoryFIFOId
+								AND rtn.intInventoryFIFOId IS NOT NULL
+						UNION ALL 
+						SELECT	cbLifo.intItemId
+								,cbLifo.intItemLocationId
+								,intLotId = CAST(NULL AS INT) 
+								,cbLifo.intItemUOMId 
+								,dblUOMQty = uom.dblUnitQty
+						FROM	tblICInventoryLIFO cbLifo LEFT JOIN tblICItemUOM uom
+									ON cbLifo.intItemUOMId = uom.intItemUOMId 
+						WHERE	cbLifo.intInventoryLIFOId = rtn.intInventoryLIFOId
+								AND rtn.intInventoryLIFOId IS NOT NULL 
+						UNION ALL 
+						SELECT	cbActualCost.intItemId
+								,cbActualCost.intItemLocationId
+								,intLotId = CAST(NULL AS INT) 
+								,cbActualCost.intItemUOMId
+								,dblUOMQty = uom.dblUnitQty
+						FROM	tblICInventoryActualCost cbActualCost LEFT JOIN tblICItemUOM uom
+									ON cbActualCost.intItemUOMId = uom.intItemUOMId 
+						WHERE	cbActualCost.intInventoryActualCostId = rtn.intInventoryActualCostId
+								AND rtn.intInventoryActualCostId IS NOT NULL 				
+					) cb
+					LEFT JOIN tblICInventoryTransaction t
+						ON rtn.intInventoryTransactionId = t.intInventoryTransactionId
+			WHERE	rtn.intTransactionId = r.intInventoryReceiptId
+					AND rtn.strTransactionId = r.strReceiptNumber
+					AND rtn.intTransactionDetailId = ri.intInventoryReceiptItemId
+					AND ISNULL(cb.intLotId, 0) = COALESCE(ril.intLotId, cb.intLotId, 0) 
+		) t
+		INNER JOIN tblICItem i
+			ON i.intItemId = ri.intItemId
+		INNER JOIN #tmpRebuildList list	
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+		OUTER APPLY (
+			SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+		) stockUOM
+		OUTER APPLY (
+			SELECT  dblTotalNet = SUM(
+						CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+									ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+								ELSE 
+									ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+						END 
+					)
+			FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+						ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+			WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+		) AggregrateItemLots
+		OUTER APPLY (
+			SELECT TOP 1 
+					strTransactionType = ty.strName
+					,ty.intTransactionTypeId
+					,strTransactionForm = 'Inventory Receipt'
+			FROM	dbo.tblICInventoryTransactionType ty
+			WHERE	ty.strName = 'Inventory Return'
+		) ty
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+			ON currencyRateType.intCurrencyExchangeRateTypeId = ri.intForexRateTypeId
+WHERE	t.strBatchId = @strBatchId
+	
 -- Generate the G/L Entries for Inventory Transactions 
 WITH ForGLEntries_CTE (
 	dtmDate
@@ -329,142 +520,21 @@ AS
 			,dblForexRate = ri.dblForexRate
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,i.strItemNo
-			,dblReceiptUnitCost = 
-					(
-						dbo.fnCalculateReceiptUnitCost(
-							ri.intItemId
-							,ri.intUnitMeasureId		
-							,ri.intCostUOMId
-							,ri.intWeightUOMId
-							,ri.dblUnitCost
-							,ri.dblNet
-							,t.intLotId
-							,t.intItemUOMId
-							,AggregrateItemLots.dblTotalNet
-							,ri.ysnSubCurrency
-							,r.intSubCurrencyCents
-							,t.intItemUOMId
-							,ri.intComputeItemTotalOption
-							,ri.dblOpenReceive
-						)
-					)
-			,dblReturnUnitCostInFunctionalCurrency = 
-				CASE 
-					WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
-						dbo.fnMultiply(
-							(
-								dbo.fnCalculateReceiptUnitCost(
-									ri.intItemId
-									,ri.intUnitMeasureId		
-									,ri.intCostUOMId
-									,ri.intWeightUOMId
-									,ri.dblUnitCost
-									,ri.dblNet
-									,t.intLotId
-									,t.intItemUOMId
-									,AggregrateItemLots.dblTotalNet
-									,ri.ysnSubCurrency
-									,r.intSubCurrencyCents
-									,t.intItemUOMId
-									,ri.intComputeItemTotalOption
-									,ri.dblOpenReceive
-								)
-							)
-							,ri.dblForexRate
-						)
-					ELSE 
-						(
-							dbo.fnCalculateReceiptUnitCost(
-								ri.intItemId
-								,ri.intUnitMeasureId		
-								,ri.intCostUOMId
-								,ri.intWeightUOMId
-								,ri.dblUnitCost
-								,ri.dblNet
-								,t.intLotId
-								,t.intItemUOMId
-								,AggregrateItemLots.dblTotalNet
-								,ri.ysnSubCurrency
-								,r.intSubCurrencyCents
-								,t.intItemUOMId
-								,ri.intComputeItemTotalOption
-								,ri.dblOpenReceive
-							)
-						)
-				END 
+			,dblReceiptUnitCost = rv.dblReturnUnitCost					
+			,dblReturnUnitCostInFunctionalCurrency = NULL --rv.dblReturnUnitCostInFunctionalCurrency
 			,intSourceEntityId = t.intSourceEntityId 
 			,i.intCommodityId
 			,intReference = CAST(1 AS TINYINT)
-	FROM	tblICInventoryReceipt r INNER JOIN (
+	FROM	@ReturnValuation rv INNER JOIN tblICInventoryReceipt r 
+				ON rv.strReceiptNumber = r.strReceiptNumber	 
+			INNER JOIN (
 				tblICInventoryReceiptItem ri LEFT JOIN tblICInventoryReceiptItemLot ril
 					ON ri.intInventoryReceiptItemId  = ril.intInventoryReceiptItemId
 			)
-				ON  r.intInventoryReceiptId = ri.intInventoryReceiptId				
-
-			CROSS APPLY (
-				SELECT	dblQty = -rtn.dblQtyReturned
-						,dblUOMQty = t.dblUOMQty 
-						,rtn.dblCost
-						,rtn.strBatchId
-						,rtn.intTransactionId
-						,rtn.intTransactionDetailId
-						,rtn.strTransactionId
-						,rtn.intTransactionTypeId
-						,t.intInventoryTransactionId
-						,cb.intLotId
-						,cb.intItemId
-						,cb.intItemUOMId
-						,cb.intItemLocationId
-						,t.intSourceEntityId
-				FROM	tblICInventoryReturned rtn 
-						OUTER APPLY (
-							SELECT	cbLot.intItemId
-									,cbLot.intItemLocationId
-									,cbLot.intLotId
-									,cbLot.intItemUOMId
-									,dblUOMQty = uom.dblUnitQty
-							FROM	tblICInventoryLot cbLot LEFT JOIN tblICItemUOM uom
-										ON cbLot.intItemUOMId = uom.intItemUOMId 
-							WHERE	cbLot.intInventoryLotId = rtn.intInventoryLotId
-									AND rtn.intInventoryLotId IS NOT NULL
-							UNION ALL 
-							SELECT	cbFifo.intItemId
-									,cbFifo.intItemLocationId
-									,intLotId = CAST(NULL AS INT) 
-									,cbFifo.intItemUOMId
-									,dblUOMQty = uom.dblUnitQty
-							FROM	tblICInventoryFIFO cbFifo LEFT JOIN tblICItemUOM uom
-										ON cbFifo.intItemUOMId = uom.intItemUOMId 
-							WHERE	cbFifo.intInventoryFIFOId = rtn.intInventoryFIFOId
-									AND rtn.intInventoryFIFOId IS NOT NULL
-							UNION ALL 
-							SELECT	cbLifo.intItemId
-									,cbLifo.intItemLocationId
-									,intLotId = CAST(NULL AS INT) 
-									,cbLifo.intItemUOMId 
-									,dblUOMQty = uom.dblUnitQty
-							FROM	tblICInventoryLIFO cbLifo LEFT JOIN tblICItemUOM uom
-										ON cbLifo.intItemUOMId = uom.intItemUOMId 
-							WHERE	cbLifo.intInventoryLIFOId = rtn.intInventoryLIFOId
-									AND rtn.intInventoryLIFOId IS NOT NULL 
-							UNION ALL 
-							SELECT	cbActualCost.intItemId
-									,cbActualCost.intItemLocationId
-									,intLotId = CAST(NULL AS INT) 
-									,cbActualCost.intItemUOMId
-									,dblUOMQty = uom.dblUnitQty
-							FROM	tblICInventoryActualCost cbActualCost LEFT JOIN tblICItemUOM uom
-										ON cbActualCost.intItemUOMId = uom.intItemUOMId 
-							WHERE	cbActualCost.intInventoryActualCostId = rtn.intInventoryActualCostId
-									AND rtn.intInventoryActualCostId IS NOT NULL 				
-						) cb
-						LEFT JOIN tblICInventoryTransaction t
-							ON rtn.intInventoryTransactionId = t.intInventoryTransactionId
-				WHERE	rtn.intTransactionId = r.intInventoryReceiptId
-						AND rtn.strTransactionId = r.strReceiptNumber
-						AND rtn.intTransactionDetailId = ri.intInventoryReceiptItemId
-						AND ISNULL(cb.intLotId, 0) = COALESCE(ril.intLotId, cb.intLotId, 0) 
-			) t
+				ON  r.intInventoryReceiptId = ri.intInventoryReceiptId							
+			INNER JOIN tblICInventoryTransaction t 
+				ON t.intInventoryTransactionId = rv.intInventoryTransactionId
+				AND t.strTransactionId = rv.strReceiptNumber			
 			INNER JOIN tblICItem i
 				ON i.intItemId = ri.intItemId
 			INNER JOIN #tmpRebuildList list	
@@ -473,18 +543,7 @@ AS
 			OUTER APPLY (
 				SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
 			) stockUOM
-			OUTER APPLY (
-				SELECT  dblTotalNet = SUM(
-							CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
-										ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
-									ELSE 
-										ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
-							END 
-						)
-				FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
-							ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
-				WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-			) AggregrateItemLots
+			
 			OUTER APPLY (
 				SELECT TOP 1 
 						strTransactionType = ty.strName
@@ -495,7 +554,6 @@ AS
 			) ty
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = ri.intForexRateTypeId
-	WHERE	t.strBatchId = @strBatchId
 
 	-- Resolve the 0.01 discrepancy between the inventory transaction value and the return line total. 
 	UNION ALL
@@ -682,7 +740,141 @@ AS
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock			
 			)
 
+	-- Discrepancy between the line total and valuation. 
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId 
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblQty = ISNULL(ri.dblLineTotalFunctional, 0) - ISNULL(valuation.dblTotalFunctional, 0)
+			,dblUOMQty = ISNULL(ri.dblLineTotalForeign, 0) -  ISNULL(valuation.dblTotalValueForeign, 0) 
+			,dblCost = 0 
+			,dblValue = 0
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = t.strTransactionType
+			,t.strTransactionForm 
+			,strDescription = 
+				dbo.fnFormatMessage(
+					'Resolve the decimal discrepancy for %s.'
+					,ri.strItemNo
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,dblForexRate = t.dblForexRate
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
+			,ri.strItemNo
+			,dblReceiptUnitCost = NULL 
+			,dblReturnUnitCostInFunctionalCurrency = NULL 
+			,t.intSourceEntityId
+			,ri.intCommodityId
+			,intReference = CAST(4 AS TINYINT)
+	FROM	
+			
+			(
+				SELECT
+					r.strReceiptNumber
+					,ri.intInventoryReceiptId
+					,ri.intInventoryReceiptItemId
+					,i.strItemNo
+					,i.intCommodityId
+					,dblLineTotalForeign = 
+						SUM(
+							ROUND(
+								dbo.fnMultiply(-t.dblQty, rv.dblReturnUnitCost)
+								, 2
+							)
+						)
+					,dblLineTotalFunctional = 
+						SUM(
+							CASE 
+								WHEN t.intCurrencyId <> @intFunctionalCurrencyId AND t.dblForexRate <> 0 THEN 
+									ROUND(
+										dbo.fnMultiply(-t.dblQty, rv.dblReturnUnitCost) * t.dblForexRate
+										, 2
+									)	
+								ELSE 
+									ROUND (
+										dbo.fnMultiply(-t.dblQty, rv.dblReturnUnitCost) 
+										, 2
+									)
+							END 
+						)
+				FROM 
+					@ReturnValuation rv INNER JOIN tblICInventoryReceipt r 
+						ON rv.strReceiptNumber = r.strReceiptNumber
+					INNER JOIN tblICInventoryReceiptItem ri
+						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					INNER JOIN tblICItem i 
+						ON ri.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+					INNER JOIN tblICInventoryTransaction t 
+						ON t.intTransactionId = r.intInventoryReceiptId
+						AND t.strTransactionId = r.strReceiptNumber
+						AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+						AND t.intInventoryTransactionId = rv.intInventoryTransactionId
+				WHERE
+					t.strBatchId = @strBatchId						
+				GROUP BY
+					r.strReceiptNumber
+					,ri.intInventoryReceiptId
+					,ri.intInventoryReceiptItemId					
+					,i.strItemNo
+					,i.intCommodityId
+			) ri
 
+			CROSS APPLY (
+				SELECT 
+					dblTotalFunctional = SUM (
+						ROUND(dbo.fnMultiply(-t.dblQty, t.dblCost), 2) 
+					)
+					,dblTotalValueForeign = 						
+						SUM (
+							ROUND(dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), ISNULL(t.dblForexRate, 1)), 2) 
+						)
+				FROM 
+					tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+						ON t.intTransactionTypeId = ty.intTransactionTypeId
+				WHERE
+					t.strTransactionId = ri.strReceiptNumber
+					AND t.intTransactionId = ri.intInventoryReceiptId
+					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+					AND ty.strName = 'Inventory Return'
+			) valuation
+
+			CROSS APPLY (
+				SELECT TOP 1 
+					t.* 
+					,strTransactionType = ty.strName
+				FROM 
+					tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+						ON t.intTransactionTypeId = ty.intTransactionTypeId
+				WHERE
+					t.strTransactionId = ri.strReceiptNumber
+					AND t.intTransactionId = ri.intInventoryReceiptId
+					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+					AND ty.strName = 'Inventory Return'
+				ORDER BY t.intInventoryTransactionId DESC 
+			) t
+
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+
+	WHERE	
+			ISNULL(ri.dblLineTotalFunctional, 0) - ISNULL(valuation.dblTotalFunctional, 0) <> 0 
+			OR ISNULL(ri.dblLineTotalForeign, 0) -  ISNULL(valuation.dblTotalValueForeign, 0) <> 0 
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
@@ -719,7 +911,7 @@ SELECT
 		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblReceiptUnitCost) 
 		,strCode					= 'IC' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -796,7 +988,7 @@ SELECT
 		,dblCreditUnit				= NULL --DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, (ISNULL(dblCost, 0) - ISNULL(dblReceiptUnitCost, 0))) 
 		,strCode					= 'IC' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -886,7 +1078,7 @@ SELECT
 		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
 		,strCode					= 'IC' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -965,7 +1157,7 @@ SELECT
 		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
 		,strCode					= 'IC' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1113,7 +1305,7 @@ SELECT
 		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAV' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1187,7 +1379,7 @@ SELECT
 		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(ForGLEntries_CTE.strDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAN' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1258,7 +1450,7 @@ SELECT
 		,dblCreditUnit				= DebitUnit.Value 
 		,strDescription				= ISNULL(ForGLEntries_CTE.strDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAN' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1339,7 +1531,7 @@ SELECT
 										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
 										+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IC' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -1418,7 +1610,7 @@ SELECT
 									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
 									+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IC' 
-		,strReference				= '' 
+		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
