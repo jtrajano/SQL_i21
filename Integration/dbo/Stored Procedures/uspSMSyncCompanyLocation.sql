@@ -1762,7 +1762,8 @@ BEGIN
 	       		FROM ptlocmst 
 	       		WHERE [ptloc_loc_no] NOT LIKE ''%[^0-9]%'' 
 	       		UNION ALL
-	       		SELECT number FROM #Existing
+	       		SELECT CAST(number AS INT) FROM #Existing  
+                WHERE number NOT LIKE ''%[^0-9]%''  
 	       )
 
 		   IF @MaxNumber2 IS NULL
