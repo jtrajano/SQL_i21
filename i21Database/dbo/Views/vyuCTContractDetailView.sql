@@ -186,7 +186,15 @@ AS
 		, CD.strBankReferenceNo
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
-		, CD.dblPrepaymentAmount
+		, CD.dblPrice
+
+		, strCostTerm = CostTerm.strFreightTerm
+        , CD.intCostTermId
+        , CD.intShippingLineId2
+        , CD.intShippingLineId3
+        , strShippingLine2 = SL2.strName
+        , strShippingLine3 = SL3.strName
+
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -280,3 +288,6 @@ AS
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intFacilityId
 	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId
 	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intOverrideFacilityId
+	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
+	LEFT JOIN tblEMEntity SL2 ON SL2.intEntityId = CD.intShippingLineId2
+	LEFT JOIN tblEMEntity SL3 ON SL3.intEntityId = CD.intShippingLineId3
