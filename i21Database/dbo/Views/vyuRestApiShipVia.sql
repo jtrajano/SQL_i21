@@ -18,6 +18,9 @@ SELECT
 	, c.strName strContactName
 	, c.strPhone
 	, c.strMobile
+  , v.strShippingService
+  , v.strTransportationMode
+  , v.strFreightBilledBy
 FROM tblSMShipVia v
 INNER JOIN tblEMEntity e ON e.intEntityId = v.intEntityId
 OUTER APPLY (

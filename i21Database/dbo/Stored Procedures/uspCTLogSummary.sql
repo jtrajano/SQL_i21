@@ -816,7 +816,8 @@ BEGIN TRY
 				LEFT JOIN (
 					SELECT * FROM (
 						SELECT intContractDetailId = @intContractDetailId, intPricingTypeId = 1, dblQty = @dblQtyPriced
-						UNION ALL SELECT intContractDetailId = @intContractDetailId, intPricingTypeId = 2, dblQty = @dblQtyUnPriced
+						UNION ALL
+						SELECT top 1 intContractDetailId = @intContractDetailId, intPricingTypeId = tm.intHeaderPricingTypeId, dblQty = @dblQtyUnPriced from @tmpContractDetail tm
 					) tbl WHERE dblQty > 0
 				) b ON b.intContractDetailId = o.intContractDetailId
 
@@ -4648,7 +4649,10 @@ BEGIN TRY
 					-- IS/IR/SS 500 | Priced 500 Basis 500 | CB: P -500 B 0 /
 					-- IS/IR/SS 500 | Priced 400 Basis 600 | CB: P -400 B - 100 /
 					IF ISNULL(@TotalPriced, 0) > 0
-					BEGIN	
+					BEGIN
+
+						declare @ysnLogSettleStorageBasisDeliveries bit = case when @TotalPriced < @dblQty then 1 else 0 end;
+						
 						-- Balance
 						SET @_priced = (CASE WHEN @dblQty > ISNULL(@TotalPriced, 0) THEN ISNULL(@TotalPriced, 0) ELSE @dblQty END)
 						UPDATE @cbLogSpecific SET dblQty = @_priced * - 1, intPricingTypeId = 1, intActionId = CASE WHEN intContractTypeId = 1 THEN 47 ELSE 46 END
@@ -4702,7 +4706,7 @@ BEGIN TRY
                                 EXEC uspCTLogContractBalance @cbLogSpecific, 0 
                             END
 						END
-						ELSE IF (@strTransactionReference = 'Settle Storage' AND @currPricingTypeId = 2 and exists (select top 1 1 from @cbLogSpecific where dblQty < 0))
+						ELSE IF (@strTransactionReference = 'Settle Storage' AND @currPricingTypeId = 2 and exists (select top 1 1 from @cbLogSpecific where dblQty < 0) and @ysnLogSettleStorageBasisDeliveries = 1)
                         BEGIN  
                             UPDATE @cbLogSpecific SET dblQty = abs(dblQty), intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
                             EXEC uspCTLogContractBalance @cbLogSpecific, 0;

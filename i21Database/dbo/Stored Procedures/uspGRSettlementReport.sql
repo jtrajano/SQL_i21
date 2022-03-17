@@ -75,6 +75,8 @@ DECLARE @Settlement AS TABLE
 	,strDiscountReadings				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,lblFarmField						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strFarmField						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strDriverName						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strTruckName						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,dtmDate							DATETIME NULL
 	,dblGrossWeight					DECIMAL(24,10)
 	,dblTareWeight					DECIMAL(24,10)
@@ -231,6 +233,8 @@ BEGIN
 				,strDiscountReadings				
 				,lblFarmField						
 				,strFarmField						
+				,strDriverName
+				,strTruckName					
 				,dtmDate							
 				,dblGrossWeight					
 				,dblTareWeight					
@@ -338,6 +342,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)													
@@ -643,6 +649,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
@@ -794,10 +802,6 @@ BEGIN
 
 			LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM 
 				on SC.intTicketId = INVRCPTITEM.intSourceId
-			
-			LEFT JOIN tblICInventoryReceipt InventoryReceipt
-				on INVRCPTITEM.intInventoryReceiptId = InventoryReceipt.intInventoryReceiptId
-
 			LEFT JOIN tblEMEntitySplit EM 
 				ON EM.intSplitId = SC.intSplitId 
 					AND SC.intSplitId <> 0
@@ -874,7 +878,6 @@ BEGIN
 			WHERE BNKTRN.intBankAccountId = @intBankAccountId
 				AND BNKTRN.strTransactionId = @strPaymentNo
 				and INVRCPTITEM.intInventoryReceiptItemId is null
-				and InventoryReceipt.intSourceType = 1
 			/*--------------------------------------------------------
 			*******************FROM SETTLE STORAGE********************
 			--------------------------------------------------------*/			
@@ -933,6 +936,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField				 	= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate					 	= Bill.dtmDate
 				,dblGrossWeight				 	= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight				 	=  ISNULL(SC.dblTareWeight, 0)
@@ -962,8 +967,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1056,6 +1061,7 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
+						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -1063,8 +1069,10 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
+					,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
 				ON tblOtherCharge.intBillId = Bill.intBillId			
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1226,6 +1234,8 @@ BEGIN
 													ELSE NULL 
 												END 		
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= NULL
+				,strTruckName					= NULL
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight					= ISNULL(SC.dblTareWeight, 0)
@@ -1255,8 +1265,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1367,6 +1377,7 @@ BEGIN
 			LEFT JOIN (
 						SELECT 
 							A.intBillId
+							,isnull(A.intLinkingId, -90) as intLinkingId
 							,SUM(dblTotal) AS dblTotal
 							,SUM(dblTax) AS dblTax
 						FROM tblAPBillDetail A
@@ -1374,8 +1385,10 @@ BEGIN
 							ON A.intItemId = B.intItemId 
 								AND B.strType = 'Other Charge'
 						GROUP BY A.intBillId
+							,isnull(A.intLinkingId, -90)
 					) tblOtherCharge 
-					ON tblOtherCharge.intBillId = Bill.intBillId			
+					ON tblOtherCharge.intBillId = Bill.intBillId	
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)		
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1538,6 +1551,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)													
@@ -1830,6 +1845,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
@@ -1980,11 +1997,6 @@ BEGIN
 
 			LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM 
 				on SC.intTicketId = INVRCPTITEM.intSourceId
-			
-			LEFT JOIN tblICInventoryReceipt InventoryReceipt
-				on INVRCPTITEM.intInventoryReceiptId = InventoryReceipt.intInventoryReceiptId
-
-
 			LEFT JOIN tblEMEntitySplit EM 
 				ON EM.intSplitId = SC.intSplitId 
 					AND SC.intSplitId <> 0
@@ -2060,7 +2072,6 @@ BEGIN
 					ON PartialPayment.intPaymentId = PYMT.intPaymentId
 			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
 				and INVRCPTITEM.intInventoryReceiptItemId is null
-				and InventoryReceipt.intSourceType = 1
 
 			/*-------------------------------------------------------
 			*****Temporary Settlement FROM SETTLE STORAGE*******
@@ -2119,6 +2130,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField				 	= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate					 	= Bill.dtmDate
 				,dblGrossWeight				 	= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight				 	=  ISNULL(SC.dblTareWeight, 0)
@@ -2148,8 +2161,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2235,6 +2248,7 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
+						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -2242,8 +2256,10 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
+							,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId			
+				ON tblOtherCharge.intBillId = Bill.intBillId				
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -2405,6 +2421,8 @@ BEGIN
 													ELSE NULL 
 												END 		
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= NULL
+				,strTruckName					= NULL
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight					= ISNULL(SC.dblTareWeight, 0)
@@ -2434,8 +2452,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered

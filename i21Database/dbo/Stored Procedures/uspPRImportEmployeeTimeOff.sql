@@ -31,6 +31,7 @@ DECLARE @dblHoursAccrued AS FLOAT(50)
 DECLARE @dblHoursEarned AS FLOAT(50) 
 DECLARE @dblHoursUsed AS FLOAT(50) 
 DECLARE @dblAdjustments AS FLOAT(50) 
+DECLARE @EmployeeCount AS INT
 
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
 SELECT
@@ -54,8 +55,8 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeTimeOff)
 	BEGIN
 		SELECT TOP 1 
-			 @strEmployeeId			= intEntityNo
-			,@intEntityNo			= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = intEntityNo)
+			 @strEmployeeId			= LTRIM(RTRIM(intEntityNo))
+			,@intEntityNo			= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(intEntityNo)))
 			,@strTimeOffId			= strTimeOffId
 			,@strTimeOffDesc		= strTimeOffDesc
 			,@dtmEligibleDate		= CAST(dtmEligibleDate AS NVARCHAR) 
@@ -63,7 +64,19 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			,@dblPerPeriod			= dblPerPeriod
 			,@strPeriod				= strPeriod
 			,@dblRateFactor			= dblRateFactor
-			,@strAwardOn			= strAwardOn
+			,@strAwardOn			= CASE WHEN strAwardOn <> '' AND strAwardOn 
+										IN(
+											'Start of Week',
+											'End of Week',
+											'Start of Month',
+											'End of Month',
+											'Start of Quarter',
+											'End of Quarter',
+											'Start of Year',
+											'End of Year',
+											'Anniversary Date',
+											'Paycheck'
+										) THEN strAwardOn ELSE '' END
 			,@dblMaxEarned			= dblMaxEarned
 			,@dblMaxCarryOver		= dblMaxCarryOver
 			,@dblMaxBalance			= dblMaxBalance
@@ -76,57 +89,62 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 		FROM #TempEmployeeTimeOff
 
 		SELECT TOP 1 
-			@EmployeeEntityNo = intEntityEmployeeId 
+			@EmployeeEntityNo = COUNT(intEntityEmployeeId) 
 		FROM tblPREmployeeTimeOff
 		WHERE intEntityEmployeeId = @intEntityNo
 		  AND intTypeTimeOffId = (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strTimeOffId AND strDescription = @strTimeOffDesc)
 
-		IF @EmployeeEntityNo IS NULL
+		IF (@EmployeeEntityNo = 0)
 			BEGIN
-				INSERT INTO tblPREmployeeTimeOff(
-					 intEntityEmployeeId
-					,intTypeTimeOffId
-					,dblRate
-					,dblPerPeriod
-					,strPeriod
-					,dblRateFactor
-					,strAwardPeriod
-					,dblMaxCarryover
-					,dblMaxEarned
-					--,dblMaxBalance
-					,dtmLastAward
-					,dblHoursAccrued
-					,dblHoursEarned
-					,dblHoursCarryover
-					,dblHoursUsed
-					,dtmEligible
-					,intSort
-					,intConcurrencyId
-				)
-				VALUES
-				(
-					 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @intEntityNo)
-					,(SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strTimeOffId AND strDescription = @strTimeOffDesc)
-					,@dblRate
-					,@dblPerPeriod
-					,@strPeriod
-					,@dblRateFactor
-					,@strAwardOn
-					,@dblMaxCarryOver
-					,@dblMaxEarned
-					--,@dblMaxBalance
-					,CONVERT(DATE, @dtmLastAwardDate)
-					,@dblHoursAccrued
-					,@dblHoursEarned
-					,@dblHoursCarryOver
-					,CAST(@dblAdjustments AS FLOAT) 
-					,CONVERT(DATE, @dtmEligibleDate)
-					,1
-					,1
-				)
+				SELECT TOP 1 @EmployeeCount = COUNT(intEntityId) FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId
+				IF(@EmployeeCount != 0)
+				BEGIN
+					INSERT INTO tblPREmployeeTimeOff(
+						 intEntityEmployeeId
+						,intTypeTimeOffId
+						,dblRate
+						,dblPerPeriod
+						,strPeriod
+						,dblRateFactor
+						,strAwardPeriod
+						,dblMaxCarryover
+						,dblMaxEarned
+						--,dblMaxBalance
+						,dtmLastAward
+						,dblHoursAccrued
+						,dblHoursEarned
+						,dblHoursCarryover
+						,dblHoursUsed
+						,dtmEligible
+						,intSort
+						,intConcurrencyId
+					)
+					VALUES
+					(
+						 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @intEntityNo)
+						,(SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strTimeOffId AND strDescription = @strTimeOffDesc)
+						,@dblRate
+						,@dblPerPeriod
+						,@strPeriod
+						,@dblRateFactor
+						,@strAwardOn
+						,@dblMaxCarryOver
+						,@dblMaxEarned
+						--,@dblMaxBalance
+						,CONVERT(DATE, @dtmLastAwardDate)
+						,@dblHoursAccrued
+						,@dblHoursEarned
+						,@dblHoursCarryOver
+						,@dblHoursUsed
+						,CONVERT(DATE, @dtmEligibleDate)
+						,1
+						,1
+					)
+				END
+				
 
 				SET @NewId = SCOPE_IDENTITY()
-				DELETE FROM #TempEmployeeTimeOff WHERE intEntityNo = @strEmployeeId AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
+				DELETE FROM #TempEmployeeTimeOff WHERE LTRIM(RTRIM(intEntityNo)) =LTRIM(RTRIM(@strEmployeeId))  AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
 
 			END
 		ELSE
@@ -145,29 +163,29 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 					,dblHoursAccrued = @dblHoursAccrued
 					,dblHoursEarned = @dblHoursEarned
 					,dblHoursCarryover = @dblHoursCarryOver
-					,dblHoursUsed = CAST(@dblAdjustments AS FLOAT)
+					,dblHoursUsed = @dblHoursUsed
 					,dtmEligible = CONVERT(DATE, @dtmEligibleDate)
 				WHERE intEmployeeTimeOffId = @intEntityNo
 				AND intTypeTimeOffId = (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strTimeOffId AND strDescription = @strTimeOffDesc)
 
-				DELETE FROM #TempEmployeeTimeOff WHERE intEntityNo = @strEmployeeId AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
+				DELETE FROM #TempEmployeeTimeOff WHERE LTRIM(RTRIM(intEntityNo)) =LTRIM(RTRIM(@strEmployeeId))  AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
 			END
 
-		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-		SELECT TOP 1
-			  NEWID()
-			, guiApiImportLogId = @guiLogId
-			, strField = 'Employee Time Off'
-			, strValue = SE.strTimeOffId
-			, strLogLevel = 'Info'
-			, strStatus = 'Success'
-			, intRowNo = SE.intRowNumber
-			, strMessage = 'The employee time off has been successfully imported.'
-		FROM tblApiSchemaEmployeeTimeOff SE
-		LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = @intEntityNo
-		WHERE SE.guiApiUniqueId = @guiApiUniqueId
-		AND SE.strTimeOffId = @strTimeOffId
-		AND SE.strTimeOffDesc = @strTimeOffDesc
+			INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+			SELECT TOP 1
+				  NEWID()
+				, guiApiImportLogId = @guiLogId
+				, strField = 'Employee Time Off'
+				, strValue = SE.strTimeOffId
+				, strLogLevel = 'Info'
+				, strStatus = 'Success'
+				, intRowNo = SE.intRowNumber
+				, strMessage = 'The employee time off has been successfully imported.'
+			FROM tblApiSchemaEmployeeTimeOff SE
+			LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+			WHERE SE.guiApiUniqueId = @guiApiUniqueId
+			AND SE.strTimeOffId = @strTimeOffId
+			AND SE.strTimeOffDesc = @strTimeOffDesc
 
 	END
 

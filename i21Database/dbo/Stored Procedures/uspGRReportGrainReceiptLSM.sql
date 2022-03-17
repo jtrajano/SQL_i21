@@ -13,6 +13,7 @@ BEGIN TRY
      ,@strCompanyName NVARCHAR(500)
 	 ,@strPhone NVARCHAR(200)
 	 ,@strFax NVARCHAR(200)
+	 ,@strStateTaxID NVARCHAR(50)
 	 ,@xmlDocumentId INT    
      ,@intScaleTicketId INT
 	 ,@strReceiptNumber NVARCHAR(30)
@@ -93,10 +94,10 @@ ELSE
  SELECT 
  @strItemStockUOM = UnitMeasure.strUnitMeasure,  
  @strItemStockUOMSymbol = UnitMeasure.strSymbol,
- @dblUnloadedGrain =  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)),3)
- ,@dblDockage = ROUND(SC.dblShrink,3)
+ @dblUnloadedGrain =  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)),4)
+ ,@dblDockage = ROUND(SC.dblShrink,4)
  ,@dblDockagePercent = ROUND((SC.dblShrink*100.0/(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)))),2)  
- ,@dblNetWeight=ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight))-SC.dblShrink,3) 
+ ,@dblNetWeight=ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight))-SC.dblShrink,4) 
 
  ,@intInventoryReceiptId = SC.intInventoryReceiptId
  ,@intFeeItemId = SS.intDefaultFeeItemId
@@ -108,7 +109,7 @@ ELSE
  JOIN   tblICItemUOM ItemUOM1 ON ItemUOM1.intUnitMeasureId=SS.intUnitMeasureId AND  ItemUOM1.intItemId=SC.intItemId    
  WHERE  SC.intTicketId = @intScaleTicketId
 
-  SET @GrainUnloadedDecimal=ROUND(@dblUnloadedGrain-FLOOR(@dblUnloadedGrain),3)    
+  SET @GrainUnloadedDecimal=ROUND(@dblUnloadedGrain-FLOOR(@dblUnloadedGrain),4)    
  
    SELECT TOP 1  
     @dblCheckOff = RI.dblTax  
@@ -125,7 +126,7 @@ ELSE
    END    
   ,@strAddress =     
    CASE     
-   WHEN LTRIM(RTRIM(strAddress)) = ''THEN NULL    
+   WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL    
    ELSE LTRIM(RTRIM(strAddress))    
    END    
   ,@strCounty =     
@@ -157,7 +158,8 @@ ELSE
    WHEN LTRIM(RTRIM(strFax)) = '' THEN NULL    
    ELSE LTRIM(RTRIM(strFax)) 
    END
-   ,@blbCompanyLogo = imgCompanyLogo
+  ,@strStateTaxID= LTRIM(RTRIM(strStateTaxID)) 
+  ,@blbCompanyLogo = imgCompanyLogo
  FROM tblSMCompanySetup     
  
 
@@ -166,6 +168,8 @@ ELSE
 	,@TotalDiscount decimal(24, 10) = 0
 	,@TotalPremiumDiscount decimal(24, 10) = 0
 	, @GRRMarketingFee DECIMAL(24,10) = 0
+	, @dblMarketingUnits DECIMAL(24,10) = 0
+	, @dblDockageLessMarketingUnits DECIMAL(24,10) = 0
 	, @intMarketingFeeId int 
  if exists(select top 1 1from tblSCTicket Ticket
 			join tblGRStorageType StorageType
@@ -179,15 +183,106 @@ begin
 	set @GetDiscountFromIR = 1
 end
 
+
+--- Client side discount computation
+
+	Declare @TotalWetShrink decimal(24, 10)
+	Declare @TotalNetShrink decimal(24, 10)
+	Declare @TotalGrossShrink decimal(24, 10)
+	
+	Declare @TicketGrossWeight decimal(24,10)
+	Declare @TicketGrossWeight1 decimal(24,10)
+	Declare @TicketGrossWeight2 decimal(24,10)
+
+
+	Declare @TicketComputedGross decimal(24,10)
+	Declare @TicketComputedWet decimal(24,10)
+	Declare @TicketComputedNet decimal(24,10)
+	
+	Declare @FinalGrossWeight decimal(24,10)
+	Declare @ConvertUOM decimal(24,10)
+
+	Declare @ysnMultipleWeight bit
+	declare @ysnMarketingFeeComputeGross bit
+
+
+
+
+	select @TotalGrossShrink  = sum (Discount.dblShrinkPercent)
+	from tblSCTicket Ticket			
+		join tblQMTicketDiscount Discount
+			on Ticket.intTicketId = Discount.intTicketId		
+	where Ticket.intTicketId = @intScaleTicketId
+		and strShrinkWhat = 'Gross Weight' or strShrinkWhat = 'P'
+				
+	select @TotalNetShrink  = sum (Discount.dblShrinkPercent)
+	from tblSCTicket Ticket			
+		join tblQMTicketDiscount Discount
+			on Ticket.intTicketId = Discount.intTicketId		
+	where Ticket.intTicketId = @intScaleTicketId
+		and strShrinkWhat = 'Net Weight' or strShrinkWhat = 'N'
+				
+
+	select @TotalWetShrink  = sum (Discount.dblShrinkPercent)
+	from tblSCTicket Ticket			
+		join tblQMTicketDiscount Discount
+			on Ticket.intTicketId = Discount.intTicketId		
+	where Ticket.intTicketId = @intScaleTicketId
+		and strShrinkWhat = 'Wet Weight' or strShrinkWhat = 'W'
+				
+	---
+	select @TotalGrossShrink = isnull(@TotalGrossShrink, 0)
+	select @TotalNetShrink = isnull(@TotalNetShrink, 0)
+	select @TotalWetShrink = isnull(@TotalWetShrink, 0)
+
+
 select 
 		@intMarketingFeeId = DiscountCode.intItemId
+		, @dblMarketingUnits = Discount.dblShrinkPercent 		
+		, @ysnMarketingFeeComputeGross = case when strShrinkWhat = 'Gross Weight' or strShrinkWhat = 'P' then 1 else 0 end
+		
+
+		, @TicketGrossWeight = Ticket.dblGrossWeight - Ticket.dblTareWeight
+		, @TicketGrossWeight1 = isnull(Ticket.dblGrossWeight1, 0) - isnull(Ticket.dblTareWeight1, 0)
+		, @TicketGrossWeight2 = isnull(Ticket.dblGrossWeight2, 0) - isnull(Ticket.dblTareWeight2, 0)
+		
+
+		, @ysnMultipleWeight = ScaleSetup.ysnMultipleWeights
+		, @ConvertUOM = Ticket.dblConvertedUOMQty
+	
 	from tblSCTicket Ticket			
 		join tblQMTicketDiscount Discount
 			on Ticket.intTicketId = Discount.intTicketId
 		join tblGRDiscountScheduleCode DiscountCode
 			on Discount.intDiscountScheduleCodeId = DiscountCode.intDiscountScheduleCodeId
 				and DiscountCode.ysnMarketingFee = 1		
+		join tblSCScaleSetup ScaleSetup
+			on Ticket.intScaleSetupId = ScaleSetup.intScaleSetupId
 	where Ticket.intTicketId = @intScaleTicketId
+
+
+	if @ysnMultipleWeight = 0
+	begin
+		select @TicketGrossWeight1 = 0, @TicketGrossWeight2 = 0
+	end
+
+	select @FinalGrossWeight = @TicketGrossWeight + @TicketGrossWeight1 + @TicketGrossWeight2
+	
+
+	select @TicketComputedGross = @FinalGrossWeight * (@TotalGrossShrink/ 100)
+	select @TicketComputedWet = (@FinalGrossWeight - @TicketComputedGross) * (@TotalWetShrink / 100)
+	select @TicketComputedNet = (@FinalGrossWeight - @TicketComputedGross - @TicketComputedWet) * (@TotalNetShrink / 100) 
+		
+
+		
+	--select @FinalGrossWeight, @TotalGrossShrink, @TotalNetShrink, @TotalWetShrink, @TicketComputedGross, @TicketComputedWet, @TicketComputedNet, @ConvertUOM --, (@TicketComputedNet * @ConvertUOM)  * (@dblMarketingUnits / @TotalNetShrink)
+		
+
+	set @dblMarketingUnits = round(isnull( (case when @ysnMarketingFeeComputeGross = 1 then @TicketComputedGross else @TicketComputedNet end  * @ConvertUOM)  * (@dblMarketingUnits / case when @ysnMarketingFeeComputeGross = 1 then isnull(nullif(@TotalGrossShrink, 0), 1) else isnull(nullif(@TotalNetShrink, 0), 1) end ), 0), 4)
+	
+	
+	
+
 
 
 if @GetDiscountFromIR = 1 
@@ -209,6 +304,7 @@ begin
 			on Ticket.intTicketId = TicketDiscount.intTicketId	
 		join tblGRDiscountScheduleCode DiscountCode
 			on TicketDiscount.intDiscountScheduleCodeId = DiscountCode.intDiscountScheduleCodeId
+
 		join tblICInventoryReceiptCharge ReceiptCharge
 			on Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				and DiscountCode.intItemId = ReceiptCharge.intChargeId
@@ -303,13 +399,13 @@ select
 
 )
 select 
-	@GRRTestWeight = TestWeight.dblGradeReading
-	,@GRRCCFM = CCFM.dblGradeReading
-	,@GRRGrade = Grade.dblGradeReading
-	,@GRRFactor = Factor.dblGradeReading
-	,@GRRProtein = Protein.dblGradeReading
-	,@GRRMoisture = Moisture.dblGradeReading
-	,@GRRSplit = Split.dblGradeReading
+	@GRRTestWeight = isnull(TestWeight.dblGradeReading, 0)
+	,@GRRCCFM = isnull(CCFM.dblGradeReading, 0)
+	,@GRRGrade = isnull(Grade.dblGradeReading, 0)
+	,@GRRFactor = isnull(Factor.dblGradeReading, 0)
+	,@GRRProtein = isnull(Protein.dblGradeReading, 0)
+	,@GRRMoisture = isnull(Moisture.dblGradeReading, 0)
+	,@GRRSplit = isnull(Split.dblGradeReading, 0)
 
 from tblSCGrainReceiptDiscountMapping Preference
 	--left join TicketDiscountInfo MarketingFee
@@ -330,24 +426,22 @@ from tblSCGrainReceiptDiscountMapping Preference
 		on Preference.[intSplitId] = Split.intItemId
 where Preference.intCommodityId = @intCommodityId
 		
-
+--+ @GRRMarketingFee
 declare @dblComputedNetWeight decimal(24,10)
-set @dblComputedNetWeight = @dblUnloadedGrain - (@dblDockage + @GRRMarketingFee)
+set @dblComputedNetWeight = @dblUnloadedGrain - (@dblDockage )
 
 SET @NetWeightDecimal=ROUND(@dblComputedNetWeight-FLOOR(@dblComputedNetWeight),3)    
 
-
+set @dblDockageLessMarketingUnits = @dblDockage - @dblMarketingUnits
 SELECT 
     -- @strCompanyName +     
     --+ CHAR(13) + CHAR(10)     
-    ISNULL(@strAddress, '') +     
-    + CHAR(13) + CHAR(10)     
+    ISNULL(@strAddress, '') +         
     + ISNULL(@strCity, '') + ISNULL(', ' + @strState, '') +' '+ISNULL(@strZip, '')    
     AS strCompanyAddress    
-  ,LTRIM(RTRIM(EY.strEntityName)) +   ' ' +  
-  + CHAR(13) + CHAR(10)     
-  + ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') +    
-  + CHAR(13) + CHAR(10)     
+  ,LTRIM(RTRIM(EY.strEntityName)) +   ' '  
+  + ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') + 
+	+ ' '     
   + ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '')     
   + ISNULL(', '     
      + CASE     
@@ -363,6 +457,7 @@ SELECT
        '')        
     AS strEntityAddress
 ,ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') +      
+	+ ' '
   + ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '')     
   + ISNULL(', '     
      + CASE     
@@ -380,19 +475,22 @@ SELECT
 ,@strCompanyName AS strCompanyName
 ,@strPhone AS strPhone
 ,@strFax AS strFax
+,@strStateTaxID as strStateTaxID
 ,SC.strTicketNumber
 ,@strReceiptNumber AS strReceiptNumber
 ,EY.strEntityName AS strEntityName
 ,imgCompanyLogo  = dbo.fnSMGetCompanyLogo('Header')  --@blbCompanyLogo
-,SC.dblGrossWeight AS 'Weight(MT)'
-,SC.dblTareWeight AS 'Vehicle Weight'
-,[dbo].[fnRemoveTrailingZeroes](@dblUnloadedGrain) + ' ' + @strItemStockUOMSymbol AS strUnloadedGrain
-,[dbo].[fnRemoveTrailingZeroes](@dblDockage) AS dblDockage
-,[dbo].[fnRemoveTrailingZeroes](dblUnitPrice) AS dblUnitPrice
-,[dbo].[fnRemoveTrailingZeroes](@dblDockagePercent) AS dblDockagePercent    
-,[dbo].[fnRemoveTrailingZeroes](@dblCheckOff) AS dblCheckOff
-,[dbo].[fnRemoveTrailingZeroes](@dblNetAmtPayable) AS dblNetAmtPayable
-, CAST((ISNULL(dblUnitPrice,0) * ISNULL(dblNetUnits,0)) AS DECIMAL(18,2)) AS dblTotalPurchasePrice
+,ItemUnitMeasure.strSymbol  as [FromUOM]
+,@strItemStockUOMSymbol as [ToUOM]
+,cast(SC.dblGrossWeight as decimal(18, 4 )) AS 'Weight(MT)'
+,cast(SC.dblTareWeight as decimal(18,4)) AS 'Vehicle Weight'
+,cast(@dblUnloadedGrain as decimal(18,4))  dblUnloadedGrain
+,cast(@dblDockage as decimal(18,4)) AS dblDockage
+,dblUnitPrice + dblUnitBasis AS dblUnitPrice
+,@dblDockagePercent AS dblDockagePercent    
+,@dblCheckOff AS dblCheckOff
+,@dblNetAmtPayable AS dblNetAmtPayable
+, CAST((ISNULL(dblUnitPrice,0) * ISNULL(dblNetUnits,0)) AS DECIMAL(18,4)) AS dblTotalPurchasePrice
 , EL.strLocationName AS strFarmName
 , EL.strFarmFieldNumber as strFarmFieldNumber
 , @GRRSplit as dblSplitPercent -- [dbo].[fnRemoveTrailingZeroes](SPD.dblSplitPercent) AS dblSplitPercent
@@ -410,8 +508,10 @@ SELECT
    END        
   + ' ' + @strItemStockUOM AS strNetWeightInWords
 ,ISNULL(CT.strContractNumber,'') AS strContractNumber
-,@dblComputedNetWeight as dblNetAfterDeduct
-,@GRRMarketingFee as dblMarketingFee
+,cast(isnull(@dblComputedNetWeight, 0) as decimal(18,4))  as dblNetAfterDeduct
+,cast(isnull(@GRRMarketingFee, 0) as decimal(18,4)) as dblMarketingFee
+,cast(isnull(@dblMarketingUnits, 0) as decimal(18,4)) as dblMarketingUnits
+,cast(isnull(@dblDockageLessMarketingUnits, 0) as decimal(18,4)) as dblDockageLessMarketingUnits
 ,@GRRTestWeight as dblTestWeight
 ,@GRRCCFM as dblCCFM
 ,@GRRGrade as dblGrade
@@ -425,8 +525,12 @@ SELECT
 
 ,@SettleStorageTickets as strSettleTickets
 ,SC.strCustomerReference as strReference 
+,SC.strTicketComment as strComment
+,SC.strDiscountComment as strDiscountComment
+,isnull(SC.dblTicketFees, 0) as dblTicketFees
   FROM tblSCTicket SC
   INNER JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId
+	AND EY.strEntityType = CASE WHEN SC.strInOutFlag = 'I' THEN 'Vendor' ELSE 'Customer' end
   LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SC.intFarmFieldId
   LEFT JOIN  tblEMEntitySplit SP ON SP.intSplitId = SC.intSplitId
   LEFT JOIN tblEMEntitySplitDetail SPD ON SPD.intSplitId = SP.intSplitId AND SPD.intEntityId = SC.intEntityId
@@ -434,6 +538,20 @@ SELECT
   left join tblCTContractDetail ContractDetail
 		on SC.intContractId = ContractDetail.intContractDetailId
   LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = ContractDetail.intContractHeaderId
+
+  left join tblICItemUOM ItemUOM
+	on SC.intItemUOMIdFrom = ItemUOM.intItemUOMId
+		and SC.intItemId = ItemUOM.intItemId
+	left join tblICUnitMeasure ItemUnitMeasure
+		on ItemUOM.intUnitMeasureId = ItemUnitMeasure.intUnitMeasureId
+
+  left join tblICItemUOM ItemToUOM
+	on SC.intItemUOMIdTo = ItemToUOM.intItemUOMId
+		and SC.intItemId = ItemToUOM.intItemId
+	left join tblICUnitMeasure ItemToUnitMeasure
+		on ItemToUOM.intUnitMeasureId = ItemToUnitMeasure.intUnitMeasureId
+
+
   WHERE SC.intTicketId = @intScaleTicketId
 
 END TRY

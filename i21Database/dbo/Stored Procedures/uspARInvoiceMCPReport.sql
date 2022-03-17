@@ -119,7 +119,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , intTicketId				= CAST(0 AS INT)
-	 , strTicketNumbers			= CAST('' AS NVARCHAR(100))
+	 , strTicketNumbers			= CAST('' AS NVARCHAR(MAX))
 	 , dtmLoadedDate			= INV.dtmShipDate
 	 , dtmScaleDate				= INV.dtmPostDate
 	 , strCommodity				= CAST('' AS NVARCHAR(100))

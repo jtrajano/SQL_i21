@@ -643,7 +643,6 @@ FROM (
 	) ID ON ICISI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId 
 		AND ICIS.strShipmentNumber = ID.strDocumentNumber
 	WHERE ISNULL(ARID.intInventoryShipmentChargeId, 0) = 0
-	  AND ICISC.intEntityVendorId IS NULL
 	  AND ISNULL(ICISC.ysnPrice, 0) = 1
 	  AND ((ISNULL(ICISC.ysnAllowInvoice, 1) = 1 AND ICIS.intSourceType = 1)
 			OR

@@ -222,5 +222,3 @@ BEGIN
 
 	END
 END
-
-EXEC uspAPUpdateVoucherStatusFromCM @strTransactionIds

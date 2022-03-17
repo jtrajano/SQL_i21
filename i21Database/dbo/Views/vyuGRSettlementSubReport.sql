@@ -3,6 +3,7 @@ AS
 
 	-- We are using this view to directly insert table to an API Export table
 	-- If there are changes in the view please update the insert in uspGRAPISettlementReportExport as well
+	-- any modification here should be applied to vyuGRSettlementSubNoTaxReport as well
 
 SELECT 
 	intBillDetailId
@@ -243,6 +244,7 @@ FROM
 			ON INVRCPT.intInventoryReceiptId = INVRCPTCHR.intInventoryReceiptId
 		LEFT JOIN tblGRStorageHistory StrgHstry 
 			ON StrgHstry.intBillId = Bill.intBillId	
+				and (BillDtl.intContractHeaderId is null or (BillDtl.intContractHeaderId = isnull(StrgHstry.intContractHeaderId, 0) ) )
 		LEFT JOIN (
 					SELECT 
 						QM.intTicketId

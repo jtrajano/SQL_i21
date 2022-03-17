@@ -265,6 +265,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\38_UpdateDefaultData.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
+:r .\AR\DefaultData\97_RefreshARTempTable.sql
+:r .\AR\DefaultData\96_RebuildReportFields.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -402,6 +404,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\StorageHistoryPaidAmount.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
+:R .\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql
 
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql
 :R .\GR\StorageInventoryReceipt.sql
