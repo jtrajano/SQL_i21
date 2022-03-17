@@ -688,7 +688,7 @@ AS
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 
 	WHERE	
-			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 
+			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 	
 
 	-- Load the Inventory-Adjustment
 	UNION ALL 
@@ -1021,38 +1021,17 @@ FROM	ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount 
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(
-			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)), 2)
-			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
+			ForGLEntries_CTE.dblQty
 		) Debit
 		CROSS APPLY dbo.fnGetCredit(
-			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)), 2)
-			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2) 
+			ForGLEntries_CTE.dblQty
 		) Credit
-		CROSS APPLY dbo.fnGetDebitForeign(
-			(
-				ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0) ), 2)
-				- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
-			)
-			,ForGLEntries_CTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,ForGLEntries_CTE.dblForexRate
-		) DebitForeign
-		CROSS APPLY dbo.fnGetCreditForeign(
-			(
-				ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)),2)
-				- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
-			)
-			,ForGLEntries_CTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,ForGLEntries_CTE.dblForexRate
+		CROSS APPLY dbo.fnGetDebit(
+			ForGLEntries_CTE.dblUOMQty
+		) DebitForeign 
+		CROSS APPLY dbo.fnGetCredit(
+			ForGLEntries_CTE.dblUOMQty
 		) CreditForeign
-		CROSS APPLY dbo.fnGetDebitUnit(
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
-		) DebitUnit
-		CROSS APPLY dbo.fnGetCreditUnit(
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
-		) CreditUnit 
-
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			@InventoryTransactionTypeId_WriteOffSold
@@ -1061,10 +1040,10 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		)
 		AND (
-			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)), 2)
-			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2) 	
-		) <> 0
-		AND ForGLEntries_CTE.intReference = 1
+			ForGLEntries_CTE.dblQty <> 0
+			OR ForGLEntries_CTE.dblUOMQty <> 0		
+		) 		
+		AND ForGLEntries_CTE.intReference = 4
 
 -- Inventory 
 UNION ALL 
