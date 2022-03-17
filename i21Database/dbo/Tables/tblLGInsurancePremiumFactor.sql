@@ -6,8 +6,6 @@
 	[dtmValidFrom] DATETIME NULL,
 
 	strPolicyNumber NVARCHAR(50) NOT NULL,
-	dblSalesPercent NUMERIC(18, 6) NULL DEFAULT((0)),
-	dblPurchasePercent NUMERIC(18, 6) NULL DEFAULT((0)),
 	dblInboundWarehouse NUMERIC(18, 6) NULL DEFAULT((0)),	
 	dtmValidTo DATETIME NULL,
 
