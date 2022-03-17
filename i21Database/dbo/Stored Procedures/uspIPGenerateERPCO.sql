@@ -317,7 +317,8 @@ BEGIN TRY
 			,@strRefFuturesMonth = RFMO.strFutureMonth
 			,@dblRefFuturesPrice = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intRefFuturesItemUOMId, @intItemUOMId, 1, CD.intRefFuturesCurrencyId, @intCurrencyId, CD.dblRefFuturesQty, NULL), 0))
 			,@strSubBook = SB.strSubBook
-			,@dblQuantityPerLot = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, FM.intUnitMeasureId, @intUnitMeasureId, RWC.dblQuantityPerLot), 0))
+			--,@dblQuantityPerLot = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, FM.intUnitMeasureId, @intUnitMeasureId, RWC.dblQuantityPerLot), 0))
+			,@dblQuantityPerLot =CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, @intItemUOMId, CF.dblQuantity), 0))/(Case When ISNULL(CONVERT(INT, CD.dblNoOfLots), 0)=0 Then 1 Else ISNULL(CONVERT(INT, CD.dblNoOfLots), 0) End)
 			,@ERPCONumber = CF.strERPPONumber
 		FROM dbo.tblCTContractFeed CF
 		JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
