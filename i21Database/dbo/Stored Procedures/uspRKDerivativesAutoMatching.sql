@@ -98,7 +98,8 @@ DECLARE @tempMatchDerivativesDetail AS TABLE (
 
 
 DECLARE @tempResult AS TABLE (
-	Result NVARCHAR(MAX)
+	Result NVARCHAR(MAX),
+	SortId INT
 )
 
 --Get Open Derivatives based on filter criteria
@@ -202,13 +203,13 @@ BEGIN
 						BEGIN
 				
 							--Get Buy and Sell ready for matching
-							SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId 
+							SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId, dblFutCommission 
 							INTO #tempBuyForMatching
 							FROM #tempBuy WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 1
 							ORDER BY dtmFilledDate ASC, dblPrice ASC
 
 
-							SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId 
+							SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId ,dblFutCommission
 							INTO #tempSellForMatching
 							FROM #tempSell WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 1
 							ORDER BY dtmFilledDate ASC, dblPrice ASC
@@ -223,6 +224,7 @@ BEGIN
 									,@intSFutOptTranactionId INT
 									,@intLFutOptTranactionHeaderId INT
 									,@intSFutOptTranactionHeaderId INT
+									,@dblFutCommission NUMERIC(18,6)
 
 							--Loop thru Buys
 							WHILE EXISTS(SELECT TOP 1 * FROM #tempBuyForMatching)
@@ -231,6 +233,7 @@ BEGIN
 									@dblBuyLot = dblBalanceLot
 									,@intLFutOptTranactionId = intFutOptTransactionId
 									,@intLFutOptTranactionHeaderId = intFutOptTransactionHeaderId
+									,@dblFutCommission = dblFutCommission
 								FROM #tempBuyForMatching
 								ORDER BY dtmFilledDate ASC, dblPrice ASC
 
@@ -268,7 +271,7 @@ BEGIN
 											, intSFutOptTransactionHeaderId)
 										SELECT 
 											@dblBuyLot
-											, 0
+											,dblFutCommission = @dblFutCommission * @dblBuyLot
 											,@intLFutOptTranactionId
 											,@intSFutOptTranactionId
 											,@dtmMatchDate
@@ -293,7 +296,7 @@ BEGIN
 											, intSFutOptTransactionHeaderId)
 										SELECT 
 											@dblSellLot
-											, 0
+											,dblFutCommission = @dblFutCommission * @dblSellLot
 											,@intLFutOptTranactionId
 											,@intSFutOptTranactionId
 											,@dtmMatchDate
@@ -419,6 +422,16 @@ BEGIN
 
 							UPDATE tblSMStartingNumber SET intNumber  = @intMatchNo WHERE intStartingNumberId = 44
 
+							--Insert to Audit Log
+							EXEC uspSMAuditLog 
+							   @keyValue = @intMatchFuturesPSHeaderId       -- Primary Key Value of the Match Derivatives. 
+							   ,@screenName = 'RiskManagement.view.MatchDerivatives'        -- Screen Namespace
+							   ,@entityId = @intUserId     -- Entity Id.
+							   ,@actionType = 'Created'       -- Action Type
+							   ,@changeDescription = ''     -- Description
+							   ,@fromValue = ''          -- Previous Value
+							   ,@toValue = ''           -- New Value
+
 							--Insert to History Log
 							EXEC uspRKMatchDerivativesHistoryInsert  @intMatchFuturesPSHeaderId, 'ADD', @intUserId
 
@@ -427,7 +440,7 @@ BEGIN
 
 
 							INSERT INTO @tempResult
-							SELECT 'Auto-Matching of Futures created Match Number ' + CAST(@intMatchNo AS NVARCHAR(50))
+							SELECT 'Auto-Matching of Futures created Match Number ' + CAST(@intMatchNo AS NVARCHAR(50)), 1
 							
 							--For debugging
 							--SELECT * FROM @tempMatchDerivativeHeader
@@ -599,7 +612,7 @@ BEGIN
 
 										
 										INSERT INTO @tempResult
-										SELECT 'Auto-Matching of Options created Trans No. ' + CAST(@strTranNo + 1 AS NVARCHAR(50)) + ' to ' + @strTranNoLast
+										SELECT 'Auto-Matching of Options created Trans No. ' + CAST(@strTranNo + 1 AS NVARCHAR(50)) + ' to ' + @strTranNoLast, 2
 							
 										--For debugging
 										--SELECT * FROM @tempMatchDerivativesDetail
@@ -675,7 +688,7 @@ END
 
 	IF EXISTS (SELECT * FROM @tempResult)
 	BEGIN
-		SELECT * FROM @tempResult
+		SELECT Result FROM @tempResult ORDER BY SortId
 	END
 
 

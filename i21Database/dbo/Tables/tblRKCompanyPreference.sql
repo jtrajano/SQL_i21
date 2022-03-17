@@ -79,6 +79,7 @@
 	[ysnEnableSliceDerivative] BIT NULL DEFAULT((0)),
 	[ysnAllowDerivativeAssignToMultipleContracts] BIT NULL DEFAULT((0)),
 	[strReportByDate] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT('Filled Date'),
+	[ysnEnableAutoMatchDerivatives] BIT NULL DEFAULT((0)),
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
 	CONSTRAINT [FK_tblRKCompanyPreference_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblRKInterfaceSystem_intCurrencyId] FOREIGN KEY([intInterfaceSystemId])REFERENCES [dbo].[tblRKInterfaceSystem] ([intInterfaceSystemId]),
