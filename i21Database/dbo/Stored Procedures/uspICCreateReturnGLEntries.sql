@@ -472,7 +472,7 @@ FROM	tblICInventoryReceipt r INNER JOIN (
 WHERE	t.strBatchId = @strBatchId
 	
 -- Generate the G/L Entries for Inventory Transactions 
-WITH ForGLEntries_CTE (
+;WITH ForGLEntries_CTE (
 	dtmDate
 	,intItemId
 	,intItemLocationId
