@@ -5,7 +5,7 @@ SELECT CF.intFreightXRefId
 	,ShipVia.strName AS strShipViaName
 	,CF.intCategoryId
 	,CAT.strCategoryCode AS strCategoryCode
-	,AR.intEntityTariffTypeId
+	,CF.intEntityTariffTypeId
 	,CF.intEntityCustomerId
 	,Customer.strName AS strCustomerName
 	,C.dtmEffectiveDateTime
