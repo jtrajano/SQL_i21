@@ -66,21 +66,21 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
-SELECT @dateFrom = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmDatePaid';
+SELECT @dateFrom = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmPaymentDate';
 SELECT @dtmBillDate = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmBillDate'; 
 IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDatePaid), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmPaymentDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDatePaid), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmPaymentDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDatePaid'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmPaymentDate'
 
 IF @dtmBillDate IS NOT NULL
 BEGIN	
