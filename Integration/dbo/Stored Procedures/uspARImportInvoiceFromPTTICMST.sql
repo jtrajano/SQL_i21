@@ -75,7 +75,8 @@ INSERT INTO @EntriesForInvoice
 	[strItemDescription],
 	[dblQtyOrdered],
 	[dblQtyShipped],
-	[dblPrice]
+	[dblPrice],
+	[intSiteId]
 )
 SELECT
 	[intId] = A4GLIdentity,
@@ -90,7 +91,7 @@ SELECT
 	[strPONumber] = pttic_po_no,
 	[intTermId] = ISNULL(Term.intTermID,1),
 	[dblDiscount] = pttic_itm_disc_amt,
-	[strType] = 'Standard',
+	[strType] = CASE WHEN pttic_src_sys = 'P' THEN 'Tank Delivery' ELSE 'Standard'END,
 	[strTransactionType] = (CASE 
 							WHEN pttic_type = 'I' THEN 'Invoice' 
 							WHEN pttic_type = 'C' THEN 'Credit Memo' 
@@ -111,13 +112,18 @@ SELECT
 	[strItemDescription] = ITM.strDescription,
 	[dblQtyOrdered] = NULL,
 	[dblQtyShipped] = CASE WHEN ISNULL(pttic_qty_ship, 0) = 0 THEN 1 ELSE pttic_qty_ship END,
-	[dblPrice]		= CASE WHEN ISNULL(pttic_unit_prc, 0) = 0 THEN pttic_actual_total ELSE pttic_unit_prc END
+	[dblPrice]		= CASE WHEN ISNULL(pttic_unit_prc, 0) = 0 THEN pttic_actual_total ELSE pttic_unit_prc END,
+	[intSiteID] = siteCus.intSiteID
 	FROM tmp_ptticmstImport A
 	INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = A.pttic_cus_no COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = A.pttic_slsmn_id COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(pttic_itm_no  COLLATE Latin1_General_CI_AS)
 	INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = Cus.intEntityId AND LOC.ysnDefaultLocation =1
 	LEFT JOIN tblSMTerm Term ON Term.strTermCode COLLATE Latin1_General_CI_AS = CONVERT(NVARCHAR(10),CONVERT(INT,A.pttic_terms_code)) COLLATE Latin1_General_CI_AS
+	LEFT JOIN  (
+		SELECT   s.intSiteNumber,s.intCustomerID,sc.strEntityNo,s.intSiteID FROM tblTMSite s 
+		INNER JOIN vyuTMSiteCustomer sc on s.intCustomerID=sc.intCustomerID  and sc.intSiteID=s.intSiteID
+	)siteCus ON RTRIM(siteCus.strEntityNo) =  RTRIM(A.pttic_cus_no) COLLATE Latin1_General_CI_AS  AND siteCus.intSiteNumber = A.pttic_tank_no
 	LEFT JOIN tblARInvoice 
 		ON A.pttic_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
 		AND tblARInvoice.[dtmDate] = CONVERT(DATE, CAST(A.pttic_rev_dt AS CHAR(12)), 112)
