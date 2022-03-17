@@ -577,6 +577,7 @@
     <Build Include="dbo\Stored Procedures\uspQMAuditLog.sql" />
     <Build Include="dbo\Views\vyuLGRejectedLotNumber.sql" />
     <Build Include="dbo\Views\vyuLGGetOpenWeightClaimLots.sql" />
+    <Build Include="dbo\Tables\tblCTVendorCertification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
