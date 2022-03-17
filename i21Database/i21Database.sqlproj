@@ -575,6 +575,7 @@
     <Build Include="dbo\Views\vyuLGGetReportRemarkValue.sql" />
     <Build Include="dbo\Views\vyuLGGetReportRemarkLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspQMAuditLog.sql" />
+    <Build Include="dbo\Views\vyuLGRejectedLotNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -133,6 +133,8 @@ FROM (
 	   ,strCertificationId = '' COLLATE Latin1_General_CI_AS
 	   ,intCustomerEntityId = LD.intCustomerEntityId
 	   ,strCustomer = Customer.strName
+	   ,ysnRejected = CAST((CASE WHEN RJTD.intLotId IS NULL THEN 0 ELSE 1 END ) AS BIT)
+	   ,RJTD.strCustomerRejected
 	FROM tblICLot Lot
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
@@ -182,6 +184,7 @@ FROM (
 		LEFT JOIN tblCTContractDetail SCTDetail ON SCTDetail.intContractDetailId = LD.intSContractDetailId
 		LEFT JOIN tblCTContractHeader SCTHeader ON SCTHeader.intContractHeaderId = SCTDetail.intContractHeaderId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+		LEFT JOIN vyuLGRejectedLotNumber RJTD ON Lot.intLotId = RJTD.intLotId
 		OUTER APPLY (SELECT TOP 1 strBundleItemNo = BI.strItemNo FROM tblICItem BI 
 						INNER JOIN tblICItemBundle IB ON IB.intItemId = BI.intItemId
 					 WHERE IB.intBundleItemId = Item.intItemId) Bundle
