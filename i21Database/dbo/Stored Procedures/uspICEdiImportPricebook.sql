@@ -553,6 +553,35 @@ WHERE
 IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
 	GOTO _Exit_With_Errors
 
+-- Log the records with invalid intBottleDepositNo
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, p.intRecordNumber
+	, 'strBottleDepositNumber'
+	, p.strBottleDepositNumber
+	, 'Invalid Bottle Deposit No. It should be an integer value.'
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM 
+	tblICEdiPricebook p
+WHERE 
+	p.strBottleDepositNumber IS NOT NULL 
+	AND ISNUMERIC(p.strBottleDepositNumber) = 0 
+	AND p.strUniqueId = @UniqueId
+
 -------------------------------------------------
 -- END Validation 
 -------------------------------------------------
