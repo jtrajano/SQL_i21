@@ -2062,6 +2062,11 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItem.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentItem.sql" />
     <Build Include="dbo\Views\vyuApiTicketSplits.sql" />
+    <Build Include="dbo\Views\vyuApiVendorRebateCategory.sql" />
+    <Build Include="dbo\Views\vyuApiVendorRebateCustomer.sql" />
+    <Build Include="dbo\Views\vyuApiVendorRebateItem.sql" />
+    <Build Include="dbo\Views\vyuApiVendorRebatesSetup.sql" />
+    <Build Include="dbo\Views\vyuApiVendorRebateUom.sql" />
     <Build Include="dbo\Views\vyuEMEntity.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
