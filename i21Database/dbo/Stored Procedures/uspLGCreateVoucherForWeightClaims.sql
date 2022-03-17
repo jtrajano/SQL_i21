@@ -162,6 +162,7 @@ BEGIN TRY
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
 		AND ISNULL(WCD.dblClaimAmount, 0) > 0
+		AND ISNULL(WCD.strCondition, '') <> 'Missing'
 	UNION
 	/* Missing/Damaged/Reconditioned */
 	SELECT intWeightClaimId = WC.intWeightClaimId

@@ -576,6 +576,7 @@
     <Build Include="dbo\Views\vyuLGGetReportRemarkLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspQMAuditLog.sql" />
     <Build Include="dbo\Views\vyuLGRejectedLotNumber.sql" />
+    <Build Include="dbo\Views\vyuLGGetOpenWeightClaimLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
