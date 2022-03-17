@@ -149,7 +149,21 @@ END
 
 BEGIN 
 	-- Generate Payables
-	DECLARE @voucherPayable VoucherPayable
+	DECLARE 
+		@voucherPayable VoucherPayable
+		, @intVoucherInvoiceNoOption TINYINT
+		,	@voucherInvoiceOption_Blank TINYINT = 1 
+		,	@voucherInvoiceOption_BOL TINYINT = 2
+		,	@voucherInvoiceOption_VendorRefNo TINYINT = 3
+		, @intDebitMemoInvoiceNoOption TINYINT
+		,	@debitMemoInvoiceOption_Blank TINYINT = 1
+		,	@debitMemoInvoiceOption_BOL TINYINT = 2
+		,	@debitMemoInvoiceOption_VendorRefNo TINYINT = 3
+
+	SELECT TOP 1 
+		@intVoucherInvoiceNoOption = intVoucherInvoiceNoOption
+		,@intDebitMemoInvoiceNoOption = intDebitMemoInvoiceNoOption
+	FROM tblAPCompanyPreference
 
 	INSERT INTO @voucherPayable(
 		[intEntityVendorId]			
@@ -218,7 +232,25 @@ BEGIN
 		,[intPayToAddressId] = payToAddress.intEntityLocationId
 		,[intCurrencyId] = A.intCurrencyId
 		,[dtmDate]	= A.dtmDate
-		,[strVendorOrderNumber] = ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo) 
+		,[strVendorOrderNumber] = 
+				--ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo) 
+				CASE 
+					WHEN A.strReceiptType = 'Inventory Return' THEN 
+						CASE 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN r.strBillOfLading 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN r.strVendorRefNo 
+							ELSE  ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
+						END 
+					ELSE
+						CASE 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN r.strBillOfLading 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN r.strVendorRefNo 
+							ELSE  ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
+						END 						
+				END 
+
 		,[strReference] = r.strVendorRefNo
 		,[strSourceNumber] = A.strSourceNumber			
 		,[intPurchaseDetailId] = NULL --PurchaseOrder.intPurchaseDetailId
