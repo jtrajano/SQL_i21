@@ -38,5 +38,5 @@ LEFT JOIN tblSMPaymentMethod H ON H.intPaymentMethodID = A.intPaymentMethodId
 LEFT JOIN vyuAPVoucherCommodity K ON K.intBillId = I.intBillId
 LEFT JOIN tblSMTerm L ON ISNULL(I.intTermsId, J.intTermId) = L.intTermID
 LEFT JOIN tblGLAccount M ON M.intAccountId = B.intAccountId
-LEFT JOIN tblSMCurrency N ON M.intCurrencyID = A.intCurrencyId
+LEFT JOIN tblSMCurrency N ON N.intCurrencyID = A.intCurrencyId
 --LEFT JOIN vyuAPFiscalPeriod H ON MONTH(A.dtmDatePaid) = H.intMonth AND 

@@ -9143,6 +9143,8 @@
     <Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
     <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
     <Build Include="dbo\Tables\tblSMPerformanceLog.sql" />
     <Build Include="dbo\Views\vyuSMPerformanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSMLogPerformanceRuntime.sql" />
@@ -9436,6 +9438,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -9624,5 +9627,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MO_Missouri.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />
   </ItemGroup>
 </Project>

@@ -456,6 +456,11 @@ UPDATE tblSMCSVDynamicImport SET
 		declare @approvalpricechargeid				int
 		declare @freighttermid						int
 
+		if ISNULL(@entityno, '''') = '''' AND ISNULL(@detailcustomerno, '''') <> ''''
+		begin
+			SET @entityno = @detailcustomerno
+		end
+		
 		if @entityno <> '''' 
 		begin
 			if exists(select top 1 intEntityId from tblEMEntity where strEntityNo = @entityno)

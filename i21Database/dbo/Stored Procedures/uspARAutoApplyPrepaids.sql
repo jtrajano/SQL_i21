@@ -236,8 +236,15 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 		FROM #AAPINVOICES I
 		INNER JOIN (
 			SELECT P.*
-				 , dblRunningTotal = SUM(P.dblAmountDue - dblAppliedPayment) OVER (ORDER BY P.dtmPostDate, P.intInvoiceId)
+				 , TOTALS.dblTotal dblRunningTotal
 			FROM #AAPPREPAIDS P
+			OUTER APPLY (  
+				SELECT  
+						SUM( PREPAIDS.dblAmountDue - PREPAIDS.dblAppliedPayment ) dblTotal
+				FROM #AAPPREPAIDS PREPAIDS 
+				WHERE PREPAIDS.intInvoiceId = P.intInvoiceId 
+					  AND PREPAIDS.dblAppliedPayment <> PREPAIDS.dblAmountDue
+			) TOTALS
 			WHERE P.dblAppliedPayment <> P.dblAmountDue
 		) CREDITS
 		ON CREDITS.intEntityCustomerId = I.intEntityCustomerId
