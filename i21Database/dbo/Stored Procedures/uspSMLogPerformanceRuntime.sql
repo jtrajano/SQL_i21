@@ -2,10 +2,11 @@ CREATE PROCEDURE [dbo].[uspSMLogPerformanceRuntime]
       @strModuleName            NVARCHAR(200)
 	, @strScreenName            NVARCHAR(200)
     , @strProcedureName         NVARCHAR(200)
-    , @strRequestId             NVARCHAR(500)
+    , @strRequestId             NVARCHAR(500) = NULL
     , @ysnStart		            BIT = 1
 	, @intUserId	            INT = NULL
     , @intPerformanceLogId      INT = NULL
+    , @strNewRequestId          NVARCHAR(500) = NULL OUTPUT
     , @intNewPerformanceLogId   INT = NULL OUTPUT
 AS
  
@@ -22,6 +23,15 @@ ORDER BY intCompanyPreferenceId DESC
 
 IF @ysnLogPerformanceRuntime = 0 OR (@ysnLogPerformanceRuntime = 1 AND @dtmPerformanceLoggingEffectivity < DATEADD(dd, 0, DATEDIFF(dd, 0, GETUTCDATE())))
     RETURN
+
+IF ISNULL(@strRequestId, '') = ''
+BEGIN
+    SET @strNewRequestId = NEWID()
+END
+ELSE
+BEGIN
+    SET @strNewRequestId = @strRequestId
+END
 
 BEGIN
     IF ISNULL(@ysnStart, 0) = 1
@@ -45,7 +55,7 @@ BEGIN
                 , strScreenName		    = @strScreenName
                 , strProcedureName		= @strProcedureName
                 , strBuildNumber		= @strBuildNumber
-                , strRequestId          = @strRequestId
+                , strRequestId          = @strNewRequestId
                 , dtmStartDateTime		= GETUTCDATE()
                 , intUserId				= @intUserId
 
