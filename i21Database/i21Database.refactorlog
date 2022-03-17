@@ -7721,4 +7721,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intValuationGroupDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7ff4cdb5-aec6-408f-9eeb-29e30887fef1" ChangeDateTime="03/17/2022 01:19:16">
+    <Property Name="ElementName" Value="[dbo].[tblLGInsurancePremiumFactorSale].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGInsurancePremiumFactorSale]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInsurancePremiumFactorSaleId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="af83f672-eab8-40ab-992a-f51169a14ba4" ChangeDateTime="03/17/2022 01:19:48">
+    <Property Name="ElementName" Value="[dbo].[tblLGInsurancePremiumFactorPurchase].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGInsurancePremiumFactorPurchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInsurancePremiumFactorPurchaseId" />
+  </Operation>
 </Operations>

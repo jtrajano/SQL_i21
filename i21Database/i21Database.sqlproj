@@ -570,6 +570,8 @@
     <Build Include="dbo\Views\vyuLGGetReportRemark.sql" />
     <Build Include="dbo\Tables\tblCTValuationGroup.sql" />
     <Build Include="dbo\Tables\tblCTValuationGroupDetail.sql" />
+    <Build Include="dbo\Tables\tblLGInsurancePremiumFactorPurchase.sql" />
+    <Build Include="dbo\Tables\tblLGInsurancePremiumFactorSale.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
