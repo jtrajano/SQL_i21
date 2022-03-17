@@ -56,6 +56,44 @@ BEGIN TRY
 			@intContractTypeId			INT,
 			@strAddToPayableMessage		NVARCHAR(MAX)
 
+
+	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
+	from tblCTContractDetail cd
+	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	join tblCTPriceFixation pf1 on pf1.intContractDetailId = cd.intContractDetailId
+	cross apply (
+		select dblPricedQty = sum(pfd.dblQuantity) from tblCTPriceFixation pf
+		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+		where pf.intContractDetailId = cd.intContractDetailId
+	) pricing
+	where cd.intContractHeaderId = @intContractHeaderId
+	and cd.intPricingTypeId = 1
+	and ch.intPricingTypeId <> 1
+	and ch.ysnMultiplePriceFixation <> 1
+	and cd.dblQuantity > isnull(pricing.dblPricedQty,0);
+
+	update
+		cd
+	set
+		cd.dblFutures = null
+		,cd.dblCashPrice = null
+		,cd.intPricingTypeId = ch.intPricingTypeId
+		,cd.intPricingStatus = 1
+		,cd.dblTotalCost = null
+		,cd.ysnPriceChanged = 1
+	from tblCTContractDetail cd
+	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	cross apply (
+		select dblPricedQty = sum(pfd.dblQuantity) from tblCTPriceFixation pf
+		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+		where pf.intContractDetailId = cd.intContractDetailId
+	) pricing
+	where cd.intContractHeaderId = @intContractHeaderId
+	and cd.intPricingTypeId = 1
+	and ch.intPricingTypeId <> 1
+	and ch.ysnMultiplePriceFixation <> 1
+	and cd.dblQuantity > isnull(pricing.dblPricedQty,0);
+
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
 			@dblNoOfLots				=	dblNoOfLots,
