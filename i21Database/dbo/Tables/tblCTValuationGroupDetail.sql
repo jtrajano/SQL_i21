@@ -9,7 +9,7 @@
     [dtmEndDate] DATETIME NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblCTValuationGroupDetail] PRIMARY KEY ([intValuationGroupDetailId]), 
-    CONSTRAINT [FK_tblCTValuationGroupDetail_tblCTValuationGroup] FOREIGN KEY ([intValuationGroupDetailId]) REFERENCES [tblCTValuationGroup]([intValuationGroupId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblCTValuationGroupDetail_tblCTValuationGroup] FOREIGN KEY ([intValuationGroupId]) REFERENCES [tblCTValuationGroup]([intValuationGroupId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblCTValuationGroupDetail_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
     CONSTRAINT [FK_tblCTValuationGroupDetail_tblICUnitMeasure] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
