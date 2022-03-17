@@ -1,4 +1,4 @@
-CREATE FUNCTION fnCMOverridePostAccounts
+CREATE FUNCTION fnGLOverridePostAccounts
  (
      @PostGLEntries RecapTableType READONLY
  )
@@ -10,10 +10,10 @@ RETURNS
     intOrigAccountId INT,
     intNewGLAccountId INT NULL,
     strMessage NVARCHAR(MAX),
-     strOverrideLocationAccountId NVARCHAR(40),
-     strOverrideLOBAccountId NVARCHAR(40),
-     strOrigAccountId NVARCHAR(40),
-      strNewAccountId NVARCHAR(40),
+    strOverrideLocationAccountId NVARCHAR(40),
+    strOverrideLOBAccountId NVARCHAR(40),
+    strOrigAccountId NVARCHAR(40),
+    strNewAccountId NVARCHAR(40),
     ysnOverriden BIT
 )
 AS
@@ -42,7 +42,7 @@ FROM @PostGLEntries A
  WHERE intOverrideLocationAccountId IS NOT NULL AND (intOverrideLOBAccountId IS NOT NULL AND @ysnHasLOB = 1)
 GROUP BY intOverrideLocationAccountId, intOverrideLOBAccountId,intAccountId, X.strAccountId, Y.strAccountId, Z.strAccountId
 
-DECLARE @strMessage NVARCHAR(MAX)=''
+
 DECLARE @intId INT,@strOverrideLocationAccountId NVARCHAR(30),@strOverrideLOBAccountId NVARCHAR(30), @strOrigAccountId NVARCHAR(30), @newStrAccountId NVARCHAR(30),
 @intOverrideLocationAccountId INT, @intOverrideLOBAccountId INT, @intOrigAccountId INT
 WHILE EXISTS (SELECT 1 FROM @tbl WHERE ysnOverriden = 0)
@@ -79,7 +79,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        IF @strMessage <> ''
+         IF NOT EXISTS(SELECT 1 FROM @tbl WHERE strMessage IS NOT NULL)
             UPDATE @tbl SET intNewGLAccountId =  (SELECT intAccountId from tblGLAccount WHERE strAccountId = @newStrAccountId),
             ysnOverriden = 1 
             WHERE intId = @intId

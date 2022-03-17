@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspGLPostRevalue]
-	@intConsolidationId			AS INT = 1,
-	@ysnPost					AS BIT = 1,
-	@ysnRecap					AS BIT = 0,
-	@intEntityId				AS INT = 1
+﻿CREATE PROCEDURE uspGLPostRevalue
+	@intConsolidationId			AS INT,
+	@ysnPost					AS BIT,
+	@ysnRecap					AS BIT,
+	@intEntityId				AS INT
 AS
 DECLARE @PostGLEntries RecapTableType
 DECLARE @ReversePostGLEntries RecapTableType
@@ -135,10 +135,13 @@ BEGIN TRANSACTION
 			,strModule = B.strTransactionType
 			,A.strType
 			,Offset = 0
-			,A.intOverrideLocationAccountId
-			,A.intOverrideLOBAccountId
+			,intOverrideLocationAccountId = Loc.intAccountId
+			,intOverrideLOBAccountId = A.intItemGLAccount
 		FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B 
 			ON A.intConsolidationId = B.intConsolidationId
+			OUTER APPLY(
+				SELECT TOP 1 intAccountId FROM tblGLAccountSegmentMapping Where intAccountSegmentId = A.intLocationSegmentId
+			)Loc
 			WHERE B.intConsolidationId = @intConsolidationId
 		),cte1 AS
 		(
@@ -277,10 +280,10 @@ BEGIN TRANSACTION
 			strNewAccountId NVARCHAR(40),
 			strOrigAccountId NVARCHAR(40)
 		)
-		INSERT into @tbl (intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage, strNewAccountId)
-		SELECT intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage, strNewAccountId FROM 
-		dbo.fnCMOverridePostAccounts(@PostGLEntries)
-		IF EXISTS(SELECT 1 FROM @tbl WHERE ISNULL(strMessage,'') <> ''  OR intNewGLAccountId is null)
+		INSERT into @tbl (intNewGLAccountId, intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage, strNewAccountId)
+		SELECT intNewGLAccountId, intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage, strNewAccountId FROM 
+		dbo.fnGLOverridePostAccounts(@PostGLEntries)
+		IF EXISTS(SELECT 1 FROM @tbl WHERE strMessage IS NOT NULL  OR intNewGLAccountId is null)
 		BEGIN
 			INSERT INTO @tblPostError(strTransactionId, strMessage)
 			SELECT A.strDescription, strMessage
@@ -289,7 +292,7 @@ BEGIN TRANSACTION
 			A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
 			AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
 			AND A.intAccountId = B.intOrigAccountId
-			WHERE ISNULL(strMessage,'') <> '' OR intNewGLAccountId is null
+			WHERE strMessage IS NOT NULL OR intNewGLAccountId is null
 			GOTO _raiserror
 		END
 		ELSE

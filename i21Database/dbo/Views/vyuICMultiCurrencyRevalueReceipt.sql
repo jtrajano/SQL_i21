@@ -30,6 +30,8 @@ SELECT
     ,dblUnrealizedCreditGain		= 0 --Calcuate By GL
     ,dblDebit						= 0 --Calcuate By GL
     ,dblCredit						= 0 --Calcuate By GL
+	,intLocationSegmentId 			= dbo.fnGetItemCompanySegment(r.intLocationId)
+	,intItemGLAccount  				= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
 FROM tblICInventoryReceipt r
 	INNER JOIN vyuICInventoryReceiptLookUp rLookUp ON rLookUp.intInventoryReceiptId = r.intInventoryReceiptId
     INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
@@ -90,6 +92,7 @@ FROM tblICInventoryReceipt r
 				)	
 	) ReceiptItemFormula 
     LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
+	JOIN  tblICItemLocation iLoc ON iLoc.intItemId = i.intItemId
     LEFT JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
     LEFT JOIN tblICCategory ct ON ct.intCategoryId = i.intCategoryId
     LEFT JOIN tblSMLineOfBusiness lob ON lob.intLineOfBusinessId = ct.intLineOfBusinessId

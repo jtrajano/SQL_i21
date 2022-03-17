@@ -26,9 +26,12 @@ SELECT
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
+	,intLocationSegmentId 		= dbo.fnGetItemCompanySegment(s.intShipFromLocationId)
+	,intItemGLAccount			= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
 FROM tblICInventoryShipment s
 	LEFT JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
 	LEFT JOIN tblICItem i ON i.intItemId = si.intItemId
+	JOIN  tblICItemLocation iLoc ON iLoc.intItemId = i.intItemId
 	LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityCustomerId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = s.intShipFromLocationId
 	LEFT JOIN tblICCategory ct ON ct.intCategoryId = i.intCategoryId

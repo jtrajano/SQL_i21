@@ -26,8 +26,8 @@ CREATE TABLE [dbo].[tblGLRevalueDetails](
 	[dblUnrealizedLoss] [numeric](18, 6) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS,
-	intOverrideLocationAccountId INT NULL,
-	intOverrideLOBAccountId INT NULL
+	intLocationSegmentId INT NULL,
+	intItemGLAccount INT NULL
  CONSTRAINT [PK_tblGLRevalueDetails] PRIMARY KEY CLUSTERED 
 (
 	[intConsolidationDetailId] ASC

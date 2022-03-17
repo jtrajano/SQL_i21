@@ -342,7 +342,7 @@
     <Build Include="dbo\Tables\tblFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
-    <Build Include="dbo\Functions\fnCMOverridePostAccounts.sql" />
+    <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaCCTransformVendorSite.sql" />
