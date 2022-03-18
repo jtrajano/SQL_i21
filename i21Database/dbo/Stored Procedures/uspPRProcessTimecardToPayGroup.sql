@@ -33,6 +33,33 @@ WHERE ysnApproved = 1
  AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)        
  AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)        
  AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)        
+
+ --Reset timecard's Paygroup link - IntPayGroupDetailId - to reprocessed approved (but not yet Paychecked)
+ ------------------------------------------------------------------------------------------------------------------------------
+ DECLARE @ResetTimecard TABLE (  
+    timeCardId INT NOT NULL,  
+    payGroupDetailId INT  
+    )
+
+ UPDATE tblPRTimecard 
+ SET intPayGroupDetailId = NULL
+
+ OUTPUT inserted.intTimecardId,  
+       deleted.intPayGroupDetailId
+ INTO @ResetTimecard
+
+ WHERE ysnApproved = 1        
+ AND intPaycheckId IS NULL        
+ AND intPayGroupDetailId IS NOT NULL        
+ AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)        
+ AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)        
+ AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)        
+
+ DELETE FROM tblPRPayGroupDetail
+ WHERE intPayGroupDetailId IN (SELECT intPayGroupDetailId FROM @ResetTimecard) AND intSource = 3
+ 
+ ------------------------------------------------------------------------------------------------------------------------------
+ 
       
  DECLARE @intDateFirst int      
  SELECT @intDateFirst  = ISNULL(intFirstDayOfWorkWeek,@@DATEFIRST) FROM tblPRCompanyPreference      
