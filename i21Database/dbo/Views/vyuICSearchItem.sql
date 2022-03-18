@@ -62,6 +62,7 @@ SELECT Item.intItemId
 , Item.ysnListBundleSeparately
 , Item.strManufactureType
 , Item.intValuationGroupId
+, strValuationGroup = VG.strName
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -72,7 +73,7 @@ LEFT JOIN tblICItemUOM CostItemUOM ON CostItemUOM.intItemUOMId = Item.intCostUOM
 LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = CostItemUOM.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure TonnageUOM ON TonnageUOM.intUnitMeasureId = Item.intTonnageTaxUOMId
 LEFT JOIN tblICM2MComputation M2M ON M2M.intM2MComputationId = Item.intM2MComputationId
-
+LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = Item.intValuationGroupId
 LEFT JOIN tblICCommodityAttribute CommodityAttribOrigin ON CommodityAttribOrigin.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblICCommodityAttribute CommodityAttribProductType ON CommodityAttribProductType.intCommodityAttributeId = Item.intProductTypeId
 LEFT JOIN tblICCommodityAttribute CommodityAttribRegion ON CommodityAttribRegion.intCommodityAttributeId = Item.intRegionId

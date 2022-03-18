@@ -74,6 +74,7 @@ SELECT
 	, Item.dblGAShrinkFactor
 	, Item.strMarketValuation
 	, Item.intValuationGroupId
+	, strValuationGroup = VG.strName
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -101,6 +102,7 @@ LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.
 LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = Item.intProductLineId
 LEFT JOIN tblICUnitMeasure ManufacturingPackingUOM ON ManufacturingPackingUOM.intUnitMeasureId = Item.intMaterialPackTypeId
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = Item.intLotStatusId
+LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = Item.intValuationGroupId
 LEFT JOIN (
 	tblICUnitMeasure mfgDimensionUOM INNER JOIN tblICItemUOM mfgDimensionItemUOM
 		ON mfgDimensionUOM.intUnitMeasureId = mfgDimensionItemUOM.intUnitMeasureId		
