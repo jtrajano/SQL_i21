@@ -1036,6 +1036,30 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
+	--Misc Item Sales Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The Sales Account of item - ' + I.[strItemDescription] + ' was not specified in ' + CL.strLocationName + '.'
+	FROM ##ARPostInvoiceDetail I
+	INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE I.intItemId IS NULL
+	  AND I.strItemDescription IS NOT NULL
+	  AND I.intSalesAccountId IS NULL
+	  AND CL.intSalesAccount IS NULL
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
 	--Software - Maintenance Type
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
@@ -1886,28 +1910,6 @@ BEGIN
 
 	UNION ALL
 	
-	SELECT intInvoiceId			= IC.intTransactionId
-		, intInvoiceDetailId	= IC.intTransactionDetailId		
-		, intItemId				= IC.intItemId
-		, intItemLocationId		= IC.intItemLocationId
-		, strInvoiceNumber		= IC.strTransactionId
-		, strAccountCategory	= 'Cost of Goods'
-	FROM @ItemsForCosting IC
-	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Cost of Goods') IS NULL
-
-	UNION ALL
-	
-	SELECT intInvoiceId			= IC.intTransactionId
-		, intInvoiceDetailId	= IC.intTransactionDetailId		
-		, intItemId				= IC.intItemId
-		, intItemLocationId		= IC.intItemLocationId
-		, strInvoiceNumber		= IC.strTransactionId
-		, strAccountCategory	= 'Sales Account'
-	FROM @ItemsForCosting IC
-	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Sales Account') IS NULL
-
-	UNION ALL
-
 	SELECT intInvoiceId			= IC.intTransactionId
 		, intInvoiceDetailId	= IC.intTransactionDetailId		
 		, intItemId				= IC.intItemId
