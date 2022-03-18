@@ -98,6 +98,12 @@ FROM (
 		, strOrderType = (CASE WHEN ft.intOrderTypeId = 2 THEN 'Limit'
 							WHEN ft.intOrderTypeId = 3 THEN 'Market'
 							ELSE '' END)
+		, ft.strCommissionRateType
+		, ft.dblBrokerageRate
+		, ft.dblCommission
+		, ft.ysnCommissionExempt
+		, ft.ysnCommissionOverride
+		, ft.ysnPosted
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN tblEMEntity sp ON sp.intEntityId = ft.intTraderId

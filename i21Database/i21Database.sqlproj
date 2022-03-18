@@ -585,6 +585,7 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSiteType.sql" />
     <Build Include="dbo\Tables\tblTMOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDerivativesForCommissionPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10315,7 +10316,7 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
-	  <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
