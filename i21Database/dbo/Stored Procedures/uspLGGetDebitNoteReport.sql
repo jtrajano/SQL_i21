@@ -78,7 +78,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,BA.strSWIFT
 	,BA.strBankName
 	,B.strRemarks
-	,dblTotalClaimAmount = ROUND(SUM(WCD.dblClaimAmount),2)
+	,dblTotalClaimAmount = ROUND(SUM(WCD.dblClaimAmount),2) + ROUND((SELECT SUM(dblAmount) FROM tblLGWeightClaimOtherCharges OC WHERE OC.intWeightClaimId = WC.intWeightClaimId),2)
 	,dblTotalOtherChargeAmount = ROUND((SELECT SUM(dblAmount) FROM tblLGWeightClaimOtherCharges OC WHERE OC.intWeightClaimId = WC.intWeightClaimId),2)
 	,INV.strInvoiceNumber
 	,strInvoiceComments = INV.strComments
