@@ -130,8 +130,8 @@ BEGIN
 				, strBankApprovalStatus = STF.strApprovalStatus
 				, dblLimit = limit.dblLimit
 				, dblSublimit = sublimit.dblLimit
-				, dblFinanceQty = cd.dblQuantity
-				, dblFinancedAmount = cd.dblTotalCost
+				, dblFinanceQty = case when cd.intContractStatusId <> 6 then cd.dblQuantity else (cd.dblQuantity - cd.dblBalance) end
+				, dblFinancedAmount = case when cd.intContractStatusId <> 6 then cd.dblTotalCost else cd.dblTotalCost * ((cd.dblQuantity - cd.dblBalance) / cd.dblQuantity) end
 				, strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
 			
 			from

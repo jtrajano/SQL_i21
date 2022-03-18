@@ -61,7 +61,8 @@ BEGIN TRY
 			@intPriceContractId			INT,
 			@ysnSeqSubCurrency			BIT,
 			@contractDetails 			AS [dbo].[ContractDetailTable],
-			@ysnPricingAsAmendment		BIT = 1;
+			@ysnPricingAsAmendment		BIT = 1,
+			@strXML nvarchar(max);
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -255,6 +256,12 @@ BEGIN TRY
 												@strSource 			 	= 'Pricing-Old',
 												@strProcess 			= 'Price Delete',
 												@intUserId				= @intUserId
+
+			select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId></row></rows>';
+
+			exec uspCTProcessTFLogs
+				@strXML = @strXML,
+				@intUserId = @intUserId
 
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
@@ -605,6 +612,12 @@ BEGIN TRY
 
 			exec uspCTUpdateSequenceCostRate
 				@intContractDetailId = @intContractDetailId,
+				@intUserId = @intUserId
+
+			select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId></row></rows>';
+
+			exec uspCTProcessTFLogs
+				@strXML = @strXML,
 				@intUserId = @intUserId
 
 			IF	@ysnMultiplePriceFixation = 1

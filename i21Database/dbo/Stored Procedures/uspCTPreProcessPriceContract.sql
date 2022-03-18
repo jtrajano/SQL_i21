@@ -31,6 +31,8 @@ BEGIN
 			, @xmlDocumentId INT
 			, @intContractDetailId int
 			, @ysnDeleteWholePricing bit = 0
+			, @ysnTFLogged bit = 0  
+			, @strTFXML nvarchar(max)  
 			;
 
 		DECLARE @PriceContractXML TABLE(    
@@ -247,6 +249,16 @@ BEGIN
 					,@intUserId = @intUserId
 					,@ysnDeleteWholePricing = @ysnDeleteWholePricing
 
+				if (@ysnTFLogged = 0)  
+				begin  
+					select @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
+					select @strTFXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId></row></rows>';
+					exec uspCTProcessTFLogs  
+						@strXML = @strTFXML,  
+						@intUserId = @intUserId  
+					select @ysnTFLogged = 1;  
+				end 
+
 				SELECT
 					@intActivePriceFixationDetailId = MIN(intPriceFixationDetailId)
 				FROM
@@ -386,6 +398,21 @@ BEGIN
 						@intPriceFixationDetailId = @intPriceFixationDetailId
 						,@intUserId = @intUserId 
 						,@ysnDeleteWholePricing = @ysnDeleteWholePricing 
+
+					if (@ysnTFLogged = 0)  
+					begin
+						select @intContractDetailId = pf.intContractDetailId
+						from
+							tblCTPriceFixationDetail pfd
+							join tblCTPriceFixation pf on pf.intPriceFixationId = pfd.intPriceFixationId
+						where pfd.intPriceFixationDetailId = @intPriceFixationDetailId;
+
+						select @strTFXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId></row></rows>';
+						exec uspCTProcessTFLogs  
+							@strXML = @strTFXML,  
+							@intUserId = @intUserId  
+						select @ysnTFLogged = 1;  
+					end
 
 					SELECT
 						@intFutOptTransactionId = FD.intFutOptTransactionId   
