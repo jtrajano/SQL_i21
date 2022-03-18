@@ -157,6 +157,7 @@ SELECT
 		WHEN 1 THEN 'Inbound'
 		WHEN 2 THEN 'Outbound'
 		WHEN 3 THEN 'Drop Ship'
+		WHEN 4 THEN 'Transfer'
 		END COLLATE Latin1_General_CI_AS
 	,strEquipmentType = EQ.strEquipmentType
 	,strPosition = P.strPosition

@@ -24,6 +24,8 @@ BEGIN
 						THEN 'Outbound'
 					WHEN 3
 						THEN 'Drop Ship'
+					WHEN 4
+						THEN 'Transfer'
 					END
 				,strEquipmentType = EQ.strEquipmentType
 				,strPosition = P.strPosition
@@ -125,6 +127,8 @@ BEGIN
 					THEN 'Outbound'
 				WHEN 3
 					THEN 'Drop Ship'
+				WHEN 4
+					THEN 'Transfer'
 				END
 			,strEquipmentType = EQ.strEquipmentType
 			,strPosition = P.strPosition

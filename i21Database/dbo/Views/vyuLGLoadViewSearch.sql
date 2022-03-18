@@ -20,10 +20,11 @@ SELECT L.intLoadId
 		WHEN 6 THEN 'Pick Lots'
 		WHEN 7 THEN 'Pick Lots w/o Contract'
 		END COLLATE Latin1_General_CI_AS
-	,strType = CASE L.intPurchaseSale
+	,strType = CASE L.intPurchaseSale 
 		WHEN 1 THEN 'Inbound'
 		WHEN 2 THEN 'Outbound'
 		WHEN 3 THEN 'Drop Ship'
+		WHEN 4 THEN 'Transfer'
 		END COLLATE Latin1_General_CI_AS
 	,strTransportationMode = CASE L.intTransportationMode
 		WHEN 1 THEN 'Truck'

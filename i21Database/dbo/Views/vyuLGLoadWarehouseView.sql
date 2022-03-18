@@ -62,11 +62,12 @@ SELECT
 	,strStorageLocationName = SL.strName
 	,CLSLV.intEntityId 
 	,strShippingLine = ShippingLine.strName
-	,strTransactionType = CASE L.intPurchaseSale
+	,strTransactionType = CASE L.intPurchaseSale 
 		WHEN 1 THEN 'Inbound'
 		WHEN 2 THEN 'Outbound'
 		WHEN 3 THEN 'Drop Ship'
-		ELSE '' END COLLATE Latin1_General_CI_AS
+		WHEN 4 THEN 'Transfer'
+		END COLLATE Latin1_General_CI_AS
 	,strShipmentStatus = CASE L.intShipmentStatus
 		WHEN 1 THEN 
 			CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1

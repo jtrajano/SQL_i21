@@ -27,10 +27,11 @@ SELECT   L.intLoadId
 		,POS.strPosition
 		,POS.strPositionType
         ,strType = CASE L.intPurchaseSale 
-			WHEN 1 THEN 'Inbound' 
-			WHEN 2 THEN 'Outbound' 
-			WHEN 3 THEN 'Drop Ship'
-			END COLLATE Latin1_General_CI_AS
+					WHEN 1 THEN 'Inbound'
+					WHEN 2 THEN 'Outbound'
+					WHEN 3 THEN 'Drop Ship'
+					WHEN 4 THEN 'Transfer'
+					END COLLATE Latin1_General_CI_AS
         ,intGenerateSequence = L.intGenerateSequence
         ,L.dtmScheduledDate
         ,ysnInProgress = IsNull(L.ysnInProgress, 0)

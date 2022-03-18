@@ -89,9 +89,12 @@ SELECT LoadDetail.intLoadDetailId
 	, Load.intDriverEntityId
 	, Load.intDispatcherId
 	, Load.strExternalLoadNumber
-	, strType = CASE WHEN Load.intPurchaseSale = 1 THEN 'Inbound'
-					ELSE CASE WHEN Load.intPurchaseSale = 2 THEN 'Outbound' 
-							ELSE 'Drop Ship' END END COLLATE Latin1_General_CI_AS
+	, strType = CASE Load.intPurchaseSale 
+		WHEN 1 THEN 'Inbound'
+		WHEN 2 THEN 'Outbound'
+		WHEN 3 THEN 'Drop Ship'
+		WHEN 4 THEN 'Transfer'
+		END COLLATE Latin1_General_CI_AS
 	, intGenerateSequence = Load.intGenerateSequence
 	, Load.dtmScheduledDate 
 	, ysnInProgress = IsNull(Load.ysnInProgress, 0)

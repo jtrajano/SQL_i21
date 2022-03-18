@@ -87,6 +87,8 @@ BEGIN TRY
 				THEN 'Outbound'
 			WHEN 3
 				THEN 'Drop Ship'
+			WHEN 4
+				THEN 'Transfer'
 			END
 		,@intShipmentType = intShipmentType
 		,@strShipmentType = CASE intShipmentType

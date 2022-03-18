@@ -15,10 +15,11 @@ SELECT -- Load Header
 	,L.intDriverEntityId
 	,L.intDispatcherId
 	,L.strExternalLoadNumber
-	,strType = CASE L.intPurchaseSale
+	,strType = CASE L.intPurchaseSale 
 		WHEN 1 THEN 'Inbound'
 		WHEN 2 THEN 'Outbound'
 		WHEN 3 THEN 'Drop Ship'
+		WHEN 4 THEN 'Transfer'
 		END COLLATE Latin1_General_CI_AS
 	,strSourceType = CASE L.intSourceType
 		WHEN 1 THEN 'None'
@@ -130,6 +131,7 @@ SELECT -- Load Header
 			WHEN 1 THEN 'Inbound'
 			WHEN 2 THEN 'Outbound'
 			WHEN 3 THEN 'Drop-Ship'
+			WHEN 4 THEN 'Transfer'
 			END + ' - ' 
 		+ CASE L.intShipmentStatus
 			WHEN 1 THEN 
