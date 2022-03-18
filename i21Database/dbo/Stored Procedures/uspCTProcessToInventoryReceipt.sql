@@ -21,7 +21,8 @@ AS
 
 			@ReceiptStagingTable		ReceiptStagingTable,
 			@OtherCharges				ReceiptOtherChargesTableType,
-			@ReceiptItemLotStagingTable	ReceiptItemLotStagingTable
+			@ReceiptItemLotStagingTable	ReceiptItemLotStagingTable,
+			@ReceiptTradeFinance		ReceiptTradeFinance
 	
 	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
 
@@ -280,7 +281,71 @@ AS
 			RAISERROR('Please verify the stock unit for the item or default location is available for the entity.',16,1)
 		END
 
-		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId, @ReceiptItemLotStagingTable;
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND strFinanceTradeNo IS NOT NULL )
+		BEGIN
+			INSERT INTO @ReceiptTradeFinance
+			(
+				[strReceiptType]
+				,[intEntityVendorId]
+				,[intCurrencyId]
+				,[intLocationId]
+				,[intShipFromId]
+				,[intShipViaId]
+				,[intShipFromEntityId]
+				,[strTradeFinanceNumber]
+				,[intBankId]
+				,[intBankAccountId]
+				,[intBorrowingFacilityId]
+				,[strBankReferenceNo]
+				,[intLimitTypeId]
+				,[intSublimitTypeId]
+				,[ysnSubmittedToBank]
+				,[dtmDateSubmitted]
+				,[strApprovalStatus]
+				,[dtmDateApproved]
+				,[strWarrantNo]
+				,[intWarrantStatus]
+				,[strReferenceNo]
+				,[intOverrideFacilityValuation]
+				,[strComments]
+			)
+			SELECT	 [strReceiptType]				=   'Purchase Contract'
+					,[intEntityVendorId]			=   CH.intEntityId
+					,[intCurrencyId]				=   ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+					,[intLocationId]				= CD.intCompanyLocationId
+					,[intShipFromId]				=   CASE	WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = CH.intEntityId), 0) > 0
+														THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = CH.intEntityId)
+														ELSE (SELECT TOP 1 intEntityLocationId from tblEMEntityLocation where intEntityId = CH.intEntityId AND ysnDefaultLocation = 1)
+														END
+					,[intShipViaId]					=   CD.intShipViaId
+					,[intShipFromEntityId]			=   CH.intEntityId
+					,[strTradeFinanceNumber]		=	CD.strFinanceTradeNo
+					,[intBankId]					=	CD.intBankId
+					,[intBankAccountId]				=	CD.intBankAccountId
+					,[intBorrowingFacilityId]		=	CD.intBorrowingFacilityId
+					,[strBankReferenceNo]			=	CD.strBankReferenceNo
+					,[intLimitTypeId]				=	CD.intBorrowingFacilityLimitId
+					,[intSublimitTypeId]			=	CD.intBorrowingFacilityLimitDetailId
+					,[ysnSubmittedToBank]			=	CD.ysnSubmittedToBank
+					,[dtmDateSubmitted]				=	CD.dtmDateSubmitted
+					,[strApprovalStatus]			=	ASTF.strApprovalStatus
+					,[dtmDateApproved]				=	CD.dtmDateApproved
+					,[strWarrantNo]					=	null
+					,[intWarrantStatus]				=	null
+					,[strReferenceNo]				=	CD.strReferenceNo
+					,[intOverrideFacilityValuation]	=	CD.intBankValuationRuleId
+					,[strComments]					=	CD.strComments
+			FROM tblCTContractDetail CD
+			JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
+			LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = CD.intApprovalStatusId
+			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)AD
+			LEFT  JOIN		tblSMCurrency				SC	ON	SC.intCurrencyID		=	AD.intSeqCurrencyId
+			where CD.intContractDetailId = @intContractDetailId
+			
+			
+		END
+	
+		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId, @ReceiptItemLotStagingTable, @ReceiptTradeFinance;
 		
 		IF EXISTS(SELECT * FROM #tmpAddItemReceiptResult)
 		BEGIN
