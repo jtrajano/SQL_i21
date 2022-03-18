@@ -174,6 +174,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	intFacilityId INT NULL,
 	intLoanLimitId INT NULL,
 	intOverrideFacilityId INT NULL,
+
 	ysnSubmittedToBank  BIT NULL,
 	dtmDateSubmitted DATETIME NULL,
 	intApprovalStatusId INT NULL,
