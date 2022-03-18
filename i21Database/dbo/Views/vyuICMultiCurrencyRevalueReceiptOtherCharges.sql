@@ -27,7 +27,7 @@ SELECT
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
 	,intLocationSegmentId 		= dbo.fnGetItemCompanySegment(rc.intLocationId)
-	,intItemGLAccount			= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
+	,intItemGLAccountId			= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
 FROM 
 	vyuICChargesForBilling rc
 	LEFT JOIN tblICItem i ON i.intItemId = rc.intItemId

@@ -27,7 +27,7 @@ SELECT
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
 	,intLocationSegmentId 		= dbo.fnGetItemCompanySegment(s.intShipFromLocationId)
-	,intItemGLAccount			= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
+	,intItemGLAccountId			= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
 FROM tblICInventoryShipment s
 	LEFT JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
 	LEFT JOIN tblICItem i ON i.intItemId = si.intItemId
