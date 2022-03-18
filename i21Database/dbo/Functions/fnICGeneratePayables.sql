@@ -580,7 +580,8 @@ WHERE
 					FROM tblAPVoucherPayable 
 					WHERE intEntityVendorId = A.intEntityVendorId 
 					AND intContractDetailId = Contracts.intContractDetailId
-					AND strSourceNumber <> A.strReceiptNumber
+					--AND strSourceNumber <> A.strReceiptNumber
+					AND strSourceNumber IN (LogisticsView2.strLoadNumber, LogisticsView.strLoadNumber)
 					AND intInventoryReceiptItemId IS NULL
 					AND intInventoryReceiptChargeId IS NULL 
 					AND intInventoryShipmentChargeId IS NULL
@@ -924,7 +925,8 @@ WHERE
 						FROM tblAPVoucherPayable 
 						WHERE intEntityVendorId = A.intEntityVendorId 
 						AND intContractDetailId = CD.intContractDetailId
-						AND strSourceNumber <> A.strSourceNumber
+						--AND strSourceNumber <> A.strSourceNumber
+						AND strSourceNumber IN (A.strLoadNumber)
 						AND intInventoryReceiptItemId IS NULL 
 						AND intInventoryReceiptChargeId IS NULL 
 						AND intInventoryShipmentChargeId IS NULL						
