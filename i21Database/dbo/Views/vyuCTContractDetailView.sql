@@ -186,7 +186,6 @@ AS
 		, CD.strBankReferenceNo
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
-		, CD.dblPrice
 
 		, strCostTerm = CostTerm.strFreightTerm
         , CD.intCostTermId
