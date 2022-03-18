@@ -27,7 +27,7 @@ SELECT DISTINCT
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
 	,intLocationSegmentId 		= dbo.fnGetItemCompanySegment(ARI.intCompanyLocationId)
-	,intItemGLAccount 			= ISNULL(ARID.intSalesAccountId, ARID.intAccountId)
+	,intItemGLAccountId			= ISNULL(ARID.intSalesAccountId, ARID.intAccountId)
 FROM 
 	tblARInvoiceDetail ARID
 INNER JOIN

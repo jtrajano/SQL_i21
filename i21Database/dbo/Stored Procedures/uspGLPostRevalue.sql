@@ -136,7 +136,7 @@ BEGIN TRANSACTION
 			,A.strType
 			,Offset = 0
 			,intOverrideLocationAccountId = Loc.intAccountId
-			,intOverrideLOBAccountId = A.intItemGLAccount
+			,intOverrideLOBAccountId = A.intItemGLAccountId
 		FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B 
 			ON A.intConsolidationId = B.intConsolidationId
 			OUTER APPLY(

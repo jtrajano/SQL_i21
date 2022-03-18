@@ -31,7 +31,7 @@ SELECT
     ,dblDebit						= 0 --Calcuate By GL
     ,dblCredit						= 0 --Calcuate By GL
 	,intLocationSegmentId 			= dbo.fnGetItemCompanySegment(r.intLocationId)
-	,intItemGLAccount  				= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
+	,intItemGLAccountId				= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
 FROM tblICInventoryReceipt r
 	INNER JOIN vyuICInventoryReceiptLookUp rLookUp ON rLookUp.intInventoryReceiptId = r.intInventoryReceiptId
     INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
