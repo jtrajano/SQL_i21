@@ -24,8 +24,9 @@ BEGIN
 		  , @filterValue			VARCHAR(MAX)	
 		  , @intSourceLetterId		INT
 		  , @intEntityUserId		INT
-		  , @strTableSource VARCHAR(MAX)
-		  , @dtmDateFrom			DATETIME = NULL;
+		  , @strTableSource 		VARCHAR(MAX)
+		  , @dtmDateFrom			DATETIME = NULL
+		  , @strReportLogId			NVARCHAR(MAX)
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 	DECLARE @temp_params TABLE (
@@ -85,6 +86,17 @@ BEGIN
 		
 	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
 
+	SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
+	FROM @temp_params
+	WHERE [fieldname] = 'strReportLogId'
+
+	IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+		BEGIN
+			INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+			VALUES (@strReportLogId, GETDATE())
+		END
+	ELSE
+		RETURN
 
 	SELECT @intSourceLetterId = intSourceLetterId FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
 	IF (@intSourceLetterId IS NULL OR @intSourceLetterId = '')
@@ -1024,6 +1036,14 @@ BEGIN
 								DECLARE @Colunm1	VARCHAR(MAX)
 										,@DataType1	VARCHAR(MAX)
 										,@SetQuery		VARCHAR(MAX)
+										,@ColumnHeader VARCHAR(MAX)
+
+								SELECT TOP 1 
+									@ColumnHeader = strValues
+								FROM 
+								    #TempTableColumnHeaders
+								WHERE 
+								   RowId = @ColumnCounter1
 
 								SELECT TOP 1						 
 									@Colunm1 = strValues	
@@ -1062,7 +1082,7 @@ BEGIN
 								SET 												
 									strField = CONVERT(varchar, CAST(strField AS money), 1)
 								WHERE 
-									ISNUMERIC(strField) = 1						
+									ISNUMERIC(strField) = 1	AND @ColumnHeader <> ''Invoice Number''						
 												
 								DECLARE @isNumeric BIT 
 								SET  @isNumeric = 0 
@@ -1071,7 +1091,7 @@ BEGIN
 								FROM 
 									#Field 
 								WHERE
-									ISNUMERIC(strField) = 1		
+									ISNUMERIC(strField) = 1	AND @ColumnHeader <> ''Invoice Number''		
 
 								IF  (@isNumeric = 1)
 								BEGIN

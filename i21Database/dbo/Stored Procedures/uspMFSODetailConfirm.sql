@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspMFSODetailConfirm (
+﻿CREATE PROCEDURE uspMFSODetailConfirm (
 	@intPickListDetailId INT
 	,@intPickListId INT
 	,@intSalesOrderId INT
@@ -17,6 +16,12 @@ BEGIN
 	DECLARE @dblSOLineItemQty NUMERIC(18, 6)
 		,@dblSOScannedQty NUMERIC(18, 6)
 		,@strError NVARCHAR(50)
+
+	IF @intStorageLocationId = 0
+		SELECT @intStorageLocationId = NULL
+
+	IF @intSubLocationId = 0
+		SELECT @intSubLocationId = NULL
 
 	SELECT @dblSOLineItemQty = dblQtyOrdered - dblQtyShipped
 	FROM dbo.tblSOSalesOrderDetail

@@ -8,7 +8,7 @@ SELECT
 	itemPricing.dblSalePrice,
     im.intItemUPCId,
 	uom.intItemUOMId,
-
+	um.strUnitMeasure,
     --im.strInvalidUPCCode,
 	CASE
 		WHEN (uom.intItemUOMId IS NOT NULL)
@@ -80,6 +80,8 @@ INNER JOIN tblSTStore st
 	ON ch.intStoreId = st.intStoreId
 LEFT JOIN tblICItemUOM uom
 	ON im.intItemUPCId = uom.intItemUOMId
+LEFT JOIN tblICUnitMeasure um
+	ON um.intUnitMeasureId = uom.intUnitMeasureId
 LEFT JOIN tblICItem item
 	ON uom.intItemId = item.intItemId
 LEFT JOIN tblICCategory category

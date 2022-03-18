@@ -22,7 +22,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.strSourceNumber
 	, ReceiptItem.intItemId
 	, Item.strItemNo
-	, strItemDescription = Item.strDescription
+	, strItemDescription = COALESCE(ItemUOM.strUPCDescription, Item.strDescription)
 	, dblQtyToReceive = ReceiptItem.dblOpenReceive
 	, intLoadToReceive = ReceiptItem.intLoadReceive
 	, ReceiptItem.dblUnitCost

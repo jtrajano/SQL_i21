@@ -19,12 +19,7 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLFiscalYearPeriod]') AND type in (N'U')) 
 BEGIN
     EXECUTE(
-    'IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLDataFixLog WHERE strDescription= ''Update fiscal period name.'')
-    BEGIN
-        UPDATE tblGLFiscalYearPeriod SET strPeriod = DATENAME(MONTH, dtmStartDate) + '' '' + DATENAME(YEAR, dtmStartDate)
-        INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), ''Update fiscal period name.'')
-    END
-    IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLDataFixLog WHERE strDescription= ''Remove orphaned fiscal period.'')
+    'IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLDataFixLog WHERE strDescription= ''Remove orphaned fiscal period.'')
     BEGIN
     	DELETE FROM tblGLFiscalYearPeriod WHERE intFiscalYearId NOT IN(SELECT intFiscalYearId FROM tblGLFiscalYear)
 	    INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), ''Remove orphaned fiscal period.'')

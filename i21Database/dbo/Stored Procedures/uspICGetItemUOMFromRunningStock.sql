@@ -311,18 +311,18 @@ FROM
 	-- Get the last cost from the valuation. 
 	OUTER APPLY (
 		SELECT TOP 1 
-			t.intItemUOMId
-			,t.dblCost
+			LastCost.intItemUOMId
+			,LastCost.dblCost
 		FROM
-			tblICInventoryTransaction t 
+			tblICInventoryTransaction LastCost 
 		WHERE
-			t.intItemId = t.intItemId
-			AND t.intItemLocationId = t.intItemLocationId
-			AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
-			AND t.intInTransitSourceLocationId IS NULL 
-			AND t.dblQty > 0 
+			LastCost.intItemId = t.intItemId
+			AND LastCost.intItemLocationId = t.intItemLocationId
+			AND FLOOR(CAST(LastCost.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+			AND LastCost.intInTransitSourceLocationId IS NULL 
+			AND LastCost.dblQty > 0 
 		ORDER BY
-			t.intInventoryTransactionId DESC 		
+			LastCost.intInventoryTransactionId DESC 		
 	) LastCost 
 
 	LEFT JOIN tblICItemLocation ItemLocation 

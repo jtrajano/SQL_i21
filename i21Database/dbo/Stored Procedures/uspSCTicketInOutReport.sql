@@ -184,8 +184,11 @@ begin
 		,AllExport.strGroupIndicator
 		,AllExport.intProcessingLocationId
 
-
-
+		,AllExport.strItemNo
+		,AllExport.strCommodityCode
+		,AllExport.strUnitMeasure
+		,AllExport.dblComputedGrossUnits
+		,AllExport.strStationUnitMeasure
 		from @RangedTicketNumber AllTicketNumber
 			left join #tmpSampleExport AllExport
 				on AllTicketNumber.intTicketNumber = AllExport.intTicketNumber

@@ -82,4 +82,5 @@ SELECT CH.intContractHeaderId
 	, CH.ysnReceivedSignedFixationLetter
 	, CH.strReportTo
 	, CH.ysnEnableFutures
+	, CH.strEntitySelectedLocation
 FROM vyuCTSearchContractHeader CH WITH(NOLOCK)

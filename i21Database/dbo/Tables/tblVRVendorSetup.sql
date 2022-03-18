@@ -5,8 +5,10 @@
 	[strExportFilePath] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strBuybackExportFileType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[strBuybackExportFilePath] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	[strCompany1Id] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
-	[strCompany2Id] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+	[strCompany1Id] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL, -- Marketer ID
+	[strCompany2Id] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL, -- Marketer Name
+	[strMarketerAccountNo] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
+	[strMarketerEmail] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
 	[strDataFileTemplate] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[strReimbursementType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblVRVendorSetup_strReimbursementType] DEFAULT (N'AP'),
 	[intAccountId] INT NULL,

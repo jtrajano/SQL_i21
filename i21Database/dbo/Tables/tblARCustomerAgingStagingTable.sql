@@ -8,20 +8,20 @@
     [dtmDate]					DATETIME NULL, 
     [dtmDueDate]				DATETIME NULL, 
     [dtmAsOfDate]				DATETIME NULL, 
-    [strCustomerName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strCustomerNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-	[strCustomerInfo]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    [strInvoiceNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strRecordNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strBOLNumber]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strSalespersonName]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strSourceTransaction]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strType]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    [strTransactionType]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strCompanyName]            NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    [strCompanyAddress]         NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strAgingType]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strEntityNo]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strCustomerName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
+    [strCustomerNumber]			NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+	[strCustomerInfo]			NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceNumber]			NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL, 
+    [strRecordNumber]			NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL, 
+    [strBOLNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strSalespersonName]		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
+    [strSourceTransaction]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strType]					NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
+    [strTransactionType]		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
+	[strCompanyName]            NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strCompanyAddress]         NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strAgingType]				NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
+	[strEntityNo]				NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL,
     [dblCreditLimit]			NUMERIC(18, 6) NULL, 
     [dblTotalAR]				NUMERIC(18, 6) NULL, 
     [dblFuture]					NUMERIC(18, 6) NULL, 
@@ -39,9 +39,14 @@
     [dblCredits]				NUMERIC(18, 6) NULL, 
     [dblPrepayments]			NUMERIC(18, 6) NULL, 
     [dblPrepaids]				NUMERIC(18, 6) NULL,
-    [dblTotalCustomerAR]        NUMERIC(18, 6) NULL 
+    [dblTotalCustomerAR]        NUMERIC(18, 6) NULL,
+    [strReportLogId]			NVARCHAR(MAX)
 );
 
 GO
 CREATE NONCLUSTERED INDEX [NC_Index_tblARCustomerAgingStagingTable]
 ON [dbo].[tblARCustomerAgingStagingTable]([intEntityUserId]) INCLUDE ([intEntityCustomerId], [strAgingType], [dbl0Days], [dbl10Days], [dbl30Days], [dbl60Days], [dbl90Days], [dbl91Days], [dbl120Days], [dbl121Days], [dblCredits], [dblPrepayments]);
+GO
+CREATE NONCLUSTERED INDEX [NC_Index_tblARCustomerAgingStagingTable_AgingSummary]
+ON [dbo].[tblARCustomerAgingStagingTable] ([intEntityUserId],[strAgingType])
+GO

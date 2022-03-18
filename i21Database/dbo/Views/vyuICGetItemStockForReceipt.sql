@@ -138,7 +138,7 @@ SELECT
 FROM vyuICGetItemStock stock
 	OUTER APPLY tblICTransactionSession tsession
 	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(tsession.dtmTransactionDate, stock.intItemId, stock.intItemLocationId, DEFAULT) EffectiveCost
-	OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(tsession.dtmTransactionDate, stock.intItemId, stock.intItemLocationId, DEFAULT) EffectivePrice
+	OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(tsession.dtmTransactionDate, stock.intItemId, stock.intItemLocationId, COALESCE(stock.intStockUOMId, stock.intReceiveUOMId, stock.intIssueUOMId, stock.intGrossUOMId), DEFAULT) EffectivePrice
 	OUTER APPLY (
 		SELECT TOP 1 xref.intVendorId, xref.strProductDescription, xref.strVendorProduct
 		FROM tblICItemVendorXref xref

@@ -111,7 +111,7 @@ SELECT Item.intItemId
 	   END COLLATE Latin1_General_CI_AS AS strUPCwthOrwthOutCheckDigit
 
 	   , UOM.ysnHasCheckDigit
-	   , UOM.intCheckDigit COLLATE Latin1_General_CI_AS AS intCheckDigit
+	   , UOM.intCheckDigit AS intCheckDigit
 	   , CASE
 			WHEN UOM.dblUPCwthOrwthOutCheckDigit <= 99999
 				THEN 'plu'
@@ -180,16 +180,16 @@ FROM
 					THEN CAST(1 AS BIT)
 		   END AS ysnHasCheckDigit
 
-		   , CASE 
-				WHEN LEN(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')) = 6
-					THEN CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1))
+		  -- , CASE 
+				--WHEN LEN(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0')) = 6
+				--	THEN CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1))
 
-				WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) <= 99999
-					THEN NULL
+				--WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) <= 99999
+				--	THEN NULL
 
-				WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) > 99999
-					THEN CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1))
-		   END AS intCheckDigit
+				--WHEN CONVERT(NUMERIC(32, 0),CAST(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), '0') AS FLOAT)) > 99999
+				--	THEN CAST(dbo.fnSTGenerateCheckDigit(ISNULL(SUBSTRING(U.strLongUPCCode, PATINDEX('%[^0]%',U.strLongUPCCode), LEN(U.strLongUPCCode)), 0)) AS NVARCHAR(1))
+		  -- END AS intCheckDigit
 
 		   , U.* 
 	FROM tblICItemUOM U
@@ -202,5 +202,4 @@ WHERE Item.ysnFuelItem = CAST(0 AS BIT)
 	AND UOM.strLongUPCCode	IS NOT NULL
 	AND UOM.strLongUPCCode	NOT LIKE '%[^0-9]%'
 	AND LEN(UOM.strLongUPCCode)		<= 13     -- ST-1366 (Max Upc length is 13 without check digit, we should skip upc that has more than 13 digits)
-	AND UOM.ysnStockUnit = CAST(1 AS BIT)
 	AND ISNULL(SUBSTRING(UOM.strLongUPCCode, PATINDEX('%[^0]%',UOM.strLongUPCCode), LEN(UOM.strLongUPCCode)), 0) NOT IN ('')

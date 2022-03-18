@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceMCPReportCustom]
-	  @tblInvoiceReport		AS InvoiceReportTable READONLY
-	, @intEntityUserId		AS INT	= NULL
+	  @intEntityUserId		AS INT	= NULL
 	, @strRequestId			AS NVARCHAR(MAX) = NULL
 AS 
 
@@ -14,23 +13,25 @@ DECLARE @blbLogo 			VARBINARY (MAX)  = NULL
       , @blbStretchedLogo 	VARBINARY (MAX)  = NULL
 	  , @dblCreditMemo		NUMERIC   (18,6) = 1
 
+--LOGO
 SELECT TOP 1 @blbLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+WHERE (A.strScreen = 'SystemManager.CompanyPreference' OR A.strScreen = 'SystemManager.view.CompanyPreference')
   AND A.strComment = 'Header'
 
+--LOGO
 SELECT TOP 1 @blbStretchedLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+WHERE (A.strScreen = 'SystemManager.CompanyPreference' OR A.strScreen = 'SystemManager.view.CompanyPreference') 
   AND A.strComment = 'Stretched Header'
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
 SELECT TOP 1 @dblCreditMemo = CASE WHEN INV.strTransactionType IN ('Credit Memo') THEN -1 ELSE 1 END 
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
-INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
+INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 WHERE  SELECTEDINV.strType IN ('Transport Delivery','Tank Delivery')
 
 DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
@@ -176,7 +177,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strPaymentInfo			= CASE WHEN INV.strTransactionType = 'Cash' THEN ISNULL(PAYMENTMETHOD.strPaymentMethod, '') + ' - ' + ISNULL(INV.strPaymentInfo, '') ELSE NULL END
 	 , dtmCreated				= GETDATE()
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
-INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
+INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (
 	SELECT intInvoiceId			= ID.intInvoiceId
 		 , intInvoiceDetailId   = ID.intInvoiceDetailId

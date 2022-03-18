@@ -18,6 +18,10 @@ SELECT
 	, c.strName strContactName
 	, c.strPhone
 	, c.strMobile
+  , v.strShippingService
+  , v.strTransportationMode
+  , v.strFreightBilledBy
+  , dtmDateLastUpdated = COALESCE(updated.dtmDate, created.dtmDate)
 FROM tblSMShipVia v
 INNER JOIN tblEMEntity e ON e.intEntityId = v.intEntityId
 OUTER APPLY (
@@ -37,3 +41,15 @@ OUTER APPLY (
 		AND EntityToContact.ysnDefaultContact = 1
     WHERE EntityToContact.intEntityId = e.intEntityId
 ) c
+OUTER APPLY (
+  SELECT TOP 1 au.dtmDate
+  FROM vyuApiRecordAudit au
+  WHERE au.intRecordId = v.intEntityId
+    AND au.strNamespace = 'EntityManagement.view.Entity'
+) created
+OUTER APPLY (
+  SELECT TOP 1 au.dtmDate
+  FROM vyuApiRecordAudit au
+  WHERE au.intRecordId = v.intEntityId
+    AND au.strNamespace = 'EntityManagement.view.Entity'
+) updated

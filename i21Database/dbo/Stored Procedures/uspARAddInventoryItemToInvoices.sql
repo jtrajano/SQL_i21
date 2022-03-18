@@ -858,23 +858,6 @@ LEFT OUTER JOIN
 		AND (IE.[intId] = IP.[intId]
 			OR
 			IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId])
---No need for this; accounts are being updated during posting (uspARUpdateTransactionAccounts)
---And this has been causing performance issue
---LEFT OUTER JOIN
---	(
---	SELECT
---		 [intAccountId] 
---		,[intCOGSAccountId] 
---		,[intSalesAccountId]
---		,[intInventoryAccountId]	
---		,[intGeneralAccountId]
---		,[intMaintenanceSalesAccountId]		
---		,[intItemId]
---		,[intLocationId]			
---	FROM vyuARGetItemAccount WITH (NOLOCK)
---	) Acct
---		ON IC.[intItemId] = Acct.[intItemId]
---		AND IL.[intLocationId] = Acct.[intLocationId]		
 
 BEGIN TRY
 MERGE INTO tblARInvoiceDetail AS Target

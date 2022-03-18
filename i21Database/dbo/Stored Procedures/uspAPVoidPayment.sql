@@ -72,6 +72,7 @@ BEGIN
 					AND C.intTransactionType IN (2, 3, 13) --BASIS, PREPAID, DEBIT MEMO
 					AND E.ysnPosted = 1
 					AND F.ysnCheckVoid = 0
+					AND B.ysnOffset = 0
 		)
 	)
 	BEGIN

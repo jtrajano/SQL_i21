@@ -1,4 +1,4 @@
-CREATE FUNCTION dbo.fnICGetItemPriceByEffectiveDate(@dtmDate DATETIME, @intItemId INT, @intItemLocationId INT, @ysnGetDefault BIT = 1)
+CREATE FUNCTION dbo.fnICGetItemPriceByEffectiveDate(@dtmDate DATETIME, @intItemId INT, @intItemLocationId INT, @intItemUOMId INT, @ysnGetDefault BIT = 1)
 RETURNS TABLE
 AS
 
@@ -13,6 +13,7 @@ OUTER APPLY (
 	FROM tblICEffectiveItemPrice
 	WHERE intItemId = p.intItemId
 		AND intItemLocationId = p.intItemLocationId
+		AND intItemUOMId = p.intItemUOMId
 	GROUP BY dblRetailPrice, dtmEffectiveRetailPriceDate
 	HAVING dtmEffectiveRetailPriceDate <= @dtmDate
 	ORDER BY dtmEffectiveRetailPriceDate DESC
@@ -23,4 +24,4 @@ OUTER APPLY (
 	WHERE intItemId = p.intItemId
 		AND intItemLocationId = p.intItemLocationId
 ) defaultPrice
-WHERE p.intItemId = @intItemId AND p.intItemLocationId = @intItemLocationId
+WHERE p.intItemId = @intItemId AND p.intItemLocationId = @intItemLocationId AND p.intItemUOMId = @intItemUOMId

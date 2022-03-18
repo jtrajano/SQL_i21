@@ -71,7 +71,7 @@ LEFT JOIN (
 	ON ItemUOM.intItemId = Item.intItemId
 OUTER APPLY tblICTransactionSession TranSession
 OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(TranSession.dtmTransactionDate, Item.intItemId, ItemLocation.intItemLocationId, DEFAULT) EffectiveCost
-OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(TranSession.dtmTransactionDate, Item.intItemId, ItemLocation.intItemLocationId, DEFAULT) EffectivePrice
+OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(TranSession.dtmTransactionDate, Item.intItemId, ItemLocation.intItemLocationId, COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId, GrossUOM.intItemUOMId), DEFAULT) EffectivePrice
 LEFT JOIN tblICItemPricing ItemPricing 
 	ON ItemLocation.intItemId = ItemPricing.intItemId 
 	AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId

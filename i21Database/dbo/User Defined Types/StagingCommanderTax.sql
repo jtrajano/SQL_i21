@@ -1,8 +1,8 @@
 ﻿CREATE TYPE StagingCommanderTax AS TABLE
 (
 	[intRowCount] 										  INT				NULL,
-	[dtmPeriodEndDate]                                    DATETIME			NULL,
-	[dtmPeriodBeginDate]                                  DATETIME			NULL,
+	--[dtmPeriodEndDate]                                    DATETIME			NULL,
+	--[dtmPeriodBeginDate]                                  DATETIME			NULL,
 	[intPeriodSeqNum]                                     INT				NULL,
 	[strPeriodName]                                       NVARCHAR(MAX)		NULL,
 	[strPeriodType]                                       NVARCHAR(MAX)		NULL,

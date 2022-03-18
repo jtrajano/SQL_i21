@@ -33,10 +33,16 @@ BEGIN
 						 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR),'') AS NVARCHAR(MAX)),
 				ptcus_state,ptcus_sales_tax_yn, ptcus_sales_tax_id 
 		FROM ptcusmst  WHERE ptcus_cus_no <> ptcus_bill_to
+
+	DECLARE @cnt INT = 1, @totalDyanamic INT
+	DECLARE @SQLCMD NVARCHAR(3000),@SQLCMD1 NVARCHAR(3000)	
 		
 	IF (@Checking = 1)		
 	BEGIN
-			SELECT @Total = COUNT (*) FROM ptpdvmst PDV
+		
+		SELECT 
+				@Total =  COUNT(CUS.intEntityId)
+			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
@@ -45,12 +51,14 @@ BEGIN
 			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
 			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'FET' 
 			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_fet_yn = 'N' AND PDV.ptpdv_class <> '' AND PDV.ptpdv_itm_no = ''
+			WHERE PDV.ptpdv_fet_yn = 'N' AND PDV.ptpdv_class <> '' AND PDV.ptpdv_itm_no = ''-- AND PDV.ptpdv_cus_no = @CustomerId
 			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
 			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])
-			
-			SELECT @Total = @Total +  COUNT (*)	FROM ptpdvmst PDV
+			AND [intTaxClassId] = TCD.[intTaxClassId])											 
+																				 
+			SELECT 
+				@Total = @Total + COUNT(CUS.intEntityId)
+			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
@@ -64,7 +72,9 @@ BEGIN
 			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
 			AND [intTaxClassId] = TCD.[intTaxClassId])
 			
-			SELECT @Total = @Total +  COUNT (*)	FROM ptpdvmst PDV
+			SELECT 
+				@Total = @Total + COUNT(CUS.intEntityId)
+			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
@@ -77,8 +87,11 @@ BEGIN
 			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
 			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
 			AND [intTaxClassId] = TCD.[intTaxClassId])
+			
 
-			SELECT @Total = @Total +  COUNT (*)	FROM ptpdvmst PDV
+			SELECT 
+				@Total = @Total + COUNT(CUS.intEntityId)
+			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
@@ -90,9 +103,12 @@ BEGIN
 			WHERE PDV.ptpdv_fet_yn = 'N'  --AND PDV.ptpdv_cus_no = @CustomerId
 			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
 			AND [intItemId] = ITM.[intItemId] AND [intCategoryId] = ITM.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])											 
+			AND [intTaxClassId] = TCD.[intTaxClassId])									 
+																				 
 
-			SELECT @Total = @Total +  COUNT (*)	FROM ptpdvmst PDV
+			SELECT 
+				@Total = @Total + COUNT(CUS.intEntityId)
+			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
@@ -105,8 +121,11 @@ BEGIN
 			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
 			AND [intItemId] = ITM.[intItemId] AND [intCategoryId] = ITM.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
 			AND [intTaxClassId] = TCD.[intTaxClassId])		
+			
 
-			SELECT @Total = @Total +  COUNT (*)	FROM ptpdvmst PDV
+			SELECT 
+				@Total = @Total + COUNT(CUS.intEntityId)
+			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
@@ -119,162 +138,12 @@ BEGIN
 			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
 			AND [intItemId] = ITM.[intItemId] AND [intCategoryId] = ITM.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
 			AND [intTaxClassId] = TCD.[intTaxClassId])		
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC1'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc1_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])												
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC2'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc2_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])	
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC3'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc3_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV 
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC4'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc4_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])						
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV 
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC5'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc5_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])						
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV 
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC6'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc6_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])						
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV 
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC7'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc7_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])						
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV 
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC8'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc8_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])						
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV 
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC9'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc9_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])						
-
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV 
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC10'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc10_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])						
 			
-			SELECT @Total = @Total + COUNT(*) FROM ptpdvmst PDV 
-			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-					   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
-			INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
-			INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = 'LC11'
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
-			WHERE PDV.ptpdv_lc11_yn = 'N' 
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])
-			
-			SELECT @Total = @Total + COUNT(*) FROM ptcusmst OCUS 
+
+		--IMPORT SALES TAX EXEMPTION FROM PTCUSMST 
+			SELECT 
+				@Total = @Total + COUNT(CUS.intEntityId)
+			FROM ptcusmst OCUS 
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			CROSS APPLY (
 				SELECT DISTINCT TC.intTaxClassId
@@ -296,6 +165,61 @@ BEGIN
 				  AND [intItemId] IS NULL 
 				  AND [intCategoryId] IS NULL 
 			   )
+
+
+	DECLARE @totalDynamic INT = 1
+	
+	WHILE @cnt < 12
+			BEGIN
+			   SET @SQLCMD ='
+							SELECT 
+								@totalDyanamic =   COUNT(CUS.intEntityId)
+							FROM ptpdvmst PDV
+							INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+							INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+							INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
+									   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS	   
+							INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
+							INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = CAT.intCategoryId
+							INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = ''LC'+CAST(@cnt AS NVARCHAR)+'''
+							INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
+							WHERE PDV.ptpdv_lc'+CAST(@cnt AS NVARCHAR)+'_yn = ''N'' 
+							AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
+							AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
+							AND [intTaxClassId] = TCD.[intTaxClassId])						
+							'
+							
+	
+			   EXEC sp_executesql @SQLCMD,N'@totalDyanamic INT OUTPUT', @totalDyanamic OUTPUT	
+			   SET @Total = @Total + @totalDyanamic
+
+			   SET @totalDyanamic =0
+			   SET @SQLCMD1 ='
+							SELECT 
+								@totalDyanamic =   COUNT(CUS.intEntityId)
+
+							FROM ptpdvmst PDV
+							INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+							INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+							INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
+									   AND UPPER(CLOC.strLocationName) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(OCUS.ptcus_name) COLLATE SQL_Latin1_General_CP1_CS_AS
+							INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_itm_no  COLLATE SQL_Latin1_General_CP1_CS_AS		   
+							INNER JOIN tblICCategoryTax CTAX ON CTAX.intCategoryId = ITM.intCategoryId
+							INNER JOIN tblSMTaxClassXref Xrf ON Xrf.intTaxClassId = CTAX.intTaxClassId AND Xrf.strTaxClassType = ''LC'+CAST(@cnt AS NVARCHAR)+'''
+							INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
+							WHERE PDV.ptpdv_lc'+CAST(@cnt AS NVARCHAR)+'_yn = ''N'' 
+							AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
+							AND [intItemId] = ITM.[intItemId] AND [intCategoryId] = ITM.[intCategoryId] AND [intTaxCodeId] = TCD.[intTaxCodeId]
+							AND [intTaxClassId] = TCD.[intTaxClassId])						
+							'	
+
+				   EXEC sp_executesql @SQLCMD1,N'@totalDyanamic INT OUTPUT', @totalDyanamic OUTPUT
+				   SET @Total = @Total + @totalDyanamic
+				   SET @totalDyanamic =0
+
+
+				   SET @cnt = @cnt + 1;
+		END
 
 		RETURN @Total
 	 
@@ -569,9 +493,7 @@ BEGIN
 				  AND [intCategoryId] IS NULL 
 			   )
 			ORDER BY OCUS.ptcus_cus_no
-			
-	DECLARE @cnt INT = 1
-	DECLARE @SQLCMD NVARCHAR(3000),@SQLCMD1 NVARCHAR(3000)		
+		
 	WHILE @cnt < 12
 			BEGIN
 			   SET @SQLCMD ='INSERT INTO [dbo].[tblARCustomerTaxingTaxException]

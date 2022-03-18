@@ -343,7 +343,7 @@ BEGIN TRY
 			, strBook
 			, strSubBook
 			, intPriceItemUOMId
-			, intSequenceUsageHistoryId
+			, intSequenceUsageHistoryId = CASE WHEN intContractStatusId IN (1, 4) THEN null ELSE intSequenceUsageHistoryId END
 			, ysnIsClosed = CASE WHEN intContractStatusId IN (1, 4) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 		INTO #tempSequenceHistoryCompare
 		FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId ORDER BY intSequenceHistoryId DESC
@@ -414,7 +414,7 @@ BEGIN TRY
 				END
 			END
 
-			IF NOT (ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory')
+			IF NOT ((ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory') or (ISNULL(@strScreenName, '') = '' AND @strProcess = 'Price Delete' AND @strSource = 'Pricing'))
 			BEGIN
 				-- CONTRACT BALANCE LOG
 				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,

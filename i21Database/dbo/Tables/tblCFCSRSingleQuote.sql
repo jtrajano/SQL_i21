@@ -12,6 +12,7 @@
     [dblNetPrice]         NUMERIC (18, 6) NULL,
     [dblTaxes]            NUMERIC (18, 6) NULL,
     [dblGrossPrice]       NUMERIC (18, 6) NULL,
+    [dblBestPrice]        NUMERIC (18, 6) NULL,  
     [strNetwork]          NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strSite]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strItem]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,

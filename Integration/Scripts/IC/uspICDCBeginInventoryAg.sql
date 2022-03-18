@@ -7,7 +7,7 @@ CREATE PROCEDURE [dbo].[uspICDCBeginInventoryAg]
 --   Then adjustment posting need to be done in i21 application, which will update the onhand units of inventory.
 --   So here we do not directly update the onhand units from ptitmmst origin table into i21 item tblICItem table, rather we update 
 --   i21 table tblICInventoryAdjustment from agitmmst table and then adjustment posting is done which updates tblICItem table. ** 
- @adjLoc NVARCHAR(3) = NULL,	
+ @adjLoc NVARCHAR(200) = NULL,	
  @adjdt  DATETIME  = NULL, 
  @intEntityUserSecurityId AS INT = 0
 AS
@@ -51,13 +51,16 @@ BEGIN
 		BEGIN
 			DECLARE loc_cursor CURSOR
 			FOR
-			SELECT rtrim(agloc_loc_no) agloc_loc_no	FROM aglocmst
+			SELECT rtrim(agloc_loc_no) agloc_loc_no	
+			FROM aglocmst
 		END	
 	ELSE
 		BEGIN
 			DECLARE loc_cursor CURSOR
 			FOR
-			SELECT @adjLoc	
+			SELECT rtrim(agloc_loc_no) agloc_loc_no	
+			FROM aglocmst
+			WHERE agloc_name = @adjLoc
 		END	
 
 		OPEN loc_cursor
@@ -69,7 +72,7 @@ BEGIN
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 	
-	SELECT @cnt = COUNT(*)
+		SELECT @cnt = COUNT(*)
 		FROM	tblICItem inv INNER JOIN agitmmst itm 
 					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
 				LEFT JOIN tblICItemUOM uom 
@@ -82,7 +85,9 @@ BEGIN
 	
 		IF @cnt > 0
 		BEGIN
-		--** Update the item status, that are discontinued in Origin to Active so the the Adjustment Posting will not fail 
+			PRINT 'creating the adj'
+			
+			--** Update the item status, that are discontinued in Origin to Active so the the Adjustment Posting will not fail 
 				UPDATE inv SET strOriginStatus = strStatus, strStatus = 'Active'
 				FROM	tblICItem inv INNER JOIN agitmmst itm 
 							ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
@@ -135,6 +140,7 @@ BEGIN
 		,dtmNewExpiryDate
 	)
      
+	-- Non-lotted. 
 	SELECT 
 		@intAdjustmentNo
 		,inv.intItemId
@@ -159,7 +165,6 @@ BEGIN
 				join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
 				where sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS 
 				and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.agitm_loc_no COLLATE Latin1_General_CI_AS) intStorageLocationId	
-
 				--,sl.intSubLocationId
 				--,sl.intStorageLocationId
 		,1
@@ -167,16 +172,20 @@ BEGIN
 		,NULL
 
 	FROM	tblICItem inv INNER JOIN agitmmst itm 
-				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+				ON inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblICItemUOM uom 
-				on uom.intItemId = inv.intItemId 
-			INNER JOIN tblICUnitMeasure B ON uom.intUnitMeasureId = B.intUnitMeasureId 
-					AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)  = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-			LEFT JOIN tblICItemLocation il ON il.intItemId = inv.intItemId
-	WHERE	agitm_un_on_hand  <> 0
-	AND agitm_loc_no = @adjLoc
-	AND inv.strType = 'Inventory'
+				ON uom.intItemId = inv.intItemId 
+			INNER JOIN tblICUnitMeasure B 
+				ON uom.intUnitMeasureId = B.intUnitMeasureId 
+				--AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS) = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+				AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS) = upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE	
+		agitm_un_on_hand  <> 0
+		AND agitm_loc_no = @adjLoc
+		AND inv.strType = 'Inventory'
+		AND rtrim((agitm_lot_yns)) = 'N'
 
+	-- Lotted 
 	UNION ALL	
 	SELECT 
 		@intAdjustmentNo
@@ -207,23 +216,27 @@ BEGIN
 				--,sl.intStorageLocationId
 		,1
 		,NULLIF(lot.aglot_lot_no, '')
-		,CAST(CONVERT(NVARCHAR(10), aglot_expire_date) AS DATE)
+		,CAST(CONVERT(NVARCHAR(10), NULLIF(aglot_expire_date, 0)) AS DATE)
 
-	FROM	tblICItem inv INNER JOIN agitmmst itm 
-				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
-			LEFT JOIN tblICItemUOM uom 
-				on uom.intItemId = inv.intItemId 
-			INNER JOIN tblICUnitMeasure B ON uom.intUnitMeasureId = B.intUnitMeasureId 
-					AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)  = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN aglotmst lot ON itm.agitm_no COLLATE Latin1_General_CI_AS = lot.aglot_itm_no COLLATE Latin1_General_CI_AS
+	FROM	
+		tblICItem inv INNER JOIN agitmmst itm 
+			ON inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+		LEFT JOIN tblICItemUOM uom 
+			ON uom.intItemId = inv.intItemId 
+		INNER JOIN tblICUnitMeasure B 
+			ON uom.intUnitMeasureId = B.intUnitMeasureId 
+			--AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS) = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+			AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS) = upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN aglotmst lot 
+			ON itm.agitm_no COLLATE Latin1_General_CI_AS = lot.aglot_itm_no COLLATE Latin1_General_CI_AS
 			
-	WHERE	ISNULL(agitm_un_on_hand,0) <> 0 
-	AND agitm_loc_no = @adjLoc
-	AND aglot_loc_no = @adjLoc
-	AND aglot_un_on_hand <> 0
-	AND inv.strType = 'Inventory'
-	AND rtrim((agitm_lot_yns)) = 'Y'
-
+	WHERE	
+		ISNULL(agitm_un_on_hand,0) <> 0 
+		AND agitm_loc_no = @adjLoc
+		AND aglot_loc_no = @adjLoc
+		AND aglot_un_on_hand <> 0
+		AND inv.strType = 'Inventory'
+		AND rtrim((agitm_lot_yns)) = 'Y'
 
 	-- Create an Audit Log
 	BEGIN 
@@ -350,37 +363,35 @@ END
 	
 
 
--- Rebuild the G/L Summary for that day. 
-BEGIN 
-	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
+---- Rebuild the G/L Summary for that day. 
+--BEGIN 
+--	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
 
-	INSERT INTO tblGLSummary (
-		intMultiCompanyId
-		,intAccountId
-		,dtmDate
-		,dblDebit 
-		,dblCredit
-		,dblDebitUnit 
-		,dblCreditUnit 
-		,strCode
-		,intConcurrencyId 
-	)
-	SELECT
-			intMultiCompanyId
-			,intAccountId
-			,dtmDate
-			,SUM(ISNULL(dblDebit,0)) as dblDebit
-			,SUM(ISNULL(dblCredit,0)) as dblCredit
-			,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
-			,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
-			,strCode
-			,0 as intConcurrencyId
-	FROM	tblGLDetail
-	WHERE	ysnIsUnposted = 0
-			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
-	GROUP BY intMultiCompanyId, intAccountId, dtmDate, strCode
-END
+--	INSERT INTO tblGLSummary (
+--		intMultiCompanyId
+--		,intAccountId
+--		,dtmDate
+--		,dblDebit 
+--		,dblCredit
+--		,dblDebitUnit 
+--		,dblCreditUnit 
+--		,strCode
+--		,intConcurrencyId 
+--	)
+--	SELECT
+--			intMultiCompanyId
+--			,intAccountId
+--			,dtmDate
+--			,SUM(ISNULL(dblDebit,0)) as dblDebit
+--			,SUM(ISNULL(dblCredit,0)) as dblCredit
+--			,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
+--			,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
+--			,strCode
+--			,0 as intConcurrencyId
+--	FROM	tblGLDetail
+--	WHERE	ysnIsUnposted = 0
+--			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
+--	GROUP BY intMultiCompanyId, intAccountId, dtmDate, strCode
+--END
 
 Post_Exit:
-
-

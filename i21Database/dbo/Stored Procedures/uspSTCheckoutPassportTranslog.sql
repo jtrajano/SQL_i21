@@ -241,7 +241,7 @@ BEGIN
 										[strTrlFlagsTrlMatch],
 
 										[strTrlDept],
-										[intTrlDeptNumber],
+										[strTrlDeptNumber],
 										[strTrlDeptType],
 										[strTrlCat],
 										[intTrlCatNumber],
@@ -464,7 +464,7 @@ BEGIN
 										[strTrlFlagsTrlMatch]				= NULL,
 
 										[strTrlDept]						= chk.strMerchandiseCodeLineDescription,
-										[intTrlDeptNumber]					= chk.intLineMerchandiseCode,
+										[strTrlDeptNumber]					= chk.intLineMerchandiseCode,
 										[strTrlDeptType]					= NULL,
 										[strTrlCat]							= NULL,
 										[intTrlCatNumber]					= NULL,
