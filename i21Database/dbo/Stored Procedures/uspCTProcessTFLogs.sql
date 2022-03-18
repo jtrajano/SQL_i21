@@ -145,6 +145,7 @@ BEGIN
 				cross apply (
 					select intTradeFinanceLogId = max(intTradeFinanceLogId) from tblTRFTradeFinanceLog where intContractDetailId = tf.intContractDetailId
 				) et
+			where isnull(cd.intBankId,0) > 0
 			;
 
 			if exists (select top 1 1 from @TRFLog)
@@ -198,6 +199,7 @@ BEGIN
 			left join tblCTApprovalStatusTF ap on ap.intApprovalStatusId = cd.intApprovalStatusId
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
 			left join tblTRFTradeFinance tff on tff.intTransactionDetailId = tf.intContractDetailId
+		where isnull(cd.intBankId,0) > 0
 			
 		;
 
