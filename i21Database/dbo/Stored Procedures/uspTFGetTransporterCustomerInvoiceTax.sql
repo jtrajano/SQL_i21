@@ -181,6 +181,8 @@ BEGIN TRY
 						LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
 							LEFT JOIN tblSMTaxCode AS DestinationCounty ON DestinationCounty.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 						LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
+						LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = tblARInvoice.intInvoiceId
+							LEFT JOIN tblCFSite ON tblCFSite.intSiteId = tblCFTransaction.intSiteId
 					INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
 					INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
 						LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId 
@@ -236,7 +238,27 @@ BEGIN TRY
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 							OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-							OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))		
+							OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0)
+							)
+						AND ((
+							(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+							(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+							(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+							OR ((
+								tblCFSite.strSiteNumber IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) OR 
+								tblCFTransaction.strTransactionType IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1)) 
+								AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						)
+						AND ((
+							(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+							(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+							(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+							OR ((
+								tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) OR 
+								tblCFTransaction.strTransactionType NOT IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0)) 
+								AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0)))
+							)
+						)
 				) Transactions
 		END
 		ELSE
@@ -377,6 +399,8 @@ BEGIN TRY
 						LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
 							LEFT JOIN tblSMTaxCode AS DestinationCounty ON DestinationCounty.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 						LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
+						LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = tblARInvoice.intInvoiceId
+							LEFT JOIN tblCFSite ON tblCFSite.intSiteId = tblCFTransaction.intSiteId
 					INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
 					INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
 						LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId 
@@ -432,7 +456,27 @@ BEGIN TRY
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 							OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-							OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
+							OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0)
+							)
+						AND ((
+							(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+							(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+							(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+							OR ((
+								tblCFSite.strSiteNumber IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) OR 
+								tblCFTransaction.strTransactionType IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1)) 
+								AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						)
+						AND ((
+							(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+							(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+							(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+							OR ((
+								tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) OR 
+								tblCFTransaction.strTransactionType NOT IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0)) 
+								AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0)))
+							)
+						)
 				) Transactions
 		END
 

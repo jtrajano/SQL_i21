@@ -578,6 +578,13 @@
     <Build Include="dbo\Views\vyuLGRejectedLotNumber.sql" />
     <Build Include="dbo\Views\vyuLGGetOpenWeightClaimLots.sql" />
     <Build Include="dbo\Tables\tblCTVendorCertification.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSite.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSite.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceCardFuelingSite.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSiteType.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSiteType.sql" />
+    <Build Include="dbo\Tables\tblTMOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10308,7 +10315,7 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
-	<Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+	  <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

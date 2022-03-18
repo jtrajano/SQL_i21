@@ -121,17 +121,17 @@ BEGIN TRY
 
 	SELECT @tmp = @tmp1 - ISNULL(@FirstCount, 0)
 
-	INSERT INTO @tblICInventoryReceipt (intInventoryReceiptId)
-	SELECT DISTINCT TOP (@tmp) R.intInventoryReceiptId
-	FROM tblICInventoryReceiptItemLot RIL
-	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
-	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = RI.intInventoryTransferId
-	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = IT.intToLocationId
-		AND CL.strLotOrigin = @strCompanyLocation
-	WHERE R.strReceiptType = 'Transfer Order'
-		AND R.ysnPosted = 1
-		AND RI.ysnExported IS NULL
+	--INSERT INTO @tblICInventoryReceipt (intInventoryReceiptId)
+	--SELECT DISTINCT TOP (@tmp) R.intInventoryReceiptId
+	--FROM tblICInventoryReceiptItemLot RIL
+	--JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	--JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	--JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = RI.intInventoryTransferId
+	--JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = IT.intToLocationId
+	--	AND CL.strLotOrigin = @strCompanyLocation
+	--WHERE R.strReceiptType = 'Transfer Order'
+	--	AND R.ysnPosted = 1
+	--	AND RI.ysnExported IS NULL
 
 	IF NOT EXISTS (
 			SELECT 1

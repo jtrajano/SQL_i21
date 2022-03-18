@@ -260,6 +260,26 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 						OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
 					AND (CASE WHEN tblARInvoice.strType = 'Standard' AND tblARInvoice.strTransactionType = 'Customer Prepayment' THEN 'Invalid' ELSE 'Invoice' END) = 'Invoice'
+
+					AND ((
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						OR ((
+							tblCFSite.strSiteNumber IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) OR 
+							tblCFTransaction.strTransactionType IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1)) 
+							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+					)
+					AND ((
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						OR ((
+							tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) OR 
+							tblCFTransaction.strTransactionType NOT IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0)) 
+							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0)))
+						)
+					)
 				) Transactions
 		END
 		ELSE
@@ -464,8 +484,27 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 						OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-						OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
-					AND (CASE WHEN tblARInvoice.strType = 'Standard' AND tblARInvoice.strTransactionType = 'Customer Prepayment' THEN 'Invalid' ELSE 'Invoice' END) = 'Invoice'
+						OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0)
+						)
+					AND ((
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						OR ((
+							tblCFSite.strSiteNumber IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) OR 
+							tblCFTransaction.strTransactionType IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1)) 
+							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+					)
+					AND ((
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						OR ((
+							tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) OR 
+							tblCFTransaction.strTransactionType NOT IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0)) 
+							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0)))
+						)
+					)
 				) Transactions
 		END
 

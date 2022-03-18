@@ -54,9 +54,13 @@ BEGIN
 	--Calculate Next Award Date
 	UPDATE #tmpEmployees 
 		SET dtmNextAward = CASE WHEN (strAwardPeriod = 'Start of Week') THEN
-								CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE)
+								CASE WHEN CAST(DATEADD(WK, DATEDIFF(WK, 0, GETDATE()), 0) AS DATE) >= GETDATE() THEN
+									CAST(DATEADD(WK, DATEDIFF(WK,6 , GETDATE()), 0) AS DATE)
+								ELSE
+									CAST(DATEADD(WK, DATEDIFF(WK, 0, GETDATE()), 0) AS DATE) 
+								END
 							 WHEN (strAwardPeriod = 'End of Week') THEN
-								CASE WHEN (dtmLastAward) < CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE) THEN
+								CASE WHEN (dtmLastAward) <= CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE) THEN
 									DATEADD(DD, -7, CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE))
 								ELSE 
 									CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())) + 7, GETDATE()) AS DATE)
@@ -92,7 +96,13 @@ BEGIN
 								 (strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR(dtmNextAward)  )
 								OR (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(GETDATE()) > YEAR(dtmLastAward))
 								) THEN 1 
-							ELSE 0 END
+							ELSE
+								CASE WHEN CONVERT(DATE ,GETDATE()) >= CONVERT(DATE,dtmNextAward)  AND CONVERT(DATE,dtmLastAward) < CONVERT(DATE,dtmNextAward) THEN  
+									1  
+								ELSE  
+									0   
+								END 
+							END
 
 	DECLARE @intEmployeeId INT
 	DECLARE @intYearsOfService INT
