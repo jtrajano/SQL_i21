@@ -313,22 +313,65 @@ BEGIN
 				RETURN -80218; 	
 			END
 
-			-- Check if contract already has a payable. 
+			-- Check if contract already has a payable in Inbound Shipment
 			DECLARE @strSourceNumber AS NVARCHAR(50)  
 			SELECT TOP 1
 				@strSourceNumber = ap.strSourceNumber 
 			FROM
 				tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-				INNER JOIN tblAPVoucherPayable ap
+
+				OUTER APPLY (
+					SELECT	dblQtyReturned = rtnItems.dblOpenReceive - ISNULL(rtnItems.dblQtyReturned, 0) 
+							,rtn.strReceiptType
+							,rtn.strReceiptNumber
+							,rtnItems.intOrderId 
+							,rtnItems.intLineNo 
+					FROM	tblICInventoryReceipt rtn INNER JOIN tblICInventoryReceiptItem rtnItems
+								ON rtn.intInventoryReceiptId = rtnItems.intInventoryReceiptId				
+					WHERE	rtn.strReceiptType = 'Inventory Return'		
+							AND rtnItems.intInventoryReceiptId = r.intSourceInventoryReceiptId
+							AND rtnItems.intInventoryReceiptItemId = ri.intSourceInventoryReceiptItemId				
+				) rtn
+
+				OUTER APPLY (
+					SELECT	
+							LogisticsView.strLoadNumber
+							,LogisticsView.dblNetWt
+					FROM	vyuICLoadContainersSearch LogisticsView 
+					WHERE	
+							(
+								r.strReceiptType = 'Purchase Contract'
+								OR (
+									r.strReceiptType = 'Inventory Return'
+									AND rtn.strReceiptType = 'Purchase Contract'
+								)
+							)		
+							AND r.intSourceType = 2
+							AND LogisticsView.intLoadDetailId = ri.intSourceId 
+							AND LogisticsView.intLoadContainerId = ri.intContainerId				
+				) LogisticsView
+
+				OUTER APPLY (
+					SELECT	TOP 1 
+							LogisticsView.strLoadNumber
+					FROM	vyuICLoadContainersSearch LogisticsView 
+					WHERE	
+						r.intSourceType = 2
+						AND LogisticsView.intLoadDetailId = ri.intLoadShipmentDetailId
+				) LogisticsView2
+
+				LEFT JOIN tblAPVoucherPayable ap
 					ON ap.intEntityVendorId = r.intEntityVendorId
 					AND ap.intContractDetailId = ri.intContractDetailId
-					AND ap.strSourceNumber <> r.strReceiptNumber
+					--AND ap.strSourceNumber <> r.strReceiptNumber
+					AND strSourceNumber IN (LogisticsView2.strLoadNumber, LogisticsView.strLoadNumber)
 					AND ap.intInventoryReceiptItemId IS NULL
 					AND ap.intInventoryReceiptChargeId IS NULL 
 					AND ap.intInventoryShipmentItemId IS NULL 
 			WHERE
 				r.intInventoryReceiptId = @intReceiptId
+				AND ap.strSourceNumber IS NOT NULL 
 
 			IF @strSourceNumber IS NOT NULL 
 			BEGIN 
