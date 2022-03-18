@@ -1641,6 +1641,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Swap')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 168
+			,[strTransactionType]	= N'Credit Insurance'
+			,[strPrefix]			= N'CI-'
+			,[intNumber]			= 1
+			,[strModule]			= 'RIsk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Insurance')
 
 
 
