@@ -275,7 +275,7 @@ BEGIN TRY
 						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
 						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
 						OR ((
-							tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) AND 
+							tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) OR 
 							tblCFTransaction.strTransactionType NOT IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0)) 
 							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0)))
 						)
@@ -500,7 +500,7 @@ BEGIN TRY
 						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
 						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
 						OR ((
-							tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) AND 
+							tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) OR 
 							tblCFTransaction.strTransactionType NOT IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0)) 
 							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0)))
 						)
