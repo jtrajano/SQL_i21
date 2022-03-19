@@ -586,6 +586,10 @@
     <Build Include="dbo\Tables\tblTMOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDerivativesForCommissionPosting.sql" />
+    <Build Include="dbo\Views\vyuCMRKDerivativesForCommissionPosting.sql" />
+    <Build Include="dbo\Views\vyuCMDerivativesForCommissionPosting.sql" />
+    <Build Include="dbo\User Defined Types\PostCommissionDerivativeEntryTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdatePostedDerivativeEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
