@@ -207,7 +207,7 @@ BEGIN TRY
 
 				SET @dblQuantityToPrice = ROUND(@dblAssignedLots * @dblQuantityPerLot,2)
 
-				EXEC uspCTCreatePrice @intContractDetailId, @dblQuantityToPrice, @dblPrice, @intUserId, @intAssignFuturesToContractSummaryId, 1
+				EXEC uspCTCreatePrice @intContractDetailId, @dblQuantityToPrice, @dblPrice, @intUserId, @intAssignFuturesToContractSummaryId, 1, @dblAssignedLots
 			END
 		END
 	
