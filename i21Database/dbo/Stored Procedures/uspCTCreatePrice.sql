@@ -5,6 +5,7 @@
 	,@intUserId int
 	,@intAssignFuturesToContractSummaryId int
 	,@ysnAllowToPriceRemainingQtyToPrice bit = 0
+	,@dblAssignedLots numeric(18,6) = 0
 AS
 
 declare
@@ -40,6 +41,7 @@ declare
 	,@strTradeNo nvarchar(50)
 	,@intNumber int
 	,@ysnMultiplePriceFixation bit
+	,@dblFixedLots numeric(18,6)
 	;
 
 begin try
@@ -82,6 +84,7 @@ begin try
 		,@intQtyItemUOMId = cd.intItemUOMId
 		,@dblQuantityPerLot = cd.dblQuantity / (case when ch.ysnMultiplePriceFixation = 1 then cd.dblQuantity / (ch.dblQuantity/ch.dblNoOfLots) else cd.dblNoOfLots end)
 		,@ysnMultiplePriceFixation = isnull(ch.ysnMultiplePriceFixation,0)
+		,@dblFixedLots = pfd.dblFixedLots
 	from
 		tblCTContractDetail cd
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -90,10 +93,15 @@ begin try
 		left join tblICItemUOM ium on ium.intItemUOMId = cd.intPriceItemUOMId
 		left join tblICCommodityUnitMeasure comm on comm.intUnitMeasureId = ium.intUnitMeasureId and comm.intCommodityId = ch.intCommodityId
 		cross apply (
-			select dblTotalPricedQuantity = sum(pfd.dblQuantity) from tblCTPriceFixationDetail pfd where pfd.intPriceFixationId = pf.intPriceFixationId
+			select dblTotalPricedQuantity = sum(pfd.dblQuantity), dblFixedLots = SUM(pfd.dblNoOfLots) from tblCTPriceFixationDetail pfd where pfd.intPriceFixationId = pf.intPriceFixationId
 		) pfd
 	where
 		cd.intContractDetailId = @intContractDetailId;
+
+	if ((@dblTotalLots - IsNULL(@dblFixedLots,0)) = @dblAssignedLots and @dblAssignedLots > 0)
+	Begin
+		set @dblQuantityToPrice = @dblSequenceQuantity - @dblTotalPricedQuantity;
+	End
 
 	if (@intPricingType = 1)
 	begin
@@ -182,7 +190,7 @@ begin try
 			,dtmFixationDate = getdate()
 			,dblQuantity = @dblQuantityToPrice
 			,intQtyItemUOMId = @intQtyItemUOMId
-			,dblNoOfLots = @dblQuantityToPrice / @dblQuantityPerLot
+			,dblNoOfLots = (Case When @dblAssignedLots > 0 then @dblAssignedLots Else (@dblQuantityToPrice / @dblQuantityPerLot) End)
 			,intFutureMarketId = @intOriginalFutureMarketId
 			,intFutureMonthId = @intOriginalFutureMonthId
 			,dblFixationPrice = @dblFutures
@@ -345,7 +353,7 @@ begin try
 			,dtmFixationDate = getdate()
 			,dblQuantity = @dblQuantityToPrice
 			,intQtyItemUOMId = @intQtyItemUOMId
-			,dblNoOfLots = @dblQuantityToPrice / @dblQuantityPerLot
+			,dblNoOfLots = (Case When @dblAssignedLots > 0 then @dblAssignedLots Else (@dblQuantityToPrice / @dblQuantityPerLot) End)
 			,intFutureMarketId = @intOriginalFutureMarketId
 			,intFutureMonthId = @intOriginalFutureMonthId
 			,dblFixationPrice = @dblFutures
