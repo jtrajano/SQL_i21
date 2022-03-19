@@ -262,8 +262,8 @@ SELECT TOP 100 PERCENT
 	,intFreightTermId					=	A.intFreightTermId
 	,ysnStage							=	A.ysnStage
 	,dblCashPrice 						= 	A.dblCost
-	,dblQualityPremium					=	A.dblQualityPremium
-	,dblOptionalityPremium				= 	A.dblOptionalityPremium
+	,dblQualityPremium					=	ISNULL(A.dblQualityPremium, 0)
+	,dblOptionalityPremium				= 	ISNULL(A.dblOptionalityPremium, 0)
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId

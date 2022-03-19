@@ -153,6 +153,6 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intBankValuationRuleId] INT NULL, --OVERRIDE FACILITY VALUATION
 	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --COMMENTS
 	/*Quality and Optionality Premium*/
-	[dblQualityPremium] DECIMAL(18, 6) NOT NULL DEFAULT 0,
- 	[dblOptionalityPremium] DECIMAL(18, 6) NOT NULL DEFAULT 0
+	[dblQualityPremium] DECIMAL(18, 6) DEFAULT 0,
+ 	[dblOptionalityPremium] DECIMAL(18, 6) DEFAULT 0
 )
