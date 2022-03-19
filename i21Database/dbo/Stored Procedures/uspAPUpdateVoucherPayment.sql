@@ -10,6 +10,10 @@ SET XACT_ABORT OFF
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+	DECLARE @emptyBillPayFromBankAccount VARCHAR(1000) = '';
+	DECLARE @emptyBillPayToBankAccount VARCHAR(1000) = '';
+	DECLARE @billPayBankAccountCount INT = 1;
+
 	DECLARE @dblPaymentTemp DECIMAL(18,2) = 0;
 	DECLARE @ysnInPayment BIT = 0;
 	DECLARE @nullCheck BIT = 0;
@@ -35,6 +39,48 @@ BEGIN TRY
 
 	IF @post IS NULL OR @post = 1
 	BEGIN
+		--VALIDATE EMPTY PAY FROM BANK ACCOUNT
+		SELECT @emptyBillPayFromBankAccount = COALESCE(@emptyBillPayFromBankAccount + ', ', '') + B.strBillId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND P.intPaymentMethodId = 2 AND PD.dblPayment != 0 AND B.intPayFromBankAccountId IS NULL
+
+		IF @emptyBillPayFromBankAccount <> ''
+		BEGIN
+			SET	@emptyBillPayFromBankAccount = RIGHT(@emptyBillPayFromBankAccount, LEN(@emptyBillPayFromBankAccount) - 2);
+			RAISERROR('%s have empty pay from bank account.', 11, 1, @emptyBillPayFromBankAccount);
+		END
+
+		--VALIDATE EMPTY PAY TO BANK ACCOUNT
+		SELECT @emptyBillPayToBankAccount = COALESCE(@emptyBillPayToBankAccount + ', ', '') + B.strBillId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND P.intPaymentMethodId = 2 AND PD.dblPayment != 0 AND B.intPayToBankAccountId IS NULL
+
+		IF @emptyBillPayToBankAccount <> ''
+		BEGIN
+			SET @emptyBillPayToBankAccount = RIGHT(@emptyBillPayToBankAccount, LEN(@emptyBillPayToBankAccount) - 2);
+			RAISERROR('%s have empty pay to bank account.', 11, 1, @emptyBillPayToBankAccount);
+		END
+
+		--VALIDATE MULTIPLE PAY BANK ACCOUNT COMBINATIONS
+		SELECT @billPayBankAccountCount = COUNT(intGroupCount)
+		FROM (
+			SELECT COUNT(*) intGroupCount
+			FROM tblAPPayment P
+			INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+			INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+			WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND PD.dblPayment != 0 AND P.intPaymentMethodId = 2
+			GROUP BY B.intPayFromBankAccountId, B.intPayToBankAccountId
+		) A
+
+		IF @billPayBankAccountCount > 1
+		BEGIN
+			RAISERROR('Multitple sets of pay from and to bank account is not allowed.', 11, 1);
+		END
+
 		--UPDATE PAYMENT SCHEDULE
 		UPDATE PS
 		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) <> 0 THEN 1 ELSE 0 END
