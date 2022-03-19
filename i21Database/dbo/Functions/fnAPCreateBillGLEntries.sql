@@ -1024,18 +1024,20 @@ BEGIN
 			CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
-	OUTER APPLY (
-		SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		WHERE intAccountStructureId = 3
-		AND intAccountId = voucherDetails.intAccountId
-	) DUEACCOUNT
+			INNER JOIN [dbo].tblAPBillDetail B 
+				ON voucherDetails.intBillDetailId = B.intBillDetailId
+			OUTER APPLY (
+				SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+				FROM tblGLAccountSegmentMapping GLASM
+				INNER JOIN tblGLAccountSegment GLAS
+				ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+				WHERE intAccountStructureId = 3
+				AND intAccountId = voucherDetails.intAccountId
+			) DUEACCOUNT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  AND @AllowSingleLocationEntries = 0
 	  AND @DueToAccountId <> 0
-	  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId) = 0
+	  AND [dbo].[fnARCompareAccountSegment](B.[intAccountId], voucherDetails.intAccountId) = 0
 	UNION ALL 
 	--Tax Adjustment
 	--When creating tax adjustment gl entry, we have to convert first the adjusted tax to foreign rate (same with original tax) 
