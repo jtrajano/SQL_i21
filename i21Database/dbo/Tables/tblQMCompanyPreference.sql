@@ -20,6 +20,7 @@
 	ysnCaptureItemInProperty BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnCaptureItemInProperty] DEFAULT 0,
 	ysnEnableAssignContractsInSample BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnEnableAssignContractsInSample] DEFAULT 0,
 	ysnShowItemDescriptionOnly BIT CONSTRAINT [DF_tblQMCompanyPreference_ysnShowItemDescriptionOnly] DEFAULT 0,
+	ysnEnableContractSequencesTabInSampleSearchScreen BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnEnableContractSequencesTabInSampleSearchScreen] DEFAULT 0,
     CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intApproveLotStatus] FOREIGN KEY ([intApproveLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intRejectLotStatus] FOREIGN KEY ([intRejectLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId])
