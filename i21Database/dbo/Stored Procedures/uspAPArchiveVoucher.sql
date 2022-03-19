@@ -131,8 +131,9 @@ USING
 		,A.dtmExportedDate
 		,A.dtmDateCreated
 		,CASE WHEN GETDATE() < A.dtmDate THEN A.dtmDate ELSE GETDATE() END AS dtmOrigDateDeleted
-		,ysnOverrideCashFlow
-		,dtmCashFlowDate
+		,A.ysnOverrideCashFlow
+		,A.dtmCashFlowDate
+		,A.dblAverageExchangeRate
 	FROM tblAPBill A
 	OUTER APPLY (
 		SELECT TOP 1 MAX(P.dtmDatePaid) AS dtmDateDeleted
@@ -237,6 +238,7 @@ INSERT
 	,dtmExportedDate
 	,dtmDateCreated
 	,dtmOrigDateDeleted
+	,dblAverageExchangeRate
 )
 VALUES
 (
@@ -330,6 +332,7 @@ VALUES
 	,SourceData.dtmExportedDate
 	,SourceData.dtmDateCreated
 	,SourceData.dtmOrigDateDeleted
+	,SourceData.dblAverageExchangeRate
 );
 
 MERGE INTO tblAPBillDetailArchive AS destination

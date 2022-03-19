@@ -90,7 +90,8 @@
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
 	[dtmOrigDateDeleted] DATETIME NULL,
 	[ysnOverrideCashFlow] BIT NULL DEFAULT 0,
-	[dtmCashFlowDate] DATETIME NULL
+	[dtmCashFlowDate] DATETIME NULL,
+	[dblAverageExchangeRate] DECIMAL (18, 6) NULL
     CONSTRAINT [PK_dbo.tblAPBillArchive] PRIMARY KEY CLUSTERED ([intBillId] ASC),
 	CONSTRAINT [UK_dbo.tblAPBillArchive_strBillId] UNIQUE (strBillId)
 );
