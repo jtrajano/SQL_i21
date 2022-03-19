@@ -551,6 +551,7 @@ BEGIN
 				,intModifiedByUserId 	= @intUserId
 				,strDataSource			= ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType)
 				,intShipFromEntityId	= ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
+				,dtmLastCargoInsuranceDate  = IntegrationData.dtmLastCargoInsuranceDate
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -594,6 +595,7 @@ BEGIN
 				,intCreatedByUserId
 				,strDataSource
 				,intShipFromEntityId
+				,dtmLastCargoInsuranceDate
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -637,6 +639,7 @@ BEGIN
 				,@intUserId
 				/*strDataSource*/				,ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType) 
 				/*intShipFromEntityId*/			,ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
+				/*dtmLastCargoInsuranceDate*/   ,IntegrationData.dtmLastCargoInsuranceDate
 			)
 		;
 				

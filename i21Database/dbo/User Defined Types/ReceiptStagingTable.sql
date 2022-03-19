@@ -30,6 +30,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intShipFromEntityId] INT NULL 
 	,[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strWarehouseRefNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[dtmLastCargoInsuranceDate] DATETIME NULL			
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 
