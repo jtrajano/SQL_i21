@@ -41,6 +41,7 @@ SELECT S.intSampleId
 	,S.intContractDetailId
 	,ST.intSampleTypeId
 	,CH.intContractHeaderId AS intLinkContractHeaderId
+	,CH.intSalespersonId
 	,CH1.intContractHeaderId
 	,I.intItemId
 	,S.intItemBundleId
