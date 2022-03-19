@@ -50,6 +50,9 @@ BEGIN
 			,intContractDetailId
 			,ysnWeighed
 			,strSealNo
+			,[dblTare]
+			,[dblTarePerQty]
+
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -102,6 +105,9 @@ BEGIN
 			,intContractDetailId		= SourceLot.intContractDetailId
 			,ysnWeighed					= SourceLot.ysnWeighed
 			,strSealNo					= SourceLot.strSealNo
+			,[dblTare]					= SourceLot.dblTare
+			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId
 		INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId

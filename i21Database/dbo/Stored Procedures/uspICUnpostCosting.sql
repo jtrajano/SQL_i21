@@ -614,7 +614,7 @@ BEGIN
 									)
 								ELSE
 									Lot.dblWeightInTransit
-							END 
+							END 						
 						--,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intItemLocationId = ISNULL(@intInTransitSourceLocationId, @intItemLocationId) 
@@ -622,6 +622,12 @@ BEGIN
 						--AND intInTransitSourceLocationId IS NULL 
 						--AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 
+				UPDATE Lot
+				SET
+						Lot.dblTare = dbo.fnMultiply(Lot.dblTarePerQty, Lot.dblQty)
+				FROM	dbo.tblICLot Lot
+				WHERE	Lot.intItemLocationId = ISNULL(@intInTransitSourceLocationId, @intItemLocationId) 
+						AND Lot.intLotId = @intLotId
 				---- Recalculate the average cost from the inventory transaction table. 
 				---- Except on Actual Costing. Do not compute the average cost when doing actual costing.
 				--UPDATE	ItemPricing

@@ -64,6 +64,8 @@ BEGIN
 			,[strContainerNo]
 			,[strCondition]
 			,[intSeasonCropYear]
+			,[dblTare]
+			,[dblTarePerQty]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -101,6 +103,8 @@ BEGIN
 			,[strContainerNo]			= SourceLot.strContainerNo
 			,[strCondition]				= SourceLot.strCondition
 			,[intSeasonCropYear]		= SourceLot.intSeasonCropYear
+			,[dblTare]					= SourceLot.dblTare
+			,[dblTarePerQty]			= SourceLot.dblTarePerQty
 	FROM tblICInventoryAdjustment Header
 		INNER JOIN tblICInventoryAdjustmentDetail Detail 
 			ON Detail.intInventoryAdjustmentId = Header.intInventoryAdjustmentId

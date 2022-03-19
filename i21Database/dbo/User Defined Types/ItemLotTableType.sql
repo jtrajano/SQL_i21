@@ -186,6 +186,9 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[dblWeight]				NUMERIC(38, 20) NULL DEFAULT ((0))
 	,[intWeightUOMId]			INT NULL
 	,[dblWeightPerQty]			NUMERIC(38,20) NULL DEFAULT ((0))
+	,[dblTare]					NUMERIC(38,20) NULL DEFAULT ((0))
+	,[dblTarePerQty]			NUMERIC(38,20) NULL DEFAULT ((0))
+	,[dblNetWeight]				NUMERIC(38,20) NULL DEFAULT ((0))
 	,[intOriginId]				INT NULL
 	,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
 	,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 		

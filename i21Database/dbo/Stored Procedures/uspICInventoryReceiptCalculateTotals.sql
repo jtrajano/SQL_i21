@@ -29,8 +29,12 @@ SET
 	, r.dblTotalTax = ISNULL(items.totalTax, 0) + ISNULL(charges.totalChargesTax,0)
 	, r.dblTotalCharges = ISNULL(charges.totalCharges,0)
 	, r.dblTotalGross = ISNULL(items.totalGross,0)
+	, r.dblTotalTare = ISNULL(items.totalTare,0)
+	, r.dblTotalLotQty = ISNULL(lots.totalLotQty, 0)	
+	, r.dblTotalLotTare = ISNULL(lots.totalLotTare,0)
 	, r.dblTotalNet =  ISNULL(items.totalNet,0)
 	, r.dblGrandTotal =  ISNULL(items.subTotal,0) + ISNULL(charges.totalCharges, 0) + ISNULL(items.totalTax, 0) + ISNULL(charges.totalChargesTax,0)
+	, r.dblAvgTarePerQty = CASE WHEN ISNULL(lots.totalLotQty, 0) <> 0 THEN ISNULL(lots.totalLotTare,0) / ISNULL(lots.totalLotQty, 0) ELSE 0 END 	
 FROM 
 	tblICInventoryReceipt r 
 	OUTER APPLY (
@@ -38,9 +42,20 @@ FROM
 			   ,totalTax = SUM(ISNULL(ReceiptItem.dblTax, 0))
 			   ,totalGross = SUM(ISNULL(ReceiptItem.dblGross, 0))
 			   ,totalNet = SUM(ISNULL(ReceiptItem.dblNet, 0))
+			   ,totalTare = SUM(ISNULL(ReceiptItem.dblTare, 0))
 		FROM	tblICInventoryReceiptItem ReceiptItem
 		WHERE	ReceiptItem.intInventoryReceiptId = r.intInventoryReceiptId
 	) items
+	OUTER APPLY (
+		SELECT 
+			totalLotQty = SUM(ISNULL(ReceiptItemLot.dblQuantity, 0))
+			,totalLotTare = SUM(ISNULL(ReceiptItemLot.dblTareWeight, 0))
+		FROM 
+			tblICInventoryReceiptItemLot ReceiptItemLot INNER JOIN tblICInventoryReceiptItem ReceiptItem 
+				ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+		WHERE
+			ReceiptItem.intInventoryReceiptId = r.intInventoryReceiptId	
+	) lots
 	OUTER APPLY (
 		SELECT totalCharges = SUM(
 					CASE 

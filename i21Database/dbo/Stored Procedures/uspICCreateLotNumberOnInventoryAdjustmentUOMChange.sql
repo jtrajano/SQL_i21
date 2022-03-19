@@ -48,6 +48,8 @@ BEGIN
 			,intParentLotId
 			,dtmManufacturedDate
 			,dtmExpiryDate
+			,[dblTare]
+			,[dblTarePerQty]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -70,6 +72,9 @@ BEGIN
 			,intParentLotId				= SourceLot.intParentLotId
 			,dtmManufacturedDate		= SourceLot.dtmManufacturedDate
 			,dtmExpiryDate				= SourceLot.dtmExpiryDate
+			,[dblTare]					= SourceLot.dblTare
+			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+
 	FROM tblICInventoryAdjustment Header
 		INNER JOIN tblICInventoryAdjustmentDetail Detail 
 			ON Detail.intInventoryAdjustmentId = Header.intInventoryAdjustmentId

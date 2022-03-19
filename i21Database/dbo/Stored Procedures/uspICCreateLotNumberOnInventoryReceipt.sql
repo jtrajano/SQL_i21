@@ -308,6 +308,9 @@ BEGIN
 			,intContractDetailId
 			,ysnWeighed
 			,strSealNo
+			,[dblTare]
+			,[dblTarePerQty]
+
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -369,6 +372,8 @@ BEGIN
 			,intContractDetailId	= ISNULL(SourceLot.intContractDetailId, ReceiptItem.intContractDetailId)
 			,ysnWeighed				= ISNULL(SourceLot.ysnWeighed, ReceiptItem.ysnWeighed) 
 			,strSealNo				= ISNULL(SourceLot.strSealNo, Receipt.strSealNo) 
+			,[dblTare]				= ISNULL(NULLIF(SourceLot.dblTare, 0), ItemLot.dblTareWeight) 
+			,[dblTarePerQty]		= ISNULL(NULLIF(SourceLot.dblTarePerQty, 0), ItemLot.dblTarePerQuantity) 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item

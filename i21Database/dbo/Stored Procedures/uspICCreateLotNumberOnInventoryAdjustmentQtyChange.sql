@@ -46,6 +46,8 @@ BEGIN
 			,intContractDetailId
 			,ysnWeighed
 			,strSealNo
+			,[dblTare]
+			,[dblTarePerQty]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -79,6 +81,9 @@ BEGIN
 			,intContractDetailId		= SourceLot.intContractDetailId
 			,ysnWeighed					= SourceLot.ysnWeighed
 			,strSealNo					= SourceLot.strSealNo
+			,[dblTare]					= SourceLot.dblTare
+			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+
 	FROM tblICInventoryAdjustment Header
 		INNER JOIN tblICInventoryAdjustmentDetail Detail ON Detail.intInventoryAdjustmentId = Header.intInventoryAdjustmentId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId

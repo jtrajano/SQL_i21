@@ -243,6 +243,14 @@ BEGIN
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
 						AND Lot.intLotId = @intLotId
+
+				UPDATE	Lot 
+				SET		Lot.dblTareInTransit = dbo.fnMultiply(Lot.dblQtyInTransit, Lot.dblTarePerQty) 
+						,Lot.dblGrossWeightInTransit = dbo.fnMultiply(Lot.dblQtyInTransit, Lot.dblTarePerQty) + Lot.dblWeightInTransit
+				FROM	dbo.tblICLot Lot
+				WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
+						AND Lot.intLotId = @intLotId
+						AND ISNULL(Lot.dblTarePerQty, 0) <> 0 
 			END 
 
 			-- Reduce the remaining qty
@@ -502,6 +510,14 @@ BEGIN
 						AND StockUOM.ysnStockUnit = 1
 			WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
 					AND Lot.intLotId = @intLotId
+
+			UPDATE	Lot 
+			SET		Lot.dblTareInTransit = dbo.fnMultiply(Lot.dblQtyInTransit, Lot.dblTarePerQty) 
+					,Lot.dblGrossWeightInTransit = dbo.fnMultiply(Lot.dblQtyInTransit, Lot.dblTarePerQty) + Lot.dblWeightInTransit
+			FROM	dbo.tblICLot Lot
+			WHERE	Lot.intItemLocationId = @intInTransitSourceLocationId
+					AND Lot.intLotId = @intLotId
+					AND ISNULL(Lot.dblTarePerQty, 0) <> 0 
 		END
 	END 
 END 

@@ -68,6 +68,10 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblTotalTax
 	, Receipt.dblTotalCharges
 	, Receipt.dblTotalGross
+	, Receipt.dblTotalTare
+	, Receipt.dblTotalLotTare
+	, Receipt.dblTotalLotQty
+	, Receipt.dblAvgTarePerQty
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
 	, Receipt.dtmCreated 

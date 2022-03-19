@@ -43,6 +43,8 @@ SELECT
 	, strSeason = Season.strDescription
 	, strClass = Class.strDescription
 	, strProductLine = ProductLine.strDescription
+	, lot.dblTare
+	, lot.dblTarePerQty
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
