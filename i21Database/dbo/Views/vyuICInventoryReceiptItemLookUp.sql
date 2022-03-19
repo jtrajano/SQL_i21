@@ -246,6 +246,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 				ELSE NULL
 				END
 			)
+		,dblLotTotalQuantity = ISNULL(receiptLot.dblLotTotalQuantity, 0) 
 		,dblLotTotalGross = ISNULL(receiptLot.dblLotTotalGross, 0)
 		,dblLotTotalTare = ISNULL(receiptLot.dblLotTotalTare, 0)
 		,dblLotTotalNet = ISNULL(receiptLot.dblLotTotalNet, 0)
@@ -304,6 +305,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		) rtn
 		OUTER APPLY (
 			SELECT	ril.intInventoryReceiptItemId
+					,dblLotTotalQuantity = SUM(ISNULL(ril.dblQuantity, 0))
 					,dblLotTotalGross = SUM(ISNULL(ril.dblGrossWeight, 0))
 					,dblLotTotalTare = SUM(ISNULL(ril.dblTareWeight, 0))
 					,dblLotTotalNet =  SUM(ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0))
