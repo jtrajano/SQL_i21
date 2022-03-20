@@ -126,6 +126,7 @@ BEGIN
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
 			(A.dblTotal) <> (SELECT CAST(SUM(dblTotal) + SUM(dblTax) AS DECIMAL(18,2)) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
+			AND A.intTransactionType <> 15
 
 		--ALREADY POSTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)

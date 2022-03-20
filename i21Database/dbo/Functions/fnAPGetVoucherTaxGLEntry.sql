@@ -9,7 +9,7 @@ RETURNS TABLE AS RETURN
 		,D.intBillDetailTaxId
 		,B.strMiscDescription
 		,CAST((D.dblTax * ISNULL(NULLIF(B.dblRate,0),1)) 
-			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) 
+			* (CASE WHEN A.intTransactionType NOT IN (1, 15) THEN -1 ELSE 1 END) 
 			--TAXES RECORD IS NOT AFFECTED BY ysnPrice, IT IS ONLY AFFECTED BY ysnCheckOffTax
 			-- * (CASE WHEN (A.intEntityVendorId = receipts.intEntityVendorId)
 			-- 	 AND charges.ysnPrice = 1
@@ -17,7 +17,7 @@ RETURNS TABLE AS RETURN
 			-- * (CASE WHEN D.ysnCheckOffTax = 1 THEN -1 ELSE 1 END) 
 			AS DECIMAL(18,2)) AS dblTotal
 		,CAST((D.dblTax) 
-			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) 
+			* (CASE WHEN A.intTransactionType NOT IN (1, 15) THEN -1 ELSE 1 END) 
 			-- * (CASE WHEN (A.intEntityVendorId = receipts.intEntityVendorId)
 			-- 	 AND charges.ysnPrice = 1
 			-- 	 THEN -1 ELSE 1 END)  
@@ -29,6 +29,7 @@ RETURNS TABLE AS RETURN
 						AND receiptTax.intInventoryReceiptItemTaxId IS NOT NULL) --has tax details
 				 OR (B.intInventoryReceiptChargeId IS NOT NULL AND chargeTax.intInventoryReceiptChargeId IS NOT NULL) 
 				 OR (B.intInventoryShipmentChargeId IS NOT NULL AND shipmentChargeTax.intInventoryShipmentChargeId IS NOT NULL))
+				 AND A.intTransactionType <> 15
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
 			ELSE D.intAccountId
 		END AS intAccountId
@@ -68,7 +69,7 @@ RETURNS TABLE AS RETURN
 		WHERE shipmentChargeTax.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
 	) shipmentChargeTax
 	WHERE A.intBillId = @billId
-	AND A.intTransactionType IN (1,3)
+	AND A.intTransactionType IN (1,3,15)
 	-- AND D.dblTax != 0
 	-- AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
 	-- 			THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax

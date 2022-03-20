@@ -15,6 +15,7 @@ SELECT
 		 WHEN 12 THEN 'Prepayment Reversal'
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
+		 WHEN 15 THEN 'Tax Adjustment'
 		 ELSE 'Invalid Type'
 	END AS strTransactionType,
 	G2.strName,
