@@ -66,6 +66,10 @@ SELECT cl.intCompanyLocationId
 	,ToCSL.strSubLocationName strToSubLocationName
 	,ToSL.strName strToStorageLocationName
 	,S.strStatus strTransferStatus
+	,LI.ysnPrinted
+	,LI.dtmLastPrinted
+	,e3.strName AS strPrintedBy
+	,ITD.intInventoryTransferDetailId
 FROM dbo.tblICInventoryTransferDetail ITD
 JOIN dbo.tblICInventoryTransfer IT ON IT.intInventoryTransferId = ITD.intInventoryTransferId
 	AND ysnShipmentRequired = 1
@@ -94,3 +98,4 @@ LEFT JOIN dbo.tblEMEntity e ON e.intEntityId = l.intEntityVendorId
 LEFT JOIN dbo.tblICCommodityAttribute CA ON CA.intCommodityAttributeId = l.intGradeId
 LEFT JOIN dbo.tblICItemOwner ito1 ON ito1.intItemOwnerId = l.intItemOwnerId
 LEFT JOIN dbo.tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
+LEFT JOIN dbo.tblEMEntity e3 ON e3.intEntityId = LI.intPrintedById
