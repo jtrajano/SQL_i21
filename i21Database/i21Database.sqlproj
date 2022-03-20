@@ -591,6 +591,7 @@
     <Build Include="dbo\User Defined Types\PostCommissionDerivativeEntryTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdatePostedDerivativeEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDScheduleDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
