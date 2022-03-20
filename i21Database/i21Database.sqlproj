@@ -392,6 +392,7 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSiteType.sql" />
     <Build Include="dbo\Tables\tblTMOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
