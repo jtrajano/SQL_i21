@@ -60,35 +60,35 @@ SELECT   L.intLoadId
 			END COLLATE Latin1_General_CI_AS
 		,L.intSourceType
 		,L.ysnPosted
-		,LoadDetail.intLoadDetailId
-		,LoadDetail.intItemId
-		,LoadDetail.dblQuantity
-		,LoadDetail.intItemUOMId
-		,LoadDetail.dblGross
-		,LoadDetail.dblTare
-		,LoadDetail.dblNet
-		,LoadDetail.intWeightItemUOMId
-		,LoadDetail.dblDeliveredQuantity
-		,LoadDetail.dblDeliveredGross
-		,LoadDetail.dblDeliveredTare
-		,LoadDetail.dblDeliveredNet
-		,LoadDetail.intVendorEntityId
-		,LoadDetail.intVendorEntityLocationId
-		,LoadDetail.intPContractDetailId
-		,LoadDetail.intPCompanyLocationId
-		,LoadDetail.intCustomerEntityId
-		,LoadDetail.intCustomerEntityLocationId
-		,LoadDetail.intSContractDetailId
-		,LoadDetail.intSCompanyLocationId
-		,LoadDetail.strScheduleInfoMsg
-		,LoadDetail.ysnUpdateScheduleInfo
-		,LoadDetail.ysnPrintScheduleInfo
-		,LoadDetail.strLoadDirectionMsg
-		,LoadDetail.ysnUpdateLoadDirections
-		,LoadDetail.ysnPrintLoadDirections
-		,LoadDetail.strExternalShipmentItemNumber
-		,LoadDetail.strExternalBatchNo
-		,LoadDetail.intCropYearId
+		,LD.intLoadDetailId
+		,LD.intItemId
+		,LD.dblQuantity
+		,LD.intItemUOMId
+		,LD.dblGross
+		,LD.dblTare
+		,LD.dblNet
+		,LD.intWeightItemUOMId
+		,LD.dblDeliveredQuantity
+		,LD.dblDeliveredGross
+		,LD.dblDeliveredTare
+		,LD.dblDeliveredNet
+		,LD.intVendorEntityId
+		,LD.intVendorEntityLocationId
+		,LD.intPContractDetailId
+		,LD.intPCompanyLocationId
+		,LD.intCustomerEntityId
+		,LD.intCustomerEntityLocationId
+		,LD.intSContractDetailId
+		,LD.intSCompanyLocationId
+		,LD.strScheduleInfoMsg
+		,LD.ysnUpdateScheduleInfo
+		,LD.ysnPrintScheduleInfo
+		,LD.strLoadDirectionMsg
+		,LD.ysnUpdateLoadDirections
+		,LD.ysnPrintLoadDirections
+		,LD.strExternalShipmentItemNumber
+		,LD.strExternalBatchNo
+		,LD.intCropYearId
 		,strCropYear = CPY.strCropYear
 		,strSampleStatus = ISNULL(LSS.strStatus, CSS.strStatus)
         ,intGenerateReferenceNumber = GLoad.intReferenceNumber
@@ -107,8 +107,10 @@ SELECT   L.intLoadId
 		,strPLocationMail = PCL.strEmail
 		,strPLocationFax = PCL.strFax
 		,strPLocationPhone = PCL.strPhone
-		,PCLSL.strSubLocationName AS strPSubLocationName
-		,SCLSL.strSubLocationName AS strSSubLocationName
+		,strPSubLocationName = PCLSL.strSubLocationName
+		,strSSubLocationName = SCLSL.strSubLocationName
+		,strPStorageLocation = PSTL.strName
+		,strSStorageLocation = SSTL.strName
         ,strVendor = VEN.strName
         ,strShipFrom = VEL.strLocationName
 		,strShipFromAddress = VEL.strAddress
@@ -121,7 +123,7 @@ SELECT   L.intLoadId
 		,strVendorFax = VEN.strFax
 		,strVendorMobile = VEN.strMobile
 		,strVendorPhone = VEN.strPhone
-		,LoadDetail.intSellerId
+		,LD.intSellerId
 		,strSeller = Seller.strName
 
 		,strPContractNumber = PHeader.strContractNumber
@@ -147,7 +149,7 @@ SELECT   L.intLoadId
 		,strSLocationMail = SCL.strEmail
 		,strSLocationFax = SCL.strFax
 		,strSLocationPhone = SCL.strPhone
-		,LoadDetail.intSalespersonId
+		,LD.intSalespersonId
 		,strSalesperson = Salesperson.strName
 
 		,Commodity.strCommodityCode AS strCommodity
@@ -185,7 +187,7 @@ SELECT   L.intLoadId
 		,Item.intCommodityId
 		,CA.intCommodityAttributeId
 		,CO.strCountry AS strOrigin
-		,LoadDetail.intNumberOfContainers
+		,LD.intNumberOfContainers
 		,strShipmentStatus = CASE L.intShipmentStatus
 			WHEN 1 THEN 
 				CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
@@ -253,46 +255,48 @@ SELECT   L.intLoadId
 		,strETAPOLReasonCodeDescription = ETAPOLRC.strReasonCodeDescription
 		,strETSPOLReasonCodeDescription = ETSPOLRC.strReasonCodeDescription
 		,strETAPODReasonCodeDescription = ETAPODRC.strReasonCodeDescription
-FROM tblLGLoadDetail LoadDetail
-JOIN tblLGLoad L ON L.intLoadId = LoadDetail.intLoadId
+FROM tblLGLoadDetail LD
+JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
-LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
-LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId
-LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LoadDetail.intVendorEntityId
-LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LoadDetail.intVendorEntityLocationId
-LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LoadDetail.intCustomerEntityId
-LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
-LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LoadDetail.intPContractDetailId
+LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LD.intPCompanyLocationId
+LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LD.intSCompanyLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LD.intPStorageLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LD.intSStorageLocationId
+LEFT JOIN tblICStorageLocation PSTL ON PSTL.intStorageLocationId = LD.intPStorageLocationId
+LEFT JOIN tblICStorageLocation SSTL ON SSTL.intStorageLocationId = LD.intSSubLocationId
+LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LD.intVendorEntityId
+LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
+LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
+LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
+LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
-LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LoadDetail.intSContractDetailId
+LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
-LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
+LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
-LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
+LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LD.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
-LEFT JOIN tblCTCropYear CPY ON CPY.intCropYearId = LoadDetail.intCropYearId
+LEFT JOIN tblCTCropYear CPY ON CPY.intCropYearId = LD.intCropYearId
 LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId  
 LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId  
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
-LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = LoadDetail.intSellerId
-LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = LoadDetail.intSalespersonId
+LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = LD.intSellerId
+LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = LD.intSalespersonId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
 LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
 LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId]	= L.intDispatcherId
-LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LoadDetail.intPickLotDetailId
+LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LD.intPickLotDetailId
 LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
-LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LoadDetail.intAllocationDetailId
+LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LD.intAllocationDetailId
 LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId	
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
@@ -317,6 +321,6 @@ OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved'
 				ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) CSS
 OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved', 'Rejected')) THEN 'Sample Sent' ELSE SS.strStatus END
 				FROM tblQMSample S JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-				WHERE S.intLoadDetailId = LoadDetail.intLoadDetailId
+				WHERE S.intLoadDetailId = LD.intLoadDetailId
 					AND SS.strStatus <> 'Rejected'
 				ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) LSS

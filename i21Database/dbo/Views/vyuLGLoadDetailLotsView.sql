@@ -15,6 +15,7 @@ SELECT L.strLoadNumber
 	  ,LDL.strID1
 	  ,LDL.strID2
 	  ,LDL.strID3
+	  ,LDL.strNewLotNumber
 	  ,strItemUnitMeasure = UM.strUnitMeasure
 	  ,strWeightUnitMeasure = WUM.strUnitMeasure
 	  ,LOT.strLotNumber 

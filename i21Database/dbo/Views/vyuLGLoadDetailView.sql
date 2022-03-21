@@ -16,8 +16,10 @@ SELECT LD.intLoadDetailId
 	, LD.dblDeliveredTare
 	, LD.dblDeliveredNet
 	, LD.intPSubLocationId
-	, PCLSL.strSubLocationName AS strPSubLocationName
-	, SCLSL.strSubLocationName AS strSSubLocationName
+	, strPSubLocationName = PCLSL.strSubLocationName
+	, strSSubLocationName = SCLSL.strSubLocationName
+	, strPStorageLocation = PSTL.strName
+	, strSStorageLocation = SSTL.strName
 	, strWeightItemUOM = WeightUOM.strUnitMeasure
 	, LD.intVendorEntityId
 	, dblItemUOMCF = ItemUOM.dblUnitQty
@@ -65,6 +67,7 @@ SELECT LD.intLoadDetailId
 
 -- Inbound Company Location
 	, LD.intPCompanyLocationId
+	, LD.intPStorageLocationId
 	, strPLocationName = PCL.strLocationName
 	, strPLocationAddress = PCL.strAddress
 	, strPLocationCity = PCL.strCity
@@ -120,6 +123,7 @@ SELECT LD.intLoadDetailId
 
 -- Outbound Company Location
 	, LD.intSCompanyLocationId
+	, LD.intSStorageLocationId
 	, strSLocationName = SCL.strLocationName
 	, strSLocationAddress = SCL.strAddress
 	, strSLocationCity = SCL.strCity
@@ -283,3 +287,5 @@ LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PHeader.intWeightId
 LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SHeader.intWeightId
 LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LD.intSSubLocationId
+LEFT JOIN tblICStorageLocation PSTL ON PSTL.intStorageLocationId = LD.intPStorageLocationId
+LEFT JOIN tblICStorageLocation SSTL ON SSTL.intStorageLocationId = LD.intSStorageLocationId

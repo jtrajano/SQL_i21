@@ -56,6 +56,8 @@
 	[intPickLotDetailId] INT NULL,
 	[intPSubLocationId] INT NULL, 
 	[intSSubLocationId] INT NULL, 
+	[intPStorageLocationId] INT NULL, 
+	[intSStorageLocationId] INT NULL, 
 	[intNumberOfContainers] INT NULL, 
 	[strContainerNumbers] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strExternalShipmentItemNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -82,7 +84,9 @@
 	CONSTRAINT [FK_tblLGLoadDetail_tblLGAllocationDetail_intAllocationDetailId] FOREIGN KEY ([intAllocationDetailId]) REFERENCES [tblLGAllocationDetail]([intAllocationDetailId]),
 	CONSTRAINT [FK_tblLGLoadDetail_tblLGPickLotDetail_intPickLotDetailId] FOREIGN KEY ([intPickLotDetailId]) REFERENCES [tblLGPickLotDetail]([intPickLotDetailId]),
 	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intPSubLocationId] FOREIGN KEY ([intPSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
-	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intSSubLocationId] FOREIGN KEY ([intSSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId])
+	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intSSubLocationId] FOREIGN KEY ([intSSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
+	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intPStorageLocationId] FOREIGN KEY ([intPStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
+	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intSStorageLocationId] FOREIGN KEY ([intSStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
 )
 GO
 --CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_11_2002822197__K9_K1_17_18] ON [dbo].[tblLGLoadDetail]
