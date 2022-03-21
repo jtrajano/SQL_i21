@@ -27,7 +27,7 @@ SELECT
     , CAST(CASE Trucker WHEN 1 THEN 1 ELSE 0 END AS BIT) IsTrucker
     , CAST(CASE Insurer WHEN 1 THEN 1 ELSE 0 END AS BIT) IsInsurer
     , CAST(CASE ShipVia WHEN 1 THEN 1 ELSE 0 END AS BIT) IsShipVia
-    , CAST(CASE Applicator WHEN 1 THEN 1 ELSE 0 END AS BIT) IsApplicator
+    , CAST(0 AS BIT) IsApplicator
     , CAST(CASE VendorOrCustomer WHEN 1 THEN 1 ELSE 0 END AS BIT) IsVendorOrCustomer
     , strFederalTaxId
     , strDefaultEntityType
