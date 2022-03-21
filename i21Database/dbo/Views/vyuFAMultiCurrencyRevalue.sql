@@ -29,7 +29,8 @@ SELECT DISTINCT
     dblUnrealizedDebitGain  =   0, --Calcuate By GL
     dblUnrealizedCreditGain =   0, --Calcuate By GL
     dblDebit                =   0, --Calcuate By GL
-    dblCredit               =   0  --Calcuate By GL
+    dblCredit               =   0, --Calcuate By GL
+	intCompanyLocationId	=	CL.intCompanyLocationId
 FROM tblFAFixedAsset FA
 JOIN tblFABookDepreciation BD
 	ON BD.intAssetId = FA.intAssetId

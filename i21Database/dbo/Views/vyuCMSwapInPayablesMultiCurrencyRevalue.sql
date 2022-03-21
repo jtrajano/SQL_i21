@@ -26,7 +26,8 @@ SELECT DISTINCT
     dblUnrealizedDebitGain  =   0, -- Calcuate By GL
     dblUnrealizedCreditGain =   0, -- Calcuate By GL
     dblDebit                =   0, -- Calcuate By GL
-    dblCredit               =   0  -- Calcuate By GL
+    dblCredit               =   0,  -- Calcuate By GL
+	intCompanyLocationId	=	NULL
 FROM tblCMBankSwap BankSwap
 JOIN tblCMBankTransfer BT
 	ON BT.intTransactionId = BankSwap.intSwapLongId

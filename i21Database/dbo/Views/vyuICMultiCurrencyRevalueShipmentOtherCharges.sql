@@ -28,8 +28,8 @@ SELECT
 	,dblCredit					= 0 --Calcuate By GL
 	,ysnPayable					= CASE WHEN sc.ysnAccrue = 1 AND sc.intEntityVendorId IS NOT NULL AND b.intBillId IS NULL THEN 1 ELSE 0 END 
 	,ysnReceivable				= CASE WHEN sc.ysnPrice = 1 AND id.intInvoiceId IS NULL THEN 1 ELSE 0 END 
-	,intLocationSegmentId 		= dbo.fnGetItemCompanySegment(s.intShipFromLocationId)
-	,intItemGLAccountId			= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
+	,intCompanyLocationId 		= s.intShipFromLocationId
+	,intLOBSegmentCodeId		= lob.intSegmentCodeId
 FROM 
 	vyuICGetInventoryShipmentCharge sc
 	LEFT OUTER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = sc.intInventoryShipmentId

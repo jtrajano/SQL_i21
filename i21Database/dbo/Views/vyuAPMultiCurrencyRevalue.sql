@@ -25,7 +25,9 @@ SELECT DISTINCT
     dblUnrealizedDebitGain  =    0, --Calcuate By GL
     dblUnrealizedCreditGain =    0, --Calcuate By GL
     dblDebit                =    0, --Calcuate By GL
-    dblCredit               =    0  --Calcuate By GL
+    dblCredit               =    0,  --Calcuate By GL
+	intAccountId			= 	 A.intAccountId,
+	intCompanyLocationId	=	 A.intShipToId
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail BD
 	ON BD.intBillId = A.intBillId

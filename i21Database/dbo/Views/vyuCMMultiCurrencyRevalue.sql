@@ -25,7 +25,8 @@ SELECT DISTINCT
     dblUnrealizedDebitGain  =    0, --Calcuate By GL
     dblUnrealizedCreditGain =    0, --Calcuate By GL
     dblDebit                =    0, --Calcuate By GL
-    dblCredit               =    0  --Calcuate By GL
+    dblCredit               =    0,  --Calcuate By GL
+	intCompanyLocationId	=	BT.intCompanyLocationId
 FROM
   tblCMBankTransaction BT
   JOIN vyuCMBankAccount BA ON BT.intBankAccountId = BA.intBankAccountId

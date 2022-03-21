@@ -26,8 +26,8 @@ SELECT
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
-	,intLocationSegmentId 		= dbo.fnGetItemCompanySegment(rc.intLocationId)
-	,intItemGLAccountId			= [dbo].[fnGetItemGLAccount](i.intItemId, iLoc.intItemLocationId,'Inventory') 
+	,intCompanyLocationId 		= rc.intLocationId
+	,intLOBSegmentCodeId		= lob.intSegmentCodeId
 FROM 
 	vyuICChargesForBilling rc
 	LEFT JOIN tblICItem i ON i.intItemId = rc.intItemId

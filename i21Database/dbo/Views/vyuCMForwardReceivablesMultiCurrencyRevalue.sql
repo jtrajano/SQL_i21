@@ -26,7 +26,8 @@ SELECT DISTINCT
     dblUnrealizedDebitGain  =   0, -- Calcuate By GL
     dblUnrealizedCreditGain =   0, -- Calcuate By GL
     dblDebit                =   0, -- Calcuate By GL
-    dblCredit               =   0  -- Calcuate By GL
+    dblCredit               =   0,  -- Calcuate By GL
+	intCompanyLocationId	=	NULL
 FROM tblCMBankTransfer BT
 LEFT JOIN tblSMCurrencyExchangeRateType RateType
 	ON RateType.intCurrencyExchangeRateTypeId = BT.intRateTypeIdAmountTo
