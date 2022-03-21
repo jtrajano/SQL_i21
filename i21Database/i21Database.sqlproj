@@ -592,6 +592,8 @@
     <Build Include="dbo\Stored Procedures\uspCMUpdatePostedDerivativeEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDScheduleDetail.sql" />
+    <Build Include="dbo\Tables\tblICWarrantStatus.sql" />
+    <None Include="Scripts\Post-Deployment\IC\31_WarrantStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -52,7 +52,8 @@ BEGIN
 			,strSealNo
 			,[dblTare]
 			,[dblTarePerQty]
-
+			,[strWarrantNo]
+			,[intWarrantStatus]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -107,6 +108,8 @@ BEGIN
 			,strSealNo					= SourceLot.strSealNo
 			,[dblTare]					= SourceLot.dblTare
 			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+			,[strWarrantNo]				= SourceLot.strWarrantNo
+			,[intWarrantStatus]			= SourceLot.intWarrantStatus
 
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId

@@ -178,6 +178,8 @@ BEGIN
 			,intLotStatusId
 			,[dblTare]
 			,[dblTarePerQty]
+			,[strWarrantNo]
+			,[intWarrantStatus]
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -233,6 +235,8 @@ BEGIN
 			,intLotStatusId				= SourceLot.intLotStatusId 
 			,[dblTare]					= SourceLot.dblTare
 			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+			,[strWarrantNo]				= SourceLot.strWarrantNo
+			,[intWarrantStatus]			= SourceLot.intWarrantStatus
 	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId
 			INNER JOIN dbo.tblICItem Item

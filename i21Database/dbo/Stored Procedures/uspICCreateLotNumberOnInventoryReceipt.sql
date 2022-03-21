@@ -302,6 +302,7 @@ BEGIN
 			,strWarehouseRefNo
 			,strCargoNo
 			,strWarrantNo
+			,intWarrantStatus
 			,intSourceType
 			,intLotStatusId
 			,intContractHeaderId
@@ -365,7 +366,8 @@ BEGIN
 			,strTrackingNumber		= ItemLot.strTrackingNumber
 			,strWarehouseRefNo		= ItemLot.strWarehouseRefNo
 			,strCargoNo				= ItemLot.strCargoNo
-			,strCargoNo				= ItemLot.strWarrantNo
+			,strWarrantNo			= ItemLot.strWarrantNo
+			,intWarrantStatus		= ItemLot.intWarrantStatus
 			,intSourceType			= Receipt.intSourceType
 			,intLotStatusId			= ItemLot.intLotStatusId
 			,intContractHeaderId	= ISNULL(SourceLot.intContractHeaderId, ReceiptItem.intContractHeaderId) 

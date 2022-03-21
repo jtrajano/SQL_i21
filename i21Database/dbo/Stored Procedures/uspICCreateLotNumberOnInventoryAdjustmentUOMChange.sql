@@ -50,6 +50,8 @@ BEGIN
 			,dtmExpiryDate
 			,[dblTare]
 			,[dblTarePerQty]
+			,[strWarrantNo]	
+			,[intWarrantStatus]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -74,7 +76,8 @@ BEGIN
 			,dtmExpiryDate				= SourceLot.dtmExpiryDate
 			,[dblTare]					= SourceLot.dblTare
 			,[dblTarePerQty]			= SourceLot.dblTarePerQty
-
+			,[strWarrantNo]				= SourceLot.strWarrantNo
+			,[intWarrantStatus]			= SourceLot.intWarrantStatus
 	FROM tblICInventoryAdjustment Header
 		INNER JOIN tblICInventoryAdjustmentDetail Detail 
 			ON Detail.intInventoryAdjustmentId = Header.intInventoryAdjustmentId

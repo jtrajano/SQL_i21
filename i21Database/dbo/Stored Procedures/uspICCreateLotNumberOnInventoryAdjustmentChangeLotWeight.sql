@@ -66,6 +66,8 @@ BEGIN
 			,[intSeasonCropYear]
 			,[dblTare]
 			,[dblTarePerQty]
+			,[strWarrantNo]
+			,[intWarrantStatus]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -105,6 +107,9 @@ BEGIN
 			,[intSeasonCropYear]		= SourceLot.intSeasonCropYear
 			,[dblTare]					= SourceLot.dblTare
 			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+			,[strWarrantNo]				= SourceLot.strWarrantNo
+			,[intWarrantStatus]			= SourceLot.intWarrantStatus
+
 	FROM tblICInventoryAdjustment Header
 		INNER JOIN tblICInventoryAdjustmentDetail Detail 
 			ON Detail.intInventoryAdjustmentId = Header.intInventoryAdjustmentId

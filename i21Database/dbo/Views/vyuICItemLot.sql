@@ -34,6 +34,7 @@ SELECT
 	, intGrossUOMDecimalPlaces = weightUOM.intDecimalPlaces
 	, strCargoNo = lot.strCargoNo
 	, strWarrantNo = lot.strWarrantNo
+	, WarrantStatus.strWarrantStatus
 	, lot.strCondition 
 	, item.intCertificationId
 	, Certification.strCertificationName
@@ -71,3 +72,4 @@ FROM tblICLot lot
 	LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = item.intSeasonId
 	LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = item.intClassVarietyId
 	LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = item.intProductLineId
+	LEFT JOIN tblICWarrantStatus WarrantStatus ON WarrantStatus.intWarrantStatus = lot.intWarrantStatus

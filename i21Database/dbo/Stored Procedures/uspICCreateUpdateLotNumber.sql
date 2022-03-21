@@ -116,6 +116,7 @@ DECLARE
 	,@strWarehouseRefNo			AS NVARCHAR(255)
 	,@strCargoNo			AS NVARCHAR(50)
 	,@strWarrantNo			AS NVARCHAR(50)
+	,@intWarrantStatus			AS TINYINT
 	,@intContractHeaderId		AS INT 
 	,@intContractDetailId		AS INT 
 	,@ysnWeighed				AS BIT 
@@ -235,6 +236,7 @@ SELECT  intId
 		,strWarehouseRefNo
 		,strCargoNo
 		,strWarrantNo
+		,intWarrantStatus
 		,intContractHeaderId
 		,intContractDetailId
 		,ysnWeighed
@@ -305,6 +307,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strWarehouseRefNo
 		,@strCargoNo
 		,@strWarrantNo
+		,@intWarrantStatus
 		,@intContractHeaderId
 		,@intContractDetailId
 		,@ysnWeighed
@@ -738,6 +741,7 @@ BEGIN
 						,strWarehouseRefNo = @strWarehouseRefNo
 						,strCargoNo = @strCargoNo
 						,strWarrantNo = @strWarrantNo
+						,intWarrantStatus = @intWarrantStatus
 						,intContractHeaderId = @intContractHeaderId
 						,intContractDetailId = @intContractDetailId
 						,ysnWeighed = @ysnWeighed
@@ -780,6 +784,7 @@ BEGIN
 				,intSeasonCropYear		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSeasonCropYear ELSE LotMaster.intSeasonCropYear END 	
 				,strCargoNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strCargoNo ELSE LotMaster.strCargoNo END 	
 				,strWarrantNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strWarrantNo ELSE LotMaster.strWarrantNo END 	
+				,intWarrantStatus		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intWarrantStatus ELSE LotMaster.intWarrantStatus END
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
 													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Incoming lot is already in wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
@@ -1070,6 +1075,7 @@ BEGIN
 				,strWarehouseRefNo
 				,strCargoNo
 				,strWarrantNo
+				,intWarrantStatus
 				,intContractHeaderId
 				,intContractDetailId
 				,ysnWeighed
@@ -1135,6 +1141,7 @@ BEGIN
 				,@strWarehouseRefNo
 				,@strCargoNo
 				,@strWarrantNo
+				,@intWarrantStatus
 				,@intContractHeaderId
 				,@intContractDetailId
 				,@ysnWeighed
@@ -1339,6 +1346,7 @@ BEGIN
 		,@strWarehouseRefNo
 		,@strCargoNo
 		,@strWarrantNo
+		,@intWarrantStatus
 		,@intContractHeaderId
 		,@intContractDetailId
 		,@ysnWeighed

@@ -91,11 +91,11 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[strTrackingNumber]			NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
 		[strCargoNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strWarrantNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intWarrantStatus]			TINYINT NULL, 
 		[intContractHeaderId]		INT NULL, -- Contract Header Id
 		[intContractDetailId]		INT NULL, -- Contract Detail Id
 		[ysnWeighed]				BIT DEFAULT((0)),
 		[strSealNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-		[intWarrantStatus]			TINYINT NULL, 
 		[intConcurrencyId]			INT NULL DEFAULT ((1)),
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
@@ -130,5 +130,15 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 
 	CREATE NONCLUSTERED INDEX [IX_tblICLot_strCondition]
 		ON [dbo].[tblICLot](intItemId ASC, intLocationId ASC, strCondition ASC, strLotNumber ASC);
+
+	GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblICLot_strWarrantNo]
+		ON [dbo].[tblICLot](strWarrantNo ASC, strLotNumber ASC, intLotId ASC);
+
+	GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblICLot_intWarrantStatus]
+		ON [dbo].[tblICLot](intWarrantStatus ASC, strLotNumber ASC, intLotId ASC);
 
 	GO 
