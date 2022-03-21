@@ -595,6 +595,8 @@
     <None Include="Scripts\Post-Deployment\IC\31_WarrantStatus.sql" />
     <Build Include="dbo\Views\vyuRKDerivativesForCommissionPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetEmailInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostMissingLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntriesForMissingLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

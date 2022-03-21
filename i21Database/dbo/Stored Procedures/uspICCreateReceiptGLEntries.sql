@@ -511,8 +511,19 @@ AS
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 
+			OUTER APPLY (
+				SELECT TOP 1 
+					ril.* 
+				FROM 
+					tblICInventoryReceiptItemLot ril
+				WHERE
+					ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+					AND ril.strCondition = 'Missing'			
+			) missingLots
+
 	WHERE	
 			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 
+			AND missingLots.intInventoryReceiptItemLotId IS NULL 
 
 	UNION ALL 
 	SELECT	
