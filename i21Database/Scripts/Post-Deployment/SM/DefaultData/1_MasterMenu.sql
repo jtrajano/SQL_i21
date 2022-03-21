@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Payable Details Revaluation' AND strModuleName = 'Accounts Payable')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Post Commissions' AND strModuleName = 'Cash Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1432,6 +1432,12 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Borrowing Fa
 ELSE
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Borrowing Facility', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'CashManagement.view.PostCommissions' WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+ELSE
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Post Commissions', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Post Commissions', N'Activity', N'Screen', N'CashManagement.view.PostCommissions', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
 
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Banks' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementMaintenanceParentMenuId)
