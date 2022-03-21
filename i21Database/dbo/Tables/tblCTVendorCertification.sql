@@ -14,5 +14,5 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT (1),
 	CONSTRAINT [PK_tblCTVendorCertification_intCertificationVendorId] PRIMARY KEY CLUSTERED  ([intCertificationProgramId] ASC),
 	CONSTRAINT [FK_tblCTVendorCertification_tblICCertification] FOREIGN KEY([intCertificationId]) REFERENCES [dbo].[tblICCertification] ([intCertificationId]),
-	CONSTRAINT [FK_tblCTVendorCertification_tblEMEntity] FOREIGN KEY([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
+	--CONSTRAINT [FK_tblCTVendorCertification_tblEMEntity] FOREIGN KEY([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )
