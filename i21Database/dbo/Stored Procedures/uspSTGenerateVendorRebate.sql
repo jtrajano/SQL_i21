@@ -359,7 +359,7 @@ BEGIN TRY
 		INNER JOIN (
 			SELECT DISTINCT intStoreId = Rebates.intStoreId
 				,ysnTobacco = Rebates.ysnTobacco
-				,intRegisterDepartmentId = CatLoc.intRegisterDepartmentId
+				,intRegisterDepartmentId = CatLoc.strCashRegisterDepartment
 			FROM tblSTStoreRebates Rebates
 			INNER JOIN tblSTStore Store
 				ON Rebates.intStoreId = Store.intStoreId
