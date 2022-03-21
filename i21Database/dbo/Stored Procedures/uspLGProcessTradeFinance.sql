@@ -104,11 +104,28 @@ BEGIN
 		,dtmTransactionDate
 		,intBankTransactionId
 		,strBankTransactionId
+		,intBankId
+		,strBank
+		,intBankAccountId
+		,strBankAccount
+		,intBorrowingFacilityId
+		,strBorrowingFacility
+		,strBorrowingFacilityBankRefNo
 		,dblTransactionAmountAllocated
 		,dblTransactionAmountActual
 		,intLoanLimitId
 		,strLoanLimitNumber
 		,strLoanLimitType
+		,intLimitId
+		,strLimit
+		,dblLimit
+		,intSublimitId
+		,strSublimit
+		,dblSublimit
+		,strBankTradeReference
+		,dblFinanceQty
+		,dblFinancedAmount
+		,strBankApprovalStatus
 		,dtmAppliedToTransactionDate
 		,intStatusId
 		,intWarrantId
@@ -129,11 +146,28 @@ BEGIN
 		,dtmTransactionDate = GETDATE()
 		,intBankTransactionId = null
 		,strBankTransactionId = null
+		,intBankId = BA.intBankId
+		,strBank = BA.strBankName
+		,intBankAccountId = L.intBankAccountId
+		,strBankAccount = BA.strBankAccountNo
+		,intBorrowingFacilityId = L.intBorrowingFacilityId
+		,strBorrowingFacility = FA.strBorrowingFacilityId
+		,strBorrowingFacilityBankRefNo = FA.strBankReferenceNo
 		,dblTransactionAmountAllocated = CD.dblLoanAmount
 		,dblTransactionAmountActual = CD.dblLoanAmount
 		,intLoanLimitId = L.intLoanLimitId
 		,strLoanLimitNumber = BL.strBankLoanId
 		,strLoanLimitType = BL.strLimitDescription
+		,intLimitId = L.intBorrowingFacilityLimitId
+		,strLimit = FL.strBorrowingFacilityLimit
+		,dblLimit = FL.dblLimit 
+		,intSublimitId = L.intBorrowingFacilityLimitDetailId
+		,strSublimit = FLD.strLimitDescription
+		,dblSublimit = FLD.dblLimit
+		,strBankTradeReference = L.strTradeFinanceReferenceNo
+		,dblFinanceQty = LD.dblQuantity
+		,dblFinancedAmount = LD.dblAmount
+		,strBankApprovalStatus = ASTF.strApprovalStatus
 		,dtmAppliedToTransactionDate = GETDATE()
 		,intStatusId = CASE WHEN L.intShipmentStatus = 4 THEN 2 ELSE 1 END
 		,intWarrantId = null
@@ -143,9 +177,15 @@ BEGIN
 		,intContractHeaderId = CD.intContractHeaderId
 		,intContractDetailId = L.intContractDetailId
 	FROM tblLGLoad L
-		CROSS APPLY (SELECT TOP 1 intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = L.intContractDetailId) LD
+		CROSS APPLY (SELECT TOP 1 intLoadDetailId, dblQuantity, dblAmount FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = L.intContractDetailId) LD
 		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = L.intContractDetailId
 		INNER JOIN tblCTContractHeader CH on CH.intContractHeaderId = CD.intContractHeaderId
+		LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
+		LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = L.intBorrowingFacilityId
+		LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = L.intBorrowingFacilityLimitId
+		LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = L.intBorrowingFacilityLimitDetailId
+		LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = L.intBankValuationRuleId
+		LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = L.intApprovalStatusId
 		LEFT JOIN tblCMBankLoan BL on BL.intBankLoanId = L.intLoanLimitId
 	WHERE intLoadId = @intLoadId
 
