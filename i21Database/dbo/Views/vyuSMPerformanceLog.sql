@@ -8,7 +8,7 @@ SELECT intPerformanceLogId	= PL.intPerformanceLogId
 	 , dtmStartDateTime		= dtmStartDateTime
 	 , dtmEndDateTime		= dtmEndDateTime
 	 , strTimeElapse		= CONVERT(NVARCHAR(200), CAST((dtmEndDateTime - dtmStartDateTime) AS TIME(0)))
-	 , strRequestId			= PL.strRequestId
+	 , strGroup				= PL.strGroup
 	 , intUserId			= PL.intUserId
 	 , strUserName			= LTRIM(RTRIM(E.strName))
 FROM tblSMPerformanceLog PL

@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[tblSMPerformanceLog](
 	[strScreenName]             NVARCHAR(200) NULL,
 	[strProcedureName]          NVARCHAR(200) NULL,
     [strBuildNumber]            NVARCHAR(50) NULL,
-	[strRequestId]				NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strGroup]				NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dtmStartDateTime]          DATETIME NULL,
     [dtmEndDateTime]            DATETIME NULL,	
 	[intUserId]                 INT NULL,

@@ -5,16 +5,15 @@
 AS
 BEGIN
 	
-	DECLARE @intNewPerformanceLogId	INT = NULL,
-			@strRequestId NVARCHAR(200) = NEWID()
+	DECLARE @intNewPerformanceLogId	INT = NULL
 
 	EXEC dbo.uspSMLogPerformanceRuntime @strModuleName			= 'System Manager'
-									  , @strScreenName			= NULL
+									  , @strScreenName			= 'Stored Procedure'
 									  , @strProcedureName       = 'uspSMIncreaseECConcurrency'
-									  , @strRequestId			= @strRequestId
 									  , @ysnStart		        = 1
-									  , @intUserId	            = NULL
+									  , @intUserId	            = 1
 									  , @intPerformanceLogId    = NULL
+									  , @strGroup				= NULL
 									  , @intNewPerformanceLogId = @intNewPerformanceLogId OUT
 
 	IF @entity = 1
@@ -85,10 +84,10 @@ BEGIN
 	END
 
 	EXEC dbo.uspSMLogPerformanceRuntime @strModuleName			= 'System Manager'
-									  , @strScreenName			= NULL
+									  , @strScreenName			= 'Stored Procedure'
 									  , @strProcedureName       = 'uspSMIncreaseECConcurrency'
-									  , @strRequestId			= @strRequestId
 									  , @ysnStart		        = 0
-									  , @intUserId	            = NULL
+									  , @intUserId	            = 1
+									  , @strGroup				= NULL
 									  , @intPerformanceLogId    = @intNewPerformanceLogId
 END

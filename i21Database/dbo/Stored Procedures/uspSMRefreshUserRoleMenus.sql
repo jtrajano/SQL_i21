@@ -4,17 +4,17 @@ BEGIN
  -- Update User Role and User Security Menus  
  DECLARE @currentRow INT  
  DECLARE @totalRows INT  
- DECLARE @intNewPerformanceLogId INT = NULL,  
-   @strRequestId NVARCHAR(200) = NEWID()  
+ DECLARE @intNewPerformanceLogId INT = NULL
   
- EXEC dbo.uspSMLogPerformanceRuntime @strModuleName = 'System Manager'
-           , @strScreenName   = NULL  
-           , @strProcedureName       = 'uspSMRefreshUserRoleMenus'  
-           , @strRequestId   = @strRequestId  
-           , @ysnStart          = 1  
-           , @intUserId             = NULL  
-           , @intPerformanceLogId    = NULL  
-           , @intNewPerformanceLogId = @intNewPerformanceLogId OUT  
+ EXEC dbo.uspSMLogPerformanceRuntime 
+             @strModuleName             = 'System Manager'
+           , @strScreenName             = 'Stored Procedure'  
+           , @strProcedureName          = 'uspSMRefreshUserRoleMenus'  
+           , @ysnStart                  = 1  
+           , @intUserId                 = 1
+           , @intPerformanceLogId       = NULL  
+           , @strGroup                  = NULL
+           , @intNewPerformanceLogId    = @intNewPerformanceLogId OUT  
   
  SET @currentRow = 1  
  SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE (strRoleType IN ('Administrator', 'User'))  
@@ -35,11 +35,12 @@ BEGIN
  SET @currentRow = @currentRow + 1  
  END  
   
- EXEC dbo.uspSMLogPerformanceRuntime @strModuleName = 'System Manager'
-           , @strScreenName   = NULL  
-           , @strProcedureName       = 'uspSMRefreshUserRoleMenus'  
-           , @strRequestId   = @strRequestId  
-           , @ysnStart          = 0  
-           , @intUserId             = NULL  
-           , @intPerformanceLogId    = @intNewPerformanceLogId  
+ EXEC dbo.uspSMLogPerformanceRuntime 
+             @strModuleName         = 'System Manager'
+           , @strScreenName         = 'Stored Procedure'  
+           , @strProcedureName      = 'uspSMRefreshUserRoleMenus'  
+           , @ysnStart              = 0  
+           , @intUserId             = 1
+           , @strGroup               = NULL
+           , @intPerformanceLogId   = @intNewPerformanceLogId  
 END  
