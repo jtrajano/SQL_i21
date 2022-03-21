@@ -14,7 +14,7 @@
     [strRTN]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strIBAN]				VARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
 	[strSwiftCode]			VARCHAR (11) COLLATE Latin1_General_CI_AS NULL,
-	[strBICCode]			VARCHAR (11) COLLATE Latin1_General_CI_AS NULL,
+	[strBICCode]			VARCHAR (8) COLLATE Latin1_General_CI_AS NULL,
     [intCreatedUserId]      INT            NULL,
     [dtmCreated]            DATETIME       NULL,
     [intLastModifiedUserId] INT            NULL,
