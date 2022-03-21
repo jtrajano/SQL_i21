@@ -5,9 +5,11 @@ BEGIN
 	SELECT LoadDetail.*
 		,strItemDescription = Item.strDescription
 		,strPLocationName = PCL.strLocationName
+		,strSLocationName = SCL.strLocationName
 		,strPSubLocationName = PCLSL.strSubLocationName
 		,strSSubLocationName = SCLSL.strSubLocationName
-		,strSLocationName = SCL.strLocationName
+		,strPStorageLocation = PSTL.strName
+		,strSStorageLocation = SSTL.strName
 		,strPContractNumber = PHeader.strContractNumber
 		,intPContractSeq = PDetail.intContractSeq
 		,strPPricingType = PTP.strPricingType
@@ -69,6 +71,8 @@ BEGIN
 	LEFT JOIN tblSMCompanyLocation				SCL				ON		SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation	PCLSL			ON		PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation	SCLSL			ON		SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId
+	LEFT JOIN tblICStorageLocation				PSTL			ON		PSTL.intStorageLocationId = LoadDetail.intPStorageLocationId
+	LEFT JOIN tblICStorageLocation				SSTL			ON		SSTL.intStorageLocationId = LoadDetail.intSStorageLocationId
 	LEFT JOIN tblCTContractDetail				PDetail			ON		PDetail.intContractDetailId = LoadDetail.intPContractDetailId
 	LEFT JOIN tblCTContractHeader				PHeader			ON		PHeader.intContractHeaderId = PDetail.intContractHeaderId
 	LEFT JOIN tblCTContractDetail				SDetail			ON		SDetail.intContractDetailId = LoadDetail.intSContractDetailId
