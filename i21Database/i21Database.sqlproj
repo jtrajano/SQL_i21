@@ -3349,6 +3349,7 @@
     <Build Include="dbo\Stored Procedures\uspWHCreatePutAwayTask.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateInboundPutawayTask.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportSampleInstruction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGTINCaseBarcode.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportDailyProduction.sql" />
     <Build Include="dbo\Views\vyuCTContractCostEnquiryCost.sql" />
