@@ -145,7 +145,7 @@ SELECT DISTINCT intLoadId,strLoadNumber,strType,intTruckId,strTrailerNo,intDrive
               isnull(a.intCustomerId,0) = isnull(delivery.intEntityId,0) and                     
               isnull(a.intCustomerLocationId,0) = isnull(delivery.intEntityLocationId,0) and                    
               isnull(a.intPCompanyLocationId,a.intSCompanyLocationId) = delivery.intCompanyLocationId              
-      and a.dtmDeliveryFrom = delivery.dtmDeliveryFrom and a.dtmDeliveryTo = delivery.dtmDeliveryTo           
+      and isnull(a.dtmDeliveryFrom,getdate()) = isnull(delivery.dtmDeliveryFrom,getdate()) and isnull(a.dtmDeliveryTo,getdate()) = isnull(delivery.dtmDeliveryTo,getdate())
  left join tblMBILPickupDetail pickupdetail on a.intLoadDetailId = pickupdetail.intLoadDetailId       
  Where a.intDriverEntityId = @intDriverId        
  and a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILDeliveryDetail)  
