@@ -13,7 +13,7 @@ SELECT DISTINCT strCommodityCode
 	, strOriginDest = ca.strDescription
 	, fm.strFutMarketName
 	, fm1.strFutureMonth
-	, strPeriodTo = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
+	, strPeriodTo = RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
 	, strLocationName
 	, strMarketZoneCode
 	, strCurrency = (CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN strCurrency ELSE muc.strCurrency END)
@@ -40,6 +40,56 @@ SELECT DISTINCT strCommodityCode
 	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
 	, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
 	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END
+	, strOriginPort =  CASE WHEN ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+							THEN loadShipmentWarehouse.strOriginPort
+							ELSE originPort.strCity
+							END
+	, intOriginPortId = CASE WHEN ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+							THEN loadShipmentWarehouse.intOriginPortId
+							ELSE originPort.intCityId
+							END
+	, strDestinationPort = CASE WHEN ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+							THEN loadShipmentWarehouse.strDestinationPort
+							ELSE destinationPort.strCity
+							END
+	, intDestinationPortId =  CASE WHEN ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+							THEN loadShipmentWarehouse.intDestinationPortId
+							ELSE destinationPort.intCityId
+							END
+	, strCropYear = cropYear.strCropYear
+	, intCropYearId = cropYear.intCropYearId
+	, strStorageLocation = CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.strStorageLocation
+							WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.strStorageLocation
+							ELSE 
+								CASE WHEN loadShipmentWarehouse.intTransUsedBy = 1 AND ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+								THEN loadShipmentWarehouse.strStorageLocation
+								ELSE storageLocation.strSubLocationName
+								END
+							END 
+	, intStorageLocationId = CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.intStorageLocationId
+							WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.intStorageLocationId
+							ELSE 
+								CASE WHEN loadShipmentWarehouse.intTransUsedBy = 1 AND ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+								THEN loadShipmentWarehouse.intStorageLocationId
+								ELSE storageLocation.intCompanyLocationSubLocationId
+								END
+							END
+	, strStorageUnit =  CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.strStorageUnit
+							WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.strStorageUnit
+							ELSE 
+								CASE WHEN loadShipmentWarehouse.intTransUsedBy = 1 AND ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+									THEN loadShipmentWarehouse.strStorageUnit
+									ELSE storageUnit.strName
+									END
+							END
+	, intStorageUnitId = CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.intStorageUnitId
+							WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.intStorageUnitId
+							ELSE
+								CASE WHEN loadShipmentWarehouse.intTransUsedBy = 1 AND ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+								THEN loadShipmentWarehouse.intStorageUnitId
+								ELSE storageUnit.intStorageLocationId
+								END
+							END
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -59,6 +109,83 @@ LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
+LEFT JOIN tblSMCity originPort
+	ON originPort.intCityId = cd.intLoadingPortId
+LEFT JOIN tblSMCity destinationPort
+	ON destinationPort.intCityId = cd.intDestinationPortId
+LEFT JOIN tblCTCropYear cropYear
+	ON cropYear.intCropYearId = ch.intCropYearId
+LEFT JOIN tblSMCompanyLocationSubLocation storageLocation
+	ON storageLocation.intCompanyLocationSubLocationId = cd.intSubLocationId
+LEFT JOIN tblICStorageLocation storageUnit
+	ON storageUnit.intStorageLocationId = cd.intStorageLocationId
+OUTER APPLY (
+		SELECT strShipmentStatus = ISNULL(NULLIF(ctShipStatus.strShipmentStatus, ''), 'Open')  
+		FROM  dbo.fnCTGetShipmentStatus(cd.intContractDetailId) ctShipStatus 
+	) ctShipmentStatus
+OUTER APPLY (
+	SELECT TOP 1 
+		  LD.intLoadId
+		, intStorageLocationId = loadStorageLoc.intCompanyLocationSubLocationId
+		, strStorageLocation = loadStorageLoc.strSubLocationName
+		, intStorageUnitId = loadStorageUnit.intStorageLocationId
+		, strStorageUnit = loadStorageUnit.strName
+		, intOriginPortId = LGLoadOrigin.intCityId
+		, strOriginPort = LGLoadOrigin.strCity
+		, intDestinationPortId = LGLoadDestination.intCityId
+		, strDestinationPort = LGLoadDestination.strCity
+		, LGLoad.intTransUsedBy
+	FROM tblLGLoadDetail LD
+	LEFT JOIN tblLGLoad LGLoad
+		ON LGLoad.intLoadId = LD.intLoadId 
+	LEFT JOIN tblLGLoadWarehouse warehouse
+		ON warehouse.intLoadId = LD.intLoadId
+	LEFT JOIN tblSMCompanyLocationSubLocation loadStorageLoc
+		ON loadStorageLoc.intCompanyLocationSubLocationId = warehouse.intSubLocationId
+	LEFT JOIN tblICStorageLocation loadStorageUnit
+		ON loadStorageUnit.intStorageLocationId = warehouse.intStorageLocationId
+	LEFT JOIN tblSMCity LGLoadOrigin
+		ON LGLoadOrigin.strCity = LGLoad.strOriginPort
+	LEFT JOIN tblSMCity LGLoadDestination
+		ON LGLoadOrigin.strCity = LGLoad.strDestinationPort
+	WHERE   ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered') -- LOAD SHIPMENT AFLOAT
+	-- WILL ONLY USE LOAD SHIPMENT VALUES WHEN TRANSPORT MODE = OCEAN VESSEL (2)
+	-- THIS IS DUE TO VESSEL TAB AND WAREHOUSE TAB IS ONLY DISPLAYED ON LOAD SHIPMENT WHEN TRANSPORT MODE = OCEAN VESSEL (2)
+	AND		LGLoad.intTransportationMode = 2 
+	AND		LGLoad.intShipmentType = 1 -- Shipment Only
+	AND		ISNULL(LD.intSContractDetailId, LD.intPContractDetailId) = cd.intContractDetailId 
+) loadShipmentWarehouse
+OUTER APPLY (
+	SELECT TOP 1 
+		  receiptItem.intInventoryReceiptId
+		, intStorageLocationId = receiptStorageLoc.intCompanyLocationSubLocationId
+		, strStorageLocation = receiptStorageLoc.strSubLocationName
+		, intStorageUnitId = receiptStorageUnit.intStorageLocationId
+		, strStorageUnit = receiptStorageUnit.strName
+	FROM tblICInventoryReceiptItem receiptItem
+	LEFT JOIN tblSMCompanyLocationSubLocation receiptStorageLoc
+		ON receiptStorageLoc.intCompanyLocationSubLocationId = receiptItem.intSubLocationId
+	LEFT JOIN tblICStorageLocation receiptStorageUnit
+		ON receiptStorageUnit.intStorageLocationId = receiptItem.intStorageLocationId
+	WHERE ch.intContractTypeId = 1 -- PURCHASE CONTRACTS ONLY
+	AND receiptItem.intContractDetailId = cd.intContractDetailId
+) receiptWarehouse
+OUTER APPLY (
+	SELECT TOP 1
+		  invShipment.intInventoryShipmentId
+		, intStorageLocationId = invShipStorageLoc.intCompanyLocationSubLocationId
+		, strStorageLocation = invShipStorageLoc.strSubLocationName
+		, intStorageUnitId = invShipStorageUnit.intStorageLocationId
+		, strStorageUnit = invShipStorageUnit.strName
+	FROM tblICInventoryShipmentItem invShipment
+	LEFT JOIN tblSMCompanyLocationSubLocation invShipStorageLoc
+		ON invShipStorageLoc.intCompanyLocationSubLocationId = invShipment.intSubLocationId
+	LEFT JOIN tblICStorageLocation invShipStorageUnit
+		ON invShipStorageUnit.intStorageLocationId = invShipment.intStorageLocationId
+	WHERE ch.intContractTypeId = 2 -- SALE CONTRACTS ONLY
+	AND invShipment.intLineNo = cd.intContractDetailId
+) invShipWarehouse
+
 WHERE dblBalance > 0 AND cd.intPricingTypeId NOT IN (5,6) AND cd.intContractStatusId <> 3	
 
 UNION SELECT DISTINCT strCommodityCode
@@ -66,7 +193,7 @@ UNION SELECT DISTINCT strCommodityCode
 	, strOriginDest = ca.strDescription
 	, fm.strFutMarketName
 	, fm1.strFutureMonth
-	, strPeriodTo = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
+	, strPeriodTo = RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
 	, strLocationName
 	, strMarketZoneCode
 	, strCurrency = (CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN strCurrency ELSE muc.strCurrency END)
@@ -92,7 +219,57 @@ UNION SELECT DISTINCT strCommodityCode
 	, i.strMarketValuation
 	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
 	, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
-	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END
+	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END	
+	, strOriginPort =  CASE WHEN ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+							THEN loadShipmentWarehouse.strOriginPort
+							ELSE originPort.strCity
+							END
+	, intOriginPortId = CASE WHEN ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+							THEN loadShipmentWarehouse.intOriginPortId
+							ELSE originPort.intCityId
+							END
+	, strDestinationPort = CASE WHEN ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+							THEN loadShipmentWarehouse.strDestinationPort
+							ELSE destinationPort.strCity
+							END
+	, intDestinationPortId =  CASE WHEN ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+							THEN loadShipmentWarehouse.intDestinationPortId
+							ELSE destinationPort.intCityId
+							END
+	, strCropYear = cropYear.strCropYear
+	, intCropYearId = cropYear.intCropYearId
+	, strStorageLocation = CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.strStorageLocation
+							WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.strStorageLocation
+							ELSE 
+								CASE WHEN loadShipmentWarehouse.intTransUsedBy = 1 AND ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+								THEN loadShipmentWarehouse.strStorageLocation
+								ELSE storageLocation.strSubLocationName
+								END
+							END 
+	, intStorageLocationId = CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.intStorageLocationId
+							WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.intStorageLocationId
+							ELSE 
+								CASE WHEN loadShipmentWarehouse.intTransUsedBy = 1 AND ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+								THEN loadShipmentWarehouse.intStorageLocationId
+								ELSE storageLocation.intCompanyLocationSubLocationId
+								END
+							END
+	, strStorageUnit =  CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.strStorageUnit
+							WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.strStorageUnit
+							ELSE 
+								CASE WHEN loadShipmentWarehouse.intTransUsedBy = 1 AND ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+									THEN loadShipmentWarehouse.strStorageUnit
+									ELSE storageUnit.strName
+									END
+							END
+	, intStorageUnitId = CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.intStorageUnitId
+							WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.intStorageUnitId
+							ELSE
+								CASE WHEN loadShipmentWarehouse.intTransUsedBy = 1 AND ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered')
+								THEN loadShipmentWarehouse.intStorageUnitId
+								ELSE storageUnit.intStorageLocationId
+								END
+							END
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail  cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -111,7 +288,83 @@ LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
-WHERE cd.intPricingTypeId IN( 5,6) AND cd.intContractStatusId <> 3
+LEFT JOIN tblSMCity originPort
+	ON originPort.intCityId = cd.intLoadingPortId
+LEFT JOIN tblSMCity destinationPort
+	ON destinationPort.intCityId = cd.intDestinationPortId
+LEFT JOIN tblCTCropYear cropYear
+	ON cropYear.intCropYearId = ch.intCropYearId
+LEFT JOIN tblSMCompanyLocationSubLocation storageLocation
+	ON storageLocation.intCompanyLocationSubLocationId = cd.intSubLocationId
+LEFT JOIN tblICStorageLocation storageUnit
+	ON storageUnit.intStorageLocationId = cd.intStorageLocationId
+OUTER APPLY (
+		SELECT strShipmentStatus = ISNULL(NULLIF(ctShipStatus.strShipmentStatus, ''), 'Open')  
+		FROM  dbo.fnCTGetShipmentStatus(cd.intContractDetailId) ctShipStatus 
+	) ctShipmentStatus
+OUTER APPLY (
+	SELECT TOP 1 
+		  LD.intLoadId
+		, intStorageLocationId = loadStorageLoc.intCompanyLocationSubLocationId
+		, strStorageLocation = loadStorageLoc.strSubLocationName
+		, intStorageUnitId = loadStorageUnit.intStorageLocationId
+		, strStorageUnit = loadStorageUnit.strName
+		, intOriginPortId = LGLoadOrigin.intCityId
+		, strOriginPort = LGLoadOrigin.strCity
+		, intDestinationPortId = LGLoadDestination.intCityId
+		, strDestinationPort = LGLoadDestination.strCity
+		, LGLoad.intTransUsedBy
+	FROM tblLGLoadDetail LD
+	LEFT JOIN tblLGLoad LGLoad
+		ON LGLoad.intLoadId = LD.intLoadId 
+	LEFT JOIN tblLGLoadWarehouse warehouse
+		ON warehouse.intLoadId = LD.intLoadId
+	LEFT JOIN tblSMCompanyLocationSubLocation loadStorageLoc
+		ON loadStorageLoc.intCompanyLocationSubLocationId = warehouse.intSubLocationId
+	LEFT JOIN tblICStorageLocation loadStorageUnit
+		ON loadStorageUnit.intStorageLocationId = warehouse.intStorageLocationId
+	LEFT JOIN tblSMCity LGLoadOrigin
+		ON LGLoadOrigin.strCity = LGLoad.strOriginPort
+	LEFT JOIN tblSMCity LGLoadDestination
+		ON LGLoadOrigin.strCity = LGLoad.strDestinationPort
+	WHERE   ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered') -- LOAD SHIPMENT AFLOAT
+	-- WILL ONLY USE LOAD SHIPMENT VALUES WHEN TRANSPORT MODE = OCEAN VESSEL (2)
+	-- THIS IS DUE TO VESSEL TAB AND WAREHOUSE TAB IS ONLY DISPLAYED ON LOAD SHIPMENT WHEN TRANSPORT MODE = OCEAN VESSEL (2)
+	AND		LGLoad.intTransportationMode = 2 
+	AND		LGLoad.intShipmentType = 1 -- Shipment Only
+	AND		ISNULL(LD.intSContractDetailId, LD.intPContractDetailId) = cd.intContractDetailId 
+) loadShipmentWarehouse
+OUTER APPLY (
+	SELECT TOP 1 
+		  receiptItem.intInventoryReceiptId
+		, intStorageLocationId = receiptStorageLoc.intCompanyLocationSubLocationId
+		, strStorageLocation = receiptStorageLoc.strSubLocationName
+		, intStorageUnitId = receiptStorageUnit.intStorageLocationId
+		, strStorageUnit = receiptStorageUnit.strName
+	FROM tblICInventoryReceiptItem receiptItem
+	LEFT JOIN tblSMCompanyLocationSubLocation receiptStorageLoc
+		ON receiptStorageLoc.intCompanyLocationSubLocationId = receiptItem.intSubLocationId
+	LEFT JOIN tblICStorageLocation receiptStorageUnit
+		ON receiptStorageUnit.intStorageLocationId = receiptItem.intStorageLocationId
+	WHERE ch.intContractTypeId = 1 -- PURCHASE CONTRACTS ONLY
+	AND receiptItem.intContractDetailId = cd.intContractDetailId
+) receiptWarehouse
+OUTER APPLY (
+	SELECT TOP 1
+		  invShipment.intInventoryShipmentId
+		, intStorageLocationId = invShipStorageLoc.intCompanyLocationSubLocationId
+		, strStorageLocation = invShipStorageLoc.strSubLocationName
+		, intStorageUnitId = invShipStorageUnit.intStorageLocationId
+		, strStorageUnit = invShipStorageUnit.strName
+	FROM tblICInventoryShipmentItem invShipment
+	LEFT JOIN tblSMCompanyLocationSubLocation invShipStorageLoc
+		ON invShipStorageLoc.intCompanyLocationSubLocationId = invShipment.intSubLocationId
+	LEFT JOIN tblICStorageLocation invShipStorageUnit
+		ON invShipStorageUnit.intStorageLocationId = invShipment.intStorageLocationId
+	WHERE ch.intContractTypeId = 2 -- SALE CONTRACTS ONLY
+	AND invShipment.intLineNo = cd.intContractDetailId
+) invShipWarehouse
+WHERE cd.intPricingTypeId IN (5,6) AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
 	, iis.strItemNo
@@ -145,6 +398,16 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
 	, intBoardMonthId = NULL
 	, strBoardMonth = NULL
+	, strOriginPort
+	, intOriginPortId
+	, strDestinationPort 
+	, intDestinationPortId
+	, strCropYear 
+	, intCropYearId
+	, strStorageLocation 
+	, intStorageLocationId
+	, strStorageUnit 
+	, intStorageUnitId
 FROM (
 	SELECT it.intItemId
 		, it.strItemNo
@@ -154,7 +417,7 @@ FROM (
 		, it.intCurrencyId
 		, it.strMarketValuation
 		, it.intOriginId
-		, it.ysnLicensed
+		, cl.ysnLicensed
 		, c.intCommodityId
 		, c.strCommodityCode
 		, intStockUOMId = UOM.intUnitMeasureId
@@ -164,6 +427,7 @@ FROM (
 	INNER JOIN tblICCommodity c on i.intCommodityId =  c.intCommodityId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = i.intItemId AND ItemUOM.ysnStockUnit = 1
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = it.intLocationId
 	WHERE dblQuantity > 0
 		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 intRiskViewId FROM tblRKCompanyPreference) = 2 THEN it.strLotTracking ELSE 'No' END)) iis
 OUTER APPLY (
@@ -174,7 +438,7 @@ OUTER APPLY (
 		, cd.intItemUOMId
 		, ch.intCommodityId
 		, c.strCommodityCode
-		, cd.intMarketZoneId
+		, intMarketZoneId = NULL
 		, ct.intContractTypeId
 		, ct.strContractType
 		, pt.intPricingTypeId
@@ -189,6 +453,16 @@ OUTER APPLY (
 		, strFMUOM = mum.strUnitMeasure
 		, intUOMId = um.intUnitMeasureId
 		, strUOM = um.strUnitMeasure
+		, strOriginPort = NULL
+		, intOriginPortId = NULL
+		, strDestinationPort = NULL
+		, intDestinationPortId = NULL
+		, strCropYear = NULL
+		, intCropYearId = NULL
+		, strStorageLocation = NULL
+		, intStorageLocationId = NULL
+		, strStorageUnit = NULL
+		, intStorageUnitId = NULL
 	FROM tblCTContractDetail cd
 	JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 	JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId

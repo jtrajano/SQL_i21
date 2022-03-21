@@ -34,6 +34,13 @@ SELECT H.intM2MHeaderId
     , H.strBatchId
     , H.intCompanyId
     , H.intConcurrencyId
+	, ysnEvaluationByLocation = ISNULL(companyConfig.ysnEvaluationByLocation, CAST(0 AS BIT))
+	, ysnEvaluationByMarketZone = ISNULL(companyConfig.ysnEvaluationByMarketZone, CAST(0 AS BIT))
+	, ysnEvaluationByOriginPort = ISNULL(companyConfig.ysnEvaluationByOriginPort, CAST(0 AS BIT))
+	, ysnEvaluationByDestinationPort = ISNULL(companyConfig.ysnEvaluationByDestinationPort, CAST(0 AS BIT))
+	, ysnEvaluationByCropYear = ISNULL(companyConfig.ysnEvaluationByCropYear, CAST(0 AS BIT))
+	, ysnEvaluationByStorageLocation = ISNULL(companyConfig.ysnEvaluationByStorageLocation, CAST(0 AS BIT))
+	, ysnEvaluationByStorageUnit = ISNULL(companyConfig.ysnEvaluationByStorageUnit, CAST(0 AS BIT))
 FROM tblRKM2MHeader H
 LEFT JOIN tblICCommodity c ON c.intCommodityId = H.intCommodityId
 LEFT JOIN tblRKM2MType t ON t.intM2MTypeId = H.intM2MTypeId
@@ -44,3 +51,14 @@ LEFT JOIN tblICUnitMeasure qUOM ON qUOM.intUnitMeasureId = H.intQtyUOMId
 LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = H.intCurrencyId
 LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = H.intLocationId
 LEFT JOIN tblARMarketZone mz ON mz.intMarketZoneId = H.intMarketZoneId
+OUTER APPLY (
+	SELECT TOP 1 
+	  ysnEvaluationByLocation
+	, ysnEvaluationByMarketZone
+	, ysnEvaluationByOriginPort
+	, ysnEvaluationByDestinationPort
+	, ysnEvaluationByCropYear
+	, ysnEvaluationByStorageLocation
+	, ysnEvaluationByStorageUnit
+	FROM tblRKCompanyPreference
+) companyConfig

@@ -19,6 +19,11 @@
 	[dblRatio] NUMERIC(18, 6) NULL, 
     [intUnitMeasureId] INT NULL, 
     [intM2MBasisDetailId] INT NULL, 
+	[intOriginPortId] INT NULL,
+	[intDestinationPortId] INT NULL,
+	[intCropYearId] INT NULL,
+	[intStorageLocationId] INT NULL,
+	[intStorageUnitId] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKM2MDifferentialBasis] PRIMARY KEY ([intM2MDifferentialBasisId]), 
     CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblRKM2MHeader] FOREIGN KEY ([intM2MHeaderId]) REFERENCES [tblRKM2MHeader]([intM2MHeaderId]) ON DELETE CASCADE, 
@@ -29,5 +34,10 @@
     CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]), 
     CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
-    CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblRKM2MBasisDetail] FOREIGN KEY ([intM2MBasisDetailId]) REFERENCES [tblRKM2MBasisDetail]([intM2MBasisDetailId])
+    CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblRKM2MBasisDetail] FOREIGN KEY ([intM2MBasisDetailId]) REFERENCES [tblRKM2MBasisDetail]([intM2MBasisDetailId]),
+	CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblSMCity_intOriginPortId] FOREIGN KEY (intOriginPortId) REFERENCES [dbo].[tblSMCity] (intCityId),
+	CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblSMCity_intDestinationPortId] FOREIGN KEY (intDestinationPortId) REFERENCES [dbo].[tblSMCity] (intCityId),
+	CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblCTCropYear_intCropYearId] FOREIGN KEY (intCropYearId) REFERENCES [dbo].[tblCTCropYear] (intCropYearId),
+	CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblSMCompanyLocationSubLocation_intStorageLocationId] FOREIGN KEY (intStorageLocationId) REFERENCES [dbo].[tblSMCompanyLocationSubLocation] (intCompanyLocationSubLocationId),
+	CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblICStorageLocation_intStorageUnitId] FOREIGN KEY (intStorageUnitId) REFERENCES [dbo].[tblICStorageLocation] (intStorageLocationId)
 )

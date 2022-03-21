@@ -116,6 +116,13 @@ BEGIN TRY
 		, @ysnIncludeInTransitM2M BIT
 		, @strEvaluationBy NVARCHAR(50)
 		, @strEvaluationByZone NVARCHAR(50)
+		, @ysnEvaluationByLocation BIT
+        , @ysnEvaluationByMarketZone BIT
+        , @ysnEvaluationByOriginPort BIT
+        , @ysnEvaluationByDestinationPort BIT
+        , @ysnEvaluationByCropYear BIT
+        , @ysnEvaluationByStorageLocation BIT
+        , @ysnEvaluationByStorageUnit BIT
 		, @strM2MType NVARCHAR(50)
 		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell BIT
 		, @dtmCurrentDate DATETIME = GETDATE()
@@ -134,6 +141,13 @@ BEGIN TRY
 		, @strEvaluationBy = strEvaluationBy
 		, @strEvaluationByZone = strEvaluationByZone
 		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell
+		, @ysnEvaluationByLocation = ysnEvaluationByLocation 
+        , @ysnEvaluationByMarketZone = ysnEvaluationByMarketZone 
+        , @ysnEvaluationByOriginPort = ysnEvaluationByOriginPort 
+        , @ysnEvaluationByDestinationPort = ysnEvaluationByDestinationPort 
+        , @ysnEvaluationByCropYear = ysnEvaluationByCropYear 
+        , @ysnEvaluationByStorageLocation = ysnEvaluationByStorageLocation 
+        , @ysnEvaluationByStorageUnit = ysnEvaluationByStorageUnit 
 	FROM tblRKCompanyPreference
 
 	SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
@@ -488,7 +502,18 @@ BEGIN TRY
 			, strSpreadMonth NVARCHAR(50)
 			, dblSpreadMonthPrice NUMERIC(24, 20)
 			, dblSpread NUMERIC(24, 10)
-			, ysnExpired BIT)
+			, ysnExpired BIT
+			, strOriginPort NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intOriginPortId INT
+			, strDestinationPort NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intDestinationPortId INT
+			, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intCropYearId INT
+			, strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intStorageLocationId INT
+			, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intStorageUnitId INT
+		)
 
 		DECLARE @GetContractDetailView TABLE (intCommodityUnitMeasureId INT
 			, strLocationName NVARCHAR(100)
@@ -549,7 +574,18 @@ BEGIN TRY
 			, dblPricedQty NUMERIC(24, 10)
 			, dblUnPricedQty NUMERIC(24, 10)
 			, dblPricedAmount NUMERIC(24, 10)
-			, strMarketZoneCode NVARCHAR(200))
+			, strMarketZoneCode NVARCHAR(200)
+			, strOriginPort NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intOriginPortId INT
+			, strDestinationPort NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intDestinationPortId INT
+			, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intCropYearId INT
+			, strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intStorageLocationId INT
+			, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intStorageUnitId INT
+		)
 			
 		--There is an error "An INSERT EXEC statement cannot be nested." that is why we cannot directly call the uspRKDPRContractDetail AND insert
 		DECLARE @ContractBalance TABLE (intRowNum INT
@@ -911,9 +947,23 @@ BEGIN TRY
 			, dblPricedQty
 			, dblUnPricedQty
 			, dblPricedAmount
-			, strMarketZoneCode)
+			, strMarketZoneCode
+			, strOriginPort 
+			, intOriginPortId 
+			, strDestinationPort 
+			, intDestinationPortId 
+			, strCropYear 
+			, intCropYearId 
+			, strStorageLocation 
+			, intStorageLocationId 
+			, strStorageUnit 
+			, intStorageUnitId 
+		)
 		SELECT DISTINCT intCommodityUnitMeasureId = CH.intCommodityUOMId
-			, CL.strLocationName
+			, strLocationName = CASE WHEN @ysnEvaluationByLocation = 0
+									THEN NULL
+									ELSE CL.strLocationName
+									END
 			, strCommodityDescription = CY.strDescription
 			, CU.intMainCurrencyId
 			, CU.intCent
@@ -945,7 +995,10 @@ BEGIN TRY
 			, dblBalance = ISNULL(CB.dblBalance, CD.dblBalance)
 			, CD.intCurrencyId
 			, CD.dblRate
-			, CD.intMarketZoneId
+			, intMarketZoneId = CASE WHEN @ysnEvaluationByMarketZone = 0
+									THEN NULL
+									ELSE CD.intMarketZoneId
+									END
 			, CD.dtmPlannedAvailabilityDate
 			, IM.strItemNo
 			, CB.strPricingType
@@ -960,7 +1013,10 @@ BEGIN TRY
 			, dblPriceWORollArb = NULL
 			, CH.dblNoOfLots dblHeaderNoOfLots
 			, ysnSubCurrency = CAST(ISNULL(CU.intMainCurrencyId, 0) AS BIT)
-			, CD.intCompanyLocationId
+			, intCompanyLocationId = CASE WHEN @ysnEvaluationByLocation = 0
+									THEN NULL
+									ELSE CD.intCompanyLocationId
+									END
 			, MO.ysnExpired
 			, CB.strPricingStatus
 			, strOrgin = CA.strDescription
@@ -971,7 +1027,84 @@ BEGIN TRY
 			, dblPricedQty = NULL
 			, dblUnPricedQty = NULL
 			, dblPricedAmount = CB.dblAmount
-			, MZ.strMarketZoneCode
+			, strMarketZoneCode = CASE WHEN @ysnEvaluationByMarketZone = 0
+									THEN NULL
+									ELSE MZ.strMarketZoneCode
+									END
+			, strOriginPort = CASE WHEN @ysnEvaluationByOriginPort = 0
+								THEN NULL
+								ELSE CASE WHEN ISNULL(loadShipmentWarehouse.intLoadId, 0) <> 0
+									THEN loadShipmentWarehouse.strOriginPort
+									ELSE originPort.strCity
+									END
+								END
+			, intOriginPortId = CASE WHEN @ysnEvaluationByOriginPort = 0
+								THEN NULL
+								ELSE CASE WHEN ISNULL(loadShipmentWarehouse.intLoadId, 0) <> 0
+									THEN loadShipmentWarehouse.intOriginPortId
+									ELSE originPort.intCityId
+									END
+								END
+			, strDestinationPort = CASE WHEN @ysnEvaluationByDestinationPort = 0
+									THEN NULL
+									ELSE CASE WHEN ISNULL(loadShipmentWarehouse.intLoadId, 0) <> 0
+										THEN loadShipmentWarehouse.strDestinationPort
+										ELSE destinationPort.strCity
+										END
+									END
+			, intDestinationPortId =  CASE WHEN @ysnEvaluationByDestinationPort = 0
+										THEN NULL
+										ELSE CASE WHEN ISNULL(loadShipmentWarehouse.intLoadId, 0) <> 0
+											THEN loadShipmentWarehouse.intDestinationPortId
+											ELSE destinationPort.intCityId
+											END
+										END
+			, strCropYear = CASE WHEN @ysnEvaluationByCropYear = 0 THEN NULL ELSE cropYear.strCropYear END
+			, intCropYearId = CASE WHEN @ysnEvaluationByCropYear = 0 THEN NULL ELSE cropYear.intCropYearId END
+			, strStorageLocation = CASE WHEN @ysnEvaluationByStorageLocation = 0
+										THEN NULL
+										ELSE CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.strStorageLocation
+											WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.strStorageLocation
+											ELSE 
+												CASE WHEN ISNULL(loadShipmentWarehouse.intLoadId, 0) <> 0 AND loadShipmentWarehouse.intTransUsedBy = 1
+												THEN loadShipmentWarehouse.strStorageLocation
+												ELSE storageLocation.strSubLocationName
+												END
+											END 
+										END
+			, intStorageLocationId = CASE WHEN @ysnEvaluationByStorageLocation = 0
+										THEN NULL
+										ELSE CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.intStorageLocationId
+											WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.intStorageLocationId
+											ELSE 
+												CASE WHEN ISNULL(loadShipmentWarehouse.intLoadId, 0) <> 0 AND loadShipmentWarehouse.intTransUsedBy = 1
+												THEN loadShipmentWarehouse.intStorageLocationId
+												ELSE storageLocation.intCompanyLocationSubLocationId
+												END
+											END
+										END
+			, strStorageUnit =  CASE WHEN @ysnEvaluationByStorageUnit = 0
+									THEN NULL
+									ELSE CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.strStorageUnit
+										WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.strStorageUnit
+										ELSE 
+											CASE WHEN ISNULL(loadShipmentWarehouse.intLoadId, 0) <> 0 AND loadShipmentWarehouse.intTransUsedBy = 1
+												THEN loadShipmentWarehouse.strStorageUnit
+												ELSE storageUnit.strName
+												END
+										END
+									END
+			, intStorageUnitId = CASE WHEN @ysnEvaluationByStorageUnit = 0
+									THEN NULL
+									ELSE CASE WHEN ISNULL(receiptWarehouse.intInventoryReceiptId, 0) <> 0 THEN receiptWarehouse.intStorageUnitId
+										WHEN ISNULL(invShipWarehouse.intInventoryShipmentId, 0) <> 0 THEN invShipWarehouse.intStorageUnitId
+										ELSE
+											CASE WHEN ISNULL(loadShipmentWarehouse.intLoadId, 0) <> 0 AND loadShipmentWarehouse.intTransUsedBy = 1
+											THEN loadShipmentWarehouse.intStorageUnitId
+											ELSE storageUnit.intStorageLocationId
+											END
+										END
+									END
 		FROM tblCTContractHeader CH
 		INNER JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 		INNER JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
@@ -989,6 +1122,89 @@ BEGIN TRY
 		LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
 		LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = CD.intMarketZoneId
+		LEFT JOIN tblSMCity originPort
+			ON originPort.intCityId = CD.intLoadingPortId
+		LEFT JOIN tblSMCity destinationPort
+			ON destinationPort.intCityId = CD.intDestinationPortId
+		LEFT JOIN tblCTCropYear cropYear
+			ON cropYear.intCropYearId = CH.intCropYearId
+		LEFT JOIN tblSMCompanyLocationSubLocation storageLocation
+			ON storageLocation.intCompanyLocationSubLocationId = CD.intSubLocationId
+		LEFT JOIN tblICStorageLocation storageUnit
+			ON storageUnit.intStorageLocationId = CD.intStorageLocationId
+		OUTER APPLY (
+				SELECT strShipmentStatus = ISNULL(NULLIF(ctShipStatus.strShipmentStatus, ''), 'Open')  
+				FROM  dbo.fnCTGetShipmentStatus(CD.intContractDetailId) ctShipStatus 
+			) ctShipmentStatus
+		OUTER APPLY (
+			SELECT TOP 1 
+				  LD.intLoadId
+				, intStorageLocationId = loadStorageLoc.intCompanyLocationSubLocationId
+				, strStorageLocation = loadStorageLoc.strSubLocationName
+				, intStorageUnitId = loadStorageUnit.intStorageLocationId
+				, strStorageUnit = loadStorageUnit.strName
+				, intOriginPortId = LGLoadOrigin.intCityId
+				, strOriginPort = LGLoadOrigin.strCity
+				, intDestinationPortId = LGLoadDestination.intCityId
+				, strDestinationPort = LGLoadDestination.strCity
+				, LGLoad.intTransUsedBy
+			FROM tblLGLoadDetail LD
+			LEFT JOIN tblLGLoad LGLoad
+				ON LGLoad.intLoadId = LD.intLoadId 
+			LEFT JOIN tblLGLoadWarehouse warehouse
+				ON warehouse.intLoadId = LD.intLoadId
+			LEFT JOIN tblSMCompanyLocationSubLocation loadStorageLoc
+				ON loadStorageLoc.intCompanyLocationSubLocationId = warehouse.intSubLocationId
+			LEFT JOIN tblICStorageLocation loadStorageUnit
+				ON loadStorageUnit.intStorageLocationId = warehouse.intStorageLocationId
+			LEFT JOIN tblSMCity LGLoadOrigin
+				ON LGLoadOrigin.strCity = LGLoad.strOriginPort
+			LEFT JOIN tblSMCity LGLoadDestination
+				ON LGLoadOrigin.strCity = LGLoad.strDestinationPort
+			WHERE	LGLoad.intTransportationMode = 2 -- TRANSPORT MODE = OCEAN VESSEL (2)
+			AND		LGLoad.intShipmentType = 1 -- SHIPMENT ONLY
+			AND		ISNULL(LD.intSContractDetailId, LD.intPContractDetailId) = CD.intContractDetailId 
+			AND		(LGLoad.dtmDispatchedDate IS NOT NULL OR LGLoad.dtmPostedDate IS NOT NULL) -- LOAD SHIPMENT AFLOAT
+			AND		LEFT(CONVERT(VARCHAR, ISNULL(LGLoad.dtmDispatchedDate, LGLoad.dtmPostedDate), 101), 10) <= @dtmEndDate
+		) loadShipmentWarehouse
+		OUTER APPLY (
+			SELECT TOP 1 
+				  receiptItem.intInventoryReceiptId
+				, intStorageLocationId = receiptStorageLoc.intCompanyLocationSubLocationId
+				, strStorageLocation = receiptStorageLoc.strSubLocationName
+				, intStorageUnitId = receiptStorageUnit.intStorageLocationId
+				, strStorageUnit = receiptStorageUnit.strName
+			FROM tblICInventoryReceiptItem receiptItem
+			LEFT JOIN tblICInventoryReceipt invReceipt
+				ON invReceipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+			LEFT JOIN tblSMCompanyLocationSubLocation receiptStorageLoc
+				ON receiptStorageLoc.intCompanyLocationSubLocationId = receiptItem.intSubLocationId
+			LEFT JOIN tblICStorageLocation receiptStorageUnit
+				ON receiptStorageUnit.intStorageLocationId = receiptItem.intStorageLocationId
+			WHERE CH.intContractTypeId = 1 -- PURCHASE CONTRACTS ONLY
+			AND receiptItem.intContractDetailId = CD.intContractDetailId
+			AND invReceipt.dtmReceiptDate IS NOT NULL
+			AND LEFT(CONVERT(VARCHAR, invReceipt.dtmReceiptDate, 101), 10) <= @dtmEndDate
+		) receiptWarehouse
+		OUTER APPLY (
+			SELECT TOP 1
+				  invShipment.intInventoryShipmentId
+				, intStorageLocationId = invShipStorageLoc.intCompanyLocationSubLocationId
+				, strStorageLocation = invShipStorageLoc.strSubLocationName
+				, intStorageUnitId = invShipStorageUnit.intStorageLocationId
+				, strStorageUnit = invShipStorageUnit.strName
+			FROM tblICInventoryShipmentItem invShipment
+			LEFT JOIN tblICInventoryShipment invShip
+				ON invShip.intInventoryShipmentId = invShipment.intInventoryShipmentId
+			LEFT JOIN tblSMCompanyLocationSubLocation invShipStorageLoc
+				ON invShipStorageLoc.intCompanyLocationSubLocationId = invShipment.intSubLocationId
+			LEFT JOIN tblICStorageLocation invShipStorageUnit
+				ON invShipStorageUnit.intStorageLocationId = invShipment.intStorageLocationId
+			WHERE CH.intContractTypeId = 2 -- SALE CONTRACTS ONLY
+			AND invShipment.intLineNo = CD.intContractDetailId
+			AND invShip.dtmShipDate IS NOT NULL
+			AND LEFT(CONVERT(VARCHAR, invShip.dtmShipDate, 101), 10) <= @dtmEndDate
+		) invShipWarehouse
 		WHERE CH.intCommodityId = @intCommodityId
 			AND CL.intCompanyLocationId = ISNULL(@intLocationId, CL.intCompanyLocationId)
 			AND ISNULL(CD.intMarketZoneId, 0) = ISNULL(@intMarketZoneId, ISNULL(CD.intMarketZoneId, 0))
@@ -1183,8 +1399,18 @@ BEGIN TRY
 			, strSpreadMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, dblSpreadMonthPrice NUMERIC(24, 10)
 			, dblSpread NUMERIC(24, 10)
-			, ysnSpreadExpired BIT)
-
+			, ysnSpreadExpired BIT
+			, strOriginPort NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intOriginPortId INT
+			, strDestinationPort NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intDestinationPortId INT
+			, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intCropYearId INT
+			, strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intStorageLocationId INT
+			, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intStorageUnitId INT
+		)
 		SELECT dblRatio
 			, dblMarketBasis = (ISNULL(dblBasisOrDiscount, 0) + ISNULL(dblCashOrFuture, 0)) / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
 			, intMarketBasisUOM = intCommodityUnitMeasureId
@@ -1200,6 +1426,11 @@ BEGIN TRY
 			, temp.intCurrencyId
 			, temp.intCommodityId
 			, temp.intMarketZoneId
+			, temp.intOriginPortId
+			, temp.intDestinationPortId
+			, temp.intCropYearId
+			, temp.intStorageLocationId
+			, temp.intStorageUnitId
 		INTO #tmpM2MBasisDetail
 		FROM tblRKM2MBasisDetail temp
 		LEFT JOIN tblSMCurrency c ON temp.intCurrencyId=c.intCurrencyID
@@ -1329,7 +1560,18 @@ BEGIN TRY
 			, strSpreadMonth
 			, dblSpreadMonthPrice
 			, dblSpread
-			, ysnSpreadExpired)
+			, ysnSpreadExpired
+			, strOriginPort
+			, intOriginPortId
+			, strDestinationPort
+			, intDestinationPortId
+			, strCropYear
+			, intCropYearId 
+			, strStorageLocation 
+			, intStorageLocationId 
+			, strStorageUnit 
+			, intStorageUnitId 
+		)
 		SELECT intContractHeaderId
 			, intContractDetailId
 			, strContractOrInventoryType
@@ -1399,6 +1641,16 @@ BEGIN TRY
 			, dblSpreadMonthPrice
 			, dblSpread
 			, ysnSpreadExpired
+			, strOriginPort
+			, intOriginPortId
+			, strDestinationPort
+			, intDestinationPortId
+			, strCropYear
+			, intCropYearId 
+			, strStorageLocation 
+			, intStorageLocationId 
+			, strStorageUnit 
+			, intStorageUnitId 
 		FROM (
 			SELECT DISTINCT cd.intContractHeaderId
 				, cd.intContractDetailId
@@ -1479,6 +1731,16 @@ BEGIN TRY
 				, dblSpreadMonthPrice = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearbySettlementPrice ELSE NULL END ELSE NULL END
 				, dblSpread = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearbySettlementPrice - (CASE WHEN cd.strPricingType IN ('Basis', 'Ratio') THEN 0 ELSE p.dblFuturePrice END) ELSE NULL END ELSE NULL END
 				, ysnSpreadExpired = CASE WHEN strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
+				, cd.strOriginPort
+				, cd.intOriginPortId
+				, cd.strDestinationPort
+				, cd.intDestinationPortId
+				, cd.strCropYear
+				, cd.intCropYearId 
+				, cd.strStorageLocation 
+				, cd.intStorageLocationId 
+				, cd.strStorageUnit 
+				, cd.intStorageUnitId 
 			FROM @GetContractDetailView cd
 			JOIN tblICCommodityUnitMeasure cuc ON cd.intCommodityId = cuc.intCommodityId AND cuc.intUnitMeasureId = cd.intUnitMeasureId AND cd.intCommodityId = @intCommodityId
 			JOIN tblICCommodityUnitMeasure cuc1 ON cd.intCommodityId = cuc1.intCommodityId AND cuc1.intUnitMeasureId = @intQuantityUOMId
@@ -1490,20 +1752,42 @@ BEGIN TRY
 			LEFT JOIN tblRKFuturesMonth ffm ON ffm.intFutureMonthId = cd.intFutureMonthId
 			LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = cd.intContractDetailId AND rk.intFutureMonthId = cd.intFutureMonthId
 			OUTER APPLY (
-				SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
+				SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId 
+				FROM #tmpM2MBasisDetail tmp
 				WHERE ISNULL(tmp.intFutureMarketId,0) = ISNULL(cd.intFutureMarketId, ISNULL(tmp.intFutureMarketId,0))
-					AND ISNULL(tmp.intItemId,0) = ISNULL(cd.intItemId, ISNULL(tmp.intItemId,0))
-					AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
-														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
-														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
-					AND ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) = CASE WHEN @strEvaluationByZone <> 'Company'
-																				THEN cd.intCompanyLocationId
-																			ELSE ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) END
-					AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
-													THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
-												ELSE tmp.strPeriodTo END
-					AND tmp.strContractInventory = 'Contract'
-					AND tmp.intMarketZoneId = ISNULL(cd.intMarketZoneId, tmp.intMarketZoneId) ) basisDetail
+					AND ISNULL(tmp.intItemId,0) = CASE WHEN @strEvaluationBy = 'Item' 
+														THEN ISNULL(cd.intItemId, 0)
+														ELSE ISNULL(tmp.intItemId, 0)
+														END
+					AND ISNULL(tmp.intContractTypeId, 0) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+																					THEN ISNULL(cd.intContractTypeId, 0)
+																					ELSE ISNULL(tmp.intContractTypeId, 0) END
+					AND ISNULL(tmp.intCompanyLocationId, 0) = CASE WHEN @ysnEvaluationByLocation = 1 
+																					THEN ISNULL(cd.intCompanyLocationId, 0)
+																					ELSE ISNULL(tmp.intCompanyLocationId, 0) END
+					AND ISNULL(tmp.intMarketZoneId, 0) = CASE WHEN @ysnEvaluationByMarketZone = 1 
+																					THEN ISNULL(cd.intMarketZoneId, 0)
+																					ELSE ISNULL(tmp.intMarketZoneId, 0) END
+					AND ISNULL(tmp.intOriginPortId, 0) = CASE WHEN @ysnEvaluationByOriginPort = 1 
+																					THEN ISNULL(cd.intOriginPortId, 0)
+																					ELSE ISNULL(tmp.intOriginPortId, 0) END
+					AND ISNULL(tmp.intDestinationPortId, 0) = CASE WHEN @ysnEvaluationByDestinationPort = 1 
+																					THEN ISNULL(cd.intDestinationPortId, 0)
+																					ELSE ISNULL(tmp.intDestinationPortId, 0) END
+					AND ISNULL(tmp.intCropYearId, 0) = CASE WHEN @ysnEvaluationByCropYear = 1 
+																					THEN ISNULL(cd.intCropYearId, 0)
+																					ELSE ISNULL(tmp.intCropYearId, 0) END
+					AND ISNULL(tmp.intStorageLocationId, 0) = CASE WHEN @ysnEvaluationByStorageLocation = 1 
+																					THEN ISNULL(cd.intStorageLocationId, 0)
+																					ELSE ISNULL(tmp.intStorageLocationId, 0) END
+					AND ISNULL(tmp.intStorageUnitId, 0) = CASE WHEN @ysnEvaluationByStorageUnit = 1 
+																					THEN ISNULL(cd.intStorageUnitId, 0)
+																					ELSE ISNULL(tmp.intStorageUnitId, 0) END
+					AND ISNULL(tmp.strPeriodTo, '') = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
+														THEN dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
+														ELSE ISNULL(tmp.strPeriodTo, '')
+														END
+					AND tmp.strContractInventory = 'Contract' ) basisDetail
 			LEFT JOIN tblCTContractHeader cth
 				ON cd.intContractHeaderId = cth.intContractHeaderId
 			OUTER APPLY (
@@ -1542,511 +1826,6 @@ BEGIN TRY
 			) priceFixationDetail
 			WHERE cd.intCommodityId = @intCommodityId 
 		)t
-
-		-- @TODO: THIS IS SUPER SLOW!!!!!!!!! YOU NEED TO OPTMIZE THIS. THIS RUNS LIKE FOREVER
-		-- THIS CAUSES Market to Market screen saving to execute endlessly
-		-- intransit
-		-- IF (@ysnIncludeInTransitM2M = 1)
-		-- BEGIN
-		-- 	SELECT *
-		-- 	INTO #tempIntransit
-		-- 	FROM (
-		-- 		SELECT strTransactionNumber
-		-- 			, intTransactionRecordId
-		-- 			, t.strContractSeq
-		-- 			, t.intContractHeaderId
-		-- 			, t.intContractDetailId
-		-- 			, t.intLocationId
-		-- 			, t.strLocationName
-		-- 			, itemLoc.intItemLocationId
-		-- 			, dblTotal = ISNULL(dblTotal, 0.000000)
-		-- 			, t.intEntityId
-		-- 			, t.strEntityName
-		-- 			, strCustomerReference = t.strEntityName
-		-- 			, dtmTicketDateTime = dtmTransactionDate
-		-- 			, intTicketId
-		-- 			, strTicketNumber
-		-- 			, t.intCommodityId
-		-- 			, t.strCommodityCode
-		-- 			, t.intItemId
-		-- 			, t.strItemNo
-		-- 			, intCategoryId
-		-- 			, strCategory
-		-- 			, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), t.dtmTransactionDate, 106), 8) COLLATE Latin1_General_CI_AS
-		-- 			, t.intFutureMarketId
-		-- 			, t.strFutureMarket
-		-- 			, t.intFutureMonthId
-		-- 			, t.strFutureMonth
-		-- 			, strDeliveryDate
-		-- 			, t.strType
-		-- 			, intOrigUOMId
-		-- 			, cur.ysnSubCurrency
-		-- 			, cur.intMainCurrencyId
-		-- 			, cur.intCent
-		-- 			, cb.strPricingStatus
-		-- 			, cb.strPricingType
-		-- 			, cb.intPricingTypeId
-		-- 			, dblLastSettle = ISNULL(p.dblLastSettle, 0.000000)
-		-- 			, dblCosts = ISNULL(cc.dblCosts, 0.000000)
-		-- 			, intSpreadMonthId = CASE WHEN cb.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END ELSE NULL END
-		-- 			, strSpreadMonth = CASE WHEN cb.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END ELSE NULL END
-		-- 			, dblSpreadMonthPrice = CASE WHEN cb.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearbySettlementPrice ELSE NULL END ELSE NULL END
-		-- 			, dblSpread = CASE WHEN cb.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearbySettlementPrice - p.dblLastSettle ELSE NULL END ELSE NULL END
-		-- 			, ysnExpired = CASE WHEN cb.strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
-		-- 		FROM dbo.fnRKGetBucketInTransit(@dtmEndDate, @intCommodityId, NULL) t
-		-- 		LEFT JOIN tblICItemLocation itemLoc ON itemLoc.intItemId = t.intItemId AND itemLoc.intLocationId = t.intLocationId
-		-- 		LEFT JOIN @ContractBalance cb ON cb.intContractDetailId = t.intContractDetailId
-		-- 		LEFT JOIN @tblGetSettlementPrice p ON t.intFutureMonthId = p.intFutureMonthId
-		-- 		LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = t.intContractDetailId AND rk.intFutureMonthId = t.intFutureMonthId
-		-- 		LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = t.intCurrencyId
-		-- 		LEFT JOIN #tblContractCost cc ON t.intContractDetailId = cc.intContractDetailId
-		-- 	) tbl
-
-		-- 	INSERT INTO @ListTransaction (intContractHeaderId
-		-- 		, intContractDetailId
-		-- 		, strContractOrInventoryType
-		-- 		, strContractSeq
-		-- 		, strEntityName
-		-- 		, intEntityId
-		-- 		, strFutureMarket
-		-- 		, intFutureMarketId
-		-- 		, strFutureMonth
-		-- 		, intFutureMonthId 
-		-- 		, strCommodityCode
-		-- 		, intCommodityId
-		-- 		, strItemNo 
-		-- 		, intItemId 
-		-- 		, intItemLocationId
-		-- 		, strOrgin 
-		-- 		, intOriginId 
-		-- 		, strPosition 
-		-- 		, strPeriod 
-		-- 		, strPeriodTo
-		-- 		, strStartDate
-		-- 		, strEndDate
-		-- 		, strPriOrNotPriOrParPriced 
-		-- 		, intPricingTypeId 
-		-- 		, strPricingType 
-		-- 		, dblFutures
-		-- 		, dblCash
-		-- 		, dblCosts
-		-- 		, dblMarketBasis1
-		-- 		, intMarketBasisUOMId
-		-- 		, intMarketBasisCurrencyId
-		-- 		, dblContractRatio
-		-- 		, dblContractBasis
-		-- 		, dblDummyContractBasis
-		-- 		, dblFuturePrice1 
-		-- 		, intFuturePriceCurrencyId
-		-- 		, dblFuturesClosingPrice1 
-		-- 		, intContractTypeId
-		-- 		, dblOpenQty 
-		-- 		, dblRate 
-		-- 		, intCommodityUnitMeasureId
-		-- 		, intQuantityUOMId 
-		-- 		, intPriceUOMId 
-		-- 		, intCurrencyId 
-		-- 		, PriceSourceUOMId 
-		-- 		, dblMarketRatio
-		-- 		, dblMarketBasis 
-		-- 		, dblCashPrice 
-		-- 		, dblAdjustedContractPrice 
-		-- 		, dblFuturesClosingPrice 
-		-- 		, dblFuturePrice 
-		-- 		, dblResult 
-		-- 		, dblMarketFuturesResult 
-		-- 		, dblResultCash1 
-		-- 		, dblContractPrice 
-		-- 		, dblResultCash 
-		-- 		, dblResultBasis
-		-- 		, dblShipQty
-		-- 		, ysnSubCurrency
-		-- 		, intMainCurrencyId
-		-- 		, intCent
-		-- 		, dtmPlannedAvailabilityDate
-		-- 		, intMarketZoneId 
-		-- 		, intLocationId
-		-- 		, strMarketZoneCode
-		-- 		, strLocationName 
-		-- 		, dblNoOfLots
-		-- 		, dblLotsFixed
-		-- 		, dblPriceWORollArb
-		-- 		, intSpreadMonthId
-		-- 		, strSpreadMonth
-		-- 		, dblSpreadMonthPrice
-		-- 		, dblSpread
-		-- 		, ysnExpired)
-		-- 	SELECT intContractHeaderId
-		-- 		, intContractDetailId
-		-- 		, strContractOrInventoryType
-		-- 		, strContractSeq
-		-- 		, strEntityName
-		-- 		, intEntityId
-		-- 		, strFutureMarket
-		-- 		, intFutureMarketId
-		-- 		, strFutureMonth
-		-- 		, intFutureMonthId
-		-- 		, strCommodityCode
-		-- 		, intCommodityId
-		-- 		, strItemNo
-		-- 		, intItemId
-		-- 		, intItemLocationId
-		-- 		, strOrgin
-		-- 		, intOriginId
-		-- 		, strPosition
-		-- 		, strPeriod
-		-- 		, strPeriodTo
-		-- 		, strStartDate
-		-- 		, strEndDate
-		-- 		, strPriOrNotPriOrParPriced
-		-- 		, intPricingTypeId
-		-- 		, strPricingType
-		-- 		, dblFutures
-		-- 		, dblCash
-		-- 		, dblCosts
-		-- 		, dblMarketBasis1
-		-- 		, intMarketBasisUOM
-		-- 		, intMarketBasisCurrencyId
-		-- 		, dblContractRatio
-		-- 		, dblContractBasis
-		-- 		, dblDummyContractBasis
-		-- 		, dblFuturePrice1
-		-- 		, intFuturePriceCurrencyId
-		-- 		, dblFuturesClosingPrice1
-		-- 		, intContractTypeId
-		-- 		, dblOpenQty
-		-- 		, dblRate
-		-- 		, intCommodityUnitMeasureId
-		-- 		, intQuantityUOMId
-		-- 		, intPriceUOMId
-		-- 		, intCurrencyId
-		-- 		, PriceSourceUOMId
-		-- 		, dblMarketRatio
-		-- 		, dblMarketBasis
-		-- 		, dblCashPrice
-		-- 		, dblAdjustedContractPrice
-		-- 		, dblFuturesClosingPrice
-		-- 		, dblFuturePrice
-		-- 		, dblResult
-		-- 		, dblMarketFuturesResult
-		-- 		, dblResultCash1
-		-- 		, dblContractPrice
-		-- 		, dblResultCash = CASE WHEN intPricingTypeId = 6 THEN dblResult ELSE 0 END
-		-- 		, dblResultBasis
-		-- 		, dblShipQty = 0
-		-- 		, ysnSubCurrency
-		-- 		, intMainCurrencyId
-		-- 		, intCent
-		-- 		, dtmPlannedAvailabilityDate
-		-- 		, intMarketZoneId
-		-- 		, intLocationId
-		-- 		, strMarketZoneCode
-		-- 		, strLocationName
-		-- 		, dblNoOfLots
-		-- 		, dblLotsFixed
-		-- 		, dblPriceWORollArb
-		-- 		, intSpreadMonthId
-		-- 		, strSpreadMonth
-		-- 		, dblSpreadMonthPrice
-		-- 		, dblSpread
-		-- 		, ysnExpired
-		-- 	FROM (
-		-- 		SELECT *
-		-- 			, dblResult = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
-		-- 			, dblResultBasis = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
-		-- 			, dblMarketFuturesResult = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
-		-- 			, dblResultCash1 = (ISNULL(dblMarketBasis, 0)-ISNULL(dblCash, 0))*dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
-		-- 			, dblContractPrice = ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId, CASE WHEN ISNULL(PriceSourceUOMId, 0) = 0 THEN intPriceUOMId ELSE PriceSourceUOMId END, ISNULL(dblContractBasis, 0)), 0) + (ISNULL(dblFutures, 0)*ISNULL(dblContractRatio, 1))
-		-- 		FROM (
-		-- 			SELECT *
-		-- 				, dblMarketBasis = CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN PriceSourceUOMId ELSE intMarketBasisUOM END, ISNULL(dblMarketBasis1, 0)) ELSE 0 END
-		-- 				, dblAdjustedContractPrice = CASE WHEN intPricingTypeId = 6 THEN ISNULL(dblCosts, 0) + (ISNULL(dblCash, 0)) + CONVERT(DECIMAL(24, 6), CASE WHEN ISNULL(dblRate, 0) = 0 THEN dblFutures ELSE dblFutures END) + ISNULL(dblCosts, 0) END
-		-- 				, dblFuturesClosingPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN PriceSourceUOMId ELSE intMarketBasisUOM END, dblFuturesClosingPrice1)
-		-- 				, dblFuturePrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN PriceSourceUOMId ELSE intMarketBasisUOM END, dblFuturePrice1)
-		-- 				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END , ISNULL(dblOpenQty1, 0))
-		-- 			FROM (
-		-- 				SELECT ch.intContractHeaderId
-		-- 					, cd.intContractDetailId
-		-- 					, strContractOrInventoryType = 'In-transit' + '(S)'
-		-- 					, strContractSeq = it.strTransactionNumber
-		-- 					, strEntityName = e.strName
-		-- 					, ch.intEntityId
-		-- 					, strFutureMarket = fm.strFutMarketName
-		-- 					, cd.intFutureMarketId
-		-- 					, fmo.strFutureMonth
-		-- 					, cd.intFutureMonthId
-		-- 					, com.strCommodityCode
-		-- 					, ch.intCommodityId
-		-- 					, i.strItemNo
-		-- 					, cd.intItemId
-		-- 					, it.intItemLocationId
-		-- 					, strOrgin = NULL
-		-- 					, i.intOriginId
-		-- 					, strPosition = NULL
-		-- 					, strPeriod = RIGHT(CONVERT(VARCHAR(8), cd.dtmStartDate, 3), 5) + '-' + RIGHT(CONVERT(VARCHAR(8), cd.dtmEndDate, 3), 5)
-		-- 					, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20), cd.dtmEndDate, 106), 4, 8)
-		-- 					, strStartDate = CONVERT(NVARCHAR(20), cd.dtmStartDate, 106)
-		-- 					, strEndDate = CONVERT(NVARCHAR(20), cd.dtmEndDate, 106)
-		-- 					, strPriOrNotPriOrParPriced = ISNULL(CB.strPricingStatus, pt.strPricingType)
-		-- 					, intPricingTypeId = ISNULL(CB.intPricingTypeId, pt.intPricingTypeId)
-		-- 					, strPricingType = ISNULL(CB.strPricingType, pt.strPricingType)
-		-- 					, dblContractRatio = cd.dblRatio
-		-- 					, dblContractBasis = cd.dblBasis
-		-- 					, dblDummyContractBasis = null
-		-- 					, cd.dblFutures
-		-- 					, dblCash = CASE WHEN cd.intPricingTypeId = 6 THEN dblCashPrice ELSE NULL END
-		-- 					, dblMarketRatio = ISNULL(basisDetail.dblRatio, 0)
-		-- 					, dblMarketBasis1 = ISNULL(basisDetail.dblMarketBasis, 0)
-		-- 					, intMarketBasisUOM = ISNULL(basisDetail.intMarketBasisUOM, 0)
-		-- 					, intMarketBasisCurrencyId = ISNULL(basisDetail.intMarketBasisCurrencyId, 0)
-		-- 					, dblFuturePrice1 = p.dblLastSettle
-		-- 					, intFuturePriceCurrencyId = null
-		-- 					, dblFuturesClosingPrice1 = p.dblLastSettle
-		-- 					, ch.intContractTypeId
-		-- 					, dblOpenQty1 = it.dblTotal
-		-- 					, cd.dblRate
-		-- 					, intCommodityUnitMeasureId = cuc.intCommodityUnitMeasureId
-		-- 					, intQuantityUOMId = cuc1.intCommodityUnitMeasureId
-		-- 					, intPriceUOMId = cuc2.intCommodityUnitMeasureId
-		-- 					, cd.intCurrencyId
-		-- 					, PriceSourceUOMId = convert(int, cuc3.intCommodityUnitMeasureId)
-		-- 					, dblCosts = ISNULL(cc.dblCosts, 0)
-		-- 					, ysnSubCurrency = CAST(ISNULL(cu.intMainCurrencyId, 0) AS BIT)
-		-- 					, cu.intMainCurrencyId
-		-- 					, cu.intCent
-		-- 					, cd.dtmPlannedAvailabilityDate
-		-- 					, dblInvoicedQuantity = cd.dblInvoicedQty
-		-- 					, cd.intMarketZoneId
-		-- 					, intLocationId = cd.intCompanyLocationId
-		-- 					, mz.strMarketZoneCode
-		-- 					, cl.strLocationName
-		-- 					, dblNoOfLots = CASE WHEN ISNULL(ch.ysnMultiplePriceFixation, 0) = 1 THEN ch.dblNoOfLots ELSE cd.dblNoOfLots END
-		-- 					, dblLotsFixed = NULL --cd.dblLotsFixed
-		-- 					, dblPriceWORollArb = NULL --cd.dblPriceWORollArb
-		-- 					, dblCashPrice = 0.00
-		-- 					, intSpreadMonthId = CASE WHEN CB.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END ELSE NULL END
-		-- 					, strSpreadMonth = CASE WHEN CB.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END ELSE NULL END
-		-- 					, dblSpreadMonthPrice = CASE WHEN CB.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearbySettlementPrice ELSE NULL END ELSE NULL END
-		-- 					, dblSpread = CASE WHEN CB.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearbySettlementPrice - p.dblLastSettle ELSE NULL END ELSE NULL END
-		-- 					, ysnExpired = CASE WHEN CB.strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
-		-- 				FROM #tempIntransit it
-		-- 				JOIN tblCTContractDetail cd ON cd.intContractDetailId = it.intContractDetailId
-		-- 				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-		-- 				JOIN tblICItem i ON cd.intItemId = i.intItemId
-		-- 				JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND iuom.intItemUOMId = cd.intBasisUOMId
-		-- 				JOIN tblEMEntity e ON ch.intEntityId = e.intEntityId
-		-- 				JOIN tblICCommodity com ON ch.intCommodityId = com.intCommodityId
-		-- 				JOIN tblRKFutureMarket fm ON cd.intFutureMarketId = fm.intFutureMarketId
-		-- 				JOIN tblRKFuturesMonth fmo ON cd.intFutureMonthId = fmo.intFutureMonthId
-		-- 				JOIN tblCTPricingType pt ON cd.intPricingTypeId = pt.intPricingTypeId
-		-- 				JOIN tblICCommodityUnitMeasure cuc ON ch.intCommodityId = cuc.intCommodityId AND cuc.intUnitMeasureId = it.intOrigUOMId AND ch.intCommodityId = @intCommodityId
-		-- 				JOIN tblICCommodityUnitMeasure cuc1 ON ch.intCommodityId = cuc1.intCommodityId AND cuc1.intUnitMeasureId = @intQuantityUOMId
-		-- 				JOIN tblICCommodityUnitMeasure cuc2 ON ch.intCommodityId = cuc2.intCommodityId AND cuc2.intUnitMeasureId = @intPriceUOMId
-		-- 				JOIN tblICCommodityUnitMeasure cuc3 ON ch.intCommodityId = cuc3.intCommodityId AND cuc3.intUnitMeasureId = iuom.intUnitMeasureId
-		-- 				LEFT JOIN @tblGetSettlementPrice p ON cd.intFutureMonthId = p.intFutureMonthId
-		-- 				LEFT JOIN #tblContractCost cc ON cd.intContractDetailId = cc.intContractDetailId
-		-- 				JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
-		-- 				LEFT JOIN tblARMarketZone mz ON mz.intMarketZoneId = cd.intMarketZoneId
-		-- 				JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
-		-- 				LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = cd.intContractDetailId AND rk.intFutureMonthId = cd.intFutureMonthId
-		-- 				LEFT JOIN @ContractBalance CB ON CB.intContractDetailId = cd.intContractDetailId
-		-- 				OUTER APPLY (
-		-- 					SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
-		-- 					WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
-		-- 						AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-		-- 						AND ISNULL(tmp.intContractTypeId, ch.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
-		-- 												THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, ch.intContractTypeId) ELSE ch.intContractTypeId END
-		-- 												ELSE ISNULL(tmp.intContractTypeId, ch.intContractTypeId) END 
-		-- 						AND ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) = CASE WHEN @strEvaluationByZone <> 'Company'
-		-- 																					THEN cd.intCompanyLocationId
-		-- 																				ELSE ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) END
-		-- 						AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
-		-- 														THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
-		-- 													ELSE tmp.strPeriodTo END
-		-- 						AND tmp.strContractInventory = 'Contract') basisDetail
-
-		-- 				--Logistics Sale
-		-- 				UNION ALL 
-						
-		-- 				SELECT ch.intContractHeaderId
-		-- 					, cd.intContractDetailId
-		-- 					, strContractOrInventoryType = 'In-transit' + '(S)'
-		-- 					, strContractSeq = it.strTransactionNumber 
-		-- 					, strEntityName = e.strName
-		-- 					, ch.intEntityId
-		-- 					, strFutureMarket = fm.strFutMarketName
-		-- 					, cd.intFutureMarketId
-		-- 					, fmo.strFutureMonth
-		-- 					, cd.intFutureMonthId
-		-- 					, com.strCommodityCode
-		-- 					, ch.intCommodityId
-		-- 					, i.strItemNo
-		-- 					, cd.intItemId
-		-- 					, it.intItemLocationId
-		-- 					, strOrgin = NULL
-		-- 					, i.intOriginId
-		-- 					, strPosition = NULL
-		-- 					, strPeriod = RIGHT(CONVERT(VARCHAR(8), cd.dtmStartDate, 3), 5) + '-' + RIGHT(CONVERT(VARCHAR(8), cd.dtmEndDate, 3), 5)
-		-- 					, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20), cd.dtmEndDate, 106), 4, 8)
-		-- 					, strStartDate = CONVERT(NVARCHAR(20), cd.dtmStartDate, 106)
-		-- 					, strEndDate = CONVERT(NVARCHAR(20), cd.dtmEndDate, 106)
-		-- 					, strPriOrNotPriOrParPriced = ISNULL(CB.strPricingStatus, pt.strPricingType)
-		-- 					, intPricingTypeId = ISNULL(CB.intPricingTypeId, pt.intPricingTypeId)
-		-- 					, strPricingType = ISNULL(CB.strPricingType, pt.strPricingType)
-		-- 					, dblContractRatio = cd.dblRatio
-		-- 					, dblContractBasis = cd.dblBasis
-		-- 					, dblDummyContractBasis = null
-		-- 					, cd.dblFutures
-		-- 					, dblCash = CASE WHEN cd.intPricingTypeId = 6 THEN dblCashPrice ELSE NULL END
-		-- 					, dblMarketRatio = ISNULL(basisDetail.dblRatio, 0)
-		-- 					, dblMarketBasis1 = ISNULL(basisDetail.dblMarketBasis, 0)
-		-- 					, intMarketBasisUOM = ISNULL(basisDetail.intMarketBasisUOM, 0)
-		-- 					, intMarketBasisCurrencyId = ISNULL(basisDetail.intMarketBasisCurrencyId, 0)
-		-- 					, dblFuturePrice1 = p.dblLastSettle
-		-- 					, intFuturePriceCurrencyId = null
-		-- 					, dblFuturesClosingPrice1 = p.dblLastSettle
-		-- 					, ch.intContractTypeId
-		-- 					, dblOpenQty1 = it.dblTotal
-		-- 					, cd.dblRate
-		-- 					, intCommodityUnitMeasureId = cuc.intCommodityUnitMeasureId
-		-- 					, intQuantityUOMId = cuc1.intCommodityUnitMeasureId
-		-- 					, intPriceUOMId = cuc2.intCommodityUnitMeasureId
-		-- 					, cd.intCurrencyId
-		-- 					, PriceSourceUOMId = CONVERT(INT, cuc3.intCommodityUnitMeasureId)
-		-- 					, dblCosts = ISNULL(cc.dblCosts, 0)
-		-- 					, ysnSubCurrency = CAST(ISNULL(cu.intMainCurrencyId, 0) AS BIT)
-		-- 					, cu.intMainCurrencyId
-		-- 					, cu.intCent
-		-- 					, cd.dtmPlannedAvailabilityDate
-		-- 					, dblInvoicedQuantity = 0
-		-- 					, cd.intMarketZoneId
-		-- 					, intLocationId = cd.intCompanyLocationId
-		-- 					, mz.strMarketZoneCode
-		-- 					, cl.strLocationName
-		-- 					, dblNoOfLots = CASE WHEN ISNULL(ch.ysnMultiplePriceFixation, 0) = 1 THEN ch.dblNoOfLots ELSE cd.dblNoOfLots END
-		-- 					, dblLotsFixed = NULL
-		-- 					, dblPriceWORollArb = NULL
-		-- 					, dblCashPrice = 0.00
-		-- 					, intSpreadMonthId = CASE WHEN pt.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END ELSE NULL END
-		-- 					, strSpreadMonth = CASE WHEN pt.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END ELSE NULL END
-		-- 					, dblSpreadMonthPrice = CASE WHEN pt.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearbySettlementPrice ELSE NULL END ELSE NULL END
-		-- 					, dblSpread = CASE WHEN pt.strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearbySettlementPrice - p.dblLastSettle ELSE NULL END ELSE NULL END
-		-- 					, ysnExpired = CASE WHEN pt.strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
-		-- 				FROM #tempIntransit it
-		-- 				JOIN tblLGLoadDetail ld ON ld.intLoadDetailId = it.intTransactionRecordId
-		-- 				JOIN tblCTContractDetail cd ON cd.intContractDetailId = ld.intSContractDetailId
-		-- 				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-		-- 				JOIN tblICItem i ON cd.intItemId = i.intItemId
-		-- 				JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND iuom.intItemUOMId = cd.intBasisUOMId
-		-- 				JOIN tblEMEntity e ON ch.intEntityId = e.intEntityId
-		-- 				JOIN tblICCommodity com ON ch.intCommodityId = com.intCommodityId
-		-- 				JOIN tblRKFutureMarket fm ON cd.intFutureMarketId = fm.intFutureMarketId
-		-- 				JOIN tblRKFuturesMonth fmo ON cd.intFutureMonthId = fmo.intFutureMonthId
-		-- 				JOIN tblCTPricingType pt ON cd.intPricingTypeId = pt.intPricingTypeId
-		-- 				JOIN tblICCommodityUnitMeasure cuc ON ch.intCommodityId = cuc.intCommodityId AND cuc.intUnitMeasureId = it.intOrigUOMId AND ch.intCommodityId = @intCommodityId
-		-- 				JOIN tblICCommodityUnitMeasure cuc1 ON ch.intCommodityId = cuc1.intCommodityId AND cuc1.intUnitMeasureId = @intQuantityUOMId
-		-- 				JOIN tblICCommodityUnitMeasure cuc2 ON ch.intCommodityId = cuc2.intCommodityId AND cuc2.intUnitMeasureId = @intPriceUOMId
-		-- 				JOIN tblICCommodityUnitMeasure cuc3 ON ch.intCommodityId = cuc3.intCommodityId AND cuc3.intUnitMeasureId = iuom.intUnitMeasureId
-		-- 				LEFT JOIN @tblGetSettlementPrice p ON cd.intFutureMonthId = p.intFutureMonthId
-		-- 				LEFT JOIN #tblContractCost cc ON cd.intContractDetailId = cc.intContractDetailId
-		-- 				JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
-		-- 				LEFT JOIN tblARMarketZone mz ON mz.intMarketZoneId = cd.intMarketZoneId
-		-- 				JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
-		-- 				LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = cd.intContractDetailId AND rk.intFutureMonthId = cd.intFutureMonthId
-		-- 				LEFT JOIN @ContractBalance CB ON CB.intContractDetailId = cd.intContractDetailId
-		-- 				OUTER APPLY (
-		-- 					SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
-		-- 					WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
-		-- 						AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-		-- 						AND ISNULL(tmp.intContractTypeId, ch.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
-		-- 												THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, ch.intContractTypeId) ELSE ch.intContractTypeId END
-		-- 												ELSE ISNULL(tmp.intContractTypeId, ch.intContractTypeId) END 
-		-- 						AND ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) = CASE WHEN @strEvaluationByZone <> 'Company'
-		-- 																					THEN cd.intCompanyLocationId
-		-- 																				ELSE ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) END
-		-- 						AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
-		-- 														THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
-		-- 													ELSE tmp.strPeriodTo END
-		-- 						AND tmp.strContractInventory = 'Contract') basisDetail
-		-- 				WHERE it.strTransactionNumber LIKE 'LS-%'
-
-		-- 				UNION ALL
-		-- 				SELECT 
-		-- 					 intContractHeaderId = NULL
-		-- 					, intContractDetailId = NULL
-		-- 					, 'In-transit' + '(S)' as strContractOrInventoryType
-		-- 					, strContractSeq = it.strTransactionNumber 
-		-- 					, strEntityName = it.strEntityName
-		-- 					, it.intEntityId
-		-- 					, strFutureMarket = NULL
-		-- 					, intFutureMarketId = NULL
-		-- 					, strFutureMonth = NULL
-		-- 					, intFutureMonthId = NULL
-		-- 					, it.strCommodityCode
-		-- 					, it.intCommodityId
-		-- 					, it.strItemNo
-		-- 					, it.intItemId
-		-- 					, it.intItemLocationId
-		-- 					, strOrgin = NULL --cd.strOrgin
-		-- 					, intOriginId = NULL
-		-- 					, strPosition = NULL --cd.strPosition
-		-- 					, strPeriod = NULL
-		-- 					, strPeriodTo = NULL
-		-- 					, strStartDate = NULL
-		-- 					, strEndDate = NULL
-		-- 					, strPriOrNotPriOrParPriced = NULL
-		-- 					, intPricingTypeId = NULL
-		-- 					, strPricingType = NULL
-		-- 					, dblContractRatio = 0
-		-- 					, dblContractBasis = 0
-		-- 					, dblDummyContractBasis = 0
-		-- 					, dblFutures = 0
-		-- 					, dblCash = ISNULL(dbo.fnCalculateValuationAverageCost(intItemId, intItemLocationId, @dtmEndDate), 0) --it.dblPrice
-		-- 					, dblMarketRatio = 0
-		-- 					, dblMarketBasis1 = 0
-		-- 					, dblMarketBasisUOM = 0
-		-- 					, intMarketBasisCurrencyId = NULL
-		-- 					, dblFuturePrice1 = 0
-		-- 					, intFuturePriceCurrencyId = NULL
-		-- 					, dblFuturesClosingPrice1 = 0
-		-- 					, intContractTypeId = NULL
-		-- 					, dblOpenQty1 = -it.dblTotal
-		-- 					, dblRate = NULL
-		-- 					, intCommodityUnitMeasureId = NULL
-		-- 					, intQuantityUOMId = NULL
-		-- 					, intPriceUOMId = NULL
-		-- 					, intCurrencyId = NULL
-		-- 					, PriceSourceUOMId = NULL
-		-- 					, dblCosts = 0
-		-- 					, ysnSubCurrency = NULL
-		-- 					, intMainCurrencyId = NULL
-		-- 					, intCent = NULL
-		-- 					, dtmPlannedAvailabilityDate = NULL
-		-- 					, dblInvoicedQuantity = NULL
-		-- 					, intMarketZoneId = NULL
-		-- 					, intLocationId = it.intLocationId
-		-- 					, strMarketZoneCode = NULL
-		-- 					, it.strLocationName
-		-- 					, dblNoOfLots = NULL
-		-- 					, dblLotsFixed = NULL --cd.dblLotsFixed
-		-- 					, dblPriceWORollArb = NULL --cd.dblPriceWORollArb
-		-- 					, dblCashPrice = ROUND(ISNULL((SELECT TOP 1 ISNULL(dblCashOrFuture, 0) FROM #tmpM2MBasisDetail temp
-		-- 							WHERE ISNULL(temp.intCommodityId, 0) = CASE WHEN ISNULL(temp.intCommodityId, 0) = 0 THEN 0 ELSE it.intCommodityId END
-		-- 								AND ISNULL(temp.intItemId, 0) = CASE WHEN ISNULL(temp.intItemId, 0) = 0 THEN 0 ELSE it.intItemId END
-		-- 								AND ISNULL(temp.intCompanyLocationId, 0) = CASE WHEN ISNULL(temp.intCompanyLocationId, 0) = 0 THEN 0 ELSE ISNULL(it.intLocationId, 0) END
-		-- 								AND temp.strContractInventory = 'Inventory'), 0), 4)
-		-- 					, intSpreadMonthId = NULL
-		-- 					, strSpreadMonth = NULL
-		-- 					, dblSpreadMonthPrice = NULL
-		-- 					, dblSpread = NULL
-		-- 					, ysnExpired = NULL
-		-- 				FROM #tempIntransit it
-		-- 				WHERE it.strTransactionNumber NOT LIKE 'LS-%'
-		-- 			)t
-		-- 		)t
-		-- 	)t2
-		-- END
-		---- intransit End(p)
  
 		select SUM(dblPurchaseContractShippedQty) dblPurchaseContractShippedQty, intContractDetailId into #tblPIntransitView from vyuRKPurchaseIntransitView group by intContractDetailId
  
@@ -2122,7 +1901,18 @@ BEGIN TRY
 			, strSpreadMonth
 			, dblSpreadMonthPrice
 			, dblSpread
-			, ysnExpired) 
+			, ysnExpired
+			, strOriginPort
+			, intOriginPortId
+			, strDestinationPort
+			, intDestinationPortId
+			, strCropYear
+			, intCropYearId 
+			, strStorageLocation 
+			, intStorageLocationId 
+			, strStorageUnit 
+			, intStorageUnitId 
+		) 
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
 			, strContractOrInventoryType 
@@ -2196,6 +1986,16 @@ BEGIN TRY
 			, dblSpreadMonthPrice
 			, dblSpread
 			, ysnExpired
+			, strOriginPort
+			, intOriginPortId
+			, strDestinationPort
+			, intDestinationPortId
+			, strCropYear
+			, intCropYearId 
+			, strStorageLocation 
+			, intStorageLocationId 
+			, strStorageUnit 
+			, intStorageUnitId 
 		FROM (
 			SELECT *
 				, dblResult = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
@@ -2282,6 +2082,16 @@ BEGIN TRY
 						, dblSpreadMonthPrice
 						, dblSpread
 						, ysnExpired = ysnSpreadExpired
+						, cd.strOriginPort
+						, cd.intOriginPortId
+						, cd.strDestinationPort
+						, cd.intDestinationPortId
+						, cd.strCropYear
+						, cd.intCropYearId 
+						, cd.strStorageLocation 
+						, cd.intStorageLocationId 
+						, cd.strStorageUnit 
+						, cd.intStorageUnitId 
 					FROM @tblOpenContractList cd
 					LEFT JOIN (
 						SELECT dblQuantity = SUM(LD.dblQuantity)
@@ -2377,7 +2187,18 @@ BEGIN TRY
 				, strSpreadMonth
 				, dblSpreadMonthPrice
 				, dblSpread
-				, ysnExpired)
+				, ysnExpired
+				, strOriginPort
+				, intOriginPortId
+				, strDestinationPort
+				, intDestinationPortId
+				, strCropYear
+				, intCropYearId 
+				, strStorageLocation 
+				, intStorageLocationId 
+				, strStorageUnit 
+				, intStorageUnitId 
+			)
 			SELECT DISTINCT intContractHeaderId
 				, intContractDetailId 
 				, strContractOrInventoryType 
@@ -2451,6 +2272,16 @@ BEGIN TRY
 				, dblSpreadMonthPrice
 				, dblSpread
 				, ysnExpired
+				, strOriginPort
+				, intOriginPortId
+				, strDestinationPort
+				, intDestinationPortId
+				, strCropYear
+				, intCropYearId 
+				, strStorageLocation 
+				, intStorageLocationId 
+				, strStorageUnit 
+				, intStorageUnitId 
 			FROM (
 				SELECT *
 					, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -2539,6 +2370,16 @@ BEGIN TRY
 							, dblSpreadMonthPrice
 							, dblSpread
 							, ysnExpired = ysnSpreadExpired
+							, cd.strOriginPort
+							, cd.intOriginPortId
+							, cd.strDestinationPort
+							, cd.intDestinationPortId
+							, cd.strCropYear
+							, cd.intCropYearId 
+							, cd.strStorageLocation 
+							, cd.intStorageLocationId 
+							, cd.strStorageUnit 
+							, cd.intStorageUnitId 
 						FROM @tblOpenContractList cd
 						JOIN vyuRKGetPurchaseInventory l ON cd.intContractDetailId = l.intContractDetailId
 						JOIN tblICItem i ON cd.intItemId = i.intItemId AND i.strLotTracking <> 'No'						
@@ -2624,7 +2465,18 @@ BEGIN TRY
 			, strSpreadMonth
 			, dblSpreadMonthPrice
 			, dblSpread
-			, ysnExpired)
+			, ysnExpired
+			, strOriginPort
+			, intOriginPortId
+			, strDestinationPort
+			, intDestinationPortId
+			, strCropYear
+			, intCropYearId 
+			, strStorageLocation 
+			, intStorageLocationId 
+			, strStorageUnit 
+			, intStorageUnitId
+		)
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
 			, strContractOrInventoryType 
@@ -2700,6 +2552,16 @@ BEGIN TRY
 			, dblSpreadMonthPrice
 			, dblSpread
 			, ysnExpired
+			, strOriginPort
+			, intOriginPortId
+			, strDestinationPort
+			, intDestinationPortId
+			, strCropYear
+			, intCropYearId 
+			, strStorageLocation 
+			, intStorageLocationId 
+			, strStorageUnit 
+			, intStorageUnitId
 		FROM (
 			SELECT *
 				, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -2793,6 +2655,16 @@ BEGIN TRY
 						, dblSpreadMonthPrice
 						, dblSpread
 						, ysnExpired = ysnSpreadExpired
+						, cd.strOriginPort
+						, cd.intOriginPortId
+						, cd.strDestinationPort
+						, cd.intDestinationPortId
+						, cd.strCropYear
+						, cd.intCropYearId 
+						, cd.strStorageLocation 
+						, cd.intStorageLocationId 
+						, cd.strStorageUnit 
+						, cd.intStorageUnitId
 					FROM @tblOpenContractList cd
 					LEFT JOIN (SELECT SUM(LD.dblQuantity)dblQuantity
 									, PCT.intContractDetailId
@@ -2914,6 +2786,16 @@ BEGIN TRY
 				, dblSpreadMonthPrice
 				, dblSpread
 				, ysnExpired
+				, strOriginPort
+				, intOriginPortId
+				, strDestinationPort
+				, intDestinationPortId
+				, strCropYear
+				, intCropYearId 
+				, strStorageLocation 
+				, intStorageLocationId 
+				, strStorageUnit 
+				, intStorageUnitId
 			FROM @ListTransaction
 		) t
 		ORDER BY intCommodityId, strContractSeq DESC
@@ -3413,6 +3295,16 @@ BEGIN TRY
 			, strSpreadMonth
 			, dblSpreadMonthPrice
 			, dblSpread
+			, t.strOriginPort
+			, t.intOriginPortId
+			, t.strDestinationPort
+			, t.intDestinationPortId
+			, t.strCropYear
+			, t.intCropYearId 
+			, t.strStorageLocation 
+			, t.intStorageLocationId 
+			, t.strStorageUnit 
+			, t.intStorageUnitId
 		INTO #tmpM2MTransaction
 		FROM (
 			SELECT intContractHeaderId
@@ -3518,6 +3410,16 @@ BEGIN TRY
 				, dblSpreadMonthPrice
 				, dblSpread
 				, t.ysnExpired
+				, t.strOriginPort
+				, t.intOriginPortId
+				, t.strDestinationPort
+				, t.intDestinationPortId
+				, t.strCropYear
+				, t.intCropYearId 
+				, t.strStorageLocation 
+				, t.intStorageLocationId 
+				, t.strStorageUnit 
+				, t.intStorageUnitId
 			FROM (
 				SELECT t.*
 					, dblCalculatedFutures = ISNULL((CASE WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Unpriced' THEN dblConvertedFuturePrice
@@ -3670,6 +3572,16 @@ BEGIN TRY
 				, dblSpreadMonthPrice
 				, dblSpread
 				, ysnExpired
+				, strOriginPort
+				, intOriginPortId
+				, strDestinationPort
+				, intDestinationPortId
+				, strCropYear
+				, intCropYearId 
+				, strStorageLocation 
+				, intStorageLocationId 
+				, strStorageUnit 
+				, intStorageUnitId
 			FROM #Temp 
 			WHERE dblOpenQty <> 0 AND intContractHeaderId IS NULL
 		)t 
@@ -3735,7 +3647,18 @@ BEGIN TRY
 			, intSpreadMonthId
 			, strSpreadMonth
 			, dblSpreadMonthPrice
-			, dblSpread)
+			, dblSpread
+			, strOriginPort
+			, intOriginPortId
+			, strDestinationPort
+			, intDestinationPortId
+			, strCropYear
+			, intCropYearId 
+			, strStorageLocation 
+			, intStorageLocationId 
+			, strStorageUnit 
+			, intStorageUnitId
+		)
 		SELECT * FROM #tmpM2MTransaction
 
 		-- Differential Basis
@@ -3743,6 +3666,11 @@ BEGIN TRY
 			, @strPeriodTos NVARCHAR(MAX)
 			, @strLocationIds NVARCHAR(MAX)
 			, @strZoneIds NVARCHAR(MAX)
+			, @strOriginPortIds NVARCHAR(MAX)
+			, @strDestinationPortIds NVARCHAR(MAX)
+			, @strCropYearIds NVARCHAR(MAX)
+			, @strStorageLocationIds NVARCHAR(MAX)
+			, @strStorageUnitIds NVARCHAR(MAX)
 	
 		--Get the unique items from transactions
 		SELECT @strItemIds = COALESCE(@strItemIds + ', ', '') + ISNULL(intItemId, '')
@@ -3756,14 +3684,46 @@ BEGIN TRY
 			WHERE strPeriodTo IS NOT NULL
 		) tbl
 	
+		-- LOCATION
 		SELECT @strLocationIds = COALESCE(@strLocationIds + ', ', '') + ISNULL(intCompanyLocationId, '')
 		FROM (
 			SELECT DISTINCT CASE WHEN intLocationId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intLocationId) END AS intCompanyLocationId FROM #tmpM2MTransaction
 		) tbl
-	
+		
+		-- MARKET ZONE
 		SELECT @strZoneIds = COALESCE(@strZoneIds + ', ', '') + ISNULL(intMarketZoneId, '')
 		FROM (
 			SELECT DISTINCT CASE WHEN intMarketZoneId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intMarketZoneId) END AS intMarketZoneId FROM #tmpM2MTransaction
+		) tbl
+		
+		-- ORIGIN PORT
+		SELECT @strOriginPortIds = COALESCE(@strOriginPortIds + ', ', '') + ISNULL(intOriginPortId, '')
+		FROM (
+			SELECT DISTINCT CASE WHEN intOriginPortId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intOriginPortId) END AS intOriginPortId FROM #tmpM2MTransaction
+		) tbl
+
+		-- DESTINATION PORT
+		SELECT @strDestinationPortIds = COALESCE(@strDestinationPortIds + ', ', '') + ISNULL(intDestinationPortId, '')
+		FROM (
+			SELECT DISTINCT CASE WHEN intDestinationPortId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intDestinationPortId) END AS intDestinationPortId FROM #tmpM2MTransaction
+		) tbl
+
+		-- CROP YEAR
+		SELECT @strCropYearIds = COALESCE(@strCropYearIds + ', ', '') + ISNULL(intCropYearId, '')
+		FROM (
+			SELECT DISTINCT CASE WHEN intCropYearId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intCropYearId) END AS intCropYearId FROM #tmpM2MTransaction
+		) tbl
+
+		-- STORAGE LOCATION
+		SELECT @strStorageLocationIds = COALESCE(@strStorageLocationIds + ', ', '') + ISNULL(intStorageLocationId, '')
+		FROM (
+			SELECT DISTINCT CASE WHEN intStorageLocationId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intStorageLocationId) END AS intStorageLocationId FROM #tmpM2MTransaction
+		) tbl
+		
+		-- STORAGE UNIT
+		SELECT @strStorageUnitIds = COALESCE(@strStorageUnitIds + ', ', '') + ISNULL(intStorageUnitId, '')
+		FROM (
+			SELECT DISTINCT CASE WHEN intStorageUnitId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intStorageUnitId) END AS intStorageUnitId FROM #tmpM2MTransaction
 		) tbl
 
 		IF @strEvaluationBy = 'Commodity'
@@ -3771,20 +3731,41 @@ BEGIN TRY
 			SET @strItemIds = ''
 		END
 	
-		IF @strEvaluationByZone = 'Location'
+		IF ISNULL(@ysnEvaluationByMarketZone, 0) = 0
 		BEGIN
 			SET @strZoneIds = ''
-		END
-		ELSE IF @strEvaluationByZone = 'Market Zone'
-		BEGIN
-			SET @strLocationIds = ''
-		END
-		ELSE IF @strEvaluationByZone = 'Company'
-		BEGIN
-			SET @strZoneIds = ''
-			SET @strLocationIds = ''
 		END
 
+		IF ISNULL(@ysnEvaluationByLocation, 0) = 0 
+		BEGIN
+			SET @strLocationIds = ''
+		END
+		
+		IF ISNULL(@ysnEvaluationByOriginPort, 0) = 0 
+		BEGIN
+			SET @strOriginPortIds = ''
+		END
+		
+		IF ISNULL(@ysnEvaluationByDestinationPort, 0) = 0 
+		BEGIN
+			SET @strDestinationPortIds = ''
+		END
+		
+		IF ISNULL(@ysnEvaluationByCropYear, 0) = 0 
+		BEGIN
+			SET @strCropYearIds = ''
+		END
+
+		IF ISNULL(@ysnEvaluationByStorageLocation, 0) = 0 
+		BEGIN
+			SET @strStorageLocationIds = ''
+		END
+
+		IF ISNULL(@ysnEvaluationByStorageUnit, 0) = 0 
+		BEGIN
+			SET @strStorageUnitIds = ''
+		END
+		
 		IF @ysnEnterForwardCurveForMarketBasisDifferential = 0
 		BEGIN
 			SET @strPeriodTos = ''
@@ -3819,6 +3800,11 @@ BEGIN TRY
 			, bd.dblRatio
 			, bd.intUnitMeasureId
 			, i.strMarketValuation
+			, bd.intOriginPortId
+			, bd.intDestinationPortId
+			, bd.intCropYearId 
+			, bd.intStorageLocationId 
+			, bd.intStorageUnitId
 		INTO #tmpM2MDifferentialBasis
 		FROM tblRKM2MBasis b
 		JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
@@ -3839,6 +3825,11 @@ BEGIN TRY
 			AND ISNULL(bd.strPeriodTo, '') IN (SELECT CASE WHEN @strPeriodTos = '' THEN ISNULL(bd.strPeriodTo, '') ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END FROM [dbo].[fnSplitString](@strPeriodTos, ', ')) --added this be able to filter by period to (RM-739)
 			AND ISNULL(bd.intCompanyLocationId, 0) IN (SELECT CASE WHEN @strLocationIds = '' THEN ISNULL(bd.intCompanyLocationId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strLocationIds, ', ')) --added this be able to filter by item (RM-739)
 			AND ISNULL(bd.intMarketZoneId, 0) IN (SELECT CASE WHEN @strZoneIds = '' THEN ISNULL(bd.intMarketZoneId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strZoneIds, ', ')) --added this be able to filter by item (RM-739)
+			AND ISNULL(bd.intOriginPortId, 0) IN (SELECT CASE WHEN @strOriginPortIds = '' THEN ISNULL(bd.intOriginPortId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strOriginPortIds, ', ')) 
+			AND ISNULL(bd.intDestinationPortId, 0) IN (SELECT CASE WHEN @strDestinationPortIds = '' THEN ISNULL(bd.intDestinationPortId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strDestinationPortIds, ', ')) 
+			AND ISNULL(bd.intCropYearId, 0) IN (SELECT CASE WHEN @strCropYearIds = '' THEN ISNULL(bd.intCropYearId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strCropYearIds, ', ')) 
+			AND ISNULL(bd.intStorageLocationId, 0) IN (SELECT CASE WHEN @strStorageLocationIds = '' THEN ISNULL(bd.intStorageLocationId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strStorageLocationIds, ', ')) 
+			AND ISNULL(bd.intStorageUnitId, 0) IN (SELECT CASE WHEN @strStorageUnitIds = '' THEN ISNULL(bd.intStorageUnitId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strStorageUnitIds, ', ')) 
 			) OR (bd.strContractInventory = 'Inventory' and b.intM2MBasisId = @intM2MBasisId
 				AND c.intCommodityId = ISNULL(@intCommodityId, c.intCommodityId)
 				AND b.strPricingType = @strM2MType)
@@ -3868,7 +3859,13 @@ BEGIN TRY
 			, dblBasisOrDiscount
 			, dblRatio
 			, intUnitMeasureId
-			, intLocationId)
+			, intLocationId
+			, intOriginPortId
+			, intDestinationPortId
+			, intCropYearId 
+			, intStorageLocationId 
+			, intStorageUnitId
+		)
 		SELECT intM2MHeaderId
 			, intM2MBasisDetailId
 			, strOriginDest
@@ -3887,6 +3884,11 @@ BEGIN TRY
 			, dblRatio
 			, intUnitMeasureId
 			, intCompanyLocationId
+			, intOriginPortId
+			, intDestinationPortId
+			, intCropYearId 
+			, intStorageLocationId 
+			, intStorageUnitId
 		FROM #tmpM2MDifferentialBasis
 
 		-- Settlement Price

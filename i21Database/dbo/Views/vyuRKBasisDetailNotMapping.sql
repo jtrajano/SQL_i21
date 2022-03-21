@@ -3,38 +3,48 @@
 AS 
 
 SELECT 
-		bd.intM2MBasisDetailId,
-		bd.intM2MBasisId,
-		bd.intCommodityId,
-		bd.intItemId,
-		bd.strOriginDest,
-		bd.intFutureMarketId,
-		bd.intFutureMonthId,
-		bd.strPeriodTo,
-		bd.intCompanyLocationId,
-		bd.intMarketZoneId,
-		bd.intCurrencyId,
-		bd.intPricingTypeId,
-		bd.strContractInventory,
-		bd.intContractTypeId,
-		bd.dblCashOrFuture,
-		bd.dblRatio,
-		bd.dblBasisOrDiscount,
-		bd.intUnitMeasureId,
-		bd.strMarketValuation
-		,strCommodityCode
-		,strContractType
-		,strCurrency
-		,strMarketZoneCode
-		,strFutMarketName
-		,strFutureMonth
-		,strItemNo
-		,pt.strPricingType
-		,strLocationName
-		,strUnitMeasure
-		,CAST(CASE WHEN IBD.intM2MBasisDetailId IS NULL THEN 0 ELSE 1 END AS bit) AS ysnUsed
-		,M2M.strRecordName as strM2MBatch
-		,M2M.dtmTransactionUpTo as dtmM2MDate
+		  bd.intM2MBasisDetailId
+		, bd.intM2MBasisId
+		, bd.intCommodityId
+		, bd.intItemId
+		, bd.strOriginDest
+		, bd.intFutureMarketId
+		, bd.intFutureMonthId
+		, bd.strPeriodTo
+		, bd.intCompanyLocationId
+		, bd.intMarketZoneId
+		, bd.intCurrencyId
+		, bd.intPricingTypeId
+		, bd.strContractInventory
+		, bd.intContractTypeId
+		, bd.dblCashOrFuture
+		, bd.dblRatio
+		, bd.dblBasisOrDiscount
+		, bd.intUnitMeasureId
+		, bd.strMarketValuation
+		, strCommodityCode
+		, strContractType
+		, strCurrency
+		, strMarketZoneCode
+		, strFutMarketName
+		, strFutureMonth
+		, strItemNo
+		, pt.strPricingType
+		, strLocationName
+		, strUnitMeasure
+		, CAST(CASE WHEN IBD.intM2MBasisDetailId IS NULL THEN 0 ELSE 1 END AS bit) AS ysnUsed
+		, M2M.strRecordName as strM2MBatch
+		, M2M.dtmTransactionUpTo as dtmM2MDate
+		, strOriginPort = originPort.strCity
+		, intOriginPortId = originPort.intCityId
+		, strDestinationPort = destinationPort.strCity
+		, intDestinationPortId = destinationPort.intCityId
+		, strCropYear = cropYear.strCropYear
+		, intCropYearId = cropYear.intCropYearId
+		, strStorageLocation = storageLocation.strSubLocationName
+		, intStorageLocationId = storageLocation.intCompanyLocationSubLocationId
+		, strStorageUnit = storageUnit.strName
+		, intStorageUnitId = storageUnit.intStorageLocationId
 FROM tblRKM2MBasisDetail bd
 JOIN tblRKM2MBasis mb on mb.intM2MBasisId=bd.intM2MBasisId
 JOIN tblICCommodity c on c.intCommodityId=bd.intCommodityId
@@ -49,3 +59,13 @@ LEFT JOIN tblCTPricingType pt on pt.intPricingTypeId=bd.intPricingTypeId
 LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=bd.intUnitMeasureId
 LEFT JOIN tblRKM2MInquiryBasisDetail IBD on bd.intM2MBasisDetailId = IBD.intM2MBasisDetailId
 LEFT JOIN tblRKM2MInquiry M2M ON IBD.intM2MInquiryId = M2M.intM2MInquiryId
+LEFT JOIN tblSMCity originPort
+	ON originPort.intCityId = bd.intOriginPortId
+LEFT JOIN tblSMCity destinationPort
+	ON destinationPort.intCityId = bd.intDestinationPortId
+LEFT JOIN tblCTCropYear cropYear
+	ON cropYear.intCropYearId = bd.intCropYearId
+LEFT JOIN tblSMCompanyLocationSubLocation storageLocation
+	ON storageLocation.intCompanyLocationSubLocationId = bd.intStorageLocationId
+LEFT JOIN tblICStorageLocation storageUnit
+	ON storageUnit.intStorageLocationId = bd.intStorageUnitId

@@ -422,6 +422,15 @@ BEGIN
 	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Derivatives Commission Exempt','1')
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnEvaluationByLocation')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ysnEvaluationByLocation IS NULL AND ysnEvaluationByMarketZone IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET ysnEvaluationByLocation = CASE WHEN strEvaluationByZone = 'Location' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			,  ysnEvaluationByMarketZone = CASE WHEN strEvaluationByZone = 'Market Zone' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	END
+END
 
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

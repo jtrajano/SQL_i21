@@ -36,7 +36,18 @@ DECLARE @tempBasis TABLE(intRowNumber INT
 	, strMarketValuation NVARCHAR(250)
 	, ysnLicensed BIT
 	, intBoardMonthId INT
-	, strBoardMonth NVARCHAR(50))  
+	, strBoardMonth NVARCHAR(50)
+	, strOriginPort NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intOriginPortId INT
+	, strDestinationPort NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intDestinationPortId INT
+	, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intCropYearId INT
+	, strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intStorageLocationId INT
+	, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intStorageUnitId INT	
+)  
 
 INSERT INTO @tempBasis
 EXEC uspRKGetM2MBasis
@@ -58,7 +69,12 @@ INSERT INTO tblRKM2MBasisDetail (intM2MBasisId
 	, dblCashOrFuture
 	, dblBasisOrDiscount
 	, dblRatio
-	, intUnitMeasureId)
+	, intUnitMeasureId
+	, intOriginPortId
+	, intDestinationPortId
+	, intCropYearId
+	, intStorageLocationId
+	, intStorageUnitId)
 SELECT @intM2MBasisId
 	, 1
 	, intCommodityId
@@ -77,5 +93,10 @@ SELECT @intM2MBasisId
 	, dblBasisOrDiscount
 	, dblRatio
 	, intUnitMeasureId
+	, intOriginPortId
+	, intDestinationPortId
+	, intCropYearId
+	, intStorageLocationId
+	, intStorageUnitId
 FROM @tempBasis
 WHERE intRowNumber NOT IN (SELECT * FROM dbo.[fnCommaSeparatedValueToTable](@intRowNumbers))

@@ -62,6 +62,16 @@
 	[strLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intMarketZoneId] INT NULL,
 	[strMarketZoneCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strOriginPort] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intOriginPortId] INT NULL,
+	[strDestinationPort] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intDestinationPortId] INT NULL,
+	[strCropYear] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intCropYearId] INT NULL,
+	[strStorageLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intStorageLocationId] INT NULL,
+	[strStorageUnit] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intStorageUnitId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKM2MTransaction] PRIMARY KEY ([intM2MTransactionId]), 
     CONSTRAINT [FK_tblRKM2MTransaction_tblRKM2MHeader] FOREIGN KEY ([intM2MHeaderId]) REFERENCES [tblRKM2MHeader]([intM2MHeaderId]) ON DELETE CASCADE, 
@@ -70,5 +80,10 @@
     CONSTRAINT [FK_tblRKM2MTransaction_tblRKFuturesMonth] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]), 
     CONSTRAINT [FK_tblRKM2MTransaction_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblRKM2MTransaction_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]), 
-    CONSTRAINT [FK_tblRKM2MTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+    CONSTRAINT [FK_tblRKM2MTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblRKM2MTransaction_tblSMCity_intOriginPortId] FOREIGN KEY (intOriginPortId) REFERENCES [dbo].[tblSMCity] (intCityId),
+	CONSTRAINT [FK_tblRKM2MTransaction_tblSMCity_intDestinationPortId] FOREIGN KEY (intDestinationPortId) REFERENCES [dbo].[tblSMCity] (intCityId),
+	CONSTRAINT [FK_tblRKM2MTransaction_tblCTCropYear_intCropYearId] FOREIGN KEY (intCropYearId) REFERENCES [dbo].[tblCTCropYear] (intCropYearId),
+	CONSTRAINT [FK_tblRKM2MTransaction_tblSMCompanyLocationSubLocation_intStorageLocationId] FOREIGN KEY (intStorageLocationId) REFERENCES [dbo].[tblSMCompanyLocationSubLocation] (intCompanyLocationSubLocationId),
+	CONSTRAINT [FK_tblRKM2MTransaction_tblICStorageLocation_intStorageUnitId] FOREIGN KEY (intStorageUnitId) REFERENCES [dbo].[tblICStorageLocation] (intStorageLocationId)
 )
