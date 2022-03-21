@@ -7,6 +7,13 @@ SELECT intRowNum = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY t1.intContractDetailI
 	, strPricingStatus = CASE WHEN CDD.intPricingStatus = 0 THEN 'Unpriced' WHEN CDD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CDD.intPricingStatus = 2 THEN 'Priced' END
 	, dblLotsPriced = CASE WHEN CDD.intPricingTypeId = 1 THEN (CDD.dblQuantity / M.dblContractSize)  ELSE ISNULL(PFD.dblQuantity, 0) / M.dblContractSize END
 	, dblLotsUnpriced = CASE WHEN CDD.intPricingTypeId = 1 THEN 0 ELSE ((CDD.dblQuantity - ISNULL(PFD.dblQuantity, 0)) / M.dblContractSize) END
+	, compactItem.strOrigin
+	, compactItem.strProductType
+	, compactItem.strGrade
+	, compactItem.strRegion
+	, compactItem.strSeason
+	, compactItem.strClass
+	, compactItem.strProductLine
 FROM (
 	SELECT *
 		, dblToBeHedgedLots = dblNoOfLots - dblHedgedLots
@@ -104,6 +111,8 @@ FROM (
 	) t
 )t1
 INNER JOIN tblCTContractDetail CDD ON CDD.intContractDetailId = t1.intContractDetailId
+INNER JOIN tblICItem item ON item.intItemId = CDD.intItemId
+INNER JOIN vyuICGetCompactItem compactItem ON item.intItemId = compactItem.intItemId
 INNER JOIN tblCTContractHeader CHD ON CHD.intContractHeaderId = t1.intContractHeaderId
 INNER JOIN vyuCTGridContractDetail vCD ON vCD.intContractDetailId = t1.intContractDetailId
 INNER JOIN tblRKFutureMarket M ON M.intFutureMarketId = vCD.intFutureMarketId
