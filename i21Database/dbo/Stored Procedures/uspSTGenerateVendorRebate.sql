@@ -359,7 +359,7 @@ BEGIN TRY
 		INNER JOIN (
 			SELECT DISTINCT intStoreId = Rebates.intStoreId
 				,ysnTobacco = Rebates.ysnTobacco
-				,intRegisterDepartmentId = CatLoc.intRegisterDepartmentId
+				,strCashRegisterDepartment = CatLoc.strCashRegisterDepartment
 			FROM tblSTStoreRebates Rebates
 			INNER JOIN tblSTStore Store
 				ON Rebates.intStoreId = Store.intStoreId
@@ -368,7 +368,7 @@ BEGIN TRY
 			INNER JOIN tblICCategoryLocation CatLoc
 				ON Category.intCategoryId = CatLoc.intCategoryId
 				AND Store.intCompanyLocationId = CatLoc.intLocationId
-		) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.intRegisterDepartmentId = TR.intTrlDeptNumber
+		) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber
 		WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL) -- Filter Store without Address
 		AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 		AND TR.strTrpPaycode != 'Change' --ST-680
