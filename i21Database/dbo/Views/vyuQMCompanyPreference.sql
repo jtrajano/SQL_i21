@@ -23,6 +23,9 @@ SELECT CP.intCompanyPreferenceId
 	,LS1.strSecondaryStatus AS strRejectionLotStatus
 	,CP.ysnEnableContractSequencesTabInSampleSearchScreen
 	,CP.strSampleInstructionReport
+	,CP.intDefaultSampleStatusId
+	,QMSS.strStatus AS strDefaultSampleStatus
 FROM tblQMCompanyPreference CP
 LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = CP.intApproveLotStatus
 LEFT JOIN tblICLotStatus LS1 ON LS1.intLotStatusId = CP.intRejectLotStatus
+LEFT JOIN tblQMSampleStatus QMSS ON CP.intDefaultSampleStatusId = QMSS.intSampleStatusId
