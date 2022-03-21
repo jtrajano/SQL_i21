@@ -19,7 +19,7 @@ SELECT
     , CAST(CASE Vendor WHEN 1 THEN 1 ELSE 0 END AS BIT) IsVendor
     , CAST(CASE Employee WHEN 1 THEN 1 ELSE 0 END AS BIT) IsEmployee
     , CAST(CASE Salesperson WHEN 1 THEN 1 ELSE 0 END AS BIT) IsSalesperson
-    , CAST(CASE User WHEN 1 THEN 1 ELSE 0 END AS BIT) IsUser
+    , CAST(CASE [User] WHEN 1 THEN 1 ELSE 0 END AS BIT) IsUser
     , CAST(CASE FuturesBroker WHEN 1 THEN 1 ELSE 0 END AS BIT) IsFuturesBroker
     , CAST(CASE ForwardingAgent WHEN 1 THEN 1 ELSE 0 END AS BIT) IsForwardingAgent
     , CAST(CASE Terminal WHEN 1 THEN 1 ELSE 0 END AS BIT) IsTerminal
