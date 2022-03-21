@@ -355,6 +355,8 @@
     <Build Include="dbo\Tables\tblTMRoute.sql" />
     <Build Include="dbo\Tables\tblTMSeasonResetArchive.sql" />
     <Build Include="dbo\Tables\tblTMSite.sql">
+	<Build Include="dbo\Tables\tblTMOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
       <SuppressTSqlWarnings>
       </SuppressTSqlWarnings>
     </Build>
@@ -9146,6 +9148,9 @@
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
+    <Build Include="dbo\Tables\tblSMPerformanceLog.sql" />
+    <Build Include="dbo\Views\vyuSMPerformanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMLogPerformanceRuntime.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
