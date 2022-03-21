@@ -56,7 +56,9 @@ BEGIN
 			,[ysnReturn]
 			,[ysnStage]
 			,[intStorageLocationId]
-			,[intSubLocationId])
+			,[intSubLocationId]
+			,[dblOptionalityPremium]
+			,[dblQualityPremium])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -115,6 +117,8 @@ BEGIN
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
 			,[intSubLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
+			,[dblOptionalityPremium] = ISNULL(LD.dblOptionalityPremium, 0)
+			,[dblQualityPremium] = ISNULL(LD.dblQualityPremium, 0)
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -200,6 +204,8 @@ BEGIN
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = NULL
 			,[intSubLocationId] = NULL
+			,[dblOptionalityPremium] = 0
+			,[dblQualityPremium] = 0
 		FROM vyuLGLoadCostForVendor A
 			OUTER APPLY tblLGCompanyPreference CP
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
