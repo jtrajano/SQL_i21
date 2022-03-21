@@ -21,7 +21,8 @@
 	ysnEnableAssignContractsInSample BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnEnableAssignContractsInSample] DEFAULT 0,
 	ysnShowItemDescriptionOnly BIT CONSTRAINT [DF_tblQMCompanyPreference_ysnShowItemDescriptionOnly] DEFAULT 0,
 	ysnEnableContractSequencesTabInSampleSearchScreen BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnEnableContractSequencesTabInSampleSearchScreen] DEFAULT 0,
-    CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
+    strSampleInstructionReport NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intApproveLotStatus] FOREIGN KEY ([intApproveLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intRejectLotStatus] FOREIGN KEY ([intRejectLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId])
 )
