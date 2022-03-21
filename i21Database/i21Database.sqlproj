@@ -585,7 +585,6 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSiteType.sql" />
     <Build Include="dbo\Tables\tblTMOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKDerivativesForCommissionPosting.sql" />
     <Build Include="dbo\Views\vyuCMRKDerivativesForCommissionPosting.sql" />
     <Build Include="dbo\Views\vyuCMDerivativesForCommissionPosting.sql" />
     <Build Include="dbo\User Defined Types\PostCommissionDerivativeEntryTable.sql" />
@@ -594,6 +593,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDScheduleDetail.sql" />
     <Build Include="dbo\Tables\tblICWarrantStatus.sql" />
     <None Include="Scripts\Post-Deployment\IC\31_WarrantStatus.sql" />
+    <Build Include="dbo\Views\vyuRKDerivativesForCommissionPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

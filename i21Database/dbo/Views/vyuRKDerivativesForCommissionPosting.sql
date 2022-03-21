@@ -1,6 +1,6 @@
-﻿CREATE PROCEDURE uspRKDerivativesForCommissionPosting
-   
-AS  
+﻿CREATE VIEW [dbo].[vyuRKDerivativesForCommissionPosting]
+
+AS
 
 SELECT 
 	intTransactionId = intFutOptTransactionId
@@ -11,8 +11,10 @@ SELECT
 	,c.strCurrency
 	,strLocationName
 	,strBrokerTradeNo
+	,strBroker = ot.strName
 	,strBrokerageAccount
-	,strSalespersonId
+	,ot.intBrokerageAccountId
+	,strTrader = strSalespersonId
 	,strBuySell
 	,dblContracts = ABS(ot.dblGetNoOfContract)
 	,strOptionMonth = ot.strOptionMonthYear
@@ -24,6 +26,7 @@ SELECT
 	,dblCommission 
 	,ysnCommissionExempt
 	,ysnCommissionOverride
+	,dblGrossPL = NULL
 	,ysnPosted
 	--,intLFutOptTransactionId = CASE WHEN strBuySell = 'Buy' THEN intFutOptTransactionId ELSE NULL END
 	--,intSFutOptTransactionId = CASE WHEN strBuySell = 'Sell' THEN intFutOptTransactionId ELSE NULL END
@@ -49,8 +52,10 @@ SELECT
 	,C.strCurrency
 	,L.strLocationName
 	,strBrokerTradeNo = ''
+	,strBroker  = B.strName
 	,BA.strAccountNumber
-	,strName
+	,A.intBrokerageAccountId
+	,strTrader = E.strName
 	,strBuySell  = NULL
 	,dblMatchQty = sum(dblMatchQty)
 	,strOptionMonth = NULL
@@ -62,10 +67,11 @@ SELECT
 	, dblCommission = sum(Lng.dblLongCommission + Shrt.dblShortCommission)
 	, ysnCommissionExempt = NULL
 	, ysnCommissionOverride = NULL
+	, dblGrossPL  = SUM(AD.dblGrossPL)
 	, Lng.ysnPosted
 	--, AD.intLFutOptTransactionId
 	--, AD.intSFutOptTransactionId
-FROM tblRKMatchFuturesPSDetail AD
+FROM vyuRKMatchedPSTransaction AD
 INNER JOIN tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId
 INNER JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = A.intFutureMarketId
 INNER JOIN tblRKFuturesMonth F ON F.intFutureMonthId = A.intFutureMonthId
@@ -74,6 +80,7 @@ INNER JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = A.intCompanyLocati
 INNER JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = A.intBrokerageAccountId
 INNER JOIN tblRKTradersbyBrokersAccountMapping T ON T.intBrokerageAccountId = BA.intBrokerageAccountId
 INNER JOIN tblEMEntity E ON E.intEntityId = T.intEntitySalespersonId
+INNER JOIN tblEMEntity B ON B.intEntityId = BA.intEntityId
 CROSS APPLY (
 	select
 	
@@ -114,7 +121,9 @@ GROUP BY
 	,C.strCurrency
 	,L.strLocationName
 	,BA.strAccountNumber
-	,strName
+	,A.intBrokerageAccountId
+	,E.strName
+	,B.strName
 	,strFutureMonth
 	,Lng.strCommissionRateType
 	,Lng.ysnPosted
