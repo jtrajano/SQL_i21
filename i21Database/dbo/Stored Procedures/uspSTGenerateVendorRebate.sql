@@ -220,7 +220,7 @@ BEGIN TRY
 			, REPLACE(CONVERT(NVARCHAR, @dtmEndingDate, 111), '/', '') AS dtmWeekEndingDate
 			, REPLACE(CONVERT(NVARCHAR, dtmDate, 111), '/', '') AS dtmTransactionDate 
 			, CONVERT(NVARCHAR, dtmDate, 108) AS strTransactionTime
-			, intTermMsgSN AS strTransactionIdCode
+			, TR.intTermMsgSN AS strTransactionIdCode
 			, ST.intStoreNo AS strStoreNumber
 			, ST.strDescription AS strStoreName
 			, REPLACE(REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') AS strStoreAddress
@@ -345,6 +345,7 @@ BEGIN TRY
 		INNER JOIN (
 			SELECT DISTINCT intStoreId = Rebates.intStoreId
 				,ysnTobacco = Rebates.ysnTobacco
+				,intRegisterDepartmentId = CatLoc.intRegisterDepartmentId
 			FROM tblSTStoreRebates Rebates
 			INNER JOIN tblSTStore Store
 				ON Rebates.intStoreId = Store.intStoreId
@@ -353,7 +354,7 @@ BEGIN TRY
 			INNER JOIN tblICCategoryLocation CatLoc
 				ON Category.intCategoryId = CatLoc.intCategoryId
 				AND Store.intCompanyLocationId = CatLoc.intLocationId
-		) DEPT ON DEPT.intStoreId = TR.intStoreId		
+		) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.intRegisterDepartmentId = TR.intTrlDeptNumber
 		WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL) -- Filter Store without Address
 		AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 		AND TR.strTrpPaycode != 'Change' --ST-680
@@ -436,7 +437,7 @@ BEGIN TRY
 						ELSE dblTrlUnitPrice 
 						END as dblPrice
 				, strTrlUPC AS strUpcCode		-- Check digit is included. Since RJ and PM requires check digits
-				, REPLACE(strTrlDesc, ',', ' ') AS strUpcDescription
+				, REPLACE(TR.strTrlDesc, ',', ' ') AS strUpcDescription
 				, CASE	WHEN DEPT.ysnTobacco = 1 THEN 'PACKS' ELSE 'CANS' END AS strUnitOfMeasure
 				, CASE 
 				WHEN CRP.strPromotionType = 'VAPS' 
@@ -592,6 +593,8 @@ BEGIN TRY
 			WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL)
 				AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 		) as innerquery
+		WHERE dblPrice < 200
+
 		-- Check if has record
 		IF EXISTS(SELECT * FROM @tblTempRJR)
 		BEGIN
