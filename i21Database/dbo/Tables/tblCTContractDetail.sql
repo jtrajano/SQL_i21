@@ -190,6 +190,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 
 	intShippingLineId2 INT NULL,
 	intShippingLineId3 INT NULL,
+	dblBudgetPrice numeric(18, 6) NULL,
+	intBudgetCurrencyId INT NULL,
+	intBudgetUOMId INT NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 

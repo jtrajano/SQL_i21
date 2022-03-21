@@ -570,6 +570,11 @@ BEGIN TRY
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
 		, CD.dblPrepaymentAmount
+		, CD.dblBudgetPrice
+		, CD.intBudgetCurrencyId
+		, CD.intBudgetUOMId
+		, strBudgetCurrency = BBC.strCurrency
+		, strBudgetUOM = dbo.[fnCTGetSeqDisplayField](CD.intBudgetUOMId, 'tblICItemUOM')
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -593,6 +598,7 @@ BEGIN TRY
 	LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = CD.intApprovalStatusId
 	--SELECT * FROM tblCMBankLoan
 
+	LEFT JOIN tblSMCurrency BBC ON BBC.intCurrencyID = CD.intBudgetCurrencyId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	LEFT JOIN tblSMCurrency BC ON BC.intCurrencyID = CD.intBasisCurrencyId

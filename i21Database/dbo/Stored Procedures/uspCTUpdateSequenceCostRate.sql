@@ -6,8 +6,7 @@ BEGIN TRY
 
 	declare  
 		@ErrMsg nvarchar(max)  
-		,@intDaysForFinance int  
-		,@dblCashPrice numeric(18,6)  
+		,@intDaysForFinance int
 		,@dblInterestRate numeric(18,6)  
 		,@intFinanceCostId int  
 		,@dblCalculatedRate numeric(18,6)  
@@ -16,10 +15,9 @@ BEGIN TRY
 		,@time numeric(18,6);  
 
 	select  
-		@intDaysForFinance = ch.intDaysForFinance  
-		,@dblCashPrice = cd.dblCashPrice  
+		@intDaysForFinance = ch.intDaysForFinance
 		,@dblInterestRate = cd.dblInterestRate  
-		,@principal = cd.dblQuantity * isnull(cd.dblCashPrice,1)  
+		,@principal = cd.dblTotalCost
 		,@rate = convert(numeric(18,6),isnull(cd.dblInterestRate,0)) / 100.00  
 		,@time = convert(numeric(18,6),isnull(ch.intDaysForFinance,0)) / 360.00  
 	from
@@ -30,7 +28,7 @@ BEGIN TRY
 
 	select top 1 @intFinanceCostId = intFinanceCostId from tblCTCompanyPreference;  
 
-	if (@intDaysForFinance is not null and @dblCashPrice is not null and @dblInterestRate is not null and @intFinanceCostId is not null)  
+	if (@intDaysForFinance is not null and @principal is not null and @dblInterestRate is not null and @intFinanceCostId is not null)  
 	begin  
 		select @dblCalculatedRate = @principal * @rate * @time;  
 		update tblCTContractCost set dblRate = @dblCalculatedRate, dblActualAmount = @dblCalculatedRate where intContractDetailId = @intContractDetailId and intItemId = @intFinanceCostId;  
