@@ -231,6 +231,15 @@ BEGIN TRY
 				WHERE intLoadId = @intLoadId
 					AND @ysnCancel = 0
 
+				UPDATE Detail
+					SET dblDeliveredQuantity = CASE WHEN (@ysnPost = 1) THEN Detail.dblQuantity ELSE 0 END
+						,dblDeliveredGross = CASE WHEN (@ysnPost = 1) THEN Detail.dblGross ELSE 0 END
+						,dblDeliveredTare = CASE WHEN (@ysnPost = 1) THEN Detail.dblTare ELSE 0 END
+						,dblDeliveredNet = CASE WHEN (@ysnPost = 1) THEN Detail.dblNet ELSE 0 END
+					FROM dbo.tblLGLoadDetail Detail
+						INNER JOIN dbo.tblLGLoad Header ON Detail.intLoadId = Header.intLoadId 
+					WHERE Header.intLoadId = @intLoadId
+
 				IF(ISNULL(@strFOBPoint,'') = 'Origin')
 				BEGIN	
 					IF (@ysnCancel = 1) 
