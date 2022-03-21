@@ -2,7 +2,6 @@ CREATE PROCEDURE [dbo].[uspSMLogPerformanceRuntime]
       @strModuleName            NVARCHAR(200)
 	, @strScreenName            NVARCHAR(200)
     , @strProcedureName         NVARCHAR(200)
-    , @strRequestId             NVARCHAR(500) = NULL
     , @ysnStart		            BIT = 1
 	, @intUserId	            INT = NULL
     , @intPerformanceLogId      INT = NULL
