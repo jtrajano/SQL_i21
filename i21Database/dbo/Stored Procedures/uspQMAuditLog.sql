@@ -11,7 +11,8 @@ AS
 BEGIN TRY
 
 	DECLARE @ErrMsg	NVARCHAR(MAX),
-			@intId	INT
+			@intId	INT,
+			@intKey	INT
 
 	DECLARE @ids TABLE (intId INT)
 
@@ -20,17 +21,19 @@ BEGIN TRY
 
 	WHILE ISNULL(@intId,0) > 0
 	BEGIN
-		IF @strScreenName = 'ContractManagement.view.Contract'
+		IF @strActionType = 'Sample Instruction'
 		BEGIN
-			SELECT @intId = intSampleId
+			SELECT @intKey = intSampleId
 			FROM tblQMSample
 			WHERE intContractDetailId = @intId
-
-			SET @strScreenName = 'Quality.view.QualitySample'
+		END
+		ELSE
+		BEGIN
+			SET @intKey = @intId
 		END
 
 		EXEC	dbo.uspSMAuditLog
-					 @keyValue = @intId				
+					 @keyValue = @intKey				
 					,@screenName = @strScreenName   
 					,@entityId = @intEntityId		
 					,@actionType = @strActionType          
