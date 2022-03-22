@@ -155,6 +155,7 @@ BEGIN TRY
 			,@intShipperId = NULL
 			,@intCompanyLocationId = NULL
 			,@intOrgContractStatusId = NULL
+			,@strCurrency=NULL
 
 		SELECT @intContractDetailId = intContractDetailId
 			,@intContractHeaderId = intContractHeaderId
@@ -167,6 +168,7 @@ BEGIN TRY
 			,@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate
 			,@strSubLocation = strSubLocation
 			,@dblQuantity = dblQuantity
+			,@strCurrency=strCurrency
 		FROM dbo.tblCTContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
@@ -249,11 +251,20 @@ BEGIN TRY
 		FROM tblIPThirdPartyContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
-		SELECT TOP 1 @intCurrencyId = intCurrencyID
-			,@strCurrency = strCurrency
-		FROM tblSMCurrency
-		WHERE strCurrency LIKE '%USD%'
-
+		If @strCurrency='CAD'
+		Begin
+			SELECT TOP 1 @intCurrencyId = intCurrencyID
+				,@strCurrency = strCurrency
+			FROM tblSMCurrency
+			WHERE strCurrency=@strCurrency
+		End
+		Else
+		Begin
+			SELECT TOP 1 @intCurrencyId = intCurrencyID
+				,@strCurrency = strCurrency
+			FROM tblSMCurrency
+			WHERE strCurrency LIKE '%USD%'
+		End
 		SELECT @dtmUpdatedAvailabilityDate = CD.dtmUpdatedAvailabilityDate
 			,@strPricingType = PT.strPricingType
 		FROM tblCTContractDetail CD WITH (NOLOCK)

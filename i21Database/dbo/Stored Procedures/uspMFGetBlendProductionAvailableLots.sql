@@ -47,7 +47,7 @@ BEGIN
 	SELECT *
 	FROM dbo.fnCommaSeparatedValueToTable(@strSourceLocationIds)
 END
-ELSE IF Ltrim(ISNULL(@strSourceLocationIds, '')) <> ''
+ELSE IF Ltrim(ISNULL(@strSourceWarehouseIds, '')) <> ''
 BEGIN
 	INSERT INTO @tblSourceStorageLocation
 	SELECT intStorageLocationId
