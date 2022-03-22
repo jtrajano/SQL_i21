@@ -584,7 +584,7 @@ BEGIN
 										SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY()
 
 
-										SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0) FROM tblRKOptionsMatchPnS
+										SELECT TOP 1 @strTranNo = ISNULL(CONVERT(INT, strTranNo), 0) FROM tblRKOptionsMatchPnS ORDER BY intMatchOptionsPnSId DESC
 
 										INSERT INTO tblRKOptionsMatchPnS (intOptionsMatchPnSHeaderId
 											, strTranNo
@@ -609,7 +609,7 @@ BEGIN
 
 										DECLARE @strTranNoLast NVARCHAR(50)
 
-										SELECT @strTranNoLast = ISNULL(MAX(strTranNo), 0) FROM tblRKOptionsMatchPnS
+										SELECT TOP 1 @strTranNoLast = ISNULL(strTranNo, 0) FROM tblRKOptionsMatchPnS ORDER BY intMatchOptionsPnSId DESC
 
 										
 										INSERT INTO @tempResult
