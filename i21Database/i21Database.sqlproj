@@ -597,6 +597,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetEmailInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostMissingLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntriesForMissingLots.sql" />
+    <Build Include="dbo\Views\vyuQMContractWithoutSampleList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
