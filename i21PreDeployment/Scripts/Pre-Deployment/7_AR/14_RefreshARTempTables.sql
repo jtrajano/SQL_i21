@@ -159,6 +159,12 @@ CREATE TABLE ##ARPostInvoiceHeader (
     ,[strSourceType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strPostingMessage]                    NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strDescription]                       NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+    ,[strInterCompanyVendorId]				NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+	,[strInterCompanyLocationId]			NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+	,[intInterCompanyId]					INT				NULL
+	,[strReceiptNumber]						NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+	,[ysnInterCompany]                      BIT             NULL
+	,[intInterCompanyVendorId]				INT				NULL
 	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
 )
 
@@ -320,6 +326,12 @@ CREATE TABLE ##ARPostInvoiceDetail (
     ,[strSourceType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
     ,[strPostingMessage]                    NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
     ,[strDescription]                       NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+    ,[strInterCompanyVendorId]				NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+	,[strInterCompanyLocationId]			NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+	,[intInterCompanyId]					INT				NULL
+	,[strReceiptNumber]						NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
+	,[ysnInterCompany]                      BIT             NULL
+	,[intInterCompanyVendorId]				INT				NULL
 	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
 )
 
@@ -388,9 +400,9 @@ CREATE TABLE ##ARItemsForCosting (
     , [ysnAutoBlend]                    BIT NULL DEFAULT 0
     , [ysnGLOnly]						BIT NULL DEFAULT 0
 	, [strBOLNumber]					NVARCHAR(100) NULL 
-    , [intTicketId]                     INT NULL
     , [strSourceType]                   NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [strSourceNumber]                 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , [intTicketId]                     INT NULL
     , [intSourceEntityId]				INT NULL
 )
 
