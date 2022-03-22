@@ -206,13 +206,13 @@ BEGIN
 							SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId, dblFutCommission 
 							INTO #tempBuyForMatching
 							FROM #tempBuy WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 1
-							ORDER BY dtmFilledDate ASC, dblPrice ASC
+							ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 
 							SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId ,dblFutCommission
 							INTO #tempSellForMatching
 							FROM #tempSell WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 1
-							ORDER BY dtmFilledDate ASC, dblPrice ASC
+							ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 							--SELECT * FROM #tempBuyForMatching
 							--SELECT * FROM #tempSellForMatching
@@ -235,7 +235,7 @@ BEGIN
 									,@intLFutOptTranactionHeaderId = intFutOptTransactionHeaderId
 									,@dblFutCommission = dblFutCommission
 								FROM #tempBuyForMatching
-								ORDER BY dtmFilledDate ASC, dblPrice ASC
+								ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 					
 								--Loop thru Sells
@@ -252,7 +252,7 @@ BEGIN
 										,@intSFutOptTranactionId = intFutOptTransactionId
 										,@intSFutOptTranactionHeaderId = intFutOptTransactionHeaderId
 									FROM #tempSellForMatching 
-									ORDER BY dtmFilledDate ASC, dblPrice ASC
+									ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 									IF @dblSellLot < 1
 									BEGIN
@@ -486,13 +486,14 @@ BEGIN
 									INTO #tempBuyForMatchingOptions
 									FROM #tempBuy 
 									WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType AND dblStrike = @dblStrike
-									ORDER BY dtmFilledDate ASC, dblPrice ASC
+									ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 
 									SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId 
 									INTO #tempSellForMatchingOptions
-									FROM #tempSell WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType AND dblStrike = @dblStrike
-									ORDER BY dtmFilledDate ASC, dblPrice ASC
+									FROM #tempSell 
+									WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType AND dblStrike = @dblStrike
+									ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 
 									IF EXISTS (SELECT * FROM #tempBuyForMatchingOptions) AND EXISTS (SELECT * FROM #tempSellForMatchingOptions)
@@ -510,7 +511,7 @@ BEGIN
 												@dblBuyLotOptions  = dblBalanceLot
 												,@intLFutOptTranactionIdOptions  = intFutOptTransactionId
 											FROM #tempBuyForMatchingOptions
-											ORDER BY dtmFilledDate ASC, dblPrice ASC
+											ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 					
 											--Loop thru Sells
@@ -521,7 +522,7 @@ BEGIN
 													@dblSellLotOptions  = dblBalanceLot
 													,@intSFutOptTranactionIdOptions = intFutOptTransactionId
 												FROM #tempSellForMatchingOptions 
-												ORDER BY dtmFilledDate ASC, dblPrice ASC
+												ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 												IF @dblBuyLotOptions  <= @dblSellLotOptions 
 												BEGIN
@@ -620,17 +621,14 @@ BEGIN
 										DELETE FROM @tempMatchDerivativesDetail
 
 
-					
-										DROP TABLE #tempBuyForMatchingOptions 
-										DROP TABLE #tempSellForMatchingOptions 
-
-
-
-
-
-										DELETE FROM #tempStrike WHERE dblStrike = @dblStrike
+									
 								
 									END
+
+									DELETE FROM #tempStrike WHERE dblStrike = @dblStrike
+								
+									DROP TABLE #tempBuyForMatchingOptions 
+									DROP TABLE #tempSellForMatchingOptions 
 								END
 
 								DROP TABLE #tempStrike
