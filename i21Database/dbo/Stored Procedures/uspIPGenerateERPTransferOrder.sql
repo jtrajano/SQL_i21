@@ -343,7 +343,7 @@ BEGIN TRY
 				,@dblTare = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblTare), 0))
 				,@dblNet = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblNet), 0))
 				,@strPrimaryStatus = LS.strPrimaryStatus
-				,@strContractNumber = CH.strContractNumber
+				,@strContractNumber = ISNULL(CH.strContractNumber, WO.strWorkOrderNo)
 			FROM tblICInventoryTransferDetail ITD
 			JOIN tblICItem I ON I.intItemId = ITD.intItemId
 			LEFT JOIN tblSMCompanyLocationSubLocation FSL ON FSL.intCompanyLocationSubLocationId = ITD.intFromSubLocationId
@@ -357,6 +357,8 @@ BEGIN TRY
 			LEFT JOIN tblICStorageLocation TSU ON TSU.intStorageLocationId = ITD.intToStorageLocationId
 			LEFT JOIN tblSMCurrency C ON C.intCurrencyID = ITD.intCurrencyId
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
+			LEFT JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = LI.intWorkOrderId
 			WHERE ITD.intInventoryTransferDetailId = @intInventoryTransferDetailId
 
 			IF ISNULL(@strItemNo, '') = ''
