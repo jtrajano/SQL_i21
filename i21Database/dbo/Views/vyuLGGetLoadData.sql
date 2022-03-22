@@ -159,6 +159,14 @@ SELECT
 		WHEN 3 THEN 'Drop Ship'
 		WHEN 4 THEN 'Transfer'
 		END COLLATE Latin1_General_CI_AS
+	,strSourceType = CASE L.intSourceType
+		WHEN 1 THEN 'None'
+		WHEN 2 THEN 'Contracts'
+		WHEN 4 THEN 'Allocations'
+		WHEN 5 THEN 'Picked Lots'
+		WHEN 6 THEN 'Pick Lots'
+		WHEN 7 THEN 'Pick Lots w/o Contract'
+		END COLLATE Latin1_General_CI_AS
 	,strEquipmentType = EQ.strEquipmentType
 	,strPosition = P.strPosition
 	,strPositionType = P.strPositionType
