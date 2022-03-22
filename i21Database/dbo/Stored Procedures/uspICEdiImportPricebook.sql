@@ -860,6 +860,8 @@ AS (
 		,dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
 	FROM 
 		@valid2ndUOM p
+	WHERE
+		p.strLongUPCCode IS NOT NULL
 )
 DELETE FROM deleteDuplicate2ndUOMLongUPC_CTE
 WHERE dblDuplicateCount > 1;
