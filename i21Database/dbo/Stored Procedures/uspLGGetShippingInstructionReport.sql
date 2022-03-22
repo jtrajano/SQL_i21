@@ -148,12 +148,23 @@ SELECT *
 		+ CASE WHEN ISNULL(strThirdNotifyFax, '') = '' THEN '' ELSE 'Fax: ' + strThirdNotifyFax + CHAR(13) END 
 		+ CASE WHEN ISNULL(strThirdNotifyMail, '') = '' THEN '' ELSE 'E-mail: ' + strThirdNotifyMail + CHAR(13) END 
 		+ CASE WHEN ISNULL(strThirdNotifyText, '') = '' THEN '' ELSE strThirdNotifyText END)) 
-	,strBOLInstructionText = '- All shipment details and purchase contract details as stated above' + CHAR(13) 
-							+ '- Gross-, Net- & Tare Weight' + CHAR(13) 
-							+ '- In the B/L description of goods: "' + LTRIM(ISNULL(intNumberOfContainers,0)) + ' ' + strPackingDescription + ' container(s) equivalent to ' 
-							+ @strContainerQtyUOM + ' each of clean green coffee in '
-							+ CASE UPPER(strPackingDescription) WHEN UPPER('Bulk') THEN strPackingDescription ELSE strItemUnitMeasure END 
-							+' for any limitation of liability purposes."'
+	,strFourthNotifyInfo = LTRIM(RTRIM(
+		CASE WHEN ISNULL(strFourthNotify, '') = '' THEN '' ELSE strFourthNotify + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyAddress, '') = '' THEN '' ELSE strFourthNotifyAddress + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyCity, '') = '' THEN '' ELSE strFourthNotifyCity + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyZipCode, '') = '' THEN '' ELSE strFourthNotifyZipCode + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyCountry, '') = '' THEN '' ELSE strFourthNotifyCountry + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyMobile, '') = '' THEN '' ELSE 'Mobile: ' + strFourthNotifyMobile + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyPhone, '') = '' THEN '' ELSE 'Phone: ' + strFourthNotifyPhone + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyFax, '') = '' THEN '' ELSE 'Fax: ' + strFourthNotifyFax + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyMail, '') = '' THEN '' ELSE 'E-mail: ' + strFourthNotifyMail + CHAR(13) END 
+		+ CASE WHEN ISNULL(strFourthNotifyText, '') = '' THEN '' ELSE strFourthNotifyText END)) 
+	,strBOLInstructionText = ISNULL(tbl.strInstructionText, '- All shipment details and purchase contract details as stated above' + CHAR(13) 
+			+ '- Gross-, Net- & Tare Weight' + CHAR(13) 
+			+ '- In the B/L description of goods: "' + LTRIM(ISNULL(intNumberOfContainers,0)) + ' ' + strPackingDescription + ' container(s) equivalent to ' 
+			+ @strContainerQtyUOM + ' each of clean green coffee in '
+			+ CASE UPPER(strPackingDescription) WHEN UPPER('Bulk') THEN strPackingDescription ELSE strItemUnitMeasure END 
+			+' for any limitation of liability purposes."')
 	,strContainerTypePackingDescription = strContainerType + ' in ' + strPackingDescription
 	,strQuantityPackingDescription = @strContainerQtyUOM + CASE WHEN (ISNULL(@strPackingUOM, '') <> '') THEN ' in ' + @strPackingUOM ELSE '' END
 	,strFullName = @strFullName
@@ -261,6 +272,7 @@ FROM (
 		,strFirstNotifyText = ISNULL(FLNP.strText, '')
 		,strSecondNotifyText = ISNULL(SLNP.strText, '')
 		,strThirdNotifyText = ISNULL(TLNP.strText, '')
+		,strFourthNotifyText = ISNULL(FtLNP.strText, '')
 		,strConsigneeText = ISNULL(CLNP.strText, '')
 
 		,strFirstNotify = ISNULL(CASE 
@@ -383,6 +395,46 @@ FROM (
 			WHEN TLNP.strType = 'Company' THEN ISNULL(TNCompanyLocation.strZipPostalCode, ThirdNotifyCompany.strZip)
 			ELSE TNLocation.strZipCode END, '')
 
+		,strFourthNotify = ISNULL(CASE 
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strBankName
+			WHEN FtLNP.strType = 'Company' THEN FourthNotifyCompany.strCompanyName
+			ELSE FourthNotify.strName END, '')
+		,strFourthNotifyMail = ISNULL(CASE 
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strEmail
+			WHEN FtLNP.strType = 'Company' THEN ISNULL(FtNCompanyLocation.strEmail, FourthNotifyCompany.strEmail)
+			ELSE FourthNotify.strEmail END, '')
+		,strFourthNotifyFax = ISNULL(CASE 
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strFax
+			WHEN FtLNP.strType = 'Company' THEN ISNULL(FtNCompanyLocation.strFax, FourthNotifyCompany.strFax)
+			ELSE FourthNotify.strFax END, '')
+		,strFourthNotifyMobile = ISNULL(CASE 
+			WHEN FtLNP.strType IN ('Bank', 'Company') THEN ''
+			ELSE FourthNotify.strMobile END, '')
+		,strFourthNotifyPhone = ISNULL(CASE 
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strPhone
+			WHEN FtLNP.strType = 'Company' THEN ISNULL(FtNCompanyLocation.strPhone, FourthNotifyCompany.strPhone)
+			ELSE FourthNotifyContactEntity.strPhone END, '')
+		,strFourthNotifyAddress = ISNULL(CASE 
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strAddress
+			WHEN FtLNP.strType = 'Company' THEN ISNULL(FtNCompanyLocation.strAddress, FourthNotifyCompany.strAddress)
+			ELSE FtNLocation.strAddress END, '')
+		,strFourthNotifyCity = ISNULL(CASE 
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strCity
+			WHEN FtLNP.strType = 'Company' THEN ISNULL(FtNCompanyLocation.strCity, FourthNotifyCompany.strCity)
+			ELSE FtNLocation.strCity END, '')
+		,strFourthNotifyCountry = ISNULL(CASE 
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strCountry
+			WHEN FtLNP.strType = 'Company' THEN ISNULL(FtNCompanyLocation.strCountry, FourthNotifyCompany.strCountry)
+			ELSE FtNLocation.strCountry END, '')
+		,strFourthNotifyState = ISNULL(CASE 
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strState
+			WHEN FtLNP.strType = 'Company' THEN ''
+			ELSE FtNLocation.strState END, '')
+		,strFourthNotifyZipCode = ISNULL(CASE
+			WHEN FtLNP.strType = 'Bank' THEN FourthNotifyBank.strZipCode
+			WHEN FtLNP.strType = 'Company' THEN ISNULL(FtNCompanyLocation.strZipPostalCode, FourthNotifyCompany.strZip)
+			ELSE FtNLocation.strZipCode END, '')
+
 		,strConsignee = ISNULL(CASE 
 			WHEN CLNP.strType = 'Bank' THEN ConsigneeNotifyBank.strBankName
 			WHEN CLNP.strType = 'Company' THEN ConsigneeNotifyCompany.strCompanyName
@@ -452,6 +504,17 @@ FROM (
 		,strShipmentPeriod = UPPER(CONVERT(NVARCHAR,CD.dtmStartDate,106)) + ' - ' + UPPER(CONVERT(NVARCHAR,CD.dtmEndDate,106))
 		,strMarkingInstruction = L.strMarks
 		,strPositionInfo = DATENAME(mm, CD.dtmEndDate) + ' / ' + CAST(DATEPART(yy, CD.dtmEndDate) AS NVARCHAR(10)) + ' ' + POS.strPosition
+		,strInstructionText = CASE
+			WHEN ISNULL(L.strBOLInstructions, '') != '' 
+				THEN L.strBOLInstructions
+			WHEN ISNULL(CP.strBOLText, '') != ''
+				THEN CP.strBOLText 
+			END
+		,firstAltShipping.strShippingLine AS strFirstAltShippingLine
+		,firstAltShipping.strServiceContractNumber AS strFirstAltSrvContractNo
+		,secondAltShipping.strShippingLine AS strSecondAltShippingLine
+		,secondAltShipping.strServiceContractNumber AS strSecondAltSrvContractNo
+
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblICItem Item ON Item.intItemId = LD.intItemId
@@ -487,7 +550,9 @@ FROM (
 	LEFT JOIN tblLGLoadNotifyParties FLNP ON L.intLoadId = FLNP.intLoadId AND FLNP.strNotifyOrConsignee = 'First Notify'
 	LEFT JOIN tblLGLoadNotifyParties SLNP ON L.intLoadId = SLNP.intLoadId AND SLNP.strNotifyOrConsignee = 'Second Notify'
 	LEFT JOIN tblLGLoadNotifyParties TLNP ON L.intLoadId = TLNP.intLoadId AND TLNP.strNotifyOrConsignee = 'Third Notify'
+	LEFT JOIN tblLGLoadNotifyParties FtLNP ON L.intLoadId = FtLNP.intLoadId AND FtLNP.strNotifyOrConsignee = 'Fourth Notify'
 	LEFT JOIN tblLGLoadNotifyParties CLNP ON L.intLoadId = CLNP.intLoadId AND CLNP.strNotifyOrConsignee = 'Consignee'
+
 	LEFT JOIN tblEMEntity FirstNotify ON FirstNotify.intEntityId = FLNP.intEntityId
 	LEFT JOIN tblEMEntityToContact FirstNotifyContact ON FirstNotifyContact.intEntityId = FirstNotify.intEntityId
 	LEFT JOIN tblEMEntity FirstNotifyContactEntity ON FirstNotifyContactEntity.intEntityId = FirstNotifyContact.intEntityContactId
@@ -495,6 +560,7 @@ FROM (
 	LEFT JOIN tblSMCompanySetup FirstNotifyCompany ON FirstNotifyCompany.intCompanySetupID = FLNP.intCompanySetupID
 	LEFT JOIN tblSMCompanyLocation FNCompanyLocation ON FNCompanyLocation.intCompanyLocationId = FLNP.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocation FNLocation ON FNLocation.intEntityLocationId = FLNP.intEntityLocationId
+
 	LEFT JOIN tblEMEntity SecondNotify ON SecondNotify.intEntityId = SLNP.intEntityId
 	LEFT JOIN tblEMEntityToContact SecondNotifyContact ON SecondNotifyContact.intEntityId = SecondNotify.intEntityId
 	LEFT JOIN tblEMEntity SecondNotifyContactEntity ON SecondNotifyContactEntity.intEntityId = SecondNotifyContact.intEntityContactId
@@ -502,6 +568,7 @@ FROM (
 	LEFT JOIN tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SLNP.intCompanySetupID
 	LEFT JOIN tblSMCompanyLocation SNCompanyLocation ON SNCompanyLocation.intCompanyLocationId = SLNP.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocation SNLocation ON SNLocation.intEntityLocationId = SLNP.intEntityLocationId
+
 	LEFT JOIN tblEMEntity ThirdNotify ON ThirdNotify.intEntityId = TLNP.intEntityId
 	LEFT JOIN tblEMEntityToContact ThirdNotifyContact ON ThirdNotifyContact.intEntityId = ThirdNotify.intEntityId
 	LEFT JOIN tblEMEntity ThirdNotifyContactEntity ON ThirdNotifyContactEntity.intEntityId = ThirdNotifyContact.intEntityContactId
@@ -509,6 +576,15 @@ FROM (
 	LEFT JOIN tblSMCompanySetup ThirdNotifyCompany ON ThirdNotifyCompany.intCompanySetupID = TLNP.intCompanySetupID
 	LEFT JOIN tblSMCompanyLocation TNCompanyLocation ON TNCompanyLocation.intCompanyLocationId = TLNP.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocation TNLocation ON TNLocation.intEntityLocationId = TLNP.intEntityLocationId	
+
+	LEFT JOIN tblEMEntity FourthNotify ON FourthNotify.intEntityId = FtLNP.intEntityId
+	LEFT JOIN tblEMEntityToContact FourthNotifyContact ON FourthNotifyContact.intEntityId = FourthNotify.intEntityId
+	LEFT JOIN tblEMEntity FourthNotifyContactEntity ON FourthNotifyContactEntity.intEntityId = FourthNotifyContact.intEntityContactId
+	LEFT JOIN tblCMBank FourthNotifyBank ON FourthNotifyBank.intBankId = FtLNP.intBankId
+	LEFT JOIN tblSMCompanySetup FourthNotifyCompany ON FourthNotifyCompany.intCompanySetupID = FtLNP.intCompanySetupID
+	LEFT JOIN tblSMCompanyLocation FtNCompanyLocation ON FtNCompanyLocation.intCompanyLocationId = FtLNP.intCompanyLocationId
+	LEFT JOIN tblEMEntityLocation FtNLocation ON FtNLocation.intEntityLocationId = FtLNP.intEntityLocationId	
+
 	LEFT JOIN tblEMEntity ConsigneeNotify ON ConsigneeNotify.intEntityId = CLNP.intEntityId
 	LEFT JOIN tblEMEntityToContact ConsigneeNotifyContact ON ConsigneeNotifyContact.intEntityId = ConsigneeNotify.intEntityId
 	LEFT JOIN tblEMEntity ConsigneeNotifyContactEntity ON ConsigneeNotifyContactEntity.intEntityId = ConsigneeNotifyContact.intEntityContactId
@@ -525,6 +601,10 @@ FROM (
 	LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intLoadingPortId AND DestinationPort.ysnPort = 1
 	LEFT JOIN tblCTPosition POS ON POS.intPositionId = CH.intPositionId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+
+	LEFT JOIN vyuLGLoadShippingLineRank firstAltShipping ON L.intLoadId = firstAltShipping.intLoadId AND firstAltShipping.intRank = 2
+	LEFT JOIN vyuLGLoadShippingLineRank secondAltShipping ON L.intLoadId = secondAltShipping.intLoadId AND secondAltShipping.intRank = 3
+
 	CROSS APPLY tblLGCompanyPreference CP
 	OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 			 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
