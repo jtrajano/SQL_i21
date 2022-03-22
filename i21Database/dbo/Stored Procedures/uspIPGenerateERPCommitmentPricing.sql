@@ -576,10 +576,10 @@ BEGIN TRY
 					SELECT @strError = @strError + 'Actual Blend Item - ERP Recipe No cannot be blank. '
 				END
 
-				IF ISNULL(@dblTotalCostPR, 0) = 0
-				BEGIN
-					SELECT @strError = @strError + 'Total Cost - PR should be greater than 0. '
-				END
+				--IF ISNULL(@dblTotalCostPR, 0) = 0
+				--BEGIN
+				--	SELECT @strError = @strError + 'Total Cost - PR should be greater than 0. '
+				--END
 			END
 			ELSE
 			BEGIN
