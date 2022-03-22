@@ -21,7 +21,7 @@ BEGIN TRY
 
 	WHILE ISNULL(@intId,0) > 0
 	BEGIN
-		IF @strActionType = 'Sample Instruction'
+		IF @strActionType = 'Email Sample Instruction'
 		BEGIN
 			SELECT @intKey = intSampleId
 			FROM tblQMSample
