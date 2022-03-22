@@ -658,7 +658,7 @@ BEGIN
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'The Tax Adjustment account of Tax Code - ' + TC.strTaxCode + ' was not set.',
-			'Tax Adjustment',
+			'Bill',
 			B.strBillId,
 			B.intBillId,
 			37
