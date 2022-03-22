@@ -90,7 +90,7 @@ FROM
 		,OutboundNetDue					= 0
 		,SalesAdjustment				= ISNULL(Invoice.dblPayment,0)
 		,VoucherAdjustment				= ISNULL(BillByReceiptItem.dblTotal, 0)
-		,VoucherAdjustment2				= ISNULL(BillByReceiptItem2.dblTotal, 0)
+		,VoucherAdjustment2				= SUM(ISNULL(BillByReceiptItem2.dblTotal, 0))
 		,dblVendorPrepayment			= CASE 
 											WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN VendorPrepayment.dblVendorPrepayment
 											ELSE NULL 
@@ -292,7 +292,6 @@ FROM
 		,tblOtherCharge.dblTax
 		,BillDtl.intInventoryReceiptChargeId
 		,BasisPayment.dblVendorPrepayment
-		,BillByReceiptItem2.dblTotal
 	--------------------------------------------------------
 	-- SCALE --> Storage --> Settle Storage
 	--------------------------------------------------------
@@ -336,7 +335,7 @@ FROM
 		,OutboundNetDue					= 0 
 		,SalesAdjustment				= ISNULL(Invoice.dblPayment,0) 
 		,VoucherAdjustment				= ISNULL(tblAdjustment.dblTotal, 0)
-		,VoucherAdjustment2				= ISNULL(tblAdjustment2.dblTotal, 0)
+		,VoucherAdjustment2				= SUM(ISNULL(tblAdjustment2.dblTotal, 0))
 		,dblVendorPrepayment			= CASE 
 											WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment
 											ELSE NULL 
@@ -523,7 +522,6 @@ FROM
 		,PartialPayment.dblPayment
 		,PartialPayment.dblTotals
 		,PYMT.dblAmountPaid	
-		,tblAdjustment2.dblTotal
 		--,BasisPayment.dblVendorPrepayment					
 ) t
 
