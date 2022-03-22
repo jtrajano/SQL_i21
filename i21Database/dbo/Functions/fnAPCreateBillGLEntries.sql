@@ -972,6 +972,7 @@ BEGIN
 			INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailTaxId = voucherDetails.intBillDetailTaxId
 			INNER JOIN tblSMTaxCode TC ON TC.intTaxCodeId = DT.intTaxCodeId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND A.intTransactionType = 15
 
 	--TAXES
 	UNION ALL

@@ -654,6 +654,20 @@ BEGIN
 		  AND DUEFROM.[ysnAllowSingleLocationEntries] = 0
 		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
 
+		--VALIDATE PAY TO BANK ACCOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'The Tax Adjustment account of Tax Code - ' + TC.strTaxCode + ' was not set.',
+			'Tax Adjustment',
+			B.strBillId,
+			B.intBillId,
+			37
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
+		LEFT JOIN tblSMTaxCode TC ON TC.intTaxCodeId = BDT.intTaxCodeId
+		WHERE B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
+
 	END
 	ELSE
 	BEGIN
