@@ -45,8 +45,13 @@
 	ysnRebuild BIT NULL,
 	-- new columns GL-3550
 
-	-- For Posting AR Revalue override
-	intOverrideLocationAccountId INT NULL,
-	intOverrideLOBAccountId INT NULL
+	--strModuleCode nvarchar(5) Collate Latin1_General_CI_AS,
+    intAccountIdOverride INT,
+    intLocationSegmentOverrideId INT,
+    intLOBSegmentOverrideId INT,
+    intCompanySegmentOverrideId INT,
+    strNewAccountIdOverride nvarchar(40) Collate Latin1_General_CI_AS,
+    intNewAccountIdOverride INT,
+    strOverrideAccountError nvarchar(800) Collate Latin1_General_CI_AS
 )
 

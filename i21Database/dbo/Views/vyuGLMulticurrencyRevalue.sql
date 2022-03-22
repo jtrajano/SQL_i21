@@ -229,8 +229,31 @@ SELECT
 FROM vyuGLMulticurrencyRevalueGJ
 )
 SELECT 
-A.*,
-strCurrency,
+A.strTransactionType,
+A.strTransactionId , 
+A.dtmDate, 
+A.dtmDueDate,
+A.strVendorName  ,
+A.strCommodity,
+A.strLineOfBusiness ,
+A.strLocation ,
+A.strTicket, 
+A.strContractId,
+A.strItemId,
+A.dblQuantity,
+A.dblUnitPrice,  
+A.dblTransactionAmount,
+A.intCurrencyId,  
+A.intCurrencyExchangeRateTypeId, 
+A.strForexRateType, 
+A.dblHistoricForexRate,
+A.dblHistoricAmount, 
+A.dblAmountDifference , 
+A.strModule, 
+A.strType,
+B.strCurrency,
+intAccountIdOverride = A.intAccountId,
+intLOBSegmentOverrideId = A.intLOBSegmentCodeId,
 CL.* 
 FROM CTE A 
 LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID

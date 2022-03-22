@@ -30,6 +30,17 @@ CREATE TABLE [dbo].[tblGLPostRecap](
     [strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strRateType]				NVARCHAR (50)	 COLLATE Latin1_General_CI_AS NULL,
+
+--Override Columns
+    strModuleCode nvarchar(5) Collate Latin1_General_CI_AS,
+    intAccountIdOverride INT,
+    intLocationSegmentOverrideId INT,
+    intLOBSegmentOverrideId INT,
+    intCompanySegmentOverrideId INT,
+    strNewAccountIdOverride nvarchar(40) Collate Latin1_General_CI_AS,
+    intNewAccountIdOverride INT,
+    strOverrideAccountError nvarchar(800) Collate Latin1_General_CI_AS,
+    
     [intConcurrencyId]          INT              DEFAULT 1 NOT NULL
 		
  CONSTRAINT [PK_tblGLPostRecap] PRIMARY KEY CLUSTERED 

@@ -345,11 +345,38 @@ WHERE strTransactionDate <= @dtmDate
 AND ISNULL(dblForexRate, 1) <> 1
 END
 
-SELECT A.*, CL.* FROM 
-@tblMulti A
+SELECT 
+A.strTransactionType,
+A.strTransactionId , 
+A.dtmDate, 
+A.dtmDueDate,
+A.strVendorName  ,
+A.strCommodity,
+A.strLineOfBusiness ,
+A.strLocation ,
+A.strTicket, 
+A.strContractId,
+A.strItemId,
+A.dblQuantity,
+A.dblUnitPrice,  
+A.dblTransactionAmount,
+A.intCurrencyId,  
+A.intCurrencyExchangeRateTypeId, 
+A.strForexRateType, 
+A.dblHistoricForexRate,
+A.dblHistoricAmount, 
+A.dblAmountDifference , 
+A.strModule, 
+A.strType,
+B.strCurrency,
+intAccountIdOverride = A.intAccountId,
+intLOBSegmentOverrideId = A.intLOBSegmentCodeId,
+CL.* 
+FROM @tblMulti A 
+LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
 OUTER APPLY(
 	SELECT	
-	intLocationSegmentCodeId = intProfitCenter, 
+	intLocationSegmentCodeId = intProfitCenter  , 
 	intCompanySegmentCodeId = intCompanySegment 
 	FROM dbo.tblSMCompanyLocation 
 	WHERE intCompanyLocationId = A.intCompanyLocationId

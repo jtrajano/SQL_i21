@@ -6,6 +6,7 @@
 AS
 DECLARE @PostGLEntries RecapTableType
 DECLARE @ReversePostGLEntries RecapTableType
+DECLARE @PostGLEntries2 RecapTableType
 DECLARE @strPostBatchId NVARCHAR(100) = ''
 DECLARE @strReversePostBatchId NVARCHAR(100) = ''
 DECLARE @strMessage NVARCHAR(MAX)
@@ -17,7 +18,7 @@ DECLARE @tblPostError TABLE(
 	strTransactionId NVARCHAR(40)
 )
 
-BEGIN TRANSACTION
+--BEGIN TRANSACTION
 
 		DECLARE @errorNum INT
 		DECLARE @dateNow DATETIME
@@ -135,8 +136,12 @@ BEGIN TRANSACTION
 			,strModule = B.strTransactionType
 			,A.strType
 			,Offset = 0
-			,intOverrideLocationAccountId = Loc.intAccountId
-			,intOverrideLOBAccountId = A.intItemGLAccountId
+			,A.intAccountIdOverride
+			,A.intLocationSegmentOverrideId
+			,A.intLOBSegmentOverrideId
+			,A.intCompanySegmentOverrideId
+			--,intOverrideLocationAccountId = Loc.intAccountId
+			--,intOverrideLOBAccountId = A.intItemGLAccountId
 		FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B 
 			ON A.intConsolidationId = B.intConsolidationId
 			OUTER APPLY(
@@ -168,8 +173,12 @@ BEGIN TRANSACTION
 				,strModule	
 				,OffSet = 0
 				,strType = ISNULL(strType,@defaultType)
-				,intOverrideLocationAccountId
-				,intOverrideLOBAccountId
+				,intAccountIdOverride
+				,intLocationSegmentOverrideId
+				,intLOBSegmentOverrideId
+				,intCompanySegmentOverrideId
+				--,intOverrideLocationAccountId
+				--,intOverrideLOBAccountId
 			FROM
 			cte 
 			UNION ALL
@@ -196,8 +205,12 @@ BEGIN TRANSACTION
 				,strModule
 				,OffSet = 1
 				,strType = ISNULL(strType,@defaultType)
-				,intOverrideLocationAccountId
-				,intOverrideLOBAccountId
+				,intAccountIdOverride
+				,intLocationSegmentOverrideId
+				,intLOBSegmentOverrideId
+				,intCompanySegmentOverrideId
+				--,intOverrideLocationAccountId
+				--,intOverrideLOBAccountId
 			FROM
 			cte 
 		)
@@ -225,8 +238,12 @@ BEGIN TRANSACTION
 			,[strTransactionType]
 			,[strTransactionForm]
 			,strModuleName
-			,intOverrideLocationAccountId
-			,intOverrideLOBAccountId
+			,intAccountIdOverride
+			,intLocationSegmentOverrideId
+			,intLOBSegmentOverrideId
+			,intCompanySegmentOverrideId
+			--,intOverrideLocationAccountId
+			--,intOverrideLOBAccountId
 			)			
 		SELECT 
 			 [strTransactionId]		
@@ -250,8 +267,12 @@ BEGIN TRANSACTION
 			,[strTransactionType]	
 			,[strTransactionForm]
 			,'General Ledger'
-			,intOverrideLocationAccountId
-			,intOverrideLOBAccountId
+			,intAccountIdOverride
+			,intLocationSegmentOverrideId
+			,intLOBSegmentOverrideId
+			,intCompanySegmentOverrideId
+			--,intOverrideLocationAccountId
+			--,intOverrideLOBAccountId
 		FROM cte1 A
 		OUTER APPLY (
 			SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable() f 
@@ -267,40 +288,42 @@ BEGIN TRANSACTION
 		) BankTransferAccount
 
 		--BEGIN TODO : transfer this on this procedure
-		DECLARE  @tbl TABLE(
-			intId int IDENTITY(1,1),
-			intOverrideLocationAccountId INT,
-			intOverrideLOBAccountId INT,
-			intOrigAccountId INT,
-			intNewGLAccountId INT NULL,
-			strMessage NVARCHAR(MAX),
-			ysnOverriden BIT,
-			strOverrideLocationAccountId NVARCHAR(40),
-			strOverrideLOBAccountId NVARCHAR(40),
-			strNewAccountId NVARCHAR(40),
-			strOrigAccountId NVARCHAR(40)
-		)
-		INSERT into @tbl (intNewGLAccountId, intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage, strNewAccountId)
-		SELECT intNewGLAccountId, intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage, strNewAccountId FROM 
-		dbo.fnGLOverridePostAccounts(@PostGLEntries)
-		IF EXISTS(SELECT 1 FROM @tbl WHERE strMessage IS NOT NULL  OR intNewGLAccountId is null)
-		BEGIN
-			INSERT INTO @tblPostError(strTransactionId, strMessage)
-			SELECT A.strDescription, strMessage
-			FROM @tbl B JOIN   @PostGLEntries A 
-			ON 
-			A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
-			AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
-			AND A.intAccountId = B.intOrigAccountId
-			WHERE strMessage IS NOT NULL OR intNewGLAccountId is null
-			GOTO _raiserror
-		END
-		ELSE
-			UPDATE A  SET intAccountId = intNewGLAccountId
-			FROM  @PostGLEntries A JOIN @tbl B ON 
-			A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
-			AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
-			AND A.intAccountId = B.intOrigAccountId
+		-- DECLARE  @tbl TABLE(
+		-- 	intId int IDENTITY(1,1),
+		-- 	intOverrideLocationAccountId INT,
+		-- 	intOverrideLOBAccountId INT,
+		-- 	intOrigAccountId INT,
+		-- 	intNewGLAccountId INT NULL,
+		-- 	strMessage NVARCHAR(MAX),
+		-- 	ysnOverriden BIT,
+		-- 	strOverrideLocationAccountId NVARCHAR(40),
+		-- 	strOverrideLOBAccountId NVARCHAR(40),
+		-- 	strNewAccountId NVARCHAR(40),
+		-- 	strOrigAccountId NVARCHAR(40)
+		-- )
+		-- INSERT into @tbl (intNewGLAccountId, intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage, strNewAccountId)
+		-- SELECT intNewGLAccountId, intOverrideLocationAccountId,intOverrideLOBAccountId,intOrigAccountId, strMessage, strNewAccountId FROM 
+		-- dbo.fnGLOverridePostAccounts(@PostGLEntries)
+		-- IF EXISTS(SELECT 1 FROM @tbl WHERE strMessage IS NOT NULL  OR intNewGLAccountId is null)
+		-- BEGIN
+		-- 	INSERT INTO @tblPostError(strTransactionId, strMessage)
+		-- 	SELECT A.strDescription, strMessage
+		-- 	FROM @tbl B JOIN   @PostGLEntries A 
+		-- 	ON 
+		-- 	A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
+		-- 	AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
+		-- 	AND A.intAccountId = B.intOrigAccountId
+		-- 	WHERE strMessage IS NOT NULL OR intNewGLAccountId is null
+		-- 	GOTO _raiserror
+		-- END
+		-- ELSE
+		-- 	UPDATE A  SET intAccountId = intNewGLAccountId
+		-- 	FROM  @PostGLEntries A JOIN @tbl B ON 
+		-- 	A.intOverrideLocationAccountId=B.intOverrideLocationAccountId 
+		-- 	AND A.intOverrideLOBAccountId = B.intOverrideLOBAccountId 
+		-- 	AND A.intAccountId = B.intOrigAccountId
+
+
 		--BEGIN TODO : transfer this on this procedure
 
 		DECLARE @dtmReverseDate DATETIME
@@ -430,7 +453,12 @@ BEGIN TRANSACTION
 				   ,[dblUnrealizedGain]
 				   ,[dblUnrealizedLoss]
 				   ,[intConcurrencyId]
-				   ,[strType])
+				   ,[strType]
+					,intAccountIdOverride
+					,intLocationSegmentOverrideId
+					,intLOBSegmentOverrideId
+					,intCompanySegmentOverrideId
+				   )
 				SELECT 
 					@intReverseID
 				   ,[strTransactionType]
@@ -457,6 +485,10 @@ BEGIN TRANSACTION
 				   ,[dblUnrealizedLoss] = [dblUnrealizedGain]
 				   ,[intConcurrencyId]
 				   ,[strType]
+				   	,intAccountIdOverride
+					,intLocationSegmentOverrideId
+					,intLOBSegmentOverrideId
+					,intCompanySegmentOverrideId
 				FROM tblGLRevalueDetails
 				WHERE intConsolidationId = @intConsolidationId
 
@@ -471,8 +503,23 @@ BEGIN TRANSACTION
 				AND ysnIsUnposted = 0
 				DELETE FROM tblGLRevalue WHERE strConsolidationNumber = @strConsolidationNumber +'-R'
 			END		
+
+
+		
+			INSERT INTO @PostGLEntries2
+			SELECT *
+			from fnGLOverridePostAccounts(@PostGLEntries) A 
 			
-			EXEC uspGLBookEntries @PostGLEntries, @ysnPost
+				
+			IF EXISTS(SELECT 1 FROM PostGLEntries2 WHERE strOverrideAccountError IS NOT NULL )
+	
+				GOTO _raiseOverrideError
+		
+			
+
+					
+
+			EXEC uspGLBookEntries @PostGLEntries2, @ysnPost
 
 		END
 		ELSE
@@ -500,6 +547,10 @@ BEGIN TRANSACTION
 				,[strTransactionType]
 				,[strTransactionForm]
 				,strModuleName
+				,intAccountIdOverride
+				,intLocationSegmentOverrideId
+				,intLOBSegmentOverrideId
+				,intCompanySegmentOverrideId
 			)
 			SELECT
 				 [strTransactionId]
@@ -523,10 +574,25 @@ BEGIN TRANSACTION
 				,[strTransactionType]
 				,[strTransactionForm]
 				,strModuleName
+				,intAccountIdOverride
+				,intLocationSegmentOverrideId
+				,intLOBSegmentOverrideId
+				,intCompanySegmentOverrideId
 			FROM @PostGLEntries
-			
-			EXEC uspGLPostRecap @RecapTable, @intEntityId
+
+
+			INSERT INTO @PostGLEntries2
+			SELECT *
+			from fnGLOverridePostAccounts(@PostGLEntries) A 
+
+			EXEC uspGLPostRecap @PostGLEntries2, @intEntityId
+
+			IF EXISTS(SELECT 1 FROM tblGLPostRecap WHERE strOverrideAccountError IS NOT NULL )
+				GOTO _raiseOverrideError
 		END
+
+
+
 		if @ysnRecap = 0
 		BEGIN
 			UPDATE tblGLRevalue SET ysnPosted = @ysnPost WHERE intConsolidationId in ( @intConsolidationId, @intReverseID)
@@ -573,51 +639,60 @@ BEGIN TRANSACTION
 
 	SELECT @strPostBatchId PostBatchId
 
-	COMMIT TRANSACTION
+
+	--COMMIT TRANSACTION
 	GOTO _end
 
-_raiserror:
-	IF XACT_STATE() <> 0
-		ROLLBACK TRANSACTION
+--_raiserror:
+	--IF XACT_STATE() <> 0
+		--ROLLBACK TRANSACTION
 	
-	DECLARE @rowCount INT
-	IF EXISTS(SELECT 1 FROM  @tblPostError)
-	BEGIN
-		TRUNCATE TABLE tblGLRevaluePostError
-		INSERT INTO tblGLRevaluePostError( strPostBatchId, strTransactionId , strMessage)
-		SELECT @strPostBatchId, strTransactionId, strMessage FROM @tblPostError
+	-- DECLARE @rowCount INT
+	-- IF EXISTS(SELECT 1 FROM  @tblPostError)
+	-- BEGIN
+	-- 	TRUNCATE TABLE tblGLRevaluePostError
+	-- 	INSERT INTO tblGLRevaluePostError( strPostBatchId, strTransactionId , strMessage)
+	-- 	SELECT @strPostBatchId, strTransactionId, strMessage FROM @tblPostError
 
 	
 
-		;WITH Segments AS(
-				SELECT A.intId, U.Item FROM @tbl A
-				CROSS APPLY(
-					select A.intId, Item Collate Latin1_General_CI_AS Item from fnSplitString(A.strNewAccountId,'-') 
-				)U
-			),
-			OrderSegment AS(
-				SELECT ROW_NUMBER()  OVER ( PARTITION BY intId ORDER BY intId)rowId, Item FROM Segments
-			),
-			Structure AS(
-				select ROW_NUMBER() over (ORDER BY intSort )rowId , intAccountStructureId from tblGLAccountStructure  where strType <> 'Divider'
-			)
-			INSERT INTO tblGLTempAccountToBuild(intAccountSegmentId, intUserId, dtmCreated)
-			SELECT SG.intAccountSegmentId, @intEntityId, @dateNow FROM OrderSegment S JOIN Structure ST ON S.rowId = ST.rowId
-			JOIN tblGLAccountSegment SG on SG.strCode = S.Item AND SG.intAccountStructureId = ST.intAccountStructureId
-			GROUP BY SG.intAccountSegmentId
+	-- 	;WITH Segments AS(
+	-- 			SELECT A.intId, U.Item FROM @tbl A
+	-- 			CROSS APPLY(
+	-- 				select A.intId, Item Collate Latin1_General_CI_AS Item from fnSplitString(A.strNewAccountId,'-') 
+	-- 			)U
+	-- 		),
+	-- 		OrderSegment AS(
+	-- 			SELECT ROW_NUMBER()  OVER ( PARTITION BY intId ORDER BY intId)rowId, Item FROM Segments
+	-- 		),
+	-- 		Structure AS(
+	-- 			select ROW_NUMBER() over (ORDER BY intSort )rowId , intAccountStructureId from tblGLAccountStructure  where strType <> 'Divider'
+	-- 		)
+	-- 		INSERT INTO tblGLTempAccountToBuild(intAccountSegmentId, intUserId, dtmCreated)
+	-- 		SELECT SG.intAccountSegmentId, @intEntityId, @dateNow FROM OrderSegment S JOIN Structure ST ON S.rowId = ST.rowId
+	-- 		JOIN tblGLAccountSegment SG on SG.strCode = S.Item AND SG.intAccountStructureId = ST.intAccountStructureId
+	-- 		GROUP BY SG.intAccountSegmentId
 			
 
-		EXEC uspGLBuildAccountTemporary @intEntityId
-		--DELETE A FROM tblGLTempAccount A RIGHT JOIN @tbl B ON A.strAccountId = B.strNewAccountId COLLATE Latin1_General_CI_AS WHERE B.strNewAccountId IS NULL
+	-- 	EXEC uspGLBuildAccountTemporary @intEntityId
+	-- 	--DELETE A FROM tblGLTempAccount A RIGHT JOIN @tbl B ON A.strAccountId = B.strNewAccountId COLLATE Latin1_General_CI_AS WHERE B.strNewAccountId IS NULL
 
-		RAISERROR( 'Error occurred. Please check post error tab for details',11,1)
-	END
-	ELSE
-	BEGIN
-		INSERT INTO tblGLRevaluePostError(strPostBatchId , strMessage)
-		SELECT @strPostBatchId, @strMessage
+	-- 	RAISERROR( 'Error occurred. Please check post error tab for details',11,1)
+	-- END
+	-- ELSE
+	--BEGIN
+		--INSERT INTO tblGLRevaluePostError(strPostBatchId , strMessage)
+		-- SELECT @strPostBatchId, @strMessage
+		--GOTO _end
+
+	_raiseOverrideError:
+		set @strMessage = 'Error overriding accounts.' + @strPostBatchId
 		RAISERROR( @strMessage,11,1)
-	END
+		GOTO _end
+
+	_raiserror:
+		RAISERROR( @strMessage,11,1)
+	--END
 		
 _end:
 

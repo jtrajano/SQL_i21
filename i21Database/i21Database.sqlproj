@@ -343,6 +343,7 @@
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
     <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
+    <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaCCTransformVendorSite.sql" />
@@ -5040,7 +5041,7 @@
     <Build Include="dbo\Views\vyuTMBEExportPrice.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccount.sql" />
-    <Build Include="dbo\Functions\fnGLGetOverrideSegmentAccount.sql" />
+    <Build Include="dbo\Functions\fnGLGetOverrideAccountBySegment.sql" />
     <Build Include="dbo\Views\vyuLGStockSaleSearch.sql" />
     <Build Include="dbo\Views\vyuLGStockSalesAllocation.sql" />
     <Build Include="dbo\Views\vyuEMEntityVendorApproval.sql" />

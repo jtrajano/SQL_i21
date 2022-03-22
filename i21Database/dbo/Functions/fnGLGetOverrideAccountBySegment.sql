@@ -1,9 +1,28 @@
-CREATE FUNCTION fnGLGetOverrideSegmentAccount(
-    @intAccountSegmentId INT, -- used to override
-    @strAccountId  NVARCHAR(40)) -- will be overriden      
+CREATE FUNCTION fnGLGetOverrideAccountBySegment
+(
+    @intAccountId INT,
+    @intLocationSegmentId INT = NULL, -- used to override
+    @intLOBSegmentId INT = NULL, -- used to override
+    @intCompanySegmentId INT = NULL
+    
+) -- will be overriden      
 RETURNS NVARCHAR(40)
 AS
 BEGIN
+DECLARE @ysnOverrideLocation BIT = 1, @ysnOverrideLOB BIT = 1, @ysnOverrideCompany BIT = 1,
+@strAccountId  NVARCHAR(40)
+
+SELECT @strAccountId = strAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId
+
+IF @intLocationSegmentId IS NULL SET @ysnOverrideLocation = 0
+IF @intLOBSegmentId IS NULL SET @ysnOverrideLOB = 0
+IF @intCompanySegmentId IS NULL SET @ysnOverrideCompany = 0
+
+WHILE @ysnOverrideLocation = 1
+    OR @ysnOverrideLOB  =1 
+    OR @ysnOverrideCompany =1
+
+    BEGIN
 
         DECLARE @intStart INT
         , @intEnd INT
@@ -12,12 +31,33 @@ BEGIN
         , @strSegment NVARCHAR(10) 
         , @intStructureType INT
 
+
+        IF @ysnOverrideLocation =1
+		BEGIN
+           SET @intStructureType = 3
+		   SET @ysnOverrideLocation = 0
+		END
+		ELSE
+        
+        IF @ysnOverrideLOB =1 
+		BEGIN
+           SET @intStructureType = 5
+		   SET  @ysnOverrideLOB = 0
+		END
+		ELSE
+
+        IF @ysnOverrideCompany =1 
+          	BEGIN
+           SET @intStructureType = 6
+		   SET  @ysnOverrideCompany = 0
+		END
+        
+
         SELECT TOP 1 
-        @strSegment =  strCode,
-        @intStructureType = intStructureType
+        @strSegment =  strCode
         FROM tblGLAccountSegment A JOIN tblGLAccountStructure B 
         ON A.intAccountStructureId = B.intAccountStructureId
-        WHERE intAccountSegmentId = @intAccountSegmentId 
+        WHERE intStructureType = @intStructureType 
 
         SELECT @intDividerCount = COUNT(1)  FROM tblGLAccountStructure 
         WHERE strType <> 'Divider' and intStructureType < @intStructureType
@@ -47,5 +87,8 @@ BEGIN
         
         END 
 
-        RETURN @str
+        SET @strAccountId = @str
+    END
+
+    RETURN @str
 END
