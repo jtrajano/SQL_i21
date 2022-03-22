@@ -25,5 +25,6 @@ intBankId
 ,strIBAN
 ,strSwiftCode
 ,strBICCode
+,ysnInternational
 ,intConcurrencyId
 FROM dbo.tblCMBank
