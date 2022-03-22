@@ -1650,6 +1650,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Insurance')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 169
+			,[strTransactionType]	= N'Storage Charge'
+			,[strPrefix]			= N'SC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Charge')
 
 
 
