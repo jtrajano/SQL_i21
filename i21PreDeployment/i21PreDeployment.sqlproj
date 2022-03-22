@@ -189,6 +189,7 @@
     <None Include="Scripts\Pre-Deployment\7_AR\11_FixSalesOrderNullysnQuote.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\1910_BasisComponent.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\13_FixCustomerBillToShipTo.sql" />
+    <None Include="Scripts\Pre-Deployment\7_AR\14_RefreshARTempTables.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\2010_Kill_State_Error_Fix.sql" />
   </ItemGroup>
   <ItemGroup>
