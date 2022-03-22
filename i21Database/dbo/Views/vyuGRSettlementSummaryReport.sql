@@ -19,7 +19,7 @@ SELECT
 	,OutboundNetDue				    = OutboundNetDue			
 	,SalesAdjustment			    = SalesAdjustment	
 	,VoucherAdjustment			    = SUM(VoucherAdjustment) + VoucherAdjustment2
-	,dblVendorPrepayment		    = VendorPrepayment.dblVendorPrepayment
+	,dblVendorPrepayment		    = SUM(dblVendorPrepayment)	 
 	,lblVendorPrepayment		    = lblVendorPrepayment		 
 	,dblCustomerPrepayment		    = dblCustomerPrepayment		 
 	,lblCustomerPrepayment		    = lblCustomerPrepayment		 
@@ -89,12 +89,12 @@ FROM
 		,OutboundDiscount				= 0
 		,OutboundNetDue					= 0
 		,SalesAdjustment				= ISNULL(Invoice.dblPayment,0)
-		,VoucherAdjustment				= ISNULL(BillAdjustments.dblTotal, 0)
-		,VoucherAdjustment2				= ISNULL(BillAdjustments2.dblTotal, 0)
-		-- ,dblVendorPrepayment			= CASE 
-		-- 									WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN VendorPrepayment.dblVendorPrepayment
-		-- 									ELSE NULL 
-		-- 								END
+		,VoucherAdjustment				= ISNULL(BillByReceiptItem.dblTotal, 0)
+		,VoucherAdjustment2				= ISNULL(BillByReceiptItem2.dblTotal, 0)
+		,dblVendorPrepayment			= CASE 
+											WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN VendorPrepayment.dblVendorPrepayment
+											ELSE NULL 
+										END
 		,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
 		,dblCustomerPrepayment			= CASE 
 											WHEN ISNULL(Invoice.dblPayment, 0) <> 0 THEN Invoice.dblPayment
@@ -169,21 +169,16 @@ FROM
 		SELECT 
 			Bill.intBillId
 			,APD.intPaymentId
-			,SUM(BD.dblTotal) dblTotal
+			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
-			ON Bill.intBillId = APD.intBillId 				
+			ON Bill.intBillId = APD.intBillId 
+				AND Bill.intTransactionType = 3				
 				and APD.dblPayment <> 0
-				AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
-		JOIN tblAPBillDetail BD
-			ON BD.intBillId = Bill.intBillId
-				AND BD.intCustomerStorageId IS NULL
-				AND BD.intSettleStorageId IS NULL
 		GROUP BY Bill.intBillId, APD.intPaymentId
-	) BillAdjustments ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
-		AND BillAdjustments.intBillId = Bill.intBillId
+	) BillByReceiptItem ON BillByReceiptItem.intBillId = Bill.intBillId
+	AND BillByReceiptItem.intPaymentId = PYMT.intPaymentId
 	-- VOUCHER ADJUSTMENTS ON SEPARATE VOUCHER
-	-- These are vouchers that are not generated via storage settlement or via ticket distribution
 	LEFT JOIN (
 		SELECT 
 			Bill.intBillId
@@ -191,23 +186,12 @@ FROM
 			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
-			ON Bill.intBillId = APD.intBillId
+			ON Bill.intBillId = APD.intBillId 
+				AND Bill.intTransactionType = 3
 				and APD.dblPayment <> 0
-				AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
-		-- Exclude vouchers generated from scale or settlement
-		WHERE NOT EXISTS (
-			SELECT 1 FROM tblGRSettleStorageBillDetail SSBH
-			WHERE SSBH.intBillId = Bill.intBillId
-
-			UNION ALL
-
-			SELECT 1 FROM tblAPBillDetail BD2
-			INNER JOIN tblSCTicket SC ON SC.intTicketId = BD2.intScaleTicketId
-			WHERE BD2.intBillId = Bill.intBillId
-		)
-		GROUP BY Bill.intBillId,APD.intPaymentId
-	) BillAdjustments2 ON BillAdjustments2.intPaymentId = PYMT.intPaymentId	
-		AND BillAdjustments2.intBillId <> Bill.intBillId
+		GROUP BY Bill.intBillId, APD.intPaymentId
+	) BillByReceiptItem2 ON BillByReceiptItem2.intBillId <> Bill.intBillId
+	AND BillByReceiptItem2.intPaymentId = PYMT.intPaymentId
 	LEFT JOIN (
 		SELECT 
 			PYMT.intPaymentId
@@ -224,6 +208,31 @@ FROM
 		WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL
 		GROUP BY PYMT.intPaymentId
 	) ScaleDiscountTax ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			 
+	OUTER APPLY (
+		SELECT 
+			a.intBillId
+			,SUM(a.dblAmountApplied * - 1) AS dblVendorPrepayment
+		FROM tblAPAppliedPrepaidAndDebit a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  not in (13, 3)
+		WHERE a.ysnApplied = 1
+		AND b.intBillId = Bill.intBillId
+		GROUP BY a.intBillId		
+
+		union 
+		select 
+			ap.intBillId,
+			[dblVendorPrepayment] = pay.dblPayment --(ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
+		from 
+		tblAPBill ap
+		inner join tblAPPaymentDetail pay
+			ON pay.intBillId = ap.intBillId
+		where ap.intTransactionType = 2
+		and ap.intBillId = Bill.intBillId
+		and pay.intPaymentId = PYMT.intPaymentId						
+		and pay.dblPayment <> 0
+		
+
+		
+	) VendorPrepayment
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
@@ -261,6 +270,7 @@ FROM
 			OR BillDtl.intInventoryReceiptItemId IS NOT NULL
 		)
 		AND Item.strType <> 'Other Charge' )
+		OR Bill.intTransactionType = 2
 	GROUP BY 
 		PYMT.intPaymentId
 		,PYMT.strPaymentRecordNum
@@ -268,8 +278,8 @@ FROM
 		,BillByReceipt.dblTotal
 		,BillByReceipt.dblTax
 		,Invoice.dblPayment
-		,BillAdjustments.dblTotal
-		-- ,VendorPrepayment.dblVendorPrepayment
+		,BillByReceiptItem.dblTotal
+		,VendorPrepayment.dblVendorPrepayment
 		,Invoice.dblPayment
 		,ScaleDiscountTax.dblGradeFactorTax
 		,PartialPayment.dblPayment
@@ -282,7 +292,7 @@ FROM
 		,tblOtherCharge.dblTax
 		,BillDtl.intInventoryReceiptChargeId
 		,BasisPayment.dblVendorPrepayment
-		,BillAdjustments2.dblTotal
+		,BillByReceiptItem2.dblTotal
 	--------------------------------------------------------
 	-- SCALE --> Storage --> Settle Storage
 	--------------------------------------------------------
@@ -312,28 +322,25 @@ FROM
 												END
 											)
 											+ ISNULL(tblOtherCharge.dblTax,0)
-		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal,0) - ISNULL(BillAdjustments.dblTotal, 0)
+		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal,0) 
 		,InboundNetDue					= SUM(
 												CASE 
-													WHEN Bill.intTransactionType = 2 then 0
-													-- Inline voucher adjustments should not be included in the net due as they have a separate computation in the summary
-													ELSE BillDtl.dblTotal + BillDtl.dblTax
+													WHEN Bill.intTransactionType = 2 then 0													
+													ELSE BillDtl.dblTotal + BillDtl.dblTax + isnull(tblOtherCharge.dblTotal, 0)
 												END
 											) + ISNULL(tblOtherCharge.dblTax,0)
-											-- Inline voucher adjustments should not be included in the net due as they have a separate computation in the summary
-											+ isnull(tblOtherCharge.dblTotal, 0) - ISNULL(BillAdjustments.dblTotal, 0)
 		,OutboundNetWeight				= 0 
 		,OutboundGrossDollars			= 0 
 		,OutboundTax		            = 0
 		,OutboundDiscount				= 0 
 		,OutboundNetDue					= 0 
 		,SalesAdjustment				= ISNULL(Invoice.dblPayment,0) 
-		,VoucherAdjustment				= ISNULL(BillAdjustments.dblTotal, 0)
-		,VoucherAdjustment2				= ISNULL(BillAdjustments2.dblTotal, 0)
-		-- ,dblVendorPrepayment			= CASE 
-		-- 									WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment
-		-- 									ELSE NULL 
-		-- 								END 
+		,VoucherAdjustment				= ISNULL(tblAdjustment.dblTotal, 0)
+		,VoucherAdjustment2				= ISNULL(tblAdjustment2.dblTotal, 0)
+		,dblVendorPrepayment			= CASE 
+											WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment
+											ELSE NULL 
+										END 
 		,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
 		,dblCustomerPrepayment			= CASE 
 											WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment 
@@ -393,26 +400,7 @@ FROM
 		FROM tblAPBillDetail A		  
 		GROUP BY A.intBillId
 	) tblTax ON tblTax.intBillId = Bill.intBillId
-	-- -- MANUALLY ADDED LINE ITEMS IN THE MAIN VOUCHER FROM SETTLEMENT
-	LEFT JOIN (
-		SELECT 
-			Bill.intBillId
-			,APD.intPaymentId
-			,SUM(BD.dblTotal) dblTotal
-		FROM tblAPPaymentDetail APD
-		JOIN tblAPBill Bill 
-			ON Bill.intBillId = APD.intBillId 				
-				and APD.dblPayment <> 0
-				AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
-		JOIN tblAPBillDetail BD
-			ON BD.intBillId = Bill.intBillId
-				AND BD.intCustomerStorageId IS NULL
-				AND BD.intSettleStorageId IS NULL
-		GROUP BY Bill.intBillId, APD.intPaymentId
-	) BillAdjustments ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
-		AND BillAdjustments.intBillId = Bill.intBillId
-	-- VOUCHER ADJUSTMENTS ON SEPARATE VOUCHER
-	-- These are vouchers that are not generated via storage settlement or via ticket distribution
+	-- MANUALLY ADDED LINE ITEMS IN THE MAIN VOUCHER FROM SETTLEMENT
 	LEFT JOIN (
 		SELECT 
 			Bill.intBillId
@@ -422,21 +410,36 @@ FROM
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 				
 				and APD.dblPayment <> 0
-				AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
-		-- Exclude vouchers generated from scale or settlement
-		WHERE NOT EXISTS (
-			SELECT 1 FROM tblGRSettleStorageBillDetail SSBH
-			WHERE SSBH.intBillId = Bill.intBillId
-
-			UNION ALL
-
-			SELECT 1 FROM tblAPBillDetail BD2
-			INNER JOIN tblSCTicket SC ON SC.intTicketId = BD2.intScaleTicketId
-			WHERE BD2.intBillId = Bill.intBillId
-		)
+				--AND Bill.intTransactionType = 3
+		JOIN tblAPBillDetail BD
+			ON BD.intBillId = Bill.intBillId
+				AND BD.intCustomerStorageId IS NULL
+				AND BD.intSettleStorageId IS NULL
+		--GROUP BY Bill.intBillId
+		GROUP BY Bill.intBillId, APD.intPaymentId
+	--) tblAdjustment ON tblAdjustment.intBillId = Bill.intBillId
+	) tblAdjustment ON tblAdjustment.intPaymentId = PYMT.intPaymentId	
+		AND tblAdjustment.intBillId = Bill.intBillId
+	-- VOUCHER ADJUSTMENTS ON SEPARATE VOUCHER
+	LEFT JOIN (
+		SELECT 
+			Bill.intBillId
+			,APD.intPaymentId
+			,SUM(APD.dblPayment) dblTotal
+		FROM tblAPPaymentDetail APD
+		JOIN tblAPBill Bill 
+			ON Bill.intBillId = APD.intBillId 				
+				and APD.dblPayment <> 0
+				--AND Bill.intTransactionType = 3
+		JOIN tblAPBillDetail BD
+			ON BD.intBillId = Bill.intBillId
+				AND BD.intCustomerStorageId IS NULL
+				AND BD.intSettleStorageId IS NULL
+		--GROUP BY Bill.intBillId
 		GROUP BY Bill.intBillId,APD.intPaymentId
-	) BillAdjustments2 ON BillAdjustments2.intPaymentId = PYMT.intPaymentId	
-		AND BillAdjustments2.intBillId <> Bill.intBillId
+	--) tblAdjustment ON tblAdjustment.intBillId = Bill.intBillId
+	) tblAdjustment2 ON tblAdjustment2.intPaymentId = PYMT.intPaymentId	
+		AND tblAdjustment2.intBillId <> Bill.intBillId
 	LEFT JOIN (
 		SELECT
 			PYMT.intPaymentId
@@ -452,6 +455,29 @@ FROM
 				AND B.strType = 'Other Charge'
 		GROUP BY PYMT.intPaymentId
 	) ScaleDiscountTax ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			
+	OUTER APPLY (
+		SELECT
+			a.intBillId
+			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
+		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType not  in (13, 3)
+		WHERE a.ysnApplied = 1
+		AND b.intBillId = Bill.intBillId
+		GROUP BY a.intBillId
+			
+		union 
+		select 
+			ap.intBillId,
+			[dblVendorPrepayment] = (ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
+		from 
+		tblAPBill ap
+		inner join tblAPPaymentDetail pay
+			ON pay.intBillId = ap.intBillId
+		where ap.intTransactionType = 2
+		and ap.intBillId = Bill.intBillId
+		and pay.intPaymentId = PYMT.intPaymentId				
+		and pay.dblPayment <> 0
+
+	) VendorPrepayment		
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
@@ -489,15 +515,15 @@ FROM
 		,tblOtherCharge.dblTotal
 		,tblOtherCharge.dblTax
 		,Invoice.dblPayment
-		,BillAdjustments.dblTotal
-		-- ,VendorPrepayment.dblVendorPrepayment
+		,tblAdjustment.dblTotal
+		,VendorPrepayment.dblVendorPrepayment
 		,Invoice.dblPayment
 		,ScaleDiscountTax.dblGradeFactorTax
 		,PartialPayment.dblPayment
 		,PartialPayment.dblPayment
 		,PartialPayment.dblTotals
 		,PYMT.dblAmountPaid	
-		,BillAdjustments2.dblTotal
+		,tblAdjustment2.dblTotal
 		--,BasisPayment.dblVendorPrepayment					
 ) t
 
@@ -529,41 +555,6 @@ outer apply (
 			and BillDetail.ysnStage = 0
 ) AdditionalTax
 
--- Only compute the vendor prepayment once for vouchers generated from scale ticket and storage settlement
-OUTER APPLY (
-	SELECT 
-		[dblVendorPrepayment] = SUM(VendorPrepayment.dblVendorPrepayment)
-	FROM tblAPPaymentDetail PD
-	INNER JOIN tblAPBill B
-		ON B.intBillId = PD.intBillId
-	INNER JOIN tblAPPayment P
-		ON PD.intPaymentId = P.intPaymentId
-	OUTER APPLY (
-		SELECT 
-			a.intBillId
-			,SUM(a.dblAmountApplied * - 1) AS dblVendorPrepayment
-		FROM tblAPAppliedPrepaidAndDebit a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  not in (13, 3)
-		WHERE a.ysnApplied = 1
-		AND b.intBillId = B.intBillId
-		GROUP BY a.intBillId		
-
-		union all
-		
-		select 
-			ap.intBillId,
-			[dblVendorPrepayment] = pay.dblPayment --(ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
-		from 
-		tblAPBill ap
-		inner join tblAPPaymentDetail pay
-			ON pay.intBillId = ap.intBillId
-		where ap.intTransactionType = 2
-		and ap.intBillId = B.intBillId
-		and pay.intPaymentId = P.intPaymentId						
-		and pay.dblPayment <> 0
-	) VendorPrepayment
-	WHERE P.intPaymentId = t.intPaymentId
-) VendorPrepayment
-
 GROUP BY 			
 	intPaymentId	
 	,strPaymentNo
@@ -574,8 +565,7 @@ GROUP BY
 	,OutboundNetDue			
 	,SalesAdjustment	
 	-- ,VoucherAdjustment		 
-	,VoucherAdjustment2
-	,VendorPrepayment.dblVendorPrepayment
+	,VoucherAdjustment2	 
 	,lblVendorPrepayment		 
 	,dblCustomerPrepayment		 
 	,lblCustomerPrepayment		 
