@@ -10085,4 +10085,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
+  </ItemGroup>
 </Project>
