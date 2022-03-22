@@ -502,6 +502,7 @@ FROM
 WHERE 
 	p.strBottleDepositNumber IS NOT NULL 
 	AND ISNUMERIC(p.strBottleDepositNumber) = 0 
+	AND NULLIF(RTRIM(LTRIM(p.strBottleDepositNumber)), '') IS NOT NULL 
 	AND p.strUniqueId = @UniqueId
 
 -------------------------------------------------
@@ -1086,7 +1087,7 @@ FROM (
 				,ysnPrePriced = ISNULL(ISNULL(CASE p.strPrePriced WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, catLoc.ysnPrePriced), l.ysnPrePriced)
 				,dblSuggestedQty = ISNULL(NULLIF(p.strSuggestedOrderQuantity, ''), l.dblSuggestedQty)
 				,dblMinOrder = ISNULL(NULLIF(p.strMinimumOrderQuantity, ''), l.dblMinOrder)
-				,intBottleDepositNo = ISNULL(NULLIF(p.strBottleDepositNumber, ''), l.intBottleDepositNo)
+				,intBottleDepositNo = ISNULL(NULLIF(LTRIM(RTRIM(p.strBottleDepositNumber)), ''), l.intBottleDepositNo)
 				,ysnTaxFlag1 = catLoc.ysnUseTaxFlag1--ISNULL(l.ysnTaxFlag1, catLoc.ysnUseTaxFlag1)
 				,ysnTaxFlag2 = catLoc.ysnUseTaxFlag2--ISNULL(l.ysnTaxFlag2, catLoc.ysnUseTaxFlag2)
 				,ysnTaxFlag3 = catLoc.ysnUseTaxFlag3--ISNULL(l.ysnTaxFlag3, catLoc.ysnUseTaxFlag3)
