@@ -18,7 +18,7 @@ SELECT S.intSampleId
 	,SH.strLoadNumber
 	,S.strLotNumber
 	,SS.strStatus
-	,S.dtmSampleReceivedDate
+	,CASE WHEN S.dtmSampleReceivedDate = CAST('1900-01-01' AS DATE) THEN NULL ELSE S.dtmSampleReceivedDate END  AS dtmSampleReceivedDate
 	,S.strSampleNote
 	,E.intEntityId AS intPartyName
 	,E.strName AS strPartyName
