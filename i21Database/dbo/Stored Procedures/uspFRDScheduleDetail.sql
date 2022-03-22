@@ -10,7 +10,7 @@ SET NOCOUNT ON
         
  --MAIN DATA SOURCE          
  DELETE tblFRReportHierarchyScheduleDetails WHERE intHierarchyScheduleId = @intHierarchyScheduleId  
- ---------------------------------------------------------------------------------------------------------------------------------------          
+ ----------------------------------------------------------------------------------------------------------------------------------------          
  INSERT INTO tblFRReportHierarchyScheduleDetails (intReportId,intHierarchyScheduleId,intReportHierarchyId,intReportHierarchyDetailId,dtmAsOfDate,dtmSchedDate)           
  SELECT intReportId,intHierarchyScheduleId,T0.intReportHierarchyId,T0.intReportHierarchyDetailId,dtmAsOfDate,dtmScheduleDate FROM tblFRReportHierarchyDetail T0  
  INNER JOIN  tblFRReportHierarchySchedule T1  
