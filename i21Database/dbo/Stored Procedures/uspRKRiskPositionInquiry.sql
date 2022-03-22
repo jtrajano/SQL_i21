@@ -134,7 +134,7 @@ BEGIN
 		, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intItemId INT
 		, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_ASAS
+		, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
 		, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
