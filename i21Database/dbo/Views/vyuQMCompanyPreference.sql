@@ -34,5 +34,5 @@ LEFT JOIN tblQMSampleStatus QMSS ON CP.intDefaultSampleStatusId = QMSS.intSample
 OUTER APPLY (
 	SELECT TOP 1 intSampleStatusId, strStatus
 	FROM tblQMSampleStatus
-	WHERE strStatus = 'RECEIVED'
+	WHERE strStatus = 'Received'
 ) QMSS1
