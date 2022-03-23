@@ -27,6 +27,7 @@ BEGIN TRY
 		,@intSampleId INT
 		,@strContainerNumber NVARCHAR(100)
 		,@intLotId INT
+		,@intParentLotId INT
 	DECLARE @tblICInventoryTransferDetail TABLE (intInventoryTransferDetailId INT)
 	DECLARE @tblSampleValues TABLE (
 		intInventoryTransferDetailId INT
@@ -123,9 +124,11 @@ BEGIN TRY
 				,@strCupScore = NULL
 				,@strGradeScore = NULL
 				,@intLotId = NULL
+				,@intParentLotId = NULL
 
 			SELECT @strContainerNumber = L.strContainerNo
 				,@intLotId = L.intLotId
+				,@intParentLotId = L.intParentLotId
 				,@strToStorageLocation = TSL.strName
 			FROM tblICInventoryTransferDetail ITD
 			JOIN tblICLot L ON L.intLotId = ITD.intLotId
@@ -139,6 +142,18 @@ BEGIN TRY
 			JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 			WHERE S.strContainerNumber = @strContainerNumber
 			ORDER BY S.intSampleId DESC
+
+			IF ISNULL(@intSampleId, 0) = 0
+			BEGIN
+				SELECT TOP 1 @intSampleId = S.intSampleId
+					,@strComment = S.strComment
+					,@strSampleStatus = SS.strSecondaryStatus
+				FROM dbo.tblQMSample S
+				JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+				WHERE S.intProductTypeId = 11
+					AND S.intProductValueId = @intParentLotId
+				ORDER BY S.intSampleId DESC
+			END
 
 			IF ISNULL(@intSampleId, 0) > 0
 			BEGIN
