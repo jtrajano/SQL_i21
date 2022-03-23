@@ -16,22 +16,46 @@ AS
 	(
 		intId int not null identity(1,1)
 		,strRecord nvarchar(100)
+		,intPaymentId int
 
 	)
 	
 	
-	insert into @PaymentRecords (strRecord)
-	select DISTINCT Payment.strPaymentRecordNum
-	
-		from tblAPPayment Payment	
-		join tblAPPaymentDetail PaymentDetail
-			on Payment.intPaymentId = PaymentDetail.intPaymentId
-		join tblAPBill Bill
-			on PaymentDetail.intBillId = Bill.intBillId
-		join tblAPBillDetail BillDetail
-			on Bill.intBillId = BillDetail.intBillId
-		where BillDetail.intSettleStorageId is not null
-			and Bill.intBillId  = @intBillId
+	insert into @PaymentRecords (strRecord, intPaymentId )
+	select distinct strPaymentRecordNum, intPaymentId from (
+		-- this is based from AP's fnAPGetSettlementStatus
+		SELECT PYMT.strPaymentRecordNum, PYMT.intPaymentId
+		FROM tblAPPayment PYMT
+			INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+			INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+			INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+			INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+			INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
+			INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+		WHERE  INVRCPTITEM.intSourceId IS NOT NULL
+			AND PYMT.intEntityVendorId = INVRCPT.intEntityVendorId 
+			and Bill.intBillId = @intBillId
+			
+		UNION
+		SELECT PYMT.strPaymentRecordNum, PYMT.intPaymentId
+		FROM tblAPPayment PYMT
+			INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+			INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+			INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+			INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+			INNER JOIN tblSCTicket TKT ON BillDtl.intScaleTicketId = TKT.intTicketId
+		WHERE  PYMT.intEntityVendorId = TKT.intEntityId 
+			and Bill.intBillId = @intBillId
+		UNION
+		SELECT PYMT.strPaymentRecordNum, PYMT.intPaymentId
+		FROM tblAPPayment PYMT 
+			INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+			INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+			INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+			INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+			INNER JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
+			WHERE Bill.intBillId = @intBillId
+	) A
 	
 	insert into @Ids(intId)
 		SELECT intBillDetailId 
@@ -39,7 +63,10 @@ AS
 				where intBillId = @intBillId
 
 	declare @current_pay_record nvarchar(100)
+	declare @current_payment_record_id int
 	declare @current_pay_id int
+	declare @bank_account_id int
+
 	declare @uidReport nvarchar(50) 
 	declare @xmlParamValue nvarchar(max)
 	select @current_pay_id = min(intId) from @PaymentRecords
@@ -50,6 +77,7 @@ AS
 		
 		select @current_pay_record = strRecord 
 			,@uidReport = convert(nvarchar(50), newid())
+			,@current_payment_record_id  = intPaymentId
 		from @PaymentRecords	
 			where intId = @current_pay_id
 		
@@ -62,26 +90,20 @@ AS
 		alter table #tmpReportHolder drop column intSettlementReportId
 
 		
+		select @bank_account_id = intBankAccountId
+			from tblAPPayment
+				where intPaymentId = @current_payment_record_id
 
-		set @xmlParamValue = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>intBankAccountId</fieldname><condition>EQUAL TO</condition><from>1</from><join>AND</join><begingroup /><endgroup /><datatype>Int32</datatype></filter><filter><fieldname>strTransactionId</fieldname><condition>EQUAL TO</condition><from>' + convert(nvarchar, @current_pay_record) + '</from><join>AND</join><begingroup /><endgroup /><datatype>Int32</datatype></filter><filter><fieldname>intSrCurrentUserId</fieldname><condition>Dummy</condition><from>1</from><join>OR</join><begingroup /><endgroup /><datatype>int</datatype></filter><filter><fieldname>intSrLanguageId</fieldname><condition>Dummy</condition><from>0</from><join>OR</join><begingroup /><endgroup /><datatype>int</datatype></filter></filters><sorts /><dummies><filter><fieldname>strReportLogId</fieldname><condition>Dummy</condition><from>' + @uidReport + '</from><join /><begingroup /><endgroup /><datatype>string</datatype></filter></dummies></xmlparam>'
+		set @xmlParamValue = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>intBankAccountId</fieldname><condition>EQUAL TO</condition><from>' + convert(nvarchar, @bank_account_id ) + '</from><join>AND</join><begingroup /><endgroup /><datatype>Int32</datatype></filter><filter><fieldname>strTransactionId</fieldname><condition>EQUAL TO</condition><from>' + convert(nvarchar, @current_pay_record) + '</from><join>AND</join><begingroup /><endgroup /><datatype>Int32</datatype></filter><filter><fieldname>intSrLanguageId</fieldname><condition>Dummy</condition><from>0</from><join>OR</join><begingroup /><endgroup /><datatype>int</datatype></filter></filters><sorts /><dummies><filter><fieldname>strReportLogId</fieldname><condition>Dummy</condition><from>' + @uidReport + '</from><join /><begingroup /><endgroup /><datatype>string</datatype></filter></dummies></xmlparam>'
 		
 
 		print @xmlParamValue
 		insert into #tmpReportHolder
 		exec "dbo"."uspGRSettlementReport" @xmlParam=@xmlParamValue
 		
+		delete from @PaymentIds
 		insert into @PaymentIds(intId)
-		select  DISTINCT  Payment.intPaymentId
-			from tblAPPayment Payment	
-			join tblAPPaymentDetail PaymentDetail
-				on Payment.intPaymentId = PaymentDetail.intPaymentId
-			join tblAPBill Bill
-				on PaymentDetail.intBillId = Bill.intBillId
-			join tblAPBillDetail BillDetail
-				on Bill.intBillId = BillDetail.intBillId
-			where BillDetail.intSettleStorageId is not null
-				and Bill.intBillId = @intBillId
-				and Payment.strPaymentRecordNum = @current_pay_record
+		select @current_payment_record_id
 
 		
 

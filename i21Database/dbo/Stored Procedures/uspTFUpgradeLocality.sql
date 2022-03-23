@@ -60,7 +60,7 @@ BEGIN TRY
 		);
 
 	-- Set insMasterId to 0 for records that are not exist in default data
-	UPDATE tblTFTerminalControlNumber
+	UPDATE tblTFLocality
 	SET intMasterId = NULL
 	WHERE intTaxAuthorityId = @TaxAuthorityId 
 	AND intMasterId NOT IN (SELECT intMasterId FROM @Locality)

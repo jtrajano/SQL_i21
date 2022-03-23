@@ -24,7 +24,20 @@ SELECT
     , sl.intLocationId
     , l.strLocationName
     , l.strLocationNumber
+    , COALESCE(updated.dtmDate, created.dtmDate, sl.dtmDateModified, sl.dtmDateCreated) dtmDateLastUpdated
 FROM tblICStorageLocation sl
 LEFT JOIN tblICStorageUnitType t ON t.intStorageUnitTypeId = sl.intStorageUnitTypeId
 JOIN tblSMCompanyLocationSubLocation cl ON cl.intCompanyLocationSubLocationId = sl.intSubLocationId
 JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = sl.intLocationId
+OUTER APPLY (
+  SELECT TOP 1 au.dtmDate
+  FROM vyuApiRecordAudit au
+  WHERE au.intRecordId = sl.intStorageLocationId
+    AND au.strNamespace = 'Inventory.view.StorageUnit'
+) created
+OUTER APPLY (
+  SELECT TOP 1 au.dtmDate
+  FROM vyuApiRecordAudit au
+  WHERE au.intRecordId = sl.intStorageLocationId
+    AND au.strNamespace = 'Inventory.view.StorageUnit'
+) updated

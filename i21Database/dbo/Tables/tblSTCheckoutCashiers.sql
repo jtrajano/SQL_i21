@@ -16,6 +16,6 @@
 
     CONSTRAINT [PK_tblSTCheckoutCashiers] PRIMARY KEY CLUSTERED ([intCheckoutCashierId] ASC),
     CONSTRAINT [FK_tblSTCheckoutCashiers_tblSTCashier] FOREIGN KEY ([intCashierId]) REFERENCES [dbo].[tblSTCashier] ([intCashierId]),
-    CONSTRAINT [FK_tblSTCheckoutCashiers_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [dbo].[tblSTCheckoutHeader] ([intCheckoutId])
+    CONSTRAINT [FK_tblSTCheckoutCashiers_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [dbo].[tblSTCheckoutHeader] ([intCheckoutId]) ON DELETE CASCADE
 );
 

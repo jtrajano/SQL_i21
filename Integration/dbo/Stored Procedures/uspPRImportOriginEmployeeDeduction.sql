@@ -1,3 +1,7 @@
+IF EXISTS (select top 1 1 from sys.procedures where name = 'uspPRImportOriginEmployeeDeduction')
+	DROP PROCEDURE [dbo].uspPRImportOriginEmployeeDeduction
+GO
+
 CREATE PROCEDURE dbo.uspPRImportOriginEmployeeDeduction(
     @ysnDoImport BIT = 0,
 	@intRecordCount INT = 0 OUTPUT
@@ -5,9 +9,11 @@ CREATE PROCEDURE dbo.uspPRImportOriginEmployeeDeduction(
 
 AS
 
+DECLARE @EmployeeCount AS NVARCHAR(50)
+DECLARE @EntityId AS INT
 DECLARE @strEmployeeId AS NVARCHAR(50)
 DECLARE @strDeduction AS NVARCHAR(50)
-DECLARE @intEntityEmployeeId AS INT
+DECLARE @intEntityEmployeeId AS NVARCHAR(50)
 DECLARE @intTypeDeductionId AS INT
 DECLARE @strDeductFrom AS NVARCHAR(50)
 DECLARE @strCalculationType AS NVARCHAR(50)
@@ -71,7 +77,7 @@ BEGIN
 
 
 	--finalizing data
-	SELECT 'E'+ premp_emp  AS premp_emp_code, * INTO prempmst_deductions_cv FROM prempmst_ded_rows WHERE (( premp_ded_code_col = 'premp_ded_code_1' and premp_ded_type_col = 'premp_ded_type_1' and premp_ded_active_col ='premp_ded_active_yn_1' and  premp_ded_calc_code_col = 'premp_ded_calc_code_1' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_1' and premp_ded_limit_col = 'premp_ded_limit_1')
+	SELECT premp_emp  AS premp_emp_code, * INTO prempmst_deductions_cv FROM prempmst_ded_rows WHERE (( premp_ded_code_col = 'premp_ded_code_1' and premp_ded_type_col = 'premp_ded_type_1' and premp_ded_active_col ='premp_ded_active_yn_1' and  premp_ded_calc_code_col = 'premp_ded_calc_code_1' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_1' and premp_ded_limit_col = 'premp_ded_limit_1')
 	OR ( premp_ded_code_col = 'premp_ded_code_2' and premp_ded_type_col = 'premp_ded_type_2' and premp_ded_active_col ='premp_ded_active_yn_2' and  premp_ded_calc_code_col = 'premp_ded_calc_code_2' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_2' and premp_ded_limit_col = 'premp_ded_limit_2')
 	OR ( premp_ded_code_col = 'premp_ded_code_3' and premp_ded_type_col = 'premp_ded_type_3' and premp_ded_active_col ='premp_ded_active_yn_3' and  premp_ded_calc_code_col = 'premp_ded_calc_code_3' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_3' and premp_ded_limit_col = 'premp_ded_limit_3')
 	OR ( premp_ded_code_col = 'premp_ded_code_4' and premp_ded_type_col = 'premp_ded_type_4' and premp_ded_active_col ='premp_ded_active_yn_4' and  premp_ded_calc_code_col = 'premp_ded_calc_code_4' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_4' and premp_ded_limit_col = 'premp_ded_limit_4')
@@ -79,14 +85,23 @@ BEGIN
 	OR ( premp_ded_code_col = 'premp_ded_code_6' and premp_ded_type_col = 'premp_ded_type_6' and premp_ded_active_col ='premp_ded_active_yn_6' and  premp_ded_calc_code_col = 'premp_ded_calc_code_6' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_6' and premp_ded_limit_col = 'premp_ded_limit_6')
 	)
 
-	SELECT @intRecordCount = COUNT(1) FROM prempmst_deductions_cv
+	SELECT @intRecordCount = COUNT(*) from prempmst_deductions_cv tded
+	INNER JOIN tblPRTypeDeduction mded
+	ON tded.premp_ded_data COLLATE Latin1_General_CI_AS = mded.strDeduction
+	INNER JOIN tblPREmployee emp
+	ON emp.strEmployeeId = tded.premp_emp_code COLLATE Latin1_General_CI_AS
+	WHERE NOT EXISTS(
+		SELECT 1 FROM tblPREmployeeDeduction 
+				WHERE intEntityEmployeeId = emp.intEntityId
+				AND intTypeDeductionId = mded.intTypeDeductionId
+	)
 
 	IF (@ysnDoImport = 1)
 	BEGIN
 		WHILE EXISTS(SELECT TOP 1 NULL FROM prempmst_deductions_cv)
 		BEGIN
 			SELECT TOP 1 
-				 @intEntityEmployeeId				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = ded.premp_emp_code collate Latin1_General_CI_AS)
+				 @intEntityEmployeeId				= ded.premp_emp_code collate Latin1_General_CI_AS
 				,@intTypeDeductionId				= (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = ded.premp_ded_data collate Latin1_General_CI_AS)
 				,@strDeductFrom						= (SELECT TOP 1 strDeductFrom FROM tblPRTypeDeduction WHERE strDeduction = ded.premp_ded_data collate Latin1_General_CI_AS)
 				,@strCalculationType				= (SELECT TOP 1 strCalculationType FROM tblPRTypeDeduction WHERE strDeduction = ded.premp_ded_data collate Latin1_General_CI_AS)
@@ -101,47 +116,52 @@ BEGIN
 				,@strEmployeeId						= ded.premp_emp_code
 				,@strDeduction						= ded.premp_ded_data
 				FROM prempmst_deductions_cv ded
-
-			IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeduction)
+	
+			SELECT @EntityId = COUNT(1) FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId
+			IF (@EntityId != 0)
 			BEGIN
-				IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax where intEmployeeDeductionId = @intEntityEmployeeId 
-								AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeduction))
+				IF EXISTS (SELECT TOP 1 * FROM tblPRTypeDeduction WHERE strDeduction = @strDeduction)
 				BEGIN
-					INSERT INTO [dbo].[tblPREmployeeDeduction]
-					   ([intEntityEmployeeId]
-					   ,[intTypeDeductionId]
-					   ,[strDeductFrom]
-					   ,[strCalculationType]
-					   ,[dblAmount]
-					   ,[dblLimit]
-					   ,[intAccountId]
-					   ,[intExpenseAccountId]
-					   ,[ysnUseLocationDistribution]
-					   ,[ysnUseLocationDistributionExpense]
-					   ,[strPaidBy]
-					   ,[ysnDefault])
-					VALUES
-					(
-						 @intEntityEmployeeId
-						,@intTypeDeductionId
-						,@strDeductFrom
-						,@strCalculationType
-						,@dblAmount
-						,@dblLimit
-						,@intAccountId
-						,@intExpenseAccountId
-						,@ysnUseLocationDistribution
-						,@ysnUseLocationDistributionExpense
-						,@strPaidBy
-						,@ysnDefault
-					)
-				END
+					IF NOT EXISTS (SELECT * FROM tblPREmployeeDeduction where intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId) 
+									AND intTypeDeductionId =  (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeduction))
+					BEGIN
+						INSERT INTO [dbo].[tblPREmployeeDeduction]
+						   ([intEntityEmployeeId]
+						   ,[intTypeDeductionId]
+						   ,[strDeductFrom]
+						   ,[strCalculationType]
+						   ,[dblAmount]
+						   ,[dblLimit]
+						   ,[intAccountId]
+						   ,[intExpenseAccountId]
+						   ,[ysnUseLocationDistribution]
+						   ,[ysnUseLocationDistributionExpense]
+						   ,[strPaidBy]
+						   ,[ysnDefault])
+						VALUES
+						(
+							 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId) 
+							,@intTypeDeductionId
+							,@strDeductFrom
+							,@strCalculationType
+							,@dblAmount
+							,@dblLimit
+							,@intAccountId
+							,@intExpenseAccountId
+							,@ysnUseLocationDistribution
+							,@ysnUseLocationDistributionExpense
+							,@strPaidBy
+							,@ysnDefault
+						)
+					END
 				
+				END
 			END
 
+
 			DELETE FROM prempmst_deductions_cv 
-				  WHERE premp_emp_code = @strEmployeeId
-					AND premp_ded_data = @strDeduction
+				  WHERE premp_emp_code collate Latin1_General_CI_AS = @strEmployeeId
+					AND premp_ded_data collate Latin1_General_CI_AS = @strDeduction
 
 		END
 

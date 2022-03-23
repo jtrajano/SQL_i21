@@ -77,7 +77,7 @@ BEGIN
 		)    
 		SELECT
 			*
-		FROM OPENXML(@xmlDocumentId, 'PreProcessXML', 2)      
+		FROM OPENXML(@xmlDocumentId, 'PreProcessXMLs/PreProcessXML', 2)      
 		WITH (
 			intPriceContractId    INT    
 			, strPriceContractState   NVARCHAR(20)    
@@ -485,11 +485,15 @@ BEGIN
 							,@intUserId = @intUserId;  
 					end  
 
-					if (@strPriceFixationDetailState = 'update')  
-					begin  
+					if (@strPriceFixationDetailState = 'update' and exists (select top 1 1 from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId and dblQuantity <> @dblTransactionQuantity))
+					begin
+
+						declare @dblTrueTransactionQty numeric(18,6);
+						select @dblTrueTransactionQty = abs(@dblTransactionQuantity - dblQuantity) * (case when @dblTransactionQuantity < dblQuantity then 1 else -1 end) from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
+
 						exec uspCTProcessSummaryLogOnPriceUpdate
 							@intPriceFixationDetailId = @intPriceFixationDetailId
-							,@dblTransactionQuantity = @dblTransactionQuantity
+							,@dblTransactionQuantity = @dblTrueTransactionQty
 							,@intUserId = @intUserId;  
 					end  
 

@@ -2271,13 +2271,15 @@ BEGIN TRY
 					FROM tblSMCity DC
 					WHERE DC.strCity = @strDestinationCity
 
-					SELECT @intStorageLocationId = intStorageLocationId
-					FROM tblICStorageLocation SL
-					WHERE SL.strName = @strVesselStorageLocationName
-
 					SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
 					FROM tblSMCompanyLocationSubLocation SB
 					WHERE SB.strSubLocationName = @strVesselSubLocationName
+					AND intCompanyLocationId=@intCompanyLocationId
+
+					SELECT @intStorageLocationId = intStorageLocationId
+					FROM tblICStorageLocation SL
+					WHERE SL.strName = @strVesselStorageLocationName
+					AND intSubLocationId=@intCompanyLocationSubLocationId
 
 					SELECT @intShippingLineId = ShippingLine.intEntityId
 					FROM tblEMEntity ShippingLine

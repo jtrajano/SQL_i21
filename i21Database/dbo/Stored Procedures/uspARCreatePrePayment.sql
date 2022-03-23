@@ -5,7 +5,8 @@
 	, @UserId		AS INT			
 	, @NewInvoiceId	AS INT			= NULL OUTPUT	
 	, @PostPrepayment	AS INT		= 0	
-	, @PaidCPP			AS BIT			= 0
+	, @PaidCPP			AS BIT		= 0
+	, @RaiseError		AS BIT		= 0
 AS
 
 BEGIN
@@ -222,7 +223,7 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@Type								= @Type
 	,@NewInvoiceId						= @NewId		OUTPUT
 	,@ErrorMessage						= @ErrorMessage	OUTPUT
-	,@RaiseError						= 1
+	,@RaiseError						= @RaiseError
 	,@EntitySalespersonId				= @EntitySalespersonId
 	,@FreightTermId						= @FreightTermId
 	,@ShipViaId							= @ShipViaId

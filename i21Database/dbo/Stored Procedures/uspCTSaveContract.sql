@@ -264,7 +264,10 @@ BEGIN TRY
 				@dblSlicedFutures numeric(18,6)
 				,@dblSlicedCashPrice numeric(18,6);
 
-			SELECT @dblLotsFixed =  round(dblLotsFixed,2), @dblSlicedFutures = dblFinalPrice - dblOriginalBasis, @dblSlicedCashPrice = dblFinalPrice FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId;
+			SELECT @dblLotsFixed =  round(dblLotsFixed,(case when @intHeaderPricingTypeId in (2,8) then 6 else 2 end)), @dblSlicedFutures = dblFinalPrice - dblOriginalBasis, @dblSlicedCashPrice = dblFinalPrice FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId;
+			
+			select @dblNoOfLots=round(@dblNoOfLots,5),@dblLotsFixed=round(@dblLotsFixed,5);
+
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
 				UPDATE	@CDTableUpdate
@@ -302,9 +305,9 @@ BEGIN TRY
 		BEGIN
 			UPDATE @CDTableUpdate SET dblOriginalBasis = @dblBasis WHERE intContractDetailId = @intContractDetailId;
 
-			DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
-			EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
-			ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			--DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			--EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
+			--ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
 		END
 
 		IF @intPricingTypeId IN (1,2,8)

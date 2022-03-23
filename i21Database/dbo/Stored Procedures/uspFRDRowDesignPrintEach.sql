@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspFRDRowDesignPrintEach]
 	@intRowId		AS INT,
-	@ysnSupressZero	AS BIT
+	@ysnSupressZero	AS BIT,
+	@intSegmentCode as int = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -44,6 +45,13 @@ CREATE TABLE #tempGLAccount (
 		[strAccountType]	NVARCHAR(MAX),
 		[strDescription]	NVARCHAR(MAX)
 	);
+
+CREATE TABLE #tempGLAccount2 (    
+  [intAccountId]  INT,    
+  [strAccountId]  NVARCHAR(150),    
+  [strAccountType] NVARCHAR(MAX),    
+  [strDescription] NVARCHAR(MAX)    
+ );   
 
 DECLARE @ConcurrencyId AS INT = (SELECT TOP 1 intConcurrencyId FROM tblFRRow WHERE intRowId = @intRowId)
 
@@ -109,8 +117,22 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 			SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLAccountView where (' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ') AND intAccountId IS NOT NULL ORDER BY strAccountId'
 		END
 
-		INSERT INTO #tempGLAccount
-		EXEC (@queryString)
+		INSERT INTO #tempGLAccount2    
+		EXEC (@queryString)   
+
+		IF @intSegmentCode <> 0
+			BEGIN	
+				INSERT INTO #tempGLAccount    		
+				SELECT T0.* FROM #tempGLAccount2 T0
+				INNER JOIN tblGLTempCOASegment T1
+				ON T0.intAccountId = T1.intAccountId
+				WHERE T1.Location in (select strSegmentCode from tblFRSegmentFilterGroupDetail where intSegmentFilterGroupId = @intSegmentCode)
+			END	
+		ELSE	
+			BEGIN	
+				INSERT INTO #tempGLAccount    
+				SELECT * FROM #tempGLAccount2    
+			END	
 
 		DECLARE @intAccountId INT
 		DECLARE @strAccountId NVARCHAR(150)
@@ -166,6 +188,7 @@ DELETE #tempGLAccount
 DELETE #tempRowDesignPrintEach
 DELETE #tempRowDesign
 DROP TABLE #tempGLAccount
+DROP TABLE #tempGLAccount2
 DROP TABLE #tempRowDesignPrintEach
 DROP TABLE #tempRowDesign
 
@@ -173,4 +196,4 @@ DROP TABLE #tempRowDesign
 -- 	SCRIPT EXECUTION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
---EXEC [dbo].[uspFRDRowDesignPrintEach] 7
+--EXEC [dbo].[uspFRDRowDesignPrintEach1] 51,0,4   

@@ -126,7 +126,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strPriceUnitMeasure					= ISNULL(POUM.strUnitMeasure, '')
      , strOrderUnitMeasure					= ISNULL(OOUM.strUnitMeasure, '')
      , strWeightUnitMeasure					= ISNULL(WOUM.strUnitMeasure, '')
-	 , strSalespersonId						= ISNULL(SPER.strSalespersonId, '')
+	 , strSalespersonId						= CASE WHEN ISNULL(ITM.strType, '') =  'Service' THEN ISNULL(PER.strSalespersonId, '') ELSE ISNULL(SPER.strSalespersonId, '') END
 	 , strSiteNumber						= ISNULL(CSITE.strSiteNumber, '') COLLATE Latin1_General_CI_AS
      , strContractNumber					= ISNULL(CT.strContractNumber, '')	 
 	 , intContractSeq						= CT.intContractSeq
@@ -212,7 +212,14 @@ LEFT JOIN (
 		 , strSalespersonName	= A.strName
 	FROM tblEMEntity A WITH(NOLOCK)
 	JOIN tblARSalesperson B WITH(NOLOCK) ON A.intEntityId = B.intEntityId
-) SPER ON ISNULL(INV.intEntitySalespersonId, INV.intPerformerId) = SPER.intEntityId
+) SPER ON INV.intEntitySalespersonId = SPER.intEntityId
+LEFT JOIN (
+	SELECT intEntityId			= A.intEntityId
+		 , strSalespersonId		= CASE WHEN B.strSalespersonId = '' THEN A.strEntityNo ELSE B.strSalespersonId END
+		 , strSalespersonName	= A.strName
+	FROM tblEMEntity A WITH(NOLOCK)
+	JOIN tblARSalesperson B WITH(NOLOCK) ON A.intEntityId = B.intEntityId
+) PER ON INV.intPerformerId = PER.intEntityId
 LEFT JOIN (
 	SELECT intSiteID		= intSiteID
 		 , strSiteNumber	= REPLACE(STR([intSiteNumber], 4), SPACE(1), '0') 

@@ -231,3 +231,11 @@ CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intLoadDetailId_intSiteDetailI
 	ON [dbo].[tblARInvoiceDetail] ([intLoadDetailId])
 INCLUDE ([intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [dblPrice])
 GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intContractDetailId]
+	ON [dbo].[tblARInvoiceDetail] ([intContractDetailId])
+INCLUDE ([intInvoiceId])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intSCInvoiceId]
+	ON [dbo].[tblARInvoiceDetail] ([intSCInvoiceId])
+INCLUDE ([intInvoiceId])
+GO

@@ -41,7 +41,7 @@ BEGIN TRY
 		, dblSalePrice
 		, strUnitMeasure
 		, strVendorId
-		, CAST(ISNULL(intRegisterDepartmentId, '') AS NVARCHAR(50))
+		, CAST(ISNULL(strCashRegisterDepartment, '') AS NVARCHAR(50))
 		, dblOnHand
 	FROM vyuSTGetPricebookExport
 	WHERE ysnStockUnit = 1 

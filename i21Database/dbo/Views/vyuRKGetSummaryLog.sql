@@ -61,6 +61,33 @@ SELECT SL.intSummaryLogId
 	, dtmEndDate
 	, SL.intCurrencyId
 	, strCurrency
+	, SL.intOptionMonthId
+	, SL.strOptionMonth
+	, SL.dblStrike
+	, SL.strOptionType
+	, SL.strInstrumentType
+	, SL.intBrokerageAccountId
+	, SL.strBrokerAccount
+	, SL.strBroker
+	, SL.strBuySell
+	, SL.ysnPreCrush
+	, SL.strBrokerTradeNo
+	, SL.intMatchNo
+	, SL.intMatchDerivativesHeaderId
+	, SL.intMatchDerivativesDetailId
+	, SL.strStorageTypeCode
+	, SL.ysnReceiptedStorage
+	, SL.intTypeId
+	, SL.strStorageType
+	, SL.intDeliverySheetId
+	, SL.strTicketStatus
+	, SL.strOwnedPhysicalStock
+	, SL.strStorageTypeDescription
+	, SL.ysnActive
+	, SL.ysnExternal
+	, SL.intStorageHistoryId
+	, SL.intInventoryReceiptItemId
+	, SL.intLoadDetailId
 FROM tblRKSummaryLog SL
 LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = SL.intLocationId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = SL.intCommodityId

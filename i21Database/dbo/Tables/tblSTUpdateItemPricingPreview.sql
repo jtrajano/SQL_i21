@@ -8,6 +8,7 @@
 	[strUpc] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strChangeDescription] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	[strUnitMeasure] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strOldData] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strNewData] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strActionType] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,

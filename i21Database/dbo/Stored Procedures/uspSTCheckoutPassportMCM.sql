@@ -85,7 +85,7 @@ BEGIN
 					Chk.intMerchandiseCode AS strXmlRegisterMerchandiseCode
 				FROM @UDT_MCM Chk
 				JOIN dbo.tblICCategoryLocation Cat 
-					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
+					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50))
 				LEFT JOIN dbo.tblICItem I 
 					ON Cat.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 
@@ -144,7 +144,7 @@ BEGIN
 					, 0 [ysnLotteryItemAdded] 
 				FROM @UDT_MCM Chk
 				JOIN dbo.tblICCategoryLocation Cat 
-					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
+					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50))
 				--JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
 				LEFT JOIN dbo.tblICItem I 
 					ON Cat.intGeneralItemId = I.intItemId
@@ -188,7 +188,7 @@ BEGIN
 				JOIN tblICCategoryLocation CatLoc 
 					ON Cat.intCategoryId = CatLoc.intCategoryId
 				JOIN @UDT_MCM Chk 
-					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.intRegisterDepartmentId AS NVARCHAR(50))
+					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.strCashRegisterDepartment AS NVARCHAR(50))
 				LEFT JOIN dbo.tblICItem I 
 					ON CatLoc.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 

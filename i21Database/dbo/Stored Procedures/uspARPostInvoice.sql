@@ -220,9 +220,12 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
     ,@UserId            = @userId
 
 IF @post = 1 AND @recap = 0
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-         @PostDate    = @PostDate
-        ,@UserId      = @userId
+    EXEC [dbo].[uspARProcessSplitOnInvoicePost]         
+		  @ysnPost	  	= 1
+		, @ysnRecap	  	= 0
+		, @dtmDatePost	= @PostDate
+		, @strBatchId	= @batchIdUsed
+		, @intUserId	= @userId
 
 --Removed excluded Invoices to post/unpost
 IF(@exclude IS NOT NULL)
@@ -371,18 +374,18 @@ BEGIN TRY
     END
 
 	IF @post = 1 AND @recap = 1
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-			@PostDate        = @PostDate
-		   ,@UserId          = @userId
+		EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+				  @ysnPost	  	= 1
+				, @ysnRecap	  	= 1
+				, @dtmDatePost	= @PostDate
+				, @strBatchId	= @batchIdUsed
+				, @intUserId	= @userId
 
 	IF @recap = 0
-	BEGIN
-		-- Log to inventory sub-ledger	
 		EXEC [dbo].[uspARLogInventorySubLedger] @post, @userId
-	END
 
 	IF @post = 1
-    EXEC [dbo].[uspARPrePostInvoiceIntegration]	
+    	EXEC [dbo].[uspARPrePostInvoiceIntegration]	
 
 	DECLARE @InvoicesForIntegration Id
 
@@ -395,7 +398,7 @@ BEGIN TRY
 
 		SELECT @intInvoiceForIntegration = intId FROM @InvoicesForIntegration
 
-		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intInvoiceForIntegration, @ForDelete = 0, @UserId = @userId, @Post = @post, @Recap = @recap, @FromPosting= 1
+		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intInvoiceForIntegration, @ForDelete = 0, @UserId = @userId, @Post = @post, @Recap = @recap, @FromPosting = 1
 
 		DELETE FROM @InvoicesForIntegration WHERE intId = @intInvoiceForIntegration
 	END

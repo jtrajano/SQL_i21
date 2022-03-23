@@ -69,6 +69,10 @@ SELECT LoadDetail.intLoadDetailId
 	, LoadDetail.ysnUpdateLoadDirections
 	, LoadDetail.ysnPrintLoadDirections
 	, Item.strLotTracking  
+	, LoadDetail.dtmPickUpFrom
+	, LoadDetail.dtmPickUpTo
+	, LoadDetail.dtmDeliveryFrom
+	, LoadDetail.dtmDeliveryTo
 
 -- Load Header
 	, Load.intLoadId 

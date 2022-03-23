@@ -18,6 +18,19 @@ BEGIN
 		DELETE FROM tblCFCSRSingleQuote	WHERE intEntityUserId = @intEntityUserId OR ISNULL(intEntityUserId,0) = 0
 		--DELETE FROM tblCFCSRSingleQuoteDetailTax
 	END
+
+	DECLARE @dblMaxAvailableDiscount NUMERIC(18,6)
+
+
+	
+	SELECT @dblMaxAvailableDiscount = MAX(dblRate) FROM tblCFDiscountSchedule 
+	INNER JOIN tblCFAccount
+	ON tblCFDiscountSchedule.intDiscountScheduleId = tblCFAccount.intDiscountScheduleId
+	LEFT JOIN tblCFDiscountScheduleDetail
+	ON tblCFDiscountSchedule.intDiscountScheduleId = tblCFDiscountScheduleDetail.intDiscountScheduleId
+	WHERE tblCFAccount.intCustomerId = @intCustomerId
+
+
 	
 	
 	DECLARE @tblNetworkSiteItem TABLE (
@@ -360,22 +373,22 @@ BEGIN
 		SELECT	@dblOutTaxCalculatedAmount = ISNULL(SUM(dblTaxCalculatedAmount),0)	FROM tblCFTransactionTaxType
 
 
-		IF(LOWER(ISNULL(@strOutPriceBasis,'')) IN ('index cost','index retail','index fixed'))
-		BEGIN
-			SET @ysnHavePriceIndex = 1
-		END
-		ELSE
-		BEGIN
-			SET @ysnHavePriceIndex = 0
-		END
+		--IF(LOWER(ISNULL(@strOutPriceBasis,'')) IN ('index cost','index retail','index fixed'))
+		--BEGIN
+		--	SET @ysnHavePriceIndex = 1
+		--END
+		--ELSE
+		--BEGIN
+		--	SET @ysnHavePriceIndex = 0
+		--END
 
-		IF(@loopSiteType = 'Local/Network' AND ISNULL(@ysnHavePriceIndex,0) = 0)
-		BEGIN
-			--FOR LOCAL SITE EXCLUDE ITEM THAT DOESNT HAVE PRICE INDEX--
-			--JIRA CF-1820--
-			print 'skip'	
-		END
-		ELSE IF((ISNULL(@networkCost,0) != 0 OR ISNULL(@ysnHavePriceIndex,0) = 1) AND ISNULL(@dblOutNetTaxCalculatedAmount,0) > 0)
+		--IF(@loopSiteType = 'Local/Network' AND ISNULL(@ysnHavePriceIndex,0) = 0)
+		--BEGIN
+		--	--FOR LOCAL SITE EXCLUDE ITEM THAT DOESNT HAVE PRICE INDEX--
+		--	--JIRA CF-1820--
+		--	print 'skip'	
+		--END
+		IF((ISNULL(@networkCost,0) != 0 OR ISNULL(@ysnHavePriceIndex,0) = 1) AND ISNULL(@dblOutNetTaxCalculatedAmount,0) > 0)
 		BEGIN
 			
 				--DEBUGGER--
@@ -452,6 +465,7 @@ BEGIN
 			,dblNetPrice	= @dblOutNetTaxCalculatedAmount
 			,dblGrossPrice	= @dblOutGrossTaxCalculatedAmount
 			,dblTaxes		= @dblOutTaxCalculatedAmount
+			,dblBestPrice = @dblOutGrossTaxCalculatedAmount - @dblMaxAvailableDiscount
 			WHERE 
 			intCSRSingleQuoteId = @pk
 		
@@ -506,6 +520,7 @@ BEGIN
 						,dblItemPrice
 						,dtmEffectiveDate
 						,intEntityUserId
+						,dblBestPrice
 					)
 					SELECT
 						 intSiteId
@@ -519,6 +534,7 @@ BEGIN
 						,@dblAmount
 						,@effectiveDate
 						,@intEntityUserId
+						,@dblAmount - @dblMaxAvailableDiscount
 					FROM @tblNetworkSiteItem
 					WHERE 
 					intNetworkId	 = @loopNetworkId	

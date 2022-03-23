@@ -89,6 +89,62 @@ AS (
 DELETE FROM deleteDuplicate_CTE
 WHERE dblDuplicateCount > 1;
 
+-- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
+DELETE p
+FROM 
+	tblICEdiPricebook p
+	LEFT JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	OUTER APPLY (
+		SELECT TOP 1 
+			i.intItemId 
+		FROM
+			tblICItem i 
+		WHERE
+			i.intItemId = u.intItemId
+			OR i.strItemNo = p.strSellingUpcNumber
+	) i		
+	OUTER APPLY (			
+		SELECT TOP 1 
+			m.*
+		FROM tblICUnitMeasure m 
+		WHERE
+			m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+		ORDER BY 
+			m.intUnitMeasureId 
+	) m
+	OUTER APPLY (
+		SELECT TOP 1 
+			s.*
+		FROM tblICUnitMeasure s 
+		WHERE
+			s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+		ORDER BY 
+			m.intUnitMeasureId 
+	) s
+	OUTER APPLY (
+		SELECT TOP 1 
+			iu.intItemUOMId 
+		FROM 
+			tblICItemUOM iu
+		WHERE
+			iu.intItemId = i.intItemId
+			AND iu.ysnStockUnit = 1 
+	) stockUnit
+	OUTER APPLY (
+		SELECT TOP 1 
+			*
+		FROM 
+			tblICItemUOM dup
+		WHERE
+			dup.intItemId = i.intItemId
+			AND dup.intItemUOMId <> u.intItemUOMId
+			AND dup.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)
+	) dup
+WHERE
+	p.strUniqueId = @UniqueId
+	AND dup.intItemUOMId IS NOT NULL 
+
 -- Get the duplicate count. 
 SELECT @duplicatePricebookCount = ISNULL(@originalPricebookCount, 0) - COUNT(1) 
 FROM 
@@ -617,9 +673,9 @@ FROM (
 		UPDATE 
 		SET	
 			intBrandId = Source_Query.intBrandId
-			,strDescription = Source_Query.strDescription
-			,strShortName = Source_Query.strShortName
-			,strItemNo = Source_Query.strSellingUpcNumber
+			,strDescription = LEFT(Source_Query.strDescription, 250)
+			,strShortName = LEFT(Source_Query.strShortName, 50)
+			,strItemNo = LEFT(Source_Query.strSellingUpcNumber, 50)
 			,dtmDateModified = GETDATE()
 			,intModifiedByUserId = @intUserId
 			,intConcurrencyId = Item.intConcurrencyId + 1
@@ -644,10 +700,10 @@ FROM (
 			,intConcurrencyId
 		)
 		VALUES ( 
-			Source_Query.strSellingUpcNumber --strItemNo
-			,Source_Query.strShortName --,strShortName
+			LEFT(Source_Query.strSellingUpcNumber, 50) --strItemNo
+			,LEFT(Source_Query.strShortName, 50) --,strShortName
 			,'Inventory'--,strType
-			,Source_Query.strDescription --,strDescription
+			,LEFT(Source_Query.strDescription, 250) --,strDescription
 			,Source_Query.intManufacturerId --,intManufacturerId
 			,Source_Query.intBrandId--,intBrandId
 			,Source_Query.intCategoryId--,intCategoryId
@@ -778,9 +834,11 @@ FROM (
 		UPDATE 
 		SET	
 			intUnitMeasureId = Source_Query.intUnitMeasureId
+			,strUpcCode = dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
 			,intModifiedByUserId = @intUserId 
 			,intConcurrencyId = ItemUOM.intConcurrencyId + 1
-
+			,intCheckDigit = dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
+			,intModifier = CAST(Source_Query.strUpcModifierNumber AS INT)
 	-- If not found and it is allowed, insert a new item uom record.
 	WHEN 
 		NOT MATCHED 
@@ -792,8 +850,10 @@ FROM (
 			intItemId
 			,intUnitMeasureId
 			,dblUnitQty
-			--,strUpcCode
+			,strUpcCode
 			,strLongUPCCode
+			,intCheckDigit
+			,intModifier
 			,ysnStockUnit
 			,ysnAllowPurchase
 			,ysnAllowSale
@@ -806,8 +866,10 @@ FROM (
 			Source_Query.intItemId --intItemId
 			,Source_Query.intUnitMeasureId --,intUnitMeasureId
 			,1--,dblUnitQty
-			--,Source_Query.strSellingUpcNumber--,strUpcCode
+			,dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
 			,Source_Query.strSellingUpcNumber--,strLongUPCCode
+			,dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)--,intCheckDigit
+			,CAST(Source_Query.strUpcModifierNumber AS INT)--,intModifier
 			,Source_Query.ysnStockUnit--,ysnStockUnit
 			,1--,ysnAllowPurchase
 			,1--,ysnAllowSale
@@ -923,7 +985,7 @@ SELECT
 	,strLongUPCCode = p.strOrderCaseUpcNumber
 	,ysnStockUnit = 0
 	,ysnAllowPurchase = 1
-	,ysnAllowSale = 1
+	,ysnAllowSale = CASE WHEN CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) <> 0 THEN 1 ELSE 0 END 
 	,intConcurrencyId = 1
 	,dtmDateCreated = GETDATE()
 	,intCreatedByUserId = @intUserId
@@ -1821,7 +1883,7 @@ FROM (
 			,il.intItemLocationId
 			,iu.intItemUOMId
 			,intCompanyLocationId = loc.intCompanyLocationId 
-			,dblRetailPrice = CAST(p.strCaseRetailPrice AS NUMERIC(38, 20)) 
+			,dblRetailPrice = CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) 
 			,dtmEffectiveDate = GETUTCDATE()
 			,dtmDateCreated = GETUTCDATE()		
 			,intCreatedByUserId	= @intUserId
@@ -1835,20 +1897,23 @@ FROM (
 					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 						ON loc.intCompanyLocationId = cl.intCompanyLocationId
 			) loc
-			INNER JOIN tblICItemLocation il ON il.intLocationId = loc.intCompanyLocationId
+			INNER JOIN tblICItemLocation il 
+				ON il.intLocationId = loc.intCompanyLocationId
 				AND il.intItemId = i.intItemId
-			INNER JOIN vyuICGetItemUOM iu ON i.intItemId = iu.intItemId AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strOrderPackageDescription)))
+			INNER JOIN vyuICGetItemUOM iu 
+				ON i.intItemId = iu.intItemId 
+				AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strOrderPackageDescription)))
 		WHERE
 			p.strUniqueId = @UniqueId
-			AND
-			p.strCaseRetailPrice IS NOT NULL
+			AND p.strCaseRetailPrice IS NOT NULL
+			AND CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) <> 0
 		UNION
 		SELECT 
 			i.intItemId
 			,il.intItemLocationId
 			,iu.intItemUOMId
 			,intCompanyLocationId = loc.intCompanyLocationId 
-			,dblRetailPrice = CAST(p.strRetailPrice AS NUMERIC(38, 20)) 
+			,dblRetailPrice = CAST(NULLIF(p.strRetailPrice, '') AS NUMERIC(38, 20)) 
 			,dtmEffectiveDate = CAST(GETUTCDATE() AS DATE)
 			,dtmDateCreated = GETUTCDATE()		
 			,intCreatedByUserId	= @intUserId
@@ -1862,22 +1927,21 @@ FROM (
 					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 						ON loc.intCompanyLocationId = cl.intCompanyLocationId
 			) loc
-			INNER JOIN tblICItemLocation il ON il.intLocationId = loc.intCompanyLocationId
+			INNER JOIN tblICItemLocation il 
+				ON il.intLocationId = loc.intCompanyLocationId
 				AND il.intItemId = i.intItemId
-			INNER JOIN vyuICGetItemUOM iu ON i.intItemId = iu.intItemId AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strItemUnitOfMeasure)))
+			INNER JOIN vyuICGetItemUOM iu 
+				ON i.intItemId = iu.intItemId 
+				AND LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(p.strItemUnitOfMeasure)))
 		WHERE
 			p.strUniqueId = @UniqueId
-			AND
-			p.strRetailPrice IS NOT NULL
+			AND p.strRetailPrice IS NOT NULL
 	) AS Source_Query  
 		ON 
 		EffectiveItemPrice.intItemId = Source_Query.intItemId
-		AND 
-		EffectiveItemPrice.intItemLocationId = Source_Query.intItemLocationId
-		AND 
-		EffectiveItemPrice.intItemUOMId = Source_Query.intItemUOMId
-		AND 
-		EffectiveItemPrice.dtmEffectiveRetailPriceDate = Source_Query.dtmEffectiveDate 
+		AND EffectiveItemPrice.intItemLocationId = Source_Query.intItemLocationId
+		AND EffectiveItemPrice.intItemUOMId = Source_Query.intItemUOMId
+		AND EffectiveItemPrice.dtmEffectiveRetailPriceDate = Source_Query.dtmEffectiveDate 
 	-- If matched, update the existing effective item pricing
 	WHEN MATCHED 
 		AND Source_Query.ysnUpdatePrice = 1	

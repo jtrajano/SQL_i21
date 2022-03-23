@@ -1,3 +1,7 @@
+IF EXISTS (select top 1 1 from sys.procedures where name = 'uspPRImportOriginDeductionTypes')
+	DROP PROCEDURE [dbo].uspPRImportOriginDeductionTypes
+GO
+
 CREATE PROCEDURE dbo.uspPRImportOriginDeductionTypes(
     @ysnDoImport BIT = 0,
 	@intRecordCount INT = 0 OUTPUT
@@ -21,8 +25,8 @@ BEGIN
 		,strDeductFrom			=	''
 		,strCalculationType		=	prded_type
 		,dblAmount				=	prded_glbs_acct
-		,dblLimit				=	prded_cycle_earn_limit
-		,dblPaycheckMax			=	prded_annual_max
+		,dblLimit				=	prded_annual_max
+		,dblPaycheckMax			=	prded_cycle_earn_limit
 		,strW2Code				=	''
 		,strPaidBy				=	CASE WHEN prded_co_emp_cd = 'E'THEN 'Employee' ELSE 'Company' END
 		,ysnCreatePayable		=	null
@@ -47,7 +51,7 @@ BEGIN
 			,intAccountId
 			,intExpenseAccountId
 			,strDeductFrom
-			,strCalculationType
+			--,strCalculationType
 			,dblAmount
 			,dblLimit
 			,dblPaycheckMax
@@ -65,7 +69,7 @@ BEGIN
 			,intAccountId
 			,intExpenseAccountId
 			,strDeductFrom
-			,strCalculationType
+			--,strCalculationType
 			,dblAmount
 			,dblLimit
 			,dblPaycheckMax

@@ -209,21 +209,21 @@ BEGIN
 		CLOSE c; DEALLOCATE c;
 
 		--update the source's customer storage open balance
-		UPDATE X
-		SET X.dblOpenBalance = Y.dblQty
-		FROM
-		tblGRCustomerStorage X
-		INNER JOIN  (SELECT A.intCustomerStorageId,B.intSourceCustomerStorageId,TSS.intTransferStorageId,  ROUND(A.dblOpenBalance + SUM(ISNULL(TSR.dblUnitQty,B.dblDeductedUnits)),6) dblQty
-		FROM tblGRCustomerStorage A 
-		INNER JOIN tblGRTransferStorageSourceSplit B 
-			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
-		LEFT JOIN tblGRTransferStorageReference TSR
-			ON TSR.intSourceCustomerStorageId = B.intSourceCustomerStorageId
-		LEFT JOIN tblGRTransferStorageSplit TSS
-			ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
-		WHERE B.intTransferStorageId = @intTransferStorageId AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
-		GROUP BY  A.intCustomerStorageId,B.intSourceCustomerStorageId, TSS.intTransferStorageId,A.dblOpenBalance) Y
-			ON Y.intCustomerStorageId = X.intCustomerStorageId
+		--UPDATE X
+		--SET X.dblOpenBalance = Y.dblQty
+		--FROM
+		--tblGRCustomerStorage X
+		--INNER JOIN  (SELECT A.intCustomerStorageId,B.intSourceCustomerStorageId,TSS.intTransferStorageId,  ROUND(A.dblOpenBalance + SUM(ISNULL(TSR.dblUnitQty,B.dblDeductedUnits)),6) dblQty
+		--FROM tblGRCustomerStorage A 
+		--INNER JOIN tblGRTransferStorageSourceSplit B 
+		--	ON B.intSourceCustomerStorageId = A.intCustomerStorageId
+		--LEFT JOIN tblGRTransferStorageReference TSR
+		--	ON TSR.intSourceCustomerStorageId = B.intSourceCustomerStorageId
+		--LEFT JOIN tblGRTransferStorageSplit TSS
+		--	ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
+		--WHERE B.intTransferStorageId = @intTransferStorageId AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
+		--GROUP BY  A.intCustomerStorageId,B.intSourceCustomerStorageId, TSS.intTransferStorageId,A.dblOpenBalance) Y
+		--	ON Y.intCustomerStorageId = X.intCustomerStorageId
 
 		/* REVERSE TRANSACTION POSTED TO Inventory */
 		DECLARE @ItemsToPost AS ItemCostingTableType
@@ -565,7 +565,22 @@ BEGIN
 
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
-		DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
+		--DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
+
+		UPDATE CS
+		SET dblOpenBalance = SH.dblRunningBalance
+		FROM tblGRCustomerStorage CS
+		INNER JOIN #tmpTransferCustomerStorage TCS
+			ON TCS.intCustomerStorageId = CS.intCustomerStorageId
+		OUTER APPLY (
+			SELECT dblRunningBalance = SUM(CASE 
+						WHEN (strType = 'Settlement' OR strType ='Reduced By Inventory Shipment') AND dblUnits > 0 THEN - dblUnits 
+						ELSE dblUnits 
+					END)
+			FROM tblGRStorageHistory
+			WHERE intTransactionTypeId NOT IN (2,6)
+				AND intCustomerStorageId = CS.intCustomerStorageId
+		) SH
 
 		DONE:
 		IF @transCount = 0 COMMIT TRANSACTION

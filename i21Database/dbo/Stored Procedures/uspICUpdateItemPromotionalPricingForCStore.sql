@@ -9,6 +9,7 @@ CREATE PROCEDURE [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 	,@strUpcCode AS VARCHAR(30) = NULL 
 	,@intItemId AS INT = NULL 
 	,@intItemLocationId AS INT = NULL 
+	,@intUnitMeasureId AS INT = NULL 
 	,@intItemSpecialPricingId AS INT = NULL 
 	,@strAction AS VARCHAR(20) = NULL
 	,@intEntityUserSecurityId AS INT 
@@ -44,6 +45,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NULL
 IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NULL  
 	CREATE TABLE #tmpUpdateItemPricingForCStore_Class (
 		intClassId INT 
+	)
+--ST-2074
+IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Description') IS NULL  
+	CREATE TABLE #tmpUpdateItemPricingForCStore_Description (
+		intItemId INT 
 	)
 
 -- Create the temp table for the audit log. 
@@ -99,6 +105,7 @@ BEGIN
 						SELECT	DISTINCT i.intItemId,
 								il.intItemLocationId,
 								uom.intItemUOMId,
+								uom.intUnitMeasureId,
 								dtmBeginDate = @dtmBeginDate,
 								dtmEndDate = @dtmEndDate
 						FROM	tblICItem i 
@@ -110,9 +117,9 @@ BEGIN
 									AND itemSpecialPricing.intItemLocationId = il.intItemLocationId
 								INNER JOIN tblICItemUOM uom
 									ON i.intItemId = uom.intItemId
-									AND ysnStockUnit = 1
 						WHERE	
 								ISNULL(itemSpecialPricing.intItemSpecialPricingId,0) = ISNULL(@intItemSpecialPricingId, ISNULL(itemSpecialPricing.intItemSpecialPricingId, 0))
+								AND uom.intUnitMeasureId = ISNULL(@intUnitMeasureId, uom.intUnitMeasureId)
 								AND (
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = il.intLocationId) 			
@@ -134,6 +141,11 @@ BEGIN
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class WHERE intClassId = il.intClassId )			
 								)
 								AND (
+									--ST-2074
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Description)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Description WHERE intItemId = i.intItemId)			
+								)
+								AND (
 									@strUpcCode IS NULL 
 									OR EXISTS (
 										SELECT TOP 1 1 
@@ -146,8 +158,9 @@ BEGIN
 					) AS Source_Query  
 						ON itemSpecialPricing.intItemLocationId = Source_Query.intItemLocationId
 						AND itemSpecialPricing.intItemId = Source_Query.intItemId
-						AND itemSpecialPricing.dtmBeginDate = Source_Query.dtmBeginDate
-						AND itemSpecialPricing.dtmEndDate = Source_Query.dtmEndDate
+						AND itemSpecialPricing.dtmBeginDate = CAST(Source_Query.dtmBeginDate AS DATE)
+						AND itemSpecialPricing.dtmEndDate = CAST(Source_Query.dtmEndDate AS DATE)
+						AND itemSpecialPricing.intItemUnitMeasureId = Source_Query.intItemUOMId
 
 					-- If matched and Action is insert, delete. the Promotional Retail Price. 
 					WHEN MATCHED AND @strAction = 'INSERT' THEN 
@@ -168,6 +181,7 @@ BEGIN
 						AND (1 NOT IN  (SELECT 1 FROM tblICItemSpecialPricing 
 									WHERE intItemLocationId = Source_Query.intItemLocationId
 									AND intItemId = Source_Query.intItemId
+									AND intUnitMeasureId = ISNULL(@intUnitMeasureId, intUnitMeasureId)
 									AND Source_Query.dtmBeginDate <= dtmEndDate AND dtmBeginDate <= Source_Query.dtmEndDate))
 						THEN 
 						INSERT (

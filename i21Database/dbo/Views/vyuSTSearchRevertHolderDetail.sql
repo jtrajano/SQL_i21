@@ -23,6 +23,7 @@ SELECT --DISTINCT
 	, Item.strDescription AS strItemDescription
 	, Uom.strLongUPCCode
 	, CompanyLoc.strLocationName
+	, Um.strUnitMeasure
 	, RHD.intConcurrencyId
 	, strPreviewNewData = CASE
 							 WHEN revertHolder.intRevertType = 1
@@ -207,7 +208,9 @@ INNER JOIN tblICCategory Category
 LEFT JOIN tblICItemLocation ItemLoc
 	ON RHD.intItemLocationId = ItemLoc.intItemLocationId
 LEFT JOIN tblICItemUOM Uom
-	ON Item.intItemId = Uom.intItemId AND Uom.ysnStockUnit = 1
+	ON Item.intItemId = Uom.intItemId AND Uom.intItemUOMId = RHD.intItemUOMId
+LEFT JOIN tblICUnitMeasure Um
+	ON Uom.intUnitMeasureId = Um.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocation CompanyLoc
 	ON ItemLoc.intLocationId = CompanyLoc.intCompanyLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_New

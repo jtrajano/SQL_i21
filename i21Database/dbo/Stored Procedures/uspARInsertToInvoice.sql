@@ -1334,15 +1334,17 @@ BEGIN
 		dblItemTermDiscount = CopySO.dblItemTermDiscount, intStorageScheduleTypeId = CopySO.intStorageScheduleTypeId
 		,intSubLocationId = CopySO.intSubLocationId
 		,intStorageLocationId = CopySO.intStorageLocationId
+		,intCategoryId = CopySO.intCategoryId
 		
 					
 	FROM(
 		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight,
-			SOD.dblItemTermDiscount, SOD.intStorageScheduleTypeId, intSubLocationId , intStorageLocationId
+			SOD.dblItemTermDiscount, SOD.intStorageScheduleTypeId, intSubLocationId , intStorageLocationId , PCD.intCategoryId	
 		FROM tblSOSalesOrder SO 
-		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount, intStorageScheduleTypeId,intSubLocationId , intStorageLocationId
+		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount, intStorageScheduleTypeId,intSubLocationId , intStorageLocationId , intItemContractHeaderId
 					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
+		LEFT JOIN ( SELECT intItemContractHeaderId,intCategoryId FROM vyuARPrepaymentContractDefault) PCD ON PCD.intItemContractHeaderId=SOD.intItemContractHeaderId
 		WHERE strSalesOrderNumber = @SalesOrderNumber
 	) CopySO
 	WHERE intInvoiceId = @NewInvoiceId AND tblARInvoiceDetail.intItemId = CopySO.intItemId AND tblARInvoiceDetail.intItemUOMId = CopySO.intItemUOMId AND tblARInvoiceDetail.strSalesOrderNumber = CopySO.strSalesOrderNumber

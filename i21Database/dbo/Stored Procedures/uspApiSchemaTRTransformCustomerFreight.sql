@@ -201,7 +201,7 @@ BEGIN
 	DECLARE @intCustomerEntityId INT = NULL
 		, @intEntityTariffTypeId INT = NULL
 		, @intCustomerEntityLocationId INT = NULL
-		,@strSupplierZipCode INT = NULL
+		,@strSupplierZipCode NVARCHAR (12) = NULL
 		,@intCategoryId INT = NULL
 		,@ysnFreightOnly BIT = NULL
 		,@strFreightType NVARCHAR(100) = NULL

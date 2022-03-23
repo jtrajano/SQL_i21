@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRHandleSettleVoucherCreateReferenceTable]
 	@strBatchId AS NVARCHAR(40)
 	,@SettleVoucherCreate AS SettleVoucherCreate READONLY
+	,@intSettleStorageId INT
 AS
 	MERGE	
 	INTO	dbo.[tblGRSettleVoucherCreateReferenceTable] 
@@ -27,6 +28,7 @@ AS
 			,a.dblSettleContractUnits
 			,a.ysnDiscountFromGrossWeight
 			,ysnItemInventoryCost = isnull(a.ysnInventoryCost, b.ysnInventoryCost)
+			,intTransactionId = @intSettleStorageId
 			from
 			@SettleVoucherCreate a
 				join tblICItem b
@@ -34,6 +36,7 @@ AS
 	) AS Source_Query  
 		ON RefTable.intItemId = Source_Query.intItemId
 		and RefTable.strBatchId = Source_Query.strBatchId
+		and RefTable.intTransactionId = Source_Query.intTransactionId
 	WHEN NOT MATCHED THEN 
 		INSERT (
 			strBatchId
@@ -55,6 +58,7 @@ AS
 			,dblSettleContractUnits
 			,ysnDiscountFromGrossWeight
 			,ysnItemInventoryCost
+			,intTransactionId
 		)
 		VALUES (
 			Source_Query.strBatchId
@@ -76,8 +80,8 @@ AS
 			,Source_Query.dblSettleContractUnits
 			,Source_Query.ysnDiscountFromGrossWeight
 			,Source_Query.ysnItemInventoryCost
+			,Source_Query.intTransactionId
 		)		
 	;
 	
 RETURN 0
-

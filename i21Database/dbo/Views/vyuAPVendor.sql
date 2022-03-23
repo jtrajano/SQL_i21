@@ -31,7 +31,6 @@ SELECT
 	B.dblCreditLimit,
 	C.intShipViaId,
 	--C.intTaxCodeId,
-	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId  END as intTermsId,
 	--C.strContactName,
 	C.strAddress,
 	C.strCity,
@@ -49,27 +48,7 @@ SELECT
 	D.strPhone2,
 	D.strTitle,
 	E.strCurrency,
-	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 
-											FROM dbo.tblAPBill G 
-											WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.[intEntityVendorId] = B.[intEntityId]
-											UNION 
-											SELECT 1
-											FROM tblARInvoice AA
-											WHERE 
-												NOT EXISTS( SELECT TOP 1 1 
-															FROM tblAPBillDetail apbilldetail
-															INNER JOIN tblAPBill apbill 
-																ON apbilldetail.intBillId = apbill.intBillId 
-															WHERE apbill.ysnPosted = 1
-																AND intInvoiceId = AA.intInvoiceId
-														   )
-												AND AA.ysnPosted = 1
-												AND AA.dblAmountDue != 0
-												AND AA.strTransactionType IN ('Cash Refund','Invoice','Debit Memo', 'Cash')
-												AND AA.strType != 'CT Tran'
-												AND AA.intEntityCustomerId = B.[intEntityId]
-											) 
-						THEN 1 ELSE 0 END) AS BIT),
+	ysnHasPayables = CAST((CASE WHEN vp.intEntityVendorId IS NULL THEN 0 ELSE 1 END) AS BIT),  
 	B.intApprovalListId,
 	C.intFreightTermId,
 	H.strPaymentMethod,
@@ -89,8 +68,9 @@ SELECT
 	B.intChainAccountNumber,
 	B.intCsvFormat,
 	storeDescription = I.strDescription,
-	ysnTransportTerminal
-	,strTerm = J.strTerm
+	ysnTransportTerminal,
+	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId END as intTermsId,
+	CASE WHEN C.intTermsId > 0 THEN K.strTerm ELSE J.strTerm END as strTerm
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -106,6 +86,8 @@ FROM
 		ON G.intEntityId = A.intEntityId
 	INNER JOIN dbo.tblEMEntity D
 		ON G.intEntityContactId = D.[intEntityId] AND G.ysnDefaultContact = 1
+	LEFT JOIN dbo.[vyuAPVendorWIthPayables] vp
+		ON vp.intEntityVendorId = A.intEntityId
 	LEFT JOIN dbo.tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN dbo.tblGLAccount F 
@@ -116,3 +98,5 @@ FROM
 		ON I.intStoreId = B.intStoreStoreId
 	LEFT JOIN tblSMTerm J
 		ON B.intTermsId = J.intTermID
+	LEFT JOIN tblSMTerm K
+		ON C.intTermsId = K.intTermID

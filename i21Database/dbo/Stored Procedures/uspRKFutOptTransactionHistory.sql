@@ -263,7 +263,18 @@ BEGIN TRY
 					, strInOut
 					, intCommodityUOMId
 					, strNotes
-					, strMiscFields)
+					, strMiscFields
+					, intOptionMonthId
+					, strOptionMonth 
+					, dblStrike
+					, strOptionType 
+					, strInstrumentType 
+					, intBrokerageAccountId
+					, strBrokerAccount
+					, strBroker
+					, strBuySell 
+					, ysnPreCrush 
+					, strBrokerTradeNo )
 				SELECT
 					  strBucketType = 'Derivatives' 
 					, strTransactionType = 'Derivative Entry'
@@ -288,17 +299,18 @@ BEGIN TRY
 					, strInOut = CASE WHEN UPPER(der.strNewBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
 					, cUOM.intCommodityUnitMeasureId
 					, strNotes = strNotes
-					, strMiscFields = '{intOptionMonthId = "' + ISNULL(CAST(intOptionMonthId AS NVARCHAR), '') +'"}'
-										+ ' {strOptionMonth = "' + ISNULL(strOptionMonth, '') +'"}'
-										+ ' {dblStrike = "' + CAST(ISNULL(dblStrike,0) AS NVARCHAR) +'"}'
-										+ ' {strOptionType = "' + ISNULL(strOptionType, '') +'"}'
-										+ ' {strInstrumentType = "' + ISNULL(strInstrumentType, '') +'"}'
-										+ ' {intBrokerageAccountId = "' + ISNULL(CAST(intBrokerId AS NVARCHAR), '') +'"}'
-										+ ' {strBrokerAccount = "' + ISNULL(strBrokerAccount, '') +'"}'
-										+ ' {strBroker = "' + ISNULL(strBroker, '') +'"}'
-										+ ' {strBuySell = "' + ISNULL(strNewBuySell, '') +'"}'
-										+ ' {ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
-										+ ' {strBrokerTradeNo = "' + ISNULL(strBrokerTradeNo, '') +'"}'
+					, strMiscFields = NULL
+					, intOptionMonthId = intOptionMonthId
+					, strOptionMonth = strOptionMonth
+					, dblStrike =  dblStrike
+					, strOptionType =  strOptionType
+					, strInstrumentType =  strInstrumentType
+					, intBrokerageAccountId =  intBrokerId
+					, strBrokerAccount =  strBrokerAccount
+					, strBroker =  strBroker
+					, strBuySell =  strNewBuySell
+					, ysnPreCrush =  ISNULL(ysnPreCrush,0)
+					, strBrokerTradeNo =  strBrokerTradeNo
 				FROM vyuRKGetFutOptTransactionHistory der
 				JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 				LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId

@@ -249,7 +249,7 @@ BEGIN
 	FROM ##ARPostInvoiceHeader I					
 	WHERE I.[dblInvoiceTotal] = @ZeroDecimal
 	  AND I.[strTransactionType] <> 'Cash Refund'
-	  AND I.[strImportFormat] <> 'CarQuest'		
+	  AND (I.[strImportFormat] IS NULL OR I.[strImportFormat] <> 'CarQuest')
 	  AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.[intItemId] IS NOT NULL)		
 
 	INSERT INTO ##ARInvalidInvoiceData
@@ -1003,6 +1003,30 @@ BEGIN
 	WHERE I.[strItemType] = 'Service'
 	  AND I.[strItemType] <> 'Comment'
 	  AND (Acct.[intGeneralAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Misc Item Sales Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The Sales Account of item - ' + I.[strItemDescription] + ' was not specified in ' + CL.strLocationName + '.'
+	FROM ##ARPostInvoiceDetail I
+	INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE I.intItemId IS NULL
+	  AND I.strItemDescription IS NOT NULL
+	  AND I.intSalesAccountId IS NULL
+	  AND CL.intSalesAccount IS NULL
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]

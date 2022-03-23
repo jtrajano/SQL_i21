@@ -13,16 +13,18 @@ DECLARE @blbLogo 			VARBINARY (MAX)  = NULL
       , @blbStretchedLogo 	VARBINARY (MAX)  = NULL
 	  , @dblCreditMemo		NUMERIC   (18,6) = 1
 
+--LOGO
 SELECT TOP 1 @blbLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+WHERE (A.strScreen = 'SystemManager.CompanyPreference' OR A.strScreen = 'SystemManager.view.CompanyPreference')
   AND A.strComment = 'Header'
 
+--LOGO
 SELECT TOP 1 @blbStretchedLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+WHERE (A.strScreen = 'SystemManager.CompanyPreference' OR A.strScreen = 'SystemManager.view.CompanyPreference') 
   AND A.strComment = 'Stretched Header'
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)

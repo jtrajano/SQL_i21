@@ -989,6 +989,7 @@ BEGIN
 						,dblRate
 						,intFeeId
 					FROM tblCFInvoiceReportTieredUnitDiscountTempTable 
+					WHERE tblCFInvoiceReportTieredUnitDiscountTempTable.strUserId = @UserId
 					GROUP BY intAccountId	
 					,intFeeId
 					,intFeeProfileId
@@ -996,6 +997,7 @@ BEGIN
 			) as tblCFInvoiceReportTieredUnitDiscountTempTable
 			WHERE [@tblCFInvoiceFeeOutput].intAccountId  = tblCFInvoiceReportTieredUnitDiscountTempTable.intAccountId
 			AND [@tblCFInvoiceFeeOutput].intFeeLoopId = tblCFInvoiceReportTieredUnitDiscountTempTable.intFeeId
+			
 
 			DELETE FROM @tblCFInvoiceFeeOutput
 			WHERE ISNULL(dblFeeAmount,0) = 0

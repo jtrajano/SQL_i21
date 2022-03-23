@@ -343,7 +343,11 @@ BEGIN TRY
 			END
 
 			UPDATE CS
-			SET CS.dblOpenBalance = CS.dblOpenBalance + ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),6)
+			SET dblOpenBalance = CASE 
+										WHEN dblOpenBalance = dblOriginalBalance 
+											THEN dblOpenBalance 
+										ELSE CS.dblOpenBalance + ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),6)
+								END
 			FROM tblGRCustomerStorage CS
 			JOIN tblICItemUOM IU
 				ON IU.intItemId = CS.intItemId

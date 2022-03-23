@@ -64,6 +64,33 @@ BEGIN
 			, intCommodityUOMId
 			, strInOut
 			, strMiscFields
+			, intOptionMonthId
+			, strOptionMonth
+			, dblStrike
+			, strOptionType
+			, strInstrumentType
+			, intBrokerageAccountId
+			, strBrokerAccount
+			, strBroker
+			, strBuySell
+			, ysnPreCrush
+			, strBrokerTradeNo
+			, intMatchNo
+			, intMatchDerivativesHeaderId
+			, intMatchDerivativesDetailId
+			, strStorageTypeCode
+			, ysnReceiptedStorage
+			, intTypeId
+			, strStorageType
+			, intDeliverySheetId
+			, strTicketStatus
+			, strOwnedPhysicalStock
+			, strStorageTypeDescription
+			, ysnActive
+			, ysnExternal
+			, intStorageHistoryId
+			, intInventoryReceiptItemId
+			, intLoadDetailId
 			, intActionId)
 		SELECT TOP 1  strBucketType = 'Derivatives'
 			, strTransactionType = 'Derivative Entry'
@@ -92,6 +119,33 @@ BEGIN
 			, intOrigUOMId
 			, strInOut = CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END 
 			, strMiscField
+			, intOptionMonthId
+			, strOptionMonth
+			, dblStrike
+			, strOptionType
+			, strInstrumentType
+			, intBrokerageAccountId
+			, strBrokerAccount
+			, strBroker
+			, strBuySell
+			, ysnPreCrush
+			, strBrokerTradeNo
+			, intMatchNo
+			, intMatchDerivativesHeaderId
+			, intMatchDerivativesDetailId
+			, strStorageTypeCode
+			, ysnReceiptedStorage
+			, intTypeId
+			, strStorageType
+			, intDeliverySheetId
+			, strTicketStatus
+			, strOwnedPhysicalStock
+			, strStorageTypeDescription
+			, ysnActive
+			, ysnExternal
+			, intStorageHistoryId
+			, intInventoryReceiptItemId
+			, intLoadDetailId
 			, intActionId = 57 --Delete Derivative
 		FROM tblRKSummaryLog 
 		WHERE intTransactionRecordId = @intFutOptTransactionId
@@ -262,7 +316,6 @@ BEGIN
 					OR intSubBookId <> @intSubBookId
 					OR intLocationId <> @intLocationId
 					OR strNotes <> @strNotes
-					OR strMiscField <>  dbo.fnRKConvertMiscFieldString(@LogHelper)
 				)
 				AND ysnNegate IS NULL)
 		BEGIN
@@ -300,7 +353,18 @@ BEGIN
 					, strNotes
 					, ysnNegate
 					, intRefSummaryLogId
-					, strMiscField)
+					, strMiscField
+					, intOptionMonthId 
+					, strOptionMonth 
+					, dblStrike 
+					, strOptionType
+					, strInstrumentType
+					, intBrokerageAccountId
+					, strBrokerAccount
+					, strBroker 
+					, strBuySell
+					, ysnPreCrush 
+					, strBrokerTradeNo)
 				SELECT 
 					  @strBatchId
 					, dtmCreatedDate = GETUTCDATE()
@@ -337,6 +401,17 @@ BEGIN
 					, ysnNegate = 1
 					, intRefSummaryLogId
 					, strMiscField
+					, intOptionMonthId 
+					, strOptionMonth 
+					, dblStrike 
+					, strOptionType
+					, strInstrumentType
+					, intBrokerageAccountId
+					, strBrokerAccount
+					, strBroker 
+					, strBuySell
+					, ysnPreCrush 
+					, strBrokerTradeNo
 				FROM tblRKSummaryLog
 				WHERE intTransactionRecordId = @intFutOptTransactionId
 					AND strBucketType = 'Derivatives'
@@ -352,7 +427,6 @@ BEGIN
 						OR intSubBookId <> @intSubBookId
 						OR intLocationId <> @intLocationId
 						OR strNotes <> @strNotes
-						OR strMiscField <>  dbo.fnRKConvertMiscFieldString(@LogHelper)
 					)
 					AND ysnNegate IS NULL 
 
@@ -371,7 +445,6 @@ BEGIN
 						OR intSubBookId <> @intSubBookId
 						OR intLocationId <> @intLocationId
 						OR strNotes <> @strNotes
-						OR strMiscField <>  dbo.fnRKConvertMiscFieldString(@LogHelper)
 					)
 					AND ysnNegate IS NULL 
 
@@ -406,6 +479,17 @@ BEGIN
 			, strNotes
 			, intCommodityUOMId
 			, strMiscFields
+			, intOptionMonthId 
+			, strOptionMonth 
+			, dblStrike 
+			, strOptionType
+			, strInstrumentType
+			, intBrokerageAccountId
+			, strBrokerAccount
+			, strBroker 
+			, strBuySell
+			, ysnPreCrush 
+			, strBrokerTradeNo
 			, intActionId)
 		SELECT @strBatchId 
 			, strBucketType = 'Derivatives'
@@ -434,7 +518,18 @@ BEGIN
 			, intUserId = @intUserId
 			, strNotes = der.strNotes
 			, intCommodityUOMId = der.intCommodityUOMId
-			, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
+			, strMiscFields = NULL
+			, intOptionMonthId 
+			, strOptionMonth 
+			, dblStrike 
+			, strOptionType
+			, strInstrumentType
+			, intBrokerageAccountId
+			, strBrokerAccount
+			, strBroker 
+			, strBuySell
+			, ysnPreCrush 
+			, strBrokerTradeNo
 			, intActionId = CASE WHEN @dblPreviousNoOfLots IS NULL THEN 34 ELSE 56 END
 		FROM #tmpDerivative der		
 		
@@ -474,6 +569,17 @@ BEGIN
 			, intCommodityUOMId
 			, strInOut
 			, strMiscFields
+			, intOptionMonthId 
+			, strOptionMonth 
+			, dblStrike 
+			, strOptionType
+			, strInstrumentType
+			, intBrokerageAccountId
+			, strBrokerAccount
+			, strBroker 
+			, strBuySell
+			, ysnPreCrush 
+			, strBrokerTradeNo
 			, intActionId)
 		SELECT TOP 1  strBucketType = 'Derivatives'
 			, strTransactionType = 'Derivative Entry'
@@ -502,6 +608,17 @@ BEGIN
 			, intOrigUOMId 
 			, strInOut = CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END
 			, strMiscField
+			, intOptionMonthId 
+			, strOptionMonth 
+			, dblStrike 
+			, strOptionType
+			, strInstrumentType
+			, intBrokerageAccountId
+			, strBrokerAccount
+			, strBroker 
+			, strBuySell
+			, ysnPreCrush 
+			, strBrokerTradeNo
 			, intActionId = 57 --Delete Derivative
 		FROM tblRKSummaryLog 
 		WHERE intTransactionRecordId = @intFutOptTransactionId

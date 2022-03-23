@@ -16,6 +16,8 @@
 	[intLoadDetailId] INT NULL,
 	[ysnBlendedItem] BIT NOT NULL DEFAULT((0)),
 	[intConcurrencyId] INT NOT NULL,
+	[dblStickStartReading] DECIMAL(18, 6) NULL,
+	[dblStickEndReading] DECIMAL(18, 6) NULL,
 	[dblMinimumUnits] DECIMAL(18, 6) NULL,
 	[dblComboFreightRate] DECIMAL(18, 6) NULL,
 	[ysnComboFreight] BIT NULL,

@@ -74,6 +74,8 @@
 					,strProduct
 					,intProductId
 					,dtmGoLive
+					,strStatusFontColor
+					,strStatusBackColor
 		from 
 				(
 				select
@@ -128,6 +130,8 @@
 					,strProduct = (select prod.strProduct from tblHDTicketProduct prod where prod.intTicketProductId = (select top 1 prodver.intProductId from tblARCustomerProductVersion prodver where prodver.intCustomerId = proj.intCustomerId))
 					,intProductId = (select top 1 prodver.intProductId from tblARCustomerProductVersion prodver where prodver.intCustomerId = proj.intCustomerId)
 					,proj.dtmGoLive
+					,strStatusFontColor = sta.strFontColor
+					,strStatusBackColor = sta.strBackColor
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
@@ -144,4 +148,5 @@
 					left join tblHDProject pp on pp.intProjectId = pd.intProjectId
 					left join tblEMEntity salesrep on salesrep.intEntityId = proj.intInternalSalesPerson
 					left join tblHDVersion tv on tv.intVersionId = proj.intTargetVersionId
+					left join tblHDTicketStatus sta on sta.intTicketStatusId = proj.intTicketStatusId
 				) as query1

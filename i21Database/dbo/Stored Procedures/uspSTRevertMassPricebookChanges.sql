@@ -1285,7 +1285,6 @@ BEGIN TRY
 									LEFT JOIN tblICItemUOM Uom
 										ON temp.intItemUOMId = Uom.intItemUOMId
 										AND Item.intItemId = Uom.intItemId
-									WHERE Uom.ysnStockUnit = 1
 									ORDER BY temp.intItemSpecialPricingId ASC
 										
 
