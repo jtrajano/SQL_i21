@@ -87,14 +87,14 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strBillToLocationName	= EMBT.strEntityNo
 	 , strShipToLocationName	= EMST.strEntityNo
 	 , strBillToAddress			= ISNULL(RTRIM(INV.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(', ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(', ' + INV.strBillToCountry), '')
-	 , strShipToAddress			= ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToCity), '') + ISNULL(RTRIM(', ' + INV.strShipToState), '') + ISNULL(RTRIM(', ' + INV.strShipToZipCode), '') + ISNULL(RTRIM(', ' + INV.strShipToCountry), '')	 
+	 , strShipToAddress			= CAST(ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToCity), '') + ISNULL(RTRIM(', ' + INV.strShipToState), '') + ISNULL(RTRIM(', ' + INV.strShipToZipCode), '') + ISNULL(RTRIM(', ' + INV.strShipToCountry), '') AS NVARCHAR(MAX))
 	 , strSource				= INV.strType
 	 , intTermId				= INV.intTermId
 	 , strTerm					= TERM.strTerm
 	 , intShipViaId				= INV.intShipViaId
 	 , strShipVia				= SHIPVIA.strShipVia
 	 , intCompanyLocationId		= INV.intCompanyLocationId
-	 , strCompanyLocation		= L.strLocationName
+	 , strCompanyLocation		= CAST(L.strLocationName AS NVARCHAR(100))
 	 , intInvoiceDetailId		= ISNULL(INVOICEDETAIL.intInvoiceDetailId,0)
 	 , intSiteId				= INVOICEDETAIL.intSiteId
 	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped
@@ -113,7 +113,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , dblTotalTax				= INVOICEDETAIL.dblTotalTax
 	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery' THEN ISNULL(INV.strComments, '') ELSE ISNULL(INV.strFooterComments, '') END
 	 , strItemComments          = CAST('' AS NVARCHAR(500))
-	 , strOrigin				= REPLACE(INV.strComments, 'Origin:', '')
+	 , strOrigin				= CAST(REPLACE(INV.strComments, 'Origin:', '') AS NVARCHAR(MAX))
 	 , blbLogo					= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
