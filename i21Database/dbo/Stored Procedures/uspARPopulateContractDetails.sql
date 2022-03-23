@@ -196,11 +196,10 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 		  AND (W.strWhereFinalized = 'Destination' OR G.strWhereFinalized= 'Destination')
 		  AND I.intContractDetailId IS NOT NULL
 		  AND ID.intShipmentPurchaseSalesContractId IS NULL
-		  AND ISNULL(I.intLoadDetailId, 0) = 0
+		  AND (I.intLoadDetailId IS NULL OR (I.intLoadDetailId IS NOT NULL AND ID.strPricing = 'Subsystem - Ticket Management'))
 		  AND ISNULL(I.[strItemType], '') <> 'Other Charge'
 		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate, RI.intInvoiceId, ID.intOriginalInvoiceDetailId
 	END
-
 
 DECLARE @intInvoiceDetailId				INT
 	  , @intInvoiceId					INT
@@ -338,7 +337,9 @@ WHILE ISNULL(@intUniqueId,0) > 0
 					ISNULL(@intTicketTypeId, 0) = 2 AND 
 					(ISNULL(@intTicketType, 0) =1 AND ISNULL(@strInOutFlag, '') = 'O')
 				)
-			) OR (ISNULL(@ysnDestWtGrd,0) = 1 AND @strPricing = 'Subsystem - Direct'))
+			) 
+			OR (ISNULL(@ysnDestWtGrd,0) = 1 AND (@strPricing = 'Subsystem - Direct' OR (@intTicketType = 6 AND @intTicketTypeId = 9 AND @strInOutFlag = 'O') ) )
+			)
 		BEGIN
 				IF	@ReduceBalance	=	1
 				BEGIN
