@@ -163,12 +163,15 @@ OUTER APPLY (
 		, intStorageUnitId = receiptStorageUnit.intStorageLocationId
 		, strStorageUnit = receiptStorageUnit.strName
 	FROM tblICInventoryReceiptItem receiptItem
+	LEFT JOIN tblICInventoryReceipt receipt
+		ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 	LEFT JOIN tblSMCompanyLocationSubLocation receiptStorageLoc
 		ON receiptStorageLoc.intCompanyLocationSubLocationId = receiptItem.intSubLocationId
 	LEFT JOIN tblICStorageLocation receiptStorageUnit
 		ON receiptStorageUnit.intStorageLocationId = receiptItem.intStorageLocationId
 	WHERE ch.intContractTypeId = 1 -- PURCHASE CONTRACTS ONLY
 	AND receiptItem.intContractDetailId = cd.intContractDetailId
+	AND receipt.ysnPosted = 1
 ) receiptWarehouse
 OUTER APPLY (
 	SELECT TOP 1
@@ -178,12 +181,15 @@ OUTER APPLY (
 		, intStorageUnitId = invShipStorageUnit.intStorageLocationId
 		, strStorageUnit = invShipStorageUnit.strName
 	FROM tblICInventoryShipmentItem invShipment
+	LEFT JOIN tblICInventoryShipment shipment
+		ON shipment.intInventoryShipmentId = invShipment.intInventoryShipmentId
 	LEFT JOIN tblSMCompanyLocationSubLocation invShipStorageLoc
 		ON invShipStorageLoc.intCompanyLocationSubLocationId = invShipment.intSubLocationId
 	LEFT JOIN tblICStorageLocation invShipStorageUnit
 		ON invShipStorageUnit.intStorageLocationId = invShipment.intStorageLocationId
 	WHERE ch.intContractTypeId = 2 -- SALE CONTRACTS ONLY
 	AND invShipment.intLineNo = cd.intContractDetailId
+	AND shipment.ysnPosted = 1
 ) invShipWarehouse
 
 WHERE dblBalance > 0 AND cd.intPricingTypeId NOT IN (5,6) AND cd.intContractStatusId <> 3	
@@ -342,12 +348,15 @@ OUTER APPLY (
 		, intStorageUnitId = receiptStorageUnit.intStorageLocationId
 		, strStorageUnit = receiptStorageUnit.strName
 	FROM tblICInventoryReceiptItem receiptItem
+	LEFT JOIN tblICInventoryReceipt receipt
+		ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 	LEFT JOIN tblSMCompanyLocationSubLocation receiptStorageLoc
 		ON receiptStorageLoc.intCompanyLocationSubLocationId = receiptItem.intSubLocationId
 	LEFT JOIN tblICStorageLocation receiptStorageUnit
 		ON receiptStorageUnit.intStorageLocationId = receiptItem.intStorageLocationId
 	WHERE ch.intContractTypeId = 1 -- PURCHASE CONTRACTS ONLY
 	AND receiptItem.intContractDetailId = cd.intContractDetailId
+	AND receipt.ysnPosted = 1
 ) receiptWarehouse
 OUTER APPLY (
 	SELECT TOP 1
@@ -357,12 +366,15 @@ OUTER APPLY (
 		, intStorageUnitId = invShipStorageUnit.intStorageLocationId
 		, strStorageUnit = invShipStorageUnit.strName
 	FROM tblICInventoryShipmentItem invShipment
+	LEFT JOIN tblICInventoryShipment shipment
+		ON shipment.intInventoryShipmentId = invShipment.intInventoryShipmentId
 	LEFT JOIN tblSMCompanyLocationSubLocation invShipStorageLoc
 		ON invShipStorageLoc.intCompanyLocationSubLocationId = invShipment.intSubLocationId
 	LEFT JOIN tblICStorageLocation invShipStorageUnit
 		ON invShipStorageUnit.intStorageLocationId = invShipment.intStorageLocationId
 	WHERE ch.intContractTypeId = 2 -- SALE CONTRACTS ONLY
 	AND invShipment.intLineNo = cd.intContractDetailId
+	AND shipment.ysnPosted = 1
 ) invShipWarehouse
 WHERE cd.intPricingTypeId IN (5,6) AND cd.intContractStatusId <> 3
 
@@ -439,8 +451,8 @@ OUTER APPLY (
 		, ch.intCommodityId
 		, c.strCommodityCode
 		, intMarketZoneId = NULL
-		, ct.intContractTypeId
-		, ct.strContractType
+		, intContractTypeId = NULL
+		, strContractType = NULL 
 		, pt.intPricingTypeId
 		, pt.strPricingType
 		, cd.intCurrencyId

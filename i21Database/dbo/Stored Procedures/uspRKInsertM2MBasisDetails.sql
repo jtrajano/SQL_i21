@@ -47,6 +47,13 @@ DECLARE @tempBasis TABLE(intRowNumber INT
 	, intStorageLocationId INT
 	, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intStorageUnitId INT	
+	, ysnEvaluationByLocation BIT
+    , ysnEvaluationByMarketZone BIT
+    , ysnEvaluationByOriginPort BIT
+    , ysnEvaluationByDestinationPort BIT
+    , ysnEvaluationByCropYear BIT
+    , ysnEvaluationByStorageLocation BIT
+    , ysnEvaluationByStorageUnit BIT
 )  
 
 INSERT INTO @tempBasis

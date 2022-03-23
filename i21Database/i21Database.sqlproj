@@ -600,6 +600,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntriesForMissingLots.sql" />
     <Build Include="dbo\Views\vyuQMContractWithoutSampleList.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionAlternativeShippingLinesReport.sql" />
+    <Build Include="dbo\Views\vyuRKM2MBasisForNotMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

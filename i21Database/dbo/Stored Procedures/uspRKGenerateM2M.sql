@@ -1229,6 +1229,8 @@ BEGIN TRY
 				, intStorageUnitId = receiptStorageUnit.intStorageLocationId
 				, strStorageUnit = receiptStorageUnit.strName
 			FROM tblICInventoryReceiptItem receiptItem
+			LEFT JOIN tblICInventoryReceipt receipt
+				ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 			LEFT JOIN tblICInventoryReceipt invReceipt
 				ON invReceipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 			LEFT JOIN tblSMCompanyLocationSubLocation receiptStorageLoc
@@ -1239,6 +1241,7 @@ BEGIN TRY
 			AND receiptItem.intContractDetailId = CD.intContractDetailId
 			AND invReceipt.dtmReceiptDate IS NOT NULL
 			AND LEFT(CONVERT(VARCHAR, invReceipt.dtmReceiptDate, 101), 10) <= @dtmEndDate
+			AND receipt.ysnPosted = 1
 		) receiptWarehouse
 		OUTER APPLY (
 			SELECT TOP 1
@@ -1248,6 +1251,8 @@ BEGIN TRY
 				, intStorageUnitId = invShipStorageUnit.intStorageLocationId
 				, strStorageUnit = invShipStorageUnit.strName
 			FROM tblICInventoryShipmentItem invShipment
+			LEFT JOIN tblICInventoryShipment shipment
+				ON shipment.intInventoryShipmentId = invShipment.intInventoryShipmentId
 			LEFT JOIN tblICInventoryShipment invShip
 				ON invShip.intInventoryShipmentId = invShipment.intInventoryShipmentId
 			LEFT JOIN tblSMCompanyLocationSubLocation invShipStorageLoc
@@ -1258,6 +1263,7 @@ BEGIN TRY
 			AND invShipment.intLineNo = CD.intContractDetailId
 			AND invShip.dtmShipDate IS NOT NULL
 			AND LEFT(CONVERT(VARCHAR, invShip.dtmShipDate, 101), 10) <= @dtmEndDate
+			AND shipment.ysnPosted = 1
 		) invShipWarehouse
 		WHERE CH.intCommodityId = @intCommodityId
 			AND CL.intCompanyLocationId = ISNULL(@intLocationId, CL.intCompanyLocationId)

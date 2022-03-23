@@ -195,8 +195,13 @@ BEGIN TRY
 				AND ISNULL(a.intCurrencyId, 0) = ISNULL(b.intCurrencyId, 0)
 				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
 				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
-				AND ISNULL(a.intMarketZoneId, 0) = (CASE WHEN @ysnEvaluationByMarketZone = 1 THEN ISNULL(b.intMarketZoneId, 0) ELSE ISNULL(a.intMarketZoneId, 0) END)
 				AND ISNULL(a.intCompanyLocationId, 0) = (CASE WHEN @ysnEvaluationByLocation = 1 THEN ISNULL(b.intCompanyLocationId, 0) ELSE ISNULL(a.intCompanyLocationId, 0) END)
+				AND ISNULL(a.intMarketZoneId, 0) = (CASE WHEN @ysnEvaluationByMarketZone = 1 THEN ISNULL(b.intMarketZoneId, 0) ELSE ISNULL(a.intMarketZoneId, 0) END)
+				AND ISNULL(a.intOriginPortId, 0) = (CASE WHEN @ysnEvaluationByOriginPort = 1 THEN ISNULL(b.intOriginPortId, 0) ELSE ISNULL(a.intOriginPortId, 0) END)
+				AND ISNULL(a.intDestinationPortId, 0) = (CASE WHEN @ysnEvaluationByDestinationPort = 1 THEN ISNULL(b.intDestinationPortId, 0) ELSE ISNULL(a.intDestinationPortId, 0) END)
+				AND ISNULL(a.intCropYearId, 0) = (CASE WHEN @ysnEvaluationByCropYear = 1 THEN ISNULL(b.intCropYearId, 0) ELSE ISNULL(a.intCropYearId, 0) END)
+				AND ISNULL(a.intStorageLocationId, 0) = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN ISNULL(b.intStorageLocationId, 0) ELSE ISNULL(a.intStorageLocationId, 0) END)
+				AND ISNULL(a.intStorageUnitId, 0) = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN ISNULL(b.intStorageUnitId, 0) ELSE ISNULL(a.intStorageUnitId, 0) END)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
@@ -315,8 +320,13 @@ BEGIN TRY
 				AND ISNULL(a.intCurrencyId, 0) = ISNULL(b.intCurrencyId, 0)
 				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
 				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
-				AND ISNULL(a.intMarketZoneId, 0) = (CASE WHEN @ysnEvaluationByMarketZone = 1 THEN ISNULL(b.intMarketZoneId, 0) ELSE ISNULL(a.intMarketZoneId, 0) END)
 				AND ISNULL(a.intCompanyLocationId, 0) = (CASE WHEN @ysnEvaluationByLocation = 1 THEN ISNULL(b.intCompanyLocationId, 0) ELSE ISNULL(a.intCompanyLocationId, 0) END)
+				AND ISNULL(a.intMarketZoneId, 0) = (CASE WHEN @ysnEvaluationByMarketZone = 1 THEN ISNULL(b.intMarketZoneId, 0) ELSE ISNULL(a.intMarketZoneId, 0) END)
+				AND ISNULL(a.intOriginPortId, 0) = (CASE WHEN @ysnEvaluationByOriginPort = 1 THEN ISNULL(b.intOriginPortId, 0) ELSE ISNULL(a.intOriginPortId, 0) END)
+				AND ISNULL(a.intDestinationPortId, 0) = (CASE WHEN @ysnEvaluationByDestinationPort = 1 THEN ISNULL(b.intDestinationPortId, 0) ELSE ISNULL(a.intDestinationPortId, 0) END)
+				AND ISNULL(a.intCropYearId, 0) = (CASE WHEN @ysnEvaluationByCropYear = 1 THEN ISNULL(b.intCropYearId, 0) ELSE ISNULL(a.intCropYearId, 0) END)
+				AND ISNULL(a.intStorageLocationId, 0) = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN ISNULL(b.intStorageLocationId, 0) ELSE ISNULL(a.intStorageLocationId, 0) END)
+				AND ISNULL(a.intStorageUnitId, 0) = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN ISNULL(b.intStorageUnitId, 0) ELSE ISNULL(a.intStorageUnitId, 0) END)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
@@ -324,6 +334,13 @@ BEGIN TRY
 	
 	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strItemNo)) AS intRowNumber
 		, *
+		, ysnEvaluationByLocation = @ysnEvaluationByLocation 
+		, ysnEvaluationByMarketZone = @ysnEvaluationByMarketZone 
+		, ysnEvaluationByOriginPort = @ysnEvaluationByOriginPort 
+		, ysnEvaluationByDestinationPort = @ysnEvaluationByDestinationPort 
+		, ysnEvaluationByCropYear = @ysnEvaluationByCropYear 
+		, ysnEvaluationByStorageLocation = @ysnEvaluationByStorageLocation 
+		, ysnEvaluationByStorageUnit = @ysnEvaluationByStorageUnit 
 	FROM @tempBasis
 	WHERE intCommodityId IS NOT NULL
 	ORDER BY strMarketValuation
