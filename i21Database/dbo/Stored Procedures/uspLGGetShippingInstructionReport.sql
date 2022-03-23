@@ -514,7 +514,8 @@ FROM (
 		,firstAltShipping.strServiceContractNumber AS strFirstAltSrvContractNo
 		,secondAltShipping.strShippingLine AS strSecondAltShippingLine
 		,secondAltShipping.strServiceContractNumber AS strSecondAltSrvContractNo
-
+		,strItemRemarks.strRemarks AS strItemRemarks
+		,strEntityRemarks.strRemarks AS strEntityRemarks
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblICItem Item ON Item.intItemId = LD.intItemId
@@ -604,6 +605,17 @@ FROM (
 
 	LEFT JOIN vyuLGLoadShippingLineRank firstAltShipping ON L.intLoadId = firstAltShipping.intLoadId AND firstAltShipping.intRank = 2
 	LEFT JOIN vyuLGLoadShippingLineRank secondAltShipping ON L.intLoadId = secondAltShipping.intLoadId AND secondAltShipping.intRank = 3
+
+	
+	LEFT JOIN tblLGReportRemark strItemRemarks ON 
+		strItemRemarks.intValueId = LD.intItemId 
+		AND ISNULL(strItemRemarks.intLocationId, LD.intPCompanyLocationId) = LD.intPCompanyLocationId
+		AND strItemRemarks.strType = 'Item'
+
+	LEFT JOIN tblLGReportRemark strEntityRemarks ON 
+		strEntityRemarks.intValueId = LD.intVendorEntityId
+		AND ISNULL(strEntityRemarks.intLocationId, LD.intPCompanyLocationId) = LD.intPCompanyLocationId
+		AND strEntityRemarks.strType = 'Entity'
 
 	CROSS APPLY tblLGCompanyPreference CP
 	OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
