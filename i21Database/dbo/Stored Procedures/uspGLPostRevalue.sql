@@ -144,9 +144,6 @@ DECLARE @tblPostError TABLE(
 			--,intOverrideLOBAccountId = A.intItemGLAccountId
 		FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B 
 			ON A.intConsolidationId = B.intConsolidationId
-			OUTER APPLY(
-				SELECT TOP 1 intAccountId FROM tblGLAccountSegmentMapping Where intAccountSegmentId = A.intLocationSegmentId
-			)Loc
 			WHERE B.intConsolidationId = @intConsolidationId
 		),cte1 AS
 		(
