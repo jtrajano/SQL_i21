@@ -75,9 +75,16 @@ BEGIN
 		, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intItemId INT
 		, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS)
+		, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+		, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	)
 	
-	INSERT INTO @RiskPositionInquiryTable
+	INSERT INTO @RiskPositionInquiryTable 
 	EXEC uspRKRiskPositionInquiry @intCommodityId = @intCommodityId
 		, @intCompanyLocationId = @intCompanyLocationId
 		, @intFutureMarketId = @intFutureMarketId
@@ -163,7 +170,10 @@ BEGIN
 		, intBookId INT
 		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intSubBookId INT
-		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	)
 
 	INSERT INTO @RiskPositionInquiryBySummaryTable(intRowNumFinal
 		, intRowNumber
@@ -193,7 +203,10 @@ BEGIN
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	EXEC uspRKRiskPositionInquiryBySummary @intCommodityId = @intCommodityId
 		, @intCompanyLocationId = @intCompanyLocationId
 		, @intFutureMarketId = @intFutureMarketId

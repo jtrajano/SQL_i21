@@ -101,7 +101,10 @@ BEGIN
 		, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	)
 
 	DECLARE @PricedContractList AS TABLE (strFutureMonth NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strAccountNumber NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
@@ -138,14 +141,17 @@ BEGIN
 		, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	)
 
 	INSERT INTO @PricedContractList
 	SELECT fm.strFutureMonth
 		, strAccountNumber = strContractType + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(ca.strDescription, '') ELSE ISNULL(cv.strEntityName, '') END
 		, dblNoOfContract = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN ISNULL(dblBalance, 0) ELSE dblDetailQuantity END)
 		, strTradeNo = LEFT(strContractType, 1) + ' - ' + strContractNumber + ' - ' + CONVERT(NVARCHAR, intContractSeq)
-		, TransactionDate = dtmStartDate
+		, TransactionDate = cv.dtmStartDate
 		, TranType = strContractType
 		, CustVendor = strEntityName
 		, dblNoOfLot = dblNoOfLots
@@ -177,6 +183,8 @@ BEGIN
 		, strRegion = region.strDescription
 		, strSeason = season.strDescription
 		, strClass = class.strDescription
+		, strCertificationName = certification.strCertificationName
+		, strCropYear = cropYear.strCropYear
 	FROM vyuRKRiskPositionContractDetail cv
 	JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
 	JOIN tblICCommodityUnitMeasure um2 ON um2.intUnitMeasureId = ffm.intUnitMeasureId AND um2.intCommodityId = cv.intCommodityId
@@ -191,6 +199,10 @@ BEGIN
 	LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 	LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 	LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
+	LEFT JOIN tblICCertification certification
+		ON certification.intCertificationId = ic.intCertificationId
+	LEFT JOIN tblCTCropYear cropYear
+		ON cropYear.intCropYearId = cv.intCropYearId
 	WHERE cv.intCommodityId = @intCommodityId
 		AND cv.intFutureMarketId = @intFutureMarketId
 		AND cv.intContractStatusId NOT IN (2, 3)
@@ -230,6 +242,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass 
+			, strCertificationName
+			, strCropYear
 		FROM @PricedContractList cv
 		WHERE cv.intPricingTypeId = 1 AND ysnDeltaHedge = 0
 		
@@ -264,6 +278,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass 
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber
@@ -304,6 +320,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass 
+				, strCertificationName
+				, strCropYear
 			FROM @PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND ISNULL(ysnDeltaHedge, 0) = 0
 		) t WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
@@ -339,6 +357,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass 
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber
@@ -380,6 +400,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass 
+				, strCertificationName
+				, strCropYear
 			FROM @PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND ISNULL(ysnDeltaHedge, 0) = 0
 		) t WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
@@ -418,6 +440,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass 
+			, strCertificationName
+			, strCropYear
 		FROM @PricedContractList cv
 		WHERE cv.intPricingTypeId = 1 AND ysnDeltaHedge = 1
 		
@@ -452,6 +476,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass 
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
@@ -493,6 +519,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass 
+				, strCertificationName
+				, strCropYear
 			FROM @PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND ISNULL(ysnDeltaHedge, 0) = 1
 		) t WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
@@ -528,6 +556,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass 
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
@@ -568,6 +598,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass 
+				, strCertificationName
+				, strCropYear
 			FROM @PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND ISNULL(ysnDeltaHedge, 0) = 1
 		) t WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
@@ -597,7 +629,10 @@ BEGIN
 		, strGrade
 		, strRegion 
 		, strSeason 
-		, strClass)
+		, strClass
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT Selection
 		, PriceStatus
 		, strFutureMonth
@@ -623,6 +658,8 @@ BEGIN
 		, strRegion 
 		, strSeason 
 		, strClass
+		, strCertificationName
+		, strCropYear
 	FROM (
 		SELECT *
 		FROM (
@@ -651,6 +688,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM #ContractTransaction
 			WHERE intPricingTypeId <> 1 AND dtmFutureMonthsDate < @dtmFutureMonthsDate
 				AND intCommodityId = @intCommodityId AND intFutureMarketId = @intFutureMarketId
@@ -681,6 +720,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM #ContractTransaction
 			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -714,6 +755,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM #ContractTransaction
 			WHERE intPricingTypeId = 1 AND dtmFutureMonthsDate < @dtmFutureMonthsDate
 				AND intCommodityId = @intCommodityId AND intFutureMarketId = @intFutureMarketId
@@ -744,6 +787,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM #ContractTransaction
 			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -777,6 +822,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM #DeltaPrecent
 			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -810,6 +857,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM #DeltaPrecent
 			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId 
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -843,6 +892,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM #DeltaPrecent
 			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -876,6 +927,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM #DeltaPrecent
 			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -907,6 +960,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT DISTINCT Selection = 'Terminal position (a. in lots )'
 				, PriceStatus = 'Broker Account'
@@ -933,11 +988,14 @@ BEGIN
 				, strRegion = region.strDescription
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
+				, strCertificationName = certification.strCertificationName
+				, strCropYear = CH.intCropYearId
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
 			JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ft.intContractDetailId
+			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
 			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
@@ -947,6 +1005,8 @@ BEGIN
 			LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 			LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 			LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
+			LEFT JOIN tblICCertification certification
+				ON certification.intCertificationId = ic.intCertificationId
 			WHERE ft.intCommodityId = @intCommodityId
 				AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 				AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
@@ -980,6 +1040,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT DISTINCT Selection = 'Terminal position (b. in ' + @strUnitMeasure + ' )'
 				, PriceStatus = 'Broker Account'
@@ -1007,6 +1069,8 @@ BEGIN
 				, strRegion = region.strDescription
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
+				, strCertificationName = certification.strCertificationName
+				, strCropYear = CH.intCropYearId
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1014,6 +1078,7 @@ BEGIN
 			JOIN tblRKFutureMarket mar ON mar.intFutureMarketId = ft.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ft.intContractDetailId
+			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
 			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
@@ -1023,6 +1088,8 @@ BEGIN
 			LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 			LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 			LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
+			LEFT JOIN tblICCertification certification
+				ON certification.intCertificationId = ic.intCertificationId
 			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 				AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 				AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1090,11 +1157,14 @@ BEGIN
 			, strRegion = region.strDescription
 			, strSeason = season.strDescription
 			, strClass = class.strDescription
+			, strCertificationName = certification.strCertificationName
+			, strCropYear = CH.intCropYearId
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ft.intContractDetailId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 		LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
 		LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
@@ -1104,6 +1174,8 @@ BEGIN
 		LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 		LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 		LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
+		LEFT JOIN tblICCertification certification
+			ON certification.intCertificationId = ic.intCertificationId
 		WHERE ft.intCommodityId = @intCommodityId
 			AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 			AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
@@ -1139,6 +1211,8 @@ BEGIN
 		, strRegion 
 		, strSeason 
 		, strClass
+		, strCertificationName
+		, strCropYear
 	FROM (
 		SELECT Selection
 			, PriceStatus
@@ -1165,6 +1239,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT DISTINCT Selection = 'Terminal position (a. in lots )'
 				, PriceStatus = 'Broker Account'
@@ -1191,11 +1267,14 @@ BEGIN
 				, strRegion = region.strDescription
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
+				, strCertificationName = certification.strCertificationName
+				, strCropYear = CH.intCropYearId
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
 			JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ft.intContractDetailId
+			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
 			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
@@ -1205,6 +1284,8 @@ BEGIN
 			LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 			LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 			LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
+			LEFT JOIN tblICCertification certification
+				ON certification.intCertificationId = ic.intCertificationId
 			WHERE ft.intCommodityId = @intCommodityId
 				AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 				AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1273,11 +1354,14 @@ BEGIN
 			, strRegion = region.strDescription
 			, strSeason = season.strDescription
 			, strClass = class.strDescription
+			, strCertificationName = certification.strCertificationName
+			, strCropYear = CH.intCropYearId
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ft.intContractDetailId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 		LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
 		LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
@@ -1287,6 +1371,8 @@ BEGIN
 		LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 		LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 		LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
+		LEFT JOIN tblICCertification certification
+			ON certification.intCertificationId = ic.intCertificationId
 		WHERE ft.intCommodityId = @intCommodityId
 			AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 			AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1323,6 +1409,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT strFutureMonth
 				, dblNoOfContract = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, (dblNoOfContract)) * @dblContractSize
@@ -1347,6 +1435,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM (
 				SELECT DISTINCT Selection = 'Terminal position (b. in ' + @strUnitMeasure + ' )'
 					, PriceStatus = 'Broker Account'
@@ -1374,6 +1464,8 @@ BEGIN
 					, strRegion = region.strDescription
 					, strSeason = season.strDescription
 					, strClass = class.strDescription
+					, strCertificationName = certification.strCertificationName
+					, strCropYear = CH.intCropYearId
 				FROM tblRKFutOptTransaction ft
 				INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1381,6 +1473,7 @@ BEGIN
 				INNER JOIN tblRKFutureMarket mar ON mar.intFutureMarketId = ft.intFutureMarketId
 				LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
 				LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ft.intContractDetailId
+				LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 				LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
 				LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
@@ -1390,6 +1483,8 @@ BEGIN
 				LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 				LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 				LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
+				LEFT JOIN tblICCertification certification
+					ON certification.intCertificationId = ic.intCertificationId
 				WHERE ft.intCommodityId = @intCommodityId
 					AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 					AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1421,6 +1516,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM (
 				SELECT DISTINCT Selection = 'Delta options'
 					, PriceStatus = 'Broker Account'
@@ -1456,6 +1553,8 @@ BEGIN
 					, strRegion = region.strDescription
 					, strSeason = season.strDescription
 					, strClass = class.strDescription
+					, strCertificationName = certification.strCertificationName
+					, strCropYear = CH.intCropYearId
 				FROM tblRKFutOptTransaction ft
 				INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1463,6 +1562,7 @@ BEGIN
 				INNER JOIN tblRKFutureMarket mar ON mar.intFutureMarketId = ft.intFutureMarketId
 				LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
 				LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ft.intContractDetailId
+				LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 				LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
 				LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
@@ -1472,6 +1572,8 @@ BEGIN
 				LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 				LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 				LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
+				LEFT JOIN tblICCertification certification
+					ON certification.intCertificationId = ic.intCertificationId
 				WHERE ft.intCommodityId = @intCommodityId
 					AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 					AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1506,7 +1608,10 @@ BEGIN
 			, strGrade
 			, strRegion 
 			, strSeason 
-			, strClass)
+			, strClass
+			, strCertificationName
+			, strCropYear
+		)
 		SELECT Selection
 			, PriceStatus
 			, strFutureMonth
@@ -1532,6 +1637,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT Selection = 'Net market risk'
 				, PriceStatus = 'Net market risk'
@@ -1558,6 +1665,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM @List
 			WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'b. Priced / Outright - (Outright position)'
 			GROUP BY strFutureMonth
@@ -1579,6 +1688,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			
 			UNION ALL SELECT Selection = 'Net market risk'
 				, PriceStatus = 'Net market risk'
@@ -1605,6 +1716,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM @List
 			WHERE PriceStatus = 'F&O' AND Selection LIKE ('Total F&O%')
 			GROUP BY strFutureMonth
@@ -1627,6 +1740,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			
 			UNION ALL SELECT Selection = 'Net market risk'
 				, PriceStatus = 'Net market risk'
@@ -1653,6 +1768,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM @List
 			WHERE PriceStatus = 'b. fixed' AND Selection = ('Specialities & Low grades') 
 			GROUP BY strFutureMonth
@@ -1675,6 +1792,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 		) t
 		GROUP BY Selection
 			, PriceStatus
@@ -1698,6 +1817,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass
+			, strCertificationName
+			, strCropYear
 		
 		--- Switch Position ---------
 		INSERT INTO @List (Selection
@@ -1724,7 +1845,10 @@ BEGIN
 			, strGrade
 			, strRegion 
 			, strSeason 
-			, strClass)
+			, strClass
+			, strCertificationName
+			, strCropYear
+		)
 		SELECT Selection
 			, PriceStatus
 			, strFutureMonth
@@ -1750,6 +1874,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT Selection = 'Switch position'
 				, PriceStatus = 'Switch position'
@@ -1776,6 +1902,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM @List
 			WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)' AND strAccountNumber LIKE '%Purchase%'
 			
@@ -1804,6 +1932,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM @List
 			WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)' AND strAccountNumber LIKE '%Sale%'
 			
@@ -1832,6 +1962,8 @@ BEGIN
 				, strRegion 
 				, strSeason 
 				, strClass
+				, strCertificationName
+				, strCropYear
 			FROM @List
 			WHERE PriceStatus = 'F&O' AND Selection = 'F&O'
 		) t
@@ -1986,6 +2118,8 @@ BEGIN
 			, strRegion 
 			, strSeason 
 			, strClass
+			, strCertificationName
+			, strCropYear
 		FROM @List
 		ORDER BY intOrderByHeading
 			, CASE WHEN strFutureMonth ='Previous' THEN '01/01/1900'
