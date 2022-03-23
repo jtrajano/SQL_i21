@@ -223,5 +223,6 @@ FROM	dbo.tblCMBankTransaction CHK
 
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
-		AND CHK.dblAmount != 0 AND PYMT.intPaymentMethodId ! = 3
+		AND CHK.dblAmount != 0 AND 
+		1 = ( CASE WHEN PYMT.intPaymentMethodId IS NOT NULL AND PYMT.intPaymentMethodId = 3 THEN  0 ELSE 1 END)
 ORDER BY CHK.strReferenceNo ASC
