@@ -447,9 +447,20 @@ DECLARE @tblPostError TABLE(
 		IF @ysnRecap = 0 
 		BEGIN
 
-			DECLARE @strReverseRevalueId NVARCHAR(100)
-			EXEC [dbo].uspGLGetNewID 3, @strReversePostBatchId OUTPUT 		
-				--EXEC [dbo].uspGLGetNewID 116, @strReverseRevalueId OUTPUT 	
+			INSERT INTO @PostGLEntries2
+			SELECT *
+			from fnGLOverridePostAccounts(@PostGLEntries) A 
+			
+				
+			IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE strOverrideAccountError IS NOT NULL )
+	
+				GOTO _raiseOverrideError
+			
+			EXEC uspGLBookEntries @PostGLEntries2, @ysnPost
+
+			IF @@ERROR <> 0 GOTO _end
+			
+			
 			IF (@ysnPost = 1)
 			BEGIN
 				INSERT INTO [dbo].[tblGLRevalue]
@@ -566,20 +577,13 @@ DECLARE @tblPostError TABLE(
 			END		
 
 		
-			INSERT INTO @PostGLEntries2
-			SELECT *
-			from fnGLOverridePostAccounts(@PostGLEntries) A 
 			
-				
-			IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE strOverrideAccountError IS NOT NULL )
-	
-				GOTO _raiseOverrideError
 		
 			
 
 					
 
-			EXEC uspGLBookEntries @PostGLEntries2, @ysnPost
+			
 
 		END
 		ELSE
@@ -699,51 +703,8 @@ DECLARE @tblPostError TABLE(
 
 	SELECT @strPostBatchId PostBatchId
 
-
-	--COMMIT TRANSACTION
 	GOTO _end
 
---_raiserror:
-	--IF XACT_STATE() <> 0
-		--ROLLBACK TRANSACTION
-	
-	-- DECLARE @rowCount INT
-	-- IF EXISTS(SELECT 1 FROM  @tblPostError)
-	-- BEGIN
-	-- 	TRUNCATE TABLE tblGLRevaluePostError
-	-- 	INSERT INTO tblGLRevaluePostError( strPostBatchId, strTransactionId , strMessage)
-	-- 	SELECT @strPostBatchId, strTransactionId, strMessage FROM @tblPostError
-
-	
-
-	-- 	;WITH Segments AS(
-	-- 			SELECT A.intId, U.Item FROM @tbl A
-	-- 			CROSS APPLY(
-	-- 				select A.intId, Item Collate Latin1_General_CI_AS Item from fnSplitString(A.strNewAccountId,'-') 
-	-- 			)U
-	-- 		),
-	-- 		OrderSegment AS(
-	-- 			SELECT ROW_NUMBER()  OVER ( PARTITION BY intId ORDER BY intId)rowId, Item FROM Segments
-	-- 		),
-	-- 		Structure AS(
-	-- 			select ROW_NUMBER() over (ORDER BY intSort )rowId , intAccountStructureId from tblGLAccountStructure  where strType <> 'Divider'
-	-- 		)
-	-- 		INSERT INTO tblGLTempAccountToBuild(intAccountSegmentId, intUserId, dtmCreated)
-	-- 		SELECT SG.intAccountSegmentId, @intEntityId, @dateNow FROM OrderSegment S JOIN Structure ST ON S.rowId = ST.rowId
-	-- 		JOIN tblGLAccountSegment SG on SG.strCode = S.Item AND SG.intAccountStructureId = ST.intAccountStructureId
-	-- 		GROUP BY SG.intAccountSegmentId
-			
-
-	-- 	EXEC uspGLBuildAccountTemporary @intEntityId
-	-- 	--DELETE A FROM tblGLTempAccount A RIGHT JOIN @tbl B ON A.strAccountId = B.strNewAccountId COLLATE Latin1_General_CI_AS WHERE B.strNewAccountId IS NULL
-
-	-- 	RAISERROR( 'Error occurred. Please check post error tab for details',11,1)
-	-- END
-	-- ELSE
-	--BEGIN
-		--INSERT INTO tblGLRevaluePostError(strPostBatchId , strMessage)
-		-- SELECT @strPostBatchId, @strMessage
-		--GOTO _end
 
 	_raiseOverrideError:
 		set @strMessage = 'Error overriding accounts.' + @strPostBatchId
