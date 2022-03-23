@@ -186,7 +186,7 @@ DECLARE @tblPostError TABLE(
 				,[dtmTransactionDate]	
 				,[dblDebit]				= dblCredit				
 				,[dblCredit]			= dblDebit			
-				,[dtmDate]				= dtmReverseDate	
+				,[dtmDate]
 				,[ysnIsUnposted]		
 				,[intConcurrencyId]		
 				,[intCurrencyId]		
@@ -195,7 +195,7 @@ DECLARE @tblPostError TABLE(
 				,[dtmDateEntered]	
 				,strBatchId	
 				,[strCode]				
-				,[strJournalLineDescription] = 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod 
+				,[strJournalLineDescription] = 'Offset Revalue '+ @strTransactionType + ' '  + @strPeriod 
 				,[intJournalLineNo]		
 				,[strTransactionType]	
 				,[strTransactionForm]	
@@ -284,6 +284,67 @@ DECLARE @tblPostError TABLE(
 			AND f.Offset = A.OffSet
 		) BankTransferAccount
 
+
+		INSERT INTO @PostGLEntries (
+			 [strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,strModuleName
+			,intAccountIdOverride
+			,intLocationSegmentOverrideId
+			,intLOBSegmentOverrideId
+			,intCompanySegmentOverrideId
+		)
+		SELECT 
+		 	[strTransactionId] + '-R'
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[dtmTransactionDate]
+			,[dblCredit]
+			,[dblDebit]
+			,[dtmDate] = U.dtmReverseDate
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription] = 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod 
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,strModuleName
+			,intAccountIdOverride
+			,intLocationSegmentOverrideId
+			,intLOBSegmentOverrideId
+			,intCompanySegmentOverrideId
+		FROM @PostGLEntries
+		OUTER APPLY(
+			SELECT dtmReverseDate FROM tblGLRevalue  WHERE intConsolidationId = @intConsolidationId
+		)U
+
+
+
 		--BEGIN TODO : transfer this on this procedure
 		-- DECLARE  @tbl TABLE(
 		-- 	intId int IDENTITY(1,1),
@@ -371,7 +432,7 @@ DECLARE @tblPostError TABLE(
 			,[intUserId]			
 			,[intEntityId]			
 			,[dtmDateEntered]		
-			,[strBatchId]	
+			,[strBatchId] = @strPostBatchId
 			,[strCode]				
 			,[strJournalLineDescription] 
 			,[intJournalLineNo]		
@@ -491,6 +552,9 @@ DECLARE @tblPostError TABLE(
 
 				UPDATE @PostGLEntries set intTransactionId = @intReverseID 
 				WHERE [strTransactionType]	= 'Revalue Currency Reversal'
+
+
+
 			END
 			ELSE
 			BEGIN
@@ -501,14 +565,13 @@ DECLARE @tblPostError TABLE(
 				DELETE FROM tblGLRevalue WHERE strConsolidationNumber = @strConsolidationNumber +'-R'
 			END		
 
-
 		
 			INSERT INTO @PostGLEntries2
 			SELECT *
 			from fnGLOverridePostAccounts(@PostGLEntries) A 
 			
 				
-			IF EXISTS(SELECT 1 FROM PostGLEntries2 WHERE strOverrideAccountError IS NOT NULL )
+			IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE strOverrideAccountError IS NOT NULL )
 	
 				GOTO _raiseOverrideError
 		
