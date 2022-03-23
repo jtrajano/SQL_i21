@@ -513,6 +513,18 @@ BEGIN TRY
 			, intStorageLocationId INT
 			, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, intStorageUnitId INT
+			, intProductTypeId INT
+			, intGradeId INT
+			, intRegionId INT
+			, intSeasonId INT	
+			, intClassVarietyId INT	
+			, intProductLineId INT	
+			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
 
 		DECLARE @GetContractDetailView TABLE (intCommodityUnitMeasureId INT
@@ -585,6 +597,18 @@ BEGIN TRY
 			, intStorageLocationId INT
 			, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, intStorageUnitId INT
+			, intProductTypeId INT
+			, intGradeId INT
+			, intRegionId INT
+			, intSeasonId INT	
+			, intClassVarietyId INT	
+			, intProductLineId INT	
+			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
 			
 		--There is an error "An INSERT EXEC statement cannot be nested." that is why we cannot directly call the uspRKDPRContractDetail AND insert
@@ -958,6 +982,18 @@ BEGIN TRY
 			, intStorageLocationId 
 			, strStorageUnit 
 			, intStorageUnitId 
+			, intProductTypeId 
+			, intGradeId 
+			, intRegionId 
+			, intSeasonId 	
+			, intClassVarietyId 
+			, intProductLineId 
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		)
 		SELECT DISTINCT intCommodityUnitMeasureId = CH.intCommodityUOMId
 			, strLocationName = CASE WHEN @ysnEvaluationByLocation = 0
@@ -1105,6 +1141,18 @@ BEGIN TRY
 											END
 										END
 									END
+			, IM.intProductTypeId
+			, IM.intGradeId
+			, IM.intRegionId
+			, IM.intSeasonId	
+			, IM.intClassVarietyId		
+			, IM.intProductLineId			
+			, strProductType = PTC.strDescription
+			, strGrade = GRADE.strDescription
+			, strRegion = REGION.strDescription
+			, strSeason = SEASON.strDescription
+			, strClass = CLASS.strDescription
+			, strProductLine = PL.strDescription
 		FROM tblCTContractHeader CH
 		INNER JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 		INNER JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
@@ -1132,6 +1180,12 @@ BEGIN TRY
 			ON storageLocation.intCompanyLocationSubLocationId = CD.intSubLocationId
 		LEFT JOIN tblICStorageLocation storageUnit
 			ON storageUnit.intStorageLocationId = CD.intStorageLocationId
+		LEFT JOIN tblICCommodityProductLine PL ON PL.intCommodityProductLineId = IM.intProductLineId
+		LEFT JOIN tblICCommodityAttribute PTC ON PTC.intCommodityAttributeId = IM.intProductTypeId
+		LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = IM.intGradeId
+		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = IM.intRegionId
+		LEFT JOIN tblICCommodityAttribute SEASON ON SEASON.intCommodityAttributeId = IM.intSeasonId
+		LEFT JOIN tblICCommodityAttribute CLASS ON CLASS.intCommodityAttributeId = IM.intClassVarietyId
 		OUTER APPLY (
 				SELECT strShipmentStatus = ISNULL(NULLIF(ctShipStatus.strShipmentStatus, ''), 'Open')  
 				FROM  dbo.fnCTGetShipmentStatus(CD.intContractDetailId) ctShipStatus 
@@ -1410,6 +1464,18 @@ BEGIN TRY
 			, intStorageLocationId INT
 			, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, intStorageUnitId INT
+			, intProductTypeId INT
+			, intGradeId INT
+			, intRegionId INT
+			, intSeasonId INT	
+			, intClassVarietyId INT	
+			, intProductLineId INT	
+			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
 		SELECT dblRatio
 			, dblMarketBasis = (ISNULL(dblBasisOrDiscount, 0) + ISNULL(dblCashOrFuture, 0)) / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
@@ -1571,6 +1637,18 @@ BEGIN TRY
 			, intStorageLocationId 
 			, strStorageUnit 
 			, intStorageUnitId 
+			, intProductTypeId 
+			, intGradeId 
+			, intRegionId 
+			, intSeasonId 	
+			, intClassVarietyId
+			, intProductLineId 	
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		)
 		SELECT intContractHeaderId
 			, intContractDetailId
@@ -1651,6 +1729,18 @@ BEGIN TRY
 			, intStorageLocationId 
 			, strStorageUnit 
 			, intStorageUnitId 
+			, intProductTypeId 
+			, intGradeId 
+			, intRegionId 
+			, intSeasonId 
+			, intClassVarietyId 
+			, intProductLineId 
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		FROM (
 			SELECT DISTINCT cd.intContractHeaderId
 				, cd.intContractDetailId
@@ -1741,6 +1831,18 @@ BEGIN TRY
 				, cd.intStorageLocationId 
 				, cd.strStorageUnit 
 				, cd.intStorageUnitId 
+				, cd.intProductTypeId 
+				, cd.intGradeId
+				, cd.intRegionId 
+				, cd.intSeasonId 
+				, cd.intClassVarietyId 
+				, cd.intProductLineId 	
+				, cd.strProductType
+				, cd.strGrade
+				, cd.strRegion
+				, cd.strSeason
+				, cd.strClass
+				, cd.strProductLine
 			FROM @GetContractDetailView cd
 			JOIN tblICCommodityUnitMeasure cuc ON cd.intCommodityId = cuc.intCommodityId AND cuc.intUnitMeasureId = cd.intUnitMeasureId AND cd.intCommodityId = @intCommodityId
 			JOIN tblICCommodityUnitMeasure cuc1 ON cd.intCommodityId = cuc1.intCommodityId AND cuc1.intUnitMeasureId = @intQuantityUOMId
@@ -1912,6 +2014,18 @@ BEGIN TRY
 			, intStorageLocationId 
 			, strStorageUnit 
 			, intStorageUnitId 
+			, intProductTypeId 
+			, intGradeId 
+			, intRegionId 
+			, intSeasonId 
+			, intClassVarietyId 
+			, intProductLineId 	
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		) 
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
@@ -1995,7 +2109,19 @@ BEGIN TRY
 			, strStorageLocation 
 			, intStorageLocationId 
 			, strStorageUnit 
-			, intStorageUnitId 
+			, intStorageUnitId
+			, intProductTypeId 
+			, intGradeId 
+			, intRegionId
+			, intSeasonId 
+			, intClassVarietyId 
+			, intProductLineId 
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		FROM (
 			SELECT *
 				, dblResult = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
@@ -2092,6 +2218,18 @@ BEGIN TRY
 						, cd.intStorageLocationId 
 						, cd.strStorageUnit 
 						, cd.intStorageUnitId 
+						, cd.intProductTypeId 
+						, cd.intGradeId 
+						, cd.intRegionId 
+						, cd.intSeasonId 	
+						, cd.intClassVarietyId 
+						, cd.intProductLineId 	
+						, cd.strProductType
+						, cd.strGrade
+						, cd.strRegion
+						, cd.strSeason
+						, cd.strClass
+						, cd.strProductLine
 					FROM @tblOpenContractList cd
 					LEFT JOIN (
 						SELECT dblQuantity = SUM(LD.dblQuantity)
@@ -2198,6 +2336,18 @@ BEGIN TRY
 				, intStorageLocationId 
 				, strStorageUnit 
 				, intStorageUnitId 
+				, intProductTypeId 
+				, intGradeId 
+				, intRegionId 
+				, intSeasonId 
+				, intClassVarietyId 	
+				, intProductLineId 	
+				, strProductType 
+				, strGrade 
+				, strRegion 
+				, strSeason 
+				, strClass 
+				, strProductLine 
 			)
 			SELECT DISTINCT intContractHeaderId
 				, intContractDetailId 
@@ -2282,6 +2432,18 @@ BEGIN TRY
 				, intStorageLocationId 
 				, strStorageUnit 
 				, intStorageUnitId 
+				, intProductTypeId 
+				, intGradeId 
+				, intRegionId 
+				, intSeasonId 	
+				, intClassVarietyId 
+				, intProductLineId 	
+				, strProductType 
+				, strGrade 
+				, strRegion 
+				, strSeason 
+				, strClass 
+				, strProductLine 
 			FROM (
 				SELECT *
 					, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -2380,6 +2542,18 @@ BEGIN TRY
 							, cd.intStorageLocationId 
 							, cd.strStorageUnit 
 							, cd.intStorageUnitId 
+							, cd.intProductTypeId 
+							, cd.intGradeId 
+							, cd.intRegionId 
+							, cd.intSeasonId 	
+							, cd.intClassVarietyId 	
+							, cd.intProductLineId 
+							, cd.strProductType
+							, cd.strGrade
+							, cd.strRegion
+							, cd.strSeason
+							, cd.strClass
+							, cd.strProductLine
 						FROM @tblOpenContractList cd
 						JOIN vyuRKGetPurchaseInventory l ON cd.intContractDetailId = l.intContractDetailId
 						JOIN tblICItem i ON cd.intItemId = i.intItemId AND i.strLotTracking <> 'No'						
@@ -2476,6 +2650,18 @@ BEGIN TRY
 			, intStorageLocationId 
 			, strStorageUnit 
 			, intStorageUnitId
+			, intProductTypeId 
+			, intGradeId 
+			, intRegionId 
+			, intSeasonId 	
+			, intClassVarietyId 	
+			, intProductLineId 
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		)
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
@@ -2562,6 +2748,18 @@ BEGIN TRY
 			, intStorageLocationId 
 			, strStorageUnit 
 			, intStorageUnitId
+			, intProductTypeId 
+			, intGradeId 
+			, intRegionId 
+			, intSeasonId 	
+			, intClassVarietyId 	
+			, intProductLineId 
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		FROM (
 			SELECT *
 				, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -2665,6 +2863,18 @@ BEGIN TRY
 						, cd.intStorageLocationId 
 						, cd.strStorageUnit 
 						, cd.intStorageUnitId
+						, cd.intProductTypeId 
+						, cd.intGradeId 
+						, cd.intRegionId 
+						, cd.intSeasonId 	
+						, cd.intClassVarietyId 	
+						, cd.intProductLineId 
+						, cd.strProductType
+						, cd.strGrade
+						, cd.strRegion
+						, cd.strSeason
+						, cd.strClass
+						, cd.strProductLine
 					FROM @tblOpenContractList cd
 					LEFT JOIN (SELECT SUM(LD.dblQuantity)dblQuantity
 									, PCT.intContractDetailId
@@ -2796,6 +3006,18 @@ BEGIN TRY
 				, intStorageLocationId 
 				, strStorageUnit 
 				, intStorageUnitId
+				, intProductTypeId 
+				, intGradeId 
+				, intRegionId 
+				, intSeasonId 	
+				, intClassVarietyId 	
+				, intProductLineId 
+				, strProductType
+				, strGrade
+				, strRegion
+				, strSeason
+				, strClass
+				, strProductLine
 			FROM @ListTransaction
 		) t
 		ORDER BY intCommodityId, strContractSeq DESC
@@ -3305,6 +3527,12 @@ BEGIN TRY
 			, t.intStorageLocationId 
 			, t.strStorageUnit 
 			, t.intStorageUnitId
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		INTO #tmpM2MTransaction
 		FROM (
 			SELECT intContractHeaderId
@@ -3420,6 +3648,12 @@ BEGIN TRY
 				, t.intStorageLocationId 
 				, t.strStorageUnit 
 				, t.intStorageUnitId
+				, strProductType 
+				, strGrade 
+				, strRegion 
+				, strSeason 
+				, strClass 
+				, strProductLine 
 			FROM (
 				SELECT t.*
 					, dblCalculatedFutures = ISNULL((CASE WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Unpriced' THEN dblConvertedFuturePrice
@@ -3582,6 +3816,12 @@ BEGIN TRY
 				, intStorageLocationId 
 				, strStorageUnit 
 				, intStorageUnitId
+				, strProductType 
+				, strGrade 
+				, strRegion 
+				, strSeason 
+				, strClass 
+				, strProductLine 
 			FROM #Temp 
 			WHERE dblOpenQty <> 0 AND intContractHeaderId IS NULL
 		)t 
@@ -3658,6 +3898,12 @@ BEGIN TRY
 			, intStorageLocationId 
 			, strStorageUnit 
 			, intStorageUnitId
+			, strProductType 
+			, strGrade 
+			, strRegion 
+			, strSeason 
+			, strClass 
+			, strProductLine 
 		)
 		SELECT * FROM #tmpM2MTransaction
 
