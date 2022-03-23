@@ -9151,6 +9151,7 @@
     <Build Include="dbo\Tables\tblSMPerformanceLog.sql" />
     <Build Include="dbo\Views\vyuSMPerformanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSMLogPerformanceRuntime.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDiagnostic.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
