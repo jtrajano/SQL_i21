@@ -441,6 +441,7 @@ BEGIN TRY
 					,@intNewLotId = @intNewLotId OUTPUT
 					,@intWorkOrderId = NULL
 					,@intAdjustmentId = @intAdjustmentId OUTPUT
+					,@ysnExternalSystemMove=1
 
 				SELECT @strAdjustmentNo = NULL
 
@@ -706,6 +707,11 @@ BEGIN TRY
 					WHERE t.intItemId = @intItemId
 						AND t.intItemLocationId = @intItemLocationId
 
+					IF @dblStandardCost IS NULL
+					BEGIN
+						SELECT @dblStandardCost=0
+					END
+
 					SELECT @intParentLotId = NULL
 						,@dblWeightPerQty = NULL
 						,@intLotItemUOMId = NULL
@@ -821,6 +827,11 @@ BEGIN TRY
 						FROM tblICItemPricing t WITH (NOLOCK)
 						WHERE t.intItemId = @intItemId
 							AND t.intItemLocationId = @intItemLocationId
+					END
+
+					IF @dblLastCost IS NULL
+					BEGIN
+						SELECT @dblLastCost=0
 					END
 
 					DELETE
