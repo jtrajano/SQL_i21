@@ -25,7 +25,7 @@
     [ysnAllowIntraCompanyEntries]	BIT NOT NULL DEFAULT(0),
 	[ysnAllowIntraLocationEntries]	BIT NOT NULL DEFAULT(0),
 	[ysnAllowSingleLocationEntries]	BIT NOT NULL DEFAULT(1),
-	[intDueToAccountId]				INT NOT NULL DEFAULT(0), 
-    [intDueFromAccountId]			INT NOT NULL DEFAULT(0)
+	[intDueToAccountId]				INT NULL DEFAULT(0), 
+    [intDueFromAccountId]			INT NULL DEFAULT(0)
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );

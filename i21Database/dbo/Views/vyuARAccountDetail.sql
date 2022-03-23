@@ -10,6 +10,7 @@ SELECT
 	,strAccountGroup
 	,intLocationAccountSegmentId = ISNULL(GLLocation.intAccountSegmentId, 0)
 	,intCompanyAccountSegmentId = ISNULL(GLCompany.intAccountSegmentId, 0)
+	,intAccountCategoryId
 FROM vyuGLAccountDetail GLAD
 OUTER APPLY (
 	SELECT TOP  1 intAccountSegmentId
