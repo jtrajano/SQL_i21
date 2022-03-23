@@ -692,6 +692,7 @@
     <Folder Include="Scripts\Post-Deployment\AG\" />
     <Folder Include="Scripts\Post-Deployment\FA\" />
     <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
+    <Folder Include="Scripts\Utility\IC\DPR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
