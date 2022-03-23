@@ -550,7 +550,7 @@ SELECT
 	,dblCredit					= CASE WHEN GL.dblCredit = 0 THEN Credit.Value ELSE 0 END
 	,dblDebitUnit				= CASE WHEN GL.dblDebitUnit = 0 THEN DebitUnit.Value ELSE 0 END
 	,dblCreditUnit				= CASE WHEN GL.dblCreditUnit = 0 THEN CreditUnit.Value ELSE 0 END
-	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' A'
+	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost, DEFAULT) --+ ' A'
 	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -620,7 +620,7 @@ SELECT DISTINCT
 	,dblCredit					= CASE WHEN @ysnUnpost = 0 THEN CASE WHEN GL.dblCredit = 0 THEN Credit.Value ELSE 0 END ELSE Credit.Value END
 	,dblDebitUnit				= CASE WHEN @ysnUnpost = 0 THEN CASE WHEN GL.dblDebitUnit = 0 THEN DebitUnit.Value ELSE 0 END ELSE DebitUnit.Value END
 	,dblCreditUnit				= CASE WHEN @ysnUnpost = 0 THEN CASE WHEN GL.dblCreditUnit = 0 THEN CreditUnit.Value ELSE 0 END ELSE CreditUnit.Value END
-	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' B'
+	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost, DEFAULT) --+ ' B'
 	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -689,7 +689,7 @@ SELECT
 	,dblCredit					= Debit.Value
 	,dblDebitUnit				= CreditUnit.Value
 	,dblCreditUnit				= DebitUnit.Value
-	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' C'
+	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost, DEFAULT) --+ ' C'
 	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
