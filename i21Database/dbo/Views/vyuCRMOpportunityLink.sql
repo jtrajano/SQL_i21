@@ -98,6 +98,8 @@
 			,a.intIndustrySegmentId
 			,a.intOpportunityTypeId
 			,a.intVolume
+			,a.intGrossProfit
+			,a.intGrossRevenue
 			,a.strOpportunityDescription
 			,a.intBrandId
 			,t.strIndustrySegment

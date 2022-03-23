@@ -59,6 +59,8 @@
     [intIndustrySegmentId] INT NULL,
     [intOpportunityTypeId] INT NULL,
     [intVolume] INT NULL,
+    [intGrossProfit] INT NULL,
+    [intGrossRevenue] INT NULL,
     [strOpportunityDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [intBrandId] INT NULL,
 
