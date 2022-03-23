@@ -238,7 +238,7 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
 		  AND (W.strWhereFinalized = 'Destination' OR G.strWhereFinalized= 'Destination')
 		  AND I.intContractDetailId IS NOT NULL
 		  AND ID.intShipmentPurchaseSalesContractId IS NULL
-		  AND I.intLoadDetailId IS NULL
+		  AND (I.intLoadDetailId IS NULL OR (I.intLoadDetailId IS NOT NULL AND (T.intTicketTypeId = 9 AND T.intTicketType = 6 AND T.strInOutFlag = 'O')))
 		  AND (I.[strItemType] IS NOT NULL AND I.[strItemType] <> 'Other Charge')
 		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate, RI.intInvoiceId, ID.intOriginalInvoiceDetailId, CD.intItemId, CD.intItemUOMId, CH.intEntityId, T.intTicketTypeId, T.intTicketType, T.strInOutFlag, CH.ysnLoad, CD.dblScheduleQty
 	END
@@ -292,7 +292,7 @@ SELECT intInvoiceId					= intInvoiceId
 FROM #TBLTOPROCESS
 WHERE (
 	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
-   OR (ysnDestWtGrd = 1 AND strPricing = 'Subsystem - Direct')
+   OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
    OR intTicketId IS NULL
 )
 
@@ -336,7 +336,7 @@ SELECT intInvoiceId					= intInvoiceId
 FROM #TBLTOPROCESS
 WHERE (
 	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
-   OR (ysnDestWtGrd = 1 AND strPricing = 'Subsystem - Direct')
+   OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
    OR intTicketId IS NULL
 )
 AND ysnFromReturn = 0
