@@ -78,9 +78,9 @@ SELECT DISTINCT
 	, dblShipToLongitude		= shipLocation.dblLongitude
 	, dblShipToLatitude			= shipLocation.dblLatitude
 	, strAccountType = CASE WHEN Vendor.intVendorType = 1 THEN 'Company' ELSE 'Person' END
-	, intDefaultPayFromBankAccountId	= NULL
-	, strDefaultPayFromBankAccountNo	= NULL
-	, strPaymentInstructions		= NULL
+	, intDefaultPayToBankAccountId		= NULL
+	, strDefaultPayToBankAccountNo		= NULL
+	, strPaymentInstructions			= NULL
 FROM tblAPVendor Vendor
 INNER JOIN tblEMEntity entityToVendor ON Vendor.intEntityId = entityToVendor.intEntityId
 --LEFT JOIN tblEMEntity entityToSalesperson ON Vendor.intSalespersonId = entityToSalesperson.intEntityId

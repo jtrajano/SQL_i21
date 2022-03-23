@@ -75,9 +75,9 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, dblShipToLongitude		= shipLocation.dblLongitude
 	, dblShipToLatitude			= shipLocation.dblLatitude
 	, strAccountType = NULLIF(CUSTOMER.strType, '')
-	, intDefaultPayFromBankAccountId = CUSTOMER.intDefaultPayFromBankAccountId
-	, strDefaultPayFromBankAccountNo = CUSTOMER.strDefaultPayFromBankAccountNo
-	, strPaymentInstructions		= CMBA.strPaymentInstructions
+	, intDefaultPayToBankAccountId		= CUSTOMER.intDefaultPayToBankAccountId
+	, strDefaultPayToBankAccountNo		= CUSTOMER.strDefaultPayToBankAccountNo
+	, strPaymentInstructions			= CMBA.strPaymentInstructions
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
@@ -126,6 +126,6 @@ LEFT JOIN (
 		AND SC.strScreenName = 'Invoice'
 	GROUP BY ARC.intEntityId 
 ) CUSTOMERCREDITAPPROVER ON CUSTOMERCREDITAPPROVER.intEntityId = CUSTOMER.intEntityId
-LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId = ISNULL(CUSTOMER.intDefaultPayFromBankAccountId, 0)
+LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId = ISNULL(CUSTOMER.intDefaultPayToBankAccountId, 0)
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO

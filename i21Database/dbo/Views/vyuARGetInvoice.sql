@@ -166,8 +166,8 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , strInterCompanyName					= INTERCOMPANY.strCompanyName
      , ysnOverrideCashFlow                  = INV.ysnOverrideCashFlow
      , dtmCashFlowDate                      = INV.dtmCashFlowDate
-	 , intDefaultPayFromBankAccountId		= ISNULL(INV.intDefaultPayFromBankAccountId, 0)
-	 , strDefaultPayFromBankAccountNo		= DBA.strBankAccountNo
+	 , intDefaultPayToBankAccountId			= ISNULL(INV.intDefaultPayToBankAccountId, 0)
+	 , strDefaultPayToBankAccountNo			= DBA.strBankAccountNo
 	 , intPayToCashBankAccountId			= ISNULL(INV.intPayToCashBankAccountId, 0)
 	 , strPayToCashBankAccountNo			= PFCBA.strBankAccountNo
 	 , strSourceOfPayTo						= INV.strSourceOfPayTo
@@ -393,7 +393,7 @@ LEFT JOIN
 (
 	SELECT  ysnReturned,intInvoiceId FROM tblARInvoice  WITH (NOLOCK) 
 ) ReturnInvoice ON ReturnInvoice.intInvoiceId = INV.intOriginalInvoiceId
-LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayFromBankAccountId, 0)
+LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId, 0)
 LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId, 0)
 LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId, 0)
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccountId, 0)

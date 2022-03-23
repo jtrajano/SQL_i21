@@ -175,8 +175,8 @@ SELECT intEntityId							= C.intEntityId
      , dtmBatchTimeTo						= C.dtmBatchTimeTo
      , intConcurrencyId						= E.intConcurrencyId
 	 , ysnExemptCreditCardFee				= C.ysnExemptCreditCardFee
-	 , intDefaultPayFromBankAccountId		= C.intDefaultPayFromBankAccountId
-	 , strDefaultPayFromBankAccountNo		= C.strDefaultPayFromBankAccountNo
+	 , intDefaultPayToBankAccountId		    = C.intDefaultPayToBankAccountId
+	 , strDefaultPayToBankAccountNo		    = C.strDefaultPayToBankAccountNo
 FROM tblARCustomer C
 INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
 LEFT JOIN tblSMLanguage LANG ON E.intLanguageId = LANG.intLanguageId

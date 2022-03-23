@@ -72,8 +72,8 @@ SELECT
 	,ysnClosed							= ARIFP.ysnClosed
 	,ysnForgiven						= ARIFP.ysnForgiven
 	,intDaysOld							= DATEDIFF(DAYOFYEAR, ARIFP.[dtmDate], CAST(GETDATE() AS DATE))
-	,intPayFromBankAccountId			= ARIFP.intPayFromBankAccountId
-	,strPayFromBankAccountNo			= ISNULL(ARIFP.strPayFromBankAccountNo, '')
+	,intPayToBankAccountId				= ARIFP.intPayToBankAccountId
+	,strPayToBankAccountNo				= ISNULL(ARIFP.strPayToBankAccountNo, '')
 FROM (
 		--AR TRANSACTIONS
 		SELECT 
@@ -137,8 +137,8 @@ FROM (
 			,intSourceId						= ARI.intSourceId
 			,ysnClosed							= CASE WHEN ISNULL(EOD.ysnClosed, 0) = 1 AND ISNULL(ONACCOUNT.intPOSPaymentId, 0) = 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 			,ysnForgiven						= ARI.ysnForgiven
-			,intPayFromBankAccountId			= PFBA.intBankAccountId
-			,strPayFromBankAccountNo			= PFBA.strBankAccountNo
+			,intPayToBankAccountId				= PFBA.intBankAccountId
+			,strPayToBankAccountNo				= PFBA.strBankAccountNo
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intEntityId
@@ -208,7 +208,7 @@ FROM (
 			WHERE intPOSId = POS.intPOSId
 			AND strPaymentMethod = 'On Account'
 		) ONACCOUNT
-		LEFT JOIN vyuCMBankAccount PFBA ON PFBA.intBankAccountId = ISNULL(ARI.intPayToCashBankAccountId, ISNULL(ARI.intDefaultPayFromBankAccountId, 0))
+		LEFT JOIN vyuCMBankAccount PFBA ON PFBA.intBankAccountId = ISNULL(ARI.intPayToCashBankAccountId, ISNULL(ARI.intDefaultPayToBankAccountId, 0))
 		WHERE (ARI.[ysnPosted] = 1 OR (ARI.[ysnPosted] = 0 AND	ARI.strComments = 'NSF Processed' AND ARI.strTransactionType = 'Overpayment'))
 			AND ISNULL(ARI.ysnCancelled, 0) = 0
 			AND (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 1 OR ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 0 )
@@ -270,8 +270,8 @@ FROM (
    			,[intSourceId] 						= NULL
 			,ysnClosed							= CAST(0 AS BIT)
 			,ysnForgiven						= CAST(0 AS BIT)
-			,intPayFromBankAccountId			= NULL
-			,strPayFromBankAccountNo			= NULL
+			,intPayToBankAccountId				= NULL
+			,strPayToBankAccountNo				= NULL
 		FROM [vyuAPVouchersForARPayment] APB
 		INNER JOIN (
 			SELECT intEntityId
@@ -340,8 +340,8 @@ FROM (
 			,[intSourceId]						= NULL
 			,[ysnClosed]						= CAST(0 AS BIT)
 			,ysnForgiven						= CAST(0 AS BIT)
-			,intPayFromBankAccountId			= NULL
-			,strPayFromBankAccountNo			= NULL
+			,intPayToBankAccountId				= NULL
+			,strPayToBankAccountNo				= NULL
 		FROM dbo.tblARCustomerBudget CB WITH (NOLOCK)
 		INNER JOIN (
 			SELECT C.intEntityId
