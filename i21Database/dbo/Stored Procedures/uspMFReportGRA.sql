@@ -19,6 +19,10 @@ BEGIN TRY
 		,@strCupScore NVARCHAR(MAX)
 		,@strGradeScore NVARCHAR(MAX)
 		,@strComment NVARCHAR(MAX)
+		,@strSampleStatus NVARCHAR(32)
+		,@strCupScoreResult NVARCHAR(50)
+		,@strGradeScoreResult NVARCHAR(50)
+		,@strToStorageLocation NVARCHAR(50)
 		,@intInventoryTransferDetailId INT
 		,@intSampleId INT
 		,@strContainerNumber NVARCHAR(100)
@@ -31,6 +35,8 @@ BEGIN TRY
 		,strMoisture NVARCHAR(MAX)
 		,strCupScore NVARCHAR(MAX)
 		,strGradeScore NVARCHAR(MAX)
+		,strCupScoreResult NVARCHAR(50)
+		,strGradeScoreResult NVARCHAR(50)
 		)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -110,6 +116,10 @@ BEGIN TRY
 			SELECT @intSampleId = NULL
 				,@strContainerNumber = NULL
 				,@strComment = NULL
+				,@strSampleStatus = NULL
+				,@strCupScoreResult = 'Cupping Required'
+				,@strGradeScoreResult = 'Cupping Required'
+				,@strToStorageLocation = NULL
 				,@strMoisture = NULL
 				,@strCupScore = NULL
 				,@strGradeScore = NULL
@@ -122,11 +132,14 @@ BEGIN TRY
 				,@strToStorageLocation = TSL.strName
 			FROM tblICInventoryTransferDetail ITD
 			JOIN tblICLot L ON L.intLotId = ITD.intLotId
+			JOIN tblICStorageLocation TSL ON TSL.intStorageLocationId = ITD.intToStorageLocationId
 			WHERE ITD.intInventoryTransferDetailId = @intInventoryTransferDetailId
 
 			SELECT TOP 1 @intSampleId = S.intSampleId
 				,@strComment = S.strComment
+				,@strSampleStatus = SS.strSecondaryStatus
 			FROM dbo.tblQMSample S
+			JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 			WHERE S.strContainerNumber = @strContainerNumber
 			ORDER BY S.intSampleId DESC
 
@@ -161,6 +174,18 @@ BEGIN TRY
 				JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 					AND TR.intSampleId = @intSampleId
 					AND P.strPropertyName = 'Grade Score'
+
+				SELECT @strCupScoreResult = @strSampleStatus
+					,@strGradeScoreResult = @strSampleStatus
+
+				IF ISNULL(@strCupScore, '') = ''
+					SELECT @strCupScore = NULL
+
+				IF CAST(ISNULL(@strCupScore, 0) AS DECIMAL(18, 6)) <= 2.0
+					AND ISNULL(@strToStorageLocation, '') = 'FMYARD'
+				BEGIN
+					SELECT @strCupScoreResult = 'Cupping Required'
+				END
 			END
 
 			INSERT INTO @tblSampleValues (
@@ -169,12 +194,16 @@ BEGIN TRY
 				,strMoisture
 				,strCupScore
 				,strGradeScore
+				,strCupScoreResult
+				,strGradeScoreResult
 				)
 			SELECT @intInventoryTransferDetailId
 				,@strComment
 				,@strMoisture
 				,@strCupScore
 				,@strGradeScore
+				,@strCupScoreResult
+				,@strGradeScoreResult
 
 			-- Update Printed detail in Lot Mapping table
 			UPDATE tblMFLotInventory
@@ -207,6 +236,8 @@ BEGIN TRY
 			,S.strMoisture
 			,S.strCupScore
 			,S.strGradeScore
+			,S.strCupScoreResult
+			,S.strGradeScoreResult
 		FROM dbo.tblICInventoryTransferDetail ITD
 		JOIN dbo.tblICInventoryTransfer IT ON IT.intInventoryTransferId = ITD.intInventoryTransferId
 		JOIN @tblSampleValues S ON S.intInventoryTransferDetailId = ITD.intInventoryTransferDetailId
