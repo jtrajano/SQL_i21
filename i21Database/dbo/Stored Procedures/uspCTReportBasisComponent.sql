@@ -149,26 +149,26 @@ BEGIN
 		, strEntity = EN.strName
 		, CH.strInternalComment
 		, strItem = IT.strItemNo
-		, dblQuantity = ROUND(CD.dblQuantity, @intQtyDec)
+		, dblQuantity = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblQuantity), @intQtyDec)
 		, strQtyUOM = IUOM.strUnitMeasure
-		, dblNetWeight = ROUND(CD.dblNetWeight, @intQtyDec)
+		, dblNetWeight = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight), @intQtyDec)
 		, strWeightUOM = WUOM.strUnitMeasure
 		, strContractItem = IC.strContractItemName
 		, strMarket = FMarket.strFutMarketName
 		, strMonth = FMonth.strFutureMonth
 		, CU.strCurrency
 		, strPriceUOM = PUOM.strUnitMeasure
-		, dblFutures = ROUND(CD.dblFutures, @intPriceDec)
+		, dblFutures = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblFutures), @intPriceDec)
 		, strProductType = PT.strDescription
 		, strINCOShipTerms = ST.strFreightTerm
 		, CS.strContractStatus
-		, dblFinancingCost = ROUND(CCTotal.dblFinancingCost, @intPriceDec)
-		, dblFOB = ROUND(CCTotal.dblFOB, @intPriceDec)
-		, dblSustainabilityPremium = ROUND(CCTotal.dblSustainabilityPremium, @intPriceDec)
-		, dblFOBCAD = ROUND(CCTotal.dblFOBCAD, @intPriceDec)
-		, dblOtherCost = ROUND(CCTotal.dblOtherCost, @intPriceDec)
-		, dblBasis = ROUND(CD.dblBasis, @intPriceDec)
-		, dblCashPrice = ROUND(CD.dblCashPrice, @intPriceDec)
+		, dblFinancingCost = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFinancingCost), @intPriceDec)
+		, dblFOB = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFOB), @intPriceDec)
+		, dblSustainabilityPremium = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblSustainabilityPremium), @intPriceDec)
+		, dblFOBCAD = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFOBCAD), @intPriceDec)
+		, dblOtherCost =  ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblOtherCost), @intPriceDec)
+		, dblBasis = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblBasis), @intPriceDec)
+		, dblCashPrice = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblCashPrice), @intPriceDec)
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblEMEntity EN ON EN.intEntityId = CH.intEntityId

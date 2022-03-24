@@ -36,15 +36,12 @@ DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
-DECLARE @PostDate AS DATETIME
-SET @PostDate = GETDATE()
-
-DECLARE @ZeroDecimal DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000
-DECLARE @OneDecimal DECIMAL(18,6)
-SET @OneDecimal = 1.000000
-DECLARE @OneHundredDecimal DECIMAL(18,6)
-SET @OneHundredDecimal = 100.000000
+DECLARE @PostDate AS DATETIME = GETDATE()
+DECLARE @ZeroDecimal DECIMAL(18,6) = 0.000000
+DECLARE @OneDecimal DECIMAL(18,6) = 1.000000
+DECLARE @OneHundredDecimal DECIMAL(18,6) = 100.000000
+DECLARE @intNewPerformanceLogId	INT = NULL
+DECLARE @strRequestId NVARCHAR(200) = NEWID()
 
 DECLARE  @InitTranCount				INT
 		,@CurrentTranCount			INT
@@ -93,6 +90,16 @@ SET @dtmStartWait = GETDATE()
 DELETE PQ
 FROM tblARPostingQueue PQ
 WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) >= 60
+
+--LOG PERFORMANCE START
+IF @transType <> 'all'
+	EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Batch Invoice Posting Screen'
+									  , @strProcedureName       = 'uspARPostInvoice'
+									  , @strRequestId			= @strRequestId
+									  , @ysnStart		        = 1
+									  , @intUserId	            = @userId
+									  , @intPerformanceLogId    = NULL
+									  , @intNewPerformanceLogId = @intNewPerformanceLogId OUT
 
 --CHECK IF THERE'S ON GOING POSTING IN QUEUE
 IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) <= 60)
@@ -220,9 +227,12 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
     ,@UserId            = @userId
 
 IF @post = 1 AND @recap = 0
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-         @PostDate    = @PostDate
-        ,@UserId      = @userId
+    EXEC [dbo].[uspARProcessSplitOnInvoicePost]         
+		  @ysnPost	  	= 1
+		, @ysnRecap	  	= 0
+		, @dtmDatePost	= @PostDate
+		, @strBatchId	= @batchIdUsed
+		, @intUserId	= @userId
 
 --Removed excluded Invoices to post/unpost
 IF(@exclude IS NOT NULL)
@@ -362,22 +372,27 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @userId
 		       ,@BatchIdUsed     = @batchIdUsed OUT
+
+		DELETE 
+		FROM tblARPostingQueue
+		WHERE intTransactionId IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@param))
+
         GOTO Do_Commit
     END
 
 	IF @post = 1 AND @recap = 1
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-			@PostDate        = @PostDate
-		   ,@UserId          = @userId
+		EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+				  @ysnPost	  	= 1
+				, @ysnRecap	  	= 1
+				, @dtmDatePost	= @PostDate
+				, @strBatchId	= @batchIdUsed
+				, @intUserId	= @userId
 
 	IF @recap = 0
-	BEGIN
-		-- Log to inventory sub-ledger	
 		EXEC [dbo].[uspARLogInventorySubLedger] @post, @userId
-	END
 
 	IF @post = 1
-    EXEC [dbo].[uspARPrePostInvoiceIntegration]	
+    	EXEC [dbo].[uspARPrePostInvoiceIntegration]	
 
 	DECLARE @InvoicesForIntegration Id
 
@@ -561,7 +576,7 @@ BEGIN TRY
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
     DECLARE @invalidGLCount INT
-	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
+	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT [strTransactionId]) FROM @InvalidGLEntries WHERE [strTransactionId] IS NOT NULL), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
 	SET @totalRecords = @totalRecords - @invalidGLCount
 
@@ -607,6 +622,15 @@ BEGIN TRY
            ,@BatchId = @batchIdUsed
 		   ,@UserId  = @userId
 		   ,@raiseError = @raiseError
+
+--LOG PERFORMANCE END
+IF @transType <> 'all'
+	EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Batch Invoice Posting Screen'
+									  , @strProcedureName       = 'uspARPostInvoice'
+									  , @strRequestId			= @strRequestId
+									  , @ysnStart		        = 0
+									  , @intUserId	            = @userId
+									  , @intPerformanceLogId    = @intNewPerformanceLogId
 
 END TRY
 BEGIN CATCH

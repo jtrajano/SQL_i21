@@ -10,6 +10,7 @@ SELECT DISTINCT
 	salesAccount.strAccountId, 
 	unitMeasure.strUnitMeasure,  
 	CASE WHEN item.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') THEN 'N' ELSE 'Y' END as strType,
+	CASE WHEN item.ysnAvailableTM = 1 THEN dblDefaultFull ELSE 0 END as dblDefaultItemFull,
 	item.intCategoryId
 
 FROM tblICItem item    

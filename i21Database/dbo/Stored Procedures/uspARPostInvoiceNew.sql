@@ -254,9 +254,15 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
 
 
 IF @Post = 1 AND @Recap = 0
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-			@PostDate        = @PostDate
-		   ,@UserId          = @UserId
+	EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+		  @ysnPost	  	= 1
+		, @ysnRecap	  	= 0
+		, @dtmDatePost	= @PostDate
+		, @strBatchId	= @BatchIdUsed
+		, @intUserId	= @UserId		
+
+IF @Recap = 0
+	EXEC [dbo].[uspARLogInventorySubLedger] 1, @UserId
 
 --Removed excluded Invoices to post/unpost
 IF(@Exclude IS NOT NULL)
@@ -409,23 +415,24 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @UserId
 		       ,@BatchIdUsed     = @BatchIdUsed OUT
+		
+		DELETE 
+		FROM tblARPostingQueue
+		WHERE intTransactionId IN (SELECT intInvoiceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @IntegrationLogId)
 
         GOTO Do_Commit
     END
 
 	IF @Post = 1 AND @Recap = 1
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-			@PostDate        = @PostDate
-		   ,@UserId          = @UserId
-
-	IF @Recap = 0
-	BEGIN
-		-- Log to inventory sub-ledger	
-		EXEC [dbo].[uspARLogInventorySubLedger] @Post, @UserId
-	END
+		EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+			  @ysnPost	  	= 1
+			, @ysnRecap	  	= 1
+			, @dtmDatePost	= @PostDate
+			, @strBatchId	= @BatchIdUsed
+			, @intUserId	= @UserId
 	
 	IF @Post = 1
-    EXEC [dbo].[uspARPrePostInvoiceIntegration]	
+    	EXEC [dbo].[uspARPrePostInvoiceIntegration]	
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
@@ -609,7 +616,7 @@ BEGIN TRY
 	END
 
     DECLARE @invalidGLCount INT
-	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
+	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries WHERE [strTransactionId] IS NOT NULL), 0)
 	SET @totalRecords = @totalRecords - @invalidGLCount
 
     INSERT INTO tblARPostResult

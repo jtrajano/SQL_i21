@@ -275,7 +275,8 @@ BEGIN TRY
 					)
 				SELECT 1 intConcurrencyId
 					,@strReferenceNumber
-					,dtmTransDate
+					--,dtmTransDate
+					,GETDATE()
 					,(
 						SELECT intLoadId
 						FROM tblLGLoad
@@ -934,7 +935,8 @@ BEGIN TRY
 					)
 				SELECT intConcurrencyId
 					,@strReferenceNumber
-					,dtmTransDate
+					--,dtmTransDate
+					,GETDATE()
 					,intLoadId
 					,strComments
 					,dtmETAPOD

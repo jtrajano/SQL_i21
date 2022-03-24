@@ -243,7 +243,7 @@ BEGIN
 		FROM @DirectVoucherLineItem A	
 		INNER JOIN tblSCTicket SC
 			ON A.intScaleTicketId = SC.intTicketId
-		INNER JOIN tblSCScaleSetup SCSetup 
+		LEFT JOIN tblSCScaleSetup SCSetup 
 			ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 		INNER JOIN tblCTContractDetail CTD
 			ON SC.intContractId = CTD.intContractDetailId
@@ -257,7 +257,7 @@ BEGIN
 			ON CTC.intItemUOMId = ICUOM.intItemUOMId
 		WHERE CTD.intItemId IS NOT NULL
 			AND A.intEntityId <> CTC.intVendorId
-			AND CTC.intItemId <> SCSetup.intFreightItemId
+			AND (SCSetup.intFreightItemId IS NULL OR (SCSetup.intFreightItemId IS NOT NULL AND CTC.intItemId <> SCSetup.intFreightItemId))
 			AND CTC.intItemUOMId IS NOT NULL
 			AND CTC.dblRate <> 0
 			AND CTC.ysnBasis <> 1
@@ -367,7 +367,7 @@ BEGIN
 		FROM @DirectVoucherLineItem A	
 		INNER JOIN tblSCTicket SC
 			ON A.intScaleTicketId = SC.intTicketId
-		INNER JOIN tblSCScaleSetup SCSetup 
+		LEFT JOIN tblSCScaleSetup SCSetup 
 			ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 		INNER JOIN tblLGLoadDetail LGD
 			ON A.intLoadDetailId = LGD.intLoadDetailId
@@ -384,7 +384,7 @@ BEGIN
 		LEFT JOIN tblCTContractCost CTC
 			ON LGD.intPContractDetailId = CTC.intContractDetailId
 		WHERE LGC.intItemId IS NOT NULL
-			AND LGC.intItemId <> SCSetup.intFreightItemId
+			AND (SCSetup.intFreightItemId IS NULL OR (SCSetup.intFreightItemId IS NOT NULL AND LGC.intItemId <> SCSetup.intFreightItemId))
 			AND NOT (CTC.intItemId = LGC.intItemId
 					AND CTC.intVendorId = LGC.intVendorId
 					AND CTC.ysnBasis <> 1
@@ -405,6 +405,7 @@ BEGIN
 		,[intItemId]
 		,[intContractDetailId]
 		,[intLoadDetailId] 
+		,intTicketDistributionAllocationId
 	)
 	SELECT
 		[intTicketId] = A.intScaleTicketId
@@ -412,6 +413,7 @@ BEGIN
 		,[intItemId] = A.intItemId
 		,[intContractDetailId] = A.intContractDetailId
 		,[intLoadDetailId] = intLoadShipmentDetailId
+		,intTicketDistributionAllocationId
 	FROM @voucherPayable A
 		
 END

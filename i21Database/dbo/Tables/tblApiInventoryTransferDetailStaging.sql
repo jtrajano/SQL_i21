@@ -2,8 +2,10 @@ CREATE TABLE dbo.tblApiInventoryTransferDetailStaging
 (
 	intApiInventoryTransferDetailStagingId INT NOT NULL IDENTITY(1, 1),
 	intApiInventoryTransferStagingId INT NOT NULL,
-	intItemId INT NOT NULL,
-	intItemUOMId INT NOT NULL,
+	intItemId INT NULL,
+	intItemUOMId INT NULL,
+	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	intUOMId INT NULL,
 	intOwnershipType INT NULL DEFAULT(1),
 	dblTransferQty NUMERIC(38, 20) NULL,
 	intFromStorageLocationId INT NULL,

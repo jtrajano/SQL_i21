@@ -39,15 +39,15 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , intItemContractHeaderId			= SOD.intItemContractHeaderId
      , intItemContractDetailId			= SOD.intItemContractDetailId
      , dblContractBalance				= ISNULL(CONT.dblBalance, 0)
-     , dblItemContractBalance				= ISNULL(ITEMCONTRACT.dblBalance, 0)
+     , dblItemContractBalance			= ISNULL(ITEMCONTRACT.dblBalance, 0)
      , dblContractAvailable				= SOD.dblContractAvailable
      , ysnBlended						= SOD.ysnBlended
      , intTaxGroupId					= SOD.intTaxGroupId
      , intRecipeId						= SOD.intRecipeId
      , intSubLocationId					= SOD.intSubLocationId
      , dblItemWeight					= SOD.dblItemWeight
-     , dblStandardWeight                        = SOD.dblStandardWeight
-     , dblOriginalItemWeight			      = SOD.dblOriginalItemWeight
+     , dblStandardWeight				= SOD.dblStandardWeight
+     , dblOriginalItemWeight			= SOD.dblOriginalItemWeight
      , intItemWeightUOMId				= SOD.intItemWeightUOMId
      , intCostTypeId					= SOD.intCostTypeId
      , intMarginById					= SOD.intMarginById
@@ -67,7 +67,7 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , dblOriginalQty					= SOD.dblQtyOrdered
      , dblOriginalPrice					= SOD.dblPrice
      , intOriginalItemUOMId				= SOD.intItemUOMId
-     , strItemNo						= ITEM.strItemNo
+     , strItemNo						= ISNULL(ITEM.strItemNo, ITEMCOMMENT.strItemNo)
      , strBundleType					= ITEM.strBundleType
      , strUnitMeasure					= ITEMUOM.strUnitMeasure
      , intUnitMeasureId					= ITEMUOM.intUnitMeasureId
@@ -81,9 +81,9 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , intPricingTypeId					= CONT.intPricingTypeId
      , strPricingType					= CONT.strPricingType
      , ysnLoad							= CONT.ysnLoad
-     , strItemContractNumber			= ISNULL(ITEMCONTRACT.strContractNumber, '')
+     , strItemContractNumber			= ISNULL(ITEMCONTRACT.strItemContractNumber, '')
      , intItemContractSeq				= ITEMCONTRACT.intLineNo
-     , strItemType						= ITEM.strType
+     , strItemType						= ISNULL(ITEM.strType, ITEMCOMMENT.strType)
      , strLotTracking					= ITEM.strLotTracking
      , strModule						= ITEM.strModule
      , strRequired						= ITEM.strRequired
@@ -102,6 +102,9 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , ysnAddonParent					= SOD.ysnAddonParent
 	 , ysnItemContract					= SOD.ysnItemContract
 	 , dblAddOnQuantity					= SOD.dblAddOnQuantity
+	 , intCategoryId					= ITEM.intCategoryId
+	 , strItemContractCategory			= ITEMCONTRACT.strContractCategoryId
+	 , strItemContractCategoryCode		= ITEMCONTRACT.strCategory
 FROM tblSOSalesOrderDetail SOD WITH(NOLOCK)
 INNER JOIN (
 	SELECT intSalesOrderId
@@ -121,12 +124,19 @@ LEFT JOIN (
 		 , dblMaintenanceRate				= ISNULL(dblMaintenanceRate, 0)
 		 , dblMaintenanceRatePercentage		= ISNULL(dblSalePrice, 0) * (ISNULL(dblMaintenanceRate, 0) / 100)
 		 , intLocationId
+		 , intCategoryId
 	FROM tblICItem I WITH(NOLOCK) 
 	LEFT JOIN tblSMModule MODULE WITH(NOLOCK) ON I.intModuleId = MODULE.intModuleId
 	LEFT JOIN tblICItemLocation ITEMLOC WITH(NOLOCK) ON I.intItemId = ITEMLOC.intItemId					
 	LEFT JOIN tblICItemPricing PRICING WITH(NOLOCK) ON I.intItemId = PRICING.intItemId AND ITEMLOC.intItemLocationId = PRICING.intItemLocationId
 ) ITEM ON SOD.intItemId = ITEM.intItemId 
       AND SO.intCompanyLocationId = ITEM.intLocationId
+OUTER APPLY (
+	SELECT strItemNo
+		  ,strType
+FROM tblICItem I WITH(NOLOCK) 
+WHERE I.strType = 'Comment' AND I.intItemId = SOD.intItemId 
+) ITEMCOMMENT 
 LEFT JOIN (
 	SELECT intItemUOMId
 		 , strUnitMeasure
@@ -164,13 +174,16 @@ LEFT JOIN (
 	FROM vyuCTCustomerContract WITH(NOLOCK)
 ) CONT ON SOD.intContractDetailId = CONT.intContractDetailId
 LEFT JOIN ( 
-	SELECT intItemContractDetailId
-		 , strContractNumber
-             , intLineNo
-             , dblBalance
-	FROM tblCTItemContractDetail ICD WITH(NOLOCK)
-	INNER JOIN tblCTItemContractHeader ICH WITH(NOLOCK) ON ICH.intItemContractHeaderId	= ICD.intItemContractHeaderId
-) ITEMCONTRACT ON SOD.intItemContractDetailId = ITEMCONTRACT.intItemContractDetailId
+	SELECT	  ARICNS.intItemContractHeaderId
+			, intItemContractDetailId
+			, strItemContractNumber
+            , intLineNo
+            , dblBalance
+			, strContractCategoryId
+			, strCategory
+	FROM vyuARItemContractNumberSearch ARICNS WITH(NOLOCK)
+	LEFT JOIN tblCTItemContractDetail ICD WITH(NOLOCK) ON ARICNS.intItemContractHeaderId = ICD.intItemContractHeaderId
+) ITEMCONTRACT ON (SOD.intItemContractHeaderId = ITEMCONTRACT.intItemContractHeaderId AND strContractCategoryId = 'Dollar') OR SOD.intItemContractDetailId = ITEMCONTRACT.intItemContractDetailId
 LEFT JOIN (
 	SELECT intTaxGroupId
 		 , strTaxGroup 

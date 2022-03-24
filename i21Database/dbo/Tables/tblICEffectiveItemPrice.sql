@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[tblICEffectiveItemPrice]
 	[intModifiedByUserId] INT NULL,
 	[intDataSourceId] TINYINT NULL,
 	[intImportFlagInternal] INT NULL,	
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,	
 	CONSTRAINT [PK_tblICEffectiveItemPrice] PRIMARY KEY ([intEffectiveItemPriceId]),
 	CONSTRAINT [FK_tblICEffectiveItemPrice_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblICEffectiveItemPrice_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])

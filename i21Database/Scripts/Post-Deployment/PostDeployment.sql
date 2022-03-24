@@ -100,6 +100,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_CreateIDPGridLayout.sql
 :r .\SM\2110_UpdateAuditLogs.sql
 :r .\SM\2110_AddIDPToCustomerLicenseModule.sql
+:r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
 
 
 -- Canned Report
@@ -279,8 +280,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
+:r .\AR\DefaultData\38_UpdateDefaultData.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
+:r .\AR\DefaultData\97_RefreshARTempTable.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -422,6 +425,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\StorageHistoryPaidAmount.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
+:R .\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql
 
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql
 :R .\GR\StorageInventoryReceipt.sql
@@ -543,6 +547,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\22_FileFieldMapping_Passport_ITT.sql
 :r .\ST\23_FileFieldMapping_Passport_ILT.sql
 :r .\ST\24_FileFieldMapping_Passport_MMT.sql
+:r .\ST\39_FileFieldMapping_Passport_TPM.sql
+:r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
 :r .\ST\25_DataFix.sql
 :r .\ST\26_FileFieldMapping_Commander_Department.sql
 :r .\ST\27_FileFieldMapping_Commander_FPHose.sql
@@ -553,10 +559,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql
 :r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
+:r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
-:r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
-:r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
 
 
 

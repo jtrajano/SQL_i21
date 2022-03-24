@@ -7,7 +7,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @voucherPayable VoucherPayable
 DECLARE @ErrorMessage NVARCHAR(4000);
@@ -26,7 +26,8 @@ BEGIN
 			,intTransactionType 
 			,intContractDetailId
 			,intItemId
-			,intLoadShipmentDetailId				
+			,intLoadShipmentDetailId
+			,intTicketDistributionAllocationId										
 	)
 	SELECT 
 		[intEntityVendorId]	= intEntityVendorId		
@@ -35,6 +36,7 @@ BEGIN
 		,intContractDetailId = intContractDetailId
 		,intItemId	= intItemId
 		,intLoadShipmentDetailId = intLoadDetailId
+		,intTicketDistributionAllocationId						
 	FROM tblSCTicketDirectAddPayable 
 	WHERE intTicketId = @intTicketId 
 

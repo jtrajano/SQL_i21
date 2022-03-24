@@ -148,7 +148,7 @@ BEGIN TRY
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
 			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END,
 			dblBalanceLoad		=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewBalance END,
-			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0
+			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0 and (CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END) > 0
 											THEN	(CASE	WHEN intContractStatusId = 5
 															THEN 1
 															ELSE intContractStatusId
@@ -170,7 +170,7 @@ BEGIN TRY
 		UPDATE tblCTContractDetail    
 		SET
 			intConcurrencyId = intConcurrencyId + 1,     
-			intContractStatusId = 	CASE WHEN @ysnCompleted = 0      
+			intContractStatusId = 	CASE WHEN @ysnCompleted = 0 and dblBalance > 0
 									THEN 	CASE WHEN intContractStatusId = 5     
 											THEN 1     
 											ELSE intContractStatusId     
@@ -230,6 +230,10 @@ BEGIN TRY
 			@strSource	 				= 	'Inventory',
 			@strProcess 				= 	@process,
 			@intUserId					= 	@intUserId
+
+	exec uspCTUpdateAppliedAndPrice
+		@intContractDetailId = @intContractDetailId
+		,@dblBalance = @dblNewBalance
 
 END TRY
 

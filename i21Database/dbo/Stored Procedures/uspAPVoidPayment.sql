@@ -48,7 +48,8 @@ BEGIN
 
 	--DO NOT ALLOW TO VOID THE PREPAYMENT PAYMENT IF IT WAS APPLIED ON THE BILLS
 	IF(
-		EXISTS(SELECT 1 FROM tblAPPayment A
+		EXISTS(
+			SELECT 1 FROM tblAPPayment A
 					INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 					INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 					INNER JOIN tblAPAppliedPrepaidAndDebit D ON C.intBillId = D.intTransactionId
@@ -57,7 +58,23 @@ BEGIN
 					AND D.dblAmountApplied > 0
 					AND E.ysnPosted = 1
 					AND B.ysnOffset = 0)
+		OR
+		EXISTS(
+			SELECT 1 FROM tblAPPayment A
+					INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+					INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+					INNER JOIN tblAPPaymentDetail D ON C.intBillId = D.intBillId
+					INNER JOIN tblAPPayment E ON D.intPaymentId = E.intPaymentId
+					INNER JOIN tblCMBankTransaction F ON E.strPaymentRecordNum = F.strTransactionId
+					WHERE 
+						A.intPaymentId IN (SELECT intId FROM @paymentKeys) --CURRENT VOIDING PAYMENT
+					AND E.intPaymentId NOT IN (SELECT intId FROM @paymentKeys) --OTHER PAYMENT
+					AND C.intTransactionType IN (2, 3, 13) --BASIS, PREPAID, DEBIT MEMO
+					AND E.ysnPosted = 1
+					AND F.ysnCheckVoid = 0
+					AND B.ysnOffset = 0
 		)
+	)
 	BEGIN
 		RAISERROR('Void failed. There are bills that applied this prepayment. Please unpost that first.', 16, 1);
 	END

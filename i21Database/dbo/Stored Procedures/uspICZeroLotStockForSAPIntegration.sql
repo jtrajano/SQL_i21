@@ -23,7 +23,13 @@ DECLARE
 	,@intInventoryAdjustmentId AS INT 
 
 DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
-SELECT @intEntityUserSecurityId = intEntityId FROM tblSMUserSecurity u WHERE u.strUserName = 'IRELYADMIN' AND @intEntityUserSecurityId IS NULL 
+SELECT TOP 1
+	@intEntityUserSecurityId = intEntityId 
+FROM 
+	tblSMUserSecurity u 
+WHERE 
+	u.strUserName IN ('IRELYADMIN', 'AUSSUP')
+	AND @intEntityUserSecurityId IS NULL 
 
 WHILE EXISTS (SELECT TOP 1 1 FROM @locations)
 BEGIN 

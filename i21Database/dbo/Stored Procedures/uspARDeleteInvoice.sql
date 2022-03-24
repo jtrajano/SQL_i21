@@ -96,6 +96,11 @@ BEGIN TRY
 			FROM tblARInvoiceDetail DETAIL
 			WHERE DETAIL.strDocumentNumber = @strShipmentNumber
 
+			INSERT INTO @InvoiceDetailIds
+			SELECT intInvoiceDetailId 
+			FROM tblARInvoiceDetail DETAIL
+			WHERE intInvoiceId = @InvoiceId AND intTicketId IS NULL
+
 			DELETE TAX 
 			FROM tblARInvoiceDetailTax TAX
 			INNER JOIN @InvoiceDetailIds DETAIL ON TAX.intInvoiceDetailId = DETAIL.intId
@@ -104,27 +109,44 @@ BEGIN TRY
 			FROM tblARInvoiceDetail DETAIL
 			INNER JOIN @InvoiceDetailIds SHIP ON DETAIL.intInvoiceDetailId = SHIP.intId
 
-			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
-			EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
+			IF NOT EXISTS (SELECT intTicketId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
+			BEGIN
+				DELETE FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
 
-			WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoiceDetailIds)
-				BEGIN
-					--AUDIT LOG
-					DECLARE @intInvoiceDetailId INT 
+				--AUDIT LOG          
+				EXEC dbo.uspSMAuditLog 
+					 @keyValue			= @InvoiceId						-- Primary Key Value of the Invoice. 
+					,@screenName		= 'AccountsReceivable.view.Invoice'	-- Screen Namespace
+					,@entityId			= @UserEntityID						-- Entity Id.
+					,@actionType		= 'Deleted'							-- Action Type
+					,@changeDescription	= ''								-- Description
+					,@fromValue			= ''								-- Previous Value
+					,@toValue			= ''								-- New Value
+			END	
+			ELSE 
+			BEGIN
+				EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
+				EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
 
-					SELECT TOP 1 @intInvoiceDetailId = intId FROM @InvoiceDetailIds
+				WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoiceDetailIds)
+					BEGIN
+						--AUDIT LOG
+						DECLARE @intInvoiceDetailId INT 
 
-					DECLARE @auditDetails NVARCHAR(max) = '{"change": "tblARInvoiceDetail", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@intInvoiceDetailId as varchar(15))+'", "keyValue": '+CAST(@intInvoiceDetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
+						SELECT TOP 1 @intInvoiceDetailId = intId FROM @InvoiceDetailIds
 
-					EXEC dbo.uspSMAuditLog @screenName = 'AccountsReceivable.view.Invoice'
-										 , @entityId = @UserEntityID
-										 , @actionType = 'Updated'
-										 , @actionIcon = 'small-tree-modified'
-										 , @keyValue = @InvoiceId
-										 , @details = @auditDetails
+						DECLARE @auditDetails NVARCHAR(max) = '{"change": "tblARInvoiceDetail", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@intInvoiceDetailId as varchar(15))+'", "keyValue": '+CAST(@intInvoiceDetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
 
-					DELETE FROM @InvoiceDetailIds WHERE intId = @intInvoiceDetailId
-				END
+						EXEC dbo.uspSMAuditLog @screenName = 'AccountsReceivable.view.Invoice'
+											 , @entityId = @UserEntityID
+											 , @actionType = 'Updated'
+											 , @actionIcon = 'small-tree-modified'
+											 , @keyValue = @InvoiceId
+											 , @details = @auditDetails
+
+						DELETE FROM @InvoiceDetailIds WHERE intId = @intInvoiceDetailId
+					END
+			END
 		END
 	ELSE
 		BEGIN

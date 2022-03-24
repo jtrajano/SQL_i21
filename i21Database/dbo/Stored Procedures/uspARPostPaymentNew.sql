@@ -895,6 +895,7 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
         ,@BatchId				= @BatchId
         ,@UserId				= @UserId
         ,@IntegrationLogId		= @IntegrationLogId
+		,@RaiseError			= @RaiseError
 
 END TRY
 BEGIN CATCH

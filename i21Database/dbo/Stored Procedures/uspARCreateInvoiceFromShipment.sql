@@ -27,7 +27,7 @@ DECLARE @ZeroDecimal					DECIMAL(18,6) = 0
 	  , @ysnHasPriceFixation			BIT = 0
 
 SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
-SET @dtmShipmentDate			 = ISNULL(CAST(@dtmShipmentDate AS DATE), @DateOnly)
+--SET @dtmShipmentDate			 = ISNULL(CAST(@dtmShipmentDate AS DATE), @DateOnly)
 
 DECLARE
 	 @TransactionType			NVARCHAR(25)
@@ -61,10 +61,10 @@ SELECT
 	,@CurrencyId				= ISNULL( ICIS.intCurrencyId, ISNULL((SELECT TOP 1 intCurrencyId FROM vyuARShippedItems WHERE intInventoryShipmentId = @ShipmentId AND intInventoryShipmentChargeId IS NOT NULL AND intCurrencyId IS nOT NULL),ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))))
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
-	,@Date						= @dtmShipmentDate
+	,@Date						= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
 	,@ShipDate					= ICIS.[dtmShipDate]
-	,@PostDate					= @dtmShipmentDate
-	,@CalculatedDate			= @dtmShipmentDate
+	,@PostDate					= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
+	,@CalculatedDate			= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
 	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
@@ -275,9 +275,11 @@ SELECT
 	,[strDocumentNumber]					= @ShipmentNumber 
 	,[strItemDescription]					= ARSI.[strItemDescription]
 	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-	,[dblQtyOrdered]						= CASE WHEN ISNULL(ARSI.[intContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intContractDetailId], 0) = 0 AND ISNULL(ARSI.[intItemContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intItemContractDetailId], 0) = 0
+	,[dblQtyOrdered]						= CASE WHEN ARSI.ysnDestinationWeightsAndGrades = 1 AND ARSI.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId = 1 THEN CTD.dblQuantity  ELSE
+											  (CASE WHEN ISNULL(ARSI.[intContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intContractDetailId], 0) = 0 AND ISNULL(ARSI.[intItemContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intItemContractDetailId], 0) = 0
 											  THEN 0 
 											  ELSE ARSI.[dblQtyOrdered] 
+											  END)
 											  END
 	,[intItemUOMId]							= ARSI.[intItemUOMId] 
 	,[intPriceUOMId]						= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[intPriceUOMId] ELSE ARSI.[intItemUOMId] END
@@ -349,6 +351,10 @@ SELECT
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 	,[dblStandardWeight]					= ARSI.dblStandardWeight
 FROM vyuARShippedItems ARSI
+LEFT JOIN(
+ SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
+ INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
+)CTD ON CTD.intContractDetailId =ARSI.intContractDetailId
 WHERE ARSI.[strTransactionType] = 'Inventory Shipment'
   AND ARSI.[intInventoryShipmentId] = @ShipmentId
   AND ARSI.intEntityCustomerId = @EntityCustomerId
@@ -939,7 +945,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 								SET dblPrice		= @dblFinalPrice
 								  , dblUnitPrice	= @dblFinalPrice
 								  , intPriceFixationDetailId	= @intPriceFixationDetailId
-								WHERE intId = @intInvoiceEntriesId OR (intContractDetailId = @intContractDetailId AND ISNULL(intOrderUOMId, 0) <> 0)
+								WHERE intId = @intInvoiceEntriesId AND (intContractDetailId = @intContractDetailId AND ISNULL(intOrderUOMId, 0) <> 0)
 
 								UPDATE @EntriesForInvoice
 								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN dblQtyOrdered ELSE @dblOriginalQtyShipped END

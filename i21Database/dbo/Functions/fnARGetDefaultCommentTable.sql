@@ -395,8 +395,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId IS NULL
-				AND intEntityCustomerId IS NULL		
-				AND strType IS NULL 
+				AND intEntityCustomerId IS NULL
+				AND strType IS NULL
 			ORDER BY A.[intDocumentMaintenanceId] DESC
 				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
 				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC

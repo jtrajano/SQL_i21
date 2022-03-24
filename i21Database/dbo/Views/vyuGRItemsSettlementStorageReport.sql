@@ -8,7 +8,7 @@ INNER JOIN (
 			,PivotColumn	= CONVERT(NVARCHAR,A.strStorageTypeDescription)
 			,Amount			= CONVERT(NVARCHAR, CONVERT(DECIMAL(18,2), ISNULL(SUM(A.dblOpenBalance),0))) COLLATE Latin1_General_CI_AS
 			,UnitMeasure	= UM.strUnitMeasure
-			,intEntityId	= CONVERT(NVARCHAR,A.intEntityId)  COLLATE Latin1_General_CI_AS
+			,intEntityId	= A.intEntityId
 			,PivotColumnId = A.intStorageScheduleTypeId
 		FROM (
 				SELECT 

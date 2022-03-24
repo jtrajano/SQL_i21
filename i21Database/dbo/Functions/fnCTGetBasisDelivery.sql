@@ -79,7 +79,7 @@ BEGIN
 			WHERE dtmHistoryCreated < DATEADD(DAY, 1, @dtmDate)
 		) tbl ON tbl.intContractDetailId = CD.intContractDetailId AND tbl.intContractHeaderId = CD.intContractHeaderId AND tbl.intRowId = 1
 		WHERE (tbl.intPricingTypeId = 2 or (tbl.intContractStatusId = 6 and 'Destination' not in (g.strWhereFinalized, w.strWhereFinalized)))
-			AND (tbl.intContractStatusId = 1 or (tbl.intContractStatusId = 5 and (g.strWhereFinalized = 'Destination' or w.strWhereFinalized = 'Destination'))) or (tbl.intContractStatusId = 6 and isnull(g.strWhereFinalized,'') <> 'Destination' and isnull(w.strWhereFinalized,'') <> 'Destination'))
+			AND (tbl.intContractStatusId in (1,4) or (tbl.intContractStatusId = 5 and (g.strWhereFinalized = 'Destination' or w.strWhereFinalized = 'Destination'))) or (tbl.intContractStatusId = 6 and isnull(g.strWhereFinalized,'') <> 'Destination' and isnull(w.strWhereFinalized,'') <> 'Destination'))
 	, CBL AS (
 		SELECT CBL1.*
 			, strEntityName = EM.strName

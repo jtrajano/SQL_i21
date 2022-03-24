@@ -13,6 +13,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @amountDue DECIMAL(18,2);
+DECLARE @discountAmt DECIMAL(18,6);
 
 IF @post = 0
 BEGIN
@@ -30,6 +31,7 @@ BEGIN
 									+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
 									- 	ABS(ISNULL(payDetails.dblInterest, 0))
 									),
+			@discountAmt = C.dblDiscount - ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount)),
 			tblAPBill.dblAmountDue = @amountDue, 
 			tblAPBill.ysnPaid = 0,
 			tblAPBill.dblPayment = C.dblPayment - 
@@ -39,7 +41,10 @@ BEGIN
 									- 	ABS(ISNULL(payDetails.dblInterest, 0))
 									),
 			tblAPBill.dtmDatePaid = NULL,
-			tblAPBill.dblDiscount = C.dblDiscount - ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount)),
+			tblAPBill.dblDiscount = CASE 
+										WHEN @discountAmt = 0 --if discount will be back to 0
+										THEN A2.dblDiscount --return the value of discount, this will be display on 'Terms Discount'
+									ELSE @discountAmt END,
 			tblAPBill.dblInterest = C.dblInterest - ABS(ISNULL(payDetails.dblInterest,0)),
 			tblAPBill.dtmInterestDate = ISNULL(latestPay.dtmDatePaid, NULL),
 			tblAPBill.dblWithheld = 0
@@ -64,17 +69,27 @@ BEGIN
 	) latestPay
 	OUTER APPLY 
 	(
-		SELECT 
-			SUM(B.dblPayment) dblPayment,
-			SUM(B.dblDiscount) dblDiscount,
-			SUM(B.dblInterest) dblInterest,
-			MIN(B.dblAmountDue) dblAmountDue,
-			B.intBillId 
-		FROM tblAPPaymentDetail B 
-		WHERE 
-			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
-		AND B.intBillId = C.intBillId
-		GROUP BY B.intBillId
+		SELECT
+			SUM(dblPayment) AS dblPayment,
+			SUM(dblDiscount) AS dblDiscount,
+			SUM(dblInterest) AS dblInterest,
+			MIN(dblAmountDue) AS dblAmountDue
+		FROM (
+			SELECT 
+				B.dblPayment,
+				CASE WHEN B.dblPayment + B.dblDiscount = B.dblAmountDue THEN B.dblDiscount 
+				WHEN C.ysnDiscountOverride = 1 THEN B.dblDiscount ELSE 0 END
+				AS dblDiscount,
+				CASE WHEN B.dblPayment - B.dblInterest = B.dblAmountDue THEN B.dblInterest 
+				ELSE 0 END
+				AS dblInterest,
+				B.dblAmountDue dblAmountDue,
+				B.intBillId 
+			FROM tblAPPaymentDetail B 
+			WHERE 
+				B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
+			AND B.intBillId = C.intBillId
+		) tmpPayDetails
 	) payDetails
 	OUTER APPLY (
 		SELECT 
@@ -119,7 +134,11 @@ BEGIN
 											(
 												paySchedDetails.dblDiscount,
 												CASE WHEN C.intTransactionType = 1 
-													THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, @amountDue) 
+													THEN 
+														(CASE WHEN C.ysnDiscountOverride = 0 AND @amountDue = 0
+															THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, @amountDue) 
+															ELSE ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
+														END)
 												ELSE 0 END
 											)
 										END),
@@ -139,19 +158,46 @@ BEGIN
 	INNER JOIN tblAPBill C
 		ON A2.intBillId = C.intBillId
 	OUTER APPLY (
-		SELECT 
-			SUM(B.dblPayment) dblPayment,
-			SUM(B.dblDiscount) dblDiscount,
-			SUM(B.dblInterest) dblInterest,
-			SUM(B.dblWithheld) dblWithheld,
-			MIN(B.dblAmountDue) dblAmountDue,
-			B.intBillId 
-		FROM tblAPPaymentDetail B 
-		WHERE 
-			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
-		AND B.intBillId = C.intBillId
-		AND B.dblPayment != 0
-		GROUP BY B.intBillId
+		--SELECT 
+		--	SUM(B.dblPayment) dblPayment,
+		--	SUM(B.dblDiscount) dblDiscount,
+		--	SUM(B.dblInterest) dblInterest,
+		--	SUM(B.dblWithheld) dblWithheld,
+		--	MIN(B.dblAmountDue) dblAmountDue,
+		--	B.intBillId 
+		--FROM tblAPPaymentDetail B 
+		--WHERE 
+		--	B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
+		--AND B.intBillId = C.intBillId
+		--AND B.dblPayment != 0
+		--GROUP BY B.intBillId
+		SELECT
+			intBillId,
+			SUM(dblPayment) AS dblPayment,
+			SUM(dblDiscount) AS dblDiscount,
+			SUM(dblInterest) AS dblInterest,
+			SUM(dblWithheld) AS dblWithheld,
+			MIN(dblAmountDue) AS dblAmountDue
+		FROM (
+			SELECT 
+				B.dblPayment,
+				--if voucher amount due the same as the payment detail payment, use discount
+				CASE WHEN B.dblPayment + B.dblDiscount - B.dblInterest = C.dblAmountDue THEN B.dblDiscount 
+				WHEN C.ysnDiscountOverride = 1 THEN B.dblDiscount ELSE 0 END
+				AS dblDiscount,
+				CASE WHEN B.dblPayment + B.dblDiscount - B.dblInterest = C.dblAmountDue THEN B.dblInterest 
+				ELSE 0 END
+				AS dblInterest,
+				B.dblAmountDue,
+				B.dblWithheld,
+				B.intBillId 
+			FROM tblAPPaymentDetail B 
+			WHERE 
+				B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
+			AND B.intBillId = C.intBillId
+			AND B.dblPayment != 0
+		) tmpPayDetails
+		GROUP BY intBillId
 	) payDetails
 	OUTER APPLY (
 		SELECT 

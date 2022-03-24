@@ -35,7 +35,11 @@ This table logs all inventory transactions related to Lot
 		[intCreatedEntityId] INT NULL,
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
-		[intSourceEntityId] INT NULL 
+		[intSourceEntityId] INT NULL,
+		[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[intTicketId] INT NULL,
 		CONSTRAINT [PK_tblICInventoryLotTransaction] PRIMARY KEY ([intInventoryLotTransactionId], [dtmCreated]),
 		CONSTRAINT [FK_tblICInventoryLotTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 		CONSTRAINT [FK_tblICInventoryLotTransaction_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),

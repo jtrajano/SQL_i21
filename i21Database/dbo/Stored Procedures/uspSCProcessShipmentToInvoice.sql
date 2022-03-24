@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].uspSCProcessShipmentToInvoice
+﻿CREATE PROCEDURE [dbo].[uspSCProcessShipmentToInvoice]
     @intTicketId INT
 	,@intInventoryShipmentId INT
 	,@intUserId INT
@@ -25,6 +25,9 @@ BEGIN
 	DECLARE @intTicketContractDetailId INT
 	DECLARE @intTicketItemUOMId INT
 	DECLARE @dblNetUnits NUMERIC(18,6)
+	DECLARE @dblTicketDWGSpotPrice NUMERIC(18,6)
+	DECLARE @intContractDetailId INT
+	DECLARE @InvoiceDetailId INT 
 
 
 	BEGIN TRY
@@ -36,6 +39,7 @@ BEGIN
 				,@intTicketContractDetailId = intContractId
 				,@intTicketItemUOMId = A.intItemUOMIdTo
 				, @dblNetUnits = A.dblNetUnits
+				,@dblTicketDWGSpotPrice = A.dblDWGSpotPrice
 			FROM tblSCTicket A
 			LEFT JOIN tblCTContractDetail B
 				ON A.intContractId = B.intContractDetailId
@@ -53,9 +57,18 @@ BEGIN
 				BEGIN
 					EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId , 0, 1 ,@dtmShipmentDate = @dtmClientDate;
 
+					SELECT
+					@InvoiceDetailId = ID.intInvoiceDetailId, @intContractDetailId = ID.intContractDetailId
+					FROM tblARInvoiceDetail ID INNER JOIN tblICItem I ON I.intItemId = ID.intItemId AND I.strType = 'Other Charge' WHERE ID.intInvoiceId=@intInvoiceId
+	
+				     IF  ISNULL(@InvoiceDetailId,0) <> 0 AND  ISNULL(@intContractDetailId,0) <> 0 
+					 BEGIN
+					 EXEC [dbo].[uspARAddDiscountsCharges] @intContractDetailId=@intContractDetailId,@intInventoryShipmentId=@intInventoryShipmentId,@UserId=@intUserId,@intInvoiceDetailId=@InvoiceDetailId
+					 END
+
 					IF(ISNULL(@intInvoiceId,0) <> 0 AND @ysnDWG = 1)
 					BEGIN
-						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,0--@intTicketId
+						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,0,@dblTicketDWGSpotPrice--@intTicketId
 					END
 				END
 

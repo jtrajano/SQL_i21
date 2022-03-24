@@ -73,8 +73,8 @@ BEGIN TRY
 			FROM (
 					SELECT 
 						t.dtmDate
-						,correctSeq = ROW_NUMBER() OVER (ORDER BY t.dtmDate, t.intInventoryTransactionId)
-						,actualSeq = ROW_NUMBER() OVER (ORDER BY t.intInventoryTransactionId)
+						,correctSeq = ROW_NUMBER() OVER (ORDER BY t.intItemId, t.dtmDate, t.intInventoryTransactionId)
+						,actualSeq = ROW_NUMBER() OVER (ORDER BY t.intItemId, t.intInventoryTransactionId)
 					FROM 
 						tblICInventoryTransaction t INNER JOIN tblICItem i 
 							ON t.intItemId = i.intItemId
@@ -97,7 +97,7 @@ BEGIN TRY
 	SELECT  TOP 1 
 			@intUserId = intEntityId
 	FROM	tblSMUserSecurity
-	WHERE	strUserName = 'irelyadmin'
+	WHERE	strUserName IN ('irelyadmin', 'aussup')
 
 	-- Exit immediately if the start date is blank. 
 	IF @dtmStartDate IS NULL 

@@ -541,6 +541,7 @@ INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalNam
 INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) 	SELECT 388 ,21	,'Marshall County', 'School', 1	WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 388 )
 INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) 	SELECT 389 ,21	,'Scott County', 'School', 1	WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 389 )
 INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) 	SELECT 390 ,21	,'Warren County', 'School', 1	WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 390 )
+INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) SELECT 391, 18, 'Posey', 'County', 1 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 391)
 GO
 
 INSERT INTO tblPRIRSCountryCode (intIRSCountryCodeId, strCountry, strCode, intConcurrencyId) SELECT 1, 'Afghanistan', 'AF', 1 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRIRSCountryCode WHERE intIRSCountryCodeId = 1)

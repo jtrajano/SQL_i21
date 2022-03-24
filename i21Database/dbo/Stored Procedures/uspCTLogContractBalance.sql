@@ -227,7 +227,7 @@ BEGIN
 			, strProcess
 			, ysnDeleted
 		FROM #tmpLogItems WHERE intId = @Id
-		AND NOT (@intHeaderPricingTypeId = 1 AND strTransactionType LIKE '%Basis Deliveries%')
+		AND NOT (@intHeaderPricingTypeId IN (1, 3, 4, 5, 6, 7, 8) AND strTransactionType LIKE '%Basis Deliveries%')
 
 		SET @intTransCtr += 1
 		IF (@intTransCtr % 10000 = 0)
@@ -373,7 +373,7 @@ BEGIN
 		, intActionId
 		, strAction = A.strActionIn 
 		, dtmTransactionDate
-		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETUTCDATE() END
+		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), dtmTransactionDate) ELSE GETUTCDATE() END
 		, strTransactionType
 		, strTransactionReference
 		, intTransactionReferenceId

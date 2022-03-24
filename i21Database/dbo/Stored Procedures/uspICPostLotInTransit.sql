@@ -27,6 +27,10 @@ CREATE PROCEDURE [dbo].[uspICPostLotInTransit]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20)
 	,@intSourceEntityId AS INT = NULL 
+	,@strSourceType NVARCHAR(100) = NULL 
+	,@strSourceNumber NVARCHAR(100) = NULL 
+	,@strBOLNumber NVARCHAR(100) = NULL 
+	,@intTicketId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -192,6 +196,10 @@ BEGIN
 					,@dblForexRate = @dblForexRate
 					,@strActualCostId = @strActualCostId
 					,@intSourceEntityId = @intSourceEntityId
+					,@strSourceType = @strSourceType
+					,@strSourceNumber = @strSourceNumber
+					,@strBOLNumber = @strBOLNumber
+					,@intTicketId = @intTicketId
 					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -323,6 +331,10 @@ BEGIN
 				,@dblForexRate = @dblForexRate
 				,@strActualCostId = @strActualCostId
 				,@intSourceEntityId = @intSourceEntityId
+				,@strSourceType = @strSourceType
+				,@strSourceNumber = @strSourceNumber
+				,@strBOLNumber = @strBOLNumber
+				,@intTicketId = @intTicketId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -421,6 +433,10 @@ BEGIN
 							,@strDescription = @strDescription
 							,@strActualCostId = @strActualCostId
 							,@intSourceEntityId = @intSourceEntityId
+							,@strSourceType = @strSourceType
+							,@strSourceNumber = @strSourceNumber
+							,@strBOLNumber = @strBOLNumber
+							,@intTicketId = @intTicketId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;

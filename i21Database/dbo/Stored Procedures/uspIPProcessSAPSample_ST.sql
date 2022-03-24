@@ -671,7 +671,7 @@ BEGIN TRY
 					,@intProductTypeId
 					,@intProductValueId
 					,@intSampleStatusId
-					,@intSampleStatusId
+					,1
 					,@intItemId
 					,@intItemContractId
 					,@intItemBundleId
@@ -812,7 +812,7 @@ BEGIN TRY
 			IF ISNULL(@strTransactionType, '') = 'SAMPLE_UPDATE'
 			BEGIN
 				SELECT @intSampleId = intSampleId
-					,@intPreviousSampleStatusId = intSampleStatusId
+					,@intPreviousSampleStatusId = 1
 				FROM tblQMSample WITH (NOLOCK)
 				WHERE strSampleNumber = @strSampleNumber
 

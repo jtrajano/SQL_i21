@@ -33,6 +33,8 @@
     [intApplianceTypeID]       INT              NULL,
     [intLocationId] INT NULL, 
     [intManufacturerId] INT NULL, 
+    [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+    [intRowNumber] INT NULL,
     CONSTRAINT [PK_tblTMDevice] PRIMARY KEY CLUSTERED ([intDeviceId] ASC),
     CONSTRAINT [FK_tblTMDevice_tblTMApplianceType] FOREIGN KEY ([intApplianceTypeID]) REFERENCES [dbo].[tblTMApplianceType] ([intApplianceTypeID]),
     CONSTRAINT [FK_tblTMDevice_tblTMDeployedStatus] FOREIGN KEY ([intDeployedStatusID]) REFERENCES [dbo].[tblTMDeployedStatus] ([intDeployedStatusID]) ON DELETE SET NULL,

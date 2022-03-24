@@ -207,6 +207,10 @@ INSERT INTO tblICBackupDetailInventoryTransaction(
 	, dblCategoryRetailValue
 	, intCategoryId
 	, intCompanyId
+	, strSourceType
+	, strSourceNumber
+	, strBOLNumber
+	, intTicketId
 	, intCreatedUserId
 	, intCreatedEntityId
 	
@@ -251,7 +255,11 @@ SELECT
 	, dblCategoryCostValue				= t.dblCategoryCostValue		
 	, dblCategoryRetailValue			= t.dblCategoryRetailValue		
 	, intCategoryId						= t.ysnNoGLPosting		
-	, intCompanyId						= t.intCompanyId						
+	, intCompanyId						= t.intCompanyId
+	, strSourceType						= t.strSourceType
+	, strSourceNumber					= t.strSourceNumber
+	, strBOLNumber						= t.strBOLNumber
+	, intTicketId						= t.intTicketId
 	, intCreatedUserId					= t.intCreatedUserId					
 	, intCreatedEntityId				= t.intCreatedEntityId				
 FROM tblICInventoryTransaction t
@@ -323,6 +331,10 @@ INSERT INTO tblICBackupDetailInventoryTransactionStorage(
 	, intForexRateTypeId
 	, dblForexRate
 	, intCompanyId
+	, strSourceType
+	, strSourceNumber
+	, strBOLNumber
+	, intTicketId
 	, dtmCreated						
 	, intCreatedUserId					
 	, intCreatedEntityId
@@ -359,6 +371,10 @@ SELECT
 	, intForexRateTypeId				= t.intForexRateTypeId	
 	, dblForexRate						= t.dblForexRate	
 	, intCompanyId						= t.intCompanyId	
+	, strSourceType						= t.strSourceType
+	, strSourceNumber					= t.strSourceNumber
+	, strBOLNumber						= t.strBOLNumber
+	, intTicketId						= t.intTicketId
 	, dtmCreated						= t.dtmCreated						
 	, intCreatedUserId					= t.intCreatedUserId					
 	, intCreatedEntityId				= t.intCreatedEntityId

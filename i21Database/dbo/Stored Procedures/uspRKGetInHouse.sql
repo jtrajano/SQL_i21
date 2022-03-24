@@ -51,13 +51,17 @@ BEGIN
 		, intTransactionId = intTransactionRecordHeaderId
 		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
 			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
-			WHEN CompOwn.intContractHeaderId IS NOT NULL THEN (SELECT strDistributionOption FROM vyuSCTicketView WHERE intTicketId = CompOwn.intTicketId and intContractId = CompOwn.intContractDetailId)
+			WHEN CompOwn.intContractHeaderId IS NOT NULL 
+				THEN ISNULL(
+			     (SELECT TOP 1 strDistributionOption FROM tblSCTicket WHERE intTicketId = CompOwn.intTicketId and intContractId = CompOwn.intContractDetailId),
+				 (SELECT TOP 1 'CNT' FROM tblSCTicketContractUsed WHERE intTicketId = CompOwn.intTicketId and intContractDetailId = CompOwn.intContractDetailId) )
 			WHEN CompOwn.strTransactionType = 'Inventory Adjustment' THEN 'ADJ'
 			WHEN CompOwn.strTransactionType IN ('Inventory Receipt','Inventory Shipment') AND CompOwn.intContractHeaderId IS NULL AND CompOwn.intTicketId IS NULL THEN ''
-			ELSE ST.strStorageTypeCode END
+			ELSE ISNULL(ST.strStorageTypeCode, ISNULL(TV.strDistributionOption, '')) END
 		,strOwnership = 'Company Owned'
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmToTransactionDate,@intCommodityId,NULL) CompOwn
 	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
+	LEFT JOIN tblSCTicket TV on CompOwn.intTicketId = TV.intTicketId
 	WHERE CompOwn.intItemId = ISNULL(@intItemId, CompOwn.intItemId)
 		AND CompOwn.intLocationId = ISNULL(@intLocationId, CompOwn.intLocationId)
 		AND CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)

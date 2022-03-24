@@ -28,4 +28,8 @@ CREATE TYPE [dbo].[ItemInTransitCostingTableType] AS TABLE
 	,[intForexRateTypeId] INT NULL
 	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1 
 	,[intSourceEntityId] INT NULL
+	,[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[intTicketId] INT NULL 
 )

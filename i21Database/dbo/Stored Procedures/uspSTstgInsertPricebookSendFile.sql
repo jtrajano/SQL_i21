@@ -303,7 +303,8 @@ BEGIN
 
 							[strITTDataActiveFlgValue]				NVARCHAR(5) COLLATE Latin1_General_CI_AS	NULL,
 							[dblITTDataInventoryValuePrice]			NUMERIC(18, 2)								NULL,
-							[intITTDataMerchandiseCode]				INT											NULL,
+							--[intITTDataMerchandiseCode]			INT										NULL,
+							[strITTDataMerchandiseCode]				NVARCHAR(20) COLLATE Latin1_General_CI_AS	NULL,
 							[dblITTDataRegularSellPrice]			NUMERIC(18, 2)								NULL,
 							[strITTDataDescription]					NVARCHAR(150) COLLATE Latin1_General_CI_AS	NULL,
 							[strITTDataLinkCode]					NVARCHAR(20) COLLATE Latin1_General_CI_AS	NULL,
@@ -336,7 +337,7 @@ BEGIN
 
 							[strITTDataActiveFlgValue],
 							[dblITTDataInventoryValuePrice],
-							[intITTDataMerchandiseCode],
+							[strITTDataMerchandiseCode],
 							[dblITTDataRegularSellPrice],
 							[strITTDataDescription],
 							[strITTDataLinkCode],
@@ -388,7 +389,7 @@ BEGIN
 																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
 																	ELSE Prc.dblSalePrice
 																END, 
-							[intITTDataMerchandiseCode]			= CatLoc.intRegisterDepartmentId,
+							[strITTDataMerchandiseCode]			= CatLoc.strCashRegisterDepartment,
 							[dblITTDataRegularSellPrice]		= CASE 
 																	WHEN (GETDATE() BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
 																		THEN SplPrc.dblUnitAfterDiscount 
@@ -535,7 +536,7 @@ BEGIN
 																	SELECT
 																		ITTData.strITTDataActiveFlgValue			AS [ActiveFlg/@value],
 																		ITTData.dblITTDataInventoryValuePrice		AS [InventoryValuePrice],
-																		ITTData.intITTDataMerchandiseCode			AS [MerchandiseCode],
+																		ITTData.strITTDataMerchandiseCode			AS [MerchandiseCode],
 																		ITTData.dblITTDataRegularSellPrice			AS [RegularSellPrice],
 																		ITTData.strITTDataDescription				AS [Description],
 																		ITTData.strITTDataLinkCode					AS [LinkCode],
@@ -552,7 +553,7 @@ BEGIN
 																			[strICPOSCode],
 																			[strITTDataActiveFlgValue],
 																			[dblITTDataInventoryValuePrice],
-																			[intITTDataMerchandiseCode],
+																			[strITTDataMerchandiseCode],
 																			[dblITTDataRegularSellPrice],
 																			[strITTDataDescription],
 																			[strITTDataLinkCode],
@@ -1099,7 +1100,7 @@ BEGIN
 					, [strUpc]						=	PCF.strUPCwthOrwthOutCheckDigit -- IF COMMANDER/SAPPHIRE include check digit
 					, [strUpcModifier]				=	'000'
 					, [strDescription]				=	LEFT(  REPLACE(REPLACE(REPLACE(REPLACE(Item.strDescription, '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
-					, [strDepartment]				=	CAST(CategoryLoc.intRegisterDepartmentId AS NVARCHAR(50))
+					, [strDepartment]				=	CAST(CategoryLoc.strCashRegisterDepartment AS NVARCHAR(50))
 					, [strFee]						=	CAST(ItemLoc.intBottleDepositNo AS NVARCHAR(10)) -- CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
 					, [strPCode]					=	ISNULL(StorePCode.strRegProdCode, '') -- ISNULL(StorePCode.strRegProdCode, '')
 					, [dblPrice]					=	ISNULL(CASE  WHEN GETDATE() BETWEEN spPrice.dtmBeginDate AND spPrice.dtmEndDate THEN spPrice.dblUnitAfterDiscount 

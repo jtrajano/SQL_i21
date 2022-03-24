@@ -26,7 +26,11 @@ BEGIN TRY
 			@intParentDetailId			INT,
 			@intContractCostId			INT,
 			@intCostUniqueId			INT,
-			@intFuturesUniqueId			INT
+			@intFuturesUniqueId			INT,
+			@intNewPricingTypeId		INT,
+			@ysnWithPricing				BIT,
+			@dblQuantity				NUMERIC(18,6),
+			@dblBalance				NUMERIC(18,6)
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber
@@ -57,7 +61,7 @@ BEGIN TRY
 	SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intUniqueId,* 
 	INTO	#ProcessDetail
 	FROM	OPENXML(@idoc,'tblCTContractDetails/tblCTContractDetail',2)          
-	WITH	(intContractDetailId INT,strRowState NVARCHAR(50),ysnSlice BIT, intParentDetailId INT, dblCashPrice NUMERIC(18,6))      
+	WITH	(intContractDetailId INT,strRowState NVARCHAR(50),ysnSlice BIT, intParentDetailId INT, dblCashPrice NUMERIC(18,6), intPricingTypeId INT)      
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail
 
@@ -67,7 +71,8 @@ BEGIN TRY
 				@strRowState			=	strRowState,
 				@ysnSlice				=	ysnSlice,
 				@intParentDetailId		=	intParentDetailId,
-				@dblCashPrice			=	dblCashPrice
+				@dblCashPrice			=	dblCashPrice,
+				@intNewPricingTypeId	=	intPricingTypeId
 		FROM	#ProcessDetail 
 		WHERE	intUniqueId = @intUniqueId
 
@@ -115,7 +120,41 @@ BEGIN TRY
 		END
 		ELSE IF(@strRowState = 'Modified')
 		BEGIN
-			SELECT @intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
+
+			SELECT @intPricingTypeId = intPricingTypeId, @dblQuantity = dblQuantity, @dblBalance = dblBalance FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId;
+			select top 1 @ysnWithPricing = convert(bit,pf.intPriceFixationId) from tblCTPriceFixation pf where pf.intContractHeaderId = @intContractHeaderId and isnull(pf.intContractDetailId,0) = (case when @ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else @intContractDetailId end)
+
+			if (
+				@intNewPricingTypeId != @intPricingTypeId and
+				(
+					isnull(@ysnMultiplePriceFixation,0) = 1 or
+					isnull(@ysnWithPricing,0) = 1 or
+					@dblQuantity <> @dblBalance
+				)
+			)
+			begin
+				set @ErrMsg = (
+					case
+					when isnull(@ysnMultiplePriceFixation,0) = 1
+					then 'Changing pricing type for contract that is Multiple Price is not allowed.'
+					else (
+						case
+						when isnull(@ysnWithPricing,0) = 1
+						then 'Changing pricing type for sequence that is partially/fully priced is not allowed.'
+						else (
+							case
+							when @dblQuantity <> @dblBalance
+							then 'Changing pricing type for sequence with applied quantity is not allowed.'
+							else 'Unable to change the pricing type.'
+							end
+						)
+						end
+					)
+					end
+				)
+				RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
+			end
+
 			IF @intPricingTypeId IN (1,6)
 			BEGIN
 				IF(SELECT dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId) <> @dblCashPrice
