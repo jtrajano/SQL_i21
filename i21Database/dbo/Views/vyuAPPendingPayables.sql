@@ -39,6 +39,9 @@ SELECT
 	,A.intContractSeqId
 	,A.intContractCostId
 	,A.strContractNumber
+	,CDV.strContractStatus
+	,CDV.dtmStartDate
+	,CDV.dtmEndDate
 	,A.intScaleTicketId
 	,A.strScaleTicketNumber
 	,A.intInventoryReceiptItemId
@@ -172,3 +175,4 @@ AND ISNULL(A.intItemId,-1) = ISNULL(A2.intItemId,-1)
 
 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 	ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
+LEFT JOIN vyuCTContractDetailView CDV ON CDV.intContractDetailId = A.intContractDetailId AND CDV.intContractSeq = A.intContractSeqId
