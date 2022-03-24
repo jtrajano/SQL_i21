@@ -1778,6 +1778,52 @@ BEGIN
 				strTransactionId = @strTransactionId
 				AND ysnIsUnposted = 0 
 		END 
+		
+		-- Update the Missing Lot's Qty and Weights. 
+		-- The Lot Qty should not be zero for Missing Lots so that it can be used to track insurance claims. 
+		BEGIN 
+			UPDATE	Lot 
+			SET		Lot.dblQty =	
+						dbo.fnCalculateLotQty(
+							Lot.intItemUOMId
+							, rtnItem.intUnitMeasureId
+							, Lot.dblQty
+							, Lot.dblWeight
+							, rtnLot.dblQuantity
+							, Lot.dblWeightPerQty
+						)
+					,Lot.dblWeight = 
+						dbo.fnCalculateLotWeight(
+							Lot.intItemUOMId
+							, Lot.intWeightUOMId
+							, rtnItem.intUnitMeasureId
+							, Lot.dblWeight
+							, rtnLot.dblQuantity
+							, Lot.dblWeightPerQty
+						)						
+			FROM	tblICInventoryReceipt rtn INNER JOIN tblICInventoryReceiptItem rtnItem
+						ON rtn.intInventoryReceiptId = rtnItem.intInventoryReceiptId
+					INNER JOIN tblICInventoryReceiptItemLot rtnLot
+						ON rtnLot.intInventoryReceiptItemId = rtnItem.intInventoryReceiptItemId
+					INNER JOIN tblICLot Lot
+						ON Lot.intLotId = rtnLot.intLotId 
+						AND Lot.intItemId = rtnItem.intItemId 
+			WHERE
+					rtnLot.strCondition = 'Missing'
+
+			UPDATE	Lot 
+			SET		Lot.dblTare = dbo.fnMultiply(Lot.dblQty, Lot.dblTarePerQty) 
+					,Lot.dblGrossWeight = dbo.fnMultiply(Lot.dblQty, Lot.dblTarePerQty) + Lot.dblWeight
+			FROM	tblICInventoryReceipt rtn INNER JOIN tblICInventoryReceiptItem rtnItem
+						ON rtn.intInventoryReceiptId = rtnItem.intInventoryReceiptId
+					INNER JOIN tblICInventoryReceiptItemLot rtnLot
+						ON rtnLot.intInventoryReceiptItemId = rtnItem.intInventoryReceiptItemId
+					INNER JOIN tblICLot Lot
+						ON Lot.intLotId = rtnLot.intLotId 
+						AND Lot.intItemId = rtnItem.intItemId 
+			WHERE
+					rtnLot.strCondition = 'Missing'
+		END 
 	END
 END   
 
