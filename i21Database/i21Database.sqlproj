@@ -9155,6 +9155,7 @@
     <Build Include="dbo\Stored Procedures\uspSMLogPerformanceRuntime.sql" />
     <None Include="Scripts\Utility\IC\DPR\uspICDPRDiagnostics.sql" />
     <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
+    <None Include="Scripts\Utility\GR\uspGRGrainStorageDiagnostics.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
