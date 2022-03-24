@@ -777,6 +777,37 @@ BEGIN
 	SELECT 3,'Crop Year','cropyearcombo', 1
 END
 GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 4)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 4,'Packaging','packagecombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 5)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 5,'INCO Terms','incotermcombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 6)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 6,'Period of Delivery','periodcombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 7)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 7,'Association','assoccombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 8)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 8,'Arbitration','arbitrationcombo', 1
+END
+GO
+
 
 
 
