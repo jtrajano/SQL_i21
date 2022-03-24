@@ -7,7 +7,7 @@ SELECT
 	,ShipVia.strName AS strShipViaName
 	,CF.intCategoryId
 	,CAT.strCategoryCode AS strCategoryCode
-	,AR.intEntityTariffTypeId
+	,CF.intEntityTariffTypeId
 	,CF.intEntityCustomerId
 	,Customer.strName AS strCustomerName
 	,C.dtmEffectiveDateTime
@@ -31,6 +31,6 @@ FROM tblARCustomerFreightXRef CF
 	INNER JOIN tblAPVendor Supplier ON Supplier.intEntityId = SupplyPointLoc.intEntityId
 	INNER JOIN tblEMEntity Vendor ON Vendor.intEntityId = Supplier.intEntityId
 CROSS APPLY (
-	SELECT  * FROM dbo.fnTRGetFreightSurcharge(CF.strFreightType, CF.intCategoryId, AR.intEntityTariffTypeId, CF.dblFreightRate, CONVERT(int,CF.dblFreightMiles))
+	SELECT  * FROM dbo.fnTRGetFreightSurcharge(CF.strFreightType, CF.intCategoryId, CF.intEntityTariffTypeId, CF.dblFreightRate, CONVERT(int,CF.dblFreightMiles))
 ) C
 	INNER JOIN tblEMEntity ShipVia ON ShipVia.intEntityId = C.intShipViaId
