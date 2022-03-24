@@ -148,6 +148,33 @@ BEGIN
 
 			END
 		END
+		ELSE
+		BEGIN
+			INSERT INTO tblTMOrder (
+				intDispatchId,
+				intSiteId,
+				intItemId,
+				strOrderNumber,
+				strPricingMethod,
+				dblQuantity,
+				dblPrice,
+				dblTotal,
+				strSource,
+				dtmTransactionDate
+			)
+			VALUES(
+				@intDispatchId,
+				@intSiteId,
+				@intItemId,
+				@strOrderNumber,
+				@strPricingMethod,
+				@dblQuantity,
+				@dblPrice,
+				@dblTotal,
+				@strSource,
+				GETDATE()
+			)
+		END
 
 	END
 	ELSE
