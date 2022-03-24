@@ -12,6 +12,7 @@
 	[dblTotal] NUMERIC(18,6) NULL,
 	[strSource] NVARCHAR(100) NULL,
 	[dtmTransactionDate] DATETIME NOT NULL,
+	[ysnOverage] BIT NULL,
 	CONSTRAINT [PK_tblTMOrder] PRIMARY KEY CLUSTERED ([intOrderId] ASC),
 	CONSTRAINT [FK_tblTMOrder_tblTMSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 )
