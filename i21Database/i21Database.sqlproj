@@ -694,6 +694,7 @@
     <Folder Include="Scripts\Post-Deployment\FA\" />
     <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
     <Folder Include="Scripts\Utility\IC\DPR" />
+    <Folder Include="Scripts\Utility\SC" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
@@ -10335,6 +10336,7 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
+    <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
     <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
   </ItemGroup>
   <ItemGroup>

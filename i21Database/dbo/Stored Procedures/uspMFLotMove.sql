@@ -15,6 +15,7 @@
 	,@intNewLotId INT = NULL OUTPUT
 	,@intWorkOrderId int=NULL
 	,@intAdjustmentId INT = NULL Output
+	,@ysnExternalSystemMove BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -184,7 +185,7 @@ BEGIN TRY
 						THEN @dblMoveQty * @dblWeightPerQty
 					ELSE @dblMoveQty
 					END
-				)) > Convert(DECIMAL(24, 3), @dblLotAvailableQty)
+				)) > Convert(DECIMAL(24, 3), @dblLotAvailableQty) AND @ysnExternalSystemMove=0
 	BEGIN
 		SET @ErrMsg = 'Move qty ' + LTRIM(CONVERT(NUMERIC(38, 4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item ''' + @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 
@@ -353,7 +354,7 @@ BEGIN TRY
 
 	IF @blnIsPartialMove = 1
 	BEGIN
-		IF @blnValidateLotReservation = 1
+		IF @blnValidateLotReservation = 1 AND @ysnExternalSystemMove=0
 		BEGIN
 			IF (
 					@dblLotAvailableQty + (
@@ -387,7 +388,7 @@ BEGIN TRY
 		SELECT @dblWorkOrderReservedQty = 0
 	END
 
-	IF (
+	IF ((
 			@dblLotAvailableQty + (
 				CASE 
 					WHEN @intItemUOMId = @intMoveItemUOMId
@@ -396,7 +397,7 @@ BEGIN TRY
 					ELSE - @dblMoveQty
 					END
 				)
-			) < @dblWorkOrderReservedQty
+			) < @dblWorkOrderReservedQty) AND @ysnExternalSystemMove=0
 	BEGIN
 		RAISERROR (
 				'There is reservation against this lot. Cannot proceed.'

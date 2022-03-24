@@ -51,6 +51,8 @@ DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 
 -- Get the GL Account ids to use
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
+DECLARE @Receive_GLAccount AS dbo.ItemGLAccount; 
+
 INSERT INTO @GLAccounts (
 	intItemId 
 	,intItemLocationId 
@@ -77,6 +79,33 @@ FROM	(
 						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	t.strBatchId = @strBatchId
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
+		) Query
+
+INSERT INTO @Receive_GLAccount (
+	intItemId 
+	,intItemLocationId 
+	,intInventoryId 
+	,intAutoNegativeId 
+	,intTransactionTypeId
+)
+SELECT	Query.intItemId
+		,Query.intItemLocationId
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
+		,intTransactionTypeId
+FROM	(
+			SELECT	DISTINCT 
+					t.intItemId
+					, intItemLocationId = t.intItemLocationId
+					, t.intTransactionTypeId
+			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
+						ON t.intItemId = i.intItemId 
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			WHERE	t.strBatchId = @strBatchId
+					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
+					AND t.intInTransitSourceLocationId IS NULL 
 		) Query
 
 IF @intContraInventory_LocationId IS NOT NULL 
@@ -258,10 +287,11 @@ BEGIN
 	DECLARE @intFunctionalCurrencyId AS INT
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 END 
-;
+
+DECLARE @resultGLEntries AS RecapTableType
 
 -- Generate the G/L Entries here: 
-WITH ForGLEntries_CTE (
+;WITH ForGLEntries_CTE (
 	dtmDate
 	,intItemId
 	,intItemLocationId
@@ -317,9 +347,47 @@ AS
 			--AND t.intInTransitSourceLocationId IS NOT NULL 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 )
--------------------------------------------------------------------------------------------
--- This part is for the usual G/L entries for Inventory Account and its contra account 
--------------------------------------------------------------------------------------------
+INSERT INTO @resultGLEntries (
+		[dtmDate] 
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]	
+		,[dblDebitReport]	
+		,[dblCreditForeign]	
+		,[dblCreditReport]	
+		,[dblReportingRate]	
+		,[dblForeignRate]
+		,[intSourceEntityId]
+		,[intCommodityId]
+)
+/*
+	Expected GL entries: 
+
+	Inventory ------------------------ Debit
+	Inventory In-Transit ------------------------- Credit
+*/
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
@@ -617,3 +685,276 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		)
 		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0
+
+-- Fix the in-transit discrepancy with the received stock
+BEGIN 
+	;WITH DiscrepanyCTE (
+		dtmDate
+		,intItemId
+		,intItemLocationId
+		,intTransactionId
+		,strTransactionId
+		,dblValue
+		,intTransactionTypeId
+		,intCurrencyId
+		,dblExchangeRate
+		,intInventoryTransactionId
+		,strInventoryTransactionTypeName
+		,strTransactionForm
+		,strDescription
+		,dblForexRate
+		,intSourceEntityId
+		,intCommodityId
+		,intInTransitSourceLocationId
+	)
+	AS 
+	(
+		SELECT	inTransit.dtmDate
+				,inTransit.intItemId
+				,intItemLocationId = ISNULL(inTransit.intInTransitSourceLocationId, inTransit.intItemLocationId)
+				,inTransit.intTransactionId
+				,inTransit.strTransactionId
+				,dblValue = inventory.dblValue
+				,inTransit.intTransactionTypeId
+				,r.intCurrencyId 
+				,dblExchangeRate = ISNULL(NULLIF(ri.dblForexRate, 0), 1)
+				,inTransit.intInventoryTransactionId
+				,strInventoryTransactionTypeName = TransType.strName
+				,inTransit.strTransactionForm 
+				,inTransit.strDescription
+				,inTransit.dblForexRate
+				,inTransit.intSourceEntityId
+				,i.intCommodityId
+				,inTransit.intInTransitSourceLocationId
+		FROM
+			tblICInventoryTransaction inTransit 
+			INNER JOIN tblICItem i
+				ON i.intItemId = inTransit.intItemId
+			INNER JOIN tblICInventoryReceipt r 
+				ON r.strReceiptNumber = inTransit.strTransactionId
+			INNER JOIN tblICInventoryReceiptItem ri
+				ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+				AND ri.intInventoryReceiptItemId = inTransit.intTransactionDetailId
+				AND ri.intItemId = i.intItemId
+			INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON inTransit.intTransactionTypeId = TransType.intTransactionTypeId				
+			CROSS APPLY (
+				SELECT 
+					dblValue = SUM(ROUND(dbo.fnMultiply(inventory.dblQty, inventory.dblCost), 2)) 
+				FROM 
+					tblICInventoryTransaction inventory
+				WHERE
+					inventory.strTransactionId = inTransit.strTransactionId
+					AND inventory.strBatchId = inTransit.strBatchId
+					AND inventory.intItemId = inTransit.intItemId
+					AND inventory.intTransactionId = inTransit.intTransactionId
+					AND inventory.intTransactionDetailId = inTransit.intTransactionDetailId
+				HAVING 
+					SUM(ROUND(dbo.fnMultiply(inventory.dblQty, inventory.dblCost), 2)) <> 0 
+			) inventory
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+		WHERE	
+			inTransit.strBatchId = @strBatchId
+			AND inTransit.strTransactionId = ISNULL(@strRebuildTransactionId, inTransit.strTransactionId) 
+			AND inTransit.intInTransitSourceLocationId IS NOT NULL 
+	) 
+	/*
+		Create the GL-Entries for the discrepancy received from the in-transit
+		Inventory ----------------------- Debit
+		Inventory Adjustment -------------------------- Credit 	
+	*/
+	INSERT INTO @resultGLEntries (
+		[dtmDate] 
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]	
+		,[dblDebitReport]	
+		,[dblCreditForeign]	
+		,[dblCreditReport]	
+		,[dblReportingRate]	
+		,[dblForeignRate]
+		,[intSourceEntityId]
+		,[intCommodityId]
+	)
+	SELECT	
+		dtmDate					= DiscrepanyCTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.[Value]
+		,dblCredit					= Credit.[Value]
+		,dblDebitUnit				= NULL
+		,dblCreditUnit				= NULL
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'IC' 
+		,strReference				= '' 
+		,intCurrencyId				= DiscrepanyCTE.intCurrencyId
+		,dblExchangeRate			= DiscrepanyCTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= DiscrepanyCTE.dtmDate
+		,strJournalLineDescription  = '' 
+		,intJournalLineNo			= DiscrepanyCTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= DiscrepanyCTE.strTransactionId
+		,intTransactionId			= DiscrepanyCTE.intTransactionId
+		,strTransactionType			= DiscrepanyCTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ISNULL(DiscrepanyCTE.strTransactionForm, @strTransactionForm)
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= DebitForeign.[Value]
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= CreditForeign.[Value]
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= DiscrepanyCTE.dblForexRate  
+		,intSourceEntityId			= DiscrepanyCTE.intSourceEntityId
+		,intCommodityId				= DiscrepanyCTE.intCommodityId
+	FROM	
+		DiscrepanyCTE  
+		INNER JOIN @Receive_GLAccount GLAccounts
+			ON DiscrepanyCTE.intItemId = GLAccounts.intItemId
+			AND DiscrepanyCTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			DiscrepanyCTE.dblValue
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			DiscrepanyCTE.dblValue
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			DiscrepanyCTE.dblValue
+			,DiscrepanyCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ISNULL(NULLIF(DiscrepanyCTE.dblForexRate, 0), 1) 
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			DiscrepanyCTE.dblValue
+			,DiscrepanyCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ISNULL(NULLIF(DiscrepanyCTE.dblForexRate, 0), 1) 
+		) CreditForeign			
+	UNION ALL 
+	SELECT	
+		dtmDate					= DiscrepanyCTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Credit.[Value]
+		,dblCredit					= Debit.[Value]
+		,dblDebitUnit				= NULL
+		,dblCreditUnit				= NULL
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'IC' 
+		,strReference				= '' 
+		,intCurrencyId				= DiscrepanyCTE.intCurrencyId
+		,dblExchangeRate			= DiscrepanyCTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= DiscrepanyCTE.dtmDate
+		,strJournalLineDescription  = '' 
+		,intJournalLineNo			= DiscrepanyCTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= DiscrepanyCTE.strTransactionId
+		,intTransactionId			= DiscrepanyCTE.intTransactionId
+		,strTransactionType			= DiscrepanyCTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ISNULL(DiscrepanyCTE.strTransactionForm, @strTransactionForm)
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= CreditForeign.[Value]
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= DebitForeign.[Value]
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= DiscrepanyCTE.dblForexRate  
+		,intSourceEntityId			= DiscrepanyCTE.intSourceEntityId
+		,intCommodityId				= DiscrepanyCTE.intCommodityId
+	FROM	
+		DiscrepanyCTE  
+		INNER JOIN @Receive_GLAccount GLAccounts
+			ON DiscrepanyCTE.intItemId = GLAccounts.intItemId
+			AND DiscrepanyCTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
+		CROSS APPLY dbo.fnGetDebit(
+			DiscrepanyCTE.dblValue
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			DiscrepanyCTE.dblValue
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			DiscrepanyCTE.dblValue
+			,DiscrepanyCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ISNULL(NULLIF(DiscrepanyCTE.dblForexRate, 0), 1) 
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			DiscrepanyCTE.dblValue
+			,DiscrepanyCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ISNULL(NULLIF(DiscrepanyCTE.dblForexRate, 0), 1) 
+		) CreditForeign			
+END 
+
+
+SELECT 
+	[dtmDate] 
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]	
+	,[dblDebitReport]	
+	,[dblCreditForeign]	
+	,[dblCreditReport]	
+	,[dblReportingRate]	
+	,[dblForeignRate]
+	,[intSourceEntityId]
+	,[intCommodityId]
+FROM
+	@resultGLEntries
