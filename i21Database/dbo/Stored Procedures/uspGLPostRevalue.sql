@@ -313,7 +313,7 @@ DECLARE @tblPostError TABLE(
 			,intCompanySegmentOverrideId
 		)
 		SELECT 
-		 	[strTransactionId] + '-R'
+		 	[strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
 			,[strDescription]
@@ -440,7 +440,7 @@ DECLARE @tblPostError TABLE(
 			,[strTransactionForm]
 			,strModuleName
 		FROM tblGLDetail A	
-		WHERE strTransactionId IN(@strConsolidationNumber ,@strConsolidationNumber + '-R' )
+		WHERE strTransactionId = @strConsolidationNumber
 		AND ysnIsUnposted = 0
 
 	END
@@ -459,132 +459,12 @@ DECLARE @tblPostError TABLE(
 			EXEC uspGLBookEntries @PostGLEntries2, @ysnPost, 1 ,1
 
 			IF @@ERROR <> 0 GOTO _end
-			
-			
-			IF (@ysnPost = 1)
-			BEGIN
-				INSERT INTO [dbo].[tblGLRevalue]
-				   ([strConsolidationNumber]
-				   ,[intGLFiscalYearPeriodId]
-				   ,[intFiscalYearId]
-				   ,[dtmDate] 
-				   ,[intFunctionalCurrencyId]
-				   ,[intTransactionCurrencyId]
-				   ,[strTransactionType]
-				   ,[dblForexRate]
-				   ,[intConcurrencyId]
-				   ,[intRateTypeId]
-				   ,[ysnPosted]
-				   ,strDescription
-				   ,intEntityId)
-				SELECT 
-					strConsolidationNumber + '-R'
-				   ,[intGLFiscalYearPeriodId]
-				   ,[intFiscalYearId]
-				   ,[dtmDate]= dtmReverseDate
-				   ,[intFunctionalCurrencyId]
-				   ,[intTransactionCurrencyId]
-				   ,[strTransactionType] 
-				   ,[dblForexRate]
-				   ,[intConcurrencyId]=1
-				   ,[intRateTypeId]
-				   ,0
-				   ,'Reversal of ' + strConsolidationNumber
-				   ,@intEntityId
-				 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
 
-
-
-				SELECT @intReverseID = SCOPE_IDENTITY()
-				UPDATE tblGLRevalue SET intReverseId = @intReverseID WHERE intConsolidationId = @intConsolidationId
-				INSERT INTO [dbo].[tblGLRevalueDetails]
-				   ([intConsolidationId]
-				   ,[strTransactionType]
-				   ,[strTransactionId]
-				   ,[dtmDate]
-				   ,[dtmDueDate]
-				   ,[strVendorName]
-				   ,[strCommodity]
-				   ,[strLineOfBusiness]
-				   ,[strLocation]
-				   ,[strTicket]
-				   ,[strContractId]
-				   ,[strItemId]
-				   ,[dblQuantity]
-				   ,[dblUnitPrice]
-				   ,[dblTransactionAmount]
-				   ,[intCurrencyId]
-				   ,[intCurrencyExchangeRateTypeId]
-				   ,[dblHistoricForexRate]
-				   ,[dblHistoricAmount]
-				   ,[dblNewForexRate]
-				   ,[dblNewAmount]
-				   ,[dblUnrealizedGain]
-				   ,[dblUnrealizedLoss]
-				   ,[intConcurrencyId]
-				   ,[strType]
-					,intAccountIdOverride
-					,intLocationSegmentOverrideId
-					,intLOBSegmentOverrideId
-					,intCompanySegmentOverrideId
-				   )
-				SELECT 
-					@intReverseID
-				   ,[strTransactionType]
-				   ,[strTransactionId]
-				   ,[dtmDate]
-				   ,[dtmDueDate]
-				   ,[strVendorName]
-				   ,[strCommodity]
-				   ,[strLineOfBusiness]
-				   ,[strLocation]
-				   ,[strTicket]
-				   ,[strContractId]
-				   ,[strItemId]
-				   ,[dblQuantity]
-				   ,[dblUnitPrice]
-				   ,[dblTransactionAmount]
-				   ,[intCurrencyId]
-				   ,[intCurrencyExchangeRateTypeId]
-				   ,[dblHistoricForexRate]
-				   ,[dblHistoricAmount]
-				   ,[dblNewForexRate]
-				   ,[dblNewAmount]
-				   ,[dblUnrealizedGain] = [dblUnrealizedLoss]
-				   ,[dblUnrealizedLoss] = [dblUnrealizedGain]
-				   ,[intConcurrencyId]
-				   ,[strType]
-				   	,intAccountIdOverride
-					,intLocationSegmentOverrideId
-					,intLOBSegmentOverrideId
-					,intCompanySegmentOverrideId
-				FROM tblGLRevalueDetails
-				WHERE intConsolidationId = @intConsolidationId
-
-				UPDATE @PostGLEntries set intTransactionId = @intReverseID 
-				WHERE [strTransactionType]	= 'Revalue Currency Reversal'
-
-
-
-			END
-			ELSE
-			BEGIN
+			IF @ysnPost = 0
 				UPDATE GL SET ysnIsUnposted = 1
 				FROM tblGLDetail GL
-				WHERE strTransactionId in (@strConsolidationNumber , @strConsolidationNumber +'-R')
+				WHERE strTransactionId = @strConsolidationNumber
 				AND ysnIsUnposted = 0
-				DELETE FROM tblGLRevalue WHERE strConsolidationNumber = @strConsolidationNumber +'-R'
-			END		
-
-		
-			
-		
-			
-
-					
-
-			
-
 		END
 		ELSE
 		BEGIN

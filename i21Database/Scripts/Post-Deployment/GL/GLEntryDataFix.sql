@@ -80,3 +80,11 @@ AND LEN(RTRIM(B.strAccountType)) > 0)
 GO
 PRINT 'Finished Update tblGLAccountGroup strAccountType'
 GO
+
+IF NOT EXISTS ( SELECT 1 FROM tblGLDataFixLog WHERE strDescription ='Remove Reverse Revalue Transaction.')
+BEGIN
+	UPDATE a set strTransactionId = replace(strTransactionId,'-R', '')
+	FROM tblGLDetail a where strTransactionId like 'REVAL%-R'
+	DELETE FROM tblGLRevalue where strConsolidationNumber like '%-R'
+	INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), 'Remove Reverse Revalue Transaction.')
+END
