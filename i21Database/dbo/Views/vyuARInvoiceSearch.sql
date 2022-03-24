@@ -27,18 +27,29 @@ SELECT
 	,dblInvoiceTotal				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblInvoiceTotal, 0)
 										   WHEN (I.strTransactionType  IN ('Customer Prepayment')) THEN CASE WHEN I.ysnRefundProcessed = 1 THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE 0 END
 										   ELSE ISNULL(I.dblInvoiceTotal, 0) * -1 END
+	,dblBaseInvoiceTotal			= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblBaseInvoiceTotal, 0)
+										   WHEN (I.strTransactionType  IN ('Customer Prepayment')) THEN CASE WHEN I.ysnRefundProcessed = 1 THEN ISNULL(I.dblBaseInvoiceTotal, 0) * -1 ELSE 0 END
+										   ELSE ISNULL(I.dblBaseInvoiceTotal, 0) * -1 END
 	,dblDiscount					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblDiscount,0)  ELSE  ISNULL(I.dblDiscount,0) * -1 END
 	,dblDiscountAvailable			= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblDiscountAvailable,0)  ELSE  ISNULL(I.dblDiscountAvailable,0) * -1 END
 	,dblInterest					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblInterest,0)  ELSE  ISNULL(I.dblInterest,0) * -1 END
+	,dblBaseInterest				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblBaseInterest,0)  ELSE  ISNULL(I.dblBaseInterest,0) * -1 END
 	,dblAmountDue					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblAmountDue,0)  ELSE  ISNULL(I.dblAmountDue,0) * -1 END
+	,dblBaseAmountDue				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblBaseAmountDue,0)  ELSE  ISNULL(I.dblBaseAmountDue,0) * -1 END
 	,dblPayment						= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblPayment, 0)
 										   WHEN (I.strTransactionType  IN ('Customer Prepayment')) THEN CASE WHEN I.ysnRefundProcessed = 1 THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 										   ELSE CASE WHEN POS.intItemCount < 0 THEN ISNULL(POS.dblTotal,0)
 												ELSE ISNULL(I.dblPayment, 0) * -1 END
 									  END
+	,dblBasePayment					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblBasePayment, 0)
+										   WHEN (I.strTransactionType  IN ('Customer Prepayment')) THEN CASE WHEN I.ysnRefundProcessed = 1 THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+										   ELSE CASE WHEN POS.intItemCount < 0 THEN ISNULL(POS.dblTotal,0)
+												ELSE ISNULL(I.dblBasePayment, 0) * -1 END
+									  END
 	,dblInvoiceSubtotal				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblInvoiceSubtotal, 0)  ELSE  ISNULL(I.dblInvoiceSubtotal, 0) * -1 END
 	,dblShipping					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblShipping, 0)  ELSE  ISNULL(I.dblShipping, 0) * -1 END
 	,dblTax							= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblTax, 0)  ELSE  ISNULL(I.dblTax, 0) * -1 END
+	,dblBaseTax						= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblBaseTax, 0)  ELSE  ISNULL(I.dblBaseTax, 0) * -1 END
 	,intPaymentMethodId				= I.intPaymentMethodId
 	,intCompanyLocationId			= I.intCompanyLocationId
 	,strComments					= dbo.fnStripHtml(I.strComments)
@@ -88,6 +99,7 @@ SELECT
 	,ysnProcessedToNSF				= ISNULL(ISNULL(PAYMENT.ysnProcessedToNSF, I.ysnProcessedToNSF), 0)
 	,ysnOverrideCashFlow            = I.ysnOverrideCashFlow
     ,dtmCashFlowDate                = I.dtmCashFlowDate
+	,dblCurrencyExchangeRate		= I.dblCurrencyExchangeRate
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
