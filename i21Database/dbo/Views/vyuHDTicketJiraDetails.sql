@@ -20,14 +20,14 @@
 			,d.intJiraKeyId
 			,d.strJiraKey
 			,d.strJiraUrl
-			,d.strTypeIconUrl
+			,REPLACE(d.strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
 			,d.strSummary
 			,d.strDescription
 			,d.strReporter
 			,d.strAssignee
 			,d.strFixedBy
-			,d.strPriorityIconUrl
-			,d.strStatusIconUrl
+			,REPLACE(d.strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
+			,REPLACE(d.strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
 			,d.strResolution
 			,d.dtmJiraCreated
 			,d.dtmJiraUpdated
@@ -44,3 +44,4 @@
 			left join tblHDTicketStatus i on i.intTicketStatusId = b.intTicketStatusId
 		where
 			b.strType <> 'CRM'
+GO

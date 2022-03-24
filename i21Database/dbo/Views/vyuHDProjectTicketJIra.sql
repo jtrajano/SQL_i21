@@ -7,14 +7,14 @@
 		,c.intTicketId
 		,c.strTicketNumber
 		,d.strKey
-		,d.strTypeIconUrl
+		,REPLACE(d.strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
 		,d.strSummary
 		,strOriginalEstimate
 		,d.strReporter
 		,d.strAssignee
 		,d.strFixedBy
-		,d.strPriorityIconUrl
-		,d.strStatusIconUrl
+		,REPLACE(d.strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
+		,REPLACE(d.strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
 		,d.dtmJiraCreated
 		,d.dtmJiraUpdated
 		,d.strFixedVersion
@@ -29,3 +29,4 @@
 		inner join tblHDProjectTask b1 on b1.intTicketId = c.intTicketId
 		inner join tblHDProject a1 on a1.intProjectId = b1.intProjectId
 	where (b.intProjectId = a.intProjectId or b.intProjectId in (select aa.intDetailProjectId from  tblHDProjectDetail aa where aa.intProjectId = a.intProjectId))
+GO
