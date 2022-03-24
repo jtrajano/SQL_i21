@@ -438,7 +438,7 @@ BEGIN TRY
 				, CAST(intScanTransactionId AS NVARCHAR(20)) as strScanTransactionId
 				, CAST(intTrTickNumPosNum AS NVARCHAR(50)) as strRegisterId
 				, dblTrlQty as intQuantity
-				,CASE WHEN TR.intTrlDeptNumber IN (SELECT strCashRegisterDepartment FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
+				,CASE WHEN TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS IN (SELECT strCashRegisterDepartment FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 							AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 							AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
 							AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
