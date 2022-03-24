@@ -1,5 +1,5 @@
 ﻿/*
-	This stored procedure will increase or decrease a Missing Lot
+	This stored procedure will reduce the stock for the specified missing lots. 
 */
 
 CREATE PROCEDURE [dbo].[uspICPostMissingLot]
@@ -19,6 +19,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
+-- Create the variables for the internal transaction types used by costing. 
+DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
+DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
+DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
+DECLARE @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock AS INT = 35;
+
 -- Create the temp table for the specific items/categories to rebuild
 IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
 BEGIN 
@@ -33,24 +39,26 @@ BEGIN
 	INSERT INTO #tmpRebuildList VALUES (@intRebuildItemId, @intRebuildCategoryId) 
 END 
 
-
 -- Auto reduce the stock for missing lots
-DECLARE @intReturnValue AS INT = 0 
+BEGIN 
+	DECLARE @intReturnValue AS INT = 0 
+	DECLARE @strBatchIdForMissingLots AS NVARCHAR(50) = @strBatchId + '2'
 
-IF @strGLDescription IS NOT NULL 
-	SET @strGLDescription =  'Missing Lot. ' + @strGLDescription
-ELSE 
-	SET @strGLDescription =  'Missing Lot.'
+	IF @strGLDescription IS NOT NULL 
+		SET @strGLDescription =  'Missing Lot. ' + @strGLDescription
+	ELSE 
+		SET @strGLDescription =  'Missing Lot.'
 
-EXEC @intReturnValue = dbo.uspICPostCosting  
-		@MissingLotsToPost  
-		,@strBatchId  
-		,NULL
-		,@intEntityUserSecurityId
-		,@strGLDescription
+	EXEC @intReturnValue = dbo.uspICPostCosting  
+			@MissingLotsToPost  
+			,@strBatchIdForMissingLots  
+			,NULL
+			,@intEntityUserSecurityId
+			,@strGLDescription
 
--- Exit immediately
-IF @intReturnValue < 0 RETURN @intReturnValue
+	-- On error, exit immediately
+	IF @intReturnValue < 0 RETURN @intReturnValue
+END
 
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
@@ -90,9 +98,8 @@ FROM	(
 						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 					INNER JOIN tblICLot lot
 						ON lot.intLotId = t.intLotId
-			WHERE	t.strBatchId = @strBatchId
+			WHERE	t.strBatchId = @strBatchIdForMissingLots
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-					AND lot.strCondition = 'Missing'			
 		) Query
 			
 -- Generate the G/L Entries here: 
@@ -160,10 +167,11 @@ AS
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 			LEFT JOIN tblICLot lot
 				ON lot.intLotId = t.intLotId
-	WHERE	t.strBatchId = @strBatchId
-			AND lot.strCondition = 'Missing'
-			AND t.dblQty < 0 
+	WHERE	t.strBatchId = @strBatchIdForMissingLots
 ) 
+----------------------------------------------------------------------------------------------
+-- GL entries for the missing lots. 
+----------------------------------------------------------------------------------------------
 /*
 	Debit ........... Inventory Adjustment 
 	Credit .............................. Inventory 
@@ -176,7 +184,10 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= DebitUnit.Value 
 		,dblCreditUnit				= CreditUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
+		,strDescription				= 
+			ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
+			+ ' ' 
+			+ dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= MissingLotsCTE.intCurrencyId
@@ -234,7 +245,14 @@ FROM	MissingLotsCTE
 		CROSS APPLY dbo.fnGetCreditUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
-WHERE	MissingLotsCTE.dblQty <> 0 
+WHERE	
+	MissingLotsCTE.intTransactionTypeId NOT IN (
+		@InventoryTransactionTypeId_WriteOffSold
+		, @InventoryTransactionTypeId_RevalueSold
+		, @InventoryTransactionTypeId_AutoNegative
+		, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+	)
+
 UNION ALL 
 SELECT	
 		dtmDate						= MissingLotsCTE.dtmDate
@@ -244,7 +262,10 @@ SELECT
 		,dblCredit					= Debit.[Value]
 		,dblDebitUnit				= CreditUnit.[Value]
 		,dblCreditUnit				= DebitUnit.[Value]
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
+		,strDescription				= 
+			ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
+			+ ' ' 
+			+ dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= MissingLotsCTE.intCurrencyId
@@ -302,7 +323,184 @@ FROM	MissingLotsCTE
 		CROSS APPLY dbo.fnGetCreditUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
-WHERE	MissingLotsCTE.dblQty <> 0 
+WHERE	
+	MissingLotsCTE.intTransactionTypeId NOT IN (
+		@InventoryTransactionTypeId_WriteOffSold
+		, @InventoryTransactionTypeId_RevalueSold
+		, @InventoryTransactionTypeId_AutoNegative
+		, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+	)
+-----------------------------------------------------------------------------------
+-- GL entries for Auto Variance 
+-----------------------------------------------------------------------------------
+/*
+	Debit ........... Inventory 
+	Credit .............................. Inventory Adjustment 
+*/
+UNION ALL  
+SELECT	
+		dtmDate						= MissingLotsCTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= DebitUnit.Value 
+		,dblCreditUnit				= CreditUnit.Value 
+		,strDescription				= 
+			ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
+			+ ' ' 
+			+ dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
+		,strCode					= 
+			CASE 
+				WHEN MissingLotsCTE.intTransactionTypeId = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock THEN 'IAV'
+				WHEN MissingLotsCTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative THEN 'IAN'
+				ELSE 'IC'
+			END 
+		,strReference				= ''
+		,intCurrencyId				= MissingLotsCTE.intCurrencyId
+		,dblExchangeRate			= MissingLotsCTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= MissingLotsCTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= MissingLotsCTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= @intEntityUserSecurityId
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= MissingLotsCTE.strTransactionId
+		,intTransactionId			= MissingLotsCTE.intTransactionId
+		,strTransactionType			= MissingLotsCTE.strInventoryTransactionTypeName
+		,strTransactionForm			= MissingLotsCTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= MissingLotsCTE.dblForexRate 
+		,strRateType				= MissingLotsCTE.strRateType 
+		,intSourceEntityId			= MissingLotsCTE.intSourceEntityId
+		,intCommodityId				= MissingLotsCTE.intCommodityId
+FROM	MissingLotsCTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON MissingLotsCTE.intItemId = GLAccounts.intItemId
+			AND MissingLotsCTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND MissingLotsCTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)	
+			,MissingLotsCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,MissingLotsCTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+			,MissingLotsCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,MissingLotsCTE.dblForexRate
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
+WHERE	MissingLotsCTE.intTransactionTypeId IN (
+			@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+			, @InventoryTransactionTypeId_AutoNegative
+		) 
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
+
+UNION ALL 
+SELECT	
+		dtmDate						= MissingLotsCTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= CreditUnit.Value 
+		,dblCreditUnit				= DebitUnit.Value 
+		,strDescription				= 
+			ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
+			+ ' ' 
+			+ dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
+		,strCode					= 
+			CASE 
+				WHEN MissingLotsCTE.intTransactionTypeId = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock THEN 'IAV'
+				WHEN MissingLotsCTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative THEN 'IAN'
+				ELSE 'IC'
+			END 
+		,strReference				= '' 
+		,intCurrencyId				= MissingLotsCTE.intCurrencyId
+		,dblExchangeRate			= MissingLotsCTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= MissingLotsCTE.dtmDate
+        ,strJournalLineDescription    = '' 
+		,intJournalLineNo			= MissingLotsCTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= @intEntityUserSecurityId
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= MissingLotsCTE.strTransactionId
+		,intTransactionId			= MissingLotsCTE.intTransactionId
+		,strTransactionType			= MissingLotsCTE.strInventoryTransactionTypeName 
+		,strTransactionForm			= MissingLotsCTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= CreditForeign.Value
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= MissingLotsCTE.dblForexRate 
+		,strRateType				= MissingLotsCTE.strRateType 
+		,intSourceEntityId			= MissingLotsCTE.intSourceEntityId
+		,intCommodityId				= MissingLotsCTE.intCommodityId
+FROM	MissingLotsCTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON MissingLotsCTE.intItemId = GLAccounts.intItemId
+			AND MissingLotsCTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND MissingLotsCTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,MissingLotsCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,MissingLotsCTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+			,MissingLotsCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,MissingLotsCTE.dblForexRate
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
+WHERE	MissingLotsCTE.intTransactionTypeId IN (
+			@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+			, @InventoryTransactionTypeId_AutoNegative
+		) 
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
+
 
 -- Update the Lot's Qty and Weights. 
 -- The Lot Qty should not be zero for Missing Lots so that it can be used to track insurance claims. 
@@ -339,6 +537,16 @@ BEGIN
 				AND Lot.intItemId = missingLots.intItemId
 				AND Lot.intItemLocationId = missingLots.intItemLocationId
 				AND ISNULL(Lot.dblTarePerQty, 0) <> 0 				
+END 
+
+-- Fix the batch ids
+BEGIN 
+	UPDATE t
+	SET
+		t.strBatchId = @strBatchId
+	FROM tblICInventoryTransaction t 
+	WHERE 
+		t.strBatchId = @strBatchIdForMissingLots	
 END 
 
 RETURN 0; 

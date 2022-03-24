@@ -1724,16 +1724,22 @@ BEGIN
 					,[intItemUOMId]			= t.intItemUOMId
 					,[dtmDate]				= r.dtmReceiptDate
 					,[dblQty]				= 
-							dbo.fnCalculateQtyBetweenUOM(
-								ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId)
-								,t.intItemUOMId
-								,CASE 
-									WHEN ri.intWeightUOMId IS NOT NULL THEN 
-										-ri.dblNet
-									ELSE 
-										-ri.dblOpenReceive
-								END 								
-							)
+							CASE 
+								WHEN ri.intUnitMeasureId = t.intItemUOMId THEN -ri.dblOpenReceive 
+								WHEN ri.intWeightUOMId = t.intItemUOMId THEN -ri.dblNet
+								ELSE 
+									dbo.fnCalculateQtyBetweenUOM(
+										ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId)
+										,t.intItemUOMId
+										,CASE 
+											WHEN ri.intWeightUOMId IS NOT NULL THEN 
+												-ri.dblNet
+											ELSE 
+												-ri.dblOpenReceive
+										END 								
+									)
+							END 
+									
 					,[dblUOMQty]			= t.dblUOMQty
 					,[dblCost]				= t.dblCost
 					,[intCurrencyId]		= t.intCurrencyId
@@ -1771,7 +1777,7 @@ BEGIN
 							,t.intItemLocationId
 							,intItemUOMId = ISNULL(l.intItemUOMId, t.intItemUOMId) 
 							,t.dblUOMQty
-							,t.dblCost 
+							,dblCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, ISNULL(l.intItemUOMId, t.intItemUOMId), t.dblCost)
 							,t.intCurrencyId
 							,t.dblExchangeRate
 							,t.dblForexRate
