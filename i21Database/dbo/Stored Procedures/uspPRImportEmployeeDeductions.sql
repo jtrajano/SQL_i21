@@ -101,7 +101,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 								) THEN strCategory ELSE '' END
 			,@strPaidBy  = strPaidBy
 			,@dblRateCalc = dblRateCalc
-			,@strRateCalcType  = CASE WHEN strRateCalcType <> '' AND strRateCalcType IN('Fixed Amount','Percent','Hourly Amount','Hourly Percent') THEN strRateCalcType ELSE '' END
+			,@strRateCalcType  = CASE WHEN strRateCalcType <> '' AND strRateCalcType IN('Fixed Amount','Percent') THEN strRateCalcType ELSE '' END
 			,@dblDeductFrom = dblDeductFrom
 			,@strDeductFromType  = CASE WHEN strDeductFromType <> '' AND strDeductFromType IN('Net Pay','Gross Pay') THEN strDeductFromType ELSE '' END
 			,@dblAnnualLimit	 = dblAnnualLimit
