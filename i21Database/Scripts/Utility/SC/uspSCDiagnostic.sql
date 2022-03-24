@@ -1564,6 +1564,7 @@ SET @body = @body + ISNULL(CAST(@xhtmlBody AS NVARCHAR(MAX)), '')
 		<th>strReceiptNumber</th>
 		<th>intInventoryReceiptId</th>
 		<th>IRTotal</th>
+		<th>Diff</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -1578,6 +1579,7 @@ SET @body = @body + ISNULL(CAST(@xhtmlBody AS NVARCHAR(MAX)), '')
 			<td>{data($row/strReceiptNumber)}</td>
 			<td>{data($row/intInventoryReceiptId)}</td>
 			<td>{data($row/IRTotal)}</td>
+			<td>{data($row/Diff)}</td>
 		</tr>
 }
 </tbody></table>'));
