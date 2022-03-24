@@ -49,12 +49,14 @@ SELECT
 	, a.dblLongitude
 	, a.dblLatitude
 	, sa.intConcurrencyId
+	, C.strLineOfBusiness 
 FROM vyuCRMActivitySearch2 ac
 JOIN vyuApiActivity a ON a.intActivityId = ac.intActivityId
 JOIN tblSMActivity sa ON sa.intActivityId = a.intActivityId
 LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = sa.intCompanyLocationId
 OUTER APPLY (
-	SELECT TOP 1 EntityContact.intEntityId, Contact.strTimezone, Contact.strEmail, Contact.strPhone, Contact.strMobile, EntityLocation.strLocationName
+	SELECT TOP 1 EntityContact.intEntityId, Contact.strTimezone, Contact.strEmail, Contact.strPhone, Contact.strMobile, EntityLocation.strLocationName, 
+		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(EntityContact.intEntityId) COLLATE Latin1_General_CI_AS
 	FROM tblEMEntityToContact EntityContact
 	LEFT JOIN tblEMEntity Contact ON EntityContact.intEntityContactId = Contact.intEntityId
 	LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityId = EntityContact.intEntityId
