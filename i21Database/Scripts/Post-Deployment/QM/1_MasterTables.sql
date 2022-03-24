@@ -1238,6 +1238,12 @@ SET ysnMultipleContractSeq = 0
 WHERE ysnMultipleContractSeq IS NULL
 GO
 
+
+UPDATE tblQMCompanyPreference
+SET strSampleInstructionReport = 'SampleInstruction_WaMa'
+WHERE ISNULL(strSampleInstructionReport,'') = ''
+GO
+
 IF NOT EXISTS(SELECT 1 FROM tblQMComponentMap)
 BEGIN
 	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
