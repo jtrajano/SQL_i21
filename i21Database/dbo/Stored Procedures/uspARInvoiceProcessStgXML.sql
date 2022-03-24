@@ -780,11 +780,11 @@ BEGIN TRY
 
 			--UPDATE HEADER TOTAL
 			UPDATE A
-			SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18, 2))
-				,A.dblTotalController = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18, 2))
-				,A.dblSubtotal = CAST((DetailTotal.dblTotal) AS DECIMAL(18, 2))
-				,A.dblAmountDue = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18, 2))
-				,A.dblTax = DetailTotal.dblTotalTax
+			SET A.dblTotal = CAST(IsNULL((DetailTotal.dblTotal + DetailTotal.dblTotalTax),0) AS DECIMAL(18, 2))
+				,A.dblTotalController = CAST(IsNULL((DetailTotal.dblTotal + DetailTotal.dblTotalTax),0) AS DECIMAL(18, 2))
+				,A.dblSubtotal = CAST(IsNULL((DetailTotal.dblTotal),0) AS DECIMAL(18, 2))
+				,A.dblAmountDue = CAST(IsNULL((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment,0) AS DECIMAL(18, 2))
+				,A.dblTax = IsNULL(DetailTotal.dblTotalTax,0)
 			FROM tblAPBill A
 			CROSS APPLY (
 				SELECT SUM(dblTax) dblTotalTax

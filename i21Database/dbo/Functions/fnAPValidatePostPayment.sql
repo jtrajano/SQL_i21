@@ -715,6 +715,23 @@ BEGIN
 			) LatestPayment ON A.intPaymentId = LatestPayment.intPostPaymentId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) 
 		AND A.intPaymentId < LatestPayment.intPaymentId
+		
+		--DO NOT ALLOW TO UNPOST THE PREPAYMENT PAYMENT IF IT WAS APPLIED ON THE BILLS
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'You cannot unpost ' + A.strPaymentRecordNum + ', this prepayment offsets ' + A.strBillId + '.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM (
+			SELECT A.intPaymentId, A.strPaymentRecordNum, E.strBillId 
+			FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+			INNER JOIN tblAPAppliedPrepaidAndDebit D ON C.intBillId = D.intTransactionId
+			INNER JOIN tblAPBill E ON D.intBillId = E.intBillId
+			WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND D.dblAmountApplied > 0 AND E.ysnPosted = 1 AND B.ysnOffset = 0
+		) A
 	END
 
 	RETURN

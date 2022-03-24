@@ -129,6 +129,22 @@ DECLARE @_strAuditDescription NVARCHAR(500)
 DECLARE @ItemReservationTableType AS ItemReservationTableType
 
 BEGIN TRY
+
+		declare @intContractUsedDetailId int
+
+		select @intContractUsedDetailId = min(intContractDetailId) from tblSCTicketContractUsed
+			where intTicketId = @intTicketId
+		
+		while(@intContractUsedDetailId is not null)
+		begin
+			
+			exec uspSCCheckContractStatus  @intContractDetailId = @intContractUsedDetailId			
+			select @intContractUsedDetailId = min(intContractDetailId) from tblSCTicketContractUsed
+				where intTicketId = @intTicketId
+					and intContractDetailId > @intContractUsedDetailId
+		end
+
+
 		-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 		BEGIN
 			DECLARE @strUpdateRIDetail AS NVARCHAR(50)
@@ -160,32 +176,22 @@ BEGIN TRY
 			FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 			WHERE LGL.intTicketId = @intTicketId
 
-			IF ISNULL(@ysnDirectShip,0) = 0 AND ISNULL(@intEntityId,0) > 0
+			/*IF ISNULL(@ysnDirectShip,0) = 0 AND ISNULL(@intEntityId,0) > 0
 			BEGIN
 				SELECT @intId = MIN(intInventoryReceiptItemId) 
-				FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+				FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale' AND intInventoryReceiptItemId > isnull(@intId, 0)
 				WHILE ISNULL(@intId,0) > 0
 				BEGIN
 					SELECT @intContractDetailId = intLineNo FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intId
 					IF ISNULL(@intContractDetailId,0) > 0
 					BEGIN
-						SELECT @intContractStatusId = intContractStatusId
-						, @strContractStatus = strContractStatus 
-						, @intContractSeq = intContractSeq
-						, @strContractNumber = strContractNumber 
-						from vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId
-						IF ISNULL(@intContractStatusId, 0) != 1 AND ISNULL(@intContractStatusId, 0) != 4
-						BEGIN
-							SET @ErrorMessage = 'Contract ' + @strContractNumber +'-Seq.' + CAST(@intContractSeq AS nvarchar) + ' is ' + @strContractStatus +'. Please Open before Undistributing.';
-							RAISERROR(@ErrorMessage, 11, 1);
-							RETURN;
-						END
+						exec uspSCCheckContractStatus  @intContractDetailId = @intContractDetailId
 					END
 					SELECT @intId = MIN(intInventoryReceiptItemId) 
 					FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 				END
 			END
-
+			*/
 			IF @strInOutFlag = 'I'
 			BEGIN
 				IF ISNULL(@ysnDirectShip,0) = 0

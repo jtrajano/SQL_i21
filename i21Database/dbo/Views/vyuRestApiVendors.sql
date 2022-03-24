@@ -29,7 +29,13 @@ SELECT
 	strFax				=	ISNULL(contactEntity.strFax,''),
 	strEmail			=	ISNULL(contactEntity.strEmail,''),
 	strWebsite			=	ISNULL(contactEntity.strWebsite,''),
-	strCountry			=	ISNULL(entityLocation.strCountry, '')
+	strCountry			=	ISNULL(entityLocation.strCountry, ''),
+	CAST(CASE terminal.ysnTransportTerminal WHEN 1 THEN 1 ELSE 0 END AS BIT) ysnTransportTerminal,
+	-- CAST(CASE WHEN ISNULL(terminal.ysnTransportTerminal, 0) = 0 AND vendor.ysnTransportTerminal = 1 THEN 1 ELSE 0 END AS BIT) ysnSupplier,
+	vendor.ysnTransportTerminal ysnSupplier,
+	entityLocation.intShipViaId,
+	shipVia.strShipVia,
+	COALESCE(updated.dtmDate, vendor.dtmLastModified, created.dtmDate, vendor.dtmCreated) dtmDateLastUpdated
 FROM tblAPVendor vendor
 JOIN tblEMEntity entity ON entity.intEntityId = vendor.intEntityId
 JOIN tblEMEntityType entityType ON entityType.intEntityId = entity.intEntityId
@@ -42,6 +48,29 @@ LEFT JOIN tblEMEntityLocation entityLocation ON entityLocation.intEntityId = ent
 LEFT JOIN tblEMEntityLocation shipFromLocation ON shipFromLocation.intEntityLocationId = vendor.intShipFromId
 	AND shipFromLocation.intEntityId = vendor.intEntityId
 LEFT JOIN tblEMEntityPhoneNumber phoneNumber ON phoneNumber.intEntityId = contactEntity.intEntityId
+LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = entityLocation.intShipViaId
+OUTER APPLY (
+	SELECT TOP 1 CAST(1 AS BIT) AS ysnTransportTerminal
+	FROM vyuApiTransportTerminals t
+	WHERE t.intEntityId = vendor.intEntityId
+) terminal
+OUTER APPLY (
+	SELECT TOP 1 au.dtmDate
+	FROM vyuApiRecordAudit au
+	WHERE au.intRecordId = vendor.intEntityId
+		AND au.strAction = 'Created'
+		AND au.strNamespace = 'EntityManagement.view.Entity'
+) created
+OUTER APPLY (
+	SELECT TOP 1 au.dtmDate
+	FROM vyuApiRecordAudit au
+	WHERE au.intRecordId = vendor.intEntityId
+		AND au.strAction = 'Updated'
+		AND au.strNamespace = 'EntityManagement.view.Entity'
+) updated
+
 --ORDER BY v.strName ASC, v.ysnActive DESC, v.dtmOriginationDate ASC
 
 GO
+
+

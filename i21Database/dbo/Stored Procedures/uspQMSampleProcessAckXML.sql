@@ -113,7 +113,7 @@ BEGIN TRY
 			UPDATE tblQMSample
 			SET intSampleRefId = @intSampleId
 				,strSampleRefNo = @strSampleNumber
-				,intConcurrencyId = intConcurrencyId + 1
+				--,intConcurrencyId = intConcurrencyId + 1
 			WHERE intSampleId = @intSampleRefId
 				AND intSampleRefId IS NULL
 

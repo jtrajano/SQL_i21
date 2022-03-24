@@ -16,11 +16,9 @@
 	, @intEntityUserId				AS INT				= NULL
 AS
 
-SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
 DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @dtmDateFromLocal					AS DATETIME			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -39,62 +37,30 @@ DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @strCompanyLocationIdsLocal			AS NVARCHAR(MAX)
 	  , @strCompanyName						AS NVARCHAR(MAX)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(MAX)	= NULL
-	  , @blbLogo							AS VARBINARY(MAX)	= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULLIF(@intEntityUserId, 0)
 	  , @intCompanyLocationId				AS INT				= NULL
 	  , @ARBalance							NUMERIC(18,6)		= 0.00
-
 
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmBalanceForwardDateLocal	= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmBalanceForwardDateLocal)))
 SET @dtmDateFromLocal			= DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 
-SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+--GET COMPANY DETAILS
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = dbo.fnARFormatCustomerAddress(strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
+		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
-IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #CUSTOMERS
-END
+IF(OBJECT_ID('tempdb..#ADCUSTOMERS') IS NOT NULL) DROP TABLE #ADCUSTOMERS
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
+IF(OBJECT_ID('tempdb..#BALANCEFORWARDAGING') IS NOT NULL) DROP TABLE #BALANCEFORWARDAGING
+IF(OBJECT_ID('tempdb..#POSTEDINVOICES') IS NOT NULL) DROP TABLE #POSTEDINVOICES
+IF(OBJECT_ID('tempdb..#POSTEDARPAYMENTS') IS NOT NULL) DROP TABLE #POSTEDARPAYMENTS
+IF(OBJECT_ID('tempdb..#PAYMENTDETAILS') IS NOT NULL) DROP TABLE #PAYMENTDETAILS
+IF(OBJECT_ID('tempdb..#GLACCOUNTS') IS NOT NULL) DROP TABLE #GLACCOUNTS
+IF(OBJECT_ID('tempdb..#STATEMENTREPORT') IS NOT NULL) DROP TABLE #STATEMENTREPORT
 
-IF(OBJECT_ID('tempdb..#WRITEOFFS') IS NOT NULL)
-BEGIN
-	DROP TABLE #WRITEOFFS
-END
-
-IF(OBJECT_ID('tempdb..#BALANCEFORWARDAGING') IS NOT NULL)
-BEGIN
-	DROP TABLE #BALANCEFORWARDAGING
-END
-
-IF(OBJECT_ID('tempdb..#POSTEDINVOICES') IS NOT NULL)
-BEGIN
-	DROP TABLE #POSTEDINVOICES
-END
-
-IF(OBJECT_ID('tempdb..#POSTEDARPAYMENTS') IS NOT NULL)
-BEGIN
-	DROP TABLE #POSTEDARPAYMENTS
-END
-
-IF(OBJECT_ID('tempdb..#PAYMENTDETAILS') IS NOT NULL)
-BEGIN
-	DROP TABLE #PAYMENTDETAILS
-END
-
-IF(OBJECT_ID('tempdb..#GLACCOUNTS') IS NOT NULL)
-BEGIN
-	DROP TABLE #GLACCOUNTS
-END
-
-IF(OBJECT_ID('tempdb..#STATEMENTREPORT') IS NOT NULL)
-BEGIN
-	DROP TABLE #STATEMENTREPORT
-END
-
+--TEMP TABLES
 CREATE TABLE #CUSTOMERS (
 	  intEntityCustomerId			INT				NOT NULL PRIMARY KEY
 	, strCustomerNumber				NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL
@@ -106,8 +72,8 @@ CREATE TABLE #CUSTOMERS (
 	, dblCreditAvailable			NUMERIC(18, 6)
 	, dblARBalance					NUMERIC(18, 6)
 	, ysnStatementCreditLimit		BIT
+	, strComment					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
 )
-
 CREATE TABLE #STATEMENTREPORT (
 	   intEntityCustomerId			INT NULL
 	 , intInvoiceId					INT NULL
@@ -127,19 +93,64 @@ CREATE TABLE #STATEMENTREPORT (
      , dtmDate						DATETIME NULL
      , dtmDueDate					DATETIME NULL	 
 	 , dtmDatePaid					DATETIME NULL
-	 , dblPayment					NUMERIC(18, 6)
-	 , dblInvoiceTotal				NUMERIC(18, 6)
-	 , dblCreditLimit				NUMERIC(18, 6)
-	 , dblCreditAvailable			NUMERIC(18, 6)
-	 , dblBalance					NUMERIC(18, 6)
-	 , dblARBalance					NUMERIC(18, 6)
-	 , dblMonthlyBudget				NUMERIC(18, 6)
-	 , dblBudgetPastDue				NUMERIC(18, 6)
-	 , dblBudgetNowDue				NUMERIC(18, 6)
+	 , dblPayment					NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblInvoiceTotal				NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblCreditLimit				NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblCreditAvailable			NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblBalance					NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblARBalance					NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblMonthlyBudget				NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblBudgetPastDue				NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblBudgetNowDue				NUMERIC(18, 6) NULL DEFAULT 0
 	 , ysnStatementCreditLimit		BIT
+	 , strComment					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
 )
+CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_BUDGETREMINDER] ON [#STATEMENTREPORT]([intEntityCustomerId], [intInvoiceId], [strTransactionType], [strType])
+CREATE TABLE #GLACCOUNTS (intAccountId	INT	NOT NULL PRIMARY KEY)
+CREATE TABLE #BALANCEFORWARDAGING (
+	  intEntityCustomerId	INT	NOT NULL PRIMARY KEY
+	, dblTotalAR			NUMERIC(18, 6) NULL DEFAULT 0
+)
+CREATE TABLE #POSTEDARPAYMENTS (
+	   intPaymentId				INT	NOT NULL PRIMARY KEY
+	 , intEntityCustomerId		INT	NOT NULL
+	 , strPaymentInfo			NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL
+	 , strRecordNumber			NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL
+	 , strNotes					NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL
+	 , dtmDatePaid				DATETIME NOT NULL
+	 , ysnInvoicePrepayment		BIT NULL
+	 , intPaymentMethodId		INT	NOT NULL
+	 , strPaymentMethod			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+)
+CREATE NONCLUSTERED INDEX [NC_Index_#POSTEDARPAYMENTS_BUDGETREMINDER] ON [#POSTEDARPAYMENTS]([intEntityCustomerId])
+CREATE TABLE #POSTEDINVOICES (
+	   intInvoiceId				INT	NOT NULL PRIMARY KEY
+	 , intPaymentId				INT	NULL
+	 , intEntityCustomerId		INT	NOT NULL
+	 , strInvoiceNumber			NVARCHAR(25)	COLLATE Latin1_General_CI_AS NULL
+	 , strTransactionType		NVARCHAR(25)	COLLATE Latin1_General_CI_AS NOT NULL
+	 , strType					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL DEFAULT 'Standard'
+	 , strInvoiceOriginId		NVARCHAR(25)	COLLATE Latin1_General_CI_AS NULL
+	 , dtmDate					DATETIME NOT NULL
+	 , dtmDueDate				DATETIME NOT NULL
+	 , dblInvoiceTotal			NUMERIC(18, 6) NULL DEFAULT 0
+	 , ysnImportedFromOrigin	BIT NULL
+	 , ysnServiceChargeCredit	BIT NULL
+)
+CREATE NONCLUSTERED INDEX [NC_Index_#POSTEDINVOICES_BUDGETREMINDER] ON [#POSTEDINVOICES]([intEntityCustomerId])
+CREATE TABLE #PAYMENTDETAILS (
+	   intPaymentId				INT	NOT NULL
+	 , intInvoiceId				INT	NULL
+	 , dblPayment				NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblDiscount				NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblWriteOffAmount		NUMERIC(18, 6) NULL DEFAULT 0
+	 , dblInterest				NUMERIC(18, 6) NULL DEFAULT 0
+	 , dtmDatePaid				DATETIME NOT NULL
+	 , ysnInvoicePrepayment		BIT NULL
+)
+CREATE NONCLUSTERED INDEX [NC_Index_#PAYMENTDETAILS_BUDGETREMINDER] ON [#PAYMENTDETAILS]([intPaymentId])
 
---CUSTOMER FILTER
+--FILTER CUSTOMER 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
 		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit)
@@ -152,17 +163,17 @@ IF @strCustomerNumberLocal IS NOT NULL
 				   , dblARBalance				= C.dblARBalance
 				   , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
 		FROM tblARCustomer C WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intEntityId
-			     , strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE strEntityNo = @strCustomerNumberLocal
-		) EC ON C.intEntityId = EC.intEntityId
+		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
 		  AND C.strStatementFormat = 'Budget Reminder'
+		  AND EC.strEntityNo = @strCustomerNumberLocal
 	END
 ELSE IF @strCustomerIdsLocal IS NOT NULL
 	BEGIN
+		SELECT DISTINCT intEntityCustomerId = intID
+		INTO #ADCUSTOMERS
+		FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIdsLocal)
+
 		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit)
 		SELECT intEntityCustomerId		= C.intEntityId 
 			 , strCustomerNumber		= C.strCustomerNumber
@@ -173,15 +184,8 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 			 , dblARBalance				= C.dblARBalance        
 			 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
 		FROM tblARCustomer C WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intID
-			FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIdsLocal)
-		) CUSTOMERS ON C.intEntityId = CUSTOMERS.intID
-		INNER JOIN (
-			SELECT intEntityId
-				 , strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)			
-		) EC ON C.intEntityId = EC.intEntityId
+		INNER JOIN #ADCUSTOMERS CUSTOMERS ON C.intEntityId = CUSTOMERS.intEntityCustomerId
+		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND C.strStatementFormat = 'Budget Reminder'
 	END
@@ -197,17 +201,13 @@ ELSE
 			 , dblARBalance				= C.dblARBalance
 			 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
 		FROM tblARCustomer C WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intEntityId
-				 , strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
-		) EC ON C.intEntityId = EC.intEntityId
+		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
 		  AND C.strStatementFormat = 'Budget Reminder'
+		  AND (@strCustomerNameLocal IS NULL OR EC.strName = @strCustomerNameLocal)
 	END
 
---ACCOUNT STATUS FILTER
+--FILTER CUSTOMER BY ACCOUNT STATUS
 IF @strAccountStatusCodeLocal IS NOT NULL
     BEGIN
         DELETE FROM #CUSTOMERS
@@ -219,17 +219,19 @@ IF @strAccountStatusCodeLocal IS NOT NULL
         )
     END
 
---FOR EMAIL ONLY FILTER
+--FILTER CUSTOMER BY EMAIL SETUP
 IF @ysnEmailOnly IS NOT NULL
 	BEGIN
 		DELETE C
 		FROM #CUSTOMERS C
 		OUTER APPLY (
 			SELECT intEmailSetupCount = COUNT(*) 
-			FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
-			WHERE CC.intCustomerEntityId = C.intEntityCustomerId 
-				AND ISNULL(CC.strEmail, '') <> '' 
-				AND CC.strEmailDistributionOption LIKE '%Statements%'
+			FROM tblARCustomer CC
+			INNER JOIN tblEMEntityToContact CONT ON CC.intEntityId = CONT.intEntityId 
+			INNER JOIN tblEMEntity E ON CONT.intEntityContactId = E.intEntityId 
+			WHERE E.strEmail <> '' 
+			  AND E.strEmail IS NOT NULL
+			  AND E.strEmailDistributionOption LIKE '%Statements%'
 		) EMAILSETUP
 		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
@@ -250,12 +252,33 @@ IF @strLocationNameLocal IS NOT NULL
 		) C (intCompanyLocationId)
 	END
 
---CUSTOMER ADDRESS AND FOOTER COMMENT
-UPDATE C 
-SET strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, C.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
-  , strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, CS.strBillToAddress, CS.strBillToCity, CS.strBillToState, CS.strBillToZipCode, CS.strBillToCountry, NULL, NULL)
+--CUSTOMER_ADDRESS
+UPDATE C
+SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry 
 FROM #CUSTOMERS C
-INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
+INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
+
+--CUSTOMER_FOOTERCOMMENT
+UPDATE C
+SET strStatementFooterComment	= FOOTER.strMessage
+FROM #CUSTOMERS C
+CROSS APPLY (
+	SELECT TOP 1 strMessage	= '<html>' + CAST(blbMessage AS VARCHAR(MAX)) + '</html>'
+	FROM tblSMDocumentMaintenanceMessage H
+	INNER JOIN tblSMDocumentMaintenance M ON H.intDocumentMaintenanceId = M.intDocumentMaintenanceId
+	WHERE H.strHeaderFooter = 'Footer'
+	  AND M.strSource = 'Statement Report'
+	  AND (M.intEntityCustomerId IS NULL OR (M.intEntityCustomerId IS NOT NULL AND M.intEntityCustomerId = C.intEntityCustomerId))
+	ORDER BY M.intDocumentMaintenanceId DESC
+		   , intEntityCustomerId DESC
+) FOOTER
+
+--CUSTOMER STATEMENT COMMENT
+UPDATE C
+SET strComment = strMessage
+FROM #CUSTOMERS C
+INNER JOIN tblEMEntityMessage EM ON C.intEntityCustomerId = EM.intEntityId
+WHERE strMessageType = 'Statement'
 
 --BALANCE FORWARD AGING
 SELECT @strCustomerIdsLocal = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
@@ -272,19 +295,35 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmBalanceForwardD
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 										  , @ysnFromBalanceForward		= 1
 
-SELECT *
-INTO #BALANCEFORWARDAGING 
+--#BALANCEFORWARDAGING
+INSERT INTO #BALANCEFORWARDAGING WITH (TABLOCK) (
+	  intEntityCustomerId
+	, dblTotalAR
+)
+SELECT intEntityCustomerId
+	 , dblTotalAR
 FROM tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
 
---GL ACCOUNTS
+--#GLACCOUNTS
+INSERT INTO #GLACCOUNTS
 SELECT intAccountId
-INTO #GLACCOUNTS
 FROM dbo.vyuGLAccountDetail
 WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
 
---POSTED PAYMENTS
+--#POSTEDARPAYMENTS
+INSERT INTO #POSTEDARPAYMENTS WITH (TABLOCK) (
+	   intPaymentId
+	 , intEntityCustomerId
+	 , strPaymentInfo
+	 , strRecordNumber
+	 , strNotes
+	 , dtmDatePaid
+	 , ysnInvoicePrepayment
+	 , intPaymentMethodId
+	 , strPaymentMethod
+)
 SELECT intPaymentId			= P.intPaymentId
 	 , intEntityCustomerId	= P.intEntityCustomerId
 	 , strPaymentInfo		= P.strPaymentInfo
@@ -293,27 +332,33 @@ SELECT intPaymentId			= P.intPaymentId
 	 , dtmDatePaid			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid)))
 	 , ysnInvoicePrepayment	= P.ysnInvoicePrepayment
 	 , intPaymentMethodId	= P.intPaymentMethodId
-INTO #POSTEDARPAYMENTS
+	 , strPaymentMethod		= UPPER(PM.strPaymentMethod)
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID
 WHERE P.ysnPosted = 1
-   AND ISNULL(P.ysnProcessedToNSF, 0) = 0   
-   AND (@intCompanyLocationId IS NULL OR P.intLocationId = @intCompanyLocationId)
+  AND ISNULL(P.ysnProcessedToNSF, 0) = 0   
+  AND (@intCompanyLocationId IS NULL OR P.intLocationId = @intCompanyLocationId)
 
---WRITE OFFS
+--FILTER WRITE OFFS
 IF @ysnIncludeWriteOffPaymentLocal = 1
 	BEGIN
-		SELECT intPaymentMethodID
-		INTO #WRITEOFFS 
-		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
-		WHERE UPPER(strPaymentMethod) LIKE '%WRITE OFF%'
-
-		DELETE ARP
-		FROM #POSTEDARPAYMENTS ARP 
-		INNER JOIN #WRITEOFFS WO ON ARP.intPaymentMethodId = WO.intPaymentMethodID
+		DELETE P
+		FROM #POSTEDARPAYMENTS P
+		WHERE strPaymentMethod = 'WRITE OFF'
 	END
 
---PAYMENT DETAILS
+--#PAYMENTDETAILS
+INSERT INTO #PAYMENTDETAILS WITH (TABLOCK) (
+	   intPaymentId
+	 , intInvoiceId
+	 , dblPayment
+	 , dblDiscount
+	 , dblWriteOffAmount
+	 , dblInterest
+	 , dtmDatePaid
+	 , ysnInvoicePrepayment
+)
 SELECT intPaymentId			= P.intPaymentId
 	 , intInvoiceId			= PD.intInvoiceId
 	 , dblPayment			= PD.dblPayment
@@ -322,12 +367,25 @@ SELECT intPaymentId			= P.intPaymentId
 	 , dblInterest			= PD.dblInterest
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , ysnInvoicePrepayment	= P.ysnInvoicePrepayment
-INTO #PAYMENTDETAILS
 FROM tblARPaymentDetail PD WITH (NOLOCK)
 INNER JOIN #POSTEDARPAYMENTS P ON PD.intPaymentId = P.intPaymentId
 WHERE P.dtmDatePaid <= @dtmDateToLocal
 
---POSTED INVOICES
+--#POSTEDINVOICES
+INSERT INTO #POSTEDINVOICES WITH (TABLOCK) (
+	   intInvoiceId
+	 , intPaymentId
+	 , intEntityCustomerId
+	 , strInvoiceNumber
+	 , strTransactionType
+	 , strType
+	 , strInvoiceOriginId
+	 , dtmDate
+	 , dtmDueDate
+	 , dblInvoiceTotal
+	 , ysnImportedFromOrigin
+	 , ysnServiceChargeCredit
+)
 SELECT intInvoiceId				= I.intInvoiceId
 	 , intPaymentId				= I.intPaymentId
 	 , intEntityCustomerId		= I.intEntityCustomerId
@@ -339,7 +397,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmDueDate				= I.dtmDueDate
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
 	 , ysnImportedFromOrigin	= I.ysnImportedFromOrigin
-INTO #POSTEDINVOICES
+	 , ysnServiceChargeCredit	= I.ysnServiceChargeCredit
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId
@@ -355,8 +413,8 @@ WHERE I.ysnPosted = 1
       )
   AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 
---STATEMENT REPORT
-INSERT INTO #STATEMENTREPORT (
+--#STATEMENTREPORT
+INSERT INTO #STATEMENTREPORT WITH (TABLOCK) (
 	   intEntityCustomerId
 	 , intInvoiceId
 	 , intPaymentId
@@ -379,6 +437,7 @@ INSERT INTO #STATEMENTREPORT (
 	 , dblBalance
 	 , dblARBalance
 	 , ysnStatementCreditLimit
+	 , strComment
 )
 SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , intInvoiceId					= TRANSACTIONS.intInvoiceId
@@ -387,7 +446,7 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , strCustomerName				= C.strCustomerName
 	 , strInvoiceNumber				= TRANSACTIONS.strInvoiceNumber
 	 , strRecordNumber				= TRANSACTIONS.strRecordNumber
-	 , strTransactionType			= TRANSACTIONS.strTransactionType
+	 , strTransactionType			= CASE WHEN ISNULL(TRANSACTIONS.ysnServiceChargeCredit, 0) = 1 THEN 'Forgiven Service Charge' ELSE TRANSACTIONS.strTransactionType END
 	 , strType						= TRANSACTIONS.strType
 	 , strPaymentInfo				= TRANSACTIONS.strPaymentInfo
 	 , strFullAddress				= C.strFullAddress
@@ -402,6 +461,7 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , dblBalance					= TRANSACTIONS.dblBalance
 	 , dblARBalance					= C.dblARBalance
 	 , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
+	 , strComment					= C.strComment
 FROM #CUSTOMERS C
 LEFT JOIN (
 	SELECT intInvoiceId			= I.intInvoiceId
@@ -423,6 +483,7 @@ LEFT JOIN (
 		 , dtmDueDate			= I.dtmDueDate
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
+		 , ysnServiceChargeCredit = I.ysnServiceChargeCredit
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
 
@@ -442,6 +503,7 @@ LEFT JOIN (
 		 , dtmDueDate			= NULL
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= NULL
+		 , ysnServiceChargeCredit = NULL
 	FROM #POSTEDARPAYMENTS P
 	INNER JOIN (
 		SELECT intPaymentId		= PD.intPaymentId
@@ -518,7 +580,7 @@ UPDATE #STATEMENTREPORT SET dblBalance = dblPayment * -1 WHERE strTransactionTyp
 UPDATE #STATEMENTREPORT SET dblBalance = dblInvoiceTotal WHERE strTransactionType IN ('Invoice', 'Debit Memo') AND dblBalance <> 0
 
 --BALANCE FORWARD LINE ITEM
-INSERT INTO #STATEMENTREPORT (
+INSERT INTO #STATEMENTREPORT WITH (TABLOCK) (
 	   intEntityCustomerId
 	 , strCustomerNumber
 	 , strCustomerName
@@ -565,10 +627,8 @@ FROM #STATEMENTREPORT GROUP BY strCustomerNumber
 )
 AS SOURCE (strCustomerNumber, dtmLastStatementDate, dblLastStatement)
 ON Target.strEntityNo = SOURCE.strCustomerNumber
-
 WHEN MATCHED THEN
 UPDATE SET dtmLastStatementDate = SOURCE.dtmLastStatementDate, dblLastStatement = SOURCE.dblLastStatement
-
 WHEN NOT MATCHED BY TARGET THEN
 INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
@@ -587,8 +647,8 @@ IF @ysnPrintZeroBalanceLocal = 0
 		DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR (ISNULL(dblBalance, 0) <= 0 OR ISNULL(dblARBalance,0) <=0)) AND ISNULL(strTransactionType, '') NOT IN ('Customer Budget')
 		END
 	END
-DELETE FROM #STATEMENTREPORT WHERE strTransactionType IS NULL
 
+DELETE FROM #STATEMENTREPORT WHERE strTransactionType IS NULL
 
 DELETE SR
 FROM #STATEMENTREPORT SR
@@ -620,14 +680,14 @@ OUTER APPLY (
 		AND @dtmDateToLocal <= dtmBudgetDate
 	) NEAREST
 	WHERE BUDGET.intEntityCustomerId = SR.intEntityCustomerId
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) <= NEAREST.dtmBudgetDate
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) <= @dtmDateToLocal
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) >=@dtmDateFrom
+	  AND BUDGET.dtmBudgetDate <= NEAREST.dtmBudgetDate
+	  AND BUDGET.dtmBudgetDate <= @dtmDateToLocal
+	  AND BUDGET.dtmBudgetDate >=@dtmDateFrom
 ) BUDGETNOWDUE
 
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Budget Reminder'
 
-INSERT INTO tblARCustomerStatementStagingTable (
+INSERT INTO tblARCustomerStatementStagingTable WITH (TABLOCK) (
 	  intEntityCustomerId
 	, intInvoiceId
 	, intPaymentId
@@ -657,7 +717,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dblBudgetNowDue
 	, dblBudgetPastDue
 	, ysnStatementCreditLimit
-	, blbLogo
+	, strComment
 )
 SELECT intEntityCustomerId		= SR.intEntityCustomerId	
 	, intInvoiceId				= SR.intInvoiceId
@@ -688,13 +748,8 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, dblBudgetNowDue			= SR.dblBudgetNowDue
 	, dblBudgetPastDue			= SR.dblBudgetPastDue
 	, ysnStatementCreditLimit	= SR.ysnStatementCreditLimit
-	, blbLogo					= @blbLogo
+	, strComment				= SR.strComment
 FROM #STATEMENTREPORT SR
-
-UPDATE tblARCustomerStatementStagingTable
-SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')  
-WHERE intEntityUserId = @intEntityUserIdLocal 
-  AND strStatementFormat = 'Budget Reminder'
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN

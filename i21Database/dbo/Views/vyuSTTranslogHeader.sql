@@ -16,7 +16,6 @@ SELECT ROW_NUMBER() OVER (ORDER BY TRR.intTermMsgSN ASC) AS intId
 	  , TRR.dblTrpAmt
 	  , TRR.dblTrlQty AS dblTotalTrlQty
 	  , TRR.intCompanyLocationId
-	  --, TRR.intEntityId
 FROM
 (   
 	SELECT DISTINCT
@@ -32,21 +31,13 @@ FROM
 		 , ST.intCompanyLocationId
 		 , CH.dtmCheckoutDate
 		 , TR.dtmClosedTime
-		 , TR.dblTrpAmt
+		 , SUM(TR.dblTrlLineTot) AS dblTrpAmt
 		 , SUM(TR.dblTrlQty) AS dblTrlQty
-		 --, USec.intEntityId
 	FROM tblSTTranslogRebates TR
-	--JOIN tblSTCheckoutHeader CH 
 	LEFT JOIN tblSTCheckoutHeader CH 
 		ON TR.intCheckoutId = CH.intCheckoutId
-	--JOIN tblSTStore ST 
 	LEFT JOIN tblSTStore ST 
-		--ON CH.intStoreId = ST.intStoreId
 		ON TR.intStoreId = ST.intStoreId
-	-- OUTER APPLY tblSMUserSecurity USec
-	-- INNER JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
-		-- ON USec.intEntityId = RolePerm.intEntityId
-		-- AND ST.intCompanyLocationId = RolePerm.intCompanyLocationId
 	WHERE TR.strTrpPaycode = 'CASH'
 	AND TR.dblTrpAmt > 0
 	GROUP BY 
@@ -62,7 +53,6 @@ FROM
 		, ST.intCompanyLocationId
 		, CH.dtmCheckoutDate
 		, TR.dtmClosedTime
-		 , TR.dblTrpAmt
 	--OR, TR.dblTrpAmtDER BY TR.dtmDate OFFSET 0 ROWS
 ) TRR
 GO

@@ -48,7 +48,7 @@
 	CONSTRAINT [FK_tblARPayment_tblEMEntityCardInformation_intEntityCardInfoId] FOREIGN KEY ([intEntityCardInfoId]) REFERENCES [dbo].[tblEMEntityCardInformation] ([intEntityCardInfoId]),
 	CONSTRAINT [FK_tblARPayment_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
-
+--INDEXES
 GO
 CREATE NONCLUSTERED INDEX [NC_Index_tblARPayment]
 	ON [dbo].[tblARPayment]([intEntityCustomerId], [ysnPosted], [ysnProcessedToNSF]) 
@@ -107,6 +107,7 @@ BEGIN
 END
 GO
 
+--TRIGGERS BEFORE DELETE
 CREATE TRIGGER trg_tblARPaymentDelete
 ON dbo.tblARPayment
 INSTEAD OF DELETE 
@@ -139,6 +140,7 @@ BEGIN
 END
 GO
 
+--TRIGGERS BEFORE UPDATE
 CREATE TRIGGER trg_tblARPaymentUpdate
 ON dbo.tblARPayment
 INSTEAD OF UPDATE
@@ -205,6 +207,7 @@ BEGIN
 		RAISERROR('Cannot update posted payment',16,1)		
 END
 
+--TRIGGERS AFTER DELETE
 GO
 CREATE TRIGGER trgForDeleteARPayment
     ON dbo.tblARPayment
@@ -220,6 +223,7 @@ BEGIN
 		END
 END
 
+--TRIGGERS AFTER UPDATE
 GO
 CREATE TRIGGER trgForUpdatePayment 
 	ON dbo.tblARPayment

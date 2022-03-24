@@ -283,6 +283,26 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod SMPM WITH (NOLOCK) WHERE SMPM.[intPaymentMethodID] = ITG.[intPaymentMethodId] AND ISNULL(SMPM.[ysnActive], 0) = 1)
 
+UNION ALL
+
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= [dbo].[fnARFormatMessage]('There is no Customer Prepaid account setup under Company Location - %s.', SMCL.strLocationName, DEFAULT)
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intPaymentId]			= ITG.[intPaymentId]
+FROM
+	@PaymentsToGenerate ITG --WITH (NOLOCK)
+OUTER APPLY (
+	SELECT TOP 1 strLocationName, intSalesAdvAcct
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId = ITG.intCompanyLocationId
+) SMCL
+WHERE
+	ITG.strNotes = 'Store Payment '
+	AND ISNULL(SMCL.intSalesAdvAcct, 0) = 0
+
 --UNION ALL
 
 --SELECT

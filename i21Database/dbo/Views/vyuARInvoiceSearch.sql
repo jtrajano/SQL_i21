@@ -149,15 +149,7 @@ LEFT OUTER JOIN (
 		 , strSubBook
 	FROM dbo.tblCTSubBook WITH (NOLOCK)
 ) SUBBOOK ON SUBBOOK.intSubBookId = I.intSubBookId
-OUTER APPLY (
-	SELECT TOP 1 strBatchId, A.ysnProcessedToNSF 
-	FROM (select intPaymentId, ysnProcessedToNSF from dbo.tblARPayment WITH (NOLOCK))A 
-	INNER JOIN (SELECT intPaymentId
-					 , intInvoiceId 
-				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-	) B ON A.intPaymentId = B.intPaymentId 
-	WHERE B.intInvoiceId = I.intInvoiceId
-) PAYMENT
+LEFT JOIN tblARPayment PAYMENT ON I.intPaymentId = PAYMENT.intPaymentId
 LEFT OUTER JOIN (
     SELECT intInvoiceId
          , strReceiptNumber
@@ -179,15 +171,8 @@ LEFT OUTER JOIN (
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId 
 	WHERE intCreditMemoId IS NOT NULL
-) POSMixedTransactionCreditMemo ON I.intInvoiceId = POSMixedTransactionCreditMemo.intCreditMemoId
-AND I.strType = 'POS'
-OUTER APPLY (
-	SELECT TOP 1 strName
-			   , strEmail
-			   , intEntityId 
-	FROM dbo.tblEMEntity WITH (NOLOCK) 
-	WHERE I.intEntityContactId = intEntityId
-) EC
+) POSMixedTransactionCreditMemo ON I.intInvoiceId = POSMixedTransactionCreditMemo.intCreditMemoId AND I.strType = 'POS'
+LEFT JOIN dbo.tblEMEntity EC WITH (NOLOCK) ON I.intEntityContactId = EC.intEntityId
 OUTER APPLY (
 	SELECT ysnHasEmailSetup = CASE WHEN COUNT(ETC.intEntityId)  > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	FROM tblEMEntityToContact ETC WITH (NOLOCK)
@@ -222,7 +207,8 @@ OUTER APPLY (
 				 , strTicketNumber 
 			FROM dbo.tblSCTicket WITH(NOLOCK)
 		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intInvoiceId = I.intInvoiceId  and ID.intTicketId is not null
+		WHERE ID.intInvoiceId = I.intInvoiceId 
+		  AND ID.intTicketId IS NOT NULL
 		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
 		FOR XML PATH ('')
 	) INV (strTicketNumber)
@@ -243,12 +229,13 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
-OUTER APPLY (
-	SELECT TOP 1 intTicketId
-	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
-	WHERE ID.intInvoiceId = I.intInvoiceId
-	  AND ID.intTicketId IS NOT NULL
-) SCALETICKETID
+LEFT JOIN (
+	SELECT intTicketId	= MIN(ID.intTicketId)
+		 , intInvoiceId	= ID.intInvoiceId
+	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)	
+	WHERE ID.intTicketId IS NOT NULL
+	GROUP BY ID.intInvoiceId
+) SCALETICKETID ON SCALETICKETID.intInvoiceId = I.intInvoiceId
 OUTER APPLY (
 	SELECT strPOSPayMethods = LEFT(strPaymentMethod, LEN(strPaymentMethod) - 1)
 	FROM
@@ -267,13 +254,13 @@ LEFT JOIN (
 		 , strAccountingPeriod = P.strPeriod
 	FROM tblGLFiscalYearPeriod P	
 ) AccPeriod ON I.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
-OUTER APPLY (
-	SELECT TOP 1 P.dtmDatePaid
+LEFT JOIN (
+	SELECT dtmDatePaid		= MAX(P.dtmDatePaid)
+		 , intInvoiceId		= PD.intInvoiceId
 	FROM tblARPaymentDetail PD
 	INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
-	WHERE PD.intInvoiceId = I.intInvoiceId
-	  AND P.ysnPosted = 1
+	WHERE P.ysnPosted = 1
 	  AND P.ysnInvoicePrepayment = 0
-	ORDER BY P.dtmDatePaid DESC
-) FULLPAY
+	GROUP BY PD.intInvoiceId
+) FULLPAY ON I.intInvoiceId = FULLPAY.intInvoiceId AND I.ysnPaid = 1
 GO

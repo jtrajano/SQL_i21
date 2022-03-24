@@ -226,10 +226,6 @@ BEGIN TRY
 					,@strRowState = 'Added'
 					,@intShipmentType = @intShipmentType
 			END
-
-			EXEC [uspLGReserveStockForInventoryShipment] @intLoadId = @intLoadId
-			,@ysnReserveStockForInventoryShipment = 1
-
 		END
 	END
 	ELSE IF (@intShipmentType = 2)

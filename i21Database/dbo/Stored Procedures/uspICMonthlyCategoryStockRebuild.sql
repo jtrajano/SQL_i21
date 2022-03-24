@@ -97,7 +97,7 @@ BEGIN TRY
 	SELECT  TOP 1 
 			@intUserId = intEntityId
 	FROM	tblSMUserSecurity
-	WHERE	strUserName = 'irelyadmin'
+	WHERE	strUserName IN ('irelyadmin', 'aussup')
 
 	-- Exit immediately if the start date is blank. 
 	IF @dtmStartDate IS NULL 

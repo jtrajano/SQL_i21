@@ -61,13 +61,21 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryStockMovement_intInventoryTransactio
 	ON [dbo].[tblICInventoryStockMovement]([intInventoryTransactionId] ASC);
 GO
 
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryStockMovement_detail]
+	ON [dbo].[tblICInventoryStockMovement]([intTransactionId] ASC, [strTransactionId] ASC)
+GO
+
+CREATE NONCLUSTERED INDEX [IXtblICInventoryStockMovement_related]
+	ON [dbo].[tblICInventoryStockMovement]([intRelatedTransactionId] ASC, [strRelatedTransactionId] ASC)
+GO
+
 CREATE CLUSTERED INDEX [IX_tblICInventoryStockMovement_Report]
 	ON [dbo].[tblICInventoryStockMovement](
 		intCommodityId ASC 
 		,intCategoryId ASC 
 		,intLocationId ASC 
 		,intItemId ASC 
-		,[dtmDate] ASC
-		,[intInventoryStockMovementId] ASC
+		,dtmDate ASC
+		,intInventoryStockMovementId ASC
 	);
 GO

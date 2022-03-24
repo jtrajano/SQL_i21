@@ -542,13 +542,14 @@ BEGIN /* Direct Inventory */
 		intCurrencyId
 		,ysnStage
 		,intTicketDistributionAllocationId
+		,intPriceFixationDetailId
 		)
 		SELECT
 		[intTransactionType]			=	1,
 		[intAccountId]					=	dbo.[fnGetItemGLAccount](A.intItemId, loc.intItemLocationId, 'AP Clearing'),
 		[intItemId]						=	A.[intItemId],					
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
-		[intQtyToBillUOMId]				=	A.intUnitOfMeasureId
+		[intQtyToBillUOMId]				=	ICUOM.intItemUOMId
 											-- CASE WHEN ctd.intItemUOMId > 0 
 											-- 	THEN ctd.intItemUOMId
 											-- 	ELSE A.intUnitOfMeasureId
@@ -556,7 +557,7 @@ BEGIN /* Direct Inventory */
 		
 		
 		,[dblQuantityToBill]			=	A.dblQtyReceived
-		,[dblQtyToBillUnitQty]			=	ISNULL(A.dblUnitQty,1) --CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
+		,[dblQtyToBillUnitQty]			=	ISNULL(ICUOM.dblUnitQty,1) --CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
 		,[dblOrderQty]					=	(CASE WHEN lgDetail.dblQuantity IS NULL
 												THEN
 													A.dblQtyReceived
@@ -605,10 +606,13 @@ BEGIN /* Direct Inventory */
 		intCurrencyId					=	SC.intCurrencyId
 		,ysnStage 						= 0
 		,intTicketDistributionAllocationId
+		,intPriceFixationDetailId		= A.intPriceFixationDetailId
 	FROM @voucherDetailDirect A
 	INNER JOIN tblSCTicket SC ON A.intScaleTicketId = SC.intTicketId
 	INNER JOIN tblAPVendor D ON SC.intEntityId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
+	INNER JOIN tblICItemUOM ICUOM
+		ON A.intUnitOfMeasureId = ICUOM.intItemUOMId
 	LEFT JOIN vyuCTContractDetailView ctd ON A.intContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblLGLoadDetail lgDetail ON A.intLoadDetailId = lgDetail.intLoadDetailId
 	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND SC.intProcessingLocationId = C.intLocationId
@@ -670,5 +674,6 @@ BEGIN /* RESULT */
 			[intItemLocationId]
 			,ysnStage
 			,intTicketDistributionAllocationId
+			,intPriceFixationDetailId
 	FROM @VoucherPayable
 END

@@ -37,8 +37,8 @@ RETURNS TABLE AS RETURN
  INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId  
  INNER JOIN tblICItem B2  
     ON B.intItemId = B2.intItemId  
- INNER JOIN tblICItemLocation loc  
-  ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId  
+--  INNER JOIN tblICItemLocation loc  
+--   ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId  
  LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)  
   ON A.intEntityVendorId = C.[intEntityId]  
  LEFT JOIN (tblICInventoryReceiptCharge D  INNER JOIN tblICInventoryReceipt D2 ON D.intInventoryReceiptId = D2.intInventoryReceiptId)

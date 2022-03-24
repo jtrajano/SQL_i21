@@ -67,13 +67,8 @@ SELECT
 	,[intSubCurrencyId] 					= [intSubCurrencyId]
 	,[dblAmountDue]							= [dblAmountDue]
 	,[intCompanyLocationId]					= [intCompanyLocationId]
-FROM
-	[tblARInvoiceDetail] ARID
-INNER JOIN
-	@InvoiceIds II
-		ON ARID.[intInvoiceId] = II.[intHeaderId]
-INNER JOIN 
-	(SELECT intInvoiceId,dblAmountDue,intCurrencyId,intCompanyLocationId FROM tblARInvoice) TMP
-		ON TMP.intInvoiceId = ARID.[intInvoiceId]
+FROM [tblARInvoiceDetail] ARID
+INNER JOIN @InvoiceIds II ON ARID.[intInvoiceId] = II.[intHeaderId]
+INNER JOIN tblARInvoice TMP ON TMP.intInvoiceId = ARID.[intInvoiceId]
 END
 

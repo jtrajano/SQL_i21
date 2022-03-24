@@ -954,7 +954,7 @@ BEGIN
 								CASE 
 									WHEN IsNUmeric(AV1.strValue) = 0
 										THEN Convert(NUMERIC(18, 6), 0.0)
-									ELSE AV1.strValue
+									ELSE ABS(AV1.strValue)
 									END
 								) > 0
 						)

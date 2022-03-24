@@ -35,7 +35,7 @@
     [strCompanyName]               NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyAddress]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strUserId]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strStatementFormat]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strStatementFormat]           NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strItemNo]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strItemDescription]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerNumberAlpha]       NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
@@ -94,4 +94,8 @@
     [strComment]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmDateCreated]               DATETIME        NULL
 );
-
+GO
+CREATE NONCLUSTERED INDEX [NC_Index_tblARCustomerStatementStagingTable_StatementReport]
+ON [dbo].[tblARCustomerStatementStagingTable] ([intEntityUserId],[strStatementFormat])
+INCLUDE ([intEntityCustomerId])
+GO

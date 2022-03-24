@@ -81,7 +81,24 @@ END
 
 	IF(@ysnPosted = 1)
 	BEGIN
-	------------------------CREATE GL ENTRIES---------------------
+
+		SELECT TOP 1 @error = CASE WHEN ISNULL(V.strType, '') = '' THEN 'Entity ' + EME.strName + ' is not a vendor.' ELSE '' END
+		FROM #tempCustomerStock C
+		INNER JOIN tblEMEntity EME ON C.intCustomerPatronId = EME.intEntityId
+		OUTER APPLY (
+			SELECT TOP 1 strType
+			FROM tblEMEntityType 
+			WHERE intEntityId = EME.intEntityId
+			AND strType = 'Vendor'
+		) V
+
+		IF(ISNULL(@error, '') <> '')
+		BEGIN
+			RAISERROR(@error, 16, 1);
+			GOTO Post_Rollback;
+		END
+
+		------------------------CREATE GL ENTRIES---------------------
 		INSERT INTO @GLEntries(
 			[dtmDate], 
 			[strBatchId], 

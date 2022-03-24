@@ -27,5 +27,6 @@ CREATE TABLE [dbo].[tblICStagingItemLocation] (
 	, strDefaultPurchaseUom NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strDefaultGrossUom NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strInventoryCountGroup NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, dtmDateLastUpdated DATETIME NULL
 	, CONSTRAINT PK_tblICStagingItemLocation_intStagingItemLocationId PRIMARY KEY (intStagingItemLocationId)
 )

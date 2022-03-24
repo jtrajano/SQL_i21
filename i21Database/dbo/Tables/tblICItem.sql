@@ -215,7 +215,7 @@ Type the overview for the table here.
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItem_strType]
 		ON [dbo].[tblICItem]([strType] ASC)
-		INCLUDE ([intCommodityId])
+		INCLUDE ([strItemNo], [strDescription], [intCategoryId], [intCommodityId])
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItem_intCommodity]

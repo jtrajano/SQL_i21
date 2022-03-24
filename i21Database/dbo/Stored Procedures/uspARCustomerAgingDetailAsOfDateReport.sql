@@ -192,6 +192,29 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
 
+--##CREDITMEMOPAIDREFUNDED
+INSERT INTO ##CREDITMEMOPAIDREFUNDED (
+	   intInvoiceId
+	 , strInvoiceNumber
+	 , strDocumentNumber
+)
+SELECT I.intInvoiceId,I.strInvoiceNumber,REFUND.strDocumentNumber
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN(
+	SELECT ID.strDocumentNumber from tblARInvoice INV
+	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
+	where   strTransactionType='Cash Refund' and ysnPosted = 1
+)REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
+WHERE I.ysnPosted = 1 
+	AND I.ysnPaid = 1
+	AND ysnCancelled = 0
+	AND I.strTransactionType <> 'Cash Refund'
+	AND I.strTransactionType = 'Credit Memo'
+	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
 --##POSTEDINVOICES
 INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	   intInvoiceId
@@ -210,6 +233,7 @@ INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	 , dtmPostDate
 	 , dtmDueDate
 	 , dtmDate
+	 , ysnPaid
 )
 SELECT intInvoiceId				= I.intInvoiceId
 	 , intEntityCustomerId		= I.intEntityCustomerId
@@ -227,22 +251,27 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmPostDate				= I.dtmPostDate
 	 , dtmDueDate				= DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate)
 	 , dtmDate					= CAST(I.dtmDate AS DATE)
+	 , ysnPaid					= I.ysnPaid
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
-WHERE ysnPosted = 1
-	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
-	AND ysnCancelled = 0
-	AND strTransactionType <> 'Cash Refund'
-	AND ( 
+WHERE I.ysnPosted = 1  
+  AND I.ysnCancelled = 0
+  AND I.strTransactionType <> 'Cash Refund'
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+  AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
 		SC.intInvoiceId IS NOT NULL
-	)
-	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
-	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+	)	
+
+IF @ysnPaidInvoice = 0
+	DELETE FROM ##POSTEDINVOICES WHERE ysnPaid = 1
+
+IF @strSourceTransactionLocal IS NOT NULL
+	DELETE FROM ##POSTEDINVOICES WHERE strType <> @strSourceTransactionLocal
 
 --##CASHREFUNDS
 INSERT INTO ##CASHREFUNDS (
@@ -262,6 +291,9 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
+
+DELETE FROM  ##POSTEDINVOICES
+WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM ##CASHREFUNDS CF INNER  JOIN ##CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber) 
 
 --##CASHRETURNS
 INSERT INTO ##CASHRETURNS (
@@ -390,8 +422,7 @@ FROM
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 120 THEN '91 - 120 Days' 
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 120 THEN 'Over 120' END
 				END
-FROM ##POSTEDINVOICES I WITH (NOLOCK)
-WHERE strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) AS A
+FROM ##POSTEDINVOICES I WITH (NOLOCK)) AS A
 
 LEFT JOIN
     

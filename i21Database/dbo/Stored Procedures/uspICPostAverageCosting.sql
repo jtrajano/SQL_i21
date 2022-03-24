@@ -56,6 +56,11 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	,@dblUnitRetail NUMERIC(38, 20) 
 	,@ysnTransferOnSameLocation AS BIT = NULL
 	,@intSourceEntityId INT = NULL
+	,@strSourceType NVARCHAR(100) = NULL 
+	,@strSourceNumber NVARCHAR(100) = NULL 
+	,@strBOLNumber NVARCHAR(100) = NULL 
+	,@intTicketId INT = NULL 
+
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -240,6 +245,10 @@ BEGIN
 				,@dblUnitRetail = @dblUnitRetail
 				,@intSourceEntityId = @intSourceEntityId
 				,@intTransactionItemUOMId = @intTransactionItemUOMId
+				,@strSourceType = @strSourceType
+				,@strSourceNumber = @strSourceNumber
+				,@strBOLNumber = @strBOLNumber
+				,@intTicketId = @intTicketId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -302,6 +311,10 @@ BEGIN
 				,@dblUnitRetail = @dblUnitRetail
 				,@intSourceEntityId = @intSourceEntityId
 				,@intTransactionItemUOMId = @intTransactionItemUOMId
+				,@strSourceType = @strSourceType
+				,@strSourceNumber = @strSourceNumber
+				,@strBOLNumber = @strBOLNumber
+				,@intTicketId = @intTicketId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -395,6 +408,10 @@ BEGIN
 							,@strDescription = @strDescription
 							,@intSourceEntityId = @intSourceEntityId
 							,@intTransactionItemUOMId = @intTransactionItemUOMId
+							,@strSourceType = @strSourceType
+							,@strSourceNumber = @strSourceNumber
+							,@strBOLNumber = @strBOLNumber
+							,@intTicketId = @intTicketId
 							,@dtmCreated = @dtmCreated OUTPUT 
 				END 
 			END
@@ -469,6 +486,10 @@ BEGIN
 				,@dblCategoryRetailValue = @CategoryRetailValue
 				,@intSourceEntityId = @intSourceEntityId
 				,@intTransactionItemUOMId = @intTransactionItemUOMId
+				,@strSourceType = @strSourceType
+				,@strSourceNumber = @strSourceNumber
+				,@strBOLNumber = @strBOLNumber
+				,@intTicketId = @intTicketId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;

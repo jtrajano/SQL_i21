@@ -5,8 +5,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
---CHANGES HERE SHOULD ALSO REFLECT IN PREDEPLOYMENT 14_RefreshARTempTables.sql
-
 IF(OBJECT_ID('tempdb..##ARPostInvoiceHeader') IS NOT NULL) DROP TABLE ##ARPostInvoiceHeader
 CREATE TABLE ##ARPostInvoiceHeader (
      [intInvoiceId]                         INT             NOT NULL PRIMARY KEY

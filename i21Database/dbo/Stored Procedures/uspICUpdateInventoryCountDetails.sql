@@ -198,9 +198,19 @@ BEGIN
 	SELECT @StorageUnitFilterCount = COUNT(*) FROM @StorageUnitIds
 END
 
+IF OBJECT_ID('tempdb..#tblICInventoryCountDetailUnSorted') IS NOT NULL  
+BEGIN 
+	DROP TABLE #tblICInventoryCountDetailUnSorted
+END 
+
+SELECT *
+INTO #tblICInventoryCountDetailUnSorted
+FROM tblICInventoryCountDetail
+WHERE 1 = 0 
+
 IF @ysnCountByLots = 1
 BEGIN
-	INSERT INTO tblICInventoryCountDetail(
+	INSERT INTO #tblICInventoryCountDetailUnSorted(
 		  intInventoryCountId
 		, intItemId
 		, intItemLocationId
@@ -215,7 +225,7 @@ BEGIN
 		, dblSystemCount
 		, dblWeightQty
 		, dblLastCost
-		, strCountLine
+		--, strCountLine
 		, intItemUOMId
 		, intStockUOMId
 		, intWeightUOMId
@@ -249,7 +259,7 @@ BEGIN
 					ELSE 
 						ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, Lot.intItemUOMId, LastLotTransaction.dblCost), 0)
 				END 
-			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
+			--, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
 			, Lot.intItemUOMId
 			, StockUOM.intItemUOMId
 			, Lot.intWeightUOMId
@@ -354,7 +364,7 @@ END
 
 ELSE IF @strCountBy = 'Pack'
 BEGIN
-	INSERT INTO tblICInventoryCountDetail(
+	INSERT INTO #tblICInventoryCountDetailUnSorted(
 		  intInventoryCountId
 		, intItemId
 		, intItemLocationId
@@ -363,7 +373,7 @@ BEGIN
 		, intLotId
 		, dblSystemCount
 		, dblLastCost
-		, strCountLine
+		--, strCountLine
 		, intItemUOMId
 		, ysnRecount
 		, ysnFetched
@@ -419,7 +429,7 @@ BEGIN
 				, 0
 			)			
 
-		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, itemUOM.intItemUOMId ASC) AS NVARCHAR(50))
+		--, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, itemUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = itemUOM.intItemUOMId
 		, ysnRecount = 0
 		, ysnFetched = 1
@@ -553,7 +563,7 @@ END
 
 ELSE
 BEGIN
-	INSERT INTO tblICInventoryCountDetail(
+	INSERT INTO #tblICInventoryCountDetailUnSorted(
 		  intInventoryCountId
 		, intItemId
 		, intItemLocationId
@@ -562,7 +572,7 @@ BEGIN
 		, intLotId
 		, dblSystemCount
 		, dblLastCost
-		, strCountLine
+		--, strCountLine
 		, intItemUOMId
 		, intStockUOMId
 		, ysnRecount
@@ -639,7 +649,7 @@ BEGIN
 					)
 			END 			
 
-		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
+		--, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 		, intItemUOMId = 
 			CASE 
@@ -791,3 +801,76 @@ BEGIN
 		)
 		AND il.ysnActive = 1
 END
+
+INSERT INTO tblICInventoryCountDetail(
+	intInventoryCountId
+	, intItemId
+	, intItemLocationId
+	, intSubLocationId
+	, intStorageLocationId
+	, intParentLotId
+	, strParentLotNo
+	, strParentLotAlias
+	, intLotId
+	, strLotNo
+	, strLotAlias
+	, dblSystemCount
+	, dblWeightQty
+	, dblLastCost
+	, strCountLine
+	, intItemUOMId
+	, intStockUOMId
+	, intWeightUOMId
+	, ysnRecount
+	, ysnFetched
+	, intEntityUserSecurityId
+	, intConcurrencyId
+	, intSort
+	, dblPhysicalCount
+)
+SELECT 
+	u.intInventoryCountId
+	, u.intItemId
+	, u.intItemLocationId
+	, u.intSubLocationId
+	, u.intStorageLocationId
+	, u.intParentLotId
+	, u.strParentLotNo
+	, u.strParentLotAlias
+	, u.intLotId
+	, u.strLotNo
+	, u.strLotAlias
+	, u.dblSystemCount
+	, u.dblWeightQty
+	, u.dblLastCost
+	, strCountLine = 
+		@strHeaderNo 
+		+ '-' 
+		+ CAST(ROW_NUMBER() OVER(ORDER BY ItemLocation.strStorageUnitNo, sl.strName, sub.strSubLocationName, i.strItemNo, l.strLotNumber) AS NVARCHAR(50))
+	, u.intItemUOMId
+	, u.intStockUOMId
+	, u.intWeightUOMId
+	, u.ysnRecount
+	, u.ysnFetched
+	, u.intEntityUserSecurityId
+	, u.intConcurrencyId
+	, u.intSort
+	, u.dblPhysicalCount
+FROM 
+	#tblICInventoryCountDetailUnSorted u
+	INNER JOIN tblICItem i 
+		ON i.intItemId = u.intItemId
+	LEFT JOIN tblICLot l
+		ON l.intLotId = u.intLotId
+	LEFT JOIN tblICStorageLocation sl
+		ON sl.intStorageLocationId = u.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation sub
+		ON sub.intCompanyLocationSubLocationId = u.intSubLocationId
+	LEFT JOIN tblICItemLocation ItemLocation 
+		ON ItemLocation.intItemLocationId = u.intItemLocationId
+ORDER BY
+	ItemLocation.strStorageUnitNo
+	,sl.strName
+	,sub.strSubLocationName
+	,i.strItemNo
+	,l.strLotNumber

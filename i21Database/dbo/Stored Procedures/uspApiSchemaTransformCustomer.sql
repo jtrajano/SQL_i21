@@ -717,7 +717,10 @@ SELECT
 	, (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrency)
 	, (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = @strPaymentMethod)
 	, (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = @strTerms)
-	, @strSalesperson
+	, (SELECT TOP 1 ARS.intEntityId FROM tblARSalesperson ARS 
+			JOIN tblEMEntity EME ON ARS.intEntityId = EME.intEntityId 
+	   WHERE ARS.strSalespersonId = @strSalesperson OR 
+			 EME.strEntityNo = @strSalesperson)
 	, @strFLO
 	, @strTaxNumber
 	, (CASE WHEN LOWER(ISNULL(@strExemptAllTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END)

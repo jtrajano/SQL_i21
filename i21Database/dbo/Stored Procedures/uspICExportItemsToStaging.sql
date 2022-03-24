@@ -63,11 +63,24 @@ WHERE dbo.fnDateGreaterThanEquals(ISNULL(item.dtmDateModified, item.dtmDateCreat
 /* Header */
 INSERT INTO tblICStagingItem(intItemId, strItemNo, strDescription, strType, strBundleType, strStatus
 	, strInventoryTracking, strLotTracking, strCostType, strCostMethod, strModelNo, ysnUseWeighScales
-	, ysnLotWeightsRequired, ysnStockedItem, strCommodityCode, strCategoryCode, strBrandCode, strManufacturer)
-SELECT intItemId, strItemNo, strDescription, strType, strBundleType, strStatus
-	, strInventoryTracking, strLotTracking, strCostType, strCostMethod, strModelNo, ysnUseWeighScales
-	, ysnLotWeightsRequired, ysnStockedItem, strCommodityCode, strCategoryCode, strBrandCode, strManufacturer
-FROM @Items	
+	, ysnLotWeightsRequired, ysnStockedItem, strCommodityCode, strCategoryCode, strBrandCode, strManufacturer, dtmDateLastUpdated)
+SELECT i.intItemId, i.strItemNo, i.strDescription, i.strType, i.strBundleType, i.strStatus
+	, i.strInventoryTracking, i.strLotTracking, i.strCostType, i.strCostMethod, i.strModelNo, i.ysnUseWeighScales
+	, i.ysnLotWeightsRequired, i.ysnStockedItem, i.strCommodityCode, i.strCategoryCode, i.strBrandCode, i.strManufacturer
+	, COALESCE(updated.dtmDate, created.dtmDate, i.dtmDate)
+FROM @Items	i
+OUTER APPLY (
+	SELECT TOP 1 au.dtmDate
+	FROM vyuApiRecordAudit au
+	WHERE au.intRecordId = i.intItemId
+		AND au.strNamespace = 'Inventory.view.Item'
+) created
+OUTER APPLY (
+	SELECT TOP 1 au.dtmDate
+	FROM vyuApiRecordAudit au
+	WHERE au.intRecordId = i.intItemId
+		AND au.strNamespace = 'Inventory.view.Item'
+) updated
 
 /* Details */
 IF @ysnIncludeDetails = 1
@@ -75,12 +88,25 @@ BEGIN
 
 	/* Units of Measurement */
 	INSERT INTO tblICStagingItemUom(intItemId, intItemUomId, intUnitMeasureId, strUnit, dblUnitQty
-		, strShortUpc, strUpc, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, dblMaxQty)
+		, strShortUpc, strUpc, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, dblMaxQty, dtmDateLastUpdated)
 	SELECT i.intItemId, m.intItemUOMId, u.intUnitMeasureId, u.strUnitMeasure, m.dblUnitQty
 		, m.strUpcCode, m.strLongUPCCode, m.ysnStockUnit, m.ysnAllowPurchase, m.ysnAllowSale, m.dblMaxQty
+		, COALESCE(updated.dtmDate, created.dtmDate, m.dtmDateModified, m.dtmDateCreated)
 	FROM @Items i
 		LEFT OUTER JOIN tblICItemUOM m ON m.intItemId = i.intItemId
 		LEFT OUTER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = m.intUnitMeasureId
+	OUTER APPLY (
+		SELECT TOP 1 au.dtmDate
+		FROM vyuApiRecordAudit au
+		WHERE au.intRecordId = i.intItemId
+			AND au.strNamespace = 'Inventory.view.InventoryUOM'
+	) created
+	OUTER APPLY (
+		SELECT TOP 1 au.dtmDate
+		FROM vyuApiRecordAudit au
+		WHERE au.intRecordId = i.intItemId
+			AND au.strNamespace = 'Inventory.view.InventoryUOM'
+	) updated
 
 	/* Item Locations */
 	INSERT INTO tblICStagingItemLocation(intItemId, intItemLocationId, intLocationId, strLocationName, strLocationNo
@@ -88,7 +114,7 @@ BEGIN
 		, strDefaultStorageLocation, strDefaultStorageUnit, strDefaultSaleUom, strDefaultPurchaseUom
 		, strDefaultGrossUom, strInventoryCountGroup, dblReorderPoint, dblLeadTime
 		, intDefaultPurchaseUomId, intDefaultSaleUomId, intDefaultGrossUomId
-		, intDefaultPurchaseUnitMeasureId, intDefaultSaleUnitMeasureId, intDefaultGrossUnitMeasureId)
+		, intDefaultPurchaseUnitMeasureId, intDefaultSaleUnitMeasureId, intDefaultGrossUnitMeasureId, dtmDateLastUpdated)
 	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName, c.strLocationNumber
 		, cm.strCostingMethod
 		, il.intAllowNegativeInventory, il.intAllowZeroCostTypeId, il.ysnStorageUnitRequired, e.strName AS strDefaultVendorNo
@@ -96,6 +122,7 @@ BEGIN
 		, us.strUnitMeasure AS strDefaultSaleUom, up.strUnitMeasure AS strDefaultPurchaseUom
 		, ug.strUnitMeasure AS strDefaultGrossUom, cg.strCountGroup AS strInventoryCountGroup, il.dblReorderPoint, il.dblLeadTime
 		, il.intReceiveUOMId, il.intIssueUOMId, il.intGrossUOMId, up.intUnitMeasureId, us.intUnitMeasureId, ug.intUnitMeasureId
+		, COALESCE(updated.dtmDate, created.dtmDate, il.dtmDateModified, il.dtmDateCreated)
 	FROM @Items i
 		INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
 		INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId
@@ -110,12 +137,25 @@ BEGIN
 		LEFT OUTER JOIN tblICUnitMeasure up ON up.intUnitMeasureId = ps.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure ug ON ug.intUnitMeasureId = gs.intUnitMeasureId
 		LEFT OUTER JOIN tblICCountGroup cg ON cg.intCountGroupId = il.intCountGroupId
+		OUTER APPLY (
+			SELECT TOP 1 au.dtmDate
+			FROM vyuApiRecordAudit au
+			WHERE au.intRecordId = i.intItemId
+				AND au.strNamespace = 'Inventory.view.ItemLocation'
+		) created
+		OUTER APPLY (
+			SELECT TOP 1 au.dtmDate
+			FROM vyuApiRecordAudit au
+			WHERE au.intRecordId = i.intItemId
+				AND au.strNamespace = 'Inventory.view.ItemLocation'
+		) updated
 
 	/* Item Pricings */
 	INSERT INTO tblICStagingItemPricing(intItemId, intItemPricingId, intItemLocationId, intLocationId
-		, strLocationName, dblStandardCost, strPricingMethod, dblRetailPrice, dblAmountPercentage)
+		, strLocationName, dblStandardCost, strPricingMethod, dblRetailPrice, dblAmountPercentage, dtmDateLastUpdated)
 	SELECT il.intItemId, p.intItemPricingId, il.intItemLocationId, il.intLocationId, c.strLocationName
 		, p.dblStandardCost, p.strPricingMethod, p.dblSalePrice, p.dblAmountPercent
+		, COALESCE(p.dtmDateModified, p.dtmDateCreated)
 	FROM @Items i
 		INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
 		INNER JOIN tblICItemPricing p ON p.intItemId = i.intItemId
