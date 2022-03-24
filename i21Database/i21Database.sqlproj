@@ -10337,7 +10337,8 @@
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
     <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
-    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+	  <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <None Include="Scripts\Utility\GR\uspGRGrainStorageDiagnostics.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
