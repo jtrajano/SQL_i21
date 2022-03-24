@@ -13,14 +13,14 @@
 			,intJiraKeyId
 			,strJiraKey
 			,strJiraUrl
-			,strTypeIconUrl
+			,REPLACE(strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
 			,strSummary
 			,strDescription
 			,strReporter
 			,strAssignee
 			,strFixedBy
-			,strPriorityIconUrl
-			,strStatusIconUrl
+			,REPLACE(strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
+			,REPLACE(strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
 			,strResolution
 			,dtmJiraCreated
 			,dtmJiraUpdated
@@ -59,3 +59,4 @@
 			where
 				b.intTicketId = c.intTicketId
 		) as result
+GO
