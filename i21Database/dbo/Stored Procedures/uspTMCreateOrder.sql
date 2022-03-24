@@ -133,7 +133,8 @@ BEGIN
 					dblPrice,
 					dblTotal,
 					strSource,
-					dtmTransactionDate
+					dtmTransactionDate,
+					ysnOverage
 				)
 				VALUES(
 					@intDispatchId,
@@ -145,9 +146,13 @@ BEGIN
 					@dblItemPrice,
 					@dblTotal,
 					@strSource,
-					GETDATE()
+					GETDATE(),
+					1
 				)
 
+				UPDATE tblTMDispatch SET dblOverageQty = @dblRemainingQty, dblOveragePrice = @dblItemPrice
+				WHERE intDispatchID = @intDispatchId
+				
 			END
 		END
 		ELSE
