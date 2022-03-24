@@ -429,3 +429,12 @@ BEGIN
 	WHERE CHARINDEX(''Voided'', strReferenceNo) > 0
 	')
 END
+
+/*
+* PR Companyconfiguration
+* SET Default value for newly added OT configurations
+*/
+IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'strOvertimeCalculation' AND OBJECT_ID = OBJECT_ID(N'tblPRCompanyPreference'))
+BEGIN
+	EXEC ('IF EXISTS(SELECT TOP 1 1 FROM tblPRCompanyPreference WHERE strOvertimeCalculation IS NULL) UPDATE tblPRCompanyPreference SET strOvertimeCalculation = ''Weekly'',dblRegularHoursThreshold = 40 ')
+END
