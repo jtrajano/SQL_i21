@@ -17,7 +17,7 @@ AS
 				, FD.intContractDetailId
 				, FD.dblContractRate
 				, O.strOrderType
-				, der.dblLimitRate
+				, CASE WHEN der.dblLimitRate = 0 THEN NULL ELSE der.dblLimitRate END dblLimitRate
 				, der.dtmMarketDate
 				, der.ysnGTC
 				, intConcurrencyId = 1
