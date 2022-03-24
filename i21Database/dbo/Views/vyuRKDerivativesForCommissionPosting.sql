@@ -26,7 +26,6 @@ SELECT
 	,dblCommission 
 	,ysnCommissionExempt
 	,ysnCommissionOverride
-	,dblGrossPL = NULL
 	,ysnPosted
 	--,intLFutOptTransactionId = CASE WHEN strBuySell = 'Buy' THEN intFutOptTransactionId ELSE NULL END
 	--,intSFutOptTransactionId = CASE WHEN strBuySell = 'Sell' THEN intFutOptTransactionId ELSE NULL END
@@ -60,14 +59,13 @@ SELECT
 	,dblMatchQty = sum(dblMatchQty)
 	,strOptionMonth = NULL
 	,strFutureMonth
-	,dtmFilledDate = NULL
+	,dtmFilledDate = A.dtmMatchDate
 	,strStatus = NULL
 	, strRateType = Lng.strCommissionRateType
 	, dblCommissionRate = NULL
 	, dblCommission = sum(Lng.dblLongCommission + Shrt.dblShortCommission)
 	, ysnCommissionExempt = NULL
 	, ysnCommissionOverride = NULL
-	, dblGrossPL  = SUM(AD.dblGrossPL)
 	, Lng.ysnPosted
 	--, AD.intLFutOptTransactionId
 	--, AD.intSFutOptTransactionId
@@ -125,5 +123,6 @@ GROUP BY
 	,E.strName
 	,B.strName
 	,strFutureMonth
+	,A.dtmMatchDate
 	,Lng.strCommissionRateType
 	,Lng.ysnPosted
