@@ -4,7 +4,7 @@ AS
 
 SELECT 
 	intTransactionId = intFutOptTransactionId
-	,strMatchNo  = NULL
+	,intMatchNo  = NULL
 	,strInternalTradeNo
 	,strInstrumentType
 	,fm.strFutMarketName
@@ -45,7 +45,7 @@ UNION all
 
 SELECT 
 	A.intMatchFuturesPSHeaderId
-	,strMatchNo = A.intMatchNo
+	,intMatchNo = A.intMatchNo
 	,strInternalTradeNo = ''
 	,strInstrumentType  = ''
 	,FM.strFutMarketName
