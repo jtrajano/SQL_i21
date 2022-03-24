@@ -614,7 +614,7 @@ BEGIN TRY
 				@intContractDetailId = @intContractDetailId,
 				@intUserId = @intUserId
 
-			select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId></row></rows>';
+			select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId><ysnStatusChange>0</ysnStatusChange></row></rows>';
 
 			exec uspCTProcessTFLogs
 				@strXML = @strXML,
