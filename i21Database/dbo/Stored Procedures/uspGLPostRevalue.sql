@@ -651,7 +651,7 @@ DECLARE @tblPostError TABLE(
 
 			EXEC uspGLPostRecap @PostGLEntries2, @intEntityId
 
-			IF EXISTS(SELECT 1 FROM tblGLPostRecap WHERE strOverrideAccountError IS NOT NULL )
+			IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE strOverrideAccountError IS NOT NULL )
 				GOTO _raiseOverrideError
 		END
 
