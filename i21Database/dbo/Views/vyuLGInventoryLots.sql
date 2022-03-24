@@ -6,8 +6,11 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.strItemUOM
 	,Lot.intItemWeightUOMId
 	,Lot.strWeightUOM
+	,Lot.intCompanyLocationId
+	,Lot.strLocationName
 	,Lot.intSubLocationId
 	,Lot.strSubLocationName
+	,Lot.intStorageLocationId
 	,Lot.strStorageLocation
 	,Lot.dblGrossWeight
 	,Lot.dblQty
@@ -26,6 +29,7 @@ SELECT DISTINCT Lot.intLotId
 	,IR.strBankReferenceNo
 	,IR.strReferenceNo
 	,Lot.strLoadNumber
+	,Lot.intContractDetailId
 FROM vyuLGPickOpenInventoryLots Lot
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemLotId = Lot.intInventoryReceiptItemLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
