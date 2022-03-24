@@ -88,3 +88,4 @@ BEGIN
 	DELETE FROM tblGLRevalue where strConsolidationNumber like '%-R'
 	INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), 'Remove Reverse Revalue Transaction.')
 END
+GO
