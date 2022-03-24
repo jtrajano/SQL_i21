@@ -26,6 +26,7 @@ BEGIN
 		DECLARE @TFXML TABLE(
 			intContractDetailId INT
 			,strFinanceTradeNo nvarchar(50)
+			,ysnStatusChange bit
 		) 
 
 		EXEC sp_xml_preparedocument @xmlDocumentId output, @strXML
@@ -33,12 +34,17 @@ BEGIN
 		INSERT INTO @TFXML
 		(
 			intContractDetailId
+			,strFinanceTradeNo
+			,ysnStatusChange
 		)
 		SELECT
 			intContractDetailId
+			,strFinanceTradeNo = null
+			,ysnStatusChange
 		FROM OPENXML(@xmlDocumentId, 'rows/row', 2)
 		WITH (
 			intContractDetailId INT
+			,ysnStatusChange bit
 		)
 
 		select top 1 @intActiveContractDetailId = min(intContractDetailId) from @TFXML where intContractDetailId > @intActiveContractDetailId;

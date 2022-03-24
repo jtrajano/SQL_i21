@@ -252,7 +252,7 @@ BEGIN
 				if (@ysnTFLogged = 0)  
 				begin  
 					select @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-					select @strTFXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId></row></rows>';
+					select @strTFXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId><ysnStatusChange>0</ysnStatusChange></row></rows>';
 					exec uspCTProcessTFLogs  
 						@strXML = @strTFXML,  
 						@intUserId = @intUserId  
