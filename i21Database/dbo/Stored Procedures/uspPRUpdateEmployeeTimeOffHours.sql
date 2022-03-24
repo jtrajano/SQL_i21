@@ -110,19 +110,7 @@ BEGIN
   --Calculate Total Accrued Hours    
   SET dblAccruedHours = CASE WHEN (strPeriod = 'Hour' AND strAwardPeriod <> 'Paycheck') THEN     
 			CASE WHEN ysnForReset = 1 THEN
-				ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))    
-				   FROM tblPRPaycheck P     
-					LEFT JOIN tblPRPaycheckEarning PE     
-					 ON P.intPaycheckId = PE.intPaycheckId    
-					INNER JOIN tblPREmployeeEarning EE     
-					 ON PE.intEmployeeEarningId = EE.intEmployeeEarningId    
-					INNER JOIN tblPREmployeeTimeOff ET     
-					 ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId     
-					  AND ET.intEntityEmployeeId = P.intEntityEmployeeId     
-					WHERE P.ysnPosted = 1    
-					   AND P.intEntityEmployeeId = #tmpEmployees.intEntityId    
-					   AND P.dtmDateTo >= #tmpEmployees.dtmNextAward --AND P.dtmDateTo < GETDATE()     
-					   AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
+				0
 			ELSE
 				ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))    
 				   FROM tblPRPaycheck P     
@@ -175,20 +163,8 @@ BEGIN
                         ELSE 0    
                         END * dblRate * dblRateFactor ---* CASE WHEN (ysnPaycheckPosted = 0) THEN -1 ELSE 1 END -->>> earned hours get negative when paycheck unposted    
                  ELSE 0    
-                 END 
-
-			 
-    --Temporary Variable for audit log
-	CREATE TABLE #tmpTableForAuditTimeOff(
-		intEntityEmployeeId Int,
-		dblHoursEarnedOld NUMERIC(18, 6),
-		dblHoursEarnedNew NUMERIC(18, 6),
-		dblHoursAccruedOld NUMERIC(18, 6),
-		dblHoursAccruedNew NUMERIC(18, 6),
-		dtmLastAwardOld DATETIME,
-		dtmLastAwardNew DATETIME	
-	)
-
+                 END    
+    
  --Update Each Employee Hours    
  DECLARE @intEmployeeId INT    
  WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEmployees)    
@@ -246,20 +222,14 @@ BEGIN
 				0 
 			END     
     ,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN    
-                                DATEADD(DD, -1, dtmPaycheckStartDate)     
-                    ELSE     
-                            CASE WHEN ysnForReset =1 THEN     
-                                T.dtmNextAward    
-                            ELSE    
-                                tblPREmployeeTimeOff.dtmLastAward    
-                            END    
-                    END  
-	OUTPUT
-		inserted.intEntityEmployeeId,
-		deleted.dblHoursEarned,inserted.dblHoursEarned,
-		deleted.dblHoursAccrued,inserted.dblHoursAccrued,
-		deleted.dtmLastAward,inserted.dtmLastAward
-	INTO #tmpTableForAuditTimeOff
+	DATEADD(DD, -1, dtmPaycheckStartDate)     
+	ELSE     
+			CASE WHEN ysnForReset =1 THEN     
+				T.dtmNextAward    
+			ELSE    
+				tblPREmployeeTimeOff.dtmLastAward    
+			END    
+	END    
   FROM    
   #tmpEmployees T    
   WHERE T.[intEntityId] = @intEmployeeId    
@@ -272,61 +242,6 @@ BEGIN
   DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId    
  END    
     
-	------------CREATE AUDIT ENTRY
-		DECLARE @cur_Id INT;
-		DECLARE @cur_Namespace VARCHAR(max);
-		DECLARE @cur_Action VARCHAR(30);
-		DECLARE @cur_Description VARCHAR(100);
-		DECLARE @cur_From VARCHAR(100);
-		DECLARE @cur_To VARCHAR(100);
-		DECLARE @cur_EntityId Int;
-
-
-		DECLARE AuditTableCursor CURSOR FOR
-		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
-			CASE
-				WHEN @ysnFromUpdateUser = 1 THEN 'Hours Earned(Updated in Update Employees)'
-				ELSE 'Hours Earned'
-			END,
-			CAST(CAST(dblHoursEarnedOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblHoursEarnedNew AS FLOAT) AS NVARCHAR(20)),@intUserId FROM #tmpTableForAuditTimeOff 
-		UNION
-		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
-			CASE
-				WHEN @ysnFromUpdateUser = 1 THEN 'Hours Accrued(Updated in Update Employees)'
-				ELSE 'Hours Accrued'
-			END,
-			CAST(CAST(dblHoursAccruedOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblHoursAccruedNew AS FLOAT) AS NVARCHAR(20)),@intUserId FROM #tmpTableForAuditTimeOff 
-		UNION
-		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
-			CASE 
-				WHEN @ysnFromUpdateUser = 1 THEN 'Last Award(Updated in Update Employees)'
-				ELSE 'Last Award' 
-			END,
-			convert(varchar, dtmLastAwardOld, 1),convert(varchar, dtmLastAwardNew, 1),@intUserId FROM #tmpTableForAuditTimeOff 
-				
-		OPEN AuditTableCursor			
-		FETCH NEXT FROM AuditTableCursor INTO @cur_Id,@cur_Namespace,@cur_Action,@cur_Description,@cur_From,@cur_To,@cur_EntityId
-		WHILE(@@FETCH_STATUS = 0)
-		BEGIN
-		--Insert individual Record to audit log
-			EXEC uspSMAuditLog
-				@keyValue = @cur_Id,
-				@screenName = @cur_Namespace,
-				@entityId = @cur_EntityId,
-				@actionType = @cur_Action,
-				@changeDescription  = @cur_Description,
-				@fromValue = @cur_From,
-				@toValue = @cur_To
-
-			FETCH NEXT FROM AuditTableCursor INTO @cur_Id,@cur_Namespace,@cur_Action,@cur_Description,@cur_From,@cur_To,@cur_EntityId
-		END
-		CLOSE AuditTableCursor
-		DEALLOCATE AuditTableCursor
-
-		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTableForAuditTimeOff')) DROP TABLE #tmpTableForAuditTimeOff 
-
-
-
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployees')) DROP TABLE #tmpEmployees    
 END
 GO
