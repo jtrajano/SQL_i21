@@ -108,19 +108,7 @@ BEGIN
   --Calculate Total Accrued Hours    
   SET dblAccruedHours = CASE WHEN (strPeriod = 'Hour' AND strAwardPeriod <> 'Paycheck') THEN     
 			CASE WHEN ysnForReset = 1 THEN
-				ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))    
-				   FROM tblPRPaycheck P     
-					LEFT JOIN tblPRPaycheckEarning PE     
-					 ON P.intPaycheckId = PE.intPaycheckId    
-					INNER JOIN tblPREmployeeEarning EE     
-					 ON PE.intEmployeeEarningId = EE.intEmployeeEarningId    
-					INNER JOIN tblPREmployeeTimeOff ET     
-					 ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId     
-					  AND ET.intEntityEmployeeId = P.intEntityEmployeeId     
-					WHERE P.ysnPosted = 1    
-					   AND P.intEntityEmployeeId = #tmpEmployees.intEntityId    
-					   AND P.dtmDateTo >= #tmpEmployees.dtmNextAward --AND P.dtmDateTo < GETDATE()     
-					   AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
+				0
 			ELSE
 				ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))    
 				   FROM tblPRPaycheck P     
@@ -232,14 +220,14 @@ BEGIN
 				0 
 			END     
     ,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN    
-                                DATEADD(DD, -1, dtmPaycheckStartDate)     
-                    ELSE     
-                            CASE WHEN ysnForReset =1 THEN     
-                                T.dtmNextAward    
-                            ELSE    
-                                tblPREmployeeTimeOff.dtmLastAward    
-                            END    
-                    END    
+	DATEADD(DD, -1, dtmPaycheckStartDate)     
+	ELSE     
+			CASE WHEN ysnForReset =1 THEN     
+				T.dtmNextAward    
+			ELSE    
+				tblPREmployeeTimeOff.dtmLastAward    
+			END    
+	END    
   FROM    
   #tmpEmployees T    
   WHERE T.[intEntityId] = @intEmployeeId    
