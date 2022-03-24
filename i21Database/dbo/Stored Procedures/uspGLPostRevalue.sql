@@ -456,7 +456,7 @@ DECLARE @tblPostError TABLE(
 	
 				GOTO _raiseOverrideError
 			
-			EXEC uspGLBookEntries @PostGLEntries2, @ysnPost
+			EXEC uspGLBookEntries @PostGLEntries2, @ysnPost, 1 ,1
 
 			IF @@ERROR <> 0 GOTO _end
 			

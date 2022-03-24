@@ -43,17 +43,18 @@ BEGIN
         SELECT 60011, 'General Ledger','revalued' from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'GL' OR @strTransactionType = 'All') AND ISNULL(ysnRevalued,0) = 0
     END
 
-    IF EXISTS (SELECT 1 FROM @errTable)
-        GOTO _end
-        -- dont post/unpost if reverse period is closed
-    INSERT INTO @errTable
-    SELECT 60012, 'Accounts Receivable','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'AR' OR @strTransactionType = 'All')) AND ISNULL(ysnAROpen,0) = 0 UNION ALL
-    SELECT 60012, 'Accounts Payable','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'AP' OR @strTransactionType = 'All')) AND ISNULL(ysnAPOpen,0) = 0 UNION ALL
-    SELECT 60012, 'Inventory','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'INV'OR @strTransactionType = 'All')) AND ISNULL(ysnINVOpen,0) = 0 UNION ALL
-    SELECT 60012, 'Contract','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'CT' OR @strTransactionType = 'All')) AND ISNULL(ysnCTOpen,0) = 0 UNION ALL
-    SELECT 60012, 'Cash Account','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'CM' OR @strTransactionType = 'All')) AND ISNULL(ysnCMOpen,0) = 0 UNION ALL
-    SELECT 60012, 'Fixed Assets','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'FA' OR @strTransactionType = 'All')) AND ISNULL(ysnFAOpen,0) = 0 UNION ALL
-    SELECT 60012, 'General Ledger','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'GL' OR @strTransactionType = 'All')) AND ISNULL(ysnOpen,0) = 0
+    -- COMMENT OUT TO ALLOW POSTING OF REVERSE REVALUES ON A CLOSED PERIOD
+    -- IF EXISTS (SELECT 1 FROM @errTable)
+    --     GOTO _end
+    --     -- dont post/unpost if reverse period is closed
+    -- INSERT INTO @errTable
+    -- SELECT 60012, 'Accounts Receivable','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'AR' OR @strTransactionType = 'All')) AND ISNULL(ysnAROpen,0) = 0 UNION ALL
+    -- SELECT 60012, 'Accounts Payable','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'AP' OR @strTransactionType = 'All')) AND ISNULL(ysnAPOpen,0) = 0 UNION ALL
+    -- SELECT 60012, 'Inventory','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'INV'OR @strTransactionType = 'All')) AND ISNULL(ysnINVOpen,0) = 0 UNION ALL
+    -- SELECT 60012, 'Contract','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'CT' OR @strTransactionType = 'All')) AND ISNULL(ysnCTOpen,0) = 0 UNION ALL
+    -- SELECT 60012, 'Cash Account','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'CM' OR @strTransactionType = 'All')) AND ISNULL(ysnCMOpen,0) = 0 UNION ALL
+    -- SELECT 60012, 'Fixed Assets','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'FA' OR @strTransactionType = 'All')) AND ISNULL(ysnFAOpen,0) = 0 UNION ALL
+    -- SELECT 60012, 'General Ledger','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'GL' OR @strTransactionType = 'All')) AND ISNULL(ysnOpen,0) = 0
     
     _end:
 
