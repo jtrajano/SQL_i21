@@ -1,4 +1,5 @@
-﻿/*
+﻿---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
 	Used to reverse the stocks from a posted transaction.
 */
 CREATE PROCEDURE [dbo].[uspICUnpostReturnCosting]
@@ -117,7 +118,6 @@ BEGIN
 			,dblQty
 			,intSubLocationId
 			,intStorageLocationId
-			,intInventoryTransactionId		
 	)
 	SELECT	intItemId
 			,intItemLocationId
@@ -126,7 +126,6 @@ BEGIN
 			,SUM(ISNULL(dblQty, 0))				
 			,intSubLocationId
 			,intStorageLocationId
-			,intInventoryTransactionId
 	FROM	@ItemsToUnpost
 	WHERE	ISNULL(intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 	GROUP BY 
@@ -135,8 +134,7 @@ BEGIN
 		, intItemUOMId
 		, intLotId
 		, intSubLocationId
-		, intStorageLocationId
-		, intInventoryTransactionId
+		, intStorageLocationId		
 
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ValidateItemsToUnpost
@@ -186,10 +184,10 @@ END
 -- Call the LOT unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	--EXEC dbo.uspICUnpostLotIn 
-	--	@strTransactionId
-	--	,@intTransactionId
-	--	,@ysnRecap
+	EXEC dbo.uspICUnpostLotIn 
+		@strTransactionId
+		,@intTransactionId
+		,@ysnRecap
 
 	EXEC dbo.uspICUnpostLotOut
 		@strTransactionId
@@ -846,4 +844,4 @@ BEGIN
 		@strBatchId
 		,@strTransactionId
 		,@intEntityUserSecurityId
-END 
+END

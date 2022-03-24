@@ -168,7 +168,7 @@ BEGIN
 			AND s.intItemLocationId = @intItemLocationId
 
 	SELECT	@strItemNo = i.strItemNo
-			,@CostBucketId = cb.intInventoryLotId
+			,@CostBucketId = ISNULL(cb.intInventoryLotId, missingLotCb.intInventoryLotId) 
 			,@AllowNegativeInventory = il.intAllowNegativeInventory
 			,@strLocationName = cl.strLocationName
 	FROM	tblICItem i INNER JOIN tblICItemLocation il
@@ -188,13 +188,24 @@ BEGIN
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intLotId = @intLotId
 						AND cb.intItemUOMId = @intItemUOMId
-						--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
-						--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
 						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 						AND cb.dblStockAvailable > 0
 						AND r.intInventoryReceiptId = @intTransactionId
 						AND r.strReceiptNumber = @strTransactionId
 			) cb 
+			OUTER APPLY (
+				SELECT	TOP 1 cb.*
+				FROM	tblICInventoryLot cb INNER JOIN tblICLot l
+							ON cb.intLotId = l.intLotId
+				WHERE	cb.intItemId = @intItemId
+						AND cb.intItemLocationId = @intItemLocationId
+						AND cb.intLotId = @intLotId
+						AND cb.intItemUOMId = @intItemUOMId
+						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+						AND cb.dblStockAvailable > 0
+						AND l.strCondition = 'Missing'
+						AND cb.strTransactionId = @strTransactionId
+			) missingLotCb 
 
 	IF @CostBucketId IS NULL  
 	BEGIN 
@@ -234,7 +245,7 @@ BEGIN
 		END 
 		ELSE 
 		BEGIN 
-			-- 'Unable to do the return. All the stocks in {item id} from {receipt id} are fully returned already.'
+			-- 'Return is stopped. All of the stocks in %s that is received in %s are either sold, consumed, returned, or over-return is going to happen.'
 			EXEC uspICRaiseError 80109, @strItemNo, @strReceiptSourceNumber;
 		END 
 		RETURN -1
@@ -257,10 +268,14 @@ BEGIN
 				,intStorageLocationId = @intStorageLocationId 
 				,intTransactionId = rSource.intInventoryReceiptId
 				,strTransactionId = rSource.strReceiptNumber
-		FROM	tblICInventoryReceipt rSource INNER JOIN tblICInventoryReceipt r
+		FROM	tblICInventoryReceipt rSource 
+				INNER JOIN tblICInventoryReceipt r
 					ON rSource.intInventoryReceiptId = r.intSourceInventoryReceiptId
+				INNER JOIN tblICLot l
+					ON l.intLotId = @intLotId
 		WHERE	r.intInventoryReceiptId = @intTransactionId
 				AND r.strReceiptNumber = @strTransactionId
+				AND (l.strCondition IS NULL OR l.strCondition <> 'Missing')
 	) AS Source_Query  
 		ON cb.intItemId = Source_Query.intItemId
 		AND cb.intItemLocationId = Source_Query.intItemLocationId
@@ -268,8 +283,6 @@ BEGIN
 		AND cb.intLotId = Source_Query.intLotId	
 		AND ISNULL(cb.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
 		AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
-		--AND (cb.dblStockIn - cb.dblStockOut) > 0 
-		--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
 		AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 		AND cb.dblStockAvailable > 0
 		AND cb.intTransactionId = Source_Query.intTransactionId
@@ -340,4 +353,103 @@ BEGIN
 			,1	
 		)
 	;
+
+	IF @@ROWCOUNT = 0 
+	BEGIN 
+		MERGE	TOP(1)
+			INTO	dbo.tblICInventoryLot 
+			WITH	(HOLDLOCK) 
+			AS		cb	
+			USING (
+				SELECT	intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,intItemUOMId = @intItemUOMId
+						,intLotId = @intLotId 
+						,intSubLocationId = @intSubLocationId
+						,intStorageLocationId = @intStorageLocationId 
+						,intTransactionId = r.intInventoryReceiptId
+						,strTransactionId = r.strReceiptNumber
+				FROM	tblICInventoryReceipt r	INNER JOIN tblICLot l
+							ON l.intLotId = @intLotId
+				WHERE	r.intInventoryReceiptId = @intTransactionId
+						AND r.strReceiptNumber = @strTransactionId
+						AND l.strCondition = 'Missing'
+			) AS Source_Query  
+				ON cb.intItemId = Source_Query.intItemId
+				AND cb.intItemLocationId = Source_Query.intItemLocationId
+				AND cb.intItemUOMId = Source_Query.intItemUOMId
+				AND cb.intLotId = Source_Query.intLotId	
+				AND ISNULL(cb.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
+				AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
+				AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+				AND cb.dblStockAvailable > 0
+				AND cb.intTransactionId = Source_Query.intTransactionId
+				AND cb.strTransactionId = Source_Query.strTransactionId 
+
+			-- Update an existing cost bucket
+			WHEN MATCHED THEN 
+				UPDATE 
+				SET	cb.dblStockOut = ISNULL(cb.dblStockOut, 0) 
+								+ CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN @dblQty
+										ELSE (cb.dblStockIn - cb.dblStockOut) 
+								END 
+
+					,cb.intConcurrencyId = ISNULL(cb.intConcurrencyId, 0) + 1
+
+					-- update the remaining qty
+					,@RemainingQty = 
+								CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN 0
+										ELSE (cb.dblStockIn - cb.dblStockOut) - @dblQty
+								END
+
+					-- retrieve the cost from the Lot bucket. 
+					,@CostUsed = cb.dblCost
+
+					-- retrieve the	qty reduced from a Lot bucket 
+					,@QtyOffset = 
+								CASE	WHEN (cb.dblStockIn - cb.dblStockOut) >= @dblQty THEN -@dblQty
+										ELSE -(cb.dblStockIn - cb.dblStockOut) 
+								END
+
+					-- retrieve the id of the matching Lot bucket 
+					,@InventoryLotId = cb.intInventoryLotId
+
+			-- Insert a new Lot bucket
+			WHEN NOT MATCHED THEN 
+				INSERT (
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[dtmDate]
+					,[intLotId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[dblStockIn]
+					,[dblStockOut]
+					,[dblCost]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[dtmCreated]
+					,[intCreatedEntityId]
+					,[intConcurrencyId]
+				)
+				VALUES (
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@dtmDate
+					,@intLotId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,0
+					,@dblQty
+					,@dblCost
+					,@strTransactionId
+					,@intTransactionId
+					,GETDATE()
+					,@intEntityUserSecurityId
+					,1	
+				)
+			;
+	END 
 END

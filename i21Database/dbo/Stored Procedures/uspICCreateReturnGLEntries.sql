@@ -529,14 +529,12 @@ AS
 			,lot.strLotNumber
 	FROM	@ReturnValuation rv INNER JOIN tblICInventoryReceipt r 
 				ON rv.strReceiptNumber = r.strReceiptNumber	 
-			INNER JOIN (
-				tblICInventoryReceiptItem ri LEFT JOIN tblICInventoryReceiptItemLot ril
-					ON ri.intInventoryReceiptItemId  = ril.intInventoryReceiptItemId
-			)
-				ON  r.intInventoryReceiptId = ri.intInventoryReceiptId							
+			INNER JOIN tblICInventoryReceiptItem ri 
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId							
 			INNER JOIN tblICInventoryTransaction t 
 				ON t.intInventoryTransactionId = rv.intInventoryTransactionId
-				AND t.strTransactionId = rv.strReceiptNumber			
+				AND t.strTransactionId = rv.strReceiptNumber
+				AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
 			INNER JOIN tblICItem i
 				ON i.intItemId = ri.intItemId
 			INNER JOIN #tmpRebuildList list	
@@ -696,7 +694,7 @@ AS
 			LEFT JOIN tblICLot lot
 				ON lot.intLotId = t.intLotId
 	WHERE	
-			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 	
+			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 				
 
 	-- Load the Inventory-Adjustment
 	UNION ALL 
@@ -790,7 +788,7 @@ AS
 			,t.intSourceEntityId
 			,ri.intCommodityId
 			,intReference = CAST(4 AS TINYINT)
-			,strLotNumber = NULL 
+			,strLotNumber = NULL --lot.strLotNumber 
 	FROM	
 			
 			(
@@ -864,6 +862,7 @@ AS
 					AND t.intTransactionId = ri.intInventoryReceiptId
 					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
 					AND ty.strName = 'Inventory Return'
+					AND t.strBatchId = @strBatchId
 			) valuation
 
 			CROSS APPLY (
@@ -878,15 +877,21 @@ AS
 					AND t.intTransactionId = ri.intInventoryReceiptId
 					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
 					AND ty.strName = 'Inventory Return'
+					AND t.strBatchId = @strBatchId
 				ORDER BY t.intInventoryTransactionId DESC 
 			) t
 
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 
+			--LEFT JOIN tblICLot lot
+			--	ON lot.intLotId = t.intLotId
+
 	WHERE	
+		(
 			ISNULL(ri.dblLineTotalFunctional, 0) - ISNULL(valuation.dblTotalFunctional, 0) <> 0 
 			OR ISNULL(ri.dblLineTotalForeign, 0) -  ISNULL(valuation.dblTotalValueForeign, 0) <> 0 
+		)
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
