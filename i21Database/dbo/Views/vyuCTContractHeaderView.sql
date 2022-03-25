@@ -46,7 +46,9 @@ AS
 			NM.strEntitySelectedLocation, -- CT-5315
 			CH.intCompanyLocationId,
 			NM.strLocationName,
-			CH.intDaysForFinance
+			CH.intDaysForFinance,
+			CH.intSampleTypeId,
+			NM.strSampleTypeName
 			
 	FROM	tblCTContractHeader					CH
 	cross apply (select * from tblCTCompanyPreference) CP

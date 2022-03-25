@@ -30,7 +30,7 @@ AS
 				CH.intGradeId,						CH.intWeightId,					CH.intContractTextId,
 				CH.intAssociationId,				CH.intTermId,					CH.intPositionId,
 				CH.intCountryId,					CH.intContractBasisId,			CH.intContractTypeId,
-				CH.intCommodityUnitMeasureId,		CH.intFreightTermId,
+				CH.intCommodityUnitMeasureId,		CH.intFreightTermId,			CH.strSampleTypeName,	CH.intSampleTypeId,
 
 				CASE	WHEN	CH.strStatuses LIKE '%Open%'
 						THEN	'Open'

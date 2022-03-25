@@ -82,6 +82,7 @@ AS
 						intCommodityFutureMarketId = CY.intFutureMarketId, -- CT-5315
 						strEntitySelectedLocation = ESL.strLocationName, -- CT-5315
 						COL.strLocationName
+						ST.strSampleTypeName
 
 				FROM	tblCTContractHeader						CH	
 				
@@ -142,5 +143,6 @@ AS
 			LEFT	JOIN	tblRKBrokerageAccount				BA	ON	BA.intBrokerageAccountId			=		CH.intBrokerageAccountId							
 			LEFT	JOIN	tblEMEntityLocation					ESL	ON	ESL.intEntityLocationId				=		CH.intEntitySelectedLocationId  -- CT-5315
 			LEFT JOIN tblSMCompanyLocation COL on COL.intCompanyLocationId = CH.intCompanyLocationId
+			LEFT JOIN tblQMSampleType ST on ST.intSampleTypeId = CH.intSampleTypeId
 
 			)t
