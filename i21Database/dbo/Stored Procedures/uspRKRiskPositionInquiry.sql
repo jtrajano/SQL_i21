@@ -989,7 +989,7 @@ BEGIN
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
-				, strCropYear = CH.intCropYearId
+				, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1070,7 +1070,7 @@ BEGIN
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
-				, strCropYear = CH.intCropYearId
+				, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1158,7 +1158,7 @@ BEGIN
 			, strSeason = season.strDescription
 			, strClass = class.strDescription
 			, strCertificationName = certification.strCertificationName
-			, strCropYear = CH.intCropYearId
+			, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1268,7 +1268,7 @@ BEGIN
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
-				, strCropYear = CH.intCropYearId
+				, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1355,7 +1355,7 @@ BEGIN
 			, strSeason = season.strDescription
 			, strClass = class.strDescription
 			, strCertificationName = certification.strCertificationName
-			, strCropYear = CH.intCropYearId
+			, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1465,7 +1465,7 @@ BEGIN
 					, strSeason = season.strDescription
 					, strClass = class.strDescription
 					, strCertificationName = certification.strCertificationName
-					, strCropYear = CH.intCropYearId
+					, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
 				FROM tblRKFutOptTransaction ft
 				INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1554,7 +1554,7 @@ BEGIN
 					, strSeason = season.strDescription
 					, strClass = class.strDescription
 					, strCertificationName = certification.strCertificationName
-					, strCropYear = CH.intCropYearId
+					, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
 				FROM tblRKFutOptTransaction ft
 				INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
