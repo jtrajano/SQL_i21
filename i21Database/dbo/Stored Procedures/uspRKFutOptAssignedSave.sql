@@ -23,64 +23,7 @@ BEGIN TRY
 
 	DECLARE @intAssignFuturesToContractHeaderId INT
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKAssignFuturesToContractSummary WHERE intFutOptAssignedId = @intFutOptTransactionId)
-	BEGIN
-		IF (ISNULL(@strContractSeq,'') <> '')
-		BEGIN
-			INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId) VALUES (1)
-			
-			SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY()
-			
-			INSERT INTO tblRKAssignFuturesToContractSummary (intAssignFuturesToContractHeaderId
-				, intConcurrencyId
-				, intContractHeaderId
-				, intContractDetailId
-				, dtmMatchDate
-				, intFutOptTransactionId
-				, dblAssignedLots
-				, dblHedgedLots
-				, ysnIsHedged
-				, intFutOptAssignedId)
-			SELECT @intAssignFuturesToContractHeaderId
-				, 1
-				, NULL
-				, @intContractDetailId
-				, @dtmMatchDate
-				, @intFutOptTransactionId
-				, @dblAssignedLots
-				, 0
-				, 0
-				, @intFutOptTransactionId
-		END
-		ELSE IF (ISNULL(@strContractNumber,'') <> '')
-		BEGIN
-			INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId) VALUES (1)
-			
-			SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY()
-			
-			INSERT INTO tblRKAssignFuturesToContractSummary (intAssignFuturesToContractHeaderId
-				, intConcurrencyId
-				, intContractHeaderId
-				, intContractDetailId
-				, dtmMatchDate
-				, intFutOptTransactionId
-				, dblAssignedLots
-				, dblHedgedLots
-				, ysnIsHedged
-				, intFutOptAssignedId)
-			SELECT @intAssignFuturesToContractHeaderId
-				, 1
-				, @intContractHeaderId
-				, NULL
-				, @dtmMatchDate
-				, @intFutOptTransactionId
-				, @dblAssignedLots
-				, 0
-				, 0
-				, @intFutOptTransactionId
-		END
-	END
-	
+
 	IF EXISTS(SELECT TOP 1 1 FROM tblRKAssignFuturesToContractSummary WHERE intFutOptAssignedId = @intFutOptTransactionId)
 	BEGIN
 		IF (ISNULL(@strContractSeq,'') <> '')
@@ -117,6 +60,64 @@ BEGIN TRY
 				, dblAssignedLots = @dblAssignedLots
 				, intContractDetailId = NULL
 			WHERE intFutOptAssignedId = @intFutOptTransactionId
+		END
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKAssignFuturesToContractSummary WHERE intFutOptAssignedId = @intFutOptTransactionId)
+	BEGIN
+		IF (ISNULL(@strContractSeq,'') <> '')
+		BEGIN
+			INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId) VALUES (1)
+			
+			SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY()
+			
+			INSERT INTO tblRKAssignFuturesToContractSummary (intAssignFuturesToContractHeaderId
+				, intConcurrencyId
+				, intContractHeaderId
+				, intContractDetailId
+				, dtmMatchDate
+				, intFutOptTransactionId
+				, dblAssignedLots
+				, dblHedgedLots
+				, ysnIsHedged
+				, intFutOptAssignedId)
+			SELECT @intAssignFuturesToContractHeaderId
+				, 1
+				, @intContractHeaderId
+				, @intContractDetailId
+				, @dtmMatchDate
+				, @intFutOptTransactionId
+				, @dblAssignedLots
+				, 0
+				, 0
+				, @intFutOptTransactionId
+		END
+		ELSE IF (ISNULL(@strContractNumber,'') <> '')
+		BEGIN
+			INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId) VALUES (1)
+			
+			SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY()
+			
+			INSERT INTO tblRKAssignFuturesToContractSummary (intAssignFuturesToContractHeaderId
+				, intConcurrencyId
+				, intContractHeaderId
+				, intContractDetailId
+				, dtmMatchDate
+				, intFutOptTransactionId
+				, dblAssignedLots
+				, dblHedgedLots
+				, ysnIsHedged
+				, intFutOptAssignedId)
+			SELECT @intAssignFuturesToContractHeaderId
+				, 1
+				, @intContractHeaderId
+				, NULL
+				, @dtmMatchDate
+				, @intFutOptTransactionId
+				, @dblAssignedLots
+				, 0
+				, 0
+				, @intFutOptTransactionId
 		END
 	END
 	

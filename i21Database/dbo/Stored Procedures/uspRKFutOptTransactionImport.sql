@@ -9,8 +9,9 @@ BEGIN TRY
 		, @strDateTimeFormat NVARCHAR(50)
 		, @strDateTimeFormat2 NVARCHAR(50)
 		, @ConvertYear INT
+		, @ysnAllowDerivativeAssignToMultipleContracts BIT
 	
-	SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
+	SELECT @strDateTimeFormat = strDateTimeFormat, @ysnAllowDerivativeAssignToMultipleContracts = ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference
 	SELECT @strDateTimeFormat2 = REPLACE(LEFT(LTRIM(RTRIM(strDateTimeFormat)),10), ' ', '-') FROM tblRKCompanyPreference;
 	
 	IF (@strDateTimeFormat = 'MM DD YYYY HH:MI' OR @strDateTimeFormat ='YYYY MM DD HH:MI' OR @strDateTimeFormat = 'MM DD YYYY' OR @strDateTimeFormat ='YYYY MM DD')
@@ -42,6 +43,11 @@ BEGIN TRY
 	DECLARE @tmpOrderTypeTable TABLE (
 		 intOrderTypeId INT
 		, strOrderType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	)
+
+	DECLARE @tmpAssignOrHedgeResult TABLE(
+		  strResultOutput NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+		  ,strInternalTradeNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	)
 	
 	INSERT INTO @tmpInstrumentTypeTable (intSelectedInstrumentTypeId, strSelectedInstrumentType)
@@ -280,6 +286,9 @@ BEGIN TRY
 					, b.intBookId
 					, sb.intSubBookId
 					, CONVERT(DATETIME, strCreateDateTime, @ConvertYear) dtmCreateDateTime
+					, strContractNumber
+					, strContractSequence
+					, strAssignOrHedge
 				FROM tblRKFutOptTransactionImport ti
 				JOIN tblRKFutureMarket fm ON fm.strFutMarketName = ti.strFutMarketName
 				JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = ti.strAccountNumber
@@ -300,7 +309,24 @@ BEGIN TRY
 			BEGIN
 				DECLARE @id INT
 					, @newTransactionId INT
-				SELECT TOP 1 @id = strInternalTradeNo FROM #temp
+					, @strContractNumber NVARCHAR(100)
+					, @strContractSequence NVARCHAR(100)
+					, @strAssignOrHedge NVARCHAR(100)
+					, @dblNoOfContract NUMERIC(18,6)
+					, @intFutOptTransactionId INT
+					, @strBuySell NVARCHAR(10)
+					, @strResultOutput NVARCHAR(MAX)
+					
+				
+				
+				SELECT TOP 1 
+					@id = strInternalTradeNo 
+					, @strContractNumber = strContractNumber
+					, @strContractSequence = strContractSequence
+					, @strAssignOrHedge = strAssignOrHedge
+					, @dblNoOfContract  = dblNoOfContract
+					, @strBuySell = strBuySell
+				FROM #temp
 			
 				EXEC uspSMGetStartingNumber 45, @strInternalTradeNo OUTPUT
 			
@@ -364,6 +390,39 @@ BEGIN TRY
 					, dblNoOfContract
 				FROM #temp 
 				WHERE strInternalTradeNo = @id
+
+				
+				IF @ysnAllowDerivativeAssignToMultipleContracts = 0 
+				BEGIN
+
+					SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
+
+					IF @strAssignOrHedge = 'Assign'
+					BEGIN
+						
+						EXEC uspRKAutoAssignDerivative @strContractNumber, @strContractSequence, @intFutOptTransactionId, @strInternalTradeNo, @dblNoOfContract, @strResultOutput OUTPUT
+
+						IF ISNULL(@strResultOutput,'') <> ''
+						BEGIN
+							INSERT INTO @tmpAssignOrHedgeResult(strResultOutput,strInternalTradeNo)
+							SELECT @strResultOutput, @strInternalTradeNo
+						END
+					END
+
+
+					IF @strAssignOrHedge = 'Hedge'
+					BEGIN
+
+						EXEC uspRKAutoHedgeDerivative @strContractNumber, @strContractSequence, @intFutOptTransactionId, @intEntityUserId, @strResultOutput OUTPUT
+
+						IF ISNULL(@strResultOutput,'') <> ''
+						BEGIN
+							INSERT INTO @tmpAssignOrHedgeResult(strResultOutput,strInternalTradeNo)
+							SELECT @strResultOutput, @strInternalTradeNo
+						END
+					END 
+				END
+
 		
 				DELETE FROM  #temp WHERE strInternalTradeNo = @id
 			END
@@ -447,8 +506,12 @@ BEGIN TRY
 		SELECT DE.strInternalTradeNo AS Result1
 			, DE.strBrokerTradeNo AS Result2
 			, DE.dtmFilledDate AS Result3
+			, AH.strResultOutput AS Result4
 		FROM tblRKFutOptTransaction DE
+		LEFT JOIN @tmpAssignOrHedgeResult AH ON AH.strInternalTradeNo = DE.strInternalTradeNo
 		WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+
+
 	
 		EXEC dbo.uspSMAuditLog @keyValue = @intFutOptTransactionHeaderId			  -- Primary Key Value of the Derivative Entry. 
 			, @screenName = 'RiskManagement.view.DerivativeEntry'  -- Screen Namespace

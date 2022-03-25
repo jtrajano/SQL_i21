@@ -40,5 +40,8 @@
 	[dblExchangeRate] decimal(24,10),
 	[dblContractAmount] decimal(24,10),
 	[dblMatchAmount] decimal(24,10),
-	[dblFinanceForwardRate] decimal(24,10)
+	[dblFinanceForwardRate] decimal(24,10),
+	[strContractNumber] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+	[strContractSequence] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+	[strAssignOrHedge] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
 )

@@ -600,6 +600,8 @@
     <Build Include="dbo\Views\vyuQMContractWithoutSampleList.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionAlternativeShippingLinesReport.sql" />
     <Build Include="dbo\Views\vyuRKM2MBasisForNotMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAutoAssignDerivative.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAutoHedgeDerivative.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

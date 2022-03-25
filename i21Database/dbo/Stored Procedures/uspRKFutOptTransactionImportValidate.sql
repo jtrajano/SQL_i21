@@ -49,6 +49,10 @@ BEGIN TRY
 		, @ysnGTC BIT = 0
 		, @intBook INT = NULL
 		, @ysnIsDateValid BIT = CAST(0 AS BIT)
+		, @strContractNumber NVARCHAR(100)
+		, @strContractSequence NVARCHAR(100)
+		, @strAssignOrHedge NVARCHAR(50)
+		, @ysnAllowDerivativeAssignToMultipleContracts BIT
 
 	DECLARE @tmpOTCBank TABLE
 	(
@@ -64,7 +68,7 @@ BEGIN TRY
 		ON locationPermission.intEntityId = userSecurity.intEntityId
 	WHERE userSecurity.intEntityId = @intEntityUserId
 
-	SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
+	SELECT @strDateTimeFormat = strDateTimeFormat, @ysnAllowDerivativeAssignToMultipleContracts = ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference
 
 	SELECT @strDateTimeFormat2 = REPLACE(LEFT(LTRIM(RTRIM(strDateTimeFormat)),10), ' ', '-') FROM tblRKCompanyPreference;
 
@@ -164,6 +168,9 @@ BEGIN TRY
 		SET @dblMatchAmount = NULL
 		SET @dblFinanceForwardRate = NULL
 		SET @ysnGTC = 0
+		SET @strContractNumber = NULL
+		SET @strContractSequence = NULL
+		SET @strAssignOrHedge = NULL
 		
 		SELECT @strName = strName
 			, @strAccountNumber = strAccountNumber
@@ -200,6 +207,9 @@ BEGIN TRY
 			, @dblMatchAmount = dblMatchAmount
 			, @dblFinanceForwardRate = dblFinanceForwardRate
 			, @ysnGTC = ysnGTC
+			, @strContractNumber = strContractNumber
+			, @strContractSequence = strContractSequence
+			, @strAssignOrHedge = strAssignOrHedge
 
 		FROM tblRKFutOptTransactionImport
 		WHERE intFutOptTransactionId = @mRowNumber
@@ -876,6 +886,24 @@ BEGIN TRY
 						SET @strCreateDateTime = NULL
 					END
 				END
+
+				IF @strAssignOrHedge <> '' AND @ysnAllowDerivativeAssignToMultipleContracts = 0
+				BEGIN
+					IF @strAssignOrHedge NOT IN('Assign','Hedge')
+					BEGIN
+						SET @ErrMsg = @ErrMsg + ' Assign or Hedge is case sensitive it must be in exact word Assign or Hedge.'
+					END
+
+					
+					IF NOT EXISTS(SELECT * FROM tblCTContractHeader H
+								INNER JOIN tblCTContractDetail D ON D.intContractHeaderId = H.intContractHeaderId
+								WHERE strContractNumber = @strContractNumber AND intContractSeq = @strContractSequence)
+					BEGIN
+						SET @ErrMsg = @ErrMsg + ' Contract Number and Sequence does not exists in the system.'
+					END
+
+				END
+
 			END
 		END
 
@@ -921,7 +949,10 @@ BEGIN TRY
 				   , [dblExchangeRate] 
 				   , [dblContractAmount] 
 				   , [dblMatchAmount] 
-				   , [dblFinanceForwardRate] )
+				   , [dblFinanceForwardRate]
+				   , [strContractNumber]
+				   , [strContractSequence]
+				   , [strAssignOrHedge])
 		
 			SELECT 
 					 [intFutOptTransactionId]
@@ -963,7 +994,10 @@ BEGIN TRY
 				   , [dblExchangeRate] 
 				   , [dblContractAmount] 
 				   , [dblMatchAmount] 
-				   , [dblFinanceForwardRate] 
+				   , [dblFinanceForwardRate]
+				   , [strContractNumber]
+				   , [strContractSequence]
+				   , [strAssignOrHedge]
 			FROM tblRKFutOptTransactionImport 
 			WHERE intFutOptTransactionId = @mRowNumber
 		END
@@ -1014,6 +1048,9 @@ BEGIN TRY
 		, dblContractAmount
 		, dblMatchAmount
 		, dblFinanceForwardRate
+		, strContractNumber
+		, strContractSequence
+		, strAssignOrHedge
 	FROM tblRKFutOptTransactionImport_ErrLog
 	ORDER BY intFutOptTransactionErrLogId
 
