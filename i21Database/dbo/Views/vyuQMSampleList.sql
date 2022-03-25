@@ -92,6 +92,8 @@ SELECT S.intSampleId
 	,I.strSeason
 	,I.strClass
 	,I.strProductLine
+	,S.dtmRequestedDate
+	,S.dtmSampleSentDate
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1

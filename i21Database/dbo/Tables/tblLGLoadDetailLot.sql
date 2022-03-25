@@ -13,6 +13,7 @@
 	[intSort] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((0)),
 	[intLoadDetailLotRefId] INT NULL,
+	[intNewLotId] INT NULL,
 	[strNewLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strID1] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strID2] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

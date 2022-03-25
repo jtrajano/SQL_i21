@@ -279,6 +279,8 @@ BEGIN TRY
 		,dtmTestingStartDate = x.dtmTestingStartDate
 		,dtmTestingEndDate = x.dtmTestingEndDate
 		,dtmSamplingEndDate = x.dtmSamplingEndDate
+		,dtmRequestedDate = x.dtmRequestedDate
+		,dtmSampleSentDate = x.dtmSampleSentDate
 		,strSamplingMethod = x.strSamplingMethod
 		,strContainerNumber = x.strContainerNumber
 		,strMarks = x.strMarks
@@ -338,6 +340,8 @@ BEGIN TRY
 			,dtmTestingStartDate DATETIME
 			,dtmTestingEndDate DATETIME
 			,dtmSamplingEndDate DATETIME
+			,dtmRequestedDate DATETIME
+			,dtmSampleSentDate DATETIME
 			,strSamplingMethod NVARCHAR(50)
 			,strContainerNumber NVARCHAR(100)
 			,strMarks NVARCHAR(100)

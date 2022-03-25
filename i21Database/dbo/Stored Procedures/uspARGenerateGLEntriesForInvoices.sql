@@ -6,22 +6,22 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @MODULE_NAME		        NVARCHAR(25) = 'Accounts Receivable'
-	  , @SCREEN_NAME		        NVARCHAR(25) = 'Invoice'
-	  , @CODE				        NVARCHAR(25) = 'AR'
-	  , @POSTDESC			        NVARCHAR(10) = 'Posted '
-	  , @ZeroDecimal		        DECIMAL(18,6) = 0
-	  , @OneDecimal			        DECIMAL(18,6) = 1
-	  , @OneHundredDecimal	        DECIMAL(18,6) = 100
-	  , @PostDate			        DATETIME = CAST(GETDATE() AS DATE)
-      , @AllowSingleLocationEntries BIT
-      , @DueToAccountId             INT
-      , @DueFromAccountId           INT
+DECLARE @MODULE_NAME		NVARCHAR(25) = 'Accounts Receivable'
+	  , @SCREEN_NAME		NVARCHAR(25) = 'Invoice'
+	  , @CODE				NVARCHAR(25) = 'AR'
+	  , @POSTDESC			NVARCHAR(10) = 'Posted '
+	  , @ZeroDecimal		DECIMAL(18,6) = 0
+	  , @OneDecimal			DECIMAL(18,6) = 1
+	  , @OneHundredDecimal	DECIMAL(18,6) = 100
+	  , @PostDate			DATETIME = CAST(GETDATE() AS DATE)
+      , @AllowIntraEntries  BIT
+      , @DueToAccountId     INT
+      , @DueFromAccountId   INT
 
 SELECT TOP 1
-      @AllowSingleLocationEntries   = ISNULL([ysnAllowSingleLocationEntries], 0)
-    , @DueToAccountId               = ISNULL([intDueToAccountId], 0)
-    , @DueFromAccountId             = ISNULL([intDueFromAccountId], 0)
+      @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 THEN 1 ELSE 0 END
+    , @DueToAccountId   = ISNULL([intDueToAccountId], 0)
+    , @DueFromAccountId = ISNULL([intDueFromAccountId], 0)
 FROM tblARCompanyPreference
 
 --REVERSE PROVISIONAL INVOICE
@@ -829,7 +829,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
   AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
   AND I.strType <> 'Tax Adjustment'
-  AND @AllowSingleLocationEntries = 0
+  AND @AllowIntraEntries = 1
   AND @DueFromAccountId <> 0
   AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 
@@ -1001,7 +1001,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
     EXISTS(SELECT NULL FROM ##ARPostInvoiceDetail ARID WHERE ARID.[intItemId] IS NOT NULL AND ARID.[strItemType] <> 'Comment' AND ARID.intInvoiceId  = I.[intInvoiceId])
   )
   AND I.strType <> 'Tax Adjustment'
-  AND @AllowSingleLocationEntries = 0
+  AND @AllowIntraEntries = 1
   AND @DueToAccountId <> 0
   AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId]) = 0
 
@@ -2103,7 +2103,7 @@ OUTER APPLY (
 WHERE I.[intPeriodsToAccrue] <= 1
   AND (ARIDT.[dblAdjustedTax] <> @ZeroDecimal
    OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 AND [ysnInvalidSetup] = 0))
-  AND @AllowSingleLocationEntries = 0
+  AND @AllowIntraEntries = 1
   AND @DueToAccountId <> 0
   AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 

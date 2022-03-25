@@ -62,13 +62,13 @@ BEGIN
 	);
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
-	DECLARE	 @AllowSingleLocationEntries BIT
-			,@DueToAccountId             INT
-			,@DueFromAccountId           INT
+	DECLARE	 @AllowIntraEntries BIT
+			,@DueToAccountId	INT
+			,@DueFromAccountId  INT
 	SELECT TOP 1
-		  @AllowSingleLocationEntries   = ISNULL([ysnAllowSingleLocationEntries], 0)
-		, @DueToAccountId               = ISNULL([intDueToAccountId], 0)
-		, @DueFromAccountId             = ISNULL([intDueFromAccountId], 0)
+		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 THEN 1 ELSE 0 END
+		, @DueToAccountId	= ISNULL([intDueToAccountId], 0)
+		, @DueFromAccountId = ISNULL([intDueFromAccountId], 0)
 	FROM tblAPCompanyPreference
 	-- Get Total Value of Other Charges Taxes
 	 --SELECT @ReceiptId = IRI.intInventoryReceiptId
@@ -369,7 +369,7 @@ BEGIN
 				AND intAccountId = A.[intAccountId]
 			) DUEACCOUNT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	  	  AND @AllowSingleLocationEntries = 0
+	  	  AND @AllowIntraEntries = 1
           AND @DueFromAccountId <> 0
           AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId]) = 0
 		  AND A.intTransactionType <> 15
@@ -630,7 +630,7 @@ BEGIN
 		AND intAccountId = voucherDetails.intAccountId
 	) DUEACCOUNT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	      AND @AllowSingleLocationEntries = 0
+	      AND @AllowIntraEntries = 1
 	      AND @DueToAccountId <> 0
 	      AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId) = 0
 		  AND A.intTransactionType <> 15
@@ -1109,9 +1109,9 @@ BEGIN
 				AND intAccountId = voucherDetails.intAccountId
 			) DUEACCOUNT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	  	  AND @AllowSingleLocationEntries = 0
+	  	  AND @AllowIntraEntries = 1
 	  	  AND @DueToAccountId <> 0
-	  	  AND [dbo].[fnARCompareAccountSegment](B.[intAccountId], voucherDetails.intAccountId) = 0
+	  	  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId) = 0
 		  AND A.intTransactionType <> 15
 	
 	--TAX ADJUSTMENT
