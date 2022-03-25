@@ -8885,6 +8885,7 @@
     <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
     <Build Include="dbo\Tables\tblARAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGFixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
