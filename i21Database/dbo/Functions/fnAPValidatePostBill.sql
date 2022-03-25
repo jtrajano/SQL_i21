@@ -655,6 +655,24 @@ BEGIN
 		  AND DUEFROM.[ysnAllowSingleLocationEntries] = 0
 		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
 
+		--You cannot post if location segment of AP Account and Payable Account when single location entry is enabled. 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'Purchase and AP Account should have the same location segment.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			2
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		OUTER APPLY (
+			SELECT TOP 1 ysnAllowSingleLocationEntries
+			FROM tblAPCompanyPreference
+		) APCP
+		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		  AND APCP.[ysnAllowSingleLocationEntries] = 1
+		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
+
 		--VALIDATE PAY TO BANK ACCOUNT
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
