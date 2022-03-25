@@ -74,26 +74,9 @@ select
 	,@strLocationNameCnt = strLocationName
 from vyuRKGetAssignPhysicalTransaction where strContractNumber = @strContractNumber and intContractSeq = @strContractSequence
 
-IF (@strBuySell = 'Buy' AND @strContractType = 'Purchase') OR (@strBuySell = 'Sell' AND @strContractType = 'Sale')
-BEGIN
-	SET @strResultOutput  = 'Please select opposite futures transactions only to hedge a contract, else use Assign instead of Hedge. '
-END
 
 
-IF @strFutMarketNameCnt <>  @strFutMarketNameDer OR @strFutureMonthCnt <> @strFutureMonthDer OR @strCommodityCodeCnt <> @strCommodityCodeDer OR @strLocationNameCnt <> @strLocationNameDer
-BEGIN
-	SET @strResultOutput += 'Market, Month, Commodity and Locations should be the same for both Derivative and Contract for hedging. '
-END
-
-IF @dblHedgedLots > @dblToBeHedgedLots 
-BEGIN
-	SET @strResultOutput += 'Derivative ' + @strInternalTradeNo +' lot (' + dbo.fnFormatNumber(@dblHedgedLots)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeHedgedLots) + ') to be hedged.'
-END
-
-
---select @strResultOutput
-
-IF @dblHedgedLots <= @dblToBeHedgedLots AND ISNULL(@strResultOutput,'') = ''
+IF @dblHedgedLots <= @dblToBeHedgedLots 
 BEGIN
 	DECLARE @strXml NVARCHAR(MAX) = '<root><intAssignFuturesToContractHeaderId>1</intAssignFuturesToContractHeaderId>'
 
@@ -163,6 +146,7 @@ BEGIN
 	
 	EXEC uspRKAssignFuturesToContractSummarySave @strXml, 0
 	
+	SET @strResultOutput = 'Derivative ' + @strInternalTradeNo +' was successfully hedged to Contract ' + @strContractNumber + '-'+ @strContractSequence + '.'
 END
 
 END TRY

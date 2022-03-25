@@ -16,6 +16,7 @@ BEGIN TRY
 		, @strSalespersonId NVARCHAR(100)
 		, @strCurrency NVARCHAR(100)
 		, @strBuySell NVARCHAR(100)
+		, @dblNoOfContract DECIMAL(24, 10)
 		, @strBrokerTradeNo NVARCHAR(100)
 		, @strFutureMonth NVARCHAR(100)
 		, @strOptionMonth NVARCHAR(100)
@@ -140,6 +141,7 @@ BEGIN TRY
 		SET @strSalespersonId = NULL
 		SET @strCurrency = NULL
 		SET @strBuySell = NULL
+		SET @dblNoOfContract = NULL
 		SET @strFutureMonth = NULL
 		SET @strOptionMonth = NULL
 		SET @strOptionType = NULL
@@ -182,6 +184,7 @@ BEGIN TRY
 			, @strCurrency = strCurrency
 			, @strBrokerTradeNo = strBrokerTradeNo
 			, @strBuySell = strBuySell
+			, @dblNoOfContract = dblNoOfContract
 			, @strFutureMonth = strFutureMonth
 			, @strOptionMonth = strOptionMonth
 			, @strOptionType = strOptionType
@@ -901,6 +904,73 @@ BEGIN TRY
 					BEGIN
 						SET @ErrMsg = @ErrMsg + ' Contract Number and Sequence does not exists in the system.'
 					END
+
+					IF EXISTS(SELECT * FROM tblCTContractHeader H
+								INNER JOIN tblCTContractDetail D ON D.intContractHeaderId = H.intContractHeaderId
+								WHERE strContractNumber = @strContractNumber AND intContractSeq = @strContractSequence)
+					BEGIN
+						
+						DECLARE @dblToBeAssignedLots NUMERIC(18,6) 
+							,@dblToBeHedgedLots NUMERIC(18,6)
+							,@intContractDetailId INT = NULL
+							,@intContractHeaderId INT = NULL
+							,@dtmCurrentDate DATETIME  = GETDATE()
+							,@strContractType NVARCHAR(50)
+							,@strFutMarketNameCnt NVARCHAR(50)
+							,@strFutureMonthCnt NVARCHAR(50)
+							,@strCommodityCodeCnt NVARCHAR(50)
+							,@strLocationNameCnt NVARCHAR(100)
+
+						
+						select
+							@dblToBeAssignedLots = dblToBeAssignedLots
+							,@dblToBeHedgedLots = dblToBeHedgedLots
+							,@intContractDetailId = intContractDetailId
+							,@intContractHeaderId = intContractHeaderId
+							,@strContractType = strContractType
+							,@strFutMarketNameCnt = strFutMarketName
+							,@strFutureMonthCnt = strFutureMonth
+							,@strCommodityCodeCnt = strCommodityCode
+							,@strLocationNameCnt = strLocationName
+						from vyuRKGetAssignPhysicalTransaction where strContractNumber = @strContractNumber and intContractSeq = @strContractSequence
+
+
+
+						IF @strAssignOrHedge = 'Assign'
+						BEGIN
+
+							IF @dblNoOfContract > @dblToBeAssignedLots
+							BEGIN
+								SET @ErrMsg = @ErrMsg + ' Derivative lots (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeAssignedLots) + ') to be assigned.'
+							END
+
+							
+						END
+
+
+						IF @strAssignOrHedge = 'Hedge'
+						BEGIN
+							
+							IF (@strBuySell = 'Buy' AND @strContractType = 'Purchase') OR (@strBuySell = 'Sell' AND @strContractType = 'Sale')
+							BEGIN
+								SET @ErrMsg = @ErrMsg + ' Please select opposite futures transactions only to hedge a contract, else use Assign instead of Hedge.'
+							END
+
+
+							IF @strFutMarketNameCnt <>  @strFutMarketName OR @strFutureMonthCnt <> REPLACE(@strFutureMonth, '-', ' ') OR @strCommodityCodeCnt <> @strCommodityCode OR @strLocationNameCnt <> @strLocationName
+							BEGIN
+								SET @ErrMsg = @ErrMsg +' Market, Month, Commodity and Locations should be the same for both Derivative and Contract for hedging.'
+							END
+
+							IF @dblNoOfContract > @dblToBeHedgedLots 
+							BEGIN
+								SET @ErrMsg = @ErrMsg + ' Derivative lot (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeHedgedLots) + ') to be hedged.'
+							END
+
+						END 
+						
+					END
+
 
 				END
 

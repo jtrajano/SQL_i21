@@ -43,11 +43,10 @@ BEGIN
 		,@strContractSequence
 		,@strContractNumber 
 
+	SET @strResultOutput = 'Derivative ' + @strInternalTradeNo +' was successfully assigned to Contract ' + @strContractNumber + '-'+ @strContractSequence + '.'
+
 END
-ELSE
-BEGIN
-	SET @strResultOutput = 'Derivative ' + @strInternalTradeNo +' lot (' + dbo.fnFormatNumber(@dblAssignedLots)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeAssignedLots) + ') to be assigned.'
-END
+
 
 END TRY
 BEGIN CATCH
