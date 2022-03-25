@@ -605,6 +605,7 @@
     <Build Include="dbo\Stored Procedures\uspLGCreateLotNumberOnInventoryTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPostInventoryTransfer.sql" />
     <Build Include="dbo\Views\vyuAPInboundTaxReportView.sql" />
+    <Build Include="dbo\Views\vyuICItemMissingLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
