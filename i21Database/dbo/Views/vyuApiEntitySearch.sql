@@ -31,4 +31,5 @@ SELECT
     , CAST(CASE VendorOrCustomer WHEN 1 THEN 1 ELSE 0 END AS BIT) IsVendorOrCustomer
     , strFederalTaxId
     , strDefaultEntityType
+    , strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(intEntityId) COLLATE Latin1_General_CI_AS
 FROM vyuEMSearch
