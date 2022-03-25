@@ -4,8 +4,15 @@
 	,intCompanyLocationId int not null
 	,intItemId int not null
 	,[intUnitMeasureId] int not null
+	,[intStorageLocationId] int null
 	,[dblEffectiveDepth] NUMERIC(18, 6) DEFAULT ((0))
 	,[dblUnitPerFoot] NUMERIC(18, 6) DEFAULT ((0))
+
+	
+	,dtmStartTrackingDate datetime null
+	,dtmEndTrackingDate datetime null
+
+
 	,intConcurrencyId int not null default(1)
 
 	-- ,constraint FK_LoadOutBin_StorageLocation_intStorageLocationId foreign key (intStorageLocationId) references tblICStorageLocation(intStorageLocationId) on delete cascade

@@ -35,14 +35,6 @@
 		on BinIn.intStorageLocationId = StorageUnit.intStorageLocationId		
 	join tblICUnitMeasure BinInUnitMeasure
 		on BinIn.intUnitMeasureId = BinInUnitMeasure.intUnitMeasureId
-	
 
-	
-	
-
-	
-
-	
-	
-
+	where (LoadOutBin.dtmStartTrackingDate is null or (BinIn.dtmTransactionDate >= LoadOutBin.dtmStartTrackingDate and BinIn.dtmTransactionDate < LoadOutBin.dtmEndTrackingDate ))
 	

@@ -11,18 +11,18 @@
 		, Ticket.intTicketId
 
 
-		,case when LoadOUtBin.intUnitMeasureId is not null and LoadOUtBin.intUnitMeasureId != UnitMeasure.intUnitMeasureId then 
+		,case when LoadOutBin.intUnitMeasureId is not null and LoadOutBin.intUnitMeasureId != UnitMeasure.intUnitMeasureId then 
 				dbo.fnGRConvertQuantityToTargetItemUOM(
 					Ticket.intItemId
 					, UnitMeasure.intUnitMeasureId
-					, LoadOUtBin.intUnitMeasureId
+					, LoadOutBin.intUnitMeasureId
 					, Ticket.dblNetUnits) 
 			else 
 				Ticket.dblNetUnits
 			end as dblConvertedUnits
 	from tblSCISLoadOutBinDeduct  BinDeduct
-	join tblSCISLoadOutBin LoadOUtBin
-		on BinDeduct.intLoadOutBinId = LoadOUtBin.intLoadOutBinId
+	join tblSCISLoadOutBin LoadOutBin
+		on BinDeduct.intLoadOutBinId = LoadOutBin.intLoadOutBinId
 	join tblICStorageLocation StorageUnit
 		on BinDeduct.intStorageLocationId = StorageUnit.intStorageLocationId
 	join tblSCTicket Ticket
@@ -38,5 +38,5 @@
 	join tblICUnitMeasure UnitMeasure
 		on ItemUOM.intUnitMeasureId = UnitMeasure.intUnitMeasureId
 	
-
+	where (LoadOutBin.dtmStartTrackingDate is null or (Ticket.dtmTicketDateTime >= LoadOutBin.dtmStartTrackingDate and Ticket.dtmTicketDateTime < LoadOutBin.dtmEndTrackingDate ))
 	
