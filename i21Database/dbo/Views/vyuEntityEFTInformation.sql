@@ -9,7 +9,8 @@ select
 	ENT.strEntityNo,
 	EFT.intBankId,
 	Bank.strBankName,
-	strAccountNumber = '**********' + RIGHT(dbo.fnAESDecryptASym(strAccountNumber), 4),
+	strAccountNumberWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strAccountNumber), 4),
+	strAccountNumber = dbo.fnAESDecryptASym(strAccountNumber),
 	strAccountType,
 	strAccountClassification,
 	strEFTType = REPLACE(strEFTType, ',', ', '),
@@ -22,7 +23,26 @@ select
 	ysnPrenoteSent,
 	Vendor,
 	Customer,
-	Employee
+	Employee,
+	strCurrency,
+	strIBANWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strIBAN), 4),
+    strIBAN = dbo.fnAESDecryptASym(strIBAN),
+    strSwiftCode,
+    strBicCode,
+    strBranchCode,
+    ysnDefaultAccount,
+    strIntermediaryBank,
+    strIntermediaryBankAddress,
+    strIntermediarySwiftCode,
+    strIntermediaryBicCode,
+    strNationalBankIdentifier,
+    strComment,
+    strDetailsOfCharges,
+    strFiftySevenFormat,
+    strFiftySixFormat,
+	strIntermediaryIBANWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strIntermediaryIBAN), 4),
+    strIntermediaryIBAN = dbo.fnAESDecryptASym(strIntermediaryIBAN),
+	intEntityEFTHeaderId
 
 
 FROM tblEMEntityEFTInformation EFT
