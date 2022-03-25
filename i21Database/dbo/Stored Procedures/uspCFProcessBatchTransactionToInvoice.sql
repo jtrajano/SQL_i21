@@ -135,7 +135,7 @@ BEGIN
 	FROM tblCFBatchUnpostStagingTable
 	INNER JOIN tblCFTransaction 
 	ON tblCFBatchUnpostStagingTable.intTransactionId = tblCFTransaction.intTransactionId
-	WHERE tblCFTransaction.strTransactionType != 'Foreign Sale' 
+	WHERE ISNULL(tblCFTransaction.intInvoiceId,0) != 0
 
 	INSERT INTO @tmpForeignTransactionId
 	(
