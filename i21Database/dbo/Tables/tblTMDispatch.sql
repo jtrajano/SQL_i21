@@ -41,7 +41,9 @@
     [ysnReceived] BIT NOT NULL DEFAULT 0, 
     [ysnLeakCheckRequired] BIT NOT NULL DEFAULT 0, 
     [dtmReceivedDate] DATETIME NULL, 
-	[intPaymentId] INT NULL, 
+	[intPaymentId] INT NULL,
+    [dblOverageQty] NUMERIC(18,6) DEFAULT 0 NULL,
+	[dblOveragePrice] NUMERIC(18,6) DEFAULT 0 NULL,
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])

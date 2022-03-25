@@ -16,14 +16,13 @@ BEGIN
 		@intLocationId INT = NULL,
 		@intCompanyLocationPricingLevelId INT = NULL
 
-
 	SELECT @intSiteId = S.intSiteID
 		, @intDispatchId = D.intDispatchID
 		, @intItemId = D.intProductID
 		, @strOrderNumber = D.strOrderNumber
 		, @strPricingMethod = D.strPricingMethod
 		, @intContractDetailId = D.intContractId
-		, @dblQuantity = D.dblQuantity
+		, @dblQuantity = CASE WHEN ISNULL(D.dblMinimumQuantity,0) = 0 THEN D.dblQuantity ELSE D.dblMinimumQuantity END
 		, @dblPrice = D.dblPrice
 		, @dblTotal = D.dblTotal
 		, @intCustomerId = S.intCustomerID
@@ -33,6 +32,9 @@ BEGIN
 	INNER JOIN tblTMSite S ON S.intSiteID = D.intSiteID
 	WHERE D.intDispatchID = @intDispatchId
 	AND D.strWillCallStatus IN ('Dispatched', 'Routed')
+
+	-- DELETE IF THERE IS EXISTING DISPATCH RECORD
+	DELETE tblTMOrder WHERE intDispatchId = @intDispatchId
 
 	IF(@intContractDetailId IS NOT NULL) 
 	BEGIN
@@ -131,7 +133,8 @@ BEGIN
 					dblPrice,
 					dblTotal,
 					strSource,
-					dtmTransactionDate
+					dtmTransactionDate,
+					ysnOverage
 				)
 				VALUES(
 					@intDispatchId,
@@ -143,10 +146,41 @@ BEGIN
 					@dblItemPrice,
 					@dblTotal,
 					@strSource,
-					GETDATE()
+					GETDATE(),
+					1
 				)
 
+				UPDATE tblTMDispatch SET dblOverageQty = @dblRemainingQty, dblOveragePrice = @dblItemPrice
+				WHERE intDispatchID = @intDispatchId
+				
 			END
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblTMOrder (
+				intDispatchId,
+				intSiteId,
+				intItemId,
+				strOrderNumber,
+				strPricingMethod,
+				dblQuantity,
+				dblPrice,
+				dblTotal,
+				strSource,
+				dtmTransactionDate
+			)
+			VALUES(
+				@intDispatchId,
+				@intSiteId,
+				@intItemId,
+				@strOrderNumber,
+				@strPricingMethod,
+				@dblQuantity,
+				@dblPrice,
+				@dblTotal,
+				@strSource,
+				GETDATE()
+			)
 		END
 
 	END
