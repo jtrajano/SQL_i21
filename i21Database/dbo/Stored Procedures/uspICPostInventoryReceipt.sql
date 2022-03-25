@@ -64,6 +64,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@intEntityVendorId AS INT = NULL 
 		,@dblStandardCost NUMERIC(18, 6)
 		,@strLocation AS NVARCHAR(50) 
+		,@strLotNumber AS NVARCHAR(50) 
 
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -132,7 +133,7 @@ END
 
  
 --------------------------------------------------------------------------------------------  
--- Validate  
+-- BEGIN Validate  
 --------------------------------------------------------------------------------------------  
 BEGIN 
 	DECLARE @strBillNumber AS NVARCHAR(50)
@@ -567,7 +568,42 @@ BEGIN
 			GOTO With_Rollback_Exit
 		END 
 	END
+
+	-- Check if the Missing Lots are not posted with negative qty. 
+	BEGIN
+		SELECT @strItemNo = NULL
+				,@intItemId = NULL 
+				,@strLotNumber = NULL 		
+
+		SELECT TOP 1 
+				@strTransactionId = Receipt.strReceiptNumber 
+				,@strItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+				,@strLotNumber = Lot.strLotNumber 
+		FROM	dbo.tblICInventoryReceipt Receipt 
+				INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+				INNER JOIN tblICInventoryReceiptItemLot ReceiptLot
+					ON ReceiptLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId 
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+				INNER JOIN tblICLot Lot
+					ON Lot.intLotId = ReceiptLot.intLotId 
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND ReceiptLot.strCondition = 'Missing'
+				AND (ReceiptItem.dblOpenReceive < 0 OR ReceiptLot.dblQuantity < 0) 
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- '{Lot Number} is a missing lot it should not have a negative quantity.'
+			EXEC uspICRaiseError 80268, @strLotNumber;
+			GOTO With_Rollback_Exit; 
+		END 		 
+	END
 END
+--------------------------------------------------------------------------------------------  
+-- END Validate  
+--------------------------------------------------------------------------------------------  
 
 -- Get the next batch number
 BEGIN 
