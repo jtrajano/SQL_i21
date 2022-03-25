@@ -202,7 +202,14 @@ BEGIN TRY
 				WHERE intContractDetailId = @intContractDetailId
 					AND intContractFeedId < @intContractFeedId
 				ORDER BY intContractFeedId
-				) = 'ADDED'
+				) = 'Added'
+			AND (
+				SELECT TOP 1 UPPER(strRowState)
+				FROM tblCTContractFeed
+				WHERE intContractDetailId = @intContractDetailId
+					AND intContractFeedId < @intContractFeedId
+					AND strRowState = 'Delete'
+				) <> 'Delete'
 		BEGIN
 			UPDATE dbo.tblCTContractFeed
 			SET strRowState = 'Modified'
@@ -346,6 +353,7 @@ BEGIN TRY
 					AND CD.intContractDetailId = @intContractDetailId
 				JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 					AND CL.strLotOrigin = @strCompanyLocation
+					AND CL.strLocationName = CF.strLocationName
 					AND CF.intContractFeedId < @intContractFeedId
 					AND intStatusId = 2
 				ORDER BY CF.intContractFeedId DESC
