@@ -108,6 +108,7 @@ SELECT	i21.intBankAccountId
 		,i21.strACHClientId
 		,i21.intResponsibleEntityId
 		,strResponsibleEntity = E.strName
+		,i21.strCorrespondingBank
 		--Advanced Bank Recon
 		,i21.ysnABREnable
 		,i21.intABRDaysNoRef
@@ -253,6 +254,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,ysnABREnable
 						,intABRDaysNoRef
 						,strPaymentInstructions
+						,strCorrespondingBank
 				)
 				OUTPUT 	inserted.intBankAccountId
 				SELECT	intBankId							= i.intBankId
@@ -344,6 +346,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,ysnABREnable						= i.ysnABREnable
 						,intABRDaysNoRef					= i.intABRDaysNoRef
 						,strPaymentInstructions				= i.strPaymentInstructions
+						,strCorrespondingBank				= i.strCorrespondingBank
 				FROM	inserted i 
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
@@ -458,6 +461,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
 					,strPaymentInstructions				= i.strPaymentInstructions
+					,strCorrespondingBank				= i.strCorrespondingBank
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
