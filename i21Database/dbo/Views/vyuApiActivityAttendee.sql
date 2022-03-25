@@ -9,6 +9,7 @@ SELECT
 	, ve.strPhone
 	, ve.strMobile
 	, a.ysnAddCalendarEvent
+	, ve.ysnDefaultContact
 FROM tblSMActivityAttendee a
 JOIN vyuEMEntityCredentialContact ve ON ve.intEntityId = a.intEntityId
 JOIN tblEMEntity e ON e.intEntityId = a.intEntityId
