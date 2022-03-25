@@ -60,6 +60,10 @@ INCLUDE ( 	[intPaymentId],
 	[dblInterest],
 	[dblWithheld]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_vyuAPBillSearchFilter]
+ON [dbo].[tblAPPaymentDetail] ([intPaymentId])
+INCLUDE ([intBillId],[dblDiscount],[dblWithheld],[intOrigBillId])
+GO
 
 
 CREATE TRIGGER trg_tblAPPaymentDetail
