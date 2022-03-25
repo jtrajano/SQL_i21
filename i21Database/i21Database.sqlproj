@@ -602,6 +602,8 @@
     <Build Include="dbo\Views\vyuRKM2MBasisForNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoAssignDerivative.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoHedgeDerivative.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateLotNumberOnInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostInventoryTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -696,6 +698,7 @@
     <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
     <Folder Include="Scripts\Utility\IC\DPR" />
     <Folder Include="Scripts\Utility\SC" />
+    <Folder Include="Scripts\Utility\GR\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />

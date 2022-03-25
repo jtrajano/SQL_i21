@@ -252,6 +252,15 @@ BEGIN TRY
 				EXEC dbo.uspLGAddPendingClaim @intLoadId, 3, @ysnPost
 			END
 		END
+		ELSE IF @intPurchaseSale = 4
+		BEGIN
+			EXEC uspLGPostInventoryTransfer 
+					@ysnPost = @ysnPost
+					,@strTransactionId = @strLoadNumber
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
+					,@ysnRecap = @ysnRecap
+					,@strBatchId = @strBatchId OUTPUT
+		END
 	END
 END TRY
 
