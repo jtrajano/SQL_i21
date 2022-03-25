@@ -3,7 +3,7 @@
     [intEntityId]										INT            NOT NULL,
 	[intEntityEFTHeaderId]								INT            NULL,
     [intBankId]											INT            NULL,
-    --[strBankName]										NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strBankName]										NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strAccountNumber]									NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAccountType]									NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
     [strAccountClassification]							NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
