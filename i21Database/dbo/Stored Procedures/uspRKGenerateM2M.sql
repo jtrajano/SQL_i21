@@ -1484,8 +1484,8 @@ BEGIN TRY
 			LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = cd.intContractDetailId AND rk.intFutureMonthId = cd.intFutureMonthId
 			OUTER APPLY (
 				SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
-				WHERE ISNULL(tmp.intFutureMarketId,0) = ISNULL(cd.intFutureMarketId, ISNULL(tmp.intFutureMarketId,0))
-					AND ISNULL(tmp.intItemId,0) = ISNULL(cd.intItemId, ISNULL(tmp.intItemId,0))
+				WHERE ISNULL(tmp.intFutureMarketId,0) = CASE WHEN tmp.intFutureMarketId IS NULL THEN ISNULL(tmp.intFutureMarketId,0) ELSE ISNULL(cd.intFutureMarketId,0) END
+					AND ISNULL(tmp.intItemId,0) = CASE WHEN tmp.intItemId IS NULL THEN ISNULL(tmp.intItemId,0) ELSE ISNULL(cd.intItemId,0) END
 					AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
 														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
@@ -1496,7 +1496,8 @@ BEGIN TRY
 													THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
 												ELSE tmp.strPeriodTo END
 					AND tmp.strContractInventory = 'Contract'
-					AND tmp.intMarketZoneId = ISNULL(cd.intMarketZoneId, tmp.intMarketZoneId) ) basisDetail
+					AND ISNULL(tmp.intMarketZoneId,0) = CASE WHEN tmp.intMarketZoneId IS NULL THEN ISNULL(tmp.intMarketZoneId,0) ELSE ISNULL(cd.intMarketZoneId,0) END
+					) basisDetail
 			LEFT JOIN tblCTContractHeader cth
 				ON cd.intContractHeaderId = cth.intContractHeaderId
 			OUTER APPLY (
