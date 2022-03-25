@@ -139,17 +139,16 @@ BEGIN
 		--SET		intNumber = ISNULL(intNumber, 0) + 1
 		--WHERE	intStartingNumberId = @intStartingNumberId
 
-		-- START: FRM-10204
-		IF (REPLICATE('9', ISNULL(@digit, 0)) = (SELECT intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId))
-		BEGIN
-			SET @digit = @digit + 1
+		-- START: FRM-10204  
+		 IF (REPLICATE('9', ISNULL(@digit, 0)) = (SELECT intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId))  
+		 BEGIN  
+		  SET		@digit = @digit + 1  
 
-			UPDATE	tblSMStartingNumber
-			SET		intNumber = REPLICATE('0', @digit),
-					intDigits = @digit
-			WHERE	intStartingNumberId = @intStartingNumberId
-		END
-		-- END: FRM-10204
+		  UPDATE	tblSMStartingNumber  
+		  SET		intDigits = @digit  
+		  WHERE		intStartingNumberId = @intStartingNumberId  
+		 END    
+		 -- END: FRM-10204
 
 		--work around for duplicate start--
 		UPDATE tblSMStartingNumber SET intNumber = ISNULL(intNumber, 0) + 1 OUTPUT inserted.intNumber INTO @tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
@@ -165,17 +164,16 @@ BEGIN
 END
 ELSE
 BEGIN
-	-- START: FRM-10204
-	IF (REPLICATE('9', ISNULL(@digit, 0)) = (SELECT intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId))
-	BEGIN
-		SET @digit = @digit + 1
+	-- START: FRM-10204  
+	 IF (REPLICATE('9', ISNULL(@digit, 0)) = (SELECT intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId))  
+	 BEGIN  
+	  SET		@digit = @digit + 1  
 
-		UPDATE	tblSMStartingNumber
-		SET		intNumber = REPLICATE('0', @digit),
-				intDigits = @digit
-		WHERE	intStartingNumberId = @intStartingNumberId
-	END
-	-- END: FRM-10204
+	  UPDATE	tblSMStartingNumber  
+	  SET		intDigits = @digit  
+	  WHERE		intStartingNumberId = @intStartingNumberId  
+	 END    
+	 -- END: FRM-10204
 
 	--work around for duplicate start--
 	UPDATE tblSMStartingNumber SET intNumber = ISNULL(intNumber, 0) + 1 OUTPUT inserted.intNumber INTO @tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
