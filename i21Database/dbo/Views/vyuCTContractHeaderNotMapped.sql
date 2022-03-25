@@ -81,7 +81,7 @@ AS
 						BA.strAccountNumber			AS strBrokerAccount,
 						intCommodityFutureMarketId = CY.intFutureMarketId, -- CT-5315
 						strEntitySelectedLocation = ESL.strLocationName, -- CT-5315
-						COL.strLocationName
+						COL.strLocationName,
 						ST.strSampleTypeName
 
 				FROM	tblCTContractHeader						CH	
