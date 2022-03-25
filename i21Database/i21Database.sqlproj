@@ -3669,6 +3669,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutSalesTaxTotals.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDeposits.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutShiftComments.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalPreview.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutRegisterCorrections.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateImportFileHeader.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\17_Notification.sql" />
@@ -3688,6 +3689,7 @@
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />
+    <Build Include="dbo\Views\vyuSTShiftPhysicalPreload.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
@@ -6619,7 +6621,6 @@
     <Build Include="dbo\Functions\fnAPVendorInquiryFinancialInfo.sql" />
     <Build Include="dbo\Functions\fnAPGetVendorBalances.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateShiftPhysical.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTUpdateShiftPhysicalCount.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForPickLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInvoiceFromShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilitySalesOrderFromShipment.sql" />
@@ -10338,7 +10339,7 @@
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
     <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
-	  <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <None Include="Scripts\Utility\GR\uspGRGrainStorageDiagnostics.sql" />
   </ItemGroup>
   <ItemGroup>
