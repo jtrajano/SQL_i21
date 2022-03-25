@@ -28,14 +28,14 @@ BEGIN
 
 		--ENTITY
 		INSERT INTO tblEMEntity(strEntityNo, strName, strWebsite, strContactNumber, strFax, strEmail, strTimezone)
-		SELECT strEntityNo, strName, strWebsite, ISNULL(strContactNumber, ''), strFax, strEmail, strTimezone
+		SELECT strEntityNo, strName, strWebsite, '', strFax, strEmail, strTimezone
 		FROM #tmpApiSchemaVendorTop
 
 		SET @entityId = SCOPE_IDENTITY()
 
 		--ENTITY CONTACT
 		INSERT INTO tblEMEntity(strName, strWebsite, strContactNumber, strFax, strEmail, strTimezone)
-		SELECT strContactName, strWebsite, ISNULL(strContactNumber, ''), strFax, strEmail, strTimezone
+		SELECT strContactName, strWebsite, '', strFax, strEmail, strTimezone
 		FROM #tmpApiSchemaVendorTop
 
 		SET @entityContactId = SCOPE_IDENTITY()
