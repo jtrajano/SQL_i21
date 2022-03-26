@@ -16,10 +16,10 @@ BEGIN
 			,@totalChargesTax NUMERIC(38,6) = 0
 			
 	--Get the totals for the receipt
-	SELECT @subTotal = SUM(ISNULL(ReceiptItem.dblLineTotal, 0))
-		   ,@totalTax = SUM(ISNULL(ReceiptItem.dblTax, 0))
-		   ,@totalGross = SUM(ISNULL(ReceiptItem.dblGross, 0))
-		   ,@totalNet = SUM(ISNULL(ReceiptItem.dblNet, 0))
+	SELECT @subTotal = SUM(ReceiptItem.dblLineTotal)
+		   ,@totalTax = SUM(ReceiptItem.dblTax)
+		   ,@totalGross = SUM(ReceiptItem.dblGross)
+		   ,@totalNet = SUM(ReceiptItem.dblNet)
 	FROM	tblICInventoryReceiptItem ReceiptItem
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 	
@@ -33,8 +33,8 @@ BEGIN
 				CASE 
 					WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
 						CASE 
-							WHEN ReceiptCharge.ysnPrice = 1 THEN ISNULL(-ReceiptCharge.dblAmount, 0) 
-							WHEN Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ISNULL(ReceiptCharge.dblAmount, 0) 
+							WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblAmount 
+							WHEN Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblAmount 
 							ELSE 0.00
 						END 
 					ELSE
@@ -47,8 +47,8 @@ BEGIN
 				CASE 
 					WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
 						CASE 
-							WHEN ReceiptCharge.ysnPrice = 1 THEN ISNULL(-ReceiptCharge.dblTax, 0) 
-							WHEN ReceiptCharge.ysnAccrue = 1 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ISNULL(ReceiptCharge.dblTax, 0) 
+							WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblTax 
+							WHEN ReceiptCharge.ysnAccrue = 1 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblTax 
 							ELSE 0.00
 						END 
 					ELSE
@@ -61,10 +61,10 @@ BEGIN
 			AND ISNULL(Receipt.intCurrencyId, 1) = ISNULL(ReceiptCharge.intCurrencyId, ISNULL(Receipt.intCurrencyId, 1)) 
 	
 	--Set Total Tax
-	SET @totalTax = ISNULL(@totalTax, 0) + ISNULL(@totalChargesTax, 0) 
+	SET @totalTax = @totalTax + @totalChargesTax
 
 	--Set Grand Total
-	SET @grandTotal = ISNULL(@subTotal, 0) + ISNULL(@totalCharges, 0) + ISNULL(@totalTax, 0) 
+	SET @grandTotal = @subTotal + @totalCharges + @totalTax
 	
 	--Return Total
 	IF @totalType = 1 --SubTotal
