@@ -608,6 +608,10 @@
     <Build Include="dbo\Views\vyuICItemMissingLot.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateReceiptForTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCancelPayables.sql" />
+    <Build Include="dbo\Tables\tblCTTermCost.sql" />
+    <Build Include="dbo\Tables\tblCTTermCostDetail.sql" />
+    <Build Include="dbo\Views\vyuCTGetTermCost.sql" />
+    <Build Include="dbo\Views\vyuCTGetTermCostDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

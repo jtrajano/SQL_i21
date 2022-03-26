@@ -7735,4 +7735,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInsurancePremiumFactorPurchaseId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="111cb895-6bf1-4095-a75a-cfb058ef0c79" ChangeDateTime="03/26/2022 02:11:08">
+    <Property Name="ElementName" Value="[dbo].[tblCTTermCostDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTTermCostDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTermCostDetailId" />
+  </Operation>
 </Operations>
