@@ -37,7 +37,7 @@ SET ANSI_WARNINGS OFF
 	SELECT TOP 1 @ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 0) FROM tblLGCompanyPreference
 
 	SELECT @strReceiptType = strReceiptType, @intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
-	IF (@strReceiptType <> 'Purchase Contract' AND @intSourceType <> 2)
+	IF (@strReceiptType NOT IN ('Purchase Contract', 'Transfer Order') AND @intSourceType NOT IN (2, 9))
 		RETURN
 	
 	SELECT @intReceiptDetailId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt
@@ -63,7 +63,7 @@ SET ANSI_WARNINGS OFF
 		END
 
 		IF (ISNULL((SELECT TOP 1 strLotTracking FROM tblICItem WHERE intItemId = @intItemId), 'No') <> 'No')
-		BEGIN
+		BEGIN /* For Lotted Items */
 			SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intInventoryReceiptDetailId = @intReceiptDetailId
 			WHILE ISNULL(@intLotId,0) > 0
 			BEGIN
@@ -120,7 +120,8 @@ SET ANSI_WARNINGS OFF
 				WHERE intLoadDetailId = @intSourceId
 	
 				/*Update Pick Containers*/
-				IF EXISTS (SELECT TOP 1 1 FROM tblLGPickLotDetail PLC LEFT JOIN tblLGPickLotHeader PL ON PL.intPickLotHeaderId = PLC.intPickLotHeaderId 
+				IF (@strReceiptType <> 'Transfer Order')
+					AND EXISTS (SELECT TOP 1 1 FROM tblLGPickLotDetail PLC LEFT JOIN tblLGPickLotHeader PL ON PL.intPickLotHeaderId = PLC.intPickLotHeaderId 
 							WHERE PL.intType = 2 AND PLC.intLotId IS NULL AND PLC.intContainerId = @intContainerId)
 				BEGIN
 					UPDATE PLC
@@ -144,11 +145,14 @@ SET ANSI_WARNINGS OFF
 					--Change LS status to "Received"
 					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
-					-- Insert to Pending Claims
-					IF (@ysnWeightClaimsByContainer = 1)
-						EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId
-					ELSE
-						EXEC uspLGAddPendingClaim @intLoadId, 1
+					IF (@strReceiptType <> 'Transfer Order')
+					BEGIN
+						-- Insert to Pending Claims
+						IF (@ysnWeightClaimsByContainer = 1)
+							EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId
+						ELSE
+							EXEC uspLGAddPendingClaim @intLoadId, 1
+					END
 				END
 				ELSE 
 				BEGIN
@@ -171,18 +175,21 @@ SET ANSI_WARNINGS OFF
 
 					IF (LEN(@ErrMsg) > 0) RAISERROR(@ErrMsg,16,1)
 					
-					-- Remove from Pending Claims
-					IF (@ysnWeightClaimsByContainer = 1)
-						EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId, 0
-					ELSE
-						EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
+					IF (@strReceiptType <> 'Transfer Order')
+					BEGIN
+						-- Remove from Pending Claims
+						IF (@ysnWeightClaimsByContainer = 1)
+							EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId, 0
+						ELSE
+							EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
+					END
 				END	
 
 				SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId AND intInventoryReceiptDetailId	= @intReceiptDetailId
 			END
 		END
 		ELSE
-		BEGIN
+		BEGIN /* For Non-Lotted Items */
 			SELECT @dblQty							=	NULL,
 					@dblNetWeight					=	NULL,
 					@dblContainerQty				=	NULL
@@ -239,11 +246,14 @@ SET ANSI_WARNINGS OFF
 				--Change LS status to "Received"
 				UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
-				-- Insert to Pending Claims
-				IF (@ysnWeightClaimsByContainer = 1)
-					EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId
-				ELSE
-					EXEC uspLGAddPendingClaim @intLoadId, 1
+				IF (@strReceiptType <> 'Transfer Order')
+				BEGIN
+					-- Insert to Pending Claims
+					IF (@ysnWeightClaimsByContainer = 1)
+						EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId
+					ELSE
+						EXEC uspLGAddPendingClaim @intLoadId, 1
+				END
 			END
 			ELSE 
 			BEGIN
@@ -266,11 +276,14 @@ SET ANSI_WARNINGS OFF
 
 				IF (LEN(@ErrMsg) > 0) RAISERROR(@ErrMsg,16,1)
 					
-				-- Remove from Pending Claims
-				IF (@ysnWeightClaimsByContainer = 1)
-					EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId, 0
-				ELSE
-					EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
+				IF (@strReceiptType <> 'Transfer Order')
+				BEGIN
+					-- Remove from Pending Claims
+					IF (@ysnWeightClaimsByContainer = 1)
+						EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId, 0
+					ELSE
+						EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
+				END
 			END	
 		END
 
@@ -300,6 +313,8 @@ SET ANSI_WARNINGS OFF
 	
 	-- Reduce the Inbound In-Transit Qty when posting an IR. 
 	-- Or Increase it back when unposting the IR. 
+	-- For Transfer Orders, in-transit stock is handled on IR posting
+	IF (@strReceiptType <> 'Transfer Order')
 	BEGIN
 		INSERT into @ItemsToIncreaseInTransitInBound(
 			[intItemId] 
@@ -343,3 +358,4 @@ SET ANSI_WARNINGS OFF
 		-- Or Increase it back when unposting the IR. 
 		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound
 	END
+GO
