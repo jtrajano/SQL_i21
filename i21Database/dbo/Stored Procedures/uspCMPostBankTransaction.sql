@@ -551,6 +551,30 @@ BEGIN
 		DELETE FROM tblGLDetail WHERE strTransactionId = @strTransactionId + '-F'
 		DELETE FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId + '-F'
 		DELETE FROM tblCMBankTransactionAdjustment WHERE intTransactionId = @intTransactionId OR intRelatedId = @intTransactionId
+
+
+		-- UNPOST DERIVATIVES ON UNPOSTING
+		IF (@BANK_TRANSACTION_TYPE_Id = 26)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId AND strSourceModule = 'Risk Management')
+			BEGIN
+				DECLARE @Derivatives PostCommissionDerivativeEntryTable
+				DECLARE @derivativeSuccessCount INT
+				INSERT INTO @Derivatives 
+				SELECT
+					  intMatchDerivativeNo -- intMatchNo
+					, strSourceTransactionId -- strInternalTradeNo
+					, NULL
+					, NULL
+					, NULL
+				FROM tblCMBankTransactionDetail
+				WHERE intTransactionId = @intTransactionId
+				AND strSourceModule = 'Risk Management'
+
+				EXEC [dbo].[uspCMUpdatePostedDerivativeEntries] @Derivatives, 0, @derivativeSuccessCount
+			END
+		END
+		
 	END
 
 	IF @@ERROR <> 0	GOTO Post_Rollback
