@@ -35,8 +35,9 @@ FROM vyuRKFutOptTransaction ot
 	LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 	LEFT JOIN tblRKBrokerageAccount ba ON ot.intBrokerageAccountId = ba.intBrokerageAccountId AND ba.intEntityId = ot.intEntityId
 WHERE intSelectedInstrumentTypeId IN(1,3) AND  ot.intInstrumentTypeId = 1
-AND ysnPosted = 0
+--AND ysnPosted = 0
 AND strCommissionRateType = 'Half-turn'
+AND ISNULL(ot.ysnCommissionExempt, 0) = 0
 
 
 
@@ -111,7 +112,7 @@ CROSS APPLY (
 ) Shrt
 WHERE A.strType = 'Realize'
 AND Lng.strCommissionRateType = 'Round-turn'
-AND Lng.ysnPosted = 0
+--AND Lng.ysnPosted = 0
 GROUP BY
 	A.intMatchFuturesPSHeaderId
 	,A.intMatchNo
