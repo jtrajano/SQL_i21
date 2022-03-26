@@ -172,9 +172,10 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #AAPPREPAIDS)
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 	BEGIN
-		DECLARE @intInvoiceId	INT
+		DECLARE  @intInvoiceId	INT
+				,@dblAmountDue	NUMERIC(18, 6)
 
-		SELECT TOP 1 @intInvoiceId = intInvoiceId
+		SELECT TOP 1 @intInvoiceId = intInvoiceId, @dblAmountDue = dblAmountDue
 		FROM #AAPINVOICES
 		WHERE ysnProcessed = 0
 
@@ -236,15 +237,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 		FROM #AAPINVOICES I
 		INNER JOIN (
 			SELECT P.*
-				 , TOTALS.dblTotal dblRunningTotal
+				 , dblRunningTotal = SUM(P.dblAmountDue - dblAppliedPayment) OVER (ORDER BY P.dtmPostDate, P.intInvoiceId)
 			FROM #AAPPREPAIDS P
-			OUTER APPLY (  
-				SELECT  
-						SUM( PREPAIDS.dblAmountDue - PREPAIDS.dblAppliedPayment ) dblTotal
-				FROM #AAPPREPAIDS PREPAIDS 
-				WHERE PREPAIDS.intInvoiceId = P.intInvoiceId 
-					  AND PREPAIDS.dblAppliedPayment <> PREPAIDS.dblAmountDue
-			) TOTALS
 			WHERE P.dblAppliedPayment <> P.dblAmountDue
 		) CREDITS
 		ON CREDITS.intEntityCustomerId = I.intEntityCustomerId
@@ -278,7 +272,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 			GROUP BY intSourceId
 		) E
 		WHERE I.intInvoiceId = @intInvoiceId
-
+		
 		--INSERT CREDITS IF HAS AVAILABLE AND INVOICE AMOUNT DUE IS NOT YET ZERO
 		IF EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment) AND EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE dblInvoiceTotal <> dblAppliedPayment)
 			BEGIN
@@ -342,6 +336,21 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 				  AND I.intInvoiceId = @intInvoiceId
 				  AND CREDITS.dblAppliedPayment <> CREDITS.dblAmountDue
 				  AND I.dblInvoiceTotal <> I.dblAppliedPayment
+				 
+				UPDATE P
+				SET dblPayment = 0
+				FROM @tblPaymentEntries P
+				WHERE P.intInvoiceId NOT IN (
+					SELECT intInvoiceId
+					FROM 
+					(
+						SELECT 
+							 intInvoiceId
+							,SUM(dblPayment) OVER(ORDER BY intInvoiceId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS dblPaymentTotal
+						FROM  @tblPaymentEntries
+					) T
+					WHERE T.dblPaymentTotal <= @dblAmountDue
+				)
 
 				UPDATE P
 				SET dblAppliedPayment = E.dblPayment
