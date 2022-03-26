@@ -53,6 +53,9 @@ BEGIN TRY
 		, @strContractNumber NVARCHAR(100)
 		, @strContractSequence NVARCHAR(100)
 		, @strAssignOrHedge NVARCHAR(50)
+		, @ysnCommissionExempt BIT = 0
+		, @ysnCommissionOverride BIT = 0
+		, @dblCommission DECIMAL(24, 10) = NULL
 		, @ysnAllowDerivativeAssignToMultipleContracts BIT
 
 	DECLARE @tmpOTCBank TABLE
@@ -173,6 +176,9 @@ BEGIN TRY
 		SET @strContractNumber = NULL
 		SET @strContractSequence = NULL
 		SET @strAssignOrHedge = NULL
+		SET @ysnCommissionExempt = NULL
+		SET @ysnCommissionOverride = NULL
+		SET @dblCommission = NULL
 		
 		SELECT @strName = strName
 			, @strAccountNumber = strAccountNumber
@@ -213,6 +219,9 @@ BEGIN TRY
 			, @strContractNumber = strContractNumber
 			, @strContractSequence = strContractSequence
 			, @strAssignOrHedge = strAssignOrHedge
+			, @ysnCommissionExempt = ysnCommissionExempt
+			, @ysnCommissionOverride = ysnCommissionOverride
+			, @dblCommission = dblCommission
 
 		FROM tblRKFutOptTransactionImport
 		WHERE intFutOptTransactionId = @mRowNumber
@@ -974,6 +983,21 @@ BEGIN TRY
 
 				END
 
+				IF @ysnCommissionExempt = 1 AND @ysnCommissionOverride = 1
+				BEGIN
+					SET @ErrMsg = @ErrMsg + ' Commission Exempt and Override should not be both checked.'
+				END
+
+				IF @ysnCommissionExempt = 1 AND @ysnCommissionOverride = 0 AND @dblCommission IS NOT NULL
+				BEGIN
+					SET @ErrMsg = @ErrMsg + ' Commission field should be blank if Commission Exempt is checked.'
+				END
+
+				IF @ysnCommissionExempt = 0 AND @ysnCommissionOverride = 1 AND (@dblCommission IS  NULL OR @dblCommission >= 0 )
+				BEGIN
+					SET @ErrMsg = @ErrMsg + ' Commission field should have a negative value if Commission Override is checked.'
+				END
+
 			END
 		END
 
@@ -1022,7 +1046,10 @@ BEGIN TRY
 				   , [dblFinanceForwardRate]
 				   , [strContractNumber]
 				   , [strContractSequence]
-				   , [strAssignOrHedge])
+				   , [strAssignOrHedge]
+				   , [ysnCommissionExempt]
+				   , [ysnCommissionOverride]
+				   , [dblCommission])
 		
 			SELECT 
 					 [intFutOptTransactionId]
@@ -1068,6 +1095,9 @@ BEGIN TRY
 				   , [strContractNumber]
 				   , [strContractSequence]
 				   , [strAssignOrHedge]
+				   , [ysnCommissionExempt]
+				   , [ysnCommissionOverride]
+				   , [dblCommission]
 			FROM tblRKFutOptTransactionImport 
 			WHERE intFutOptTransactionId = @mRowNumber
 		END
@@ -1121,6 +1151,9 @@ BEGIN TRY
 		, strContractNumber
 		, strContractSequence
 		, strAssignOrHedge
+		, ysnCommissionExempt
+		, ysnCommissionOverride
+		, dblCommission
 	FROM tblRKFutOptTransactionImport_ErrLog
 	ORDER BY intFutOptTransactionErrLogId
 

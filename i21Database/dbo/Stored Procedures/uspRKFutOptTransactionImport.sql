@@ -257,6 +257,12 @@ BEGIN TRY
 			VALUES (1, GETDATE(), @intInstrument, @strInstrument)
 		
 			SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY()
+
+			DECLARE @tmpCommission TABLE (
+				dblCommissionRate NUMERIC(18,6)
+				,strCommissionRateType NVARCHAR(50)
+				,intBrokerageCommissionId INT
+			)
 			
 			SELECT * INTO #temp
 			FROM (
@@ -289,6 +295,9 @@ BEGIN TRY
 					, strContractNumber
 					, strContractSequence
 					, strAssignOrHedge
+					, ysnCommissionExempt
+					, ysnCommissionOverride
+					, dblCommission
 				FROM tblRKFutOptTransactionImport ti
 				JOIN tblRKFutureMarket fm ON fm.strFutMarketName = ti.strFutMarketName
 				JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = ti.strAccountNumber
@@ -304,6 +313,7 @@ BEGIN TRY
 				WHERE ISNULL(ti.strName, '') <> '' AND ISNULL(ti.strFutMarketName, '') <> '' AND ISNULL(ti.strInstrumentType, '') <> ''
 					AND ISNULL(ti.strAccountNumber, '') <> '' AND ISNULL(ti.strCommodityCode, '') <> '' AND ISNULL(ti.strLocationName, '') <> '' AND ISNULL(ti.strSalespersonId, '') <> ''
 			)t ORDER BY strInternalTradeNo
+
 		
 			WHILE EXISTS (SELECT TOP 1 1 FROM #temp)
 			BEGIN
@@ -315,7 +325,15 @@ BEGIN TRY
 					, @dblNoOfContract NUMERIC(18,6)
 					, @intFutOptTransactionId INT
 					, @strBuySell NVARCHAR(10)
+					, @intBrokerageAccountId INT
+					, @intFutureMarketId INT
+					, @dtmTransactionDate DATETIME
+					, @intInstrumentTypeId INT
 					, @strResultOutput NVARCHAR(MAX)
+					, @dblCommissionRate NUMERIC(18,6)
+					, @strCommissionRateType NVARCHAR(50)
+					, @intBrokerageCommissionId INT
+					
 					
 				
 				
@@ -326,7 +344,23 @@ BEGIN TRY
 					, @strAssignOrHedge = strAssignOrHedge
 					, @dblNoOfContract  = dblNoOfContract
 					, @strBuySell = strBuySell
+					, @intBrokerageAccountId = intBrokerageAccountId
+					, @intFutureMarketId = intFutureMarketId
+					, @dtmTransactionDate = GETDATE()
+					, @intInstrumentTypeId = intInstrumentTypeId
 				FROM #temp
+
+				--Call uspRKGetCommission
+				INSERT INTO @tmpCommission
+				EXEC uspRKGetCommission @intBrokerageAccountId , @intFutureMarketId , @dtmTransactionDate , @intInstrumentTypeId 
+				
+
+				SELECT TOP 1
+					 @dblCommissionRate = dblCommissionRate
+					,@strCommissionRateType = strCommissionRateType
+					,@intBrokerageCommissionId = intBrokerageCommissionId
+				FROM @tmpCommission
+
 			
 				EXEC uspSMGetStartingNumber 45, @strInternalTradeNo OUTPUT
 			
@@ -358,7 +392,13 @@ BEGIN TRY
 					, intSubBookId
 					, dtmCreateDateTime
 					, dblSContractBalanceLots
-					, dblPContractBalanceLots)
+					, dblPContractBalanceLots
+					, intBrokerageCommissionId
+					, strCommissionRateType 
+					, dblBrokerageRate
+					, dblCommission
+					, ysnCommissionExempt
+					, ysnCommissionOverride)
 				SELECT @intInstrument
 					, intFutOptTransactionHeaderId
 					, intConcurrencyId
@@ -388,8 +428,17 @@ BEGIN TRY
 					, dtmCreateDateTime
 					, dblNoOfContract
 					, dblNoOfContract
+					, @intBrokerageCommissionId
+					, @strCommissionRateType
+					, @dblCommissionRate
+					, dblCommission = CASE WHEN ysnCommissionExempt = 1 THEN NULL WHEN ysnCommissionOverride = 1 THEN dblCommission ELSE (@dblCommissionRate * dblNoOfContract) * -1 END
+					, ysnCommissionExempt
+					, ysnCommissionOverride
 				FROM #temp 
 				WHERE strInternalTradeNo = @id
+
+
+				DELETE FROM @tmpCommission
 
 				
 				IF @ysnAllowDerivativeAssignToMultipleContracts = 0 
