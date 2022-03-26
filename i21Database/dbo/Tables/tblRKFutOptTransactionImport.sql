@@ -41,5 +41,8 @@
 	[dblFinanceForwardRate] decimal(24,10),
 	[strContractNumber] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[strContractSequence] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
-	[strAssignOrHedge] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
+	[strAssignOrHedge] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[ysnCommissionExempt] BIT,
+	[ysnCommissionOverride] BIT,
+	[dblCommission] DECIMAL(24, 10)
 )

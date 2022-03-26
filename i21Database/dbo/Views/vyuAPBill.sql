@@ -79,7 +79,12 @@ SELECT
 	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
 	A.ysnPrepayHasPayment,
-	A.intShipToId
+	A.intShipToId,
+	ISNULL(A.dblAverageExchangeRate, 1) dblAverageExchangeRate,
+	(A.dblTax * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END) AS dblTaxForeign,
+	(A.dblTotal * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END) AS dblTotalForeign,
+	(A.dblAmountDue * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END) AS dblAmountDueForeign,
+	(A.dblPayment * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN  -1 ELSE 1 END) AS dblPaymentForeign
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
