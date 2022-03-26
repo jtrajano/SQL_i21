@@ -2,7 +2,8 @@
 AS
 
 SELECT
-	APB.intBillId
+	 APBD.intBillDetailId
+	,APB.intBillId
 	,strVendorName =  E.strName
 	,strVendorNumber = E.strEntityNo
 	,strVendorFederalTaxId = E.strFederalTaxId 
@@ -39,10 +40,10 @@ SELECT
 	,APBD.dblTax
 	,APBD.dblQtyReceived
 	,strUnitOfMeasure = UM.strUnitMeasure
-	,dblPaymentAmount = payment.dblAmountPaid 
-	,dblNontaxablePurchase = 0
-	,dblTaxablePurchase = 0
-	,dblGross = APB.dblSubtotal
+	,dblPaymentAmount = ISNULL(payment.dblAmountPaid, 0.00)
+	,dblNontaxablePurchase = CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0.00 END
+	,dblTaxablePurchase = CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0.00 ELSE APBD.dblTotal END
+	,dblGross = APBD.dblTotal
 	,dblTaxRate = RT.dblRate
 	,ysnPaid = APB.ysnPaid
 	,strCheckNumber = payment.strPaymentInfo
@@ -62,7 +63,7 @@ INNER JOIN (
     SELECT
          APBDT.intBillDetailId
         ,APBDT.intTaxGroupId
-		, APBDT.strCalculationMethod
+		,APBDT.strCalculationMethod
         ,STC.strTaxCode
 		,STC.strTaxAgency
 		,STC.strDescription
@@ -93,7 +94,7 @@ OUTER APPLY(
     FROM tblAPPayment B1
 	INNER JOIN tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId  
 	LEFT JOIN tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId   
-	WHERE B.intBillId = B.intBillId
+	WHERE B.intBillId = APB.intBillId
 	ORDER BY dtmDatePaid DESC
 ) payment
 OUTER APPLY (
