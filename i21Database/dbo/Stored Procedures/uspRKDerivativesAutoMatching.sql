@@ -23,9 +23,11 @@ DECLARE @tempOpenDerivativesForAutoMatching AS TABLE(
 	,strTransactionNo NVARCHAR(100)
 	,dtmTransactionDate DATETIME
 	,dblTotalLot NUMERIC(18,6)
-	,dblSelectedLot1 NUMERIC(18,6)
+	,dblFuturesMatchedLotBuy NUMERIC(18,6)
+	,dblFuturesMatchedLotSell NUMERIC(18,6)
 	,dblSelectedLotRoll NUMERIC(18,6)
-	,dblOptionsMatchedLot NUMERIC(18,6)
+	,dblOptionsMatchedLotBuy NUMERIC(18,6)
+	,dblOptionsMatchedLotSell NUMERIC(18,6)
 	,strBS NVARCHAR(1)
 	,strBuySell NVARCHAR(10)
 	,dblPrice NUMERIC(18,6)

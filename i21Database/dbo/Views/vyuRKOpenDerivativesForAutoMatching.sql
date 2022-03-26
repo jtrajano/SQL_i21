@@ -4,8 +4,11 @@ AS
 
 SELECT TOP 100 PERCENT *
 FROM (
-	SELECT dblBalanceLot = CASE WHEN intInstrumentTypeId = 1 THEN dblTotalLot-dblSelectedLot1 ELSE dblTotalLot - dblOptionsMatchedLot END
-		, dblTotalLot-dblSelectedLot1 AS dblBalanceLotRoll
+	SELECT 
+		dblBalanceLot = CASE WHEN intInstrumentTypeId = 1 THEN  CASE WHEN strBuySell = 'Buy' THEN  dblTotalLot - dblFuturesMatchedLotBuy ELSE   dblTotalLot - dblFuturesMatchedLotSell END
+							ELSE CASE WHEN strBuySell = 'Buy' THEN  dblTotalLot - dblOptionsMatchedLotBuy ELSE dblTotalLot - dblOptionsMatchedLotSell END 
+						END
+		, dblTotalLot - dblFuturesMatchedLotBuy AS dblBalanceLotRoll
 		, 0.0 as dblSelectedLot
 		, *
 	FROM (
@@ -19,7 +22,13 @@ FROM (
 					inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId
 					where A.strType = 'Realize'
 					Group By AD.intLFutOptTransactionId
-					Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLot1
+					Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblFuturesMatchedLotBuy
+			, IsNull((SELECT SUM (AD.dblMatchQty)
+					from tblRKMatchFuturesPSDetail AD
+					inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId
+					where A.strType = 'Realize'
+					Group By AD.intSFutOptTransactionId
+					Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)  As dblFuturesMatchedLotSell
 			, IsNull((SELECT SUM (AD.dblMatchQty)
 					from tblRKMatchFuturesPSDetail AD
 					inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId
@@ -28,9 +37,12 @@ FROM (
 					Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLotRoll
 			, IsNull((SELECT SUM (OM.dblMatchQty)
 					from tblRKOptionsMatchPnS OM
-					where OM.intLFutOptTransactionId = ot.intFutOptTransactionId
 					Group By OM.intLFutOptTransactionId
-					Having ot.intFutOptTransactionId = OM.intLFutOptTransactionId), 0)  As dblOptionsMatchedLot
+					Having ot.intFutOptTransactionId = OM.intLFutOptTransactionId), 0)  As dblOptionsMatchedLotBuy
+			, IsNull((SELECT SUM (OM.dblMatchQty)
+					from tblRKOptionsMatchPnS OM
+					Group By OM.intSFutOptTransactionId
+					Having ot.intFutOptTransactionId = OM.intSFutOptTransactionId), 0)  As dblOptionsMatchedLotSell
 			, CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBS
 			, strBuySell
 			, dblPrice as dblPrice
