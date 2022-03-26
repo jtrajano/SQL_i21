@@ -69,6 +69,7 @@ BEGIN TRY
 	/* Construct Receipt Staging Parameter */
 	INSERT INTO @ReceiptStagingTable (
 		[strReceiptType]
+		,[intTransferorId]
 		,[intEntityVendorId]
 		,[intShipFromId]
 		,[intLocationId]
@@ -104,7 +105,8 @@ BEGIN TRY
 		,[intLoadShipmentDetailId]
 		)
 	SELECT [strReceiptType] = 'Transfer Order'
-		,[intEntityVendorId] = LD.intVendorEntityId
+		,[intTransferorId] = LD.intPCompanyLocationId
+		,[intEntityVendorId] = NULL --LD.intVendorEntityId
 		,[intShipFromId] = LD.intPCompanyLocationId
 		,[intLocationId] = ISNULL(CLSL.intCompanyLocationId, LD.intSCompanyLocationId)
 		,[strBillOfLadding] = L.strBLNumber
@@ -120,15 +122,15 @@ BEGIN TRY
 		,[dblGross] = COALESCE(LD.dblGross, LDCL.dblLinkGrossWt, 0)
 		,[dblNet] = COALESCE(LD.dblNet, LDCL.dblLinkNetWt, 0)
 		,[dblCost] = COALESCE(Lot.dblLastCost, ItemPricing.dblLastCost)
-		,[intCostUOMId] = IRI.intCostUOMId
+		,[intCostUOMId] = StkUOM.intItemUOMId
 		,[intCurrencyId] = @DefaultCurrencyId
 		,[dblExchangeRate] = 1
-		,[intLotId] = NULL --LDL.intLotId
+		,[intLotId] = NULL
 		,[intSubLocationId] = ISNULL(LW.intSubLocationId, LD.intSSubLocationId)
 		,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, LD.intSStorageLocationId)
 		,[ysnIsStorage] = 0
 		,[intSourceId] = LD.intLoadDetailId
-		,[intSourceType] = 1 --TEMPORARY Source Type for Transfer Shipment
+		,[intSourceType] = 0 --TEMPORARY Source Type for Transfer Shipment
 		,[strSourceId] = L.strLoadNumber
 		,[strSourceScreenName] = 'Load Shipment/Schedule'
 		,[intContainerId] = ISNULL(LC.intLoadContainerId, -1)
@@ -149,14 +151,12 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = LD.intItemId
 			AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(LD.intItemId, LD.intPCompanyLocationId)
-		LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = Lot.intLotId
-		LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
-		LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId) LCUOM
+		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND ysnStockUOM = 1) StkUOM
 	WHERE L.intLoadId = @intLoadId
 		AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
 						INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-						WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 1) --TEMPORARY Source Type for Transfer Shipment
+						WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 0) --TEMPORARY Source Type for Transfer Shipment
 	ORDER BY LDCL.intLoadDetailContainerLinkId
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM @ReceiptStagingTable)
@@ -270,6 +270,8 @@ BEGIN TRY
 		[intLotId]
 		,[strLotNumber]
 		,[strLotAlias]
+		,[intParentLotId]
+		,[strParentLotNumber]
 		,[intSubLocationId]
 		,[intStorageLocationId]
 		,[intContractHeaderId] 
@@ -299,6 +301,8 @@ BEGIN TRY
 	SELECT DISTINCT [intLotId] = LDL.intNewLotId
 		,[strLotNumber] = CASE WHEN ISNULL(LDL.strNewLotNumber, '') <> '' THEN LDL.strNewLotNumber ELSE Lot.strLotNumber END
 		,[strLotAlias] = Lot.strLotAlias
+		,[intParentLotId] = Lot.intParentLotId
+		,[strParentLotNumber] = PLot.strParentLotNumber
 		,[intSubLocationId] = ISNULL(LW.intSubLocationId, LD.intSSubLocationId)
 		,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, LD.intSStorageLocationId)
 		,[intContractHeaderId] = NULL
@@ -312,13 +316,13 @@ BEGIN TRY
 		,[intSort] = ISNULL(LC.intLoadContainerId,0)
 		,[strMarkings] = LC.strMarks
 		,[strCondition] = Lot.strCondition
-		,[intEntityVendorId] = LD.intVendorEntityId
+		,[intEntityVendorId] = NULL --LD.intVendorEntityId
 		,[strReceiptType] = 'Transfer Order'
 		,[intLocationId] = ISNULL(CLSL.intCompanyLocationId, LD.intSCompanyLocationId)
 		,[intShipViaId] = ISNULL(LW.intHaulerEntityId, L.intHaulerEntityId)
 		,[intShipFromId] = LD.intPCompanyLocationId
 		,[intCurrencyId] = @DefaultCurrencyId
-		,[intSourceType] =  1 --TEMPORARY Source Type for Transfer Shipment
+		,[intSourceType] =  0 --TEMPORARY Source Type for Transfer Shipment
 		,[strBillOfLadding] = L.strBLNumber
 		,[strCertificate] = Lot.strCertificate
 		,[intProducerId] = Lot.intProducerId
@@ -328,6 +332,7 @@ BEGIN TRY
 		JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblICParentLot PLot ON PLot.intParentLotId = Lot.intParentLotId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN tblLGLoadWarehouse LW ON LD.intLoadId = LW.intLoadId
