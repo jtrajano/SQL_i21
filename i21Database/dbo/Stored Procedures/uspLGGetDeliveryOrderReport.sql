@@ -124,6 +124,7 @@ BEGIN
 		  ,dtmApprovalDate = SMPL.dtmTestingEndDate
 		  ,dtmFreeTimeExpires = DATEADD(DD, ISNULL(SCH.intClaimValidTill, 0), LW.dtmDeliveryDate)
 		  ,dtmDODate = LW.dtmDeliveryDate
+		  ,L.dtmScheduledDate
 		  ,strBuyersPONo = SCH.strCustomerContract
 		  ,strSalesContractNo = SCH.strContractNumber + ' / ' + LTRIM(SCH.intContractSeq)
 		  ,strSalesContractNoDashSeq = SCH.strContractNumber + '-' + LTRIM(SCH.intContractSeq)
@@ -153,6 +154,8 @@ BEGIN
 		  ,strUserFullName = @strUserFullName
 		  ,strUserEmailId = @strUserEmailId
 		  ,strUserPhoneNo = @strUserPhoneNo
+		  ,LD.dtmDeliveryFrom
+		  ,LD.dtmDeliveryTo
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
