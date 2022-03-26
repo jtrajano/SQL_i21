@@ -336,26 +336,33 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 				  AND I.intInvoiceId = @intInvoiceId
 				  AND CREDITS.dblAppliedPayment <> CREDITS.dblAmountDue
 				  AND I.dblInvoiceTotal <> I.dblAppliedPayment
-				 
-				UPDATE P
-				SET dblPayment = 0
-				FROM @tblPaymentEntries P
-				WHERE P.intInvoiceId NOT IN (
-					SELECT intInvoiceId
-					FROM 
-					(
-						SELECT 
-							 intInvoiceId
-							,SUM(dblPayment) OVER(ORDER BY intInvoiceId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS dblPaymentTotal
-						FROM  @tblPaymentEntries
-					) T
-					WHERE T.dblPaymentTotal <= @dblAmountDue
-				)
 
 				UPDATE P
 				SET dblAppliedPayment = E.dblPayment
 				FROM #AAPPREPAIDS P
 				INNER JOIN @tblPaymentEntries E ON P.intInvoiceId = E.intInvoiceId
+
+				DECLARE @queryRows AS NVARCHAR(MAX) = '
+					UPDATE PP
+					SET dblAppliedPayment = 0
+					FROM #AAPPREPAIDS PP
+					WHERE PP.intInvoiceId NOT IN (
+						SELECT intInvoiceId
+						FROM 
+						(
+							SELECT 
+								 intInvoiceId
+								,SUM(dblAppliedPayment) OVER(ORDER BY intInvoiceId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS dbldblAppliedPaymentTotal
+							FROM  #AAPPREPAIDS
+						) T
+						WHERE T.dbldblAppliedPaymentTotal <= ' + CAST(@dblAmountDue AS NVARCHAR(MAX)) + '
+					)
+				'
+				EXEC sp_executesql @queryRows
+
+
+				DELETE FROM @tblPaymentEntries
+				WHERE intInvoiceId IN (SELECT intInvoiceId FROM #AAPPREPAIDS WHERE dblAppliedPayment = 0)
 
 				UPDATE I
 				SET dblAppliedPayment = E.dblPayment
@@ -431,6 +438,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
                     , ysnPost                       = 1
                 FROM #AAPINVOICES I
                 WHERE I.intInvoiceId = @intInvoiceId
+
+				select 789,* from #AAPINVOICES
             END
 
 		IF NOT EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment)
