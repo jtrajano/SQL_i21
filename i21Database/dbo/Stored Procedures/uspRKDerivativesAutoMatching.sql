@@ -85,7 +85,8 @@ DECLARE @tempMatchDerivativeHeader AS TABLE (
 )
 
 DECLARE @tempMatchDerivativesDetail AS TABLE (
-	dblMatchQty NUMERIC(18,6)
+	intId INT NOT NULL IDENTITY(1,1)
+	,dblMatchQty NUMERIC(18,6)
 	,dblFutCommission NUMERIC(18,6)
 	,intLFutOptTransactionId INT
 	,intSFutOptTransactionId INT
@@ -239,13 +240,13 @@ BEGIN
 
 					
 								--Loop thru Sells
-								WHILE EXISTS(SELECT TOP 1 * FROM #tempSellForMatching)
+								WHILE EXISTS(SELECT TOP 1 * FROM #tempSellForMatching) AND @dblBuyLot > 0
 								BEGIN
 
-									IF @dblBuyLot < 1
-									BEGIN
-										BREAK
-									END
+									--IF @dblBuyLot < 1
+									--BEGIN
+									--	BREAK
+									--END
 
 									SELECT TOP 1 
 										@dblSellLot = dblBalanceLot
@@ -254,12 +255,12 @@ BEGIN
 									FROM #tempSellForMatching 
 									ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
-									IF @dblSellLot < 1
-									BEGIN
-										BREAK
-									END
+									--IF @dblSellLot < 1
+									--BEGIN
+									--	BREAK
+									--END
 
-									IF @dblBuyLot <= @dblSellLot
+									IF @dblBuyLot <= @dblSellLot AND @dblSellLot > 0
 									BEGIN
 										INSERT INTO @tempMatchDerivativesDetail(
 											dblMatchQty
@@ -283,7 +284,7 @@ BEGIN
 										BREAK
 									END
 
-									IF @dblBuyLot > @dblSellLot
+									IF @dblBuyLot > @dblSellLot AND @dblSellLot > 0
 									BEGIN
 
 										INSERT INTO @tempMatchDerivativesDetail(
@@ -515,7 +516,7 @@ BEGIN
 
 					
 											--Loop thru Sells
-											WHILE EXISTS(SELECT TOP 1 * FROM #tempSellForMatchingOptions)
+											WHILE EXISTS(SELECT TOP 1 * FROM #tempSellForMatchingOptions) AND @dblBuyLotOptions > 0
 											BEGIN
 
 												SELECT TOP 1 
@@ -524,7 +525,7 @@ BEGIN
 												FROM #tempSellForMatchingOptions 
 												ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
-												IF @dblBuyLotOptions  <= @dblSellLotOptions 
+												IF @dblBuyLotOptions  <= @dblSellLotOptions AND @dblSellLotOptions > 0
 												BEGIN
 													INSERT INTO @tempMatchDerivativesDetail(
 														dblMatchQty
@@ -542,7 +543,7 @@ BEGIN
 													BREAK
 												END
 
-												IF @dblBuyLotOptions  > @dblSellLotOptions 
+												IF @dblBuyLotOptions  > @dblSellLotOptions AND @dblSellLotOptions > 0
 												BEGIN
 
 													INSERT INTO @tempMatchDerivativesDetail(
@@ -595,7 +596,7 @@ BEGIN
 											, strMatchingType
 											, intConcurrencyId)
 										SELECT @intOptionsMatchPnSHeaderId 
-											, @strTranNo + ROW_NUMBER() OVER (ORDER BY intLFutOptTransactionId)
+											, @strTranNo + ROW_NUMBER() OVER (ORDER BY intId)
 											, dtmMatchedDate
 											, dblMatchQty
 											, intLFutOptTransactionId
@@ -611,10 +612,16 @@ BEGIN
 
 										SELECT TOP 1 @strTranNoLast = ISNULL(strTranNo, 0) FROM tblRKOptionsMatchPnS ORDER BY intMatchOptionsPnSId DESC
 
-										
-										INSERT INTO @tempResult
-										SELECT 'Auto-Matching of Options created Trans No. ' + CAST(@strTranNo + 1 AS NVARCHAR(50)) + ' to ' + @strTranNoLast, 2
-							
+										IF CAST(@strTranNo + 1 AS NVARCHAR(50)) = @strTranNoLast
+										BEGIN
+											INSERT INTO @tempResult
+											SELECT 'Auto-Matching of Options created Trans No. ' +  @strTranNoLast, 2
+										END
+										ELSE
+										BEGIN
+											INSERT INTO @tempResult
+											SELECT 'Auto-Matching of Options created Trans No. ' + CAST(@strTranNo + 1 AS NVARCHAR(50)) + ' to ' + @strTranNoLast, 2
+										END
 										--For debugging
 										--SELECT * FROM @tempMatchDerivativesDetail
 
