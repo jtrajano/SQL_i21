@@ -66,7 +66,7 @@ BEGIN
 			,@DueToAccountId	INT
 			,@DueFromAccountId  INT
 	SELECT TOP 1
-		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 THEN 1 ELSE 0 END
+		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END
 		, @DueToAccountId	= ISNULL([intDueToAccountId], 0)
 		, @DueFromAccountId = ISNULL([intDueFromAccountId], 0)
 	FROM tblAPCompanyPreference
