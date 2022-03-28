@@ -171,6 +171,11 @@ BEGIN TRY
 	--INSERT TO TRANSACTION LINKS
 	EXEC dbo.[uspARInsertInvoiceTransactionLink] @InvoiceIds
 
+	IF @FromPosting = 0
+	BEGIN
+		EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete
+	END
+
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
 	IF @intTranCount = 0

@@ -567,7 +567,13 @@ SELECT A.[intTransactionId], A.[intInvoiceId], A.[dblBaseAmountPaid], A.[strTran
 FROM #ARPostPaymentDetail A 
 
 EXEC dbo.uspARPaymentIntegration @InvoiceId, @Post, @PaymentStaging
-EXEC dbo.uspARProcessTradeFinanceLog @PaymentStaging, @UserId, @Post
+
+
+INSERT INTO @InvoiceId(intHeaderId) 
+SELECT intHeaderId = intInvoiceId
+FROM @PaymentStaging
+
+EXEC dbo.uspARProcessTradeFinanceLog @InvoiceId, @UserId, 'Payment'
 
 IF @Post = 0
 	BEGIN			
