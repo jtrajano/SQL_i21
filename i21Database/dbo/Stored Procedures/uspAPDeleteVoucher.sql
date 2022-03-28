@@ -131,7 +131,7 @@ BEGIN TRY
 		EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
 	END
 
-	EXEC uspAPAddTransactionLinks 1, @intBillId, 2
+	EXEC uspAPAddTransactionLinks 1, @intBillId, 2, @UserId
 	
 	--UPDATE PO STATUS
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPurchaseId')) DROP TABLE #tmpPurchaseId

@@ -683,7 +683,7 @@ BEGIN TRY
 
 	CLOSE c; DEALLOCATE c;
 
-	EXEC uspAPAddTransactionLinks 1, @createdVouchersId, 1
+	EXEC uspAPAddTransactionLinks 1, @createdVouchersId, 1, @userId
 
 	IF @transCount = 0 COMMIT TRANSACTION;
 
