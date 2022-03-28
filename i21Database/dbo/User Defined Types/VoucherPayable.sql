@@ -47,6 +47,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[strBillOfLading]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strCheckComment]				NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[intAPAccount]					INT NULL, --if null, we will use default setup
+	[intComputeTotalOption] 		TINYINT NOT NULL DEFAULT(0),
 	/*Detail info*/
 	[strMiscDescription]			NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId]						INT NULL,

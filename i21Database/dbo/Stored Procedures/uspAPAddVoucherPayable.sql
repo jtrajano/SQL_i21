@@ -278,6 +278,7 @@ BEGIN
 			,[intLineNo]						=	A.intLineNo
 			,[intBookId]						=	A.intBookId
 			,[intSubBookId]						=	A.intSubBookId
+			,[intComputeTotalOption]			=	A.intComputeTotalOption
 			,[intPayFromBankAccountId]			=	A.intPayFromBankAccountId
 			,[strPayFromBankAccount]			=	bankAccount.strBankAccountNo
 		FROM @voucherPayable A
@@ -410,6 +411,7 @@ BEGIN
 		,[strSubLocationName]
 		,[intBookId]
 		,[intSubBookId]
+		,[intComputeTotalOption]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
 	)
@@ -502,6 +504,7 @@ BEGIN
 		,[strSubLocationName]
 		,[intBookId]
 		,[intSubBookId]
+		,[intComputeTotalOption]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
 	)
