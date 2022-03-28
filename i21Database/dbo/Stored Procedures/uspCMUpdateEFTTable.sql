@@ -18,7 +18,7 @@ BEGIN
 
    
     ;WITH TransIds AS(
-    SELECT  CAST(Item AS INT) intTransactionId FROM dbo.fnSplitString(@intTransactionId, ',')
+    SELECT  CAST(Item AS INT) intTransactionId FROM dbo.fnSplitString(@intTransactionIds, ',')
     )
     INSERT INTO @tbl(intTransactionId,ysnGenerated)
     SELECT A.intTransactionId,0 FROM TransIds A LEFT JOIN
@@ -30,7 +30,7 @@ BEGIN
    
    IF EXISTS (SELECT 1 FROM tblCMEFTNumbers WHERE intBankAccountId =@intBankAccountId)
    BEGIN
-      SELECT @intEFTNextNo = MAX(intEFTNextNo) FROM tblCMEFTNumber WHERE intBankAccountId = @intBankAccountId 
+      SELECT @intEFTNextNo = MAX(intEFTNoId) FROM tblCMEFTNumbers WHERE intBankAccountId = @intBankAccountId 
       SET @intEFTNextNo = @intEFTNextNo +1
    END
    ELSE
@@ -42,7 +42,7 @@ BEGIN
     BEGIN
 
         SELECT TOP 1 @intTransactionId = intTransactionId FROM @tbl
-        INSERT INTO tblCMEFTNumber (intTransactionId, intBankAccountId,intEFTNoId)
+        INSERT INTO tblCMEFTNumbers (intTransactionId, intBankAccountId,intEFTNoId)
             SELECT intTransactionId , @intBankAccountId, @intEFTNextNo from @tbl WHERE  intTransactionId = @intTransactionId
         
         SELECT @intEFTNextNo = @intEFTNextNo +1
@@ -58,12 +58,12 @@ BEGIN
         FROM
         tblCMUndepositedFund A JOIN @tbl B ON A.intUndepositedFundId = B.intTransactionId
         WHERE ISNULL(strReferenceNo,'') = ''
-        AND ysnGenerated = 1
+        AND B.ysnGenerated = 1
          
     ELSE
 
         UPDATE A SET strReferenceNo = CAST(B.intEFTNoId AS NVARCHAR(30)) FROM tblCMBankTransaction A JOIN  @tbl B ON A.intTransactionId = B.intTransactionId
-        WHERE ysnGenerated = 1
+        WHERE B.ysnGenerated = 1
    
 
 
