@@ -4,6 +4,7 @@ BEGIN
 	PRINT 'EXECUTE'
 	
 	UPDATE tblSTTranslogRebates SET strTrlDeptNumber = CAST(intTrlDeptNumber AS NVARCHAR)
+	WHERE strTrlDeptNumber = NULL
 
 END
 PRINT 'Done tblSTTranslogRebates for intTrlDeptNumber'
