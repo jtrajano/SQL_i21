@@ -14,6 +14,8 @@ DECLARE @transCount INT = @@TRANCOUNT;
 DECLARE @posted BIT;
 DECLARE @shipToId INT;
 DECLARE @detailTotal DECIMAL(18,2);
+DECLARE @qty DECIMAL(38,15);
+DECLARE @unitQty DECIMAL(38,02);
 
 IF @transCount = 0 BEGIN TRANSACTION
 
