@@ -121,7 +121,7 @@ BEGIN TRY
 		,intPartyEntityId = WCD.intPartyEntityId
 		,dblNetShippedWeight = WCD.dblFromNet
 		,dblWeightLoss = ABS(WCD.dblWeightLoss)
-		,dblNetWeight = WCD.dblToNet
+		,dblNetWeight = CASE WHEN (strCondition = 'Missing') THEN WCD.dblFromNet ELSE WCD.dblToNet END
 		,dblFranchiseWeight = CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END
 		,dblQtyReceived = (ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END)
 		,dblCost = WCD.dblUnitPrice
@@ -162,7 +162,6 @@ BEGIN TRY
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
 		AND ISNULL(WCD.dblClaimAmount, 0) > 0
-		AND ISNULL(WCD.strCondition, '') <> 'Missing'
 	UNION
 	/* Missing/Damaged/Reconditioned */
 	SELECT intWeightClaimId = WC.intWeightClaimId
