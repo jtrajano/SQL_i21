@@ -1034,6 +1034,7 @@
     <Build Include="dbo\Functions\fnGetItemTotalValueFromTransactions.sql" />
     <Build Include="dbo\Functions\fnCalculateAverageCost.sql" />
     <Build Include="dbo\Tables\tblSTStore.sql" />
+    <Build Include="dbo\Tables\tblSTGenerateVendorRebateHistory.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
