@@ -51,7 +51,7 @@ SET ANSI_WARNINGS OFF
 	--INVENTORY
 	UPDATE LIA
 	SET LIA.[intAccountId]			= IA.[intSalesAccountId]
-	  , LIA.[intSalesAccountId]		= CASE WHEN ARID.[strTransactionType] = 'Debit Memo' OR ARID.[ysnAllowSingleLocationEntries] = 0 THEN ARID.[intSalesAccountId] ELSE IA.[intSalesAccountId] END
+	  , LIA.[intSalesAccountId]		= CASE WHEN ARID.[strTransactionType] = 'Debit Memo' OR ARID.[ysnAllowIntraEntries] = 1 THEN ARID.[intSalesAccountId] ELSE IA.[intSalesAccountId] END
 	  , LIA.[intCOGSAccountId]		= IA.[intCOGSAccountId]
 	  , LIA.[intInventoryAccountId]	= IA.[intInventoryAccountId]
 	FROM @LineItemAccounts LIA
