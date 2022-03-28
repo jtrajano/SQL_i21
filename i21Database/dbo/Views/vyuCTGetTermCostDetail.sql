@@ -13,6 +13,7 @@ SELECT tc.intTermCostId
 	, strDestinationTerm = DestinationTerm.strFreightTerm
 	, tc.intMarketZoneId
 	, strMarketZone = mz.strMarketZoneCode
+	, tcd.intTermCostDetailId
 	, tcd.intCostId
 	, strCostItem = it.strItemNo
 	, tcd.strCostMethod

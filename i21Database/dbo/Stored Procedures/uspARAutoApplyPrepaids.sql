@@ -172,9 +172,10 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #AAPPREPAIDS)
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 	BEGIN
-		DECLARE @intInvoiceId	INT
+		DECLARE  @intInvoiceId	INT
+				,@dblAmountDue	NUMERIC(18, 6)
 
-		SELECT TOP 1 @intInvoiceId = intInvoiceId
+		SELECT TOP 1 @intInvoiceId = intInvoiceId, @dblAmountDue = dblAmountDue
 		FROM #AAPINVOICES
 		WHERE ysnProcessed = 0
 
@@ -236,15 +237,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 		FROM #AAPINVOICES I
 		INNER JOIN (
 			SELECT P.*
-				 , TOTALS.dblTotal dblRunningTotal
+				 , dblRunningTotal = SUM(P.dblAmountDue - dblAppliedPayment) OVER (ORDER BY P.dtmPostDate, P.intInvoiceId)
 			FROM #AAPPREPAIDS P
-			OUTER APPLY (  
-				SELECT  
-						SUM( PREPAIDS.dblAmountDue - PREPAIDS.dblAppliedPayment ) dblTotal
-				FROM #AAPPREPAIDS PREPAIDS 
-				WHERE PREPAIDS.intInvoiceId = P.intInvoiceId 
-					  AND PREPAIDS.dblAppliedPayment <> PREPAIDS.dblAmountDue
-			) TOTALS
 			WHERE P.dblAppliedPayment <> P.dblAmountDue
 		) CREDITS
 		ON CREDITS.intEntityCustomerId = I.intEntityCustomerId
@@ -278,7 +272,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 			GROUP BY intSourceId
 		) E
 		WHERE I.intInvoiceId = @intInvoiceId
-
+		
 		--INSERT CREDITS IF HAS AVAILABLE AND INVOICE AMOUNT DUE IS NOT YET ZERO
 		IF EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment) AND EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE dblInvoiceTotal <> dblAppliedPayment)
 			BEGIN
@@ -347,6 +341,28 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 				SET dblAppliedPayment = E.dblPayment
 				FROM #AAPPREPAIDS P
 				INNER JOIN @tblPaymentEntries E ON P.intInvoiceId = E.intInvoiceId
+
+				DECLARE @queryRows AS NVARCHAR(MAX) = '
+					UPDATE PP
+					SET dblAppliedPayment = 0
+					FROM #AAPPREPAIDS PP
+					WHERE PP.intInvoiceId NOT IN (
+						SELECT intInvoiceId
+						FROM 
+						(
+							SELECT 
+								 intInvoiceId
+								,SUM(dblAppliedPayment) OVER(ORDER BY intInvoiceId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS dbldblAppliedPaymentTotal
+							FROM  #AAPPREPAIDS
+						) T
+						WHERE T.dbldblAppliedPaymentTotal <= ' + CAST(@dblAmountDue AS NVARCHAR(MAX)) + '
+					)
+				'
+				EXEC sp_executesql @queryRows
+
+
+				DELETE FROM @tblPaymentEntries
+				WHERE intInvoiceId IN (SELECT intInvoiceId FROM #AAPPREPAIDS WHERE dblAppliedPayment = 0)
 
 				UPDATE I
 				SET dblAppliedPayment = E.dblPayment
@@ -422,6 +438,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
                     , ysnPost                       = 1
                 FROM #AAPINVOICES I
                 WHERE I.intInvoiceId = @intInvoiceId
+
+				select 789,* from #AAPINVOICES
             END
 
 		IF NOT EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment)

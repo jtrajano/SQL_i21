@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCancelPayables]
 	@payableIds NVARCHAR(4000),
 	@userId AS INT,
-	@billsCreated NVARCHAR(MAX) OUTPUT
+	@billsCreated NVARCHAR(4000) OUTPUT
 AS
 
 BEGIN  
@@ -14,10 +14,78 @@ BEGIN
 		DECLARE @transCount INT = @@TRANCOUNT; 
 		IF @transCount = 0 BEGIN TRANSACTION;
 
-		--DO LOGICS
+		IF NULLIF(@payableIds, '') IS NULL
+		BEGIN
+			RAISERROR('No payable/s to cancel.', 16, 1);
+			RETURN;
+		END
 
+		DECLARE @payableId Id
+		INSERT INTO @payableId
+		SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@payableIds)
+		DECLARE @cancelledPayable Id
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblAPVoucherPayable VP INNER JOIN @payableId P ON P.intId = VP.intVoucherPayableId WHERE dblQuantityToBill < 0)
+		BEGIN
+			RAISERROR('Cancelling negative quantity to bill is not supported.', 16, 1);
+			RETURN;
+		END
+
+		DECLARE @postingResult BIT;
+		DECLARE @postingBatchId NVARCHAR(1000);
+		DECLARE @postingError NVARCHAR(1000);
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM @payableId)
+		BEGIN
+			DECLARE @stringId NVARCHAR(10);
+			DECLARE @createdBillId INT;
+			DECLARE @createdDebitMemoId INT;
+			DECLARE @debitMemoId Id;
+
+			--GET FIRST PAYABLE
+			DECLARE @voucherPayableId INT
+			SELECT TOP 1 @voucherPayableId = intId FROM @payableId
+
+			--CREATE VOUCHER
+			EXEC uspAPCreateVoucherForPendingPayable @payableId = @voucherPayableId, @userId = @userId, @billCreated = @stringId OUT
+			SELECT TOP 1 @createdBillId = intID FROM dbo.fnGetRowsFromDelimitedValues(@stringId)
+			UPDATE tblAPBill SET strVendorOrderNumber = strBillId WHERE intBillId = @createdBillId
+
+			--CREATE DEBIT MEMO
+			EXEC uspAPDuplicateBill @billId = @createdBillId, @userId = @userId, @reset = 0, @type = 3, @billCreatedId = @createdDebitMemoId OUT
+			INSERT INTO @debitMemoId VALUES(@createdDebitMemoId)
+
+			--POST DEBIT MEMO
+			EXEC uspAPPostBill @post = 1, @recap = 0, @isBatch = 0, @param = @createdDebitMemoId, @userId = @userId, @success = @postingResult OUT, @batchIdUsed = @postingBatchId OUT
+			-- IF @postingResult = 0
+			-- BEGIN
+			-- 	SELECT TOP 1 @postingError = strMessage FROM tblAPPostResult WHERE strBatchNumber = @postingBatchId
+			-- 	RAISERROR(@postingError, 16, 1);
+			-- END
+			
+			IF  @postingResult = 1
+			BEGIN
+				--APPLY DEBIT MEMO
+				EXEC uspAPApplyPrepaid @billId = @createdBillId, @prepaidIds = @debitMemoId	
+
+				--POST VOUCHER
+				EXEC uspAPPostBill @post = 1, @recap = 0, @isBatch = 0, @param = @createdBillId, @userId = @userId, @success = @postingResult OUT, @batchIdUsed = @postingBatchId OUT
+				-- IF @postingResult = 0
+				-- BEGIN
+				-- 	SELECT TOP 1 @postingError = strMessage FROM tblAPPostResult WHERE strBatchNumber = @postingBatchId
+				-- 	RAISERROR(@postingError, 16, 1);
+				-- END
+			END
+
+			--RECORD THE CANCELLED PAYABLE
+			INSERT INTO @cancelledPayable VALUES(@createdBillId)
+
+			--DELETE FIRST PAYABLE
+			DELETE FROM @payableId WHERE intId = @voucherPayableId
+		END
+
+		SELECT @billsCreated = COALESCE(@billsCreated + '|^|', '') + CONVERT(NVARCHAR(10), intId) FROM @cancelledPayable ORDER BY intId
 		IF @transCount = 0 COMMIT TRANSACTION;
-	
 	END TRY  
 	BEGIN CATCH  
 		DECLARE @ErrorSeverity INT,  

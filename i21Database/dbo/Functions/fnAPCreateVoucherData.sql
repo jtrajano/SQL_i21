@@ -48,6 +48,7 @@ RETURNS @returntable TABLE
 	[intPayFromBankAccountId]		INT NULL,
 	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intPayToBankAccountId]		INT NULL,
 	--Trade Finance Info
 	[strFinanceTradeNo] 				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intBankId] 						INT NULL,
@@ -163,6 +164,7 @@ BEGIN
 		[intPayFromBankAccountId],
 		[strFinancingSourcedFrom],
 		[strFinancingTransactionNumber]		,
+		[intPayToBankAccountId]				,
 		[strFinanceTradeNo]					,
 		[intBankId]							,
 		[intBankAccountId]					,
@@ -266,8 +268,8 @@ BEGIN
 												END
 										END 
 									END,
-		[strFinancingTransactionNumber] = A.strFinancingTransactionNumber,
-		
+		[strFinancingTransactionNumber] 	= A.strFinancingTransactionNumber,
+		[intPayToBankAccountId]				= EFT.intEntityEFTInfoId,
 		[strFinanceTradeNo]					= A.strFinanceTradeNo,
 		[intBankId]							= A.intBankId,
 		[intBankAccountId]					= A.intBankAccountId,
@@ -288,8 +290,9 @@ BEGIN
 	LEFT JOIN tblSMCompanyLocation payableLoc ON A.intLocationId = payableLoc.intCompanyLocationId
 	LEFT JOIN tblSMUserSecurity userData ON userData.intEntityId = @userId
 	LEFT JOIN tblSMCompanyLocation userCompLoc ON userData.intCompanyLocationId = userCompLoc.intCompanyLocationId
-	LEFT JOIN tblSMCurrency subCur ON subCur.intMainCurrencyId = A.intCurrencyId AND subCur.ysnSubCurrency = 1
-	LEFT JOIN tblAPDefaultPayFromBankAccount payFrom ON payFrom.intCurrencyId = A.intCurrencyId
+	LEFT JOIN tblSMCurrency subCur ON subCur.intMainCurrencyId = ISNULL(A.intCurrencyId, vendor.intCurrencyId) AND subCur.ysnSubCurrency = 1
+	LEFT JOIN tblAPDefaultPayFromBankAccount payFrom ON payFrom.intCurrencyId = ISNULL(A.intCurrencyId, vendor.intCurrencyId)
+	LEFT JOIN vyuAPEntityEFTInformation EFT ON EFT.intEntityId = vendor.intEntityId AND EFT.intCurrencyId = ISNULL(A.intCurrencyId, vendor.intCurrencyId) AND EFT.ysnDefaultAccount = 1
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM (

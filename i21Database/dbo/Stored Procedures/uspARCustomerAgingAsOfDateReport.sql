@@ -55,7 +55,7 @@ SET @dtmDateToLocal					= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDat
 SET @strReportLogId					= NULLIF(@strReportLogId, CAST(NEWID() AS NVARCHAR(100)))
 
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 

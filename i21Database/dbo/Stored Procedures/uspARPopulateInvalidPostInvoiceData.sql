@@ -2014,7 +2014,7 @@ BEGIN
 		AND GLASM.intAccountId = I.[intSalesAccountId]
 	) GLSEGMENT
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
-	AND I.[ysnAllowSingleLocationEntries] = 0
+	AND I.[ysnAllowIntraEntries] = 1
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
@@ -2052,7 +2052,7 @@ BEGIN
 		AND GLASM.intAccountId = I.[intAccountId]
 	) GLSEGMENT
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
-	AND I.[ysnAllowSingleLocationEntries] = 0
+	AND I.[ysnAllowIntraEntries] = 1
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
@@ -2073,7 +2073,7 @@ BEGIN
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'Sales and AR Account should have the same location segment.'
 	FROM ##ARPostInvoiceDetail I
-	WHERE I.[ysnAllowSingleLocationEntries] = 1
+	WHERE I.[ysnAllowIntraEntries] = 0
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 END
 

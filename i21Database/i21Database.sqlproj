@@ -589,6 +589,7 @@
     <Build Include="dbo\Views\vyuCMDerivativesForCommissionPosting.sql" />
     <Build Include="dbo\User Defined Types\PostCommissionDerivativeEntryTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdatePostedDerivativeEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateEFTTable.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDScheduleDetail.sql" />
     <Build Include="dbo\Tables\tblICWarrantStatus.sql" />
@@ -748,6 +749,7 @@
     <Build Include="dbo\Tables\tblCMCreditCardBatchEntryDetail.sql" />
     <Build Include="dbo\Tables\tblCMCurrentBankReconciliation.sql" />
     <Build Include="dbo\Tables\tblCMEFTACHAudit.sql" />
+    <Build Include="dbo\Tables\tblCMEFTNumbers.sql" />
     <Build Include="dbo\Tables\tblCMUndepositedFund.sql" />
     <Build Include="dbo\Tables\tblCMResponsiblePartyMatching.sql" />
     <Build Include="dbo\Tables\tblCMResponsiblePartyMatchingBDEP.sql" />
@@ -1389,6 +1391,7 @@
     <Build Include="dbo\Functions\fnGetItemTotalValueFromTransactions.sql" />
     <Build Include="dbo\Functions\fnCalculateAverageCost.sql" />
     <Build Include="dbo\Tables\tblSTStore.sql" />
+    <Build Include="dbo\Tables\tblSTGenerateVendorRebateHistory.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />

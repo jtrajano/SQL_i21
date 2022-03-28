@@ -25,8 +25,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--UPDATE DETAIL TOTAL
 	UPDATE A
 		SET --A.dblTotal = CAST((A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL (18,2)) 
-			@detailTotal					=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL--C.intTransactionType = 11
+		@qty							=	CASE WHEN A.intComputeTotalOption = 0
+											THEN (CASE WHEN A.dblNetWeight != 0 THEN A.dblNetWeight ELSE A.dblQtyReceived END)
+											ELSE A.dblQtyReceived END,
+		@unitQty						=	CASE WHEN A.intComputeTotalOption = 0
+											THEN (CASE WHEN A.dblNetWeight != 0 THEN A.dblWeightUnitQty ELSE A.dblUnitQty END)
+											ELSE A.dblUnitQty END,
+		@detailTotal					=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL--C.intTransactionType = 11
 											THEN 
+												--WEIGHT CLAIM ALWAYS USE THE QTY RECEIVED BECAUSE THAT IS THE CLAIM QTY CREATED BY LG, NET WEIGHT IS JUST FOR DISPLAY
 												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN
 													CAST((A.dblQtyReceived) *  (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
@@ -35,20 +42,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 												END),0)
 											ELSE
 												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
-												THEN (CASE 
-														WHEN A.intWeightUOMId > 0 
-															THEN CAST(A.dblCost / ISNULL(C.intSubCurrencyCents,1)  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
-														WHEN (A.intUnitOfMeasureId > 0 AND A.intCostUOMId > 0)
-															THEN CAST((A.dblQtyReceived) *  (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-														ELSE CAST((A.dblQtyReceived) * (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
-													END)
-												ELSE (CASE 
-														WHEN A.intWeightUOMId > 0 --CHECK IF SUB-CURRENCY
-															THEN CAST(A.dblCost  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
-														WHEN (A.intUnitOfMeasureId > 0 AND A.intCostUOMId > 0)
-															THEN CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-														ELSE CAST((A.dblQtyReceived) * (A.dblCost)  AS DECIMAL(18,2))  --Orig Calculation
-													END)
+												THEN (
+													CAST(A.dblCost / ISNULL(C.intSubCurrencyCents,1)  * @qty * @unitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2))
+												)
+												ELSE (
+													CAST(A.dblCost  * @qty * @unitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+												)
 												END),0)
 											END,	
 			[dblTotal]					=	@detailTotal,
@@ -88,11 +87,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,A.dblSubtotal = CAST((DetailTotal.dblTotal)  AS DECIMAL(18,2)) 
 		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
 		,A.dblTax = DetailTotal.dblTotalTax
-		,A.dblAverageExchangeRate = DetailTotal.dblTotalUSD
+		,A.dblAverageExchangeRate = DetailTotal.dblAverageExchangeRate
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM ((dblTotal + dblTax) * dblRate) dblTotalUSD FROM tblAPBillDetail C WHERE C.intBillId = B.intId
+		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM(((dblTotal + dblTax) * dblRate) / (dblTotal + dblTax)) dblAverageExchangeRate FROM tblAPBillDetail C WHERE C.intBillId = B.intId
 	) DetailTotal
 	WHERE DetailTotal.dblTotal IS NOT NULL
 

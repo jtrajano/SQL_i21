@@ -1045,7 +1045,7 @@ AS
  		, pContract.strPurchaseCurrency
  		, dblPurchaseLots = ISNULL(pContract.dblPurchaseLots, @dblZero)
  		, dblPHedgedLots = ISNULL(pHedge.dblHedgedLots, @dblZero)
- 		, dblPExposed = ISNULL((pContract.dblPurchaseLots - pHedge.dblHedgedLots), @dblZero)
+ 		, dblPExposed = ISNULL((ISNULL(pContract.dblPurchaseLots, @dblZero) - ISNULL(pHedge.dblHedgedLots, @dblZero)), @dblZero)
  		, strBuyVessel = pShipment.strFVessel
  		, pShipment.strShipmentStatus
  		, strPLoadNumber = pShipment.strLoadNumber
@@ -1092,7 +1092,7 @@ AS
  		, dtmSaleInvoiceDueDate = sInvoice.dtmInvoiceDueDate
  		, dblSaleLots = ISNULL(sContract.dblSaleLots, @dblZero)
  		, dblSaleHedgedLots = ISNULL(sHedge.dblHedgedLots, @dblZero)
- 		, dblSaleExposed = ISNULL((sContract.dblSaleLots - sHedge.dblHedgedLots), @dblZero)
+ 		, dblSaleExposed = ISNULL((ISNULL(sContract.dblSaleLots, @dblZero) - ISNULL(sHedge.dblHedgedLots, @dblZero)), @dblZero)
  		, strSaleHedgeMonth = sHedge.strFutureMonth
 
  		-- Financing columns

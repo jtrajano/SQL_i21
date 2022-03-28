@@ -47,6 +47,7 @@ DECLARE	@DiscountAccountId          INT
        ,@OneHundredDecimal          DECIMAL(18,6)
        ,@Param2                     NVARCHAR(MAX)
 	   ,@Precision					INT = 2
+       ,@AllowIntraEntries          BIT
 
 SET @ZeroDecimal = 0.000000
 SET @OneDecimal = 1.000000
@@ -59,6 +60,7 @@ SELECT TOP 1
     ,@DeferredRevenueAccountId  = [intDeferredRevenueAccountId]
 	,@ImpactForProvisional      = ISNULL([ysnImpactForProvisional], @ZeroBit)
     ,@ExcludeInvoiceFromPayment = ISNULL([ysnExcludePaymentInFinalInvoice], @ZeroBit)
+    ,@AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 THEN 1 ELSE 0 END
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId 
 
@@ -230,7 +232,7 @@ INSERT ##ARPostInvoiceHeader WITH (TABLOCK)
     ,[ysnInterCompany]
     ,[intInterCompanyVendorId]
 	,[strBOLNumber]
-    ,[ysnAllowSingleLocationEntries]
+    ,[ysnAllowIntraEntries]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -315,16 +317,12 @@ SELECT
     ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 	,[strBOLNumber]						= ARI.[strBOLNumber]
-    ,[ysnAllowSingleLocationEntries]    = ARCP.[ysnAllowSingleLocationEntries]
+    ,[ysnAllowIntraEntries]             = @AllowIntraEntries
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN tblEMEntity EM ON ARC.intEntityId = EM.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-OUTER APPLY (
-	SELECT TOP 1 [ysnAllowSingleLocationEntries]
-	FROM tblARCompanyPreference
-) ARCP
 
 UPDATE ##ARPostInvoiceHeader
 SET ysnIsInvoicePositive = CAST(0 AS BIT)  
@@ -488,7 +486,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]
     ,[strDescription]
 	,[strBOLNumber]
-    ,[ysnAllowSingleLocationEntries]
+    ,[ysnAllowIntraEntries]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -639,7 +637,7 @@ SELECT
     ,[ysnBlended]                       = ARID.[ysnBlended]
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
 	,[strBOLNumber]						= ARI.strBOLNumber
-    ,[ysnAllowSingleLocationEntries]    = ARI.[ysnAllowSingleLocationEntries]
+    ,[ysnAllowIntraEntries]             = @AllowIntraEntries
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -810,7 +808,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
-    ,[ysnAllowSingleLocationEntries]
+    ,[ysnAllowIntraEntries]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1021,7 +1019,7 @@ SELECT
     ,[ysnBlended]                       = ARID.[ysnBlended]    
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
-    ,[ysnAllowSingleLocationEntries]    = ARI.[ysnAllowSingleLocationEntries]
+    ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1180,7 +1178,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
-    ,[ysnAllowSingleLocationEntries]
+    ,[ysnAllowIntraEntries]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1327,7 +1325,7 @@ SELECT
     ,[ysnBlended]                       = @ZeroBit
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
-    ,[ysnAllowSingleLocationEntries]    = ARI.[ysnAllowSingleLocationEntries]
+    ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
