@@ -156,7 +156,7 @@ FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId DESC
 
 --COMPANY INFO
-SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 		   , @strCompanyName		= strCompanyName
 		   , @strPhone				= strPhone
 		   , @strEmail				= strEmail
@@ -168,7 +168,7 @@ SELECT intCompanyLocationId		= L.intCompanyLocationId
 	 , strLocationName			= L.strLocationName
 	 , strUseLocationAddress	= ISNULL(L.strUseLocationAddress, 'No')
 	 , strInvoiceComments		= L.strInvoiceComments
-	 , strFullAddress			= L.strAddress + CHAR(13) + char(10) + L.strCity + ', ' + L.strStateProvince + ', ' + L.strZipPostalCode + ', ' + L.strCountry 
+	 , strFullAddress			= L.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(L.strCity, ''), '') + ISNULL(', ' + NULLIF(L.strStateProvince, ''), '') + ISNULL(', ' + NULLIF(L.strZipPostalCode, ''), '') + ISNULL(', ' + NULLIF(L.strCountry, ''), '')
 INTO #LOCATIONS
 FROM tblSMCompanyLocation L
 
@@ -311,8 +311,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strCurrency				= CURRENCY.strCurrency	 	 
 	 , strInvoiceNumber			= INV.strInvoiceNumber
 	 , strBillToLocationName	= INV.strBillToLocationName
-	 , strBillTo				= ISNULL(RTRIM(ENTITYLOCATION.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(', ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(', ' + INV.strBillToCountry), '')
-	 , strShipTo				= ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(INV.strShipToCity), '') + ISNULL(RTRIM(', ' + INV.strShipToState), '') + ISNULL(RTRIM(', ' + INV.strShipToZipCode), '') + ISNULL(RTRIM(', ' + INV.strShipToCountry), '')	 
+	 , strBillTo				= ISNULL(RTRIM(ENTITYLOCATION.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + CHAR(10), '')	+ ISNULL(NULLIF(INV.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToState, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToCountry, ''), '')
+	 , strShipTo				= ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + CHAR(10), '') + ISNULL(NULLIF(INV.strShipToCity, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToState, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToZipCode, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToCountry, ''), '')	 
 	 , strSalespersonName		= SALESPERSON.strName
 	 , strPONumber				= INV.strPONumber
 	 , strBOLNumber				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
