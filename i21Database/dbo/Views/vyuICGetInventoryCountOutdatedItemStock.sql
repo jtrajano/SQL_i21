@@ -97,8 +97,16 @@ FROM
 			WHERE 
 				ss.intItemId = cd.intItemId
 				AND ss.intItemLocationId = cd.intItemLocationId
-				AND (ss.intSubLocationId = cd.intSubLocationId OR NULLIF(cd.intSubLocationId, 0) IS NULL) 
-				AND (ss.intStorageLocationId = cd.intStorageLocationId OR NULLIF(cd.intSubLocationId, 0) IS NULL) 
+				--AND (ss.intSubLocationId = cd.intSubLocationId OR NULLIF(cd.intSubLocationId, 0) IS NULL) 
+				--AND (ss.intStorageLocationId = cd.intStorageLocationId OR NULLIF(cd.intSubLocationId, 0) IS NULL) 
+				AND (
+					ss.intSubLocationId = cd.intSubLocationId 
+					OR (ss.intSubLocationId IS NULL AND NULLIF(cd.intSubLocationId, 0) IS NULL)					
+				)
+				AND (
+					ss.intStorageLocationId = cd.intStorageLocationId 
+					OR (ss.intStorageLocationId IS NULL AND NULLIF(cd.intStorageLocationId, 0) IS NULL) 
+				)
 				AND FLOOR(CAST(ss.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 				AND i.strLotTracking = 'No'
 			GROUP BY 
