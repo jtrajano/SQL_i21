@@ -159,7 +159,7 @@ FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId DESC
 
 --COMPANY INFO
-SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(ISNULL(strCity, ''), '') + ISNULL(', ' + ISNULL(strState, ''), '') + ISNULL(', ' + ISNULL(strZip, ''), '') + ISNULL(', ' + ISNULL(strCountry, ''), '')
+SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 		   , @strCompanyName		= strCompanyName
 		   , @strPhone				= strPhone
 		   , @strEmail				= strEmail
