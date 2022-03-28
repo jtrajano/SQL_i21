@@ -62,7 +62,7 @@ SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 --GET COMPANY DETAILS
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
+		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '') + CHAR(13) + CHAR(10) + strPhone
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -369,7 +369,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @intEntityUserId			= @intEntityUserI
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry
+SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
   , strSalesPersonName	= SP.strName
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1

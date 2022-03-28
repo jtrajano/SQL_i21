@@ -69,7 +69,7 @@ SET @strReportCommentLocal				= NULLIF(@strReportComment, '')
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -296,7 +296,7 @@ INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress	= EL.strAddress + CHAR(13) + char(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry 
+SET strFullAddress	= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 
