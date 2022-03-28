@@ -402,7 +402,7 @@ END
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress  = LTRIM(RTRIM(EL.strAddress)) + CHAR(13) + CHAR(10) + ISNULL(NULLIF(LTRIM(RTRIM(EL.strCity)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strState)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strZipCode)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strCountry)), ''), '')
+SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 
