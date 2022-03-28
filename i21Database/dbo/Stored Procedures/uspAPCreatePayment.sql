@@ -517,5 +517,5 @@ BEGIN
 	,@entityId = @userId											-- Entity Id
 	,@actionType = 'Created'										-- Action Type
 
-	EXEC uspAPAddTransactionLinks 2, @createdPaymentId, 1
+	EXEC uspAPAddTransactionLinks 2, @createdPaymentId, 1, @userId
 END
