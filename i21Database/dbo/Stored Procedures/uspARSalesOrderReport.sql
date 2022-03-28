@@ -165,7 +165,7 @@ ELSE
 	END
 
 --COMPANY INFO
-SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 		   , @strCompanyName		= strCompanyName
 		   , @strPhone				= strPhone
 		   , @strEmail				= strEmail
@@ -184,7 +184,7 @@ ORDER BY U.intAttachmentId DESC
 SELECT intCompanyLocationId		= L.intCompanyLocationId
 	 , strLocationName			= L.strLocationName
 	 , strUseLocationAddress	= ISNULL(L.strUseLocationAddress, 'No')
-	 , strFullAddress			= L.strAddress + CHAR(13) + char(10) + L.strCity + ', ' + L.strStateProvince + ', ' + L.strZipPostalCode + ', ' + L.strCountry 
+	 , strFullAddress			= L.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(L.strCity, ''), '') + ISNULL(', ' + NULLIF(L.strStateProvince, ''), '') + ISNULL(', ' + NULLIF(L.strZipPostalCode, ''), '') + ISNULL(', ' + NULLIF(L.strCountry, ''), '')
 INTO #LOCATIONS
 FROM tblSMCompanyLocation L
 
