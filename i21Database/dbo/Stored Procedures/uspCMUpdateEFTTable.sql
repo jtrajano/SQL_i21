@@ -23,7 +23,8 @@ BEGIN
     INSERT INTO @tbl(intTransactionId,ysnGenerated)
     SELECT A.intTransactionId,0 FROM TransIds A LEFT JOIN
         tblCMEFTNumbers B ON B.intTransactionId = A.intTransactionId
-        WHERE B.intTransactionId IS NULL
+        AND B.strProcessType = @strProcessType
+        WHERE B.intTransactionId IS NULL 
 
     
 
@@ -42,12 +43,14 @@ BEGIN
     BEGIN
 
         SELECT TOP 1 @intTransactionId = intTransactionId FROM @tbl
-        INSERT INTO tblCMEFTNumbers (intTransactionId, intBankAccountId,intEFTNoId)
-            SELECT intTransactionId , @intBankAccountId, @intEFTNextNo from @tbl WHERE  intTransactionId = @intTransactionId
+        INSERT INTO tblCMEFTNumbers (intTransactionId, intBankAccountId,intEFTNoId, strProcessType)
+            SELECT intTransactionId , @intBankAccountId, @intEFTNextNo, @strProcessType from @tbl WHERE  intTransactionId = @intTransactionId
         
-        SELECT @intEFTNextNo = @intEFTNextNo +1
+       
 
-        UPDATE @tbl SET ysnGenerated = 1 WHERE intTransactionId = @intTransactionId
+        UPDATE @tbl SET ysnGenerated = 1, intEFTNoId = @intEFTNextNo WHERE intTransactionId = @intTransactionId
+
+         SELECT @intEFTNextNo = @intEFTNextNo +1
 
     END
 
