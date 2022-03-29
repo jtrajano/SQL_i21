@@ -613,6 +613,9 @@
     <Build Include="dbo\Tables\tblCTTermCostDetail.sql" />
     <Build Include="dbo\Views\vyuCTGetTermCost.sql" />
     <Build Include="dbo\Views\vyuCTGetTermCostDetail.sql" />
+    <Build Include="dbo\Tables\tblICLotRejected.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRejectLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICMoveRejectLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

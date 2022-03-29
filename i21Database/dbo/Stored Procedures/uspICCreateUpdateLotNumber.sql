@@ -126,6 +126,8 @@ DECLARE
 	,@dblTare AS NUMERIC(38,20) 
 	,@dblTarePerQty AS NUMERIC(38,20) 
 
+	,@ysnRejected BIT 
+
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
 		,@intEntityProducerId AS INT 
@@ -707,11 +709,12 @@ BEGIN
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
-		-- Get Date Created from Source Lot
-		SELECT @dtmCreatedDate = Lot.dtmDateCreated
+		-- Get Date Created and Rejected Status from Source Lot
+		SELECT 
+				@dtmCreatedDate = Lot.dtmDateCreated
+				,@ysnRejected = Lot.ysnRejected
 		FROM	dbo.tblICLot Lot
 		WHERE	Lot.intLotId = @intSplitFromLotId
-
 
 		-- Get the Lot id or insert a new record on the Lot master table. 
 		MERGE	
@@ -1205,6 +1208,11 @@ BEGIN
 					,@intParentLotId
 					,@strParentLotNumber
 			WHERE ISNULL(@intLotId, 0) <> 0 
+		END 
+
+		-- Update the rejected lot
+		BEGIN 
+			EXEC uspICMoveRejectLot @intSplitFromLotId, @intInsertedLotId
 		END 
 	END 
 

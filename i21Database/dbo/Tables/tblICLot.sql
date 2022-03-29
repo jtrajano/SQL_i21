@@ -97,6 +97,8 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[ysnWeighed]				BIT DEFAULT((0)),
 		[strSealNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnInsuranceClaimed]		BIT NULL DEFAULT(0),
+		[ysnRejected]				BIT NULL DEFAULT(0),
+		[strRejectedBy]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 	
 		[intConcurrencyId]			INT NULL DEFAULT ((1)),
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
