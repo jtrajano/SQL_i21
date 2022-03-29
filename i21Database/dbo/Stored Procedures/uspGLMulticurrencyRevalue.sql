@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspGLMulticurrencyRevalue]
-@strModule NVARCHAR(5),
+@strModule NVARCHAR(20),
 @dtmDate DATETIME 
 AS
 
