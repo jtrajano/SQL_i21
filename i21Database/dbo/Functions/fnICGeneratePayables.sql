@@ -98,6 +98,23 @@ RETURNS @table TABLE
 , [intLoadShipmentCostId]			INT NULL	
 , [intBookId]						INT NULL
 , [intSubBookId]					INT NULL
+
+/*Payment Info*/
+, [intPayFromBankAccountId]			INT NULL --DEFAULT PAY FROM BANK ACCOUNT
+, [strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --MODULE OR PROCESS WHERE THE INFORMATION CAME FROM E.G. LOGISTICS
+, [strFinancingTransactionNumber]	NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --TRANSACTION WHERE THE INFORMATION CAME FORM E.G. LS-0001
+/*Trade Finance Info*/
+, [strFinanceTradeNo]				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --TRANSACTION NUMBER
+, [intBankId]						INT NULL --BANK NAME
+, [intBankAccountId]				INT NULL --BANK ACCOUNT NO.
+, [intBorrowingFacilityId]			INT NULL --FACILITY
+, [strBankReferenceNo]				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --BANK REFERENCE NO.
+, [intBorrowingFacilityLimitId]		INT NULL --LIMIT
+, [intBorrowingFacilityLimitDetailId] INT NULL --SUBLIMIT
+, [strReferenceNo]					NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --BANK TRADE REFERENCE NO.
+, [intBankValuationRuleId]			INT NULL --OVERRIDE FACILITY VALUATION
+, [strComments]						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --COMMENTS
+
 )
 AS
 BEGIN
@@ -337,6 +354,21 @@ SELECT DISTINCT
 	,[intBookId] = A.intBookId
 	,[intSubBookId] = A.intSubBookId
 
+	/*Payment Info*/
+	, [intPayFromBankAccountId]		= A.intBankAccountId
+	, [strFinancingSourcedFrom] 	= 'Inventory Receipt'
+	, [strFinancingTransactionNumber] = A.strReceiptNumber 
+	/*Trade Finance Info*/
+	, [strFinanceTradeNo]			= A.strTradeFinanceNumber
+	, [intBankId]					= A.intBankId 
+	, [intBankAccountId]			= A.intBankAccountId 
+	, [intBorrowingFacilityId]		= A.intBorrowingFacilityId
+	, [strBankReferenceNo]			= A.strBankReferenceNo
+	, [intBorrowingFacilityLimitId]	= A.intLimitTypeId
+	, [intBorrowingFacilityLimitDetailId] = A.intSublimitTypeId
+	, [strReferenceNo]					= A.strBankReferenceNo
+	, [intBankValuationRuleId]			= A.intOverrideFacilityValuation
+	, [strComments]						= A.strComments
 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C 
@@ -776,6 +808,21 @@ SELECT DISTINCT
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
 		,[intBookId]								= A.intBookId
 		,[intSubBookId]								= A.intSubBookId
+		/*Payment Info*/
+		, [intPayFromBankAccountId]		= A.[intPayFromBankAccountId]
+		, [strFinancingSourcedFrom] 	= A.[strFinancingSourcedFrom]
+		, [strFinancingTransactionNumber] = A.[strFinancingTransactionNumber] 
+		/*Trade Finance Info*/
+		, [strFinanceTradeNo]			= A.[strFinanceTradeNo]
+		, [intBankId]					= A.[intBankId] 
+		, [intBankAccountId]			= A.[intBankAccountId] 
+		, [intBorrowingFacilityId]		= A.[intBorrowingFacilityId]
+		, [strBankReferenceNo]			= A.[strBankReferenceNo]
+		, [intBorrowingFacilityLimitId]	= A.[intBorrowingFacilityLimitId]
+		, [intBorrowingFacilityLimitDetailId] = A.[intBorrowingFacilityLimitDetailId]
+		, [strReferenceNo]					= A.[strReferenceNo]
+		, [intBankValuationRuleId]			= A.[intBankValuationRuleId]
+		, [strComments]						= A.[strComments]
 FROM 
 	[vyuICChargesForBilling] A
 	INNER JOIN (

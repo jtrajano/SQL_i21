@@ -152,61 +152,91 @@ BEGIN
 				,[ysnReturn]
 				,[intBookId]
 				,[intSubBookId]
-		)
-		SELECT 
-			[intEntityVendorId]			
-			,[intTransactionType]
-			,[intLocationId]	
-			,[intShipToId] = NULL	
-			,[intShipFromId] = NULL	 		
-			,[intShipFromEntityId] = NULL
-			,[intPayToAddressId] = NULL
-			,[intCurrencyId]					
-			,[dtmDate]				
-			,[strVendorOrderNumber]		
-			,[strReference]						
-			,[strSourceNumber]					
-			,[intPurchaseDetailId]				
-			,[intContractHeaderId]				
-			,[intContractDetailId]				
-			,[intContractSeqId] = intContractSequence					
-			,[intScaleTicketId]					
-			,[intInventoryReceiptItemId]		
-			,[intInventoryReceiptChargeId]		
-			,[intInventoryShipmentItemId]		
-			,[intInventoryShipmentChargeId]		
-			,[intLoadShipmentId] = NULL				
-			,[intLoadShipmentDetailId] = NULL			
-			,[intItemId]						
-			,[intPurchaseTaxGroupId]			
-			,[strMiscDescription]				
-			,[dblOrderQty]						
-			,[dblOrderUnitQty] = 0.00					
-			,[intOrderUOMId] = NULL	 				
-			,[dblQuantityToBill]			
-			,[dblQtyToBillUnitQty]				
-			,[intQtyToBillUOMId]				
-			,[dblCost] = dblUnitCost							
-			,ISNULL([dblCostUnitQty], 1) 
-			,[intCostUOMId]						
-			,[dblNetWeight]						
-			,ISNULL([dblWeightUnitQty], 1) 
-			,[intWeightUOMId]					
-			,[intCostCurrencyId]
-			,[dblTax]							
-			,[dblDiscount]
-			,[intCurrencyExchangeRateTypeId]	
-			,[dblExchangeRate] = dblRate					
-			,[ysnSubCurrency]					
-			,[intSubCurrencyCents]				
-			,[intAccountId]						
-			,[intShipViaId]						
-			,[intTermId]						
-			,[strBillOfLading]					
-			,[ysnReturn]	 
-			,[intBookId]
-			,[intSubBookId]
-		FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1)
+				/*Payment Info*/
+				, [intPayFromBankAccountId]
+				, [strFinancingSourcedFrom]
+				, [strFinancingTransactionNumber]
+				/*Trade Finance Info*/
+				, [strFinanceTradeNo]
+				, [intBankId]
+				, [intBankAccountId]
+				, [intBorrowingFacilityId]
+				, [strBankReferenceNo]
+				, [intBorrowingFacilityLimitId]
+				, [intBorrowingFacilityLimitDetailId]
+				, [strReferenceNo]
+				, [intBankValuationRuleId]
+				, [strComments]
+			)
+			SELECT 
+				[intEntityVendorId]			
+				,[intTransactionType]
+				,[intLocationId]	
+				,[intShipToId] = NULL	
+				,[intShipFromId] = NULL	 		
+				,[intShipFromEntityId] = NULL
+				,[intPayToAddressId] = NULL
+				,[intCurrencyId]					
+				,[dtmDate]				
+				,[strVendorOrderNumber]		
+				,[strReference]						
+				,[strSourceNumber]					
+				,[intPurchaseDetailId]				
+				,[intContractHeaderId]				
+				,[intContractDetailId]				
+				,[intContractSeqId] = intContractSequence					
+				,[intScaleTicketId]					
+				,[intInventoryReceiptItemId]		
+				,[intInventoryReceiptChargeId]		
+				,[intInventoryShipmentItemId]		
+				,[intInventoryShipmentChargeId]		
+				,[intLoadShipmentId] = NULL				
+				,[intLoadShipmentDetailId] = NULL			
+				,[intItemId]						
+				,[intPurchaseTaxGroupId]			
+				,[strMiscDescription]				
+				,[dblOrderQty]						
+				,[dblOrderUnitQty] = 0.00					
+				,[intOrderUOMId] = NULL	 				
+				,[dblQuantityToBill]			
+				,[dblQtyToBillUnitQty]				
+				,[intQtyToBillUOMId]				
+				,[dblCost] = dblUnitCost							
+				,ISNULL([dblCostUnitQty], 1) 
+				,[intCostUOMId]						
+				,[dblNetWeight]						
+				,ISNULL([dblWeightUnitQty], 1) 
+				,[intWeightUOMId]					
+				,[intCostCurrencyId]
+				,[dblTax]							
+				,[dblDiscount]
+				,[intCurrencyExchangeRateTypeId]	
+				,[dblExchangeRate] = dblRate					
+				,[ysnSubCurrency]					
+				,[intSubCurrencyCents]				
+				,[intAccountId]						
+				,[intShipViaId]						
+				,[intTermId]						
+				,[strBillOfLading]					
+				,[ysnReturn]	 
+				,[intBookId]
+				,[intSubBookId]
+				/*Payment Info*/
+				, [intPayFromBankAccountId]
+				, [strFinancingSourcedFrom]
+				, [strFinancingTransactionNumber]
+				/*Trade Finance Info*/
+				, [strFinanceTradeNo]
+				, [intBankId]
+				, [intBankAccountId]
+				, [intBorrowingFacilityId]
+				, [strBankReferenceNo]
+				, [intBorrowingFacilityLimitId]
+				, [intBorrowingFacilityLimitDetailId]
+				, [strReferenceNo]
+				, [intBankValuationRuleId]
+				, [strComments]
+			FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1)
 
 		END 
 

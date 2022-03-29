@@ -137,6 +137,21 @@ BEGIN
 			,[intSubLocationId]
 			,[intBookId]
 			,[intSubBookId]
+			/*Payment Info*/
+			, [intPayFromBankAccountId]
+			, [strFinancingSourcedFrom]
+			, [strFinancingTransactionNumber]
+			/*Trade Finance Info*/
+			, [strFinanceTradeNo]
+			, [intBankId]
+			, [intBankAccountId]
+			, [intBorrowingFacilityId]
+			, [strBankReferenceNo]
+			, [intBorrowingFacilityLimitId]
+			, [intBorrowingFacilityLimitDetailId]
+			, [strReferenceNo]
+			, [intBankValuationRuleId]
+			, [strComments]
 	)
 	SELECT 
 		GP.[intEntityVendorId]
@@ -196,6 +211,21 @@ BEGIN
 		,GP.intSubLocationId
 		,GP.intBookId
 		,GP.intSubBookId
+		/*Payment Info*/
+		, [intPayFromBankAccountId]
+		, [strFinancingSourcedFrom]
+		, [strFinancingTransactionNumber]
+		/*Trade Finance Info*/
+		, [strFinanceTradeNo]
+		, [intBankId]
+		, [intBankAccountId]
+		, [intBorrowingFacilityId]
+		, [strBankReferenceNo]
+		, [intBorrowingFacilityLimitId]
+		, [intBorrowingFacilityLimitDetailId]
+		, [strReferenceNo]
+		, [intBankValuationRuleId]
+		, [strComments]
 	FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1) GP
 
 	END 

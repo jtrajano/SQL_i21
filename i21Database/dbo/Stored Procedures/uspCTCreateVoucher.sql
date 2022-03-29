@@ -631,7 +631,22 @@ begin try
 					,[strBillOfLading]					
 					,[ysnReturn]
 					,[ysnStage]
-					,[dblRatio]			
+					,[dblRatio]
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]					
 				)
 				EXEC uspICGetProRatedReceiptCharges
 					@intInventoryReceiptItemId = @intInventoryReceiptItemId

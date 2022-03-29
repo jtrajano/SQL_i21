@@ -74,6 +74,21 @@ SET ANSI_WARNINGS ON
 			,[ysnReturn]
 			,[intBookId]
 			,[intSubBookId]
+			/*Payment Info*/
+			, [intPayFromBankAccountId]
+			, [strFinancingSourcedFrom]
+			, [strFinancingTransactionNumber]
+			/*Trade Finance Info*/
+			, [strFinanceTradeNo]
+			, [intBankId]
+			, [intBankAccountId]
+			, [intBorrowingFacilityId]
+			, [strBankReferenceNo]
+			, [intBorrowingFacilityLimitId]
+			, [intBorrowingFacilityLimitDetailId]
+			, [strReferenceNo]
+			, [intBankValuationRuleId]
+			, [strComments]
 		)
 		SELECT 
 			 GP.[intEntityVendorId]			
@@ -131,6 +146,21 @@ SET ANSI_WARNINGS ON
 			,GP.[ysnReturn]	 
 			,GP.[intBookId]
 			,GP.[intSubBookId]
+			/*Payment Info*/
+			, [intPayFromBankAccountId]
+			, [strFinancingSourcedFrom]
+			, [strFinancingTransactionNumber]
+			/*Trade Finance Info*/
+			, [strFinanceTradeNo]
+			, [intBankId]
+			, [intBankAccountId]
+			, [intBorrowingFacilityId]
+			, [strBankReferenceNo]
+			, [intBorrowingFacilityLimitId]
+			, [intBorrowingFacilityLimitDetailId]
+			, [strReferenceNo]
+			, [intBankValuationRuleId]
+			, [strComments]
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
 	END
 	

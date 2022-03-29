@@ -221,6 +221,21 @@ BEGIN
 		,[ysnReturn]
 		,[ysnStage]
 		,[dblRatio]
+		/*Payment Info*/
+		, [intPayFromBankAccountId]
+		, [strFinancingSourcedFrom]
+		, [strFinancingTransactionNumber]
+		/*Trade Finance Info*/
+		, [strFinanceTradeNo]
+		, [intBankId]
+		, [intBankAccountId]
+		, [intBorrowingFacilityId]
+		, [strBankReferenceNo]
+		, [intBorrowingFacilityLimitId]
+		, [intBorrowingFacilityLimitDetailId]
+		, [strReferenceNo]
+		, [intBankValuationRuleId]
+		, [strComments]
 	)
 	SELECT
 		[intEntityVendorId]	= A.intEntityVendorId
@@ -360,6 +375,21 @@ BEGIN
 		,ysnStage = 
 			CASE WHEN hasExistingPayable.intVoucherPayableId IS NOT NULL THEN 1 ELSE 0 END 
 		,dblRatio = @dblRatio
+		/*Payment Info*/
+		, A.[intPayFromBankAccountId]
+		, A.[strFinancingSourcedFrom]
+		, A.[strFinancingTransactionNumber]
+		/*Trade Finance Info*/
+		, A.[strFinanceTradeNo]
+		, A.[intBankId]
+		, A.[intBankAccountId]
+		, A.[intBorrowingFacilityId]
+		, A.[strBankReferenceNo]
+		, A.[intBorrowingFacilityLimitId]
+		, A.[intBorrowingFacilityLimitDetailId]
+		, A.[strReferenceNo]
+		, A.[intBankValuationRuleId]
+		, A.[strComments]
 	FROM 
 		vyuICChargesForBilling A 
 		INNER JOIN tblICInventoryReceipt r
@@ -463,5 +493,20 @@ SELECT
 	,[ysnReturn]
 	,[ysnStage]
 	,[dblRatio]
+	/*Payment Info*/
+	, [intPayFromBankAccountId]
+	, [strFinancingSourcedFrom]
+	, [strFinancingTransactionNumber]
+	/*Trade Finance Info*/
+	, [strFinanceTradeNo]
+	, [intBankId]
+	, [intBankAccountId]
+	, [intBorrowingFacilityId]
+	, [strBankReferenceNo]
+	, [intBorrowingFacilityLimitId]
+	, [intBorrowingFacilityLimitDetailId]
+	, [strReferenceNo]
+	, [intBankValuationRuleId]
+	, [strComments]
 FROM 
 	@voucherPayable
