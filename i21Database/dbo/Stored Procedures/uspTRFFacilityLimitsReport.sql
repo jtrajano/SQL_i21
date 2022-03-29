@@ -67,6 +67,8 @@ AS
  		DROP TABLE #tempFacilityInfo
  	IF OBJECT_ID('tempdb..#tempTradeLogContracts') IS NOT NULL
  		DROP TABLE #tempTradeLogContracts
+ 	IF OBJECT_ID('tempdb..#tempPurchaseContracts') IS NOT NULL
+ 		DROP TABLE #tempPurchaseContracts
  	IF OBJECT_ID('tempdb..#tempPurchaseContractInfo') IS NOT NULL
  		DROP TABLE #tempPurchaseContractInfo
  	IF OBJECT_ID('tempdb..#tempContractCommodity') IS NOT NULL
@@ -139,7 +141,7 @@ AS
 
 
  	-- Get All Contracts and filter by facility and transaction date
- 	SELECT  
+ 	SELECT  DISTINCT
  		  intContractHeaderId
  		, intContractDetailId
  	INTO #tempTradeLogContracts
@@ -250,6 +252,7 @@ AS
 		, dblSublimit = latestLog.dblSublimit
 		, strBankValuationRule = valRule.strBankValuationRule
 		, intBankValuationRuleId = valRule.intBankValuationRuleId
+		, intUnitMeasureId = ctd.intPriceItemUOMId
  	INTO #tempPurchaseContracts
  	FROM tblCTContractDetail ctd
  	JOIN tblCTContractHeader cth
@@ -298,7 +301,7 @@ AS
  		, strLimit = tempLogCT.strLimit
  		, dblLimitAmount = tempLogCT.dblLimit
  		, strReference = tempLogCT.strTradeFinanceTransaction
- 		, strPContractBankRef = ctd.strBankReferenceNo
+ 		, strPContractBankRef = ctd.strReferenceNo
  		, dtmTransactionDate = tempLogCT.dtmOpened
  		, dtmMaturityDate = tempLogCT.dtmMaturity
  		, cth.intCommodityId
@@ -582,7 +585,7 @@ AS
  	LEFT JOIN vyuLGLoadViewSearch loadView
  		ON loadView.intLoadId = shipmentDetail.intLoadId
  	WHERE shipmentDetail.intPContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
-
+	AND shipment.intShipmentType = 1 -- SHIPMENT
 	
  	SELECT * 
  	INTO #tempVoucher
@@ -636,15 +639,11 @@ AS
  		, intTicketId = intSourceId
  		, receiptItem.intInventoryReceiptItemId
  		, receipt.intInventoryReceiptId
- 		, ysnHasVoucher = CAST(CASE WHEN EXISTS (SELECT TOP 1 '' FROM #tempVoucher tempV WHERE tempV.intContractDetailId = intContractDetailId)
- 			THEN 1 ELSE 0 END AS BIT)
- 		, ysnHasVoucherPayment = CAST(CASE WHEN EXISTS (SELECT TOP 1 '' FROM #tempVoucherPayment tempV WHERE tempV.intContractDetailId = intContractDetailId)
- 			THEN 1 ELSE 0 END AS BIT)
  	INTO #tempReceiptInfo
  	FROM tblICInventoryReceiptItem receiptItem
  	JOIN tblICInventoryReceipt receipt
  		ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
- 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
+ 	WHERE receiptItem.intContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
 
 	
  	-- Get Purchase Contract Voucher
@@ -664,11 +663,10 @@ AS
  	FROM vyuICGetInventoryReceiptVoucher voucher
  	JOIN tblAPBill bill
  	ON bill.intBillId = voucher.intBillId
- 	WHERE voucher.intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM #tempReceiptInfo WHERE ysnHasVoucher = 1)
 
 
  	-- Get Purchase Contract's Allocated Sale Contract
- 	SELECT intPContractDetailId
+ 	SELECT DISTINCT intPContractDetailId
  		, intSContractDetailId
  	INTO #tempContractPair
  	FROM tblLGAllocationDetail allocation
@@ -718,8 +716,11 @@ AS
  	FROM tblCTContractDetail ctd
  	JOIN tblCTContractHeader cth
  		ON cth.intContractHeaderId = ctd.intContractHeaderId
- 	JOIN #tempSaleHedgeInfo saleHedgeInfo
- 		ON saleHedgeInfo.intContractDetailId = ctd.intContractDetailId
+	OUTER APPLY (
+		SELECT TOP 1 * 
+		FROM #tempSaleHedgeInfo sHedgeInfo
+		WHERE sHedgeInfo.intContractDetailId = ctd.intContractDetailId
+	) saleHedgeInfo
  	LEFT JOIN tblICCommodity commodity
  		ON commodity.intCommodityId = cth.intCommodityId
  	LEFT JOIN tblICItem item
@@ -738,6 +739,8 @@ AS
  		ON supplier.intEntityId = cth.intEntityId
  	LEFT JOIN tblSMTerm term
  		ON term.intTermID = cth.intTermId
+	WHERE ctd.intContractDetailId IN (SELECT intSContractDetailId FROM #tempContractPair)
+	AND cth.intContractTypeId = 2 -- SALE CONTRACTS ONLY
 
 
  	-- Allocated Sale Contract Ticket Info
@@ -783,6 +786,7 @@ AS
  	LEFT JOIN vyuLGLoadViewSearch loadView
  		ON loadView.intLoadId = shipmentDetail.intLoadId
  	WHERE shipmentDetail.intSContractDetailId IN (SELECT intSContractDetailId FROM #tempContractPair)
+	AND shipment.intShipmentType = 1 -- SHIPMENT
 
 	
  	-- Allocated Sale Contract Inventory Shipment Info
@@ -794,9 +798,11 @@ AS
  	FROM tblICInventoryShipmentItem shipmentItem
  	JOIN tblICInventoryShipment shipment
  		ON shipment.intInventoryShipmentId = shipmentItem.intInventoryShipmentId
- 	JOIN #tempSaleTicketInfo saleTicketInfo
- 		ON saleTicketInfo.intTicketId = shipmentItem.intSourceId
-
+	CROSS APPLY (
+		SELECT TOP 1 *
+		FROM #tempSaleTicketInfo sTicketInfo
+		WHERE sTicketInfo.intTicketId = shipmentItem.intSourceId
+	) saleTicketInfo
 		
  	-- Allocated Sale Contract Invoice Info
  	SELECT shipmentDetail.intContractDetailId
@@ -1000,7 +1006,7 @@ AS
  		INNER JOIN vyuRKM2MContractCost dc ON dc.intContractDetailId = cd.intContractDetailId
  		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
  		INNER JOIN tblRKM2MConfiguration M2M ON dc.intItemId = M2M.intItemId AND ch.intFreightTermId = M2M.intFreightTermId
- 		INNER JOIN tblICCommodityUnitMeasure cu ON cu.intCommodityId = cd.intCommodityId AND cu.intUnitMeasureId = cd.intPurchasePriceCurrencyId
+ 		INNER JOIN tblICCommodityUnitMeasure cu ON cu.intCommodityId = cd.intCommodityId AND cu.intUnitMeasureId = cd.intUnitMeasureId
  		LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = dc.intCurrencyId
  		LEFT JOIN tblICCommodityUnitMeasure cu1 ON cu1.intCommodityId = cd.intCommodityId AND cu1.intUnitMeasureId = dc.intUnitMeasureId
  		GROUP BY cu.intCommodityUnitMeasureId
@@ -1049,7 +1055,7 @@ AS
  		, strBuyVessel = pShipment.strFVessel
  		, pShipment.strShipmentStatus
  		, strPLoadNumber = pShipment.strLoadNumber
- 		, dtmPDispatchedDate = pShipment.dtmDispatchedDate
+ 		, dtmPDispatchedDate = CONVERT(DATE, pShipment.dtmDispatchedDate)
  		, dtmPDeliveredDate = pShipment.dtmDeliveredDate
  		, dblBuyPackingVolume = ISNULL(pShipment.dblPackingVolume, @dblZero)
  		, strBuyPackingType = pShipment.strPackingType
@@ -1062,10 +1068,8 @@ AS
  		, dblPurchaseInvoiceAmount = ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero)
  		, pVoucher.dtmVoucherDate
  		, pVoucher.dtmVoucherDueDate
- 		, dblVoucherPaidAmount = CASE WHEN pReceipt.ysnHasVoucherPayment = 1 
- 										THEN ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero)
- 										ELSE @dblZero END
- 		, dblVoucherBalance = CASE WHEN pReceipt.ysnHasVoucherPayment = 1 
+ 		, dblVoucherPaidAmount = ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero)
+ 		, dblVoucherBalance = CASE WHEN ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero) > 0
  									THEN ISNULL(pVoucher.dblVoucherBalance, @dblZero)
  									ELSE ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero)
  									END
@@ -1112,7 +1116,8 @@ AS
  		, dblBankValuation = CASE WHEN pContract.intBankValuationRuleId = 1 THEN purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
  								WHEN pContract.intBankValuationRuleId = 2 
  									THEN 
- 										CASE WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
+ 										 CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
+										 WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
  											(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
  											THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
  											ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
@@ -1123,7 +1128,8 @@ AS
  									THEN 
  										CASE WHEN ISNULL(sContract.strSContractNumber, '') = ''
  											THEN 
- 												CASE WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
+												CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
+ 												WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
  													(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
  													THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
  													ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
@@ -1140,25 +1146,40 @@ AS
  		ON pHedge.intContractDetailId = pContract.intContractDetailId
  	LEFT JOIN #tempTicketInfo pTicket
  		ON pTicket.intContractDetailId = pContract.intContractDetailId
- 	LEFT JOIN #tempReceiptInfo pReceipt
- 		ON pReceipt.intContractDetailId = pContract.intContractDetailId
- 	LEFT JOIN #tempVoucherInfo pVoucher
- 		ON pVoucher.intInventoryReceiptId = pReceipt.intInventoryReceiptId
- 		AND pVoucher.intInventoryReceiptItemId = pReceipt.intInventoryReceiptItemId
- 	LEFT JOIN #tempContractPair contractPair
- 		ON contractPair.intPContractDetailId = pContract.intContractDetailId
+	OUTER APPLY (
+		SELECT TOP 1 *
+		FROM #tempReceiptInfo pReceiptInfo
+		WHERE pReceiptInfo.intContractDetailId = pContract.intContractDetailId
+	) pReceipt
+	OUTER APPLY (
+		SELECT TOP 1 *
+		FROM #tempVoucherInfo pVoucherInfo
+		WHERE pVoucherInfo.intInventoryReceiptId = pReceipt.intInventoryReceiptId
+ 		AND pVoucherInfo.intInventoryReceiptItemId = pReceipt.intInventoryReceiptItemId
+	) pVoucher
+	OUTER APPLY (
+		SELECT TOP 1 *
+		FROM #tempContractPair ctPair
+		WHERE ctPair.intPContractDetailId = pContract.intContractDetailId
+	) contractPair
  	LEFT JOIN #tempSaleContractInfo sContract
  		ON sContract.intContractDetailId = contractPair.intSContractDetailId
- 	LEFT JOIN #tempSaleHedgeInfo sHedge
- 		ON sHedge.intContractDetailId = sContract.intContractDetailId
- 	LEFT JOIN #tempSaleTicketInfo sTicket
- 		ON sTicket.intContractDetailId = sHedge.intContractDetailId
+	OUTER APPLY (
+		SELECT TOP 1 * 
+		FROM #tempSaleHedgeInfo sHedgeInfo
+		WHERE sHedgeInfo.intContractDetailId = sContract.intContractDetailId
+	) sHedge
+	OUTER APPLY (
+		SELECT TOP 1 *
+		FROM #tempSaleTicketInfo sTicketInfo
+		WHERE sTicketInfo.intContractDetailId = contractPair.intSContractDetailId
+	) sTicket
  	LEFT JOIN #tempSaleShipmentDetails sLoadShipment
- 		ON sLoadShipment.intSContractDetailId = sHedge.intContractDetailId
+ 		ON sLoadShipment.intSContractDetailId = contractPair.intSContractDetailId
  	LEFT JOIN #tempInvShipmentInfo	sShipment
- 		ON sShipment.intContractDetailId = sHedge.intContractDetailId
+ 		ON sShipment.intContractDetailId = contractPair.intSContractDetailId
  	LEFT JOIN #tempInvoiceInfo sInvoice
- 		ON sInvoice.intContractDetailId = sHedge.intContractDetailId
+ 		ON sInvoice.intContractDetailId = contractPair.intSContractDetailId
  	LEFT JOIN #tempContractBalance purchaseCB
  		ON purchaseCB.intContractDetailId = pContract.intContractDetailId
  		AND purchaseCB.intContractTypeId = 1
