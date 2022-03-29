@@ -196,6 +196,8 @@ AS
         , strShippingLine3 = SL3.strName
 		, CD.dblBudgetPrice
 		, CD.dblTotalBudget
+		, CH.intSampleTypeId
+		, sam.strSampleTypeName
 
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
@@ -293,3 +295,4 @@ AS
 	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
 	LEFT JOIN tblEMEntity SL2 ON SL2.intEntityId = CD.intShippingLineId2
 	LEFT JOIN tblEMEntity SL3 ON SL3.intEntityId = CD.intShippingLineId3
+	LEFT JOIN tblQMSampleType sam on sam.intSampleTypeId = CH.intSampleTypeId
