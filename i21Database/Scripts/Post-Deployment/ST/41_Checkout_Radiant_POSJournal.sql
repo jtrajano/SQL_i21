@@ -1,4 +1,4 @@
--GO
+GO
 DECLARE @intImportFileHeaderId INT
 DECLARE @intImportFileColumnDetailId INT
 DECLARE @intTagAttributeId INT
