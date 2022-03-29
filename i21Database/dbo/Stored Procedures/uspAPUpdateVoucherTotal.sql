@@ -27,10 +27,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--UPDATE DETAIL TOTAL
 	UPDATE A
 		SET --A.dblTotal = CAST((A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL (18,2)) 
-		@qty							=	CASE WHEN A.intComputeTotalOption = 0
+		@qty							=	CASE WHEN A.intComputeTotalOption = 0 OR A.intComputeTotalOption IS NULL
 											THEN (CASE WHEN A.dblNetWeight != 0 THEN A.dblNetWeight ELSE A.dblQtyReceived END)
 											ELSE A.dblQtyReceived END,
-		@unitQty						=	CASE WHEN A.intComputeTotalOption = 0
+		@unitQty						=	CASE WHEN A.intComputeTotalOption = 0 OR A.intComputeTotalOption IS NULL
 											THEN (CASE WHEN A.dblNetWeight != 0 THEN A.dblWeightUnitQty ELSE A.dblUnitQty END)
 											ELSE A.dblUnitQty END,
 		@detailTotal					=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL--C.intTransactionType = 11
