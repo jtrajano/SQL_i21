@@ -19,6 +19,9 @@ BEGIN
 		,@intContractStatusId INT
 		,@dtmUpdatedAvailabilityDate DATETIME
 		,@intSubBookId INT
+		,@dtmContractDate DATETIME
+		,@dblFXPrice NUMERIC(18, 6)
+		,@dblRefFuturesQty NUMERIC(18, 6)
 		,@intContractFeedId INT
 	--,@intOrgContractFeedId INT
 	DECLARE @tblCTContractDetail TABLE (
@@ -56,6 +59,24 @@ BEGIN
 		OR ISNULL(L.dtmUpdatedAvailabilityDate, 0) <> ISNULL(CD.dtmUpdatedAvailabilityDate, 0)
 		OR ISNULL(L.intSubBookId, 0) <> ISNULL(CH.intSubBookId, 0)
 
+	-- Only for Sales Contract
+	INSERT INTO @tblCTContractDetail (
+		intContractDetailId
+		,intContractHeaderId
+		)
+	SELECT DISTINCT L.intContractDetailId
+		,L.intContractHeaderId
+	FROM tblIPContractFeedLog L
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
+		AND CH.intContractTypeId = 2
+		AND CD.intContractStatusId = 1
+	WHERE IsNULL(L.intCompanyLocationId, 0) <> IsNULL(CD.intCompanyLocationId, 0)
+		OR IsNULL(L.intHeaderBookId, 0) <> IsNULL(CH.intBookId, 0)
+		OR ISNULL(L.dtmContractDate, 0) <> ISNULL(CH.dtmContractDate, 0)
+		OR ISNULL(L.dblFXPrice, 0) <> ISNULL(CD.dblFXPrice, 0)
+		OR ISNULL(L.dblRefFuturesQty, 0) <> ISNULL(CD.dblRefFuturesQty, 0)
+
 	SELECT @intContractDetailId = NULL
 
 	SELECT @intContractDetailId = MIN(intContractDetailId)
@@ -83,6 +104,9 @@ BEGIN
 			,@intContractStatusId = NULL
 			,@dtmUpdatedAvailabilityDate = NULL
 			,@intSubBookId = NULL
+			,@dtmContractDate = NULL
+			,@dblFXPrice = NULL
+			,@dblRefFuturesQty = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 		FROM tblIPContractFeedLog
@@ -208,6 +232,8 @@ BEGIN
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intContractStatusId = intContractStatusId
 			,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
+			,@dblFXPrice = dblFXPrice
+			,@dblRefFuturesQty = dblRefFuturesQty
 		FROM tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -215,6 +241,7 @@ BEGIN
 			,@strVendorRefNo = strCustomerContract
 			,@intBookId = intBookId
 			,@intSubBookId = intSubBookId
+			,@dtmContractDate = dtmContractDate
 		FROM tblCTContractHeader WITH (NOLOCK)
 		WHERE intContractHeaderId = @intContractHeaderId
 
@@ -234,6 +261,9 @@ BEGIN
 			,intContractStatusId
 			,dtmUpdatedAvailabilityDate
 			,intSubBookId
+			,dtmContractDate
+			,dblFXPrice
+			,dblRefFuturesQty
 			)
 		SELECT @intContractHeaderId
 			,@intContractDetailId
@@ -246,6 +276,9 @@ BEGIN
 			,@intContractStatusId
 			,@dtmUpdatedAvailabilityDate
 			,@intSubBookId
+			,@dtmContractDate
+			,@dblFXPrice
+			,@dblRefFuturesQty
 
 		SELECT @strInfo1 = @strContractNumber + ' / ' + ISNULL(@strContractSeq, '')
 
