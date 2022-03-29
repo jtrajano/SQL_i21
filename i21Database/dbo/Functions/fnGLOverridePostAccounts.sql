@@ -184,7 +184,7 @@ FROM @tbl A
 OUTER APPLY(
     SELECT intAccountId from tblGLAccount WHERE strAccountId = A.strNewAccountIdOverride
 )U
-WHERE strNewAccountIdOverride IS NOT NULL AND intAccountIdOverride IS NOT NULL
+WHERE ISNULL(strNewAccountIdOverride,'') <> '' AND ISNULL(intAccountIdOverride,0) <> 0
 
 UPDATE A 
 SET strNewAccountIdOverride = 
@@ -194,10 +194,11 @@ dbo.fnGLGetOverrideAccountBySegment(
      A.intLOBSegmentOverrideId, 
      A.intCompanySegmentOverrideId)
 FROM @tbl A 
-WHERE (intLocationSegmentOverrideId IS NOT NULL 
-OR intLOBSegmentOverrideId IS NOT NULL
-OR intCompanySegmentOverrideId IS NOT NULL)
-AND intAccountIdOverride IS NULL
+WHERE (
+	ISNULL(intLocationSegmentOverrideId,0)<> 0
+OR ISNULL(intLOBSegmentOverrideId,0) <> 0
+OR ISNULL(intCompanySegmentOverrideId,0) <> 0)
+AND ISNULL(intAccountIdOverride,0) = 0
 
 
 UPDATE A 
@@ -210,10 +211,11 @@ OUTER APPLY(
 )U
 WHERE 
 strNewAccountIdOverride IS NOT NULL AND
-(intLocationSegmentOverrideId IS NOT NULL 
-OR intLOBSegmentOverrideId IS NOT NULL
-OR intCompanySegmentOverrideId IS NOT NULL)
-AND intAccountIdOverride IS NULL
+( 
+	ISNULL(intLocationSegmentOverrideId,0) <> 0 
+OR ISNULL(intLOBSegmentOverrideId,0) <> 0
+OR ISNULL(intCompanySegmentOverrideId,0) <> 0)
+AND ISNULL(intAccountIdOverride,0) = 0
 
 
 
