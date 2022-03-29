@@ -8,18 +8,6 @@ AS
 
 BEGIN
 	--TRACEABILITY
-	IF EXISTS(
-		SELECT 1
-		FROM tblAPBillDetail A
-		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) B ON A.intBillId = B.intID
-		WHERE A.intInventoryReceiptItemId > 0
-			  OR A.intInventoryReceiptChargeId > 0
-			  OR A.intInventoryShipmentChargeId > 0
-			  OR A.intLoadDetailId > 0
-			  OR A.intLoadShipmentCostId > 0
-			  OR A.intSettleStorageId > 0
-	)
-	BEGIN
 		DECLARE @TransactionLinks udtICTransactionLinks
 		DECLARE @ID AS TABLE (intID INT)
 		DECLARE @intDestId INT, @strDestTransactionNo NVARCHAR(100)
@@ -27,59 +15,72 @@ BEGIN
 		--VOUCHER
 		IF @intTransactionType = 1
 		BEGIN
-			--CREATE/UPDATE
-			IF @intAction = 1 OR @intAction = 2
+			IF EXISTS(
+				SELECT 1
+				FROM tblAPBillDetail A
+				INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) B ON A.intBillId = B.intID
+				WHERE A.intInventoryReceiptItemId > 0
+					OR A.intInventoryReceiptChargeId > 0
+					OR A.intInventoryShipmentChargeId > 0
+					OR A.intLoadDetailId > 0
+					OR A.intLoadShipmentCostId > 0
+					OR A.intSettleStorageId > 0
+			)
 			BEGIN
-				INSERT INTO @TransactionLinks (
-					intSrcId,
-					strSrcTransactionNo,
-					strSrcTransactionType,
-					strSrcModuleName,
-					intDestId,
-					strDestTransactionNo,
-					strDestTransactionType,
-					strDestModuleName,
-					strOperation
-				)
-				SELECT
-					ST.intSourceTransactionId,
-					ST.strSourceTransaction,
-					ST.strSourceTransactionType,
-					ST.strSourceModule,
-					B.intBillId,
-					B.strBillId,
-					'Voucher',
-					'Accounts Payable',
-					'Create'
-				FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) IDS
-				INNER JOIN tblAPBill B ON B.intBillId = IDS.intID
-				INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
-				CROSS APPLY fnAPGetDetailSourceTransaction(BD.intInventoryReceiptItemId, BD.intInventoryReceiptChargeId, BD.intInventoryShipmentChargeId, BD.intLoadDetailId, BD.intLoadShipmentCostId, BD.intCustomerStorageId, BD.intSettleStorageId, BD.intBillId, BD.intItemId) ST
-
-				EXEC uspICAddTransactionLinks @TransactionLinks
-			END
-
-			--DELETE
-			IF @intAction = 3
-			BEGIN
-				INSERT INTO @ID
-				SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds)
-
-				WHILE EXISTS(SELECT TOP 1 1 FROM @ID)
+				--CREATE/UPDATE
+				IF @intAction = 1 OR @intAction = 2
 				BEGIN
-					SELECT TOP 1 @intDestId = B.intBillId, @strDestTransactionNo = B.strBillId
-					FROM @ID ID
-					INNER JOIN tblAPBill B ON B.intBillId = ID.intID
+					INSERT INTO @TransactionLinks (
+						intSrcId,
+						strSrcTransactionNo,
+						strSrcTransactionType,
+						strSrcModuleName,
+						intDestId,
+						strDestTransactionNo,
+						strDestTransactionType,
+						strDestModuleName,
+						strOperation
+					)
+					SELECT
+						ST.intSourceTransactionId,
+						ST.strSourceTransaction,
+						ST.strSourceTransactionType,
+						ST.strSourceModule,
+						B.intBillId,
+						B.strBillId,
+						'Voucher',
+						'Accounts Payable',
+						'Create'
+					FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) IDS
+					INNER JOIN tblAPBill B ON B.intBillId = IDS.intID
+					INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+					CROSS APPLY fnAPGetDetailSourceTransaction(BD.intInventoryReceiptItemId, BD.intInventoryReceiptChargeId, BD.intInventoryShipmentChargeId, BD.intLoadDetailId, BD.intLoadShipmentCostId, BD.intCustomerStorageId, BD.intSettleStorageId, BD.intBillId, BD.intItemId) ST
 
-					IF @intDestId IS NULL
+					EXEC uspICAddTransactionLinks @TransactionLinks
+				END
+
+				--DELETE
+				IF @intAction = 3
+				BEGIN
+					INSERT INTO @ID
+					SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds)
+
+					WHILE EXISTS(SELECT TOP 1 1 FROM @ID)
 					BEGIN
-						RAISERROR('Error occured while updating Voucher Traceability.', 16, 1);
-						RETURN;
-					END
-					ELSE
-					BEGIN
-						EXEC uspICDeleteTransactionLinks @intDestId, @strDestTransactionNo, 'Voucher', 'Accounts Payable'
-						DELETE FROM @ID WHERE intID = @intDestId
+						SELECT TOP 1 @intDestId = B.intBillId, @strDestTransactionNo = B.strBillId
+						FROM @ID ID
+						INNER JOIN tblAPBill B ON B.intBillId = ID.intID
+
+						IF @intDestId IS NULL
+						BEGIN
+							RAISERROR('Error occured while updating Voucher Traceability.', 16, 1);
+							RETURN;
+						END
+						ELSE
+						BEGIN
+							EXEC uspICDeleteTransactionLinks @intDestId, @strDestTransactionNo, 'Voucher', 'Accounts Payable'
+							DELETE FROM @ID WHERE intID = @intDestId
+						END
 					END
 				END
 			END
@@ -147,175 +148,153 @@ BEGIN
 				END
 			END
 		END
-	END
 
 	--TRADE FINANCE
-	IF EXISTS(
-		SELECT 1
-		FROM tblAPBill A
-		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) B ON A.intBillId = B.intID
-		WHERE NULLIF(A.strFinanceTradeNo, '') IS NOT NULL
-			  OR NULLIF(A.intBankId, 0) IS NOT NULL
-			  OR NULLIF(A.intBankAccountId, 0) IS NOT NULL
-			  OR NULLIF(A.intBorrowingFacilityId, 0) IS NOT NULL
-			  OR NULLIF(A.strBankReferenceNo, '') IS NOT NULL
-			  OR NULLIF(A.intBorrowingFacilityLimitId, 0) IS NOT NULL
-			  OR NULLIF(A.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
-			  OR NULLIF(A.strReferenceNo, '') IS NOT NULL
-			  OR NULLIF(A.intBankValuationRuleId, 0) IS NOT NULL
-			  OR NULLIF(A.strComments, '') IS NOT NULL
-	) AND @ysnSkip <> 1
-	BEGIN
 		DECLARE @TradeFinanceLogs AS TRFLog
 
 		--VOUCHER
 		IF @intTransactionType = 1
 		BEGIN
 			INSERT INTO @TradeFinanceLogs (
-				strAction
-				, strTransactionType
-				, intTransactionHeaderId
-				, intTransactionDetailId
-				, strTransactionNumber
-				, dtmTransactionDate
-				, intBankId
-				, intBankAccountId
-				, intBorrowingFacilityId
-				, dblTransactionAmountAllocated
-				, dblTransactionAmountActual
-				, intLimitId
-				, dblLimit
-				, strBankTradeReference
-				, strBankApprovalStatus
-				, dtmAppliedToTransactionDate
-				, intStatusId
-				, intWarrantId
-				, strWarrantId
-				, intUserId
-				, intConcurrencyId
-				, intContractHeaderId
-				, intContractDetailId
+				strAction,
+				strTransactionType,
+				strTradeFinanceTransaction,
+				intTransactionHeaderId,
+				intTransactionDetailId,
+				strTransactionNumber,
+				dtmTransactionDate,
+				intBankId,
+				intBankAccountId,
+				intBorrowingFacilityId,
+				intLimitId,
+				dblLimit,
+				intSublimitId,
+				dblSublimit,
+				strBankTradeReference,
+				dblFinanceQty,
+				dblFinancedAmount,
+				strBankApprovalStatus,
+				dtmAppliedToTransactionDate,
+				intStatusId,
+				intUserId,
+				intConcurrencyId,
+				intContractHeaderId,
+				intContractDetailId
 			)
 			SELECT
 				strAction						= CASE WHEN @intAction = 1 THEN 'Created Voucher' 
-													   WHEN @intAction = 2 THEN 'Updated Voucher'
-													   ELSE 'Deleted Voucher'
-												  END
-				, strTransactionType			= 'Voucher'
-				, intTransactionHeaderId		= B.intBillId
-				, intTransactionDetailId		= BD.intBillDetailId
-				, strTransactionNumber			= B.strBillId
-				, dtmTransactionDate			= GETDATE()
-				, intBankId						= B.intBankId
-				, intBankAccountId				= B.intBankAccountId
-				, intBorrowingFacilityId		= B.intBorrowingFacilityId
-				, dblTransactionAmountAllocated = CTCD.dblLoanAmount
-				, dblTransactionAmountActual	= CTCD.dblLoanAmount
-				, intLimitId					= B.intBorrowingFacilityLimitId
-				, dblLimit						= CMBFL.dblLimit
-				, strBankTradeReference			= B.strBankReferenceNo
-				, strBankApprovalStatus			= 'No Need For Approval'
-				, dtmAppliedToTransactionDate	= GETDATE()
-				, intStatusId					= 1
-				, intWarrantId					= NULL
-				, strWarrantId					= ''
-				, intUserId						= @intUserId
-				, intConcurrencyId				= 1
-				, intContractHeaderId			= BD.intContractHeaderId
-				, intContractDetailId			= BD.intContractDetailId
+														WHEN @intAction = 2 THEN 'Updated Voucher'
+														ELSE 'Deleted Voucher'
+													END, 
+				strTransactionType				= 'Voucher',
+				strTradeFinanceTransaction		= B.strFinanceTradeNo,
+				intTransactionHeaderId			= B.intBillId,
+				intTransactionDetailId			= BD.intBillDetailId,
+				strTransactionNumber			= B.strBillId,
+				dtmTransactionDate				= B.dtmBillDate,
+				intBankId						= B.intBankId,
+				intBankAccountId				= B.intBankAccountId,
+				intBorrowingFacilityId			= B.intBorrowingFacilityId,
+				intLimitId						= B.intBorrowingFacilityLimitId,
+				dblLimit						= BFL.dblLimit,
+				intSublimitId					= B.intBorrowingFacilityLimitDetailId,
+				dblSublimit						= BFLD.dblLimit,
+				strBankTradeReference			= B.strReferenceNo,
+				dblFinanceQty					= BD.dblQtyReceived,
+				dblFinancedAmount				= BD.dblTotal + BD.dblTax,
+				strBankApprovalStatus			= 'No Need For Approval',
+				dtmAppliedToTransactionDate		= B.dtmBillDate,
+				intStatusId						= 2, --Completed
+				intUserId						= @intUserId,
+				intConcurrencyId				= 1,
+				intContractHeaderId				= BD.intContractHeaderId,
+				intContractDetailId				= BD.intContractDetailId
 			FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) IDS
 			INNER JOIN tblAPBill B ON B.intBillId = IDS.intID
 			INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
-			LEFT JOIN tblCTContractDetail CTCD ON CTCD.intContractDetailId = BD.intContractDetailId
-			LEFT JOIN tblCTContractHeader CTCH ON CTCH.intContractHeaderId = CTCD.intContractHeaderId
-			LEFT JOIN tblCMBorrowingFacilityLimit CMBFL ON CMBFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
+			LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
+			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = B.intBorrowingFacilityLimitDetailId
 			WHERE NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
-			  	  OR NULLIF(B.intBankId, 0) IS NOT NULL
-			      OR NULLIF(B.intBankAccountId, 0) IS NOT NULL
-			      OR NULLIF(B.intBorrowingFacilityId, 0) IS NOT NULL
-			      OR NULLIF(B.strBankReferenceNo, '') IS NOT NULL
-			      OR NULLIF(B.intBorrowingFacilityLimitId, 0) IS NOT NULL
-			      OR NULLIF(B.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
-			      OR NULLIF(B.strReferenceNo, '') IS NOT NULL
-			      OR NULLIF(B.intBankValuationRuleId, 0) IS NOT NULL
-			      OR NULLIF(B.strComments, '') IS NOT NULL
+				  OR NULLIF(B.intBankId, 0) IS NOT NULL
+				  OR NULLIF(B.intBankAccountId, 0) IS NOT NULL
+				  OR NULLIF(B.intBorrowingFacilityId, 0) IS NOT NULL
+				  OR NULLIF(B.intBorrowingFacilityLimitId, 0) IS NOT NULL
+				  OR NULLIF(B.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
+				  OR NULLIF(B.strReferenceNo, '') IS NOT NULL
 		END
 
 		--PAYMENT
 		IF @intTransactionType = 2
 		BEGIN
 			INSERT INTO @TradeFinanceLogs (
-				strAction
-				, strTransactionType
-				, intTransactionHeaderId
-				, intTransactionDetailId
-				, strTransactionNumber
-				, dtmTransactionDate
-				, intBankId
-				, intBankAccountId
-				, intBorrowingFacilityId
-				, dblTransactionAmountAllocated
-				, dblTransactionAmountActual
-				, intLimitId
-				, dblLimit
-				, strBankTradeReference
-				, strBankApprovalStatus
-				, dtmAppliedToTransactionDate
-				, intStatusId
-				, intWarrantId
-				, strWarrantId
-				, intUserId
-				, intConcurrencyId
-				, intContractHeaderId
-				, intContractDetailId
+				strAction,
+				strTransactionType,
+				strTradeFinanceTransaction,
+				intTransactionHeaderId,
+				intTransactionDetailId,
+				strTransactionNumber,
+				dtmTransactionDate,
+				intBankId,
+				intBankAccountId,
+				intBorrowingFacilityId,
+				intLimitId,
+				dblLimit,
+				intSublimitId,
+				dblSublimit,
+				strBankTradeReference,
+				dblFinanceQty,
+				dblFinancedAmount,
+				strBankApprovalStatus,
+				dtmAppliedToTransactionDate,
+				intStatusId,
+				intUserId,
+				intConcurrencyId,
+				intContractHeaderId,
+				intContractDetailId
 			)
 			SELECT
 				strAction						= CASE WHEN @intAction = 1 THEN 'Created Payment' 
-													   WHEN @intAction = 2 THEN 'Updated Payment'
-													   ELSE 'Deleted Payment'
-												  END
-				, strTransactionType			= 'Payment'
-				, intTransactionHeaderId		= P.intPaymentId
-				, intTransactionDetailId		= PD.intPaymentDetailId
-				, strTransactionNumber			= P.strPaymentRecordNum
-				, dtmTransactionDate			= GETDATE()
-				, intBankId						= B.intBankId
-				, intBankAccountId				= B.intBankAccountId
-				, intBorrowingFacilityId		= B.intBorrowingFacilityId
-				, dblTransactionAmountAllocated = CTCD.dblLoanAmount
-				, dblTransactionAmountActual	= CTCD.dblLoanAmount
-				, intLimitId					= B.intBorrowingFacilityLimitId
-				, dblLimit						= CMBFL.dblLimit
-				, strBankTradeReference			= B.strBankReferenceNo
-				, strBankApprovalStatus			= 'No Need For Approval'
-				, dtmAppliedToTransactionDate	= GETDATE()
-				, intStatusId					= 1
-				, intWarrantId					= NULL
-				, strWarrantId					= ''
-				, intUserId						= @intUserId
-				, intConcurrencyId				= 1
-				, intContractHeaderId			= BD.intContractHeaderId
-				, intContractDetailId			= BD.intContractDetailId
+														WHEN @intAction = 2 THEN 'Updated Payment'
+														ELSE 'Deleted Payment'
+													END, 
+				strTransactionType				= 'Payment',
+				strTradeFinanceTransaction		= B.strFinanceTradeNo,
+				intTransactionHeaderId			= P.intPaymentId,
+				intTransactionDetailId			= PD.intPaymentDetailId,
+				strTransactionNumber			= P.strPaymentRecordNum,
+				dtmTransactionDate				= P.dtmDatePaid,
+				intBankId						= B.intBankId,
+				intBankAccountId				= B.intBankAccountId,
+				intBorrowingFacilityId			= B.intBorrowingFacilityId,
+				intLimitId						= B.intBorrowingFacilityLimitId,
+				dblLimit						= BFL.dblLimit,
+				intSublimitId					= B.intBorrowingFacilityLimitDetailId,
+				dblSublimit						= BFLD.dblLimit,
+				strBankTradeReference			= B.strReferenceNo,
+				dblFinanceQty					= BD.dblQtyReceived,
+				dblFinancedAmount				= PD.dblPayment,
+				strBankApprovalStatus			= 'No Need For Approval',
+				dtmAppliedToTransactionDate		= P.dtmDatePaid,
+				intStatusId						= 2, --Completed
+				intUserId						= @intUserId,
+				intConcurrencyId				= 1,
+				intContractHeaderId				= BD.intContractHeaderId,
+				intContractDetailId				= BD.intContractDetailId
 			FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) IDS
 			INNER JOIN tblAPPayment P ON P.intPaymentId = IDS.intID
 			INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
 			INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 			INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
-			LEFT JOIN tblCTContractDetail CTCD ON CTCD.intContractDetailId = BD.intContractDetailId
-			LEFT JOIN tblCTContractHeader CTCH ON CTCH.intContractHeaderId = CTCD.intContractHeaderId
-			LEFT JOIN tblCMBorrowingFacilityLimit CMBFL ON CMBFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
+			LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
+			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = B.intBorrowingFacilityLimitDetailId
 			WHERE NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
-			  	  OR NULLIF(B.intBankId, 0) IS NOT NULL
-			      OR NULLIF(B.intBankAccountId, 0) IS NOT NULL
-			      OR NULLIF(B.intBorrowingFacilityId, 0) IS NOT NULL
-			      OR NULLIF(B.strBankReferenceNo, '') IS NOT NULL
-			      OR NULLIF(B.intBorrowingFacilityLimitId, 0) IS NOT NULL
-			      OR NULLIF(B.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
-			      OR NULLIF(B.strReferenceNo, '') IS NOT NULL
-			      OR NULLIF(B.intBankValuationRuleId, 0) IS NOT NULL
-			      OR NULLIF(B.strComments, '') IS NOT NULL
+				  OR NULLIF(B.intBankId, 0) IS NOT NULL
+				  OR NULLIF(B.intBankAccountId, 0) IS NOT NULL
+				  OR NULLIF(B.intBorrowingFacilityId, 0) IS NOT NULL
+				  OR NULLIF(B.intBorrowingFacilityLimitId, 0) IS NOT NULL
+				  OR NULLIF(B.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
+				  OR NULLIF(B.strReferenceNo, '') IS NOT NULL
 		END
 
 		EXEC uspTRFLogTradeFinance @TradeFinanceLogs
-	END
 END
