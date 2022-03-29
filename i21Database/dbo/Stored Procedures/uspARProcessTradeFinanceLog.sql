@@ -18,6 +18,7 @@ INSERT INTO @TradeFinanceLogs (
 	, intTransactionHeaderId
 	, intTransactionDetailId
 	, strTransactionNumber
+	, strTradeFinanceTransaction
 	, dtmTransactionDate
 	, intBankId
 	, intBankAccountId
@@ -32,6 +33,8 @@ INSERT INTO @TradeFinanceLogs (
 	, intStatusId
 	, intUserId
 	, intConcurrencyId
+	, dblFinanceQty
+	, dblFinancedAmount
 	, intContractHeaderId
 	, intContractDetailId
 )
@@ -44,6 +47,7 @@ SELECT
 	, intTransactionHeaderId		= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
 	, intTransactionDetailId		= CASE WHEN @TransactionType = 'Payment' THEN ARPD.intPaymentDetailId ELSE ARID.intInvoiceDetailId END
 	, strTransactionNumber			= CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
+	, strTradeFinanceTransaction	= ARI.strTransactionNo
 	, dtmTransactionDate			= GETDATE()
 	, intBankId						= ARI.intBankId
 	, intBankAccountId				= ARI.intBankAccountId
@@ -58,6 +62,8 @@ SELECT
 	, intStatusId					= 2
 	, intUserId						= @UserId
 	, intConcurrencyId				= 1 
+	, dblFinanceQty					= ARID.dblQtyShipped
+	, dblFinancedAmount				= ARID.dblTotal
 	, intContractHeaderId			= ARID.intContractHeaderId
 	, intContractDetailId			= ARID.intContractDetailId
 FROM tblARInvoice ARI WITH (NOLOCK)
@@ -70,6 +76,7 @@ AND (
 	OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
 	OR ISNULL(ARI.strBankReferenceNo, '') <> ''
 	OR ISNULL(ARI.dblLoanAmount, 0) <> 0
+	OR ISNULL(ARI.strTransactionNo, '') <> ''
 )
 LEFT JOIN tblARPaymentDetail ARPD ON ARI.intInvoiceId = ARPD.intInvoiceId
 LEFT JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
