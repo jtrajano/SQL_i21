@@ -372,6 +372,8 @@ BEGIN TRY
 		,dtmTestingStartDate
 		,dtmTestingEndDate
 		,dtmSamplingEndDate
+		,dtmRequestedDate
+		,dtmSampleSentDate
 		,strSamplingMethod
 		,strContainerNumber
 		,strMarks
@@ -442,6 +444,8 @@ BEGIN TRY
 		,dtmTestingStartDate
 		,dtmTestingEndDate
 		,dtmSamplingEndDate
+		,dtmRequestedDate
+		,dtmSampleSentDate
 		,strSamplingMethod
 		,strContainerNumber
 		,strMarks
@@ -507,6 +511,8 @@ BEGIN TRY
 			,dtmTestingStartDate DATETIME
 			,dtmTestingEndDate DATETIME
 			,dtmSamplingEndDate DATETIME
+			,dtmRequestedDate DATETIME
+			,dtmSampleSentDate DATETIME
 			,strSamplingMethod NVARCHAR(50)
 			,strContainerNumber NVARCHAR(100)
 			,strMarks NVARCHAR(100)
