@@ -133,12 +133,12 @@ SET strCommand = N'
 		SET @ValidationMessage = @ValidationMessage + '',Active ['' + @ActiveStr + ''] should only be (0, 1, Yes, No, True, False)''
 	END
 	
-	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblSMUserRole WHERE strName = @PortalUserRole)
+	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblSMUserRole WHERE strName = @PortalUserRole) AND ISNULL(@PortalUserRole, '''') <> ''''
 	BEGIN
 		SELECT TOP 1 @UserRoleId = intUserRoleID FROM dbo.tblSMUserRole WHERE strName = @PortalUserRole
 		SET @PortalBit = 1
 	END
-	ELSE
+	ELSE IF ISNULL(@PortalUserRole, '''') <> ''''
 	BEGIN
 		IF @ValidationMessage != ''''
 		BEGIN
