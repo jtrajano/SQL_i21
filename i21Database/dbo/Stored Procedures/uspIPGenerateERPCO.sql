@@ -54,6 +54,8 @@ BEGIN TRY
 		,@intContractStatusId INT
 		,@dtmUpdatedAvailabilityDate DATETIME
 		,@intSubBookId INT
+		,@dblFXPrice NUMERIC(18, 6)
+		,@dblRefFuturesQty NUMERIC(18, 6)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intContractFeedId INT
@@ -164,6 +166,8 @@ BEGIN TRY
 			,@intContractStatusId = NULL
 			,@dtmUpdatedAvailabilityDate = NULL
 			,@intSubBookId = NULL
+			,@dblFXPrice = NULL
+			,@dblRefFuturesQty = NULL
 
 		SELECT @intContractDetailId = intContractDetailId
 			,@intContractHeaderId = intContractHeaderId
@@ -297,6 +301,8 @@ BEGIN TRY
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intContractStatusId = intContractStatusId
 			,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
+			,@dblFXPrice = dblFXPrice
+			,@dblRefFuturesQty = dblRefFuturesQty
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -342,6 +348,11 @@ BEGIN TRY
 		IF ISNULL(@dblQuantity, 0) = 0
 		BEGIN
 			SELECT @strError = @strError + 'Quantity cannot be blank. '
+		END
+
+		IF ISNULL(@dblQuantityPerLot, 0) = 0
+		BEGIN
+			SELECT @strError = @strError + 'Quantity Per Lot cannot be zero. '
 		END
 
 		IF @strError <> ''
@@ -496,6 +507,9 @@ BEGIN TRY
 					,intContractStatusId
 					,dtmUpdatedAvailabilityDate
 					,intSubBookId
+					,dtmContractDate
+					,dblFXPrice
+					,dblRefFuturesQty
 					)
 				SELECT @intContractHeaderId
 					,@intContractDetailId
@@ -507,6 +521,9 @@ BEGIN TRY
 					,@intContractStatusId
 					,@dtmUpdatedAvailabilityDate
 					,@intSubBookId
+					,@dtmContractDate
+					,@dblFXPrice
+					,@dblRefFuturesQty
 			END
 			ELSE
 			BEGIN
