@@ -70,15 +70,21 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	dblConversionFactor = dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, 1),
 	dblPhysicalCountStockUnit = dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, InvCountDetail.dblPhysicalCount),
 	dblVariance = 
-		CASE WHEN InvCountDetail.dblPhysicalCount IS NULL THEN NULL ELSE
-			CASE WHEN InvCount.strCountBy = 'Retail Count' THEN
-				InvCountDetail.dblPhysicalCount - (ISNULL(InvCountDetail.dblSystemCount, 0) + ISNULL(InvCountDetail.dblQtyReceived, 0) - ISNULL(InvCountDetail.dblQtySold, 0))
+		CASE 
+			WHEN InvCountDetail.dblPhysicalCount IS NULL THEN 
+				NULL 
 			ELSE
-				CASE WHEN (CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE Item.ysnLotWeightsRequired END) = 1 
-					THEN InvCountDetail.dblPhysicalCount - ISNULL(InvCountDetail.dblWeightQty, 0) 
-					ELSE InvCountDetail.dblPhysicalCount - ISNULL(InvCountDetail.dblSystemCount, 0) 
+				CASE 
+					WHEN InvCount.strCountBy = 'Retail Count' THEN
+						InvCountDetail.dblPhysicalCount - (ISNULL(InvCountDetail.dblSystemCount, 0) + ISNULL(InvCountDetail.dblQtyReceived, 0) - ISNULL(InvCountDetail.dblQtySold, 0))
+					ELSE
+						CASE 
+							WHEN (CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE Item.ysnLotWeightsRequired END) = 1 THEN 
+								ISNULL(InvCountDetail.dblNetQty, 0) - ISNULL(InvCountDetail.dblWeightQty, 0) 
+							ELSE 
+								InvCountDetail.dblPhysicalCount - ISNULL(InvCountDetail.dblSystemCount, 0) 
+						END
 				END
-			END
 		END,
 	InvCountDetail.ysnRecount,
 	InvCountDetail.intEntityUserSecurityId,
