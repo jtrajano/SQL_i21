@@ -103,11 +103,11 @@ begin
 	declare @Min int
 	declare @Max int
 
-
+	/*
 	declare @MinMaxTable table ( id int identity(1,1), intMin int, intMax int, intDifference int, intLocationId int, strIndicator nvarchar(50))
 	declare @RangedTicketNumber table( intTicketNumber int, intLocationId int, strIndicator nvarchar(50) )
 
-
+	
 	insert @MinMaxTable ( intMin, intMax, intLocationId, strIndicator)
 	select min(intTicketNumber), max(intTicketNumber), intProcessingLocationId, strIndicator
 		from #tmpSampleExport
@@ -117,12 +117,12 @@ begin
 
 	update @MinMaxTable set intDifference = intMax - intMin
 	
-	
 	declare @CurrentLocationId int
 	declare @CurrentIndicator nvarchar(50)
+
 	declare @id int
 	select @id= min(id) from @MinMaxTable
-
+	
 	while @id is not null
 	begin
 
@@ -168,15 +168,15 @@ begin
 		
 	end
 
-
+	*/
 	select 
 	
-		AllTicketNumber.intTicketNumber
-		,case when AllExport.intTicketNumber is null then cast(AllTicketNumber.intTicketNumber as nvarchar(50)) + '*' else AllExport.strTicketNumber end as strTicketNumber
+		AllExport.intTicketNumber
+		,case when AllExport.intTicketNumber is null then cast(AllExport.intTicketNumber as nvarchar(50)) + '*' else AllExport.strTicketNumber end as strTicketNumber
 		,AllExport.strName
 		,CompanyLocation.strLocationName
 		,AllExport.strStorageTypeDescription
-		,case when AllExport.intTicketNumber is null then cast(AllTicketNumber.strIndicator as nvarchar(50)) else AllExport.strIndicator end as strIndicator
+		,case when AllExport.intTicketNumber is null then cast(AllExport.strIndicator as nvarchar(50)) else AllExport.strIndicator end as strIndicator
 		,AllExport.dblGrossUnits
 		,AllExport.intTicketType
 		,AllExport.strTicketType
@@ -189,16 +189,20 @@ begin
 		,AllExport.strUnitMeasure
 		,AllExport.dblComputedGrossUnits
 		,AllExport.strStationUnitMeasure
+		from #tmpSampleExport AllExport				
+			left join tblSMCompanyLocation CompanyLocation
+				on AllExport.intProcessingLocationId = CompanyLocation.intCompanyLocationId
+			order by AllExport.intTicketNumber asc, strModTicketNumber
+			/*
 		from @RangedTicketNumber AllTicketNumber
-			left join #tmpSampleExport AllExport
+			join #tmpSampleExport AllExport
 				on AllTicketNumber.intTicketNumber = AllExport.intTicketNumber
 					and AllTicketNumber.intLocationId = AllExport.intProcessingLocationId
 					and AllTicketNumber.strIndicator = AllExport.strIndicator
 			left join tblSMCompanyLocation CompanyLocation
 				on AllTicketNumber.intLocationId = CompanyLocation.intCompanyLocationId
-			order by AllTicketNumber.intTicketNumber asc, strModTicketNumber
+			order by AllTicketNumber.intTicketNumber asc, strModTicketNumber */
 
 
 
 end
-GO
