@@ -572,6 +572,11 @@ BEGIN TRY
 		, CD.dblPrepaymentAmount
 		, CD.dblBudgetPrice
 		, CD.dblTotalBudget
+		, CD.intLocalCurrencyId
+		, CD.intLocalUOMId
+		, CD.dblLocalCashPrice
+		, ILU.strUnitMeasure AS strLocalUOM
+		, LUC.strCurrency AS strLocalCurrency
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -646,6 +651,9 @@ BEGIN TRY
 	) AP
 	-- Commodity Attributes
 	LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
+	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
+	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
+	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	ORDER BY CD.intContractSeq
 
 	DROP TABLE #tmpContractDetail

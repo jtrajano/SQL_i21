@@ -48,7 +48,8 @@ AS
 			NM.strLocationName,
 			CH.intDaysForFinance,
 			CH.intSampleTypeId,
-			NM.strSampleTypeName
+			NM.strSampleTypeName,
+			CH.ysnLocalCurrency
 			
 	FROM	tblCTContractHeader					CH
 	cross apply (select * from tblCTCompanyPreference) CP

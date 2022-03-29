@@ -187,7 +187,6 @@ AS
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
 		, CD.dblPrepaymentAmount
-
 		, strCostTerm = CostTerm.strFreightTerm
         , CD.intCostTermId
         , CD.intShippingLineId2
@@ -198,7 +197,11 @@ AS
 		, CD.dblTotalBudget
 		, CH.intSampleTypeId
 		, sam.strSampleTypeName
-
+		, CD.intLocalCurrencyId
+		, CD.intLocalUOMId
+		, CD.dblLocalCashPrice
+		, ILU.strUnitMeasure AS strLocalUOM
+		, LUC.strCurrency AS strLocalCurrency
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -296,3 +299,5 @@ AS
 	LEFT JOIN tblEMEntity SL2 ON SL2.intEntityId = CD.intShippingLineId2
 	LEFT JOIN tblEMEntity SL3 ON SL3.intEntityId = CD.intShippingLineId3
 	LEFT JOIN tblQMSampleType sam on sam.intSampleTypeId = CH.intSampleTypeId
+	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
+	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
