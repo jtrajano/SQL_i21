@@ -24,7 +24,7 @@
     [intConcurrencyId]              INT NOT NULL DEFAULT 0,
     [ysnAllowIntraCompanyEntries]	BIT NOT NULL DEFAULT(0),
 	[ysnAllowIntraLocationEntries]	BIT NOT NULL DEFAULT(0),
-	[ysnAllowSingleLocationEntries]	BIT NOT NULL DEFAULT(1),
+	[ysnAllowSingleLocationEntries]	BIT NOT NULL DEFAULT(0),
 	[intDueToAccountId]				INT NULL DEFAULT(0), 
     [intDueFromAccountId]			INT NULL DEFAULT(0)
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
