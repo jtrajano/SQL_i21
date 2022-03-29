@@ -95,10 +95,11 @@ begin
 					   strGroupIndicator as strStorageTypeDescription
 					   , strCommodityCode
 					   , sum(dblComputedGrossUnits) as dblGrossUnits 
+					   , strStationUnitMeasure
 
 					from vyuSCTicketInOutReport
 						where (dtmTicketDateTime between ''' + @sFrom + ''' and  ''' + @sTo + ''')
-						group by strGroupIndicator, strCommodityCode	
+						group by strGroupIndicator, strCommodityCode, strStationUnitMeasure
 					'
 
 

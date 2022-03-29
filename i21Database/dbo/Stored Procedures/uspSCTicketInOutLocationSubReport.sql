@@ -96,13 +96,12 @@ begin
 					   , strCommodityCode
 					   , strLocationName 
 					   , sum(dblComputedGrossUnits) as dblGrossUnits 
-
+					   , strStationUnitMeasure
 					from vyuSCTicketInOutReport
 						where (dtmTicketDateTime between ''' + @sFrom + ''' and  ''' + @sTo + ''')
-						group by strGroupIndicator, strCommodityCode, strLocationName
+						group by strGroupIndicator, strCommodityCode, strLocationName, strStationUnitMeasure
 					'
-
-
+						
 	exec (@sqlcmd)
 
 end
