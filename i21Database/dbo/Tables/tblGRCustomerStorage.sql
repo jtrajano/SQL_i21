@@ -70,5 +70,7 @@ CREATE NONCLUSTERED INDEX [IX_tblGRCustomerStorage_intItemId]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblGRCustomerStorage_intEntityId] ON [dbo].[tblGRCustomerStorage]([intEntityId] ASC);
 GO
+CREATE NONCLUSTERED INDEX [IX_tblGRCustomerStorage_strStorageTicketNumber] ON [dbo].[tblGRCustomerStorage]([strStorageTicketNumber] ASC);
+GO
 
 
