@@ -46,7 +46,7 @@
 	[intAttachmentRetention]				INT NOT NULL DEFAULT 7,
 	[ysnAllowIntraCompanyEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraCompanyEntries] DEFAULT((0)),
 	[ysnAllowIntraLocationEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraLocationEntries] DEFAULT((0)),
-	[ysnAllowSingleLocationEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowSingleLocationEntries] DEFAULT((1)),
+	[ysnAllowSingleLocationEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowSingleLocationEntries] DEFAULT((0)),
 	[intDueToAccountId]						INT NULL, 
     [intDueFromAccountId]					INT NULL,
 	[strCustomerAgingBy]					NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Invoice Due Date',
