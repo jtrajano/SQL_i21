@@ -9775,7 +9775,6 @@
     <Build Include="dbo\User Defined Types\SettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\Views\vyuGRSettleStorageBillDetail.sql" />
     <None Include="Scripts\Utility\IC\DPR\uspARDprInTransitFix.sql" />
-    <Build Include="dbo\Stored Procedures\uspLGFixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
