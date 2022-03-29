@@ -998,12 +998,12 @@ GO
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.DerivativeEntry') 
 	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Derivative Entry', N'Derivative Entry', N'RiskManagement.view.DerivativeEntry', N'Risk Management', NULL, 1, N'Risk Management')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName], [ysnApproval], [ysnApprovalsReadOnly]) 
+		VALUES (N'Derivative Entry', N'Derivative Entry', N'RiskManagement.view.DerivativeEntry', N'Risk Management', NULL, 1, N'Risk Management', 1, 1)
 	END
 	ELSE
 	BEGIN
-		UPDATE [dbo].[tblSMScreen] SET [ysnApproval] = 1 WHERE strNamespace = N'RiskManagement.view.DerivativeEntry'
+		UPDATE [dbo].[tblSMScreen] SET [ysnApproval] = 1, [ysnApprovalsReadOnly] = 1 WHERE strNamespace = N'RiskManagement.view.DerivativeEntry'
 	END
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.AssignFuturesToContracts') 
