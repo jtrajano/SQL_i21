@@ -25,6 +25,10 @@ DECLARE @valuation AS TABLE (
 DECLARE @intCommodityId INT
 DECLARE @ysnInTransit BIT = 1
 
+DECLARE 
+	@resultAsHTML AS NVARCHAR(MAX) 
+	,@companyName AS NVARCHAR(MAX) 
+
 -------------------------------------------------------------
 -- Run the data fix first before running the valuation
 -------------------------------------------------------------
@@ -75,6 +79,9 @@ HAVING
 ORDER BY 
 	b.intCommodityId ASC
 	,a.strTransactionId ASC 
+
+-- Get the company name
+SELECT TOP 1 @companyName = ISNULL(strCompanyName, '') FROM tblSMCompanySetup
 
 IF EXISTS (
 	SELECT TOP 1 1
@@ -139,14 +146,7 @@ BEGIN
 		AND @emailRecipient IS NOT NULL 
 	BEGIN 
 		PRINT 'Discrepancy found and email will be sent.'		
-
-		DECLARE 
-			@resultAsHTML AS NVARCHAR(MAX) 
-			,@companyName AS NVARCHAR(MAX) 
 	
-		-- Get the company name
-		SELECT TOP 1 @companyName = ISNULL(strCompanyName, '') FROM tblSMCompanySetup
-
 		-- Assemble the result as html table 
 		SET @resultAsHTML = 
 			N'<h1>Diagnostic result for ' + @companyName +'</h1>'
@@ -297,6 +297,93 @@ BEGIN
 
 	RETURN 0;
 END 
+ELSE 
+BEGIN 
+	-- Assemble the result as html table 
+	SET @resultAsHTML = 
+		N'<h1>Diagnostic result for ' + @companyName +'</h1>'
 
-PRINT 'Cheers! IC diagnostics did not find any issues.'
+	-- Format the details
+	BEGIN			
+		SET @resultAsHTML = @resultAsHTML + N'<h2>DPR In-Transit versus Valuation In-Transit</h2>' +
+			N'<table border="1">' + 
+			N'<tr>' +
+				N'<th>Commodity</th>' +
+				N'<th align=''right''>DPR Qty</th>' +
+				N'<th align=''right''>Valuation Qty</th>' +
+				N'<th align=''right''>Difference</th>' +
+			N'</tr>'
+
+		DECLARE loopResult CURSOR LOCAL FAST_FORWARD
+		FOR 
+		SELECT 
+			c.strCommodityCode
+			,dpr = ISNULL(dpr.dblTotal, 0)
+			,valuation = ISNULL(valuation.dblTotal, 0) 
+			,[difference] = ISNULL(dpr.dblTotal, 0) - ISNULL(valuation.dblTotal, 0) 
+		FROM 
+			tblICCommodity c 
+			OUTER APPLY 
+			(	
+				SELECT 
+					dblTotal = SUM(ISNULL(d.dblTotal, 0))
+				FROM
+					@dpr d
+				WHERE
+					d.intCommodityId = c.intCommodityId
+			) dpr 
+			OUTER APPLY 
+			(
+				SELECT 
+					dblTotal = SUM(ISNULL(v.dblTotal, 0))
+				FROM
+					@valuation v
+				WHERE
+					v.intCommodityId = c.intCommodityId			
+			) valuation 				
+		ORDER BY
+			c.strCommodityCode			
+
+		OPEN loopResult
+		FETCH NEXT FROM loopResult INTO 
+			@strCommodityCode
+			,@dblDPRQty 
+			,@dblValuationQty 
+			,@dblDifference 
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 
+			SET @resultAsHTML += 
+				N'<tr>' + 
+				N'<td>'+ @strCommodityCode +'</td>' + 
+				N'<td align=''right''>'+ ISNULL(dbo.fnICFormatNumber(@dblDPRQty), '') +'</td>' + 
+				N'<td align=''right''>'+ ISNULL(dbo.fnICFormatNumber(@dblValuationQty),'') +'</td>' + 
+				N'<td align=''right''> '+ ISNULL(dbo.fnICFormatNumber(@dblDifference), '') +'</td>' + 
+				N'</tr>'
+
+			FETCH NEXT FROM loopResult INTO 
+				@strCommodityCode
+				,@dblDPRQty 
+				,@dblValuationQty 
+				,@dblDifference 
+		END 
+
+		SET @resultAsHTML += N'</table>'; 
+
+		CLOSE loopResult;
+		DEALLOCATE loopResult;
+	END 
+
+	-- Send the email 
+	EXEC msdb.dbo.sp_send_dbmail
+		@profile_name = @emailProfileName
+		,@recipients = @emailRecipient
+		,@subject = 'IC Diagnostics for DPR'
+		,@body = @resultAsHTML
+		,@body_format = 'HTML'			
+
+	PRINT 'Email Sent to Queue.'
+	PRINT 'Cheers! IC diagnostics did not find any issues.'
+END 
+
 RETURN 0; 
