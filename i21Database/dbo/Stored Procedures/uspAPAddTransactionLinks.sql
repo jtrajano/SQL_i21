@@ -118,6 +118,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
 				LEFT JOIN tblAPBill B ON B.intBillId = PD.intBillId
 				LEFT JOIN tblARInvoice I ON I.intInvoiceId = PD.intInvoiceId
+				WHERE PD.dblPayment <> 0
 
 				EXEC uspICAddTransactionLinks @TransactionLinks
 			END
@@ -289,13 +290,14 @@ BEGIN
 			INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 			LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
 			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = B.intBorrowingFacilityLimitDetailId
-			WHERE NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
+			WHERE (NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
 				  OR NULLIF(B.intBankId, 0) IS NOT NULL
 				  OR NULLIF(B.intBankAccountId, 0) IS NOT NULL
 				  OR NULLIF(B.intBorrowingFacilityId, 0) IS NOT NULL
 				  OR NULLIF(B.intBorrowingFacilityLimitId, 0) IS NOT NULL
 				  OR NULLIF(B.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
-				  OR NULLIF(B.strReferenceNo, '') IS NOT NULL
+				  OR NULLIF(B.strReferenceNo, '') IS NOT NULL)
+				  AND PD.dblPayment <> 0
 		END
 
 		EXEC uspTRFLogTradeFinance @TradeFinanceLogs
