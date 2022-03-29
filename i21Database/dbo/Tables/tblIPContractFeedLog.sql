@@ -12,6 +12,9 @@
 	,intContractStatusId INT
 	,dtmUpdatedAvailabilityDate DATETIME
 	,intSubBookId INT
+	,dtmContractDate DATETIME
+	,dblFXPrice NUMERIC(18, 6)
+	,dblRefFuturesQty NUMERIC(18, 6)
 
 	,CONSTRAINT [PK_tblIPContractFeedLog_intContractFeedLogId] PRIMARY KEY CLUSTERED (intContractFeedLogId ASC)
 	)
