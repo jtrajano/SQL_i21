@@ -43,6 +43,7 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
 		AND CD.intContractStatusId = 1
+		AND CH.intContractTypeId = 1
 	WHERE IsNULL(L.intCompanyLocationId, 0) <> IsNULL(CD.intCompanyLocationId, 0)
 		OR IsNULL(L.intHeaderBookId, 0) <> IsNULL(CH.intBookId, 0)
 
