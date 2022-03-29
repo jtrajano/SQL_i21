@@ -382,6 +382,7 @@
     <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
     <Folder Include="Scripts\Utility\IC\DPR" />
     <Folder Include="Scripts\Utility\SC" />
+    <Folder Include="Scripts\Utility\GR\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
@@ -9773,6 +9774,7 @@
     <Build Include="dbo\Tables\tblGRSettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\User Defined Types\SettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\Views\vyuGRSettleStorageBillDetail.sql" />
+    <None Include="Scripts\Utility\IC\DPR\uspARDprInTransitFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
