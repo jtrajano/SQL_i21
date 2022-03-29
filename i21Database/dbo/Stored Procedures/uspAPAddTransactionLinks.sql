@@ -150,6 +150,8 @@ BEGIN
 		END
 
 	--TRADE FINANCE
+	IF @ysnSkip <> 1
+	BEGIN
 		DECLARE @TradeFinanceLogs AS TRFLog
 
 		--VOUCHER
@@ -297,4 +299,5 @@ BEGIN
 		END
 
 		EXEC uspTRFLogTradeFinance @TradeFinanceLogs
+	END
 END
