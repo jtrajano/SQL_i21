@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMGetEmailInfo]
 		@strId			NVARCHAR(MAX),
 		@strMailType	NVARCHAR(100),
-		@strURL	NVARCHAR(MAX),
-		@intCurrentUserEntityId int
+		@strURL			NVARCHAR(MAX),
+		@intCurrentUserEntityId int,
+		@strNumber		NVARCHAR(MAX)
 AS 
 BEGIN
-	DECLARE @strNumber					NVARCHAR(100),
-			@intEntityId				INT,
+	DECLARE @intEntityId				INT,
 			@strEntityName				NVARCHAR(200),
 			@body						NVARCHAR(MAX) = '',
 			@Subject					NVARCHAR(MAX) = '',
@@ -27,8 +27,7 @@ BEGIN
 		SELECT CD.intContractHeaderId,SL.strSampleNumber
 		FROM tblCTContractDetail CD
 		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-		INNER JOIN vyuQMSampleList SL ON CD.intContractDetailId = SL.intContractDetailId
-		WHERE CD.intContractDetailId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
+		INNER JOIN vyuQMSampleList SL ON CD.intContractDetailId = SL.intContractDetailId AND SL.strSampleNumber COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT * FROM  dbo.fnSplitString(@strNumber,','))
 	END
 	ELSE IF @strMailType = 'Sample Print'
 	BEGIN
@@ -56,16 +55,6 @@ BEGIN
 				
 	FROM	vyuCTEntityToContact CH
 	WHERE	intEntityId = @intEntityId
-
-
-	SELECT	@strNumber	=	STUFF(															
-									(
-										SELECT	DISTINCT												
-												', ' +	LTRIM(strNumber)
-										FROM	@loop
-										FOR XML PATH('')
-									),1,2, ''
-								)
 
 	IF EXISTS ( 
 	SELECT	DISTINCT	1 
