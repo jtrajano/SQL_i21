@@ -120,7 +120,26 @@ BEGIN TRY
 	END
 
 	DROP TABLE #tmpCheckOTCOthers
-	
+
+
+	IF @ysnAllowDerivativeAssignToMultipleContracts = 0
+	BEGIN
+		SELECT
+			 dblToBeAssignedLots
+			, dblToBeHedgedLots
+			, intContractDetailId
+			, intContractHeaderId
+			, strContractType
+			, strFutMarketName
+			, strFutureMonth
+			, strCommodityCode
+			, strLocationName
+			, strContractNumber
+			, intContractSeq
+		INTO #tmpAssignPhysicalTransaction
+		FROM vyuRKGetAssignPhysicalTransaction
+	END
+
 	IF (@strDateTimeFormat = 'MM DD YYYY HH:MI' OR @strDateTimeFormat ='YYYY MM DD HH:MI')
 		SELECT @ConvertYear = 101
 	ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD MM HH:MI')
@@ -941,7 +960,7 @@ BEGIN TRY
 							,@strFutureMonthCnt = strFutureMonth
 							,@strCommodityCodeCnt = strCommodityCode
 							,@strLocationNameCnt = strLocationName
-						from vyuRKGetAssignPhysicalTransaction where strContractNumber = @strContractNumber and intContractSeq = @strContractSequence
+						from #tmpAssignPhysicalTransaction where strContractNumber = @strContractNumber and intContractSeq = @strContractSequence
 
 
 
@@ -951,6 +970,10 @@ BEGIN TRY
 							IF @dblNoOfContract > @dblToBeAssignedLots
 							BEGIN
 								SET @ErrMsg = @ErrMsg + ' Derivative lots (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeAssignedLots) + ') to be assigned.'
+							END
+							ELSE
+							BEGIN
+								UPDATE #tmpAssignPhysicalTransaction SET dblToBeAssignedLots = @dblToBeAssignedLots - @dblNoOfContract WHERE strContractNumber = @strContractNumber AND intContractSeq = @strContractSequence
 							END
 
 							
@@ -974,6 +997,10 @@ BEGIN TRY
 							IF @dblNoOfContract > @dblToBeHedgedLots 
 							BEGIN
 								SET @ErrMsg = @ErrMsg + ' Derivative lot (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeHedgedLots) + ') to be hedged.'
+							END
+							ELSE
+							BEGIN
+								UPDATE #tmpAssignPhysicalTransaction SET dblToBeHedgedLots = @dblToBeHedgedLots - @dblNoOfContract WHERE strContractNumber = @strContractNumber AND intContractSeq = @strContractSequence
 							END
 
 						END 
