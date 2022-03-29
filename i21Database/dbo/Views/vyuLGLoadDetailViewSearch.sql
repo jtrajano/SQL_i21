@@ -96,6 +96,10 @@ SELECT   L.intLoadId
 		,intContractHeaderId = CASE WHEN L.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END 
 		,PHeader.intContractHeaderId AS intPContractHeaderId 
 		,L.ysnLoadBased
+		,LD.dblForexRate
+		,LD.dblForexAmount
+		,strForeignCurrency = FXC.strCurrency
+		,strForexRateType = FXRT.strCurrencyExchangeRateType
 
 -- Inbound Company Location
         ,strPLocationName = PCL.strLocationName
@@ -292,6 +296,8 @@ LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLi
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
 LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
 LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
+LEFT JOIN tblSMCurrency FXC ON FXC.intCurrencyID = LD.intForexCurrencyId
+LEFT JOIN tblSMCurrencyExchangeRateType FXRT ON FXRT.intCurrencyExchangeRateTypeId = LD.intForexRateTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId]	= L.intDispatcherId
 LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LD.intPickLotDetailId
