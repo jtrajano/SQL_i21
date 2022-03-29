@@ -145,7 +145,7 @@ INNER JOIN(
 				)TOR
 				ON E.intEntityId = TOR.intEntityEmployeeId
 				AND T.intTypeTimeOffId = TOR.intTypeTimeOffId
-				AND PCTimeOff.intYear = YEAR(TOR.dtmDateTo) 
+				AND ((PCTimeOff.intYear IS NOT NULL AND PCTimeOff.intYear = YEAR(TOR.dtmDateTo)) OR PCTimeOff.intYear IS NULL)
    			GROUP BY 
 			E.intEntityId
 			,T.intTypeTimeOffId   
