@@ -1036,8 +1036,8 @@ BEGIN
 
 		SELECT @paymentIds = COALESCE(@paymentIds + ', ', '') + CONVERT(VARCHAR(12), intId) FROM @payments
 
-		EXEC uspAPAddTransactionLinks 2, @paymentIds, 2, @userId
-		EXEC uspAPAddTransactionLinks 2, @paymentIds, 1, @userId
+		EXEC uspAPAddTransactionLinks 2, @paymentIds, 2, @userId, 1
+		EXEC uspAPAddTransactionLinks 2, @paymentIds, 1, @userId, 1
 	END
 
 	DECLARE @voucherHistory AS Id

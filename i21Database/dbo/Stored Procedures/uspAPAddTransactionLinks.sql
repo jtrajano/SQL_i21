@@ -2,7 +2,8 @@
 	@intTransactionType INT,
 	@strTransactionIds NVARCHAR(MAX),
 	@intAction INT,
-	@intUserId INT
+	@intUserId INT,
+	@ysnSkip BIT = 0
 AS
 
 BEGIN
@@ -163,7 +164,7 @@ BEGIN
 			  OR NULLIF(A.strReferenceNo, '') IS NOT NULL
 			  OR NULLIF(A.intBankValuationRuleId, 0) IS NOT NULL
 			  OR NULLIF(A.strComments, '') IS NOT NULL
-	)
+	) AND @ysnSkip <> 1
 	BEGIN
 		DECLARE @TradeFinanceLogs AS TRFLog
 
