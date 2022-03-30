@@ -1631,6 +1631,7 @@ BEGIN
 		) ICIUOM
 		ON COSTING.intItemUOMId = ICIUOM.intItemUOMId
 	WHERE ISNULL([ysnAutoBlend], 0) = 0
+	  AND ISNULL(ysnGLOnly, 0) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
