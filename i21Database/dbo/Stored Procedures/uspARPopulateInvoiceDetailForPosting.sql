@@ -60,7 +60,10 @@ SELECT TOP 1
     ,@DeferredRevenueAccountId  = [intDeferredRevenueAccountId]
 	,@ImpactForProvisional      = ISNULL([ysnImpactForProvisional], @ZeroBit)
     ,@ExcludeInvoiceFromPayment = ISNULL([ysnExcludePaymentInFinalInvoice], @ZeroBit)
-    ,@AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END
+    ,@AllowIntraEntries         = CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 OR (ISNULL(ysnAllowIntraCompanyEntries, 0) = 0 AND ISNULL(ysnAllowIntraLocationEntries, 0) = 0 AND ISNULL(ysnAllowSingleLocationEntries, 0) = 0)
+                                    THEN 1 
+                                    ELSE 0 
+                                  END
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId 
 
