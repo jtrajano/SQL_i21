@@ -989,9 +989,9 @@ BEGIN
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
-				, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
+				, strCropYear = cropYear.strCropYear
 			FROM tblRKFutOptTransaction ft
-			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
+			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId 
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
 			JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ft.intContractDetailId
@@ -1007,6 +1007,8 @@ BEGIN
 			LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
 			LEFT JOIN tblICCertification certification
 				ON certification.intCertificationId = ic.intCertificationId
+			LEFT JOIN tblCTCropYear cropYear
+				ON cropYear.intCropYearId = CH.intCropYearId
 			WHERE ft.intCommodityId = @intCommodityId
 				AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 				AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
@@ -1070,7 +1072,7 @@ BEGIN
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
-				, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
+				, strCropYear = cropYear.strCropYear
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1090,6 +1092,8 @@ BEGIN
 			LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
 			LEFT JOIN tblICCertification certification
 				ON certification.intCertificationId = ic.intCertificationId
+			LEFT JOIN tblCTCropYear cropYear
+				ON cropYear.intCropYearId = CH.intCropYearId
 			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 				AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 				AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1158,7 +1162,7 @@ BEGIN
 			, strSeason = season.strDescription
 			, strClass = class.strDescription
 			, strCertificationName = certification.strCertificationName
-			, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
+			, strCropYear = cropYear.strCropYear
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1176,6 +1180,8 @@ BEGIN
 		LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
 		LEFT JOIN tblICCertification certification
 			ON certification.intCertificationId = ic.intCertificationId
+		LEFT JOIN tblCTCropYear cropYear
+			ON cropYear.intCropYearId = CH.intCropYearId
 		WHERE ft.intCommodityId = @intCommodityId
 			AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 			AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
@@ -1268,7 +1274,7 @@ BEGIN
 				, strSeason = season.strDescription
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
-				, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
+				, strCropYear = cropYear.strCropYear
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1286,6 +1292,8 @@ BEGIN
 			LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
 			LEFT JOIN tblICCertification certification
 				ON certification.intCertificationId = ic.intCertificationId
+			LEFT JOIN tblCTCropYear cropYear
+				ON cropYear.intCropYearId = CH.intCropYearId
 			WHERE ft.intCommodityId = @intCommodityId
 				AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 				AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1355,7 +1363,7 @@ BEGIN
 			, strSeason = season.strDescription
 			, strClass = class.strDescription
 			, strCertificationName = certification.strCertificationName
-			, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
+			, strCropYear = cropYear.strCropYear
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1373,6 +1381,8 @@ BEGIN
 		LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
 		LEFT JOIN tblICCertification certification
 			ON certification.intCertificationId = ic.intCertificationId
+		LEFT JOIN tblCTCropYear cropYear
+			ON cropYear.intCropYearId = CH.intCropYearId
 		WHERE ft.intCommodityId = @intCommodityId
 			AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 			AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1465,7 +1475,7 @@ BEGIN
 					, strSeason = season.strDescription
 					, strClass = class.strDescription
 					, strCertificationName = certification.strCertificationName
-					, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
+					, strCropYear = cropYear.strCropYear
 				FROM tblRKFutOptTransaction ft
 				INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1485,6 +1495,8 @@ BEGIN
 				LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
 				LEFT JOIN tblICCertification certification
 					ON certification.intCertificationId = ic.intCertificationId
+				LEFT JOIN tblCTCropYear cropYear
+					ON cropYear.intCropYearId = CH.intCropYearId
 				WHERE ft.intCommodityId = @intCommodityId
 					AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 					AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
@@ -1554,7 +1566,7 @@ BEGIN
 					, strSeason = season.strDescription
 					, strClass = class.strDescription
 					, strCertificationName = certification.strCertificationName
-					, strCropYear = CAST(CH.intCropYearId AS NVARCHAR(100))
+					, strCropYear = cropYear.strCropYear
 				FROM tblRKFutOptTransaction ft
 				INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1574,6 +1586,8 @@ BEGIN
 				LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
 				LEFT JOIN tblICCertification certification
 					ON certification.intCertificationId = ic.intCertificationId
+				LEFT JOIN tblCTCropYear cropYear
+					ON cropYear.intCropYearId = CH.intCropYearId
 				WHERE ft.intCommodityId = @intCommodityId
 					AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
 					AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
