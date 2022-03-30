@@ -599,7 +599,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostMissingLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntriesForMissingLots.sql" />
     <Build Include="dbo\Views\vyuQMContractWithoutSampleList.sql" />
-    <Build Include="dbo\Views\vyuQMAllocation.sql" />   
+    <Build Include="dbo\Views\vyuQMAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionAlternativeShippingLinesReport.sql" />
     <Build Include="dbo\Views\vyuRKM2MBasisForNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoAssignDerivative.sql" />
@@ -627,6 +627,10 @@
     <Build Include="dbo\Stored Procedures\uspICGenerateStorageCharges.sql" />
     <Build Include="dbo\Tables\tblICStorageChargeDetail.sql" />
     <Build Include="dbo\Views\vyuICGetStorageChargeDetail.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute1.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute2.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute3.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute4.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

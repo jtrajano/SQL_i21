@@ -75,6 +75,10 @@ SELECT
 	, Item.strMarketValuation
 	, Item.intValuationGroupId
 	, strValuationGroup = VG.strName
+	, attribute1.strAttribute1
+	, attribute2.strAttribute2
+	, attribute3.strAttribute3
+	, attribute4.strAttribute4
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -119,3 +123,15 @@ LEFT JOIN tblSMModule Module
 	ON Module.intModuleId = Item.intModuleId
 LEFT JOIN tblICCertification Certification
 	ON Certification.intCertificationId = Item.intCertificationId
+
+LEFT JOIN tblICCommodityAttribute1 attribute1 
+	ON attribute1.intCommodityAttributeId1 = Item.intCommodityAttributeId1
+
+LEFT JOIN tblICCommodityAttribute2 attribute2
+	ON attribute2.intCommodityAttributeId2 = Item.intCommodityAttributeId2
+
+LEFT JOIN tblICCommodityAttribute3 attribute3
+	ON attribute3.intCommodityAttributeId3 = Item.intCommodityAttributeId3
+
+LEFT JOIN tblICCommodityAttribute4 attribute4
+	ON attribute4.intCommodityAttributeId4 = Item.intCommodityAttributeId4
