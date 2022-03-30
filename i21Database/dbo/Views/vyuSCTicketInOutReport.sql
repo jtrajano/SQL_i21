@@ -1,6 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketInOutReport]
 	AS 
-
+	/*
+		-- Dev Note 
+		column strStationUnitMeasure is not referring to scale station uom but to company preference uom since SC-4512
+	*/
 	select 
 
 		Ticket.strTicketNumber
@@ -26,17 +29,18 @@
 		, Commodity.strCommodityCode
 		, UOM.strUnitMeasure
 
-		,case when ScaleSetup.intUnitMeasureId != UOM.intUnitMeasureId then
+		,case when ScaleSetupUOM.intUnitMeasureId is not null and 
+			ScaleSetupUOM.intUnitMeasureId != UOM.intUnitMeasureId then
 			round(dbo.fnGRConvertQuantityToTargetItemUOM(
 									Ticket.intItemId
 									, UOM.intUnitMeasureId
-									, ScaleSetup.intUnitMeasureId
+									, ScaleSetupUOM.intUnitMeasureId
 									, Ticket.dblGrossUnits) , 4)
 		else
 			Ticket.dblGrossUnits
 		end as dblComputedGrossUnits
 
-		,ScaleSetupUOM.strUnitMeasure as strStationUnitMeasure
+		,isnull(ScaleSetupUOM.strUnitMeasure, UOM.strUnitMeasure) as strStationUnitMeasure
 
 		from tblSCTicket Ticket
 			join tblICItem Item
@@ -58,10 +62,13 @@
 
 			join tblICUnitMeasure UOM
 					on ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-			join tblSCScaleSetup ScaleSetup
-				on Ticket.intScaleSetupId = ScaleSetup.intScaleSetupId
-			join tblICUnitMeasure ScaleSetupUOM
-				on ScaleSetup.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+			outer apply(
+				select ScaleSetupUOM.strUnitMeasure, Pref.intUnitMeasureId from	
+					tblGRCompanyPreference Pref
+						join tblICUnitMeasure ScaleSetupUOM
+							on Pref.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+			) ScaleSetupUOM
+			
 
 			left join tblSCDeliverySheet DeliverySheet
 				on Ticket.intDeliverySheetId = DeliverySheet.intDeliverySheetId
@@ -87,17 +94,18 @@
 		, Commodity.strCommodityCode
 		, UOM.strUnitMeasure
 
-		,case when ScaleSetup.intUnitMeasureId != UOM.intUnitMeasureId then
+		,case when ScaleSetupUOM.intUnitMeasureId is not null and 
+			ScaleSetupUOM.intUnitMeasureId != UOM.intUnitMeasureId then
 			dbo.fnGRConvertQuantityToTargetItemUOM(
 									Ticket.intItemId
 									, UOM.intUnitMeasureId
-									, ScaleSetup.intUnitMeasureId
+									, ScaleSetupUOM.intUnitMeasureId
 									, Ticket.dblGrossUnits)
 		else
 			Ticket.dblGrossUnits
 		end as dblComputedGrossUnits
 
-		,ScaleSetupUOM.strUnitMeasure as strStationUnitMeasure
+		,isnull(ScaleSetupUOM.strUnitMeasure, UOM.strUnitMeasure) as strStationUnitMeasure
 		from tblSCTicket Ticket	
 			join tblICItem Item
 				on Ticket.intItemId = Item.intItemId
@@ -116,10 +124,12 @@
 
 			join tblICUnitMeasure UOM
 					on ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-			join tblSCScaleSetup ScaleSetup
-				on Ticket.intScaleSetupId = ScaleSetup.intScaleSetupId
-			join tblICUnitMeasure ScaleSetupUOM
-				on ScaleSetup.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+			outer apply(
+				select ScaleSetupUOM.strUnitMeasure, Pref.intUnitMeasureId from	
+					tblGRCompanyPreference Pref
+						join tblICUnitMeasure ScaleSetupUOM
+							on Pref.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+			) ScaleSetupUOM
 			
 	where Ticket.intTicketType = 7
 		and CompanyLocation.ysnLicensed = 1
@@ -144,17 +154,18 @@
 		, Commodity.strCommodityCode
 		, UOM.strUnitMeasure
 
-		,case when ScaleSetup.intUnitMeasureId != UOM.intUnitMeasureId then
+		,case when ScaleSetupUOM.intUnitMeasureId is not null and 
+			ScaleSetupUOM.intUnitMeasureId != UOM.intUnitMeasureId then
 			dbo.fnGRConvertQuantityToTargetItemUOM(
 									Ticket.intItemId
 									, UOM.intUnitMeasureId
-									, ScaleSetup.intUnitMeasureId
+									, ScaleSetupUOM.intUnitMeasureId
 									, Ticket.dblGrossUnits)
 		else
 			Ticket.dblGrossUnits
 		end as dblComputedGrossUnits
 
-		,ScaleSetupUOM.strUnitMeasure as strStationUnitMeasure
+		,isnull(ScaleSetupUOM.strUnitMeasure, UOM.strUnitMeasure) as strStationUnitMeasure
 		from tblSCTicket Ticket		
 			join tblICItem Item
 				on Ticket.intItemId = Item.intItemId
@@ -173,10 +184,12 @@
 
 			join tblICUnitMeasure UOM
 					on ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-			join tblSCScaleSetup ScaleSetup
-				on Ticket.intScaleSetupId = ScaleSetup.intScaleSetupId
-			join tblICUnitMeasure ScaleSetupUOM
-				on ScaleSetup.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+			outer apply(
+				select ScaleSetupUOM.strUnitMeasure, Pref.intUnitMeasureId from	
+					tblGRCompanyPreference Pref
+						join tblICUnitMeasure ScaleSetupUOM
+							on Pref.intUnitMeasureId = ScaleSetupUOM.intUnitMeasureId
+			) ScaleSetupUOM
 
 	where Ticket.intTicketType = 7
 		and CompanyLocation.ysnLicensed = 1		
