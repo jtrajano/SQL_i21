@@ -37,7 +37,7 @@ SELECT
 	,strDebitAccount = account.strAccountId
 	,strCreditAccount = apaccount.strAccountId
 	,strTaxAccount = RT.strAccountId
-	,APBD.dblTax
+	,dblTax = RT.dblAdjustedTax
 	,APBD.dblQtyReceived
 	,strUnitOfMeasure = UM.strUnitMeasure
 	,dblPaymentAmount = ISNULL(payment.dblAmountPaid, 0.00)
@@ -71,6 +71,7 @@ INNER JOIN (
 		,GL.strAccountId
         ,SMTC.strTaxClass
 		,APBDT.dblRate
+		,APBDT.dblAdjustedTax
     FROM tblAPBillDetailTax APBDT
     LEFT JOIN tblSMTaxCode STC ON APBDT.intTaxCodeId = STC.intTaxCodeId
 	LEFT JOIN tblGLAccount GL ON STC.intPurchaseTaxAccountId = GL.intAccountId
