@@ -1784,6 +1784,7 @@ BEGIN
 		,[dblForexRate]
 	FROM ##ARItemsForCosting
 	WHERE ISNULL([ysnAutoBlend], 0) = 0
+	  AND ISNULL(ysnGLOnly, 0) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
