@@ -617,6 +617,16 @@
     <Build Include="dbo\Tables\tblICLotRejected.sql" />
     <Build Include="dbo\Stored Procedures\uspICRejectLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICMoveRejectLot.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageCharge.sql" />
+    <Build Include="dbo\Tables\tblICStorageCharge.sql" />
+    <Build Include="dbo\Tables\tblICStorageRate.sql" />
+    <Build Include="dbo\Tables\tblICStorageRateDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageRate.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageRateDetail.sql" />
+    <Build Include="dbo\Views\vyuICSearchStorageRateDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGenerateStorageCharges.sql" />
+    <Build Include="dbo\Tables\tblICStorageChargeDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageChargeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
