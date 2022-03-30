@@ -1178,6 +1178,38 @@ BEGIN TRY
 
 	END
 
+
+	--=======================================--
+	-- Do this when transaction is only CF   --
+	--=======================================--
+	UPDATE tblARCustomerStatementStagingTable
+	SET 
+	dblTotalAR					= dblInvoiceTotal
+	,dblCreditAvailable			= 0
+	,dblFuture					= 0
+	,dbl0Days					= 0
+	,dbl10Days					= 0
+	,dbl30Days					= 0
+	,dbl60Days					= 0
+	,dbl90Days					= 0
+	,dbl91Days					= 0
+	,dblCredits					= 0
+	,dblPrepayments				= 0
+	FROM tblARCustomerStatementStagingTable
+	WHERE intEntityCustomerId IN
+	(
+		SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable
+		WHERE  intEntityUserId = @intEntityUserId
+		GROUP BY intEntityCustomerId,strCustomerName
+		HAVING ISNULL(COUNT(*),0) = 1
+	) 
+	AND intEntityUserId = @intEntityUserId
+	AND strTransactionType = 'Invoice'
+	AND ISNULL(dblTotalAR,0) = 0
+	AND ISNULL(dblPayment,0) = 0 
+	
+
+
 	UPDATE tblARCustomerStatementStagingTable
 	SET 
 			
