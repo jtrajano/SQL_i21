@@ -94,10 +94,15 @@ SELECT S.intSampleId
 	,I.strProductLine
 	,S.dtmRequestedDate
 	,S.dtmSampleSentDate
+	,SC.strSamplingCriteria
+	,S.strSendSampleTo
+	,S.strRepresentLotNumber
+	,RS.strSampleNumber AS strRelatedSampleNumber
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+LEFT JOIN tblQMSamplingCriteria SC ON SC.intSamplingCriteriaId = S.intSamplingCriteriaId
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 LEFT JOIN dbo.tblCTContractHeader CH1 ON CH1.intContractHeaderId = S.intContractHeaderId
@@ -134,3 +139,4 @@ LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
+LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
