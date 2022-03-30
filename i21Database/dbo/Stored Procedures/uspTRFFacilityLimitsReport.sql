@@ -663,6 +663,8 @@ AS
  	FROM vyuICGetInventoryReceiptVoucher voucher
  	JOIN tblAPBill bill
  	ON bill.intBillId = voucher.intBillId
+	WHERE voucher.intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tempReceiptInfo)
+	AND voucher.intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM #tempReceiptInfo)
 
 
  	-- Get Purchase Contract's Allocated Sale Contract
