@@ -38,9 +38,12 @@ SELECT S.intSampleId
 	,ST.ysnMultipleContractSeq
 	,CH.dblQuantity AS dblHeaderQuantity
 	,U2.strUnitMeasure AS strHeaderUnitMeasure
+	,SC.strSamplingCriteria
+	,RS.strSampleNumber AS strRelatedSampleNumber
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+LEFT JOIN tblQMSamplingCriteria SC ON SC.intSamplingCriteriaId = S.intSamplingCriteriaId
 LEFT JOIN tblQMSampleStatus SS1 ON SS1.intSampleStatusId = S.intPreviousSampleStatusId
 LEFT JOIN tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN tblICItem I1 ON I1.intItemId = S.intItemBundleId
@@ -66,3 +69,4 @@ LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
 LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
+LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId

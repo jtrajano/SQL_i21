@@ -395,6 +395,9 @@ BEGIN TRY
 		,strSentBy
 		,intSentById
 		,ysnImpactPricing
+		,intSamplingCriteriaId
+		,strSendSampleTo
+		,strRepresentLotNumber
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -467,6 +470,9 @@ BEGIN TRY
 		,strSentBy
 		,intSentById
 		,ysnImpactPricing
+		,intSamplingCriteriaId
+		,strSendSampleTo
+		,strRepresentLotNumber
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -529,6 +535,9 @@ BEGIN TRY
 			,strSentBy NVARCHAR(50)
 			,intSentById INT
 			,ysnImpactPricing BIT
+			,intSamplingCriteriaId INT
+			,strSendSampleTo NVARCHAR(50)
+			,strRepresentLotNumber NVARCHAR(50)
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT

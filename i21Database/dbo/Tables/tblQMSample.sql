@@ -72,6 +72,10 @@
 	ysnImpactPricing BIT CONSTRAINT [DF_tblQMSample_ysnImpactPricing] DEFAULT 0,
 	dtmRequestedDate DATETIME NULL,
 	dtmSampleSentDate DATETIME NULL,
+	intSamplingCriteriaId INT NULL,
+	strSendSampleTo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strRepresentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	intRelatedSampleId INT NULL,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
@@ -109,7 +113,8 @@
 	CONSTRAINT [FK_tblQMSample_tblICStorageLocation] FOREIGN KEY([intStorageLocationId]) REFERENCES tblICStorageLocation ([intStorageLocationId]),
 	CONSTRAINT [FK_tblQMSample_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblQMSample_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblQMSample_tblMFWorkOrder] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblQMSample_tblMFWorkOrder] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblQMSample_tblQMSamplingCriteria] FOREIGN KEY ([intSamplingCriteriaId]) REFERENCES [tblQMSamplingCriteria]([intSamplingCriteriaId])
 )
 GO
 CREATE STATISTICS [_dta_stat_1863273993_4_11_1] ON [dbo].[tblQMSample]([strSampleNumber], [intContractDetailId], [intSampleId])

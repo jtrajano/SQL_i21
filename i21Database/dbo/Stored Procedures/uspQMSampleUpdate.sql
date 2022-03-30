@@ -299,6 +299,9 @@ BEGIN TRY
 		,strSentBy = x.strSentBy
 		,intSentById = x.intSentById
 		,ysnImpactPricing = x.ysnImpactPricing
+		,intSamplingCriteriaId = x.intSamplingCriteriaId
+		,strSendSampleTo = x.strSendSampleTo
+		,strRepresentLotNumber = x.strRepresentLotNumber
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -360,6 +363,9 @@ BEGIN TRY
 			,strSentBy NVARCHAR(50)
 			,intSentById INT
 			,ysnImpactPricing BIT
+			,intSamplingCriteriaId INT
+			,strSendSampleTo NVARCHAR(50)
+			,strRepresentLotNumber NVARCHAR(50)
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)
