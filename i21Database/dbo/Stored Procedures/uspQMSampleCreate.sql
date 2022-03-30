@@ -470,7 +470,7 @@ BEGIN TRY
 		,strSentBy
 		,intSentById
 		,ysnImpactPricing
-		,intSamplingCriteriaId
+		,CASE intSamplingCriteriaId WHEN 0 THEN NULL ELSE intSamplingCriteriaId END intSamplingCriteriaId
 		,strSendSampleTo
 		,strRepresentLotNumber
 		,intCreatedUserId
