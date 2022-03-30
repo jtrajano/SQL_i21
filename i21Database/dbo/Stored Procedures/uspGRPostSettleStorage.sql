@@ -185,6 +185,9 @@ BEGIN TRY
 	DECLARE @dblTotalUnits AS DECIMAL(24,10)
 
 	DECLARE @ysnDeliverySheet AS BIT
+		,@ysnStorageChargeAccountUseIncome BIT = 1
+	
+	--select @ysnStorageChargeAccountUseIncome = ysnStorageChargeAccountUseIncome from tblGRCompanyPreference
 
 	/*	intItemType
 		------------
@@ -2328,6 +2331,7 @@ BEGIN TRY
 															case WHEN @ysnFromPriceBasisContract = 1 and a.intItemType = 2 then 'Other Charge Expense' else  'AP Clearing' end 
 														WHEN a.intItemType = 1 THEN 'AP Clearing'
 														WHEN @ysnDPOwnedType = 1 and a.intItemType = 3 AND CS.intTicketId IS NOT NULL then 'AP Clearing'
+														WHEN @ysnDPOwnedType = 1 and a.intItemType = 2 and @ysnStorageChargeAccountUseIncome = 1 THEN 'Other Charge Income'
 														ELSE 'Other Charge Expense' 
 													END
 																				)
