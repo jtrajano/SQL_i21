@@ -385,8 +385,7 @@ DECLARE @tblPostError TABLE(
   --BEGIN TODO : transfer this on this procedure  
   
   DECLARE @dtmReverseDate DATETIME  
-  SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationI
-d  
+  SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId  
   IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)  
   BEGIN  
    GOTO _raiserror  
