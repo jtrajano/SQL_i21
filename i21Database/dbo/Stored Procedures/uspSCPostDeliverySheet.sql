@@ -345,7 +345,7 @@ BEGIN TRY
 			,@actionType		= 'Post'							-- Action Type
 			,@changeDescription	= @strDescription					-- Description
 			,@fromValue			= @dblOrigQuantity					-- Old Value
-			,@toValue			= @s					-- New Value
+			,@toValue			= @dblFinalQuantity					-- New Value
 			,@details			= '';
 			SET @dblTempSplitQty = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
 			SET @dblTempAdjustByQuantity = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
