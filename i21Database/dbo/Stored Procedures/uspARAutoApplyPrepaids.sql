@@ -63,7 +63,7 @@ ORDER BY intCompanyPreferenceId
 SELECT TOP 1 @intPaymentMethodId 	= intPaymentMethodID
 		   , @strPaymentMethod		= strPaymentMethod
 FROM tblSMPaymentMethod 
-WHERE strPaymentMethod = 'Debit Memos and Payments'
+WHERE strPaymentMethod = 'Manual Credit Card'
 
 IF ISNULL(@intPaymentMethodId, 0) = 0
 	BEGIN
@@ -74,7 +74,7 @@ IF ISNULL(@intPaymentMethodId, 0) = 0
 			, intSort
 			, intConcurrencyId
 		)
-		SELECT strPaymentMethod = 'Debit Memos and Payments'
+		SELECT strPaymentMethod = 'Manual Credit Card'
 			, intNumber		 	= 1
 			, ysnActive			= 1
 			, intSort			= 0
@@ -83,7 +83,7 @@ IF ISNULL(@intPaymentMethodId, 0) = 0
 		SELECT TOP 1 @intPaymentMethodId 	= intPaymentMethodID
 					, @strPaymentMethod		= strPaymentMethod
 		FROM tblSMPaymentMethod 
-		WHERE strPaymentMethod = 'Debit Memos and Payments'
+		WHERE strPaymentMethod = 'Manual Credit Card'
 	END
 
 --GET INVOICES TO POST
