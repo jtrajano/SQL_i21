@@ -45,6 +45,7 @@ CREATE TABLE #AAPPREPAIDS (
 	, strInvoiceNumber		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
 	, strTransactionType	NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
 	, ysnProcessed			BIT NULL DEFAULT 0
+	, dblRunningTotal		NUMERIC(18,6) DEFAULT 0
 )
 
 SELECT TOP 1 @ysnAutoApplyPrepaids = ysnAutoApplyPrepaids 
@@ -179,6 +180,20 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 		FROM #AAPINVOICES
 		WHERE ysnProcessed = 0
 
+		DECLARE @query AS NVARCHAR(MAX) = '
+				UPDATE P
+				 SET dblRunningTotal = CREDITS.dblRunningTotal
+				FROM #AAPPREPAIDS P
+				INNER JOIN (
+					SELECT P.dtmPostDate, P.intInvoiceId,P.dblAmountDue,P.dblAppliedPayment
+						 ,dblRunningTotal = SUM(P.dblAmountDue - dblAppliedPayment) OVER (ORDER BY P.dtmPostDate, P.intInvoiceId)
+					FROM #AAPPREPAIDS P
+					WHERE P.dblAppliedPayment <> P.dblAmountDue
+				) CREDITS ON CREDITS.intInvoiceId = P.intInvoiceId
+				WHERE P.dblAppliedPayment <> P.dblAmountDue
+				'
+		 EXEC sp_executesql @query
+
 		--INSERT CREDITS
 		INSERT INTO @tblPaymentEntries (
 			  intId
@@ -237,7 +252,6 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 		FROM #AAPINVOICES I
 		INNER JOIN (
 			SELECT P.*
-				 , dblRunningTotal = SUM(P.dblAmountDue - dblAppliedPayment) OVER (ORDER BY P.dtmPostDate, P.intInvoiceId)
 			FROM #AAPPREPAIDS P
 			WHERE P.dblAppliedPayment <> P.dblAmountDue
 		) CREDITS
