@@ -62,7 +62,7 @@ BEGIN
 		intTransactionId,
 		strTransactionId,
 		strTransactionType,
-		@dtmReportDate,
+		dtmDate,
 		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket1) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
