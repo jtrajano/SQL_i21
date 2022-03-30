@@ -75,6 +75,7 @@ INNER JOIN (
     LEFT JOIN tblSMTaxCode STC ON APBDT.intTaxCodeId = STC.intTaxCodeId
 	LEFT JOIN tblGLAccount GL ON STC.intPurchaseTaxAccountId = GL.intAccountId
     LEFT JOIN tblSMTaxClass SMTC ON APBDT.intTaxClassId = SMTC.intTaxClassId
+	WHERE APBDT.ysnCheckOffTax = 1
 ) RT ON APBD.intBillDetailId = RT.intBillDetailId
 LEFT OUTER JOIN tblSMTaxGroup SMTG ON ISNULL(APBD.intTaxGroupId, RT.intTaxGroupId) = SMTG.intTaxGroupId
 OUTER APPLY (
