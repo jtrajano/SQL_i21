@@ -432,5 +432,34 @@ BEGIN
 	END
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnEnableAllocatedContractsGainOrLoss')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ysnEnableAllocatedContractsGainOrLoss IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET ysnEnableAllocatedContractsGainOrLoss = 0
+	END
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'strTransactionShouldBeRelieved')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE strTransactionShouldBeRelieved IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET strTransactionShouldBeRelieved = 'Final Invoiced'
+	END
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnDropUninvoicedPurchaseAndInvoicedSales')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ysnDropUninvoicedPurchaseAndInvoicedSales IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET ysnDropUninvoicedPurchaseAndInvoicedSales = 1
+	END
+END
+
+
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
