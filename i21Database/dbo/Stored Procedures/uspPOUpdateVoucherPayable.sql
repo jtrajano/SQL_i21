@@ -67,7 +67,8 @@ INSERT INTO @voucherPayables(
 	,[intShipViaId]						
 	,[intTermId]						
 	,[strBillOfLading]					
-	,[ysnReturn]						
+	,[ysnReturn]
+	,[intFreightTermId]				
 )
 SELECT * FROM dbo.fnAPCreatePOVoucherPayable(@poDetailIds);
 

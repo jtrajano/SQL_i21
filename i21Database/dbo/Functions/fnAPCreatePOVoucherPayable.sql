@@ -57,6 +57,7 @@ RETURNS TABLE AS RETURN
 		,[intTermId]						=	A.intTermsId
 		,[strBillOfLading]					=	NULL
 		,[ysnReturn]						=	0
+		,[intFreightTermId]					=	A.intFreightTermId
 	FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN @poDetailIds ids ON B.intPurchaseDetailId = ids.intId
@@ -65,5 +66,4 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblCTContractDetail ctd ON B.intContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblICItemLocation itemLoc ON B.intItemId = itemLoc.intItemId AND itemLoc.intLocationId = A.intShipToId
 	WHERE dbo.fnIsStockTrackingItem(B.intItemId) = 0 OR B.intItemId IS NULL
-	
 )
