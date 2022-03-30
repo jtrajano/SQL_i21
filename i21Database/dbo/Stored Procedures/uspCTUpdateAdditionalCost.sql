@@ -56,7 +56,7 @@ BEGIN TRY
 												WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 																							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
 												WHEN	CC.strCostMethod = 'Amount'		THEN
-																							CC.dblRate
+																							CC.dblRate * isnull(CC.dblFX,1)
 												WHEN	CC.strCostMethod = 'Percentage' THEN 
 																							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
 										END)*CC.dblRemainingPercent/100
