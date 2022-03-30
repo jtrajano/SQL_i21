@@ -33,6 +33,8 @@
     [ysnEnableCanadianGrainReceipt] BIT NOT NULL DEFAULT(0),
     [strDefaultGrainReceiptReport] NVARCHAR(MAX) COLLATE  Latin1_General_CI_AS NULL,
     [ysnUseItemCommodityDiscountOriginImport] BIT NOT NULL DEFAULT(0),
+    --[ysnStorageChargeAccountUseIncome] BIT NOT NULL DEFAULT(0),
+    
     
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
