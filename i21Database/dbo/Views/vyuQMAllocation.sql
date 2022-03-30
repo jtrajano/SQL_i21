@@ -16,7 +16,7 @@ strDescription = 'Purchase Contract'
 ,A.intSContractDetailId
 ,B.intSampleId
 ,C.strContractNumber
-, intPContractSeq strSequence
+, intPContractSeq intSequence
 , B.strSampleNumber
 , B.intItemId
 , intPContractHeaderId 
@@ -63,7 +63,7 @@ strDescription = 'Sales Contract'
 ,A.intSContractDetailId
 ,B.intSampleId
 ,C.strContractNumber
-, intPContractSeq strSequence
+, intPContractSeq intSequence
 , B.strSampleNumber
 , B.intItemId
 , intPContractHeaderId 
@@ -97,7 +97,7 @@ FROM --vyuLGLoadDetailView A
 vyuLGAllocationDetails A
 join vyuQMSampleList  B
 on B.intContractDetailId = A.intSContractDetailId
-join vyuCTGridContractHeader C on C.intContractHeaderId = intSContractDetailId
+join vyuCTGridContractHeader C on C.intContractHeaderId = intSContractHeaderId
 join vyuCTContractDetailView D on D.intContractDetailId = B.intContractDetailId
 join tblLGAllocationDetail E on E.intSContractDetailId = B.intContractDetailId
 
