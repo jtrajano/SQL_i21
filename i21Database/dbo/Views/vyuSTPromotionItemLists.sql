@@ -7,6 +7,7 @@ SELECT
 	, UOM.strUpcCode
 	, UOM.strLongUPCCode
 	, UOM.intItemUOMId
+	, UM.strUnitMeasure
 	, I.strItemNo
 	, I.strDescription AS strPumpItemDescription
 	, I.ysnFuelItem
@@ -25,6 +26,8 @@ SELECT
 	, Class.strSubcategoryId AS strClass
 	, ST.intStoreId
 FROM tblICItemUOM UOM
+JOIN tblICUnitMeasure UM
+	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 JOIN tblICItemLocation IL 
 	ON UOM.intItemId = IL.intItemId 
 JOIN tblSTStore ST 
