@@ -807,6 +807,7 @@ BEGIN TRY
 					,dtmExpiryDate
 					,intParentLotId
 					,strParentLotNumber
+					,intLotStatusId
 					)
 				SELECT intLotId = NULL
 					,strLotNumber = @strLotNo
@@ -836,6 +837,7 @@ BEGIN TRY
 					,dtmExpiryDate = @dtmExpiryDate
 					,intParentLotId = @intParentLotId
 					,strParentLotNumber = @strParentLotNumber
+					,intLotStatusId = @intLotStatusId
 				FROM @ReceiptStagingTable RI
 				WHERE RI.intInventoryTransferId = @intInventoryTransferId
 					AND RI.intInventoryTransferDetailId = @intInventoryTransferDetailId
