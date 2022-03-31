@@ -119,7 +119,6 @@ AS
 			,CP.ysnFreightTermCost
 			,CP.ysnAutoCalculateFreightTermCost
 			,CP.ysnAllowCropYearOverlap
-			,CP.ysnEnableRankShippingLine
 			,CP.ysnEnableFXFieldInContractPricing
 			,CP.ysnEnableItemQualityFields
 			,CP.intFinanceCostId

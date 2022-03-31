@@ -189,11 +189,7 @@ AS
 		, CD.dblPrepaymentAmount
 		, strCostTerm = CostTerm.strFreightTerm
         , CD.intCostTermId
-        , CD.intShippingLineId2
-        , CD.intShippingLineId3
-        , strShippingLine2 = SL2.strName
-        , strShippingLine3 = SL3.strName
-		, CD.dblBudgetPrice
+        , CD.dblBudgetPrice
 		, CD.dblTotalBudget
 		, CH.intSampleTypeId
 		, sam.strSampleTypeName
@@ -296,8 +292,6 @@ AS
 	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId
 	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intOverrideFacilityId
 	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
-	LEFT JOIN tblEMEntity SL2 ON SL2.intEntityId = CD.intShippingLineId2
-	LEFT JOIN tblEMEntity SL3 ON SL3.intEntityId = CD.intShippingLineId3
 	LEFT JOIN tblQMSampleType sam on sam.intSampleTypeId = CH.intSampleTypeId
 	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
 	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM

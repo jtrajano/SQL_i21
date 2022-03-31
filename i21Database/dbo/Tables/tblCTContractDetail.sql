@@ -188,8 +188,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblQualityPremium numeric(18, 6) NULL,
 	dblOptionalityPremium numeric(18, 6) NULL,
 
-	intShippingLineId2 INT NULL,
-	intShippingLineId3 INT NULL,
 	dblBudgetPrice numeric(18, 6) NULL,
 	dblTotalBudget numeric(18, 6) NULL,
 	intLocalCurrencyId INT NULL,

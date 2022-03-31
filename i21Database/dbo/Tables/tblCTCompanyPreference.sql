@@ -108,7 +108,6 @@
 	ysnFreightTermCost  BIT NOT NULL DEFAULT 0, 
 	ysnAutoCalculateFreightTermCost  BIT NOT NULL DEFAULT 0, 
     ysnAllowCropYearOverlap BIT NOT NULL DEFAULT 0, 
-	ysnEnableRankShippingLine BIT NOT NULL DEFAULT 0,
     ysnEnableFXFieldInContractPricing BIT NOT NULL DEFAULT 0,
 	ysnEnableItemQualityFields BIT NOT NULL DEFAULT 0,
     [intFinanceCostId] INT NULL, 
