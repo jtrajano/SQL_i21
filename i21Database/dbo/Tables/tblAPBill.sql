@@ -113,6 +113,7 @@
 	[intBorrowingFacilityLimitDetailId] INT NULL,
 	[strReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intBankValuationRuleId] INT NULL,
+	[intFreightTermId] INT NULL, 
 	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[dblRoundingTotal] DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblAverageExchangeRate] DECIMAL (18, 6) NULL
