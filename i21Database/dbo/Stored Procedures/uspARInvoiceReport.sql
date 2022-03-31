@@ -360,7 +360,7 @@ LEFT JOIN (
 		WHERE ysnApplied = 1
 	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
 			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId
-	--WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
+	-- WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
