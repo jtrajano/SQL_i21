@@ -60,7 +60,7 @@ BEGIN
 		intTransactionId,
 		strTransactionId,
 		strTransactionType,
-		@dtmReportDate,
+		dtmDate,
 		(dblAmount * RateFilter.dblRateBucket1) * -1,
 		0,
 		0,
