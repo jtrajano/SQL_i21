@@ -1689,7 +1689,7 @@ BEGIN
 					@valueLotRecordNo = ItemLot.strLotNumber
 			FROM	@LotEntries ItemLot
 			WHERE	ItemLot.intSourceType IS NULL 
-					OR ItemLot.intSourceType > 5 
+					OR ItemLot.intSourceType > 9 
 					OR ItemLot.intSourceType < 0
 
 			IF @valueLotRecordNo IS NOT NULL

@@ -130,7 +130,7 @@ BEGIN TRY
 		,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, LD.intSStorageLocationId)
 		,[ysnIsStorage] = 0
 		,[intSourceId] = LD.intLoadDetailId
-		,[intSourceType] = 0 --TEMPORARY Source Type for Transfer Shipment
+		,[intSourceType] = 9 --TEMPORARY Source Type for Transfer Shipment
 		,[strSourceId] = L.strLoadNumber
 		,[strSourceScreenName] = 'Load Shipment/Schedule'
 		,[intContainerId] = ISNULL(LC.intLoadContainerId, -1)
@@ -156,7 +156,7 @@ BEGIN TRY
 	WHERE L.intLoadId = @intLoadId
 		AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
 						INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-						WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 0) --TEMPORARY Source Type for Transfer Shipment
+						WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 9) --TEMPORARY Source Type for Transfer Shipment
 	ORDER BY LDCL.intLoadDetailContainerLinkId
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM @ReceiptStagingTable)
@@ -322,7 +322,7 @@ BEGIN TRY
 		,[intShipViaId] = ISNULL(LW.intHaulerEntityId, L.intHaulerEntityId)
 		,[intShipFromId] = LD.intPCompanyLocationId
 		,[intCurrencyId] = @DefaultCurrencyId
-		,[intSourceType] =  0 --TEMPORARY Source Type for Transfer Shipment
+		,[intSourceType] =  9 --TEMPORARY Source Type for Transfer Shipment
 		,[strBillOfLadding] = L.strBLNumber
 		,[strCertificate] = Lot.strCertificate
 		,[intProducerId] = Lot.intProducerId

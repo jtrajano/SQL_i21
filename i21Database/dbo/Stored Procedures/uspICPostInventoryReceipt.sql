@@ -1321,7 +1321,8 @@ BEGIN
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
 				-- In-Transit GL Entries from Inbound Shipment 
-				IF (@intSourceType IN (@SOURCE_TYPE_InboundShipment, @SOURCE_TYPE_TransferShipment) AND @strFobPoint = 'Origin')
+				IF (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
+					OR (@intSourceType = @SOURCE_TYPE_TransferShipment)
 				BEGIN 				
 					INSERT INTO @DummyGLEntries (
 							[dtmDate] 
@@ -1580,9 +1581,11 @@ BEGIN
 		END
 
 		-- Reduce In-Transit stocks coming from Inbound Shipment. 
-		IF	(@intSourceType IN (@SOURCE_TYPE_InboundShipment, @SOURCE_TYPE_TransferShipment)) 
-			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
-			AND @strFobPoint = 'Origin'
+		IF	EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
+			AND (
+				(@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin') 
+				OR @intSourceType = @SOURCE_TYPE_TransferShipment
+			)			
 		BEGIN 
 			-- Get values for the In-Transit Costing 
 			INSERT INTO @ItemsForInTransitCosting (
@@ -1658,7 +1661,10 @@ BEGIN
 
 			WHERE	r.strReceiptNumber = @strTransactionId
 					AND t.ysnIsUnposted = 0 
-					AND t.intFobPointId = @FOB_ORIGIN
+					AND (
+						t.intFobPointId = @FOB_ORIGIN
+						OR (@intSourceType = @SOURCE_TYPE_TransferShipment)
+					)
 					AND t.dblQty > 0
 					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 					
@@ -1724,7 +1730,7 @@ BEGIN
 		END 
 
 		-- Reduce In-Transit stocks coming from Transfer Order
-		IF	(@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER) 
+		ELSE IF	(@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER) 
 			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
 		BEGIN 
 			-- Get values for the In-Transit Costing 

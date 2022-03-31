@@ -1097,6 +1097,7 @@ BEGIN
 							, 20
 						) THEN 4 
 						WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
+						WHEN t.strTransactionForm = 'Transfer Shipment' THEN 4
 						WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
 						WHEN 
 							dblQty > 0 
@@ -1200,6 +1201,7 @@ BEGIN
 					, 20
 				) THEN 4 
 				WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
+				WHEN t.strTransactionForm = 'Transfer Shipment' THEN 4
 				WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
 				WHEN 
 					dblQty > 0 
@@ -4623,10 +4625,12 @@ BEGIN
 							ON r.intFreightTermId = ft.intFreightTermId
 				WHERE	strReceiptNumber = @strTransactionId 
 
-				-- Reduce In-Transit stocks coming from Inbound Shipment. 
+				-- Reduce In-Transit stocks coming from Inbound Shipment or Transfer Shipment 
 				IF (
-					@intReceiptSourceType IN (@RECEIPT_SOURCE_TYPE_InboundShipment, @RECEIPT_SOURCE_TYPE_TransferShipment)
-					AND @strFobPoint = 'Origin'
+					(
+						(@intReceiptSourceType = @RECEIPT_SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
+						OR @intReceiptSourceType = @RECEIPT_SOURCE_TYPE_TransferShipment
+					)
 					AND EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				)
 				BEGIN 
