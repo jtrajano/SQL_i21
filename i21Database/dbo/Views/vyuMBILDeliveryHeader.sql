@@ -1,11 +1,12 @@
 CREATE VIEW [dbo].[vyuMBILDeliveryHeader]    
 AS    
 SELECT delivery.intDeliveryHeaderId,       
-	   delivery.intLoadHeaderId,            
+	   delivery.intLoadHeaderId,           
+	   delivery.strDeliveryNumber, 
 	   intDriverEntityId = load.intDriverId,            
 	   load.strType,            
 	   load.strLoadNumber,    
-    delivery.intCompanyLocationId,            
+	    intLocationId = isnull(delivery.intEntityLocationId,delivery.intCompanyLocationId),            
     strCompanyName = case when strType = 'Inbound' then company.strCompanyName else null end,            
     strCompanyLocationName = companylocation.strLocationName,            
     strCompanyAddress = companylocation.strAddress,            
