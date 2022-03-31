@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Line Configuration' AND strModuleName = 'Risk Management')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inbound Tax Report' AND strModuleName = 'Accounts Payable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -2077,6 +2077,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Voucher C
 	VALUES (N'Voucher CheckOff Detail', N'Accounts Payable', @AccountsPayableActivitiesParentMenuId, N'Voucher CheckOff Detail', N'Activity', N'Screen', N'AccountsPayable.view.VoucherCheckOffDetail?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.VoucherCheckOffDetail?showSearch=true', intSort = 9 WHERE strMenuName = 'Voucher CheckOff Detail' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inbound Tax Report' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Inbound Tax Report', N'Accounts Payable', @AccountsPayableActivitiesParentMenuId, N'Inbound Tax Report', N'Activity', N'Screen', N'AccountsPayable.view.InboundTaxReport?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.InboundTaxReport?showSearch=true', intSort = 10 WHERE strMenuName = 'Inbound Tax Report' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Buyers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
