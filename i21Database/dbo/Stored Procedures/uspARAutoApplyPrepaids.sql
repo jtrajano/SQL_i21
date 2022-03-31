@@ -167,6 +167,13 @@ WHERE C.ysnPosted = 1
   AND ((C.strTransactionType  IN ('Customer Prepayment', 'Overpayment') AND PREPAY.intPaymentId IS NOT NULL) OR C.strTransactionType = 'Credit Memo')
 ORDER BY C.dtmPostDate, C.intInvoiceId
 
+--REMOVE RESTRICTED CPP FROM AVAILABLE PREPAIDS
+DELETE P
+FROM #AAPPREPAIDS P
+INNER JOIN tblARInvoiceDetail ID ON P.intInvoiceId = ID.intInvoiceId
+WHERE P.strTransactionType = 'Customer Prepayment'
+  AND ID.ysnRestricted = 1
+
 IF NOT EXISTS(SELECT TOP 1 NULL FROM #AAPPREPAIDS) 
 	RETURN;
 
