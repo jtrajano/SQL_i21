@@ -22,6 +22,8 @@ SELECT tc.intTermCostId
 	, tcd.dblValue
 	, tcd.intUnitMeasureId
 	, uom.strUnitMeasure
+	, ysnFreight = ISNULL(tcd.ysnFreight, 0)
+	, ysnInsurance = ISNULL(tcd.ysnInsurance, 0)
 	, tcd.intConcurrencyId
 FROM tblCTTermCostDetail tcd
 JOIN tblCTTermCost tc ON tc.intTermCostId = tcd.intTermCostId

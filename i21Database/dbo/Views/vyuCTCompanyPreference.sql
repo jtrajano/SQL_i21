@@ -118,14 +118,6 @@ AS
 			,CP.ysnDefaultShipperCargillFrontingDetails			
 			,CP.ysnFreightTermCost
 			,CP.ysnAutoCalculateFreightTermCost
-			,CP.intDefaultFreightId
-			,strFreightItem = FI.strItemNo
-			,CP.intDefaultInsuranceId
-			,strInsuranceItem = INS.strItemNo
-			,CP.intDefaultTHCId
-			,strTHCItem = THC.strItemNo
-			,CP.intDefaultStorageId
-			,strStorageItem = SI.strItemNo
 			,CP.ysnAllowCropYearOverlap
 			,CP.ysnEnableRankShippingLine
 			,CP.ysnEnableFXFieldInContractPricing
@@ -146,8 +138,4 @@ AS
 	LEFT JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId
 	LEFT JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule
 	LEFT JOIN	tblICItem					FB	ON	FB.intItemId				=	CP.intFreightBasisCostItemId
-	LEFT JOIN	tblICItem					FI	ON	FI.intItemId				=	CP.intDefaultFreightId
-	LEFT JOIN	tblICItem					INS	ON	INS.intItemId				=	CP.intDefaultInsuranceId
-	LEFT JOIN	tblICItem					THC	ON	THC.intItemId				=	CP.intDefaultTHCId
-	LEFT JOIN	tblICItem					SI	ON	SI.intItemId				=	CP.intDefaultStorageId
 	LEFT JOIN	tblICItem					FCI	ON	FCI.intItemId				=	CP.intFinanceCostId

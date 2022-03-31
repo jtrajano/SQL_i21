@@ -6,6 +6,8 @@
     [strCostMethod] NVARCHAR(50) NOT NULL, 
     [intCurrencyId] INT NULL, 
     [dblValue] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [ysnFreight] BIT NULL DEFAULT((0)),
+    [ysnInsurance] BIT NULL DEFAULT((0)),
     [intUnitMeasureId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblCTTermCostDetail] PRIMARY KEY ([intTermCostDetailId]), 
