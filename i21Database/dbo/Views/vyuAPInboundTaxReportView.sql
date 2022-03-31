@@ -55,7 +55,10 @@ INNER JOIN tblEMEntity E ON E.intEntityId = V.intEntityId
 INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
 INNER JOIN tblSMCurrency SMC ON APB.intCurrencyId = SMC.intCurrencyID
 INNER JOIN tblICItem IE ON IE.intItemId = APBD.intItemId
-LEFT JOIN (dbo.tblICItemUOM costUOM INNER JOIN dbo.tblICUnitMeasure UM ON costUOM.intUnitMeasureId = UM.intUnitMeasureId) ON APBD.intCostUOMId = costUOM.intItemUOMId
+LEFT JOIN (
+	tblICItemUOM IUOM 
+	INNER JOIN tblICUnitMeasure UM ON IUOM.intUnitMeasureId = UM.intUnitMeasureId
+) ON APBD.intCostUOMId = IUOM.intItemUOMId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intPayToAddressId
 LEFT JOIN tblEMEntityLocation ELS ON APB.intShipFromEntityId = EL.intEntityId AND APB.intShipFromId = ELS.intEntityLocationId
 LEFT JOIN tblICCommodity C ON C.intCommodityId = IE.intCommodityId
