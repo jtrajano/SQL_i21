@@ -77,4 +77,4 @@ FROM tblICLot lot
 	LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = item.intProductLineId
 	LEFT JOIN tblICWarrantStatus WarrantStatus ON WarrantStatus.intWarrantStatus = lot.intWarrantStatus
 WHERE
-	lot.strCondition = 'Missing'
+	lot.strCondition IN ('Missing', 'Swept', 'Skimmed')
