@@ -302,7 +302,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 30, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate))
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 31, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -348,7 +348,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 61, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -394,7 +394,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 91, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -440,7 +440,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
+	FROM [dbo].[fnARCashFlowTransactions](DATEADD(DAY, 121, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
