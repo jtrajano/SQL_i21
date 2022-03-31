@@ -261,6 +261,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , blbLogo					= @blbLogo
 	 , intRecipeId				= SALESORDERDETAIL.intRecipeId	 
 	 , intOneLinePrintId		= SALESORDERDETAIL.intOneLinePrintId
+	 , dblStandardWeight		= SALESORDERDETAIL.dblStandardWeight
 	 , dblTotalWeight			= ISNULL(SO.dblTotalWeight, 0)	 
 	 , ysnListBundleSeparately	= ISNULL(SALESORDERDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 	 , dblTotalDiscount			= ISNULL(dblTotalDiscount,0) * -1
@@ -268,6 +269,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strCustomerNumber		= CAST('' AS NVARCHAR(50))
 	 , strCustomerComments		= CAST('' AS NVARCHAR(500))
 	 , ysnHasEmailSetup			= CAST(0 AS BIT)
+
 INTO #SALESORDERS
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN #SELECTEDSO SOS ON SO.intSalesOrderId = SOS.intSalesOrderId
@@ -297,6 +299,7 @@ LEFT JOIN (
 		 , dblItemPrice				= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblTotal, 0) ELSE NULL END
 		 , dblAdjustedTax			= SDT.dblAdjustedTax
 		 , dblContractBalance		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CD.dblBalance ELSE NULL END
+		 , dblStandardWeight		= SD.dblStandardWeight
 		 , strContractNumber		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END
 		 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
 		 , ysnListBundleSeparately	= I.ysnListBundleSeparately
@@ -499,6 +502,7 @@ INSERT INTO tblARSalesOrderReportStagingTable WITH (TABLOCK) (
 	 , blbLogo
 	 , intRecipeId
 	 , intOneLinePrintId
+	 , dblStandardWeight
 	 , dblTotalWeight
 	 , ysnListBundleSeparately
 	 , dblTotalDiscount
@@ -573,6 +577,7 @@ SELECT intSalesOrderId
 	 , blbLogo
 	 , intRecipeId
 	 , intOneLinePrintId
+	 , dblStandardWeight
 	 , dblTotalWeight
 	 , ysnListBundleSeparately
 	 , dblTotalDiscount

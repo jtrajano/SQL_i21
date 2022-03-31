@@ -63,6 +63,7 @@ CREATE TABLE [dbo].[tblARSalesOrderReportStagingTable] (
 	[dblProductTotal]					NUMERIC (18, 6)	NULL,
 	[dblTaxDetail]						NUMERIC (18, 6)	NULL,
 	[dblTotalWeight]					NUMERIC (18, 6)	NULL,
+	[dblStandardWeight]					NUMERIC (18, 6)	NULL,
 	[dblTotalDiscount]					NUMERIC (18, 6)	NULL,
 	[ysnHasEmailSetup]					BIT             NULL,
 	[ysnHasRecipeItem]					BIT             NULL,
