@@ -4,7 +4,6 @@ SELECT
 	PU.intStorePumpItemId
 	, PU.intStoreId
 	, PU.intItemUOMId
-	, PU.strUnitMeasure
 	, PU.dblPrice
 	, PU.intTaxGroupId
 	, PU.intCategoryId
