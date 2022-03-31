@@ -24,6 +24,7 @@ DECLARE @SourceType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @SourceType_Direct AS NVARCHAR(100) = 'Direct'
 DECLARE @TransactionSourceType_Scale AS NVARCHAR(100) = 'Scale'
 DECLARE @TransactionSourceType_InboundShipment AS NVARCHAR(100) = 'Inbound Shipment'
+DECLARE @TransactionSourceType_TransferShipment AS NVARCHAR(100) = 'Transfer Shipment'
 
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType 
 

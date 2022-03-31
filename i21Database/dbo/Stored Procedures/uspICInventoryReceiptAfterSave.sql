@@ -28,7 +28,7 @@ DECLARE @SourceType_SettleStorage AS INT = 4
 DECLARE @SourceType_DeliverySheet AS INT = 5
 DECLARE @SourceType_PurchaseOrder AS INT = 6
 DECLARE @SourceType_Store AS INT = 7
-
+DECLARE @SourceType_TransferShipment AS INT = 9
 
 
 DECLARE @ErrMsg NVARCHAR(MAX)
@@ -393,7 +393,7 @@ END
 -- Inbound Shipment, Scale Ticket, and Purchase Order will be calling uspCTUpdateScheduleQuantity on their own. 
 IF	@ReceiptType = @ReceiptType_PurchaseContract
 	AND (
-		ISNULL(@SourceType, @SourceType_None) NOT IN (@SourceType_InboundShipment, @SourceType_Scale, @SourceType_PurchaseOrder)
+		ISNULL(@SourceType, @SourceType_None) NOT IN (@SourceType_InboundShipment, @SourceType_Scale, @SourceType_PurchaseOrder, @SourceType_TransferShipment)
 	)
 BEGIN 
 	-- Get the deleted, new, or modified data. 

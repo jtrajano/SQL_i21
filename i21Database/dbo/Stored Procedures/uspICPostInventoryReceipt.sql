@@ -53,6 +53,7 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@SOURCE_TYPE_DeliverySheet AS INT = 5
 		,@SOURCE_TYPE_PurchaseOrder AS INT = 6
 		,@SOURCE_TYPE_Store AS INT = 7
+		,@SOURCE_TYPE_TransferShipment AS INT = 9
 
 -- Posting variables
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -1320,7 +1321,7 @@ BEGIN
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
 				-- In-Transit GL Entries from Inbound Shipment 
-				IF (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
+				IF (@intSourceType IN (@SOURCE_TYPE_InboundShipment, @SOURCE_TYPE_TransferShipment) AND @strFobPoint = 'Origin')
 				BEGIN 				
 					INSERT INTO @DummyGLEntries (
 							[dtmDate] 
@@ -1579,7 +1580,7 @@ BEGIN
 		END
 
 		-- Reduce In-Transit stocks coming from Inbound Shipment. 
-		IF	(@intSourceType = @SOURCE_TYPE_InboundShipment) 
+		IF	(@intSourceType IN (@SOURCE_TYPE_InboundShipment, @SOURCE_TYPE_TransferShipment)) 
 			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
 			AND @strFobPoint = 'Origin'
 		BEGIN 

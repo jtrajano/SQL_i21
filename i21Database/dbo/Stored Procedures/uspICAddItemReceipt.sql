@@ -49,6 +49,7 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_PURCHASE_ORDER AS INT = 6
 		,@SourceType_STORE AS INT = 7
 		,@SourceType_STORE_LOTTERY_MODULE AS INT = 8
+		,@SourceType_TRANSFER_SHIPMENT AS INT = 9
 
 
 DECLARE @STATUS_OPEN AS TINYINT = 1
@@ -377,6 +378,7 @@ BEGIN
 			,@SourceType_PURCHASE_ORDER 
 			,@SourceType_STORE 
 			,@SourceType_STORE_LOTTERY_MODULE
+			,@SourceType_TRANSFER_SHIPMENT
 		)
 			BEGIN
 				-- Source Type Id is invalid or missing.

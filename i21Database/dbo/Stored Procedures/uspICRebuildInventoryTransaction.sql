@@ -18,6 +18,7 @@ BEGIN
 						WHEN receipt.intSourceType = 5 THEN 'Delivery Sheet'
 						WHEN receipt.intSourceType = 6 THEN 'Purchase Order'
 						WHEN receipt.intSourceType = 7 THEN 'Store'
+						WHEN receipt.intSourceType = 9 THEN 'Transfer Shipment'
 						ELSE NULL 
 					END
 				WHEN shipment.intInventoryShipmentId IS NOT NULL THEN

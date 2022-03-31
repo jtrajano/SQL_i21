@@ -102,6 +102,7 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@RECEIPT_SOURCE_TYPE_InboundShipment AS INT = 2
 		,@RECEIPT_SOURCE_TYPE_Transport AS INT = 3
 		,@RECEIPT_SOURCE_TYPE_SettleStorage AS INT = 4
+		,@RECEIPT_SOURCE_TYPE_TransferShipment AS INT = 9
 
 		,@INVENTORY_RECEIPT_TYPE AS INT = 4
 
@@ -4624,7 +4625,7 @@ BEGIN
 
 				-- Reduce In-Transit stocks coming from Inbound Shipment. 
 				IF (
-					@intReceiptSourceType = @RECEIPT_SOURCE_TYPE_InboundShipment
+					@intReceiptSourceType IN (@RECEIPT_SOURCE_TYPE_InboundShipment, @RECEIPT_SOURCE_TYPE_TransferShipment)
 					AND @strFobPoint = 'Origin'
 					AND EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				)
@@ -4960,7 +4961,7 @@ BEGIN
 
 				-- Receive the Inbound Shipment					
 				IF (
-					@intReceiptSourceType = @RECEIPT_SOURCE_TYPE_InboundShipment
+					@intReceiptSourceType IN (@RECEIPT_SOURCE_TYPE_InboundShipment, @RECEIPT_SOURCE_TYPE_TransferShipment)
 					AND @strFobPoint = 'Origin'
 					AND EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				)
