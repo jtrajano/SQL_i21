@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inbound Tax Report' AND strModuleName = 'Accounts Payable')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Charges' AND strModuleName = 'Inventory')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1711,6 +1711,15 @@ ELSE
 DECLARE @InventoryImportParentMenuId INT
 SELECT @InventoryImportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Imports' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId)
+    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+    VALUES (N'Warehouse', N'Inventory', @InventoryParentMenuId, N'Warehouse', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 5, 1)
+ELSE
+    UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 5 WHERE strMenuName = 'Warehouse' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
+
+DECLARE @InventoryWarehouseParentMenuId INT
+SELECT @InventoryWarehouseParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */
 UPDATE tblSMMasterMenu SET intParentMenuID = @InventoryActivitiesParentMenuId WHERE intParentMenuID =  @InventoryParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @InventoryMaintenanceParentMenuId WHERE intParentMenuID =  @InventoryParentMenuId AND strCategory = 'Maintenance'
@@ -1897,6 +1906,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Se
 	VALUES (N'Import Setup', N'Inventory', @InventoryImportParentMenuId, N'Import Setup', N'Import', N'Screen', N'Inventory.view.ImportSetup?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 1, 0)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.ImportSetup?showSearch=true', intSort = 1 WHERE strMenuName = 'Import Setup' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryImportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Rate' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Storage Rate', N'Inventory', @InventoryWarehouseParentMenuId, N'Storage Rate', N'Import', N'Screen', N'Inventory.view.StorageRate?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 1, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.StorageRate?showSearch=true', intSort = 1 WHERE strMenuName = 'Storage Rate' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Charges' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Storage Charges', N'Inventory', @InventoryWarehouseParentMenuId, N'Storage Charges', N'Import', N'Screen', N'Inventory.view.StorageCharge?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 2, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.StorageCharge?showSearch=true', intSort = 2 WHERE strMenuName = 'Storage Charges' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Build Assemblies' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
