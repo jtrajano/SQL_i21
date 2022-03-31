@@ -1,4 +1,4 @@
-﻿ALTER FUNCTION [dbo].[fnCTCashFlowTransactions]
+﻿CREATE FUNCTION [dbo].[fnCTCashFlowTransactions]
 (
 	 @dtmDateFrom datetime = null
 	 ,@dtmDateTo  datetime = null
