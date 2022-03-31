@@ -31,7 +31,7 @@ BEGIN
 	FROM tblTMDispatch D
 	INNER JOIN tblTMSite S ON S.intSiteID = D.intSiteID
 	WHERE D.intDispatchID = @intDispatchId
-	AND D.strWillCallStatus IN ('Dispatched', 'Routed')
+	AND D.strWillCallStatus = 'Generated' --IN ('Dispatched', 'Routed')
 
 	-- DELETE IF THERE IS EXISTING DISPATCH RECORD
 	DELETE tblTMOrder WHERE intDispatchId = @intDispatchId
@@ -91,35 +91,38 @@ BEGIN
 			BEGIN
 				DECLARE @intUOMId INT = NULL
 
-				SELECT @intUOMId = intIssueUOMId 
-                FROM tblICItemLocation WHERE intItemId = @intItemId
-                AND intLocationId = @intLocationId
+				SELECT @dblItemPrice = dblRegularPrice FROM tblTMDispatch WHERE intDispatchID = @intDispatchId
+				SET @strPricingMethod = 'Special/Regular'
+				
+				-- SELECT @intUOMId = intIssueUOMId 
+                -- FROM tblICItemLocation WHERE intItemId = @intItemId
+                -- AND intLocationId = @intLocationId
 
-				EXEC dbo.uspARGetItemPrice
-				 @ItemUOMId = @intUOMId
-				,@ItemId =  @intItemId
-				,@CustomerId = @intCustomerId
-				,@LocationId = @intLocationId
-				,@Quantity = @dblRemainingQty
-				,@PricingLevelId = @intCompanyLocationPricingLevelId
-				,@InvoiceType = 'Tank Delivery'
-				,@ExcludeContractPricing = 1
-				,@Price = @dblItemPrice OUT
-				,@Pricing = @strPricing OUT
+				-- EXEC dbo.uspARGetItemPrice
+				--  @ItemUOMId = @intUOMId
+				-- ,@ItemId =  @intItemId
+				-- ,@CustomerId = @intCustomerId
+				-- ,@LocationId = @intLocationId
+				-- ,@Quantity = @dblRemainingQty
+				-- ,@PricingLevelId = @intCompanyLocationPricingLevelId
+				-- ,@InvoiceType = 'Tank Delivery'
+				-- ,@ExcludeContractPricing = 1
+				-- ,@Price = @dblItemPrice OUT
+				-- ,@Pricing = @strPricing OUT
 
-				IF(@dblItemPrice IS NULL)
-				BEGIN
-					SET @dblItemPrice = 0
-					SET @strPricingMethod = 'Regular'
-				END
-				ELSE IF(@strPricing = 'Standard Pricing')
-				BEGIN
-					SET @strPricingMethod = 'Regular'
-				END
-				ELSE
-				BEGIN
-					SET @strPricingMethod = 'Special'
-				END
+				-- IF(@dblItemPrice IS NULL)
+				-- BEGIN
+				-- 	SET @dblItemPrice = 0
+				-- 	SET @strPricingMethod = 'Regular'
+				-- END
+				-- ELSE IF(@strPricing = 'Standard Pricing')
+				-- BEGIN
+				-- 	SET @strPricingMethod = 'Regular'
+				-- END
+				-- ELSE
+				-- BEGIN
+				-- 	SET @strPricingMethod = 'Special'
+				-- END
 
 				SET @dblTotal = @dblRemainingQty * @dblItemPrice
 						
