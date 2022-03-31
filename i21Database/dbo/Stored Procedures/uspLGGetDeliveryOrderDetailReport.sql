@@ -20,8 +20,8 @@ BEGIN
 		,dblWeight = LDL.dblNet
 		,strWeightUOM = WU.strUnitMeasure
 		,strWeightUOMSymbol = WU.strSymbol
-		,strContainerNumber = ISNULL(IRIL.strContainerNo, LC.strContainerNumber)
-		,strMarks = ISNULL(IRIL.strMarkings, LC2.strMarks)
+		,strContainerNumber = CASE WHEN ISNULL(IRIL.strContainerNo, '') <> '' THEN IRIL.strContainerNo ELSE LC2.strContainerNumber END
+		,strMarks = CASE WHEN ISNULL(IRIL.strMarkings, '') <> '' THEN IRIL.strMarkings ELSE LC2.strMarks END
 		,strSealNo = ISNULL(LC.strSealNumber, LC2.strSealNumber)
 		,strID1 = LDL.strID1
 		,strID2 = LDL.strID2
