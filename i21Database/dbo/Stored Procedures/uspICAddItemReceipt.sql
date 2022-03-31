@@ -1964,6 +1964,7 @@ BEGIN
 				,[intProducerId]
 				,[strCertificateId]
 				,[strTrackingNumber]
+				,[intLotStatusId]
 				,[intSort]
 				,[intConcurrencyId]
 				,dtmDateCreated
@@ -2013,6 +2014,7 @@ BEGIN
 				,[intProducerId] = ItemLot.intProducerId
 				,[strCertificateId] = ItemLot.strCertificateId
 				,[strTrackingNumber] = ItemLot.strTrackingNumber 
+				,[intLotStatusId] = ItemLot.intLotStatusId
 				,[intSort] = ISNULL(ItemLot.intSort, 1) 
 				,[intConcurrencyId] = 1
 				,[dtmDateCreated] = GETDATE()
