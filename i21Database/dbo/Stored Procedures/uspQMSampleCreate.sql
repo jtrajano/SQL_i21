@@ -49,6 +49,7 @@ BEGIN TRY
 		,@intOrgItemId INT
 		,@intOrgCountryID INT
 		,@intOrgCompanyLocationSubLocationId INT
+		,@intRelatedSampleId INT
 
 	SELECT @intOrgSampleTypeId = intSampleTypeId
 		,@intOrgItemId = intItemId
@@ -78,6 +79,7 @@ BEGIN TRY
 		,@intItemId = intItemId
 		,@intCreatedUserId = intCreatedUserId
 		,@intContractHeaderId = intContractHeaderId
+		,@intRelatedSampleId = intRelatedSampleId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
@@ -96,6 +98,7 @@ BEGIN TRY
 			,intItemId INT
 			,intCreatedUserId INT
 			,intContractHeaderId INT
+			,intRelatedSampleId INT
 			)
 
 	-- Quantity Check
@@ -332,6 +335,7 @@ BEGIN TRY
 		,intSampleTypeId
 		,strSampleNumber
 		,intParentSampleId
+		,intRelatedSampleId
 		,strSampleRefNo
 		,intProductTypeId
 		,intProductValueId
@@ -407,6 +411,7 @@ BEGIN TRY
 		,intSampleTypeId
 		,@strSampleNumber
 		,intParentSampleId
+		,intRelatedSampleId
 		,strSampleRefNo
 		,intProductTypeId
 		,intProductValueId
@@ -480,6 +485,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intParentSampleId INT
+			,intRelatedSampleId INT
 			,strSampleRefNo NVARCHAR(30)
 			,intProductTypeId INT
 			,intProductValueId INT
@@ -811,6 +817,11 @@ BEGIN TRY
 		,@intOrgCompanyLocationSubLocationId
 
 	EXEC sp_xml_removedocument @idoc
+
+
+	-- UPDATES THE RELATED SAMPLE ID
+	IF ISNULL(@intRelatedSampleId, 0) <> 0
+		UPDATE tblQMSample SET intRelatedSampleId = @intSampleId WHERE intSampleId = @intRelatedSampleId
 
 	COMMIT TRAN
 END TRY
