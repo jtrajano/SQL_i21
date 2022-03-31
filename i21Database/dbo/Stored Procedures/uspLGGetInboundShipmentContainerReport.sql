@@ -174,6 +174,7 @@ BEGIN
 			,LW.dtmDeliveryDate
 			,SMC.strCountry 
 			,CH.strContractNumber
+			,CD.dtmEndDate AS  dtmEndDate
 		FROM vyuLGLoadDetailView LDV
 		JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
@@ -244,6 +245,7 @@ BEGIN
 			,LW.dtmDeliveryDate
 			,SMC.strCountry
 			,LDV.strVendor
+			,CD.dtmEndDate AS  dtmEndDate
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseContainer WC ON WC.intLoadWarehouseId = LW.intLoadWarehouseId
