@@ -229,7 +229,7 @@ LEFT JOIN (
 		FROM tblTMSite
 	) SITE
 		ON SITE.intSiteID = ID.intSiteId
-	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
+	-- WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
