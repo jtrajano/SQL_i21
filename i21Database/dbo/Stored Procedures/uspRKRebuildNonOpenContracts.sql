@@ -516,7 +516,7 @@ BEGIN
 			, @intContractTypeId
 			, dblQuantity = CASE WHEN dblCumulativeBalance > dblActualPriceFixation OR dblCumulativeBalance <= dblCumulativeQtyPriced THEN dblActualPriceFixation ELSE dblActualPriceFixation - dblCumulativeBalance END
 			, strTransactionReference = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
-											THEN 'Basis - Price Fixation'
+											THEN 'Basis - Price Fixation'	
 											ELSE 'Price Fixation' 
 											END
 			, @intContractHeaderId
@@ -552,6 +552,7 @@ BEGIN
 				,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
 				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
 				,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+				,intLagPricingTypeId = lagctsh.intPricingTypeId
 				,origctsh.* 
 			FROM #tmpCTSequenceHistory origctsh
 			OUTER APPLY 
@@ -573,14 +574,14 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> 1)
 				OR
-				(ISNULL(P.intPriceFixationId, 0) = 0
-				AND SH.ysnFuturesChange = 1
-				AND SH.ysnCashPriceChange = 1
-				AND SH.strPricingType IN ('Priced','Basis')
+					(ISNULL(P.intPriceFixationId, 0) = 0
+					AND SH.ysnFuturesChange = 1
+					AND SH.ysnCashPriceChange = 1
+					AND SH.strPricingType IN ('Priced','Basis')
+					)
 				)
-			)
 
 		union all -- Counter entry when price fixing a Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
 		select 
@@ -626,6 +627,7 @@ BEGIN
 				,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
 				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
 				,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+				,intLagPricingTypeId = lagctsh.intPricingTypeId
 				,origctsh.* 
 			FROM #tmpCTSequenceHistory origctsh
 			OUTER APPLY 
@@ -647,14 +649,14 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> 1)
 				OR
-				(ISNULL(P.intPriceFixationId, 0) = 0
-				AND SH.ysnFuturesChange = 1
-				AND SH.ysnCashPriceChange = 1
-				AND SH.strPricingType IN ('Priced','Basis')
+					(ISNULL(P.intPriceFixationId, 0) = 0
+					AND SH.ysnFuturesChange = 1
+					AND SH.ysnCashPriceChange = 1
+					AND SH.strPricingType IN ('Priced','Basis')
+					)
 				)
-			)
 
 		union all
 		select 

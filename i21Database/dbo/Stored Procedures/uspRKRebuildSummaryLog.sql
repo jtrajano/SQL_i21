@@ -533,6 +533,7 @@ BEGIN TRY
 					,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
 					,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
 					,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+					,intLagPricingTypeId = lagctsh.intPricingTypeId
 					,origctsh.* 
 				FROM #tmpCTSequenceHistory origctsh
 				OUTER APPLY 
@@ -554,7 +555,7 @@ BEGIN TRY
 			WHERE SH.intContractDetailId = @intContractDetailId 
 			AND @intHeaderPricingType = 2
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> 1)
 					OR
 					 (ISNULL(P.intPriceFixationId, 0) = 0
 					  AND SH.ysnFuturesChange = 1
@@ -607,6 +608,7 @@ BEGIN TRY
 					,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
 					,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
 					,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+					,intLagPricingTypeId = lagctsh.intPricingTypeId
 					,origctsh.* 
 				FROM #tmpCTSequenceHistory origctsh
 				OUTER APPLY 
@@ -628,7 +630,7 @@ BEGIN TRY
 			WHERE SH.intContractDetailId = @intContractDetailId 
 			AND @intHeaderPricingType = 2
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> 1)
 					OR
 					 (ISNULL(P.intPriceFixationId, 0) = 0
 					  AND SH.ysnFuturesChange = 1
