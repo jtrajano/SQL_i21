@@ -194,6 +194,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	intLocalUOMId INT NULL,
 	dblLocalCashPrice NUMERIC (18, 6) NULL,
 
+	intAverageUOMId INT NULL,
+	dblAverageQuantity NUMERIC (18, 6) NULL,
+
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
 

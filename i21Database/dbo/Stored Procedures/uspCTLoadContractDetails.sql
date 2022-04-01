@@ -573,6 +573,9 @@ BEGIN TRY
 		, CD.dblLocalCashPrice
 		, ILU.strUnitMeasure AS strLocalUOM
 		, LUC.strCurrency AS strLocalCurrency
+		, CD.intAverageUOMId
+		, CD.dblAverageQuantity
+		, IAU.strUnitMeasure AS strAverageUOM
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -648,6 +651,8 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
 	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
+	LEFT JOIN tblICItemUOM   AU	ON	AU.intItemUOMId	= CD.intAverageUOMId
+	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
 	ORDER BY CD.intContractSeq
 
 	DROP TABLE #tmpContractDetail

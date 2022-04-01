@@ -198,6 +198,9 @@ AS
 		, CD.dblLocalCashPrice
 		, ILU.strUnitMeasure AS strLocalUOM
 		, LUC.strCurrency AS strLocalCurrency
+		, CD.intAverageUOMId
+		, CD.dblAverageQuantity
+		, IAU.strUnitMeasure AS strAverageUOM
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -296,3 +299,5 @@ AS
 	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
 	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
+	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
+	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
