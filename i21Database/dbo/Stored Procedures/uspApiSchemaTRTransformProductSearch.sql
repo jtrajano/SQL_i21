@@ -106,6 +106,7 @@ BEGIN
 	INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId AND EL.strLocationName = PS.strLocationName
 	INNER JOIN tblICItem I ON I.strItemNo = PS.strItemNo
 	WHERE PS.guiApiUniqueId = @guiApiUniqueId
+	ORDER BY PS.intKey DESC
 
 
 	OPEN DataCursor
