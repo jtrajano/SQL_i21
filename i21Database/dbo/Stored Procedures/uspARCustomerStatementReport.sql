@@ -333,6 +333,7 @@ FROM (
 		) SCALETICKETS
 		WHERE ysnPosted  = 1		
 		AND ysnCancelled = 0
+		AND ysnProcessedToNSF = 0
 		AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
 		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +'
 		AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId 

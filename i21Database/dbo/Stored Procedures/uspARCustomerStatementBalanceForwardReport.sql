@@ -631,6 +631,7 @@ FROM vyuARCustomerSearch C
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 		) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 		WHERE ysnPosted = 1
+		  AND ysnProcessedToNSF = 0
 			--AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
 			AND I.dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 			AND I.strType <> ''CF Tran''
