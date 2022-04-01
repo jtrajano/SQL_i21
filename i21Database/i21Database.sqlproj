@@ -385,6 +385,8 @@
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
     <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
+    <Build Include="dbo\User Defined Types\SingleAuditLogParam.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
