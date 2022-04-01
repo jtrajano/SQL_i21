@@ -332,6 +332,7 @@ FROM vyuARCustomerSearch C
 			) INV (strTicketNumber)
 		) SCALETICKETS
 		WHERE ysnPosted = 1
+		AND I.ysnProcessedToNSF = 0
 		AND ysnCancelled = 0
 		AND I.strType <> ''CF Tran''
 		AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))		
@@ -373,6 +374,7 @@ FROM vyuARCustomerSearch C
 					FROM dbo.tblARPayment WITH (NOLOCK)
 					WHERE ysnPosted = 1
 					  AND ysnInvoicePrepayment = 0
+					  AND ysnProcessedToNSF = 0
 					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
 					  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 		) P ON PD.intPaymentId = P.intPaymentId
@@ -401,6 +403,7 @@ FROM vyuARCustomerSearch C
 			 , dtmDatePaid
 		FROM dbo.tblARPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1
+		  AND ysnProcessedToNSF = 0
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 	) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 	LEFT JOIN (
@@ -411,6 +414,7 @@ FROM vyuARCustomerSearch C
 					FROM dbo.tblARPayment WITH (NOLOCK)
 					WHERE ysnPosted = 1
 					  AND ysnInvoicePrepayment = 0 
+					  AND ysnProcessedToNSF = 0
 					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
 					  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 		) P ON PD.intPaymentId = P.intPaymentId
