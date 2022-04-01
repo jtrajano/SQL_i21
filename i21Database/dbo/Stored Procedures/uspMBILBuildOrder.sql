@@ -17,6 +17,11 @@ BEGIN
 	DELETE tblMBILOrder WHERE intDriverId = @intDriverId AND intOrderId NOT IN (SELECT intOrderId FROM tblMBILInvoice WHERE intOrderId IS NOT NULL)
 END
 
+-- ++++++ CLEAN-OUT ORDERS WITH POSTED INVOICE  ++++++ --
+BEGIN
+	DELETE tblMBILOrder WHERE intOrderId IN (SELECT intOrderId FROM tblMBILInvoice WHERE ysnPosted = 1) AND intDriverId = @intDriverId
+END
+
 -- ++++++ CALL TM SP FOR OVERRAGE ++++++
 DECLARE  @TMDispatchId INT = NULL
 
