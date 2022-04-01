@@ -496,6 +496,7 @@ LEFT JOIN (
 WHERE I.ysnPosted = 1
 	AND I.ysnCancelled = 0
 	AND I.ysnRejected = 0
+	AND I.ysnProcessedToNSF = 0
 	AND (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND (I.strInvoiceNumber IN (SELECT strInvoiceOriginId from tblARInvoice)  OR   I.ysnForgiven = 0  )))	
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
@@ -668,6 +669,7 @@ LEFT JOIN (
 	) CUR ON P.intCurrencyId = CUR.intCurrencyID
 	WHERE P.ysnPosted = 1
 	  AND P.ysnInvoicePrepayment = 0
+	  AND P.ysnProcessedToNSF = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
 	  AND P.intPaymentId NOT IN (SELECT I.intPaymentId FROM dbo.tblARInvoice I WITH (NOLOCK) WHERE I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId IS NOT NULL AND I.ysnPosted = 1)
@@ -713,7 +715,8 @@ LEFT JOIN (
 			 , strCurrency 
 		FROM tblSMCurrency WITH (NOLOCK)  
 	) CUR ON P.intCurrencyId = CUR.intCurrencyID
-	WHERE P.ysnPosted = 1	  
+	WHERE P.ysnPosted = 1
+	  AND P.ysnProcessedToNSF = 0	  
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
 

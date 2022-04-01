@@ -214,6 +214,7 @@ FROM (
 			AND (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 1 OR ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 0 )
 			AND strTransactionType != 'Credit Note'
 			AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
+			AND ARI.ysnProcessedToNSF = 0
 	
 		UNION ALL
 
