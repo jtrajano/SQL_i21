@@ -78,7 +78,16 @@ SELECT DISTINCT PL.intPickLotDetailId,
 					END,
   strSplitFrom = PPL.strPickLotNumber,
   strAllocationNumber = AH.strAllocationNumber,
-  strAllocationDetailRefNo = AD.strAllocationDetailRefNo
+  strAllocationDetailRefNo = AD.strAllocationDetailRefNo,
+  PLH.dblGAShrinkFactor,
+  PLH.strOrigin,
+  PLH.strProductType,
+  PLH.strGrade,
+  PLH.strRegion,
+  PLH.strSeason,
+  PLH.strClass,
+  PLH.strProductLine,
+  PLH.strMarketValuation
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PL.intAllocationDetailId

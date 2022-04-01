@@ -61,7 +61,7 @@ FROM (
        ,dblWeightUOMConv = ItemWeightUOM.dblUnitQty
        ,dblWeightPerQty = Lot.dblWeightPerQty
        ,intOriginId = OG.intCountryID
-	   ,strOrigin = OG.strCountry
+	   ,strOrigin = ISNULL(OG.strCountry, Origin.strDescription)
        ,strBOLNo = Lot.strBOLNo
        ,strVessel = Lot.strVessel
 	   ,strDestinationCity = L.strDestinationCity
@@ -135,6 +135,13 @@ FROM (
 	   ,strCustomer = Customer.strName
 	   ,ysnRejected = CAST((CASE WHEN RJTD.intLotId IS NULL THEN 0 ELSE 1 END ) AS BIT)
 	   ,RJTD.strCustomerRejected
+	   ,Item.dblGAShrinkFactor
+	   ,strProductType = ProductType.strDescription
+	   ,strRegion = Region.strDescription
+	   ,strSeason = Season.strDescription
+	   ,strClass = Class.strDescription
+	   ,strProductLine = ProductLine.strDescription
+	   ,Item.strMarketValuation
 	FROM tblICLot Lot
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
@@ -151,6 +158,13 @@ FROM (
 							FROM tblLGPickLotDetail PLC WHERE intContainerId = LC.intLoadContainerId) PC
 		LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId   
 		LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
+		LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = Item.intOriginId
+		LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId
+		LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
+		LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = Item.intRegionId
+		LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = Item.intSeasonId
+		LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.intClassVarietyId
+		LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = Item.intProductLineId
 		LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId
 		LEFT JOIN tblICItem ConBundle ON ConBundle.intItemId = CTDetail.intItemBundleId
 		LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = Lot.intLocationId
