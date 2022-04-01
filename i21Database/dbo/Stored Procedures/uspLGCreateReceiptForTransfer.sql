@@ -21,6 +21,13 @@ BEGIN TRY
 	DECLARE @dblPContractDetailQty NUMERIC(18, 6)
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
+	/* Validate "To" Company Location */
+	IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadId = @intLoadId AND intSCompanyLocationId IS NULL)
+	BEGIN
+		SET @strErrorMessage = 'To Company Location is not specified.'
+		RAISERROR (@strErrorMessage,16,1)
+	END
+
 	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult'))
 	BEGIN
 		CREATE TABLE #tmpAddItemReceiptResult (
@@ -328,9 +335,6 @@ BEGIN TRY
 		,[intCurrencyId]
 		,[intSourceType]
 		,[strBillOfLadding]
-		,[strCertificate]
-		,[intProducerId]
-		,[strCertificateId]
 		,[strTrackingNumber]
 		)
 	SELECT DISTINCT [intLotId] = LDL.intNewLotId
@@ -359,9 +363,6 @@ BEGIN TRY
 		,[intCurrencyId] = @DefaultCurrencyId
 		,[intSourceType] =  9 --TEMPORARY Source Type for Transfer Shipment
 		,[strBillOfLadding] = L.strBLNumber
-		,[strCertificate] = Lot.strCertificate
-		,[intProducerId] = Lot.intProducerId
-		,[strCertificateId] = Lot.strCertificateId
 		,[strTrackingNumber] = Lot.strTrackingNumber
 	FROM tblLGLoadDetailLot LDL
 		JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId

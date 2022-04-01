@@ -56,6 +56,13 @@ BEGIN
 				,dblDeliveredNet = 0
 		WHERE intLoadId = @intLoadId
 
+		EXEC dbo.uspSMAuditLog @keyValue = @intLoadId 
+			,@screenName = 'Logistics.view.ShipmentSchedule'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = 'Rejected'
+			,@changeDescription = ''
+			,@fromValue = ''
+			,@toValue = ''
 	END
 	/* Begin Unreject Process */
 	ELSE IF (@ysnReject = 0)
@@ -63,7 +70,7 @@ BEGIN
 		--Set Shipment Status to "Rejected"
 		UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId
 
-		--S.Company Location moves to P.Company Location and becomes the source location for the transfer
+		--P.Company Location moves back to S.Company Location, Delivered Quantities are restored
 		UPDATE tblLGLoadDetail 
 			SET intSCompanyLocationId = intPCompanyLocationId
 				,intSSubLocationId = intPSubLocationId 
@@ -74,12 +81,20 @@ BEGIN
 				,dblDeliveredNet = dblNet
 		WHERE intLoadId = @intLoadId
 
-		--P.Company Location is reset for user entry (destination location)
+		--P.Company Location is reset
 		UPDATE tblLGLoadDetail
 			SET intPCompanyLocationId = NULL
 				,intPSubLocationId = NULL 
 				,intPStorageLocationId = NULL
 		WHERE intLoadId = @intLoadId
+
+		EXEC dbo.uspSMAuditLog @keyValue = @intLoadId 
+			,@screenName = 'Logistics.view.ShipmentSchedule'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = 'Unrejected'
+			,@changeDescription = ''
+			,@fromValue = ''
+			,@toValue = ''
 	END
 END
 GO
