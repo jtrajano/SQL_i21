@@ -58,6 +58,7 @@ SELECT LC.intLoadCostId
 			WHEN 9 THEN 'Full Shipment Created'
 			WHEN 10 THEN 'Cancelled'
 			WHEN 11 THEN 'Invoiced'
+			WHEN 12 THEN 'Rejected'
 			ELSE '' END COLLATE Latin1_General_CI_AS
 	  ,UM.strUnitMeasure
 	  ,I.strItemNo

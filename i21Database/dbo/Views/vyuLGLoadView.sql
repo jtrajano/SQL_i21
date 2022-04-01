@@ -119,6 +119,7 @@ SELECT -- Load Header
 		WHEN 9 THEN 'Full Shipment Created'
 		WHEN 10 THEN 'Cancelled'
 		WHEN 11 THEN 'Invoiced'
+		WHEN 12 THEN 'Rejected'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,strCalenderInfo = L.strLoadNumber 
 		+ CASE L.intTransportationMode 
@@ -175,6 +176,7 @@ SELECT -- Load Header
 			WHEN 9 THEN 'Full Shipment Created'
 			WHEN 10 THEN 'Cancelled'
 			WHEN 11 THEN 'Invoiced'
+			WHEN 12 THEN 'Rejected'
 			ELSE '' END 
 		+ CASE WHEN ISNULL(L.strExternalLoadNumber, '') <> '' THEN ' - ' + '(S) ' + L.strExternalLoadNumber ELSE '' END 
 		+ CASE WHEN ISNULL(L.strCustomerReference, '') <> '' THEN ' - ' + '(C) ' + L.strCustomerReference ELSE '' END COLLATE Latin1_General_CI_AS

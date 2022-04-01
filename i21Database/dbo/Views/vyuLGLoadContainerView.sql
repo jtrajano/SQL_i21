@@ -131,6 +131,7 @@ SELECT   L.intLoadId
 								WHEN 9 THEN 'Full Shipment Created'
 								WHEN 10 THEN 'Cancelled'
 								WHEN 11 THEN 'Invoiced'
+								WHEN 12 THEN 'Rejected'
 								ELSE '' END COLLATE Latin1_General_CI_AS
 		,LDCL.dblReceivedQty AS dblContainerReceivedQty
 		,CAST((CASE WHEN ISNULL(LDCL.dblReceivedQty ,0) = 0 THEN 0 ELSE 1 END) AS BIT) AS  ysnReceived

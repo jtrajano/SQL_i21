@@ -633,6 +633,7 @@
     <Build Include="dbo\Tables\tblICCommodityAttribute4.sql" />
     <Build Include="dbo\Views\vyuAPVendorStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVendorStatement.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRejectLoadSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10965,4 +10966,3 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />
   </ItemGroup>
 </Project>
-
