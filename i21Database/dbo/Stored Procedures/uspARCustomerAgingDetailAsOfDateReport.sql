@@ -164,6 +164,7 @@ INNER JOIN ##ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId AND P.ysnInvo
 INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
 WHERE PD.intInvoiceId IS NOT NULL
   AND I.strTransactionType = 'Customer Prepayment'
+  AND I.ysnProcessedToNSF = 0
 GROUP BY PD.intInvoiceId
 
 --##GLACCOUNTS
@@ -262,7 +263,7 @@ INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 WHERE I.ysnPosted = 1  
-  --AND I.ysnCancelled = 0
+  AND I.ysnProcessedToNSF = 0
   AND I.strTransactionType <> 'Cash Refund'
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND ( 
