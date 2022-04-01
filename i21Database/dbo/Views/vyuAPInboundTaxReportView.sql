@@ -37,7 +37,7 @@ SELECT
 	,strDebitAccount = account.strAccountId
 	,strCreditAccount = apaccount.strAccountId
 	,strTaxAccount = RT.strAccountId
-	,APBD.dblTax
+	,dblTax = RT.dblAdjustedTax
 	,APBD.dblQtyReceived
 	,strUnitOfMeasure = UM.strUnitMeasure
 	,dblPaymentAmount = ISNULL(payment.dblAmountPaid, 0.00)
@@ -55,7 +55,10 @@ INNER JOIN tblEMEntity E ON E.intEntityId = V.intEntityId
 INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
 INNER JOIN tblSMCurrency SMC ON APB.intCurrencyId = SMC.intCurrencyID
 INNER JOIN tblICItem IE ON IE.intItemId = APBD.intItemId
-LEFT JOIN (dbo.tblICItemUOM costUOM INNER JOIN dbo.tblICUnitMeasure UM ON costUOM.intUnitMeasureId = UM.intUnitMeasureId) ON APBD.intCostUOMId = costUOM.intItemUOMId
+LEFT JOIN (
+	tblICItemUOM IUOM 
+	INNER JOIN tblICUnitMeasure UM ON IUOM.intUnitMeasureId = UM.intUnitMeasureId
+) ON APBD.intCostUOMId = IUOM.intItemUOMId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intPayToAddressId
 LEFT JOIN tblEMEntityLocation ELS ON APB.intShipFromEntityId = EL.intEntityId AND APB.intShipFromId = ELS.intEntityLocationId
 LEFT JOIN tblICCommodity C ON C.intCommodityId = IE.intCommodityId
@@ -71,10 +74,12 @@ INNER JOIN (
 		,GL.strAccountId
         ,SMTC.strTaxClass
 		,APBDT.dblRate
+		,APBDT.dblAdjustedTax
     FROM tblAPBillDetailTax APBDT
     LEFT JOIN tblSMTaxCode STC ON APBDT.intTaxCodeId = STC.intTaxCodeId
 	LEFT JOIN tblGLAccount GL ON STC.intPurchaseTaxAccountId = GL.intAccountId
     LEFT JOIN tblSMTaxClass SMTC ON APBDT.intTaxClassId = SMTC.intTaxClassId
+	WHERE APBDT.ysnCheckOffTax = 0
 ) RT ON APBD.intBillDetailId = RT.intBillDetailId
 LEFT OUTER JOIN tblSMTaxGroup SMTG ON ISNULL(APBD.intTaxGroupId, RT.intTaxGroupId) = SMTG.intTaxGroupId
 OUTER APPLY (

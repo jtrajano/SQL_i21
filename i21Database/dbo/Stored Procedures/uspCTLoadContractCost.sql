@@ -60,7 +60,7 @@ AS
 				(CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
 						WHEN	CC.strCostMethod = 'Amount' THEN
-							CC.dblRate
+							CC.dblRate * isnull(CC.dblFX,1)
 						WHEN	CC.strCostMethod = 'Per Container'	THEN
 							(CC.dblRate * (case when isnull(CD.intNumberOfContainers,1) = 0 then 1 else isnull(CD.intNumberOfContainers,1) end))
 						WHEN	CC.strCostMethod = 'Percentage' THEN 

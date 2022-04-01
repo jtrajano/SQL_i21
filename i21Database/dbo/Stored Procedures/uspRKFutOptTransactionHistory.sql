@@ -64,7 +64,8 @@ BEGIN TRY
 			, dblContractRate
 			, strOrderType
 			, strUserName
-			, strAction)
+			, strAction
+			, strNotes)
 		SELECT H.intFutOptTransactionHeaderId
 			, H.strSelectedInstrumentType
 			, T.intFutOptTransactionId
@@ -112,6 +113,7 @@ BEGIN TRY
 								   ELSE '' END)
 			, strUserName = @strUserName
 			, 'DELETE'
+			, T.strReference
 		FROM tblRKFutOptTransaction T
 		JOIN tblRKFutOptTransactionHeader H ON T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId
@@ -200,7 +202,8 @@ BEGIN TRY
 			, dblContractRate
 			, strOrderType
 			, strUserName
-			, strAction)
+			, strAction
+			, strNotes)
 		SELECT H.intFutOptTransactionHeaderId
 			, H.strSelectedInstrumentType
 			, T.intFutOptTransactionId
@@ -248,6 +251,7 @@ BEGIN TRY
 								   ELSE '' END)
 			, strUserName = @strUserName
 			, @action
+			, T.strReference
 		FROM tblRKFutOptTransaction T
 		JOIN tblRKFutOptTransactionHeader H on T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId

@@ -6,7 +6,10 @@ SELECT
 	, strBankAccountNo = ISNULL(dbo.fnAESDecryptASym(BA.strBankAccountNo),strBankAccountNo) COLLATE Latin1_General_CI_AS
 	, intBankAccountCurrencyId = BA.intCurrencyId
 	, strBankAccountCurrency = C.strCurrency
-	, strBankTransactionId = BankTransaction.strTransactionId
+	, strBankTransactionId = CASE 
+							WHEN A.strInternalTradeNo <> '' AND A.strInternalTradeNo IS NOT NULL THEN BankTransactionFromSourceTransaction.strTransactionId
+							WHEN A.intMatchNo <> '' AND A.intMatchNo IS NOT NULL THEN BankTransactionFromMatchDerivative.strTransactionId
+							ELSE NULL END
 	, intConcurrencyId = 1
 FROM vyuRKDerivativesForCommissionPosting A
 INNER JOIN tblCMBankAccount BA
@@ -14,12 +17,26 @@ INNER JOIN tblCMBankAccount BA
 LEFT JOIN tblSMCurrency C
 	ON C.intCurrencyID = BA.intCurrencyId
 OUTER APPLY (
-	SELECT strTransactionId 
+	SELECT TOP 1 strTransactionId 
 	FROM tblCMBankTransaction BT
 	INNER JOIN tblCMBankTransactionDetail BTD
 		ON BTD.intTransactionId = BT.intTransactionId
 	WHERE
 		BT.intBankTransactionTypeId = 26
 		AND BTD.strSourceModule = 'Risk Management'
-		AND (BTD.strSourceTransactionId = A.strInternalTradeNo OR BTD.intMatchDerivativeNo = A.intMatchNo)
-) BankTransaction
+		AND BTD.strSourceTransactionId = A.strInternalTradeNo
+		AND BT.ysnPosted = 1
+		AND A.ysnPosted = 1
+) BankTransactionFromSourceTransaction
+OUTER APPLY (
+	SELECT TOP 1 strTransactionId 
+	FROM tblCMBankTransaction BT
+	INNER JOIN tblCMBankTransactionDetail BTD
+		ON BTD.intTransactionId = BT.intTransactionId
+	WHERE
+		BT.intBankTransactionTypeId = 26
+		AND BTD.strSourceModule = 'Risk Management'
+		AND BTD.intMatchDerivativeNo = A.intMatchNo
+		AND BT.ysnPosted = 1
+		AND A.ysnPosted = 1
+) BankTransactionFromMatchDerivative

@@ -557,10 +557,6 @@ BEGIN TRY
 		, CD.dblOptionalityPremium
 		, CD.intCostTermId
 		, strCostTerm = CostTerm.strFreightTerm
-		, CD.intShippingLineId2
-		, strShippingLine2 = SL2.strName
-		, CD.intShippingLineId3
-		, strShippingLine3 = SL3.strName
 		, ICC.strProductType
 		, ICC.strGrade AS strGradeCommodity
 		, ICC.strRegion
@@ -577,6 +573,9 @@ BEGIN TRY
 		, CD.dblLocalCashPrice
 		, ILU.strUnitMeasure AS strLocalUOM
 		, LUC.strCurrency AS strLocalCurrency
+		, CD.intAverageUOMId
+		, CD.dblAverageQuantity
+		, IAU.strUnitMeasure AS strAverageUOM
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -606,8 +605,6 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = CD.intConvPriceCurrencyId
 	LEFT JOIN tblSMCurrency IY ON IY.intCurrencyID = CD.intInvoiceCurrencyId
 	LEFT JOIN tblSMCurrency MY ON MY.intCurrencyID = MA.intCurrencyId
-	LEFT JOIN tblEMEntity SL2 ON SL2.intEntityId = CD.intShippingLineId2
-	LEFT JOIN tblEMEntity SL3 ON SL3.intEntityId = CD.intShippingLineId3
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 	LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intDestinationPortId
 	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
@@ -654,6 +651,8 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
 	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
+	LEFT JOIN tblICItemUOM   AU	ON	AU.intItemUOMId	= CD.intAverageUOMId
+	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
 	ORDER BY CD.intContractSeq
 
 	DROP TABLE #tmpContractDetail

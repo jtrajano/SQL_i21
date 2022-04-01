@@ -599,7 +599,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostMissingLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntriesForMissingLots.sql" />
     <Build Include="dbo\Views\vyuQMContractWithoutSampleList.sql" />
-    <Build Include="dbo\Views\vyuQMAllocation.sql" />   
+    <Build Include="dbo\Views\vyuQMAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionAlternativeShippingLinesReport.sql" />
     <Build Include="dbo\Views\vyuRKM2MBasisForNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoAssignDerivative.sql" />
@@ -627,6 +627,13 @@
     <Build Include="dbo\Stored Procedures\uspICGenerateStorageCharges.sql" />
     <Build Include="dbo\Tables\tblICStorageChargeDetail.sql" />
     <Build Include="dbo\Views\vyuICGetStorageChargeDetail.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute1.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute2.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute3.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute4.sql" />
+    <Build Include="dbo\Views\vyuAPVendorStatement.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVendorStatement.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRejectLoadSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -908,6 +915,8 @@
       <SuppressTSqlWarnings>
       </SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Tables\tblTMOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
     <Build Include="dbo\Tables\tblTMSiteDevice.sql" />
     <Build Include="dbo\Tables\tblTMSiteDeviceLink.sql" />
     <Build Include="dbo\Tables\tblTMSiteJulianCalendar.sql" />
@@ -10367,14 +10376,19 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
-    <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
     <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Tables\tblSMPerformanceLog.sql" />
+    <Build Include="dbo\Views\vyuSMPerformanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMLogPerformanceRuntime.sql" />
+    <None Include="Scripts\Utility\IC\DPR\uspICDPRDiagnostics.sql" />
+    <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
     <None Include="Scripts\Utility\GR\uspGRGrainStorageDiagnostics.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDuplicateChargeAndPremium.sql" />
     <Build Include="dbo\Tables\tblGRSettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\User Defined Types\SettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\Views\vyuGRSettleStorageBillDetail.sql" />
     <None Include="Scripts\Utility\IC\DPR\uspARDprInTransitFix.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRebuildNonOpenContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10720,6 +10734,9 @@
     <Build Include="dbo\User Defined Types\SettleContract.sql" />
     <Build Include="dbo\User Defined Types\SettleStorageTicket.sql" />
     <Build Include="dbo\Tables\tblQMSamplingCriteria.sql" />
+    <Build Include="dbo\Tables\tblQMPriorityGroup.sql" />
+    <Build Include="dbo\Tables\tblQMPriorityGroupDetail.sql" />
+    <Build Include="dbo\Views\vyuQMProductGroupDetailSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

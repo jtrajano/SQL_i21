@@ -62,7 +62,7 @@ BEGIN
 		intTransactionId,
 		strTransactionId,
 		strTransactionType,
-		@dtmReportDate,
+		dtmDate,
 		dblAmount * RateFilter.dblRateBucket1,
 		0,
 		0,
@@ -362,7 +362,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
+	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 61, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -409,7 +409,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
+	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 91, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -456,7 +456,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
+	FROM [dbo].[fnLGCashFlowTransactions](DATEADD(DAY, 121, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter

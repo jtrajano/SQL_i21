@@ -4,11 +4,11 @@ SELECT
 	PU.intStorePumpItemId
 	, PU.intStoreId
 	, PU.intItemUOMId
-	, PU.strUnitMeasure
 	, PU.dblPrice
 	, PU.intTaxGroupId
 	, PU.intCategoryId
 	, CAT.strCategoryCode
+	, UM.strUnitMeasure
 	, I.strItemNo
 	, UOM.strLongUPCCode
 	, I.strDescription AS strPumpItemDescription
@@ -17,6 +17,8 @@ SELECT
 FROM tblSTPumpItem PU
 JOIN tblICItemUOM UOM 
 	ON PU.intItemUOMId = UOM.intItemUOMId
+JOIN tblICUnitMeasure UM 
+	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 JOIN tblICCategory CAT
 	ON PU.intCategoryId = CAT.intCategoryId
 JOIN tblICItem I

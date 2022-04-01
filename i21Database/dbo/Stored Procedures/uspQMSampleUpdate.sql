@@ -299,7 +299,7 @@ BEGIN TRY
 		,strSentBy = x.strSentBy
 		,intSentById = x.intSentById
 		,ysnImpactPricing = x.ysnImpactPricing
-		,intSamplingCriteriaId = x.intSamplingCriteriaId
+		,intSamplingCriteriaId = CASE x.intSamplingCriteriaId WHEN 0 THEN NULL ELSE x.intSamplingCriteriaId END
 		,strSendSampleTo = x.strSendSampleTo
 		,strRepresentLotNumber = x.strRepresentLotNumber
 		,intLastModifiedUserId = x.intLastModifiedUserId

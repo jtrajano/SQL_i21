@@ -284,8 +284,10 @@ AS
 			CD.intLocalUOMId,	 
 			CD.dblLocalCashPrice,
 			ILU.strUnitMeasure AS strLocalUOM,
-			LUC.strCurrency AS strLocalCurrency
-			
+			LUC.strCurrency AS strLocalCurrency,
+			CD.intAverageUOMId,
+			CD.dblAverageQuantity,
+			IAU.strUnitMeasure AS strAverageUOM
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
@@ -343,6 +345,8 @@ AS
 	LEFT    JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId				=		CD.intStorageLocationId		--strStorageLocationName
 	LEFT    JOIN	tblICItemUOM					LU	ON	LU.intItemUOMId						=		CD.intLocalUOMId
 	LEFT    JOIN	tblICUnitMeasure				ILU	ON	ILU.intUnitMeasureId				=		LU.intUnitMeasureId			--strLocalUOM
+	LEFT	JOIN	tblICItemUOM					AU	ON	AU.intItemUOMId						=		CD.intAverageUOMId
+	LEFT	JOIN	tblICUnitMeasure				IAU ON	IAU.intUnitMeasureId				=		AU.intUnitMeasureId			--strAverageUOM
 
 	LEFT    JOIN	tblRKFutureMarket				MA	ON	MA.intFutureMarketId				=		CD.intFutureMarketId		--strFutureMarket
 	LEFT    JOIN	tblICUnitMeasure				MU	ON	MU.intUnitMeasureId					=		MA.intUnitMeasureId

@@ -190,7 +190,7 @@ SELECT   L.intLoadId
 			ELSE '' END COLLATE Latin1_General_CI_AS
 		,Item.intCommodityId
 		,CA.intCommodityAttributeId
-		,CO.strCountry AS strOrigin
+		,strOrigin = ISNULL(CO.strCountry, CA.strDescription)
 		,LD.intNumberOfContainers
 		,strShipmentStatus = CASE L.intShipmentStatus
 			WHEN 1 THEN 
@@ -234,6 +234,7 @@ SELECT   L.intLoadId
 			WHEN 9 THEN 'Full Shipment Created'
 			WHEN 10 THEN 'Cancelled'
 			WHEN 11 THEN 'Invoiced'
+			WHEN 12 THEN 'Rejected'
 			ELSE '' END COLLATE Latin1_General_CI_AS
 		,strTransportationMode = CASE L.intTransportationMode
 			WHEN 1 THEN 'Truck'
@@ -259,6 +260,14 @@ SELECT   L.intLoadId
 		,strETAPOLReasonCodeDescription = ETAPOLRC.strReasonCodeDescription
 		,strETSPOLReasonCodeDescription = ETSPOLRC.strReasonCodeDescription
 		,strETAPODReasonCodeDescription = ETAPODRC.strReasonCodeDescription
+		,Item.dblGAShrinkFactor
+		,strProductType = ProductType.strDescription
+		,strGrade = Grade.strDescription
+		,strRegion = Region.strDescription
+		,strSeason = Season.strDescription
+		,strClass = Class.strDescription
+		,strProductLine = ProductLine.strDescription
+		,Item.strMarketValuation
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -283,6 +292,12 @@ LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureI
 LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LD.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
+LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = Item.intRegionId
+LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = Item.intSeasonId
+LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.intClassVarietyId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = Item.intProductLineId
 LEFT JOIN tblCTCropYear CPY ON CPY.intCropYearId = LD.intCropYearId
 LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId  
 LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId  

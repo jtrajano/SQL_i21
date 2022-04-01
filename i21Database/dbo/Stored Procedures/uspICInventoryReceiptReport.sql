@@ -102,7 +102,16 @@ SELECT
 	, r.strReceiptNumber
 	, strOrderType = r.strReceiptType
 	, r.dtmReceiptDate
-	, strSourceType = CASE r.intSourceType WHEN 1 THEN 'Scale' WHEN 2 THEN 'Inbound Shipment' WHEN 3 THEN 'Transport' WHEN 4 THEN 'Settle Storage' WHEN 5 THEN 'Delivery Sheet' ELSE 'None' END
+	, strSourceType = 
+		CASE r.intSourceType 
+			WHEN 1 THEN 'Scale' 
+			WHEN 2 THEN 'Inbound Shipment' 
+			WHEN 3 THEN 'Transport' 
+			WHEN 4 THEN 'Settle Storage' 
+			WHEN 5 THEN 'Delivery Sheet' 
+			WHEN 9 THEN 'Transfer Shipment' 
+			ELSE 'None' 
+		END
 	, strShipTo = cl.strLocationName
 	, strVendor = e.strName
 	, strShipFrom = el.strLocationName

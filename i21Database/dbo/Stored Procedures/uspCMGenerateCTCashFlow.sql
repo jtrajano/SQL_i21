@@ -62,7 +62,7 @@ BEGIN
 		intTransactionId,
 		strTransactionId,
 		strTransactionType,
-		@dtmReportDate,
+		dtmDate,
 		(ISNULL(dblAmount, 0) * RateFilter.dblRateBucket1) * CASE WHEN strTransactionType = 'Purchase' THEN -1 ELSE 1 END,
 		0,
 		0,
@@ -357,7 +357,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 61, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -403,7 +403,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 91, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter
@@ -449,7 +449,7 @@ BEGIN
 		intBankAccountId,
 		intCompanyLocationId,
 		1
-	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
+	FROM [dbo].[fnCTCashFlowTransactions](DATEADD(DAY, 121, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
 	JOIN @tblRateFilters RateFilter
 		ON RateFilter.intFilterCurrencyId = intCurrencyId
 	JOIN @tblRateTypeFilters RateTypeFilter

@@ -53,6 +53,7 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@SOURCE_TYPE_DeliverySheet AS INT = 5
 		,@SOURCE_TYPE_PurchaseOrder AS INT = 6
 		,@SOURCE_TYPE_Store AS INT = 7
+		,@SOURCE_TYPE_TransferShipment AS INT = 9
 
 -- Posting variables
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -1320,7 +1321,7 @@ BEGIN
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
 				-- In-Transit GL Entries from Inbound Shipment 
-				IF (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
+				IF (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')					
 				BEGIN 				
 					INSERT INTO @DummyGLEntries (
 							[dtmDate] 
@@ -1410,13 +1411,10 @@ BEGIN
 
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 				END 
-
 				
 				-- In-Transit GL entries from Transfer Order 
-				ELSE IF (
-						@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-						--AND EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
-					)
+				ELSE IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+					OR @intSourceType = @SOURCE_TYPE_TransferShipment
 				BEGIN 
 					INSERT INTO @DummyGLEntries (
 							[dtmDate] 
@@ -1579,9 +1577,9 @@ BEGIN
 		END
 
 		-- Reduce In-Transit stocks coming from Inbound Shipment. 
-		IF	(@intSourceType = @SOURCE_TYPE_InboundShipment) 
-			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
-			AND @strFobPoint = 'Origin'
+		IF	EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
+			AND @intSourceType = @SOURCE_TYPE_InboundShipment 
+			AND @strFobPoint = 'Origin'					
 		BEGIN 
 			-- Get values for the In-Transit Costing 
 			INSERT INTO @ItemsForInTransitCosting (
@@ -1657,7 +1655,10 @@ BEGIN
 
 			WHERE	r.strReceiptNumber = @strTransactionId
 					AND t.ysnIsUnposted = 0 
-					AND t.intFobPointId = @FOB_ORIGIN
+					AND (
+						t.intFobPointId = @FOB_ORIGIN
+						OR (@intSourceType = @SOURCE_TYPE_TransferShipment)
+					)
 					AND t.dblQty > 0
 					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 					
@@ -1722,8 +1723,11 @@ BEGIN
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END 
 
-		-- Reduce In-Transit stocks coming from Transfer Order
-		IF	(@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER) 
+		-- Reduce In-Transit stocks coming from Transfer Order (Inventory Transfer) 
+		ELSE IF	(
+				@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+				AND @intSourceType <> @SOURCE_TYPE_TransferShipment
+			) 			
 			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
 		BEGIN 
 			-- Get values for the In-Transit Costing 
@@ -1777,7 +1781,7 @@ BEGIN
 							END 
 									
 					,[dblUOMQty]			= t.dblUOMQty
-					,[dblCost]				= t.dblCost
+					,[dblCost]				= valuationCost.dblCost 
 					,[intCurrencyId]		= t.intCurrencyId
 					,[dblExchangeRate]		= t.dblExchangeRate
 					,[intTransactionId]		= r.intInventoryReceiptId
@@ -1785,9 +1789,9 @@ BEGIN
 					,[strTransactionId]			= r.strReceiptNumber
 					,[intTransactionTypeId]		= @INVENTORY_RECEIPT_TYPE
 					,[intLotId]					= t.intLotId
-					,[intSourceTransactionId]	= t.intInventoryTransferId
-					,[strSourceTransactionId]	= t.strTransferNo
-					,[intSourceTransactionDetailId] = t.intInventoryTransferDetailId
+					,[intSourceTransactionId]	= t.intTransactionId
+					,[strSourceTransactionId]	= t.strTransactionId
+					,[intSourceTransactionDetailId] = t.intTransactionDetailId
 					,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId)
 					,[intForexRateTypeId]			= t.intForexRateTypeId --ri.intForexRateTypeId
 					,[dblForexRate]					= t.dblForexRate --ri.dblForexRate
@@ -1804,27 +1808,16 @@ BEGIN
 						ON ri.intInventoryReceiptItemId = v.intInventoryReceiptItemId
 						AND r.intInventoryReceiptId = v.intInventoryReceiptId
 					CROSS APPLY (
-						SELECT TOP 1
-							th.strTransferNo
-							,th.intInventoryTransferId
-							,td.intInventoryTransferDetailId
-							,t.intLotId 
-							,t.intItemId
-							,t.intItemLocationId
-							,intItemUOMId = ISNULL(l.intItemUOMId, t.intItemUOMId) 
-							,t.dblUOMQty
-							,dblCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, ISNULL(l.intItemUOMId, t.intItemUOMId), t.dblCost)
-							,t.intCurrencyId
-							,t.dblExchangeRate
-							,t.dblForexRate
-							,t.intForexRateTypeId
+						SELECT 
+							dblCost = 
+								dbo.fnDivide(
+									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+									,SUM(ISNULL(t.dblQty, 0))
+								)
 						FROM 				
 							tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
 								ON th.intInventoryTransferId = td.intInventoryTransferId
-							INNER JOIN (
-								tblICInventoryTransaction t LEFT JOIN tblICLot l
-									ON t.intLotId = l.intLotId
-							)
+							INNER JOIN tblICInventoryTransaction t 
 								ON t.strTransactionId = th.strTransferNo
 								AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
 								AND t.intItemId = ri.intItemId 
@@ -1844,11 +1837,38 @@ BEGIN
 									AND td.intInventoryTransferId = ri.intInventoryTransferId
 								)
 							)
-					) t		
+					) valuationCost 		
+					CROSS APPLY (
+						SELECT TOP 1
+							t.*
+						FROM 				
+							tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
+								ON th.intInventoryTransferId = td.intInventoryTransferId
+							INNER JOIN tblICInventoryTransaction t 
+								ON t.strTransactionId = th.strTransferNo
+								AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
+								AND t.intItemId = ri.intItemId 
+								AND t.dblQty > 0 
+								AND t.ysnIsUnposted = 0 
+						WHERE
+							td.intItemId = ri.intItemId 
+							AND (
+								(
+									td.intInventoryTransferDetailId = ri.intSourceId
+									AND td.intInventoryTransferId = ri.intOrderId
+									AND ri.intInventoryTransferDetailId IS NULL 
+									AND ri.intInventoryTransferId IS NULL 
+								)
+								OR (
+									td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
+									AND td.intInventoryTransferId = ri.intInventoryTransferId
+								)
+							)
+					) t
 
 			WHERE	r.strReceiptNumber = @strTransactionId
-					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
-					
+					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 				
+
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
 			BEGIN 
 				-- Call the post routine for the In-Transit costing. 
@@ -1896,6 +1916,219 @@ BEGIN
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 						
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[intSourceEntityId]
+					,[intCommodityId]
+			)
+			EXEC	@intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit
+					@strBatchId  
+					,'Inventory'
+					,@intEntityUserSecurityId
+					,DEFAULT 
+					,@intLocationId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit			
+		END 
+
+		-- Reduce In-Transit stocks coming from Logistics - Transfer Shipment 
+		ELSE IF	(
+				@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER 
+				AND @intSourceType = @SOURCE_TYPE_TransferShipment
+			) 			
+			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
+		BEGIN 
+			-- Get values for the In-Transit Costing 
+			INSERT INTO @ItemsForTransferOrder (
+					[intItemId] 
+					,[intItemLocationId] 
+					,[intItemUOMId] 
+					,[dtmDate] 
+					,[dblQty] 
+					,[dblUOMQty] 
+					,[dblCost] 
+					,[intCurrencyId] 
+					,[dblExchangeRate] 
+					,[intTransactionId] 
+					,[intTransactionDetailId] 
+					,[strTransactionId] 
+					,[intTransactionTypeId] 
+					,[intLotId] 
+					,[intSourceTransactionId] 
+					,[strSourceTransactionId] 
+					,[intSourceTransactionDetailId]					
+					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
+					,[intSourceEntityId]
+					,[strBOLNumber]
+					,[intTicketId]
+					,[strSourceType]
+					,[strSourceNumber]
+			)
+			SELECT 
+					[intItemId]				= t.intItemId  
+					,[intItemLocationId]	= t.intItemLocationId
+					,[intItemUOMId]			= t.intItemUOMId
+					,[dtmDate]				= r.dtmReceiptDate
+					,[dblQty]				= 
+							CASE 
+								WHEN ri.intUnitMeasureId = t.intItemUOMId THEN -ri.dblOpenReceive 
+								WHEN ri.intWeightUOMId = t.intItemUOMId THEN -ri.dblNet
+								ELSE 
+									dbo.fnCalculateQtyBetweenUOM(
+										ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId)
+										,t.intItemUOMId
+										,CASE 
+											WHEN ri.intWeightUOMId IS NOT NULL THEN 
+												-ri.dblNet
+											ELSE 
+												-ri.dblOpenReceive
+										END 								
+									)
+							END 
+									
+					,[dblUOMQty]			= t.dblUOMQty
+					,[dblCost]				= valuationCost.dblCost 							
+					,[intCurrencyId]		= t.intCurrencyId
+					,[dblExchangeRate]		= t.dblExchangeRate
+					,[intTransactionId]		= r.intInventoryReceiptId
+					,[intTransactionDetailId]	= ri.intInventoryReceiptItemId
+					,[strTransactionId]			= r.strReceiptNumber
+					,[intTransactionTypeId]		= @INVENTORY_RECEIPT_TYPE
+					,[intLotId]					= t.intLotId
+					,[intSourceTransactionId]	= t.intInventoryTransactionId
+					,[strSourceTransactionId]	= t.strTransactionId
+					,[intSourceTransactionDetailId] = t.intTransactionDetailId
+					,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId)
+					,[intForexRateTypeId]			= t.intForexRateTypeId --ri.intForexRateTypeId
+					,[dblForexRate]					= t.dblForexRate --ri.dblForexRate
+					,[intSourceEntityId]		= NULL 
+					,[strBOLNumber] = r.strBillOfLading
+					,[intTicketId] = ri.intTicketId 
+					,[strSourceType] = v.strSourceType
+					,[strSourceNumber] = v.strSourceNumber
+			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					INNER JOIN tblICItem i
+						ON i.intItemId = ri.intItemId
+					INNER JOIN vyuICGetReceiptItemSource v
+						ON ri.intInventoryReceiptItemId = v.intInventoryReceiptItemId
+						AND r.intInventoryReceiptId = v.intInventoryReceiptId
+					INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
+						ON loadShipmentLookup.intLoadDetailId = ri.intSourceId
+						AND loadShipmentLookup.intLoadContainerId = ri.intContainerId 
+					CROSS APPLY (
+						SELECT 
+							dblCost = 
+								dbo.fnDivide(
+									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+									,SUM(ISNULL(t.dblQty, 0))
+								)
+						FROM 				
+							tblICInventoryTransaction t 
+						WHERE 
+							t.strTransactionId = loadShipmentLookup.strLoadNumber
+							AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId	
+							AND t.intItemId = ri.intItemId 
+							AND t.dblQty > 0 
+							AND t.ysnIsUnposted = 0 
+					) valuationCost 		
+					CROSS APPLY (
+						SELECT TOP 1
+							t.*
+						FROM 				
+							tblICInventoryTransaction t 
+						WHERE 
+							t.strTransactionId = loadShipmentLookup.strLoadNumber
+							AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId	
+							AND t.intItemId = ri.intItemId 
+							AND t.dblQty > 0 
+							AND t.ysnIsUnposted = 0 
+					) t
+
+			WHERE	r.strReceiptNumber = @strTransactionId
+					AND t.ysnIsUnposted = 0 				
+					AND t.dblQty > 0
+					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 		
+
+			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
+			BEGIN 
+				-- Call the post routine for the In-Transit costing. 
+				INSERT INTO @DummyGLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]	
+						,[dblDebitReport]	
+						,[dblCreditForeign]	
+						,[dblCreditReport]	
+						,[dblReportingRate]	
+						,[dblForeignRate]
+						,[intSourceEntityId]
+						,[intCommodityId]
+				)
+				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
+						@ItemsForTransferOrder  
+						,@strBatchId  
+						,'Inventory'
+						,@intEntityUserSecurityId
+			END 
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
 			INSERT INTO @GLEntries (
 					[dtmDate] 
 					,[strBatchId]

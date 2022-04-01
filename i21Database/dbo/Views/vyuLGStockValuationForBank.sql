@@ -51,6 +51,7 @@ SELECT DISTINCT CH.intContractHeaderId
 		WHEN 9 THEN 'Full Shipment Created'
 		WHEN 10 THEN 'Cancelled'
 		WHEN 11 THEN 'Invoiced'
+		WHEN 12 THEN 'Rejected'
 		ELSE '' END COLLATE Latin1_General_CI_AS AS strShipmentStatus
 	,I.strItemNo
 	,I.strDescription AS strItemDescription

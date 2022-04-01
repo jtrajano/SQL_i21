@@ -49,6 +49,7 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_PURCHASE_ORDER AS INT = 6
 		,@SourceType_STORE AS INT = 7
 		,@SourceType_STORE_LOTTERY_MODULE AS INT = 8
+		,@SourceType_TRANSFER_SHIPMENT AS INT = 9
 
 
 DECLARE @STATUS_OPEN AS TINYINT = 1
@@ -377,6 +378,7 @@ BEGIN
 			,@SourceType_PURCHASE_ORDER 
 			,@SourceType_STORE 
 			,@SourceType_STORE_LOTTERY_MODULE
+			,@SourceType_TRANSFER_SHIPMENT
 		)
 			BEGIN
 				-- Source Type Id is invalid or missing.
@@ -1687,7 +1689,7 @@ BEGIN
 					@valueLotRecordNo = ItemLot.strLotNumber
 			FROM	@LotEntries ItemLot
 			WHERE	ItemLot.intSourceType IS NULL 
-					OR ItemLot.intSourceType > 5 
+					OR ItemLot.intSourceType > 9 
 					OR ItemLot.intSourceType < 0
 
 			IF @valueLotRecordNo IS NOT NULL
@@ -1915,6 +1917,7 @@ BEGIN
 				FROM	@LotEntries ItemLot LEFT JOIN tblICCertification c
 							ON ItemLot.strCertificate = c.strCertificationName 
 				WHERE	ItemLot.strCertificate IS NOT NULL 
+						AND LTRIM(RTRIM(ItemLot.strCertificate)) <> ''
 						AND c.strCertificationName IS NULL 
 				IF (@strCertificateName IS NOT NULL)
 				BEGIN 
@@ -1964,6 +1967,7 @@ BEGIN
 				,[intProducerId]
 				,[strCertificateId]
 				,[strTrackingNumber]
+				,[intLotStatusId]
 				,[intSort]
 				,[intConcurrencyId]
 				,dtmDateCreated
@@ -2013,6 +2017,7 @@ BEGIN
 				,[intProducerId] = ItemLot.intProducerId
 				,[strCertificateId] = ItemLot.strCertificateId
 				,[strTrackingNumber] = ItemLot.strTrackingNumber 
+				,[intLotStatusId] = ItemLot.intLotStatusId
 				,[intSort] = ISNULL(ItemLot.intSort, 1) 
 				,[intConcurrencyId] = 1
 				,[dtmDateCreated] = GETDATE()

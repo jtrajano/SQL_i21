@@ -179,8 +179,6 @@ BEGIN
 			,intForexRateTypeId		= PODetail.intForexRateTypeId
 			,dblForexRate			= PODetail.dblForexRate
 			,intTaxGroupId          = ISNULL(PODetail.intTaxGroupId, NULL)
-
-
 	FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 				ON PO.intPurchaseId = PODetail.intPurchaseId
 			INNER JOIN dbo.tblICItemUOM ItemUOM
@@ -329,7 +327,8 @@ BEGIN
 			,[intShipViaId]						
 			,[intTermId]						
 			,[strBillOfLading]					
-			,[ysnReturn]						
+			,[ysnReturn]	
+			,[intFreightTermId]					
 		)
 		SELECT * FROM dbo.fnAPCreatePOVoucherPayable(@poDetailIds)
 		WHERE 

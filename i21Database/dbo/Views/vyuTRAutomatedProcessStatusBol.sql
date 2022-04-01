@@ -42,6 +42,7 @@ SELECT
 	, EM.strName AS strUserName
 	, IL.guidImportIdentifier
 	, IL.strFileName
+	, IL.strFileExtension
 	, ILD.ysnDelete
 	, ILD.intLoadHeaderId
 	, TM.strName AS strVendorName

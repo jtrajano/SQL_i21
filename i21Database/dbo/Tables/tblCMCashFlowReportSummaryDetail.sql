@@ -6,7 +6,7 @@
 	[intTransactionId]					INT NOT NULL,
 	[strTransactionId]					NVARCHAR(255) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTransactionType]				NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
-	[dtmTransactionDate]				DATETIME NOT NULL,
+	[dtmTransactionDate]				DATETIME NULL,
 	[dblBucket1]						NUMERIC(18, 6) NOT NULL DEFAULT(0),
 	[dblBucket2]						NUMERIC(18, 6) NOT NULL DEFAULT(0),
 	[dblBucket3]						NUMERIC(18, 6) NOT NULL DEFAULT(0),

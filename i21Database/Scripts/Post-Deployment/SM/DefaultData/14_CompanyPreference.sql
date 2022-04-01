@@ -73,6 +73,16 @@ BEGIN
 		UPDATE tblSMCompanyPreference SET strReportNumberFormat = '1,234,567.89' WHERE intCompanyPreferenceId = 1
 	END
 
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE ISNULL(strIDPApiKey, '') <> '' AND ISNULL(dbo.fnAESDecryptASym(strIDPApiKey), '') = '')
+	BEGIN
+		UPDATE tblSMCompanyPreference SET strIDPApiKey = dbo.fnAESEncryptASym(strIDPApiKey)
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE ISNULL(strIDPSasURI, '') <> '' AND ISNULL(dbo.fnAESDecryptASym(strIDPSasURI), '') = '')
+	BEGIN
+		UPDATE tblSMCompanyPreference SET strIDPSasURI = dbo.fnAESEncryptASym(strIDPSasURI)
+	END
+
 END
 
 

@@ -23,6 +23,7 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 2
 		,@SOURCE_TYPE_TRANSPORT AS INT = 3
 		,@SOURCE_TYPE_DELIVERY_SHEET AS INT = 5
+		,@SOURCE_TYPE_TRANSFER_SHIPMENT AS INT = 9
 		-- Item Ownership types
 		,@OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_Storage AS INT = 2
@@ -203,7 +204,7 @@ END
 IF ISNULL(@ReceiptType, @RECEIPT_TYPE_DIRECT) <> @RECEIPT_TYPE_INVENTORY_RETURN 
 BEGIN 
 	-- Update the received quantities back to Inbound Shipment 
-	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT
+	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) IN (@SOURCE_TYPE_INBOUND_SHIPMENT, @SOURCE_TYPE_TRANSFER_SHIPMENT) 
 	BEGIN 
 		EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 		EXEC uspICLinkInboundShipmentReceiptWithVoucher DEFAULT, @intTransactionId

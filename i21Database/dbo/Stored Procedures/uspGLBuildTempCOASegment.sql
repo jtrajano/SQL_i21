@@ -140,7 +140,7 @@ BEGIN
 					  LEFT JOIN dbo.tblGLAccountUnit AS E ON E.intAccountUnitId = B.intAccountUnitId  
 					  INNER JOIN dbo.tblSMCurrency AS F ON F.intCurrencyID= A.intCurrencyId 
 				)T0 LEFT JOIN (	
-					SELECT B.intAccountId intUnAccountId,B.strAccountId strUnAccountId,B.strDescription strUnDescription, C.strAccountGroup strUnAccountGroup, C.strAccountType strUnAccountType,Location UnLocation, [Primary Account] [UnPrimary Account] FROM
+					SELECT B.intAccountId intUnAccountId,B.strAccountId strUnAccountId,B.strDescription strUnDescription, C.strAccountGroup strUnAccountGroup, C.strAccountType strUnAccountType,Location UnLocation, [Primary Account] AS [UnPrimary Account] FROM
 					dbo.tblGLAccount B
 					INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId  
 					LEFT JOIN dbo.tblGLTempCOASegment AS D ON D.intAccountId = B.intAccountId  

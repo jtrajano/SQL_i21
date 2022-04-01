@@ -60,7 +60,7 @@ BEGIN
 		intTransactionId,
 		strTransactionId,
 		strTransactionType,
-		@dtmReportDate,
+		dtmDate,
 		(dblAmount * RateFilter.dblRateBucket1) * -1,
 		0,
 		0,
@@ -319,7 +319,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 60, @dtmReportDate) AND DATEADD(DAY, 90, @dtmReportDate)
+		AND dtmDate BETWEEN DATEADD(DAY, 61, @dtmReportDate) AND DATEADD(DAY, 90, @dtmReportDate)
 	-- Bucket 90 - 120
 	UNION ALL
 	SELECT
@@ -357,7 +357,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-	AND dtmDate BETWEEN DATEADD(DAY, 90, @dtmReportDate) AND DATEADD(DAY, 120, @dtmReportDate)
+	AND dtmDate BETWEEN DATEADD(DAY, 91, @dtmReportDate) AND DATEADD(DAY, 120, @dtmReportDate)
 	-- Bucket 120+
 	UNION ALL
 	SELECT
@@ -395,7 +395,7 @@ BEGIN
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
 				END
 		) = 1
-		AND dtmDate BETWEEN DATEADD(DAY, 120, @dtmReportDate) AND DATEADD(DAY, 3650, @dtmReportDate)
+		AND dtmDate BETWEEN DATEADD(DAY, 121, @dtmReportDate) AND DATEADD(DAY, 3650, @dtmReportDate)
 
 		-- Get sum of each bucket
 		SELECT 
