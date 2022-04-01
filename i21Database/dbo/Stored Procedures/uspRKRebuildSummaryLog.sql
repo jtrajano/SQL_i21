@@ -254,7 +254,7 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblBalance  
+				, dblBalance
 				, strTransactionReference = 'Contract Sequence Begin Balance'
 				, @intContractHeaderId
 				, @intContractDetailId
@@ -298,7 +298,7 @@ BEGIN TRY
 				, strTransactionReference = 'Contract Sequence Balance Change'
 				, @intContractHeaderId
 				, @intContractDetailId
-				, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
+				, intPricingTypeId  = SH.intPricingTypeId --  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
 				, intTransactionReferenceId = SH.intContractHeaderId
 				, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
 				, @intCommodityId
@@ -327,7 +327,7 @@ BEGIN TRY
 				AND SUH.ysnDeleted = 0
 				AND SUH.intContractDetailId = @intContractDetailId
 			WHERE SH.intContractDetailId = @intContractDetailId
-			and SH.ysnQtyChange = 1
+			--and SH.ysnQtyChange = 1
 			and SH.ysnBalanceChange = 1
 			and SH.intPricingTypeId <> 5
 			AND SUH.intSequenceUsageHistoryId IS NULL
@@ -2640,6 +2640,11 @@ BEGIN TRY
 		---------------------------------------------------------------------------------------------------
 		EXEC uspRKRebuildNonOpenContracts
 			@intMonthThreshold = 3
+			
+		----------------------------------------------------
+		-- Run Integration scripts required after rebuild --
+		----------------------------------------------------
+		EXEC uspRKRunIntegrationAfterRebuild
 
 		----------------------------------------------------
 		-- Run Integration scripts required after rebuild --
