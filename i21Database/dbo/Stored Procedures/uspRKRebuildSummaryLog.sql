@@ -249,7 +249,7 @@ BEGIN TRY
 				,intSubBookId 
 				,intUserId
 			)
-			select top 1 
+			SELECT
 				dtmHistoryCreated
 				, @strContractNumber
 				, @intContractSeq
@@ -280,26 +280,31 @@ BEGIN TRY
 				, @intBookId 
 				, @intSubBookId
 				, @intUserId 
-			from tblCTSequenceHistory 
-			where intContractDetailId = @intContractDetailId
+			FROM 
+			(
+				SELECT TOP 1 *
+				FROM tblCTSequenceHistory 
+				WHERE intContractDetailId = @intContractDetailId
+				ORDER BY dtmHistoryCreated
+			) t
 
 			union  all
 			select
-				dtmHistoryCreated
+				SH.dtmHistoryCreated
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblBalance  = dblBalance - dblOldBalance
+				, dblBalance  = SH.dblBalance - SH.dblOldBalance
 				, strTransactionReference = 'Contract Sequence Balance Change'
 				, @intContractHeaderId
 				, @intContractDetailId
-				, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE intPricingTypeId END
-				, intTransactionReferenceId = intContractHeaderId
-				, strTransactionReferenceNo = strContractNumber + '-' + cast(intContractSeq as nvarchar(10))
+				, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
+				, intTransactionReferenceId = SH.intContractHeaderId
+				, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
 				, @intCommodityId
 				, @strCommodityCode
 				, @intItemId
-				, intEntityId
+				, SH.intEntityId
 				, @intLocationId
 				, @intFutureMarketId 
 				, @intFutureMonthId 
@@ -315,12 +320,18 @@ BEGIN TRY
 				, @intBookId 
 				, @intSubBookId
 				, @intUserId 
-			from tblCTSequenceHistory 
-			where intContractDetailId = @intContractDetailId
-			and ysnQtyChange = 1
-			and ysnBalanceChange = 1
-			and intPricingTypeId <> 5
-
+			from tblCTSequenceHistory SH
+			LEFT JOIN vyuCTSequenceUsageHistory SUH
+				ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
+				AND SUH.strFieldName = 'Balance'
+				AND SUH.ysnDeleted = 0
+				AND SUH.intContractDetailId = @intContractDetailId
+			WHERE SH.intContractDetailId = @intContractDetailId
+			and SH.ysnQtyChange = 1
+			and SH.ysnBalanceChange = 1
+			and SH.intPricingTypeId <> 5
+			AND SUH.intSequenceUsageHistoryId IS NULL
+			
 			union all
 			select 
 				dtmHistoryCreated
@@ -437,20 +448,27 @@ BEGIN TRY
 			and ysnBasisChange = 1
 			and ysnCashPriceChange = 1
 			and strPricingType IN ('Priced','HTA')
-
-			union all  -- Header is Basis
+			
+			union all  -- Header is Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
 			select 
 				dtmHistoryCreated
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
 				, dblQuantity = CASE WHEN dblCumulativeBalance > dblActualPriceFixation OR dblCumulativeBalance <= dblCumulativeQtyPriced THEN dblActualPriceFixation ELSE dblActualPriceFixation - dblCumulativeBalance END
-				, 'Price Fixation' 
+				, strTransactionReference = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
+												THEN 'Basis - Price Fixation'	
+												ELSE 'Price Fixation' 
+												END
 				, @intContractHeaderId
 				, @intContractDetailId
 				, 1
-				, intTransactionReferenceId = P.intPriceFixationId
-				, strTransactionReferenceNo = P.strPriceContractNo
+				, intTransactionReferenceId = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
+												THEN SH.intContractHeaderId 
+												ELSE P.intPriceFixationId END
+				, strTransactionReferenceNo = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
+												THEN SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
+												ELSE P.strPriceContractNo END
 				, @intCommodityId
 				, @strCommodityCode
 				, @intItemId
@@ -469,7 +487,7 @@ BEGIN TRY
 				, @intContractStatusId 
 				, @intBookId 
 				, @intSubBookId
-				, P.intUserId 
+				, intUserId = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 THEN @intUserId ELSE P.intUserId END
 			from  (
 				SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced THEN 1 ELSE 0 END
 					,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
@@ -483,26 +501,48 @@ BEGIN TRY
 					WHERE ictsh.rowNum = origctsh.rowNum - 1
 				) lagctsh
 			) SH 
-			cross apply (
+			OUTER APPLY(
 				select top 1 PF.intPriceFixationId, PC.strPriceContractNo, intUserId from tblCTPriceFixation PF
 				inner join tblCTPriceContract PC ON PC.intPriceContractId = PF.intPriceContractId
 				where intContractHeaderId = @intContractHeaderId and intContractDetailId = @intContractDetailId
 			) P 
-			where SH.intContractDetailId = @intContractDetailId AND SH.ysnIsPricing = 1  AND @intHeaderPricingType IN (2) -- AND SH.dblActualPriceFixation > 0
+			LEFT JOIN vyuCTSequenceUsageHistory SUH
+				ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
+				AND SUH.strFieldName = 'Balance'
+				AND SUH.ysnDeleted = 0
+				AND SUH.intContractDetailId = @intContractDetailId
+			WHERE SH.intContractDetailId = @intContractDetailId 
+			AND @intHeaderPricingType = 2
+			AND SUH.intSequenceUsageHistoryId IS NULL
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+					OR
+					 (ISNULL(P.intPriceFixationId, 0) = 0
+					  AND SH.ysnFuturesChange = 1
+					  AND SH.ysnCashPriceChange = 1
+					  AND SH.strPricingType IN ('Priced','Basis')
+					 )
+				 )
 
-			union all  --Counter entry when price fixing a Basis
+			union all -- Counter entry when price fixing a Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
 			select 
 				dtmHistoryCreated
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
 				, dblQuantity = CASE WHEN dblCumulativeBalance > dblActualPriceFixation OR dblCumulativeBalance <= dblCumulativeQtyPriced THEN dblActualPriceFixation ELSE dblActualPriceFixation - dblCumulativeBalance END * -1
-				, 'Price Fixation' 
+				, strTransactionReference = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
+												THEN 'Basis - Price Fixation'
+												ELSE 'Price Fixation' 
+												END
 				, @intContractHeaderId
 				, @intContractDetailId
 				, 2
-				, intTransactionReferenceId = P.intPriceFixationId
-				, strTransactionReferenceNo = P.strPriceContractNo
+				, intTransactionReferenceId = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
+												THEN SH.intContractHeaderId 
+												ELSE P.intPriceFixationId END
+				, strTransactionReferenceNo = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
+												THEN SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
+												ELSE P.strPriceContractNo END
 				, @intCommodityId
 				, @strCommodityCode
 				, @intItemId
@@ -521,7 +561,7 @@ BEGIN TRY
 				, @intContractStatusId 
 				, @intBookId 
 				, @intSubBookId
-				, P.intUserId  
+				, intUserId = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 THEN @intUserId ELSE P.intUserId END
 			from  (
 				SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced THEN 1 ELSE 0 END
 					,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
@@ -535,12 +575,27 @@ BEGIN TRY
 					WHERE ictsh.rowNum = origctsh.rowNum - 1
 				) lagctsh
 			) SH 
-			cross apply (
+			OUTER APPLY (
 				select top 1  PF.intPriceFixationId, PC.strPriceContractNo, intUserId from tblCTPriceFixation PF
 				inner join tblCTPriceContract PC ON PC.intPriceContractId = PF.intPriceContractId
 				where intContractHeaderId = @intContractHeaderId and intContractDetailId = @intContractDetailId
 			) P 
-			where SH.intContractDetailId = @intContractDetailId AND SH.ysnIsPricing = 1  AND @intHeaderPricingType IN (2) --AND SH.dblActualPriceFixation > 0
+			LEFT JOIN vyuCTSequenceUsageHistory SUH
+				ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
+				AND SUH.strFieldName = 'Balance'
+				AND SUH.ysnDeleted = 0
+				AND SUH.intContractDetailId = @intContractDetailId
+			WHERE SH.intContractDetailId = @intContractDetailId 
+			AND @intHeaderPricingType = 2
+			AND SUH.intSequenceUsageHistoryId IS NULL
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+					OR
+					 (ISNULL(P.intPriceFixationId, 0) = 0
+					  AND SH.ysnFuturesChange = 1
+					  AND SH.ysnCashPriceChange = 1
+					  AND SH.strPricingType IN ('Priced','Basis')
+					 )
+				 )
 
 			union all -- Header is Priced
 			select 
@@ -2539,10 +2594,12 @@ BEGIN TRY
         INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - On Hold')
         DELETE FROM @ExistingHistory
 		
-		----------------------------------------------------
-		-- Run Integration scripts required after rebuild --
-		----------------------------------------------------
-		EXEC uspRKRunIntegrationAfterRebuild
+		---------------------------------------------------------------------------------------------------
+		-- CB LOG Rebuild for Cancelled, Short Closed, and Completed contracts within 3 month threshold  --
+		-- NOTE: WILL ONLY REBUILD CONTRACTS WITHOUT CONTRACT BALANCE LOGS.								 --
+		---------------------------------------------------------------------------------------------------
+		EXEC uspRKRebuildNonOpenContracts
+			@intMonthThreshold = 3
 
 		----------------------------------------------------
 		-- Run Integration scripts required after rebuild --
