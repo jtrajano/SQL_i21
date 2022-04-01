@@ -225,6 +225,15 @@ BEGIN
 			,@intSubBookId = intSubBookId
 			,@intUserId = intUserId
 		FROM #tempContracts 
+		
+		IF OBJECT_ID('tempdb..#tmpCTSequenceHistory') IS NOT NULL
+			DROP TABLE #tmpCTSequenceHistory
+
+		SELECT ROW_NUMBER() OVER (ORDER BY intSequenceHistoryId) as rowNum, 
+			* 
+		INTO	#tmpCTSequenceHistory
+		FROM	tblCTSequenceHistory ctsha
+		WHERE	ctsha.intContractDetailId = @intContractDetailId
 
 		insert into @tblCTSequenceHistory (
 			dtmHistoryCreated
@@ -308,7 +317,7 @@ BEGIN
 			, strTransactionReference = 'Contract Sequence Balance Change'
 			, @intContractHeaderId
 			, @intContractDetailId
-			, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
+			, intPricingTypeId  = SH.intPricingTypeId --  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
 			, intTransactionReferenceId = SH.intContractHeaderId
 			, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
 			, @intCommodityId
@@ -337,50 +346,10 @@ BEGIN
 			AND SUH.ysnDeleted = 0
 			AND SUH.intContractDetailId = @intContractDetailId
 		WHERE SH.intContractDetailId = @intContractDetailId
-		and SH.ysnQtyChange = 1
+		--and SH.ysnQtyChange = 1
 		and SH.ysnBalanceChange = 1
 		and SH.intPricingTypeId <> 5
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		
-		union  all -- Contract Sequence Balance Change -> Counter Entry When Header Contract is Basis and Sequence is already Priced.
-		select
-			dtmHistoryCreated
-			, @strContractNumber
-			, @intContractSeq
-			, @intContractTypeId
-			, dblBalance  = -(dblBalance - dblOldBalance)
-			, strTransactionReference = 'Contract Sequence Balance Change'
-			, @intContractHeaderId
-			, @intContractDetailId
-			, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE intPricingTypeId END
-			, intTransactionReferenceId = intContractHeaderId
-			, strTransactionReferenceNo = strContractNumber + '-' + cast(intContractSeq as nvarchar(10))
-			, @intCommodityId
-			, @strCommodityCode
-			, @intItemId
-			, intEntityId
-			, @intLocationId
-			, @intFutureMarketId 
-			, @intFutureMonthId 
-			, @dtmStartDate 
-			, @dtmEndDate 
-			, @intQtyUOMId
-			, @dblFutures
-			, @dblBasis
-			, @intBasisUOMId 
-			, @intBasisCurrencyId 
-			, @intPriceUOMId 
-			, @intContractStatusId 
-			, @intBookId 
-			, @intSubBookId
-			, @intUserId 
-		from tblCTSequenceHistory 
-		where intContractDetailId = @intContractDetailId
-		and ysnQtyChange = 1
-		and ysnBalanceChange = 1
-		AND intPricingTypeId = 1
-		AND @intHeaderPricingType = 2 
-		AND @intPricingTypeId = 1
 
 		union all
 		select 
@@ -547,7 +516,7 @@ BEGIN
 			, @intContractTypeId
 			, dblQuantity = CASE WHEN dblCumulativeBalance > dblActualPriceFixation OR dblCumulativeBalance <= dblCumulativeQtyPriced THEN dblActualPriceFixation ELSE dblActualPriceFixation - dblCumulativeBalance END
 			, strTransactionReference = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
-											THEN 'Basis - Price Fixation'
+											THEN 'Basis - Price Fixation'	
 											ELSE 'Price Fixation' 
 											END
 			, @intContractHeaderId
@@ -583,6 +552,7 @@ BEGIN
 				,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
 				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
 				,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+				,intLagPricingTypeId = lagctsh.intPricingTypeId
 				,origctsh.* 
 			FROM #tmpCTSequenceHistory origctsh
 			OUTER APPLY 
@@ -604,14 +574,14 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
 				OR
-				(ISNULL(P.intPriceFixationId, 0) = 0
-				AND SH.ysnFuturesChange = 1
-				AND SH.ysnCashPriceChange = 1
-				AND SH.strPricingType IN ('Priced','Basis')
+					(ISNULL(P.intPriceFixationId, 0) = 0
+					AND SH.ysnFuturesChange = 1
+					AND SH.ysnCashPriceChange = 1
+					AND SH.strPricingType IN ('Priced','Basis')
+					)
 				)
-			)
 
 		union all -- Counter entry when price fixing a Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
 		select 
@@ -657,6 +627,7 @@ BEGIN
 				,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
 				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
 				,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+				,intLagPricingTypeId = lagctsh.intPricingTypeId
 				,origctsh.* 
 			FROM #tmpCTSequenceHistory origctsh
 			OUTER APPLY 
@@ -678,14 +649,14 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
 				OR
-				(ISNULL(P.intPriceFixationId, 0) = 0
-				AND SH.ysnFuturesChange = 1
-				AND SH.ysnCashPriceChange = 1
-				AND SH.strPricingType IN ('Priced','Basis')
+					(ISNULL(P.intPriceFixationId, 0) = 0
+					AND SH.ysnFuturesChange = 1
+					AND SH.ysnCashPriceChange = 1
+					AND SH.strPricingType IN ('Priced','Basis')
+					)
 				)
-			)
 
 		union all
 		select 

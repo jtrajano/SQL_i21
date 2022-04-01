@@ -254,7 +254,7 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblBalance  
+				, dblBalance
 				, strTransactionReference = 'Contract Sequence Begin Balance'
 				, @intContractHeaderId
 				, @intContractDetailId
@@ -298,7 +298,7 @@ BEGIN TRY
 				, strTransactionReference = 'Contract Sequence Balance Change'
 				, @intContractHeaderId
 				, @intContractDetailId
-				, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
+				, intPricingTypeId  = SH.intPricingTypeId --  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
 				, intTransactionReferenceId = SH.intContractHeaderId
 				, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
 				, @intCommodityId
@@ -327,7 +327,7 @@ BEGIN TRY
 				AND SUH.ysnDeleted = 0
 				AND SUH.intContractDetailId = @intContractDetailId
 			WHERE SH.intContractDetailId = @intContractDetailId
-			and SH.ysnQtyChange = 1
+			--and SH.ysnQtyChange = 1
 			and SH.ysnBalanceChange = 1
 			and SH.intPricingTypeId <> 5
 			AND SUH.intSequenceUsageHistoryId IS NULL
@@ -533,6 +533,7 @@ BEGIN TRY
 					,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
 					,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
 					,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+					,intLagPricingTypeId = lagctsh.intPricingTypeId
 					,origctsh.* 
 				FROM #tmpCTSequenceHistory origctsh
 				OUTER APPLY 
@@ -554,7 +555,7 @@ BEGIN TRY
 			WHERE SH.intContractDetailId = @intContractDetailId 
 			AND @intHeaderPricingType = 2
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
 					OR
 					 (ISNULL(P.intPriceFixationId, 0) = 0
 					  AND SH.ysnFuturesChange = 1
@@ -607,6 +608,7 @@ BEGIN TRY
 					,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
 					,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
 					,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+					,intLagPricingTypeId = lagctsh.intPricingTypeId
 					,origctsh.* 
 				FROM #tmpCTSequenceHistory origctsh
 				OUTER APPLY 
@@ -628,7 +630,7 @@ BEGIN TRY
 			WHERE SH.intContractDetailId = @intContractDetailId 
 			AND @intHeaderPricingType = 2
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1)
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
 					OR
 					 (ISNULL(P.intPriceFixationId, 0) = 0
 					  AND SH.ysnFuturesChange = 1
@@ -2640,6 +2642,11 @@ BEGIN TRY
 		---------------------------------------------------------------------------------------------------
 		EXEC uspRKRebuildNonOpenContracts
 			@intMonthThreshold = 3
+			
+		----------------------------------------------------
+		-- Run Integration scripts required after rebuild --
+		----------------------------------------------------
+		EXEC uspRKRunIntegrationAfterRebuild
 
 		----------------------------------------------------
 		-- Run Integration scripts required after rebuild --
