@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Session Ranking' AND strModuleName = 'Quality')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vendor Statement' AND strModuleName = 'Accounts Payable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -2224,6 +2224,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Paya
 	VALUES (N'Open Payable Details Revaluation', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Open Payable Details Revaluation', N'Reports', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=OpenPayablesDetailRevaluation&direct=true', N'small-menu-report', 1, 0, 0, 1, 5, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=OpenPayablesDetailRevaluation&direct=true', intSort = 5 WHERE strMenuName = 'Open Payable Details Revaluation' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vendor Statement' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Vendor Statement', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Vendor Statement', N'Reports', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=VendorStatement&direct=true', N'small-menu-report', 1, 0, 0, 1, 6, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=VendorStatement&direct=true', intSort = 6 WHERE strMenuName = 'Vendor Statement' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Purchase Order' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
