@@ -282,6 +282,7 @@ INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocat
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 WHERE ysnPosted = 1
 	AND ysnCancelled = 0	
+	AND ysnProcessedToNSF = 0
 	AND strTransactionType <> 'Cash Refund'
 	AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
