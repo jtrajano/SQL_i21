@@ -759,7 +759,7 @@ IF @ysnPost = 1
               ,intCurrencyId        = intCurrencyId    
               ,intCurrencyExchangeRateTypeId  = intCurrencyExchangeRateTypeId
               ,dblExchangeRate      = dblExchangeRate
-              ,dtmDate            =ISNULL( @dtmAccrual, dtmDate)
+              ,dtmDate            = CASE WHEN @intBankTransferTypeId = 3 THEN dtmDate ELSE   ISNULL( @dtmAccrual, dtmDate) END
               ,strPayee          = ''    
               ,intPayeeId         = NULL    
               ,strAddress         = ''    
