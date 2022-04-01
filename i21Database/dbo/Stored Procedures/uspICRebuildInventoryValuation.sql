@@ -1085,7 +1085,6 @@ BEGIN
 							17	Inventory Adjustment - Split Lot	Inventory Adjustment
 							19	Inventory Adjustment - Lot Merge	Inventory Adjustment
 							20	Inventory Adjustment - Lot Move	Inventory Adjustment
-							22  Inbound Shipments
 							60  Transfer Shipment 
 						*/
 						WHEN t.intTransactionTypeId IN (
@@ -1097,7 +1096,6 @@ BEGIN
 							, 17
 							, 19
 							, 20
-							, 22
 							, 60
 						) THEN 4 
 						WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
@@ -1192,7 +1190,6 @@ BEGIN
 					17	Inventory Adjustment - Split Lot	Inventory Adjustment
 					19	Inventory Adjustment - Lot Merge	Inventory Adjustment
 					20	Inventory Adjustment - Lot Move	Inventory Adjustment
-					22  Inbound Shipments
 					60  Transfer Shipment 
 				*/
 				WHEN t.intTransactionTypeId IN (
@@ -1204,7 +1201,6 @@ BEGIN
 					, 17
 					, 19
 					, 20
-					, 22
 					, 60
 				) THEN 4 
 				WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
@@ -1799,7 +1795,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			--PRINT 'Posting ' + @strBatchId + ' ' + @strTransactionId 
+			PRINT 'Posting ' + @strBatchId + ' ' + @strTransactionId 
 			
 			-- Setup the GL Description
 			SET @strGLDescription = 
@@ -4617,156 +4613,157 @@ BEGIN
 							ON r.intFreightTermId = ft.intFreightTermId
 				WHERE	strReceiptNumber = @strTransactionId 
 
-				---- Reduce In-Transit stocks coming from Inbound Shipment
-				--IF (@intReceiptSourceType = @RECEIPT_SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
-				--	AND EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
-				--BEGIN 
+				-- Reduce In-Transit stocks coming from Inbound Shipment
+				IF	@intReceiptSourceType = @RECEIPT_SOURCE_TYPE_InboundShipment 
+					AND @strFobPoint = 'Origin'
+					AND EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
+				BEGIN 
+					--PRINT 'INBOUND SHIPMENT'
+					SET @strAccountToCounterInventory = 'Inventory In-Transit'
+					INSERT INTO @ItemsForInTransitCosting (
+							[intItemId] 
+							,[intItemLocationId] 
+							,[intItemUOMId] 
+							,[dtmDate] 
+							,[dblQty] 
+							,[dblUOMQty] 
+							,[dblCost] 
+							,[dblValue] 
+							,[dblSalesPrice] 
+							,[intCurrencyId] 
+							,[dblExchangeRate] 
+							,[intTransactionId] 
+							,[intTransactionDetailId] 
+							,[strTransactionId] 
+							,[intTransactionTypeId] 
+							,[intLotId] 
+							,[intSourceTransactionId] 
+							,[strSourceTransactionId] 
+							,[intSourceTransactionDetailId]
+							,[intFobPointId]
+							,[intInTransitSourceLocationId]
+							,[intForexRateTypeId]
+							,[dblForexRate]
+							,[intSourceEntityId] 
+							,[strBOLNumber] 
+							,[intTicketId] 
+					)
+					SELECT
+							t.[intItemId] 
+							,t.[intItemLocationId] 
+							,t.intItemUOMId 
+							,r.[dtmReceiptDate] 
+							,dblQty = -ri.dblOpenReceive  
+							,t.[dblUOMQty] 
+							,t.[dblCost] 
+							,t.[dblValue] 
+							,t.[dblSalesPrice] 
+							,t.[intCurrencyId] 
+							,t.[dblExchangeRate] 
+							,[intTransactionId] = r.intInventoryReceiptId 
+							,[intTransactionDetailId] = ri.intInventoryReceiptItemId
+							,[strTransactionId] = r.strReceiptNumber
+							,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE  
+							,t.[intLotId]
+							,t.[intTransactionId] 
+							,t.[strTransactionId] 
+							,t.[intTransactionDetailId] 
+							,t.[intFobPointId] 
+							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+							,[intForexRateTypeId] = t.intForexRateTypeId
+							,[dblForexRate] = t.dblForexRate
+							,[intSourceEntityId] = r.intEntityVendorId
+							,[strBOLNumber] = r.strBillOfLading
+							,[intTicketId] = CASE WHEN r.intSourceType = 1 THEN ri.intSourceId ELSE NULL END 
+					FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+								ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+							INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
+								ON loadShipmentLookup.intLoadDetailId = ri.intSourceId
+								AND loadShipmentLookup.intLoadContainerId = ri.intContainerId 
+							INNER JOIN tblICInventoryTransaction t 
+								ON t.strTransactionId = loadShipmentLookup.strLoadNumber
+								AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId
+							LEFT JOIN tblICItemLocation il 
+								ON il.intLocationId = r.intLocationId
+								AND il.intItemId = ri.intItemId 
+							LEFT JOIN tblICItemUOM iu 
+								ON iu.intItemUOMId = ri.intUnitMeasureId
+							LEFT JOIN tblICItem i 
+								ON ri.intItemId = i.intItemId 
 
-				--	SET @strAccountToCounterInventory = 'Inventory In-Transit'
-				--	INSERT INTO @ItemsForInTransitCosting (
-				--			[intItemId] 
-				--			,[intItemLocationId] 
-				--			,[intItemUOMId] 
-				--			,[dtmDate] 
-				--			,[dblQty] 
-				--			,[dblUOMQty] 
-				--			,[dblCost] 
-				--			,[dblValue] 
-				--			,[dblSalesPrice] 
-				--			,[intCurrencyId] 
-				--			,[dblExchangeRate] 
-				--			,[intTransactionId] 
-				--			,[intTransactionDetailId] 
-				--			,[strTransactionId] 
-				--			,[intTransactionTypeId] 
-				--			,[intLotId] 
-				--			,[intSourceTransactionId] 
-				--			,[strSourceTransactionId] 
-				--			,[intSourceTransactionDetailId]
-				--			,[intFobPointId]
-				--			,[intInTransitSourceLocationId]
-				--			,[intForexRateTypeId]
-				--			,[dblForexRate]
-				--			,[intSourceEntityId] 
-				--			,[strBOLNumber] 
-				--			,[intTicketId] 
-				--	)
-				--	SELECT
-				--			t.[intItemId] 
-				--			,t.[intItemLocationId] 
-				--			,iu.intItemUOMId 
-				--			,r.[dtmReceiptDate] 
-				--			,dblQty = -ri.dblOpenReceive  
-				--			,t.[dblUOMQty] 
-				--			,t.[dblCost] 
-				--			,t.[dblValue] 
-				--			,t.[dblSalesPrice] 
-				--			,t.[intCurrencyId] 
-				--			,t.[dblExchangeRate] 
-				--			,[intTransactionId] = r.intInventoryReceiptId 
-				--			,[intTransactionDetailId] = ri.intInventoryReceiptItemId
-				--			,[strTransactionId] = r.strReceiptNumber
-				--			,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE  
-				--			,t.[intLotId]
-				--			,t.[intTransactionId] 
-				--			,t.[strTransactionId] 
-				--			,t.[intTransactionDetailId] 
-				--			,t.[intFobPointId] 
-				--			,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-				--			,[intForexRateTypeId] = t.intForexRateTypeId
-				--			,[dblForexRate] = t.dblForexRate
-				--			,[intSourceEntityId] = r.intEntityVendorId
-				--			,[strBOLNumber] = r.strBillOfLading
-				--			,[intTicketId] = CASE WHEN r.intSourceType = 1 THEN ri.intSourceId ELSE NULL END 
-				--	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-				--				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-				--			INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
-				--				ON loadShipmentLookup.intLoadDetailId = ri.intSourceId
-				--				AND loadShipmentLookup.intLoadContainerId = ri.intContainerId 
-				--			INNER JOIN tblICInventoryTransaction t 
-				--				ON t.strTransactionId = loadShipmentLookup.strLoadNumber
-				--				AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId
-				--			LEFT JOIN tblICItemLocation il 
-				--				ON il.intLocationId = r.intLocationId
-				--				AND il.intItemId = ri.intItemId 
-				--			LEFT JOIN tblICItemUOM iu 
-				--				ON iu.intItemUOMId = ri.intUnitMeasureId
-				--			LEFT JOIN tblICItem i 
-				--				ON ri.intItemId = i.intItemId 
+					WHERE	r.strReceiptNumber = @strTransactionId
+							AND t.ysnIsUnposted = 0 
+							AND t.intFobPointId = @FOB_ORIGIN
+							AND t.dblQty > 0
+							AND i.strType <> 'Bundle'
 
-				--	WHERE	r.strReceiptNumber = @strTransactionId
-				--			AND t.ysnIsUnposted = 0 
-				--			AND t.intFobPointId = @FOB_ORIGIN
-				--			AND t.dblQty > 0
-				--			AND i.strType <> 'Bundle'
+					-- Update the @ItemsForInTransitCosting for source type and source no.
+					BEGIN
+						UPDATE i
+						SET
+							i.strSourceType = v.strSourceType
+							,i.strSourceNumber = v.strSourceNumber			
+						FROM 
+							@ItemsForInTransitCosting i INNER JOIN vyuICGetReceiptItemSource v
+								ON i.intTransactionDetailId = v.intInventoryReceiptItemId
+								AND i.intTransactionId = v.intInventoryReceiptId
+					END 
 
-				--	-- Update the @ItemsForInTransitCosting for source type and source no.
-				--	BEGIN
-				--		UPDATE i
-				--		SET
-				--			i.strSourceType = v.strSourceType
-				--			,i.strSourceNumber = v.strSourceNumber			
-				--		FROM 
-				--			@ItemsForInTransitCosting i INNER JOIN vyuICGetReceiptItemSource v
-				--				ON i.intTransactionDetailId = v.intInventoryReceiptItemId
-				--				AND i.intTransactionId = v.intInventoryReceiptId
-				--	END 
-
-				--	IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
-				--	BEGIN 
-				--		-- Call the post routine for the In-Transit costing (Inbound Shipment) 
-				--		INSERT INTO @GLEntries (
-				--				[dtmDate] 
-				--				,[strBatchId]
-				--				,[intAccountId]
-				--				,[dblDebit]
-				--				,[dblCredit]
-				--				,[dblDebitUnit]
-				--				,[dblCreditUnit]
-				--				,[strDescription]
-				--				,[strCode]
-				--				,[strReference]
-				--				,[intCurrencyId]
-				--				,[dblExchangeRate]
-				--				,[dtmDateEntered]
-				--				,[dtmTransactionDate]
-				--				,[strJournalLineDescription]
-				--				,[intJournalLineNo]
-				--				,[ysnIsUnposted]
-				--				,[intUserId]
-				--				,[intEntityId]
-				--				,[strTransactionId]
-				--				,[intTransactionId]
-				--				,[strTransactionType]
-				--				,[strTransactionForm]
-				--				,[strModuleName]
-				--				,[intConcurrencyId]
-				--				,[dblDebitForeign]	
-				--				,[dblDebitReport]	
-				--				,[dblCreditForeign]	
-				--				,[dblCreditReport]	
-				--				,[dblReportingRate]	
-				--				,[dblForeignRate]
-				--				,[intSourceEntityId]
-				--				,[intCommodityId]
-				--		)
-				--		EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
-				--				@ItemsForInTransitCosting  
-				--				,@strBatchId  
-				--				,NULL -- 'Inventory' 
-				--				,@intEntityUserSecurityId
-				--	END 
-				--END
+					IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
+					BEGIN 
+						-- Call the post routine for the In-Transit costing (Inbound Shipment) 
+						INSERT INTO @GLEntries (
+								[dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[intSourceEntityId]
+								,[intCommodityId]
+						)
+						EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
+								@ItemsForInTransitCosting  
+								,@strBatchId  
+								,NULL -- 'Inventory' 
+								,@intEntityUserSecurityId
+					END 
+				END
 
 				-- Reduce In-Transit stocks coming from Transfer Order 
-				IF (
+				ELSE IF 
 					@strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 					AND @intReceiptSourceType <> @RECEIPT_SOURCE_TYPE_TransferShipment
-					AND EXISTS (SELECT TOP 1 1 FROM @ItemsToPost) 
-				)
+					AND EXISTS (SELECT TOP 1 1 FROM @ItemsToPost) 				
 				BEGIN 
-					SET @strAccountToCounterInventory = NULL 
+					--PRINT 'TRANSFER ORDER'
 
+					SET @strAccountToCounterInventory = NULL 
 					INSERT INTO @ItemsForInTransitCosting (
 							[intItemId] 
 							,[intItemLocationId] 
@@ -4949,14 +4946,14 @@ BEGIN
 				END			
 
 				-- Reduce In-Transit stocks coming from Logistics - Transfer Shipment 
-				ELSE IF (
-						(@strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER AND @intReceiptSourceType = @RECEIPT_SOURCE_TYPE_TransferShipment)
-						OR (@intReceiptSourceType = @RECEIPT_SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
-					)
+				ELSE IF 
+					@strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER 
+					AND @intReceiptSourceType = @RECEIPT_SOURCE_TYPE_TransferShipment					
 					AND EXISTS (SELECT TOP 1 1 FROM @ItemsToPost) 
 				BEGIN 
-					SET @strAccountToCounterInventory = NULL 
+					--PRINT 'TRANSFER SHIPMENT'
 
+					SET @strAccountToCounterInventory = NULL 
 					INSERT INTO @ItemsForInTransitCosting (
 							[intItemId] 
 							,[intItemLocationId] 

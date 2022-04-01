@@ -1917,6 +1917,7 @@ BEGIN
 				FROM	@LotEntries ItemLot LEFT JOIN tblICCertification c
 							ON ItemLot.strCertificate = c.strCertificationName 
 				WHERE	ItemLot.strCertificate IS NOT NULL 
+						AND LTRIM(RTRIM(ItemLot.strCertificate)) <> ''
 						AND c.strCertificationName IS NULL 
 				IF (@strCertificateName IS NOT NULL)
 				BEGIN 
