@@ -104,7 +104,7 @@ BEGIN
 			   [CompanyId]
 			   ,[dtmDate]
 			   ,[strBatchId]
-			   ,[intAccountId]
+			   ,B.[intAccountId]
 			   ,[dblDebit]
 			   ,[dblCredit]
 			   ,[dblDebitUnit]
@@ -137,9 +137,13 @@ BEGIN
 			   ,[dtmReconciled]
 			   ,[ysnReconciled]
 			   ,[ysnRevalued]
-				FROM tblGLDetail 
+				FROM vyuGLDetail A JOIN 
+				[ParentDbName].dbo.tblGLAccount B ON A.strAccountId = B.strAccountId
 				WHERE dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
 				AND ysnIsUnposted =0
+
+
+
 			UPDATE [ParentDbName].dbo.tblGLConsolidateLog
 			SET strComment= ''Successfully consolidated'' ,
 			intRowInserted = @@ROWCOUNT,
