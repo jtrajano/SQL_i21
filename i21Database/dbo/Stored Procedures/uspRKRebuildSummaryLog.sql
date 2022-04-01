@@ -2608,16 +2608,6 @@ BEGIN TRY
 		----------------------------------------------------
 		EXEC uspRKRunIntegrationAfterRebuild
 
-		----------------------------------------------------
-		-- Run Integration scripts required after rebuild --
-		----------------------------------------------------
-		EXEC uspRKRunIntegrationAfterRebuild
-
-		----------------------------------------------------
-		-- Run Integration scripts required after rebuild --
-		----------------------------------------------------
-		EXEC uspRKRunIntegrationAfterRebuild
-
 		UPDATE tblRKRebuildSummaryLog
 		SET ysnSuccess = 1
 		WHERE intRebuildSummaryLogId = @RebuildLogId
