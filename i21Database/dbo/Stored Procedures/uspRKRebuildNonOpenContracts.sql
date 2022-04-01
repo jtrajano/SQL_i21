@@ -225,6 +225,15 @@ BEGIN
 			,@intSubBookId = intSubBookId
 			,@intUserId = intUserId
 		FROM #tempContracts 
+		
+		IF OBJECT_ID('tempdb..#tmpCTSequenceHistory') IS NOT NULL
+			DROP TABLE #tmpCTSequenceHistory
+
+		SELECT ROW_NUMBER() OVER (ORDER BY intSequenceHistoryId) as rowNum, 
+			* 
+		INTO	#tmpCTSequenceHistory
+		FROM	tblCTSequenceHistory ctsha
+		WHERE	ctsha.intContractDetailId = @intContractDetailId
 
 		insert into @tblCTSequenceHistory (
 			dtmHistoryCreated
@@ -308,7 +317,7 @@ BEGIN
 			, strTransactionReference = 'Contract Sequence Balance Change'
 			, @intContractHeaderId
 			, @intContractDetailId
-			, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
+			, intPricingTypeId  = SH.intPricingTypeId --  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
 			, intTransactionReferenceId = SH.intContractHeaderId
 			, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
 			, @intCommodityId
@@ -337,50 +346,10 @@ BEGIN
 			AND SUH.ysnDeleted = 0
 			AND SUH.intContractDetailId = @intContractDetailId
 		WHERE SH.intContractDetailId = @intContractDetailId
-		and SH.ysnQtyChange = 1
+		--and SH.ysnQtyChange = 1
 		and SH.ysnBalanceChange = 1
 		and SH.intPricingTypeId <> 5
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		
-		union  all -- Contract Sequence Balance Change -> Counter Entry When Header Contract is Basis and Sequence is already Priced.
-		select
-			dtmHistoryCreated
-			, @strContractNumber
-			, @intContractSeq
-			, @intContractTypeId
-			, dblBalance  = -(dblBalance - dblOldBalance)
-			, strTransactionReference = 'Contract Sequence Balance Change'
-			, @intContractHeaderId
-			, @intContractDetailId
-			, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE intPricingTypeId END
-			, intTransactionReferenceId = intContractHeaderId
-			, strTransactionReferenceNo = strContractNumber + '-' + cast(intContractSeq as nvarchar(10))
-			, @intCommodityId
-			, @strCommodityCode
-			, @intItemId
-			, intEntityId
-			, @intLocationId
-			, @intFutureMarketId 
-			, @intFutureMonthId 
-			, @dtmStartDate 
-			, @dtmEndDate 
-			, @intQtyUOMId
-			, @dblFutures
-			, @dblBasis
-			, @intBasisUOMId 
-			, @intBasisCurrencyId 
-			, @intPriceUOMId 
-			, @intContractStatusId 
-			, @intBookId 
-			, @intSubBookId
-			, @intUserId 
-		from tblCTSequenceHistory 
-		where intContractDetailId = @intContractDetailId
-		and ysnQtyChange = 1
-		and ysnBalanceChange = 1
-		AND intPricingTypeId = 1
-		AND @intHeaderPricingType = 2 
-		AND @intPricingTypeId = 1
 
 		union all
 		select 
