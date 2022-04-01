@@ -23,6 +23,7 @@
 	[intCustomerStorageId]    INT             NULL,
 	[intSettleStorageId] INT NULL,
 	[intStorageLocationId] INT             NULL,
+	[intStorageChargeId] INT             NULL,
 	[intSubLocationId] INT             NULL,
 	[intLocationId] INT             NULL,
 	[intLoadDetailId]    INT             NULL,
