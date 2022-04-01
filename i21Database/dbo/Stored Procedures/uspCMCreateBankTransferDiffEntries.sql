@@ -49,8 +49,8 @@ INSERT INTO #tmpGLDetail (
         ,[intAccountId]          = @intDiffAccountId
         ,[dblDebit]              = CASE WHEN dblDifference < 0 THEN dblDifference * -1 ELSE 0 END
         ,[dblCredit]             = CASE WHEN dblDifference > 0 THEN dblDifference ELSE 0 END
-        ,[dblDebitForeign]       = 0    
-        ,[dblCreditForeign]      = 0
+        ,[dblDebitForeign]       = CASE WHEN dblDifference < 0 THEN dblDifference * -1 ELSE 0 END    
+        ,[dblCreditForeign]      = CASE WHEN dblDifference > 0 THEN dblDifference ELSE 0 END
         ,[dblDebitUnit]          = 0    
         ,[dblCreditUnit]         = 0    
         ,[strDescription]        = A.strDescription    
