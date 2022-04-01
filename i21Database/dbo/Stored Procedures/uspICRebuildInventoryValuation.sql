@@ -1795,7 +1795,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			PRINT 'Posting ' + @strBatchId + ' ' + @strTransactionId 
+			--PRINT 'Posting ' + @strBatchId + ' ' + @strTransactionId 
 			
 			-- Setup the GL Description
 			SET @strGLDescription = 
