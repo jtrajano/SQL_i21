@@ -1780,7 +1780,7 @@ BEGIN
 							END 
 									
 					,[dblUOMQty]			= t.dblUOMQty
-					,[dblCost]				= t.dblCost
+					,[dblCost]				= valuationCost.dblCost 
 					,[intCurrencyId]		= t.intCurrencyId
 					,[dblExchangeRate]		= t.dblExchangeRate
 					,[intTransactionId]		= r.intInventoryReceiptId
@@ -1788,9 +1788,9 @@ BEGIN
 					,[strTransactionId]			= r.strReceiptNumber
 					,[intTransactionTypeId]		= @INVENTORY_RECEIPT_TYPE
 					,[intLotId]					= t.intLotId
-					,[intSourceTransactionId]	= t.intInventoryTransferId
-					,[strSourceTransactionId]	= t.strTransferNo
-					,[intSourceTransactionDetailId] = t.intInventoryTransferDetailId
+					,[intSourceTransactionId]	= t.intTransactionId
+					,[strSourceTransactionId]	= t.strTransactionId
+					,[intSourceTransactionDetailId] = t.intTransactionDetailId
 					,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId)
 					,[intForexRateTypeId]			= t.intForexRateTypeId --ri.intForexRateTypeId
 					,[dblForexRate]					= t.dblForexRate --ri.dblForexRate
@@ -1806,28 +1806,60 @@ BEGIN
 					INNER JOIN vyuICGetReceiptItemSource v
 						ON ri.intInventoryReceiptItemId = v.intInventoryReceiptItemId
 						AND r.intInventoryReceiptId = v.intInventoryReceiptId
+					--CROSS APPLY (
+					--	SELECT TOP 1
+					--		th.strTransferNo
+					--		,th.intInventoryTransferId
+					--		,td.intInventoryTransferDetailId
+					--		,t.intLotId 
+					--		,t.intItemId
+					--		,t.intItemLocationId
+					--		,intItemUOMId = ISNULL(l.intItemUOMId, t.intItemUOMId) 
+					--		,t.dblUOMQty
+					--		,dblCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, ISNULL(l.intItemUOMId, t.intItemUOMId), t.dblCost)
+					--		,t.intCurrencyId
+					--		,t.dblExchangeRate
+					--		,t.dblForexRate
+					--		,t.intForexRateTypeId
+					--	FROM 				
+					--		tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
+					--			ON th.intInventoryTransferId = td.intInventoryTransferId
+					--		INNER JOIN (
+					--			tblICInventoryTransaction t LEFT JOIN tblICLot l
+					--				ON t.intLotId = l.intLotId
+					--		)
+					--			ON t.strTransactionId = th.strTransferNo
+					--			AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
+					--			AND t.intItemId = ri.intItemId 
+					--			AND t.dblQty > 0 
+					--			AND t.ysnIsUnposted = 0 
+					--	WHERE
+					--		td.intItemId = ri.intItemId 
+					--		AND (
+					--			(
+					--				td.intInventoryTransferDetailId = ri.intSourceId
+					--				AND td.intInventoryTransferId = ri.intOrderId
+					--				AND ri.intInventoryTransferDetailId IS NULL 
+					--				AND ri.intInventoryTransferId IS NULL 
+					--			)
+					--			OR (
+					--				td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
+					--				AND td.intInventoryTransferId = ri.intInventoryTransferId
+					--			)
+					--		)
+					--) t		
+
 					CROSS APPLY (
-						SELECT TOP 1
-							th.strTransferNo
-							,th.intInventoryTransferId
-							,td.intInventoryTransferDetailId
-							,t.intLotId 
-							,t.intItemId
-							,t.intItemLocationId
-							,intItemUOMId = ISNULL(l.intItemUOMId, t.intItemUOMId) 
-							,t.dblUOMQty
-							,dblCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, ISNULL(l.intItemUOMId, t.intItemUOMId), t.dblCost)
-							,t.intCurrencyId
-							,t.dblExchangeRate
-							,t.dblForexRate
-							,t.intForexRateTypeId
+						SELECT 
+							dblCost = 
+								dbo.fnDivide(
+									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+									,SUM(ISNULL(t.dblQty, 0))
+								)
 						FROM 				
 							tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
 								ON th.intInventoryTransferId = td.intInventoryTransferId
-							INNER JOIN (
-								tblICInventoryTransaction t LEFT JOIN tblICLot l
-									ON t.intLotId = l.intLotId
-							)
+							INNER JOIN tblICInventoryTransaction t 
 								ON t.strTransactionId = th.strTransferNo
 								AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
 								AND t.intItemId = ri.intItemId 
@@ -1847,7 +1879,34 @@ BEGIN
 									AND td.intInventoryTransferId = ri.intInventoryTransferId
 								)
 							)
-					) t		
+					) valuationCost 		
+					CROSS APPLY (
+						SELECT TOP 1
+							t.*
+						FROM 				
+							tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
+								ON th.intInventoryTransferId = td.intInventoryTransferId
+							INNER JOIN tblICInventoryTransaction t 
+								ON t.strTransactionId = th.strTransferNo
+								AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
+								AND t.intItemId = ri.intItemId 
+								AND t.dblQty > 0 
+								AND t.ysnIsUnposted = 0 
+						WHERE
+							td.intItemId = ri.intItemId 
+							AND (
+								(
+									td.intInventoryTransferDetailId = ri.intSourceId
+									AND td.intInventoryTransferId = ri.intOrderId
+									AND ri.intInventoryTransferDetailId IS NULL 
+									AND ri.intInventoryTransferId IS NULL 
+								)
+								OR (
+									td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
+									AND td.intInventoryTransferId = ri.intInventoryTransferId
+								)
+							)
+					) t
 
 			WHERE	r.strReceiptNumber = @strTransactionId
 					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 				
@@ -2002,7 +2061,7 @@ BEGIN
 							END 
 									
 					,[dblUOMQty]			= t.dblUOMQty
-					,[dblCost]				= t.dblCost
+					,[dblCost]				= valuationCost.dblCost 							
 					,[intCurrencyId]		= t.intCurrencyId
 					,[dblExchangeRate]		= t.dblExchangeRate
 					,[intTransactionId]		= r.intInventoryReceiptId
@@ -2031,14 +2090,34 @@ BEGIN
 					INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
 						ON loadShipmentLookup.intLoadDetailId = ri.intSourceId
 						AND loadShipmentLookup.intLoadContainerId = ri.intContainerId 
-					INNER JOIN tblICInventoryTransaction t 
-						ON t.strTransactionId = loadShipmentLookup.strLoadNumber
-						AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId
-					LEFT JOIN tblICItemLocation il 
-						ON il.intLocationId = r.intLocationId
-						AND il.intItemId = ri.intItemId 
-					LEFT JOIN tblICItemUOM iu 
-						ON iu.intItemUOMId = ri.intUnitMeasureId
+					CROSS APPLY (
+						SELECT 
+							dblCost = 
+								dbo.fnDivide(
+									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+									,SUM(ISNULL(t.dblQty, 0))
+								)
+						FROM 				
+							tblICInventoryTransaction t 
+						WHERE 
+							t.strTransactionId = loadShipmentLookup.strLoadNumber
+							AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId	
+							AND t.intItemId = ri.intItemId 
+							AND t.dblQty > 0 
+							AND t.ysnIsUnposted = 0 
+					) valuationCost 		
+					CROSS APPLY (
+						SELECT TOP 1
+							t.*
+						FROM 				
+							tblICInventoryTransaction t 
+						WHERE 
+							t.strTransactionId = loadShipmentLookup.strLoadNumber
+							AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId	
+							AND t.intItemId = ri.intItemId 
+							AND t.dblQty > 0 
+							AND t.ysnIsUnposted = 0 
+					) t
 
 			WHERE	r.strReceiptNumber = @strTransactionId
 					AND t.ysnIsUnposted = 0 

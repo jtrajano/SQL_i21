@@ -118,11 +118,16 @@ BEGIN TRY
 		,[dtmDate] = GETDATE()
 		,[intShipViaId] = ISNULL(LW.intHaulerEntityId, L.intHaulerEntityId)
 		,[dblQty] = COALESCE(LDCL.dblQuantity, LD.dblQuantity, 0)
-		,[intGrossNetUOMId] = COALESCE(LCUOM.intItemUOMId, LD.intWeightItemUOMId)
+		,[intGrossNetUOMId] = COALESCE(Lot.intWeightUOMId, LCUOM.intItemUOMId, LD.intWeightItemUOMId)
 		,[dblGross] = COALESCE(LD.dblGross, LDCL.dblLinkGrossWt, 0)
 		,[dblNet] = COALESCE(LD.dblNet, LDCL.dblLinkNetWt, 0)
-		,[dblCost] = COALESCE(Lot.dblLastCost, ItemPricing.dblLastCost)
-		,[intCostUOMId] = StkUOM.intItemUOMId
+		,[dblCost] = --COALESCE(Lot.dblLastCost, ItemPricing.dblLastCost)
+			dbo.fnCalculateCostBetweenUOM(
+				topValuation.intItemUOMId
+				,ISNULL(Lot.intWeightUOMId, StkUOM.intItemUOMId) 
+				,valuationCost.dblCost
+			)
+		,[intCostUOMId] = ISNULL(Lot.intWeightUOMId, StkUOM.intItemUOMId) --StkUOM.intItemUOMId
 		,[intCurrencyId] = @DefaultCurrencyId
 		,[dblExchangeRate] = 1
 		,[intLotId] = NULL
@@ -153,6 +158,36 @@ BEGIN TRY
 			AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(LD.intItemId, LD.intPCompanyLocationId)
 		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId) LCUOM
 		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND ysnStockUOM = 1) StkUOM
+		OUTER APPLY (
+			SELECT 				
+				dblCost = 
+					dbo.fnDivide(
+						SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+						,SUM(t.dblQty) 
+					)
+			FROM 
+				tblICInventoryTransaction t 
+			WHERE
+				t.strTransactionId = L.strLoadNumber
+				AND t.intTransactionId = L.intLoadId
+				AND t.intTransactionDetailId = LD.intLoadDetailId
+				AND t.intItemId = LD.intItemId
+				AND t.dblQty > 0
+				AND t.ysnIsUnposted = 0 
+		) valuationCost 
+		OUTER APPLY (
+			SELECT TOP 1 			
+				t.* 
+			FROM 
+				tblICInventoryTransaction t 
+			WHERE
+				t.strTransactionId = L.strLoadNumber
+				AND t.intTransactionId = L.intLoadId
+				AND t.intTransactionDetailId = LD.intLoadDetailId
+				AND t.intItemId = LD.intItemId
+				AND t.dblQty > 0
+				AND t.ysnIsUnposted = 0 
+		) topValuation
 	WHERE L.intLoadId = @intLoadId
 		AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
 						INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
