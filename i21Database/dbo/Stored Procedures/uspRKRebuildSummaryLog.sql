@@ -555,7 +555,7 @@ BEGIN TRY
 			WHERE SH.intContractDetailId = @intContractDetailId 
 			AND @intHeaderPricingType = 2
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> 1)
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
 					OR
 					 (ISNULL(P.intPriceFixationId, 0) = 0
 					  AND SH.ysnFuturesChange = 1
@@ -630,7 +630,7 @@ BEGIN TRY
 			WHERE SH.intContractDetailId = @intContractDetailId 
 			AND @intHeaderPricingType = 2
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> 1)
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
 					OR
 					 (ISNULL(P.intPriceFixationId, 0) = 0
 					  AND SH.ysnFuturesChange = 1
