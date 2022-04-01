@@ -1576,154 +1576,154 @@ BEGIN
 			END
 		END
 
-		-- Reduce In-Transit stocks coming from Inbound Shipment. 
-		IF	EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
-			AND (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')					
-		BEGIN 
-			-- Get values for the In-Transit Costing 
-			INSERT INTO @ItemsForInTransitCosting (
-					[intItemId] 
-					,[intItemLocationId] 
-					,[intItemUOMId] 
-					,[dtmDate] 
-					,[dblQty] 
-					,[dblUOMQty] 
-					,[dblCost] 
-					,[dblValue] 
-					,[dblSalesPrice] 
-					,[intCurrencyId] 
-					,[dblExchangeRate] 
-					,[intTransactionId] 
-					,[intTransactionDetailId] 
-					,[strTransactionId] 
-					,[intTransactionTypeId] 
-					,[intLotId] 
-					,[intSourceTransactionId] 
-					,[strSourceTransactionId] 
-					,[intSourceTransactionDetailId]
-					,[intFobPointId]
-					,[intInTransitSourceLocationId]
-					,[intForexRateTypeId]
-					,[dblForexRate]
-					,[intSourceEntityId]
-					,[strBOLNumber]
-					,[intTicketId]
-			)
-			SELECT
-					t.[intItemId] 
-					,t.[intItemLocationId] 
-					,t.intItemUOMId
-					,r.[dtmReceiptDate] 
-					,dblQty = -ri.dblOpenReceive
-					,t.[dblUOMQty] 
-					,t.[dblCost] 
-					,t.[dblValue] 
-					,t.[dblSalesPrice] 
-					,t.[intCurrencyId] 
-					,t.[dblExchangeRate] 
-					,[intTransactionId] = r.intInventoryReceiptId 
-					,[intTransactionDetailId] = ri.intInventoryReceiptItemId
-					,[strTransactionId] = r.strReceiptNumber
-					,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE  
-					,t.[intLotId]
-					,t.[intTransactionId] 
-					,t.[strTransactionId] 
-					,t.[intTransactionDetailId] 
-					,t.[intFobPointId] 
-					,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-					,[intForexRateTypeId] = t.intForexRateTypeId
-					,[dblForexRate] = t.dblForexRate
-					,[intSourceEntityId] = r.intEntityVendorId
-					,strBOLNumber = r.strBillOfLading
-					,intTicketId = CASE WHEN r.intSourceType = 1 THEN ri.intSourceId ELSE NULL END 
-			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-					INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
-						ON loadShipmentLookup.intLoadDetailId = ri.intSourceId
-						AND loadShipmentLookup.intLoadContainerId = ri.intContainerId 
-					INNER JOIN tblICInventoryTransaction t 
-						ON t.strTransactionId = loadShipmentLookup.strLoadNumber
-						AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId
-					LEFT JOIN tblICItemLocation il 
-						ON il.intLocationId = r.intLocationId
-						AND il.intItemId = ri.intItemId 
-					LEFT JOIN tblICItemUOM iu 
-						ON iu.intItemUOMId = ri.intUnitMeasureId
-					LEFT JOIN tblICItem i 
-						ON ri.intItemId = i.intItemId 
+		---- Reduce In-Transit stocks coming from Inbound Shipment. 
+		--IF	EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
+		--	AND (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')					
+		--BEGIN 
+		--	-- Get values for the In-Transit Costing 
+		--	INSERT INTO @ItemsForInTransitCosting (
+		--			[intItemId] 
+		--			,[intItemLocationId] 
+		--			,[intItemUOMId] 
+		--			,[dtmDate] 
+		--			,[dblQty] 
+		--			,[dblUOMQty] 
+		--			,[dblCost] 
+		--			,[dblValue] 
+		--			,[dblSalesPrice] 
+		--			,[intCurrencyId] 
+		--			,[dblExchangeRate] 
+		--			,[intTransactionId] 
+		--			,[intTransactionDetailId] 
+		--			,[strTransactionId] 
+		--			,[intTransactionTypeId] 
+		--			,[intLotId] 
+		--			,[intSourceTransactionId] 
+		--			,[strSourceTransactionId] 
+		--			,[intSourceTransactionDetailId]
+		--			,[intFobPointId]
+		--			,[intInTransitSourceLocationId]
+		--			,[intForexRateTypeId]
+		--			,[dblForexRate]
+		--			,[intSourceEntityId]
+		--			,[strBOLNumber]
+		--			,[intTicketId]
+		--	)
+		--	SELECT
+		--			t.[intItemId] 
+		--			,t.[intItemLocationId] 
+		--			,t.intItemUOMId
+		--			,r.[dtmReceiptDate] 
+		--			,dblQty = -ri.dblOpenReceive
+		--			,t.[dblUOMQty] 
+		--			,t.[dblCost] 
+		--			,t.[dblValue] 
+		--			,t.[dblSalesPrice] 
+		--			,t.[intCurrencyId] 
+		--			,t.[dblExchangeRate] 
+		--			,[intTransactionId] = r.intInventoryReceiptId 
+		--			,[intTransactionDetailId] = ri.intInventoryReceiptItemId
+		--			,[strTransactionId] = r.strReceiptNumber
+		--			,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE  
+		--			,t.[intLotId]
+		--			,t.[intTransactionId] 
+		--			,t.[strTransactionId] 
+		--			,t.[intTransactionDetailId] 
+		--			,t.[intFobPointId] 
+		--			,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+		--			,[intForexRateTypeId] = t.intForexRateTypeId
+		--			,[dblForexRate] = t.dblForexRate
+		--			,[intSourceEntityId] = r.intEntityVendorId
+		--			,strBOLNumber = r.strBillOfLading
+		--			,intTicketId = CASE WHEN r.intSourceType = 1 THEN ri.intSourceId ELSE NULL END 
+		--	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+		--				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		--			INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
+		--				ON loadShipmentLookup.intLoadDetailId = ri.intSourceId
+		--				AND loadShipmentLookup.intLoadContainerId = ri.intContainerId 
+		--			INNER JOIN tblICInventoryTransaction t 
+		--				ON t.strTransactionId = loadShipmentLookup.strLoadNumber
+		--				AND t.intTransactionDetailId = loadShipmentLookup.intLoadDetailId
+		--			LEFT JOIN tblICItemLocation il 
+		--				ON il.intLocationId = r.intLocationId
+		--				AND il.intItemId = ri.intItemId 
+		--			LEFT JOIN tblICItemUOM iu 
+		--				ON iu.intItemUOMId = ri.intUnitMeasureId
+		--			LEFT JOIN tblICItem i 
+		--				ON ri.intItemId = i.intItemId 
 
-			WHERE	r.strReceiptNumber = @strTransactionId
-					AND t.ysnIsUnposted = 0 
-					AND (
-						t.intFobPointId = @FOB_ORIGIN
-						OR (@intSourceType = @SOURCE_TYPE_TransferShipment)
-					)
-					AND t.dblQty > 0
-					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
+		--	WHERE	r.strReceiptNumber = @strTransactionId
+		--			AND t.ysnIsUnposted = 0 
+		--			AND (
+		--				t.intFobPointId = @FOB_ORIGIN
+		--				OR (@intSourceType = @SOURCE_TYPE_TransferShipment)
+		--			)
+		--			AND t.dblQty > 0
+		--			AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 					
-			-- Update the @ItemsForPost for source type and source no.
-			BEGIN
-				UPDATE i
-				SET
-					i.strSourceType = v.strSourceType
-					,i.strSourceNumber = v.strSourceNumber			
-				FROM 
-					@ItemsForInTransitCosting i INNER JOIN vyuICGetReceiptItemSource v
-						ON i.intTransactionDetailId = v.intInventoryReceiptItemId
-						AND i.intTransactionId = v.intInventoryReceiptId
-			END 
+		--	-- Update the @ItemsForPost for source type and source no.
+		--	BEGIN
+		--		UPDATE i
+		--		SET
+		--			i.strSourceType = v.strSourceType
+		--			,i.strSourceNumber = v.strSourceNumber			
+		--		FROM 
+		--			@ItemsForInTransitCosting i INNER JOIN vyuICGetReceiptItemSource v
+		--				ON i.intTransactionDetailId = v.intInventoryReceiptItemId
+		--				AND i.intTransactionId = v.intInventoryReceiptId
+		--	END 
 
-			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
-			BEGIN 
+		--	IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
+		--	BEGIN 
 
-				-- Call the post routine for the In-Transit costing (Inbound Shipment) 
-				INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm]
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]	
-						,[dblDebitReport]	
-						,[dblCreditForeign]	
-						,[dblCreditReport]	
-						,[dblReportingRate]	
-						,[dblForeignRate]
-						,[intSourceEntityId]
-						,[intCommodityId]
-				)
-				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
-						@ItemsForInTransitCosting  
-						,@strBatchId  
-						,NULL -- 'Inventory' 
-						,@intEntityUserSecurityId
-			END 
+		--		-- Call the post routine for the In-Transit costing (Inbound Shipment) 
+		--		INSERT INTO @GLEntries (
+		--				[dtmDate] 
+		--				,[strBatchId]
+		--				,[intAccountId]
+		--				,[dblDebit]
+		--				,[dblCredit]
+		--				,[dblDebitUnit]
+		--				,[dblCreditUnit]
+		--				,[strDescription]
+		--				,[strCode]
+		--				,[strReference]
+		--				,[intCurrencyId]
+		--				,[dblExchangeRate]
+		--				,[dtmDateEntered]
+		--				,[dtmTransactionDate]
+		--				,[strJournalLineDescription]
+		--				,[intJournalLineNo]
+		--				,[ysnIsUnposted]
+		--				,[intUserId]
+		--				,[intEntityId]
+		--				,[strTransactionId]
+		--				,[intTransactionId]
+		--				,[strTransactionType]
+		--				,[strTransactionForm]
+		--				,[strModuleName]
+		--				,[intConcurrencyId]
+		--				,[dblDebitForeign]	
+		--				,[dblDebitReport]	
+		--				,[dblCreditForeign]	
+		--				,[dblCreditReport]	
+		--				,[dblReportingRate]	
+		--				,[dblForeignRate]
+		--				,[intSourceEntityId]
+		--				,[intCommodityId]
+		--		)
+		--		EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
+		--				@ItemsForInTransitCosting  
+		--				,@strBatchId  
+		--				,NULL -- 'Inventory' 
+		--				,@intEntityUserSecurityId
+		--	END 
 
-			IF @intReturnValue < 0 GOTO With_Rollback_Exit
-		END 
+		--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		--END 
 
 		-- Reduce In-Transit stocks coming from Transfer Order (Inventory Transfer) 
-		ELSE IF	(
+		IF	(
 				@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 				AND @intSourceType <> @SOURCE_TYPE_TransferShipment
 			) 			
@@ -1806,49 +1806,6 @@ BEGIN
 					INNER JOIN vyuICGetReceiptItemSource v
 						ON ri.intInventoryReceiptItemId = v.intInventoryReceiptItemId
 						AND r.intInventoryReceiptId = v.intInventoryReceiptId
-					--CROSS APPLY (
-					--	SELECT TOP 1
-					--		th.strTransferNo
-					--		,th.intInventoryTransferId
-					--		,td.intInventoryTransferDetailId
-					--		,t.intLotId 
-					--		,t.intItemId
-					--		,t.intItemLocationId
-					--		,intItemUOMId = ISNULL(l.intItemUOMId, t.intItemUOMId) 
-					--		,t.dblUOMQty
-					--		,dblCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, ISNULL(l.intItemUOMId, t.intItemUOMId), t.dblCost)
-					--		,t.intCurrencyId
-					--		,t.dblExchangeRate
-					--		,t.dblForexRate
-					--		,t.intForexRateTypeId
-					--	FROM 				
-					--		tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
-					--			ON th.intInventoryTransferId = td.intInventoryTransferId
-					--		INNER JOIN (
-					--			tblICInventoryTransaction t LEFT JOIN tblICLot l
-					--				ON t.intLotId = l.intLotId
-					--		)
-					--			ON t.strTransactionId = th.strTransferNo
-					--			AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
-					--			AND t.intItemId = ri.intItemId 
-					--			AND t.dblQty > 0 
-					--			AND t.ysnIsUnposted = 0 
-					--	WHERE
-					--		td.intItemId = ri.intItemId 
-					--		AND (
-					--			(
-					--				td.intInventoryTransferDetailId = ri.intSourceId
-					--				AND td.intInventoryTransferId = ri.intOrderId
-					--				AND ri.intInventoryTransferDetailId IS NULL 
-					--				AND ri.intInventoryTransferId IS NULL 
-					--			)
-					--			OR (
-					--				td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
-					--				AND td.intInventoryTransferId = ri.intInventoryTransferId
-					--			)
-					--		)
-					--) t		
-
 					CROSS APPLY (
 						SELECT 
 							dblCost = 
@@ -2003,10 +1960,11 @@ BEGIN
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit			
 		END 
 
+		-- Reduce In-Transit stocks coming from Inbound Shipment. 
 		-- Reduce In-Transit stocks coming from Logistics - Transfer Shipment 
 		ELSE IF	(
-				@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-				AND @intSourceType = @SOURCE_TYPE_TransferShipment
+				@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER AND @intSourceType = @SOURCE_TYPE_TransferShipment
+				OR (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')	
 			) 			
 			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
 		BEGIN 
@@ -2120,8 +2078,7 @@ BEGIN
 					) t
 
 			WHERE	r.strReceiptNumber = @strTransactionId
-					AND t.ysnIsUnposted = 0 
-					AND @intSourceType = @SOURCE_TYPE_TransferShipment					
+					AND t.ysnIsUnposted = 0 				
 					AND t.dblQty > 0
 					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 		
 
