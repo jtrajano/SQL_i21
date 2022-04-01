@@ -583,7 +583,7 @@ BEGIN TRY
 				INNER JOIN tblICCategoryLocation CatLoc
 					ON Category.intCategoryId = CatLoc.intCategoryId
 					AND Store.intCompanyLocationId = CatLoc.intLocationId
-			) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber COLLATE SQL_Latin1_General_CP1_CS_AS
+			) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber
 			LEFT JOIN (
 				SELECT 
 					intTermMsgSN,

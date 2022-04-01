@@ -479,8 +479,8 @@ DECLARE @EmployeeCount AS INT
 						, guiApiImportLogId = @guiLogId
 						, strField = 'Employee Earnings'
 						, strValue = @strCalculationType
-						, strLogLevel = 'Info'
-						, strStatus = 'Success'
+						, strLogLevel = 'Error'
+	   					, strStatus = 'Failed'
 						, intRowNo = SE.intRowNumber
 						, strMessage = 'Wrong input/format for Calculation Type. Please try again.'
 					FROM tblApiSchemaEmployeeEarnings SE
