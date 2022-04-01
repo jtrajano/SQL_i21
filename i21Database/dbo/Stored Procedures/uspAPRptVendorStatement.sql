@@ -12,6 +12,7 @@ BEGIN
 	DECLARE @tblAPVendorStatement TABLE (
 		strCompanyName NVARCHAR(1000) NULL,
 		strCompanyAddress NVARCHAR(1000) NULL,
+		strLocationName NVARCHAR(1000) NULL,
 		strCompanyVatNo NVARCHAR(1000) NULL,
 		dtmDateFrom DATETIME NULL,
 		dtmDateTo DATETIME NULL,
@@ -29,8 +30,8 @@ BEGIN
 		dblDebit DECIMAL(18, 6) NULL,
 		dblCredit DECIMAL(18, 6) NULL,
 		strCurrency NVARCHAR(1000) NULL,
-		dblBalance DECIMAL(18, 6) NULL,
-		strComment NVARCHAR(1000) NULL
+		strComment NVARCHAR(1000) NULL,
+		intPartitionId INT NULL
 	)
 
 	IF ISNULL(@xmlParam,'') = '' 
@@ -81,13 +82,18 @@ BEGIN
 		IF EXISTS(SELECT 1 FROM @temp_xml_table)
 		BEGIN
 			SELECT @dtmDateFrom = [from], @dtmDateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+			SELECT @strName = [from] FROM @temp_xml_table WHERE [fieldname] = 'strName';
 			SELECT @strComment = [from] FROM @temp_xml_table WHERE [fieldname] = 'strComment';
 		END
+
+		SET @dtmDateFrom = ISNULL(@dtmDateFrom, '1/1/1900')
+		SET @dtmDateTo = ISNULL(@dtmDateTo, GETDATE())
 
 		-- ASSEMBLE VENDOR STATEMENTS
 		INSERT INTO @tblAPVendorStatement
 		SELECT CS.strCompanyName,
 			   dbo.fnAPFormatAddress(NULL, NULL, NULL, CS.strAddress, CS.strCity, CS.strState, CS.strZip, CS.strCountry, NULL),
+			   CL.strLocationName,
 			   CL.strVatNo,
 			   @dtmDateFrom,
 			   @dtmDateTo,
@@ -101,12 +107,12 @@ BEGIN
 			   A.strBillId,
 			   A.strTransactionType,
 			   CH.strContractNumber,
-			   ISNULL(A.strDescription, I.strDescription),
-			   CASE WHEN A.dblTotal > 0 THEN A.dblTotal ELSE 0 END,
-			   CASE WHEN A.dblTotal < 0 THEN A.dblTotal ELSE 0 END,
+			   A.strDescription,
+			   CASE WHEN A.dblTotal > 0 THEN ABS(A.dblTotal) ELSE 0 END,
+			   CASE WHEN A.dblTotal < 0 THEN ABS(A.dblTotal) ELSE 0 END,
 			   C.strCurrency,
-			   0,
-			   @strComment
+			   @strComment,
+			   DENSE_RANK() OVER(ORDER BY A.intShipToId, A.intEntityVendorId, A.intCurrencyId)
 		FROM (
 			--INITIAL BALANCES
 			SELECT NULL intBillId, 
@@ -117,12 +123,10 @@ BEGIN
 				   intCurrencyId, 
 				   SUM(dblTotal) dblTotal, 
 				   NULL intContractHeaderId, 
-				   0 intItemId, 
+				   'INITIAL BALANCE' strDescription,
 				   intEntityVendorId, 
 				   intShipToId,
-				   0 intOrder,
-				   'INITIAL BALANCE' strDescription,
-				   SUM(dblTotal) dblBalance
+				   0 intOrder
 			FROM (
 				SELECT *
 				FROM vyuAPVendorStatement
@@ -131,16 +135,17 @@ BEGIN
 			GROUP BY intShipToId, intEntityVendorId, intCurrencyId
 			UNION ALL
 			--DETAILS
-			SELECT *, NULL, NULL FROM vyuAPVendorStatement WHERE dtmBillDate BETWEEN @dtmDateFrom AND @dtmDateTo
+			SELECT * FROM vyuAPVendorStatement WHERE dtmBillDate BETWEEN @dtmDateFrom AND @dtmDateTo
 		) A
 		CROSS APPLY tblSMCompanySetup CS
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intShipToId
 		INNER JOIN (tblAPVendor V INNER JOIN tblEMEntity E ON V.intEntityId = E.intEntityId) ON V.intEntityId = A.intEntityVendorId
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = A.intEntityVendorId AND ysnDefaultLocation = 1
-		LEFT JOIN tblICItem I ON I.intItemId = A.intItemId
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 		INNER JOIN tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
 		WHERE NULLIF(@strName, '') IS NULL OR @strName = E.strName
 		ORDER BY dtmBillDate, intOrder
+
+		SELECT * FROM @tblAPVendorStatement
 	END
 END
