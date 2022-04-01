@@ -55,6 +55,7 @@
 	[strTaxGroup]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intItemLocationId]				INT NULL,
 	[strItemLocationName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[intStorageChargeId] 			INT NULL,
 	[intStorageLocationId]			INT NULL,
 	[strStorageLocationName]		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intSubLocationId]				INT NULL,

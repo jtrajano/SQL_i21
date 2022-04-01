@@ -35,6 +35,7 @@
 	[intWeightClaimDetailId]		INT NULL,
 	[intCustomerStorageId]			INT NULL,
 	[intSettleStorageId] 			INT NULL,
+	[intStorageChargeId] 			INT NULL,
 	[intItemId]						INT NULL,
 	[intLinkingId]					INT NULL,
 	[intTicketDistributionAllocationId] INT NULL,

@@ -83,6 +83,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intCCSiteDetailId]				INT NULL,
 	[intInvoiceId]					INT NULL,
 	[intBuybackChargeId]			INT NULL,
+	[intStorageChargeId] 			INT NULL,
 	[intTicketId]					INT NULL,
 	[intLinkingId]					INT NULL,
 	[intTicketDistributionAllocationId] INT NULL,

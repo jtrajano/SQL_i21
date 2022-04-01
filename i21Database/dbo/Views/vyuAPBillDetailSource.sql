@@ -109,6 +109,20 @@ AS
 		--WHERE storage.intParentSettleStorageId IS NULL AND ticket.intCustomerStorageId = voucherDetail.intCustomerStorageId
 	) claim
 	WHERE voucherDetail.intWeightClaimId IS NOT NULL AND voucherDetail.intWeightClaimId > 0
+	UNION ALL
+	SELECT
+		voucherDetail.intBillDetailId
+		,intInventoryReceiptItemId = NULL
+		,intPurchaseDetailId = NULL
+		,strSourceNumber = storageCharge.strStorageChargeNumber
+	FROM tblAPBillDetail voucherDetail
+	OUTER APPLY (
+		SELECT TOP 1
+			schrge.strStorageChargeNumber
+		FROM tblICStorageCharge schrge
+		WHERE schrge.intStorageChargeId = voucherDetail.intStorageChargeId
+	) storageCharge
+	WHERE voucherDetail.intStorageChargeId IS NOT NULL AND voucherDetail.intStorageChargeId > 0
 	--INNER JOIN
 	--(
 	--	--PO Items
