@@ -7,6 +7,7 @@ SELECT
 	, UOM.strUpcCode
 	, UOM.strLongUPCCode
 	, UOM.intItemUOMId
+	, UM.strUnitMeasure
 	, I.strItemNo
 	, I.strDescription AS strPumpItemDescription
 	, I.ysnFuelItem

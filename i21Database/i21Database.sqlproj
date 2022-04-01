@@ -673,6 +673,8 @@
       <SuppressTSqlWarnings>
       </SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Tables\tblTMOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
     <Build Include="dbo\Tables\tblTMSiteDevice.sql" />
     <Build Include="dbo\Tables\tblTMSiteDeviceLink.sql" />
     <Build Include="dbo\Tables\tblTMSiteJulianCalendar.sql" />
@@ -10076,8 +10078,12 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
-    <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
     <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Tables\tblSMPerformanceLog.sql" />
+    <Build Include="dbo\Views\vyuSMPerformanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMLogPerformanceRuntime.sql" />
+    <None Include="Scripts\Utility\IC\DPR\uspICDPRDiagnostics.sql" />
+    <None Include="Scripts\Utility\SC\uspSCDiagnostic.sql" />
     <None Include="Scripts\Utility\GR\uspGRGrainStorageDiagnostics.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDuplicateChargeAndPremium.sql" />
     <Build Include="dbo\Tables\tblGRSettleStorageChargeAndPremium.sql" />
@@ -10642,3 +10648,4 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />
   </ItemGroup>
 </Project>
+

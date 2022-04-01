@@ -584,6 +584,13 @@ BEGIN TRY
 			AND strTransactionType = 'Settlement'
 		END
 
+		--5. Delete applied charges and premiums
+		BEGIN
+			DELETE FROM tblGRAppliedChargeAndPremium
+			WHERE intTransactionId = @intSettleStorageId
+			AND strTransactionType = 'Settlement'
+		END
+
 		--get first the parent settle storage id before the deletion
 		IF @isParentSettleStorage = 0
 		BEGIN
