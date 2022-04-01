@@ -444,6 +444,21 @@ begin try
 					,ysnStage
 					,intPriceFixationDetailId
 					,dblRatio
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]
 				)
 				select
 					intPartitionId = vp.intPartitionId
@@ -556,6 +571,21 @@ begin try
 							@dblTransactionQuantity
 							,dblQuantityToBill
 						)
+					/*Payment Info*/
+					, vp.intPayFromBankAccountId
+					, vp.strFinancingSourcedFrom
+					, vp.strFinancingTransactionNumber
+					/*Trade Finance Info*/
+					, vp.strFinanceTradeNo
+					, vp.intBankId
+					, vp.intBankAccountId
+					, vp.intBorrowingFacilityId
+					, vp.strBankReferenceNo
+					, vp.intBorrowingFacilityLimitId
+					, vp.intBorrowingFacilityLimitDetailId
+					, vp.strReferenceNo
+					, vp.intBankValuationRuleId
+					, vp.strComments
 				from
 					@voucherPayables vp
 					LEFT JOIN tblEMEntityLocation em 
@@ -709,6 +739,21 @@ begin try
 					,[ysnReturn]
 					,[ysnStage]
 					,[dblRatio]
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]
 				)
 				SELECT 
 					[intEntityVendorId]			
@@ -765,6 +810,21 @@ begin try
 					,[ysnReturn]
 					,[ysnStage]
 					,[dblRatio]
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]
 				FROM 
 					@voucherPayableProRatedCharges
 
@@ -871,6 +931,21 @@ begin try
 					,int1099Category
 					,dbl1099
 					,ysnStage
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]
 		)
 		SELECT
 			intPartitionId = vp.intPartitionId
@@ -964,6 +1039,21 @@ begin try
 			,int1099Category = vp.int1099Category
 			,dbl1099 = vp.dbl1099
 			,ysnStage = vp.ysnStage
+			/*Payment Info*/
+			, [intPayFromBankAccountId]
+			, [strFinancingSourcedFrom]
+			, [strFinancingTransactionNumber]
+			/*Trade Finance Info*/
+			, [strFinanceTradeNo]
+			, [intBankId]
+			, [intBankAccountId]
+			, [intBorrowingFacilityId]
+			, [strBankReferenceNo]
+			, [intBorrowingFacilityLimitId]
+			, [intBorrowingFacilityLimitDetailId]
+			, [strReferenceNo]
+			, [intBankValuationRuleId]
+			, [strComments]
 		from
 			@voucherPayables vp
 		where
