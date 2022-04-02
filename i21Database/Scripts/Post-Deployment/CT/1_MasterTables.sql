@@ -807,6 +807,13 @@ BEGIN
 	SELECT 8,'Arbitration','arbitrationcombo', 1
 END
 GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 9)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 9,'Item','itemcombo', 1
+END
+GO
+
 
 
 

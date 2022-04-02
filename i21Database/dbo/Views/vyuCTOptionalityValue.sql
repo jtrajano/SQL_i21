@@ -63,6 +63,20 @@ FROM
 		Inner join tblSMCountry b on a.intCountryId = b.intCountryID
 		where ysnArbitration = 1
 		
+		UNION ALL 
+
+		SELECT 
+			   intItemId
+		      ,intItemId
+			  ,strItemNo,
+			  'itemcombo' strControlName
+			  ,strDescription
+        FROM [dbo].[vyuCTInventoryItemBundle] AS IC
+        WHERE (1 = IC.[intCommodityId]) AND (1 = IC.[intLocationId]) 
+		AND (IC.[intBundleId] IS NULL) 
+		AND ( NOT ((N'Discontinued' = IC.[strStatus]) AND (IC.[strStatus] IS NOT NULL)))
 	) a
 Inner join tblCTOption b on a.strControlName = b.strControlName
 GROUP BY  intOptionId, intValueId, intFilterId, strValue, strDescription
+
+		
