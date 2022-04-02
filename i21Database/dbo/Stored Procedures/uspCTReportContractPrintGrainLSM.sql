@@ -225,11 +225,11 @@ BEGIN TRY
 	FROM
 		(
 		SELECT		
-			intCreatedById = a.intCreatedById
+			intSalespersonId = a.intSalespersonId
 		FROM
 			tblCTContractHeader a WHERE a.intContractHeaderId = @intContractHeaderId
 		) t
-	LEFT join tblEMEntitySignature ems on ems.intEntityId = t.intCreatedById
+	LEFT join tblEMEntitySignature ems on ems.intEntityId = t.intSalespersonId
 	LEFT join tblSMSignature sms  on sms.intEntityId = ems.intEntityId and sms.intSignatureId = ems.intElectronicSignatureId 
 
 	SELECT	@strCompanyName + CHAR(13)+CHAR(10) +
