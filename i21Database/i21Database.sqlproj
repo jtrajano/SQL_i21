@@ -634,6 +634,8 @@
     <Build Include="dbo\Views\vyuAPVendorStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVendorStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectLoadSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
+    <Build Include="dbo\User Defined Types\SingleAuditLogParam.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
