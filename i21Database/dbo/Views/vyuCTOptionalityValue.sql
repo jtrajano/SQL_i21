@@ -72,8 +72,7 @@ FROM
 			  'itemcombo' strControlName
 			  ,strDescription
         FROM [dbo].[vyuCTInventoryItemBundle] AS IC
-        WHERE (1 = IC.[intCommodityId]) AND (1 = IC.[intLocationId]) 
-		AND (IC.[intBundleId] IS NULL) 
+        WHERE (IC.[intBundleId] IS NULL) 
 		AND ( NOT ((N'Discontinued' = IC.[strStatus]) AND (IC.[strStatus] IS NOT NULL)))
 	) a
 Inner join tblCTOption b on a.strControlName = b.strControlName
