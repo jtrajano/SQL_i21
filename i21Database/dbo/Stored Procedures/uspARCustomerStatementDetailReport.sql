@@ -44,7 +44,6 @@ DECLARE @temp_xml_table TABLE (
 
 IF(OBJECT_ID('tempdb..#ADCUSTOMERS') IS NOT NULL) DROP TABLE #ADCUSTOMERS
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
-IF(OBJECT_ID('tempdb..#STATEMENTREPORT') IS NOT NULL) DROP TABLE #STATEMENTREPORT
 IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL) DROP TABLE #INVOICES
 
 CREATE TABLE #CUSTOMERS (
@@ -57,7 +56,7 @@ CREATE TABLE #CUSTOMERS (
 	, dblARBalance				NUMERIC(18,6) NULL DEFAULT 0
 	, ysnStatementCreditLimit	BIT NULL
 )
-CREATE TABLE #STATEMENTREPORT (
+DECLARE @temp_statement_table TABLE (
 	   strReferenceNumber				NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	 , strTransactionType				NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	 , intEntityCustomerId				INT NOT NULL
@@ -70,7 +69,7 @@ CREATE TABLE #STATEMENTREPORT (
 	 , dblAmountDue						NUMERIC(18,6) NULL DEFAULT 0
 	 , dblPastDue						NUMERIC(18,6) NULL DEFAULT 0
 	 , dblMonthlyBudget					NUMERIC(18,6) NULL DEFAULT 0
-	 , strDescription					NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
+	 , strDescription					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	 , strItemNo						NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
 	 , dblQtyOrdered					NUMERIC(18,6) NULL DEFAULT 0
 	 , dblQtyShipped					NUMERIC(18,6) NULL DEFAULT 0
@@ -83,14 +82,13 @@ CREATE TABLE #STATEMENTREPORT (
 	 , strName							NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	 , strBOLNumber						NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	 , dblCreditLimit					NUMERIC(18,6) NULL DEFAULT 0
-	 , strFullAddress					NVARCHAR(500) COLLATE Latin1_General_CI_AS	NULL
-	 , strStatementFooterComment		NVARCHAR(500) COLLATE Latin1_General_CI_AS	NULL
-	 , strCompanyName					NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
-	 , strCompanyAddress				NVARCHAR(500) COLLATE Latin1_General_CI_AS	NULL
-	 , strTicketNumbers					NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	 , strFullAddress					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
+	 , strStatementFooterComment		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
+	 , strCompanyName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
+	 , strCompanyAddress				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
+	 , strTicketNumbers					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	 , ysnStatementCreditLimit			BIT NULL
 )
-CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTREPORT_STATEMENTDETAIL] ON [#STATEMENTREPORT]([intEntityCustomerId], [strTransactionType])
 CREATE TABLE #INVOICES (
 	   intInvoiceId				INT NOT NULL PRIMARY KEY
 	 , strTransactionType		NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
@@ -120,7 +118,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
 		SET @xmlParam = NULL
 
-		SELECT * FROM #STATEMENTREPORT
+		SELECT * FROM @temp_statement_table
 	END
 
 -- Prepare the XML 
@@ -463,7 +461,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo			= @dtmDateTo
 										  , @strCustomerIds		= @strCustomerIdsLocal
  
 --#STATEMENTREPORT
-INSERT INTO #STATEMENTREPORT WITH (TABLOCK) (
+INSERT INTO @temp_statement_table (
 	   strReferenceNumber
 	 , strTransactionType
 	 , intEntityCustomerId
@@ -533,7 +531,7 @@ INNER JOIN tblARInvoiceDetail ID WITH (NOLOCK) ON I.intInvoiceId = ID.intInvoice
 LEFT JOIN tblSCTicket SCALE WITH (NOLOCK) ON ID.intTicketId = SCALE.intTicketId  
 LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId  
 
-DELETE FROM #STATEMENTREPORT
+DELETE FROM @temp_statement_table
 WHERE strReferenceNumber IN (SELECT strInvoiceNumber FROM dbo.tblARInvoice WITH (NOLOCK) WHERE strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo'))
 
 SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
@@ -577,7 +575,7 @@ SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
 	 , dtmAsOfDate					= @dtmDateTo
 	 , ysnStatementCreditLimit		= STATEMENTREPORT.ysnStatementCreditLimit
 	 , strTicketNumbers				= STATEMENTREPORT.strTicketNumbers
-FROM #STATEMENTREPORT AS STATEMENTREPORT
+FROM @temp_statement_table AS STATEMENTREPORT
 INNER JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
  AND AGINGREPORT.intEntityUserId = @intEntityUserId
