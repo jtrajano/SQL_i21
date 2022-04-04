@@ -14,7 +14,8 @@ BEGIN
 		@dblTotal DECIMAL(18,6) = NULL,
 		@intCustomerId INT = NULL,
 		@intLocationId INT = NULL,
-		@intCompanyLocationPricingLevelId INT = NULL
+		@intCompanyLocationPricingLevelId INT = NULL,
+		@strOriginalPricingMethod NVARCHAR(100) = NULL
 
 	SELECT @intSiteId = S.intSiteID
 		, @intDispatchId = D.intDispatchID
@@ -27,7 +28,8 @@ BEGIN
 		, @dblTotal = D.dblTotal
 		, @intCustomerId = S.intCustomerID
 		, @intLocationId = S.intLocationId
-		, @intCompanyLocationPricingLevelId = intCompanyLocationPricingLevelId	
+		, @intCompanyLocationPricingLevelId = intCompanyLocationPricingLevelId
+		, @strOriginalPricingMethod = D.strOriginalPricingMethod
 	FROM tblTMDispatch D
 	INNER JOIN tblTMSite S ON S.intSiteID = D.intSiteID
 	WHERE D.intDispatchID = @intDispatchId
@@ -92,7 +94,6 @@ BEGIN
 				DECLARE @intUOMId INT = NULL
 
 				SELECT @dblItemPrice = dblRegularPrice FROM tblTMDispatch WHERE intDispatchID = @intDispatchId
-				SET @strPricingMethod = 'Special/Regular'
 				
 				-- SELECT @intUOMId = intIssueUOMId 
                 -- FROM tblICItemLocation WHERE intItemId = @intItemId
@@ -144,7 +145,7 @@ BEGIN
 					@intSiteId,
 					@intItemId,
 					@strOrderNumber,
-					@strPricingMethod,
+					@strOriginalPricingMethod,
 					@dblRemainingQty,
 					@dblItemPrice,
 					@dblTotal,
