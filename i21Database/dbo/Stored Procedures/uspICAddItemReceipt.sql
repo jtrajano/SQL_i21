@@ -1004,6 +1004,8 @@ BEGIN
 																	ISNULL(TransportView.dblOrderedQuantity, 0)
 																WHEN RawData.intSourceType = 5 THEN -- Delivery Sheet
 																	0
+																WHEN RawData.intSourceType = 9 THEN -- Transfer Shipment
+																	ISNULL(LogisticsView.dblQuantity, 0)
 																ELSE 
 																	NULL
 														END
@@ -1166,8 +1168,8 @@ BEGIN
 				-- 4. Logistics
 				LEFT JOIN vyuICLoadContainersSearch LogisticsView --vyuICLoadContainerReceiptContracts LogisticsView
 					ON LogisticsView.intLoadDetailId = RawData.intSourceId
-					AND RawData.strReceiptType = 'Purchase Contract'
-					AND RawData.intSourceType = 2
+					--AND RawData.strReceiptType = 'Purchase Contract'
+					AND RawData.intSourceType IN (2, 9)
 					AND RawData.intContainerId = LogisticsView.intLoadContainerId
 
 				-- 5. Transport Loads (New tables)

@@ -1609,6 +1609,8 @@ BEGIN
 					,[intSourceEntityId]
 					,[strBOLNumber]
 					,[intTicketId]
+					,[strSourceType]
+					,[strSourceNumber]
 			)
 			SELECT
 					t.[intItemId] 
@@ -1637,8 +1639,14 @@ BEGIN
 					,[intSourceEntityId] = r.intEntityVendorId
 					,strBOLNumber = r.strBillOfLading
 					,intTicketId = CASE WHEN r.intSourceType = 1 THEN ri.intSourceId ELSE NULL END 
+					,[strSourceType] = v.strSourceType
+					,[strSourceNumber] = v.strSourceNumber 
+
 			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					INNER JOIN vyuICGetReceiptItemSource v
+						ON v.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+						AND v.intInventoryReceiptId = v.intInventoryReceiptId
 					INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
 						ON loadShipmentLookup.intLoadDetailId = ri.intSourceId
 						AND loadShipmentLookup.intLoadContainerId = ri.intContainerId 
