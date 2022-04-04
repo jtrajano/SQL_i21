@@ -1659,6 +1659,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Charge')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 170
+			,[strTransactionType]	= N'Letter of Credit'
+			,[strPrefix]			= N'LC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Letter of Credit')
 
 
 

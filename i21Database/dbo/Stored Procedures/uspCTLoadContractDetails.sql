@@ -576,8 +576,47 @@ BEGIN TRY
 		, CD.intAverageUOMId
 		, CD.dblAverageQuantity
 		, IAU.strUnitMeasure AS strAverageUOM
+		, CD.strLCNumber
+		, CD.intLCApplicantId
+		, CD.strLCType
+		, CD.strLCStatus
+		, CD.strLCConfirmation
+		, CD.dtmLCDate2
+		, CD.dtmLCValidityDate
+		, CD.dtmLCLatestDateOfReceipt
+		, CD.intLCPlaceOfIssuingId
+		, CD.intLCPaymentTermId
+		, CD.strLCReference
+		, CD.strLCFeesBreakdown
+		, CD.dtmLCStartPeriod
+		, CD.dtmLCEndPeriod
+		, CD.strLCPresentation
+		, CD.intLCTreasuryBankId
+		, CD.intLCBankId
+		, CD.strLCBankRole
+		, CD.ysnTransportPartialShipment
+		, CD.ysnTransportTransShipment
+		, CD.ysnTransportMultiplePorts
+		, CD.dblQuantityMinRate
+		, CD.dblAmountMinRate
+		, CD.dblQuantityMaxRate
+		, CD.dblAmountMaxRate
+		, CD.dblQuantityMinValue
+		, CD.dblAmountMinValue
+		, CD.dblQuantityMaxValue
+		, CD.dblAmountMaxValue
+		, strLCApplicant = credE.strName
+		, strLCPlaceOfIssuing = credC.strCountry
+		, strLCPaymentTerm = credT.strTerm
+		, strLCTreasuryBank = credB.strBankName
+		, strLCBank = credB2.strBankName
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
+	LEFT JOIN tblSMCountry credC on credC.intCountryID = CD.intLCPlaceOfIssuingId
+	LEFT JOIN tblSMTerm credT on credT.intTermID = CD.intLCPaymentTermId
+	LEFT JOIN tblCMBank credB on credB.intBankId = CD.intLCTreasuryBankId
+	LEFT JOIN tblCMBank credB2 on credB2.intBankId = CD.intLCBankId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
 	LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 	LEFT JOIN tblCTPricingType PTH ON PTH.intPricingTypeId = CT.intHeaderPricingTypeId

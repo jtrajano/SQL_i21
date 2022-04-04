@@ -54,7 +54,11 @@ BEGIN TRY
 			@strCertificationName		NVARCHAR(MAX),
 			@strCustomerContract		NVARCHAR(100),
 			@intContractTypeId			INT,
-			@strAddToPayableMessage		NVARCHAR(MAX)
+			@strAddToPayableMessage		NVARCHAR(MAX),
+			@ysnEnableLetterOfCredit    BIT = 0,
+			@intLCApplicantId			INT,
+            @strLCType					NVARCHAR(100),
+            @strLCNumber				NVARCHAR(50)
 
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
@@ -186,7 +190,7 @@ BEGIN TRY
 		, strCertifications
 	FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
+	SELECT @ysnEnableLetterOfCredit = ysnEnableLetterOfCredit, @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
@@ -247,7 +251,8 @@ BEGIN TRY
 				@dblCashPrice		=	NULL,
 				@dblBasis			=	NULL,
 				@dblOriginalBasis	=	NULL,
-				@ysnSlice			=	NULL
+				@ysnSlice			=	NULL,
+				@strLCNumber		=	null
 
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
 				@dblCashPrice		=	dblCashPrice,
@@ -265,10 +270,22 @@ BEGIN TRY
 				@intConcurrencyId	=	intConcurrencyId,
 				@intFutureMarketId	=	intFutureMarketId,
 				@intUnitMeasureId	=	intUnitMeasureId,
-				@intCurrencyId		=	intCurrencyId
+				@intCurrencyId		=	intCurrencyId,
+				@strLCNumber		=	strLCNumber,
+				@intLCApplicantId	=	intLCApplicantId,
+				@strLCType			=	strLCType
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
 		WHERE	intContractDetailId =	@intContractDetailId 
+
+		if (@ysnEnableLetterOfCredit = 1 and @strLCNumber is null and @intLCApplicantId > 0 and isnull(@strLCType,'') <> '')
+		begin
+			exec uspSMGetStartingNumber
+				@intStartingNumberId = 170,
+				@strID = @strLCNumber OUTPUT,
+				@intCompanyLocationId = default
+		end
+
 		
 		IF EXISTS (SELECT TOP 1 1 FROM tblCTCompanyPreference where ysnEnablePackingWeightAdjustment = 0)
 		BEGIN
@@ -406,6 +423,7 @@ BEGIN TRY
 			, ysnPriceChanged = CD.ysnPriceChanged
 			, dblOriginalBasis = CD.dblOriginalBasis
 			, dblConvertedBasis = CD.dblConvertedBasis
+			, strLCNumber = @strLCNumber
 		FROM @CDTableUpdate CD
 		WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
 
