@@ -52,8 +52,8 @@ BEGIN
 		ReceiptItemLot.intImportStagingReceiptItemLotId,
 		'Storage Unit',
 		ReceiptItemLot.strStorageUnit,
-		'Error',
-		'Invalid storage unit: ' + ReceiptItemLot.strStorageUnit + '.'
+		'Warning',
+		'Invalid storage unit: ' + ReceiptItemLot.strStorageUnit + '. System will use the storage unit from the line item instead.'
 	FROM
 		tblICImportStagingReceiptItemLot ReceiptItemLot
 		INNER JOIN tblICInventoryReceiptItem ReceiptItem
@@ -119,7 +119,6 @@ END
 -- End Validation 
 ----------------------------------------------------------------------
 
-
 ----------------------------------------------------------------------
 -- Start Data Import
 ----------------------------------------------------------------------
@@ -129,7 +128,6 @@ BEGIN
 	INSERT INTO tblICInventoryReceiptItemLot
 	(
 		intInventoryReceiptItemId,
-		intLotId,
 		strLotNumber,
 		strLotAlias,
 		intSubLocationId,
@@ -139,17 +137,13 @@ BEGIN
 		dblGrossWeight,
 		strWarehouseRefNo,
 		dblTareWeight,
-		-- dblCost,
-		-- intNoPallet,
 		intUnitPallet,
 		dblStatedGrossPerUnit,
 		dblStatedTarePerUnit,
 		strContainerNo,
-		-- intEntityVendorId,
 		strGarden,
 		strMarkings,
 		intOriginId,
-		-- intGradeId,
 		intSeasonCropYear,
 		strVendorLotId,
 		dtmManufacturedDate,
@@ -159,56 +153,44 @@ BEGIN
 		dtmExpiryDate,
 		intParentLotId,
 		strParentLotNumber,
-		-- strParentLotAlias,
 		dblStatedNetPerUnit,
 		dblStatedTotalNet,
 		dblPhysicalVsStated,
 		strCertificate,
 		intProducerId,
 		strCertificateId,
-		strTrackingNumber
-		-- ,
-		-- intSort,
-		-- strCargoNo,
-		-- strWarrantNo,
-		-- intLotStatusId,
-		-- intSourceLotId,
+		strTrackingNumber,
+		intConcurrencyId
 	)
 	SELECT
-		intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId,
-		intLotId = Lot.strLotNumber,
-		strLotNumber = ReceiptItemLot.strLotNo,
-		strLotAlias = ReceiptItemLot.strLotAlias,
-		intSubLocationId = ReceiptItem.intSubLocationId,
-		intStorageLocationId = StorageLocation.intStorageLocationId,
-		intItemUnitMeasureId = ItemUOM.intItemUOMId,
-		dblQuantity = ReceiptItemLot.dblQuantity,
-		dblGrossWeight = ReceiptItemLot.dblGross,
-		strWarehouseRefNo = Receipt.strWarehouseRefNo,
-		dblTareWeight = ReceiptItemLot.dblTare,
-		-- dblCost = 0, TO ASK
-		-- intNoPallet = 0, TO ASK
-		intUnitPallet = ReceiptItemLot.intUnitPallet,
-		dblStatedGrossPerUnit = ReceiptItemLot.dblStatedGrossPerUnit,
-		dblStatedTarePerUnit = ReceiptItemLot.dblStatedTarePerUnit,
-		strContainerNo = ReceiptItemLot.strContainerNo,
-		-- intEntityVendorId = NULL, 
-		strGarden = ReceiptItemLot.strGarden,
-		strMarkings = ReceiptItemLot.strMarkings,
-		intOriginId = Country.intCountryID,
-		-- intGradeId = 0, TO ASK
-		intSeasonCropYear = ReceiptItemLot.intSeasonCropYear,
-		strVendorLotId = ReceiptItemLot.strVendorLotId,
-		dtmManufacturedDate = ReceiptItemLot.dtmManufacturedDate,
-		strRemarks = ReceiptItemLot.strRemarks,
-		strCondition = ReceiptItemLot.strCondition,
-		dtmCertified = ReceiptItemLot.dtmCertified,
-		dtmExpiryDate = ReceiptItemLot.dtmExpiryDate,
-		intParentLotId = ParentLot.intParentLotId,
-		strParentLotNumber = ReceiptItemLot.strParentLotNo,
-		-- strParentLotAlias = NULL, TO ASK
-		dblStatedNetPerUnit = ROUND(ISNULL(ReceiptItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ReceiptItemLot.dblStatedTarePerUnit, 0), 6),
-		dblStatedTotalNet = CASE
+		intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+		,strLotNumber = ReceiptItemLot.strLotNo
+		,strLotAlias = ReceiptItemLot.strLotAlias
+		,intSubLocationId = ReceiptItem.intSubLocationId
+		,intStorageLocationId = ISNULL(StorageLocation.intStorageLocationId, ReceiptItem.intSubLocationId) 
+		,intItemUnitMeasureId = ItemUOM.intItemUOMId
+		,dblQuantity = ReceiptItemLot.dblQuantity
+		,dblGrossWeight = ReceiptItemLot.dblGross
+		,strWarehouseRefNo = Receipt.strWarehouseRefNo
+		,dblTareWeight = ReceiptItemLot.dblTare
+		,intUnitPallet = ReceiptItemLot.intUnitPallet
+		,dblStatedGrossPerUnit = ReceiptItemLot.dblStatedGrossPerUnit
+		,dblStatedTarePerUnit = ReceiptItemLot.dblStatedTarePerUnit
+		,strContainerNo = ReceiptItemLot.strContainerNo
+		,strGarden = ReceiptItemLot.strGarden
+		,strMarkings = ReceiptItemLot.strMarkings
+		,intOriginId = Country.intCountryID
+		,intSeasonCropYear = ReceiptItemLot.intSeasonCropYear
+		,strVendorLotId = ReceiptItemLot.strVendorLotId
+		,dtmManufacturedDate = ReceiptItemLot.dtmManufacturedDate
+		,strRemarks = ReceiptItemLot.strRemarks
+		,strCondition = ReceiptItemLot.strCondition
+		,dtmCertified = ReceiptItemLot.dtmCertified
+		,dtmExpiryDate = ReceiptItemLot.dtmExpiryDate
+		,intParentLotId = ParentLot.intParentLotId
+		,strParentLotNumber = ReceiptItemLot.strParentLotNo
+		,dblStatedNetPerUnit = ROUND(ISNULL(ReceiptItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ReceiptItemLot.dblStatedTarePerUnit, 0), 6)
+		,dblStatedTotalNet = CASE
 								WHEN 
 									ISNULL(ItemUOM.intItemUOMId, 0) = ISNULL(ReceiptItem.intWeightUOMId, 0)
 								THEN 
@@ -218,8 +200,8 @@ BEGIN
 										ISNULL(ReceiptItemLot.dblQuantity, 0) * (ISNULL(ReceiptItemLot.dblStatedGrossPerUnit, 0) - -- Stated Total Net
 										ISNULL(ReceiptItemLot.dblStatedTarePerUnit, 0))
 									, 6)
-							END,
-		dblPhysicalVsStated = (ISNULL(ReceiptItemLot.dblGross, 0) - ISNULL(ReceiptItemLot.dblTare, 0)) - --Lot Net Weight
+							END
+		,dblPhysicalVsStated = (ISNULL(ReceiptItemLot.dblGross, 0) - ISNULL(ReceiptItemLot.dblTare, 0)) - --Lot Net Weight
 								CASE
 									WHEN 
 										ISNULL(ItemUOM.intItemUOMId, 0) = ISNULL(ReceiptItem.intWeightUOMId, 0)
@@ -236,29 +218,18 @@ BEGIN
 											)
 										, 6) 
 									
-								END,
-		strCertificate = ReceiptItemLot.strCertificate,
-		intProducerId = Producer.intEntityId,
-		strCertificateId = ReceiptItemLot.strCertificateId,
-		strTrackingNumber = ReceiptItemLot.strTrackingNumber
-		-- ,
-		-- intSort = NULL, TO ASK
-		-- strCargoNo = NULL, TO ASK
-		-- strWarrantNo = NULL, TO ASK
-		-- intLotStatusId = NULL, TO ASK
-		-- intSourceLotId = NULL, TO ASK
+								END
+		,strCertificate = ReceiptItemLot.strCertificate
+		,intProducerId = Producer.intEntityId
+		,strCertificateId = ReceiptItemLot.strCertificateId
+		,strTrackingNumber = ReceiptItemLot.strTrackingNumber
+		,intConcurrencyId = 1
 	FROM
 		tblICImportStagingReceiptItemLot ReceiptItemLot
 		INNER JOIN tblICInventoryReceiptItem ReceiptItem
 			ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt Receipt
 			ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-		LEFT JOIN vyuICGetLot Lot
-			ON Receipt.intLocationId = Lot.intLocationId
-			AND ReceiptItem.intSubLocationId = Lot.intSubLocationId
-			AND ReceiptItem.intStorageLocationId = Lot.intStorageLocationId
-			AND ReceiptItem.intOwnershipType = Lot.intOwnershipType
-			AND ReceiptItemLot.strLotNo = Lot.strLotNumber
 		LEFT JOIN tblICStorageLocation StorageLocation
 			ON ReceiptItem.intSubLocationId = StorageLocation.intSubLocationId
 			AND ReceiptItemLot.strStorageUnit = StorageLocation.strName
@@ -282,7 +253,8 @@ BEGIN
 END 
 
 -- If Lot is for single line item, clone the original receipt item. 
-IF	EXISTS (SELECT TOP 1 strSingleOrMultipleLots FROM tblICCompanyPreference WHERE strSingleOrMultipleLots = 'Single')
+ELSE IF	
+	EXISTS (SELECT TOP 1 strSingleOrMultipleLots FROM tblICCompanyPreference WHERE strSingleOrMultipleLots = 'Single')
 	AND NOT EXISTS (SELECT TOP 1 * FROM @tblItemLotLogs WHERE strLogType = 'Error') 
 BEGIN 
 	DECLARE @insertedReceiptItems AS TABLE (
@@ -445,7 +417,7 @@ BEGIN
 			,ri.ysnWeighed
 			,ri.strImportDescription
 			,ri.intComputeItemTotalOption		
-			,ri.intConcurrencyId
+			,intConcurrencyId = 1
 		FROM 
 			tblICInventoryReceiptItem ri INNER JOIN tblICImportStagingReceiptItemLot lotImport
 				ON ri.intInventoryReceiptItemId = lotImport.intInventoryReceiptItemId
@@ -475,7 +447,6 @@ BEGIN
 	INSERT INTO tblICInventoryReceiptItemLot
 	(
 		intInventoryReceiptItemId,
-		intLotId,
 		strLotNumber,
 		strLotAlias,
 		intSubLocationId,
@@ -485,17 +456,13 @@ BEGIN
 		dblGrossWeight,
 		strWarehouseRefNo,
 		dblTareWeight,
-		-- dblCost,
-		-- intNoPallet,
 		intUnitPallet,
 		dblStatedGrossPerUnit,
 		dblStatedTarePerUnit,
 		strContainerNo,
-		-- intEntityVendorId,
 		strGarden,
 		strMarkings,
 		intOriginId,
-		-- intGradeId,
 		intSeasonCropYear,
 		strVendorLotId,
 		dtmManufacturedDate,
@@ -505,56 +472,44 @@ BEGIN
 		dtmExpiryDate,
 		intParentLotId,
 		strParentLotNumber,
-		-- strParentLotAlias,
 		dblStatedNetPerUnit,
 		dblStatedTotalNet,
 		dblPhysicalVsStated,
 		strCertificate,
 		intProducerId,
 		strCertificateId,
-		strTrackingNumber
-		-- ,
-		-- intSort,
-		-- strCargoNo,
-		-- strWarrantNo,
-		-- intLotStatusId,
-		-- intSourceLotId,
+		strTrackingNumber,
+		intConcurrencyId
 	)
 	SELECT
-		intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId,
-		intLotId = Lot.strLotNumber,
-		strLotNumber = ReceiptItemLot.strLotNo,
-		strLotAlias = ReceiptItemLot.strLotAlias,
-		intSubLocationId = ReceiptItem.intSubLocationId,
-		intStorageLocationId = StorageLocation.intStorageLocationId,
-		intItemUnitMeasureId = ItemUOM.intItemUOMId,
-		dblQuantity = ReceiptItemLot.dblQuantity,
-		dblGrossWeight = ReceiptItemLot.dblGross,
-		strWarehouseRefNo = Receipt.strWarehouseRefNo,
-		dblTareWeight = ReceiptItemLot.dblTare,
-		-- dblCost = 0, TO ASK
-		-- intNoPallet = 0, TO ASK
-		intUnitPallet = ReceiptItemLot.intUnitPallet,
-		dblStatedGrossPerUnit = ReceiptItemLot.dblStatedGrossPerUnit,
-		dblStatedTarePerUnit = ReceiptItemLot.dblStatedTarePerUnit,
-		strContainerNo = ReceiptItemLot.strContainerNo,
-		-- intEntityVendorId = NULL, 
-		strGarden = ReceiptItemLot.strGarden,
-		strMarkings = ReceiptItemLot.strMarkings,
-		intOriginId = Country.intCountryID,
-		-- intGradeId = 0, TO ASK
-		intSeasonCropYear = ReceiptItemLot.intSeasonCropYear,
-		strVendorLotId = ReceiptItemLot.strVendorLotId,
-		dtmManufacturedDate = ReceiptItemLot.dtmManufacturedDate,
-		strRemarks = ReceiptItemLot.strRemarks,
-		strCondition = ReceiptItemLot.strCondition,
-		dtmCertified = ReceiptItemLot.dtmCertified,
-		dtmExpiryDate = ReceiptItemLot.dtmExpiryDate,
-		intParentLotId = ParentLot.intParentLotId,
-		strParentLotNumber = ReceiptItemLot.strParentLotNo,
-		-- strParentLotAlias = NULL, TO ASK
-		dblStatedNetPerUnit = ROUND(ISNULL(ReceiptItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ReceiptItemLot.dblStatedTarePerUnit, 0), 6),
-		dblStatedTotalNet = CASE
+		intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+		,strLotNumber = ReceiptItemLot.strLotNo
+		,strLotAlias = ReceiptItemLot.strLotAlias
+		,intSubLocationId = ReceiptItem.intSubLocationId
+		,intStorageLocationId = ISNULL(StorageLocation.intStorageLocationId, ReceiptItem.intSubLocationId) 
+		,intItemUnitMeasureId = ItemUOM.intItemUOMId
+		,dblQuantity = ReceiptItemLot.dblQuantity
+		,dblGrossWeight = ReceiptItemLot.dblGross
+		,strWarehouseRefNo = Receipt.strWarehouseRefNo
+		,dblTareWeight = ReceiptItemLot.dblTare
+		,intUnitPallet = ReceiptItemLot.intUnitPallet
+		,dblStatedGrossPerUnit = ReceiptItemLot.dblStatedGrossPerUnit
+		,dblStatedTarePerUnit = ReceiptItemLot.dblStatedTarePerUnit
+		,strContainerNo = ReceiptItemLot.strContainerNo
+		,strGarden = ReceiptItemLot.strGarden
+		,strMarkings = ReceiptItemLot.strMarkings
+		,intOriginId = Country.intCountryID
+		,intSeasonCropYear = ReceiptItemLot.intSeasonCropYear
+		,strVendorLotId = ReceiptItemLot.strVendorLotId
+		,dtmManufacturedDate = ReceiptItemLot.dtmManufacturedDate
+		,strRemarks = ReceiptItemLot.strRemarks
+		,strCondition = ReceiptItemLot.strCondition
+		,dtmCertified = ReceiptItemLot.dtmCertified
+		,dtmExpiryDate = ReceiptItemLot.dtmExpiryDate
+		,intParentLotId = ParentLot.intParentLotId
+		,strParentLotNumber = ReceiptItemLot.strParentLotNo
+		,dblStatedNetPerUnit = ROUND(ISNULL(ReceiptItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ReceiptItemLot.dblStatedTarePerUnit, 0), 6)
+		,dblStatedTotalNet = CASE
 								WHEN 
 									ISNULL(ItemUOM.intItemUOMId, 0) = ISNULL(ReceiptItem.intWeightUOMId, 0)
 								THEN 
@@ -564,8 +519,8 @@ BEGIN
 										ISNULL(ReceiptItemLot.dblQuantity, 0) * (ISNULL(ReceiptItemLot.dblStatedGrossPerUnit, 0) - -- Stated Total Net
 										ISNULL(ReceiptItemLot.dblStatedTarePerUnit, 0))
 									, 6)
-							END,
-		dblPhysicalVsStated = (ISNULL(ReceiptItemLot.dblGross, 0) - ISNULL(ReceiptItemLot.dblTare, 0)) - --Lot Net Weight
+							END
+		,dblPhysicalVsStated = (ISNULL(ReceiptItemLot.dblGross, 0) - ISNULL(ReceiptItemLot.dblTare, 0)) - --Lot Net Weight
 								CASE
 									WHEN 
 										ISNULL(ItemUOM.intItemUOMId, 0) = ISNULL(ReceiptItem.intWeightUOMId, 0)
@@ -582,31 +537,20 @@ BEGIN
 											)
 										, 6) 
 									
-								END,
-		strCertificate = ReceiptItemLot.strCertificate,
-		intProducerId = Producer.intEntityId,
-		strCertificateId = ReceiptItemLot.strCertificateId,
-		strTrackingNumber = ReceiptItemLot.strTrackingNumber
-		-- ,
-		-- intSort = NULL, TO ASK
-		-- strCargoNo = NULL, TO ASK
-		-- strWarrantNo = NULL, TO ASK
-		-- intLotStatusId = NULL, TO ASK
-		-- intSourceLotId = NULL, TO ASK
+								END
+		,strCertificate = ReceiptItemLot.strCertificate
+		,intProducerId = Producer.intEntityId
+		,strCertificateId = ReceiptItemLot.strCertificateId
+		,strTrackingNumber = ReceiptItemLot.strTrackingNumber
+		,intConcurrencyId = 1
 	FROM
 		tblICImportStagingReceiptItemLot ReceiptItemLot
 		INNER JOIN @insertedReceiptItems insertedReceiptItem 
 			ON ReceiptItemLot.intImportStagingReceiptItemLotId = insertedReceiptItem.intImportStagingReceiptItemLotId
 		INNER JOIN tblICInventoryReceiptItem ReceiptItem
-			ON ReceiptItemLot.intInventoryReceiptItemId = insertedReceiptItem.intInventoryReceiptItemId
+			ON ReceiptItem.intInventoryReceiptItemId = insertedReceiptItem.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt Receipt
 			ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-		LEFT JOIN vyuICGetLot Lot
-			ON Receipt.intLocationId = Lot.intLocationId
-			AND ReceiptItem.intSubLocationId = Lot.intSubLocationId
-			AND ReceiptItem.intStorageLocationId = Lot.intStorageLocationId
-			AND ReceiptItem.intOwnershipType = Lot.intOwnershipType
-			AND ReceiptItemLot.strLotNo = Lot.strLotNumber
 		LEFT JOIN tblICStorageLocation StorageLocation
 			ON ReceiptItem.intSubLocationId = StorageLocation.intSubLocationId
 			AND ReceiptItemLot.strStorageUnit = StorageLocation.strName
@@ -629,8 +573,26 @@ BEGIN
 	SELECT @intRowsImported = @@ROWCOUNT
 
 	-- Recompute the taxes for the new line item. 
+	SELECT TOP 1 
+		@intInventoryReceiptItemId = intInventoryReceiptItemId 
+	FROM 
+		tblICImportStagingReceiptItemLot 
+	WHERE 
+		strImportIdentifier = @strIdentifier
+
+	IF @intInventoryReceiptItemId IS NOT NULL 
 	BEGIN 
-		SELECT TOP 1 @intInventoryReceiptId = 1 FROM tblICInventoryReceiptItem ri WHERE ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
+		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId 
+		FROM 
+			tblICInventoryReceiptItem ri 
+		WHERE 
+			ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+		-- Delete the line item and related records. 
+		DELETE FROM tblICInventoryReceiptItemTax WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+		DELETE FROM tblICInventoryReceiptChargePerItem WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+		DELETE FROM tblICInventoryReceiptItemAllocatedCharge WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+		DELETE FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 		
 		-- Re-update the line total 
 		UPDATE	ReceiptItem 
@@ -680,6 +642,25 @@ BEGIN
 
 		-- Calculate the tax
 		EXEC uspICCalculateReceiptTax @intInventoryReceiptId
+
+		-- Calculate the other charges
+		BEGIN 			
+			-- Calculate the other charges. 
+			EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
+				@intInventoryReceiptId			
+
+			-- Calculate the surcharges
+			EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
+				@intInventoryReceiptId
+			
+			-- Allocate the other charges and surcharges. 
+			EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+				@intInventoryReceiptId		
+				
+			-- Calculate Other Charges Taxes
+			EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
+				@intInventoryReceiptId
+		END 
 
 		-- Update the receipt sub total. 
 		EXEC uspICInventoryReceiptCalculateTotals @intInventoryReceiptId, 1 
