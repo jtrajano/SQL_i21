@@ -24,6 +24,7 @@ BEGIN
 	SET @intLogId = SCOPE_IDENTITY()  
   
 	DECLARE @id INT
+	DECLARE @keyValue INT
 	DECLARE @action NVARCHAR(MAX)
 	DECLARE @change NVARCHAR(MAX)
 	DECLARE @from NVARCHAR(MAX)
@@ -46,6 +47,7 @@ BEGIN
 	BEGIN
 		SELECT TOP 1 
 				@id = [Id],
+				@keyValue = CASE WHEN ISNULL([KeyValue], 0) <> 0 THEN [KeyValue] ELSE @intRecordId END,
 				@action = [Action],
 				@change = [Change],
 				@from = [From],
@@ -57,7 +59,7 @@ BEGIN
 		FROM @newSingleAuditLogParam
 
 		INSERT INTO dbo.tblSMAudit (intLogId, intKeyValue, strAction, strChange, strFrom, strTo, strAlias, ysnField, ysnHidden, intParentAuditId, intConcurrencyId)
-		VALUES (@intLogId, @intRecordId, @action, @change, @from, @to, @alias, @field, @hidden, (SELECT [intAuditId] FROM @tmpSMAuditIds WHERE [intId] = @parentId), 1)
+		VALUES (@intLogId, @keyValue, @action, @change, @from, @to, @alias, @field, @hidden, (SELECT [intAuditId] FROM @tmpSMAuditIds WHERE [intId] = @parentId), 1)
 
 		SET @newAuditId = SCOPE_IDENTITY()
 

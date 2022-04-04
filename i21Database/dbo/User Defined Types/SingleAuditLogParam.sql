@@ -1,6 +1,7 @@
 ﻿CREATE TYPE SingleAuditLogParam 
 AS TABLE ( 
   [Id]			INT, 
+  [KeyValue]	INT,
   [Action]		NVARCHAR(MAX),
   [Change]		NVARCHAR(MAX),
   [From]		NVARCHAR(MAX),
