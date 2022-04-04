@@ -54,6 +54,10 @@ BEGIN TRY
 
 	IF OBJECT_ID('tempdb..#tblContractCost') IS NOT NULL
 		DROP TABLE #tblContractCost
+	IF OBJECT_ID('tempdb..#tmpAllocatedContracts') IS NOT NULL
+		DROP TABLE #tmpAllocatedContracts
+	IF OBJECT_ID('tempdb..#tmpPartialPricedContracts') IS NOT NULL
+		DROP TABLE #tmpPartialPricedContracts
 	IF OBJECT_ID('tempdb..#tblSettlementPrice') IS NOT NULL
 		DROP TABLE #tblSettlementPrice
 	IF OBJECT_ID('tempdb..#tblPIntransitView') IS NOT NULL
@@ -123,6 +127,7 @@ BEGIN TRY
         , @ysnEvaluationByCropYear BIT
         , @ysnEvaluationByStorageLocation BIT
         , @ysnEvaluationByStorageUnit BIT
+		, @ysnEnableAllocatedContractsGainOrLoss BIT
 		, @strM2MType NVARCHAR(50)
 		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell BIT
 		, @dtmCurrentDate DATETIME = GETDATE()
@@ -148,6 +153,7 @@ BEGIN TRY
         , @ysnEvaluationByCropYear = ysnEvaluationByCropYear 
         , @ysnEvaluationByStorageLocation = ysnEvaluationByStorageLocation 
         , @ysnEvaluationByStorageUnit = ysnEvaluationByStorageUnit 
+		, @ysnEnableAllocatedContractsGainOrLoss = ysnEnableAllocatedContractsGainOrLoss
 	FROM tblRKCompanyPreference
 
 	SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
@@ -525,6 +531,10 @@ BEGIN TRY
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intBookId INT
+			, strSubBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intSubBookId INT
 		)
 
 		DECLARE @GetContractDetailView TABLE (intCommodityUnitMeasureId INT
@@ -609,6 +619,10 @@ BEGIN TRY
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intBookId INT
+			, strSubBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intSubBookId INT
 		)
 			
 		--There is an error "An INSERT EXEC statement cannot be nested." that is why we cannot directly call the uspRKDPRContractDetail AND insert
@@ -643,7 +657,9 @@ BEGIN TRY
 			, strCustomerContract NVARCHAR(100)
 			, intFutureMarketId INT
 			, intFutureMonthId INT
-			, strPricingStatus NVARCHAR(50))
+			, strPricingStatus NVARCHAR(50)
+			, intBookId INT
+			, intSubBookId INT)
 
 		SELECT *
 		INTO #CBBucket
@@ -692,6 +708,8 @@ BEGIN TRY
 			, intEntityId
 			, strEntityName
 			, intQtyCurrencyId
+			, intBookId
+			, intSubBookId
 		INTO #tempLatestContractDetails
 		FROM
 		(
@@ -766,7 +784,10 @@ BEGIN TRY
 			, strCustomerContract
 			--, intFutureMarketId
 			--, intFutureMonthId
-			, strPricingStatus)
+			, strPricingStatus
+			, intBookId
+			, intSubBookId
+		)
 		SELECT ROW_NUMBER() OVER (PARTITION BY tbl.intContractDetailId ORDER BY dtmTransactionDate DESC) intRowNum
 			, strCommodityCode
 			, intCommodityId
@@ -799,6 +820,8 @@ BEGIN TRY
 			--, intFutureMarketId
 			--, intFutureMonthId
 			, strPricingStatus
+			, intBookId
+			, intSubBookId
 		FROM (
 			SELECT dtmTransactionDate = MAX(dtmTransactionDate)
 				, strCommodityCode
@@ -830,6 +853,8 @@ BEGIN TRY
 				--, intFutureMarketId
 				--, intFutureMonthId
 				, strPricingStatus = CASE WHEN lcd.ysnFullyPriced = 1 THEN 'Fully Priced' ELSE strPricingStatus END
+				, lcd.intBookId
+				, lcd.intSubBookId
 			FROM
 			(
 				SELECT dtmTransactionDate = CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END
@@ -906,11 +931,41 @@ BEGIN TRY
 				, lcd.dblBasis
 				, lcd.dblFutures
 				, lcd.ysnFullyPriced
+				, lcd.intBookId
+				, lcd.intSubBookId
 			HAVING SUM(dblQuantity) > 0
 			
 		) tbl
 		JOIN #ContractStatus cs ON cs.intContractDetailId = tbl.intContractDetailId
 		WHERE cs.intContractStatusId NOT IN (2, 3, 6, 5) 
+
+		-- GET ALLOCATED CONTRACTS
+		SELECT *
+		INTO #tmpAllocatedContracts
+		FROM 
+		(
+			SELECT intContractDetailId = allocD.intPContractDetailId -- Purchase
+				, intAllocatedUnitMeasureId = allocH.intWeightUnitMeasureId
+				, dblAllocatedQty = SUM(allocD.dblPAllocatedQty)
+			FROM tblLGAllocationDetail allocD
+			LEFT JOIN tblLGAllocationHeader allocH
+				ON allocH.intAllocationHeaderId = allocD.intAllocationHeaderId
+			WHERE @ysnEnableAllocatedContractsGainOrLoss = 1
+			AND dbo.fnRemoveTimeOnDate(allocD.dtmAllocatedDate) <= @dtmEndDate
+			GROUP BY allocD.intPContractDetailId, allocH.intWeightUnitMeasureId
+
+			UNION
+			
+			SELECT intContractDetailId = allocD.intSContractDetailId -- Sale
+				, intAllocatedUnitMeasureId = allocH.intWeightUnitMeasureId
+				, dblAllocatedQty = SUM(allocD.dblSAllocatedQty)
+			FROM tblLGAllocationDetail allocD
+			LEFT JOIN tblLGAllocationHeader allocH
+				ON allocH.intAllocationHeaderId = allocD.intAllocationHeaderId
+			WHERE @ysnEnableAllocatedContractsGainOrLoss = 1
+			AND dbo.fnRemoveTimeOnDate(allocD.dtmAllocatedDate) <= @dtmEndDate
+			GROUP BY allocD.intSContractDetailId, allocH.intWeightUnitMeasureId
+		) t
 
 		INSERT INTO @GetContractDetailView (intCommodityUnitMeasureId
 			, strLocationName
@@ -994,6 +1049,10 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		)
 		SELECT DISTINCT intCommodityUnitMeasureId = CH.intCommodityUOMId
 			, strLocationName = CASE WHEN @ysnEvaluationByLocation = 0
@@ -1153,6 +1212,10 @@ BEGIN TRY
 			, strSeason = SEASON.strDescription
 			, strClass = CLASS.strDescription
 			, strProductLine = PL.strDescription
+			, strBook = book.strBook
+			, intBookId = book.intBookId
+			, strSubBook = subBook.strSubBook
+			, intSubBookId = subBook.intSubBookId
 		FROM tblCTContractHeader CH
 		INNER JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 		INNER JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
@@ -1170,6 +1233,10 @@ BEGIN TRY
 		LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
 		LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = CD.intMarketZoneId
+		LEFT JOIN tblCTBook book
+			ON book.intBookId = CH.intBookId
+		LEFT JOIN tblCTSubBook subBook
+			ON subBook.intSubBookId = CH.intSubBookId 
 		LEFT JOIN tblSMCity originPort
 			ON originPort.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity destinationPort
@@ -1482,7 +1549,13 @@ BEGIN TRY
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, dblDetailQuantity NUMERIC(24, 10)
+			, strBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intBookId INT
+			, strSubBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intSubBookId INT
 		)
+
 		SELECT dblRatio
 			, dblMarketBasis = (ISNULL(dblBasisOrDiscount, 0) + ISNULL(dblCashOrFuture, 0)) / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
 			, intMarketBasisUOM = intCommodityUnitMeasureId
@@ -1655,6 +1728,11 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, dblDetailQuantity
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		)
 		SELECT intContractHeaderId
 			, intContractDetailId
@@ -1747,6 +1825,11 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, dblDetailQuantity
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		FROM (
 			SELECT DISTINCT cd.intContractHeaderId
 				, cd.intContractDetailId
@@ -1849,6 +1932,11 @@ BEGIN TRY
 				, cd.strSeason
 				, cd.strClass
 				, cd.strProductLine
+				, cd.dblDetailQuantity
+				, cd.strBook
+				, cd.intBookId
+				, cd.strSubBook
+				, cd.intSubBookId
 			FROM @GetContractDetailView cd
 			JOIN tblICCommodityUnitMeasure cuc ON cd.intCommodityId = cuc.intCommodityId AND cuc.intUnitMeasureId = cd.intUnitMeasureId AND cd.intCommodityId = @intCommodityId
 			JOIN tblICCommodityUnitMeasure cuc1 ON cd.intCommodityId = cuc1.intCommodityId AND cuc1.intUnitMeasureId = @intQuantityUOMId
@@ -1934,7 +2022,7 @@ BEGIN TRY
 			) priceFixationDetail
 			WHERE cd.intCommodityId = @intCommodityId 
 		)t
- 
+
 		select SUM(dblPurchaseContractShippedQty) dblPurchaseContractShippedQty, intContractDetailId into #tblPIntransitView from vyuRKPurchaseIntransitView group by intContractDetailId
  
 		INSERT INTO @ListTransaction (intContractHeaderId
@@ -2032,6 +2120,10 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		) 
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
@@ -2128,6 +2220,10 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		FROM (
 			SELECT *
 				, dblResult = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
@@ -2236,6 +2332,10 @@ BEGIN TRY
 						, cd.strSeason
 						, cd.strClass
 						, cd.strProductLine
+						, cd.strBook
+						, cd.intBookId
+						, cd.strSubBook
+						, cd.intSubBookId
 					FROM @tblOpenContractList cd
 					LEFT JOIN (
 						SELECT dblQuantity = SUM(LD.dblQuantity)
@@ -2354,6 +2454,10 @@ BEGIN TRY
 				, strSeason 
 				, strClass 
 				, strProductLine 
+				, strBook
+				, intBookId
+				, strSubBook
+				, intSubBookId
 			)
 			SELECT DISTINCT intContractHeaderId
 				, intContractDetailId 
@@ -2450,6 +2554,10 @@ BEGIN TRY
 				, strSeason 
 				, strClass 
 				, strProductLine 
+				, strBook
+				, intBookId
+				, strSubBook
+				, intSubBookId
 			FROM (
 				SELECT *
 					, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -2559,7 +2667,11 @@ BEGIN TRY
 							, cd.strRegion
 							, cd.strSeason
 							, cd.strClass
-							, cd.strProductLine
+							, cd.strProductLine							
+							, cd.strBook
+							, cd.intBookId
+							, cd.strSubBook
+							, cd.intSubBookId
 						FROM @tblOpenContractList cd
 						JOIN vyuRKGetPurchaseInventory l ON cd.intContractDetailId = l.intContractDetailId
 						JOIN tblICItem i ON cd.intItemId = i.intItemId AND i.strLotTracking <> 'No'						
@@ -2569,6 +2681,19 @@ BEGIN TRY
 			)t2
 			WHERE strContractOrInventoryType = case when @ysnIncludeInventoryM2M = 1 THEN 'Inventory (P)' ELSE '' END
 		END
+
+		-- Partial Priced Contracts
+		SELECT 
+			  cdBasis.intContractDetailId
+			, dblPricedOpenQty = cdPriced.dblContractOriginalQty
+			, dblBasisOpenQty = cdBasis.dblContractOriginalQty
+			, dblCompletedQty = cdPriced.dblDetailQuantity - (cdPriced.dblContractOriginalQty + cdBasis.dblContractOriginalQty)
+		INTO #tmpPartialPricedContracts
+		FROM @tblOpenContractList cdPriced
+		INNER JOIN @tblOpenContractList cdBasis
+			ON cdBasis.intContractDetailId = cdPriced.intContractDetailId
+			AND cdPriced.intPricingTypeId = 2
+		WHERE cdPriced.intPricingTypeId = 1
 
 		---- contract
 		INSERT INTO @ListTransaction (intContractHeaderId
@@ -2668,6 +2793,10 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		)
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
@@ -2766,6 +2895,10 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		FROM (
 			SELECT *
 				, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -2786,9 +2919,17 @@ BEGIN TRY
 																	else dblFutures END END)
 								 + ISNULL(dblCosts, 0) END AS dblAdjustedContractPrice
 					, dblFuturePrice1 as dblFuturePrice
-					, convert(decimal(24, 6), CASE WHEN ISNULL(intCommodityUnitMeasureId, 0) = 0 THEN dblContractOriginalQty
-												else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, dblContractOriginalQty) END)
-						 as dblOpenQty
+
+					-- COMPUTE OPEN QTY. INCLUDE REDUCTION OF ALLOCATED QTY
+					, dblOpenQty = CONVERT(decimal(24, 6), CASE WHEN ISNULL(intCommodityUnitMeasureId, 0) = 0 
+												THEN dblContractOriginalQty
+												ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId
+															, CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 
+																	THEN intCommodityUnitMeasureId 
+																	ELSE intQuantityUOMId END
+															, dblContractOriginalQty) 
+												END
+											)
 				FROM (
 					SELECT cd.intContractHeaderId
 						, cd.intContractDetailId
@@ -2834,7 +2975,6 @@ BEGIN TRY
 						, cd.intCurrencyId
 						, convert(int, cd.PriceSourceUOMId) PriceSourceUOMId
 						, cd.dblCosts
-						, cd.dblContractOriginalQty
 						, LG.dblQuantity as InTransQty
 						, cd.dblInvoicedQuantity
 						, cd.ysnSubCurrency
@@ -2881,6 +3021,48 @@ BEGIN TRY
 						, cd.strSeason
 						, cd.strClass
 						, cd.strProductLine
+						, dblContractOriginalQty = 
+							-- IF NOT PARTIAL PRICED
+							CASE WHEN ISNULL(partialPricedCT.intContractDetailId, 0) = 0 
+								THEN CASE WHEN cd.dblDetailQuantity = cd.dblContractOriginalQty
+									THEN cd.dblContractOriginalQty - ISNULL(allocatedContract.dblAllocatedQty, 0)
+									ELSE CASE WHEN (cd.dblDetailQuantity - cd.dblContractOriginalQty) > ISNULL(allocatedContract.dblAllocatedQty, 0)
+										THEN cd.dblContractOriginalQty
+										ELSE cd.dblDetailQuantity - ISNULL(allocatedContract.dblAllocatedQty, 0)
+										END
+									END
+							-- IF PARTIAL PRICED
+								-- PRICED RECORD
+								ELSE CASE WHEN cd.intPricingTypeId = 1
+									THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
+											THEN CASE WHEN partialPricedCT.dblPricedOpenQty > ISNULL(allocatedContract.dblAllocatedQty, 0)
+												THEN partialPricedCT.dblPricedOpenQty - ISNULL(allocatedContract.dblAllocatedQty, 0)
+												ELSE 0
+												END
+											ELSE CASE WHEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) > ISNULL(allocatedContract.dblAllocatedQty, 0)
+												THEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
+												ELSE 0
+												END													
+											END
+									-- BASIS RECORD
+									WHEN cd.intPricingTypeId = 2
+									THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
+											THEN CASE WHEN partialPricedCT.dblPricedOpenQty >= ISNULL(allocatedContract.dblAllocatedQty, 0)
+												THEN cd.dblContractOriginalQty
+												ELSE (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
+												END
+											ELSE CASE WHEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) >= ISNULL(allocatedContract.dblAllocatedQty, 0)
+												THEN cd.dblContractOriginalQty
+												ELSE (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
+												END
+											END
+									ELSE cd.dblContractOriginalQty
+									END
+								END
+						, strBook
+						, intBookId
+						, strSubBook
+						, intSubBookId
 					FROM @tblOpenContractList cd
 					LEFT JOIN (SELECT SUM(LD.dblQuantity)dblQuantity
 									, PCT.intContractDetailId
@@ -2896,6 +3078,10 @@ BEGIN TRY
 								JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = LD.intSContractDetailId AND PCT.dblQuantity > PCT.dblInvoicedQty
 								group by PCT.intContractDetailId
 					) AS LG ON LG.intContractDetailId = cd.intContractDetailId
+					LEFT JOIN #tmpAllocatedContracts allocatedContract
+						ON allocatedContract.intContractDetailId = cd.intContractDetailId
+					LEFT JOIN #tmpPartialPricedContracts partialPricedCT
+						ON partialPricedCT.intContractDetailId = cd.intContractDetailId
 				) t
 			) t where ISNULL(dblOpenQty, 0) > 0
 		) t1
@@ -3024,6 +3210,10 @@ BEGIN TRY
 				, strSeason
 				, strClass
 				, strProductLine
+				, strBook
+				, intBookId
+				, strSubBook
+				, intSubBookId
 			FROM @ListTransaction
 		) t
 		ORDER BY intCommodityId, strContractSeq DESC
@@ -3539,6 +3729,10 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		INTO #tmpM2MTransaction
 		FROM (
 			SELECT intContractHeaderId
@@ -3660,6 +3854,10 @@ BEGIN TRY
 				, strSeason 
 				, strClass 
 				, strProductLine 
+				, t.strBook
+				, t.intBookId
+				, t.strSubBook
+				, t.intSubBookId
 			FROM (
 				SELECT t.*
 					, dblCalculatedFutures = ISNULL((CASE WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Unpriced' THEN dblConvertedFuturePrice
@@ -3828,6 +4026,10 @@ BEGIN TRY
 				, strSeason 
 				, strClass 
 				, strProductLine 
+				, strBook
+				, intBookId
+				, strSubBook
+				, intSubBookId
 			FROM #Temp 
 			WHERE dblOpenQty <> 0 AND intContractHeaderId IS NULL
 		)t 
@@ -3910,6 +4112,10 @@ BEGIN TRY
 			, strSeason 
 			, strClass 
 			, strProductLine 
+			, strBook
+			, intBookId
+			, strSubBook
+			, intSubBookId
 		)
 		SELECT * FROM #tmpM2MTransaction
 
