@@ -344,7 +344,8 @@ BEGIN TRY
 			, strSubBook
 			, intPriceItemUOMId
 			, intSequenceUsageHistoryId = CASE WHEN intContractStatusId IN (1, 4) THEN null ELSE intSequenceUsageHistoryId END
-			, ysnIsClosed = CASE WHEN intContractStatusId IN (1, 4) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+			, ysnIsClosed = CASE WHEN intContractStatusId IN (1, 4) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END			
+			, intEntityId
 		INTO #tempSequenceHistoryCompare
 		FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId ORDER BY intSequenceHistoryId DESC
 
