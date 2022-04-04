@@ -35,6 +35,9 @@ BEGIN TRY
         , @ysnAddAmendmentForNonDraftContract BIT = 0
         , @ysnPricingAsAmendment BIT = 1
 		, @ysnAmendmentForCashFuture BIT = 0
+		, @ysnSequenceHistoryForEntity Bit = 0
+		, @intEntityDeletedId INT = null
+		, @intEntityPreviousId INT = null
 		;
 	
 	DECLARE @tblHeader AS TABLE (intContractHeaderId INT
@@ -73,7 +76,10 @@ BEGIN TRY
 		SELECT @intContractHeaderId	=   intContractHeaderId FROM tblCTContractDetail with (nolock) WHERE intContractDetailId = @intContractDetailId
 	END
 		
-	SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
+	SELECT @intLastModifiedById = intLastModifiedById 
+			,@intEntityPreviousId = intLastEntityId
+		FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
+
 	SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor with (nolock) WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
 	SELECT @ysnAmdWoAppvl       = ISNULL(ysnAmdWoAppvl,0), @ysnStayAsDraftContractUntilApproved = ISNULL(ysnStayAsDraftContractUntilApproved,0), @ysnPricingAsAmendment = ysnPricingAsAmendment FROM tblCTCompanyPreference
 
@@ -302,6 +308,9 @@ BEGIN TRY
 		SELECT @intContractDetailId = intContractDetailId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
 		SELECT @intPrevHistoryId = max(intSequenceHistoryId) FROM tblCTSequenceHistory WITH (NOLOCK) WHERE intSequenceHistoryId < @intSequenceHistoryId AND intContractDetailId = @intContractDetailId
 
+
+		select @ysnSequenceHistoryForEntity = 0, @intEntityDeletedId = null --, @intEntityPreviousId = null
+
 		DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 
 		IF (OBJECT_ID('tempdb..#tempSequenceHistoryCompare') IS NOT NULL)
@@ -353,6 +362,20 @@ BEGIN TRY
 		SELECT @intValidSequenceHistoryCount = COUNT(*) FROM (
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
+
+
+		--CT-7027
+		IF( @intEntityPreviousId is not null)
+		BEGIN
+			IF EXISTS(select top 1 1 from tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId and intEntityId <> @intEntityPreviousId)
+			BEGIN
+				select 
+						@ysnSequenceHistoryForEntity = 1
+						, @intEntityDeletedId = intEntityId 
+					from tblCTSequenceHistory 
+					where intSequenceHistoryId = @intSequenceHistoryId;
+			END	
+		END
 
 		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1)
 		BEGIN
@@ -493,6 +516,37 @@ BEGIN TRY
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intLastModifiedById AND intApprovalListId = @intApprovalListId) OR (@ysnAmdWoAppvl = 1)
 		BEGIN
+
+			--CT-7027
+			IF isnull(@ysnSequenceHistoryForEntity, 0) = 1
+			BEGIN
+
+				INSERT INTO tblCTSequenceAmendmentLog (intSequenceHistoryId
+						, dtmHistoryCreated
+						, intContractHeaderId
+						, intContractDetailId
+						, intAmendmentApprovalId
+						, strItemChanged
+						, strOldValue
+						, strNewValue
+						, intConcurrencyId)
+			
+					--Entity
+					SELECT TOP 1 intSequenceHistoryId = NULL
+						, dtmHistoryCreated			= GETDATE()
+						, intContractHeaderId		= @intContractHeaderId
+						, intContractDetailId		= NULL
+						, intAmendmentApprovalId	= 1
+						, strItemChanged			= 'Entity'
+						, strOldValue				= PreviousType.strName
+						, strNewValue				= CurrentType.strName
+						, intConcurrencyId			= 1
+					FROM tblEMEntity		PreviousType
+					OUTER APPLY (SELECT TOP 1 strName from tblEMEntity where intEntityId = @intEntityDeletedId ) CurrentType
+						WHERE PreviousType.intEntityId = @intEntityPreviousId
+			END
+
+
 			INSERT INTO tblCTSequenceAmendmentLog (intSequenceHistoryId
 				, dtmHistoryCreated
 				, intContractHeaderId
@@ -501,26 +555,9 @@ BEGIN TRY
 				, strItemChanged
 				, strOldValue
 				, strNewValue
-				, intConcurrencyId)
-			
-			--Entity
-			SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
-				, dtmHistoryCreated			= GETDATE()
-				, intContractHeaderId		= @intContractHeaderId
-				, intContractDetailId		= NULL
-				, intAmendmentApprovalId	= 1
-				, strItemChanged			= 'Entity'
-				, strOldValue				= PreviousType.strName
-				, strNewValue				= CurrentType.strName
-				, intConcurrencyId			= 1
-			FROM tblCTSequenceHistory	CurrentRow
-			JOIN @SCOPE_IDENTITY		NewRecords          ON  NewRecords.intSequenceHistoryId			=   CurrentRow.intSequenceHistoryId 
-			JOIN @tblHeader				PreviousRow			ON  ISNULL(PreviousRow.intEntityId,0)		<>  ISNULL(CurrentRow.intEntityId,0)
-			LEFT JOIN tblEMEntity		CurrentType		    ON CurrentType.intEntityId			        =	CurrentRow.intEntityId
-			LEFT JOIN tblEMEntity		PreviousType	    ON PreviousType.intEntityId			        =	PreviousRow.intEntityId
-
+				, intConcurrencyId)			
 			--Position
-			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
+			SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
 				, dtmHistoryCreated			= GETDATE()
 				, intContractHeaderId		= @intContractHeaderId
 				, intContractDetailId		= NULL

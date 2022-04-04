@@ -250,7 +250,9 @@ BEGIN TRY
 	FROM	tblCTContractCost	CC
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
-
+	
+	--CT-7027
+	UPDATE tblCTContractHeader set intLastEntityId = intEntityId where intContractHeaderId = @intContractHeaderId
 END TRY
 
 BEGIN CATCH
