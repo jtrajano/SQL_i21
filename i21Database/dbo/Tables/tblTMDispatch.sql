@@ -44,6 +44,7 @@
 	[intPaymentId] INT NULL,
     [dblOverageQty] NUMERIC(18,6) DEFAULT 0 NULL,
 	[dblOveragePrice] NUMERIC(18,6) DEFAULT 0 NULL,
+    [strOriginalPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])
