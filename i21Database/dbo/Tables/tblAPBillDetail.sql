@@ -38,6 +38,7 @@
 	[intPrepayTransactionId]    INT             NULL,
 	[intReallocationId]    INT             NULL,
 	[intItemBundleId]	INT 	NULL,
+	[intLotId]	INT 	NULL,
 	[intLinkingId]	INT NULL,
 	[intComputeTotalOption] TINYINT NOT NULL DEFAULT(0),
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,

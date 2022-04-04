@@ -88,6 +88,7 @@
 	[strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intContractSeq] INT NULL,
 	[intInvoiceId] INT NULL , 
+	[intLotId]	INT 	NULL,
     [intBuybackChargeId] INT NULL, 
 	[intTicketDistributionAllocationId] INT NULL,
 	[dblCashPrice] DECIMAL(18, 6) NOT NULL DEFAULT 0,
@@ -96,117 +97,69 @@
 	[dblRounding] DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[ysnOverrideForexRate] BIT NOT NULL DEFAULT 0,
 	[strReasonablenessComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
-    CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblICInventoryReceiptCharge] FOREIGN KEY ([intInventoryReceiptChargeId]) REFERENCES [tblICInventoryReceiptCharge]([intInventoryReceiptChargeId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblAPBillDeferred] FOREIGN KEY ([intDeferredVoucherId]) REFERENCES [tblAPBill]([intBillId]),
+    CONSTRAINT [PK__tblAPProvisional__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
+    CONSTRAINT [FK_tblAPProvisionalDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPProvisional] ([intBillId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblICInventoryReceiptCharge] FOREIGN KEY ([intInventoryReceiptChargeId]) REFERENCES [tblICInventoryReceiptCharge]([intInventoryReceiptChargeId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblAPBillDeferred] FOREIGN KEY ([intDeferredVoucherId]) REFERENCES [tblAPProvisional]([intBillId]),
 	--TEMPORARILY REMOVED, WE'LL VERIFY THIS TO AJITH AS THIS MIGHT BECOME MANUAL DATA FIX FIRST BEFORE ENABLING AGAIN
 	--CONSTRAINT [FK_tblAPBillDetail_tblICInventoryReceiptItem_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [dbo].[tblICInventoryReceiptItem] ([intInventoryReceiptItemId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [dbo].[tblLGLoadDetail] ([intLoadDetailId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblCCSiteDetail_intCCSiteDetailId] FOREIGN KEY ([intCCSiteDetailId]) REFERENCES [dbo].[tblCCSiteDetail] ([intSiteDetailId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblCTContractCost] FOREIGN KEY ([intContractCostId]) REFERENCES [tblCTContractCost]([intContractCostId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblICInventoryShipmentCharge] FOREIGN KEY ([intInventoryShipmentChargeId]) REFERENCES [tblICInventoryShipmentCharge]([intInventoryShipmentChargeId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [dbo].[tblLGLoadDetail] ([intLoadDetailId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblCCSiteDetail_intCCSiteDetailId] FOREIGN KEY ([intCCSiteDetailId]) REFERENCES [dbo].[tblCCSiteDetail] ([intSiteDetailId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblCTContractCost] FOREIGN KEY ([intContractCostId]) REFERENCES [tblCTContractCost]([intContractCostId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblICInventoryShipmentCharge] FOREIGN KEY ([intInventoryShipmentChargeId]) REFERENCES [tblICInventoryShipmentCharge]([intInventoryShipmentChargeId]),
 
-	CONSTRAINT [FK_tblAPBillDetail_intUnitOfMeasureId] FOREIGN KEY ([intUnitOfMeasureId]) REFERENCES tblICItemUOM([intItemUOMId]),
-	CONSTRAINT [FK_tblAPBillDetail_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES tblICItemUOM([intItemUOMId]),
-	CONSTRAINT [FK_tblAPBillDetail_intWeightUOMId] FOREIGN KEY ([intWeightUOMId]) REFERENCES tblICItemUOM([intItemUOMId]),
-	CONSTRAINT [FK_tblAPBillDetail_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES tblICInventoryReceiptItem([intInventoryReceiptItemId]),
-	CONSTRAINT [FK_tblAPBillDetail_intPaycheckHeaderId] FOREIGN KEY ([intPaycheckHeaderId]) REFERENCES tblPRPaycheck([intPaycheckId]),
-	CONSTRAINT [FK_tblAPBillDetail_intPurchaseDetailId] FOREIGN KEY ([intPurchaseDetailId]) REFERENCES tblPOPurchaseDetail([intPurchaseDetailId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intUnitOfMeasureId] FOREIGN KEY ([intUnitOfMeasureId]) REFERENCES tblICItemUOM([intItemUOMId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES tblICItemUOM([intItemUOMId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intWeightUOMId] FOREIGN KEY ([intWeightUOMId]) REFERENCES tblICItemUOM([intItemUOMId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES tblICInventoryReceiptItem([intInventoryReceiptItemId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intPaycheckHeaderId] FOREIGN KEY ([intPaycheckHeaderId]) REFERENCES tblPRPaycheck([intPaycheckId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intPurchaseDetailId] FOREIGN KEY ([intPurchaseDetailId]) REFERENCES tblPOPurchaseDetail([intPurchaseDetailId]),
 	--CONSTRAINT [FK_tblAPBillDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES tblLGLoadDetail([intLoadDetailId]), /* this is a duplicate FK */
-	CONSTRAINT [FK_tblAPBillDetail_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
-	CONSTRAINT [FK_tblAPBillDetail_intWeightClaimDetailId] FOREIGN KEY ([intWeightClaimDetailId]) REFERENCES tblLGWeightClaimDetail([intWeightClaimDetailId]),
-	CONSTRAINT [FK_tblAPBillDetail_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES tblARInvoice([intInvoiceId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblHDTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES tblHDTicket([intTicketId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblAPBillReallocation] FOREIGN KEY ([intReallocationId]) REFERENCES tblAPBillReallocation([intReallocationId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblSCTicketDistributionAllocation] FOREIGN KEY ([intTicketDistributionAllocationId]) REFERENCES tblSCTicketDistributionAllocation([intTicketDistributionAllocationId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intWeightClaimDetailId] FOREIGN KEY ([intWeightClaimDetailId]) REFERENCES tblLGWeightClaimDetail([intWeightClaimDetailId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES tblARInvoice([intInvoiceId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblHDTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES tblHDTicket([intTicketId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblAPBillReallocation] FOREIGN KEY ([intReallocationId]) REFERENCES tblAPBillReallocation([intReallocationId]),
+	CONSTRAINT [FK_tblAPProvisionalDetail_tblSCTicketDistributionAllocation] FOREIGN KEY ([intTicketDistributionAllocationId]) REFERENCES tblSCTicketDistributionAllocation([intTicketDistributionAllocationId]),
 ) ON [PRIMARY];
 
 
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryShipmentChargeId]
-		ON [dbo].[tblAPBillDetail]([intInventoryShipmentChargeId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblAPProvisionalDetail_intInventoryShipmentChargeId]
+		ON [dbo].[tblAPProvisionalDetail]([intInventoryShipmentChargeId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryReceiptItemId]
-		ON [dbo].[tblAPBillDetail]([intInventoryReceiptItemId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblAPProvisionalDetail_intInventoryReceiptItemId]
+		ON [dbo].[tblAPProvisionalDetail]([intInventoryReceiptItemId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived, intInventoryReceiptChargeId)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryReceiptChargeId]
-		ON [dbo].[tblAPBillDetail]([intInventoryReceiptChargeId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblAPProvisionalDetail_intInventoryReceiptChargeId]
+		ON [dbo].[tblAPProvisionalDetail]([intInventoryReceiptChargeId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived, intInventoryReceiptItemId)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intLoadDetailId]
-		ON [dbo].[tblAPBillDetail]([intLoadDetailId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblAPProvisionalDetail_intLoadDetailId]
+		ON [dbo].[tblAPProvisionalDetail]([intLoadDetailId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intCustomerStorageId]
-		ON [dbo].[tblAPBillDetail]([intCustomerStorageId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblAPProvisionalDetail_intCustomerStorageId]
+		ON [dbo].[tblAPProvisionalDetail]([intCustomerStorageId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intSettleStorageId]
-		ON [dbo].[tblAPBillDetail]([intSettleStorageId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblAPProvisionalDetail_intSettleStorageId]
+		ON [dbo].[tblAPProvisionalDetail]([intSettleStorageId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
 GO
-CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intContractDetailId]
-		ON [dbo].[tblAPBillDetail]([intContractDetailId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblAPProvisionalDetail_intContractDetailId]
+		ON [dbo].[tblAPProvisionalDetail]([intContractDetailId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
-GO
-CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBillDetail]
-(
-	[intBillId] ASC,
-	[intBillDetailId] ASC
-)
-INCLUDE ( 	[dblTotal],
-	[dblRate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_voucherPayable]
-    ON [dbo].[tblAPBillDetail](intPurchaseDetailId
-								,intContractDetailId
-								,intScaleTicketId
-								,intInventoryReceiptChargeId
-								,intInventoryReceiptItemId
-								,intInventoryShipmentChargeId
-								,intLoadDetailId
-								,intSettleStorageId
-								,intTicketDistributionAllocationId
-								DESC);
-GO
-CREATE TRIGGER trgLogVoucherDetailRisk
-ON dbo.tblAPBillDetail
-AFTER INSERT, UPDATE, DELETE
-AS 
-BEGIN
-    SET NOCOUNT ON;
-
-    --
-    -- Check if this is an INSERT, UPDATE or DELETE Action.
-    -- 
-    DECLARE @action as char(1);
-
-    SET @action = 'I'; -- Set Action to Insert by default.
-    IF EXISTS(SELECT * FROM DELETED)
-    BEGIN
-        SET @action = 
-            CASE
-                WHEN EXISTS(SELECT * FROM INSERTED) THEN 'U' -- Set Action to Updated.
-                ELSE 'D' -- Set Action to Deleted.       
-            END
-    END
-    ELSE 
-        IF NOT EXISTS(SELECT * FROM INSERTED) RETURN; -- Nothing updated or inserted.
-		ELSE
-			RETURN;
-END
-
 GO

@@ -279,6 +279,7 @@ BEGIN
 			,[intBookId]						=	A.intBookId
 			,[intSubBookId]						=	A.intSubBookId
 			,[intComputeTotalOption]			=	A.intComputeTotalOption
+			,[intLotId]							=	A.intLotId
 			,[intPayFromBankAccountId]			=	A.intPayFromBankAccountId
 			,[strPayFromBankAccount]			=	bankAccount.strBankAccountNo
 		FROM @voucherPayable A
@@ -412,6 +413,7 @@ BEGIN
 		,[intBookId]
 		,[intSubBookId]
 		,[intComputeTotalOption]
+		,[intLotId]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
 	)
@@ -505,6 +507,7 @@ BEGIN
 		,[intBookId]
 		,[intSubBookId]
 		,[intComputeTotalOption]
+		,[intLotId]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
 	)

@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblAPAppliedPrepaidAndDebit]
+﻿CREATE TABLE [dbo].[tblAPProvisionalAppliedPrepaidAndDebit]
 (
 	[intId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
     [intBillId] INT NULL, 
@@ -18,9 +18,9 @@
 	[dblAmountApplied] DECIMAL(18, 6) NOT NULL DEFAULT 0,
     [ysnApplied] BIT NOT NULL DEFAULT 0,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0,
-	CONSTRAINT [FK_tblAPAppliedPreapaidAndDebit_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblAPAppliedPreapaidAndDebit_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
-	CONSTRAINT [FK_tblAPAppliedPreapaidAndDebit_intBillDetailApplied] FOREIGN KEY ([intBillDetailApplied]) REFERENCES [dbo].[tblAPBillDetail] ([intBillDetailId]), -- this is used as checking if we are to execute the fix for the data
+	CONSTRAINT [FK_tblAPProvisionalAppliedPrepaidAndDebit_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPProvisional] ([intBillId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblAPProvisionalAppliedPrepaidAndDebit_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblAPProvisional] ([intBillId]),
+	CONSTRAINT [FK_tblAPProvisionalAppliedPrepaidAndDebit_intBillDetailApplied] FOREIGN KEY ([intBillDetailApplied]) REFERENCES [dbo].[tblAPProvisionalDetail] ([intBillDetailId]), -- this is used as checking if we are to execute the fix for the data
 	 
 )
 GO
