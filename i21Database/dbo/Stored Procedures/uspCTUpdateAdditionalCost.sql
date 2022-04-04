@@ -52,7 +52,7 @@ BEGIN TRY
 		END
 		
 		UPDATE  CC
-		SET	    CC.dblAccruedAmount	=	(CASE	
+		SET	    CC.dblAccruedAmount	=	( (CASE	
 												WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 																							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
 												WHEN	CC.strCostMethod = 'Amount'		THEN
@@ -60,6 +60,7 @@ BEGIN TRY
 												WHEN	CC.strCostMethod = 'Percentage' THEN 
 																							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
 										END)*CC.dblRemainingPercent/100
+									) / (case when isnull(CY.ysnSubCurrency,convert(bit,0)) = convert(bit,1) then isnull(CY.intCent,1) else 1 end)
 		FROM	tblCTContractCost	CC
 		JOIN	tblCTContractDetail	CD	   ON CD.intContractDetailId	=	CC.intContractDetailId
 		LEFT JOIN	tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
@@ -67,6 +68,9 @@ BEGIN TRY
 		LEFT JOIN	tblICItemUOM		QU ON QU.intItemUOMId			=	CD.intItemUOMId	
 		LEFT JOIN	tblICItemUOM		CM ON CM.intUnitMeasureId		=	IU.intUnitMeasureId
 									    AND CM.intItemId				=	CD.intItemId		
+		
+		LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
+
 		WHERE	CC.intContractDetailId = @intContractDetailId
 
 		UPDATE  CC
