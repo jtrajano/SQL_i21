@@ -636,6 +636,10 @@
     <Build Include="dbo\Stored Procedures\uspLGRejectLoadSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
     <Build Include="dbo\User Defined Types\SingleAuditLogParam.sql" />
+    <Build Include="dbo\Tables\tblAPProvisional.sql" />
+    <Build Include="dbo\Tables\tblAPProvisionalDetail.sql" />
+    <Build Include="dbo\Tables\tblAPProvisionalDetailTax.sql" />
+    <Build Include="dbo\Tables\tblAPProvisionalAppliedPrepaidAndDebit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
