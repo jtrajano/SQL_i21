@@ -5,7 +5,7 @@
 CREATE VIEW vyuQMAllocation
 AS
 SELECT DISTINCT --A.intPContractDetailId,
-		  D.intContractDetailId intPContractDetailId,
+		  D.intContractDetailId intContractDetailIdP,
                 B.intSampleId,
                 D.intContractHeaderId intContractHeaderIdP,
                 D.strContractNumber strContractNumberP,
@@ -42,6 +42,7 @@ FROM   vyuQMSampleList B -- PURCHASE SAMPLES CAN HAVE NO PURCHASE CONTRACT
        LEFT JOIN tblLGAllocationDetail E
               ON E.intPContractDetailId = B.intContractDetailId
        OUTER APPLY(SELECT
+                  DD.intContractDetailId intContractDetailIdS,
                   DD.intContractHeaderId intContractHeaderIdS,
 		    DD.strContractNumber strContractNumberS,
                   DD.intContractSeq  intSequenceS,
