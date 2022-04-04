@@ -2692,8 +2692,9 @@ BEGIN TRY
 		FROM @tblOpenContractList cdPriced
 		INNER JOIN @tblOpenContractList cdBasis
 			ON cdBasis.intContractDetailId = cdPriced.intContractDetailId
-			AND cdPriced.intPricingTypeId = 2
-		WHERE cdPriced.intPricingTypeId = 1
+			AND cdBasis.intPricingTypeId = 2 
+			AND cdBasis.strPricingType = 'Basis'
+		WHERE cdPriced.intPricingTypeId = 2 AND cdPriced.strPricingType = 'Priced'
 
 		---- contract
 		INSERT INTO @ListTransaction (intContractHeaderId
@@ -2919,8 +2920,6 @@ BEGIN TRY
 																	else dblFutures END END)
 								 + ISNULL(dblCosts, 0) END AS dblAdjustedContractPrice
 					, dblFuturePrice1 as dblFuturePrice
-
-					-- COMPUTE OPEN QTY. INCLUDE REDUCTION OF ALLOCATED QTY
 					, dblOpenQty = CONVERT(decimal(24, 6), CASE WHEN ISNULL(intCommodityUnitMeasureId, 0) = 0 
 												THEN dblContractOriginalQty
 												ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId
@@ -3022,42 +3021,47 @@ BEGIN TRY
 						, cd.strClass
 						, cd.strProductLine
 						, dblContractOriginalQty = 
-							-- IF NOT PARTIAL PRICED
-							CASE WHEN ISNULL(partialPricedCT.intContractDetailId, 0) = 0 
-								THEN CASE WHEN cd.dblDetailQuantity = cd.dblContractOriginalQty
-									THEN cd.dblContractOriginalQty - ISNULL(allocatedContract.dblAllocatedQty, 0)
-									ELSE CASE WHEN (cd.dblDetailQuantity - cd.dblContractOriginalQty) > ISNULL(allocatedContract.dblAllocatedQty, 0)
-										THEN cd.dblContractOriginalQty
-										ELSE cd.dblDetailQuantity - ISNULL(allocatedContract.dblAllocatedQty, 0)
+							CASE WHEN ISNULL(allocatedContract.dblAllocatedQty, 0) = 0 THEN cd.dblContractOriginalQty
+								ELSE
+									-- COMPUTE OPEN QTY. INCLUDE REDUCTION OF ALLOCATED QTY
+									-- IF NOT PARTIAL PRICED
+									CASE WHEN ISNULL(partialPricedCT.intContractDetailId, 0) = 0 
+										THEN CASE WHEN cd.dblDetailQuantity = cd.dblContractOriginalQty
+											THEN cd.dblContractOriginalQty - ISNULL(allocatedContract.dblAllocatedQty, 0)
+											-- COMPLETED QTY > ALLOCATED QTY = RETAIN OPEN QTY.
+											ELSE CASE WHEN (cd.dblDetailQuantity - cd.dblContractOriginalQty) > ISNULL(allocatedContract.dblAllocatedQty, 0)
+												THEN cd.dblContractOriginalQty
+												ELSE cd.dblDetailQuantity - ISNULL(allocatedContract.dblAllocatedQty, 0)
+												END
+											END
+									-- IF PARTIAL PRICED
+											-- PRICED RECORD
+										ELSE CASE WHEN cd.intPricingTypeId = 2 AND cd.strPricingType = 'Priced'
+											THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
+													THEN CASE WHEN partialPricedCT.dblPricedOpenQty > ISNULL(allocatedContract.dblAllocatedQty, 0)
+														THEN partialPricedCT.dblPricedOpenQty - ISNULL(allocatedContract.dblAllocatedQty, 0)
+														ELSE 0
+														END
+													ELSE CASE WHEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) > ISNULL(allocatedContract.dblAllocatedQty, 0)
+														THEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
+														ELSE 0
+														END													
+													END
+											-- BASIS RECORD
+											WHEN cd.intPricingTypeId = 2 AND cd.strPricingType = 'Basis'
+											THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
+													THEN CASE WHEN partialPricedCT.dblPricedOpenQty >= ISNULL(allocatedContract.dblAllocatedQty, 0)
+														THEN cd.dblContractOriginalQty
+														ELSE (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
+														END
+													ELSE CASE WHEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) >= ISNULL(allocatedContract.dblAllocatedQty, 0)
+														THEN cd.dblContractOriginalQty
+														ELSE (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
+														END
+													END
+											ELSE cd.dblContractOriginalQty
+											END
 										END
-									END
-							-- IF PARTIAL PRICED
-								-- PRICED RECORD
-								ELSE CASE WHEN cd.intPricingTypeId = 1
-									THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
-											THEN CASE WHEN partialPricedCT.dblPricedOpenQty > ISNULL(allocatedContract.dblAllocatedQty, 0)
-												THEN partialPricedCT.dblPricedOpenQty - ISNULL(allocatedContract.dblAllocatedQty, 0)
-												ELSE 0
-												END
-											ELSE CASE WHEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) > ISNULL(allocatedContract.dblAllocatedQty, 0)
-												THEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
-												ELSE 0
-												END													
-											END
-									-- BASIS RECORD
-									WHEN cd.intPricingTypeId = 2
-									THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
-											THEN CASE WHEN partialPricedCT.dblPricedOpenQty >= ISNULL(allocatedContract.dblAllocatedQty, 0)
-												THEN cd.dblContractOriginalQty
-												ELSE (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
-												END
-											ELSE CASE WHEN (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty) >= ISNULL(allocatedContract.dblAllocatedQty, 0)
-												THEN cd.dblContractOriginalQty
-												ELSE (partialPricedCT.dblCompletedQty + partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty) - ISNULL(allocatedContract.dblAllocatedQty, 0)
-												END
-											END
-									ELSE cd.dblContractOriginalQty
-									END
 								END
 						, strBook
 						, intBookId
