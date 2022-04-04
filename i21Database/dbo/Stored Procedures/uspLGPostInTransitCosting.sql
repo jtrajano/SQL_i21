@@ -48,11 +48,11 @@ BEGIN TRY
 
 		IF (@intPurchaseSale = 3) 
 		BEGIN
-			IF (EXISTS (SELECT 1 FROM tblLGLoadDetail LD 
-					INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
-					INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId IN (LD.intPContractDetailId, LD.intSContractDetailId)
-					INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					WHERE L.intLoadId = @intLoadId AND CH.intPricingTypeId = 2 AND CD.intPricingStatus = 1))
+			IF (EXISTS (SELECT 1 FROM (
+					SELECT dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+					FROM tblLGLoadDetail LD
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId IN (LD.intPContractDetailId, LD.intSContractDetailId)
+					WHERE LD.intLoadId = @intLoadId) p WHERE p.dblUnitPrice IS NULL))
 				RAISERROR('One or more contracts is not yet priced. Please price the contracts to proceed.', 16, 1);
 		END
 		ELSE
