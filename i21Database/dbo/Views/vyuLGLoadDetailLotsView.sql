@@ -33,6 +33,8 @@ SELECT L.strLoadNumber
 	  ,Receipt.strBankReferenceNo
 	  ,Receipt.strReferenceNo
 	  ,strSourceLoadNumber = PL.strLoadNumber
+	  ,dblWeightPerUnit = ISNULL(LOT.dblWeightPerQty,1.0)
+	  ,dblTarePerQty = ISNULL(LOT.dblTarePerQty,1.0)
 FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId

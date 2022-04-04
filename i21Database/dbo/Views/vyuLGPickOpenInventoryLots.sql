@@ -8,6 +8,7 @@ SELECT *,
 	dblNetWeight = dbo.fnMultiply(dbo.fnDivide(dblNetWeightFull, dblQty), dblUnPickedQty),
 	dblGrossWeight = dbo.fnMultiply(dbo.fnDivide(dblGrossWeightFull, dblQty), dblUnPickedQty),
 	dblTareWeight = dbo.fnMultiply(dbo.fnDivide(dblTareWeightFull, dblQty), dblUnPickedQty)
+	,dblTarePerQty = dbo.fnDivide(dblTareWeightFull, dblQty)
 FROM (
 	SELECT 
 		intLotId = Lot.intLotId
