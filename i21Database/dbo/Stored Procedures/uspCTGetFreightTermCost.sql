@@ -137,11 +137,13 @@ BEGIN TRY
 				, @intUnitMeasureId
 				, @strUnitMeasure
 				, @strCostMethod
-				, dblRate = detail.dblInsurancePremiumFactor
-				, dblAmount = detail.dblInsurancePremiumFactor
+				, dblRate = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
+				, dblAmount = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
 			FROM tblLGInsurancePremiumFactor ipf
 			JOIN tblLGInsurancePremiumFactorDetail detail ON detail.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId
 			JOIN tblEMEntity em ON em.intEntityId = ipf.intEntityId
+			LEFT JOIN tblLGInsurancePremiumFactorPurchase pFactor ON pFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 1
+			LEFT JOIN tblLGInsurancePremiumFactorSale sFactor ON sFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 2
 			WHERE detail.intLoadingPortId = @intFromPortId
 				AND detail.intDestinationPortId = @intToPortId
 				AND @intMarketZoneId = (CASE WHEN @intContractTypeId = 1 THEN detail.intLoadingZoneId ELSE detail.intDestinationZoneId END)
