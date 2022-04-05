@@ -601,6 +601,41 @@ BEGIN
 			GOTO With_Rollback_Exit; 
 		END 		 
 	END
+
+	-- Check if multiple lots are not allowed. 
+	BEGIN
+		SELECT @strItemNo = NULL
+				,@intItemId = NULL 
+
+		SELECT TOP 1 
+				@strTransactionId = Receipt.strReceiptNumber 
+				,@strItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+		FROM	dbo.tblICInventoryReceipt Receipt 
+				INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+				CROSS APPLY (				
+					SELECT c = COUNT(1) 
+					FROM tblICInventoryReceiptItemLot ReceiptLot
+					WHERE 
+						ReceiptLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId 				
+				) lotCount 
+				CROSS APPLY (
+					SELECT TOP 1 * FROM tblICCompanyPreference 
+				) pref
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND lotCount.c > 1
+				AND pref.strSingleOrMultipleLots = 'Single'
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- '{Lot Number} is a missing lot it should not have a negative quantity.'
+			EXEC uspICRaiseError 80269, @strItemNo;
+			GOTO With_Rollback_Exit; 
+		END 		 
+	END
 END
 --------------------------------------------------------------------------------------------  
 -- END Validate  

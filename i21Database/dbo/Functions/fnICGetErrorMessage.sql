@@ -282,6 +282,7 @@ BEGIN
 		WHEN @msgId = 80266 THEN 'Invoice Control Total and Receipt Total does not match. Unable to post.'
 		WHEN @msgId = 80267 THEN 'The Receipt Qty for %s is %f. Total Lot Quantity is %f. The difference is %f.'
 		WHEN @msgId = 80268 THEN '%s is a missing lot it should not have a negative quantity.'
+		WHEN @msgId = 80269 THEN 'Multiple lots are not allowed for %s. See the company configuration &#8594; Receipts &#8594; Single or Multiple Lots option.'
 	END 
 
 	RETURN @msg
