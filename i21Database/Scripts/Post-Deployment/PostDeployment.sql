@@ -431,6 +431,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\CTPreference.sql
 :R .\CT\DefaultData.sql
 :R .\CT\DropUnusedObjects.sql
+:R .\CT\UpdateContractCostsPayableShipVia.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql

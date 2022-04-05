@@ -644,6 +644,7 @@
     <Build Include="dbo\Stored Procedures\uspAPAddProvisionalDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateProvisionalTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateProvisionalDetailTax.sql" />
+    <None Include="Scripts\Post-Deployment\CT\UpdateContractCostsPayableShipVia.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
