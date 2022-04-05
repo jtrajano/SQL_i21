@@ -945,6 +945,7 @@ BEGIN
 		,[intEntityCustomerId]
 		,[intInventoryShipmentItemId]
 		,[intItemId]
+		,[intLotId]
 		,[intLocationId]
 		,[intItemLocationId]
 		,[intSubLocationId]
@@ -972,22 +973,19 @@ BEGIN
 		,[intEntityCustomerId] = LD.intCustomerEntityId
 		,[intInventoryShipmentItemId] = LD.intLoadDetailId
 		,[intItemId] = LD.intItemId
+		,[intLotId] = LDL.intLotId
 		,[intLocationId] = LD.intSCompanyLocationId
 		,[intItemLocationId] = 
 						(SELECT TOP 1 ITL.intItemLocationId
 						FROM tblICItemLocation ITL
 						WHERE ITL.intItemId = LD.intItemId
-							AND ITL.intLocationId = CD.intCompanyLocationId)
+							AND ITL.intLocationId = LD.intSCompanyLocationId)
 		,[intSubLocationId] = LD.intSSubLocationId
 		,[intStorageLocationId] = NULL
-		,[intItemUOMId] = LD.intItemUOMId
-		,[intWeightUOMId] = LD.intWeightItemUOMId
-		,[dblQty] = CASE 
-					WHEN @ysnPost = 1
-						THEN - 1 * LD.dblQuantity
-					ELSE LD.dblQuantity
-					END
-		,[dblUOMQty] = IU.dblUnitQty
+		,[intItemUOMId] = ISNULL(LOUM.intItemUOMId, LD.intItemUOMId)
+		,[intWeightUOMId] = ISNULL(LWOUM.intItemUOMId, LD.intWeightItemUOMId)
+		,[dblQty] = ISNULL(LDL.dblLotQuantity, LD.dblQuantity) * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END
+		,[dblUOMQty] = ISNULL(LOUM.dblUnitQty, IU.dblUnitQty)
 		,[dblSalesPrice] = ISNULL(CD.dblCashPrice, 0)
 		,[intDockDoorId] = NULL
 		,[intOrderId] = NULL
@@ -1001,8 +999,12 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = LDL.intLotId
+	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 	LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
+	OUTER APPLY (SELECT IU1.intItemUOMId, IU1.dblUnitQty from tblICItemUOM IU1 WHERE IU1.intItemId = Lot.intItemId AND IU1.intUnitMeasureId = IU.intUnitMeasureId) LOUM
+	OUTER APPLY (SELECT IU2.intItemUOMId from tblICItemUOM IU2 WHERE IU2.intItemId = Lot.intItemId AND IU2.intUnitMeasureId = WU.intUnitMeasureId) LWOUM
 	WHERE L.intLoadId = @intTransactionId
 
 	EXEC dbo.uspCTShipped @ItemsFromInventoryShipment

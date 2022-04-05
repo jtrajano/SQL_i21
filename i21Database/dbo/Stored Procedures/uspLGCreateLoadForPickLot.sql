@@ -218,7 +218,7 @@ BEGIN TRY
 			,dblNetWt
 			,dblTareWt
 			,1
-			,CD.intItemUOMId
+			,Lot.intItemUOMId
 			,@intLoadDetailId
 			,PLD.intLotId
 			,WUOM.intItemUOMId

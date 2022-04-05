@@ -82,13 +82,22 @@ BEGIN TRY
 	END
 
 	/* Auto-correct Weight UOMs */
-		UPDATE LD
-		SET intWeightItemUOMId = WUOM.intItemUOMId
-		FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
-			LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemId = LD.intItemId AND WUOM.intUnitMeasureId = ISNULL(L.intWeightUnitMeasureId, IUOM.intUnitMeasureId)
-		WHERE L.intLoadId = @intLoadId AND ISNULL(intWeightItemUOMId, 0) <> WUOM.intItemUOMId
+	UPDATE LD
+	SET intWeightItemUOMId = WUOM.intItemUOMId
+	FROM tblLGLoadDetail LD
+		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
+		LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemId = LD.intItemId AND WUOM.intUnitMeasureId = ISNULL(L.intWeightUnitMeasureId, IUOM.intUnitMeasureId)
+	WHERE L.intLoadId = @intLoadId AND ISNULL(intWeightItemUOMId, 0) <> WUOM.intItemUOMId
+
+	/* Auto-correct Cost UOMs */
+	UPDATE LD
+	SET intPriceUOMId = CPUOM.intItemUOMId
+	FROM tblLGLoadDetail LD
+		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblICItemUOM PUOM ON PUOM.intItemUOMId = LD.intPriceUOMId
+		LEFT JOIN tblICItemUOM CPUOM ON CPUOM.intItemId = LD.intItemId AND CPUOM.intUnitMeasureId = PUOM.intUnitMeasureId
+	WHERE L.intLoadId = @intLoadId AND ISNULL(LD.intPriceUOMId, 0) <> CPUOM.intItemUOMId
 
 	/* Build In-Transit Costing parameter */
 		
