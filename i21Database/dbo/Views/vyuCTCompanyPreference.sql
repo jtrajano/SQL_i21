@@ -118,6 +118,10 @@ AS
 			,CP.ysnDefaultShipperCargillFrontingDetails			
 			,CP.ysnFreightTermCost
 			,CP.ysnAutoCalculateFreightTermCost
+			,CP.intDefaultFreightItemId
+			,strDefaultFreightItem = DFI.strItemNo
+			,CP.intDefaultInsuranceItemId
+			,strDefaultInsuranceItem = DII.strItemNo
 			,CP.ysnAllowCropYearOverlap
 			,CP.ysnEnableFXFieldInContractPricing
 			,CP.ysnEnableItemQualityFields
@@ -141,3 +145,5 @@ AS
 	LEFT JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule
 	LEFT JOIN	tblICItem					FB	ON	FB.intItemId				=	CP.intFreightBasisCostItemId
 	LEFT JOIN	tblICItem					FCI	ON	FCI.intItemId				=	CP.intFinanceCostId
+	LEFT JOIN	tblICItem					DFI	ON	DFI.intItemId				=	CP.intDefaultFreightItemId
+	LEFT JOIN	tblICItem					DII	ON	DII.intItemId				=	CP.intDefaultInsuranceItemId

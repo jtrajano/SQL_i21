@@ -107,6 +107,8 @@
     ysnDefaultShipperCargillFrontingDetails BIT NOT NULL DEFAULT 0, 
 	ysnFreightTermCost  BIT NOT NULL DEFAULT 0, 
 	ysnAutoCalculateFreightTermCost  BIT NOT NULL DEFAULT 0, 
+	intDefaultFreightItemId INT NULL,
+	intDefaultInsuranceItemId INT NULL,
     ysnAllowCropYearOverlap BIT NOT NULL DEFAULT 0, 
     ysnEnableFXFieldInContractPricing BIT NOT NULL DEFAULT 0,
 	ysnEnableItemQualityFields BIT NOT NULL DEFAULT 0,

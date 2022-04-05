@@ -25,6 +25,8 @@ BEGIN TRY
 		, @strUnitMeasure NVARCHAR(100)
 		, @dblValue NUMERIC(18, 6)
 		, @strCostMethod NVARCHAR(50)
+		, @intFreightItemId INT
+		, @intInsuranceItemId INT
 		, @ysnFreight BIT
 		, @ysnInsurance BIT
 
@@ -42,6 +44,8 @@ BEGIN TRY
 
 	SELECT TOP 1 @ysnFreightTermCost = ISNULL(ysnFreightTermCost, 0)
 		, @ysnAutoCalc = ISNULL(ysnAutoCalculateFreightTermCost, 0)
+		, @intFreightItemId = intDefaultFreightItemId
+		, @intInsuranceItemId = intDefaultInsuranceItemId
 	FROM vyuCTCompanyPreference
 	
 	IF (@ysnFreightTermCost = 0)
@@ -72,7 +76,7 @@ BEGIN TRY
 			, @ysnInsurance = ysnInsurance
 		FROM #tmpCosts
 
-		IF (@ysnFreight = 1)
+		IF (@intCostItemId = @intFreightItemId) OR (@ysnFreight = 1)
 		BEGIN			
 			SELECT TOP 1 @intFreightRateMatrixId = FRM.intFreightRateMatrixId
 			FROM tblLGFreightRateMatrix FRM
@@ -121,7 +125,7 @@ BEGIN TRY
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
 			END
 		END
-		ELSE IF (@ysnInsurance = 1)
+		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
 		BEGIN
 			INSERT INTO @CostItems		
 			SELECT @intCostItemId
