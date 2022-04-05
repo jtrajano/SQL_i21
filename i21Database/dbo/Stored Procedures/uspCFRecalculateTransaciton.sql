@@ -6711,7 +6711,7 @@ BEGIN
 		SET @dblQuoteNetPrice			 =   @dblPrice
 
 	END
-	ELSE IF (LOWER(@strPriceMethod) = 'contracts')
+	ELSE IF (LOWER(@strPriceMethod) = 'contracts') OR (LOWER(@strPriceMethod) = 'contract pricing') 
 		BEGIN
 
 		
