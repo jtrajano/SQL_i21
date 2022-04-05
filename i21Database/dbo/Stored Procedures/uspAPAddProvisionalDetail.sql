@@ -619,7 +619,7 @@ FROM @voucherPayableTax A
 -- INNER JOIN @payablesKey B
 -- 	ON A.intVoucherPayableId = B.intNewPayableId
 INNER JOIN @voucherDetailsInfo C
-	ON A.intOldPayableId = C.intVoucherPayableId
+	ON C.intVoucherPayableId = A.intVoucherPayableId
 
 --GENERATE TAXES FOR ysnStage = 0, AND NO TAX DETAILS
 DECLARE @idetailIds AS Id
