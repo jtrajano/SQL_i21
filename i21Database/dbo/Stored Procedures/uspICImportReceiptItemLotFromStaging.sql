@@ -137,6 +137,7 @@ BEGIN
 		dblGrossWeight,
 		strWarehouseRefNo,
 		dblTareWeight,
+		dblTarePerQuantity,
 		intUnitPallet,
 		dblStatedGrossPerUnit,
 		dblStatedTarePerUnit,
@@ -173,6 +174,7 @@ BEGIN
 		,dblGrossWeight = ReceiptItemLot.dblGross
 		,strWarehouseRefNo = Receipt.strWarehouseRefNo
 		,dblTareWeight = ReceiptItemLot.dblTare
+		,dblTarePerQuantity = ISNULL(dbo.fnDivide(ISNULL(ReceiptItemLot.dblTare, 0), ISNULL(ReceiptItemLot.dblQuantity, 0)), 0)
 		,intUnitPallet = ReceiptItemLot.intUnitPallet
 		,dblStatedGrossPerUnit = ReceiptItemLot.dblStatedGrossPerUnit
 		,dblStatedTarePerUnit = ReceiptItemLot.dblStatedTarePerUnit
@@ -456,6 +458,7 @@ BEGIN
 		dblGrossWeight,
 		strWarehouseRefNo,
 		dblTareWeight,
+		dblTarePerQuantity,
 		intUnitPallet,
 		dblStatedGrossPerUnit,
 		dblStatedTarePerUnit,
@@ -492,6 +495,7 @@ BEGIN
 		,dblGrossWeight = ReceiptItemLot.dblGross
 		,strWarehouseRefNo = Receipt.strWarehouseRefNo
 		,dblTareWeight = ReceiptItemLot.dblTare
+		,dblTarePerQuantity = ISNULL(dbo.fnDivide(ISNULL(ReceiptItemLot.dblTare, 0), ISNULL(ReceiptItemLot.dblQuantity, 0)), 0)
 		,intUnitPallet = ReceiptItemLot.intUnitPallet
 		,dblStatedGrossPerUnit = ReceiptItemLot.dblStatedGrossPerUnit
 		,dblStatedTarePerUnit = ReceiptItemLot.dblStatedTarePerUnit
