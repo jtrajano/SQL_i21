@@ -16,6 +16,16 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
+EXEC uspAPCreateVoucher 
+		@voucherPayables = @voucherPayables,
+		@voucherPayableTax = @voucherPayableTax,
+		@userId = @userId,
+		@throwError = @throwError,
+		@error = @error OUT,
+		@createdVouchersId = @createdVouchersId OUT
+
+RETURN;
+
 BEGIN TRY
 
 	DECLARE @startingRecordId INT;

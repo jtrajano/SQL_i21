@@ -55,6 +55,8 @@ BEGIN TRY
 	DECLARE @deferPref NVARCHAR(50);
 	DECLARE @adjStartNum INT = 0;
 	DECLARE @adjPref NVARCHAR(50);
+	DECLARE @provStartNum INT = 0;
+	DECLARE @provPref NVARCHAR(50);
 	DECLARE @hasSavePoint BIT = 0;
 
 	--IF NO ACCOUNT PROVIDED, MAKE SURE THERE IS A DEFAULT LOCATION SETUP FOR THE USER
@@ -397,6 +399,23 @@ BEGIN TRY
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 9
 
+	--Provisional
+	UPDATE A
+		SET A.intConcurrencyId = A.intConcurrencyId + 1
+		,@provStartNum = A.intNumber
+		,@provPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 171
+
+	UPDATE A
+		SET A.strBillId = @provPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@provStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@provStartNum AS NVARCHAR), @startingNumberDigit) END
+		,@provStartNum = @provStartNum + 1
+	FROM #tmpVoucherHeaderData A
+	WHERE A.intTransactionType = 16
+
 	MERGE INTO tblAPBill AS destination
 	USING
 	(
@@ -558,6 +577,12 @@ BEGIN TRY
 		SET A.intNumber = @adjStartNum
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 77
+
+	--Provisional Type
+	UPDATE A
+		SET A.intNumber = @provStartNum
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 171
 
 	UPDATE A
 		SET A.intBillId = B.intBillId
