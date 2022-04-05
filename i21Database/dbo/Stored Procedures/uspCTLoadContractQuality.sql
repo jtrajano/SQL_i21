@@ -1,4 +1,5 @@
-﻿Create PROCEDURE [dbo].[uspCTLoadContractQuality]
+﻿
+Create PROCEDURE [dbo].[uspCTLoadContractQuality]
 	@intContractDetailId	INT
 AS
 
@@ -49,32 +50,17 @@ AS
 		   strCurrency,
 		   strUnitMeasure,
 		   dblActualValue,
-		 --  ISNULL(CASE WHEN (dblActualValue - dblTargetValue) >= 0 THEN 
-			--	Round((dblActualValue - dblTargetValue) / dblFactorOverTarget,0) * dblPremium
-			--ELSE
-			--	Round((dblTargetValue - dblActualValue) / dblFactorUnderTarget,0) * dblDiscount
-			--END,0) dblResult,
 			0 dblResult,
-			'Exact factor' strEscalatedBy,
+			'Exact Factor' strEscalatedBy,
 		   intConcurrencyId
 	from tblCTContractQuality CQ
 	WHERE CQ.intContractDetailId = @intContractDetailId
 
 
 	UPDATE @Qty
-	SET dblResult = ISNULL(CASE WHEN (dblActualValue - dblTargetValue) >= 0 THEN 
-						Round((dblActualValue - dblTargetValue) / dblFactorOverTarget,0) * dblPremium
-					ELSE
-						Round((dblTargetValue - dblActualValue) / dblFactorUnderTarget,0) * dblDiscount
-					END,0) 
-	
-	
-	--((dblActualValue - dblTargetValue) / (CASE WHEN dblActualValue < dblTargetValue THEN dblFactorUnderTarget ELSE dblFactorOverTarget END)) *
-	--CASE WHEN dblActualValue < dblTargetValue THEN dblDiscount ELSE dblPremium END
-	
+	SET dblResult = (SELECT dbo.fnCTGetQualityResult(dblActualValue, dblMinValue, dblMaxValue, dblTargetValue, dblFactorUnderTarget, dblFactorOverTarget, dblDiscount, dblPremium, strEscalatedBy))
 
 
+	
 	select  *
 	from @Qty
-
-	
