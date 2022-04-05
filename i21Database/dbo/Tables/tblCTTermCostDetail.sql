@@ -14,5 +14,6 @@
     CONSTRAINT [FK_tblCTTermCostDetail_tblCTTermCost] FOREIGN KEY ([intTermCostId]) REFERENCES [tblCTTermCost]([intTermCostId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblCTTermCostDetail_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
     CONSTRAINT [FK_tblCTTermCostDetail_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [FK_tblCTTermCostDetail_tblICItem] FOREIGN KEY ([intCostId]) REFERENCES [tblICItem]([intItemId])
+    CONSTRAINT [FK_tblCTTermCostDetail_tblICItem] FOREIGN KEY ([intCostId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [AK_tblCTTermCostDetail] UNIQUE ([intTermCostId], [intCostId])
 )
