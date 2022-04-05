@@ -98,6 +98,7 @@ SELECT S.intSampleId
 	,S.strSendSampleTo
 	,S.strRepresentLotNumber
 	,RS.strSampleNumber AS strRelatedSampleNumber
+	,S.intRelatedSampleId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
