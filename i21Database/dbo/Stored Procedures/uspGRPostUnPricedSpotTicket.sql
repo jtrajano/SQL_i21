@@ -184,6 +184,7 @@ BEGIN TRY
 							,[ysnStage]
 							,[intBookId]
 							,[intSubBookId]
+							,[intLotId]
 					)
 					SELECT 
 						GP.[intEntityVendorId]
@@ -243,6 +244,7 @@ BEGIN TRY
 						,0
 						,GP.intBookId
 						,GP.intSubBookId
+						,GP.intLotId
 					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1) GP
 
 					END 

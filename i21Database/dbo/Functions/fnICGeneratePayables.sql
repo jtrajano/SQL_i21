@@ -98,6 +98,7 @@ RETURNS @table TABLE
 , [intLoadShipmentCostId]			INT NULL	
 , [intBookId]						INT NULL
 , [intSubBookId]					INT NULL
+, [intLotId]						INT NULL 
 
 /*Payment Info*/
 , [intPayFromBankAccountId]			INT NULL --DEFAULT PAY FROM BANK ACCOUNT
@@ -353,6 +354,7 @@ SELECT DISTINCT
 	,[intLoadShipmentCostId]	     = NULL 
 	,[intBookId] = A.intBookId
 	,[intSubBookId] = A.intSubBookId
+	,[intLotId] = Lot.intLotId
 
 	/*Payment Info*/
 	, [intPayFromBankAccountId]		= A.intBankAccountId
@@ -567,6 +569,17 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 			AND po.intPurchaseId = ISNULL(rtn.intOrderId, B.intOrderId)
 			AND po.intPurchaseDetailId = ISNULL(rtn.intLineNo, B.intLineNo) 
 	) PurchaseOrder
+
+	OUTER APPLY (
+		SELECT TOP 1 
+			ril.intLotId 
+		FROM 
+			tblICInventoryReceiptItemLot ril
+			INNER JOIN tblICCompanyPreference p
+				ON p.strSingleOrMultipleLots = 'Single'
+		WHERE
+			ril.intInventoryReceiptItemId = B.intInventoryReceiptItemId		
+	) Lot
 
 WHERE 
 	A.intInventoryReceiptId = @intReceiptId
@@ -808,6 +821,7 @@ SELECT DISTINCT
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
 		,[intBookId]								= A.intBookId
 		,[intSubBookId]								= A.intSubBookId
+		,[intLotId]									= NULL 
 		/*Payment Info*/
 		, [intPayFromBankAccountId]		= A.[intPayFromBankAccountId]
 		, [strFinancingSourcedFrom] 	= A.[strFinancingSourcedFrom]

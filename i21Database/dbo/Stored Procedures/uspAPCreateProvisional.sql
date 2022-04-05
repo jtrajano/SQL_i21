@@ -430,8 +430,8 @@ BEGIN TRY
 	INSERT INTO @voucherIds
 	SELECT intBillId FROM @createdVouchers
 
-	EXEC uspAPAddProvisionDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
-	EXEC uspAPUpdateProvisionTotal @voucherIds
+	EXEC uspAPAddProvisionalDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
+	EXEC uspAPUpdateProvisionalTotal @voucherIds
 
 	-- DECLARE @billDetailIds AS Id
 	-- INSERT INTO @billDetailIds

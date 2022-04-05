@@ -152,6 +152,7 @@ BEGIN
 				,[ysnReturn]
 				,[intBookId]
 				,[intSubBookId]
+				,[intLotId]
 				/*Payment Info*/
 				, [intPayFromBankAccountId]
 				, [strFinancingSourcedFrom]
@@ -221,6 +222,7 @@ BEGIN
 				,[ysnReturn]	 
 				,[intBookId]
 				,[intSubBookId]
+				,[intLotId]
 				/*Payment Info*/
 				, [intPayFromBankAccountId]
 				, [strFinancingSourcedFrom]

@@ -74,6 +74,7 @@ SET ANSI_WARNINGS ON
 			,[ysnReturn]
 			,[intBookId]
 			,[intSubBookId]
+			,[intLotId]
 			/*Payment Info*/
 			, [intPayFromBankAccountId]
 			, [strFinancingSourcedFrom]
@@ -146,6 +147,7 @@ SET ANSI_WARNINGS ON
 			,GP.[ysnReturn]	 
 			,GP.[intBookId]
 			,GP.[intSubBookId]
+			,GP.intLotId
 			/*Payment Info*/
 			, [intPayFromBankAccountId]
 			, [strFinancingSourcedFrom]
