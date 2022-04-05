@@ -163,7 +163,7 @@ SET ANSI_WARNINGS ON
 			, [strReferenceNo]
 			, [intBankValuationRuleId]
 			, [strComments]
-		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
+		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT, DEFAULT) GP
 	END
 	
 	/* Get Shipment Charges */

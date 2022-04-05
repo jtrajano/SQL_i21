@@ -245,7 +245,7 @@ BEGIN TRY
 						,GP.intBookId
 						,GP.intSubBookId
 						,GP.intLotId
-					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1) GP
+					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1, DEFAULT) GP
 
 					END 
 

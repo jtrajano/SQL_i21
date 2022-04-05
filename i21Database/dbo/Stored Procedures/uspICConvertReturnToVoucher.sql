@@ -238,7 +238,7 @@ BEGIN
 				, [strReferenceNo]
 				, [intBankValuationRuleId]
 				, [strComments]
-			FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1)
+			FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1, DEFAULT)
 
 		END 
 

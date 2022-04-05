@@ -970,7 +970,7 @@ BEGIN TRY
 				,1
 				,@dtmDueDate
 				,GP.intLotId
-			FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1) GP
+			FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1, DEFAULT) GP
 
 			SELECT @intShipFromId = NULL
 				,@intShipFromEntityId = NULL

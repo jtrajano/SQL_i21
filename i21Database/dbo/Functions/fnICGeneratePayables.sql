@@ -2,6 +2,7 @@ CREATE FUNCTION dbo.fnICGeneratePayables (
 	@intReceiptId INT
 	, @ysnPosted BIT
 	, @ysnForVoucher BIT = 0
+	, @strType NVARCHAR(50) = NULL 
 )
 RETURNS @table TABLE
 (
@@ -124,6 +125,7 @@ BEGIN
 DECLARE @SourceType_STORE AS INT = 7		 
 	, @type_Voucher AS INT = 1
 	, @type_DebitMemo AS INT = 3
+	, @type_ProvisionalVoucher AS INT = 16
 	, @billTypeToUse INT
 	, @intVoucherInvoiceNoOption TINYINT
 	,	@voucherInvoiceOption_Blank TINYINT = 1 
@@ -154,7 +156,15 @@ FROM tblAPCompanyPreference
 INSERT INTO @table
 SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
-	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE ISNULL(@billTypeToUse, 1) END 
+	,[intTransactionType]		=	
+		CASE 
+			WHEN @strType = 'provisional voucher' THEN 
+				@type_ProvisionalVoucher
+			WHEN A.strReceiptType = 'Inventory Return' THEN 
+				@type_DebitMemo 
+			ELSE 
+				ISNULL(@billTypeToUse, @type_Voucher) 
+		END 
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
