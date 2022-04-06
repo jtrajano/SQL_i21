@@ -252,7 +252,50 @@ BEGIN TRY
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	
 	--CT-7027
-	UPDATE tblCTContractHeader set intLastEntityId = intEntityId where intContractHeaderId = @intContractHeaderId
+	--UPDATE tblCTContractHeader set intLastEntityId = intEntityId where intContractHeaderId = @intContractHeaderId
+	--CT-7064	
+	;
+	MERGE INTO tblCTContractHeaderLastModification as destination
+	using  (
+		select 
+			intContractHeaderId 
+			,intEntityId 
+			,intPositionId 
+			,intFreightTermId 
+			,intTermId 
+			,intGradeId 
+			,intWeightId 
+
+			from tblCTContractHeader 
+				where intContractHeaderId = @intContractHeaderId --order by intContractHeaderId desc
+	) as source
+	on destination.intContractHeaderId = source.intContractHeaderId
+	when not matched then
+	insert ( intContractHeaderId 
+			,intEntityId 
+			,intPositionId 
+			,intFreightTermId 
+			,intTermId 
+			,intGradeId 
+			,intWeightId 
+	)values (
+		source.intContractHeaderId 
+			,source.intEntityId 
+			,source.intPositionId 
+			,source.intFreightTermId 
+			,source.intTermId 
+			,source.intGradeId 
+			,source.intWeightId )
+	when matched then 
+	update set intContractHeaderId = source.intContractHeaderId
+			,intEntityId  = source.intEntityId
+			,intPositionId  = source.intPositionId  
+			,intFreightTermId  = source.intFreightTermId  
+			,intTermId  = source.intTermId  
+			,intGradeId  = source.intGradeId  
+			,intWeightId  = source.intWeightId
+
+	;
 END TRY
 
 BEGIN CATCH

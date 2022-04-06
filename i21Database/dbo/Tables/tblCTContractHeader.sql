@@ -97,7 +97,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[ysnLocalCurrency] BIT default ((0)),
 	
 	--CT-7027
-	[intLastEntityId] INT NULL,
+	--[intLastEntityId] INT NULL,
     -- CT-5315
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber],[intEntityId],[intCommodityId]), 

@@ -647,6 +647,7 @@
     <None Include="Scripts\Post-Deployment\CT\UpdateContractCostsPayableShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProvisionalFinalize.sql" />
     <Build Include="dbo\Views\vyuICGetContractBundleOptions.sql" />
+    <Build Include="dbo\Tables\tblCTContractHeaderLastModification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
