@@ -27,6 +27,7 @@ AS
 			,strINCOShipTerm = CB.strContractBasis
 			,CD.intCompanyLocationId
 			,PT.intPricingTypeId
+			,CD.intItemBundleId
 	FROM	tblCTContractDetail					CD	
 	CROSS APPLY tblCTCompanyPreference			CP
 	/** 
