@@ -15,9 +15,9 @@ RETURNS @table TABLE
 , [strPurchaseOrderNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [intPurchaseDetailId]				INT NULL 
 , [intItemId]						INT NULL 
-, [strMiscDescription]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strMiscDescription]				NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL 
 , [strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strDescription]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strDescription]					NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL 
 , [intPurchaseTaxGroupId]			INT NULL 
 , [dblOrderQty]						NUMERIC(38, 20) NULL 
 , [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
