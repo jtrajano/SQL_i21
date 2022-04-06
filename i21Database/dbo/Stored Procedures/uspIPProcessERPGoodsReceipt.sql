@@ -13,6 +13,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@dtmDateCreated DATETIME = GETDATE()
 		,@strError NVARCHAR(MAX)
+		,@intCertificationId int
 	DECLARE @intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
 		,@intActionId INT
@@ -72,6 +73,11 @@ BEGIN TRY
 		,@intDefaultForexRateTypeId INT
 		,@dblForexRate NUMERIC(18,6)
 		,@intTransferDetailCurrencyId INT
+		,@strMarks NVARCHAR(100)
+		,@strCertificate NVARCHAR(50) 
+		,@strCertificateId NVARCHAR(50)
+		,@intContractHeaderId int
+		,@intContractDetailId int
 	DECLARE @InventoryTransferDetail TABLE (intInventoryTransferDetailId INT)
 	DECLARE @tblIPInvReceiptStage TABLE (intStageReceiptId INT)
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
@@ -405,7 +411,11 @@ BEGIN TRY
 							,1
 							)
 				END
-
+				Select @strMarks=NULL
+					,@strCertificate=NULL
+					,@strCertificateId=NULL
+					,@intContractHeaderId=NULL
+					,@intContractDetailId=NULL
 				SELECT TOP 1 @intInventoryTransferDetailId = ITD.intInventoryTransferDetailId
 					,@dblQuantity = ISNULL(ITD.dblQuantity, 0)
 					,@intQtyItemUOMId = ITD.intItemUOMId
@@ -414,6 +424,11 @@ BEGIN TRY
 					,@strLotCondition = ISNULL(ITD.strLotCondition, 'Sound/Full')
 					--,@dblCost = (dbo.fnMultiply(ITD.dblQuantity, ISNULL(ITD.dblCost, 0)) / ITD.dblNet) -- Line Total / Net Wt
 					,@intTransferDetailCurrencyId = ITD.intCurrencyId
+					,@strMarks=strMarks
+					,@strCertificate=(Case When L.strCertificate='' Then NULL Else L.strCertificate End)
+					,@strCertificateId=(Case When L.strCertificateId='' Then NULL Else L.strCertificateId End)
+					,@intContractHeaderId=intContractHeaderId
+					,@intContractDetailId=intContractDetailId
 				FROM tblICInventoryTransferDetail ITD
 				JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ITD.intItemUOMId
 					AND ITD.intInventoryTransferId = @intInventoryTransferId
@@ -424,6 +439,25 @@ BEGIN TRY
 						FROM @InventoryTransferDetail
 						)
 				ORDER BY ABS(ITD.dblNet - @dblNetWeight)
+
+				if @strCertificate IS NOT NULL AND @intContractDetailId IS NOT NULL
+				Begin
+					Select @intCertificationId=NULL
+					Select @intCertificationId=intCertificationId
+					from tblICCertification 
+					Where strCertificationName=@strCertificate
+					IF EXISTS(SELECT *FROM tblCTContractCertification WHERE intContractDetailId=@intContractDetailId)
+					BEGIN
+						UPDATE tblCTContractCertification 
+						SET intCertificationId=@intCertificationId,strCertificationId=@strCertificateId
+						WHERE intContractDetailId=@intContractDetailId
+					END
+					ELSE 
+					BEGIN
+						INSERT INTO tblCTContractCertification(intCertificationId,strCertificationId,intConcurrencyId,intContractDetailId )
+						SELECT @intCertificationId,@strCertificateId,1,@intContractDetailId
+					END
+				End
 
 				IF @strLotCondition = ''
 					SELECT @strLotCondition = 'Sound/Full'
@@ -712,8 +746,8 @@ BEGIN TRY
 					,intItemId = @intItemId
 					,intItemLocationId = @intCompanyLocationId
 					,intItemUOMId = @intQtyItemUOMId
-					,intContractHeaderId = NULL
-					,intContractDetailId = NULL
+					,intContractHeaderId = @intContractHeaderId
+					,intContractDetailId = @intContractDetailId
 					,dtmDate = @dtmReceiptDate
 					,intShipViaId = IT.intShipViaId
 					,dblQty = @dblQuantity
@@ -808,6 +842,8 @@ BEGIN TRY
 					,intParentLotId
 					,strParentLotNumber
 					,intLotStatusId
+					,strCertificate
+					,strCertificateId
 					)
 				SELECT intLotId = NULL
 					,strLotNumber = @strLotNo
@@ -824,7 +860,7 @@ BEGIN TRY
 					,dblCost = 0
 					,strContainerNo = @strContainerNumber
 					,intSort = RI.intSort
-					,strMarkings = NULL
+					,strMarkings = @strMarks
 					,strCondition = @strLotCondition
 					,intEntityVendorId = RI.intEntityVendorId
 					,strReceiptType = RI.strReceiptType
@@ -838,6 +874,8 @@ BEGIN TRY
 					,intParentLotId = @intParentLotId
 					,strParentLotNumber = @strParentLotNumber
 					,intLotStatusId = @intLotStatusId
+					,strCertificate=NULL--@strCertificate
+					,strCertificateId=NULL--@strCertificateId
 				FROM @ReceiptStagingTable RI
 				WHERE RI.intInventoryTransferId = @intInventoryTransferId
 					AND RI.intInventoryTransferDetailId = @intInventoryTransferDetailId
