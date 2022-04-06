@@ -20,6 +20,7 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.dblTareWeight
 	,Lot.dblNetWeight
 	,Lot.intItemId
+	,Lot.intCommodityId
 	,Lot.strWarehouseRefNo
 	,strWarrantNo = ISNULL(IRIL.strWarrantNo, IR.strWarrantNo)
 	,strWarrantStatus = CASE ISNULL(IRIL.intWarrantStatus, IR.intWarrantStatus)
