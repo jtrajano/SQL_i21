@@ -189,7 +189,7 @@ BEGIN
 														WHEN @intAction = 2 THEN 'Updated Voucher'
 														ELSE 'Deleted Voucher'
 													END, 
-				strTransactionType				= 'Voucher',
+				strTransactionType				= 'Purchasing',
 				strTradeFinanceTransaction		= B.strFinanceTradeNo,
 				intTransactionHeaderId			= B.intBillId,
 				intTransactionDetailId			= BD.intBillDetailId,
@@ -260,7 +260,7 @@ BEGIN
 														WHEN @intAction = 2 THEN 'Updated Payment'
 														ELSE 'Deleted Payment'
 													END, 
-				strTransactionType				= 'Payment',
+				strTransactionType				= 'Purchasing',
 				strTradeFinanceTransaction		= B.strFinanceTradeNo,
 				intTransactionHeaderId			= P.intPaymentId,
 				intTransactionDetailId			= PD.intPaymentDetailId,
