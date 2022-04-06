@@ -6377,6 +6377,32 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Session R
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Quality.view.QualityCriteria?showSearch=true' WHERE strMenuName = 'Session Ranking' AND strModuleName = 'Quality' AND intParentMenuID = @QualityMaintenanceParentMenuId
 
+--BEGIN QUALITY REPORT
+DECLARE @QualityReportParentMenuId INT
+SELECT @QualityReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
+
+IF  @QualityReportParentMenuId IS NULL
+BEGIN
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Reports', N'Quality', @QualityParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 1)
+	SELECT  @QualityReportParentMenuId = SCOPE_IDENTITY()
+END
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strType= 'Folder', strIcon = 'small-folder', strCommand = N'', intSort = 2 WHERE  intMenuID = @QualityReportParentMenuId
+
+DECLARE @QualityContractSampleMenuId INT
+SELECT @QualityContractSampleMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract Samples Monitoring' AND intParentMenuID = @QualityReportParentMenuId
+
+IF @QualityContractSampleMenuId IS NULL
+BEGIN
+	INSERT INTO tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strCategory, strType,strCommand, strIcon, ysnVisible,intSort, intConcurrencyId)
+	SELECT 'Contract Samples Monitoring', 'Quality', @QualityReportParentMenuId, 'Contract Samples Monitoring', 'Report', 'Screen', 'Quality.view.RelatedSample?showSearch=true','small-menu-report',1,0, 1
+END
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = 'Report', strIcon = 'small-menu-report', strCommand = N'Quality.view.RelatedSample?showSearch=true', intSort = 0, ysnVisible=1,strType='Screen'
+	WHERE  intMenuID = @QualityContractSampleMenuId
+--END QUALITY REPORT
+
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Quality Exception View' AND strModuleName = 'Quality'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Attribute' AND strModuleName = 'Quality'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sample Type' AND strModuleName = 'Quality'

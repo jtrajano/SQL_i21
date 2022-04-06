@@ -1,16 +1,24 @@
 /*
-- FOR VIEWING RELATED SAMPLE
-- EXCLUDES CONTRACT WITH STATUS SHORT CLOSE, COMPLETED, CANCELLED
+FOR VIEWING OF ALLOCATION IN THE QUALITY SAMPLE SCREEN
+IF THE SALES CONTRACT SELECTED ON A NEW SAMPLE HAS PURCHASE CONTRACT, GET THE SAMPLE ID
+- IF MORE THAN ONE, USER WILL MANUALLY CREATE THE SAMPLE
 */
-CREATE VIEW vyuQMAllocation
+
+CREATE VIEW vyuQMRelatedSample
 AS
-SELECT DISTINCT --A.intPContractDetailId,
-		  D.intContractDetailId intPContractDetailId,
-                B.intSampleId,
-                D.intContractHeaderId intContractHeaderIdP,
-                D.strContractNumber strContractNumberP,
-		  D.intContractSeq intSequenceP,
-                D.strEntityName strEntityNameP,
+
+SELECT DISTINCT A.intPContractDetailId,
+                --B.intRelatedSampleId
+                --,strDescription = 'Purchase Contract'
+                --,
+                --A.intAllocationDetailId
+                --,A.strAllocationNumber
+                --,A.intSContractDetailId
+                --,
+                --B.intSampleId,
+                C.strContractNumber strContractNumberP,
+                intPContractSeq intSequenceP,
+                C.strEntityName strEntityNameP,
                 B.dblSampleQty dblSampleQtyP,
                 B.strSampleUOM strSampleUOMP,
                 D.dblNetWeight dblNetWeightP,
@@ -30,7 +38,16 @@ SELECT DISTINCT --A.intPContractDetailId,
                 C.strFreightTerm strFreightTermP,
                 C.strINCOLocation strINCOLocationP,
                 D.dtmStartDate dtmStartDateP,
-                D.dtmEndDate dtmEndDateP,
+                D.dtmEndDate dtmEndDateP
+                --,B.strRepresentingUOM
+                --,B.strSamplingMethod
+                --,B.dtmSamplingEndDate
+                --,C.strLocationName
+                --,B.strCourier
+                --,C.strGrade 
+                --,B.strSampleTypeName
+                --,B.strStatus
+                ,
                 SalesContract.*
 FROM   vyuQMSampleList B
        LEFT JOIN vyuLGAllocationDetails A
@@ -41,11 +58,15 @@ FROM   vyuQMSampleList B
               ON D.intContractDetailId = B.intContractDetailId
        LEFT JOIN tblLGAllocationDetail E
               ON E.intPContractDetailId = B.intContractDetailId
-       OUTER APPLY(SELECT
-                  DD.intContractHeaderId intContractHeaderIdS,
-				  DD.strContractNumber strContractNumberS,
-                  DD.intContractSeq  intSequenceS,
-                  DD.strEntityName strEntityNameS,
+       OUTER APPLY(SELECT DISTINCT
+                  --,AA.intAllocationDetailId
+                  --,AA.strAllocationNumber
+                  --,AA.intPContractDetailId 
+                  --,BB.intSampleId
+                  --AA.intSContractDetailId,
+                  CC.strContractNumber strContractNumberS,
+                  intPContractSeq  intSequenceS,
+                  CC.strEntityName strEntityNameS,
                   BB.dblSampleQty dblSampleQtyS,
                   BB.strSampleUOM strSampleUOMS,
                   DD.dblNetWeight dblNetWeightS,
@@ -54,7 +75,7 @@ FROM   vyuQMSampleList B
                   BB.strSampleNumber strSampleNumberS,
                   BB.strGrade strSampleTypeS,
                   CC.strFreightTerm strFreightTermS,
-                  CC.strINCOLocation strINCOLocationS,
+                  C.strINCOLocation strINCOLocationS,
                   DD.dtmStartDate dtmStartDateS,
                   DD.dtmEndDate dtmEndDateS,
                   BB.strSamplingCriteria strSamplingCriteriaS,
@@ -64,7 +85,6 @@ FROM   vyuQMSampleList B
                   BB.dtmSampleReceivedDate dtmSampleReceivedDateS,
                   BB.strStatus strStatusS,
                   BB.strLotNumber strLotNumberS
-				  
                    FROM   --vyuLGLoadDetailView A
                   vyuQMSampleList BB
                   LEFT JOIN vyuLGAllocationDetails AA
@@ -75,8 +95,8 @@ FROM   vyuQMSampleList B
                          ON DD.intContractDetailId = BB.intContractDetailId
                   LEFT JOIN tblLGAllocationDetail EE
                          ON EE.intSContractDetailId = BB.intContractDetailId
-                   WHERE   AA.intPContractDetailId = D.intContractDetailId
+                   WHERE  B.intRelatedSampleId = BB.intSampleId
                           AND intContractStatusId NOT IN( 3, 5, 6 ))
                   SalesContract
 WHERE  intContractStatusId NOT IN( 3, 5, 6 ) 
-AND intRelatedSampleId IS  NULL
+AND B.intRelatedSampleId IS NOT NULL

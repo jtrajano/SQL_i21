@@ -189,6 +189,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , dblOptionalityPremium				= INV.dblOptionalityPremium
 	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
 	 , strReasonablenessComment				= INV.strReasonablenessComment
+	 , dblItemPrice							= ISNULL(INV.dblItemPrice, 0)
+	 , dblTotalByItemPrice					= ISNULL(INV.dblTotalByItemPrice, 0)
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (

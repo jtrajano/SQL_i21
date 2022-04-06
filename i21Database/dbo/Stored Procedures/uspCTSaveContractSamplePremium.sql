@@ -37,47 +37,64 @@ BEGIN TRY
 			DELETE FROM tblCTContractQuality where intSampleId = @intSampleId
 		END
 
-		Insert INTO tblCTContractQuality(
-			intSampleId
-			,intContractDetailId
-			,intItemId
-			,intPropertyId
-			,strPropertyName
-			,dblTargetValue
-			,dblMinValue
-			,dblMaxValue
-			,dblFactorOverTarget
-			,dblPremium
-			,dblFactorUnderTarget
-			,dblDiscount
-			,strCostMethod
-			,intCurrencyId
-			,intUnitMeasureId
-			,strCurrency
-			,strUnitMeasure
-			,ysnImpactPricing
-			,dblActualValue
-		)
-		SELECT	intSampleId, 
-				intContractDetailId, 
-				intItemId,
-				intPropertyId,
-				strPropertyName,
-				dblTargetValue,
-				dblMinValue,
-				dblMaxValue,
-				dblFactorOverTarget,
-				dblPremium,
-				dblFactorUnderTarget,
-				dblDiscount,
-				strCostMethod,
-				intCurrencyId,
-				intUnitMeasureId,
-				strCurrency,
-				strUnitMeasure,
-				1,
-				CASE WHEN ISNULL(strActualValue, '') = '' THEN 0 ELSE CAST(strActualValue as Numeric(18,6)) END AS dblActualValue
-		FROM @tblTemp
+		
+		IF @ysnImpactPricing = 1 
+		BEGIN
+
+			Insert INTO tblCTContractQuality(
+				intSampleId
+				,intContractDetailId
+				,intItemId
+				,intPropertyId
+				,strPropertyName
+				,dblTargetValue
+				,dblMinValue
+				,dblMaxValue
+				,dblFactorOverTarget
+				,dblPremium
+				,dblFactorUnderTarget
+				,dblDiscount
+				,strCostMethod
+				,intCurrencyId
+				,intUnitMeasureId
+				,strCurrency
+				,strUnitMeasure
+				,ysnImpactPricing
+				,dblActualValue
+				,dblResult
+				,strEscalatedBy
+			)
+			SELECT	intSampleId, 
+					intContractDetailId, 
+					intItemId,
+					intPropertyId,
+					strPropertyName,
+					dblTargetValue,
+					dblMinValue,
+					dblMaxValue,
+					dblFactorOverTarget,
+					dblPremium,
+					dblFactorUnderTarget,
+					dblDiscount,
+					strCostMethod,
+					intCurrencyId,
+					intUnitMeasureId,
+					strCurrency,
+					strUnitMeasure,
+					1,
+					CASE WHEN ISNULL(strActualValue, '') = '' THEN 0 ELSE CAST(strActualValue as Numeric(18,6)) END AS dblActualValue,
+					(SELECT dbo.fnCTGetQualityResult(CASE WHEN ISNULL(strActualValue, '') = '' THEN 0 ELSE CAST(strActualValue as Numeric(18,6)) END 
+													, dblMinValue
+													, dblMaxValue
+													, dblTargetValue
+													, dblFactorUnderTarget
+													, dblFactorOverTarget
+													, dblDiscount
+													, dblPremium
+													, 'Exact Factor')),
+					'Exact Factor'
+			FROM @tblTemp
+		END
 
 END TRY
 
