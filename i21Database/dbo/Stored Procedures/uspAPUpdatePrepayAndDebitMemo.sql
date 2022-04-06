@@ -13,7 +13,7 @@ CREATE TABLE #tmpBillsId (
 --DECLARE @transCount INT = @@TRANCOUNT;
 --IF @transCount = 0 BEGIN TRANSACTION
 
-INSERT INTO #tmpBillsId SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@billIds)
+INSERT INTO #tmpBillsId SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@billIds)
 
 UPDATE A
 	SET dblAmountDue = CASE WHEN @post = 0 

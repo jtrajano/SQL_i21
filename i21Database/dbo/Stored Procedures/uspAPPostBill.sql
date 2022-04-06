@@ -237,14 +237,13 @@ BEGIN
 	-- FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
-	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
+	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData)
 	BEGIN
 		DECLARE @invalidAmountAppliedIds NVARCHAR(MAX);
 		--undo updating of transactions for those invalid only
 		SELECT 
 			@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
 		FROM #tmpInvalidBillData
-		WHERE intErrorKey = 1 OR intErrorKey = 33
 		EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
 	END
 
