@@ -62,7 +62,8 @@ BEGIN TRY
 			@ysnSeqSubCurrency			BIT,
 			@contractDetails 			AS [dbo].[ContractDetailTable],
 			@ysnPricingAsAmendment		BIT = 1,
-			@strXML nvarchar(max);
+			@strXML nvarchar(max),
+			@ysnEnableDerivativeInArbitrage BIT = 0;
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -100,7 +101,7 @@ BEGIN TRY
 
 	SELECT	@ysnUnlimitedQuantity	=	ysnUnlimitedQuantity FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity, @ysnPricingAsAmendment = ysnPricingAsAmendment FROM tblCTCompanyPreference
+	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity, @ysnPricingAsAmendment = ysnPricingAsAmendment,@ysnEnableDerivativeInArbitrage = ysnEnableDerivativeInArbitrage FROM tblCTCompanyPreference
 
 	declare @intDWGIdId int
 			,@ysnDestinationWeightsAndGrades bit;
@@ -549,6 +550,25 @@ BEGIN TRY
 
 		IF	@ysnFullyPriced = 1
 		BEGIN
+			
+			declare @dblArbitrageAmount numeric(18,6) = 0;
+			if (@ysnEnableDerivativeInArbitrage = 1)
+			begin
+			 select
+				@intNewFutureMarketId = intNewFutureMarketId
+				,@intNewFutureMonthId = intNewFutureMonthId
+				,@dblArbitrageAmount = dblSpreadAmount
+			 from
+				tblCTSpreadArbitrage
+			 where
+				intPriceFixationId = @intPriceFixationId
+				and strBuySell = 'Sell'
+				and strTradeType = 'Arbitrage'
+				and ysnPriceImpact = 1;
+
+				select @dblArbitrageAmount = isnull(@dblArbitrageAmount,0);
+			end
+			
 			UPDATE	CD
 			SET		CD.intPricingTypeId		=	1,
 					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
