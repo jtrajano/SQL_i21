@@ -211,6 +211,7 @@ BEGIN TRY
 			, CH.ysnLoad
 			, CH.intCommodityUOMId			
 			, CH.ysnMultiplePriceFixation
+			, FI.dblRollArb
 		FROM
 			#tmpContractDetail CD
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -610,6 +611,7 @@ BEGIN TRY
 		, strLCPaymentTerm = credT.strTerm
 		, strLCTreasuryBank = credB.strBankName
 		, strLCBank = credB2.strBankName
+		, CT.dblRollArb
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
