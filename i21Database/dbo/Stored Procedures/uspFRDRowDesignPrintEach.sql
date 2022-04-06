@@ -125,9 +125,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		ELSE	
 			BEGIN	
 				INSERT INTO #tempGLAccount    
-				SELECT * FROM #tempGLAccount2   
-				
-				TRUNCATE TABLE #tempGLAccount2    
+				SELECT * FROM #tempGLAccount2    
 			END	
 
 		DECLARE @intAccountId INT
