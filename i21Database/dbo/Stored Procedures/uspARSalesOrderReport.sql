@@ -263,6 +263,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , intOneLinePrintId		= SALESORDERDETAIL.intOneLinePrintId
 	 , dblStandardWeight		= SALESORDERDETAIL.dblStandardWeight
 	 , dblTotalWeight			= ISNULL(SO.dblTotalWeight, 0)	 
+	 , dblTotalStandardWeight   = ISNULL(SO.dblTotalStandardWeight,0)
 	 , ysnListBundleSeparately	= ISNULL(SALESORDERDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 	 , dblTotalDiscount			= ISNULL(dblTotalDiscount,0) * -1
 	 , strCustomerName			= CAST('' AS NVARCHAR(100))
@@ -504,6 +505,7 @@ INSERT INTO tblARSalesOrderReportStagingTable WITH (TABLOCK) (
 	 , intOneLinePrintId
 	 , dblStandardWeight
 	 , dblTotalWeight
+	 , dblTotalStandardWeight
 	 , ysnListBundleSeparately
 	 , dblTotalDiscount
 	 , strCustomerName
@@ -579,6 +581,7 @@ SELECT intSalesOrderId
 	 , intOneLinePrintId
 	 , dblStandardWeight
 	 , dblTotalWeight
+	 , dblTotalStandardWeight
 	 , ysnListBundleSeparately
 	 , dblTotalDiscount
 	 , strCustomerName

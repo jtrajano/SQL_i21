@@ -389,7 +389,7 @@ begin try
 		update
 			tblCTPriceFixation
 		set
-			dblLotsFixed = @dblTotalPricedQuantity / @dblQuantityPerLot
+			dblLotsFixed = (case when @ysnMultiplePriceFixation = 1 and dblTotalLots = @dblAssignedLots then dblTotalLots else @dblTotalPricedQuantity / @dblQuantityPerLot end)
 			,dblPriceWORollArb = @dblTotalWeightedAvg / @dblTotalPricedLots
 		where
 			intPriceFixationId = @intPriceFixationId;
