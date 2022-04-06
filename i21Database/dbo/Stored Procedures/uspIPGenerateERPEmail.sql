@@ -20,17 +20,24 @@ BEGIN TRY
 
 						table.GeneratedTable td {
 							border-width:1px;
-							border-color:#000000;
+							border-color:#d0d0d0;
 							border-style:solid;
 							padding:3px;
+							background-color: #F1F4F8;
+							color: #0f0f0f;
+							font-size: 12px;
+							font-family: Verdana, Geneva, Tahoma, sans-serif;
 						}
 
 						table.GeneratedTable th {
 							border-width:1px;
-							border-color:#000000;
+							border-color:#d0d0d0;
 							border-style:solid;
-							background-color:yellow;
+							background-color:#3572b0;
+							color:white;
 							padding:3px;
+							font-size: 12px;
+							font-family: Verdana, Geneva, Tahoma, sans-serif;
 						}
 
 						table.GeneratedTable thead {
@@ -39,7 +46,7 @@ BEGIN TRY
 						</style>'
 	SET @strHtml = '<html>
 						<body>
-						<table class="GeneratedTable">
+						<table class="GeneratedTable"  
 							<tbody>
 								@header
 								@detail
@@ -435,6 +442,7 @@ BEGIN TRY
 	BEGIN
 		SET @strHeader = '<tr>
 							<th>&nbsp;Transfer No</th>
+							<th>&nbsp;Transferred By</th>
 							<th>&nbsp;ERP Transfer No</th>
 							<th>&nbsp;Message</th>
 						</tr>'
@@ -448,10 +456,13 @@ BEGIN TRY
 		BEGIN
 			SELECT @strDetail = @strDetail + '<tr>' + 
 				   '<td>&nbsp;' + ISNULL(t.strTransferNo, '') + '</td>' + 
+				    '<td>&nbsp;' + ISNULL(E.strName, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strERPTransferOrderNo, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strMessage, '') + '</td>' + 
 			'</tr>'
 			FROM tblIPInvTransferFeed t WITH (NOLOCK)
+			JOIN tblICInventoryTransfer t1 on t.intInventoryTransferId =t1.intInventoryTransferId 
+			JOIN tblEMEntity E on E.intEntityId =t1.intTransferredById 
 			WHERE t.intStatusId IN (1, 3)
 				AND t.ysnMailSent = 0
 
