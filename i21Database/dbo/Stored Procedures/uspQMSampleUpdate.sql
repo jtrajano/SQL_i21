@@ -279,8 +279,8 @@ BEGIN TRY
 		,dtmTestingStartDate = x.dtmTestingStartDate
 		,dtmTestingEndDate = x.dtmTestingEndDate
 		,dtmSamplingEndDate = x.dtmSamplingEndDate
-		,dtmRequestedDate = x.dtmRequestedDate
-		,dtmSampleSentDate = x.dtmSampleSentDate
+		,dtmRequestedDate = CASE WHEN x.dtmRequestedDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmRequestedDate END
+		,dtmSampleSentDate = CASE WHEN x.dtmSampleSentDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmSampleSentDate END
 		,strSamplingMethod = x.strSamplingMethod
 		,strContainerNumber = x.strContainerNumber
 		,strMarks = x.strMarks

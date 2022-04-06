@@ -452,8 +452,8 @@ BEGIN TRY
 		,dtmTestingStartDate
 		,dtmTestingEndDate
 		,dtmSamplingEndDate
-		,dtmRequestedDate
-		,dtmSampleSentDate
+		,dtmRequestedDate = CASE WHEN dtmRequestedDate = CAST('' AS DATETIME) THEN NULL ELSE dtmRequestedDate END
+		,dtmSampleSentDate = CASE WHEN dtmSampleSentDate = CAST('' AS DATETIME) THEN NULL ELSE dtmSampleSentDate END
 		,strSamplingMethod
 		,strContainerNumber
 		,strMarks
