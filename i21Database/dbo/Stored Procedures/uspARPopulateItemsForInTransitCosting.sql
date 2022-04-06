@@ -333,7 +333,7 @@ CROSS APPLY (
 ) ICIT
 LEFT JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND (LG.[intPurchaseSale] IN (2, 3) AND ARID.[strType] = 'Provisional')
+  AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[strTransactionType] <> 'Credit Memo'
   AND ARID.[intTicketId] IS NULL
@@ -402,7 +402,7 @@ INNER JOIN (
       AND AVGT.[intItemId] = ARID.[intItemId]
       AND AVGT.[intLotId] = ARIDL.[intLotId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND (LG.[intPurchaseSale] IN (2, 3) AND ARID.[strType] = 'Provisional')
+  AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[strTransactionType] <> 'Credit Memo'
 
@@ -462,7 +462,7 @@ INNER JOIN (
 	  AND ICIT.[strTransactionId] = ARRETURN.[strInvoiceNumber] 			 
 	  AND ICIT.[intItemId] = ARRETURN.[intItemId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND (LG.[intPurchaseSale] IN (2, 3) AND ARID.[strType] = 'Provisional')
+	AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
 	AND ARID.[intInventoryShipmentItemId] IS NULL
 	AND ARID.[strTransactionType] = 'Credit Memo'
     AND ARID.[intTicketId] IS NULL
@@ -523,7 +523,7 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ARRETURN.
 										 AND ICIT.[ysnIsUnposted] = 0		
 										 AND ICIT.[intInTransitSourceLocationId] IS NOT NULL	 
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND (LG.[intPurchaseSale] IN (2, 3) AND ARID.[strType] = 'Provisional')
+	AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
 	AND ARID.[intInventoryShipmentItemId] IS NULL
 	AND ARID.[strTransactionType] = 'Credit Memo'
 
@@ -604,7 +604,7 @@ WHERE ARID.[intSourceId] = 2
   AND ARID.[ysnFromProvisional] = 1 
   AND ARID.[ysnProvisionalWithGL] = 1
   AND ARID.[strTransactionType] IN ('Invoice', 'Credit Memo')
-  AND (LG.[intPurchaseSale] IN (2, 3) AND ARID.[strType] = 'Provisional')
+  AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intTicketId] IS NULL
   AND ARIDL.[intInvoiceDetailLotId] IS NULL
@@ -689,7 +689,7 @@ WHERE ARID.[intSourceId] = 2
   AND ARID.[ysnFromProvisional] = 1 
   AND ARID.[ysnProvisionalWithGL] = 1
   AND ARID.[strTransactionType] IN ('Invoice', 'Credit Memo')
-  AND (LG.[intPurchaseSale] IN (2, 3) AND ARID.[strType] = 'Provisional')
+  AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intTicketId] IS NULL
   AND ARIDL.[intInvoiceDetailLotId] IS NULL
