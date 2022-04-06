@@ -648,6 +648,7 @@
     <Build Include="dbo\Stored Procedures\uspAPProvisionalFinalize.sql" />
     <Build Include="dbo\Views\vyuICGetContractBundleOptions.sql" />
     <Build Include="dbo\Tables\tblCTContractHeaderLastModification.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetRiskPositionInquiry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
