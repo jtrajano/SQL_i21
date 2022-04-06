@@ -35,19 +35,22 @@ DECLARE @ysnOverrideFormula BIT
 DECLARE @ysnOverrideColumnFormula BIT
 DECLARE @intSort INT
 DECLARE @queryString NVARCHAR(MAX)
+DECLARE @intSubRowDetailId NVARCHAR(MAX)  
 
 CREATE TABLE #tempGLAccount (
 		[intAccountId]		INT,
 		[strAccountId]		NVARCHAR(150),
 		[strAccountType]	NVARCHAR(MAX),
-		[strDescription]	NVARCHAR(MAX)
+		[strDescription]	NVARCHAR(MAX),
+		[intRowDetailId]  INT
 	);
 
 CREATE TABLE #tempGLAccount2 (    
   [intAccountId]  INT,    
   [strAccountId]  NVARCHAR(150),    
   [strAccountType] NVARCHAR(MAX),    
-  [strDescription] NVARCHAR(MAX)    
+  [strDescription] NVARCHAR(MAX),   
+  [intRowDetailId]  INT
  );   
 
 DECLARE @ConcurrencyId AS INT = (SELECT TOP 1 intConcurrencyId FROM tblFRRow WHERE intRowId = @intRowId)
@@ -90,13 +93,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 					@ysnForceReversedExpense	= [ysnForceReversedExpense],
 					@ysnOverrideFormula			= [ysnOverrideFormula],
 					@ysnOverrideColumnFormula	= [ysnOverrideColumnFormula],
-					@intSort					= [intSort]
+					@intSort					= [intSort],
+					@intSubRowDetailId			= [intRowDetailId]  
 				
 					FROM #tempRowDesignPrintEach ORDER BY [intSort]
 				
 		IF(@ysnSupressZero = 1 and @strAccountsType != 'RE')
 		BEGIN
-			SET @queryString = 'SELECT DISTINCT intAccountId, strAccountId, strAccountType, strDescription FROM ( ' +
+			SET @queryString = 'SELECT DISTINCT intAccountId, strAccountId, strAccountType, strDescription,'''+@intSubRowDetailId+''' FROM ( ' +
 									'SELECT DISTINCT A.intAccountId, strAccountId, strAccountGroup, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLSummary A ' +
 										'WHERE ' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ' ' +
 									'UNION ' +
@@ -108,7 +112,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		END
 		ELSE
 		BEGIN
-			SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLAccountView where (' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ') AND intAccountId IS NOT NULL ORDER BY strAccountId'
+			SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription,'''+@intSubRowDetailId+''' FROM vyuGLAccountView where (' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ') AND intAccountId IS NOT NULL ORDER BY strAccountId'
 		END
 
 		INSERT INTO #tempGLAccount2    
@@ -125,7 +129,9 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		ELSE	
 			BEGIN	
 				INSERT INTO #tempGLAccount    
-				SELECT * FROM #tempGLAccount2    
+				SELECT * FROM #tempGLAccount2   
+				
+				TRUNCATE TABLE #tempGLAccount2    
 			END	
 
 		DECLARE @intAccountId INT
@@ -134,7 +140,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		DECLARE @strAccountDescription NVARCHAR(MAX)
 		DECLARE @REAccount NVARCHAR(100)
 
-		WHILE EXISTS(SELECT 1 FROM #tempGLAccount)
+		WHILE EXISTS(SELECT 1 FROM #tempGLAccount WHERE intRowDetailId = @intSubRowDetailId)
 		BEGIN
 			SELECT TOP 1 @intAccountId			= [intAccountId],
 						 @strAccountId			= [strAccountId], 
