@@ -360,8 +360,8 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 			)
-		SELECT intItemId = LoadDetail.intItemId
-			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
+		SELECT intItemId = ISNULL(Lot.intItemId, LoadDetail.intItemId)
+			,intItemLocationId = dbo.fnICGetItemLocation(ISNULL(Lot.intItemId, LoadDetail.intItemId), LoadDetail.intSCompanyLocationId)
 			,intItemUOMId = CASE WHEN Lot.intLotId IS NULL THEN 
 									ISNULL(LoadDetail.intItemUOMId, 0)
 								ELSE 
@@ -376,7 +376,7 @@ BEGIN
 								SELECT TOP 1 dblLastCost
 								FROM tblICItemPricing
 								WHERE intItemId = LoadDetail.intItemId
-									AND intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
+									AND intItemLocationId = dbo.fnICGetItemLocation(ISNULL(Lot.intItemId, LoadDetail.intItemId), LoadDetail.intSCompanyLocationId)
 								)
 					ELSE Lot.dblLastCost
 					END, 0) * CASE 
