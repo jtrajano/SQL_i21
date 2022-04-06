@@ -986,7 +986,7 @@ GO
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET [strScreenId] = 'Vendors', [strScreenName] = 'Vendors', [strModule] = 'Accounts Payable' WHERE strNamespace = 'AccountsPayable.view.EntityVendor'
+		UPDATE [tblSMScreen] SET [strScreenId] = 'Vendors', [strScreenName] = 'Vendors', [strModule] = 'Accounts Payable', ysnApproval = 1 WHERE strNamespace = 'AccountsPayable.view.EntityVendor'
 	END
 
 	-- Subsidiary
