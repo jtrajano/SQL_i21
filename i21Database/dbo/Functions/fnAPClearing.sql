@@ -54,6 +54,7 @@ BEGIN
 	OUTER APPLY fnAPGetDetailSourceTransaction(BD.intInventoryReceiptItemId, BD.intInventoryReceiptChargeId, BD.intInventoryShipmentChargeId, BD.intLoadDetailId, BD.intLoadShipmentCostId, BD.intCustomerStorageId, BD.intSettleStorageId, BD.intBillId, BD.intItemId) ST
 	WHERE B.intBillId IN (SELECT intId FROM @ids) AND AD.intAccountCategoryId = 45
 	AND ST.intSourceTransactionId IS NOT NULL --ONLY BILLS WITH SOURCE TRANSACTION
+	AND B.intTransactionType NOT IN (15) --DON'T INCLUDE TAX ADJUSTMENTS
 
 	INSERT @returntable
 	--DETAIL TAX
@@ -85,6 +86,7 @@ BEGIN
 	WHERE B.intBillId IN (SELECT intId FROM @ids) AND AD.intAccountCategoryId = 45 
 	AND ST.intSourceTransactionTypeId IN (1, 2, 3) AND ST.dblSourceTransactionTax <> 0 AND DT.dblTax <> 0 --ONLY RECEIPT AND SHIPMENT TAXES AND DON'T INCLUDE 0 
 	AND ST.intSourceTransactionId IS NOT NULL --ONLY BILLS WITH SOURCE TRANSACTION
+	AND B.intTransactionType NOT IN (15) --DON'T INCLUDE TAX ADJUSTMENTS
 
 	RETURN
 END
