@@ -2,6 +2,8 @@
 AS
 SELECT DISTINCT Lot.intLotId
 	,Lot.strLotNumber
+	,Lot.strItemNo
+	,Lot.strItemDescription
 	,Lot.intItemUOMId
 	,Lot.strItemUOM
 	,Lot.intItemWeightUOMId
