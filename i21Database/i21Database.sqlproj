@@ -9177,6 +9177,8 @@
     <Build Include="dbo\Tables\tblGRSettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\User Defined Types\SettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\Views\vyuGRSettleStorageBillDetail.sql" />
+    <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
     <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
   </ItemGroup>
