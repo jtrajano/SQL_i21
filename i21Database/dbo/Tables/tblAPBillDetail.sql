@@ -96,6 +96,7 @@
  	[dblOptionalityPremium] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblRounding] DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[ysnOverrideForexRate] BIT NOT NULL DEFAULT 0,
+	[dblProvisionalPercentage] DECIMAL(18, 6) NOT NULL DEFAULT 100
 	[strReasonablenessComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
