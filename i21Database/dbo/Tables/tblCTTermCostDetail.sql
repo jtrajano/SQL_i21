@@ -3,7 +3,7 @@
 	[intTermCostDetailId] INT IDENTITY NOT NULL, 
     [intTermCostId] INT NOT NULL, 
     [intCostId] INT NOT NULL, 
-    [strCostMethod] NVARCHAR(50) NOT NULL, 
+    [strCostMethod] NVARCHAR(50) NULL, 
     [intCurrencyId] INT NULL, 
     [dblValue] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [ysnFreight] BIT NULL DEFAULT((0)),
