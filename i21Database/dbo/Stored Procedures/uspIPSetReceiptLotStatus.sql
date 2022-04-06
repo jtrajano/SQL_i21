@@ -169,6 +169,7 @@ BEGIN TRY
 				FROM tblQMSample S
 				JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 				WHERE S.strContainerNumber = @strContainerNumber
+				AND S.intSampleStatusId=3
 				ORDER BY S.intSampleId DESC
 
 				--SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
@@ -178,7 +179,7 @@ BEGIN TRY
 				--WHERE S.intLoadContainerId = @intContainerId
 				--ORDER BY S.intSampleId DESC
 
-				IF @intSampleStatusId <> 3
+				IF IsNULL(@intSampleStatusId,0) <> 3
 				BEGIN
 					SELECT @strError = 'Approved Sample is not available for receipt container "' + @strContainerNumber + '". '
 
@@ -236,7 +237,7 @@ BEGIN TRY
 					FROM @LotData
 					WHERE intSeqNo = @intSeqNo
 
-					IF @intCurrentLotStatusId <> @intLotStatusId
+					IF @intCurrentLotStatusId <> ISNULL(@intLotStatusId, 0)
 						AND ISNULL(@intLotStatusId, 0) <> 0
 					BEGIN
 						EXEC uspMFSetLotStatus @intLotId = @intLotId

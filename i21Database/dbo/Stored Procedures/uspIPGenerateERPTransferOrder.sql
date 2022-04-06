@@ -14,6 +14,7 @@ BEGIN TRY
 		,@strXML NVARCHAR(MAX) = ''
 		,@strItemXML NVARCHAR(MAX) = ''
 		,@strDetailXML NVARCHAR(MAX) = ''
+		,@strCommodityCode NVARCHAR(50)
 	DECLARE @strQuantityUOM NVARCHAR(50)
 		,@strDefaultCurrency NVARCHAR(40)
 		,@intCurrencyId INT
@@ -49,9 +50,9 @@ BEGIN TRY
 		,@dblTransferPrice NUMERIC(18, 6)
 		,@strCurrency NVARCHAR(40)
 		,@strComment NVARCHAR(1000)
-		,@dblGross NUMERIC(18, 6)
-		,@dblTare NUMERIC(18, 6)
-		,@dblNet NUMERIC(18, 6)
+		,@dblGross NUMERIC(18, 4)
+		,@dblTare NUMERIC(18, 4)
+		,@dblNet NUMERIC(18, 4)
 		,@strPrimaryStatus NVARCHAR(50)
 		,@strContractNumber NVARCHAR(50)
 	DECLARE @tblICInventoryTransfer TABLE (intInventoryTransferId INT)
@@ -285,6 +286,7 @@ BEGIN TRY
 				,@dblNet = NULL
 				,@strPrimaryStatus = NULL
 				,@strContractNumber = NULL
+				,@strCommodityCode = NULL
 
 			SELECT @intItemId = ITD.intItemId
 			FROM dbo.tblICInventoryTransferDetail ITD
@@ -339,11 +341,12 @@ BEGIN TRY
 				,@dblTransferPrice = CONVERT(NUMERIC(18, 6), ITD.dblTransferPrice)
 				,@strCurrency = ISNULL(C.strCurrency, '')
 				,@strComment = ISNULL(ITD.strComment, '')
-				,@dblGross = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblGross), 0))
-				,@dblTare = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblTare), 0))
-				,@dblNet = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblNet), 0))
+				,@dblGross = CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblGross), 0))
+				,@dblTare = CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblTare), 0))
+				,@dblNet = CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblNet), 0))
 				,@strPrimaryStatus = LS.strPrimaryStatus
 				,@strContractNumber = ISNULL(CH.strContractNumber, WO.strWorkOrderNo)
+				,@strCommodityCode = C1.strCommodityCode
 			FROM tblICInventoryTransferDetail ITD
 			JOIN tblICItem I ON I.intItemId = ITD.intItemId
 			LEFT JOIN tblSMCompanyLocationSubLocation FSL ON FSL.intCompanyLocationSubLocationId = ITD.intFromSubLocationId
@@ -359,7 +362,20 @@ BEGIN TRY
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
 			LEFT JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = LI.intWorkOrderId
+			LEFT JOIN tblICCommodity C1 ON C1.intCommodityId = I.intCommodityId
 			WHERE ITD.intInventoryTransferDetailId = @intInventoryTransferDetailId
+
+			IF UPPER(@strCommodityCode) = 'COFFEE'
+			BEGIN
+				IF ISNULL(@strContainerNumber, '') = ''
+				BEGIN
+					SELECT @strError = @strError + 'Container No cannot be blank. '
+				END
+				IF ISNULL(@strMarks, '') = ''
+				BEGIN
+					SELECT @strError = @strError + 'Marks cannot be blank. '
+				END
+			END
 
 			IF ISNULL(@strItemNo, '') = ''
 			BEGIN
