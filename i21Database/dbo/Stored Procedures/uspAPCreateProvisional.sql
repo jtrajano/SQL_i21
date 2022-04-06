@@ -24,7 +24,7 @@ EXEC uspAPCreateVoucher
 		@error = @error OUT,
 		@createdVouchersId = @createdVouchersId OUT
 
-RETURN;
+-- RETURN;
 
 BEGIN TRY
 
