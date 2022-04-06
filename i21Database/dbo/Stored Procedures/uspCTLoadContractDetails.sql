@@ -284,7 +284,7 @@ BEGIN TRY
 		, CD.dblFreightBasis
 		, CD.intFreightBasisUOMId
 		, CD.dblRatio
-		, dblCashPrice = CD.dblCashPrice + ISNULL(CT.dblRollArb, 0)
+		, CD.dblCashPrice
 		, CD.dblTotalCost
 		, CD.intCurrencyId
 		, CD.intPriceItemUOMId
