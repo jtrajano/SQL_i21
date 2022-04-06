@@ -2267,7 +2267,8 @@ BEGIN TRY
 					-- END
 				
 				--IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intChargeAndPremiumId IS NOT NULL AND intCustomerStorageId = @intCustomerStorageId)
-				IF EXISTS(SELECT 1 FROM tblGRSettleStorageChargeAndPremium WHERE intCustomerStorageId = @intCustomerStorageId)
+				IF EXISTS(SELECT 1 FROM tblGRSettleStorageChargeAndPremium WHERE intCustomerStorageId = @intCustomerStorageId) OR 
+						EXISTS(SELECT 1 FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intChargeAndPremiumId IS NOT NULL)
 				BEGIN
 					-- Calculate and Store the Charges and Premium for the current storage ticket
 					DELETE FROM @tblQMDiscountIds
