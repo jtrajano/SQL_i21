@@ -60,7 +60,6 @@ BEGIN TRY
 			,@intCreatedById		=   intCreatedById
 
 	FROM	tblCTWashout
-	WHERE 	intWashoutId = @intWashoutId
 	
 	SELECT  @strSequenceNumber		=	strSequenceNumber,
 			@dblCashPrice			=	dblCashPrice,
@@ -91,45 +90,18 @@ BEGIN TRY
 				@strContractNumber	=   strContractNumber
 		FROM	tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
 		
-
-
-		IF @strDocType = 'AR Credit Memo' OR @strDocType = 'AR Invoice' OR @strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher'
+		IF NOT EXISTS(SELECT * from vyuCTEntity WHERE intEntityId = @intEntityId AND strEntityType = CASE WHEN @intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 		BEGIN
-			IF(@strDocType = 'AR Credit Memo' OR @strDocType = 'AR Invoice')
+			IF @intContractTypeId = 2 
 			BEGIN
-				IF NOT EXISTS(SELECT TOP 1 1 FROM vyuCTEntity WHERE intEntityId = @intEntityId AND strEntityType = 'Customer')
-				BEGIN
-					SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a customer.'
-				END
+				SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a customer.'
 			END
-			ELSE IF(@strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher') 
+			ELSE
 			BEGIN
-				IF NOT EXISTS(SELECT TOP 1 1 FROM vyuCTEntity WHERE intEntityId = @intEntityId AND strEntityType = 'Vendor')
-				BEGIN
-					SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a vendor.'
-				END
+				SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a vendor.'
 			END
-		END
-		ELSE
-		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM vyuCTEntity WHERE intEntityId = @intEntityId AND strEntityType = CASE WHEN @intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
-			BEGIN
-				IF @intContractTypeId = 2 
-				BEGIN
-					SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a customer.'
-				END
-				ELSE
-				BEGIN
-					SELECT @ErrMsg = 'Cannot continue the washout process as ' + @strEntityName + ' is not a vendor.'
-				END
-			END
-		END
-
-		IF(ISNULL(@ErrMsg,'') <> '')
-		BEGIN
 			RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
 		END
-
 
 		SELECT	@strNumber = CASE WHEN @intContractTypeId = 2 THEN 'SaleContract' ELSE 'PurchaseContract' END 
 
@@ -180,7 +152,7 @@ BEGIN TRY
 		SET		dblFXPrice = @dblFXPrice 
 		WHERE	intContractDetailId = @intWashoutDetailId
 
-		EXEC	uspCTSaveContract @intContractHeaderId=@intWashoutHeaderId, @userId=NULL, @strXML='',@strTFXML='';
+		EXEC	uspCTSaveContract @intContractHeaderId=@intWashoutHeaderId, @userId=NULL, @strXML='',@strTFXML=''; 
 
 		UPDATE	tblCTWashout SET intWashoutHeaderId = @intWashoutHeaderId, intWashoutDetailId = @intWashoutDetailId WHERE intWashoutId = @intWashoutId
 	END
