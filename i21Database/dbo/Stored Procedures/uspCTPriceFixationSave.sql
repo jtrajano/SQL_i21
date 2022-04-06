@@ -610,6 +610,15 @@ BEGIN TRY
 			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
+
+			UPDATE CD
+			SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
+				dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost)
+			FROM tblCTContractDetail	CD WITH (ROWLOCK) 
+			JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
+			where PF.intPriceFixationId = @intPriceFixationId
+
+
 			exec uspCTUpdateSequenceCostRate
 				@intContractDetailId = @intContractDetailId,
 				@intUserId = @intUserId
