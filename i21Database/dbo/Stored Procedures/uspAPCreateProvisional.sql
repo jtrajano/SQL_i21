@@ -290,6 +290,14 @@ BEGIN TRY
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 171
 
+	UPDATE A
+		SET A.strBillId = @voucherPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@voucherStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@voucherStartNum AS NVARCHAR), @startingNumberDigit) END
+		,@voucherStartNum = @voucherStartNum --+ 1
+	FROM #tmpVoucherHeaderData A
+	WHERE A.intTransactionType = 16
+
 	MERGE INTO tblAPProvisional AS destination
 	USING
 	(
@@ -451,11 +459,11 @@ BEGIN TRY
 	-- INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	-- EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 0
 
-	SELECT @idsCreated = COALESCE(@idsCreated + ',', '') +  CONVERT(VARCHAR(12),intBillId) 
-	FROM @createdVouchers
+	-- SELECT @idsCreated = COALESCE(@idsCreated + ',', '') +  CONVERT(VARCHAR(12),intBillId) 
+	-- FROM @createdVouchers
 	
-	SET @createdVouchersId = @idsCreated 
-	SELECT @createdVouchersId
+	-- SET @createdVouchersId = @idsCreated 
+	-- SELECT @createdVouchersId
 
 	
 	DECLARE @strDescription AS NVARCHAR(100) 
