@@ -32,7 +32,7 @@ SELECT DISTINCT --A.intPContractDetailId,
                 D.dtmStartDate dtmStartDateP,
                 D.dtmEndDate dtmEndDateP,
                 SalesContract.*
-FROM   vyuQMSampleList B
+FROM   vyuQMSampleList B -- PURCHASE SAMPLES CAN HAVE NO PURCHASE CONTRACT
        LEFT JOIN vyuLGAllocationDetails A
               ON B.intContractDetailId = intPContractDetailId
        LEFT JOIN vyuCTGridContractHeader C
@@ -43,7 +43,7 @@ FROM   vyuQMSampleList B
               ON E.intPContractDetailId = B.intContractDetailId
        OUTER APPLY(SELECT
                   DD.intContractHeaderId intContractHeaderIdS,
-				  DD.strContractNumber strContractNumberS,
+		    DD.strContractNumber strContractNumberS,
                   DD.intContractSeq  intSequenceS,
                   DD.strEntityName strEntityNameS,
                   BB.dblSampleQty dblSampleQtyS,
@@ -63,11 +63,10 @@ FROM   vyuQMSampleList B
                   BB.strCourier strCourierS,
                   BB.dtmSampleReceivedDate dtmSampleReceivedDateS,
                   BB.strStatus strStatusS,
-                  BB.strLotNumber strLotNumberS
-				  
-                   FROM   --vyuLGLoadDetailView A
-                  vyuQMSampleList BB
-                  LEFT JOIN vyuLGAllocationDetails AA
+                  BB.strLotNumber strLotNumberS	  
+                  FROM   --vyuLGLoadDetailView A
+                  vyuLGAllocationDetails AA -- SALES CONTRACT CAN HAVE NO SAMPLES
+                  LEFT JOIN vyuQMSampleList BB
                          ON BB.intContractDetailId = AA.intSContractDetailId
                   LEFT JOIN vyuCTGridContractHeader CC
                          ON CC.intContractHeaderId = intSContractHeaderId
@@ -78,5 +77,4 @@ FROM   vyuQMSampleList B
                    WHERE   AA.intPContractDetailId = D.intContractDetailId
                           AND intContractStatusId NOT IN( 3, 5, 6 ))
                   SalesContract
-WHERE  intContractStatusId NOT IN( 3, 5, 6 ) 
-AND intRelatedSampleId IS  NULL
+WHERE  intContractStatusId NOT IN( 3, 5, 6 )
