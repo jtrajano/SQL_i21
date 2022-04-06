@@ -634,6 +634,14 @@
     <Build Include="dbo\Views\vyuAPVendorStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVendorStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectLoadSchedule.sql" />
+    <Build Include="dbo\Tables\tblRKCreditLine.sql" />
+    <Build Include="dbo\Tables\tblRKInternalLimit.sql" />
+    <Build Include="dbo\Tables\tblRKCreditLimit.sql" />
+    <Build Include="dbo\Tables\tblRKCreditTempLimit.sql" />
+    <Build Include="dbo\Tables\tblRKComplementaryLimit.sql" />
+    <Build Include="dbo\Views\vyuRKCreditLImit.sql" />
+    <Build Include="dbo\Views\vyuRKCreditTempLimit.sql" />
+    <Build Include="dbo\Views\vyuRKComplementaryLimit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
