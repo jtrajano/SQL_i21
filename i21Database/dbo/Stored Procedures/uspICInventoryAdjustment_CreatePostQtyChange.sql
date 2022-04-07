@@ -186,6 +186,7 @@ BEGIN
 			,intInventoryReceiptId
 			,intTicketId
 			,intInvoiceId
+			,intBillId
 	)
 	SELECT	intLocationId				= @intLocationId
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
@@ -206,7 +207,7 @@ BEGIN
 			,intInventoryReceiptId		= @intInventoryReceiptId
 			,intTicketId				= @intTicketId
 			,intInvoiceId				= @intInvoiceId
-			,intBill					= @intBillId
+			,intBillId					= @intBillId
 	SELECT @intInventoryAdjustmentId = SCOPE_IDENTITY();
 END
 
