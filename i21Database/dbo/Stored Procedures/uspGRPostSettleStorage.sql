@@ -2841,7 +2841,7 @@ BEGIN TRY
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription]			= ITEM.[strItemNo]
 					,[intItemId]					= ITEM.[intItemId]
-					,[intAccountId]					= [dbo].[fnGetItemGLAccount](ITEM.intItemId,@ItemLocationId, 'Other Charge Expense')
+					,[intAccountId]					= COALESCE([dbo].[fnGetItemGLAccount](ITEM.intItemId,@ItemLocationId, 'Other Charge Expense'),[dbo].[fnGetItemGLAccount](ITEM.intItemId,@ItemLocationId, 'General'))
 					,[intContractHeaderId]			= NULL
 					,[intContractDetailId]			= NULL
 					,[intInventoryReceiptItemId]	= NULL
