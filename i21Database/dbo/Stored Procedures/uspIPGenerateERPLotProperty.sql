@@ -41,7 +41,7 @@ BEGIN TRY
 		SELECT @tmp = 50
 
 	INSERT INTO @tblIPLotPropertyFeed (intLotPropertyFeedId)
-	SELECT TOP (@tmp) intLotPropertyFeedId
+	SELECT intLotPropertyFeedId
 	FROM dbo.tblIPLotPropertyFeed
 	WHERE strCompanyLocation = @strCompanyLocation
 	AND intStatusId IS NULL
