@@ -1212,6 +1212,74 @@ BEGIN
 	END
 END
 
+INSERT INTO @qtyAdjustmentTable
+SELECT B.intBillId,
+		BD.intBillDetailId,
+		BD.intItemId, 
+		B.dtmDate,
+		L.intLocationId,
+		L.intSubLocationId,
+		L.intStorageLocationId,
+		L.strLotNumber,
+		BD.dblNetWeight,
+		BD.dblCost,
+		BD.intUnitOfMeasureId,
+		B.intBillId,
+		B.strBillId,
+		BD.intContractHeaderId,
+		BD.intContractDetailId,
+		B.intEntityVendorId
+FROM tblAPBill B
+INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
+WHERE B.ysnFinalVoucher = 1 AND BD.ysnNetWeightChanged = 1
+
+IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
+BEGIN
+	WHILE EXISTS(SELECT TOP 1 1 FROM @qtyAdjustmentTable)
+	BEGIN
+		SELECT TOP 1 @intBillId = intBillId
+					,@intBillDetailId = intBillDetailId
+					,@intItemId = intItemId
+					,@dtmDate = dtmDate
+					,@intLocationId = intLocationId
+					,@intSubLocationId = intSubLocationId
+					,@intStorageLocationId = intStorageLocationId
+					,@strLotNumber = strLotNumber
+					,@dblAdjustByQuantity = dblAdjustByQuantity
+					,@dblNewUnitCost = dblNewUnitCost
+					,@intItemUOMId = intItemUOMId
+					,@intSourceId = intSourceId
+					,@strDescription2 = strDescription
+					,@intContractHeaderId = intContractHeaderId
+					,@intContractDetailId = intContractDetailId
+					,@intEntityId = intEntityId
+		FROM @qtyAdjustmentTable
+
+		-- INSERT INTO @InventoryAdjustmentIntegrationId
+		-- SELECT NULL, NULL, NULL, NULL, @intBillId
+
+		EXEC uspICInventoryAdjustment_CreatePostLotWeight
+			@intItemId = @intItemId
+			,@dtmDate = @dtmDate
+			,@intLocationId	= @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			,@dblNewLotWeight = NULL
+			,@dblNewWeightPerQty = @dblAdjustByQuantity
+			,@intSourceId = @intSourceId
+			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			,@strDescription = @strDescription2
+			--,@ysnPost = @ysnPost
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+		DELETE @qtyAdjustmentTable WHERE intBillDetailId = @intBillDetailId
+	END
+END
+
 -- Get the vendor id to intSourceEntityId
 UPDATE GL SET intSourceEntityId = BL.intEntityVendorId
 FROM @GLEntries GL
