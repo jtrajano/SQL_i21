@@ -863,23 +863,51 @@ UNION ALL
 --PROVISIONAL
 SELECT
 	[intBillId]				=	@billId, 
-	[intBillDetailApplied]	=	NULL, 
-	[intLineApplied]		=	NULL, 
+	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
+	[intLineApplied]		=	CurrentBill.intLotId, 
 	[intTransactionId]		=	A.intBillId,
 	[strTransactionNumber]	=	A.strBillId,
-	[intItemId]				=	NULL,
-	[strItemDescription]	=	NULL,
-	[strItemNo]				=	NULL,
-	[intContractHeaderId]	=	NULL,	
-	[strContractNumber]		=	NULL,
+	[intItemId]				=	CurrentBill.intItemId,
+	[strItemDescription]	=	CurrentBill.strLotNumber,
+	[strItemNo]				=	itm.strItemNo,
+	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
+	[strContractNumber]		=	CurrentBill.strContractNumber,
 	[intPrepayType]			=	NULL,
-	[dblTotal]				=	A.dblTotal,
-	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
-	[dblBalance]			=	A.dblAmountDue,
+	[dblTotal]				=	B.dblTotal,
+	[dblBillAmount]			=	CurrentBill.dblTotal,
+	[dblBalance]			=	B.dblTotal,
 	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
+INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+CROSS APPLY
+(
+	SELECT
+		C.intItemId
+		,C.dblTotal + C.dblTax AS dblTotal
+		,C.dblCost
+		,C.dblQtyReceived
+		,C.intBillDetailId
+		,D.strContractNumber
+		,D.intContractHeaderId
+		,C.intContractDetailId
+		,C.intLineNo
+		,C.intLotId
+		,E.strLotNumber
+		,Total.dblDetailTotal
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
+	FROM tblAPBillDetail C
+	LEFT JOIN tblICLot E ON C.intLotId = E.intLotId
+	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
+	OUTER APPLY (
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal FROM dbo.tblAPBillDetail C2
+		WHERE intBillId = @billId
+	) Total
+	WHERE intBillId = @billId
+	AND C.intLotId = B.intLotId
+) CurrentBill
+LEFT JOIN tblICItem itm ON itm.intItemId = B.intItemId
 WHERE A.intTransactionType = 16
 
 SELECT * FROM tblAPAppliedPrepaidAndDebit WHERE intBillId = @billId
