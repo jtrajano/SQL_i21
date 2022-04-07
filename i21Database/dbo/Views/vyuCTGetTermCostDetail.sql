@@ -20,7 +20,7 @@ SELECT tc.intTermCostId
 	, tcd.intCurrencyId
 	, cur.strCurrency
 	, tcd.dblValue
-	, tcd.intUnitMeasureId
+	, tcd.intItemUOMId
 	, uom.strUnitMeasure
 	, ysnFreight = ISNULL(tcd.ysnFreight, 0)
 	, ysnInsurance = ISNULL(tcd.ysnInsurance, 0)
@@ -34,4 +34,5 @@ JOIN tblSMFreightTerms DestinationTerm ON DestinationTerm.intFreightTermId = tc.
 JOIN tblARMarketZone mz ON mz.intMarketZoneId = tc.intMarketZoneId
 LEFT JOIN tblICItem it ON it.intItemId = tcd.intCostId
 LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = tcd.intCurrencyId
-LEFT JOIN tblICUnitMeasure uom ON uom.intUnitMeasureId = tcd.intUnitMeasureId
+LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = tcd.intItemUOMId
+LEFT JOIN tblICUnitMeasure uom ON uom.intUnitMeasureId = iUOM.intUnitMeasureId
