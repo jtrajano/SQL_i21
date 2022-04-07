@@ -54,5 +54,11 @@ BEGIN
 		WHERE B.intBillId = @createdVoucher
 
 		EXEC uspAPDeleteVoucherDetail @billDetailIds = @excludedDetailIds, @userId = @userId, @callerModule = 0
+
+		UPDATE BD
+		SET BD.intLotId = BD2.intLotId
+		FROM tblAPBillDetail BD
+		INNER JOIN tblAPBillDetail BD2 ON BD2.intInventoryReceiptItemId = BD.intInventoryReceiptItemId AND BD2.intBillId = @billId
+		WHERE BD.intBillId = @createdVoucher
 	END
 END
