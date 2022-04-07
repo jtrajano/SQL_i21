@@ -43,7 +43,7 @@ SELECT
 										THEN CASE WHEN ARI.ysnPosted = 1 THEN 'Posted Payment' ELSE 'Unposted Payment' END
 										ELSE CASE WHEN @ForDelete = 1 THEN 'Deleted ' ELSE ISNULL(ARAL.strActionType, 'Created') END + ' ' + @TransactionType
 									  END
-	, strTransactionType			= @TransactionType
+	, strTransactionType			= 'Sales'
 	, intTransactionHeaderId		= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
 	, intTransactionDetailId		= CASE WHEN @TransactionType = 'Payment' THEN ARPD.intPaymentDetailId ELSE ARID.intInvoiceDetailId END
 	, strTransactionNumber			= CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
@@ -67,17 +67,8 @@ SELECT
 	, intContractHeaderId			= ARID.intContractHeaderId
 	, intContractDetailId			= ARID.intContractDetailId
 FROM tblARInvoice ARI WITH (NOLOCK)
-INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
+LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
 ON (ARI.intInvoiceId = ARID.intInvoiceId AND ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds))
-AND (
-	ISNULL(ARI.intBankId, 0) <> 0
-	OR ISNULL(ARI.intBankAccountId, 0) <> 0
-	OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
-	OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
-	OR ISNULL(ARI.strBankReferenceNo, '') <> ''
-	OR ISNULL(ARI.dblLoanAmount, 0) <> 0
-	OR ISNULL(ARI.strTransactionNo, '') <> ''
-)
 LEFT JOIN tblARPaymentDetail ARPD ON ARI.intInvoiceId = ARPD.intInvoiceId
 LEFT JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
 LEFT JOIN tblCTContractDetail CTCD on CTCD.intContractDetailId = ARID.intContractDetailId
@@ -89,6 +80,16 @@ OUTER APPLY (
 	WHERE strRecordNo COLLATE SQL_Latin1_General_CP1_CS_AS = ARI.strInvoiceNumber
 	ORDER BY intAuditLogId DESC
 ) ARAL
+WHERE ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds)
+AND (
+	  ISNULL(ARI.intBankId, 0) <> 0
+   OR ISNULL(ARI.intBankAccountId, 0) <> 0
+   OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
+   OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
+   OR ISNULL(ARI.strBankReferenceNo, '') <> ''
+   OR ISNULL(ARI.dblLoanAmount, 0) <> 0
+   OR ISNULL(ARI.strTransactionNo, '') <> ''
+)
 
 EXEC uspTRFLogTradeFinance @TradeFinanceLogs
 

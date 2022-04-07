@@ -53,10 +53,24 @@ BEGIN TRY
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
 
+	INSERT INTO @InvoiceIds(
+		  intHeaderId
+		, ysnForDelete
+		, strBatchId
+	) 
+	SELECT intHeaderId 	= @intInvoiceId
+		 , ysnForDelete = ISNULL(@ForDelete, 0)
+		 , strBatchId 	= @strBatchId
+
 	IF @strTransactionType = 'Proforma Invoice'
 		BEGIN
 			IF @intTranCount = 0
 				COMMIT TRANSACTION
+
+			IF @FromPosting = 0
+			BEGIN
+				EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete
+			END
 
 			RETURN
 		END
@@ -143,16 +157,6 @@ BEGIN TRY
 	IF @ForDelete = 1 AND @InvoiceDetailId IS NULL EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId	
-	
-	INSERT INTO @InvoiceIds(
-		  intHeaderId
-		, ysnForDelete
-		, strBatchId
-	) 
-	SELECT intHeaderId 	= @intInvoiceId
-		 , ysnForDelete = ISNULL(@ForDelete, 0)
-		 , strBatchId 	= @strBatchId	
-
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
 	EXEC dbo.[uspARUpdateInvoiceReportFields] @InvoiceIds, 0
 	
