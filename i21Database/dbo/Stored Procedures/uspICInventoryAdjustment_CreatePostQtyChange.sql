@@ -52,13 +52,15 @@ DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 DECLARE @intInventoryShipmentId AS INT,
 	@intInventoryReceiptId AS INT,
 	@intTicketId AS INT,
-	@intInvoiceId AS INT
+	@intInvoiceId AS INT,
+	@intBillId AS INT 
 
 SELECT TOP 1 
 	@intInventoryShipmentId = intInventoryShipmentId,
 	@intInventoryReceiptId = intInventoryReceiptId,
 	@intTicketId = intTicketId,
-	@intInvoiceId = intInvoiceId
+	@intInvoiceId = intInvoiceId,
+	@intBillId = intBillId
 FROM @InventoryAdjustmentIntegrationId
 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -204,6 +206,7 @@ BEGIN
 			,intInventoryReceiptId		= @intInventoryReceiptId
 			,intTicketId				= @intTicketId
 			,intInvoiceId				= @intInvoiceId
+			,intBill					= @intBillId
 	SELECT @intInventoryAdjustmentId = SCOPE_IDENTITY();
 END
 
