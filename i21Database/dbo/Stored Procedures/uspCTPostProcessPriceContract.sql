@@ -70,15 +70,7 @@ BEGIN
 			AND intScreenId = @intScreenId
 
 		select top 1  @ysnEnableArbitrageDerivative = ysnEnableDerivativeInArbitrage from tblCTCompanyPreference;
-
-		if exists (select top 1 1 from tblCTPriceFixation pf join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId where pf.intPriceContractId = @intPriceContractId and isnull(ch.ysnMultiplePriceFixation,0) = 1)
-		begin
-
-			exec uspCTProcessPriceFixationMultiplePrice
-				@intPriceContractId = @intPriceContractId
-				,@intUserId = @intUserId
-		end
-
+		
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intUserId AND intScreenId = @intScreenId)
 		BEGIN
 			RETURN
