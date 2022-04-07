@@ -51,13 +51,20 @@ SET ANSI_WARNINGS OFF
 	--INVENTORY
 	UPDATE LIA
 	SET LIA.[intAccountId]			= IA.[intSalesAccountId]
-	  , LIA.[intSalesAccountId]		= CASE WHEN ARID.[strTransactionType] = 'Debit Memo' OR ARID.[ysnAllowIntraEntries] = 1 THEN ARID.[intSalesAccountId] ELSE IA.[intSalesAccountId] END
+	  , LIA.[intSalesAccountId]		= CASE WHEN ARID.[strTransactionType] = 'Debit Memo' OR ARCP.ysnAllowIntraCompanyEntries = 1 OR ARCP.ysnAllowIntraLocationEntries = 1 OR ARCP.ysnAllowSingleLocationEntries = 1
+											THEN ARID.[intSalesAccountId] 
+											ELSE IA.[intSalesAccountId] 
+									  END
 	  , LIA.[intCOGSAccountId]		= IA.[intCOGSAccountId]
 	  , LIA.[intInventoryAccountId]	= IA.[intInventoryAccountId]
 	FROM @LineItemAccounts LIA
 	INNER JOIN ##ARPostInvoiceDetail ARID ON LIA.[intDetailId] = ARID.[intInvoiceDetailId]
 	INNER JOIN ##ARInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId]
 									   AND ARID.[intCompanyLocationId] = IA.[intLocationId]
+	OUTER APPLY(
+		SELECT TOP 1 ysnAllowIntraCompanyEntries, ysnAllowIntraLocationEntries, ysnAllowSingleLocationEntries
+		FROM tblARCompanyPreference
+	) ARCP
 	WHERE ARID.[strItemType] NOT IN ('Non-Inventory', 'Service', 'Other Charge', 'Software')
 
 	--NON-INVENTORY, SERVICE, OTHER CHARGE
