@@ -62,7 +62,8 @@ BEGIN TRY
 			@contractDetails 			AS [dbo].[ContractDetailTable],
 			@ysnPricingAsAmendment		BIT = 1,
 			@strXML nvarchar(max),
-			@ysnEnableDerivativeInArbitrage BIT = 0;
+			@ysnEnableDerivativeInArbitrage BIT = 0
+			,@ysnPriceImpact bit = 0;
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -433,8 +434,8 @@ BEGIN TRY
 					@intNewFutureMarketId	=	intNewFutureMarketId
 			FROM	tblCTSpreadArbitrage 
 			WHERE	intPriceFixationId		=	@intPriceFixationId
-			AND		intTypeRef				=	case when @ysnEnableDerivativeInArbitrage = 1 then intTypeRef else @intTypeRef end
-			AND		strBuySell				=	case when @ysnEnableDerivativeInArbitrage = 1 then 'Sell' else strBuySell end
+			AND		intTypeRef				=	case when @ysnEnableDerivativeInArbitrage = 1 and ysnPriceImpact = 1 then intTypeRef else @intTypeRef end
+			AND		strBuySell				=	case when @ysnEnableDerivativeInArbitrage = 1 and ysnPriceImpact = 1 then 'Sell' else strBuySell end
 
 			SELECT	@intMarketUnitMeasureId = intUnitMeasureId,
 					@intMarketCurrencyId = intCurrencyId 
@@ -492,6 +493,10 @@ BEGIN TRY
 				WHERE	intPriceFixationId		=	@intPriceFixationId
 				AND		intTypeRef				=	@intTypeRef
 			end
+			else
+			begin
+				select @ysnPriceImpact = ysnPriceImpact from tblCTSpreadArbitrage where intPriceFixationId = @intPriceFixationId and strTradeType = 'Arbitrage';
+			end
 
 			SELECT	@intCurrencyId	=	@intMarketCurrencyId
 
@@ -505,7 +510,7 @@ BEGIN TRY
 													END
 												) +
 												case
-												when @ysnEnableDerivativeInArbitrage = 1
+												when @ysnEnableDerivativeInArbitrage = 1 and @ysnPriceImpact = 1
 												then dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblRollArb,0))
 												else 0
 												end,
