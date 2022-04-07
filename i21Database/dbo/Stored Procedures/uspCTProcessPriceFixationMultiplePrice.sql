@@ -343,6 +343,11 @@ BEGIN
 				select @intPriceFixationMultiplePriceId = case when @dblQuantity > 0 then min(intPriceFixationMultiplePriceId) else null end from #tmpPriceFixationMultiplePrice where dblQuantity > 0
 			end
 
+			if (@intPriceFixationMultiplePriceId is null)
+			begin
+				BREAK;
+			end
+
 			select @intActivePriceFixationDetailId = min(intPriceFixationDetailId) from #tmpPriceFixationDetail where dblQuantity > 0
 		end
 
