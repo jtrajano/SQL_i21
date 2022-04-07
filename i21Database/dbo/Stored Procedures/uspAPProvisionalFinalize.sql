@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPProvisionalFinalize]
 	@billId INT,
+	@detailIds NVARCHAR(4000),
 	@userId INT,
 	@createdVoucher INT OUTPUT
 AS
@@ -29,5 +30,29 @@ BEGIN
 	IF @receiptId > 0
 	BEGIN
 		EXEC uspICProcessToBill @intReceiptId = @receiptId, @intUserId = @userId, @strType = 'voucher', @intScreenId = 1, @intBillId = @createdVoucher OUT
+
+		UPDATE B 
+		SET B.strReference = 'Final Voucher of ' + B2.strBillId 
+		FROM tblAPBill B
+		INNER JOIN tblAPBill B2 ON B2.intBillId = @billId
+		WHERE B.intBillId = @createdVoucher
+
+		DECLARE @excludedReceiptIds Id
+		INSERT INTO @excludedReceiptIds
+		SELECT BD.intInventoryReceiptItemId
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+		LEFT JOIN dbo.fnGetRowsFromDelimitedValues(@detailIds) IDS ON IDS.intID = BD.intBillDetailId
+		WHERE B.intBillId = @billId AND IDS.intID IS NULL
+
+		DECLARE @excludedDetailIds Id
+		INSERT INTO @excludedDetailIds
+		SELECT BD.intBillDetailId
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+		INNER JOIN @excludedReceiptIds IDS ON IDS.intID = BD.intInventoryReceiptItemId
+		WHERE B.intBillId = @createdVoucher
+
+		EXEC uspAPDeleteVoucherDetail @billDetailIds = @excludedDetailIds, @userId = @userId, @callerModule = 0
 	END
 END
