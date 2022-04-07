@@ -2,8 +2,8 @@
 (
 	[intBrandId]			INT IDENTITY(1,1) NOT NULL,
 	[strBrand]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strFileType]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'JSON',
-	[strIntegrationObject]	NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Opportunity',
+    [strFileType]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strIntegrationObject]	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strLoginUrl]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strUserName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strPassword]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
