@@ -160,6 +160,8 @@ WHERE
 		(((ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped]) OR (ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt])) AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice')
 		OR
 		((ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 OR ISNULL(ARID.[intLoadDetailId], 0) = 0) AND ARID.[strTransactionType] = 'Credit Memo')
+		OR
+		(ARID.[intLoadDetailId] IS NOT NULL AND ARID.intTicketId IS NOT NULL)
 		)
 	AND ARID.[intItemId] IS NOT NULL
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
