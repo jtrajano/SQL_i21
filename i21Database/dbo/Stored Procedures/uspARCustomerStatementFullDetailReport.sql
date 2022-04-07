@@ -716,7 +716,6 @@ LEFT JOIN (
 		FROM tblSMCurrency WITH (NOLOCK)  
 	) CUR ON P.intCurrencyId = CUR.intCurrencyID
 	WHERE P.ysnPosted = 1
-	  AND P.ysnProcessedToNSF = 0	  
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
 
