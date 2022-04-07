@@ -167,29 +167,31 @@ BEGIN
 	WHERE L.intLoadId = @intTransactionId
 
 	/* Validate if Lot Quantity is still enough for moving */
-	DECLARE @insufficientLotQtyMsg NVARCHAR(MAX)
-	SELECT TOP 1
-		@insufficientLotQtyMsg = 'Not enough quantity to transfer for Lot ''' + Lot.strLotNumber + '''. ' 
-			+ '<br>Current quantity: ' + CAST(CAST(dblLotQtyInLSUnit AS decimal(18, 6)) AS nvarchar(50)) + ' ' + UM.strUnitMeasure
-			+ '<br>Transfer quantity: ' + CAST(CAST(LDL.dblLotQuantity AS decimal(18, 6)) AS nvarchar(50)) + ' ' + UM.strUnitMeasure
-	FROM tblLGLoadDetailLot LDL
-		INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
-		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		LEFT JOIN tblICItemUOM UOM ON UOM.intItemUOMId = LDL.intItemUOMId
-		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-		CROSS APPLY (
-			SELECT strLotNumber, 
-				dblLotQtyInLSUnit = ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, LDL.intItemUOMId, dblQty), dblQty) 
-			FROM tblICLot WHERE intLotId = LDL.intLotId) Lot
-	WHERE L.intLoadId = @intTransactionId
-	AND LDL.dblLotQuantity > dblLotQtyInLSUnit
+	IF (@ysnPost = 1)
+	BEGIN
+		DECLARE @insufficientLotQtyMsg NVARCHAR(MAX)
+		SELECT TOP 1
+			@insufficientLotQtyMsg = 'Not enough quantity to transfer for Lot ''' + Lot.strLotNumber + '''. ' 
+				+ '<br>Current quantity: ' + CAST(CAST(dblLotQtyInLSUnit AS decimal(18, 6)) AS nvarchar(50)) + ' ' + UM.strUnitMeasure
+				+ '<br>Transfer quantity: ' + CAST(CAST(LDL.dblLotQuantity AS decimal(18, 6)) AS nvarchar(50)) + ' ' + UM.strUnitMeasure
+		FROM tblLGLoadDetailLot LDL
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
+			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			LEFT JOIN tblICItemUOM UOM ON UOM.intItemUOMId = LDL.intItemUOMId
+			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+			CROSS APPLY (
+				SELECT strLotNumber, 
+					dblLotQtyInLSUnit = ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, LDL.intItemUOMId, dblQty), dblQty) 
+				FROM tblICLot WHERE intLotId = LDL.intLotId) Lot
+		WHERE L.intLoadId = @intTransactionId
+		AND LDL.dblLotQuantity > dblLotQtyInLSUnit
 
-	IF (@insufficientLotQtyMsg IS NOT NULL)
-	BEGIN  
-		RAISERROR(@insufficientLotQtyMsg, 11, 1)
-		GOTO Post_Exit  
+		IF (@insufficientLotQtyMsg IS NOT NULL)
+		BEGIN  
+			RAISERROR(@insufficientLotQtyMsg, 11, 1)
+			GOTO Post_Exit  
+		END
 	END
-
 
 	UPDATE	dbo.tblLGLoad  
 	SET		ysnPosted = @ysnPost
