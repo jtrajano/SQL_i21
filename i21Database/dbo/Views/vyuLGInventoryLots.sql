@@ -35,6 +35,13 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.intContractDetailId
 	,dblWeightPerQty = ISNULL(Lot.dblWeightPerQty,0.0)
 	,dblTarePerQty = ISNULL(Lot.dblTarePerQty,0.0)
+	,Lot.intEntityVendorId
+	,Lot.strVendor
+	,Lot.strContractNumber
+	,Lot.intContractSeq
+	,Lot.dtmReceiptDate
+	,Lot.strLotStatus
+	,Lot.strCondition
 FROM vyuLGPickOpenInventoryLots Lot
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemLotId = Lot.intInventoryReceiptItemLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
