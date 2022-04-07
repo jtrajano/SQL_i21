@@ -168,7 +168,7 @@ BEGIN
 		,strLotNumber = ReceiptItemLot.strLotNo
 		,strLotAlias = ReceiptItemLot.strLotAlias
 		,intSubLocationId = ReceiptItem.intSubLocationId
-		,intStorageLocationId = ISNULL(StorageLocation.intStorageLocationId, ReceiptItem.intSubLocationId) 
+		,intStorageLocationId = ISNULL(storageUnit.intStorageLocationId, ReceiptItem.intStorageLocationId) 
 		,intItemUnitMeasureId = ItemUOM.intItemUOMId
 		,dblQuantity = ReceiptItemLot.dblQuantity
 		,dblGrossWeight = ReceiptItemLot.dblGross
@@ -232,9 +232,9 @@ BEGIN
 			ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt Receipt
 			ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-		LEFT JOIN tblICStorageLocation StorageLocation
-			ON ReceiptItem.intSubLocationId = StorageLocation.intSubLocationId
-			AND ReceiptItemLot.strStorageUnit = StorageLocation.strName
+		LEFT JOIN tblICStorageLocation storageUnit
+			ON storageUnit.intSubLocationId = ReceiptItem.intSubLocationId
+			AND storageUnit.strName = ReceiptItemLot.strStorageUnit 
 		LEFT JOIN tblICUnitMeasure UnitMeasure
 			ON ReceiptItemLot.strUnitMeasure = UnitMeasure.strUnitMeasure
 		LEFT JOIN tblICItemUOM ItemUOM
@@ -355,8 +355,8 @@ BEGIN
 			,ri.intSourceId
 			,ri.intItemId
 			,ri.intContainerId
-			,ri.intSubLocationId
-			,ri.intStorageLocationId
+			,intSubLocationId = ISNULL(storageUnit.intSubLocationId, ri.intSubLocationId) 
+			,intStorageLocationId = ISNULL(storageUnit.intStorageLocationId, ri.intStorageLocationId) 
 			,ri.intOwnershipType
 			,ri.dblOrderQty
 			,ri.dblBillQty
@@ -421,8 +421,13 @@ BEGIN
 			,ri.intComputeItemTotalOption		
 			,intConcurrencyId = 1
 		FROM 
-			tblICInventoryReceiptItem ri INNER JOIN tblICImportStagingReceiptItemLot lotImport
+			tblICInventoryReceipt r	INNER JOIN tblICInventoryReceiptItem ri 
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			INNER JOIN tblICImportStagingReceiptItemLot lotImport
 				ON ri.intInventoryReceiptItemId = lotImport.intInventoryReceiptItemId
+			LEFT JOIN tblICStorageLocation storageUnit
+				ON storageUnit.strName = lotImport.strStorageUnit
+				AND storageUnit.intLocationId = r.intLocationId
 		WHERE
 			lotImport.intImportStagingReceiptItemLotId = @intImportStagingReceiptItemLotId
 
@@ -488,8 +493,8 @@ BEGIN
 		intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 		,strLotNumber = ReceiptItemLot.strLotNo
 		,strLotAlias = ReceiptItemLot.strLotAlias
-		,intSubLocationId = ReceiptItem.intSubLocationId
-		,intStorageLocationId = ISNULL(StorageLocation.intStorageLocationId, ReceiptItem.intSubLocationId) 
+		,intSubLocationId = ISNULL(storageUnit.intSubLocationId, ReceiptItem.intSubLocationId) 
+		,intStorageLocationId = ISNULL(storageUnit.intStorageLocationId, ReceiptItem.intStorageLocationId) 
 		,intItemUnitMeasureId = ItemUOM.intItemUOMId
 		,dblQuantity = ReceiptItemLot.dblQuantity
 		,dblGrossWeight = ReceiptItemLot.dblGross
@@ -555,9 +560,9 @@ BEGIN
 			ON ReceiptItem.intInventoryReceiptItemId = insertedReceiptItem.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt Receipt
 			ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-		LEFT JOIN tblICStorageLocation StorageLocation
-			ON ReceiptItem.intSubLocationId = StorageLocation.intSubLocationId
-			AND ReceiptItemLot.strStorageUnit = StorageLocation.strName
+		LEFT JOIN tblICStorageLocation storageUnit
+			ON storageUnit.intLocationId = Receipt.intLocationId
+			AND storageUnit.strName = ReceiptItemLot.strStorageUnit 
 		LEFT JOIN tblICUnitMeasure UnitMeasure
 			ON ReceiptItemLot.strUnitMeasure = UnitMeasure.strUnitMeasure
 		LEFT JOIN tblICItemUOM ItemUOM
