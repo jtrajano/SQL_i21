@@ -651,6 +651,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetRiskPositionInquiry.sql" />
     <Build Include="dbo\Tables\tblCRMBrandFieldMapping.sql" />
     <Build Include="dbo\Views\vyuCRMBrandOpportunityIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
