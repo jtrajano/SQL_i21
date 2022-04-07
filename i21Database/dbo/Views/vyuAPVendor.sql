@@ -70,7 +70,8 @@ SELECT
 	storeDescription = I.strDescription,
 	ysnTransportTerminal,
 	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId END as intTermsId,
-	CASE WHEN C.intTermsId > 0 THEN K.strTerm ELSE J.strTerm END as strTerm
+	CASE WHEN C.intTermsId > 0 THEN K.strTerm ELSE J.strTerm END as strTerm,
+	B.strVATNo
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B

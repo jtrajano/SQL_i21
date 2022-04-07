@@ -8,6 +8,7 @@
     [strVendorPayToId]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intPaymentMethodId]        INT            NULL,
     [intTaxCodeId]              INT            NULL,
+	[strVATNo]					NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
     [intGLAccountExpenseId]     INT            NULL ,
     [intVendorType]             INT            NOT NULL,
     [strVendorId]               NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
