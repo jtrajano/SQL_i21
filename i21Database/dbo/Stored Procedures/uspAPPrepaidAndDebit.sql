@@ -873,9 +873,9 @@ SELECT
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
 	[intPrepayType]			=	NULL,
-	[dblTotal]				=	((A.dblProvisionalPercentage / 100) * B.dblTotal),--B.dblTotal,
+	[dblTotal]				=	ROUND(((A.dblProvisionalPercentage / 100) * (B.dblTotal + B.dblTax)), 2),--B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	((A.dblProvisionalPercentage / 100) * B.dblTotal),
+	[dblBalance]			=	ROUND(((A.dblProvisionalPercentage / 100) * (B.dblTotal + B.dblTax)), 2),
 	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
