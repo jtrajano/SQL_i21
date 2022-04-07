@@ -1,9 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKCurrencyExposureForOTC]
-	@intCommodityId INT
-
+	 @intCurrencyId INT
 AS
 
 BEGIN
+	DECLARE @intCurrencyCommodityId INT = 0
+		
+	SELECT @intCurrencyCommodityId = intCommodityId
+	FROM tblICCommodity
+	WHERE strCommodityCode = 'Currency'
+
 	SELECT intRowNum = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY strInternalTradeNo))
 		, strInternalTradeNo
 		, dtmFilledDate = t.dtmTransactionDate
@@ -30,5 +35,6 @@ BEGIN
 	JOIN tblSMCurrencyExchangeRateType rt ON rt.intCurrencyExchangeRateTypeId = ft.intCurrencyExchangeRateTypeId
 	JOIN tblSMCurrency c ON c.strCurrency = ft.strFromCurrency
 	LEFT JOIN tblSMMultiCompany mc ON mc.intMultiCompanyId = t.intCompanyId
-	WHERE ft.intCommodityId = @intCommodityId AND ISNULL(ft.ysnLiquidation, 0) = 0
+	WHERE ft.intCommodityId = @intCurrencyCommodityId AND ISNULL(ft.ysnLiquidation, 0) = 0
+	AND ft.intFromCurrencyId = @intCurrencyId
 END

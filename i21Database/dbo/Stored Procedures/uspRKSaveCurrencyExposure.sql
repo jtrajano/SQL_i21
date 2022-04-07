@@ -103,7 +103,7 @@ BEGIN TRY
 		, intExchangeRateCurrencyId
 		, intAmountCurrencyId
 		, intCompanyId) 
-	EXEC uspRKCurrencyExposureForOTC @intCommodityId = @intCommodityId
+	EXEC uspRKCurrencyExposureForOTC @intCurrencyId = @intCurrencyId
 	
 	DECLARE @tblRKExposureForNonOTC TABLE (intRowNum INT
 		, strContractNumber NVARCHAR(100)
