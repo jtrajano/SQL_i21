@@ -2885,6 +2885,24 @@ BEGIN TRY
 				WHERE ACAP.intTransactionId = @intSettleStorageId
 					AND ACAP.intTransactionDetailId = @intSettleStorageTicketId
 				ORDER BY SST.intSettleStorageTicketId
+
+				--CHECK IF THERE'S A CHARGE AND PREMIUM WITH NO ACCOUNT ID
+				BEGIN
+					DECLARE @strCharges NVARCHAR(500)					
+
+					SELECT @strCharges = STUFF((
+					SELECT ', ' + (strMiscDescription)
+					FROM @voucherPayable
+					WHERE intAccountId IS NULL
+					FOR XML PATH('')) COLLATE Latin1_General_CI_AS,1,1,'')
+
+					IF @strCharges IS NOT NULL
+					BEGIN 
+						SET @ErrMsg = 'Account is missing for item/s ' + @strCharges + '.'
+						RAISERROR (@ErrMsg, 16, 1);
+					END
+
+				END
 				
 				update @voucherPayable set dblOldCost = null where dblCost = dblOldCost
 				 ---we should delete priced contracts that has a voucher already
