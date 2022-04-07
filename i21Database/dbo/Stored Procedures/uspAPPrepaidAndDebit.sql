@@ -873,9 +873,9 @@ SELECT
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
 	[intPrepayType]			=	NULL,
-	[dblTotal]				=	B.dblTotal,
+	[dblTotal]				=	((A.dblProvisionalPercentage / 100) * B.dblTotal),--B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	B.dblTotal,
+	[dblBalance]			=	((A.dblProvisionalPercentage / 100) * B.dblTotal),
 	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
@@ -895,7 +895,7 @@ CROSS APPLY
 		,C.intLineNo
 		,C.intLotId
 		,E.strLotNumber
-		,Total.dblDetailTotal
+		,((A.dblProvisionalPercentage / 100) * Total.dblDetailTotal) AS dblDetailTotal
 		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	LEFT JOIN tblICLot E ON C.intLotId = E.intLotId
