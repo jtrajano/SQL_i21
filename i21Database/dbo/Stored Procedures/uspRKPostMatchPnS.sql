@@ -18,8 +18,6 @@ BEGIN TRY
 		, @strLocationName NVARCHAR(100)
 		, @strFutMarketName NVARCHAR(100)
 		, @intMatchFuturesPSHeaderId INT
-		, @GLEntries AS RecapTableType
-		, @strBatchId NVARCHAR(100)
 		, @intCommodityId INT
 		, @intEntityId INT
 		
@@ -150,148 +148,42 @@ BEGIN TRY
 		DELETE FROM #tmpPostRecap WHERE intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 	END
 	
-	IF (SELECT COUNT(Result) FROM @tblResult) > 0 
+	DROP TABLE #tmpPostRecap
+
+	IF EXISTS (SELECT TOP 1 '' FROM @tblResult)
 	BEGIN
-		SELECT DISTINCT * FROM @tblResult
+		SELECT DISTINCT Result
+		FROM @tblResult
+
 		GOTO Exit_Routine
 	END
 	
-	BEGIN TRANSACTION
-
-	INSERT INTO tblRKStgMatchPnS (intConcurrencyId
-		, intMatchFuturesPSHeaderId
-		, intMatchNo
-		, dtmMatchDate
-		, strCurrency
-		, intCompanyLocationId
-		, intCommodityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, intEntityId
-		, intBrokerageAccountId
-		, dblMatchQty
-		, dblNetPnL
-		, dblGrossPnL
-		, strStatus
-		, strBrokerName
-		, strBrokerAccount
-		, dtmPostingDate
-		, strUserName
-		, strBook
-		, strSubBook
-		, strLocationName
-		, strFutMarketName
-		, ysnPost)
-	SELECT 0
-		, intMatchFuturesPSHeaderId
-		, intMatchNo
-		, dtmMatchDate
-		, @strCurrency
-		, intCompanyLocationId
-		, intCommodityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, intEntityId
-		, intBrokerageAccountId
-		, dblMatchQty = ISNULL((SELECT SUM(ISNULL(dblMatchQty, 0))
-								FROM tblRKMatchFuturesPSDetail m
-								WHERE intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId), 0)
-		, @dblNetPnL
-		, @dblGrossPL
-		, ''
-		, @BrokerName
-		, @BrokerAccount
-		, dtmMatchDate
-		, @strUserName
-		, @strBook
-		, @strSubBook
-		, @strLocationName
-		, @strFutMarketName
-		, 1
-	FROM tblRKMatchFuturesPSHeader h
-	WHERE intMatchNo = @intMatchNo
-
-	IF (@strBatchId IS NULL)
-	BEGIN
-		EXEC uspSMGetStartingNumber 3, @strBatchId OUT
-	END
-
-	INSERT INTO @GLEntries (dtmDate
-		, strBatchId
-		, intAccountId
-		, dblDebit
-		, dblCredit
-		, dblDebitUnit
-		, dblCreditUnit
-		, strDescription
-		, intCurrencyId
-		, dtmTransactionDate
-		, strTransactionId
-		, intTransactionId
-		, strTransactionType
-		, strTransactionForm
-		, strModuleName
-		, intConcurrencyId
-		, dblExchangeRate
-		, dtmDateEntered
-		, ysnIsUnposted
-		, strCode
-		, strReference
-		, intEntityId
-		, intUserId
-		, intSourceLocationId
-		, intSourceUOMId
-		, intCommodityId)
-	SELECT dtmPostDate
-		, @strBatchId
-		, intAccountId
-		, ROUND(dblDebit, 2)
-		, ROUND(dblCredit, 2)
-		, ROUND(dblDebitUnit, 2)
-		, ROUND(dblCreditUnit, 2)
-		, strAccountDescription
-		, intCurrencyId
-		, dtmTransactionDate
-		, strTransactionId
-		, intTransactionId
-		, strTransactionType
-		, strTransactionForm
-		, strModuleName
-		, intConcurrencyId
-		, dblExchangeRate
-		, dtmDateEntered
-		, ysnIsUnposted
-		, 'RK'
-		, strReference
-		, intEntityId
-		, intUserId
-		, intSourceLocationId
-		, intSourceUOMId
-		, intCommodityId
+	SELECT	  Result = '' -- No Error Message
+			, intAccountId
+			, strAccountId
+			, strAccountDescription
+			, dblDebit = ROUND(dblDebit, 2)
+			, dblCredit = ROUND(dblCredit, 2)
+			, dblDebitUnit = ROUND(dblDebitUnit, 2)
+			, dblCreditUnit = ROUND(dblCreditUnit, 2)
+			, intCurrencyId
+	INTO #tmpMatchDerivativesPostRecap
 	FROM tblRKMatchDerivativesPostRecap
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId 
+	AND (	(ROUND(dblDebit, 2) <> 0 AND ROUND(dblCredit, 2) = 0)
+			OR (ROUND(dblCredit, 2) <> 0 AND ROUND(dblDebit, 2) = 0)
+		)
 
-	EXEC dbo.uspGLBookEntries @GLEntries, 1
+	IF NOT EXISTS (SELECT TOP 1 '' FROM #tmpMatchDerivativesPostRecap)
+	BEGIN
+		SELECT Result = 'Match could not be posted due to matching of derivatives resulting to 0 Gross PnL.'
+	END
+	ELSE 
+	BEGIN
+		SELECT * FROM #tmpMatchDerivativesPostRecap
+	END
 
-	UPDATE tblRKMatchFuturesPSHeader
-	SET ysnPosted = 1
-	WHERE intMatchNo = @intMatchNo
-
-	UPDATE tblRKMatchDerivativesPostRecap
-	SET ysnIsUnposted = 1
-		, strBatchId = @strBatchId
-	WHERE intTransactionId = @intMatchFuturesPSHeaderId
-
-	EXEC uspSMAuditLog 
-	   @keyValue = @intMatchFuturesPSHeaderId       -- Primary Key Value of the Match Derivatives. 
-	   ,@screenName = 'RiskManagement.view.MatchDerivatives'        -- Screen Namespace
-	   ,@entityId = @intEntityId     -- Entity Id.
-	   ,@actionType = 'Posted'       -- Action Type
-	   ,@changeDescription = ''     -- Description
-	   ,@fromValue = ''          -- Previous Value
-	   ,@toValue = ''           -- New Value
-
-	COMMIT TRAN
+	DROP TABLE #tmpMatchDerivativesPostRecap
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()

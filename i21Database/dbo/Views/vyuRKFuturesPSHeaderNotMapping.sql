@@ -21,6 +21,8 @@ SELECT mh.*
 	, dblNetPL = SUM(md.dblNetPL)
 	, dblGrossPL = SUM(md.dblGrossPL)
 	, dblFutCommission = SUM(md.dblFutCommission)
+	, intBankTransactionId = bankTransaction.intBankTransactionId
+	, strBankTransactionId = bankTransaction.strBankTransactionId
 FROM tblRKMatchFuturesPSHeader mh
 LEFT JOIN vyuRKMatchedPSTransaction md ON md.intMatchFuturesPSHeaderId = mh.intMatchFuturesPSHeaderId
 LEFT JOIN tblSMCompanyLocation cl ON mh.intCompanyLocationId = cl.intCompanyLocationId
@@ -33,7 +35,16 @@ LEFT JOIN tblCTBook b ON mh.intBookId = b.intBookId
 LEFT JOIN tblCTSubBook sb ON mh.intSubBookId = sb.intSubBookId
 LEFT JOIN tblSMCurrencyExchangeRateType ert ON mh.intCurrencyExchangeRateTypeId = ert.intCurrencyExchangeRateTypeId
 LEFT JOIN tblCMBank bk ON mh.intBankId = bk.intBankId
-LEFT JOIN tblCMBankAccount bac ON mh.intBankAccountId = bac.intBankAccountId
+LEFT JOIN vyuCMBankAccount bac ON mh.intBankAccountId = bac.intBankAccountId
+OUTER APPLY (
+	SELECT TOP 1 
+		  intBankTransactionId = btHeader.intTransactionId
+		, strBankTransactionId = btHeader.strTransactionId
+	FROM tblCMBankTransactionDetail btDetail
+	LEFT JOIN tblCMBankTransaction btHeader
+		ON btHeader.intTransactionId = btDetail.intTransactionId
+	WHERE intMatchDerivativeNo = mh.intMatchNo
+) bankTransaction
 GROUP BY mh.intMatchFuturesPSHeaderId
 	, mh.intMatchNo
 	, mh.dtmMatchDate
@@ -67,3 +78,5 @@ GROUP BY mh.intMatchFuturesPSHeaderId
 	, bac.strBankAccountNo
 	, intSelectedInstrumentTypeId
 	, strRollNo
+	, bankTransaction.intBankTransactionId
+	, bankTransaction.strBankTransactionId
