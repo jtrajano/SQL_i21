@@ -2,6 +2,7 @@
 
 CREATE TABLE [dbo].[tblGLSubsidiaryCompany](
 	[intSubsidiaryCompanyId] [int] IDENTITY(1,1) NOT NULL,
+	[intDatabaseId] INT NOT NULL,
 	[strDatabase] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCompany] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
     [strCompanySegment] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
