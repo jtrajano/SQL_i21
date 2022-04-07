@@ -178,6 +178,7 @@ FROM	tblICInventoryReceipt Receipt
 						WHERE	bd.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 								AND bd.intInventoryReceiptChargeId IS NULL
 								AND b.ysnPosted = 1 
+								AND b.intTransactionType <> 16
 					) voucher
 					LEFT JOIN (
 						tblCTContractHeader ct INNER JOIN tblCTContractDetail cd
@@ -224,6 +225,7 @@ FROM	tblICInventoryReceipt Receipt
 			WHERE	bd.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 					AND bd.intInventoryReceiptChargeId IS NULL 
 					AND b.ysnPosted = 1
+					AND b.intTransactionType <> 16
 			ORDER BY b.intBillId DESC 
 		) topVoucher
 		OUTER APPLY (
@@ -237,6 +239,7 @@ FROM	tblICInventoryReceipt Receipt
 								WHERE	bd.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 										AND bd.intInventoryReceiptChargeId IS NULL 
 										AND b.ysnPosted = 1
+										AND b.intTransactionType <> 16
 								GROUP BY b.intBillId
 								FOR xml path('')
 							)
@@ -257,6 +260,7 @@ FROM	tblICInventoryReceipt Receipt
 								WHERE	bd.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 										AND bd.intInventoryReceiptChargeId IS NULL 
 										AND b.ysnPosted = 1
+										AND b.intTransactionType <> 16
 								GROUP BY b.strBillId
 								FOR xml path('')
 							)

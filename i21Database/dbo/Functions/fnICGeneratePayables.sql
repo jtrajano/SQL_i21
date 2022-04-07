@@ -520,7 +520,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		WHERE 
 			billDetail.intInventoryReceiptItemId = B.intInventoryReceiptItemId 
 			AND billDetail.intInventoryReceiptChargeId IS NULL
-			AND bill.intTransactionType NOT IN (13)  
+			AND bill.intTransactionType NOT IN (13, 16)  -- ('Basis Advance', 'Provisional Voucher')
 			/*
 				CASE A.intTransactionType
 						WHEN 1 THEN 'Voucher'
@@ -895,7 +895,7 @@ FROM
 				ON BD.intBillId = B.intBillId
 		WHERE 
 			BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-			AND B.intTransactionType NOT IN (13)  
+			AND B.intTransactionType NOT IN (13, 16)  -- ('Basis Advance', 'Provisional Voucher')
 			/*
 				CASE A.intTransactionType
 						WHEN 1 THEN 'Voucher'
