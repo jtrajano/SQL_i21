@@ -32,7 +32,8 @@ BEGIN
 		EXEC uspICProcessToBill @intReceiptId = @receiptId, @intUserId = @userId, @strType = 'voucher', @intScreenId = 1, @intBillId = @createdVoucher OUT
 
 		UPDATE B 
-		SET B.strReference = 'Final Voucher of ' + B2.strBillId 
+		SET B.strReference = 'Final Voucher of ' + B2.strBillId,
+			B.ysnFinalVoucher = 1
 		FROM tblAPBill B
 		INNER JOIN tblAPBill B2 ON B2.intBillId = @billId
 		WHERE B.intBillId = @createdVoucher
@@ -50,13 +51,14 @@ BEGIN
 		SELECT BD.intBillDetailId
 		FROM tblAPBill B
 		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
-		INNER JOIN @excludedReceiptIds IDS ON IDS.intID = BD.intInventoryReceiptItemId
+		INNER JOIN @excludedReceiptIds IDS ON IDS.intId = BD.intInventoryReceiptItemId
 		WHERE B.intBillId = @createdVoucher
 
 		EXEC uspAPDeleteVoucherDetail @billDetailIds = @excludedDetailIds, @userId = @userId, @callerModule = 0
 
 		UPDATE BD
-		SET BD.intLotId = BD2.intLotId
+		SET BD.intLotId = BD2.intLotId,
+			BD.ysnStage = 0
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBillDetail BD2 ON BD2.intInventoryReceiptItemId = BD.intInventoryReceiptItemId AND BD2.intBillId = @billId
 		WHERE BD.intBillId = @createdVoucher
