@@ -649,6 +649,8 @@
     <Build Include="dbo\Views\vyuICGetContractBundleOptions.sql" />
     <Build Include="dbo\Tables\tblCTContractHeaderLastModification.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetRiskPositionInquiry.sql" />
+    <Build Include="dbo\Tables\tblCRMBrandFieldMapping.sql" />
+    <Build Include="dbo\Views\vyuCRMBrandOpportunityIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
