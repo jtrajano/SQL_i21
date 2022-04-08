@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantTranslog]
-	@intStoreNo										INT,
+	@intStoreId										INT,
 	@UDT_Translog StagingTransactionLogRadiant		READONLY,
 	@ysnSuccess										BIT				OUTPUT,
 	@strMessage										NVARCHAR(1000)	OUTPUT,
@@ -44,12 +44,10 @@ BEGIN
 			BEGIN
 				
 				--Get StoreId
-				DECLARE @intStoreId			INT,
-						@strRegisterClass	NVARCHAR(50),
+				DECLARE @strRegisterClass	NVARCHAR(50),
 						@intRegisterClassId INT
 
 				SELECT
-					@intStoreId			= st.intStoreId,
 					@strRegisterClass	= r.strRegisterClass,
 					@intRegisterClassId = setup.intRegisterSetupId
 				FROM tblSTStore st
@@ -57,13 +55,13 @@ BEGIN
 					ON st.intRegisterId = r.intRegisterId
 				INNER JOIN tblSTRegisterSetup setup
 					ON r.strRegisterClass = setup.strRegisterClass
-				WHERE st.intStoreNo = @intStoreNo
+				WHERE st.intStoreId = @intStoreId
 
 
 				-- ==================================================================================================================
 				-- START - Validate if Store has department setup for rebate
 				-- ==================================================================================================================
-				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
+				IF EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
 					BEGIN
 						
 						--Get Number of rows
@@ -77,13 +75,13 @@ BEGIN
 								OR
 								(chk.strFuelGradeID IS NOT NULL AND chk.intFuelPositionID IS NOT NULL)
 							  )
-							  AND
-							  (
-							     -- TENDER
-								 tender.strTenderCode IN ('outsideMobileCr', 'outsideCredit', 'coupons', 'debitCards', 'creditCards', 'cash', 'loyaltyOffer', 'check', 'houseCharges') 
-								 AND 
-								 tender.strChangeFlag IN ('yes','no')
-							  )
+							  --AND
+							  --(
+							  --   -- TENDER
+								 --tender.strTenderCode IN ('outsideMobileCr', 'outsideCredit', 'coupons', 'debitCards', 'creditCards', 'cash', 'loyaltyOffer', 'check', 'houseCharges') 
+								 --AND 
+								 --tender.strChangeFlag IN ('yes','no')
+							  --)
 							  AND NOT EXISTS
 							  (
 								SELECT *
@@ -574,13 +572,13 @@ BEGIN
 											OR
 											(chk.strFuelGradeID IS NOT NULL AND chk.intFuelPositionID IS NOT NULL)
 										  )
-										  AND
-										  (
-											-- TENDER
-											tender.strTenderCode IN ('outsideMobileCr', 'outsideCredit', 'coupons', 'debitCards', 'creditCards', 'cash', 'loyaltyOffer', 'check', 'houseCharges') 
-											AND 
-											tender.strChangeFlag IN ('yes','no')
-										  )
+										 -- AND
+										 -- (
+											---- TENDER
+											--tender.strTenderCode IN ('outsideMobileCr', 'outsideCredit', 'coupons', 'debitCards', 'creditCards', 'cash', 'loyaltyOffer', 'check', 'houseCharges') 
+											--AND 
+											--tender.strChangeFlag IN ('yes','no')
+										 -- )
 										  AND NOT EXISTS
 										  (
 											SELECT *
