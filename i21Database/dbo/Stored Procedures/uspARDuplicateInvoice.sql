@@ -471,7 +471,9 @@ IF @IsCancel = 0
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
 				,[dblAddOnQuantity]
-				,[dblStandardWeight])
+				,[dblStandardWeight]
+				,[dblItemPrice]
+				,[dblTotalByItemPrice])
 			SELECT 
 				[intInvoiceId]					= @CreatedInvoiceId
 				,[strDocumentNumber]			= ''
@@ -561,6 +563,8 @@ IF @IsCancel = 0
 				,[ysnAddonParent]				= ARID.[ysnAddonParent]
 				,[dblAddOnQuantity]				= ARID.[dblAddOnQuantity]
 				,[dblStandardWeight]		    = ARID.[dblStandardWeight]
+				,[dblItemPrice]					= ARID.[dblItemPrice]
+				,[dblTotalByItemPrice]			= ARID.[dblTotalByItemPrice]
 			FROM
 				tblARInvoiceDetail ARID
 			LEFT OUTER JOIN
