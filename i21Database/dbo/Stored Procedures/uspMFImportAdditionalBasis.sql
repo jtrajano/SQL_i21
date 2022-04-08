@@ -171,6 +171,22 @@ BEGIN TRY
 				,@actionType = 'Created'
 				,@actionIcon = 'small-new-plus'
 				,@details = @strJson
+
+			BEGIN TRY
+				DECLARE @SingleAuditLogParam SingleAuditLogParam
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT 1, '', 'Created', 'Created - Record: ' + CAST(@intAdditionalBasisId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+						UNION ALL
+						SELECT 2, CONVERT(VARCHAR, @intAdditionalBasisId), 'Created', 'Imported - Record: ' + CONVERT(VARCHAR, @intAdditionalBasisId), NULL, NULL, NULL, NULL, NULL, 1
+
+				EXEC uspSMSingleAuditLog 
+					@screenName     = 'Manufacturing.view.AdditionalBasisEntry',
+					@recordId       = @intAdditionalBasisId,
+					@entityId       = @intCreatedUserId,
+					@AuditLogParam  = @SingleAuditLogParam
+			END TRY
+			BEGIN CATCH
+			END CATCH
 		END
 		ELSE
 		BEGIN

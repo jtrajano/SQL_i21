@@ -64,6 +64,24 @@ BEGIN
 	@keyValue = @billId,
 	@details = @details
 
+	BEGIN TRY
+		DECLARE @SingleAuditLogParam SingleAuditLogParam
+		INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@billId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+				UNION ALL
+				SELECT 2, '', '', 'tblAPBillDetails', NULL, NULL, 'Details', NULL, NULL, 1
+				UNION ALL
+				SELECT 3, CAST(@billDetailId as varchar(15)), 'Deleted', 'Deleted-Record: '+CAST(@billDetailId as varchar(15)), NULL, NULL, NULL, NULL, NULL, 2
+
+		EXEC uspSMSingleAuditLog 
+			@screenName     = 'AccountsPayable.view.Voucher',
+			@recordId       = @billId,
+			@entityId       = @userId,
+			@AuditLogParam  = @SingleAuditLogParam
+    END TRY
+    BEGIN CATCH
+    END CATCH
+
   SET @billCounter = @billCounter + 1
   DELETE FROM @tmpBillDetailDelete WHERE intBillDetailId = @billDetailId
 END

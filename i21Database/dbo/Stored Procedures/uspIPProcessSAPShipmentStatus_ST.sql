@@ -167,17 +167,48 @@ BEGIN TRY
 				-- Audit Log
 				SELECT @strDetails = ''
 
+				DECLARE @SingleAuditLogParam SingleAuditLogParam
+				DECLARE @intId INT = 0
+
+				SET @intId += 1
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intLoadId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+
 				IF (@dtmOldArrivedInPort <> @dtmNewArrivedInPort)
+				BEGIN
 					SET @strDetails += '{"change":"dtmArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived in Port Date"},'
 
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'dtmArrivedInPort', LTRIM(ISNULL(@dtmOldArrivedInPort, '')), LTRIM(ISNULL(@dtmNewArrivedInPort, '')), 'Arrived in Port Date', NULL, NULL, 1
+				END
+
 				IF (@dtmOldCustomsReleased <> @dtmNewCustomsReleased)
+				BEGIN
 					SET @strDetails += '{"change":"dtmCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released Date"},'
 
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'dtmCustomsReleased', LTRIM(ISNULL(@dtmOldCustomsReleased, '')), LTRIM(ISNULL(@dtmNewCustomsReleased, '')), 'Customs Released Date', NULL, NULL, 1
+				END
+
 				IF (@ysnOldArrivedInPort <> @ysnNewArrivedInPort)
+				BEGIN	
 					SET @strDetails += '{"change":"ysnArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived In Port"},'
 
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'ysnArrivedInPort', LTRIM(ISNULL(@ysnOldArrivedInPort, '')), LTRIM(ISNULL(@ysnNewArrivedInPort, '')), 'Arrived In Port', NULL, NULL, 1
+				END
+
 				IF (@ysnOldCustomsReleased <> @ysnNewCustomsReleased)
+				BEGIN	
 					SET @strDetails += '{"change":"ysnCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released"},'
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'ysnCustomsReleased', LTRIM(ISNULL(@ysnOldCustomsReleased, '')), LTRIM(ISNULL(@ysnNewCustomsReleased, '')), 'Customs Released', NULL, NULL, 1
+				END
 
 				IF (LEN(@strDetails) > 1)
 				BEGIN
@@ -189,6 +220,16 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
+
+					BEGIN TRY
+						EXEC uspSMSingleAuditLog 
+							@screenName     = 'Logistics.view.ShipmentSchedule',
+							@recordId       = @intLoadId,
+							@entityId       = @intEntityId,
+							@AuditLogParam  = @SingleAuditLogParam
+					END TRY
+					BEGIN CATCH
+					END CATCH
 				END
 			END
 
@@ -222,6 +263,22 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
+
+					BEGIN TRY
+						DECLARE @SingleAuditLogParam2 SingleAuditLogParam
+						INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+								SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intLoadId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+								UNION ALL
+								SELECT 2, '', '', 'dtmETAPOD', LTRIM(ISNULL(@dtmOldETA, '')), LTRIM(ISNULL(@dtmETA, '')), 'ETA POD', NULL, NULL, 1
+
+						EXEC uspSMSingleAuditLog 
+							@screenName     = 'Logistics.view.ShipmentSchedule',
+							@recordId       = @intLoadId,
+							@entityId       = @intEntityId,
+							@AuditLogParam  = @SingleAuditLogParam2
+					END TRY
+					BEGIN CATCH
+					END CATCH
 				END
 			END
 

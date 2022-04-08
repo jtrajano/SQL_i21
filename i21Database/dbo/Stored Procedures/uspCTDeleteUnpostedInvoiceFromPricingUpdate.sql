@@ -132,6 +132,25 @@ begin try
 					@keyValue = @intContractHeaderId,
 					@details = @details
 
+					BEGIN TRY
+					DECLARE @SingleAuditLogParam SingleAuditLogParam
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+							SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intContractHeaderId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+							UNION ALL
+							SELECT 2, '', '', 'tblCTContractDetail', NULL, NULL, 'Details', NULL, NULL, 1
+							UNION ALL
+							SELECT 3, '', 'Updated', 'Updated - Record: Contract Sequence ' + CAST(@intContractSeq AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, 2
+							UNION ALL
+							SELECT 4, '', '', 'Status', @strVarStatus, 'Complete', NULL, NULL, NULL, 3
+
+					EXEC uspSMSingleAuditLog 
+						@screenName     = 'ContractManagement.view.Contract',
+						@recordId       = @intContractHeaderId,
+						@entityId       = @intUserId,
+						@AuditLogParam  = @SingleAuditLogParam
+					END TRY
+					BEGIN CATCH
+					END CATCH
 
 					end
 
@@ -171,6 +190,27 @@ begin try
 					@actionIcon = 'small-tree-modified',
 					@keyValue = @intContractHeaderId,
 					@details = @details
+
+					BEGIN TRY
+					DECLARE @SingleAuditLogParam2 SingleAuditLogParam
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+							SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intContractHeaderId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+							UNION ALL
+							SELECT 2, '', '', 'tblCTContractDetail', NULL, NULL, 'Details', NULL, NULL, 1
+							UNION ALL
+							SELECT 3, '', 'Updated', 'Updated - Record: Contract Sequence ' + CAST(@intContractSeq AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, 2
+							UNION ALL
+							SELECT 4, '', '', 'Status', 'Complete', 'Open', NULL, NULL, NULL, 3
+
+					EXEC uspSMSingleAuditLog 
+						@screenName     = 'ContractManagement.view.Contract',
+						@recordId       = @intContractHeaderId,
+						@entityId       = @intUserId,
+						@AuditLogParam  = @SingleAuditLogParam2
+					END TRY
+					BEGIN CATCH
+					END CATCH
+
 					end
 				end
 				else
@@ -211,6 +251,26 @@ begin try
 					@actionIcon = 'small-tree-modified',
 					@keyValue = @intContractHeaderId,
 					@details = @details
+
+					BEGIN TRY
+					DECLARE @SingleAuditLogParam3 SingleAuditLogParam
+					INSERT INTO @SingleAuditLogParam3 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+							SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intContractHeaderId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+							UNION ALL
+							SELECT 2, '', '', 'tblCTContractDetail', NULL, NULL, 'Details', NULL, NULL, 1
+							UNION ALL
+							SELECT 3, '', 'Updated', 'Updated - Record: Contract Sequence ' + CAST(@intContractSeq AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, 2
+							UNION ALL
+							SELECT 4, '', '', 'Status', @strVarStatus, 'Complete', NULL, NULL, NULL, 3
+
+					EXEC uspSMSingleAuditLog 
+						@screenName     = 'ContractManagement.view.Contract',
+						@recordId       = @intContractHeaderId,
+						@entityId       = @intUserId,
+						@AuditLogParam  = @SingleAuditLogParam3
+					END TRY
+					BEGIN CATCH
+					END CATCH
 					end
 				end
 

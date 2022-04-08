@@ -144,6 +144,22 @@ BEGIN TRY
 							,@actionType = 'Updated'
 							,@actionIcon = 'small-tree-modified'
 							,@details = @strDetails
+
+						BEGIN TRY
+							DECLARE @SingleAuditLogParam SingleAuditLogParam
+							INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+									SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intNewFutureMarketId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+									UNION ALL
+									SELECT 2, '', '', 'dblForecastPrice', LTRIM(ISNULL(@dblOldForecastPrice, 0)), LTRIM(ISNULL(@dblNewForecastPrice, 0)), 'Forecast Price from Inter Company', NULL, NULL, 1
+
+							EXEC uspSMSingleAuditLog 
+								@screenName     = 'RiskManagement.view.FuturesMarket',
+								@recordId       = @intNewFutureMarketId,
+								@entityId       = @intLastModifiedUserId,
+								@AuditLogParam  = @SingleAuditLogParam
+						END TRY
+						BEGIN CATCH
+						END CATCH
 					END
 				END
 			END
