@@ -709,6 +709,9 @@
     <Build Include="dbo\Views\vyuICGetInsuranceCharge.sql" />
     <Build Include="dbo\Tables\tblICInsuranceChargeDetail.sql" />
     <Build Include="dbo\Views\vyuICSearchStorageCharge.sql" />
+	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
