@@ -430,6 +430,10 @@ BEGIN
 			AND SH.intTransactionTypeId = 1
 	INNER JOIN tblGRCustomerStorage CS_FROM
 		ON CS_FROM.intCustomerStorageId = SH.intCustomerStorageId
+	LEFT JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = IRI.intContractDetailId
+	LEFT JOIN tblCTContractHeader CH 
+		ON CH.intContractHeaderId = CD.intContractHeaderId  
 	OUTER APPLY (
 		SELECT dblUnitQty,dtmProcessDate,TS.strTransferStorageTicket,TS.intTransferStorageId 
 		FROM tblGRTransferStorageReference A
@@ -440,7 +444,7 @@ BEGIN
 	LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 		ON currencyRateType.intCurrencyExchangeRateTypeId = IRI.intForexRateTypeId
 	WHERE IR.intInventoryReceiptId = @intSourceTransactionDetailId
-
+		AND ISNULL(CH.intPricingTypeId, -99) IN (5)
 	UNION ALL
 
 	--TRA side
