@@ -667,6 +667,9 @@
     <Build Include="dbo\Tables\tblTMRoute.sql" />
     <Build Include="dbo\Tables\tblTMSeasonResetArchive.sql" />
     <Build Include="dbo\Tables\tblTMSite.sql">
+	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
       <SuppressTSqlWarnings>
       </SuppressTSqlWarnings>
     </Build>
