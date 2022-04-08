@@ -9146,6 +9146,7 @@
     <Build Include="dbo\Tables\tblGRSettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\User Defined Types\SettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\Views\vyuGRSettleStorageBillDetail.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
