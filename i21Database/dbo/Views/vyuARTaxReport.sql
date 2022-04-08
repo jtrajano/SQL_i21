@@ -63,6 +63,12 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTaxCollected			= INVOICE.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , strCustomerNumber	    = CUSTOMER.strCustomerNumber
 	 , strCustomerName			= CUSTOMER.strCustomerName
+	 , strCustomerCity			= CUSTOMER.strCustomerCity
+	 , strCustomerState			= CUSTOMER.strCustomerState
+	 , strCustomerAddress		= CUSTOMER.strCustomerAddress
+	 , strCustomerZipCode		= CUSTOMER.strCustomerZipCode
+	 , strCustomerCountry		= CUSTOMER.strCustomerCountry
+	 , strCustomerEmail			= CUSTOMER.strCustomerEmail
 	 , strDisplayName			= CUSTOMER.strDisplayName
 	 , strTaxNumber				= CUSTOMER.strTaxNumber
 	 , intEntitySalespersonId	= INVOICE.intEntitySalespersonId
@@ -82,6 +88,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , strCounty				= DETAIL.strCounty
 	 , strCity					= DETAIL.strCity
 	 , strTaxClass				= DETAIL.strTaxClass
+	 , strTaxPoint				= DETAIL.strTaxPoint
 	 , strSalesTaxAccount		= DETAIL.strSalesTaxAccount
 	 , strPurchaseTaxAccount	= DETAIL.strPurchaseTaxAccount	 
 	 , strLocationName			= LOC.strLocationName
@@ -100,6 +107,13 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblInvoiceTotal          = INVOICE.dblInvoiceTotal
 	 , intFreightTermId			= INVOICE.intFreightTermId
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
+	 , strCommodityCode			= DETAIL.strCommodityCode
+	 , strUnitOfMeasure			= DETAIL.strUnitOfMeasure
+	 , ysnPaid					= INVOICE.ysnPaid
+	 , intARAccountId			= INVOICE.intAccountId
+	 , strARAccountI			= ARACCOUNT.strAccountId
+	 , intSalesAccountId		= DETAIL.intSalesAccountId
+	 , strSalesAccountId		= DETAIL.strAccountId
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId				= ID.intInvoiceId
@@ -127,7 +141,7 @@ INNER JOIN (
 		 , strCounty				= TAXCODE.strCounty
 		 , strCity					= TAXCODE.strCity
 		 , strTaxClass				= TAXCLASS.strTaxClass
-		 , strSalesTaxAccount		= SALESACCOUNT.strAccountId
+		 , strSalesTaxAccount		= SALESTAXACCOUNT.strAccountId
 		 , strPurchaseTaxAccount	= PURCHASEACCOUNT.strAccountId
 		 , strItemNo				= ITEM.strItemNo
 		 , strCategoryCode			= CATEGORY.strCategoryCode
@@ -138,6 +152,11 @@ INNER JOIN (
 		 , intTaxCodeCount			= COALESCE(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount, TAXCLASSTOTALBYINVOICEDETAIL.intTaxClassCount)
 		 , intTonnageTaxUOMId		= ITEM.intTonnageTaxUOMId
 		 , dblQtyTonShipped			= CASE WHEN ITEM.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ITEMUOMSETUP.intItemUOMId, ID.intItemUOMId), ID.dblQtyShipped)) ELSE ID.dblQtyShipped END
+		 , strTaxPoint				= TAXCODE.strTaxPoint
+		 , strCommodityCode			= ICC.strCommodityCode 
+		 , strUnitOfMeasure			= ICUM.strUnitMeasure
+		 , strAccountId				= SALESACCOUNT.strAccountId
+		 , intSalesAccountId		= ID.intSalesAccountId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInvoiceDetailId
@@ -167,6 +186,7 @@ INNER JOIN (
 			 , intCategoryId
 			 , intTonnageTaxUOMId	= CASE WHEN ISNULL(ysnTonnageTax, 0) = 1 THEN intTonnageTaxUOMId ELSE NULL END
 			 , strItemNo
+			 , intCommodityId
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
 	OUTER APPLY (
@@ -192,6 +212,7 @@ INNER JOIN (
 		FROM tblICItemUOM WITH (NOLOCK) 
 	) ITEMUOMSETUP ON ITEMUOMSETUP.intItemId = ITEM.intItemId
 				  AND ITEMUOMSETUP.intUnitMeasureId = ITEM.intTonnageTaxUOMId
+	LEFT JOIN tblICUnitMeasure ICUM ON ITEMUOMSETUP.intUnitMeasureId = ICUM.intUnitMeasureId
 	INNER JOIN (
 		SELECT intCategoryId
 			 , strCategoryCode
@@ -212,7 +233,8 @@ INNER JOIN (
 			 , strCountry
 			 , strState
 			 , strCounty
-			 , strCity			 
+			 , strCity
+			 , strTaxPoint
 		FROM dbo.tblSMTaxCode WITH (NOLOCK)
 	) TAXCODE ON IDT.intTaxCodeId = TAXCODE.intTaxCodeId
 	INNER JOIN (
@@ -224,12 +246,18 @@ INNER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
 		FROM dbo.tblGLAccount WITH (NOLOCK)
-	) SALESACCOUNT ON IDT.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
+	) SALESTAXACCOUNT ON IDT.intSalesTaxAccountId = SALESTAXACCOUNT.intAccountId 
 	LEFT OUTER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
 		FROM dbo.tblGLAccount WITH (NOLOCK)
 	) PURCHASEACCOUNT ON TAXCODE.intPurchaseTaxAccountId = PURCHASEACCOUNT.intAccountId
+	LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = ITEM.intCommodityId
+	OUTER APPLY (
+		SELECT TOP 1 strAccountId
+		FROM tblGLAccount
+		WHERE intAccountId = ID.intSalesAccountId
+	) SALESACCOUNT
 ) DETAIL ON INVOICE.intInvoiceId = DETAIL.intInvoiceId
 INNER JOIN (
 	SELECT intEntityId			= ENTITY.intEntityId 
@@ -239,13 +267,20 @@ INNER JOIN (
 		 , strStateTaxId  		= ENTITY.strStateTaxId
 		 , strFederalTaxId		= ENTITY.strFederalTaxId
 		 , strTaxNumber			= C.strTaxNumber
-	FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
+		 , strCustomerCity		= EMEL.strCity
+		 , strCustomerState		= EMEL.strState
+		 , strCustomerAddress	= EMEL.strAddress
+		 , strCustomerZipCode	= EMEL.strZipCode
+		 , strCustomerCountry	= EMEL.strCountry
+		 , strCustomerEmail		= ENTITY.strEmail
+	FROM dbo.tblEMEntity ENTITY WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intEntityId
 			 , strCustomerNumber
 			 , strTaxNumber
 		FROM dbo.tblARCustomer WITH (NOLOCK)
 	) C ON ENTITY.intEntityId = C.intEntityId
+	LEFT JOIN tblEMEntityLocation EMEL ON ENTITY.intEntityId = EMEL.intEntityId AND ysnDefaultLocation = 1
 ) CUSTOMER ON INVOICE.intEntityCustomerId = CUSTOMER.intEntityId
 LEFT JOIN (
 	SELECT intEntityId					= ENTITY.intEntityId 
@@ -301,4 +336,9 @@ OUTER APPLY (
 	  FOR XML PATH ('')
 	 ) SC (strAccountStatusCode)
 ) STATUSCODES
+OUTER APPLY (
+	SELECT TOP 1 strAccountId
+	FROM tblGLAccount
+	WHERE intAccountId = INVOICE.intAccountId
+) ARACCOUNT
 WHERE INVOICE.ysnPosted = 1
