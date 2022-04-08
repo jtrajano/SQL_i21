@@ -188,6 +188,9 @@ IF(@totalInvalid > 0)
 		DELETE GL
 		FROM ##ARInvoiceGLEntries GL
 		INNER JOIN ##ARInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId]	AND GL.[strTransactionId] = B.[strInvoiceNumber]
+
+		IF @RaiseError = 1 AND @Post = 0
+			SELECT TOP 1 @ErrorMerssage = strPostingError FROM ##ARInvalidInvoiceData
 							
         DELETE FROM ##ARInvalidInvoiceData					
 	END
@@ -232,7 +235,9 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 		IF @RaiseError = 1
 			BEGIN
-				SELECT TOP 1 @ErrorMerssage = [strPostingMessage] FROM tblARInvoiceIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId AND [ysnPost] IS NOT NULL
+				IF @Post = 1				
+					SELECT TOP 1 @ErrorMerssage = [strPostingMessage] FROM tblARInvoiceIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId AND [ysnPost] IS NOT NULL
+					
 				RAISERROR(@ErrorMerssage, 11, 1)							
 			END				
 		GOTO Post_Exit	
