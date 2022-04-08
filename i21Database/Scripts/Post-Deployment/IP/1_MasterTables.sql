@@ -238,6 +238,13 @@ BEGIN
     VALUES(15,'i21 Web API Endpoint')
 END
 UPDATE tblIPStepType SET strName = 'i21 Web API Endpoint' WHERE intStepTypeId = 15 AND strName = 'Web API Endpoint'
+
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 16)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(16,'External Web API Endpoint')
+END
+
 GO
 IF NOT EXISTS (
 		SELECT *
