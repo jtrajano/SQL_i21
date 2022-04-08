@@ -987,7 +987,7 @@ OUTER APPLY (
 	INNER JOIN tblGLAccountSegment GLAS
 	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
 	WHERE intAccountStructureId = 3
-	AND intAccountId = I.[intSalesAccountId]
+	AND intAccountId = I.[intAccountId]
 ) DUEACCOUNT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0

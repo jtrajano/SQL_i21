@@ -20,13 +20,17 @@ SET ANSI_WARNINGS OFF
 	
 	--AR ACCOUNT	
 	UPDATE ARI
-	SET ARI.intAccountId = CASE WHEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter) IS NOT NULL AND ISNULL(GL.ysnActive, 0) = 1
+	SET ARI.intAccountId = CASE WHEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter) IS NOT NULL AND ISNULL(GL.ysnActive, 0) = 1 AND ARCP.ysnAllowIntraCompanyEntries = 0 AND ARCP.ysnAllowIntraLocationEntries = 0 AND ARCP.ysnAllowSingleLocationEntries = 0
 								THEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
 								ELSE ARI.intAccountId
 							END
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	INNER JOIN ##ARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
 	LEFT JOIN tblGLAccount GL ON GL.intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
+	OUTER APPLY(
+		SELECT TOP 1 ysnAllowIntraCompanyEntries, ysnAllowIntraLocationEntries, ysnAllowSingleLocationEntries
+		FROM tblARCompanyPreference
+	) ARCP
 
 	INSERT INTO @LineItemAccounts (
 		  [intDetailId]
