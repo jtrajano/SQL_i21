@@ -153,7 +153,7 @@ LEFT JOIN (
 		ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
 	) 
 	ON SC.intTicketId = CS.intTicketId
-		AND IR.intEntityId = CS.intEntityId
+		AND IR.intEntityVendorId = CS.intEntityId
 LEFT JOIN tblSCTicketSplit SCTicketSplit	
 	ON SCTicketSplit.intTicketId = CS.intTicketId 
 		AND SCTicketSplit.intCustomerId = CS.intEntityId
