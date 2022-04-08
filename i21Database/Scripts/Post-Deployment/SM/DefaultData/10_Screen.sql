@@ -981,8 +981,8 @@ GO
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor') 
 	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Vendors', N'Vendors', N'AccountsPayable.view.EntityVendor', N'Accounts Payable', N'tblAPVendor', 1, N'Accounts Payable')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName],[ysnApproval]) 
+		VALUES (N'Vendors', N'Vendors', N'AccountsPayable.view.EntityVendor', N'Accounts Payable', N'tblAPVendor', 1, N'Accounts Payable',1)
 	END
 	ELSE
 	BEGIN
