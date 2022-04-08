@@ -172,6 +172,22 @@ BEGIN TRY
 									  ,@actionType = 'Updated'
 									  ,@actionIcon = 'small-tree-modified'
 									  ,@details = @strDetails
+
+					BEGIN TRY
+						DECLARE @SingleAuditLogParam SingleAuditLogParam
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+								SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intAuditLogLoadId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+								UNION ALL
+								SELECT 2, '', '', 'intContractDetailId', LTRIM(@intParentContractDetailId), LTRIM(@intCContractDetailId), NULL, NULL, NULL, 1
+
+						EXEC uspSMSingleAuditLog 
+							@screenName     = 'Logistics.view.ShipmentSchedule',
+							@recordId       = @intAuditLogLoadId,
+							@entityId       = @intUserId,
+							@AuditLogParam  = @SingleAuditLogParam
+					END TRY
+					BEGIN CATCH
+					END CATCH
 				END
 
 				IF EXISTS (SELECT 1 FROM tblLGLoadStg WHERE ISNULL(strFeedStatus, '') = '' AND intLoadId = @intOrgLoadId AND strRowState = 'Added')

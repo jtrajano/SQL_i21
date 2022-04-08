@@ -50,6 +50,11 @@ SELECT @count = Count(*) FROM #tmpCardNumbers
 
 DECLARE @counter INT
 SET @counter = 0
+
+DECLARE @SingleAuditLogParam SingleAuditLogParam
+INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+	SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@keyValue AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+
 WHILE EXISTS (SELECT TOP (1) 1 FROM #tmpCardNumbers)
 BEGIN
 
@@ -61,6 +66,9 @@ BEGIN
 	BEGIN
 	SET @children += ','
 	END
+
+	INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+		SELECT @counter + 1, '', '', @singleValue, NULL, NULL, NULL, NULL, NULL, 1
 
 	DELETE TOP (1) FROM #tmpCardNumbers where strCardNumber = @singleValue
 END
@@ -75,4 +83,14 @@ exec uspSMAuditLog
 @actionType				 = @action,
 @changeDescription  	 = 'Locked Cards',
 @details				 = @children
+
+BEGIN TRY
+EXEC uspSMSingleAuditLog 
+	@screenName     = @screenName,
+	@recordId       = @keyValue,
+	@entityId       = @entityId,
+	@AuditLogParam  = @SingleAuditLogParam
+END TRY
+BEGIN CATCH
+END CATCH
 

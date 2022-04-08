@@ -176,6 +176,22 @@ BEGIN TRY
 					,@actionType = 'Updated'
 					,@actionIcon = 'small-tree-modified'
 					,@details = @strDetails
+
+				BEGIN TRY
+					DECLARE @SingleAuditLogParam SingleAuditLogParam
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+							SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intCommitmentPricingId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+							UNION ALL
+							SELECT 2, '', '', 'dblBalanceQty', LTRIM(ISNULL(dblOldBalanceQty, 0)), LTRIM(ISNULL(dblNewBalanceQty, 0)), 'Balance Qty', NULL, NULL, 1
+
+					EXEC uspSMSingleAuditLog 
+						@screenName     = 'Manufacturing.view.CommitmentPricing',
+						@recordId       = @intCommitmentPricingId,
+						@entityId       = @intUserId,
+						@AuditLogParam  = @SingleAuditLogParam
+				END TRY
+				BEGIN CATCH
+				END CATCH
 			END
 
 			MOVE_TO_ARCHIVE:

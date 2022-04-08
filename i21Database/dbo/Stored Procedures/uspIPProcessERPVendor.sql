@@ -1162,49 +1162,95 @@ BEGIN TRY
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 
+				DECLARE @SingleAuditLogParam SingleAuditLogParam
+				DECLARE @intId INT = 0
+
+				SET @intId += 1
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intEntityId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+
 				IF EXISTS (
 						SELECT 1
 						FROM @tblEMEntity
 						WHERE IsNULL(strOldName, '') <> IsNULL(strNewName, '')
 						)
+				BEGIN
 					SELECT @strDetails += '{"change":"strName","iconCls":"small-gear","from":"' + IsNULL(strOldName, '') + '","to":"' + IsNULL(strNewName, '') + '","leaf":true,"changeDescription":"Name"},'
 					FROM @tblEMEntity
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'strName', IsNULL(strOldName, ''), IsNULL(strNewName, ''), 'Name', NULL, NULL, 1
+					FROM @tblEMEntity
+				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblEMEntity
 						WHERE IsNULL(ysnOldActive, 0) <> IsNULL(ysnNewActive, 0)
 						)
+				BEGIN
 					SELECT @strDetails += '{"change":"ysnActive","iconCls":"small-gear","from":"' + LTRIM(ysnOldActive) + '","to":"' + LTRIM(ysnNewActive) + '","leaf":true,"changeDescription":"Active"},'
 					FROM @tblEMEntity
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'ysnActive', LTRIM(ysnOldActive), LTRIM(ysnNewActive), 'Active', NULL, NULL, 1
+					FROM @tblEMEntity
+				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblAPVendor
 						WHERE IsNULL(intOldCurrencyId, 0) <> IsNULL(intNewCurrencyId, 0)
 						)
+				BEGIN
 					SELECT @strDetails += '{"change":"strCurrency","iconCls":"small-gear","from":"' + ISNULL(C.strCurrency, '') + '","to":"' + ISNULL(C1.strCurrency, '') + '","leaf":true,"changeDescription":"Currency"},'
 					FROM @tblAPVendor V
 					LEFT JOIN tblSMCurrency C ON C.intCurrencyID = V.intOldCurrencyId
 					LEFT JOIN tblSMCurrency C1 ON C1.intCurrencyID = V.intNewCurrencyId
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'strCurrency', ISNULL(C.strCurrency, ''), ISNULL(C1.strCurrency, ''), 'Currency', NULL, NULL, 1
+					FROM @tblAPVendor V
+					LEFT JOIN tblSMCurrency C ON C.intCurrencyID = V.intOldCurrencyId
+					LEFT JOIN tblSMCurrency C1 ON C1.intCurrencyID = V.intNewCurrencyId
+				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblAPVendor
 						WHERE IsNULL(intOldTermsId, 0) <> IsNULL(intNewTermsId, 0)
 						)
+				BEGIN
 					SELECT @strDetails += '{"change":"strTerm","iconCls":"small-gear","from":"' + ISNULL(T.strTerm, '') + '","to":"' + ISNULL(T1.strTerm, '') + '","leaf":true,"changeDescription":"Default Terms"},'
 					FROM @tblAPVendor V
 					LEFT JOIN tblSMTerm T ON T.intTermID = V.intOldTermsId
 					LEFT JOIN tblSMTerm T1 ON T1.intTermID = V.intNewTermsId
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'strTerm', ISNULL(T.strTerm, ''), ISNULL(T1.strTerm, ''), 'Default Terms', NULL, NULL, 1
+					FROM @tblAPVendor V
+					LEFT JOIN tblSMTerm T ON T.intTermID = V.intOldTermsId
+					LEFT JOIN tblSMTerm T1 ON T1.intTermID = V.intNewTermsId
+				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblAPVendor
 						WHERE IsNULL(strOldTaxNumber, '') <> IsNULL(strNewTaxNumber, '')
 						)
+				BEGIN
 					SELECT @strDetails += '{"change":"strTaxNumber","iconCls":"small-gear","from":"' + IsNULL(strOldTaxNumber, '') + '","to":"' + IsNULL(strNewTaxNumber, '') + '","leaf":true,"changeDescription":"Tax No"},'
 					FROM @tblAPVendor
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'strTaxNumber', IsNULL(strOldTaxNumber, ''), IsNULL(strNewTaxNumber, ''), 'Tax No', NULL, NULL, 1
+					FROM @tblAPVendor
+				END
 
 				IF EXISTS (
 						SELECT 1
@@ -1219,6 +1265,16 @@ BEGIN TRY
 					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
 					SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Entity Type"},'
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'tblEMEntityTypes', NULL, NULL, 'Entity Type', NULL, NULL, 1
+					FROM @tblAPVendor
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, ltrim(intEntityTypeId), 'Created', 'Created - Record: ' + strType, NULL, NULL, NULL, NULL, NULL, (@intId - 1)
+					FROM @tblEMEntityType
 				END
 
 				IF EXISTS (
@@ -1241,6 +1297,23 @@ BEGIN TRY
 					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
 					SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Entity Location"},'
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'tblEMEntityLocations', NULL, NULL, 'Entity Location', NULL, NULL, 1
+					FROM @tblAPVendor
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, ltrim(intEntityLocationId), 'Created', 'Created - Record: ' + strLocationName, NULL, NULL, NULL, NULL, NULL, (@intId - 1)
+					FROM @tblEMEntityNewLocation
+					WHERE strRowState = 'Added'
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, ltrim(intEntityLocationId), 'Deleted', 'Deleted - Record: ' + strLocationName, NULL, NULL, NULL, NULL, NULL, (@intId - 2)
+					FROM @tblEMEntityNewLocation
+					WHERE strRowState = 'Deleted'
 				END
 
 				IF EXISTS (
@@ -1265,6 +1338,25 @@ BEGIN TRY
 					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
 					SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Specific Terms"},'
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, '', '', 'tblAPVendorTerms', NULL, NULL, 'Specific Terms', NULL, NULL, 1
+					FROM @tblAPVendor
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, ltrim(intVendorTermId), 'Created', 'Created - Record: ' + T.strTerm, NULL, NULL, NULL, NULL, NULL, (@intId - 1)
+					FROM @tblAPVendorTerm VT
+					LEFT JOIN tblSMTerm T ON T.intTermID = VT.intTermId
+					WHERE strRowState = 'Added'
+
+					SET @intId += 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @intId, ltrim(intVendorTermId), 'Deleted', 'Deleted - Record: ' + T.strTerm, NULL, NULL, NULL, NULL, NULL, (@intId - 2)
+					FROM @tblAPVendorTerm VT
+					LEFT JOIN tblSMTerm T ON T.intTermID = VT.intTermId
+					WHERE strRowState = 'Deleted'
 				END
 
 				IF (LEN(@strDetails) > 1)
@@ -1277,9 +1369,24 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
+
+					BEGIN TRY
+						EXEC uspSMSingleAuditLog 
+							@screenName     = 'EntityManagement.view.Entity',
+							@recordId       = @intEntityId,
+							@entityId       = @intUserId,
+							@AuditLogParam  = @SingleAuditLogParam
+					END TRY
+					BEGIN CATCH
+					END CATCH
 				END
 
 				DECLARE @strLocationDetails NVARCHAR(MAX) = ''
+
+				DECLARE @SingleAuditLogParam2 SingleAuditLogParam
+
+				INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intAuditDetailId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
 
 				WHILE EXISTS (
 						SELECT TOP 1 NULL
@@ -1296,7 +1403,19 @@ BEGIN TRY
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldAddress, '') <> IsNULL(strNewAddress, '')
 
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 2, '', '', 'strAddress', IsNULL(strOldAddress, ''), IsNULL(strNewAddress, ''), 'Address', NULL, NULL, 1
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(strOldAddress, '') <> IsNULL(strNewAddress, '')
+
 					SELECT @strLocationDetails += '{"change":"strCity","iconCls":"small-gear","from":"' + IsNULL(strOldCity, '') + '","to":"' + IsNULL(strNewCity, '') + '","leaf":true,"changeDescription":"City"},'
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(strOldCity, '') <> IsNULL(strNewCity, '')
+
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 3, '', '', 'strCity', IsNULL(strOldCity, ''), IsNULL(strNewCity, ''), 'City', NULL, NULL, 1
 					FROM @tblEMEntityLocation
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldCity, '') <> IsNULL(strNewCity, '')
@@ -1306,7 +1425,19 @@ BEGIN TRY
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldCountry, '') <> IsNULL(strNewCountry, '')
 
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 4, '', '', 'strCountry', IsNULL(strOldCountry, ''), IsNULL(strNewCountry, ''), 'Country', NULL, NULL, 1
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(strOldCountry, '') <> IsNULL(strNewCountry, '')
+
 					SELECT @strLocationDetails += '{"change":"strZipCode","iconCls":"small-gear","from":"' + IsNULL(strOldZipCode, '') + '","to":"' + IsNULL(strNewZipCode, '') + '","leaf":true,"changeDescription":"Zip Code"},'
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(strOldZipCode, '') <> IsNULL(strNewZipCode, '')
+
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 5, '', '', 'strZipCode', IsNULL(strOldZipCode, ''), IsNULL(strNewZipCode, ''), 'Zip Code', NULL, NULL, 1
 					FROM @tblEMEntityLocation
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldZipCode, '') <> IsNULL(strNewZipCode, '')
@@ -1316,7 +1447,19 @@ BEGIN TRY
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldState, '') <> IsNULL(strNewState, '')
 
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 6, '', '', 'strState', IsNULL(strOldState, ''), IsNULL(strNewState, ''), 'State', NULL, NULL, 1
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(strOldState, '') <> IsNULL(strNewState, '')
+
 					SELECT @strLocationDetails += '{"change":"strCheckPayeeName","iconCls":"small-gear","from":"' + IsNULL(strOldCheckPayeeName, '') + '","to":"' + IsNULL(strNewCheckPayeeName, '') + '","leaf":true,"changeDescription":"Check Payee Name"},'
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(strOldCheckPayeeName, '') <> IsNULL(strNewCheckPayeeName, '')
+
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 7, '', '', 'strCheckPayeeName', IsNULL(strOldCheckPayeeName, ''), IsNULL(strNewCheckPayeeName, ''), 'Check Payee Name', NULL, NULL, 1
 					FROM @tblEMEntityLocation
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldCheckPayeeName, '') <> IsNULL(strNewCheckPayeeName, '')
@@ -1326,7 +1469,19 @@ BEGIN TRY
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldPhone, '') <> IsNULL(strNewPhone, '')
 
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 8, '', '', 'strPhone', IsNULL(strOldPhone, ''), IsNULL(strNewPhone, ''), 'Phone', NULL, NULL, 1
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(strOldPhone, '') <> IsNULL(strNewPhone, '')
+
 					SELECT @strLocationDetails += '{"change":"strFax","iconCls":"small-gear","from":"' + IsNULL(strOldFax, '') + '","to":"' + IsNULL(strNewFax, '') + '","leaf":true,"changeDescription":"Fax"},'
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(strOldFax, '') <> IsNULL(strNewFax, '')
+
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 9, '', '', 'strFax', IsNULL(strOldFax, ''), IsNULL(strNewFax, ''), 'Fax', NULL, NULL, 1
 					FROM @tblEMEntityLocation
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldFax, '') <> IsNULL(strNewFax, '')
@@ -1338,7 +1493,21 @@ BEGIN TRY
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(intOldTermsId, 0) <> IsNULL(intNewTermsId, 0)
 
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 10, '', '', 'strTerms', IsNULL(T.strTerm, ''), IsNULL(T1.strTerm, ''), 'Terms', NULL, NULL, 1
+					FROM @tblEMEntityLocation EL
+					LEFT JOIN tblSMTerm T ON T.intTermID = EL.intOldTermsId
+					LEFT JOIN tblSMTerm T1 ON T1.intTermID = EL.intNewTermsId
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(intOldTermsId, 0) <> IsNULL(intNewTermsId, 0)
+
 					SELECT @strLocationDetails += '{"change":"ysnDefaultLocation","iconCls":"small-gear","from":"' + LTRIM(ysnOldDefaultLocation) + '","to":"' + LTRIM(ysnNewDefaultLocation) + '","leaf":true,"changeDescription":"Default Location"},'
+					FROM @tblEMEntityLocation
+					WHERE intEntityLocationId = @intAuditDetailId
+						AND IsNULL(ysnOldDefaultLocation, 0) <> IsNULL(ysnNewDefaultLocation, 0)
+
+					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 11, '', '', 'ysnDefaultLocation', LTRIM(ysnOldDefaultLocation), LTRIM(ysnNewDefaultLocation), 'Default Location', NULL, NULL, 1
 					FROM @tblEMEntityLocation
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(ysnOldDefaultLocation, 0) <> IsNULL(ysnNewDefaultLocation, 0)
@@ -1353,6 +1522,16 @@ BEGIN TRY
 							,@actionType = 'Updated'
 							,@actionIcon = 'small-tree-modified'
 							,@details = @strLocationDetails
+
+						BEGIN TRY
+							EXEC uspSMSingleAuditLog 
+								@screenName     = 'EntityManagement.view.EntityLocation',
+								@recordId       = @intAuditDetailId,
+								@entityId       = @intUserId,
+								@AuditLogParam  = @SingleAuditLogParam2
+						END TRY
+						BEGIN CATCH
+						END CATCH
 					END
 
 					DELETE

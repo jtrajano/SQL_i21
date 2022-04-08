@@ -239,6 +239,22 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
+
+					BEGIN TRY
+					DECLARE @SingleAuditLogParam SingleAuditLogParam
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+							SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@strSampleId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+							UNION ALL
+							SELECT 2, '', '', 'dblRepresentingQty', LTRIM(@dblSRepresentingQty), LTRIM(@dblCQuantity), NULL, NULL, NULL, 1
+
+						EXEC uspSMSingleAuditLog 
+							@screenName     = 'Quality.view.QualitySample',
+							@recordId       = @strSampleId,
+							@entityId       = @intUserId,
+							@AuditLogParam  = @SingleAuditLogParam
+					END TRY
+					BEGIN CATCH
+					END CATCH
 				END
 
 				SELECT @dblSRepresentingQty = (ISNULL(@dblSRepresentingQty, 0) - ISNULL(@dblCQuantity, 0))
@@ -344,6 +360,22 @@ BEGIN TRY
 							,@actionType = 'Updated'
 							,@actionIcon = 'small-tree-modified'
 							,@details = @strDetails
+
+						BEGIN TRY
+						DECLARE @SingleAuditLogParam2 SingleAuditLogParam
+							INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+								SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@strSampleId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+								UNION ALL
+								SELECT 2, '', '', 'intContractDetailId', LTRIM(@intOrgParentDetailId), LTRIM(@intCContractDetailId), NULL, NULL, NULL, 1
+
+							EXEC uspSMSingleAuditLog 
+								@screenName     = 'Quality.view.QualitySample',
+								@recordId       = @strSampleId,
+								@entityId       = @intUserId,
+								@AuditLogParam  = @SingleAuditLogParam2
+						END TRY
+						BEGIN CATCH
+						END CATCH
 					END
 				END
 			END

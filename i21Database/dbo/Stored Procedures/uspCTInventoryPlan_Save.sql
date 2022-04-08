@@ -427,6 +427,22 @@ BEGIN TRY
 				,@actionType = 'Updated'
 				,@actionIcon = 'small-tree-modified'
 				,@details = @strDetails
+
+			BEGIN TRY
+			DECLARE @SingleAuditLogParam SingleAuditLogParam
+			INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intInvPlngReportMasterID AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+					UNION ALL
+					SELECT 2, '', '', strColumnName, Ltrim(isNULL(strOldValue, '')), Ltrim(IsNULL(strNewValue, '')), strColumnDescription, NULL, NULL, 1
+
+			EXEC uspSMSingleAuditLog 
+				@screenName     = 'Manufacturing.view.DemandAnalysisView',
+				@recordId       = @intInvPlngReportMasterID,
+				@entityId       = @intLastModifiedUserId,
+				@AuditLogParam  = @SingleAuditLogParam
+			END TRY
+			BEGIN CATCH
+			END CATCH
 		END
 	END
 

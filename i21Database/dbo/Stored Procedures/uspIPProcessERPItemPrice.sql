@@ -281,6 +281,13 @@ BEGIN TRY
 					WHERE strRowState = 'Added'
 					)
 			BEGIN
+				DECLARE @SingleAuditLogParam SingleAuditLogParam
+				DECLARE @intId INT = 0
+
+				SET @intId += 1
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intItemId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+
 				SELECT @strDetails += '{"change":"tblICItemPricings","children":['
 
 				SELECT @strDetails += '{"action":"Created","change":"Created - Record: ' + strLocationName + '","keyValue":' + ltrim(intItemPricingId) + ',"iconCls":"small-new-plus","leaf":true},'
@@ -290,6 +297,14 @@ BEGIN TRY
 				SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
 				SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Standard Cost/Price"},'
+
+				SET @intId += 1
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT @intId, '', '', 'tblICItemPricings', NULL, NULL, 'Standard Cost/Price', NULL, NULL, 1
+
+				SET @intId += 1
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT @intId, ltrim(intItemPricingId), 'Created', 'Created - Record: ' + strLocationName, NULL, NULL, 'Standard Cost/Price', NULL, NULL, (@intId - 1)
 
 				IF (LEN(@strDetails) > 1)
 				BEGIN
@@ -301,6 +316,16 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
+
+					BEGIN TRY
+						EXEC uspSMSingleAuditLog 
+							@screenName     = 'Inventory.view.Item',
+							@recordId       = @intItemId,
+							@entityId       = @intUserId,
+							@AuditLogParam  = @SingleAuditLogParam
+					END TRY
+					BEGIN CATCH
+					END CATCH
 				END
 			END
 
