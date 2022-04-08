@@ -24,15 +24,11 @@ DECLARE @tblResult TABLE (
 	,dblOpenBalance NUMERIC(18,6)
 	,strUOM NVARCHAR(50)
 	,dblDefaultRisk NUMERIC(18,6)
+	,dblDefaultRiskLimit NUMERIC(18,6)
+	,dblDefaultRiskExposure NUMERIC(18,6)
 	,strCommodityCode NVARCHAR(100)
-
-	
-
-
-
 )
 
-	
 
 SELECT intCommodityId, strCommodityCode INTO #tempCommodity FROM tblICCommodity WHERE ysnMarkToMarket = 1
 
@@ -4283,6 +4279,8 @@ SELECT TOP 1  @intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis ORDER BY intM2MB
 			, dblOpenBalance  = (dblFixedPurchaseValue + dblUnfixedPurchaseValue) - ISNULL(CPLimit.OpenTonnage,0)
 			, strUOM  = @strUOM
 			, dblDefaultRisk
+			, dblDefaultRiskLimit = ISNULL(CPLimit.DefaultRisk, 0) 
+			, dblDefaultRiskExposure = ISNULL(CPLimit.DefaultRisk, 0) - dblDefaultRisk
 			, strCommodityCode = @strCommodityCode
 		
 		FROM (
@@ -4302,18 +4300,18 @@ SELECT TOP 1  @intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis ORDER BY intM2MB
 		INNER JOIN tblAPVendor Ven ON Ven.intEntityId = t2.intEntityId
 		LEFT JOIN tblEMEntityLocation AS Loc ON t2.intEntityId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 		OUTER APPLY (
-			SELECT Credit, OpenTonnage
+			SELECT Credit, OpenTonnage, DefaultRisk
 			FROM (
 				SELECT CTD.strFieldName, FV.strValue
 				FROM tblSMTransaction T
 				INNER JOIN tblSMTabRow TR ON TR.intTransactionId = T.intTransactionId
-				INNER JOIN tblSMCustomTabDetail CTD ON CTD.intCustomTabId = TR.intCustomTabId AND CTD.strFieldName IN ('Credit','OpenTonnage')
+				INNER JOIN tblSMCustomTabDetail CTD ON CTD.intCustomTabId = TR.intCustomTabId AND CTD.strFieldName IN ('Credit','OpenTonnage','DefaultRisk')
 				INNER JOIN tblSMFieldValue FV ON FV.intTabRowId = TR.intTabRowId AND FV.intCustomTabDetailId = CTD.intCustomTabDetailId
 			WHERE T.intRecordId = Ven.intEntityId
 			) d
 			PIVOT(
 				MAX(strValue)
-				FOR strFieldName IN (Credit, OpenTonnage)
+				FOR strFieldName IN (Credit, OpenTonnage, DefaultRisk)
 			) piv
 		
 		) CPLimit
@@ -4325,15 +4323,16 @@ SELECT TOP 1  @intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis ORDER BY intM2MB
 				, strCountry = strCountry COLLATE Latin1_General_CI_AS
 				, dblCreditLimit  = ISNULL(CPLimit.Credit,0)
 				, dblCreditExposure = dblFixedSalesVolume + dblUnfixedSalesVolume --dblTotalCommittedVolume
-				, dblCreditBalance  = (dblFixedSalesVolume + dblUnfixedSalesVolume) - ISNULL(CPLimit.Credit,0)
+				, dblCreditBalance  = ISNULL(CPLimit.Credit,0) - (dblFixedSalesVolume + dblUnfixedSalesVolume)
 				, strCurrency = @strCurrency
 				, dblOpenTonnageLimit  = ISNULL(CPLimit.OpenTonnage,0)
 				, dblOpenMTExposure  =  dblFixedSalesValue + dblUnfixedSalesValue -- dblTotalCommittedValue
-				, dblOpenBalance  = (dblFixedSalesValue + dblUnfixedSalesValue) - ISNULL(CPLimit.OpenTonnage,0)
+				, dblOpenBalance  = ISNULL(CPLimit.OpenTonnage,0) - (dblFixedSalesValue + dblUnfixedSalesValue)
 				, strUOM  = @strUOM
-				, dblDefaultRisk
+				, dblDefaultRisk 
+				, dblDefaultRiskLimit = ISNULL(CPLimit.DefaultRisk, 0) 
+				, dblDefaultRiskExposure = ISNULL(CPLimit.DefaultRisk, 0) - dblDefaultRisk
 				, strCommodityCode = @strCommodityCode
-				
 			FROM (
 				SELECT strEntityName
 					, intEntityId
@@ -4353,27 +4352,22 @@ SELECT TOP 1  @intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis ORDER BY intM2MB
 					, strCountry
 			)t2
 			OUTER APPLY (
-			SELECT Credit, OpenTonnage
+			SELECT Credit, OpenTonnage, DefaultRisk
 				FROM (
 					SELECT CTD.strFieldName, FV.strValue
 					FROM tblSMTransaction T
 					INNER JOIN tblSMTabRow TR ON TR.intTransactionId = T.intTransactionId
-					INNER JOIN tblSMCustomTabDetail CTD ON CTD.intCustomTabId = TR.intCustomTabId AND CTD.strFieldName IN ('Credit','OpenTonnage')
+					INNER JOIN tblSMCustomTabDetail CTD ON CTD.intCustomTabId = TR.intCustomTabId AND CTD.strFieldName IN ('Credit','OpenTonnage','DefaultRisk')
 					INNER JOIN tblSMFieldValue FV ON FV.intTabRowId = TR.intTabRowId AND FV.intCustomTabDetailId = CTD.intCustomTabDetailId
 				WHERE T.intRecordId = t2.intEntityId
 				) d
 				PIVOT(
 					MAX(strValue)
-					FOR strFieldName IN (Credit, OpenTonnage)
+					FOR strFieldName IN (Credit, OpenTonnage, DefaultRisk)
 				) piv
 		
 			) CPLimit
-
-			
-		
-	
 	END
-
 
 
 	DELETE FROM @ContractBalance
@@ -4397,8 +4391,6 @@ DROP TABLE #tempCommodity
 SELECT * FROM @tblResult
 
 END TRY
-
-
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
