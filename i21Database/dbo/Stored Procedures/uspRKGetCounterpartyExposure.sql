@@ -23,8 +23,8 @@ DECLARE @tblResult TABLE (
 	,dblOpenMTExposure NUMERIC(18,6)
 	,dblOpenBalance NUMERIC(18,6)
 	,strUOM NVARCHAR(50)
-	,dblDefaultRisk NUMERIC(18,6)
 	,dblDefaultRiskLimit NUMERIC(18,6)
+	,dblDefaultRisk NUMERIC(18,6)
 	,dblDefaultRiskExposure NUMERIC(18,6)
 	,strCommodityCode NVARCHAR(100)
 )
@@ -4278,8 +4278,8 @@ SELECT TOP 1  @intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis ORDER BY intM2MB
 			, dblOpenMTExposure  =  dblFixedPurchaseValue + dblUnfixedPurchaseValue -- dblTotalCommittedValue
 			, dblOpenBalance  = (dblFixedPurchaseValue + dblUnfixedPurchaseValue) - ISNULL(CPLimit.OpenTonnage,0)
 			, strUOM  = @strUOM
-			, dblDefaultRisk
 			, dblDefaultRiskLimit = ISNULL(CPLimit.DefaultRisk, 0) 
+			, dblDefaultRisk
 			, dblDefaultRiskExposure = ISNULL(CPLimit.DefaultRisk, 0) - dblDefaultRisk
 			, strCommodityCode = @strCommodityCode
 		
@@ -4329,8 +4329,8 @@ SELECT TOP 1  @intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis ORDER BY intM2MB
 				, dblOpenMTExposure  =  dblFixedSalesValue + dblUnfixedSalesValue -- dblTotalCommittedValue
 				, dblOpenBalance  = ISNULL(CPLimit.OpenTonnage,0) - (dblFixedSalesValue + dblUnfixedSalesValue)
 				, strUOM  = @strUOM
-				, dblDefaultRisk 
 				, dblDefaultRiskLimit = ISNULL(CPLimit.DefaultRisk, 0) 
+				, dblDefaultRisk 
 				, dblDefaultRiskExposure = ISNULL(CPLimit.DefaultRisk, 0) - dblDefaultRisk
 				, strCommodityCode = @strCommodityCode
 			FROM (
