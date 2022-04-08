@@ -24,6 +24,7 @@ IF @InitTranCount = 0
 ELSE
 	SAVE TRANSACTION @Savepoint
 
+DECLARE @GLEntries 							RecapTableType
 DECLARE @MODULE_NAME						NVARCHAR(25) = 'Accounts Receivable'
 	  , @SCREEN_NAME						NVARCHAR(25) = 'Invoice'
 	  , @CODE								NVARCHAR(25) = 'AR'
@@ -52,10 +53,103 @@ BEGIN TRY
 								  , @BatchId	= @BatchIdUsed
 								  , @UserId		= @UserId 
 
+	INSERT INTO @GLEntries
+		([dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]
+		,[strRateType]
+		,[strDocument]
+		,[strComments]
+		,[strSourceDocumentId]
+		,[intSourceLocationId]
+		,[intSourceUOMId]
+		,[dblSourceUnitDebit]
+		,[dblSourceUnitCredit]
+		,[intCommodityId]
+		,[intSourceEntityId]
+		,[ysnRebuild])
+	SELECT
+		 [dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]
+		,[strRateType]
+		,[strDocument]
+		,[strComments]
+		,[strSourceDocumentId]
+		,[intSourceLocationId]
+		,[intSourceUOMId]
+		,[dblSourceUnitDebit]
+		,[dblSourceUnitCredit]
+		,[intCommodityId]
+		,[intSourceEntityId]
+		,[ysnRebuild]
+	FROM ##ARInvoiceGLEntries
+
+	IF @InitTranCount = 0
+		ROLLBACK TRANSACTION
+	ELSE
+		ROLLBACK TRANSACTION @Savepoint
+    
     DELETE  Q
     FROM tblARPostingQueue Q
     INNER JOIN ##ARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
-							  
+    
     DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchIdUsed
 		 
 	INSERT INTO tblGLPostRecap WITH (TABLOCK) (
@@ -116,7 +210,7 @@ BEGIN TRY
 		,[strAccountId]						= B.[strAccountId]
 		,[strAccountGroup]					= C.[strAccountGroup]
 		,[strRateType]						= RATETYPE.strCurrencyExchangeRateType
-	FROM ##ARInvoiceGLEntries A
+	FROM @GLEntries A
 	INNER JOIN dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
 	INNER JOIN dbo.tblGLAccountGroup C ON B.intAccountGroupId = C.intAccountGroupId			
 	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, @ZeroDecimal) - ISNULL(A.dblCredit, @ZeroDecimal)) Debit

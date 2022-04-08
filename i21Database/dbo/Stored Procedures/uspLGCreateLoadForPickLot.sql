@@ -22,7 +22,7 @@ BEGIN TRY
 	DECLARE @intTransportationMode INT
 	DECLARE @intTransUsedBy INT
 	DECLARE @intWeightUnitMeasureId INT
-	DECLARE @intItemId INT
+	--DECLARE @intItemId INT
 	DECLARE @intWeightItemUOMId INT
 	
 	DECLARE @intSubLocationId INT
@@ -136,15 +136,6 @@ BEGIN TRY
 		FROM tblLGAllocationDetail
 		WHERE intAllocationDetailId = @intAllocationDetailId
 
-		SELECT @intItemId = intItemId
-		FROM tblCTContractDetail
-		WHERE intContractDetailId = @intSContractDetailId
-
-		SELECT @intWeightItemUOMId = intItemUOMId
-		FROM tblICItemUOM
-		WHERE intItemId = @intItemId
-			AND intUnitMeasureId = @intWeightUnitMeasureId
-
 		INSERT INTO tblLGLoadDetail (
 			dblGross
 			,dblNet
@@ -172,13 +163,13 @@ BEGIN TRY
 			,AD.intAllocationDetailId
 			,1
 			,PLH.intCustomerEntityId
-			,CD.intItemId
-			,CD.intItemUOMId
+			,Lot.intItemId
+			,Lot.intItemUOMId
 			,@intLoadId
 			,PLD.intPickLotDetailId
 			,CD.intCompanyLocationId
 			,CD.intContractDetailId
-			,@intWeightItemUOMId
+			,WUOM.intItemUOMId
 			,PT.strPricingType
 			,A.intSeqCurrencyId
 			,A.intSeqPriceUOMId
@@ -189,7 +180,9 @@ BEGIN TRY
 		JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intSContractDetailId
 		JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+		LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = PLD.intLotId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) A
+		OUTER APPLY (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = Lot.intItemId AND IU.intUnitMeasureId = PLD.intWeightUnitMeasureId) WUOM
 		WHERE AD.intAllocationDetailId = @intAllocationDetailId
 			AND PLD.intPickLotDetailId = @intPickLotDetailId
 
@@ -225,14 +218,16 @@ BEGIN TRY
 			,dblNetWt
 			,dblTareWt
 			,1
-			,CD.intItemUOMId
+			,Lot.intItemUOMId
 			,@intLoadDetailId
 			,PLD.intLotId
-			,@intWeightItemUOMId
+			,WUOM.intItemUOMId
 			,''
 		FROM tblLGPickLotDetail PLD
 		JOIN tblLGAllocationDetail AD ON PLD.intAllocationDetailId = AD.intAllocationDetailId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intPContractDetailId
+		LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = PLD.intLotId
+		OUTER APPLY (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = Lot.intItemId AND IU.intUnitMeasureId = PLD.intWeightUnitMeasureId) WUOM
 		WHERE AD.intAllocationDetailId = @intAllocationDetailId
 			AND PLD.intPickLotDetailId = @intPickLotDetailId
 

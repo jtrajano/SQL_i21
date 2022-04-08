@@ -33,13 +33,13 @@ SELECT L.strLoadNumber
 	  ,Receipt.strBankReferenceNo
 	  ,Receipt.strReferenceNo
 	  ,strSourceLoadNumber = PL.strLoadNumber
-	  ,dblWeightPerUnit = ISNULL(LOT.dblWeightPerQty,1.0)
-	  ,dblTarePerQty = ISNULL(LOT.dblTarePerQty,1.0)
+	  ,dblWeightPerUnit = dbo.fnDivide(LOT.dblWeight, ISNULL(dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, LDL.intItemUOMId, dblQty), 1.0)) --ISNULL(LOT.dblWeightPerQty,1.0)
+	  ,dblTarePerQty = dbo.fnDivide(LOT.dblTare, ISNULL(dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, LDL.intItemUOMId, dblQty), 1.0)) --ISNULL(LOT.dblTarePerQty,1.0)
 FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LOT.intItemUOMId, LDL.intItemUOMId)
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = LDL.intItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = ISNULL(LOT.intWeightUOMId, LDL.intWeightUOMId)
 	LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WU.intUnitMeasureId

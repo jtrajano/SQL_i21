@@ -19,6 +19,7 @@ BEGIN
 		,QCD.dblFactorUnderTarget
 		,QCD.dblDiscount
 		,QCD.strCostMethod
+		,QCD.strEscalateBy
 		,QCD.intCurrencyId
 		,QCD.intUnitMeasureId
 		,TR.strPropertyValue AS strActualValue

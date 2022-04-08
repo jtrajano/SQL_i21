@@ -623,7 +623,7 @@ BEGIN TRY
 									ISNULL(LDCL.dblLinkNetWt, 0)
 								END
 				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
-				,[intCostUOMId] = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)
+				,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
 				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
 				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
 				,[dblExchangeRate] = 1
@@ -763,7 +763,7 @@ BEGIN TRY
 				,[dblGross] = LD.dblGross - ISNULL(LD.dblDeliveredGross,0)
 				,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
 				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
-				,[intCostUOMId] = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)
+				,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
 				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
 				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
 				,[dblExchangeRate] = 1

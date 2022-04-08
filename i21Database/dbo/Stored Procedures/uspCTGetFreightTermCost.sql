@@ -21,10 +21,12 @@ BEGIN TRY
 		, @intTermCostDetailId INT
 		, @intCurrencyId INT
 		, @strCurrency NVARCHAR(100)
-		, @intUnitMeasureId INT
+		, @intItemUOMId INT
 		, @strUnitMeasure NVARCHAR(100)
 		, @dblValue NUMERIC(18, 6)
 		, @strCostMethod NVARCHAR(50)
+		, @intFreightItemId INT
+		, @intInsuranceItemId INT
 		, @ysnFreight BIT
 		, @ysnInsurance BIT
 
@@ -34,7 +36,7 @@ BEGIN TRY
 		, strEntityName NVARCHAR(100)
 		, intCurrencyId INT
 		, strCurrency NVARCHAR(100)
-		, intUnitMeasureId INT
+		, intItemUOMId INT
 		, strUnitMeasure NVARCHAR(100)
 		, strCostMethod NVARCHAR(50)
 		, dblRate NUMERIC(18, 6)
@@ -42,6 +44,8 @@ BEGIN TRY
 
 	SELECT TOP 1 @ysnFreightTermCost = ISNULL(ysnFreightTermCost, 0)
 		, @ysnAutoCalc = ISNULL(ysnAutoCalculateFreightTermCost, 0)
+		, @intFreightItemId = intDefaultFreightItemId
+		, @intInsuranceItemId = intDefaultInsuranceItemId
 	FROM vyuCTCompanyPreference
 	
 	IF (@ysnFreightTermCost = 0)
@@ -64,7 +68,7 @@ BEGIN TRY
 			, @strCostItem = strCostItem
 			, @intCurrencyId = intCurrencyId
 			, @strCurrency = strCurrency
-			, @intUnitMeasureId = intUnitMeasureId
+			, @intItemUOMId = intItemUOMId
 			, @strUnitMeasure = strUnitMeasure
 			, @dblValue = dblValue
 			, @strCostMethod = strCostMethod
@@ -72,7 +76,7 @@ BEGIN TRY
 			, @ysnInsurance = ysnInsurance
 		FROM #tmpCosts
 
-		IF (@ysnFreight = 1)
+		IF (@intCostItemId = @intFreightItemId) OR (@ysnFreight = 1)
 		BEGIN			
 			SELECT TOP 1 @intFreightRateMatrixId = FRM.intFreightRateMatrixId
 			FROM tblLGFreightRateMatrix FRM
@@ -90,7 +94,7 @@ BEGIN TRY
 				JOIN tblSMCity DP ON DP.strCity = FRM.strDestinationCity
 				WHERE LP.intCityId = @intFromPortId
 					AND DP.intCityId = @intToPortId
-					AND FRM.dblTotalCostPerContainer = (SELECT MAX(dblTotalCostPerContainer)
+					AND FRM.dblTotalCostPerContainer = (SELECT MIN(dblTotalCostPerContainer)
 														FROM tblLGFreightRateMatrix FRM
 														JOIN tblSMCity LP ON LP.strCity = FRM.strOriginPort
 														JOIN tblSMCity DP ON DP.strCity = FRM.strDestinationCity
@@ -107,7 +111,7 @@ BEGIN TRY
 					, strVendor = em.strName
 					, @intCurrencyId
 					, @strCurrency
-					, @intUnitMeasureId
+					, @intItemUOMId
 					, @strUnitMeasure
 					, @strCostMethod
 					, dblRate = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
@@ -121,7 +125,7 @@ BEGIN TRY
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
 			END
 		END
-		ELSE IF (@ysnInsurance = 1)
+		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
 		BEGIN
 			INSERT INTO @CostItems		
 			SELECT @intCostItemId
@@ -130,14 +134,16 @@ BEGIN TRY
 				, strVendor = em.strName
 				, @intCurrencyId
 				, @strCurrency
-				, @intUnitMeasureId
+				, @intItemUOMId
 				, @strUnitMeasure
 				, @strCostMethod
-				, dblRate = detail.dblInsurancePremiumFactor
-				, dblAmount = detail.dblInsurancePremiumFactor
+				, dblRate = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
+				, dblAmount = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
 			FROM tblLGInsurancePremiumFactor ipf
 			JOIN tblLGInsurancePremiumFactorDetail detail ON detail.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId
 			JOIN tblEMEntity em ON em.intEntityId = ipf.intEntityId
+			LEFT JOIN tblLGInsurancePremiumFactorPurchase pFactor ON pFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 1
+			LEFT JOIN tblLGInsurancePremiumFactorSale sFactor ON sFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 2
 			WHERE detail.intLoadingPortId = @intFromPortId
 				AND detail.intDestinationPortId = @intToPortId
 				AND @intMarketZoneId = (CASE WHEN @intContractTypeId = 1 THEN detail.intLoadingZoneId ELSE detail.intDestinationZoneId END)
@@ -151,7 +157,7 @@ BEGIN TRY
 				, NULL
 				, @intCurrencyId
 				, @strCurrency
-				, @intUnitMeasureId
+				, @intItemUOMId
 				, @strUnitMeasure
 				, @strCostMethod
 				, dblRate = CASE WHEN @strCostMethod = 'Amount' THEN 0 ELSE @dblValue END

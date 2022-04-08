@@ -25,6 +25,7 @@
 	[intContractDetailId]			INT NULL,
 	[intPriceFixationDetailId]		INT NULL,
 	[intContractSeqId]				INT NULL,
+	[intLotId] 						INT NULL,
 	[intContractCostId]				INT NULL,
 	[strContractNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intScaleTicketId]				INT NULL,

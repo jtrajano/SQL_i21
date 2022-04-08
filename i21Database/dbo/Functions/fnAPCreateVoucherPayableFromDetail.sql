@@ -57,6 +57,7 @@ RETURNS TABLE AS RETURN
 		,[intBuybackChargeId]				=	B.intBuybackChargeId
 		,[intLinkingId]						=	B.intLinkingId
 		,[intComputeTotalOption]			=	B.intComputeTotalOption
+		,[intLotId]							=	B.intLotId
 		,[intTicketDistributionAllocationId]=	B.intTicketDistributionAllocationId
 		,[dblOrderQty]						=	B.dblQtyOrdered
 		,[dblOrderUnitQty]					=	B.dblUnitQty

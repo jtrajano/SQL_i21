@@ -124,6 +124,7 @@ FROM	tblICInventoryReceipt r
 						WHERE	bd.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 								AND bd.intInventoryReceiptChargeId IS NULL
 								AND b.ysnPosted = 1 
+								AND b.intTransactionType <> 16
 					) totalFromVouchers
 					LEFT JOIN (
 						tblAPBill b INNER JOIN tblAPBillDetail bd
@@ -132,6 +133,7 @@ FROM	tblICInventoryReceipt r
 						ON bd.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 						AND bd.intInventoryReceiptChargeId IS NULL
 						AND b.ysnPosted = 1 
+						AND b.intTransactionType <> 16
 
 					LEFT JOIN vyuCTContractDetailView ContractView
 						ON ContractView.intContractDetailId = ri.intLineNo

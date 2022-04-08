@@ -908,6 +908,7 @@ BEGIN TRY
 				,[intSubBookId]
 				,intPartitionId
 				,dtmDueDate
+				,intLotId
 				)
 			SELECT GP.[intEntityVendorId]
 				,GP.[intTransactionType]
@@ -968,7 +969,8 @@ BEGIN TRY
 				,GP.intSubBookId
 				,1
 				,@dtmDueDate
-			FROM dbo.fnICGeneratePayables(@intInventoryReceiptId, 1, 1) GP
+				,GP.intLotId
+			FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1, DEFAULT) GP
 
 			SELECT @intShipFromId = NULL
 				,@intShipFromEntityId = NULL

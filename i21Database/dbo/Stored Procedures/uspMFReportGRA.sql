@@ -238,6 +238,7 @@ BEGIN TRY
 			,S.strGradeScore
 			,S.strCupScoreResult
 			,S.strGradeScoreResult
+			,CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), ITD.dblQuantity)) + ' ' + QUOM.strUnitMeasure AS strQuantityUOM
 		FROM dbo.tblICInventoryTransferDetail ITD
 		JOIN dbo.tblICInventoryTransfer IT ON IT.intInventoryTransferId = ITD.intInventoryTransferId
 		JOIN @tblSampleValues S ON S.intInventoryTransferDetailId = ITD.intInventoryTransferDetailId
@@ -249,6 +250,8 @@ BEGIN TRY
 		LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = L.intEntityVendorId
 		LEFT JOIN dbo.tblICItemUOM NetUOM ON NetUOM.intItemUOMId = ITD.intGrossNetUOMId
 		LEFT JOIN dbo.tblICUnitMeasure NUOM ON NUOM.intUnitMeasureId = NetUOM.intUnitMeasureId
+		LEFT JOIN dbo.tblICItemUOM QtyUOM ON QtyUOM.intItemUOMId = ITD.intItemUOMId
+		LEFT JOIN dbo.tblICUnitMeasure QUOM ON QUOM.intUnitMeasureId = QtyUOM.intUnitMeasureId
 	END
 END TRY
 

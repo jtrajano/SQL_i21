@@ -2,6 +2,7 @@ CREATE FUNCTION dbo.fnICGeneratePayables (
 	@intReceiptId INT
 	, @ysnPosted BIT
 	, @ysnForVoucher BIT = 0
+	, @strType NVARCHAR(50) = NULL 
 )
 RETURNS @table TABLE
 (
@@ -14,9 +15,9 @@ RETURNS @table TABLE
 , [strPurchaseOrderNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [intPurchaseDetailId]				INT NULL 
 , [intItemId]						INT NULL 
-, [strMiscDescription]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strMiscDescription]				NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL 
 , [strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strDescription]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strDescription]					NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL 
 , [intPurchaseTaxGroupId]			INT NULL 
 , [dblOrderQty]						NUMERIC(38, 20) NULL 
 , [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
@@ -98,6 +99,7 @@ RETURNS @table TABLE
 , [intLoadShipmentCostId]			INT NULL	
 , [intBookId]						INT NULL
 , [intSubBookId]					INT NULL
+, [intLotId]						INT NULL 
 
 /*Payment Info*/
 , [intPayFromBankAccountId]			INT NULL --DEFAULT PAY FROM BANK ACCOUNT
@@ -123,6 +125,7 @@ BEGIN
 DECLARE @SourceType_STORE AS INT = 7		 
 	, @type_Voucher AS INT = 1
 	, @type_DebitMemo AS INT = 3
+	, @type_ProvisionalVoucher AS INT = 16
 	, @billTypeToUse INT
 	, @intVoucherInvoiceNoOption TINYINT
 	,	@voucherInvoiceOption_Blank TINYINT = 1 
@@ -153,7 +156,15 @@ FROM tblAPCompanyPreference
 INSERT INTO @table
 SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
-	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE ISNULL(@billTypeToUse, 1) END 
+	,[intTransactionType]		=	
+		CASE 
+			WHEN @strType = 'provisional voucher' THEN 
+				@type_ProvisionalVoucher
+			WHEN A.strReceiptType = 'Inventory Return' THEN 
+				@type_DebitMemo 
+			ELSE 
+				ISNULL(@billTypeToUse, @type_Voucher) 
+		END 
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
@@ -353,6 +364,7 @@ SELECT DISTINCT
 	,[intLoadShipmentCostId]	     = NULL 
 	,[intBookId] = A.intBookId
 	,[intSubBookId] = A.intSubBookId
+	,[intLotId] = Lot.intLotId
 
 	/*Payment Info*/
 	, [intPayFromBankAccountId]		= A.intBankAccountId
@@ -508,7 +520,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		WHERE 
 			billDetail.intInventoryReceiptItemId = B.intInventoryReceiptItemId 
 			AND billDetail.intInventoryReceiptChargeId IS NULL
-			AND bill.intTransactionType NOT IN (13)  
+			AND bill.intTransactionType NOT IN (13, 16)  -- ('Basis Advance', 'Provisional Voucher')
 			/*
 				CASE A.intTransactionType
 						WHEN 1 THEN 'Voucher'
@@ -567,6 +579,17 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 			AND po.intPurchaseId = ISNULL(rtn.intOrderId, B.intOrderId)
 			AND po.intPurchaseDetailId = ISNULL(rtn.intLineNo, B.intLineNo) 
 	) PurchaseOrder
+
+	OUTER APPLY (
+		SELECT TOP 1 
+			ril.intLotId 
+		FROM 
+			tblICInventoryReceiptItemLot ril
+			INNER JOIN tblICCompanyPreference p
+				ON p.strSingleOrMultipleLots = 'Single'
+		WHERE
+			ril.intInventoryReceiptItemId = B.intInventoryReceiptItemId		
+	) Lot
 
 WHERE 
 	A.intInventoryReceiptId = @intReceiptId
@@ -808,6 +831,7 @@ SELECT DISTINCT
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
 		,[intBookId]								= A.intBookId
 		,[intSubBookId]								= A.intSubBookId
+		,[intLotId]									= NULL 
 		/*Payment Info*/
 		, [intPayFromBankAccountId]		= A.[intPayFromBankAccountId]
 		, [strFinancingSourcedFrom] 	= A.[strFinancingSourcedFrom]
@@ -871,7 +895,7 @@ FROM
 				ON BD.intBillId = B.intBillId
 		WHERE 
 			BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-			AND B.intTransactionType NOT IN (13)  
+			AND B.intTransactionType NOT IN (13, 16)  -- ('Basis Advance', 'Provisional Voucher')
 			/*
 				CASE A.intTransactionType
 						WHEN 1 THEN 'Voucher'

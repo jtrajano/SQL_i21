@@ -13,7 +13,7 @@ CREATE TABLE #tmpBillsId (
 --DECLARE @transCount INT = @@TRANCOUNT;
 --IF @transCount = 0 BEGIN TRANSACTION
 
-INSERT INTO #tmpBillsId SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@billIds)
+INSERT INTO #tmpBillsId SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@billIds)
 
 UPDATE A
 	SET dblAmountDue = CASE WHEN @post = 0 
@@ -48,7 +48,7 @@ CROSS APPLY
 	AND F.intBillId = A.intBillId
 	AND C.intTransactionType = 11 --Claims
 ) AppliedPayments
-WHERE A.intTransactionType IN (2, 13, 3,8)
+WHERE A.intTransactionType IN (2, 13, 3,8, 16)
 
 -- IF @post = 0
 -- BEGIN

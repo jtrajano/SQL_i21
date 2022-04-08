@@ -118,6 +118,10 @@ AS
 			,CP.ysnDefaultShipperCargillFrontingDetails			
 			,CP.ysnFreightTermCost
 			,CP.ysnAutoCalculateFreightTermCost
+			,CP.intDefaultFreightItemId
+			,strDefaultFreightItem = DFI.strItemNo
+			,CP.intDefaultInsuranceItemId
+			,strDefaultInsuranceItem = DII.strItemNo
 			,CP.ysnAllowCropYearOverlap
 			,CP.ysnEnableFXFieldInContractPricing
 			,CP.ysnEnableItemQualityFields
@@ -128,6 +132,8 @@ AS
 			,CP.ysnEnableVendorCertificationProgram
 			,CP.ysnEnablePackingWeightAdjustment
 			,CP.ysnEnableLetterOfCredit
+			,CP.ysnEnableOutrightPricing
+			,CP.ysnEnableDerivativeInArbitrage
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
 	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId
@@ -140,3 +146,5 @@ AS
 	LEFT JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule
 	LEFT JOIN	tblICItem					FB	ON	FB.intItemId				=	CP.intFreightBasisCostItemId
 	LEFT JOIN	tblICItem					FCI	ON	FCI.intItemId				=	CP.intFinanceCostId
+	LEFT JOIN	tblICItem					DFI	ON	DFI.intItemId				=	CP.intDefaultFreightItemId
+	LEFT JOIN	tblICItem					DII	ON	DII.intItemId				=	CP.intDefaultInsuranceItemId

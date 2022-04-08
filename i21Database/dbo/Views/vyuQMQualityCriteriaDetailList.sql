@@ -13,6 +13,7 @@ SELECT QCD.intQualityCriteriaDetailId
 	,QCD.dblFactorUnderTarget
 	,QCD.dblDiscount
 	,QCD.strCostMethod
+	,QCD.strEscalateBy
 	,P.strPropertyName
 	,C.strCurrency
 	,UOM.strUnitMeasure

@@ -507,6 +507,8 @@ BEGIN
 			OR	(C.intTransactionType = 2 AND C.intTransactionReversed > 0) --VPRE WAS REVERSED
 			OR	C.intBillId IS NULL --DELETED
 			)
+			AND
+			C.intTransactionType <> 16
 		)--Prepay and Debit Memo transactions
 
 		--VALIDATE THE AMOUNT DUE

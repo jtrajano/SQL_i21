@@ -16,6 +16,7 @@ SELECT
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
 		 WHEN 15 THEN 'Tax Adjustment'
+		 WHEN 16 THEN 'Provisional Voucher'
 		 ELSE 'Invalid Type'
 	END AS strTransactionType,
 	G2.strName,

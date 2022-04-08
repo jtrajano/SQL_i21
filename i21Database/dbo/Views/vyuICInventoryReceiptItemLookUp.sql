@@ -28,10 +28,24 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, ItemLocation.ysnStorageUnitRequired
 		, dblItemUOMConvFactor = ISNULL(ItemUOM.dblUnitQty, 0)
 		, dblWeightUOMConvFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0)
-		, dblGrossMargin = (
-			CASE	WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
-					ELSE ((ISNULL(dblUnitRetail, 0) - dbo.fnCalculateCostBetweenUOM(ItemCostUOM.intItemUOMId, ReceiptItem.intUnitMeasureId, ISNULL(ReceiptItem.dblUnitCost, 0))) / dblUnitRetail) * 100 END
-		)
+		, dblGrossMargin = 
+			CASE	
+				WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
+				ELSE 				
+				-- (salesPrice - cost) / salesPrice * 100
+				dbo.fnDivide(
+					(
+						ISNULL(dblUnitRetail, 0) 
+						- dbo.fnCalculateCostBetweenUOM(
+							ISNULL(ItemCostUOM.intItemUOMId, ReceiptItem.intUnitMeasureId) 
+							,stockUOM.intItemUOMId  
+							, ISNULL(ReceiptItem.dblUnitCost, 0)
+						)
+					)
+					, ISNULL(dblUnitRetail, 0) 
+				) 
+				* 100 					
+			END		
 		, Item.strLifeTimeType
 		, Item.intLifeTime
 		, strCostUOM = CostUOM.strUnitMeasure
@@ -268,6 +282,13 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		LEFT JOIN tblICStorageLocation StorageLocation 
 			ON StorageLocation.intStorageLocationId = ReceiptItem.intStorageLocationId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Receipt.intLocationId AND ItemLocation.intItemId = Item.intItemId
+		OUTER APPLY (
+			SELECT TOP 1 
+				stockUOM.intItemUOMId
+			FROM tblICItemUOM stockUOM
+			WHERE stockUOM.intItemId = ReceiptItem.intItemId
+				AND stockUOM.ysnStockUnit = 1
+		) stockUOM
 		LEFT JOIN tblICItemUOM ItemUOM 
 			ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 			AND ItemUOM.intItemId = ReceiptItem.intItemId

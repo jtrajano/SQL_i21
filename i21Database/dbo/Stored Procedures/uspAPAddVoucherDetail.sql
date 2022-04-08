@@ -122,6 +122,7 @@ SELECT TOP 100 PERCENT
 	,intContractSeq						=	ctDetail.intContractSeq
 	,intLinkingId						=	A.intLinkingId
 	,intComputeTotalOption				=	A.intComputeTotalOption
+	,intLotId							=	A.intLotId
 	,intTicketDistributionAllocationId	=	A.intTicketDistributionAllocationId
 	/*Prepaid info*/					
 	,dblPrepayPercentage				=	A.dblPrepayPercentage
@@ -424,6 +425,7 @@ INSERT
 	,intContractSeq						
 	,intLinkingId	
 	,intComputeTotalOption
+	,intLotId
 	,intTicketDistributionAllocationId				
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
@@ -523,6 +525,7 @@ VALUES
 	,intContractSeq						
 	,intLinkingId	
 	,intComputeTotalOption
+	,intLotId
 	,intTicketDistributionAllocationId		
 	/*Prepaid info*/					
 	,dblPrepayPercentage				

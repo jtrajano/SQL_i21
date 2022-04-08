@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICConvertReceiptToVoucher]
 	@intReceiptId INT,
 	@intEntityUserSecurityId INT,
+	@strType NVARCHAR(50) = NULL,
 	@intBillId INT OUTPUT,
 	@strBillIds NVARCHAR(MAX) = NULL OUTPUT,
 	@intScreenId INT = NULL
@@ -137,6 +138,7 @@ BEGIN
 			,[intSubLocationId]
 			,[intBookId]
 			,[intSubBookId]
+			,[intLotId]
 			/*Payment Info*/
 			, [intPayFromBankAccountId]
 			, [strFinancingSourcedFrom]
@@ -211,6 +213,7 @@ BEGIN
 		,GP.intSubLocationId
 		,GP.intBookId
 		,GP.intSubBookId
+		,GP.intLotId
 		/*Payment Info*/
 		, [intPayFromBankAccountId]
 		, [strFinancingSourcedFrom]
@@ -226,7 +229,7 @@ BEGIN
 		, [strReferenceNo]
 		, [intBankValuationRuleId]
 		, [strComments]
-	FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1) GP
+	FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1, @strType) GP
 
 	END 
 
@@ -275,15 +278,27 @@ BEGIN
 	BEGIN 
 		DECLARE @throwedError AS NVARCHAR(1000);
 
-		--EXEC [dbo].[uspAPCreateVoucher]
-		EXEC uspCTCreateVoucher
-			@voucherPayables = @voucherItems
-			,@voucherPayableTax = @voucherItemsTax
-			,@userId = @intEntityUserSecurityId
-			,@throwError = 0
-			,@error = @throwedError OUTPUT
-			,@createdVouchersId = @strBillIds OUTPUT
-
+		IF @strType = 'provisional voucher'
+		BEGIN 
+			EXEC uspAPCreateProvisional
+				@voucherPayables = @voucherItems
+				,@voucherPayableTax = @voucherItemsTax
+				,@userId = @intEntityUserSecurityId
+				,@throwError = 0
+				,@error = @throwedError OUTPUT
+				,@createdVouchersId = @strBillIds OUTPUT
+		END 
+		ELSE 
+		BEGIN 
+			--EXEC [dbo].[uspAPCreateVoucher]
+			EXEC uspCTCreateVoucher
+				@voucherPayables = @voucherItems
+				,@voucherPayableTax = @voucherItemsTax
+				,@userId = @intEntityUserSecurityId
+				,@throwError = 0
+				,@error = @throwedError OUTPUT
+				,@createdVouchersId = @strBillIds OUTPUT
+		END 
 
 		--THIS ASSUMES THAT THE VOUCHER CREATED IS ONLY ONE
 		SET @intBillId = CAST(@strBillIds AS INT)

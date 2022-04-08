@@ -1669,6 +1669,15 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Letter of Credit')
 	UNION ALL
+	SELECT	[intStartingNumberId]	= 171
+			,[strTransactionType]	= N'Provisional Voucher'
+			,[strPrefix]			= N'PROV-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Provisional Voucher')
+	UNION ALL
 	SELECT	[intStartingNumberId]	= 172
 			,[strTransactionType]	= N'Credit Line'
 			,[strPrefix]			= N'CL-'
@@ -1677,7 +1686,6 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Line')
-
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF

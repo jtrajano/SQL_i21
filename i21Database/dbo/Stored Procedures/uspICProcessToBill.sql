@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICProcessToBill]
 	@intReceiptId int,
 	@intUserId int,
+	@strType NVARCHAR(50) = NULL,
 	@intBillId int OUTPUT,
 	@strBillIds NVARCHAR(MAX) = NULL OUTPUT,
 	@intScreenId int = NULL
@@ -31,10 +32,10 @@ BEGIN
 END 
 ELSE IF @receiptType <> 'Transfer Order'
 BEGIN 
-
 	EXEC @intReturnValue = uspICConvertReceiptToVoucher
 		@intReceiptId 
 		,@intUserId 
+		,@strType 
 		,@intBillId OUTPUT
 		,@strBillIds OUTPUT
 		,@intScreenId

@@ -2,6 +2,7 @@
 	 @intLoadId INT
 	,@intEntityUserSecurityId INT
 	,@intBillId INT OUTPUT
+	,@intType INT = 1
 AS
 BEGIN TRY
 	DECLARE @strErrorMessage NVARCHAR(4000);
@@ -35,6 +36,21 @@ BEGIN TRY
 
 	IF OBJECT_ID('tempdb..#tempVoucherId') IS NOT NULL
 		DROP TABLE #tempVoucherId
+
+	--Update LS Unit Cost for Unpriced Contracts
+	UPDATE LD 
+	SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+		,dblAmount = dbo.fnCalculateCostBetweenUOM(
+							LD.intPriceUOMId
+							, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+							,(dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
+						) * CASE WHEN (LD.intWeightItemUOMId IS NOT NULL) THEN LD.dblNet ELSE LD.dblQuantity END		
+	FROM tblLGLoadDetail LD
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
+	WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
 
 	--Check if any Purchase Basis Contract price is not fully priced
 	IF EXISTS (SELECT TOP 1 1 FROM 
@@ -404,7 +420,7 @@ BEGIN TRY
 				,[strComments])
 			SELECT
 				[intEntityVendorId]
-				,[intTransactionType]
+				,[intTransactionType] = CASE WHEN @intType = 1 THEN 1 WHEN @intType = 2 THEN 16 END
 				,[intLocationId]
 				,[intCurrencyId]
 				,[dtmDate]
@@ -463,13 +479,26 @@ BEGIN TRY
 			FROM @voucherPayable
 			WHERE intEntityVendorId = @intVendorEntityId
 
-			EXEC uspAPCreateVoucher 
-				@voucherPayables = @voucherPayableToProcess
-				,@voucherPayableTax = DEFAULT
-				,@userId = @intEntityUserSecurityId
-				,@throwError = 1
-				,@error = @strErrorMessage OUTPUT
-				,@createdVouchersId = @createVoucherIds OUTPUT
+			IF (@intType = 1)
+			BEGIN
+				EXEC uspAPCreateVoucher 
+					@voucherPayables = @voucherPayableToProcess
+					,@voucherPayableTax = DEFAULT
+					,@userId = @intEntityUserSecurityId
+					,@throwError = 1
+					,@error = @strErrorMessage OUTPUT
+					,@createdVouchersId = @createVoucherIds OUTPUT
+			END
+			ELSE
+			BEGIN
+				EXEC uspAPCreateProvisional
+					@voucherPayables = @voucherPayableToProcess
+					,@voucherPayableTax = DEFAULT
+					,@userId = @intEntityUserSecurityId
+					,@throwError = 1
+					,@error = @strErrorMessage OUTPUT
+					,@createdVouchersId = @createVoucherIds OUTPUT
+			END
 
 			DELETE FROM @voucherPayableToProcess
 

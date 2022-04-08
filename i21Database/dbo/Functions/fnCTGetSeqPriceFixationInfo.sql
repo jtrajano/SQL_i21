@@ -13,7 +13,8 @@ RETURNS	@returntable	TABLE
     dblPFQuantityUOMId			INT,
     ysnSpreadAvailable			BIT,
     ysnFixationDetailAvailable  BIT,
-    ysnMultiPricingDetail		BIT
+    ysnMultiPricingDetail		BIT,
+	dblRollArb					NUMERIC(18,6)
 )
 
 AS
@@ -29,7 +30,8 @@ BEGIN
 			@ysnSpreadAvailable			BIT = 0,
 			@ysnFixationDetailAvailable	BIT = 0,
 			@ysnMultiPricingDetail		BIT = 0,
-			@intMaxFixationDetailId		INT
+			@intMaxFixationDetailId		INT,
+			@dblRollArb					NUMERIC(18,6)
 
     IF EXISTS(
 		SELECT
@@ -83,7 +85,8 @@ BEGIN
 
 
 		SELECT	@dblTotalLots		=	pf.dblTotalLots,
-				@dblLotsFixed		=	sum(pfd.dblNoOfLots)
+				@dblLotsFixed		=	sum(pfd.dblNoOfLots),
+				@dblRollArb			=	pf.dblRollArb
 		FROM
 			tblCTContractDetail cd
 			join tblCTContractHeader ch
@@ -95,7 +98,7 @@ BEGIN
 				on pfd.intPriceFixationId = pf.intPriceFixationId
 		WHERE
 			cd.intContractDetailId = @intContractDetailId and pfd.intPriceFixationDetailId NOT IN (ISNULL(@intMaxFixationDetailId,0))
-				GROUP BY pf.dblTotalLots, pf.intPriceFixationId, pf.intPriceContractId 
+				GROUP BY pf.dblTotalLots, pf.intPriceFixationId, pf.intPriceContractId , pf.dblRollArb
 		
 
 		SELECT	 @intPFDCount			=   COUNT(intPriceFixationDetailId) 
@@ -111,8 +114,8 @@ BEGIN
 				@ysnMultiPricingDetail	    =   CASE WHEN @intPFDCount > 1 THEN 1 ELSE 0 END
     END
 
-    INSERT INTO @returntable (dblTotalLots,dblLotsFixed,intPriceFixationId,intPriceContractId,dblQuantityPriceFixed,dblPFQuantityUOMId,ysnSpreadAvailable,ysnFixationDetailAvailable,ysnMultiPricingDetail)
-    SELECT @dblTotalLots,@dblLotsFixed,@intPriceFixationId,@intPriceContractId,@dblQuantityPriceFixed,@dblPFQuantityUOMId,@ysnSpreadAvailable,@ysnFixationDetailAvailable,@ysnMultiPricingDetail
+    INSERT INTO @returntable (dblTotalLots,dblLotsFixed,intPriceFixationId,intPriceContractId,dblQuantityPriceFixed,dblPFQuantityUOMId,ysnSpreadAvailable,ysnFixationDetailAvailable,ysnMultiPricingDetail,dblRollArb)
+    SELECT @dblTotalLots,@dblLotsFixed,@intPriceFixationId,@intPriceContractId,@dblQuantityPriceFixed,@dblPFQuantityUOMId,@ysnSpreadAvailable,@ysnFixationDetailAvailable,@ysnMultiPricingDetail, @dblRollArb
 
     RETURN ;
 END

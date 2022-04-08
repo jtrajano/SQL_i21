@@ -35,6 +35,8 @@ BEGIN TRY
         , @ysnAddAmendmentForNonDraftContract BIT = 0
         , @ysnPricingAsAmendment BIT = 1
 		, @ysnAmendmentForCashFuture BIT = 0
+		, @ysnHasModification Bit = 0
+		, @ysnAmmendmentLogged bit = 0
 		;
 	
 	DECLARE @tblHeader AS TABLE (intContractHeaderId INT
@@ -45,6 +47,22 @@ BEGIN TRY
 		, intGradeId INT
 		, intWeightId INT
 		, intFreightTermId INT)
+	-- CT-7064
+	DECLARE @ContractHeaderIntEntityId INT
+		, @ContractHeaderIntPositionId INT
+		, @ContractHeaderIntContractBasisId INT
+		, @ContractHeaderIntTermId INT
+		, @ContractHeaderIntGradeId INT
+		, @ContractHeaderIntWeightId INT
+		, @ContractHeaderIntFreightTermId INT
+	
+	DECLARE @HeaderLastModificationIntEntityId INT
+		, @HeaderLastModificationIntPositionId INT
+		, @HeaderLastModificationIntContractBasisId INT
+		, @HeaderLastModificationIntTermId INT
+		, @HeaderLastModificationIntGradeId INT
+		, @HeaderLastModificationIntWeightId INT
+		, @HeaderLastModificationIntFreightTermId INT
 		
 	DECLARE @tblDetail AS TABLE (intContractHeaderId INT
 		, intContractDetailId INT
@@ -73,11 +91,23 @@ BEGIN TRY
 		SELECT @intContractHeaderId	=   intContractHeaderId FROM tblCTContractDetail with (nolock) WHERE intContractDetailId = @intContractDetailId
 	END
 		
-	SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
+	SELECT @intLastModifiedById = intLastModifiedById 
+	
+			--CT-7064
+			, @ContractHeaderIntEntityId = intEntityId
+			, @ContractHeaderIntPositionId = intPositionId		
+			, @ContractHeaderIntTermId = intTermId
+			, @ContractHeaderIntGradeId = intGradeId
+			, @ContractHeaderIntWeightId = intWeightId
+			, @ContractHeaderIntFreightTermId = intFreightTermId
+
+
+		FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
+
 	SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor with (nolock) WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
 	SELECT @ysnAmdWoAppvl       = ISNULL(ysnAmdWoAppvl,0), @ysnStayAsDraftContractUntilApproved = ISNULL(ysnStayAsDraftContractUntilApproved,0), @ysnPricingAsAmendment = ysnPricingAsAmendment FROM tblCTCompanyPreference
 
-	DELETE FROM @tblHeader
+	DELETE FROM @tblHeader	
 	DELETE FROM @tblDetail
 
 	INSERT INTO @tblHeader (intContractHeaderId
@@ -99,6 +129,30 @@ BEGIN TRY
 	FROM tblCTSequenceHistory
 	WHERE intContractHeaderId = @intContractHeaderId ORDER BY intSequenceHistoryId DESC
 	
+	-- CT-7064
+	SELECT TOP 1 
+		  @HeaderLastModificationIntEntityId = intEntityId
+		, @HeaderLastModificationIntPositionId = intPositionId
+		, @HeaderLastModificationIntTermId = intTermId
+		, @HeaderLastModificationIntGradeId = intGradeId
+		, @HeaderLastModificationIntWeightId = intWeightId
+		, @HeaderLastModificationIntFreightTermId = intFreightTermId
+	FROM tblCTContractHeaderLastModification
+	WHERE intContractHeaderId = @intContractHeaderId
+
+	if (
+		isnull(@ContractHeaderIntEntityId, 0) <> isnull(@HeaderLastModificationIntEntityId, 0)
+		or isnull(@ContractHeaderIntPositionId,0) <> isnull(@HeaderLastModificationIntPositionId, 0)
+		or isnull(@ContractHeaderIntTermId,0) <> isnull(@HeaderLastModificationIntTermId, 0)
+		or isnull(@ContractHeaderIntGradeId,0) <> isnull(@HeaderLastModificationIntGradeId, 0)
+		or isnull(@ContractHeaderIntWeightId,0) <> isnull(@HeaderLastModificationIntWeightId, 0)
+		or isnull(@ContractHeaderIntFreightTermId,0) <> isnull(@HeaderLastModificationIntFreightTermId, 0)
+	)
+	begin
+		set @ysnHasModification = 1
+	end
+	-- CT-7064
+
 	INSERT INTO @tblDetail (intContractHeaderId
 		, intContractDetailId
 		, intContractStatusId
@@ -302,6 +356,7 @@ BEGIN TRY
 		SELECT @intContractDetailId = intContractDetailId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
 		SELECT @intPrevHistoryId = max(intSequenceHistoryId) FROM tblCTSequenceHistory WITH (NOLOCK) WHERE intSequenceHistoryId < @intSequenceHistoryId AND intContractDetailId = @intContractDetailId
 
+
 		DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 
 		IF (OBJECT_ID('tempdb..#tempSequenceHistoryCompare') IS NOT NULL)
@@ -493,6 +548,133 @@ BEGIN TRY
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intLastModifiedById AND intApprovalListId = @intApprovalListId) OR (@ysnAmdWoAppvl = 1)
 		BEGIN
+
+			--CT-7027 x 
+			--CT-7064
+			IF isnull(@ysnAmmendmentLogged, 0) = 0
+			BEGIN
+				set @ysnAmmendmentLogged = 1
+				INSERT INTO tblCTSequenceAmendmentLog (intSequenceHistoryId
+						, dtmHistoryCreated
+						, intContractHeaderId
+						, intContractDetailId
+						, intAmendmentApprovalId
+						, strItemChanged
+						, strOldValue
+						, strNewValue
+						, intConcurrencyId)
+			
+					--Entity
+					SELECT TOP 1 intSequenceHistoryId = NULL
+						, dtmHistoryCreated			= GETDATE()
+						, intContractHeaderId		= @intContractHeaderId
+						, intContractDetailId		= NULL
+						, intAmendmentApprovalId	= 1
+						, strItemChanged			= 'Entity'
+						, strOldValue				= PreviousType.strName
+						, strNewValue				= CurrentType.strName
+						, intConcurrencyId			= 1
+					FROM tblCTAmendmentApproval		
+					OUTER APPLY (SELECT TOP 1 strName from tblEMEntity where intEntityId = isnull(@ContractHeaderIntEntityId, 0) ) CurrentType
+					OUTER APPLY (SELECT TOP 1 strName from tblEMEntity where intEntityId = isnull(@HeaderLastModificationIntEntityId, 0) ) PreviousType
+						WHERE strType = '1.Header' 
+							and ysnAmendment = 1 
+							and strDataIndex = 'intEntityId'
+							and isnull(@ContractHeaderIntEntityId,0) <> isnull(@HeaderLastModificationIntEntityId, 0)
+					
+					--Position
+					union SELECT TOP 1 intSequenceHistoryId = NULL
+						, dtmHistoryCreated			= GETDATE()
+						, intContractHeaderId		= @intContractHeaderId
+						, intContractDetailId		= NULL
+						, intAmendmentApprovalId	= 2
+						, strItemChanged			= 'Position'
+						, strOldValue				= PreviousType.strPosition
+						, strNewValue				= CurrentType.strPosition
+						, intConcurrencyId			= 1
+					FROM tblCTAmendmentApproval					
+					outer apply (select intPositionId, strPosition from tblCTPosition where intPositionId = isnull(@ContractHeaderIntPositionId, 0))		CurrentType
+					outer apply (select intPositionId, strPosition from tblCTPosition where intPositionId = isnull(@HeaderLastModificationIntPositionId, 0))		PreviousType
+						where strType = '1.Header' 
+							and ysnAmendment = 1 
+							and strDataIndex = 'intPositionId'
+							and isnull(@ContractHeaderIntPositionId, 0) <> isnull(@HeaderLastModificationIntPositionId,0)
+
+					--INCO/Ship Term
+					UNION SELECT TOP 1 intSequenceHistoryId = NULL
+						, dtmHistoryCreated			= GETDATE()
+						, intContractHeaderId		= @intContractHeaderId
+						, intContractDetailId		= NULL
+						, intAmendmentApprovalId	= 3
+						, strItemChanged			= 'INCO/Ship Term' 
+						, strOldValue				= PreviousType.strFreightTerm
+						, strNewValue				= CurrentType.strFreightTerm
+						, intConcurrencyId			= 1
+					FROM tblCTAmendmentApproval
+					outer apply(select intFreightTermId,strFreightTerm from tblSMFreightTerms where ISNULL(intFreightTermId,0)   =	ISNULL(@ContractHeaderIntFreightTermId,0))	CurrentType
+					outer apply(select intFreightTermId,strFreightTerm from tblSMFreightTerms where ISNULL(intFreightTermId,0)   =	ISNULL(@HeaderLastModificationIntFreightTermId,0))	PreviousType	    
+						where strType = '1.Header' 
+							and ysnAmendment = 1 
+							and strDataIndex = 'intFreightTermId'
+							and isnull(@ContractHeaderIntFreightTermId, 0) <> isnull(@HeaderLastModificationIntFreightTermId, 0)
+
+					--Terms
+					UNION SELECT TOP 1 intSequenceHistoryId = NULL
+						, dtmHistoryCreated			= GETDATE()
+						, intContractHeaderId	    = @intContractHeaderId
+						, intContractDetailId		= NULL
+						, intAmendmentApprovalId	= 4
+						, strItemChanged			= 'Terms'
+						, strOldValue			    =  PreviousType.strTerm
+						, strNewValue		        =  CurrentType.strTerm
+						, intConcurrencyId			=  1
+					FROM tblCTAmendmentApproval
+					outer apply(select intTermID, strTerm from tblSMTerm where ISNULL(intTermID,0)	        =	ISNULL(@ContractHeaderIntTermId,0))			CurrentType			
+					outer apply(select intTermID, strTerm from tblSMTerm where ISNULL(intTermID,0)	        =	ISNULL(@HeaderLastModificationIntTermId,0))			PreviousType
+						where strType = '1.Header' 
+							and ysnAmendment = 1 
+							and strDataIndex = 'intTermId'
+							and isnull(@ContractHeaderIntTermId, 0) <> isnull(@HeaderLastModificationIntTermId, 0)
+
+					--Grades
+					UNION SELECT TOP 1 intSequenceHistoryId = NULL
+						, dtmHistoryCreated			= GETDATE()
+						, intContractHeaderId	    = @intContractHeaderId
+						, intContractDetailId		= NULL
+						, intAmendmentApprovalId	= 5
+						, strItemChanged			= 'Grades' 
+						, strOldValue			    = PreviousType.strWeightGradeDesc
+						, strNewValue		        = CurrentType.strWeightGradeDesc
+						, intConcurrencyId		    = 1
+					FROM  tblCTAmendmentApproval			
+					outer apply (select intWeightGradeId, strWeightGradeDesc from  tblCTWeightGrade where ISNULL(intWeightGradeId,0)   =   ISNULL(@ContractHeaderIntGradeId,0))	CurrentType		
+					outer apply (select intWeightGradeId, strWeightGradeDesc from  tblCTWeightGrade where ISNULL(intWeightGradeId,0)   =   ISNULL(@HeaderLastModificationIntGradeId,0))	PreviousType		
+						where strType = '1.Header' 
+							and ysnAmendment = 1 
+							and strDataIndex = 'intGradeId'
+							and isnull(@ContractHeaderIntGradeId, 0) <> isnull(@HeaderLastModificationIntGradeId, 0)
+
+					--Weights
+					UNION SELECT TOP 1 intSequenceHistoryId = NULL
+						, dtmHistoryCreated			= GETDATE()
+						, intContractHeaderId	    = @intContractHeaderId
+						, intContractDetailId		= NULL
+						, intAmendmentApprovalId	= 6
+						, strItemChanged			= 'Weights'
+						, strOldValue			    = PreviousType.strWeightGradeDesc
+						, strNewValue		        = CurrentType.strWeightGradeDesc
+						, intConcurrencyId		    = 1
+					FROM tblCTAmendmentApproval
+					outer apply(select intWeightGradeId, strWeightGradeDesc from tblCTWeightGrade where ISNULL(intWeightGradeId,0)	 =	 ISNULL(@ContractHeaderIntWeightId,0))	CurrentType
+					outer apply(select intWeightGradeId, strWeightGradeDesc from tblCTWeightGrade where ISNULL(intWeightGradeId,0)	 =	 ISNULL(@HeaderLastModificationIntWeightId,0))	PreviousType
+						where strType = '1.Header' 
+							and ysnAmendment = 1 
+							and strDataIndex = 'intWeightId'
+							and isnull(@ContractHeaderIntWeightId, 0) <> isnull(@HeaderLastModificationIntWeightId, 0)
+
+			END
+
+
 			INSERT INTO tblCTSequenceAmendmentLog (intSequenceHistoryId
 				, dtmHistoryCreated
 				, intContractHeaderId
@@ -502,105 +684,8 @@ BEGIN TRY
 				, strOldValue
 				, strNewValue
 				, intConcurrencyId)
-			
-			--Entity
-			SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
-				, dtmHistoryCreated			= GETDATE()
-				, intContractHeaderId		= @intContractHeaderId
-				, intContractDetailId		= NULL
-				, intAmendmentApprovalId	= 1
-				, strItemChanged			= 'Entity'
-				, strOldValue				= PreviousType.strName
-				, strNewValue				= CurrentType.strName
-				, intConcurrencyId			= 1
-			FROM tblCTSequenceHistory	CurrentRow
-			JOIN @SCOPE_IDENTITY		NewRecords          ON  NewRecords.intSequenceHistoryId			=   CurrentRow.intSequenceHistoryId 
-			JOIN @tblHeader				PreviousRow			ON  ISNULL(PreviousRow.intEntityId,0)		<>  ISNULL(CurrentRow.intEntityId,0)
-			LEFT JOIN tblEMEntity		CurrentType		    ON CurrentType.intEntityId			        =	CurrentRow.intEntityId
-			LEFT JOIN tblEMEntity		PreviousType	    ON PreviousType.intEntityId			        =	PreviousRow.intEntityId
-
-			--Position
-			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
-				, dtmHistoryCreated			= GETDATE()
-				, intContractHeaderId		= @intContractHeaderId
-				, intContractDetailId		= NULL
-				, intAmendmentApprovalId	= 2
-				, strItemChanged			= 'Position'
-				, strOldValue				= PreviousType.strPosition
-				, strNewValue				= CurrentType.strPosition
-				, intConcurrencyId			= 1
-			FROM tblCTSequenceHistory	CurrentRow
-			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId			=    CurrentRow.intSequenceHistoryId 
-			JOIN @tblHeader				PreviousRow			ON ISNULL(PreviousRow.intPositionId ,0)		<>   ISNULL(CurrentRow.intPositionId ,0)
-			LEFT JOIN tblCTPosition		CurrentType			ON ISNULL(CurrentType.intPositionId ,0)		=	ISNULL(CurrentRow.intPositionId	,0)
-			LEFT JOIN tblCTPosition		PreviousType		ON ISNULL(PreviousType.intPositionId,0)		=	ISNULL(PreviousRow.intPositionId,0)
-
-			--INCO/Ship Term
-			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
-				, dtmHistoryCreated			= GETDATE()
-				, intContractHeaderId		= @intContractHeaderId
-				, intContractDetailId		= NULL
-				, intAmendmentApprovalId	= 3
-				, strItemChanged			= 'INCO/Ship Term' 
-				, strOldValue				= PreviousType.strFreightTerm
-				, strNewValue				= CurrentType.strFreightTerm
-				, intConcurrencyId			= 1
-			FROM tblCTSequenceHistory	CurrentRow
-			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId	 =  CurrentRow.intSequenceHistoryId 
-			JOIN @tblHeader				PreviousRow			ON ISNULL(PreviousRow.intFreightTermId ,0)   <>   ISNULL(CurrentRow.intFreightTermId ,0)
-			LEFT JOIN tblSMFreightTerms	CurrentType		    ON ISNULL(CurrentType.intFreightTermId ,0)   =	ISNULL(CurrentRow.intFreightTermId ,0)
-			LEFT JOIN tblSMFreightTerms	PreviousType	    ON ISNULL(PreviousType.intFreightTermId,0)   =	ISNULL(PreviousRow.intFreightTermId,0)
-
-			--Terms
-			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
-				, dtmHistoryCreated			= GETDATE()
-				, intContractHeaderId	    = @intContractHeaderId
-				, intContractDetailId		= NULL
-				, intAmendmentApprovalId	= 4
-				, strItemChanged			= 'Terms'
-				, strOldValue			    =  PreviousType.strTerm
-				, strNewValue		        =  CurrentType.strTerm
-				, intConcurrencyId			=  1
-			FROM tblCTSequenceHistory	CurrentRow
-			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId			=   CurrentRow.intSequenceHistoryId
-			JOIN @tblHeader				PreviousRow			ON ISNULL(PreviousRow.intTermId ,0)        <>   ISNULL(CurrentRow.intTermId	,0)
-			LEFT JOIN tblSMTerm			CurrentType			ON ISNULL(CurrentType.intTermID	,0)         =	ISNULL(CurrentRow.intTermId	,0)
-			LEFT JOIN tblSMTerm			PreviousType		ON ISNULL(PreviousType.intTermID,0)	        =	ISNULL(PreviousRow.intTermId,0)
-
-			--Grades
-			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
-				, dtmHistoryCreated			= GETDATE()
-				, intContractHeaderId	    = @intContractHeaderId
-				, intContractDetailId		= NULL
-				, intAmendmentApprovalId	= 5
-				, strItemChanged			= 'Grades' 
-				, strOldValue			    = PreviousType.strWeightGradeDesc
-				, strNewValue		        = CurrentType.strWeightGradeDesc
-				, intConcurrencyId		    = 1
-			FROM tblCTSequenceHistory	CurrentRow
-			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId			 =    CurrentRow.intSequenceHistoryId 
-			JOIN @tblHeader				PreviousRow			ON  ISNULL(PreviousRow.intGradeId       ,0)  <>   ISNULL(CurrentRow.intGradeId ,0)
-			LEFT JOIN tblCTWeightGrade	CurrentType			ON	ISNULL(CurrentType.intWeightGradeId ,0)   =   ISNULL(CurrentRow.intGradeId ,0)
-			LEFT JOIN tblCTWeightGrade	PreviousType		ON	ISNULL(PreviousType.intWeightGradeId,0)   =   ISNULL(PreviousRow.intGradeId,0)
-
-			--Weights
-			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
-				, dtmHistoryCreated			= GETDATE()
-				, intContractHeaderId	    = @intContractHeaderId
-				, intContractDetailId		= NULL
-				, intAmendmentApprovalId	= 6
-				, strItemChanged			= 'Weights'
-				, strOldValue			    = PreviousType.strWeightGradeDesc
-				, strNewValue		        = CurrentType.strWeightGradeDesc
-				, intConcurrencyId		    = 1
-			FROM tblCTSequenceHistory	CurrentRow
-			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId			 =   CurrentRow.intSequenceHistoryId
-			JOIN @tblHeader				PreviousRow			ON  ISNULL(PreviousRow.intWeightId      ,0)  <>  ISNULL(CurrentRow.intWeightId ,0)
-			LEFT JOIN tblCTWeightGrade	CurrentType			ON	ISNULL(CurrentType.intWeightGradeId	,0)  =	 ISNULL(CurrentRow.intWeightId ,0)
-			LEFT JOIN tblCTWeightGrade	PreviousType		ON	ISNULL(PreviousType.intWeightGradeId,0)	 =	 ISNULL(PreviousRow.intWeightId,0)
-
 			--intContractStatusId
-			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
+			SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
 				, dtmHistoryCreated			= GETDATE()
 				, intContractHeaderId		= @intContractHeaderId
 				, intContractDetailId		= CurrentRow.intContractDetailId

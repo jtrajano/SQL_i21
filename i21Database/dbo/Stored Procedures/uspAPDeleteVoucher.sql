@@ -110,6 +110,12 @@ BEGIN TRY
 
 	IF(EXISTS(SELECT TOP 1 1 FROM @voucherBillDetailIds))
 	BEGIN
+		UPDATE BD
+		SET BD.ysnStage = 1
+		FROM tblAPBillDetail BD
+		INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
+		WHERE B.intBillId = @intBillId AND B.ysnFinalVoucher = 1
+
 		--EXECUTE uspAPUpdateVoucherPayable for deleted.
 		EXEC [dbo].[uspAPUpdateVoucherPayable]
 			@voucherDetailIds = @voucherBillDetailIds,

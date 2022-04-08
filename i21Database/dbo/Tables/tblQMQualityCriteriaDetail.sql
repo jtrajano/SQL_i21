@@ -13,6 +13,7 @@
 	dblFactorUnderTarget		NUMERIC(18, 6),
 	dblDiscount					NUMERIC(18, 6),
 	strCostMethod				NVARCHAR(30) COLLATE Latin1_General_CI_AS,
+	strEscalateBy				NVARCHAR(30) COLLATE Latin1_General_CI_AS,
 	intCurrencyId				INT,
 	intUnitMeasureId			INT,
 		

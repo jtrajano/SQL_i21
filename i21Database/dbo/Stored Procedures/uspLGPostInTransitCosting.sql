@@ -48,11 +48,11 @@ BEGIN TRY
 
 		IF (@intPurchaseSale = 3) 
 		BEGIN
-			IF (EXISTS (SELECT 1 FROM tblLGLoadDetail LD 
-					INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
-					INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId IN (LD.intPContractDetailId, LD.intSContractDetailId)
-					INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					WHERE L.intLoadId = @intLoadId AND CH.intPricingTypeId = 2 AND CD.intPricingStatus = 1))
+			IF (EXISTS (SELECT 1 FROM (
+					SELECT dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+					FROM tblLGLoadDetail LD
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId IN (LD.intPContractDetailId, LD.intSContractDetailId)
+					WHERE LD.intLoadId = @intLoadId) p WHERE p.dblUnitPrice IS NULL))
 				RAISERROR('One or more contracts is not yet priced. Please price the contracts to proceed.', 16, 1);
 		END
 		ELSE
@@ -82,13 +82,22 @@ BEGIN TRY
 	END
 
 	/* Auto-correct Weight UOMs */
-		UPDATE LD
-		SET intWeightItemUOMId = WUOM.intItemUOMId
-		FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
-			LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemId = LD.intItemId AND WUOM.intUnitMeasureId = ISNULL(L.intWeightUnitMeasureId, IUOM.intUnitMeasureId)
-		WHERE L.intLoadId = @intLoadId AND ISNULL(intWeightItemUOMId, 0) <> WUOM.intItemUOMId
+	UPDATE LD
+	SET intWeightItemUOMId = WUOM.intItemUOMId
+	FROM tblLGLoadDetail LD
+		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
+		LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemId = LD.intItemId AND WUOM.intUnitMeasureId = ISNULL(L.intWeightUnitMeasureId, IUOM.intUnitMeasureId)
+	WHERE L.intLoadId = @intLoadId AND ISNULL(intWeightItemUOMId, 0) <> WUOM.intItemUOMId
+
+	/* Auto-correct Cost UOMs */
+	UPDATE LD
+	SET intPriceUOMId = CPUOM.intItemUOMId
+	FROM tblLGLoadDetail LD
+		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblICItemUOM PUOM ON PUOM.intItemUOMId = LD.intPriceUOMId
+		LEFT JOIN tblICItemUOM CPUOM ON CPUOM.intItemId = LD.intItemId AND CPUOM.intUnitMeasureId = PUOM.intUnitMeasureId
+	WHERE L.intLoadId = @intLoadId AND ISNULL(LD.intPriceUOMId, 0) <> CPUOM.intItemUOMId
 
 	/* Build In-Transit Costing parameter */
 		

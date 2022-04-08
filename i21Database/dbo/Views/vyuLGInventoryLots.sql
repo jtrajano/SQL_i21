@@ -2,6 +2,8 @@
 AS
 SELECT DISTINCT Lot.intLotId
 	,Lot.strLotNumber
+	,Lot.strItemNo
+	,Lot.strItemDescription
 	,Lot.intItemUOMId
 	,Lot.strItemUOM
 	,Lot.intItemWeightUOMId
@@ -18,6 +20,7 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.dblTareWeight
 	,Lot.dblNetWeight
 	,Lot.intItemId
+	,Lot.intCommodityId
 	,Lot.strWarehouseRefNo
 	,strWarrantNo = ISNULL(IRIL.strWarrantNo, IR.strWarrantNo)
 	,strWarrantStatus = CASE ISNULL(IRIL.intWarrantStatus, IR.intWarrantStatus)
@@ -32,6 +35,13 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.intContractDetailId
 	,dblWeightPerQty = ISNULL(Lot.dblWeightPerQty,0.0)
 	,dblTarePerQty = ISNULL(Lot.dblTarePerQty,0.0)
+	,Lot.intEntityVendorId
+	,Lot.strVendor
+	,Lot.strContractNumber
+	,Lot.intContractSeq
+	,Lot.dtmReceiptDate
+	,Lot.strLotStatus
+	,Lot.strCondition
 FROM vyuLGPickOpenInventoryLots Lot
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemLotId = Lot.intInventoryReceiptItemLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId

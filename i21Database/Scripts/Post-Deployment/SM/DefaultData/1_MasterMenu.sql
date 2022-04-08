@@ -2941,6 +2941,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Timecard 
 	VALUES (N'Timecard History', N'Payroll', @PayrollTimeEntryParentMenuId, N'Timecard History', N'Time Entry', N'Screen', N'Payroll.view.TimeHistory?showSearch=true&searchCommand=TimeHistory', N'small-menu-time-entry', 1, 1, 0, 1, 2, 0)
 ELSE
 	UPDATE tblSMMasterMenu SET  intSort = 2, strCommand = N'Payroll.view.TimeHistory?showSearch=true&searchCommand=TimeHistory' WHERE strMenuName = 'Timecard History' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTimeEntryParentMenuId
+	
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Timecard Location Restriction' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTimeEntryParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Timecard Location Restriction', N'Payroll', @PayrollTimeEntryParentMenuId, N'Timecard Location Restriction', N'Time Entry', N'Screen', N'Payroll.view.TimecardLocationRestriction', N'small-menu-time-entry', 1, 1, 0, 1, 3, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET  intSort = 3, strCommand = N'Payroll.view.TimecardLocationRestriction' WHERE strMenuName = 'Timecard Location Restriction' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTimeEntryParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Deduction Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -6375,7 +6381,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Session R
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Session Ranking', N'Quality', @QualityMaintenanceParentMenuId, N'Session Ranking', N'Maintenance', N'Screen', N'Quality.view.PriorityGroup?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Quality.view.QualityCriteria?showSearch=true' WHERE strMenuName = 'Session Ranking' AND strModuleName = 'Quality' AND intParentMenuID = @QualityMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Quality.view.PriorityGroup?showSearch=true' WHERE strMenuName = 'Session Ranking' AND strModuleName = 'Quality' AND intParentMenuID = @QualityMaintenanceParentMenuId
 
 --BEGIN QUALITY REPORT
 DECLARE @QualityReportParentMenuId INT
