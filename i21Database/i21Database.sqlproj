@@ -436,6 +436,9 @@
     <Build Include="dbo\Tables\tblCFImportTransactionTaxType.sql" />
     <Build Include="dbo\Tables\tblCFImportTransactionTaxZeroQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
+	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
