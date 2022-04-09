@@ -1250,6 +1250,24 @@ INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.int
 WHERE 
 	B.ysnFinalVoucher = 1 
 	AND BD.ysnNetWeightChanged = 1
+	-- compare the weight change between IR and final voucher
+	AND (
+		ROUND(
+			dbo.fnMultiply(
+				dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived) -- wgt/qty in final voucher
+				,BD.dblQtyReceived
+			)
+			,2
+		) 
+		<> 
+		ROUND(
+			dbo.fnMultiply(
+				dbo.fnDivide(ri.dblNet, ri.dblOpenReceive) -- wgt/qty from receipt
+				,BD.dblQtyReceived
+			)
+			,2
+		)
+	)
 
 IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
 BEGIN
