@@ -48,7 +48,7 @@ BEGIN
 		RETURN 0;
 	END
 
-	IF @receiptId > 0 AND NULLIF(@contractNumber,'') = NULL
+	IF @receiptId > 0 AND @contractNumber IS NULL
 	BEGIN
 		EXEC uspICProcessToBill @intReceiptId = @receiptId, @intUserId = @userId, @strType = 'voucher', @intScreenId = 1, @intBillId = @createdVoucher OUT
 
