@@ -27,7 +27,28 @@ BEGIN
 	INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
 	WHERE B.intBillId = @billId
 
-	IF @receiptId > 0
+	DECLARE @isBasis INT;
+	DECLARE @contractNumber NVARCHAR(50) = NULL;
+	DECLARE @itemNo NVARCHAR(50) = NULL;
+
+	SELECT TOP 1 
+		@contractNumber = CD.strContractNumber
+	FROM tblAPBill B
+	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+	INNER JOIN dbo.fnGetRowsFromDelimitedValues(@detailIds) IDS ON IDS.intID = BD.intBillDetailId
+	INNER JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = BD.intContractDetailId
+	INNER JOIN tblCTContractHeader CD ON CTD.intContractHeaderId = CD.intContractHeaderId
+	WHERE B.intBillId = @billId AND CTD.intPricingTypeId = 2
+
+	IF @contractNumber IS NOT NULL
+	BEGIN
+		DECLARE @errMsg NVARCHAR(500);
+		SET @errMsg = 'Cannot finalize basis contract ' + @contractNumber + '.'
+		RAISERROR(@errMsg, 16, 1);
+		RETURN 0;
+	END
+
+	IF @receiptId > 0 AND NULLIF(@contractNumber,'') = NULL
 	BEGIN
 		EXEC uspICProcessToBill @intReceiptId = @receiptId, @intUserId = @userId, @strType = 'voucher', @intScreenId = 1, @intBillId = @createdVoucher OUT
 
