@@ -1147,7 +1147,11 @@ SELECT B.intBillId,
 		L.intSubLocationId,
 		L.intStorageLocationId,
 		L.strLotNumber,
-		BD.dblQtyReceived - BD.dblQtyOrdered,
+		--BD.dblQtyReceived - BD.dblQtyOrdered,
+		CASE 
+			WHEN @ysnPost = 1 THEN BD.dblQtyReceived - ri.dblOpenReceive
+			WHEN @ysnPost = 0 THEN -(BD.dblQtyReceived - ri.dblOpenReceive)
+		END,
 		BD.dblCost,
 		BD.intUnitOfMeasureId,
 		B.intBillId,
@@ -1159,7 +1163,11 @@ FROM tblAPBill B
 INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
 INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
-WHERE B.ysnFinalVoucher = 1 AND BD.dblQtyReceived <> BD.dblQtyOrdered
+INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+WHERE 
+	B.ysnFinalVoucher = 1 
+	--AND BD.dblQtyReceived <> BD.dblQtyOrdered
+	AND (BD.dblQtyReceived - ri.dblOpenReceive) <> 0 
 
 IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
 BEGIN
@@ -1221,7 +1229,11 @@ SELECT B.intBillId,
 		L.intSubLocationId,
 		L.intStorageLocationId,
 		L.strLotNumber,
-		dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived),
+		--dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived),
+		CASE 
+			WHEN @ysnPost = 1 THEN dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived)
+			WHEN @ysnPost = 0 THEN dbo.fnDivide(ri.dblNet, ri.dblOpenReceive) 
+		END,
 		BD.dblCost,
 		BD.intUnitOfMeasureId,
 		B.intBillId,
@@ -1233,7 +1245,10 @@ FROM tblAPBill B
 INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
 INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
-WHERE B.ysnFinalVoucher = 1 AND BD.ysnNetWeightChanged = 1
+INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+WHERE 
+	B.ysnFinalVoucher = 1 
+	AND BD.ysnNetWeightChanged = 1
 
 IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
 BEGIN
@@ -1965,3 +1980,4 @@ Post_Exit:
 	--CLEAN UP TRACKER FOR POSTING
 	DELETE A
 	FROM tblAPBillForPosting A
+
