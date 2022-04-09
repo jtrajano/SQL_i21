@@ -162,7 +162,8 @@ AS
 				[ysnSubCurrency],
 				[intCostCurrencyId],
 				[ysnInventoryCost],
-				[dblForexRate]
+				[dblForexRate],
+				[intForexRateTypeId]
 		) 
 		
 		SELECT	CC.intVendorId,
@@ -184,7 +185,8 @@ AS
 				CY.ysnSubCurrency,
 				CY.intCurrencyID,
 				CC.ysnInventoryCost,
-				CC.dblFX
+				CC.dblFX,
+				CC.intRateTypeId
 								
 		FROM	vyuCTContractCostView	CC
 		JOIN	vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
