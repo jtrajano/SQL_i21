@@ -1221,7 +1221,9 @@ begin try
 					select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
 				end
 
+				--CT-7098 - commented this block not to auto post voucher for ECOM demo purposes.
 				--3. Post all created Vuchers
+				/*
 				set @intCreatedBillId = 0;
 				select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				while (@intCreatedBillId is not null and @intCreatedBillId > 0)
@@ -1238,6 +1240,7 @@ begin try
 
 					select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				end
+				*/
 
 			end
 
