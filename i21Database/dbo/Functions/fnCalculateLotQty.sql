@@ -24,9 +24,12 @@ BEGIN
 						CASE	WHEN ISNULL(@dblLotWeightPerQty, 0) = 0 THEN 
 									@dblLotQty
 								ELSE 
-									dbo.fnDivide(
-										ISNULL(@dblLotWeight, 0) + ISNULL(@dblCostingQty, 0) 
-										,@dblLotWeightPerQty 
+									ROUND(
+										dbo.fnDivide(
+											ISNULL(@dblLotWeight, 0) + ISNULL(@dblCostingQty, 0) 
+											,@dblLotWeightPerQty 
+										) 
+										, 2
 									) 
 						END 
 			END
