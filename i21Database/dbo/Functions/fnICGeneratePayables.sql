@@ -617,6 +617,7 @@ WHERE
 	)
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
+		AND @strType != 'provisional voucher'
 		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 		
 		AND ISNULL(Contracts.intPricingStatus, 0) = 0 -- NOT IN (1, 2) -- 1 is Partially Priced, 2 is Fully Priced. 
 	)
