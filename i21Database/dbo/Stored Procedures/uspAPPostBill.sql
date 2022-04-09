@@ -1095,6 +1095,7 @@ BEGIN
 	END
 END
 
+
 --QUANTITY ADJUSTMENT
 DECLARE @qtyAdjustmentTable AS TABLE (
 		intBillId  INT
