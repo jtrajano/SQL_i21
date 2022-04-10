@@ -157,7 +157,9 @@ AS
 			CH.intCompanyLocationId,
 			NM.strLocationName,
 			CH.intDaysForFinance,
-			CH.ysnLocalCurrency
+			CH.ysnLocalCurrency,
+			NM.ysnProvisionalVoucher,
+			NM.strProvisionalVoucherIds
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY
