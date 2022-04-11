@@ -128,47 +128,47 @@ END
 
 IF @ysnRecap = 0 
 BEGIN 
-	/* Recalculate Weights to reflect the latest Lot Weights */
-	UPDATE LDL
-	SET dblGross = LDL.dblLotQuantity * (dblWeightPerQtyInLSUnit + dblTarePerQtyInLSUnit)
-		,dblTare = LDL.dblLotQuantity * dblTarePerQtyInLSUnit
-		,dblNet = LDL.dblLotQuantity * dblWeightPerQtyInLSUnit
-		,intWeightUOMId = LWUOM.intItemUOMId
-	FROM tblLGLoadDetailLot LDL
-		INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
-		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = L.intWeightUnitMeasureId) LWUOM
-		CROSS APPLY 
-			(SELECT 
-				dblWeightPerQtyInLSUnit = dblWeight / ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, LDL.intItemUOMId, dblQty), 1)
-				,dblTarePerQtyInLSUnit = dblTare / ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, LDL.intItemUOMId, dblQty), 1)
-				,intItemUOMId
-				,intWeightUOMId
-				,intLocationId
-				,intSubLocationId
-				,intStorageLocationId
-			FROM tblICLot 
-			WHERE intLotId = LDL.intLotId) Lot
-	WHERE L.intLoadId = @intTransactionId
-
-	UPDATE LD
-		SET dblGross = LDLT.dblLotTotalGross
-			,dblTare = LDLT.dblLotTotalTare 
-			,dblNet = LDLT.dblLotTotalNet
-	FROM tblLGLoadDetail LD
-	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-	OUTER APPLY 
-		(SELECT 
-			dblLotTotalGross = SUM(dblGross) 
-				,dblLotTotalTare = SUM(dblTare)
-				,dblLotTotalNet = SUM(dblNet)
-			FROM tblLGLoadDetailLot
-			WHERE intLoadDetailId = LD.intLoadDetailId) LDLT
-	WHERE L.intLoadId = @intTransactionId
-
-	/* Validate if Lot Quantity is still enough for moving */
 	IF (@ysnPost = 1)
 	BEGIN
+		/* Recalculate Weights to reflect the latest Lot Weights */
+		UPDATE LDL
+		SET dblGross = LDL.dblLotQuantity * (dblWeightPerQtyInLSUnit + dblTarePerQtyInLSUnit)
+			,dblTare = LDL.dblLotQuantity * dblTarePerQtyInLSUnit
+			,dblNet = LDL.dblLotQuantity * dblWeightPerQtyInLSUnit
+			,intWeightUOMId = LWUOM.intItemUOMId
+		FROM tblLGLoadDetailLot LDL
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
+			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = L.intWeightUnitMeasureId) LWUOM
+			CROSS APPLY 
+				(SELECT 
+					dblWeightPerQtyInLSUnit = dblWeight / ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, LDL.intItemUOMId, dblQty), 1)
+					,dblTarePerQtyInLSUnit = dblTare / ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, LDL.intItemUOMId, dblQty), 1)
+					,intItemUOMId
+					,intWeightUOMId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+				FROM tblICLot 
+				WHERE intLotId = LDL.intLotId) Lot
+		WHERE L.intLoadId = @intTransactionId
+
+		UPDATE LD
+			SET dblGross = LDLT.dblLotTotalGross
+				,dblTare = LDLT.dblLotTotalTare 
+				,dblNet = LDLT.dblLotTotalNet
+		FROM tblLGLoadDetail LD
+		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		OUTER APPLY 
+			(SELECT 
+				dblLotTotalGross = SUM(dblGross) 
+					,dblLotTotalTare = SUM(dblTare)
+					,dblLotTotalNet = SUM(dblNet)
+				FROM tblLGLoadDetailLot
+				WHERE intLoadDetailId = LD.intLoadDetailId) LDLT
+		WHERE L.intLoadId = @intTransactionId
+
+		/* Validate if Lot Quantity is still enough for moving */
 		DECLARE @insufficientLotQtyMsg NVARCHAR(MAX)
 		SELECT TOP 1
 			@insufficientLotQtyMsg = 'Not enough quantity to transfer for Lot ''' + Lot.strLotNumber + '''. ' 
@@ -195,7 +195,7 @@ BEGIN
 
 	UPDATE	dbo.tblLGLoad  
 	SET		ysnPosted = @ysnPost
-			,intShipmentStatus = 3
+			,intShipmentStatus = CASE WHEN (@ysnPost = 1) THEN 3 ELSE 1 END
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strLoadNumber = @strTransactionId  
 END 
