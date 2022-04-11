@@ -110,7 +110,7 @@ JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 		,2
 		)
 	AND ISNUMERIC(TR.strPropertyValue) = 1
-JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
+JOIN tblQMSample S ON S.intSampleId = TR.intSampleId AND S.intTypeId = 1
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND ST.intControlPointId IN (
 		4,5
@@ -124,6 +124,7 @@ JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 			AND S1.strLotNumber = S.strLotNumber
 			AND S1.intProductTypeId = 6
 			AND ST1.intControlPointId = ST.intControlPointId
+			AND S1.intTypeId = 1
 		)
 GROUP BY P.intPropertyId
 	,P.strPropertyName

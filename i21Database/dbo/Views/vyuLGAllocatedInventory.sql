@@ -79,6 +79,7 @@ LEFT JOIN (
               JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
               LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
               WHERE S.intContractDetailId IS NOT NULL
+              AND S.intTypeId = 1
               ) t
        WHERE intRowNum = 1
        ) S ON S.intContractDetailId = LD.intPContractDetailId
@@ -157,6 +158,7 @@ LEFT JOIN (
               JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
               LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
               WHERE S.intContractDetailId IS NOT NULL
+              AND S.intTypeId = 1
               ) t
        WHERE intRowNum = 1
        ) S ON S.intContractDetailId = LD.intPContractDetailId
@@ -234,6 +236,7 @@ LEFT JOIN (
               JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
               LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
               WHERE S.intContractDetailId IS NOT NULL
+              AND S.intTypeId = 1
               ) t
        WHERE intRowNum = 1
        ) S ON S.intContractDetailId = LD.intPContractDetailId

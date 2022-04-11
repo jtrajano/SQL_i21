@@ -46,6 +46,7 @@ BEGIN TRY
 		AND S.intSampleStatusId = 3
 		AND S.intProductTypeId = @intProductTypeId
 		AND S.intProductValueId = @intProductValueId
+		AND S.intTypeId = 1
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@dtmSampleReceivedDate = CONVERT(NVARCHAR, dtmSampleReceivedDate, 101)

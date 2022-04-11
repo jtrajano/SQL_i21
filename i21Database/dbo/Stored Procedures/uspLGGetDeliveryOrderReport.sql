@@ -204,6 +204,7 @@ BEGIN
 					LEFT JOIN tblQMSampleStatus SMPS ON SMPS.intSampleStatusId = SMP.intSampleStatusId 
 					WHERE SMP.intContractDetailId = PCH.intContractDetailId 
 						AND SMPS.strStatus = 'Approved'
+						AND SMP.intTypeId = 1
 						AND LOWER(SMPT.strSampleTypeName) IN ('arrival sample', 'approval sample', 'stock sample')) SMPL
 	CROSS APPLY tblLGCompanyPreference CP
 	WHERE strLoadNumber = @strLoadNumber

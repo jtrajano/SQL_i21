@@ -627,6 +627,7 @@ BEGIN TRY
 					FROM tblQMSample S
 					WHERE S.intProductTypeId = 11
 						AND S.intProductValueId = @intParentLotId
+						AND S.intTypeId = 1
 					ORDER BY S.intSampleId DESC
 
 					SELECT @strParentLotNumber = strParentLotNumber
@@ -668,6 +669,7 @@ BEGIN TRY
 						JOIN tblQMSampleType ST on ST.intSampleTypeId =S.intSampleTypeId and ST.intControlPointId =5
 						WHERE S.strContainerNumber = @strContainerNumber
 						AND S.intSampleStatusId=3
+						AND S.intTypeId = 1
 						ORDER BY S.intSampleId DESC
 					End
 

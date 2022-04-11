@@ -123,3 +123,4 @@ LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
+WHERE S.intTypeId = 1

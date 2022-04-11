@@ -73,7 +73,7 @@ AS
 				(
 					SELECT 	(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, intRepresentingUOMId, CD.intUnitMeasureId,dblRepresentingQty) ) qty
 					FROM	tblQMSample 
-					WHERE	intProductTypeId = 8  AND intSampleStatusId = 3 AND intProductValueId = CD.intContractDetailId
+					WHERE	intProductTypeId = 8  AND intSampleStatusId = 3 AND intProductValueId = CD.intContractDetailId AND tblQMSample.intTypeId = 1
 				)t
 			) AS dblApprovedQty,
 			SB.strSubLocationName,

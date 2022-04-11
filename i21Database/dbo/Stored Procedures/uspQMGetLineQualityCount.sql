@@ -23,7 +23,7 @@ BEGIN TRY
 	   JOIN tblMFWorkOrder W ON W.intWorkOrderId = TR.intProductValueId AND TR.intProductTypeId = 12
 	   JOIN tblICItem AS I ON I.intItemId = W.intItemId  
 	   JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
-	   JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId
+	   JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId AND S.intTypeId = 1
 		  AND S.intLocationId =' + @strLocationId + 
 		'
 	   JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
@@ -79,7 +79,7 @@ BEGIN TRY
     JOIN tblMFWorkOrder W ON W.intWorkOrderId = TR.intProductValueId AND TR.intProductTypeId = 12
     JOIN tblICItem AS I ON I.intItemId = W.intItemId  
     JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
-    JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId
+    JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId AND S.intTypeId = 1
 	   AND S.intLocationId =' + @strLocationId + 
 		'
     JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  

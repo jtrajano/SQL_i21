@@ -141,6 +141,7 @@ BEGIN TRY
 			FROM dbo.tblQMSample S
 			JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 			WHERE S.strContainerNumber = @strContainerNumber
+			AND S.intTypeId = 1
 			ORDER BY S.intSampleId DESC
 
 			IF ISNULL(@intSampleId, 0) = 0
@@ -152,6 +153,7 @@ BEGIN TRY
 				JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 				WHERE S.intProductTypeId = 11
 					AND S.intProductValueId = @intParentLotId
+					AND S.intTypeId = 1
 				ORDER BY S.intSampleId DESC
 			END
 

@@ -35,7 +35,8 @@ BEGIN TRY
 		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
-			AND S.intProductTypeId = 6'
+			AND S.intProductTypeId = 6
+			AND S.intTypeId = 1'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
@@ -126,7 +127,8 @@ BEGIN TRY
 		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
-			AND S.intProductTypeId = 6'
+			AND S.intProductTypeId = 6
+			AND S.intTypeId = 1'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN

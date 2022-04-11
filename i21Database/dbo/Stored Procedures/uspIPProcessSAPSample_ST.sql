@@ -953,6 +953,7 @@ BEGIN TRY
 					,@intPreviousSampleStatusId = 1
 				FROM tblQMSample WITH (NOLOCK)
 				WHERE strSampleNumber = @strSampleNumber
+				AND intTypeId = 1
 
 				IF ISNULL(@intSampleId, 0) = 0
 				BEGIN
@@ -1334,6 +1335,7 @@ BEGIN TRY
 				SELECT @intSampleId = intSampleId
 				FROM tblQMSample WITH (NOLOCK)
 				WHERE strSampleNumber = @strSampleNumber
+				AND intTypeId = 1
 
 				IF ISNULL(@intSampleId, 0) = 0
 				BEGIN

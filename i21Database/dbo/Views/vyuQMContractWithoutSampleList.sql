@@ -29,7 +29,7 @@ FROM vyuCTContractDetailView CTCDV
 INNER JOIN tblCTContractStatus CTCS ON CTCS.intContractStatusId = CTCDV.intContractStatusId AND CTCS.strContractStatus NOT IN ('Cancelled' , 'Complete', 'Short Close')
 INNER JOIN tblICUnitMeasure ICUM ON CTCDV.intUnitMeasureId = ICUM.intUnitMeasureId
 INNER JOIN tblCTWeightGrade CTWG ON CTCDV.intGradeId = CTWG.intWeightGradeId AND ISNULL(CTWG.ysnSample, 0) = 1
-LEFT JOIN tblQMSample QMS ON CTCDV.intContractDetailId = QMS.intContractDetailId
+LEFT JOIN tblQMSample QMS ON CTCDV.intContractDetailId = QMS.intContractDetailId AND QMS.intTypeId = 1
 LEFT JOIN tblSMCountry SMC ON CTCDV.intCountryId = SMC.intCountryID
 OUTER APPLY (
 	SELECT 

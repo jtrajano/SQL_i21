@@ -127,7 +127,7 @@ FROM (
 				dtmSampleReceived = S.dtmSampleReceivedDate,
 				dtmSampleApproved = CASE WHEN (SS.strStatus = 'Approved') THEN dtmTestedOn ELSE NULL END
 			FROM tblQMSample S JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-            WHERE S.intContractDetailId = Shipment.intContractDetailId) S
+            WHERE S.intContractDetailId = Shipment.intContractDetailId AND S.intTypeId = 1) S
 		LEFT JOIN tblAPBillDetail BD ON BD.intLoadDetailId = Shipment.intLoadDetailId
 		LEFT JOIN tblAPBill B ON B.intBillId = BD.intBillId
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
@@ -243,7 +243,7 @@ FROM (
 				dtmSampleReceived = S.dtmSampleReceivedDate,
 				dtmSampleApproved = CASE WHEN (SS.strStatus = 'Approved') THEN dtmTestedOn ELSE NULL END
 			FROM tblQMSample S JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-            WHERE S.intContractDetailId = Spot.intContractDetailId) S
+            WHERE S.intContractDetailId = Spot.intContractDetailId AND S.intTypeId = 1) S
 		OUTER APPLY 
 				(SELECT TOP 1 ysnHasPickLots = CAST(1 AS BIT) 
 					FROM tblLGPickLotDetail PLD1 INNER JOIN tblLGPickLotHeader PLD2 ON PLD2.intPickLotHeaderId = PLD1.intPickLotHeaderId
@@ -368,7 +368,7 @@ FROM (
 				dtmSampleReceived = S.dtmSampleReceivedDate,
 				dtmSampleApproved = CASE WHEN (SS.strStatus = 'Approved') THEN dtmTestedOn ELSE NULL END
 			FROM tblQMSample S JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-            WHERE S.intContractDetailId = PCD.intContractDetailId) S
+            WHERE S.intContractDetailId = PCD.intContractDetailId AND S.intTypeId = 1) S
 		--Sales
 		INNER JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
 		INNER JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId

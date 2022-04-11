@@ -10,3 +10,4 @@ FROM tblQMSample S
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 CROSS APPLY tblLGCompanyPreference LP
+WHERE S.intTypeId = 1

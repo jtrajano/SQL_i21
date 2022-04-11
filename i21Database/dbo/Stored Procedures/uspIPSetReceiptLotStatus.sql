@@ -170,6 +170,7 @@ BEGIN TRY
 				JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 				WHERE S.strContainerNumber = @strContainerNumber
 				AND S.intSampleStatusId=3
+				AND S.intTypeId = 1
 				ORDER BY S.intSampleId DESC
 
 				--SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId

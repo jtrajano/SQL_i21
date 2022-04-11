@@ -60,7 +60,7 @@ BEGIN TRY
 		SELECT TOP 1 
 			dblRepresentingQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(S.intRepresentingUOMId, CD.intItemUOMId, S.dblRepresentingQty), 0)
 		FROM tblQMSample S 
-		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
+		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId AND S.intTypeId = 1
 		WHERE S.intContractDetailId = C.intContractDetailId
 		ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 	WHERE L.intLoadId = @intLoadId
@@ -80,7 +80,7 @@ BEGIN TRY
 		SELECT dblSampleQty = ISNULL(SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(s.intRepresentingUOMId, cd.intItemUOMId, s.dblRepresentingQty), 0)), 0)
 		 FROM tblQMSample s 
 		 INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = s.intContractDetailId
-		WHERE s.intContractDetailId = C.intContractDetailId AND s.intProductTypeId = 8 AND s.intSampleStatusId <> 4) S
+		WHERE s.intContractDetailId = C.intContractDetailId AND s.intProductTypeId = 8 AND s.intSampleStatusId <> 4 AND s.intTypeId = 1) S
 	WHERE L.intLoadId = @intLoadId
 		AND C.intShipmentType = 1
 

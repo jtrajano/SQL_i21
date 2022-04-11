@@ -53,6 +53,7 @@ BEGIN TRY
 	WHERE S.intProductTypeId = @intProductTypeId
 		AND S.intProductValueId = @intProductValueId
 		AND TR.intControlPointId = @intControlPointId
+		AND S.intTypeId = 1
 
 	BEGIN TRAN
 
