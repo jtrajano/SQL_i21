@@ -36,11 +36,28 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	, dblNonTaxableFunctional    = (CASE WHEN INVOICE.dblBaseTax = 0 
+		 							THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
+									ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax = 0.000000
+												THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
+												ELSE 0.000000 
+											END) 
+									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTaxable       		= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN 0 
 									ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
 												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
 														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+														  ELSE 0.000000
+													 END
+												ELSE 0.000000 
+											END) 
+									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	, dblTaxableFunctional       = (CASE WHEN INVOICE.dblBaseTax = 0 
+		 							THEN 0 
+									ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax <> 0.000000 
+												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
+														  THEN DETAIL.dblBaseLineTotal * (DETAIL.dblBaseAdjustedTax/ISNULL(NULLIF(DETAIL.dblBaseTotalAdjustedTax, 0), DETAIL.dblBaseAdjustedTax))
 														  ELSE 0.000000
 													 END
 												ELSE 0.000000 
@@ -120,6 +137,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , strShipToState			= SHIPTO.strState
 	 , strShipToCountry			= SHIPTO.strCountry
 	 , dblPayment				= INVOICE.dblPayment
+	 , dblPaymentFunctional		= INVOICE.dblBasePayment
 	 , strCheckNumbers			= PAYMENT.strCheckNumbers
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
@@ -134,9 +152,13 @@ INNER JOIN (
 		 , dblPrice					= ID.dblPrice
 		 , dblQtyShipped			= ID.dblQtyShipped
 		 , dblLineTotal				= ID.dblQtyShipped * ID.dblPrice
+		 , dblBaseLineTotal			= ID.dblQtyShipped * ID.dblBasePrice
 		 , dblAdjustedTax			= IDT.dblAdjustedTax
-		 , dblTax					= IDT.dblTax		 
-		 , dblTotalAdjustedTax		= ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0)		 
+		 , dblBaseAdjustedTax		= IDT.dblBaseAdjustedTax
+		 , dblTax					= IDT.dblTax
+		 , dblBaseTax				= IDT.dblBaseAdjustedTax
+		 , dblTotalAdjustedTax		= ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0)
+		 , dblBaseTotalAdjustedTax	= ISNULL(TAXTOTAL.dblBaseTotalAdjustedTax, 0)
 		 , ysnTaxExempt				= IDT.ysnTaxExempt		
 		 , ysnInvalidSetup			= IDT.ysnInvalidSetup		
 		 , strTaxGroup				= TAXGROUP.strTaxGroup
@@ -173,8 +195,9 @@ INNER JOIN (
 			 , intSalesTaxAccountId
 			 , strCalculationMethod
 			 , dblRate
-			 , dblAdjustedTax		
-			 , dblTax				
+			 , dblAdjustedTax
+			 , dblBaseAdjustedTax
+			 , dblTax
 			 , ysnTaxExempt
 			 , ysnTaxAdjusted
 			 , ysnInvalidSetup			 
@@ -182,8 +205,9 @@ INNER JOIN (
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	LEFT JOIN (
 		SELECT intInvoiceDetailId
-			 , dblTotalAdjustedTax	= SUM(dblAdjustedTax)			 
-			 , intTaxCodeCount		= COUNT(intInvoiceDetailTaxId)
+			 , dblTotalAdjustedTax		= SUM(dblAdjustedTax)
+			 , dblBaseTotalAdjustedTax	= SUM(dblBaseAdjustedTax)
+			 , intTaxCodeCount			= COUNT(intInvoiceDetailTaxId)
 		FROM tblARInvoiceDetailTax WITH (NOLOCK)
 		WHERE ysnTaxExempt = 0
 		GROUP BY intInvoiceDetailId
