@@ -31,7 +31,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000 --AND (DETAIL.ysnTaxExempt = 1 OR (DETAIL.ysnTaxExempt = 0 AND ISNULL(DETAIL.dblTotalAdjustedTax, 0.000000) = 0.000000)) 
+									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000
 												THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 												ELSE 0.000000 
 											END) 
@@ -48,7 +48,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTotalSales 			= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-									ELSE ((CASE WHEN DETAIL.dblAdjustedTax = 0.000000 --AND ISNULL(DETAIL.dblTotalAdjustedTax, 0.000000) = 0.000000 
+									ELSE ((CASE WHEN DETAIL.dblAdjustedTax = 0.000000
 												THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 												ELSE 0.000000 
 											END) +
@@ -74,7 +74,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , intEntitySalespersonId	= INVOICE.intEntitySalespersonId
 	 , strSalespersonNumber		= SALESPERSON.strSalespersonNumber
 	 , strSalespersonName		= SALESPERSON.strSalespersonName
-	 , strSalespersonDisplayName = SALESPERSON.strSalespersonDisplayName
+	 , strSalespersonDisplayName= SALESPERSON.strSalespersonDisplayName
 	 , strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
 	 , strCurrency				= CURRENCY.strCurrency
@@ -111,9 +111,16 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , strUnitOfMeasure			= DETAIL.strUnitOfMeasure
 	 , ysnPaid					= INVOICE.ysnPaid
 	 , intARAccountId			= INVOICE.intAccountId
-	 , strARAccountI			= ARACCOUNT.strAccountId
+	 , strARAccountId			= ARACCOUNT.strAccountId
 	 , intSalesAccountId		= DETAIL.intSalesAccountId
 	 , strSalesAccountId		= DETAIL.strAccountId
+	 , strShipToName			= SHIPTO.strCheckPayeeName
+	 , strShipToAddress			= SHIPTO.strAddress
+	 , strShipToCity			= SHIPTO.strCity
+	 , strShipToState			= SHIPTO.strState
+	 , strShipToCountry			= SHIPTO.strCountry
+	 , dblPayment				= INVOICE.dblPayment
+	 , strCheckNumbers			= PAYMENT.strCheckNumbers
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId				= ID.intInvoiceId
@@ -302,6 +309,11 @@ LEFT OUTER JOIN (
 LEFT OUTER JOIN (
 	SELECT intEntityLocationId
 	     , strLocationName
+		 , strCheckPayeeName
+		 , strAddress
+		 , strCity
+		 , strState
+		 , strCountry
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 ) SHIPTO ON INVOICE.intShipToLocationId = SHIPTO.intEntityLocationId
 LEFT OUTER JOIN (
@@ -341,4 +353,17 @@ OUTER APPLY (
 	FROM tblGLAccount
 	WHERE intAccountId = INVOICE.intAccountId
 ) ARACCOUNT
+OUTER APPLY (
+	SELECT strCheckNumbers = STUFF(
+		(
+			SELECT DISTINCT ',' + LTRIM(strPaymentInfo)
+			FROM tblARPayment
+			WHERE intPaymentId = ARPD.intPaymentId
+			
+			FOR XML PATH('')
+		), 1, 1, ''
+	)
+	FROM tblARPaymentDetail ARPD
+	WHERE intInvoiceId = INVOICE.intInvoiceId
+) PAYMENT
 WHERE INVOICE.ysnPosted = 1
