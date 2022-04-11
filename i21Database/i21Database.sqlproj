@@ -660,6 +660,9 @@
     <Build Include="dbo\Views\vyuRKCreditLImit.sql" />
     <Build Include="dbo\Views\vyuRKCreditTempLimit.sql" />
     <Build Include="dbo\Views\vyuRKComplementaryLimit.sql" />
+    <Build Include="dbo\Tables\tblQMCuppingSession.sql" />
+    <Build Include="dbo\Tables\tblQMCuppingSessionDetail.sql" />
+    <Build Include="dbo\Views\tblQMCuppingSessionSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

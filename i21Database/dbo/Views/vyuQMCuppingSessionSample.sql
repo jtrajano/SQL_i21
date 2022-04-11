@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuQMSampleList
+CREATE VIEW vyuQMCuppingSessionSample
 AS
 SELECT S.intSampleId
 	,S.strSampleNumber
@@ -100,6 +100,11 @@ SELECT S.intSampleId
 	,RS.strSampleNumber AS strRelatedSampleNumber
 	,S.intRelatedSampleId
 	,S.intTypeId
+    ,CSH.strCuppingSessionNumber
+	,CSH.intCuppingSessionId
+	,CSH.dtmCuppingDateTime
+	,CSD.intRank
+    ,CSD.intCuppingSessionDetailId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -142,4 +147,6 @@ LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
 LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
+LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intParentSampleId = S.intSampleId
+LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionDetailId
 WHERE S.intTypeId = 1

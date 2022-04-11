@@ -40,6 +40,12 @@ SELECT S.intSampleId
 	,U2.strUnitMeasure AS strHeaderUnitMeasure
 	,SC.strSamplingCriteria
 	,RS.strSampleNumber AS strRelatedSampleNumber
+	-- Cupping Session Fields
+    ,CSH.strCuppingSessionNumber
+	,CSH.intCuppingSessionId
+	,CSH.dtmCuppingDateTime
+	,CSD.intRank
+    ,CSD.intCuppingSessionDetailId
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -70,3 +76,5 @@ LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
 LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
+LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intCuppingSessionDetailId = S.intCuppingSessionDetailId
+LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
