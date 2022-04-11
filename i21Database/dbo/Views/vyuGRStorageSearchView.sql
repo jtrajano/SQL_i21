@@ -147,6 +147,8 @@ LEFT JOIN (
 	tblSCTicket SC 		
 	LEFT JOIN tblGRStorageHistory SH
 		ON SH.intTicketId = SC.intTicketId
+	LEFT JOIN tblICInventoryReceipt IR
+		ON IR.intInventoryReceiptId = SH.intInventoryReceiptId
 	LEFT JOIN tblICInventoryReceiptItem IRI
 		ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
 	) 
