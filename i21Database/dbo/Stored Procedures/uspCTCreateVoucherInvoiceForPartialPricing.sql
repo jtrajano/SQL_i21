@@ -139,10 +139,14 @@ BEGIN TRY
 				else
 				begin
 					update tblICInventoryReceiptItem set ysnAllowVoucher = 1 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
+					declare @strBillIds nvarchar(max);
 					exec uspICConvertReceiptToVoucher
-						@intInventoryReceiptId
-						,@intUserId
-						,@intNewBillId OUTPUT
+						@intReceiptId = @intInventoryReceiptId
+						,@intEntityUserSecurityId = @intUserId
+						,@strType = default
+						,@intBillId = @intNewBillId OUTPUT
+						,@strBillIds = @strBillIds OUTPUT
+						,@intScreenId = default
 
 					if (@intPricingTypeId = 2)
 					begin

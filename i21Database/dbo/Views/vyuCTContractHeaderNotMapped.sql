@@ -3,7 +3,8 @@
 AS 
 
 	SELECT	*,
-			CAST(CASE WHEN ISNULL(strPrepaidIds,'') = '' THEN 0 ELSE 1 END AS BIT) ysnPrepaid
+			CAST(CASE WHEN ISNULL(strPrepaidIds,'') = '' THEN 0 ELSE 1 END AS BIT) ysnPrepaid,
+			CAST(CASE WHEN ISNULL(strProvisionalVoucherIds,'') = '' THEN 0 ELSE 1 END AS BIT) ysnProvisionalVoucher
 	FROM	(
 				SELECT	CH.intContractHeaderId,
 						PF.intPriceFixationId, 
@@ -19,6 +20,7 @@ AS
 
 						dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intLoadUOMId,CH.intCommodityUOMId,1)	AS	dblCommodityUOMConversionFactor,
 						dbo.fnCTGetPrepaidIds(CH.intContractHeaderId)  COLLATE Latin1_General_CI_AS AS strPrepaidIds,
+						dbo.fnCTGetProvisionalIds(CH.intContractHeaderId)  COLLATE Latin1_General_CI_AS AS strProvisionalVoucherIds,
 						
 						EY.strName					AS	strEntityName,
 						SP.strName					AS	strSalesperson,

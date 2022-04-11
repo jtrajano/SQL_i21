@@ -25,6 +25,7 @@ BEGIN TRY
 		,@intBookId INT
 		,@intCurrencyId INT
 		,@strCurrency NVARCHAR(40)
+		,@intDefaultCurrencyId INT
 	DECLARE @intActionId INT
 		,@intContractStatusId INT
 		,@dtmPlannedAvailabilityDate DATETIME
@@ -258,20 +259,31 @@ BEGIN TRY
 		FROM tblIPThirdPartyContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
-		If @strCurrency='CAD'
-		Begin
+		IF @strCurrency='CAD'
+		BEGIN
 			SELECT TOP 1 @intCurrencyId = intCurrencyID
 				,@strCurrency = strCurrency
 			FROM tblSMCurrency
 			WHERE strCurrency=@strCurrency
-		End
-		Else
-		Begin
+		END
+		ELSE
+		BEGIN
 			SELECT TOP 1 @intCurrencyId = intCurrencyID
 				,@strCurrency = strCurrency
 			FROM tblSMCurrency
 			WHERE strCurrency LIKE '%USD%'
-		End
+		END
+
+		SELECT 
+			@intDefaultCurrencyId= V.intCurrencyId 
+		FROM tblAPVendor V 
+		WHERE V.strVendorAccountNum =@strVendorAccountNum
+
+		IF IsNULl(@intDefaultCurrencyId,0)<>@intCurrencyId
+		BEGIN
+			SELECT @strError = @strError + 'Contract currency cannot be different than vendor''s default currency. '
+		END
+
 		SELECT @dtmUpdatedAvailabilityDate = CD.dtmUpdatedAvailabilityDate
 			,@strPricingType = PT.strPricingType
 		FROM tblCTContractDetail CD WITH (NOLOCK)

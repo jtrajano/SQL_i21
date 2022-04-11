@@ -148,7 +148,7 @@ BEGIN TRY
 		,[intContainerId] = ISNULL(LC.intLoadContainerId, -1)
 		,[intBookId] = L.intBookId
 		,[intSubBookId] = L.intSubBookId
-		,[intSort] = ISNULL(LC.intLoadContainerId,0)
+		,[intSort] = COALESCE(LC.intLoadContainerId,LD.intLoadDetailId,0)
 		,[intLoadShipmentId] = L.intLoadId
 		,[intLoadShipmentDetailId] = LD.intLoadDetailId
 	FROM tblLGLoad L
@@ -352,7 +352,7 @@ BEGIN TRY
 		,[dblGrossWeight] = LDL.dblGross
 		,[dblTareWeight] = LDL.dblTare
 		,[strContainerNo] = LC.strContainerNumber
-		,[intSort] = ISNULL(LC.intLoadContainerId,0)
+		,[intSort] = COALESCE(LC.intLoadContainerId,LD.intLoadDetailId,0)
 		,[strMarkings] = LC.strMarks
 		,[strCondition] = Lot.strCondition
 		,[intEntityVendorId] = NULL --LD.intVendorEntityId

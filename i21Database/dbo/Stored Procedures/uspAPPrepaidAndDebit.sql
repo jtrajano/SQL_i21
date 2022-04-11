@@ -859,6 +859,56 @@ AND EXISTS
 -- AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
 -- AND 1 = CASE WHEN A.intTransactionType = 13 AND A.ysnPosted = 0 THEN 0 --EXCLUDE UNPOSTED 
 -- 		ELSE 1 END
+UNION ALL
+--PROVISIONAL
+SELECT
+	[intBillId]				=	@billId, 
+	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
+	[intLineApplied]		=	CurrentBill.intLotId, 
+	[intTransactionId]		=	A.intBillId,
+	[strTransactionNumber]	=	A.strBillId,
+	[intItemId]				=	CurrentBill.intItemId,
+	[strItemDescription]	=	CurrentBill.strLotNumber,
+	[strItemNo]				=	itm.strItemNo,
+	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
+	[strContractNumber]		=	CurrentBill.strContractNumber,
+	[intPrepayType]			=	NULL,
+	[dblTotal]				=	ROUND(((A.dblProvisionalPercentage / 100) * (B.dblTotal + B.dblTax)), 2),--B.dblTotal,
+	[dblBillAmount]			=	CurrentBill.dblTotal,
+	[dblBalance]			=	ROUND(((A.dblProvisionalPercentage / 100) * (B.dblTotal + B.dblTax)), 2),
+	[dblAmountApplied]		=	0,
+	[ysnApplied]			=	0,
+	[intConcurrencyId]		=	0
+FROM tblAPBill A
+INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+CROSS APPLY
+(
+	SELECT
+		C.intItemId
+		,C.dblTotal + C.dblTax AS dblTotal
+		,C.dblCost
+		,C.dblQtyReceived
+		,C.intBillDetailId
+		,D.strContractNumber
+		,D.intContractHeaderId
+		,C.intContractDetailId
+		,C.intLineNo
+		,C.intLotId
+		,E.strLotNumber
+		,((A.dblProvisionalPercentage / 100) * Total.dblDetailTotal) AS dblDetailTotal
+		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
+	FROM tblAPBillDetail C
+	LEFT JOIN tblICLot E ON C.intLotId = E.intLotId
+	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
+	OUTER APPLY (
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal FROM dbo.tblAPBillDetail C2
+		WHERE intBillId = @billId
+	) Total
+	WHERE intBillId = @billId
+	AND C.intLotId = B.intLotId
+) CurrentBill
+LEFT JOIN tblICItem itm ON itm.intItemId = B.intItemId
+WHERE A.intTransactionType = 16
 
 SELECT * FROM tblAPAppliedPrepaidAndDebit WHERE intBillId = @billId
 

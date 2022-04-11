@@ -667,6 +667,7 @@ BEGIN TRY
 						FROM tblQMSample S
 						JOIN tblQMSampleType ST on ST.intSampleTypeId =S.intSampleTypeId and ST.intControlPointId =5
 						WHERE S.strContainerNumber = @strContainerNumber
+						AND S.intSampleStatusId=3
 						ORDER BY S.intSampleId DESC
 					End
 

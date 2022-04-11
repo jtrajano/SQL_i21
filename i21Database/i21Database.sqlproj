@@ -649,6 +649,10 @@
     <Build Include="dbo\Views\vyuICGetContractBundleOptions.sql" />
     <Build Include="dbo\Tables\tblCTContractHeaderLastModification.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetRiskPositionInquiry.sql" />
+    <Build Include="dbo\Tables\tblCRMBrandFieldMapping.sql" />
+    <Build Include="dbo\Views\vyuCRMBrandOpportunityIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCounterpartyExposure.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10752,6 +10756,7 @@
     <Build Include="dbo\Tables\tblQMPriorityGroup.sql" />
     <Build Include="dbo\Tables\tblQMPriorityGroupDetail.sql" />
     <Build Include="dbo\Views\vyuQMProductGroupDetailSearch.sql" />
+    <Build Include="dbo\Functions\fnCTGetProvisionalIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

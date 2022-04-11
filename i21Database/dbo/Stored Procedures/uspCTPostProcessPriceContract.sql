@@ -43,6 +43,9 @@ BEGIN
 			,@intOutputId int
 			,@intFutOptTransactionHeaderId int
 			,@ysnSplit bit
+			,@ysnEnableArbitrageDerivative bit = 0
+			,@intSpreadArbitrageId int
+			,@ysnDerivative bit
 			;
 
 		DECLARE @PFTable TABLE(
@@ -65,6 +68,8 @@ BEGIN
 		WHERE
 			intRecordId = @intPriceContractId
 			AND intScreenId = @intScreenId
+
+		select top 1  @ysnEnableArbitrageDerivative = ysnEnableDerivativeInArbitrage from tblCTCompanyPreference;
 
 		if exists (select top 1 1 from tblCTPriceFixation pf join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId where pf.intPriceContractId = @intPriceContractId and isnull(ch.ysnMultiplePriceFixation,0) = 1)
 		begin
@@ -241,6 +246,131 @@ BEGIN
 				WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 
 			END --> End Price Fixation Detail loop
+
+			if (@ysnEnableArbitrageDerivative = 1)
+			begin
+				select @intSpreadArbitrageId = min(intSpreadArbitrageId) from tblCTSpreadArbitrage where intPriceFixationId = @intPriceFixationId and strTradeType = 'Arbitrage';
+				while (isnull(@intSpreadArbitrageId,0) > 0)
+				begin
+
+					select
+						@ysnDerivative = a.ysnDerivative
+						,@intFutOptTransactionId = a.intInternalTradeNumberId
+						,@dblHedgeNoOfLots = a.dblNoOfLots
+						,@intBrokerId = a.intBrokerId
+						,@intBrokerageAccountId = a.intBrokerAccountId
+						,@intFutureMarketId = a.intNewFutureMarketId
+						,@intCommodityId = c.intCommodityId
+						,@intLocationId = (case when b.intContractDetailId is null then TS1.intCompanyLocationId else TS.intCompanyLocationId end)
+						,@intTraderId = c.intSalespersonId
+						,@intCurrencyId = a.intCurrencyId
+						,@strBuySell = a.strBuySell
+						,@intHedgeFutureMonthId = a.intNewFutureMonthId
+						,@dblHedgePrice = a.dblSpreadPrice
+						,@dtmFixationDate = a.dtmSpreadArbitrageDate
+						,@ysnAA = 0
+						,@intBookId				= (case when b.intContractDetailId is null then TS1.intBookId else TS.intBookId end)
+						,@intSubBookId			= (case when b.intContractDetailId is null then TS1.intSubBookId else TS.intSubBookId end)
+					from
+						tblCTSpreadArbitrage a
+						join tblCTPriceFixation b on b.intPriceFixationId = a.intPriceFixationId
+						join tblCTContractHeader c on c.intContractHeaderId = b.intContractHeaderId
+						left join tblCTContractDetail TS WITH (UPDLOCK) on TS.intContractDetailId = b.intContractDetailId  
+						CROSS APPLY fnCTGetTopOneSequence(b.intContractHeaderId,isnull(b.intContractDetailId,0)) TS1 
+					where
+						a.intSpreadArbitrageId = @intSpreadArbitrageId;
+
+					if (@ysnDerivative = 1)
+					begin
+
+						SELECT @dblDerivativeNoOfContract = ISNULL(dblNoOfContract,0), @ysnFreezed = isnull(ysnFreezed,0) FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
+						IF @dblHedgeNoOfLots = @dblDerivativeNoOfContract
+						BEGIN
+							select @intSpreadArbitrageId = min(intSpreadArbitrageId) from tblCTSpreadArbitrage where intPriceFixationId = @intPriceFixationId and strTradeType = 'Arbitrage' and intSpreadArbitrageId > @intSpreadArbitrageId;
+							CONTINUE
+						END
+
+						
+
+						IF ISNULL(@ysnFreezed,0) = 0
+						BEGIN
+							SET @strXML = '<root>'
+
+							IF ISNULL(@intFutOptTransactionId,0) > 0
+							BEGIN
+								SET @strXML = @strXML +  '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
+							END
+
+							SET @strXML = @strXML +  '<intFutOptTransactionHeaderId>1</intFutOptTransactionHeaderId>'
+							SET @strXML = @strXML +  '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
+
+							IF ISNULL(@intContractDetailId,0) > 0
+							BEGIN
+								SET @strXML = @strXML +  '<intContractDetailId>' + LTRIM(@intContractDetailId) + '</intContractDetailId>'
+							END
+
+							SET @strXML = @strXML +  '<dtmTransactionDate>' + LTRIM(GETDATE()) + '</dtmTransactionDate>'
+							SET @strXML = @strXML +  '<intEntityId>' + LTRIM(@intBrokerId) + '</intEntityId>'
+							SET @strXML = @strXML +  '<intBrokerageAccountId>' + LTRIM(@intBrokerageAccountId) + '</intBrokerageAccountId>'
+							SET @strXML = @strXML +  '<intFutureMarketId>' + LTRIM(@intFutureMarketId) + '</intFutureMarketId>'
+							SET @strXML = @strXML +  '<intInstrumentTypeId>1</intInstrumentTypeId>'
+							SET @strXML = @strXML +  '<intCommodityId>' + LTRIM(@intCommodityId) + '</intCommodityId>'
+							SET @strXML = @strXML +  '<intLocationId>' + LTRIM(@intLocationId) + '</intLocationId>'
+							SET @strXML = @strXML +  '<intTraderId>' + LTRIM(@intTraderId) + '</intTraderId>'
+							SET @strXML = @strXML +  '<intCurrencyId>' + LTRIM(@intCurrencyId) + '</intCurrencyId>'
+							SET @strXML = @strXML +  '<intSelectedInstrumentTypeId>1</intSelectedInstrumentTypeId>'
+							SET @strXML = @strXML +  '<strBuySell>' + @strBuySell + '</strBuySell>'
+							SET @strXML = @strXML +  '<dblNoOfContract>' + LTRIM(@dblHedgeNoOfLots) + '</dblNoOfContract>'
+							SET @strXML = @strXML +  '<intFutureMonthId>' + LTRIM(@intHedgeFutureMonthId) + '</intFutureMonthId>'
+							SET @strXML = @strXML +  '<dblPrice>' + LTRIM(@dblHedgePrice) + '</dblPrice>'
+							SET @strXML = @strXML +  '<strStatus>' + 'Filled' + '</strStatus>'
+							SET @strXML = @strXML +  '<dtmFilledDate>' + LTRIM(@dtmFixationDate) + '</dtmFilledDate>'
+							SET @strXML = @strXML +  '<ysnAA>' + LTRIM(ISNULL(@ysnAA,0)) + '</ysnAA>'
+
+							if ISNULL(@intBookId,0) > 0
+							BEGIN
+								SET @strXML = @strXML +  '<intBookId>' + LTRIM(@intBookId) + '</intBookId>'
+							END
+
+							if ISNULL(@intSubBookId,0) > 0
+							BEGIN
+								SET @strXML = @strXML +  '<intSubBookId>' + LTRIM(@intSubBookId) + '</intSubBookId>'
+							END
+
+							SET @strXML = @strXML +  '</root>'
+
+
+							EXEC uspRKAutoHedge @strXML,@intUserId,@intOutputId OUTPUT
+
+							IF ISNULL(@intFutOptTransactionId,0) = 0
+							BEGIN
+								UPDATE tblCTSpreadArbitrage SET intInternalTradeNumberId = @intOutputId WHERE intSpreadArbitrageId = @intSpreadArbitrageId;
+							END
+							ELSE IF dbo.fnCTCheckIfDuplicateFutOptTransactionHistory(@intOutputId) > 1
+							BEGIN
+								-- DERIVATIVE ENTRY HISTORY
+								SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
+								EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Arbitrage', @intUserId, 'UPDATE', 0
+							END
+						END
+
+					end
+					else
+					begin
+						IF ISNULL(@intFutOptTransactionId,0) > 0
+						BEGIN
+							-- DERIVATIVE ENTRY HISTORY
+							SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
+							EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'Price Arbitrage', @intUserId, 'DELETE'
+							UPDATE tblCTSpreadArbitrage SET intInternalTradeNumberId = NULL WHERE intSpreadArbitrageId = @intSpreadArbitrageId
+							EXEC uspRKDeleteAutoHedge @intFutOptTransactionId, @intUserId
+						END
+					end
+				
+					select @intSpreadArbitrageId = min(intSpreadArbitrageId) from tblCTSpreadArbitrage where intPriceFixationId = @intPriceFixationId and strTradeType = 'Arbitrage' and intSpreadArbitrageId > @intSpreadArbitrageId;
+				end
+			end
+
 
 			EXEC uspCTPriceFixationSave
 				@intPriceFixationId = @intPriceFixationId

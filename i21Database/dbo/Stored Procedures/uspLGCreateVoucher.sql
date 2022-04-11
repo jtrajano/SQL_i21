@@ -2,6 +2,7 @@
 	 @intLoadId INT
 	,@intEntityUserSecurityId INT
 	,@intNewBillId INT OUTPUT
+	,@intType INT = 1
 
 AS
 BEGIN TRY
@@ -21,6 +22,7 @@ BEGIN TRY
 		        @intLoadId = @intLoadId
 			   ,@intEntityUserSecurityId = @intEntityUserSecurityId
 			   ,@intBillId = @intBillId OUTPUT
+			   ,@intType = @intType
 	END
 	ELSE IF @intPurchaseSale IN (2)
 	BEGIN

@@ -4,6 +4,17 @@ CREATE PROCEDURE uspICImportReceiptItemLotFromStaging
 	@intDataSourceId INT = 2
 AS
 
+DECLARE @SourceType_None AS INT = 0
+DECLARE @SourceType_Scale AS INT = 1
+DECLARE @SourceType_InboundShipment AS INT = 2
+DECLARE @SourceType_Transport AS INT = 3
+DECLARE @SourceType_SettleStorage AS INT = 4
+DECLARE @SourceType_DeliverySheet AS INT = 5
+DECLARE @SourceType_PurchaseOrder AS INT = 6
+DECLARE @SourceType_Store AS INT = 7
+DECLARE @SourceType_TransferShipment AS INT = 9
+
+
 DELETE FROM tblICImportStagingReceiptItemLot WHERE strImportIdentifier <> @strIdentifier
 
 DECLARE @tblItemLotLogs TABLE(
@@ -168,7 +179,7 @@ BEGIN
 		,strLotNumber = ReceiptItemLot.strLotNo
 		,strLotAlias = ReceiptItemLot.strLotAlias
 		,intSubLocationId = ReceiptItem.intSubLocationId
-		,intStorageLocationId = ISNULL(StorageLocation.intStorageLocationId, ReceiptItem.intSubLocationId) 
+		,intStorageLocationId = ISNULL(storageUnit.intStorageLocationId, ReceiptItem.intStorageLocationId) 
 		,intItemUnitMeasureId = ItemUOM.intItemUOMId
 		,dblQuantity = ReceiptItemLot.dblQuantity
 		,dblGrossWeight = ReceiptItemLot.dblGross
@@ -232,9 +243,9 @@ BEGIN
 			ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt Receipt
 			ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-		LEFT JOIN tblICStorageLocation StorageLocation
-			ON ReceiptItem.intSubLocationId = StorageLocation.intSubLocationId
-			AND ReceiptItemLot.strStorageUnit = StorageLocation.strName
+		LEFT JOIN tblICStorageLocation storageUnit
+			ON storageUnit.intSubLocationId = ReceiptItem.intSubLocationId
+			AND storageUnit.strName = ReceiptItemLot.strStorageUnit 
 		LEFT JOIN tblICUnitMeasure UnitMeasure
 			ON ReceiptItemLot.strUnitMeasure = UnitMeasure.strUnitMeasure
 		LEFT JOIN tblICItemUOM ItemUOM
@@ -259,13 +270,68 @@ ELSE IF
 	EXISTS (SELECT TOP 1 strSingleOrMultipleLots FROM tblICCompanyPreference WHERE strSingleOrMultipleLots = 'Single')
 	AND NOT EXISTS (SELECT TOP 1 * FROM @tblItemLotLogs WHERE strLogType = 'Error') 
 BEGIN 
+
 	DECLARE @insertedReceiptItems AS TABLE (
 		intImportStagingReceiptItemLotId INT 
 		,intInventoryReceiptItemId INT 
 	)
+
 	DECLARE @intImportStagingReceiptItemLotId INT
 		,@intInventoryReceiptItemId INT 
 		,@intInventoryReceiptId INT 
+		,@intContractDetailId INT 
+		,@dblQty NUMERIC(18,6)
+		,@intUserId	INT
+
+	-- Log the contracts
+	-- Reduce schedule quantity from the original line item. 
+	BEGIN 			
+		SELECT TOP 1 
+			@intContractDetailId = ISNULL(ReceiptItem.intContractDetailId, ReceiptItem.intLineNo) 
+			,@dblQty = 
+				CASE 
+				WHEN (ISNULL(ContractHeader.ysnLoad, 0) = 0) THEN 					
+					dbo.fnCalculateQtyBetweenUOM(						
+						dbo.fnGetMatchingItemUOMId(
+							ContractDetail.intItemId
+							,ReceiptItem.intUnitMeasureId
+						)
+						,ContractDetail.intItemUOMId
+						,-ReceiptItem.dblOpenReceive
+					)
+				ELSE 
+					ReceiptItem.intLoadReceive 
+				END
+			,@intUserId = ISNULL(Receipt.intModifiedByUserId, Receipt.intCreatedByUserId) 
+			,@intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+		FROM
+			tblICImportStagingReceiptItemLot ReceiptItemLot
+			INNER JOIN tblICInventoryReceiptItem ReceiptItem
+				ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+			INNER JOIN tblICInventoryReceipt Receipt
+				ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+			INNER JOIN tblCTContractDetail ContractDetail
+				ON ContractDetail.intContractDetailId = ISNULL(ReceiptItem.intContractDetailId, ReceiptItem.intLineNo) 
+			INNER JOIN tblCTContractHeader ContractHeader
+				ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
+				AND ContractHeader.intContractHeaderId = ISNULL(ReceiptItem.intContractHeaderId, ReceiptItem.intOrderId) 
+			LEFT JOIN tblICItem Item 
+				ON Item.intItemId = ContractDetail.intItemId
+		WHERE
+			ReceiptItemLot.strImportIdentifier = @strIdentifier
+			AND Receipt.strReceiptType = 'Purchase Contract'
+			AND Receipt.intSourceType NOT IN (@SourceType_InboundShipment, @SourceType_Scale, @SourceType_PurchaseOrder, @SourceType_TransferShipment)
+
+		IF @intContractDetailId IS NOT NULL 
+		BEGIN
+			EXEC	uspCTUpdateScheduleQuantity
+					@intContractDetailId	=	@intContractDetailId,
+					@dblQuantityToUpdate	=	@dblQty,
+					@intUserId				=	@intUserId,
+					@intExternalId			=	@intInventoryReceiptItemId,
+					@strScreenName			=	'Inventory Receipt'
+		END 
+	END 
 
 	;DECLARE loopImport CURSOR LOCAL FAST_FORWARD
 	FOR 
@@ -355,8 +421,8 @@ BEGIN
 			,ri.intSourceId
 			,ri.intItemId
 			,ri.intContainerId
-			,ri.intSubLocationId
-			,ri.intStorageLocationId
+			,intSubLocationId = ISNULL(storageUnit.intSubLocationId, ri.intSubLocationId) 
+			,intStorageLocationId = ISNULL(storageUnit.intStorageLocationId, ri.intStorageLocationId) 
 			,ri.intOwnershipType
 			,ri.dblOrderQty
 			,ri.dblBillQty
@@ -421,8 +487,13 @@ BEGIN
 			,ri.intComputeItemTotalOption		
 			,intConcurrencyId = 1
 		FROM 
-			tblICInventoryReceiptItem ri INNER JOIN tblICImportStagingReceiptItemLot lotImport
+			tblICInventoryReceipt r	INNER JOIN tblICInventoryReceiptItem ri 
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			INNER JOIN tblICImportStagingReceiptItemLot lotImport
 				ON ri.intInventoryReceiptItemId = lotImport.intInventoryReceiptItemId
+			LEFT JOIN tblICStorageLocation storageUnit
+				ON storageUnit.strName = lotImport.strStorageUnit
+				AND storageUnit.intLocationId = r.intLocationId
 		WHERE
 			lotImport.intImportStagingReceiptItemLotId = @intImportStagingReceiptItemLotId
 
@@ -438,6 +509,53 @@ BEGIN
 			SELECT
 				@intImportStagingReceiptItemLotId
 				,@intInventoryReceiptItemId
+
+			-- Log the contracts
+			-- Add schedule quantity from the mew line items. 
+			BEGIN 			
+				SELECT TOP 1 
+					@intContractDetailId = ISNULL(ReceiptItem.intContractDetailId, ReceiptItem.intLineNo) 
+					,@dblQty = 
+						CASE 
+						WHEN (ISNULL(ContractHeader.ysnLoad, 0) = 0) THEN 					
+							dbo.fnCalculateQtyBetweenUOM(						
+								dbo.fnGetMatchingItemUOMId(
+									ContractDetail.intItemId
+									,ReceiptItem.intUnitMeasureId
+								)
+								,ContractDetail.intItemUOMId
+								,ReceiptItem.dblOpenReceive
+							)
+						ELSE 
+							ReceiptItem.intLoadReceive 
+						END
+					,@intUserId = ISNULL(Receipt.intModifiedByUserId, Receipt.intCreatedByUserId) 
+				FROM
+					tblICInventoryReceiptItem ReceiptItem			
+					INNER JOIN tblICInventoryReceipt Receipt
+						ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+					INNER JOIN tblCTContractDetail ContractDetail
+						ON ContractDetail.intContractDetailId = ISNULL(ReceiptItem.intContractDetailId, ReceiptItem.intLineNo) 
+					INNER JOIN tblCTContractHeader ContractHeader
+						ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
+						AND ContractHeader.intContractHeaderId = ISNULL(ReceiptItem.intContractHeaderId, ReceiptItem.intOrderId) 
+					LEFT JOIN tblICItem Item 
+						ON Item.intItemId = ContractDetail.intItemId
+				WHERE
+					ReceiptItem.intInventoryReceiptItemId = @intInventoryReceiptItemId
+					AND Receipt.strReceiptType = 'Purchase Contract'
+					AND Receipt.intSourceType NOT IN (@SourceType_InboundShipment, @SourceType_Scale, @SourceType_PurchaseOrder, @SourceType_TransferShipment)
+
+				IF @intContractDetailId IS NOT NULL 
+				BEGIN
+					EXEC	uspCTUpdateScheduleQuantity
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblQty,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInventoryReceiptItemId,
+							@strScreenName			=	'Inventory Receipt'
+				END 
+			END 
 		END
 
 		FETCH NEXT FROM loopImport INTO @intImportStagingReceiptItemLotId;
@@ -488,8 +606,8 @@ BEGIN
 		intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 		,strLotNumber = ReceiptItemLot.strLotNo
 		,strLotAlias = ReceiptItemLot.strLotAlias
-		,intSubLocationId = ReceiptItem.intSubLocationId
-		,intStorageLocationId = ISNULL(StorageLocation.intStorageLocationId, ReceiptItem.intSubLocationId) 
+		,intSubLocationId = ISNULL(storageUnit.intSubLocationId, ReceiptItem.intSubLocationId) 
+		,intStorageLocationId = ISNULL(storageUnit.intStorageLocationId, ReceiptItem.intStorageLocationId) 
 		,intItemUnitMeasureId = ItemUOM.intItemUOMId
 		,dblQuantity = ReceiptItemLot.dblQuantity
 		,dblGrossWeight = ReceiptItemLot.dblGross
@@ -555,9 +673,9 @@ BEGIN
 			ON ReceiptItem.intInventoryReceiptItemId = insertedReceiptItem.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt Receipt
 			ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-		LEFT JOIN tblICStorageLocation StorageLocation
-			ON ReceiptItem.intSubLocationId = StorageLocation.intSubLocationId
-			AND ReceiptItemLot.strStorageUnit = StorageLocation.strName
+		LEFT JOIN tblICStorageLocation storageUnit
+			ON storageUnit.intLocationId = Receipt.intLocationId
+			AND storageUnit.strName = ReceiptItemLot.strStorageUnit 
 		LEFT JOIN tblICUnitMeasure UnitMeasure
 			ON ReceiptItemLot.strUnitMeasure = UnitMeasure.strUnitMeasure
 		LEFT JOIN tblICItemUOM ItemUOM

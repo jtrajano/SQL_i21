@@ -15,9 +15,9 @@ RETURNS @table TABLE
 , [strPurchaseOrderNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [intPurchaseDetailId]				INT NULL 
 , [intItemId]						INT NULL 
-, [strMiscDescription]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strMiscDescription]				NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL 
 , [strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strDescription]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strDescription]					NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL 
 , [intPurchaseTaxGroupId]			INT NULL 
 , [dblOrderQty]						NUMERIC(38, 20) NULL 
 , [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
@@ -520,7 +520,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		WHERE 
 			billDetail.intInventoryReceiptItemId = B.intInventoryReceiptItemId 
 			AND billDetail.intInventoryReceiptChargeId IS NULL
-			AND bill.intTransactionType NOT IN (13)  
+			AND bill.intTransactionType NOT IN (13, 16)  -- ('Basis Advance', 'Provisional Voucher')
 			/*
 				CASE A.intTransactionType
 						WHEN 1 THEN 'Voucher'
@@ -617,6 +617,7 @@ WHERE
 	)
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
+		AND @strType != 'provisional voucher'
 		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 		
 		AND ISNULL(Contracts.intPricingStatus, 0) = 0 -- NOT IN (1, 2) -- 1 is Partially Priced, 2 is Fully Priced. 
 	)
@@ -895,7 +896,7 @@ FROM
 				ON BD.intBillId = B.intBillId
 		WHERE 
 			BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-			AND B.intTransactionType NOT IN (13)  
+			AND B.intTransactionType NOT IN (13, 16)  -- ('Basis Advance', 'Provisional Voucher')
 			/*
 				CASE A.intTransactionType
 						WHEN 1 THEN 'Voucher'

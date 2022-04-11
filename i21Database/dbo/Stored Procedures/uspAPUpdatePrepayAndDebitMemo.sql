@@ -48,7 +48,7 @@ CROSS APPLY
 	AND F.intBillId = A.intBillId
 	AND C.intTransactionType = 11 --Claims
 ) AppliedPayments
-WHERE A.intTransactionType IN (2, 13, 3,8)
+WHERE A.intTransactionType IN (2, 13, 3,8, 16)
 
 -- IF @post = 0
 -- BEGIN

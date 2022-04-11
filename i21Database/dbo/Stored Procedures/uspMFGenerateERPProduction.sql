@@ -115,6 +115,7 @@ BEGIN TRY
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 		WHERE WP.intWorkOrderId = @intWorkOrderId
+		AND IsNULL(WP.ysnProductionReversed,0)=0
 
 		Select @strServiceItemNo=I.strItemNo,@TrxSequenceNo=intWorkOrderRecipeItemId
 		from dbo.tblMFWorkOrderRecipeItem RI
@@ -165,6 +166,9 @@ BEGIN TRY
 			+'<StorageUnit>'+	SL.strName    +'</StorageUnit>'
 			+'<Quantity>'+	ltrim(Convert(Numeric(18,6),WP.dblQuantity))    +'</Quantity>'
 			+'<QuantityUOM>'+	UM.strUnitMeasure    +'</QuantityUOM>'
+			+'<ContractNumber>'+	W.strWorkOrderNo    +'</ContractNumber>'
+			+'<ContainerNo>'+	IsNULL(WP.strReferenceNo,'')    +'</ContainerNo>'
+			+'<Marks>'+	IsNULL(WP.strComment ,'')   +'</Marks>'
 			+'</line>'
 		FROM dbo.tblMFWorkOrderProducedLot WP
 		JOIN dbo.tblICLot L ON L.intLotId = WP.intLotId
@@ -173,7 +177,9 @@ BEGIN TRY
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocationId
+		JOIN dbo.tblMFWorkOrder W on W.intWorkOrderId=WP.intWorkOrderId
 		WHERE WP.intWorkOrderId = @intWorkOrderId
+		AND IsNULL(WP.ysnProductionReversed,0)=0
 
 		IF IsNULL(@strDetailXML, '') <> ''
 		BEGIN

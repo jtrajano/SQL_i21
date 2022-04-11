@@ -2,6 +2,7 @@
 	 @intLoadId INT
 	,@intEntityUserSecurityId INT
 	,@intBillId INT OUTPUT
+	,@intType INT = 1
 AS
 BEGIN TRY
 	DECLARE @strErrorMessage NVARCHAR(4000);
@@ -419,7 +420,7 @@ BEGIN TRY
 				,[strComments])
 			SELECT
 				[intEntityVendorId]
-				,[intTransactionType]
+				,[intTransactionType] = CASE WHEN @intType = 1 THEN 1 WHEN @intType = 2 THEN 16 END
 				,[intLocationId]
 				,[intCurrencyId]
 				,[dtmDate]
@@ -478,13 +479,26 @@ BEGIN TRY
 			FROM @voucherPayable
 			WHERE intEntityVendorId = @intVendorEntityId
 
-			EXEC uspAPCreateVoucher 
-				@voucherPayables = @voucherPayableToProcess
-				,@voucherPayableTax = DEFAULT
-				,@userId = @intEntityUserSecurityId
-				,@throwError = 1
-				,@error = @strErrorMessage OUTPUT
-				,@createdVouchersId = @createVoucherIds OUTPUT
+			IF (@intType = 1)
+			BEGIN
+				EXEC uspAPCreateVoucher 
+					@voucherPayables = @voucherPayableToProcess
+					,@voucherPayableTax = DEFAULT
+					,@userId = @intEntityUserSecurityId
+					,@throwError = 1
+					,@error = @strErrorMessage OUTPUT
+					,@createdVouchersId = @createVoucherIds OUTPUT
+			END
+			ELSE
+			BEGIN
+				EXEC uspAPCreateProvisional
+					@voucherPayables = @voucherPayableToProcess
+					,@voucherPayableTax = DEFAULT
+					,@userId = @intEntityUserSecurityId
+					,@throwError = 1
+					,@error = @strErrorMessage OUTPUT
+					,@createdVouchersId = @createVoucherIds OUTPUT
+			END
 
 			DELETE FROM @voucherPayableToProcess
 

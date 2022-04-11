@@ -1095,6 +1095,225 @@ BEGIN
 	END
 END
 
+
+--QUANTITY ADJUSTMENT
+DECLARE @qtyAdjustmentTable AS TABLE (
+		intBillId  INT
+		,intBillDetailId  INT
+		,intItemId  INT
+		,dtmDate  DATETIME 
+		,intLocationId  INT	
+		,intSubLocationId  INT	
+		,intStorageLocationId  INT	
+		,strLotNumber  NVARCHAR(50)
+		,dblAdjustByQuantity  NUMERIC(38,20)
+		,dblNewUnitCost  NUMERIC(38,20)
+		,intItemUOMId  INT 
+		,intSourceId  INT
+		,strDescription  NVARCHAR(1000)
+		,intContractHeaderId  INT NULL
+		,intContractDetailId  INT NULL
+		,intEntityId  INT NULL
+)
+
+DECLARE @intBillId AS INT
+		,@intBillDetailId AS INT
+		,@intItemId AS INT
+		,@dtmDate AS DATETIME 
+		,@intLocationId AS INT	
+		,@intSubLocationId AS INT	
+		,@intStorageLocationId AS INT	
+		,@strLotNumber AS NVARCHAR(50) 
+		,@intOwnershipType AS INT = 1
+		,@dblAdjustByQuantity AS NUMERIC(38,20)
+		,@dblNewUnitCost AS NUMERIC(38,20)
+		,@intItemUOMId AS INT 
+		,@intSourceId AS INT
+		,@intSourceTransactionTypeId AS INT = 27
+		,@intEntityUserSecurityId AS INT = @userId
+		,@strDescription2 AS NVARCHAR(1000)
+		,@ysnPost AS BIT = @post
+		,@intContractHeaderId AS INT
+		,@intContractDetailId AS INT
+		,@intEntityId AS INT
+		,@InventoryAdjustmentIntegrationId AS InventoryAdjustmentIntegrationId
+		,@intInventoryAdjustmentId AS INT
+
+INSERT INTO @qtyAdjustmentTable
+SELECT B.intBillId,
+		BD.intBillDetailId,
+		BD.intItemId, 
+		B.dtmDate,
+		L.intLocationId,
+		L.intSubLocationId,
+		L.intStorageLocationId,
+		L.strLotNumber,
+		--BD.dblQtyReceived - BD.dblQtyOrdered,
+		CASE 
+			WHEN @ysnPost = 1 THEN BD.dblQtyReceived - ri.dblOpenReceive
+			WHEN @ysnPost = 0 THEN -(BD.dblQtyReceived - ri.dblOpenReceive)
+		END,
+		BD.dblCost,
+		BD.intUnitOfMeasureId,
+		B.intBillId,
+		B.strBillId,
+		BD.intContractHeaderId,
+		BD.intContractDetailId,
+		B.intEntityVendorId
+FROM tblAPBill B
+INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
+INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+WHERE 
+	B.ysnFinalVoucher = 1 
+	--AND BD.dblQtyReceived <> BD.dblQtyOrdered
+	AND (BD.dblQtyReceived - ri.dblOpenReceive) <> 0 
+
+IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
+BEGIN
+	WHILE EXISTS(SELECT TOP 1 1 FROM @qtyAdjustmentTable)
+	BEGIN
+		SELECT TOP 1 @intBillId = intBillId
+					,@intBillDetailId = intBillDetailId
+					,@intItemId = intItemId
+					,@dtmDate = dtmDate
+					,@intLocationId = intLocationId
+					,@intSubLocationId = intSubLocationId
+					,@intStorageLocationId = intStorageLocationId
+					,@strLotNumber = strLotNumber
+					,@dblAdjustByQuantity = dblAdjustByQuantity
+					,@dblNewUnitCost = dblNewUnitCost
+					,@intItemUOMId = intItemUOMId
+					,@intSourceId = intSourceId
+					,@strDescription2 = strDescription
+					,@intContractHeaderId = intContractHeaderId
+					,@intContractDetailId = intContractDetailId
+					,@intEntityId = intEntityId
+		FROM @qtyAdjustmentTable
+
+		INSERT INTO @InventoryAdjustmentIntegrationId
+		SELECT NULL, NULL, NULL, NULL, @intBillId
+
+		EXEC uspICInventoryAdjustment_CreatePostQtyChange
+			@intItemId = @intItemId
+			,@dtmDate = @dtmDate
+			,@intLocationId	= @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			,@intOwnershipType = @intOwnershipType
+			,@dblAdjustByQuantity = @dblAdjustByQuantity
+			,@dblNewUnitCost = @dblNewUnitCost
+			,@intItemUOMId = @intItemUOMId
+			,@intSourceId = @intSourceId
+			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			,@strDescription = @strDescription2
+			,@ysnPost = @ysnPost
+			,@InventoryAdjustmentIntegrationId = @InventoryAdjustmentIntegrationId
+			,@intContractHeaderId = @intContractHeaderId
+			,@intContractDetailId = @intContractDetailId
+			,@intEntityId = @intEntityId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+		DELETE @qtyAdjustmentTable WHERE intBillDetailId = @intBillDetailId
+	END
+END
+
+INSERT INTO @qtyAdjustmentTable
+SELECT B.intBillId,
+		BD.intBillDetailId,
+		BD.intItemId, 
+		B.dtmDate,
+		L.intLocationId,
+		L.intSubLocationId,
+		L.intStorageLocationId,
+		L.strLotNumber,
+		--dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived),
+		CASE 
+			WHEN @ysnPost = 1 THEN dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived)
+			WHEN @ysnPost = 0 THEN dbo.fnDivide(ri.dblNet, ri.dblOpenReceive) 
+		END,
+		BD.dblCost,
+		BD.intUnitOfMeasureId,
+		B.intBillId,
+		B.strBillId,
+		BD.intContractHeaderId,
+		BD.intContractDetailId,
+		B.intEntityVendorId
+FROM tblAPBill B
+INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
+INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+WHERE 
+	B.ysnFinalVoucher = 1 
+	AND BD.ysnNetWeightChanged = 1
+	-- compare the weight change between IR and final voucher
+	AND (
+		ROUND(
+			dbo.fnMultiply(
+				dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived) -- wgt/qty in final voucher
+				,BD.dblQtyReceived
+			)
+			,2
+		) 
+		<> 
+		ROUND(
+			dbo.fnMultiply(
+				dbo.fnDivide(ri.dblNet, ri.dblOpenReceive) -- wgt/qty from receipt
+				,BD.dblQtyReceived
+			)
+			,2
+		)
+	)
+
+IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
+BEGIN
+	WHILE EXISTS(SELECT TOP 1 1 FROM @qtyAdjustmentTable)
+	BEGIN
+		SELECT TOP 1 @intBillId = intBillId
+					,@intBillDetailId = intBillDetailId
+					,@intItemId = intItemId
+					,@dtmDate = dtmDate
+					,@intLocationId = intLocationId
+					,@intSubLocationId = intSubLocationId
+					,@intStorageLocationId = intStorageLocationId
+					,@strLotNumber = strLotNumber
+					,@dblAdjustByQuantity = dblAdjustByQuantity
+					,@dblNewUnitCost = dblNewUnitCost
+					,@intItemUOMId = intItemUOMId
+					,@intSourceId = intSourceId
+					,@strDescription2 = strDescription
+					,@intContractHeaderId = intContractHeaderId
+					,@intContractDetailId = intContractDetailId
+					,@intEntityId = intEntityId
+		FROM @qtyAdjustmentTable
+
+		-- INSERT INTO @InventoryAdjustmentIntegrationId
+		-- SELECT NULL, NULL, NULL, NULL, @intBillId
+
+		EXEC uspICInventoryAdjustment_CreatePostLotWeight
+			@intItemId = @intItemId
+			,@dtmDate = @dtmDate
+			,@intLocationId	= @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			,@dblNewLotWeight = NULL
+			,@dblNewWeightPerQty = @dblAdjustByQuantity
+			,@intSourceId = @intSourceId
+			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			,@strDescription = @strDescription2
+			--,@ysnPost = @ysnPost
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+		DELETE @qtyAdjustmentTable WHERE intBillDetailId = @intBillDetailId
+	END
+END
+
 -- Get the vendor id to intSourceEntityId
 UPDATE GL SET intSourceEntityId = BL.intEntityVendorId
 FROM @GLEntries GL
@@ -1780,3 +1999,4 @@ Post_Exit:
 	--CLEAN UP TRACKER FOR POSTING
 	DELETE A
 	FROM tblAPBillForPosting A
+

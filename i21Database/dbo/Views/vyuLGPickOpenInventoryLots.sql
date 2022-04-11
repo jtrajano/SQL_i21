@@ -72,7 +72,7 @@ FROM (
        ,strReceiptNumber = Lot.strReceiptNumber
        ,strMarkings = LC.strMarks
        ,strNotes = Lot.strNotes
-       ,intEntityVendorId = Lot.intEntityVendorId
+       ,intEntityVendorId = EY.intEntityId
        ,strVendorLotNo = Lot.strVendorLotNo
        ,strGarden = Lot.strGarden
        ,strContractNo = Lot.strContractNo

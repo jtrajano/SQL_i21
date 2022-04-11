@@ -67,6 +67,13 @@ USING	(
 				,dbo.tblICInventoryTransactionType LinkedTransaction
 		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity'
 				AND LinkedTransaction.strName = 'Scale Ticket'
+		UNION ALL 
+		SELECT	intTransactionTypeId = HostTransaction.intTransactionTypeId
+				,intLinkAllowedTransactionTypeId = LinkedTransaction.intTransactionTypeId
+		FROM	dbo.tblICInventoryTransactionType HostTransaction
+				,dbo.tblICInventoryTransactionType LinkedTransaction
+		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity'
+				AND LinkedTransaction.strName = 'Bill'
 ) AS B
 	ON  A.intTransactionTypeId = B.intTransactionTypeId
 		AND A.intLinkAllowedTransactionTypeId = B.intLinkAllowedTransactionTypeId

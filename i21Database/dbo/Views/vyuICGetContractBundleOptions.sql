@@ -12,6 +12,7 @@ SELECT
 	,intCostUOMId = dbo.fnGetMatchingItemUOMId(bundleItem.intItemId, ri.intCostUOMId) 
 	,intWeightUOMId = dbo.fnGetMatchingItemUOMId(bundleItem.intItemId, ri.intWeightUOMId) 
 	,il.intItemLocationId
+	,bundleItems.dblMarkUpOrDown
 FROM 
 	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 		ON r.intInventoryReceiptId = ri.intInventoryReceiptId
