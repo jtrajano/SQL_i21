@@ -13,7 +13,7 @@ CREATE TYPE [dbo].[StagingTransactionLogRadiant] AS TABLE(
 	[dtmEndTime] [datetime] NULL,
 	[intEventSequenceID] [int] NULL,
 	[strTrainingModeFlagValue] [nvarchar](40) NULL,
-	[intCashierID] [int] NULL,
+	[intCashierID] [bigint] NULL,
 	[intRegisterID] [int] NULL,
 	[strTillID] [nvarchar](40) NULL,
 	[strOutsideSalesFlagValue] [nvarchar](40) NULL,
