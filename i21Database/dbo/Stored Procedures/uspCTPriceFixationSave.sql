@@ -63,7 +63,11 @@ BEGIN TRY
 			@ysnPricingAsAmendment		BIT = 1,
 			@strXML nvarchar(max),
 			@ysnEnableDerivativeInArbitrage BIT = 0,
-			@ysnPriceImpact bit = 0;
+			@ysnPriceImpact bit = 0,
+			@intContractTypeId int,
+			@intSpreadArbitrageId int,
+			@dblTotalSpread numeric(18,6),
+			@intSpreadUOMId int;
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -73,7 +77,7 @@ BEGIN TRY
 			@intFinalPriceUOMId		=	PC.intFinalPriceUOMId,
 			@ysnSplit				=	ysnSplit,
 			@dblTotalLots			=	[dblTotalLots],
-			@intFinalCurrencyId		=	intFinalCurrencyId,
+			@intFinalCurrencyId		=	PC.intFinalCurrencyId,
 			@ysnFinalSubCurrency	=	CY.ysnSubCurrency,
 			@intPriceContractId		=	PF.intPriceContractId
 	FROM	tblCTPriceFixation		PF  WITH (UPDLOCK)
@@ -99,7 +103,7 @@ BEGIN TRY
 	FROM	tblCTPriceFixationDetail
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
-	SELECT	@ysnUnlimitedQuantity	=	ysnUnlimitedQuantity FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+	SELECT	@ysnUnlimitedQuantity = ysnUnlimitedQuantity, @intContractTypeId = intContractTypeId FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
 	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity, @ysnPricingAsAmendment = ysnPricingAsAmendment,@ysnEnableDerivativeInArbitrage = ysnEnableDerivativeInArbitrage FROM tblCTCompanyPreference
 
@@ -430,17 +434,24 @@ BEGIN TRY
 			begin
 				if exists (select top 1 1 from tblCTSpreadArbitrage where intPriceFixationId = @intPriceFixationId and strTradeType = 'Arbitrage' and ysnPriceImpact = 1)
 				begin
-				--------------------------------------------------------------------------------------------
+					declare @leg nvarchar(10) = 'Sell';
+					if (@intContractTypeId = 2)
+					begin
+						select @leg = 'Buy';
+					end
+					
+					select @ysnPriceImpact = 1;
 
-					SELECT	@intTypeRef				=	MAX(intTypeRef) 
+					SELECT	@intSpreadArbitrageId = intSpreadArbitrageId, @dblTotalSpread = dblTotalSpread,@intSpreadUOMId = intSpreadUOMId,@intFinalCurrencyId = intCurrencyId
 					FROM	tblCTSpreadArbitrage 
 					WHERE	intPriceFixationId		=	@intPriceFixationId
+					and strTradeType = 'Arbitrage'
+					and strBuySell = @leg
 
 					SELECT  @intNewFutureMonthId	=	intNewFutureMonthId,
 							@intNewFutureMarketId	=	intNewFutureMarketId
 					FROM	tblCTSpreadArbitrage 
-					WHERE	intPriceFixationId		=	@intPriceFixationId
-					AND		intTypeRef				=	@intTypeRef
+					WHERE	intSpreadArbitrageId = @intSpreadArbitrageId
 
 					SELECT	@intMarketUnitMeasureId = intUnitMeasureId,
 							@intMarketCurrencyId = intCurrencyId 
@@ -448,7 +459,6 @@ BEGIN TRY
 					WHERE	intFutureMarketId = @intNewFutureMarketId
 
 					SELECT	@intFinalPriceUOMId		=	intCommodityUnitMeasureId,
-							@intFinalCurrencyId		=	@intMarketCurrencyId,
 							@intPriceCommodityUOMId	=	intCommodityUnitMeasureId
 					FROM	tblICCommodityUnitMeasure 
 					WHERE	intCommodityId		=	@intCommodityId 
@@ -474,7 +484,6 @@ BEGIN TRY
 																ELSE	0.01 
 														END) + PF.dblOriginalBasis + PF.dblRollArb
 					FROM	tblCTPriceFixation			PF 
-					--JOIN	tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
 					JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
 					WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
@@ -490,17 +499,10 @@ BEGIN TRY
 					WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 					UPDATE  tblCTPriceContract SET intFinalPriceUOMId = @intFinalPriceUOMId, intFinalCurrencyId = @intFinalCurrencyId WHERE intPriceContractId	=	@intPriceContractId
-			
-					UPDATE	tblCTSpreadArbitrage 
-					SET		intSpreadUOMId			=	@intFinalPriceUOMId
-					WHERE	intPriceFixationId		=	@intPriceFixationId
-					AND		intTypeRef				=	@intTypeRef
-
-					SELECT	@intCurrencyId	=	@intMarketCurrencyId
-
+					
 					UPDATE	CD
 					SET		CD.dblBasis				=	(
-															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0))) / 
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,(ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0)) + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intSpreadUOMId,@intBasisUOMId,ISNULL(@dblTotalSpread,0)))) / 
 															CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																	WHEN	@intBasisCurrencyId <> @intCurrencyId	
 																	AND		@ysnBasisSubCurrency = 1				THEN 100 
@@ -528,8 +530,6 @@ BEGIN TRY
 						JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
 						WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 					END
-
-				--------------------------------------------------------------------------------------------
 				end
 			end
 			else
@@ -660,37 +660,19 @@ BEGIN TRY
 
 		IF	@ysnFullyPriced = 1
 		BEGIN
-			
-			UPDATE	CD
-			SET		CD.intPricingTypeId		=	1,
-					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
-												CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-														WHEN	@intFinalCurrencyId <> @intCurrencyId	
-														AND		@ysnFinalSubCurrency = 1				THEN 100 
-														ELSE	0.01 
-												END,
-					CD.dblCashPrice			=	(
-													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
-													CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
-															WHEN	@intBasisCurrencyId <> @intCurrencyId	
-															AND		@ysnBasisSubCurrency = 1				THEN 100 
+
+			if (@ysnEnableDerivativeInArbitrage = 1 and @ysnPriceImpact = 1)
+			begin
+
+				UPDATE	CD
+				SET		CD.intPricingTypeId		=	1,
+						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(dblPriceWORollArb,0))  / 
+													CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+															WHEN	@intFinalCurrencyId <> @intCurrencyId	
+															AND		@ysnFinalSubCurrency = 1				THEN 100 
 															ELSE	0.01 
-													END
-												) + 
-												(
-													CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
-													(
-														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)) / 
-														CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-																WHEN	@intFinalCurrencyId <> @intCurrencyId	
-																AND		@ysnFinalSubCurrency = 1				THEN 100 
-																ELSE	0.01 
-														END									
-													) 
-												),	
-					CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
-												(	
-													(
+													END,
+						CD.dblCashPrice			=	(
 														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
 														CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																WHEN	@intBasisCurrencyId <> @intCurrencyId	
@@ -701,55 +683,171 @@ BEGIN TRY
 													(
 														CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 														(
-															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(dblPriceWORollArb,0)) / 
 															CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 																	WHEN	@intFinalCurrencyId <> @intCurrencyId	
 																	AND		@ysnFinalSubCurrency = 1				THEN 100 
 																	ELSE	0.01 
+															END									
+														) 
+													),	
+						CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
+													(	
+														(
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
+															CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
+																	WHEN	@intBasisCurrencyId <> @intCurrencyId	
+																	AND		@ysnBasisSubCurrency = 1				THEN 100 
+																	ELSE	0.01 
 															END
+														) + 
+														(
+															CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
+															(
+																dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
+																CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+																		WHEN	@intFinalCurrencyId <> @intCurrencyId	
+																		AND		@ysnFinalSubCurrency = 1				THEN 100 
+																		ELSE	0.01 
+																END
+															)
 														)
-													)
-												)/
-												CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
-					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
-					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 and isnull(@ysnDestinationWeightsAndGrades,0) = 0 THEN 5 ELSE CD.intContractStatusId END,
-					CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
-					CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END
-			FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
-			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
-			JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intSplitFromId, CD.intContractDetailId)
-			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
-			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
-
-
-			UPDATE CD
-			SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
-				dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost)
-			FROM tblCTContractDetail	CD WITH (ROWLOCK) 
-			JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
-			where PF.intPriceFixationId = @intPriceFixationId
-
-
-			exec uspCTUpdateSequenceCostRate
-				@intContractDetailId = @intContractDetailId,
-				@intUserId = @intUserId
-
-			select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId><ysnStatusChange>0</ysnStatusChange></row></rows>';
-
-			exec uspCTProcessTFLogs
-				@strXML = @strXML,
-				@intUserId = @intUserId
-
-			IF	@ysnMultiplePriceFixation = 1
-			BEGIN
-				UPDATE	CH
-				SET		CH.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
-						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
-				FROM	tblCTContractHeader		CH
-				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+													)/
+													CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
+						CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
+						CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 and isnull(@ysnDestinationWeightsAndGrades,0) = 0 THEN 5 ELSE CD.intContractStatusId END,
+						CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
+						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END
+				FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
+				JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+				JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
+				JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intSplitFromId, CD.intContractDetailId)
+				AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
 				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
-			END
+
+
+				UPDATE CD
+				SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
+					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost)
+				FROM tblCTContractDetail	CD WITH (ROWLOCK) 
+				JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
+				where PF.intPriceFixationId = @intPriceFixationId
+
+
+				exec uspCTUpdateSequenceCostRate
+					@intContractDetailId = @intContractDetailId,
+					@intUserId = @intUserId
+
+				select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId><ysnStatusChange>0</ysnStatusChange></row></rows>';
+
+				exec uspCTProcessTFLogs
+					@strXML = @strXML,
+					@intUserId = @intUserId
+
+				IF	@ysnMultiplePriceFixation = 1
+				BEGIN
+					UPDATE	CH
+					SET		CH.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
+							CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+					FROM	tblCTContractHeader		CH
+					JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+					WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+				END
+			end
+			else
+			begin
+				UPDATE	CD
+				SET		CD.intPricingTypeId		=	1,
+						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
+													CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+															WHEN	@intFinalCurrencyId <> @intCurrencyId	
+															AND		@ysnFinalSubCurrency = 1				THEN 100 
+															ELSE	0.01 
+													END,
+						CD.dblCashPrice			=	(
+														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
+														CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
+																WHEN	@intBasisCurrencyId <> @intCurrencyId	
+																AND		@ysnBasisSubCurrency = 1				THEN 100 
+																ELSE	0.01 
+														END
+													) + 
+													(
+														CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
+														(
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)) / 
+															CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+																	WHEN	@intFinalCurrencyId <> @intCurrencyId	
+																	AND		@ysnFinalSubCurrency = 1				THEN 100 
+																	ELSE	0.01 
+															END									
+														) 
+													),	
+						CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
+													(	
+														(
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
+															CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
+																	WHEN	@intBasisCurrencyId <> @intCurrencyId	
+																	AND		@ysnBasisSubCurrency = 1				THEN 100 
+																	ELSE	0.01 
+															END
+														) + 
+														(
+															CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
+															(
+																dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
+																CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+																		WHEN	@intFinalCurrencyId <> @intCurrencyId	
+																		AND		@ysnFinalSubCurrency = 1				THEN 100 
+																		ELSE	0.01 
+																END
+															)
+														)
+													)/
+													CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
+						CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
+						CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 and isnull(@ysnDestinationWeightsAndGrades,0) = 0 THEN 5 ELSE CD.intContractStatusId END,
+						CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
+						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END
+				FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
+				JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+				JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
+				JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intSplitFromId, CD.intContractDetailId)
+				AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+
+				UPDATE CD
+				SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
+					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost)
+				FROM tblCTContractDetail	CD WITH (ROWLOCK) 
+				JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
+				where PF.intPriceFixationId = @intPriceFixationId
+
+
+				exec uspCTUpdateSequenceCostRate
+					@intContractDetailId = @intContractDetailId,
+					@intUserId = @intUserId
+
+				select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId><ysnStatusChange>0</ysnStatusChange></row></rows>';
+
+				exec uspCTProcessTFLogs
+					@strXML = @strXML,
+					@intUserId = @intUserId
+
+				IF	@ysnMultiplePriceFixation = 1
+				BEGIN
+					UPDATE	CH
+					SET		CH.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
+							CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+					FROM	tblCTContractHeader		CH
+					JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+					WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+				END
+			end
+			
+			
 		END
 		ELSE
 		BEGIN
