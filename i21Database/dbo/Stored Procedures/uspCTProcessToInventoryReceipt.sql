@@ -100,12 +100,18 @@ AS
 				intGrossNetUOMId			=	ISNULL(CD.intNetWeightUOMId,0),	
 				dblGross					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblNet						=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
+				--CT-7100 (ECOM commented this line for ECOM) --dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
+				--CT-7100 (ECOM commented this line for ECOM) --										THEN	ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
+				--CT-7100 (ECOM commented this line for ECOM) --												ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis),0)
+				--CT-7100 (ECOM commented this line for ECOM) --										ELSE	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice),0)
+				--CT-7100 (ECOM commented this line for ECOM) --								END,
+				--CT-7100 (ECOM commented this line for ECOM) --intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
 				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
 														THEN	ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
-																ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis),0)
-														ELSE	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice),0)
+																ISNULL(CD.dblBasis,0)
+														ELSE	ISNULL(AD.dblSeqPrice,0)
 												END,
-				intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
+				intCostUOMId				=	case when CD.intPricingTypeId = 2 then CD.intBasisUOMId else CD.intPriceItemUOMId end,
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SY.intCent, 1), 
 				dblExchangeRate				=	1,
@@ -128,8 +134,7 @@ AS
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-		JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CD.intItemId	
-												AND	IU.ysnStockUnit			=	1		
+		--CT-7100 (ECOM commented this line for ECOM) --JOIN tblICItemUOM IU ON IU.intItemId = CD.intItemId AND IU.ysnStockUnit = 1		
 
 		CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 
