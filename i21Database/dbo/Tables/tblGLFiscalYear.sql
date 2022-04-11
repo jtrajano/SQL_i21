@@ -2,6 +2,7 @@
     [intFiscalYearId]  INT           IDENTITY (1, 1) NOT NULL,
     [strFiscalYear]    NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
     [intRetainAccount] INT           NULL,
+    [intIncomeSummaryAccount] INT    NULL,
     [dtmDateFrom]      DATETIME      NULL,
     [dtmDateTo]        DATETIME      NULL,
     [ysnStatus]        BIT           DEFAULT 1 NOT NULL,

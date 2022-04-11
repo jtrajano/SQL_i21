@@ -18,7 +18,6 @@
 	[ysnREOverrideLocation] BIT NULL,
 	[ysnREOverrideLOB] BIT NULL,
 	[ysnREOverrideCompany] BIT NULL,
-	[intIncomeSummaryAccountId] INT NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO
