@@ -1,7 +1,7 @@
 /*
 - FOR VIEWING RELATED SAMPLE
 - EXCLUDES CONTRACT WITH STATUS SHORT CLOSE, COMPLETED, CANCELLED
-*/
+--*/
 CREATE VIEW vyuQMAllocation
 AS
 SELECT DISTINCT --A.intPContractDetailId,
@@ -30,52 +30,54 @@ SELECT DISTINCT --A.intPContractDetailId,
                 C.strFreightTerm strFreightTermP,
                 C.strINCOLocation strINCOLocationP,
                 D.dtmStartDate dtmStartDateP,
-                D.dtmEndDate dtmEndDateP,
+                D.dtmEndDate dtmEndDateP,		
                 SalesContract.*
 FROM   vyuQMSampleList B -- PURCHASE SAMPLES CAN HAVE NO PURCHASE CONTRACT
-       LEFT JOIN vyuLGAllocationDetails A
+        JOIN vyuLGAllocationDetails A
               ON B.intContractDetailId = intPContractDetailId
        LEFT JOIN vyuCTGridContractHeader C
               ON C.intContractHeaderId = intPContractHeaderId
        LEFT JOIN vyuCTContractDetailView D
               ON D.intContractDetailId = B.intContractDetailId
        LEFT JOIN tblLGAllocationDetail E
-              ON E.intPContractDetailId = B.intContractDetailId
-       OUTER APPLY(SELECT
-                  DD.intContractDetailId intContractDetailIdS,
-                  DD.intContractHeaderId intContractHeaderIdS,
-		    DD.strContractNumber strContractNumberS,
-                  DD.intContractSeq  intSequenceS,
-                  DD.strEntityName strEntityNameS,
-                  BB.dblSampleQty dblSampleQtyS,
-                  BB.strSampleUOM strSampleUOMS,
-                  DD.dblNetWeight dblNetWeightS,
-                  DD.strNetWeightUOM strNetWeightUOMS,
-                  BB.dblRepresentingQty dblRepresentingQtyS,
-                  BB.strSampleNumber strSampleNumberS,
-                  BB.strGrade strSampleTypeS,
-                  CC.strFreightTerm strFreightTermS,
-                  CC.strINCOLocation strINCOLocationS,
-                  DD.dtmStartDate dtmStartDateS,
-                  DD.dtmEndDate dtmEndDateS,
-                  BB.strSamplingCriteria strSamplingCriteriaS,
-                  BB.dtmSamplingEndDate dtmSamplingEndDateS, 
-                  BB.dtmSampleSentDate dtmSampleSentDateS,
-                  BB.strCourier strCourierS,
-                  BB.dtmSampleReceivedDate dtmSampleReceivedDateS,
-                  BB.strStatus strStatusS,
-                  BB.strLotNumber strLotNumberS	  
+              ON E.intPContractDetailId = B.intContractDetailId 
+      OUTER APPLY(SELECT
+	 -- DD.*
+                     AA.strSContractNumber strContractNumberS,
+                     AA.intSContractDetailId intContractDetailIdS,
+                     AA.intSContractHeaderId intContractHeaderIdS,
+                     AA.intSContractSeq intSequenceS,
+                     AA.strSName strEntityNameS,
+                     BB.dblSampleQty dblSampleQtyS,
+                     BB.strSampleUOM strSampleUOMS,
+                     DD.dblNetWeight dblNetWeightS,
+                     DD.strNetWeightUOM strNetWeightUOMS,
+                     BB.dblRepresentingQty dblRepresentingQtyS,
+                     BB.strSampleNumber strSampleNumberS,
+                     BB.strGrade strSampleTypeS,
+                     CC.strFreightTerm strFreightTermS,
+                     CC.strINCOLocation strINCOLocationS,
+                     DD.dtmStartDate dtmStartDateS,
+                     DD.dtmEndDate dtmEndDateS,
+                     BB.strSamplingCriteria strSamplingCriteriaS,
+                     BB.dtmSamplingEndDate dtmSamplingEndDateS, 
+                     BB.dtmSampleSentDate dtmSampleSentDateS,
+                     BB.strCourier strCourierS,
+                     BB.dtmSampleReceivedDate dtmSampleReceivedDateS,
+                     BB.strStatus strStatusS,
+                     BB.strLotNumber strLotNumberS	  
                   FROM   --vyuLGLoadDetailView A
                   vyuLGAllocationDetails AA -- SALES CONTRACT CAN HAVE NO SAMPLES
                   LEFT JOIN vyuQMSampleList BB
-                         ON BB.intContractDetailId = AA.intSContractDetailId
+                        ON BB.intContractDetailId = AA.intSContractDetailId
                   LEFT JOIN vyuCTGridContractHeader CC
                          ON CC.intContractHeaderId = intSContractHeaderId
                   LEFT JOIN vyuCTContractDetailView DD
-                         ON DD.intContractDetailId = BB.intContractDetailId
+                        ON DD.intContractDetailId = BB.intContractDetailId
                   LEFT JOIN tblLGAllocationDetail EE
-                         ON EE.intSContractDetailId = BB.intContractDetailId
-                   WHERE   AA.intPContractDetailId = D.intContractDetailId
-                          AND intContractStatusId NOT IN( 3, 5, 6 ))
-                  SalesContract
-WHERE  intContractStatusId NOT IN( 3, 5, 6 )
+                        ON EE.intSContractDetailId = BB.intContractDetailId
+                  WHERE   AA.intPContractDetailId = D.intContractDetailId
+                         AND intContractStatusId NOT IN( 3, 5, 6 )
+			) SalesContract
+WHERE  intContractStatusId NOT IN( 3, 5, 6 ) and C.intContractTypeId =1 
+
