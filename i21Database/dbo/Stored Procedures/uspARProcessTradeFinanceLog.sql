@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessTradeFinanceLog]
-	  @InvoiceIds		InvoiceId READONLY
-	 ,@UserId			INT
-	 ,@TransactionType	NVARCHAR(15)
-	 ,@ForDelete		BIT = 0
+	  @InvoiceIds			InvoiceId READONLY
+	 ,@UserId				INT
+	 ,@TransactionType		NVARCHAR(15)
+	 ,@ForDelete			BIT = 0
+	 ,@LogTradeFinanceInfo	BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -37,6 +38,9 @@ INSERT INTO @TradeFinanceLogs (
 	, dblFinancedAmount
 	, intContractHeaderId
 	, intContractDetailId
+	, intSublimitId
+	, strSublimit
+	, dblSublimit
 )
 SELECT
 	  strAction						= CASE WHEN @TransactionType = 'Payment' 
@@ -66,6 +70,9 @@ SELECT
 	, dblFinancedAmount				= ARID.dblTotal
 	, intContractHeaderId			= ARID.intContractHeaderId
 	, intContractDetailId			= ARID.intContractDetailId
+	, intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
+	, strSublimit					= CMBFLD.strLimitDescription
+	, dblSublimit					= CMBFLD.dblLimit
 FROM tblARInvoice ARI WITH (NOLOCK)
 LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
 ON (ARI.intInvoiceId = ARID.intInvoiceId AND ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds))
@@ -74,6 +81,7 @@ LEFT JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
 LEFT JOIN tblCTContractDetail CTCD on CTCD.intContractDetailId = ARID.intContractDetailId
 LEFT JOIN tblCTContractHeader CTCH on CTCH.intContractHeaderId = CTCD.intContractHeaderId
 LEFT JOIN tblCMBorrowingFacilityLimit CMBFL ON ARI.intBorrowingFacilityLimitId = CMBFL.intBorrowingFacilityLimitId
+LEFT JOIN tblCMBorrowingFacilityLimitDetail CMBFLD ON CMBFLD.intBorrowingFacilityLimitDetailId = ARI.intBorrowingFacilityLimitDetailId
 OUTER APPLY (
 	SELECT TOP 1 strActionType
 	FROM tblARAuditLog
@@ -81,14 +89,21 @@ OUTER APPLY (
 	ORDER BY intAuditLogId DESC
 ) ARAL
 WHERE ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds)
-AND (
-	  ISNULL(ARI.intBankId, 0) <> 0
-   OR ISNULL(ARI.intBankAccountId, 0) <> 0
-   OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
-   OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
-   OR ISNULL(ARI.strBankReferenceNo, '') <> ''
-   OR ISNULL(ARI.dblLoanAmount, 0) <> 0
-   OR ISNULL(ARI.strTransactionNo, '') <> ''
+AND 
+(
+	(
+		ISNULL(ARAL.strActionType, 'Created') = 'Created'
+		AND (
+			  ISNULL(ARI.intBankId, 0) <> 0
+		   OR ISNULL(ARI.intBankAccountId, 0) <> 0
+		   OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
+		   OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
+		   OR ISNULL(ARI.strBankReferenceNo, '') <> ''
+		   OR ISNULL(ARI.dblLoanAmount, 0) <> 0
+		   OR ISNULL(ARI.strTransactionNo, '') <> ''
+		)
+	)
+	OR @LogTradeFinanceInfo = 1
 )
 
 EXEC uspTRFLogTradeFinance @TradeFinanceLogs
