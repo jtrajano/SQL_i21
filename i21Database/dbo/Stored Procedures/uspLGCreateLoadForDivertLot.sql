@@ -4,6 +4,13 @@
 	,@intNewLoadId INT OUTPUT
 AS
 
+/* Check if there are any Lot Quantity to Divert */
+IF NOT EXISTS (SELECT 1 FROM tblLGLoadDetailLot WHERE ISNULL(dblDivertQuantity, 0) > 0
+	AND intLoadDetailId IN (SELECT intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId))
+BEGIN
+	RAISERROR('No quantity specified for diversion.', 16, 1);
+END
+
 /* Unpost the Transfer */
 EXEC uspLGPostLoadSchedule @intLoadId, @intEntityUserSecurityId, 0, 0
 
