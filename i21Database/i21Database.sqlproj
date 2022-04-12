@@ -1028,6 +1028,7 @@
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLBuildMissingAccountsRevalueOverride.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql">
