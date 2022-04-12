@@ -667,6 +667,8 @@ WHERE ISNULL(LDL.dblDivertQuantity, 0) > 0
 
 /* If Reduction causes the Qty to drop to zero, remove the record entirely. */
 DELETE FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId AND dblQuantity <= 0
+DELETE FROM tblLGLoadWarehouseContainer WHERE intLoadContainerId IN 
+	(SELECT intLoadContainerId FROM tblLGLoadContainer WHERE intLoadId = @intLoadId AND dblQuantity <= 0)
 DELETE FROM tblLGLoadContainer WHERE intLoadId = @intLoadId AND dblQuantity <= 0
 DELETE FROM tblLGLoadDetail WHERE intLoadId = @intLoadId AND dblQuantity <= 0
 DELETE FROM tblLGLoadDetailLot WHERE dblLotQuantity <= 0
