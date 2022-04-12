@@ -652,6 +652,7 @@
     <Build Include="dbo\Tables\tblCRMBrandFieldMapping.sql" />
     <Build Include="dbo\Views\vyuCRMBrandOpportunityIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
