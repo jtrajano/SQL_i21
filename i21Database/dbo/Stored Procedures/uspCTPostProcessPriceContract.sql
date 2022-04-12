@@ -285,7 +285,7 @@ BEGIN
 					begin
 
 						SELECT @dblDerivativeNoOfContract = ISNULL(dblNoOfContract,0), @ysnFreezed = isnull(ysnFreezed,0) FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
-						IF @dblHedgeNoOfLots = @dblDerivativeNoOfContract
+						IF ( @dblDerivativeNoOfContract > 0 and @dblHedgeNoOfLots = @dblDerivativeNoOfContract)
 						BEGIN
 							select @intSpreadArbitrageId = min(intSpreadArbitrageId) from tblCTSpreadArbitrage where intPriceFixationId = @intPriceFixationId and strTradeType = 'Arbitrage' and intSpreadArbitrageId > @intSpreadArbitrageId;
 							CONTINUE
