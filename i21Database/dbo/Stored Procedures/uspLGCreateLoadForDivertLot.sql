@@ -139,7 +139,7 @@ INSERT INTO tblLGLoad (
 	,intLoadRefId)
 SELECT @strNewLoadNumber
 	,intCompanyLocationId
-	,intPurchaseSale
+	,intPurchaseSale = 2
 	,intFreightTermId
 	,intCurrencyId
 	,dtmScheduledDate
