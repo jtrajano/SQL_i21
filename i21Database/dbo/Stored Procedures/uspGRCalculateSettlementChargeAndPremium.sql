@@ -653,7 +653,8 @@ BEGIN TRY
         LEFT JOIN tblICItemUOM CAP_UOM_TO
             ON CAP_UOM_TO.intItemId = CAP.intChargeAndPremiumItemId
             AND CAP_UOM_TO.intUnitMeasureId = CASE WHEN @ysnSpot = 1 THEN SPOT_UOM.intUnitMeasureId ELSE CS.intUnitMeasureId END
-        WHERE CS.intCustomerStorageId = @intCustomerStorageId
+        WHERE CAP.dblAmount <> 0
+            AND CS.intCustomerStorageId = @intCustomerStorageId
 
         FETCH NEXT FROM @C INTO @intCustomerStorageId, @dblVoucherUnits, @dblVoucherAmount, @ysnSpot, @intContractDetailId;
     END
