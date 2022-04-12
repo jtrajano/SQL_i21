@@ -98,6 +98,7 @@ BEGIN
         ,[strCtOtherChargeItemNo]           =   CC_ITEM.strItemNo
 		,[dblGradeReading]                  =   CASE CAPD.intCalculationTypeId
 													WHEN 2 THEN ISNULL(RANGE_BY_GRADEREADING.dblGradeReading, 0)
+													WHEN 4 THEN ISNULL(PERCENTAGE_BY_DISCOUNT.dblGradeReading, 0)
                                                     ELSE 0
                                                 END
     FROM tblGRChargeAndPremiumId CAP
@@ -262,6 +263,7 @@ BEGIN
                             -- The "Rate From Location" takes precedence over the default rate.
                             * (CASE WHEN _OVERRIDE.ysnOverride = 1 THEN _OVERRIDE.dblRate ELSE ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD.dblRate, 0)) END / 100)
             ,[dblRate]  =   CASE WHEN _OVERRIDE.ysnOverride = 1 THEN _OVERRIDE.dblRate ELSE ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD.dblRate, 0)) END
+            ,QM.dblGradeReading
         FROM @tblQMDiscountIds QM_ID
         INNER JOIN tblQMTicketDiscount QM
             ON QM.intTicketDiscountId = QM_ID.intId
