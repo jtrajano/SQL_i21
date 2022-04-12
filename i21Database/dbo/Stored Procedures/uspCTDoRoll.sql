@@ -171,6 +171,15 @@ BEGIN TRY
 			JOIN  tblRKFuturesMonth		    FMonth ON FMonth.intFutureMonthId  = New.intFutureMonthId
 			WHERE Old.intContractDetailId = @ContractDetailId
 
+			DECLARE @SingleAuditLogParam SingleAuditLogParam
+			DECLARE @intId INT = 3
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@ContractHeaderId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+				UNION ALL
+				SELECT 2, '', '', 'tblCTContractDetails', NULL, NULL, 'Details', NULL, NULL, 1
+				UNION ALL
+				SELECT 3, '', 'Updated', 'Updated - Record: Sequence - '+LTRIM(@ContractSeq)+' Roll Contract ', NULL, NULL, NULL, NULL, NULL, 2
+
 				SET @details ='{  
 								 "action":"Updated",
 								 "change":"Updated - Record: '+LTRIM(@ContractHeaderId)+'",
@@ -190,102 +199,140 @@ BEGIN TRY
 												 [   
 													 '
 												     IF @OldEndDate <> @NewEndDate
-													 SET @details = @details+'
-													 {  
-												        "change":"dtmEndDate",
-												        "from":"'+LTRIM(@OldEndDate)+'",
-												        "to":"'+LTRIM(@NewEndDate)+'",
-												        "leaf":true,
-												        "iconCls":"small-gear",
-												        "isField":true,
-												        "keyValue":'+LTRIM(@ContractDetailId)+',
-												        "associationKey":"tblCTContractDetails",
-												        "changeDescription":"End Date"
-												     },'
+													 BEGIN
+														 SET @details = @details+'
+														 {  
+															"change":"dtmEndDate",
+															"from":"'+LTRIM(@OldEndDate)+'",
+															"to":"'+LTRIM(@NewEndDate)+'",
+															"leaf":true,
+															"iconCls":"small-gear",
+															"isField":true,
+															"keyValue":'+LTRIM(@ContractDetailId)+',
+															"associationKey":"tblCTContractDetails",
+															"changeDescription":"End Date"
+														 },'
+
+														 SET @intId += 1
+														 INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+														 SELECT @intId, LTRIM(@ContractDetailId), '', 'dtmEndDate', LTRIM(@OldEndDate), LTRIM(@NewEndDate), 'End Date', 1, NULL, 3
+												     END
 
 													 IF @OldFutures <> @NewFutures
-													 SET @details = @details+'
-													 {  
-												      "change":"dblFutures",
-												      "from":"'+LTRIM(@OldFutures)+'",
-												      "to":"'+LTRIM(@NewFutures)+'",
-												      "leaf":true,
-												      "iconCls":"small-gear",
-												      "isField":true,
-												      "keyValue":'+LTRIM(@ContractDetailId)+',
-												      "associationKey":"tblCTContractDetails",
-												      "changeDescription":"Futures Price",
-												      "hidden":false
-												     },'
+													 BEGIN
+														 SET @details = @details+'
+														 {  
+														  "change":"dblFutures",
+														  "from":"'+LTRIM(@OldFutures)+'",
+														  "to":"'+LTRIM(@NewFutures)+'",
+														  "leaf":true,
+														  "iconCls":"small-gear",
+														  "isField":true,
+														  "keyValue":'+LTRIM(@ContractDetailId)+',
+														  "associationKey":"tblCTContractDetails",
+														  "changeDescription":"Futures Price",
+														  "hidden":false
+														 },'
+
+														 SET @intId += 1
+														 INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+														 SELECT @intId, LTRIM(@ContractDetailId), '', 'dblFutures', LTRIM(@OldFutures), LTRIM(@NewFutures), 'Futures Price', 1, 0, 3
+													END
 												   
 												    IF @OldBasis <> @NewBasis
-													SET @details = @details+'
+													BEGIN
+														SET @details = @details+'
 												    
-												     {  
-												        "change":"dblBasis",
-												        "from":'+LTRIM(@OldBasis)+',
-												        "to":"'+LTRIM(@NewBasis)+'",
-												        "leaf":true,
-												        "iconCls":"small-gear",
-												        "isField":true,
-												        "keyValue":'+LTRIM(@ContractDetailId)+',
-												        "associationKey":"tblCTContractDetails",
-												        "changeDescription":"Basis",
-												        "hidden":false
-												     },'
+														 {  
+															"change":"dblBasis",
+															"from":'+LTRIM(@OldBasis)+',
+															"to":"'+LTRIM(@NewBasis)+'",
+															"leaf":true,
+															"iconCls":"small-gear",
+															"isField":true,
+															"keyValue":'+LTRIM(@ContractDetailId)+',
+															"associationKey":"tblCTContractDetails",
+															"changeDescription":"Basis",
+															"hidden":false
+														 },'
+
+														 SET @intId += 1
+														 INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+														 SELECT @intId, LTRIM(@ContractDetailId), '', 'dblBasis', LTRIM(@OldBasis), LTRIM(@NewBasis), 'Basis', 1, 0, 3
+													 END
 													 
 													 IF @OldFutureMarketId <> @NewFutureMarketId
-													 SET @details = @details+'
-													 {  
-														"change":"intFutureMarketId",
-														"from":"'+LTRIM(@OldFutureMarketId)+'",
-														"to":"'+LTRIM(@NewFutureMarketId)+'",
-														"leaf":true,
-														"iconCls":"small-gear",
-														"isField":true,
-														"keyValue":'+LTRIM(@ContractDetailId)+',
-														"associationKey":"tblCTContractDetails",
-														"hidden":true
-												     },					                                   
-												     {  
-												        "change":"strFutMarketName",
-												        "from":"'+LTRIM(@OldFutureMarket)+'",
-												        "to":"'+LTRIM(@NewFutureMarket)+'",
-												        "leaf":true,
-												        "iconCls":"small-gear",
-												        "isField":true,
-												        "keyValue":'+LTRIM(@ContractDetailId)+',
-												        "associationKey":"tblCTContractDetails",
-												        "changeDescription":"Future Market",
-												        "hidden":false
-												     },'
+													 BEGIN
+														 SET @details = @details+'
+														 {  
+															"change":"intFutureMarketId",
+															"from":"'+LTRIM(@OldFutureMarketId)+'",
+															"to":"'+LTRIM(@NewFutureMarketId)+'",
+															"leaf":true,
+															"iconCls":"small-gear",
+															"isField":true,
+															"keyValue":'+LTRIM(@ContractDetailId)+',
+															"associationKey":"tblCTContractDetails",
+															"hidden":true
+														 },					                                   
+														 {  
+															"change":"strFutMarketName",
+															"from":"'+LTRIM(@OldFutureMarket)+'",
+															"to":"'+LTRIM(@NewFutureMarket)+'",
+															"leaf":true,
+															"iconCls":"small-gear",
+															"isField":true,
+															"keyValue":'+LTRIM(@ContractDetailId)+',
+															"associationKey":"tblCTContractDetails",
+															"changeDescription":"Future Market",
+															"hidden":false
+														 },'
+
+														 SET @intId += 1
+														 INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+														 SELECT @intId, LTRIM(@ContractDetailId), '', 'intFutureMarketId', LTRIM(@OldFutureMarketId), LTRIM(@NewFutureMarketId), NULL, 1, 0, 3
+
+														 SET @intId += 1
+														 INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+														 SELECT @intId, LTRIM(@ContractDetailId), '', 'strFutMarketName', LTRIM(@OldFutureMarket), LTRIM(@NewFutureMarket), 'Future Market', 1, 0, 3
+												   END
 												   
 												   IF @OldFutureMonthId <> @NewFutureMonthId
-													  SET @details = @details
-													+'
-													{  
-												      "change":"intFutureMonthId",
-												      "from":"'+LTRIM(@OldFutureMonthId)+'",
-												      "to":"'+LTRIM(@NewFutureMonthId)+'",
-												      "leaf":true,
-												      "iconCls":"small-gear",
-												      "isField":true,
-												      "keyValue":'+LTRIM(@ContractDetailId)+',
-												      "associationKey":"tblCTContractDetails",
-												      "hidden":true
-												   },					                                   
-												   {  
-												      "change":"strFutureMonth",
-												      "from":"'+LTRIM(@OldFuturesMonth)+'",
-												      "to":"'+LTRIM(@NewFuturesMonth)+'",
-												      "leaf":true,
-												      "iconCls":"small-gear",
-												      "isField":true,
-												      "keyValue":'+LTRIM(@ContractDetailId)+',
-												      "associationKey":"tblCTContractDetails",
-												      "changeDescription":"Futures Month/Yr",
-												      "hidden":false
-												   }'
+												   BEGIN
+														  SET @details = @details
+														+'
+														{  
+														  "change":"intFutureMonthId",
+														  "from":"'+LTRIM(@OldFutureMonthId)+'",
+														  "to":"'+LTRIM(@NewFutureMonthId)+'",
+														  "leaf":true,
+														  "iconCls":"small-gear",
+														  "isField":true,
+														  "keyValue":'+LTRIM(@ContractDetailId)+',
+														  "associationKey":"tblCTContractDetails",
+														  "hidden":true
+													   },					                                   
+													   {  
+														  "change":"strFutureMonth",
+														  "from":"'+LTRIM(@OldFuturesMonth)+'",
+														  "to":"'+LTRIM(@NewFuturesMonth)+'",
+														  "leaf":true,
+														  "iconCls":"small-gear",
+														  "isField":true,
+														  "keyValue":'+LTRIM(@ContractDetailId)+',
+														  "associationKey":"tblCTContractDetails",
+														  "changeDescription":"Futures Month/Yr",
+														  "hidden":false
+													   }'
+
+														SET @intId += 1
+														INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+														SELECT @intId, LTRIM(@ContractDetailId), '', 'intFutureMonthId', LTRIM(@OldFutureMonthId), LTRIM(@NewFutureMonthId), NULL, 1, 0, 3
+
+														SET @intId += 1
+														INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+														SELECT @intId, LTRIM(@ContractDetailId), '', 'strFutureMonth', LTRIM(@OldFuturesMonth), LTRIM(@NewFuturesMonth), 'Futures Month/Yr', 1, 0, 3
+												  END
 												  
 												  IF RIGHT(@details,1) = ','
 												  SET @details = SUBSTRING(@details,0,LEN(@details))
@@ -311,6 +358,16 @@ BEGIN TRY
 			,@fromValue			 = ''			
 			,@toValue			 = ''			
 			,@details			 = @details
+
+			BEGIN TRY
+				EXEC uspSMSingleAuditLog 
+					@screenName     = 'ContractManagement.view.Contract',
+					@recordId       = @ContractHeaderId,
+					@entityId       = @intUserId,
+					@AuditLogParam  = @SingleAuditLogParam
+			END TRY
+			BEGIN CATCH
+			END CATCH
 
 			SELECT @ContractDetailId = MIN(intContractDetailId) FROM #tblCTContractDetail  WHERE intContractDetailId > @ContractDetailId
 	  END
