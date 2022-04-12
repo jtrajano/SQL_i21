@@ -331,7 +331,7 @@ END
 
 -- Return the result back to the caller. 
 SELECT
-	intKey							= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
+	intKey	= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
 	, i.intItemId
 	, i.strItemNo 
 	, intItemUOMId = ItemUOM.intItemUOMId 
@@ -349,10 +349,10 @@ SELECT
 	, strStorageLocationName		= strgLoc.strName
 	, intOwnershipType				= @intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
-	, dblRunningAvailableQty		= ROUND(t.dblQty, 6)
+	, dblRunningAvailableQty		= ROUND(ISNULL(t.dblQty, 0), 6)
 	, dblRunningReservedQty			= ROUND(ISNULL(reserved.dblQty, 0), 6)
 	, dblRunningAvailableQtyNoReserved = ROUND(ISNULL(t.dblQty, 0) - ISNULL(reserved.dblQty, 0), 6) 
-	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
+	, dblStorageAvailableQty		= ROUND(ISNULL(t.dblUnitStorage, 0), 6) 
 	, dblCost = 
 		COALESCE (
 			NULLIF(
@@ -373,23 +373,21 @@ SELECT
 						COALESCE(EffectivePricing.dblCost, t.dblCost)
 				END, 
 				0
-			),
-			NULLIF(
-				ItemPricing.dblLastCost, 
-				0
-			), 
-			ItemPricing.dblStandardCost
+			)
+			,NULLIF(ItemPricing.dblLastCost, 0)
+			,ItemPricing.dblStandardCost
 		)
 	, intDecimalPlaces = iUOM.intDecimalPlaces
 	, ItemUOM.ysnAllowPurchase
 	, ItemUOM.ysnAllowSale
-FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
-		ON i.intItemId = t.intItemId
-	INNER JOIN (
+FROM tblICItem i INNER JOIN (
 		tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
 			ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 	) 
-		ON ItemUOM.intItemUOMId = t.intItemUOMId
+		ON ItemUOM.intItemId = i.intItemId
+	LEFT JOIN @tblInventoryTransactionGrouped t
+		ON t.intItemId = i.intItemId
+		AND t.intItemUOMId = ItemUOM.intItemUOMId
 	OUTER APPLY (		
 		SELECT 
 			dblQty = SUM(sr.dblQty) 
@@ -402,39 +400,6 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 			AND ISNULL(sr.intSubLocationId, 0) = ISNULL(t.intSubLocationId, 0)
 			AND sr.intItemStockTypeId = 9
 	) reserved
-	CROSS APPLY (
-		SELECT
-			SUM(s.dblOnHand) dblOnHand
-			, SUM(s.dblUnitStorage) dblUnitStorage
-			, s.intItemId
-			, s.intItemLocationId
-			, u.strUnitMeasure
-			, i.intItemUOMId
-			, u.strUnitType
-			, i.dblUnitQty
-			, i.ysnStockUnit
-		FROM	
-			tblICItemStockUOM s	INNER JOIN tblICItemUOM i 
-				ON i.intItemUOMId = s.intItemUOMId
-				AND s.intItemId = i.intItemId
-				AND i.ysnStockUnit = 1
-			INNER JOIN tblICUnitMeasure u 
-				ON u.intUnitMeasureId = i.intUnitMeasureId
-		WHERE 
-			s.intItemId = @intItemId
-			AND (@intSubLocationId IS NULL OR s.intSubLocationId = @intSubLocationId)
-			AND (@intStorageLocationId IS NULL OR s.intStorageLocationId = @intStorageLocationId)
-			AND s.intItemLocationId = t.intItemLocationId
-		GROUP BY 
-			s.intItemId
-			, s.intItemLocationId
-			, u.strUnitMeasure
-			, i.intItemUOMId
-			, u.strUnitType
-			, i.dblUnitQty
-			, i.ysnStockUnit
-	) stock 
-
 	LEFT JOIN tblICItemUOM StockUOM
 		ON StockUOM.intItemId = t.intItemId
 		AND StockUOM.ysnStockUnit = 1
@@ -451,6 +416,8 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 	LEFT JOIN tblICCostingMethod CostMethod
 		ON CostMethod.intCostingMethodId = t.intCostingMethodId
 	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@dtmDate, i.intItemId, ItemLocation.intItemLocationId, 0) EffectivePricing
+WHERE
+	i.intItemId = @intItemId
 ORDER BY
 	ItemUOM.ysnStockUnit DESC 
 	,iUOM.strUnitMeasure ASC
