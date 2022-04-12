@@ -256,7 +256,7 @@ BEGIN
 					select
 						@ysnDerivative = a.ysnDerivative
 						,@intFutOptTransactionId = a.intInternalTradeNumberId
-						,@dblHedgeNoOfLots = isnull(aa.dblNoOfLots,0)
+						,@dblHedgeNoOfLots = isnull(a.dblNoOfLots,0)
 						,@intBrokerId = a.intBrokerId
 						,@intBrokerageAccountId = a.intBrokerAccountId
 						,@intFutureMarketId = a.intNewFutureMarketId
@@ -277,13 +277,14 @@ BEGIN
 						join tblCTContractHeader c on c.intContractHeaderId = b.intContractHeaderId
 						left join tblCTContractDetail TS WITH (UPDLOCK) on TS.intContractDetailId = b.intContractDetailId  
 						CROSS APPLY fnCTGetTopOneSequence(b.intContractHeaderId,isnull(b.intContractDetailId,0)) TS1 
-						left join tblCTSpreadArbitrage aa on aa.intSpreadArbitrageId = a.intSpreadArbitrageId and aa.ysnDerivative = 1 and isnull(aa.intInternalTradeNumberId,0) > 0
+						--left join tblCTSpreadArbitrage aa on aa.intSpreadArbitrageId = a.intSpreadArbitrageId and aa.ysnDerivative = 1 and isnull(aa.intInternalTradeNumberId,0) > 0
 					where
 						a.intSpreadArbitrageId = @intSpreadArbitrageId;
 
 					if (@ysnDerivative = 1)
 					begin
 
+						SELECT @dblDerivativeNoOfContract = 0;
 						SELECT @dblDerivativeNoOfContract = ISNULL(dblNoOfContract,0), @ysnFreezed = isnull(ysnFreezed,0) FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
 						IF ( @dblDerivativeNoOfContract > 0 and @dblHedgeNoOfLots = @dblDerivativeNoOfContract)
 						BEGIN
