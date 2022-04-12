@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vendor Statement' AND strModuleName = 'Accounts Payable')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Insurance Charges' AND strModuleName = 'Inventory')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1918,6 +1918,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage C
 	VALUES (N'Storage Charges', N'Inventory', @InventoryWarehouseParentMenuId, N'Storage Charges', N'Import', N'Screen', N'Inventory.view.StorageCharge?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 2, 0)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.StorageCharge?showSearch=true', intSort = 2 WHERE strMenuName = 'Storage Charges' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Insurance Rate' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Insurance Rate', N'Inventory', @InventoryWarehouseParentMenuId, N'Insurance Rate', N'Import', N'Screen', N'Inventory.view.InsuranceRate?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 3, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.InsuranceRate?showSearch=true', intSort = 3 WHERE strMenuName = 'Insurance Rate' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Insurance Charges' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Insurance Charges', N'Inventory', @InventoryWarehouseParentMenuId, N'Insurance Charges', N'Import', N'Screen', N'Inventory.view.InsuranceCharge?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 3, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.InsuranceCharge?showSearch=true', intSort = 4 WHERE strMenuName = 'Insurance Charges' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryWarehouseParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Build Assemblies' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
