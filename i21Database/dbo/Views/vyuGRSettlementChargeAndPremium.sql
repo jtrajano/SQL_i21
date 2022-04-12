@@ -23,11 +23,15 @@ SELECT
     ,[dblCost]						    =   ACAP.dblCost
     ,[dblAmount]					    =   ACAP.dblQty * ACAP.dblCost
     ,[intOtherChargeItemId]			    =   ACAP.intOtherChargeItemId
-    ,[strOtherChargeItemNo]			    =   INV_ITEM.strItemNo
+    ,[strOtherChargeItemNo]			    =   OC_ITEM.strItemNo
     ,[intInventoryItemId]			    =   ACAP.intInventoryItemId
-    ,[strInventoryItemNo]			    =   OC_ITEM.strItemNo
+    ,[strInventoryItemNo]			    =   INV_ITEM.strItemNo
     ,[dblInventoryItemNetUnits]		    =   ACAP.dblInventoryItemNetUnits
     ,[dblInventoryItemGrossUnits]	    =   ACAP.dblInventoryItemGrossUnits
+    ,[intCtOtherChargeItemId]			=   ACAP.intCtOtherChargeItemId
+    ,[strCtOtherChargeItemNo]			=   CT_OC_ITEM.strItemNo
+    --,[dblCtOtherChargeRate]				=	ACAP.dblCtOtherChargeRate
+    ,[dblGradeReading]                  =   TD.dblGradeReading
 FROM tblGRAppliedChargeAndPremium ACAP
 INNER JOIN tblICItem CAP_ITEM
     ON CAP_ITEM.intItemId = ACAP.intChargeAndPremiumItemId
@@ -45,9 +49,19 @@ INNER JOIN tblGRSettleStorageTicket SST
     AND ACAP.intTransactionDetailId = SST.intSettleStorageTicketId
 INNER JOIN tblGRCustomerStorage CS
     ON CS.intCustomerStorageId = SST.intCustomerStorageId
+LEFT JOIN (tblQMTicketDiscount TD
+			INNER JOIN tblGRDiscountScheduleCode DSC
+				ON DSC.intDiscountScheduleCodeId = TD.intDiscountScheduleCodeId
+	)
+	ON TD.intTicketFileId = CS.intCustomerStorageId
+		AND TD.strSourceType = 'Storage'
+		AND DSC.intItemId = ACAP.intCtOtherChargeItemId
+		AND CT.intCalculationTypeId = 2 --range by grade reading
 LEFT JOIN tblICItem INV_ITEM
     ON INV_ITEM.intItemId = ACAP.intInventoryItemId
 LEFT JOIN tblICItem OC_ITEM
     ON OC_ITEM.intItemId = ACAP.intOtherChargeItemId
+LEFT JOIN tblICItem CT_OC_ITEM
+    ON CT_OC_ITEM.intItemId = ACAP.intCtOtherChargeItemId
 
 GO

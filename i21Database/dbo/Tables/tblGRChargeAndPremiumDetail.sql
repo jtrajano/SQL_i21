@@ -6,6 +6,7 @@ CREATE TABLE [dbo].[tblGRChargeAndPremiumDetail]
 	[intCalculationTypeId] INT NOT NULL,
 	[intInventoryItemId] INT NULL,
 	[intOtherChargeItemId] INT NULL,
+	[intCtOtherChargeItemId] INT NULL,
 	[dblRate] DECIMAL(18,6) NULL DEFAULT ((0)),
 	[strRateType] NVARCHAR(30) NULL,
 	[dtmEffectiveDate] DATETIME NULL,
@@ -18,7 +19,8 @@ CREATE TABLE [dbo].[tblGRChargeAndPremiumDetail]
 	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intChargeAndPremiumItemId] FOREIGN KEY ([intChargeAndPremiumItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intCalculationTypeId] FOREIGN KEY ([intCalculationTypeId]) REFERENCES [tblGRCalculationType]([intCalculationTypeId]),
 	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intInventoryItemId] FOREIGN KEY ([intInventoryItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intOtherChargeItemId] FOREIGN KEY ([intOtherChargeItemId]) REFERENCES [tblICItem]([intItemId])
+	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intOtherChargeItemId] FOREIGN KEY ([intOtherChargeItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intCtOtherChargeItemId] FOREIGN KEY ([intCtOtherChargeItemId]) REFERENCES [tblICItem]([intItemId])
 )
 GO
 

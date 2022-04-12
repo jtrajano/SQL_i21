@@ -19,6 +19,8 @@ SELECT
 	,CAPD.dtmTerminationDate
 	,CAPD.intConcurrencyId
 	,CAPD.ysnDeductVendor
+	,CT_OTHER_CHARGE_ITEM.strItemNo AS strCtOtherChargeItemNo
+	,CT_OTHER_CHARGE_ITEM.intItemId AS intCtOtherChargeItemId
 FROM tblGRChargeAndPremiumDetail CAPD
 INNER JOIN tblGRChargeAndPremiumId CAP
 	ON CAP.intChargeAndPremiumId = CAPD.intChargeAndPremiumId
@@ -30,3 +32,5 @@ LEFT JOIN tblICItem DISC_ITEM
 	ON DISC_ITEM.intItemId = CAPD.intOtherChargeItemId
 LEFT JOIN tblICItem INV_ITEM
 	ON INV_ITEM.intItemId = CAPD.intInventoryItemId
+LEFT JOIN tblICItem CT_OTHER_CHARGE_ITEM
+	ON CT_OTHER_CHARGE_ITEM.intItemId = CAPD.intCtOtherChargeItemId
