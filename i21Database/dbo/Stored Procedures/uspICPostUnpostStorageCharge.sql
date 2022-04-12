@@ -258,7 +258,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+				EXEC [dbo].[uspAPDeleteVoucher] @_intBillId, @intUserId
 			END
 
 			SET @_intBillId = (SELECT TOP 1 
