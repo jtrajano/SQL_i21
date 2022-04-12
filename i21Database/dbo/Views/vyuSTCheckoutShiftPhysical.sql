@@ -6,12 +6,12 @@ intCheckoutShiftPhysicalId
 , SP.intItemId
 , SP.intItemLocationId
 , SP.intCountGroupId
-, SP.dblSystemCount
-, SP.dblPhysicalCount
+, dblSystemCount
+, dblPhysicalCount
 , SP.intItemUOMId
-, preload.dblQtyReceived
-, preload.dblQtySold
-, SP.intEntityUserSecurityId
+, dblQtyReceived
+, dblQtySold
+, intEntityUserSecurityId
 , dblConversionFactor = dbo.fnICConvertUOMtoStockUnit(SP.intItemId, SP.intItemUOMId, 1)
 
 
@@ -26,12 +26,6 @@ intCheckoutShiftPhysicalId
 					ELSE ISNULL(SP.dblSystemCount, 0) - dbo.fnICConvertUOMtoStockUnit(SP.intItemId, SP.intItemUOMId, SP.dblPhysicalCount)
 					END)
 FROM tblSTCheckoutShiftPhysical SP
-LEFT JOIN tblSTCheckoutShiftPhysicalPreview preload 
-	ON SP.intCheckoutId = preload.intCheckoutId
-	AND ISNULL(SP.intItemId, 0) = ISNULL(preload.intItemId, 0)
-	AND ISNULL(SP.intCountGroupId, 0) = ISNULL(preload.intCountGroupId, 0)
-	AND ISNULL(SP.intItemLocationId, 0) = ISNULL(preload.intItemLocationId, 0)
-	AND ISNULL(SP.intItemUOMId, 0) = ISNULL(preload.intItemUOMId, 0)
 LEFT JOIN tblSTCheckoutHeader CH ON CH.intCheckoutId = SP.intCheckoutId
 LEFT JOIN tblICItem Item ON Item.intItemId = SP.intItemId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
