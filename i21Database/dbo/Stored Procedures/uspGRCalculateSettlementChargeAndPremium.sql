@@ -62,10 +62,13 @@ BEGIN TRY
         ,[dblAmount]					DECIMAL(38, 20) NOT NULL 
         ,[intOtherChargeItemId]			INT NULL
         ,[strOtherChargeItemNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[intCtOtherChargeItemId]		INT NULL
+        ,[strCtOtherChargeItemNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
         ,[intInventoryItemId]			INT NULL
         ,[strInventoryItemNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
         ,[dblInventoryItemNetUnits]		DECIMAL(38, 20) NOT NULL 
         ,[dblInventoryItemGrossUnits]	DECIMAL(38, 20) NOT NULL
+		,[dblGradeReading]				DECIMAL(18,6)
 	)
 
 	DECLARE @SettleStorageToSave AS TABLE 
@@ -109,7 +112,7 @@ BEGIN TRY
 		,dblContractRemaningUnits DECIMAL(18,6)
 		,dblFinalPrice DECIMAL(18,6)
 	)
-
+	 
 	INSERT INTO @SettleStorage
 	(
 		 intSettleStorageTicketId
@@ -455,6 +458,8 @@ BEGIN TRY
 		END
 	END
 
+	SET @intContractDetailId = NULL
+
     -- Loop through each simulated settle storage voucher and calculate the charges and premiums
     DECLARE @C AS CURSOR;
     SET @C = CURSOR FAST_FORWARD FOR
@@ -469,14 +474,16 @@ BEGIN TRY
                                             ELSE dblSpotUnits * dblSpotCashPrice
                                         END)
             ,ysnSpot                =   CAST(CASE WHEN intContractDetailId > 0 THEN 0 ELSE 1 END AS BIT)
+			,intContractDetailId
         FROM @SettleStorageToSave SSTS
         WHERE intContractPricingTypeId <> 2
         OR (intContractPricingTypeId = 2 AND intPriceFixationDetailId IS NOT NULL)
         GROUP BY
             intCustomerStorageId
             ,(CASE WHEN intContractDetailId > 0 THEN 0 ELSE 1 END)
+			,intContractDetailId
     OPEN @C  
-    FETCH NEXT FROM @C INTO @intCustomerStorageId, @dblVoucherUnits, @dblVoucherAmount, @ysnSpot;
+    FETCH NEXT FROM @C INTO @intCustomerStorageId, @dblVoucherUnits, @dblVoucherAmount, @ysnSpot, @intContractDetailId;
     WHILE @@FETCH_STATUS = 0
     BEGIN
         -- Calculate and Store the Charges and Premium for the current storage ticket
@@ -513,6 +520,7 @@ BEGIN TRY
                 ,@dtmCalculateOn --Calculate On
 				,@SettleStorageChargeAndPremium
 				,CS.intCustomerStorageId
+				,@intContractDetailId
             ) CAP
         ) CAP
 		LEFT JOIN @SettleStorageChargeAndPremium SSCP
@@ -566,10 +574,13 @@ BEGIN TRY
             ,[dblAmount]
             ,[intOtherChargeItemId]
             ,[strOtherChargeItemNo]
+			,[intCtOtherChargeItemId]
+            ,[strCtOtherChargeItemNo]
             ,[intInventoryItemId]
             ,[strInventoryItemNo]
             ,[dblInventoryItemNetUnits]
             ,[dblInventoryItemGrossUnits]
+			,[dblGradeReading]
         )
         SELECT
             [intTransactionId]				= NULL
@@ -603,10 +614,13 @@ BEGIN TRY
             ,[dblAmount]					= CAP.dblAmount
             ,[intOtherChargeItemId]			= CAP.intOtherChargeItemId
             ,[strOtherChargeItemNo]			= CAP.strOtherChargeItemNo
+			,[intCtOtherChargeItemId]		= CAP.intCtOtherChargeItemId
+            ,[strCtOtherChargeItemNo]		= CAP.strCtOtherChargeItemNo
             ,[intInventoryItemId]			= CAP.intInventoryItemId
             ,[strInventoryItemNo]			= CAP.strInventoryItemNo
             ,[dblInventoryItemNetUnits]		= @dblVoucherUnits
             ,[dblInventoryItemGrossUnits]	= @dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits)
+			,[dblGradeReading]				= CAP.dblGradeReading
         FROM tblGRCustomerStorage CS
         INNER JOIN @SettleStorageTicketInput SSTI
             ON SSTI.intCustomerStorageId = CS.intCustomerStorageId		
@@ -624,6 +638,7 @@ BEGIN TRY
                 ,@dtmCalculateOn --Calculate On
 				,@SettleStorageChargeAndPremium
 				,CS.intCustomerStorageId
+				,@intContractDetailId
             ) CAP
         ) CAP
 		LEFT JOIN @SettleStorageChargeAndPremium SSCP
@@ -638,10 +653,9 @@ BEGIN TRY
         LEFT JOIN tblICItemUOM CAP_UOM_TO
             ON CAP_UOM_TO.intItemId = CAP.intChargeAndPremiumItemId
             AND CAP_UOM_TO.intUnitMeasureId = CASE WHEN @ysnSpot = 1 THEN SPOT_UOM.intUnitMeasureId ELSE CS.intUnitMeasureId END
-        WHERE CAP.dblAmount <> 0
-        AND CS.intCustomerStorageId = @intCustomerStorageId
+        WHERE CS.intCustomerStorageId = @intCustomerStorageId
 
-        FETCH NEXT FROM @C INTO @intCustomerStorageId, @dblVoucherUnits, @dblVoucherAmount, @ysnSpot;
+        FETCH NEXT FROM @C INTO @intCustomerStorageId, @dblVoucherUnits, @dblVoucherAmount, @ysnSpot, @intContractDetailId;
     END
     CLOSE @C
     DEALLOCATE @C
