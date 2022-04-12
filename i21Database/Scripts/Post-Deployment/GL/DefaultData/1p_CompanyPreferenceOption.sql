@@ -40,7 +40,7 @@ BEGIN
             IF @ysnStarted = 1
                 SET @str += ','
 
-            SELECT TOP 1 @i = rowId,
+            SELECT TOP 1 @i = rowId - 1,
                         @intSType = intStructureType
             FROM   @tbl
 
