@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRPostSettleStorage]
-	@intSettleStorageId INT
+@intSettleStorageId INT
 	,@ysnPosted BIT
 	,@ysnFromPriceBasisContract BIT = 0
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
@@ -2325,6 +2325,7 @@ BEGIN TRY
 							,@dtmCalculateChargeAndPremiumOn --Calculate On
 							,@SettleStorageChargeAndPremium
 							,CS.intCustomerStorageId
+							,SVC.intContractDetailId
 						) CAP
 					) CAP
 					LEFT JOIN @SettleStorageChargeAndPremium SSCP
@@ -2371,7 +2372,9 @@ BEGIN TRY
 						[intOtherChargeItemId],
 						[intInventoryItemId],
 						[dblInventoryItemNetUnits],
-						[dblInventoryItemGrossUnits]
+						[dblInventoryItemGrossUnits],
+						[dblGradeReading],
+						[intCtOtherChargeItemId]
 					)
 					SELECT
 						[intTransactionId]				= @intSettleStorageId
@@ -2400,14 +2403,19 @@ BEGIN TRY
 						,[intInventoryItemId]			= CAP.intInventoryItemId
 						,[dblInventoryItemNetUnits]		= SVC.dblUnits
 						,[dblInventoryItemGrossUnits]	= SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits)
+						,[dblGradeReading]				= CAP.dblGradeReading
+						,[intCtOtherChargeItemId]		= CAP.intCtOtherChargeItemId
 					FROM (
 						SELECT
 							[dblUnits]			= SUM(SVC.dblUnits)
 							,[dblTotalAmount]	= SUM(SVC.dblUnits * SVC.dblCashPrice)
 							,SVC.intCustomerStorageId
+							,SVC.intContractDetailId
 						FROM @SettleVoucherCreate SVC
 						WHERE SVC.intItemType = 1
 						GROUP BY SVC.intCustomerStorageId
+							,SVC.intContractDetailId
+							
 					) SVC
 					INNER JOIN tblGRCustomerStorage CS
 						ON CS.intCustomerStorageId = SVC.intCustomerStorageId
@@ -2428,6 +2436,7 @@ BEGIN TRY
 							,@dtmCalculateChargeAndPremiumOn
 							,@SettleStorageChargeAndPremium
 							,CS.intCustomerStorageId
+							,SVC.intContractDetailId
 						) CAP
 					) CAP
 					LEFT JOIN @SettleStorageChargeAndPremium SSCP
