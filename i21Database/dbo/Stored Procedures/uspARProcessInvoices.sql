@@ -234,7 +234,6 @@ DECLARE  @Id									INT
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
-		,@BorrowingFacilityLimitDetailId		INT
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -453,7 +452,6 @@ BEGIN
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
-		,@BorrowingFacilityLimitDetailId= [intBorrowingFacilityLimitDetailId]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -735,7 +733,6 @@ BEGIN
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
-			,@BorrowingFacilityLimitDetailId=@BorrowingFacilityLimitDetailId
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId

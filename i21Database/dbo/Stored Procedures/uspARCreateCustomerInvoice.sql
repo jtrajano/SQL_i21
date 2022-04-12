@@ -157,7 +157,6 @@
 	,@BankValuationRuleId					INT				= NULL
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
-	,@BorrowingFacilityLimitDetailId		INT				= NULL
 AS
 
 BEGIN
@@ -430,6 +429,22 @@ SELECT TOP 1
 	 @ImpactForProvisional = CASE WHEN @Type = 'Provisional' THEN ISNULL([ysnImpactForProvisional], 0) ELSE 0 END
 FROM
 	tblARCompanyPreference
+
+DECLARE @BorrowingFacilityLimitDetailId INT = NULL
+
+SELECT TOP 1
+	  @BorrowingFacilityLimitId = intBorrowingFacilityLimitId
+FROM
+	tblCMBorrowingFacilityLimit
+WHERE intBorrowingFacilityId = @BorrowingFacilityId
+  AND strBorrowingFacilityLimit = 'Receivables'
+
+SELECT TOP 1
+	  @BorrowingFacilityLimitDetailId = intBorrowingFacilityLimitDetailId
+FROM
+	tblCMBorrowingFacilityLimitDetail
+WHERE intBorrowingFacilityLimitId = @BorrowingFacilityLimitId
+  AND ysnDefault = 1
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
