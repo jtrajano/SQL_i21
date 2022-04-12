@@ -110,7 +110,7 @@ BEGIN TRY
 	
 	SELECT	@strContractDocuments = STUFF(								
 			   (SELECT			
-					CHAR(13)+CHAR(10) + DM.strDocumentName	
+					CHAR(13)+CHAR(10) + char(149) +' ' + DM.strDocumentName	
 					FROM tblCTContractDocument CD	
 					JOIN tblICDocument DM WITH (NOLOCK) ON DM.intDocumentId = CD.intDocumentId	
 					WHERE CD.intContractHeaderId=CH.intContractHeaderId	
@@ -170,7 +170,8 @@ BEGIN TRY
 	SELECT
 		intContractHeaderId					= CH.intContractHeaderId
 		,blbHeaderLogo						    = dbo.fnSMGetCompanyLogo('Header')
-		,strCaptionBGT							= TP.strContractType + ' Contract: ' + CH.strContractNumber
+		,strContractTypeNumber					= TP.strContractType + ' Contract Nr. ' + CH.strContractNumber
+		,strContractType						= CASE WHEN CH.intContractTypeId = 1 THEN 'SELLER:' ELSE 'BUYER:' END
 		,dtmContractDate						= CH.dtmContractDate
 		,strOtherPartyAddress					= CASE 
 													WHEN CH.strReportTo = 'Buyer' THEN
@@ -195,10 +196,30 @@ BEGIN TRY
 													ELSE '' END
 													END
 		,strAtlasDeclaration					= 'We confirm having' + CASE WHEN CH.intContractTypeId = 1	   THEN ' bought from '   ELSE ' sold to ' END + 'you as follows:'
+		,strReferenceNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END	
+		,strCommodityCode						= ICC.strCommodityCode		
+		,lblCropYear							= CASE WHEN ISNULL(CH.ysnPrintCropYear,'') <> 0	THEN 'Crop Year :'	ELSE NULL END
+		,strCropYear							= CASE WHEN ISNULL(CH.ysnPrintCropYear,'') <> 0 THEN CY.strCropYear ELSE NULL END
+		,strContractBasis						= CB.strFreightTerm + ' ' + SCI.strCity
+		,strInsurance							= 'To be covered by' + CASE WHEN CH.intInsuranceById = 1 THEN 'Buyer' ELSE 'Seller' END 
+		,lblWeighing						    = CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN 'Weighing :'					ELSE NULL END
+		,strWeight								= W1.strWeightGradeDesc
+		,lblTerm								= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN 'Payment Terms :'				ELSE NULL END
+		,strTerm							    = TM.strTerm
+		,lblGrade								= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN 'Approval term :'				ELSE NULL END
+		,strGrade								= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN W2.strWeightGradeDesc			ELSE NULL END
+		,strApprovalTerm						= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN W2.strWeightGradeDesc			ELSE NULL END
+		,strPriceFixation						= 'Price to be fixed by the ' + CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s call latest one day prior to the First Notice Day.' END		
+		,lblContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN 'Conditions:'					ELSE NULL END
+		,strContractConditions				    = @strContractConditions	
+		,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN 'Documents Required :'			ELSE NULL END
+		,strContractDocuments					= @strContractDocuments
+		,strPackaging							= 'In hydrocarbon-free bags as per IJO-Standard 98/01.'
+		,strDressing							= (SELECT TOP 1 strConditionDesc FROM tblCTCondition where strConditionName LIKE '%Dressing%')		
+
 		,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Buyer Ref No. :'  ELSE NULL END
 		,strBuyerRefNo							= CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 		,lblIncoTerms							= CASE WHEN ISNULL(CB.strFreightTerm,'') <>''		   THEN 'Incoterms :'					ELSE NULL END
-		,strContractBasis						= CB.strFreightTerm
 		,lblPosition							= CASE WHEN ISNULL(PO.strPosition,'') <>''		       THEN 'Position :'					ELSE NULL END
 		,strPosition							= PO.strPosition
 		,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN 'Producer :'					ELSE NULL END
@@ -207,32 +228,20 @@ BEGIN TRY
 		,strLoadingPointName					= SQ.strLoadingPointName
 		,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END
 		,strSellerRefNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END
-		,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN 'Location :'					ELSE NULL END
+		,lblAtlasLocation				 		= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN 'Location :'					ELSE NULL END
 		,strCityWarehouse						= CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
-		,lblCropYear							= CASE WHEN ISNULL(CY.strCropYear,'') <>''			   THEN 'Crop Year :'				    ELSE NULL END
-		,strCropYear							= CY.strCropYear
 		,lblShipper								= CASE WHEN ISNULL(SQ.strShipper,'') <>''			   THEN 'Shipper :'					    ELSE NULL END 
 		,strShipper								= SQ.strShipper
 		,lblDestinationPoint					= CASE WHEN ISNULL(SQ.strDestinationPointName,'') <>'' THEN SQ.srtDestinationPoint + ' :'   ELSE NULL END
 		,strDestinationPointName				= (case when PO.strPositionType = 'Spot' then CT.strCity else SQ.strDestinationPointName end)
 		,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN 'Pricing :'		ELSE NULL END
 		,strBeGreenCaller						= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
-		,lblWeighing						    = CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN 'Weighing :'					ELSE NULL END
-		,strWeight								= W1.strWeightGradeDesc
-		,lblTerm								= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN 'Payment Terms :'				ELSE NULL END
-		,strTerm							    = TM.strTerm
-		,lblGrade								= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN 'Approval term :'				ELSE NULL END
-		,strGrade								= W2.strWeightGradeDesc
-		,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN 'Documents Required :'			ELSE NULL END
-		,strContractDocuments					= @strContractDocuments
 		,lblBeGreenArbitrationComment			= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Rule :'							ELSE NULL END
 		,strArbitrationComment				    = AN.strComment
 		,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:'  ELSE NULL END
-		,strBeGreenArbitration					=   AB.strCity
+		,strArbitration							=   AB.strCity
 		,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN 'Others :'						ELSE NULL END
 		,strContractText						= ISNULL(TX.strText,'') 
-		,lblContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN 'Conditions:'					ELSE NULL END
-		,strContractConditions				    = @strContractConditions
 		,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN 'Notes/Remarks :'				ELSE NULL END
 		,strPrintableRemarks				    = CH.strPrintableRemarks			
 		,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
@@ -251,12 +260,16 @@ BEGIN TRY
 		LEFT JOIN	tblSMTerm					TM	WITH (NOLOCK) ON	TM.intTermID					=	CH.intTermId				
 		LEFT JOIN	tblSMCity					AB	WITH (NOLOCK) ON	AB.intCityId					=	CH.intArbitrationId			
 		LEFT JOIN	tblSMCountry				RY	WITH (NOLOCK) ON	RY.intCountryID					=	AB.intCountryId
+		LEFT JOIN	tblSMCountry				SMC WITH (NOLOCK) ON	SMC.intCountryID				=	CH.intCountryId
+		LEFT JOIN	tblSMCity					SCI WITH (NOLOCK) ON	SCI.intCountryId				=	SMC.intCountryID
 		LEFT JOIN	tblEMEntity					PR	WITH (NOLOCK) ON	PR.intEntityId					=	CH.intProducerId			
 		LEFT JOIN	tblCTPosition				PO	WITH (NOLOCK) ON	PO.intPositionId				=	CH.intPositionId
 		LEFT JOIN	tblAPVendor					VR	WITH (NOLOCK) ON	VR.intEntityId					=	CH.intEntityId				
 		LEFT JOIN	tblARCustomer				CR	WITH (NOLOCK) ON	CR.intEntityId					=	CH.intEntityId					
 		LEFT JOIN	tblSMCity					CT	WITH (NOLOCK) ON	CT.intCityId					=	CH.intINCOLocationTypeId
-		LEFT JOIN	tblSMCompanyLocationSubLocation		SL	WITH (NOLOCK) ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId 
+		LEFT JOIN	tblSMCompanyLocationSubLocation		SL	WITH (NOLOCK) ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId
+		LEFT JOIN	tblICCommodity				ICC WITH (NOLOCK) ON	ICC.intCommodityId				=	CH.intCommodityId
+		
 		LEFT JOIN	(
 					SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum
 				
