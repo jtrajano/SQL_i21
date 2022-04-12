@@ -665,6 +665,7 @@
     <Build Include="dbo\Views\vyuQMCuppingSessionSample.sql" />
     <Build Include="dbo\Tables\tblSMGeographicalZone.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostUnpostStorageCharge.sql" />
+    <Build Include="dbo\Functions\fnCTGetQualityResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
