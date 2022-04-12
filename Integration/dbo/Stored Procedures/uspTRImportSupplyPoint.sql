@@ -78,7 +78,7 @@ BEGIN
 			   ,1
 		FROM ssvncmst VNC
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VNC.ssvnc_vnd_no
-			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
+			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tempvnd tmp ON tmp.ssvnd_vnd_no = VNC.ssvnc_vnd_no AND SUBSTRING(VNC.ssvnc_seq_cd, 1, 2) = tmp.ssvnd_tax_st 
 			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -114,7 +114,7 @@ BEGIN
 				   ,1
 			FROM ssvncmst VNC
 				 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VNC.ssvnc_vnd_no
-				 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
+				 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 				 INNER JOIN tempvndloc tmp ON tmp.ssvnd_vnd_no = VNC.ssvnc_vnd_no  AND SUBSTRING(VNC.ssvnc_seq_cd, 1, 2) = tmp.ssvnd_tax_st
 				 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 				 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.LocName COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -126,7 +126,7 @@ BEGIN
 		SELECT @Total = COUNT(ELOC.intEntityLocationId)
 		FROM ssvncmst VNC
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VNC.ssvnc_vnd_no
-			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
+			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tempvnd tmp ON tmp.ssvnd_vnd_no = VNC.ssvnc_vnd_no AND SUBSTRING(VNC.ssvnc_seq_cd, 1, 2) = tmp.ssvnd_tax_st 
 			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -135,7 +135,7 @@ BEGIN
 		SELECT @Total = @Total + COUNT(ELOC.intEntityLocationId)
 		FROM ssvncmst VNC
 				 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VNC.ssvnc_vnd_no
-				 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
+				 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 				 INNER JOIN tempvndloc tmp ON tmp.ssvnd_vnd_no = VNC.ssvnc_vnd_no AND SUBSTRING(VNC.ssvnc_seq_cd, 1, 2) = tmp.ssvnd_tax_st 
 				 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 				 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.LocName COLLATE SQL_Latin1_General_CP1_CS_AS
