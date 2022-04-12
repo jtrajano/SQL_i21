@@ -10,6 +10,7 @@ CREATE FUNCTION [dbo].[fnGRCalculateChargeAndPremium](
     ,@dtmCalculateOn DATETIME
 	,@settleStorageChargeAndPremium SettleStorageChargeAndPremium READONLY
 	,@intCustomerStorageId INT
+	,@intContractDetailId INT
 )
 RETURNS @tblChargeAndPremium TABLE
 (
@@ -32,6 +33,9 @@ RETURNS @tblChargeAndPremium TABLE
     ,[intInventoryItemId] INT NULL
 	,[strInventoryItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     ,[ysnDeductVendor] BIT
+	,[intCtOtherChargeItemId] INT NULL
+	,[strCtOtherChargeItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[dblGradeReading] DECIMAL(18,6)
 )
 AS
 BEGIN
@@ -46,6 +50,7 @@ BEGIN
         ,[intCalculationTypeId]             =   CT.intCalculationTypeId
         ,[strCalculationType]               =   CT.strCalculationType
         ,[dblRate]                          =   CASE CAPD.intCalculationTypeId
+													WHEN 6 THEN ISNULL(RATE_AND_CONTRACT_CHARGE.dblRate, 0)
 													WHEN 5 THEN ISNULL(FIXED_RATE.dblRate, 0)
 													WHEN 4 THEN ISNULL(PERCENTAGE_BY_DISCOUNT.dblRate, 0)
 													WHEN 3 THEN ISNULL(PERCENTAGE_BY_ITEM.dblRate, 0)
@@ -55,6 +60,7 @@ BEGIN
 												END
         ,[strRateType]                      =   CAPD.strRateType
         ,[dblQty]                           =   (CASE CAPD.intCalculationTypeId
+													WHEN 6 THEN ISNULL(RATE_AND_CONTRACT_CHARGE.dblQty, 0)
                                                     WHEN 5 THEN ISNULL(FIXED_RATE.dblQty, 0)
                                                     WHEN 4 THEN ISNULL(PERCENTAGE_BY_DISCOUNT.dblQty, 0)
                                                     WHEN 3 THEN ISNULL(PERCENTAGE_BY_ITEM.dblQty, 0)
@@ -66,6 +72,7 @@ BEGIN
         ,[intChargeAndPremiumItemUOMId]     =   CAP_ITEM_UOM.intItemUOMId
         ,[strChargeAndPremiumUnitMeasure]   =   UOM.strUnitMeasure
         ,[dblCost]                          =   CASE CAPD.intCalculationTypeId
+													WHEN 6 THEN ISNULL(RATE_AND_CONTRACT_CHARGE.dblCost, 0)
                                                     WHEN 5 THEN ISNULL(FIXED_RATE.dblCost, 0)
                                                     WHEN 4 THEN ISNULL(PERCENTAGE_BY_DISCOUNT.dblCost, 0)
                                                     WHEN 3 THEN ISNULL(PERCENTAGE_BY_ITEM.dblCost, 0)
@@ -74,6 +81,7 @@ BEGIN
                                                     ELSE 0
                                                 END
         ,[dblAmount]                        =   CASE CAPD.intCalculationTypeId
+													WHEN 6 THEN ISNULL(RATE_AND_CONTRACT_CHARGE.dblCost, 0) * ISNULL(RATE_AND_CONTRACT_CHARGE.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
                                                     WHEN 5 THEN ISNULL(FIXED_RATE.dblCost, 0) * ISNULL(FIXED_RATE.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
                                                     WHEN 4 THEN ISNULL(PERCENTAGE_BY_DISCOUNT.dblCost, 0) * ISNULL(PERCENTAGE_BY_DISCOUNT.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
                                                     WHEN 3 THEN ISNULL(PERCENTAGE_BY_ITEM.dblCost, 0) * ISNULL(PERCENTAGE_BY_ITEM.dblQty * (CASE WHEN CAPD.ysnDeductVendor = 1 THEN -1 ELSE 1 END), 0)
@@ -86,6 +94,12 @@ BEGIN
         ,[intInventoryItemId]               =   INV_ITEM.intItemId
         ,[strInventoryItemNo]               =   INV_ITEM.strItemNo
         ,[ysnDeductVendor]                  =   CAPD.ysnDeductVendor
+		,[intCtOtherChargeItemId]           =   CC_ITEM.intItemId
+        ,[strCtOtherChargeItemNo]           =   CC_ITEM.strItemNo
+		,[dblGradeReading]                  =   CASE CAPD.intCalculationTypeId
+													WHEN 2 THEN ISNULL(RANGE_BY_GRADEREADING.dblGradeReading, 0)
+                                                    ELSE 0
+                                                END
     FROM tblGRChargeAndPremiumId CAP
     INNER JOIN tblGRChargeAndPremiumDetail CAPD
         ON CAPD.intChargeAndPremiumId = CAP.intChargeAndPremiumId
@@ -102,6 +116,8 @@ BEGIN
         ON OC_ITEM.intItemId = CAPD.intOtherChargeItemId
     LEFT JOIN tblICItem INV_ITEM
         ON INV_ITEM.intItemId = CAPD.intInventoryItemId
+	LEFT JOIN tblICItem CC_ITEM
+        ON CC_ITEM.intItemId = CAPD.intCtOtherChargeItemId
 	--OUTER APPLY (
 	--	SELECT * 
 	--	FROM @settleStorageChargeAndPremium
@@ -130,6 +146,7 @@ BEGIN
 									END
 							END
             ,[dblRate]  =  CASE WHEN _OVERRIDE.ysnOverride = 1 THEN _OVERRIDE.dblRate ELSE ISNULL(CAPD_RANGE.dblRangeRate, 0) END
+			,QM.dblGradeReading
         FROM @tblQMDiscountIds QM_ID
         INNER JOIN tblQMTicketDiscount QM
             ON QM.intTicketDiscountId = QM_ID.intId
@@ -289,6 +306,51 @@ BEGIN
         AND CAPD.intCalculationTypeId = 3 --Percentage By Item
     ) PERCENTAGE_BY_ITEM
 
+	-- Rate x Contract's Charge
+    OUTER APPLY (
+        SELECT
+            [dblQty]    =   CASE CAPD.strRateType
+                                WHEN 'Per Unit' THEN @dblNetUnits
+                                WHEN 'Flat' THEN 1
+                            END
+                            --The "Rate From Location" takes precedence over the default rate.
+            ,[dblCost]  =   CASE 
+								WHEN _OVERRIDE.ysnOverride = 1 THEN 
+									(
+										CASE CAPD.strRateType
+											WHEN 'Per Unit' THEN _OVERRIDE.dblRate
+											-- Get prorated cost when rate type is "Flat"
+											WHEN 'Flat' THEN (@dblNetUnits * _OVERRIDE.dblRate) / @dblTransactionUnits
+										END
+									) * CC.dblRate
+								ELSE (
+										CASE CAPD.strRateType
+											WHEN 'Per Unit' THEN ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0))
+											-- Get prorated cost when rate type is "Flat"
+											WHEN 'Flat' THEN (@dblNetUnits * ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0))) / @dblTransactionUnits
+										END
+									) * CC.dblRate
+							END							
+            ,[dblRate]  =  (CASE WHEN _OVERRIDE.ysnOverride = 1 THEN _OVERRIDE.dblRate ELSE ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0)) END) * CC.dblRate
+        FROM tblGRChargeAndPremiumDetail CAPD2
+		INNER JOIN tblCTContractCost CC
+			ON CC.intItemId = CAPD2.intCtOtherChargeItemId
+        LEFT JOIN tblGRChargeAndPremiumDetailLocation CAPD_LOC
+            ON CAPD_LOC.intChargeAndPremiumDetailId = CAPD2.intChargeAndPremiumDetailId
+            AND CAPD_LOC.intCompanyLocationId = @intCompanyLocationId
+		OUTER APPLY (
+			SELECT * 
+			FROM @settleStorageChargeAndPremium
+			WHERE ysnOverride = 1
+				AND intChargeAndPremiumDetailId = CAPD2.intChargeAndPremiumDetailId
+				AND intCustomerStorageId = ISNULL(@intCustomerStorageId,intCustomerStorageId)
+		) _OVERRIDE
+        WHERE CAPD2.intChargeAndPremiumDetailId = CAPD.intChargeAndPremiumDetailId
+		--AND CAPD2.intChargeAndPremiumDetailId = _OVERRIDE.intChargeAndPremiumDetailId
+			AND CAPD.intCalculationTypeId = 6 --Rate x Contract's Charge
+			AND CC.intContractDetailId = @intContractDetailId
+    ) RATE_AND_CONTRACT_CHARGE
+
     WHERE CAP.intChargeAndPremiumId = @intChargeAndPremiumId
     AND (
         (CAPD.dtmEffectiveDate IS NULL AND CAPD.dtmTerminationDate IS NULL)
@@ -298,6 +360,8 @@ BEGIN
         )
     )
 	--AND _OVERRIDE.intChargeAndPremiumDetailId = CAPD.intChargeAndPremiumDetailId
+
+
 
     RETURN
 END
