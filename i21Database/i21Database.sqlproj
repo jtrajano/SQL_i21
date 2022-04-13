@@ -10775,6 +10775,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSortCuppingSample.sql" />
     <Build Include="dbo\Views\vyuQMCuppingSessionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMProcessCuppingSession.sql" />
+    <Build Include="dbo\Views\vyuQMSampleCuppingSessionTab.sql" />    
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
