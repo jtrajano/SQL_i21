@@ -1218,6 +1218,12 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Storage Rate', N'Storage Rate', N'Inventory.view.StorageRate', N'Inventory', N'tblICStorageRate', 1, N'Inventory')
 	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Warrant') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Warrant', N'Warrant', N'Inventory.view.Warrant', N'Inventory', NULL, 1, N'Inventory')
+	END
 	
 
 	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')

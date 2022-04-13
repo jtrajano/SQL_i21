@@ -666,6 +666,8 @@
     <Build Include="dbo\Tables\tblSMGeographicalZone.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostUnpostStorageCharge.sql" />
     <Build Include="dbo\Functions\fnCTGetQualityResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateWarrantlot.sql" />
+    <Build Include="dbo\Views\vyuICGetWarrantLotAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1052,7 +1054,6 @@
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\GL\StoredProcedures\uspGLAccountOriginSync.sql" />
     <None Include="Scripts\Post-Deployment\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql" />
-
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
