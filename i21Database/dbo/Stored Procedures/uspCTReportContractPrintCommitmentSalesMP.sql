@@ -264,7 +264,10 @@ BEGIN TRY
 		FROM tblCTSequenceHistory
 		WHERE intContractHeaderId = @intContractHeaderId
 	END
+	DECLARE @intQtyDec INT
+	DECLARE @intPriceDec INT
 
+	SELECT @intQtyDec = intQuantityDecimals, @intPriceDec = intPricingDecimals FROM tblCTCompanyPreference
 	IF @strAmendedColumns IS NULL AND EXISTS(SELECT 1 FROM @tblSequenceHistoryId)
 	BEGIN
 		DECLARE @dtmApproveDate DATETIME
@@ -294,7 +297,7 @@ BEGIN TRY
 	FROM	tblSMCompanySetup WITH (NOLOCK)
 
 	select top 1 @strPackingDescription = strPackingDescription, @intContractDetailItemId = intItemId, @intContractDetailBundleItemId = intItemBundleId, @intFutureMarketId = intFutureMarketId, @intFutureMonthId = intFutureMonthId, 
-				 @intSequenceCurrency = intCurrencyId, @dblContractDetailBasis = dblBasis,@intBasisCurrencyId = intBasisCurrencyId, @intBasisUOMId = intBasisUOMId, @strFixationBy = strFixationBy, @dblCashPrice = dblCashPrice, @dblFutures = dblFutures,
+				 @intSequenceCurrency = intCurrencyId, @dblContractDetailBasis = dblBasis,@intBasisCurrencyId = intBasisCurrencyId, @intBasisUOMId = intBasisUOMId, @strFixationBy = strFixationBy, @dblCashPrice = dblCashPrice, @dblFutures = ROUND( dbo.fnRemoveTrailingZeroes(dblFutures),@intPriceDec),
 				 @intPriceItemUOMId = intPriceItemUOMId, @dtmStartDate = dtmStartDate, @dtmEndDate = dtmEndDate, @intDestinationPortId = intDestinationPortId, @intCurrencyExchangeRateId = intCurrencyExchangeRateId, @dblForexRate = dblRate
 	from tblCTContractDetail 			 
 	where intContractDetailId = @intContractDetailId order by intContractSeq;
@@ -351,7 +354,7 @@ BEGIN TRY
 		,MPContractSubmitSignature						= @blbChildSubmitSignature
 		,MPContractApproverSignature					= @blbChildApproveSignature
 		,strExchangeRate								= '( ' + @strFromCurrency + ' to ' + @strToCurrency +' )' 
-		,dblForexRate									= @dblForexRate
+		,dblForexRate									= ROUND(@dblForexRate,6)
 		,strCompanyName									= (case when @ysnIsParent = convert(bit,0) then LTRIM(RTRIM(EY.strEntityName)) else @strCompanyName end)
 		,intEntityId									= CH.intEntityId
 		,strCustomerName								= (case when @ysnIsParent = convert(bit,0) then @strCompanyName else LTRIM(RTRIM(EL.strCheckPayeeName)) end)
@@ -362,7 +365,7 @@ BEGIN TRY
 		,strFutureMonth									= @strFutureMonthYear
 		,strFutureMarket								= @strFutMarketName
 		,strFutureMarketMonth							= @strFutureMonthYear +','+ @strFutMarketName
-		,dblSequencePrice								= @dblFutures
+		,dblSequencePrice								=  dbo.fnRemoveTrailingZeroes(@dblFutures)
 		,strPriceCurrencyAndUOMForPriced				= @strPriceCurrencyAndUOMForPriced2
 		,dblQuantity									= dblQuantity
 		,strContractNumberMP							= CH.strContractNumber
