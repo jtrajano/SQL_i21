@@ -12,7 +12,7 @@ SELECT S.intSampleId
 	,CH.strCustomerContract
 	,IC.strContractItemName
 	,I1.strItemNo AS strBundleItemNo
-	,I.strItemNo
+	,strItemNo = I.strItemNo + ' - ' + I.strDescription
 	,I.strDescription
 	,S.strContainerNumber
 	,SH.strLoadNumber
@@ -86,12 +86,13 @@ SELECT S.intSampleId
 	,S.dtmLastModified AS dtmLastUpdated
 	,UE.strName AS strUpdatedUserName
 	,S.ysnImpactPricing
-	,I.strOrigin 
-	,I.strProductType
-	,I.strGrade,strRegion
-	,I.strSeason
-	,I.strClass
-	,I.strProductLine
+	,strOrigin	= O.strDescription
+	,strProductType	= PT.strDescription	
+	,strGrade = ''
+	,strRegion = ''
+	,strSeason = ''
+	,strClass = ''
+	,strProductLine = ''
 	,S.dtmRequestedDate
 	,S.dtmSampleSentDate
 	,SC.strSamplingCriteria
@@ -102,31 +103,34 @@ SELECT S.intSampleId
 	,S.intTypeId
     ,CSH.strCuppingSessionNumber
 	,CSH.intCuppingSessionId
-	,CSH.dtmCuppingDateTime
+	,CSH.dtmCuppingDate
+	,CSH.dtmCuppingTime
 	,CSD.intRank
     ,CSD.intCuppingSessionDetailId
+	,strMethodology = ''
+	,strExtension = EX.strAttribute1
+	,intContractSequence = CD.intContractSeq
+	,strContractType = CT.strContractType
+	,strPacking = ''
 FROM dbo.tblQMSample S
-JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
-	AND S.ysnIsContractCompleted <> 1
+JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 LEFT JOIN tblQMSamplingCriteria SC ON SC.intSamplingCriteriaId = S.intSamplingCriteriaId
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN dbo.tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 LEFT JOIN dbo.tblCTContractHeader CH1 ON CH1.intContractHeaderId = S.intContractHeaderId
 LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
-LEFT JOIN dbo.vyuICSearchItem I ON I.intItemId = S.intItemId
+LEFT JOIN tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN dbo.tblLGLoadContainer C ON C.intLoadContainerId = S.intLoadContainerId
 LEFT JOIN dbo.tblLGLoad SH ON SH.intLoadId = S.intLoadId
 LEFT JOIN dbo.tblEMEntity U ON U.intEntityId = S.intTestedById
 LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = S.intEntityId
-LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intProductValueId
-	AND S.intProductTypeId = 6
-LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = S.intProductValueId
-	AND S.intProductTypeId = 11
+LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intProductValueId AND S.intProductTypeId = 6
+LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = S.intProductValueId AND S.intProductTypeId = 11
 LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = L.intItemOwnerId
-LEFT JOIN tblICItemOwner ito2 ON ito2.intItemId = S.intItemId
-	AND ito2.ysnDefault = 1
+LEFT JOIN tblICItemOwner ito2 ON ito2.intItemId = S.intItemId AND ito2.ysnDefault = 1
 LEFT JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = S.intLotStatusId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 LEFT JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intSampleUOMId
@@ -146,7 +150,10 @@ LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
-LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
-LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intParentSampleId = S.intSampleId
-LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionDetailId
+LEFT JOIN tblQMSample RS ON RS.intRelatedSampleId = S.intSampleId
+LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intSampleId = S.intSampleId
+LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
+LEFT JOIN tblICCommodityAttribute PT ON I.intProductTypeId = PT.intCommodityAttributeId AND PT.strType = 'ProductType'
+LEFT JOIN tblICCommodityAttribute O ON I.intOriginId = O.intCommodityAttributeId AND O.strType = 'Origin'
+LEFT JOIN tblICCommodityAttribute1 EX ON I.intCommodityAttributeId1 = EX.intCommodityAttributeId1
 WHERE S.intTypeId = 1
