@@ -1051,6 +1051,8 @@
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\GL\StoredProcedures\uspGLAccountOriginSync.sql" />
+    <None Include="Scripts\Post-Deployment\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql" />
+
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
@@ -2704,7 +2706,6 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Views\vyuAPRptTaxRemittance.sql" />
     <Build Include="dbo\Views\vyuAPRptReconcileAPGL.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleCreate.sql" />
