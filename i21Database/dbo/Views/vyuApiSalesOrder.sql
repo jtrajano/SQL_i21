@@ -40,6 +40,8 @@ SELECT
 	, so.intConcurrencyId
 	, strFooterComments = dbo.fnStripHtml(so.strFooterComments)
 	, strHeaderComments = dbo.fnStripHtml(so.strComments)
+	, vso.strTemplateName
+	, vso.strSplitNumber
 FROM vyuSOSalesOrderSearch vso
 LEFT JOIN tblSOSalesOrder so ON so.intSalesOrderId = vso.intSalesOrderId
 LEFT JOIN tblCRMOpportunity op ON op.intOpportunityId = so.intOpportunityId
