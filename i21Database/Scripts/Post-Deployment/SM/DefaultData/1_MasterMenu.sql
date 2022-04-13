@@ -10,8 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Split View' AND strModuleName = 'Ticket Management')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample Session' AND strModuleName = 'Quality')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6378,6 +6378,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample En
 	VALUES (N'Sample Entry', N'Quality', @QualityActivitiesParentMenuId, N'Sample Entry', N'Activity', N'Screen', N'Quality.view.QualitySample?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Quality.view.QualitySample?showSearch=true' WHERE strMenuName = 'Sample Entry' AND strModuleName = 'Quality' AND intParentMenuID = @QualityActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample Session' AND strModuleName = 'Quality' AND intParentMenuID = @QualityActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Sample Session', N'Quality', @QualityActivitiesParentMenuId, N'Sample Session', N'Maintenance', N'Screen', N'Quality.view.CuppingSession?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Quality.view.CuppingSession?showSearch=true' WHERE strMenuName = 'Sample Session' AND strModuleName = 'Quality' AND intParentMenuID = @QualityActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality Parameters' AND strModuleName = 'Quality' AND intParentMenuID = @QualityMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
