@@ -71,18 +71,20 @@ SELECT
 	,dblTax = RT.dblAdjustedTax
 	
 	--TOTAL AMOUNTS
-	,dblPaymentAmount = ISNULL(payment.dblAmountPaid, 0.00)
-	,dblNontaxablePurchase = CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0.00 END
-	,dblTaxablePurchase = CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0.00 ELSE APBD.dblTotal END
+	,dblTotalAmount = APB.dblTotal
+	,dblPaymentAmount = APB.dblPayment
+	,dblNontaxablePurchase = CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0 END
+	,dblTaxablePurchase = CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0 ELSE APBD.dblTotal END
 	
 	--GENERIC AMOUNTS
 	,dblGross = APBD.dblTotal
 	,dblTaxRate = RT.dblRate
 	
 	--FUNCTIONAL TOTAL AMOUNTS
-	,dblFunctionalPaymentAmount = ISNULL(APB.dblAverageExchangeRate, 1) * ISNULL(payment.dblAmountPaid, 0.00)
-	,dblFunctionalNontaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0.00 END)
-	,dblFunctionalTaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0.00 ELSE APBD.dblTotal END)
+	,dblFunctionalTotalAmount = ISNULL(APB.dblAverageExchangeRate, 1) * APB.dblTotal
+	,dblFunctionalPaymentAmount = ISNULL(APB.dblAverageExchangeRate, 1) * APB.dblPayment
+	,dblFunctionalNontaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0 END)
+	,dblFunctionalTaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0 ELSE APBD.dblTotal END)
 	
 	--PAYMENT HEADERS
 	,ysnPaid = APB.ysnPaid
