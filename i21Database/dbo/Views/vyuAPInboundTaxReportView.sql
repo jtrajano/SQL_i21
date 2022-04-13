@@ -2,13 +2,17 @@
 AS
 
 SELECT
+	--HEADER
 	 APBD.intBillDetailId
 	,APB.intBillId
+	,APB.strBillId
+	,dbo.fnAPGetVoucherTransactionType2(APB.intTransactionType) strTransactionType
+
+	--VENDOR
 	,strVendorName =  E.strName
 	,strVendorNumber = E.strEntityNo
 	,strVendorFederalTaxId = E.strFederalTaxId 
 	,strVendorStateTaxId = E.strStateTaxId
-	,APB.strBillId
 	,strVendorAddress = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, NULL)) COLLATE Latin1_General_CI_AS
 	,strVendorCity = ISNULL(EL.strCity, 'N/A')
 	,strVendorState = ISNULL(EL.strState, 'N/A')
@@ -16,38 +20,73 @@ SELECT
 	,strVendorCounty = ISNULL(EL.strCounty,'N/A')
 	,strVendorEmail = ISNULL(vendor.strEmail, vendor.strEmail2)
 	,strVendorPhone = ISNULL(vendor.strPhone, vendor.strPhone2)
+
+	--TAXES
+	,RT.strTaxGroup
+	,RT.strCalculationMethod
 	,RT.strTaxCode
 	,strTaxAgency = RT.strTaxAgency
 	,strTaxCodeDescription = RT.strDescription
 	,strTaxClassDescription =RT.strTaxClass
 	,strTaxCodePointFrom = RT.strTaxPoint
-	,RT.strCalculationMethod
+	
+	--DATES
 	,dtmDatePaid = CASE WHEN APB.ysnPaid = 1 THEN payment.dtmDatePaid ELSE NULL END
-	,dtmInvoicePostDate = APB.dtmDate
-	,dtmInvoiceDate = APB.dtmBillDate
-	,dtmInvoiceDueDate = dtmDueDate
+	,APB.dtmDate
+	,APB.dtmBillDate
+	,APB.dtmDueDate
+
+	--ITEMS
 	,C.strCommodityCode 
 	,strItem = IE.strItemNo
-	,strShipFromLocation = ELS.strLocationName COLLATE Latin1_General_CI_AS
+	,strItemCategory = IC.strCategoryCode
+
+	--SHIP FROM
 	,strShipFromName = ELS.strCheckPayeeName
+	,strShipFromLocation = ELS.strLocationName COLLATE Latin1_General_CI_AS
 	,strShipFromAddress = ELS.strAddress
 	,strShipFromCity = ELS.strCity
 	,strShipFromState = ELS.strState
 	,strShipFromCountry = ELS.strCountry
+
+	--SHIP TO
+	,strShipToLocation = CL.strLocationName COLLATE Latin1_General_CI_AS
+	,strShipToAddress = CL.strAddress
+	,strShipToCity = CL.strCity
+	,strShipToState = CL.strStateProvince
+	,strShipToCountry = CL.strCountry
+
+	--ACCOUNTS
 	,strDebitAccount = account.strAccountId
 	,strCreditAccount = apaccount.strAccountId
 	,strTaxAccount = RT.strAccountId
-	,dblTax = RT.dblAdjustedTax
-	,APBD.dblQtyReceived
+
+	--TOTAL HEADERS
+	,strCurrency = SMC.strCurrency
 	,strUnitOfMeasure = UM.strUnitMeasure
+
+	--TAX AMOUNTS
+	,APBD.dblQtyReceived
+	,APBD.dblCost
+	,dblTax = RT.dblAdjustedTax
+	
+	--TOTAL AMOUNTS
 	,dblPaymentAmount = ISNULL(payment.dblAmountPaid, 0.00)
 	,dblNontaxablePurchase = CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0.00 END
 	,dblTaxablePurchase = CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0.00 ELSE APBD.dblTotal END
+	
+	--GENERIC AMOUNTS
 	,dblGross = APBD.dblTotal
 	,dblTaxRate = RT.dblRate
+	
+	--FUNCTIONAL TOTAL AMOUNTS
+	,dblFunctionalPaymentAmount = ISNULL(APB.dblAverageExchangeRate, 1) * ISNULL(payment.dblAmountPaid, 0.00)
+	,dblFunctionalNontaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0.00 END)
+	,dblFunctionalTaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0.00 ELSE APBD.dblTotal END)
+	
+	--PAYMENT HEADERS
 	,ysnPaid = APB.ysnPaid
 	,strCheckNumber = payment.strPaymentInfo
-	,strCurrency = SMC.strCurrency
 FROM tblAPBillDetail APBD
 INNER JOIN tblAPBill APB ON APBD.intBillId = APB.intBillId AND APB.ysnPosted = CAST(1 AS BIT)
 INNER JOIN tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
@@ -61,11 +100,14 @@ LEFT JOIN (
 ) ON APBD.intCostUOMId = IUOM.intItemUOMId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intPayToAddressId
 LEFT JOIN tblEMEntityLocation ELS ON APB.intShipFromEntityId = EL.intEntityId AND APB.intShipFromId = ELS.intEntityLocationId
+LEFT JOIN tblSMCompanyLocation CL ON APB.intShipToId = CL.intCompanyLocationId
 LEFT JOIN tblICCommodity C ON C.intCommodityId = IE.intCommodityId
+LEFT JOIN tblICCategory IC ON IC.intCategoryId = IE.intCategoryId
 INNER JOIN (
     SELECT
          APBDT.intBillDetailId
         ,APBDT.intTaxGroupId
+		,TG.strTaxGroup
 		,APBDT.strCalculationMethod
         ,STC.strTaxCode
 		,STC.strTaxAgency
@@ -76,6 +118,7 @@ INNER JOIN (
 		,APBDT.dblRate
 		,APBDT.dblAdjustedTax
     FROM tblAPBillDetailTax APBDT
+	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = APBDT.intTaxGroupId
     LEFT JOIN tblSMTaxCode STC ON APBDT.intTaxCodeId = STC.intTaxCodeId
 	LEFT JOIN tblGLAccount GL ON STC.intPurchaseTaxAccountId = GL.intAccountId
     LEFT JOIN tblSMTaxClass SMTC ON APBDT.intTaxClassId = SMTC.intTaxClassId
