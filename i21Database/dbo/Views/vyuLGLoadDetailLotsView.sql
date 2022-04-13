@@ -16,6 +16,7 @@ SELECT L.strLoadNumber
 	  ,LDL.strID2
 	  ,LDL.strID3
 	  ,LDL.strNewLotNumber
+	  ,LDL.dblDivertQuantity
 	  ,strItemUnitMeasure = UM.strUnitMeasure
 	  ,strWeightUnitMeasure = WUM.strUnitMeasure
 	  ,LOT.strLotNumber 
@@ -33,8 +34,14 @@ SELECT L.strLoadNumber
 	  ,Receipt.strBankReferenceNo
 	  ,Receipt.strReferenceNo
 	  ,strSourceLoadNumber = PL.strLoadNumber
-	  ,dblWeightPerUnit = dbo.fnDivide(LOT.dblWeight, ISNULL(dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, LDL.intItemUOMId, dblQty), 1.0)) --ISNULL(LOT.dblWeightPerQty,1.0)
-	  ,dblTarePerQty = dbo.fnDivide(LOT.dblTare, ISNULL(dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, LDL.intItemUOMId, dblQty), 1.0)) --ISNULL(LOT.dblTarePerQty,1.0)
+	  ,dblWeightPerUnit = CASE WHEN dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, LDL.intItemUOMId, 1) IS NOT NULL AND ISNULL(LOT.dblWeight, 0) > 0
+							THEN dbo.fnDivide(LOT.dblWeight, ISNULL(dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, LDL.intItemUOMId, dblQty), 1.0))
+							ELSE dbo.fnDivide(ISNULL(LDL.dblNet, (LDL.dblGross - LDL.dblTare)), LDL.dblLotQuantity)
+							END
+	  ,dblTarePerQty = CASE WHEN dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, LDL.intItemUOMId, 1) IS NULL AND ISNULL(LOT.dblTare, 0) > 0
+							THEN dbo.fnDivide(LOT.dblTare, ISNULL(dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, LDL.intItemUOMId, dblQty), 1.0))
+							ELSE dbo.fnDivide(ISNULL(LDL.dblTare, (LDL.dblNet - LDL.dblGross)), LDL.dblLotQuantity)
+							END
 FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId

@@ -434,7 +434,8 @@ BEGIN TRY
 			begin
 				if exists (select top 1 1 from tblCTSpreadArbitrage where intPriceFixationId = @intPriceFixationId and strTradeType = 'Arbitrage' and ysnPriceImpact = 1)
 				begin
-					declare @leg nvarchar(10) = 'Sell';
+					declare @dblArbitrageFX numeric(18,6)
+						,@leg nvarchar(10) = 'Sell';
 					if (@intContractTypeId = 2)
 					begin
 						select @leg = 'Buy';
@@ -442,19 +443,24 @@ BEGIN TRY
 					
 					select @ysnPriceImpact = 1;
 
-					SELECT	@intSpreadArbitrageId = intSpreadArbitrageId, @dblTotalSpread = dblTotalSpread,@intSpreadUOMId = intSpreadUOMId,@intFinalCurrencyId = intCurrencyId
+					SELECT	@intSpreadArbitrageId = intSpreadArbitrageId, @dblTotalSpread = dblTotalSpread,@intSpreadUOMId = intSpreadUOMId,@intFinalCurrencyId = intCurrencyId,@dblArbitrageFX=dblFX,@intMarketCurrencyId = intCurrencyId
 					FROM	tblCTSpreadArbitrage 
 					WHERE	intPriceFixationId		=	@intPriceFixationId
 					and strTradeType = 'Arbitrage'
 					and strBuySell = @leg
+
+					SELECT	@dblArbitrageFX=dblFX
+					FROM	tblCTSpreadArbitrage 
+					WHERE	intPriceFixationId		=	@intPriceFixationId
+					and strTradeType = 'Arbitrage'
+					and strBuySell = case when @leg = 'Buy' then 'Sell' else 'Buy' end;
 
 					SELECT  @intNewFutureMonthId	=	intNewFutureMonthId,
 							@intNewFutureMarketId	=	intNewFutureMarketId
 					FROM	tblCTSpreadArbitrage 
 					WHERE	intSpreadArbitrageId = @intSpreadArbitrageId
 
-					SELECT	@intMarketUnitMeasureId = intUnitMeasureId,
-							@intMarketCurrencyId = intCurrencyId 
+					SELECT	@intMarketUnitMeasureId = intUnitMeasureId
 					FROM	tblRKFutureMarket 
 					WHERE	intFutureMarketId = @intNewFutureMarketId
 
@@ -464,25 +470,49 @@ BEGIN TRY
 					WHERE	intCommodityId		=	@intCommodityId 
 					AND		intUnitMeasureId	=	@intMarketUnitMeasureId
 
+					declare @fromCurrencyId int, @toCurrencyId int, @toSubCurrency bit, @dblExRate numeric(18,6);
+					select @fromCurrencyId = case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyID end from tblSMCurrency where intCurrencyID = @intCurrencyId
+					select @toCurrencyId = case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyID end, @toSubCurrency = isnull(ysnSubCurrency,0) from tblSMCurrency where intCurrencyID = @intFinalCurrencyId
+
 					UPDATE	FD
-					SET		dblFutures		=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFinalPriceUOMId,PF.intFinalPriceUOMId,FD.dblFixationPrice) / 
-														CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-																WHEN	@intFinalCurrencyId <> @intCurrencyId	
-																AND		@ysnSeqSubCurrency = 1				THEN 100 
-																ELSE	0.01 
+					SET		dblBasis		=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblBasis) * @dblArbitrageFX) / 
+														CASE
+														WHEN @toSubCurrency = 1
+														THEN 100 
+														ELSE 1
 														END,
-							dblFinalPrice	=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFinalPriceUOMId,PF.intFinalPriceUOMId,FD.dblFixationPrice) / 
-														CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-																WHEN	@intFinalCurrencyId <> @intCurrencyId	
-																AND		@ysnSeqSubCurrency = 1				THEN 100 
-																ELSE	0.01 
-														END) + PF.dblOriginalBasis + PF.dblRollArb,
-							dblCashPrice	=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFinalPriceUOMId,PF.intFinalPriceUOMId,FD.dblFixationPrice) / 
-														CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-																WHEN	@intFinalCurrencyId <> @intCurrencyId	
-																AND		@ysnSeqSubCurrency = 1				THEN 100 
-																ELSE	0.01 
-														END) + PF.dblOriginalBasis + PF.dblRollArb
+							dblFutures		=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblFixationPrice) * @dblArbitrageFX) / 
+														CASE
+														WHEN @toSubCurrency = 1
+														THEN 100 
+														ELSE 1 
+														END,
+							dblFinalPrice	=	((dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblFixationPrice) * @dblArbitrageFX) / 
+														CASE
+														WHEN @toSubCurrency = 1
+														THEN 100 
+														ELSE 1
+														END) + 
+															(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblBasis) * @dblArbitrageFX) / 
+																CASE
+																WHEN @toSubCurrency = 1
+																THEN 100 
+																ELSE 1
+																END	
+														 + PF.dblRollArb,
+							dblCashPrice	=	((dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblFixationPrice) * @dblArbitrageFX) / 
+														CASE
+														WHEN @toSubCurrency = 1
+														THEN 100 
+														ELSE 1
+														END) + 
+															(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblBasis) * @dblArbitrageFX) / 
+																CASE
+																WHEN @toSubCurrency = 1
+																THEN 100 
+																ELSE 1
+																END	
+														 + PF.dblRollArb
 					FROM	tblCTPriceFixation			PF 
 					JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
 					WHERE	PF.intPriceFixationId	=	@intPriceFixationId
@@ -499,14 +529,14 @@ BEGIN TRY
 					WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 					UPDATE  tblCTPriceContract SET intFinalPriceUOMId = @intFinalPriceUOMId, intFinalCurrencyId = @intFinalCurrencyId WHERE intPriceContractId	=	@intPriceContractId
-					
+			
 					UPDATE	CD
 					SET		CD.dblBasis				=	(
 															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,(ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0)) + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intSpreadUOMId,@intBasisUOMId,ISNULL(@dblTotalSpread,0)))) / 
 															CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																	WHEN	@intBasisCurrencyId <> @intCurrencyId	
 																	AND		@ysnBasisSubCurrency = 1				THEN 100 
-																	ELSE	0.01 
+																	ELSE	1
 															END
 														),
 							CD.intFutureMarketId	=	@intNewFutureMarketId,
@@ -518,7 +548,6 @@ BEGIN TRY
 					JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intContractDetailId, CD.intSplitFromId)
 					AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 					WHERE	PF.intPriceFixationId	=	@intPriceFixationId
-			
 
 					IF	@ysnMultiplePriceFixation = 1
 					BEGIN
@@ -663,53 +692,55 @@ BEGIN TRY
 
 			if (@ysnEnableDerivativeInArbitrage = 1 and @ysnPriceImpact = 1)
 			begin
+			
+			select @toCurrencyId = case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyID end, @toSubCurrency = isnull(ysnSubCurrency,0) from tblSMCurrency where intCurrencyID = @intFinalCurrencyId
 
 				UPDATE	CD
 				SET		CD.intPricingTypeId		=	1,
-						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(dblPriceWORollArb,0))  / 
-													CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-															WHEN	@intFinalCurrencyId <> @intCurrencyId	
-															AND		@ysnFinalSubCurrency = 1				THEN 100 
-															ELSE	0.01 
-													END,
+						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(PF.dblPriceWORollArb,0))  / 
+														CASE
+														WHEN @toSubCurrency = 1
+														THEN 100
+														ELSE 1 
+														END,
 						CD.dblCashPrice			=	(
-														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
-														CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
-																WHEN	@intBasisCurrencyId <> @intCurrencyId	
-																AND		@ysnBasisSubCurrency = 1				THEN 100 
-																ELSE	0.01 
-														END
+														(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) * @dblArbitrageFX)/ 
+															CASE
+															WHEN @toSubCurrency = 1
+															THEN 100
+															ELSE 1 
+															END
 													) + 
 													(
 														CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 														(
 															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(dblPriceWORollArb,0)) / 
-															CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-																	WHEN	@intFinalCurrencyId <> @intCurrencyId	
-																	AND		@ysnFinalSubCurrency = 1				THEN 100 
-																	ELSE	0.01 
-															END									
+																CASE
+																WHEN @toSubCurrency = 1
+																THEN 100
+																ELSE 1 
+																END								
 														) 
 													),	
 						CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
 													(	
 														(
-															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
-															CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
-																	WHEN	@intBasisCurrencyId <> @intCurrencyId	
-																	AND		@ysnBasisSubCurrency = 1				THEN 100 
-																	ELSE	0.01 
-															END
+															(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) * @dblArbitrageFX)/ 
+																CASE
+																WHEN @toSubCurrency = 1
+																THEN 100
+																ELSE 1 
+																END
 														) + 
 														(
 															CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 															(
 																dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
-																CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-																		WHEN	@intFinalCurrencyId <> @intCurrencyId	
-																		AND		@ysnFinalSubCurrency = 1				THEN 100 
-																		ELSE	0.01 
-																END
+																	CASE
+																	WHEN @toSubCurrency = 1
+																	THEN 100
+																	ELSE 1 
+																	END
 															)
 														)
 													)/
