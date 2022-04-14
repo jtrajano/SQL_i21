@@ -722,8 +722,49 @@ BEGIN TRY
 	-- Actual update for parent sample test results
 	UPDATE A
 	SET
-		strPropertyValue = B.strPropertyValue
+		-- strPropertyValue = B.strPropertyValue
+		-- ,strComment = B.strComment
+		-- ,strResult = B.strResult
+		-- ,intLastModifiedUserId = B.intLastModifiedUserId
+		-- ,dtmLastModified = B.dtmLastModified
+		intConcurrencyId = A.intConcurrencyId + 1
+		-- ,intSampleId = B.intSampleId
+		,intProductId = B.intProductId
+		,intProductTypeId = B.intProductTypeId
+		,intProductValueId = B.intProductValueId
+		-- ,intTestId = B.intTestId
+		-- ,intPropertyId = B.intPropertyId
+		,strPanelList = B.strPanelList
+		,strPropertyValue = B.strPropertyValue
+		-- ,dtmCreateDate = B.dtmCreateDate
+		,strResult = B.strResult
+		,ysnFinal = B.ysnFinal
 		,strComment = B.strComment
+		,intSequenceNo = B.intSequenceNo
+		,dtmValidFrom = B.dtmValidFrom
+		,dtmValidTo = B.dtmValidTo
+		,strPropertyRangeText = B.strPropertyRangeText
+		,dblMinValue = B.dblMinValue
+		,dblMaxValue = B.dblMaxValue
+		,dblLowValue = B.dblLowValue
+		,dblHighValue = B.dblHighValue
+		,intUnitMeasureId = B.intUnitMeasureId
+		,strFormulaParser = B.strFormulaParser
+		,dblCrdrPrice = B.dblCrdrPrice
+		,dblCrdrQty = B.dblCrdrQty
+		,intProductPropertyValidityPeriodId = B.intProductPropertyValidityPeriodId
+		,intPropertyValidityPeriodId = B.intPropertyValidityPeriodId
+		,intControlPointId = B.intControlPointId
+		,intParentPropertyId = B.intParentPropertyId
+		,intRepNo = B.intRepNo
+		,strFormula = B.strFormula
+		,intListItemId = B.intListItemId
+		,strIsMandatory = B.strIsMandatory
+		,intPropertyItemId = B.intPropertyItemId
+		,dtmPropertyValueCreated = B.dtmPropertyValueCreated
+		,intTestResultRefId = B.intTestResultRefId
+		-- ,intCreatedUserId = B.intCreatedUserId
+		-- ,dtmCreated = B.dtmCreated
 		,intLastModifiedUserId = B.intLastModifiedUserId
 		,dtmLastModified = B.dtmLastModified
 	FROM tblQMSample S
