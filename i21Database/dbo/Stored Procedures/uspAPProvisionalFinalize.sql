@@ -47,6 +47,13 @@ BEGIN
 		RAISERROR(@errMsg, 16, 1);
 		RETURN 0;
 	END
+	ELSE IF NULLIF(@receiptId,0) IS NULL
+	BEGIN
+		DECLARE @errMsg2 NVARCHAR(500);
+		SET @errMsg2 = 'Cannot finalize provisional voucher without receipt.'
+		RAISERROR(@errMsg2, 16, 1);
+		RETURN 0;
+	END
 
 	IF @receiptId > 0 AND @contractNumber IS NULL
 	BEGIN
