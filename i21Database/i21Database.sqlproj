@@ -669,6 +669,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateWarrantlot.sql" />
     <Build Include="dbo\Views\vyuICGetWarrantLotAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRecordPostedMatchPnS.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMCuppingSessionUpdateParentSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

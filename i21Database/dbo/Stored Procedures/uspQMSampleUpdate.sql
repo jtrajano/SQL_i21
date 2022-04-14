@@ -814,6 +814,17 @@ BEGIN TRY
 		,@intOrgItemId
 		,@intOrgCountryID
 		,@intOrgCompanyLocationSubLocationId
+	
+	-- Update parent sample if the sample being updated is a cupping sample
+	DECLARE @intTypeId INT
+	SELECT @intTypeId = intTypeId FROM tblQMSample WHERE intSampleId = @intSampleId
+	
+	IF(@intTypeId = 2)
+	BEGIN
+		EXEC uspQMCuppingSessionUpdateParentSample
+			@intCuppingSampleId = @intSampleId,
+			@intUserEntityId = @intLastModifiedUserId
+	END
 
 	COMMIT TRAN
 END TRY
