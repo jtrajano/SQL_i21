@@ -425,6 +425,7 @@ BEGIN TRY
 										ELSE (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)) END END
 		, dblExchangeRate = dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0)
 		, IM.intProductTypeId
+		, intExtensionId = IM.intCommodityAttributeId4
 		, ysnItemUOMIdExist = CAST(1 AS BIT)
 		, strSubLocationName = dbo.[fnCTGetSeqDisplayField](CD.intSubLocationId, 'tblSMCompanyLocationSubLocation')
 		, strStorageLocationName = dbo.[fnCTGetSeqDisplayField](CD.intStorageLocationId, 'tblICStorageLocation')
