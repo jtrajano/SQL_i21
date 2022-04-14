@@ -20,9 +20,35 @@ BEGIN TRY
 		, @intMatchFuturesPSHeaderId INT
 		, @intCommodityId INT
 		, @intEntityId INT
+		, @intBankTransactionId INT = NULL
+		, @intBankAccountCurrencyId INT = NULL
+		, @intFunctionalCurrencyId INT = NULL
 		
 
 	DECLARE @tblResult TABLE (Result NVARCHAR(MAX))
+
+	SELECT @intFunctionalCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
+
+	IF ISNULL(@intFunctionalCurrencyId, 0) <> 0
+	BEGIN
+		SELECT Result = 'Missing Functional Currency Setup.'
+			, intBankTransactionId = @intBankTransactionId
+		
+		GOTO Exit_Routine
+	END
+
+	SELECT TOP 1 @intBankTransactionId = bth.intTransactionId FROM tblCMBankTransactionDetail btd
+	LEFT JOIN tblCMBankTransaction bth
+		ON bth.intTransactionId = btd.intTransactionId
+	WHERE intMatchDerivativeNo = @intMatchNo
+
+	IF ISNULL(@intBankTransactionId, 0) <> 0
+	BEGIN
+		SELECT Result = 'Match already has Bank Transaction created for Posting.'
+			, intBankTransactionId = @intBankTransactionId
+		
+		GOTO Exit_Routine
+	END
 	
 	SELECT TOP 1 @intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId
 		, @intCommodityId = intCommodityId
@@ -39,7 +65,7 @@ BEGIN TRY
 	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
 	WHERE EC.strUserName = @strUserName
 
-	SELECT @intCurrencyId = intCurrencyId
+	SELECT @intCurrencyId = fm.intCurrencyId
 		, @BrokerAccount = strClearingAccountNumber
 		, @BrokerName = strName
 		, @strBook = strBook
@@ -47,6 +73,7 @@ BEGIN TRY
 		, @strFutMarketName = strFutMarketName
 		, @strLocationName = strLocationName
 		, @intLocationId = h.intCompanyLocationId
+		, @intBankAccountCurrencyId = bankAcct.intCurrencyId
 	FROM tblRKMatchFuturesPSHeader h
 	JOIN tblRKFutureMarket fm ON h.intFutureMarketId = fm.intFutureMarketId
 	JOIN tblRKBrokerageAccount ba ON ba.intBrokerageAccountId = h.intBrokerageAccountId
@@ -54,6 +81,8 @@ BEGIN TRY
 	JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = h.intCompanyLocationId
 	LEFT JOIN tblCTBook b ON b.intBookId = h.intBookId
 	LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = h.intSubBookId
+	LEFT JOIN vyuCMBankAccount bankAcct
+		ON bankAcct.intBankAccountId = h.intBankAccountId
 	WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId)
@@ -162,11 +191,24 @@ BEGIN TRY
 			, intAccountId
 			, strAccountId
 			, strAccountDescription
-			, dblDebit = ROUND(dblDebit, 2)
-			, dblCredit = ROUND(dblCredit, 2)
+			-- CONVERSION TO FUNCTIONAL CURRENCY DUE TO CHANGES FOR POSTING TO BANK TRANSACTION
+			, dblDebit = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId 
+							THEN ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId) * dblDebit, 2)
+							ELSE ROUND(dblDebit, 2)
+							END
+			, dblCredit = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId 
+							THEN ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId) * dblCredit, 2)
+							ELSE ROUND(dblCredit, 2)
+							END
 			, dblDebitUnit = ROUND(dblDebitUnit, 2)
 			, dblCreditUnit = ROUND(dblCreditUnit, 2)
 			, intCurrencyId
+			, strSourceTransactionNo
+			, ysnForeignCurrency = CASE WHEN ISNULL(@intBankAccountCurrencyId, 0) = 0 THEN CAST(0 AS BIT)
+								WHEN @intFunctionalCurrencyId <> @intBankAccountCurrencyId 
+									THEN CAST(1 AS BIT) 
+								ELSE CAST(0 AS BIT)
+								END
 	INTO #tmpMatchDerivativesPostRecap
 	FROM tblRKMatchDerivativesPostRecap
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId 
@@ -180,7 +222,30 @@ BEGIN TRY
 	END
 	ELSE 
 	BEGIN
-		SELECT * FROM #tmpMatchDerivativesPostRecap
+
+		SELECT Result = '' -- No Error Message
+			, intAccountId
+			, strAccountId
+			, strAccountDescription
+			-- CHECKING IF DEBIT/CREDIT OR DEBIT/CREDIT FOREIGN
+			, dblDebit = CASE WHEN ysnForeignCurrency = 0 THEN dblDebit
+							  ELSE 0
+							  END
+			, dblCredit = CASE WHEN ysnForeignCurrency = 0 THEN dblCredit
+							  ELSE 0
+							  END
+			, dblDebitForeign = CASE WHEN ysnForeignCurrency = 0 THEN 0
+							  ELSE ROUND(dblDebit / dbo.fnRKGetCurrencyConvertion(@intBankAccountCurrencyId, @intFunctionalCurrencyId), 2)
+							  END
+			, dblCreditForeign = CASE WHEN ysnForeignCurrency = 0 THEN dblCredit
+							  ELSE ROUND(dblCredit / dbo.fnRKGetCurrencyConvertion(@intBankAccountCurrencyId, @intFunctionalCurrencyId), 2)
+							  END
+			, dblDebitUnit
+			, dblCreditUnit
+			, intCurrencyId
+			, strSourceTransactionNo
+			, ysnForeignCurrency
+		FROM #tmpMatchDerivativesPostRecap
 	END
 
 	DROP TABLE #tmpMatchDerivativesPostRecap

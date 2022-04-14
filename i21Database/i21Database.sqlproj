@@ -668,6 +668,7 @@
     <Build Include="dbo\Functions\fnCTGetQualityResult.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateWarrantlot.sql" />
     <Build Include="dbo\Views\vyuICGetWarrantLotAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRecordPostedMatchPnS.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
