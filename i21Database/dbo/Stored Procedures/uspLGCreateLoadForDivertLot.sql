@@ -657,23 +657,6 @@ CROSS APPLY
 	GROUP BY intLoadDetailId) LDL
 WHERE LD.intLoadId = @intLoadId AND LDL.dblDivertQuantity > 0
 
-UPDATE LC
-SET dblQuantity = (LC.dblQuantity - dblDivertQuantity)
-	,dblGrossWt = (LC.dblQuantity - dblDivertQuantity) * (dblWeightPerUnit + dblTarePerQty)
-	,dblTareWt = (LC.dblQuantity - dblDivertQuantity) * dblTarePerQty
-	,dblNetWt = (LC.dblQuantity - dblDivertQuantity) * dblWeightPerUnit
-FROM tblLGLoadContainer LC
-INNER JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
-CROSS APPLY 
-	(SELECT dblDivertQuantity = SUM(dblDivertQuantity)
-		,dblWeightPerUnit = SUM(dblWeightPerUnit)
-		,dblTarePerQty = SUM(dblTarePerQty)
-	FROM vyuLGLoadDetailLotsView 
-	WHERE intLoadDetailId = LDCL.intLoadDetailId
-	AND ISNULL(dblDivertQuantity, 0) > 0
-	GROUP BY intLoadDetailId) LDL
-WHERE LDCL.intLoadId = @intLoadId AND LDL.dblDivertQuantity > 0
-
 UPDATE LDCL
 SET dblQuantity = (LDCL.dblQuantity - dblDivertQuantity)
 	,dblLinkGrossWt = (LDCL.dblQuantity - dblDivertQuantity) * (dblWeightPerUnit + dblTarePerQty)
@@ -689,6 +672,20 @@ CROSS APPLY
 	AND ISNULL(dblDivertQuantity, 0) > 0
 	GROUP BY intLoadDetailId) LDL
 WHERE LDCL.intLoadId = @intLoadId AND LDL.dblDivertQuantity > 0
+
+UPDATE LC
+	SET dblQuantity = LDCL.dblQuantity
+		,dblGrossWt = LDCL.dblGross
+		,dblTareWt = LDCL.dblTare
+		,dblNetWt = LDCL.dblNet
+FROM tblLGLoadContainer LC
+OUTER APPLY (
+	SELECT dblQuantity = SUM(dblQuantity)
+		,dblGross = SUM(dblLinkGrossWt)
+		,dblTare = SUM(dblLinkTareWt)
+		,dblNet = SUM(dblLinkNetWt)
+FROM tblLGLoadDetailContainerLink WHERE intLoadContainerId = LC.intLoadContainerId) LDCL
+WHERE LC.intLoadId = @intLoadId
 
 UPDATE LDL
 SET dblLotQuantity = LDL.dblLotQuantity - LDL.dblDivertQuantity
