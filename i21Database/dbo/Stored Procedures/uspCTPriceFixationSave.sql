@@ -487,6 +487,12 @@ BEGIN TRY
 														THEN 100 
 														ELSE 1 
 														END,
+							dblFixationPrice =	(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblFixationPrice) * @dblArbitrageFX) / 
+														CASE
+														WHEN @toSubCurrency = 1
+														THEN 100 
+														ELSE 1 
+														END,
 							dblFinalPrice	=	((dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblFixationPrice) * @dblArbitrageFX) / 
 														CASE
 														WHEN @toSubCurrency = 1
@@ -697,7 +703,7 @@ BEGIN TRY
 
 				UPDATE	CD
 				SET		CD.intPricingTypeId		=	1,
-						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(PF.dblPriceWORollArb,0))  / 
+						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(PF.dblPriceWORollArb,0)) / 
 														CASE
 														WHEN @toSubCurrency = 1
 														THEN 100
