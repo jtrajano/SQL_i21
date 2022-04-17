@@ -38,6 +38,15 @@ CREATE TABLE #STANDARDINVOICES
 	,[strType]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
 	,[ysnStretchLogo]	BIT NULL
 );
+CREATE TABLE #WALTERMATTERINVOICES
+(
+	 [intInvoiceId]		INT	NOT NULL PRIMARY KEY
+	,[intEntityUserId]	INT	NULL
+	,[strRequestId]		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strInvoiceFormat]	NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
+	,[strType]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnStretchLogo]	BIT NULL
+);
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -280,8 +289,14 @@ IF EXISTS (SELECT TOP 1 NULL FROM #MCPINVOICES) AND @strCompanyName IS NULL
 ELSE IF EXISTS (SELECT TOP 1 NULL FROM #MCPINVOICES)
 	EXEC dbo.[uspARInvoiceMCPReportCustom] @intEntityUserId, @strRequestId
 
+INSERT INTO #WALTERMATTERINVOICES
+SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat = 'Format 7 - Walter Matter'
+
+IF EXISTS (SELECT TOP 1 NULL FROM #WALTERMATTERINVOICES)
+	EXEC dbo.[uspARInvoiceWalterMatterReport] @intEntityUserId, @strRequestId
+
 INSERT INTO #STANDARDINVOICES
-SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
+SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax', 'Format 7 - Walter Matter')
 
 IF EXISTS (SELECT TOP 1 NULL FROM #STANDARDINVOICES)
 	EXEC dbo.[uspARInvoiceReport] @intEntityUserId, @strRequestId

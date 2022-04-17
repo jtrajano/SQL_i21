@@ -671,6 +671,7 @@
     <Build Include="dbo\Views\vyuICGetWarrantLotAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRecordPostedMatchPnS.sql" />
     <Build Include="dbo\Stored Procedures\uspQMCuppingSessionUpdateParentSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceWalterMatterReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10780,7 +10781,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSortCuppingSample.sql" />
     <Build Include="dbo\Views\vyuQMCuppingSessionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMProcessCuppingSession.sql" />
-    <Build Include="dbo\Views\vyuQMSampleCuppingSessionTab.sql" />    
+    <Build Include="dbo\Views\vyuQMSampleCuppingSessionTab.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
