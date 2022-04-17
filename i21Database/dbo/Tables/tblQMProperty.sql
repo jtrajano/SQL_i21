@@ -21,6 +21,8 @@
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProperty_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,
 	[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblQMProperty_dtmLastModified] DEFAULT GetDate(),
+
+	[ysnPrintInCuppingForm] bit CONSTRAINT [DF_tblQMProperty_ysnPrintInCuppingForm] DEFAULT 0,
 		
 	CONSTRAINT [PK_tblQMProperty] PRIMARY KEY ([intPropertyId]), 
 	CONSTRAINT [AK_tblQMProperty_strPropertyName] UNIQUE ([strPropertyName]), 
