@@ -365,7 +365,7 @@ BEGIN TRY
 		,strFutureMonth									= @strFutureMonthYear
 		,strFutureMarket								= @strFutMarketName
 		,strFutureMarketMonth							= @strFutureMonthYear +','+ @strFutMarketName
-		,dblSequencePrice								=  dbo.fnRemoveTrailingZeroes(@dblFutures)
+		,dblSequencePrice								= dbo.fnCTChangeNumericScale( ROUND(dblFutures,@intPriceDec), @intPriceDec)
 		,strPriceCurrencyAndUOMForPriced				= @strPriceCurrencyAndUOMForPriced2
 		,dblQuantity									= dblQuantity
 		,strContractNumberMP							= CH.strContractNumber
