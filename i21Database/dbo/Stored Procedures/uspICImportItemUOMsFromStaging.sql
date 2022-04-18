@@ -690,6 +690,7 @@ BEGIN
 		,intRowsSkipped = ISNULL(@intRowsSkipped, 0)
 		,intTotalWarnings = ISNULL(ISNULL(@intTotalUPCCodeDuplicates, 0) + ISNULL(@intTotalUPCImportDuplicates, 0) + ISNULL(@intTotalInvalidStockUnit, 0), 0)
 		,intTotalErrors = @intTotalMissingItem + @intTotalMissingUOM + @intTotalInvalidModifier
+	
 	-- Log Detail for missing items and uoms
 	INSERT INTO tblICImportLogDetailFromStaging(
 		strUniqueId
@@ -712,7 +713,6 @@ BEGIN
 		, 1
 	FROM 
 		@tblMissingItems
-
 	UNION ALL
 	SELECT 
 		@strIdentifier
@@ -724,13 +724,13 @@ BEGIN
 		, 'Error'
 		, 1
 	FROM 
-		@tblMissingUOMs
+		@tblMissingUOMs	
 	UNION ALL
 	SELECT 
 		@strIdentifier
 		, 'Modifier'
 		, 'Import Failed.'
-		, intModifier
+		, CAST(intModifier AS NVARCHAR(50)) 
 		, 'Invalid modifier.'
 		, 'Failed'
 		, 'Error'
