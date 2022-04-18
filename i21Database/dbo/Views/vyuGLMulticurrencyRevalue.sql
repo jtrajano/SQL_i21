@@ -22,7 +22,7 @@ SELECT
 	strType = CASE WHEN strTransactionType = 'Purchase' THEN 'Payables' ELSE CASE WHEN  strTransactionType = 'Sales' THEN 'Receivables' END END  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuCTMultiCurrencyRevalue
  UNION ALL
 SELECT 
@@ -46,7 +46,7 @@ SELECT
 	dblHistoricAmount, dblAmountDifference = 0, strModule = 'INV'  COLLATE Latin1_General_CI_AS , strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueReceipt
 UNION ALL
 SELECT 
@@ -58,7 +58,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueReceiptOtherCharges
 UNION ALL
 SELECT 
@@ -70,7 +70,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables' COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipment
 UNION ALL
 SELECT 
@@ -83,7 +83,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnPayable = 1
 UNION ALL
 SELECT 
@@ -96,7 +96,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnReceivable = 1
 UNION ALL
 SELECT 
@@ -253,7 +253,7 @@ A.strModule,
 A.strType,
 B.strCurrency,
 intAccountIdOverride = A.intAccountId,
-intLOBSegmentOverrideId = A.intLOBSegmentCodeId,
+intLOBSegmentOverrideId  = NULL,
 CL.* 
 FROM CTE A 
 LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
