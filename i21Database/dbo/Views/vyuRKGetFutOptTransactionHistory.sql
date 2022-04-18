@@ -91,7 +91,10 @@ FROM (
 									AND PrevRec.strCommodity = History.strCommodity
 									AND PrevRec.dtmTransactionDate < History.dtmTransactionDate
 								ORDER BY PrevRec.dtmTransactionDate DESC)
-		, dblNewNoOfLots = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
+		, dblNewNoOfLots = CASE WHEN ISNULL(Trans.intFutOptTransactionId, 0) = 0 AND
+							THEN 0
+							ELSE CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
+							END
 		, History.strScreenName
 		, History.strOldBuySell
 		, History.strNewBuySell	
@@ -146,6 +149,14 @@ FROM (
 	) ON secUser.strName = History.strUserName
 	LEFT JOIN tblICCommodityUnitMeasure CommodityUOM ON CommodityUOM.intCommodityId = Commodity.intCommodityId AND CommodityUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
 	LEFT JOIN tblICCommodityUnitMeasure CommodityStock ON CommodityStock.intCommodityId = Commodity.intCommodityId AND CommodityStock.ysnStockUnit = 1
+	OUTER APPLY (
+		SELECT TOP 1 
+			*
+		FROM tblRKFutOptTransactionHistory histDel
+		WHERE histDel.intFutOptTransactionId = History.intFutOptTransactionId
+		AND histDel.strAction = 'DELETE'
+		ORDER BY dtmTransactionDate DESC
+	) HistoryDelete
 	WHERE ISNULL(History.strAction, '') <> ''
 		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
