@@ -756,8 +756,8 @@ BEGIN
 		) P 
 		where SH.intContractDetailId = @intContractDetailId AND SH.ysnIsPricing = 1  AND @intHeaderPricingType IN (1) and strPricingStatus <> 'Unpriced'
 
-		union all -- Cancelled and Short Closed Contracts
-		SELECT TOP 1
+		UNION ALL -- Cancelled and Short Closed Contracts
+		SELECT 
 			dtmHistoryCreated
 			, @strContractNumber
 			, @intContractSeq
@@ -789,13 +789,54 @@ BEGIN
 			, @intSubBookId
 			, @intUserId 
 		from 
-		(	SELECT TOP 1 * 
+		(	SELECT * 
 			FROM tblCTSequenceHistory ctsh
 			WHERE ctsh.intContractDetailId = @intContractDetailId
 			AND ctsh.intContractStatusId IN (3, 6) -- Cancelled and Short Closed
 			AND ctsh.ysnStatusChange = 1
-			ORDER BY ctsh.dtmHistoryCreated DESC
-		) sh
+		) sh 
+		JOIN tblCTContractDetail ctd
+		ON ctd.intContractDetailId = sh.intContractDetailId
+
+		UNION ALL -- Cancelled and Short Closed Contracts (Reopened)
+		SELECT 
+			dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblBalance  = sh.dblBalance
+			, strTransactionReference = 'Updated Contract'
+			, @intContractHeaderId
+			, @intContractDetailId
+			, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN ctd.intPricingTypeId ELSE sh.intPricingTypeId END
+			, intTransactionReferenceId = sh.intContractHeaderId
+			, strTransactionReferenceNo = strContractNumber + '-' + cast(sh.intContractSeq as nvarchar(10))
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, @intUserId 
+		from 
+		(	SELECT *
+			FROM tblCTSequenceHistory ctsh
+			WHERE ctsh.intContractDetailId = @intContractDetailId
+			AND ctsh.intContractStatusId IN (4) -- Reopened
+			AND ctsh.ysnStatusChange = 1
+		) sh 
 		JOIN tblCTContractDetail ctd
 		ON ctd.intContractDetailId = sh.intContractDetailId
 
