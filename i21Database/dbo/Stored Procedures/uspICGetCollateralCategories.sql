@@ -163,3 +163,41 @@ SELECT DISTINCT
 FROM 
 	#tmpCollateralCategories c INNER JOIN tblICCategory cat
 		ON cat.intCategoryId = c.intCategoryId
+	OUTER APPLY (
+		SELECT 
+			dtmDate = MIN(tblSequenced.dtmDate) 
+		FROM (
+				SELECT 
+					t.dtmDate
+					,correctSeq = ROW_NUMBER() OVER (ORDER BY t.intItemId, t.dtmDate, t.intInventoryTransactionId)
+					,actualSeq = ROW_NUMBER() OVER (ORDER BY t.intItemId, t.intInventoryTransactionId)
+				FROM 
+					tblICInventoryTransaction t INNER JOIN tblICItem i 
+						ON t.intItemId = i.intItemId
+				WHERE
+					i.intCategoryId = cat.intCategoryId
+					AND t.dblQty <> 0 
+					AND t.dblValue = 0  
+					AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
+			)
+			AS tblSequenced
+		WHERE
+			tblSequenced.correctSeq <> tblSequenced.actualSeq
+	) outOfSequence
+	OUTER APPLY (
+		SELECT TOP 1
+			t.* 
+		FROM 
+			tblICInventoryTransaction t INNER JOIN tblICItem i 
+				ON t.intItemId = i.intItemId
+		WHERE
+			i.intCategoryId = cat.intCategoryId
+			AND t.dblQty <> 0 
+			AND t.dblValue = 0  
+			AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
+			AND t.strTransactionForm = 'Produce'
+	) produceExists 
+WHERE
+	outOfSequence.dtmDate IS NOT NULL
+	OR produceExists.intInventoryTransactionId IS NOT NULL 
+	OR produceExists.intInventoryTransactionId IS NOT NULL 
