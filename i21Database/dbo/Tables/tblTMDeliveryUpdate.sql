@@ -10,6 +10,5 @@
 	[dblDeliveryTotal] DECIMAL(18, 6) NULL,
 	[dtmTransactionDate] DATETIME NOT NULL,
 	CONSTRAINT [PK_tblTMDeliveryUpdate] PRIMARY KEY CLUSTERED ([intDeliveryUpdateId] ASC),
-	CONSTRAINT [FK_tblTMDeliveryUpdate_tblTMSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
-	CONSTRAINT [FK_tblTMDeliveryUpdate_tblTMDispatch] FOREIGN KEY ([intDispatchId]) REFERENCES [dbo].[tblTMDispatch] ([intDispatchID])
+	CONSTRAINT [FK_tblTMDeliveryUpdate_tblTMSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 )
