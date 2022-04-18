@@ -18,6 +18,7 @@ END
 
 DECLARE @blbLogo 				VARBINARY (MAX)  = NULL
       , @blbStretchedLogo 		VARBINARY (MAX)  = NULL	  
+	  , @ysnPrintInvoicePaymentDetail	BIT = 0
 	  , @strEmail				NVARCHAR(100) = NULL
 	  , @strPhone				NVARCHAR(100) = NULL
 	  , @strCompanyName			NVARCHAR(200) = NULL
@@ -43,6 +44,11 @@ ORDER BY A.intAttachmentId DESC
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 SET @dtmDateNow = GETDATE()
 
+--AR PREFERENCE
+SELECT TOP 1 @ysnPrintInvoicePaymentDetail	= ysnPrintInvoicePaymentDetail
+FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+ORDER BY intCompanyPreferenceId DESC
+
 --COMPANY INFO
 SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
 		   , @strCompanyName		= strCompanyName
@@ -64,7 +70,7 @@ FROM tblSMCompanyLocation L
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE intEntityUserId = @intEntityUserId 
   AND strRequestId = @strRequestId 
-  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
+  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2')
 
 --MAIN QUERY
 SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
@@ -131,6 +137,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strPaymentInfo			= CASE WHEN INV.strTransactionType = 'Cash' THEN ISNULL(PAYMENTMETHOD.strPaymentMethod, '') + ' - ' + ISNULL(INV.strPaymentInfo, '') ELSE NULL END
 	 , dtmCreated				= @dtmDateNow
 	 , strType					= INV.strType
+	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 INTO #INVOICES
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
@@ -327,6 +334,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , strSalesOrderNumber
 	 , strPaymentInfo
 	 , dtmCreated
+	 , ysnPrintInvoicePaymentDetail
 )
 SELECT strCompanyName
 	 , strCompanyAddress
@@ -388,6 +396,7 @@ SELECT strCompanyName
 	 , strSalesOrderNumber
 	 , strPaymentInfo
 	 , dtmCreated
+	 , ysnPrintInvoicePaymentDetail
 FROM #INVOICES
 
 UPDATE STAGING
