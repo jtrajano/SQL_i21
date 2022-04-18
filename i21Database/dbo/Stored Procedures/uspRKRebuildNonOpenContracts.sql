@@ -348,7 +348,8 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId
 		--and SH.ysnQtyChange = 1
 		and SH.ysnBalanceChange = 1
-		and SH.intPricingTypeId <> 5
+		and SH.intPricingTypeId <> 5 
+		AND SH.intContractStatusId NOT IN (3, 6)-- NOT INCLUDE CANCELLED AND SHORT CLOSE (SEPARATE PART)
 		AND SUH.intSequenceUsageHistoryId IS NULL
 
 		union all
@@ -357,7 +358,9 @@ BEGIN
 			, @strContractNumber
 			, @intContractSeq
 			, @intContractTypeId
-			, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad ELSE SUH.dblTransactionQuantity END
+			, dblTransactionQuantity = CASE WHEN SH.intContractStatusId = 6 AND ISNULL(SH.ysnStatusChange, 0) <> 1 THEN 0
+											ELSE CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad ELSE SUH.dblTransactionQuantity END
+											END
 			, SUH.strScreenName  
 			, @intContractHeaderId
 			, @intContractDetailId
@@ -389,6 +392,7 @@ BEGIN
 		where ysnDeleted = 0
 		and SUH.strFieldName = 'Balance'
 		and SUH.intContractDetailId = @intContractDetailId
+		
 	
 		union all
 		select 
