@@ -917,7 +917,7 @@ OUTER APPLY (
 ) SUBFORMULA
 WHERE STAGING.intEntityUserId = @intEntityUserId 
   AND STAGING.strRequestId = @strRequestId 
-  AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 
+  AND STAGING.strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 2')
   
 EXEC dbo.uspARInvoiceDetailTaxReport @intEntityUserId, @strRequestId
 
@@ -926,4 +926,4 @@ WHERE intEntityUserId = @intEntityUserId
   AND strRequestId = @strRequestId 
   AND ysnIncludeInvoicePrice = 1
   AND strInvoiceType = 'Transport Delivery'
-  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
+  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2')
