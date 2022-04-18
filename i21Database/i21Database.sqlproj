@@ -695,6 +695,10 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateAllocatedContractsGainOrLoss.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAllocatedContractsGLUnpost.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAllocatedContractsGLPost.sql" />
+    <Build Include="dbo\Tables\tblSMRapidDeployment.sql" />
+    <Build Include="dbo\Tables\tblSMRapidDeploymentDetail.sql" />
+    <Build Include="dbo\Views\vyuSMRapidDeployment.sql" />
+    <Build Include="vyuSMRapidDeploymentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
