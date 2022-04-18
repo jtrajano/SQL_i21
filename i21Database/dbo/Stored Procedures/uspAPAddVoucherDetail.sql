@@ -145,12 +145,14 @@ SELECT TOP 100 PERCENT
 	,dblNetWeight						=	A.dblNetWeight
 	,dblWeight							=	A.dblWeight
 	/*Cost info*/						
-	,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
-											ELSE A.intCostUOMId END
-	,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
-											ELSE A.dblCostUnitQty END
+	,intCostUOMId						=	A.intCostUOMId
+	-- ,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- 											THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
+	-- 										ELSE A.intCostUOMId END
+	-- ,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- 											THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
+	-- 										ELSE A.dblCostUnitQty END
+	,dblCostUnitQty						=	A.dblCostUnitQty
 	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
 	,dblCost							=	A.dblCost + ISNULL(A.dblQualityPremium, 0) + ISNULL(A.dblOptionalityPremium, 0)
 	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
