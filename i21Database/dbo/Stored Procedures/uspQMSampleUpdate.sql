@@ -203,14 +203,33 @@ BEGIN TRY
 		END
 	END
 
-	BEGIN TRAN
-
 	SELECT @dblOldSampleQty = dblSampleQty
 		,@intCurrentConcurrencyId = intConcurrencyId
 		,@ysnOldImpactPricing = ISNULL(ysnImpactPricing, 0)
 		,@intCurrentSampleStatusId = intSampleStatusId
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
+
+	-- If sequence already has a voucher, do not allow user to uncheck Impact Pricing till the voucher is deleted
+	IF @ysnOldImpactPricing = 1
+		AND @ysnImpactPricing = 0
+		AND ISNULL(@intContractDetailId, 0) > 0
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM dbo.tblAPBillDetail
+				WHERE ISNULL(intContractDetailId, 0) = @intContractDetailId
+				)
+		BEGIN
+			RAISERROR (
+					'Voucher is already created for the contract sequence so you cannot uncheck Impact Pricing. '
+					,16
+					,1
+					)
+		END
+	END
+
+	BEGIN TRAN
 
 	IF ISNULL(@intConcurrencyId, 0) < ISNULL(@intCurrentConcurrencyId, 0)
 	BEGIN
