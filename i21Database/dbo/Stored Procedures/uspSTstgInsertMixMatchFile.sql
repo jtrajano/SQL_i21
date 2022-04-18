@@ -569,44 +569,18 @@ BEGIN
 					, PSL.intPromoSalesId [PromotionID]
 					, PSL.strPromoReason [PromotionReason]
 					, PSL.strPromoSalesDescription [MixMatchDescription]
-					, 1 [SalesRestrictCode]
-					, CASE 
-						WHEN PSL.ysnPurchaseAtleastMin = 1 
-							THEN 'yes' 
-						ELSE 'no' 
-					END [MixMatchStrictHighFlagValue]
-					, CASE 
-						WHEN PSL.ysnPurchaseExactMultiples = 1 
-							THEN 'yes' 
-						ELSE 'no' 
-					END [MixMatchStrictLowFlagValue]
+					, NULL AS [SalesRestrictCode]
 					, PIL.intPromoItemListNo [ItemListID]
 					, PSLD.intQuantity [MixMatchUnits]
 					, PSLD.dblPrice [MixMatchPrice]
 					, 'USD' [MixMatchPriceCurrency]	
 					, CONVERT(nvarchar(10), PSL.dtmPromoBegPeriod, 126) [StartDate]
-					, '0:00:01' [StartTime]
 					, CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126) [StopDate]
-					, '23:59:59' [StopTime]
 					, CASE 
 						WHEN R.strRegisterClass = 'RADIANT' 
 							THEN 0 
 						ELSE NULL 
 					END [Priority]
-					, 'yes' [WeekdayAvailabilitySunday]
-					, 'Sunday' [WeekdaySunday]
-					, 'yes' [WeekdayAvailabilityMonday]
-					, 'Monday' [WeekdayMonday]
-					, 'yes' [WeekdayAvailabilityTuesday]
-					, 'Tuesday' [WeekdayTuesday]
-					, 'yes' [WeekdayAvailabilityWednesday]
-					, 'Wednesday' [WeekdayWednesday]
-					, 'yes' [WeekdayAvailabilityThursday]
-					, 'Thursday' [WeekdayThursday]
-					, 'yes' [WeekdayAvailabilityFriday]
-					, 'Friday' [WeekdayFriday]
-					, 'yes' [WeekdayAvailabilitySaturday]
-					, 'Saturday' [WeekdaySaturday]	
 					, NULL [MixMatchPromotions]
 					, R.strRegisterStoreId [DiscountExternalID]
 				FROM tblICItem I
