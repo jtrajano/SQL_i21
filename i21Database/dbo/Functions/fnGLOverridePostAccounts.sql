@@ -204,7 +204,7 @@ AND ISNULL(intAccountIdOverride,0) = 0
   
 UPDATE A   
 SET A.intAccountId = U.intAccountId,  
-strOverrideAccountError = CASE WHEN U.intAccountId =0 THEN 'Segment Override Error. ' +  
+strOverrideAccountError = CASE WHEN ISNULL(U.intAccountId,0) =0 THEN 'Segment Override Error. ' +  
 A.strNewAccountIdOverride + ' is not an existing GL Account Id.' ELSE NULL END  
 FROM @tbl A   
 OUTER APPLY(  
