@@ -205,5 +205,18 @@ FROM
 		WHERE
 			tblSequenced.correctSeq <> tblSequenced.actualSeq
 	) outOfSequence
+	OUTER APPLY (
+		SELECT TOP 1
+			t.* 
+		FROM 
+			tblICInventoryTransaction 
+		WHERE
+			t.intItemId = i.intItemId
+			AND t.dblQty <> 0 
+			AND t.dblValue = 0  
+			AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
+			AND t.strTransactionForm = 'Produce'
+	) produceExists 
 WHERE
 	outOfSequence.dtmDate IS NOT NULL 
+	OR produceExists.intInventoryTransactionId IS NOT NULL 
