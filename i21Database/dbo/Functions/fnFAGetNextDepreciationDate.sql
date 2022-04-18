@@ -16,7 +16,7 @@ BEGIN
 
 	SELECT 
 		@dtmDepreciationToDate = Depreciation.dtmDepreciationToDate,
-		@dtmPlacedInService = A.dtmDateInService, 
+		@dtmPlacedInService = CASE WHEN ISNULL(A.ysnImported, 0) = 1 THEN A.dtmCreateAssetPostDate ELSE A.dtmDateInService END, 
 		@strTransaction = Depreciation.strTransaction,
 		@ysnDepreciated = CASE WHEN (Depreciation.strTransaction = 'Place in service' OR Depreciation.strTransaction IS NULL) THEN 0 ELSE 1 END
 	FROM tblFAFixedAsset A
