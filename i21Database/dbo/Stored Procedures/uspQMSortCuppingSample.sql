@@ -47,7 +47,7 @@ LEFT JOIN tblICCommodityAttribute EX ON I.intCommodityAttributeId1 = EX.intCommo
 --RANK ACCORDING TO SORT
 SELECT S.intItemId
 	 , S.intSampleId
-	 , R.intId
+	 , intId = ISNULL(R.intId, ROW_NUMBER() OVER (ORDER BY S.intSampleId ASC))
 	 , S.strItemNo
 INTO #FINALRANKING
 FROM #SAMPLES S
