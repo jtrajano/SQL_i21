@@ -431,7 +431,8 @@ BEGIN TRY
 			,V.strRelatedSampleNumber
 			,V.strCuppingSessionNumber
 			,V.intCuppingSessionId
-			,V.dtmCuppingDateTime
+			,V.dtmCuppingDate
+			,V.dtmCuppingTime
 			,V.intRank
 		FROM tblQMSample S
 		LEFT JOIN vyuQMSampleNotMapped V ON V.intSampleId = S.intSampleId
@@ -559,11 +560,12 @@ BEGIN TRY
 			,V.strRelatedSampleNumber
 			,V.strCuppingSessionNumber
 			,V.intCuppingSessionId
-			,V.dtmCuppingDateTime
+			,V.dtmCuppingDate
+			,V.dtmCuppingTime
 			,V.intRank
 		FROM tblQMSample S
 		LEFT JOIN vyuQMSampleNotMapped V ON V.intSampleId = S.intSampleId
-	) A ON A.intSampleId = CSD.intParentSampleId
+	) A ON A.intSampleId = CSD.intSampleId
 	WHERE B.intSampleId = @intCuppingSampleId
 
 	-- Generate audit logs JSON string for the test result changes
@@ -606,7 +608,7 @@ BEGIN TRY
 				,[intKeyValue] = A.intTestResultId
 			FROM tblQMSample S
 			INNER JOIN tblQMCuppingSessionDetail CSD ON CSD.intCuppingSessionDetailId = S.intCuppingSessionDetailId
-			INNER JOIN tblQMSample T ON T.intSampleId = CSD.intParentSampleId
+			INNER JOIN tblQMSample T ON T.intSampleId = CSD.intSampleId
 			-- A = Test Results From Parent Sample
 			INNER JOIN tblQMTestResult A ON A.intSampleId = T.intSampleId
 			INNER JOIN tblQMTest QT ON QT.intTestId = A.intTestId
@@ -715,7 +717,7 @@ BEGIN TRY
 		,intLastModifiedUserId = B.intLastModifiedUserId
 		,dtmLastModified = B.dtmLastModified
 	FROM tblQMSample A
-	INNER JOIN tblQMCuppingSessionDetail CSD ON CSD.intParentSampleId = A.intSampleId
+	INNER JOIN tblQMCuppingSessionDetail CSD ON CSD.intSampleId = A.intSampleId
 	INNER JOIN tblQMSample B ON B.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
 	WHERE B.intSampleId = @intCuppingSampleId
 
@@ -769,7 +771,7 @@ BEGIN TRY
 		,dtmLastModified = B.dtmLastModified
 	FROM tblQMSample S
 	INNER JOIN tblQMCuppingSessionDetail CSD ON CSD.intCuppingSessionDetailId = S.intCuppingSessionDetailId
-	INNER JOIN tblQMSample T ON T.intSampleId = CSD.intParentSampleId
+	INNER JOIN tblQMSample T ON T.intSampleId = CSD.intSampleId
 	-- A = Test Results From Parent Sample
 	INNER JOIN tblQMTestResult A ON A.intSampleId = T.intSampleId
 	INNER JOIN tblQMTest QT ON QT.intTestId = A.intTestId
