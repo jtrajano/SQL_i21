@@ -12,7 +12,9 @@ SELECT
     , u.strUnitMeasure
     , vd.dblQtyShipped
     , vd.dblQtyOrdered
+    , vd.dblQtyAllocated
     , vd.dblDiscount
+    , vd.dblPrice
     , vd.dblTotalTax
     , vd.strTaxGroup
     , vd.strSubLocation strStorageLocation
