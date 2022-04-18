@@ -5,4 +5,4 @@ SELECT
 	,strPropertyValue
 	,strResult
 FROM tblQMTestResult QMTR
-JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1
+INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1
