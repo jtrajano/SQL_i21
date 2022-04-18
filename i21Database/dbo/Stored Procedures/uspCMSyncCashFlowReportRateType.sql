@@ -12,25 +12,42 @@ IF (@intFilterCurrencyId IS NULL)
 	SELECT @intFilterCurrencyId = intFilterCurrencyId FROM tblCMCashFlowReport WHERE intCashFlowReportId = @intCashFlowReportId
 
 -- Default Rate and Rate Types per bucket
-DECLARE @tblDefaultRateTypes TABLE (
+DECLARE @tblDefaultRateTypesRaw TABLE (
+	intRowId INT,
 	intFromCurrencyId INT,
 	intToCurrencyId INT,
 	intCurrencyExchangeRateDetailId INT,
 	intCurrencyExchangeRateTypeId INT,
 	strBucket NVARCHAR(MAX) NULL,
 	dblRate DECIMAL(18, 6) DEFAULT 1,
-	dtmValidFromDate DATETIME NULL
+	dtmValidFromDate DATETIME NULL,
+	dtmCreatedDate DATETIME NULL
 )
 
-INSERT INTO @tblDefaultRateTypes
+DECLARE @tblDefaultRateTypes TABLE (
+	intRowId INT,
+	intFromCurrencyId INT,
+	intToCurrencyId INT,
+	intCurrencyExchangeRateDetailId INT,
+	intCurrencyExchangeRateTypeId INT,
+	strBucket NVARCHAR(MAX) NULL,
+	dblRate DECIMAL(18, 6) DEFAULT 1,
+	dtmValidFromDate DATETIME NULL,
+	dtmCreatedDate DATETIME NULL
+)
+
+-- Get all Exchange Rate Details with Cash Flow defined
+INSERT INTO @tblDefaultRateTypesRaw
 SELECT
+	ROW_NUMBER() OVER(ORDER BY RateDetail.dtmValidFromDate DESC),
 	Rate.intFromCurrencyId,
 	Rate.intToCurrencyId,
 	RateDetail.intCurrencyExchangeRateDetailId,
 	RateType.intCurrencyExchangeRateTypeId,
 	Bucket.Item strBucket,
 	ISNULL(RateDetail.dblRate, 1),
-	RateDetail.dtmValidFromDate
+	RateDetail.dtmValidFromDate dtmValidFromDate,
+	RateDetail.dtmCreatedDate dtmCreatedDate
 FROM tblSMCurrencyExchangeRate Rate
 JOIN tblSMCurrencyExchangeRateDetail RateDetail
 	ON RateDetail.intCurrencyExchangeRateId = Rate.intCurrencyExchangeRateId
@@ -43,6 +60,20 @@ WHERE
 	RTRIM(LTRIM(strCashFlows)) IS NOT NULL 
 	AND NULLIF(strCashFlows, '') IS NOT NULL
 	AND Rate.intToCurrencyId = @intReportingCurrencyId
+ORDER BY RateDetail.dtmValidFromDate DESC, RateDetail.dtmCreatedDate DESC
+
+-- Get and filter out exchange rate details by most recent Valid From Date
+INSERT INTO @tblDefaultRateTypes
+SELECT A.* FROM @tblDefaultRateTypesRaw A
+INNER JOIN (
+	SELECT strBucket, MAX(dtmValidFromDate) dtmValidFromDate, MAX(dtmCreatedDate) dtmCreatedDate
+	FROM @tblDefaultRateTypesRaw
+	GROUP BY strBucket
+) G
+ON A.strBucket = G.strBucket AND A.dtmValidFromDate = G.dtmValidFromDate AND A.dtmCreatedDate = G.dtmCreatedDate
+ORDER BY intRowId
+
+
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblCMCashFlowReportRateType WHERE intCashFlowReportId = @intCashFlowReportId) -- create new rates
 BEGIN
@@ -70,9 +101,9 @@ BEGIN
 				intRateTypeIdBucket4 = MAX(CASE WHEN strBucket = '15 - 21'	THEN intCurrencyExchangeRateTypeId END),
 				intRateTypeIdBucket5 = MAX(CASE WHEN strBucket = '22 - 29'	THEN intCurrencyExchangeRateTypeId END),
 				intRateTypeIdBucket6 = MAX(CASE WHEN strBucket = '30 - 60'	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = '60 - 90'	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = '90 - 120' THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = '120+'		THEN intCurrencyExchangeRateTypeId END)
+				intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = '61 - 90'	THEN intCurrencyExchangeRateTypeId END),
+				intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = '91 - 120' THEN intCurrencyExchangeRateTypeId END),
+				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = '121+'		THEN intCurrencyExchangeRateTypeId END)
 			FROM @tblDefaultRateTypes A
 			WHERE intFromCurrencyId = @intFilterCurrencyId
 			AND dtmValidFromDate = (
@@ -106,9 +137,9 @@ BEGIN
 				dblRateBucket4 = MAX(CASE WHEN strBucket = '15 - 21'	THEN dblRate END),
 				dblRateBucket5 = MAX(CASE WHEN strBucket = '22 - 29'	THEN dblRate END),
 				dblRateBucket6 = MAX(CASE WHEN strBucket = '30 - 60'	THEN dblRate END),
-				dblRateBucket7 = MAX(CASE WHEN strBucket = '60 - 90'	THEN dblRate END),
-				dblRateBucket8 = MAX(CASE WHEN strBucket = '90 - 120'	THEN dblRate END),
-				dblRateBucket9 = MAX(CASE WHEN strBucket = '120+'		THEN dblRate END)
+				dblRateBucket7 = MAX(CASE WHEN strBucket = '61 - 90'	THEN dblRate END),
+				dblRateBucket8 = MAX(CASE WHEN strBucket = '91 - 120'	THEN dblRate END),
+				dblRateBucket9 = MAX(CASE WHEN strBucket = '121+'		THEN dblRate END)
 			FROM @tblDefaultRateTypes A
 			WHERE intFromCurrencyId = @intFilterCurrencyId
 			AND dtmValidFromDate = (
@@ -154,9 +185,9 @@ BEGIN
 				intRateTypeIdBucket4 = MAX(CASE WHEN strBucket = '15 - 21'	THEN intCurrencyExchangeRateTypeId END),
 				intRateTypeIdBucket5 = MAX(CASE WHEN strBucket = '22 - 29'	THEN intCurrencyExchangeRateTypeId END),
 				intRateTypeIdBucket6 = MAX(CASE WHEN strBucket = '30 - 60'	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = '60 - 90'	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = '90 - 120' THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = '120+'		THEN intCurrencyExchangeRateTypeId END)
+				intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = '61 - 90'	THEN intCurrencyExchangeRateTypeId END),
+				intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = '91 - 120' THEN intCurrencyExchangeRateTypeId END),
+				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = '121+'		THEN intCurrencyExchangeRateTypeId END)
 			FROM @tblDefaultRateTypes A
 			WHERE intFromCurrencyId = @intFilterCurrencyId
 			AND dtmValidFromDate = (
@@ -190,9 +221,9 @@ BEGIN
 				dblRateBucket4 = MAX(CASE WHEN strBucket = '15 - 21'	THEN dblRate END),
 				dblRateBucket5 = MAX(CASE WHEN strBucket = '22 - 29'	THEN dblRate END),
 				dblRateBucket6 = MAX(CASE WHEN strBucket = '30 - 60'	THEN dblRate END),
-				dblRateBucket7 = MAX(CASE WHEN strBucket = '60 - 90'	THEN dblRate END),
-				dblRateBucket8 = MAX(CASE WHEN strBucket = '90 - 120'	THEN dblRate END),
-				dblRateBucket9 = MAX(CASE WHEN strBucket = '120+'		THEN dblRate END)
+				dblRateBucket7 = MAX(CASE WHEN strBucket = '61 - 90'	THEN dblRate END),
+				dblRateBucket8 = MAX(CASE WHEN strBucket = '91 - 120'	THEN dblRate END),
+				dblRateBucket9 = MAX(CASE WHEN strBucket = '121+'		THEN dblRate END)
 			FROM @tblDefaultRateTypes A
 			WHERE intFromCurrencyId = @intFilterCurrencyId
 			AND dtmValidFromDate = (
@@ -257,9 +288,9 @@ BEGIN
 				intRateTypeIdBucket4 = MAX(CASE WHEN strBucket = '15 - 21'	THEN intCurrencyExchangeRateTypeId END),
 				intRateTypeIdBucket5 = MAX(CASE WHEN strBucket = '22 - 29'	THEN intCurrencyExchangeRateTypeId END),
 				intRateTypeIdBucket6 = MAX(CASE WHEN strBucket = '30 - 60'	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = '60 - 90'	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = '90 - 120' THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = '120+'		THEN intCurrencyExchangeRateTypeId END)
+				intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = '61 - 90'	THEN intCurrencyExchangeRateTypeId END),
+				intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = '91 - 120' THEN intCurrencyExchangeRateTypeId END),
+				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = '121+'		THEN intCurrencyExchangeRateTypeId END)
 			FROM @tblDefaultRateTypes A
 			WHERE intFromCurrencyId = @intFilterCurrencyId
 			AND dtmValidFromDate = (
@@ -293,9 +324,9 @@ BEGIN
 				dblRateBucket4 = MAX(CASE WHEN strBucket = '15 - 21'	THEN dblRate END),
 				dblRateBucket5 = MAX(CASE WHEN strBucket = '22 - 29'	THEN dblRate END),
 				dblRateBucket6 = MAX(CASE WHEN strBucket = '30 - 60'	THEN dblRate END),
-				dblRateBucket7 = MAX(CASE WHEN strBucket = '60 - 90'	THEN dblRate END),
-				dblRateBucket8 = MAX(CASE WHEN strBucket = '90 - 120'	THEN dblRate END),
-				dblRateBucket9 = MAX(CASE WHEN strBucket = '120+'		THEN dblRate END)
+				dblRateBucket7 = MAX(CASE WHEN strBucket = '61 - 90'	THEN dblRate END),
+				dblRateBucket8 = MAX(CASE WHEN strBucket = '91 - 120'	THEN dblRate END),
+				dblRateBucket9 = MAX(CASE WHEN strBucket = '121+'		THEN dblRate END)
 			FROM @tblDefaultRateTypes A
 			WHERE intFromCurrencyId = @intFilterCurrencyId
 			AND dtmValidFromDate = (
@@ -332,9 +363,9 @@ OUTER APPLY (
 		intRateTypeIdBucket4 = MAX(CASE WHEN strBucket = '15 - 21'	THEN intCurrencyExchangeRateTypeId END),
 		intRateTypeIdBucket5 = MAX(CASE WHEN strBucket = '22 - 29'	THEN intCurrencyExchangeRateTypeId END),
 		intRateTypeIdBucket6 = MAX(CASE WHEN strBucket = '30 - 60'	THEN intCurrencyExchangeRateTypeId END),
-		intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = '60 - 90'	THEN intCurrencyExchangeRateTypeId END),
-		intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = '90 - 120' THEN intCurrencyExchangeRateTypeId END),
-		intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = '120+'		THEN intCurrencyExchangeRateTypeId END)
+		intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = '61 - 90'	THEN intCurrencyExchangeRateTypeId END),
+		intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = '91 - 120' THEN intCurrencyExchangeRateTypeId END),
+		intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = '121+'		THEN intCurrencyExchangeRateTypeId END)
 	FROM @tblDefaultRateTypes A
 	WHERE intFromCurrencyId = C.intFromCurrencyId
 	AND dtmValidFromDate = (
@@ -370,9 +401,9 @@ OUTER APPLY (
 		dblRateBucket4 = MAX(CASE WHEN strBucket = '15 - 21'	THEN dblRate END),
 		dblRateBucket5 = MAX(CASE WHEN strBucket = '22 - 29'	THEN dblRate END),
 		dblRateBucket6 = MAX(CASE WHEN strBucket = '30 - 60'	THEN dblRate END),
-		dblRateBucket7 = MAX(CASE WHEN strBucket = '60 - 90'	THEN dblRate END),
-		dblRateBucket8 = MAX(CASE WHEN strBucket = '90 - 120'	THEN dblRate END),
-		dblRateBucket9 = MAX(CASE WHEN strBucket = '120+'		THEN dblRate END)
+		dblRateBucket7 = MAX(CASE WHEN strBucket = '61 - 90'	THEN dblRate END),
+		dblRateBucket8 = MAX(CASE WHEN strBucket = '91 - 120'	THEN dblRate END),
+		dblRateBucket9 = MAX(CASE WHEN strBucket = '121+'		THEN dblRate END)
 	FROM @tblDefaultRateTypes A
 	WHERE intFromCurrencyId = C.intFromCurrencyId
 	AND dtmValidFromDate = (

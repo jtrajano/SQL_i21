@@ -102,7 +102,16 @@ BEGIN
 	)
 
 	ALTER TABLE tblGLTempCOASegment ADD [Company] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
-			
+
+	--this will ensure there is [Primary Account] column in tblGLTempCOASegmen
+	IF NOT EXISTS(
+		SELECT 1 
+			FROM   INFORMATION_SCHEMA.COLUMNS
+			WHERE  TABLE_NAME = 'tblGLTempCOASegment'
+					AND COLUMN_NAME = 'Primary Account'
+	)
+
+	ALTER TABLE tblGLTempCOASegment ADD [Primary Account] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
 			
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLDetailView') 
 	BEGIN 

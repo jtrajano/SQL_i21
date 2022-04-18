@@ -22,6 +22,7 @@ BEGIN TRY
 	SELECT intSampleId
 	FROM tblQMSample
 	WHERE strContainerNumber = @strContainerNumber
+		AND intTypeId = 1
 		AND intContractDetailId = @intContractDetailId
 		AND (
 			intLoadDetailContainerLinkId IS NULL
@@ -43,6 +44,7 @@ BEGIN TRY
 		,dtmLastModified = GETDATE()
 	WHERE strContainerNumber = @strContainerNumber
 		AND intContractDetailId = @intContractDetailId
+		AND intTypeId = 1
 		AND (
 			intLoadDetailContainerLinkId IS NULL
 			OR intLoadDetailContainerLinkId <> @intLoadDetailContainerLinkId

@@ -378,7 +378,7 @@ SELECT DISTINCT
 	, [strBankReferenceNo]			= A.strBankReferenceNo
 	, [intBorrowingFacilityLimitId]	= A.intLimitTypeId
 	, [intBorrowingFacilityLimitDetailId] = A.intSublimitTypeId
-	, [strReferenceNo]					= A.strBankReferenceNo
+	, [strReferenceNo]					= A.strReferenceNo
 	, [intBankValuationRuleId]			= A.intOverrideFacilityValuation
 	, [strComments]						= A.strComments
 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B

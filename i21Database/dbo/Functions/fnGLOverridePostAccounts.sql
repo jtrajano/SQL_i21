@@ -178,11 +178,11 @@ WHERE ISNULL(intAccountIdOverride,0) <> 0
   
  UPDATE A   
  SET A.intAccountId = U.intAccountId,  
- strOverrideAccountError = CASE WHEN U.intAccountId IS NULL THEN 'Account Override Error. ' +  
+ strOverrideAccountError = CASE WHEN U.intAccountId = 0 THEN 'Account Override Error. ' +  
  A.strNewAccountIdOverride + ' is not an existing GL Account Id.' ELSE NULL END  
  FROM @tbl A   
  OUTER APPLY(  
-     SELECT intAccountId from tblGLAccount WHERE strAccountId = A.strNewAccountIdOverride  
+     SELECT ISNULL(intAccountId,0) intAccountId from tblGLAccount WHERE strAccountId = A.strNewAccountIdOverride  
  )U  
  WHERE   
  ISNULL(strNewAccountIdOverride,'') <> '' AND ISNULL(intAccountIdOverride,0) <> 0  
@@ -204,11 +204,11 @@ AND ISNULL(intAccountIdOverride,0) = 0
   
 UPDATE A   
 SET A.intAccountId = U.intAccountId,  
-strOverrideAccountError = CASE WHEN U.intAccountId IS NULL THEN 'Segment Override Error. ' +  
+strOverrideAccountError = CASE WHEN ISNULL(U.intAccountId,0) =0 THEN 'Segment Override Error. ' +  
 A.strNewAccountIdOverride + ' is not an existing GL Account Id.' ELSE NULL END  
 FROM @tbl A   
 OUTER APPLY(  
-    SELECT intAccountId from tblGLAccount WHERE strAccountId = A.strNewAccountIdOverride  
+    SELECT ISNULL(intAccountId,0) intAccountId from tblGLAccount WHERE strAccountId = A.strNewAccountIdOverride  
 )U  
 WHERE   
  (  

@@ -398,6 +398,7 @@
     <Build Include="dbo\Views\vyuQMQualityCriteriaList.sql" />
     <Build Include="dbo\Views\vyuQMQualityCriteriaDetailList.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMMirrorRelatedSample.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
@@ -653,6 +654,51 @@
     <Build Include="dbo\Views\vyuCRMBrandOpportunityIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotWeight.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertLot.sql" />
+    <Build Include="dbo\Tables\tblRKCreditLine.sql" />
+    <Build Include="dbo\Tables\tblRKInternalLimit.sql" />
+    <Build Include="dbo\Tables\tblRKCreditLimit.sql" />
+    <Build Include="dbo\Tables\tblRKCreditTempLimit.sql" />
+    <Build Include="dbo\Tables\tblRKComplementaryLimit.sql" />
+    <Build Include="dbo\Views\vyuRKCreditLImit.sql" />
+    <Build Include="dbo\Views\vyuRKCreditTempLimit.sql" />
+    <Build Include="dbo\Views\vyuRKComplementaryLimit.sql" />
+    <Build Include="dbo\Tables\tblQMCuppingSession.sql" />
+    <Build Include="dbo\Tables\tblQMCuppingSessionDetail.sql" />
+    <Build Include="dbo\Views\vyuQMCuppingSessionSample.sql" />
+    <Build Include="dbo\Tables\tblSMGeographicalZone.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostUnpostStorageCharge.sql" />
+    <Build Include="dbo\Functions\fnCTGetQualityResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateWarrantlot.sql" />
+    <Build Include="dbo\Views\vyuICGetWarrantLotAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRecordPostedMatchPnS.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMCuppingSessionUpdateParentSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceWalterMatterReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCuppingForm.sql" />
+    <Build Include="dbo\Views\vyuQMCuppingFormResultReport.sql" />
+    <Build Include="dbo\Views\vyuQMTestingSessionSummaryReport.sql" />
+    <Build Include="dbo\Tables\tblICInsuranceRate.sql" />
+    <Build Include="dbo\Tables\tblICInsuranceRateDetail.sql" />
+    <Build Include="dbo\Views\vyuICSearchInsuranceRate.sql" />
+    <Build Include="dbo\Views\vyuICGetInsuranceRate.sql" />
+    <Build Include="dbo\Views\vyuICGetInsuranceRateDetail.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsGainOrLossHeader.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsBasisEntry.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsSummary.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsSettlementPrice.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsPostRecap.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsBasisEntry.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsGainOrLossHeader.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsPostPreview.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsSettlementPrice.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateAllocatedContractsGainOrLoss.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAllocatedContractsGLUnpost.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAllocatedContractsGLPost.sql" />
+    <Build Include="dbo\Tables\tblSMRapidDeployment.sql" />
+    <Build Include="dbo\Tables\tblSMRapidDeploymentDetail.sql" />
+    <Build Include="dbo\Views\vyuSMRapidDeployment.sql" />
+    <Build Include="vyuSMRapidDeploymentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1016,6 +1062,7 @@
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLBuildMissingAccountsRevalueOverride.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql">
@@ -1028,6 +1075,7 @@
     </Build>
     <Build Include="dbo\Stored Procedures\uspCMGetRPAccountIdByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRecalcRetainedEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspAPExportPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
@@ -1037,6 +1085,7 @@
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\GL\StoredProcedures\uspGLAccountOriginSync.sql" />
+    <None Include="Scripts\Post-Deployment\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql" />
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
@@ -2690,7 +2739,6 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Views\vyuAPRptTaxRemittance.sql" />
     <Build Include="dbo\Views\vyuAPRptReconcileAPGL.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleCreate.sql" />
@@ -4177,6 +4225,7 @@
     <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
     <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
+    <Build Include="dbo\Functions\fnGLGetRelativeDatabase.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
@@ -10408,6 +10457,8 @@
     <Build Include="dbo\Views\vyuGRSettleStorageBillDetail.sql" />
     <None Include="Scripts\Utility\IC\DPR\uspARDprInTransitFix.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRebuildNonOpenContracts.sql" />
+    <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10757,6 +10808,10 @@
     <Build Include="dbo\Tables\tblQMPriorityGroupDetail.sql" />
     <Build Include="dbo\Views\vyuQMProductGroupDetailSearch.sql" />
     <Build Include="dbo\Functions\fnCTGetProvisionalIds.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSortCuppingSample.sql" />
+    <Build Include="dbo\Views\vyuQMCuppingSessionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMProcessCuppingSession.sql" />
+    <Build Include="dbo\Views\vyuQMSampleCuppingSessionTab.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -152,6 +152,7 @@ BEGIN TRY
 				,@intSampleTypeId = t.intSampleTypeId
 			FROM tblQMSample t WITH (NOLOCK)
 			WHERE t.strSampleNumber = @strSampleNumber
+			AND t.intTypeId = 1
 
 			IF ISNULL(@intSampleId, 0) = 0
 			BEGIN

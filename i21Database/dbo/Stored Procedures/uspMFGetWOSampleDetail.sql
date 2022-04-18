@@ -22,6 +22,7 @@ BEGIN
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		--AND S.intProductTypeId = 12
 		AND S.intWorkOrderId = @intWorkOrderId
+		AND S.intTypeId = 1
 	JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 	LEFT JOIN tblICItem I ON I.intItemId = S.intItemId
 	LEFT JOIN tblEMEntity E ON E.intEntityId = S.intEntityId

@@ -1,4 +1,5 @@
-﻿Create FUNCTION [dbo].[fnCTGetQualityResult] 
+﻿
+Create FUNCTION [dbo].[fnCTGetQualityResult] 
 	(
 		 @dblActualValue NUMERIC(18, 6),
 		 @dblMinValue NUMERIC(18, 6),

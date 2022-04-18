@@ -35,7 +35,7 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 LEFT JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
-WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
+WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0
 UNION ALL --VOID VOUCHER DELETED
 SELECT 
 	A.dtmDate	
@@ -66,7 +66,7 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 LEFT JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
-WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
+WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0
 -- GROUP BY  
 -- 	 A.dtmDate
 -- 	,A.intBillId 
@@ -114,7 +114,7 @@ INNER JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 --INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
-WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0 AND B.dblTax != 0
+WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0 AND B.dblTax != 0
 --ORIGIN
 UNION ALL
 SELECT 
@@ -142,7 +142,7 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
-WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13) AND A.ysnOrigin = 1
+WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13, 15) AND A.ysnOrigin = 1
 UNION ALL   
 SELECT  A.dtmDatePaid AS dtmDate,    
 	 C.intBillId,   

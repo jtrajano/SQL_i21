@@ -75,7 +75,9 @@ BEGIN
 		, intEntityId
 		, intSourceLocationId
 		, intSourceUOMId
-		, intCommodityId)
+		, intCommodityId
+		, strSourceTransactionNo
+	)
 	SELECT dtmPostDate
 		, strBatchId
 		, intAccountId
@@ -102,6 +104,7 @@ BEGIN
 		, intSourceLocationId
 		, intSourceUOMId
 		, intCommodityId
+		, strSourceTransactionNo
 	FROM (
 		SELECT dtmPostDate = H.dtmMatchDate
 			, strBatchId = NULL
@@ -131,42 +134,43 @@ BEGIN
 			, H.intCommodityId
 			, M.intMatchFuturesPSDetailId
 			, intSort = 1
+			, strSourceTransactionNo = M.strLInternalTradeNo + ', ' + M.strSInternalTradeNo
 		FROM tblRKMatchFuturesPSHeader H
 		INNER JOIN vyuRKMatchedPSTransaction M ON M.intMatchFuturesPSHeaderId = H.intMatchFuturesPSHeaderId
 		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
-		--Offset
-		UNION ALL SELECT dtmPostDate = H.dtmMatchDate
-			, strBatchId = NULL
-			, intAccountId = @intFuturesGainOrLossRealizedOffset 
-			, strAccountId = ISNULL(@strFuturesGainOrLossRealizedOffset , 'Invalid Account Id')
-			, dblDebit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN 0.00 ELSE ABS(dblNetPL) END
-			, dblCredit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblNetPL) ELSE 0.00 END
-			, dblDebitUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN 0.00 ELSE ABS(dblMatchQty) END
-			, dblCreditUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
-			, strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
-			, intCurrencyId
-			, dblExchangeRate = 1.00
-			, dtmTransactionDate = dtmMatchDate
-			, strTransactionId = H.intMatchNo
-			, intTransactionId = H.intMatchFuturesPSHeaderId
-			, strReference = H.intMatchNo
-			, strTransactionType = 'Match Derivatives'
-			, strTransactionForm = 'Match Derivatives'
-			, strModuleName = 'Risk Management'
-			, strCode = 'RK'
-			, dtmDateEntered = GETDATE()
-			, ysnIsUnposted = 0
-			, intEntityId = @intUserId
-			, intUserId = @intUserId 
-			, intSourceLocationId = H.intCompanyLocationId
-			, intSourceUOMId = intCurrencyId
-			, H.intCommodityId
-			, M.intMatchFuturesPSDetailId
-			, intSort = 2
-		FROM tblRKMatchFuturesPSHeader H
-		INNER JOIN vyuRKMatchedPSTransaction M ON M.intMatchFuturesPSHeaderId = H.intMatchFuturesPSHeaderId
-		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+		----Offset
+		--UNION ALL SELECT dtmPostDate = H.dtmMatchDate
+		--	, strBatchId = NULL
+		--	, intAccountId = @intFuturesGainOrLossRealizedOffset 
+		--	, strAccountId = ISNULL(@strFuturesGainOrLossRealizedOffset , 'Invalid Account Id')
+		--	, dblDebit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN 0.00 ELSE ABS(dblNetPL) END
+		--	, dblCredit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblNetPL) ELSE 0.00 END
+		--	, dblDebitUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN 0.00 ELSE ABS(dblMatchQty) END
+		--	, dblCreditUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
+		--	, strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
+		--	, intCurrencyId
+		--	, dblExchangeRate = 1.00
+		--	, dtmTransactionDate = dtmMatchDate
+		--	, strTransactionId = H.intMatchNo
+		--	, intTransactionId = H.intMatchFuturesPSHeaderId
+		--	, strReference = H.intMatchNo
+		--	, strTransactionType = 'Match Derivatives'
+		--	, strTransactionForm = 'Match Derivatives'
+		--	, strModuleName = 'Risk Management'
+		--	, strCode = 'RK'
+		--	, dtmDateEntered = GETDATE()
+		--	, ysnIsUnposted = 0
+		--	, intEntityId = @intUserId
+		--	, intUserId = @intUserId 
+		--	, intSourceLocationId = H.intCompanyLocationId
+		--	, intSourceUOMId = intCurrencyId
+		--	, H.intCommodityId
+		--	, M.intMatchFuturesPSDetailId
+		--	, intSort = 2
+		--FROM tblRKMatchFuturesPSHeader H
+		--INNER JOIN vyuRKMatchedPSTransaction M ON M.intMatchFuturesPSHeaderId = H.intMatchFuturesPSHeaderId
+		--WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 	) t
 	ORDER BY intMatchFuturesPSDetailId, intSort
 END

@@ -23,6 +23,8 @@
 	ysnEnableContractSequencesTabInSampleSearchScreen BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnEnableContractSequencesTabInSampleSearchScreen] DEFAULT 0,
     strSampleInstructionReport NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	intDefaultSampleStatusId INT DEFAULT(5),
+	ysnSetDefaultReceivedDateInSampleScreen BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnSetDefaultReceivedDateInSampleScreen] DEFAULT 1,
+	intCuppingSessionLimit INT DEFAULT(18),
 	CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intApproveLotStatus] FOREIGN KEY ([intApproveLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intRejectLotStatus] FOREIGN KEY ([intRejectLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),

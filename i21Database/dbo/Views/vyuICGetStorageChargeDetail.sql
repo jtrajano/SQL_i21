@@ -37,6 +37,7 @@ SELECT
     ,A.dblCustomerNoOfDays
 	,A.strRateType
 	,A.intConcurrencyId
+	,A.intInventoryStockMovementIdUsed
 	----Details from other table
 	,C.strItemNo
 	,D.strLotNumber

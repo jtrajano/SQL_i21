@@ -1,11 +1,11 @@
-﻿CREATE PROCEDURE uspCTSaveContractSamplePremium @intContractDetailId INT
+﻿Create PROCEDURE [dbo].[uspCTSaveContractSamplePremium] @intContractDetailId INT
 	,@intSampleId INT
 	,@intUserId INT
 	,@ysnImpactPricing BIT
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
-
+	
 	DECLARE @tblTemp TABLE (
 			intSampleId INT
 			,intContractDetailId INT
@@ -19,6 +19,8 @@ BEGIN TRY
 			,dblFactorUnderTarget NUMERIC(18, 6)
 			,dblDiscount NUMERIC(18, 6)
 			,strCostMethod nvarchar(100)
+			,strEscalatedBy nvarchar(100)
+
 			,intCurrencyId INT
 			,intUnitMeasureId INT
 			,strActualValue nvarchar(100)
@@ -29,12 +31,35 @@ BEGIN TRY
 			,strCurrency nvarchar(100)
 			,strUnitMeasure nvarchar(100)
 		)
-		INSERT INTO @tblTemp
-		EXEC uspQMGetSamplePremiumTestResult @intSampleId
+		INSERT INTO @tblTemp(
+			intSampleId 
+			,intContractDetailId
+			,intItemId
+			,intPropertyId
+			,dblTargetValue
+			,dblMinValue
+			,dblMaxValue
+			,dblFactorOverTarget
+			,dblPremium
+			,dblFactorUnderTarget
+			,dblDiscount
+			,strCostMethod
+			,strEscalatedBy
+			,intCurrencyId
+			,intUnitMeasureId
+			,strActualValue
+			,intQualityCriteriaId
+			,intQualityCriteriaDetailId
+			,strSampleNumber
+			,strPropertyName
+			,strCurrency
+			,strUnitMeasure
+		)
+		EXEC uspQMGetSamplePremiumTestResult 100
 
-		IF Exists(SELECT TOP 1 1 FROM tblCTContractQuality where intSampleId = @intSampleId)
+		IF Exists(SELECT TOP 1 1 FROM tblCTContractQuality where intContractDetailId = @intContractDetailId and intSampleId = @intSampleId)
 		BEGIN
-			DELETE FROM tblCTContractQuality where intSampleId = @intSampleId
+			DELETE FROM tblCTContractQuality where intContractDetailId = @intContractDetailId and intSampleId = @intSampleId
 		END
 
 		
@@ -91,8 +116,8 @@ BEGIN TRY
 													, dblFactorOverTarget
 													, dblDiscount
 													, dblPremium
-													, 'Exact Factor')),
-					'Exact Factor'
+													, strEscalatedBy)),
+					strEscalatedBy
 			FROM @tblTemp
 		END
 

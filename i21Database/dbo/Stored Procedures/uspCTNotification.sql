@@ -177,6 +177,7 @@ BEGIN TRY
 			FROM	vyuCTNotificationHeader CH
 			JOIN	tblQMSample as SM
 					on CH.intContractDetailId = SM.intContractDetailId
+					and SM.intTypeId = 1
 			JOIN	tblQMSampleType as SMT
 					on SM.intSampleTypeId = SMT.intSampleTypeId
 						and SMT.strSampleTypeName = ''Pre-shipment Sample''
@@ -211,7 +212,7 @@ BEGIN TRY
 						) a
 							on CH.intContractHeaderId = a.intContractHeaderId
 				where CH.intContractHeaderId not in (select intContractHeaderId from tblCTContractDetail where intContractDetailId in (select intContractDetailId from tblQMSample, tblQMSampleStatus
-																			where tblQMSampleStatus.intSampleStatusId = tblQMSample.intSampleStatusId and tblQMSampleStatus.strStatus = ''Approved''))
+																			where tblQMSampleStatus.intSampleStatusId = tblQMSample.intSampleStatusId and tblQMSampleStatus.strStatus = ''Approved'' and tblQMSample.intTypeId = 1))
 				and CH.strContractType = ''Purchase''
 		
 			) EDPEXO			

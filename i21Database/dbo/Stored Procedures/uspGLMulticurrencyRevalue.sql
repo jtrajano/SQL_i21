@@ -69,7 +69,7 @@ BEGIN
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId= NULL
 FROM vyuCTMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
 AND ISNULL(dblForexRate, 1) <> 1
@@ -105,7 +105,7 @@ SELECT
 	dblHistoricAmount, dblAmountDifference = 0, strModule = 'INV'  COLLATE Latin1_General_CI_AS , strType = 'Payables'  COLLATE Latin1_General_CI_AS 
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueReceipt
 UNION ALL
 SELECT 
@@ -117,7 +117,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueReceiptOtherCharges
 UNION ALL
 SELECT 
@@ -129,7 +129,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables' COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipment
 UNION ALL
 SELECT 
@@ -142,7 +142,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnPayable = 1
 UNION ALL
 SELECT 
@@ -155,7 +155,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnReceivable = 1
 )
 INSERT INTO  @tblMulti
@@ -370,7 +370,7 @@ A.strModule,
 A.strType,
 B.strCurrency,
 intAccountIdOverride = A.intAccountId,
-intLOBSegmentOverrideId = A.intLOBSegmentCodeId,
+intLOBSegmentOverrideId = NULL,
 CL.* 
 FROM @tblMulti A 
 LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID

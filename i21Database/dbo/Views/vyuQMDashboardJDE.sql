@@ -51,3 +51,4 @@ LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOrigin
 	AND CA.strType = 'Origin'
 LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntity AS E ON E.intEntityId = S.intEntityId
+WHERE S.intTypeId = 1

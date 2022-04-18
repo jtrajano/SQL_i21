@@ -16,7 +16,7 @@ BEGIN
 
 	SELECT	@result = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, intRepresentingUOMId, @intUnitMeasureId, dblRepresentingQty))
 	FROM	tblQMSample 
-	WHERE	intProductTypeId = 8  AND intSampleStatusId = 3 AND intProductValueId = @intContractDetailId
+	WHERE	intProductTypeId = 8  AND intSampleStatusId = 3 AND intProductValueId = @intContractDetailId AND intTypeId = 1
 
 	RETURN @result;	
 END

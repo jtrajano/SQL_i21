@@ -14,7 +14,9 @@ SET  IDENTITY_INSERT tblCMCashFlowReportSummaryGroup ON
 			SELECT id = 4,  summaryGroup = '4: Total Sales Logistics Shipments', sort = 1003  UNION ALL
 			SELECT id = 5,  summaryGroup = '5: Total Purchase Logistics Shipments', sort = 1004  UNION ALL
 			SELECT id = 6,  summaryGroup = '6: Total Sales Contracts', sort = 1005  UNION ALL
-			SELECT id = 7,  summaryGroup = '7: Total Purchase Contracts', sort = 1006
+			SELECT id = 7,  summaryGroup = '7: Total Purchase Contracts', sort = 1006 UNION ALL
+			SELECT id = 8,  summaryGroup = '8: Total Sales Cost', sort = 1007 UNION ALL
+			SELECT id = 9,  summaryGroup = '9: Total Purchase Cost', sort = 1008
 
 	) AS SummaryGroupHardCodedValues
 		ON  SummaryGroupTable.intCashFlowReportSummaryGroupId = SummaryGroupHardCodedValues.id
@@ -57,7 +59,9 @@ SET  IDENTITY_INSERT tblCMCashFlowReportSummaryCode ON
 			SELECT id = 4,   reportCode = 'LG-1001', report = 'Sales Logistics Shipments', reportDescription = 'Sales Logistics Shipments',				sort = 1003, operation = 'Add', groupId = 4 UNION ALL
 			SELECT id = 5,   reportCode = 'LG-1002', report = 'Purchase Logistics Shipments', reportDescription = 'Purchase Logistics Shipments',		sort = 1004, operation = 'Subtract', groupId = 5 UNION ALL
 			SELECT id = 6,   reportCode = 'CT-1001', report = 'Sales Contracts', reportDescription = 'Sales Contracts',									sort = 1005, operation = 'Add', groupId = 6 UNION ALL
-			SELECT id = 7,   reportCode = 'CT-1002', report = 'Purchase Contracts', reportDescription = 'Purchase Contracts',							sort = 1006, operation = 'Subtract', groupId = 7
+			SELECT id = 7,   reportCode = 'CT-1002', report = 'Purchase Contracts', reportDescription = 'Purchase Contracts',							sort = 1006, operation = 'Subtract', groupId = 7 UNION ALL
+			SELECT id = 8,   reportCode = 'CT-2001', report = 'Sales Cost', reportDescription = 'Sales Cost',											sort = 1007, operation = 'Subtract', groupId = 8 UNION
+			SELECT id = 9,   reportCode = 'CT-2002', report = 'Purchase Cost', reportDescription = 'Purchase Cost',										sort = 1008, operation = 'Subtract', groupId = 9
 
 			--SELECT id = 1,   reportCode = 'CH-1001', report = 'Cash', reportDescription = 'Cash',														sort = 1000, operation = 'Add', groupId = 1 UNION ALL
 			--SELECT id = 2,   reportCode = 'AR-1001', report = 'AR Goods', reportDescription = 'AR Goods',												sort = 1001, operation = 'Add', groupId = 2 UNION ALL

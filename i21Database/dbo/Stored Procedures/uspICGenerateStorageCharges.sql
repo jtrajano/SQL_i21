@@ -38,6 +38,8 @@ DECLARE @_dblInboundAvailableQty AS NUMERIC(36,20)
 DECLARE @_dblInboundAvailableDeliveredQty AS NUMERIC(36,20)
 DECLARE @_dblUsedDeliveredQty AS NUMERIC(36,20)
 DECLARE @_dtmInboundAvailableStartDate AS DATETIME
+DECLARE @_intItemUOMId INT
+DECLARE @_intLotId INT
 
 SET @LocalToUTCDiff = (DATEDIFF(HOUR,GETDATE(),GETUTCDATE()))
 SET @UTCToLocalDiff = (DATEDIFF(HOUR,GETUTCDATE(),GETDATE()))
@@ -57,6 +59,8 @@ BEGIN TRY
 		,dblNoOfDays NUMERIC(18,6)
 		,intCommodityUnitMeasureId INT
 		,strRateType NVARCHAR(50)
+		,intItemUOMId INT
+		,dblUnitQty NUMERIC(36,20)
 	)
 
 	IF(ISNULL(@intSubLocationId,0) = 0)
@@ -69,6 +73,8 @@ BEGIN TRY
 			,dblNoOfDays
 			,intCommodityUnitMeasureId
 			,strRateType
+			,intItemUOMId
+			,dblUnitQty
 		)
 		SELECT 
 			A.intStorageRateId
@@ -78,7 +84,8 @@ BEGIN TRY
 			,B.dblNoOfDays
 			,B.intCommodityUnitMeasureId
 			,B.strRateType
-	
+			,D.intItemUOMId
+			,D.dblUnitQty
 		FROM (
 			SELECT TOP 1 
 				intStorageRateId
@@ -87,13 +94,17 @@ BEGIN TRY
 			FROM tblICStorageRate
 			WHERE intCompanyLocationId = @intLocationId
 			AND intCommodityId = @intCommodity
-			AND dtmStartDateUTC <= @dtmBillDateUTC
-			AND dtmEndDateUTC >= @dtmBillDateUTC
+			AND ISNULL(dtmStartDateUTC,'1900-01-01') <= @dtmBillDateUTC
+			AND ISNULL(dtmEndDateUTC,'9999-12-31') >= @dtmBillDateUTC
 			AND ysnActive = 1
 		) A
 		INNER JOIN tblICStorageRateDetail B
 			ON A.intStorageRateId = B.intStorageRateId
-		
+		LEFT JOIN tblICCommodityUnitMeasure C
+			ON B.intCommodityUnitMeasureId = C.intCommodityUnitMeasureId
+		LEFT JOIN tblICItemUOM D
+			ON D.intItemId = A.intItemId
+				AND D.intUnitMeasureId = C.intUnitMeasureId
 	END
 	ELSE
 	BEGIN
@@ -105,6 +116,8 @@ BEGIN TRY
 			,dblNoOfDays
 			,intCommodityUnitMeasureId
 			,strRateType
+			,intItemUOMId
+			,dblUnitQty
 		)
 		SELECT 
 			A.intStorageRateId
@@ -114,7 +127,8 @@ BEGIN TRY
 			,B.dblNoOfDays
 			,B.intCommodityUnitMeasureId
 			,B.strRateType
-	
+			,D.intItemUOMId
+			,D.dblUnitQty
 		FROM (
 			SELECT TOP 1 
 				intStorageRateId
@@ -124,16 +138,21 @@ BEGIN TRY
 			WHERE intStorageLocationId = @intSubLocationId
 			AND intCompanyLocationId = @intLocationId
 			AND intCommodityId = @intCommodity
-			AND dtmStartDateUTC <= @dtmBillDateUTC
-			AND dtmEndDateUTC >= @dtmBillDateUTC
+			AND ISNULL(dtmStartDateUTC,'1900-01-01') <= @dtmBillDateUTC
+			AND ISNULL(dtmEndDateUTC,'9999-12-31') >= @dtmBillDateUTC
 			AND ysnActive = 1
 		)A
 		INNER JOIN tblICStorageRateDetail B
 			ON A.intStorageRateId = B.intStorageRateId
+		LEFT JOIN tblICCommodityUnitMeasure C
+			ON B.intCommodityUnitMeasureId = C.intCommodityUnitMeasureId
+		LEFT JOIN tblICItemUOM D
+			ON D.intItemId = A.intItemId
+				AND D.intUnitMeasureId = C.intUnitMeasureId
 		
 	END
 
-	--GEt All Transaction from tblICInventoryStockMovement Based on Params
+	--GEt All Transaction from tblICInventoryStockMovement and previously generated charges Based on Params
 	DECLARE @tmpICInventoryForStorageCharge TABLE(
 		intRecId INT IDENTITY(1,1)
 		,intItemId INT
@@ -152,7 +171,13 @@ BEGIN TRY
 		,dtmLastBillDateUTC DATETIME
 		,dtmLastFreeWarehouseDateUTC DATETIME
 		,dtmLastFreeOutboundDateUTC DATETIME
-		
+		,dtmStartDateUTC DATETIME
+		,dblGross NUMERIC(36,20)
+		,dblNet NUMERIC(36,20)
+		,intWeightUOMId INT
+		,strWeightUOMId NVARCHAR(100)
+		,strItemUOM NVARCHAR(100)
+		,intInventoryStockMovementIdUsed INT
 	)
 
 	
@@ -351,6 +376,8 @@ BEGIN TRY
 	--WHERE dblQty < 0
 	--GROUP BY intItemId
 
+	
+
 	DECLARE @finalInventoryForStorageCharge TABLE(
 		intRecId INT IDENTITY(1,1)
 		,intItemId INT
@@ -375,11 +402,11 @@ BEGIN TRY
 		,dblNet NUMERIC(36,20)
 		,intWeightUOMId INT
 		,strWeightUOMId NVARCHAR(50)
+		,intInventoryStockMovementIdUsed INT
 	)
 
 	SELECT TOP 1 
 		@_intLoopId = intRecId
-		,@_intItemId = intItemId
 	FROM @tmpICInventoryForStorageCharge
 	ORDER BY intRecId ASC
 
@@ -389,6 +416,8 @@ BEGIN TRY
 		SELECT TOP 1 
 			@_intItemId  = intItemId
 			,@_dblQty = dblQty
+			,@_intLotId = intLotId
+			,@_intItemUOMId = intItemUOMId
 		FROM @tmpICInventoryForStorageCharge
 		WHERE intRecId = @_intLoopId
 
@@ -396,9 +425,46 @@ BEGIN TRY
 		-----INBOUND
 		IF(@_dblQty > 0)
 		BEGIN
-			--SELECT TOP 1 @_dblRemainingDeliveredQty = dblRemainingQuantityDelivered
-			--FROM @tblItemDeliveredQuantity
-			--WHERE intItemId = @_intItemId
+			
+			UPDATE @tmpICInventoryForStorageCharge
+			SET		dtmStartDateUTC = ISNULL(DATEADD(DAY,1,dtmLastBillDateUTC),ISNULL(DATEADD(DAY,1,dtmLastFreeWhseDateUTC),DATEADD(HOUR,@LocalToUTCDiff,A.dtmDate)))
+					,dtmLastFreeWarehouseDateUTC = B.dtmLastFreeWhseDateUTC
+					,dblGross = B.dblGross
+					,dblNet = B.dblNet
+					,intWeightUOMId = B.intWeightUOMId
+					,strWeightUOMId = B.strWeightUnitMeasure
+					--,dblQty = B.dblOpenReceive
+					--,strItemUOM = B.strItemUnitMeasure
+					--,intItemUOMId = intUnitMeasureId
+			FROM @tmpICInventoryForStorageCharge A
+			---------------------
+			-------Get IR Detail
+			---------------------
+			OUTER APPLY (  
+				SELECT TOP 1 
+					AA.dblGross
+					,AA.dblNet
+					,AA.intWeightUOMId
+					,strWeightUnitMeasure = CC.strUnitMeasure
+					,dtmLastFreeWhseDateUTC = (DATEADD(HOUR,@LocalToUTCDiff,DD.dtmLastFreeWhseDate))
+					,AA.dblOpenReceive
+					,AA.intUnitMeasureId
+					,strItemUnitMeasure = FF.strUnitMeasure
+				FROM tblICInventoryReceiptItem AA
+				INNER JOIN tblICInventoryReceipt DD
+					ON AA.intInventoryReceiptId = DD.intInventoryReceiptId
+				LEFT JOIN tblICItemUOM BB
+					ON AA.intWeightUOMId = BB.intItemUOMId
+				LEFT JOIN tblICUnitMeasure CC
+					ON BB.intUnitMeasureId = CC.intUnitMeasureId
+				LEFT JOIN tblICItemUOM EE
+					ON AA.intUnitMeasureId = EE.intItemUOMId
+				LEFT JOIN tblICUnitMeasure FF
+					ON EE.intUnitMeasureId = FF.intUnitMeasureId
+				WHERE AA.intInventoryReceiptItemId = A.intTransactionDetailId
+					AND A.intTransactionTypeId = 4 --- Inventory receipt
+			) B   
+			WHERE intRecId = @_intLoopId
 
 
 			INSERT INTO @finalInventoryForStorageCharge (
@@ -439,36 +505,15 @@ BEGIN TRY
 				,A.intSubLocationId
 				,A.intInventoryStockMovementId
 				,A.dblDeliveredQuantity
-				,dtmStartDateUTC = ISNULL(DATEADD(DAY,1,dtmLastBillDateUTC),ISNULL(DATEADD(DAY,1,dtmLastFreeWhseDateUTC),DATEADD(HOUR,@LocalToUTCDiff,A.dtmDate)))
+				,dtmStartDateUTC
 				,dtmEndDateUTC = @dtmBillDateUTC
 				,A.dtmLastBillDateUTC 
-				,dtmLastFreeWarehouseDateUTC = B.dtmLastFreeWhseDateUTC
-				,dblGross = B.dblGross
-				,dblNet = B.dblNet
-				,intWeightUOMId = B.intWeightUOMId
-				,strWeightUOMId = B.strUnitMeasure
+				,dtmLastFreeWarehouseDateUTC
+				,dblGross = dblGross
+				,dblNet = dblNet
+				,intWeightUOMId = intWeightUOMId
+				,strWeightUOMId = strWeightUOMId
 			FROM @tmpICInventoryForStorageCharge A
-			---------------------
-			-------Get IR Detail
-			---------------------
-			OUTER APPLY (  
-				SELECT TOP 1 
-					AA.dblGross
-					,AA.dblNet
-					,AA.intWeightUOMId
-					,CC.strUnitMeasure
-					,dtmLastFreeWhseDateUTC = (DATEADD(HOUR,@LocalToUTCDiff,DD.dtmLastFreeWhseDate))
-				FROM tblICInventoryReceiptItem AA
-				INNER JOIN tblICInventoryReceipt DD
-					ON AA.intInventoryReceiptId = DD.intInventoryReceiptId
-				INNER JOIN tblICItemUOM BB
-					ON AA.intWeightUOMId = BB.intItemUOMId
-				INNER JOIN tblICUnitMeasure CC
-					ON BB.intUnitMeasureId = CC.intUnitMeasureId
-			
-				WHERE AA.intInventoryReceiptItemId = A.intTransactionDetailId
-					AND A.intTransactionTypeId = 4 --- Inventory receipt
-			) B   
 			WHERE intRecId = @_intLoopId
 
 		END
@@ -534,10 +579,11 @@ BEGIN TRY
 			WHERE A.intRecId < @_intLoopId
 				AND A.dblQty > 0
 				AND (A.dblQty - ABS(A.dblDeliveredQuantity)) > 0
-				AND intItemId = @_intItemId
-				AND intLotId = A.intLotId
+				AND A.intItemId = @_intItemId
+				AND A.intLotId = @_intLotId
+				AND intItemUOMId = @_intItemUOMId
 			ORDER BY A.intRecId ASC
-
+			
 			---Inbound qty is not enough for the outbound
 			IF(ISNULL(@_dblInboundAvailableQty,0) + ISNULL(@_dblInboundAvailableDeliveredQty,0) + @_dblQty) < 0 AND ISNULL(@_intInventoryStockMovementId,0) > 0
 			BEGIN
@@ -572,6 +618,7 @@ BEGIN TRY
 					,dtmLastBillDateUTC 
 					,dtmLastFreeWarehouseDateUTC
 					,dtmLastFreeOutboundDateUTC
+					,intInventoryStockMovementIdUsed
 				)
 				SELECT 
 					A.intItemId
@@ -592,6 +639,7 @@ BEGIN TRY
 					,A.dtmLastBillDateUTC
 					,A.dtmLastFreeWarehouseDateUTC
 					,A.dtmLastFreeOutboundDateUTC
+					,@_intInventoryStockMovementId
 				FROM @tmpICInventoryForStorageCharge A
 				WHERE intRecId = @_intLoopId
 
@@ -629,6 +677,7 @@ BEGIN TRY
 					,dtmLastBillDateUTC 
 					,dtmLastFreeWarehouseDateUTC
 					,dtmLastFreeOutboundDateUTC
+					,intInventoryStockMovementIdUsed
 				)
 				SELECT 
 					A.intItemId
@@ -649,6 +698,7 @@ BEGIN TRY
 					,A.dtmLastBillDateUTC 
 					,A.dtmLastFreeWarehouseDateUTC
 					,dtmLastFreeOutboundDateUTC
+					,@_intInventoryStockMovementId
 				FROM @tmpICInventoryForStorageCharge A
 				WHERE intRecId = @_intLoopId
 			END
@@ -662,7 +712,7 @@ BEGIN TRY
 							ORDER BY intRecId ASC)
 		
 	END
-
+	
 	---Get Initial Details for the transaction to be charged
 	DECLARE @tblChargeTableDetail TABLE (
 		intItemId INT
@@ -703,6 +753,9 @@ BEGIN TRY
 		,intStorageRateId INT
 		,strPlanNo NVARCHAR(50)
 		,strRateType NVARCHAR(15)
+		,dblRateUnitQty NUMERIC(36,20)
+		,dblRateItemUOMUnitQty NUMERIC(36,20) -- conversion factor for the item UOM base on the charge item
+		,intInventoryStockMovementIdUsed INT
 	)
 	
 	
@@ -746,6 +799,9 @@ BEGIN TRY
 		,intStorageRateId
 		,strPlanNo
 		,strRateType
+		,dblRateUnitQty
+		,dblRateItemUOMUnitQty
+		,intInventoryStockMovementIdUsed
 	)
 
 	SELECT 
@@ -761,14 +817,14 @@ BEGIN TRY
 		,dblReceivedQuantity = CASE WHEN A.dblQty < 0 THEN 0 ELSE A.dblQty END
 		,dblDeliveredQuantity =  A.dblDeliveredQuantity 
 		,intItemUOMId = A.intItemUOMId
-		,intItemChargeUOMId = B.intCommodityUnitMeasureId
+		,intItemChargeUOMId = ISNULL(B.intItemUOMId,A.intItemUOMId)
 		,dblGross = A.dblGross
 		,dblNet = A.dblNet
 		,intWeightUOMId = A.intWeightUOMId
 		,dblNumberOfDays = 0
 		,dblChargeQuantity = A.dblQty
 		,dblRate = B.dblRate
-		,intRateUOMId = ISNULL(B.intCommodityUnitMeasureId,A.intItemUOMId)
+		,intRateUOMId = ISNULL(B.intItemUOMId,A.intItemUOMId)
 		,dblStorageCharge = 0
 		,intTransactionDetailId = ISNULL(A.intTransactionDetailId,0)
 		,intStorageLocationId = A.intStorageLocationId
@@ -787,6 +843,9 @@ BEGIN TRY
 		,B.intStorageRateId
 		,B.strPlanNo
 		,B.strRateType
+		,dblRateUnitQty = ISNULL(B.dblUnitQty,1)
+		,dblRateItemUOMUnitQty = ISNULL(K.dblUnitQty,1)
+		,A.intInventoryStockMovementIdUsed
 	FROM @finalInventoryForStorageCharge A
 	OUTER APPLY (
 		SELECT TOP 1
@@ -796,9 +855,11 @@ BEGIN TRY
 			,dblRate
 			,intItemId
 			,strRateType
+			,intItemUOMId
+			,dblUnitQty
 		FROM @tmpICStorageRate
-		WHERE dblNoOfDays <= (DATEDIFF(DAY,A.dtmStartDateUTC,A.dtmEndDateUTC) + 1)
-		ORDER BY dblNoOfDays DESC
+		WHERE dblNoOfDays <= CASE WHEN (DATEDIFF(DAY,A.dtmStartDateUTC,A.dtmEndDateUTC) + 1) < 0 THEN 0 ELSE  (DATEDIFF(DAY,A.dtmStartDateUTC,A.dtmEndDateUTC) + 1) END
+		ORDER BY dblNoOfDays ASC
 	) B
 	INNER JOIN tblICItem C
 		ON A.intItemId = C.intItemId
@@ -812,14 +873,22 @@ BEGIN TRY
 		ON G.intUnitMeasureId = H.intUnitMeasureId
 	LEFT JOIN tblICItem J
 		ON B.intItemId = J.intItemId
-	WHERE B.intStorageRateId IS NOT NULL
+	OUTER APPLY(
+		SELECT TOP 1 
+			AA.intItemUOMId
+			,AA.dblUnitQty
+		FROM tblICItemUOM AA
+		WHERE AA.intItemId = B.intItemId
+			AND AA.intUnitMeasureId = G.intUnitMeasureId
+	) K
+	WHERE B.intStorageRateId IS NOT NULL OR (B.intStorageRateId IS NULL AND A.dblQty <= 0 AND A.dblDeliveredQuantity < 0)
 		
-
+		
 
 	------UPDATE no of Days
 	-------------------------------------------
 	UPDATE @tblChargeTableDetail
-	SET dblNumberOfDays = CASE WHEN (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) < 0 THEN 0 ELSE (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) END
+	SET dblNumberOfDays = ISNULL(CASE WHEN (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) < 0 THEN 0 ELSE (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) END,0)
 
 	----UPDATE charge Quantity
 	-----------------------------------------------
@@ -830,17 +899,17 @@ BEGIN TRY
 	-----UPDATE Storage Charge
 	-------------------------------------------------
 	UPDATE  @tblChargeTableDetail
-	SET dblStorageCharge =  CASE WHEN strRateType = 'Per Unit' THEN
-									dblNumberOfDays * ABS(dblChargeQuantity) * dblRate
+	SET dblStorageCharge =  ROUND( CASE WHEN strRateType = 'Per Unit' THEN
+									dblNumberOfDays * ABS(dblChargeQuantity) * dblRate * dblRateUnitQty * dblRateItemUOMUnitQty
 								WHEN strRateType = 'Gross' THEN
-									dblNumberOfDays * ABS(dblGross) * dblRate
+									dblNumberOfDays * ABS(dblGross) * dblRate * dblRateUnitQty * dblRateItemUOMUnitQty
 								WHEN strRateType = 'Net' THEN
-									dblNumberOfDays * ABS(dblNet) * dblRate
+									dblNumberOfDays * ABS(dblNet) * dblRate * dblRateUnitQty * dblRateItemUOMUnitQty
 								WHEN strRateType = 'Flat' THEN
-									dblRate
+									dblRate * dblRateUnitQty * dblRateItemUOMUnitQty
 								ELSE
-									dblNumberOfDays * ABS(dblChargeQuantity) * dblRate
-							END
+									dblNumberOfDays * ABS(dblChargeQuantity) * dblRate * dblRateUnitQty * dblRateItemUOMUnitQty
+							END,2)
 
 	------UPDATE Customer no of Days
 	-------------------------------------------
@@ -853,7 +922,7 @@ BEGIN TRY
 	-----UPDATE Customer Charge
 	-------------------------------------------------
 	UPDATE  @tblChargeTableDetail
-	SET dblCustomerCharge = dblCustomerNoOfDays * ABS(dblChargeQuantity) * dblRate
+	SET dblCustomerCharge = ROUND((dblCustomerNoOfDays * ABS(dblChargeQuantity) * dblRate * dblRateUnitQty * dblRateItemUOMUnitQty),2)
 
 
 	SELECT

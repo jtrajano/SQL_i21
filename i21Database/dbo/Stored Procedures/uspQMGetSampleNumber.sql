@@ -219,6 +219,7 @@ BEGIN
 		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN tblQMControlPoint C ON C.intControlPointId = ST.intControlPointId
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intTypeId = 1
 			AND C.intControlPointId = (CASE WHEN @intPreProductionControlPointId IS NOT NULL AND @ysnSampleBasedOnControlPoint = 1 THEN @intPreProductionControlPointId ELSE C.intControlPointId END)
 			AND EXISTS (
 				SELECT *
@@ -235,6 +236,7 @@ BEGIN
 		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN tblQMControlPoint C ON C.intControlPointId = ST.intControlPointId
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intTypeId = 1
 			AND C.intControlPointId = (CASE WHEN @intPreProductionControlPointId IS NOT NULL AND @ysnSampleBasedOnControlPoint = 1 THEN @intPreProductionControlPointId ELSE C.intControlPointId END)
 			AND EXISTS (
 				SELECT *
@@ -409,6 +411,7 @@ BEGIN
 		JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId
 			AND SU.intUserRoleID = @intUserRoleID
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intTypeId = 1
 			AND EXISTS (
 				SELECT *
 				FROM @tblMFFinalLot L
@@ -422,6 +425,7 @@ BEGIN
 		SELECT @strSampleId = COALESCE(@strSampleId + '|^|', '') + CONVERT(NVARCHAR, S.intSampleId)
 		FROM tblQMSample S
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intTypeId = 1
 			AND EXISTS (
 				SELECT *
 				FROM @tblMFFinalLot L
@@ -441,6 +445,7 @@ BEGIN
 			AND SU.intUserRoleID = @intUserRoleID
 		WHERE S.intProductTypeId = @intProductTypeId
 			AND S.intProductValueId = @intProductValueId
+			AND S.intTypeId = 1
 		ORDER BY S.intSampleId DESC
 	END
 	ELSE
@@ -449,6 +454,7 @@ BEGIN
 		FROM tblQMSample S
 		WHERE S.intProductTypeId = @intProductTypeId
 			AND S.intProductValueId = @intProductValueId
+			AND S.intTypeId = 1
 		ORDER BY S.intSampleId DESC
 	END
 END

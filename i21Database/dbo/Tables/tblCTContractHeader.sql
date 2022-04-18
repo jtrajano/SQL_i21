@@ -95,6 +95,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intDaysForFinance] INT NULL, 
 	[intSampleTypeId] [int] NULL,
 	[ysnLocalCurrency] BIT default ((0)),
+	[ysnPrintCropYear] BIT default ((0)),
 	
 	--CT-7027
 	--[intLastEntityId] INT NULL,

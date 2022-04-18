@@ -487,6 +487,12 @@ BEGIN TRY
 														THEN 100 
 														ELSE 1 
 														END,
+							dblFixationPrice =	(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblFixationPrice) * @dblArbitrageFX) / 
+														CASE
+														WHEN @toSubCurrency = 1
+														THEN 100 
+														ELSE 1 
+														END,
 							dblFinalPrice	=	((dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,@intFinalPriceUOMId,FD.dblFixationPrice) * @dblArbitrageFX) / 
 														CASE
 														WHEN @toSubCurrency = 1
@@ -532,7 +538,7 @@ BEGIN TRY
 			
 					UPDATE	CD
 					SET		CD.dblBasis				=	(
-															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,(ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0)) + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intSpreadUOMId,@intBasisUOMId,ISNULL(@dblTotalSpread,0)))) / 
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,(ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0)) + (dbo.fnCTConvertQuantityToTargetCommodityUOM(@intSpreadUOMId,@intBasisUOMId,ISNULL(@dblTotalSpread,0)) / @dblArbitrageFX))) / 
 															CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																	WHEN	@intBasisCurrencyId <> @intCurrencyId	
 																	AND		@ysnBasisSubCurrency = 1				THEN 100 
@@ -697,7 +703,7 @@ BEGIN TRY
 
 				UPDATE	CD
 				SET		CD.intPricingTypeId		=	1,
-						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(PF.dblPriceWORollArb,0))  / 
+						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(PF.dblPriceWORollArb,0)) / 
 														CASE
 														WHEN @toSubCurrency = 1
 														THEN 100
@@ -714,7 +720,7 @@ BEGIN TRY
 													(
 														CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 														(
-															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(dblPriceWORollArb,0)) / 
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intSpreadUOMId,ISNULL(PF.dblPriceWORollArb,0)) / 
 																CASE
 																WHEN @toSubCurrency = 1
 																THEN 100

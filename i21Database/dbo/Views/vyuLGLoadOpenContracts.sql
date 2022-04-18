@@ -174,6 +174,7 @@ OUTER APPLY (
 	JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 	WHERE S.intContractDetailId = CD.intContractDetailId
+	AND S.intTypeId = 1
 	ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 CROSS APPLY tblLGCompanyPreference CP
 OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC

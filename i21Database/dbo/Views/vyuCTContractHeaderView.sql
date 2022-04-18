@@ -49,8 +49,8 @@ AS
 			CH.intDaysForFinance,
 			CH.intSampleTypeId,
 			NM.strSampleTypeName,
-			CH.ysnLocalCurrency
-			
+			CH.ysnLocalCurrency,
+			CH.ysnPrintCropYear
 	FROM	tblCTContractHeader					CH
 	cross apply (select * from tblCTCompanyPreference) CP
 	jOIN	vyuCTContractHeaderNotMapped		NM	ON	NM.intContractHeaderId				=		CH.intContractHeaderId

@@ -131,5 +131,17 @@
 	[intDaysOld]						INT				NULL,
 	[strServiceChargeItem]				NVARCHAR(100)	NULL,
 	[strServiceChareInvoiceNumber]		NVARCHAR(100)	NULL,
-	[dtmDateSC]							DATETIME		NULL
+	[dtmDateSC]							DATETIME		NULL,
+	[strPrice]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strQtyShipped]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strShipmentGrossWt]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strShipmentTareWt]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strShipmentNetWt]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strFLOId]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strGrade]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strWeight]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strEDICode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strDestinationCity]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strMVessel]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[ysnCustomsReleased]				BIT             NULL
 );

@@ -105,3 +105,4 @@ LEFT JOIN dbo.tblCTContractDetail AS CD2 ON CD2.intContractDetailId = LD2.intPCo
 LEFT JOIN dbo.tblCTContractHeader AS CH2 ON CH2.intContractHeaderId = CD2.intContractHeaderId
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
+WHERE S.intTypeId = 1

@@ -41,6 +41,7 @@ BEGIN TRY
 			  FROM dbo.tblQMSample S
 			  JOIN dbo.tblQMTestResult TR ON TR.intSampleId = S.intSampleId
 				  AND S.intSampleStatusId = 3
+				  AND S.intTypeId = 1
 				  AND S.intProductTypeId = ' + CONVERT(NVARCHAR, @intProductTypeId) + '
 				  AND S.intProductValueId = ' + CONVERT(NVARCHAR, @intProductValueId) + '
 			  ORDER BY S.intSampleId DESC'
@@ -76,6 +77,7 @@ BEGIN TRY
 			FROM @SampleNo
 			)
 		AND S.intSampleStatusId = 3
+		AND S.intTypeId = 1
 		AND TR.intProductValueId = @intProductValueId
 		AND TR.intProductTypeId = @intProductTypeId
 		AND TR.strPropertyValue <> ''
