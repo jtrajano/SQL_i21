@@ -10,6 +10,8 @@
 	[dblTotalCreditLimit] NUMERIC(18, 6) NULL,
 	[intCurrencyID] INT NOT NULL,
 	[strCurrency] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intCreditCurrencyId] INT NOT NULL,
+	[strCreditCurrency] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dblHaircut] NUMERIC(18, 6) NULL,
     [intPaymentConditionId] INT NOT NULL,
 	[strPaymentCondition] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NOT NULL,

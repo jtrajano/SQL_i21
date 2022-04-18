@@ -1,34 +1,35 @@
 ﻿CREATE VIEW [dbo].[vyuARTaxReport]
 AS
-SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
+SELECT intEntityCustomerId= INVOICE.intEntityCustomerId
 	 , strInvoiceNumber			= INVOICE.strInvoiceNumber
-	 , strTransactionType       = INVOICE.strTransactionType
-	 , strSourceType			= INVOICE.strType
-	 , strCFTransactionType     = CF.strTransactionType
-	 , dtmDate					= CAST(INVOICE.dtmDate AS DATE)
-	 , dtmPostDate				= CAST(INVOICE.dtmPostDate AS DATE)
-	 , dtmDueDate				= CAST(INVOICE.dtmDueDate AS DATE)
-	 , intCurrencyId			= INVOICE.intCurrencyId
-	 , intCompanyLocationId		= INVOICE.intCompanyLocationId
-	 , intShipToLocationId		= INVOICE.intShipToLocationId
-	 , intTaxCodeId				= DETAIL.intTaxCodeId
-	 , intInvoiceId				= DETAIL.intInvoiceId
+	 , strTransactionType  	= INVOICE.strTransactionType
+	 , strSourceType				= INVOICE.strType
+	 , strCFTransactionType = CF.strTransactionType
+	 , dtmDate							= CAST(INVOICE.dtmDate AS DATE)
+	 , dtmPostDate					= CAST(INVOICE.dtmPostDate AS DATE)
+	 , dtmDueDate						= CAST(INVOICE.dtmDueDate AS DATE)
+	 , intCurrencyId				= INVOICE.intCurrencyId
+	 , intCompanyLocationId	= INVOICE.intCompanyLocationId
+	 , intShipToLocationId	= INVOICE.intShipToLocationId
+	 , intTaxCodeId					= DETAIL.intTaxCodeId
+	 , intInvoiceId					= DETAIL.intInvoiceId
 	 , intInvoiceDetailId		= DETAIL.intInvoiceDetailId
-	 , intItemId				= DETAIL.intItemId
-	 , intItemUOMId				= DETAIL.intItemUOMId
-	 , intTaxGroupId			= DETAIL.intTaxGroupId
-	 , strCalculationMethod		= DETAIL.strCalculationMethod
-	 , dblRate					= DETAIL.dblRate
-	 , dblUnitPrice				= DETAIL.dblPrice * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblQtyShipped			= DETAIL.dblQtyShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblAdjustedTax			= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTax					= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTotalAdjustedTax		= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTotalTax				= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , ysnTaxExempt				= DETAIL.ysnTaxExempt
+	 , intItemId						= DETAIL.intItemId
+	 , intItemUOMId					= DETAIL.intItemUOMId
+	 , intTaxGroupId				= DETAIL.intTaxGroupId
+	 , strCalculationMethod	= DETAIL.strCalculationMethod
+	 , dblRate							= DETAIL.dblRate
+	 , dblUnitPrice					= DETAIL.dblPrice * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblQtyShipped				= DETAIL.dblQtyShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblAdjustedTax				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTax								= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTotalAdjustedTax	= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTotalTax					= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , ysnTaxExempt					= DETAIL.ysnTaxExempt
 	 , ysnInvalidSetup			= DETAIL.ysnInvalidSetup
 	 , dblTaxDifference			= (DETAIL.dblAdjustedTax - DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTaxAmount					= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTaxAmountFunctional= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000
@@ -36,14 +37,14 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	, dblNonTaxableFunctional    = (CASE WHEN INVOICE.dblBaseTax = 0 
+	, dblNonTaxableFunctional= (CASE WHEN INVOICE.dblBaseTax = 0 
 		 							THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 									ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax = 0.000000
 												THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTaxable       		= (CASE WHEN INVOICE.dblTax = 0 
+	 , dblTaxable       	= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN 0 
 									ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
 												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
@@ -53,7 +54,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	, dblTaxableFunctional       = (CASE WHEN INVOICE.dblBaseTax = 0 
+	, dblTaxableFunctional	= (CASE WHEN INVOICE.dblBaseTax = 0 
 		 							THEN 0 
 									ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax <> 0.000000 
 												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
@@ -63,7 +64,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTotalSales 			= (CASE WHEN INVOICE.dblTax = 0 
+	 , dblTotalSales 				= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 									ELSE ((CASE WHEN DETAIL.dblAdjustedTax = 0.000000
 												THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
@@ -72,6 +73,20 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 											(CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
 												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
 														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+														  ELSE 0.000000
+													 END
+												ELSE 0.000000 
+											END))
+									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTotalSalesFunctional= (CASE WHEN INVOICE.dblBaseTax = 0 
+		 							THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
+									ELSE ((CASE WHEN DETAIL.dblBaseAdjustedTax = 0.000000
+												THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
+												ELSE 0.000000 
+											END) +
+											(CASE WHEN DETAIL.dblBaseAdjustedTax <> 0.000000 
+												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
+														  THEN DETAIL.dblBaseLineTotal * (DETAIL.dblBaseAdjustedTax/ISNULL(NULLIF(DETAIL.dblBaseTotalAdjustedTax, 0), DETAIL.dblBaseAdjustedTax))
 														  ELSE 0.000000
 													 END
 												ELSE 0.000000 

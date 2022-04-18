@@ -93,6 +93,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
+		AND H.strType <> 'Tank Delivery'
 		
 	UNION ALL
 
@@ -134,6 +135,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
+		AND H.strType <> 'Tank Delivery'
 		
 	UNION ALL
 
@@ -175,6 +177,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
+		AND H.strType <> 'Tank Delivery'
 		
 	UNION ALL
 		
@@ -215,6 +218,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
+		AND H.strType <> 'Tank Delivery'
 		
 	UNION ALL	
 
@@ -249,6 +253,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(H.intLoadId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
+		AND H.strType <> 'Tank Delivery'
 		
 	UNION ALL
 		
@@ -284,6 +289,7 @@ BEGIN TRY
 		-- AND ISNULL(Detail.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(Header.intTransactionId, 0) = 0
 		AND Header.ysnFromProvisional = 0
+		AND Header.strType <> 'Tank Delivery'
 
 	UNION ALL
 
@@ -309,6 +315,7 @@ BEGIN TRY
       AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)    
       AND ISNULL(Header.intTransactionId, 0) = 0
       AND @TransactionId IS NULL
+	  AND Header.strType <> 'Tank Delivery'
 
 	UNION ALL
 
@@ -322,6 +329,7 @@ BEGIN TRY
 		, I.intLoadDetailId
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail D ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN tblARInvoice Header ON D.intInvoiceId = Header.intInvoiceId 
 	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
 	INNER JOIN tblSCTicket T ON D.intTicketId = T.intTicketId
 	LEFT JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
@@ -335,6 +343,7 @@ BEGIN TRY
 		AND TD.intId IS NULL
 		AND T.strDistributionOption = 'SO'
 		AND I.strTransactionType IN ('Cash', 'Invoice')
+		AND Header.strType <> 'Tank Delivery'
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
