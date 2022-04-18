@@ -159,7 +159,7 @@ AS
 			CH.intDaysForFinance,
 			CH.ysnLocalCurrency,
 			NM.ysnProvisionalVoucher,
-			NM.strProvisionalVoucherIds
+			NM.strProvisionalVoucherIds,
 			CH.ysnPrintCropYear
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
