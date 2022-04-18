@@ -43,7 +43,8 @@ SELECT S.intSampleId
 	-- Cupping Session Fields
     ,CSH.strCuppingSessionNumber
 	,CSH.intCuppingSessionId
-	,CSH.dtmCuppingDateTime
+	,CSH.dtmCuppingDate
+	,CSH.dtmCuppingTime
 	,CSD.intRank
     ,CSD.intCuppingSessionDetailId
 FROM tblQMSample S
