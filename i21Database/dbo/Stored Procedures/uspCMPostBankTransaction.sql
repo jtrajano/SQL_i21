@@ -537,6 +537,45 @@ BEGIN
 		
 	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 
+	-- POST MATCHED DERIVATIVES ON SUCCESSFUL POSTING
+	IF (@BANK_TRANSACTION_TYPE_Id = 25)
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId 
+				AND strSourceModule = 'Risk Management' 
+				AND intMatchDerivativeNo IS NOT NULL
+		)
+		BEGIN
+			DECLARE
+				@tblMatchNo Id,
+				@strUser NVARCHAR(100)
+
+			SELECT @strUser = EC.strUserName 
+			FROM tblEMEntity EM
+			JOIN tblEMEntityCredential EC
+				ON EC.intEntityId = EM.intEntityId
+			WHERE EM.intEntityId = @intEntityId
+
+			INSERT INTO @tblMatchNo
+			SELECT intMatchDerivativeNo 
+			FROM tblCMBankTransactionDetail 
+			WHERE
+				intTransactionId = @intTransactionId
+				AND strSourceModule = 'Risk Management'
+				AND intMatchDerivativeNo IS NOT NULL
+
+			WHILE EXISTS(SELECT TOP 1 1 FROM @tblMatchNo)
+			BEGIN
+				DECLARE @intMatchNo INT
+				SELECT TOP 1 @intMatchNo = intId FROM @tblMatchNo
+
+				EXEC [dbo].[uspRKRecordPostedMatchPnS] @intMatchNo = @intMatchNo, @dblGrossPL = 0, @dblNetPnL = 0, @strUserName = @strUser
+
+				DELETE @tblMatchNo WHERE intId = @intMatchNo
+			END
+		END
+	END
+
+
 	UPDATE tblCMBankTransaction
 	SET		ysnPosted = @ysnPost
 			,intFiscalPeriodId = F.intGLFiscalYearPeriodId
@@ -572,6 +611,44 @@ BEGIN
 				AND strSourceModule = 'Risk Management'
 
 				EXEC [dbo].[uspCMUpdatePostedDerivativeEntries] @Derivatives, 0, @derivativeSuccessCount
+			END
+		END
+
+		-- UNPOST MATCHED DERIVATIVES ON UNPOSTING
+		IF (@BANK_TRANSACTION_TYPE_Id = 25)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId 
+					AND strSourceModule = 'Risk Management' 
+					AND intMatchDerivativeNo IS NOT NULL
+			)
+			BEGIN
+				DECLARE
+					@tblMatchDerivativeNo Id,
+					@strUserName NVARCHAR(100)
+
+				SELECT @strUserName = EC.strUserName 
+				FROM tblEMEntity EM
+				JOIN tblEMEntityCredential EC
+					ON EC.intEntityId = EM.intEntityId
+				WHERE EM.intEntityId = @intEntityId
+
+				INSERT INTO @tblMatchDerivativeNo
+				SELECT intMatchDerivativeNo 
+				FROM tblCMBankTransactionDetail 
+				WHERE
+					intTransactionId = @intTransactionId
+					AND strSourceModule = 'Risk Management'
+					AND intMatchDerivativeNo IS NOT NULL
+
+				WHILE EXISTS(SELECT TOP 1 1 FROM @tblMatchDerivativeNo)
+				BEGIN
+					DECLARE @intCurrentMatchNo INT
+					SELECT TOP 1 @intCurrentMatchNo = intId FROM @tblMatchDerivativeNo
+
+					EXEC [dbo].[uspRKUnpostMatchPnS] @intMatchNo = @intCurrentMatchNo, @strUserName = @strUserName
+
+					DELETE @tblMatchDerivativeNo WHERE intId = @intCurrentMatchNo
+				END
 			END
 		END
 		
