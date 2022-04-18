@@ -17,6 +17,7 @@ SELECT
     , vd.dblPrice
     , vd.dblTotalTax
     , vd.strTaxGroup
+    , vd.intTaxGroupId
     , vd.strSubLocation strStorageLocation
     , vd.strStorageLocation strStorageUnit
     , vd.dblStandardWeight
