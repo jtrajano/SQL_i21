@@ -70,11 +70,11 @@ AS
                  [strLOBSegment],
                  [strDescription],
                  [strUOM])
-    SELECT Replace(Ltrim(Rtrim([strPrimarySegment])), '"', ''),
-           Replace(Ltrim(Rtrim([strLocationSegment])), '"', ''),
-           Replace(Ltrim(Rtrim([strLOBSegment])), '"', ''),
-           Replace(Ltrim(Rtrim([strDescription])), '"', ''),
-           Replace(Ltrim(Rtrim([strUOM])), '"', '')
+    SELECT Replace(LTRIM(RTRIM([strPrimarySegment])), '"', ''),
+           Replace(LTRIM(RTRIM([strLocationSegment])), '"', ''),
+           Replace(LTRIM(RTRIM([strLOBSegment])), '"', ''),
+           Replace(LTRIM(RTRIM([strDescription])), '"', ''),
+           Replace(LTRIM(RTRIM([strUOM])), '"', '')
     FROM   tblStagingTable
 
     CREATE UNIQUE INDEX indunique
@@ -95,15 +95,15 @@ AS
 
     UPDATE [tblGLAccountImportDataStaging2]
     SET    ysnNoDescription = 1
-    WHERE  Rtrim(Ltrim(ISNULL([strDescription], ''))) = ''
+    WHERE  RTRIM(LTRIM(ISNULL([strDescription], ''))) = ''
 
     UPDATE [tblGLAccountImportDataStaging2]
-    SET    [ysnMissingLOBSegment] = Cast(0 AS BIT)
+    SET    [ysnMissingLOBSegment] = CAST(0 AS BIT)
 
     -- UPDATE EXISTING GL ACCOUNT  
     UPDATE T
-    SET    [ysnGLAccountExist] = Cast(1 AS BIT),
-           ysnInvalid = Cast(1 AS BIT)
+    SET    [ysnGLAccountExist] = CAST(1 AS BIT),
+           ysnInvalid = CAST(1 AS BIT)
     FROM   [tblGLAccountImportDataStaging2] T
            JOIN tblGLAccount A
              ON A.strAccountId COLLATE Latin1_General_CI_AS =
@@ -113,16 +113,16 @@ AS
     SET    intAccountUnitId = A.intAccountUnitId
     FROM   [tblGLAccountImportDataStaging2] T
            LEFT JOIN tblGLAccountUnit A
-                  ON Lower(A.strUOMCode) COLLATE Latin1_General_CI_AS =
-                     Lower(Rtrim(
-                     Ltrim(ISNULL(T.strUOM, '')))) COLLATE Latin1_General_CI_AS
+                  ON LOWER(A.strUOMCode) COLLATE Latin1_General_CI_AS =
+                     LOWER(RTRIM(
+                     LTRIM(ISNULL(T.strUOM, '')))) COLLATE Latin1_General_CI_AS
 
     UPDATE T
     SET    intPrimarySegmentId = A.intAccountSegmentId
     FROM   [tblGLAccountImportDataStaging2] T
            LEFT JOIN tblGLAccountSegment A
                   ON A.strCode COLLATE Latin1_General_CI_AS =
-                     Rtrim(Ltrim(T.strPrimarySegment)) COLLATE
+                     RTRIM(LTRIM(T.strPrimarySegment)) COLLATE
                      Latin1_General_CI_AS
            JOIN tblGLAccountStructure S
              ON S.intAccountStructureId = A.intAccountStructureId
@@ -133,7 +133,7 @@ AS
     FROM   [tblGLAccountImportDataStaging2] T
            LEFT JOIN tblGLAccountSegment A
                   ON A.strCode COLLATE Latin1_General_CI_AS =
-                     Rtrim(Ltrim(T.strLocationSegment)) COLLATE
+                     RTRIM(LTRIM(T.strLocationSegment)) COLLATE
                      Latin1_General_CI_AS
            JOIN tblGLAccountStructure S
              ON S.intAccountStructureId = A.intAccountStructureId
@@ -146,7 +146,7 @@ AS
           FROM   [tblGLAccountImportDataStaging2] T
                  LEFT JOIN tblGLAccountSegment A
                         ON A.strCode COLLATE Latin1_General_CI_AS =
-                           Rtrim(Ltrim(T.strLOBSegment)) COLLATE
+                           RTRIM(LTRIM(T.strLOBSegment)) COLLATE
                            Latin1_General_CI_AS
                  LEFT JOIN tblGLAccountStructure S
                         ON S.intAccountStructureId = A.intAccountStructureId
@@ -158,7 +158,7 @@ AS
       END
 
     UPDATE [tblGLAccountImportDataStaging2]
-    SET    ysnInvalid = Cast(1 AS BIT)
+    SET    ysnInvalid = CAST(1 AS BIT)
     WHERE  ( intPrimarySegmentId IS NULL
               OR intLocationSegmentId IS NULL )
 
@@ -166,7 +166,7 @@ AS
     SET    strDescription = ISNULL(S.strChartDesc, '')
     FROM   [tblGLAccountImportDataStaging2] T
            JOIN tblGLAccountSegment S
-             ON S.strCode = Rtrim(Ltrim(T.strPrimarySegment))
+             ON S.strCode = RTRIM(LTRIM(T.strPrimarySegment))
            JOIN tblGLAccountStructure ST
              ON ST.intAccountStructureId = S.intAccountStructureId
     WHERE  ST.strType = 'Primary'
@@ -178,7 +178,7 @@ AS
                             + ISNULL(S.strChartDesc, '')
     FROM   [tblGLAccountImportDataStaging2] T
            JOIN tblGLAccountSegment S
-             ON S.strCode = Rtrim(Ltrim(T.strLocationSegment))
+             ON S.strCode = RTRIM(LTRIM(T.strLocationSegment))
            JOIN tblGLAccountStructure ST
              ON ST.intAccountStructureId = S.intAccountStructureId
     WHERE  ST.strStructureName = 'Location'
@@ -190,7 +190,7 @@ AS
                             + ISNULL(S.strChartDesc, '')
     FROM   [tblGLAccountImportDataStaging2] T
            JOIN tblGLAccountSegment S
-             ON S.strCode = Rtrim(Ltrim(T.strLOBSegment))
+             ON S.strCode = RTRIM(LTRIM(T.strLOBSegment))
            JOIN tblGLAccountStructure ST
              ON ST.intAccountStructureId = S.intAccountStructureId
     WHERE  ST.strStructureName = 'LOB'
@@ -220,16 +220,16 @@ AS
                       END
 
     UPDATE [tblGLAccountImportDataStaging2]
-    SET    strAccountId = Rtrim(Ltrim(strPrimarySegment))
+    SET    strAccountId = RTRIM(LTRIM(strPrimarySegment))
                           + @separator
-                          + Rtrim(Ltrim(strLocationSegment)) + CASE WHEN Rtrim(
-                          Ltrim
+                          + RTRIM(LTRIM(strLocationSegment)) + CASE WHEN RTRIM(
+                          LTRIM
                           (ISNULL
                                  (strLOBSegment, ''))) = '' THEN '' ELSE
                           @separator
                           +
                                  strLOBSegment END
-    WHERE  isnull(ysnInvalid, 0) = 0
+    WHERE  ISNULL(ysnInvalid, 0) = 0
 
     INSERT INTO tblGLAccount
                 ([strAccountId],
@@ -253,7 +253,7 @@ AS
     FROM   [tblGLAccountImportDataStaging2] S
            JOIN tblGLAccountSegment SG
              ON SG.intAccountSegmentId = S.[intPrimarySegmentId]
-    WHERE  isnull(ysnInvalid, 0) = 0
+    WHERE  ISNULL(ysnInvalid, 0) = 0
 
     UPDATE ST
     SET    intAccountId = GL.intAccountId
@@ -265,17 +265,17 @@ AS
          AS (SELECT intAccountId,
                     intPrimarySegmentId SegmentId
              FROM   [tblGLAccountImportDataStaging2]
-             WHERE  isnull(ysnInvalid, 0) = 0
+             WHERE  ISNULL(ysnInvalid, 0) = 0
              UNION ALL
              SELECT intAccountId,
                     [intLocationSegmentId]
              FROM   [tblGLAccountImportDataStaging2]
-             WHERE  isnull(ysnInvalid, 0) = 0
+             WHERE  ISNULL(ysnInvalid, 0) = 0
              UNION ALL
              SELECT intAccountId,
                     [intLOBSegmentId]
              FROM   [tblGLAccountImportDataStaging2]
-             WHERE  isnull(ysnInvalid, 0) = 0)
+             WHERE  ISNULL(ysnInvalid, 0) = 0)
     INSERT INTO tblGLAccountSegmentMapping
                 (intAccountSegmentId,
                  intAccountId,
@@ -306,17 +306,17 @@ AS
                  [intConcurrencyId])
     SELECT B.intAccountId                           AS inti21Id,
            B.strAccountId                           AS stri21Id,
-           Cast(Cast(B.strPrimarySegment AS INT) AS NVARCHAR(50))
-           + '.' + Replicate('0', (SELECT 8 - Sum(intLength) FROM
+           CAST(CAST(B.strPrimarySegment AS INT) AS NVARCHAR(50))
+           + '.' + REPLICATE('0', (SELECT 8 - Sum(intLength) FROM
            tblGLAccountStructure
            WHERE strType = 'Segment'))
            + B.strLocationSegment + B.strLOBSegment AS strExternalId,
            B.strPrimarySegment
-           + Replicate('0', (SELECT 8 - Sum(intLength) FROM
+           + REPLICATE('0', (SELECT 8 - Sum(intLength) FROM
            tblGLAccountStructure
            WHERE
            strType = 'Segment')) + '-'
-           + Replicate('0', (SELECT 8 - Sum(intLength) FROM
+           + REPLICATE('0', (SELECT 8 - Sum(intLength) FROM
            tblGLAccountStructure
            WHERE
            strType = 'Segment'))
@@ -340,7 +340,7 @@ AS
           FROM tblGLCOACrossReference C Join tblGLAccount A ON A.intAccountId = C.inti21Id     
           JOIN [tblGLAccountImportDataStaging2] D  ON D.intAccountId = A.intAccountId    
           JOIN glactmst G ON G.A4GLIdentity = C.intLegacyReferenceId    
-          WHERE isnull(ysnNoDescription,0) = 0  AND isnull(ysnInvalid,0) = 0')
+          WHERE ISNULL(ysnNoDescription,0) = 0  AND ISNULL(ysnInvalid,0) = 0')
         SET ANSI_WARNINGS ON
     END
 
@@ -409,10 +409,10 @@ AS
                  strLineNumber)
     SELECT @importLogId,
            CASE
-             WHEN isnull(ysnInvalid, 0) = 1 THEN strError
+             WHEN ISNULL(ysnInvalid, 0) = 1 THEN strError
              ELSE 'GL Account created. '
                   + ISNULL( strError, '')
            END,
            strAccountId,
-           Cast([intImportStagingId] AS NVARCHAR(4))
+           CAST([intImportStagingId] AS NVARCHAR(4))
     FROM   tblGLAccountImportDataStaging2 
