@@ -1695,7 +1695,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Cupping Session')
-
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 174
+				,[strTransactionType]	= N'Allocated Contracts Gain or Loss'
+				,[strPrefix]			= N'AC-'
+				,[intNumber]			= 0
+				,[strModule]			= 'Risk Management'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Allocated Contracts Gain or Loss')
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF

@@ -57,6 +57,8 @@
 	[intUnrealizedLossOnInventoryIOSId] INT NULL,
 	[intFuturesGainOrLossRealizedId] INT NULL,
 	[intFuturesGainOrLossRealizedOffsetId] INT NULL,
+	[intAllocatedContractGainOrLossId] INT NULL,
+	[intAllocatedContractGainOrLossOffsetId] INT NULL,
 	[intCommissionExpenseId] INT NULL,
 	[ysnDisplayAllStorage] BIT DEFAULT ((0)) NULL,
 	[strM2MView] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

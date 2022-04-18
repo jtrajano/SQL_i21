@@ -681,6 +681,20 @@
     <Build Include="dbo\Views\vyuICSearchInsuranceRate.sql" />
     <Build Include="dbo\Views\vyuICGetInsuranceRate.sql" />
     <Build Include="dbo\Views\vyuICGetInsuranceRateDetail.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsGainOrLossHeader.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsBasisEntry.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsSummary.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsSettlementPrice.sql" />
+    <Build Include="dbo\Tables\tblRKAllocatedContractsPostRecap.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsBasisEntry.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsGainOrLossHeader.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsPostPreview.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsSettlementPrice.sql" />
+    <Build Include="dbo\Views\vyuRKGetAllocatedContractsSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateAllocatedContractsGainOrLoss.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAllocatedContractsGLUnpost.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAllocatedContractsGLPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
