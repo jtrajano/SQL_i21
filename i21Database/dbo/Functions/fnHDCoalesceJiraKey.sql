@@ -12,6 +12,7 @@ BEGIN
 			FROM tblHDTicketJIRAIssue	
 			WHERE LTRIM(RTRIM(tblHDTicketJIRAIssue.strKey)) <> ''
 				  AND tblHDTicketJIRAIssue.intTicketId = @intTicketId
+				  AND (strKey != strJiraKey OR ISNULL(strJiraKey, '') = '')
 			GROUP BY strKey
 		) Ticket
 
