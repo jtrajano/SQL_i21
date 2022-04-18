@@ -18,4 +18,5 @@ AS
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	WHERE S.strContainerNumber <> ''
 		AND S.intContractDetailId IS NOT NULL
+		AND S.intTypeId = 1
 GO

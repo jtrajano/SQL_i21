@@ -114,6 +114,7 @@ BEGIN TRY
 	WHERE S.intProductTypeId = 12
 		AND S.intProductValueId = @intWorkOrderId
 		AND ST.intControlPointId = 11 --Line Sample
+		AND S.intTypeId = 1
 	ORDER BY S.dtmLastModified DESC
 
 	IF @intSampleStatusId = 4
@@ -140,6 +141,7 @@ BEGIN TRY
 	WHERE S.intProductTypeId = 12
 		AND S.intProductValueId = @intWorkOrderId
 		AND ST.intControlPointId = 12 --WIP Sample
+		AND S.intTypeId = 1
 	ORDER BY S.dtmLastModified DESC
 
 	IF @intSampleStatusId = 4
@@ -185,6 +187,7 @@ BEGIN TRY
 					AND S.intProductValueId = @intWorkOrderId
 					AND ST.intControlPointId = 11 --Line Sample
 					AND ST.intSampleTypeId = ST1.Item Collate Latin1_General_CI_AS
+					AND S.intTypeId = 1
 				)
 
 		IF @intSampleTypeId IS NOT NULL
@@ -216,6 +219,7 @@ BEGIN TRY
 		WHERE S.intProductTypeId = 12
 			AND S.intProductValueId = @intWorkOrderId
 			AND ST.intControlPointId = 12 --WIP Sample
+			AND S.intTypeId = 1
 		ORDER BY S.dtmLastModified DESC
 
 		IF @intSampleStatusId IS NULL
@@ -255,6 +259,7 @@ BEGIN TRY
 			WHERE S.intProductTypeId = 12
 				AND S.intProductValueId = @intWorkOrderId
 				AND ST.intControlPointId = 11 --WIP Sample
+				AND S.intTypeId = 1
 			ORDER BY S.dtmLastModified DESC
 
 			IF @intSampleStatusId IS NULL
@@ -289,6 +294,7 @@ BEGIN TRY
 			WHERE S.intProductTypeId = 12
 				AND S.intProductValueId = @intWorkOrderId
 				AND ST.intControlPointId = 12 --WIP Sample
+				AND S.intTypeId = 1
 			ORDER BY S.dtmLastModified DESC
 
 			IF @intSampleStatusId IS NULL

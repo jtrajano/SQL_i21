@@ -98,6 +98,14 @@ SELECT S.intSampleId
 	,S.strSendSampleTo
 	,S.strRepresentLotNumber
 	,RS.strSampleNumber AS strRelatedSampleNumber
+	,S.intRelatedSampleId
+	,S.intTypeId
+	,S.intCuppingSessionDetailId
+	,strMethodology = ''
+	,strExtension = EX.strAttribute1
+	,intContractSequence = CD.intContractSeq
+	,strContractType = CT.strContractType
+	,strPacking = ''
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -105,6 +113,7 @@ JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 LEFT JOIN tblQMSamplingCriteria SC ON SC.intSamplingCriteriaId = S.intSamplingCriteriaId
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN dbo.tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 LEFT JOIN dbo.tblCTContractHeader CH1 ON CH1.intContractHeaderId = S.intContractHeaderId
 LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 LEFT JOIN dbo.vyuICSearchItem I ON I.intItemId = S.intItemId
@@ -140,3 +149,6 @@ LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
 LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
+LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
+LEFT JOIN tblICCommodityAttribute1 EX ON I.intCommodityAttributeId1 = EX.intCommodityAttributeId1
+WHERE S.intTypeId = 1

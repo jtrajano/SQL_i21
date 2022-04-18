@@ -78,6 +78,10 @@
 	[strSeason] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strClass] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strProductLine] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intBookId] INT,
+	[strBook] NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+	[intSubBookId] INT,
+	[strSubBook] NVARCHAR(200) COLLATE Latin1_General_CI_AS,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKM2MTransaction] PRIMARY KEY ([intM2MTransactionId]), 
     CONSTRAINT [FK_tblRKM2MTransaction_tblRKM2MHeader] FOREIGN KEY ([intM2MHeaderId]) REFERENCES [tblRKM2MHeader]([intM2MHeaderId]) ON DELETE CASCADE, 
@@ -91,5 +95,7 @@
 	CONSTRAINT [FK_tblRKM2MTransaction_tblSMCity_intDestinationPortId] FOREIGN KEY (intDestinationPortId) REFERENCES [dbo].[tblSMCity] (intCityId),
 	CONSTRAINT [FK_tblRKM2MTransaction_tblCTCropYear_intCropYearId] FOREIGN KEY (intCropYearId) REFERENCES [dbo].[tblCTCropYear] (intCropYearId),
 	CONSTRAINT [FK_tblRKM2MTransaction_tblSMCompanyLocationSubLocation_intStorageLocationId] FOREIGN KEY (intStorageLocationId) REFERENCES [dbo].[tblSMCompanyLocationSubLocation] (intCompanyLocationSubLocationId),
-	CONSTRAINT [FK_tblRKM2MTransaction_tblICStorageLocation_intStorageUnitId] FOREIGN KEY (intStorageUnitId) REFERENCES [dbo].[tblICStorageLocation] (intStorageLocationId)
+	CONSTRAINT [FK_tblRKM2MTransaction_tblICStorageLocation_intStorageUnitId] FOREIGN KEY (intStorageUnitId) REFERENCES [dbo].[tblICStorageLocation] (intStorageLocationId),
+	CONSTRAINT [FK_tblRKM2MTransaction_tblCTBook_intBookId] FOREIGN KEY (intBookId) REFERENCES [dbo].[tblCTBook] (intBookId),
+	CONSTRAINT [FK_tblRKM2MTransaction_tblCTSubBook_intSubBookId] FOREIGN KEY (intSubBookId) REFERENCES [dbo].[tblCTSubBook] (intSubBookId)
 )

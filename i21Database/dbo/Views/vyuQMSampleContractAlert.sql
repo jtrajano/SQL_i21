@@ -42,6 +42,7 @@ FROM (
 		LEFT JOIN tblSMCountry C ON C.intCountryID = CA.intCountryID
 		LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intProductTypeId
 			AND CA1.strType = 'ProductType'
+		WHERE S.intTypeId = 1
 		GROUP BY S.intSampleId
 			,S.strSampleNumber
 			,ST.strSampleTypeName

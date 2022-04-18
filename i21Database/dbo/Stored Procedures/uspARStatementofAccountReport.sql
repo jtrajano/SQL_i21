@@ -234,7 +234,7 @@ BEGIN
 		FROM tblSMUpload U
 		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
 		WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-		  AND A.strComment = 'Stretch Header'
+		  AND (A.strComment = 'Stretch Header' OR A.strComment = 'Stretched Header')
 		ORDER BY A.intAttachmentId DESC
 	) S
 	
@@ -395,7 +395,7 @@ BEGIN
 		, ysnPrintCreditBalance
 		, ysnIncludeBudget
 		, ysnPrintOnlyPastDue
-		, strStatementFormat
+		, strStatementFormat	
 		, dtmDateFrom
 		, dtmDateTo
 		, intEntityUserId

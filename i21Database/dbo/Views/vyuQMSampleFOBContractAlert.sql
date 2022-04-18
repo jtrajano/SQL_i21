@@ -45,6 +45,7 @@ FROM (
 			,'Partially Rejected'
 			,'Partially Approved'
 			)
+		AND S.intTypeId = 1
 	GROUP BY CD.intContractDetailId
 		,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq)
 		,CD.dblQuantity

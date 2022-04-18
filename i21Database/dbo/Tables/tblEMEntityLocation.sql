@@ -60,6 +60,7 @@
 	[strLocationRoute]				NVARCHAR (1000)   COLLATE Latin1_General_CI_AS NULL,
 	[dtmOperatingHoursStartTime]	DATETIME        NULL,
 	[dtmOperatingHoursEndTime]      DATETIME        NULL,
+	[strVATNo]						NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_dbo.tblEMEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),

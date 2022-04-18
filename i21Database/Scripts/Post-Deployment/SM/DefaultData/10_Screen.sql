@@ -1207,6 +1207,25 @@ GO
 		UPDATE [tblSMScreen] SET strScreenId = 'Email History', strScreenName = 'Email History', strModule = 'Global Component Engine', ysnAvailable = 1  WHERE strNamespace = 'GlobalComponentEngine.view.EmailHistory'
 	END
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.StorageCharge') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Storage Charge', N'Storage Charge', N'Inventory.view.StorageCharge', N'Inventory', N'tblICStorageCharge', 1, N'Inventory')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.StorageRate') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Storage Rate', N'Storage Rate', N'Inventory.view.StorageRate', N'Inventory', N'tblICStorageRate', 1, N'Inventory')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Warrant') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Warrant', N'Warrant', N'Inventory.view.Warrant', N'Inventory', NULL, 1, N'Inventory')
+	END
+	
+
 	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
 	-- BEGIN
 	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])

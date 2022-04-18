@@ -23,6 +23,7 @@ BEGIN TRY
 	SELECT intSampleId
 	FROM dbo.tblQMSample
 	WHERE intContractDetailId = @intOldContractDetailId
+	AND intTypeId = 1
 
 	SELECT @intOldContractSeq = intContractSeq
 		,@strOldContractNumber = strContractNumber
@@ -41,12 +42,14 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = GETDATE()
 	WHERE intContractDetailId = @intOldContractDetailId
+	AND intTypeId = 1
 
 	-- Contract Samples
 	UPDATE dbo.tblQMSample
 	SET intProductValueId = @intNewContractDetailId
 	WHERE intProductTypeId = 8
 		AND intProductValueId = @intOldContractDetailId
+		AND intTypeId = 1
 
 	UPDATE dbo.tblQMTestResult
 	SET intProductValueId = @intNewContractDetailId

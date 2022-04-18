@@ -23,9 +23,11 @@ BEGIN
 		@dblBucket7 DECIMAL(18, 6) = 0,
 		@dblBucket8 DECIMAL(18, 6) = 0,
 		@dblBucket9 DECIMAL(18, 6) = 0,
-		@strContractType NVARCHAR(20)
+		@strContractType NVARCHAR(20),
+		@ysnCost BIT
 
 	SET @strContractType = 'Sale'
+	SET @ysnCost = 0
 
 	START_PROCESS:
 
@@ -100,7 +102,7 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
-
+		AND ysnCost = @ysnCost
 
 	-- Bucket 1 - 7
 	UNION ALL
@@ -147,6 +149,7 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
+		AND ysnCost = @ysnCost
 
 	-- Bucket 8 - 14
 	UNION ALL
@@ -193,6 +196,7 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
+		AND ysnCost = @ysnCost
 
 	-- Bucket 15 - 21
 	UNION ALL
@@ -239,6 +243,7 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
+		AND ysnCost = @ysnCost
 
 	-- Bucket 22 - 29
 	UNION ALL
@@ -285,6 +290,7 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
+		AND ysnCost = @ysnCost
 
 	-- Bucket 30 - 60
 	UNION ALL
@@ -331,8 +337,9 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
+		AND ysnCost = @ysnCost
 	
-	-- Bucket 60 - 90
+	-- Bucket 61 - 90
 	UNION ALL
 	SELECT
 		@intCashFlowReportId,
@@ -377,8 +384,9 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
+		AND ysnCost = @ysnCost
 
-	-- Bucket 90 - 120
+	-- Bucket 91 - 120
 	UNION ALL
 	SELECT
 		@intCashFlowReportId,
@@ -423,8 +431,9 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
+		AND ysnCost = @ysnCost
 
-	-- Bucket 120+
+	-- Bucket 121+
 	UNION ALL
 	SELECT
 		@intCashFlowReportId,
@@ -469,6 +478,7 @@ BEGIN
 				END
 		) = 1
 		AND strTransactionType = @strContractType
+		AND ysnCost = @ysnCost
 
 	-- Get sum of each bucket
 	SELECT 
@@ -521,7 +531,16 @@ BEGIN
 		,@dblBucket8
 		,@dblBucket9
 		,@intCashFlowReportId
-		,CASE WHEN @strContractType = 'Sale' THEN 6 ELSE 7 END -- Report Code = 6-> Total Sales Contracts; 7 -> Total Purchase Contracts
+		,CASE WHEN @strContractType = 'Sale' 
+			THEN CASE WHEN @ysnCost = 0
+				THEN 6 -- Sales Contract
+				ELSE 8 -- Sales Cost
+				END
+			ELSE CASE WHEN @ysnCost = 0
+				THEN 7 -- Purchase Contract
+				ELSE 9 -- Purchase Cost
+				END
+			END
 		,1
 	)
 		
@@ -544,10 +563,26 @@ BEGIN
 	SET @dblBucket8 = 0
 	SET @dblBucket9 = 0
 
-	IF @strContractType = 'Sale'
+	IF @strContractType = 'Sale' AND @ysnCost = 0
+	BEGIN
 		SET @strContractType = 'Purchase'
-	ELSE 
-		SET @strContractType = NULL -- this will end the loop
+	END
+	ELSE
+	BEGIN
+		IF @strContractType = 'Purchase' AND @ysnCost = 0
+		BEGIN
+			SET @ysnCost = 1
+			SET @strContractType = 'Sale'
+		END
+		ELSE
+		BEGIN
+			IF @strContractType = 'Purchase' AND @ysnCost = 1
+			 GOTO END_PROCESS
+
+			SET @strContractType = 'Purchase'
+		END
+	END
+
 
 	GOTO START_PROCESS
 

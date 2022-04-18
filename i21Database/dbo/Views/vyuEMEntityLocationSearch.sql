@@ -57,6 +57,7 @@ SELECT intEntityId				= EL.intEntityId
      , str1099Type				= EL.str1099Type
      , strFederalTaxId			= EL.strFederalTaxId
      , dtmW9Signed				= EL.dtmW9Signed
+	 , strVATNo					= EL.strVATNo
 FROM tblEMEntityLocation EL
 LEFT JOIN tblSMTaxClass TC ON EL.intTaxClassId = TC.intTaxClassId
 LEFT JOIN tblSMTaxGroup TG ON EL.intTaxGroupId = TG.intTaxGroupId

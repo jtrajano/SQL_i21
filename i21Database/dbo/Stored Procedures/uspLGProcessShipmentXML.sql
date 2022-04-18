@@ -4421,6 +4421,7 @@ BEGIN TRY
 						AND S.intBookId = @intBookId
 						AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 						AND S.intLoadId = @intNewLoadId
+						AND S.intTypeId = 1
 					)
 				AND @ysnParent = 0
 			BEGIN
@@ -4431,6 +4432,7 @@ BEGIN TRY
 					AND S.intBookId = @intBookId
 					AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					AND S.intLoadId = @intNewLoadId
+					AND S.intTypeId = 1
 
 				UPDATE S
 				SET S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
@@ -4441,6 +4443,7 @@ BEGIN TRY
 					AND S.intBookId = @intBookId
 					AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					AND S.intLoadId = @intNewLoadId
+					AND S.intTypeId = 1
 				JOIN tblLGLoadContainer LC ON LC.strContainerNumber = LDC.strContainerNumber
 					AND LC.intLoadId = @intNewLoadId
 				JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId

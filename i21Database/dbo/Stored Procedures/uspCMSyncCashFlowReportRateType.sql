@@ -12,25 +12,42 @@ IF (@intFilterCurrencyId IS NULL)
 	SELECT @intFilterCurrencyId = intFilterCurrencyId FROM tblCMCashFlowReport WHERE intCashFlowReportId = @intCashFlowReportId
 
 -- Default Rate and Rate Types per bucket
-DECLARE @tblDefaultRateTypes TABLE (
+DECLARE @tblDefaultRateTypesRaw TABLE (
+	intRowId INT,
 	intFromCurrencyId INT,
 	intToCurrencyId INT,
 	intCurrencyExchangeRateDetailId INT,
 	intCurrencyExchangeRateTypeId INT,
 	strBucket NVARCHAR(MAX) NULL,
 	dblRate DECIMAL(18, 6) DEFAULT 1,
-	dtmValidFromDate DATETIME NULL
+	dtmValidFromDate DATETIME NULL,
+	dtmCreatedDate DATETIME NULL
 )
 
-INSERT INTO @tblDefaultRateTypes
+DECLARE @tblDefaultRateTypes TABLE (
+	intRowId INT,
+	intFromCurrencyId INT,
+	intToCurrencyId INT,
+	intCurrencyExchangeRateDetailId INT,
+	intCurrencyExchangeRateTypeId INT,
+	strBucket NVARCHAR(MAX) NULL,
+	dblRate DECIMAL(18, 6) DEFAULT 1,
+	dtmValidFromDate DATETIME NULL,
+	dtmCreatedDate DATETIME NULL
+)
+
+-- Get all Exchange Rate Details with Cash Flow defined
+INSERT INTO @tblDefaultRateTypesRaw
 SELECT
+	ROW_NUMBER() OVER(ORDER BY RateDetail.dtmValidFromDate DESC),
 	Rate.intFromCurrencyId,
 	Rate.intToCurrencyId,
 	RateDetail.intCurrencyExchangeRateDetailId,
 	RateType.intCurrencyExchangeRateTypeId,
 	Bucket.Item strBucket,
 	ISNULL(RateDetail.dblRate, 1),
-	RateDetail.dtmValidFromDate
+	RateDetail.dtmValidFromDate dtmValidFromDate,
+	RateDetail.dtmCreatedDate dtmCreatedDate
 FROM tblSMCurrencyExchangeRate Rate
 JOIN tblSMCurrencyExchangeRateDetail RateDetail
 	ON RateDetail.intCurrencyExchangeRateId = Rate.intCurrencyExchangeRateId
@@ -43,6 +60,20 @@ WHERE
 	RTRIM(LTRIM(strCashFlows)) IS NOT NULL 
 	AND NULLIF(strCashFlows, '') IS NOT NULL
 	AND Rate.intToCurrencyId = @intReportingCurrencyId
+ORDER BY RateDetail.dtmValidFromDate DESC, RateDetail.dtmCreatedDate DESC
+
+-- Get and filter out exchange rate details by most recent Valid From Date
+INSERT INTO @tblDefaultRateTypes
+SELECT A.* FROM @tblDefaultRateTypesRaw A
+INNER JOIN (
+	SELECT strBucket, MAX(dtmValidFromDate) dtmValidFromDate, MAX(dtmCreatedDate) dtmCreatedDate
+	FROM @tblDefaultRateTypesRaw
+	GROUP BY strBucket
+) G
+ON A.strBucket = G.strBucket AND A.dtmValidFromDate = G.dtmValidFromDate AND A.dtmCreatedDate = G.dtmCreatedDate
+ORDER BY intRowId
+
+
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblCMCashFlowReportRateType WHERE intCashFlowReportId = @intCashFlowReportId) -- create new rates
 BEGIN

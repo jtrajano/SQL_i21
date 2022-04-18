@@ -181,6 +181,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , strBorrowingFacility					= BF.strBorrowingFacilityId
 	 , intBorrowingFacilityLimitId			= INV.intBorrowingFacilityLimitId
 	 , strBorrowingFacilityLimit			= BFL.strBorrowingFacilityLimit
+	 , intBorrowingFacilityLimitDetailId	= INV.intBorrowingFacilityLimitDetailId
 	 , strBankReferenceNo					= INV.strBankReferenceNo
 	 , strBankTransactionId					= INV.strBankTransactionId
 	 , dblLoanAmount						= INV.dblLoanAmount

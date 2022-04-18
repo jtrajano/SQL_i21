@@ -913,7 +913,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
 
 -- DUE TO ACCOUNT CREDIT FOR LOCATION
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
-	 [dtmDate]
+     [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
     ,[dblDebit]
@@ -943,24 +943,26 @@ INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
     ,[dblCreditForeign]
     ,[dblCreditReport]
     ,[dblReportingRate]
-    ,[dblForeignRate]    
-    ,[intSourceEntityId])
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+)
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = DUEACCOUNT.intDueToAccountId
-	,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
-	,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
-    ,[dblCreditUnit]                = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
+    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
+    ,[dblCreditUnit]                = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]
     ,[intCurrencyId]                = I.[intCurrencyId]
-    ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
-    ,[dtmDateEntered]               = @PostDate
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
     ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = @POSTDESC + I.[strTransactionType]
-    ,[intJournalLineNo]             = I.[intInvoiceId]
+    ,[strJournalLineDescription]    = I.[strItemDescription]
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
     ,[ysnIsUnposted]                = 0
     ,[intUserId]                    = I.[intUserId]
     ,[intEntityId]                  = I.[intEntityId]
@@ -970,21 +972,15 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-	,[dblDebitForeign]				= CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblDebitReport]				= CASE WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblReportingRate]             = I.[dblAverageExchangeRate]
-    ,[dblForeignRate]               = I.[dblAverageExchangeRate]    
+    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]    
-FROM ##ARPostInvoiceHeader I
-LEFT OUTER JOIN (
-    SELECT [dblUnitQtyShipped]		= SUM([dblUnitQtyShipped])		
-         , [intInvoiceId]			= [intInvoiceId]
-		 , [intSalesAccountId]
-    FROM ##ARPostInvoiceDetail
-    GROUP BY [intInvoiceId], [intSalesAccountId]
-) ARID ON I.[intInvoiceId] = ARID.[intInvoiceId]
+FROM ##ARPostInvoiceDetail I
 OUTER APPLY (
 	SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
 	FROM tblGLAccountSegmentMapping GLASM
@@ -995,15 +991,13 @@ OUTER APPLY (
 ) DUEACCOUNT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
-  AND (
-    I.[dblInvoiceTotal] <> @ZeroDecimal
-    OR
-    EXISTS(SELECT NULL FROM ##ARPostInvoiceDetail ARID WHERE ARID.[intItemId] IS NOT NULL AND ARID.[strItemType] <> 'Comment' AND ARID.intInvoiceId  = I.[intInvoiceId])
-  )
+  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+  AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
+  AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
   AND I.strType <> 'Tax Adjustment'
   AND @AllowIntraEntries = 1
-  AND @DueToAccountId <> 0
-  AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId]) = 0
+  AND @DueFromAccountId <> 0
+  AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 
 --FINAL INVOICE CREDIT
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (

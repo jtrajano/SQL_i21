@@ -18,13 +18,45 @@ BEGIN TRY
 		, @strLocationName NVARCHAR(100)
 		, @strFutMarketName NVARCHAR(100)
 		, @intMatchFuturesPSHeaderId INT
-		, @GLEntries AS RecapTableType
-		, @strBatchId NVARCHAR(100)
 		, @intCommodityId INT
 		, @intEntityId INT
+		, @intBankTransactionId INT = NULL
+		, @strBankTransactionId NVARCHAR(100)
+		, @intBankAccountCurrencyId INT = NULL
+		, @strBankAccountCurrency NVARCHAR(100)
+		, @intFunctionalCurrencyId INT = NULL
+		, @strFunctionalCurrency NVARCHAR(100)
 		
 
 	DECLARE @tblResult TABLE (Result NVARCHAR(MAX))
+
+	SELECT @intFunctionalCurrencyId = intDefaultCurrencyId 
+		, @strFunctionalCurrency = curr.strCurrency
+	FROM tblSMCompanyPreference sm
+	LEFT JOIN tblSMCurrency curr
+		ON curr.intCurrencyID = sm.intDefaultCurrencyId
+
+	IF ISNULL(@intFunctionalCurrencyId, 0) = 0
+	BEGIN
+		SELECT Result = 'Missing Functional Currency Setup.'
+			, intBankTransactionId = @intBankTransactionId
+		
+		GOTO Exit_Routine
+	END
+
+	SELECT TOP 1 @intBankTransactionId = bth.intTransactionId 
+			, @strBankTransactionId = bth.strTransactionId FROM tblCMBankTransactionDetail btd
+	LEFT JOIN tblCMBankTransaction bth
+		ON bth.intTransactionId = btd.intTransactionId
+	WHERE intMatchDerivativeNo = @intMatchNo
+
+	IF ISNULL(@intBankTransactionId, 0) <> 0
+	BEGIN
+		SELECT Result = 'Match already has Bank Transaction created. Please refer to ' + @strBankTransactionId + '.'
+			, intBankTransactionId = @intBankTransactionId
+		
+		GOTO Exit_Routine
+	END
 	
 	SELECT TOP 1 @intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId
 		, @intCommodityId = intCommodityId
@@ -41,7 +73,7 @@ BEGIN TRY
 	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
 	WHERE EC.strUserName = @strUserName
 
-	SELECT @intCurrencyId = intCurrencyId
+	SELECT @intCurrencyId = fm.intCurrencyId
 		, @BrokerAccount = strClearingAccountNumber
 		, @BrokerName = strName
 		, @strBook = strBook
@@ -49,6 +81,8 @@ BEGIN TRY
 		, @strFutMarketName = strFutMarketName
 		, @strLocationName = strLocationName
 		, @intLocationId = h.intCompanyLocationId
+		, @intBankAccountCurrencyId = bankAcct.intCurrencyId
+		, @strBankAccountCurrency = curr.strCurrency
 	FROM tblRKMatchFuturesPSHeader h
 	JOIN tblRKFutureMarket fm ON h.intFutureMarketId = fm.intFutureMarketId
 	JOIN tblRKBrokerageAccount ba ON ba.intBrokerageAccountId = h.intBrokerageAccountId
@@ -56,6 +90,10 @@ BEGIN TRY
 	JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = h.intCompanyLocationId
 	LEFT JOIN tblCTBook b ON b.intBookId = h.intBookId
 	LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = h.intSubBookId
+	LEFT JOIN vyuCMBankAccount bankAcct
+		ON bankAcct.intBankAccountId = h.intBankAccountId
+	LEFT JOIN tblSMCurrency curr
+		ON curr.intCurrencyID = bankAcct.intCurrencyId
 	WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId)
@@ -150,148 +188,93 @@ BEGIN TRY
 		DELETE FROM #tmpPostRecap WHERE intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 	END
 	
-	IF (SELECT COUNT(Result) FROM @tblResult) > 0 
+	DROP TABLE #tmpPostRecap
+
+	IF EXISTS (SELECT TOP 1 '' FROM @tblResult)
 	BEGIN
-		SELECT DISTINCT * FROM @tblResult
+		SELECT DISTINCT Result
+		FROM @tblResult
+
 		GOTO Exit_Routine
 	END
 	
-	BEGIN TRANSACTION
-
-	INSERT INTO tblRKStgMatchPnS (intConcurrencyId
-		, intMatchFuturesPSHeaderId
-		, intMatchNo
-		, dtmMatchDate
-		, strCurrency
-		, intCompanyLocationId
-		, intCommodityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, intEntityId
-		, intBrokerageAccountId
-		, dblMatchQty
-		, dblNetPnL
-		, dblGrossPnL
-		, strStatus
-		, strBrokerName
-		, strBrokerAccount
-		, dtmPostingDate
-		, strUserName
-		, strBook
-		, strSubBook
-		, strLocationName
-		, strFutMarketName
-		, ysnPost)
-	SELECT 0
-		, intMatchFuturesPSHeaderId
-		, intMatchNo
-		, dtmMatchDate
-		, @strCurrency
-		, intCompanyLocationId
-		, intCommodityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, intEntityId
-		, intBrokerageAccountId
-		, dblMatchQty = ISNULL((SELECT SUM(ISNULL(dblMatchQty, 0))
-								FROM tblRKMatchFuturesPSDetail m
-								WHERE intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId), 0)
-		, @dblNetPnL
-		, @dblGrossPL
-		, ''
-		, @BrokerName
-		, @BrokerAccount
-		, dtmMatchDate
-		, @strUserName
-		, @strBook
-		, @strSubBook
-		, @strLocationName
-		, @strFutMarketName
-		, 1
-	FROM tblRKMatchFuturesPSHeader h
-	WHERE intMatchNo = @intMatchNo
-
-	IF (@strBatchId IS NULL)
-	BEGIN
-		EXEC uspSMGetStartingNumber 3, @strBatchId OUT
-	END
-
-	INSERT INTO @GLEntries (dtmDate
-		, strBatchId
-		, intAccountId
-		, dblDebit
-		, dblCredit
-		, dblDebitUnit
-		, dblCreditUnit
-		, strDescription
-		, intCurrencyId
-		, dtmTransactionDate
-		, strTransactionId
-		, intTransactionId
-		, strTransactionType
-		, strTransactionForm
-		, strModuleName
-		, intConcurrencyId
-		, dblExchangeRate
-		, dtmDateEntered
-		, ysnIsUnposted
-		, strCode
-		, strReference
-		, intEntityId
-		, intUserId
-		, intSourceLocationId
-		, intSourceUOMId
-		, intCommodityId)
-	SELECT dtmPostDate
-		, @strBatchId
-		, intAccountId
-		, ROUND(dblDebit, 2)
-		, ROUND(dblCredit, 2)
-		, ROUND(dblDebitUnit, 2)
-		, ROUND(dblCreditUnit, 2)
-		, strAccountDescription
-		, intCurrencyId
-		, dtmTransactionDate
-		, strTransactionId
-		, intTransactionId
-		, strTransactionType
-		, strTransactionForm
-		, strModuleName
-		, intConcurrencyId
-		, dblExchangeRate
-		, dtmDateEntered
-		, ysnIsUnposted
-		, 'RK'
-		, strReference
-		, intEntityId
-		, intUserId
-		, intSourceLocationId
-		, intSourceUOMId
-		, intCommodityId
+	SELECT	  Result = '' -- No Error Message
+			, intAccountId
+			, strAccountId
+			, strAccountDescription
+			-- CONVERSION TO FUNCTIONAL CURRENCY DUE TO CHANGES FOR POSTING TO BANK TRANSACTION
+			, dblDebit = ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId) * dblDebit, 2)
+			, dblCredit = ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId) * dblCredit, 2)
+			, dblDebitUnit = ROUND(dblDebitUnit, 2)
+			, dblCreditUnit = ROUND(dblCreditUnit, 2)
+			, intCurrencyId
+			, strSourceTransactionNo
+			, ysnForeignCurrency = CASE WHEN ISNULL(@intBankAccountCurrencyId, 0) = 0 THEN CAST(0 AS BIT)
+								WHEN @intFunctionalCurrencyId <> @intBankAccountCurrencyId 
+									THEN CAST(1 AS BIT) 
+								ELSE CAST(0 AS BIT)
+								END
+	INTO #tmpMatchDerivativesPostRecap
 	FROM tblRKMatchDerivativesPostRecap
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId 
+	AND (	(ROUND(dblDebit, 2) <> 0 AND ROUND(dblCredit, 2) = 0)
+			OR (ROUND(dblCredit, 2) <> 0 AND ROUND(dblDebit, 2) = 0)
+		)
 
-	EXEC dbo.uspGLBookEntries @GLEntries, 1
+	IF NOT EXISTS (SELECT TOP 1 '' FROM #tmpMatchDerivativesPostRecap)
+	BEGIN
+		SELECT Result = 'Match could not be posted due to matching of derivatives resulting to 0 Gross PnL.'
+		GOTO Exit_Routine
+	END
+	
+	DECLARE @dblRate NUMERIC(24, 10) = 1
+		, @intCurrencyExchangeRateTypeId INT = NULL
+		, @ysnForeignCurrency BIT = 0
 
-	UPDATE tblRKMatchFuturesPSHeader
-	SET ysnPosted = 1
-	WHERE intMatchNo = @intMatchNo
+	SELECT TOP 1 @ysnForeignCurrency = ysnForeignCurrency FROM #tmpMatchDerivativesPostRecap WHERE ysnForeignCurrency = 1
 
-	UPDATE tblRKMatchDerivativesPostRecap
-	SET ysnIsUnposted = 1
-		, strBatchId = @strBatchId
-	WHERE intTransactionId = @intMatchFuturesPSHeaderId
+	SELECT TOP 1 @dblRate = rd.dblRate
+		, @intCurrencyExchangeRateTypeId = rd.intRateTypeId
+	FROM tblSMCurrencyExchangeRate er
+	JOIN tblSMCurrencyExchangeRateDetail rd ON er.intCurrencyExchangeRateId = rd.intCurrencyExchangeRateId
+	WHERE intFromCurrencyId = @intBankAccountCurrencyId AND intToCurrencyId = @intFunctionalCurrencyId
+		AND dtmValidFromDate <= GETDATE()
+	ORDER BY dtmValidFromDate DESC
 
-	EXEC uspSMAuditLog 
-	   @keyValue = @intMatchFuturesPSHeaderId       -- Primary Key Value of the Match Derivatives. 
-	   ,@screenName = 'RiskManagement.view.MatchDerivatives'        -- Screen Namespace
-	   ,@entityId = @intEntityId     -- Entity Id.
-	   ,@actionType = 'Posted'       -- Action Type
-	   ,@changeDescription = ''     -- Description
-	   ,@fromValue = ''          -- Previous Value
-	   ,@toValue = ''           -- New Value
+	-- CHECK IF HAS EXCHANGE RATE SETUP FOR FOREIGN CURRENCIES
+	IF  @ysnForeignCurrency = 1 AND ISNULL(@intCurrencyExchangeRateTypeId, 0) = 0
+	BEGIN
+		SELECT Result = 'Missing Currency Exchange Rate Setup for ' + @strBankAccountCurrency + ' to ' + @strFunctionalCurrency
+		GOTO Exit_Routine
+	END
 
-	COMMIT TRAN
+	SELECT Result = '' -- No Error Message
+		, intAccountId
+		, strAccountId
+		, strAccountDescription
+		-- CHECKING IF DEBIT/CREDIT OR DEBIT/CREDIT FOREIGN
+		, dblDebit = CASE WHEN ysnForeignCurrency = 0 THEN dblDebit
+							ELSE 0
+							END
+		, dblCredit = CASE WHEN ysnForeignCurrency = 0 THEN dblCredit
+							ELSE 0
+							END
+		, dblDebitForeign = CASE WHEN ysnForeignCurrency = 0 THEN 0
+							ELSE ROUND(dblDebit / @dblRate, 2)
+							END
+		, dblCreditForeign = CASE WHEN ysnForeignCurrency = 0 THEN dblCredit
+							ELSE ROUND(dblCredit / @dblRate, 2)
+							END
+		, dblDebitUnit
+		, dblCreditUnit
+		, intCurrencyId
+		, strSourceTransactionNo
+		, ysnForeignCurrency = @ysnForeignCurrency
+		, dblExchangeRate = CASE WHEN @ysnForeignCurrency = 1 THEN @dblRate ELSE NULL END
+		, intCurrencyExchangeRateTypeId = CASE WHEN @ysnForeignCurrency = 1 THEN @intCurrencyExchangeRateTypeId ELSE NULL END
+	FROM #tmpMatchDerivativesPostRecap
+
+	DROP TABLE #tmpMatchDerivativesPostRecap
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()

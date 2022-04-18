@@ -32,7 +32,7 @@ BEGIN TRY
      JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId  
      JOIN tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
      JOIN tblICItem AS I ON I.intItemId = CD.intItemId  
-     JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId'
+     JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId AND S.intTypeId = 1'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
@@ -125,7 +125,7 @@ BEGIN TRY
 		JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId
 		JOIN tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId
 		JOIN tblICItem AS I ON I.intItemId = CD.intItemId
-		JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId'
+		JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId AND S.intTypeId = 1'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN

@@ -77,6 +77,7 @@ LEFT JOIN (
 		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 		WHERE S.intContractDetailId IS NOT NULL
+		AND S.intTypeId = 1
 		) t
 	WHERE intRowNum = 1
 	) S ON S.intContractDetailId = CD.intContractDetailId

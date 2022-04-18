@@ -26,6 +26,7 @@ BEGIN TRY
 			SELECT @intKey = intSampleId
 			FROM tblQMSample
 			WHERE intContractDetailId = @intId
+			AND intTypeId = 1
 		END
 		ELSE
 		BEGIN

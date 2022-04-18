@@ -11,7 +11,7 @@ RETURN SELECT
 	,strTransactionType		= ARI.strTransactionType
 	,intCurrencyId			= ARI.intCurrencyId
 	,dtmDate				= ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate)
-	,dblAmount				= CASE WHEN ARI.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(ARI.dblInvoiceTotal, 0) * -1 ELSE ISNULL(ARI.dblInvoiceTotal, 0) END
+	,dblAmount				= CASE WHEN ARI.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(ARI.dblAmountDue, 0) * -1 ELSE ISNULL(ARI.dblAmountDue, 0) END
 	,intBankAccountId		= CMUF.intBankAccountId
 	,intGLAccountId			= ARI.intAccountId
 	,intCompanyLocationId	= ARI.intCompanyLocationId

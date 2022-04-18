@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetFreightTermCost]
 	@intContractTypeId INT
 	, @intCommodityId INT
+	, @intItemId INT
 	, @intFromPortId INT
 	, @intToPortId INT
 	, @intFromTermId INT
@@ -109,18 +110,21 @@ BEGIN TRY
 					, @strCostItem
 					, frm.intEntityId
 					, strVendor = em.strName
-					, @intCurrencyId
-					, @strCurrency
-					, @intItemUOMId
-					, @strUnitMeasure
-					, @strCostMethod
+					, frm.intCurrencyId
+					, cur.strCurrency
+					, iUOM.intItemUOMId
+					, UOM.strUnitMeasure
+					, 'Per Unit'
 					, dblRate = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
 					, dblAmount = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
 				FROM tblLGFreightRateMatrix frm
 				JOIN tblEMEntity em ON em.intEntityId = frm.intEntityId
 				JOIN tblLGContainerType cnt ON cnt.intContainerTypeId = frm.intContainerTypeId
 				JOIN tblLGContainerTypeCommodityQty ctq ON ctq.intContainerTypeId = cnt.intContainerTypeId
+				LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemId = @intCostItemId AND iUOM.intUnitMeasureId = ctq.intUnitMeasureId
+				LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = iUOM.intUnitMeasureId
 				JOIN tblICCommodityAttribute cat ON cat.intCommodityAttributeId = ctq.intCommodityAttributeId
+				JOIN tblSMCurrency cur ON cur.intCurrencyID = frm.intCurrencyId
 				WHERE ctq.intCommodityId = @intCommodityId
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
 			END
@@ -132,11 +136,11 @@ BEGIN TRY
 				, @strCostItem
 				, ipf.intEntityId
 				, strVendor = em.strName
-				, @intCurrencyId
-				, @strCurrency
-				, @intItemUOMId
-				, @strUnitMeasure
-				, @strCostMethod
+				, NULL
+				, NULL
+				, NULL
+				, NULL
+				, 'Amount'
 				, dblRate = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
 				, dblAmount = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
 			FROM tblLGInsurancePremiumFactor ipf
@@ -144,9 +148,12 @@ BEGIN TRY
 			JOIN tblEMEntity em ON em.intEntityId = ipf.intEntityId
 			LEFT JOIN tblLGInsurancePremiumFactorPurchase pFactor ON pFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 1
 			LEFT JOIN tblLGInsurancePremiumFactorSale sFactor ON sFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 2
+			JOIN tblICItem item ON item.intItemId = @intItemId AND item.intProductTypeId = ipf.intCommodityAttributeId
 			WHERE detail.intLoadingPortId = @intFromPortId
 				AND detail.intDestinationPortId = @intToPortId
 				AND @intMarketZoneId = (CASE WHEN @intContractTypeId = 1 THEN detail.intLoadingZoneId ELSE detail.intDestinationZoneId END)
+				AND ipf.intCommodityId = @intCommodityId
+				
 		END
 		ELSE
 		BEGIN

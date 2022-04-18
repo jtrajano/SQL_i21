@@ -89,6 +89,7 @@ BEGIN TRY
 				SELECT 1
 				FROM tblQMSample
 				WHERE strSampleNumber = @strSampleNumber
+				AND intTypeId = 1
 				)
 		BEGIN
 			IF (ISNULL(@strSampleStatus, '') <> '')
@@ -122,6 +123,7 @@ BEGIN TRY
 			SELECT @intSampleId = intSampleId
 			FROM tblQMSample
 			WHERE strSampleNumber = @strSampleNumber
+			AND intTypeId = 1
 
 			BEGIN TRAN
 

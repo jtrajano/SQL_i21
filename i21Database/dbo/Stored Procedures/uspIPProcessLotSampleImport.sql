@@ -243,6 +243,7 @@ BEGIN TRY
 						SELECT 1
 						FROM tblQMSample WITH (NOLOCK)
 						WHERE strSampleRefNo = @strSampleRefNo
+						AND intTypeId = 1
 						)
 				BEGIN
 					SELECT @strSuccessMsg = 'Sample already processed. '
@@ -493,6 +494,7 @@ BEGIN TRY
 					SELECT 1
 					FROM tblQMSample WITH (NOLOCK)
 					WHERE strSampleNumber = @strSampleNumber
+					AND intTypeId = 1
 					)
 			BEGIN
 				RAISERROR (

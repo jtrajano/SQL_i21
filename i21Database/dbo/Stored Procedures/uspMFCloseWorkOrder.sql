@@ -212,6 +212,7 @@ BEGIN TRY
 				,12
 				) --Line / WIP Sample
 			AND S.intSampleStatusId = 1
+			AND S.intTypeId = 1
 
 		IF @strSampleNumber IS NOT NULL
 		BEGIN

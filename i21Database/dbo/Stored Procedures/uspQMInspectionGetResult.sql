@@ -47,6 +47,7 @@ BEGIN
 		WHERE S.intProductTypeId = @intProductTypeId
 			AND S.intProductValueId = @intProductValueId
 			AND TR.intControlPointId = @intControlPointId
+			AND S.intTypeId = 1
 
 		SELECT DISTINCT P.strPropertyName
 			,TR.intPropertyId

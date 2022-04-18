@@ -1,63 +1,116 @@
-
 CREATE PROCEDURE uspGLBuildRetainedEarningsAccount
 AS
-DECLARE @dtmNow datetime = getdate()
-DECLARE @intUserId INT =1
-DECLARE @intRetainedEarningsAccount INT
-DECLARE @intIncomeSummaryAccount INT
-SELECT @intRetainedEarningsAccount = intRetainAccount FROM tblGLFiscalYear 
-SELECT @intIncomeSummaryAccount = intIncomeSummaryAccountId FROM tblGLCompanyPreferenceOption 
+    DECLARE @dtmNow DATETIME = Getdate()
+    DECLARE @intUserId INT =1
+    DECLARE @intRetainedEarningsAccount INT
+    DECLARE @intIncomeSummaryAccount INT
 
-DECLARE @ysnREOverrideLocation bit , @ysnREOverrideLOB bit , @ysnREOverrideCompany bit
-select  @ysnREOverrideLocation= ysnREOverrideLocation,@ysnREOverrideLOB =ysnREOverrideLOB,@ysnREOverrideCompany = ysnREOverrideCompany  from tblGLCompanyPreferenceOption 
+    SELECT @intRetainedEarningsAccount = intRetainAccount,
+           @intIncomeSummaryAccount = intIncomeSummaryAccount
+    FROM   tblGLFiscalYear
 
-truncate table tblGLTempAccountToBuild
+    IF @intIncomeSummaryAccount IS NULL
+       AND @intRetainedEarningsAccount IS NULL
+      BEGIN
+          RAISERROR('Missing Income Summary and Retained Earnings Account',16,1)
+          RETURN -1
+      END
 
-DECLARE @tbl table(
-	intAccountStructureId int,
-	intAccountSegmentId INT
-)
+    IF @intIncomeSummaryAccount IS NULL
+      BEGIN
+          RAISERROR('Missing Retained Earnings Account',16,1)
+          RETURN -1
+      END
 
-select @ysnREOverrideLocation = 1,@ysnREOverrideLOB =1,@ysnREOverrideCompany = 0
-INSERT INTO @tbl
-SELECT B.intAccountStructureId, B.intAccountSegmentId
-FROM tblGLAccountSegmentMapping 
-A join tblGLAccountSegment B on A.intAccountSegmentId = B.intAccountSegmentId
-WHERE intAccountId = @intRetainedEarningsAccount
+    IF @intIncomeSummaryAccount IS NULL
+      BEGIN
+          RAISERROR('Missing Income Summary Account',16,1)
+          RETURN -1
+      END
 
+    DECLARE @ysnREOverrideLocation BIT,
+            @ysnREOverrideLOB      BIT,
+            @ysnREOverrideCompany  BIT
 
-IF isnull(@ysnREOverrideCompany,0) = 1  DELETE FROM @tbl where intAccountStructureId = 6
-IF isnull(@ysnREOverrideLocation,0) = 1  DELETE FROM @tbl where intAccountStructureId  = 3
-IF isnull(@ysnREOverrideLOB,0) = 1 DELETE FROM @tbl where intAccountStructureId  = 5
+    SELECT @ysnREOverrideLocation = ysnREOverrideLocation,
+           @ysnREOverrideLOB = ysnREOverrideLOB,
+           @ysnREOverrideCompany = ysnREOverrideCompany
+    FROM   tblGLCompanyPreferenceOption
 
-insert into 
-tblGLTempAccountToBuild ( intUserId , intAccountSegmentId, dtmCreated)
-SELECT @intUserId, intAccountSegmentId , @dtmNow from @tbl
+    TRUNCATE TABLE tblGLTempAccountToBuild
 
+    DECLARE @tbl TABLE
+      (
+         intAccountStructureId INT,
+         intAccountSegmentId   INT
+      )
 
-DECLARE @tbl1 table(
-	intAccountId int,
-	intAccountStructureId int,
-	intAccountSegmentId INT,
-	strDescription NVARCHAR(200)
-)
-INSERT INTO @tbl1
+    SELECT @ysnREOverrideLocation = 1,
+           @ysnREOverrideLOB = 1,
+           @ysnREOverrideCompany = 0
 
-SELECT A.intAccountId,B.intAccountStructureId, B.intAccountSegmentId, B.strDescription 
-FROM tblGLAccountSegmentMapping 
-A join tblGLAccountSegment B on A.intAccountSegmentId = B.intAccountSegmentId
-LEFT JOIN @tbl T on T.intAccountStructureId = B.intAccountStructureId
-WHERE A.intAccountId in (
+    INSERT INTO @tbl
+    SELECT B.intAccountStructureId,
+           B.intAccountSegmentId
+    FROM   tblGLAccountSegmentMapping A
+           JOIN tblGLAccountSegment B
+             ON A.intAccountSegmentId = B.intAccountSegmentId
+    WHERE  intAccountId IN ( @intRetainedEarningsAccount,
+                             @intIncomeSummaryAccount )
 
-SELECT intAccountId FROM vyuGLAccountDetail
-	where strAccountType in ('Expense', 'Revenue')
-)
-AND T.intAccountStructureId IS NULL
+    IF isnull(@ysnREOverrideCompany, 0) = 1
+      DELETE FROM @tbl
+      WHERE  intAccountStructureId = 6
 
-insert into 
-tblGLTempAccountToBuild ( intUserId , intAccountSegmentId, dtmCreated)
-SELECT @intUserId, intAccountSegmentId , @dtmNow from @tbl1
-group by intAccountSegmentId
+    IF isnull(@ysnREOverrideLocation, 0) = 1
+      DELETE FROM @tbl
+      WHERE  intAccountStructureId = 3
 
-exec uspGLBuildAccountTemporary 1
+    IF isnull(@ysnREOverrideLOB, 0) = 1
+      DELETE FROM @tbl
+      WHERE  intAccountStructureId = 5
 
+    INSERT INTO tblGLTempAccountToBuild
+                (intUserId,
+                 intAccountSegmentId,
+                 dtmCreated)
+    SELECT @intUserId,
+           intAccountSegmentId,
+           @dtmNow
+    FROM   @tbl
+
+    DECLARE @tbl1 TABLE
+      (
+         intAccountId          INT,
+         intAccountStructureId INT,
+         intAccountSegmentId   INT,
+         strDescription        NVARCHAR(200)
+      )
+
+    INSERT INTO @tbl1
+    SELECT A.intAccountId,
+           B.intAccountStructureId,
+           B.intAccountSegmentId,
+           B.strDescription
+    FROM   tblGLAccountSegmentMapping A
+           JOIN tblGLAccountSegment B
+             ON A.intAccountSegmentId = B.intAccountSegmentId
+           LEFT JOIN @tbl T
+                  ON T.intAccountStructureId = B.intAccountStructureId
+    WHERE  A.intAccountId IN (SELECT intAccountId
+                              FROM   vyuGLAccountDetail
+                              WHERE  strAccountType IN ( 'Expense', 'Revenue' ))
+           AND T.intAccountStructureId IS NULL
+
+    INSERT INTO tblGLTempAccountToBuild
+                (intUserId,
+                 intAccountSegmentId,
+                 dtmCreated)
+    SELECT @intUserId,
+           intAccountSegmentId,
+           @dtmNow
+    FROM   @tbl1
+    GROUP  BY intAccountSegmentId
+
+    EXEC uspGLBuildAccountTemporary
+      1 

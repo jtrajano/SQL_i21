@@ -32,6 +32,7 @@
     [dblCustomerCharge] NUMERIC(18, 6) NULL, 
     [dblCustomerNoOfDays] NUMERIC(18, 6) NULL, 
     [strRateType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [intInventoryStockMovementIdUsed] INT NULL,
     CONSTRAINT [PK_tblICStorageChargeDetail] PRIMARY KEY CLUSTERED ([intStorageChargeDetailId] ASC)
 ) 
 GO

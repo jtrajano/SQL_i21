@@ -102,84 +102,12 @@ BEGIN TRY
 		RETURN
 	END
 	
-	DECLARE @strOldBatchId NVARCHAR(50)
-	
-	SELECT @strOldBatchId = strBatchId
-	FROM tblRKMatchDerivativesPostRecap WHERE intTransactionId = @intMatchFuturesPSHeaderId
-	
-	IF (@strBatchId IS NULL)
-	BEGIN
-		EXEC uspSMGetStartingNumber 3, @strBatchId OUT
-	END
-	
-	INSERT INTO @GLEntries (dtmDate
-		, strBatchId
-		, intAccountId
-		, dblDebit
-		, dblCredit
-		, dblDebitUnit
-		, dblCreditUnit
-		, strDescription
-		, intCurrencyId
-		, dtmTransactionDate
-		, strTransactionId
-		, intTransactionId
-		, strTransactionType
-		, strTransactionForm
-		, strModuleName
-		, intConcurrencyId
-		, dblExchangeRate
-		, dtmDateEntered
-		, ysnIsUnposted
-		, strCode
-		, strReference
-		, intEntityId
-		, intUserId
-		, intSourceLocationId
-		, intSourceUOMId
-		, intCommodityId)
-	SELECT dtmPostDate
-		, @strBatchId
-		, intAccountId
-		, ROUND(dblCredit, 2) * -1
-		, ROUND(dblDebit, 2) * -1
-		, ROUND(dblCreditUnit, 2) * -1
-		, ROUND(dblDebitUnit, 2) * -1
-		, strAccountDescription
-		, intCurrencyId
-		, dtmTransactionDate
-		, strTransactionId
-		, intTransactionId
-		, strTransactionType
-		, strTransactionForm
-		, strModuleName
-		, intConcurrencyId
-		, dblExchangeRate
-		, dtmDateEntered
-		, ysnIsUnposted
-		, strCode
-		, strReference
-		, intEntityId
-		, intUserId
-		, intSourceLocationId
-		, intSourceUOMId
-		, intCommodityId
-	FROM tblRKMatchDerivativesPostRecap
-	WHERE intTransactionId = @intMatchFuturesPSHeaderId
-	
-	EXEC dbo.uspGLBookEntries @GLEntries, 0
-	
-	UPDATE	tblGLDetail
-	SET	ysnIsUnposted = 1
-	WHERE strBatchId = @strOldBatchId
-	
 	UPDATE tblRKMatchFuturesPSHeader
 	SET ysnPosted = 0
 	WHERE intMatchNo = @intMatchNo
 	
 	UPDATE tblRKMatchDerivativesPostRecap
 	SET ysnIsUnposted = 0
-		, strReversalBatchId = @strBatchId
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId
 
 	EXEC uspSMAuditLog 

@@ -102,7 +102,7 @@ SELECT
 	, [strBankReferenceNo]			= Receipt.strBankReferenceNo
 	, [intBorrowingFacilityLimitId]	= Receipt.intLimitTypeId
 	, [intBorrowingFacilityLimitDetailId] = Receipt.intSublimitTypeId
-	, [strReferenceNo]					= Receipt.strBankReferenceNo
+	, [strReferenceNo]					= Receipt.strReferenceNo
 	, [intBankValuationRuleId]			= Receipt.intOverrideFacilityValuation
 	, [strComments]						= Receipt.strComments
 FROM 
