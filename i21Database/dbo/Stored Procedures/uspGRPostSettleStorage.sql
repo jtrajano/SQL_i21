@@ -279,7 +279,7 @@ BEGIN TRY
 
 		WHILE EXISTS(SELECT 1 FROM @CustomerStorageIds)
 		BEGIN
-			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds
+			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds		
 
 			IF (SELECT ysnTransferStorage FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId) = 1
 			BEGIN
@@ -287,7 +287,9 @@ BEGIN TRY
 				INSERT INTO @Transfers
 				SELECT * FROM [dbo].[fnGRFindOriginalCustomerStorage](@intId)
 
-				IF EXISTS(SELECT 1 FROM @Transfers WHERE ABS(dblTotalTransactions) > 1)
+				--select '@Transfers',* from @Transfers
+
+				IF EXISTS(SELECT 1 FROM @Transfers WHERE ABS(ROUND(dblTotalTransactions,4) - ROUND(dblOpenBalance,4)) > 1 )
 				BEGIN
 					RAISERROR('Unable to settle storage. Please check the storage and try again.',16,1,1)
 					RETURN;
@@ -299,13 +301,13 @@ BEGIN TRY
 				,@dblHistoryTotal		= ISNULL(dblHistoryTotalUnits,0)
 			FROM [dbo].[fnGRCheckStorageBalance](@intId, NULL)
 
-			IF (@dblSettlementTotal + @dblTransferTotal) > @dblHistoryTotal OR (@dblSettlementTotal - @dblHistoryTotal) > 0.1
+			IF ROUND((@dblSettlementTotal + @dblTransferTotal),4) > ROUND(@dblHistoryTotal,4) OR (@dblSettlementTotal - @dblHistoryTotal) > 0.1
 			BEGIN
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
 			END
 			DELETE FROM @CustomerStorageIds WHERE intId = @intId
-		END	
+		END
 	END
 
 	IF @ysnFromPriceBasisContract = 0 
