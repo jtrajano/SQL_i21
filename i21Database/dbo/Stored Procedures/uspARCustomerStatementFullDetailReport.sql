@@ -636,7 +636,6 @@ LEFT JOIN (
 	) PD ON P.intPaymentId = PD.intPaymentId
 	INNER JOIN #COMPANYLOCATIONS CL ON P.intCompanyLocationId = CL.intCompanyLocationId
 	WHERE P.ysnPosted = 1
-	  AND P.ysnProcessedToNSF = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
 

@@ -182,7 +182,7 @@ UNION
 ------------------------- Customer Xref Logs -------------------------
 SELECT -- Invalid Customer
 	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
-	'Customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' does not exist.',
+	'Customer ' + CASE WHEN FilteredVendorSetup.strCustomer IS NOT NULL THEN 'No. :' ELSE 'Name: ' END + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' does not exist.',
 	FilteredVendorSetup.intRowNumber,
 	4
 FROM
@@ -190,7 +190,7 @@ FROM
 LEFT JOIN
 	vyuARCustomer Customer
 	ON
-		ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = Customer.strName
+		ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = CASE WHEN FilteredVendorSetup.strCustomer IS NOT NULL THEN Customer.strCustomerNumber ELSE Customer.strName END
 		AND
 		Customer.ysnActive = 1
 WHERE
@@ -200,7 +200,7 @@ ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS 
 UNION
 SELECT -- Duplicate Customer Name
 	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
-	'Customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' has duplicate name matches.',
+	'Customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' has duplicate customer matches.',
 	FilteredVendorSetup.intRowNumber,
 	5
 FROM
@@ -212,7 +212,7 @@ OUTER APPLY
 	FROM 
 		vyuARCustomer 
 	WHERE 
-		strName = ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) 
+		CASE WHEN FilteredVendorSetup.strCustomer IS NOT NULL THEN strCustomerNumber ELSE strName END = ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) 
 ) Customer
 WHERE
 Customer.intMatchCount > 1
@@ -704,7 +704,7 @@ SELECT
 		WHEN LogVendorSetup.intLogType = 3
 		THEN 'Export File Type'
 		WHEN LogVendorSetup.intLogType IN (4,5,6,7,8)
-		THEN 'Customer Name'
+		THEN 'Customer No./Name'
 		WHEN LogVendorSetup.intLogType IN (9,10,11,12)
 		THEN 'Item Name'
 		WHEN LogVendorSetup.intLogType IN (13,14,15,16)
@@ -809,7 +809,7 @@ USING
 	INNER JOIN
 		vyuARCustomer Customer
 		ON
-			ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = Customer.strName
+			ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = CASE WHEN FilteredVendorSetup.strCustomer IS NOT NULL THEN Customer.strCustomerNumber ELSE Customer.strName END
 			AND
 			Customer.ysnActive = 1
 	INNER JOIN

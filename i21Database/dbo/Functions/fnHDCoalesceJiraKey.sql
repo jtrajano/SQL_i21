@@ -5,14 +5,17 @@ BEGIN
 
 	DECLARE @strJiraKeys nvarchar(max);
 	SELECT
-		@strJiraKeys = (case when @ysnDisplay = convert(bit,1) then COALESCE(@strJiraKeys + ',<br>', '') + '<a target="_blank" title="Click to go to ' + tblHDTicketJIRAIssue.strKey + '." href="http://jira.irelyserver.com/browse/' + tblHDTicketJIRAIssue.strKey + '">' + tblHDTicketJIRAIssue.strKey + '</a>' else COALESCE(@strJiraKeys + ',', '') + tblHDTicketJIRAIssue.strKey end)
+		@strJiraKeys = (case when @ysnDisplay = convert(bit,1) then COALESCE(@strJiraKeys + ',<br>', '') + '<a target="_blank" title="Click to go to ' + Ticket.strKey + '." href="http://jira.irelyserver.com/browse/' + Ticket.strKey + '">' + Ticket.strKey + '</a>' else COALESCE(@strJiraKeys + ',', '') + Ticket.strKey end)
 	FROM
-		tblHDTicketJIRAIssue
-	WHERE
-		ltrim(rtrim(tblHDTicketJIRAIssue.strKey)) <> ''
-		and tblHDTicketJIRAIssue.intTicketId = @intTicketId
-		and strKey = strJiraKey
+		( 
+			SELECT strKey
+			FROM tblHDTicketJIRAIssue	
+			WHERE LTRIM(RTRIM(tblHDTicketJIRAIssue.strKey)) <> ''
+				  AND tblHDTicketJIRAIssue.intTicketId = @intTicketId
+				  AND (strKey != strJiraKey OR ISNULL(strJiraKey, '') = '')
+			GROUP BY strKey
+		) Ticket
 
-	return @strJiraKeys
+	RETURN @strJiraKeys
 
 END

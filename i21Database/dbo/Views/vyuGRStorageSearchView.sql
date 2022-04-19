@@ -108,7 +108,7 @@ SELECT
 	,strStorageTransactionNumber = CS.strStorageTicketNumber
 	,CS.dblBasis
 	,CS.dblSettlementPrice
-	--,intTicketPricingTypeId = ISNULL(CH.intPricingTypeId, -99)
+	,intTicketPricingTypeId = ISNULL(CH.intPricingTypeId, -99)
 	,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
 	,CAP.intChargeAndPremiumId
 	,CAP.strChargeAndPremiumId
@@ -147,10 +147,13 @@ LEFT JOIN (
 	tblSCTicket SC 		
 	LEFT JOIN tblGRStorageHistory SH
 		ON SH.intTicketId = SC.intTicketId
+	LEFT JOIN tblICInventoryReceipt IR
+		ON IR.intInventoryReceiptId = SH.intInventoryReceiptId
 	LEFT JOIN tblICInventoryReceiptItem IRI
 		ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
 	) 
 	ON SC.intTicketId = CS.intTicketId
+		AND IR.intEntityVendorId = CS.intEntityId
 LEFT JOIN tblSCTicketSplit SCTicketSplit	
 	ON SCTicketSplit.intTicketId = CS.intTicketId 
 		AND SCTicketSplit.intCustomerId = CS.intEntityId

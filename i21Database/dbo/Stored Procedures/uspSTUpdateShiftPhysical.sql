@@ -51,8 +51,8 @@ SELECT
 	intCheckoutId = @intCheckoutId
 	, CG.intCountGroupId
 	, dblSystemCount = ISNULL(SUM(shiftPhysical.dblPhysicalCount), 0)
-	, SUM(InventoryReceipt.dblQtyReceived) AS dblQtyReceived
-	, SUM(ItemMovement.dblQtySold) AS dblQtySold
+	, ISNULL(SUM(InventoryReceipt.dblQtyReceived), 0) AS dblQtyReceived
+	, ISNULL(SUM(ItemMovement.dblQtySold), 0) AS dblQtySold
 	, intEntityUserSecurityId = @intEntityUserSecurityId
 	, intConcurrencyId = 1
 FROM tblICCountGroup CG
