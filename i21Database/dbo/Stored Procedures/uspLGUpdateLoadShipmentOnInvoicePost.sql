@@ -168,12 +168,12 @@ BEGIN TRY
 		BEGIN
 			IF(@strInvoiceType IN ('Provisional', 'Standard'))
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12)
 			END
 		END
 		ELSE 
 		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12)
 		END
 
 		SELECT @intMinRecordId = MIN(intRecordId)

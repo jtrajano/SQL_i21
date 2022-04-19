@@ -8,6 +8,7 @@ BEGIN
 	DECLARE @strLoadNumber NVARCHAR(50)
 		,@InTransit_Inbound InTransitTableType
 		,@strErrMsg NVARCHAR(MAX)
+		,@ysnInvoiced BIT = 0
 
 	/* Validate Parameters */
 	IF (@ysnReject IS NULL) RETURN;
@@ -68,8 +69,14 @@ BEGIN
 	/* Begin Unreject Process */
 	ELSE IF (@ysnReject = 0)
 	BEGIN
-		--Set Shipment Status to "Rejected"
-		UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId
+		/* Check if Load Shipment has associated Invoice */
+		SELECT @ysnInvoiced = 1 FROM tblARInvoiceDetail IVD 
+			INNER JOIN tblARInvoice IV ON IV.intInvoiceId = IVD.intInvoiceId 
+		WHERE IV.ysnPosted = 1
+		AND IVD.intLoadDetailId IN (SELECT intLoadDetailId FROM tblLGLoad WHERE intLoadId = @intLoadId)
+
+		--Set Shipment Status back to "Delivered" or "Invoiced"
+		UPDATE tblLGLoad SET intShipmentStatus = CASE WHEN (@ysnInvoiced = 1) THEN 11 ELSE 6 END WHERE intLoadId = @intLoadId
 
 		--P.Company Location moves back to S.Company Location, Delivered Quantities are restored
 		UPDATE tblLGLoadDetail 
@@ -98,6 +105,7 @@ BEGIN
 			,@toValue = ''
 	END
 
+	/* In-Transit Inbound Stock Movement */
 	INSERT INTO @InTransit_Inbound (
 		[intItemId]
 		,[intItemLocationId]
