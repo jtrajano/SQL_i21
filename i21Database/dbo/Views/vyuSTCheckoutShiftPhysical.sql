@@ -6,7 +6,7 @@ intCheckoutShiftPhysicalId
 , SP.intItemId
 , SP.intItemLocationId
 , SP.intCountGroupId
-, SP.dblSystemCount
+, preload.dblSystemCount
 , SP.dblPhysicalCount
 , SP.intItemUOMId
 , preload.dblQtyReceived
