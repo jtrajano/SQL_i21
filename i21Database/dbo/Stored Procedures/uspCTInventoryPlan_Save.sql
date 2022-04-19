@@ -433,7 +433,7 @@ BEGIN TRY
 			INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
 					SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intInvPlngReportMasterID AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
 					UNION ALL
-					SELECT 2, '', '', strColumnName, Ltrim(isNULL(strOldValue, '')), Ltrim(IsNULL(strNewValue, '')), strColumnDescription, NULL, NULL, 1
+					SELECT 2, '', '', strColumnName, Ltrim(isNULL(strOldValue, '')), Ltrim(IsNULL(strNewValue, '')), strColumnDescription, NULL, NULL, 1 from @tblIPAuditLog
 
 			EXEC uspSMSingleAuditLog 
 				@screenName     = 'Manufacturing.view.DemandAnalysisView',
