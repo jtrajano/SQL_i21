@@ -82,6 +82,7 @@ RETURNS TABLE AS RETURN
 		,account.strBankAccountNo strPayFromBankAccount
 		,voucher.intPayToBankAccountId
 		,eft.strAccountNumber strPayToBankAccount
+		,accountDetail.strAccountId strAPAccount
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail
@@ -89,6 +90,7 @@ RETURNS TABLE AS RETURN
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	LEFT JOIN vyuCMBankAccount account ON account.intBankAccountId = voucher.intPayFromBankAccountId
 	LEFT JOIN vyuAPEntityEFTInformation eft ON eft.intEntityEFTInfoId = voucher.intPayToBankAccountId
+	LEFT JOIN vyuGLAccountDetail accountDetail ON accountDetail.intAccountId = voucher.intAccountId
 	LEFT JOIN tblSMCurrency currency ON currency.intCurrencyID = voucher.intCurrencyId
 	OUTER APPLY (
 		SELECT TOP 1
