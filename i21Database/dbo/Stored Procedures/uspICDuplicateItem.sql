@@ -179,7 +179,8 @@ BEGIN
 		intCommodityAttributeId2,
 		intCommodityAttributeId3,
 		intCommodityAttributeId4,
-		ysnProducePartialPacking
+		ysnProducePartialPacking,
+		intValuationGroupId
 	)
 	SELECT @NewItemNo,
 		strType,
@@ -328,7 +329,8 @@ BEGIN
 		intCommodityAttributeId2,
 		intCommodityAttributeId3,
 		intCommodityAttributeId4,
-		ysnProducePartialPacking
+		ysnProducePartialPacking,
+		intValuationGroupId
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
