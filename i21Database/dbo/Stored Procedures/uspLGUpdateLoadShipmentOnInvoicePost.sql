@@ -27,6 +27,8 @@ BEGIN TRY
 	DECLARE @intOutboundLoadDetailId INT
 	DECLARE @intInboundLoadDetailId INT
 	DECLARE @strInvoiceType NVARCHAR(100)
+	DECLARE @intShipmentStatus INT
+	DECLARE @ysnFromReturn BIT
 
 	DECLARE @tblInvoiceDetail TABLE (
 		intRecordId INT IDENTITY(1, 1)
@@ -61,8 +63,17 @@ BEGIN TRY
 		WHERE intRecordId = @intMinRecordId
 
 		SELECT @strInvoiceType = strType 
-		FROM tblARInvoice 
-		WHERE intInvoiceId = @InvoiceId
+			,@ysnFromReturn = CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN 1 ELSE 0 END
+		FROM tblARInvoice I
+		OUTER APPLY (
+			SELECT TOP 1 intInvoiceId 
+			FROM tblARInvoice RET
+			WHERE RET.strTransactionType = 'Invoice'
+			  AND RET.ysnReturned = 1
+			  AND RET.strInvoiceNumber = I.strInvoiceOriginId
+			  AND RET.intInvoiceId = I.intOriginalInvoiceId
+		) RI
+		WHERE I.intInvoiceId = @InvoiceId
 
 		SELECT @intPContractDetailId = intPContractDetailId
 		      ,@intSContractDetailId = intSContractDetailId
@@ -75,7 +86,8 @@ BEGIN TRY
 		FROM tblLGLoadDetail
 		WHERE intLoadDetailId = @intLoadDetailId
 
-		SELECT @intPurchaseSale = intPurchaseSale 
+		SELECT @intPurchaseSale = intPurchaseSale
+			,@intShipmentStatus = intShipmentStatus 
 		FROM tblLGLoad 
 		WHERE intLoadId = @intLoadId
 
@@ -108,6 +120,21 @@ BEGIN TRY
 									+ (CASE WHEN ISNULL(@Post,0) =  1 THEN @dblPurchasedLotQty ELSE @dblPurchasedLotQty *(-1) END 
 										* CASE WHEN (@strInvoiceType = 'Credit Memo') THEN -1 ELSE 1 END)
 				WHERE intContractDetailId = @intAllocationPContractDetailId
+
+				/* When Posting Credit Memo from Return, Unpost and Cancel LS */
+				IF (ISNULL(@ysnFromReturn, 0) = 1 AND @intShipmentStatus NOT IN (4, 12))
+				BEGIN
+					IF (@Post = 1)
+					BEGIN
+						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 0, @intEntityUserSecurityId = @UserId
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 1, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
+					END
+					ELSE
+					BEGIN
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
+						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
+					END
+				END
 			END
 		END
 		ELSE IF (@intPurchaseSale = 3)
@@ -116,12 +143,6 @@ BEGIN TRY
 			SET @dblInvoicedQty = NUll
             IF @intPContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
             BEGIN
-				--EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
-				--	,@dblQuantityToUpdate =  @dblLoadDetailQty
-				--	,@intUserId = @UserId
-				--	,@intExternalId = @intInvoiceDetailId
-				--	,@strScreenName = 'Invoice'
-				
 				UPDATE tblCTContractDetail
 				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + + (@dblLoadDetailQty * -1)
 				WHERE intContractDetailId = @intPContractDetailId
@@ -136,12 +157,6 @@ BEGIN TRY
 						END
 				FROM tblLGLoadDetail
 				WHERE intSContractDetailId = @intSContractDetailId AND intLoadId = @intLoadId
-
-				--EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
-				--	,@dblQuantityToUpdate	=	@dblInvoicedQty
-				--	,@intUserId				=	@UserId
-				--	,@intExternalId			=	@intInvoiceDetailId
-				--	,@strScreenName			=	'Invoice' 
 
 				UPDATE tblCTContractDetail
 				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + (@dblInvoicedQty * -1)

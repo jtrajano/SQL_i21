@@ -388,25 +388,6 @@ BEGIN
 	--LOAD SHIPMENT
 	IF @ysnFromProvisional = 0 OR @ysnProvisionalWithGL = 0
 		EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost] @InvoiceId = @intInvoiceId, @Post = @Post, @LoadId = @intLoadId, @UserId = @UserId
-	
-	--UNPOST AND CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
-	IF ISNULL(@ysnFromReturn, 0) = 1 AND @intLoadId IS NOT NULL
-		BEGIN
-			IF @Post = 1
-				BEGIN
-					EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 0, @intEntityUserSecurityId = @UserId
-
-					IF ISNULL(@intPurchaseSaleId, 0) <> 3
-						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 1, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
-				END
-			ELSE
-				BEGIN
-					IF ISNULL(@intPurchaseSaleId, 0) <> 3
-						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
-
-					EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
-				END
-		END
 
 	DELETE FROM @tblLoadShipment WHERE [intInvoiceId] = @intInvoiceId
 END
