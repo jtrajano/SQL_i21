@@ -58,6 +58,7 @@ SELECT
 	, intOrderedById = so.intOrderedById
 	, vso.strTemplateName
 	, vso.strSplitNumber
+	, so.ysnProcessed
 FROM vyuSOSalesOrderSearch vso
 LEFT JOIN tblSOSalesOrder so ON so.intSalesOrderId = vso.intSalesOrderId
 LEFT JOIN tblCRMOpportunity op ON op.intOpportunityId = so.intOpportunityId
