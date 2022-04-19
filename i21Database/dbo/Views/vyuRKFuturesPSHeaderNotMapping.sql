@@ -43,7 +43,10 @@ OUTER APPLY (
 	FROM tblCMBankTransactionDetail btDetail
 	LEFT JOIN tblCMBankTransaction btHeader
 		ON btHeader.intTransactionId = btDetail.intTransactionId
+	LEFT JOIN tblCMBankTransactionType btType	
+		ON btType.intBankTransactionTypeId = btHeader.intBankTransactionTypeId
 	WHERE intMatchDerivativeNo = mh.intMatchNo
+	AND btType.strBankTransactionTypeName = 'Broker Settlement'
 ) bankTransaction
 GROUP BY mh.intMatchFuturesPSHeaderId
 	, mh.intMatchNo
