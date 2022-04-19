@@ -98,7 +98,7 @@ begin try
 		end
 	end
 
-	set @strXML = '<PreProcessXML>' + @strXML + '</PreProcessXML>'
+	set @strXML = '<PreProcessXMLs><PreProcessXML>' + @strXML + '</PreProcessXML></PreProcessXMLs>'
 
 	EXEC uspCTPreProcessPriceContract @strXML = @strXML, @intUserId = @intUserId;
 
