@@ -740,12 +740,17 @@ AS
 					INNER JOIN #tmpRebuildList list	
 						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-					INNER JOIN tblICInventoryTransaction t 
-						ON t.intTransactionId = r.intInventoryReceiptId
-						AND t.strTransactionId = r.strReceiptNumber
-						AND t.intTransactionDetailId = ri.intInventoryReceiptItemId			
-				WHERE
-					t.strBatchId = @strBatchId						
+					CROSS APPLY (
+						SELECT TOP 1
+							t.* 
+						FROM 
+							tblICInventoryTransaction t 
+						WHERE 
+							t.intTransactionId = r.intInventoryReceiptId
+							AND t.strTransactionId = r.strReceiptNumber
+							AND t.intTransactionDetailId = ri.intInventoryReceiptItemId			
+							AND t.strBatchId = @strBatchId						
+					) t
 				GROUP BY
 					r.strReceiptNumber
 					,ri.intInventoryReceiptId
