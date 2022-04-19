@@ -21,6 +21,7 @@ BEGIN TRY
 		, @intCommodityId INT
 		, @intEntityId INT
 		, @intBankTransactionId INT = NULL
+		, @strBrokerBankAccount NVARCHAR(MAX) = NULL
 		, @strBankTransactionId NVARCHAR(100)
 		, @intBankAccountCurrencyId INT = NULL
 		, @strBankAccountCurrency NVARCHAR(100)
@@ -81,6 +82,7 @@ BEGIN TRY
 		, @strFutMarketName = strFutMarketName
 		, @strLocationName = strLocationName
 		, @intLocationId = h.intCompanyLocationId
+		, @strBrokerBankAccount = bankAcct.strBankAccountNo
 		, @intBankAccountCurrencyId = bankAcct.intCurrencyId
 		, @strBankAccountCurrency = curr.strCurrency
 	FROM tblRKMatchFuturesPSHeader h
@@ -90,11 +92,23 @@ BEGIN TRY
 	JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = h.intCompanyLocationId
 	LEFT JOIN tblCTBook b ON b.intBookId = h.intBookId
 	LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = h.intSubBookId
-	LEFT JOIN vyuCMBankAccount bankAcct
-		ON bankAcct.intBankAccountId = h.intBankAccountId
+	OUTER APPLY (
+		SELECT TOP 1 
+			  cmba.intBrokerageAccountId
+			, cmba.intCurrencyId
+			, cmba.strBankAccountNo
+		FROM vyuCMBankAccount cmba
+		WHERE cmba.intBrokerageAccountId = h.intBrokerageAccountId
+	) bankAcct
 	LEFT JOIN tblSMCurrency curr
 		ON curr.intCurrencyID = bankAcct.intCurrencyId
 	WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+	
+	IF ISNULL(@intBankAccountCurrencyId, 0) = 0
+	BEGIN
+		SELECT Result = 'Brokerage Account Selected is not assigned to Any Bank Account.'
+		GOTO Exit_Routine
+	END
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId)
 	BEGIN
@@ -252,6 +266,7 @@ BEGIN TRY
 		, intAccountId
 		, strAccountId
 		, strAccountDescription
+		, strBrokerBankAccount = @strBrokerBankAccount
 		-- CHECKING IF DEBIT/CREDIT OR DEBIT/CREDIT FOREIGN
 		, dblDebit = CASE WHEN ysnForeignCurrency = 0 THEN dblDebit
 							ELSE 0
