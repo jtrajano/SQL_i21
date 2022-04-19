@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspQMReportCuppingForm]
+CREATE PROCEDURE [dbo].[uspQMReportTestingSummarySession]
 	
 	@xmlParam NVARCHAR(MAX) = NULL  
 	
@@ -63,53 +63,22 @@ BEGIN TRY
 	SELECT
 		 QMCS.intCuppingSessionId
 		,QMS.intSampleId
-		,CTCDV.strContractNumber
-		,QMS.strSamplingMethod
 		,QMS.strSampleNumber
-		,strVendorName = CTCDV.strEntityName
-		,QMS.strSentBy
-		,QMS.dtmSampleSentDate
 		,strItem = CTCDV.strItemDescription
-		,strCommodity = CTCDV.strCommodityDescription
-		,QMS.strLotNumber
-		,QMS.strSendSampleTo
-		,strRankCuppingNumber = QMCS.strCuppingSessionNumber
+		,CTCDV.strItemOrigin
 		,QMCS.dtmCuppingDate
 		,QMCS.dtmCuppingTime
-		,QMCSD.intRank
-		,CTCDV.intContractSeq
-		,CTCDV.strItemOrigin
-		,QMS.dtmSampleReceivedDate
-		,strExtension = ICCA1.strAttribute1
-		,strVisualAspect = VISUAL_ASPECT.strPropertyValue
-		,strHumidity = HUMIDITY.strPropertyValue
-		,strRoasting = ROASTING.strPropertyValue
-		,QMST.strSampleTypeName
+		,QMA.strContractNumberP
+		,QMA.strContractNumberS
+		,strVendorName = QMA.strEntityNameP
+		,strCustomerName = QMA.strEntityNameS
+		,strRankCuppingNumber = CAST(QMCSD.intRank AS NVARCHAR(MAX)) + ' / ' + QMCS.strCuppingSessionNumber
 	FROM tblQMCuppingSession QMCS
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
 	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
 	INNER JOIN tblQMSampleType QMST ON QMS.intSampleTypeId = QMST.intSampleTypeId
+	LEFT JOIN vyuQMAllocation QMA ON QMS.intSampleId = QMA.intSampleId 
 	LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON QMS.intContractDetailId = CTCDV.intContractDetailId
-	LEFT JOIN tblICItem ICI WITH (NOLOCK) ON CTCDV.intItemId = ICI.intItemId
-	LEFT JOIN tblICCommodityAttribute1 ICCA1 WITH (NOLOCK) ON ICI.intCommodityAttributeId1 = ICCA1.intCommodityAttributeId1
-	OUTER APPLY (
-		SELECT TOP 1 strPropertyValue
-		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Visual Aspect'
-		WHERE QMTR.intSampleId = QMS.intSampleId
-	) VISUAL_ASPECT
-	OUTER APPLY (
-		SELECT TOP 1 strPropertyValue
-		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Humidity'
-		WHERE QMTR.intSampleId = QMS.intSampleId
-	) HUMIDITY
-	OUTER APPLY (
-		SELECT TOP 1 strPropertyValue
-		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Roasting'
-		WHERE QMTR.intSampleId = QMS.intSampleId
-	) ROASTING
 
 END TRY
 
