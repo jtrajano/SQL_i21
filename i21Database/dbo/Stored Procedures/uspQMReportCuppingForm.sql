@@ -95,20 +95,23 @@ BEGIN TRY
 	OUTER APPLY (
 		SELECT TOP 1 strPropertyValue
 		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Visual Aspect'
-		WHERE QMTR.intSampleId = QMS.intSampleId
+		INNER JOIN tblQMProductProperty QMPP ON QMPP.intPropertyId = QMTR.intPropertyId AND QMPP.ysnPrintInCuppingForm = 1 AND QMTR.intProductId = QMPP.intProductId
+		INNER JOIN tblQMProperty QMP ON QMPP.intPropertyId = QMP.intPropertyId AND QMP.strPropertyName = 'Visual Aspect'
+		INNER JOIN tblQMSample QMSR ON QMTR.intSampleId = QMSR.intSampleId AND QMTR.intSampleId = QMS.intSampleId
 	) VISUAL_ASPECT
 	OUTER APPLY (
 		SELECT TOP 1 strPropertyValue
 		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Humidity'
-		WHERE QMTR.intSampleId = QMS.intSampleId
+		INNER JOIN tblQMProductProperty QMPP ON QMPP.intPropertyId = QMTR.intPropertyId AND QMPP.ysnPrintInCuppingForm = 1 AND QMTR.intProductId = QMPP.intProductId
+		INNER JOIN tblQMProperty QMP ON QMPP.intPropertyId = QMP.intPropertyId AND QMP.strPropertyName = 'Humidity'
+		INNER JOIN tblQMSample QMSR ON QMTR.intSampleId = QMSR.intSampleId AND QMTR.intSampleId = QMS.intSampleId
 	) HUMIDITY
 	OUTER APPLY (
 		SELECT TOP 1 strPropertyValue
 		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Roasting'
-		WHERE QMTR.intSampleId = QMS.intSampleId
+		INNER JOIN tblQMProductProperty QMPP ON QMPP.intPropertyId = QMTR.intPropertyId AND QMPP.ysnPrintInCuppingForm = 1 AND QMTR.intProductId = QMPP.intProductId
+		INNER JOIN tblQMProperty QMP ON QMPP.intPropertyId = QMP.intPropertyId AND QMP.strPropertyName = 'Roasting'
+		INNER JOIN tblQMSample QMSR ON QMTR.intSampleId = QMSR.intSampleId AND QMTR.intSampleId = QMS.intSampleId
 	) ROASTING
 
 END TRY
