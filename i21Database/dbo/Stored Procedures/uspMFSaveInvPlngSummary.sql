@@ -188,6 +188,10 @@ BEGIN TRY
 			,SB INT
 			)
 
+	DECLARE @SingleAuditLogParam SingleAuditLogParam
+	INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+	SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intInvPlngSummaryId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+
 	IF EXISTS (
 			SELECT *
 			FROM @tblIPAuditLog
@@ -198,6 +202,9 @@ BEGIN TRY
 		SELECT @strDetails += '{"change":"' + strColumnName + '","iconCls":"small-gear","from":"' + Ltrim(isNULL(strOldValue, '')) + '","to":"' + Ltrim(IsNULL(strNewValue, '')) + '","leaf":true,"changeDescription":"' + strColumnDescription + '"},'
 		FROM @tblIPAuditLog 
 		WHERE IsNULL(strOldValue, '') <> IsNULL(strNewValue, '')
+
+		INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+		SELECT 2, '', '', strColumnName, Ltrim(isNULL(strOldValue, '')), Ltrim(IsNULL(strNewValue, '')), strColumnDescription, NULL, NULL, 1
 	END
 
 	IF (LEN(@strDetails) > 1)
@@ -210,6 +217,16 @@ BEGIN TRY
 			,@actionType = 'Updated'
 			,@actionIcon = 'small-tree-modified'
 			,@details = @strDetails
+
+		BEGIN TRY
+			EXEC uspSMSingleAuditLog 
+				@screenName     = 'Manufacturing.view.DemandSummaryView',
+				@recordId       = @intInvPlngSummaryId,
+				@entityId       = @intUserId,
+				@AuditLogParam  = @SingleAuditLogParam
+		END TRY
+		BEGIN CATCH
+		END CATCH
 	END
 
 	IF @intTransactionCount = 0

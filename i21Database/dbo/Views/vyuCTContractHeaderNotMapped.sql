@@ -84,7 +84,8 @@ AS
 						intCommodityFutureMarketId = CY.intFutureMarketId, -- CT-5315
 						strEntitySelectedLocation = ESL.strLocationName, -- CT-5315
 						COL.strLocationName,
-						ST.strSampleTypeName
+						ST.strSampleTypeName,
+						CY.ysnCheckMissingStandardPriceInContract
 
 				FROM	tblCTContractHeader						CH	
 				

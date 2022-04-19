@@ -8,7 +8,7 @@
 AS
 SET ANSI_WARNINGS ON
 
-BEGIN TRY
+--BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ItemsToPost ItemInTransitCostingTableType
@@ -484,15 +484,15 @@ BEGIN
 		,@intEntityUserSecurityId
 		,@ysnPost
 END
-END TRY
-BEGIN CATCH
-	IF @@TRANCOUNT > 1
-	BEGIN
-		ROLLBACK TRAN @TransactionName
+--END TRY
+--BEGIN CATCH
+--	IF @@TRANCOUNT > 1
+--	BEGIN
+--		ROLLBACK TRAN @TransactionName
 
-		COMMIT TRAN @TransactionName
-	END
+--		COMMIT TRAN @TransactionName
+--	END
 
-	SET @strErrMsg = ERROR_MESSAGE()
-	RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
-END CATCH
+--	SET @strErrMsg = ERROR_MESSAGE()
+--	RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
+--END CATCH

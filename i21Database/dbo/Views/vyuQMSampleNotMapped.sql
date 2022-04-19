@@ -75,7 +75,7 @@ LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
 LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
-LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
+LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND ETC.ysnDefaultContact = 1
 LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
 LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intCuppingSessionDetailId = S.intCuppingSessionDetailId
 LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId

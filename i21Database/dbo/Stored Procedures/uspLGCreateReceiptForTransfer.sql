@@ -178,8 +178,8 @@ BEGIN TRY
 				t.strTransactionId = L.strLoadNumber
 				AND t.intTransactionId = L.intLoadId
 				AND t.intTransactionDetailId = LD.intLoadDetailId
-				AND t.intItemId = LD.intItemId
-				AND t.dblQty > 0
+				AND t.intItemId = ISNULL(Lot.intItemId, LD.intItemId)
+				AND ((L.intPurchaseSale = 2 AND t.dblQty < 0) OR (L.intPurchaseSale = 4 AND t.dblQty > 0))
 				AND t.ysnIsUnposted = 0 
 		) valuationCost 
 		OUTER APPLY (
@@ -191,8 +191,8 @@ BEGIN TRY
 				t.strTransactionId = L.strLoadNumber
 				AND t.intTransactionId = L.intLoadId
 				AND t.intTransactionDetailId = LD.intLoadDetailId
-				AND t.intItemId = LD.intItemId
-				AND t.dblQty > 0
+				AND t.intItemId = ISNULL(Lot.intItemId, LD.intItemId)
+				AND ((L.intPurchaseSale = 2 AND t.dblQty < 0) OR (L.intPurchaseSale = 4 AND t.dblQty > 0))
 				AND t.ysnIsUnposted = 0 
 		) topValuation
 	WHERE L.intLoadId = @intLoadId

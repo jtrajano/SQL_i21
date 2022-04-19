@@ -8,7 +8,8 @@ BEGIN TRY
  
 	DECLARE
 		@ErrMsg NVARCHAR(MAX)
-		,@intContractTypeId int;
+		,@intContractTypeId int
+		,@intScreenId int;
 
 
 	DECLARE @tblShipment TABLE (
@@ -32,6 +33,7 @@ BEGIN TRY
 		intContractDetailId INT
 		, ysnOpenLoad BIT
 	);
+	Select @intScreenId=intScreenId from tblSMScreen Where strNamespace = 'ContractManagement.view.PriceContracts'
 
 	select top 1 @intContractTypeId = intContractTypeId from tblCTContractHeader where intContractHeaderId = @intContractHeaderId
 	
@@ -682,8 +684,7 @@ BEGIN TRY
 			, a.intContractDetailId
 			, c.strApprovalStatus
 		FROM tblCTPriceFixation a
-		LEFT JOIN tblSMTransaction c ON c.intRecordId = a.intPriceContractId AND c.strApprovalStatus IS NOT NULL
-		LEFT JOIN tblSMScreen d ON d.strNamespace = 'ContractManagement.view.PriceContracts' AND d.intScreenId = c.intScreenId AND d.ysnApproval = 1
+		LEFT JOIN tblSMTransaction c ON c.intRecordId = a.intPriceContractId AND c.strApprovalStatus IS NOT NULL and c.intScreenId =@intScreenId
 		WHERE a.intContractHeaderId = @intContractHeaderId
 			AND ISNULL(a.intContractDetailId, 0) = CASE WHEN CT.ysnMultiplePriceFixation = 1 THEN ISNULL(a.intContractDetailId, 0) ELSE ISNULL(CD.intContractDetailId, 0) END
 		ORDER BY c.intTransactionId DESC

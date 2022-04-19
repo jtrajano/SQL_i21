@@ -102,6 +102,7 @@
 	tblSCTicketFormat.intTicketFormatId,
 	tblSCTicketFormat.ysnSuppressCompanyName,
 	tblSCTicketFormat.intSuppressDiscountOptionId,
+	tblSCTicketPrintOption.intTicketPrintOptionId,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
   from dbo.tblSCTicket tblSCTicket
   LEFT JOIN dbo.tblEMEntity tblEMEntity on tblEMEntity.intEntityId = tblSCTicket.intEntityId

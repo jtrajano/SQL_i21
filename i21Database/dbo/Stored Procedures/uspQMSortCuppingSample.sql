@@ -47,7 +47,7 @@ LEFT JOIN tblICCommodityAttribute EX ON I.intCommodityAttributeId1 = EX.intCommo
 --RANK ACCORDING TO SORT
 SELECT S.intItemId
 	 , S.intSampleId
-	 , R.intId
+	 , intId = ISNULL(R.intId, ROW_NUMBER() OVER (ORDER BY S.intSampleId ASC))
 	 , S.strItemNo
 INTO #FINALRANKING
 FROM #SAMPLES S
@@ -57,7 +57,7 @@ LEFT JOIN #SESSIONRANKING R ON ((R.intItemId IS NOT NULL AND S.intItemId = R.int
 						   AND ((R.strExtension IS NOT NULL AND S.strExtension = R.strExtension) OR R.strExtension IS NULL)
 ORDER BY ISNULL(R.intId, 99)
 
-SELECT intRank				= FR.intId
+SELECT intRank				= ROW_NUMBER() OVER (ORDER BY FR.intId ASC)
 	 , strSampleNumber		= S.strSampleNumber	 
 	 , strSampleTypeName	= ST.strSampleTypeName
 	 , strMethodology		= ''
@@ -95,4 +95,4 @@ LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeade
 LEFT JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 LEFT JOIN tblICLot L ON L.intLotId = S.intProductValueId AND S.intProductTypeId = 6
 LEFT JOIN tblEMEntity E ON S.intEntityId = E.intEntityId
-ORDER BY intId
+ORDER BY FR.intId

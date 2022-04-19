@@ -674,7 +674,9 @@
     <Build Include="dbo\Stored Procedures\uspQMCuppingSessionUpdateParentSample.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceWalterMatterReport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingForm.sql" />
-    <Build Include="dbo\Views\vyuQMCuppingFormResultReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCuppingFormResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCuppingFormSaleInfromation.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportTestingSummarySession.sql" />
     <Build Include="dbo\Views\vyuQMTestingSessionSummaryReport.sql" />
     <Build Include="dbo\Tables\tblICInsuranceRate.sql" />
     <Build Include="dbo\Tables\tblICInsuranceRateDetail.sql" />
@@ -699,6 +701,11 @@
     <Build Include="dbo\Tables\tblSMRapidDeploymentDetail.sql" />
     <Build Include="dbo\Views\vyuSMRapidDeployment.sql" />
     <Build Include="vyuSMRapidDeploymentDetail.sql" />
+    <Build Include="dbo\Tables\tblCRMBrandIntegrationLog.sql" />
+    <Build Include="dbo\Views\vyuCRMBrandIntegrationLog.sql" />
+    <Build Include="dbo\Views\vyuCRMGetBrand.sql" />
+    <Build Include="dbo\Stored Procedures\uspCRMInsertIntegrationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCRMDuplicateBrand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10813,6 +10820,7 @@
     <Build Include="dbo\Views\vyuQMCuppingSessionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMProcessCuppingSession.sql" />
     <Build Include="dbo\Views\vyuQMSampleCuppingSessionTab.sql" />
+    <Build Include="dbo\Views\vyuQMCuppingSession.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

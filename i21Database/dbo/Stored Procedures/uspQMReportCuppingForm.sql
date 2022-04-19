@@ -7,9 +7,9 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg NVARCHAR(MAX),
-			@xmlDocumentId	INT
+					@xmlDocumentId	INT
 
-	DECLARE @intLaguageId	INT
+	DECLARE @intCuppingSessionId	INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -56,12 +56,13 @@ BEGIN TRY
 				[datatype]		NVARCHAR(50)  
 	)  
 	
-	SELECT	@intLaguageId = [from]
+	SELECT	@intCuppingSessionId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intSrLanguageId'
+	WHERE	[fieldname] = 'intCuppingSessionId'
 
 	SELECT
-		 QMS.intSampleId
+		 QMCS.intCuppingSessionId
+		,QMS.intSampleId
 		,CTCDV.strContractNumber
 		,QMS.strSamplingMethod
 		,QMS.strSampleNumber
@@ -78,35 +79,39 @@ BEGIN TRY
 		,QMCSD.intRank
 		,CTCDV.intContractSeq
 		,CTCDV.strItemOrigin
-		,QMCS.intCuppingSessionId
 		,QMS.dtmSampleReceivedDate
 		,strExtension = ICCA1.strAttribute1
 		,strVisualAspect = VISUAL_ASPECT.strPropertyValue
 		,strHumidity = HUMIDITY.strPropertyValue
 		,strRoasting = ROASTING.strPropertyValue
-	FROM tblQMSample QMS
-	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMS.intCuppingSessionDetailId = QMCSD.intCuppingSessionDetailId
-	INNER JOIN tblQMCuppingSession QMCS ON QMCSD.intCuppingSessionId = QMCS.intCuppingSessionId
+		,QMST.strSampleTypeName
+	FROM tblQMCuppingSession QMCS
+	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
+	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
+	INNER JOIN tblQMSampleType QMST ON QMS.intSampleTypeId = QMST.intSampleTypeId
 	LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON QMS.intContractDetailId = CTCDV.intContractDetailId
 	LEFT JOIN tblICItem ICI WITH (NOLOCK) ON CTCDV.intItemId = ICI.intItemId
 	LEFT JOIN tblICCommodityAttribute1 ICCA1 WITH (NOLOCK) ON ICI.intCommodityAttributeId1 = ICCA1.intCommodityAttributeId1
 	OUTER APPLY (
 		SELECT TOP 1 strPropertyValue
 		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Visual Aspect'
-		WHERE QMTR.intSampleId = QMS.intSampleId
+		INNER JOIN tblQMProductProperty QMPP ON QMPP.intPropertyId = QMTR.intPropertyId AND QMPP.ysnPrintInCuppingForm = 1 AND QMTR.intProductId = QMPP.intProductId
+		INNER JOIN tblQMProperty QMP ON QMPP.intPropertyId = QMP.intPropertyId AND QMP.strPropertyName = 'Visual Aspect'
+		INNER JOIN tblQMSample QMSR ON QMTR.intSampleId = QMSR.intSampleId AND QMTR.intSampleId = QMS.intSampleId
 	) VISUAL_ASPECT
 	OUTER APPLY (
 		SELECT TOP 1 strPropertyValue
 		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Humidity'
-		WHERE QMTR.intSampleId = QMS.intSampleId
+		INNER JOIN tblQMProductProperty QMPP ON QMPP.intPropertyId = QMTR.intPropertyId AND QMPP.ysnPrintInCuppingForm = 1 AND QMTR.intProductId = QMPP.intProductId
+		INNER JOIN tblQMProperty QMP ON QMPP.intPropertyId = QMP.intPropertyId AND QMP.strPropertyName = 'Humidity'
+		INNER JOIN tblQMSample QMSR ON QMTR.intSampleId = QMSR.intSampleId AND QMTR.intSampleId = QMS.intSampleId
 	) HUMIDITY
 	OUTER APPLY (
 		SELECT TOP 1 strPropertyValue
 		FROM tblQMTestResult QMTR
-		INNER JOIN tblQMProperty QMP ON QMP.intPropertyId = QMTR.intPropertyId AND QMP.ysnPrintInCuppingForm = 1 AND QMP.strPropertyName = 'Roasting'
-		WHERE QMTR.intSampleId = QMS.intSampleId
+		INNER JOIN tblQMProductProperty QMPP ON QMPP.intPropertyId = QMTR.intPropertyId AND QMPP.ysnPrintInCuppingForm = 1 AND QMTR.intProductId = QMPP.intProductId
+		INNER JOIN tblQMProperty QMP ON QMPP.intPropertyId = QMP.intPropertyId AND QMP.strPropertyName = 'Roasting'
+		INNER JOIN tblQMSample QMSR ON QMTR.intSampleId = QMSR.intSampleId AND QMTR.intSampleId = QMS.intSampleId
 	) ROASTING
 
 END TRY

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGRejectLoadSchedule]
 	@intLoadId INT,
 	@ysnReject BIT, /* 1 = Reject, 0 = Unreject */
+	@intRejectLocationId INT,
 	@intEntityUserSecurityId INT
 AS
 BEGIN
@@ -47,7 +48,7 @@ BEGIN
 
 		--S.Company Location is reset for user entry (destination location)
 		UPDATE tblLGLoadDetail
-			SET intSCompanyLocationId = NULL
+			SET intSCompanyLocationId = @intRejectLocationId
 				,intSSubLocationId = NULL 
 				,intSStorageLocationId = NULL
 				,dblDeliveredQuantity = 0
@@ -96,5 +97,45 @@ BEGIN
 			,@fromValue = ''
 			,@toValue = ''
 	END
+
+	INSERT INTO @InTransit_Inbound (
+		[intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[dblQty]
+		,[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intFOBPointId]
+	)
+	SELECT	[intItemId]				= d.intItemId
+			,[intItemLocationId]	= itemLocation.intItemLocationId
+			,[intItemUOMId]			= d.intItemUOMId
+			,[intLotId]				= l.intLotId
+			,[intSubLocationId]		= ISNULL(wh.intSubLocationId, d.intSSubLocationId)
+			,[intStorageLocationId]	= ISNULL(wh.intStorageLocationId, d.intSStorageLocationId)
+			,[dblQty]				= ISNULL(l.dblLotQuantity, d.dblQuantity) * CASE WHEN @ysnReject = 1 THEN 1 ELSE -1 END 
+			,[intTransactionId]		= h.intLoadId
+			,[strTransactionId]		= h.strLoadNumber
+			,[intTransactionTypeId] = 12 
+			,[intFOBPointId]		= 2
+	FROM dbo.tblLGLoad h
+		INNER JOIN dbo.tblLGLoadDetail d ON h.intLoadId = d.intLoadId
+		INNER JOIN dbo.tblLGLoadDetailLot l ON l.intLoadDetailId = d.intLoadDetailId
+		OUTER APPLY (
+			SELECT TOP 1 clsl.intCompanyLocationId, lw.intSubLocationId, lw.intStorageLocationId FROM tblLGLoadWarehouse lw 
+			INNER JOIN tblSMCompanyLocationSubLocation clsl ON lw.intSubLocationId = clsl.intCompanyLocationSubLocationId
+			WHERE lw.intLoadId = h.intLoadId) wh
+		INNER JOIN dbo.tblICItem Item ON Item.intItemId = d.intItemId
+		INNER JOIN dbo.tblICItemLocation itemLocation 
+			ON itemLocation.intItemId = d.intItemId
+			AND itemLocation.intLocationId = @intRejectLocationId
+	WHERE h.intLoadId = @intLoadId
+		AND Item.strType <> 'Comment'
+
+	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
 END
 GO
