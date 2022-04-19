@@ -141,23 +141,23 @@ AND NOT EXISTS(	SELECT NULL
 				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
 				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
 	
-UNION ALL
+-- UNION ALL
 
-SELECT
-	 [intId]				= IT.[intId]
-	,[strMessage]			= 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(IT.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.'
-	,[strTransactionType]	= IT.[strTransactionType]
-	,[strType]				= IT.[strType]
-	,[strSourceTransaction]	= IT.[strSourceTransaction]
-	,[intSourceId]			= IT.[intSourceId]
-	,[strSourceId]			= IT.[strSourceId]
-	,[intInvoiceId]			= IT.[intInvoiceId]
-FROM @ItemEntries IT
-INNER JOIN tblCTContractDetail CTD ON IT.intContractDetailId = CTD.intContractDetailId
-INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
-WHERE IT.strTransactionType = 'Invoice'
-  AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
-  AND IT.strType = 'Tank Delivery'
+-- SELECT
+-- 	 [intId]				= IT.[intId]
+-- 	,[strMessage]			= 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(IT.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.'
+-- 	,[strTransactionType]	= IT.[strTransactionType]
+-- 	,[strType]				= IT.[strType]
+-- 	,[strSourceTransaction]	= IT.[strSourceTransaction]
+-- 	,[intSourceId]			= IT.[intSourceId]
+-- 	,[strSourceId]			= IT.[strSourceId]
+-- 	,[intInvoiceId]			= IT.[intInvoiceId]
+-- FROM @ItemEntries IT
+-- INNER JOIN tblCTContractDetail CTD ON IT.intContractDetailId = CTD.intContractDetailId
+-- INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+-- WHERE IT.strTransactionType = 'Invoice'
+--   AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
+--   AND IT.strType = 'Tank Delivery'
 
 DELETE I
 FROM tblARInvoice I
