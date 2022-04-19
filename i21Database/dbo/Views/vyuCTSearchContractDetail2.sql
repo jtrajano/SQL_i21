@@ -231,7 +231,7 @@ SELECT a.intContractDetailId
 	, b.strInternalComment
 	, a.dblIntransitQty
 	, a.strInvoiceNo
-	, ARI.strInvoiceNumber
+	, ba.strInvoiceNumber
 	, bb.strInvoiceType
 	, strItemDescription = c.strDescription
 	, strItemShortName = c.strShortName
@@ -365,6 +365,7 @@ LEFT JOIN tblSMCity aw WITH(NOLOCK) ON aw.intCityId = b.intINCOLocationTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation ax WITH(NOLOCK) ON ax.intCompanyLocationSubLocationId = b.intWarehouseId
 LEFT JOIN tblCTIndex ay WITH(NOLOCK) ON ay.intIndexId = a.intIndexId
 LEFT JOIN tblCTInsuranceBy az WITH(NOLOCK) ON az.intInsuranceById = b.intInsuranceById
+LEFT JOIN tblCTContractInvoice ba WITH(NOLOCK) ON ba.intContractDetailId = a.intContractDetailId
 LEFT JOIN tblCTInvoiceType bb WITH(NOLOCK) ON bb.intInvoiceTypeId = b.intInvoiceTypeId
 LEFT JOIN tblEMEntity bc WITH(NOLOCK) ON bc.intEntityId = b.intLastModifiedById
 LEFT JOIN tblICCommodityUnitMeasure bd WITH(NOLOCK) ON bd.intCommodityUnitMeasureId = b.intLoadUOMId
@@ -405,8 +406,6 @@ LEFT JOIN tblICItemUOM cm WITH(NOLOCK) ON cm.intItemUOMId = a.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure cn WITH(NOLOCK) ON cn.intUnitMeasureId = cm.intUnitMeasureId
 LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
 OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
-LEFT JOIN tblARInvoiceDetail ARID ON ARID.intContractDetailId = a.intContractDetailId
-LEFT JOIN tblARInvoice ARI ON ARI.intInvoiceId = ARID.intInvoiceId
 LEFT JOIN (
     SELECT *
     FROM
