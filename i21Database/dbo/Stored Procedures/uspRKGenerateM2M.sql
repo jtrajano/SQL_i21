@@ -677,7 +677,7 @@ BEGIN TRY
 		
 		SELECT DISTINCT a.intContractDetailId, a.strContractNumber
 			, CASE WHEN b.intCounter > 1 THEN 'Partially Priced'
-				WHEN b.intCounter = 1 AND strPricingType IN ('Basis', 'HTA') THEN 'Unpriced'
+				WHEN b.intCounter = 1 AND strPricingType IN ('Basis', 'HTA', 'Ratio') THEN 'Unpriced'
 				WHEN b.intCounter = 1 AND strPricingType = 'Priced' THEN 'Fully Priced'
 				END as strPricingStatus
 		INTO #tmpPricingStatus
