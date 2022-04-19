@@ -24,7 +24,7 @@ SELECT intCuppingSessionId			= CS.intCuppingSessionId
 	 , intContractHeaderId			= S.intContractHeaderId
 	 , intContractDetailId			= S.intContractDetailId
 	 , intLotId						= L.intLotId
-     , dtmCuppingDate               = CS.dtmCuppingDate + CAST(CS.dtmCuppingTime AS TIME)
+     , dtmCuppingDate               = CAST(CS.dtmCuppingDate AS DATETIME) + CAST(CAST(CS.dtmCuppingTime AS TIME) AS DATETIME)
      , dtmCuppingTime               = CS.dtmCuppingTime
 	 , intConcurrencyId				= CSD.intConcurrencyId
 FROM tblQMCuppingSession CS
