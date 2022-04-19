@@ -145,5 +145,41 @@ BEGIN
 		AND Item.strType <> 'Comment'
 
 	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
+
+	/* Contract Balance Movement */
+	SELECT 
+		intContractDetailId = intSContractDetailId
+		,dblConvertedQty = CASE WHEN ISNULL(L.ysnLoadBased, 0) = 1 THEN LD.dblQuantity 
+							ELSE dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, CD.intItemUOMId, LD.dblQuantity) END 
+							* CASE WHEN @ysnReject = 1 THEN -1 ELSE 1 END
+		,intLoadDetailId
+	INTO #tmpLoadDetails
+	FROM tblLGLoadDetail LD
+	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	WHERE LD.intLoadId = @intLoadId
+
+	DECLARE @intLoadDetailId INT
+		,@intContractDetailId INT
+		,@dblConvertedQty NUMERIC(18, 6)
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpLoadDetails)
+	BEGIN
+		SELECT TOP 1 
+			@intLoadDetailId = intLoadDetailId 
+			,@intContractDetailId = intContractDetailId
+			,@dblConvertedQty = dblConvertedQty
+		FROM #tmpLoadDetails
+		
+		EXEC uspCTUpdateSequenceBalance
+			@intContractDetailId	=	@intContractDetailId,
+			@dblQuantityToUpdate	=	@dblConvertedQty,
+			@intUserId				=	@intEntityUserSecurityId,
+			@intExternalId			=	@intLoadDetailId,
+			@strScreenName			=	'Load Schedule'
+
+		DELETE FROM #tmpLoadDetails WHERE intLoadDetailId = @intLoadDetailId
+	END
+
 END
 GO
