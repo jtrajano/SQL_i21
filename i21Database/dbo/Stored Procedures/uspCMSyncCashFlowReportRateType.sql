@@ -66,11 +66,11 @@ ORDER BY RateDetail.dtmValidFromDate DESC, RateDetail.dtmCreatedDate DESC
 INSERT INTO @tblDefaultRateTypes
 SELECT A.* FROM @tblDefaultRateTypesRaw A
 INNER JOIN (
-	SELECT strBucket, MAX(dtmValidFromDate) dtmValidFromDate, MAX(dtmCreatedDate) dtmCreatedDate
+	SELECT strBucket, intFromCurrencyId, MAX(dtmValidFromDate) dtmValidFromDate
 	FROM @tblDefaultRateTypesRaw
-	GROUP BY strBucket
+	GROUP BY strBucket, intFromCurrencyId
 ) G
-ON A.strBucket = G.strBucket AND A.dtmValidFromDate = G.dtmValidFromDate AND A.dtmCreatedDate = G.dtmCreatedDate
+ON A.strBucket = G.strBucket AND A.dtmValidFromDate = G.dtmValidFromDate AND A.intFromCurrencyId = G.intFromCurrencyId
 ORDER BY intRowId
 
 
