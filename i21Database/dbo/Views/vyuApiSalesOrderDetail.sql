@@ -10,6 +10,7 @@ SELECT
     , vd.ysnItemContract
     , vd.strContractNumber
     , u.strUnitMeasure
+    , vd.intUnitMeasureId
     , vd.dblQtyShipped
     , vd.dblQtyOrdered
     , vd.dblQtyAllocated
