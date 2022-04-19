@@ -7,9 +7,10 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg NVARCHAR(MAX),
-					@xmlDocumentId	INT
+			@xmlDocumentId	INT
 
-	DECLARE @intCuppingSessionId	INT
+	DECLARE @intCuppingSessionId INT
+	DECLARE @strPrintType NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -60,25 +61,32 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intCuppingSessionId'
 
+	SELECT	@strPrintType = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strPrintType'
+
 	SELECT
-		 QMCS.intCuppingSessionId
+		 strPrintType = @strPrintType
+		,QMCS.intCuppingSessionId
 		,QMS.intSampleId
 		,QMS.strSampleNumber
-		,strItem = CTCDV.strItemDescription
+		,strItem				= CTCDV.strItemDescription
 		,CTCDV.strItemOrigin
 		,QMCS.dtmCuppingDate
 		,QMCS.dtmCuppingTime
 		,QMA.strContractNumberP
 		,QMA.strContractNumberS
-		,strVendorName = QMA.strEntityNameP
-		,strCustomerName = QMA.strEntityNameS
-		,strRankCuppingNumber = CAST(QMCSD.intRank AS NVARCHAR(MAX)) + ' / ' + QMCS.strCuppingSessionNumber
+		,strVendorName			= QMA.strEntityNameP
+		,strCustomerName		= QMA.strEntityNameS
+		,strRankCuppingNumber	= CAST(QMCSD.intRank AS NVARCHAR(MAX)) + ' / ' + QMCS.strCuppingSessionNumber
+		,strProductType			= ICCA.strDescription
 	FROM tblQMCuppingSession QMCS
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
 	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
 	INNER JOIN tblQMSampleType QMST ON QMS.intSampleTypeId = QMST.intSampleTypeId
 	LEFT JOIN vyuQMAllocation QMA ON QMS.intSampleId = QMA.intSampleId 
 	LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON QMS.intContractDetailId = CTCDV.intContractDetailId
+	LEFT JOIN tblICCommodityAttribute ICCA ON QMS.intProductTypeId = ICCA.intCommodityAttributeId AND ICCA.strType = 'ProductType'
 
 END TRY
 

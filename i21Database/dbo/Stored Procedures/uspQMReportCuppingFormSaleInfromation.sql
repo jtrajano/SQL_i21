@@ -9,8 +9,11 @@ BEGIN TRY
 		 strEntityNameS
 		,strContractNumberS
 		,dblSampleQtyS
+		,strSampleUOMS
+		,strShipmentPeriod = FORMAT(dtmStartDateS, 'dd.MM.yyyy') + ' - ' + FORMAT(dtmEndDateS, 'dd.MM.yyyy')
 	FROM vyuQMAllocation
 	WHERE intSampleId = @intSampleId
+	AND ISNULL(strContractNumberS, '') <> ''
 
 END TRY
 
