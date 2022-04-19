@@ -8,7 +8,7 @@ CREATE PROCEDURE dbo.uspApiCalculateTax (
 	, @CurrencyId INT
 	, @Amount NUMERIC(18, 6)
 	, @Price NUMERIC(18, 6)
-	, @FreightTermId INT NULL
+	, @FreightTermId INT
 )
 AS
 
