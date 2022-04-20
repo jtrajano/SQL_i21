@@ -677,7 +677,6 @@
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingFormResult.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingFormSaleInfromation.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTestingSummarySession.sql" />
-    <Build Include="dbo\Views\vyuQMTestingSessionSummaryReport.sql" />
     <Build Include="dbo\Tables\tblICInsuranceRate.sql" />
     <Build Include="dbo\Tables\tblICInsuranceRateDetail.sql" />
     <Build Include="dbo\Views\vyuICSearchInsuranceRate.sql" />
