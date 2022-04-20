@@ -6,6 +6,9 @@
     [strCompanyName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strDefaultCustomerNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strDefaultSiteNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strHazardousSpillCompanyName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strHazardousSpillCompanyPhoneNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strEmergencyCustomerCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblMBILCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId])
 )
