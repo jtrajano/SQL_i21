@@ -92,6 +92,7 @@ SELECT TOP 100 PERCENT
 												THEN ROW_NUMBER() OVER(PARTITION BY A.intBillId ORDER BY A.intBillId)
 											ELSE A.intLineNo END
 	,intStorageLocationId				=	A.intStorageLocationId
+	,intStorageChargeId					=	A.intStorageChargeId
 	,intSubLocationId					=	A.intSubLocationId
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				=	A.intDeferredVoucherId
@@ -396,7 +397,8 @@ INSERT
 	,ysnSubCurrency	
 	,intCurrencyId					
 	,intLineNo							
-	,intStorageLocationId				
+	,intStorageLocationId		
+	,intStorageChargeId		
 	,intSubLocationId				
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
@@ -496,7 +498,8 @@ VALUES
 	,ysnSubCurrency		
 	,intCurrencyId				
 	,intLineNo		
-	,intStorageLocationId						
+	,intStorageLocationId	
+	,intStorageChargeId					
 	,intSubLocationId				
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
