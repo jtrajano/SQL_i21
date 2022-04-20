@@ -298,7 +298,6 @@ INSERT INTO @ReturnValuation (
 	,strReceiptNumber 
 	,dblQty 
 	,dblReturnUnitCost 
-	--,dblReturnUnitCostInFunctionalCurrency 
 )
 SELECT
 	intInventoryReceiptId = r.intInventoryReceiptId
@@ -325,50 +324,6 @@ SELECT
 						,ri.dblOpenReceive
 					)
 				)
-	--,dblReturnUnitCostInFunctionalCurrency = 
-	--		CASE 
-	--			WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
-	--				dbo.fnMultiply(
-	--					(
-	--						dbo.fnCalculateReceiptUnitCost(
-	--							ri.intItemId
-	--							,ri.intUnitMeasureId		
-	--							,ri.intCostUOMId
-	--							,ri.intWeightUOMId
-	--							,ri.dblUnitCost
-	--							,ri.dblNet
-	--							,t.intLotId
-	--							,t.intItemUOMId
-	--							,AggregrateItemLots.dblTotalNet
-	--							,ri.ysnSubCurrency
-	--							,r.intSubCurrencyCents
-	--							,t.intItemUOMId
-	--							,ri.intComputeItemTotalOption
-	--							,ri.dblOpenReceive
-	--						)
-	--					)
-	--					,ri.dblForexRate
-	--				)
-	--			ELSE 
-	--				(
-	--					dbo.fnCalculateReceiptUnitCost(
-	--						ri.intItemId
-	--						,ri.intUnitMeasureId		
-	--						,ri.intCostUOMId
-	--						,ri.intWeightUOMId
-	--						,ri.dblUnitCost
-	--						,ri.dblNet
-	--						,t.intLotId
-	--						,t.intItemUOMId
-	--						,AggregrateItemLots.dblTotalNet
-	--						,ri.ysnSubCurrency
-	--						,r.intSubCurrencyCents
-	--						,t.intItemUOMId
-	--						,ri.intComputeItemTotalOption
-	--						,ri.dblOpenReceive
-	--					)
-	--				)
-	--		END 
 FROM	tblICInventoryReceipt r INNER JOIN (
 			tblICInventoryReceiptItem ri LEFT JOIN tblICInventoryReceiptItemLot ril
 				ON ri.intInventoryReceiptItemId  = ril.intInventoryReceiptItemId
@@ -470,6 +425,7 @@ FROM	tblICInventoryReceipt r INNER JOIN (
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 			ON currencyRateType.intCurrencyExchangeRateTypeId = ri.intForexRateTypeId
 WHERE	t.strBatchId = @strBatchId
+	
 	
 -- Generate the G/L Entries for Inventory Transactions 
 ;WITH ForGLEntries_CTE (
