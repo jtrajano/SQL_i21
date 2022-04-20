@@ -10473,6 +10473,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRebuildNonOpenContracts.sql" />
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
+	<Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
