@@ -2750,7 +2750,23 @@ BEGIN TRY
 						tblICInventoryReceiptItem RI
 						INNER JOIN tblGRStorageHistory SH
 								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
-										AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
+										AND 
+											CASE WHEN (SH.strType = 'From Transfer') THEN 
+												CASE WHEN SH.intContractHeaderId is not null then  
+													case when SH.intContractHeaderId = RI.intContractHeaderId then 
+														1 
+													else
+														0
+													end
+												else 
+													1 
+												end
+											ELSE 
+												(CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) 
+													THEN 1 
+												ELSE 0 												
+												END) 
+											END = 1
 				)  
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
@@ -2764,7 +2780,17 @@ BEGIN TRY
 						tblICInventoryReceiptCharge RC
 						INNER JOIN tblGRStorageHistory SHC
 								ON SHC.intInventoryReceiptId = RC.intInventoryReceiptId
-										AND CASE WHEN (SHC.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RC.intContractId = ISNULL(SHC.intContractHeaderId,RC.intContractId) THEN 1 ELSE 0 END) END = 1
+										AND CASE WHEN (SHC.strType = 'From Transfer') THEN
+											CASE WHEN SHC.intContractHeaderId is not null then  
+												case when SHC.intContractHeaderId = RC.intContractId then 
+													1 
+												else
+													0
+												end
+											else 
+												1
+											end
+										ELSE (CASE WHEN RC.intContractId = ISNULL(SHC.intContractHeaderId,RC.intContractId) THEN 1 ELSE 0 END) END = 1
 				)  
 						ON SHC.intCustomerStorageId = CS.intCustomerStorageId AND a.intItemType = 3 and @ysnDPOwnedType = 1 and a.intItemId = RC.intChargeId
 				LEFT JOIN tblCTContractDetail CD
