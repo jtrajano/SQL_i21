@@ -131,6 +131,11 @@ BEGIN TRY
 		END
 		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
 		BEGIN
+			DECLARE @intGeographicalZoneId INT
+			SELECT TOP 1 @intGeographicalZoneId = intGeographicalZoneId FROM tblSMCity
+			WHERE intCityId = @intFromPortId
+
+
 			INSERT INTO @CostItems		
 			SELECT @intCostItemId
 				, @strCostItem
@@ -151,7 +156,8 @@ BEGIN TRY
 			JOIN tblICItem item ON item.intItemId = @intItemId AND item.intProductTypeId = ipf.intCommodityAttributeId
 			WHERE detail.intLoadingPortId = @intFromPortId
 				AND detail.intDestinationPortId = @intToPortId
-				AND @intMarketZoneId = (CASE WHEN @intContractTypeId = 1 THEN detail.intLoadingZoneId ELSE detail.intDestinationZoneId END)
+				AND ISNULL(@intMarketZoneId, 0) = (CASE WHEN @intContractTypeId = 1 THEN ISNULL(@intMarketZoneId, 0) ELSE detail.intDestinationZoneId END)
+				AND ISNULL(detail.intProcurementZoneId, 0) = (CASE WHEN @intContractTypeId = 1 THEN ISNULL(@intGeographicalZoneId, 0) ELSE ISNULL(detail.intProcurementZoneId, 0) END)
 				AND ipf.intCommodityId = @intCommodityId
 				
 		END

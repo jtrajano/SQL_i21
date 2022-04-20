@@ -2,7 +2,7 @@
 (
 	intInsurancePremiumFactorDetailId INT NOT NULL IDENTITY (1, 1),
 	intInsurancePremiumFactorId INT NOT NULL,
-	intLoadingZoneId INT NULL,
+	intProcurementZoneId INT NULL,
 	intLoadingPortId INT NULL,
 	intDestinationZoneId INT NULL,
 	intDestinationPortId INT NULL,
