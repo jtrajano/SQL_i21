@@ -155,6 +155,8 @@ BEGIN TRY
 			,intPriceCurrencyId
 			,intPriceUOMId
 			,dblUnitPrice
+			,dtmDeliveryFrom
+			,dtmDeliveryTo
 			)
 		SELECT PLD.dblGrossWt
 			,PLD.dblNetWt
@@ -174,6 +176,8 @@ BEGIN TRY
 			,A.intSeqCurrencyId
 			,A.intSeqPriceUOMId
 			,A.dblSeqPrice
+			,CD.dtmStartDate
+			,CD.dtmEndDate
 		FROM tblLGAllocationDetail AD
 		JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 		JOIN tblLGPickLotDetail PLD ON PLD.intAllocationDetailId = AD.intAllocationDetailId
