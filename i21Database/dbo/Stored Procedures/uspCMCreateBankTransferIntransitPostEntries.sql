@@ -99,7 +99,7 @@ BEGIN
         ,[dblDebit]             = dblAmountFrom
         ,[dblCredit]            = 0     
         ,[dblDebitForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom
-                                    THEN dblAmountTo ELSE  dblAmountForeignFrom END  
+                                    THEN dblAmountFrom ELSE  dblAmountForeignFrom END  
         ,[dblCreditForeign]     = 0    
         ,[dblDebitUnit]         = 0    
         ,[dblCreditUnit]        = 0    
