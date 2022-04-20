@@ -86,7 +86,8 @@ BEGIN
 		,strOwnership = 'Customer Owned'
 	FROM dbo.fnRKGetBucketCustomerOwned(@dtmToTransactionDate,@intCommodityId,NULL) CusOwn
 		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CusOwn.strDistributionType
-	WHERE CusOwn.intItemId = ISNULL(@intItemId, CusOwn.intItemId)
+	WHERE ISNULL(CusOwn.strStorageType, '') <> 'ITR' AND CusOwn.intTypeId IN (1, 3, 4, 5, 8, 9)
+		AND CusOwn.intItemId = ISNULL(@intItemId, CusOwn.intItemId)
 		AND CusOwn.intLocationId = ISNULL(@intLocationId, CusOwn.intLocationId)
 		AND CusOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
