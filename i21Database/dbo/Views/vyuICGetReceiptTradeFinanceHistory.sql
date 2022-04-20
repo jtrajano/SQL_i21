@@ -4,6 +4,25 @@ AS
 		r.intInventoryReceiptId
 		,tfh.* 
 	FROM 
-		tblICInventoryReceipt r INNER JOIN tblTRFTradeFinanceHistory tfh
-			ON r.strTradeFinanceNumber = tfh.strTradeFinanceNumber
+		tblICInventoryReceipt r 
+		CROSS APPLY (
+			SELECT 
+				intTradeFinanceHistoryId = MIN (tfh.intTradeFinanceHistoryId)  
+			FROM 
+				tblTRFTradeFinanceHistory tfh
+			WHERE
+				tfh.strTradeFinanceNumber = r.strTradeFinanceNumber 		
+		) firstLog 
+		CROSS APPLY (
+			SELECT 
+				* 
+			FROM 
+				tblTRFTradeFinanceHistory tfh
+			WHERE
+				tfh.strTradeFinanceNumber = r.strTradeFinanceNumber 
+				AND (
+					tfh.strTransactionNumber = r.strReceiptNumber
+					OR tfh.intTradeFinanceHistoryId <= firstLog.intTradeFinanceHistoryId
+				)
+		) tfh 
 GO 

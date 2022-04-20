@@ -33,6 +33,7 @@ DECLARE @SourceType_TransferShipment AS INT = 9
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 		,@intReturnValue AS INT 
+		,@strAction AS NVARCHAR(50) 
 
 -- Iterate and process records
 DECLARE @Id INT = NULL,
@@ -46,6 +47,7 @@ DECLARE @Id INT = NULL,
 		@intTradeFinanceId			INT = NULL 
 
 DECLARE @TRFTradeFinance AS TRFTradeFinance
+		,@TRFLog AS TRFLog
 
 -- Initialize the variables
 BEGIN
@@ -234,6 +236,8 @@ BEGIN
 				, @intUserId = @UserId
 				, @strAction = 'UPDATE'
 				, @dtmTransactionDate = @dtmDate 
+
+			SET @strAction = 'Updated'
 		END 
 		-- Create a new trade finance record. 
 		ELSE IF EXISTS (
@@ -282,6 +286,138 @@ BEGIN
 				WHERE 
 					r.intInventoryReceiptId = @ReceiptId
 					AND @strTradeFinanceNumber IS NOT NULL 
+
+				SET @strAction = 'Created'
+			END 
+		END 
+		
+		-- Create a trade finance log.
+		IF @strAction IS NOT NULL 
+		BEGIN 
+			INSERT INTO @TRFLog (
+				strAction 
+				, strTransactionType 
+				, intTradeFinanceTransactionId 
+				, strTradeFinanceTransaction 
+				, intTransactionHeaderId 
+				, intTransactionDetailId 
+				, strTransactionNumber 
+				, dtmTransactionDate 
+				, intBankTransactionId 
+				, strBankTransactionId 
+				, intBankId 
+				, strBank 
+				, intBankAccountId 
+				, strBankAccount 
+				, intBorrowingFacilityId 
+				, strBorrowingFacility 
+				, strBorrowingFacilityBankRefNo 
+				, dblTransactionAmountAllocated 
+				, dblTransactionAmountActual 
+				--, intLoanLimitId 
+				--, strLoanLimitNumber 
+				--, strLoanLimitType 
+				, intLimitId 
+				, strLimit 
+				, dblLimit 
+				, intSublimitId 
+				, strSublimit 
+				, dblSublimit 
+				, strBankTradeReference 
+				, dblFinanceQty 
+				, dblFinancedAmount 
+				, strBankApprovalStatus 
+				, dtmAppliedToTransactionDate 
+				, intStatusId 
+				, intWarrantId 
+				, strWarrantId 
+				, intUserId 
+				, intConcurrencyId 
+				, intContractHeaderId 
+				, intContractDetailId 
+			)
+			SELECT 
+				strAction = @strAction + ' ' + CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
+				, strTransactionType = CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
+				, intTradeFinanceTransactionId = tf.intTradeFinanceId
+				, strTradeFinanceTransaction = tf.strTradeFinanceNumber
+				, intTransactionHeaderId = r.intInventoryReceiptId
+				, intTransactionDetailId = NULL 
+				, strTransactionNumber = r.strReceiptNumber
+				, dtmTransactionDate = r.dtmReceiptDate
+				, intBankTransactionId = NULL 
+				, strBankTransactionId = NULL 
+				, intBankId = r.intBankId
+				, strBank = ba.strBankName
+				, intBankAccountId = ba.intBankAccountId
+				, strBankAccount  = ba.strBankAccountNo
+				, intBorrowingFacilityId = r.intBorrowingFacilityId
+				, strBorrowingFacility = fa.strBorrowingFacilityId
+				, strBorrowingFacilityBankRefNo = r.strBankReferenceNo
+				, dblTransactionAmountAllocated = r.dblGrandTotal 
+				, dblTransactionAmountActual = r.dblGrandTotal
+				--, intLoanLimitId 
+				--, strLoanLimitNumber 
+				--, strLoanLimitType 
+				, intLimitId = r.intLimitTypeId
+				, strLimit = fl.strBorrowingFacilityLimit
+				, dblLimit = fl.dblLimit
+				, intSublimitId = r.intSublimitTypeId
+				, strSublimit = fld.strLimitDescription
+				, dblSublimit = fld.dblLimit
+				, strBankTradeReference = r.strBankReferenceNo
+				, dblFinanceQty = ri.dblQty
+				, dblFinancedAmount = r.dblGrandTotal
+				, strBankApprovalStatus = r.strApprovalStatus
+				, dtmAppliedToTransactionDate = GETDATE()
+				, intStatusId = 1
+						--CASE 
+						--	WHEN tf.intStatusId = 1 THEN 'Active' 
+						--	WHEN tf.intStatusId = 2 THEN 'Completed'
+						--	WHEN tf.intStatusId = 0 THEN 'Cancelled'							
+						--END
+				, intWarrantId = NULL 
+				, strWarrantId = r.strWarrantNo
+				, intUserId = COALESCE(r.intModifiedByUserId, r.intCreatedUserId, r.intCreatedByUserId) 
+				, intConcurrencyId = 1
+				, intContractHeaderId = receiptContract.intContractHeaderId
+				, intContractDetailId = receiptContract.intContractDetailId
+			FROM 
+				tblICInventoryReceipt r LEFT JOIN tblTRFTradeFinance tf
+					ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
+				LEFT JOIN vyuCMBankAccount ba 
+					ON ba.intBankAccountId = r.intBankAccountId
+				LEFT JOIN tblCMBorrowingFacility fa
+					ON fa.intBorrowingFacilityId = r.intBorrowingFacilityId
+				LEFT JOIN tblCMBorrowingFacilityLimit fl 
+					ON fl.intBorrowingFacilityLimitId = r.intLimitTypeId
+				LEFT JOIN tblCMBorrowingFacilityLimitDetail fld
+					ON fld.intBorrowingFacilityLimitDetailId = r.intSublimitTypeId
+				LEFT JOIN tblCMBankValuationRule bvr
+					ON bvr.intBankValuationRuleId = r.intOverrideFacilityValuation				
+				OUTER APPLY (
+					SELECT 
+						dblQty = SUM(ri.dblOpenReceive) 
+					FROM 
+						tblICInventoryReceiptItem ri 
+					WHERE
+						ri.intInventoryReceiptId = r.intInventoryReceiptId
+				) ri
+				OUTER APPLY (
+					SELECT TOP 1 
+						ri.intContractHeaderId
+						,ri.intContractDetailId
+					FROM 
+						tblICInventoryReceiptItem ri 
+					WHERE
+						ri.intInventoryReceiptId = r.intInventoryReceiptId
+				) receiptContract
+			WHERE
+				r.intInventoryReceiptId = @ReceiptId
+
+			IF EXISTS (SELECT TOP 1 1 FROM @TRFLog) 
+			BEGIN 
+				EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
 			END 
 		END 
 	END 
