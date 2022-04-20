@@ -197,8 +197,8 @@ END
         ,[intAccountId]         = GLAccnt.intAccountId      
         ,[dblCredit]             = dblAmountSettlementFrom  
         ,[dblDebit]            = 0       
-        ,[dblDebitForeign]      = dblAmountForeignFrom
-        ,[dblCreditForeign]     = 0      
+        ,[dblDebitForeign]      = 0
+        ,[dblCreditForeign]     = dblAmountForeignFrom      
         ,[dblDebitUnit]         = 0      
         ,[dblCreditUnit]        = 0      
         ,[strDescription]       = A.strDescription      
@@ -228,9 +228,9 @@ END
         ,[intAccountId]          = @intBTInTransitAccountId  
         ,[dblCredit]              = 0  
         ,[dblDebit]             = dblAmountTo 
-        ,[dblDebitForeign]       = 0  
-        ,[dblCreditForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo
-                                    THEN dblAmountTo ELSE  dblAmountForeignTo END        
+        ,[dblDebitForeign]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo
+                                    THEN dblAmountTo ELSE  dblAmountForeignTo END   
+        ,[dblCreditForeign]      = 0       
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
@@ -259,8 +259,8 @@ END
         ,[intAccountId]          = @intBTForwardToFXGLAccountId
         ,[dblCredit]              = 0
         ,[dblDebit]               = dblAmountFrom
-        ,[dblDebitForeign]       = 0
-        ,[dblCreditForeign]      =  dblAmountForeignFrom
+        ,[dblDebitForeign]       = dblAmountForeignFrom
+        ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
@@ -289,8 +289,8 @@ END
         ,[intAccountId]          = @intBTForwardFromFXGLAccountId
         ,[dblCredit]             = dblAmountSettlementTo
         ,[dblDebit]				 = 0
-        ,[dblDebitForeign]       = dblAmountForeignTo
-        ,[dblCreditForeign]      = 0
+        ,[dblDebitForeign]       = 0
+        ,[dblCreditForeign]      = dblAmountForeignTo
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
