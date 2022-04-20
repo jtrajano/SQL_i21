@@ -17,11 +17,15 @@ RETURN SELECT
 	,intCompanyLocationId	= ARI.intCompanyLocationId
 	,ysnPosted				= ISNULL(ARI.ysnPosted, 0)
 FROM tblARInvoice ARI
-LEFT JOIN tblCMUndepositedFund CMUF
-ON ARI.strInvoiceNumber = CMUF.strSourceTransactionId
-AND strSourceSystem = 'AR'
+LEFT JOIN tblCMUndepositedFund CMUF ON ARI.strInvoiceNumber = CMUF.strSourceTransactionId AND strSourceSystem = 'AR'
+LEFT JOIN tblARPaymentDetail ARPD ON ARI.intInvoiceId = ARPD.intInvoiceId
+LEFT JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
 WHERE (@dtmDateFrom IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate) >= @dtmDateFrom)
   AND (@dtmDateTo IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate) <= @dtmDateTo)
-  AND ARI.ysnPaid = 0
+  AND (
+	(ARI.ysnPaid = 0 AND ARI.strTransactionType <> 'Customer Prepayment')
+	OR
+	(ARP.ysnPosted = 1 AND ARI.strTransactionType = 'Customer Prepayment')
+  )
 
 GO
