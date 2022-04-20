@@ -9178,6 +9178,7 @@
     <Build Include="dbo\User Defined Types\SettleStorageChargeAndPremium.sql" />
     <Build Include="dbo\Views\vyuGRSettleStorageBillDetail.sql" />
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
