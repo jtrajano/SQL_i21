@@ -363,7 +363,6 @@ BEGIN TRY
 			END
 
 			DECLARE @strDetails NVARCHAR(MAX) = ''
-			DECLARE @SingleAuditLogParam SingleAuditLogParam
 
 			IF EXISTS (
 					SELECT 1
@@ -371,7 +370,7 @@ BEGIN TRY
 					WHERE strRowState = 'Added'
 						OR strRowState = 'Deleted'
 					)
-			BEGIN				
+			BEGIN
 				SELECT @strDetails += '{"change":"tblICItemFactories","children":['
 
 				SELECT @strDetails += '{"action":"Created","change":"Created - Record: ' + @strLocationName + '","keyValue":' + ltrim(intItemFactoryId) + ',"iconCls":"small-new-plus","leaf":true},'
@@ -385,16 +384,6 @@ BEGIN TRY
 				SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
 				SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Factory Association"},'
-
-				-- NEW SP CALL
-				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intItemId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-				UNION ALL
-				SELECT 2, '', '', 'tblICItemFactories', NULL, NULL, 'Factory Association', NULL, NULL, 1
-				UNION ALL
-				SELECT 3, ltrim(intItemFactoryId), 'Created', 'Created - Record: ' + @strLocationName, NULL, NULL, NULL, NULL, NULL, 2
-				UNION ALL
-				SELECT 4, ltrim(intItemFactoryId), 'Deleted', 'Deleted - Record: ' + @strLocationName, NULL, NULL, NULL, NULL, NULL, 2
 			END
 
 			IF (LEN(@strDetails) > 1)
@@ -407,16 +396,6 @@ BEGIN TRY
 					,@actionType = 'Updated'
 					,@actionIcon = 'small-tree-modified'
 					,@details = @strDetails
-
-				BEGIN TRY
-					EXEC uspSMSingleAuditLog 
-						@screenName     = 'Inventory.view.Item',
-						@recordId       = @intItemId,
-						@entityId       = @intUserId,
-						@AuditLogParam  = @SingleAuditLogParam
-				END TRY
-				BEGIN CATCH
-				END CATCH
 			END
 
 			SELECT @strDetails = ''

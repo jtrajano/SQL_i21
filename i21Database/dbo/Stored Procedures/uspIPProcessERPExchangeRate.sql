@@ -433,20 +433,6 @@ BEGIN TRY
 							,@actionType = 'Updated'
 							,@actionIcon = 'small-tree-modified'
 							,@details = @strDetails
-
-						BEGIN TRY
-							DECLARE @SingleAuditLogParam SingleAuditLogParam
-							INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-									SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intCurrencyExchangeRateId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-
-							EXEC uspSMSingleAuditLog 
-								@screenName     = 'i21.view.CurrencyExchangeRate',
-								@recordId       = @intCurrencyExchangeRateId,
-								@entityId       = @intUserId,
-								@AuditLogParam  = @SingleAuditLogParam
-						END TRY
-						BEGIN CATCH
-						END CATCH
 					END
 				END
 			END

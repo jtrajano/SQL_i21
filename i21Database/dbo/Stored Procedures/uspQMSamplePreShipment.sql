@@ -203,66 +203,24 @@ BEGIN TRY
 			IF (@intSampleId > 0)
 			BEGIN
 				DECLARE @strDetails NVARCHAR(MAX) = ''
-				DECLARE @SingleAuditLogParam SingleAuditLogParam
-				DECLARE @intId INT = 0
-
-				SET @intId += 1
-				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intSampleId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
 
 				IF (@dblOldRepresentingQty <> @dblNewRepresentingQty)
-				BEGIN
 					SET @strDetails += '{"change":"dblRepresentingQty","iconCls":"small-gear","from":"' + LTRIM(@dblOldRepresentingQty) + '","to":"' + LTRIM(@dblNewRepresentingQty) + '","leaf":true},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'dblRepresentingQty', LTRIM(@dblOldRepresentingQty), LTRIM(@dblNewRepresentingQty), NULL, NULL, NULL, 1
-				END
-
 				IF (@intOldRepresentingUOMId <> @intNewRepresentingUOMId)
-				BEGIN
 					SET @strDetails += '{"change":"intRepresentingUOMId","iconCls":"small-gear","from":"' + LTRIM(@intOldRepresentingUOMId) + '","to":"' + LTRIM(@intNewRepresentingUOMId) + '","leaf":true},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'intRepresentingUOMId', LTRIM(@intOldRepresentingUOMId), LTRIM(@intNewRepresentingUOMId), NULL, NULL, NULL, 1
-				END
-
 				IF (@strOldRefNo <> @strNewRefNo)
-				BEGIN
 					SET @strDetails += '{"change":"strRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldRefNo) + '","to":"' + LTRIM(@strNewRefNo) + '","leaf":true},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strRefNo', LTRIM(@strOldRefNo), LTRIM(@strNewRefNo), NULL, NULL, NULL, 1
-				END
-
 				IF (@intOldSampleStatusId <> @intNewSampleStatusId)
-				BEGIN
 					SET @strDetails += '{"change":"intSampleStatusId","iconCls":"small-gear","from":"' + LTRIM(@intOldSampleStatusId) + '","to":"' + LTRIM(@intNewSampleStatusId) + '","leaf":true},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'intSampleStatusId', LTRIM(@intOldSampleStatusId), LTRIM(@intNewSampleStatusId), NULL, NULL, NULL, 1
-				END
-
 				IF (@strOldSampleNote <> @strNewSampleNote)
-				BEGIN
 					SET @strDetails += '{"change":"strSampleNote","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleNote) + '","to":"' + LTRIM(@strNewSampleNote) + '","leaf":true},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strSampleNote', LTRIM(@strOldSampleNote), LTRIM(@strNewSampleNote), NULL, NULL, NULL, 1
-				END
-
 				IF (@dtmOldSampleReceivedDate <> @dtmNewSampleReceivedDate)
-				BEGIN
 					SET @strDetails += '{"change":"dtmSampleReceivedDate","iconCls":"small-gear","from":"' + LTRIM(@dtmOldSampleReceivedDate) + '","to":"' + LTRIM(@dtmNewSampleReceivedDate) + '","leaf":true},'
-
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'dtmSampleReceivedDate', LTRIM(@dtmOldSampleReceivedDate), LTRIM(@dtmNewSampleReceivedDate), NULL, NULL, NULL, 1
-				END
 
 				IF (LEN(@strDetails) > 1)
 				BEGIN
@@ -274,16 +232,6 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
-
-					BEGIN TRY
-						EXEC uspSMSingleAuditLog 
-							@screenName     = 'Quality.view.QualitySample',
-							@recordId       = @intSampleId,
-							@entityId       = @intUserId,
-							@AuditLogParam  = @SingleAuditLogParam
-					END TRY
-					BEGIN CATCH
-					END CATCH
 				END
 			END
 

@@ -245,22 +245,6 @@ BEGIN TRY
 					,@actionType = 'Updated'
 					,@actionIcon = 'small-tree-modified'
 					,@details = @strDetails
-
-				BEGIN TRY
-					DECLARE @SingleAuditLogParam SingleAuditLogParam
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-							SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intBillId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-							UNION ALL
-							SELECT 2, '', '', 'strComment', ISNULL(strOldComment, ''), ISNULL(strNewComment, ''), 'Check Comments', NULL, NULL, 1
-
-					EXEC uspSMSingleAuditLog 
-						@screenName     = 'AccountsPayable.view.Voucher',
-						@recordId       = @intBillId,
-						@entityId       = @intUserId,
-						@AuditLogParam  = @SingleAuditLogParam
-				END TRY
-				BEGIN CATCH
-				END CATCH
 			END
 
 			INSERT INTO tblIPInitialAck (

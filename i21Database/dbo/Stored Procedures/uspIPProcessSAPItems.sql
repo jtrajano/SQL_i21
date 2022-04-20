@@ -674,42 +674,21 @@ BEGIN TRY
 
 					DECLARE @strDetails NVARCHAR(MAX) = ''
 
-					DECLARE @SingleAuditLogParam SingleAuditLogParam
-					DECLARE @intId INT = 0
-
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intItemId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-
 					IF EXISTS (
 							SELECT *
 							FROM @tblICItem
 							WHERE IsNULL(strOldDescription, '') <> IsNULL(strNewDescription, '')
 							)
-					BEGIN
 						SELECT @strDetails += '{"change":"strDescription","iconCls":"small-gear","from":"' + IsNULL(strOldDescription, '') + '","to":"' + IsNULL(strNewDescription, '') + '","leaf":true,"changeDescription":"Description"},'
 						FROM @tblICItem
-
-						SET @intId += 1
-						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-						SELECT @intId, '', '', 'strDescription', IsNULL(strOldDescription, ''), IsNULL(strNewDescription, ''), 'Description', NULL, NULL, 1
-						FROM @tblICItem
-					END
 
 					IF EXISTS (
 							SELECT *
 							FROM @tblICItem
 							WHERE IsNULL(strOldShortName, '') <> IsNULL(strNewShortName, '')
 							)
-					BEGIN
 						SELECT @strDetails += '{"change":"strShortName","iconCls":"small-gear","from":"' + IsNULL(strOldShortName, '') + '","to":"' + IsNULL(strNewShortName, '') + '","leaf":true,"changeDescription":"Short Name"},'
 						FROM @tblICItem
-
-						SET @intId += 1
-						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-						SELECT @intId, '', '', 'strShortName', IsNULL(strOldShortName, ''), IsNULL(strNewShortName, ''), 'Short Name', NULL, NULL, 1
-						FROM @tblICItem
-					END
 
 					IF EXISTS (
 							SELECT *
@@ -718,13 +697,6 @@ BEGIN TRY
 							)
 					BEGIN
 						SELECT @strDetails += '{"change":"intProductTypeId","iconCls":"small-gear","from":"' + ISNULL(CA.strDescription, '') + '","to":"' + ISNULL(CA1.strDescription, '') + '","leaf":true,"changeDescription":"Product Type"},'
-						FROM @tblICItem I
-						LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOldProductTypeId
-						LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intNewProductTypeId
-
-						SET @intId += 1
-						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-						SELECT @intId, '', '', 'intProductTypeId', ISNULL(CA.strDescription, ''), ISNULL(CA1.strDescription, ''), 'Product Type', NULL, NULL, 1
 						FROM @tblICItem I
 						LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOldProductTypeId
 						LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intNewProductTypeId
@@ -744,16 +716,6 @@ BEGIN TRY
 						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
 						SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Unit of Measure"},'
-
-						SET @intId += 1
-						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-						SELECT @intId, '', '', 'tblICItemUOMs', NULL, NULL, 'Unit of Measure', NULL, NULL, 1
-
-						SET @intId += 1
-						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-						SELECT @intId, ltrim(intItemUOMId), 'Created', 'Created - Record: ' + strUnitMeasure, NULL, NULL, 'Unit of Measure', NULL, NULL, (@intId - 1)
-						FROM @tblICItemUOM IU
-						JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					END
 
 					IF (LEN(@strDetails) > 1)
@@ -766,16 +728,6 @@ BEGIN TRY
 							,@actionType = 'Updated'
 							,@actionIcon = 'small-tree-modified'
 							,@details = @strDetails
-
-						BEGIN TRY
-							EXEC uspSMSingleAuditLog 
-								@screenName     = 'Inventory.view.Item',
-								@recordId       = @intItemId,
-								@entityId       = @intUserId,
-								@AuditLogParam  = @SingleAuditLogParam
-						END TRY
-						BEGIN CATCH
-						END CATCH
 					END
 				END
 			END

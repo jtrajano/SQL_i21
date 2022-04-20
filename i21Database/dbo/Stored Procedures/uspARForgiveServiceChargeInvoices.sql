@@ -490,28 +490,6 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 					SET @childData = '{"change": "tblARInvoice","children": [{"action": "' + @auditAction + '","change": "'+ @auditAction +' - Invoice No: ' + CAST(@invoiceNo as VARCHAR(MAX)) + '","iconCls": "small-tree-modified","children": [{"change":"ysnForgive","from":"'+ @valueFrom +'","to":"'+ @valueTo +'","leaf":true,"iconCls":"small-gear"},{"change":"dtmForgiveDate","from":"'+   CASE WHEN @ysnForgive = 1 THEN '' ELSE ISNULL(CAST(@fromDtmForgiveDate AS VARCHAR(20)),'') END  +'","to":"'+ CASE WHEN @ysnForgive = 1 THEN ISNULL(CAST(@toDtmForgiveDate AS VARCHAR(20)),'') ELSE '' END +'","leaf":true,"iconCls":"small-gear"}]}]}';
 					DECLARE @strInvoiceId VARCHAR(MAX) = CAST(@intInvoiceId as VARCHAR(MAX))
 					EXEC uspSMAuditLog @screenName = 'AccountsReceivable.view.Invoice', @keyValue = @strInvoiceId, @entityId = @intEntityId, @actionType = 'Updated', @actionIcon = 'small-tree-modified', @changeDescription =  '', @fromValue = '0', @toValue = '1', @details = @childData
-
-					BEGIN TRY
-					DECLARE @SingleAuditLogParam SingleAuditLogParam
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-							SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@strInvoiceId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-							UNION ALL
-							SELECT 2, '', '', 'tblARInvoice', NULL, NULL, NULL, NULL, NULL, 1
-							UNION ALL
-							SELECT 3, '', @auditAction, @auditAction + ' - Invoice No: ' + CAST(@invoiceNo as varchar(15)), NULL, NULL, NULL, NULL, NULL, 2
-							UNION ALL
-							SELECT 4, '', '', 'ysnForgive', @valueFrom, @valueTo, NULL, NULL, NULL, 3
-							UNION ALL
-							SELECT 5, '', '', 'dtmForgiveDate', CASE WHEN @ysnForgive = 1 THEN '' ELSE ISNULL(CAST(@fromDtmForgiveDate AS VARCHAR(20)),'') END, CASE WHEN @ysnForgive = 1 THEN ISNULL(CAST(@toDtmForgiveDate AS VARCHAR(20)),'') ELSE '' END, NULL, NULL, NULL, 3
-
-					EXEC uspSMSingleAuditLog 
-						@screenName     = 'AccountsReceivable.view.Invoice',
-						@recordId       = @strInvoiceId,
-						@entityId       = @intEntityId,
-						@AuditLogParam  = @SingleAuditLogParam
-					END TRY
-					BEGIN CATCH
-					END CATCH
 				 FETCH NEXT FROM @ServiceChargeAuditLogCursor INTO @intInvoiceId, @fromDtmForgiveDate,@toDtmForgiveDate, @invoiceNo;
 				END
  

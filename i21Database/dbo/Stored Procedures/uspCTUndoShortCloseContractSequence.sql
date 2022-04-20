@@ -41,26 +41,6 @@ BEGIN
 			@toValue				= '',
 			@details				= @Details 		
 
-	BEGIN TRY
-		DECLARE @SingleAuditLogParam SingleAuditLogParam
-		INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intContractHeaderId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-				UNION ALL
-				SELECT 2, '', '', 'tblCTContractDetails', NULL, NULL, NULL, NULL, NULL, 1
-				UNION ALL
-				SELECT 3, '', 'Updated', 'Updated - Record: ' + CONVERT(NVARCHAR(20), @intContractDetailId), NULL, NULL, NULL, NULL, NULL, 2
-				UNION ALL
-				SELECT 4, '', '', 'Contract Status', @strOldStatus, @strNewStatus, NULL, NULL, NULL, 3
-
-		EXEC uspSMSingleAuditLog 
-			@screenName     = 'ContractManagement.view.Contract',
-			@recordId       = @intContractHeaderId,
-			@entityId       = @intUserId,
-			@AuditLogParam  = @SingleAuditLogParam
-	END TRY
-	BEGIN CATCH
-	END CATCH
-
 	EXEC	uspCTCreateDetailHistory	@intContractHeaderId 	= NULL,--@intContractHeaderId,
 										@intContractDetailId	= @intContractDetailId,
 										@strSource 				= 'Contract',

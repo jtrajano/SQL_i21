@@ -51,26 +51,6 @@ BEGIN
 			@fromValue				= '',
 			@toValue				= '',
 			@details				= @cv 
-
-		BEGIN TRY
-			DECLARE @SingleAuditLogParam SingleAuditLogParam
-			INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@Id AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-					UNION ALL
-					SELECT 2, '', '', 'tblCustomers', NULL, NULL, NULL, NULL, NULL, 1
-					UNION ALL
-					SELECT 3, '', 'Updated', 'Updated - Record: ' + CAST(@Id as NVARCHAR), NULL, NULL, NULL, NULL, NULL, 2
-					UNION ALL
-					SELECT 4, '', '', @Field, @PreviousValue, @Value, NULL, NULL, NULL, 3
-
-			EXEC uspSMSingleAuditLog 
-				@screenName     = 'EntityManagement.view.Entity',
-				@recordId       = @Id,
-				@entityId       = @EntityId,
-				@AuditLogParam  = @SingleAuditLogParam
-		END TRY
-		BEGIN CATCH
-		END CATCH
 	END
 
 END

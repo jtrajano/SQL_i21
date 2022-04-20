@@ -737,185 +737,98 @@ BEGIN TRY
 					AND ysnStockUnit = 1
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
-				DECLARE @SingleAuditLogParam SingleAuditLogParam
-				DECLARE @intId INT = 0
-
-				SET @intId += 1;
-				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intItemId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(strOldDescription, '') <> IsNULL(strNewDescription, '')
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strDescription","iconCls":"small-gear","from":"' + IsNULL(strOldDescription, '') + '","to":"' + IsNULL(strNewDescription, '') + '","leaf":true,"changeDescription":"Description"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strDescription', IsNULL(strOldDescription, ''), IsNULL(strNewDescription, ''), 'Description', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(strOldShortName, '') <> IsNULL(strNewShortName, '')
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strShortName","iconCls":"small-gear","from":"' + IsNULL(strOldShortName, '') + '","to":"' + IsNULL(strNewShortName, '') + '","leaf":true,"changeDescription":"Short Name"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strShortName', IsNULL(strOldShortName, ''), IsNULL(strNewShortName, ''), 'Short Name', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(intOldLifeTime, 0) <> IsNULL(intNewLifeTime, 0)
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"intLifeTime","iconCls":"small-gear","from":"' + LTRIM(intOldLifeTime) + '","to":"' + LTRIM(intNewLifeTime) + '","leaf":true,"changeDescription":"Life Time"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'intLifeTime', IsNULL(intOldLifeTime, ''), IsNULL(intNewLifeTime, ''), 'Life Time', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(strOldLifeTimeType, '') <> IsNULL(strNewLifeTimeType, '')
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strLifeTimeType","iconCls":"small-gear","from":"' + IsNULL(strOldLifeTimeType, '') + '","to":"' + IsNULL(strNewLifeTimeType, '') + '","leaf":true,"changeDescription":"Life Time Type"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strLifeTimeType', IsNULL(strOldLifeTimeType, ''), IsNULL(strNewLifeTimeType, ''), 'Life Time Type', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(strOldItemStatus, '') <> IsNULL(strNewItemStatus, '')
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strStatus","iconCls":"small-gear","from":"' + IsNULL(strOldItemStatus, '') + '","to":"' + IsNULL(strNewItemStatus, '') + '","leaf":true,"changeDescription":"Status"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strStatus', IsNULL(strOldItemStatus, ''), IsNULL(strNewItemStatus, ''), 'Status', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(ysnOldFairTradeCompliance, 0) <> IsNULL(ysnNewFairTradeCompliance, 0)
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"ysnFairTradeCompliant","iconCls":"small-gear","from":"' + LTRIM(ysnOldFairTradeCompliance) + '","to":"' + LTRIM(ysnNewFairTradeCompliance) + '","leaf":true,"changeDescription":"Fair Trade Compliant"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'ysnFairTradeCompliant', IsNULL(ysnOldFairTradeCompliance, ''), IsNULL(ysnNewFairTradeCompliance, ''), 'Fair Trade Compliant', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(ysnOldOrganicItem, 0) <> IsNULL(ysnNewOrganicItem, 0)
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"ysnOrganic","iconCls":"small-gear","from":"' + LTRIM(ysnOldOrganicItem) + '","to":"' + LTRIM(ysnNewOrganicItem) + '","leaf":true,"changeDescription":"Organic Item"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'ysnOrganic', IsNULL(ysnOldOrganicItem, ''), IsNULL(ysnNewOrganicItem, ''), 'Organic Item', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(ysnOldRainForestCertified, 0) <> IsNULL(ysnNewRainForestCertified, 0)
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"ysnRainForestCertified","iconCls":"small-gear","from":"' + LTRIM(ysnOldRainForestCertified) + '","to":"' + LTRIM(ysnNewRainForestCertified) + '","leaf":true,"changeDescription":"Rain Forest Certified"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'ysnRainForestCertified', IsNULL(ysnOldRainForestCertified, ''), IsNULL(ysnNewRainForestCertified, ''), 'Rain Forest Certified', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(strOldExternalGroup, '') <> IsNULL(strNewExternalGroup, '')
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strExternalGroup","iconCls":"small-gear","from":"' + IsNULL(strOldExternalGroup, '') + '","to":"' + IsNULL(strNewExternalGroup, '') + '","leaf":true,"changeDescription":"External Group"},'
 					FROM @tblICItem
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strExternalGroup', IsNULL(strOldExternalGroup, ''), IsNULL(strNewExternalGroup, ''), 'External Group', NULL, NULL, 1
-					FROM @tblICItem
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(intOldOriginId, 0) <> IsNULL(intNewOriginId, 0)
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strOrigin","iconCls":"small-gear","from":"' + IsNULL(CA.strDescription, '') + '","to":"' + IsNULL(CA1.strDescription, '') + '","leaf":true,"changeDescription":"Origin"},'
 					FROM @tblICItem I
 					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOldOriginId
 					LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intNewOriginId
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strOrigin', IsNULL(CA.strDescription, ''), IsNULL(CA1.strDescription, ''), 'Origin', NULL, NULL, 1
-					FROM @tblICItem I
-					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOldOriginId
-					LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intNewOriginId
-				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @tblICItem
 						WHERE IsNULL(intOldProductTypeId, 0) <> IsNULL(intNewProductTypeId, 0)
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strProductType","iconCls":"small-gear","from":"' + IsNULL(CA.strDescription, '') + '","to":"' + IsNULL(CA1.strDescription, '') + '","leaf":true,"changeDescription":"Product Type"},'
 					FROM @tblICItem I
 					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOldProductTypeId
 					LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intNewProductTypeId
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strProductType', IsNULL(CA.strDescription, ''), IsNULL(CA1.strDescription, ''), 'Product Type', NULL, NULL, 1
-					FROM @tblICItem I
-					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOldProductTypeId
-					LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intNewProductTypeId
-				END
 
 				IF EXISTS (
 						SELECT 1
@@ -931,16 +844,6 @@ BEGIN TRY
 					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
 					SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Unit of Measure"},'
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'tblICItemUOMs', NULL, NULL, 'Unit of Measure', NULL, NULL, 1
-
-					SET @intId += 1;
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, ltrim(IU.intItemUOMId), 'Created', 'Created - Record: ' + UM.strUnitMeasure, NULL, NULL, NULL, NULL, NULL, (@intId - 1)
-					FROM @tblICItemUOM IU
-					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 				END
 
 				IF (LEN(@strDetails) > 1)
@@ -953,16 +856,6 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
-
-					BEGIN TRY
-						EXEC uspSMSingleAuditLog 
-							@screenName     = 'Inventory.view.Item',
-							@recordId       = @intItemId,
-							@entityId       = @intUserId,
-							@AuditLogParam  = @SingleAuditLogParam
-					END TRY
-					BEGIN CATCH
-					END CATCH
 				END
 			END
 			ELSE IF @intActionId = 4

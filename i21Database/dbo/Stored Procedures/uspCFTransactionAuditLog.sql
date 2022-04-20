@@ -225,40 +225,4 @@ exec uspSMAuditLog
 @changeDescription  	 = @processName,
 @details				 = @children
 
-BEGIN TRY
-	DECLARE @SingleAuditLogParam SingleAuditLogParam
-	INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-			SELECT 1, '', @processName, @processName + ' - Record: ' + CAST(@keyValue AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-			UNION ALL
-			SELECT 2, '', '', 'Total Original Price', @dblFromOriginalTotalPrice, @dblToOriginalTotalPrice, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 3, '', '', 'Original Gross Price', @dblFromOriginalGrossPrice, @dblToOriginalGrossPrice, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 4, '', '', 'Original Net Price', @dblFromOriginalNetPrice, @dblToOriginalNetPrice, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 5, '', '', 'Total Calculated Price', @dblFromCalculatedTotalPrice, @dblToCalculatedTotalPrice, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 6, '', '', 'Calculated Gross Price', @dblFromCalculatedGrossPrice, @dblToCalculatedGrossPrice, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 7, '', '', 'Calculated Net Price', @dblFromCalculatedNetPrice, @dblToCalculatedNetPrice, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 8, '', '', 'Total Calculated Tax', @dblFromCalculatedTotalTax, @dblToCalculatedTotalTax, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 9, '', '', 'Total Original Tax', @dblFromOriginalTotalTax, @dblToOriginalTotalTax, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 10, '', '', 'Price Method', @strFromPriceMethod, @strToPriceMethod, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 11, '', '', 'Price Basis', @strFromPriceBasis, @strToPriceBasis, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 12, '', '', 'Price Profile', @strFromPriceProfileId, @strToPriceProfileId, NULL, NULL, NULL, 1
-			UNION ALL
-			SELECT 13, '', '', 'Price Index', @strFromPriceIndexId, @strToPriceIndexId, NULL, NULL, NULL, 1
 
-	EXEC uspSMSingleAuditLog 
-		@screenName     = @screenName,
-		@recordId       = @keyValue,
-		@entityId       = @entityId,
-		@AuditLogParam  = @SingleAuditLogParam
-END TRY
-BEGIN CATCH
-END CATCH

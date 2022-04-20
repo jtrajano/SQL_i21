@@ -160,22 +160,6 @@ Begin
 				,@actionIcon = 'small-tree-modified'
 				,@details = @strJson
 
-		BEGIN TRY
-			DECLARE @SingleAuditLogParam SingleAuditLogParam
-			INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intLoadId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-					UNION ALL
-					SELECT 2, '', '', 'dtmETAPOD', case When @dtmOldETA IS NULL THEN '' ELSE  CONVERT(VARCHAR(10),@dtmOldETA,121) END  + ' ' + @strGMT, CONVERT(VARCHAR(10),@dtmETA,121) + ' ' + @strGMT, NULL, NULL, NULL, 1
-
-			EXEC uspSMSingleAuditLog 
-				@screenName     = 'Logistics.view.ShipmentSchedule',
-				@recordId       = @intLoadId,
-				@entityId       = @intEntityId,
-				@AuditLogParam  = @SingleAuditLogParam
-		END TRY
-		BEGIN CATCH
-		END CATCH
-
 		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId Order By intLoadStgId Desc
 
 		--Write to Shipment Stg Tables so that ETA Update will send to SAP
