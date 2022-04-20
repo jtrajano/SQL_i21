@@ -24,6 +24,7 @@ CREATE TABLE [dbo].[tblCTContractQuality](
 	[ysnImpactPricing] [bit] NULL,
 	[intConcurrencyId] [int] NULL,
 	CONSTRAINT [PK_tblCTContractQuality] PRIMARY KEY CLUSTERED ([intQualityId] ASC),
+	CONSTRAINT [FK_tblCTContractQuality_tblCTContractDetail_intContractDetailId] FOREIGN KEY([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractQuality_tblICUnitMeasure] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractQuality_tblSMCurrency] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
 )
