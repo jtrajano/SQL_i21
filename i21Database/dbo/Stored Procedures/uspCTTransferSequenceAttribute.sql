@@ -65,24 +65,6 @@ BEGIN TRY
 				@actionIcon =	'small-tree-modified',
 				@details	=	@strFromDetails
 
-		BEGIN TRY
-			DECLARE @SingleAuditLogParam SingleAuditLogParam
-			INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT 1, '', @actionType, @actionType + ' - Record: ' + CAST(@intFromHeaderId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-					UNION ALL
-					SELECT 2, '', '', 'tblCTContractDetails', NULL, NULL, NULL, NULL, NULL, 1
-					UNION ALL
-					SELECT 3, '', 'Updated', 'Sequence: '+@strFromSeq, NULL, NULL, NULL, NULL, NULL, 2
-
-			EXEC uspSMSingleAuditLog 
-				@screenName     = 'ContractManagement.view.Contract',
-				@recordId       = @intFromHeaderId,
-				@entityId       = @intUserId,
-				@AuditLogParam  = @SingleAuditLogParam
-		END TRY
-		BEGIN CATCH
-		END CATCH
-
 		SELECT	@actionType	=	'Transferred From ' + @strFromContractNumber
 		SELECT	@strToDetails = '{"change":"tblCTContractDetails","children":[{"action":"Updated","change":"Sequence: '+@strToSeq+'","iconCls":"small-tree-modified","children":['+@strToDetails+']}],"iconCls":"small-tree-grid"}'
 
@@ -93,24 +75,6 @@ BEGIN TRY
 				@actionType =	@actionType,
 				@actionIcon =	'small-tree-modified',
 				@details	=	@strToDetails
-
-		BEGIN TRY
-			DECLARE @SingleAuditLogParam2 SingleAuditLogParam
-			INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT 1, '', @actionType, @actionType + ' - Record: ' + CAST(@intToHeaderId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-					UNION ALL
-					SELECT 2, '', '', 'tblCTContractDetails', NULL, NULL, NULL, NULL, NULL, 1
-					UNION ALL
-					SELECT 3, '', 'Updated', 'Sequence: '+@strToSeq, NULL, NULL, NULL, NULL, NULL, 2
-
-			EXEC uspSMSingleAuditLog 
-				@screenName     = 'ContractManagement.view.Contract',
-				@recordId       = @intToHeaderId,
-				@entityId       = @intUserId,
-				@AuditLogParam  = @SingleAuditLogParam2
-		END TRY
-		BEGIN CATCH
-		END CATCH
 	END
 
 	EXEC uspQMTransferContractSample @intFromContractDetailId, @intToContractDetailId, @intUserId

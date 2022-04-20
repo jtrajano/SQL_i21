@@ -81,24 +81,6 @@ BEGIN TRY
 			@actionIcon = 'small-tree-modified',
 			@keyValue = @InvoiceId,
 			@details = @details
-
-			BEGIN TRY
-			DECLARE @SingleAuditLogParam SingleAuditLogParam
-			INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@InvoiceId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-					UNION ALL
-					SELECT 2, '', '', 'tblARInvoiceDetail', NULL, NULL, 'Details', NULL, NULL, 1
-					UNION ALL
-					SELECT 3, CAST(@InvoiceDetailId as varchar(15)), 'Deleted', 'Deleted-Record: '+CAST(@InvoiceDetailId as varchar(15)), NULL, NULL, NULL, NULL, NULL, 2
-
-			EXEC uspSMSingleAuditLog 
-				@screenName     = 'AccountsReceivable.view.Invoice',
-				@recordId       = @InvoiceId,
-				@entityId       = @UserEntityID,
-				@AuditLogParam  = @SingleAuditLogParam
-			END TRY
-			BEGIN CATCH
-			END CATCH
 		END
 	ELSE IF @InventoryShipmentId IS NOT NULL
 		BEGIN
@@ -161,24 +143,6 @@ BEGIN TRY
 											 , @actionIcon = 'small-tree-modified'
 											 , @keyValue = @InvoiceId
 											 , @details = @auditDetails
-
-						BEGIN TRY
-						DECLARE @SingleAuditLogParam2 SingleAuditLogParam
-						INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-								SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@InvoiceId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-								UNION ALL
-								SELECT 2, '', '', 'tblARInvoiceDetail', NULL, NULL, 'Details', NULL, NULL, 1
-								UNION ALL
-								SELECT 3, CAST(@intInvoiceDetailId as varchar(15)), 'Deleted', 'Deleted-Record: '+CAST(@intInvoiceDetailId as varchar(15)), NULL, NULL, NULL, NULL, NULL, 2
-
-						EXEC uspSMSingleAuditLog 
-							@screenName     = 'AccountsReceivable.view.Invoice',
-							@recordId       = @InvoiceId,
-							@entityId       = @UserEntityID,
-							@AuditLogParam  = @SingleAuditLogParam2
-						END TRY
-						BEGIN CATCH
-						END CATCH
 
 						DELETE FROM @InvoiceDetailIds WHERE intId = @intInvoiceDetailId
 					END

@@ -64,7 +64,7 @@ BEGIN
 			@intAGWorkOrderId = @intAGWorkOrderId,
 			@newAGTotal = @outAGTotal out,
 			@newAGSubTotal = @outAGSubTotal out
-       
+        
         DECLARE @header NVARCHAR(MAX) = '{"change": "dblWorkOrderSubtotal", "from": '+cast(@fromSubTotal as varchar(max))+', "to": '+cast(@outAGSubTotal as varchar(max))+', "iconCls": "small-new-modified", "keyValue": '+CAST(@intAGWorkOrderDetailId AS VARCHAR(20)) +', "changeDescription": "Subtotal" }, {"change": "dblWorkOrderTotal", "from": '+cast(@fromTotal as varchar(max))+', "to": '+cast(@outAGTotal as varchar(max))+', "iconCls": "small-new-modified", "keyValue": ' + CAST(@intAGWorkOrderDetailId AS VARCHAR(20)) +', "changeDescription": "Total"  },'
 
         DECLARE @details NVARCHAR(MAX) = @header + '{"change": "tblAGWorkOrderDetails", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Updated", "change": "Updated-Record: '+CAST(@intAGWorkOrderDetailId AS VARCHAR(15))+'", "keyValue": '+CAST(@intAGWorkOrderDetailId AS VARCHAR(15))+', "iconCls": "small-new-modified", "children": [{"change": "Shipped Qty", "from": "'+ CAST(@valueFrom AS VARCHAR(15)) +'", "to": "'+ CAST(@valueTo AS VARCHAR(15)) +'", "leaf": true, "iconCls": "small-gear" }] }]}'
@@ -76,30 +76,8 @@ BEGIN
             @actionIcon = 'small-tree-modified',
             @keyValue = @intAGWorkOrderId,
             @details = @details  
-            
 
-        BEGIN TRY
-            DECLARE @SingleAuditLogParam SingleAuditLogParam
-            INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-                    SELECT 1, '', 'Updated', 'Updated - Record: ' + cast(@intAGWorkOrderId as varchar(max)), NULL, NULL, NULL, NULL, NULL, NULL
-                    UNION ALL
-                    SELECT 2, CAST(@intAGWorkOrderDetailId AS VARCHAR(20)), '', 'dblWorkOrderSubtotal', cast(@fromSubTotal as varchar(max)), cast(@outAGSubTotal as varchar(max)), 'Subtotal', NULL, NULL, 1
-                    UNION ALL
-                    SELECT 3, CAST(@intAGWorkOrderDetailId AS VARCHAR(20)), '', 'dblWorkOrderTotal', cast(@fromTotal as varchar(max)), cast(@outAGTotal as varchar(max)), 'Total', NULL, NULL, 1
-                    UNION ALL
-                    SELECT 4, '', '', 'tblAGWorkOrderDetails', '', '', 'Details', NULL, NULL, 1
-                    UNION ALL
-                    SELECT 5, CAST(@intAGWorkOrderDetailId AS VARCHAR(15)), 'Updated', 'Updated-Record: '+CAST(@intAGWorkOrderDetailId AS VARCHAR(15)), cast(@fromTotal as varchar(max)), cast(@outAGTotal as varchar(max)), NULL, NULL, NULL, 4
-                    UNION ALL
-                    SELECT 6, '', '', 'Shipped Qty', CAST(@valueFrom AS VARCHAR(15)), CAST(@valueTo AS VARCHAR(15)), NULL, NULL, NULL, 5
-            EXEC uspSMSingleAuditLog 
-                @screenName     = 'Agronomy.view.WorkOrder',
-                @recordId       = @intAGWorkOrderId,
-                @entityId       = @intUserId,
-                @AuditLogParam  = @SingleAuditLogParam
-        END TRY
-        BEGIN CATCH
-        END CATCH
+
     END
 
 END

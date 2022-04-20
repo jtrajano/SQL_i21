@@ -275,46 +275,24 @@ BEGIN TRY
 				WHERE intStorageLocationId = @intStorageLocationId
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
-				DECLARE @SingleAuditLogParam SingleAuditLogParam
-				DECLARE @intId INT = 0
-						
-				SET @intId += 1
-				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intStorageLocationId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
 
 				IF EXISTS (
 						SELECT *
 						FROM @tblICStorageLocation
 						WHERE IsNULL(strOldDescription, '') <> IsNULL(strNewDescription, '')
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strDescription","iconCls":"small-gear","from":"' + IsNULL(strOldDescription, '') + '","to":"' + IsNULL(strNewDescription, '') + '","leaf":true,"changeDescription":"Description"},'
 					FROM @tblICStorageLocation
-
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strDescription', IsNULL(strOldDescription, ''), IsNULL(strNewDescription, ''), 'Description', NULL, NULL, 1
-					FROM @tblICStorageLocation
-				END
 
 				IF EXISTS (
 						SELECT *
 						FROM @tblICStorageLocation
 						WHERE IsNULL(intOldStorageUnitTypeId, '') <> IsNULL(intNewStorageUnitTypeId, '')
 						)
-				BEGIN
 					SELECT @strDetails += '{"change":"strStorageUnitType","iconCls":"small-gear","from":"' + IsNULL(UT.strStorageUnitType, '') + '","to":"' + IsNULL(UT1.strStorageUnitType, '') + '","leaf":true,"changeDescription":"Storage Unit Type"},'
 					FROM @tblICStorageLocation SL
 					LEFT JOIN tblICStorageUnitType UT ON SL.intOldStorageUnitTypeId = UT.intStorageUnitTypeId
 					LEFT JOIN tblICStorageUnitType UT1 ON SL.intOldStorageUnitTypeId = UT1.intStorageUnitTypeId
-
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strStorageUnitType', IsNULL(UT.strStorageUnitType, ''), IsNULL(UT1.strStorageUnitType, ''), 'Storage Unit Type', NULL, NULL, 1
-					FROM @tblICStorageLocation SL
-					LEFT JOIN tblICStorageUnitType UT ON SL.intOldStorageUnitTypeId = UT.intStorageUnitTypeId
-					LEFT JOIN tblICStorageUnitType UT1 ON SL.intOldStorageUnitTypeId = UT1.intStorageUnitTypeId
-				END
 
 				IF (LEN(@strDetails) > 1)
 				BEGIN
@@ -326,16 +304,6 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
-
-					BEGIN TRY
-						EXEC uspSMSingleAuditLog 
-							@screenName     = 'Inventory.view.StorageLocation',
-							@recordId       = @intStorageLocationId,
-							@entityId       = @intUserId,
-							@AuditLogParam  = @SingleAuditLogParam
-					END TRY
-					BEGIN CATCH
-					END CATCH
 				END
 			END
 			ELSE IF @intActionId = 4

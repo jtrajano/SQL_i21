@@ -835,12 +835,6 @@ BEGIN TRY
 					WHERE intStageEntityId = @intStageEntityId
 					) t2 ON t1.intRowNo = t2.intRowNo
 
-				DECLARE @SingleAuditLogParam SingleAuditLogParam
-
-				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intEntityId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-						
-
 				IF EXISTS (
 						SELECT *
 						FROM @tblEMEntity
@@ -849,11 +843,6 @@ BEGIN TRY
 					SELECT @strDetails = ''
 
 					SELECT @strDetails += '{"change":"' + strColumnName + '","iconCls":"small-gear","from":"' + Ltrim(isNULL(strOldValue, '')) + '","to":"' + Ltrim(IsNULL(strNewValue, '')) + '","leaf":true,"changeDescription":"' + strColumnDescription + '"},'
-					FROM @tblEMEntity EM
-					WHERE IsNULL(strOldValue, '') <> IsNULL(strNewValue, '')
-
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT 2, '', '', strColumnName, Ltrim(isNULL(strOldValue, '')), Ltrim(IsNULL(strNewValue, '')), strColumnDescription, NULL, NULL, 1
 					FROM @tblEMEntity EM
 					WHERE IsNULL(strOldValue, '') <> IsNULL(strNewValue, '')
 				END
@@ -868,16 +857,6 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
-
-					BEGIN TRY
-						EXEC uspSMSingleAuditLog 
-							@screenName     = 'EntityManagement.view.Entity',
-							@recordId       = @intEntityId,
-							@entityId       = @intUserId,
-							@AuditLogParam  = @SingleAuditLogParam
-					END TRY
-					BEGIN CATCH
-					END CATCH
 				END
 			END
 

@@ -133,42 +133,21 @@ BEGIN TRY
 			--Update Audit Trail Record
 			DECLARE @strDetails NVARCHAR(MAX) = ''
 
-			DECLARE @SingleAuditLogParam SingleAuditLogParam
-			DECLARE @intId INT = 0
-
-			SET @intId += 1
-			INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-			SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intRecipeLossesId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-
 			IF EXISTS (
 					SELECT 1
 					FROM @tblMFRecipeLosses
 					WHERE ISNULL(dblOldLoss1, 0) <> ISNULL(dblNewLoss1, 0)
 					)
-			BEGIN	
 				SELECT @strDetails += '{"change":"dblLoss1","iconCls":"small-gear","from":"' + LTRIM(ISNULL(dblOldLoss1, 0)) + '","to":"' + LTRIM(ISNULL(dblNewLoss1, 0)) + '","leaf":true,"changeDescription":"Loss 1(%)"},'
 				FROM @tblMFRecipeLosses
-
-				SET @intId += 1
-				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT @intId, '', '', 'dblLoss1', LTRIM(ISNULL(dblOldLoss1, 0)), LTRIM(ISNULL(dblNewLoss1, 0)), 'Loss 1(%)', NULL, NULL, 1
-				FROM @tblMFRecipeLosses
-			END
 
 			IF EXISTS (
 					SELECT 1
 					FROM @tblMFRecipeLosses
 					WHERE ISNULL(dblOldLoss2, 0) <> ISNULL(dblNewLoss2, 0)
 					)
-			BEGIN	
 				SELECT @strDetails += '{"change":"dblLoss2","iconCls":"small-gear","from":"' + LTRIM(ISNULL(dblOldLoss2, 0)) + '","to":"' + LTRIM(ISNULL(dblNewLoss2, 0)) + '","leaf":true,"changeDescription":"Loss 2(%)"},'
 				FROM @tblMFRecipeLosses
-
-				SET @intId += 1
-				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT @intId, '', '', 'dblLoss2', LTRIM(ISNULL(dblOldLoss2, 0)), LTRIM(ISNULL(dblNewLoss2, 0)), 'Loss 2(%)', NULL, NULL, 1
-				FROM @tblMFRecipeLosses
-			END
 
 			IF (LEN(@strDetails) > 1)
 			BEGIN
@@ -180,16 +159,6 @@ BEGIN TRY
 					,@actionType = 'Updated'
 					,@actionIcon = 'small-tree-modified'
 					,@details = @strDetails
-
-				BEGIN TRY
-					EXEC uspSMSingleAuditLog 
-						@screenName     = 'Manufacturing.view.RecipeLosses',
-						@recordId       = @intRecipeLossesId,
-						@entityId       = @intCreatedUserId,
-						@AuditLogParam  = @SingleAuditLogParam
-				END TRY
-				BEGIN CATCH
-				END CATCH
 			END
 		END
 		ELSE
@@ -230,22 +199,6 @@ BEGIN TRY
 				,@actionType = 'Created'
 				,@actionIcon = 'small-new-plus'
 				,@details = @strJson
-
-			BEGIN TRY
-				DECLARE @SingleAuditLogParam2 SingleAuditLogParam
-				INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-						SELECT 1, '', 'Created', 'Created - Record: ' + CAST(@intRecipeLossesId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-						UNION ALL
-						SELECT 2, CONVERT(VARCHAR, @intRecipeLossesId), 'Created', 'Created - Record: ' + CONVERT(VARCHAR, @intRecipeLossesId), NULL, NULL, NULL, NULL, NULL, 1
-
-				EXEC uspSMSingleAuditLog 
-					@screenName     = 'Manufacturing.view.RecipeLosses',
-					@recordId       = @intRecipeLossesId,
-					@entityId       = @intCreatedUserId,
-					@AuditLogParam  = @SingleAuditLogParam2
-			END TRY
-			BEGIN CATCH
-			END CATCH
 		END
 
 		SELECT @intRecipeLossesImportId = MIN(intRecipeLossesImportId)

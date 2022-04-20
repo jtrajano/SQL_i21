@@ -423,66 +423,23 @@ BEGIN TRY
 			BEGIN
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 
-				DECLARE @SingleAuditLogParam SingleAuditLogParam
-				DECLARE @intId INT = 0
-
-				SET @intId += 1
-				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT @intId, '', 'Updated', 'Updated - Record: ' + CAST(@intSampleId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-
 				IF (@strOldSampleStatus <> @strSampleStatus)
-				BEGIN
 					SET @strDetails += '{"change":"strSampleStatus","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleStatus) + '","to":"' + LTRIM(@strSampleStatus) + '","leaf":true,"changeDescription":"Sample Status"},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strSampleStatus', LTRIM(@strOldSampleStatus), LTRIM(@strSampleStatus), 'Sample Status', NULL, NULL, 1
-				END
-
 				IF (@strOldComment <> @strComments)
-				BEGIN
 					SET @strDetails += '{"change":"strComment","iconCls":"small-gear","from":"' + LTRIM(@strOldComment) + '","to":"' + LTRIM(@strComments) + '","leaf":true,"changeDescription":"Comments"},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strComment', LTRIM(@strOldComment), LTRIM(@strComments), 'Comments', NULL, NULL, 1
-				END
-
 				IF (@dtmOldTestedOn <> @dtmTestedOn)
-				BEGIN
 					SET @strDetails += '{"change":"dtmTestedOn","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldTestedOn, '')) + '","to":"' + LTRIM(ISNULL(@dtmTestedOn, '')) + '","leaf":true,"changeDescription":"Tested On"},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'dtmTestedOn', LTRIM(ISNULL(@dtmOldTestedOn, '')), LTRIM(ISNULL(@dtmTestedOn, '')), 'Tested On', NULL, NULL, 1
-				END
-
 				IF (@strOldTestedUserName <> @strTestedUserName)
-				BEGIN	
 					SET @strDetails += '{"change":"strTestedUserName","iconCls":"small-gear","from":"' + LTRIM(@strOldTestedUserName) + '","to":"' + LTRIM(@strTestedUserName) + '","leaf":true,"changeDescription":"Tested By"},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strTestedUserName', LTRIM(@strOldTestedUserName), LTRIM(@strTestedUserName), 'Tested By', NULL, NULL, 1
-				END
-
 				IF (@dtmOldLastModified <> @dtmLastModified)
-				BEGIN	
 					SET @strDetails += '{"change":"dtmLastModified","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldLastModified, '')) + '","to":"' + LTRIM(ISNULL(@dtmLastModified, '')) + '","leaf":true,"changeDescription":"Last Modified On"},'
 
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'dtmLastModified', LTRIM(ISNULL(@dtmOldLastModified, '')), LTRIM(ISNULL(@dtmLastModified, '')), 'Tested On', NULL, NULL, 1
-				END
-
 				IF (@strOldModifiedUserName <> @strModifiedUserName)
-				BEGIN
 					SET @strDetails += '{"change":"strModifiedUserName","iconCls":"small-gear","from":"' + LTRIM(@strOldModifiedUserName) + '","to":"' + LTRIM(@strModifiedUserName) + '","leaf":true,"changeDescription":"Last Modified By"},'
-
-					SET @intId += 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId, '', '', 'strModifiedUserName', LTRIM(@strOldModifiedUserName), LTRIM(@strModifiedUserName), 'Last Modified By', NULL, NULL, 1
-				END
 
 				IF (LEN(@strDetails) > 1)
 				BEGIN
@@ -494,16 +451,6 @@ BEGIN TRY
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
-
-					BEGIN TRY
-						EXEC uspSMSingleAuditLog 
-							@screenName     = 'Quality.view.QualitySample',
-							@recordId       = @intSampleId,
-							@entityId       = @intUserId,
-							@AuditLogParam  = @SingleAuditLogParam
-					END TRY
-					BEGIN CATCH
-					END CATCH
 				END
 
 				-- Test Result Audit Log
@@ -529,9 +476,6 @@ BEGIN TRY
 						,@strPropertyName = strPropertyName
 					FROM @tblQMTestResultChanges
 
-					DECLARE @SingleAuditLogParam2 SingleAuditLogParam
-					DECLARE @intId2 INT = 0
-
 					SET @details = '{  
 							"action":"Updated",
 							"change":"Updated - Record: ' + LTRIM(@intSampleId) + '",
@@ -549,16 +493,8 @@ BEGIN TRY
 										"children":
 											[   
 												'
-					SET @intId2 += 1
-					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId2, LTRIM(@intSampleId), 'Updated', 'Updated - Record: ' + LTRIM(@intSampleId), NULL, NULL, NULL, NULL, NULL, NULL
-
-					SET @intId2 += 1
-					INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @intId2, '', '', 'tblQMTestResults', NULL, NULL, 'Test Detail', NULL, NULL, 1
 
 					IF @strOldPropertyValue <> @strNewPropertyValue
-					BEGIN
 						SET @details = @details + '
 												{  
 												"change":"strPropertyValue",
@@ -573,13 +509,7 @@ BEGIN TRY
 												"hidden":false
 												},'
 
-						SET @intId2 += 1
-						INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-						SELECT @intId2, LTRIM(@intTestResultId), '', 'strPropertyValue', LTRIM(@strOldPropertyValue), LTRIM(@strNewPropertyValue), 'Actual Value', 1, 0, 2
-					END
-
 					IF @strOldResult <> @strNewResult
-					BEGIN
 						SET @details = @details + '
 												{  
 												"change":"strResult",
@@ -593,11 +523,6 @@ BEGIN TRY
 												"changeDescription":"Result",
 												"hidden":false
 												},'
-
-						SET @intId2 += 1
-						INSERT INTO @SingleAuditLogParam2 ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-						SELECT @intId2, LTRIM(@intTestResultId), '', 'strResult', LTRIM(@strOldResult), LTRIM(@strNewResult), 'Result', 1, 0, 2
-					END
 
 					IF RIGHT(@details, 1) = ','
 						SET @details = SUBSTRING(@details, 0, LEN(@details))
@@ -620,16 +545,6 @@ BEGIN TRY
 							,@actionType = 'Updated'
 							,@actionIcon = 'small-tree-modified'
 							,@details = @details
-
-						BEGIN TRY
-							EXEC uspSMSingleAuditLog 
-								@screenName     = 'Quality.view.QualitySample',
-								@recordId       = @intSampleId,
-								@entityId       = @intUserId,
-								@AuditLogParam  = @SingleAuditLogParam2
-						END TRY
-						BEGIN CATCH
-						END CATCH
 					END
 
 					DELETE

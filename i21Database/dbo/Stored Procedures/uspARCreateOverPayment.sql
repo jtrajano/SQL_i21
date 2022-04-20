@@ -319,22 +319,7 @@ DECLARE @details NVARCHAR(max) = '{"change": "tblARInvoice","iconCls": "small-tr
 			@keyValue = @NewId,
 			@details = @details,
 			@changeDescription = 'Processed On'
-
-	BEGIN TRY
-		DECLARE @SingleAuditLogParam SingleAuditLogParam
-		INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				SELECT 1, '', 'Processed', 'Processed - Record: ' + CAST(@NewId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-				UNION ALL
-				SELECT 2, '', '', 'tblARInvoice', NULL, @strInvoiceId, 'Cash Refund on', NULL, NULL, 1
-
-		EXEC uspSMSingleAuditLog 
-			@screenName     = 'AccountsReceivable.view.Invoice',
-			@recordId       = @NewId,
-			@entityId       = @UserId,
-			@AuditLogParam  = @SingleAuditLogParam
-    END TRY
-    BEGIN CATCH
-    END CATCH
+	  
 	       
 RETURN @NewId
 
