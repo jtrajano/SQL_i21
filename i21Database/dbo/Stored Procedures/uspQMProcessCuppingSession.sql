@@ -3,6 +3,12 @@ CREATE PROCEDURE [dbo].[uspQMProcessCuppingSession]
     , @intEntityUserId          INT
 AS
 
+DELETE S
+FROM tblQMSample S
+INNER JOIN tblQMCuppingSessionDetail CSD ON S.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
+INNER JOIN tblQMCuppingSession CS ON CSD.intCuppingSessionId = CS.intCuppingSessionId
+WHERE CS.intCuppingSessionId = @intCuppingSessionId
+
 INSERT INTO tblQMSample (
 	  intCompanyId
 	, intSampleTypeId
