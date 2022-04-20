@@ -22,6 +22,8 @@ LEFT JOIN tblARPaymentDetail ARPD ON ARI.intInvoiceId = ARPD.intInvoiceId
 LEFT JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
 WHERE (@dtmDateFrom IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate) >= @dtmDateFrom)
   AND (@dtmDateTo IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate) <= @dtmDateTo)
+  AND ARI.ysnRefundProcessed = 0
+  AND ARI.strTransactionType <> 'Cash Refund'
   AND (
 	(ARI.ysnPaid = 0 AND ARI.strTransactionType <> 'Customer Prepayment')
 	OR
