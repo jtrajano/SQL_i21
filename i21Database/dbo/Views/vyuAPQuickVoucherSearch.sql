@@ -49,6 +49,7 @@ FROM
 		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
 		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
 		WHERE detail.intBillId = A.intBillId
+		ORDER BY detail.intLineNo
 	) commodity
 	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId
 	LEFT JOIN dbo.tblSMCompanyLocation G
