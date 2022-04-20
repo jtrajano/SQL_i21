@@ -183,6 +183,11 @@ SET strCommand = N'
 
 	IF ISNULL(@EntityId, 0) > 0
 	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityToContact contact INNER JOIN tblEMEntity entity ON contact.intEntityContactId = entity.intEntityId where contact.intEntityId = @EntityId AND entity.strName = ''@name@'')
+		BEGIN
+			SET @ValidationMessage = ''Detected duplicate contact name. Please check the name and re-attempt the upload''
+			RAISERROR(@ValidationMessage, 16, 1);
+		END
 
 		DECLARE @NewEntityId INT
 		INSERT INTO tblEMEntity(
@@ -214,7 +219,7 @@ SET strCommand = N'
 			select @NewEntityId, @Mobile, null
 		END
 
-		IF @PortalBit = 1
+		IF @PortalBit = 1 AND ISNULL(@PortalPassword, '''') <> ''''
 		BEGIN
 			DECLARE @ToggleOutput	NVARCHAR(200)
 
