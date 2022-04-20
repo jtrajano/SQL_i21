@@ -17,17 +17,43 @@ BEGIN
 	DELETE tblMBILOrder WHERE intDriverId = @intDriverId AND intOrderId NOT IN (SELECT intOrderId FROM tblMBILInvoice WHERE intOrderId IS NOT NULL)
 END
 
-SELECT intDispatchId = Dispatch.intDispatchID
-	, strOrderNumber = Dispatch.strOrderNumber
+-- ++++++ CLEAN-OUT ORDERS WITH POSTED INVOICE  ++++++ --
+BEGIN
+	DELETE tblMBILOrder WHERE intOrderId IN (SELECT intOrderId FROM tblMBILInvoice WHERE ysnPosted = 1)
+END
+
+---- ++++++ CALL TM SP FOR OVERRAGE ++++++
+--DECLARE  @TMDispatchId INT = NULL
+
+--SELECT intDispatchID 
+--INTO #TMOrderDispatch
+--FROM tblTMDispatch
+--WHERE intDriverID = @intDriverId
+--AND strWillCallStatus IN ('Dispatched','Routed')
+
+--WHILE EXISTS(SELECT 1 FROM #TMOrderDispatch)
+--BEGIN
+--	SELECT TOP 1 @TMDispatchId = [intDispatchID] FROM #TMOrderDispatch
+
+--	DELETE tblTMOrder WHERE intDispatchId =  @TMDispatchId and strSource = 'Mobile Billing'
+--	EXEC uspTMCreateOrder @TMDispatchId, 'Mobile Billing'
+
+--	DELETE #TMOrderDispatch WHERE [intDispatchID] = @TMDispatchId
+--END
+
+
+-- ++++++ PREPARE TM ORDER ++++++
+SELECT intDispatchId = TMOrder.intDispatchId
+	, strOrderNumber = TMOrder.strOrderNumber
 	, strOrderStatus = Dispatch.strWillCallStatus
 	, dtmRequestedDate = Dispatch.dtmRequestedDate
 	, intItemId = Item.intItemId
 	, ItemUOM.intItemUOMId
 	, intEntityId = Customer.intEntityId
 	, intSiteId = Site.intSiteID
-	, intContractDetailId = Dispatch.intContractId
-	, dblQuantity = CASE WHEN ISNULL(Dispatch.dblMinimumQuantity,0) = 0 THEN Dispatch.dblQuantity ELSE Dispatch.dblMinimumQuantity END
-	, Dispatch.dblPrice
+	, intContractDetailId = TMOrder.intContractDetailId
+	, dblQuantity = TMOrder.dblQuantity
+	, TMOrder.dblPrice
 	, intTermId = Dispatch.intDeliveryTermID
 	, strComments = Dispatch.strComments
 	, intDriverId = Dispatch.intDriverID
@@ -38,7 +64,8 @@ SELECT intDispatchId = Dispatch.intDispatchID
 	, Site.intLocationId
 	, intShiftId = @intShiftId
 INTO #Dispatch
-FROM tblTMDispatch Dispatch
+FROM tblTMOrder TMOrder
+INNER JOIN tblTMDispatch Dispatch ON TMOrder.intDispatchId = Dispatch.intDispatchID
 INNER JOIN tblTMSite Site ON Dispatch.intSiteID = Site.intSiteID
 INNER JOIN tblTMCustomer B
 	ON Site.intCustomerID = B.intCustomerID
@@ -49,7 +76,7 @@ LEFT JOIN tblLGRouteOrder L ON K.intRouteId = L.intRouteId AND Dispatch.intDispa
 LEFT JOIN tblICItem Item ON Item.intItemId = Site.intProduct
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblARCustomer Customer ON Customer.intEntityId =  C.intEntityId
---WHERE Dispatch.strOrderNumber NOT IN (select strOrderNumber from tblMBILOrder)
+WHERE Dispatch.intDriverID = @intDriverId
 
 -- ++++++ CREATE DRIVER's ORDER LIST ++++++ --
 INSERT INTO tblMBILOrder(intDispatchId
