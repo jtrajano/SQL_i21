@@ -23,13 +23,13 @@ SELECT intEntityCustomerId= INVOICE.intEntityCustomerId
 	 , dblQtyShipped				= DETAIL.dblQtyShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblAdjustedTax				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTax								= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTotalAdjustedTax	= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTotalTax					= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , ysnTaxExempt					= DETAIL.ysnTaxExempt
+	 , dblTotalAdjustedTax		= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTotalTax				= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , ysnTaxExempt				= DETAIL.ysnTaxExempt
 	 , ysnInvalidSetup			= DETAIL.ysnInvalidSetup
 	 , dblTaxDifference			= (DETAIL.dblAdjustedTax - DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTaxAmount					= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTaxAmountFunctional= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTaxAmountFunctional	= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000
@@ -64,143 +64,117 @@ SELECT intEntityCustomerId= INVOICE.intEntityCustomerId
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTotalSales 				= (CASE WHEN INVOICE.dblTax = 0 
-		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-									ELSE ((CASE WHEN DETAIL.dblAdjustedTax = 0.000000
-												THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-												ELSE 0.000000 
-											END) +
-											(CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
-														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
-														  ELSE 0.000000
-													 END
-												ELSE 0.000000 
-											END))
-									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTotalSalesFunctional= (CASE WHEN INVOICE.dblBaseTax = 0 
-		 							THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-									ELSE ((CASE WHEN DETAIL.dblBaseAdjustedTax = 0.000000
-												THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-												ELSE 0.000000 
-											END) +
-											(CASE WHEN DETAIL.dblBaseAdjustedTax <> 0.000000 
-												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
-														  THEN DETAIL.dblBaseLineTotal * (DETAIL.dblBaseAdjustedTax/ISNULL(NULLIF(DETAIL.dblBaseTotalAdjustedTax, 0), DETAIL.dblBaseAdjustedTax))
-														  ELSE 0.000000
-													 END
-												ELSE 0.000000 
-											END))
-									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , dblTaxCollected			= INVOICE.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , strCustomerNumber	    = CUSTOMER.strCustomerNumber
-	 , strCustomerName			= CUSTOMER.strCustomerName
-	 , strCustomerCity			= CUSTOMER.strCustomerCity
-	 , strCustomerState			= CUSTOMER.strCustomerState
-	 , strCustomerAddress		= CUSTOMER.strCustomerAddress
-	 , strCustomerZipCode		= CUSTOMER.strCustomerZipCode
-	 , strCustomerCountry		= CUSTOMER.strCustomerCountry
-	 , strCustomerEmail			= CUSTOMER.strCustomerEmail
-	 , strDisplayName			= CUSTOMER.strDisplayName
-	 , strTaxNumber				= CUSTOMER.strTaxNumber
-	 , intEntitySalespersonId	= INVOICE.intEntitySalespersonId
-	 , strSalespersonNumber		= SALESPERSON.strSalespersonNumber
-	 , strSalespersonName		= SALESPERSON.strSalespersonName
+	 , dblTotalSales 				= DETAIL.dblLineTotal * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTotalSalesFunctional		= DETAIL.dblBaseLineTotal * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTaxCollected				= INVOICE.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , strCustomerNumber	    	= CUSTOMER.strCustomerNumber
+	 , strCustomerName					= CUSTOMER.strCustomerName
+	 , strCustomerCity					= CUSTOMER.strCustomerCity
+	 , strCustomerState					= CUSTOMER.strCustomerState
+	 , strCustomerAddress				= CUSTOMER.strCustomerAddress
+	 , strCustomerZipCode				= CUSTOMER.strCustomerZipCode
+	 , strCustomerCountry				= CUSTOMER.strCustomerCountry
+	 , strCustomerEmail					= CUSTOMER.strCustomerEmail
+	 , strDisplayName						= CUSTOMER.strDisplayName
+	 , strTaxNumber							= CUSTOMER.strTaxNumber
+	 , intEntitySalespersonId		= INVOICE.intEntitySalespersonId
+	 , strSalespersonNumber			= SALESPERSON.strSalespersonNumber
+	 , strSalespersonName				= SALESPERSON.strSalespersonName
 	 , strSalespersonDisplayName= SALESPERSON.strSalespersonDisplayName
-	 , strCompanyName			= COMPANY.strCompanyName
-	 , strCompanyAddress		= COMPANY.strCompanyAddress
-	 , strCurrency				= CURRENCY.strCurrency
+	 , strCompanyName						= COMPANY.strCompanyName
+	 , strCompanyAddress				= COMPANY.strCompanyAddress
+	 , strCurrency							= CURRENCY.strCurrency
 	 , strCurrencyDescription   = CURRENCY.strDescription
-	 , strTaxGroup				= DETAIL.strTaxGroup
-	 , strTaxAgency				= DETAIL.strTaxAgency
-	 , strTaxCode				= DETAIL.strTaxCode
-	 , strTaxCodeDescription	= DETAIL.strTaxCodeDescription
-	 , strCountry				= DETAIL.strCountry
-	 , strState					= DETAIL.strState
-	 , strCounty				= DETAIL.strCounty
-	 , strCity					= DETAIL.strCity
-	 , strTaxClass				= DETAIL.strTaxClass
-	 , strTaxPoint				= DETAIL.strTaxPoint
-	 , strSalesTaxAccount		= DETAIL.strSalesTaxAccount
-	 , strPurchaseTaxAccount	= DETAIL.strPurchaseTaxAccount	 
-	 , strLocationName			= LOC.strLocationName
+	 , strTaxGroup							= DETAIL.strTaxGroup
+	 , strTaxAgency							= DETAIL.strTaxAgency
+	 , strTaxCode								= DETAIL.strTaxCode
+	 , strTaxCodeDescription		= DETAIL.strTaxCodeDescription
+	 , strCountry								= DETAIL.strCountry
+	 , strState									= DETAIL.strState
+	 , strCounty								= DETAIL.strCounty
+	 , strCity									= DETAIL.strCity
+	 , strTaxClass							= DETAIL.strTaxClass
+	 , strTaxPoint							= DETAIL.strTaxPoint
+	 , strSalesTaxAccount				= DETAIL.strSalesTaxAccount
+	 , strPurchaseTaxAccount		= DETAIL.strPurchaseTaxAccount	 
+	 , strLocationName					= LOC.strLocationName
 	 , strShipToLocationAddress = SHIPTO.strLocationName
-	 , strItemNo				= DETAIL.strItemNo
-	 , strCategoryCode			= DETAIL.strCategoryCode
-	 , strItemCategory			= DETAIL.strCategoryCode
-	 , intTaxClassId			= DETAIL.intTaxClassId
-	 , intSalesTaxAccountId		= DETAIL.intSalesTaxAccountId
+	 , strItemNo								= DETAIL.strItemNo
+	 , strCategoryCode					= DETAIL.strCategoryCode
+	 , strItemCategory					= DETAIL.strCategoryCode
+	 , intTaxClassId						= DETAIL.intTaxClassId
+	 , intSalesTaxAccountId			= DETAIL.intSalesTaxAccountId
 	 , intPurchaseTaxAccountId	= DETAIL.intPurchaseTaxAccountId
-	 , intCategoryId			= DETAIL.intCategoryId
-	 , intTonnageTaxUOMId		= DETAIL.intTonnageTaxUOMId
-	 , dblQtyTonShipped			= DETAIL.dblQtyTonShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	 , strFederalTaxId 			= CUSTOMER.strFederalTaxId
-	 , strStateTaxId			= CUSTOMER.strStateTaxId
+	 , intCategoryId						= DETAIL.intCategoryId
+	 , intTonnageTaxUOMId				= DETAIL.intTonnageTaxUOMId
+	 , dblQtyTonShipped					= DETAIL.dblQtyTonShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , strFederalTaxId 					= CUSTOMER.strFederalTaxId
+	 , strStateTaxId						= CUSTOMER.strStateTaxId
 	 , dblInvoiceTotal          = INVOICE.dblInvoiceTotal
-	 , intFreightTermId			= INVOICE.intFreightTermId
-	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
-	 , strCommodityCode			= DETAIL.strCommodityCode
-	 , strUnitOfMeasure			= DETAIL.strUnitOfMeasure
-	 , ysnPaid					= INVOICE.ysnPaid
-	 , intARAccountId			= INVOICE.intAccountId
-	 , strARAccountId			= ARACCOUNT.strAccountId
-	 , intSalesAccountId		= DETAIL.intSalesAccountId
-	 , strSalesAccountId		= DETAIL.strAccountId
-	 , strShipToName			= SHIPTO.strCheckPayeeName
-	 , strShipToAddress			= SHIPTO.strAddress
-	 , strShipToCity			= SHIPTO.strCity
-	 , strShipToState			= SHIPTO.strState
-	 , strShipToCountry			= SHIPTO.strCountry
-	 , dblPayment				= INVOICE.dblPayment
-	 , dblPaymentFunctional		= INVOICE.dblBasePayment
-	 , strCheckNumbers			= PAYMENT.strCheckNumbers
+	 , intFreightTermId					= INVOICE.intFreightTermId
+	 , strAccountStatusCode 		= STATUSCODES.strAccountStatusCode
+	 , strCommodityCode					= DETAIL.strCommodityCode
+	 , strUnitOfMeasure					= DETAIL.strUnitOfMeasure
+	 , ysnPaid									= INVOICE.ysnPaid
+	 , intARAccountId						= INVOICE.intAccountId
+	 , strARAccountId						= ARACCOUNT.strAccountId
+	 , intSalesAccountId				= DETAIL.intSalesAccountId
+	 , strSalesAccountId				= DETAIL.strAccountId
+	 , strShipToName						= SHIPTO.strCheckPayeeName
+	 , strShipToAddress					= SHIPTO.strAddress
+	 , strShipToCity						= SHIPTO.strCity
+	 , strShipToState						= SHIPTO.strState
+	 , strShipToCountry					= SHIPTO.strCountry
+	 , dblPayment								= INVOICE.dblPayment
+	 , dblPaymentFunctional			= INVOICE.dblBasePayment
+	 , strCheckNumbers					= PAYMENT.strCheckNumbers
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
-	SELECT intInvoiceId				= ID.intInvoiceId
-		 , intInvoiceDetailId		= ID.intInvoiceDetailId
-		 , intItemId				= ID.intItemId
-		 , intItemUOMId				= ID.intItemUOMId
-		 , intTaxCodeId				= IDT.intTaxCodeId
-		 , intTaxGroupId			= IDT.intTaxGroupId
-		 , strCalculationMethod		= IDT.strCalculationMethod
-		 , dblRate					= IDT.dblRate
-		 , dblPrice					= ID.dblPrice
-		 , dblQtyShipped			= ID.dblQtyShipped
-		 , dblLineTotal				= ID.dblQtyShipped * ID.dblPrice
-		 , dblBaseLineTotal			= ID.dblQtyShipped * ID.dblBasePrice
-		 , dblAdjustedTax			= IDT.dblAdjustedTax
-		 , dblBaseAdjustedTax		= IDT.dblBaseAdjustedTax
-		 , dblTax					= IDT.dblTax
-		 , dblBaseTax				= IDT.dblBaseAdjustedTax
-		 , dblTotalAdjustedTax		= ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0)
+	SELECT intInvoiceId						= ID.intInvoiceId
+		 , intInvoiceDetailId				= ID.intInvoiceDetailId
+		 , intItemId								= ID.intItemId
+		 , intItemUOMId							= ID.intItemUOMId
+		 , intTaxCodeId							= IDT.intTaxCodeId
+		 , intTaxGroupId						= IDT.intTaxGroupId
+		 , strCalculationMethod			= IDT.strCalculationMethod
+		 , dblRate									= IDT.dblRate
+		 , dblPrice									= ID.dblPrice
+		 , dblQtyShipped						= ID.dblQtyShipped
+		 , dblLineTotal							= ID.dblQtyShipped * ID.dblPrice
+		 , dblBaseLineTotal					= ID.dblQtyShipped * ID.dblBasePrice
+		 , dblAdjustedTax						= IDT.dblAdjustedTax
+		 , dblBaseAdjustedTax				= IDT.dblBaseAdjustedTax
+		 , dblTax										= IDT.dblTax
+		 , dblBaseTax								= IDT.dblBaseAdjustedTax
+		 , dblTotalAdjustedTax			= ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0)
 		 , dblBaseTotalAdjustedTax	= ISNULL(TAXTOTAL.dblBaseTotalAdjustedTax, 0)
-		 , ysnTaxExempt				= IDT.ysnTaxExempt		
-		 , ysnInvalidSetup			= IDT.ysnInvalidSetup		
-		 , strTaxGroup				= TAXGROUP.strTaxGroup
-		 , strTaxAgency				= TAXCODE.strTaxAgency
-		 , strTaxCode				= TAXCODE.strTaxCode
-		 , strTaxCodeDescription	= TAXCODE.strDescription
-		 , strCountry				= TAXCODE.strCountry
-		 , strState					= TAXCODE.strState
-		 , strCounty				= TAXCODE.strCounty
-		 , strCity					= TAXCODE.strCity
-		 , strTaxClass				= TAXCLASS.strTaxClass
-		 , strSalesTaxAccount		= SALESTAXACCOUNT.strAccountId
-		 , strPurchaseTaxAccount	= PURCHASEACCOUNT.strAccountId
-		 , strItemNo				= ITEM.strItemNo
-		 , strCategoryCode			= CATEGORY.strCategoryCode
-		 , intTaxClassId			= IDT.intTaxClassId
-		 , intSalesTaxAccountId		= IDT.intSalesTaxAccountId
+		 , ysnTaxExempt							= IDT.ysnTaxExempt		
+		 , ysnInvalidSetup					= IDT.ysnInvalidSetup		
+		 , strTaxGroup							= TAXGROUP.strTaxGroup
+		 , strTaxAgency							= TAXCODE.strTaxAgency
+		 , strTaxCode								= TAXCODE.strTaxCode
+		 , strTaxCodeDescription		= TAXCODE.strDescription
+		 , strCountry								= TAXCODE.strCountry
+		 , strState									= TAXCODE.strState
+		 , strCounty								= TAXCODE.strCounty
+		 , strCity									= TAXCODE.strCity
+		 , strTaxClass							= TAXCLASS.strTaxClass
+		 , strSalesTaxAccount				= SALESTAXACCOUNT.strAccountId
+		 , strPurchaseTaxAccount		= PURCHASEACCOUNT.strAccountId
+		 , strItemNo								= ITEM.strItemNo
+		 , strCategoryCode					= CATEGORY.strCategoryCode
+		 , intTaxClassId						= IDT.intTaxClassId
+		 , intSalesTaxAccountId			= IDT.intSalesTaxAccountId
 		 , intPurchaseTaxAccountId	= TAXCODE.intPurchaseTaxAccountId
-		 , intCategoryId			= ITEM.intCategoryId
-		 , intTaxCodeCount			= COALESCE(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount, TAXCLASSTOTALBYINVOICEDETAIL.intTaxClassCount)
-		 , intTonnageTaxUOMId		= ITEM.intTonnageTaxUOMId
-		 , dblQtyTonShipped			= CASE WHEN ITEM.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ITEMUOMSETUP.intItemUOMId, ID.intItemUOMId), ID.dblQtyShipped)) ELSE ID.dblQtyShipped END
-		 , strTaxPoint				= TAXCODE.strTaxPoint
-		 , strCommodityCode			= ICC.strCommodityCode 
-		 , strUnitOfMeasure			= ICUM.strUnitMeasure
-		 , strAccountId				= SALESACCOUNT.strAccountId
-		 , intSalesAccountId		= ID.intSalesAccountId
+		 , intCategoryId						= ITEM.intCategoryId
+		 , intTaxCodeCount					= COALESCE(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount, TAXCLASSTOTALBYINVOICEDETAIL.intTaxClassCount)
+		 , intTonnageTaxUOMId				= ITEM.intTonnageTaxUOMId
+		 , dblQtyTonShipped					= CASE WHEN ITEM.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ITEMUOMSETUP.intItemUOMId, ID.intItemUOMId), ID.dblQtyShipped)) ELSE ID.dblQtyShipped END
+		 , strTaxPoint							= TAXCODE.strTaxPoint
+		 , strCommodityCode					= ICC.strCommodityCode 
+		 , strUnitOfMeasure					= ICUM.strUnitMeasure
+		 , strAccountId							= SALESACCOUNT.strAccountId
+		 , intSalesAccountId				= ID.intSalesAccountId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInvoiceDetailId
@@ -242,7 +216,6 @@ INNER JOIN (
 		ON TCT_IDT.intInvoiceDetailId = TCT_ID.intInvoiceDetailId
 		WHERE TCT_ID.intItemId = ITEM.intItemId
 		  AND IDT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE ID.intTaxGroupId IS NOT NULL AND TGC.intTaxGroupId = ID.intTaxGroupId OR ID.intTaxGroupId IS NULL)
-		GROUP BY TCT_ID.intCategoryId
 	) TAXCLASSTOTALBYINVOICEDETAIL
 	CROSS APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
