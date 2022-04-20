@@ -35,7 +35,7 @@ SELECT strCustomerName				= CUSTOMER.strName
      , dblNextPaymentAmount			= ISNULL(CB.dblBudgetAmount, 0)
      , dblAmountPastDue				= ISNULL(BUGETPASTDUE.dblAmountPastDue, 0)
      , intRemainingBudgetPeriods	= ISNULL(BUDGETPERIODS.intRemainingBudgetPeriods, 0)
-     , intAveragePaymentDays		= 0
+     , intAveragePaymentDays		= ISNULL(DAYSTOPAY.intDaysToPay, 0)
      , strBudgetStatus				= CASE WHEN 1 = 1 THEN 'Past Due' ELSE 'Current' END COLLATE Latin1_General_CI_AS
      , strTerm						= CUSTOMER.strTerm
      , strContact					= dbo.fnARFormatCustomerAddress(CONTACT.strPhone, CONTACT.strEmail, CUSTOMER.strBillToLocationName, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, NULL, 0) COLLATE Latin1_General_CI_AS
@@ -174,5 +174,24 @@ OUTER APPLY (
 	  AND ysnForgiven = 0
 	  AND strType = 'Service Charge'	  
 	  AND YEAR(dtmPostDate) = DATEPART(year, GETDATE())
-	  AND intEntityCustomerId = CUSTOMER.intEntityCustomerId
-) YTDSERVICECHARGE
+	GROUP BY intEntityCustomerId
+) YTDSERVICECHARGE ON CUSTOMER.intEntityCustomerId = YTDSERVICECHARGE.intEntityCustomerId
+LEFT JOIN (
+	SELECT intEntityCustomerId	= I.intEntityCustomerId
+		 , intDaysToPay = AVG(CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
+								   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
+						      END)
+	FROM tblARInvoice I
+	CROSS APPLY (
+		SELECT TOP 1 P.dtmDatePaid
+		FROM tblARPaymentDetail PD
+		INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+		WHERE PD.intInvoiceId = I.intInvoiceId
+		AND P.ysnPosted = 1
+		AND P.ysnInvoicePrepayment = 0
+		ORDER BY P.dtmDatePaid DESC
+	) FULLPAY
+	WHERE I.ysnPosted = 1
+	  AND I.ysnPaid = 1
+	GROUP BY I.intEntityCustomerId
+) DAYSTOPAY ON DAYSTOPAY.intEntityCustomerId = CUSTOMER.intEntityCustomerId
