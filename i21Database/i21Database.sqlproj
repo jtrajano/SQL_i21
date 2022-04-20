@@ -705,6 +705,9 @@
     <Build Include="dbo\Views\vyuCRMGetBrand.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMInsertIntegrationLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMDuplicateBrand.sql" />
+    <Build Include="dbo\Tables\tblICInsuranceCharge.sql" />
+    <Build Include="dbo\Views\vyuICGetInsuranceCharge.sql" />
+    <Build Include="dbo\Tables\tblICInsuranceChargeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

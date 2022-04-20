@@ -1704,6 +1704,15 @@ GO
 				,[ysnEnable]			= 1
 				,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Allocated Contracts Gain or Loss')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 175
+				,[strTransactionType]	= N'Insurance Charge'
+				,[strPrefix]			= N'INC-'
+				,[intNumber]			= 1
+				,[strModule]			= 'Inventory'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Insurance Charge' AND [strModule] = 'Inventory')
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
