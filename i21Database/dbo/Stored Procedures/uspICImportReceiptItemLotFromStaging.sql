@@ -172,6 +172,8 @@ BEGIN
 		intProducerId,
 		strCertificateId,
 		strTrackingNumber,
+		strWarrantNo,
+		intWarrantStatus,
 		intConcurrencyId
 	)
 	SELECT
@@ -236,6 +238,8 @@ BEGIN
 		,intProducerId = Producer.intEntityId
 		,strCertificateId = ReceiptItemLot.strCertificateId
 		,strTrackingNumber = ReceiptItemLot.strTrackingNumber
+		,strWarrantNo = Receipt.strWarrantNo
+		,intWarrantStatus = Receipt.intWarrantStatus
 		,intConcurrencyId = 1
 	FROM
 		tblICImportStagingReceiptItemLot ReceiptItemLot
@@ -600,6 +604,8 @@ BEGIN
 		intProducerId,
 		strCertificateId,
 		strTrackingNumber,
+		strWarrantNo,
+		intWarrantStatus,
 		intConcurrencyId
 	)
 	SELECT
@@ -664,6 +670,8 @@ BEGIN
 		,intProducerId = Producer.intEntityId
 		,strCertificateId = ReceiptItemLot.strCertificateId
 		,strTrackingNumber = ReceiptItemLot.strTrackingNumber
+		,strWarrantNo = Receipt.strWarrantNo
+		,intWarrantStatus = Receipt.intWarrantStatus
 		,intConcurrencyId = 1
 	FROM
 		tblICImportStagingReceiptItemLot ReceiptItemLot
