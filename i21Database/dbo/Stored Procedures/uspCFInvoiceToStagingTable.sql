@@ -302,20 +302,44 @@ BEGIN TRY
 	----------------------------------------------------------------------------------
 	,intOdometerAging = (CASE 
 						WHEN cfInvRpt.strPrimarySortOptions = 'Card' 
-						THEN cfCardOdom.intOdometer
+						THEN 
+							CASE WHEN (cfCardOdom.intOdometer IS NULL)
+							THEN 
+								ISNULL(cfInvRpt.intOdometer,0)
+							ELSE
+								cfCardOdom.intOdometer
+       						END
                         WHEN cfInvRpt.strPrimarySortOptions = 'Vehicle' 
 							THEN 
 								CASE 
 								WHEN ISNULL(cfInvRpt.intVehicleId, 0) =  0
-									THEN cfCardOdom.intOdometer
-								ELSE cfVehicleOdom.intOdometer
+									THEN 
+										CASE WHEN (cfCardOdom.intOdometer IS NULL)
+										THEN 
+											ISNULL(cfInvRpt.intOdometer,0)
+										ELSE
+											cfCardOdom.intOdometer
+       									END
+									ELSE
+										CASE WHEN (cfVehicleOdom.intOdometer IS NULL)
+										THEN 
+											ISNULL(cfInvRpt.intOdometer,0)
+										ELSE
+											cfVehicleOdom.intOdometer
+       									END 
 								END
 						 WHEN cfInvRpt.strPrimarySortOptions = 'Miscellaneous' 
 							THEN 
 								CASE 
 								WHEN strMiscellaneous =  '' OR strMiscellaneous IS NULL
-									THEN cfCardOdom.intOdometer
-								ELSE ISNULL((SELECT TOP 1 intOdometer FROM (
+									THEN 
+										CASE WHEN (cfCardOdom.intOdometer IS NULL)
+										THEN 
+											ISNULL(cfInvRpt.intOdometer,0)
+										ELSE
+											cfCardOdom.intOdometer
+       									END
+									ELSE ISNULL((SELECT TOP 1 ISNULL(intOdometer,0) AS intOdometer FROM (
 											SELECT iocftran.*  
 												FROM   dbo.tblCFTransaction as iocftran
 												LEFT JOIN tblCFItem as iocfitem
@@ -327,7 +351,7 @@ BEGIN TRY
 											) as miscBase
 										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
 										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
-										ORDER  BY dtmTransactionDate DESC),0)
+										ORDER  BY dtmTransactionDate DESC),ISNULL(cfInvRpt.intOdometer,0))
 								END
 						ELSE 0
 					END)
@@ -414,26 +438,23 @@ BEGIN TRY
 	,dblTotalMiles = (CASE 
 						WHEN cfInvRpt.strPrimarySortOptions = 'Card' 
 						THEN
-							CASE
-								WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
-								THEN cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
-								ELSE 0 
+							CASE WHEN  cfCardOdom.intOdometer IS NULL 
+								THEN 0
+								ELSE cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
 							END
                         WHEN cfInvRpt.strPrimarySortOptions = 'Vehicle' 
 						THEN 
 							CASE 
 								WHEN ISNULL(cfInvRpt.intVehicleId, 0) =  0
 								THEN 
-									CASE
-										WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
-										THEN cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
-										ELSE 0 
+									CASE WHEN  cfCardOdom.intOdometer IS NULL 
+										THEN 0
+										ELSE cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
 									END
 								ELSE 
-									CASE
-										WHEN  ISNULL (cfVehicleOdom.intOdometer, 0)   > 0 
-										THEN cfInvRpt.intOdometer -	ISNULL (cfVehicleOdom.intOdometer, 0) 
-										ELSE 0 
+									CASE WHEN  cfVehicleOdom.intOdometer IS NULL 
+										THEN 0
+										ELSE cfInvRpt.intOdometer -	ISNULL (cfVehicleOdom.intOdometer, 0) 
 									END
 							END
 							WHEN cfInvRpt.strPrimarySortOptions = 'Miscellaneous' 
@@ -441,15 +462,14 @@ BEGIN TRY
 								CASE 
 								WHEN cfInvRpt.strMiscellaneous =  '' OR cfInvRpt.strMiscellaneous IS NULL
 								THEN 
-									CASE
-										WHEN  ISNULL (cfCardOdom.intOdometer, 0)   > 0 
-										THEN cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
-										ELSE 0 
+									CASE WHEN  cfCardOdom.intOdometer IS NULL 
+										THEN 0
+										ELSE cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
 									END
 								ELSE 
 									CASE
 										WHEN  
-										ISNULL((SELECT TOP 1 intOdometer FROM (
+										(SELECT TOP 1 ISNULL(intOdometer,0) AS intOdometer FROM (
 											SELECT iocftran.*  
 												FROM   dbo.tblCFTransaction as iocftran
 												LEFT JOIN tblCFItem as iocfitem
@@ -461,8 +481,12 @@ BEGIN TRY
 											) as miscBase
 										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
 										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
-										ORDER  BY dtmTransactionDate DESC),0)  > 0 
-										THEN cfInvRpt.intOdometer -	ISNULL((SELECT TOP 1 intOdometer FROM (
+										ORDER  BY dtmTransactionDate DESC)  IS NULL
+
+										THEN 0 
+
+										ELSE 
+											cfInvRpt.intOdometer -	(SELECT TOP 1 ISNULL(intOdometer,0) AS intOdometer FROM (
 											SELECT iocftran.*  
 												FROM   dbo.tblCFTransaction as iocftran
 												LEFT JOIN tblCFItem as iocfitem
@@ -472,10 +496,9 @@ BEGIN TRY
 												AND strMiscellaneous != ''
 												AND ISNULL(ysnPosted,0) = 1
 											) as miscBase
-										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
-										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
-										ORDER  BY dtmTransactionDate DESC),0) 
-										ELSE 0 
+											WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
+											AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
+											ORDER  BY dtmTransactionDate DESC) 
 									END
 							END
 						ELSE 0
@@ -588,7 +611,7 @@ BEGIN TRY
 	ON cfInvRpt.intTransactionId = cfInvRptDcnt.intTransactionId 
 	-------------------------------------------------------------
 	OUTER APPLY (
-		SELECT TOP (1) intOdometer 
+		SELECT TOP (1) ISNULL(intOdometer,0) AS intOdometer
 			  FROM   dbo.tblCFTransaction as iocftran
 			  LEFT JOIN tblCFItem as iocfitem
 			  ON iocftran.intProductId = iocfitem.intItemId
@@ -600,7 +623,7 @@ BEGIN TRY
 	) AS cfCardOdom
 	-----------------------------------------------------------
 	OUTER APPLY (
-		SELECT TOP (1) intOdometer 
+		SELECT TOP (1) ISNULL(intOdometer,0) AS intOdometer
 			  FROM   dbo.tblCFTransaction as iocftran
 			  LEFT JOIN tblCFItem as iocfitem
 			  ON iocftran.intProductId = iocfitem.intItemId
