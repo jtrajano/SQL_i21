@@ -761,7 +761,7 @@ IF @ysnPost = 1
             ,intConcurrencyId     
             )    
             -- Bank Transaction Credit    
-            SELECT strTransactionId     = A.strTransactionId + @BANK_TRANSFER_WD_PREFIX    
+            SELECT TOP 1 strTransactionId     = A.strTransactionId + @BANK_TRANSFER_WD_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_WD    
               ,intBankAccountId      = @intBankAccountIdFrom
               ,intCurrencyId        = intCurrencyId    
@@ -807,7 +807,7 @@ IF @ysnPost = 1
               
             -- Bank Transaction Debit    
             UNION ALL    
-            SELECT strTransactionId     = A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX    
+            SELECT TOP 1 strTransactionId     = A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_DEP    
               ,intBankAccountId      = @intBankAccountIdTo
               ,intCurrencyId        = intCurrencyId

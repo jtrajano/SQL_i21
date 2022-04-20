@@ -73,13 +73,13 @@ dblRateAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrency
 1
 from tblCMBankTransfer  A
 OUTER APPLY(
-	SELECT dblCreditForeign, dblExchangeRate, intCurrencyExchangeRateTypeId, dblCredit
+	SELECT TOP 1 dblCreditForeign, dblExchangeRate, intCurrencyExchangeRateTypeId, dblCredit
     FROM tblGLDetail 
 	WHERE intAccountId = @intBTForwardToFXGLAccountId
 	AND strTransactionId =A.strTransactionId
 	AND ysnIsUnposted = 0
+	ORDER by intGLDetailId DESC
 )GLDetail
-
 where intTransactionId = @intSwapShortId
 
 SET @intSwapLongId = SCOPE_IDENTITY()
