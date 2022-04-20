@@ -55,7 +55,7 @@ BEGIN TRY
 			,strCurrency
 			,strUnitMeasure
 		)
-		EXEC uspQMGetSamplePremiumTestResult 100
+		EXEC uspQMGetSamplePremiumTestResult @intSampleId
 
 		IF Exists(SELECT TOP 1 1 FROM tblCTContractQuality where intContractDetailId = @intContractDetailId and intSampleId = @intSampleId)
 		BEGIN
