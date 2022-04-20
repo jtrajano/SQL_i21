@@ -386,6 +386,7 @@
     <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessERPFeed.sql" />
+    <Build Include="dbo\Views\vyuTRCustomerFreightList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
