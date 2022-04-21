@@ -708,6 +708,7 @@
     <Build Include="dbo\Tables\tblICInsuranceCharge.sql" />
     <Build Include="dbo\Views\vyuICGetInsuranceCharge.sql" />
     <Build Include="dbo\Tables\tblICInsuranceChargeDetail.sql" />
+    <Build Include="dbo\Views\vyuICSearchStorageCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
