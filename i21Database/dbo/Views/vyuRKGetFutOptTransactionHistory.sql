@@ -64,7 +64,7 @@ SELECT intFutOptTransactionHistoryId
 	, ysnBankTransferPosted 
 	, dblCommission
 FROM (
-	SELECT intFutOptTransactionHistoryId
+	SELECT History.intFutOptTransactionHistoryId
 		, History.intFutOptTransactionId
 		, History.intFutOptTransactionHeaderId
 		, History.dtmTransactionDate
@@ -98,7 +98,7 @@ FROM (
 									AND PrevRec.strCommodity = History.strCommodity
 									AND PrevRec.dtmTransactionDate < History.dtmTransactionDate
 								ORDER BY PrevRec.dtmTransactionDate DESC)
-		, dblNewNoOfLots = CASE WHEN ISNULL(Trans.intFutOptTransactionId, 0) = 0 AND
+		, dblNewNoOfLots = CASE WHEN ISNULL(HistoryDelete.intFutOptTransactionHistoryId, 0) <> 0 
 							THEN 0
 							ELSE CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
 							END
@@ -166,14 +166,16 @@ FROM (
 	LEFT JOIN tblCMBank AS BuyBank ON History.intBuyBankId = BuyBank.intBankId
 	LEFT JOIN vyuCMBankAccount AS BuyBankAcct ON History.intBuyBankAccountId = BuyBankAcct.intBankAccountId
 	LEFT JOIN tblCMBankTransfer BT ON History.intBankTransferId = BT.intTransactionId 
-	OUTER APPLY (
-		SELECT TOP 1 
-			*
+	LEFT JOIN (
+		SELECT histDel.intFutOptTransactionHistoryId
+			, intFutOptTransactionId
+			, dtmTransactionDate
 		FROM tblRKFutOptTransactionHistory histDel
-		WHERE histDel.intFutOptTransactionId = History.intFutOptTransactionId
-		AND histDel.strAction = 'DELETE'
-		ORDER BY dtmTransactionDate DESC
+		WHERE histDel.strAction = 'DELETE'
 	) HistoryDelete
+		ON HistoryDelete.intFutOptTransactionId = History.intFutOptTransactionId
+		AND History.strAction = 'ADD'
+		AND History.dtmTransactionDate > HistoryDelete.dtmTransactionDate
 	WHERE ISNULL(History.strAction, '') <> ''
 		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
