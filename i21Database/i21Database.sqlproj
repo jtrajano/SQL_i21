@@ -10832,6 +10832,9 @@
     <Build Include="dbo\Views\vyuQMSampleCuppingSessionTab.sql" />
     <Build Include="dbo\Views\vyuQMCuppingSession.sql" />
     <Build Include="dbo\Views\vyuQMCuppingSample.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCommodityAttribute.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCommodityProductLine.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCommodityItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
