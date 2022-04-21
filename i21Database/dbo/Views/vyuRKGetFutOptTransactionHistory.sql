@@ -62,6 +62,7 @@ SELECT intFutOptTransactionHistoryId
 	, strBankTransferNo 
 	, dtmBankTransferDate 
 	, ysnBankTransferPosted 
+	, dblCommission
 FROM (
 	SELECT intFutOptTransactionHistoryId
 		, History.intFutOptTransactionId
@@ -130,6 +131,7 @@ FROM (
 		, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
 		, dtmBankTransferDate = BT.dtmDate	
 		, ysnBankTransferPosted = BT.ysnPosted
+		, Trans.dblCommission
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.strFutMarketName = History.strFutureMarket
@@ -236,6 +238,7 @@ FROM (
 		, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
 		, dtmBankTransferDate = BT.dtmDate	
 		, ysnBankTransferPosted = BT.ysnPosted
+		, Trans.dblCommission
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.strCommodityCode = History.strCommodity

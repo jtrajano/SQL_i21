@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspRKUnrealizedPnL]
+﻿ALTER PROCEDURE [dbo].[uspRKUnrealizedPnL]
 	@dtmFromDate DATETIME
 	, @dtmToDate DATETIME
 	, @intCommodityId INT = NULL
@@ -113,7 +113,7 @@ BEGIN
 	FROM (
 		SELECT *
 			, GrossPnL = GrossPnL1 * (dblClosing - dblPrice)
-			, dblFutCommission = - dblFutCommission2
+			, dblFutCommission = CASE WHEN (SELECT TOP 1 ysnEnableCommissionExemptAndOverride FROM tblRKCompanyPreference) = 1 THEN - dblFutCommission1 ELSE - dblFutCommission2 END
 			, dblShortTotalLotByMonth = SUM(dblShort) OVER (PARTITION BY intFutureMonthId, strBroker)
 			, dblLongTotalLotByMonth = SUM(dblLong) OVER (PARTITION BY intFutureMonthId, strBroker)
 			, LongWaitedPrice = (dblLong * dblPrice)
@@ -149,11 +149,13 @@ BEGIN
 					, dblPrice = ISNULL(ot.dblPrice, 0)
 					, ot.dblContractSize
 					, intConcurrencyId = 0
-					, dblFutCommission1 = ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 1 THEN 0 ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END)
+					, dblFutCommission1 = CASE WHEN (SELECT TOP 1 ysnEnableCommissionExemptAndOverride FROM tblRKCompanyPreference) = 1 THEN ISNULL(ot.dblCommission, 0) ELSE
+											(ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 1 THEN 0 ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END)
 												FROM tblRKBrokerageCommission bc
 												LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = bc.intFutCurrencyId
 												WHERE bc.intFutureMarketId = ot.intFutureMarketId
-													AND bc.intBrokerageAccountId = ot.intBrokerageAccountId AND @dtmToDate BETWEEN bc.dtmEffectiveDate AND ISNULL(bc.dtmEndDate, GETDATE())), 0)
+													AND bc.intBrokerageAccountId = ot.intBrokerageAccountId AND @dtmToDate BETWEEN bc.dtmEffectiveDate AND ISNULL(bc.dtmEndDate, GETDATE())), 0)) 
+													END
 					--, MatchLong = ISNULL((SELECT SUM(dblMatchQty)
 					--						FROM tblRKMatchFuturesPSDetail psd
 					--						JOIN tblRKMatchFuturesPSHeader h ON psd.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId

@@ -46,7 +46,8 @@ RETURNS @FinalResult TABLE (intFutOptTransactionId INT
 	, dtmFilledDate DATETIME
 	, intTraderId INT
 	, strSalespersonId NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, dblMatchContract NUMERIC(18, 6))
+	, dblMatchContract NUMERIC(18, 6)
+	, dblCommission NUMERIC(18, 6))
 
 
 AS 
@@ -126,6 +127,7 @@ BEGIN
 		, intTraderId
 		, strSalespersonId
 		, dblMatchContract
+		, dblCommission
 	)
 	SELECT DISTINCT intFutOptTransactionId
 		, dtmTransactionDate
@@ -170,6 +172,7 @@ BEGIN
 		, intTraderId
 		, strSalespersonId
 		, dblMatchContract
+		, dblCommission
 	FROM (
 		SELECT ROW_NUMBER() OVER (PARTITION BY intFutOptTransactionId ORDER BY dtmTransactionDate DESC) intRowNum
 			, *
@@ -226,6 +229,7 @@ BEGIN
 				, FOT.intTraderId
 				, FOT.strSalespersonId
 				, dblMatchContract
+				, FOT.dblCommission
 			FROM tblRKFutOptTransactionHeader FOTH
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			OUTER APPLY (
@@ -332,6 +336,7 @@ BEGIN
 				, FOT.intTraderId
 				, FOT.strSalespersonId
 				, dblMatchContract
+				, FOT.dblCommission
 			FROM tblRKFutOptTransactionHeader FOTH
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			OUTER APPLY (
@@ -436,6 +441,7 @@ BEGIN
 				, intTraderId
 				, History.strSalespersonId COLLATE Latin1_General_CI_AS
 				, dblMatchContract
+				, History.dblCommission
 			FROM (
 				SELECT *
 				FROM (
