@@ -715,6 +715,7 @@
     <Build Include="dbo\Stored Procedures\uspTRFNegateTFLogFinancedQtyAndAmount.sql" />
     <Build Include="dbo\Tables\tblCRMBrandMaintenance.sql" />
     <Build Include="dbo\Views\vyuCRMIntegrationSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCheckUnnatural.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
