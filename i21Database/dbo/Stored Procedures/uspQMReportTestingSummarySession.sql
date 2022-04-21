@@ -74,19 +74,29 @@ BEGIN TRY
 		,CTCDV.strItemOrigin
 		,QMCS.dtmCuppingDate
 		,QMCS.dtmCuppingTime
-		,QMA.strContractNumberP
-		,QMA.strContractNumberS
-		,strVendorName			= QMA.strEntityNameP
-		,strCustomerName		= QMA.strEntityNameS
-		,strRankCuppingNumber	= CAST(QMCSD.intRank AS NVARCHAR(MAX)) + ' / ' + QMCS.strCuppingSessionNumber
+		,strContractNumber = CTCDV.strContractNumber + ' / ' + CAST(CTCDV.intContractSeq AS NVARCHAR(MAX))
+		,strVendorName = strEntityName
+		,QMCSD.intRank
+		,QMCS.strCuppingSessionNumber
 		,strProductType			= ICCA.strDescription
+		,strBuyer = CASE WHEN LGAC1.intCount > 1 THEN 'Multiple' ELSE LGAC.strBuyer END
+		,strSContractNumber = CASE WHEN LGAC1.intCount > 1 THEN 'Multiple' ELSE LGAC.strSContractNumber END
 	FROM tblQMCuppingSession QMCS
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
 	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
-	INNER JOIN tblQMSampleType QMST ON QMS.intSampleTypeId = QMST.intSampleTypeId
-	LEFT JOIN vyuQMAllocation QMA ON QMS.intSampleId = QMA.intSampleId 
 	LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON QMS.intContractDetailId = CTCDV.intContractDetailId
-	LEFT JOIN tblICCommodityAttribute ICCA ON QMS.intProductTypeId = ICCA.intCommodityAttributeId AND ICCA.strType = 'ProductType'
+	LEFT JOIN tblICItem ICI WITH (NOLOCK) ON CTCDV.intItemId = ICI.intItemId
+	LEFT JOIN tblICCommodityAttribute ICCA ON ICI.intProductTypeId = ICCA.intCommodityAttributeId AND ICCA.strType = 'ProductType'
+	OUTER APPLY (
+		SELECT TOP 1 intPContractDetailId, strSContractNumber, strBuyer
+		FROM vyuLGAllocatedContracts
+		WHERE intPContractDetailId = QMS.intContractDetailId
+	) LGAC
+	OUTER APPLY (
+		SELECT intCount = COUNT(intAllocationDetailId)
+		FROM vyuLGAllocatedContracts
+		WHERE intPContractDetailId = QMS.intContractDetailId
+	) LGAC1
 
 END TRY
 
