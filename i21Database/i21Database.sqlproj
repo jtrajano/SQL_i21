@@ -6422,6 +6422,8 @@
     <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
     <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions" />
+    <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
