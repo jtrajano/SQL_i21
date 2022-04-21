@@ -335,7 +335,7 @@ END
 				,strChargesLink					= CASE WHEN ysnComboFreight = 1 THEN NULL ELSE RE.strChargesLink END
 				,dblQuantity					= NULL
 	FROM	#tmpReceipts RE 
-	WHERE	RE.dblSurcharge != 0  OR (RE.dblComboSurcharge != 0  AND ysnComboFreight = 1)
+	WHERE (RE.dblSurcharge != 0  AND ysnComboFreight = 0) OR (RE.dblComboSurcharge != 0  AND ysnComboFreight = 1)
 
 
 	DROP TABLE #tmpReceipts
