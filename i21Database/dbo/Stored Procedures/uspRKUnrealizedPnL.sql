@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspRKUnrealizedPnL]
+﻿CREATE PROCEDURE [dbo].[uspRKUnrealizedPnL]
 	@dtmFromDate DATETIME
 	, @dtmToDate DATETIME
 	, @intCommodityId INT = NULL
