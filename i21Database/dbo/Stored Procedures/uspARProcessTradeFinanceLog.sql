@@ -123,7 +123,7 @@ OUTER APPLY (
 	ORDER BY intAuditLogId DESC
 ) ARAL
 OUTER APPLY (
-	SELECT ICIR.strApprovalStatus
+	SELECT TOP 1 ICIR.strApprovalStatus
 	FROM tblLGLoadDetailLot LGLD
 	LEFT JOIN tblICInventoryReceiptItemLot ICIRIL ON ICIRIL.intLotId = LGLD.intLotId
 	LEFT JOIN tblICInventoryReceiptItem ICIRI ON ICIRI.intInventoryReceiptItemId = ICIRIL.intInventoryReceiptItemId
