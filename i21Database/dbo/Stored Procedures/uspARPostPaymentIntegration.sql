@@ -461,6 +461,9 @@ BEGIN
 
 END
 
+-- UPDATE PAYMENT HEADER INVOICE
+EXEC dbo.uspARUpdatePaymentInvoiceField @PaymentIds, 0
+
 --UPDATE PAYMENT DETAIL AMOUNT DUE PAID FROM VOUCHER
 UPDATE ARPD
 SET ARPD.dblAmountDue     = -((C.dblTotal + ABS(ARPD.dblInterest)) - (ABS(ARPD.dblPayment) + ABS(ARPD.dblDiscount) + ABS(ARPD.dblWriteOffAmount)))
