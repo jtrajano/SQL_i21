@@ -2,7 +2,7 @@
 
 AS
 
-SELECT intRowNumber  = row_number() OVER(ORDER BY tf.dtmCreatedDate DESC) 
+SELECT intRowNumber  = row_number() OVER(ORDER BY tf.dtmTransactionDate DESC) 
 	, tf.dtmCreatedDate
 	, tf.strAction
 	, tf.strTransactionType
