@@ -3,6 +3,8 @@
 	 ,@UserId				INT
 	 ,@TransactionType		NVARCHAR(15)
 	 ,@ForDelete			BIT = 0
+	 ,@Post					BIT = 0
+	 ,@FromPosting			BIT = 0
 	 ,@LogTradeFinanceInfo	BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF  
@@ -10,8 +12,23 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF  
 
-DECLARE   @TradeFinanceLogs	TRFLog
-		, @strAction		NVARCHAR(30)
+DECLARE  @TradeFinanceLogs	TRFLog
+		,@strAction			NVARCHAR(30) = ''
+		,@intStatusId		INT = 0
+
+IF @TransactionType = 'Payment'
+BEGIN
+	IF @Post = 1
+		BEGIN
+			SET @strAction = 'Posted Payment'
+			SET @intStatusId = 2
+		END
+	ELSE
+	BEGIN
+		SET @strAction = 'Unposted Payment'
+		SET @intStatusId = 1
+	END
+END
 
 INSERT INTO @TradeFinanceLogs (
 	  strAction
@@ -43,9 +60,16 @@ INSERT INTO @TradeFinanceLogs (
 	, dblSublimit
 )
 SELECT
-	  strAction						= CASE WHEN @TransactionType = 'Payment' 
-										THEN CASE WHEN ARI.ysnPosted = 1 THEN 'Posted Payment' ELSE 'Unposted Payment' END
-										ELSE CASE WHEN @ForDelete = 1 THEN 'Deleted ' ELSE ISNULL(ARAL.strActionType, 'Created') END + ' ' + @TransactionType
+	  strAction						= CASE WHEN @strAction = '' 
+										   THEN CASE WHEN @FromPosting = 1 
+												     THEN CASE WHEN @Post = 1 THEN 'Posted ' ELSE ' Unposted ' END
+													 ELSE
+														CASE WHEN @ForDelete = 1 
+															 THEN 'Deleted ' 
+															 ELSE ISNULL(ARAL.strActionType, 'Created') 
+														END
+													 END   + ' ' + @TransactionType
+									       ELSE @strAction 
 									  END
 	, strTransactionType			= 'Sales'
 	, intTransactionHeaderId		= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
@@ -61,9 +85,19 @@ SELECT
 	, intLimitId					= ARI.intBorrowingFacilityLimitId
 	, dblLimit						= CMBFL.dblLimit
 	, strBankTradeReference			= ARI.strBankReferenceNo
-	, strBankApprovalStatus			= 'No Need For Approval'
+	, strBankApprovalStatus			=  ISNULL(LS.strApprovalStatus, '')
 	, dtmAppliedToTransactionDate	= GETDATE() 
-	, intStatusId					= 2
+	, intStatusId					= CASE WHEN @intStatusId = 0
+										   THEN CASE WHEN @FromPosting = 1 
+												     THEN 1
+													 ELSE
+														CASE WHEN @ForDelete = 1 
+															 THEN 3
+															 ELSE 1
+														END
+													 END
+									       ELSE @intStatusId 
+									  END
 	, intUserId						= @UserId
 	, intConcurrencyId				= 1 
 	, dblFinanceQty					= ARID.dblQtyShipped
@@ -75,7 +109,7 @@ SELECT
 	, dblSublimit					= CMBFLD.dblLimit
 FROM tblARInvoice ARI WITH (NOLOCK)
 LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
-ON (ARI.intInvoiceId = ARID.intInvoiceId AND ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds))
+ON ARI.intInvoiceId = ARID.intInvoiceId
 LEFT JOIN tblARPaymentDetail ARPD ON ARI.intInvoiceId = ARPD.intInvoiceId
 LEFT JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
 LEFT JOIN tblCTContractDetail CTCD on CTCD.intContractDetailId = ARID.intContractDetailId
@@ -88,6 +122,14 @@ OUTER APPLY (
 	WHERE strRecordNo COLLATE SQL_Latin1_General_CP1_CS_AS = ARI.strInvoiceNumber
 	ORDER BY intAuditLogId DESC
 ) ARAL
+OUTER APPLY (
+	SELECT ICIR.strApprovalStatus
+	FROM tblLGLoadDetailLot LGLD
+	LEFT JOIN tblICInventoryReceiptItemLot ICIRIL ON ICIRIL.intLotId = LGLD.intLotId
+	LEFT JOIN tblICInventoryReceiptItem ICIRI ON ICIRI.intInventoryReceiptItemId = ICIRIL.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt ICIR ON ICIR.intInventoryReceiptId = ICIRI.intInventoryReceiptId
+	WHERE LGLD.intLoadDetailId = ARID.intLoadDetailId
+) LS
 WHERE ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds)
 AND 
 (
@@ -103,6 +145,7 @@ AND
 		   OR ISNULL(ARI.strTransactionNo, '') <> ''
 		)
 	)
+	OR @FromPosting = 1
 	OR @LogTradeFinanceInfo = 1
 )
 

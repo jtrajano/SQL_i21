@@ -573,7 +573,7 @@ INSERT INTO @InvoiceId(intHeaderId)
 SELECT intHeaderId = intInvoiceId
 FROM @PaymentStaging
 
-EXEC dbo.uspARProcessTradeFinanceLog @InvoiceId, @UserId, 'Payment'
+EXEC dbo.uspARProcessTradeFinanceLog @InvoiceId, @UserId, 'Payment', 0, @Post
 
 IF @Post = 0
 	BEGIN			
