@@ -301,6 +301,7 @@ BEGIN TRY
 					, intFutureMonthId
 					, dblNoOfLots
 					, dblContractSize
+					, dblQty
 					, dblPrice
 					, intEntityId
 					, intUserId
@@ -337,6 +338,7 @@ BEGIN TRY
 					, intFutureMonthId = der.intFutureMonthId
 					, dblNoOfLots = der.dblNewNoOfLots
 					, dblContractSize = m.dblContractSize
+					, dblQty = der.dblNewNoOfLots  * m.dblContractSize
 					, dblPrice = der.dblPrice
 					, intEntityId = der.intEntityId
 					, intUserId = der.intUserId
