@@ -145,6 +145,7 @@ AND
 		   OR ISNULL(ARI.strTransactionNo, '') <> ''
 		)
 	)
+	OR @ForDelete = 1
 	OR @FromPosting = 1
 	OR @LogTradeFinanceInfo = 1
 )
