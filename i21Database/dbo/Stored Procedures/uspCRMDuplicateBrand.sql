@@ -20,7 +20,7 @@ DECLARE @InitTranCount INT
 		,@Savepoint NVARCHAR(32)
 
 SET @InitTranCount = @@TRANCOUNT
-SET @Savepoint = SUBSTRING(('ARDuplicateInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+SET @Savepoint = SUBSTRING(('ARDuplicateBrand' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
 IF ISNULL(@RaiseError,0) = 0	
 BEGIN
@@ -34,7 +34,8 @@ END
 BEGIN TRY
 	INSERT INTO tblCRMBrand
 	(
-		 [strBrand]
+		 [intBrandMaintenanceId]
+		,[strIntegrationName]
 		,[strFileType]
 		,[strIntegrationObject]
 		,[strLoginUrl]
@@ -53,7 +54,9 @@ BEGIN TRY
 		,[intConcurrencyId]
 	 )
 
-	 SELECT [strBrand]				= Brand.[strBrand] + ' - Copy'
+	 SELECT  
+	         [intBrandMaintenanceId]= Brand.[intBrandMaintenanceId]
+			,[strIntegrationName]	= Brand.[strIntegrationName] + ' - Test'
 			,[strFileType]			= Brand.[strFileType]
 			,[strIntegrationObject]	= Brand.[strIntegrationObject]
 			,[strLoginUrl]			= Brand.[strLoginUrl]

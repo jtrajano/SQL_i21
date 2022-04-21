@@ -709,10 +709,12 @@
     <Build Include="dbo\Views\vyuICGetInsuranceCharge.sql" />
     <Build Include="dbo\Tables\tblICInsuranceChargeDetail.sql" />
     <Build Include="dbo\Views\vyuICSearchStorageCharge.sql" />
-	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReading.sql" />
     <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFNegateTFLogFinancedQtyAndAmount.sql" />
+    <Build Include="dbo\Tables\tblCRMBrandMaintenance.sql" />
+    <Build Include="dbo\Views\vyuCRMIntegrationSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10474,7 +10476,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRebuildNonOpenContracts.sql" />
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
-	<Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

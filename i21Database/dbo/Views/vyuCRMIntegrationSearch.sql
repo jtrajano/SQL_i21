@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuCRMGetBrand]
+﻿CREATE VIEW [dbo].[vyuCRMIntegrationSearch]
 AS
 	SELECT 
 		   intBrandId					= Brand.intBrandId
@@ -9,7 +9,6 @@ AS
 		  ,strIntegrationObject			= Brand.strIntegrationObject
 		  ,strLoginUrl					= Brand.strLoginUrl
 		  ,strUserName					= Brand.strUserName
-		  ,strPassword					= dbo.fnAESDecryptASym(Brand.strPassword) COLLATE Latin1_General_CI_AS
 		  ,strSendType					= Brand.strSendType
 		  ,strFrequency					= Brand.strFrequency
 		  ,strDayOfWeek					= Brand.strDayOfWeek
@@ -17,10 +16,6 @@ AS
 		  ,ysnHoldSchedule				= Brand.ysnHoldSchedule
 		  ,dtmStartTime					= Brand.dtmStartTime
 		  ,dtmApprovedDate				= Brand.dtmApprovedDate
-		  ,intVendorId					= Brand.intVendorId
-		  ,intVendorContactId			= Brand.intVendorContactId
-		  ,strNote						= Brand.strNote
-		  ,intConcurrencyId				= Brand.intConcurrencyId
 		  ,strVendorName				= Vendor.strName
 		  ,strVendorContactName			= VendorContact.strName
 		  ,strVendorContactPhone		= VendorContact.strPhone
