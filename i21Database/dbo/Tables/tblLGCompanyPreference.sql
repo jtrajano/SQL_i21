@@ -35,6 +35,7 @@
 [intDebitNoteReportFormat] INT NULL,
 [intCreditNoteReportFormat] INT NULL,
 [intPreArrivalNotificationReportFormat] INT NULL,
+[intTransferOrderReportFormat] INT NULL,
 [intOrganicDeclarationReportFormat] INT NULL,
 [intBOLReportFormat] INT NULL,
 [ysnAlertApprovedQty] [bit] NULL,
