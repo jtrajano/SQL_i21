@@ -22,6 +22,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY tf.dtmCreatedDate DESC)
 	, tf.intStatusId
 	, strStatus = CASE WHEN  tf.intStatusId = 1 THEN 'Active' 
 						WHEN tf.intStatusId = 2 THEN 'Completed'
+						WHEN tf.intStatusId = 3 THEN 'Inactive'
 						WHEN tf.intStatusId = 0 THEN 'Cancelled'
 						ELSE '' END
 	, tf.intWarrantId
