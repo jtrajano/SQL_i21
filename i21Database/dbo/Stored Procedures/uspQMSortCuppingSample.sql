@@ -32,7 +32,7 @@ SELECT intSampleId			= S.intSampleId
 	 , strProductType		= PT.strDescription
 	 , intOriginId			= I.intOriginId
 	 , strOrigin			= O.strDescription
-	 , intExtensionId		= I.intCommodityAttributeId1
+	 , intExtensionId		= I.intProductLineId
 	 , strExtension			= EX.strDescription
 	 , intItemId			= S.intItemId
 	 , strItemNo			= I.strItemNo 
@@ -44,9 +44,9 @@ SELECT intSampleId			= S.intSampleId
 	 , strContractNumber	= CH.strContractNumber
 	 , intContractSequence	= CD.intContractSeq
 	 , strLotNumber			= L.strLotNumber
-	 , dblQuantity			= S.dblSampleQty
-	 , strPacking			= ''
-	 , strMethodology		= ''
+	 , dblQuantity			= S.dblRepresentingQty
+	 , strPacking			= UM.strUnitMeasure
+	 , strMethodology		= SC.strSamplingCriteria
 	 , intSampleTypeId		= S.intSampleTypeId
 	 , intContractHeaderId	= S.intContractHeaderId
 	 , intContractDetailId	= S.intContractDetailId
@@ -59,12 +59,14 @@ LEFT JOIN tblQMSampleStatus STAT ON S.intSampleStatusId = STAT.intSampleStatusId
 LEFT JOIN tblICItem I ON S.intItemId = I.intItemId
 LEFT JOIN tblICCommodityAttribute PT ON I.intProductTypeId = PT.intCommodityAttributeId AND PT.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute O ON I.intOriginId = O.intCommodityAttributeId AND O.strType = 'Origin'
-LEFT JOIN tblICCommodityAttribute EX ON I.intCommodityAttributeId1 = EX.intCommodityAttributeId
+LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId
 LEFT JOIN tblCTContractDetail CD ON S.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 LEFT JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 LEFT JOIN tblICLot L ON L.intLotId = S.intProductValueId AND S.intProductTypeId = 6
 LEFT JOIN tblEMEntity E ON S.intEntityId = E.intEntityId
+LEFT JOIN tblQMSamplingCriteria SC ON S.intSamplingCriteriaId = SC.intSamplingCriteriaId
+LEFT JOIN tblICUnitMeasure UM ON S.intRepresentingUOMId = UM.intUnitMeasureId
 
 --RANK ACCORDING TO SORT
 SELECT S.intItemId
