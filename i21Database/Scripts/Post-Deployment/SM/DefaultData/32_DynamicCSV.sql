@@ -145,7 +145,8 @@ SET strCommand = N'
 
 	IF ISNULL(@EntityId, 0) > 0
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityToContact contact INNER JOIN tblEMEntity entity ON contact.intEntityContactId = entity.intEntityId where contact.intEntityId = @EntityId AND entity.strName = ''@name@'')
+		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityToContact contact INNER JOIN tblEMEntity entity ON contact.intEntityContactId = entity.intEntityId 
+				  WHERE contact.intEntityId = @EntityId AND entity.strName = ''@name@'')
 		BEGIN
 			SET @ValidationMessage = ''Detected duplicate contact name. Please check the name and re-attempt the upload''
 			RAISERROR(@ValidationMessage, 16, 1);
@@ -182,6 +183,7 @@ SET strCommand = N'
 		END
 
 		IF @PortalBit = 1 AND ISNULL(@PortalPassword, '''') <> ''''
+			AND EXISTS(SELECT TOP 1 1 FROM vyuEME2C2Role WHERE intEntityId = @EntityId AND ysnAdmin = 1)
 		BEGIN
 			DECLARE @ToggleOutput	NVARCHAR(200)
 
