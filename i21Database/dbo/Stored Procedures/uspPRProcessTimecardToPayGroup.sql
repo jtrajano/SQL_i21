@@ -296,21 +296,22 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard WHERE ysnProcessed = 0)
    ,1        
   FROM tblPREmployeeEarning EL         
   INNER JOIN (SELECT   
-  EE.intTypeEarningId       
-      ,EE.intEntityEmployeeId      
-      ,EE.intEmployeeEarningId      
-      ,intEmployeeDepartmentId      
-      ,SUM(dblOvertimeHours) dblOvertimeHours --SELECT EE.*, TC.dblRegularHours, TC.dblOvertimeHours, TC.intEmployeeDepartmentId         
-            ,TC.intWorkersCompensationId      
-   ,EE.intPayGroupId  
-            FROM #tmpTimecard TC INNER JOIN tblPREmployeeEarning EE         
-            ON TC.intEmployeeEarningId = EE.intEmployeeEarningId      
-            GROUP BY EE.intTypeEarningId       
-          ,EE.intEntityEmployeeId      
-          ,EE.intEmployeeEarningId      
-          ,intEmployeeDepartmentId      
+                EE.intTypeEarningId       
+                ,EE.intEntityEmployeeId      
+                ,EE.intEmployeeEarningId      
+                ,intEmployeeDepartmentId      
+                ,SUM(dblOvertimeHours) dblOvertimeHours --SELECT EE.*, TC.dblRegularHours, TC.dblOvertimeHours, TC.intEmployeeDepartmentId         
                 ,TC.intWorkersCompensationId      
-    ,EE.intPayGroupId  
+                ,EE.intPayGroupId  
+            FROM #tmpTimecard TC INNER JOIN tblPREmployeeEarning EE         
+                ON TC.intEmployeeEarningId = EE.intEmployeeEarningId      
+                AND TC.intEmployeeEarningId = @intEmployeeEarningId
+            GROUP BY EE.intTypeEarningId       
+                    ,EE.intEntityEmployeeId      
+                    ,EE.intEmployeeEarningId      
+                    ,intEmployeeDepartmentId      
+                    ,TC.intWorkersCompensationId      
+                    ,EE.intPayGroupId  
     ) TCE        
    ON EL.intEmployeeEarningLinkId = TCE.intTypeEarningId        
     AND EL.intEntityEmployeeId = TCE.intEntityEmployeeId         
