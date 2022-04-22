@@ -241,7 +241,9 @@ SET strCommand = N'
 	Union All
 	SELECT @NewHeaderId, 'rank', 'Rank', 0
 	Union All
-	SELECT @NewHeaderId, 'portal', 'Portal Access', 0
+	SELECT @NewHeaderId, 'portalUserRole', 'Portal User Role', 0
+	Union All
+	SELECT @NewHeaderId, 'portalPassword', 'Portal Password', 0
 
 -- Customer Contact Import End
 
