@@ -10358,6 +10358,7 @@
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
     <Build Include="dbo\Views\vyuARGetEntityLocation.sql" />
     <Build Include="dbo\Views\vyuARGetCustomer.sql" />
+	<Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
