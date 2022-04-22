@@ -4849,6 +4849,7 @@ BEGIN TRY
 									UPDATE @cbLogSpecific
 									SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
 																WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
+																WHEN @intHeaderPricingTypeId = 6 THEN 6
 																ELSE 2 END
 										, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
 															ELSE intActionId END
