@@ -101,7 +101,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_CreateIDPGridLayout.sql
 :r .\SM\2110_UpdateAuditLogs.sql
 :r .\SM\2110_AddIDPToCustomerLicenseModule.sql
-:r .\SM\2120_AddUserPortalSettingsToContactImport.sql
 :r .\SM\2120_InsertLanguages.sql
 :r .\SM\2120_UpdateAddonComponents.sql
 :r .\SM\2120_InsertOtherLabels.sql
