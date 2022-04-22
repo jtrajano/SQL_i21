@@ -718,6 +718,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDCheckUnnatural.sql" />
     <Build Include="dbo\Stored Procedures\uspICGenerateInsuranceCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetTransferOrderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPReprocessERPFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
