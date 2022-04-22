@@ -69,8 +69,8 @@ SELECT
 	,strCompanyAddress		= @strCompanyFullAddress
 	,strInvoiceNumber		= ARI.strInvoiceNumber
 	,strCustomerName		= ARCS.strName
-	,strLocationName		= SMCL.strLocationName + '.' + ARI.strInvoiceNumber + FORMAT(ARI.dtmDate, 'dd.MM.yyyy')
-	,strContractNumber		= CTCDV.strContractNumber + '-' + CAST(CTCDV.intContractSeq AS NVARCHAR(100)) + ' dated ' + FORMAT(CTCDV.dtmContractDate, 'dd.MM.yyyy')
+	,strLocationName		= SMCL.strLocationName + ',' +  + [dbo].[fnConvertDateToReportDateFormat](ARI.dtmDate, 0)
+	,strContractNumber		= CTCDV.strContractNumber + '-' + CAST(CTCDV.intContractSeq AS NVARCHAR(100)) + ' dated ' + [dbo].[fnConvertDateToReportDateFormat](CTCDV.dtmContractDate, 0)
 	,strOrigin				= CTCDV.strItemOrigin
 	,strFreightTerm			= CTCDV.strFreightTerm
 	,strWeight				= CTCDV.strWeight
@@ -88,7 +88,7 @@ SELECT
 	,dblInvoiceTotal		= ARGID.dblTotal
 	,strEDICode				= ICC.strEDICode
 	,ysnCustomsReleased		= ISNULL(LGL.ysnCustomsReleased, 0)
-	,strBOLNumber			= LGL.strBLNumber + FORMAT(LGL.dtmBLDate, 'dd.MM.yyyy')
+	,strBOLNumber			= LGL.strBLNumber + ' dd ' + [dbo].[fnConvertDateToReportDateFormat](LGL.dtmBLDate, 0)
 	,strDestinationCity		= LGL.strDestinationCity
 	,strMVessel				= LGL.strMVessel
 	,strPaymentComments		= ARI.strTradeFinanceComments
