@@ -33,6 +33,8 @@ SELECT intPaymentId				= P.intPaymentId
 	 , ysnProcessedToNSF		= P.ysnProcessedToNSF
 	 , strTransactionId			= ISNULL(ARP.strTransactionId, '')
 	 , strAccountingPeriod      = AccPeriod.strAccountingPeriod
+	 , ysnScheduledPayment		= ISNULL(P.ysnScheduledPayment, 0)
+	 , dtmScheduledPayment		= P.dtmScheduledPayment
 FROM (
 	SELECT intPaymentId
 		 , strRecordNumber 
@@ -53,6 +55,8 @@ FROM (
 		 , ysnProcessedToNSF
 		 , intPeriodId
 		 , strInvoices
+		 , ysnScheduledPayment
+		 , dtmScheduledPayment
 	FROM dbo.tblARPayment WITH (NOLOCK)
 ) P 
 LEFT JOIN (

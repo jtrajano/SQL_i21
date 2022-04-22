@@ -43,6 +43,8 @@
 	[strInvoices]			VARCHAR(MAX)    COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]		INT             CONSTRAINT [DF_tblARPayment_intConcurrencyId] DEFAULT ((0)) NOT NULL,    
 	[ysnIntraCompany]		BIT				CONSTRAINT [DF_tblARPayment_ysnIntraCompany] DEFAULT((0)) NULL,
+	[ysnScheduledPayment]	BIT				CONSTRAINT [DF_tblARPayment_ysnScheduledPayment] DEFAULT ((0)) NULL,
+	[dtmScheduledPayment]	DATETIME		NULL,
     CONSTRAINT [PK_tblARPayment_intPaymentId] PRIMARY KEY CLUSTERED ([intPaymentId] ASC),
     CONSTRAINT [FK_tblARPayment_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblARPayment_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

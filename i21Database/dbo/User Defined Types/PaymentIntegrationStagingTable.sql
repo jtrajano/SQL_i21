@@ -43,7 +43,8 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[ysnUnPostAndUpdate]					BIT												NULL		-- 
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity
 	,[intEntityCardInfoId]					INT												NULL		-- Credit Card Info Id (tblEMEntityCardInformation)
-
+	,[ysnScheduledPayment]					BIT 											NULL		-- Credit Card Scheduled Payment
+	,[dtmScheduledPayment]					DATETIME										NULL		-- Credit Card Scheduled Payment Date
 	
 
 	--Detail																																															
