@@ -88,10 +88,14 @@ BEGIN TRY
 				,dblActualValue
 				,dblResult
 				,strEscalatedBy
+				,intSequenceCurrencyId
+				,strSequenceCurrency
+				,intSequenceUnitMeasureId
+				,strSequenceUnitMeasure
 			)
 			SELECT	intSampleId, 
-					intContractDetailId, 
-					intItemId,
+					tmp.intContractDetailId, 
+					tmp.intItemId,
 					intPropertyId,
 					strPropertyName,
 					dblTargetValue,
@@ -102,10 +106,10 @@ BEGIN TRY
 					dblFactorUnderTarget,
 					dblDiscount,
 					strCostMethod,
-					intCurrencyId,
-					intUnitMeasureId,
-					strCurrency,
-					strUnitMeasure,
+					tmp.intCurrencyId,
+					tmp.intUnitMeasureId,
+					tmp.strCurrency,
+					tmp.strUnitMeasure,
 					1,
 					CASE WHEN ISNULL(strActualValue, '') = '' THEN 0 ELSE CAST(strActualValue as Numeric(18,6)) END AS dblActualValue,
 					(SELECT dbo.fnCTGetQualityResult(CASE WHEN ISNULL(strActualValue, '') = '' THEN 0 ELSE CAST(strActualValue as Numeric(18,6)) END 
@@ -117,8 +121,39 @@ BEGIN TRY
 													, dblDiscount
 													, dblPremium
 													, strEscalatedBy)),
-					strEscalatedBy
-			FROM @tblTemp
+					strEscalatedBy,
+					CU.intMainCurrencyId intSequenceCurrencyId,
+					CU.strCurrency strSequenceCurrency,
+					UM.intUnitMeasureId,
+					UM.strUnitMeasure
+					
+			FROM @tblTemp tmp
+			JOIN tblCTContractDetail CD on CD.intContractDetailId = tmp.intContractDetailId
+			JOIN (
+				SELECT intCurrencyID, intMainCurrencyId, strCurrency 
+				FROM (
+					
+					select intCurrencyID, ISNULL(intMainCurrencyId, intCurrencyID) intMainCurrencyId, strCurrency
+					from tblSMCurrency 
+					where intMainCurrencyId is null
+
+					UNION ALL
+
+					select C.intCurrencyID, M.intCurrencyID intMainCurrencyId, M.strCurrency
+					from tblSMCurrency C
+					JOIN tblSMCurrency M on C.intMainCurrencyId = M.intCurrencyID
+					where C.intMainCurrencyId is NOT null
+					) a
+				Group by intCurrencyID, strCurrency, intMainCurrencyId 
+			
+			) CU on CU.intCurrencyID = CD.intCurrencyId
+			JOIN (
+				select  IT.intItemUOMId, IT.intUnitMeasureId, strUnitMeasure
+				from tblICItemUOM IT
+				JOIN tblICUnitMeasure UM on IT.intUnitMeasureId = UM.intUnitMeasureId
+
+			)UM on UM.intItemUOMId = CD.intPriceItemUOMId
+
 		END
 
 END TRY
