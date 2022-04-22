@@ -810,7 +810,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)	 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 		JOIN		tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
