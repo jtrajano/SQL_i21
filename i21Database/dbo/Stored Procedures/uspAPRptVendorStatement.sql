@@ -10,6 +10,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN
 	DECLARE @tblAPVendorStatement TABLE (
+		imgLogo VARBINARY(MAX) NULL,
 		strCompanyName NVARCHAR(1000) NULL,
 		strCompanyAddress NVARCHAR(1000) NULL,
 		strLocationName NVARCHAR(1000) NULL,
@@ -46,6 +47,7 @@ BEGIN
 		DECLARE @strName NVARCHAR(1000)
 		DECLARE @strLocationName NVARCHAR(1000)
 		DECLARE @strComment NVARCHAR(1000)
+		DECLARE @imgLogo VARBINARY(MAX)
 
 		-- Declare XML document Id
 		DECLARE @xmlDocumentId AS INT;
@@ -92,9 +94,22 @@ BEGIN
 		SET @dtmDateFrom = ISNULL(@dtmDateFrom, '1/1/1900')
 		SET @dtmDateTo = ISNULL(@dtmDateTo, GETDATE())
 
+		-- GET LOGO
+		SELECT @imgLogo = imgLogo FROM tblSMLogoPreference WHERE ysnVendorStatement = 1
+		IF @imgLogo IS NULL
+		BEGIN
+			SELECT @imgLogo = imgLogo FROM tblSMLogoPreference WHERE ysnDefault = 1
+
+			IF @imgLogo IS NULL
+			BEGIN
+				SELECT @imgLogo = imgCompanyLogo FROM tblSMCompanySetup
+			END
+		END
+
 		-- ASSEMBLE VENDOR STATEMENTS
 		INSERT INTO @tblAPVendorStatement
-		SELECT CS.strCompanyName,
+		SELECT @imgLogo,
+			   CS.strCompanyName,
 			   dbo.fnAPFormatAddress(NULL, NULL, NULL, CS.strAddress, CS.strCity, CS.strState, CS.strZip, CS.strCountry, NULL),
 			   CL.strLocationName,
 			   CL.strVatNo,
