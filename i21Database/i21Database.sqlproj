@@ -399,6 +399,7 @@
     <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Views\vyuTRCustomerFreightList.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPReprocessERPFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
