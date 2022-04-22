@@ -387,6 +387,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
     <Build Include="dbo\User Defined Types\SingleAuditLogParam.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPReprocessERPFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
