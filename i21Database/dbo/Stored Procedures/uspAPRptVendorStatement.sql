@@ -44,6 +44,7 @@ BEGIN
 		DECLARE @dtmDateFrom DATETIME
 		DECLARE @dtmDateTo DATETIME
 		DECLARE @strName NVARCHAR(1000)
+		DECLARE @strLocationName NVARCHAR(1000)
 		DECLARE @strComment NVARCHAR(1000)
 
 		-- Declare XML document Id
@@ -85,6 +86,7 @@ BEGIN
 			SELECT @dtmDateFrom = [from], @dtmDateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 			SELECT @strName = [from] FROM @temp_xml_table WHERE [fieldname] = 'strName';
 			SELECT @strComment = [from] FROM @temp_xml_table WHERE [fieldname] = 'strComment';
+			SELECT @strLocationName = [from] FROM @temp_xml_table WHERE [fieldname] = 'strLocationName';
 		END
 
 		SET @dtmDateFrom = ISNULL(@dtmDateFrom, '1/1/1900')
@@ -145,7 +147,7 @@ BEGIN
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = A.intEntityVendorId AND ysnDefaultLocation = 1
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 		INNER JOIN tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
-		WHERE NULLIF(@strName, '') IS NULL OR @strName = E.strName
+		WHERE (NULLIF(@strName, '') IS NULL OR @strName = E.strName) AND (NULLIF(@strLocationName, '') IS NULL OR @strLocationName = CL.strLocationName)
 		ORDER BY dtmBillDate, intOrder
 
 		SELECT * FROM @tblAPVendorStatement
