@@ -154,6 +154,10 @@ BEGIN TRY
 
 			)UM on UM.intItemUOMId = CD.intPriceItemUOMId
 
+			UPDATE tblCTContractQuality
+				SET dblAmount = dblResult
+				where intSequenceCurrencyId = intCurrencyId and intContractDetailId = @intContractDetailId
+
 		END
 
 END TRY
