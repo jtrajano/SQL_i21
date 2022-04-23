@@ -28,6 +28,7 @@ ORDER BY intCompanySetupID DESC
 DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 7 - Walter Matter'
 INSERT INTO tblARInvoiceReportStagingTable (
 	 intInvoiceId
+	,intInvoiceDetailId
 	,intEntityUserId
 	,strInvoiceFormat
 	,strRequestId
@@ -62,6 +63,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 )
 SELECT
 	 intInvoiceId			= ARI.intInvoiceId
+	,intInvoiceDetailId		= ARGID.intInvoiceDetailId
 	,intEntityUserId		= @intEntityUserId
 	,strInvoiceFormat		= SELECTEDINV.strInvoiceFormat
 	,strRequestId			= @strRequestId
