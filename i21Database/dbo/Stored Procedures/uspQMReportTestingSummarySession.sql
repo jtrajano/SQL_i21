@@ -68,7 +68,6 @@ BEGIN TRY
 	SELECT
 		 strPrintType = @strPrintType
 		,QMCS.intCuppingSessionId
-		,QMS.intSampleId
 		,QMS.strSampleNumber
 		,ICI.strItemNo
 		,strOrigin = ICCAO.strDescription
@@ -83,7 +82,7 @@ BEGIN TRY
 		,strSContractNumber = CASE WHEN LGACC.intCount > 1 THEN 'Multiple' ELSE LGAC.strSContractNumber END
 	FROM tblQMCuppingSession QMCS
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
-	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
+	INNER JOIN tblQMSample QMS ON QMCSD.intCuppingSessionDetailId = QMS.intCuppingSessionDetailId
 	INNER JOIN tblICItem ICI WITH (NOLOCK) ON QMS.intItemId = ICI.intItemId
 	LEFT JOIN (
 		SELECT 
