@@ -202,7 +202,8 @@ BEGIN
 			,p.intPostedById                  = i.intPostedById                 
 			,p.intConcurrencyId               = i.intConcurrencyId 
 			,p.intCurrentStatus				  = i.intCurrentStatus
-			,p.intPeriodId                    = i.intPeriodId   
+			,p.intPeriodId                    = i.intPeriodId
+			,p.dtmScheduledPayment			  = i.dtmScheduledPayment   
 		FROM tblARPayment p
 		INNER JOIN inserted i
 			ON i.intPaymentId = p.intPaymentId
