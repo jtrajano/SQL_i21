@@ -160,18 +160,20 @@ SET ANSI_WARNINGS OFF
                                    ELSE ISNULL(LIA.[intConversionAccountId],(CASE WHEN LIA.[intServiceChargeAccountId] IS NOT NULL AND LIA.[intServiceChargeAccountId] <> 0 THEN LIA.[intServiceChargeAccountId] ELSE LIA.[intSalesAccountId] END)) 
                               END)		
 	FROM tblARInvoiceDetail ARID
-	INNER JOIN ##ARPostInvoiceDetail LIA ON ARID.[intInvoiceDetailId] = LIA.[intInvoiceDetailId]
-									   AND LIA.[intItemId] IS NULL
+	INNER JOIN ##ARPostInvoiceDetail LIA ON ARID.[intInvoiceDetailId] = LIA.[intInvoiceDetailId] AND LIA.[intItemId] IS NULL
 
 	--UPDATE INVOICE TAX DETAIL ACCOUNTS
-	UPDATE ARITD
-	SET ARITD.intSalesTaxAccountId = ISNULL(dbo.fnGetGLAccountIdFromProfitCenter(ARITD.intSalesTaxAccountId, ARID.intProfitCenter), ARITD.intSalesTaxAccountId)
-	FROM tblARInvoiceDetailTax ARITD
-	INNER JOIN ##ARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
+	IF EXISTS(SELECT TOP 1 1 FROM tblARCompanyPreference WHERE ysnOverrideTaxAccountLocation = 1 OR ysnOverrideTaxAccountCompany = 1) 
+	BEGIN
+		UPDATE ARITD
+		SET ARITD.intSalesTaxAccountId = ISNULL(dbo.fnGetGLAccountIdFromProfitCenter(ARITD.intSalesTaxAccountId, ARID.intProfitCenter), ARITD.intSalesTaxAccountId)
+		FROM tblARInvoiceDetailTax ARITD
+		INNER JOIN ##ARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
+	END
 
 	--UPDATE FINAL
 	UPDATE PIH
-	SET PIH.intAccountId	= ARI.intAccountId
+	SET PIH.intAccountId = ARI.intAccountId
 	FROM ##ARPostInvoiceHeader PIH
 	INNER JOIN tblARInvoice ARI ON PIH.intInvoiceId = ARI.intInvoiceId
 
