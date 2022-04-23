@@ -10,7 +10,7 @@ RETURN SELECT
 	,strTransactionId		= ARI.strInvoiceNumber
 	,strTransactionType		= ARI.strTransactionType
 	,intCurrencyId			= ARI.intCurrencyId
-	,dtmDate				= ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate)
+	,dtmDate				= ISNULL(ARI.dtmCashFlowDate, ARI.dtmDueDate)
 	,dblAmount				= CASE WHEN ARI.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(ARI.dblAmountDue, 0) * -1 ELSE ISNULL(ARI.dblAmountDue, 0) END
 	,intBankAccountId		= CMUF.intBankAccountId
 	,intGLAccountId			= ARI.intAccountId
@@ -20,8 +20,8 @@ FROM tblARInvoice ARI
 LEFT JOIN tblCMUndepositedFund CMUF ON ARI.strInvoiceNumber = CMUF.strSourceTransactionId AND strSourceSystem = 'AR'
 LEFT JOIN tblARPaymentDetail ARPD ON ARI.intInvoiceId = ARPD.intInvoiceId
 LEFT JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
-WHERE (@dtmDateFrom IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate) >= @dtmDateFrom)
-  AND (@dtmDateTo IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate) <= @dtmDateTo)
+WHERE (@dtmDateFrom IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDueDate) >= @dtmDateFrom)
+  AND (@dtmDateTo IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDueDate) <= @dtmDateTo)
   AND ARI.ysnRefundProcessed = 0
   AND ARI.strTransactionType <> 'Cash Refund'
   AND (
