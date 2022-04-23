@@ -19,7 +19,6 @@ SELECT intSampleId			= S.intSampleId
 FROM tblQMSample S
 INNER JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 LEFT JOIN tblQMSampleStatus STAT ON S.intSampleStatusId = STAT.intSampleStatusId
-LEFT JOIN tblQMSample TYPE2 ON S.intSampleId = TYPE2.intRelatedSampleId
 LEFT JOIN tblICItem I ON S.intItemId = I.intItemId
 LEFT JOIN tblICCommodity IC ON I.intCommodityId = IC.intCommodityId
 LEFT JOIN tblICCommodityAttribute PT ON I.intProductTypeId = PT.intCommodityAttributeId AND PT.strType = 'ProductType'

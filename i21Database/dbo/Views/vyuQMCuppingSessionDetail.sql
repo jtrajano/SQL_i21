@@ -39,7 +39,7 @@ INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCupp
 INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
 INNER JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 LEFT JOIN tblQMSampleStatus STAT ON S.intSampleStatusId = STAT.intSampleStatusId
-LEFT JOIN tblQMSample TYPE2 ON S.intSampleId = TYPE2.intRelatedSampleId
+LEFT JOIN tblQMSample TYPE2 ON S.intSampleId = TYPE2.intRelatedSampleId AND CSD.intCuppingSessionDetailId = TYPE2.intCuppingSessionDetailId
 LEFT JOIN tblQMSampleType ST2 ON TYPE2.intSampleTypeId = ST2.intSampleTypeId
 LEFT JOIN tblQMSampleStatus STAT2 ON TYPE2.intSampleStatusId = STAT2.intSampleStatusId
 LEFT JOIN tblICItem I ON S.intItemId = I.intItemId
