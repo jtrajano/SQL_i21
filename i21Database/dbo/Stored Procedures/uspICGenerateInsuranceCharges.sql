@@ -115,7 +115,7 @@ BEGIN TRY
 		,strWeightUOM = H.strUnitMeasure
 		,intWeightUOMId = B.intWeightUOMId
 		,dblInvemtoryValue = B.dblCost
-		,dblM2MValue = 0.0
+		,dblM2MValue = K.dblMarketPrice
 		,dtmLastCargoInsuranceDate
 		,A.strInsurerName
 		,A.intInsurerId
@@ -126,7 +126,7 @@ BEGIN TRY
 		,intRateUOMId = L.intItemUOMId
 		,dblAmount = CASE	WHEN A.strRateType = 'Unit' THEN B.dblQuantity * A.dblRate
 							WHEN A.strRateType = 'Percent' THEN (CASE WHEN A.strAppliedTo = 'Inventory Value' THEN ISNULL(((B.dblCost * B.dblQuantity * dblRate) /100),0.0)
-																		 WHEN A.strAppliedTo = 'M2M Value' THEN ISNULL(((ISNULL(K.dblMarketPrice,0.0) * dblRate) /100),0.0)
+																		 WHEN A.strAppliedTo = 'M2M Value' THEN ISNULL(((ISNULL(K.dblMarketPrice,0.0) * B.dblQuantity * dblRate) /100),0.0)
 																	ELSE 0.0 END)
 							ELSE 0.0 END
 		,B.intInventoryReceiptItemLotId
