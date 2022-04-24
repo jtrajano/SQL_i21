@@ -134,6 +134,7 @@ BEGIN TRY
 		,A.strPolicyNumber
 		,intStorageLocationId = @intSubLocationId
 		,A.intInsuranceRateDetailId
+		,intChargeItemId = A.intItemId
 	FROM #tmpInsuranceRate A
 	INNER JOIN #tmpLotTransactions B
 		ON A.intStorageLocationId = B.intStorageLocationId

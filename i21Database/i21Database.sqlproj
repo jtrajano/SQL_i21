@@ -719,6 +719,9 @@
     <Build Include="dbo\Stored Procedures\uspICGenerateInsuranceCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetTransferOrderReport.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessERPFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostUnpostInsuranceCharge.sql" />
+    <Build Include="dbo\Views\vyuICSearchInsuranceCharge.sql" />
+    <Build Include="dbo\Views\vyuICGetInsuranceChargeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -22,6 +22,7 @@ SELECT
 	,A.dblAmount
 	,A.intInsurerId
 	,A.dtmLastCargoInsuranceDate
+	,A.intChargeItemId
 	,A.intConcurrencyId
 	,strStorageLocation = C.strSubLocationName
 	,strCompanyLocation = D.strLocationName
