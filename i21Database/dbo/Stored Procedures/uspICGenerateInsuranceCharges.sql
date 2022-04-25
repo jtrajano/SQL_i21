@@ -102,7 +102,7 @@ BEGIN TRY
 													INNER JOIN tblICInsuranceCharge B
 														ON A.intInsuranceChargeId = B.intInsuranceChargeId
 													WHERE B.ysnPosted = 1)
-
+		AND E.dblStockAvailable > 0
 	----Generate charge items
 
 	SELECT 
@@ -114,7 +114,7 @@ BEGIN TRY
 		,dblWeight = ISNULL(dblGrossWeight,0.0) - ISNULL(dblTareWeight,0.0)
 		,strWeightUOM = H.strUnitMeasure
 		,intWeightUOMId = B.intWeightUOMId
-		,dblInvemtoryValue = B.dblCost
+		,dblInventoryValue = B.dblCost
 		,dblM2MValue = K.dblMarketPrice
 		,dtmLastCargoInsuranceDate
 		,A.strInsurerName
