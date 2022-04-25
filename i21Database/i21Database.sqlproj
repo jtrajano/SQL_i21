@@ -6638,8 +6638,8 @@
     <None Include="Scripts\Post-Deployment\LG\2_DataFixes.sql" />
     <None Include="Scripts\Post-Deployment\TM\6_SyncStartingNumberAndDispatchId.sql" />
     <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
-    <None Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions" />
-    <None Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes" />
+    <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions" />
+    <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
