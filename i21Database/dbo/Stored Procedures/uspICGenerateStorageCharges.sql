@@ -45,6 +45,8 @@ SET @LocalToUTCDiff = (DATEDIFF(HOUR,GETDATE(),GETUTCDATE()))
 SET @UTCToLocalDiff = (DATEDIFF(HOUR,GETUTCDATE(),GETDATE()))
 
 SELECT @dtmBillDate = DATEADD(HOUR,@UTCToLocalDiff,@dtmBillDateUTC)
+SET @dtmBillDate = DATEADD(dd, DATEDIFF(dd, 0,@dtmBillDate), 0) ----------Remove Time
+SET @dtmBillDateUTC = DATEADD(HOUR,@LocalToUTCDiff,@dtmBillDate)
 
 
 BEGIN TRY
@@ -859,7 +861,7 @@ BEGIN TRY
 			,dblUnitQty
 		FROM @tmpICStorageRate
 		WHERE dblNoOfDays <= CASE WHEN (DATEDIFF(DAY,A.dtmStartDateUTC,A.dtmEndDateUTC) + 1) < 0 THEN 0 ELSE  (DATEDIFF(DAY,A.dtmStartDateUTC,A.dtmEndDateUTC) + 1) END
-		ORDER BY dblNoOfDays ASC
+		ORDER BY dblNoOfDays DESC
 	) B
 	INNER JOIN tblICItem C
 		ON A.intItemId = C.intItemId

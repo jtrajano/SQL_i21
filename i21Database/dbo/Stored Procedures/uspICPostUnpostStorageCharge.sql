@@ -22,10 +22,15 @@ DECLARE @billList Id
 DECLARE @ysnBillPosted BIT
 DECLARE @_intBillId INT
 DECLARE @strBillNumber NVARCHAR(100)
+DECLARE @logDescriotion NVARCHAR(MAX)
 
 
 BEGIN TRY
-	
+	IF ISNULL(@intInsuranceChargeId,0) = 0
+	BEGIN
+		GOTO COMPLETEPROCESS
+	END
+
 	IF (@ysnPost = 1)
 	BEGIN
 		---------Create Voucher
@@ -216,9 +221,27 @@ BEGIN TRY
 		---Update Storage Charge
 		IF(ISNULL(@intBillId,0) > 0)
 		BEGIN
+			SELECT TOP 1 
+				@strBillNumber = strBillId
+			FROM tblAPBill
+			WHERE intBillId = @intBillId
+
 			UPDATE tblICStorageCharge 
 			SET ysnPosted = 1
 			WHERE intStorageChargeId = @intStorageChargeId
+
+			SET @logDescriotion = 'Posted with Voucher ''' + @strBillNumber + ''''
+			
+			EXEC dbo.uspSMAuditLog 
+				@keyValue			= @intStorageChargeId					-- Primary Key Value of the Ticket. 
+				,@screenName		= 'Inventory.view.StorageCharge'		-- Screen Namespace
+				,@entityId			= @intUserId				-- Entity Id.
+				,@actionType		= 'Posted'					-- Action Type
+				,@changeDescription	= @logDescriotion	-- Description
+				,@fromValue			= ''						-- Old Value
+				,@toValue			= ''			-- New Value
+				,@details			= '';
+			
 		END
 
 	END
@@ -275,8 +298,20 @@ BEGIN TRY
 		UPDATE tblICStorageCharge 
 		SET ysnPosted = 0
 		WHERE intStorageChargeId = @intStorageChargeId
+
 		
+		EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intStorageChargeId					-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Inventory.view.StorageCharge'		-- Screen Namespace
+			,@entityId			= @intUserId				-- Entity Id.
+			,@actionType		= 'Unposted'					-- Action Type
+			,@changeDescription	= 'Unposted Storage Charge.'	-- Description
+			,@fromValue			= ''						-- Old Value
+			,@toValue			= ''			-- New Value
+			,@details			= '';
+	
 	END
+	COMPLETEPROCESS:
 END TRY
 BEGIN CATCH
 	SELECT 
