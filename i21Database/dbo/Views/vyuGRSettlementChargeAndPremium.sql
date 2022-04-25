@@ -31,7 +31,7 @@ SELECT
     ,[intCtOtherChargeItemId]			=   ACAP.intCtOtherChargeItemId
     ,[strCtOtherChargeItemNo]			=   CT_OC_ITEM.strItemNo
     --,[dblCtOtherChargeRate]				=	ACAP.dblCtOtherChargeRate
-    ,[dblGradeReading]                  =   TD.dblGradeReading
+    ,[dblGradeReading]                  =   ACAP.dblGradeReading
 FROM tblGRAppliedChargeAndPremium ACAP
 INNER JOIN tblICItem CAP_ITEM
     ON CAP_ITEM.intItemId = ACAP.intChargeAndPremiumItemId
@@ -49,14 +49,6 @@ INNER JOIN tblGRSettleStorageTicket SST
     AND ACAP.intTransactionDetailId = SST.intSettleStorageTicketId
 INNER JOIN tblGRCustomerStorage CS
     ON CS.intCustomerStorageId = SST.intCustomerStorageId
-LEFT JOIN (tblQMTicketDiscount TD
-			INNER JOIN tblGRDiscountScheduleCode DSC
-				ON DSC.intDiscountScheduleCodeId = TD.intDiscountScheduleCodeId
-	)
-	ON TD.intTicketFileId = CS.intCustomerStorageId
-		AND TD.strSourceType = 'Storage'
-		AND DSC.intItemId = ACAP.intCtOtherChargeItemId
-		AND CT.intCalculationTypeId = 2 --range by grade reading
 LEFT JOIN tblICItem INV_ITEM
     ON INV_ITEM.intItemId = ACAP.intInventoryItemId
 LEFT JOIN tblICItem OC_ITEM
