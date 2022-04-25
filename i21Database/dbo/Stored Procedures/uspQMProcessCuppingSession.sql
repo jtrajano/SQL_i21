@@ -199,7 +199,7 @@ FROM tblQMCuppingSession CS
 INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCuppingSessionId
 INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
 INNER JOIN tblQMSampleDetail SD ON S.intSampleId = SD.intSampleId
-INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intRelatedSampleId
+INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intRelatedSampleId AND NEWSAMPLE.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
 WHERE CS.intCuppingSessionId = @intCuppingSessionId
 
 --INSERT TEST RESULT
@@ -287,5 +287,5 @@ FROM tblQMCuppingSession CS
 INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCuppingSessionId
 INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
 INNER JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
-INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intRelatedSampleId
+INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intRelatedSampleId AND NEWSAMPLE.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
 WHERE CS.intCuppingSessionId = @intCuppingSessionId
