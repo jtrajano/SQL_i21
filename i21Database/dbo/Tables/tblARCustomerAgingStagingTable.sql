@@ -46,7 +46,7 @@
     [dblHistoricAmount]			NUMERIC(18, 6) NULL,
     [dblEndOfMonthRate]			NUMERIC(18, 6) NULL,
     [dblEndOfMonthAmount]		NUMERIC(18, 6) NULL,
-    [intCurrencyId]			    INT NULL
+    [intCurrencyId]			    INT NULL,
     [intAccountId]			    INT NULL
 );
 
