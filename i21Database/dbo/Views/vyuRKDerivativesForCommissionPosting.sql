@@ -126,4 +126,4 @@ GROUP BY
 	,strFutureMonth
 	,A.dtmMatchDate
 	,Lng.strCommissionRateType
-	,Lng.ysnPosted
+	,A.ysnCommissionPosted
