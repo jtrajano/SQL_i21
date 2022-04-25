@@ -15,6 +15,7 @@
 	[intQuantityUOMId] [int] NULL,
 	[intInsuranceRateDetailId] [int] NOT NULL,
 	[intInsurerId] [int] NOT NULL,
+	[intChargeItemId] [int] NOT NULL,
 	[dblAmount] NUMERIC(18, 6) NULL,
 	[dtmLastCargoInsuranceDate] DATETIME NOT NULL, 
 	[strAppliedTo] NVARCHAR(20) COLLATE Latin1_General_CI_AS ,
