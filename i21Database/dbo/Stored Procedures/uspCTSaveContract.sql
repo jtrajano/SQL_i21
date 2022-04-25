@@ -96,7 +96,8 @@ BEGIN TRY
 	and cd.intPricingTypeId = 1
 	and ch.intPricingTypeId <> 1
 	and ch.ysnMultiplePriceFixation <> 1
-	and cd.dblQuantity > isnull(pricing.dblPricedQty,0);
+	and cd.dblQuantity > isnull(pricing.dblPricedQty,0)
+	and ISNULL(cd.intSplitFromId,0) = 0;
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
