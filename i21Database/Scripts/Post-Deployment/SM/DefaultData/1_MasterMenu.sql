@@ -6408,7 +6408,7 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample Session' AND strModuleName = 'Quality' AND intParentMenuID = @QualityActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Sample Session', N'Quality', @QualityActivitiesParentMenuId, N'Sample Session', N'Maintenance', N'Screen', N'Quality.view.CuppingSession?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Sample Session', N'Quality', @QualityActivitiesParentMenuId, N'Sample Session', N'Activity', N'Screen', N'Quality.view.CuppingSession?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Quality.view.CuppingSession?showSearch=true' WHERE strMenuName = 'Sample Session' AND strModuleName = 'Quality' AND intParentMenuID = @QualityActivitiesParentMenuId
 
@@ -6473,6 +6473,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Report Property' AND strModuleN
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Quality Sample' AND strModuleName = 'Quality'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Contract Quality View' AND strModuleName = 'Quality'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Lot Quality View' AND strModuleName = 'Quality'
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sample Session' AND strModuleName = 'Quality' AND strCategory = 'Maintenance'
 
 /* WAREHOUSE */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse' AND strModuleName = 'Warehouse' AND intParentMenuID = 0)
