@@ -14,9 +14,10 @@ CROSS APPLY (
 		, tfLogs.strBank
 		, tfLogs.intBankAccountId
 		, tfLogs.strBankAccount
+		, tfLogs.intStatusId
 	FROM tblTRFTradeFinanceLog tfLogs
 	WHERE tfLogs.strTradeFinanceTransaction = tf.strTradeFinanceNumber
-	AND tfLogs.intStatusId = 1
 	AND dblFinanceQty > 0
 	ORDER BY dtmTransactionDate DESC
 ) tfLog
+WHERE tfLog.intStatusId = 1
