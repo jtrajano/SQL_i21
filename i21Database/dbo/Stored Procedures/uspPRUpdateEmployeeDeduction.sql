@@ -61,58 +61,109 @@ BEGIN
 	DECLARE @employeeDeductionIdLog INT
 	DECLARE @entityEmployeeIdLog INT
 
+	DECLARE @logAction NVARCHAR(100)
+	DECLARE @logChange NVARCHAR(100)
+	DECLARE @logIcon NVARCHAR(100)
+
+	--log from
+	DECLARE @logFromAmount NVARCHAR(100)
+	DECLARE @logFromCalcType NVARCHAR(100)
+	DECLARE @logFromLimit NVARCHAR(100)
+	DECLARE @logFromDeductFrom NVARCHAR(100)
+	DECLARE @logFromAccount NVARCHAR(100)
+	DECLARE @logFromExpense NVARCHAR(100)
+	--log to
+	DECLARE @logToAmount NVARCHAR(100)
+	DECLARE @logToCalcType NVARCHAR(100)
+	DECLARE @logToLimit NVARCHAR(100)
+	DECLARE @logToDeductFrom NVARCHAR(100)
+	DECLARE @logToAccount NVARCHAR(100)
+	DECLARE @logToExpense NVARCHAR(100)
+
+	DECLARE @AuditSingle NVARCHAR(10)
+
+	--fields
+	DECLARE @logFieldAmount NVARCHAR(100)
+	DECLARE @logFieldCalcType NVARCHAR(100)
+	DECLARE @logFieldLimit NVARCHAR(100)
+	DECLARE @logFieldDeductFrom NVARCHAR(100)
+	DECLARE @logFieldAccount NVARCHAR(100)
+	DECLARE @logFieldExpense NVARCHAR(100)
+
 	--Create Audit Log Entry for the changes
 	WHILE EXISTS (SELECT TOP 1 1 FROM @EmployeeDeductionAudit)
 	BEGIN
 		SELECT TOP 1 
 			@employeeDeductionIdLog = intEmployeeDeductionId,
 			@entityEmployeeIdLog = intEntityEmployeeId,
-			@details = '{"change": "Deductions (via Update Employees)","children": [' + 
-							'{"action": "Updated","change": "Updated - Record: ' + 
-							(SELECT TOP 1 strDeduction COLLATE Latin1_General_CI_AS FROM tblPRTypeDeduction WHERE intTypeDeductionId = @intTypeDeductionId) + 
-							'","iconCls": "small-tree-modified","children": [' +
-					CASE WHEN (@ysnUpdateAmount = 1 AND dblAmountOld <> dblAmountNew) THEN 
-						'{"change":"Rate","from": "' + CAST(CAST(dblAmountOld AS FLOAT) AS NVARCHAR(20)) + 
-										'","to": "' + CAST(CAST(dblAmountNew AS FLOAT) AS NVARCHAR(20)) + '","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateCalcType = 1 AND strCalculationTypeOld <> strCalculationTypeNew) THEN 
-						'{"change":"Rate Type","from": "' + strCalculationTypeOld + 
-											'","to": "' + strCalculationTypeNew + '","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateLimit = 1 AND dblLimitOld <> dblLimitNew) THEN 
-						'{"change":"Annual Limit","from": "' + CAST(CAST(dblLimitOld AS FLOAT) AS NVARCHAR(20)) + 
-												'","to": "' + CAST(CAST(dblLimitNew AS FLOAT) AS NVARCHAR(20)) + '","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateDeductFrom = 1 AND (dblPaycheckMaxOld <> dblPaycheckMaxNew OR strDeductFromOld <> strDeductFromNew)) THEN 
-						'{"change":"Deduct From","from": "' + CAST(CAST(dblPaycheckMaxOld AS FLOAT) AS NVARCHAR(20)) + '% of ' + strDeductFromOld + 
-												'","to": "' + CAST(CAST(dblPaycheckMaxNew AS FLOAT) AS NVARCHAR(20)) + '% of ' + strDeductFromNew +
-												'","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateAccount = 1 AND intAccountIdOld <> intAccountIdNew) THEN 
-						'{"change":"Account ID","from": "' + (SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intAccountIdOld) + 
-												'","to": "' + (SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intAccountIdNew) + 
-												' ","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateExpense = 1 AND (intExpenseAccountIdOld <> intExpenseAccountIdNew 
-														OR (intExpenseAccountIdOld IS NOT NULL AND intExpenseAccountIdNew IS NULL)
-														OR (intExpenseAccountIdOld IS NULL AND intExpenseAccountIdNew IS NOT NULL))) THEN 
-						'{"change":"Expense Account","from": "' + ISNULL((SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intExpenseAccountIdOld), '') + 
-												'","to": "' + ISNULL((SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intExpenseAccountIdNew), '') + 
-												' ","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateTaxes = 1) THEN 
-						'{"change":"Deduction Taxes","from": "","to":"Override All","leaf": true,"iconCls": "small-gear"}' ELSE '' END +
-					']' +
-				'}],"iconCls":"small-tree-grid"}'
+			@logAction = 'Updated',
+			@logChange = 'Updated - Record: ' + (SELECT TOP 1 strDeduction COLLATE Latin1_General_CI_AS FROM tblPRTypeDeduction WHERE intTypeDeductionId = @intTypeDeductionId),
+			
+			@logFromAmount = CAST(CAST(dblAmountOld AS FLOAT) AS NVARCHAR(20)) ,
+			@logFromCalcType  = strCalculationTypeOld,
+			@logFromLimit  = CAST(CAST(dblLimitOld AS FLOAT) AS NVARCHAR(20)),
+			@logFromDeductFrom  = CAST(CAST(dblPaycheckMaxOld AS FLOAT) AS NVARCHAR(20)) + '% of ' + strDeductFromOld,
+			@logFromAccount  = (SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intAccountIdOld),
+			@logFromExpense  = ISNULL((SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intExpenseAccountIdOld), ''),
+			
+			@logToAmount = CAST(CAST(dblAmountNew AS FLOAT) AS NVARCHAR(20)),
+			@logToCalcType = strCalculationTypeNew,
+			@logToLimit = CAST(CAST(dblLimitNew AS FLOAT) AS NVARCHAR(20)),
+			@logToDeductFrom = CAST(CAST(dblPaycheckMaxNew AS FLOAT) AS NVARCHAR(20)) + '% of ' + strDeductFromNew,
+			@logToAccount = (SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intAccountIdNew),
+			@logToExpense = ISNULL((SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intExpenseAccountIdNew), ''),
+
+			
+			@logFieldAmount = 'Rate',
+			@logFieldCalcType = 'Rate Type',
+			@logFieldLimit = 'Annual Limit',
+			@logFieldDeductFrom = 'Deduct From',
+			@logFieldAccount = 'Account ID',
+			@logFieldExpense = 'Expense Account'
+			
 			FROM @EmployeeDeductionAudit
 
-		SET @details = REPLACE(@details, '"small-gear"},]', '"small-gear"}]')
 
-		IF (@details NOT LIKE '%"children": []%')
-			EXEC dbo.uspSMAuditLog
-				@keyValue				= @entityEmployeeIdLog,				
-				@screenName				= 'EntityManagement.view.Entity', 
-				@entityId				= @intUserId,	
-				@actionType				= 'Updated',
-				@actionIcon				= 'small-tree-modified',
-				@changeDescription		= '',
-				@fromValue				= '',
-				@toValue				= '',
-				@details				= @details 
+		-- Start: New way of audit logging
+		BEGIN TRY
+			DECLARE @auditLogsParam SingleAuditLogParam
+			INSERT INTO @auditLogsParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 1, '', @logAction, @logChange, NULL, NULL, NULL, NULL, NULL, NULL
+					UNION ALL
+					SELECT 2, '', '', 'tblPREmployeeDeduction', NULL, NULL, NULL, NULL, NULL, 1
+					UNION ALL
+					SELECT 3, '', @logAction, @logChange, NULL, NULL, NULL, NULL, NULL, 2
+
+					UNION ALL
+					SELECT 4, '', '', @logFieldAmount, @logFromAmount, @logToAmount, NULL, NULL, NULL, 3
+					WHERE @ysnUpdateAmount = 1
+
+					UNION ALL
+					SELECT 5, '', '', @logFieldCalcType, @logFromCalcType, @logToCalcType, NULL, NULL, NULL, 3
+					WHERE @ysnUpdateCalcType = 1
+
+					UNION ALL
+					SELECT 6, '', '', @logFieldLimit, @logFromLimit, @logToLimit, NULL, NULL, NULL, 3
+					WHERE @ysnUpdateLimit = 1
+
+					UNION ALL
+					SELECT 7, '', '', @logFieldDeductFrom, @logFromDeductFrom, @logToDeductFrom, NULL, NULL, NULL, 3
+					WHERE  @ysnUpdateDeductFrom = 1
+
+					UNION ALL
+					SELECT 8, '', '', @logFieldAccount, @logFromAccount, @logToAccount, NULL, NULL, NULL, 3
+					WHERE @ysnUpdateAccount = 1
+
+					UNION ALL
+					SELECT 9, '', '', @logFieldExpense, @logFromExpense, @logToExpense, NULL, NULL, NULL, 3
+					WHERE @ysnUpdateExpense = 1
+
+			EXEC uspSMSingleAuditLog 'EntityManagement.view.Entity', @entityEmployeeIdLog, @intUserId, @auditLogsParam
+		END TRY
+		BEGIN CATCH
+		END CATCH
+		-- End: New way of audit logging
+
 
 		DELETE FROM @EmployeeDeductionAudit WHERE intEmployeeDeductionId = @employeeDeductionIdLog AND intEntityEmployeeId = @entityEmployeeIdLog
 	END
