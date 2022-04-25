@@ -10845,6 +10845,7 @@
     <Build Include="dbo\Views\vyuQMSearchCommodityProductLine.sql" />
     <Build Include="dbo\Views\vyuQMSearchCommodityItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetScheduledPayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
