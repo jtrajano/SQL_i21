@@ -215,7 +215,7 @@ BEGIN
 		WHERE intTradeFinanceId = @intTradeFinanceId
 
 
-		IF  (@strCurrentStatus = 'Rejected')
+		IF  (@strCurrentStatus in ('Rejected', 'Canceled'))
 		BEGIN
 			SET @strAction = 'UPDATE'
 		END
@@ -246,7 +246,7 @@ BEGIN
 					,dtmCreatedDate	
 					,intConcurrencyId
 			FROM @TRFTradeFinance where intId = @Counter
-			select * from @TRFTradeFinanceFinal
+			
 			If @strAction = 'Created'
 			BEGIN
 				EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinanceFinal, @intUserId = @intUserId

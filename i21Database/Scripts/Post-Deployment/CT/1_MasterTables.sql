@@ -844,6 +844,13 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 4)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 4, 'Canceled', 1
+END
+GO
+
 IF EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed')
 BEGIN
 	DELETE  FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed'
