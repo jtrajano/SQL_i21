@@ -33,6 +33,7 @@ BEGIN TRY
 	DECLARE @intSContractSeq INT
 	DECLARE @intSContractHeaderId INT
 	DECLARE @strAuditDescription NVARCHAR(MAX)
+	DECLARE @intTransportationMode INT
 
 	DECLARE @tblLoadDetail TABLE
 			(intDetailRecordId INT Identity(1, 1),
@@ -48,7 +49,8 @@ BEGIN TRY
 		   @strETSPOLReasonCode = POLRC.strReasonCodeDescription,
 		   @intShipmentStatus = L.intShipmentStatus,
 		   @intLeadTime = ISNULL(DPort.intLeadTime, 0),
-		   @intPurchaseSale = L.intPurchaseSale
+		   @intPurchaseSale = L.intPurchaseSale,
+		   @intTransportationMode = L.intTransportationMode
 	FROM tblLGLoad L
 	LEFT JOIN tblLGReasonCode PODRC ON PODRC.intReasonCodeId = L.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode POLRC ON POLRC.intReasonCodeId = L.intETSPOLReasonCodeId
@@ -629,7 +631,7 @@ BEGIN TRY
 							,@toValue = @dtmCalculatedAvailabilityDate
 					END
 
-					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
+					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,'') AND @intTransportationMode = 2)
 					BEGIN
 						UPDATE tblCTContractDetail 
 						SET dtmUpdatedAvailabilityDate = @dtmCalculatedAvailabilityDate
