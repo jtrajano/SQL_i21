@@ -723,6 +723,7 @@
     <Build Include="dbo\Views\vyuICSearchInsuranceCharge.sql" />
     <Build Include="dbo\Views\vyuICGetInsuranceChargeDetail.sql" />
     <Build Include="dbo\Views\vyuTRFGetOpenTradeFinanceNumbers.sql" />
+    <Build Include="dbo\Functions\fnARCustomerAgingDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
