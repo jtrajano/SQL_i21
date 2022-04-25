@@ -1,6 +1,6 @@
 CREATE PROCEDURE dbo.uspApiCalculateTax (
 	  @ItemId INT
-	, @ItemUOMId INT
+	, @UOMId INT
 	, @LocationId INT
 	, @CustomerId INT
 	, @TransactionDate DATETIME
@@ -13,6 +13,12 @@ CREATE PROCEDURE dbo.uspApiCalculateTax (
 AS
 
 DECLARE @guiTaxesUniqueId UNIQUEIDENTIFIER = NEWID()
+DECLARE @ItemUOMId INT
+
+SELECT @ItemUOMId = i.intItemUOMId
+FROM tblICItemUOM i
+JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
+WHERE i.intItemId = @ItemId
 
 DECLARE @tblRestApiItemTaxes TABLE (
 	  intTransactionDetailTaxId INT NULL
@@ -91,7 +97,7 @@ EXEC [dbo].[uspARGetItemTaxes]
 	@CurrencyExchangeRate= 1
 
 INSERT INTO tblRestApiItemTaxes (
-		guiTaxesUniqueId
+	  guiTaxesUniqueId
 	, intItemContractDetailId
 	, intTransactionDetailTaxId
 	, intInvoiceDetailId
