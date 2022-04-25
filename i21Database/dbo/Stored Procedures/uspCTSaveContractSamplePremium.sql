@@ -5,6 +5,8 @@
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @intItemId INT
+	DECLARE @strItemNo NVARCHAR(50)
 	
 	DECLARE @tblTemp TABLE (
 			intSampleId INT
@@ -65,6 +67,21 @@ BEGIN TRY
 		
 		IF @ysnImpactPricing = 1 
 		BEGIN
+
+			IF  EXISTS(SELECT TOP 1 1 FROM @tblTemp where intCurrencyId IS NULL)
+			begin
+
+				SELECT TOP 1 @intItemId = intItemId from @tblTemp where intCurrencyId IS NULL
+				SELECT TOP 1 @strItemNo = strItemNo from tblICItem where intItemId = @intItemId
+				SELECT @ErrMsg = 'Quality Premium Criteria for the item ' + @strItemNo + ' is not configured.'
+
+				RAISERROR (
+						@ErrMsg
+						,16
+						,1
+						)
+			END
+
 
 			Insert INTO tblCTContractQuality(
 				intSampleId
