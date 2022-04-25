@@ -25,111 +25,69 @@ BEGIN
 --SET @json = N'{"strRepresentLotNumber":"4556"}';
 
 
-
-  DECLARE  @tblBefore TABLE(
-        [strLoadNumber] [nvarchar](100) NULL,
-        [strContainerNumber] [nvarchar](100) NULL,
-        [strComment] [nvarchar](max) NULL,
-        [strSampleRefNo] [nvarchar](30) NULL,
+DECLARE  @tblBefore TABLE(
+        [strComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
         [dblSampleQty] [numeric](18, 6) NULL,
-        [strSampleUOM] [nvarchar](50) NULL,
-        [dtmSampleReceivedDate] [datetime] NULL,
-        [strSampleNote] [nvarchar](512) NULL,
-        [strRefNo] [nvarchar](100) NULL,
-        [strMarks] [nvarchar](100) NULL,
-        [dtmTestingStartDate] [datetime] NULL,
-        [dtmTestingEndDate] [datetime] NULL,
-        [dtmSamplingEndDate] [datetime] NULL,
-        [strSamplingMethod] [nvarchar](50) NULL,
-        [strSubLocationName] [nvarchar](50) NULL,
-        [strSamplingCriteria] [nvarchar](50) NULL,
-        [strRepresentLotNumber] [nvarchar](50) NULL,
-        [strSentBy] [nvarchar](50) NULL
+        [strSampleUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+        [strRepresentingUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+        [dblRepresentingQty] [numeric](18, 6) NULL,
+        [strDescription] [nvarchar](350) COLLATE Latin1_General_CI_AS NULL,
+        [strSampleNote] [nvarchar](512) COLLATE Latin1_General_CI_AS NULL,
+        [strSamplingCriteria] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+        [strRepresentLotNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+        [strItemNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL
     ) 
 DECLARE  @tblAfter TABLE(
-         [strLoadNumber] [nvarchar](100) NULL,
-        [strContainerNumber] [nvarchar](100) NULL,
-        [strComment] [nvarchar](max) NULL,
-        [strSampleRefNo] [nvarchar](30) NULL,
+        [strComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
         [dblSampleQty] [numeric](18, 6) NULL,
-        [strSampleUOM] [nvarchar](50) NULL,
-        [dtmSampleReceivedDate] [datetime] NULL,
-        [strSampleNote] [nvarchar](512) NULL,
-        [strRefNo] [nvarchar](100) NULL,
-        [strMarks] [nvarchar](100) NULL,
-        [dtmTestingStartDate] [datetime] NULL,
-        [dtmTestingEndDate] [datetime] NULL,
-        [dtmSamplingEndDate] [datetime] NULL,
-        [strSamplingMethod] [nvarchar](50) NULL,
-        [strSubLocationName] [nvarchar](50) NULL,
-        [strSamplingCriteria] [nvarchar](50) NULL,
-        [strRepresentLotNumber] [nvarchar](50) NULL,
-        [strSentBy] [nvarchar](50) NULL
+        [strSampleUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+        [strRepresentingUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+        [dblRepresentingQty] [numeric](18, 6) NULL,
+        [strDescription] [nvarchar](350) COLLATE Latin1_General_CI_AS NULL,
+        [strSampleNote] [nvarchar](512) COLLATE Latin1_General_CI_AS NULL,
+        [strSamplingCriteria] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+        [strRepresentLotNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+        [strItemNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL
     ) 
 
 INSERT INTO @tblBefore(
-        strLoadNumber,
-        strContainerNumber,
         strComment,
-        strSampleRefNo,
         dblSampleQty,
         strSampleUOM,
-        dtmSampleReceivedDate,
+        strRepresentingUOM,
+        dblRepresentingQty,
+        strDescription,
         strSampleNote,
-        strRefNo,
-        strMarks,
-        dtmTestingStartDate,
-        dtmTestingEndDate,
-        dtmSamplingEndDate,
-        strSamplingMethod,
-        strSubLocationName,
         strSamplingCriteria,
         strRepresentLotNumber,
-        strSentBy
+        strItemNo
     )
 	
-    SELECT 
-         strLoadNumber,
-        strContainerNumber,
+    SELECT
         strComment,
-        strSampleRefNo,
         dblSampleQty,
         strSampleUOM,
-        dtmSampleReceivedDate,
+        strRepresentingUOM,
+        dblRepresentingQty,
+        strDescription,
         strSampleNote,
-        strRefNo,
-        strMarks,
-        dtmTestingStartDate,
-        dtmTestingEndDate,
-        dtmSamplingEndDate,
-        strSamplingMethod,
-        strSubLocationName,
         strSamplingCriteria,
         strRepresentLotNumber,
-        strSentBy
+        strItemNo
 		FROM vyuQMSampleList
 	WHERE intSampleId = @intRelatedSampleId
 
 
     UPDATE A SET
-        intLoadDetailId = B.intLoadDetailId,
-        intLoadDetailContainerLinkId = B.intLoadDetailContainerLinkId,
-        strContainerNumber=B.strContainerNumber,
-        strComment=B.strComment,
-        strSampleRefNo=B.strSampleRefNo,
-        dblSampleQty=B.dblSampleQty,
-        intSampleUOMId=B.intSampleUOMId,
-        dtmSampleReceivedDate=B.dtmSampleReceivedDate,
-        strSampleNote=B.strSampleNote,
-        strRefNo=B.strRefNo,
-        strMarks=B.strMarks,
-        dtmTestingStartDate=B.dtmTestingStartDate,
-        dtmTestingEndDate=B.dtmTestingEndDate,
-        dtmSamplingEndDate=B.dtmSamplingEndDate,
-        strSamplingMethod=B.strSamplingMethod,
-        intCompanyLocationSubLocationId=B.intCompanyLocationSubLocationId,
-        intSamplingCriteriaId=B.intSamplingCriteriaId,
-        strRepresentLotNumber=B.strRepresentLotNumber
+        strComment = B.strComment,
+        dblSampleQty = B.dblSampleQty,
+        intSampleUOMId = B.intSampleUOMId ,
+        intRepresentingUOMId = B.intRepresentingUOMId,
+        dblRepresentingQty = B.dblRepresentingQty,
+        strSampleNote = B.strSampleNote,
+        intSamplingCriteriaId = B.intSamplingCriteriaId,
+        strRepresentLotNumber = B.strRepresentLotNumber,
+        intItemId = B.intItemId
     FROM tblQMSample
     A join
     tblQMSample B
@@ -137,50 +95,31 @@ INSERT INTO @tblBefore(
     WHERE A.intSampleId  = @intRelatedSampleId
 
     INSERT INTO @tblAfter(
-        strLoadNumber,
-        strContainerNumber,
         strComment,
-        strSampleRefNo,
         dblSampleQty,
         strSampleUOM,
-        dtmSampleReceivedDate,
+        strRepresentingUOM,
+        dblRepresentingQty,
+        strDescription,
         strSampleNote,
-        strRefNo,
-        strMarks,
-        dtmTestingStartDate,
-        dtmTestingEndDate,
-        dtmSamplingEndDate,
-        strSamplingMethod,
-        strSubLocationName,
         strSamplingCriteria,
         strRepresentLotNumber,
-        strSentBy
+        strItemNo
     )
 	
     SELECT 
-         strLoadNumber,
-        strContainerNumber,
         strComment,
-        strSampleRefNo,
         dblSampleQty,
         strSampleUOM,
-        dtmSampleReceivedDate,
+        strRepresentingUOM,
+        dblRepresentingQty,
+        strDescription,
         strSampleNote,
-        strRefNo,
-        strMarks,
-        dtmTestingStartDate,
-        dtmTestingEndDate,
-        dtmSamplingEndDate,
-        strSamplingMethod,
-        strSubLocationName,
         strSamplingCriteria,
         strRepresentLotNumber,
-        strSentBy
+        strItemNo
         FROM vyuQMSampleList
 	WHERE intSampleId = @intRelatedSampleId
-
-
-
 
 	DECLARE @intLogId INT
 		,@intTransactionId INT
@@ -204,25 +143,7 @@ INSERT INTO @tblBefore(
     --Insert child audit entry
 
     BEGIN
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'strLoadNumber'
-        ,A.strLoadNumber
-        ,B.strLoadNumber, 
-        'Load Number', 1 
-        FROM @tblBefore A,@tblAfter B where
-        A.strLoadNumber <> B.strLoadNumber 
-
- 
-
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'strContainerNumber'
-        ,A.strContainerNumber
-        ,B.strContainerNumber, 
-        'Container Number', 1
-        FROM @tblBefore A,@tblAfter B where
-        A.strContainerNumber <> B.strContainerNumber 
- 
-
+      
         INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
         SELECT  'strComment'
         ,A.strComment
@@ -231,16 +152,6 @@ INSERT INTO @tblBefore(
         FROM @tblBefore A,@tblAfter B where
         A.strComment <> B.strComment 
  
-
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'strSampleRefNo'
-        ,A.strSampleRefNo
-        ,B.strSampleRefNo, 
-        'Sample RefNo', 1
-        FROM @tblBefore A,@tblAfter B where
-        A.strSampleRefNo <> B.strSampleRefNo 
- 
-
         INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
         SELECT  'dblSampleQty'
         ,CAST(A.dblSampleQty AS NVARCHAR(10))
@@ -249,8 +160,6 @@ INSERT INTO @tblBefore(
         FROM @tblBefore A,@tblAfter B where
         A.dblSampleQty <> B.dblSampleQty 
  
-
-
         INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
         SELECT  'strSampleUOM'
         ,A.strSampleUOM
@@ -259,20 +168,29 @@ INSERT INTO @tblBefore(
         FROM @tblBefore A,@tblAfter B where
         A.strSampleUOM <> B.strSampleUOM 
  
-
-
-
+        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
+        SELECT  'strRepresentingUOM'
+        ,A.strRepresentingUOM
+        ,B.strRepresentingUOM, 
+        'Representing UOM', 1
+        FROM @tblBefore A,@tblAfter B where
+        A.strRepresentingUOM <> B.strRepresentingUOM 
 
         INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'dtmSampleReceivedDate'
-        ,CONVERT(VARCHAR(20),A.dtmSampleReceivedDate,101) 
-        ,CONVERT(VARCHAR(20),B.dtmSampleReceivedDate,101)  
-        ,'Sample Received Date', 1
+        SELECT  'dblRepresentingQty'
+        ,CAST(A.dblRepresentingQty AS NVARCHAR(10))
+        ,CAST (B.dblRepresentingQty AS NVARCHAR(10)), 
+        'Representing Qty', 1
         FROM @tblBefore A,@tblAfter B where
-        A.dtmSampleReceivedDate <> B.dtmSampleReceivedDate 
- 
+        A.dblRepresentingQty <> B.dblRepresentingQty 
 
-
+        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
+        SELECT  'strDescription'
+        ,A.strDescription
+        ,B.strDescription
+        ,'Description', 1
+        FROM @tblBefore A,@tblAfter B where
+        A.strDescription <> B.strDescription 
 
         INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
         SELECT  'strSampleNote'
@@ -282,46 +200,6 @@ INSERT INTO @tblBefore(
         FROM @tblBefore A,@tblAfter B where
         A.strSampleNote <> B.strSampleNote 
  
-
-
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'strRefNo'
-        ,A.strRefNo
-        ,B.strRefNo
-        ,'Ref No', 1
-        FROM @tblBefore A,@tblAfter B where
-        A.strRefNo <> B.strRefNo 
- 
-    
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'strMarks'
-        ,A.strMarks
-        ,B.strMarks
-        ,'Marks', 1
-        FROM @tblBefore A,@tblAfter B where
-        A.strMarks <> B.strMarks 
- 
-
-
-
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'strSamplingMethod'
-        ,A.strSamplingMethod
-        ,B.strSamplingMethod
-        ,'Sampling Method', 1
-        FROM @tblBefore A,@tblAfter B where
-        A.strSamplingMethod <> B.strSamplingMethod 
- 
-
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'strSubLocationName'
-        ,A.strSubLocationName
-        ,B.strSubLocationName
-        ,'Sub Location Name', 1
-        FROM @tblBefore A,@tblAfter B where
-        ISNULL(A.strSubLocationName,'') <> ISNULL(B.strSubLocationName ,'')
- 
-
         INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
         SELECT  'strSamplingCriteria'
         ,A.strSamplingCriteria
@@ -329,8 +207,6 @@ INSERT INTO @tblBefore(
         ,'Sampling Criteria', 1
         FROM @tblBefore A,@tblAfter B where
         A.strSamplingCriteria <> B.strSamplingCriteria 
- 
-
 
         INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
         SELECT  'strRepresentLotNumber'
@@ -339,47 +215,15 @@ INSERT INTO @tblBefore(
         ,'Represent Lot Number', 1
         FROM @tblBefore A,@tblAfter B where
         A.strRepresentLotNumber <> B.strRepresentLotNumber 
- 
 
         INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'strSentBy'
-        ,A.strSentBy
-        ,B.strSentBy
-        ,'Sent By', 1
+        SELECT  'strItemNo'
+        ,A.strItemNo
+        ,B.strItemNo
+        ,'Item No.', 1
         FROM @tblBefore A,@tblAfter B where
-        A.strSentBy <> B.strSentBy 
+        A.strItemNo <> B.strItemNo 
  
-
-
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'dtmTestingStartDate'
-        ,CONVERT(VARCHAR(20),A.dtmTestingStartDate,101) 
-        ,CONVERT(VARCHAR(20),B.dtmTestingStartDate,101)  
-        ,'Testing Start Date', 1
-        FROM @tblBefore A,@tblAfter B where
-        A.dtmTestingStartDate <> B.dtmTestingStartDate 
- 
-
-
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'dtmTestingEndDate'
-        ,CONVERT(VARCHAR(20),A.dtmTestingEndDate,101) 
-        ,CONVERT(VARCHAR(20),B.dtmTestingEndDate,101)  
-        ,'Testing End Date', 1
-        FROM @tblBefore A,@tblAfter B where
-        A.dtmTestingEndDate <> B.dtmTestingEndDate 
- 
-
-
-        INSERT INTO @tblAudit ( strChange, strFrom, strTo, strAlias, ysnField)
-        SELECT  'dtmSamplingEndDate'
-        ,CONVERT(VARCHAR(20),A.dtmSamplingEndDate,101) 
-        ,CONVERT(VARCHAR(20),B.dtmSamplingEndDate,101)  
-        ,'Sampling End Date', 1
-        FROM @tblBefore A,@tblAfter B where
-        A.dtmSamplingEndDate <> B.dtmSamplingEndDate 
- 
-
     END
 
     IF EXISTS (SELECT 1 FROM @tblAudit)
