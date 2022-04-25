@@ -67,7 +67,7 @@ SELECT
 	, dblCommission = sum(Lng.dblLongCommission + Shrt.dblShortCommission)
 	, ysnCommissionExempt = NULL
 	, ysnCommissionOverride = NULL
-	, Lng.ysnPosted
+	, ysnPosted = A.ysnCommissionPosted
 	--, AD.intLFutOptTransactionId
 	--, AD.intSFutOptTransactionId
 FROM vyuRKMatchedPSTransaction AD
