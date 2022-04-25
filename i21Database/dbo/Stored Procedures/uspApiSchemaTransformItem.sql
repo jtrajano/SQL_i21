@@ -332,6 +332,20 @@ BEGIN
 		FilteredItem.strCommodity IS NOT NULL 		
 		AND LOWER(Commodity.strCommodityCode) <> LTRIM(RTRIM(LOWER(FilteredItem.strCommodity)))
 		AND dbo.fnAllowCommodityToChange(Item.intItemId, Item.intCommodityId) = 0
+	UNION ALL
+	SELECT
+		FilteredItem.strItemNo,
+		FilteredItem.intRowNumber,
+		4 -- Category Error
+	FROM 
+		@tblFilteredItem FilteredItem		
+		INNER JOIN tblICItem Item 
+			ON FilteredItem.strItemNo = Item.strItemNo
+		INNER JOIN tblICCategory Category
+			ON Category.intCategoryId = Item.intCategoryId
+	WHERE
+		FilteredItem.strCommodity IS NOT NULL 		
+		AND LOWER(Category.strCategoryCode) <> LTRIM(RTRIM(LOWER(FilteredItem.strCategory)))
 
 	INSERT INTO tblApiImportLogDetail 
 	(
@@ -352,7 +366,9 @@ BEGIN
 				THEN 'Lot Tracking'
 			WHEN ErrorItem.intErrorType = 2
 				THEN 'Item Type'
-			ELSE 'Commodity'
+			WHEN ErrorItem.intErrorType = 3
+				THEN 'Commodity'
+			ELSE 'Category'
 		END,
 		strValue = ErrorItem.strItemNo,
 		strLogLevel = 'Error',
@@ -363,10 +379,12 @@ BEGIN
 				THEN 'Lot Tracking change is not allowed for item "' + ErrorItem.strItemNo + '"'
 			WHEN ErrorItem.intErrorType = 2
 				THEN 'Item Type change is not allowed for item "' + ErrorItem.strItemNo + '"'
-			ELSE 'Commodity change is not allowed for item "' + ErrorItem.strItemNo + '"'
+			WHEN ErrorItem.intErrorType = 3
+				THEN 'Commodity change is not allowed for item "' + ErrorItem.strItemNo + '"'
+			ELSE 'Category is required for item "' + ErrorItem.strItemNo + '"'
 		END
 	FROM @tblErrorItem ErrorItem
-	WHERE ErrorItem.intErrorType IN(1, 2, 3)
+	WHERE ErrorItem.intErrorType IN(1, 2, 3, 4)
 
 END
 
