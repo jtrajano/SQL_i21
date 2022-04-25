@@ -26,7 +26,7 @@ DECLARE @logDescriotion NVARCHAR(MAX)
 
 
 BEGIN TRY
-	IF ISNULL(@intInsuranceChargeId,0) = 0
+	IF ISNULL(@intStorageChargeId,0) = 0
 	BEGIN
 		GOTO COMPLETEPROCESS
 	END
