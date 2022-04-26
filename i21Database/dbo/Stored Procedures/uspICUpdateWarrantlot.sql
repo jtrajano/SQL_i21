@@ -69,61 +69,61 @@ BEGIN
 	END
 
 	---- Update IR trade finance
-	IF OBJECT_ID('tempdb..#tmpReceiptList') IS NOT NULL  					
-		DROP TABLE #tmpReceiptList	
+	-- IF OBJECT_ID('tempdb..#tmpReceiptList') IS NOT NULL  					
+	-- 	DROP TABLE #tmpReceiptList	
 
-	SELECT DISTINCT
-		C.intInventoryReceiptId
-		,C.strTradeFinanceNumber
-		,C.strReceiptNumber
-	INTO #tmpReceiptList
-	FROM tblICInventoryReceiptItemLot A
-	INNER JOIN tblICInventoryReceiptItem B
-		ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-	INNER JOIN tblICInventoryReceipt C
-		ON B.intInventoryReceiptId = C.intInventoryReceiptId
-	WHERE A.intLotId = @intLotId
-	ORDER BY C.intInventoryReceiptId
+	-- SELECT DISTINCT
+	-- 	C.intInventoryReceiptId
+	-- 	,C.strTradeFinanceNumber
+	-- 	,C.strReceiptNumber
+	-- INTO #tmpReceiptList
+	-- FROM tblICInventoryReceiptItemLot A
+	-- INNER JOIN tblICInventoryReceiptItem B
+	-- 	ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+	-- INNER JOIN tblICInventoryReceipt C
+	-- 	ON B.intInventoryReceiptId = C.intInventoryReceiptId
+	-- WHERE A.intLotId = @intLotId
+	-- ORDER BY C.intInventoryReceiptId
 
-	SELECT TOP 1 
-		@_intInventoryReceiptId = intInventoryReceiptId
-	FROM #tmpReceiptList
-	ORDER BY intInventoryReceiptId
+	-- SELECT TOP 1 
+	-- 	@_intInventoryReceiptId = intInventoryReceiptId
+	-- FROM #tmpReceiptList
+	-- ORDER BY intInventoryReceiptId
 
-	WHILE ISNULL(@_intInventoryReceiptId,0) > 0
-	BEGIN
-		SELECT TOP 1
-			@_strOldTradeFinanceNumber = strTradeFinanceNumber
-			,@_strReceiptNumber = strReceiptNumber
-		FROM #tmpReceiptList
-		WHERE intInventoryReceiptId = @_intInventoryReceiptId
+	-- WHILE ISNULL(@_intInventoryReceiptId,0) > 0
+	-- BEGIN
+	-- 	SELECT TOP 1
+	-- 		@_strOldTradeFinanceNumber = strTradeFinanceNumber
+	-- 		,@_strReceiptNumber = strReceiptNumber
+	-- 	FROM #tmpReceiptList
+	-- 	WHERE intInventoryReceiptId = @_intInventoryReceiptId
 
-		IF(ISNULL(@_strOldTradeFinanceNumber,'') <> @strTradeFinanceNumber)
-		BEGIN
-			UPDATE tblICInventoryReceipt
-			SET strTradeFinanceNumber = @strTradeFinanceNumber
-			WHERE intInventoryReceiptId = @_intInventoryReceiptId
+	-- 	IF(ISNULL(@_strOldTradeFinanceNumber,'') <> @strTradeFinanceNumber)
+	-- 	BEGIN
+	-- 		UPDATE tblICInventoryReceipt
+	-- 		SET strTradeFinanceNumber = @strTradeFinanceNumber
+	-- 		WHERE intInventoryReceiptId = @_intInventoryReceiptId
 
-			SET @_logDescription = 'Trade Finance Number for ' + @_strReceiptNumber
-			EXEC dbo.uspSMAuditLog 
-			@keyValue			= @intLotId					-- Primary Key Value of the Ticket. 
-			,@screenName		= 'Inventory.view.Warrant'		-- Screen Namespace
-			,@entityId			= @intUserId				-- Entity Id.
-			,@actionType		= 'Updated'					-- Action Type
-			,@changeDescription	= @_logDescription		-- Description
-			,@fromValue			= @_strOldTradeFinanceNumber						-- Old Value
-			,@toValue			= @strTradeFinanceNumber			-- New Value
-			,@details			= '';
-		END
+	-- 		SET @_logDescription = 'Trade Finance Number for ' + @_strReceiptNumber
+	-- 		EXEC dbo.uspSMAuditLog 
+	-- 		@keyValue			= @intLotId					-- Primary Key Value of the Ticket. 
+	-- 		,@screenName		= 'Inventory.view.Warrant'		-- Screen Namespace
+	-- 		,@entityId			= @intUserId				-- Entity Id.
+	-- 		,@actionType		= 'Updated'					-- Action Type
+	-- 		,@changeDescription	= @_logDescription		-- Description
+	-- 		,@fromValue			= @_strOldTradeFinanceNumber						-- Old Value
+	-- 		,@toValue			= @strTradeFinanceNumber			-- New Value
+	-- 		,@details			= '';
+	-- 	END
 
-		SET @_intInventoryReceiptId = (
-										SELECT TOP 1 
-											intInventoryReceiptId
-										FROM #tmpReceiptList
-										WHERE intInventoryReceiptId > @_intInventoryReceiptId
-										ORDER BY intInventoryReceiptId
-									)
-	END
+	-- 	SET @_intInventoryReceiptId = (
+	-- 									SELECT TOP 1 
+	-- 										intInventoryReceiptId
+	-- 									FROM #tmpReceiptList
+	-- 									WHERE intInventoryReceiptId > @_intInventoryReceiptId
+	-- 									ORDER BY intInventoryReceiptId
+	-- 								)
+	-- END
 	
 
 END
