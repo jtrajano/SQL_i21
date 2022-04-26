@@ -216,6 +216,7 @@ BEGIN TRY
 		,[strInvoiceReportNumber]
 		,[intConcurrencyId]
 		,[dtmDiscountDate]
+		,[dblCurrencyExchangeRate]
 		)
 	SELECT
 		 [intPaymentId]				= @PaymentId
@@ -239,6 +240,7 @@ BEGIN TRY
 		,[strInvoiceReportNumber]	= @InvoiceReportNumber
 		,[intConcurrencyId]			= 0
 		,[dtmDiscountDate]			= @dtmDiscountDate
+		,[dblCurrencyExchangeRate]	= ARI.[dblCurrencyExchangeRate]
 	FROM	
 		tblARInvoice ARI	
 	WHERE
