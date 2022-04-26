@@ -724,6 +724,7 @@
     <Build Include="dbo\Views\vyuICGetInsuranceChargeDetail.sql" />
     <Build Include="dbo\Views\vyuTRFGetOpenTradeFinanceNumbers.sql" />
     <Build Include="dbo\Functions\fnARCustomerAgingDetail.sql" />
+    <Build Include="dbo\Functions\fnCMGetUndepositedFundsForCashFlowReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10183,7 +10184,7 @@
     <Build Include="dbo\Stored Procedures\uspQMPreStageSample.sql" />
     <Build Include="dbo\Views\vyuQMGetSampleType.sql" />
     <Build Include="dbo\Views\vyuQMContractSamplesMonitoring.sql" />
-    <Build Include="dbo\Views\vyuQMSampleNotAllocated.sql" /> 
+    <Build Include="dbo\Views\vyuQMSampleNotAllocated.sql" />
     <Build Include="dbo\Tables\tblIPSampleType.sql" />
     <Build Include="dbo\Stored Procedures\uspIPTransferOrderWithoutBOL.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
