@@ -83,3 +83,4 @@ GROUP BY mh.intMatchFuturesPSHeaderId
 	, strRollNo
 	, bankTransaction.intBankTransactionId
 	, bankTransaction.strBankTransactionId
+	, mh.ysnCommissionPosted

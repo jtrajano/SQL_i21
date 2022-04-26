@@ -10,6 +10,7 @@ SELECT
 	,A.dtmChargeDateUTC
 	,A.intM2MBatchId 
 	,A.strChargeNo
+	,A.ysnPosted
 	,A.intConcurrencyId
 	,strCommodity = C.strCommodityCode
 	,strInsurerName = B.strName

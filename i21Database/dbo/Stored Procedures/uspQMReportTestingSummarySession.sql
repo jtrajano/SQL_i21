@@ -68,25 +68,46 @@ BEGIN TRY
 	SELECT
 		 strPrintType = @strPrintType
 		,QMCS.intCuppingSessionId
-		,QMS.intSampleId
 		,QMS.strSampleNumber
-		,strItem				= CTCDV.strItemDescription
-		,CTCDV.strItemOrigin
+		,ICI.strItemNo
+		,strOrigin = ICCAO.strDescription
 		,QMCS.dtmCuppingDate
 		,QMCS.dtmCuppingTime
-		,QMA.strContractNumberP
-		,QMA.strContractNumberS
-		,strVendorName			= QMA.strEntityNameP
-		,strCustomerName		= QMA.strEntityNameS
-		,strRankCuppingNumber	= CAST(QMCSD.intRank AS NVARCHAR(MAX)) + ' / ' + QMCS.strCuppingSessionNumber
-		,strProductType			= ICCA.strDescription
+		,strPContractNumber				= CTC.strContractNumber + ' / ' + CAST(CTC.intContractSeq AS NVARCHAR(MAX))
+		,strVendorName					= EME.strName
+		,QMCSD.intRank
+		,QMCS.strCuppingSessionNumber
+		,strProductType					= ICCAPT.strDescription
+		,strBuyer = CASE WHEN LGACC.intCount > 1 THEN 'Multiple' ELSE LGAC.strBuyer END
+		,strSContractNumber = CASE WHEN LGACC.intCount > 1 THEN 'Multiple' ELSE LGAC.strSContractNumber END
 	FROM tblQMCuppingSession QMCS
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
-	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
-	INNER JOIN tblQMSampleType QMST ON QMS.intSampleTypeId = QMST.intSampleTypeId
-	LEFT JOIN vyuQMAllocation QMA ON QMS.intSampleId = QMA.intSampleId 
-	LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON QMS.intContractDetailId = CTCDV.intContractDetailId
-	LEFT JOIN tblICCommodityAttribute ICCA ON QMS.intProductTypeId = ICCA.intCommodityAttributeId AND ICCA.strType = 'ProductType'
+	INNER JOIN tblQMSample QMS ON QMCSD.intCuppingSessionDetailId = QMS.intCuppingSessionDetailId
+	INNER JOIN tblICItem ICI WITH (NOLOCK) ON QMS.intItemId = ICI.intItemId
+	LEFT JOIN (
+		SELECT 
+			 intContractDetailId
+			,CTCH.strContractNumber
+			,CTCD.intContractSeq
+		FROM tblCTContractDetail CTCD 
+		LEFT JOIN tblCTContractHeader CTCH ON CTCD.intContractHeaderId = CTCH.intContractHeaderId
+	) CTC ON QMS.intContractDetailId = CTC.intContractDetailId
+	LEFT JOIN tblICCommodityAttribute ICCAO	ON	ICCAO.intCommodityAttributeId =	ICI.intOriginId
+	LEFT JOIN tblICCommodityAttribute ICCAPT ON ICI.intProductTypeId = ICCAPT.intCommodityAttributeId AND ICCAPT.strType = 'ProductType'
+	LEFT JOIN tblEMEntity EME ON QMS.intEntityId = EME.intEntityId
+	OUTER APPLY (
+		SELECT TOP 1 
+			 intPContractDetailId
+			,strBuyer
+			,strSContractNumber = strSalesContractNumber + ' / ' + CAST(intSContractSeq AS NVARCHAR(MAX))
+		FROM vyuLGAllocatedContracts
+		WHERE intPContractDetailId = QMS.intContractDetailId
+	) LGAC
+	OUTER APPLY (
+		SELECT intCount = COUNT(intAllocationDetailId)
+		FROM tblLGAllocationDetail
+		WHERE intPContractDetailId = QMS.intContractDetailId
+	) LGACC
 
 END TRY
 

@@ -348,7 +348,8 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId
 		--and SH.ysnQtyChange = 1
 		and SH.ysnBalanceChange = 1
-		and SH.intPricingTypeId <> 5
+		and SH.intPricingTypeId <> 5 
+		AND SH.intContractStatusId NOT IN (3, 6)-- NOT INCLUDE CANCELLED AND SHORT CLOSE (SEPARATE PART)
 		AND SUH.intSequenceUsageHistoryId IS NULL
 
 		union all
@@ -357,7 +358,9 @@ BEGIN
 			, @strContractNumber
 			, @intContractSeq
 			, @intContractTypeId
-			, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad ELSE SUH.dblTransactionQuantity END
+			, dblTransactionQuantity = CASE WHEN SH.intContractStatusId = 6 AND ISNULL(SH.ysnStatusChange, 0) <> 1 THEN 0
+											ELSE CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad ELSE SUH.dblTransactionQuantity END
+											END
 			, SUH.strScreenName  
 			, @intContractHeaderId
 			, @intContractDetailId
@@ -389,6 +392,7 @@ BEGIN
 		where ysnDeleted = 0
 		and SUH.strFieldName = 'Balance'
 		and SUH.intContractDetailId = @intContractDetailId
+		
 	
 		union all
 		select 
@@ -756,8 +760,8 @@ BEGIN
 		) P 
 		where SH.intContractDetailId = @intContractDetailId AND SH.ysnIsPricing = 1  AND @intHeaderPricingType IN (1) and strPricingStatus <> 'Unpriced'
 
-		union all -- Cancelled and Short Closed Contracts
-		SELECT TOP 1
+		UNION ALL -- Cancelled and Short Closed Contracts
+		SELECT 
 			dtmHistoryCreated
 			, @strContractNumber
 			, @intContractSeq
@@ -789,13 +793,54 @@ BEGIN
 			, @intSubBookId
 			, @intUserId 
 		from 
-		(	SELECT TOP 1 * 
+		(	SELECT * 
 			FROM tblCTSequenceHistory ctsh
 			WHERE ctsh.intContractDetailId = @intContractDetailId
 			AND ctsh.intContractStatusId IN (3, 6) -- Cancelled and Short Closed
 			AND ctsh.ysnStatusChange = 1
-			ORDER BY ctsh.dtmHistoryCreated DESC
-		) sh
+		) sh 
+		JOIN tblCTContractDetail ctd
+		ON ctd.intContractDetailId = sh.intContractDetailId
+
+		UNION ALL -- Cancelled and Short Closed Contracts (Reopened)
+		SELECT 
+			dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblBalance  = sh.dblBalance
+			, strTransactionReference = 'Updated Contract'
+			, @intContractHeaderId
+			, @intContractDetailId
+			, intPricingTypeId  =  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN ctd.intPricingTypeId ELSE sh.intPricingTypeId END
+			, intTransactionReferenceId = sh.intContractHeaderId
+			, strTransactionReferenceNo = strContractNumber + '-' + cast(sh.intContractSeq as nvarchar(10))
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, @intUserId 
+		from 
+		(	SELECT *
+			FROM tblCTSequenceHistory ctsh
+			WHERE ctsh.intContractDetailId = @intContractDetailId
+			AND ctsh.intContractStatusId IN (4) -- Reopened
+			AND ctsh.ysnStatusChange = 1
+		) sh 
 		JOIN tblCTContractDetail ctd
 		ON ctd.intContractDetailId = sh.intContractDetailId
 

@@ -58,6 +58,8 @@ BEGIN TRY
 	from [vyuGRReportSplitView]
 		where ( @strMainEntityName is null or strMainEntityName = @strMainEntityName )
 
+	order by intSplitId 
+
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()

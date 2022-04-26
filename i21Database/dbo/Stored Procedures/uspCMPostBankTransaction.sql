@@ -606,6 +606,7 @@ BEGIN
 					, NULL
 					, NULL
 					, NULL
+					, @strTransactionId
 				FROM tblCMBankTransactionDetail
 				WHERE intTransactionId = @intTransactionId
 				AND strSourceModule = 'Risk Management'

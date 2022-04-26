@@ -1,19 +1,18 @@
 ﻿CREATE PROCEDURE uspQMReportCuppingFormSaleInfromation
-     @intSampleId INT
+     @intContractDetailId INT
 AS
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 
 BEGIN TRY
 	SELECT 
-		 strEntityNameS
-		,strContractNumberS
-		,dblSampleQtyS
-		,strSampleUOMS
-		,strShipmentPeriod = FORMAT(dtmStartDateS, 'dd.MM.yyyy') + ' - ' + FORMAT(dtmEndDateS, 'dd.MM.yyyy')
-	FROM vyuQMAllocation
-	WHERE intSampleId = @intSampleId
-	AND ISNULL(strContractNumberS, '') <> ''
+		 strSContractNumber
+		,strBuyer
+		,dblSContractAllocatedQty
+		,strSItemUOM
+		,strShipmentPeriod = FORMAT(dtmSStartDate, 'dd.MM.yyyy') + ' - ' + FORMAT(dtmSEndDate, 'dd.MM.yyyy')
+	FROM vyuLGAllocatedContracts
+	WHERE intPContractDetailId = @intContractDetailId
 
 END TRY
 

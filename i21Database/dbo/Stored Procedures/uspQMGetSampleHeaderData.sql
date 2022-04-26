@@ -276,7 +276,7 @@ BEGIN
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
-		,@strContainerNumber AS strContainerNumber
+		,ISNULL(@strContainerNumber, L.strContainerNo) AS strContainerNumber
 		,L.intStorageLocationId
 		,SL.strName AS strStorageLocationName
 		,CL.intCompanyLocationSubLocationId
@@ -292,7 +292,7 @@ BEGIN
 		,C.strContractItemName
 		,ISNULL(C.intEntityId, R.intEntityVendorId) AS intEntityId
 		,ISNULL(C.strEntityName, E.strName) AS strPartyName
-		,S.strMarks
+		,ISNULL(S.strMarks, L.strMarkings) AS strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
 		,C.intContractHeaderId
@@ -382,7 +382,7 @@ BEGIN
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
-		,@strContainerNumber AS strContainerNumber
+		,ISNULL(@strContainerNumber, L.strContainerNo) AS strContainerNumber
 		,L.intStorageLocationId
 		,SL.strName AS strStorageLocationName
 		,CL.intCompanyLocationSubLocationId
@@ -398,7 +398,7 @@ BEGIN
 		,C.strContractItemName
 		,ISNULL(C.intEntityId, R.intEntityVendorId) AS intEntityId
 		,ISNULL(C.strEntityName, E.strName) AS strPartyName
-		,S.strMarks
+		,ISNULL(S.strMarks, L.strMarkings) AS strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
 		,C.intContractHeaderId

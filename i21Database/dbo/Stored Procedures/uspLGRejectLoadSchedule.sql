@@ -73,7 +73,8 @@ BEGIN
 		SELECT @ysnInvoiced = 1 FROM tblARInvoiceDetail IVD 
 			INNER JOIN tblARInvoice IV ON IV.intInvoiceId = IVD.intInvoiceId 
 		WHERE IV.ysnPosted = 1
-		AND IVD.intLoadDetailId IN (SELECT intLoadDetailId FROM tblLGLoad WHERE intLoadId = @intLoadId)
+		AND IVD.intLoadDetailId IS NOT NULL
+		AND IVD.intLoadDetailId IN (SELECT intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId)
 
 		--Set Shipment Status back to "Delivered" or "Invoiced"
 		UPDATE tblLGLoad SET intShipmentStatus = CASE WHEN (@ysnInvoiced = 1) THEN 11 ELSE 6 END WHERE intLoadId = @intLoadId

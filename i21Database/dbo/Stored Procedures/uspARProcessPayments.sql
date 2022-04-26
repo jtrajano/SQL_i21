@@ -206,6 +206,8 @@ BEGIN
 		,[ysnUnPostAndUpdate]
 		,[intEntityId]
 		,[intEntityCardInfoId]
+		,[ysnScheduledPayment]
+		,[dtmScheduledPayment]
 		--Detail																																															
 		,[intPaymentDetailId]
 		,[intInvoiceId]
@@ -265,6 +267,8 @@ BEGIN
 		,[ysnUnPostAndUpdate]					= IE.[ysnUnPostAndUpdate]
 		,[intEntityId]							= IE.[intEntityId]
 		,[intEntityCardInfoId]					= IE.[intEntityCardInfoId]
+		,[ysnScheduledPayment]					= IE.[ysnScheduledPayment]
+		,[dtmScheduledPayment]					= IE.[dtmScheduledPayment]
 		--Detail																																															
 		,[intPaymentDetailId]					= IE.[intPaymentDetailId]
 		,[intInvoiceId]							= (CASE WHEN @GroupingOption = 0 THEN IE.[intInvoiceId] ELSE NULL END)

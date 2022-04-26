@@ -143,5 +143,9 @@
 	[strEDICode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strDestinationCity]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strMVessel]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[ysnCustomsReleased]				BIT             NULL
+	[ysnCustomsReleased]				BIT             NULL,
+	[strBankName]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strIBAN]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strSWIFT]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strBICCode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
 );

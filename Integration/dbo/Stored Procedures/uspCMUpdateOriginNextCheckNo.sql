@@ -6,6 +6,7 @@
 GO
 IF	EXISTS(select top 1 1 from sys.procedures where name = 'uspCMUpdateOriginNextCheckNo')
 	AND (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+	AND EXISTS (select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'apcbkmst_origin' )
 BEGIN 
 	DROP PROCEDURE uspCMUpdateOriginNextCheckNo
 

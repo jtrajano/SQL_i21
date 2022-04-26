@@ -1597,7 +1597,7 @@ BEGIN
 	SELECT
 		 [intItemId]
 		,[intItemLocationId]
-		,ISNULL(dbo.fnGetMatchingItemUOMId([intItemId], ICIUOM.intUnitMeasureId), COSTING.intItemUOMId)
+		,[intItemUOMId]
 		,[dtmDate]
 		,[dblQty]
 		,[dblUOMQty]
@@ -1621,10 +1621,6 @@ BEGIN
 		,[intForexRateTypeId]
 		,[dblForexRate]
 	FROM ##ARItemsForCosting COSTING
-	LEFT OUTER JOIN 
-	(SELECT intUnitMeasureId,intItemUOMId FROM tblICItemUOM ICUOM  WITH (NOLOCK)
-		) ICIUOM
-		ON COSTING.intItemUOMId = ICIUOM.intItemUOMId
 	WHERE ISNULL([ysnAutoBlend], 0) = 0
 	  AND ISNULL(ysnGLOnly, 0) = 0
 

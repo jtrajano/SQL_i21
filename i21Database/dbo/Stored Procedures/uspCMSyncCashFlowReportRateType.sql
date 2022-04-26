@@ -36,6 +36,33 @@ DECLARE @tblDefaultRateTypes TABLE (
 	dtmCreatedDate DATETIME NULL
 )
 
+DECLARE @tblDefaultRateTypeDuplicates TABLE (
+	intRowId INT,
+	intFromCurrencyId INT,
+	intToCurrencyId INT,
+	intCurrencyExchangeRateDetailId INT,
+	intCurrencyExchangeRateTypeId INT,
+	strBucket NVARCHAR(MAX) NULL,
+	dblRate DECIMAL(18, 6) DEFAULT 1,
+	dtmValidFromDate DATETIME NULL,
+	dtmCreatedDate DATETIME NULL
+)
+
+DECLARE 
+	@CURRENT NVARCHAR(10)	= 'Current',
+	@1_7 NVARCHAR(10)		= '1 - 7',
+	@8_14 NVARCHAR(10)		= '8 - 14',
+	@15_21 NVARCHAR(10)		= '15 - 21',
+	@22_29 NVARCHAR(10)		= '22 - 29',
+	@30_60 NVARCHAR(10)		= '30 - 60',
+	@61_90 NVARCHAR(10)		= '61 - 90',
+	@91_120 NVARCHAR(10)	= '91 - 120',
+	@121_ NVARCHAR(10)		= '121+'
+
+-- Clear existing rates
+DELETE tblCMCashFlowReportRateType WHERE intCashFlowReportId = @intCashFlowReportId
+DELETE tblCMCashFlowReportRate WHERE intCashFlowReportId = @intCashFlowReportId
+
 -- Get all Exchange Rate Details with Cash Flow defined
 INSERT INTO @tblDefaultRateTypesRaw
 SELECT
@@ -71,189 +98,115 @@ INNER JOIN (
 	GROUP BY strBucket, intFromCurrencyId
 ) G
 ON A.strBucket = G.strBucket AND A.dtmValidFromDate = G.dtmValidFromDate AND A.intFromCurrencyId = G.intFromCurrencyId
-ORDER BY intRowId
 
-DECLARE 
-	@CURRENT NVARCHAR(10)	= 'Current',
-	@1_7 NVARCHAR(10)		= '1 - 7',
-	@8_14 NVARCHAR(10)		= '8 - 14',
-	@15_21 NVARCHAR(10)		= '15 - 21',
-	@22_29 NVARCHAR(10)		= '22 - 29',
-	@30_60 NVARCHAR(10)		= '30 - 60',
-	@61_90 NVARCHAR(10)		= '61 - 90',
-	@91_120 NVARCHAR(10)	= '91 - 120',
-	@121_ NVARCHAR(10)		= '121+'
+-- Check and get if have duplicate buckets with same Valid From date
+INSERT INTO @tblDefaultRateTypeDuplicates
+SELECT * FROM @tblDefaultRateTypes WHERE strBucket IN(
+	SELECT strBucket FROM @tblDefaultRateTypes
+	GROUP BY strBucket
+	HAVING COUNT (*) > 1
+)
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblCMCashFlowReportRateType WHERE intCashFlowReportId = @intCashFlowReportId) -- create new rates
+-- Get and filter out exchange rate details by most recent Created Date
+IF EXISTS(SELECT 1 FROM @tblDefaultRateTypeDuplicates)
 BEGIN
-	IF (@intFilterCurrencyId IS NOT NULL)
-	BEGIN
-		INSERT INTO tblCMCashFlowReportRateType
-		SELECT
-			@intCashFlowReportId,
-			@intFilterCurrencyId,
-			intRateTypeIdBucket1,
-			intRateTypeIdBucket2,
-			intRateTypeIdBucket3,
-			intRateTypeIdBucket4,
-			intRateTypeIdBucket5,
-			intRateTypeIdBucket6,
-			intRateTypeIdBucket7,
-			intRateTypeIdBucket8,
-			intRateTypeIdBucket9,
-			1
-		FROM (
-			SELECT
-				intRateTypeIdBucket1 = MAX(CASE WHEN strBucket = @CURRENT	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket2 = MAX(CASE WHEN strBucket = @1_7		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket3 = MAX(CASE WHEN strBucket = @8_14		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket4 = MAX(CASE WHEN strBucket = @15_21		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket5 = MAX(CASE WHEN strBucket = @22_29		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket6 = MAX(CASE WHEN strBucket = @30_60		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = @61_90		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = @91_120	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = @121_		THEN intCurrencyExchangeRateTypeId END)
-			FROM @tblDefaultRateTypes A
-			WHERE intFromCurrencyId = @intFilterCurrencyId
-			AND dtmValidFromDate = (
-				SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
-				WHERE 
-					intFromCurrencyId = A.intFromCurrencyId
-					AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
-					AND strBucket = A.strBucket
-			)
-		) DefaultRateType
+	-- Remove duplicate buckets with same Valid From date
+	DELETE @tblDefaultRateTypes WHERE intRowId IN (SELECT intRowId FROM @tblDefaultRateTypeDuplicates B WHERE B.intRowId = intRowId)
 
-		INSERT INTO tblCMCashFlowReportRate 
-		SELECT
-			@intCashFlowReportId,
-			@intFilterCurrencyId,
-			ISNULL(dblRateBucket1, 1),
-			ISNULL(dblRateBucket2, 1),
-			ISNULL(dblRateBucket3, 1),
-			ISNULL(dblRateBucket4, 1),
-			ISNULL(dblRateBucket5, 1),
-			ISNULL(dblRateBucket6, 1),
-			ISNULL(dblRateBucket7, 1),
-			ISNULL(dblRateBucket8, 1),
-			ISNULL(dblRateBucket9, 1),
-			1
-		FROM (
-			SELECT
-				dblRateBucket1 = MAX(CASE WHEN strBucket = @CURRENT	THEN dblRate END),
-				dblRateBucket2 = MAX(CASE WHEN strBucket = @1_7		THEN dblRate END),
-				dblRateBucket3 = MAX(CASE WHEN strBucket = @8_14	THEN dblRate END),
-				dblRateBucket4 = MAX(CASE WHEN strBucket = @15_21	THEN dblRate END),
-				dblRateBucket5 = MAX(CASE WHEN strBucket = @22_29	THEN dblRate END),
-				dblRateBucket6 = MAX(CASE WHEN strBucket = @30_60	THEN dblRate END),
-				dblRateBucket7 = MAX(CASE WHEN strBucket = @61_90	THEN dblRate END),
-				dblRateBucket8 = MAX(CASE WHEN strBucket = @91_120	THEN dblRate END),
-				dblRateBucket9 = MAX(CASE WHEN strBucket = @121_	THEN dblRate END)
-			FROM @tblDefaultRateTypes A
-			WHERE intFromCurrencyId = @intFilterCurrencyId
-			AND dtmValidFromDate = (
-				SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
-				WHERE 
-					intFromCurrencyId = A.intFromCurrencyId
-					AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
-					AND strBucket = A.strBucket
-			)
-		) DefaultRate
-		
-		GOTO EXIT_PROCESS
-	END
-	ELSE
-		GOTO GET_FROM_CURRENCY_EXCHANGE
+	-- Insert most recent rates using Created Date
+	INSERT INTO @tblDefaultRateTypes
+	SELECT A.* FROM @tblDefaultRateTypeDuplicates A
+	INNER JOIN (
+		SELECT strBucket, intFromCurrencyId, MAX(dtmCreatedDate) dtmCreatedDate
+		FROM @tblDefaultRateTypesRaw
+		GROUP BY strBucket, intFromCurrencyId
+	) G
+	ON A.strBucket = G.strBucket AND A.dtmCreatedDate = G.dtmCreatedDate AND A.intFromCurrencyId = G.intFromCurrencyId
+
 END
-ELSE   -- Update existing rates
+
+IF (@intFilterCurrencyId IS NOT NULL)
 BEGIN
-	IF (@intFilterCurrencyId IS NOT NULL)
-	BEGIN
-		DELETE tblCMCashFlowReportRateType WHERE intCashFlowReportId = @intCashFlowReportId
-		DELETE tblCMCashFlowReportRate WHERE intCashFlowReportId = @intCashFlowReportId
-
-		INSERT INTO tblCMCashFlowReportRateType
+	INSERT INTO tblCMCashFlowReportRateType
+	SELECT
+		@intCashFlowReportId,
+		@intFilterCurrencyId,
+		intRateTypeIdBucket1,
+		intRateTypeIdBucket2,
+		intRateTypeIdBucket3,
+		intRateTypeIdBucket4,
+		intRateTypeIdBucket5,
+		intRateTypeIdBucket6,
+		intRateTypeIdBucket7,
+		intRateTypeIdBucket8,
+		intRateTypeIdBucket9,
+		1
+	FROM (
 		SELECT
-			@intCashFlowReportId,
-			@intFilterCurrencyId,
-			intRateTypeIdBucket1,
-			intRateTypeIdBucket2,
-			intRateTypeIdBucket3,
-			intRateTypeIdBucket4,
-			intRateTypeIdBucket5,
-			intRateTypeIdBucket6,
-			intRateTypeIdBucket7,
-			intRateTypeIdBucket8,
-			intRateTypeIdBucket9,
-			1
-		FROM (
-			SELECT
-				intRateTypeIdBucket1 = MAX(CASE WHEN strBucket = @CURRENT	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket2 = MAX(CASE WHEN strBucket = @1_7		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket3 = MAX(CASE WHEN strBucket = @8_14		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket4 = MAX(CASE WHEN strBucket = @15_21		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket5 = MAX(CASE WHEN strBucket = @22_29		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket6 = MAX(CASE WHEN strBucket = @30_60		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = @61_90		THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = @91_120	THEN intCurrencyExchangeRateTypeId END),
-				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = @121_		THEN intCurrencyExchangeRateTypeId END)
-			FROM @tblDefaultRateTypes A
-			WHERE intFromCurrencyId = @intFilterCurrencyId
-			AND dtmValidFromDate = (
-				SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
-				WHERE 
-					intFromCurrencyId = A.intFromCurrencyId
-					AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
-					AND strBucket = A.strBucket
-			)
-		) DefaultRateType
+			intRateTypeIdBucket1 = MAX(CASE WHEN strBucket = @CURRENT	THEN intCurrencyExchangeRateTypeId END),
+			intRateTypeIdBucket2 = MAX(CASE WHEN strBucket = @1_7		THEN intCurrencyExchangeRateTypeId END),
+			intRateTypeIdBucket3 = MAX(CASE WHEN strBucket = @8_14		THEN intCurrencyExchangeRateTypeId END),
+			intRateTypeIdBucket4 = MAX(CASE WHEN strBucket = @15_21		THEN intCurrencyExchangeRateTypeId END),
+			intRateTypeIdBucket5 = MAX(CASE WHEN strBucket = @22_29		THEN intCurrencyExchangeRateTypeId END),
+			intRateTypeIdBucket6 = MAX(CASE WHEN strBucket = @30_60		THEN intCurrencyExchangeRateTypeId END),
+			intRateTypeIdBucket7 = MAX(CASE WHEN strBucket = @61_90		THEN intCurrencyExchangeRateTypeId END),
+			intRateTypeIdBucket8 = MAX(CASE WHEN strBucket = @91_120	THEN intCurrencyExchangeRateTypeId END),
+			intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = @121_		THEN intCurrencyExchangeRateTypeId END)
+		FROM @tblDefaultRateTypes A
+		WHERE intFromCurrencyId = @intFilterCurrencyId
+		AND dtmValidFromDate = (
+			SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
+			WHERE 
+				intFromCurrencyId = A.intFromCurrencyId
+				AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
+				AND intCurrencyExchangeRateDetailId = A.intCurrencyExchangeRateDetailId
+				AND strBucket = A.strBucket
+		)
+	) DefaultRateType
 
-		INSERT INTO tblCMCashFlowReportRate 
+	INSERT INTO tblCMCashFlowReportRate 
+	SELECT
+		@intCashFlowReportId,
+		@intFilterCurrencyId,
+		ISNULL(dblRateBucket1, 1),
+		ISNULL(dblRateBucket2, 1),
+		ISNULL(dblRateBucket3, 1),
+		ISNULL(dblRateBucket4, 1),
+		ISNULL(dblRateBucket5, 1),
+		ISNULL(dblRateBucket6, 1),
+		ISNULL(dblRateBucket7, 1),
+		ISNULL(dblRateBucket8, 1),
+		ISNULL(dblRateBucket9, 1),
+		1
+	FROM (
 		SELECT
-			@intCashFlowReportId,
-			@intFilterCurrencyId,
-			ISNULL(dblRateBucket1, 1),
-			ISNULL(dblRateBucket2, 1),
-			ISNULL(dblRateBucket3, 1),
-			ISNULL(dblRateBucket4, 1),
-			ISNULL(dblRateBucket5, 1),
-			ISNULL(dblRateBucket6, 1),
-			ISNULL(dblRateBucket7, 1),
-			ISNULL(dblRateBucket8, 1),
-			ISNULL(dblRateBucket9, 1),
-			1
-		FROM (
-			SELECT
-				dblRateBucket1 = MAX(CASE WHEN strBucket = @CURRENT	THEN dblRate END),
-				dblRateBucket2 = MAX(CASE WHEN strBucket = @1_7		THEN dblRate END),
-				dblRateBucket3 = MAX(CASE WHEN strBucket = @8_14	THEN dblRate END),
-				dblRateBucket4 = MAX(CASE WHEN strBucket = @15_21	THEN dblRate END),
-				dblRateBucket5 = MAX(CASE WHEN strBucket = @22_29	THEN dblRate END),
-				dblRateBucket6 = MAX(CASE WHEN strBucket = @30_60	THEN dblRate END),
-				dblRateBucket7 = MAX(CASE WHEN strBucket = @61_90	THEN dblRate END),
-				dblRateBucket8 = MAX(CASE WHEN strBucket = @91_120	THEN dblRate END),
-				dblRateBucket9 = MAX(CASE WHEN strBucket = @121_	THEN dblRate END)
-			FROM @tblDefaultRateTypes A
-			WHERE intFromCurrencyId = @intFilterCurrencyId
-			AND dtmValidFromDate = (
-				SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
-				WHERE 
-					intFromCurrencyId = A.intFromCurrencyId
-					AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
-					AND strBucket = A.strBucket
-			)
-		) DefaultRate
+			dblRateBucket1 = MAX(CASE WHEN strBucket = @CURRENT	THEN dblRate END),
+			dblRateBucket2 = MAX(CASE WHEN strBucket = @1_7		THEN dblRate END),
+			dblRateBucket3 = MAX(CASE WHEN strBucket = @8_14	THEN dblRate END),
+			dblRateBucket4 = MAX(CASE WHEN strBucket = @15_21	THEN dblRate END),
+			dblRateBucket5 = MAX(CASE WHEN strBucket = @22_29	THEN dblRate END),
+			dblRateBucket6 = MAX(CASE WHEN strBucket = @30_60	THEN dblRate END),
+			dblRateBucket7 = MAX(CASE WHEN strBucket = @61_90	THEN dblRate END),
+			dblRateBucket8 = MAX(CASE WHEN strBucket = @91_120	THEN dblRate END),
+			dblRateBucket9 = MAX(CASE WHEN strBucket = @121_	THEN dblRate END)
+		FROM @tblDefaultRateTypes A
+		WHERE intFromCurrencyId = @intFilterCurrencyId
+		AND dtmValidFromDate = (
+			SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
+			WHERE 
+				intFromCurrencyId = A.intFromCurrencyId
+				AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
+				AND intCurrencyExchangeRateDetailId = A.intCurrencyExchangeRateDetailId
+				AND strBucket = A.strBucket
+		)
+	) DefaultRate
 		
-		GOTO EXIT_PROCESS
-	END
-	
+	GOTO EXIT_PROCESS
+END
+ELSE
 	GOTO GET_FROM_CURRENCY_EXCHANGE
-END
 
 GET_FROM_CURRENCY_EXCHANGE:
-
-DELETE tblCMCashFlowReportRateType WHERE intCashFlowReportId = @intCashFlowReportId
-DELETE tblCMCashFlowReportRate WHERE intCashFlowReportId = @intCashFlowReportId
 
 DECLARE @tblCurrency TABLE (
 	intFromCurrencyId INT
@@ -264,12 +217,7 @@ SELECT DISTINCT intFromCurrencyId
 FROM tblSMCurrencyExchangeRate 
 WHERE intToCurrencyId = @intReportingCurrencyId
 
-IF EXISTS(SELECT TOP 1 1 FROM @tblCurrency)
-BEGIN
-	DELETE tblCMCashFlowReportRateType WHERE intCashFlowReportId = @intCashFlowReportId
-	DELETE tblCMCashFlowReportRate WHERE intCashFlowReportId = @intCashFlowReportId
-END
-ELSE
+IF NOT EXISTS(SELECT TOP 1 1 FROM @tblCurrency)
 BEGIN
 	IF (@intFilterCurrencyId IS NULL)
 		INSERT INTO @tblCurrency SELECT DISTINCT intCurrencyID FROM tblSMCurrency
@@ -302,13 +250,9 @@ BEGIN
 				intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = @121_		THEN intCurrencyExchangeRateTypeId END)
 			FROM @tblDefaultRateTypes A
 			WHERE intFromCurrencyId = @intFilterCurrencyId
-			AND dtmValidFromDate = (
-				SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
-				WHERE 
-					intFromCurrencyId = A.intFromCurrencyId
-					AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
-					AND strBucket = A.strBucket
-			)
+				AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
+				AND intCurrencyExchangeRateDetailId = A.intCurrencyExchangeRateDetailId
+				AND strBucket = A.strBucket
 		) DefaultRateType
 
 		INSERT INTO tblCMCashFlowReportRate 
@@ -338,15 +282,13 @@ BEGIN
 				dblRateBucket9 = MAX(CASE WHEN strBucket = @121_	THEN dblRate END)
 			FROM @tblDefaultRateTypes A
 			WHERE intFromCurrencyId = @intFilterCurrencyId
-			AND dtmValidFromDate = (
-				SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
-				WHERE 
-					intFromCurrencyId = A.intFromCurrencyId
-					AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
-					AND strBucket = A.strBucket
-			)
+				AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
+				AND intCurrencyExchangeRateDetailId = A.intCurrencyExchangeRateDetailId
+				AND strBucket = A.strBucket
 		) DefaultRate
 	END
+
+	GOTO EXIT_PROCESS
 END
 
 INSERT INTO tblCMCashFlowReportRateType
@@ -377,13 +319,9 @@ OUTER APPLY (
 		intRateTypeIdBucket9 = MAX(CASE WHEN strBucket = @121_		THEN intCurrencyExchangeRateTypeId END)
 	FROM @tblDefaultRateTypes A
 	WHERE intFromCurrencyId = C.intFromCurrencyId
-	AND dtmValidFromDate = (
-		SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
-		WHERE 
-			intFromCurrencyId = A.intFromCurrencyId
 			AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
+			AND intCurrencyExchangeRateDetailId = A.intCurrencyExchangeRateDetailId
 			AND strBucket = A.strBucket
-	)
 ) DefaultRateType
 
 
@@ -415,13 +353,9 @@ OUTER APPLY (
 		dblRateBucket9 = MAX(CASE WHEN strBucket = @121_	THEN dblRate END)
 	FROM @tblDefaultRateTypes A
 	WHERE intFromCurrencyId = C.intFromCurrencyId
-	AND dtmValidFromDate = (
-		SELECT MAX(dtmValidFromDate) FROM @tblDefaultRateTypes
-		WHERE 
-			intFromCurrencyId = A.intFromCurrencyId
 			AND intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
+			AND intCurrencyExchangeRateDetailId = A.intCurrencyExchangeRateDetailId
 			AND strBucket = A.strBucket
-	)
 ) DefaultRateType
 
 EXIT_PROCESS:

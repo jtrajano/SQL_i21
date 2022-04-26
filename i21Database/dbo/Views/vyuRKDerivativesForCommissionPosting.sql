@@ -67,7 +67,7 @@ SELECT
 	, dblCommission = sum(Lng.dblLongCommission + Shrt.dblShortCommission)
 	, ysnCommissionExempt = NULL
 	, ysnCommissionOverride = NULL
-	, Lng.ysnPosted
+	, ysnPosted = ISNULL(A.ysnCommissionPosted, 0)
 	--, AD.intLFutOptTransactionId
 	--, AD.intSFutOptTransactionId
 FROM vyuRKMatchedPSTransaction AD
@@ -126,4 +126,4 @@ GROUP BY
 	,strFutureMonth
 	,A.dtmMatchDate
 	,Lng.strCommissionRateType
-	,Lng.ysnPosted
+	,A.ysnCommissionPosted

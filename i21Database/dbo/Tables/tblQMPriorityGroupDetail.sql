@@ -12,6 +12,6 @@ CREATE TABLE [dbo].[tblQMPriorityGroupDetail]
 	CONSTRAINT [FK_tblQMPriorityGroupDetail_tblQMPriorityGroup] FOREIGN KEY ([intPriorityGroupId]) REFERENCES [tblQMPriorityGroup] ([intPriorityGroupId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblQMPriorityGroupDetail_tblICCommodityAttribute_intProductTypeId] FOREIGN KEY ([intProductTypeId]) REFERENCES [dbo].[tblICCommodityAttribute] ([intCommodityAttributeId]),
 	CONSTRAINT [FK_tblQMPriorityGroupDetail_tblICCommodityAttribute_intOriginId] FOREIGN KEY ([intOriginId]) REFERENCES [dbo].[tblICCommodityAttribute] ([intCommodityAttributeId]),
-	CONSTRAINT [FK_tblQMPriorityGroupDetail_tblICCommodityAttribute_intExtensionId] FOREIGN KEY ([intExtensionId]) REFERENCES [dbo].[tblICCommodityAttribute] ([intCommodityAttributeId]),
+	CONSTRAINT [FK_tblQMPriorityGroupDetail_tblICCommodityProductLine_intExtensionId] FOREIGN KEY ([intExtensionId]) REFERENCES [dbo].[tblICCommodityProductLine] ([intCommodityProductLineId]),
 	CONSTRAINT [FK_tblQMPriorityGroupDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );

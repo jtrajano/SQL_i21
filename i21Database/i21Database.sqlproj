@@ -708,6 +708,22 @@
     <Build Include="dbo\Tables\tblICInsuranceCharge.sql" />
     <Build Include="dbo\Views\vyuICGetInsuranceCharge.sql" />
     <Build Include="dbo\Tables\tblICInsuranceChargeDetail.sql" />
+    <Build Include="dbo\Views\vyuICSearchStorageCharge.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRFNegateTFLogFinancedQtyAndAmount.sql" />
+    <Build Include="dbo\Tables\tblCRMBrandMaintenance.sql" />
+    <Build Include="dbo\Views\vyuCRMIntegrationSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCheckUnnatural.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGenerateInsuranceCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetTransferOrderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPReprocessERPFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostUnpostInsuranceCharge.sql" />
+    <Build Include="dbo\Views\vyuICSearchInsuranceCharge.sql" />
+    <Build Include="dbo\Views\vyuICGetInsuranceChargeDetail.sql" />
+    <Build Include="dbo\Views\vyuTRFGetOpenTradeFinanceNumbers.sql" />
+    <Build Include="dbo\Functions\fnARCustomerAgingDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10469,6 +10485,8 @@
     <Build Include="dbo\Stored Procedures\uspRKRebuildNonOpenContracts.sql" />
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10769,7 +10787,6 @@
     <None Include="Scripts\Post-Deployment\ET\01_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\PAT\6_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
-    <None Include="Scripts\Post-Deployment\SM\2120_AddUserPortalSettingsToContactImport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
@@ -10824,6 +10841,11 @@
     <Build Include="dbo\Views\vyuQMSampleCuppingSessionTab.sql" />
     <Build Include="dbo\Views\vyuQMCuppingSession.sql" />
     <Build Include="dbo\Views\vyuQMCuppingSample.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCommodityAttribute.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCommodityProductLine.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCommodityItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetScheduledPayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

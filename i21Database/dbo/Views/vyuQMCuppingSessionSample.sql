@@ -108,7 +108,7 @@ SELECT S.intSampleId
 	,CSD.intRank
     ,CSD.intCuppingSessionDetailId
 	,strMethodology = ''
-	,strExtension = EX.strAttribute1
+	,strExtension = EX.strDescription
 	,intContractSequence = CD.intContractSeq
 	,strContractType = CT.strContractType
 	,strPacking = ''
@@ -149,11 +149,11 @@ LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
-LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
+LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND ETC.ysnDefaultContact = 1
 LEFT JOIN tblQMSample RS ON RS.intRelatedSampleId = S.intSampleId
 LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intSampleId = S.intSampleId
 LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
 LEFT JOIN tblICCommodityAttribute PT ON I.intProductTypeId = PT.intCommodityAttributeId AND PT.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute O ON I.intOriginId = O.intCommodityAttributeId AND O.strType = 'Origin'
-LEFT JOIN tblICCommodityAttribute1 EX ON I.intCommodityAttributeId1 = EX.intCommodityAttributeId1
+LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId
 WHERE S.intTypeId = 1

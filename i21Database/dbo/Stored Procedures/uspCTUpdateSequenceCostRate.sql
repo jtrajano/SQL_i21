@@ -19,7 +19,7 @@ BEGIN TRY
 		,@dblInterestRate = cd.dblInterestRate  
 		,@principal = cd.dblTotalCost
 		,@rate = convert(numeric(18,6),isnull(cd.dblInterestRate,0)) / 100.00  
-		,@time = convert(numeric(18,6),isnull(ch.intDaysForFinance,0)) / 360.00  
+		,@time = convert(numeric(18,6),isnull(ch.intDaysForFinance,0)) / 365.00  
 	from
 		tblCTContractDetail cd  
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId  

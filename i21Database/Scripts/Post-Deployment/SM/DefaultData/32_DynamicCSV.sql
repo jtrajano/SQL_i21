@@ -13,20 +13,13 @@ BEGIN
 	SELECT @NewHeaderId, '1','1'
 END
 
-UPDATE tblSMCSVDynamicImport SET
-	strName = 'Contact Import',
-	strCommand = '
+UPDATE [dbo].[tblSMCSVDynamicImport]
+SET strCommand = N'
 	DECLARE @EntityId 			INT
 	DECLARE @EntityLocationId 	INT
-
-		--	phone
-		--mobile
-		--locname
-		--portal
-
-
-	--validation stage
+	DECLARE @UserRoleId		    INT
 	DECLARE @IsValid BIT
+	
 	--DECLARE @ValidationMessage NVARCHAR(MAX)
 	SET @IsValid = 1
 
@@ -35,11 +28,13 @@ UPDATE tblSMCSVDynamicImport SET
 	DECLARE @ActiveBit		BIT
 	DECLARE @RankStr		NVARCHAR(100)
 	DECLARE @Rank			INT
-	DECLARE @PortalStr		NVARCHAR(100)
 	DECLARE @PortalBit		BIT
 	DECLARE @Phone			NVARCHAR(100)
 	DECLARE @Mobile			NVARCHAR(100)
 	DECLARE @LocationName	NVARCHAR(100)
+	DECLARE @PortalUserRole NVARCHAR(100)
+	DECLARE @PortalPassword NVARCHAR(100)
+	DECLARE @Email          NVARCHAR(100)
 
 	SET @ValidationMessage	= ''''
 	SET @ContactMethod		= ''@contactMethod@''
@@ -47,11 +42,14 @@ UPDATE tblSMCSVDynamicImport SET
 	SET @ActiveBit			= 0
 	SET @RankStr			= ''@rank@''
 	SET @Rank				= 1
-	SET @PortalStr			= LOWER(''@portal@'')
 	SET @PortalBit			= 0
 	SET @Phone				= ''@phone@''
 	SET @Mobile				= ''@mobile@''
 	SET @LocationName		= ''@locname@''
+	SET @PortalPassword     = ''@portalPassword@''
+	SET @PortalUserRole     = ''@portalUserRole@''
+	SET @UserRoleId         = 0
+	SET @Email              = ''@email@''
 
 	DECLARE @EmailDistribution NVARCHAR(MAX)
 	DECLARE @EmailDistributionList NVARCHAR(MAX)
@@ -59,8 +57,6 @@ UPDATE tblSMCSVDynamicImport SET
 	DECLARE @EmailDistributionInvalid NVARCHAR(MAX)
 
 	SET @EmailDistributionList = ''Invoices,Transport Quote,Statements,AP remittance,AR Remittance,Contracts,Sales Order,Credit Memo,Quote Order,Scale,Storage,Cash,Cash Refund,Debit Memo,Customer Prepayment,CF Invoice,Letter,PR Remittance,Dealer CC Notification,Purchase Order,Settlement''
-
-
 	SET @EmailDistribution = ''@emailDistribution@''
 
 	select @EmailDistributionInvalid = COALESCE(@EmailDistributionInvalid + '','', '''') + RTRIM(LTRIM(a.Item))
@@ -99,13 +95,27 @@ UPDATE tblSMCSVDynamicImport SET
 		SET @ValidationMessage = @ValidationMessage + '',Active ['' + @ActiveStr + ''] should only be (0, 1, Yes, No, True, False)''
 	END
 
-	IF @PortalStr = ''1'' OR @PortalStr = ''yes'' OR @PortalStr = ''true''
+	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblSMUserRole WHERE strName = @PortalUserRole) AND ISNULL(@PortalUserRole, '''') <> ''''
 	BEGIN
+		SELECT TOP 1 @UserRoleId = intUserRoleID FROM dbo.tblSMUserRole WHERE strName = @PortalUserRole
 		SET @PortalBit = 1
 	END
-	ELSE IF lower(@PortalStr) NOT IN (''1'', ''0'', ''yes'', ''no'', ''true'', ''false'')
+	ELSE IF ISNULL(@PortalUserRole, '''') <> ''''
 	BEGIN
-		SET @ValidationMessage = @ValidationMessage + '',Portal Access ['' + @PortalStr + ''] should only be (0, 1, Yes, No, True, False)''
+		IF @ValidationMessage != ''''
+		BEGIN
+   			SET @ValidationMessage = @ValidationMessage + '',''
+		END
+		SET @ValidationMessage = @ValidationMessage + ''The User Role of '' + @PortalUserRole + '' was not found in the Portal User Role. Please add this Role from the System Manager screen and re-attempt the upload''
+	END
+
+	IF (@Email IS NULL OR @Email = '''')
+	BEGIN
+		IF @ValidationMessage != ''''
+	BEGIN
+   			SET @ValidationMessage = @ValidationMessage + '',''
+		END
+		SET @ValidationMessage = @ValidationMessage + ''The Portal Username and Contact Email will be identical.  Please provide a valid email to use as the Portal Username and re-attempt the upload.''
 	END
 
 	IF ISNUMERIC(@RankStr) = 1
@@ -117,11 +127,14 @@ UPDATE tblSMCSVDynamicImport SET
 		SET @ValidationMessage = @ValidationMessage + '',Rank ['' + @RankStr + ''] should be a number''
 	END
 
-
+	IF @ValidationMessage != ''''
+	BEGIN
+		RAISERROR(@ValidationMessage, 16, 1);
+	END
 
 	SELECT @EntityId = intEntityId
 		FROM tblEMEntity
-			where strEntityNo = ''@entityCustomerId@''
+			where strEntityNo LIKE ''%'' + ''@entityCustomerId@''
 
 	SET @EntityLocationId = null
 	IF ISNULL(@EntityId, 0) > 0 and @LocationName <> ''''
@@ -130,10 +143,14 @@ UPDATE tblSMCSVDynamicImport SET
 
 	END
 
-	DECLARE @RoleId INT
-
 	IF ISNULL(@EntityId, 0) > 0
 	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityToContact contact INNER JOIN tblEMEntity entity ON contact.intEntityContactId = entity.intEntityId 
+				  WHERE contact.intEntityId = @EntityId AND entity.strName = ''@name@'')
+		BEGIN
+			SET @ValidationMessage = ''Detected duplicate contact name. Please check the name and re-attempt the upload''
+			RAISERROR(@ValidationMessage, 16, 1);
+		END
 
 		DECLARE @NewEntityId INT
 		INSERT INTO tblEMEntity(
@@ -165,16 +182,18 @@ UPDATE tblSMCSVDynamicImport SET
 			select @NewEntityId, @Mobile, null
 		END
 
-		IF @PortalBit = 1
+		IF @PortalBit = 1 AND ISNULL(@PortalPassword, '''') <> ''''
+			AND EXISTS(SELECT TOP 1 1 FROM vyuEME2C2Role WHERE intEntityId = @EntityId AND ysnAdmin = 1)
 		BEGIN
 			DECLARE @ToggleOutput	NVARCHAR(200)
-			DECLARE @UserRoleId		INT
+
 			EXEC uspEMTogglePortalAccess
 				@intEntityId				= @EntityId,
 				@intEntityContactId			= @NewEntityId,
 				@ysnEnablePortalAccess		= 1,
 				@message					= @ToggleOutput OUTPUT,
-				@intUserRoleId				= @UserRoleId OUTPUT
+				@intUserRoleId				= @UserRoleId,
+				@strPassword				= @PortalPassword
 
 			IF ISNULL(@ToggleOutput, '''') <> ''''
 			BEGIN
@@ -187,6 +206,7 @@ UPDATE tblSMCSVDynamicImport SET
 	END
 
 '
+
 	 WHERE intCSVDynamicImportId = @NewHeaderId
 
 	 DELETE FROM tblSMCSVDynamicImportParameter WHERE intCSVDynamicImportId = @NewHeaderId
@@ -223,7 +243,9 @@ UPDATE tblSMCSVDynamicImport SET
 	Union All
 	SELECT @NewHeaderId, 'rank', 'Rank', 0
 	Union All
-	SELECT @NewHeaderId, 'portal', 'Portal Access', 0
+	SELECT @NewHeaderId, 'portalUserRole', 'Portal User Role', 0
+	Union All
+	SELECT @NewHeaderId, 'portalPassword', 'Portal Password', 0
 
 -- Customer Contact Import End
 
@@ -933,6 +955,8 @@ UPDATE tblSMCSVDynamicImport SET
 			select @entityno, @name, '''', @originationdated, @documentdelivery, @externalerpid, @genfederaltaxid, @genstatetaxid
 
 			set @entityId = @@IDENTITY
+
+			exec uspSMUpdateEntityStartingNumber @entityno		
 
 			insert into tblEMEntity(strName, strContactNumber, strSuffix, strEmail, intLanguageId, strInternalNotes)
 			select @contactname, '''', @suffix, @email, @languageId, @internalnotes

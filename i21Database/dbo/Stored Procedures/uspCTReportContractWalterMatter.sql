@@ -196,12 +196,12 @@ BEGIN TRY
 													ELSE '' END
 													END
 		,strAtlasDeclaration					= 'We confirm having' + CASE WHEN CH.intContractTypeId = 1	   THEN ' bought from '   ELSE ' sold to ' END + 'you as follows:'
-		,strReferenceNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END	
-		,strCommodityCode						= ICC.strCommodityCode		
+		,strReferenceNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strCustomerContract ELSE CH.strCustomerContract END	
+		,strCommodityCode						= ICC.strDescription		
 		,lblCropYear							= CASE WHEN ISNULL(CH.ysnPrintCropYear,'') <> 0	THEN 'Crop Year :'	ELSE NULL END
 		,strCropYear							= CASE WHEN ISNULL(CH.ysnPrintCropYear,'') <> 0 THEN CY.strCropYear ELSE NULL END
 		,strContractBasis						= CB.strFreightTerm + ' ' + SCI.strCity
-		,strInsurance							= 'To be covered by' + CASE WHEN CH.intInsuranceById = 1 THEN 'Buyer' ELSE 'Seller' END 
+		,strInsurance							= CASE WHEN ISNULL(CH.intInsuranceById,'') <>'' THEN ('To be covered by ' + CASE WHEN CH.intInsuranceById = 1 THEN 'Buyer' ELSE 'Seller' END) ELSE  ''  END
 		,lblWeighing						    = CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN 'Weighing :'					ELSE NULL END
 		,strWeight								= W1.strWeightGradeDesc
 		,lblTerm								= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN 'Payment Terms :'				ELSE NULL END

@@ -4177,17 +4177,30 @@ BEGIN TRY
 				--Check if the sequence was HTA and then priced
 				IF (@prevPricingTypeId = 3 AND @truePricingTypeId = 1 AND @TotalHTA > 0)
 				BEGIN
-					UPDATE @cbLogSpecific
-					SET dblQty = @TotalConsumed * -1
-						, dblOrigQty = @TotalConsumed
-						, intPricingTypeId = 3
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
-					UPDATE @cbLogSpecific
-					SET dblQty = @TotalConsumed
-						, dblOrigQty = @TotalConsumed
-						, intPricingTypeId = 1
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					--check if reduce quantity.
+					if (@dblSeqHistoryPreviousQty > @dblContractQty)
+					begin
+						UPDATE @cbLogSpecific
+						SET dblQty = (@dblSeqHistoryPreviousQty - @dblContractQty) * -1
+							, dblOrigQty = (@dblSeqHistoryPreviousQty - @dblContractQty)
+							, intPricingTypeId = case when @truePricingTypeId = 1 then 1 else 3 end
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					end
+					else
+					begin
+						UPDATE @cbLogSpecific
+						SET dblQty = @TotalConsumed * -1
+							, dblOrigQty = @TotalConsumed
+							, intPricingTypeId = 3
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+						UPDATE @cbLogSpecific
+						SET dblQty = @TotalConsumed
+							, dblOrigQty = @TotalConsumed
+							, intPricingTypeId = 1
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					end
 				END
 				ELSE IF (@strProcess = 'Do Roll')
 				BEGIN
@@ -4849,6 +4862,7 @@ BEGIN TRY
 									UPDATE @cbLogSpecific
 									SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
 																WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
+																WHEN @intHeaderPricingTypeId = 6 THEN 6
 																ELSE 2 END
 										, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
 															ELSE intActionId END

@@ -461,6 +461,9 @@ BEGIN
 
 END
 
+-- UPDATE PAYMENT HEADER INVOICE
+EXEC dbo.uspARUpdatePaymentInvoiceField @PaymentIds, 0
+
 --UPDATE PAYMENT DETAIL AMOUNT DUE PAID FROM VOUCHER
 UPDATE ARPD
 SET ARPD.dblAmountDue     = -((C.dblTotal + ABS(ARPD.dblInterest)) - (ABS(ARPD.dblPayment) + ABS(ARPD.dblDiscount) + ABS(ARPD.dblWriteOffAmount)))
@@ -573,7 +576,7 @@ INSERT INTO @InvoiceId(intHeaderId)
 SELECT intHeaderId = intInvoiceId
 FROM @PaymentStaging
 
-EXEC dbo.uspARProcessTradeFinanceLog @InvoiceId, @UserId, 'Payment'
+EXEC dbo.uspARProcessTradeFinanceLog @InvoiceId, @UserId, 'Payment', 0, @Post, 1
 
 IF @Post = 0
 	BEGIN			

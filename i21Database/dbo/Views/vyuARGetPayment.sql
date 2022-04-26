@@ -52,6 +52,8 @@ SELECT intPaymentId						= P.intPaymentId
 	 , dblConvenienceFee				= ISNULL(PM.dblConvenienceFee, 0)
 	 , strConvenienceFeeType			= ISNULL(PM.strConvenienceFeeType, 'None')
 	 , ysnIntraCompany					= P.ysnIntraCompany
+	 , ysnScheduledPayment				= ISNULL(P.ysnScheduledPayment, 0)
+	 , dtmScheduledPayment				= P.dtmScheduledPayment
 FROM tblARPayment P WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch C ON C.intEntityId = P.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = P.intLocationId

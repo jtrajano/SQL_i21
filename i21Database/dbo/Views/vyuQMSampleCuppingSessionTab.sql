@@ -1,13 +1,14 @@
 CREATE VIEW vyuQMSampleCuppingSessionTab
 AS
-SELECT S.intSampleId
-	 , CS.intCuppingSessionId
-	 , CS.strCuppingSessionNumber
-	 , S.intSampleStatusId
-	 , SS.strStatus
-	 , dtmCuppingDate = dtmCuppingTime
-	 , CS.dtmCuppingTime
+SELECT intSampleId				= S.intSampleId
+	 , intCuppingSessionId		= CS.intCuppingSessionId
+	 , strCuppingSessionNumber	= CS.strCuppingSessionNumber
+	 , intSampleStatusId		= S.intSampleStatusId
+	 , strStatus				= SS.strStatus
+	 , dtmCuppingDate			= CS.dtmCuppingDate
+	 , strCuppingTime			= CONVERT(VARCHAR(8), CS.dtmCuppingTime, 8)
 FROM tblQMSample S
 INNER JOIN tblQMCuppingSessionDetail CSD ON CSD.intSampleId = S.intSampleId
 INNER JOIN tblQMCuppingSession CS ON CS.intCuppingSessionId = CSD.intCuppingSessionId
-INNER JOIN tblQMSampleStatus SS ON S.intSampleStatusId = SS.intSampleStatusId
+INNER JOIN tblQMSample CHILDSAMPLE ON S.intSampleId = CHILDSAMPLE.intRelatedSampleId
+INNER JOIN tblQMSampleStatus SS ON CHILDSAMPLE.intSampleStatusId = SS.intSampleStatusId

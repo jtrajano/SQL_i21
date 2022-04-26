@@ -2,7 +2,9 @@ CREATE VIEW [dbo].[vyuCRMGetBrand]
 AS
 	SELECT 
 		   intBrandId					= Brand.intBrandId
-		  ,strBrand						= Brand.strBrand
+		  ,intBrandMaintenanceId		= BrandMaintenance.intBrandMaintenanceId
+		  ,strBrand						= BrandMaintenance.strBrand
+		  ,strIntegrationName			= Brand.strIntegrationName
 		  ,strFileType					= Brand.strFileType
 		  ,strIntegrationObject			= Brand.strIntegrationObject
 		  ,strLoginUrl					= Brand.strLoginUrl
@@ -24,10 +26,12 @@ AS
 		  ,strVendorContactPhone		= VendorContact.strPhone
 		  ,strVendorContactEmail		= VendorContact.strEmail
 	FROM tblCRMBrand Brand
+		INNER JOIN tblCRMBrandMaintenance BrandMaintenance
+	ON BrandMaintenance.intBrandMaintenanceId = Brand.intBrandMaintenanceId
 		LEFT JOIN tblEMEntity Vendor
 	ON Vendor.intEntityId = Brand.intVendorId
 			LEFT JOIN tblEMEntity VendorContact
-	ON VendorContact.intEntityId = Brand.intVendorId
+	ON VendorContact.intEntityId = Brand.intVendorContactId
 
 		
 GO

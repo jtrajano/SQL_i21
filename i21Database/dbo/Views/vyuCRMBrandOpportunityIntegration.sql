@@ -39,7 +39,7 @@ SELECT  [Owner]						 = SalesPerson.strName
 	   ,PrivateLabel				 = ''
 	   ,MSA							 = ''
 	   ,intOpportunityId			 = Opportunity.intOpportunityId
-	   ,intBrandId					 = Opportunity.intBrandId
+	   ,intBrandMaintenanceId		 = Opportunity.intBrandMaintenanceId
 FROM tblCRMOpportunity Opportunity
 		LEFT JOIN tblEMEntity SalesPerson
 ON SalesPerson.intEntityId = Opportunity.intInternalSalesPerson
@@ -59,6 +59,6 @@ ON IndustrySegment.intIndustrySegmentId = Opportunity.intIndustrySegmentId
 ON SalesPipeStatus.intSalesPipeStatusId = Opportunity.intSalesPipeStatusId
 		LEFT JOIN tblCRMOpportunityType OpportunityType
 ON OpportunityType.intOpportunityTypeId = Opportunity.intOpportunityTypeId
-WHERE Opportunity.intBrandId IS NOT NULL
+WHERE Opportunity.intBrandMaintenanceId IS NOT NULL
 
 GO
