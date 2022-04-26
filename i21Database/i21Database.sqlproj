@@ -10182,6 +10182,8 @@
     <Build Include="dbo\Views\vyuQMGetSample.sql" />
     <Build Include="dbo\Stored Procedures\uspQMPreStageSample.sql" />
     <Build Include="dbo\Views\vyuQMGetSampleType.sql" />
+    <Build Include="dbo\Views\vyuQMContractSamplesMonitoring.sql" />
+    <Build Include="dbo\Views\vyuQMSampleNotAllocated.sql" /> 
     <Build Include="dbo\Tables\tblIPSampleType.sql" />
     <Build Include="dbo\Stored Procedures\uspIPTransferOrderWithoutBOL.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
