@@ -482,7 +482,7 @@ BEGIN
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
 			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
-			and I.strTransactionType IN ('Invoice')
+			and I.strType IN ('Standard') and I.strTransactionType = 'Invoice'
 		)
 	END
 
@@ -494,7 +494,7 @@ BEGIN
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
 			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
-			and I.strTransactionType IN ('Provisional')
+			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
 		)
 	END
 END
@@ -512,7 +512,7 @@ where intContractDetailId in (select intPurchaseContractDetailId from tblRKAlloc
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
 			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
-			and I.strTransactionType IN ('Invoice')
+			and I.strType IN ('Standard') and I.strTransactionType = 'Invoice'
 		)
 		AND intPurchaseContractDetailId IN (select intContractDetailId from #tmpPurchaseWithVoucher)
 	END
@@ -525,7 +525,7 @@ where intContractDetailId in (select intPurchaseContractDetailId from tblRKAlloc
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
 			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
-			and I.strTransactionType IN ('Provisional')
+			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
 		)
 		AND intPurchaseContractDetailId IN (select intContractDetailId from #tmpPurchaseWithVoucher)
 	END
