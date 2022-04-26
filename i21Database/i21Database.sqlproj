@@ -725,6 +725,8 @@
     <Build Include="dbo\Views\vyuTRFGetOpenTradeFinanceNumbers.sql" />
     <Build Include="dbo\Functions\fnARCustomerAgingDetail.sql" />
     <Build Include="dbo\Functions\fnCMGetUndepositedFundsForCashFlowReport.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTradeFinance.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTradeFinanceLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
