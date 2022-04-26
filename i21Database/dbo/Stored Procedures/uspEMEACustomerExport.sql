@@ -39,6 +39,18 @@ INSERT INTO tblAREACustomerExport (
 	, dtmDateCreated
 	, dtmDateModified
 	, strAccountType
+	, intFreightTermId
+	, strFreightTerm
+	, intTermId
+	, strTerm
+	, strCurrency
+	, intCurrencyId
+	, intShipViaId
+	, strShipVia
+	, intBillToLocationId
+	, strBillToLocation
+	, intShipToLocationId
+	, strShipToLocation
 )
 SELECT intEntityId			= intId
 	, strEntityNo			= LTRIM(RTRIM(Id))
@@ -73,6 +85,18 @@ SELECT intEntityId			= intId
 	, dtmDateCreated		= DateCreated
 	, dtmDateModified		= DateModified
 	, strAccountType		= AccountType
+	, intFreightTermId 		= FreightTermId
+	, strFreightTerm 		= FreightTerm
+	, intTermId 			= TermId
+	, strTerm			 	= Term
+	, strCurrency 			= Currency
+	, intCurrencyId 		= CurrencyId
+	, intShipViaId 			= ShipViaId
+	, strShipVia 			= ShipVia
+	, intBillToLocationId 	= BillToLocationId
+	, strBillToLocation 	= BillToLocation
+	, intShipToLocationId 	= ShipToLocationId
+	, strShipToLocation 	= ShipToLocation
 FROM vyuEMEAExportCustomer 
 WHERE (CAST(ModifiedDate AS DATE) BETWEEN @dtmFrom AND @dtmTo) OR (@dtmFrom IS NULL OR @dtmTo IS NULL)
 
