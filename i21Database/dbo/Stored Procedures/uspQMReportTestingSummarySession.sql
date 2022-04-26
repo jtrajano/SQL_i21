@@ -68,7 +68,8 @@ BEGIN TRY
 	SELECT
 		 strPrintType = @strPrintType
 		,QMCS.intCuppingSessionId
-		,QMS.strSampleNumber
+		,QMSP.strSampleNumber
+		,strChildSampleNumber			= QMS.strSampleNumber
 		,ICI.strItemNo
 		,strOrigin = ICCAO.strDescription
 		,QMCS.dtmCuppingDate
@@ -78,12 +79,14 @@ BEGIN TRY
 		,QMCSD.intRank
 		,QMCS.strCuppingSessionNumber
 		,strProductType					= ICCAPT.strDescription
-		,strBuyer = CASE WHEN LGACC.intCount > 1 THEN 'Multiple' ELSE LGAC.strBuyer END
-		,strSContractNumber = CASE WHEN LGACC.intCount > 1 THEN 'Multiple' ELSE LGAC.strSContractNumber END
+		,strBuyer						= CASE WHEN LGACC.intCount > 1 THEN 'Multiple' ELSE LGAC.strBuyer END
+		,strSContractNumber				= CASE WHEN LGACC.intCount > 1 THEN 'Multiple' ELSE LGAC.strSContractNumber END
+		,strProductLine					= ICCPL.strDescription
 	FROM tblQMCuppingSession QMCS
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
 	INNER JOIN tblQMSample QMS ON QMCSD.intCuppingSessionDetailId = QMS.intCuppingSessionDetailId
 	INNER JOIN tblICItem ICI WITH (NOLOCK) ON QMS.intItemId = ICI.intItemId
+	LEFT JOIN tblQMSample QMSP ON QMS.intRelatedSampleId = QMSP.intSampleId
 	LEFT JOIN (
 		SELECT 
 			 intContractDetailId
@@ -93,6 +96,7 @@ BEGIN TRY
 		LEFT JOIN tblCTContractHeader CTCH ON CTCD.intContractHeaderId = CTCH.intContractHeaderId
 	) CTC ON QMS.intContractDetailId = CTC.intContractDetailId
 	LEFT JOIN tblICCommodityAttribute ICCAO	ON	ICCAO.intCommodityAttributeId =	ICI.intOriginId
+	LEFT JOIN tblICCommodityProductLine ICCPL ON ICI.intProductLineId = ICCPL.intCommodityProductLineId
 	LEFT JOIN tblICCommodityAttribute ICCAPT ON ICI.intProductTypeId = ICCAPT.intCommodityAttributeId AND ICCAPT.strType = 'ProductType'
 	LEFT JOIN tblEMEntity EME ON QMS.intEntityId = EME.intEntityId
 	OUTER APPLY (
