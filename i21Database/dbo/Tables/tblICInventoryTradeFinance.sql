@@ -30,6 +30,12 @@ CREATE TABLE [dbo].[tblICInventoryTradeFinance]
 	[intOverrideFacilityValuation] INT NULL,
 	[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,	
 
+	[intConcurrencyId] [int] NULL DEFAULT ((0)),
+	[dtmDateCreated] DATETIME NULL,
+    [dtmDateModified] DATETIME NULL,
+    [intCreatedByUserId] INT NULL,
+    [intModifiedByUserId] INT NULL,
+
 	CONSTRAINT [PK_tblICInventoryTradeFinance] PRIMARY KEY ([intInventoryTradeFinanceId]), 
 	CONSTRAINT [AK_tblICInventoryTradeFinance_strTradeFinanceNumber] UNIQUE ([strTradeFinanceNumber]), 
 	CONSTRAINT [FK_tblICInventoryTradeFinance_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank] ([intBankId]),
