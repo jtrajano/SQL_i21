@@ -260,6 +260,18 @@ BEGIN TRY
 		FROM tblICStorageChargeDetail A
 		INNER JOIN tblICStorageCharge B
 			ON A.intStorageChargeId = B.intStorageChargeId
+		INNER JOIN (
+						SELECT 
+							intRow = ROW_NUMBER() OVER (PARTITION BY A.intInventoryStockMovementId ORDER BY B.dtmBillDateUTC DESC)
+							,A.intStorageChargeDetailId
+						FROM tblICStorageChargeDetail A
+						INNER JOIN tblICStorageCharge B 
+							ON A.intStorageChargeId = B.intStorageChargeId
+						WHERE B.ysnPosted = 1
+							AND B.dtmBillDateUTC < @dtmBillDateUTC
+					)C 
+			ON A.intStorageChargeDetailId = C.intStorageChargeDetailId
+				AND C.intRow = 1	
 		WHERE B.ysnPosted = 1
 			AND A.dblReceivedQuantity - ABS(A.dblDeliveredQuantity) > 0
 			AND B.dtmBillDateUTC < @dtmBillDateUTC
@@ -349,6 +361,18 @@ BEGIN TRY
 		FROM tblICStorageChargeDetail A
 		INNER JOIN tblICStorageCharge B
 			ON A.intStorageChargeId = B.intStorageChargeId
+		INNER JOIN (
+						SELECT 
+							intRow = ROW_NUMBER() OVER (PARTITION BY A.intInventoryStockMovementId ORDER BY B.dtmBillDateUTC DESC)
+							,A.intStorageChargeDetailId
+						FROM tblICStorageChargeDetail A
+						INNER JOIN tblICStorageCharge B 
+							ON A.intStorageChargeId = B.intStorageChargeId
+						WHERE B.ysnPosted = 1
+							AND B.dtmBillDateUTC < @dtmBillDateUTC
+					)C 
+			ON A.intStorageChargeDetailId = C.intStorageChargeDetailId
+				AND C.intRow = 1	
 		WHERE B.ysnPosted = 1
 			AND A.dblReceivedQuantity - ABS(A.dblDeliveredQuantity) > 0
 			AND B.dtmBillDateUTC < @dtmBillDateUTC

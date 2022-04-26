@@ -23,7 +23,8 @@ DECLARE @ysnBillPosted BIT
 DECLARE @_intBillId INT
 DECLARE @strBillNumber NVARCHAR(100)
 DECLARE @logDescriotion NVARCHAR(MAX)
-
+DECLARE @strBillIds NVARCHAR(MAX)
+DECLARE @strVoucherNumbers NVARCHAR(MAX)
 
 BEGIN TRY
 	IF ISNULL(@intStorageChargeId,0) = 0
@@ -69,6 +70,7 @@ BEGIN TRY
 					intCurrencyId
 					,ysnStage
 					,intStorageChargeId
+					,intLotId
 					)
 			SELECT
 					[intTransactionType]			=	1,
@@ -76,12 +78,12 @@ BEGIN TRY
 					[intItemId]						=	B.intItemChargeId,					
 					[strMiscDescription]			=	D.strDescription,
 					[intQtyToBillUOMId]				=	B.intItemChargeUOMId
-					,[dblQuantityToBill]			=	B.dblChargeQuantity
+					,[dblQuantityToBill]			=	1
 					,[dblQtyToBillUnitQty]			=	E.dblUnitQty
-					,[dblOrderQty]					=	B.dblChargeQuantity
+					,[dblOrderQty]					=	1
 					,[dblDiscount]					=	0
 					,[intCostUOMId]					=	B.intItemChargeUOMId
-					,[dblCost]						=	B.dblRate
+					,[dblCost]						=	B.dblStorageCharge
 					,[dblCostUnitQty]				=	E.dblUnitQty
 					,[int1099Form]					=	(CASE WHEN COALESCE(G.intEntityId, M.intEntityId) IS NOT NULL 
 																	AND C.intItemId > 0
@@ -111,12 +113,13 @@ BEGIN TRY
 					,strSourceNumber				=	A.strStorageChargeNumber
 					,intLocationId					=	COALESCE(F.intLocationId,L.intLocationId)
 					,intSubLocationId				=	A.intStorageLocationId
-					,intStorageLocationId			=   NULL
+					,intStorageLocationId  			= 	Q.intStorageLocationId
 					,intItemLocationId				=	C.intItemLocationId
 					,ysnSubCurrency					=	0
 					,intCurrencyId					=	A.intCurrencyId
 					,ysnStage 						=	0
 					,intStorageChargeId				=	B.intStorageChargeDetailId
+					,intLotId						= 	B.intLotId
 			FROM tblICStorageCharge A
 			INNER JOIN tblICStorageChargeDetail B
 				ON A.intStorageChargeId = B.intStorageChargeId
@@ -162,6 +165,8 @@ BEGIN TRY
 				ON P.strCategory = O.str1099Type
 			---------End Inventory Receipt ---------------
 			---------------------------------------------------
+			LEFT JOIN tblICLot Q
+				ON B.intLotId = Q.intLotId
 			WHERE B.dblStorageCharge <> 0
 				AND A.intStorageChargeId = @intStorageChargeId
 
@@ -212,25 +217,30 @@ BEGIN TRY
 					,@userId = @intUserId
 					,@throwError = 1
 					,@error = @ErrorMessage OUT
-					,@createdVouchersId = @intBillId OUT
+					,@createdVouchersId = @strBillIds OUT
 
 				
 			END
 		END
 
 		---Update Storage Charge
-		IF(ISNULL(@intBillId,0) > 0)
+		IF(ISNULL(@strBillIds,'') <> '')
 		BEGIN
-			SELECT TOP 1 
-				@strBillNumber = strBillId
-			FROM tblAPBill
-			WHERE intBillId = @intBillId
-
+			SELECT @strVoucherNumbers = STUFF((
+				SELECT 
+					',' + strBillId
+				FROM tblAPBill
+				WHERE intBillId IN (	SELECT											
+											A.Item
+										FROM dbo.fnSplitString (@strBillIds,',') A																							
+									)
+				FOR XML PATH('')),1,1,'')				
+			
 			UPDATE tblICStorageCharge 
 			SET ysnPosted = 1
 			WHERE intStorageChargeId = @intStorageChargeId
 
-			SET @logDescriotion = 'Posted with Voucher ''' + @strBillNumber + ''''
+			SET @logDescriotion = 'Posted with Voucher ' + @strVoucherNumbers
 			
 			EXEC dbo.uspSMAuditLog 
 				@keyValue			= @intStorageChargeId					-- Primary Key Value of the Ticket. 
