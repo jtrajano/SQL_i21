@@ -4396,6 +4396,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Truck Dis
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.TruckSchedule', intSort = 6 WHERE strMenuName = 'Truck Dispatch Schedule' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dispatch Orders' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Dispatch Orders', N'Logistics', @LogisticsActivitiesParentMenuId, N'Dispatch Orders', N'Activity', N'Screen', N'Logistics.view.DispatchOrder?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.DispatchOrder?showSearch=true', intSort = 7 WHERE strMenuName = 'Dispatch Orders' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Container Types' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Container Types', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Container Types', N'Maintenance', N'Screen', N'Logistics.view.ContainerType?showSearch=true', N'small-menu-Maintenance', 0, 0, 0, 1, 0, 1)
