@@ -1,10 +1,17 @@
 CREATE PROCEDURE dbo.uspQMMirrorRelatedSample 
-	@intRelatedSampleId INT
+    @intSampleId INT
+	,@intRelatedSampleId INT
     ,@intUserId INT
 	,@strAction NVARCHAR(20)
 AS
 SET XACT_ABORT ON
 SET NOCOUNT ON
+
+
+DECLARE @intLogId INT
+,@intTransactionId INT
+,@intLoadAuditParentId INT
+
 
 IF (@strAction = 'Created')
 BEGIN
@@ -23,6 +30,66 @@ ELSE IF (@strAction = 'Updated')
 BEGIN
 --DECLARE @json NVARCHAR(MAX);
 --SET @json = N'{"strRepresentLotNumber":"4556"}';
+
+DECLARE @strSampleNumberBefore NVARCHAR(30) = '',@strRelatedSampleNumberBefore NVARCHAR(30) = '', @intSampleRelatedBeforeId INT
+SELECT @strSampleNumberBefore = strSampleNumber , @intSampleRelatedBeforeId = intSampleId,@strRelatedSampleNumberBefore = strRelatedSampleNumber
+ FROM vyuQMSampleList WHERE intRelatedSampleId = @intSampleId AND intSampleId <> @intRelatedSampleId
+
+
+
+IF ISNULL(@strSampleNumberBefore,'') <> ''
+BEGIN
+print('heelo')
+    UPDATE tblQMSample SET intRelatedSampleId = NULL WHERE @intSampleRelatedBeforeId = intSampleId
+
+
+     EXEC uspSMInsertTransaction @screenNamespace = 'Quality.view.QualitySample', @intKeyValue = @intSampleRelatedBeforeId, @output = @intTransactionId OUTPUT
+    
+     INSERT INTO tblSMLog (strType, dtmDate, intEntityId, intTransactionId, intConcurrencyId) 
+        VALUES('Audit', GETUTCDATE(), @intUserId, @intTransactionId, 1)
+        SET @intLogId = SCOPE_IDENTITY()
+
+        --Insert Load parent Audit entry
+        INSERT INTO tblSMAudit (intLogId, intKeyValue, strAction, strChange, intConcurrencyId)
+        SELECT @intLogId, @intSampleRelatedBeforeId, 'Updated', ('Removed related sample Id - Record: ' + CAST(@strSampleNumberBefore AS nvarchar(20))), 1
+        SET @intLoadAuditParentId = SCOPE_IDENTITY()
+
+        INSERT INTO tblSMAudit (intLogId, intKeyValue, strChange, strFrom, strTo, strAlias, ysnField, ysnHidden, intParentAuditId, intConcurrencyId)
+        SELECT @intLogId, @intSampleRelatedBeforeId,'strRelatedSampleNumber'
+            ,@strRelatedSampleNumberBefore
+            ,NULL
+            ,'Related Sample Id', 1,0, 
+            @intLoadAuditParentId,1
+        
+    
+END
+
+
+
+ EXEC uspSMInsertTransaction @screenNamespace = 'Quality.view.QualitySample', @intKeyValue = @intRelatedSampleId, @output = @intTransactionId OUTPUT
+
+	  SELECT @strSampleNumberBefore = strSampleNumber ,@strRelatedSampleNumberBefore = strRelatedSampleNumber
+		FROM vyuQMSampleList WHERE intSampleId = @intRelatedSampleId
+
+
+		UPDATE tblQMSample SET intRelatedSampleId = @intSampleId WHERE intSampleId = @intRelatedSampleId
+
+		INSERT INTO tblSMLog (strType, dtmDate, intEntityId, intTransactionId, intConcurrencyId) 
+        VALUES('Audit', GETUTCDATE(), @intUserId, @intTransactionId, 1)
+        SET @intLogId = SCOPE_IDENTITY()
+
+        --Insert Load parent Audit entry
+        INSERT INTO tblSMAudit (intLogId, intKeyValue, strAction, strChange, intConcurrencyId)
+        SELECT @intLogId, @intSampleRelatedBeforeId, 'Updated', ('Added related sample Id - Record: ' + CAST(@strSampleNumberBefore AS nvarchar(20))), 1
+        SET @intLoadAuditParentId = SCOPE_IDENTITY()
+
+        INSERT INTO tblSMAudit (intLogId, intKeyValue, strChange, strFrom, strTo, strAlias, ysnField, ysnHidden, intParentAuditId, intConcurrencyId)
+        SELECT @intLogId, @intSampleRelatedBeforeId,'strRelatedSampleNumber'
+            ,@strRelatedSampleNumberBefore
+            ,strRelatedSampleNumber
+            ,'Related Sample Id', 1,0, 
+            @intLoadAuditParentId,1
+			from vyuQMSampleList WHERE intSampleId = @intRelatedSampleId
 
 
 DECLARE  @tblBefore TABLE(
@@ -121,9 +188,6 @@ INSERT INTO @tblBefore(
         FROM vyuQMSampleList
 	WHERE intSampleId = @intRelatedSampleId
 
-	DECLARE @intLogId INT
-		,@intTransactionId INT
-		,@intLoadAuditParentId INT
 
     DECLARE @tblAudit TABLE (
         [strAction]		     NVARCHAR(100)    COLLATE Latin1_General_CI_AS NULL,
@@ -228,8 +292,11 @@ INSERT INTO @tblBefore(
 
     IF EXISTS (SELECT 1 FROM @tblAudit)
     BEGIN
+        DECLARE @strRelatedSampleId NVARCHAR(30) 
 
         EXEC uspSMInsertTransaction @screenNamespace = 'Quality.view.QualitySample', @intKeyValue = @intRelatedSampleId, @output = @intTransactionId OUTPUT
+
+        SELECT @strRelatedSampleId = strSampleNumber from vyuQMSampleList WHERE intSampleId = @intSampleId
 
         --Insert to SM Log
         INSERT INTO tblSMLog (strType, dtmDate, intEntityId, intTransactionId, intConcurrencyId) 
@@ -238,7 +305,7 @@ INSERT INTO @tblBefore(
 
         --Insert Load parent Audit entry
         INSERT INTO tblSMAudit (intLogId, intKeyValue, strAction, strChange, intConcurrencyId)
-        SELECT @intLogId, @intRelatedSampleId, 'Updated', ('Updated (from mirroring) - Record: ' + CAST(@intRelatedSampleId AS nvarchar(20))), 1
+        SELECT @intLogId, @intRelatedSampleId, 'Updated', ('Updated (from mirroring) - Record: ' + @strRelatedSampleId), 1
         SET @intLoadAuditParentId = SCOPE_IDENTITY()
 
 
