@@ -727,6 +727,7 @@
     <Build Include="dbo\Functions\fnCMGetUndepositedFundsForCashFlowReport.sql" />
     <Build Include="dbo\Tables\tblICInventoryTradeFinance.sql" />
     <Build Include="dbo\Tables\tblICInventoryTradeFinanceLot.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryTradeFinanceLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
