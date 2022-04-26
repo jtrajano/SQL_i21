@@ -103,7 +103,7 @@ ON A.strBucket = G.strBucket AND A.dtmValidFromDate = G.dtmValidFromDate AND A.i
 INSERT INTO @tblDefaultRateTypeDuplicates
 SELECT * FROM @tblDefaultRateTypes WHERE strBucket IN(
 	SELECT strBucket FROM @tblDefaultRateTypes
-	GROUP BY strBucket
+	GROUP BY strBucket, intFromCurrencyId
 	HAVING COUNT (*) > 1
 )
 
