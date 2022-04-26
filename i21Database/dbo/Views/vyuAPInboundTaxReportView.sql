@@ -159,5 +159,6 @@ OUTER APPLY (
 	FROM tblGLAccount
 	WHERE intAccountId = APBD.intAccountId
 ) account
+WHERE APB.intTransactionType NOT IN (15)
 
 GO
