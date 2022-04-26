@@ -485,7 +485,7 @@ BEGIN TRY
 		, CT.dblPFQuantityUOMId
 		, dblTotalLots = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN CD.dblNoOfLots
 								ELSE CT.[dblTotalLots] END
-		, dblLotsFixed = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN CD.dblNoOfLots
+		, dblLotsFixed = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN ISNULL(CD.dblNoOfLots,AP.dblLotsFixed)
 								ELSE CT.[dblLotsFixed] END
 		, dblUnpricedLots = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN NULL
 								ELSE CT.dblUnpricedLots END
@@ -683,6 +683,7 @@ BEGIN TRY
 		SELECT TOP 1 a.intContractHeaderId
 			, a.intContractDetailId
 			, c.strApprovalStatus
+			, a.dblLotsFixed
 		FROM tblCTPriceFixation a
 		LEFT JOIN tblSMTransaction c ON c.intRecordId = a.intPriceContractId AND c.strApprovalStatus IS NOT NULL and c.intScreenId =@intScreenId
 		WHERE a.intContractHeaderId = @intContractHeaderId
