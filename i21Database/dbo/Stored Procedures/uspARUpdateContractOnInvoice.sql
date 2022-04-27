@@ -82,6 +82,7 @@ BEGIN TRY
 	INNER JOIN
 		tblCTContractDetail CD
 			ON D.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
 	WHERE
 		D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId = TD.intContractDetailId		
@@ -93,7 +94,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND H.strType <> 'Tank Delivery'
+		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4) )
 		
 	UNION ALL
 
@@ -125,6 +126,7 @@ BEGIN TRY
 	INNER JOIN
 		tblCTContractDetail CD
 			ON D.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
 	WHERE
 		D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
@@ -135,7 +137,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND H.strType <> 'Tank Delivery'
+		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4) )
 		
 	UNION ALL
 
@@ -167,6 +169,7 @@ BEGIN TRY
 	INNER JOIN
 		tblCTContractDetail CD
 			ON TD.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
 	WHERE
 		D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
@@ -177,7 +180,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND H.strType <> 'Tank Delivery'
+		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4) )
 		
 	UNION ALL
 		
@@ -209,6 +212,7 @@ BEGIN TRY
 	INNER JOIN
 		tblCTContractDetail CD
 			ON TD.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
 	WHERE
 		D.intContractDetailId IS NULL
 		AND TD.intContractDetailId IS NOT NULL
@@ -218,7 +222,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND H.strType <> 'Tank Delivery'
+		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4))
 		
 	UNION ALL	
 
@@ -242,6 +246,7 @@ BEGIN TRY
 	INNER JOIN
 		tblCTContractDetail CD
 			ON TD.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
 	WHERE
 		TD.intTransactionId = @TransactionId 
 		AND TD.strTransactionType IN ('Cash', 'Invoice')
@@ -253,7 +258,7 @@ BEGIN TRY
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(H.intLoadId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND H.strType <> 'Tank Delivery'
+		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4))
 		
 	UNION ALL
 		
@@ -277,6 +282,7 @@ BEGIN TRY
 	INNER JOIN
 		tblCTContractDetail CD
 			ON Detail.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMBILInvoice MBIL ON Header.intInvoiceId = MBIL.inti21InvoiceId
 	WHERE
 		Detail.intInvoiceId = @TransactionId 
 		AND Header.strTransactionType IN ('Cash', 'Invoice')
@@ -289,7 +295,7 @@ BEGIN TRY
 		-- AND ISNULL(Detail.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(Header.intTransactionId, 0) = 0
 		AND Header.ysnFromProvisional = 0
-		AND Header.strType <> 'Tank Delivery'
+		AND (Header.strType <> 'Tank Delivery' OR (Header.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND Header.intSourceId <> 4))
 
 	UNION ALL
 
@@ -307,6 +313,7 @@ BEGIN TRY
     INNER JOIN tblICItem ITEM ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
     INNER JOIN tblARInvoice Header ON Detail.intInvoiceId = Header.intInvoiceId 
     INNER JOIN tblCTContractDetail CD ON Detail.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMBILInvoice MBIL ON Header.intInvoiceId = MBIL.inti21InvoiceId
     WHERE Header.strTransactionType IN ('Cash', 'Invoice')
       AND Detail.intContractDetailId IS NOT NULL
       AND Detail.[intInventoryShipmentItemId] IS NULL
@@ -315,7 +322,7 @@ BEGIN TRY
       AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)    
       AND ISNULL(Header.intTransactionId, 0) = 0
       AND @TransactionId IS NULL
-	  AND Header.strType <> 'Tank Delivery'
+	  AND (Header.strType <> 'Tank Delivery' OR (Header.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND Header.intSourceId <> 4))
 
 	UNION ALL
 
@@ -332,6 +339,7 @@ BEGIN TRY
 	INNER JOIN tblARInvoice Header ON D.intInvoiceId = Header.intInvoiceId 
 	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
 	INNER JOIN tblSCTicket T ON D.intTicketId = T.intTicketId
+	LEFT JOIN tblMBILInvoice MBIL ON Header.intInvoiceId = MBIL.inti21InvoiceId
 	LEFT JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 									   AND D.intInvoiceId = TD.intTransactionId 
 									   AND TD.strTransactionType IN ('Cash', 'Invoice')
@@ -343,7 +351,7 @@ BEGIN TRY
 		AND TD.intId IS NULL
 		AND T.strDistributionOption = 'SO'
 		AND I.strTransactionType IN ('Cash', 'Invoice')
-		AND Header.strType <> 'Tank Delivery'
+		AND (Header.strType <> 'Tank Delivery' OR (Header.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND Header.intSourceId <> 4))
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
