@@ -94,7 +94,8 @@ SELECT
 	A.intShipToId,
 	CASE WHEN B.dblCashPrice = 0 THEN B.dblCost ELSE B.dblCashPrice END dblCashPrice,
 	B.dblQualityPremium,
-	B.dblOptionalityPremium
+	B.dblOptionalityPremium,
+	lot.strLotNumber
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -168,3 +169,5 @@ LEFT JOIN (tblLGLoad receiptLoad INNER JOIN tblLGLoadDetail receiptLoadDetail ON
 	ON receiptLoadDetail.intLoadDetailId = IRE.intSourceId 
 			AND IR.intSourceType = 2
 			AND (IR.strReceiptType = 'Purchase Contract' OR IR.strReceiptType = 'Inventory Return')
+LEFT JOIN tblICLot lot
+	ON lot.intLotId = B.intLotId
