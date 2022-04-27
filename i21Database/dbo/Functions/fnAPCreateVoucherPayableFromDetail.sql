@@ -39,6 +39,8 @@ RETURNS TABLE AS RETURN
 		,[intContractSeqId]					=	B.intContractSeq
 		,[intContractDetailId]				=	B.intContractDetailId
 		,[intPriceFixationDetailId]			=	B.intPriceFixationDetailId
+		,[intInsuranceChargeDetailId]		=	B.intInsuranceChargeDetailId
+		,[intStorageChargeId]				=	B.intStorageChargeId
 		,[intScaleTicketId]					=	B.intScaleTicketId
 		,[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	B.intInventoryReceiptChargeId
@@ -117,6 +119,8 @@ RETURNS TABLE AS RETURN
 		OR	B.intScaleTicketId > 0
 		OR	B.intInventoryShipmentChargeId > 0
 		OR	B.intPriceFixationDetailId > 0
+		OR	B.intInsuranceChargeDetailId > 0
+		OR	B.intStorageChargeId > 0
 	)
 )
 

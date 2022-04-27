@@ -123,6 +123,21 @@ AS
 		WHERE schrge.intStorageChargeId = voucherDetail.intStorageChargeId
 	) storageCharge
 	WHERE voucherDetail.intStorageChargeId IS NOT NULL AND voucherDetail.intStorageChargeId > 0
+	UNION ALL
+	SELECT
+		voucherDetail.intBillDetailId
+		,intInventoryReceiptItemId = NULL
+		,intPurchaseDetailId = NULL
+		,strSourceNumber = insuranceCharge.strChargeNo
+	FROM tblAPBillDetail voucherDetail
+	OUTER APPLY (
+		SELECT TOP 1
+			ichrge.strChargeNo
+		FROM tblICInsuranceCharge ichrge
+		INNER JOIN tblICInsuranceChargeDetail ichrgedtl ON ichrge.intInsuranceChargeId = ichrgedtl.intInsuranceChargeId
+		WHERE ichrgedtl.intInsuranceChargeDetailId = voucherDetail.intInsuranceChargeDetailId
+	) insuranceCharge
+	WHERE voucherDetail.intInsuranceChargeDetailId IS NOT NULL AND voucherDetail.intInsuranceChargeDetailId > 0
 	--INNER JOIN
 	--(
 	--	--PO Items

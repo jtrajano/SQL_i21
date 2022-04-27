@@ -128,6 +128,8 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+				AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
+				AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 		AND NOT EXISTS(
@@ -151,6 +153,8 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+				AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
+				AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 	BEGIN
@@ -236,6 +240,8 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intContractHeaderId]			
 				,B.[intContractDetailId]
 				,B.[intPriceFixationDetailId]			
+				,B.[intInsuranceChargeDetailId]	
+				,B.[intStorageChargeId]	
 				,B.[intContractSeqId]				
 				,B.[intContractCostId]				
 				,B.[strContractNumber]				
@@ -349,6 +355,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intContractHeaderId]			
 			,[intContractDetailId]	
 			,[intPriceFixationDetailId]		
+			,[intInsuranceChargeDetailId]	
+			,[intStorageChargeId]	
 			,[intContractSeqId]				
 			,[intContractCostId]				
 			,[strContractNumber]				
@@ -442,7 +450,9 @@ ELSE SAVE TRAN @SavePoint
 			,[strPurchaseOrderNumber]		
 			,[intContractHeaderId]			
 			,[intContractDetailId]
-			,[intPriceFixationDetailId]			
+			,[intPriceFixationDetailId]		
+			,[intInsuranceChargeDetailId]	
+			,[intStorageChargeId]	
 			,[intContractSeqId]				
 			,[intContractCostId]				
 			,[strContractNumber]				
@@ -711,6 +721,8 @@ ELSE SAVE TRAN @SavePoint
 				,D.[intContractHeaderId]			
 				,D.[intContractDetailId]
 				,D.[intPriceFixationDetailId]			
+				,D.[intInsuranceChargeDetailId]			
+				,D.[intStorageChargeId]			
 				,D.[intContractSeqId]				
 				,D.[intContractCostId]				
 				,D.[strContractNumber]				
@@ -825,6 +837,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intContractHeaderId]			
 			,[intContractDetailId]	
 			,[intPriceFixationDetailId]		
+			,[intInsuranceChargeDetailId]		
+			,[intStorageChargeId]		
 			,[intContractSeqId]				
 			,[intContractCostId]				
 			,[strContractNumber]				
@@ -916,7 +930,9 @@ ELSE SAVE TRAN @SavePoint
 			,[strPurchaseOrderNumber]		
 			,[intContractHeaderId]			
 			,[intContractDetailId]	
-			,[intPriceFixationDetailId]			
+			,[intPriceFixationDetailId]	
+			,[intInsuranceChargeDetailId]		
+			,[intStorageChargeId]				
 			,[intContractSeqId]				
 			,[intContractCostId]				
 			,[strContractNumber]				

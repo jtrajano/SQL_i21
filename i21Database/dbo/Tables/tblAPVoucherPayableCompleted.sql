@@ -36,6 +36,7 @@
 	[intCustomerStorageId]			INT NULL,
 	[intSettleStorageId] 			INT NULL,
 	[intStorageChargeId] 			INT NULL,
+	[intInsuranceChargeDetailId]	INT NULL,
 	[intItemId]						INT NULL,
 	[intLotId] 						INT NULL,
 	[intLinkingId]					INT NULL,

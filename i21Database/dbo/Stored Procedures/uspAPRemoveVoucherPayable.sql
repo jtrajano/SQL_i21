@@ -27,6 +27,8 @@ DECLARE @vouchers AS TABLE(
 	,intSettleStorageId INT NULL
 	,intTicketDistributionAllocationId INT NULL
 	,intPriceFixationDetailId INT NULL
+	,intStorageChargeId INT NULL
+	,intInsuranceChargeDetailId INT NULL
 	,intItemId INT NULL
 	,intTransactionType INT NOT NULL
 	);
@@ -45,6 +47,8 @@ DECLARE @payablesDeleted AS TABLE(
 	,intSettleStorageId INT NULL
 	,intTicketDistributionAllocationId INT NULL
 	,intPriceFixationDetailId INT NULL
+	,intStorageChargeId INT NULL
+	,intInsuranceChargeDetailId INT NULL
 	,intItemId INT NULL
 	,intTransactionType INT NOT NULL
 	);
@@ -84,6 +88,8 @@ BEGIN
 		,B.intSettleStorageId
 		,B.intTicketDistributionAllocationId
 		,B.intPriceFixationDetailId
+		,B.intStorageChargeId
+		,B.intInsuranceChargeDetailId
 		,B.intItemId
 		,A.intTransactionType
 	FROM tblAPBill A
@@ -104,6 +110,8 @@ BEGIN
 		AND ISNULL(C.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 		AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(B.intTicketDistributionAllocationId,-1)
 		AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
+		AND ISNULL(C.intStorageChargeId,-1) = ISNULL(B.intStorageChargeId,-1)
+		AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(B.intInsuranceChargeDetailId,-1)
 		AND ISNULL(C.intItemId,-1) = ISNULL(B.intItemId,-1)
 	
 	IF EXISTS(SELECT 1 FROM @vouchers)
@@ -124,6 +132,8 @@ BEGIN
 			,deleted.intSettleStorageId
 			,deleted.intTicketDistributionAllocationId
 			,deleted.intPriceFixationDetailId
+			,deleted.intStorageChargeId
+			,deleted.intInsuranceChargeDetailId
 			,deleted.intItemId
 			,deleted.intTransactionType
 		INTO @payablesDeleted
@@ -142,6 +152,8 @@ BEGIN
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intTicketDistributionAllocationId,-1) = ISNULL(B.intTicketDistributionAllocationId,-1)
 			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
+			AND ISNULL(A.intInsuranceChargeDetailId,-1) = ISNULL(B.intInsuranceChargeDetailId,-1)
+			AND ISNULL(A.intStorageChargeId,-1) = ISNULL(B.intStorageChargeId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(A.intItemId,-1)
 		WHERE A.dblQuantityToBill = 0
 
@@ -169,7 +181,8 @@ BEGIN
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intTicketDistributionAllocationId,-1) = ISNULL(B.intTicketDistributionAllocationId,-1)
-			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
+			AND ISNULL(A.intInsuranceChargeDetailId,-1) = ISNULL(B.intInsuranceChargeDetailId,-1)
+			AND ISNULL(A.intStorageChargeId,-1) = ISNULL(B.intStorageChargeId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
 	END
 
@@ -200,6 +213,8 @@ BEGIN
 			,deleted.intSettleStorageId
 			,deleted.intTicketDistributionAllocationId
 			,deleted.intPriceFixationDetailId
+			,deleted.intStorageChargeId
+			,deleted.intInsuranceChargeDetailId
 			,deleted.intItemId
 			,deleted.intTransactionType
 		INTO @payablesDeleted
@@ -218,6 +233,8 @@ BEGIN
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intTicketDistributionAllocationId,-1) = ISNULL(B.intTicketDistributionAllocationId,-1)
 			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
+			AND ISNULL(A.intStorageChargeId,-1) = ISNULL(B.intStorageChargeId,-1)
+			AND ISNULL(A.intInsuranceChargeDetailId,-1) = ISNULL(B.intInsuranceChargeDetailId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
 		LEFT JOIN @vouchers C ON ISNULL(A.intEntityVendorId,-1) = ISNULL(C.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(C.intPurchaseDetailId,-1)
@@ -232,6 +249,8 @@ BEGIN
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(C.intSettleStorageId,-1)
 			AND ISNULL(A.intTicketDistributionAllocationId,-1) = ISNULL(C.intTicketDistributionAllocationId,-1)
 			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(C.intPriceFixationDetailId,-1)
+			AND ISNULL(A.intStorageChargeId,-1) = ISNULL(C.intStorageChargeId,-1)
+			AND ISNULL(A.intInsuranceChargeDetailId,-1) = ISNULL(C.intInsuranceChargeDetailId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(C.intItemId,-1)
 		WHERE C.intEntityVendorId IS NULL --make sure to delete only if no voucher created
 

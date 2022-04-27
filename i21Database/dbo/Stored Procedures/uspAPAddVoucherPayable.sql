@@ -46,6 +46,8 @@ BEGIN
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 			AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+			AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
+			AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND C.ysnStage = 1
@@ -87,6 +89,8 @@ BEGIN
 			,[intContractHeaderId]				=	A.intContractHeaderId
 			,[intContractDetailId]				=	A.intContractDetailId
 			,[intPriceFixationDetailId]			=	A.intPriceFixationDetailId
+			,[intInsuranceChargeDetailId]		=	A.intInsuranceChargeDetailId
+			,[intStorageChargeId]				=	A.intStorageChargeId
 			,[intContractSeqId]					=	A.intContractSeqId
 			,[intContractCostId]				=	A.intContractCostId
 			,[strContractNumber]				=	ctDetail.strContractNumber
@@ -342,7 +346,9 @@ BEGIN
 		,[strPurchaseOrderNumber]		
 		,[intContractHeaderId]			
 		,[intContractDetailId]
-		,[intPriceFixationDetailId]			
+		,[intPriceFixationDetailId]	
+		,[intStorageChargeId]		
+		,[intInsuranceChargeDetailId]		
 		,[intContractSeqId]		
 		,[intContractCostId]		
 		,[strContractNumber]				
@@ -436,7 +442,9 @@ BEGIN
 		,[strPurchaseOrderNumber]		
 		,[intContractHeaderId]			
 		,[intContractDetailId]	
-		,[intPriceFixationDetailId]		
+		,[intPriceFixationDetailId]	
+		,[intStorageChargeId]		
+		,[intInsuranceChargeDetailId]			
 		,[intContractSeqId]		
 		,[intContractCostId]		
 		,[strContractNumber]				
