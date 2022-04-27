@@ -35,7 +35,7 @@ BEGIN
 		,intGLAccountId			= ARCAST.intAccountId
 		,intCompanyLocationId	= ARCAST.intCompanyLocationId
 		,ysnPosted				= 1
-	FROM [dbo].[fnARCustomerAgingDetail](@dtmDateFrom, @dtmDateTo, NULL, NULL, NULL, NULL, NULL, @intEntityUserId, NULL, 0, 0, 0, 0) ARCAST
+	FROM [dbo].[fnARCustomerAgingDetail](@dtmDateFrom, @dtmDateTo, NULL, NULL, NULL, NULL, NULL, @intEntityUserId, NULL, 0, 0, 0, 1) ARCAST
 	LEFT JOIN tblCMUndepositedFund CMUF ON strInvoiceNumber = CMUF.strSourceTransactionId AND strSourceSystem = 'AR'
 	WHERE intEntityUserId = @intEntityUserId
 	GROUP BY
