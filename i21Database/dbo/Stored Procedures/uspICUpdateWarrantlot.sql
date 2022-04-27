@@ -3,27 +3,31 @@
   ,@intUserId INT
   ,@strWarrantStatus NVARCHAR(100) = ''
   ,@strWarrantNo NVARCHAR(100) = ''
-  ,@strTradeFinanceNumber NVARCHAR(100) = ''
+  ,@intTradeFinanceId INT = NULL
 AS
 
 BEGIN
 
     DECLARE @strOldWarrantStatus NVARCHAR(100) = ''
 	DECLARE @strOldWarrantNo NVARCHAR(100) = ''
-	DECLARE @_strOldTradeFinanceNumber NVARCHAR(100) = ''
+	DECLARE @strOldTradeFinanceNumber NVARCHAR(100) = ''
 	DECLARE @_intInventoryReceiptId INT
 	DECLARE @_strReceiptNumber NVARCHAR(100) = ''
 	DECLARE @_logDescription NVARCHAR(MAX) = ''
 	DECLARE @intWarrantStatus INT
+	DECLARE @strTradeFinanceNumber NVARCHAR(100) = ''
 
 
 	--GEt  Old data
 	SELECT TOP 1
 		@strOldWarrantStatus = ISNULL(B.strWarrantStatus,'')
 		,@strOldWarrantNo = A.strWarrantNo
+		,@strOldTradeFinanceNumber = C.strTradeFinanceNumber
 	FROM tblICLot A
 	LEFT JOIN tblICWarrantStatus B
 		ON A.intWarrantStatus  = B.intWarrantStatus
+	LEFT JOIN tblTRFTradeFinance C
+		ON A.intTradeFinanceId = A.intTradeFinanceId
 	WHERE intLotId = @intLotId
 
 	
@@ -33,10 +37,17 @@ BEGIN
 	FROM tblICWarrantStatus
 	WHERE strWarrantStatus =  @strWarrantStatus
 
+	--GEt Trade Finance name
+	SELECT TOP 1
+		@strTradeFinanceNumber = strTradeFinanceNumber
+	FROM tblTRFTradeFinance
+	WHERE intTradeFinanceId = @intTradeFinanceId
+
 	--update data
 	UPDATE tblICLot
 	SET strWarrantNo = @strWarrantNo
 		,intWarrantStatus = ISNULL(@intWarrantStatus,intWarrantStatus)
+		,intTradeFinanceId = CASE WHEN @intTradeFinanceId = 0 THEN intTradeFinanceId ELSE ISNULL(@intTradeFinanceId,intTradeFinanceId) END
 	WHERE intLotId = @intLotId
 
 
@@ -65,6 +76,20 @@ BEGIN
 			,@changeDescription	= 'Warrant No'		-- Description
 			,@fromValue			= @strOldWarrantNo						-- Old Value
 			,@toValue			= @strWarrantNo			-- New Value
+			,@details			= '';
+	END
+
+	--Audit Log for Warrant No
+	IF(@strTradeFinanceNumber <> @strOldTradeFinanceNumber)
+	BEGIN
+		EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intLotId					-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Inventory.view.Warrant'		-- Screen Namespace
+			,@entityId			= @intUserId				-- Entity Id.
+			,@actionType		= 'Updated'					-- Action Type
+			,@changeDescription	= 'Trade Finance Number'		-- Description
+			,@fromValue			= @strOldTradeFinanceNumber						-- Old Value
+			,@toValue			= @strTradeFinanceNumber		-- New Value
 			,@details			= '';
 	END
 
