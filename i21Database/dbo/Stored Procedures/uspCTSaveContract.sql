@@ -198,7 +198,7 @@ BEGIN TRY
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 
-		if (isnull(@ysnMultiplePriceFixation,0) <> 1)
+		if (isnull(@ysnMultiplePriceFixation,0) <> 1 AND @intHeaderPricingTypeId = 2)
 		begin
 			update cd
 			set
