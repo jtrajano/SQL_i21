@@ -127,7 +127,7 @@ CREATE VIEW vyuQMContractSamplesMonitoring AS WITH QUERY AS
 _orderQuery as(
 SELECT
    CAST(ROW_NUMBER () OVER (
-ORDER BY intContractDetailIdP , intContractDetailIdS ) AS INT)  rowId, * 
+ORDER BY intContractDetailIdP DESC, intContractDetailIdS DESC) AS INT)  rowId, * 
 FROM
    QUERY
 )
