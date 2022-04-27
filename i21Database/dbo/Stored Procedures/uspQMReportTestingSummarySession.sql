@@ -68,7 +68,7 @@ BEGIN TRY
 	SELECT
 		 strPrintType = @strPrintType
 		,QMCS.intCuppingSessionId
-		,QMSP.strSampleNumber
+		,strSampleNumber				= ISNULL(QMSP.strSampleNumber, QMS.strSampleNumber)
 		,strChildSampleNumber			= QMS.strSampleNumber
 		,ICI.strItemNo
 		,strOrigin = ICCAO.strDescription

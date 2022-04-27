@@ -10,7 +10,8 @@ BEGIN TRY
 		,QMS.intSampleId
 		,CTC.intContractDetailId
 		,strContractNumberSequence		= CTC.strContractNumber + '/' + CAST(CTC.intContractSeq AS NVARCHAR(MAX))
-		,QMS.strSampleNumber
+		,strSampleNumber				= ISNULL(QMSP.strSampleNumber, QMS.strSampleNumber)
+		,strChildSampleNumber			= QMS.strSampleNumber
 		,strVendorName					= EME.strName
 		,QMS.strSentBy
 		,QMS.dtmSampleSentDate
@@ -38,6 +39,7 @@ BEGIN TRY
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
 	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
 	INNER JOIN tblQMSampleType QMST ON QMS.intSampleTypeId = QMST.intSampleTypeId
+	LEFT JOIN tblQMSample QMSP ON QMS.intRelatedSampleId = QMSP.intSampleId
 	LEFT JOIN tblQMSamplingCriteria QMSC WITH (NOLOCK) ON QMS.intSamplingCriteriaId = QMSC.intSamplingCriteriaId
 	LEFT JOIN (
 		SELECT 
