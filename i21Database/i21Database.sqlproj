@@ -729,6 +729,14 @@
     <Build Include="dbo\Views\vyuICGetInventoryTradeFinanceLot.sql" />
     <Build Include="dbo\Views\vyuLGGetContractQuality.sql" />
     <Build Include="dbo\Views\vyuSMRapidDeploymentDetail.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryPeriod.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryPeriodDetail.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryPeriodNotification.sql" />
+    <Build Include="dbo\Views\vyuHDGetFiscalYear.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryPeriodNotification.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDImportTimeEntryPeriodDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateTimeEntryPeriodNotification.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateTimeEntryPeriodNotification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
