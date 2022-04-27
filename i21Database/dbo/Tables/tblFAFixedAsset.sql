@@ -3,7 +3,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[strAssetId]				NVARCHAR (20) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strAssetDescription]		NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intCompanyLocationId]		INT NULL,
-	[strSerialNumber]			NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
+	[strSerialNumber]			NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
 	[strNotes]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateAcquired]			DATETIME NULL,			
 	[dtmDateInService]			DATETIME NULL,
