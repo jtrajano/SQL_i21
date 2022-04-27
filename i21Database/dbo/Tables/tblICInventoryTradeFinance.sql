@@ -14,6 +14,7 @@ CREATE TABLE [dbo].[tblICInventoryTradeFinance]
 (
 	[intInventoryTradeFinanceId] [int] IDENTITY NOT NULL,
 	[strTradeFinanceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intLocationId] INT NULL,
 	[intBankId] INT NULL,
 	[intBankAccountId] INT NULL,
 	[intBorrowingFacilityId] INT NULL,
