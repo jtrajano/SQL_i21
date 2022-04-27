@@ -12,7 +12,8 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF  
 
-DECLARE  @TradeFinanceLogs	TRFLog
+DECLARE  @TRFTradeFinance	TRFTradeFinance
+		,@TradeFinanceLogs	TRFLog
 		,@strAction			NVARCHAR(30) = ''
 		,@intStatusId		INT = 0
 
@@ -131,6 +132,11 @@ OUTER APPLY (
 	WHERE LGLD.intLoadDetailId = ARID.intLoadDetailId
 ) LS
 WHERE ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds)
+AND (
+	(ISNULL(ARPD.intPaymentDetailId, 0) <> 0 AND @TransactionType = 'Payment')
+	OR
+	@TransactionType <> 'Payment'
+)
 AND 
 (
 	(
@@ -150,22 +156,96 @@ AND
 	OR @LogTradeFinanceInfo = 1
 )
 
-DECLARE  @strTradeFinanceNumber NVARCHAR(100)
-		,@dtmTransactionDate DATETIME
-		,@strNegateAction NVARCHAR(100)
+DECLARE  @strTradeFinanceNumber		NVARCHAR(100)
+		,@dtmTransactionDate		DATETIME
+		,@intTransactionHeaderId	INT = 0
 DECLARE TFLogCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT 
 	 strTradeFinanceTransaction
 	,dtmTransactionDate
 	,strAction
+	,intTransactionHeaderId
 FROM @TradeFinanceLogs
 
 OPEN TFLogCursor
-FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @dtmTransactionDate, @strNegateAction
+
+FETCH NEXT FROM TFLogCursor INTO 
+	 @strTradeFinanceNumber
+	,@dtmTransactionDate
+	,@strAction
+	,@intTransactionHeaderId
+
 WHILE @@FETCH_STATUS = 0
 BEGIN
-	DECLARE @strImpactedModule NVARCHAR(100) = 'Sales'
+	DECLARE	 @strImpactedModule			NVARCHAR(100) = 'Sales'
+			,@intTradeFinanceId			INT = NULL
+			,@strNewTradeFinanceNumber	NVARCHAR(100)
+
+	IF @FromPosting = 0
+	BEGIN
+		SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
+		FROM tblTRFTradeFinance TRTF
+		INNER JOIN @TradeFinanceLogs TRFL 
+		ON TRTF.strTransactionNumber = TRFL.strTransactionNumber AND TRTF.strTransactionType = 'Sales' AND TRTF.intTransactionHeaderId = TRFL.intTransactionHeaderId
+
+		IF (ISNULL(@strTradeFinanceNumber, '') = '')
+		BEGIN
+			EXEC uspSMGetStartingNumber 166, @strNewTradeFinanceNumber OUT
+		END	
+
+		DELETE FROM @TRFTradeFinance
+		-- This is for direct invoice.
+		INSERT INTO @TRFTradeFinance 
+		(
+			 intTradeFinanceId
+			,strTradeFinanceNumber
+			,strTransactionType
+			,strTransactionNumber
+			,intTransactionHeaderId
+			,intTransactionDetailId
+			,intBankId
+			,intBankAccountId
+			,intBorrowingFacilityId
+			,strRefNo
+			,intOverrideFacilityValuation
+			,strCommnents
+			,dtmCreatedDate
+			,intConcurrencyId
+		)
+		SELECT
+			 intTradeFinanceId				= @intTradeFinanceId
+			,strTradeFinanceNumber			= ISNULL(TFL.strTradeFinanceTransaction, @strNewTradeFinanceNumber)
+			,strTransactionType				= TFL.strTransactionType
+			,strTransactionNumber			= TFL.strTransactionNumber
+			,intTransactionHeaderId			= TFL.intTransactionHeaderId
+			,intTransactionDetailId			= TFL.intTransactionDetailId
+			,intBankId						= TFL.intBankId
+			,intBankAccountId				= TFL.intBankAccountId
+			,intBorrowingFacilityId			= TFL.intBorrowingFacilityId
+			,strRefNo						= TFL.strBankTradeReference
+			,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
+			,strCommnents					= ARI.strTradeFinanceComments
+			,dtmCreatedDate					= GETDATE()
+			,intConcurrencyId				= 1
+		FROM @TradeFinanceLogs TFL
+		INNER JOIN tblARInvoice ARI WITH (NOLOCK)
+		ON ARI.intInvoiceId = TFL.intTransactionHeaderId
+		WHERE ARI.intInvoiceId = @intTransactionHeaderId
+
+		IF (ISNULL(@strTradeFinanceNumber, '') = '')
+		BEGIN
+			UPDATE tblARInvoice 
+			SET strTransactionNo = @strNewTradeFinanceNumber
+			WHERE intInvoiceId = @intTransactionHeaderId
+
+			EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId
+		END	
+		ELSE IF ISNULL(@intTradeFinanceId, 0) <> 0
+		BEGIN
+			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId, @strAction = @strAction
+		END
+	END
 
 	SELECT TOP 1 @strImpactedModule = strTransactionType
 	FROM tblTRFTradeFinanceLog
@@ -177,10 +257,15 @@ BEGIN
 		,@strTransactionType	= @strImpactedModule
 		,@strLimitType			= NULL
 		,@dtmTransactionDate	= @dtmTransactionDate
-		,@strAction				= @strNegateAction
+		,@strAction				= @strAction
 
-	FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @dtmTransactionDate, @strNegateAction
+	FETCH NEXT FROM TFLogCursor INTO 
+		 @strTradeFinanceNumber
+		,@dtmTransactionDate
+		,@strAction
+		,@intTransactionHeaderId
 END
+
 CLOSE TFLogCursor
 DEALLOCATE TFLogCursor
 
