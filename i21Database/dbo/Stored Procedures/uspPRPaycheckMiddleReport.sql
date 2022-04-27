@@ -84,6 +84,9 @@ WHERE [fieldname] = 'strBatchId'
 -- Sanitize the parameters  
 SET @strTransactionId = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL ELSE @strTransactionId END  
 SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL ELSE @strBatchId END  
+
+SELECT strValues into #tmpChecks FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId)    
+
 -- Report Query:  
 SELECT DISTINCT 
 	tblCMBankTransaction.dtmDate,
@@ -151,7 +154,9 @@ FROM
 		ysnVoid 
 	FROM 
 		tblPRPaycheck
-	WHERE ysnPosted = 1) [tblPRPaycheck] on 1=1
+	WHERE 
+		ysnPosted = 1 AND tblPRPaycheck.strPaycheckId IN (select strValues COLLATE Latin1_General_CI_AS from #tmpChecks)
+	) [tblPRPaycheck] on 1=1
 	LEFT JOIN 
 		(SELECT 
 			tblPREmployee.*,
@@ -218,7 +223,7 @@ FROM
 WHERE 
 	tblCMBankTransaction.intBankTransactionTypeId = 21
 	AND tblCMBankTransaction.intBankAccountId = @intBankAccountId 
-	AND tblCMBankTransaction.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
+	AND tblCMBankTransaction.strTransactionId IN  (select strValues COLLATE Latin1_General_CI_AS from #tmpChecks)
 GROUP BY 
 	tblSMCompanySetup.strCompanyName,
 	tblSMCompanySetup.strAddress, tblSMCompanySetup.strCity,
