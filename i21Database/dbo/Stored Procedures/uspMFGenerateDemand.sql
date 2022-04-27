@@ -708,7 +708,7 @@ BEGIN TRY
 			)
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
-			,- SUM([Value])
+			, SUM([Value])
 			,LId
 		FROM OPENXML(@idoc, 'root/AFC', 2) WITH (
 				[intItemId] INT
@@ -2840,13 +2840,13 @@ BEGIN TRY
 						THEN D.dblQty
 					WHEN A.intReportAttributeID IN (
 							8
-							,15
+							--,15
 							)
 						AND DL.intMonthId <= @intMonthsToView
 						THEN ABS(IsNULL(D.dblQty, 0))
 					WHEN A.intReportAttributeID IN (
 							8
-							,15
+							--,15
 							,16
 							)
 						AND DL.intMonthId > @intMonthsToView

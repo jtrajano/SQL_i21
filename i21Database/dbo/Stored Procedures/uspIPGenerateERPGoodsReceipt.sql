@@ -41,9 +41,9 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@dblReceiptQty NUMERIC(18, 6)
 		,@strReceiptQtyUOM NVARCHAR(50)
-		,@dblGross NUMERIC(18, 6)
-		,@dblNet NUMERIC(18, 6)
-		,@dblTare NUMERIC(18, 6)
+		,@dblGross NUMERIC(18, 4)
+		,@dblNet NUMERIC(18, 4)
+		,@dblTare NUMERIC(18, 4)
 		,@dblUnitCost NUMERIC(18, 6)
 		,@strSubLocationName NVARCHAR(50)
 		,@strStorageLocation NVARCHAR(50)
@@ -394,14 +394,23 @@ BEGIN TRY
 					AND IUOM.intItemId = @intItemId
 					AND IUOM.ysnStockUnit = 1
 			END
+			SELECT 
+				@dblGross=CONVERT(NUMERIC(18, 4),SUM(CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblGrossWeight), 0)))),
+				@dblTare=CONVERT(NUMERIC(18, 4),SUM(CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblTareWeight), 0))))
+			FROM tblICInventoryReceiptItemLot RIL
+			JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+				AND RIL.intInventoryReceiptItemId = @intInventoryReceiptItemId
+			WHERE RIL.intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+			SELECT @dblNet = @dblGross - @dblTare
 
 			SELECT @strContractNumber = ISNULL(CH.strContractNumber, '')
 				,@strSequenceNo = ISNULL(LTRIM(CD.intContractSeq), '')
 				,@strItemNo = I.strItemNo
 				,@dblReceiptQty = CONVERT(NUMERIC(18, 6), RI.dblOpenReceive)
 				,@strReceiptQtyUOM = UOM.strUnitMeasure
-				,@dblGross = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RI.dblGross), 0))
-				,@dblNet = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RI.dblNet), 0))
+				--,@dblGross = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RI.dblGross), 0))
+				--,@dblNet = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RI.dblNet), 0))
 				,@dblUnitCost = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intCostUOMId, @intItemUOMId, RI.dblUnitCost), 0))
 				,@strSubLocationName = ISNULL(CSL.strSubLocationName, '')
 				,@strStorageLocation = ISNULL(SL.strName, '')
@@ -459,6 +468,17 @@ BEGIN TRY
 					BEGIN
 						SELECT @strError = @strError + 'Contract Seq is not yet priced. '
 					END
+
+					--IF EXISTS (
+					--		SELECT *
+					--		FROM tblLGLoadContainer
+					--		WHERE intLoadContainerId = @intContainerId
+					--			AND strDocumentNumber = 'CBS'
+					--		)
+					--BEGIN
+					--	SELECT @strError = @strError + 'Container is CBS.'
+					--END
+
 					IF NOT EXISTS (
 							SELECT *
 							FROM tblICInventoryReceiptItemLot RL
@@ -484,7 +504,18 @@ BEGIN TRY
 
 						SELECT @strError = @strError + 'Certification/Document '+@strCertificationName+' is missing. '
 					END
+
+					IF EXISTS (
+						SELECT *
+						FROM tblICInventoryReceiptItemLot RIL
+						WHERE RIL.intInventoryReceiptItemId = @intInventoryReceiptItemId
+						AND (IsNULL(strContainerNo,'')='' OR IsNULL(strMarkings,'')='')
+						)
+					BEGIN
+						SELECT @strError = @strError + 'Container number/marks are blank. '
+					END
 				END
+
 			END
 
 			IF NOT EXISTS (
@@ -539,7 +570,16 @@ BEGIN TRY
 				WHERE intInventoryReceiptId = @intInventoryReceiptId
 					AND intInventoryReceiptItemId = @intInventoryReceiptItemId
 
-				GOTO NextRec
+				SELECT @strError = ''
+
+				IF UPPER(@strCommodityCode) = 'COFFEE'
+				BEGIN
+					GOTO NextItemRec
+				END
+				ELSE
+				BEGIN
+					GOTO NextRec
+				END
 			END
 
 			SELECT @strItemXML = ''
@@ -590,7 +630,14 @@ BEGIN TRY
 				WHERE intInventoryReceiptId = @intInventoryReceiptId
 					AND intInventoryReceiptItemId = @intInventoryReceiptItemId
 
-				GOTO NextRec
+				IF UPPER(@strCommodityCode) = 'COFFEE'
+				BEGIN
+					GOTO NextItemRec
+				END
+				ELSE
+				BEGIN
+					GOTO NextRec
+				END
 			END
 
 			DELETE
@@ -711,9 +758,9 @@ BEGIN TRY
 				+ '<LotNo>' + RIL.strLotNumber + '</LotNo>'
 				+ '<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), ISNULL(RIL.dblQuantity, 0))) + '</Quantity>'
 				+ '<QuantityUOM>' + UOM.strUnitMeasure + '</QuantityUOM>'
-				+ '<GrossWeight>' + LTRIM(CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblGrossWeight), 0))) + '</GrossWeight>'
-				+ '<TareWeight>' + LTRIM(CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblTareWeight), 0))) + '</TareWeight>'
-				+ '<NetWeight>' + LTRIM((CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblGrossWeight), 0)) - CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblTareWeight), 0)))) + '</NetWeight>'
+				+ '<GrossWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblGrossWeight), 0))) + '</GrossWeight>'
+				+ '<TareWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblTareWeight), 0))) + '</TareWeight>'
+				+ '<NetWeight>' + LTRIM((CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblGrossWeight), 0)) - CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblTareWeight), 0)))) + '</NetWeight>'
 				+ '<WeightUOM>' + @strQuantityUOM + '</WeightUOM>'
 				+ '<VendorLotNo>' + ISNULL(RIL.strVendorLotId, '') + '</VendorLotNo>'
 				+ '<ExpiryDate>' + ISNULL(CONVERT(VARCHAR, RIL.dtmExpiryDate, 112), '') + '</ExpiryDate>'
