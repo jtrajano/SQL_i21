@@ -698,10 +698,10 @@ BEGIN TRY
 		,intMonthId INT
 		)
 
-	IF OBJECT_ID('tempdb..#tblMFContractDetail') IS NOT NULL
-		DROP TABLE #tblMFContractDetail
+	--IF OBJECT_ID('tempdb..#tblMFContractDetail') IS NOT NULL
+	--	DROP TABLE #tblMFContractDetail
 
-	CREATE TABLE #tblMFContractDetail (intContractDetailId INT)
+	--CREATE TABLE #tblMFContractDetail (intContractDetailId INT)
 
 	IF OBJECT_ID('tempdb..#tblMFDemandList') IS NOT NULL
 		DROP TABLE #tblMFDemandList
@@ -1135,34 +1135,34 @@ BEGIN TRY
 	BEGIN
 		IF @ysnRefreshContract = 1
 		BEGIN
-			INSERT INTO #tblMFContractDetail (intContractDetailId)
-			SELECT SS.intContractDetailId
-			FROM tblLGLoad L
-			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-				AND L.intPurchaseSale = 1
-				AND L.ysnPosted = 1
-			JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-			JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-			JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
-			JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
-			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-			WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (
-					CASE 
-						WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL)
-							THEN ISNULL(LDCL.dblReceivedQty, 0)
-						ELSE LD.dblDeliveredQuantity
-						END
-					) > 0
-				AND SS.intContractStatusId = 1
-				AND ISNULL(SS.intCompanyLocationId, 0) = (
-					CASE 
-						WHEN @intCompanyLocationId = 0
-							THEN ISNULL(SS.intCompanyLocationId, 0)
-						ELSE @intCompanyLocationId
-						END
-					)
-				AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
-				AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+			--INSERT INTO #tblMFContractDetail (intContractDetailId)
+			--SELECT SS.intContractDetailId
+			--FROM tblLGLoad L
+			--JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			--	AND L.intPurchaseSale = 1
+			--	AND L.ysnPosted = 1
+			--JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+			--JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+			--JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
+			--JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+			--LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+			--WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (
+			--		CASE 
+			--			WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL)
+			--				THEN ISNULL(LDCL.dblReceivedQty, 0)
+			--			ELSE LD.dblDeliveredQuantity
+			--			END
+			--		) > 0
+			--	AND SS.intContractStatusId = 1
+			--	AND ISNULL(SS.intCompanyLocationId, 0) = (
+			--		CASE 
+			--			WHEN @intCompanyLocationId = 0
+			--				THEN ISNULL(SS.intCompanyLocationId, 0)
+			--			ELSE @intCompanyLocationId
+			--			END
+			--		)
+			--	AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
+			--	AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 
 			INSERT INTO #tblMFDemand (
 				intItemId
@@ -1175,7 +1175,7 @@ BEGIN TRY
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance) * I.dblRatio) AS dblIntrasitQty
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, (SS.dblBalance-IsNULL(SS.dblScheduleQty,0))) * I.dblRatio) AS dblIntrasitQty
 				,13 AS intAttributeId --Open Purchases
 				,0 AS intMonthId
 			FROM @tblMFItemDetail I
@@ -1188,7 +1188,7 @@ BEGIN TRY
 						ELSE @intCompanyLocationId
 						END
 					)
-			WHERE SS.intContractStatusId = 1
+			WHERE SS.intContractStatusId IN (1,4)
 				AND (
 					CASE 
 						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
@@ -1196,11 +1196,11 @@ BEGIN TRY
 						ELSE SS.dtmUpdatedAvailabilityDate
 						END
 					) < @dtmStartOfMonth
-				AND NOT EXISTS (
-					SELECT *
-					FROM #tblMFContractDetail CD
-					WHERE CD.intContractDetailId = SS.intContractDetailId
-					)
+				--AND NOT EXISTS (
+				--	SELECT *
+				--	FROM #tblMFContractDetail CD
+				--	WHERE CD.intContractDetailId = SS.intContractDetailId
+				--	)
 				AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
 				AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			GROUP BY CASE 
@@ -1220,7 +1220,7 @@ BEGIN TRY
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance) * I.dblRatio) AS dblIntrasitQty
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, (SS.dblBalance-IsNULL(SS.dblScheduleQty,0))) * I.dblRatio) AS dblIntrasitQty
 				,13 AS intAttributeId --Open Purchases
 				,DATEDIFF(mm, 0, (
 					CASE 
@@ -1239,7 +1239,7 @@ BEGIN TRY
 						ELSE @intCompanyLocationId
 						END
 					)
-			WHERE SS.intContractStatusId = 1
+			WHERE SS.intContractStatusId in (1,4)
 				AND (
 					CASE 
 						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
@@ -1247,11 +1247,11 @@ BEGIN TRY
 						ELSE SS.dtmUpdatedAvailabilityDate
 						END
 					) >= @dtmStartOfMonth
-				AND NOT EXISTS (
-					SELECT *
-					FROM #tblMFContractDetail CD
-					WHERE CD.intContractDetailId = SS.intContractDetailId
-					)
+				--AND NOT EXISTS (
+				--	SELECT *
+				--	FROM #tblMFContractDetail CD
+				--	WHERE CD.intContractDetailId = SS.intContractDetailId
+				--	)
 				AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
 				AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			GROUP BY datename(m, (
@@ -1352,7 +1352,7 @@ BEGIN TRY
 				ELSE LD.dblDeliveredQuantity
 				END
 			) > 0
-		AND SS.intContractStatusId = 1
+		AND SS.intContractStatusId IN (1,4)
 		AND ISNULL(SS.intCompanyLocationId, 0) = (
 			CASE 
 				WHEN @intCompanyLocationId = 0
@@ -1417,7 +1417,7 @@ BEGIN TRY
 				ELSE LD.dblDeliveredQuantity
 				END
 			) > 0
-		AND SS.intContractStatusId = 1
+		AND SS.intContractStatusId IN (1,4)
 		AND ISNULL(SS.intCompanyLocationId, 0) = (
 			CASE 
 				WHEN @intCompanyLocationId = 0
