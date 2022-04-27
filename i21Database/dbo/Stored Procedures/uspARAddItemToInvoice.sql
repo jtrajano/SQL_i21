@@ -97,6 +97,7 @@
 	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
 	,@ItemQualityPremium			NUMERIC(18, 6)	= 0.000000
 	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0.000000
+	,@ItemComputedGrossPrice		NUMERIC(18, 6)	= 0.000000
 AS
 BEGIN
 
@@ -250,6 +251,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemAddOnQuantity				= @ItemAddOnQuantity
 			,@ItemQualityPremium			= @ItemQualityPremium
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
+			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN

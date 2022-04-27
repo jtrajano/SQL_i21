@@ -95,6 +95,7 @@
 	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
 	,@ItemQualityPremium			NUMERIC(18, 6)	= 0.000000
 	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0.000000
+	,@ItemComputedGrossPrice		NUMERIC(18, 6)	= 0.000000
 AS
 
 BEGIN
@@ -390,7 +391,8 @@ BEGIN TRY
 				,[dblAddOnQuantity]
 				,[intConcurrencyId]
 				,[dblQualityPremium]
-				,[dblOptionalityPremium])
+				,[dblOptionalityPremium]
+				,[dblComputedGrossPrice])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
 				,[intItemId]						= IC.[intItemId]
@@ -512,6 +514,7 @@ BEGIN TRY
 				,[intConcurrencyId]					= 0
 				,[dblQualityPremium]				= @ItemQualityPremium
 				,[dblOptionalityPremium]			= @ItemOptionalityPremium
+				,[dblComputedGrossPrice]			= @ItemComputedGrossPrice
 			FROM tblICItem IC
 			INNER JOIN tblICItemLocation IL ON IC.intItemId = IL.intItemId
 			WHERE IC.[intItemId] = @ItemId

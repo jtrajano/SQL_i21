@@ -157,6 +157,7 @@
 	,@BankValuationRuleId					INT				= NULL
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
+	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
 AS
 
 BEGIN
@@ -790,6 +791,7 @@ BEGIN TRY
 		,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 		,@ItemQualityPremium			= @ItemQualityPremium
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
+		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

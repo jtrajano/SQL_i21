@@ -329,6 +329,7 @@ DECLARE  @Id									INT
 		,@NewInvoiceNumber						NVARCHAR(50) = ''
 		,@ItemQualityPremium					NUMERIC(18, 6)
 		,@ItemOptionalityPremium				NUMERIC(18, 6)
+		,@ItemComputedGrossPrice				NUMERIC(18, 6)
 
 --INSERT
 BEGIN TRY
@@ -541,6 +542,7 @@ BEGIN
         ,@ItemAddOnQuantity             = (CASE WHEN @GroupingOption = 0 THEN [dblAddOnQuantity] ELSE NULL END)
 		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
 		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
+		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -821,6 +823,7 @@ BEGIN
             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 			,@ItemQualityPremium			= @ItemQualityPremium
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
+			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1004,6 +1007,7 @@ BEGIN
                     ,@ItemAddOnQuantity             = [dblAddOnQuantity]
 					,@ItemQualityPremium            = [dblQualityPremium]
 					,@ItemOptionalityPremium        = [dblOptionalityPremium]
+					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1091,7 +1095,7 @@ BEGIN
 						,@ItemPerformerId				= @ItemPerformerId
 						,@ItemLeaseBilling				= @ItemLeaseBilling
 						,@ItemConversionAccountId		= @ItemConversionAccountId
-						,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+						,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 						,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 						,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 						,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -1106,6 +1110,7 @@ BEGIN
                         ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 						,@ItemQualityPremium            = @ItemQualityPremium
 						,@ItemOptionalityPremium        = @ItemOptionalityPremium
+						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1787,6 +1792,7 @@ BEGIN TRY
                         ,@ItemAddOnQuantity             = [dblAddOnQuantity]
 						,@ItemQualityPremium            = [dblQualityPremium]
                         ,@ItemOptionalityPremium        = [dblOptionalityPremium]
+						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1864,7 +1870,7 @@ BEGIN TRY
 							,@ItemPerformerId				= @ItemPerformerId
 							,@ItemLeaseBilling				= @ItemLeaseBilling
 							,@ItemConversionAccountId		= @ItemConversionAccountId
-							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+							,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 							,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 							,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -1881,6 +1887,7 @@ BEGIN TRY
                             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 							,@ItemQualityPremium            = @ItemQualityPremium
 							,@ItemOptionalityPremium        = @ItemOptionalityPremium
+							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN

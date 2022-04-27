@@ -180,6 +180,7 @@ BEGIN TRY
 		,[dblSubCurrencyRate]
 		,[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]
+		,[dblComputedGrossPrice]
 	)
 	SELECT
 		 [strTransactionType]				= 'Invoice'
@@ -278,6 +279,7 @@ BEGIN TRY
 		,[dblSubCurrencyRate]				= ARID.[dblSubCurrencyRate]
 		,[intStorageLocationId]				= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
+		,[dblComputedGrossPrice]			= ARID.[dblComputedGrossPrice]
 	FROM
 		tblARInvoiceDetail ARID
 	INNER JOIN
@@ -384,6 +386,7 @@ SELECT
 		,[dblSubCurrencyRate]				= ARID.[dblSubCurrencyRate]
 		,[intStorageLocationId]				= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
+		,[dblComputedGrossPrice]			= ARID.[dblComputedGrossPrice]
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -505,6 +508,7 @@ SELECT
 		,[dblSubCurrencyRate]				= ARID.[dblSubCurrencyRate]
 		,[intStorageLocationId]				= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
+		,[dblComputedGrossPrice]			= ARID.[dblComputedGrossPrice]
 	FROM 
 		tblARInvoiceDetail ARID
 	LEFT JOIN tblICItem I
