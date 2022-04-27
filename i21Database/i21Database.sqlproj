@@ -738,6 +738,7 @@
     <Build Include="dbo\Stored Procedures\uspHDUpdateTimeEntryPeriodNotification.sql" />
     <Build Include="dbo\Stored Procedures\uspHDCreateTimeEntryPeriodNotification.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTradeFinance.sql" />
+    <Build Include="dbo\Views\vyuICGetTradeFinanceLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
