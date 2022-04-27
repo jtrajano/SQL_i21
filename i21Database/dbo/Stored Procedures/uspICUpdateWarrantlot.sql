@@ -37,17 +37,17 @@ BEGIN
 	FROM tblICWarrantStatus
 	WHERE strWarrantStatus =  @strWarrantStatus
 
-	--GEt Trade Finance name
-	SELECT TOP 1
-		@strTradeFinanceNumber = strTradeFinanceNumber
-	FROM tblTRFTradeFinance
-	WHERE intTradeFinanceId = @intTradeFinanceId
+	----GEt Trade Finance name
+	SET @strTradeFinanceNumber = ISNULL((SELECT TOP 1
+												strTradeFinanceNumber
+											FROM tblTRFTradeFinance
+											WHERE intTradeFinanceId = @intTradeFinanceId),'')
 
 	--update data
 	UPDATE tblICLot
 	SET strWarrantNo = @strWarrantNo
 		,intWarrantStatus = ISNULL(@intWarrantStatus,intWarrantStatus)
-		,intTradeFinanceId = CASE WHEN @intTradeFinanceId = 0 THEN intTradeFinanceId ELSE ISNULL(@intTradeFinanceId,intTradeFinanceId) END
+		,intTradeFinanceId = CASE WHEN ISNULL(@intTradeFinanceId,0) = 0 THEN NULL ELSE @intTradeFinanceId END
 	WHERE intLotId = @intLotId
 
 
@@ -79,6 +79,9 @@ BEGIN
 			,@details			= '';
 	END
 
+	SET @strTradeFinanceNumber = ISNULL(@strTradeFinanceNumber,'')
+	SET @strOldTradeFinanceNumber = ISNULL(@strOldTradeFinanceNumber,'')
+	
 	--Audit Log for Warrant No
 	IF(@strTradeFinanceNumber <> @strOldTradeFinanceNumber)
 	BEGIN
