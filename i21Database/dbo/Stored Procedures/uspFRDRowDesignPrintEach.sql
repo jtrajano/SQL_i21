@@ -38,7 +38,9 @@ DECLARE @ysnShowCurrencies  BIT
 DECLARE @intCurrencyID INT      
 DECLARE @queryString NVARCHAR(MAX)
 DECLARE @intSubRowDetailId NVARCHAR(MAX)  
-DECLARE @strCurrency NVARCHAR(50)      
+DECLARE @strCurrency NVARCHAR(50)    
+DECLARE @strQuery NVARCHAR(max)        
+DECLARE @ysnUnnaturalAccount INT = 0    
 
 CREATE TABLE #tempGLAccount (
 		[intAccountId]		INT,
@@ -55,6 +57,10 @@ CREATE TABLE #tempGLAccount2 (
   [strDescription] NVARCHAR(MAX),   
   [intRowDetailId]  INT
  );   
+
+CREATE TABLE #TempGLUnnatural (                  
+ [intCnt] int        
+);     
 
 DECLARE @ConcurrencyId AS INT = (SELECT TOP 1 intConcurrencyId FROM tblFRRow WHERE intRowId = @intRowId)
 
@@ -137,8 +143,9 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 				INSERT INTO #tempGLAccount    
 				SELECT * FROM #tempGLAccount2   
 				
-				TRUNCATE TABLE #tempGLAccount2    
 			END	
+
+			TRUNCATE TABLE #tempGLAccount2    
 
 		DECLARE @intAccountId INT
 		DECLARE @strAccountId NVARCHAR(150)
@@ -173,8 +180,21 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 				SET @strAccountsType = 'IS'
 			END
 
-			INSERT INTO #tempRowDesign (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency)
-								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@strPercentage,@strAccountsType,@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,1,@ysnHidden,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1,@ysnShowCurrencies,@intCurrencyID,@strCurrency)
+			 SET @strQuery = '    
+			 INSERT INTO #TempGLUnnatural    
+			 SELECT SUM(CNT) FROM (    
+			 SELECT COUNT(0)CNT FROM vyuGLSummary WHERE strAccountId = '''+@strAccountId+''' AND ISNULL(intUnAccountId,0) <> 0    
+			 UNION ALL    
+			 SELECT COUNT(0)CNT FROM vyuGLSummary WHERE strUnAccountId = '''+@strAccountId+'''    
+			 ) A    
+			  '    
+			 EXEC(@strQuery)    
+			 SET @ysnUnnaturalAccount = (SELECT CASE WHEN intCnt <> 0 THEN 1 ELSE 0 END FROM #TempGLUnnatural)    
+  
+			 TRUNCATE TABLE #TempGLUnnatural      
+
+			INSERT INTO #tempRowDesign (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency,ysnUnnaturalAccount)
+								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@strPercentage,@strAccountsType,@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,1,@ysnHidden,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1,@ysnShowCurrencies,@intCurrencyID,@strCurrency,@ysnUnnaturalAccount)
 
 			DELETE #tempGLAccount WHERE [intAccountId] = @intAccountId
 		END
@@ -182,10 +202,10 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		DELETE #tempRowDesignPrintEach WHERE [intRowDetailId] = @intRowDetailId
 	END
 
-	INSERT INTO tblFRRowDesignPrintEach (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,dtmEntered,intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency)
+	INSERT INTO tblFRRowDesignPrintEach (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,dtmEntered,intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency,ysnUnnaturalAccount)
 	SELECT intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,        
 	strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,        
-	strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,GETDATE() as dtmEntered,@ConcurrencyId as intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency     
+	strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,GETDATE() as dtmEntered,@ConcurrencyId as intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency,ysnUnnaturalAccount     
 	FROM #tempRowDesign
 
 END
@@ -202,4 +222,4 @@ DROP TABLE #tempRowDesign
 -- 	SCRIPT EXECUTION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
---EXEC [dbo].[uspFRDRowDesignPrintEach1] 51,0,4   
+--EXEC [dbo].[uspFRDRowDesignPrintEach] 51,0,4   

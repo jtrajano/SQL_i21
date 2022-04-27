@@ -4,6 +4,8 @@ CREATE PROCEDURE  [dbo].[uspFRDUnnaturalAccoutAmount]
 	@dtmBeginDate AS VARCHAR(max),  
 	@dtmEndDate AS VARCHAR(max),    
 	@intReportType AS INT,  
+	@strLocation AS NVARCHAR(max) = null,            
+	@intCurrencyID AS INT,            
 	@totalAmount AS NUMERIC(20,6) = 0 OUTPUT  
 AS    
   
@@ -19,7 +21,8 @@ BEGIN
 	DECLARE @strNameAlt NVARCHAR(MAX)    
 	DECLARE @strCondition NVARCHAR(MAX)    
 	DECLARE @strCriteria NVARCHAR(MAX)    
-	DECLARE @strCriteriaAlt NVARCHAR(MAX)    
+	DECLARE @strCriteriaAlt NVARCHAR(MAX)  
+	DECLARE @strCurrency NVARCHAR(MAX) 
 	DECLARE @dblAmount NUMERIC(20,6)   
 	DECLARE @intUnnaturalAccountId INT  
 	DECLARE @intStart INT  
@@ -56,6 +59,8 @@ BEGIN
 	CREATE TABLE #tempFormulaConcat (        
 		[Formula] NVARCHAR(MAX)   
 	);     
+
+	SET @strCurrency = CASE WHEN @intCurrencyID = 0 THEN '' ELSE ' AND [intCurrencyId] = '''+ CAST(@intCurrencyID AS VARCHAR(10))+'''' END       
   
 	--MAIN REPORT  
 	IF @intReportType = 0  
@@ -167,7 +172,7 @@ BEGIN
 			SELECT 0,@strCriteria,0,0  
   
 			SET @queryString = 'UPDATE #tempAmount SET Amount = (SELECT '+@strFormula+' FROM vyuGLSummary WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime)   
-			BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'') ,  
+			BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'' '+@strLocation+' '+@strCurrency+') ,  
 			intUnnaturalAccountId = (SELECT TOP 1 intUnnaturalAccountId FROM vyuGLSummary   
 			WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime) BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+'''   
 			AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'')  
@@ -206,7 +211,7 @@ BEGIN
 					SET @strCriteria  = (SELECT TOP 1 strCriteria FROM #tempFormula2)  
   
 					SET @queryString = 'INSERT INTO #tempAmount2 SELECT '+@strFormula+',intUnnaturalAccountId FROM vyuGLSummary WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime)   
-					BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA''   
+					BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'' '+@strLocation+' '+@strCurrency+'   
 					GROUP BY intUnnaturalAccountId  '  
 					EXEC(@queryString)   
          
