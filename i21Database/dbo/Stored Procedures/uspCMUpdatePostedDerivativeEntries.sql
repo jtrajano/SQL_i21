@@ -68,13 +68,12 @@ AS
 
 				-- Check if each derivative entries have other Matched Derivatives
 				DECLARE @tblOtherMatchedDerivatives TABLE(
-					intMatchNo INT,
-					strBankTransactionId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+					intMatchNo INT NULL,
+					intFutOptTransactionId INT
 				)
 				
-				
 				INSERT INTO @tblOtherMatchedDerivatives
-				SELECT A.intMatchNo, B.strBankTransactionId
+				SELECT A.intMatchNo, B.intFutOptTransactionId
 				FROM tblRKMatchFuturesPSHeader A
 				INNER JOIN tblRKMatchFuturesPSDetail D
 					ON D.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId
@@ -82,7 +81,7 @@ AS
 					ON B.intFutOptTransactionId = D.intLFutOptTransactionId
 				WHERE B.strBuySell = 'Buy'  AND A.intMatchNo <> B.intMatchNo
 				UNION ALL
-				SELECT A.intMatchNo, B.strBankTransactionId
+				SELECT A.intMatchNo, B.intFutOptTransactionId
 				FROM tblRKMatchFuturesPSHeader A
 				INNER JOIN tblRKMatchFuturesPSDetail D
 					ON D.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId
@@ -90,23 +89,32 @@ AS
 					ON B.intFutOptTransactionId = D.intSFutOptTransactionId
 				WHERE B.strBuySell = 'Sell'  AND A.intMatchNo <> B.intMatchNo
 
+				-- Unpost derivative entries that have no other matched derivatives
+				UPDATE A
+					SET A.ysnPosted = 0
+				FROM tblRKFutOptTransaction A
+				INNER JOIN @tblMatchedDerivativeEntry B
+					ON B.intFutOptTransactionId = A.intFutOptTransactionId
+				WHERE ISNULL(A.ysnPosted, 0) = 1 AND B.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM @tblOtherMatchedDerivatives)
+
+				SELECT @intSuccessfulCount = @@ROWCOUNT;
+
 				-- Check if other Matched Derivatives have posted Bank Transactions
 				-- Update Derivative entries to unposted if none
 				IF NOT EXISTS(SELECT 1 FROM @tblOtherMatchedDerivatives A
 					INNER JOIN tblCMBankTransactionDetail D ON D.intMatchDerivativeNo = A.intMatchNo
 					INNER JOIN tblCMBankTransaction H ON H.intTransactionId = D.intTransactionId 
-					WHERE H.strTransactionId <> A.strBankTransactionId AND H.ysnPosted = 1
+					WHERE H.ysnPosted = 1 AND A.intMatchNo IS NOT NULL
 				)
 				BEGIN
 					UPDATE A
 						SET A.ysnPosted = 0
 					FROM tblRKFutOptTransaction A
-					INNER JOIN @tblMatchedDerivativeEntry B
+					INNER JOIN @tblOtherMatchedDerivatives B
 						ON B.intFutOptTransactionId = A.intFutOptTransactionId
 					WHERE ISNULL(A.ysnPosted, 0) = 1
 
-					SELECT @intSuccessfulCount = @@ROWCOUNT;
-
+					SELECT @intSuccessfulCount += @@ROWCOUNT;
 				END
 				
 				-- Update Matched Derivative entry
