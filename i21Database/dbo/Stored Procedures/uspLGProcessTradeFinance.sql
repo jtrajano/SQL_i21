@@ -5,24 +5,35 @@
 AS
 BEGIN 
 	DECLARE @TRFTradeFinance TRFTradeFinance
+			,@TRFTradeFinanceCancel TRFTradeFinance
 			,@TRFLog TRFLog
+			,@TRFLogCancel TRFLog
 			,@intTradeFinanceId INT = NULL
+			,@strTradeFinanceNumber NVARCHAR(100) = NULL
+			,@intLastTradeFinanceId INT = NULL
+			,@strLastTradeFinanceNo NVARCHAR(100) = NULL
+			,@strLastApprovalStatus NVARCHAR(100) = NULL
+			,@intLastTradeFinanceLogId INT = NULL
+			,@strLastTradeFinanceLogStatus INT = NULL
 	
 	/* Generate Trade Finance No if blank */
-	IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(strTradeFinanceNo, '') <> '')
-	BEGIN
-		DECLARE @strTradeFinanceNumber NVARCHAR(100)	
+	IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND intBankAccountId IS NOT NULL AND ISNULL(strTradeFinanceNo, '') = '')
+	BEGIN	
 		EXEC uspSMGetStartingNumber 166, @strTradeFinanceNumber OUT
 
 		UPDATE tblLGLoad
 		SET strTradeFinanceNo = @strTradeFinanceNumber
 		WHERE intLoadId = @intLoadId
 	END
+	ELSE
+	BEGIN
+		SELECT @strTradeFinanceNumber = strTradeFinanceNo FROM tblLGLoad WHERE intLoadId = @intLoadId
+	END
 
 	/* Get intTradeFinanceId */
 	SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
 	FROM tblTRFTradeFinance TRF
-	INNER JOIN tblLGLoad L ON L.strTradeFinanceNo = TRF.strTradeFinanceNumber 
+	INNER JOIN tblLGLoad L ON ISNULL(L.strTradeFinanceNo, '') = TRF.strTradeFinanceNumber 
 		AND TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = L.intLoadId
 	WHERE L.intLoadId = @intLoadId
 
@@ -79,8 +90,67 @@ BEGIN
 		LEFT JOIN tblCMBankLoan BL on BL.intBankLoanId = L.intLoanLimitId
 	WHERE intLoadId = @intLoadId
 	
+	/* Get Last Trade Finance Number associated to this LS */
+	SELECT TOP 1 
+		@intLastTradeFinanceId = intTradeFinanceId
+		,@strLastTradeFinanceNo = TRF.strTradeFinanceNumber
+		,@strLastApprovalStatus = TRF.strApprovalStatus
+	FROM tblTRFTradeFinance TRF
+	WHERE TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = @intLoadId
+
+	/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel the previous */
+	IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') <> 'Canceled' 
+		AND ISNULL(@strLastTradeFinanceNo, '') <> ISNULL(@strTradeFinanceNumber, ''))
+	BEGIN 
+		INSERT INTO @TRFTradeFinanceCancel
+			(intTradeFinanceId
+			,strTradeFinanceNumber
+			,strTransactionType
+			,strTransactionNumber
+			,intTransactionHeaderId
+			,intTransactionDetailId
+			,intBankId
+			,intBankAccountId
+			,intBorrowingFacilityId
+			,intLimitTypeId
+			,intSublimitTypeId
+			,ysnSubmittedToBank
+			,dtmDateSubmitted
+			,strApprovalStatus
+			,dtmDateApproved
+			,strRefNo
+			,intOverrideFacilityValuation
+			,strCommnents
+			,dtmCreatedDate
+			,intConcurrencyId)
+		SELECT
+			intTradeFinanceId = @intLastTradeFinanceId
+			,strTradeFinanceNumber = @strLastTradeFinanceNo
+			,strTransactionType
+			,strTransactionNumber
+			,intTransactionHeaderId
+			,intTransactionDetailId
+			,intBankId
+			,intBankAccountId
+			,intBorrowingFacilityId
+			,intLimitTypeId
+			,intSublimitTypeId
+			,ysnSubmittedToBank
+			,dtmDateSubmitted
+			,strApprovalStatus = 'Canceled'
+			,dtmDateApproved
+			,strRefNo
+			,intOverrideFacilityValuation
+			,strCommnents
+			,dtmCreatedDate = GETDATE()
+			,intConcurrencyId = 1
+		FROM @TRFTradeFinance
+
+		EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinanceCancel, @intUserId = @intUserId, @strAction = @strAction
+	END
+
 	/* Execute Trade Finance SP */
-	If (@strAction = 'ADD' OR @intTradeFinanceId IS NULL)
+	If (@strAction = 'ADD' OR (@intTradeFinanceId IS NULL AND ISNULL(@strTradeFinanceNumber, '') <> ''))
 	BEGIN
 		EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId
 	END	
@@ -191,7 +261,102 @@ BEGIN
 
 	IF EXISTS (SELECT 1 FROM @TRFLog)
 	BEGIN
-		EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
+		/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel the previous */
+		IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') <> 'Canceled' 
+			AND ISNULL(@strLastTradeFinanceNo, '') <> ISNULL(@strTradeFinanceNumber, ''))
+		BEGIN
+
+			INSERT INTO @TRFLogCancel
+				(strAction
+				,strTransactionType
+				,intTradeFinanceTransactionId
+				,strTradeFinanceTransaction
+				,intTransactionHeaderId
+				,intTransactionDetailId
+				,strTransactionNumber
+				,dtmTransactionDate
+				,intBankTransactionId
+				,strBankTransactionId
+				,intBankId
+				,strBank
+				,intBankAccountId
+				,strBankAccount
+				,intBorrowingFacilityId
+				,strBorrowingFacility
+				,strBorrowingFacilityBankRefNo
+				,dblTransactionAmountAllocated
+				,dblTransactionAmountActual
+				,intLoanLimitId
+				,strLoanLimitNumber
+				,strLoanLimitType
+				,intLimitId
+				,strLimit
+				,dblLimit
+				,intSublimitId
+				,strSublimit
+				,dblSublimit
+				,strBankTradeReference
+				,dblFinanceQty
+				,dblFinancedAmount
+				,strBankApprovalStatus
+				,dtmAppliedToTransactionDate
+				,intStatusId
+				,intWarrantId
+				,strWarrantId
+				,intUserId
+				,intConcurrencyId
+				,intContractHeaderId
+				,intContractDetailId)
+			SELECT TOP 1
+				strAction = REPLACE(strAction, 'Created', 'Updated')
+				,strTransactionType
+				,intTradeFinanceTransactionId = @intLastTradeFinanceId
+				,strTradeFinanceTransaction = @strLastTradeFinanceNo
+				,intTransactionHeaderId
+				,intTransactionDetailId
+				,strTransactionNumber
+				,dtmTransactionDate
+				,intBankTransactionId
+				,strBankTransactionId
+				,intBankId
+				,strBank
+				,intBankAccountId
+				,strBankAccount
+				,intBorrowingFacilityId
+				,strBorrowingFacility
+				,strBorrowingFacilityBankRefNo
+				,dblTransactionAmountAllocated
+				,dblTransactionAmountActual
+				,intLoanLimitId
+				,strLoanLimitNumber
+				,strLoanLimitType
+				,intLimitId
+				,strLimit
+				,dblLimit
+				,intSublimitId
+				,strSublimit
+				,dblSublimit
+				,strBankTradeReference
+				,dblFinanceQty
+				,dblFinancedAmount
+				,strBankApprovalStatus = 'Canceled'
+				,dtmAppliedToTransactionDate
+				,intStatusId
+				,intWarrantId
+				,strWarrantId
+				,intUserId
+				,intConcurrencyId
+				,intContractHeaderId
+				,intContractDetailId
+			FROM tblTRFTradeFinanceLog
+			WHERE strTransactionType = 'Logistics'
+			AND intTransactionHeaderId = @intLoadId
+
+			EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLogCancel;
+		END
+
+		IF EXISTS (SELECT 1 FROM @TRFLog WHERE ISNULL(strTradeFinanceTransaction, '') <> '')
+			EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
 	END
 
 END
