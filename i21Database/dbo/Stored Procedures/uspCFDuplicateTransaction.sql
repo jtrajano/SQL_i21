@@ -9,6 +9,39 @@ BEGIN TRANSACTION
 
 	BEGIN TRY
 
+	DECLARE @dblAuditOriginalTotalPrice	    NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalGrossPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalNetPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedTotalPrice	NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedGrossPrice	NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedNetPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedTotalTax		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalTotalTax		NVARCHAR(MAX) = 0.000000
+	DECLARE @strAuditPriceMethod			NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceBasis				NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceProfileId			NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceIndexId			NVARCHAR(MAX) = ''
+	DECLARE @strTransactionId				NVARCHAR(MAX) = ''
+	
+
+	
+	SELECT TOP 1
+		@dblAuditOriginalTotalPrice	     =		ISNULL(dblOriginalTotalPrice,0)		
+	, @dblAuditOriginalGrossPrice		 =		ISNULL(dblOriginalGrossPrice,0)
+	, @dblAuditOriginalNetPrice			 =		ISNULL(dblOriginalNetPrice,0) 
+	, @dblAuditCalculatedTotalPrice		 =		ISNULL(dblCalculatedTotalPrice,0) 
+	, @dblAuditCalculatedGrossPrice		 =		ISNULL(dblCalculatedGrossPrice,0) 
+	, @dblAuditCalculatedNetPrice		 =		ISNULL(dblCalculatedNetPrice,0)
+	, @dblAuditCalculatedTotalTax		 =		ISNULL(dblCalculatedTotalTax,0)
+	, @dblAuditOriginalTotalTax			 =		ISNULL(dblOriginalTotalTax,0)
+	, @strAuditPriceMethod				 =		ISNULL(strPriceMethod,'')
+	, @strAuditPriceBasis				 =		ISNULL(strPriceBasis,'')
+	, @strAuditPriceProfileId			 =		ISNULL(strPriceProfileId,'')
+	, @strAuditPriceIndexId				 =		ISNULL(strPriceIndexId,'')
+	, @strTransactionId					 =		ISNULL(strTransactionId,'')
+	FROM tblCFTransaction
+	WHERE intTransactionId = @TransactionId 
+
 	DECLARE @newId INT
 	DECLARE @strOldId NVARCHAR(MAX)
 	DECLARE @newDate DATETIME = GETDATE()
