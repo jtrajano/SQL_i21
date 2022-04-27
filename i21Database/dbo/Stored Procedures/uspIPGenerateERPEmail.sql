@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspIPGenerateERPEmail @strMessageType NVARCHAR(50) = ''
 	,@strStatus NVARCHAR(50) = ''
+	,@ysnDaily bit=0
 AS
 BEGIN TRY
 	DECLARE @strStyle NVARCHAR(MAX)
@@ -270,23 +271,35 @@ BEGIN TRY
 	BEGIN
 		SET @strHeader = '<tr>
 							<th>&nbsp;Receipt No</th>
+							<th>&nbsp;Receipt Date</th>
+							<th>&nbsp;Container No</th>
+							<th>&nbsp;Received By</th>
 							<th>&nbsp;Message</th>
+							<th>&nbsp;i21/ERP</th>
 						</tr>'
 
 		IF EXISTS (
 			SELECT 1
 			FROM tblIPInvReceiptFeed t WITH (NOLOCK)
 			WHERE t.intStatusId IN (1, 3)
-				AND t.ysnMailSent = 0
+				AND t.ysnMailSent = (Case When @ysnDaily = 0 then 0 Else t.ysnMailSent End)
 			)
 		BEGIN
 			SELECT @strDetail = @strDetail + '<tr>' + 
 				   '<td>&nbsp;' + ISNULL(t.strReceiptNumber, '') + '</td>' + 
+				    '<td>&nbsp;' + ISNULL(convert(varchar, t1.dtmReceiptDate, 106), '') + '</td>' + 
+				     '<td>&nbsp;' + ISNULL(LC.strContainerNumber, '') + '</td>' + 
+					   '<td>&nbsp;' + ISNULL(E.strName, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(t.strMessage, '') + '</td>' + 
+				    '<td>&nbsp;' + (Case When t.intStatusId =1 then 'i21' Else 'ERP' End )+ '</td>' + 
 			'</tr>'
 			FROM tblIPInvReceiptFeed t WITH (NOLOCK)
+			JOIN tblICInventoryReceipt  t1 on t.intInventoryReceiptId  =t1.intInventoryReceiptId 
+			JOIN tblICInventoryReceiptItem t2 on t2.intInventoryReceiptItemId =t.intInventoryReceiptItemId 
+			Left JOIN tblLGLoadContainer LC on LC.intLoadContainerId=t2.intContainerId 
+			Left JOIN tblEMEntity E on E.intEntityId =t1.intCreatedByUserId  
 			WHERE t.intStatusId IN (1, 3)
-				AND t.ysnMailSent = 0
+				AND t.ysnMailSent = (Case When @ysnDaily = 0 then 0 Else t.ysnMailSent End)
 
 			UPDATE t
 			SET ysnMailSent = 1
