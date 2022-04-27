@@ -9184,6 +9184,8 @@
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
 	<Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
