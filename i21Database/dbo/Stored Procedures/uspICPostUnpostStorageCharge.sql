@@ -76,7 +76,7 @@ BEGIN TRY
 					[intTransactionType]			=	1,
 					[intAccountId]					=	dbo.[fnGetItemGLAccount](B.intItemChargeId, C.intItemLocationId, 'Other Charge Expense'),
 					[intItemId]						=	B.intItemChargeId,					
-					[strMiscDescription]			=	D.strDescription,
+					[strMiscDescription]			=	B.strTransactionId,
 					[intQtyToBillUOMId]				=	B.intItemChargeUOMId
 					,[dblQuantityToBill]			=	1
 					,[dblQtyToBillUnitQty]			=	E.dblUnitQty
