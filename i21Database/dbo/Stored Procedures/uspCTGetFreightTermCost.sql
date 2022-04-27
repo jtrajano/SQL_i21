@@ -85,6 +85,8 @@ BEGIN TRY
 			JOIN tblSMCity DP ON DP.strCity = FRM.strDestinationCity
 			WHERE LP.intCityId = @intFromPortId
 				AND DP.intCityId = @intToPortId
+				AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) >= FRM.dtmValidFrom
+				AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
 				AND ISNULL(FRM.ysnDefault, 0) = 1
 
 			IF ISNULL(@intFreightRateMatrixId, 0) = 0
@@ -95,6 +97,8 @@ BEGIN TRY
 				JOIN tblSMCity DP ON DP.strCity = FRM.strDestinationCity
 				WHERE LP.intCityId = @intFromPortId
 					AND DP.intCityId = @intToPortId
+					AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) >= FRM.dtmValidFrom
+					AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
 					AND FRM.dblTotalCostPerContainer = (SELECT MIN(dblTotalCostPerContainer)
 														FROM tblLGFreightRateMatrix FRM
 														JOIN tblSMCity LP ON LP.strCity = FRM.strOriginPort
