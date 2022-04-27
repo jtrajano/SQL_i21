@@ -248,6 +248,27 @@ BEGIN TRY
 	
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
+
+		if (isnull(@ysnMultiplePriceFixation,0) <> 1)
+		begin
+			update cd
+			set
+				cd.intPricingTypeId = 2
+				,cd.dblFutures = NULL
+				,cd.dblCashPrice = NULL
+				,cd.dblTotalCost = NULL
+			from @CDTableUpdate cd
+			left join (
+				select pf.intContractDetailId, dblPricedQuantity = sum(fd.dblQuantity)
+				from tblCTPriceFixation pf
+				join tblCTPriceFixationDetail fd on fd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractDetailId = @intContractDetailId
+				group by pf.intContractDetailId
+			)p on p.intContractDetailId = cd.intContractDetailId
+			where cd.intContractDetailId = @intContractDetailId
+			and isnull(p.dblPricedQuantity,0) < cd.dblQuantity
+		end
+
 		SELECT	@intPricingTypeId	=	NULL,
 				@dblCashPrice		=	NULL,
 				@dblBasis			=	NULL,
