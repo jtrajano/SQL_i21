@@ -29,6 +29,7 @@ CREATE TABLE [dbo].[tblICInventoryTradeFinance]
 	[strReferenceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
 	[intOverrideFacilityValuation] INT NULL,
 	[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,	
+	[ysnCommit] BIT NULL, 
 
 	[intConcurrencyId] [int] NULL DEFAULT ((0)),
 	[dtmDateCreated] DATETIME NULL,
