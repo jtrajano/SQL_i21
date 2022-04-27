@@ -38,6 +38,9 @@ BEGIN
       SELECT @intEFTNextNo = intEFTNextNo FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId
 
 
+  SELECT @intEFTNextNo = ISNULL(@intEFTNextNo,1)
+
+
 
     WHILE EXISTS(SELECT 1 FROM @tbl WHERE ysnGenerated = 0)
     BEGIN
