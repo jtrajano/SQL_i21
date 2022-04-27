@@ -18,11 +18,6 @@ BEGIN
 	-- REMOVE MILLISECOND TO MAKE NEGATE RECORD APPEAR AS EARLIER THAN THE NEW LOG TO BE CREATED.
 	SELECT @dtmTransactionDate = CAST(CONVERT(VARCHAR(10), @dtmTransactionDate, 101) + ' '  + convert(VARCHAR(8), @dtmTransactionDate, 14) AS DATETIME)
 
-	IF (ISNULL(@strTransactionType, '') = '')
-	BEGIN
-		RETURN
-	END
-
 	-- RETRIEVE LATEST LOG FOR THE SELECTED PARAMETERS.
 	SELECT TOP 1 * 
 	INTO #tmpTRFLogNegateStaging
@@ -69,6 +64,7 @@ BEGIN
 			, strWarrantId
 			, intUserId
 			, intConcurrencyId
+			, ysnNegateLog
 		)
 		SELECT @strAction
 			, strTransactionType
@@ -101,6 +97,7 @@ BEGIN
 			, strWarrantId
 			, intUserId
 			, intConcurrencyId
+			, ysnNegateLog = CAST(1 AS BIT)
 		FROM #tmpTRFLogNegateStaging
 	END
 

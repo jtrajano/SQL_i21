@@ -40,4 +40,5 @@ CREATE TYPE [dbo].[TRFLog] AS TABLE (
 	, intConcurrencyId INT NULL
 	, intContractHeaderId INT NULL
 	, intContractDetailId INT NULL
+	, ysnNegateLog BIT NULL DEFAULT(0)
 )

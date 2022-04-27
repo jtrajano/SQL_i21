@@ -51,6 +51,7 @@ BEGIN
 		, @intContractHeaderId INT
 		, @intContractDetailId INT
 		, @intTotal INT
+		, @ysnNegateLog BIT
 
 	DECLARE @FinalTable AS TABLE (
 		  strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -93,6 +94,7 @@ BEGIN
 		, intConcurrencyId INT NULL
 		, intContractHeaderId INT NULL
 		, intContractDetailId INT NULL
+		, ysnNegateLog BIT NULL DEFAULT(0)
 	)
 
 	SELECT @intTotal = COUNT(*) FROM @TradeFinanceLogs
@@ -143,6 +145,7 @@ BEGIN
 			, @intConcurrencyId = NULL
 			, @intContractHeaderId = NULL
 			, @intContractDetailId = NULL
+			, @ysnNegateLog = NULL
 
 		SELECT TOP 1 
 		      @intId = tfLog.intId
@@ -186,6 +189,7 @@ BEGIN
 			, @intConcurrencyId = tfLog.intConcurrencyId
 			, @intContractHeaderId = tfLog.intContractHeaderId
 			, @intContractDetailId = tfLog.intContractDetailId
+			, @ysnNegateLog = tfLog.ysnNegateLog
 		
 		FROM #tmpTradeFinanceLogs tfLog
 		LEFT JOIN tblCMBank bank
@@ -291,7 +295,14 @@ BEGIN
 		WHERE intId = @intId
 	END
 
-	DECLARE @dtmCreatedDate DATETIME = GETDATE() --GETUTCDATE()
+	DECLARE @dtmCreatedDate DATETIME = GETDATE()
+	
+	IF (@ysnNegateLog = 0)
+	BEGIN
+		DECLARE @strActionNegate NVARCHAR(100) = 'Moved to ' + @strTransactionType
+
+		EXEC uspTRFNegateTFLogFinancedQtyAndAmount @strTradeFinanceTransaction, NULL, NULL, @dtmTransactionDate, @strActionNegate
+	END
 
 	INSERT INTO tblTRFTradeFinanceLog(
 		  dtmCreatedDate
