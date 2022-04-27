@@ -728,6 +728,7 @@
     <Build Include="dbo\Tables\tblICInventoryTradeFinance.sql" />
     <Build Include="dbo\Tables\tblICInventoryTradeFinanceLot.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTradeFinanceLot.sql" />
+    <Build Include="dbo\Views\vyuLGGetContractQuality.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
