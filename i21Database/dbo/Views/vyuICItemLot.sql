@@ -49,6 +49,8 @@ SELECT
 	, lot.ysnInsuranceClaimed
 	, lot.ysnRejected
 	, lot.strRejectedBy
+	, tf.strTradeFinanceNumber
+	, tf.intTradeFinanceId
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
@@ -76,3 +78,4 @@ FROM tblICLot lot
 	LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = item.intClassVarietyId
 	LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = item.intProductLineId
 	LEFT JOIN tblICWarrantStatus WarrantStatus ON WarrantStatus.intWarrantStatus = lot.intWarrantStatus
+	LEFT JOIN tblTRFTradeFinance tf ON tf.intTradeFinanceId = lot.intTradeFinanceId
