@@ -5,7 +5,9 @@ BEGIN TRY
 
 	IF OBJECT_ID('tempdb..#PAYMENTSTOPROCESS') IS NOT NULL DROP TABLE #PAYMENTSTOPROCESS	
 
-	DECLARE @strVersion NVARCHAR(100)
+	DECLARE @strVersion 		NVARCHAR(100)
+	DECLARE @dtmCurrentDate		DATETIME = CAST(GETDATE() AS DATE)
+	DECLARE @intMaxDayLastMonth	INT = DAY(DATEADD(d, -1, DATEADD(M, DATEDIFF(M, 0, @dtmCurrentDate), 0)))
 
 	SELECT TOP 1 @strVersion = strVersionNo
 	FROM tblSMBuildNumber
@@ -47,11 +49,10 @@ BEGIN TRY
 	WHERE P.intPaymentMethodId = 11
 	  AND P.ysnScheduledPayment = 1
 	  AND CI.ysnAutoPay = 1
+	  AND CI.ysnActive = 1
 	  AND P.ysnProcessCreditCard = 0
 	  AND P.ysnPosted = 0
-	  AND CAST(P.dtmScheduledPayment AS DATE) >= P.dtmDatePaid
-	  AND CAST(P.dtmScheduledPayment AS DATE) = CAST(GETDATE() AS DATE)
-	  AND (DAY(GETDATE()) = CI.intDayOfMonth) --OR (CI.intDayOfMonth < DAY(DATEADD(d, -1, DATEADD(M, DATEDIFF(M, 0, GETDATE()) + 1, 0)))           ) )
+	  AND ((DAY(@dtmCurrentDate) = 1 AND DAY(P.dtmScheduledPayment) = @intMaxDayLastMonth AND @intMaxDayLastMonth < CI.intDayOfMonth) OR (DAY(@dtmCurrentDate) <> 1 AND DAY(P.dtmScheduledPayment) = CI.intDayOfMonth))
 	
 	WHILE EXISTS (SELECT TOP 1 NULL FROM #PAYMENTSTOPROCESS WHERE ysnValidated = 0)
 		BEGIN
