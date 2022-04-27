@@ -11,6 +11,8 @@
 	strChargePeriod NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (N'Daily') ,
 	[intItemId] [int] NULL,
  	[ysnActive] BIT NOT NULL DEFAULT 1, 
+	[strChargeType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (N'Discounted'),
+	[intVendorId] [int] NULL,
     CONSTRAINT [PK_tblICStorageRate] PRIMARY KEY CLUSTERED ([intStorageRateId] ASC)
 ) 
 GO

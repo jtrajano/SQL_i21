@@ -85,21 +85,21 @@ BEGIN TRY
 					,[intCostUOMId]					=	B.intItemChargeUOMId
 					,[dblCost]						=	B.dblStorageCharge
 					,[dblCostUnitQty]				=	E.dblUnitQty
-					,[int1099Form]					=	(CASE WHEN COALESCE(G.intEntityId, M.intEntityId) IS NOT NULL 
+					,[int1099Form]					=	(CASE WHEN G.intEntityId IS NOT NULL 
 																	AND C.intItemId > 0
 																	AND D.ysn1099Box3 = 1
-																	AND COALESCE(G.ysnStockStatusQualified,M.ysnStockStatusQualified) = 1 
+																	AND G.ysnStockStatusQualified = 1 
 																	THEN 4
-																WHEN COALESCE(J.str1099Form, O.str1099Form) = '1099-MISC' THEN 1
-																WHEN COALESCE(J.str1099Form, O.str1099Form) = '1099-INT' THEN 2
-																WHEN COALESCE(J.str1099Form, O.str1099Form) = '1099-B' THEN 3
+																WHEN J.str1099Form = '1099-MISC' THEN 1
+																WHEN J.str1099Form = '1099-INT' THEN 2
+																WHEN J.str1099Form = '1099-B' THEN 3
 															ELSE 0 END)
-					,[int1099Category]				=	CASE 	WHEN COALESCE(G.intEntityId, M.intEntityId) IS NOT NULL 
+					,[int1099Category]				=	CASE 	WHEN G.intEntityId IS NOT NULL 
 																	AND D.intItemId > 0
 																	AND D.ysn1099Box3 = 1
-																	AND COALESCE(G.ysnStockStatusQualified,M.ysnStockStatusQualified) = 1 
+																	AND G.ysnStockStatusQualified = 1 
 																	THEN 3
-														ELSE ISNULL(COALESCE(I.int1099CategoryId,P.int1099CategoryId), 0) END
+														ELSE ISNULL(int1099CategoryId, 0) END
 					,[intLineNo]					=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 					,[intContractDetailId]			=	NULL
 					,[intContractHeaderId]			=	NULL
@@ -107,11 +107,11 @@ BEGIN TRY
 					,[intLoadId]					=	NULL
 					,[intScaleTicketId]				=	NULL
 					,[intPurchaseTaxGroupId]		=	NULL
-					,[intEntityVendorId]			=	COALESCE(F.intEntityVendorId,L.intEntityVendorId)
+					,[intEntityVendorId]			=	F.intVendorId
 					,[strVendorOrderNumber]			=	'Storage Charge-' + A.strStorageChargeNumber
 					,strReference					=	'Storage Charge-' + A.strStorageChargeNumber
 					,strSourceNumber				=	A.strStorageChargeNumber
-					,intLocationId					=	COALESCE(F.intLocationId,L.intLocationId)
+					,intLocationId					=	A.intCompanyLocationId
 					,intSubLocationId				=	A.intStorageLocationId
 					,intStorageLocationId  			= 	Q.intStorageLocationId
 					,intItemLocationId				=	C.intItemLocationId
@@ -130,41 +130,21 @@ BEGIN TRY
 				ON D.intItemId = B.intItemChargeId
 			LEFT JOIN tblICItemUOM E
 				ON E.intItemUOMId = B.intItemChargeUOMId
-			--------Start Inventory Receipt----------------
-			--------Inbound
-			LEFT JOIN tblICInventoryReceipt F
-				ON B.intTransactionId = F.intInventoryReceiptId
-					AnD B.intTransactionTypeId = 4 --- Inventory Receipt filter
+			---------------Vendor Info-----------------
+			-------------------------------------------
+			LEFT JOIN tblICStorageRate F
+				ON A.intStorageRateId = F.intStorageRateId
 			LEFT JOIN vyuPATEntityPatron G
-				ON F.intEntityVendorId = G.intEntityId
-			LEFT JOIN vyuICGetItemStock H 
-				ON H.intItemId = D.intItemId 
-					AND H.intLocationId = A.intCompanyLocationId
-			LEFT JOIN tblEMEntity J
-				ON J.intEntityId = F.intEntityVendorId
-			LEFT JOIN tblAP1099Category I 
-				ON I.strCategory = J.str1099Type
-			--------END Inventory Receipt----------------
-			---------------------------------------------
-
-			---------Start Inventory Receipt---------------
-			-----------Used by outbound
-			LEFT JOIN tblICInventoryStockMovement K
-				ON B.intInventoryStockMovementIdUsed = K.intInventoryStockMovementId
-					AND B.intInventoryStockMovementIdUsed IS NOT NULL
-			LEFT JOIN tblICInventoryReceipt L
-				ON K.intTransactionId = L.intInventoryReceiptId
-			LEFT JOIN vyuPATEntityPatron M
-				ON L.intEntityVendorId = M.intEntityId
-			LEFT JOIN vyuICGetItemStock N 
-				ON N.intItemId = D.intItemId 
-					AND N.intLocationId = A.intCompanyLocationId
-			LEFT JOIN tblEMEntity O
-				ON O.intEntityId = L.intEntityVendorId
-			LEFT JOIN tblAP1099Category P 
-				ON P.strCategory = O.str1099Type
-			---------End Inventory Receipt ---------------
-			---------------------------------------------------
+			 	ON F.intVendorId = G.intEntityId
+			 LEFT JOIN vyuICGetItemStock H 
+			 	ON H.intItemId = D.intItemId 
+			 		AND H.intLocationId = A.intCompanyLocationId
+			 LEFT JOIN tblEMEntity J
+			 	ON J.intEntityId = F.intVendorId
+			 LEFT JOIN tblAP1099Category I 
+			 	ON I.strCategory = J.str1099Type
+			-------------------------------------------
+			-------------------------------------------
 			LEFT JOIN tblICLot Q
 				ON B.intLotId = Q.intLotId
 			WHERE B.dblStorageCharge <> 0
