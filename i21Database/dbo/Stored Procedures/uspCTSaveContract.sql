@@ -195,10 +195,7 @@ BEGIN TRY
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
-	SELECT @intPriceFixationId = intPriceFixationId
-	FROM tblCTPriceFixation WITH (UPDLOCK)
-	WHERE intContractHeaderId = case when @ysnMultiplePriceFixation = 1 then @intContractHeaderId  else intContractHeaderId end
- 	and  intContractDetailId = case when @ysnMultiplePriceFixation = 1 then intContractDetailId  else @intContractDetailId end
+	SELECT @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId
 
 	SELECT  @ysnOnceApproved  =	ysnOnceApproved,
 			@intTransactionId = intTransactionId 
@@ -214,28 +211,14 @@ BEGIN TRY
 	AND		strStatus = 'Approved' 
 	ORDER BY intApprovalId DESC
 
-	if (@ysnMultiplePriceFixation = 1)
-	begin
-		IF ISNULL(@intPriceFixationId,0) = 0 AND @dblFutures IS NOT NULL AND @intHeaderPricingTypeId = 2
-		BEGIN
-			UPDATE @CDTableUpdate
-			SET intPricingTypeId = 2
-				, dblFutures = NULL
-				, dblCashPrice = NULL
-				, dblTotalCost = NULL
-		END
-	end
-	else
-	begin
-		IF ISNULL(@intPriceFixationId,0) = 0 AND @intHeaderPricingTypeId = 2
-		BEGIN
-			UPDATE @CDTableUpdate
-			SET intPricingTypeId = 2
-				, dblFutures = NULL
-				, dblCashPrice = NULL
-				, dblTotalCost = NULL
-		END
-	end
+	IF ISNULL(@intPriceFixationId,0) = 0 AND @ysnMultiplePriceFixation = 1 AND @dblFutures IS NOT NULL AND @intHeaderPricingTypeId = 2
+	BEGIN
+		UPDATE @CDTableUpdate
+		SET intPricingTypeId = 2
+			, dblFutures = NULL
+			, dblCashPrice = NULL
+			, dblTotalCost = NULL
+	END
 
 	UPDATE @CDTableUpdate
 	SET intProducerId = @intProducerId
