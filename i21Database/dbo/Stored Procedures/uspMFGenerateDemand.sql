@@ -1307,7 +1307,7 @@ BEGIN TRY
 			JOIN dbo.tblCTContractDetail SS ON SS.intItemId = I.intItemId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
 				AND SS.intCompanyLocationId = IsNULL(@intCompanyLocationId, SS.intCompanyLocationId)
-			WHERE SS.intContractStatusId = 1
+			WHERE SS.intContractStatusId IN (1, 4)
 				AND (
 					CASE 
 						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
@@ -1367,7 +1367,7 @@ BEGIN TRY
 			JOIN dbo.tblCTContractDetail SS ON SS.intItemId = I.intItemId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
 				AND SS.intCompanyLocationId = IsNULL(@intCompanyLocationId, SS.intCompanyLocationId)
-			WHERE SS.intContractStatusId = 1
+			WHERE SS.intContractStatusId IN (1, 4)
 				AND (
 					CASE 
 						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
@@ -1499,7 +1499,7 @@ BEGIN TRY
 				ELSE LD.dblDeliveredQuantity
 				END
 			) > 0
-		AND SS.intContractStatusId = 1
+		AND SS.intContractStatusId IN (1, 4)
 		AND SS.intCompanyLocationId = IsNULL(@intCompanyLocationId, SS.intCompanyLocationId)
 		AND (
 			CASE 
@@ -1573,7 +1573,7 @@ BEGIN TRY
 				ELSE LD.dblDeliveredQuantity
 				END
 			) > 0
-		AND SS.intContractStatusId = 1
+		AND SS.intContractStatusId IN (1, 4)
 		AND SS.intCompanyLocationId = IsNULL(@intCompanyLocationId, SS.intCompanyLocationId)
 		AND (
 			CASE 
