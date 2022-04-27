@@ -68,7 +68,7 @@ BEGIN TRY
 					ysnSubCurrency					,
 					intCurrencyId
 					,ysnStage
-					--,intInsuranceChargeId
+					,intInsuranceChargeDetailId
 					)
 			SELECT
 					[intTransactionType]			=	1,
@@ -116,7 +116,7 @@ BEGIN TRY
 					,ysnSubCurrency					=	0
 					,intCurrencyId					=	B.intCurrencyId
 					,ysnStage 						=	0
-					--,intInsuranceChargeId				=	B.intStorageChargeDetailId
+					,intInsuranceChargeDetailId		=	B.intInsuranceChargeDetailId
 			FROM tblICInsuranceCharge A
 			INNER JOIN tblICInsuranceChargeDetail B
 				ON A.intInsuranceChargeId = B.intInsuranceChargeId
@@ -194,7 +194,7 @@ BEGIN TRY
 			END
 		END
 
-		---Update Storage Charge
+		---Update Insurance Charge
 		IF(ISNULL(@intBillId,0) > 0)
 		BEGIN
 
@@ -227,55 +227,55 @@ BEGIN TRY
 	ELSE
 	BEGIN
 		--Get the vouchers and Delete
-		--INSERT INTO @billList
-		--SELECT DISTINCT
-		--	A.intBillId
-		--FROM tblAPBillDetail A
-		--WHERE A.intStorageChargeId IN (SELECT  
-		--									intStorageChargeDetailId 
-		--								FROM tblICStorageChargeDetail
-		--								WHERE intStorageChargeId = @intStorageChargeId
-		--								) 
-		--ORDER BY A.intBillId ASC
+		INSERT INTO @billList
+		SELECT DISTINCT
+			A.intBillId
+		FROM tblAPBillDetail A
+		WHERE A.intInsuranceChargeDetailId IN (SELECT  
+													intInsuranceChargeDetailId 
+												FROM tblICInsuranceChargeDetail
+												WHERE intInsuranceChargeId = @intInsuranceChargeId
+												) 
+		ORDER BY A.intBillId ASC
 
 
-		--SELECT TOP 1 
-		--	@_intBillId = intId
-		--FROM @billList
-		--ORDER BY intId
+		SELECT TOP 1 
+			@_intBillId = intId
+		FROM @billList
+		ORDER BY intId
 
-		--WHILE(ISNULL(@_intBillId,0) > 0)
-		--BEGIN
-		--	SELECT TOP 1 
-		--		@ysnBillPosted = ysnPosted
-		--		,@strBillNumber = strBillId
-		--	FROM tblAPBill
-		--	WHERE intBillId = @_intBillId
+		WHILE(ISNULL(@_intBillId,0) > 0)
+		BEGIN
+			SELECT TOP 1 
+				@ysnBillPosted = ysnPosted
+				,@strBillNumber = strBillId
+			FROM tblAPBill
+			WHERE intBillId = @_intBillId
 
-		--	IF(@ysnBillPosted = 1)
-		--	BEGIN
-		--		SET @ErrorMessage = 'Voucher ' + @strBillNumber + 'is already posted. Please unpost the voucher first.'
+			IF(@ysnBillPosted = 1)
+			BEGIN
+				SET @ErrorMessage = 'Voucher ' + @strBillNumber + 'is already posted. Please unpost the voucher first.'
 				
-		--		RAISERROR(@ErrorMessage,11,1)
-		--	END
-		--	ELSE
-		--	BEGIN
-		--		EXEC [dbo].[uspAPDeleteVoucher] @_intBillId, @intUserId
-		--	END
+				RAISERROR(@ErrorMessage,11,1)
+			END
+			ELSE
+			BEGIN
+				EXEC [dbo].[uspAPDeleteVoucher] @_intBillId, @intUserId
+			END
 
-		--	SET @_intBillId = (SELECT TOP 1 
-		--							intId
-		--						FROM @billList
-		--						WHERE intId > @_intBillId 
-		--						ORDER BY intId)
+			SET @_intBillId = (SELECT TOP 1 
+									intId
+								FROM @billList
+								WHERE intId > @_intBillId 
+								ORDER BY intId)
 
-		--END
-
-
+		END
 
 
 
-		---Update Storage Charge
+
+
+		---Update Insurance Charge
 		UPDATE tblICInsuranceCharge 
 			SET ysnPosted = 0
 		WHERE intInsuranceChargeId = @intInsuranceChargeId

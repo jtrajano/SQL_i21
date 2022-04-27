@@ -25,6 +25,8 @@ SELECT
 	,strCurrency = E.strCurrency
 	,strRateUOM = I.strUnitMeasure
 	,F.dblAmount
+	,M.intBillId
+	,M.strBillId
 FROM tblICInsuranceCharge A
 LEFT JOIN tblEMEntity B
 	ON A.intInsurerId = B.intEntityId
@@ -47,3 +49,7 @@ LEFT JOIN tblICItemUOM J
 	ON F.intRateUOMId = J.intItemUOMId
 LEFT JOIN tblICUnitMeasure K
 	ON H.intUnitMeasureId = K.intUnitMeasureId
+LEFT JOIN tblAPBillDetail L
+	ON F.intInsuranceChargeDetailId = L.intInsuranceChargeDetailId
+LEFT JOIN tblAPBill M
+	ON L.intBillId = M.intBillId
