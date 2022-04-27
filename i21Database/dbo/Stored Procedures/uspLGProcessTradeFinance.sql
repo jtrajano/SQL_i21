@@ -97,6 +97,7 @@ BEGIN
 		,@strLastApprovalStatus = TRF.strApprovalStatus
 	FROM tblTRFTradeFinance TRF
 	WHERE TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = @intLoadId
+	ORDER BY intTradeFinanceId DESC
 
 	/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel the previous */
 	IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') <> 'Canceled' 
@@ -162,6 +163,7 @@ BEGIN
 	/* Construct Trade Finance Log SP parameter */
 	SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
 	FROM tblTRFTradeFinance WHERE strTransactionType = 'Logistics' AND intTransactionHeaderId = @intLoadId
+	ORDER BY intTradeFinanceId DESC
 
 	INSERT INTO @TRFLog
 		(strAction
@@ -315,7 +317,7 @@ BEGIN
 				,intTransactionHeaderId
 				,intTransactionDetailId
 				,strTransactionNumber
-				,dtmTransactionDate
+				,dtmTransactionDate = GETDATE()
 				,intBankTransactionId
 				,strBankTransactionId
 				,intBankId
@@ -340,7 +342,7 @@ BEGIN
 				,dblFinanceQty
 				,dblFinancedAmount
 				,strBankApprovalStatus = 'Canceled'
-				,dtmAppliedToTransactionDate
+				,dtmAppliedToTransactionDate = GETDATE()
 				,intStatusId
 				,intWarrantId
 				,strWarrantId
@@ -351,6 +353,7 @@ BEGIN
 			FROM tblTRFTradeFinanceLog
 			WHERE strTransactionType = 'Logistics'
 			AND intTransactionHeaderId = @intLoadId
+			ORDER BY intTradeFinanceLogId DESC
 
 			EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLogCancel;
 		END
