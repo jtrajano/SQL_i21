@@ -11,7 +11,8 @@ SELECT tf.intTradeFinanceId
 	, tfLog.strTransactionType
 FROM tblTRFTradeFinance tf
 CROSS APPLY (
-	SELECT TOP 1 tfLogs.strTradeFinanceTransaction 
+	SELECT TOP 1 
+		tfLogs.strTradeFinanceTransaction 
 		, tfLogs.intBankId
 		, tfLogs.strBank
 		, tfLogs.intBankAccountId

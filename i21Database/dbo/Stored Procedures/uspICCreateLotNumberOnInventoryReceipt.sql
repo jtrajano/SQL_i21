@@ -311,7 +311,7 @@ BEGIN
 			,strSealNo
 			,[dblTare]
 			,[dblTarePerQty]
-
+			,intTradeFinanceId
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -376,6 +376,7 @@ BEGIN
 			,strSealNo				= ISNULL(SourceLot.strSealNo, Receipt.strSealNo) 
 			,[dblTare]				= ISNULL(NULLIF(SourceLot.dblTare, 0), ItemLot.dblTareWeight) 
 			,[dblTarePerQty]		= ISNULL(NULLIF(SourceLot.dblTarePerQty, 0), ItemLot.dblTarePerQuantity) 
+			,tf.intTradeFinanceId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -389,6 +390,8 @@ BEGIN
 				ON StorageLocation.intStorageLocationId = ISNULL(ItemLot.intStorageLocationId, ReceiptItem.intStorageLocationId)
 			LEFT JOIN tblICLot SourceLot
 				ON SourceLot.intLotId = ItemLot.intSourceLotId
+			LEFT JOIN tblTRFTradeFinance tf
+				ON tf.strTradeFinanceNumber = Receipt.strTradeFinanceNumber
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
 
 END 

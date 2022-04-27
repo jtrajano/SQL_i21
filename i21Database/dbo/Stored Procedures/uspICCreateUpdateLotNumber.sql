@@ -125,6 +125,7 @@ DECLARE
 	,@intParentLotId AS INT 
 	,@dblTare AS NUMERIC(38,20) 
 	,@dblTarePerQty AS NUMERIC(38,20) 
+	,@intTradeFinanceId AS INT 
 
 	,@ysnRejected BIT 
 
@@ -246,6 +247,7 @@ SELECT  intId
 		,intParentLotId
 		,dblTare		
 		,dblTarePerQty
+		,intTradeFinanceId
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -317,7 +319,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intParentLotId
 		,@dblTare		
 		,@dblTarePerQty
-
+		,@intTradeFinanceId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -788,6 +790,7 @@ BEGIN
 				,strCargoNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strCargoNo ELSE LotMaster.strCargoNo END 	
 				,strWarrantNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strWarrantNo ELSE LotMaster.strWarrantNo END 	
 				,intWarrantStatus		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intWarrantStatus ELSE LotMaster.intWarrantStatus END
+				,intTradeFinanceId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intTradeFinanceId ELSE LotMaster.intTradeFinanceId END
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
 													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Incoming lot is already in wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
@@ -1086,6 +1089,7 @@ BEGIN
 				,intParentLotId 
 				,dblTare
 				,dblTarePerQty
+				,intTradeFinanceId
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -1152,6 +1156,7 @@ BEGIN
 				,@intParentLotId 
 				,0 -- @dblTare
 				,@dblTarePerQty
+				,@intTradeFinanceId
 			)
 		;
 	
@@ -1361,7 +1366,8 @@ BEGIN
 		,@strSealNo
 		,@intParentLotId
 		,@dblTare		
-		,@dblTarePerQty		
+		,@dblTarePerQty
+		,@intTradeFinanceId
 	;
 END
 
