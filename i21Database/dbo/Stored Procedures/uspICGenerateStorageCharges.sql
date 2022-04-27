@@ -468,8 +468,8 @@ BEGIN TRY
 			---------------------
 			OUTER APPLY (  
 				SELECT TOP 1 
-					AA.dblGross
-					,AA.dblNet
+					dblGross = CASE WHEN GG.intInventoryReceiptItemId IS NULL THEN AA.dblGross ELSE GG.dblGrossWeight END
+					,dblNet = CASE WHEN GG.intInventoryReceiptItemId IS NULL THEN AA.dblNet ELSE ISNULL(GG.dblGrossWeight,0) - ISNULL(GG.dblTareWeight,0) END
 					,AA.intWeightUOMId
 					,strWeightUnitMeasure = CC.strUnitMeasure
 					,dtmLastFreeWhseDateUTC = (DATEADD(HOUR,@LocalToUTCDiff,DD.dtmLastFreeWhseDate))
@@ -487,8 +487,11 @@ BEGIN TRY
 					ON AA.intUnitMeasureId = EE.intItemUOMId
 				LEFT JOIN tblICUnitMeasure FF
 					ON EE.intUnitMeasureId = FF.intUnitMeasureId
+				LEFT JOIN tblICInventoryReceiptItemLot GG
+					ON AA.intInventoryReceiptItemId = GG.intInventoryReceiptItemId
 				WHERE AA.intInventoryReceiptItemId = A.intTransactionDetailId
 					AND A.intTransactionTypeId = 4 --- Inventory receipt
+					AND GG.intLotId = A.intLotId
 			) B   
 			WHERE intRecId = @_intLoopId
 
@@ -908,7 +911,7 @@ BEGIN TRY
 			AND AA.intUnitMeasureId = G.intUnitMeasureId
 	) K
 	WHERE B.intStorageRateId IS NOT NULL OR (B.intStorageRateId IS NULL AND A.dblQty <= 0 AND A.dblDeliveredQuantity < 0)
-		
+		AND B.intItemId	IS NOT NULL
 		
 
 	------UPDATE no of Days
