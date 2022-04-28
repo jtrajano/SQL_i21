@@ -31,7 +31,7 @@ SET @Currency = ( SELECT intCurrencyID FROM tblFRRowDesignCurrencies WHERE intRo
 INSERT INTO tblFRRowDesignCurrencies (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency,ysnUnnaturalAccount)                
 SELECT intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,            
 NULL as strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,            
-ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,'0' intCurrencyID,strCurrency,ysnUnnaturalAccount            
+ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,0 intCurrencyID,strCurrency,ysnUnnaturalAccount
 FROM tblFRRowDesignDrillDown            
 WHERE intRowId = @intRowId AND ysnShowCurrencies = 1          
             
