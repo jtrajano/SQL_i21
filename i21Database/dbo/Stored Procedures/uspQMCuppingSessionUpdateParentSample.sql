@@ -48,7 +48,7 @@ IF @intCuppingSampleId <> (
 	-- The latest cupping session will base on Cupping Date, Cupping Time, and Sample Id
 	ORDER BY
 		CS.dtmCuppingDate DESC,
-		CS.dtmCuppingTime DESC,
+		CAST(CS.dtmCuppingTime AS TIME) DESC,
 		S.intSampleId DESC
 )
 BEGIN
