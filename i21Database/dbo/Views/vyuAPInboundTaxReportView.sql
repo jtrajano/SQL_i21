@@ -89,7 +89,7 @@ SELECT
 	,dblFunctionalTaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0 ELSE APBD.dblTotal END)
 	
 	--PAYMENT HEADERS
-	,ysnPaid = APB.ysnPaid
+	,ysnPaid = CASE WHEN APB.intTransactionType IN (15) THEN CAST(0 AS BIT) ELSE APB.ysnPaid END
 	,strCheckNumber = payment.strPaymentInfo
 FROM tblAPBillDetail APBD
 INNER JOIN tblAPBill APB ON APBD.intBillId = APB.intBillId AND APB.ysnPosted = CAST(1 AS BIT)
@@ -159,6 +159,5 @@ OUTER APPLY (
 	FROM tblGLAccount
 	WHERE intAccountId = APBD.intAccountId
 ) account
-WHERE APB.intTransactionType NOT IN (15)
 
 GO
