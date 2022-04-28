@@ -57,9 +57,9 @@ BEGIN TRY
 		RAISERROR('Remaining quantity for Collateral %s cannot be negative.',16,1,@strTransNo)
 	END
 
-	SELECT	@strAdjustmentNo = @strTransNo + 'A' + LTRIM(CAST(ISNULL(MAX(RIGHT(strAdjustmentNo, CHARINDEX('A', REVERSE(strAdjustmentNo)) - 1)),0) AS INT) + 1)
+	SELECT	@strAdjustmentNo = @strTransNo + 'A' + convert(nvarchar(20),max(convert(int,isnull(right(strAdjustmentNo,CHARINDEX('A',REVERSE(strAdjustmentNo)) - 1),0))) + 1)
 	FROM	tblRKCollateralAdjustment 
-	WHERE	intCollateralId = @intCollateralId
+	WHERE	intCollateralId = 3 and strAdjustmentNo like '%A%'
 
 	SET @XML =	'<tblRKCollateralAdjustments>'
 	SET @XML +=		'<tblRKCollateralAdjustment>'
