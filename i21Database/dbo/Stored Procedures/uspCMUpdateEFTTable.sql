@@ -16,29 +16,35 @@ BEGIN
     DECLARE @intEFTNextNo INT
     DECLARE @intTransactionId INT
 
+	
+
    
     ;WITH TransIds AS(
     SELECT  CAST(Item AS INT) intTransactionId FROM dbo.fnSplitString(@intTransactionIds, ',')
     )
-    INSERT INTO @tbl(intTransactionId,ysnGenerated)
+	INSERT INTO @tbl(intTransactionId,ysnGenerated)
     SELECT A.intTransactionId,0 FROM TransIds A LEFT JOIN
         tblCMEFTNumbers B ON B.intTransactionId = A.intTransactionId
         AND B.strProcessType = @strProcessType
-        WHERE B.intTransactionId IS NULL 
+        WHERE B.intTransactionId IS NULL or ISNULL(B.intEFTNoId,0) = 0
 
-    
-
+	
    
    IF EXISTS (SELECT 1 FROM tblCMEFTNumbers WHERE intBankAccountId =@intBankAccountId)
    BEGIN
       SELECT @intEFTNextNo = MAX(intEFTNoId) FROM tblCMEFTNumbers WHERE intBankAccountId = @intBankAccountId 
-      SET @intEFTNextNo = @intEFTNextNo +1
+	  SELECT @intEFTNextNo = ISNULL(@intEFTNextNo,0) +1
+	  PRINT('JEFF')
    END
    ELSE
-      SELECT @intEFTNextNo = intEFTNextNo FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId
+	SELECT @intEFTNextNo = intEFTNextNo FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId
+
+  
+
+  SELECT @intEFTNextNo = ISNULL(@intEFTNextNo,0) 
+  IF @intEFTNextNo = 0  SET @intEFTNextNo = 1
 
 
-  SELECT @intEFTNextNo = ISNULL(@intEFTNextNo,1)
 
 
 
@@ -56,7 +62,7 @@ BEGIN
          SELECT @intEFTNextNo = @intEFTNextNo +1
 
     END
-
+	
 
     IF @strProcessType = 'ACH From Customer'
         UPDATE A
