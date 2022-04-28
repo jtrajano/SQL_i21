@@ -28,7 +28,7 @@ DELETE tblFRRowDesignCurrencies WHERE intRowId = @intRowId
 INSERT INTO tblFRRowDesignCurrencies        
 SELECT intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,          
 strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,          
-ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,'0' intCurrencyID,strCurrency          
+ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,0 intCurrencyID,strCurrency,ysnUnnaturalAccount          
 FROM tblFRRowDesign          
 WHERE intRowDetailId = @intRowId AND ysnShowCurrencies = 1        
           
@@ -53,7 +53,7 @@ BEGIN
  INSERT INTO tblFRRowDesignCurrencies          
  SELECT T0.intRowDetailId,intRefNo,strDescription + ' - ' + T1.strCurrency collate SQL_Latin1_General_CP1_CI_AS,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,          
  strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,          
- ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,T1.intCurrencyId,T1.strCurrency          
+ ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,T1.intCurrencyId,T1.strCurrency,T0.ysnUnnaturalAccount          
  FROM tblFRRowDesign T0          
  INNER JOIN #TMPCURRENCIES T1           
  ON T0.intRowDetailId = T1.intRowDetailId          
