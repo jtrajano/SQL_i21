@@ -744,6 +744,8 @@
     <Build Include="dbo\Stored Procedures\uspICTradeFinanceAfterSave.sql" />
     <Build Include="dbo\Views\vyuICSearchCountGroupItem.sql" />
     <Build Include="dbo\Views\vyuICItemLocationCountGroup.sql" />
+    <Build Include="dbo\Views\vyuICSearchItemStockDetail.sql" />
+    <Build Include="dbo\Views\vyuICSearchItemStockDetailOnHand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
