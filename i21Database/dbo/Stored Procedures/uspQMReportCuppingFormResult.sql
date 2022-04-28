@@ -13,7 +13,7 @@ BEGIN TRY
 		,QMTR.strResult
 	FROM tblQMCuppingSession QMCS
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId
-	INNER JOIN tblQMSample QMS ON QMCSD.intCuppingSessionDetailId = QMS.intCuppingSessionDetailId AND QMS.intRelatedSampleId = @intSampleId
+	INNER JOIN tblQMSample QMS ON QMCSD.intCuppingSessionDetailId = QMS.intCuppingSessionDetailId AND QMS.intParentSampleId = @intSampleId
 	INNER JOIN  tblQMTestResult QMTR ON QMS.intSampleId = QMTR.intSampleId
 	INNER JOIN tblQMProductProperty QMPP ON QMPP.intPropertyId = QMTR.intPropertyId AND QMPP.ysnPrintInCuppingForm = 1 AND QMTR.intProductId = QMPP.intProductId
 	INNER JOIN tblQMProperty QMP ON QMPP.intPropertyId = QMP.intPropertyId AND QMP.strPropertyName NOT IN ('Visual Aspect', 'Humidity', 'Roasting')

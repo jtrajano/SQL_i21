@@ -10,7 +10,7 @@ SELECT DISTINCT
 	,intCompanyLocationId	= SC.intProcessingLocationId
 	,strLocationName		= Loc.strLocationName
 	,intEntityId			= ISNULL(TS.intCustomerId,SC.intEntityId)
-	,strEntityName          = Entity.strName
+	,strEntityName          = case when TS.intTicketSplitId is null then  Entity.strName else TSEntity.strName end
 	,dblUnits				= ISNULL(TS.dblSplitPercent,100)*SC.dblNetUnits/100.0
 	,dtmTicketDateTime		= SC.dtmTicketDateTime
 	,intItemUOMIdTo			= SC.intItemUOMIdTo
@@ -27,7 +27,10 @@ SELECT DISTINCT
 	JOIN tblSMCompanyLocation Loc 
 		ON Loc.intCompanyLocationId = SC.intProcessingLocationId
 	JOIN tblEMEntity Entity
-		ON Entity.intEntityId = ISNULL(TS.intCustomerId,SC.intEntityId)
+		ON Entity.intEntityId = SC.intEntityId
+	left join tblEMEntity TSEntity
+		on TS.intCustomerId = TSEntity.intEntityId
+
 	JOIN tblICItemUOM UOM 
 		ON UOM.intItemUOMId = SC.intItemUOMIdTo
 	JOIN tblICUnitMeasure UnitMeasure
