@@ -742,6 +742,8 @@
     <Build Include="dbo\Stored Procedures\uspICCommitTradeFinance.sql" />
     <Build Include="dbo\Stored Procedures\uspICTradeFinanceBeforeSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICTradeFinanceAfterSave.sql" />
+    <Build Include="dbo\Views\vyuICSearchCountGroupItem.sql" />
+    <Build Include="dbo\Views\vyuICItemLocationCountGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
