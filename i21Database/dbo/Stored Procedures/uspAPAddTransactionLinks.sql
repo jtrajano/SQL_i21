@@ -205,9 +205,9 @@ BEGIN
 				strBankTradeReference			= B.strReferenceNo,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= BD.dblTotal + BD.dblTax,
-				strBankApprovalStatus			= 'No Need For Approval',
+				strBankApprovalStatus			= '',
 				dtmAppliedToTransactionDate		= B.dtmBillDate,
-				intStatusId						= 2, --Completed
+				intStatusId						= 1, --Active
 				intUserId						= @intUserId,
 				intConcurrencyId				= 1,
 				intContractHeaderId				= BD.intContractHeaderId,
@@ -276,9 +276,9 @@ BEGIN
 				strBankTradeReference			= B.strReferenceNo,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= PD.dblPayment,
-				strBankApprovalStatus			= 'No Need For Approval',
+				strBankApprovalStatus			= '',
 				dtmAppliedToTransactionDate		= P.dtmDatePaid,
-				intStatusId						= 2, --Completed
+				intStatusId						= 1, --Active
 				intUserId						= @intUserId,
 				intConcurrencyId				= 1,
 				intContractHeaderId				= BD.intContractHeaderId,
@@ -300,6 +300,30 @@ BEGIN
 				  AND PD.dblPayment <> 0
 		END
 
+		--REVERSE LOGS
+		DECLARE @strTradeFinanceNumber NVARCHAR(100), @strTransactionType NVARCHAR(100), @dtmTransactionDate DATETIME, @strAction NVARCHAR(100)
+		
+		DECLARE TFLogCursor CURSOR LOCAL FAST_FORWARD
+		FOR
+		SELECT strTradeFinanceTransaction, strTransactionType, dtmTransactionDate, strAction FROM @TradeFinanceLogs
+
+		OPEN TFLogCursor
+		FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @strTransactionType, @dtmTransactionDate, @strAction
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC uspTRFNegateTFLogFinancedQtyAndAmount
+				@strTradeFinanceNumber 	= @strTradeFinanceNumber,
+				@strTransactionType		= @strTransactionType,
+				@strLimitType			= NULL,
+				@dtmTransactionDate		= @dtmTransactionDate,
+				@strAction				= @strAction
+
+			FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @strTransactionType, @dtmTransactionDate, @strAction
+		END
+		CLOSE TFLogCursor
+		DEALLOCATE TFLogCursor
+
+		--NEW LOGS
 		EXEC uspTRFLogTradeFinance @TradeFinanceLogs
 	END
 END
