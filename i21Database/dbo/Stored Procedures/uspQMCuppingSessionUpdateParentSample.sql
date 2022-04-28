@@ -62,7 +62,7 @@ BEGIN TRY
 	INSERT INTO @LogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
 	SELECT 1, '', 'Updated', 'Updated (Updated from: '+ @strCuppingSessionSampleNumber +') - Record: ' + @strParentSampleNumber, NULL, NULL, NULL, NULL, NULL, NULL
 	UNION ALL
-	SELECT 2, '', '', 'tblQMTestResults', NULL, NULL, 'Test Detail', NULL, NULL, 1
+	SELECT 2, '', '', 'tblQMTestResults', NULL, NULL, 'Test Detail (Updated from: '+ @strCuppingSessionSampleNumber +')', NULL, NULL, 1
 	
 	SET @intKeyId = 2
 
