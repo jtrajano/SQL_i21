@@ -7,6 +7,7 @@ SELECT
 	,lot.strLotAlias
 	,lot.intItemId
 	,item.strItemNo
+	,lot.intLocationId 
 	,lot.intSubLocationId
 	,SubLocation.strSubLocationName
 	,lot.intStorageLocationId
