@@ -167,6 +167,11 @@ SELECT
 	,strAction
 	,intTransactionHeaderId
 FROM @TradeFinanceLogs
+GROUP BY 
+	 strTradeFinanceTransaction
+	,dtmTransactionDate
+	,strAction
+	,intTransactionHeaderId
 
 OPEN TFLogCursor
 
@@ -188,6 +193,7 @@ BEGIN
 		FROM tblTRFTradeFinance TRTF
 		INNER JOIN @TradeFinanceLogs TRFL 
 		ON TRTF.strTransactionNumber = TRFL.strTransactionNumber AND TRTF.strTransactionType = 'Sales' AND TRTF.intTransactionHeaderId = TRFL.intTransactionHeaderId
+		WHERE strTradeFinanceNumber = @strTradeFinanceNumber
 
 		IF (ISNULL(@strTradeFinanceNumber, '') = '')
 		BEGIN
@@ -220,10 +226,10 @@ BEGIN
 			,strTransactionNumber			= TFL.strTransactionNumber
 			,intTransactionHeaderId			= TFL.intTransactionHeaderId
 			,intTransactionDetailId			= TFL.intTransactionDetailId
-			,intBankId						= TFL.intBankId
-			,intBankAccountId				= TFL.intBankAccountId
-			,intBorrowingFacilityId			= TFL.intBorrowingFacilityId
-			,strRefNo						= TFL.strBankTradeReference
+			,intBankId						= ARI.intBankId
+			,intBankAccountId				= ARI.intBankAccountId
+			,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
+			,strRefNo						= ARI.strBankReferenceNo
 			,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
 			,strCommnents					= ARI.strTradeFinanceComments
 			,dtmCreatedDate					= GETDATE()
@@ -239,11 +245,15 @@ BEGIN
 			SET strTransactionNo = @strNewTradeFinanceNumber
 			WHERE intInvoiceId = @intTransactionHeaderId
 
+			UPDATE @TradeFinanceLogs 
+			SET strTradeFinanceTransaction = @strNewTradeFinanceNumber
+			WHERE intTransactionHeaderId = @intTransactionHeaderId
+
 			EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId
 		END	
 		ELSE IF ISNULL(@intTradeFinanceId, 0) <> 0
 		BEGIN
-			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId, @strAction = @strAction
+			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId, @strAction = 'UPDATE'
 		END
 	END
 
@@ -269,6 +279,9 @@ END
 CLOSE TFLogCursor
 DEALLOCATE TFLogCursor
 
-EXEC uspTRFLogTradeFinance @TradeFinanceLogs
+IF @ForDelete <> 1
+BEGIN
+	EXEC uspTRFLogTradeFinance @TradeFinanceLogs
+END
 
 RETURN 0
