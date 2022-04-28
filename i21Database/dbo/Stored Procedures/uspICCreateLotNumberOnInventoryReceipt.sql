@@ -421,6 +421,7 @@ BEGIN
 				ON SourceLot.intLotId = ItemLot.intSourceLotId
 			LEFT JOIN tblTRFTradeFinance tf
 				ON tf.strTradeFinanceNumber = Receipt.strTradeFinanceNumber
+				AND tf.strTransactionNumber = Receipt.strReceiptNumber
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
 
 END 

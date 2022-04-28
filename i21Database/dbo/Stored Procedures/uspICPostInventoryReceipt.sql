@@ -371,11 +371,13 @@ BEGIN
 								ON AggregrateLot.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 					WHERE	
 						AggregrateLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId 
+						AND AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed') -- Do not include the Swept or Skimmed in the total.
 				) ItemLot					
 		WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
 				AND Receipt.strReceiptNumber = @strTransactionId
 				AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
 				AND Item.strType IN ('Inventory', 'Bundle')
+				
 			
 		IF @intItemId IS NOT NULL 
 		BEGIN 
