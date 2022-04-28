@@ -86,7 +86,7 @@ BEGIN TRY
 	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
 	INNER JOIN tblQMSample QMS ON QMCSD.intCuppingSessionDetailId = QMS.intCuppingSessionDetailId
 	INNER JOIN tblICItem ICI WITH (NOLOCK) ON QMS.intItemId = ICI.intItemId
-	LEFT JOIN tblQMSample QMSP ON QMS.intRelatedSampleId = QMSP.intSampleId
+	LEFT JOIN tblQMSample QMSP ON QMS.intParentSampleId = QMSP.intSampleId
 	LEFT JOIN (
 		SELECT 
 			 intContractDetailId
