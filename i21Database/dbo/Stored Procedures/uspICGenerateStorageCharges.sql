@@ -44,9 +44,10 @@ DECLARE @_intLotId INT
 SET @LocalToUTCDiff = (DATEDIFF(HOUR,GETDATE(),GETUTCDATE()))
 SET @UTCToLocalDiff = (DATEDIFF(HOUR,GETUTCDATE(),GETDATE()))
 
+
 SELECT @dtmBillDate = DATEADD(HOUR,@UTCToLocalDiff,@dtmBillDateUTC)
-SET @dtmBillDate = DATEADD(dd, DATEDIFF(dd, 0,@dtmBillDate), 0) ----------Remove Time
-SET @dtmBillDateUTC = DATEADD(HOUR,@LocalToUTCDiff,@dtmBillDate)
+-- SET @dtmBillDate = DATEADD(dd, DATEDIFF(dd, 0,@dtmBillDate), 0) ----------Remove Time
+-- SET @dtmBillDateUTC = DATEADD(HOUR,@LocalToUTCDiff,@dtmBillDate)
 
 
 BEGIN TRY
@@ -554,14 +555,18 @@ BEGIN TRY
 			-------- GET/Update Details from transaction
 			UPDATE @tmpICInventoryForStorageCharge
 			SET dtmLastFreeOutboundDateUTC = B.dtmLastFreeDate
+				,dblGross = ISNULL(B.dblGross,0.0)
+				,dblNet = ISNULL(B.dblNet,0.0)
+				,intWeightUOMId = B.intWeightUOMId
+				,strWeightUOMId = B.strUnitMeasure
 			FROM @tmpICInventoryForStorageCharge A
 			-------------------------------
 			-----------Load Shipment Detail
 			-------------------------------
 			OUTER APPLY (
 				SELECT TOP 1
-					AA.dblGross
-					,AA.dblNet
+					dblGross = ISNULL(EE.dblGross,AA.dblGross)
+					,dblNet = ISNULL(EE.dblNet,AA.dblNet)
 					,intWeightUOMId = AA.intWeightItemUOMId
 					,CC.strUnitMeasure
 					,DD.dtmLastFreeDate
@@ -576,8 +581,11 @@ BEGIN TRY
 					FROM tblLGLoadWarehouse AAA
 					WHERE AAA.intLoadId = AA.intLoadId
 				) DD
-				WHERE intLoadDetailId = A.intTransactionDetailId
-					AND intTransactionTypeId = 46 --- Outbound Shipment
+				LEFT JOIN tblLGLoadDetailLot EE
+					ON AA.intLoadDetailId = EE.intLoadDetailId
+						AND EE.intLotId = A.intLotId
+				WHERE AA.intLoadDetailId = A.intTransactionDetailId
+					AND A.intTransactionTypeId = 46 --- Outbound Shipment
 			) B
 			WHERE A.intRecId = @_intLoopId
 
@@ -648,6 +656,10 @@ BEGIN TRY
 					,dtmLastFreeWarehouseDateUTC
 					,dtmLastFreeOutboundDateUTC
 					,intInventoryStockMovementIdUsed
+					,dblGross
+					,dblNet
+					,intWeightUOMId
+					,strWeightUOMId
 				)
 				SELECT 
 					A.intItemId
@@ -669,6 +681,10 @@ BEGIN TRY
 					,A.dtmLastFreeWarehouseDateUTC
 					,A.dtmLastFreeOutboundDateUTC
 					,@_intInventoryStockMovementId
+					,dblGross
+					,dblNet
+					,intWeightUOMId
+					,strWeightUOMId
 				FROM @tmpICInventoryForStorageCharge A
 				WHERE intRecId = @_intLoopId
 
@@ -707,6 +723,10 @@ BEGIN TRY
 					,dtmLastFreeWarehouseDateUTC
 					,dtmLastFreeOutboundDateUTC
 					,intInventoryStockMovementIdUsed
+					,dblGross
+					,dblNet
+					,intWeightUOMId
+					,strWeightUOMId
 				)
 				SELECT 
 					A.intItemId
@@ -728,6 +748,10 @@ BEGIN TRY
 					,A.dtmLastFreeWarehouseDateUTC
 					,dtmLastFreeOutboundDateUTC
 					,@_intInventoryStockMovementId
+					,dblGross
+					,dblNet
+					,intWeightUOMId
+					,strWeightUOMId
 				FROM @tmpICInventoryForStorageCharge A
 				WHERE intRecId = @_intLoopId
 			END
