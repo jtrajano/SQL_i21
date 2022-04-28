@@ -746,6 +746,7 @@
     <Build Include="dbo\Views\vyuICItemLocationCountGroup.sql" />
     <Build Include="dbo\Views\vyuICSearchItemStockDetail.sql" />
     <Build Include="dbo\Views\vyuICSearchItemStockDetailOnHand.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptTradeFinance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

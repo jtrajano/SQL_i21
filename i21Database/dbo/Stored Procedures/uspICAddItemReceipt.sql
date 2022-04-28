@@ -2217,6 +2217,12 @@ BEGIN
 				true
 		END
 
+		-- Add the Log & History for the IR Trade Finance
+		EXEC uspICInventoryReceiptTradeFinance 
+				@ReceiptId = @inventoryReceiptId
+				,@UserId = @intUserId
+				,@strAction = 'Created'
+
 		-- Create an Audit Log
 		BEGIN 
 			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Receipt'
