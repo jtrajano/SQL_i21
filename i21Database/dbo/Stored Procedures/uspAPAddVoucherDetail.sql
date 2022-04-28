@@ -129,7 +129,7 @@ SELECT TOP 100 PERCENT
 	,intPriceFixationDetailId			=	A.intPriceFixationDetailId
 	,intContractSeq						=	ctDetail.intContractSeq
 	,intLinkingId						=	A.intLinkingId
-	,intComputeTotalOption				=	ISNULL(A.intComputeTotalOption,item.intComputeItemTotalOption)
+	,intComputeTotalOption				=	item.intComputeItemTotalOption
 	,intLotId							=	A.intLotId
 	,intTicketDistributionAllocationId	=	A.intTicketDistributionAllocationId
 	/*Prepaid info*/					

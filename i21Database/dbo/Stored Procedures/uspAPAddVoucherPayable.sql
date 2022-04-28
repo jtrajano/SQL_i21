@@ -282,7 +282,7 @@ BEGIN
 			,[intLineNo]						=	A.intLineNo
 			,[intBookId]						=	A.intBookId
 			,[intSubBookId]						=	A.intSubBookId
-			,[intComputeTotalOption]			=	ISNULL(A.intComputeTotalOption,item.intComputeItemTotalOption)
+			,[intComputeTotalOption]			=	item.intComputeItemTotalOption
 			,[intLotId]							=	A.intLotId
 			,[intPayFromBankAccountId]			=	A.intPayFromBankAccountId
 			,[strPayFromBankAccount]			=	bankAccount.strBankAccountNo
