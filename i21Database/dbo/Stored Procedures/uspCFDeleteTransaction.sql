@@ -90,6 +90,7 @@ BEGIN
 	SELECT intTransactionId,intInvoiceId  from tblCFTransaction INV
 	WHERE intTransactionId = @intTransactionId
 
+	DECLARE @attachedInvoices INT = 0
 
 	SELECT @total = count(*) from @IVTable;
 	SET @incval = 1 
@@ -99,6 +100,15 @@ BEGIN
 
 	   --UPDATE tblCFTransaction 
 	   --set intInvoiceId = null where intTransactionId = @intTransactionId
+	   SET @attachedInvoices = 0
+	   SELECT @attachedInvoices = COUNT(1) FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
+
+	   IF(@attachedInvoices <= 0)
+	   BEGIN
+			UPDATE tblCFTransaction 
+		    SET intInvoiceId = null WHERE intTransactionId = @intTransactionId
+			SET @intInvoiceId = null
+	   END
 
 	   IF ISNULL(@intInvoiceId,0) != 0
 	   BEGIN
