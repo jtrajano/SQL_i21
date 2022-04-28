@@ -173,7 +173,8 @@ BEGIN TRY
 
 			UPDATE tblCTContractQuality
 				SET dblAmount = dblResult
-				where intSequenceCurrencyId = intCurrencyId and intContractDetailId = @intContractDetailId
+				where (intSequenceCurrencyId = intCurrencyId or isnull(intCurrencyId,0) = 0) and intContractDetailId = @intContractDetailId
+
 
 		END
 
