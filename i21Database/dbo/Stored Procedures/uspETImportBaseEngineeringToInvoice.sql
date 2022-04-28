@@ -332,6 +332,7 @@ BEGIN
 								,@InvoiceOriginId         = @strOriginInvoiceNumber
 								,@ContractDetailId		= @intContractDetailId
 								,@RecomputeTax = @ysnRecomputeTax
+								,@SourceId = 4
 
 								--GEt the created invoice number
 								SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
