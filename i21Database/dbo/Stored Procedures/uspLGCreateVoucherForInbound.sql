@@ -274,7 +274,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId and ItemLoc.intLocationId = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
 		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemId = LD.intItemId and ItemWeightUOM.intUnitMeasureId = L.intWeightUnitMeasureId
-		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = CT.intPriceItemUOMId
+		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END)
 		OUTER APPLY (SELECT dblQtyBilled = SUM(CASE WHEN (intTransactionType = 3) THEN -dblQtyReceived ELSE dblQtyReceived END)
 							,dblNetWeight = SUM(CASE WHEN (intTransactionType = 3) THEN -BD.dblNetWeight ELSE BD.dblNetWeight END)
 					FROM tblAPBillDetail BD 
