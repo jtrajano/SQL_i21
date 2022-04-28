@@ -177,8 +177,8 @@ BEGIN TRY
 				, @intItemUOMId
 				, @strUnitMeasure
 				, @strCostMethod
-				, dblRate = CASE WHEN @strCostMethod = 'Amount' THEN 0 ELSE @dblValue END
-				, dblAmount = CASE WHEN @strCostMethod = 'Amount' THEN @dblValue ELSE 0 END
+				, dblRate = @dblValue
+				, dblAmount = @dblValue
 		END
 
 		DELETE FROM #tmpCosts WHERE intTermCostDetailId = @intTermCostDetailId
