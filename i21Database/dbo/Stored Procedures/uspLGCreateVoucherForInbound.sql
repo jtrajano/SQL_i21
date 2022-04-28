@@ -15,14 +15,12 @@ BEGIN TRY
 	DECLARE @voucherPayableToProcess AS VoucherPayable
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
-	DECLARE @intPurchaseSale INT
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
 	DECLARE @intCurrencyId INT
 	DECLARE @intShipmentStatus INT
 	DECLARE @ysnAllowReweighs BIT = 0
 	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
-	DECLARE @strFOBPoint NVARCHAR(50)
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
@@ -32,13 +30,9 @@ BEGIN TRY
 		(intItemRecordId INT Identity(1, 1)
 		,intItemId INT)
 
-	SELECT @strLoadNumber = L.strLoadNumber 
-		,@intPurchaseSale = intPurchaseSale
-		,@ysnAllowReweighs = L.ysnAllowReweighs
-		,@strFOBPoint = FT.strFobPoint
-	FROM tblLGLoad L
-	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId 
-	WHERE intLoadId = @intLoadId
+	SELECT @strLoadNumber = strLoadNumber 
+		,@ysnAllowReweighs = ysnAllowReweighs
+	FROM tblLGLoad WHERE intLoadId = @intLoadId
 
 	IF OBJECT_ID('tempdb..#tempVoucherId') IS NOT NULL
 		DROP TABLE #tempVoucherId
@@ -128,14 +122,11 @@ BEGIN TRY
 		DELETE FROM tblAPVoucherPayable WHERE intLoadShipmentId = @intLoadId AND intLoadShipmentCostId IS NULL
 
 		DECLARE @intInventoryReceiptId INT = NULL
-		DECLARE @strVoucherType NVARCHAR(100)
-		SELECT @strVoucherType = CASE WHEN @intType = 2 THEN 'provisional voucher' ELSE '' END
-
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInventoryReceipts)
 		BEGIN
 			SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId FROM #tmpInventoryReceipts
 				
-			EXEC uspICConvertReceiptToVoucher @intInventoryReceiptId, @intEntityUserSecurityId, @strVoucherType, @intBillId OUTPUT
+			EXEC uspICConvertReceiptToVoucher @intInventoryReceiptId, @intEntityUserSecurityId, @intBillId OUTPUT
 
 			DELETE FROM #tmpInventoryReceipts WHERE intInventoryReceiptId = @intInventoryReceiptId
 		END
@@ -143,11 +134,6 @@ BEGIN TRY
 	ELSE
 	BEGIN
 	--If Shipment is not yet received, create Voucher normally
-		IF (@strFOBPoint = 'Destination' AND @intShipmentStatus <> 4)
-		BEGIN
-			RAISERROR('Load/Shipment has FOB Point of ''Destination''. Create and post Inventory Receipt first before creating Voucher.',16,1)
-		END
-
 		INSERT INTO @voucherPayable(
 			[intEntityVendorId]
 			,[intTransactionType]
@@ -232,34 +218,37 @@ BEGIN TRY
 			,[dblQuantityToBill] = LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
+			,[dblCost] = dbo.fnCalculateCostBetweenUOM(
+				CT.intPriceItemUOMId,
+				(CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END),
+				(CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END))
 			,[dblOptionalityPremium] = LD.dblOptionalityPremium
 			,[dblQualityPremium] = LD.dblQualityPremium
-			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
+			,[dblCostUnitQty] = CAST(ISNULL(AD.dblCostUnitQty,1) AS DECIMAL(38,20))
 			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
 			,[dblNetWeight] = LD.dblNet - ISNULL(B.dblNetWeight, 0)
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
-			,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
+			,[intCostCurrencyId] = SC.intCurrencyID
 			,[intFreightTermId] = L.intFreightTermId
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = CASE --if contract FX tab is setup
-										 WHEN AD.ysnValidFX = 1 THEN 
-											CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-													THEN dbo.fnDivide(1, ISNULL(CT.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
-												WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId = @DefaultCurrencyId)
-													THEN 1 --foreign price to functional FX, use 1
-												WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId)
-													THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-												ELSE ISNULL(LD.dblForexRate,1) END
-										 ELSE  --if contract FX tab is not setup
-											CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
-												THEN ISNULL(FX.dblFXRate, 1)
-												ELSE ISNULL(LD.dblForexRate,1) END
-										 END
-			,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
-			,[intSubCurrencyCents] = CY.intCent
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+											THEN CT.dblRate --functional price to foreign FX, use contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId = @DefaultCurrencyId)
+											THEN 1 --foreign price to functional FX, use 1
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+										ELSE ISNULL(LD.dblForexRate,1) END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										THEN ISNULL(FX.dblFXRate, 1)
+										ELSE ISNULL(LD.dblForexRate,1) END
+									END
+			,[ysnSubCurrency] =	CASE WHEN SC.intMainCurrencyId IS NOT NULL THEN 1 ELSE 0 END
+			,[intSubCurrencyCents] = SC.intCent
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
@@ -281,7 +270,7 @@ BEGIN TRY
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
-		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CT.intContractDetailId
+		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CT.intContractDetailId) AD
 		JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CH.intEntityId = D1.[intEntityId]  
 		LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = AD.intSeqCurrencyId
 		LEFT JOIN tblICItem item ON item.intItemId = LD.intItemId 
