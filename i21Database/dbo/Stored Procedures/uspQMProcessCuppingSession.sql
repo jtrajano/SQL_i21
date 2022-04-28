@@ -93,7 +93,7 @@ INSERT INTO tblQMSample (
 SELECT intCompanyId						= S.intCompanyId
 	, intSampleTypeId					= S.intSampleTypeId
 	, strSampleNumber					= CS.strCuppingSessionNumber + '/' + S.strSampleNumber
-	, intParentSampleId					= S.intParentSampleId
+	, intParentSampleId					= S.intSampleId
 	, strSampleRefNo					= S.strSampleRefNo
 	, intProductTypeId					= S.intProductTypeId
 	, intProductValueId					= S.intProductValueId
@@ -163,7 +163,7 @@ SELECT intCompanyId						= S.intCompanyId
 	, intSamplingCriteriaId				= S.intSamplingCriteriaId
 	, strSendSampleTo					= S.strSendSampleTo
 	, strRepresentLotNumber				= S.strRepresentLotNumber
-	, intRelatedSampleId				= S.intSampleId
+	, intRelatedSampleId				= NULL
 	, intTypeId							= 2
 	, intCuppingSessionDetailId			= CSD.intCuppingSessionDetailId
 	, intCreatedUserId					= @intEntityUserId
@@ -199,7 +199,7 @@ FROM tblQMCuppingSession CS
 INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCuppingSessionId
 INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
 INNER JOIN tblQMSampleDetail SD ON S.intSampleId = SD.intSampleId
-INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intRelatedSampleId AND NEWSAMPLE.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
+INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intParentSampleId AND NEWSAMPLE.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
 WHERE CS.intCuppingSessionId = @intCuppingSessionId
 
 --INSERT TEST RESULT
@@ -287,5 +287,5 @@ FROM tblQMCuppingSession CS
 INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCuppingSessionId
 INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
 INNER JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
-INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intRelatedSampleId AND NEWSAMPLE.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
+INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intParentSampleId AND NEWSAMPLE.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
 WHERE CS.intCuppingSessionId = @intCuppingSessionId
