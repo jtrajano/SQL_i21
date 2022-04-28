@@ -40,6 +40,9 @@ DECLARE @_dblUsedDeliveredQty AS NUMERIC(36,20)
 DECLARE @_dtmInboundAvailableStartDate AS DATETIME
 DECLARE @_intItemUOMId INT
 DECLARE @_intLotId INT
+DECLARE @strChargeType NVARCHAR(15)
+DECLARE @_intInboundAvailableTotalAccumulatedDays INT
+DECLARE @_intFinalRecId INT
 
 SET @LocalToUTCDiff = (DATEDIFF(HOUR,GETDATE(),GETUTCDATE()))
 SET @UTCToLocalDiff = (DATEDIFF(HOUR,GETUTCDATE(),GETDATE()))
@@ -64,6 +67,7 @@ BEGIN TRY
 		,strRateType NVARCHAR(50)
 		,intItemUOMId INT
 		,dblUnitQty NUMERIC(36,20)
+		,strChargeType NVARCHAR(15)
 	)
 
 	IF(ISNULL(@intSubLocationId,0) = 0)
@@ -78,6 +82,7 @@ BEGIN TRY
 			,strRateType
 			,intItemUOMId
 			,dblUnitQty
+			,strChargeType
 		)
 		SELECT 
 			A.intStorageRateId
@@ -89,11 +94,13 @@ BEGIN TRY
 			,B.strRateType
 			,D.intItemUOMId
 			,D.dblUnitQty
+			,A.strChargeType
 		FROM (
 			SELECT TOP 1 
 				intStorageRateId
 				,intItemId
 				,strPlanNo
+				,strChargeType
 			FROM tblICStorageRate
 			WHERE intCompanyLocationId = @intLocationId
 			AND intCommodityId = @intCommodity
@@ -121,6 +128,7 @@ BEGIN TRY
 			,strRateType
 			,intItemUOMId
 			,dblUnitQty
+			,strChargeType
 		)
 		SELECT 
 			A.intStorageRateId
@@ -132,11 +140,13 @@ BEGIN TRY
 			,B.strRateType
 			,D.intItemUOMId
 			,D.dblUnitQty
+			,A.strChargeType
 		FROM (
 			SELECT TOP 1 
 				intStorageRateId
 				,intItemId
 				,strPlanNo
+				,strChargeType
 			FROM tblICStorageRate
 			WHERE intStorageLocationId = @intSubLocationId
 			AND intCompanyLocationId = @intLocationId
@@ -154,6 +164,11 @@ BEGIN TRY
 				AND D.intUnitMeasureId = C.intUnitMeasureId
 		
 	END
+
+	---Check/Get Charge Type
+	SELECT TOP 1
+		@strChargeType = strChargeType
+	FROM @tmpICStorageRate
 
 	--GEt All Transaction from tblICInventoryStockMovement and previously generated charges Based on Params
 	DECLARE @tmpICInventoryForStorageCharge TABLE(
@@ -181,6 +196,7 @@ BEGIN TRY
 		,strWeightUOMId NVARCHAR(100)
 		,strItemUOM NVARCHAR(100)
 		,intInventoryStockMovementIdUsed INT
+		,intTotalAccumulatedDays INT NOT NULL DEFAULT 0 --- previous charge accumulation of days
 	)
 
 	
@@ -202,7 +218,7 @@ BEGIN TRY
 			,dblDeliveredQuantity
 			,dtmLastFreeWarehouseDateUTC
 			,dtmLastBillDateUTC
-			
+			,intTotalAccumulatedDays
 		)
 		SELECT 
 			A.intItemId
@@ -220,7 +236,7 @@ BEGIN TRY
 			,dblDeliveredQuantity = 0
 			,dtmLastFreeWarehouseDateUTC = NULL
 			,dtmLastBillDateUTC = NULL
-			
+			,intTotalAccumulatedDays = 0
 		FROM tblICInventoryStockMovement A
 		OUTER APPLY (
 			SELECT TOP 1 
@@ -257,7 +273,7 @@ BEGIN TRY
 			,dblDeliveredQuantity = A.dblDeliveredQuantity
 			,dtmLastFreeWarehouseDateUTC = A.dtmLastFreeWarehouseDateUTC
 			,dtmLastBillDateUTC = B.dtmBillDateUTC
-			
+			,intTotalAccumulatedDays = ISNULL(D.intTotalAccumulatedDays,0)
 		FROM tblICStorageChargeDetail A
 		INNER JOIN tblICStorageCharge B
 			ON A.intStorageChargeId = B.intStorageChargeId
@@ -273,6 +289,15 @@ BEGIN TRY
 					)C 
 			ON A.intStorageChargeDetailId = C.intStorageChargeDetailId
 				AND C.intRow = 1	
+		OUTER APPLY (
+			SELECT TOP 1
+				intTotalAccumulatedDays = SUM(ISNULL(BB.dblNumberOfDays,0))
+			FROM tblICStorageCharge AA
+			INNER JOIN tblICStorageChargeDetail BB
+				ON AA.intStorageChargeId = BB.intStorageChargeId
+			WHERE BB.intInventoryStockMovementId = A.intInventoryStockMovementId
+				AND AA.ysnPosted = 1
+		) D
 		WHERE B.ysnPosted = 1
 			AND A.dblReceivedQuantity - ABS(A.dblDeliveredQuantity) > 0
 			AND B.dtmBillDateUTC < @dtmBillDateUTC
@@ -302,7 +327,7 @@ BEGIN TRY
 			,dblDeliveredQuantity
 			,dtmLastFreeWarehouseDateUTC
 			,dtmLastBillDateUTC
-			
+			,intTotalAccumulatedDays
 		)
 		SELECT 
 			A.intItemId
@@ -320,7 +345,7 @@ BEGIN TRY
 			,dblDeliveredQuantity = 0
 			,dtmLastFreeWarehouseDateUTC = NULL
 			,dtmLastBillDateUTC = NULL
-			
+			,intTotalAccumulatedDays = 0
 		FROM tblICInventoryStockMovement A
 		OUTER APPLY (
 			SELECT TOP 1 
@@ -333,6 +358,7 @@ BEGIN TRY
 				AND BB.ysnPosted = 1
 			
 		)B
+		
 		WHERE A.dtmDate <= @dtmBillDate
 			AND A.intCommodityId = @intCommodity
 			AND A.intLocationId = @intLocationId
@@ -358,7 +384,7 @@ BEGIN TRY
 			,dblDeliveredQuantity = A.dblDeliveredQuantity
 			,dtmLastFreeWarehouseDateUTC = A.dtmLastFreeWarehouseDateUTC
 			,dtmLastBillDateUTC = B.dtmBillDateUTC
-			
+			,intTotalAccumulatedDays = ISNULL(D.intTotalAccumulatedDays,0)
 		FROM tblICStorageChargeDetail A
 		INNER JOIN tblICStorageCharge B
 			ON A.intStorageChargeId = B.intStorageChargeId
@@ -374,6 +400,15 @@ BEGIN TRY
 					)C 
 			ON A.intStorageChargeDetailId = C.intStorageChargeDetailId
 				AND C.intRow = 1	
+		OUTER APPLY (
+			SELECT TOP 1
+				intTotalAccumulatedDays = SUM(ISNULL(BB.dblNumberOfDays,0))
+			FROM tblICStorageCharge AA
+			INNER JOIN tblICStorageChargeDetail BB
+				ON AA.intStorageChargeId = BB.intStorageChargeId
+			WHERE BB.intInventoryStockMovementId = A.intInventoryStockMovementId
+				AND AA.ysnPosted = 1
+		) D
 		WHERE B.ysnPosted = 1
 			AND A.dblReceivedQuantity - ABS(A.dblDeliveredQuantity) > 0
 			AND B.dtmBillDateUTC < @dtmBillDateUTC
@@ -430,6 +465,8 @@ BEGIN TRY
 		,intWeightUOMId INT
 		,strWeightUOMId NVARCHAR(50)
 		,intInventoryStockMovementIdUsed INT
+		,intTotalAccumulatedDays INT
+		,intNumberOfDays INT
 	)
 
 	SELECT TOP 1 
@@ -519,7 +556,8 @@ BEGIN TRY
 				,dblNet 
 				,intWeightUOMId
 				,strWeightUOMId
-
+				,intTotalAccumulatedDays
+				,intNumberOfDays
 			)
 			SELECT 
 				A.intItemId
@@ -543,9 +581,13 @@ BEGIN TRY
 				,dblNet = dblNet
 				,intWeightUOMId = intWeightUOMId
 				,strWeightUOMId = strWeightUOMId
+				,intTotalAccumulatedDays = A.intTotalAccumulatedDays
+				,intNumberOfDays = ISNULL(CASE WHEN (DATEDIFF(DAY,dtmStartDateUTC,@dtmBillDateUTC)) < 0 THEN 0 ELSE (DATEDIFF(DAY,dtmStartDateUTC,@dtmBillDateUTC)) + 1 END,0)
 			FROM @tmpICInventoryForStorageCharge A
 			WHERE intRecId = @_intLoopId
 
+
+			
 		END
 		
 		---OUTBOUND
@@ -597,6 +639,7 @@ BEGIN TRY
 			SET	@_dblInboundAvailableQty = 0
 			SET	@_dblInboundAvailableDeliveredQty = 0
 			SET @_dtmInboundAvailableStartDate = NULL
+			SET @_intInboundAvailableTotalAccumulatedDays = 0
 
 			---GET The first inbound available
 			SELECT TOP 1
@@ -605,6 +648,7 @@ BEGIN TRY
 				,@_dblInboundAvailableQty = A.dblQty
 				,@_dblInboundAvailableDeliveredQty = A.dblDeliveredQuantity
 				,@_dtmInboundAvailableStartDate =  ISNULL(DATEADD(DAY,1,A.dtmLastBillDateUTC),ISNULL(B.dtmLastFreeWhseDateUTC, DATEADD(HOUR,@LocalToUTCDiff,A.dtmDate)))
+				,@_intInboundAvailableTotalAccumulatedDays =  intTotalAccumulatedDays
 			FROM @tmpICInventoryForStorageCharge A
 			LEFT JOIN (
 				SELECT 
@@ -660,6 +704,7 @@ BEGIN TRY
 					,dblNet
 					,intWeightUOMId
 					,strWeightUOMId
+					,intTotalAccumulatedDays
 				)
 				SELECT 
 					A.intItemId
@@ -685,9 +730,17 @@ BEGIN TRY
 					,dblNet
 					,intWeightUOMId
 					,strWeightUOMId
+					,intTotalAccumulatedDays = @_intInboundAvailableTotalAccumulatedDays
 				FROM @tmpICInventoryForStorageCharge A
 				WHERE intRecId = @_intLoopId
 
+				SET @_intFinalRecId = @@IDENTITY
+
+				------UPDATE no of Days
+				-------------------------------------------
+				UPDATE @finalInventoryForStorageCharge
+				SET intNumberOfDays = ISNULL(CASE WHEN (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC)) < 0 THEN 0 ELSE (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC)) + 1 END,0)			
+				WHERE intRecId = @_intFinalRecId
 
 				GOTO GETFIRSTAVAILABLE
 			END
@@ -727,6 +780,7 @@ BEGIN TRY
 					,dblNet
 					,intWeightUOMId
 					,strWeightUOMId
+					,intTotalAccumulatedDays
 				)
 				SELECT 
 					A.intItemId
@@ -752,8 +806,18 @@ BEGIN TRY
 					,dblNet
 					,intWeightUOMId
 					,strWeightUOMId
+					,intTotalAccumulatedDays = @_intInboundAvailableTotalAccumulatedDays
 				FROM @tmpICInventoryForStorageCharge A
 				WHERE intRecId = @_intLoopId
+
+				SET @_intFinalRecId = @@IDENTITY
+
+				------UPDATE no of Days---------------
+				-------------------------------------------
+				UPDATE @finalInventoryForStorageCharge
+				SET intNumberOfDays = ISNULL(CASE WHEN (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC)) < 0 THEN 0 ELSE (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC)) + 1 END,0)			
+				WHERE intRecId = @_intFinalRecId
+
 			END
 		END
 		
@@ -809,6 +873,7 @@ BEGIN TRY
 		,dblRateUnitQty NUMERIC(36,20)
 		,dblRateItemUOMUnitQty NUMERIC(36,20) -- conversion factor for the item UOM base on the charge item
 		,intInventoryStockMovementIdUsed INT
+		,intTotalAccumulatedDays INT
 	)
 	
 	
@@ -855,11 +920,12 @@ BEGIN TRY
 		,dblRateUnitQty
 		,dblRateItemUOMUnitQty
 		,intInventoryStockMovementIdUsed
+		,intTotalAccumulatedDays
 	)
 
 	SELECT 
 		intItemId = A.intItemId
-		,intItemChargeId = B.intItemId
+		,intItemChargeId = ISNULL(B.intItemId,L.intItemId)
 		,intLotId = A.intLotId 
 		,intTransactionTypeId = A.intTransactionTypeId 
 		,intTransactionId = A.intTransactionId
@@ -870,13 +936,13 @@ BEGIN TRY
 		,dblReceivedQuantity = CASE WHEN A.dblQty < 0 THEN 0 ELSE A.dblQty END
 		,dblDeliveredQuantity =  A.dblDeliveredQuantity 
 		,intItemUOMId = A.intItemUOMId
-		,intItemChargeUOMId = ISNULL(B.intItemUOMId,A.intItemUOMId)
+		,intItemChargeUOMId = ISNULL(B.intItemUOMId,L.intItemUOMId)
 		,dblGross = A.dblGross
 		,dblNet = A.dblNet
 		,intWeightUOMId = A.intWeightUOMId
-		,dblNumberOfDays = 0
+		,dblNumberOfDays = CASE WHEN (@strChargeType = 'Segmented') THEN L.intDaysCovered ELSE 0 END
 		,dblChargeQuantity = A.dblQty
-		,dblRate = B.dblRate
+		,dblRate = ISNULL(B.dblRate,L.dblRate)
 		,intRateUOMId = ISNULL(B.intItemUOMId,A.intItemUOMId)
 		,dblStorageCharge = 0
 		,intTransactionDetailId = ISNULL(A.intTransactionDetailId,0)
@@ -892,13 +958,14 @@ BEGIN TRY
 		,dtmLastFreeOutboundDateUTC = A.dtmLastFreeOutboundDateUTC
 		,dblCustomerCharge = 0
 		,dblCustomerNoOfDays = 0
-		,strChargeItemNo = J.strItemNo
-		,B.intStorageRateId
-		,B.strPlanNo
-		,B.strRateType
+		,strChargeItemNo = ISNULL(J.strItemNo,M.strItemNo)
+		,intStorageRateId = ISNULL(B.intStorageRateId,L.intStorageRateId)
+		,strPlanNo = ISNULL(B.strPlanNo,L.strPlanNo)
+		,strRateType = ISNULL(B.strRateType,L.strRateType)
 		,dblRateUnitQty = ISNULL(B.dblUnitQty,1)
 		,dblRateItemUOMUnitQty = ISNULL(K.dblUnitQty,1)
 		,A.intInventoryStockMovementIdUsed
+		,A.intTotalAccumulatedDays
 	FROM @finalInventoryForStorageCharge A
 	OUTER APPLY (
 		SELECT TOP 1
@@ -911,7 +978,8 @@ BEGIN TRY
 			,intItemUOMId
 			,dblUnitQty
 		FROM @tmpICStorageRate
-		WHERE dblNoOfDays <= CASE WHEN (DATEDIFF(DAY,A.dtmStartDateUTC,A.dtmEndDateUTC) + 1) < 0 THEN 0 ELSE  (DATEDIFF(DAY,A.dtmStartDateUTC,A.dtmEndDateUTC) + 1) END
+		WHERE dblNoOfDays <= CASE WHEN (A.intNumberOfDays + A.intTotalAccumulatedDays) < 0 THEN 0 ELSE  (A.intNumberOfDays + A.intTotalAccumulatedDays) END
+			AND ISNULL(strChargeType,'Discounted') = 'Discounted'
 		ORDER BY dblNoOfDays DESC
 	) B
 	INNER JOIN tblICItem C
@@ -934,14 +1002,60 @@ BEGIN TRY
 		WHERE AA.intItemId = B.intItemId
 			AND AA.intUnitMeasureId = G.intUnitMeasureId
 	) K
-	WHERE B.intStorageRateId IS NOT NULL OR (B.intStorageRateId IS NULL AND A.dblQty <= 0 AND A.dblDeliveredQuantity < 0)
-		AND B.intItemId	IS NOT NULL
-		
+	---------------------SEGMENTED RATE---------------------
+	-------------------------------------------------
+	OUTER APPLY (
+		SELECT
+			AA.intStorageRateId
+			,AA.strPlanNo
+			,AA.intCommodityUnitMeasureId
+			,AA.dblRate
+			,AA.intItemId
+			,AA.strRateType
+			,AA.intItemUOMId
+			,AA.dblUnitQty
+			--,intDaysCovered =  ISNULL(CC.intNoDays,(ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays)) 
+			--,intDaysCovered =  ISNULL(CC.intNoDays,(ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays + 1)) 
+			--,intDaysCovered =  ISNULL(AA.dblNoOfDays,0)
+			--,intDaysCovered = CASE WHEN CC.intNoDays IS NULL THEN 0 ELSE 1 END
+			,intDaysCovered = ISNULL(CC.intNoDays,(ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays)) --- Higher range/accumulated
+								- CASE WHEN ISNULL(AA.dblNoOfDays,0) > 0 THEN AA.dblNoOfDays - 1 ELSE ISNULL(AA.dblNoOfDays,0) END --  
+								- CASE WHEN CC.intNoDays IS NULL AND ISNULL(A.intTotalAccumulatedDays,0) = 0 THEN 0 ELSE 1 END
+		FROM @tmpICStorageRate AA
+		--OUTER APPLY(
+		--	SELECT intNoDays = (SELECT TOP 1 dblNoOfDays 
+		--						FROM @tmpICStorageRate 
+		--						WHERE dblNoOfDays < AA.dblNoOfDays 
+		--							AND dblNoOfDays <= CASE WHEN  (ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays) < 0 THEN 0 ELSE (ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays) END
+		--						ORDER BY dblNoOfDays DESC)
+		--)BB --- Lower No of Days
+		OUTER APPLY(
+			SELECT intNoDays = (SELECT TOP 1 dblNoOfDays 
+								FROM @tmpICStorageRate 
+								WHERE dblNoOfDays > AA.dblNoOfDays 
+									AND dblNoOfDays <= CASE WHEN  (ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays) < 0 THEN 0 ELSE (ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays) END
+								ORDER BY dblNoOfDays ASC)
+		)CC --- Higher No of Days
+		WHERE AA.dblNoOfDays <= CASE WHEN  (ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays) < 0 THEN 0 ELSE (ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays) END
+			AND AA.dblNoOfDays >= A.intTotalAccumulatedDays
+			AND ISNULL(AA.strChargeType,'Discounted') = 'Segmented'
+	) L 
+	LEFT JOIN tblICItem M
+		ON L.intItemId = M.intItemId
+	--------------------------------------------------------------------
+	--------------------------------------------------------------------
+	WHERE COALESCE(B.intStorageRateId,L.intStorageRateId) IS NOT NULL OR (B.intStorageRateId IS NULL AND A.dblQty <= 0 AND A.dblDeliveredQuantity < 0)
+		AND COALESCE(B.intItemId,L.intItemId) IS NOT NULL
+	
+	--SELECT 'debug',* FROM @finalInventoryForStorageCharge
 
 	------UPDATE no of Days
 	-------------------------------------------
-	UPDATE @tblChargeTableDetail
-	SET dblNumberOfDays = ISNULL(CASE WHEN (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) < 0 THEN 0 ELSE (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) END,0)
+	IF(ISNULL(@strChargeType,'Discounted') = 'Discounted')
+	BEGIN
+		UPDATE @tblChargeTableDetail
+		SET dblNumberOfDays = ISNULL(CASE WHEN (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) < 0 THEN 0 ELSE (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) END,0)
+	END
 
 	----UPDATE charge Quantity
 	-----------------------------------------------
