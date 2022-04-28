@@ -1339,6 +1339,7 @@ BEGIN TRY
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
 		--AND L.ysnPosted = 1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
@@ -1404,6 +1405,7 @@ BEGIN TRY
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
 		--AND L.ysnPosted = 1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
