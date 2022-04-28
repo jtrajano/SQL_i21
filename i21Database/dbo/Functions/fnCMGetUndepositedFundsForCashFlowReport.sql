@@ -4,9 +4,34 @@
     @dtmFrom DATETIME,
     @dtmTo DATETIME
 )
-RETURNS TABLE
+RETURNS @returntable TABLE (
+	 intTransactionId		INT NOT NULL
+	,strTransactionId		NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	,intBankAccountId		INT NULL
+	,intCurrencyId			INT NULL
+	,dtmDate				DATETIME NOT NULL
+	,dblAmount				DECIMAL(18, 6)
+	,intGLAccountId			INT NULL
+	,intCompanyLocationId	INT NULL
+	,strTransactionType		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+)
 AS
-RETURN SELECT 
+BEGIN
+
+    DECLARE @tblUndepositedFunds TABLE (
+	     intTransactionId		INT NOT NULL
+	    ,strTransactionId		NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	    ,intBankAccountId		INT NULL
+	    ,intCurrencyId			INT NULL
+	    ,dtmDate				DATETIME NOT NULL
+	    ,dblAmount				DECIMAL(18, 6)
+	    ,intGLAccountId			INT NULL
+	    ,intCompanyLocationId	INT NULL
+	    ,strTransactionType		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+    )
+
+    INSERT INTO @tblUndepositedFunds
+    SELECT 
         intTransactionId = UF.intSourceTransactionId,
         strTransactionId = UF.strSourceTransactionId,
         intBankAccountId = UF.intBankAccountId,
@@ -28,3 +53,43 @@ RETURN SELECT
             ELSE CASE WHEN (UF.dtmDate <= @dtmTo) THEN 1 ELSE 0 END
             END
         ) = 1
+
+    INSERT INTO @returntable
+    SELECT
+        intTransactionId = ARP.intPaymentId,
+        strTransactionId = ARP.strRecordNumber,
+        intBankAccountId = ARP.intBankAccountId,
+        intCurrencyId = ARP.intCurrencyId,
+        dtmDate = ARP.dtmDatePaid,
+        dblAmount = ISNULL(ARP.dblAmountPaid, 0),
+        intGLAccountId = BA.intGLAccountId,
+		intCompanyLocationId = ARP.intLocationId,
+        strTransactionType = ARP.strPaymentMethod
+    FROM [dbo].[tblARPayment] ARP
+    JOIN [dbo].[tblCMBankAccount] BA
+        ON BA.intBankAccountId = ARP.intBankAccountId
+    WHERE 
+        ARP.intBankAccountId = @intBankAccountId
+        AND ARP.ysnPosted = 1
+        AND 
+        (CASE WHEN @dtmFrom IS NOT NULL
+            THEN CASE WHEN (ARP.dtmDatePaid BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
+            ELSE CASE WHEN (ARP.dtmDatePaid <= @dtmTo) THEN 1 ELSE 0 END
+            END
+        ) = 1
+        AND ARP.strRecordNumber NOT IN (SELECT strTransactionId FROM @tblUndepositedFunds)
+    UNION ALL
+    SELECT 
+        intTransactionId,
+        strTransactionId,
+        intBankAccountId,
+        intCurrencyId,
+        dtmDate,
+        dblAmount,
+        intGLAccountId,
+		intCompanyLocationId,
+        strTransactionType
+    FROM @tblUndepositedFunds
+
+    RETURN
+END
