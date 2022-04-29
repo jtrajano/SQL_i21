@@ -12,6 +12,25 @@ guiApiUniqueId = @guiApiUniqueId
 AND
 strPropertyName = 'Overwrite'
 
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Category'
+    , strValue = sr.strCategory
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Category ' + ISNULL(sr.strCategory, '') + ' does not exist.'
+FROM tblApiSchemaTransformItem sr
+OUTER APPLY (
+  SELECT TOP 1 * 
+  FROM tblICCategory ii
+  WHERE ii.strCategoryCode = sr.strCategory OR ii.strDescription = sr.strCategory
+) e
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND e.intCategoryId IS NULL
+
 DECLARE @tblFilteredItem TABLE(
 	intKey INT NOT NULL,
     guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
@@ -721,27 +740,27 @@ OUTPUT INSERTED.strItemNo, $action AS strAction INTO @tblItemOutput;
 
 --Log skipped items when overwrite is not enabled.
 
-INSERT INTO tblApiImportLogDetail 
-(
-	guiApiImportLogDetailId,
-	guiApiImportLogId,
-	strField,
-	strValue,
-	strLogLevel,
-	strStatus,
-	intRowNo,
-	strMessage
-)
-SELECT
-	guiApiImportLogDetailId = NEWID(),
-	guiApiImportLogId = @guiLogId,
-	strField = 'Item No',
-	strValue = FilteredItem.strItemNo,
-	strLogLevel = 'Warning',
-	strStatus = 'Skipped',
-	intRowNo = FilteredItem.intRowNumber,
-	strMessage = 'Item No "' + FilteredItem.strItemNo + '" already exists and overwrite is not enabled.'
-FROM @tblFilteredItem FilteredItem
-LEFT JOIN @tblItemOutput ItemOutput
-	ON FilteredItem.strItemNo = ItemOutput.strItemNo
-WHERE ItemOutput.strItemNo IS NULL
+--INSERT INTO tblApiImportLogDetail 
+--(
+--	guiApiImportLogDetailId,
+--	guiApiImportLogId,
+--	strField,
+--	strValue,
+--	strLogLevel,
+--	strStatus,
+--	intRowNo,
+--	strMessage
+--)
+--SELECT
+--	guiApiImportLogDetailId = NEWID(),
+--	guiApiImportLogId = @guiLogId,
+--	strField = 'Item No',
+--	strValue = FilteredItem.strItemNo,
+--	strLogLevel = 'Warning',
+--	strStatus = 'Skipped',
+--	intRowNo = FilteredItem.intRowNumber,
+--	strMessage = 'Item No "' + FilteredItem.strItemNo + '" already exists and overwrite is not enabled.'
+--FROM @tblFilteredItem FilteredItem
+--LEFT JOIN @tblItemOutput ItemOutput
+--	ON FilteredItem.strItemNo = ItemOutput.strItemNo
+--WHERE ItemOutput.strItemNo IS NULL
