@@ -38,6 +38,7 @@ SELECT
 	,A.strRateType
 	,A.intConcurrencyId
 	,A.intInventoryStockMovementIdUsed
+	,A.intTotalAccumulatedDays
 	----Details from other table
 	,C.strItemNo
 	,D.strLotNumber
