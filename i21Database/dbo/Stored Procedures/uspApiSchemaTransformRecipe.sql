@@ -1,751 +1,784 @@
-CREATE PROCEDURE [dbo].[uspApiSchemaTransformRecipe] (
-    @guiApiUniqueId UNIQUEIDENTIFIER,
-    @guiLogId UNIQUEIDENTIFIER
-)
-
+CREATE PROCEDURE uspApiSchemaTransformItem 
+	@guiApiUniqueId UNIQUEIDENTIFIER,
+	@guiLogId UNIQUEIDENTIFIER
 AS
 
--- Retrieve Properties
-DECLARE @OverwriteExisting BIT = 0
+DECLARE @ysnAllowOverwrite BIT
 
-SELECT @OverwriteExisting = ISNULL(CAST(OverwriteExisting AS BIT), 0)
-FROM (
-	SELECT tp.strPropertyName, tp.varPropertyValue
-	FROM tblApiSchemaTransformProperty tp
-	WHERE tp.guiApiUniqueId = @guiApiUniqueId
-) AS Properties
-PIVOT (
-	MIN(varPropertyValue)
-	FOR strPropertyName IN
-	(
-		OverwriteExisting
-	)
-) AS PivotTable
+SELECT @ysnAllowOverwrite = CAST(varPropertyValue AS BIT)
+FROM tblApiSchemaTransformProperty
+WHERE 
+guiApiUniqueId = @guiApiUniqueId
+AND
+strPropertyName = 'Overwrite'
 
--- Validations
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
       NEWID()
     , guiApiImportLogId = @guiLogId
-    , strField = 'Item No'
-    , strValue = sr.strItemNo
+    , strField = 'Category'
+    , strValue = sr.strCategory
     , strLogLevel = 'Error'
     , strStatus = 'Failed'
     , intRowNo = sr.intRowNumber
-    , strMessage = 'The Item No. ' + ISNULL(sr.strItemNo, '') + ' does not exist.'
-FROM tblApiSchemaRecipe sr
+    , strMessage = 'The Category ' + ISNULL(sr.strCategory, '') + ' does not exist.'
+FROM tblApiSchemaTransformItem sr
 OUTER APPLY (
   SELECT TOP 1 * 
-  FROM tblICItem ii
-  WHERE ii.strItemNo = sr.strItemNo OR ii.strDescription = sr.strItemNo
+  FROM tblICCategory ii
+  WHERE ii.strCategoryCode = sr.strCategory OR ii.strDescription = sr.strCategory
 ) e
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND e.intItemId IS NULL
+AND e.intCategoryId IS NULL
 
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Quantity'
-    , strValue = CAST(sr.dblQuantity AS NVARCHAR(50))
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'Quantity should be greater than 0.'
-FROM tblApiSchemaRecipe sr
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND dblQuantity <= 0
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'UOM'
-    , strValue = sr.strUOM
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The UOM ' + ISNULL(sr.strUOM, '') + ' does not exist.'
-FROM tblApiSchemaRecipe sr
-LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = sr.strUOM
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND u.intUnitMeasureId IS NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Location Name'
-    , strValue = sr.strLocationName
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Location Name ' + ISNULL(sr.strLocationName, '') + ' does not exist.'
-FROM tblApiSchemaRecipe sr
-LEFT JOIN tblSMCompanyLocation l ON l.strLocationName = sr.strLocationName
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND l.intCompanyLocationId IS NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Version No'
-    , strValue = CAST(sr.intVersionNo AS NVARCHAR(50))
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Version No ' + CAST(sr.intVersionNo AS NVARCHAR(50)) + ' is not valid.'
-FROM tblApiSchemaRecipe sr
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND sr.intVersionNo = 0
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Recipe Type'
-    , strValue = sr.strRecipeType
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Recipe Type ' + ISNULL(sr.strRecipeType, '') + ' is not valid.'
-FROM tblApiSchemaRecipe sr
-LEFT JOIN tblMFRecipeType r ON r.strName = sr.strRecipeType
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND r.intRecipeTypeId IS NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Manufacturing Process'
-    , strValue = sr.strManufacturingProcess
-    , strLogLevel = 'Warning'
-    , strStatus = 'Ignored'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Manufacturing Process ' + ISNULL(sr.strManufacturingProcess, '') + ' does not exist.'
-FROM tblApiSchemaRecipe sr
-LEFT JOIN tblMFManufacturingProcess p ON p.strProcessName = sr.strManufacturingProcess
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND p.intManufacturingProcessId IS NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Customer'
-    , strValue = sr.strCustomer
-    , strLogLevel = 'Warning'
-    , strStatus = 'Ignored'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Customer ' + ISNULL(sr.strCustomer, '') + ' does not exist.'
-FROM tblApiSchemaRecipe sr
-LEFT JOIN vyuARCustomer c ON c.strName = sr.strCustomer
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND c.intEntityId IS NULL
-AND NULLIF(sr.strCustomer, '') IS NOT NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Farm'
-    , strValue = sr.strFarm
-    , strLogLevel = 'Warning'
-    , strStatus = 'Ignored'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Farm ' + ISNULL(sr.strFarm, '') + ' does not exist.'
-FROM tblApiSchemaRecipe sr
-OUTER APPLY (
-	SELECT TOP 1 f.strFarmDescription, f.intFarmFieldId, f.intEntityId
-	FROM tblEMEntityFarm f
-	WHERE strFarmDescription = sr.strFarm OR strFarm = sr.strFarm
-) f
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND f.intFarmFieldId IS NULL
-AND NULLIF(sr.strFarm, '') IS NOT NULL
-AND NULLIF(sr.strCustomer, '') IS NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Cost Type'
-    , strValue = sr.strCostType
-    , strLogLevel = 'Warning'
-    , strStatus = 'Ignored'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Cost Type ' + ISNULL(sr.strCostType, '') + ' is not valid.'
-FROM tblApiSchemaRecipe sr
-LEFT JOIN tblMFCostType ct ON ct.strName = sr.strCostType
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND ct.intCostTypeId IS NULL
-AND NULLIF(sr.strCostType, '') IS NOT NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Margin By'
-    , strValue = sr.strMarginBy
-    , strLogLevel = 'Warning'
-    , strStatus = 'Ignored'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Margin By ' + ISNULL(sr.strMarginBy, '') + ' is not valid.'
-FROM tblApiSchemaRecipe sr
-LEFT JOIN tblMFMarginBy mb ON mb.strName = sr.strMarginBy
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND mb.intMarginById IS NULL
-AND NULLIF(sr.strMarginBy, '') IS NOT NULL
-
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Margin'
-    , strValue = CAST(sr.dblMargin AS NVARCHAR(50))
-    , strLogLevel = 'Warning'
-    , strStatus = 'Ignored'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'Invalid Margin ' + ISNULL(CAST(sr.dblMargin AS NVARCHAR(50)), '') + ' / Margin cannot be negative.'
-FROM tblApiSchemaRecipe sr
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND sr.dblMargin < 0
-AND sr.dblMargin IS NOT NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Discount'
-    , strValue = CAST(sr.dblDiscount AS NVARCHAR(50))
-    , strLogLevel = 'Warning'
-    , strStatus = 'Ignored'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'Invalid Discount ' + ISNULL(CAST(sr.dblDiscount AS NVARCHAR(50)), '') + ' / Discount cannot be negative.'
-FROM tblApiSchemaRecipe sr
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND sr.dblDiscount < 0
-AND sr.dblDiscount IS NOT NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'One Line Print'
-    , strValue = sr.strOneLinePrint
-    , strLogLevel = 'Warning'
-    , strStatus = 'Ignored'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The One Line Print ' + ISNULL(sr.strOneLinePrint, '') + ' is not valid.'
-FROM tblApiSchemaRecipe sr
-LEFT JOIN tblMFOneLinePrint op ON op.strName = sr.strOneLinePrint
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND op.intOneLinePrintId IS NULL
-AND NULLIF(sr.strOneLinePrint, '') IS NOT NULL
-
---Set Default Values
-UPDATE sr
-SET sr.strRecipeName = strItemNo
-FROM tblApiSchemaRecipe sr
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND NULLIF(sr.strRecipeName, '') IS NULL
-AND NULLIF(sr.strItemNo, '') IS NOT NULL
-
-UPDATE sr
-SET sr.strRecipeType = 'By Quantity'
-FROM tblApiSchemaRecipe sr
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND NULLIF(sr.strRecipeType, '') IS NULL
-
--- INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
--- SELECT
---       NEWID()
---     , guiApiImportLogId = @guiLogId
---     , strField = 'Valid From'
---     , strValue = sr.dtmValidFrom
---     , strLogLevel = 'Error'
---     , strStatus = 'Failed'
---     , intRowNo = sr.intRowNumber
---     , strMessage = 'The Valid From date (YYYY-MM-DD) is not valid.'
--- FROM tblApiSchemaRecipe sr
--- WHERE sr.guiApiUniqueId = @guiApiUniqueId
--- AND (sr.dtmValidFrom = CAST ('1900-01-01' AS DATETIME) OR sr.dtmValidFrom IS NULL)
-
--- INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
--- SELECT
---       NEWID()
---     , guiApiImportLogId = @guiLogId
---     , strField = 'Valid To'
---     , strValue = sr.dtmValidFrom
---     , strLogLevel = 'Error'
---     , strStatus = 'Failed'
---     , intRowNo = sr.intRowNumber
---     , strMessage = 'The Valid To date (YYYY-MM-DD) is not valid.'
--- FROM tblApiSchemaRecipe sr
--- WHERE sr.guiApiUniqueId = @guiApiUniqueId
--- AND (sr.dtmValidTo = CAST ('1900-01-01' AS DATETIME) OR sr.dtmValidTo IS NULL)
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Farm'
-    , strValue = sr.strFarm
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = sr.intRowNumber
-    , strMessage = 'The Farm "' + ISNULL(sr.strFarm, '') + '" does not belong to the customer "' 
-		+ ISNULL(sr.strCustomer, '') + '".'
-FROM tblApiSchemaRecipe sr
-JOIN vyuARCustomer c ON c.strName = sr.strCustomer
-OUTER APPLY (
-	SELECT TOP 1 f.strFarmDescription, f.intFarmFieldId
-	FROM tblEMEntityFarm f
-	WHERE (strFarmDescription = sr.strFarm OR strFarm = sr.strFarm)
-	AND f.intEntityId = c.intEntityId
-) f
-WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND f.intFarmFieldId IS NULL
-AND NULLIF(sr.strFarm, '') IS NOT NULL
-
--- Transformation
-
--- Execute pre-requisite
-EXEC dbo.uspApiSchemaTransformRecipeInitialize
-
-DECLARE @intUserId INT = 1
-
-DECLARE @strRecipeName NVARCHAR(50)
-DECLARE @strItemNo NVARCHAR(50)
-DECLARE @dblQuantity NVARCHAR(50)
-DECLARE @strUOM NVARCHAR(50)
-DECLARE @strLocationName NVARCHAR(50)
-DECLARE @intVersionNo INT
-DECLARE @strRecipeType NVARCHAR(50)
-DECLARE @strManufacturingProcess NVARCHAR(50)
-DECLARE @strCustomer NVARCHAR(50)
-DECLARE @strFarm NVARCHAR(50)
-DECLARE @strCostType NVARCHAR(50)
-DECLARE @strMarginBy NVARCHAR(50)
-DECLARE @dblMargin NVARCHAR(50)
-DECLARE @dblDiscount NVARCHAR(50)
-DECLARE @strOneLinePrint NVARCHAR(50)
-DECLARE @dtmValidFrom NVARCHAR(50)
-DECLARE @dtmValidTo NVARCHAR(50)
-
-DECLARE @intItemId INT
-DECLARE @intItemUOMId INT
-DECLARE @intCompanyLocationId INT
-DECLARE @intRecipeTypeId INT
-DECLARE @intManufacturingProcessId INT
-DECLARE @intCostTypeId INT
-DECLARE @intMarginById INT
-DECLARE @intUnitMeasureId INT
-DECLARE @intOneLinePrintId INT
-DECLARE @intCustomerId INT
-DECLARE @intFarmFieldId INT
-DECLARE @intRowNumber INT
-
-DECLARE @intRecipeId INT
-
-DECLARE cur CURSOR LOCAL FAST_FORWARD
-FOR
-SELECT
-	  sr.strRecipeName
-	, sr.strItemNo
-	, sr.dblQuantity
-	, sr.strUOM
-	, sr.strLocationName
-	, sr.intVersionNo
-	, sr.strRecipeType
-	, ISNULL(sr.strManufacturingProcess, mfp.strProcessName)
-	, sr.strCustomer
-	, sr.strFarm
-	, sr.strCostType
-	, ISNULL(sr.strMarginBy, dm.strName)
-	, sr.dblMargin
-	, sr.dblDiscount
-	, sr.strOneLinePrint
-	, sr.dtmValidFrom
-	, sr.dtmValidTo
-	, i.intItemId
-	, iu.intItemUOMId
-	, cl.intCompanyLocationId
-	, rt.intRecipeTypeId
-	, ISNULL(mp.intManufacturingProcessId, mfp.intManufacturingProcessId)
-	, ct.intCostTypeId
-	, ISNULL(m.intMarginById, dm.intMarginById)
-	, um.intUnitMeasureId
-	, p.intOneLinePrintId
-	, cust.intEntityId
-	, farm.intEntityId
-	, MIN(sr.intRowNumber)
-FROM tblApiSchemaRecipe sr
-LEFT JOIN tblICItem i ON i.strItemNo = sr.strItemNo
-LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
-	AND iu.ysnStockUnit = 1
-LEFT JOIN tblSMCompanyLocation cl ON cl.strLocationName = sr.strLocationName
-LEFT JOIN tblMFRecipeType rt ON rt.strName = sr.strRecipeType
-LEFT JOIN tblMFManufacturingProcess mp ON mp.strProcessName = sr.strManufacturingProcess
-LEFT JOIN tblMFCostType ct ON ct.strName = sr.strCostType
-LEFT JOIN tblMFMarginBy m ON m.strName = sr.strMarginBy
-OUTER APPLY (
-	SELECT TOP 1 strName, intMarginById
-	FROM tblMFMarginBy
-	WHERE strName = 'Amount'
-) dm
-OUTER APPLY (
-    SELECT TOP 1 strProcessName, intManufacturingProcessId
-    FROM tblMFManufacturingProcess
-	WHERE NOT EXISTS(SELECT * 
-		FROM tblMFManufacturingProcess 
-		WHERE strProcessName = sr.strManufacturingProcess)
-) mfp
-LEFT JOIN tblICUnitMeasure um ON um.strUnitMeasure = sr.strUOM
-LEFT JOIN tblMFOneLinePrint p ON p.strName = sr.strOneLinePrint
-OUTER APPLY (
-	SELECT TOP 1 intEntityId
-	FROM vyuARCustomer
-	WHERE strName = sr.strCustomer
-) cust
-OUTER APPLY (
-	SELECT TOP 1 intEntityId
-	FROM tblEMEntityFarm
-	WHERE strFarmNumber = sr.strFarm
-		AND intCustomerId = cust.intEntityId
-) farm
-WHERE NOT EXISTS(
-	SELECT *
-	FROM tblApiImportLogDetail
-	WHERE guiApiImportLogId = @guiLogId
-		AND intRowNo = sr.intRowNumber
-		AND strLogLevel = 'Error'
+DECLARE @tblFilteredItem TABLE(
+	intKey INT NOT NULL,
+    guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
+    intRowNumber INT NULL,
+	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strShortName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL,
+	strManufacturer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strCommodity NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strBrand NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strModelNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
+	ysnStockedItem BIT NULL,
+	ysnDyedFuel BIT NULL,
+	ysnMSDSRequired BIT NULL,
+	strEPANumber NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	ysnInboundTax BIT NULL,
+	ysnOutboundTax BIT NULL,
+	ysnRestrictedChemical BIT NULL,
+	ysnFuelItem BIT NULL,
+	ysnListBundleItemsSeparately BIT NULL,
+	dblDenaturantPercentage NUMERIC(38, 20) NULL,
+	ysnTonnageTax BIT NULL,
+	ysnLoadTracking BIT NULL,
+	dblMixOrder NUMERIC(38, 20) NULL,
+	ysnHandAddIngredients BIT NULL,
+	ysnExtendPickTicket BIT NULL,
+	ysnExportEDI BIT NULL,
+	ysnHazardMaterial BIT NULL,
+	ysnMaterialFee BIT NULL,
+	ysnAutoBlend BIT NULL,
+	dblUserGroupFeePercentage NUMERIC(38, 20) NULL,
+	dblWgtTolerancePercentage NUMERIC(38, 20) NULL,
+	dblOverReceiveTolerancePercentage NUMERIC(38, 20) NULL,
+	strMaintenanceCalculationMethod NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strWICCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	ysnLandedCost BIT NULL,
+	strLeadTime NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	ysnTaxable BIT NULL,
+	strKeywords NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	dblCaseQty NUMERIC(38, 20) NULL,
+	dtmDateShip DATETIME NULL,
+	dblTaxExempt NUMERIC(38, 20) NULL,
+	ysnDropShip BIT NULL,
+	ysnCommissionable BIT NULL,
+	ysnSpecialCommission BIT NULL,
+	ysnTankRequired BIT NULL,
+	ysnAvailableforTM BIT NULL,
+	dblDefaultPercentageFull NUMERIC(38, 20) NULL,
+	dblRate NUMERIC(38, 20) NULL,
+	strNACSCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	ysnReceiptCommentReq BIT NULL,
+	strDirectSale NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strPatronageCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strPhysicalItem NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVolumeRebateGroup NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strIngredientTag NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strMedicationTag NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strFuelCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	ysnLotWeightsRequired BIT NULL,
+	ysnUseWeighScales BIT NULL,
+	strCountCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strRinRequired NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strLotTracking NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strBarcodePrint NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strFuelInspectFee NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	ysnSeparateStockForUOMs BIT NULL DEFAULT ((1))
 )
-AND sr.guiApiUniqueId = @guiApiUniqueId
-GROUP BY
-	  sr.strRecipeName
-	, sr.strItemNo
-	, sr.dblQuantity
-	, sr.strUOM
-	, sr.strLocationName
-	, sr.intVersionNo
-	, sr.strRecipeType
-	, sr.strManufacturingProcess
-	, sr.strCustomer
-	, sr.strFarm
-	, sr.strCostType
-	, sr.strMarginBy
-	, sr.dblMargin
-	, sr.dblDiscount
-	, sr.strOneLinePrint
-	, sr.dtmValidFrom
-	, sr.dtmValidTo
-	, i.intItemId
-	, iu.intItemUOMId
-	, cl.intCompanyLocationId
-	, rt.intRecipeTypeId
-	, mp.intManufacturingProcessId
-	, ct.intCostTypeId
-	, m.intMarginById
-	, um.intUnitMeasureId
-	, p.intOneLinePrintId
-	, cust.intEntityId
-	, farm.intEntityId
-	, dm.intMarginById
-	, dm.strName
-	, mfp.intManufacturingProcessId
-	, mfp.strProcessName
+INSERT INTO @tblFilteredItem
+(
+	intKey,
+    guiApiUniqueId,
+    intRowNumber,
+	strItemNo,
+	strType,
+	strShortName,
+	strDescription,
+	strManufacturer,
+	strCommodity,
+	strBrand,
+	strModelNo,
+	strCategory,
+	ysnStockedItem ,
+	ysnDyedFuel,
+	ysnMSDSRequired,
+	strEPANumber,
+	ysnInboundTax,
+	ysnOutboundTax,
+	ysnRestrictedChemical,
+	ysnFuelItem,
+	ysnListBundleItemsSeparately,
+	dblDenaturantPercentage,
+	ysnTonnageTax,
+	ysnLoadTracking,
+	dblMixOrder,
+	ysnHandAddIngredients,
+	ysnExtendPickTicket,
+	ysnExportEDI,
+	ysnHazardMaterial,
+	ysnMaterialFee,
+	ysnAutoBlend,
+	dblUserGroupFeePercentage,
+	dblWgtTolerancePercentage,
+	dblOverReceiveTolerancePercentage,
+	strMaintenanceCalculationMethod,
+	strWICCode,
+	ysnLandedCost,
+	strLeadTime,
+	ysnTaxable,
+	strKeywords,
+	dblCaseQty,
+	dtmDateShip,
+	dblTaxExempt,
+	ysnDropShip,
+	ysnCommissionable,
+	ysnSpecialCommission,
+	ysnTankRequired,
+	ysnAvailableforTM,
+	dblDefaultPercentageFull,
+	dblRate,
+	strNACSCategory,
+	ysnReceiptCommentReq,
+	strDirectSale,
+	strPatronageCategory,
+	strPhysicalItem,
+	strVolumeRebateGroup,
+	strIngredientTag,
+	strMedicationTag,
+	strFuelCategory,
+	ysnLotWeightsRequired,
+	ysnUseWeighScales,
+	strCountCode,
+	strRinRequired,
+	strStatus,
+	strLotTracking,
+	strBarcodePrint,
+	strFuelInspectFee ,
+	ysnSeparateStockForUOMs
+)
+SELECT 
+	intKey,
+    guiApiUniqueId,
+    intRowNumber,
+	strItemNo,
+	strType,
+	strShortName,
+	strDescription,
+	strManufacturer,
+	strCommodity,
+	strBrand,
+	strModelNo,
+	strCategory,
+	ysnStockedItem ,
+	ysnDyedFuel,
+	ysnMSDSRequired,
+	strEPANumber,
+	ysnInboundTax,
+	ysnOutboundTax,
+	ysnRestrictedChemical,
+	ysnFuelItem,
+	ysnListBundleItemsSeparately,
+	dblDenaturantPercentage,
+	ysnTonnageTax,
+	ysnLoadTracking,
+	dblMixOrder,
+	ysnHandAddIngredients,
+	ysnExtendPickTicket,
+	ysnExportEDI,
+	ysnHazardMaterial,
+	ysnMaterialFee,
+	ysnAutoBlend,
+	dblUserGroupFeePercentage,
+	dblWgtTolerancePercentage,
+	dblOverReceiveTolerancePercentage,
+	strMaintenanceCalculationMethod,
+	strWICCode,
+	ysnLandedCost,
+	strLeadTime,
+	ysnTaxable,
+	strKeywords,
+	dblCaseQty,
+	dtmDateShip,
+	dblTaxExempt,
+	ysnDropShip,
+	ysnCommissionable,
+	ysnSpecialCommission,
+	ysnTankRequired,
+	ysnAvailableforTM,
+	dblDefaultPercentageFull,
+	dblRate,
+	strNACSCategory,
+	ysnReceiptCommentReq,
+	strDirectSale,
+	strPatronageCategory,
+	strPhysicalItem,
+	strVolumeRebateGroup,
+	strIngredientTag,
+	strMedicationTag,
+	strFuelCategory,
+	ysnLotWeightsRequired,
+	ysnUseWeighScales,
+	strCountCode,
+	strRinRequired,
+	strStatus,
+	strLotTracking,
+	strBarcodePrint,
+	strFuelInspectFee ,
+	ysnSeparateStockForUOMs
+FROM
+tblApiSchemaTransformItem
+WHERE guiApiUniqueId = @guiApiUniqueId;
 
-OPEN cur
+--Validate
 
-FETCH NEXT FROM cur INTO
-	  @strRecipeName
-	, @strItemNo
-	, @dblQuantity
-	, @strUOM
-	, @strLocationName
-	, @intVersionNo
-	, @strRecipeType
-	, @strManufacturingProcess
-	, @strCustomer
-	, @strFarm
-	, @strCostType
-	, @strMarginBy
-	, @dblMargin
-	, @dblDiscount
-	, @strOneLinePrint
-	, @dtmValidFrom
-	, @dtmValidTo
-	, @intItemId
-	, @intItemUOMId
-	, @intCompanyLocationId
-	, @intRecipeTypeId
-	, @intManufacturingProcessId
-	, @intCostTypeId
-	, @intMarginById
-	, @intUnitMeasureId
-	, @intOneLinePrintId
-	, @intCustomerId
-	, @intFarmFieldId
-	, @intRowNumber
+--Validate duplicate Item No
 
-WHILE @@FETCH_STATUS = 0
+INSERT INTO tblApiImportLogDetail 
+(
+	guiApiImportLogDetailId,
+	guiApiImportLogId,
+	strField,
+	strValue,
+	strLogLevel,
+	strStatus,
+	intRowNo,
+	strMessage
+)
+SELECT
+	guiApiImportLogDetailId = NEWID(),
+	guiApiImportLogId = @guiLogId,
+	strField = 'Item No',
+	strValue = DuplicateCounter.strItemNo,
+	strLogLevel = 'Warning',
+	strStatus = 'Skipped',
+	intRowNo = DuplicateCounter.intRowNumber,
+	strMessage = 'Duplicate imported item no: ' + ISNULL(DuplicateCounter.strItemNo, '') + '.'
+FROM
+(
+	SELECT 
+		*,
+		RowNumber = ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo)
+	FROM 
+		@tblFilteredItem
+) AS DuplicateCounter
+WHERE RowNumber > 1
+
+--Remove duplicate Item No
+
+DELETE DuplicateCounter
+FROM
+(
+	SELECT 
+		RowNumber = ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo)
+	FROM 
+		@tblFilteredItem
+) DuplicateCounter
+WHERE RowNumber > 1
+
+DECLARE @tblErrorItem TABLE(
+	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	intRowNumber INT NULL,
+	intErrorType INT -- 1 - Lot Tracking, 2 - Item Type, 3 - Commodity
+)
+
+
+IF @ysnAllowOverwrite = 1
 BEGIN
-	SELECT @intRecipeId = intRecipeId FROM tblMFRecipe WHERE strName = @strRecipeName
 
-	IF @OverwriteExisting = 0
-	BEGIN
-		IF @intRecipeId IS NOT NULL
-		BEGIN
-			INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-			SELECT
-				NEWID()
-				, guiApiImportLogId = @guiLogId
-				, strField = 'Recipe Name'
-				, strValue = @strRecipeName
-				, strLogLevel = 'Error'
-				, strStatus = 'Failed'
-				, intRowNo = @intRowNumber
-				, strMessage = 'The recipe "' + @strRecipeName + '" already exists.'
+	--Validate update changes on Lot Tracking, Item Type and Commodity
+
+	INSERT INTO @tblErrorItem
+	(
+		strItemNo,
+		intRowNumber,
+		intErrorType
+	)
+	SELECT
+		FilteredItem.strItemNo,
+		FilteredItem.intRowNumber,
+		1 -- Lot Tracking Error
+	FROM 
+		@tblFilteredItem FilteredItem 
+		INNER JOIN 
+		tblICItem Item
+			ON FilteredItem.strItemNo = Item.strItemNo
+	WHERE
+		FilteredItem.strLotTracking IS NOT NULL 		
+		AND LOWER(Item.strLotTracking) <> RTRIM(LTRIM(LOWER(ISNULL(FilteredItem.strLotTracking, 'No'))))	
+		AND dbo.fnAllowLotTrackingToChange(Item.intItemId, Item.strLotTracking) = 0
+	UNION ALL
+	SELECT
+		FilteredItem.strItemNo,
+		FilteredItem.intRowNumber,
+		2 -- Item Type Error
+	FROM
+		@tblFilteredItem FilteredItem
+		INNER JOIN 
+		tblICItem Item 
+			ON FilteredItem.strItemNo = Item.strItemNo
+	WHERE
+		FilteredItem.strType IS NOT NULL
+		AND LOWER(Item.strType) <> LTRIM(RTRIM(LOWER(ISNULL(FilteredItem.strType, 'Inventory'))))
+		AND dbo.fnAllowItemTypeChange(Item.intItemId, Item.strType) = 0
+	UNION ALL
+	SELECT
+		FilteredItem.strItemNo,
+		FilteredItem.intRowNumber,
+		3 -- Commodity Error
+	FROM 
+		@tblFilteredItem FilteredItem		
+		INNER JOIN tblICItem Item 
+			ON FilteredItem.strItemNo = Item.strItemNo
+		INNER JOIN tblICCommodity Commodity
+			ON Commodity.intCommodityId = Item.intCommodityId
+	WHERE
+		FilteredItem.strCommodity IS NOT NULL 		
+		AND LOWER(Commodity.strCommodityCode) <> LTRIM(RTRIM(LOWER(FilteredItem.strCommodity)))
+		AND dbo.fnAllowCommodityToChange(Item.intItemId, Item.intCommodityId) = 0
+	UNION ALL
+	SELECT
+		FilteredItem.strItemNo,
+		FilteredItem.intRowNumber,
+		4 -- Category Error
+	FROM 
+		@tblFilteredItem FilteredItem		
+		INNER JOIN tblICItem Item 
+			ON FilteredItem.strItemNo = Item.strItemNo
+		INNER JOIN tblICCategory Category
+			ON Category.intCategoryId = Item.intCategoryId
+	WHERE
+		FilteredItem.strCommodity IS NOT NULL 		
+		AND LOWER(Category.strCategoryCode) <> LTRIM(RTRIM(LOWER(FilteredItem.strCategory)))
+
+	INSERT INTO tblApiImportLogDetail 
+	(
+		guiApiImportLogDetailId,
+		guiApiImportLogId,
+		strField,
+		strValue,
+		strLogLevel,
+		strStatus,
+		intRowNo,
+		strMessage
+	)
+	SELECT
+		guiApiImportLogDetailId = NEWID(),
+		guiApiImportLogId = @guiLogId,
+		strField = CASE
+			WHEN ErrorItem.intErrorType = 1
+				THEN 'Lot Tracking'
+			WHEN ErrorItem.intErrorType = 2
+				THEN 'Item Type'
+			WHEN ErrorItem.intErrorType = 3
+				THEN 'Commodity'
+			ELSE 'Category'
+		END,
+		strValue = ErrorItem.strItemNo,
+		strLogLevel = 'Error',
+		strStatus = 'Failed',
+		intRowNo = ErrorItem.intRowNumber,
+		strMessage = CASE
+			WHEN ErrorItem.intErrorType = 1
+				THEN 'Lot Tracking change is not allowed for item "' + ErrorItem.strItemNo + '"'
+			WHEN ErrorItem.intErrorType = 2
+				THEN 'Item Type change is not allowed for item "' + ErrorItem.strItemNo + '"'
+			WHEN ErrorItem.intErrorType = 3
+				THEN 'Commodity change is not allowed for item "' + ErrorItem.strItemNo + '"'
+			ELSE 'Category is required for item "' + ErrorItem.strItemNo + '"'
 		END
-	END
-	
-	IF @intRecipeId IS NULL
-	BEGIN
-		INSERT INTO tblMFRecipe (
-			strName
-			, intItemId
-			, dblQuantity
-			, intItemUOMId
-			, intLocationId
-			, intVersionNo
-			, intRecipeTypeId
-			, intManufacturingProcessId
-			, ysnActive
-			, intCustomerId
-			, intFarmId
-			, intCostTypeId
-			, intMarginById
-			, dblMargin
-			, dblDiscount
-			, intMarginUOMId
-			, intOneLinePrintId
-			, intCreatedUserId
-			, dtmCreated
-			, intLastModifiedUserId
-			, dtmLastModified
-			, dtmValidFrom
-			, dtmValidTo
-			, intConcurrencyId
-			, guiApiUniqueId
-			, intRowNumber
-		)
-		SELECT
-			strName                     = @strRecipeName
-			, intItemId                   = @intItemId
-			, dblQuantity                 = @dblQuantity
-			, intItemUOMId                = @intItemUOMId
-			, intLocationId               = @intCompanyLocationId
-			, intVersionNo                = @intVersionNo
-			, intRecipeTypeId             = @intRecipeTypeId
-			, intManufacturingProcessId   = @intManufacturingProcessId
-			, ysnActive                   = 0
-			, intCustomerId               = @intCustomerId
-			, intFarmId                   = @intFarmFieldId
-			, intCostTypeId               = @intCostTypeId
-			, intMarginById               = @intMarginById
-			, dblMargin                   = @dblMargin
-			, dblDiscount                 = @dblDiscount
-			, intMarginUOMId              = @intUnitMeasureId
-			, intOneLinePrintId           = @intOneLinePrintId
-			, intCreatedUserId            = @intUserId
-			, dtmCreated                  = GETUTCDATE()
-			, intLastModifiedUserId       = @intUserId
-			, dtmLastModified             = GETUTCDATE()
-			, dtmValidFrom                = @dtmValidFrom
-			, dtmValidTo                  = @dtmValidTo
-			, intConcurrencyId            = 1
-			, guiApiUniqueId              = @guiApiUniqueId
-			, intRowNumber                = @intRowNumber
+	FROM @tblErrorItem ErrorItem
+	WHERE ErrorItem.intErrorType IN(1, 2, 3, 4)
 
-		SET @intRecipeId = SCOPE_IDENTITY()
-
-		-- Create a default output items
-		INSERT INTO tblMFRecipeItem (
-			intRecipeId
-			, intItemId
-			, strDescription
-			, dblQuantity
-			, dblCalculatedQuantity
-			, intItemUOMId
-			, intRecipeItemTypeId
-			, strItemGroupName
-			, dblUpperTolerance
-			, dblLowerTolerance
-			, dblCalculatedUpperTolerance
-			, dblCalculatedLowerTolerance
-			, dblShrinkage
-			, ysnScaled
-			, intConsumptionMethodId
-			, intStorageLocationId
-			, dtmValidFrom
-			, dtmValidTo
-			, ysnYearValidationRequired
-			, ysnMinorIngredient
-			, ysnOutputItemMandatory
-			, dblScrap
-			, ysnConsumptionRequired
-			, dblCostAllocationPercentage
-			, intMarginById
-			, dblMargin
-			, ysnCostAppliedAtInvoice
-			, intCommentTypeId
-			, strDocumentNo
-			, intSequenceNo
-			, ysnPartialFillConsumption
-			, intCreatedUserId
-			, dtmCreated
-			, intLastModifiedUserId
-			, dtmLastModified
-			, intConcurrencyId)
-		SELECT
-			intRecipeId                       = @intRecipeId
-			, intItemId                         = @intItemId
-			, strDescription                    = ''
-			, dblQuantity                       = @dblQuantity
-			, dblCalculatedQuantity             = 0
-			, intItemUOMId                      = @intItemUOMId
-			, intRecipeItemTypeId               = 2
-			, strItemGroupName                  = ''
-			, dblUpperTolerance                 = 0
-			, dblLowerTolerance                 = 0
-			, dblCalculatedUpperTolerance       = @dblQuantity
-			, dblCalculatedLowerTolerance       = @dblQuantity
-			, dblShrinkage                      = 0
-			, ysnScaled                         = 0
-			, intConsumptionMethodId            = NULL
-			, intStorageLocationId              = NULL
-			, dtmValidFrom                      = NULL
-			, dtmValidTo                        = NULL
-			, ysnYearValidationRequired         = 0
-			, ysnMinorIngredient                = 0
-			, ysnOutputItemMandatory            = 1
-			, dblScrap                          = 0
-			, ysnConsumptionRequired            = 1
-			, dblCostAllocationPercentage       = 100
-			, intMarginById                     = NULL
-			, dblMargin                         = 0
-			, ysnCostAppliedAtInvoice           = 0
-			, intCommentTypeId                  = NULL
-			, strDocumentNo                     = NULL
-			, intSequenceNo                     = NULL
-			, ysnPartialFillConsumption         = 1
-			, intCreatedUserId                  = @intUserId
-			, dtmCreated                        = GETUTCDATE()
-			, intLastModifiedUserId             = @intUserId
-			, dtmLastModified                   = GETUTCDATE()
-			, intConcurrencyId                  = 1
-	END
-	ELSE
-	BEGIN
-		IF @OverwriteExisting = 1
-		BEGIN
-			UPDATE r
-			SET r.strName = @strRecipeName
-				, r.dblQuantity = @dblQuantity
-				, r.intManufacturingProcessId = @intManufacturingProcessId
-				, r.intCustomerId = @intCustomerId
-				, r.intFarmId = @intFarmFieldId
-				, r.intCostTypeId = @intCostTypeId
-				, r.intMarginById = @intMarginById
-				, r.dblMargin = @dblMargin
-				, r.dblDiscount = @dblDiscount
-				, r.intMarginUOMId = @intUnitMeasureId
-				, r.intOneLinePrintId = @intOneLinePrintId
-				, r.dtmLastModified = GETUTCDATE()
-				, r.intLastModifiedUserId = @intUserId
-				, r.dtmValidFrom = @dtmValidFrom
-				, r.dtmValidTo = @dtmValidTo
-				, r.intRecipeTypeId = @intRecipeTypeId
-				, r.intConcurrencyId = 1 + ISNULL(r.intConcurrencyId, 1)
-				 , r.guiApiUniqueId = @guiApiUniqueId
-				 , r.intRowNumber = @intRowNumber
-			FROM tblMFRecipe r
-			WHERE r.intRecipeId = @intRecipeId
-
-			INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, strAction, intRowNo, strMessage)
-			SELECT
-				NEWID()
-				, guiApiImportLogId = @guiLogId
-				, strField = 'Recipe'
-				, strValue = @strRecipeName
-				, strLogLevel = 'Warning'
-				, strStatus = 'Success'
-				, strAction = 'Update'
-				, intRowNo = @intRowNumber
-				, strMessage = 'The Recipe "' + @strRecipeName + '" was updated.'
-		END
-	END
-
-	FETCH NEXT FROM cur INTO
-		  @strRecipeName
-		, @strItemNo
-		, @dblQuantity
-		, @strUOM
-		, @strLocationName
-		, @intVersionNo
-		, @strRecipeType
-		, @strManufacturingProcess
-		, @strCustomer
-		, @strFarm
-		, @strCostType
-		, @strMarginBy
-		, @dblMargin
-		, @dblDiscount
-		, @strOneLinePrint
-		, @dtmValidFrom
-		, @dtmValidTo
-		, @intItemId
-		, @intItemUOMId
-		, @intCompanyLocationId
-		, @intRecipeTypeId
-		, @intManufacturingProcessId
-		, @intCostTypeId
-		, @intMarginById
-		, @intUnitMeasureId
-		, @intOneLinePrintId
-		, @intCustomerId
-		, @intFarmFieldId
-		, @intRowNumber
 END
 
-CLOSE cur
-DEALLOCATE cur
+--Remove Items with update error
 
--- Log successful imports
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Recipe'
-    , strValue = r.strName
-    , strLogLevel = 'Info'
-    , strStatus = 'Success'
-    , intRowNo = r.intRowNumber
-    , strMessage = 'The recipe ' + ISNULL(r.strName, '') + ' was imported successfully.'
-FROM tblMFRecipe r
-WHERE r.guiApiUniqueId = @guiApiUniqueId
+DELETE FilteredItem
+FROM @tblFilteredItem FilteredItem
+INNER JOIN @tblErrorItem Error
+ON FilteredItem.strItemNo = Error.strItemNo
 
-UPDATE log
-SET log.intTotalRowsImported = r.intCount
-FROM tblApiImportLog log
-CROSS APPLY (
-	SELECT COUNT(*) intCount
-	FROM tblMFRecipe
-	WHERE guiApiUniqueId = log.guiApiUniqueId
-) r
-WHERE log.guiApiImportLogId = @guiLogId
+--Crete Output Table
 
+DECLARE @tblItemOutput TABLE(
+	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS
+)
+
+--Transform and Insert statement
+
+;MERGE INTO tblICItem AS TARGET
+USING
+(
+	SELECT
+		guiApiUniqueId = FilteredItem.guiApiUniqueId,
+		strItemNo = FilteredItem.strItemNo,
+		strType	= COALESCE(InventoryType.strType, 'Inventory'),
+		strDescription = ISNULL(FilteredItem.strDescription, FilteredItem.strItemNo),
+		strStatus = COALESCE(Stat.strStatus, 'Active'),
+		intLifeTime = 1,
+		strShortName = FilteredItem.strShortName,
+		strLotTracking = COALESCE(LotTrackingTypes.strLotTracking, 'No'),
+		ysnLotWeightsRequired = FilteredItem.ysnLotWeightsRequired,
+		ysnUseWeighScales = FilteredItem.ysnUseWeighScales,
+		strBarcodePrint = FilteredItem.strBarcodePrint,
+		intManufacturerId = Manufacturer.intManufacturerId,
+		intCommodityId = Commodity.intCommodityId,
+		intBrandId = Brand.intBrandId,
+		strModelNo = FilteredItem.strModelNo,
+		intCategoryId = Category.intCategoryId,
+		ysnStockedItem = FilteredItem.ysnStockedItem,
+		ysnDyedFuel = FilteredItem.ysnDyedFuel,
+		ysnMSDSRequired	= FilteredItem.ysnMSDSRequired,
+		strEPANumber = FilteredItem.strEPANumber,
+		ysnInboundTax = FilteredItem.ysnInboundTax,
+		ysnRestrictedChemical = FilteredItem.ysnRestrictedChemical,
+		ysnFuelItem = FilteredItem.ysnFuelItem,
+		ysnListBundleSeparately	= FilteredItem.ysnListBundleItemsSeparately,
+		dblDenaturantPercent = FilteredItem.dblDefaultPercentageFull,
+		ysnTonnageTax = FilteredItem.ysnTonnageTax,
+		ysnLoadTracking = FilteredItem.ysnLoadTracking,
+		dblMixOrder = FilteredItem.dblMixOrder,
+		ysnHandAddIngredient = FilteredItem.ysnHandAddIngredients,
+		ysnExtendPickTicket = FilteredItem.ysnExtendPickTicket,
+		ysnExportEDI = FilteredItem.ysnExportEDI,
+		ysnHazardMaterial = FilteredItem.ysnHazardMaterial,
+		ysnMaterialFee = FilteredItem.ysnMaterialFee,
+		ysnAutoBlend = FilteredItem.ysnAutoBlend,
+		dblUserGroupFee = FilteredItem.dblUserGroupFeePercentage,
+		dblWeightTolerance = FilteredItem.dblWgtTolerancePercentage,
+		dblOverReceiveTolerance = FilteredItem.dblOverReceiveTolerancePercentage,
+		strMaintenanceCalculationMethod = FilteredItem.strMaintenanceCalculationMethod,
+		strWICCode = FilteredItem.strWICCode,
+		ysnLandedCost = ISNULL(FilteredItem.ysnLandedCost, 0),
+		strLeadTime = FilteredItem.strLeadTime,
+		ysnTaxable = ISNULL(FilteredItem.ysnTaxable, 0),
+		strKeywords = FilteredItem.strKeywords,
+		dblCaseQty = FilteredItem.dblCaseQty,
+		dtmDateShip = FilteredItem.dtmDateShip,
+		dblTaxExempt = FilteredItem.dblTaxExempt,
+		ysnDropShip = ISNULL(FilteredItem.ysnDropShip, 0),
+		ysnCommisionable = ISNULL(FilteredItem.ysnCommissionable, 0),
+		ysnSpecialCommission = ISNULL(FilteredItem.ysnSpecialCommission, 0),
+		ysnTankRequired = FilteredItem.ysnTankRequired,
+		ysnAvailableTM = FilteredItem.ysnAvailableforTM,
+		dblDefaultFull = FilteredItem.dblDefaultPercentageFull,
+		dblMaintenanceRate = FilteredItem.dblRate,
+		strNACSCategory = FilteredItem.strNACSCategory,
+		ysnReceiptCommentRequired = FilteredItem.ysnReceiptCommentReq,
+		intPatronageCategoryDirectId = DirectSale.intPatronageCategoryId,
+		intPatronageCategoryId = Patronage.intPatronageCategoryId,
+		intPhysicalItem	= PhysicalItem.intItemId,
+		strVolumeRebateGroup = FilteredItem.strVolumeRebateGroup,
+		intIngredientTag = IngredientTag.intTagId,
+		intMedicationTag = MedicationTag.intTagId,
+		intRINFuelTypeId = Rin.intRinFuelCategoryId,
+		strFuelInspectFee = FilteredItem.strFuelInspectFee,
+		ysnSeparateStockForUOMs = FilteredItem.ysnSeparateStockForUOMs,
+		dtmDateCreated = GETDATE(),
+		intCreatedByUserId = NULL
+	FROM @tblFilteredItem FilteredItem
+		OUTER APPLY (
+			SElECT strType
+			FROM (
+				SELECT 'Bundle' strType UNION
+				SELECT 'Inventory' strType UNION
+				SELECT 'Non-Inventory' strType UNION
+				SELECT 'Kit' strType UNION
+				SELECT 'Finished Good' strType UNION
+				SELECT 'Other Charge' strType UNION
+				SELECT 'Raw Material' strType UNION
+				SELECT 'Service' strType UNION
+				SELECT 'Software' strType UNION
+				SELECT 'Comment' strType
+			) Types WHERE LOWER(Types.strType) = LTRIM(RTRIM(LOWER(ISNULL(FilteredItem.strType, 'Inventory'))))
+		) InventoryType
+		OUTER APPLY (
+			SELECT strStatus
+			FROM (
+				SELECT 'Active' strStatus UNION
+				SELECT 'Phased Out' strStatus UNION
+				SELECT 'Discontinued' strStatus
+			) Stat WHERE LOWER(Stat.strStatus) = LTRIM(RTRIM(LOWER(ISNULL(FilteredItem.strStatus, 'Active'))))
+		) Stat
+		OUTER APPLY (
+			SELECT strLotTracking
+			FROM (
+				SELECT 'No' strLotTracking UNION
+				SELECT 'Yes - Manual' strLotTracking UNION
+				SELECT 'Yes - Serial Number' strLotTracking UNION
+				SELECT 'Yes - Manual/Serial Number' strLotTracking
+			) Lot WHERE LOWER(Lot.strLotTracking) = RTRIM(LTRIM(LOWER(ISNULL(FilteredItem.strLotTracking, 'No'))))
+		) LotTrackingTypes
+		LEFT OUTER JOIN tblICManufacturer Manufacturer ON LOWER(Manufacturer.strManufacturer) = LTRIM(RTRIM(LOWER(FilteredItem.strManufacturer)))
+		LEFT OUTER JOIN tblICCategory Category
+			ON LOWER(Category.strCategoryCode) = LTRIM(RTRIM(LOWER(FilteredItem.strCategory)))
+			--AND c.strInventoryType = invTypes.strType
+		LEFT OUTER JOIN tblICCommodity Commodity ON LOWER(Commodity.strCommodityCode) = LTRIM(RTRIM(LOWER(FilteredItem.strCommodity)))
+		LEFT OUTER JOIN tblICBrand Brand ON LOWER(Brand.strBrandCode) = LTRIM(RTRIM(LOWER(FilteredItem.strBrand)))
+		LEFT OUTER JOIN tblPATPatronageCategory Patronage ON LOWER(Patronage.strCategoryCode) = LTRIM(RTRIM(LOWER(FilteredItem.strPatronageCategory)))
+		LEFT OUTER JOIN tblPATPatronageCategory DirectSale ON LOWER(DirectSale.strCategoryCode) = LTRIM(RTRIM(LOWER(FilteredItem.strDirectSale)))
+		LEFT OUTER JOIN tblICItem PhysicalItem ON LOWER(PhysicalItem.strItemNo) = LTRIM(RTRIM(LOWER(FilteredItem.strPhysicalItem)))
+		LEFT OUTER JOIN tblICTag MedicationTag ON MedicationTag.strTagNumber = FilteredItem.strMedicationTag AND MedicationTag.strType = 'Medication Tag'
+		LEFT OUTER JOIN tblICTag IngredientTag ON IngredientTag.strTagNumber = FilteredItem.strIngredientTag AND IngredientTag.strType = 'Ingredient Tag'
+		LEFT OUTER JOIN tblICRinFuelCategory Rin ON Rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(FilteredItem.strFuelCategory)))	
+		WHERE Category.intCategoryId IS NOT NULL
+) AS SOURCE
+ON LTRIM(RTRIM(TARGET.strItemNo)) = LTRIM(RTRIM(SOURCE.strItemNo))
+WHEN MATCHED AND @ysnAllowOverwrite = 1 
+THEN
+	UPDATE SET
+		guiApiUniqueId = SOURCE.guiApiUniqueId,
+		strItemNo = SOURCE.strItemNo,
+		strInventoryTracking = 
+			CASE WHEN ISNULL(SOURCE.strLotTracking, 'No') = 'No' THEN 
+				CASE WHEN SOURCE.strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END 
+			ELSE 'Lot Level' END,
+		strDescription = SOURCE.strDescription,
+		strStatus = SOURCE.strStatus,
+		intLifeTime = SOURCE.intLifeTime,
+		strShortName = SOURCE.strShortName,
+		ysnLotWeightsRequired = SOURCE.ysnLotWeightsRequired,
+		ysnUseWeighScales = SOURCE.ysnUseWeighScales,
+		strBarcodePrint = SOURCE.strBarcodePrint,
+		intManufacturerId = SOURCE.intManufacturerId		,
+		intBrandId = SOURCE.intBrandId,
+		strModelNo = SOURCE.strModelNo,
+		intCategoryId = SOURCE.intCategoryId,
+		ysnStockedItem = SOURCE.ysnStockedItem,
+		ysnDyedFuel = SOURCE.ysnDyedFuel,
+		ysnMSDSRequired = SOURCE.ysnMSDSRequired,
+		strEPANumber = SOURCE.strEPANumber,
+		ysnInboundTax = SOURCE.ysnInboundTax,
+		ysnRestrictedChemical = SOURCE.ysnRestrictedChemical,
+		ysnFuelItem = SOURCE.ysnFuelItem,
+		ysnListBundleSeparately = SOURCE.ysnListBundleSeparately,
+		dblDenaturantPercent = SOURCE.dblDenaturantPercent,
+		ysnTonnageTax = SOURCE.ysnTonnageTax,
+		ysnLoadTracking = SOURCE.ysnLoadTracking,
+		dblMixOrder = SOURCE.dblMixOrder,
+		ysnHandAddIngredient = SOURCE.ysnHandAddIngredient,
+		ysnExtendPickTicket = SOURCE.ysnExtendPickTicket,
+		ysnExportEDI = SOURCE.ysnExportEDI,
+		ysnHazardMaterial = SOURCE.ysnHazardMaterial,
+		ysnMaterialFee = SOURCE.ysnMaterialFee,
+		ysnAutoBlend = SOURCE.ysnAutoBlend,
+		dblUserGroupFee = SOURCE.dblUserGroupFee,
+		dblWeightTolerance = SOURCE.dblWeightTolerance,
+		dblOverReceiveTolerance = SOURCE.dblOverReceiveTolerance,
+		strMaintenanceCalculationMethod = SOURCE.strMaintenanceCalculationMethod,
+		strWICCode = SOURCE.strWICCode,
+		ysnLandedCost = SOURCE.ysnLandedCost,
+		strLeadTime = SOURCE.strLeadTime,
+		ysnTaxable = SOURCE.ysnTaxable,
+		strKeywords = SOURCE.strKeywords,
+		dblCaseQty = SOURCE.dblCaseQty,
+		dtmDateShip = SOURCE.dtmDateShip,
+		dblTaxExempt = SOURCE.dblTaxExempt,
+		ysnDropShip = SOURCE.ysnDropShip,
+		ysnCommisionable = SOURCE.ysnCommisionable,
+		ysnSpecialCommission = SOURCE.ysnSpecialCommission,
+		ysnTankRequired = SOURCE.ysnTankRequired,
+		ysnAvailableTM = SOURCE.ysnAvailableTM,
+		dblDefaultFull = SOURCE.dblDefaultFull,
+		dblMaintenanceRate = SOURCE.dblMaintenanceRate,
+		strNACSCategory = SOURCE.strNACSCategory,
+		ysnReceiptCommentRequired = SOURCE.ysnReceiptCommentRequired,
+		intPatronageCategoryDirectId = SOURCE.intPatronageCategoryDirectId,
+		intPatronageCategoryId = SOURCE.intPatronageCategoryId,
+		intPhysicalItem = SOURCE.intPhysicalItem,
+		strVolumeRebateGroup = SOURCE.strVolumeRebateGroup,
+		intIngredientTag = SOURCE.intIngredientTag,
+		intMedicationTag = SOURCE.intMedicationTag,
+		intRINFuelTypeId = SOURCE.intRINFuelTypeId,
+		strFuelInspectFee = SOURCE.strFuelInspectFee,
+		ysnSeparateStockForUOMs = SOURCE.ysnSeparateStockForUOMs,
+		dtmDateModified = GETUTCDATE(),
+		intModifiedByUserId = SOURCE.intCreatedByUserId
+WHEN NOT MATCHED THEN
+	INSERT
+	(
+		guiApiUniqueId,
+		strItemNo,
+		strType,
+		strInventoryTracking,
+		strDescription,
+		strStatus,
+		intLifeTime,
+		strShortName,
+		strLotTracking,
+		ysnLotWeightsRequired,
+		ysnUseWeighScales,
+		strBarcodePrint,
+		intManufacturerId,
+		intCommodityId,
+		intBrandId,
+		strModelNo,
+		intCategoryId,
+		ysnStockedItem,
+		ysnDyedFuel,
+		ysnMSDSRequired,
+		strEPANumber,
+		ysnInboundTax,
+		ysnRestrictedChemical,
+		ysnFuelItem,
+		ysnListBundleSeparately,
+		dblDenaturantPercent,
+		ysnTonnageTax,
+		ysnLoadTracking,
+		dblMixOrder,
+		ysnHandAddIngredient,
+		ysnExtendPickTicket,
+		ysnExportEDI,
+		ysnHazardMaterial,
+		ysnMaterialFee,
+		ysnAutoBlend,
+		dblUserGroupFee,
+		dblWeightTolerance,
+		dblOverReceiveTolerance,
+		strMaintenanceCalculationMethod,
+		strWICCode,
+		ysnLandedCost,
+		strLeadTime,
+		ysnTaxable,
+		strKeywords,
+		dblCaseQty,
+		dtmDateShip,
+		dblTaxExempt,
+		ysnDropShip,
+		ysnCommisionable,
+		ysnSpecialCommission,
+		ysnTankRequired,
+		ysnAvailableTM,
+		dblDefaultFull,
+		dblMaintenanceRate,
+		strNACSCategory,
+		ysnReceiptCommentRequired,
+		intPatronageCategoryDirectId,
+		intPatronageCategoryId,
+		intPhysicalItem,
+		strVolumeRebateGroup,
+		intIngredientTag,
+		intMedicationTag,
+		intRINFuelTypeId,
+		strFuelInspectFee,
+		ysnSeparateStockForUOMs,
+		dtmDateCreated,
+		intDataSourceId
+	)
+	VALUES
+	(
+		guiApiUniqueId,
+		strItemNo,
+		strType,
+		CASE WHEN ISNULL(strLotTracking, 'No') = 'No' THEN
+				CASE WHEN strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END
+			ELSE 'Lot Level' END,
+		strDescription,
+		strStatus,
+		intLifeTime,
+		strShortName,
+		strLotTracking,
+		ysnLotWeightsRequired,
+		ysnUseWeighScales,
+		strBarcodePrint,
+		intManufacturerId,
+		intCommodityId,
+		intBrandId,
+		strModelNo,
+		intCategoryId,
+		ysnStockedItem,
+		ysnDyedFuel,
+		ysnMSDSRequired,
+		strEPANumber,
+		ysnInboundTax,
+		ysnRestrictedChemical,
+		ysnFuelItem,
+		ysnListBundleSeparately,
+		dblDenaturantPercent,
+		ysnTonnageTax,
+		ysnLoadTracking,
+		dblMixOrder,
+		ysnHandAddIngredient,
+		ysnExtendPickTicket,
+		ysnExportEDI,
+		ysnHazardMaterial,
+		ysnMaterialFee,
+		ysnAutoBlend,
+		dblUserGroupFee,
+		dblWeightTolerance,
+		dblOverReceiveTolerance,
+		strMaintenanceCalculationMethod,
+		strWICCode,
+		ysnLandedCost,
+		strLeadTime,
+		ysnTaxable,
+		strKeywords,
+		dblCaseQty,
+		dtmDateShip,
+		dblTaxExempt,
+		ysnDropShip,
+		ysnCommisionable,
+		ysnSpecialCommission,
+		ysnTankRequired,
+		ysnAvailableTM,
+		dblDefaultFull,
+		dblMaintenanceRate,
+		strNACSCategory,
+		ysnReceiptCommentRequired,
+		intPatronageCategoryDirectId,
+		intPatronageCategoryId,
+		intPhysicalItem,
+		strVolumeRebateGroup,
+		intIngredientTag,
+		intMedicationTag,
+		intRINFuelTypeId,
+		strFuelInspectFee,
+		ysnSeparateStockForUOMs,
+		dtmDateCreated,
+		2
+	)
+OUTPUT INSERTED.strItemNo, $action AS strAction INTO @tblItemOutput;
+
+--Log skipped items when overwrite is not enabled.
+
+--INSERT INTO tblApiImportLogDetail 
+--(
+--	guiApiImportLogDetailId,
+--	guiApiImportLogId,
+--	strField,
+--	strValue,
+--	strLogLevel,
+--	strStatus,
+--	intRowNo,
+--	strMessage
+--)
+--SELECT
+--	guiApiImportLogDetailId = NEWID(),
+--	guiApiImportLogId = @guiLogId,
+--	strField = 'Item No',
+--	strValue = FilteredItem.strItemNo,
+--	strLogLevel = 'Warning',
+--	strStatus = 'Skipped',
+--	intRowNo = FilteredItem.intRowNumber,
+--	strMessage = 'Item No "' + FilteredItem.strItemNo + '" already exists and overwrite is not enabled.'
+--FROM @tblFilteredItem FilteredItem
+--LEFT JOIN @tblItemOutput ItemOutput
+--	ON FilteredItem.strItemNo = ItemOutput.strItemNo
+--WHERE ItemOutput.strItemNo IS NULL
