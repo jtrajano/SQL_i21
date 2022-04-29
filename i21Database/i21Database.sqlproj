@@ -411,6 +411,7 @@
     <Build Include="dbo\Tables\tblMBILPickupHeader.sql" />
     <Build Include="dbo\Tables\tblMBILDeliveryHeader.sql" />
     <Build Include="dbo\Tables\tblMBILDeliveryDetail.sql" />
+    <Build Include="dbo\Tables\tblMBILLoadHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
