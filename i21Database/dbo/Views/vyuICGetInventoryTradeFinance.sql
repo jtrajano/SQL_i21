@@ -10,6 +10,7 @@ SELECT
 	, strLimit = limit.strBorrowingFacilityLimit
 	, strSublimit = sublimit.strLimitDescription
 	, strOverrideFacilityValuation = overrideFacilityValuation.strBankValuationRule
+	, warrantStatus.strWarrantStatus
 FROM 
 	tblICInventoryTradeFinance tf
 	LEFT JOIN tblSMCompanyLocation cl
@@ -26,3 +27,5 @@ FROM
 		ON sublimit.intBorrowingFacilityLimitDetailId = tf.intSublimitTypeId
 	LEFT JOIN tblCMBankValuationRule overrideFacilityValuation
 		ON overrideFacilityValuation.intBankValuationRuleId = tf.intOverrideFacilityValuation
+	LEFT JOIN tblICWarrantStatus warrantStatus
+		ON warrantStatus.intWarrantStatus = tf.intWarrantStatus
