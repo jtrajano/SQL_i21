@@ -765,6 +765,11 @@
     <Build Include="dbo\Tables\tblMBILDeliveryHeader.sql" />
     <Build Include="dbo\Tables\tblMBILDeliveryDetail.sql" />
     <Build Include="dbo\Tables\tblMBILLoadHeader.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerGoal.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerGoalDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateCoworkerGoalDetail.sql" />
+    <Build Include="dbo\Views\vyuHDAccountDetail.sql" />
+    <Build Include="dbo\Views\vyuHDCoworkerGoal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
