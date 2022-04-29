@@ -24,8 +24,11 @@ SET @ysnForDelete = @ForDelete
 		BEGIN
 			IF(@intSalesOrderId IS NOT NULL)
 			BEGIN
-				INSERT INTO tblCRMOpportunityQuote(intOpportunityId, intSalesOrderId, intConcurrencyId)
-				VALUES(@intOpportunityId, @intSalesOrderId, 1)
+				IF NOT EXISTS(SELECT * FROM tblCRMOpportunityQuote WHERE intOpportunityId = @intOpportunityId AND intSalesOrderId = @intSalesOrderId)
+				BEGIN
+					INSERT INTO tblCRMOpportunityQuote(intOpportunityId, intSalesOrderId, intConcurrencyId)
+					VALUES(@intOpportunityId, @intSalesOrderId, 1)
+				END
 			END
 		END
 	END
