@@ -5,6 +5,7 @@ SELECT C.intManufacturingCellId
 	,W.intWorkOrderId
 	,W.strWorkOrderNo
 	,W.strReferenceNo
+	,W.dblBatchSize
 	,W.dblQuantity
 	,W.dtmExpectedDate
 	,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
