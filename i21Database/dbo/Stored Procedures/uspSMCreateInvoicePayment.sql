@@ -315,6 +315,19 @@ BEGIN
 		,@fromValue			= ''			
 		,@toValue			= ''
 
+	-- Start: New way of audit logging
+	BEGIN TRY
+		DECLARE @auditLogsParam SingleAuditLogParam
+
+		INSERT INTO @auditLogsParam ([Id], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+		SELECT 1, 'Created', '', NULL, NULL, NULL, NULL, NULL, NULL
+
+		EXEC uspSMSingleAuditLog 'AccountsReceivable.view.ReceivePaymentsDetail', @intPaymentIdNew, @intUserId, @auditLogsParam
+	END TRY
+	BEGIN CATCH
+	END CATCH
+	-- End: New way of audit logging
+
 	GOTO Exit_Routine
 END
 --================================================================

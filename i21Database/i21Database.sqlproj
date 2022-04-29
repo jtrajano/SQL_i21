@@ -481,6 +481,11 @@
     <Build Include="dbo\Stored Procedures\uspRKCreateOtcForwardFromCT.sql" />
     <Build Include="dbo\Views\vyuRKGetOtcForwards.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadForwardCurrency.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSite.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSite.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceCardFuelingSite.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSiteType.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSiteType.sql" />
     <Build Include="dbo\Stored Procedures\uspUBSCreateDriverEntity.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEMEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntity.sql" />
@@ -747,6 +752,19 @@
     <Build Include="dbo\Views\vyuICSearchItemStockDetail.sql" />
     <Build Include="dbo\Views\vyuICSearchItemStockDetailOnHand.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptTradeFinance.sql" />
+    <Build Include="dbo\Views\vyuTRCustomerFreightList.sql" />
+    <Build Include="dbo\Views\vyuMBILLoadSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILLoadSchedule.sql" />
+    <Build Include="dbo\Tables\tblMBILLoadSchedule.sql" />
+    <Build Include="dbo\Views\vyuMBILDeliveryDetail.sql" />
+    <Build Include="dbo\Views\vyuMBILDeliveryHeader.sql" />
+    <Build Include="dbo\Views\vyuMBILPickupDetail.sql" />
+    <Build Include="dbo\Views\vyuMBILPickupHeader.sql" />
+    <Build Include="dbo\Tables\tblMBILPickupDetail.sql" />
+    <Build Include="dbo\Tables\tblMBILPickupHeader.sql" />
+    <Build Include="dbo\Tables\tblMBILDeliveryHeader.sql" />
+    <Build Include="dbo\Tables\tblMBILDeliveryDetail.sql" />
+    <Build Include="dbo\Tables\tblMBILLoadHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10510,6 +10528,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRebuildNonOpenContracts.sql" />
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
     <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
