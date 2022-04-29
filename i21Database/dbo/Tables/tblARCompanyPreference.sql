@@ -52,6 +52,8 @@
 	[strCustomerAgingBy]					NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Invoice Due Date',
 	[ysnOverrideTaxAccountCompany]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideTaxAccountCompany] DEFAULT((1)),
 	[ysnOverrideTaxAccountLocation]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideTaxAccountLocation] DEFAULT((1)),
+	[intFreightRevenueAccount]				INT NULL, 
+    [intFreightExpenseAccount]				INT NULL,
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -61,5 +63,7 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intConversionAccountId] FOREIGN KEY ([intConversionAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMTerm_intServiceChargeTermId] FOREIGN KEY ([intServiceChargeTermId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueToAccountId] FOREIGN KEY ([intDueToAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueFromAccountId] FOREIGN KEY ([intDueFromAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDueFromAccountId] FOREIGN KEY ([intDueFromAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFreightRevenueAccount] FOREIGN KEY ([intFreightRevenueAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFreightExpenseAccount] FOREIGN KEY ([intFreightExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
