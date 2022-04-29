@@ -519,6 +519,7 @@ USING
 		LEFT OUTER JOIN tblICTag MedicationTag ON MedicationTag.strTagNumber = FilteredItem.strMedicationTag AND MedicationTag.strType = 'Medication Tag'
 		LEFT OUTER JOIN tblICTag IngredientTag ON IngredientTag.strTagNumber = FilteredItem.strIngredientTag AND IngredientTag.strType = 'Ingredient Tag'
 		LEFT OUTER JOIN tblICRinFuelCategory Rin ON Rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(FilteredItem.strFuelCategory)))	
+		WHERE Category.intCategoryId IS NOT NULL
 ) AS SOURCE
 ON LTRIM(RTRIM(TARGET.strItemNo)) = LTRIM(RTRIM(SOURCE.strItemNo))
 WHEN MATCHED AND @ysnAllowOverwrite = 1 
