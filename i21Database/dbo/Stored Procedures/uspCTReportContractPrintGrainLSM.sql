@@ -220,6 +220,7 @@ BEGIN TRY
 		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
 		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId 
 	
+	
 	--CONTRACT CREATOR SIGNATORIES
 	SELECT @CreatorSign = sms.blbDetail
 	FROM
