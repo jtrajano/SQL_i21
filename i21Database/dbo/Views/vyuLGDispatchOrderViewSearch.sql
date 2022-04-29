@@ -14,6 +14,15 @@ SELECT
 	,DO.intEntityShipViaId
 	,DO.intEntityShipViaTruckId
 	,DO.intEntityShipViaTrailerId
+	,DO.intSourceType
+	,strSourceType = CASE (DO.intSourceType)
+		WHEN 1 THEN 'LG Loads - Outbound'
+		WHEN 2 THEN 'In Progress'
+		WHEN 3 THEN 'LG Loads - Inbound'
+		WHEN 4 THEN 'TM Sites'
+		WHEN 5 THEN 'Entities'
+		WHEN 6 THEN 'Sales/Transfer Orders'
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,strShipVia = SV.strName
 	,strTruckNumber = SVT.strTruckNumber
 	,strTrailerNumber = SVTL.strTrailerNumber
