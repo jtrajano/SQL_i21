@@ -14,7 +14,7 @@
 	[intConcurrencyId] [int]	NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTimeEntryPeriodDetail_intTimeEntryPeriodDetailId] PRIMARY KEY CLUSTERED ([intTimeEntryPeriodDetailId] ASC),
 	CONSTRAINT [FK_tblHDTimeEntryPeriodDetail_tblHDTimeEntryPeriod_intTimeEntryPeriodId] FOREIGN KEY ([intTimeEntryPeriodId]) REFERENCES [dbo].[tblHDTimeEntryPeriod] ([intTimeEntryPeriodId]) ON DELETE CASCADE,
-    CONSTRAINT [UQ_tblHDTimeEntryPeriodDetail_intBillingPeriod] UNIQUE ([intBillingPeriod])
+    CONSTRAINT [UQ_tblHDTimeEntryPeriodDetail_intTimeEntryPeriodId_intBillingPeriod] UNIQUE ([intTimeEntryPeriodId],[intBillingPeriod])
 )
 
 GO

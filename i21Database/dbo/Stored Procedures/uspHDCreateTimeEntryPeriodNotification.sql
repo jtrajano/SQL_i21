@@ -51,13 +51,9 @@ DECLARE @EntityId int
 DECLARE EmployeeLoop CURSOR 
   LOCAL STATIC READ_ONLY FORWARD_ONLY
 FOR 
-SELECT DISTINCT a.intEntityId 
-FROM 	tblEMEntity a
-	INNER JOIN tblEMEntityType b
-ON b.intEntityId = a.intEntityId and b.strType = 'Employee'
-	INNER JOIN tblPREmployee c
-ON c.[intEntityId] = a.intEntityId
-WHERE c.ysnActive = 1 
+
+SELECT DISTINCT intEntityId 
+FROM 	vyuHDAgentDetail
 
 OPEN EmployeeLoop
 FETCH NEXT FROM EmployeeLoop INTO @EntityId
