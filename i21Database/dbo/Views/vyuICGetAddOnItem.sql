@@ -11,6 +11,8 @@ SELECT	ItemAddOn.intItemAddOnId
 		,ItemAddOn.intItemUOMId
 		,UOM.strUnitMeasure
 		,ItemAddOn.ysnAutoAdd
+		,ItemAddOn.dtmEffectivityDateFrom
+		,ItemAddOn.dtmEffectivityDateTo
 		,AddOnComponent.strType 
 		,ItemAddOn.intConcurrencyId
 FROM	tblICItemAddOn ItemAddOn
