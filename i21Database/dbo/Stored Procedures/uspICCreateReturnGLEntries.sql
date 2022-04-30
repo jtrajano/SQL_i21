@@ -1704,7 +1704,7 @@ BEGIN
 		,[intItemUOMId] = ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId) 			
 		,[dblQuantity] = 
 			CASE 
-				WHEN ri.intWeightUOMId IS NOT NULL THEN -ri.dblNet 
+				WHEN ri.intWeightUOMId IS NOT NULL AND i.intComputeItemTotalOption = 0 THEN -ri.dblNet 
 				ELSE -ri.dblOpenReceive
 			END 
 		,[dblAmount] = -ri.dblLineTotal
