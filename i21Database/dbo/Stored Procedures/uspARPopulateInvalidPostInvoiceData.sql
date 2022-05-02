@@ -2011,7 +2011,7 @@ BEGIN
 		AND GLASM.intAccountId = I.[intSalesAccountId]
 	) GLSEGMENT
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
-	AND I.[ysnAllowIntraEntries] = 1
+	AND I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
@@ -2049,7 +2049,7 @@ BEGIN
 		AND GLASM.intAccountId = I.[intAccountId]
 	) GLSEGMENT
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
-	AND I.[ysnAllowIntraEntries] = 1
+	AND I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData

@@ -48,6 +48,7 @@ DECLARE	@DiscountAccountId          INT
        ,@Param2                     NVARCHAR(MAX)
 	   ,@Precision					INT = 2
        ,@AllowIntraEntries          BIT
+       ,@SkipIntraEntriesValiation  BIT
 
 SET @ZeroDecimal = 0.000000
 SET @OneDecimal = 1.000000
@@ -64,6 +65,10 @@ SELECT TOP 1
                                     THEN 1 
                                     ELSE 0 
                                   END
+    ,@SkipIntraEntriesValiation = CASE WHEN (ISNULL(ysnAllowIntraCompanyEntries, 0) = 0 AND ISNULL(ysnAllowIntraLocationEntries, 0) = 0 AND ISNULL(ysnAllowSingleLocationEntries, 0) = 0)
+									THEN 1
+									ELSE 0
+								  END
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId 
 
@@ -236,6 +241,7 @@ INSERT ##ARPostInvoiceHeader WITH (TABLOCK)
     ,[intInterCompanyVendorId]
 	,[strBOLNumber]
     ,[ysnAllowIntraEntries]
+    ,[ysnSkipIntraEntriesValiation]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -321,6 +327,7 @@ SELECT
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 	,[strBOLNumber]						= ARI.[strBOLNumber]
     ,[ysnAllowIntraEntries]             = @AllowIntraEntries
+    ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -490,6 +497,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[strDescription]
 	,[strBOLNumber]
     ,[ysnAllowIntraEntries]
+    ,[ysnSkipIntraEntriesValiation]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -641,6 +649,7 @@ SELECT
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
 	,[strBOLNumber]						= ARI.strBOLNumber
     ,[ysnAllowIntraEntries]             = @AllowIntraEntries
+    ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -812,6 +821,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[strDescription]
 	,[strBOLNumber]
     ,[ysnAllowIntraEntries]
+    ,[ysnSkipIntraEntriesValiation]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1023,6 +1033,7 @@ SELECT
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
     ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
+    ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1182,6 +1193,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[strDescription]
 	,[strBOLNumber]
     ,[ysnAllowIntraEntries]
+    ,[ysnSkipIntraEntriesValiation]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1329,6 +1341,7 @@ SELECT
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
     ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
+    ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
 FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]

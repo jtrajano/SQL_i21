@@ -770,6 +770,8 @@
     <Build Include="dbo\Stored Procedures\uspHDCreateCoworkerGoalDetail.sql" />
     <Build Include="dbo\Views\vyuHDAccountDetail.sql" />
     <Build Include="dbo\Views\vyuHDCoworkerGoal.sql" />
+    <Build Include="dbo\Tables\tblCMBankImportLog.sql" />
+    <Build Include="dbo\Tables\tblCMBankImportLogDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
