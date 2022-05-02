@@ -1,5 +1,4 @@
-﻿
-Create PROCEDURE [dbo].[uspCTProcessTFLogs]
+﻿Create PROCEDURE [dbo].[uspCTProcessTFLogs]
 	@strXML    NVARCHAR(MAX),
 	@intUserId INT
 AS    
@@ -20,7 +19,8 @@ BEGIN
 			,@TFTransNo nvarchar(50)
 			,@intActiveContractDetailId int = 0
 			,@strAction nvarchar(20)
-			,@intTradeFinanceId int = 0;
+			,@intTradeFinanceId int = 0
+			,@intContractDetailId INT;
 			;
 
 		DECLARE @TFXML TABLE(
@@ -47,11 +47,13 @@ BEGIN
 			,ysnStatusChange bit
 		)
 
+
 		select top 1 @intActiveContractDetailId = min(intContractDetailId) from @TFXML where intContractDetailId > @intActiveContractDetailId;
 		while (@intActiveContractDetailId is not null)
 		begin
-
-			select @TFTransNo = max(strTradeFinanceTransaction) from tblTRFTradeFinanceLog where intContractDetailId = @intActiveContractDetailId ;
+			
+			select @TFTransNo = strFinanceTradeNo from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId ;
+		
 			if (@TFTransNo is null)
 			begin
 				EXEC uspSMGetStartingNumber 166, @TFTransNo OUTPUT;
@@ -209,6 +211,8 @@ BEGIN
 			
 		;
 
+	
+
 		Declare @strCurrentStatus  nvarchar(20)
 		SELECT @strCurrentStatus = strApprovalStatus 
 		FROM tblTRFTradeFinance 
@@ -246,6 +250,8 @@ BEGIN
 					,dtmCreatedDate	
 					,intConcurrencyId
 			FROM @TRFTradeFinance where intId = @Counter
+
+		
 			
 			If @strAction = 'Created'
 			BEGIN
@@ -253,8 +259,12 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-			
+				
+				
+
 				EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinanceFinal, @intUserId = @intUserId, @strAction = @strAction
+
+				SELECT @intContractDetailId  = intTransactionDetailId FROM @TRFTradeFinanceFinal
 
 				UPDATE tblCTContractDetail
 				SET intBankAccountId = 0
@@ -274,7 +284,13 @@ BEGIN
 					,dtmDateSubmitted = '1/1/1900'
 					,intApprovalStatusId = 0
 					,dtmDateApproved = '1/1/1900'
-				WHERE intApprovalStatusId = 3
+					,strFinanceTradeNo = CASE WHEN intApprovalStatusId = 4 then null else strFinanceTradeNo END
+				WHERE intApprovalStatusId in (3,4) and intContractDetailId = @intContractDetailId
+
+
+				
+			
+
 			END
 
 
@@ -292,3 +308,4 @@ BEGIN
 
 
 END;
+
