@@ -31,6 +31,8 @@ SELECT DISTINCT
                                         END
                                 END AS BIT
                             )
+    ,strItemUnitMeasure = UM.strUnitMeasure
+    ,strItemSymbol = UM.strSymbol
 FROM tblGRCustomerStorage CS
 JOIN tblICItem Item 
     ON Item.intItemId = CS.intItemId
@@ -41,4 +43,6 @@ JOIN tblICCommodity COM
 	ON COM.intCommodityId = Item.intCommodityId
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+JOIN tblICUnitMeasure UM
+	ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 WHERE CS.dblOpenBalance > 0 
