@@ -1441,23 +1441,34 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Loan
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'CashManagement.view.BankLoan?showSearch=true' WHERE strMenuName = 'Bank Loan' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Payments' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+DELETE FROM  tblSMMasterMenu WHERE strMenuName = 'Process Payments' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Payments AP' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Process Payments', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process Payments', N'Activity', N'Screen', N'AccountsPayable.controller.PrintChecks', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
+	VALUES (N'Process Payments AP', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process Payments AP', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=Positive Pay&strModule=AP&intTransactionType=16', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.controller.PrintChecks', intSort = 9 WHERE strMenuName = 'Process Payments' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=Positive Pay&strModule=AP&intTransactionType=16', intSort = 9 WHERE strMenuName = 'Process Payments AP' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Payments AR' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Process Payments AR', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process Payments AR', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', intSort = 10 WHERE strMenuName = 'Process Payments AR' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+
+
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true' WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true' WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 ELSE
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Borrowing Facility', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Borrowing Facility', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 11, 1)
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'CashManagement.view.PostCommissions' WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'CashManagement.view.PostCommissions' WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 ELSE
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Post Commissions', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Post Commissions', N'Activity', N'Screen', N'CashManagement.view.PostCommissions', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Post Commissions', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Post Commissions', N'Activity', N'Screen', N'CashManagement.view.PostCommissions', N'small-menu-activity', 0, 0, 0, 1, 12, 1)
 
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Banks' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementMaintenanceParentMenuId)
