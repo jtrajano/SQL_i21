@@ -772,12 +772,12 @@
     <Build Include="dbo\Views\vyuHDCoworkerGoal.sql" />
     <Build Include="dbo\Tables\tblCMBankImportLog.sql" />
     <Build Include="dbo\Tables\tblCMBankImportLogDetail.sql" />
-    <Build Include="Scripts\Post-Deployment\ST\42_FileFieldMapping_Commander_TankMonitor.sql" />
-    <Build Include="Scripts\Post-Deployment\ST\43_FileFieldMapping_Commander_FuelTotals.sql" />
-    <Build Include="Scripts\Post-Deployment\ST\44_FileFieldMapping_Commander_AppInfo.sql" />
-    <Build Include="Scripts\Post-Deployment\ST\45_FileFieldMapping_Commander_PopCfg.sql" />
-    <Build Include="Scripts\Post-Deployment\ST\46_FileFieldMapping_Commander_Tank.sql" />
-    <Build Include="Scripts\Post-Deployment\ST\47_FileFieldMapping_Commander_Loyalty.sql" />
+    <None Include="Scripts\Post-Deployment\ST\42_FileFieldMapping_Commander_TankMonitor.sql" />
+    <None Include="Scripts\Post-Deployment\ST\43_FileFieldMapping_Commander_FuelTotals.sql" />
+    <None Include="Scripts\Post-Deployment\ST\44_FileFieldMapping_Commander_AppInfo.sql" />
+    <None Include="Scripts\Post-Deployment\ST\45_FileFieldMapping_Commander_PopCfg.sql" />
+    <None Include="Scripts\Post-Deployment\ST\46_FileFieldMapping_Commander_Tank.sql" />
+    <None Include="Scripts\Post-Deployment\ST\47_FileFieldMapping_Commander_Loyalty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
