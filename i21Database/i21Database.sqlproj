@@ -9188,6 +9188,7 @@
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateContractInSettlement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -135,6 +135,7 @@ BEGIN TRY
 	DECLARE @dtmCalculateChargeAndPremiumOn DATETIME
 	DECLARE @SettleStorageChargeAndPremium SettleStorageChargeAndPremium
 
+	DECLARE @intPricingTypeHeader INT
 	DECLARE @SettleStorage AS TABLE 
 	(
 		 intSettleStorageKey INT IDENTITY(1, 1)
@@ -166,6 +167,7 @@ BEGIN TRY
 		,strPricingType NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,strPricingTypeHeader NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intFuturesMonthId int null
+		,intPricingTypeHeader INT
 	)
 	
 	DECLARE @tblDepletion AS TABLE 
@@ -180,6 +182,7 @@ BEGIN TRY
 		,dblUnits DECIMAL(24, 10)
 		,intSourceItemUOMId INT
 		,dblCost DECIMAL(24, 10)
+		,intPricingTypeHeader INT
 	)
 	
 	DECLARE @SettleVoucherCreate AS SettleVoucherCreate
@@ -303,10 +306,13 @@ BEGIN TRY
 
 			IF ROUND((@dblSettlementTotal + @dblTransferTotal),4) > ROUND(@dblHistoryTotal,4) OR (@dblSettlementTotal - @dblHistoryTotal) > 0.1
 			BEGIN
+				--DECLARE @msg AS NVARCHAR(MAX)
+				--SET @msg = 'The record has changed. Please refresh screen. @dblSettlementTotal = ' + CAST(@dblSettlementTotal AS NVARCHAR) + ' @dblTransferTotal = ' + CAST(@dblSettlementTotal AS NVARCHAR) + ' @dblHistoryTotal = ' + CAST(@dblHistoryTotal AS NVARCHAR)
+				--RAISERROR(@msg,16,1,1)
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
 			END
-			DELETE FROM @CustomerStorageIds WHERE intId = @intId
+			DELETE FROM @CustomerStorageIds WHERE intId = @intId			
 		END
 	END
 
@@ -504,6 +510,7 @@ BEGIN TRY
 				,strPricingType
 				,strPricingTypeHeader
 				,intFuturesMonthId
+				,intPricingTypeHeader
 			)
 			SELECT 
 				 intSettleContractId 	= SSC.intSettleContractId 
@@ -516,8 +523,9 @@ BEGIN TRY
 				,intContractUOMId	 	= CD.intContractUOMId
 				,dblCostUnitQty		 	= CD.dblCostUnitQty
 				,strPricingType			= CD.strPricingType
-				,strPricingTypeHeader			= CD.strPricingTypeHeader
+				,strPricingTypeHeader	= CD.strPricingTypeHeader
 				,intFuturesMonthId		= CD.intGetContractDetailFutureMonthId
+				,intPricingTypeHeader	= CD.intPricingTypeHeader
 			FROM tblGRSettleContract SSC
 			JOIN vyuGRGetContracts CD 
 				ON CD.intContractDetailId = SSC.intContractDetailId
@@ -1042,16 +1050,18 @@ BEGIN TRY
 						,intCustomerStorageId
 						,dblUnits
 						,intSourceItemUOMId
+						,intPricingTypeHeader
 					)
 					SELECT 
-						 intSettleStorageTicketId = @intSettleStorageTicketId
-						,intPricingTypeId		  = 5
-						,strDepletionType		  = 'DP Contract'
-						,intContractHeaderId      = @DPContractHeaderId
-						,intContractDetailId      = @ContractDetailId
-						,intCustomerStorageId     = @intCustomerStorageId
-						,dblUnits                 = - @dblStorageUnits
-						,intSourceItemUOMId       = @CommodityStockUomId
+						 intSettleStorageTicketId	= @intSettleStorageTicketId
+						,intPricingTypeId			= 5
+						,strDepletionType			= 'DP Contract'
+						,intContractHeaderId		= @DPContractHeaderId
+						,intContractDetailId		= @ContractDetailId
+						,intCustomerStorageId		= @intCustomerStorageId
+						,dblUnits					= - @dblStorageUnits
+						,intSourceItemUOMId			= @CommodityStockUomId
+						,intPricingTypeHeader		= 5
 				END
 
 				IF EXISTS (
@@ -1082,6 +1092,7 @@ BEGIN TRY
 							,@dblContractBasis		= dblBasis
 							,@intContractUOMId		= intContractUOMId
 							,@dblCostUnitQty		= dblCostUnitQty
+							,@intPricingTypeHeader	= intPricingTypeHeader
 						FROM @SettleContract
 						WHERE intSettleContractKey 	= @SettleContractKey
 
@@ -1125,15 +1136,18 @@ BEGIN TRY
 								,intContractDetailId
 								,intCustomerStorageId
 								,dblUnits
+								,intPricingTypeHeader
 							 )
 							SELECT 
-								 intSettleStorageTicketId = @intSettleStorageTicketId
-								,intPricingTypeId		  = @intPricingTypeId
-								,strDepletionType         = 'Contract'
-								,intContractHeaderId      = 0 
-								,intContractDetailId      = @intContractDetailId
-								,intCustomerStorageId     = @intCustomerStorageId
-								,dblUnits                 = @dblUnitsForContract
+								 intSettleStorageTicketId	= @intSettleStorageTicketId
+								,intPricingTypeId			= @intPricingTypeId
+								,strDepletionType			= 'Contract'
+								,intContractHeaderId		= 0 
+								,intContractDetailId		= @intContractDetailId
+								,intCustomerStorageId		= @intCustomerStorageId
+								,dblUnits					= @dblUnitsForContract
+								,intPricingTypeHeader		= @intPricingTypeHeader
+
 
 							INSERT INTO @SettleVoucherCreate 
 							(
@@ -1196,15 +1210,17 @@ BEGIN TRY
 								,intContractDetailId
 								,intCustomerStorageId
 								,dblUnits
+								,intPricingTypeHeader
 							)
 							SELECT 
-								 intSettleStorageTicketId = @intSettleStorageTicketId
-								,intPricingTypeId		  = 1 
-								,strDepletionType         = 'Contract' 
-								,intContractHeaderId      = 0
-								,intContractDetailId      = @intContractDetailId 
-								,intCustomerStorageId     = @intCustomerStorageId 
-								,dblUnits                 = @dblUnitsForContract
+								 intSettleStorageTicketId	= @intSettleStorageTicketId
+								,intPricingTypeId			= 1 
+								,strDepletionType			= 'Contract' 
+								,intContractHeaderId		= 0
+								,intContractDetailId		= @intContractDetailId 
+								,intCustomerStorageId		= @intCustomerStorageId 
+								,dblUnits					= @dblUnitsForContract
+								,intPricingTypeHeader		= @intPricingTypeHeader
 
 							INSERT INTO @SettleVoucherCreate 
 							(
@@ -3442,7 +3458,6 @@ BEGIN TRY
 			---6.DP Contract Depletion, Purchase Contract Depletion,Storage Ticket Depletion
 			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
-
 				SELECT @intDepletionKey = MIN(intDepletionKey)
 				FROM @tblDepletion
 
@@ -3455,6 +3470,7 @@ BEGIN TRY
 					SET @dblUnits = NULL
 					SET @CommodityStockUomId = NULL
 					SET @dblCost = NULL
+					SET @intPricingTypeHeader = NULL
 
 					SELECT 
 						 @intSettleStorageTicketId 	= intSettleStorageTicketId
@@ -3464,22 +3480,31 @@ BEGIN TRY
 						,@dblUnits 					= dblUnits
 						,@CommodityStockUomId 		= intSourceItemUOMId
 						,@dblCost 					= dblCost
+						,@intPricingTypeHeader		= intPricingTypeHeader
 					FROM @tblDepletion
-					WHERE intDepletionKey = @intDepletionKey					
-
+					WHERE intDepletionKey = @intDepletionKey
 					
-					IF @intPricingTypeId = 5
-					BEGIN
+					DECLARE @dblCurrentContractBalance DECIMAL(38,20)
+					DECLARE @strUnitMeasure NVARCHAR(50)
+					DECLARE @dblNewContractBalance DECIMAL(38,20)
+					DECLARE @dblDiff DECIMAL(38,20)
+					
+					SET @dblCurrentContractBalance = NULL
+					SET @strUnitMeasure = NULL
+					SET @dblNewContractBalance = NULL
 
-						declare @dblCurrentContractBalance DECIMAL(24, 10)
-						select @dblCurrentContractBalance = dblBalance 
-							from tblCTContractDetail where intContractDetailId = @intContractDetailId						
-							
-						if( (@dblCurrentContractBalance) + (@dblUnits)  < 0.01)
-						begin
-							set @dblUnits = @dblCurrentContractBalance * -1
-						end
-						
+					SELECT @dblCurrentContractBalance = dblBalance 
+					FROM tblCTContractDetail 
+					WHERE intContractDetailId = @intContractDetailId
+
+					SET @dblDiff = @dblUnits - @dblCurrentContractBalance
+					
+					IF @intPricingTypeId = 5 --DP
+					BEGIN											
+						IF( (@dblCurrentContractBalance) + (@dblUnits)  < 0.01)
+						BEGIN
+							SET @dblUnits = @dblCurrentContractBalance * -1
+						END						
 
 						IF (SELECT dblDetailQuantity FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId) > 0
 						EXEC uspCTUpdateSequenceQuantityUsingUOM 
@@ -3492,12 +3517,41 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
+						--add the microbalance in the contract
+						IF @dblDiff > 0 AND @intPricingTypeHeader <> 2--DO NOT HANDLE BASIS CONTRACTS FOR NOW 
+						BEGIN
+							EXEC uspGRUpdateContractInSettlement @intContractDetailId,2, @dtmClientPostDate, @intCreatedUserId,@dblDiff
+						END
+
 						EXEC uspCTUpdateSequenceBalance 
 							 @intContractDetailId = @intContractDetailId
 							,@dblQuantityToUpdate = @dblUnits
 							,@intUserId = @intCreatedUserId
 							,@intExternalId = @intSettleStorageTicketId
 							,@strScreenName = 'Settle Storage'
+
+						--short-close the contract if there is a microbalance left in the sequence
+						--check first if the auto-short close config is enabled
+						IF (SELECT ysnAutoShortCloseContractInSettlement FROM tblGRCompanyPreference) = 1 
+							AND @intPricingTypeHeader <> 2 --DO NOT HANDLE BASIS CONTRACTS FOR NOW 
+						BEGIN
+							SET @strUnitMeasure = NULL
+							SET @dblNewContractBalance = NULL
+
+							SELECT @dblNewContractBalance = dblBalance
+								,@strUnitMeasure = UM.strUnitMeasure
+							FROM tblCTContractDetail CD
+							INNER JOIN tblICUnitMeasure UM
+								ON UM.intUnitMeasureId = CD.intUnitMeasureId
+							WHERE intContractDetailId = @intContractDetailId
+
+							--SHORT-CLOSE CONTRACT WITH MICROBALANCE LEFT IN THE BALANCE
+							IF ((@dblNewContractBalance <= 0.000001 AND (LOWER(@strUnitMeasure) = 'ton' OR LOWER(@strUnitMeasure) = 'tonne'))
+								OR (@dblNewContractBalance <= 0.0001 AND (LOWER(@strUnitMeasure) = 'bushel'))) AND ISNULL(@dblDiff,0) < 0
+							BEGIN
+								EXEC uspGRUpdateContractInSettlement @intContractDetailId,1, @dtmClientPostDate, @intCreatedUserId,@dblDiff
+							END
+						END
 					END
 
 					SELECT @intDepletionKey = MIN(intDepletionKey)
