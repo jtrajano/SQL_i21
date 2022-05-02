@@ -40,7 +40,14 @@ BEGIN
 					, @intExternalId = @intSiteId
 					, @strScreenName = @strScreenName
 			END
-
+			ELSE
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
+					, @dblQuantityToUpdate = @dblQuantity
+					, @intUserId = @intUserId
+					, @intExternalId = @intSiteId
+					, @strScreenName = @strScreenName
+			END
 		END
 		ELSE
 		BEGIN
@@ -51,7 +58,7 @@ BEGIN
 	BEGIN
 	 	-- IF NEGATIVE QTY THEN REMOVE FROM SCHEDULED QTY
 		SELECT @intContractDetailId = intContractId
-			, @dblQuantity = (dblQuantity - dblOverageQty) * -1
+			, @dblQuantity = (dblQuantity - ISNULL(dblOverageQty, 0)) * -1
 			, @intUserId = intUserID
 		FROM tblTMDispatch WHERE intSiteID = @intSiteId
 
