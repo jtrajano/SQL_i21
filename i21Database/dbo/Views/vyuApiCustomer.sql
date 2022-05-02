@@ -57,6 +57,7 @@ SELECT [EntityId]			= e.intEntityId
 	 , [DateLastUpdated]	= COALESCE(c.dtmDateModified, c.dtmDateCreated)
      , [SalespersonId]      = e.intSalespersonId
      , [ContactId]          = e.intEntityContactId
+	 , [WarehouseId]		= e.intWarehouseId
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId
@@ -83,4 +84,3 @@ OUTER APPLY (
 	INNER JOIN tblEMContactDetailType bb ON aa.intContactDetailTypeId = bb.intContactDetailTypeId AND strField = 'Fax'
 	WHERE aa.intEntityId = d.intEntityContactId
 ) FAX
-WHERE e.intWarehouseId IN (-99,-99,1,2,3,4,5,6,7,8,9,10,11,12,13,36,41,42,45,46,51,52,53,56,57,58,59,60,61,63,66)
