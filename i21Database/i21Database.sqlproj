@@ -9747,10 +9747,6 @@
     <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
-    <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
-    <Build Include="dbo\Views\vyuApiSalesperson.sql" />
-    <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
-    <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
