@@ -10267,7 +10267,7 @@
     <Build Include="dbo\Views\vyuApiTransportTerminals.sql" />
     <Build Include="dbo\Views\vyuApiApproval.sql" />
     <Build Include="dbo\Views\vyuApiActivity.sql" />
-    <Build Include="dbo\Views\vyuApiCompanyLocations.sql" />
+    <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuApiActivityAttendee.sql" />
     <Build Include="dbo\Views\vyuApiActivityHoursWorked.sql" />
     <Build Include="dbo\Views\vyuApiCrmActivity.sql" />
