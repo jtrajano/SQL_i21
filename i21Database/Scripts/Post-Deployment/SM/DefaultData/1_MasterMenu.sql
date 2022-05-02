@@ -1443,18 +1443,18 @@ ELSE
 
 DELETE FROM  tblSMMasterMenu WHERE strMenuName = 'Process Payments' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Payments AP' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process AP Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Process Payments AP', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process Payments AP', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=Positive Pay&strModule=AP&intTransactionType=16', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
+	VALUES (N'Process AP Payments ', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process AP Payments ', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=Positive Pay&strModule=AP&intTransactionType=16', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=Positive Pay&strModule=AP&intTransactionType=16', intSort = 9 WHERE strMenuName = 'Process Payments AP' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=Positive Pay&strModule=AP&intTransactionType=16', intSort = 9 WHERE strMenuName = 'Process AP Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Payments AR' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process AR Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Process Payments AR', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process Payments AR', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Process AR Payments ', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process AR Payments ', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', intSort = 10 WHERE strMenuName = 'Process Payments AR' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', intSort = 10 WHERE strMenuName = 'Process AR Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
 
 
