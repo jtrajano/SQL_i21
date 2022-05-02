@@ -181,6 +181,10 @@ BEGIN TRY
 			,[ysnStage]
 			,[intSubLocationId]
 			,[intStorageLocationId]
+			/*Payment Info*/
+			,[intPayFromBankAccountId]
+			,[strFinancingSourcedFrom]
+			,[strFinancingTransactionNumber]
 			/* Trade Finance */
 			,[strFinanceTradeNo]
 			,[intBankId]
@@ -255,6 +259,10 @@ BEGIN TRY
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 			,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
+			/*Payment Info*/
+			,[intPayFromBankAccountId] = BA.intBankAccountId
+			,[strFinancingSourcedFrom] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN 'Logistics' ELSE '' END
+			,[strFinancingTransactionNumber] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN L.strLoadNumber ELSE '' END
 			/* Trade Finance */
 			,[strFinanceTradeNo] = L.strTradeFinanceNo
 			,[intBankId] = BA.intBankId
@@ -410,6 +418,10 @@ BEGIN TRY
 				,[ysnStage]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				/*Payment Info*/
+				,[intPayFromBankAccountId]
+				,[strFinancingSourcedFrom]
+				,[strFinancingTransactionNumber]
 				/* Trade Finance */
 				,[strFinanceTradeNo]
 				,[intBankId]
@@ -468,6 +480,10 @@ BEGIN TRY
 				,[ysnStage]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				/*Payment Info*/
+				,[intPayFromBankAccountId]
+				,[strFinancingSourcedFrom]
+				,[strFinancingTransactionNumber]
 				/* Trade Finance */
 				,[strFinanceTradeNo]
 				,[intBankId]
