@@ -42,7 +42,7 @@ SELECT
 	strReceiveUOMType = IssueUOM.strUnitType,
 	strIssueUOMType = IssueUOM.strUnitType,
 	strReceiveUOM = ReceiveUOM.strUnitMeasure,
-	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, ''),
+	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, ReceiveUOM.strUpcCode, ''),
 	strReceieveLongUPC = COALESCE(ReceiveUOM.strLongUPCCode, ''),
 	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
 	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
@@ -54,7 +54,7 @@ SELECT
 	ysnReceiveUOMAllowSale = ReceiveUOM.ysnAllowSale, 
 	
 	strIssueUOM = IssueUOM.strUnitMeasure,
-	strIssueUPC = COALESCE(IssueUOM.strLongUPCCode, ''),
+	strIssueUPC = COALESCE(IssueUOM.strLongUPCCode, IssueUOM.strUpcCode, ''),
 	strIssueLongUPC = COALESCE(IssueUOM.strLongUPCCode, ''),
 	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(IssueUOM.dblUnitQty, 0),
 	dblIssueMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(IssueUOM.dblUnitQty, 0),
@@ -186,11 +186,11 @@ FROM
 			tblICItemUOM defaultReceiveItemUOM INNER JOIN tblICUnitMeasure defaultReceiveUOM 
 				ON defaultReceiveItemUOM.intUnitMeasureId = defaultReceiveUOM.intUnitMeasureId
 			LEFT JOIN tblICItemLocation locationReceiveUOM 
-				ON locationReceiveUOM.intItemId = Item.intItemId
-				AND locationReceiveUOM.intItemLocationId = ItemLocation.intItemLocationId
+				ON locationReceiveUOM.intItemId = Item.intItemId				
 				AND locationReceiveUOM.intReceiveUOMId = defaultReceiveItemUOM.intItemUOMId
 		WHERE
 			defaultReceiveItemUOM.intItemId = Item.intItemId
+			AND locationReceiveUOM.intItemLocationId = ItemLocation.intItemLocationId
 			AND defaultReceiveItemUOM.ysnAllowPurchase = 1
 		ORDER BY
 			locationReceiveUOM.intItemLocationId DESC 
@@ -206,11 +206,11 @@ FROM
 			tblICItemUOM defaultIssueItemUOM INNER JOIN tblICUnitMeasure defaultIssueUOM 
 				ON defaultIssueItemUOM.intUnitMeasureId = defaultIssueUOM.intUnitMeasureId
 			LEFT JOIN tblICItemLocation locationIssueUOM 
-				ON locationIssueUOM.intItemId = Item.intItemId
-				AND locationIssueUOM.intItemLocationId = ItemLocation.intItemLocationId
+				ON locationIssueUOM.intItemId = Item.intItemId				
 				AND locationIssueUOM.intIssueUOMId = defaultIssueItemUOM.intItemUOMId
 		WHERE
 			defaultIssueItemUOM.intItemId = Item.intItemId
+			AND locationIssueUOM.intItemLocationId = ItemLocation.intItemLocationId
 			AND defaultIssueItemUOM.ysnAllowSale = 1
 		ORDER BY
 			locationIssueUOM.intItemLocationId DESC 
