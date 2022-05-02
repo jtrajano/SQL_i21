@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[tblTRFTradeFinanceLog]
 (
-	intTradeFinanceLogId INT IDENTITY NOT NULL,
+	intTradeFinanceLogId INT IDENTITY(1,1) NOT NULL,
 	dtmCreatedDate DATETIME NULL DEFAULT(GETDATE()),
 	strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
 	strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
