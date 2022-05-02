@@ -32,40 +32,42 @@ SELECT
 	ItemLocation.intVendorId,
 	strVendorId = v.strVendorId,
 	intStockUOMId = StockUOM.intItemUOMId,
-	strStockUOM = sUOM.strUnitMeasure,
-	strStockUOMType = sUOM.strUnitType,
+	strStockUOM = StockUOM.strUnitMeasure,
+	strStockUOMType = StockUOM.strUnitType,
 	dblStockUnitQty = StockUOM.dblUnitQty,
-	intReceiveUOMId = COALESCE(ReceiveUOM.intItemUOMId, StockUOM.intItemUOMId),
-	intReceiveUnitMeasureId = COALESCE(ReceiveUOM.intUnitMeasureId, StockUOM.intUnitMeasureId),
-	dblReceiveUOMConvFactor = COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	intIssueUOMId = COALESCE(IssueUOM.intItemUOMId, StockUOM.intItemUOMId),
-	intIssueUnitMeasureId = COALESCE(IssueUOM.intUnitMeasureId, StockUOM.intUnitMeasureId),
-	dblIssueUOMConvFactor = COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	strReceiveUOMType = COALESCE(rUOM.strUnitType, sUOM.strUnitType),
-	strIssueUOMType = COALESCE(iUOM.strUnitType, sUOM.strUnitType),
-	strReceiveUOM = COALESCE(rUOM.strUnitMeasure, sUOM.strUnitMeasure),
-	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, StockUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, StockUOM.strUpcCode, '')),
-	strReceieveLongUPC = COALESCE(ReceiveUOM.strLongUPCCode, StockUOM.strLongUPCCode, ''),
-	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
+	
+	intReceiveUOMId = ReceiveUOM.intItemUOMId,
+	intReceiveUnitMeasureId = ReceiveUOM.intUnitMeasureId,
+	dblReceiveUOMConvFactor = ISNULL(ReceiveUOM.dblUnitQty, 0),
+	intIssueUOMId = IssueUOM.intItemUOMId,
+	intIssueUnitMeasureId = IssueUOM.intUnitMeasureId,
+	dblIssueUOMConvFactor = COALESCE(IssueUOM.dblUnitQty, 0),
+
+	strReceiveUOMType = IssueUOM.strUnitType,
+	strIssueUOMType = IssueUOM.strUnitType,
+	strReceiveUOM = ReceiveUOM.strUnitMeasure,
+	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, ''),
+	strReceieveLongUPC = COALESCE(ReceiveUOM.strLongUPCCode, ''),
+	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
+	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
 	dblReceiveLastCost = ISNULL(ItemPricing.dblLastCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblReceiveStandardCost = ISNULL(ItemPricing.dblStandardCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblReceiveAverageCost = ISNULL(ItemPricing.dblAverageCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblReceiveStandardWeight = COALESCE(ReceiveUOM.dblStandardWeight, StockUOM.dblStandardWeight, 0),
-	ysnReceiveUOMAllowPurchase = COALESCE(ReceiveUOM.ysnAllowPurchase, StockUOM.ysnAllowPurchase), 
-	ysnReceiveUOMAllowSale = COALESCE(ReceiveUOM.ysnAllowSale, StockUOM.ysnAllowSale), 
-	strIssueUOM = COALESCE(iUOM.strUnitMeasure, sUOM.strUnitMeasure),
-	strIssueUPC = COALESCE(IssueUOM.strLongUPCCode, StockUOM.strLongUPCCode, COALESCE(IssueUOM.strUpcCode, StockUOM.strUpcCode, '')),
-	strIssueLongUPC = COALESCE(IssueUOM.strLongUPCCode, StockUOM.strLongUPCCode, ''),
-	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblIssueMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblIssueLastCost = ISNULL(ItemPricing.dblLastCost, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblIssueStandardCost = ISNULL(ItemPricing.dblStandardCost, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblIssueAverageCost = ISNULL(ItemPricing.dblAverageCost, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	dblIssueEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
-	ysnIssueUOMAllowPurchase = COALESCE(IssueUOM.ysnAllowPurchase, StockUOM.ysnAllowPurchase), 
-	ysnIssueUOMAllowSale = COALESCE(IssueUOM.ysnAllowSale, StockUOM.ysnAllowSale), 
+	dblReceiveStandardCost = ISNULL(ItemPricing.dblStandardCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
+	dblReceiveAverageCost = ISNULL(ItemPricing.dblAverageCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
+	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
+	ysnReceiveUOMAllowPurchase = ReceiveUOM.ysnAllowPurchase, 
+	ysnReceiveUOMAllowSale = ReceiveUOM.ysnAllowSale, 
+	
+	strIssueUOM = IssueUOM.strUnitMeasure,
+	strIssueUPC = COALESCE(IssueUOM.strLongUPCCode, ''),
+	strIssueLongUPC = COALESCE(IssueUOM.strLongUPCCode, ''),
+	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(IssueUOM.dblUnitQty, 0),
+	dblIssueMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(IssueUOM.dblUnitQty, 0),
+	dblIssueLastCost = ISNULL(ItemPricing.dblLastCost, 0) * COALESCE(IssueUOM.dblUnitQty, 0),
+	dblIssueStandardCost = ISNULL(ItemPricing.dblStandardCost, 0) * COALESCE(IssueUOM.dblUnitQty, 0),
+	dblIssueAverageCost = ISNULL(ItemPricing.dblAverageCost, 0) * COALESCE(IssueUOM.dblUnitQty, 0),
+	dblIssueEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * COALESCE(IssueUOM.dblUnitQty, 0),
+	ysnIssueUOMAllowPurchase = IssueUOM.ysnAllowPurchase, 
+	ysnIssueUOMAllowSale = IssueUOM.ysnAllowSale, 
 	
 	intGrossUOMId = GrossUOM.intItemUOMId,
 	intGrossUnitMeasureId = GrossUOM.intUnitMeasureId,
@@ -165,31 +167,67 @@ FROM
 			ON l.intCompanyLocationId = ItemLocation.intLocationId
 	)
 		ON ItemLocation.intItemId = Item.intItemId
-		AND ItemLocation.intLocationId IS NOT NULL 
+		AND ItemLocation.intLocationId IS NOT NULL
+		
+	OUTER APPLY (
+		SELECT TOP 1 
+			stockUOM.* 
+			,stockUnitMeasure.strUnitMeasure
+			,stockUnitMeasure.strUnitType
+		FROM 
+			tblICItemUOM stockUOM INNER JOIN tblICUnitMeasure stockUnitMeasure
+				ON stockUOM.intUnitMeasureId = stockUnitMeasure.intUnitMeasureId
+		WHERE
+			stockUOM.intItemId = Item.intItemId 
+			AND stockUOM.ysnStockUnit = 1
+	) StockUOM		
 
-	LEFT JOIN (
-		tblICItemUOM ReceiveUOM INNER JOIN tblICUnitMeasure rUOM 
-			ON rUOM.intUnitMeasureId = ReceiveUOM.intUnitMeasureId
-	)	
-		ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
+	OUTER APPLY (
+		SELECT TOP 1 
+			defaultReceiveItemUOM.*
+			,defaultReceiveUOM.strUnitMeasure
+			,defaultReceiveUOM.strUnitType
+		FROM 
+			tblICItemUOM defaultReceiveItemUOM INNER JOIN tblICUnitMeasure defaultReceiveUOM 
+				ON defaultReceiveItemUOM.intUnitMeasureId = defaultReceiveUOM.intUnitMeasureId
+			LEFT JOIN tblICItemLocation locationReceiveUOM 
+				ON locationReceiveUOM.intItemId = Item.intItemId
+				AND locationReceiveUOM.intItemLocationId = ItemLocation.intItemLocationId
+				AND locationReceiveUOM.intReceiveUOMId = defaultReceiveItemUOM.intItemUOMId
+		WHERE
+			defaultReceiveItemUOM.intItemId = Item.intItemId
+			AND defaultReceiveItemUOM.ysnAllowPurchase = 1
+		ORDER BY
+			locationReceiveUOM.intItemLocationId DESC 
+			,defaultReceiveItemUOM.ysnStockUnit DESC 
+	) ReceiveUOM
 
-	LEFT JOIN (
-		tblICItemUOM IssueUOM INNER JOIN tblICUnitMeasure iUOM 
-			ON iUOM.intUnitMeasureId = IssueUOM.intUnitMeasureId
-	)
-		ON IssueUOM.intItemUOMId = ItemLocation.intIssueUOMId
+	OUTER APPLY (
+		SELECT TOP 1 
+			defaultIssueItemUOM.*
+			,defaultIssueUOM.strUnitMeasure
+			,defaultIssueUOM.strUnitType
+		FROM 
+			tblICItemUOM defaultIssueItemUOM INNER JOIN tblICUnitMeasure defaultIssueUOM 
+				ON defaultIssueItemUOM.intUnitMeasureId = defaultIssueUOM.intUnitMeasureId
+			LEFT JOIN tblICItemLocation locationIssueUOM 
+				ON locationIssueUOM.intItemId = Item.intItemId
+				AND locationIssueUOM.intItemLocationId = ItemLocation.intItemLocationId
+				AND locationIssueUOM.intIssueUOMId = defaultIssueItemUOM.intItemUOMId
+		WHERE
+			defaultIssueItemUOM.intItemId = Item.intItemId
+			AND defaultIssueItemUOM.ysnAllowSale = 1
+		ORDER BY
+			locationIssueUOM.intItemLocationId DESC 
+			,defaultIssueItemUOM.ysnStockUnit DESC 
+	) IssueUOM
+	
 	LEFT JOIN (
 		tblICItemUOM GrossUOM INNER JOIN tblICUnitMeasure gUOM 
 			ON gUOM.intUnitMeasureId = GrossUOM.intUnitMeasureId
 			AND gUOM.strUnitType IN ('Volume', 'Weight')
 	)
 		ON GrossUOM.intItemUOMId = ItemLocation.intGrossUOMId
-	LEFT JOIN (
-		tblICItemUOM StockUOM INNER JOIN tblICUnitMeasure sUOM
-			ON StockUOM.intUnitMeasureId = sUOM.intUnitMeasureId
-	)
-		ON StockUOM.intItemId = Item.intItemId 
-		AND StockUOM.ysnStockUnit = 1
 
 	LEFT JOIN tblICItemPricing ItemPricing 
 		ON ItemLocation.intItemId = ItemPricing.intItemId 
