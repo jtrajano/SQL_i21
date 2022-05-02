@@ -15,14 +15,25 @@ BEGIN
 	FROM tblHDTimeEntryPeriod
 	WHERE strFiscalYear = @strFiscalYear
 
-	IF @intTimeEntryPeriodDetail IS NULL OR
+	IF @intTimeEntryPeriodDetail IS NULL
+	BEGIN
+		DELETE FROM tblHDCoworkerGoalDetail
+		WHERE intCoworkerGoalId = @CoworkerGoalId
+
+		RETURN
+	END
+
+	IF @intTimeEntryPeriodDetail IS NOT NULL AND
 	EXISTS(
 			SELECT TOP 1 ''
-			FROM tblHDCoworkerGoalDetail
-			WHERE intCoworkerGoalId = @CoworkerGoalId
+			FROM tblHDCoworkerGoalDetail a
+			WHERE a.intCoworkerGoalId = @CoworkerGoalId 					
 	)
 	BEGIN
-		RETURN
+
+		DELETE FROM tblHDCoworkerGoalDetail
+		WHERE intCoworkerGoalId = @CoworkerGoalId
+
 	END
 
 	INSERT INTO tblHDCoworkerGoalDetail

@@ -56,6 +56,7 @@ SELECT
 	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
 	ysnReceiveUOMAllowPurchase = ReceiveUOM.ysnAllowPurchase, 
 	ysnReceiveUOMAllowSale = ReceiveUOM.ysnAllowSale, 
+	dblReceiveStandardWeight = COALESCE(ReceiveUOM.dblStandardWeight, 0),
 	
 	strIssueUOM = IssueUOM.strUnitMeasure,
 	strIssueUPC = COALESCE(IssueUOM.strLongUPCCode, IssueUOM.strUpcCode, ''),
