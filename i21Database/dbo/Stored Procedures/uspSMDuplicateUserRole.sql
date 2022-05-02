@@ -11,7 +11,7 @@ BEGIN
 	INSERT INTO tblSMUserRole([strName], [strDescription], [strMenu], [strMenuPermission], [strForm], [strRoleType], [ysnAdmin])
 	SELECT CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strName] 
-		   ELSE 'DUP: ' + [strName] + ' (' + @intCount + ')' END,
+		   ELSE 'DUP: ' + [strName] + ' (' + TRIM(CAST(@intCount AS CHAR(4))) + ')' END,
 		   [strDescription], 
 		   [strMenu], 
 		   [strMenuPermission], 
