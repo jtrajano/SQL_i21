@@ -203,6 +203,10 @@ BEGIN
 								BEGIN
 									SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@cost * @quantity) * (@TaxRate/100.000000) END))
 								END
+							ELSE IF(@TaxCalculationMethod = 'Percentage of Tax Only')
+								BEGIN
+									SET @OtherTaxAmount = 0.00;
+								END
 							ELSE
 								BEGIN
 									SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@quantity * @TaxRate) END))
