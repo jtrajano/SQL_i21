@@ -3,7 +3,6 @@
 	,@intSubLocationId AS INT
 	,@intCommodity AS INT
 	,@dtmBillDateUTC AS DATETIME
-	,@dtmBillDate AS DATETIME
 AS
 
 
@@ -45,18 +44,13 @@ DECLARE @strChargeType NVARCHAR(15)
 DECLARE @_intInboundAvailableTotalAccumulatedDays INT
 DECLARE @_intFinalRecId INT
 
--- SET @LocalToUTCDiff = (DATEDIFF(HOUR,GETDATE(),GETUTCDATE()))
--- SET @UTCToLocalDiff = (DATEDIFF(HOUR,GETUTCDATE(),GETDATE()))
+SET @LocalToUTCDiff = (DATEDIFF(HOUR,GETDATE(),GETUTCDATE()))
+SET @UTCToLocalDiff = (DATEDIFF(HOUR,GETUTCDATE(),GETDATE()))
 
 
--- SELECT @dtmBillDate = DATEADD(HOUR,@UTCToLocalDiff,@dtmBillDateUTC)
+SELECT @dtmBillDate = DATEADD(HOUR,@UTCToLocalDiff,@dtmBillDateUTC)
 -- SET @dtmBillDate = DATEADD(dd, DATEDIFF(dd, 0,@dtmBillDate), 0) ----------Remove Time
 -- SET @dtmBillDateUTC = DATEADD(HOUR,@LocalToUTCDiff,@dtmBillDate)
-
-
-SET @LocalToUTCDiff = (DATEDIFF(HOUR,@dtmBillDate,@dtmBillDateUTC))
-SET @UTCToLocalDiff = (DATEDIFF(HOUR,@dtmBillDateUTC,@dtmBillDate))
-
 
 
 BEGIN TRY
