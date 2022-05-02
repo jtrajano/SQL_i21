@@ -246,6 +246,52 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
 IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
 	RETURN;
 
+--CONTRACT SCHEDULED
+INSERT INTO ##ARItemsForContracts (
+	  intInvoiceId
+	, intInvoiceDetailId
+	, intItemId
+	, intContractDetailId
+	, intContractHeaderId
+	, intEntityId
+	, intUserId
+	, dtmDate
+	, dblQuantity
+	, dblBalanceQty
+	, dblSheduledQty
+	, dblRemainingQty
+	, strType
+	, strTransactionType
+	, strInvoiceNumber
+	, strItemNo
+	, strBatchId
+)
+SELECT intInvoiceId					= intInvoiceId
+	, intInvoiceDetailId			= intInvoiceDetailId
+	, intItemId						= intItemId
+	, intContractDetailId			= intContractDetailId
+	, intContractHeaderId			= intContractHeaderId
+	, intEntityId					= intEntityId
+	, intUserId						= intEntityId
+	, dtmDate						= dtmDate
+	, dblQuantity					= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) END-- @dblSchQuantityToUpdate
+	, dblBalanceQty					= 0
+	, dblSheduledQty				= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) END-- @dblSchQuantityToUpdate
+	, dblRemainingQty				= 0
+	, strType						= 'Contract Scheduled'
+	, strTransactionType			= strTransactionType
+	, strInvoiceNumber				= strInvoiceNumber
+	, strItemNo						= strItemNo
+	, strBatchId					= strBatchId
+FROM #TBLTOPROCESS
+WHERE (
+	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
+   OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
+   OR intTicketId IS NULL
+)
+AND ysnFromReturn = 0
+AND (intLoadDetailId IS NULL OR (intLoadDetailId IS NOT NULL AND intPurchaseSale = 3))
+
 --CONTRACT BALANCE
 INSERT INTO ##ARItemsForContracts (
 	  intInvoiceId
@@ -295,52 +341,6 @@ WHERE (
    OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
    OR intTicketId IS NULL
 )
-
---CONTRACT SCHEDULED
-INSERT INTO ##ARItemsForContracts (
-	  intInvoiceId
-	, intInvoiceDetailId
-	, intItemId
-	, intContractDetailId
-	, intContractHeaderId
-	, intEntityId
-	, intUserId
-	, dtmDate
-	, dblQuantity
-	, dblBalanceQty
-	, dblSheduledQty
-	, dblRemainingQty
-	, strType
-	, strTransactionType
-	, strInvoiceNumber
-	, strItemNo
-	, strBatchId
-)
-SELECT intInvoiceId					= intInvoiceId
-	, intInvoiceDetailId			= intInvoiceDetailId
-	, intItemId						= intItemId
-	, intContractDetailId			= intContractDetailId
-	, intContractHeaderId			= intContractHeaderId
-	, intEntityId					= intEntityId
-	, intUserId						= intEntityId
-	, dtmDate						= dtmDate
-	, dblQuantity					= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) END-- @dblSchQuantityToUpdate
-	, dblBalanceQty					= 0
-	, dblSheduledQty				= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) END-- @dblSchQuantityToUpdate
-	, dblRemainingQty				= 0
-	, strType						= 'Contract Scheduled'
-	, strTransactionType			= strTransactionType
-	, strInvoiceNumber				= strInvoiceNumber
-	, strItemNo						= strItemNo
-	, strBatchId					= strBatchId
-FROM #TBLTOPROCESS
-WHERE (
-	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
-   OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
-   OR intTicketId IS NULL
-)
-AND ysnFromReturn = 0
-AND (intLoadDetailId IS NULL OR (intLoadDetailId IS NOT NULL AND intPurchaseSale = 3))
 
 --FIX CONTRACT SCHEDULED
 UPDATE P
