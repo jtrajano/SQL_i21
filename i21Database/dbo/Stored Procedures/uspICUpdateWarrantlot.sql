@@ -27,7 +27,7 @@ BEGIN
 	LEFT JOIN tblICWarrantStatus B
 		ON A.intWarrantStatus  = B.intWarrantStatus
 	LEFT JOIN tblTRFTradeFinance C
-		ON A.intTradeFinanceId = A.intTradeFinanceId
+		ON A.intTradeFinanceId = C.intTradeFinanceId
 	WHERE intLotId = @intLotId
 
 	
