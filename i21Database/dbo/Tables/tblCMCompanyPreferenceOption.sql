@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	intBTBankFeesAccountId int NULL,
 	intBTInTransitAccountId int NULL,
 	intBTForexDiffAccountId INT NULL,
+	intBankReconciliationBankFeesAccountId INT NULL,
 	ysnRevalue_Swap BIT NULL,
 	ysnAllowBetweenLocations_Swap BIT NULL,
 	ysnAllowBetweenCompanies_Swap BIT NULL,
