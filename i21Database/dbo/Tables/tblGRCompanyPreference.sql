@@ -33,6 +33,7 @@
     [ysnEnableCanadianGrainReceipt] BIT NOT NULL DEFAULT(0),
     [strDefaultGrainReceiptReport] NVARCHAR(MAX) COLLATE  Latin1_General_CI_AS NULL,
     [ysnUseItemCommodityDiscountOriginImport] BIT NOT NULL DEFAULT(0),
+    [ysnAutoShortCloseContractInSettlement] BIT NOT NULL DEFAULT(0),
     --[ysnStorageChargeAccountUseIncome] BIT NOT NULL DEFAULT(0),
     
     
