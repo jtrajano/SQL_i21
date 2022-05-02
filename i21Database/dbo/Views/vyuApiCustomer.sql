@@ -1,4 +1,4 @@
-CREATE VIEW dbo.vyuApiCustomer
+CREATE VIEW [dbo].[vyuApiCustomer]
 AS 
 SELECT [EntityId]			= e.intEntityId
 	 , [Id]					= LTRIM(RTRIM(e.strCustomerNumber)) COLLATE Latin1_General_CI_AS
@@ -55,6 +55,8 @@ SELECT [EntityId]			= e.intEntityId
 	 , [IsVFDDealer]		= CAST(0 AS BIT)
 	 , [IsVFDAcknowledged]	= CAST(0 AS BIT)
 	 , [DateLastUpdated]	= COALESCE(c.dtmDateModified, c.dtmDateCreated)
+     , [SalespersonId]      = e.intSalespersonId
+     , [ContactId]          = e.intEntityContactId
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId
