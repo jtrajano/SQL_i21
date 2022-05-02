@@ -73,6 +73,7 @@ This table holds stock information like quantity on hand and etc.
 		[dblInTransitDirect] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblOpenPurchaseContract] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblOpenSalesContract] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblReleasedLot] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[dtmLastPurchaseDate] DATETIME NULL,
 		[dtmLastSaleDate] DATETIME NULL,

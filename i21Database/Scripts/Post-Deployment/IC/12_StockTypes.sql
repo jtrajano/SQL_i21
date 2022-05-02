@@ -48,6 +48,9 @@ USING	(
 		UNION ALL
 		SELECT id = 12
 				,strName = 'Usage Qty'
+		UNION ALL
+		SELECT id = 13
+				,strName = 'Released Lot'
 
 
 ) AS ValuesForItemStockType

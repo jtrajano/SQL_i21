@@ -779,6 +779,7 @@
     <None Include="Scripts\Post-Deployment\ST\45_FileFieldMapping_Commander_PopCfg.sql" />
     <None Include="Scripts\Post-Deployment\ST\46_FileFieldMapping_Commander_Tank.sql" />
     <None Include="Scripts\Post-Deployment\ST\47_FileFieldMapping_Commander_Loyalty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseReleasedLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
