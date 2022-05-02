@@ -109,6 +109,10 @@ BEGIN TRY
 				,strSequenceCurrency
 				,intSequenceUnitMeasureId
 				,strSequenceUnitMeasure
+				,intCurrencyIdTmp
+				,strCurrencyTmp
+				,intUnitMeasureIdTmp
+				,strUnitMeasureTmp
 			)
 			SELECT	intSampleId, 
 					tmp.intContractDetailId, 
@@ -142,7 +146,11 @@ BEGIN TRY
 					CU.intMainCurrencyId intSequenceCurrencyId,
 					CU.strCurrency strSequenceCurrency,
 					UM.intUnitMeasureId,
-					UM.strUnitMeasure
+					UM.strUnitMeasure,
+					tmp.intCurrencyId,
+					tmp.strCurrency, 
+					tmp.intUnitMeasureId, 
+					tmp.strUnitMeasure
 					
 			FROM @tblTemp tmp
 			JOIN tblCTContractDetail CD on CD.intContractDetailId = tmp.intContractDetailId
