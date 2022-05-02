@@ -56,9 +56,9 @@ LEFT JOIN tblSMCurrency E
 	ON A.intCurrencyId = E.intCurrencyID
 LEFT JOIN tblICStorageRate F
 	ON A.intStorageRateId = F.intStorageRateId
-INNER JOIN  tblICStorageChargeDetail G
+LEFT JOIN  tblICStorageChargeDetail G
 	ON A.intStorageChargeId = G.intStorageChargeId
-INNER JOIN tblICItem H	
+LEFT JOIN tblICItem H	
 	ON G.intItemId = H.intItemId
 LEFT JOIN tblICLot I
 	ON G.intLotId = I.intLotId
