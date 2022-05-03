@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[uspCTProcessTFLogs]
+﻿CREATE PROCEDURE [dbo].[uspCTProcessTFLogs]
 	@strXML    NVARCHAR(MAX),
 	@intUserId INT
 AS    
@@ -141,9 +141,9 @@ BEGIN
 				, dblFinanceQty = CASE WHEN cd.intApprovalStatusId = 4 THEN 0 
 										ELSE  case when cd.intContractStatusId <> 6 then cd.dblQuantity else (cd.dblQuantity - cd.dblBalance) END 
 								  END
-				, dblFinancedAmount = CASE WHEN cd.intApprovalStatusId = 4 THEN 0 
+				, dblFinancedAmount = (CASE WHEN cd.intApprovalStatusId = 4 THEN 0 
 											ELSE case when cd.intContractStatusId <> 6 then cd.dblTotalCost else cd.dblTotalCost * ((cd.dblQuantity - cd.dblBalance) / cd.dblQuantity) end
-									  END
+									  END) * (case when cd.intCurrencyId <> cd.intInvoiceCurrencyId and isnull(cd.dblRate,0) <> 0 then cd.dblRate else 1 end)
 				, strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
 			
 			from
