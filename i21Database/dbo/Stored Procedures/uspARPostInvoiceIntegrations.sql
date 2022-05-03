@@ -662,6 +662,17 @@ FROM tblARPostInvoiceHeader
 WHERE strSessionId = @strSessionId
 
 EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
+
+DELETE FROM tblARPostInvoiceHeader WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostInvoiceDetail WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostInvoiceItemAccount WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostInvalidInvoiceData WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostItemsForCosting WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostItemsForInTransitCosting WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostItemsForContracts WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostItemsForStorageCosting WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostInvoiceGLEntries WHERE strSessionId = @strSessionId
+
 END
 
 END TRY
