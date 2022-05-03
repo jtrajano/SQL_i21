@@ -451,8 +451,7 @@
     <Build Include="dbo\Tables\tblApiSchemaTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />    
     <None Include="Scripts\Post-Deployment\IC\30_InventoryValuationAccountIds.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
@@ -11133,9 +11132,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />
