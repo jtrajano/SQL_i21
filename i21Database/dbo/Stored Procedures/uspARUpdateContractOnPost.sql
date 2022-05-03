@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspARUpdateContractOnPost]
-	  @intUserId    INT
-	, @ysnPost 		BIT = 1
+	  @intUserId    	INT
+	, @ysnPost 			BIT = 1
+	, @strSessionId		NVARCHAR(50) = NULL
 AS
 
 DECLARE @strErrorMsg	NVARCHAR(500) = NULL
@@ -12,7 +13,7 @@ BEGIN TRY
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	WHILE EXISTS(SELECT TOP 1 NULL FROM ##ARItemsForContracts)
+	WHILE EXISTS(SELECT TOP 1 NULL FROM tblARPostItemsForContracts WHERE strSessionId = @strSessionId)
 		BEGIN
 			DECLARE @intInvoiceId				INT = NULL
 				  , @intInvoiceDetailId			INT = NULL
@@ -41,7 +42,8 @@ BEGIN TRY
 							, @dblRemainingQty				= dblRemainingQty
 							, @ysnFromReturn				= ysnFromReturn
 							, @strTransactionType			= strTransactionType
-					FROM ##ARItemsForContracts
+					FROM tblARPostItemsForContracts
+					WHERE strSessionId = @strSessionId
 					ORDER BY ABS(dblBalanceQty) ASC
 				END
 			--IF UNPOST, DEDUCT BALANCE FIRST BEFORE DEDUCTING SCHEDULED QTY
@@ -58,7 +60,8 @@ BEGIN TRY
 							, @dblRemainingQty				= dblRemainingQty
 							, @ysnFromReturn				= ysnFromReturn
 							, @strTransactionType			= strTransactionType
-					FROM ##ARItemsForContracts
+					FROM tblARPostItemsForContracts
+					WHERE strSessionId = @strSessionId
 					ORDER BY ABS(dblBalanceQty) DESC
 				END
 
@@ -92,10 +95,11 @@ BEGIN TRY
 													  , @strScreenName		 = @strTransactionType
 				END
 
-			DELETE FROM ##ARItemsForContracts 
+			DELETE FROM tblARPostItemsForContracts 
 			WHERE intInvoiceDetailId = @intInvoiceDetailId 
 			  AND intContractDetailId = @intContractDetailId
               AND strType = @strType
+			  AND strSessionId = @strSessionId
 		END
 
 END TRY

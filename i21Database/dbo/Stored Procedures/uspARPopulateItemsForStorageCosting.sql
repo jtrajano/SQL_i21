@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForStorageCosting]
+	@strSessionId		NVARCHAR(50)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -24,7 +25,7 @@ SET @ZeroBit = CAST(0 AS BIT)
 DECLARE @OneBit BIT
 SET @OneBit = CAST(1 AS BIT)
 
-INSERT INTO ##ARItemsForStorageCosting
+INSERT INTO tblARPostItemsForStorageCosting
 	([intItemId] 
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -43,6 +44,7 @@ INSERT INTO ##ARItemsForStorageCosting
 	,[intSubLocationId]
 	,[intStorageLocationId]
 	,[strActualCostId]
+	,[strSessionId]
 ) 
 SELECT 
 	 [intItemId]				= ARID.[intItemId]  
@@ -87,7 +89,8 @@ SELECT
 	,[intSubLocationId]			= ARID.[intSubLocationId]
 	,[intStorageLocationId]		= ARID.[intStorageLocationId]
 	,[strActualCostId]			= CASE WHEN (ISNULL(ARID.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARID.[intLoadDistributionHeaderId],0) <> 0) THEN ARID.[strActualCostId] ELSE NULL END
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]				= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]
 WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') 
   AND ARID.[intPeriodsToAccrue] <= 1 
@@ -100,5 +103,6 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
   AND ARID.[strTransactionType] <> 'Debit Memo'
   AND ARID.[intStorageScheduleTypeId] IS NOT NULL
   AND LGL.[intPurchaseSale] NOT IN (2, 3)
+  AND ARID.strSessionId = @strSessionId
 
 RETURN 1

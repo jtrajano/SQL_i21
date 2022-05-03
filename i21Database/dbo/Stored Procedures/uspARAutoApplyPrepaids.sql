@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAutoApplyPrepaids]
-	@intEntityUserId	INT
+	  @intEntityUserId	INT
+	, @strSessionId		NVARCHAR(50) = NULL
 AS
 
 DECLARE @tblPaymentEntries	PaymentIntegrationStagingTable
@@ -116,10 +117,11 @@ SELECT intInvoiceId			= I.intInvoiceId
 	, dtmPostDate			= I.dtmPostDate
 	, strInvoiceNumber		= I.strInvoiceNumber
 	, strTransactionType	= I.strTransactionType
-FROM ##ARPostInvoiceHeader I
+FROM tblARPostInvoiceHeader I
 WHERE I.ysnCancelled = 0
   AND I.ysnPaid = 0
   AND I.strTransactionType IN ('Invoice', 'Debit Memo')
+  AND I.strSessionId = @strSessionId
 
 --GET AVAILABLE CREDITS AND PREPAIDS FOR CUSTOMERS
 INSERT INTO #AAPPREPAIDS WITH (TABLOCK) (
