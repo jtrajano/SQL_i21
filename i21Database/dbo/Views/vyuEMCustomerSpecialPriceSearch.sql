@@ -12,7 +12,7 @@
 		strVendorLocationName =  vend_location.strLocationName,
 		category.strCategoryCode,
 		special_price.strCustomerGroup,
-		special_price.dblDeviation + special_price.dblDeviation2 + special_price.dblDeviation3 + special_price.dblDeviation4,
+		dblDeviation = special_price.dblDeviation + special_price.dblDeviation2 + special_price.dblDeviation3 + special_price.dblDeviation4,
 		special_price.strLineNote,
 		special_price.dtmBeginDate,
 		special_price.dtmEndDate,
