@@ -61,6 +61,8 @@ BEGIN
 
          SELECT @intEFTNextNo = @intEFTNextNo +1
 
+         UPDATE tblCMBankAccount SET intEFTNextNo = @intEFTNextNo WHERE intBankAccountId = @intBankAccountId
+
     END
 	
 
