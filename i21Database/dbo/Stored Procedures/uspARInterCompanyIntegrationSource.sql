@@ -2,6 +2,7 @@
 	 @BatchId		NVARCHAR(40)
 	,@Post			BIT = 0
 	,@raiseError	BIT = 1
+	,@strSessionId	NVARCHAR(50) = NULL
 AS
 	DECLARE @strDatabaseName NVARCHAR(50)
 	DECLARE @strInvoiceNumber NVARCHAR(50)
@@ -10,12 +11,11 @@ AS
 	DECLARE @intInvoiceId INT = 0
 
 	SELECT @strDatabaseName = strDatabaseName, @strInvoiceNumber = strInvoiceNumber
-	FROM ##ARPostInvoiceHeader I
-	INNER JOIN tblARCustomer C
-	ON I.intEntityCustomerId = C.intEntityId
-	INNER JOIN tblSMInterCompany IC
-	ON C.intInterCompanyId = IC.intInterCompanyId
+	FROM tblARPostInvoiceHeader I
+	INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityId
+	INNER JOIN tblSMInterCompany IC ON C.intInterCompanyId = IC.intInterCompanyId
 	WHERE I.strTransactionType = 'Invoice'
+	  AND I.strSessionId = @strSessionId
 
 	IF(ISNULL(@strDatabaseName, '') <> '')
 	BEGIN

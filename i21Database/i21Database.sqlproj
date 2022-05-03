@@ -10911,6 +10911,15 @@
     <Build Include="dbo\Views\vyuQMSearchCommodityItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetScheduledPayments.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceHeader.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceDetail.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceItemAccount.sql" />
+    <Build Include="dbo\Tables\tblARPostInvalidInvoiceData.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForInTransitCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForStorageCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

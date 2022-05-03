@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForInTransitCosting]
-
+	@strSessionId		NVARCHAR(50)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -17,7 +17,7 @@ FROM tblICInventoryTransactionType WITH (NOLOCK)
 WHERE [strName] = 'Invoice'
 ORDER BY intTransactionTypeId
 
-INSERT INTO ##ARItemsForInTransitCosting WITH (TABLOCK)
+INSERT INTO tblARPostItemsForInTransitCosting WITH (TABLOCK)
 	([intItemId] 
 	,[intItemLocationId] 
 	,[intItemUOMId] 
@@ -45,6 +45,7 @@ INSERT INTO ##ARItemsForInTransitCosting WITH (TABLOCK)
 	,[strBOLNumber]
 	,[intTicketId]
     ,[intSourceEntityId]
+	,[strSessionId]
 )
 --INVENTORY SHIPMENT NON-LOTTED
 SELECT
@@ -75,7 +76,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 CROSS APPLY (
@@ -94,6 +96,7 @@ WHERE ARID.[intLoadDetailId] IS NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
   AND ARID.[strTransactionType] <> 'Credit Memo'
   AND ARIDL.[intInvoiceDetailLotId] IS NULL
+  AND ARID.strSessionId = @strSessionId
 	
 UNION ALL
 
@@ -127,7 +130,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
@@ -161,7 +165,8 @@ WHERE ARID.[intLoadDetailId] IS NULL
   AND ARID.[intTicketId] IS NULL
   AND ICIT.[intInTransitSourceLocationId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND ARID.[strTransactionType] <> 'Credit Memo'  
+  AND ARID.[strTransactionType] <> 'Credit Memo'
+  AND ARID.strSessionId = @strSessionId  
 	
 UNION ALL
 
@@ -197,7 +202,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
@@ -218,6 +224,7 @@ WHERE ARID.[intLoadDetailId] IS NULL
   AND ARID.[strTransactionType] <> 'Credit Memo'
   AND ARIDL.[intInvoiceDetailLotId] IS NULL
   AND (ITEM.strLotTracking IS NULL OR ITEM.strLotTracking = 'No')
+  AND ARID.strSessionId = @strSessionId
 
 UNION ALL
 
@@ -251,7 +258,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 INNER JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
@@ -286,6 +294,7 @@ WHERE ARID.[intLoadDetailId] IS NULL
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
   AND ARID.[strTransactionType] <> 'Credit Memo'
+  AND ARID.strSessionId = @strSessionId
 
 UNION ALL
 
@@ -318,7 +327,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON LGD.[intLoadDetailId] = ARID.[intLoadDetailId]
 INNER JOIN tblLGLoad LG WITH (NOLOCK) ON LGD.[intLoadId] = LG.[intLoadId] 
 CROSS APPLY (
@@ -338,6 +348,7 @@ WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (A
   AND ARID.[strTransactionType] <> 'Credit Memo'
   AND ARID.[intTicketId] IS NULL
   AND ARIDL.[intInvoiceDetailLotId] IS NULL
+  AND ARID.strSessionId = @strSessionId
 
 UNION ALL
 
@@ -370,7 +381,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON LGD.[intLoadDetailId] = ARID.[intLoadDetailId]
 INNER JOIN tblLGLoad LG WITH (NOLOCK) ON LGD.[intLoadId] = LG.[intLoadId] 
 INNER JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
@@ -405,6 +417,7 @@ WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (A
   AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[strTransactionType] <> 'Credit Memo'
+  AND ARID.strSessionId = @strSessionId
 
 UNION ALL
 
@@ -437,7 +450,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON LGD.[intLoadDetailId] = ARID.[intLoadDetailId]
 INNER JOIN tblLGLoad LG WITH (NOLOCK) ON LGD.[intLoadId] = LG.[intLoadId] 
 LEFT JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
@@ -467,6 +481,7 @@ WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (A
 	AND ARID.[strTransactionType] = 'Credit Memo'
     AND ARID.[intTicketId] IS NULL
     AND ARIDL.[intInvoiceDetailLotId] IS NULL
+	AND ARID.strSessionId = @strSessionId
 
 UNION ALL
 
@@ -499,7 +514,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON LGD.[intLoadDetailId] = ARID.[intLoadDetailId]
 INNER JOIN tblLGLoad LG WITH (NOLOCK) ON LGD.[intLoadId] = LG.[intLoadId] 
 INNER JOIN (
@@ -526,6 +542,7 @@ WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (A
 	AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
 	AND ARID.[intInventoryShipmentItemId] IS NULL
 	AND ARID.[strTransactionType] = 'Credit Memo'
+	AND ARID.strSessionId = @strSessionId
 
 UNION ALL
 
@@ -558,6 +575,7 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
+	,[strSessionId]					= @strSessionId
 FROM (
 	SELECT ARPID.intInvoiceId
 		, INVD.intLoadDetailId
@@ -584,8 +602,9 @@ FROM (
 		, ARPID.strBOLNumber
 		, ARPID.intEntityCustomerId
 	FROM tblARInvoiceDetail INVD
-	INNER JOIN ##ARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
+	INNER JOIN tblARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
 										  AND INVD.dblShipmentNetWt <> ARPID.dblShipmentNetWt
+	WHERE ARPID.strSessionId = @strSessionId
 ) ARID
 INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON LGD.[intLoadDetailId] = ARID.[intLoadDetailId]
 INNER JOIN tblLGLoad LG WITH (NOLOCK) ON LGD.[intLoadId] = LG.[intLoadId] 
@@ -640,6 +659,7 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
+	,[strSessionId]					= @strSessionId
 FROM (
 	SELECT ARPID.intInvoiceId
 		, INVD.intLoadDetailId
@@ -668,9 +688,8 @@ FROM (
 		, ARPID.strBOLNumber 
 		, ARPID.intEntityCustomerId
 	FROM tblARInvoiceDetail INVD
-	INNER JOIN ##ARPostInvoiceDetail ARPID
-	ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
-	AND INVD.dblShipmentNetWt <> ARPID.dblShipmentNetWt
+	INNER JOIN tblARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId AND INVD.dblShipmentNetWt <> ARPID.dblShipmentNetWt
+	WHERE ARPID.strSessionId = @strSessionId
 ) ARID
 INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON LGD.[intLoadDetailId] = ARID.[intLoadDetailId]
 INNER JOIN tblLGLoad LG WITH (NOLOCK) ON LGD.[intLoadId] = LG.[intLoadId] 
@@ -725,6 +744,7 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
+	,[strSessionId]					= @strSessionId
 FROM (
 	SELECT INVD.intInvoiceId
 		, INVD.intLoadDetailId
@@ -749,8 +769,9 @@ FROM (
 		, ARPID.strBOLNumber 
 		, ARPID.intEntityCustomerId
 	FROM tblARInvoiceDetail INVD
-	INNER JOIN ##ARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
+	INNER JOIN tblARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
 										  AND INVD.dblQtyShipped <> ARPID.dblQtyShipped
+    WHERE ARPID.strSessionId = @strSessionId
 ) ARID
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
@@ -804,6 +825,7 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
+	,[strSessionId]					= @strSessionId
 FROM (
 	SELECT INVD.intInvoiceId
 		 , INVD.intLoadDetailId
@@ -829,8 +851,8 @@ FROM (
 		 , ARPID.strBOLNumber 
 		 , ARPID.intEntityCustomerId
 	FROM tblARInvoiceDetail INVD
-	INNER JOIN ##ARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
-	AND INVD.dblQtyShipped <> ARPID.dblQtyShipped
+	INNER JOIN tblARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId AND INVD.dblQtyShipped <> ARPID.dblQtyShipped
+	WHERE ARPID.strSessionId = @strSessionId
 ) ARID
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId] 
 INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
@@ -884,7 +906,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 INNER JOIN tblARInvoiceDetailLot ARIDLP ON ARIDLP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
@@ -923,6 +946,7 @@ WHERE ARID.[intLoadDetailId] IS NULL
   AND ARID.[ysnProvisionalWithGL] = 1
   AND ARID.[strTransactionType]  IN ('Invoice', 'Credit Memo')
   AND ARIDLP.[dblQuantityShipped] <> ARIDL.[dblQuantityShipped]
+  AND ARID.strSessionId = @strSessionId
 
 UNION ALL
 
@@ -955,7 +979,8 @@ SELECT
 	,[strBOLNumber]					= ARID.strBOLNumber
 	,[intTicketId]					= ARID.intTicketId
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]					= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 INNER JOIN tblARInvoiceDetailLot ARIDLP ON ARIDLP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
@@ -994,11 +1019,13 @@ WHERE ARID.[intLoadDetailId] IS NULL
 	AND ARID.[ysnProvisionalWithGL] = 1
 	AND ARID.[strTransactionType]  IN ('Invoice', 'Credit Memo')
 	AND ARIDLP.[dblQuantityShipped] <> ARIDL.[dblQuantityShipped]
+	AND ARID.strSessionId = @strSessionId
 
 UPDATE A 
 SET intLinkedItemId = B.intItemId
-FROM ##ARItemsForInTransitCosting A
+FROM tblARPostItemsForInTransitCosting A
 INNER JOIN tblICInventoryShipmentItem B ON A.intLinkedItem = B.intParentItemLinkId
 WHERE A.intLinkedItem IS NOT NULL
+  AND A.strSessionId = @strSessionId
 
 RETURN 1

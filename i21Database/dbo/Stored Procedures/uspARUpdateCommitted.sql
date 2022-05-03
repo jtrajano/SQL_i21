@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateCommitted]
+	@strSessionId		NVARCHAR(50) = NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -51,7 +52,7 @@ BEGIN
 		, [intLotId]				= NULL
 		, [intSubLocationId]		= SOTD.[intSubLocationId]
 		, [intStorageLocationId]	= SOTD.[intStorageLocationId]
-	FROM ##ARPostInvoiceDetail ARID
+	FROM tblARPostInvoiceDetail ARID
 	INNER JOIN tblSOSalesOrderDetail SOTD ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
 	INNER JOIN tblICItemUOM ICIUOM ON ICIUOM.[intItemUOMId] = SOTD.[intItemUOMId]	
 	WHERE ARID.strItemType = 'Inventory'
@@ -59,6 +60,7 @@ BEGIN
 	  AND ARID.[intInventoryShipmentItemId] IS NULL
 	  AND ARID.[intSalesOrderDetailId] IS NOT NULL
 	  AND ARID.[intLoadDetailId] IS NULL
+	  AND ARID.strSessionId = @strSessionId
 
 	UNION ALL
 	--SO shipped > ordered		--Component
@@ -83,7 +85,7 @@ BEGIN
 		, [intLotId]				= NULL
 		, [intSubLocationId]		= SOTD.[intSubLocationId]
 		, [intStorageLocationId]	= SOTD.[intStorageLocationId]
-	FROM ##ARPostInvoiceDetail ARID
+	FROM tblARPostInvoiceDetail ARID
 	INNER JOIN tblARInvoiceDetailComponent ARIDC ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
 	INNER JOIN tblSOSalesOrderDetail SOTD ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
 	INNER JOIN tblICItem ITEM ON ARIDC.[intComponentItemId] = ITEM.intItemId
@@ -92,6 +94,7 @@ BEGIN
 	  AND ARID.[intInventoryShipmentItemId] IS NULL
 	  AND ARID.[intSalesOrderDetailId] IS NOT NULL
 	  AND ARID.[intLoadDetailId] IS NULL
+	  AND ARID.strSessionId = @strSessionId
 
 	IF EXISTS(SELECT TOP 1 NULL FROM @items)
 		EXEC uspICIncreaseOrderCommitted @items

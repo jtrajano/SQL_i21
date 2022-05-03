@@ -3,7 +3,8 @@
     ,@Recap             BIT				= 0
     ,@PostDate          DATETIME        = NULL
     ,@BatchId           NVARCHAR(40)    = NULL
-    ,@UserId            INT             = NULL    
+    ,@UserId            INT             = NULL
+	,@strSessionId		NVARCHAR(50) 	= NULL    
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -98,14 +99,14 @@ SELECT
 	,[strSourceNumber]
 	,[strSourceType]
 	,[intSourceEntityId]
-FROM 
-	##ARItemsForCosting
+FROM tblARPostItemsForCosting
 WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
+  AND strSessionId = @strSessionId
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 BEGIN
-	INSERT INTO ##ARInvoiceGLEntries (
+	INSERT INTO tblARPostInvoiceGLEntries (
 		 [dtmDate]
 		,[strBatchId]
 		,[intAccountId]
@@ -152,7 +153,7 @@ DECLARE  @InTransitItems                ItemInTransitCostingTableType
 		,@FOB_ORIGIN                    INT = 1
 		,@FOB_DESTINATION               INT = 2	
 				
-IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM ##ARPostInvoiceDetail WHERE intSourceId = 2))
+IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM tblARPostInvoiceDetail WHERE intSourceId = 2 AND strSessionId = @strSessionId))
 INSERT INTO @InTransitItems
     ([intItemId] 
     ,[intItemLocationId] 
@@ -208,11 +209,12 @@ SELECT
 	,[strBOLNumber]
 	,[intTicketId]
 	,[intSourceEntityId]
-FROM ##ARItemsForInTransitCosting
+FROM tblARPostItemsForInTransitCosting
+WHERE strSessionId = @strSessionId
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 BEGIN		 --Call the post routine 
-	INSERT INTO ##ARInvoiceGLEntries
+	INSERT INTO tblARPostInvoiceGLEntries
 		([dtmDate] 
 		,[strBatchId]
 		,[intAccountId]
@@ -256,10 +258,10 @@ BEGIN		 --Call the post routine
 	UPDATE B
 	SET intAccountId = dbo.fnGetItemGLAccount(C.intLinkedItemId, A.intItemLocationId, 'Cost Of Goods')		
 	FROM tblICInventoryTransaction  A
-	JOIN ##ARInvoiceGLEntries B ON A.intInventoryTransactionId = B.intJournalLineNo
+	JOIN tblARPostInvoiceGLEntries B ON A.intInventoryTransactionId = B.intJournalLineNo
 							  AND A.intTransactionId = B.intTransactionId
 							  AND A.strTransactionId = B.strTransactionId
-	JOIN ##ARItemsForInTransitCosting C ON A.intTransactionId = C.intTransactionId
+	JOIN tblARPostItemsForInTransitCosting C ON A.intTransactionId = C.intTransactionId
 					             AND A.strTransactionId = C.strTransactionId
 					             AND A.intTransactionDetailId =  C.intTransactionDetailId 
 					             AND A.intItemId = C.intItemId
@@ -267,6 +269,7 @@ BEGIN		 --Call the post routine
 	WHERE A.strBatchId = @BatchId
 	  AND C.intLinkedItemId IS NOT NULL
 	  AND dbo.fnGetItemGLAccount(A.intItemId, A.intItemLocationId, 'Cost of Goods') = B.intAccountId
+	  AND C.strSessionId = @strSessionId
 
 END
 
@@ -314,14 +317,14 @@ SELECT
     ,[intStorageLocationId]
     ,[strActualCostId]
 	,[strBOLNumber]
-FROM 
-	##ARItemsForStorageCosting
+FROM tblARPostItemsForStorageCosting
+WHERE strSessionId = @strSessionId
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 BEGIN 
 	-- Call the post routine 
-	INSERT INTO ##ARInvoiceGLEntries
+	INSERT INTO tblARPostInvoiceGLEntries
 		([dtmDate] 
 		,[strBatchId]
 		,[intAccountId]
@@ -362,16 +365,22 @@ BEGIN
 			,@UserId
 END
 
-UPDATE ##ARInvoiceGLEntries
+UPDATE tblARPostInvoiceGLEntries
+SET [strSessionId] = @strSessionId
+WHERE strSessionId IS NULL 
+
+UPDATE tblARPostInvoiceGLEntries
 SET [dtmDateEntered] = @PostDate
    ,[strBatchId]     = @BatchId
+WHERE strSessionId = @strSessionId
 
 UPDATE GL
 SET GL.intSourceEntityId = I.intEntityCustomerId
   , GL.intEntityId		 = I.intEntityId
-FROM ##ARInvoiceGLEntries GL
+FROM tblARPostInvoiceGLEntries GL
 INNER JOIN tblARInvoice I ON GL.strTransactionId = I.strInvoiceNumber
 						 AND GL.intTransactionId = I.intInvoiceId
 WHERE GL.intSourceEntityId IS NULL
+  AND GL.strSessionId = @strSessionId
  
 RETURN 0

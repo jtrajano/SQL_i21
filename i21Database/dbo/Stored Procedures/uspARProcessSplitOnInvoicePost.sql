@@ -4,6 +4,7 @@
 	, @dtmDatePost		DATETIME = NULL
 	, @strBatchId		NVARCHAR(40) = NULL
 	, @intUserId		INT = 1
+	, @strSessionId		NVARCHAR(50) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -57,12 +58,13 @@ BEGIN TRY
 		 , dtmDate				= I.dtmDate
 		 , dblSplitPercent		= CASE WHEN SD.dblSplitPercent > 0 THEN SD.dblSplitPercent/100 ELSE 1 END
 		 , strTransactionType	= I.strTransactionType
-	FROM ##ARPostInvoiceHeader I 
+	FROM tblARPostInvoiceHeader I 
 	INNER JOIN tblEMEntitySplitDetail SD ON I.intSplitId = SD.intSplitId
 	WHERE I.intSplitId IS NOT NULL
 	  AND I.intDistributionHeaderId IS NULL 
 	  AND I.strType <> 'Transport Delivery'
 	  AND ((I.strTransactionType IN ('Invoice', 'Credit Memo') AND I.strType = 'Standard') OR I.strTransactionType NOT IN ('Invoice', 'Credit Memo'))
+	  AND I.strSessionId = @strSessionId
 
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM #SPLITINVOICEDETAILS)
 		RETURN;
@@ -159,8 +161,9 @@ BEGIN TRY
 		, dblPrice				= I.dblPrice
 		, ysnRecomputeTax		= 1
 	FROM #SPLITINVOICEDETAILS SD
-	INNER JOIN ##ARPostInvoiceDetail I ON I.intInvoiceId = SD.intInvoiceId
+	INNER JOIN tblARPostInvoiceDetail I ON I.intInvoiceId = SD.intInvoiceId
 	WHERE I.intContractDetailId IS NULL
+	  AND I.strSessionId = @strSessionId
 	
 	EXEC uspARProcessInvoicesByBatch @InvoiceEntries		= @InvoiceEntries
 								   , @LineItemTaxEntries	= @LineItemTaxEntries
@@ -242,12 +245,14 @@ BEGIN TRY
 
 	--DELETE UPDATED INVOICE FROM CURRENT POSTING DETAILS AND HEADER
 	DELETE IH
-	FROM ##ARPostInvoiceHeader IH
+	FROM tblARPostInvoiceHeader IH
 	INNER JOIN #EXCLUDEDSPLIT ES ON IH.intInvoiceId = ES.intInvoiceId
+	WHERE IH.strSessionId = @strSessionId
 
 	DELETE ID
-	FROM ##ARPostInvoiceDetail ID 	
+	FROM tblARPostInvoiceDetail ID 	
 	INNER JOIN #EXCLUDEDSPLIT ES ON ID.intInvoiceId = ES.intInvoiceId
+	WHERE ID.strSessionId = @strSessionId
 
 	INSERT INTO @InvoiceIds (
 		  intHeaderId
@@ -279,7 +284,7 @@ BEGIN TRY
 	  AND ysnSuccess = 1
       AND ysnHeader = 1
 			
-	EXEC dbo.uspARPopulateInvoiceDetailForPosting @InvoiceIds = @InvoiceIds, @Post = @ysnPost, @Recap = @ysnRecap, @PostDate = @dtmDatePost, @BatchId = @strBatchId
+	EXEC dbo.uspARPopulateInvoiceDetailForPosting @InvoiceIds = @InvoiceIds, @Post = @ysnPost, @Recap = @ysnRecap, @PostDate = @dtmDatePost, @BatchId = @strBatchId, @strSessionId = @strSessionId
 
 END TRY
 BEGIN CATCH

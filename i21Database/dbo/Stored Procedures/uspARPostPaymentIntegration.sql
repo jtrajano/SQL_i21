@@ -16,6 +16,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal    DECIMAL(18,6) = 0
 DECLARE @ZeroBit        BIT = CAST(0 AS BIT)
 DECLARE @OneBit         BIT = CAST(1 AS BIT)
+DECLARE @strSessionId   NVARCHAR(50) = NEWID()
 
 DECLARE @PaymentIds AS Id
 DECLARE @NonZeroPaymentIds AS Id
@@ -569,7 +570,7 @@ INSERT INTO @PaymentStaging(intId, intInvoiceId, dblBasePayment, strTransactionN
 SELECT A.[intTransactionId], A.[intInvoiceId], A.[dblBaseAmountPaid], A.[strTransactionId], '0', '0', 1, 1, 1, getdate(), 1, 1
 FROM #ARPostPaymentDetail A 
 
-EXEC dbo.uspARPaymentIntegration @InvoiceId, @Post, @PaymentStaging
+EXEC dbo.uspARPaymentIntegration @InvoiceId, @Post, @PaymentStaging, @strSessionId
 
 
 INSERT INTO @InvoiceId(intHeaderId) 

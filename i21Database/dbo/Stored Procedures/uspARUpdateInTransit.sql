@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInTransit]
+	@strSessionId		NVARCHAR(50) = NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -39,7 +40,7 @@ BEGIN
 		, intTransactionTypeId				= @INVENTORY_INVOICE_TYPE
 		, intFOBPointId						= FP.intFobPointId
 		, dtmTransactionDate				= ISNULL(ID.dtmPostDate, ID.dtmShipDate)
-	FROM ##ARPostInvoiceDetail ID
+	FROM tblARPostInvoiceDetail ID
 	LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
 	LEFT JOIN tblSMFreightTerms FT ON ID.intFreightTermId = FT.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
@@ -60,6 +61,7 @@ BEGIN
 		OR
 			(ID.[strType] = 'Provisional' AND ID.[ysnProvisionalWithGL] = 1)
 		)
+	AND ID.strSessionId = @strSessionId
 
 	DECLARE @TransactionDate DATE
 	DECLARE @tblItemsToUpdateByDate InTransitTableType
