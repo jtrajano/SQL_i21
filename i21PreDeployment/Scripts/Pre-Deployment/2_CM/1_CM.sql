@@ -7,7 +7,7 @@ BEGIN
 		DROP TABLE apcbkmst_origin
 	END
 
-	EXEC sp_rename 'apcbkmst', 'apcbkmst_origin'
+	EXEC sp_rename 'dbo.apcbkmst', 'apcbkmst_origin'
 END
 GO
 
@@ -19,7 +19,7 @@ BEGIN
 		DROP TABLE apchkmst_origin
 	END
 
-	EXEC sp_rename 'apchkmst', 'apchkmst_origin'
+	EXEC sp_rename 'dbo.apchkmst', 'apchkmst_origin'
 END
 GO
 
