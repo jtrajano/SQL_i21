@@ -79,7 +79,7 @@ CREATE TABLE #CUSTOMERS (
 	, dblCreditAvailable			NUMERIC(18, 6)
 	, dblARBalance					NUMERIC(18, 6)
 	, ysnStatementCreditLimit		BIT
-	, strComment					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	, strComment					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 )
 CREATE TABLE #STATEMENTREPORT (
 	   intId						INT IDENTITY (2, 1) NOT NULL
@@ -112,7 +112,7 @@ CREATE TABLE #STATEMENTREPORT (
 	 , dblBudgetNowDue				NUMERIC(18, 6)
 	 , ysnStatementCreditLimit		BIT
 	 , dtmDateCreated				DATETIME
-	 , strComment					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strComment					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 )
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_BUDGETREMINDER2] ON [#STATEMENTREPORT]([intEntityCustomerId], [intInvoiceId], [strTransactionType], [strType])
 CREATE TABLE #GLACCOUNTS (intAccountId	INT	NOT NULL PRIMARY KEY)
