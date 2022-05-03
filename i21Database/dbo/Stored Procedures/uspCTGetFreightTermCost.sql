@@ -132,6 +132,21 @@ BEGIN TRY
 				WHERE ctq.intCommodityId = @intCommodityId
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
 			END
+			ELSE
+			BEGIN
+				INSERT INTO @CostItems
+				SELECT @intCostItemId
+					, @strCostItem
+					, NULL
+					, NULL
+					, NULL
+					, NULL
+					, NULL
+					, NULL
+					, 'Per Unit'
+					, dblRate = 0
+					, dblAmount = 0
+			END
 		END
 		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
 		BEGIN
