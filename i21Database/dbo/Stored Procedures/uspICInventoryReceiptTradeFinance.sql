@@ -1,4 +1,4 @@
-﻿ CREATE PROCEDURE [dbo].[uspICInventoryReceiptTradeFinance]
+﻿CREATE PROCEDURE [dbo].[uspICInventoryReceiptTradeFinance]
 	@ReceiptId INT 
 	,@UserId INT
 	,@strAction NVARCHAR(50) = NULL 
@@ -281,4 +281,57 @@ BEGIN
 			EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
 		END 
 	END 
+END 
+
+-- Update the released lots
+BEGIN
+	DECLARE @LotsToRelease AS LotReleaseTableType 
+
+	INSERT INTO @LotsToRelease (
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[dblQty] 
+		,[intTransactionId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intOwnershipTypeId] 
+		,[dtmDate] 
+	)
+	SELECT 
+		[intItemId] = ri.intItemId
+		,[intItemLocationId] = il.intItemLocationId
+		,[intItemUOMId] = ril.intItemUnitMeasureId
+		,[intLotId] = ril.intLotId
+		,[intSubLocationId] = ril.intSubLocationId
+		,[intStorageLocationId] = ril.intStorageLocationId
+		,[dblQty] = ril.dblQuantity
+		,[intTransactionId] = r.intInventoryReceiptId
+		,[strTransactionId] = r.strReceiptNumber
+		,[intTransactionTypeId] = 4
+		,[intOwnershipTypeId] = ri.intOwnershipType
+		,[dtmDate] = r.dtmReceiptDate
+	FROM 
+		tblICInventoryReceipt r 
+		INNER JOIN tblICInventoryReceiptItem ri
+			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		INNER JOIN tblICInventoryReceiptItemLot ril 
+			ON ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId		
+		INNER JOIN tblICItemLocation il
+			ON il.intItemId = ri.intItemId
+			AND il.intLocationId = r.intLocationId
+		LEFT JOIN tblICWarrantStatus warrantStatus
+			ON warrantStatus.intWarrantStatus = ril.intWarrantStatus	
+	WHERE
+		r.intInventoryReceiptId = @ReceiptId
+		AND r.ysnPosted = 1
+
+	EXEC [uspICCreateLotRelease]
+		@LotsToRelease = @LotsToRelease 
+		,@intTransactionId = @ReceiptId
+		,@intTransactionTypeId = 4
+		,@intUserId = @UserId
 END 

@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICIncreaseReleasedLot]
-	@ItemsToIncreaseReleasedLot AS ItemCostingTableType READONLY
+	@ItemsToIncreaseReleasedLot AS LotReleaseTableType READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -122,12 +122,12 @@ BEGIN
 				AND (ItemsToValidate.intStorageLocationId = lot.intStorageLocationId OR (ItemsToValidate.intStorageLocationId IS NULL AND lot.intStorageLocationId IS NULL))
 
 	WHERE	ItemsToValidate.intItemId IS NOT NULL 	
-			AND lot.dblQty - ISNULL(lot.dblReleasedQty, 0) + ISNULL(ItemsToValidate.dblQty, 0) >= 0 
+			AND lot.dblQty - ISNULL(lot.dblReleasedQty, 0) + ISNULL(ItemsToValidate.dblQty, 0) < 0 
 			
 	-- 'Available Qty in %s is %f. Releasing %f is not allowed.'
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		EXEC uspICRaiseError 80130, @strLotNumber, @dblQty, @dblReleasedQty;
+		EXEC uspICRaiseError 80270, @strLotNumber, @dblQty, @dblReleasedQty;
 		GOTO _Exit
 	END 
 END 
