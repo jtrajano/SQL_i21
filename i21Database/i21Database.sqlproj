@@ -902,7 +902,7 @@
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblAPVendor.sql" />
     <Build Include="dbo\Tables\tblCMBank.sql" />
-    <Build Include="dbo\Tables\tblCMResponsibleParty.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyOption.sql" />
     <Build Include="dbo\Tables\tblCMBankAccount.sql" />
     <Build Include="dbo\Tables\tblCMBankFileFormat.sql" />
     <Build Include="dbo\Tables\tblCMBankFileFormatDetail.sql" />
@@ -10866,6 +10866,7 @@
     <None Include="Scripts\Post-Deployment\CM\14_BankAccountTypes.sql" />
     <None Include="Scripts\Post-Deployment\CM\15_CompanyPreferenceOptions.sql" />
     <None Include="Scripts\Post-Deployment\CM\16_UpdateNextEFTNo.sql" />
+    <None Include="Scripts\Post-Deployment\CM\17_InsertResponsiblePartyOption.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
