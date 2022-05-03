@@ -270,7 +270,6 @@
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerPricing.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
@@ -10285,8 +10284,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
-  </ItemGroup>
+  </ItemGroup>  
 </Project>
