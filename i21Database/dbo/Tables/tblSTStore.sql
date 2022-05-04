@@ -133,6 +133,7 @@
 	[intChangeFundBegBalanceItemId]	INT NULL, 
 
     [ysnLotterySetupMode]           BIT NULL, 
+    [ysnActive]						BIT NULL DEFAULT 1 WITH VALUES, 
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
