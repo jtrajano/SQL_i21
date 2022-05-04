@@ -1,4 +1,8 @@
 ﻿
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'apcbkmst')
+	DROP VIEW apcbkmst
+
+
 IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'apcbkmst' and TABLE_TYPE = N'BASE TABLE')
 BEGIN
 	--Drop apcbkmst_origin if exist in preparation for sp_rename
