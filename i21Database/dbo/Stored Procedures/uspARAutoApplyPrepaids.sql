@@ -459,8 +459,6 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
                     , ysnPost                       = 1
                 FROM #AAPINVOICES I
                 WHERE I.intInvoiceId = @intInvoiceId
-
-				select 789,* from #AAPINVOICES
             END
 
 		IF NOT EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment)
@@ -478,8 +476,12 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 --CREATE AND POST PAYMENTS
 IF EXISTS (SELECT TOP 1 NULL FROM @tblPaymentEntries)
 	BEGIN
+		DECLARE @ErrorMessage NVARCHAR(500) = NULL, @LogId INT = NULL
+
 		EXEC dbo.uspARProcessPayments @PaymentEntries	= @tblPaymentEntries
 									, @UserId			= @intEntityUserId
 									, @GroupingOption	= 7
 									, @RaiseError		= 0
+									, @ErrorMessage		= @ErrorMessage OUT
+								    , @LogId			= @LogId OUT
 	END
