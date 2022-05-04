@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Coworker Goal' AND strModuleName = 'Help Desk')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Entry Period' AND strModuleName = 'Help Desk')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6022,9 +6022,15 @@ UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'HelpDesk.view.TicketType'
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Coworker Goal' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Coworker Goal', N'Help Desk', @HelpDeskMaintenanceParentMenuId, N'Coworker Goal', N'Maintenance', N'Screen', N'HelpDesk.view.TicketStatusWorkflow', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
+	VALUES (N'Coworker Goal', N'Help Desk', @HelpDeskMaintenanceParentMenuId, N'Coworker Goal', N'Maintenance', N'Screen', N'HelpDesk.view.CoworkerGoal?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'HelpDesk.view.CoworkerGoal?showSearch=true' WHERE strMenuName = 'Coworker Goal' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Entry Period' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Time Entry Period', N'Help Desk', @HelpDeskMaintenanceParentMenuId, N'Time Entry Period', N'Maintenance', N'Screen', N'HelpDesk.view.TimeEntryPeriod?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'HelpDesk.view.TimeEntryPeriod?showSearch=true' WHERE strMenuName = 'Time Entry Period' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Summary' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
