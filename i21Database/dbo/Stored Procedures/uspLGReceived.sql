@@ -169,7 +169,8 @@ SET ANSI_WARNINGS OFF
 				BEGIN
 					UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
 
-					IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) < SUM(ISNULL(dblQuantity, 0)))
+					--If total Delivered Qty is zero, change status back to "In-Transit Inbound"
+					IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) <= 0)
 						UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 							
 					SELECT TOP 1
@@ -264,7 +265,8 @@ SET ANSI_WARNINGS OFF
 			BEGIN
 				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
 
-				IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) < SUM(ISNULL(dblQuantity, 0)))
+				--If total Delivered Qty is zero, change status back to "In-Transit Inbound"
+				IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) <= 0)
 					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 							
 				SELECT TOP 1
