@@ -1,14 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMPostBankTransfer]    
- @ysnPost      BIT  = 0    
- ,@ysnRecap      BIT  = 0    
- ,@strTransactionId  NVARCHAR(40) = NULL     
- ,@strBatchId     NVARCHAR(40) = NULL     
- ,@intUserId      INT  = NULL     
- ,@intEntityId    INT  = NULL    
- ,@isSuccessful    BIT  = 0 OUTPUT     
- ,@message_id     INT  = 0 OUTPUT     
- ,@outBatchId     NVARCHAR(40) = NULL OUTPUT    
- ,@ysnBatch      BIT  = 0    
+   @ysnPost      BIT  = 0    
+  ,@ysnRecap      BIT  = 0    
+  ,@strTransactionId  NVARCHAR(40) = NULL     
+  ,@strBatchId     NVARCHAR(40) = NULL     
+  ,@intUserId      INT  = NULL     
+  ,@intEntityId    INT  = NULL    
+  ,@isSuccessful    BIT  = 0 OUTPUT     
+  ,@message_id     INT  = 0 OUTPUT     
+  ,@outBatchId     NVARCHAR(40) = NULL OUTPUT    
+  ,@ysnBatch      BIT  = 0    
 AS    
     
 SET QUOTED_IDENTIFIER OFF    
@@ -716,16 +716,9 @@ IF @ysnPost = 1
     
     IF @ysnPost = 1   
     BEGIN    
-      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId =2 OR @intBankTransferTypeId = 4
+      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId =2 OR @intBankTransferTypeId = 4 OR @intBankTransferTypeId =5
       BEGIN  
-            DELETE A FROM tblCMBankTransaction A
-            WHERE 
-            A.strTransactionId IN( 
-              SELECT strTransactionId +@BANK_TRANSFER_WD_PREFIX strTransactionId FROM #tmpGLDetail UNION 
-              SELECT strTransactionId +@BANK_TRANSFER_DEP_PREFIX strTransactionId FROM #tmpGLDetail
-            )
-
-
+         
             INSERT INTO tblCMBankTransaction (    
             strTransactionId    
             ,intBankTransactionTypeId    
@@ -848,13 +841,7 @@ IF @ysnPost = 1
               CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F    
               WHERE intAccountId = @intGLAccountIdTo
 
-            -- FROM [dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt    
-            --   ON A.intGLAccountIdFrom = GLAccnt.intAccountId      
-            --   INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp    
-            --   ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId    
-                  
-              
-              
+ 
         
             IF @intBankTransferTypeId = 4 AND ISNULL(@ysnPostedInTransit,0) =1
               EXEC uspCMCreateBankSwapLong @intTransactionId
@@ -862,9 +849,9 @@ IF @ysnPost = 1
       END    -- @ysnPost =1
     ELSE    
     BEGIN    
-      IF @intBankTransferTypeId = 2
-      BEGIN
-        IF @ysnPosted = 1
+      IF @ysnPostedInTransit = 1 --OR @intBankTransferTypeId = 1 --OR (@intBankTransferTypeId = 2 AND @ysnPosted = 1)  
+      BEGIN  
+		 IF @ysnPosted = 1
           DELETE FROM tblCMBankTransaction    
           WHERE strLink = @strTransactionId    
           AND ysnClr = 0    
@@ -873,44 +860,11 @@ IF @ysnPost = 1
           DELETE FROM tblCMBankTransaction    
           WHERE strLink = @strTransactionId    
           AND ysnClr = 0    
-          AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD)      
-
-      END
-      ELSE
-      IF @ysnPostedInTransit = 1 --OR @intBankTransferTypeId = 1 --OR (@intBankTransferTypeId = 2 AND @ysnPosted = 1)  
-      BEGIN  
-        DELETE FROM tblCMBankTransaction    
-        WHERE strLink = @strTransactionId    
-        AND ysnClr = 0    
-        AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)    
+          AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD)   
+     
       END  
     END    
     IF @@ERROR <> 0 GOTO Post_Rollback    
-
-    -- SWAP IN TRANSACTION WILL CREATE SWAP OUT AFTER POSTING
-    -- IF @intBankTransferTypeId = 4 AND @ysnPostedInTransit = 1
-    -- BEGIN
-    --   IF @ysnPost = 1
-    --   BEGIN
-    --   -- CREATE SWAP OUT HERE
-    --   -- DISABLE SWAP IN WINDOW
-    --   -- ENABLE SWAP OUT WINDOW
-    --   END
-    --   ELSE
-    --   BEGIN
-      
-    --     -- IF SWAP OUT IS POSTED THROW ERROR 'UNPOST SWAP OUT BEFORE UNPOSTING SWAP IN'
-        
-    --     -- DELETE SWAP OUT   
-    --     -- DISABLE SWAP IN WINDOW
-    --     -- ENABLE SWAP OUT WINDOW
-       
-      
-      
-    --   END
-      
-
-    -- END
 END    
 --=====================================================================================================================================    
 --  Check if process is only a RECAP    
