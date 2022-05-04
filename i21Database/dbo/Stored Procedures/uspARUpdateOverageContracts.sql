@@ -6,6 +6,7 @@
 	, @ysnFromSalesOrder	BIT = 0
 	, @ysnFromImport		BIT = 0
 	, @dblSpotPrice			NUMERIC(18, 6) = 0
+	, @ysnSpotQtyOnly		BIT = 0
 AS
 
 DECLARE @tblInvoiceIds				InvoiceId
@@ -15,6 +16,8 @@ DECLARE @intUnitMeasureId			INT
 	  , @strInvalidItem				NVARCHAR(500)
 	  , @dblQtyOverAged				NUMERIC(18, 6) = 0
 	  , @dblDWGSpotPrice			NUMERIC(18, 6) = 0
+
+SET @ysnSpotQtyOnly = ISNULL(@ysnSpotQtyOnly, 0)
 
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#INVOICEDETAILS') IS NOT NULL)
@@ -431,7 +434,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				  AND C.intEntityId = @intEntityCustomerId
 				  AND CD.intCompanyLocationId = @intCompanyLocationId
 				  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
-				  --AND C.intPricingTypeId <> 2
+				  AND @ysnSpotQtyOnly = 0
 				ORDER BY CD.intContractSeq
 
 				WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTS)
@@ -566,7 +569,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						  AND CD.intCompanyLocationId = @intCompanyLocationId
 						  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
 						  AND C.intContractHeaderId > @intContractHeaderId
-						  --AND C.intPricingTypeId <> 2
+						  AND @ysnSpotQtyOnly = 0
 						ORDER BY C.intContractHeaderId, CD.intContractDetailId
 
 						WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTSBYCUSTOMER)
