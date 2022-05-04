@@ -25,7 +25,7 @@ BEGIN
 	WHERE strTradeFinanceTransaction = @strTradeFinanceNumber
 	AND strTransactionType = CASE WHEN ISNULL(@strTransactionType, '') = '' THEN strTransactionType ELSE @strTransactionType END
 	AND strLimit = CASE WHEN ISNULL(@strLimitType, '') = '' THEN strLimit ELSE @strLimitType END
-	ORDER BY dtmTransactionDate DESC
+	ORDER BY dtmCreatedDate DESC
 
 	-- CHECK IF LATEST LOG CONTAINS QTY AND AMOUNT TO BE NEGATED. 
 	-- IF FINANCE QTY <= 0, WILL NOT BE CREATING NEGATE LOG DUE TO NO QTY TO BE NEGATED OR QTY WAS ALREADY NEGATED
