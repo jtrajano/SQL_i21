@@ -302,10 +302,17 @@ BEGIN
 		FROM tblLGLoad
 		WHERE intLoadId = @intTransactionId
 
-		SELECT @intEntityId = (SELECT TOP 1 CASE @intPurchaseSaleId 
+		IF(@strInstoreTo = 'Hauler')
+		BEGIN
+			SELECT @intEntityId = intHaulerEntityId FROM tblLGLoad WHERE intLoadId = @intTransactionId		
+		END
+		ELSE 
+		BEGIN
+			SELECT @intEntityId = (SELECT TOP 1 CASE @intPurchaseSaleId 
 												WHEN 1 THEN intVendorEntityId 
 												WHEN 2 THEN intCustomerEntityId 
 												WHEN 3 THEN intCustomerEntityId END FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId)
+		END
 
 		SELECT @strEntityName = strName
 		FROM tblEMEntity
