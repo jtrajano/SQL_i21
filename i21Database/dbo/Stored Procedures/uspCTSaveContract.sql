@@ -72,7 +72,7 @@ BEGIN TRY
 	) pricing
 	where cd.intContractHeaderId = @intContractHeaderId
 	and cd.intPricingTypeId = 1
-	and ch.intPricingTypeId <> 1
+	and ch.intPricingTypeId in (2,3)
 	and ch.ysnMultiplePriceFixation <> 1
 	and cd.dblQuantity > isnull(pricing.dblPricedQty,0);
 
@@ -94,7 +94,7 @@ BEGIN TRY
 	) pricing
 	where cd.intContractHeaderId = @intContractHeaderId
 	and cd.intPricingTypeId = 1
-	and ch.intPricingTypeId <> 1
+	and ch.intPricingTypeId = 2
 	and ch.ysnMultiplePriceFixation <> 1
 	and cd.dblQuantity > isnull(pricing.dblPricedQty,0)
 	and ISNULL(cd.intSplitFromId,0) = 0;

@@ -340,26 +340,31 @@ BEGIN
 	  , intCurrentStatus = 5
 	WHERE intPaymentId = @intPaymentId
 
-	EXEC [dbo].[uspARPostPayment]
-			@batchId = NULL,
-			@post = 1,
-			@recap = 0,
-			@param = @intPaymentId,
-			@userId = @intUserId,
-			@beginDate = NULL,
-			@endDate = NULL,
-			@beginTransaction = NULL,
-			@endTransaction = NULL,
-			@exclude = NULL,
-			@raiseError = 1,
-			@bankAccountId = NULL
+	BEGIN TRY
+		EXEC [dbo].[uspARPostPayment] @post			= 1
+									, @recap		= 0
+									, @param		= @intPaymentId
+									, @userId		= @intUserId
+									, @raiseError	= 1
+	END TRY
+	BEGIN CATCH
+		DECLARE @strErrorMsg NVARCHAR(250) = ERROR_MESSAGE()
+
+		UPDATE tblARPayment 
+		SET intEntityCardInfoId		= @intEntityCardInfoId
+		  , ysnProcessCreditCard	= 0 
+		  , intCurrentStatus		= 5
+		  , strCreditCardNote		= @strErrorMsg
+		  , strCreditCardStatus		= 'Failed'
+		WHERE intPaymentId = @intPaymentId
+
+	END CATCH
 
 	SET @intPaymentIdNew = @intPaymentId
 	SELECT @strPaymentIdNew = strRecordNumber FROM tblARPayment WHERE intPaymentId = @intPaymentId
-	--Set the Card Info Id and Process Credit Card
+	
 	UPDATE tblARPayment 
 	SET intEntityCardInfoId = @intEntityCardInfoId
-	  --, ysnProcessCreditCard = 1 
 	  , intCurrentStatus = 5
 	WHERE intPaymentId = @intPaymentId
 

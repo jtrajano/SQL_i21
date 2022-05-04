@@ -9,6 +9,7 @@
 	[intDriverEntityId] INT NULL, 
 	[intDispatchStatus] INT NULL, 
 	[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[intSourceType] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT((1)), 
 
 	CONSTRAINT [PK_tblLGDispatchOrder_intDispatchOrderId] PRIMARY KEY ([intDispatchOrderId]),

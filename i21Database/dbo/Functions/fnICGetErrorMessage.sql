@@ -283,6 +283,7 @@ BEGIN
 		WHEN @msgId = 80267 THEN 'The Receipt Qty for %s is %f. Total Lot Quantity is %f. The difference is %f.'
 		WHEN @msgId = 80268 THEN '%s is a missing lot it should not have a negative quantity.'
 		WHEN @msgId = 80269 THEN 'Multiple lots are not allowed for %s. See the company configuration &#8594; Receipts &#8594; Single or Multiple Lots option.'
+		WHEN @msgId = 80270 THEN 'Available Qty in %s is %f. Releasing %f is not allowed.'
 	END 
 
 	RETURN @msg

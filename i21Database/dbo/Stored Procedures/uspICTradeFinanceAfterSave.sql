@@ -261,4 +261,57 @@ BEGIN
 	WHERE
 		itf.intInventoryTradeFinanceId = @intTransactionId
 END
+
+-- Update the released lots
+BEGIN
+	DECLARE @LotsToRelease AS LotReleaseTableType 
+
+	INSERT INTO @LotsToRelease (
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[dblQty] 
+		,[intTransactionId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intOwnershipTypeId] 
+		,[dtmDate] 
+	)
+	SELECT 
+		[intItemId] = itfLot.intItemId
+		,[intItemLocationId] = lot.intItemLocationId
+		,[intItemUOMId] = itfLot.intItemUOMId
+		,[intLotId] = itfLot.intLotId
+		,[intSubLocationId] = itfLot.intSubLocationId
+		,[intStorageLocationId] = itfLot.intStorageLocationId
+		,[dblQty] = itfLot.dblQuantity
+		,[intTransactionId] = itf.intInventoryTradeFinanceId
+		,[strTransactionId] = itf.strTradeFinanceNumber
+		,[intTransactionTypeId] = 62
+		,[intOwnershipTypeId] = lot.intOwnershipType
+		,[dtmDate] = itf.dtmDateApproved
+	FROM 
+		tblICInventoryTradeFinance itf
+		
+		LEFT JOIN tblTRFTradeFinance tf
+			ON itf.strTradeFinanceNumber = tf.strTradeFinanceNumber
+
+		LEFT JOIN (
+			tblICInventoryTradeFinanceLot itfLot INNER JOIN tblICLot lot
+				ON itfLot.intLotId = lot.intLotId
+		)
+			ON itfLot.intInventoryTradeFinanceId = itf.intInventoryTradeFinanceId	
+	WHERE
+		itf.intInventoryTradeFinanceId = @intTransactionId
+
+	EXEC [uspICCreateLotRelease]
+		@LotsToRelease = @LotsToRelease 
+		,@intTransactionId = @intTransactionId
+		,@intTransactionTypeId = 62
+		,@intUserId = @intEntityUserSecurityId
+END 
+
 RETURN 0

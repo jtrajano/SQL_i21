@@ -2,14 +2,15 @@
  @intConsolidationId   AS INT,  
  @ysnPost     AS BIT,  
  @ysnRecap     AS BIT,  
- @intEntityId    AS INT  
+ @intEntityId    AS INT,
+ @strMessage NVARCHAR(MAX) OUT
 AS  
 DECLARE @PostGLEntries RecapTableType  
 DECLARE @ReversePostGLEntries RecapTableType  
 DECLARE @PostGLEntries2 RecapTableType  
 DECLARE @strPostBatchId NVARCHAR(100) = ''  
 DECLARE @strReversePostBatchId NVARCHAR(100) = ''  
-DECLARE @strMessage NVARCHAR(MAX)  
+-- DECLARE @strMessage NVARCHAR(MAX)  
 DECLARE @intReverseID INT  
 DECLARE @strConsolidationNumber NVARCHAR(30)  
 DECLARE @tblPostError TABLE(  
@@ -27,7 +28,7 @@ DECLARE @tblPostError TABLE(
     
   SELECT @strMessage = dbo.fnGLValidateRevaluePeriod(@intConsolidationId,@ysnPost)   
   IF @strMessage <> ''  
-   GOTO _raiserror  
+    GOTO _error
   
   IF @ysnRecap = 1  
    SELECT @strPostBatchId =  NEWID()  
@@ -37,7 +38,7 @@ DECLARE @tblPostError TABLE(
     IF EXISTS(SELECT TOP 1 1 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)  
     BEGIN  
      SET @strMessage ='The transaction is already posted.'  
-     GOTO _raiserror  
+      GOTO _error 
     END  
     EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT  
    END  
@@ -74,7 +75,7 @@ DECLARE @tblPostError TABLE(
   -- Validate CM revaluation  
   SELECT @strMessage = dbo.fnCMValidateCMRevaluation(@intGLFiscalYearPeriodId, @strTransactionType, @ysnPost)  
   IF @strMessage IS NOT NULL  
-   GOTO _raiserror  
+    GOTO _error
   
   IF (@strTransactionType IN ('CM Forwards', 'CM In-Transit', 'CM Swaps'))  
   BEGIN  
@@ -95,7 +96,7 @@ DECLARE @tblPostError TABLE(
     END TRY  
     BEGIN CATCH  
      SELECT  @strMessage = ERROR_MESSAGE();   
-     GOTO _raiserror  
+      GOTO _error 
     END CATCH  
   
     DELETE @tblTransactions WHERE strTransactionId = @strCurrentTransaction  
@@ -388,7 +389,7 @@ DECLARE @tblPostError TABLE(
   SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId  
   IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)  
   BEGIN  
-   GOTO _raiserror  
+    GOTO _error
   END  
   
  END  
@@ -452,13 +453,15 @@ DECLARE @tblPostError TABLE(
    from fnGLOverridePostAccounts(@PostGLEntries) A   
      
       
-   IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' )  
-   
-    GOTO _raiseOverrideError  
-  
+    IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
+    BEGIN 
+      EXEC uspGLPostRecap @PostGLEntries2, @intEntityId  
+      GOTO _overrideError
+    END
+    
    EXEC uspGLBookEntries @PostGLEntries2, @ysnPost, 1 ,1  
   
-   IF @@ERROR <> 0 GOTO _end  
+   IF @@ERROR <> 0 RETURN  
   
    IF @ysnPost = 0  
     UPDATE GL SET ysnIsUnposted = 1  
@@ -532,7 +535,8 @@ DECLARE @tblPostError TABLE(
    EXEC uspGLPostRecap @PostGLEntries2, @intEntityId  
   
    IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' )  
-    GOTO _raiseOverrideError  
+      GOTO _overrideError
+   
   END  
   
   
@@ -581,19 +585,18 @@ DECLARE @tblPostError TABLE(
   END  
    
   
- SELECT @strPostBatchId PostBatchId  
+ SET @strMessage = @strPostBatchId
+
+ RETURN  
+
+ _error:
+  SET @strMessage = 'Error Posting Revalue:'  + @strMessage
+
+  RETURN
+
+ _overrideError:
+  SET @strMessage = 'Error Overriding Accounts'  
+  EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId
   
- GOTO _end  
-  
-  
- _raiseOverrideError:  
-  set @strMessage = 'Error overriding accounts.' + @strPostBatchId  
-  RAISERROR( @strMessage,11,1)  
-  GOTO _end  
-  
- _raiserror:  
-  RAISERROR( @strMessage,11,1)  
- --END  
-    
-_end:  
-  
+
+ 

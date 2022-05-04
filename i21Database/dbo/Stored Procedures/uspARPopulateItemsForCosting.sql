@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
+	@strSessionId		NVARCHAR(50)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -21,7 +22,7 @@ DECLARE @ZeroDecimal 	DECIMAL(18,6) = 0.000000
 DECLARE @ZeroBit 		BIT = CAST(0 AS BIT)	
 DECLARE @OneBit 		BIT = CAST(1 AS BIT)
 
-INSERT INTO ##ARItemsForCosting
+INSERT INTO tblARPostItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -52,6 +53,7 @@ INSERT INTO ##ARItemsForCosting
 	,[strBOLNumber]
 	,[intTicketId]
 	,[intSourceEntityId]
+	,[strSessionId]
 )
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
@@ -116,7 +118,8 @@ SELECT
 	,[strBOLNumber]				= ARID.strBOLNumber 
 	,[intTicketId]				= ARID.intTicketId
 	,[intSourceEntityId]		= ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]				= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
 LEFT OUTER JOIN tblARInvoiceDetailLot ARIDL WITH (NOLOCK) ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN tblARInvoiceDetail ARIDP WITH (NOLOCK) ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
@@ -149,10 +152,11 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
 	AND ARID.[intStorageScheduleTypeId] IS NULL
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND LGL.[intPurchaseSale] NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NULL)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NOT NULL))))
-	--AND ISNULL(T.[intTicketTypeId], 0) <> 9 
+	--AND ISNULL(T.[intTicketTypeId], 0) <> 9
+	AND ARID.strSessionId = @strSessionId 
 
 --Bundle Items
-INSERT INTO ##ARItemsForCosting
+INSERT INTO tblARPostItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -182,6 +186,7 @@ INSERT INTO ##ARItemsForCosting
 	,[strBOLNumber] 
 	,[intTicketId]
 	,[intSourceEntityId]
+	,[strSessionId]
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
@@ -222,7 +227,8 @@ SELECT
 	,[strBOLNumber]				= ARID.strBOLNumber 
 	,[intTicketId]				= ARID.intTicketId
 	,[intSourceEntityId]		= ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]				= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.[intBundleItemId] = ICI.[intItemId]
@@ -246,9 +252,10 @@ WHERE (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest')
 	AND ICI.[strType] <> 'Non-Inventory'
 	AND ARID.[intStorageScheduleTypeId] IS NULL
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND LGL.[intPurchaseSale] NOT IN (2, 3)))
+	AND ARID.strSessionId = @strSessionId
 
 -- Final Invoice
-INSERT INTO ##ARItemsForCosting
+INSERT INTO tblARPostItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -278,6 +285,7 @@ INSERT INTO ##ARItemsForCosting
 	,[strBOLNumber] 
 	,[intTicketId]
 	,[intSourceEntityId]
+	,[strSessionId]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -309,19 +317,23 @@ SELECT
 	,ARID.[strBOLNumber] 
 	,ARID.[intTicketId]
 	,ARID.[intEntityCustomerId]
-FROM ##ARItemsForCosting ARIC
-INNER JOIN ##ARPostInvoiceDetail ARID ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
+	,@strSessionId
+FROM tblARPostItemsForCosting ARIC
+INNER JOIN tblARPostInvoiceDetail ARID ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
 INNER JOIN tblARInvoiceDetail ARIDP ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
 WHERE ARID.[intSourceId] = 2
 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NULL) OR (ARID.[dblQtyShipped] < ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NOT NULL))
+AND ARID.strSessionId = @strSessionId
+AND ARIC.strSessionId = @strSessionId
 
 UPDATE IC
 SET strSourceType = 'Transport'
   , strSourceNumber	= LH.strTransaction
-FROM ##ARItemsForCosting IC
+FROM tblARPostItemsForCosting IC
 INNER JOIN tblARInvoice I ON IC.intTransactionId = I.intInvoiceId AND IC.strTransactionId = I.strInvoiceNumber
 INNER JOIN tblTRLoadDistributionHeader DH ON I.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId 
 INNER JOIN tblTRLoadHeader LH ON DH.intLoadHeaderId = LH.intLoadHeaderId
 WHERE IC.strType = 'Transport Delivery'
+  AND IC.strSessionId = @strSessionId
 
 RETURN 1

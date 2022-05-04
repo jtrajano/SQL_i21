@@ -62,6 +62,14 @@ BEGIN TRY
 	SELECT TOP 1 @intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId
 		, @intCommodityId = intCommodityId
 	FROM tblRKMatchFuturesPSHeader WHERE intMatchNo = @intMatchNo
+
+	-- FOR SCENARIO OF CREATE NEW MATCH AND CLICK CREATE BANK TRANSACTION WITHOUT SAVING.
+	IF NOT EXISTS (SELECT TOP 1 '' FROM tblRKMatchDerivativesPostRecap 
+					WHERE intTransactionId = @intMatchFuturesPSHeaderId
+			)
+	BEGIN
+		EXEC uspRKMatchDerivativesPostRecap @intMatchFuturesPSHeaderId, 1
+	END
 	
 	SELECT @dblGrossPL = SUM(dblGrossPL)
 		, @dblNetPnL = SUM(dblNetPL)

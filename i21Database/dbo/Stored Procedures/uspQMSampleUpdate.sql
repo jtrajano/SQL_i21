@@ -730,6 +730,7 @@ BEGIN TRY
 			)
 
 	EXEC sp_xml_removedocument @idoc
+	SET @idoc = 0
 
 	SELECT @intSampleTypeId = intSampleTypeId
 		,@dblSampleQty = dblSampleQty

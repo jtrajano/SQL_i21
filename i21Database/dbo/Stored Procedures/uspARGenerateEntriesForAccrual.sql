@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGenerateEntriesForAccrual]
-
+    @strSessionId		NVARCHAR(50) = NULL
 AS
 
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
@@ -12,9 +12,9 @@ DECLARE @ZeroDecimal DECIMAL(18,6) = 0
 DECLARE @OneDecimal DECIMAL(18,6) = 1
 DECLARE @OneHundredDecimal DECIMAL(18,6) = 100
 
-EXEC dbo.[uspARUpdateInvoiceAccruals]  
+EXEC dbo.[uspARUpdateInvoiceAccruals] @strSessionId = @strSessionId
 
-WHILE EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.[intTransactionId],0) = 0)
+WHILE EXISTS(SELECT NULL FROM tblARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.[intTransactionId],0) = 0 AND I.strSessionId = @strSessionId)
 BEGIN
     DECLARE  @InvoiceId							INT
             ,@AccrualPeriod						INT
@@ -29,14 +29,15 @@ BEGIN
             ,@UnitsRemainder					DECIMAL(18,6)
             ,@TaxRemainder						DECIMAL(18,6)
 
-    SELECT TOP 1 @InvoiceId = I.[intInvoiceId] FROM ##ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.intTransactionId,0) = 0
+    SELECT TOP 1 @InvoiceId = I.[intInvoiceId] FROM tblARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.intTransactionId,0) = 0 AND I.strSessionId = @strSessionId
 
     SELECT @AccrualPeriod = [intPeriodsToAccrue]
-    FROM ##ARPostInvoiceHeader
+    FROM tblARPostInvoiceHeader
     WHERE [intInvoiceId] = @InvoiceId 
+      AND strSessionId = @strSessionId
 
     --DEBIT AR
-	INSERT INTO ##ARInvoiceGLEntries
+	INSERT INTO tblARPostInvoiceGLEntries
 		([dtmDate]
         ,[strBatchId]
         ,[intAccountId]
@@ -79,6 +80,7 @@ BEGIN
         ,[intCommodityId]
         ,[intSourceEntityId]
         ,[ysnRebuild]
+        ,[strSessionId]
 	)	
     SELECT
          [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
@@ -123,21 +125,18 @@ BEGIN
         ,[intCommodityId]               = NULL
         ,[intSourceEntityId]            = NULL
         ,[ysnRebuild]                   = NULL
-    FROM
-        ##ARPostInvoiceHeader I
-    LEFT OUTER JOIN
-        (
+        ,[strSessionId]                 = @strSessionId
+    FROM tblARPostInvoiceHeader I
+    LEFT OUTER JOIN (
         SELECT
              [dblUnitQtyShipped]    = SUM([dblUnitQtyShipped])
             ,[intInvoiceId]         = [intInvoiceId]
-        FROM
-            ##ARPostInvoiceDetail
-        GROUP BY
-            [intInvoiceId]
-        ) ARID
-            ON I.[intInvoiceId] = ARID.[intInvoiceId]
-    WHERE
-        I.[intInvoiceId] = @InvoiceId
+        FROM tblARPostInvoiceDetail
+        WHERE strSessionId = @strSessionId
+        GROUP BY [intInvoiceId]
+    ) ARID ON I.[intInvoiceId] = ARID.[intInvoiceId]
+    WHERE I.[intInvoiceId] = @InvoiceId
+      AND I.strSessionId = @strSessionId
 
 	UNION ALL
 	 
@@ -184,23 +183,20 @@ BEGIN
         ,[intCommodityId]               = NULL
         ,[intSourceEntityId]            = NULL
         ,[ysnRebuild]                   = NULL
-    FROM
-        ##ARPostInvoiceHeader I
-    LEFT OUTER JOIN
-        (
+        ,[strSessionId]                 = @strSessionId
+    FROM tblARPostInvoiceHeader I
+    LEFT OUTER JOIN (
         SELECT
              [dblUnitQtyShipped]        = SUM([dblUnitQtyShipped])
             ,[dblDiscountAmount]        = SUM([dblDiscountAmount])
             ,[dblBaseDiscountAmount]    = SUM([dblBaseDiscountAmount])
             ,[intInvoiceId]             = [intInvoiceId]
-        FROM
-            ##ARPostInvoiceDetail
-        GROUP BY
-            [intInvoiceId]
-        ) ARID
-            ON I.[intInvoiceId] = ARID.[intInvoiceId]
-    WHERE
-        I.[intInvoiceId] = @InvoiceId
+        FROM tblARPostInvoiceDetail
+        WHERE strSessionId = @strSessionId
+        GROUP BY [intInvoiceId]
+    ) ARID ON I.[intInvoiceId] = ARID.[intInvoiceId]
+    WHERE I.[intInvoiceId] = @InvoiceId
+      AND I.strSessionId = @strSessionId
 		
 		
 		 
@@ -229,7 +225,7 @@ BEGIN
         ,[dblLicenseAmount]     = @ZeroDecimal
         ,[strMaintenanceType]   = ARID.[strMaintenanceType]
     FROM
-        ##ARPostInvoiceDetail ARID
+        tblARPostInvoiceDetail ARID
     WHERE
         ARID.[intInvoiceId] = @InvoiceId
         AND ARID.[dblTotal] <> @ZeroDecimal 
@@ -239,6 +235,7 @@ BEGIN
             ARID.[strItemType] IN ('Non-Inventory','Service','Other Charge')
             )
         AND ARID.[strTransactionType] <> 'Debit Memo'
+        AND ARID.strSessionId = @strSessionId
     ORDER BY
         ARID.[intInvoiceDetailId]
 
@@ -266,7 +263,7 @@ BEGIN
         ,[dblLicenseAmount]     = CASE WHEN ARID.[ysnAccrueLicense] = 1 THEN ARID.[dblLicenseAmount] ELSE @ZeroDecimal END
         ,[strMaintenanceType]   = ARID.[strMaintenanceType]
     FROM
-        ##ARPostInvoiceDetail ARID
+        tblARPostInvoiceDetail ARID
     WHERE
         ARID.[intInvoiceId] = @InvoiceId 
         AND (ARID.[dblLicenseAmount] <> @ZeroDecimal OR ARID.[dblMaintenanceAmount] <> @ZeroDecimal) 
@@ -274,6 +271,7 @@ BEGIN
         AND ARID.[intItemId] IS NOT NULL
         AND ARID.[strItemType] = 'Software'
         AND ARID.[strTransactionType] <> 'Debit Memo'
+        AND ARID.strSessionId = @strSessionId
     ORDER BY
     ARID.[intInvoiceDetailId]
 
@@ -301,7 +299,7 @@ BEGIN
         ,[dblLicenseAmount]     = ARID.[dblLicenseAmount]
         ,[strMaintenanceType]   = ARID.[strMaintenanceType]
     FROM
-        ##ARPostInvoiceDetail ARID
+        tblARPostInvoiceDetail ARID
     WHERE
         ARID.[intInvoiceId] = @InvoiceId 
         AND ARID.[dblLicenseAmount] <> @ZeroDecimal
@@ -310,6 +308,7 @@ BEGIN
         AND ARID.[intItemId] IS NOT NULL
         AND ARID.[strItemType] = 'Software'
         AND ARID.[strTransactionType] <> 'Debit Memo'
+        AND ARID.strSessionId = @strSessionId
     ORDER BY
         ARID.[intInvoiceDetailId]
 
@@ -337,7 +336,7 @@ BEGIN
         ,[dblLicenseAmount]     = @ZeroDecimal
         ,[strMaintenanceType]   = ARID.[strMaintenanceType]
     FROM
-        ##ARPostInvoiceDetail ARID
+        tblARPostInvoiceDetail ARID
     WHERE
         ARID.[intInvoiceId] = @InvoiceId 
         AND ARID.[dblMaintenanceAmount] <> @ZeroDecimal
@@ -346,6 +345,7 @@ BEGIN
         AND ARID.[intItemId] IS NOT NULL
         AND ARID.[strItemType] = 'Software'
         AND ARID.[strTransactionType] <> 'Debit Memo'
+        AND ARID.strSessionId = @strSessionId
     ORDER BY
         ARID.[intInvoiceDetailId]
 
@@ -507,7 +507,7 @@ BEGIN
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
         FROM
-            ##ARPostInvoiceDetail I
+            tblARPostInvoiceDetail I
         INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
@@ -520,6 +520,7 @@ BEGIN
                 I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
                 )
             AND I.[strTransactionType] <> 'Debit Memo'
+            AND I.strSessionId = @strSessionId
 
 		UNION ALL
 
@@ -602,17 +603,10 @@ BEGIN
             ,[intCommodityId]               = NULL
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
-        FROM
-            ##ARPostInvoiceDetail I
-        INNER JOIN
-            tblARInvoiceAccrual ARIA
-                ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
-        LEFT OUTER JOIN
-            ##ARInvoiceItemAccount IA
-                ON I.[intItemId] = IA.[intItemId] 
-                AND I.[intCompanyLocationId] = IA.[intLocationId]
-        WHERE
-            I.[intInvoiceDetailId] = @InvoiceDetailId
+        FROM tblARPostInvoiceDetail I
+        INNER JOIN tblARInvoiceAccrual ARIA ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
+        LEFT OUTER JOIN tblARPostInvoiceItemAccount IA ON I.[intItemId] = IA.[intItemId]  AND I.[intCompanyLocationId] = IA.[intLocationId]
+        WHERE I.[intInvoiceDetailId] = @InvoiceDetailId
             --AND I.[intInvoiceId] = @InvoiceId
             --AND I.[intInvoiceDetailId] IS NOT NULL
             AND I.[dblTotal] <> @ZeroDecimal
@@ -622,6 +616,8 @@ BEGIN
                 I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
                 )
             AND I.[strTransactionType] <> 'Debit Memo'
+            AND I.strSessionId = @strSessionId
+            AND IA.strSessionId = @strSessionId
 		
 		UNION ALL 
 
@@ -701,17 +697,10 @@ BEGIN
             ,[intCommodityId]               = NULL
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
-        FROM
-            ##ARPostInvoiceDetail I
-        INNER JOIN
-            tblARInvoiceAccrual ARIA
-                ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
-        LEFT OUTER JOIN
-            ##ARInvoiceItemAccount IA
-                ON I.[intItemId] = IA.[intItemId] 
-                AND I.[intCompanyLocationId] = IA.[intLocationId]
-        WHERE
-            I.[intInvoiceDetailId] = @InvoiceDetailId
+        FROM tblARPostInvoiceDetail I
+        INNER JOIN tblARInvoiceAccrual ARIA ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
+        LEFT OUTER JOIN tblARPostInvoiceItemAccount IA ON I.[intItemId] = IA.[intItemId]  AND I.[intCompanyLocationId] = IA.[intLocationId]
+        WHERE I.[intInvoiceDetailId] = @InvoiceDetailId
             --AND I.[intInvoiceId] = @InvoiceId
             --AND I.[intInvoiceDetailId] IS NOT NULL
             AND I.[dblLicenseAmount] <> @ZeroDecimal
@@ -719,6 +708,8 @@ BEGIN
             AND I.[strMaintenanceType] IN ('License/Maintenance', 'License Only')
             AND I.[strItemType] = 'Software'
             AND I.[strTransactionType] <> 'Debit Memo'
+            AND I.strSessionId = @strSessionId
+            AND IA.strSessionId = @strSessionId
 		
 		UNION ALL 
 
@@ -798,17 +789,10 @@ BEGIN
             ,[intCommodityId]               = NULL
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
-        FROM
-            ##ARPostInvoiceDetail I
-        INNER JOIN
-            tblARInvoiceAccrual ARIA
-                ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
-        LEFT OUTER JOIN
-            ##ARInvoiceItemAccount IA
-                ON I.[intItemId] = IA.[intItemId] 
-                AND I.[intCompanyLocationId] = IA.[intLocationId]
-        WHERE
-            I.[intInvoiceDetailId] = @InvoiceDetailId
+        FROM tblARPostInvoiceDetail I
+        INNER JOIN tblARInvoiceAccrual ARIA ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
+        LEFT OUTER JOIN tblARPostInvoiceItemAccount IA ON I.[intItemId] = IA.[intItemId] AND I.[intCompanyLocationId] = IA.[intLocationId]
+        WHERE I.[intInvoiceDetailId] = @InvoiceDetailId
             --AND I.[intInvoiceId] = @InvoiceId
             --AND I.[intInvoiceDetailId] IS NOT NULL
             AND I.[dblLicenseAmount] <> @ZeroDecimal
@@ -816,6 +800,8 @@ BEGIN
             AND I.[strMaintenanceType] IN ('License/Maintenance', 'License Only')
             AND I.[strItemType] = 'Software'
             AND I.[strTransactionType] <> 'Debit Memo'
+            AND I.strSessionId = @strSessionId
+            AND IA.strSessionId = @strSessionId
 		
 		UNION ALL 
 
@@ -895,23 +881,18 @@ BEGIN
             ,[intCommodityId]               = NULL
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
-        FROM
-            ##ARPostInvoiceDetail I
-        INNER JOIN
-            tblARInvoiceAccrual ARIA
-                ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
-        LEFT OUTER JOIN
-            ##ARInvoiceItemAccount IA
-                ON I.[intItemId] = IA.[intItemId] 
-                AND I.[intCompanyLocationId] = IA.[intLocationId]
-        WHERE
-            I.[intInvoiceDetailId] = @InvoiceDetailId
+        FROM tblARPostInvoiceDetail I
+        INNER JOIN tblARInvoiceAccrual ARIA ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
+        LEFT OUTER JOIN tblARPostInvoiceItemAccount IA ON I.[intItemId] = IA.[intItemId] AND I.[intCompanyLocationId] = IA.[intLocationId]
+        WHERE I.[intInvoiceDetailId] = @InvoiceDetailId
             --AND I.[intInvoiceId] = @InvoiceId
             --AND I.[intInvoiceDetailId] IS NOT NULL
             AND I.[dblMaintenanceAmount] <> @ZeroDecimal
             AND I.[strMaintenanceType] IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
             AND I.[strItemType] = 'Software'
             AND I.[strTransactionType] <> 'Debit Memo'
+            AND I.strSessionId = @strSessionId
+            AND IA.strSessionId = @strSessionId
 		
 		UNION ALL 
 
@@ -991,23 +972,18 @@ BEGIN
             ,[intCommodityId]               = NULL
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
-        FROM
-            ##ARPostInvoiceDetail I
-        INNER JOIN
-            tblARInvoiceAccrual ARIA
-                ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
-        LEFT OUTER JOIN
-            ##ARInvoiceItemAccount IA
-                ON I.[intItemId] = IA.[intItemId] 
-                AND I.[intCompanyLocationId] = IA.[intLocationId]
-        WHERE
-            I.[intInvoiceDetailId] = @InvoiceDetailId
+        FROM tblARPostInvoiceDetail I
+        INNER JOIN tblARInvoiceAccrual ARIA ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
+        LEFT OUTER JOIN tblARPostInvoiceItemAccount IA ON I.[intItemId] = IA.[intItemId] AND I.[intCompanyLocationId] = IA.[intLocationId]
+        WHERE I.[intInvoiceDetailId] = @InvoiceDetailId
             --AND I.[intInvoiceId] = @InvoiceId
             --AND I.[intInvoiceDetailId] IS NOT NULL
             AND I.[dblMaintenanceAmount] <> @ZeroDecimal
             AND I.[strMaintenanceType] IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
             AND I.[strItemType] = 'Software'
             AND I.[strTransactionType] <> 'Debit Memo'
+            AND I.strSessionId = @strSessionId
+            AND IA.strSessionId = @strSessionId
 
 		SET @LoopCounter = @LoopCounter + 1
 
@@ -1079,9 +1055,10 @@ SELECT
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
 FROM tblARInvoiceDetailTax ARITD WITH (NOLOCK)
-INNER JOIN ##ARPostInvoiceDetail I ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
+INNER JOIN tblARPostInvoiceDetail I ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 WHERE I.[intInvoiceId] = @InvoiceId
   AND ARITD.[dblBaseAdjustedTax] <> @ZeroDecimal
+  AND I.strSessionId = @strSessionId
 		
 UNION ALL
 	
@@ -1117,9 +1094,10 @@ SELECT
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
 FROM tblARInvoiceDetailTax ARITD WITH (NOLOCK)
-INNER JOIN ##ARPostInvoiceDetail I ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
+INNER JOIN tblARPostInvoiceDetail I ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 WHERE I.[intInvoiceId] = @InvoiceId 
   AND ARITD.[dblBaseAdjustedTax] <> @ZeroDecimal
+  AND I.strSessionId = @strSessionId
 
     IF NOT EXISTS(SELECT TOP 1 NULL FROM @GLEntries)
 	BEGIN
@@ -1127,7 +1105,7 @@ WHERE I.[intInvoiceId] = @InvoiceId
 	END
 END
 
-INSERT INTO ##ARInvoiceGLEntries WITH (TABLOCK)
+INSERT INTO tblARPostInvoiceGLEntries WITH (TABLOCK)
 	([dtmDate]
 	,[strBatchId]
 	,[intAccountId]
@@ -1169,7 +1147,8 @@ INSERT INTO ##ARInvoiceGLEntries WITH (TABLOCK)
 	,[dblSourceUnitCredit]
 	,[intCommodityId]
 	,[intSourceEntityId]
-	,[ysnRebuild])
+	,[ysnRebuild]
+    ,[strSessionId])
 SELECT 
     [dtmDate]                      = GLEntries.[dtmDate]
    ,[strBatchId]                   = GLEntries.[strBatchId]
@@ -1213,6 +1192,7 @@ SELECT
    ,[intCommodityId]               = GLEntries.[intCommodityId]
    ,[intSourceEntityId]            = GLEntries.[intSourceEntityId]
    ,[ysnRebuild]                   = GLEntries.[ysnRebuild]
+   ,[strSessionId]                 = @strSessionId
 FROM @GLEntries GLEntries
 CROSS APPLY dbo.fnGetDebitUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) DebitUnit
 CROSS APPLY dbo.fnGetCreditUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) CreditUnit

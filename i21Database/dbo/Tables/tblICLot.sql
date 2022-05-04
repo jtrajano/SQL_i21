@@ -100,6 +100,7 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[ysnRejected]				BIT NULL DEFAULT(0),
 		[strRejectedBy]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 	
 		[intTradeFinanceId]			INT NULL, 
+		[dblReleasedQty]			NUMERIC(38,20) DEFAULT ((0)) NOT NULL,		
 		[intConcurrencyId]			INT NULL DEFAULT ((1)),
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,

@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspARLogInventorySubLedger]
-	@ysnPost BIT,
-	@intUserId INT
+	@ysnPost 		BIT,
+	@intUserId 		INT,
+	@strSessionId	NVARCHAR(50) = NULL
 AS
 DECLARE @InventorySubLedger SubLedgerReportUdt
 IF @ysnPost = 1
@@ -33,9 +34,12 @@ BEGIN
 		, d.intItemUOMId
 		, d.intItemWeightUOMId
 		, d.intContractHeaderId
-	FROM ##ARPostInvoiceDetail d
-		INNER JOIN ##ARPostInvoiceHeader h ON h.intInvoiceId = d.intInvoiceId
-	WHERE h.strTransactionType = 'Credit Memo' AND d.intItemId <> NULL
+	FROM tblARPostInvoiceDetail d
+	INNER JOIN tblARPostInvoiceHeader h ON h.intInvoiceId = d.intInvoiceId
+	WHERE h.strTransactionType = 'Credit Memo' 
+	  AND d.intItemId <> NULL 
+	  AND h.strSessionId = @strSessionId
+	  AND d.strSessionId = @strSessionId
 
 	EXEC uspICSubLedgerAddReportEntries @SubLedgerReportEntries = @InventorySubLedger, @intUserId = @intUserId
 END
@@ -48,8 +52,9 @@ BEGIN
 		strSourceTransactionNo
 	)
 	SELECT h.strTransactionType, h.strInvoiceNumber
-	FROM ##ARPostInvoiceHeader h
+	FROM tblARPostInvoiceHeader h
 	WHERE h.strTransactionType = 'Credit Memo'
+	  AND h.strSessionId = @strSessionId
 
 	EXEC [dbo].[uspICSubLedgerRemoveReportEntries] @SubLedgerTransactions = @TransactionIds, @intUserId = @intUserId
 END

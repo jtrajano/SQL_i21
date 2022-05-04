@@ -1259,7 +1259,7 @@ BEGIN
 		SET A.strDescription = B.strDescription
 	FROM @returntable A
 	INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-	WHERE A.strDescription IS NULL
+	WHERE NULLIF(A.strDescription, '') IS NULL
 	
 	RETURN
 END

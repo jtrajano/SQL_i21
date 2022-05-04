@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAutoApplyPrepaids]
-	@intEntityUserId	INT
+	  @intEntityUserId	INT
+	, @strSessionId		NVARCHAR(50) = NULL
 AS
 
 DECLARE @tblPaymentEntries	PaymentIntegrationStagingTable
@@ -116,10 +117,11 @@ SELECT intInvoiceId			= I.intInvoiceId
 	, dtmPostDate			= I.dtmPostDate
 	, strInvoiceNumber		= I.strInvoiceNumber
 	, strTransactionType	= I.strTransactionType
-FROM ##ARPostInvoiceHeader I
+FROM tblARPostInvoiceHeader I
 WHERE I.ysnCancelled = 0
   AND I.ysnPaid = 0
   AND I.strTransactionType IN ('Invoice', 'Debit Memo')
+  AND I.strSessionId = @strSessionId
 
 --GET AVAILABLE CREDITS AND PREPAIDS FOR CUSTOMERS
 INSERT INTO #AAPPREPAIDS WITH (TABLOCK) (
@@ -459,8 +461,6 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
                     , ysnPost                       = 1
                 FROM #AAPINVOICES I
                 WHERE I.intInvoiceId = @intInvoiceId
-
-				select 789,* from #AAPINVOICES
             END
 
 		IF NOT EXISTS (SELECT TOP 1 NULL FROM #AAPPREPAIDS WHERE dblAmountDue <> dblAppliedPayment)
@@ -478,8 +478,12 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 --CREATE AND POST PAYMENTS
 IF EXISTS (SELECT TOP 1 NULL FROM @tblPaymentEntries)
 	BEGIN
+		DECLARE @ErrorMessage NVARCHAR(500) = NULL, @LogId INT = NULL
+
 		EXEC dbo.uspARProcessPayments @PaymentEntries	= @tblPaymentEntries
 									, @UserId			= @intEntityUserId
 									, @GroupingOption	= 7
 									, @RaiseError		= 0
+									, @ErrorMessage		= @ErrorMessage OUT
+								    , @LogId			= @LogId OUT
 	END

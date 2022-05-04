@@ -132,6 +132,21 @@ BEGIN TRY
 				WHERE ctq.intCommodityId = @intCommodityId
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
 			END
+			ELSE
+			BEGIN
+				INSERT INTO @CostItems
+				SELECT @intCostItemId
+					, @strCostItem
+					, NULL
+					, NULL
+					, NULL
+					, NULL
+					, NULL
+					, NULL
+					, 'Per Unit'
+					, dblRate = 0
+					, dblAmount = 0
+			END
 		END
 		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
 		BEGIN
@@ -155,8 +170,8 @@ BEGIN TRY
 			FROM tblLGInsurancePremiumFactor ipf
 			JOIN tblLGInsurancePremiumFactorDetail detail ON detail.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId
 			JOIN tblEMEntity em ON em.intEntityId = ipf.intEntityId
-			LEFT JOIN tblLGInsurancePremiumFactorPurchase pFactor ON pFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 1
-			LEFT JOIN tblLGInsurancePremiumFactorSale sFactor ON sFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 2
+			LEFT JOIN tblLGInsurancePremiumFactorPurchase pFactor ON pFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 1 AND pFactor.intFreightTermId = @intFromTermId
+			LEFT JOIN tblLGInsurancePremiumFactorSale sFactor ON sFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 2 AND sFactor.intFreightTermId = @intToTermId
 			JOIN tblICItem item ON item.intItemId = @intItemId AND item.intProductTypeId = ipf.intCommodityAttributeId
 			WHERE detail.intLoadingPortId = @intFromPortId
 				AND detail.intDestinationPortId = @intToPortId
@@ -177,8 +192,8 @@ BEGIN TRY
 				, @intItemUOMId
 				, @strUnitMeasure
 				, @strCostMethod
-				, dblRate = CASE WHEN @strCostMethod = 'Amount' THEN 0 ELSE @dblValue END
-				, dblAmount = CASE WHEN @strCostMethod = 'Amount' THEN @dblValue ELSE 0 END
+				, dblRate = @dblValue
+				, dblAmount = @dblValue
 		END
 
 		DELETE FROM #tmpCosts WHERE intTermCostDetailId = @intTermCostDetailId

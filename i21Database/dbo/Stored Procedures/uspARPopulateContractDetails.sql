@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspARPopulateContractDetails]
-	@Post BIT
+	  @Post 			BIT
+	, @strSessionId		NVARCHAR(50) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -46,7 +47,7 @@ CREATE TABLE #TBLTOPROCESS (
 	  , ysnLoad						BIT NULL DEFAULT 0
 )
 
-DELETE FROM ##ARItemsForContracts
+DELETE FROM tblARPostItemsForContracts WHERE strSessionId = @strSessionId
 
 INSERT INTO #TBLTOPROCESS (
 	  intInvoiceDetailId
@@ -119,7 +120,7 @@ SELECT intInvoiceDetailId			= ID.intInvoiceDetailId
 	, strInOutFlag					= T.strInOutFlag
 	, ysnLoad						= CH.ysnLoad
 	, dblScheduledQty				= CD.dblScheduleQty
-FROM ##ARPostInvoiceDetail ID
+FROM tblARPostInvoiceDetail ID
 INNER JOIN tblARInvoiceDetail IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -149,6 +150,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
 	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
 	AND ID.intContractDetailId IS NOT NULL
+	AND ID.strSessionId = @strSessionId
 
 --DESTINATION WEIGHTS/GRADES
 IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
@@ -216,7 +218,7 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
 			, strInOutFlag			= T.strInOutFlag
 			, ysnLoad				= CH.ysnLoad
 			, dblScheduledQty		= CD.dblScheduleQty
-		FROM ##ARPostInvoiceDetail I
+		FROM tblARPostInvoiceDetail I
 		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
 		INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
 		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -240,64 +242,15 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
 		  AND ID.intShipmentPurchaseSalesContractId IS NULL
 		  AND (I.intLoadDetailId IS NULL OR (I.intLoadDetailId IS NOT NULL AND (T.intTicketTypeId = 9 AND T.intTicketType = 6 AND T.strInOutFlag = 'O')))
 		  AND (I.[strItemType] IS NOT NULL AND I.[strItemType] <> 'Other Charge')
+		  AND I.strSessionId = @strSessionId
 		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate, RI.intInvoiceId, ID.intOriginalInvoiceDetailId, CD.intItemId, CD.intItemUOMId, CH.intEntityId, T.intTicketTypeId, T.intTicketType, T.strInOutFlag, CH.ysnLoad, CD.dblScheduleQty
 	END
 
 IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
 	RETURN;
 
---CONTRACT BALANCE
-INSERT INTO ##ARItemsForContracts (
-	  intInvoiceId
-	, intInvoiceDetailId
-	, intOriginalInvoiceId
-	, intOriginalInvoiceDetailId
-	, intItemId
-	, intContractDetailId
-	, intContractHeaderId
-	, intEntityId
-	, intUserId
-	, dtmDate
-	, dblQuantity
-	, dblBalanceQty
-	, dblSheduledQty
-	, dblRemainingQty
-	, strType
-	, strTransactionType
-	, strInvoiceNumber
-	, strItemNo
-	, strBatchId
-	, ysnFromReturn
-)
-SELECT intInvoiceId					= intInvoiceId
-	, intInvoiceDetailId			= intInvoiceDetailId
-	, intOriginalInvoiceId			= intOriginalInvoiceId
-	, intOriginalInvoiceDetailId	= intOriginalInvoiceDetailId
-	, intItemId						= intItemId
-	, intContractDetailId			= intContractDetailId
-	, intContractHeaderId			= intContractHeaderId
-	, intEntityId					= intEntityId
-	, intUserId						= intEntityId
-	, dtmDate						= dtmDate
-	, dblQuantity					= dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty)
-	, dblBalanceQty					= dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty)
-	, dblSheduledQty				= 0
-	, dblRemainingQty				= 0
-	, strType						= 'Contract Balance'
-	, strTransactionType			= strTransactionType
-	, strInvoiceNumber				= strInvoiceNumber
-	, strItemNo						= strItemNo
-	, strBatchId					= strBatchId
-	, ysnFromReturn					= ysnFromReturn
-FROM #TBLTOPROCESS
-WHERE (
-	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
-   OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
-   OR intTicketId IS NULL
-)
-
 --CONTRACT SCHEDULED
-INSERT INTO ##ARItemsForContracts (
+INSERT INTO tblARPostItemsForContracts (
 	  intInvoiceId
 	, intInvoiceDetailId
 	, intItemId
@@ -315,6 +268,7 @@ INSERT INTO ##ARItemsForContracts (
 	, strInvoiceNumber
 	, strItemNo
 	, strBatchId
+	, strSessionId
 )
 SELECT intInvoiceId					= intInvoiceId
 	, intInvoiceDetailId			= intInvoiceDetailId
@@ -333,6 +287,7 @@ SELECT intInvoiceId					= intInvoiceId
 	, strInvoiceNumber				= strInvoiceNumber
 	, strItemNo						= strItemNo
 	, strBatchId					= strBatchId
+	, strSessionId					= @strSessionId
 FROM #TBLTOPROCESS
 WHERE (
 	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
@@ -342,50 +297,8 @@ WHERE (
 AND ysnFromReturn = 0
 AND (intLoadDetailId IS NULL OR (intLoadDetailId IS NOT NULL AND intPurchaseSale = 3))
 
---FIX CONTRACT SCHEDULED
-UPDATE P
-SET dblConvertedQtyOrdered	= dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered)
-  , dblConvertedQty			= dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty)
-FROM ##ARItemsForContracts C
-INNER JOIN #TBLTOPROCESS P ON C.intInvoiceDetailId = P.intInvoiceDetailId AND C.intContractDetailId = P.intContractDetailId
-WHERE C.strType = 'Contract Scheduled'
-
---FIX REMAINING CONTRACT SCHEDULED
-UPDATE P
-SET dblRemainingSchedQty	= CASE WHEN dblConvertedQtyOrdered - dblConvertedQty > dblScheduledQty THEN dblScheduledQty ELSE dblConvertedQtyOrdered - dblConvertedQty END
-FROM ##ARItemsForContracts C
-INNER JOIN #TBLTOPROCESS P ON C.intInvoiceDetailId = P.intInvoiceDetailId AND C.intContractDetailId = P.intContractDetailId
-WHERE C.strType = 'Contract Scheduled'
-
---IF UNPOST WITH OVERAGE CONTRACT
-UPDATE P
-SET dblRemainingSchedQty	= ID.dblQtyShipped - ID.dblQtyOrdered
-FROM ##ARItemsForContracts C
-INNER JOIN #TBLTOPROCESS P ON C.intInvoiceDetailId = P.intInvoiceDetailId AND C.intContractDetailId = P.intContractDetailId
-INNER JOIN tblARInvoiceDetail ID ON C.intInvoiceDetailId = ID.intInvoiceDetailId AND C.intContractDetailId = ID.intContractDetailId
-WHERE C.strType = 'Contract Scheduled'
-  AND P.dblConvertedQty > P.dblConvertedQtyOrdered
-  AND P.dblRemainingSchedQty <> 0
-  AND P.dblConvertedQtyOrdered <> 0
-  AND P.dblQty < 0
-  AND P.ysnLoad = 0
-  AND ID.intSalesOrderDetailId IS NOT NULL
-  AND ID.dblQtyOrdered <> ID.dblQtyShipped
-	
-UPDATE C
-SET dblQuantity		= dblQuantity - CASE WHEN @Post = 1 AND dblQty > 0 THEN -dblRemainingSchedQty ELSE 0 END
-  , dblSheduledQty	= dblSheduledQty - CASE WHEN @Post = 1 AND dblQty > 0 THEN -dblRemainingSchedQty ELSE 0 END
-FROM ##ARItemsForContracts C
-INNER JOIN #TBLTOPROCESS P ON C.intInvoiceDetailId = P.intInvoiceDetailId AND C.intContractDetailId = P.intContractDetailId
-WHERE C.strType = 'Contract Scheduled'
-  AND P.dblConvertedQty > P.dblConvertedQtyOrdered
-  AND P.dblRemainingSchedQty <> 0
-  AND P.dblConvertedQtyOrdered <> 0
-  AND P.dblQty <> 0
-  AND P.ysnLoad = 0 
-
---RETURN AND DWG
-INSERT INTO ##ARItemsForContracts (
+--CONTRACT BALANCE
+INSERT INTO tblARPostItemsForContracts (
 	  intInvoiceId
 	, intInvoiceDetailId
 	, intOriginalInvoiceId
@@ -406,6 +319,7 @@ INSERT INTO ##ARItemsForContracts (
 	, strItemNo
 	, strBatchId
 	, ysnFromReturn
+	, strSessionId
 )
 SELECT intInvoiceId					= intInvoiceId
 	, intInvoiceDetailId			= intInvoiceDetailId
@@ -427,6 +341,105 @@ SELECT intInvoiceId					= intInvoiceId
 	, strItemNo						= strItemNo
 	, strBatchId					= strBatchId
 	, ysnFromReturn					= ysnFromReturn
+	, strSessionId 					= @strSessionId
+FROM #TBLTOPROCESS
+WHERE (
+	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
+   OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
+   OR intTicketId IS NULL
+)
+
+--FIX CONTRACT SCHEDULED
+UPDATE P
+SET dblConvertedQtyOrdered	= dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered)
+  , dblConvertedQty			= dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty)
+FROM tblARPostItemsForContracts C
+INNER JOIN #TBLTOPROCESS P ON C.intInvoiceDetailId = P.intInvoiceDetailId AND C.intContractDetailId = P.intContractDetailId
+WHERE C.strType = 'Contract Scheduled'
+  AND C.strSessionId = @strSessionId
+
+--FIX REMAINING CONTRACT SCHEDULED
+UPDATE P
+SET dblRemainingSchedQty	= CASE WHEN dblConvertedQtyOrdered - dblConvertedQty > dblScheduledQty THEN dblScheduledQty ELSE dblConvertedQtyOrdered - dblConvertedQty END
+FROM tblARPostItemsForContracts C
+INNER JOIN #TBLTOPROCESS P ON C.intInvoiceDetailId = P.intInvoiceDetailId AND C.intContractDetailId = P.intContractDetailId
+WHERE C.strType = 'Contract Scheduled'
+  AND C.strSessionId = @strSessionId
+
+--IF UNPOST WITH OVERAGE CONTRACT
+UPDATE P
+SET dblRemainingSchedQty	= ID.dblQtyShipped - ID.dblQtyOrdered
+FROM tblARPostItemsForContracts C
+INNER JOIN #TBLTOPROCESS P ON C.intInvoiceDetailId = P.intInvoiceDetailId AND C.intContractDetailId = P.intContractDetailId
+INNER JOIN tblARInvoiceDetail ID ON C.intInvoiceDetailId = ID.intInvoiceDetailId AND C.intContractDetailId = ID.intContractDetailId
+WHERE C.strType = 'Contract Scheduled'
+  AND P.dblConvertedQty > P.dblConvertedQtyOrdered
+  AND P.dblRemainingSchedQty <> 0
+  AND P.dblConvertedQtyOrdered <> 0
+  AND P.dblQty < 0
+  AND P.ysnLoad = 0
+  AND ID.intSalesOrderDetailId IS NOT NULL
+  AND ID.dblQtyOrdered <> ID.dblQtyShipped
+  AND C.strSessionId = @strSessionId
+	
+UPDATE C
+SET dblQuantity		= dblQuantity - CASE WHEN @Post = 1 AND dblQty > 0 THEN -dblRemainingSchedQty ELSE 0 END
+  , dblSheduledQty	= dblSheduledQty - CASE WHEN @Post = 1 AND dblQty > 0 THEN -dblRemainingSchedQty ELSE 0 END
+FROM tblARPostItemsForContracts C
+INNER JOIN #TBLTOPROCESS P ON C.intInvoiceDetailId = P.intInvoiceDetailId AND C.intContractDetailId = P.intContractDetailId
+WHERE C.strType = 'Contract Scheduled'
+  AND P.dblConvertedQty > P.dblConvertedQtyOrdered
+  AND P.dblRemainingSchedQty <> 0
+  AND P.dblConvertedQtyOrdered <> 0
+  AND P.dblQty <> 0
+  AND P.ysnLoad = 0 
+  AND C.strSessionId = @strSessionId
+
+--RETURN AND DWG
+INSERT INTO tblARPostItemsForContracts (
+	  intInvoiceId
+	, intInvoiceDetailId
+	, intOriginalInvoiceId
+	, intOriginalInvoiceDetailId
+	, intItemId
+	, intContractDetailId
+	, intContractHeaderId
+	, intEntityId
+	, intUserId
+	, dtmDate
+	, dblQuantity
+	, dblBalanceQty
+	, dblSheduledQty
+	, dblRemainingQty
+	, strType
+	, strTransactionType
+	, strInvoiceNumber
+	, strItemNo
+	, strBatchId
+	, ysnFromReturn
+	, strSessionId
+)
+SELECT intInvoiceId					= intInvoiceId
+	, intInvoiceDetailId			= intInvoiceDetailId
+	, intOriginalInvoiceId			= intOriginalInvoiceId
+	, intOriginalInvoiceDetailId	= intOriginalInvoiceDetailId
+	, intItemId						= intItemId
+	, intContractDetailId			= intContractDetailId
+	, intContractHeaderId			= intContractHeaderId
+	, intEntityId					= intEntityId
+	, intUserId						= intEntityId
+	, dtmDate						= dtmDate
+	, dblQuantity					= dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty)
+	, dblBalanceQty					= dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty)
+	, dblSheduledQty				= 0
+	, dblRemainingQty				= 0
+	, strType						= 'Contract Balance'
+	, strTransactionType			= strTransactionType
+	, strInvoiceNumber				= strInvoiceNumber
+	, strItemNo						= strItemNo
+	, strBatchId					= strBatchId
+	, ysnFromReturn					= ysnFromReturn
+	, strSessionId					= @strSessionId
 FROM #TBLTOPROCESS
 WHERE ysnFromReturn = 1 
   AND ysnDestWtGrd = 1

@@ -42,6 +42,7 @@ DECLARE @OneDecimal DECIMAL(18,6)
 SET @OneDecimal = 1.000000
 DECLARE @OneHundredDecimal DECIMAL(18,6)
 SET @OneHundredDecimal = 100.000000
+DECLARE @strRequestId NVARCHAR(200) = NEWID()
 
 DECLARE  @InitTranCount				INT
 		,@CurrentTranCount			INT
@@ -234,8 +235,6 @@ ELSE
 		WHERE ISNULL(ARI.intLoadId, 0) = 0	
     END
 
-
-EXEC [dbo].[uspARInitializeTempTableForPosting]
 EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
      @Param             = NULL
     ,@BeginDate         = @BeginDate
@@ -251,6 +250,7 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
     ,@AccrueLicense     = NULL
     ,@TransType         = @TransType
     ,@UserId            = @UserId
+	,@strSessionId		= @strRequestId
 
 
 IF @Post = 1 AND @Recap = 0
@@ -259,10 +259,11 @@ IF @Post = 1 AND @Recap = 0
 		, @ysnRecap	  	= 0
 		, @dtmDatePost	= @PostDate
 		, @strBatchId	= @BatchIdUsed
-		, @intUserId	= @UserId		
+		, @intUserId	= @UserId
+		, @strSessionId	= @strRequestId
 
 IF @Recap = 0
-	EXEC [dbo].[uspARLogInventorySubLedger] 1, @UserId
+	EXEC [dbo].[uspARLogInventorySubLedger] 1, @UserId, @strRequestId
 
 --Removed excluded Invoices to post/unpost
 IF(@Exclude IS NOT NULL)
@@ -275,30 +276,32 @@ IF(@Exclude IS NOT NULL)
 		SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@Exclude)
 
 		DELETE FROM A
-		FROM ##ARPostInvoiceHeader A
+		FROM tblARPostInvoiceHeader A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
+		  AND A.strSessionId = @strRequestId
 
 		DELETE FROM A
-		FROM ##ARPostInvoiceDetail A
+		FROM tblARPostInvoiceDetail A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
+		  AND A.strSessionId = @strRequestId
 	END
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
 ----------------------------------------------------------------------------------------------
-EXEC [dbo].[uspARPopulateInvoiceAccountForPosting]
-     @Post     = @Post
+EXEC [dbo].[uspARPopulateInvoiceAccountForPosting] @Post = @Post, @strSessionId = @strRequestId
 
 IF @Post = 1
-    EXEC dbo.[uspARUpdateTransactionAccountOnPost]  	
+    EXEC dbo.[uspARUpdateTransactionAccountOnPost] @strSessionId = @strRequestId	
 
 EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
-	 @Post     = @Post
-	,@Recap    = @Recap
-	,@PostDate = @PostDate
-	,@BatchId  = @BatchIdUsed
+	 @Post     		= @Post
+	,@Recap    		= @Recap
+	,@PostDate 		= @PostDate
+	,@BatchId  		= @BatchIdUsed
+	,@strSessionId 	= @strRequestId
 		
-SELECT @totalInvalid = COUNT(DISTINCT [intInvoiceId]) FROM ##ARInvalidInvoiceData
+SELECT @totalInvalid = COUNT(DISTINCT [intInvoiceId]) FROM tblARPostInvalidInvoiceData WHERE strSessionId = @strRequestId
 
 IF(@totalInvalid > 0)
 	BEGIN
@@ -311,49 +314,61 @@ IF(@totalInvalid > 0)
 			,ILD.[strBatchId]				= PID.[strBatchId]
 			,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 			,ILD.[ysnSuccess] = 0
-		FROM
-			tblARInvoiceIntegrationLogDetail ILD
-		INNER JOIN
-			##ARInvalidInvoiceData PID
-				ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-		WHERE
-			ILD.[intIntegrationLogId] = @IntegrationLogId
-			AND ILD.[ysnPost] IS NOT NULL
+		FROM tblARInvoiceIntegrationLogDetail ILD
+		INNER JOIN tblARPostInvalidInvoiceData PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+		WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
+		  AND ILD.[ysnPost] IS NOT NULL
+		  AND PID.strSessionId = @strRequestId
 
 		--DELETE Invalid Transaction From temp table
 		DELETE A
-		FROM ##ARPostInvoiceHeader A
-		INNER JOIN ##ARInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
+		FROM tblARPostInvoiceHeader A
+		INNER JOIN tblARPostInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
+		WHERE A.strSessionId = @strRequestId
+		  AND B.strSessionId = @strRequestId
 
 		DELETE A
-		FROM ##ARPostInvoiceDetail A
-		INNER JOIN ##ARInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
+		FROM tblARPostInvoiceDetail A
+		INNER JOIN tblARPostInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
+		WHERE A.strSessionId = @strRequestId
+		  AND B.strSessionId = @strRequestId
 
 		DELETE A
-		FROM ##ARItemsForCosting A
-		INNER JOIN ##ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+		FROM tblARPostItemsForCosting A
+		INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+		WHERE A.strSessionId = @strRequestId
+		  AND B.strSessionId = @strRequestId
 
 		DELETE A
-		FROM ##ARItemsForInTransitCosting A
-		INNER JOIN ##ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+		FROM tblARPostItemsForInTransitCosting A
+		INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+		WHERE A.strSessionId = @strRequestId
+		  AND B.strSessionId = @strRequestId
 
 		DELETE A
-		FROM ##ARItemsForStorageCosting A
-		INNER JOIN ##ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+		FROM tblARPostItemsForStorageCosting A
+		INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+		WHERE A.strSessionId = @strRequestId
+		  AND B.strSessionId = @strRequestId
 
 		DELETE A
-		FROM ##ARItemsForContracts A
-		INNER JOIN ##ARInvalidInvoiceData B ON A.[intInvoiceId] = B.[intInvoiceId]	
+		FROM tblARPostItemsForContracts A
+		INNER JOIN tblARPostInvalidInvoiceData B ON A.[intInvoiceId] = B.[intInvoiceId]
+		WHERE A.strSessionId = @strRequestId
+		  AND B.strSessionId = @strRequestId	
 
 		DELETE GL
-  		FROM ##ARInvoiceGLEntries GL
-  		INNER JOIN ##ARInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId] AND GL.[strTransactionId] = B.[strInvoiceNumber]
+  		FROM tblARPostInvoiceGLEntries GL
+  		INNER JOIN tblARPostInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId] AND GL.[strTransactionId] = B.[strInvoiceNumber]
+		WHERE GL.strSessionId = @strRequestId
+		  AND B.strSessionId = @strRequestId
 							
-        DELETE FROM ##ARInvalidInvoiceData
+        DELETE FROM tblARPostInvalidInvoiceData
+		WHERE strSessionId = @strRequestId
 					
 	END
 
-SELECT @totalRecords = COUNT([intInvoiceId]) FROM ##ARPostInvoiceHeader
+SELECT @totalRecords = COUNT([intInvoiceId]) FROM tblARPostInvoiceHeader WHERE strSessionId = @strRequestId
 			
 IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 	BEGIN
@@ -381,14 +396,11 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 				,ILD.[strPostingMessage]		= PID.[strPostingError]
 				,ILD.[strBatchId]				= PID.[strBatchId]
 				,ILD.[strPostedTransactionId]   = PID.[strInvoiceNumber] 
-			FROM
-				tblARInvoiceIntegrationLogDetail ILD
-			INNER JOIN
-				##ARInvalidInvoiceData PID
-					ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-			WHERE
-				ILD.[intIntegrationLogId] = @IntegrationLogId
-				AND ILD.[ysnPost] IS NOT NULL
+			FROM tblARInvoiceIntegrationLogDetail ILD
+			INNER JOIN tblARPostInvalidInvoiceData PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+			WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
+			  AND ILD.[ysnPost] IS NOT NULL
+			  AND PID.strSessionId = @strRequestId
 		END
 
 		IF @RaiseError = 1
@@ -404,7 +416,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 BEGIN TRY
 
 	IF @Recap = 0
-		EXEC [dbo].[uspARPostItemResevation]
+		EXEC [dbo].[uspARPostItemResevation] @strSessionId = @strRequestId
 
 	IF @Recap = 1
     BEGIN
@@ -415,6 +427,7 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @UserId
 		       ,@BatchIdUsed     = @BatchIdUsed OUT
+			   ,@strSessionId	 = @strRequestId
 		
 		DELETE 
 		FROM tblARPostingQueue
@@ -430,9 +443,10 @@ BEGIN TRY
 			, @dtmDatePost	= @PostDate
 			, @strBatchId	= @BatchIdUsed
 			, @intUserId	= @UserId
+			, @strSessionId	= @strRequestId
 	
 	IF @Post = 1
-    	EXEC [dbo].[uspARPrePostInvoiceIntegration]	
+    	EXEC [dbo].[uspARPrePostInvoiceIntegration]	@strSessionId = @strRequestId
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
@@ -503,6 +517,7 @@ BEGIN TRY
         ,@PostDate 		= @PostDate
         ,@BatchId  		= @BatchIdUsed
         ,@UserId   		= @UserId
+		,@strSessionId	= @strRequestId
 
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -590,8 +605,9 @@ BEGIN TRY
 		,[intCommodityId]
 		,[intSourceEntityId]
 		,[ysnRebuild]
-    FROM ##ARInvoiceGLEntries
+    FROM tblARPostInvoiceGLEntries
 	WHERE strCode = 'IC'
+	  AND strSessionId = @strRequestId
 
     DECLARE @InvalidGLEntries AS TABLE
         ([strTransactionId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
@@ -631,30 +647,27 @@ BEGIN TRY
         ,[strTransactionId]     = IGLE.[strTransactionId]
         ,[strBatchNumber]       = GLE.[strBatchId]
         ,[intTransactionId]     = GLE.[intTransactionId] 
-    FROM
-        @InvalidGLEntries IGLE
-    LEFT OUTER JOIN
-        @GLEntries GLE
-        ON IGLE.[strTransactionId] = GLE.[strTransactionId]
-					
+    FROM @InvalidGLEntries IGLE
+    LEFT OUTER JOIN @GLEntries GLE ON IGLE.[strTransactionId] = GLE.[strTransactionId]					
 
-    DELETE FROM ##ARInvoiceGLEntries
-    WHERE
-		[strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+    DELETE FROM tblARPostInvoiceGLEntries
+    WHERE [strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+	  AND strSessionId = @strRequestId
 
-    DELETE FROM ##ARPostInvoiceHeader
-    WHERE
-		[strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+    DELETE FROM tblARPostInvoiceHeader
+    WHERE [strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+	  AND strSessionId = @strRequestId
 
-    DELETE FROM ##ARPostInvoiceDetail
-    WHERE
-		[strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+    DELETE FROM tblARPostInvoiceDetail
+    WHERE [strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+	  AND strSessionId = @strRequestId
 
     EXEC [dbo].[uspARBookInvoiceGLEntries]
-            @Post    = @Post
-           ,@BatchId = @BatchIdUsed
-		   ,@UserId  = @UserId
-		   ,@raiseError = @RaiseError
+            @Post    		= @Post
+           ,@BatchId 		= @BatchIdUsed
+		   ,@UserId  		= @UserId
+		   ,@raiseError 	= @RaiseError
+		   ,@strSessionId 	= @strRequestId
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
 	        @Post             = @Post
@@ -662,6 +675,7 @@ BEGIN TRY
 		   ,@UserId           = @UserId
 		   ,@IntegrationLogId = @IntegrationLogId
 		   ,@raiseError		  = @RaiseError
+		   ,@strSessionId 	  = @strRequestId
 
 	UPDATE ILD
 	SET
@@ -670,14 +684,11 @@ BEGIN TRY
 		,ILD.[strPostingMessage]		= CASE WHEN ILD.[ysnPost] = 1 THEN 'Transaction successfully posted.' ELSE 'Transaction successfully unposted.' END
 		,ILD.[strBatchId]				= @BatchId
 		,ILD.[strPostedTransactionId]	= PID.[strInvoiceNumber] 
-	FROM
-		tblARInvoiceIntegrationLogDetail ILD
-	INNER JOIN
-		##ARPostInvoiceHeader PID
-			ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-	WHERE
-		ILD.[intIntegrationLogId] = @IntegrationLogId
-		AND ILD.[ysnPost] IS NOT NULL
+	FROM tblARInvoiceIntegrationLogDetail ILD
+	INNER JOIN tblARPostInvoiceHeader PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+	WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
+	  AND ILD.[ysnPost] IS NOT NULL
+	  AND PID.strSessionId = @strRequestId
 
 END TRY
 BEGIN CATCH

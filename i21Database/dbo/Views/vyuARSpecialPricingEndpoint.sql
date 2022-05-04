@@ -9,7 +9,7 @@ SELECT
 	,Loc.strLocationName strCustomerLocation
 	,SP.intItemId
 	,I.strItemNo
-	,SP.dblDeviation
+	,dblDeviation = SP.dblDeviation + SP.dblDeviation2 + SP.dblDeviation3 + SP.dblDeviation4
 FROM
 	tblARCustomerSpecialPrice SP
 INNER JOIN

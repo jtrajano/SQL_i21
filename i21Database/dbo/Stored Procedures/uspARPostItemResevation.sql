@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostItemResevation]
+  @strSessionId		NVARCHAR(50)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -32,24 +33,26 @@ INSERT INTO @InvoiceIds (
 )
 SELECT [intHeaderId]  = ARID.[intInvoiceId]
      , [ysnPost]      = ARID.[ysnPost]
-FROM ##ARPostInvoiceDetail ARID
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICStockReservation ICSR ON ARID.[intInvoiceId] = ICSR.[intTransactionId] 
                                      AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
                                      AND ARID.[intItemId] = ICSR.[intItemId]
 WHERE ICSR.[ysnPosted] <> ARID.[ysnPost]
   AND ICSR.intInventoryTransactionType = @TransactionTypeId
+  AND ARID.strSessionId = @strSessionId
 
 UNION
 
 SELECT [intHeaderId]  = ARID.[intInvoiceId]
      , [ysnPost]      = ARID.[ysnPost] 
-FROM ##ARPostInvoiceDetail ARID
+FROM tblARPostInvoiceDetail ARID
 JOIN tblICItemBundle BDL ON BDL.intItemId = ARID.intItemId
 INNER JOIN tblICStockReservation ICSR ON ARID.[intInvoiceId] = ICSR.[intTransactionId] 
                                      AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
                                      AND BDL.[intBundleItemId] = ICSR.[intItemId]
 WHERE ICSR.[ysnPosted] <> ARID.[ysnPost]
   AND ICSR.intInventoryTransactionType = @TransactionTypeId
+  AND ARID.strSessionId = @strSessionId
 
 WHILE EXISTS(SELECT NULL FROM @InvoiceIds)
 BEGIN

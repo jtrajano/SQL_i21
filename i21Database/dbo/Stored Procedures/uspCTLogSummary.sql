@@ -4294,6 +4294,7 @@ BEGIN TRY
 				
 			SELECT TOP 1 @prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
 				, @qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
+				, @FinalQty = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
 				, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (dblLoadPriced - dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE dblQuantity - dblQuantityAppliedAndPriced END
 				, @dblCurrentQty = dblQuantity
 				, @dblQuantityAppliedAndPriced = dblQuantityAppliedAndPriced

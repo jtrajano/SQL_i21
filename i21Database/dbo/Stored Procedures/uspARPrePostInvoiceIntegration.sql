@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPrePostInvoiceIntegration]
+    @strSessionId		NVARCHAR(50)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -48,12 +49,13 @@ SELECT
     ,[intStorageLocationId] = [intStorageLocationId]
     ,[intUserId]            = [intUserId]
     ,[dtmDate]              = [dtmPostDate] 
-FROM ##ARPostInvoiceDetail
+FROM tblARPostInvoiceDetail
 WHERE [ysnBlended] = 0
   AND [ysnAutoBlend] = 1
   AND [strTransactionType] NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
   AND [strType] NOT IN ('Transport Delivery')
   AND [ysnImpactInventory] = 1
+  AND strSessionId = @strSessionId
 
 WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 BEGIN
@@ -118,7 +120,8 @@ END
 UPDATE ARI
 SET ARI.[ysnProvisionalWithGL] = ARI1.[ysnProvisionalWithGL]
 FROM tblARInvoice ARI
-INNER JOIN ##ARPostInvoiceHeader ARI1 ON ARI.[intInvoiceId] = ARI1.[intInvoiceId] AND ARI.[strType] = 'Provisional'
+INNER JOIN tblARPostInvoiceHeader ARI1 ON ARI.[intInvoiceId] = ARI1.[intInvoiceId] AND ARI.[strType] = 'Provisional'
+WHERE ARI1.strSessionId = @strSessionId
 
 END TRY
 BEGIN CATCH

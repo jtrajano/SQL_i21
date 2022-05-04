@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[tblTRFTradeFinanceLog]
 (
-	intTradeFinanceLogId INT IDENTITY NOT NULL,
+	intTradeFinanceLogId INT IDENTITY(1,1) NOT NULL,
 	dtmCreatedDate DATETIME NULL DEFAULT(GETDATE()),
 	strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
 	strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
@@ -41,6 +41,7 @@ CREATE TABLE [dbo].[tblTRFTradeFinanceLog]
 	intWarrantId INT NULL,
 	strWarrantId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	intUserId INT NULL, 
+	ysnDeleted BIT NULL DEFAULT(0),
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblTRFTradeFinanceLog] PRIMARY KEY ([intTradeFinanceLogId])
 )

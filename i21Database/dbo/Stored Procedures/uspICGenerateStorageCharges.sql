@@ -721,7 +721,7 @@ BEGIN TRY
 					,A.intInventoryStockMovementId
 					,dblDeliveredQuantity  = @_dblUsedDeliveredQty
 					,dtmStartDateUTC = @_dtmInboundAvailableStartDate
-					,dtmEndDateUTC = ISNULL(A.dtmLastFreeOutboundDateUTC,DATEADD(HOUR,@LocalToUTCDiff,A.dtmDate))
+					,dtmEndDateUTC = CASE WHEN A.dtmDate <=  A.dtmLastFreeOutboundDateUTC THEN A.dtmDate ELSE A.dtmLastFreeOutboundDateUTC END --ISNULL(A.dtmLastFreeOutboundDateUTC,DATEADD(HOUR,@LocalToUTCDiff,A.dtmDate))
 					,A.dtmLastBillDateUTC
 					,A.dtmLastFreeWarehouseDateUTC
 					,A.dtmLastFreeOutboundDateUTC
@@ -797,7 +797,7 @@ BEGIN TRY
 					,A.intInventoryStockMovementId
 					,dblDeliveredQuantity = @_dblQty
 					,dtmStartDateUTC = ISNULL(@_dtmInboundAvailableStartDate,DATEADD(HOUR,@LocalToUTCDiff,A.dtmDate))
-					,dtmEndDateUTC = ISNULL(A.dtmLastFreeOutboundDateUTC,DATEADD(HOUR,@LocalToUTCDiff,A.dtmDate))
+					,dtmEndDateUTC = CASE WHEN A.dtmDate <=  A.dtmLastFreeOutboundDateUTC THEN A.dtmDate ELSE A.dtmLastFreeOutboundDateUTC END --ISNULL(A.dtmLastFreeOutboundDateUTC,DATEADD(HOUR,@LocalToUTCDiff,A.dtmDate))
 					,A.dtmLastBillDateUTC 
 					,A.dtmLastFreeWarehouseDateUTC
 					,dtmLastFreeOutboundDateUTC
@@ -979,7 +979,7 @@ BEGIN TRY
 			,dblUnitQty
 		FROM @tmpICStorageRate
 		WHERE dblNoOfDays <= CASE WHEN (A.intNumberOfDays + A.intTotalAccumulatedDays) < 0 THEN 0 ELSE  (A.intNumberOfDays + A.intTotalAccumulatedDays) END
-			AND ISNULL(strChargeType,'Discounted') = 'Discounted'
+			AND ISNULL(strChargeType,'Flat Rate') = 'Flat Rate'
 		ORDER BY dblNoOfDays DESC
 	) B
 	INNER JOIN tblICItem C
@@ -1038,7 +1038,7 @@ BEGIN TRY
 		)CC --- Higher No of Days
 		WHERE AA.dblNoOfDays <= CASE WHEN  (ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays) < 0 THEN 0 ELSE (ISNULL(A.intNumberOfDays,0) + A.intTotalAccumulatedDays) END
 			AND AA.dblNoOfDays >= A.intTotalAccumulatedDays
-			AND ISNULL(AA.strChargeType,'Discounted') = 'Segmented'
+			AND ISNULL(AA.strChargeType,'Flat Rate') = 'Segmented Rate'
 	) L 
 	LEFT JOIN tblICItem M
 		ON L.intItemId = M.intItemId
@@ -1051,7 +1051,7 @@ BEGIN TRY
 
 	------UPDATE no of Days
 	-------------------------------------------
-	IF(ISNULL(@strChargeType,'Discounted') = 'Discounted')
+	IF(ISNULL(@strChargeType,'Flat Rate') = 'Flat Rate')
 	BEGIN
 		UPDATE @tblChargeTableDetail
 		SET dblNumberOfDays = ISNULL(CASE WHEN (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) < 0 THEN 0 ELSE (DATEDIFF(DAY,dtmStartDateUTC,dtmEndDateUTC) + 1) END,0)

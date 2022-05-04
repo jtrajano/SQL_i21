@@ -15,12 +15,14 @@ BEGIN TRY
 	DECLARE @voucherPayableToProcess AS VoucherPayable
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
+	DECLARE @intPurchaseSale INT
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
 	DECLARE @intCurrencyId INT
 	DECLARE @intShipmentStatus INT
 	DECLARE @ysnAllowReweighs BIT = 0
 	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+	DECLARE @strFOBPoint NVARCHAR(50)
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
@@ -30,9 +32,13 @@ BEGIN TRY
 		(intItemRecordId INT Identity(1, 1)
 		,intItemId INT)
 
-	SELECT @strLoadNumber = strLoadNumber 
-		,@ysnAllowReweighs = ysnAllowReweighs
-	FROM tblLGLoad WHERE intLoadId = @intLoadId
+	SELECT @strLoadNumber = L.strLoadNumber 
+		,@intPurchaseSale = intPurchaseSale
+		,@ysnAllowReweighs = L.ysnAllowReweighs
+		,@strFOBPoint = FT.strFobPoint
+	FROM tblLGLoad L
+	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId 
+	WHERE intLoadId = @intLoadId
 
 	IF OBJECT_ID('tempdb..#tempVoucherId') IS NOT NULL
 		DROP TABLE #tempVoucherId
@@ -122,11 +128,14 @@ BEGIN TRY
 		DELETE FROM tblAPVoucherPayable WHERE intLoadShipmentId = @intLoadId AND intLoadShipmentCostId IS NULL
 
 		DECLARE @intInventoryReceiptId INT = NULL
+		DECLARE @strVoucherType NVARCHAR(100)
+		SELECT @strVoucherType = CASE WHEN @intType = 2 THEN 'provisional voucher' ELSE '' END
+
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInventoryReceipts)
 		BEGIN
 			SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId FROM #tmpInventoryReceipts
 				
-			EXEC uspICConvertReceiptToVoucher @intInventoryReceiptId, @intEntityUserSecurityId, @intBillId OUTPUT
+			EXEC uspICConvertReceiptToVoucher @intInventoryReceiptId, @intEntityUserSecurityId, @strVoucherType, @intBillId OUTPUT
 
 			DELETE FROM #tmpInventoryReceipts WHERE intInventoryReceiptId = @intInventoryReceiptId
 		END
@@ -134,6 +143,11 @@ BEGIN TRY
 	ELSE
 	BEGIN
 	--If Shipment is not yet received, create Voucher normally
+		IF (@strFOBPoint = 'Destination' AND @intShipmentStatus <> 4)
+		BEGIN
+			RAISERROR('Load/Shipment has FOB Point of ''Destination''. Create and post Inventory Receipt first before creating Voucher.',16,1)
+		END
+
 		INSERT INTO @voucherPayable(
 			[intEntityVendorId]
 			,[intTransactionType]
@@ -181,6 +195,10 @@ BEGIN TRY
 			,[ysnStage]
 			,[intSubLocationId]
 			,[intStorageLocationId]
+			/*Payment Info*/
+			,[intPayFromBankAccountId]
+			,[strFinancingSourcedFrom]
+			,[strFinancingTransactionNumber]
 			/* Trade Finance */
 			,[strFinanceTradeNo]
 			,[intBankId]
@@ -255,6 +273,10 @@ BEGIN TRY
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 			,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
+			/*Payment Info*/
+			,[intPayFromBankAccountId] = BA.intBankAccountId
+			,[strFinancingSourcedFrom] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN 'Logistics' ELSE '' END
+			,[strFinancingTransactionNumber] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN L.strLoadNumber ELSE '' END
 			/* Trade Finance */
 			,[strFinanceTradeNo] = L.strTradeFinanceNo
 			,[intBankId] = BA.intBankId
@@ -410,6 +432,10 @@ BEGIN TRY
 				,[ysnStage]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				/*Payment Info*/
+				,[intPayFromBankAccountId]
+				,[strFinancingSourcedFrom]
+				,[strFinancingTransactionNumber]
 				/* Trade Finance */
 				,[strFinanceTradeNo]
 				,[intBankId]
@@ -468,6 +494,10 @@ BEGIN TRY
 				,[ysnStage]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				/*Payment Info*/
+				,[intPayFromBankAccountId]
+				,[strFinancingSourcedFrom]
+				,[strFinancingTransactionNumber]
 				/* Trade Finance */
 				,[strFinanceTradeNo]
 				,[intBankId]

@@ -452,7 +452,6 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
     <None Include="Scripts\Post-Deployment\IC\30_InventoryValuationAccountIds.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
@@ -517,6 +516,7 @@
     <Build Include="dbo\Functions\fnRKIsUserOTCApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspRKValidateOTCRecords.sql" />
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuApiUserCompanyLocations.sql" />
     <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
     <Build Include="dbo\Views\vyuApiRecordAuditPivot.sql" />
     <Build Include="dbo\Views\vyuApiSalesperson.sql" />
@@ -765,6 +765,27 @@
     <Build Include="dbo\Tables\tblMBILDeliveryHeader.sql" />
     <Build Include="dbo\Tables\tblMBILDeliveryDetail.sql" />
     <Build Include="dbo\Tables\tblMBILLoadHeader.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerGoal.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerGoalDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateCoworkerGoalDetail.sql" />
+    <Build Include="dbo\Views\vyuHDAccountDetail.sql" />
+    <Build Include="dbo\Views\vyuHDCoworkerGoal.sql" />
+    <Build Include="dbo\Tables\tblCMBankImportLog.sql" />
+    <Build Include="dbo\Tables\tblCMBankImportLogDetail.sql" />
+    <None Include="Scripts\Post-Deployment\ST\42_FileFieldMapping_Commander_TankMonitor.sql" />
+    <None Include="Scripts\Post-Deployment\ST\43_FileFieldMapping_Commander_FuelTotals.sql" />
+    <None Include="Scripts\Post-Deployment\ST\44_FileFieldMapping_Commander_AppInfo.sql" />
+    <None Include="Scripts\Post-Deployment\ST\45_FileFieldMapping_Commander_PopCfg.sql" />
+    <None Include="Scripts\Post-Deployment\ST\46_FileFieldMapping_Commander_Tank.sql" />
+    <None Include="Scripts\Post-Deployment\ST\47_FileFieldMapping_Commander_Loyalty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseReleasedLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotRelease.sql" />
+    <Build Include="dbo\User Defined Types\LotReleaseTableType.sql" />
+    <Build Include="dbo\Tables\tblICLotReleased.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderFuelTotal.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelTotals.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderFuelTotal.sql" />
+    <Build Include="dbo\Functions\fnCTGetQualityResultAmount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -885,7 +906,7 @@
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblAPVendor.sql" />
     <Build Include="dbo\Tables\tblCMBank.sql" />
-    <Build Include="dbo\Tables\tblCMResponsibleParty.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyOption.sql" />
     <Build Include="dbo\Tables\tblCMBankAccount.sql" />
     <Build Include="dbo\Tables\tblCMBankFileFormat.sql" />
     <Build Include="dbo\Tables\tblCMBankFileFormatDetail.sql" />
@@ -7381,6 +7402,7 @@
     <Build Include="dbo\Views\vyuLGInsurancePremiumFactor.sql" />
     <Build Include="dbo\Views\vyuLGShippingLineServiceContract.sql" />
     <Build Include="dbo\Views\vyuSTStore.sql" />
+    <Build Include="dbo\Views\vyuSTStoreDetail.sql" />
     <Build Include="dbo\Views\vyuSTStoreRegister.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
@@ -10249,6 +10271,7 @@
     <Build Include="dbo\Views\vyuRestApiEntityUsers.sql" />
     <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuRestApiVendors.sql" />
+    <Build Include="dbo\Views\vyuApiCustomer.sql" />
     <Build Include="dbo\Views\vyuApiEntitySearch.sql" />
     <Build Include="dbo\Views\vyuApiTransportTerminals.sql" />
     <Build Include="dbo\Views\vyuApiApproval.sql" />
@@ -10814,7 +10837,6 @@
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
@@ -10847,6 +10869,8 @@
     <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
     <None Include="Scripts\Post-Deployment\CM\14_BankAccountTypes.sql" />
     <None Include="Scripts\Post-Deployment\CM\15_CompanyPreferenceOptions.sql" />
+    <None Include="Scripts\Post-Deployment\CM\16_UpdateNextEFTNo.sql" />
+    <None Include="Scripts\Post-Deployment\CM\17_InsertResponsiblePartyOption.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
@@ -10892,6 +10916,15 @@
     <Build Include="dbo\Views\vyuQMSearchCommodityItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetScheduledPayments.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceHeader.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceDetail.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceItemAccount.sql" />
+    <Build Include="dbo\Tables\tblARPostInvalidInvoiceData.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForInTransitCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForStorageCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -11113,9 +11146,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />

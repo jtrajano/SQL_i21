@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCreateRCVForCreditMemo]
-	@intUserId 		INT
+	  @intUserId 		INT
+	, @strSessionId		NVARCHAR(50) = NULL
 AS
 
 SET ANSI_NULLS ON  
@@ -76,10 +77,11 @@ SELECT intPrepaymentId		= PC.intPrepaymentId
 	, strTransactionType	= PCI.strTransactionType
 	, dblAppliedAmount		= PC.dblAppliedInvoiceDetailAmount
 FROM dbo.tblARPrepaidAndCredit PC WITH (NOLOCK)
-INNER JOIN ##ARPostInvoiceHeader I ON PC.intInvoiceId = I.intInvoiceId
+INNER JOIN tblARPostInvoiceHeader I ON PC.intInvoiceId = I.intInvoiceId
 INNER JOIN tblARInvoice PCI ON PC.intPrepaymentId = PCI.intInvoiceId
 WHERE PC.ysnApplied = 1
   AND PC.dblAppliedInvoiceDetailAmount > 0
+  AND I.strSessionId = @strSessionId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM #CRCPREPAIDS)
 	RETURN 0;
@@ -111,13 +113,14 @@ SELECT intInvoiceId				= IH.intInvoiceId
 	, dtmPostDate				= IH.dtmPostDate
 	, strInvoiceNumber			= IH.strInvoiceNumber
 	, strTransactionType		= IH.strTransactionType
-FROM ##ARPostInvoiceHeader IH
+FROM tblARPostInvoiceHeader IH
 INNER JOIN (
 	SELECT DISTINCT intInvoiceId
 	FROM #CRCPREPAIDS
 ) P ON P.intInvoiceId = IH.intInvoiceId
 WHERE IH.dblAmountDue > 0  
   AND IH.strTransactionType <> 'Cash Refund'
+  AND IH.strSessionId = @strSessionId
 
 --CREATE CASH PAYMENT METHOD IF MISSING
 SELECT TOP 1 @intPaymentMethodId 	= intPaymentMethodID

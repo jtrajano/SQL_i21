@@ -109,6 +109,10 @@ BEGIN TRY
 				,strSequenceCurrency
 				,intSequenceUnitMeasureId
 				,strSequenceUnitMeasure
+				,intCurrencyIdTmp
+				,strCurrencyTmp
+				,intUnitMeasureIdTmp
+				,strUnitMeasureTmp
 			)
 			SELECT	intSampleId, 
 					tmp.intContractDetailId, 
@@ -142,7 +146,11 @@ BEGIN TRY
 					CU.intMainCurrencyId intSequenceCurrencyId,
 					CU.strCurrency strSequenceCurrency,
 					UM.intUnitMeasureId,
-					UM.strUnitMeasure
+					UM.strUnitMeasure,
+					tmp.intCurrencyId,
+					tmp.strCurrency, 
+					tmp.intUnitMeasureId, 
+					tmp.strUnitMeasure
 					
 			FROM @tblTemp tmp
 			JOIN tblCTContractDetail CD on CD.intContractDetailId = tmp.intContractDetailId
@@ -171,10 +179,36 @@ BEGIN TRY
 
 			)UM on UM.intItemUOMId = CD.intPriceItemUOMId
 
-			UPDATE tblCTContractQuality
-				SET dblAmount = dblResult
-				where (intSequenceCurrencyId = intCurrencyId or isnull(intCurrencyId,0) = 0) and intContractDetailId = @intContractDetailId
+				--SAME CURRENCY AND UOM
+			UPDATE Q
+			SET dblAmount = dblResult
+			FROM tblCTContractQuality Q 
+			INNER JOIN @tblTemp tmp on tmp.intContractDetailId = Q.intContractDetailId and tmp.intPropertyId = Q.intPropertyId
+			WHERE tmp.intContractDetailId = Q.intContractDetailId 
+				  AND tmp.intPropertyId = Q.intPropertyId
+				  AND Q.intCurrencyId = Q.intSequenceCurrencyId 
+				  AND Q.intUnitMeasureId = Q.intSequenceUnitMeasureId 
+				  AND Q.strCostMethod <> 'Percentage'
 
+
+			--SAME CURRENCY - Different UOM
+			UPDATE Q
+			SET Q.dblAmount = (ICF.dblUnitQty / ICT.dblUnitQty) * dblResult
+			FROM tblCTContractQuality Q
+			INNER JOIN tblICItemUOM ICF on Q.intUnitMeasureId = ICF.intUnitMeasureId and Q.intItemId = ICF.intItemId
+			INNER JOIN tblICItemUOM ICT on Q.intSequenceUnitMeasureId = ICT.intUnitMeasureId and Q.intItemId = ICT.intItemId
+			INNER JOIN @tblTemp tmp on tmp.intContractDetailId = Q.intContractDetailId and tmp.intPropertyId = Q.intPropertyId
+			WHERE Q.intCurrencyId = Q.intSequenceCurrencyId 
+			      AND Q.intUnitMeasureId <> Q.intSequenceUnitMeasureId 
+				  AND Q.strCostMethod <> 'Percentage'
+
+			--PERCENTAGE
+			UPDATE Q
+			SET Q.dblAmount = CD.dblBasis * dblResult
+			FROM tblCTContractQuality Q
+			INNER JOIN tblCTContractDetail CD on Q.intContractDetailId = CD.intContractDetailId
+			INNER JOIN @tblTemp tmp on tmp.intContractDetailId = Q.intContractDetailId and tmp.intPropertyId = Q.intPropertyId
+			WHERE Q.strCostMethod = 'Percentage'
 
 		END
 

@@ -464,7 +464,8 @@ USING
 		,[ysnPost]							= ITG.[ysnPost]
 		,[ysnRecap]							= ITG.[ysnRecap]
 		,[intPaymentId]						= ITG.[intPaymentId]
-		,[ysnPosted]						= ITG.[ysnImportedAsPosted]	
+		,[ysnPosted]						= ITG.[ysnImportedAsPosted]
+		,[strCreditCardStatus]				= CASE WHEN intEntityCardInfoId IS NOT NULL THEN 'Ready' ELSE NULL END
 	FROM @PaymentsToGenerate ITG
 	)
 AS Source
@@ -504,6 +505,7 @@ INSERT(
 	,[intWriteOffAccountId]
 	,[strPaymentMethod]
 	,[dblTotalAR]
+	,[strCreditCardStatus]
 	,[intConcurrencyId]
 	)
 VALUES(
@@ -540,6 +542,7 @@ VALUES(
 	,[intWriteOffAccountId]
 	,[strPaymentMethod]
 	,[dblTotalAR]
+	,[strCreditCardStatus]
 	,[intConcurrencyId]
 )
 	OUTPUT  

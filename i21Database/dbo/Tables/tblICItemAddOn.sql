@@ -6,6 +6,8 @@
 	[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	[intItemUOMId] INT NULL, 
 	[ysnAutoAdd] BIT NULL DEFAULT((0)),
+	[dtmEffectivityDateFrom] [datetime] NULL,
+	[dtmEffectivityDateTo] [datetime] NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((0)), 
 	[dtmDateCreated] DATETIME NULL,
 	[dtmDateModified] DATETIME NULL,

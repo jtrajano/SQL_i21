@@ -194,6 +194,10 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , intCompanyAccountSegmentId			= GLSEGMENT.intCompanyAccountSegmentId
 	 , ysnIntraCompany						= CASE WHEN ISNULL(INV.ysnIntraCompany, 0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries, 0) END
 	 , strGoodsStatus						= INV.strGoodsStatus
+	 , ysnOverrideFreightCharge				= INV.ysnOverrideFreightCharge
+	 , dblFreightCharge						= INV.dblFreightCharge
+	 , strFreightCompanySegment				= INV.strFreightCompanySegment
+	 , strFreightLocationSegment			= INV.strFreightLocationSegment
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId

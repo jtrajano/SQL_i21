@@ -7,7 +7,8 @@ strBTSwapFromFXGLAccountId =  D.strAccountId,
 strBTSwapToFXGLAccountId = E.strAccountId,
 strBTBankFeesAccountId = F.strAccountId,
 strBTInTransitAccountId = G.strAccountId,
-strBTForexDiffAccountId = H.strAccountId
+strBTForexDiffAccountId = H.strAccountId,
+strBankReconciliationBankFeesAccountId = I.strAccountId
 FROM tblCMCompanyPreferenceOption A
 OUTER APPLY(
     SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intBTForwardFromFXGLAccountId
@@ -30,3 +31,6 @@ OUTER APPLY(
 OUTER APPLY(
     SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intBTForexDiffAccountId
 )H
+OUTER APPLY(
+    SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intBankReconciliationBankFeesAccountId
+)I

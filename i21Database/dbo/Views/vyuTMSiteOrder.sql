@@ -8,7 +8,7 @@ SELECT
 	,C.strName AS strCustomerName
 	,RIGHT('000'+ CAST(A.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS  AS strSiteNumber
 	,(A.strSiteAddress + CHAR(10) + A.strCity + ', ' + A.strState +  ' ' +  A.strZipCode) AS strSiteAddress
-	,A.strLocation
+	,strLocation = Q.strLocationName
 	,E.strEntityNo COLLATE Latin1_General_CI_AS AS strDriverName
 	,D.strItemNo AS strItemNo
 	,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
@@ -76,6 +76,8 @@ LEFT JOIN tblICCategory H
 	ON D.intCategoryId = H.intCategoryId	
 LEFT JOIN tblTMFillGroup N
 	ON A.intFillGroupId = N.intFillGroupId
+LEFT JOIN tblSMCompanyLocation Q
+	ON A.intLocationId = Q.intCompanyLocationId
 INNER JOIN (
 	SELECT 
 		Ent.intEntityId

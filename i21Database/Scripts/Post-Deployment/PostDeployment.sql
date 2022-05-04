@@ -266,6 +266,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\13_InsertDefaultCashFlowReportBucketType.sql
 :r .\CM\14_BankAccountTypes.sql
 :r .\CM\15_CompanyPreferenceOptions.sql
+:r .\CM\16_UpdateNextEFTNo.sql
+:r .\CM\17_InsertResponsiblePartyOption.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 
@@ -301,7 +303,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
-:r .\AR\DefaultData\97_RefreshARTempTable.sql
 :r .\AR\DefaultData\96_RebuildReportFields.sql
 
 --Accounts Payable
@@ -587,6 +588,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
 :r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
+:r .\ST\42_FileFieldMapping_Commander_TankMonitor.sql
+:r .\ST\43_FileFieldMapping_Commander_FuelTotals.sql
+:r .\ST\44_FileFieldMapping_Commander_AppInfo.sql
+:r .\ST\45_FileFieldMapping_Commander_PopCfg.sql
+:r .\ST\46_FileFieldMapping_Commander_Tank.sql
+:r .\ST\47_FileFieldMapping_Commander_Loyalty.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql

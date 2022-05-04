@@ -12,6 +12,16 @@ TRUNCATE TABLE tblARTaxStagingTable
 TRUNCATE TABLE tblARGLSummaryStagingTable
 TRUNCATE TABLE tblARProductRecapStagingTable
 
+TRUNCATE TABLE tblARPostInvoiceHeader
+TRUNCATE TABLE tblARPostInvoiceDetail
+TRUNCATE TABLE tblARPostInvoiceItemAccount
+TRUNCATE TABLE tblARPostInvalidInvoiceData
+TRUNCATE TABLE tblARPostItemsForCosting
+TRUNCATE TABLE tblARPostItemsForInTransitCosting
+TRUNCATE TABLE tblARPostItemsForContracts
+TRUNCATE TABLE tblARPostItemsForStorageCosting
+TRUNCATE TABLE tblARPostInvoiceGLEntries
+
 GO
 print('/*******************  END - Truncating all AR staging tables  *******************/')
 

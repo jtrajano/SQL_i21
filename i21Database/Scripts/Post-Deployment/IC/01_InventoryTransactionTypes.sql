@@ -250,6 +250,16 @@ USING	(
         SELECT	id = 60
                 ,name = 'Transfer Shipment'
                 ,form = 'Transfer Shipment'
+		UNION ALL
+        SELECT	id = 61
+                ,name = 'Warrant'
+                ,form = 'Warrant'
+		UNION ALL
+        SELECT	id = 62
+                ,name = 'Inventory Trade Finance'
+                ,form = 'Inventory Trade Finance'
+
+
 		/****************************************************************************************************
 		IMPORTANT! When adding a new transaction type, create a new jira to include it in the Stock Rebuild. 
 		We don't want to lose those transaction types after the stock has been rebuilt.

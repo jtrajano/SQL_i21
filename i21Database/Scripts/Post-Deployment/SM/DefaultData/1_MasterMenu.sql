@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Configure Integrations' AND strModuleName = 'CRM')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Entry Period' AND strModuleName = 'Help Desk')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1441,23 +1441,34 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Loan
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'CashManagement.view.BankLoan?showSearch=true' WHERE strMenuName = 'Bank Loan' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Payments' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+DELETE FROM  tblSMMasterMenu WHERE strMenuName = 'Process Payments' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process AP Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Process Payments', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process Payments', N'Activity', N'Screen', N'AccountsPayable.controller.PrintChecks', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
+	VALUES (N'Process AP Payments ', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process AP Payments ', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=Positive Pay&strModule=AP&intTransactionType=16', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.controller.PrintChecks', intSort = 9 WHERE strMenuName = 'Process Payments' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=Positive Pay&strModule=AP&intTransactionType=16', intSort = 9 WHERE strMenuName = 'Process AP Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process AR Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Process AR Payments ', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process AR Payments ', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', intSort = 10 WHERE strMenuName = 'Process AR Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+
+
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true' WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true' WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 ELSE
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Borrowing Facility', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Borrowing Facility', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 11, 1)
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'CashManagement.view.PostCommissions' WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'CashManagement.view.PostCommissions' WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 ELSE
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Post Commissions', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Post Commissions', N'Activity', N'Screen', N'CashManagement.view.PostCommissions', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Post Commissions', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Post Commissions', N'Activity', N'Screen', N'CashManagement.view.PostCommissions', N'small-menu-activity', 0, 0, 0, 1, 12, 1)
 
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Banks' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementMaintenanceParentMenuId)
@@ -6008,6 +6019,18 @@ ELSE
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Ticket Types' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'HelpDesk.view.TicketType' WHERE strMenuName = N'Ticket Types' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Coworker Goal' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Coworker Goal', N'Help Desk', @HelpDeskMaintenanceParentMenuId, N'Coworker Goal', N'Maintenance', N'Screen', N'HelpDesk.view.CoworkerGoal?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'HelpDesk.view.CoworkerGoal?showSearch=true' WHERE strMenuName = 'Coworker Goal' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Entry Period' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Time Entry Period', N'Help Desk', @HelpDeskMaintenanceParentMenuId, N'Time Entry Period', N'Maintenance', N'Screen', N'HelpDesk.view.TimeEntryPeriod?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'HelpDesk.view.TimeEntryPeriod?showSearch=true' WHERE strMenuName = 'Time Entry Period' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Summary' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])

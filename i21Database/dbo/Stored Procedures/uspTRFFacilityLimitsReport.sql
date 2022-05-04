@@ -150,8 +150,8 @@ AS
  		ON tlog.intBorrowingFacilityId = facility.intBorrowingFacilityId
  	WHERE tlog.intContractHeaderId IS NOT NULL 
  	AND tlog.intContractDetailId IS NOT NULL
- 	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmTransactionDate)) >= @dtmStartDate
- 	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmTransactionDate)) <= @dtmEndDate
+ 	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
+ 	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
 
 
  	SELECT  
@@ -184,8 +184,8 @@ AS
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempTradeLogContracts tContract
  		ON	tContract.intContractDetailId = tlog.intContractDetailId
- 		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmTransactionDate)) >= @dtmStartDate
- 		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmTransactionDate)) <= @dtmEndDate
+ 		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
+ 		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
 
  	SELECT intContractHeaderId
  		, intContractDetailId
@@ -218,7 +218,7 @@ AS
  	FROM 
  	(
  		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmTransactionDate DESC)
+ 			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreatedDate DESC)
  			, *
  		FROM #tempTradeFinanceLog
  	) t
@@ -545,7 +545,7 @@ AS
  	FROM
  	(
  		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmTransactionDate DESC)
+ 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
  			, tlog.intContractHeaderId
  			, tlog.intContractDetailId
  			, tlog.intTransactionHeaderId
@@ -592,7 +592,7 @@ AS
  	FROM
  	(
  		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmTransactionDate DESC)
+ 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
  			, tlog.intContractHeaderId
  			, tlog.intContractDetailId
  			, tlog.intTransactionHeaderId
@@ -609,7 +609,7 @@ AS
  	FROM
  	(
  		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmTransactionDate DESC)
+ 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
  			, tlog.intContractHeaderId
  			, tlog.intContractDetailId
  			, tlog.intTransactionHeaderId
