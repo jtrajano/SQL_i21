@@ -186,6 +186,7 @@ AS
    ,SCT.dblDWGOriginalNetUnits
    ,SCT.dblDWGSpotPrice
    ,SCT.intFreightCostUOMId
+   ,HaulerEntity.strName as strHaulerEntityName
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -228,3 +229,4 @@ AS
       ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
    LEFT JOIN tblSMCompanyLocation AWOL
 		ON AWO.intCompanyLocationId = AWOL.intCompanyLocationId
+	LEFT JOIN tblEMEntity HaulerEntity on SCT.intHaulerId = HaulerEntity.intEntityId
