@@ -54,6 +54,8 @@ SELECT intPaymentId						= P.intPaymentId
 	 , ysnIntraCompany					= P.ysnIntraCompany
 	 , ysnScheduledPayment				= ISNULL(P.ysnScheduledPayment, 0)
 	 , dtmScheduledPayment				= P.dtmScheduledPayment
+	 , strCreditCardStatus				= P.strCreditCardStatus
+	 , strCreditCardNote				= P.strCreditCardNote
 FROM tblARPayment P WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch C ON C.intEntityId = P.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = P.intLocationId

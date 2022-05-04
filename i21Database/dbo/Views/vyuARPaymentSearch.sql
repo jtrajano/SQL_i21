@@ -5,7 +5,7 @@ SELECT intPaymentId				= P.intPaymentId
 	 , intEntityId				= P.intEntityId
 	 , intEntityCustomerId		= P.intEntityCustomerId
 	 , intBankAccountId			= P.intBankAccountId
-	 , strBankName				= LTRIM(RTRIM(BA.strBankName))
+	 , strBankName				= LTRIM(RTRIM(B.strBankName))
 	 , strBankAccountNo			= dbo.fnAESDecryptASym(BA.strBankAccountNo)
 	 , strBankAccountNoEncrypt  = ISNULL(LTRIM(RTRIM(BA.strBankAccountNo)), '')
 	 , strCustomerName			= LTRIM(RTRIM(E.strName))
@@ -32,33 +32,23 @@ SELECT intPaymentId				= P.intPaymentId
 	 , strPaymentInfo			= P.strPaymentInfo
 	 , ysnProcessedToNSF		= P.ysnProcessedToNSF
 	 , strTransactionId			= ISNULL(ARP.strTransactionId, '')
-	 , strAccountingPeriod      = AccPeriod.strAccountingPeriod
+	 , strAccountingPeriod      = AccPeriod.strPeriod
 	 , ysnScheduledPayment		= ISNULL(P.ysnScheduledPayment, 0)
 	 , dtmScheduledPayment		= P.dtmScheduledPayment
-FROM (
-	SELECT intPaymentId
-		 , strRecordNumber 
-		 , intEntityId
-		 , intEntityCustomerId
-		 , intBankAccountId
-		 , dtmDatePaid
-		 , intPaymentMethodId
-		 , dblAmountPaid
-		 , ysnPosted
-		 , intLocationId
-		 , intAccountId 
-		 , intCurrencyId
-		 , dtmBatchDate
-		 , intPostedById
-		 , strBatchId
-		 , strPaymentInfo
-		 , ysnProcessedToNSF
-		 , intPeriodId
-		 , strInvoices
-		 , ysnScheduledPayment
-		 , dtmScheduledPayment
-	FROM dbo.tblARPayment WITH (NOLOCK)
-) P 
+	 , strCreditCardStatus		= P.strCreditCardStatus
+	 , strCreditCardNote		= P.strCreditCardNote
+FROM tblARPayment P WITH (NOLOCK)
+LEFT OUTER JOIN tblEMEntity EM WITH (NOLOCK) ON P.intEntityId = EM.intEntityId
+LEFT OUTER JOIN tblSMPaymentMethod PM WITH (NOLOCK) ON P.intPaymentMethodId = PM.intPaymentMethodID
+INNER JOIN tblEMEntity E WITH (NOLOCK) ON P.intEntityCustomerId = E.intEntityId
+INNER JOIN tblARCustomer C WITH (NOLOCK) ON E.intEntityId = C.intEntityId
+LEFT OUTER JOIN tblCMBankAccount BA WITH (NOLOCK) ON P.intBankAccountId = BA.intBankAccountId
+LEFT JOIN tblCMBank B WITH (NOLOCK) ON B.intBankId = BA.intBankId
+INNER JOIN tblSMCompanyLocation CL WITH (NOLOCK) ON P.intLocationId = CL.intCompanyLocationId
+LEFT OUTER JOIN tblEMEntity POSTEDBY WITH (NOLOCK) ON P.intPostedById = POSTEDBY.intEntityId
+LEFT OUTER JOIN tblSMCurrency SMC WITH (NOLOCK) ON P.intCurrencyId = SMC.intCurrencyID
+LEFT OUTER JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId
+LEFT JOIN tblGLFiscalYearPeriod AccPeriod ON P.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 LEFT JOIN (
      SELECT intPaymentId
           , dblDiscount = SUM(ISNULL(dblDiscount, 0))
@@ -66,56 +56,6 @@ LEFT JOIN (
      WHERE ISNULL(dblDiscount, 0) <> 0
      GROUP BY intPaymentId
 ) PD ON P.intPaymentId = PD.intPaymentId
-LEFT OUTER JOIN (
-	SELECT intEntityId
-		 , strName 
-	FROM dbo.tblEMEntity WITH (NOLOCK)
-) EM ON P.intEntityId = EM.intEntityId
-LEFT OUTER JOIN (
-	SELECT intPaymentMethodID
-		 , strPaymentMethod 
-	FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
-) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
-INNER JOIN (
-	SELECT intEntityId 
-		 , strEntityNo
-		 , strName 
-	FROM dbo.tblEMEntity WITH (NOLOCK)
-) E ON P.intEntityCustomerId = E.intEntityId
-LEFT OUTER JOIN (
-	SELECT intEntityId
-		 , strCustomerNumber 
-	FROM dbo.tblARCustomer WITH (NOLOCK)
-) C ON E.intEntityId = C.intEntityId
-LEFT OUTER JOIN (
-	SELECT intBankAccountId
-		 , BA.intBankId
-		 , strBankAccountNo
-		 , B.strBankName 
-	FROM dbo.tblCMBankAccount BA WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intBankId
-			 , strBankName 
-		FROM dbo.tblCMBank WITH (NOLOCK)
-	) B ON B.intBankId = BA.intBankId
-) BA ON P.intBankAccountId = BA.intBankAccountId
-LEFT OUTER JOIN (
-	SELECT intCompanyLocationId
-		 , strLocationName 
-	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) CL ON P.intLocationId = CL.intCompanyLocationId
-LEFT OUTER JOIN (
-	SELECT intEntityId
-		 , strName
-	FROM dbo.tblEMEntity WITH (NOLOCK)
-) POSTEDBY ON P.intPostedById = POSTEDBY.intEntityId
-LEFT OUTER JOIN (
-	SELECT intCurrencyID
-		 , strCurrency
-		 , strDescription 
-	FROM dbo.tblSMCurrency WITH (NOLOCK)
-) SMC ON P.intCurrencyId = SMC.intCurrencyID
-LEFT OUTER JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId
 OUTER APPLY (
 	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
@@ -138,8 +78,3 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
-LEFT JOIN (
-	SELECT intGLFiscalYearPeriodId
-		 , strAccountingPeriod = P.strPeriod
-	FROM tblGLFiscalYearPeriod P	
-) AccPeriod ON P.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
