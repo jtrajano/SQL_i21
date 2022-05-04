@@ -451,7 +451,7 @@
     <Build Include="dbo\Tables\tblApiSchemaTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />    
+    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
     <None Include="Scripts\Post-Deployment\IC\30_InventoryValuationAccountIds.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
@@ -515,8 +515,8 @@
     <Build Include="dbo\Views\vyuCMUnassignedBrokerageAccount.sql" />
     <Build Include="dbo\Functions\fnRKIsUserOTCApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspRKValidateOTCRecords.sql" />
-    <Build Include="dbo\Views\vyuApiCompanyLocation.sql"  />
-    <Build Include="dbo\Views\vyuApiUserCompanyLocations.sql"  />
+    <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuApiUserCompanyLocations.sql" />
     <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
     <Build Include="dbo\Views\vyuApiRecordAuditPivot.sql" />
     <Build Include="dbo\Views\vyuApiSalesperson.sql" />
@@ -782,6 +782,9 @@
     <Build Include="dbo\Stored Procedures\uspICCreateLotRelease.sql" />
     <Build Include="dbo\User Defined Types\LotReleaseTableType.sql" />
     <Build Include="dbo\Tables\tblICLotReleased.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderFuelTotal.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelTotals.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderFuelTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10832,7 +10835,7 @@
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
-    <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />    
+    <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
