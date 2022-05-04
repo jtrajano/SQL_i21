@@ -132,7 +132,7 @@ BEGIN TRY
 				,Lot.strLotAlias
 				,ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQtyToShip, 0)) AS dblQty
 				,ISNULL(ShipmentItemLot.strLotUOM, ShipmentItem.strUnitMeasure) AS strUOM
-				,ISNULL(ShipmentItemLot.dblNetWeight,0) AS dblNetWeight
+				,ISNULL(ShipmentItemLot.dblNetWeight, ShipmentItem.dblNet) AS dblNetWeight
 				,SUM(ShipmentItemLot.dblNetWeight) OVER() AS dblTotalWeight
 				,intWarehouseInstructionHeaderId = ISNULL(WarehouseInstruction.intWarehouseInstructionHeaderId, 0)
 				,Shipment.strCompanyName
