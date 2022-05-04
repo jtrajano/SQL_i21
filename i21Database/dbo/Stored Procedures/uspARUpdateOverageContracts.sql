@@ -200,7 +200,7 @@ IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0 AND I
 IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 	BEGIN
 		SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 
-														  THEN IDD.dblQtyOrdered 
+														  THEN IDD.dblQtyShipped 
 														  ELSE CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) = 0 
 																	THEN CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END
 																	ELSE ISI.dblQuantity
@@ -470,6 +470,10 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 								)
 								EXEC dbo.uspCTGetContractPrice @intContractHeaderIdAC, @intContractDetailIdAC, @dblQtyOverAged, 'Invoice'
 
+								DELETE FROM #BASISCONTRACT WHERE intContractHeaderId = @intContractHeaderIdAC AND dblFinalPrice IS NULL
+								IF NOT EXISTS (SELECT TOP 1 NULL FROM #BASISCONTRACT WHERE intContractHeaderId = @intContractHeaderIdAC)
+									DELETE FROM #AVAILABLECONTRACTS WHERE intContractHeaderId = @intContractHeaderIdAC
+
 								WHILE EXISTS (SELECT TOP 1 NULL FROM #BASISCONTRACT WHERE ysnProcessed = 0 AND intContractHeaderId = @intContractHeaderId) AND @dblQtyOverAged > 0
 									BEGIN
 										DECLARE @intPriceFixationDetailId	INT = NULL
@@ -601,6 +605,10 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 											, dblFinalPrice
 										)
 										EXEC dbo.uspCTGetContractPrice @intContractHeaderIdACBC, @intContractDetailIdACBC, @dblQtyOverAged, 'Invoice'
+
+										DELETE FROM #BASISCONTRACT WHERE intContractHeaderId = @intContractHeaderIdACBC AND dblFinalPrice IS NULL
+										IF NOT EXISTS (SELECT TOP 1 NULL FROM #BASISCONTRACT WHERE intContractHeaderId = @intContractHeaderIdACBC)
+											DELETE FROM #AVAILABLECONTRACTSBYCUSTOMER WHERE intContractHeaderId = @intContractHeaderIdACBC
 
 										WHILE EXISTS (SELECT TOP 1 NULL FROM #BASISCONTRACT WHERE ysnProcessed = 0 AND intContractHeaderId = @intContractHeaderIdACBC) AND @dblQtyOverAged > 0
 											BEGIN
