@@ -113,8 +113,16 @@ BEGIN
 	-- Clear the list (if it exists)
 	DELETE	LotsReleased
 	FROM	dbo.tblICLotReleased LotsReleased 
-	WHERE	intTransactionId = @intTransactionId
-			AND intInventoryTransactionType = @intTransactionTypeId
+			CROSS APPLY (
+				SELECT DISTINCT 
+					LotsToRelease.intLotId
+				FROM 
+					@LotsToRelease LotsToRelease
+				WHERE
+					LotsReleased.intLotId = LotsToRelease.intLotId
+			) LotsToRelease
+	--WHERE	intTransactionId = @intTransactionId
+	--		AND intInventoryTransactionType = @intTransactionTypeId
 
 END 
 
