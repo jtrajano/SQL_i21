@@ -312,6 +312,8 @@ SELECT
 												END
 											WHEN PCD.intPricingTypeId = 1 THEN	
 												'Fully Priced'
+											WHEN PCD.intPricingTypeId = 3 THEN
+												'Unpriced'
 											ELSE ''
 										END	
 	,strPurchasePricingType = P_PT.strPricingType
@@ -379,6 +381,8 @@ SELECT
 												END
 											WHEN SCD.intPricingTypeId = 1 THEN	
 												'Fully Priced'
+											WHEN PCD.intPricingTypeId = 3 THEN
+												'Unpriced'
 											ELSE ''
 										END	
 	,strSalesPricingType = S_PT.strPricingType
