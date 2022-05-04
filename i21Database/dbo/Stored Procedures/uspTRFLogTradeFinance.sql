@@ -52,6 +52,7 @@ BEGIN
 		, @intContractDetailId INT
 		, @intTotal INT
 		, @ysnNegateLog BIT
+		, @ysnDeleted BIT
 
 	DECLARE @FinalTable AS TABLE (
 		  strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -95,6 +96,7 @@ BEGIN
 		, intContractHeaderId INT NULL
 		, intContractDetailId INT NULL
 		, ysnNegateLog BIT NULL DEFAULT(0)
+		, ysnDeleted BIT NULL DEFAULT(0)
 	)
 
 	SELECT @intTotal = COUNT(*) FROM @TradeFinanceLogs
@@ -146,6 +148,7 @@ BEGIN
 			, @intContractHeaderId = NULL
 			, @intContractDetailId = NULL
 			, @ysnNegateLog = NULL
+			, @ysnDeleted = NULL
 
 		SELECT TOP 1 
 		      @intId = tfLog.intId
@@ -190,6 +193,7 @@ BEGIN
 			, @intContractHeaderId = tfLog.intContractHeaderId
 			, @intContractDetailId = tfLog.intContractDetailId
 			, @ysnNegateLog = tfLog.ysnNegateLog
+			, @ysnDeleted = tfLog.ysnDeleted
 		
 		FROM #tmpTradeFinanceLogs tfLog
 		LEFT JOIN tblCMBank bank
@@ -249,7 +253,9 @@ BEGIN
 				 , intUserId
 				 , intConcurrencyId
 				 , intContractHeaderId
-				 , intContractDetailId)
+				 , intContractDetailId
+				 , ysnDeleted
+			)
 			SELECT @strAction
 				 , @strTransactionType
 				 , @intTradeFinanceTransactionId
@@ -290,19 +296,20 @@ BEGIN
 				 , @intConcurrencyId
 				 , @intContractHeaderId
 				 , @intContractDetailId
+				 , @ysnDeleted
+				 
+		IF (ISNULL(@ysnNegateLog, 0) = 0 AND ISNULL(@ysnDeleted, 0) = 0)
+		BEGIN
+			DECLARE @strActionNegate NVARCHAR(100) = 'Moved to ' + @strTransactionType
+
+			EXEC uspTRFNegateTFLogFinancedQtyAndAmount @strTradeFinanceTransaction, NULL, NULL, @dtmTransactionDate, @strActionNegate
+		END
 
 		DELETE FROM #tmpTradeFinanceLogs
 		WHERE intId = @intId
 	END
 
 	DECLARE @dtmCreatedDate DATETIME = GETDATE()
-	
-	IF (@ysnNegateLog = 0)
-	BEGIN
-		DECLARE @strActionNegate NVARCHAR(100) = 'Moved to ' + @strTransactionType
-
-		EXEC uspTRFNegateTFLogFinancedQtyAndAmount @strTradeFinanceTransaction, NULL, NULL, @dtmTransactionDate, @strActionNegate
-	END
 
 	INSERT INTO tblTRFTradeFinanceLog(
 		  dtmCreatedDate
@@ -345,7 +352,9 @@ BEGIN
 		, intUserId
 		, intConcurrencyId
 		, intContractHeaderId
-		, intContractDetailId)
+		, intContractDetailId
+		, ysnDeleted
+	)
 	SELECT dtmCreatedDate = @dtmCreatedDate
 		, strAction
 		, strTransactionType
@@ -387,6 +396,7 @@ BEGIN
 		, intConcurrencyId
 		, intContractHeaderId
 		, intContractDetailId
+		, ysnDeleted
 	FROM @FinalTable F
 	ORDER BY dtmTransactionDate
 
