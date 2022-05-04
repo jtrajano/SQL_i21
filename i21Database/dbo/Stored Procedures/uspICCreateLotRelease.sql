@@ -57,14 +57,16 @@ GROUP  BY
 	, r.intSubLocationId
 	, r.intStorageLocationId
 	, r.dtmDate
+HAVING 
+	SUM(r.dblQty) > 0 
 
--- Clear the existing released records. 
-IF EXISTS (
-	SELECT TOP 1 1 
-	FROM	dbo.tblICLotReleased LotsReleased 
-	WHERE	intTransactionId = @intTransactionId
-			AND intInventoryTransactionType = @intTransactionTypeId	
-)
+---- Clear the existing released records. 
+--IF EXISTS (
+--	SELECT TOP 1 1 
+--	FROM	dbo.tblICLotReleased LotsReleased 
+--	WHERE	intTransactionId = @intTransactionId
+--			AND intInventoryTransactionType = @intTransactionTypeId	
+--)
 BEGIN 
 	INSERT INTO @ClearReleased (
 			intItemId
@@ -158,6 +160,8 @@ FROM	@LotsToReleaseAggregrate Items
 		INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON Items.intItemLocationId = ItemLocation.intItemLocationId
 			AND Items.intItemId = ItemLocation.intItemId
+WHERE
+	Items.dblQty > 0 
 
 -- Call this SP to increase the released qty. 
 IF EXISTS (SELECT TOP 1 1 FROM @LotsToReleaseAggregrate)

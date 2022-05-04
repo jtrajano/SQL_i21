@@ -122,7 +122,7 @@ BEGIN
 				AND (ItemsToValidate.intStorageLocationId = lot.intStorageLocationId OR (ItemsToValidate.intStorageLocationId IS NULL AND lot.intStorageLocationId IS NULL))
 
 	WHERE	ItemsToValidate.intItemId IS NOT NULL 	
-			AND lot.dblQty - ISNULL(lot.dblReleasedQty, 0) + ISNULL(ItemsToValidate.dblQty, 0) < 0 
+			AND lot.dblQty - (ISNULL(lot.dblReleasedQty, 0) + ISNULL(ItemsToValidate.dblQty, 0)) < 0 
 			
 	-- 'Available Qty in %s is %f. Releasing %f is not allowed.'
 	IF @intItemId IS NOT NULL 
