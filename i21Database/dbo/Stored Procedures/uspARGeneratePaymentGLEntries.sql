@@ -683,7 +683,7 @@ BEGIN
 	LEFT OUTER JOIN
 		(
 			SELECT
-				 [dblGainLossAmount]        = SUM((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))), @ZeroDecimal)))
+				 [dblGainLossAmount]        = SUM(CASE WHEN P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount] < P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount] THEN @ZeroDecimal ELSE ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) END)
 				,[intTransactionDetailId]   = P.[intTransactionDetailId]
 			FROM
 				#ARPostPaymentDetail P
