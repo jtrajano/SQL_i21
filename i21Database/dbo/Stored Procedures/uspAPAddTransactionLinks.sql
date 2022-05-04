@@ -300,28 +300,28 @@ BEGIN
 				  AND PD.dblPayment <> 0
 		END
 
-		--REVERSE LOGS
-		DECLARE @strTradeFinanceNumber NVARCHAR(100), @strTransactionType NVARCHAR(100), @dtmTransactionDate DATETIME, @strAction NVARCHAR(100)
+		-- --REVERSE LOGS
+		-- DECLARE @strTradeFinanceNumber NVARCHAR(100), @strTransactionType NVARCHAR(100), @dtmTransactionDate DATETIME, @strAction NVARCHAR(100)
 		
-		DECLARE TFLogCursor CURSOR LOCAL FAST_FORWARD
-		FOR
-		SELECT strTradeFinanceTransaction, strTransactionType, dtmTransactionDate, strAction FROM @TradeFinanceLogs
+		-- DECLARE TFLogCursor CURSOR LOCAL FAST_FORWARD
+		-- FOR
+		-- SELECT strTradeFinanceTransaction, strTransactionType, dtmTransactionDate, strAction FROM @TradeFinanceLogs
 
-		OPEN TFLogCursor
-		FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @strTransactionType, @dtmTransactionDate, @strAction
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			EXEC uspTRFNegateTFLogFinancedQtyAndAmount
-				@strTradeFinanceNumber 	= @strTradeFinanceNumber,
-				@strTransactionType		= @strTransactionType,
-				@strLimitType			= NULL,
-				@dtmTransactionDate		= @dtmTransactionDate,
-				@strAction				= @strAction
+		-- OPEN TFLogCursor
+		-- FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @strTransactionType, @dtmTransactionDate, @strAction
+		-- WHILE @@FETCH_STATUS = 0
+		-- BEGIN
+		-- 	EXEC uspTRFNegateTFLogFinancedQtyAndAmount
+		-- 		@strTradeFinanceNumber 	= @strTradeFinanceNumber,
+		-- 		@strTransactionType		= @strTransactionType,
+		-- 		@strLimitType			= NULL,
+		-- 		@dtmTransactionDate		= @dtmTransactionDate,
+		-- 		@strAction				= @strAction
 
-			FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @strTransactionType, @dtmTransactionDate, @strAction
-		END
-		CLOSE TFLogCursor
-		DEALLOCATE TFLogCursor
+		-- 	FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @strTransactionType, @dtmTransactionDate, @strAction
+		-- END
+		-- CLOSE TFLogCursor
+		-- DEALLOCATE TFLogCursor
 
 		--NEW LOGS
 		EXEC uspTRFLogTradeFinance @TradeFinanceLogs
