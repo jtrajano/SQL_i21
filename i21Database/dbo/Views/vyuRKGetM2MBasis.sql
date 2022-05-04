@@ -147,7 +147,7 @@ OUTER APPLY (
 	LEFT JOIN tblSMCity LGLoadOrigin
 		ON LGLoadOrigin.strCity = LGLoad.strOriginPort
 	LEFT JOIN tblSMCity LGLoadDestination
-		ON LGLoadOrigin.strCity = LGLoad.strDestinationPort
+		ON LGLoadDestination.strCity = LGLoad.strDestinationPort
 	WHERE   ctShipmentStatus.strShipmentStatus IN ('Inbound Transit', 'Outbound Transit', 'Dispatched', 'Delivered') -- LOAD SHIPMENT AFLOAT
 	-- WILL ONLY USE LOAD SHIPMENT VALUES WHEN TRANSPORT MODE = OCEAN VESSEL (2)
 	-- THIS IS DUE TO VESSEL TAB AND WAREHOUSE TAB IS ONLY DISPLAYED ON LOAD SHIPMENT WHEN TRANSPORT MODE = OCEAN VESSEL (2)
