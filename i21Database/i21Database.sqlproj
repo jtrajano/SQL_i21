@@ -6999,6 +6999,7 @@
     <Build Include="dbo\Views\vyuLGInsurancePremiumFactor.sql" />
     <Build Include="dbo\Views\vyuLGShippingLineServiceContract.sql" />
     <Build Include="dbo\Views\vyuSTStore.sql" />
+    <Build Include="dbo\Views\vyuSTStoreDetail.sql" />
     <Build Include="dbo\Views\vyuSTStoreRegister.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
