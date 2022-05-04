@@ -506,7 +506,7 @@ FROM tblARInvoice INV
 INNER JOIN ##ARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
 
 --UPDATE CONTRACT BALANCE
-EXEC dbo.uspARUpdateContractOnPost @UserIdTemp
+EXEC dbo.uspARUpdateContractOnPost @UserIdTemp, @Post
 
 --UPDATE CONTRACTS FINANCIAL STATUS
 BEGIN
