@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspARUpdateContractOnPost]
-    @intUserId  INT
+	  @intUserId    INT
+	, @ysnPost 		BIT = 1
 AS
 
 DECLARE @strErrorMsg	NVARCHAR(500) = NULL
@@ -26,18 +27,40 @@ BEGIN TRY
 				  , @ysnFromReturn				BIT = 0
 				  , @strTransactionType			NVARCHAR(100) = NULL
 
-			SELECT TOP 1 @intInvoiceId					= intInvoiceId
-					   , @intInvoiceDetailId			= intInvoiceDetailId
-					   , @intOriginalInvoiceId			= intOriginalInvoiceId
-					   , @intOriginalInvoiceDetailId	= intOriginalInvoiceDetailId
-					   , @intContractDetailId			= intContractDetailId
-					   , @strType						= strType
-					   , @dblBalanceQty					= dblBalanceQty
-					   , @dblSheduledQty				= dblSheduledQty
-					   , @dblRemainingQty				= dblRemainingQty
-					   , @ysnFromReturn					= ysnFromReturn
-					   , @strTransactionType			= strTransactionType
-			FROM ##ARItemsForContracts
+		    --IF POST, DEDUCT SCHEDULED QTY FIRST BEFORE DEDUCTING BALANCE
+			IF @ysnPost = 1
+				BEGIN
+					SELECT TOP 1 @intInvoiceId				= intInvoiceId
+							, @intInvoiceDetailId			= intInvoiceDetailId
+							, @intOriginalInvoiceId			= intOriginalInvoiceId
+							, @intOriginalInvoiceDetailId	= intOriginalInvoiceDetailId
+							, @intContractDetailId			= intContractDetailId
+							, @strType						= strType
+							, @dblBalanceQty				= dblBalanceQty
+							, @dblSheduledQty				= dblSheduledQty
+							, @dblRemainingQty				= dblRemainingQty
+							, @ysnFromReturn				= ysnFromReturn
+							, @strTransactionType			= strTransactionType
+					FROM ##ARItemsForContracts
+					ORDER BY ABS(dblBalanceQty) ASC
+				END
+			--IF UNPOST, DEDUCT BALANCE FIRST BEFORE DEDUCTING SCHEDULED QTY
+			ELSE
+				BEGIN
+					SELECT TOP 1 @intInvoiceId				= intInvoiceId
+							, @intInvoiceDetailId			= intInvoiceDetailId
+							, @intOriginalInvoiceId			= intOriginalInvoiceId
+							, @intOriginalInvoiceDetailId	= intOriginalInvoiceDetailId
+							, @intContractDetailId			= intContractDetailId
+							, @strType						= strType
+							, @dblBalanceQty				= dblBalanceQty
+							, @dblSheduledQty				= dblSheduledQty
+							, @dblRemainingQty				= dblRemainingQty
+							, @ysnFromReturn				= ysnFromReturn
+							, @strTransactionType			= strTransactionType
+					FROM ##ARItemsForContracts
+					ORDER BY ABS(dblBalanceQty) DESC
+				END
 
 			IF @strType = 'Contract Balance' AND @dblBalanceQty <> 0
 				BEGIN
