@@ -170,8 +170,8 @@ BEGIN TRY
 			FROM tblLGInsurancePremiumFactor ipf
 			JOIN tblLGInsurancePremiumFactorDetail detail ON detail.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId
 			JOIN tblEMEntity em ON em.intEntityId = ipf.intEntityId
-			LEFT JOIN tblLGInsurancePremiumFactorPurchase pFactor ON pFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 1
-			LEFT JOIN tblLGInsurancePremiumFactorSale sFactor ON sFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 2
+			LEFT JOIN tblLGInsurancePremiumFactorPurchase pFactor ON pFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 1 AND pFactor.intFreightTermId = @intFromTermId
+			LEFT JOIN tblLGInsurancePremiumFactorSale sFactor ON sFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 2 AND sFactor.intFreightTermId = @intToTermId
 			JOIN tblICItem item ON item.intItemId = @intItemId AND item.intProductTypeId = ipf.intCommodityAttributeId
 			WHERE detail.intLoadingPortId = @intFromPortId
 				AND detail.intDestinationPortId = @intToPortId
