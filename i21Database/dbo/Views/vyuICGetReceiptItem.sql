@@ -21,6 +21,7 @@ SELECT
 	strReceiveUOMType = COALESCE(rUOM.strUnitType, iUOM.strUnitType),
 	intReceiveUOMId = COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId),
 	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, ItemUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode, '')),
+	ISNULL(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode) AS strShortUpc,
 	intReceiveUnitMeasureId = COALESCE(ReceiveUOM.intUnitMeasureId, ItemUOM.intUnitMeasureId),
 	intGrossUOMId = GrossUOM.intItemUOMId,
 	strGrossUOM = gUOM.strUnitMeasure,
