@@ -73,27 +73,6 @@ WHEN NOT MATCHED THEN
 INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
 VALUES ([Source].strUnitMeasure, [Source].strSymbol, 1);
 
-UNION ALL
-SELECT DISTINCT
-	  strUnitMeasure	= LTRIM(RTRIM(ptpkg_desc)) COLLATE Latin1_General_CI_AS 
-	, strSymbol			= LTRIM(RTRIM(ptpkg_code)) COLLATE Latin1_General_CI_AS
-FROM ptpkgmst
-WHERE RTRIM(LTRIM(ptpkg_code)) <> ''
-
-UNION ALL 
-SELECT DISTINCT
-	  strUnitMeasure	= LTRIM(RTRIM(ptitm_unit)) COLLATE Latin1_General_CI_AS 
-	, strSymbol			= LTRIM(RTRIM(ptitm_unit)) COLLATE Latin1_General_CI_AS
-FROM ptitmmst
-WHERE LTRIM(RTRIM(ptitm_unit)) <> ''
-
-UNION ALL 
-SELECT DISTINCT
-	  strUnitMeasure	= LTRIM(RTRIM(ptitm_pak_desc)) COLLATE Latin1_General_CI_AS 
-	, strSymbol			= LTRIM(RTRIM(ptitm_pak_desc)) COLLATE Latin1_General_CI_AS
-FROM ptitmmst
-WHERE LTRIM(RTRIM(ptitm_pak_desc)) <> ''
-
 -- Delete the duplicate UOMs, relative to strUnitMeasure
 ;WITH CTE AS 
 (
