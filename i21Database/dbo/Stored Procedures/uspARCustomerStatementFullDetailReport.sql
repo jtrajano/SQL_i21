@@ -50,12 +50,12 @@ SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
 SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 1)
-SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
-SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
-SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
-SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
-SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
-SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
+SET @strCustomerNumberLocal				= ISNULL(@strCustomerNumber, '')
+SET @strAccountStatusCodeLocal			= ISNULL(@strAccountStatusCode, '')
+SET @strLocationNameLocal				= ISNULL(@strLocationName, '')
+SET @strCustomerNameLocal				= ISNULL(@strCustomerName, '')
+SET @strCustomerIdsLocal				= ISNULL(@strCustomerIds, '')
+SET @intEntityUserIdLocal				= ISNULL(@intEntityUserId, 0)
 SET @dtmBalanceForwardDateLocal			= DATEADD(DAYOFYEAR, -1, @dtmDateFromLocal)
 
 --COMPANY INFO
@@ -580,7 +580,7 @@ LEFT JOIN (
 		 , strInvoiceType			= 'Payment'
 		 , strType					= NULL
 		 , strItemNo				= NULL
-		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(ISNULL(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
 		 , dblAmount				= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1
@@ -617,7 +617,7 @@ LEFT JOIN (
 		 , strInvoiceType			= 'Payment'
 		 , strType					= NULL
 		 , strItemNo				= NULL
-		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strPaymentRecordNum) + ')'
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(ISNULL(P.strPaymentInfo, ''), P.strPaymentRecordNum) + ')'
 		 , dblAmount				= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
@@ -636,7 +636,6 @@ LEFT JOIN (
 	) PD ON P.intPaymentId = PD.intPaymentId
 	INNER JOIN #COMPANYLOCATIONS CL ON P.intCompanyLocationId = CL.intCompanyLocationId
 	WHERE P.ysnPosted = 1
-	  AND P.ysnProcessedToNSF = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
 
