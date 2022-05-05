@@ -274,7 +274,10 @@ BEGIN
 	WHERE
 		r.intInventoryReceiptId = @intTransactionId
 		AND r.ysnPosted = 1
-		AND ril.strCondition NOT IN ('Missing', 'Swept', 'Skimmed')
+		AND (
+			ril.strCondition NOT IN ('Missing', 'Swept', 'Skimmed')
+			OR l.strCondition IS NULL
+		)
 
 	EXEC [uspICCreateLotRelease]
 		@LotsToRelease = @LotsToRelease 
