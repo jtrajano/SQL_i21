@@ -42,7 +42,7 @@ BEGIN TRY
 							, @dblRemainingQty				= dblRemainingQty
 							, @ysnFromReturn				= ysnFromReturn
 							, @strTransactionType			= strTransactionType
-					FROM ##ARItemsForContracts
+					FROM tblARPostItemsForContracts
 					WHERE strSessionId = @strSessionId
 					ORDER BY ABS(dblBalanceQty) ASC
 				END
@@ -60,7 +60,7 @@ BEGIN TRY
 							, @dblRemainingQty				= dblRemainingQty
 							, @ysnFromReturn				= ysnFromReturn
 							, @strTransactionType			= strTransactionType
-					FROM ##ARItemsForContracts
+					FROM tblARPostItemsForContracts
 					WHERE strSessionId = @strSessionId
 					ORDER BY ABS(dblBalanceQty) DESC
 				END
