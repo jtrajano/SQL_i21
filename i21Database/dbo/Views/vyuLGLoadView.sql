@@ -29,6 +29,7 @@ SELECT -- Load Header
 		WHEN 5 THEN 'Picked Lots'
 		WHEN 6 THEN 'Pick Lots'
 		WHEN 7 THEN 'Pick Lots w/o Contract'
+		WHEN 8 THEN 'TM Orders'
 		END COLLATE Latin1_General_CI_AS
 	,strTransportationMode = CASE L.intTransportationMode
 		WHEN 1 THEN 'Truck'
