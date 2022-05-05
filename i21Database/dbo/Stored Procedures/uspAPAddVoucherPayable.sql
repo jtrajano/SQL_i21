@@ -299,7 +299,7 @@ BEGIN
 		LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 		LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 		LEFT JOIN tblSMTerm term ON term.intTermID = A.intTermId
-		LEFT JOIN tblSMTerm freightTerm ON freightTerm.intFreightTermId = A.intFreightTermId
+		LEFT JOIN tblSMFreightTerm freightTerm ON freightTerm.intFreightTermId = A.intFreightTermId
 		LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = A.intShipViaId
 		LEFT JOIN tblSMCurrency tranCur ON A.intCurrencyId = tranCur.intCurrencyID
 		LEFT JOIN tblSMCurrency costCur ON A.intCostCurrencyId = costCur.intCurrencyID
