@@ -74,16 +74,16 @@ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
 IF (@@version NOT LIKE '%2008%')
+BEGIN
+	IF(@strStatementFormatLocal = 'AR Detail Statement')
 	BEGIN
-		IF(@strStatementFormatLocal = 'AR Detail Statement')
-		BEGIN
-			SET @queryRunningBalance = ' , STATEMENTREPORT.strCurrency ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
-		END
-		ELSE
-		BEGIN
-			SET @queryRunningBalance = ' ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
-		END
+		SET @queryRunningBalance = ' , STATEMENTREPORT.strCurrency ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
 	END
+	ELSE
+	BEGIN
+		SET @queryRunningBalance = ' ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+	END
+END
 
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
 IF(OBJECT_ID('tempdb..#BEGINNINGBALANCE') IS NOT NULL) DROP TABLE #BEGINNINGBALANCE
@@ -222,7 +222,7 @@ FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 WHERE @strLocationName IS NULL OR @strLocationName = strLocationName
 
 --CUSTOMER FILTERS
-IF @strCustomerNumberLocal IS NOT NULL
+IF ISNULL(@strCustomerNumberLocal, '') <> ''
 	BEGIN
 		INSERT INTO #CUSTOMERS (intEntityCustomerId)
 		SELECT TOP 1 intEntityCustomerId    = C.intEntityId 
@@ -232,7 +232,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 			AND C.strStatementFormat = @strStatementFormatLocal
 			AND EC.strEntityNo = @strCustomerNumberLocal
 	END
-ELSE IF @strCustomerIdsLocal IS NOT NULL
+ELSE IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	BEGIN
 		INSERT INTO #DELCUSTOMERS
 		SELECT DISTINCT intEntityCustomerId =  intID
@@ -253,13 +253,13 @@ ELSE
 		INNER JOIN (
 			SELECT intEntityId
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
+			WHERE (ISNULL(@strCustomerNameLocal, '') = '' OR strName = @strCustomerNameLocal)
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND C.strStatementFormat = @strStatementFormatLocal
 END
 
-IF @strAccountStatusCodeLocal IS NOT NULL
+IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
     BEGIN
         DELETE FROM #CUSTOMERS
         WHERE intEntityCustomerId NOT IN (
