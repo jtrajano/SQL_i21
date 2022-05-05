@@ -36,6 +36,7 @@ CREATE TYPE [dbo].[TRFLog] AS TABLE (
 	, intStatusId INT NULL
 	, intWarrantId INT NULL
 	, strWarrantId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, intWarrantStatusId INT NULL
 	, intUserId INT NULL
 	, intConcurrencyId INT NULL
 	, intContractHeaderId INT NULL

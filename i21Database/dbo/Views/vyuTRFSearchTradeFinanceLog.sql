@@ -45,8 +45,12 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY tf.dtmCreatedDate DESC)
 	, dblFinanceQty = ROUND(tf.dblFinanceQty, 2)
 	, dblFinancedAmount = ROUND(tf.dblFinancedAmount, 2)
 	, tf.strBankApprovalStatus
+	, wStatus.strWarrantStatus
 FROM tblTRFTradeFinanceLog tf
-LEFT JOIN tblEMEntity U ON U.intEntityId = tf.intUserId
+LEFT JOIN tblEMEntity U 
+	ON U.intEntityId = tf.intUserId
+LEFT JOIN tblICWarrantStatus wStatus
+	ON wStatus.intWarrantStatus = tf.intWarrantStatusId
 
 OUTER APPLY(
 	SELECT TOP 1 
