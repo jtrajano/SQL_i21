@@ -371,7 +371,10 @@ BEGIN
 								ON AggregrateLot.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 					WHERE	
 						AggregrateLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId 
-						AND AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed') -- Do not include the Swept or Skimmed in the total.
+						AND (
+							AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed') -- Do not include the Swept or Skimmed in the total.
+							OR AggregrateLot.strCondition IS NULL
+						)
 				) ItemLot					
 		WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
 				AND Receipt.strReceiptNumber = @strTransactionId
