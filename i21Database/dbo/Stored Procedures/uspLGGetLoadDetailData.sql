@@ -65,6 +65,8 @@ BEGIN
 		,strPriceUOM = PUM.strUnitMeasure
 		,ysnSubCurrency = PCU.ysnSubCurrency
 		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
+		,strTMOrderNumber = TMD.strOrderNumber
+		,strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
@@ -107,9 +109,7 @@ BEGIN
 	LEFT JOIN tblAPBillDetail					BD				ON		BD.intLoadDetailId = LoadDetail.intLoadDetailId AND BD.intItemId = LoadDetail.intItemId
 	LEFT JOIN tblAPBill							B				ON		B.intBillId = BD.intBillId
 	LEFT JOIN tblICItemContract					ICI				ON		ICI.intItemId = Item.intItemId AND PDetail.intItemContractId = ICI.intItemContractId
-	LEFT JOIN tblSMCountry						CO				ON		CO.intCountryID = (CASE 
-																							WHEN ISNULL(ICI.intCountryId, 0) = 0
-																								THEN ISNULL(CA.intCountryID, 0)
-																							ELSE ICI.intCountryId
-																							END)
+	LEFT JOIN tblSMCountry						CO				ON		CO.intCountryID = (CASE WHEN ISNULL(ICI.intCountryId, 0) = 0 THEN ISNULL(CA.intCountryID, 0) ELSE ICI.intCountryId END)
+	LEFT JOIN tblTMSite							TMS				ON		TMS.intSiteID = LoadDetail.intTMSiteId
+	LEFT JOIN tblTMDispatch						TMD				ON		TMD.intDispatchID = LoadDetail.intTMDispatchId
 END
