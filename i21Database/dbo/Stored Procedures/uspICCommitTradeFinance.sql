@@ -139,8 +139,8 @@ BEGIN
 		, strBankApprovalStatus 
 		, dtmAppliedToTransactionDate 
 		, intStatusId 
-		, intWarrantId 
 		, strWarrantId 
+		, intWarrantStatusId 
 		, intUserId 
 		, intConcurrencyId 
 		, intContractHeaderId 
@@ -186,8 +186,8 @@ BEGIN
 				--	WHEN tf.intStatusId = 2 THEN 'Completed'
 				--	WHEN tf.intStatusId = 0 THEN 'Cancelled'							
 				--END
-		, intWarrantId = NULL 
 		, strWarrantId = itf.strWarrantNo
+		, intWarrantStatusId = itf.intWarrantStatus
 		, intUserId = COALESCE(itf.intModifiedByUserId, itf.intCreatedByUserId) 
 		, intConcurrencyId = 1
 		, intContractHeaderId = lot.intContractHeaderId
