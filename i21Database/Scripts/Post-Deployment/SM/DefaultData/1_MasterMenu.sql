@@ -6479,15 +6479,15 @@ ELSE
 	UPDATE tblSMMasterMenu SET strCategory = NULL, strType= 'Folder', strIcon = 'small-folder', strCommand = N'', intSort = 2 WHERE  intMenuID = @QualityReportParentMenuId
 
 DECLARE @QualityContractSampleMenuId INT
-SELECT @QualityContractSampleMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract Samples Monitoring' AND intParentMenuID = @QualityReportParentMenuId
+SELECT @QualityContractSampleMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName in ('Contract Samples Monitoring','Contract Sample Monitoring')  AND intParentMenuID = @QualityReportParentMenuId
 
 IF @QualityContractSampleMenuId IS NULL
 BEGIN
 	INSERT INTO tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strCategory, strType,strCommand, strIcon, ysnVisible,intSort, intConcurrencyId)
-	SELECT 'Contract Samples Monitoring', 'Quality', @QualityReportParentMenuId, 'Contract Samples Monitoring', 'Report', 'Screen', 'Quality.view.ContractSamplesMonitoring?showSearch=true','small-menu-report',1,0, 1
+	SELECT 'Contract Sample Monitoring', 'Quality', @QualityReportParentMenuId, 'Contract Sample Monitoring', 'Report', 'Screen', 'Quality.view.ContractSamplesMonitoring?showSearch=true','small-menu-report',1,0, 1
 END
 ELSE
-	UPDATE tblSMMasterMenu SET strCategory = 'Report', strIcon = 'small-menu-report', strCommand = N'Quality.view.ContractSamplesMonitoring?showSearch=true', intSort = 0, ysnVisible=1,strType='Screen'
+	UPDATE tblSMMasterMenu SET strMenuName = 'Contract Sample Monitoring', strCategory = 'Report', strIcon = 'small-menu-report', strCommand = N'Quality.view.ContractSamplesMonitoring?showSearch=true', intSort = 0, ysnVisible=1,strType='Screen'
 	WHERE  intMenuID = @QualityContractSampleMenuId
 --END QUALITY REPORT
 
