@@ -149,6 +149,14 @@ BEGIN TRY
 	SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 
 	EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'FutOptTransaction', @intUserId, 'ADD', 0
+	
+	EXEC dbo.uspSMAuditLog @keyValue = @intFutOptTransactionHeaderId				-- Primary Key Value of the Derivative Entry. 
+		, @screenName = 'RiskManagement.view.DerivativeEntry'						-- Screen Namespace
+		, @entityId = @intUserId                   									-- Entity Id
+		, @actionType = 'Created'													-- Action Type
+		, @changeDescription = ''													-- Description
+		, @fromValue = ''															-- Previous Value
+		, @toValue = ''																-- New Value
 
 END TRY
 BEGIN CATCH
