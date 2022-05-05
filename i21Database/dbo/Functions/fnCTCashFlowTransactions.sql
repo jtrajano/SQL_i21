@@ -81,7 +81,7 @@ BEGIN
 		LEFT JOIN tblICItemUOM QUB ON QUB.intItemUOMId = cd.intBasisUOMId
 		left join tblSMCurrency cb on cb.intCurrencyID = cd.intBasisCurrencyId
 		cross apply (
-			select
+			select top 1
 				fspm.dblLastSettle
 			from
 				tblRKFuturesSettlementPrice sp
@@ -91,6 +91,7 @@ BEGIN
 				sp.strPricingType = 'Mark to Market' COLLATE Latin1_General_CS_AS
 				and sp.intCommodityMarketId = cmm.intCommodityMarketId
 				and cmm.intCommodityId = ch.intCommodityId and sp.intFutureMarketId = cd.intFutureMarketId and fspm.intFutureMonthId = cd.intFutureMonthId
+			order by sp.dtmPriceDate desc
 		)sp
 	where
 		cd.intContractStatusId in (1,4)
