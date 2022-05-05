@@ -276,7 +276,7 @@ BEGIN
 		AND r.ysnPosted = 1
 		AND (
 			ril.strCondition NOT IN ('Missing', 'Swept', 'Skimmed')
-			OR l.strCondition IS NULL
+			OR ril.strCondition IS NULL
 		)
 
 	EXEC [uspICCreateLotRelease]
