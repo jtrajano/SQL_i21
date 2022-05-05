@@ -62,6 +62,7 @@ BEGIN
 			, intStatusId 
 			, intWarrantId
 			, strWarrantId
+			, intWarrantStatusId
 			, intUserId
 			, intConcurrencyId
 			, ysnNegateLog
@@ -95,6 +96,7 @@ BEGIN
 			, intStatusId 
 			, intWarrantId
 			, strWarrantId
+			, intWarrantStatusId
 			, intUserId
 			, intConcurrencyId
 			, ysnNegateLog = CAST(1 AS BIT)

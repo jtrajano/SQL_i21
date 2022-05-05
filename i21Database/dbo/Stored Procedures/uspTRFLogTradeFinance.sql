@@ -46,6 +46,7 @@ BEGIN
 		, @intStatusId INT
 		, @intWarrantId INT
 		, @strWarrantId NVARCHAR(100)
+		, @intWarrantStatusId INT
 		, @intUserId INT
 		, @intConcurrencyId INT
 		, @intContractHeaderId INT
@@ -91,6 +92,7 @@ BEGIN
 		, intStatusId INT NULL
 		, intWarrantId INT NULL
 		, strWarrantId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+		, intWarrantStatusId INT NULL
 		, intUserId INT NULL
 		, intConcurrencyId INT NULL
 		, intContractHeaderId INT NULL
@@ -143,6 +145,7 @@ BEGIN
 			, @intStatusId = NULL
 			, @intWarrantId = NULL
 			, @strWarrantId = NULL
+			, @intWarrantStatusId = NULL
 			, @intUserId = NULL
 			, @intConcurrencyId = NULL
 			, @intContractHeaderId = NULL
@@ -188,6 +191,7 @@ BEGIN
 			, @intStatusId = tfLog.intStatusId
 			, @intWarrantId = tfLog.intWarrantId
 			, @strWarrantId = tfLog.strWarrantId
+			, @intWarrantStatusId = tfLog.intWarrantStatusId
 			, @intUserId = tfLog.intUserId
 			, @intConcurrencyId = tfLog.intConcurrencyId
 			, @intContractHeaderId = tfLog.intContractHeaderId
@@ -250,6 +254,7 @@ BEGIN
 				 , intStatusId
 				 , intWarrantId
 				 , strWarrantId
+				 , intWarrantStatusId
 				 , intUserId
 				 , intConcurrencyId
 				 , intContractHeaderId
@@ -292,6 +297,7 @@ BEGIN
 				 , @intStatusId
 				 , @intWarrantId
 				 , @strWarrantId
+				 , @intWarrantStatusId
 				 , @intUserId
 				 , @intConcurrencyId
 				 , @intContractHeaderId
@@ -310,6 +316,12 @@ BEGIN
 	END
 
 	DECLARE @dtmCreatedDate DATETIME = GETDATE()
+
+	IF (ISNULL(@ysnNegateLog, 0) = 1)
+	BEGIN
+		-- REMOVE MILLISECOND TO MAKE NEGATE RECORD APPEAR AS EARLIER THAN THE NEW LOG TO BE CREATED.
+		SELECT @dtmCreatedDate = CAST(CONVERT(VARCHAR(10), @dtmCreatedDate, 101) + ' '  + convert(VARCHAR(8), @dtmCreatedDate, 14) AS DATETIME)
+	END
 
 	INSERT INTO tblTRFTradeFinanceLog(
 		  dtmCreatedDate
@@ -349,6 +361,7 @@ BEGIN
 		, intStatusId
 		, intWarrantId
 		, strWarrantId
+		, intWarrantStatusId
 		, intUserId
 		, intConcurrencyId
 		, intContractHeaderId
@@ -392,6 +405,7 @@ BEGIN
 		, intStatusId
 		, intWarrantId
 		, strWarrantId
+		, intWarrantStatusId
 		, intUserId
 		, intConcurrencyId
 		, intContractHeaderId
