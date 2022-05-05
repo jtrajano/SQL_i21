@@ -42,8 +42,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY tf.dtmCreatedDate DESC)
 	, tf.strSublimit
 	, tf.dblSublimit
 	, tf.strBankTradeReference
-	, tf.dblFinanceQty
-	, tf.dblFinancedAmount
+	, dblFinanceQty = ROUND(tf.dblFinanceQty, 2)
+	, dblFinancedAmount = ROUND(tf.dblFinancedAmount, 2)
 	, tf.strBankApprovalStatus
 FROM tblTRFTradeFinanceLog tf
 LEFT JOIN tblEMEntity U ON U.intEntityId = tf.intUserId
