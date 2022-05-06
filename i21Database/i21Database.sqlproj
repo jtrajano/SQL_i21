@@ -9181,6 +9181,8 @@
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
     <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBatchSheetReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
