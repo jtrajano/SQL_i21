@@ -676,20 +676,6 @@ BEGIN TRY
 		   ,@IntegrationLogId = @IntegrationLogId
 		   ,@raiseError		  = @RaiseError
 		   ,@strSessionId 	  = @strRequestId
-
-	UPDATE ILD
-	SET
-		 ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
-		,ILD.[ysnUnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
-		,ILD.[strPostingMessage]		= CASE WHEN ILD.[ysnPost] = 1 THEN 'Transaction successfully posted.' ELSE 'Transaction successfully unposted.' END
-		,ILD.[strBatchId]				= @BatchId
-		,ILD.[strPostedTransactionId]	= PID.[strInvoiceNumber] 
-	FROM tblARInvoiceIntegrationLogDetail ILD
-	INNER JOIN tblARPostInvoiceHeader PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-	WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
-	  AND ILD.[ysnPost] IS NOT NULL
-	  AND PID.strSessionId = @strRequestId
-
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
