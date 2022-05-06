@@ -790,6 +790,7 @@
     <Build Include="dbo\Views\vyuARCreditCardByExpiration.sql" />
     <Build Include="dbo\Views\vyuLGCustomerConsumptionSite.sql" />
     <Build Include="dbo\Views\vyuTMSiteCustomerLocation.sql" />
+    <Build Include="dbo\Tables\tblGLLedger.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

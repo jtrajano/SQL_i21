@@ -101,6 +101,7 @@ BEGIN
 			,[intConcurrencyId]
 			,[ysnPostAction]
 			,dtmDateEnteredMin
+			,[intLedgerId]
 	)
 	SELECT 
 			dbo.fnRemoveTimeOnDate(dtmDate)
@@ -148,6 +149,7 @@ BEGIN
 			,[intConcurrencyId]
 			,@ysnPost
 			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
+			,[intLedgerId]
 	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit

@@ -23,6 +23,7 @@
     [intFiscalPeriodId] INT NULL, 
     [intLocationSegmentId]  INT NULL,
     [intJournalIdToReverse] INT NULL, 
+    [intLedgerId] INT NULL, 
     [ysnReversed] BIT NULL, 
     [ysnRecurringTemplate] BIT NULL, 
 	[ysnExported] BIT NULL,

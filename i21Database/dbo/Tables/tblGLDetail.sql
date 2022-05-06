@@ -53,6 +53,7 @@
 	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
     [intFiscalPeriodId] INT NULL,
     [intSubsidiaryGLDetailId] INT NULL,
+    [intLedgerId] INT NULL,
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])

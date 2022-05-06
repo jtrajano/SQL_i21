@@ -61,7 +61,8 @@ AS
         A.intSourceEntityId,
         A.ysnPostAction,
         A.dtmDateEnteredMin,
-        FP.strPeriod
+        FP.strPeriod,
+        L.strLedgerName
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
@@ -70,6 +71,7 @@ AS
      LEFT JOIN tblICCommodity ICCom ON ICCom.intCommodityId = A.intCommodityId
      LEFT JOIN tblEMEntity EM ON EM.intEntityId = A.intEntityId
      LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId
+     LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 	 )U
