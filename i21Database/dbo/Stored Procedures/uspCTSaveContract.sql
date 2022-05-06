@@ -96,6 +96,7 @@ BEGIN TRY
 	and cd.intPricingTypeId = 1
 	and ch.intPricingTypeId = 2
 	and ch.ysnMultiplePriceFixation <> 1
+	and isnull(pricing.dblPricedQty,0) > 0
 	and cd.dblQuantity > isnull(pricing.dblPricedQty,0)
 	and ISNULL(cd.intSplitFromId,0) = 0;
 
@@ -267,6 +268,7 @@ BEGIN TRY
 			)p on p.intContractDetailId = cd.intContractDetailId
 			where cd.intContractDetailId = @intContractDetailId
 			and isnull(p.dblPricedQuantity,0) < cd.dblQuantity
+			and isnull(p.dblPricedQuantity,0) > 0
 		end
 
 		SELECT	@intPricingTypeId	=	NULL,
