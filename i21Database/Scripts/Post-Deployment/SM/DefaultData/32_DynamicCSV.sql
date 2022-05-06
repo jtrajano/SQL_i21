@@ -1939,7 +1939,7 @@ UPDATE tblSMCSVDynamicImport SET
 		BEGIN
 			IF LOWER(@FreightType) = ''amount''
 			BEGIN
-				SELECT @ShipViaId = NULL, 	
+				SELECT  @ShipViaId = NULL, 	
 						@FreightIn = 0,			@Miles = 0, 
 						@FreightOut = 0,
 						@Unit = 0,
@@ -1949,7 +1949,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE IF LOWER(@FreightType) = ''miles''
 			BEGIN
-				SELECT @Amount = 0,
+				SELECT  @Amount = 0,
 						@FreightIn = 0,		
 						@FreightOut = 0,			
 						@Unit = 0,
@@ -1963,10 +1963,11 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SELECT @ShipViaId = NULL, 	@Amount = 0,
-						@FreightIn = 0,			@Miles = 0,
+				SELECT 	@Amount = 0,
+						@FreightIn = 0,			
 						@FreightOut = 0,	
 						@Unit = 0,
+						@Miles = 0,
 						@UnitIn = 0
 			END
 			BEGIN TRY
@@ -1998,7 +1999,7 @@ UPDATE tblSMCSVDynamicImport SET
 				SELECT @Err
 				IF CHARINDEX(''uk_tblarcustomerfreightxref_reference_columns'', LOWER(@Err)) > 0
 				BEGIN
-					SET @ValidationMessage = ''Duplicate combination of (Location, Zip Code & Category) entry for Customer (@entityCustomerId@).''
+					SET @ValidationMessage = ''Duplicate combination of (Location, Zip Code, Category, and Fixed Ship Via) entry for Customer (@entityCustomerId@).''
 				END
 				ELSE
 				BEGIN
