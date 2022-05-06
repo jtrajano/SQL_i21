@@ -100,12 +100,19 @@ SELECT
 	,ysnOverrideCashFlow            = I.ysnOverrideCashFlow
     ,dtmCashFlowDate                = I.dtmCashFlowDate
 	,dblCurrencyExchangeRate		= I.dblCurrencyExchangeRate
+	,strCustomerPaymentMethod		= SMPM.strPaymentMethod
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
 		 , strCustomerNumber 
+		 , intPaymentMethodId
 	FROM dbo.tblARCustomer WITH (NOLOCK)
 ) C ON I.intEntityCustomerId = C.intEntityId
+LEFT OUTER JOIN (
+	SELECT intPaymentMethodID
+		 , strPaymentMethod
+	FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
+) SMPM ON C.intPaymentMethodId = SMPM.intPaymentMethodID
 INNER JOIN (
 	SELECT intEntityId
 		 , strName
