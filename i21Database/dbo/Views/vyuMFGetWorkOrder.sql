@@ -6,6 +6,7 @@ SELECT C.intManufacturingCellId
 	,W.strWorkOrderNo
 	,W.strReferenceNo
 	,W.dblBatchSize
+	,MCUOM.strUnitMeasure AS strBatchSizeUOM
 	,W.dblQuantity
 	,W.dtmExpectedDate
 	,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
@@ -100,6 +101,7 @@ SELECT C.intManufacturingCellId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
+LEFT JOIN tblICUnitMeasure MCUOM ON MCUOM.intUnitMeasureId = C.intStdUnitMeasureId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICCategory IC ON IC.intCategoryId = I.intCategoryId
 LEFT JOIN dbo.tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
