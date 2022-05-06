@@ -22,6 +22,7 @@ CREATE TABLE [dbo].[tblFABookDepreciation](
 	[dblFunctionalMarketValue]		NUMERIC(18, 6) NULL DEFAULT ((0)),
 	[dblInsuranceValue]				NUMERIC(18, 6) NULL DEFAULT ((0)),
 	[dblFunctionalInsuranceValue]	NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[intLedgerId]					INT NULL
  CONSTRAINT [PK_tblFABookDepreciation] PRIMARY KEY CLUSTERED 
 (
 	[intBookDepreciationId] ASC
