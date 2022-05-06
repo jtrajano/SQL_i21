@@ -822,6 +822,7 @@
     <Build Include="dbo\Views\vyuAPReserveDetailTemp.sql" />
     <Build Include="dbo\Functions\fnAPGetAccountBudgetWarning.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateTimeEntryPeriodDetailStatus.sql" />
+    <Build Include="dbo\Tables\tblAPVendorAccountNumLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
