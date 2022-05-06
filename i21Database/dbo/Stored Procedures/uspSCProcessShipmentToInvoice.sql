@@ -28,6 +28,7 @@ BEGIN
 	DECLARE @dblTicketDWGSpotPrice NUMERIC(18,6)
 	DECLARE @intContractDetailId INT
 	DECLARE @InvoiceDetailId INT 
+	DECLARE @ysnApplyOverageToSpot BIT
 
 
 	BEGIN TRY
@@ -40,6 +41,7 @@ BEGIN
 				,@intTicketItemUOMId = A.intItemUOMIdTo
 				, @dblNetUnits = A.dblNetUnits
 				,@dblTicketDWGSpotPrice = A.dblDWGSpotPrice
+				,@ysnApplyOverageToSpot = A.ysnApplyOverageToSpot
 			FROM tblSCTicket A
 			LEFT JOIN tblCTContractDetail B
 				ON A.intContractId = B.intContractDetailId
@@ -68,7 +70,7 @@ BEGIN
 
 					IF(ISNULL(@intInvoiceId,0) <> 0 AND @ysnDWG = 1)
 					BEGIN
-						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,0,@dblTicketDWGSpotPrice--@intTicketId
+						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,0,@dblTicketDWGSpotPrice, @ysnApplyOverageToSpot--@intTicketId
 					END
 				END
 
