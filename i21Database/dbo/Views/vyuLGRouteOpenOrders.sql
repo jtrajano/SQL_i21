@@ -6,12 +6,13 @@ SELECT
 	intSourceType = 2 /* TM Orders */
 	,intOrderId = TMO.intDispatchId
 	,intOrderDetailId = NULL
-	,intEntityId = NULL
-	,intEntityLocationId = NULL
+	,intEntityId = E.intEntityId
+	,intEntityLocationId = EL.intEntityLocationId
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
-	,strCustomerNumber = NULL
+	,strCustomerNumber = E.strEntityNo
 	,intSiteID = TMO.intSiteID
+	,strSiteNumber = TMO.strSiteNumber
 	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = TMO.intDispatchId
 	,intLoadDetailId = NULL
@@ -65,6 +66,9 @@ FROM vyuTMGeneratedCallEntry TMO
 LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
 LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
+LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
+LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
 WHERE TMO.strOrderStatus <> 'Delivered' AND TMO.strOrderStatus <> 'Routed'
 
 UNION ALL
@@ -78,9 +82,10 @@ SELECT
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
 	,strCustomerNumber = NULL
-	,intSiteID = NULL
+	,intSiteID = LGLD.intTMSiteId
+	,strSiteNumber = LGLD.strSiteID
 	,intCustomerID = NULL
-	,intDispatchID = NULL
+	,intDispatchID = LGLD.intTMDispatchId
 	,intLoadDetailId = LGLD.intLoadDetailId
 	,intLoadId = LGLD.intLoadId
 	,intSequence = -1
@@ -147,6 +152,7 @@ SELECT
 	,strEntityType = 'Vendor'
 	,strCustomerNumber = NULL
 	,intSiteID = NULL
+	,strSiteNumber = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = LGLD.intLoadDetailId
@@ -215,6 +221,7 @@ SELECT
 	,strEntityType = 'Customer'
 	,strCustomerNumber
 	,intSiteID = TMO.intSiteId
+	,strSiteNumber = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS
 	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
@@ -264,7 +271,8 @@ SELECT
 	,ysnHold = Cast(0 as Bit)
 	,ysnRoutingAlert = Cast(0 as Bit)
 	,strRoute = TMO.strRoute
-FROM vyuTMCustomerConsumptionSiteInfo TMO WHERE TMO.ysnActive = 1
+FROM vyuTMCustomerConsumptionSiteInfo TMO 
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteId WHERE TMO.ysnActive = 1
 
 UNION ALL
 
@@ -278,6 +286,7 @@ SELECT
 	,strEntityType = ET.strType
 	,strCustomerNumber = NULL
 	,intSiteID = NULL
+	,strSiteNumber = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
@@ -344,6 +353,7 @@ SELECT
 	,strEntityType = 'Customer'
 	,strCustomerNumber = NULL
 	,intSiteID = NULL
+	,strSiteNumber = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
@@ -419,6 +429,7 @@ SELECT
 	,strEntityType = 'User'
 	,strCustomerNumber = NULL
 	,intSiteID = NULL
+	,strSiteNumber = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
