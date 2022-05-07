@@ -86,6 +86,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intCustomerStorageId					= INV.intCustomerStorageId
 	 , intSiteDetailId						= INV.intSiteDetailId
 	 , intLoadDetailId						= INV.intLoadDetailId
+	 , intLoadDistributionDetailId			= INV.intLoadDistributionDetailId
 	 , intLotId								= INV.intLotId
 	 , intSiteId							= INV.intSiteId
 	 , strBillingBy							= INV.strBillingBy

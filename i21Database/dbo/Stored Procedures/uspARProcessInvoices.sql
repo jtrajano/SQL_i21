@@ -297,6 +297,7 @@ DECLARE  @Id									INT
 		,@ItemCustomerStorageId					INT
 		,@ItemSiteDetailId						INT
 		,@ItemLoadDetailId						INT
+		,@ItemLoadDistributionDetailId			INT
 		,@ItemLotId								INT
 		,@ItemOriginalInvoiceDetailId			INT			
 		,@ItemSiteId							INT
@@ -515,6 +516,7 @@ BEGIN
 		,@ItemCustomerStorageId			= (CASE WHEN @GroupingOption = 0 THEN [intCustomerStorageId] ELSE NULL END)
 		,@ItemSiteDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intSiteDetailId] ELSE NULL END)
 		,@ItemLoadDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intLoadDetailId] ELSE NULL END)
+		,@ItemLoadDistributionDetailId	= (CASE WHEN @GroupingOption = 0 THEN [intLoadDistributionDetailId] ELSE NULL END)
 		,@ItemLotId						= (CASE WHEN @GroupingOption = 0 THEN [intLotId] ELSE NULL END)
 		,@ItemOriginalInvoiceDetailId	= (CASE WHEN @GroupingOption = 0 THEN [intOriginalInvoiceDetailId] ELSE NULL END)
 		,@ItemSiteId					= (CASE WHEN @GroupingOption = 0 THEN [intSiteId] ELSE NULL END)
@@ -797,6 +799,7 @@ BEGIN
 			,@ItemCustomerStorageId			= @ItemCustomerStorageId
 			,@ItemSiteDetailId				= @ItemSiteDetailId
 			,@ItemLoadDetailId				= @ItemLoadDetailId
+			,@ItemLoadDistributionDetailId	= @ItemLoadDistributionDetailId
 			,@ItemLotId						= @ItemLotId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
@@ -978,6 +981,7 @@ BEGIN
 					,@ItemCustomerStorageId			= [intCustomerStorageId]
 					,@ItemSiteDetailId				= [intSiteDetailId]
 					,@ItemLoadDetailId				= [intLoadDetailId]
+					,@ItemLoadDistributionDetailId  = [intLoadDistributionDetailId]
 					,@ItemLotId						= [intLotId]
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemSiteId					= [intSiteId]
@@ -1085,6 +1089,7 @@ BEGIN
 						,@ItemCustomerStorageId			= @ItemCustomerStorageId
 						,@ItemSiteDetailId				= @ItemSiteDetailId
 						,@ItemLoadDetailId				= @ItemLoadDetailId
+						,@ItemLoadDistributionDetailId	= @ItemLoadDistributionDetailId
 						,@ItemLotId						= @ItemLotId
 						,@ItemSiteId					= @ItemSiteId
 						,@ItemBillingBy					= @ItemBillingBy
@@ -1765,6 +1770,7 @@ BEGIN TRY
 						,@ItemCustomerStorageId			= [intCustomerStorageId]
 						,@ItemSiteDetailId				= [intSiteDetailId]
 						,@ItemLoadDetailId				= [intLoadDetailId]
+						,@ItemLoadDistributionDetailId	= [intLoadDistributionDetailId]
 						,@ItemLotId						= [intLotId]
 						,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 						,@ItemSiteId					= [intSiteId]
@@ -1859,6 +1865,7 @@ BEGIN TRY
 							,@ItemCustomerStorageId			= @ItemCustomerStorageId
 							,@ItemSiteDetailId				= @ItemSiteDetailId
 							,@ItemLoadDetailId				= @ItemLoadDetailId
+							,@ItemLoadDistributionDetailId	= @ItemLoadDistributionDetailId
 							,@ItemLotId						= @ItemLotId
 							,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 							,@ItemSiteId					= @ItemSiteId
@@ -2101,6 +2108,7 @@ BEGIN TRY
 					,@ItemCustomerStorageId			= [intCustomerStorageId]
 					,@ItemSiteDetailId				= [intSiteDetailId]
 					,@ItemLoadDetailId				= [intLoadDetailId]
+					,@ItemLoadDistributionDetailId	= [intLoadDistributionDetailId]
 					,@ItemLotId						= [intLotId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
@@ -2266,6 +2274,7 @@ BEGIN TRY
 						,[intCustomerStorageId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCustomerStorageId ELSE [intCustomerStorageId] END
 						,[intSiteDetailId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteDetailId ELSE [intSiteDetailId] END
 						,[intLoadDetailId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLoadDetailId ELSE [intLoadDetailId] END
+						,[intLoadDistributionDetailId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLoadDistributionDetailId	ELSE [intLoadDistributionDetailId] END
 						,[intLotId]								= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLotId ELSE [intLotId] END
 						,[intOriginalInvoiceDetailId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemOriginalInvoiceDetailId ELSE [intOriginalInvoiceDetailId] END
 						,[intSiteId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteId ELSE [intSiteId] END

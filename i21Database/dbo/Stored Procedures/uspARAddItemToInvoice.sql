@@ -69,7 +69,8 @@
 	,@ItemTicketHoursWorkedId		INT				= NULL	
 	,@ItemCustomerStorageId			INT				= NULL		
 	,@ItemSiteDetailId				INT				= NULL		
-	,@ItemLoadDetailId				INT				= NULL			
+	,@ItemLoadDetailId				INT				= NULL
+	,@ItemLoadDistributionDetailId	INT 		    = NULL			
 	,@ItemLotId						INT				= NULL			
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemConversionAccountId		INT				= NULL
@@ -224,6 +225,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemCustomerStorageId			= @ItemCustomerStorageId
 			,@ItemSiteDetailId				= @ItemSiteDetailId
 			,@ItemLoadDetailId				= @ItemLoadDetailId
+			,@ItemLoadDistributionDetailId	= @ItemLoadDistributionDetailId
 			,@ItemLotId						= @ItemLotId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
