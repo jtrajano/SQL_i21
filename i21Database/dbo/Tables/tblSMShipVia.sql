@@ -13,7 +13,7 @@
 	[strMotorCarrierIFTA]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strTransportationMode] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnCompanyOwnedCarrier] BIT DEFAULT ((1)) NOT NULL,
-	[strFreightBilledBy] NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL, 
+	[strFreightBilledBy] NVARCHAR (16) COLLATE Latin1_General_CI_AS NULL, 
     [ysnActive]          BIT            DEFAULT ((1)) NOT NULL,
     [intSort]            INT            NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
