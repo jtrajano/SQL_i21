@@ -51,7 +51,7 @@ FROM tblEMEntityEFTInformation EFT
 			FROM tblEMEntity )  ENT
 
 		ON EFT.intEntityId = ENT.intEntityId
-	INNER JOIN 
+	LEFT OUTER JOIN 
 		(SELECT intBankId, strBankName 
 			FROM tblCMBank 
 		)Bank ON EFT.intBankId = Bank.intBankId
