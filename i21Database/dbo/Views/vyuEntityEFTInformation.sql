@@ -42,7 +42,8 @@ select
     strFiftySixFormat,
 	strIntermediaryIBANWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strIntermediaryIBAN), 4),
     strIntermediaryIBAN = dbo.fnAESDecryptASym(strIntermediaryIBAN),
-	intEntityEFTHeaderId
+	intEntityEFTHeaderId,
+	intConcurrencyId
 
 
 FROM tblEMEntityEFTInformation EFT
