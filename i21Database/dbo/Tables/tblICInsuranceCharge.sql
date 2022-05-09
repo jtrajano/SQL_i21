@@ -4,6 +4,8 @@
 	[strStorageLocationIds] NVARCHAR(500) COLLATE Latin1_General_CI_AS,
 	[intInsurerId] [int] NOT NULL,
 	[dtmChargeDateUTC] [datetime] NULL,
+	[dtmInvoiceDateUTC] [datetime] NULL,
+	[dtmInvoiceDate] [datetime] NULL,
 	[intM2MBatchId] [int] NULL,
 	[strChargeNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 0,

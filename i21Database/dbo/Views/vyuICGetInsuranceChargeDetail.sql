@@ -23,6 +23,7 @@ SELECT
 	,A.intInsurerId
 	,A.dtmLastCargoInsuranceDate
 	,A.intChargeItemId
+	,A.intLotId
 	,A.intConcurrencyId
 	,strStorageLocation = C.strSubLocationName
 	,strCompanyLocation = D.strLocationName
@@ -31,6 +32,11 @@ SELECT
 	,strRateUOM = I.strUnitMeasure
 	,strQuantityUOM = K.strUnitMeasure
 	,strInsurerName = L.strName
+	,O.strContractNumber
+	,N.intContractSeq
+	,R.strReceiptNumber
+	,M.strLotNumber
+	,T.strPolicyNumber
 FROM tblICInsuranceChargeDetail A
 LEFT JOIN tblSMCompanyLocationSubLocation C
 	ON A.intStorageLocationId = C.intCompanyLocationSubLocationId
@@ -52,3 +58,19 @@ LEFT JOIN tblICUnitMeasure K
 	ON K.intUnitMeasureId = J.intUnitMeasureId
 LEFT JOIN tblEMEntity L
 	ON A.intInsurerId = L.intEntityId
+LEFT JOIN tblICLot M
+	ON A.intLotId = M.intLotId
+LEFT JOIN tblCTContractDetail N
+	ON M.intContractDetailId = N.intContractDetailId
+LEFT JOIN tblCTContractHeader O
+	ON N.intContractHeaderId = N.intContractHeaderId
+LEFT JOIN tblICInventoryReceiptItemLot P
+	ON A.intInventoryReceiptItemLotId = P.intInventoryReceiptItemLotId
+LEFT JOIN tblICInventoryReceiptItem Q
+	ON P.intInventoryReceiptItemId = Q.intInventoryReceiptItemId
+LEFT JOIN tblICInventoryReceipt R
+	ON Q.intInventoryReceiptId = R.intInventoryReceiptId
+LEFT JOIN tblICInsuranceRateDetail S
+	ON A.intInsuranceRateDetailId = S.intInsuranceRateDetailId
+LEFT JOIN tblICInsuranceRate T
+	ON S.intInsuranceRateId = T.intInsuranceRateId

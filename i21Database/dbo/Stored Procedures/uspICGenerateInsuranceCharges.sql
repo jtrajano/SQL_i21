@@ -96,6 +96,11 @@ BEGIN TRY
 		,intStorageLocationId = B.intSubLocationId
 		,B.intContractDetailId
 		,A.intInventoryReceiptItemLotId
+		,D.intLotId
+		,strContractNumber = F.strContractNumber
+		,intContractSeq = E.intContractSeq
+		,strReceiptNumber = C.strReceiptNumber
+		,D.strLotNumber
 	INTO #tmpLotTransactions
 	FROM tblICInventoryReceiptItemLot A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -104,6 +109,10 @@ BEGIN TRY
 		ON B.intInventoryReceiptId = C.intInventoryReceiptId
 	INNER JOIN tblICLot D
 		ON A.intLotId = D.intLotId
+	LEFT JOIN tblCTContractDetail E
+		ON D.intContractDetailId = E.intContractDetailId
+	LEFT JOIN tblCTContractHeader F
+		ON E.intContractHeaderId = F.intContractHeaderId
 	WHERE C.dtmLastCargoInsuranceDate <= @dtmChargeDate
 		AND B.intSubLocationId IN	(
 										SELECT											
@@ -116,7 +125,7 @@ BEGIN TRY
 														ON A.intInsuranceChargeId = B.intInsuranceChargeId
 													WHERE B.ysnPosted = 1)
 		AND D.dblQty > 0
-
+		AND ISNULL(D.strCondition,'') NOT IN ('Missing','Skimmed','Swept')
 	
 
 
@@ -140,17 +149,23 @@ BEGIN TRY
 		,A.strCurrency
 		,strRateUOM = I.strUnitMeasure
 		,intRateUOMId = L.intItemUOMId
-		,dblAmount = CASE	WHEN A.strRateType = 'Unit' THEN B.dblQuantity * A.dblRate
+		,dblAmount = ROUND ((CASE	WHEN A.strRateType = 'Unit' THEN B.dblQuantity * A.dblRate
 							WHEN A.strRateType = 'Percent' THEN (CASE WHEN A.strAppliedTo = 'Inventory Value' THEN ISNULL(((B.dblCost * B.dblQuantity * dblRate) /100),0.0)
 																		 WHEN A.strAppliedTo = 'M2M' THEN ISNULL(((ISNULL(K.dblMarketPrice,0.0) * B.dblQuantity * dblRate) /100),0.0)
 																	ELSE 0.0 END)
-							ELSE 0.0 END
+							ELSE 0.0 END),2)
 		,B.intInventoryReceiptItemLotId
 		,A.strRateType
 		,A.strPolicyNumber
 		,intStorageLocationId = A.intStorageLocationId
 		,A.intInsuranceRateDetailId
 		,intChargeItemId = A.intItemId
+		,intLotId = B.intLotId
+		,B.strContractNumber
+		,B.intContractSeq
+		,B.strReceiptNumber
+		,B.strLotNumber
+		,A.strAppliedTo
 	FROM #tmpInsuranceRate A
 	INNER JOIN #tmpLotTransactions B
 		ON A.intStorageLocationId = B.intStorageLocationId
