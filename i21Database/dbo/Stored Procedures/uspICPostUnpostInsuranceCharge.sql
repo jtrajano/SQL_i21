@@ -70,6 +70,8 @@ BEGIN TRY
 					,ysnStage
 					,intInsuranceChargeDetailId
 					,intLotId
+					,dtmDate
+					,dtmVoucherDate
 					)
 			SELECT
 					[intTransactionType]			=	1,
@@ -100,8 +102,8 @@ BEGIN TRY
 																	THEN 3
 														ELSE ISNULL(I.int1099CategoryId, 0) END
 					,[intLineNo]					=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-					,[intContractDetailId]			=	L.intContractDetailId
-					,[intContractHeaderId]			=	L.intContractHeaderId
+					,[intContractDetailId]			=	N.intContractDetailId
+					,[intContractHeaderId]			=	N.intContractHeaderId
 					,[intLoadDetailId]				=	NULL
 					,[intLoadId]					=	NULL
 					,[intScaleTicketId]				=	NULL
@@ -119,6 +121,8 @@ BEGIN TRY
 					,ysnStage 						=	0
 					,intInsuranceChargeDetailId		=	B.intInsuranceChargeDetailId
 					,intLotId						=  	K.intLotId
+					,dtmDate						= 	A.dtmInvoiceDate
+					,dtmVoucherDate					= 	A.dtmInvoiceDate
 			FROM tblICInsuranceCharge A
 			INNER JOIN tblICInsuranceChargeDetail B
 				ON A.intInsuranceChargeId = B.intInsuranceChargeId
@@ -146,6 +150,8 @@ BEGIN TRY
 				ON K.intInventoryReceiptItemId = L.intInventoryReceiptItemId
 			INNER JOIN tblICInventoryReceipt M
 				ON L.intInventoryReceiptId = M.intInventoryReceiptId
+			INNER JOIN tblICLot	N
+				ON B.intLotId = N.intLotId
 			WHERE B.dblAmount <> 0
 				AND A.intInsuranceChargeId = @intInsuranceChargeId
 

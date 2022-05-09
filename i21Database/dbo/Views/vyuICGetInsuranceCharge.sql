@@ -8,6 +8,8 @@ SELECT
 	,A.strStorageLocationIds 
 	,A.intInsurerId
 	,A.dtmChargeDateUTC
+	,A.dtmInvoiceDateUTC
+	,A.dtmInvoiceDate
 	,A.intM2MBatchId 
 	,A.strChargeNo
 	,A.ysnPosted
