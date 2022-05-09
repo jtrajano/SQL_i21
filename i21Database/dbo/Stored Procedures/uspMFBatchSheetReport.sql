@@ -78,8 +78,10 @@ BEGIN TRY
 		,W.strWorkOrderNo
 		,I.strItemNo
 		,I.strDescription
-		,W.dblQuantity
-		,UOM.strUnitMeasure
+		--,W.dblQuantity
+		,@dblConvertedWOQty AS dblQuantity
+		,MCUOM.strUnitMeasure AS strUnitMeasure
+		--,UOM.strUnitMeasure
 		,NULL AS dblActual
 		,W.dblBatchSize
 		,MCUOM.strUnitMeasure AS strBatchSizeUOM
