@@ -940,7 +940,7 @@ BEGIN TRY
 		,dblGross = A.dblGross
 		,dblNet = A.dblNet
 		,intWeightUOMId = A.intWeightUOMId
-		,dblNumberOfDays = CASE WHEN (@strChargeType = 'Segmented') THEN L.intDaysCovered ELSE 0 END
+		,dblNumberOfDays = CASE WHEN (@strChargeType = 'Segmented Rate') THEN L.intDaysCovered ELSE 0 END
 		,dblChargeQuantity = A.dblQty
 		,dblRate = ISNULL(B.dblRate,L.dblRate)
 		,intRateUOMId = ISNULL(B.intItemUOMId,A.intItemUOMId)
