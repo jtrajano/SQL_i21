@@ -15,6 +15,7 @@
 	[intQuantityUOMId] [int] NULL,
 	[intInsuranceRateDetailId] [int] NOT NULL,
 	[intInsurerId] [int] NOT NULL,
+	[intLotId] [int] NULL,
 	[intChargeItemId] [int] NOT NULL,
 	[dblAmount] NUMERIC(18, 6) NULL,
 	[dtmLastCargoInsuranceDate] DATETIME NOT NULL, 
