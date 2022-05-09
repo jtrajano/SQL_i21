@@ -10,10 +10,10 @@ SELECT
 	,A.intConcurrencyId
 	,strCommodity = C.strCommodityCode
 	,strInsurerName = B.strName
-	,strStorageLocation = D.strSubLocationName
+	,strStorageLocation = ISNULL(D.strSubLocationName,'')
 	,strM2MBatch = E.strRecordName
 	----Detail
-	,strCompanyLocation = G.strLocationName
+	,strCompanyLocation = ISNULL(G.strLocationName,'')
 	,F.dblQuantity
 	,strQuantityUOM = K.strUnitMeasure
 	,F.dblWeight
@@ -32,15 +32,41 @@ LEFT JOIN tblEMEntity B
 	ON A.intInsurerId = B.intEntityId
 LEFT JOIN tblICCommodity C
 	ON A.intCommodityId = C.intCommodityId
-LEFT JOIN tblSMCompanyLocationSubLocation D
-	ON A.intStorageLocationId = D.intCompanyLocationSubLocationId
+OUTER APPLY (
+	SELECT strSubLocationName = STUFF(
+		(	SELECT 
+				',' + strSubLocationName
+			FROM tblSMCompanyLocationSubLocation
+			WHERE intCompanyLocationSubLocationId IN (
+				SELECT											
+					Item
+				FROM dbo.fnSplitString (ISNULL(A.strStorageLocationIds,''),',') AA
+			)
+			FOR XML PATH('')
+		),1,1,'') 
+)  D
+	
 LEFT JOIN vyuRKGetM2MHeader E
 	ON A.intM2MBatchId = E.intM2MHeaderId
 -----------------Detail
-INNER JOIN tblICInsuranceChargeDetail F
+LEFT JOIN tblICInsuranceChargeDetail F
 	ON A.intInsuranceChargeId = F.intInsuranceChargeId
-LEFT JOIN tblSMCompanyLocation G
-	ON G.intCompanyLocationId = D.intCompanyLocationId
+OUTER APPLY (
+	SELECT strLocationName = STUFF(
+		(	SELECT 
+				',' + BB.strLocationName
+			FROM tblSMCompanyLocationSubLocation AA
+			INNER JOIN tblSMCompanyLocation BB
+				ON AA.intCompanyLocationId = BB.intCompanyLocationId
+			WHERE AA.intCompanyLocationSubLocationId IN (
+				SELECT											
+					Item
+				FROM dbo.fnSplitString (ISNULL(A.strStorageLocationIds,''),',') 
+			)
+			FOR XML PATH('')
+		),1,1,'') 
+) G
+	
 LEFT JOIN tblICItemUOM H
 	ON F.intQuantityUOMId = H.intItemUOMId
 LEFT JOIN tblICUnitMeasure I

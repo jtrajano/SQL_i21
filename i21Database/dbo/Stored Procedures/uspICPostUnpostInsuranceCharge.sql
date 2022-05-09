@@ -69,12 +69,13 @@ BEGIN TRY
 					intCurrencyId
 					,ysnStage
 					,intInsuranceChargeDetailId
+					,intLotId
 					)
 			SELECT
 					[intTransactionType]			=	1,
 					[intAccountId]					=	dbo.[fnGetItemGLAccount](B.intChargeItemId, D.intItemLocationId, 'Other Charge Expense'),
 					[intItemId]						=	B.intChargeItemId,					
-					[strMiscDescription]			=	D.strDescription,
+					[strMiscDescription]			=	M.strReceiptNumber,
 					[intQtyToBillUOMId]				=	B.intRateUOMId
 					,[dblQuantityToBill]			=	B.dblQuantity
 					,[dblQtyToBillUnitQty]			=	B.intQuantityUOMId
@@ -99,8 +100,8 @@ BEGIN TRY
 																	THEN 3
 														ELSE ISNULL(I.int1099CategoryId, 0) END
 					,[intLineNo]					=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-					,[intContractDetailId]			=	NULL
-					,[intContractHeaderId]			=	NULL
+					,[intContractDetailId]			=	L.intContractDetailId
+					,[intContractHeaderId]			=	L.intContractHeaderId
 					,[intLoadDetailId]				=	NULL
 					,[intLoadId]					=	NULL
 					,[intScaleTicketId]				=	NULL
@@ -110,18 +111,19 @@ BEGIN TRY
 					,strReference					=	'Insurance Charge-' + A.strChargeNo
 					,strSourceNumber				=	A.strChargeNo
 					,intLocationId					=	C.intCompanyLocationId
-					,intSubLocationId				=	C.intCompanyLocationSubLocationId
-					,intStorageLocationId			=   NULL
+					,intSubLocationId				=	K.intSubLocationId
+					,intStorageLocationId			=   K.intStorageLocationId
 					,intItemLocationId				=	D.intItemLocationId
 					,ysnSubCurrency					=	0
 					,intCurrencyId					=	B.intCurrencyId
 					,ysnStage 						=	0
 					,intInsuranceChargeDetailId		=	B.intInsuranceChargeDetailId
+					,intLotId						=  	K.intLotId
 			FROM tblICInsuranceCharge A
 			INNER JOIN tblICInsuranceChargeDetail B
 				ON A.intInsuranceChargeId = B.intInsuranceChargeId
 			INNER JOIN tblSMCompanyLocationSubLocation C
-				ON A.intStorageLocationId = C.intCompanyLocationSubLocationId
+				ON B.intStorageLocationId = C.intCompanyLocationSubLocationId
 			INNER JOIN tblICItemLocation D
 				ON C.intCompanyLocationId = D.intLocationId
 					AND D.intItemId = B.intChargeItemId
@@ -138,6 +140,12 @@ BEGIN TRY
 			LEFT JOIN vyuICGetItemStock J 
 				ON J.intItemId = B.intChargeItemId
 					AND J.intLocationId = C.intCompanyLocationId
+			INNER JOIN tblICInventoryReceiptItemLot K
+				ON B.intInventoryReceiptItemLotId = K.intInventoryReceiptItemLotId
+			INNER JOIN tblICInventoryReceiptItem L
+				ON K.intInventoryReceiptItemId = L.intInventoryReceiptItemId
+			INNER JOIN tblICInventoryReceipt M
+				ON L.intInventoryReceiptId = M.intInventoryReceiptId
 			WHERE B.dblAmount <> 0
 				AND A.intInsuranceChargeId = @intInsuranceChargeId
 

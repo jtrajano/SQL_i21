@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICGenerateInsuranceCharges]
-	@intSubLocationId AS INT
+	@strStorageLocationIds AS NVARCHAR(MAX)
 	,@intCommodity AS INT
 	,@dtmChargeDateUTC AS DATETIME
 	,@intM2MHeaderId AS INT
@@ -36,6 +36,14 @@ SELECT @dtmChargeDate = DATEADD(HOUR,@UTCToLocalDiff,@dtmChargeDateUTC)
 
 
 BEGIN TRY
+	
+	-----GEt Storage Location Ids
+	IF OBJECT_ID('tempdb..#tmpStorageLocationIds') IS NOT NULL  					
+		DROP TABLE #tmpStorageLocationIds	
+	SELECT											
+ 		intStorageLocationId = AA.Item
+	INTO #tmpStorageLocationIds
+ 	FROM dbo.fnSplitString (ISNULL(@strStorageLocationIds,''),',') AA
 
 	-------------Get the insurance rates
 	IF OBJECT_ID('tempdb..#tmpInsuranceRate') IS NOT NULL  					
@@ -66,7 +74,11 @@ BEGIN TRY
 		ON A.intCurrencyId = D.intCurrencyID
 	WHERE B.dtmStartDateUTC <= @dtmChargeDateUTC
 		AND B.dtmEndDateUTC >= @dtmChargeDateUTC
-		AND A.intStorageLocationId = @intSubLocationId 
+		AND A.intStorageLocationId IN	(
+											SELECT											
+ 												intStorageLocationId
+ 											FROM #tmpStorageLocationIds AA
+										)
 
 	
 	------Get Lot IR transaction 
@@ -79,7 +91,7 @@ BEGIN TRY
 		,A.dblGrossWeight
 		,A.dblTareWeight
 		,B.intWeightUOMId
-		,E.dblCost
+		,dblCost = D.dblLastCost
 		,C.dtmLastCargoInsuranceDate
 		,intStorageLocationId = B.intSubLocationId
 		,B.intContractDetailId
@@ -92,19 +104,23 @@ BEGIN TRY
 		ON B.intInventoryReceiptId = C.intInventoryReceiptId
 	INNER JOIN tblICLot D
 		ON A.intLotId = D.intLotId
-	INNER JOIN tblICInventoryLot E
-		ON E.strTransactionId = C.strReceiptNumber
-			AND D.intLotId = E.intLotId
 	WHERE C.dtmLastCargoInsuranceDate <= @dtmChargeDate
-		AND B.intSubLocationId = @intSubLocationId
+		AND B.intSubLocationId IN	(
+										SELECT											
+ 											intStorageLocationId
+ 										FROM #tmpStorageLocationIds AA
+									)
 		AND A.intInventoryReceiptItemLotId NOT IN (SELECT A.intInventoryReceiptItemLotId 
 													FROM tblICInsuranceChargeDetail A
 													INNER JOIN tblICInsuranceCharge B
 														ON A.intInsuranceChargeId = B.intInsuranceChargeId
 													WHERE B.ysnPosted = 1)
-		AND E.dblStockAvailable > 0
-	----Generate charge items
+		AND D.dblQty > 0
 
+	
+
+
+	----Generate charge items
 	SELECT 
 		strCompanyLocation = D.strLocationName
 		,strStorageLocation = C.strSubLocationName
@@ -126,13 +142,13 @@ BEGIN TRY
 		,intRateUOMId = L.intItemUOMId
 		,dblAmount = CASE	WHEN A.strRateType = 'Unit' THEN B.dblQuantity * A.dblRate
 							WHEN A.strRateType = 'Percent' THEN (CASE WHEN A.strAppliedTo = 'Inventory Value' THEN ISNULL(((B.dblCost * B.dblQuantity * dblRate) /100),0.0)
-																		 WHEN A.strAppliedTo = 'M2M Value' THEN ISNULL(((ISNULL(K.dblMarketPrice,0.0) * B.dblQuantity * dblRate) /100),0.0)
+																		 WHEN A.strAppliedTo = 'M2M' THEN ISNULL(((ISNULL(K.dblMarketPrice,0.0) * B.dblQuantity * dblRate) /100),0.0)
 																	ELSE 0.0 END)
 							ELSE 0.0 END
 		,B.intInventoryReceiptItemLotId
 		,A.strRateType
 		,A.strPolicyNumber
-		,intStorageLocationId = @intSubLocationId
+		,intStorageLocationId = A.intStorageLocationId
 		,A.intInsuranceRateDetailId
 		,intChargeItemId = A.intItemId
 	FROM #tmpInsuranceRate A
@@ -157,6 +173,7 @@ BEGIN TRY
 	LEFT JOIN tblRKM2MTransaction K
 		ON J.intM2MHeaderId = K.intM2MHeaderId
 			AND B.intContractDetailId = K.intContractDetailId
+			AND K.strContractOrInventoryType = 'Inventory (P)'
 	LEFT JOIN tblICItemUOM L
 		ON L.intItemId = A.intItemId
 			AND L.intUnitMeasureId = A.intUnitMeasureId
