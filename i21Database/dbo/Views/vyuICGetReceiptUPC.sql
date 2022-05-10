@@ -1,6 +1,5 @@
-CREATE VIEW [dbo].[vyuICGetReceiptItem]
+﻿CREATE VIEW [dbo].[vyuICGetReceiptUPC]
 AS 
-
 SELECT
 	intKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intItemId, ItemLocation.intLocationId) AS INT),
 	Item.intItemId,
@@ -21,8 +20,8 @@ SELECT
 	strReceiveUOM = COALESCE(rUOM.strUnitMeasure, iUOM.strUnitMeasure),
 	strReceiveUOMType = COALESCE(rUOM.strUnitType, iUOM.strUnitType),
 	intReceiveUOMId = COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId),
-	ysnReceiveUOMAllowPurchase = COALESCE(ReceiveUOM.ysnAllowPurchase, ItemUOM.ysnAllowPurchase), 
 	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, ItemUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode, '')),
+	ysnReceiveUOMAllowPurchase = COALESCE(ReceiveUOM.ysnAllowPurchase, ItemUOM.ysnAllowPurchase), 
 	COALESCE(ReceiveUOM.strLongUPCCode, ItemUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode, '')) AS strLongUPCCode,
 	ISNULL(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode) AS strShortUpc,
 	ISNULL(ReceiveUOM.strUPCDescription, ItemUOM.strUPCDescription) AS strUPCDescription,
@@ -101,7 +100,7 @@ OUTER APPLY(
 	AND ChargeItem.strType = 'Other Charge'
 ) AddOnOtherCharge
 WHERE 
-COALESCE(ItemUOM.strLongUPCCode, ItemUOM.strUpcCode) IS NOT NULL 
+(COALESCE(ItemUOM.strLongUPCCode, ItemUOM.strUpcCode) IS NOT NULL 
 OR
 (
 	(SELECT COUNT(*) FROM tblICItemUOM WHERE intItemId = Item.intItemId AND COALESCE(strLongUPCCode, strUpcCode) IS NOT NULL) = 0
@@ -115,4 +114,4 @@ OR
 	ItemUOM.ysnStockUnit = 1
 )
 OR
-ItemUOM.ysnStockUnit = 1
+ItemUOM.ysnStockUnit = 1) AND (LEN(COALESCE(ReceiveUOM.strLongUPCCode, ItemUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode, ''))) > 0)

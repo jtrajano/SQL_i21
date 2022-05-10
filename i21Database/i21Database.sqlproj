@@ -412,6 +412,7 @@
     <Build Include="dbo\Tables\tblMBILDeliveryHeader.sql" />
     <Build Include="dbo\Tables\tblMBILDeliveryDetail.sql" />
     <Build Include="dbo\Tables\tblMBILLoadHeader.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
