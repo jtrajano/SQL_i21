@@ -302,7 +302,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<ReceiptDate>' + ISNULL(CONVERT(VARCHAR, @dtmReceiptDate, 112), '') + '</ReceiptDate>'
 
-		SELECT @strXML += '<BOLNo>' + ISNULL(@strBillOfLading, '') + '</BOLNo>'
+		SELECT @strXML += '<BOLNo>' + dbo.fnEscapeXML(ISNULL(@strBillOfLading, '')) + '</BOLNo>'
 
 		SELECT @strXML += '<WarehouseRefNo>' + dbo.fnEscapeXML(ISNULL(@strWarehouseRefNo, '')) + '</WarehouseRefNo>'
 

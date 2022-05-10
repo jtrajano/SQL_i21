@@ -12,6 +12,16 @@ BEGIN TRY
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 		,@intUserId INT
 		,@strError NVARCHAR(MAX)
+		,@strContainerNo nvarchar(50)=NULL
+		,@strMarkings nvarchar(50)=NULL
+		,@intEntityVendorId int=NULL
+		,@strCondition NVARCHAR(50)=NULL
+		,@strCertificate NVARCHAR(50)=NULL
+		,@strCertificateId NVARCHAR(50)=NULL
+		,@intContractHeaderId	INT =NULL -- Contract Header Id
+		,@intContractDetailId	INT =NULL
+		,@strLotAlias NVARCHAR(50)=NULL
+
 	DECLARE @intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
 		,@dtmCreatedDate DATETIME
@@ -343,6 +353,29 @@ BEGIN TRY
 					,@ysnProposed = 0
 					,@strPatternString = @intBatchId OUTPUT
 
+				SELECT @strContainerNo =NULL
+					,@strMarkings=NULL
+					,@intEntityVendorId =NULL 
+					,@strCondition=NULL
+					,@strCertificate=NULL
+					,@strCertificateId=NULL
+					,@intContractHeaderId=NULL
+					,@intContractDetailId=NULL	
+					,@strLotAlias=NULL
+
+				SELECT @strContainerNo =strContainerNo
+					,@strMarkings=strMarkings
+					,@intEntityVendorId =intEntityVendorId 
+					,@strCondition=strCondition
+					,@strCertificate=strCertificate
+					,@strCertificateId=strCertificateId
+					,@intContractHeaderId=intContractHeaderId
+					,@intContractDetailId=intContractDetailId
+					,@strLotAlias=strLotAlias
+				FROM tblICLot L WITH (NOLOCK)
+				WHERE L.strLotNumber = @strLotNumber
+				AND strContainerNo<>''
+
 				EXEC uspMFPostProduction 1
 					,0
 					,NULL
@@ -359,7 +392,7 @@ BEGIN TRY
 					,@strLotNumber
 					,@intBatchId
 					,@intLotId OUTPUT
-					,NULL
+					,@strLotAlias
 					,NULL
 					,@strLotNumber
 					,NULL
@@ -374,6 +407,15 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,@intOriginId
+					,@strContainerNo
+					,@strMarkings
+					,@intEntityVendorId
+					,@strCondition
+					,NULL--Expiry Date
+					,@strCertificate
+					,@strCertificateId
+					,@intContractHeaderId 
+					,@intContractDetailId 
 			END
 			ELSE
 			BEGIN
