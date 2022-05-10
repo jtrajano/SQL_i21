@@ -21,6 +21,9 @@ BEGIN TRY
 		,@intContractHeaderId	INT =NULL -- Contract Header Id
 		,@intContractDetailId	INT =NULL
 		,@strLotAlias NVARCHAR(50)=NULL
+		,@strParentLotNumber NVARCHAR(50)
+		,@intParentLotId INT
+		,@dtmExpiryDate datetime
 
 	DECLARE @intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
@@ -362,6 +365,9 @@ BEGIN TRY
 					,@intContractHeaderId=NULL
 					,@intContractDetailId=NULL	
 					,@strLotAlias=NULL
+					,@strParentLotNumber=NULL
+					,@intParentLotId=NULL
+					,@dtmExpiryDate=NULL
 
 				SELECT @strContainerNo =strContainerNo
 					,@strMarkings=strMarkings
@@ -372,9 +378,15 @@ BEGIN TRY
 					,@intContractHeaderId=intContractHeaderId
 					,@intContractDetailId=intContractDetailId
 					,@strLotAlias=strLotAlias
+					,@intParentLotId=intParentLotId 
+					,@dtmExpiryDate=dtmExpiryDate 
 				FROM tblICLot L WITH (NOLOCK)
 				WHERE L.strLotNumber = @strLotNumber
 				AND strContainerNo<>''
+
+				Select @strParentLotNumber=strParentLotNumber 
+				from tblICParentLot 
+				Where intParentLotId=@intParentLotId
 
 				EXEC uspMFPostProduction 1
 					,0
@@ -394,7 +406,7 @@ BEGIN TRY
 					,@intLotId OUTPUT
 					,@strLotAlias
 					,NULL
-					,@strLotNumber
+					,@strParentLotNumber
 					,NULL
 					,NULL
 					,NULL
@@ -411,7 +423,7 @@ BEGIN TRY
 					,@strMarkings
 					,@intEntityVendorId
 					,@strCondition
-					,NULL--Expiry Date
+					,@dtmExpiryDate
 					,@strCertificate
 					,@strCertificateId
 					,@intContractHeaderId 
