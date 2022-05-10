@@ -43,12 +43,14 @@ BEGIN
 		,[strBillingPeriodName]
 		,[dblBudget]
 		,[intUtilization]
+		,[intTimeEntryPeriodDetailId]
 	)
-	SELECT  [intCoworkerGoalId]			= @CoworkerGoalId
-		   ,[intBillingPeriod]			= TimeEntryPeriodDetail.intBillingPeriod
-		   ,[strBillingPeriodName]		= TimeEntryPeriodDetail.strBillingPeriodName
-		   ,[dblBudget]					= 0
-		   ,[intUtilization]			= 0
+	SELECT  [intCoworkerGoalId]			 = @CoworkerGoalId
+		   ,[intBillingPeriod]			 = TimeEntryPeriodDetail.intBillingPeriod
+		   ,[strBillingPeriodName]		 = TimeEntryPeriodDetail.strBillingPeriodName
+		   ,[dblBudget]					 = 0
+		   ,[intUtilization]			 = 0
+		   ,[intTimeEntryPeriodDetailId] = TimeEntryPeriodDetail.[intTimeEntryPeriodDetailId]
     FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail
 	WHERE intTimeEntryPeriodId = @intTimeEntryPeriodDetail
 END
