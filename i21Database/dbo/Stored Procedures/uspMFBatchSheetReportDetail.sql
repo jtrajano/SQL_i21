@@ -83,8 +83,8 @@ BEGIN TRY
 		,(
 			CASE 
 				WHEN ISNULL(UM.strUnitType, '') = 'Weight'
-					THEN dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, UM.intUnitMeasureId, @intStdUnitMeasureId, (ri.dblCalculatedQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, @intStdUnitMeasureId, UM1.intUnitMeasureId, r.dblQuantity))) * @dblBatchSize
-				ELSE (@dblBatchSize / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, @intStdUnitMeasureId, UM1.intUnitMeasureId, r.dblQuantity)) * ri.dblCalculatedQuantity
+					THEN dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, UM.intUnitMeasureId, @intStdUnitMeasureId, (ri.dblCalculatedQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, UM1.intUnitMeasureId, @intStdUnitMeasureId, r.dblQuantity))) * @dblBatchSize
+				ELSE (@dblBatchSize / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, UM1.intUnitMeasureId, @intStdUnitMeasureId, r.dblQuantity)) * ri.dblCalculatedQuantity
 				END
 			)
 		,(
@@ -97,8 +97,8 @@ BEGIN TRY
 		,(
 			CASE 
 				WHEN ISNULL(UM.strUnitType, '') = 'Weight'
-					THEN dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, UM.intUnitMeasureId, @intStdUnitMeasureId, (ri.dblCalculatedQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, @intStdUnitMeasureId, UM1.intUnitMeasureId, r.dblQuantity))) * @dblPartialQuantity
-				ELSE (@dblPartialQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, @intStdUnitMeasureId, UM1.intUnitMeasureId, r.dblQuantity)) * ri.dblCalculatedQuantity
+					THEN dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, UM.intUnitMeasureId, @intStdUnitMeasureId, (ri.dblCalculatedQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, UM1.intUnitMeasureId, @intStdUnitMeasureId, r.dblQuantity))) * @dblPartialQuantity
+				ELSE (@dblPartialQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, UM1.intUnitMeasureId, @intStdUnitMeasureId, r.dblQuantity)) * ri.dblCalculatedQuantity
 				END
 			)
 	FROM tblMFRecipeItem ri
