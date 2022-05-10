@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFProcessBatchTransactionToInvoice]
+﻿CREATE PROCEDURE [dbo].[uspCFProcessBatchTransactionToInvoice]
 	  @TransactionId		NVARCHAR(MAX)
 	 ,@UserId				INT 
 	 ,@Post					BIT
@@ -173,8 +171,9 @@ END
 --SELECT * FROM @tmpForeignTransactionId
 		
 				INSERT INTO @EntriesForInvoice(
-					 [intId]
-					,[strTransactionType]
+					-- [intId]
+					--,
+					 [strTransactionType]
 					,[strSourceTransaction]
 					,[intSourceId]
 					,[strSourceId]
@@ -255,8 +254,9 @@ END
 					,[ysnImpactInventory]
 				)
 				SELECT
-					[intId]						= TI.intTransactionId
-					,[strTransactionType]		= (case
+					--[intId]						= TI.intTransactionId
+					--,
+					[strTransactionType]		= (case
 												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
 												else 'Invoice'
 											  end)
@@ -401,8 +401,9 @@ END
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 				---------------EXPENSE TRANS-------------
 				INSERT INTO @EntriesForInvoice(
-					 [intId]
-					,[strTransactionType]
+					-- [intId]
+					--,
+					[strTransactionType]
 					,[strSourceTransaction]
 					,[intSourceId]
 					,[strSourceId]
@@ -483,8 +484,9 @@ END
 					,[ysnImpactInventory]
 				)
 				SELECT
-					 [intId]						= TI.intTransactionId
-					,[strTransactionType]		= (case
+					-- [intId]						= TI.intTransactionId
+					--,
+					[strTransactionType]		= (case
 												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
 												else 'Invoice'
 											  end)
@@ -734,12 +736,184 @@ END
 
 	
 	--DECLARE @LogId INT
+	
+	
+	DECLARE @InvoiceEntriesTEMP	InvoiceStagingTable
+
+	INSERT INTO @InvoiceEntriesTEMP(
+	 [intId]
+	,[strTransactionType]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[intTermId]
+	,[dtmDate]
+	,[dtmDueDate]
+	,[dtmShipDate]
+	,[intEntitySalespersonId]
+	,[intFreightTermId]
+	,[intShipViaId]
+	,[intPaymentMethodId]
+	,[strInvoiceOriginId]
+	,[ysnUseOriginIdAsInvoiceNumber]
+	,[strPONumber]
+	,[strBOLNumber]
+	,[strComments]
+	,[intShipToLocationId]
+	,[intBillToLocationId]
+	,[ysnTemplate]
+	,[ysnForgiven]
+	,[ysnCalculated]
+	,[ysnSplitted]
+	,[intPaymentId]
+	,[intSplitId]
+	,[intLoadDistributionHeaderId]
+	,[strActualCostId]
+	,[intShipmentId]
+	,[intTransactionId]
+	,[intEntityId]
+	,[ysnResetDetails]
+	,[ysnPost]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[ysnInventory]
+	,[strItemDescription]
+	,[intItemUOMId]
+	,[dblQtyOrdered]
+	,[dblQtyShipped]
+	,[dblDiscount]
+	,[dblPrice]
+	,[ysnRefreshPrice]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]
+	,[dblLicenseAmount]
+	,[intTaxGroupId]
+	,[ysnRecomputeTax]
+	,[intSCInvoiceId]
+	,[strSCInvoiceNumber]
+	,[intInventoryShipmentItemId]
+	,[strShipmentNumber]
+	,[intSalesOrderDetailId]
+	,[strSalesOrderNumber]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intShipmentPurchaseSalesContractId]
+	,[intTicketId]
+	,[intTicketHoursWorkedId]
+	,[intSiteId]
+	,[strBillingBy]
+	,[dblPercentFull]
+	,[dblNewMeterReading]
+	,[dblPreviousMeterReading]
+	,[dblConversionFactor]
+	,[intPerformerId]
+	,[ysnLeaseBilling]
+	,[ysnVirtualMeterReading]
+	,[ysnClearDetailTaxes]					
+	,[intTempDetailIdForTaxes]
+	,[strType]
+	,[ysnUpdateAvailableDiscount]
+	,[strItemTermDiscountBy]
+	,[dblItemTermDiscount]
+	,[dtmPostDate]
+	,[ysnImpactInventory])
+	SELECT 
+	ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
+	,[strTransactionType]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[intTermId]
+	,[dtmDate]
+	,[dtmDueDate]
+	,[dtmShipDate]
+	,[intEntitySalespersonId]
+	,[intFreightTermId]
+	,[intShipViaId]
+	,[intPaymentMethodId]
+	,[strInvoiceOriginId]
+	,[ysnUseOriginIdAsInvoiceNumber]
+	,[strPONumber]
+	,[strBOLNumber]
+	,[strComments]
+	,[intShipToLocationId]
+	,[intBillToLocationId]
+	,[ysnTemplate]
+	,[ysnForgiven]
+	,[ysnCalculated]
+	,[ysnSplitted]
+	,[intPaymentId]
+	,[intSplitId]
+	,[intLoadDistributionHeaderId]
+	,[strActualCostId]
+	,[intShipmentId]
+	,[intTransactionId]
+	,[intEntityId]
+	,[ysnResetDetails]
+	,[ysnPost]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[ysnInventory]
+	,[strItemDescription]
+	,[intItemUOMId]
+	,[dblQtyOrdered]
+	,[dblQtyShipped]
+	,[dblDiscount]
+	,[dblPrice]
+	,[ysnRefreshPrice]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]
+	,[dblLicenseAmount]
+	,[intTaxGroupId]
+	,[ysnRecomputeTax]
+	,[intSCInvoiceId]
+	,[strSCInvoiceNumber]
+	,[intInventoryShipmentItemId]
+	,[strShipmentNumber]
+	,[intSalesOrderDetailId]
+	,[strSalesOrderNumber]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intShipmentPurchaseSalesContractId]
+	,[intTicketId]
+	,[intTicketHoursWorkedId]
+	,[intSiteId]
+	,[strBillingBy]
+	,[dblPercentFull]
+	,[dblNewMeterReading]
+	,[dblPreviousMeterReading]
+	,[dblConversionFactor]
+	,[intPerformerId]
+	,[ysnLeaseBilling]
+	,[ysnVirtualMeterReading]
+	,[ysnClearDetailTaxes]					
+	,[intTempDetailIdForTaxes]
+	,[strType]
+	,[ysnUpdateAvailableDiscount]
+	,[strItemTermDiscountBy]
+	,[dblItemTermDiscount]
+	,[dtmPostDate]
+	,[ysnImpactInventory]
+	FROM @EntriesForInvoice
 
 	SELECT * INTO #tblCFEntriesForInvoice FROM @EntriesForInvoice
 
+
 	EXEC [dbo].[uspARProcessInvoicesByBatch]
-		 --@InvoiceEntries	= @InvoiceEntriesTEMP
-		 @InvoiceEntries	= @EntriesForInvoice
+		 @InvoiceEntries	= @InvoiceEntriesTEMP
+		 --@InvoiceEntries	= @EntriesForInvoice
 		,@LineItemTaxEntries = @TaxDetails
 		,@UserId			= @UserId
 		,@GroupingOption	= 11
