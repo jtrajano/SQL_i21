@@ -6,6 +6,7 @@
 	, @ysnFromSalesOrder	BIT = 0
 	, @ysnFromImport		BIT = 0
 	, @dblSpotPrice			NUMERIC(18, 6) = 0
+	, @ysnSpotQtyOnly		BIT = 0
 AS
 
 DECLARE @tblInvoiceIds				InvoiceId
@@ -15,6 +16,8 @@ DECLARE @intUnitMeasureId			INT
 	  , @strInvalidItem				NVARCHAR(500)
 	  , @dblQtyOverAged				NUMERIC(18, 6) = 0
 	  , @dblDWGSpotPrice			NUMERIC(18, 6) = 0
+
+SET @ysnSpotQtyOnly = ISNULL(@ysnSpotQtyOnly, 0)
 
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#INVOICEDETAILS') IS NOT NULL)
@@ -200,7 +203,7 @@ IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0 AND I
 IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 	BEGIN
 		SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 
-														  THEN IDD.dblQtyOrdered 
+														  THEN IDD.dblQtyShipped 
 														  ELSE CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) = 0 
 																	THEN CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END
 																	ELSE ISI.dblQuantity
@@ -431,7 +434,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				  AND C.intEntityId = @intEntityCustomerId
 				  AND CD.intCompanyLocationId = @intCompanyLocationId
 				  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
-				  --AND C.intPricingTypeId <> 2
+				  AND @ysnSpotQtyOnly = 0
 				ORDER BY CD.intContractSeq
 
 				WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTS)
@@ -469,6 +472,10 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 									, dblFinalPrice
 								)
 								EXEC dbo.uspCTGetContractPrice @intContractHeaderIdAC, @intContractDetailIdAC, @dblQtyOverAged, 'Invoice'
+
+								DELETE FROM #BASISCONTRACT WHERE intContractHeaderId = @intContractHeaderIdAC AND dblFinalPrice IS NULL
+								IF NOT EXISTS (SELECT TOP 1 NULL FROM #BASISCONTRACT WHERE intContractHeaderId = @intContractHeaderIdAC)
+									DELETE FROM #AVAILABLECONTRACTS WHERE intContractHeaderId = @intContractHeaderIdAC
 
 								WHILE EXISTS (SELECT TOP 1 NULL FROM #BASISCONTRACT WHERE ysnProcessed = 0 AND intContractHeaderId = @intContractHeaderId) AND @dblQtyOverAged > 0
 									BEGIN
@@ -562,7 +569,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						  AND CD.intCompanyLocationId = @intCompanyLocationId
 						  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
 						  AND C.intContractHeaderId > @intContractHeaderId
-						  --AND C.intPricingTypeId <> 2
+						  AND @ysnSpotQtyOnly = 0
 						ORDER BY C.intContractHeaderId, CD.intContractDetailId
 
 						WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTSBYCUSTOMER)
@@ -601,6 +608,10 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 											, dblFinalPrice
 										)
 										EXEC dbo.uspCTGetContractPrice @intContractHeaderIdACBC, @intContractDetailIdACBC, @dblQtyOverAged, 'Invoice'
+
+										DELETE FROM #BASISCONTRACT WHERE intContractHeaderId = @intContractHeaderIdACBC AND dblFinalPrice IS NULL
+										IF NOT EXISTS (SELECT TOP 1 NULL FROM #BASISCONTRACT WHERE intContractHeaderId = @intContractHeaderIdACBC)
+											DELETE FROM #AVAILABLECONTRACTSBYCUSTOMER WHERE intContractHeaderId = @intContractHeaderIdACBC
 
 										WHILE EXISTS (SELECT TOP 1 NULL FROM #BASISCONTRACT WHERE ysnProcessed = 0 AND intContractHeaderId = @intContractHeaderIdACBC) AND @dblQtyOverAged > 0
 											BEGIN

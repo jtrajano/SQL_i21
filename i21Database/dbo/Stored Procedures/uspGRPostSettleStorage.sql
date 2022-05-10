@@ -3938,7 +3938,7 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				INSERT INTO @VoucherIdError
-				SELECT intTransactionId FROM tblAPPostResult WHERE intTransactionId = @intVoucherId2 AND strMessage <> 'Posting of negative voucher is not allowed.'
+				SELECT TOP 1 intTransactionId FROM tblAPPostResult WHERE intTransactionId = @intVoucherId2 AND strMessage <> 'Posting of negative voucher is not allowed.'
 			END
 
 			DELETE FROM @VoucherIds WHERE intId = @intVoucherId2

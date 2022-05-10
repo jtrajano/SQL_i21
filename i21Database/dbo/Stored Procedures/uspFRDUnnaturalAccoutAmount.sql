@@ -57,7 +57,7 @@ BEGIN
 	);     
   
 	CREATE TABLE #tempFormulaConcat (        
-		[Formula] NVARCHAR(MAX)   
+		[Formula] NVARCHAR(MAX)      
 	);     
 
 	SET @strCurrency = CASE WHEN @intCurrencyID = 0 THEN '' ELSE ' AND [intCurrencyId] = '''+ CAST(@intCurrencyID AS VARCHAR(10))+'''' END       
@@ -136,7 +136,6 @@ BEGIN
 				SET @intEnd  = (SELECT CHARINDEX(']',(SELECT TOP 1 Formula FROM #tempFormulaConcat)))   
 				SET @strName = (SELECT SUBSTRING((SELECT TOP 1 Formula FROM #tempFormulaConcat),@intStart,@intEnd))  
 				SET @strCondition  =  '='  
-				SELECT TOP 1 Formula FROM #tempFormulaConcat  
 				SET @strCriteria = REPLACE((SELECT TOP 1 Formula FROM #tempFormulaConcat),@strName,'')  
 				SET @strCriteria = REPLACE(@strCriteria,'=' , '')  
 				SET @strCriteria = REPLACE(@strCriteria,'''' , '')  
@@ -151,7 +150,7 @@ BEGIN
 		DROP TABLE #tempFormulaConcat  
 	END  
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
---CREATE A PREDEFINED TABLE  
+--1ST ACCOUNT , SENDER
 	WHILE EXISTS(SELECT 1 FROM #tempFormula)    
 		BEGIN    
 			SET @strName  = (SELECT TOP 1   
@@ -172,7 +171,7 @@ BEGIN
 			SELECT 0,@strCriteria,0,0  
   
 			SET @queryString = 'UPDATE #tempAmount SET Amount = (SELECT '+@strFormula+' FROM vyuGLSummary WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime)   
-			BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'' '+@strLocation+' '+@strCurrency+') ,  
+			BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'' AND ISNULL(intUnnaturalAccountId,0) = 0 '+@strLocation+' '+@strCurrency+') ,  
 			intUnnaturalAccountId = (SELECT TOP 1 intUnnaturalAccountId FROM vyuGLSummary   
 			WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime) BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+'''   
 			AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'')  
@@ -181,7 +180,8 @@ BEGIN
      
 			DELETE #tempFormula WHERE intRowDetailId = @intRowDetailId and strCriteria = @strCriteria  
 		END   
-       
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+--2ND ACCOUNT , RECEIVER      
 	WHILE EXISTS(SELECT 1 FROM #tempFormula2)    
 		BEGIN  
 			SET @strCriteria  = (SELECT TOP 1 strCriteria FROM #tempFormula2)  
@@ -225,7 +225,10 @@ BEGIN
 				TRUNCATE TABLE #tempAmount2  
 			END  
 			DELETE #tempFormula2 WHERE intRowDetailId = @intRowDetailId and strCriteria = @strCriteria  
-		END       
+		END
+		
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+--SUM UP
 	DROP TABLE #tempFormula    
 	DROP TABLE #tempFormula2  
 	SET @totalAmount = (SELECT SUM(Amount) FROM #tempAmount)     

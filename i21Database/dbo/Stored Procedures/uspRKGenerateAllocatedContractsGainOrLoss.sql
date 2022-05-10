@@ -312,6 +312,8 @@ SELECT
 												END
 											WHEN PCD.intPricingTypeId = 1 THEN	
 												'Fully Priced'
+											WHEN PCD.intPricingTypeId = 3 THEN
+												'Unpriced'
 											ELSE ''
 										END	
 	,strPurchasePricingType = P_PT.strPricingType
@@ -379,6 +381,8 @@ SELECT
 												END
 											WHEN SCD.intPricingTypeId = 1 THEN	
 												'Fully Priced'
+											WHEN PCD.intPricingTypeId = 3 THEN
+												'Unpriced'
 											ELSE ''
 										END	
 	,strSalesPricingType = S_PT.strPricingType
@@ -497,12 +501,39 @@ BEGIN
 			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
 		)
 	END
+
+	UPDATE @tmpAllocatedContracs SET strSalesInvoiceStatus = 'Provisional'
+	WHERE  intSalesContractDetailId IN (
+			select distinct intContractDetailId 
+			from tblARInvoiceDetail ID
+			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
+		)
+
 END
 ELSE
 BEGIN
 	
-select distinct intContractDetailId into #tmpPurchaseWithVoucher from tblAPBillDetail 
-where intContractDetailId in (select intPurchaseContractDetailId from tblRKAllocatedContractsTransaction)
+select distinct BD.intContractDetailId 
+,CASE B.intTransactionType
+		 WHEN 1 THEN 'Voucher'
+		 WHEN 2 THEN 'Vendor Prepayment'
+		 WHEN 3 THEN 'Debit Memo'
+		 WHEN 7 THEN 'Invalid Type'
+		 WHEN 9 THEN '1099 Adjustment'
+		 WHEN 11 THEN 'Claim'
+		 WHEN 12 THEN 'Prepayment Reversal'
+		 WHEN 13 THEN 'Basis Advance'
+		 WHEN 14 THEN 'Deferred Interest'
+		 WHEN 15 THEN 'Tax Adjustment'
+		 WHEN 16 THEN 'Provisional Voucher'
+		 ELSE 'Invalid Type'
+	END COLLATE Latin1_General_CI_AS AS strTransactionType
+into #tmpPurchaseWithVoucher 
+from tblAPBillDetail BD
+inner join tblAPBill B on B.intBillId = BD.intBillId
+where BD.intContractDetailId in (select intPurchaseContractDetailId from tblRKAllocatedContractsTransaction)
 
 	IF @strTransactionShouldBeRelieved = 'Final Invoiced'
 	BEGIN
@@ -529,6 +560,13 @@ where intContractDetailId in (select intPurchaseContractDetailId from tblRKAlloc
 		)
 		AND intPurchaseContractDetailId IN (select intContractDetailId from #tmpPurchaseWithVoucher)
 	END
+
+	
+	UPDATE AC 
+	SET AC.strPurchaseInvoiceStatus =  PWV.strTransactionType
+	FROM @tmpAllocatedContracs AC
+	INNER JOIN #tmpPurchaseWithVoucher PWV ON PWV.intContractDetailId = AC.intPurchaseContractDetailId
+	
 
 DROP TABLE #tmpPurchaseWithVoucher
 END

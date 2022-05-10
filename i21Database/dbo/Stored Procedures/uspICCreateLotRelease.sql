@@ -45,7 +45,7 @@ FROM	@LotsToRelease r INNER JOIN tblICLot l
 			ON s.intWarrantStatus = l.intWarrantStatus
 WHERE
 		s.strWarrantStatus IN ('Partially Released', 'Released')
-		AND l.strCondition NOT IN ('Missing', 'Swept', 'Skimmed')
+		AND (l.strCondition NOT IN ('Missing', 'Swept', 'Skimmed') OR l.strCondition IS NULL)
 GROUP  BY 
 	r.intItemId
 	, r.intItemLocationId

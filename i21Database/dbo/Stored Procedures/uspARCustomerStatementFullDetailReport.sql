@@ -56,34 +56,34 @@ SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
 SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 1)
-SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
-SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
-SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
-SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
-SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
-SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
+SET @strCustomerNumberLocal				= ISNULL(@strCustomerNumber, '')
+SET @strAccountStatusCodeLocal			= ISNULL(@strAccountStatusCode, '')
+SET @strLocationNameLocal				= ISNULL(@strLocationName, '')
+SET @strCustomerNameLocal				= ISNULL(@strCustomerName, '')
+SET @strCustomerIdsLocal				= ISNULL(@strCustomerIds, '')
+SET @intEntityUserIdLocal				= ISNULL(@intEntityUserId, 0)
 SET @dtmBalanceForwardDateLocal			= DATEADD(DAYOFYEAR, -1, @dtmDateFromLocal)
-SET @strStatementFormatLocal			= NULLIF(@strStatementFormat, 'Full Details - No Card Lock')
-SET @strCurrencyLocal					= NULLIF(@strCurrency, '')
-SET @strReportCommentLocal				= NULLIF(@strReportComment, '')
+SET @strStatementFormatLocal			= ISNULL(@strStatementFormat, 'Full Details - No Card Lock')
+SET @strCurrencyLocal					= ISNULL(@strCurrency, '')
+SET @strReportCommentLocal				= ISNULL(@strReportComment, '')
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
+		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(ISNULL(strCity, ''), '') + ISNULL(', ' + ISNULL(strState, ''), '') + ISNULL(', ' + ISNULL(strZip, ''), '') + ISNULL(', ' + ISNULL(strCountry, ''), '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
 IF (@@version NOT LIKE '%2008%')
+BEGIN
+	IF(@strStatementFormatLocal = 'AR Detail Statement')
 	BEGIN
-		IF(@strStatementFormatLocal = 'AR Detail Statement')
-		BEGIN
-			SET @queryRunningBalance = ' , STATEMENTREPORT.strCurrency ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
-		END
-		ELSE
-		BEGIN
-			SET @queryRunningBalance = ' ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
-		END
+		SET @queryRunningBalance = ' , STATEMENTREPORT.strCurrency ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
 	END
+	ELSE
+	BEGIN
+		SET @queryRunningBalance = ' ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+	END
+END
 
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
 IF(OBJECT_ID('tempdb..#BEGINNINGBALANCE') IS NOT NULL) DROP TABLE #BEGINNINGBALANCE
@@ -222,7 +222,7 @@ FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 WHERE @strLocationName IS NULL OR @strLocationName = strLocationName
 
 --CUSTOMER FILTERS
-IF @strCustomerNumberLocal IS NOT NULL
+IF ISNULL(@strCustomerNumberLocal, '') <> ''
 	BEGIN
 		INSERT INTO #CUSTOMERS (intEntityCustomerId)
 		SELECT TOP 1 intEntityCustomerId    = C.intEntityId 
@@ -232,7 +232,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 			AND C.strStatementFormat = @strStatementFormatLocal
 			AND EC.strEntityNo = @strCustomerNumberLocal
 	END
-ELSE IF @strCustomerIdsLocal IS NOT NULL
+ELSE IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	BEGIN
 		INSERT INTO #DELCUSTOMERS
 		SELECT DISTINCT intEntityCustomerId =  intID
@@ -253,13 +253,13 @@ ELSE
 		INNER JOIN (
 			SELECT intEntityId
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
+			WHERE (ISNULL(@strCustomerNameLocal, '') = '' OR strName = @strCustomerNameLocal)
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND C.strStatementFormat = @strStatementFormatLocal
 END
 
-IF @strAccountStatusCodeLocal IS NOT NULL
+IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
     BEGIN
         DELETE FROM #CUSTOMERS
         WHERE intEntityCustomerId NOT IN (
@@ -296,7 +296,7 @@ INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress	= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
+SET strFullAddress	= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(ISNULL(EL.strCity, ''), '') + ISNULL(', ' + ISNULL(EL.strState, ''), '') + ISNULL(', ' + ISNULL(EL.strZipCode, ''), '') + ISNULL(', ' + ISNULL(EL.strCountry, ''), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 
@@ -639,7 +639,7 @@ LEFT JOIN (
 		 , strInvoiceType			= 'Payment'
 		 , strType					= NULL
 		 , strItemNo				= NULL
-		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(ISNULL(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
 		 , dblAmount				= CASE WHEN @strStatementFormatLocal = 'AR Detail Statement' THEN 0 ELSE (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1 END
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1
@@ -687,7 +687,7 @@ LEFT JOIN (
 		 , strInvoiceType			= 'Payment'
 		 , strType					= NULL
 		 , strItemNo				= NULL
-		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strPaymentRecordNum) + ')'
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(ISNULL(P.strPaymentInfo, ''), P.strPaymentRecordNum) + ')'
 		 , dblAmount				= CASE WHEN @strStatementFormatLocal = 'AR Detail Statement' THEN 0 ELSE ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1 END
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1

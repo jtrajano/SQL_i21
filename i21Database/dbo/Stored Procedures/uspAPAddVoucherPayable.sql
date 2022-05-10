@@ -245,6 +245,7 @@ BEGIN
 			,[strTerm]							=	CASE WHEN contractTerm.intTermID IS NOT NULL THEN contractTerm.strTerm
 														ELSE term.strTerm END
 			,[intFreightTermId]					=	A.intFreightTermId
+			,[strFreightTerm]					=	freightTerm.strFreightTerm
 			,[strBillOfLading]					=	A.strBillOfLading
 			,[int1099Form]						=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 																AND A.intItemId > 0
@@ -282,7 +283,7 @@ BEGIN
 			,[intLineNo]						=	A.intLineNo
 			,[intBookId]						=	A.intBookId
 			,[intSubBookId]						=	A.intSubBookId
-			,[intComputeTotalOption]			=	item.intComputeItemTotalOption
+			,[intComputeTotalOption]			=	ISNULL(item.intComputeItemTotalOption, 0)
 			,[intLotId]							=	A.intLotId
 			,[intPayFromBankAccountId]			=	A.intPayFromBankAccountId
 			,[strPayFromBankAccount]			=	bankAccount.strBankAccountNo
@@ -298,6 +299,7 @@ BEGIN
 		LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 		LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 		LEFT JOIN tblSMTerm term ON term.intTermID = A.intTermId
+		LEFT JOIN tblSMFreightTerms freightTerm ON freightTerm.intFreightTermId = A.intFreightTermId
 		LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = A.intShipViaId
 		LEFT JOIN tblSMCurrency tranCur ON A.intCurrencyId = tranCur.intCurrencyID
 		LEFT JOIN tblSMCurrency costCur ON A.intCostCurrencyId = costCur.intCurrencyID
@@ -406,6 +408,7 @@ BEGIN
 		,[intTermId]						
 		,[strTerm]	
 		,[intFreightTermId]					
+		,[strFreightTerm]					
 		,[strBillOfLading]
 		,[int1099Form]
 		,[int1099Category]				
@@ -502,6 +505,7 @@ BEGIN
 		,[intTermId]						
 		,[strTerm]		
 		,[intFreightTermId]				
+		,[strFreightTerm]
 		,[strBillOfLading]
 		,[int1099Form]
 		,[int1099Category]				

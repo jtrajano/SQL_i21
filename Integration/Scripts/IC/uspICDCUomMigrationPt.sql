@@ -73,6 +73,29 @@ WHEN NOT MATCHED THEN
 INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
 VALUES ([Source].strUnitMeasure, [Source].strSymbol, 1);
 
+-- Delete the duplicate UOMs, relative to strUnitMeasure
+;WITH CTE AS 
+(
+    SELECT strUnitMeasure, strSymbol, ROW_NUMBER() OVER 
+    (
+        PARTITION BY strUnitMeasure ORDER BY strUnitMeasure
+    ) RowNumber
+    FROM  @UOMS
+)
+DELETE
+FROM CTE 
+WHERE RowNumber > 1;
+
+MERGE tblICUnitMeasure AS [Target]
+USING 
+(
+	SELECT DISTINCT strUnitMeasure, strSymbol FROM @UOMS
+) AS [Source] (strUnitMeasure, strSymbol)
+ON [Target].strUnitMeasure = [Source].strUnitMeasure
+WHEN NOT MATCHED THEN
+INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
+VALUES ([Source].strUnitMeasure, [Source].strSymbol, 1);
+
 --update the unit type for the imported uoms
 UPDATE tblICUnitMeasure
 SET strUnitType = 

@@ -663,6 +663,20 @@ WHERE strSessionId = @strSessionId
 
 EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 
+UPDATE ILD
+SET
+	 ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+	,ILD.[ysnUnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+	,ILD.[strPostingMessage]		= CASE WHEN ILD.[ysnPost] = 1 THEN 'Transaction successfully posted.' ELSE 'Transaction successfully unposted.' END
+	,ILD.[strBatchId]				= @BatchId
+	,ILD.[strPostedTransactionId]	= PID.[strInvoiceNumber] 
+FROM tblARInvoiceIntegrationLogDetail ILD
+INNER JOIN tblARPostInvoiceHeader PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
+	AND ILD.[ysnPost] IS NOT NULL
+	AND PID.strType = 'Store Checkout'
+	AND PID.strSessionId = @strSessionId
+
 DELETE FROM tblARPostInvoiceHeader WHERE strSessionId = @strSessionId
 DELETE FROM tblARPostInvoiceDetail WHERE strSessionId = @strSessionId
 DELETE FROM tblARPostInvoiceItemAccount WHERE strSessionId = @strSessionId

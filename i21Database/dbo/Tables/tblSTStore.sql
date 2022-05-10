@@ -134,6 +134,9 @@
 
     [ysnLotterySetupMode]           BIT NULL, 
     [ysnActive]						BIT NULL DEFAULT 1, 
+    [ysnConsStopAutoProcessIfValuesDontMatch] BIT NOT NULL DEFAULT 0,
+    [ysnConsMeterReadingsForDollars] BIT NOT NULL DEFAULT 1,
+    [ysnConsAddOutsideFuelDiscounts] BIT NOT NULL DEFAULT 1,
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),

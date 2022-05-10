@@ -70,4 +70,7 @@ WHERE	Receipt.intInventoryReceiptId = @intReceiptId
 					WHEN ISNULL(ReceiptItem.strItemType,'') = 'Option' THEN 1
 					WHEN ISNULL(ReceiptItem.strItemType,'') <> '' THEN 0
 					ELSE 1 END
-		AND ItemLot.strCondition NOT IN ('Swept', 'Skimmed') -- Do not include the Swept or Skimmed in the total.
+		AND (
+			ItemLot.strCondition NOT IN ('Swept', 'Skimmed') -- Do not include the Swept or Skimmed in the total.
+			OR ItemLot.strCondition  IS NULL 
+		)
