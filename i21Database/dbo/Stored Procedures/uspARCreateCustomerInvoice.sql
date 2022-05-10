@@ -159,6 +159,9 @@
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
+	,@FreightCharge							NUMERIC(18, 6)
+	,@FreightCompanySegment					NVARCHAR(100)
+	,@FreightLocationSegment				NVARCHAR(100)
 AS
 
 BEGIN
@@ -545,7 +548,10 @@ BEGIN TRY
 		,[intBankValuationRuleId]
 		,[strTradeFinanceComments]
 		,[strGoodsStatus]
-		,[intBorrowingFacilityLimitDetailId])
+		,[intBorrowingFacilityLimitDetailId]
+		,[dblFreightCharge]
+		,[strFreightCompanySegment]
+		,[strFreightLocationSegment])
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -643,6 +649,9 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
+		,[dblFreightCharge]					= @FreightCharge
+		,[strFreightCompanySegment]			= @FreightCompanySegment
+		,[strFreightLocationSegment]		= @FreightLocationSegment
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
