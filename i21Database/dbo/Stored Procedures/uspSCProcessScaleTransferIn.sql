@@ -110,12 +110,12 @@ BEGIN TRY
 											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
 											ELSE SC.intItemUOMIdTo
 										END
-			,intCostUOMId				= ICTran.intItemUOMId
+			,intCostUOMId				= InnerICTran.intItemUOMId
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime
 			,dblQty						= SCMatch.dblNetUnits --abs(ICTran.dblQty) --case when abs(ICTran.dblQty) < SC.dblNetUnits then abs(ICTran.dblQty) else SC.dblNetUnits end
-			,dblCost					= ICTran.dblCost
+			,dblCost					= InnerICTran.dblCost
 											/*
 												 ICTran.dblCost + ( (case when abs(ICTran.dblQty) > SC.dblNetUnits then 1 else -1 end)
 																*
@@ -142,15 +142,27 @@ BEGIN TRY
             ,intInventoryTransferDetailId   = ICTD.intInventoryTransferDetailId
             ,intSourceType                  = 1 -- Source type for scale is 1 
             ,strSourceScreenName            = 'Scale Ticket'
-			,intSort						= RANK() OVER( ORDER BY ICTran.dblQty ASC)--RANK() OVER (ORDER BY ICTran.dblQty)
+			,intSort						= RANK() OVER( ORDER BY InnerICTran.dblCost ASC)--RANK() OVER (ORDER BY ICTran.dblQty)
 			,intShipFromEntityId			= SC.intEntityId
 	FROM	tblSCTicket SC 
 	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
 	INNER JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
 	INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
 	LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
-	LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
-	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
+	-- LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
+	OUTER APPLY(
+					SELECT dbo.fnDivide(SUM(dbo.fnMultiply(dblQty, dblCost)) , ICTD.dblNet) as dblCost, ICTran.intLotId, ICTran.intItemUOMId
+						from tblICInventoryTransaction ICTran 
+							where 
+								ICTran.intTransactionId = ICTD.intInventoryTransferId 
+								AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
+								AND ICTran.intTransactionTypeId = 13
+								and ICTran.intInTransitSourceLocationId is not null
+						group by ICTran.intLotId, ICTran.intItemUOMId
+
+		)InnerICTran
+	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) 
+	--AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
 	--FROM	tblSCTicket SC 
 	--INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
 	--INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
