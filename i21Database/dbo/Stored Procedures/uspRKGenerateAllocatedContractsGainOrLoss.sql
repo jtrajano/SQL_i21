@@ -381,7 +381,7 @@ SELECT
 												END
 											WHEN SCD.intPricingTypeId = 1 THEN	
 												'Fully Priced'
-											WHEN PCD.intPricingTypeId = 3 THEN
+											WHEN SCD.intPricingTypeId = 3 THEN 
 												'Unpriced'
 											ELSE ''
 										END	
@@ -502,7 +502,7 @@ BEGIN
 		)
 	END
 
-	UPDATE @tmpAllocatedContracs SET strSalesInvoiceStatus = 'Provisional'
+	UPDATE @tmpAllocatedContracs SET strSalesInvoiceStatus = 'Provisional Invoiced'
 	WHERE  intSalesContractDetailId IN (
 			select distinct intContractDetailId 
 			from tblARInvoiceDetail ID
@@ -527,7 +527,7 @@ select distinct BD.intContractDetailId
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
 		 WHEN 15 THEN 'Tax Adjustment'
-		 WHEN 16 THEN 'Provisional Voucher'
+		 WHEN 16 THEN 'Provisional Voucher' 
 		 ELSE 'Invalid Type'
 	END COLLATE Latin1_General_CI_AS AS strTransactionType
 into #tmpPurchaseWithVoucher 
@@ -561,6 +561,24 @@ where BD.intContractDetailId in (select intPurchaseContractDetailId from tblRKAl
 		AND intPurchaseContractDetailId IN (select intContractDetailId from #tmpPurchaseWithVoucher)
 	END
 
+
+	UPDATE @tmpAllocatedContracs SET strSalesInvoiceStatus = 'Provisional Invoiced'
+	WHERE  intSalesContractDetailId IN (
+			select distinct intContractDetailId 
+			from tblARInvoiceDetail ID
+			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
+		)
+
+	UPDATE @tmpAllocatedContracs SET strSalesInvoiceStatus = 'Final Invoiced'
+	WHERE  intSalesContractDetailId IN (
+			select distinct intContractDetailId 
+			from tblARInvoiceDetail ID
+			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			and I.strType IN ('Standard')  and I.strTransactionType = 'Invoice'
+		)
 	
 	UPDATE AC 
 	SET AC.strPurchaseInvoiceStatus =  PWV.strTransactionType
