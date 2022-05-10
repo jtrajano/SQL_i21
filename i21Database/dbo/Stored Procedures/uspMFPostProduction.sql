@@ -34,6 +34,10 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@intEntityVendorId int=NULL
 	,@strCondition NVARCHAR(50)=NULL
 	,@dtmExpiryDate Datetime=NULL
+	,@strCertificate NVARCHAR(50)=NULL
+	,@strCertificateId NVARCHAR(50)=NULL
+	,@intContractHeaderId INT =NULL -- Contract Header Id
+	,@intContractDetailId INT =NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -327,6 +331,10 @@ BEGIN
 		,strContainerNo
 		,dblWeightPerQty
 		,strCondition
+		,strCertificate
+		,strCertificateId
+		,intContractHeaderId
+	    ,intContractDetailId
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -362,6 +370,10 @@ BEGIN
 		,strContainerNo = @strContainerNo
 		,dblWeightPerQty=@dblUnitQty
 		,strCondition=@strCondition
+		,strCertificate=@strCertificate
+		,strCertificateId=@strCertificateId
+		,intContractHeaderId=@intContractHeaderId
+	    ,intContractDetailId=@intContractDetailId
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
