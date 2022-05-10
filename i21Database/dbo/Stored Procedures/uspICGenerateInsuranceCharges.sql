@@ -94,7 +94,7 @@ BEGIN TRY
 		,dblCost = D.dblLastCost
 		,C.dtmLastCargoInsuranceDate
 		,intStorageLocationId = B.intSubLocationId
-		,B.intContractDetailId
+		,D.intContractDetailId
 		,A.intInventoryReceiptItemLotId
 		,D.intLotId
 		,strContractNumber = F.strContractNumber
