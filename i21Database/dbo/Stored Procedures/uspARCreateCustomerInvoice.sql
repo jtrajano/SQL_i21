@@ -159,6 +159,9 @@
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
+	,@FreightCharge							NUMERIC(18, 6)
+	,@FreightCompanySegment					NVARCHAR(100)
+	,@FreightLocationSegment				NVARCHAR(100)
 	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
@@ -538,6 +541,9 @@ BEGIN TRY
 		,[strTradeFinanceComments]
 		,[strGoodsStatus]
 		,[intBorrowingFacilityLimitDetailId]
+		,[dblFreightCharge]
+		,[strFreightCompanySegment]
+		,[strFreightLocationSegment]
 		,[intDefaultPayToBankAccountId]
 		,[strSourcedFrom]
 		,[intTaxLocationId]
@@ -638,6 +644,9 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
+		,[dblFreightCharge]					= @FreightCharge
+		,[strFreightCompanySegment]			= @FreightCompanySegment
+		,[strFreightLocationSegment]		= @FreightLocationSegment
 		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 		,[strSourcedFrom]					= @SourcedFrom
 		,[intTaxLocationId]					= @TaxLocationId
