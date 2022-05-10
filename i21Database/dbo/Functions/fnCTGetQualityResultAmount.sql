@@ -32,7 +32,7 @@ BEGIN
 
 	Declare @dblResult Numeric(18,6) 
 	Declare @dblAmount Numeric(18,6)
-	Declare @dblConversionFactor Numeric(18,6)
+	Declare @dblConversionFactor Numeric(18,10)
 
 	SET @dblResult = CASE WHEN @dblActualValue between @dblMinValue and @dblMaxValue THEN
 						((@dblActualValue - @dblTargetValue) / (CASE WHEN @dblActualValue < @dblTargetValue THEN @dblFactorUnderTarget ELSE @dblFactorOverTarget END)) *
@@ -43,7 +43,7 @@ BEGIN
 		SET @dblResult = @dblResult - (@dblResult % CASE WHEN @dblActualValue < @dblTargetValue THEN @dblDiscount ELSE @dblPremium END)
 	END
 
-	SELECT @dblConversionFactor = ICF.dblUnitQty / ICT.dblUnitQty 
+	SELECT @dblConversionFactor = CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10))
 	FROM tblCTContractQuality CQ
 	INNER JOIN tblICItemUOM ICF on CQ.intUnitMeasureId = ICF.intUnitMeasureId and CQ.intItemId = ICF.intItemId
 	INNER JOIN tblICItemUOM ICT on CQ.intSequenceUnitMeasureId = ICT.intUnitMeasureId and CQ.intItemId = ICT.intItemId
