@@ -34,15 +34,15 @@ v.intKey
 , v.strStockUOM
 , v.strStockUOMType
 , v.dblStockUnitQty
-, v.intReceiveUOMId
-, v.intReceiveUnitMeasureId
+, COALESCE(v.intReceiveUOMId, stockUnit.intItemUOMId) intReceiveUOMId
+, COALESCE(v.intReceiveUnitMeasureId, stockUnit.intUnitMeasureId) intReceiveUnitMeasureId
 , v.dblReceiveUOMConvFactor
-, v.intIssueUOMId
-, v.intIssueUnitMeasureId
+, COALESCE(v.intIssueUOMId, stockUnit.intItemUOMId) intIssueUOMId
+, COALESCE(v.intIssueUnitMeasureId, stockUnit.intUnitMeasureId) intIssueUnitMeasureId
 , v.dblIssueUOMConvFactor
-, v.strReceiveUOMType
-, v.strIssueUOMType
-, v.strReceiveUOM
+, COALESCE(v.strReceiveUOMType, stockUnit.strUnitType) strReceiveUOMType
+, COALESCE(v.strIssueUOMType, stockUnit.strUnitType) strIssueUOMType
+, COALESCE(v.strReceiveUOM, stockUnit.strUnitMeasure) strReceiveUOM
 , v.strReceiveUPC
 , v.strReceieveLongUPC
 , COALESCE(EffectivePrice.dblRetailPrice, v.dblReceiveSalePrice) dblReceiveSalePrice
@@ -53,7 +53,7 @@ v.intKey
 , v.dblReceiveEndMonthCost
 , v.ysnReceiveUOMAllowPurchase
 , v.ysnReceiveUOMAllowSale
-, v.strIssueUOM
+, COALESCE(v.strIssueUOM, stockUnit.strUnitMeasure) strIssueUOM
 , v.strIssueUPC
 , v.strIssueLongUPC
 , COALESCE(EffectivePrice.dblRetailPrice, v.dblIssueSalePrice) dblIssueSalePrice
@@ -138,3 +138,10 @@ FROM vyuICGetItemStock v
 OUTER APPLY tblICTransactionSession tsession
 OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, DEFAULT) EffectiveCost
 OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, DEFAULT) EffectivePrice
+OUTER APPLY (
+    SELECT TOP 1 xi.intUnitMeasureId, xi.intItemUOMId, xu.strUnitMeasure, xu.strUnitType
+    FROM tblICItemUOM xi
+    JOIN tblICUnitMeasure xu ON xu.intUnitMeasureId = xi.intUnitMeasureId
+    WHERE xi.intItemId = v.intItemId
+        AND xi.ysnStockUnit = 1
+) stockUnit
