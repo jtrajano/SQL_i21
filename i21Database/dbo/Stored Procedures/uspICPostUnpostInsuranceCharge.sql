@@ -80,7 +80,7 @@ BEGIN TRY
 					[strMiscDescription]			=	M.strReceiptNumber,
 					[intQtyToBillUOMId]				=	B.intRateUOMId
 					,[dblQuantityToBill]			=	1---B.dblQuantity
-					,[dblQtyToBillUnitQty]			=	B.intQuantityUOMId
+					,[dblQtyToBillUnitQty]			=	F.dblUnitQty
 					,[dblOrderQty]					=	1--B.dblQuantity
 					,[dblDiscount]					=	0
 					,[intCostUOMId]					=	B.intRateUOMId
