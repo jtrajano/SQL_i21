@@ -23,15 +23,9 @@ BEGIN
 	FROM tblICCommodityUnitMeasure
 	WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1
 
-	SELECT * 
-	INTO #tmpDelayedPricing
-	FROM dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL)
-	
-	CREATE NONCLUSTERED INDEX IX_tmpDelayedPricing_intTransactionRecordId
-	ON #tmpDelayedPricing (intTransactionRecordId);
 	
 	DECLARE @tblResult TABLE (Id INT IDENTITY
-		, dtmDate DATE
+		, dtmDate DATETIME
 		, dblTotal NUMERIC(18,6)
 		, strTransactionType NVARCHAR(100)
 		, strTransactionId NVARCHAR(50)
@@ -39,14 +33,10 @@ BEGIN
 		, strDistribution NVARCHAR(50)
 		, strOwnership NVARCHAR(20))
 
-	SELECT * 
-	INTO #tmpInHouseResult
-	FROM @tblResult
-
 	--=============================
 	-- Company Owned
 	--=============================
-	INSERT INTO #tmpInHouseResult (dtmDate
+	INSERT INTO @tblResult (dtmDate
 		, dblTotal
 		, strTransactionType
 		, strTransactionId
@@ -54,20 +44,13 @@ BEGIN
 		, strDistribution
 		, strOwnership)
 	SELECT
-		  dtmDate = CONVERT(DATE, dtmTransactionDate) -- CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110)
-		-- RM-4507: dblTotal = Replaced fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
-		, dblTotal = CASE WHEN ISNULL(uomFrom.dblUnitQty, 0) <> uomTo.dblUnitQty 
-							THEN CASE WHEN uomTo.dblUnitQty <> 0 
-								THEN CAST((dblTotal * uomFrom.dblUnitQty) AS NUMERIC(38,20)) / uomTo.dblUnitQty
-								ELSE NULL
-								END
-							ELSE dblTotal
-							END
+		  dtmDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110)
+		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
 		, strTransactionType
 		, strTransactionId  = strTransactionNumber
 		, intTransactionId = intTransactionRecordHeaderId
 		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
-			WHEN (SELECT TOP 1 1 FROM #tmpDelayedPricing WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
+			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
 			WHEN CompOwn.intContractHeaderId IS NOT NULL 
 				THEN ISNULL(
 			     (SELECT TOP 1 strDistributionOption FROM tblSCTicket WHERE intTicketId = CompOwn.intTicketId and intContractId = CompOwn.intContractDetailId),
@@ -78,21 +61,15 @@ BEGIN
 		,strOwnership = 'Company Owned'
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmToTransactionDate,@intCommodityId,NULL) CompOwn
 	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
-	LEFT JOIN tblICCommodityUnitMeasure uomFrom
-		ON uomFrom.intCommodityUnitMeasureId = intOrigUOMId
-	LEFT JOIN tblICCommodityUnitMeasure uomTo
-		ON uomTo.intCommodityUnitMeasureId = @intCommodityUnitMeasureId
 	LEFT JOIN tblSCTicket TV on CompOwn.intTicketId = TV.intTicketId
 	WHERE CompOwn.intItemId = ISNULL(@intItemId, CompOwn.intItemId)
 		AND CompOwn.intLocationId = ISNULL(@intLocationId, CompOwn.intLocationId)
 		AND CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	
-	DROP TABLE #tmpDelayedPricing
-
 	--=============================
 	-- Customer Owned
 	--=============================
-	INSERT INTO #tmpInHouseResult (dtmDate
+	INSERT INTO @tblResult (dtmDate
 		, dblTotal
 		, strTransactionType
 		, strTransactionId
@@ -100,26 +77,15 @@ BEGIN
 		, strDistribution
 		, strOwnership)
 	SELECT
-		dtmDate = CONVERT(DATE, dtmTransactionDate) -- CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110)
-		-- RM-4507: dblTotal = Replaced fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
-		, dblTotal = CASE WHEN ISNULL(uomFrom.dblUnitQty, 0) <> uomTo.dblUnitQty 
-							THEN CASE WHEN uomTo.dblUnitQty <> 0 
-								THEN CAST((dblTotal * uomFrom.dblUnitQty) AS NUMERIC(38,20)) / uomTo.dblUnitQty
-								ELSE NULL
-								END
-							ELSE dblTotal
-							END
+		dtmDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110)
+		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
 		, strTransactionType
 		, strTransactionId  = strTransactionNumber
 		, intTransactionId = intTransactionRecordId
 		, ST.strStorageTypeCode
 		,strOwnership = 'Customer Owned'
 	FROM dbo.fnRKGetBucketCustomerOwned(@dtmToTransactionDate,@intCommodityId,NULL) CusOwn
-	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CusOwn.strDistributionType
-	LEFT JOIN tblICCommodityUnitMeasure uomFrom
-		ON uomFrom.intCommodityUnitMeasureId = intOrigUOMId
-	LEFT JOIN tblICCommodityUnitMeasure uomTo
-		ON uomTo.intCommodityUnitMeasureId = @intCommodityUnitMeasureId
+		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CusOwn.strDistributionType
 	WHERE ISNULL(CusOwn.strStorageType, '') <> 'ITR' AND CusOwn.intTypeId IN (1, 3, 4, 5, 8, 9)
 		AND CusOwn.intItemId = ISNULL(@intItemId, CusOwn.intItemId)
 		AND CusOwn.intLocationId = ISNULL(@intLocationId, CusOwn.intLocationId)
@@ -128,41 +94,27 @@ BEGIN
 	--=============================
 	-- On Hold
 	--=============================
-	INSERT INTO #tmpInHouseResult (dtmDate
+	INSERT INTO @tblResult (dtmDate
 		, dblTotal
 		, strTransactionType
 		, strTransactionId
 		, intTransactionId
 		, strDistribution
 		, strOwnership)
-	SELECT dtmDate = CONVERT(DATE, dtmTransactionDate)--CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110)
-		-- RM-4507: dblTotal = Replaced fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
-		, dblTotal = CASE WHEN ISNULL(uomFrom.dblUnitQty, 0) <> uomTo.dblUnitQty 
-							THEN CASE WHEN uomTo.dblUnitQty <> 0 
-								THEN CAST((dblTotal * uomFrom.dblUnitQty) AS NUMERIC(38,20)) / uomTo.dblUnitQty
-								ELSE NULL
-								END
-							ELSE dblTotal
-							END
+	SELECT CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110)
+		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
 		, 'On Hold' 
 		, strTicketNumber = strTransactionNumber
 		, intTicketId = intTransactionRecordId
 		, 'HLD'
 		, 'HOLD'
 	FROM dbo.fnRKGetBucketOnHold(@dtmToTransactionDate,@intCommodityId, NULL) OnHold
-	LEFT JOIN tblICCommodityUnitMeasure uomFrom
-		ON uomFrom.intCommodityUnitMeasureId = intOrigUOMId
-	LEFT JOIN tblICCommodityUnitMeasure uomTo
-		ON uomTo.intCommodityUnitMeasureId = @intCommodityUnitMeasureId
 	WHERE OnHold.intItemId = ISNULL(@intItemId, OnHold.intItemId)
 		AND OnHold.intLocationId = ISNULL(@intLocationId, OnHold.intLocationId)
 		AND OnHold.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-
-	CREATE NONCLUSTERED INDEX IX_tmpInHouseResult_strTransactionType
-	ON #tmpInHouseResult (strTransactionType)
 			
 	DECLARE @tblResultInventory TABLE (Id INT IDENTITY
-		, dtmDate DATE
+		, dtmDate DATETIME
 		, dblInvIn NUMERIC(18,6)
 		, dblInvOut NUMERIC(18,6)
 		, dblAdjustments NUMERIC(18,6)
@@ -188,20 +140,9 @@ BEGIN
 	FROM Dates AS d
 
 	SELECT dtmDate = InTran.dtmTransactionDate 
-		-- RM-4507: dblInTransitQty = Replaced fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId , @intCommodityUnitMeasureId, ISNULL((InTran.dblTotal), 0))
-		, dblInTransitQty = CASE WHEN ISNULL(uomFrom.dblUnitQty, 0) <> uomTo.dblUnitQty 
-							THEN CASE WHEN uomTo.dblUnitQty <> 0 
-								THEN CAST((ISNULL((InTran.dblTotal), 0) * uomFrom.dblUnitQty) AS NUMERIC(38,20)) / uomTo.dblUnitQty
-								ELSE NULL
-								END
-							ELSE ISNULL((InTran.dblTotal), 0)
-							END
+		, dblInTransitQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId , @intCommodityUnitMeasureId, ISNULL((InTran.dblTotal), 0))
 	INTO #InTransitDateRange
 	FROM dbo.fnRKGetBucketInTransit(@dtmToTransactionDate,@intCommodityId,NULL) InTran
-	LEFT JOIN tblICCommodityUnitMeasure uomFrom
-		ON uomFrom.intCommodityUnitMeasureId = intOrigUOMId
-	LEFT JOIN tblICCommodityUnitMeasure uomTo
-		ON uomTo.intCommodityUnitMeasureId = @intCommodityUnitMeasureId
 	WHERE InTran.strBucketType = 'Sales In-Transit'
 		AND InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)
 		AND InTran.intLocationId = ISNULL(@intLocationId, InTran.intLocationId ) 
@@ -226,18 +167,20 @@ BEGIN
 			, dblBalanceInv)
 		SELECT @date
 			, SUM(dblTotal)
-		FROM #tmpInHouseResult WHERE dtmDate <= @date --CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
+		FROM @tblResult WHERE CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
 		
 		SELECT @dblBalanceCompanyOwned = SUM(dblTotal)
-		FROM #tmpInHouseResult 
-		WHERE dtmDate <= @date --CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
+		FROM @tblResult 
+		WHERE CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
 		AND strOwnership = 'Company Owned'
 		
 		SELECT @dblBalanceCustomerOwned = SUM(dblTotal)
-		FROM #tmpInHouseResult 
-		WHERE dtmDate <= @date --CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
+		FROM @tblResult 
+		WHERE CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
 		AND strOwnership = 'Customer Owned'
 
+		
+				
 		SELECT @dblSalesInTransitAsOf = SUM(ISNULL(InTran.dblInTransitQty, 0))
 		FROM #InTransitDateRange InTran
 		WHERE InTran.dtmDate <= @date
@@ -273,7 +216,7 @@ BEGIN
 			, strDistribution
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Inventory Receipt')
 		GROUP BY dtmDate
 			, strTransactionId
@@ -308,7 +251,7 @@ BEGIN
 			, strDistribution
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Storage Settlement')
 		GROUP BY dtmDate
 			, strTransactionId
@@ -340,7 +283,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Credit Memo')
 		GROUP BY dtmDate
 			, strTransactionId
@@ -372,7 +315,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Inventory Transfer')
 		AND dblTotal > 0
 		GROUP BY dtmDate
@@ -405,7 +348,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Inventory Transfer')
 		AND dblTotal < 0
 		GROUP BY dtmDate
@@ -438,7 +381,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType = 'On Hold'
 		AND dblTotal  > 0
 		GROUP BY dtmDate
@@ -471,7 +414,7 @@ BEGIN
 			, strDistribution ='PRDC' 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Produce')
 		GROUP BY dtmDate
 			, strTransactionId
@@ -504,7 +447,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType = 'On Hold' 
 		AND dblTotal < 0
 		GROUP BY dtmDate
@@ -537,7 +480,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Inventory Shipment')
 		GROUP BY dtmDate
 			, strTransactionId
@@ -570,7 +513,7 @@ BEGIN
 			, strDistribution  = 'CNSM'
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Consume')
 		GROUP BY dtmDate
 			, strTransactionId
@@ -603,7 +546,7 @@ BEGIN
 			, strDistribution  = ''
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Outbound Shipment')
 		GROUP BY dtmDate
 			, strTransactionId
@@ -636,7 +579,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN ('Invoice', 'Cash')
 		AND dblTotal < 0
 		GROUP BY dtmDate
@@ -670,7 +613,7 @@ BEGIN
 			, strDistribution  = CASE WHEN ISNULL(strDistribution,'') <> '' THEN strDistribution ELSE 'ADJ' END
 			, strTransactionType = 'Inventory Adjustment'
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType LIKE 'Inventory Adjustment%'
 		GROUP BY dtmDate
 			, strTransactionId
@@ -701,7 +644,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult
+		FROM @tblResult
 		WHERE strTransactionType IN('Inventory Count')
 		GROUP BY dtmDate
 			, strTransactionId
@@ -734,7 +677,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult s
+		FROM @tblResult s
 		WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
 			AND dblTotal > 0
 		GROUP BY dtmDate
@@ -767,7 +710,7 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult s
+		FROM @tblResult s
 		WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
 			AND dblTotal < 0
 		GROUP BY dtmDate
@@ -801,16 +744,13 @@ BEGIN
 			, strDistribution 
 			, strTransactionType
 			, strOwnership
-		FROM #tmpInHouseResult s
+		FROM @tblResult s
 		WHERE strTransactionType IN ( 'Storage Adjustment')
 	) t
 
 	--==============================
 	-- FINAL SELECT
 	--===============================
-	
-	DECLARE @dtmPrevTransactionDate DATE = CONVERT(DATE, DATEADD(DAY, -1, @dtmFromTransactionDate))
-
 	SELECT * FROM (
 		SELECT r.dtmDate
 			, ri.dblInvIn
@@ -827,9 +767,8 @@ BEGIN
 			, ri.strTransactionType
 			, intCommodityId = @intCommodityId
 			, strOwnership
-		FROM @tblBalanceInvByDate r
-		LEFT JOIN @tblResultInventory ri ON ri.dtmDate = r.dtmDate
-		WHERE r.dblBalanceInv IS NOT NULL 
+		FROM @tblResultInventory ri
+		FULL JOIN @tblBalanceInvByDate r ON ri.dtmDate = r.dtmDate
 		
 		--Insert Company Title Beginning Balance
 		UNION SELECT NULL
@@ -841,17 +780,17 @@ BEGIN
 			, NULL
 			, NULL
 			, (SELECT sum(dblTotal) 
-				FROM #tmpInHouseResult 
-				WHERE dtmDate <= @dtmPrevTransactionDate --CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
+				FROM @tblResult 
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
 				) --dblBalanceInv
 			, (SELECT sum(dblTotal) 
-				FROM #tmpInHouseResult 
-				WHERE dtmDate <= @dtmPrevTransactionDate --CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
+				FROM @tblResult 
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
 				AND strOwnership = 'Company Owned'
 				)
 			, (SELECT sum(dblTotal) 
-				FROM #tmpInHouseResult 
-				WHERE dtmDate <= @dtmPrevTransactionDate --CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
+				FROM @tblResult 
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
 				AND strOwnership = 'Customer Owned'
 				)
 			, NULL
@@ -865,5 +804,4 @@ BEGIN
 	DROP TABLE #LicensedLocation
 	DROP TABLE #tempDateRange
 	DROP TABLE #InTransitDateRange
-	DROP TABLE #tmpInHouseResult
 END
