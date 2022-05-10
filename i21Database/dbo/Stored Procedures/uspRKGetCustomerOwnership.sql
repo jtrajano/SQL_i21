@@ -43,7 +43,7 @@ SELECT
 INTO #tempCustomer
 FROM (
 	select
-		dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
+		dtmDate = CONVERT(DATE, dtmTransactionDate) -- CONVERT(VARCHAR(10),dtmTransactionDate,110)
 		, strDistributionType
 		, dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
 		, dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
@@ -56,7 +56,7 @@ FROM (
 	
 	union all
 	select
-		dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
+		dtmDate = CONVERT(DATE, dtmTransactionDate) -- CONVERT(VARCHAR(10),dtmTransactionDate,110)
 		, strDistributionType
 		, dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
 		, dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
@@ -68,7 +68,7 @@ FROM (
 
 	union all
 	select
-		dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
+		dtmDate = CONVERT(DATE, dtmTransactionDate) -- CONVERT(VARCHAR(10),dtmTransactionDate,110)
 		, strDistributionType
 		, dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
 		, dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
@@ -91,7 +91,7 @@ BEGIN
 	declare @intRowNumber int
 	SELECT TOP 1 @intRowNumber=intRowNum FROM #tempCustomer order by intRowNum desc
 	INSERT INTO #tempCustomer (intRowNum,dtmDate,strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId)
-		SELECT CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription))+isnull(@intRowNumber,0),CONVERT(VARCHAR(10),@dtmToTransactionDate,110),strStorageTypeDescription,0.0,0.0,0.0,intStorageScheduleTypeId
+		SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription))+isnull(@intRowNumber,0),CONVERT(VARCHAR(10),@dtmToTransactionDate,110),strStorageTypeDescription,0.0,0.0,0.0,intStorageScheduleTypeId
 		FROM tblGRStorageScheduleRule SSR 
 		INNER JOIN tblGRStorageType  ST ON SSR.intStorageType = ST.intStorageScheduleTypeId 
 		WHERE SSR.intCommodity = @intCommodityId AND ISNULL(ysnActive,0) = 1 AND intStorageScheduleTypeId > 0 AND intStorageScheduleTypeId not in(SELECT DISTINCT intStorageScheduleTypeId FROM #tempCustomer)
@@ -115,14 +115,14 @@ DELETE FROM tblRKDailyPositionForCustomer
 
 DECLARE @FinalResult TABLE
 (intRowNum INT identity(1,1),
-  dtmDate datetime
+  dtmDate DATE
 )
 INSERT INTO @FinalResult
 SELECT DISTINCT dtmDate FROM #tempCustomer  WHERE strDistribution IS NOT NULL
 
 declare @mRowNumber1 int=0
-declare @dtmDate1 datetime =''
-declare @SQL1 nvarchar(max) =''
+declare @dtmDate1 DATE = ''
+declare @SQL1 nvarchar(max) = ''
 
 SELECT DISTINCT @mRowNumber1=Min(intRowNum) FROM @FinalResult  
 
@@ -131,18 +131,18 @@ BEGIN
 	DECLARE @strCumulativeNum NVARCHAR(MAX)=''
 	DECLARE @intColumn_Id INT
 	DECLARE @Type nvarchar(max) =''
-	SELECT @dtmDate1=dtmDate FROM @FinalResult WHERE intRowNum=@mRowNumber1
+	SELECT @dtmDate1 = dtmDate FROM @FinalResult WHERE intRowNum = @mRowNumber1
 	
 		SET @SQL1 =''
 		DECLARE @intCount int =0
-		SELECT @intCount=min(intRowNum) FROM #tempCustomer WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
+		SELECT @intCount=min(intRowNum) FROM #tempCustomer WHERE dtmDate = @dtmDate1 -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110)) = convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
 		WHILE @intCount > 0
 		BEGIN
 
-		select @Type=strDistribution from #tempCustomer where CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110)) and intRowNum=@intCount
+		select @Type=strDistribution from #tempCustomer where dtmDate = @dtmDate1 AND intRowNum=@intCount -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110)) and intRowNum=@intCount
 		SET @SQL1 = @SQL1+'(SELECT strDistribution as '''+convert(nvarchar(100),@Type)+'_strDistribution'+''', dblIn as '''+convert(nvarchar(100),@Type)+'_In'+''',dblOut as '''+convert(nvarchar(100),@Type)+'_Out'+''',dblNet as '''+convert(nvarchar(100),@Type)+'_Net'+''' FROM #tempCustomer WHERE intRowNum= ' + convert(nvarchar,@intCount) +') t' + convert(nvarchar(100),@intCount) + ' CROSS JOIN'
 		
-		SELECT @intCount = MIN(intRowNum) FROM #tempCustomer WHERE intRowNum > @intCount and CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
+		SELECT @intCount = MIN(intRowNum) FROM #tempCustomer WHERE intRowNum > @intCount and dtmDate = @dtmDate1 -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
 		END
 
 		IF LEN(@SQL1)>0
