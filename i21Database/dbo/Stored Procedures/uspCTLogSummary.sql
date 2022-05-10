@@ -4800,7 +4800,7 @@ BEGIN TRY
 							SET @_actual = @dblActual
 						END
 					END
-					IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5)
+					IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5 and ISNULL(@dblDP, 0) <> 0)
 					BEGIN
 						-- Balance
 						SET @_dp = (CASE WHEN @dblQty > ISNULL(@dblDP, 0) THEN ISNULL(@dblDP, 0) ELSE @dblQty END)
