@@ -12,8 +12,8 @@ SELECT  [intTimeEntryPeriodNotificationId] = Notif.[intTimeEntryPeriodNotificati
 	   ,[strRecipientEmail]				   = Entity.[strEmail]
 	   ,[strBillingPeriodRange]			   = FORMAT(TimeEntryPeriodDetail.dtmBillingPeriodStart, 'MM/dd/yyyy') + ' - ' + FORMAT(TimeEntryPeriodDetail.dtmBillingPeriodEnd, 'MM/dd/yyyy')
 FROM tblHDTimeEntryPeriodNotification Notif
-		INNER JOIN tblEMEntity Entity
-ON Entity.[intEntityId] = Notif.[intEntityRecipientId]
+		INNER JOIN vyuEMEntityContact Entity
+ON Entity.[intEntityId] = Notif.[intEntityRecipientId] AND Entity.ysnDefaultContact = 1 
 		LEFT JOIN tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail
 ON TimeEntryPeriodDetail.intTimeEntryPeriodDetailId = Notif.intTimeEntryPeriodDetailId
 WHERE Notif.ysnSent = 0 AND
