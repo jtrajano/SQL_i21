@@ -234,6 +234,9 @@ DECLARE  @Id									INT
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
+		,@FreightCharge							NUMERIC(18, 6)
+		,@FreightCompanySegment					NVARCHAR(100)
+		,@FreightLocationSegment				NVARCHAR(100)
 		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
@@ -457,6 +460,9 @@ BEGIN
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
+		,@FreightCharge					= [dblFreightCharge]
+		,@FreightCompanySegment			= [strFreightCompanySegment]
+		,@FreightLocationSegment		= [strFreightLocationSegment]
 		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
 
@@ -745,6 +751,9 @@ BEGIN
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
+			,@FreightCharge					= @FreightCharge
+			,@FreightCompanySegment			= @FreightCompanySegment
+			,@FreightLocationSegment		= @FreightLocationSegment
 			,@SourcedFrom					= @SourcedFrom
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
