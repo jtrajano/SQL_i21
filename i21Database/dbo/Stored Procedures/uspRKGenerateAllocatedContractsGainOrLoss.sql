@@ -381,7 +381,7 @@ SELECT
 												END
 											WHEN SCD.intPricingTypeId = 1 THEN	
 												'Fully Priced'
-											WHEN PCD.intPricingTypeId = 3 THEN
+											WHEN PCD.intPricingTypeId = 3 THEN 
 												'Unpriced'
 											ELSE ''
 										END	
@@ -527,7 +527,7 @@ select distinct BD.intContractDetailId
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
 		 WHEN 15 THEN 'Tax Adjustment'
-		 WHEN 16 THEN 'Provisional Voucher'
+		 WHEN 16 THEN 'Provisional Voucher' 
 		 ELSE 'Invalid Type'
 	END COLLATE Latin1_General_CI_AS AS strTransactionType
 into #tmpPurchaseWithVoucher 
