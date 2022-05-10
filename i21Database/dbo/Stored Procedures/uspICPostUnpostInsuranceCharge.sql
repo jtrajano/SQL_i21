@@ -79,12 +79,12 @@ BEGIN TRY
 					[intItemId]						=	B.intChargeItemId,					
 					[strMiscDescription]			=	M.strReceiptNumber,
 					[intQtyToBillUOMId]				=	B.intRateUOMId
-					,[dblQuantityToBill]			=	B.dblQuantity
+					,[dblQuantityToBill]			=	1---B.dblQuantity
 					,[dblQtyToBillUnitQty]			=	B.intQuantityUOMId
-					,[dblOrderQty]					=	B.dblQuantity
+					,[dblOrderQty]					=	1--B.dblQuantity
 					,[dblDiscount]					=	0
 					,[intCostUOMId]					=	B.intRateUOMId
-					,[dblCost]						=	B.dblRate
+					,[dblCost]						=	B.dblAmount--B.dblRate
 					,[dblCostUnitQty]				=	F.dblUnitQty
 					,[int1099Form]					=	(CASE WHEN G.intEntityId IS NOT NULL 
 																	AND D.intItemId > 0
