@@ -10,7 +10,7 @@ AS
 
 BEGIN
 	DECLARE @tblResultInventory TABLE (Id INT IDENTITY(1,1)
-		, dtmDate DATETIME
+		, dtmDate DATE
 		, tranShipmentNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		, tranShipQty NUMERIC(24,10)
 		, tranReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -48,7 +48,7 @@ BEGIN
 		, ISNULL(tranRecQty, 0) - ISNULL(ABS(tranShipQty), 0) + ISNULL(dblAdjustmentQty, 0) + ISNULL(dblCountQty, 0) + ISNULL(dblInvoiceQty, 0) BalanceForward
 	INTO #temp
 	FROM (
-		SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
+		SELECT dtmDate = CONVERT(DATE, dtmDate) -- CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 			, (SELECT strShipmentNumber FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber = it.strTransactionId) tranShipmentNumber
 			, (SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, SUM(ABS(dblQty))) FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber = it.strTransactionId) tranShipQty
 			, (SELECT strReceiptNumber FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber = it.strTransactionId) tranReceiptNumber
@@ -77,7 +77,8 @@ BEGIN
 			, ium.intCommodityUnitMeasureId
 		
 		--Consume, Produce AND Outbound Shipment
-		UNION ALL SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
+		UNION ALL 
+		SELECT dtmDate = CONVERT(DATE, dtmDate) -- CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 			, CASE WHEN it.intTransactionTypeId = 8 OR it.intTransactionTypeId = 46 THEN it.strTransactionId ELSE '' END tranShipmentNumber
 			, CASE WHEN it.intTransactionTypeId = 8 OR it.intTransactionTypeId = 46 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, SUM(ISNULL(it.dblQty,0))) ELSE 0.0 END tranShipQty
 			, CASE WHEN it.intTransactionTypeId = 9 THEN it.strTransactionId ELSE '' END tranReceiptNumber
@@ -107,7 +108,8 @@ BEGIN
 			, ium.intCommodityUnitMeasureId
 
 		--Inventory Transfer
-		UNION ALL SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
+		UNION ALL 
+		SELECT dtmDate = CONVERT(DATE, dtmDate) -- CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 			, CASE WHEN it.dblQty < 0 THEN it.strTransactionId ELSE '' END tranShipmentNumber
 			, CASE WHEN it.dblQty < 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ABS(it.dblQty),0)) ELSE 0.0 END tranShipQty
 			, CASE WHEN it.dblQty > 0 THEN it.strTransactionId ELSE '' END tranReceiptNumber
@@ -147,7 +149,7 @@ BEGIN
 			, 0.0 dblSalesInTransit
 			, 0.0 tranDSInQty
 		FROM (
-			SELECT CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
+			SELECT dtmDate = CONVERT(DATE, IA.dtmPostedDate) -- CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
 				, ROUND(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
 				, IA.strAdjustmentNo strAdjustmentNo
 				, IA.intInventoryAdjustmentId intInventoryAdjustmentId
@@ -180,7 +182,7 @@ BEGIN
 			, 0.0 dblSalesInTransit
 			, 0.0 tranDSInQty
 		FROM (
-			SELECT CONVERT(VARCHAR(10), st.dtmTicketDateTime,110) dtmDate
+			SELECT dtmDate = CONVERT(DATE, st.dtmTicketDateTime) -- CONVERT(VARCHAR(10), st.dtmTicketDateTime,110) dtmDate
 				, CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblInQty
 				, r.strReceiptNumber
 			FROM tblSCTicket st
@@ -217,7 +219,7 @@ BEGIN
 			, 0.0 dblSalesInTransit
 			, 0.0 tranDSInQty
 		FROM (
-			SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
+			SELECT dtmDate = CONVERT(DATE, st.dtmTicketDateTime) -- CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
 				, CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblInQty
 				, r.strReceiptNumber
 			FROM tblSCTicket st
@@ -251,7 +253,8 @@ BEGIN
 		) a
 
 		--Shipment against customer storage	
-		UNION ALL SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
+		UNION ALL 
+		SELECT dtmDate = CONVERT(DATE, dtmDate) -- CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 			, '' tranShipmentNumber
 			, ABS(dblOutQty) tranShipQty
 			, '' tranReceiptNumber
@@ -285,7 +288,8 @@ BEGIN
 		) a
 
 		--Shipment against company owned (this is to get the Sales In Transit)
-		UNION ALL SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
+		UNION ALL 
+		SELECT dtmDate = CONVERT(DATE, dtmDate) -- CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 			, '' tranShipmentNumber
 			, 0 tranShipQty
 			, '' tranReceiptNumber
@@ -330,7 +334,7 @@ BEGIN
 			, 0.0 dblSalesInTransit
 			, 0.0 tranDSInQty
 		FROM (
-			SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
+			SELECT dtmDate = CONVERT(DATE, st.dtmTicketDateTime) --  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
 				, st.strDistributionOption
 				, '' strShipDistributionOption
 				, '' as strAdjDistributionOption
@@ -377,7 +381,7 @@ BEGIN
 			, 0.0 dblSalesInTransit
 			, 0.0 tranDSInQty
 		FROM (
-			SELECT CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
+			SELECT dtmDate = CONVERT(DATE, SH.dtmHistoryDate) -- CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
 				, S.strStorageTypeCode strDistributionOption
 				, CASE WHEN strType = 'Reverse Settlement' THEN ABS(dblUnits) ELSE 0 END AS dblOutQty
 				, CASE WHEN strType = 'Settlement' THEN ABS(dblUnits) ELSE 0 END AS dblInQty
@@ -405,7 +409,7 @@ BEGIN
 	SELECT sum(BalanceForward) BalanceForward
 	FROM (
 		SELECT BalanceForward + tranDSInQty as BalanceForward FROM #temp
-		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110)
+		WHERE dtmDate < @dtmFromTransactionDate --CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110)
 	) t
 
 	--Previous value End
@@ -440,7 +444,7 @@ BEGIN
 	FROM (
 		SELECT *
 		FROM #temp
-		WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+		WHERE dtmDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate-- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 	) t
 
 	DROP TABLE #LicensedLocation
