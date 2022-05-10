@@ -301,6 +301,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
+:r .\AR\DefaultData\39_UpdateCreditCardCompanyPreference.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
 :r .\AR\DefaultData\96_RebuildReportFields.sql
