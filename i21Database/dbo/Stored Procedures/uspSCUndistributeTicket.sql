@@ -252,8 +252,12 @@ BEGIN TRY
 							
 							IF ISNULL(@ysnIRPosted, 0) = 1
 								EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
-							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
+							-- Set Inventory Transfer status back to "In Transit" if ticket distribution type is Transfer In
+							IF @intEntityId = 0
+								EXEC [dbo].[uspICUpdateTransferOrderStatus] @InventoryReceiptId, 2
+
+							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
 							---- Update contract schedule if ticket Distribution type is load and link it to IS
 							IF(@strDistributionOption = 'LOD')
