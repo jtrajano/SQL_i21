@@ -2,7 +2,7 @@
 
 CREATE TABLE [dbo].[tblGLSubsidiaryCompany](
 	[intSubsidiaryCompanyId] [int] IDENTITY(1,1) NOT NULL,
-	[intDatabaseId] INT NOT NULL,
+	[intDatabaseId] INT NULL,
 	[strDatabase] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCompany] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
     [strCompanySegment] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
@@ -13,6 +13,9 @@ CREATE TABLE [dbo].[tblGLSubsidiaryCompany](
 	[intLastGLDetailId] INT NULL,
 	[ysnMergedCOA] BIT NULL,
 	[hasCompanySegment] BIT NULL,
+	[intAccountSystemId] INT NULL,
+	[strAccountMapping] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblPercentage] NUMERIC(18, 6)
  CONSTRAINT [PK_tblGLSubsidiaryCompany] PRIMARY KEY CLUSTERED 
 (
 	[intSubsidiaryCompanyId] ASC
