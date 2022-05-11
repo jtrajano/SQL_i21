@@ -196,8 +196,8 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , strGoodsStatus						= INV.strGoodsStatus
 	 , ysnOverrideFreightCharge				= INV.ysnOverrideFreightCharge
 	 , dblFreightCharge						= INV.dblFreightCharge
-	 , strFreightCompanySegment				= INV.strFreightCompanySegment
-	 , strFreightLocationSegment			= INV.strFreightLocationSegment
+	 , strFreightCompanySegment				= GLCAI.strDescription
+	 , strFreightLocationSegment			= GLLAI.strDescription
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -414,3 +414,13 @@ OUTER APPLY(
 	SELECT TOP 1 ysnAllowIntraCompanyEntries
 	FROM tblARCompanyPreference
 ) ARCOMPANYPREFERENCE
+LEFT JOIN (
+	SELECT TOP 1 intAccountId
+		 , strDescription 
+	FROM vyuGLCompanyAccountId WITH (NOLOCK)
+) GLCAI ON INV.intFreightCompanySegment = GLCAI.intAccountId
+LEFT JOIN (
+	SELECT TOP 1 intAccountId
+		 , strDescription 
+	FROM vyuGLLocationAccountId WITH (NOLOCK)
+) GLLAI ON INV.intFreightLocationSegment = GLLAI.intAccountId

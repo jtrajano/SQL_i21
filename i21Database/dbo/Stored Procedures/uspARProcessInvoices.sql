@@ -235,8 +235,8 @@ DECLARE  @Id									INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
 		,@FreightCharge							NUMERIC(18, 6)
-		,@FreightCompanySegment					NVARCHAR(100)
-		,@FreightLocationSegment				NVARCHAR(100)
+		,@FreightCompanySegment					INT
+		,@FreightLocationSegment				INT
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -458,8 +458,8 @@ BEGIN
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
 		,@FreightCharge					= [dblFreightCharge]
-		,@FreightCompanySegment			= [strFreightCompanySegment]
-		,@FreightLocationSegment		= [strFreightLocationSegment]
+		,@FreightCompanySegment			= [intFreightCompanySegment]
+		,@FreightLocationSegment		= [intFreightLocationSegment]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
