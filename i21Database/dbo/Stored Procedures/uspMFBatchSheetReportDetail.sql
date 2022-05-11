@@ -136,9 +136,7 @@ BEGIN TRY
 			WHEN @intNoOfBatches > 0
 				THEN CASE 
 						WHEN t.ysnAdditionalItem = 0
-							THEN SUM(t.dblQuantity) OVER (
-									PARTITION BY t.ysnAdditionalItem ORDER BY t.intId
-									)
+							THEN t.dblQuantity
 						ELSE NULL
 						END
 			ELSE 0
@@ -147,9 +145,7 @@ BEGIN TRY
 		,t.dblPartialQuantity AS dblPartialQty
 		,CASE 
 			WHEN t.ysnAdditionalItem = 0
-				THEN SUM(t.dblPartialQuantity) OVER (
-						PARTITION BY t.ysnAdditionalItem ORDER BY t.intId
-						)
+				THEN t.dblPartialQuantity
 			ELSE NULL
 			END AS dblPartialQtyAcc
 		,@intNoOfBatches AS intNoOfBatches
