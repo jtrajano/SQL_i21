@@ -64,6 +64,7 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@strType NVARCHAR(50)
 		,@strReceiptNumber NVARCHAR(50)
+		,@strContainerNumber NVARCHAR(100)
 		,@intNoOfReceipt INT
 		,@intWeightAdjItemId INT
 		,@dblCostAdjustment NUMERIC(18, 6)
@@ -403,6 +404,7 @@ BEGIN TRY
 				,@intContractDetailId = NULL
 				,@strType = NULL
 				,@strReceiptNumber = NULL
+				,@strContainerNumber = NULL
 				,@intNoOfReceipt = NULL
 
 			SELECT @intItemId = BD.intItemId
@@ -537,11 +539,13 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				SELECT @strReceiptNumber = R.strReceiptNumber
+					,@strContainerNumber = LC.strContainerNumber
 				FROM tblAPBillDetail BD
 				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
 					AND BD.intContractDetailId IS NOT NULL
 					AND BD.intBillDetailId = @intBillDetailId
 				JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+				LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
 			END
 
 			IF ISNULL(@strReceiptNumber, '') = ''
@@ -560,6 +564,7 @@ BEGIN TRY
 				IF ISNULL(@intNoOfReceipt, 0) = 1
 				BEGIN
 					SELECT TOP 1 @strReceiptNumber = R.strReceiptNumber
+						,@strContainerNumber = LC.strContainerNumber
 					FROM tblLGLoad L WITH (NOLOCK)
 					JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 						AND L.intShipmentType = 1
@@ -569,6 +574,7 @@ BEGIN TRY
 					JOIN tblICInventoryReceiptItem RI WITH (NOLOCK) ON RI.intSourceId = LD.intLoadDetailId
 						AND RI.intLineNo = LD.intPContractDetailId
 					JOIN tblICInventoryReceipt R WITH (NOLOCK) ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+					LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
 				END
 			END
 
@@ -701,7 +707,11 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<lineTotal>' + LTRIM(ISNULL(@dblDetailTotalwithTax, 0)) + '</lineTotal>'
 
-			SELECT @strItemXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + '</ReceiptNo>'
+			IF @intOrgTransactionType = 1
+				AND ISNULL(@strContainerNumber, '') <> ''
+				SELECT @strItemXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + ' ' + @strContainerNumber + '</ReceiptNo>'
+			ELSE
+				SELECT @strItemXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + '</ReceiptNo>'
 
 			SELECT @strItemXML += '</line>'
 
