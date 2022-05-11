@@ -9174,6 +9174,7 @@
     <Build Include="dbo\Stored Procedures\uspGRUpdateContractInSettlement.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
+    <Build Include="dbo\Tables\tblMBILDatacenter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
