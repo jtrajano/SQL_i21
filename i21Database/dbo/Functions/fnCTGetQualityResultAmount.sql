@@ -45,7 +45,7 @@ BEGIN
 
 	SELECT @dblConversionFactor = CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10))
 	FROM tblCTContractQuality CQ
-	INNER JOIN tblICItemUOM ICF on CQ.intUnitMeasureId = ICF.intUnitMeasureId and CQ.intItemId = ICF.intItemId
+	INNER JOIN tblICItemUOM ICF on CQ.intUnitMeasureIdTmp = ICF.intUnitMeasureId and CQ.intItemId = ICF.intItemId
 	INNER JOIN tblICItemUOM ICT on CQ.intSequenceUnitMeasureId = ICT.intUnitMeasureId and CQ.intItemId = ICT.intItemId
 	WHERE CQ.intQualityId = @intQualityId		
 
