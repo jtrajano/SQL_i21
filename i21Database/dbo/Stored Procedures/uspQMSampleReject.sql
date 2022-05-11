@@ -322,6 +322,7 @@ BEGIN TRY
 
 			EXEC uspICRejectLot @intLotId = @intLotId
 				,@intEntityId = @intLastModifiedUserId
+				,@ysnAdd = 1
 
 			SELECT @intSeqNo = MIN(intSeqNo)
 			FROM @LotRecords
