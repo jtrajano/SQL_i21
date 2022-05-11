@@ -261,7 +261,7 @@ BEGIN TRY
 		LEFT JOIN	tblSMCity					AB	WITH (NOLOCK) ON	AB.intCityId					=	CH.intArbitrationId			
 		LEFT JOIN	tblSMCountry				RY	WITH (NOLOCK) ON	RY.intCountryID					=	AB.intCountryId
 		LEFT JOIN	tblSMCountry				SMC WITH (NOLOCK) ON	SMC.intCountryID				=	CH.intCountryId
-		LEFT JOIN	tblSMCity					SCI WITH (NOLOCK) ON	SCI.intCountryId				=	SMC.intCountryID
+		LEFT JOIN	tblSMCity					SCI WITH (NOLOCK) ON	SCI.intCityId					=	CH.intINCOLocationTypeId
 		LEFT JOIN	tblEMEntity					PR	WITH (NOLOCK) ON	PR.intEntityId					=	CH.intProducerId			
 		LEFT JOIN	tblCTPosition				PO	WITH (NOLOCK) ON	PO.intPositionId				=	CH.intPositionId
 		LEFT JOIN	tblAPVendor					VR	WITH (NOLOCK) ON	VR.intEntityId					=	CH.intEntityId				
