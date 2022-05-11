@@ -15,7 +15,8 @@ CREATE TABLE [dbo].[tblGLSubsidiaryCompany](
 	[hasCompanySegment] BIT NULL,
 	[intAccountSystemId] INT NULL,
 	[strAccountMapping] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[dblPercentage] NUMERIC(18, 6)
+	[dblPercentage] NUMERIC(18, 6),
+	[intConcurrencyId] INT NULL
  CONSTRAINT [PK_tblGLSubsidiaryCompany] PRIMARY KEY CLUSTERED 
 (
 	[intSubsidiaryCompanyId] ASC
