@@ -17,7 +17,8 @@ RETURNS @tbl TABLE (
 	ysnMultiCurrency BIT NULL,
 	ysnFullyDepreciated BIT NULL,
 	strError NVARCHAR(100) NULL,
-	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	intLedgerId INT NULL
 )
 AS
 BEGIN
@@ -52,7 +53,8 @@ DECLARE @tblAssetInfo TABLE (
 	dblMidQuarter NUMERIC (18,6),
 	dblMidYear NUMERIC (18,6),
 	dblRate NUMERIC (18,6),
-	ysnMultiCurrency BIT NULL
+	ysnMultiCurrency BIT NULL,
+	intLedgerId INT NULL
 ) 
 
 DECLARE @intDefaultCurrencyId INT, @dblAdjustment NUMERIC(18, 6), @dblFunctionalAdjustment NUMERIC(18, 6), @ysnAdjustBasis BIT = NULL,
@@ -75,6 +77,7 @@ INSERT INTO  @tblAssetInfo(
 	strAssetTransaction,
 	dblRate,
 	ysnMultiCurrency,
+	intLedgerId,
 	strError
 )
 SELECT 
@@ -91,6 +94,7 @@ SELECT
 	Depreciation.strTransaction,
 	CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE ISNULL(A.dblForexRate, 1) END,
 	CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(A.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, A.intCurrencyId) THEN 0 ELSE 1 END,
+	BD.intLedgerId,
 	NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
 JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId = @BookId
@@ -435,7 +439,8 @@ INSERT INTO @tbl(
 	ysnMultiCurrency,
 	ysnFullyDepreciated,
 	strError,
-	strTransaction
+	strTransaction,
+	intLedgerId
 	)
 	SELECT 
 	intAssetId,
@@ -451,7 +456,8 @@ INSERT INTO @tbl(
 	ysnMultiCurrency,
 	ysnFullyDepreciated,
 	strError,
-	strTransaction
+	strTransaction,
+	intLedgerId
 	FROM @tblAssetInfo 
 	RETURN
 END

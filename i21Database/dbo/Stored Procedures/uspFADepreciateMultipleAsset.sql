@@ -171,11 +171,12 @@ BEGIN
         ysnMultiCurrency BIT NULL,
         ysnDepreciated BIT NULL,
         dtmDepreciate DATETIME NULL,
-        strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+        strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+        intLedgerId INT NULL
       )
   
-      INSERT INTO @tblDepComputation(intAssetId,dblBasis, dblDepreciationBasis,dblMonth, dblDepre, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction)
-        SELECT intAssetId, dblBasis,dblDepreciationBasis,dblMonth,dblDepre, dblFunctionalBasis,dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction
+      INSERT INTO @tblDepComputation(intAssetId,dblBasis, dblDepreciationBasis,dblMonth, dblDepre, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction, intLedgerId)
+        SELECT intAssetId, dblBasis,dblDepreciationBasis,dblMonth,dblDepre, dblFunctionalBasis,dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction, intLedgerId
         FROM dbo.fnFAComputeMultipleDepreciation(@IdGood, @BookId) 
 
       DELETE FROM @IdGood
@@ -605,7 +606,8 @@ BEGIN
           ,[strTransactionType]  
           ,[strTransactionForm]  
           ,[strModuleName]     
-          ,[intCurrencyExchangeRateTypeId]  
+          ,[intCurrencyExchangeRateTypeId]
+          ,[intLedgerId]
           )
 		  -- Adjustment Entries
 		  SELECT   
@@ -661,6 +663,7 @@ BEGIN
           ,[strTransactionForm] = 'Fixed Assets'  
           ,[strModuleName]  = 'Fixed Assets'
           ,[intCurrencyExchangeRateTypeId] = Adjustment.intCurrencyExchangeRateTypeId
+          ,[intLedgerId] = B.intLedgerId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
           ON A.intAssetId = B.intAssetId
@@ -726,6 +729,7 @@ BEGIN
           ,[strTransactionForm] = 'Fixed Assets'  
           ,[strModuleName]  = 'Fixed Assets'
           ,[intCurrencyExchangeRateTypeId] = Adjustment.intCurrencyExchangeRateTypeId
+          ,[intLedgerId] = B.intLedgerId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
           ON A.intAssetId = B.intAssetId
@@ -772,6 +776,7 @@ BEGIN
           ,[strTransactionForm] = 'Fixed Assets'  
           ,[strModuleName]  = 'Fixed Assets'
           ,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
+          ,[intLedgerId] = B.intLedgerId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
           ON A.intAssetId = B.intAssetId
@@ -818,6 +823,7 @@ BEGIN
           ,[strTransactionForm] = 'Fixed Assets'  
           ,[strModuleName]  = 'Fixed Assets'  
           ,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
+          ,[intLedgerId] = B.intLedgerId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
           ON A.intAssetId = B.intAssetId
