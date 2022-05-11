@@ -481,7 +481,7 @@ BEGIN
 			@intTransactionDetailId = @intTransactionId,
 			@strScreenName = 'Card Fueling Transaction Screen'
 		END
-		ELSE IF(LOWER(@transactionPriceMethod) = 'contract')
+		ELSE IF(LOWER(@transactionPriceMethod) = 'contract pricing')
 		BEGIN
 			EXEC uspCTUpdateScheduleQuantity 
 			@intContractDetailId = @transactionContractDetailId
@@ -549,7 +549,7 @@ BEGIN
 			@intTransactionDetailId = @intTransactionId,
 			@strScreenName = 'Card Fueling Transaction Screen'
 		END
-		ELSE IF(LOWER(@transactionPriceMethod) = 'contract')
+		ELSE IF(LOWER(@transactionPriceMethod) = 'contract pricing')
 		BEGIN
 			EXEC uspCTUpdateScheduleQuantity 
 			@intContractDetailId = @transactionContractDetailId
@@ -6693,7 +6693,7 @@ BEGIN
 
 		END
 	END
-	ELSE IF (LOWER(@strPriceMethod) = 'item contracts')
+	ELSE IF (LOWER(@strPriceMethod) = 'item contracts' OR LOWER(@strPriceMethod) = 'item contract pricing')
 		BEGIN
 
 		--COMPUTES TAX AND PRICES BASED IN AVAILABLE QTY IF QTY IS BIGGER THAN AVAILABLE QTY
@@ -6720,7 +6720,7 @@ BEGIN
 		SET @dblQuantity = @Quantity
 
 	END
-	ELSE IF (LOWER(@strPriceMethod) = 'contracts') OR (LOWER(@strPriceMethod) = 'contract pricing') 
+	ELSE IF (LOWER(@strPriceMethod) = 'contracts' OR LOWER(@strPriceMethod) = 'contract pricing')
 		BEGIN
 
 		--COMPUTES TAX AND PRICES BASED IN AVAILABLE QTY IF QTY IS BIGGER THAN AVAILABLE QTY
