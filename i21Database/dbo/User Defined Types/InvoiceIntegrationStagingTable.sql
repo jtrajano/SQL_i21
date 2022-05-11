@@ -227,8 +227,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[strGoodsStatus]						NVARCHAR(100) COLLATE Latin1_General_CI_AS		NULL
 	,[dblComputedGrossPrice]				NUMERIC(18, 6)									NULL
 	,[dblFreightCharge]						NUMERIC(18, 6)									NULL
-	,[strFreightCompanySegment]				NVARCHAR(100)									NULL
-	,[strFreightLocationSegment]			NVARCHAR(100)									NULL
+	,[intFreightCompanySegment]				INT												NULL
+	,[intFreightLocationSegment]			INT												NULL
 	,[intTaxLocationId]						INT												NULL
 	,[strTaxPoint]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 )
