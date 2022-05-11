@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdateAppliedAndPrice]
 	@intContractDetailId int
-	,@dblBalance numeric(18,6)
+	,@dblBalance numeric(38,20)
 as
 
 	declare
@@ -10,8 +10,8 @@ as
 		,@ysnLoad bit
 		,@dblQuantityPerLoad numeric(18,6)
 		,@intActivePriceFixationDetailId int
-		,@dblSequenceQuantity numeric(18,6)
-		,@dblSequenceAppliedQuantity numeric(18,6)
+		,@dblSequenceQuantity numeric(38,20)
+		,@dblSequenceAppliedQuantity numeric(38,20)
 		,@intSequenceLoad numeric(18,6)
 		,@intSequenceAppliedLoad numeric(18,6)
 		,@dblPricedLoad numeric(18,6)
@@ -20,7 +20,7 @@ as
 
 	declare @PurchasePricing table (
 			intPriceFixationDetailId int
-			,dblQuantity numeric(18,6)
+			,dblQuantity numeric(38,20)
 			,dblQuantityAppliedAndPriced numeric(18,6) null
 			,dblLoadPriced numeric(18,6) null
 			,dblLoadApplied numeric(18,6) null
