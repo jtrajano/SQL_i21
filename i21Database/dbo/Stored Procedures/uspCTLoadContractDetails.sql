@@ -406,7 +406,7 @@ BEGIN TRY
 		, strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open')
 		, strFinancialStatus = CASE WHEN CT.intContractTypeId = 1 THEN CASE WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
 														WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
-														ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END END
+														ELSE CASE WHEN BDB.intBillId IS NOT NULL THEN 'Purchase Invoice Received' END END
 				ELSE CD.strFinancialStatus END
 		, strFutureMarket = MA.strFutMarketName
 		, strFutureMonth = REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ')
@@ -562,7 +562,8 @@ BEGIN TRY
 		AND FRM.strDestinationCity = DestinationPort.strCity
 		AND FRM.intType = 2 -- General type
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
-	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId and BD.intItemId = CD.intItemId
+	LEFT JOIN tblAPBill BDB on BDB.intBillId = BD.intBillId and BDB.intTransactionType = 1
     outer apply (
         select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
     ) AD
