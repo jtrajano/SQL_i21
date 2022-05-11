@@ -190,10 +190,10 @@ FROM
 				ON defaultReceiveItemUOM.intUnitMeasureId = defaultReceiveUOM.intUnitMeasureId
 			LEFT JOIN tblICItemLocation locationReceiveUOM 
 				ON locationReceiveUOM.intItemId = Item.intItemId				
-				AND locationReceiveUOM.intReceiveUOMId = defaultReceiveItemUOM.intItemUOMId
+				AND locationReceiveUOM.intItemLocationId = ItemLocation.intItemLocationId
+				AND locationReceiveUOM.intReceiveUOMId = defaultReceiveItemUOM.intItemUOMId				
 		WHERE
-			defaultReceiveItemUOM.intItemId = Item.intItemId
-			AND locationReceiveUOM.intItemLocationId = ItemLocation.intItemLocationId
+			defaultReceiveItemUOM.intItemId = Item.intItemId			
 			AND defaultReceiveItemUOM.ysnAllowPurchase = 1
 		ORDER BY
 			locationReceiveUOM.intItemLocationId DESC 
@@ -210,10 +210,10 @@ FROM
 				ON defaultIssueItemUOM.intUnitMeasureId = defaultIssueUOM.intUnitMeasureId
 			LEFT JOIN tblICItemLocation locationIssueUOM 
 				ON locationIssueUOM.intItemId = Item.intItemId				
+				AND locationIssueUOM.intItemLocationId = ItemLocation.intItemLocationId
 				AND locationIssueUOM.intIssueUOMId = defaultIssueItemUOM.intItemUOMId
 		WHERE
-			defaultIssueItemUOM.intItemId = Item.intItemId
-			AND locationIssueUOM.intItemLocationId = ItemLocation.intItemLocationId
+			defaultIssueItemUOM.intItemId = Item.intItemId			
 			AND defaultIssueItemUOM.ysnAllowSale = 1
 		ORDER BY
 			locationIssueUOM.intItemLocationId DESC 
