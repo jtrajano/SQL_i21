@@ -22,6 +22,9 @@ BEGIN TRY
 			,@intSampleTypeId INT
 		,@dblSampleQty NUMERIC(18, 6)
 		,@intLotId INT
+		,@intProductTypeId INT
+		,@intProductValueId INT
+		,@intSeqNo INT
 		,@dblQty NUMERIC(18, 6)
 		,@intItemUOMId INT
 		,@intStorageLocationId INT
@@ -418,6 +421,69 @@ BEGIN TRY
 			AND intLotStatusId IS NOT NULL
 
 		EXEC uspQMSetLotStatus @intSampleId
+
+		SELECT @intProductTypeId = intProductTypeId
+			,@intProductValueId = intProductValueId
+			,@intLastModifiedUserId = intLastModifiedUserId
+		FROM tblQMSample
+		WHERE intSampleId = @intSampleId
+
+		-- Call IC SP to monitor the rejected samples at lot level
+		IF @intProductTypeId = 6
+			OR @intProductTypeId = 11
+		BEGIN
+			DECLARE @LotRecords TABLE (
+				intSeqNo INT IDENTITY(1, 1)
+				,intLotId INT
+				,strLotNumber NVARCHAR(50)
+				)
+
+			DELETE
+			FROM @LotRecords
+
+			IF @intProductTypeId = 11
+			BEGIN
+				INSERT INTO @LotRecords (
+					intLotId
+					,strLotNumber
+					)
+				SELECT intLotId
+					,strLotNumber
+				FROM tblICLot
+				WHERE intParentLotId = @intProductValueId
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @LotRecords (
+					intLotId
+					,strLotNumber
+					)
+				SELECT intLotId
+					,strLotNumber
+				FROM tblICLot
+				WHERE intLotId = @intProductValueId
+			END
+
+			SELECT @intSeqNo = MIN(intSeqNo)
+			FROM @LotRecords
+
+			WHILE (@intSeqNo > 0)
+			BEGIN
+				SELECT @intLotId = NULL
+
+				SELECT @intLotId = intLotId
+				FROM @LotRecords
+				WHERE intSeqNo = @intSeqNo
+
+				EXEC uspICRejectLot @intLotId = @intLotId
+					,@intEntityId = @intLastModifiedUserId
+					,@ysnAdd = 0
+
+				SELECT @intSeqNo = MIN(intSeqNo)
+				FROM @LotRecords
+				WHERE intSeqNo > @intSeqNo
+			END
+		END
 	END
 
 	-- Sample Detail Create, Update, Delete
@@ -779,6 +845,8 @@ BEGIN TRY
 					,1
 					)
 		END
+
+		SELECT @intLotId = NULL
 
 		SELECT @intLotId = intLotId
 			,@dblQty = dblQty
