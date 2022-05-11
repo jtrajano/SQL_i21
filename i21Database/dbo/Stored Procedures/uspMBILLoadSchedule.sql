@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]   
+CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]
     @intDriverId AS INT,                
  @forDeleteId NVARCHAR(MAX) = ''                
 AS                                
@@ -19,7 +19,7 @@ BEGIN
                
              DELETE FROM tblMBILPickupDetail  where intLoadDetailId in(select intLoadDetailId from #tmp)    
                   
-              DELETE FROM tblMBILDeliveryDetail where intLoadDetailId in(select intLoadDetailId from #tmp)    
+             DELETE FROM tblMBILDeliveryDetail where ysnDelivered = 0
                   
               DELETE FROM tblMBILDeliveryHeader where intDeliveryHeaderId not in(Select intDeliveryHeaderId FROM tblMBILDeliveryDetail)  
                    
@@ -62,7 +62,8 @@ BEGIN
  intOutboundTaxGroupId INT NULL,                      
  intInboundTaxGroupId INT NULL                      
  )                               
-                      
+ 
+
  INSERT INTO #loadOrder                                  
  SELECT *                                
  FROM vyuMBILLoadSchedule                                  
@@ -108,7 +109,7 @@ SELECT DISTINCT intLoadId,strLoadNumber,strType,intTruckId,strTrailerNo,intDrive
     FROM #loadOrder a                                
  INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId          
  Where a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILPickupDetail)                            
-                  
+ 
  INSERT INTO tblMBILDeliveryHeader(intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId,dtmDeliveryFrom,dtmDeliveryTo,intSalesPersonId)                      
  Select load.intLoadHeaderId                      
     ,intCustomerId                      
