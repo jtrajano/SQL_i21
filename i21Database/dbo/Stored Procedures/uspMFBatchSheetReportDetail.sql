@@ -149,11 +149,7 @@ BEGIN TRY
 			ELSE NULL
 			END AS dblPartialQtyAcc
 		,@intNoOfBatches AS intNoOfBatches
-		,CASE 
-			WHEN t.ysnAdditionalItem = 0
-				THEN ISNULL((t.dblQuantity * @intNoOfBatches), 0) + ISNULL(t.dblPartialQuantity, 0)
-			ELSE NULL
-			END AS dblTotal
+		,ISNULL((t.dblQuantity * @intNoOfBatches), 0) + ISNULL(t.dblPartialQuantity, 0) AS dblTotal
 		,CASE 
 			WHEN t.ysnAdditionalItem = 0
 				THEN 'Input Items'
