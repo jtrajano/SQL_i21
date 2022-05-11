@@ -54,5 +54,7 @@ FROM vyuTMGeneratedCallEntry TMO
 		LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId = uom.intUnitMeasureId
 		WHERE intItemId = I.intItemId AND ysnStockUnit = 1) UOM
 WHERE TMO.strOrderStatus <> 'Delivered' AND TMO.strOrderStatus <> 'Routed'
+	AND TMO.dblQuantity > 0
+	AND intDispatchId NOT IN (SELECT intTMDispatchId FROM tblLGLoadDetail WHERE intTMDispatchId IS NOT NULL)
 
 GO
