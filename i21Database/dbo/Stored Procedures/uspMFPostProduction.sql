@@ -61,7 +61,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@ItemsThatNeedLotId AS dbo.ItemLotTableType
 	,@strLifeTimeType NVARCHAR(50)
 	,@intLifeTime INT
-	,@dtmExpiryDate DATETIME
+	--,@dtmExpiryDate DATETIME
 	,@ItemsForPost AS ItemCostingTableType
 	,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 	,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
