@@ -77,7 +77,10 @@
 	[intFeeGeneralLedgerAccountId]			INT NULL,
 	[intPaymentsLocationId]					INT NULL,
     [dtmCreditCardProcessingTime]           DATETIME NULL,
-	
+	[dblReserveBucket30Percentage]			NUMERIC(18, 6) NOT NULL DEFAULT(10),
+	[dblReserveBucket60Percentage]			NUMERIC(18, 6) NOT NULL DEFAULT(20),
+	[dblReserveBucket90Percentage]			NUMERIC(18, 6) NOT NULL DEFAULT(30),
+	[dblReserveBucket120Percentage]			NUMERIC(18, 6) NOT NULL DEFAULT(40),
 	
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
