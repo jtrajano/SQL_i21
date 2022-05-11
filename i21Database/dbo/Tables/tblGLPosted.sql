@@ -12,5 +12,6 @@
 	[strCode]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
 	[intCurrencyId]			INT             NOT NULL,
 	[intConcurrencyId]		INT             NOT NULL,
+	[intLedgerId]			INT             NOT NULL,
 	CONSTRAINT [PK_tblGLPosted] PRIMARY KEY CLUSTERED ([intAccountId] ASC,[dtmDate] ASC,[intCurrencyId] ASC,[strCode] ASC),
 )

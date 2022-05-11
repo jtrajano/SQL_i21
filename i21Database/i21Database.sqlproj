@@ -792,6 +792,7 @@
     <Build Include="dbo\Views\vyuTMSiteCustomerLocation.sql" />
     <Build Include="dbo\Tables\tblGLLedger.sql" />
     <Build Include="dbo\Views\vyuLGOpenTankManagementOrders.sql" />
+    <Build Include="dbo\Tables\tblFRLedger.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
