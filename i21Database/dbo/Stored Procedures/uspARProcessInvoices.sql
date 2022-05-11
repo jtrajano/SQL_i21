@@ -235,8 +235,8 @@ DECLARE  @Id									INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
 		,@FreightCharge							NUMERIC(18, 6)
-		,@FreightCompanySegment					NVARCHAR(100)
-		,@FreightLocationSegment				NVARCHAR(100)
+		,@FreightCompanySegment					INT
+		,@FreightLocationSegment				INT
 		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
@@ -461,8 +461,8 @@ BEGIN
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
 		,@FreightCharge					= [dblFreightCharge]
-		,@FreightCompanySegment			= [strFreightCompanySegment]
-		,@FreightLocationSegment		= [strFreightLocationSegment]
+		,@FreightCompanySegment			= [intFreightCompanySegment]
+		,@FreightLocationSegment		= [intFreightLocationSegment]
 		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
 
