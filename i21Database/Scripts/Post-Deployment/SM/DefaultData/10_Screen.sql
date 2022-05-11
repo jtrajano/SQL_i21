@@ -1224,7 +1224,43 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Warrant', N'Warrant', N'Inventory.view.Warrant', N'Inventory', NULL, 1, N'Inventory')
 	END
-	
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.CreditLine') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Credit Line', N'Credit Line', N'RiskManagement.view.CreditLine', N'Risk Management', 'tblRKCreditLine', 1, N'Risk Management')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] 
+		SET strScreenId = 'Credit Line', 
+		strScreenName = 'Credit Line', 
+		strModule = N'Risk Management', 
+		ysnAvailable = 1, 
+		strGroupName = N'Risk Management',
+		strTableName = 'tblRKCreditLine'
+		WHERE strNamespace = N'RiskManagement.view.CreditLine'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.CreditInsurance') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Credit Insurance', N'Credit Insurance', N'RiskManagement.view.CreditInsurance', N'Risk Management', 'tblRKCreditInsurance', 1, N'Risk Management')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] 
+		SET strScreenId = 'Credit Insurance', 
+		strScreenName = 'Credit Insurance', 
+		strModule = N'Risk Management', 
+		ysnAvailable = 1, 
+		strGroupName = N'Risk Management',
+		strTableName = 'tblRKCreditInsurance'
+		WHERE strNamespace = N'RiskManagement.view.CreditInsurance'
+	END
+
+	-- UPDATE strModule on Risk Management so that it would show on Screen Permissions in User Roles
+	UPDATE [tblSMScreen] SET strModule = 'Risk Management' WHERE strModule = 'Riskmanagement'
 
 	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
 	-- BEGIN
