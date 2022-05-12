@@ -22,7 +22,7 @@ LEFT JOIN vyuGLLocationAccountId GLLA ON ARCAD.intAccountId = GLLA.intAccountId
 LEFT JOIN (
 	SELECT GLTCS.intAccountId, GLAS.strDescription
 	FROM tblGLTempCOASegment GLTCS
-	JOIN tblGLAccountSegment GLAS ON GLTCS.[Line of business] COLLATE Latin1_General_CI_AS = GLAS.strCode
+	JOIN tblGLAccountSegment GLAS ON GLTCS.[LOB] COLLATE Latin1_General_CI_AS = GLAS.strCode
 	JOIN tblGLAccountStructure GLASt ON GLASt.intAccountStructureId = GLAS.intAccountStructureId
 	WHERE GLASt.strStructureName = 'Line of business'
 ) GLLOB ON ARCAD.intAccountId = GLLOB.intAccountId
