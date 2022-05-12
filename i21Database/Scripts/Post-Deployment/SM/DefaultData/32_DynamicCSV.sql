@@ -109,10 +109,10 @@ SET strCommand = N'
 		SET @ValidationMessage = @ValidationMessage + ''The User Role of '' + @PortalUserRole + '' was not found in the Portal User Role. Please add this Role from the System Manager screen and re-attempt the upload''
 	END
 
-	IF (@Email IS NULL OR @Email = '''')
+	IF (@Email IS NULL OR @Email = '''') AND @PortalBit = 1 AND ISNULL(@PortalPassword, '''') <> ''''
 	BEGIN
 		IF @ValidationMessage != ''''
-	BEGIN
+		BEGIN
    			SET @ValidationMessage = @ValidationMessage + '',''
 		END
 		SET @ValidationMessage = @ValidationMessage + ''The Portal Username and Contact Email will be identical.  Please provide a valid email to use as the Portal Username and re-attempt the upload.''
