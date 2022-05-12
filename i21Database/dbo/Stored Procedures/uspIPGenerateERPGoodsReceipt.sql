@@ -99,6 +99,12 @@ BEGIN TRY
 		AND R.ysnPosted = 1
 		AND RI.ysnExported IS NULL
 		AND ISNULL(CD.strERPPONumber, '') <> ''
+		AND ISNULL(RI.intLoadShipmentId, 0) NOT IN (
+			SELECT ISNULL(intLoadId, 0)
+			FROM tblLGLoadCondition LC
+			JOIN tblCTCondition C ON C.intConditionId = LC.intConditionId
+			WHERE C.strConditionName = 'CBS'
+			)
 
 	SELECT @FirstCount = COUNT(1)
 	FROM @tblICInventoryReceipt
