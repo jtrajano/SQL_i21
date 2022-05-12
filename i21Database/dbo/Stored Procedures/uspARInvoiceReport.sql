@@ -115,6 +115,7 @@ CREATE TABLE #INVOICES (
 	 , ysnIncludeEntityName			BIT				NULL
 	 , strFooterComments			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	 , intOriginalInvoiceId			INT				NULL
+	 , intInventoryShipmentChargeId INT				NULL
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -287,6 +288,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	 , ysnIncludeEntityName
 	 , strFooterComments
 	 , intOriginalInvoiceId
+	 , intInventoryShipmentChargeId
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -410,6 +412,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnIncludeEntityName		= CAST(0 AS BIT)
 	 , strFooterComments		= INV.strFooterComments
 	 , intOriginalInvoiceId		= INV.intOriginalInvoiceId
+	 , intInventoryShipmentChargeId = ISNULL(INVOICEDETAIL.intInventoryShipmentChargeId, 0)
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -458,7 +461,8 @@ LEFT JOIN (
 		 , strSubFormula			= ID.strSubFormula
 		 , strSCInvoiceNumber		= INVSC.strInvoiceNumber
 		 , dtmDateSC				= INVSC.dtmDate
-		 , dtmToCalculate			= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END		 
+		 , dtmToCalculate			= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END
+		 , intInventoryShipmentChargeId = ISNULL(ID.intInventoryShipmentChargeId, 0)
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN tblARInvoice INVSC ON INVSC.intInvoiceId = ID.intSCInvoiceId
@@ -776,6 +780,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , intDaysOld
 	 , strServiceChareInvoiceNumber
 	 , dtmDateSC
+	 , intInventoryShipmentChargeId
 )
 SELECT intInvoiceId
 	 , intCompanyLocationId
@@ -875,6 +880,7 @@ SELECT intInvoiceId
 	 , intDaysOld
 	 , strServiceChareInvoiceNumber
 	 , dtmDateSC
+	 , intInventoryShipmentChargeId
 FROM #INVOICES
 
 --UPDATE STAGING
