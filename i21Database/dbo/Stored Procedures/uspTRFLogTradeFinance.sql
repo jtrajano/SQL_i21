@@ -54,6 +54,7 @@ BEGIN
 		, @intTotal INT
 		, @ysnNegateLog BIT
 		, @ysnDeleted BIT
+		, @ysnReverseLog BIT
 
 	DECLARE @FinalTable AS TABLE (
 		  strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -99,6 +100,16 @@ BEGIN
 		, intContractDetailId INT NULL
 		, ysnNegateLog BIT NULL DEFAULT(0)
 		, ysnDeleted BIT NULL DEFAULT(0)
+		, ysnReverseLog BIT NULL DEFAULT(0)
+	)
+
+	DECLARE @deletedTable TABLE (
+		  intId INT
+		, strTradeFinanceTransaction NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+		, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		, intTransactionHeaderId INT NULL
+		, intTransactionDetailId INT NULL
+		, dtmTransactionDate DATETIME NULL
 	)
 
 	SELECT @intTotal = COUNT(*) FROM @TradeFinanceLogs
@@ -152,6 +163,7 @@ BEGIN
 			, @intContractDetailId = NULL
 			, @ysnNegateLog = NULL
 			, @ysnDeleted = NULL
+			, @ysnReverseLog = NULL
 
 		SELECT TOP 1 
 		      @intId = tfLog.intId
@@ -198,6 +210,7 @@ BEGIN
 			, @intContractDetailId = tfLog.intContractDetailId
 			, @ysnNegateLog = tfLog.ysnNegateLog
 			, @ysnDeleted = tfLog.ysnDeleted
+			, @ysnReverseLog = tfLog.ysnReverseLog
 		
 		FROM #tmpTradeFinanceLogs tfLog
 		LEFT JOIN tblCMBank bank
@@ -259,7 +272,9 @@ BEGIN
 				 , intConcurrencyId
 				 , intContractHeaderId
 				 , intContractDetailId
+				 , ysnNegateLog
 				 , ysnDeleted
+				 , ysnReverseLog
 			)
 			SELECT @strAction
 				 , @strTransactionType
@@ -302,13 +317,41 @@ BEGIN
 				 , @intConcurrencyId
 				 , @intContractHeaderId
 				 , @intContractDetailId
+				 , @ysnNegateLog
 				 , @ysnDeleted
+				 , @ysnReverseLog
 				 
+		-- CREATION OF NEGATE LOGS.
 		IF (ISNULL(@ysnNegateLog, 0) = 0 AND ISNULL(@ysnDeleted, 0) = 0)
 		BEGIN
 			DECLARE @strActionNegate NVARCHAR(100) = 'Moved to ' + @strTransactionType
 
-			EXEC uspTRFNegateTFLogFinancedQtyAndAmount @strTradeFinanceTransaction, NULL, NULL, @dtmTransactionDate, @strActionNegate
+			EXEC uspTRFNegateTFLogFinancedQtyAndAmount 
+					  @strTradeFinanceNumber = @strTradeFinanceTransaction
+					, @strTransactionType = NULL
+					, @strLimitType = NULL
+					, @dtmTransactionDate = @dtmTransactionDate
+					, @strAction = @strActionNegate
+					, @ysnReverse = 0
+		END
+
+		-- ADDED TO LIST FOR CREATION OF REVERSAL LOGS.
+		IF (ISNULL(@ysnDeleted, 0) = 1)
+		BEGIN
+			INSERT INTO @deletedTable (
+				  intId
+				, strTradeFinanceTransaction
+				, strTransactionType
+				, intTransactionHeaderId
+				, intTransactionDetailId
+				, dtmTransactionDate
+			)
+			SELECT @intId
+				, @strTradeFinanceTransaction
+				, @strTransactionType
+				, @intTransactionHeaderId
+				, @intTransactionDetailId
+				, @dtmTransactionDate
 		END
 
 		DELETE FROM #tmpTradeFinanceLogs
@@ -316,12 +359,6 @@ BEGIN
 	END
 
 	DECLARE @dtmCreatedDate DATETIME = GETDATE()
-
-	IF (ISNULL(@ysnNegateLog, 0) = 1)
-	BEGIN
-		-- REMOVE MILLISECOND TO MAKE NEGATE RECORD APPEAR AS EARLIER THAN THE NEW LOG TO BE CREATED.
-		SELECT @dtmCreatedDate = CAST(CONVERT(VARCHAR(10), @dtmCreatedDate, 101) + ' '  + convert(VARCHAR(8), @dtmCreatedDate, 14) AS DATETIME)
-	END
 
 	INSERT INTO tblTRFTradeFinanceLog(
 		  dtmCreatedDate
@@ -368,7 +405,11 @@ BEGIN
 		, intContractDetailId
 		, ysnDeleted
 	)
-	SELECT dtmCreatedDate = @dtmCreatedDate
+							-- REMOVE MILLISECOND TO MAKE NEGATE/DELETE LOG RECORD APPEAR AS EARLIER THAN THE NEW LOG TO BE CREATED.
+	SELECT dtmCreatedDate = CASE WHEN (ISNULL(ysnNegateLog, 0) = 1 AND ISNULL(@ysnReverseLog, 0) = 0) OR ISNULL(@ysnDeleted, 0) = 1
+								THEN CAST(CONVERT(VARCHAR(10), @dtmCreatedDate, 101) + ' '  + convert(VARCHAR(8), @dtmCreatedDate, 14) AS DATETIME)
+								ELSE @dtmCreatedDate
+								END
 		, strAction
 		, strTransactionType
 		, intTradeFinanceTransactionId
@@ -398,8 +439,9 @@ BEGIN
 		, strSublimit
 		, dblSublimit
 		, strBankTradeReference 
-		, dblFinanceQty 
-		, dblFinancedAmount 
+						-- DELETE ACTION WILL CONTAIN THE NEGATE QTY. ANOTHER LOG WILL BE CREATED TO ADD BACK QTY TO PREV. TRANSACTION/MODULE.
+		, dblFinanceQty = CASE WHEN ISNULL(ysnDeleted, 0) = 1 THEN -ABS(dblFinanceQty) ELSE dblFinanceQty END
+		, dblFinancedAmount = CASE WHEN ISNULL(ysnDeleted, 0) = 1 THEN -ABS(dblFinancedAmount) ELSE dblFinancedAmount END
 		, strBankApprovalStatus 
 		, dtmAppliedToTransactionDate
 		, intStatusId
@@ -413,6 +455,49 @@ BEGIN
 		, ysnDeleted
 	FROM @FinalTable F
 	ORDER BY dtmTransactionDate
+
+	-- DELETE SCENARIO:
+	-- CREATION OF REVERSAL LOG FOR THE PREVIOUS TRANSACTION/MODULE (WILL CREATE NEW LOG ON PREVIOUS TRANSACTION NEGATED QTY).
+	IF (ISNULL(@ysnDeleted, 0) = 1)
+	BEGIN
+		WHILE EXISTS (SELECT TOP 1 '' FROM @deletedTable)
+		BEGIN
+			SELECT @intId = NULL
+				, @strTradeFinanceTransaction = NULL
+				, @strTransactionType = NULL
+				, @dtmTransactionDate = NULL
+				, @intTransactionHeaderId = NULL
+				, @intTransactionDetailId = NULL
+
+			SELECT TOP 1 @intId = intId
+				, @strTradeFinanceTransaction = strTradeFinanceTransaction
+				, @strTransactionType = strTransactionType
+				, @intTransactionHeaderId = intTransactionHeaderId
+				, @intTransactionDetailId = intTransactionDetailId
+				, @dtmTransactionDate = dtmTransactionDate
+			FROM @deletedTable
+
+			-- MARK ALL LOGS WITHIN THIS TRANSACTION AS DELETED TO BE EXCLUDED ON CHECKING OF NEGATE/REVERSE LOGS.
+			UPDATE tblTRFTradeFinanceLog
+			SET ysnDeleted = 1
+			WHERE strTradeFinanceTransaction = @strTradeFinanceTransaction
+			AND strTransactionType = @strTransactionType
+			AND intTransactionHeaderId = @intTransactionHeaderId
+			AND intTransactionDetailId = @intTransactionDetailId
+
+			-- REVERSAL
+			EXEC uspTRFNegateTFLogFinancedQtyAndAmount 
+					  @strTradeFinanceNumber = @strTradeFinanceTransaction
+					, @strTransactionType = @strTransactionType
+					, @strLimitType = NULL
+					, @dtmTransactionDate = @dtmTransactionDate
+					, @strAction = NULL
+					, @ysnReverse = 1
+			
+			DELETE FROM @deletedTable
+			WHERE  intId = @intId
+		END
+	END
 
 	DROP TABLE #tmpTradeFinanceLogs
 END
