@@ -105,7 +105,6 @@ BEGIN TRY
 		BEGIN
 			IF @intSourceType = 2
 			BEGIN
-				select line=108,* from @ItemsFromInventoryReceipt;
 				INSERT INTO @tblTempToProcess (intInventoryReceiptDetailId
 					, intContractDetailId
 					, intItemUOMId
@@ -223,7 +222,7 @@ BEGIN TRY
 		intInventoryReceiptDetailId
 		, intContractDetailId
 		, intItemUOMId
-		, dblQty
+		, dblQty = sum(dblQty)
 		, intContainerId
 		, ysnLoad
 		, intPricingTypeId
@@ -231,6 +230,17 @@ BEGIN TRY
 		, intInventoryReceiptId
 		, intToItemUOMId
 	from @tblTempToProcess
+	group by
+
+		intInventoryReceiptDetailId
+		, intContractDetailId
+		, intItemUOMId
+		, intContainerId
+		, ysnLoad
+		, intPricingTypeId
+		, intSourceId
+		, intInventoryReceiptId
+		, intToItemUOMId
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
