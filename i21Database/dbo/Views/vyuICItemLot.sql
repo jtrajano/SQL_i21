@@ -51,6 +51,7 @@ SELECT
 	, lot.strRejectedBy
 	, tf.strTradeFinanceNumber
 	, tf.intTradeFinanceId
+	, lot.dblReleasedQty
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
