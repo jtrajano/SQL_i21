@@ -56,6 +56,7 @@ Type the overview for the table here.
 				END
 			) PERSISTED,
         [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+        [intRowNumber] INT NULL,
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
         CONSTRAINT [CHK_tblICItemUOM_intModifier] CHECK (intModifier >= 0 AND intModifier <= 999),
         CONSTRAINT [CHK_tblICItemUOM_intCheckDigit] CHECK (intCheckDigit >= 0 AND intCheckDigit <= 9),
