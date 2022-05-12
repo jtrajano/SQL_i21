@@ -132,7 +132,8 @@ INNER JOIN(
 				)PCTimeOff
 				ON PCTimeOff.intEntityEmployeeId = E.intEntityId 
 				AND PCTimeOff.intTypeTimeoffId = T.intTypeTimeOffId
-				AND T.dtmLastAward < PCTimeOff.dtmDateFrom
+				AND ISNULL(T.dtmLastAward,E.dtmDateHired) < PCTimeOff.dtmDateFrom
+
    			LEFT JOIN (	SELECT
 						intYear  = YEAR(dtmDateFrom)
 						,dtmDateFrom
