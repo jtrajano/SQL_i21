@@ -563,7 +563,7 @@ BEGIN TRY
 		AND FRM.intType = 2 -- General type
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId and BD.intItemId = CD.intItemId
-	LEFT JOIN tblAPBill BDB on BDB.intBillId = BD.intBillId and BDB.intTransactionType = 1
+	LEFT JOIN tblAPBill BDB on BDB.intBillId = BD.intBillId and BDB.intTransactionType in (1,2)
     outer apply (
         select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
     ) AD
