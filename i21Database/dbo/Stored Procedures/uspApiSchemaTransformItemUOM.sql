@@ -3,588 +3,455 @@ CREATE PROCEDURE uspApiSchemaTransformItemUOM
 	@guiLogId UNIQUEIDENTIFIER
 AS
 
---Check overwrite settings
+-- Retrieve Properties
+DECLARE @OverwriteExisting BIT = 1
 
-DECLARE @ysnAllowOverwrite BIT = 0
+SELECT
+    @OverwriteExisting = ISNULL(CAST(Overwrite AS BIT), 0)
+FROM (
+	SELECT tp.strPropertyName, tp.varPropertyValue
+	FROM tblApiSchemaTransformProperty tp
+	WHERE tp.guiApiUniqueId = @guiApiUniqueId
+) AS Properties
+PIVOT (
+	MIN(varPropertyValue)
+	FOR strPropertyName IN
+	(
+		Overwrite
+	)
+) AS PivotTable
 
-SELECT @ysnAllowOverwrite = CAST(varPropertyValue AS BIT)
-FROM tblApiSchemaTransformProperty
-WHERE 
-guiApiUniqueId = @guiApiUniqueId
-AND
-strPropertyName = 'Overwrite'
 
---Filter Item UOM imported
+-- Validations
 
-DECLARE @tblFilteredItemUOM TABLE(
-	intKey INT NOT NULL,
-    guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
-    intRowNumber INT NULL,
-	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	dblUnitQty NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strWeightUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strShortUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	ysnIsStockUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	ysnAllowPurchase NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	ysnAllowSale NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	dblLength NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	dblWidth NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	dblHeight NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strDimensionUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	dblWeight NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	dblVolume NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strVolumeUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	dblMaxQty NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-)
-INSERT INTO @tblFilteredItemUOM
+-- Remove duplicate UOMs from file
+;WITH cte AS
 (
-	intKey,
-    guiApiUniqueId,
-    intRowNumber,
-	strItemNo,
-	strUOM,
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strItemNo, sr.strUOM ORDER BY sr.strItemNo, sr.strUOM) AS RowNumber
+   FROM tblApiSchemaTransformItemUOM sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND NULLIF(sr.strUOM, '') IS NOT NULL
+   AND NULLIF(sr.strItemNo, '') IS NOT NULL
+)
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'UOM'
+    , strValue = sr.strUOM
+    , strLogLevel = 'Error'
+    , strStatus = 'Skipped'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The UOM ' + ISNULL(sr.strUOM, '') + ' for ' + ISNULL(sr.strItemNo, '') + ' in the file has duplicates.'
+FROM cte sr
+JOIN tblICUnitMeasure u ON u.strUnitMeasure = sr.strUOM
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.RowNumber > 1;
+
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strItemNo, sr.strUOM ORDER BY sr.strItemNo, sr.strUOM) AS RowNumber
+   FROM tblApiSchemaTransformItemUOM sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND NULLIF(sr.strUOM, '') IS NOT NULL
+   AND NULLIF(sr.strItemNo, '') IS NOT NULL
+)
+DELETE FROM cte WHERE RowNumber > 1;
+
+-- Set UPC Code of duplicates from file to NULL
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strUPCCode ORDER BY sr.strUPCCode) AS RowNumber
+   FROM tblApiSchemaTransformItemUOM sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND NULLIF(sr.strUPCCode, '') IS NOT NULL
+)
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'UPC Code'
+    , strValue = sr.strUPCCode
+    , strLogLevel = 'Warning'
+    , strStatus = 'Skipped'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The UPC Code ' + ISNULL(sr.strUPCCode, '') + ' for ' + ISNULL(sr.strItemNo, '') + ' in the file has duplicates.'
+FROM cte sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.RowNumber > 1
+	AND NULLIF(sr.strUPCCode, '') IS NOT NULL
+
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strUPCCode ORDER BY sr.strUPCCode) AS RowNumber
+   FROM tblApiSchemaTransformItemUOM sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND NULLIF(sr.strUPCCode, '') IS NOT NULL 
+)
+UPDATE cte
+SET cte.strUPCCode = NULL
+WHERE cte.RowNumber > 1;
+
+-- Set Short UPC Code of duplicates from file to NULL
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strShortUPCCode ORDER BY sr.strShortUPCCode) AS RowNumber
+   FROM tblApiSchemaTransformItemUOM sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND NULLIF(sr.strShortUPCCode, '') IS NOT NULL
+)
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Short UPC Code'
+    , strValue = sr.strShortUPCCode
+    , strLogLevel = 'Warning'
+    , strStatus = 'Skipped'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Short UPC Code ' + ISNULL(sr.strShortUPCCode, '') + ' for ' + ISNULL(sr.strItemNo, '') + ' in the file has duplicates.'
+FROM cte sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.RowNumber > 1
+	AND NULLIF(sr.strShortUPCCode, '') IS NOT NULL
+
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strShortUPCCode ORDER BY sr.strShortUPCCode) AS RowNumber
+   FROM tblApiSchemaTransformItemUOM sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND NULLIF(sr.strShortUPCCode, '') IS NOT NULL 
+)
+UPDATE cte
+SET cte.strShortUPCCode = NULL
+WHERE cte.RowNumber > 1;
+
+-- Duplicate stock units
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.ysnIsStockUnit ORDER BY sr.ysnIsStockUnit) AS RowNumber
+   FROM tblApiSchemaTransformItemUOM sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.ysnIsStockUnit = 1
+)
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Is Stock Unit'
+    , strValue = sr.ysnIsStockUnit
+    , strLogLevel = 'Warning'
+    , strStatus = 'Skipped'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'Duplicated stock units for ' + ISNULL(sr.strItemNo, '') + ' found in the file.'
+FROM cte sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.RowNumber > 1
+	AND sr.ysnIsStockUnit = 1
+
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.ysnIsStockUnit ORDER BY sr.ysnIsStockUnit) AS RowNumber
+   FROM tblApiSchemaTransformItemUOM sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND sr.ysnIsStockUnit = 1
+)
+UPDATE cte
+SET cte.ysnIsStockUnit = 0
+WHERE cte.RowNumber > 1;
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Item No'
+    , strValue = sr.strItemNo
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Item No ' + ISNULL(sr.strItemNo, '') + ' does not exist.'
+FROM tblApiSchemaTransformItemUOM sr
+LEFT JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND i.intItemId IS NULL
+AND NULLIF(sr.strItemNo, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'UOM'
+    , strValue = sr.strUOM
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The UOM ' + ISNULL(sr.strUOM, '') + ' does not exist.'
+FROM tblApiSchemaTransformItemUOM sr
+LEFT JOIN tblICUnitMeasure i ON i.strUnitMeasure = sr.strUOM
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND i.intUnitMeasureId IS NULL
+AND NULLIF(sr.strUOM, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Weight UOM'
+    , strValue = sr.strWeightUOM
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Weight UOM ' + ISNULL(sr.strWeightUOM, '') + ' does not exist.'
+FROM tblApiSchemaTransformItemUOM sr
+LEFT JOIN tblICUnitMeasure i ON i.strUnitMeasure = sr.strWeightUOM
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND i.intUnitMeasureId IS NULL
+AND NULLIF(sr.strWeightUOM, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'UOM'
+    , strValue = sr.strUOM
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The UOM ' + ISNULL(sr.strUOM, '') + ' already exists in ' + ISNULL(sr.strItemNo, '') + '.'
+FROM tblApiSchemaTransformItemUOM sr
+JOIN tblICUnitMeasure u ON u.strUnitMeasure = sr.strUOM
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+CROSS APPLY (
+	SELECT TOP 1 1 intCount
+	FROM tblICItemUOM xui
+	JOIN tblICItem xi ON xi.intItemId = xui.intItemId
+	JOIN tblICUnitMeasure xu ON xu.intUnitMeasureId = xui.intUnitMeasureId
+	WHERE xi.intItemId = i.intItemId
+		AND xu.intUnitMeasureId = u.intUnitMeasureId
+) ex
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND u.intUnitMeasureId IS NOT NULL
+AND i.intItemId IS NOT NULL
+AND ex.intCount IS NOT NULL
+AND NULLIF(sr.strUOM, '') IS NOT NULL
+AND @OverwriteExisting = 0
+
+-- Existing UPC Code
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'UPC Code'
+    , strValue = sr.strUPCCode
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The UPC Code ' + ISNULL(sr.strUPCCode, '') + ' already exists in ' + ISNULL(sr.strItemNo, '') + '.'
+FROM tblApiSchemaTransformItemUOM sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+CROSS APPLY (
+	SELECT TOP 1 1 intCount
+	FROM tblICItemUOM xui
+	WHERE xui.strLongUPCCode = sr.strUPCCode
+		AND (@OverwriteExisting = 0 OR (@OverwriteExisting = 1 AND EXISTS(
+			SELECT TOP 1 1
+			FROM tblICUnitMeasure u
+			JOIN tblICItemUOM xx ON xx.intItemId = i.intItemId
+				AND xx.intUnitMeasureId = u.intUnitMeasureId
+			WHERE u.strUnitMeasure != sr.strUOM
+				AND xx.strLongUPCCode = sr.strUPCCode
+		)))
+) ex
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND i.intItemId IS NOT NULL
+AND ex.intCount IS NOT NULL
+AND NULLIF(sr.strUPCCode, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Short UPC Code'
+    , strValue = sr.strUPCCode
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Short UPC Code ' + ISNULL(sr.strShortUPCCode, '') + ' already exists in ' + ISNULL(sr.strItemNo, '') + '.'
+FROM tblApiSchemaTransformItemUOM sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+CROSS APPLY (
+	SELECT TOP 1 1 intCount
+	FROM tblICItemUOM xui
+	WHERE xui.strUpcCode = sr.strShortUPCCode
+		AND (@OverwriteExisting = 0 OR (@OverwriteExisting = 1 AND EXISTS(
+			SELECT TOP 1 1
+			FROM tblICUnitMeasure u
+			JOIN tblICItemUOM xx ON xx.intItemId = i.intItemId
+				AND xx.intUnitMeasureId = u.intUnitMeasureId
+			WHERE u.strUnitMeasure != sr.strUOM
+				AND xx.strUpcCode = sr.strShortUPCCode
+		)))
+) ex
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND i.intItemId IS NOT NULL
+AND ex.intCount IS NOT NULL
+AND NULLIF(sr.strShortUPCCode, '') IS NOT NULL
+
+-- Update EXISTING
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Item UOM'
+    , strValue = ux.strUOM
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = ux.intRowNumber
+    , strMessage = 'The UOM ' + ISNULL(ux.strUOM, '') + ' for ' + ISNULL(ux.strItemNo, '') + ' was updated.'
+FROM tblICItemUOM iu
+JOIN tblICItem i ON i.intItemId = iu.intItemId
+JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
+JOIN tblApiSchemaTransformItemUOM ux ON ux.strUOM = u.strUnitMeasure
+   AND ux.strItemNo = i.strItemNo
+WHERE ux.guiApiUniqueId = @guiApiUniqueId
+   AND iu.intItemUOMId IS NOT NULL
+   AND @OverwriteExisting = 1
+   AND NOT EXISTS(
+		SELECT TOP 1 1
+		FROM tblICUnitMeasure u
+		JOIN tblICItemUOM xx ON xx.intItemId = i.intItemId
+			AND xx.intUnitMeasureId = u.intUnitMeasureId
+		WHERE u.strUnitMeasure != ux.strUOM
+			AND (xx.strLongUPCCode = ux.strUPCCode OR xx.strUpcCode = ux.strShortUPCCode)
+	)
+
+UPDATE iu
+SET
+     iu.dblUnitQty = ux.dblUnitQty
+   , iu.dblHeight = ux.dblHeight
+   , iu.dblWidth = ux.dblWidth
+   , iu.dblLength = ux.dblLength
+   , iu.dblMaxQty = ux.dblMaxQty
+   , iu.dblVolume = ux.dblVolume
+   , iu.dblWeight = ux.dblWeight
+   , iu.ysnStockUnit = ux.ysnIsStockUnit
+   , iu.ysnAllowPurchase = ux.ysnAllowPurchase
+   , iu.ysnAllowSale = ux.ysnAllowSale
+   , iu.dtmDateModified = GETUTCDATE()
+   , iu.strLongUPCCode = ux.strUPCCode
+   , iu.intRowNumber = ux.intRowNumber
+   , iu.guiApiUniqueId = @guiApiUniqueId
+FROM tblICItemUOM iu
+JOIN tblICItem i ON i.intItemId = iu.intItemId
+JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
+JOIN tblApiSchemaTransformItemUOM ux ON ux.strUOM = u.strUnitMeasure
+   AND ux.strItemNo = i.strItemNo
+WHERE ux.guiApiUniqueId = @guiApiUniqueId
+   AND @OverwriteExisting = 1
+   AND NOT EXISTS(
+		SELECT TOP 1 1
+		FROM tblICUnitMeasure u
+		JOIN tblICItemUOM xx ON xx.intItemId = i.intItemId
+			AND xx.intUnitMeasureId = u.intUnitMeasureId
+		WHERE u.strUnitMeasure != ux.strUOM
+			AND (xx.strLongUPCCode = ux.strUPCCode OR xx.strUpcCode = ux.strShortUPCCode)
+	)
+
+-- Insert new UOMs
+INSERT INTO tblICItemUOM
+(
+	intItemId, 
+	intUnitMeasureId, 
+	strLongUPCCode,
+	strUpcCode,
+	intCheckDigit,
 	dblUnitQty,
-	strWeightUOM,
-	strUPCCode,
-	strShortUPCCode,
-	ysnIsStockUnit,
+	dblHeight,
+	dblWidth,
+	dblLength,
+	dblMaxQty,
+	dblVolume,
+	dblWeight,
+	ysnStockUnit,
 	ysnAllowPurchase,
 	ysnAllowSale,
-	dblLength,
-	dblWidth,
-	dblHeight,
-	strDimensionUOM,
-	dblWeight,
-	dblVolume,
-	strVolumeUOM,
-	dblMaxQty
-)
-SELECT 
-	intKey,
-    guiApiUniqueId,
-    intRowNumber,
-	strItemNo,
-	strUOM,
-	dblUnitQty,
-	strWeightUOM,
-	strUPCCode,
-	strShortUPCCode,
-	ysnIsStockUnit,
-	ysnAllowPurchase,
-	ysnAllowSale,
-	dblLength,
-	dblWidth,
-	dblHeight,
-	strDimensionUOM,
-	dblWeight,
-	dblVolume,
-	strVolumeUOM,
-	dblMaxQty
-FROM
-tblApiSchemaTransformItemUOM
-WHERE guiApiUniqueId = @guiApiUniqueId;
-
---Create Error Table
-
-DECLARE @tblErrorItemUOM TABLE(
-	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strFieldValue NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	intRowNumber INT NULL,
-	intErrorType INT
-)
--- Error Types
--- 1 - Duplicate Import UOM 
--- 2 - Duplicate Import UPC 
--- 3 - Missing Item
--- 4 - Missing UOM
--- 5 - Invalid Stock Quantity
--- 6 - Existing UPC Code
--- 7 - Overwrite UOM Disabled
--- 8 - Overwrite UPC Disabled
-
---Validate Records
-
-INSERT INTO @tblErrorItemUOM
-(
-	strItemNo, 
-	strFieldValue, 
-	intRowNumber, 
-	intErrorType
-)
-SELECT -- Duplicate Import UOM
-	strItemNo = DuplicateImportUOM.strItemNo,
-	strFieldValue = DuplicateImportUOM.strUOM,
-	intRowNumber = DuplicateImportUOM.intRowNumber,
-	intErrorType = 1
-FROM
-(
-	SELECT 
-		strItemNo,
-		strUOM,
-		intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY strItemNo, strUOM ORDER BY strItemNo, strUOM)
-	FROM 
-		@tblFilteredItemUOM
-) AS DuplicateImportUOM
-WHERE RowNumber > 1
-UNION
-SELECT -- Duplicate Import UPC
-	strItemNo = DuplicateImportUPC.strItemNo,
-	strFieldValue = DuplicateImportUPC.strUPCCode,
-	intRowNumber = DuplicateImportUPC.intRowNumber,
-	intErrorType = 2
-FROM
-(
-	SELECT 
-		strItemNo,
-		strUPCCode,
-		strShortUPCCode,
-		intRowNumber,
-		LongUpcRowNumber = ROW_NUMBER() OVER (PARTITION BY strUPCCode ORDER BY strUPCCode),
-		ShortUpcRowNumber = ROW_NUMBER() OVER (PARTITION BY strShortUPCCode ORDER BY strShortUPCCode)
-	FROM
-		@tblFilteredItemUOM 
-) AS DuplicateImportUPC
-WHERE 
-(LongUpcRowNumber > 1 AND strUPCCode IS NOT NULL)
-OR
-(ShortUpcRowNumber > 1 AND strShortUPCCode IS NOT NULL)
-UNION
-SELECT -- Missing Item
-	strItemNo = FilteredItemUOM.strItemNo,
-	strFieldValue = FilteredItemUOM.strItemNo,
-	intRowNumber = FilteredItemUOM.intRowNumber,
-	intErrorType = 3
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM 
-	LEFT JOIN tblICItem Item 
-		ON RTRIM(LTRIM(Item.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(FilteredItemUOM.strItemNo) COLLATE Latin1_General_CI_AS	
-WHERE
-	Item.intItemId IS NULL
-UNION
-SELECT -- Missing UOM
-	strItemNo = FilteredItemUOM.strItemNo,
-	strFieldValue = FilteredItemUOM.strUOM,
-	intRowNumber = FilteredItemUOM.intRowNumber,
-	intErrorType = 4
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM 
-	LEFT JOIN tblICUnitMeasure UnitMeasure 
-		ON RTRIM(LTRIM(UnitMeasure.strUnitMeasure)) COLLATE Latin1_General_CI_AS = LTRIM(FilteredItemUOM.strUOM) COLLATE Latin1_General_CI_AS
-WHERE
-	UnitMeasure.intUnitMeasureId IS NULL
-UNION
-SELECT -- Invalid Stock Quantity
-	strItemNo = FilteredItemUOM.strItemNo,
-	strFieldValue = FilteredItemUOM.strUOM,
-	intRowNumber = FilteredItemUOM.intRowNumber,
-	intErrorType = 5
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM 
-WHERE 
-	FilteredItemUOM.ysnIsStockUnit = 1 AND 
-	CONVERT(DECIMAL(38,20), FilteredItemUOM.dblUnitQty) <> 1
-UNION
-SELECT -- Existing UPC Code
-	strItemNo = FilteredItemUOM.strItemNo,
-	strFieldValue = COALESCE(CAST(LongUPC.intUpcCode AS NVARCHAR(100)), LongUPC.strUpcCode, ShortUPC.strUpcCode),
-	intRowNumber = FilteredItemUOM.intRowNumber,
-	intErrorType = 6
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM
-	INNER JOIN tblICItem Item 
-		ON RTRIM(LTRIM(Item.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(FilteredItemUOM.strItemNo) COLLATE Latin1_General_CI_AS
-	OUTER APPLY (
-		SELECT TOP 1 intUpcCode, strUpcCode, intUnitMeasureId, intItemId
-		FROM tblICItemUOM
-		WHERE 
-			intUpcCode = CASE 
-							WHEN FilteredItemUOM.strUPCCode IS NOT NULL AND isnumeric(rtrim(ltrim(strUPCCode)))=(1) 
-							AND NOT (FilteredItemUOM.strUPCCode like '%.%' OR FilteredItemUOM.strUPCCode like '%e%' OR FilteredItemUOM.strUPCCode like '%E%') 
-								THEN CONVERT([bigint],rtrim(ltrim(FilteredItemUOM.strUPCCode)),0) 
-							ELSE CONVERT([bigint],NULL,0) 
-						END
-	) LongUPC
-	OUTER APPLY (
-		SELECT TOP 1 ShortUPC.strUpcCode, ShortUPC.intUnitMeasureId, ShortUPC.intItemId
-		FROM tblICItemUOM ShortUPC
-		INNER JOIN tblICItem ItemUPC 
-		ON ShortUPC.intItemId = ItemUPC.intItemId
-		WHERE ItemUPC.strItemNo COLLATE Latin1_General_CI_AS = FilteredItemUOM.strItemNo COLLATE Latin1_General_CI_AS
-	) ShortUPC
-WHERE
-(
-	LongUPC.intUpcCode IS NOT NULL 
-	AND 
-	Item.intItemId <> LongUPC.intItemId
-)
-OR
-(
-	ShortUPC.strUpcCode IS NOT NULL 
-	AND 
-	Item.intItemId <> ShortUPC.intItemId
-)
-UNION
-SELECT -- Overwrite UOM Disabled
-	strItemNo = FilteredItemUOM.strItemNo,
-	strFieldValue = FilteredItemUOM.strUOM,
-	intRowNumber = FilteredItemUOM.intRowNumber,
-	intErrorType = 7
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM
-	INNER JOIN vyuICItemUOM ItemUOM
-		ON FilteredItemUOM.strItemNo = ItemUOM.strItemNo
-		AND
-		FilteredItemUOM.strUOM = ItemUOM.strUnitMeasure
-		AND
-		@ysnAllowOverwrite = 0
-UNION
-SELECT -- Overwrite UPC Disabled
-	strItemNo = FilteredItemUOM.strItemNo,
-	strFieldValue = FilteredItemUOM.strUPCCode,
-	intRowNumber = FilteredItemUOM.intRowNumber,
-	intErrorType = 8
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM
-	INNER JOIN vyuICItemUOM ItemUOM
-		ON 
-		(
-			FilteredItemUOM.strItemNo = ItemUOM.strItemNo
-			AND
-			FilteredItemUOM.strShortUPCCode = ItemUOM.strUpcCode
-			AND 
-			FilteredItemUOM.strShortUPCCode IS NOT NULL
-		)
-		OR
-		(
-			FilteredItemUOM.strItemNo = ItemUOM.strItemNo
-			AND
-			FilteredItemUOM.strUPCCode = ItemUOM.strLongUPCCode
-			AND 
-			FilteredItemUOM.strUPCCode IS NOT NULL
-		)
-		AND
-		@ysnAllowOverwrite = 0
-
---Log Warnings and Errors
-
-INSERT INTO tblApiImportLogDetail 
-(
-	guiApiImportLogDetailId,
-	guiApiImportLogId,
-	strField,
-	strValue,
-	strLogLevel,
-	strStatus,
-	intRowNo,
-	strMessage
+	dtmDateCreated,
+	guiApiUniqueId,
+	intRowNumber
 )
 SELECT
-	guiApiImportLogDetailId = NEWID(),
-	guiApiImportLogId = @guiLogId,
-	strField = CASE
-		WHEN ErrorItemUOM.intErrorType = 1
-			THEN 'UOM'
-		WHEN ErrorItemUOM.intErrorType = 2
-			THEN 'UPC Code'
-		WHEN ErrorItemUOM.intErrorType = 3
-			THEN 'Item No'
-		WHEN ErrorItemUOM.intErrorType = 4
-			THEN 'UOM'
-		WHEN ErrorItemUOM.intErrorType = 5
-			THEN 'Unit Qty'
-		WHEN ErrorItemUOM.intErrorType = 6
-			THEN 'UPC Code'
-		WHEN ErrorItemUOM.intErrorType = 7
-			THEN 'UOM'
-		ELSE 'UPC Code'
-	END,
-	strValue = ErrorItemUOM.strFieldValue,
-	strLogLevel = CASE
-		WHEN ErrorItemUOM.intErrorType = 1 OR ErrorItemUOM.intErrorType = 3 OR ErrorItemUOM.intErrorType = 4
-			THEN 'Error'
-		ELSE 'Warning'
-	END,
-	strStatus = CASE
-		WHEN ErrorItemUOM.intErrorType = 1 OR ErrorItemUOM.intErrorType = 3 OR ErrorItemUOM.intErrorType = 4 OR ErrorItemUOM.intErrorType = 7 OR ErrorItemUOM.intErrorType = 8
-			THEN 'Skipped'
-		ELSE 'Success'
-	END,
-	intRowNo = ErrorItemUOM.intRowNumber,
-	strMessage = CASE
-		WHEN ErrorItemUOM.intErrorType = 1
-			THEN 'Duplicate imported unit of measure: ' + ISNULL(ErrorItemUOM.strFieldValue, '') + ' on item: ' + ISNULL(ErrorItemUOM.strItemNo, '') + '.'
-		WHEN ErrorItemUOM.intErrorType = 2
-			THEN 'Duplicate imported UPC: ' + ISNULL(ErrorItemUOM.strFieldValue, '') + ' on item: ' + ISNULL(ErrorItemUOM.strItemNo, '') + '. Import will continue with empty UPC instead.'
-		WHEN ErrorItemUOM.intErrorType = 3
-			THEN 'Missing item: ' + ErrorItemUOM.strItemNo + '.'
-		WHEN ErrorItemUOM.intErrorType = 4
-			THEN 'Missing unit of measure: ' + ErrorItemUOM.strFieldValue + ' on item: ' + ErrorItemUOM.strItemNo + '.'
-		WHEN ErrorItemUOM.intErrorType = 5
-			THEN 'Unit quantity for stock unit: ' + ErrorItemUOM.strFieldValue + ' on item: ' + ErrorItemUOM.strItemNo + ' is greater than 1. Setting quantity to 1.'
-		WHEN ErrorItemUOM.intErrorType = 6
-			THEN 'UPC: ' + ErrorItemUOM.strFieldValue + ' on item: ' + ErrorItemUOM.strItemNo + ' already exists. Import will continue with empty UPC instead.'
-		WHEN ErrorItemUOM.intErrorType = 7
-			THEN 'Unit of measure: ' + ISNULL(ErrorItemUOM.strFieldValue, '') + ' on item: ' + ISNULL(ErrorItemUOM.strItemNo, '') + ' already exists and overwrite is not enabled.'
-		ELSE 'UPC: ' + ISNULL(ErrorItemUOM.strFieldValue, '') + ' on item: ' + ISNULL(ErrorItemUOM.strItemNo, '') + ' already exists and overwrite is not enabled.'
-	END
-FROM @tblErrorItemUOM ErrorItemUOM
-WHERE ErrorItemUOM.intErrorType IN(1, 2, 3, 4, 5, 6, 7, 8)
+	i.intItemId
+	, u.intUnitMeasureId
+	, ux.strUPCCode
+	, ux.strShortUPCCode
+	, dbo.fnICCalculateCheckDigit(ux.strUPCCode)
+	, ux.dblUnitQty
+	, ux.dblHeight
+	, ux.dblWidth
+	, ux.dblLength
+	, ux.dblMaxQty
+	, ux.dblVolume
+	, ux.dblWeight
+	, ux.ysnIsStockUnit
+	, ux.ysnAllowPurchase
+	, ux.ysnAllowSale
+	, GETUTCDATE()
+	, @guiApiUniqueId
+	, ux.intRowNumber
+FROM tblApiSchemaTransformItemUOM ux
+JOIN tblICItem i ON i.strItemNo = ux.strItemNo
+JOIN tblICUnitMeasure u ON u.strUnitMeasure = ux.strUOM
+OUTER APPLY (
+	SELECT TOP 1 1 intCount
+	FROM tblICItemUOM xui
+	JOIN tblICItem xi ON xi.intItemId = xui.intItemId
+	JOIN tblICUnitMeasure xu ON xu.intUnitMeasureId = xui.intUnitMeasureId
+	WHERE xi.intItemId = i.intItemId
+		AND xu.intUnitMeasureId = u.intUnitMeasureId
+) ex
+WHERE ux.guiApiUniqueId = @guiApiUniqueId
+	AND ex.intCount IS NULL
 
---Filter Item UOM to be removed
+-- Global cleanup
+UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
 
-DELETE 
-FilteredItemUOM
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM
-	INNER JOIN @tblErrorItemUOM ErrorItemUOM
-		ON FilteredItemUOM.intRowNumber = ErrorItemUOM.intRowNumber
-WHERE ErrorItemUOM.intErrorType IN(1, 3, 4, 7, 8)
+-- Remove duplicate stock unit
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY intItemId ORDER BY intItemId, ysnStockUnit) AS RowNumber
+   FROM tblICItemUOM
+   WHERE ysnStockUnit = 1
+)
+UPDATE cte SET ysnStockUnit = 0 WHERE RowNumber > 1;
 
---Update Item UOM with UPC warnings
-
-UPDATE FilteredItemUOM 
-SET 
-FilteredItemUOM.strUPCCode = CASE  
-	WHEN ErrorItemUOM.strFieldValue IS NOT NULL AND ErrorItemUOM.strFieldValue COLLATE Latin1_General_CI_AS = FilteredItemUOM.strUPCCode COLLATE Latin1_General_CI_AS
-	THEN NULL
-	ELSE FilteredItemUOM.strUPCCode
-END,
-FilteredItemUOM.strShortUPCCode = CASE  
-	WHEN ErrorItemUOM.strFieldValue IS NOT NULL AND ErrorItemUOM.strFieldValue COLLATE Latin1_General_CI_AS = FilteredItemUOM.strShortUPCCode COLLATE Latin1_General_CI_AS
-	THEN NULL
-	ELSE FilteredItemUOM.strShortUPCCode
-END
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM
-	INNER JOIN @tblErrorItemUOM ErrorItemUOM
-		ON FilteredItemUOM.intRowNumber = ErrorItemUOM.intRowNumber
-WHERE ErrorItemUOM.intErrorType IN(2, 6)
-
---Update Item UOM with stock unit warnings
-
-UPDATE FilteredItemUOM 
-SET 
-FilteredItemUOM.dblUnitQty = 1
-FROM 
-	@tblFilteredItemUOM FilteredItemUOM
-	INNER JOIN @tblErrorItemUOM ErrorItemUOM
-		ON FilteredItemUOM.intRowNumber = ErrorItemUOM.intRowNumber
-WHERE ErrorItemUOM.intErrorType = 5
-
-DECLARE @intItemId INT 
-DECLARE @intUnitMeasureId INT 
-DECLARE @strLongUPCCode NVARCHAR(200)
-DECLARE @strUpcCode NVARCHAR(200)
-DECLARE @dblUnitQty NUMERIC(38, 20) 
-DECLARE @dblHeight NUMERIC(38, 20) 
-DECLARE @dblWidth NUMERIC(38, 20) 
-DECLARE @dblLength NUMERIC(38, 20) 
-DECLARE @dblMaxQty NUMERIC(38, 20) 
-DECLARE @dblVolume NUMERIC(38, 20) 
-DECLARE @dblWeight NUMERIC(38, 20) 
-DECLARE @ysnStockUnit BIT 
-DECLARE @ysnAllowPurchase BIT 
-DECLARE @ysnAllowSale BIT
-
-DECLARE uom_cursor CURSOR FOR 
+-- Log successful imports
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
-	intItemId = Item.intItemId,
-	intUnitMeasureId = UnitMeasure.intUnitMeasureId,
-	strLongUPCCode = FilteredItemUOM.strUPCCode,
-	strUpcCode = FilteredItemUOM.strShortUPCCode,
-	dblUnitQty = FilteredItemUOM.dblUnitQty,
-	dblHeight = FilteredItemUOM.dblHeight,
-	dblWidth = FilteredItemUOM.dblWidth,
-	dblLength = FilteredItemUOM.dblLength,
-	dblMaxQty = FilteredItemUOM.dblMaxQty,
-	dblVolume = FilteredItemUOM.dblVolume,
-	dblWeight = FilteredItemUOM.dblWeight,
-	ysnStockUnit = ISNULL(Stock.ysnStockUnit, FilteredItemUOM.ysnIsStockUnit),
-	ysnAllowPurchase = FilteredItemUOM.ysnAllowPurchase,
-	ysnAllowSale = FilteredItemUOM.ysnAllowSale
-FROM @tblFilteredItemUOM FilteredItemUOM
-	INNER JOIN tblICItem Item ON RTRIM(LTRIM(Item.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(FilteredItemUOM.strItemNo) COLLATE Latin1_General_CI_AS
-	INNER JOIN tblICUnitMeasure UnitMeasure ON RTRIM(LTRIM(UnitMeasure.strUnitMeasure)) COLLATE Latin1_General_CI_AS = LTRIM(FilteredItemUOM.strUOM) COLLATE Latin1_General_CI_AS
-	OUTER APPLY (
-		SELECT TOP 1 CAST(0 AS BIT) ysnStockUnit
-		FROM tblICItemUOM
-		WHERE intUnitMeasureId = UnitMeasure.intUnitMeasureId
-			AND intItemId = Item.intItemId
-			AND ysnStockUnit = 1
-	) Stock
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Item UOM'
+    , strValue = u.strUnitMeasure
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = iu.intRowNumber
+    , strMessage = 'The Item UOM ' + ISNULL(u.strUnitMeasure, '') + ' was imported successfully to ' +
+		ISNULL(i.strItemNo, '') + '.'
+FROM tblICItemUOM iu
+JOIN tblICItem i ON i.intItemId = iu.intItemId
+JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
+WHERE iu.guiApiUniqueId = @guiApiUniqueId
 
-OPEN uom_cursor  
-FETCH NEXT FROM uom_cursor INTO 
-	@intItemId,
-	@intUnitMeasureId,
-	@strLongUPCCode,
-	@strUpcCode,
-	@dblUnitQty,
-	@dblHeight,
-	@dblWidth,
-	@dblLength,
-	@dblMaxQty,
-	@dblVolume,
-	@dblWeight,
-	@ysnStockUnit,
-	@ysnAllowPurchase,
-	@ysnAllowSale
-
-WHILE @@FETCH_STATUS = 0  
-BEGIN  
-      
-	
-	UPDATE tblICItemUOM 
-	SET 
-		intItemId = @intItemId,
-		intUnitMeasureId = @intUnitMeasureId,
-		strLongUPCCode = @strLongUPCCode,
-		strUpcCode = @strUpcCode,
-		dblUnitQty = @dblUnitQty,
-		dblHeight = @dblHeight,
-		dblWidth = @dblWidth,
-		dblLength = @dblLength,
-		dblMaxQty = @dblMaxQty,
-		dblVolume = @dblVolume,
-		dblWeight = @dblWeight,
-		ysnStockUnit = @ysnStockUnit,
-		ysnAllowPurchase = @ysnAllowPurchase,
-		ysnAllowSale = @ysnAllowSale,
-		dtmDateModified = GETUTCDATE(),
-		guiApiUniqueId = @guiApiUniqueId
-	WHERE 
-		(intUnitMeasureId = @intUnitMeasureId AND intItemId = @intItemId)
-		OR
-		(
-			RTRIM(LTRIM(strLongUPCCode)) COLLATE Latin1_General_CI_AS = LTRIM(@strLongUPCCode) COLLATE Latin1_General_CI_AS 
-			AND 
-			@strLongUPCCode IS NOT NULL
-			AND
-			intItemId = @intItemId
-		)
-		OR
-		(
-			RTRIM(LTRIM(strUpcCode)) COLLATE Latin1_General_CI_AS = LTRIM(@strUpcCode) COLLATE Latin1_General_CI_AS 
-			AND 
-			@strUpcCode IS NOT NULL
-			AND
-			intItemId = @intItemId
-		)
-		AND
-		@ysnAllowOverwrite = 1
-	IF (@@ROWCOUNT > 0)
-	BEGIN
-		PRINT 'Row Updated'
-		--SET @intRowsUpdated = @intRowsUpdated + 1
-	END
-	ELSE
-	BEGIN
-		INSERT INTO tblICItemUOM
-		(
-			intItemId, 
-			intUnitMeasureId, 
-			strLongUPCCode,
-			strUpcCode,
-			dblUnitQty,
-			dblHeight,
-			dblWidth,
-			dblLength,
-			dblMaxQty,
-			dblVolume,
-			dblWeight,
-			ysnStockUnit,
-			ysnAllowPurchase,
-			ysnAllowSale,
-			dtmDateCreated,
-			guiApiUniqueId
-		)
-		SELECT 
-			RowItem.intItemId, 
-			RowItem.intUnitMeasureId, 
-			RowItem.strLongUPCCode,
-			RowItem.strUpcCode,
-			RowItem.dblUnitQty,
-			RowItem.dblHeight,
-			RowItem.dblWidth,
-			RowItem.dblLength,
-			RowItem.dblMaxQty,
-			RowItem.dblVolume,
-			RowItem.dblWeight,
-			RowItem.ysnStockUnit,
-			RowItem.ysnAllowPurchase,
-			RowItem.ysnAllowSale,
-			GETUTCDATE(),
-			@guiApiUniqueId
-		FROM
-		(
-			SELECT
-			intItemId = @intItemId,
-			intUnitMeasureId = @intUnitMeasureId,
-			strLongUPCCode = @strLongUPCCode,
-			strUpcCode = @strUpcCode,
-			dblUnitQty = @dblUnitQty,
-			dblHeight = @dblHeight,
-			dblWidth = @dblWidth,
-			dblLength = @dblLength,
-			dblMaxQty = @dblMaxQty,
-			dblVolume = @dblVolume,
-			dblWeight = @dblWeight,
-			ysnStockUnit = @ysnStockUnit,
-			ysnAllowPurchase = @ysnAllowPurchase,
-			ysnAllowSale = @ysnAllowSale
-		) AS RowItem
-		LEFT JOIN 
-		tblICItemUOM ItemUOM
-		ON 
-		RowItem.intItemId = ItemUOM.intItemId
-		AND
-		RowItem.intUnitMeasureId = ItemUOM.intUnitMeasureId
-		LEFT JOIN 
-		tblICItemUOM ItemLongUPC
-		ON 
-		RowItem.intItemId = ItemUOM.intItemId
-		AND
-		RowItem.strLongUPCCode = ItemUOM.strLongUPCCode
-		AND
-		RowItem.strLongUPCCode IS NOT NULL
-		LEFT JOIN 
-		tblICItemUOM ItemShortUPC
-		ON 
-		RowItem.intItemId = ItemUOM.intItemId
-		AND
-		RowItem.strUpcCode = ItemUOM.strUpcCode
-		AND
-		RowItem.strUpcCode IS NOT NULL
-		WHERE
-		ItemUOM.intItemUOMId IS NULL
-
-		IF (@@ROWCOUNT > 0)
-		BEGIN
-			PRINT 'Row Inserted'
-			--SET @intRowsImported = @intRowsImported + 1
-		END
-	END
-
-
-	FETCH NEXT FROM uom_cursor INTO 
-		@intItemId
-		,@intUnitMeasureId
-		,@strLongUPCCode
-		,@strUpcCode
-		,@dblUnitQty
-		,@dblHeight
-		,@dblWidth
-		,@dblLength
-		,@dblMaxQty
-		,@dblVolume
-		,@dblWeight
-		,@ysnStockUnit
-		,@ysnAllowPurchase
-		,@ysnAllowSale
-END 
-
-CLOSE uom_cursor  
-DEALLOCATE uom_cursor
+UPDATE log
+SET log.intTotalRowsImported = r.intCount
+FROM tblApiImportLog log
+CROSS APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblICItemUOM
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) r
+WHERE log.guiApiImportLogId = @guiLogId
