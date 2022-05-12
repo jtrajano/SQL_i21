@@ -64,5 +64,6 @@ BEGIN
 		AND CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) >= CONVERT(NVARCHAR, ISNULL(@dtmStartDate, tfLog.dtmCreatedDate), 111)
 		AND CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) <= CONVERT(NVARCHAR, ISNULL(@dtmEndDate, tfLog.dtmCreatedDate), 111)
 		AND tfLog.dblFinanceQty >= 0
+		AND tfLog.ysnDeleted = 0
 	) t WHERE t.intRowNum = 1
 END
