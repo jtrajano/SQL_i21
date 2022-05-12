@@ -194,6 +194,11 @@ begin try
 	   ,intQtyToBillUOMId int
 	);
 
+	declare @ProcessedAvailablePrice as table(
+		intPriceFixationDetailId int
+		,dblQuantity numeric(18,6)
+	)
+
 		insert into
 			@voucherPayablesDataTemp
 		select
@@ -257,24 +262,25 @@ begin try
 			insert into @availablePrice
 			select
 				intId = intId
-				,intPriceFixationId = intPriceFixationId  
-				,intPriceFixationDetailId = intPriceFixationDetailId  
-				,dblFinalPrice = dblFinalprice  
-				,dblAvailablePriceQuantity = dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId,@intQtyToBillUOMId,dblAvailableQuantity)--dblAvailableQuantity
-				,dtmFixationDate = dtmFixationDate  
-				,dblPriceQuantity = dblQuantity  
-				,intAvailablePriceLoad = intAvailableLoad  
-				,intPriceItemUOMId = intPriceItemUOMId
-				,intPricingTypeId = intPricingTypeId
-				,intFreightTermId = intFreightTermId
-				,intCompanyLocationId = intCompanyLocationId
-				,intPriceContractId = intPriceContractId
-				,strPriceContractNo = strPriceContractNo
+				,intPriceFixationId = a.intPriceFixationId  
+				,intPriceFixationDetailId = a.intPriceFixationDetailId  
+				,dblFinalPrice = a.dblFinalprice  
+				,dblAvailablePriceQuantity = dbo.fnCTConvertQtyToTargetItemUOM(a.intPriceItemUOMId,@intQtyToBillUOMId,a.dblAvailableQuantity) - isnull(c.dblQuantity,0)
+				,dtmFixationDate = a.dtmFixationDate  
+				,dblPriceQuantity = a.dblQuantity  
+				,intAvailablePriceLoad = a.intAvailableLoad  
+				,intPriceItemUOMId = a.intPriceItemUOMId
+				,intPricingTypeId = a.intPricingTypeId
+				,intFreightTermId = a.intFreightTermId
+				,intCompanyLocationId = a.intCompanyLocationId
+				,intPriceContractId = a.intPriceContractId
+				,strPriceContractNo = a.strPriceContractNo
 			from  
-				vyuCTGetAvailablePriceForVoucher  
+				vyuCTGetAvailablePriceForVoucher a
+				left join @ProcessedAvailablePrice c on c.intPriceFixationDetailId = a.intPriceFixationDetailId
 			where  
-				intContractDetailId = @intContractDetailId  
-			order by intPriceFixationDetailId 
+				a.intContractDetailId = @intContractDetailId  
+			order by a.intPriceFixationDetailId 
 
 			/*Loop Pricing*/
 			select @intId = min(intId) from @availablePrice where (isnull(dblAvailablePriceQuantity,0) > 0 or isnull(intAvailablePriceLoad,0) > 0);
@@ -346,8 +352,17 @@ begin try
 				--Deduct the quantity
 				set @dblQuantityToBill = (@dblQuantityToBill - @dblTransactionQuantity);
 				set @dblNetWeight = (@dblNetWeight - @dblTransactionNetWeight);
-				update @voucherPayablesDataTemp set dblQuantityToBill = (dblQuantityToBill - @dblTransactionQuantity), dblNetWeight = (dblNetWeight - @dblTransactionNetWeight) where intVoucherPayableId = @intVoucherPayableId;
-				update @availablePrice set dblAvailablePriceQuantity = (dblAvailablePriceQuantity - @dblTransactionQuantity) where intPriceFixationDetailId = @intPriceFixationDetailId;
+				update @voucherPayablesDataTemp set dblQuantityToBill = (dblQuantityToBill - @dblTransactionQuantity), dblNetWeight = (dblNetWeight - @dblTransactionNetWeight) where intVoucherPayableId = @intVoucherPayableId;				
+				update @availablePrice set dblAvailablePriceQuantity = (dblAvailablePriceQuantity - @dblTransactionQuantity) where intPriceFixationDetailId = @intPriceFixationDetailId;				
+
+				if exists (select top 1 1 from @ProcessedAvailablePrice where intPriceFixationDetailId = @intPriceFixationDetailId)
+				begin
+					update @ProcessedAvailablePrice set dblQuantity += @dblTransactionQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
+				end
+				else
+				begin
+					insert into @ProcessedAvailablePrice (intPriceFixationDetailId,dblQuantity) select intPriceFixationDetailId=@intPriceFixationDetailId,dblQuantity=@dblTransactionQuantity;
+				end
 				
 				--Construct voucher data
 				insert into @voucherPayablesFinal (
