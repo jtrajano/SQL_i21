@@ -269,7 +269,7 @@ BEGIN TRY
 		AND TD.intId IS NULL
 		AND T.strDistributionOption = 'SO'
 		AND I.strTransactionType IN ('Cash', 'Invoice')
-		
+			
 	--UPDATE TM QTY
 	INSERT INTO @tblToProcess (
 		  intInvoiceDetailId
@@ -285,12 +285,38 @@ BEGIN TRY
 		, intTicketId					= P.intTicketId
 		, intInventoryShipmentItemId	= P.intInventoryShipmentItemId
 		, intItemUOMId					= P.intItemUOMId
-		, dblQty						= (CASE WHEN ABS(P.dblQty) > TMO.dblQuantity
-													THEN (ABS(P.dblQty) - TMO.dblQuantity) * CASE WHEN @ForDelete = 0 THEN 1 ELSE -1 END
-											    WHEN ABS(P.dblQty) < TMO.dblQuantity
-													THEN (TMO.dblQuantity - ABS(P.dblQty)) * CASE WHEN @ForDelete = 1 THEN 1 ELSE -1 END
-										  END) 
+		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL
+													THEN 
+														CASE WHEN ABS(P.dblQty) > TMO.dblQuantity
+																THEN (ABS(P.dblQty) - TMO.dblQuantity)
+															 WHEN ABS(P.dblQty) < TMO.dblQuantity
+																THEN -(TMO.dblQuantity - ABS(P.dblQty))
+														END 
+												ELSE 
+													P.dblQty * CASE WHEN ID.dblQtyShipped < TMO.dblQuantity AND P.dblQty > TMO.dblQuantity THEN -1 ELSE 1 END
+											END)
 		, intLoadDetailId				= P.intLoadDetailId
+	FROM @tblToProcess P
+	LEFT JOIN tblARInvoiceDetail ID ON P.intInvoiceDetailId = ID.intInvoiceDetailId AND ID.intSiteId IS NOT NULL
+	CROSS APPLY ( 
+		SELECT TOP 1 TMO.dblQuantity
+			       , TMO.intContractDetailId
+		FROM tblTMOrder TMO 
+		WHERE TMO.intSiteId = P.intSiteId
+		  AND TMO.intContractDetailId = P.intContractDetailId
+		ORDER BY TMO.dtmTransactionDate DESC
+	) TMO
+	OUTER APPLY (
+		SELECT TOP 1 TD.intTransactionDetailId
+		FROM tblARTransactionDetail TD 
+		WHERE P.intInvoiceDetailId = TD.intTransactionDetailId 
+	      AND TD.strTransactionType IN ('Cash', 'Invoice')
+	) TRD
+	WHERE TMO.intContractDetailId IS NOT NULL
+	  AND P.intSiteId IS NOT NULL
+	  AND (ABS(P.dblQty) <> TMO.dblQuantity OR (ABS(P.dblQty) = TMO.dblQuantity AND TRD.intTransactionDetailId IS NOT NULL))
+	  
+	DELETE P 
 	FROM @tblToProcess P
 	CROSS APPLY ( 
 		SELECT TOP 1 TMO.*
@@ -298,14 +324,9 @@ BEGIN TRY
 		WHERE TMO.intSiteId = P.intSiteId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
-	) TMO
-	WHERE TMO.intContractDetailId IS NOT NULL
-	  AND P.intSiteId IS NOT NULL
-	  AND ABS(P.dblQty) <> TMO.dblQuantity
-
-	DELETE FROM @tblToProcess
-	WHERE intSiteId IS NOT NULL
-
+	) TMO 
+	WHERE P.intSiteId IS NOT NULL
+	
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
 	WHILE ISNULL(@intUniqueId,0) > 0
