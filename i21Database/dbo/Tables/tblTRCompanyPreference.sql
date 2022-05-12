@@ -24,6 +24,7 @@
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	[ysnFreightInRequired] BIT NULL,	
 	[ysnComboFreight] BIT NULL,
+	[ysnAllowDifferentUnits] BIT NULL,
 	CONSTRAINT [PK_tblTRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC), 
     CONSTRAINT [FK_tblTRCompanyPreference_tblSMImportFileHeader] FOREIGN KEY ([intRackPriceImportMappingId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId]), 
     CONSTRAINT [FK_tblTRCompanyPreference_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia](intEntityId),
