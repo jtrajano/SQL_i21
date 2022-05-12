@@ -1281,7 +1281,7 @@ BEGIN TRY
 			LEFT JOIN tblSMCity LGLoadOrigin
 				ON LGLoadOrigin.strCity = LGLoad.strOriginPort
 			LEFT JOIN tblSMCity LGLoadDestination
-				ON LGLoadOrigin.strCity = LGLoad.strDestinationPort
+				ON LGLoadDestination.strCity = LGLoad.strDestinationPort
 			WHERE	LGLoad.intTransportationMode = 2 -- TRANSPORT MODE = OCEAN VESSEL (2)
 			AND		LGLoad.intShipmentType = 1 -- SHIPMENT ONLY
 			AND		ISNULL(LD.intSContractDetailId, LD.intPContractDetailId) = CD.intContractDetailId 
