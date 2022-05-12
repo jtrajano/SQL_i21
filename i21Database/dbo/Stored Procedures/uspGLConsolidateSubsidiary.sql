@@ -14,7 +14,7 @@ DECLARE @ysnOpen BIT, @ysnUnpostedTrans BIT,
 	@intFiscalYearId INT,@intFiscalPeriodId INT,
 	@dtmStartDate DATETIME,	@dtmEndDate DATETIME,
 	@dtmCurrentDate DATETIME = GETDATE(),
-	@strAccountId NVARCHAR(30)
+	@strAccountId NVARCHAR(30)= ''''
 
 SELECT @ysnOpen = 0 , @ysnUnpostedTrans = 0
 
@@ -52,13 +52,20 @@ END
 	
 ELSE
 BEGIN
-		SELECT TOP 1 @strAccountId = A.strAccountId from dbo.vyuGLDetail A
+		DECLARE @tbl TABLE( strAccountId nvarchar(30))
+
+		INSERT INTO @tbl (strAccountId)
+		SELECT A.strAccountId from dbo.vyuGLDetail A
 			LEFT JOIN [ParentDbName].dbo.tblGLAccount B
 			on A.strAccountId= B.strAccountId
 			WHERE A.dtmDate BETWEEN @dtmStartDate AND @dtmEndDate AND B.strAccountId IS NULL
 
-		IF (@strAccountId IS NOT NULL)
+		IF EXISTS (SELECT 1 FROM @tbl)
+		BEGIN
+			SELECT TOP 1 @strAccountId= strAccountId FROM @tbl
 			RAISERROR (''Account id %s is not existing in [ParentDbName] '', 16,1,@strAccountId);  
+		END
+			
 
 		DELETE FROM [ParentDbName].dbo.tblGLDetail WHERE intSubsidiaryCompanyId = [CompanyId]
 		AND dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
@@ -104,7 +111,7 @@ BEGIN
 			   [CompanyId]
 			   ,[dtmDate]
 			   ,[strBatchId]
-			   ,[intAccountId]
+			   ,B.intAccountId
 			   ,[dblDebit]
 			   ,[dblCredit]
 			   ,[dblDebitUnit]
@@ -137,7 +144,12 @@ BEGIN
 			   ,[dtmReconciled]
 			   ,[ysnReconciled]
 			   ,[ysnRevalued]
-				FROM tblGLDetail 
+				FROM tblGLDetail A 
+				CROSS APPLY(
+					SELECT strAccountId FROM vyuGLDetail WHERE intGLDetailId = A.intGLDetailId
+				)C		
+				CROSS APPLY( SELECT intAccountId from
+				[ParentDbName].dbo.tblGLAccount where strAccountId = C.strAccountId ) B
 				WHERE dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
 				AND ysnIsUnposted =0
 			UPDATE [ParentDbName].dbo.tblGLConsolidateLog
