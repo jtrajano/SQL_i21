@@ -2386,6 +2386,8 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeviceActions.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceActions.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountTemplateGroupToCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
     <Build Include="dbo\Functions\fnAPCreateFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAgingSummary.sql" />
     <Build Include="dbo\Views\vyuARReceivables.sql" />
