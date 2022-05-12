@@ -289,7 +289,10 @@ BEGIN TRY
 			dblRate = (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end),
 			strFXFinalPrice = LTRIM(
 									dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)*
-									dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)/CASE WHEN CY.ysnSubCurrency = 1 THEN ISNULL(CY.intCent,1) ELSE 1 END
+									CASE WHEN  isnull(@ysnEnableFXFieldInContractPricing,0) = 1 
+									 THEN ISNULL(PF.dblFX,1)
+									ELSE dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)/CASE WHEN CY.ysnSubCurrency = 1 THEN ISNULL(CY.intCent,1) ELSE 1 END 
+									END
 								) +  ' ' + 
 								CASE WHEN CD.intCurrencyId = TY.intCurrencyID THEN FY.strCurrency ELSE TY.strCurrency END + 
 								' '+@per+' ' + isnull(rtrt5.strTranslation,FM.strUnitMeasure),
