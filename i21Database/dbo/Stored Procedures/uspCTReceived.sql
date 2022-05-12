@@ -60,25 +60,13 @@ BEGIN TRY
 		, intInventoryReceiptId INT NULL
 		, intToItemUOMId INT NULL)
 	
-	DECLARE @tblTempToProcess TABLE (intUniqueId INT IDENTITY
-		, intInventoryReceiptDetailId INT
-		, intContractDetailId INT
-		, intItemUOMId INT
-		, dblQty NUMERIC(18, 6)
-		, intContainerId INT
-		, ysnLoad BIT
-		, intPricingTypeId INT
-		, intSourceId INT NULL 
-		, intInventoryReceiptId INT NULL
-		, intToItemUOMId INT NULL)
-	
 	IF @strReceiptType IN ('Purchase Contract', 'Inventory Return')
 	BEGIN
 		IF(@intSourceType = 6) --'Purchase Order'
 		BEGIN
 			SELECT @ysnPO = 1
 			
-			INSERT INTO @tblTempToProcess (intInventoryReceiptDetailId
+			INSERT INTO @tblToProcess (intInventoryReceiptDetailId
 				, intContractDetailId
 				, intItemUOMId
 				, dblQty
@@ -105,8 +93,7 @@ BEGIN TRY
 		BEGIN
 			IF @intSourceType = 2
 			BEGIN
-				select line=108,* from @ItemsFromInventoryReceipt;
-				INSERT INTO @tblTempToProcess (intInventoryReceiptDetailId
+				INSERT INTO @tblToProcess (intInventoryReceiptDetailId
 					, intContractDetailId
 					, intItemUOMId
 					, dblQty
@@ -152,7 +139,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				INSERT	INTO @tblTempToProcess (intInventoryReceiptDetailId
+				INSERT	INTO @tblToProcess (intInventoryReceiptDetailId
 					, intContractDetailId
 					, intItemUOMId
 					, dblQty
@@ -179,7 +166,7 @@ BEGIN TRY
 					AND ISNULL(CH.ysnLoad, 0) = 1
 			END
 			
-			INSERT INTO @tblTempToProcess (intInventoryReceiptDetailId
+			INSERT INTO @tblToProcess (intInventoryReceiptDetailId
 				, intContractDetailId
 				, intItemUOMId
 				, dblQty
@@ -206,31 +193,6 @@ BEGIN TRY
 				AND ISNULL(CH.ysnLoad, 0) = 0 -- CT-4969
 		END
 	END
-
-	insert into @tblToProcess(
-		intInventoryReceiptDetailId
-		, intContractDetailId
-		, intItemUOMId
-		, dblQty
-		, intContainerId
-		, ysnLoad
-		, intPricingTypeId
-		, intSourceId
-		, intInventoryReceiptId
-		, intToItemUOMId
-	)
-	select distinct
-		intInventoryReceiptDetailId
-		, intContractDetailId
-		, intItemUOMId
-		, dblQty
-		, intContainerId
-		, ysnLoad
-		, intPricingTypeId
-		, intSourceId
-		, intInventoryReceiptId
-		, intToItemUOMId
-	from @tblTempToProcess
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
