@@ -37,6 +37,42 @@ BEGIN
 	FROM tblICWarrantStatus
 	WHERE strWarrantStatus =  @strWarrantStatus
 
+
+	---UPDATE released quantity to 0 if released or pledged status
+	IF(@intWarrantStatus = 1 OR @intWarrantStatus = 3)
+	BEGIN
+		DECLARE @LotsToRelease AS LotReleaseTableType 
+		INSERT INTO @LotsToRelease (
+            [intItemId] 
+            ,[intItemLocationId] 
+            ,[intItemUOMId] 
+            ,[intLotId] 
+            ,[intSubLocationId] 
+            ,[intStorageLocationId] 
+            ,[dblQty] 
+            ,[intTransactionId] 
+            ,[strTransactionId] 
+            ,[intTransactionTypeId] 
+            ,[intOwnershipTypeId] 
+            ,[dtmDate] 
+        )
+        SELECT 
+            [intItemId] = lot.intItemId
+            ,[intItemLocationId] = lot.intItemLocationId
+            ,[intItemUOMId] = lot.intItemUOMId
+            ,[intLotId] = lot.intLotId
+            ,[intSubLocationId] = lot.intSubLocationId
+            ,[intStorageLocationId] = lot.intStorageLocationId
+            ,[dblQty] = 0
+            ,[intTransactionId] = lot.intLotId -- Use the lot id. 
+            ,[strTransactionId] = lot.strLotNumber -- Use the lot number. 
+            ,[intTransactionTypeId] = 61 -- Use 61 for a release coming from the Warrant screen. 
+            ,[intOwnershipTypeId] = lot.intOwnershipType
+            ,[dtmDate] = GETDATE()
+        FROM tblICLot lot
+		WHERE intLotId = @intLotId
+ 	END
+
 	----GEt Trade Finance name
 	SET @strTradeFinanceNumber = ISNULL((SELECT TOP 1
 												strTradeFinanceNumber
