@@ -71,6 +71,7 @@ BEGIN
             ,[dtmDate] = GETDATE()
         FROM tblICLot lot
 		WHERE intLotId = @intLotId
+			AND lot.dblReleasedQty <> 0
  	END
 
 	----GEt Trade Finance name
