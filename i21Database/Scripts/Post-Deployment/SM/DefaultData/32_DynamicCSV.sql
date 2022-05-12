@@ -140,7 +140,12 @@ SET strCommand = N'
 	IF ISNULL(@EntityId, 0) > 0 and @LocationName <> ''''
 	BEGIN
 		SELECT TOP  1 @EntityLocationId = intEntityLocationId FROM tblEMEntityLocation where intEntityId = @EntityId and rtrim(ltrim(lower(@LocationName))) = rtrim(ltrim(lower(strLocationName)))
+	END
 
+	IF ISNULL(@EntityId, 0) = 0
+	BEGIN
+		SET @ValidationMessage = ''Entity Number does not exists!. Please check the Customer Entity No. and re-attempt the upload''
+		RAISERROR(@ValidationMessage, 16, 1);
 	END
 
 	IF ISNULL(@EntityId, 0) > 0
