@@ -223,7 +223,7 @@ BEGIN
 		WHERE intTradeFinanceId = @intTradeFinanceId
 
 
-		IF  (@strCurrentStatus in ('Rejected', 'Canceled'))
+		IF  (@strCurrentStatus in ('Rejected', 'Cancelled'))
 		BEGIN
 			SET @strAction = 'UPDATE'
 		END
