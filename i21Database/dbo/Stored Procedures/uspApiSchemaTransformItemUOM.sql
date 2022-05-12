@@ -76,12 +76,10 @@ SELECT
     , strLogLevel = 'Warning'
     , strStatus = 'Skipped'
     , intRowNo = sr.intRowNumber
-    , strMessage = 'The UPC Code ' + ISNULL(sr.strUPCCode, '') + ' for ' + ISNULL(sr.strItemNo, '') + ' in the file has duplicates.'
+    , strMessage = 'The UPC Code ' + ISNULL(sr.strUPCCode, '') + ' in the file has duplicates.'
 FROM cte sr
-JOIN tblICItem i ON i.strItemNo = sr.strItemNo
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
 	AND sr.RowNumber > 1
-	AND NULLIF(sr.strUPCCode, '') IS NOT NULL
 
 ;WITH cte AS
 (
@@ -111,12 +109,10 @@ SELECT
     , strLogLevel = 'Warning'
     , strStatus = 'Skipped'
     , intRowNo = sr.intRowNumber
-    , strMessage = 'The Short UPC Code ' + ISNULL(sr.strShortUPCCode, '') + ' for ' + ISNULL(sr.strItemNo, '') + ' in the file has duplicates.'
+    , strMessage = 'The Short UPC Code ' + ISNULL(sr.strShortUPCCode, '') + ' in the file has duplicates.'
 FROM cte sr
-JOIN tblICItem i ON i.strItemNo = sr.strItemNo
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
 	AND sr.RowNumber > 1
-	AND NULLIF(sr.strShortUPCCode, '') IS NOT NULL
 
 ;WITH cte AS
 (
@@ -355,8 +351,7 @@ WHERE ux.guiApiUniqueId = @guiApiUniqueId
    AND NOT EXISTS(
 		SELECT TOP 1 1
 		FROM tblICUnitMeasure u
-		JOIN tblICItemUOM xx ON xx.intItemId = i.intItemId
-			AND xx.intUnitMeasureId = u.intUnitMeasureId
+		JOIN tblICItemUOM xx ON xx.intUnitMeasureId = u.intUnitMeasureId
 		WHERE u.strUnitMeasure != ux.strUOM
 			AND (xx.strLongUPCCode = ux.strUPCCode OR xx.strUpcCode = ux.strShortUPCCode)
 	)
@@ -415,7 +410,13 @@ OUTER APPLY (
 ) ex
 WHERE ux.guiApiUniqueId = @guiApiUniqueId
 	AND ex.intCount IS NULL
-
+	AND NOT EXISTS(
+		SELECT TOP 1 1
+		FROM tblICUnitMeasure u
+		JOIN tblICItemUOM xx ON xx.intUnitMeasureId = u.intUnitMeasureId
+		WHERE u.strUnitMeasure != ux.strUOM
+			AND (xx.strLongUPCCode = ux.strUPCCode OR xx.strUpcCode = ux.strShortUPCCode)
+	)
 -- Global cleanup
 UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
 UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
