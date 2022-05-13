@@ -87,6 +87,19 @@ ysnChildAsset = CAST(
     CASE WHEN ChildAsset.strAssetId IS NULL
     THEN 0 ELSE 1 END
     AS BIT),
+FA.ysnNewAccountPosted,
+FA.intNewAssetAccountId,  
+FA.intNewExpenseAccountId,  
+FA.intNewDepreciationAccountId,  
+FA.intNewAccumulatedAccountId,  
+FA.intNewGainLossAccountId,  
+FA.intNewSalesOffsetAccountId,
+NewGLAsset.strAccountId strNewAssetAccountId,        
+NewGLExpense.strAccountId strNewExpenseAccountId,        
+NewGLDepreciation.strAccountId strNewDepreciationAccountId,        
+NewGLAccumulation.strAccountId strNewAccumulatedAccountId,        
+NewGLGainLoss.strAccountId strNewGainLossAccountId,
+NewGLARAccount.strAccountId strNewSalesOffsetAccountId,
 FA.intConcurrencyId  
 FROM tblFAFixedAsset FA       
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId        
@@ -102,6 +115,12 @@ LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intC
 LEFT JOIN tblFADepreciationMethod DM on DM.intDepreciationMethodId = FA.intDepreciationMethodId
 LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = FA.intAssetGroupId
 LEFT JOIN tblFAFixedAssetDepartment Department ON Department.intAssetDepartmentId = FA.intAssetDepartmentId
+LEFT JOIN tblGLAccount NewGLAsset ON NewGLAsset.intAccountId = FA.intNewAssetAccountId        
+LEFT JOIN tblGLAccount NewGLExpense ON NewGLExpense.intAccountId = FA.intNewExpenseAccountId        
+LEFT JOIN tblGLAccount NewGLDepreciation ON NewGLDepreciation.intAccountId = FA.intNewDepreciationAccountId        
+LEFT JOIN tblGLAccount NewGLAccumulation ON NewGLAccumulation.intAccountId = FA.intNewAccumulatedAccountId        
+LEFT JOIN tblGLAccount NewGLGainLoss ON NewGLGainLoss.intAccountId = FA.intNewGainLossAccountId        
+LEFT JOIN tblGLAccount NewGLARAccount ON NewGLARAccount.intAccountId = FA.intNewSalesOffsetAccountId    
 OUTER APPLY(  
     SELECT COUNT(*) Cnt FROM tblFABookDepreciation   
     WHERE intAssetId = FA.intAssetId  

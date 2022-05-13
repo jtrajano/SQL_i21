@@ -7,6 +7,8 @@
 	[intAccumulatedAccountId]		INT NULL,
 	[intGainLossAccountId]			INT NULL,
 	[intSalesOffsetAccountId]		INT NULL,
+	[intDueToAccountId]				INT NULL,
+	[intDueFromAccountId]			INT NULL,
     [intConcurrencyId]				INT DEFAULT 1 NOT NULL,
 
 	CONSTRAINT [PK_tblFACompanyPreferenceOption] PRIMARY KEY CLUSTERED ([intCompanyPreferenceOptionId] ASC),
