@@ -4372,12 +4372,20 @@ BEGIN TRY
 					IF (@ysnReassign = 0)
 					BEGIN
 						-- Increase basis, qtyDiff is negative so multiply to -1
-						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
+						UPDATE  @cbLogSpecific
+						SET
+							dblQty = (case when strNotes = 'Change Futures Price' then dblOrigQty else @FinalQty end) * - 1
+							,intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE (case when strNotes = 'Change Futures Price' then intPricingTypeId else @intHeaderPricingTypeId end)  END
+							,intActionId = case when strTransactionReference = 'Price Fixation' and (strNotes like '%Change Futures Price%' or strNotes like '%Change Quantity%') then 67 else intActionId end
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 
 					-- Decrease Priced
-					UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
+					UPDATE  @cbLogSpecific
+					SET
+						dblQty = (case when strNotes = 'Change Futures Price' then dblOrigQty else @FinalQty end)
+						,intPricingTypeId = 1
+						,intActionId = case when strTransactionReference = 'Price Fixation' and (strNotes like '%Change Futures Price%' or strNotes like '%Change Quantity%') then 67 else intActionId end
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 			END
