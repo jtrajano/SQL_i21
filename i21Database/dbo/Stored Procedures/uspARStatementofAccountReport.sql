@@ -225,7 +225,7 @@ BEGIN
 		SELECT TOP 1 U.blbFile
 		FROM tblSMUpload U
 		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-		WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+		WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
 		  AND A.strComment = 'Header'
 		ORDER BY A.intAttachmentId DESC
 	) A 
