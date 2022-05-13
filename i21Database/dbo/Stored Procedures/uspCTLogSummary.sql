@@ -3030,19 +3030,14 @@ BEGIN TRY
 					, cd.intContractTypeId
 					, dblQty = (
 						case
-						when ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity and ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures
-						then pfd.dblQuantity
+						when ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity
+						then 0
 						else
-							case
-							when ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity
-							then 0
-							else
-								CASE
-								WHEN @ysnLoadBased = 1
-								THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
-								ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0)
-								END
-							end
+							CASE
+							WHEN @ysnLoadBased = 1
+							THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
+							ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0)
+							END
 						end
 					)
 					, dblOrigQty = pfd.dblQuantity
@@ -3693,7 +3688,6 @@ BEGIN TRY
 			, @intPriceFixationDetailId INT
 			, @intContractStatusId INT
 			, @prevContractStatusId INT
-			, @ysnPricedQtyChange BIT = 1
 			
 
 		SELECT @TotalBasis = ABS(SUM(dblQty)), @TotalOrigBasis = ABS(SUM(dblOrigQty))
@@ -4306,19 +4300,13 @@ BEGIN TRY
 
 			SELECT @dblRemainingQty = 0
 				
-			SELECT TOP 1 @prevOrigQty = ISNULL(fd.dblPreviousQty,fd.dblQuantity)    
-				, @qtyDiff = isnull(c.dblQty,0) - isnull(p.dblQty,0)
-				, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (fd.dblLoadPriced - fd.dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE fd.dblQuantity - fd.dblQuantityAppliedAndPriced END
-				, @dblCurrentQty = fd.dblQuantity
-				, @dblQuantityAppliedAndPriced = fd.dblQuantityAppliedAndPriced
-			FROM tblCTPriceFixationDetail fd
-			left join (
-				select top 1 intPriceFixationDetailId = lc.intTransactionReferenceDetailId, dblQty = lc.dblOrigQty from @cbLogCurrent lc order by lc.intId desc
-			) c on c.intPriceFixationDetailId = fd.intPriceFixationDetailId
-			left join (
-				select top 1 intPriceFixationDetailId = lp.intTransactionReferenceDetailId, dblQty = lp.dblOrigQty from @cbLogPrev lp where lp.intTransactionReferenceDetailId = @intPriceFixationDetailId order by lp.intId desc
-			) p on p.intPriceFixationDetailId = fd.intPriceFixationDetailId
-			WHERE fd.intPriceFixationDetailId = @intPriceFixationDetailId
+			SELECT TOP 1 @prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
+				, @qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
+				, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (dblLoadPriced - dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE dblQuantity - dblQuantityAppliedAndPriced END
+				, @dblCurrentQty = dblQuantity
+				, @dblQuantityAppliedAndPriced = dblQuantityAppliedAndPriced
+			FROM tblCTPriceFixationDetail
+			WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
 			IF @strProcess = 'Price Delete' OR @strProcess = 'Fixation Detail Delete'
 			BEGIN
@@ -4370,7 +4358,6 @@ BEGIN TRY
 				BEGIN
 					-- New Price or No change
 					SET @FinalQty = @dblQty
-					SET @ysnPricedQtyChange = 0;
 				END
 				
 				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
@@ -4389,7 +4376,7 @@ BEGIN TRY
 					IF (@ysnReassign = 0)
 					BEGIN
 						-- Increase basis, qtyDiff is negative so multiply to -1
-						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE (case when @ysnPricedQtyChange = 0 then intPricingTypeId else @intHeaderPricingTypeId end) END
+						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 
