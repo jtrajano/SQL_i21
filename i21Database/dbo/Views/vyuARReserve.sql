@@ -20,11 +20,12 @@ SELECT
 FROM fnARCustomerAgingDetail(NULL, GETDATE(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) ARCAD
 LEFT JOIN vyuGLLocationAccountId GLLA ON ARCAD.intAccountId = GLLA.intAccountId
 LEFT JOIN (
-	SELECT GLTCS.intAccountId, GLAS.strDescription
-	FROM tblGLTempCOASegment GLTCS
-	JOIN tblGLAccountSegment GLAS ON GLTCS.[LOB] COLLATE Latin1_General_CI_AS = GLAS.strCode
-	JOIN tblGLAccountStructure GLASt ON GLASt.intAccountStructureId = GLAS.intAccountStructureId
-	WHERE GLASt.strStructureName = 'Line of business'
+	SELECT TOP 1 GLASM.intAccountId, GLAS.strDescription
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS ON GLAS.intAccountSegmentId = GLASM.intAccountSegmentId
+	INNER JOIN  tblGLAccountStructure GLASt ON GLASt.intAccountStructureId = GLAS.intAccountStructureId
+	WHERE GLASt.intStructureType = 5
+
 ) GLLOB ON ARCAD.intAccountId = GLLOB.intAccountId
 LEFT JOIN tblARReserve ARR ON ARCAD.intInvoiceId = ARR.intInvoiceId
 OUTER APPLY (
