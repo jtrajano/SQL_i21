@@ -468,10 +468,10 @@ BEGIN
 
 	IF(@transactionContractDetailId > 0 OR @transactionItemContractDetailId > 0)
 	BEGIN 
-
+		
 		SET @transactionCurrentQty = @transactionCurrentQty * -1
 
-		IF(LOWER(@transactionPriceMethod) = 'item contract pricing')
+		IF(LOWER(@transactionPriceMethod) = 'item contracts' OR LOWER(@transactionPriceMethod) = 'item contract pricing')
 		BEGIN
 			print 'itc'
 			EXEC uspCTItemContractUpdateScheduleQuantity
@@ -481,7 +481,7 @@ BEGIN
 			@intTransactionDetailId = @intTransactionId,
 			@strScreenName = 'Card Fueling Transaction Screen'
 		END
-		ELSE IF(LOWER(@transactionPriceMethod) = 'contract pricing')
+		ELSE IF(LOWER(@transactionPriceMethod) = 'contracts' OR LOWER(@transactionPriceMethod) = 'contract pricing')
 		BEGIN
 			EXEC uspCTUpdateScheduleQuantity 
 			@intContractDetailId = @transactionContractDetailId
@@ -539,7 +539,7 @@ BEGIN
 
 		SET @transactionCurrentQty = @transactionCurrentQty * -1
 
-		IF(LOWER(@transactionPriceMethod) = 'item contract pricing')
+		IF(LOWER(@transactionPriceMethod) = 'item contracts' OR LOWER(@transactionPriceMethod) = 'item contract pricing')
 		BEGIN
 			print 'itc'
 			EXEC uspCTItemContractUpdateScheduleQuantity
@@ -549,7 +549,7 @@ BEGIN
 			@intTransactionDetailId = @intTransactionId,
 			@strScreenName = 'Card Fueling Transaction Screen'
 		END
-		ELSE IF(LOWER(@transactionPriceMethod) = 'contract pricing')
+		ELSE IF(LOWER(@transactionPriceMethod) = 'contracts' OR LOWER(@transactionPriceMethod) = 'contract pricing')
 		BEGIN
 			EXEC uspCTUpdateScheduleQuantity 
 			@intContractDetailId = @transactionContractDetailId
