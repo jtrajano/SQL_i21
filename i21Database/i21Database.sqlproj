@@ -803,6 +803,8 @@
     <Build Include="dbo\Views\vyuFAGLAccountChangeLog.sql" />
     <Build Include="dbo\Stored Procedures\uspFAPostGLAccountChange.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountBySegment2.sql" />
+    <Build Include="dbo\Tables\tblGLEliminate.sql" />
+    <Build Include="dbo\Views\vyuGLEliminate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
