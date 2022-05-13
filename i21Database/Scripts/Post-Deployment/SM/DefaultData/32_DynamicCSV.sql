@@ -134,7 +134,7 @@ SET strCommand = N'
 
 	SELECT @EntityId = intEntityId
 		FROM tblEMEntity
-			where strEntityNo LIKE ''%'' + ''@entityCustomerId@''
+			where strEntityNo = ''@entityCustomerId@''
 
 	SET @EntityLocationId = null
 	IF ISNULL(@EntityId, 0) > 0 and @LocationName <> ''''
