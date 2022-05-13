@@ -86,7 +86,7 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Voucher', N'Voucher', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill',  1, 1,  0, N'Transaction')
 	ELSE
-		UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction', strScreenName = 'Voucher/Vendor Prepayment/Basis Advance'
+		UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction', strScreenName = 'Voucher'
 		WHERE strNamespace = 'AccountsPayable.view.Voucher'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.PurchaseOrder') 
@@ -1210,11 +1210,22 @@ GO
         VALUES (N'Debit Memo', N'Debit Memo', N'AccountsPayable.view.DebitMemo', N'Accounts Payable', N'', 1,  0)
     END
 	ELSE
-		BEGIN
-			UPDATE tblSMScreen
-			SET  ysnApproval = 1
-			WHERE strNamespace = 'AccountsPayable.view.DebitMemo'
-		END
+	BEGIN
+		UPDATE tblSMScreen
+		SET  ysnApproval = 1
+		WHERE strNamespace = 'AccountsPayable.view.DebitMemo'
+	END
+
+	--IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance')
+	--BEGIN
+	--	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
+	--	VALUES (N'Voucher/Vendor Prepayment/Basis Advance', N'Voucher/Vendor Prepayment/Basis Advance', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill',  1, 1,  0, N'Transaction')
+	--END
+	--ELSE
+	--BEGIN
+	--	UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction'
+	--	WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance'
+	--END
 
 	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
 	-- BEGIN
