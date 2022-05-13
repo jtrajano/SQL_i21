@@ -214,6 +214,17 @@ IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 		INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
 		INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId 
 		LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
+
+		--MANUAL SPOT FROM TICKET
+		SELECT @dblQtyOverAged = @dblQtyOverAged - SUM(ID.dblQtyShipped)
+		FROM tblARInvoiceDetail ID
+		INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId AND ID.intItemId = IDD.intItemId
+		INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+		LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
+		WHERE ID.intContractDetailId IS NULL
+		AND ID.intTicketId IS NOT NULL
+		AND ID.intInventoryShipmentItemId IS NOT NULL
+		AND ID.intItemId IS NOT NULL
 	END 
 
 DECLARE @intSalesOrderContractTicketItemCount	INT = 1
