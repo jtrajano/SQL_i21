@@ -159,7 +159,7 @@
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
-	,@FreightCharge							NUMERIC(18, 6)
+	,@FreightCharge							NUMERIC(18, 6)	= 0
 	,@FreightCompanySegment					INT
 	,@FreightLocationSegment				INT
 AS

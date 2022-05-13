@@ -195,7 +195,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , ysnIntraCompany						= CASE WHEN ISNULL(INV.ysnIntraCompany, 0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries, 0) END
 	 , strGoodsStatus						= INV.strGoodsStatus
 	 , ysnOverrideFreightCharge				= INV.ysnOverrideFreightCharge
-	 , dblFreightCharge						= INV.dblFreightCharge
+	 , dblFreightCharge						= ISNULL(INV.dblFreightCharge, 0.00)
 	 , strFreightCompanySegment				= GLCAI.strDescription
 	 , strFreightLocationSegment			= GLLAI.strDescription
 FROM tblARInvoice INV WITH (NOLOCK)

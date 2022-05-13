@@ -159,7 +159,7 @@
 	[strTicketNumbers]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
 	[strCustomerReferences]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
 	[ysnOverrideFreightCharge]   		BIT               								NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnOverrideFreightCharge] DEFAULT ((0)),
-	[dblFreightCharge]					NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
+	[dblFreightCharge]					NUMERIC(18, 6)									NULL		DEFAULT ((0)),
 	[intFreightCompanySegment]			INT												NULL,
 	[intFreightLocationSegment]			INT												NULL,
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
