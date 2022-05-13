@@ -793,6 +793,7 @@
     <Build Include="dbo\Tables\tblGLLedger.sql" />
     <Build Include="dbo\Views\vyuLGOpenTankManagementOrders.sql" />
     <Build Include="dbo\Tables\tblFRLedger.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGetLedger.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
