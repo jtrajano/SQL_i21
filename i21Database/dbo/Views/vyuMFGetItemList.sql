@@ -7,3 +7,4 @@ SELECT I.intItemId
 	,I.strExternalGroup
 FROM tblICItem I
 LEFT JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
+WHERE I.strStatus = 'Active'
