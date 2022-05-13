@@ -793,6 +793,10 @@
     <Build Include="dbo\Tables\tblGLLedger.sql" />
     <Build Include="dbo\Views\vyuLGOpenTankManagementOrders.sql" />
     <Build Include="dbo\Tables\tblFRLedger.sql" />
+    <Build Include="dbo\User Defined Types\IdQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReleaseWarrant.sql" />
+    <Build Include="dbo\Tables\tblARReserve.sql" />
+    <Build Include="dbo\Views\vyuARReserve.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetLedger.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -2385,6 +2389,8 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeviceActions.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceActions.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountTemplateGroupToCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
     <Build Include="dbo\Functions\fnAPCreateFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAgingSummary.sql" />
     <Build Include="dbo\Views\vyuARReceivables.sql" />

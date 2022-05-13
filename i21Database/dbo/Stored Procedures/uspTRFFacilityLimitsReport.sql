@@ -152,6 +152,7 @@ AS
  	AND tlog.intContractDetailId IS NOT NULL
  	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
  	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
+	AND tlog.ysnDeleted = 0
 
 
  	SELECT  
@@ -186,6 +187,7 @@ AS
  		ON	tContract.intContractDetailId = tlog.intContractDetailId
  		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
  		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
+	WHERE tlog.ysnDeleted = 0
 
  	SELECT intContractHeaderId
  		, intContractDetailId

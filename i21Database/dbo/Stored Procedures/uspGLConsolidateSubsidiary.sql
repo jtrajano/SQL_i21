@@ -14,7 +14,7 @@ DECLARE @ysnOpen BIT, @ysnUnpostedTrans BIT,
 	@intFiscalYearId INT,@intFiscalPeriodId INT,
 	@dtmStartDate DATETIME,	@dtmEndDate DATETIME,
 	@dtmCurrentDate DATETIME = GETDATE(),
-	@strAccountId NVARCHAR(30)
+	@strAccountId NVARCHAR(30)= ''''
 
 SELECT @ysnOpen = 0 , @ysnUnpostedTrans = 0
 
@@ -52,13 +52,39 @@ END
 	
 ELSE
 BEGIN
-		SELECT TOP 1 @strAccountId = A.strAccountId from dbo.vyuGLDetail A
+		DECLARE @tbl TABLE( strAccountId nvarchar(30))
+
+		INSERT INTO @tbl (strAccountId)
+		SELECT A.strAccountId from dbo.vyuGLDetail A
 			LEFT JOIN [ParentDbName].dbo.tblGLAccount B
 			on A.strAccountId= B.strAccountId
 			WHERE A.dtmDate BETWEEN @dtmStartDate AND @dtmEndDate AND B.strAccountId IS NULL
+			GROUP BY A.strAccountId
 
-		IF (@strAccountId IS NOT NULL)
+
+		IF EXISTS (SELECT 1 FROM @tbl)
+		BEGIN
+			SELECT TOP 1 @strAccountId= strAccountId FROM @tbl
 			RAISERROR (''Account id %s is not existing in [ParentDbName] '', 16,1,@strAccountId);  
+			RETURN
+		END
+			
+		DECLARE @tbl1 TABLE( strCurrency nvarchar(30))
+		DECLARE @strCurrency NVARCHAR(10)
+
+		INSERT INTO @tbl1 (strCurrency)
+		SELECT A.strCurrency from dbo.vyuGLDetail A
+			LEFT JOIN [ParentDbName].dbo.tblSMCurrency B
+			on A.strCurrency= B.strCurrency
+			WHERE A.dtmDate BETWEEN @dtmStartDate AND @dtmEndDate AND B.strCurrency IS NULL
+			GROUP BY A.strCurrency
+
+		IF EXISTS (SELECT 1 FROM @tbl1)
+		BEGIN
+			SELECT TOP 1 @strCurrency= strCurrency FROM @tbl1
+			RAISERROR (''Currency %s is not existing in [ParentDbName] '', 16,1,@strCurrency);  
+			RETURN
+		END
 
 		DELETE FROM [ParentDbName].dbo.tblGLDetail WHERE intSubsidiaryCompanyId = [CompanyId]
 		AND dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
@@ -104,7 +130,7 @@ BEGIN
 			   [CompanyId]
 			   ,[dtmDate]
 			   ,[strBatchId]
-			   ,[intAccountId]
+			   ,B.intAccountId
 			   ,[dblDebit]
 			   ,[dblCredit]
 			   ,[dblDebitUnit]
@@ -112,7 +138,7 @@ BEGIN
 			   ,[strDescription]
 			   ,[strCode]
 			   ,[strReference]
-			   ,[intCurrencyId]
+			   ,D.intCurrencyID
 			   ,[dblExchangeRate]
 			   ,[dtmDateEntered]
 			   ,[dtmTransactionDate]
@@ -137,13 +163,26 @@ BEGIN
 			   ,[dtmReconciled]
 			   ,[ysnReconciled]
 			   ,[ysnRevalued]
-				FROM tblGLDetail 
+				FROM tblGLDetail A 
+				CROSS APPLY(
+					SELECT strAccountId, strCurrency FROM vyuGLDetail WHERE intGLDetailId = A.intGLDetailId
+				)C		
+				CROSS APPLY( 
+					SELECT intAccountId from
+					[ParentDbName].dbo.tblGLAccount where strAccountId = C.strAccountId 
+				) B
+				CROSS APPLY( 
+					SELECT intCurrencyID from
+					[ParentDbName].dbo.tblSMCurrency where strCurrency = C.strCurrency 
+				) D
+
 				WHERE dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
 				AND ysnIsUnposted =0
 			UPDATE [ParentDbName].dbo.tblGLConsolidateLog
 			SET strComment= ''Successfully consolidated'' ,
 			intRowInserted = @@ROWCOUNT,
-			intConcurrencyId = intConcurrencyId + 1
+			intConcurrencyId = intConcurrencyId + 1,
+			ysnSuccess = 1
 			WHERE intConsolidateLogId = [ConsolidateLogId]
 END			
 '

@@ -14,7 +14,7 @@ AS
 			WHERE
 				tfh.strTransactionNumber = r.strReceiptNumber						
 		) tf
-		-- Get the first log in the history. 
+		-- Get the first "Inventory" log in the history. 
 		CROSS APPLY (
 			SELECT 
 				intTradeFinanceHistoryId = MIN (tfh.intTradeFinanceHistoryId)  
@@ -22,6 +22,7 @@ AS
 				tblTRFTradeFinanceHistory tfh
 			WHERE
 				tfh.intTradeFinanceId = tf.intTradeFinanceId
+				AND tfh.strTransactionNumber = r.strReceiptNumber
 		) firstLog 
 		-- Get all the related history records. 
 		CROSS APPLY (
@@ -33,7 +34,9 @@ AS
 				tfh.intTradeFinanceId = tf.intTradeFinanceId
 				AND (
 					tfh.strTransactionNumber = r.strReceiptNumber
-					OR tfh.intTradeFinanceHistoryId <= firstLog.intTradeFinanceHistoryId
+					OR (
+						tfh.intTradeFinanceHistoryId <= firstLog.intTradeFinanceHistoryId
+						AND tfh.strTransactionType NOT IN ('Inventory Receipt', 'Inventory Return')
+					)
 				)
 		) tfh 
-GO 

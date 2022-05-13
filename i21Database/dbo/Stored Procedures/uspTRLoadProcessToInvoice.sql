@@ -161,6 +161,7 @@ BEGIN TRY
 		,ysnComboFreight						= DD.ysnComboFreight
 		,dblComboMinimumUnits					= DD.dblComboMinimumUnits
 		,dblComboSurcharge						= DD.dblComboSurcharge
+		,intInventoryReceiptId					= TR.intInventoryReceiptId
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -671,6 +672,7 @@ BEGIN TRY
 		,[ysnBlended]
 		,[ysnComboFreight]
 		,[dblComboFreightRate]
+		,[intInventoryReceiptId]
 	)
 	SELECT
 		0 AS intId
@@ -757,6 +759,7 @@ BEGIN TRY
 		,[ysnBlended]							= IE.ysnBlended
 		,[ysnComboFreight]						= IE.ysnComboFreight
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
+		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1) AND ysnComboFreight = 0
@@ -846,6 +849,7 @@ BEGIN TRY
 		,[ysnBlended]							= IE.ysnBlended
 		,[ysnComboFreight]						= IE.ysnComboFreight
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
+		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1 AND ysnComboFreight = 1)
@@ -1480,6 +1484,28 @@ BEGIN TRY
 		,[strBOLNumberDetail]
 
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
+
+	-- CHECK IF INTERNAL CARRIER
+	IF EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice E
+	LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
+	WHERE E.intLoadDistributionHeaderId IS NOT NULL AND S.strFreightBilledBy = 'Internal Carrier')
+	BEGIN
+		DECLARE @dblTotalCharge NUMERIC(18,6) = NULL
+		
+		SELECT @dblTotalCharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
+		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
+
+		UPDATE E SET E.intFreightCompanySegment = S.intCompanySegmentId
+		, E.intFreightLocationSegment = S.intProfitCenterId
+		, E.dblFreightCharge = @dblTotalCharge
+		FROM @EntriesForInvoice E
+		LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
+		WHERE E.intId = (
+			SELECT TOP 1 intId FROM @EntriesForInvoice EI
+			LEFT JOIN tblSMShipVia SI ON SI.intEntityId = EI.intShipViaId
+			WHERE EI.intLoadDistributionHeaderId IS NOT NULL AND SI.strFreightBilledBy = 'Internal Carrier'
+		)
+	END
 
 	EXEC [dbo].[uspARProcessInvoices]
 			 @InvoiceEntries	= @EntriesForInvoice

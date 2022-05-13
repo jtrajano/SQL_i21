@@ -138,10 +138,10 @@ BEGIN
 				, strBankApprovalStatus = STF.strApprovalStatus
 				, dblLimit = limit.dblLimit
 				, dblSublimit = sublimit.dblLimit
-				, dblFinanceQty = CASE WHEN cd.intApprovalStatusId = 4 THEN 0 
+				, dblFinanceQty = CASE WHEN cd.intApprovalStatusId in (3,4) THEN 0 
 										ELSE  case when cd.intContractStatusId <> 6 then cd.dblQuantity else (cd.dblQuantity - cd.dblBalance) END 
 								  END
-				, dblFinancedAmount = (CASE WHEN cd.intApprovalStatusId = 4 THEN 0 
+				, dblFinancedAmount = (CASE WHEN cd.intApprovalStatusId in (3,4) THEN 0 
 											ELSE case when cd.intContractStatusId <> 6 then cd.dblTotalCost else cd.dblTotalCost * ((cd.dblQuantity - cd.dblBalance) / cd.dblQuantity) end
 									  END) * (case when cd.intCurrencyId <> cd.intInvoiceCurrencyId and isnull(cd.dblRate,0) <> 0 then cd.dblRate else 1 end)
 				, strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
@@ -223,7 +223,7 @@ BEGIN
 		WHERE intTradeFinanceId = @intTradeFinanceId
 
 
-		IF  (@strCurrentStatus in ('Rejected', 'Canceled'))
+		IF  (@strCurrentStatus in ('Rejected', 'Cancelled'))
 		BEGIN
 			SET @strAction = 'UPDATE'
 		END
