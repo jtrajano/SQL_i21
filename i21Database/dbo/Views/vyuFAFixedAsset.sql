@@ -87,7 +87,6 @@ ysnChildAsset = CAST(
     CASE WHEN ChildAsset.strAssetId IS NULL
     THEN 0 ELSE 1 END
     AS BIT),
-FA.ysnNewAccountPosted,
 FA.intNewAssetAccountId,  
 FA.intNewExpenseAccountId,  
 FA.intNewDepreciationAccountId,  
