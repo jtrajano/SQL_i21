@@ -24,6 +24,7 @@ select
 	Vendor,
 	Customer,
 	Employee,
+	intCurrencyId,
 	strCurrency,
 	strIBANWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strIBAN), 4),
     strIBAN = dbo.fnAESDecryptASym(strIBAN),

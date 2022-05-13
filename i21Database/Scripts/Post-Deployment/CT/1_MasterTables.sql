@@ -849,6 +849,10 @@ BEGIN
 	INSERT INTO tblCTApprovalStatusTF
 	select 4, 'Cancelled', 1
 END
+ELSE 
+BEGIN
+	UPDATE tblCTApprovalStatusTF SET strApprovalStatus = 'Cancelled' WHERE intApprovalStatusId = 4
+END
 GO
 
 IF EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed')

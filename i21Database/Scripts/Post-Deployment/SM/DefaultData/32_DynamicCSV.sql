@@ -109,10 +109,10 @@ SET strCommand = N'
 		SET @ValidationMessage = @ValidationMessage + ''The User Role of '' + @PortalUserRole + '' was not found in the Portal User Role. Please add this Role from the System Manager screen and re-attempt the upload''
 	END
 
-	IF (@Email IS NULL OR @Email = '''')
+	IF (@Email IS NULL OR @Email = '''') AND (@PortalBit = 1 AND ISNULL(@PortalPassword, '''') <> '''' AND EXISTS(SELECT TOP 1 1 FROM vyuEME2C2Role WHERE intEntityId = @EntityId AND ysnAdmin = 1))
 	BEGIN
 		IF @ValidationMessage != ''''
-	BEGIN
+		BEGIN
    			SET @ValidationMessage = @ValidationMessage + '',''
 		END
 		SET @ValidationMessage = @ValidationMessage + ''The Portal Username and Contact Email will be identical.  Please provide a valid email to use as the Portal Username and re-attempt the upload.''
@@ -134,13 +134,18 @@ SET strCommand = N'
 
 	SELECT @EntityId = intEntityId
 		FROM tblEMEntity
-			where strEntityNo LIKE ''%'' + ''@entityCustomerId@''
+			where strEntityNo = ''@entityCustomerId@''
 
 	SET @EntityLocationId = null
 	IF ISNULL(@EntityId, 0) > 0 and @LocationName <> ''''
 	BEGIN
 		SELECT TOP  1 @EntityLocationId = intEntityLocationId FROM tblEMEntityLocation where intEntityId = @EntityId and rtrim(ltrim(lower(@LocationName))) = rtrim(ltrim(lower(strLocationName)))
+	END
 
+	IF ISNULL(@EntityId, 0) = 0
+	BEGIN
+		SET @ValidationMessage = ''Entity Number does not exists!. Please check the Customer Entity No. and re-attempt the upload''
+		RAISERROR(@ValidationMessage, 16, 1);
 	END
 
 	IF ISNULL(@EntityId, 0) > 0
