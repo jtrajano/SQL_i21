@@ -1,17 +1,47 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRGetPaycheckEmployeeDeductions]
-@intPaycheckId INT
-AS 
+	@intPaycheckId INT
+	,@intYear INT	
+	,@intEmployeeId INT
+AS
 BEGIN
-
- SELECT intPaycheckId,
-       intPaycheckDeductionId,
-       strDeduction,
-       dblTotal = dblTotal * CASE WHEN (ysnVoid = 1) THEN - 1 ELSE 1 END,
-       dblTotalYTD,
-       strPaidBy,
-       strDeductFrom
-  FROM vyuPRPaycheckDeduction
-  WHERE intPaycheckId = @intPaycheckId
-  
-END
-GO
+	IF(NULLIF(@intPaycheckId,0) IS NOT NULL)
+		BEGIN
+			SELECT YEAR (vyuPRPaycheckDeduction.dtmPayDate) intYear,
+				DATEPART (QQ, vyuPRPaycheckDeduction.dtmPayDate)
+				intQuarter, 
+				vyuPRPaycheckDeduction.intPaycheckId,
+				vyuPRPaycheckDeduction.intPaycheckDeductionId,
+				vyuPRPaycheckDeduction.strDeduction,
+				vyuPRPaycheckDeduction.dblTotal,
+				vyuPRPaycheckDeduction.dblTotalYTD,
+				vyuPRPaycheckDeduction.strPaidBy,
+				vyuPRPaycheckDeduction.strDeductFrom,
+				vyuPRPaycheckDeduction.strDescription,
+				vyuPRPaycheckDeduction.intEntityEmployeeId
+      
+			FROM vyuPRPaycheckDeduction
+			WHERE vyuPRPaycheckDeduction.ysnVoid = 0
+		END
+	ELSE
+		BEGIN
+			SELECT YEAR (vyuPRPaycheckDeduction.dtmPayDate) intYear,
+				DATEPART (QQ, vyuPRPaycheckDeduction.dtmPayDate)
+				intQuarter, 
+				vyuPRPaycheckDeduction.intPaycheckId,
+				vyuPRPaycheckDeduction.intPaycheckDeductionId,
+				vyuPRPaycheckDeduction.strDeduction,
+				vyuPRPaycheckDeduction.dblTotal,
+				vyuPRPaycheckDeduction.dblTotalYTD,
+				vyuPRPaycheckDeduction.strPaidBy,
+				vyuPRPaycheckDeduction.strDeductFrom,
+				vyuPRPaycheckDeduction.strDescription,
+				vyuPRPaycheckDeduction.intEntityEmployeeId
+      
+			FROM vyuPRPaycheckDeduction
+			WHERE vyuPRPaycheckDeduction.ysnVoid = 0
+			AND (@intYear IS NULL OR YEAR (vyuPRPaycheckDeduction.dtmPayDate) = @intYear )
+			AND (@intEmployeeId IS NULL OR vyuPRPaycheckDeduction.intEntityEmployeeId = @intEmployeeId )
+		END
+ END
+ 
+ GO
