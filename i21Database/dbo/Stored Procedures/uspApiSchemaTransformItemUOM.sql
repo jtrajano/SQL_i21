@@ -363,7 +363,7 @@ INSERT INTO tblICItemUOM
 	intUnitMeasureId, 
 	strLongUPCCode,
 	strUpcCode,
-	intCheckDigit,
+	-- intCheckDigit,
 	dblUnitQty,
 	dblHeight,
 	dblWidth,
@@ -383,7 +383,7 @@ SELECT
 	, u.intUnitMeasureId
 	, ux.strUPCCode
 	, ux.strShortUPCCode
-	, dbo.fnICCalculateCheckDigit(ux.strUPCCode)
+	-- , dbo.fnICCalculateCheckDigit(ux.strUPCCode)
 	, ux.dblUnitQty
 	, ux.dblHeight
 	, ux.dblWidth
