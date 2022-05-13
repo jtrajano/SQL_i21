@@ -573,7 +573,6 @@ BEGIN TRY
 	DECLARE @billId INT;
 	DECLARE @tranType INT;
 	DECLARE @tmpBillDetailDelete TABLE(intBillId INT)
-	DECLARE @screenName NVARCHAR(100);
 	SELECT @actionType = 'Deleted'
 
 	INSERT INTO @tmpBillDetailDelete
@@ -588,12 +587,10 @@ BEGIN TRY
 		FROM @tmpBillDetailDelete A
 		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 
-		SET @screenName = CASE WHEN @tranType IN (1,2,13) THEN 'AccountsPayable.view.Voucher' ELSE 'AccountsPayable.view.DebitMemo' END 		
-
 		IF @tranType IN (1,2,3,13)
 		BEGIN
 			EXEC dbo.uspSMAuditLog 
-				@screenName = @screenName		-- Screen Namespace
+				@screenName = CASE WHEN @tranType IN (1,2,13) THEN 'AccountsPayable.view.Voucher' ELSE 'AccountsPayable.view.DebitMemo' END 		-- Screen Namespace
 				,@keyValue = @billId								-- Primary Key Value of the Voucher. 
 				,@entityId = @userId									-- Entity Id.
 				,@actionType = 'Created'                        -- Action Type
