@@ -1953,7 +1953,7 @@ BEGIN
 		,[intItemLocationId]
 		,ISNULL(dbo.fnGetMatchingItemUOMId([intItemId], ICIUOM.intUnitMeasureId), COSTING.intItemUOMId)
 		,[dtmDate]
-		,CASE WHEN [strType] IN ('CF Tran', 'POS') THEN ABS([dblQty]) ELSE [dblQty] END
+		,[dblQty]
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
