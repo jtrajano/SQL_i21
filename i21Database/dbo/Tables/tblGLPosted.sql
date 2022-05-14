@@ -13,5 +13,5 @@
 	[intCurrencyId]			INT             NOT NULL,
 	[intConcurrencyId]		INT             NOT NULL,
 	[intLedgerId]			INT             NOT NULL,
-	CONSTRAINT [PK_tblGLPosted] PRIMARY KEY CLUSTERED ([intAccountId] ASC,[dtmDate] ASC,[intCurrencyId] ASC,[strCode] ASC),
+	CONSTRAINT [PK_tblGLPosted] PRIMARY KEY CLUSTERED ([intAccountId] ASC,[dtmDate] ASC,[intCurrencyId] ASC,[strCode] ASC,[intLedgerId] ASC),
 )

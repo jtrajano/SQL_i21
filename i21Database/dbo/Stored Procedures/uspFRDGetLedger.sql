@@ -16,7 +16,7 @@ BEGIN
 	);     
 
 	SET @strFilterString = REPLACE(REPLACE(REPLACE(REPLACE(@strFilterString,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription')
-	SET @queryString = 'INSERT INTO #tempLedger SELECT TOP 1 intLedgerId FROM vyuGLSummary WHERE  '+@strFilterString+''         
+	SET @queryString = 'INSERT INTO #tempLedger SELECT TOP 1 intLedgerId FROM vyuGLSummary WHERE  '+@strFilterString+' AND intLedgerId <> 0'         
 	EXEC(@queryString)    
 
 	WHILE EXISTS(SELECT 1 FROM #tempLedger)          
