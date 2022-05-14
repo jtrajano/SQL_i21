@@ -59,7 +59,7 @@ IF OBJECT_ID(''tempdb..##tmpCMBT'') IS NOT NULL DROP TABLE ##tmpCMBT
 SELECT 
         intBankTransactionTypeId
         --,intBankAccountId
-  
+        ,intCurrencyId
         ,dblExchangeRate
        --, intCurrencyExchangeRateTypeId
         ,dtmDate
@@ -84,6 +84,15 @@ SELECT
         ,dtmLastModified
 
  INTO ##tmpCMBT FROM vyuCMGetBankTransaction WHERE @intTransactionId = intTransactionId
+
+ UPDATE A SET intCurrencyId = B.intCurrencyID
+FROM
+##tmpCMBT A 
+outer apply(
+    SELECT top 1  intCurrencyID from	[Subsidiary].dbo.tblSMCurrency B  
+    where strCurrency=@strCurrencyTransaction
+)B
+
 
 IF OBJECT_ID(''tempdb..##tmpCMBTD'') IS NOT NULL DROP TABLE ##tmpCMBTD
 
@@ -202,6 +211,7 @@ INSERT INTO [Subsidiary].dbo.tblCMBankTransaction (
 	strTransactionId
 	  ,intBankTransactionTypeId
 	  ,intBankAccountId
+      ,intCurrencyId
         ,dblExchangeRate
         ,dtmDate
         ,strPayee
@@ -228,6 +238,7 @@ select
 		@newTransId
 		,case when @dblAmount > 0 then 2 else 1 end
         ,@intBankAccountId
+        ,intCurrencyId
         ,dblExchangeRate
         ,dtmDate
         ,strPayee
