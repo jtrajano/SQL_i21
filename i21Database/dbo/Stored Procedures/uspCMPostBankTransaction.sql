@@ -654,6 +654,10 @@ BEGIN
 		END
 		
 	END
+	ELSE
+	BEGIN
+		EXEC uspCMCreateInterCompanyBankTransaction @intTransactionId
+	END
 
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END --@ysnRecap = 0
