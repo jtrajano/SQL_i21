@@ -28,9 +28,9 @@ BEGIN
 
 SELECT TOP 1 @intTransactionDetailId = intTransactionDetailId, @strDatabase = strDatabase, @strRefreshScript =strRefreshScript FROM @tbl
 
-
-IF ISNULL(@strRefreshScript,'') <> ''
-    EXEC sp_executesql @strRefreshScript
+-- COMMENT OUT UNTIL FURTHER NOTICE
+-- IF ISNULL(@strRefreshScript,'') <> ''
+--     EXEC sp_executesql @strRefreshScript
 
 
 
