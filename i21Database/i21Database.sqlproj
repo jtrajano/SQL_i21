@@ -805,6 +805,8 @@
     <Build Include="dbo\Functions\fnGLGetOverrideAccountBySegment2.sql" />
     <Build Include="dbo\Tables\tblGLEliminate.sql" />
     <Build Include="dbo\Views\vyuGLEliminate.sql" />
+    <Build Include="dbo\Tables\tblGLEliminateDetail.sql" />
+    <Build Include="dbo\Views\vyuGLEliminateDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
