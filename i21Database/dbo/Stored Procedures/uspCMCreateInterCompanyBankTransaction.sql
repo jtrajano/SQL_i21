@@ -1,5 +1,5 @@
 CREATE PROCEDURE uspCMCreateInterCompanyBankTransaction
-@intTransactionid INT
+@intTransactionId INT
 AS
 
 IF NOT EXISTS (SELECT 1 FROM tblCMBankTransaction WHERE ysnInterCompany =1 AND  intTransactionId = @intTransactionId)
