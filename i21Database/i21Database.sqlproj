@@ -807,6 +807,8 @@
     <Build Include="dbo\Views\vyuGLEliminate.sql" />
     <Build Include="dbo\Tables\tblGLEliminateDetail.sql" />
     <Build Include="dbo\Views\vyuGLEliminateDetail.sql" />
+    <Build Include="dbo\Tables\tblARReserveDetail.sql" />
+    <Build Include="dbo\Views\vyuARReserveDetailTemp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
