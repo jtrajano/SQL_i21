@@ -1736,6 +1736,8 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateParentCompany.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCreateInterCompanyBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
     <Build Include="dbo\Views\vyuSMContacts.sql" />
