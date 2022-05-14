@@ -16,18 +16,19 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 
 DECLARE @ErrorMsg NVARCHAR(MAX)
-DECLARE @IdGood Id
+DECLARE @IdGood FixedAssetLedgerTypeTable
 --DECLARE @ysnSingleMode BIT = 0
 DECLARE @tblError TABLE (  
   [intAssetId] [int] NOT NULL,  
-  strError NVARCHAR(400) NULL
+  strError NVARCHAR(400) NULL,
+  intLedgerId INT NULL
 )  
 
 
 --IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
 
 INSERT INTO @tblError 
-      SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @BookId, @Id)
+      SELECT intAssetId , strError, intLedgerId FROM fnFAValidateAssetDepreciation(@ysnPost, @BookId, @Id)
 
 
   UPDATE BD
@@ -47,7 +48,7 @@ INSERT INTO @tblError
 
 
 INSERT INTO @IdGood
-    SELECT A.intId FROM @Id A LEFT JOIN @tblError B
+    SELECT A.intId, B.intLedgerId FROM @Id A LEFT JOIN @tblError B
     ON A.intId = B.intAssetId WHERE B.intAssetId IS NULL
     
 IF NOT EXISTS (SELECT TOP 1 1 FROM @IdGood)
@@ -120,10 +121,10 @@ IF ISNULL(@ysnRecap, 0) = 0
 BEGIN     
         
       DECLARE @GLEntries RecapTableType ,
-              @IdHasNoDepreciation Id,
-              @IdHasDepreciation Id,
-              @IdHasBasisAdjustment Id,
-              @IdHasDepreciationAdjustment Id
+              @IdHasNoDepreciation FixedAssetLedgerTypeTable,
+              @IdHasDepreciation FixedAssetLedgerTypeTable,
+              @IdHasBasisAdjustment FixedAssetLedgerTypeTable,
+              @IdHasDepreciationAdjustment FixedAssetLedgerTypeTable
       
       -- Adjustment to Basis and Depreciation should be different/separated
 	   DECLARE @tblBasisAdjustment TABLE (
@@ -182,10 +183,10 @@ BEGIN
       DELETE FROM @IdGood
 
       INSERT INTO @IdGood
-        SELECT intAssetId FROM @tblDepComputation WHERE strError IS NULL
+        SELECT intAssetId, intLedgerId FROM @tblDepComputation WHERE strError IS NULL
 
-      INSERT INTO @tblError(intAssetId, strError)
-        SELECT intAssetId,strError FROM @tblDepComputation WHERE strError IS NOT NULL
+      INSERT INTO @tblError(intAssetId, strError, intLedgerId)
+        SELECT intAssetId, strError, intLedgerId FROM @tblDepComputation WHERE strError IS NOT NULL
       
       DELETE FROM @tblDepComputation WHERE strError IS NOT NULL
       
@@ -193,28 +194,26 @@ BEGIN
           GOTO LogError
       
     INSERT INTO @IdHasNoDepreciation 
-		select intId from @IdGood 
-		outer apply
-		(	
-			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
-      AND ISNULL(intBookId,1) = @BookId
-      AND strTransaction  in( 'Depreciation','Imported')
+		SELECT G.intId, G.intLedgerId FROM @IdGood G
+		OUTER APPLY (	
+            SELECT COUNT(*) cnt FROM tblFAFixedAssetDepreciation WHERE intAssetId = G.intId AND intLedgerId = intLedgerId
+            AND ISNULL(intBookId,1) = @BookId
+            AND strTransaction  in( 'Depreciation','Imported')
 		)D
-        where D.cnt = 0
+        WHERE D.cnt = 0
 
     INSERT INTO @IdHasDepreciation 
-		select intId from @IdGood 
-		outer apply
-		(	
-			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
-      AND ISNULL(intBookId,1) = @BookId
-      AND strTransaction  in( 'Depreciation','Imported')
+		SELECT G.intId, G.intLedgerId FROM @IdGood G
+		OUTER APPLY (	
+			SELECT count(*) cnt FROM tblFAFixedAssetDepreciation WHERE intAssetId = G.intId AND intLedgerId = G.intLedgerId
+            AND ISNULL(intBookId,1) = @BookId
+            AND strTransaction  in( 'Depreciation','Imported')
 		)D
-        where D.cnt > 0
+        WHERE D.cnt > 0
 
 	-- GL Entry for Adjustment is for GAAP only
 	INSERT INTO @IdHasBasisAdjustment
-        SELECT intId FROM @IdGood
+        SELECT intId, intLedgerId FROM @IdGood
         OUTER APPLY (
             SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId) WHERE intAssetId = intId AND intBookdId = @BookId AND (strAdjustmentType IS NULL OR strAdjustmentType = 'Basis')
         ) Adjustment
@@ -241,7 +240,8 @@ BEGIN
     END 
 
     INSERT INTO @IdHasDepreciationAdjustment
-        SELECT intId FROM @IdGood
+        SELECT intId, BD.intLedgerId FROM @IdGood
+        LEFT JOIN tblFABookDepreciation BD ON BD.intAssetId = intId AND BD.intBookId = @BookId
         OUTER APPLY (
             SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId) WHERE intAssetId = intId AND intBookdId = @BookId AND strAdjustmentType = 'Depreciation'
         ) Adjustment
@@ -274,7 +274,7 @@ BEGIN
       IF EXISTS(SELECT TOP 1 1 FROM @IdHasNoDepreciation)  
       BEGIN  
           DELETE FROM @IdIterate
-          INSERT INTO @IdIterate SELECT intId FROM @IdHasNoDepreciation
+          INSERT INTO @IdIterate SELECT DISTINCT intId FROM @IdHasNoDepreciation
           WHILE EXISTS(SELECT TOP 1 1 FROM @IdIterate)
           BEGIN
               SELECT TOP 1 @i = intId FROM @IdIterate 
@@ -302,7 +302,8 @@ BEGIN
                   [strTransactionId],  
                   [strType],  
                   [strConvention],
-                  [strBatchId]
+                  [strBatchId],
+                  [intLedgerId]
                 )  
                   SELECT  
                   @i,  
@@ -312,7 +313,7 @@ BEGIN
                   E.dblDepreciationBasis,
                   BD.dtmPlacedInService,  
                   NULL,  
-				  [dbo].[fnFAGetNextDepreciationDate](@i, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
+				  [dbo].[fnFAGetNextDepreciationDate](@i, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END, E.intLedgerId),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
                   E.dblDepre,
                   E.dblMonth,
                   E.dblFunctionalMonth,
@@ -326,21 +327,24 @@ BEGIN
                   @strTransactionId,  
                   D.strDepreciationType,
                   D.strConvention,
-                  @strBatchId
+                  @strBatchId,
+                  E.intLedgerId
                   FROM tblFAFixedAsset F 
                   JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
                   JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                   OUTER APPLY (
-                    SELECT dblDepre,dblBasis, dblDepreciationBasis, dblRate, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction 
+                    SELECT dblDepre,dblBasis, dblDepreciationBasis, dblRate, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction, intLedgerId 
                     FROM @tblDepComputation WHERE intAssetId = @i
                   ) E
                   OUTER APPLY(
                     SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
-                    WHERE [intAssetId] = @i AND intBookId = @BookId
+                    WHERE [intAssetId] = @i AND intBookId = @BookId AND intLedgerId = E.intLedgerId
                     ORDER BY dtmDepreciationToDate DESC
                   )Depreciation
                   WHERE F.intAssetId = @i
                   AND BD.intBookId = @BookId
+                  AND BD.intLedgerId = E.intLedgerId
+
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId, ysnDepreciated = 1 WHERE intAssetId = @i
                   DELETE FROM @IdIterate WHERE intId = @i
           END
@@ -349,7 +353,7 @@ BEGIN
 	  IF EXISTS(SELECT TOP 1 1 FROM @IdHasBasisAdjustment)
       BEGIN  
           DELETE FROM @IdIterate
-          INSERT INTO @IdIterate SELECT intId FROM @IdHasBasisAdjustment
+          INSERT INTO @IdIterate SELECT DISTINCT intId FROM @IdHasBasisAdjustment
  
           WHILE EXISTS(SELECT TOP 1 1 FROM @IdIterate)
           BEGIN
@@ -425,7 +429,7 @@ BEGIN
       IF EXISTS(SELECT TOP 1 1 FROM @IdHasDepreciationAdjustment)
       BEGIN  
           DELETE FROM @IdIterate
-          INSERT INTO @IdIterate SELECT intId FROM @IdHasDepreciationAdjustment
+          INSERT INTO @IdIterate SELECT DISTINCT intId FROM @IdHasDepreciationAdjustment
  
           WHILE EXISTS(SELECT TOP 1 1 FROM @IdIterate)
           BEGIN
@@ -500,7 +504,7 @@ BEGIN
       IF EXISTS(SELECT TOP 1 1 FROM @IdHasDepreciation)
       BEGIN  
           DELETE FROM @IdIterate
-          INSERT INTO @IdIterate SELECT intId FROM @IdHasDepreciation
+          INSERT INTO @IdIterate SELECT DISTINCT intId FROM @IdHasDepreciation
  
           WHILE EXISTS(SELECT TOP 1 1 FROM @IdIterate)
           BEGIN
@@ -528,7 +532,8 @@ BEGIN
                 [strTransactionId],  
                 [strType],  
                 [strConvention],
-                [strBatchId]
+                [strBatchId],
+                [intLedgerId]
               )  
               SELECT  
                 @i,
@@ -538,7 +543,7 @@ BEGIN
                 E.dblDepreciationBasis,
                 BD.dtmPlacedInService,  
                 NULL,  
-				        dbo.fnFAGetNextDepreciationDate(@i, @BookId),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
+				        dbo.fnFAGetNextDepreciationDate(@i, @BookId, E.intLedgerId),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
                 E.dblDepre,  
                 E.dblMonth,
                 E.dblFunctionalMonth,
@@ -552,15 +557,17 @@ BEGIN
                 @strTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention,
-                @strBatchId
+                @strBatchId,
+                E.intLedgerId
                 FROM tblFAFixedAsset F 
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                 OUTER APPLY (
-                  SELECT dblDepre,dblBasis, dblDepreciationBasis, dblRate, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
+                  SELECT dblDepre,dblBasis, dblDepreciationBasis, dblRate, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction, intLedgerId FROM @tblDepComputation WHERE intAssetId = @i
                 ) E
                 WHERE F.intAssetId = @i
                 AND BD.intBookId = @BookId
+                AND BD.intLedgerId = E.intLedgerId
 
                 UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
                 DELETE FROM @IdIterate WHERE intId = @i
@@ -870,7 +877,7 @@ UPDATE A  SET A.ysnTaxDepreciated = 1
 -- we should recreate the removed fiscal asset.
 DECLARE @IdAsset Id
 INSERT INTO @IdAsset
-SELECT intAssetId FROM @tblDepComputation
+SELECT DISTINCT intAssetId FROM @tblDepComputation
 
 WHILE EXISTS (SELECT TOP 1 1 FROM @IdAsset)
 BEGIN
@@ -924,37 +931,44 @@ BEGIN
 END
 
   ;WITH Q as(
-     SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult, 'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError 
-      FROM @GLEntries C WHERE @strBatchId = strBatchId
+     SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult, 'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError, L.strLedgerName 
+      FROM @GLEntries C 
+      LEFT JOIN tblGLLedger L ON L.intLedgerId = C.intLedgerId
+      WHERE @strBatchId = strBatchId
       AND ysnIsUnposted = 0  AND @BookId = 1
       AND strModuleName ='Fixed Assets'
-      GROUP by strReference, strTransactionId, dtmDate
+      GROUP by strReference, strTransactionId, dtmDate, L.strLedgerName
     UNION
-	  SELECT strAssetId, strTransactionId, 'Asset Basis Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+	  SELECT strAssetId, strTransactionId, 'Asset Basis Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) ysnError, L.strLedgerName
 	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
       WHERE @strBatchId = strBatchId AND A.intBookId = 1 AND @BookId = 1
 	  AND strTransaction = 'Basis Adjustment'
 	UNION
-      SELECT strAssetId, strTransactionId, 'Asset Depreciation Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+      SELECT strAssetId, strTransactionId, 'Asset Depreciation Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) ysnError, L.strLedgerName
 	  FROM  tblFAFixedAssetDepreciation A 
+      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId = 1 AND @BookId = 1 
 	  AND strTransaction = 'Depreciation Adjustment'
 	UNION
-      SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+      SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) ysnError, L.strLedgerName
 	  FROM  tblFAFixedAssetDepreciation A 
+      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
 	UNION
-      SELECT strAssetId, strTransactionId, 'Tax Basis Adjusted' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+      SELECT strAssetId, strTransactionId, 'Tax Basis Adjusted' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) ysnError, L.strLedgerName
 	  FROM  tblFAFixedAssetDepreciation A 
+      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
 	  AND strTransaction = 'Basis Adjustment'
 	UNION
-      SELECT strAssetId, strTransactionId, 'Tax Depreciation Adjusted' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+      SELECT strAssetId, strTransactionId, 'Tax Depreciation Adjusted' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) ysnError, L.strLedgerName
 	  FROM  tblFAFixedAssetDepreciation A 
+      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
 	  AND strTransaction = 'Depreciation Adjustment'
@@ -964,11 +978,13 @@ END
       WHEN @BookId = 2 THEN 'Tax'
       END strBook, 
       NULL dtmDate ,
-      CAST(1 AS BIT)
+      CAST(1 AS BIT) ysnError,
+      L.strLedgerName
       FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
+      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
   )
-  INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strBook, strResult, dtmDate,ysnError) 
-  SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate, ysnError FROM Q ORDER BY strAssetId
+  INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strBook, strResult, dtmDate, ysnError, strLedgerName) 
+  SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate, ysnError, strLedgerName FROM Q ORDER BY strAssetId
 
 DECLARE @intGLEntry INT
 

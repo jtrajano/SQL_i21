@@ -3,7 +3,7 @@ AS
 WITH GetNextForDepreciate AS(  
  SELECT 
     B.intAssetId, 
-    dtmNextDepreciation = dbo.fnFAGetNextDepreciationDate(B.intAssetId, BD.intBookId)
+    dtmNextDepreciation = dbo.fnFAGetNextDepreciationDate(B.intAssetId, BD.intBookId, BD.intLedgerId)
  FROM tblFAFixedAssetDepreciation A
  RIGHT JOIN tblFAFixedAsset B ON A.intAssetId = B.intAssetId  
  JOIN tblFABookDepreciation BD on BD.intAssetId = B.intAssetId  
