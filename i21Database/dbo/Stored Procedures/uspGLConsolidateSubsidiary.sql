@@ -178,6 +178,7 @@ BEGIN
 
 				WHERE dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
 				AND ysnIsUnposted =0
+				AND intSubsidiaryCompanyId IS NULL
 			UPDATE [ParentDbName].dbo.tblGLConsolidateLog
 			SET strComment= ''Successfully consolidated'' ,
 			intRowInserted = @@ROWCOUNT,
