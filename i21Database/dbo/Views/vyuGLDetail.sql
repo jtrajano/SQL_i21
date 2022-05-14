@@ -62,7 +62,8 @@ AS
         A.ysnPostAction,
         A.dtmDateEnteredMin,
         FP.strPeriod,
-        L.strLedgerName
+        L.strLedgerName,
+        A.intSubsidiaryCompanyId
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
