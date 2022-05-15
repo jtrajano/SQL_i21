@@ -50,6 +50,7 @@ select
 			,ysnVendor
 			,strServiceType
 			,ysnTimeOff
+			,strCustomerName 
 from
 (
 		select
@@ -102,6 +103,7 @@ from
 			,ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType m where m.intEntityId = a.intAgentEntityId and m.strType = 'Vendor')
 			,strServiceType = h.strServiceType
 			,ysnTimeOff = convert(bit,0)
+			,strCustomerName = m.strName
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
@@ -115,6 +117,7 @@ from
 			left join tblHDProjectTask j on j.intTicketId = a.intTicketId
 			left join tblHDProject k on k.intProjectId = j.intProjectId
 			left join tblAPBill l on l.intBillId = a.intBillId
+			left join tblEMEntity m on m.intEntityId = i.intCustomerId
 
 union all
 
@@ -168,6 +171,7 @@ union all
 			,ysnVendor = convert(bit,0)
 			,strServiceType = null
 			,ysnTimeOff = convert(bit,1)
+			,strCustomerName = ''
 		from
 			tblHDTimeOffRequest a
 			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId

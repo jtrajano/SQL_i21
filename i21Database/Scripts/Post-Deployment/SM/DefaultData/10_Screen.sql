@@ -1224,6 +1224,20 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Warrant', N'Warrant', N'Inventory.view.Warrant', N'Inventory', NULL, 1, N'Inventory')
 	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'HelpDesk.view.TimeEntry')
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [ysnApproval], [intConcurrencyId])
+			VALUES (N'Time Entry', N'Time Entry', N'HelpDesk.view.TimeEntry', N'HelpDesk', 1, 0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET  ysnApproval = 1
+			WHERE strNamespace = 'HelpDesk.view.TimeEntry'
+		END
+
+
 	
 
 	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
