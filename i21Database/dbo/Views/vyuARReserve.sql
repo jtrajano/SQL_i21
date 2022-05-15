@@ -11,6 +11,7 @@ SELECT
 	,[dblReserveBucket60Percentage]
 	,[dblReserveBucket90Percentage]
 	,[dblReserveBucket120Percentage]
+	,ARR.intConcurrencyId
 FROM tblARReserve ARR
 LEFT JOIN tblGLFiscalYearPeriod GLFYP ON ARR.intGLFiscalYearPeriodId = GLFYP.intGLFiscalYearPeriodId
 LEFT JOIN tblGLFiscalYear GLFY ON ARR.intFiscalYearId = GLFY.intFiscalYearId
