@@ -77,7 +77,7 @@ BEGIN
 		BEGIN   
   
 			INSERT INTO #tempFormulaConcat  
-			SELECT * FROM dbo.splitstring((SELECT LTRIM(REPLACE(REPLACE(strAccountsUsed,'Or',','),'And',','))  FROM tblFRRowDesignDrillDown WHERE  intRowDetailId = @intRowDetailId  ))  
+			SELECT * FROM dbo.fnFRDSplitString((SELECT LTRIM(REPLACE(REPLACE(strAccountsUsed,'Or',','),'And',','))  FROM tblFRRowDesignDrillDown WHERE  intRowDetailId = @intRowDetailId  ))  
 			WHILE EXISTS(SELECT 1 FROM #tempFormulaConcat)    
 			BEGIN   
 				SET @intStart = (SELECT CHARINDEX('[',(SELECT TOP 1 Formula FROM #tempFormulaConcat)))  
@@ -103,7 +103,7 @@ BEGIN
 		BEGIN   
   
 		INSERT INTO #tempFormulaConcat  
-		SELECT * FROM dbo.splitstring((SELECT LTRIM(REPLACE(REPLACE(strAccountsUsed,'Or',','),'And',','))  FROM tblFRRowDesignPrintEach WHERE  intRowDetailId = @intRowDetailId  ))  
+		SELECT * FROM dbo.fnFRDSplitString((SELECT LTRIM(REPLACE(REPLACE(strAccountsUsed,'Or',','),'And',','))  FROM tblFRRowDesignPrintEach WHERE  intRowDetailId = @intRowDetailId  ))  
 		WHILE EXISTS(SELECT 1 FROM #tempFormulaConcat)    
 			BEGIN   
 				SET @intStart = (SELECT CHARINDEX('[',(SELECT TOP 1 Formula FROM #tempFormulaConcat)))  
@@ -129,7 +129,7 @@ BEGIN
 		BEGIN   
   
 		INSERT INTO #tempFormulaConcat  
-		SELECT * FROM dbo.splitstring((SELECT LTRIM(REPLACE(REPLACE(strAccountsUsed,'Or',','),'And',','))  FROM tblFRRowDesignCurrencies WHERE  intRowDetailId = @intRowDetailId  ))  
+		SELECT * FROM dbo.fnFRDSplitString((SELECT LTRIM(REPLACE(REPLACE(strAccountsUsed,'Or',','),'And',','))  FROM tblFRRowDesignCurrencies WHERE  intRowDetailId = @intRowDetailId  ))  
 		WHILE EXISTS(SELECT 1 FROM #tempFormulaConcat)    
 			BEGIN   
 				SET @intStart = (SELECT CHARINDEX('[',(SELECT TOP 1 Formula FROM #tempFormulaConcat)))  
