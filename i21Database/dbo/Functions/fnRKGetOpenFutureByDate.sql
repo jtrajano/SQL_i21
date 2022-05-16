@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetOpenFutureByDate](
 	@intCommodityId INT = NULL
-	, @dtmFromDate DATETIME = NULL
-	, @dtmToDate DATETIME = NULL
+	, @dtmFromDate DATE = NULL
+	, @dtmToDate DATE = NULL
 	, @ysnCrush BIT = 0
 )
 RETURNS @FinalResult TABLE (intFutOptTransactionId INT
@@ -53,8 +53,8 @@ RETURNS @FinalResult TABLE (intFutOptTransactionId INT
 AS 
 
 BEGIN
-	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
-	SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
+	--SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+	--SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 
 	DECLARE @strCommodityCode NVARCHAR(MAX)
 		, @ysnDisableHistoricalDerivative BIT = 0
@@ -254,12 +254,12 @@ BEGIN
 							((@ysnDisableHistoricalDerivative = 0
 									AND 
 									(  (@strReportByDate = 'Create Date'
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
+											AND CAST(History.dtmCreateDateTime AS DATE) >= @dtmFromDate
+											AND CAST(History.dtmCreateDateTime AS DATE) <= @dtmToDate)
 										OR
 										((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+										AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
+										AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
 									))
 							  OR @ysnDisableHistoricalDerivative = 1
 							)
@@ -269,16 +269,16 @@ BEGIN
 				AND FOT.strStatus = 'Filled'
 				AND (  
 						(@strReportByDate = 'Batch Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(FOT.dtmTransactionDate AS DATE) >= @dtmFromDate
+						AND CAST(FOT.dtmTransactionDate AS DATE) <= @dtmToDate)
 						OR
 						(@strReportByDate = 'Create Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(FOT.dtmCreateDateTime AS DATE) >= @dtmFromDate
+						AND CAST(FOT.dtmCreateDateTime AS DATE) <= @dtmToDate)
 						OR 
 						(@strReportByDate = 'Filled Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(FOT.dtmFilledDate AS DATE) >= @dtmFromDate
+						AND CAST(FOT.dtmFilledDate AS DATE) <= @dtmToDate)
 					)
 				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
@@ -360,12 +360,12 @@ BEGIN
 						AND ((@ysnDisableHistoricalDerivative = 0
 									AND 
 									(  (@strReportByDate = 'Create Date'
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
+											AND CAST(History.dtmCreateDateTime AS DATE) >= @dtmFromDate
+											AND CAST(History.dtmCreateDateTime AS DATE) <= @dtmToDate)
 										OR
 										((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+										AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
+										AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
 									))
 							  OR @ysnDisableHistoricalDerivative = 1
 							)
@@ -375,16 +375,16 @@ BEGIN
 				AND FOT.strStatus = 'Filled'
 				AND (  
 						(@strReportByDate = 'Batch Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(FOT.dtmTransactionDate AS DATE) >= @dtmFromDate
+						AND CAST(FOT.dtmTransactionDate AS DATE) <= @dtmToDate)
 						OR
 						(@strReportByDate = 'Create Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(FOT.dtmCreateDateTime AS DATE) >= @dtmFromDate
+						AND CAST(FOT.dtmCreateDateTime AS DATE) <= @dtmToDate)
 						OR 
 						(@strReportByDate = 'Filled Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(FOT.dtmFilledDate AS DATE) >= @dtmFromDate
+						AND CAST(FOT.dtmFilledDate AS DATE) <= @dtmToDate)
 					)
 				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
@@ -462,12 +462,12 @@ BEGIN
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = History.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
 						AND (  (@strReportByDate = 'Create Date'
-									AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-									AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
+									AND CAST(History.dtmCreateDateTime AS DATE) >= @dtmFromDate
+									AND CAST(History.dtmCreateDateTime AS DATE) <= @dtmToDate)
 								OR
 								((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
-								AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-								AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+								AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
+								AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
 							)
 				) t WHERE intRowNum = 1
 						AND @ysnDisableHistoricalDerivative = 0
@@ -476,16 +476,16 @@ BEGIN
 				AND strStatus = 'Filled'
 				AND (  
 						(@strReportByDate = 'Batch Date' 
-						AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(dtmTransactionDate AS DATE) >= @dtmFromDate
+						AND CAST(dtmTransactionDate AS DATE) <= @dtmToDate)
 						OR
 						(@strReportByDate = 'Create Date' 
-						AND CAST(FLOOR(CAST(dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(dtmCreateDateTime AS DATE) >= @dtmFromDate
+						AND CAST(dtmCreateDateTime AS DATE) <= @dtmToDate)
 						OR 
 						(@strReportByDate = 'Filled Date' 
-						AND CAST(FLOOR(CAST(dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(dtmFilledDate AS DATE) >= @dtmFromDate
+						AND CAST(dtmFilledDate AS DATE) <= @dtmToDate)
 					)
 		) t2
 	)t3 WHERE t3.intRowNum = 1
