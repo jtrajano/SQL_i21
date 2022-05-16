@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF /*NOT*/ EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'AR Reserve' AND strModuleName = 'Accounts Receivable')
+	IF /*NOT*/ EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'AP Reserve' AND strModuleName = 'Accounts Payable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
