@@ -334,7 +334,7 @@ BEGIN
        ,[intTicketHoursWorkedId]        
        ,[intId]        
        ,[strSourceId]        
-       ,[intSourceId]        
+       --,[intSourceId]        
        --,[strBillingBy]        
        ,[dblPercentFull]        
     ,[intTruckDriverId]    
@@ -432,7 +432,7 @@ BEGIN
        ,[intTicketHoursWorkedId] = NULL        
        ,[intId] = @intImportDDToInvoiceId        
        ,[strSourceId]    = @strInvoiceNumber        
-       ,[intSourceId]    = 4
+       --,[intSourceId]    = @intImportDDToInvoiceId        
        --,[strBillingBy]    = @BillingBy        
        ,[dblPercentFull]   = @dblPercentFullAfterDelivery  
     ,[intTruckDriverId] =  @intDriverEntityId  
