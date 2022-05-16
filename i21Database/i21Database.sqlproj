@@ -520,6 +520,7 @@
     <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
     <Build Include="dbo\Views\vyuApiRecordAuditPivot.sql" />
     <Build Include="dbo\Views\vyuApiSalesperson.sql" />
+    <Build Include="dbo\Views\vyuApiTopCustomersBySalesPerUom.sql" />
     <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Functions\fnCMValidateCMRevaluation.sql" />
