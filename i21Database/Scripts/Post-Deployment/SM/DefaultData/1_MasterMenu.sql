@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'AR Reserve' AND strModuleName = 'Accounts Receivable')
+	IF /*NOT*/ EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'AR Reserve' AND strModuleName = 'Accounts Receivable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -2517,9 +2517,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'AR Reserve' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'AR Reserve', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'AR Reserve', N'Activity', N'Screen', N'AccountsReceivable.view.Reserve', N'small-menu-activity', 1, 0, 0, 1, 12, 1)
+	VALUES (N'AR Reserve', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'AR Reserve', N'Activity', N'Screen', N'AccountsReceivable.view.Reserve?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 12, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'AccountsReceivable.view.Reserve' WHERE strMenuName = 'AR Reserve' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'AccountsReceivable.view.Reserve?showSearch=true' WHERE strMenuName = 'AR Reserve' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 
 -- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivables' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 -- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
