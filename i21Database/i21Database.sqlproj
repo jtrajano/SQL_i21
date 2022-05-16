@@ -816,6 +816,10 @@
     <Build Include="dbo\Views\vyuHDGetAgentTimeEntryPeriodDetailInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspHDCreateUpdateAgentTimeEntryPeriodDetailSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspHDCreateAgentTimeEntry.sql" />
+    <Build Include="dbo\Tables\tblAPReserve.sql" />
+    <Build Include="dbo\Tables\tblAPReserveDetail.sql" />
+    <Build Include="dbo\Views\vyuAPReserve.sql" />
+    <Build Include="dbo\Views\vyuAPReserveDetailTemp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
