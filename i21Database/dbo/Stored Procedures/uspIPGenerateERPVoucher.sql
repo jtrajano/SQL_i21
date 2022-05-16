@@ -17,6 +17,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@intMaxRecordId int
 		,@intCurrentRecordId int
+		,@intLoadDetailId int
 	DECLARE @strQuantityUOM NVARCHAR(50)
 		,@strDefaultCurrency NVARCHAR(40)
 		,@intCurrencyId INT
@@ -464,6 +465,7 @@ BEGIN TRY
 				,@dblDetailTax = CONVERT(NUMERIC(18, 6), BD.dblTax)
 				,@intContractDetailId = BD.intContractDetailId
 				,@strType = I.strType
+				,@intLoadDetailId=BD.intLoadDetailId
 			FROM tblAPBillDetail BD
 			JOIN tblICItem I ON I.intItemId = BD.intItemId
 			JOIN dbo.tblSMCurrency C ON C.intCurrencyID = BD.intCurrencyId
@@ -481,7 +483,14 @@ BEGIN TRY
 					SELECT 1
 					FROM tblAPBillDetail
 					WHERE intBillDetailId = @intBillDetailId
-						AND intInventoryReceiptItemId IS NOT NULL
+					AND (
+							intInventoryReceiptItemId IS NOT NULL
+							OR (
+								intLoadDetailId IS NOT NULL
+								AND intContractDetailId IS NOT NULL
+								)
+							)
+
 					)
 			BEGIN
 				SELECT @dblCostAdjustment = NULL
@@ -496,7 +505,13 @@ BEGIN TRY
 				SELECT @intNoOfItem = Count(*)
 				FROM tblAPBillDetail
 				WHERE intBillId = @intBillId
-					AND intInventoryReceiptItemId IS NOT NULL
+				AND (
+					intInventoryReceiptItemId IS NOT NULL
+					OR (
+						intLoadDetailId IS NOT NULL
+						AND intContractDetailId IS NOT NULL
+						)
+					)
 
 				IF @intNoOfItem IS NULL
 					SELECT @intNoOfItem = 1
@@ -550,13 +565,14 @@ BEGIN TRY
 
 			IF ISNULL(@strReceiptNumber, '') = ''
 			BEGIN
-				SELECT @intNoOfReceipt = COUNT(1)
+				SELECT @intNoOfReceipt = COUNT(Distinct R.intInventoryReceiptId)
 				FROM tblLGLoad L WITH (NOLOCK)
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 					AND L.intShipmentType = 1
 					AND LD.intPContractDetailId = @intContractDetailId
 					AND L.intShipmentStatus <> 10
 					AND LD.intItemId = @intItemId
+					AND LD.intLoadDetailId=@intLoadDetailId
 				JOIN tblICInventoryReceiptItem RI WITH (NOLOCK) ON RI.intSourceId = LD.intLoadDetailId
 					AND RI.intLineNo = LD.intPContractDetailId
 				JOIN tblICInventoryReceipt R WITH (NOLOCK) ON R.intInventoryReceiptId = RI.intInventoryReceiptId
@@ -571,6 +587,7 @@ BEGIN TRY
 						AND LD.intPContractDetailId = @intContractDetailId
 						AND L.intShipmentStatus <> 10
 						AND LD.intItemId = @intItemId
+						AND LD.intLoadDetailId=@intLoadDetailId
 					JOIN tblICInventoryReceiptItem RI WITH (NOLOCK) ON RI.intSourceId = LD.intLoadDetailId
 						AND RI.intLineNo = LD.intPContractDetailId
 					JOIN tblICInventoryReceipt R WITH (NOLOCK) ON R.intInventoryReceiptId = RI.intInventoryReceiptId
