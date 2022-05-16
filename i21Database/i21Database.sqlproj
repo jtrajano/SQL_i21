@@ -684,6 +684,7 @@
     <Build Include="dbo\Tables\tblCMBankStatementImport.sql" />
     <Build Include="dbo\Functions\fnGetBankBalance.sql" />
     <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
+    <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
     <Build Include="dbo\Functions\fnGetBankGLBalance.sql" />
     <Build Include="dbo\Functions\fnGetUnclearedPayments.sql" />
     <Build Include="dbo\Functions\fnGetUnclearedDeposits.sql" />
