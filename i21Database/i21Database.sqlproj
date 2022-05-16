@@ -820,6 +820,7 @@
     <Build Include="dbo\Tables\tblAPReserveDetail.sql" />
     <Build Include="dbo\Views\vyuAPReserve.sql" />
     <Build Include="dbo\Views\vyuAPReserveDetailTemp.sql" />
+    <Build Include="dbo\Functions\fnAPGetAccountBudgetWarning.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
