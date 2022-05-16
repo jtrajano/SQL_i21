@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetOpenFutureByDate](
 	@intCommodityId INT = NULL
-	, @dtmFromDate DATETIME = NULL
-	, @dtmToDate DATETIME = NULL
+	, @dtmFromDate DATE = NULL
+	, @dtmToDate DATE = NULL
 	, @ysnCrush BIT = 0
 )
 RETURNS @FinalResult TABLE (intFutOptTransactionId INT
@@ -52,8 +52,8 @@ RETURNS @FinalResult TABLE (intFutOptTransactionId INT
 AS 
 
 BEGIN
-	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
-	SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
+	--SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+	--SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 
 	DECLARE @strCommodityCode NVARCHAR(MAX)
 
@@ -221,18 +221,18 @@ BEGIN
 					FROM vyuRKGetFutOptTransactionHistory History
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+						AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate 
+						AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate
 				) t WHERE intRowNum = 1
 			) History
 			WHERE FOT.strInstrumentType = 'Futures'
 				AND FOT.strStatus = 'Filled'
-				AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-				AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+				AND CAST(FOT.dtmFilledDate AS DATE) >= @dtmFromDate
+				AND CAST(FOT.dtmFilledDate AS DATE) <= @dtmToDate
 				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-											ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				AND CONVERT(DATE, CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
+											ELSE History.dtmTransactionDate END) <= @dtmToDate
 			
 			
 			UNION ALL
@@ -293,19 +293,20 @@ BEGIN
 						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History 
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
-					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId					
+						AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate 
+						AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate
 				) t WHERE intRowNum = 1
 			) History
 			WHERE FOT.strInstrumentType = 'Options'
 				AND FOT.strStatus = 'Filled'
-				AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-				AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+				AND CAST(FOT.dtmFilledDate AS DATE) >= @dtmFromDate
+				AND CAST(FOT.dtmFilledDate AS DATE) <= @dtmToDate
 				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-											ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				
+				AND CONVERT(DATE, CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
+											ELSE History.dtmTransactionDate END) <= @dtmToDate
 				
 
 			UNION ALL
@@ -366,14 +367,14 @@ BEGIN
 					FROM vyuRKGetFutOptTransactionHistory History 
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = History.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+						AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate 
+						AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate
 				) t WHERE intRowNum = 1
 			) History
 			WHERE ISNULL(@ysnCrush, 0) = 1
 				AND strStatus = 'Filled'
-				AND CAST(FLOOR(CAST(dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-				AND CAST(FLOOR(CAST(dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+				AND CAST(dtmFilledDate AS DATE) >= @dtmFromDate
+				AND CAST(dtmFilledDate AS DATE) <= @dtmToDate
 		) t2
 	)t3 WHERE t3.intRowNum = 1
 	RETURN
