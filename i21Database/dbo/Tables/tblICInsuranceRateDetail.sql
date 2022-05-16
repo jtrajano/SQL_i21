@@ -9,7 +9,8 @@
 	[intCurrencyId] [int] NOT NULL,
 	[intUnitMeasureId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 0,
-    CONSTRAINT [PK_tblICInsuranceRateDetail] PRIMARY KEY CLUSTERED ([intInsuranceRateDetailId] ASC)
+    CONSTRAINT [PK_tblICInsuranceRateDetail] PRIMARY KEY CLUSTERED ([intInsuranceRateDetailId] ASC),
+	CONSTRAINT [FK_tblICInsuranceRateDetail_tblICInsuranceRate] FOREIGN KEY ([intInsuranceRateId]) REFERENCES [tblICInsuranceRate]([intInsuranceRateId])
 ) 
 GO
 
