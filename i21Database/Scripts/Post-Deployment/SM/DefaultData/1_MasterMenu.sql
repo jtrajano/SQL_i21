@@ -2140,6 +2140,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Voucher C
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.VoucherCheckOffDetail?showSearch=true', intSort = 9 WHERE strMenuName = 'Voucher CheckOff Detail' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'AP Reserve' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'AP Reserve', N'Accounts Payable', @AccountsPayableActivitiesParentMenuId, N'AP Reserve', N'Activity', N'Screen', N'AccountsPayable.view.Reserve?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Reserve?showSearch=true', intSort = 10 WHERE strMenuName = 'AP Reserve' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Buyers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Buyers', N'Accounts Payable', @AccountsPayableMaintenanceParentMenuId, N'Buyers', N'Maintenance', N'Screen', N'EntityManagement.view.EntityDirect?showSearch=true&searchCommand=EntityBuyer', N'small-menu-maintenance', 1, 0, 0, 1, 1, 1)
