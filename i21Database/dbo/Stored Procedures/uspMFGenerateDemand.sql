@@ -313,6 +313,7 @@ BEGIN TRY
 				SELECT I.intItemId
 				FROM tblICItem I
 				WHERE I.intCategoryId = @intCategoryId
+					AND I.strStatus='Active'
 					AND NOT EXISTS (
 						SELECT *
 						FROM tblMFItemExclude IE
