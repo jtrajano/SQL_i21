@@ -83,8 +83,6 @@ BEGIN TRY
 		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
 		WHERE PD.intPaymentId = @createdPaymentId
 
-		EXEC uspAPUpdateVoucherPayment @createdPaymentId, NULL
-
 		UPDATE P
 		SET P.intBankAccountId = @bankAccountId,
 			P.intCompanyLocationId = @locationId,
