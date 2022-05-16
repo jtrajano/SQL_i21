@@ -78,14 +78,14 @@ BEGIN TRY
 					[intAccountId]					=	dbo.[fnGetItemGLAccount](B.intChargeItemId, D.intItemLocationId, 'Other Charge Expense'),
 					[intItemId]						=	B.intChargeItemId,					
 					[strMiscDescription]			=	M.strReceiptNumber,
-					[intQtyToBillUOMId]				=	B.intRateUOMId
+					[intQtyToBillUOMId]				=	ISNULL(F.intItemUOMId,N.intItemUOMId)
 					,[dblQuantityToBill]			=	1---B.dblQuantity
-					,[dblQtyToBillUnitQty]			=	F.dblUnitQty
+					,[dblQtyToBillUnitQty]			=	ISNULL(F.dblUnitQty,O.dblUnitQty)
 					,[dblOrderQty]					=	1--B.dblQuantity
 					,[dblDiscount]					=	0
-					,[intCostUOMId]					=	B.intRateUOMId
+					,[intCostUOMId]					=	ISNULL(F.intItemUOMId,N.intItemUOMId)
 					,[dblCost]						=	B.dblAmount--B.dblRate
-					,[dblCostUnitQty]				=	F.dblUnitQty
+					,[dblCostUnitQty]				=	ISNULL(F.dblUnitQty,O.dblUnitQty)
 					,[int1099Form]					=	(CASE WHEN G.intEntityId IS NOT NULL 
 																	AND D.intItemId > 0
 																	AND J.ysn1099Box3 = 1
@@ -152,6 +152,8 @@ BEGIN TRY
 				ON L.intInventoryReceiptId = M.intInventoryReceiptId
 			INNER JOIN tblICLot	N
 				ON B.intLotId = N.intLotId
+			INNER JOIN tblICItemUOM O
+				ON N.intItemUOMId = O.intItemUOMId
 			WHERE B.dblAmount <> 0
 				AND A.intInsuranceChargeId = @intInsuranceChargeId
 
