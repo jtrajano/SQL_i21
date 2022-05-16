@@ -7859,6 +7859,8 @@
     <Build Include="dbo\Functions\fnAP1099EFileEndOfK.sql" />
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intLFutOptTransactionId.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
