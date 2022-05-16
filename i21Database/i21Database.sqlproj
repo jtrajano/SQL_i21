@@ -7808,6 +7808,8 @@
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intLFutOptTransactionId.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
