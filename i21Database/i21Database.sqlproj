@@ -789,6 +789,8 @@
     <Build Include="dbo\Functions\fnCTGetQualityResultAmount.sql" />
     <Build Include="dbo\Views\vyuARCreditCardByExpiration.sql" />
     <Build Include="dbo\Tables\tblAPVendorAccountNumLocation.sql" />
+    <Build Include="dbo\Tables\tblSTSiteStatus.sql" />
+    <Build Include="dbo\Views\vyuSTSiteStatusSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
