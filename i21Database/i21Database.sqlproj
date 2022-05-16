@@ -9176,6 +9176,8 @@
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
     <Build Include="dbo\Tables\tblMBILDatacenter.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intLFutOptTransactionId.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
