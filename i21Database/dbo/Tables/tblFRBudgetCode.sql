@@ -5,7 +5,7 @@
     [strBudgetEnglishDescription] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDefault]                  BIT            DEFAULT ((0)) NULL,    
     [intConcurrencyId]            INT            DEFAULT 1 NOT NULL,
-	[intLedgerId]				  INT            DEFAULT 0 NULL,
+	[intLedgerId]				  INT            DEFAULT 0,
     CONSTRAINT [PK_tblFRBudgetCode] PRIMARY KEY CLUSTERED ([intBudgetCode] ASC),
 	CONSTRAINT [FK_tblFRBudgetCode_tblGLFiscalYear] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId])
 );
