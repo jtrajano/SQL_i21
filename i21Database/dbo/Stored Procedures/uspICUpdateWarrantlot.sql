@@ -4,6 +4,7 @@
   ,@strWarrantStatus NVARCHAR(100) = ''
   ,@strWarrantNo NVARCHAR(100) = ''
   ,@intTradeFinanceId INT = NULL
+  ,@strClearField NVARCHAR(25) = ''
 AS
 
 BEGIN
@@ -16,6 +17,8 @@ BEGIN
 	DECLARE @_logDescription NVARCHAR(MAX) = ''
 	DECLARE @intWarrantStatus INT
 	DECLARE @strTradeFinanceNumber NVARCHAR(100) = ''
+	DECLARE @intOldWarrantStatus INT
+	DECLARE @intOldTradeFinanceId INT
 
 
 	--GEt  Old data
@@ -23,6 +26,8 @@ BEGIN
 		@strOldWarrantStatus = ISNULL(B.strWarrantStatus,'')
 		,@strOldWarrantNo = A.strWarrantNo
 		,@strOldTradeFinanceNumber = C.strTradeFinanceNumber
+		,@intOldWarrantStatus = A.intWarrantStatus
+		,@intOldTradeFinanceId = A.intTradeFinanceId 
 	FROM tblICLot A
 	LEFT JOIN tblICWarrantStatus B
 		ON A.intWarrantStatus  = B.intWarrantStatus
@@ -37,96 +42,148 @@ BEGIN
 	FROM tblICWarrantStatus
 	WHERE strWarrantStatus =  @strWarrantStatus
 
-
-	DECLARE @LotsToRelease AS LotReleaseTableType 
-	---UPDATE released quantity to 0 pledged status 
-	IF(@intWarrantStatus = 1)
-	BEGIN
-		
-		INSERT INTO @LotsToRelease (
-            [intItemId] 
-            ,[intItemLocationId] 
-            ,[intItemUOMId] 
-            ,[intLotId] 
-            ,[intSubLocationId] 
-            ,[intStorageLocationId] 
-            ,[dblQty] 
-            ,[intTransactionId] 
-            ,[strTransactionId] 
-            ,[intTransactionTypeId] 
-            ,[intOwnershipTypeId] 
-            ,[dtmDate] 
-        )
-        SELECT 
-            [intItemId] = lot.intItemId
-            ,[intItemLocationId] = lot.intItemLocationId
-            ,[intItemUOMId] = lot.intItemUOMId
-            ,[intLotId] = lot.intLotId
-            ,[intSubLocationId] = lot.intSubLocationId
-            ,[intStorageLocationId] = lot.intStorageLocationId
-            ,[dblQty] = 0
-            ,[intTransactionId] = lot.intLotId -- Use the lot id. 
-            ,[strTransactionId] = lot.strLotNumber -- Use the lot number. 
-            ,[intTransactionTypeId] = 61 -- Use 61 for a release coming from the Warrant screen. 
-            ,[intOwnershipTypeId] = lot.intOwnershipType
-            ,[dtmDate] = GETDATE()
-        FROM tblICLot lot
-		WHERE intLotId = @intLotId
-			AND lot.dblReleasedQty <> 0
- 	END
-
-	 ---UPDATE released quantity to the lot quantity if released status 
-	IF(@intWarrantStatus = 3)
-	BEGIN
-		
-		INSERT INTO @LotsToRelease (
-            [intItemId] 
-            ,[intItemLocationId] 
-            ,[intItemUOMId] 
-            ,[intLotId] 
-            ,[intSubLocationId] 
-            ,[intStorageLocationId] 
-            ,[dblQty] 
-            ,[intTransactionId] 
-            ,[strTransactionId] 
-            ,[intTransactionTypeId] 
-            ,[intOwnershipTypeId] 
-            ,[dtmDate] 
-        )
-        SELECT 
-            [intItemId] = lot.intItemId
-            ,[intItemLocationId] = lot.intItemLocationId
-            ,[intItemUOMId] = lot.intItemUOMId
-            ,[intLotId] = lot.intLotId
-            ,[intSubLocationId] = lot.intSubLocationId
-            ,[intStorageLocationId] = lot.intStorageLocationId
-            ,[dblQty] = lot.dblQty
-            ,[intTransactionId] = lot.intLotId -- Use the lot id. 
-            ,[strTransactionId] = lot.strLotNumber -- Use the lot number. 
-            ,[intTransactionTypeId] = 61 -- Use 61 for a release coming from the Warrant screen. 
-            ,[intOwnershipTypeId] = lot.intOwnershipType
-            ,[dtmDate] = GETDATE()
-        FROM tblICLot lot
-		WHERE intLotId = @intLotId
-			AND lot.dblReleasedQty <> 0
- 	END
-
 	----GEt Trade Finance name
 	SET @strTradeFinanceNumber = ISNULL((SELECT TOP 1
 												strTradeFinanceNumber
 											FROM tblTRFTradeFinance
 											WHERE intTradeFinanceId = @intTradeFinanceId),'')
 
+
+	----Check for clear field
+	IF(ISNULL(@strClearField,'') = '')
+	BEGIN
+		DECLARE @LotsToRelease AS LotReleaseTableType 
+		---UPDATE released quantity to 0 pledged status 
+		IF(@intWarrantStatus = 1)
+		BEGIN
+			
+			INSERT INTO @LotsToRelease (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[intLotId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[dblQty] 
+				,[intTransactionId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intOwnershipTypeId] 
+				,[dtmDate] 
+			)
+			SELECT 
+				[intItemId] = lot.intItemId
+				,[intItemLocationId] = lot.intItemLocationId
+				,[intItemUOMId] = lot.intItemUOMId
+				,[intLotId] = lot.intLotId
+				,[intSubLocationId] = lot.intSubLocationId
+				,[intStorageLocationId] = lot.intStorageLocationId
+				,[dblQty] = 0
+				,[intTransactionId] = lot.intLotId -- Use the lot id. 
+				,[strTransactionId] = lot.strLotNumber -- Use the lot number. 
+				,[intTransactionTypeId] = 61 -- Use 61 for a release coming from the Warrant screen. 
+				,[intOwnershipTypeId] = lot.intOwnershipType
+				,[dtmDate] = GETDATE()
+			FROM tblICLot lot
+			WHERE intLotId = @intLotId
+				AND lot.dblReleasedQty <> 0
+		END
+
+		---UPDATE released quantity to the lot quantity if released status 
+		IF(@intWarrantStatus = 3)
+		BEGIN
+			
+			INSERT INTO @LotsToRelease (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[intLotId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[dblQty] 
+				,[intTransactionId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intOwnershipTypeId] 
+				,[dtmDate] 
+			)
+			SELECT 
+				[intItemId] = lot.intItemId
+				,[intItemLocationId] = lot.intItemLocationId
+				,[intItemUOMId] = lot.intItemUOMId
+				,[intLotId] = lot.intLotId
+				,[intSubLocationId] = lot.intSubLocationId
+				,[intStorageLocationId] = lot.intStorageLocationId
+				,[dblQty] = lot.dblQty
+				,[intTransactionId] = lot.intLotId -- Use the lot id. 
+				,[strTransactionId] = lot.strLotNumber -- Use the lot number. 
+				,[intTransactionTypeId] = 61 -- Use 61 for a release coming from the Warrant screen. 
+				,[intOwnershipTypeId] = lot.intOwnershipType
+				,[dtmDate] = GETDATE()
+			FROM tblICLot lot
+			WHERE intLotId = @intLotId
+				AND lot.dblReleasedQty <> 0
+		END
+
+		EXEC [uspICCreateLotRelease]
+			@LotsToRelease = @LotsToRelease 
+			,@intTransactionId = 0 -- Since warrant does not have a transaction id, you can use the lot id. 
+			,@intTransactionTypeId = 61 -- Use 61 for Warrant. 
+			,@intUserId = @intUserId
+		
+		
+		
+		IF(ISNULL(@strWarrantNo,'') = '')
+		BEGIN
+			SET @strWarrantNo = @strOldWarrantNo
+		END
+		IF(ISNULL(@strWarrantStatus,'') = '')
+		BEGIN
+			SET @strWarrantStatus = @strOldWarrantStatus
+			SET @intWarrantStatus = @intOldWarrantStatus
+		END
+		IF(ISNULL(@intTradeFinanceId ,0) = 0)
+		BEGIN
+			SET @intTradeFinanceId = @intOldTradeFinanceId
+			SET @strTradeFinanceNumber = @strOldTradeFinanceNumber
+		END
+	END
+	ELSE
+	BEGIN
+
+		SET @strWarrantNo = @strOldWarrantNo
+		SET @strWarrantStatus = @strOldWarrantStatus
+		SET	@strTradeFinanceNumber = @strOldTradeFinanceNumber
+		SET @intWarrantStatus = @intOldWarrantStatus
+		SET @intTradeFinanceId = @intOldTradeFinanceId
+		
+		IF(@strClearField = 'Trade Finance No')
+		BEGIN
+			SET @strTradeFinanceNumber = ''
+			SET @intTradeFinanceId = NULL
+		END
+		ELSE IF(@strClearField = 'Warrant No')
+		BEGIN
+			SET @strWarrantNo = ''
+		END
+		ELSE IF(@strClearField = 'Warrant Status')
+		BEGIN
+			SET @strWarrantStatus = ''
+			SET @intWarrantStatus = NULL
+		END
+	END
+
+
 	--update data
 	UPDATE tblICLot
 	SET strWarrantNo = @strWarrantNo
-		,intWarrantStatus = ISNULL(@intWarrantStatus,intWarrantStatus)
-		,intTradeFinanceId = CASE WHEN ISNULL(@intTradeFinanceId,0) = 0 THEN NULL ELSE @intTradeFinanceId END
+		,intWarrantStatus = @intWarrantStatus
+		,intTradeFinanceId =  @intTradeFinanceId 
 	WHERE intLotId = @intLotId
 
 
 	--Audit Log for Warrant Status
-	IF(ISNULL(@intWarrantStatus,0) > 0 AND @strWarrantStatus <> @strOldWarrantStatus )
+	IF(@strWarrantStatus <> @strOldWarrantStatus )
 	BEGIN
 		EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intLotId					-- Primary Key Value of the Ticket. 
