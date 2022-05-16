@@ -10594,6 +10594,8 @@
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intLFutOptTransactionId.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
