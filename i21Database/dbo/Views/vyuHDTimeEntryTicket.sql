@@ -20,7 +20,7 @@
 			,i.strProjectName
 			,i.intProjectId
 			,j.strStatus
-			,dtmCloseDate = FORMAT (a.dtmCompleted, 'MM/dd/yyyy ')
+			,dtmCloseDate = FORMAT(a.dtmCompleted, 'MM/dd/yyyy')
 		from
 			tblHDTicket a
 			left join tblSMCurrency b on b.intCurrencyID = a.intCurrencyId
