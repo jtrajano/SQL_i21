@@ -947,6 +947,16 @@ GO
 		VALUES (N'Banks', N'Banks', N'CashManagement.view.Banks', N'Cash Management', N'tblCMBank', 1, N'Cash Management')
 	END
 
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.BankTransactions') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName], [ysnApproval]) 
+		VALUES (N'Bank Transactions', N'Bank Transactions', N'CashManagement.view.BankTransactions', N'Cash Management', N'tblCMBankTransaction', 1, N'Cash Management', 1)
+	END
+	ELSE
+		UPDATE tblSMScreen SET ysnApproval =1 WHERE strNamespace = 'CashManagement.view.BankTransactions' 
+
+
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.BankAccounts') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
