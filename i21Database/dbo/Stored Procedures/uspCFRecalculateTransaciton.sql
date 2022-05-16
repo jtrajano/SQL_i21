@@ -7292,6 +7292,18 @@ BEGIN
 			WHERE intTransactionId = @TransactionId	
 
 
+			IF(@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
+			BEGIN
+				SET @strPriceMethod = 'Contract Pricing'
+			END
+
+			IF(@strOldPriceMethod = 'Contracts' OR @strOldPriceMethod = 'Contract Pricing')
+			BEGIN
+				SET @strOldPriceMethod = 'Contract Pricing'
+			END
+
+
+
 			IF(@strOldPriceMethod = 'Contracts' OR @strOldPriceMethod = 'Contract Pricing')
 			BEGIN
 				-- 1-1 
