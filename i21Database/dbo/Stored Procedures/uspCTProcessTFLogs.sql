@@ -52,15 +52,19 @@ BEGIN
 		while (@intActiveContractDetailId is not null)
 		begin
 			
-			select @TFTransNo = strFinanceTradeNo from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId ;
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail where intContractDetailId = @intActiveContractDetailId and intBankId IS NOT NULL)
+			BEGIN
+				select @TFTransNo = strFinanceTradeNo from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId  ;
 		
-			if (@TFTransNo is null)
-			begin
-				EXEC uspSMGetStartingNumber 166, @TFTransNo OUTPUT;
-				update tblCTContractDetail set strFinanceTradeNo = @TFTransNo where intContractDetailId = @intActiveContractDetailId;
-			end
+				if (@TFTransNo is null)
+				begin
+					EXEC uspSMGetStartingNumber 166, @TFTransNo OUTPUT;
+					update tblCTContractDetail set strFinanceTradeNo = @TFTransNo where intContractDetailId = @intActiveContractDetailId;
+				end
 			
-			update @TFXML set strFinanceTradeNo = @TFTransNo where intContractDetailId = @intActiveContractDetailId;
+				update @TFXML set strFinanceTradeNo = @TFTransNo where intContractDetailId = @intActiveContractDetailId;
+			END
+				
 			
 			select top 1 @intActiveContractDetailId = min(intContractDetailId) from @TFXML where intContractDetailId > @intActiveContractDetailId;
 		end
