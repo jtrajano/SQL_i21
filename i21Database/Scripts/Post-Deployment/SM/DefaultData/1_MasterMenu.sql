@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF /*NOT*/ EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'AP Reserve' AND strModuleName = 'Accounts Payable')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Eliminating Entries' AND strModuleName = 'General Ledger')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1132,6 +1132,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Origin A
 	VALUES (N'Origin Audit Log', N'General Ledger', @GeneralLedgerActivitiesParentMenuId, N'Origin Audit Log', N'Activity', N'Screen', N'GeneralLedger.view.OriginAuditLog?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'GeneralLedger.view.OriginAuditLog?showSearch=true' WHERE strMenuName = N'Origin Audit Log' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Eliminating Entries' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Eliminating Entries', N'General Ledger', @GeneralLedgerActivitiesParentMenuId, N'Eliminating Entries', N'Activity', N'Screen', N'GeneralLedger.view.EliminateEntry?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'GeneralLedger.view.EliminateEntry?showSearch=true' WHERE strMenuName = N'Eliminating Entries' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
