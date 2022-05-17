@@ -32,6 +32,7 @@ SELECT
 	,strItemNo = ISNULL(I.strItemNo, DOD.strItemNo)
 	,strItemDescription = I.strDescription
 	,DOD.dblQuantity
+	,DOD.dblStandardWeight
 	,DOD.strOrderComments
 	,DOD.strDeliveryComments
 	,DOD.intEntityShipViaId
