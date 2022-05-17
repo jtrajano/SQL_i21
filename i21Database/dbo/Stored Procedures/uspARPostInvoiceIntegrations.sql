@@ -284,7 +284,7 @@ IF EXISTS (
 	WHERE PID.strSessionId = @strSessionId
 )
 BEGIN
-	EXEC [dbo].[uspHDUpdateTimeEntryPeriodDetail]
+	EXEC [dbo].[uspHDUpdateTimeEntryPeriodDetailStatus]
 END
 
 --TANK DELIVERY SYNC
