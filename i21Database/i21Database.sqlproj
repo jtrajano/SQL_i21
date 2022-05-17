@@ -821,6 +821,7 @@
     <Build Include="dbo\Views\vyuAPReserve.sql" />
     <Build Include="dbo\Views\vyuAPReserveDetailTemp.sql" />
     <Build Include="dbo\Functions\fnAPGetAccountBudgetWarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateTimeEntryPeriodDetailStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

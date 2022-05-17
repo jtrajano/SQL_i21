@@ -276,6 +276,17 @@ FROM tblARPostInvoiceHeader PID
 INNER JOIN tblHDTicketHoursWorked HDTHW WITH (NOLOCK) ON PID.[intInvoiceId] = HDTHW.[intInvoiceId]
 WHERE PID.strSessionId = @strSessionId
 
+--HELPDESK SYNC
+IF EXISTS (
+	SELECT TOP 1 ''
+	FROM tblARPostInvoiceHeader PID
+	INNER JOIN tblHDTicketHoursWorked HDTHW WITH (NOLOCK) ON PID.[intInvoiceId] = HDTHW.[intInvoiceId]
+	WHERE PID.strSessionId = @strSessionId
+)
+BEGIN
+	EXEC [dbo].[uspHDUpdateTimeEntryPeriodDetail]
+END
+
 --TANK DELIVERY SYNC
 BEGIN
 DECLARE @TankDeliveryForSync TABLE ([intInvoiceId] INT, UNIQUE (intInvoiceId))
