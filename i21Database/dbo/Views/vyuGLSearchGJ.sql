@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGLSearchGJ]
 AS
-SELECT strJournalType ,
+SELECT     strJournalType ,
            strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,
            strSourceType COLLATE Latin1_General_CI_AS strSourceType,
            j.strJournalId COLLATE Latin1_General_CI_AS strJournalId,
