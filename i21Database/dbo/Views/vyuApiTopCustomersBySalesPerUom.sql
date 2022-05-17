@@ -12,6 +12,7 @@ SELECT
 	, SUM(ad.dblQtyOrdered) dblTotalOrdered
 	, MIN(r.dtmDate) dtmLastOrderDate
 	, MIN(ad.dblQtyOrdered) dblLastOrderQty
+    , MIN(r.intEntitySalespersonId) intSalespersonId
 FROM tblARSalesAnalysisStagingReport r
 JOIN tblARInvoiceDetail ad ON ad.intInvoiceDetailId = r.intInvoiceDetailId
 JOIN tblICItemUOM iu ON iu.intItemUOMId = ad.intItemUOMId
