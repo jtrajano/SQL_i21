@@ -588,6 +588,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
 :r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
+:r .\ST\41_Checkout_Radiant_POSJournal.sql
 :r .\ST\42_FileFieldMapping_Commander_TankMonitor.sql
 :r .\ST\43_FileFieldMapping_Commander_FuelTotals.sql
 :r .\ST\44_FileFieldMapping_Commander_AppInfo.sql
@@ -597,7 +598,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
-:r .\ST\41_Checkout_Radiant_POSJournal.sql
 
 
 

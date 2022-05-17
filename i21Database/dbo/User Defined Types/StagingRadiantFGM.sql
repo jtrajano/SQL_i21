@@ -1,6 +1,6 @@
 CREATE TYPE [dbo].[StagingRadiantFGM] AS TABLE(
 	[intRowCount] [int] NULL,
-	[intFuelGradeID] [int] NULL,
+	[intFuelGradeID] [bigint] NULL,
 	[dblFuelGradeNonResettableTotalVolume] [numeric](18, 6) NULL,
 	[dblFuelGradeNonResettableTotalAmount] [numeric](18, 6) NULL,
 	[dblFuelGradeSalesVolume] [numeric](18, 6) NULL,
