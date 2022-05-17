@@ -47,7 +47,7 @@ FROM (
 	LEFT JOIN tblICCommodityUnitMeasure co ON co.intCommodityUnitMeasureId = pfd.intPricingUOMId      
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = cd.intItemId AND iu.intUnitMeasureId = co.intUnitMeasureId
 	OUTER APPLY (
-		SELECT TOP 1 ysnMultiplePriceFixation  from tblCTContractHeader
+		SELECT TOP 1 ysnMultiplePriceFixation  from tblCTContractHeader a where a.intContractHeaderId = cd.intContractHeaderId
 	) ct
 	GROUP BY pf.intContractDetailId
 		, pf.intPriceFixationId
