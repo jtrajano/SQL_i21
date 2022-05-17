@@ -16,6 +16,9 @@ SELECT
 	,strDriver = DV.strName
 	,strTruckNumber = SVT.strTruckNumber
 	,strTrailerNumber = SVTL.strTrailerNumber
+	,strTrailerType = SVTL.strTrailerDescription --temp placeholder for trailer type
+	,dblMaxWeight = DO.dblMaxWeight
+	,dblLoadWeight = DO.dblLoadWeight
 	,strDispatchStatus = CASE (DO.intDispatchStatus) 
 		WHEN 1 THEN 'Scheduled'
 		WHEN 2 THEN 'TM Orders'

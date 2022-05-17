@@ -4,6 +4,7 @@ SELECT
 	DOD.intDispatchOrderDetailId
 	,DOD.intDispatchOrderId
 	,DOD.intSequence
+	,DOD.intLoadSeq
 	,DOD.intStopType
 	,strStopType = CASE DOD.intStopType 
 		WHEN 1 THEN 'Pick Up'
@@ -33,6 +34,10 @@ SELECT
 	,DOD.dblQuantity
 	,DOD.strOrderComments
 	,DOD.strDeliveryComments
+	,DOD.intEntityShipViaId
+	,DOD.intEntityShipViaTruckId 
+	,DOD.intEntityShipViaTrailerId
+	,DOD.intEntityShipViaCompartmentId
 	,DOD.intConcurrencyId
 FROM tblLGDispatchOrderDetail DOD 
 LEFT JOIN tblICItem I ON I.intItemId = DOD.intItemId

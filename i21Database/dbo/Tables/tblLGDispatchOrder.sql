@@ -6,6 +6,8 @@
 	[intEntityShipViaId] INT NULL,
 	[intEntityShipViaTruckId] INT NULL, 
 	[intEntityShipViaTrailerId] INT NULL, 
+	[dblMaxWeight] NUMERIC(18, 6) NULL,
+	[dblLoadWeight] NUMERIC(18, 6) NULL,
 	[intDriverEntityId] INT NULL, 
 	[intDispatchStatus] INT NULL, 
 	[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
