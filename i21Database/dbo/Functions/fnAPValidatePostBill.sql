@@ -538,7 +538,7 @@ BEGIN
 			SELECT SUM(dblTax) AS dblTaxTotal
 			FROM (
 				SELECT 
-					(ISNULL(B.dblAdjustedTax,0) 
+					(ISNULL(NULLIF(B.dblAdjustedTax,0),B.dblTax) 
 						* (CASE WHEN (D.intInventoryReceiptChargeId IS NOT NULL 
 										AND A.intEntityVendorId = D2.intEntityVendorId 
 										AND D.ysnPrice = 1) THEN -1 ELSE 1 END)) 
