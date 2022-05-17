@@ -823,6 +823,7 @@
     <Build Include="dbo\Functions\fnAPGetAccountBudgetWarning.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateTimeEntryPeriodDetailStatus.sql" />
     <Build Include="dbo\Tables\tblAPVendorAccountNumLocation.sql" />
+    <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -7017,7 +7018,7 @@
     <None Include="Scripts\Post-Deployment\PAT\3_UpdateIssueStockNo.sql" />
     <None Include="Scripts\Post-Deployment\PAT\4_UpdateRetiredStockNo.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
-    <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
+    <Build Include="dbo\Tables\tblSMLogoPreferenceFooter.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityBeginEndInventory.sql" />
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCompanyLocationFreightTerm.sql" />
