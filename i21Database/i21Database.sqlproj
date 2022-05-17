@@ -7857,7 +7857,6 @@
     <Build Include="dbo\Functions\fnAP1099EFileKPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfK.sql" />
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
-    <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
