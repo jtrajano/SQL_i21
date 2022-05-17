@@ -49,10 +49,11 @@ BEGIN
 											WHERE intTradeFinanceId = @intTradeFinanceId),'')
 
 
+	DECLARE @LotsToRelease AS LotReleaseTableType 
 	----Check for clear field
 	IF(ISNULL(@strClearField,'') = '')
 	BEGIN
-		DECLARE @LotsToRelease AS LotReleaseTableType 
+		
 		---UPDATE released quantity to 0 pledged status 
 		IF(@intWarrantStatus = 1)
 		BEGIN
@@ -86,7 +87,7 @@ BEGIN
 				,[dtmDate] = GETDATE()
 			FROM tblICLot lot
 			WHERE intLotId = @intLotId
-				AND lot.dblReleasedQty <> 0
+			
 		END
 
 		---UPDATE released quantity to the lot quantity if released status 
@@ -122,7 +123,7 @@ BEGIN
 				,[dtmDate] = GETDATE()
 			FROM tblICLot lot
 			WHERE intLotId = @intLotId
-				AND lot.dblReleasedQty <> 0
+				
 		END
 
 		EXEC [uspICCreateLotRelease]
@@ -141,6 +142,7 @@ BEGIN
 		BEGIN
 			SET @strWarrantStatus = @strOldWarrantStatus
 			SET @intWarrantStatus = @intOldWarrantStatus
+
 		END
 		IF(ISNULL(@intTradeFinanceId ,0) = 0)
 		BEGIN
@@ -170,6 +172,37 @@ BEGIN
 		BEGIN
 			SET @strWarrantStatus = ''
 			SET @intWarrantStatus = NULL
+
+			--Update release qty
+			INSERT INTO @LotsToRelease (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[intLotId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[dblQty] 
+				,[intTransactionId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intOwnershipTypeId] 
+				,[dtmDate] 
+			)
+			SELECT 
+				[intItemId] = lot.intItemId
+				,[intItemLocationId] = lot.intItemLocationId
+				,[intItemUOMId] = lot.intItemUOMId
+				,[intLotId] = lot.intLotId
+				,[intSubLocationId] = lot.intSubLocationId
+				,[intStorageLocationId] = lot.intStorageLocationId
+				,[dblQty] = 0
+				,[intTransactionId] = lot.intLotId -- Use the lot id. 
+				,[strTransactionId] = lot.strLotNumber -- Use the lot number. 
+				,[intTransactionTypeId] = 61 -- Use 61 for a release coming from the Warrant screen. 
+				,[intOwnershipTypeId] = lot.intOwnershipType
+				,[dtmDate] = GETDATE()
+			FROM tblICLot lot
+			WHERE intLotId = @intLotId
 		END
 	END
 
