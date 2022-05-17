@@ -14,6 +14,7 @@ SELECT
     , e.strEntityPhone
     , created.dtmDate dtmDateCreated
 	, COALESCE(updated.dtmDate, created.dtmDate) dtmDateLastUpdated
+    , e.strEmail
 FROM vyuCTEntity e
 OUTER APPLY (
 	SELECT TOP 1 au.dtmDate
