@@ -10,6 +10,7 @@ AS
 			L.strZipCode		AS strEntityZipCode,
 			L.strCountry		AS strEntityCountry,
 			T.strPhone			AS strEntityPhone,
+			T.strEmail			AS strEntityEmail,
 			L.intEntityLocationId	AS	 intDefaultLocationId,
 			L.strLocationName	AS	strDefaultLocation,
 			CASE	WHEN Y.strType IN('Vendor','Shipping Line','Producer') THEN V.ysnPymtCtrlActive 
