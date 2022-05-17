@@ -160,8 +160,8 @@
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
 	,@FreightCharge							NUMERIC(18, 6)	= 0
-	,@FreightCompanySegment					INT
-	,@FreightLocationSegment				INT
+	,@FreightCompanySegment					INT				= NULL
+	,@FreightLocationSegment				INT				= NULL
 AS
 
 BEGIN
