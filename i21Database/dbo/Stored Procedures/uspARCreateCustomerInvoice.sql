@@ -544,7 +544,8 @@ BEGIN TRY
 		,[intBankValuationRuleId]
 		,[strTradeFinanceComments]
 		,[strGoodsStatus]
-		,[intBorrowingFacilityLimitDetailId])
+		,[intBorrowingFacilityLimitDetailId]
+		,[intDefaultPayToBankAccountId])
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -642,6 +643,7 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
+		,[intDefaultPayToBankAccountId]  = @BankAccountId
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
