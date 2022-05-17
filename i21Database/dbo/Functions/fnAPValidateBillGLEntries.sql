@@ -24,16 +24,12 @@ BEGIN
 	INNER JOIN @billIds A2 ON A.intBillId = A2.intId
 	OUTER APPLY (
 		SELECT
-			--USE FOREIGN INSTEAD TO HANDLE FOREIGN CURRENCY, tblAPBill.dblTotal IS A BASE CURRENCY
-			--DEBIT AND CREDIT FOREIGN HAS SAME CALCULATION EXCEPT FROM * tblAPBillDetail.dblRate
-			ABS(SUM(dblCreditForeign - dblDebitForeign)) AS dblTotal
+			SUM(dblCredit) AS dblTotal
 		FROM @GLEntries B
-		INNER JOIN vyuGLAccountDetail C ON B.intAccountId = C.intAccountId
 		WHERE B.strTransactionId = A.strBillId
-			AND C.intAccountCategoryId IN (1, 53)
 	) glEntries
 	WHERE
-		A.dblTotal != ISNULL(glEntries.dblTotal,0)
+		A.dblAmountDue != ISNULL(glEntries.dblTotal,0)
 	GROUP BY A.intBillId, A.strBillId
 	RETURN;
 END
