@@ -17,4 +17,5 @@ JOIN tblARInvoiceDetail ad ON ad.intInvoiceDetailId = r.intInvoiceDetailId
 JOIN tblICItemUOM iu ON iu.intItemUOMId = ad.intItemUOMId
 JOIN vyuApiCustomer c ON c.EntityId = r.intEntityCustomerId
 WHERE r.strTransactionType != 'Order'
+    AND YEAR(r.dtmDate) = YEAR(GETDATE())
 GROUP BY r.intEntityCustomerId, r.strCustomerName, r.strCustomerNumber, r.intUnitMeasureId, r.strUOM, c.Email, c.Phone
