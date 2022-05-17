@@ -551,7 +551,8 @@ BEGIN TRY
 		,[intBorrowingFacilityLimitDetailId]
 		,[dblFreightCharge]
 		,[intFreightCompanySegment]
-		,[intFreightLocationSegment])
+		,[intFreightLocationSegment]
+		,[intDefaultPayToBankAccountId])
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -652,6 +653,7 @@ BEGIN TRY
 		,[dblFreightCharge]					= @FreightCharge
 		,[intFreightCompanySegment]			= @FreightCompanySegment
 		,[intFreightLocationSegment]		= @FreightLocationSegment
+		,[intDefaultPayToBankAccountId]		= @BankAccountId
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
