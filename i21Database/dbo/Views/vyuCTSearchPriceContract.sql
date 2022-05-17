@@ -161,6 +161,9 @@ AS
 					intHeaderSubBookId,
 					intDetailBookId,
 					intDetailSubBookId
+					,CD.intInvoiceCurrencyId
+					,CD.strInvoiceCurrency
+					,CD.intMainCurrencyId
 		FROM		vyuCTContractSequence		CD 	WITH (NOLOCK)
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
 		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -233,6 +236,9 @@ AS
 					,intHeaderSubBookId
 					,intDetailBookId
 					,intDetailSubBookId
+					,CD.intInvoiceCurrencyId
+					,CD.strInvoiceCurrency
+					,CD.intMainCurrencyId
 		FROM		vyuCTContractSequence		CD  WITH (NOLOCK)
 		JOIN		tblCTContractHeader			CH	WITH (NOLOCK) ON	CH.intContractHeaderId			=	CD.intContractHeaderId
 		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
@@ -275,6 +281,9 @@ cross apply (select * from cpHTA) hta
 					intHeaderSubBookId,
 					intDetailBookId,
 					intDetailSubBookId
+					,CD.intInvoiceCurrencyId
+					,CD.strInvoiceCurrency
+					,CD.intMainCurrencyId
 					--,CD.strItemNo,
 					--CD.strItemDescription,
 					--CD.strShortName
@@ -344,6 +353,9 @@ cross apply (select * from cpHTA) hta
 					intHeaderSubBookId,
 					intDetailBookId,
 					intDetailSubBookId
+					,CD.intInvoiceCurrencyId
+					,CD.strInvoiceCurrency
+					,CD.intMainCurrencyId
 		FROM		tblCTPriceFixation			PF 	WITH (NOLOCK)
 		JOIN		tblCTPriceContract			PC	WITH (NOLOCK) ON PC.intPriceContractId	=	PF.intPriceContractId
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -426,6 +438,9 @@ cross apply (select * from cpHTA) hta
 					intHeaderSubBookId,
 					intDetailBookId,
 					intDetailSubBookId
+					,CD.intInvoiceCurrencyId
+					,CD.strInvoiceCurrency
+					,CD.intMainCurrencyId
 
 		UNION ALL
 		
@@ -491,6 +506,9 @@ cross apply (select * from cpHTA) hta
 					,intHeaderSubBookId
 					,intDetailBookId
 					,intDetailSubBookId
+					,CD.intInvoiceCurrencyId
+					,CD.strInvoiceCurrency
+					,CD.intMainCurrencyId
 		FROM		tblCTPriceFixation			PF	WITH (NOLOCK)
 		JOIN		tblCTPriceContract			PC	WITH (NOLOCK) ON	PC.intPriceContractId			=	PF.intPriceContractId
 		JOIN		vyuCTContractSequence		CD	WITH (NOLOCK) ON	CD.intContractHeaderId			=	PF.intContractHeaderId
@@ -535,6 +553,9 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					intHeaderSubBookId,
 					intDetailBookId,
 					intDetailSubBookId
+					,CD.intInvoiceCurrencyId
+					,CD.strInvoiceCurrency
+					,CD.intMainCurrencyId
 					--,CD.strItemNo,
 					--CD.strItemDescription,
 					--CD.strShortName

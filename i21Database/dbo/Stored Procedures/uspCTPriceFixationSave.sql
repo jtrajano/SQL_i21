@@ -67,7 +67,10 @@ BEGIN TRY
 			@intContractTypeId int,
 			@intSpreadArbitrageId int,
 			@dblTotalSpread numeric(18,6),
-			@intSpreadUOMId int;
+			@intSpreadUOMId int,
+			@ysnEnableFXFieldInContractPricing BIT = 0,
+			@dblFixationFX numeric(18,6)
+			;
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -79,7 +82,8 @@ BEGIN TRY
 			@dblTotalLots			=	[dblTotalLots],
 			@intFinalCurrencyId		=	PC.intFinalCurrencyId,
 			@ysnFinalSubCurrency	=	CY.ysnSubCurrency,
-			@intPriceContractId		=	PF.intPriceContractId
+			@intPriceContractId		=	PF.intPriceContractId,
+			@dblFixationFX			=	PF.dblFX
 	FROM	tblCTPriceFixation		PF  WITH (UPDLOCK)
 	JOIN	tblCTPriceContract		PC	ON	PC.intPriceContractId	=	PF.intPriceContractId	LEFT 
 	JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	PC.intFinalCurrencyId
@@ -105,7 +109,7 @@ BEGIN TRY
 
 	SELECT	@ysnUnlimitedQuantity = ysnUnlimitedQuantity, @intContractTypeId = intContractTypeId FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity, @ysnPricingAsAmendment = ysnPricingAsAmendment,@ysnEnableDerivativeInArbitrage = ysnEnableDerivativeInArbitrage FROM tblCTCompanyPreference
+	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity, @ysnPricingAsAmendment = ysnPricingAsAmendment,@ysnEnableDerivativeInArbitrage = ysnEnableDerivativeInArbitrage, @ysnEnableFXFieldInContractPricing = ysnEnableFXFieldInContractPricing  FROM tblCTCompanyPreference
 
 	declare @intDWGIdId int
 			,@ysnDestinationWeightsAndGrades bit;
@@ -754,7 +758,9 @@ BEGIN TRY
 						CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
 						CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 and isnull(@ysnDestinationWeightsAndGrades,0) = 0 THEN 5 ELSE CD.intContractStatusId END,
 						CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
-						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END
+						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END,
+						CD.dblRate	= case when @ysnEnableFXFieldInContractPricing = 1 then @dblFixationFX else CD.dblRate end,
+						CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 then 1 else CD.ysnUseFXPrice end
 				FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
 				JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 				JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
@@ -846,7 +852,9 @@ BEGIN TRY
 						CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
 						CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 and isnull(@ysnDestinationWeightsAndGrades,0) = 0 THEN 5 ELSE CD.intContractStatusId END,
 						CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
-						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END
+						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END,
+						CD.dblRate	= case when @ysnEnableFXFieldInContractPricing = 1 then @dblFixationFX else CD.dblRate end,
+						CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 then 1 else CD.ysnUseFXPrice end
 				FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
 				JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 				JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
@@ -894,7 +902,9 @@ BEGIN TRY
 					CD.dblCashPrice			=	NULL,	
 					CD.dblTotalCost			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
-					CD.dblBasis 			=	CASE WHEN CH.intPricingTypeId = 3 THEN null ELSE CD.dblBasis END
+					CD.dblBasis 			=	CASE WHEN CH.intPricingTypeId = 3 THEN null ELSE CD.dblBasis END,
+					CD.dblRate	= case when @ysnEnableFXFieldInContractPricing = 1 then @dblFixationFX else CD.dblRate end,
+					CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 then 1 else CD.ysnUseFXPrice end
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intContractDetailId, CD.intSplitFromId)

@@ -345,7 +345,7 @@ BEGIN TRY
 		, CD.intInvoiceCurrencyId
 		, CD.dtmFXValidFrom
 		, CD.dtmFXValidTo
-		, dblRate = isnull(CD.dblRate,1)
+		, dblRate = case when CD.intInvoiceCurrencyId = CD.intCurrencyId or CD.intInvoiceCurrencyId = CY.intCurrencyID then 1 else CD.dblRate end
 		, CD.dblFXPrice
 		, CD.ysnUseFXPrice
 		, CD.intFXPriceUOMId
