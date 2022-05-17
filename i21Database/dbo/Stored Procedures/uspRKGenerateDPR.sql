@@ -5654,10 +5654,9 @@ BEGIN TRY
 			-- START BATCH INSERT
 			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
 			SET @idControl = 0		-- CURRENT BATCH
+
 		
-			WHILE (@results > 0) 
-			BEGIN
-				INSERT INTO tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
+			INSERT INTO tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
 					, intSeqNo
 					, intRowNumber
 					, strCommodityCode
@@ -5725,117 +5724,189 @@ BEGIN TRY
 					, ysnPreCrush
 				FROM @FinalHedgeByMonth
 				WHERE dblTotal IS NULL OR dblTotal <> 0
-					AND intRowNumber > @idControl
-					AND intRowNumber <= @idControl + @batchSize
 				ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
-					, intSeqNo
-					, strType
-				OPTION (LOOP JOIN)
+
+			--WHILE (@results > 0) 
+			--BEGIN
+			--	INSERT INTO tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
+			--		, intSeqNo
+			--		, intRowNumber
+			--		, strCommodityCode
+			--		, strContractNumber
+			--		, intContractHeaderId
+			--		, strInternalTradeNo
+			--		, intFutOptTransactionHeaderId
+			--		, strType
+			--		, strLocationName
+			--		, strContractEndMonth
+			--		, strContractEndMonthNearBy
+			--		, dblTotal
+			--		, strUnitMeasure
+			--		, strAccountNumber
+			--		, strTranType
+			--		, dblNoOfLot
+			--		, dblDelta
+			--		, intBrokerageAccountId
+			--		, strInstrumentType
+			--		, strEntityName
+			--		, intItemId
+			--		, strItemNo
+			--		, intCategoryId
+			--		, strCategory
+			--		, intFutureMarketId
+			--		, strFutureMarket
+			--		, intFutureMonthId
+			--		, strFutureMonth
+			--		, strDeliveryDate
+			--		, strBrokerTradeNo
+			--		, strNotes
+			--		, ysnCrush)
+			--	SELECT @intDPRHeaderId
+			--		, intSeqNo
+			--		, intRowNumber
+			--		, strCommodityCode
+			--		, strContractNumber
+			--		, intContractHeaderId
+			--		, strInternalTradeNo
+			--		, intFutOptTransactionHeaderId
+			--		, strType
+			--		, strLocationName
+			--		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
+			--		, strContractEndMonthNearBy
+			--		, dblTotal
+			--		, strUnitMeasure
+			--		, strAccountNumber
+			--		, strTranType
+			--		, dblNoOfLot
+			--		, dblDelta
+			--		, intBrokerageAccountId
+			--		, strInstrumentType
+			--		, strEntityName
+			--		, intItemId
+			--		, strItemNo
+			--		, intCategoryId
+			--		, strCategory
+			--		, intFutureMarketId
+			--		, strFutureMarket
+			--		, intFutureMonthId
+			--		, strFutureMonth
+			--		, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
+			--		, strBrokerTradeNo
+			--		, strNotes
+			--		, ysnPreCrush
+			--	FROM @FinalHedgeByMonth
+			--	WHERE dblTotal IS NULL OR dblTotal <> 0
+			--		AND intRowNumber > @idControl
+			--		AND intRowNumber <= @idControl + @batchSize
+			--	ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
+			--		, intSeqNo
+			--		, strType
+			--	OPTION (LOOP JOIN)
 					
-				SET @results = @@ROWCOUNT
-		   		SET @idControl = @idControl + @batchSize
-			END
+			--	SET @results = @@ROWCOUNT
+		 --  		SET @idControl = @idControl + @batchSize
+			--END
 			-- END BATCH INSERT
 
 			--=====================================
 			-- Insert into DPR Run Log Detail table
 			--=====================================
-			IF (ISNULL(@ysnLogDPR, 0) = 1)
-			BEGIN
+			--IF (ISNULL(@ysnLogDPR, 0) = 1)
+			--BEGIN
 				
-				-- START BATCH INSERT
-				SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
-				SET @idControl = 0		-- CURRENT BATCH
+			--	-- START BATCH INSERT
+			--	SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			--	SET @idControl = 0		-- CURRENT BATCH
 		
-				WHILE (@results > 0) 
-				BEGIN
-					INSERT INTO tblRKDPRRunLogDetail WITH(ROWLOCK)  (
-						intDPRRunLogId
-						, strContractNumber
-						, intSeqNo
-						, intContractHeaderId
-						, strInternalTradeNo
-						, intFutOptTransactionHeaderId
-						, strType
-						, strLocationName
-						, strContractEndMonth
-						, strContractEndMonthNearBy
-						, dblTotal
-						, strUnitMeasure
-						, strAccountNumber
-						, strTranType
-						, dblNoOfLot
-						, dblDelta
-						, intBrokerageAccountId
-						, strInstrumentType
-						, strEntityName
-						, intOrderId
-						, intItemId
-						, strItemNo
-						, intCategoryId
-						, strCategory
-						, intFutureMarketId
-						, strFutMarketName
-						, intFutureMonthId
-						, strFutureMonth
-						, strDeliveryDate
-						, strBrokerTradeNo
-						, strNotes
-						, ysnPreCrush
-						, strTransactionReferenceId 
-						, intTransactionReferenceId 
-						, intTransactionReferenceDetailId 
-					)
-					SELECT 
-						intDPRRunLogId = @intDPRRunLogId
-						, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
-						, intSeqNo
-						, intContractHeaderId
-						, strInternalTradeNo
-						, intFutOptTransactionHeaderId
-						, strType
-						, strLocationName
-						, strContractEndMonth
-						, strContractEndMonthNearBy
-						, dblTotal
-						, strUnitMeasure
-						, strAccountNumber
-						, strTranType
-						, dblNoOfLot
-						, dblDelta
-						, intBrokerageAccountId
-						, strInstrumentType
-						, strEntityName
-						, intOrderId = 16
-						, intItemId
-						, strItemNo
-						, intCategoryId
-						, strCategory
-						, intFutureMarketId
-						, strFutMarketName = strFutureMarket
-						, intFutureMonthId
-						, strFutureMonth
-						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
-						, strBrokerTradeNo
-						, strNotes
-						, ysnPreCrush
-						, strTransactionReferenceId = NULL
-						, intTransactionReferenceId = NULL
-						, intTransactionReferenceDetailId = NULL
-					FROM @FinalHedgeByMonth
-					WHERE dblTotal IS NULL OR dblTotal <> 0
-						AND intRowNumber > @idControl
-						AND intRowNumber <= @idControl + @batchSize
-					ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
-						, intSeqNo
-						, strType
-					OPTION (LOOP JOIN)
+			--	WHILE (@results > 0) 
+			--	BEGIN
+			--		INSERT INTO tblRKDPRRunLogDetail WITH(ROWLOCK)  (
+			--			intDPRRunLogId
+			--			, strContractNumber
+			--			, intSeqNo
+			--			, intContractHeaderId
+			--			, strInternalTradeNo
+			--			, intFutOptTransactionHeaderId
+			--			, strType
+			--			, strLocationName
+			--			, strContractEndMonth
+			--			, strContractEndMonthNearBy
+			--			, dblTotal
+			--			, strUnitMeasure
+			--			, strAccountNumber
+			--			, strTranType
+			--			, dblNoOfLot
+			--			, dblDelta
+			--			, intBrokerageAccountId
+			--			, strInstrumentType
+			--			, strEntityName
+			--			, intOrderId
+			--			, intItemId
+			--			, strItemNo
+			--			, intCategoryId
+			--			, strCategory
+			--			, intFutureMarketId
+			--			, strFutMarketName
+			--			, intFutureMonthId
+			--			, strFutureMonth
+			--			, strDeliveryDate
+			--			, strBrokerTradeNo
+			--			, strNotes
+			--			, ysnPreCrush
+			--			, strTransactionReferenceId 
+			--			, intTransactionReferenceId 
+			--			, intTransactionReferenceDetailId 
+			--		)
+			--		SELECT 
+			--			intDPRRunLogId = @intDPRRunLogId
+			--			, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
+			--			, intSeqNo
+			--			, intContractHeaderId
+			--			, strInternalTradeNo
+			--			, intFutOptTransactionHeaderId
+			--			, strType
+			--			, strLocationName
+			--			, strContractEndMonth
+			--			, strContractEndMonthNearBy
+			--			, dblTotal
+			--			, strUnitMeasure
+			--			, strAccountNumber
+			--			, strTranType
+			--			, dblNoOfLot
+			--			, dblDelta
+			--			, intBrokerageAccountId
+			--			, strInstrumentType
+			--			, strEntityName
+			--			, intOrderId = 16
+			--			, intItemId
+			--			, strItemNo
+			--			, intCategoryId
+			--			, strCategory
+			--			, intFutureMarketId
+			--			, strFutMarketName = strFutureMarket
+			--			, intFutureMonthId
+			--			, strFutureMonth
+			--			, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
+			--			, strBrokerTradeNo
+			--			, strNotes
+			--			, ysnPreCrush
+			--			, strTransactionReferenceId = NULL
+			--			, intTransactionReferenceId = NULL
+			--			, intTransactionReferenceDetailId = NULL
+			--		FROM @FinalHedgeByMonth
+			--		WHERE dblTotal IS NULL OR dblTotal <> 0
+			--			AND intRowNumber > @idControl
+			--			AND intRowNumber <= @idControl + @batchSize
+			--		ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
+			--			, intSeqNo
+			--			, strType
+			--		OPTION (LOOP JOIN)
 
-					SET @results = @@ROWCOUNT
-		   			SET @idControl = @idControl + @batchSize
-				END
-				-- END BATCH INSERT
-			END
+			--		SET @results = @@ROWCOUNT
+		 --  			SET @idControl = @idControl + @batchSize
+			--	END
+			--	-- END BATCH INSERT
+			--END
 
 		END
 		ELSE
@@ -5843,193 +5914,269 @@ BEGIN TRY
 			-- START BATCH INSERT
 			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
 			SET @idControl = 0		-- CURRENT BATCH
+
+
+			INSERT tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
+				, intSeqNo
+				, intRowNumber
+				, strCommodityCode
+				, strContractNumber
+				, intContractHeaderId
+				, strInternalTradeNo
+				, intFutOptTransactionHeaderId
+				, strType
+				, strLocationName
+				, strContractEndMonth
+				, strContractEndMonthNearBy
+				, dblTotal
+				, strUnitMeasure
+				, strAccountNumber
+				, strTranType
+				, dblNoOfLot
+				, dblDelta
+				, intBrokerageAccountId
+				, strInstrumentType
+				, strEntityName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, intFutureMarketId
+				, strFutureMarket
+				, intFutureMonthId
+				, strFutureMonth
+				, strDeliveryDate
+				, strBrokerTradeNo
+				, strNotes
+				, ysnCrush)
+			SELECT @intDPRHeaderId
+				, intSeqNo
+				, intRowNumber
+				, strCommodityCode
+				, strContractNumber
+				, intContractHeaderId
+				, strInternalTradeNo
+				, intFutOptTransactionHeaderId
+				, strType
+				, strLocationName
+				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),strContractEndMonth,106),8) COLLATE Latin1_General_CI_AS
+				, strContractEndMonthNearBy
+				, dblTotal
+				, strUnitMeasure
+				, strAccountNumber
+				, strTranType
+				, dblNoOfLot
+				, dblDelta
+				, intBrokerageAccountId
+				, strInstrumentType
+				, strEntityName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, intFutureMarketId
+				, strFutureMarket
+				, intFutureMonthId
+				, strFutureMonth
+				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
+				, strBrokerTradeNo
+				, strNotes
+				, ysnPreCrush
+			FROM @FinalHedgeByMonth
+			WHERE (dblTotal IS NULL
+				OR dblTotal <> 0)
+				AND strType NOT LIKE '%' + @strPurchaseSales + '%'
+				AND strType <> 'Net Hedge'
+			ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
+				, intSeqNo
+					, strType
 		
-			WHILE (@results > 0) 
-			BEGIN
-				INSERT tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
-					, intSeqNo
-					, intRowNumber
-					, strCommodityCode
-					, strContractNumber
-					, intContractHeaderId
-					, strInternalTradeNo
-					, intFutOptTransactionHeaderId
-					, strType
-					, strLocationName
-					, strContractEndMonth
-					, strContractEndMonthNearBy
-					, dblTotal
-					, strUnitMeasure
-					, strAccountNumber
-					, strTranType
-					, dblNoOfLot
-					, dblDelta
-					, intBrokerageAccountId
-					, strInstrumentType
-					, strEntityName
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutureMarket
-					, intFutureMonthId
-					, strFutureMonth
-					, strDeliveryDate
-					, strBrokerTradeNo
-					, strNotes
-					, ysnCrush)
-				SELECT @intDPRHeaderId
-					, intSeqNo
-					, intRowNumber
-					, strCommodityCode
-					, strContractNumber
-					, intContractHeaderId
-					, strInternalTradeNo
-					, intFutOptTransactionHeaderId
-					, strType
-					, strLocationName
-					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),strContractEndMonth,106),8) COLLATE Latin1_General_CI_AS
-					, strContractEndMonthNearBy
-					, dblTotal
-					, strUnitMeasure
-					, strAccountNumber
-					, strTranType
-					, dblNoOfLot
-					, dblDelta
-					, intBrokerageAccountId
-					, strInstrumentType
-					, strEntityName
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutureMarket
-					, intFutureMonthId
-					, strFutureMonth
-					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush
-				FROM @FinalHedgeByMonth
-				WHERE (dblTotal IS NULL
-					OR dblTotal <> 0)
-					AND strType NOT LIKE '%' + @strPurchaseSales + '%'
-					AND strType <> 'Net Hedge'
-					AND intRowNumber > @idControl
-					AND intRowNumber <= @idControl + @batchSize
-				ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
-					, intSeqNo
-					, strType
+			--WHILE (@results > 0) 
+			--BEGIN
+			--	INSERT tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
+			--		, intSeqNo
+			--		, intRowNumber
+			--		, strCommodityCode
+			--		, strContractNumber
+			--		, intContractHeaderId
+			--		, strInternalTradeNo
+			--		, intFutOptTransactionHeaderId
+			--		, strType
+			--		, strLocationName
+			--		, strContractEndMonth
+			--		, strContractEndMonthNearBy
+			--		, dblTotal
+			--		, strUnitMeasure
+			--		, strAccountNumber
+			--		, strTranType
+			--		, dblNoOfLot
+			--		, dblDelta
+			--		, intBrokerageAccountId
+			--		, strInstrumentType
+			--		, strEntityName
+			--		, intItemId
+			--		, strItemNo
+			--		, intCategoryId
+			--		, strCategory
+			--		, intFutureMarketId
+			--		, strFutureMarket
+			--		, intFutureMonthId
+			--		, strFutureMonth
+			--		, strDeliveryDate
+			--		, strBrokerTradeNo
+			--		, strNotes
+			--		, ysnCrush)
+			--	SELECT @intDPRHeaderId
+			--		, intSeqNo
+			--		, intRowNumber
+			--		, strCommodityCode
+			--		, strContractNumber
+			--		, intContractHeaderId
+			--		, strInternalTradeNo
+			--		, intFutOptTransactionHeaderId
+			--		, strType
+			--		, strLocationName
+			--		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),strContractEndMonth,106),8) COLLATE Latin1_General_CI_AS
+			--		, strContractEndMonthNearBy
+			--		, dblTotal
+			--		, strUnitMeasure
+			--		, strAccountNumber
+			--		, strTranType
+			--		, dblNoOfLot
+			--		, dblDelta
+			--		, intBrokerageAccountId
+			--		, strInstrumentType
+			--		, strEntityName
+			--		, intItemId
+			--		, strItemNo
+			--		, intCategoryId
+			--		, strCategory
+			--		, intFutureMarketId
+			--		, strFutureMarket
+			--		, intFutureMonthId
+			--		, strFutureMonth
+			--		, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
+			--		, strBrokerTradeNo
+			--		, strNotes
+			--		, ysnPreCrush
+			--	FROM @FinalHedgeByMonth
+			--	WHERE (dblTotal IS NULL
+			--		OR dblTotal <> 0)
+			--		AND strType NOT LIKE '%' + @strPurchaseSales + '%'
+			--		AND strType <> 'Net Hedge'
+			--		AND intRowNumber > @idControl
+			--		AND intRowNumber <= @idControl + @batchSize
+			--	ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
+			--		, intSeqNo
+			--		, strType
 					
-				SET @results = @@ROWCOUNT
-		   		SET @idControl = @idControl + @batchSize
-			END
+			--	SET @results = @@ROWCOUNT
+		 --  		SET @idControl = @idControl + @batchSize
+			--END
 			-- END BATCH INSERT
 
 			--=====================================
 			-- Insert into DPR Run Log Detail table
 			--=====================================
-			IF (ISNULL(@ysnLogDPR, 0) = 1)
-			BEGIN
-				-- START BATCH INSERT
-				SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
-				SET @idControl = 0		-- CURRENT BATCH
+			--IF (ISNULL(@ysnLogDPR, 0) = 1)
+			--BEGIN
+			--	-- START BATCH INSERT
+			--	SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			--	SET @idControl = 0		-- CURRENT BATCH
 		
-				WHILE (@results > 0) 
-				BEGIN
-					INSERT INTO tblRKDPRRunLogDetail WITH(ROWLOCK)  (
-						intDPRRunLogId
-						, strContractNumber
-						, intSeqNo
-						, intContractHeaderId
-						, strInternalTradeNo
-						, intFutOptTransactionHeaderId
-						, strType
-						, strLocationName
-						, strContractEndMonth
-						, strContractEndMonthNearBy
-						, dblTotal
-						, strUnitMeasure
-						, strAccountNumber
-						, strTranType
-						, dblNoOfLot
-						, dblDelta
-						, intBrokerageAccountId
-						, strInstrumentType
-						, strEntityName
-						, intOrderId
-						, intItemId
-						, strItemNo
-						, intCategoryId
-						, strCategory
-						, intFutureMarketId
-						, strFutMarketName
-						, intFutureMonthId
-						, strFutureMonth
-						, strDeliveryDate
-						, strBrokerTradeNo
-						, strNotes
-						, ysnPreCrush
-						, strTransactionReferenceId 
-						, intTransactionReferenceId 
-						, intTransactionReferenceDetailId 
-					)
-					SELECT 
-						intDPRRunLogId = @intDPRRunLogId
-						, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
-						, intSeqNo
-						, intContractHeaderId
-						, strInternalTradeNo
-						, intFutOptTransactionHeaderId
-						, strType
-						, strLocationName
-						, strContractEndMonth
-						, strContractEndMonthNearBy
-						, dblTotal
-						, strUnitMeasure
-						, strAccountNumber
-						, strTranType
-						, dblNoOfLot
-						, dblDelta
-						, intBrokerageAccountId
-						, strInstrumentType
-						, strEntityName
-						, intOrderId = 16
-						, intItemId
-						, strItemNo
-						, intCategoryId
-						, strCategory
-						, intFutureMarketId
-						, strFutMarketName = strFutureMarket
-						, intFutureMonthId
-						, strFutureMonth
-						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
-						, strBrokerTradeNo
-						, strNotes
-						, ysnPreCrush
-						, strTransactionReferenceId = NULL
-						, intTransactionReferenceId = NULL
-						, intTransactionReferenceDetailId = NULL
-					FROM @FinalHedgeByMonth
-					WHERE (dblTotal IS NULL
-						OR dblTotal <> 0)
-						AND strType NOT LIKE '%' + @strPurchaseSales + '%'
-						AND strType <> 'Net Hedge'
-						AND intRowNumber > @idControl
-						AND intRowNumber <= @idControl + @batchSize
-					ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
-						, intSeqNo
-						, strType
-					OPTION (LOOP JOIN)
+			--	WHILE (@results > 0) 
+			--	BEGIN
+			--		INSERT INTO tblRKDPRRunLogDetail WITH(ROWLOCK)  (
+			--			intDPRRunLogId
+			--			, strContractNumber
+			--			, intSeqNo
+			--			, intContractHeaderId
+			--			, strInternalTradeNo
+			--			, intFutOptTransactionHeaderId
+			--			, strType
+			--			, strLocationName
+			--			, strContractEndMonth
+			--			, strContractEndMonthNearBy
+			--			, dblTotal
+			--			, strUnitMeasure
+			--			, strAccountNumber
+			--			, strTranType
+			--			, dblNoOfLot
+			--			, dblDelta
+			--			, intBrokerageAccountId
+			--			, strInstrumentType
+			--			, strEntityName
+			--			, intOrderId
+			--			, intItemId
+			--			, strItemNo
+			--			, intCategoryId
+			--			, strCategory
+			--			, intFutureMarketId
+			--			, strFutMarketName
+			--			, intFutureMonthId
+			--			, strFutureMonth
+			--			, strDeliveryDate
+			--			, strBrokerTradeNo
+			--			, strNotes
+			--			, ysnPreCrush
+			--			, strTransactionReferenceId 
+			--			, intTransactionReferenceId 
+			--			, intTransactionReferenceDetailId 
+			--		)
+			--		SELECT 
+			--			intDPRRunLogId = @intDPRRunLogId
+			--			, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
+			--			, intSeqNo
+			--			, intContractHeaderId
+			--			, strInternalTradeNo
+			--			, intFutOptTransactionHeaderId
+			--			, strType
+			--			, strLocationName
+			--			, strContractEndMonth
+			--			, strContractEndMonthNearBy
+			--			, dblTotal
+			--			, strUnitMeasure
+			--			, strAccountNumber
+			--			, strTranType
+			--			, dblNoOfLot
+			--			, dblDelta
+			--			, intBrokerageAccountId
+			--			, strInstrumentType
+			--			, strEntityName
+			--			, intOrderId = 16
+			--			, intItemId
+			--			, strItemNo
+			--			, intCategoryId
+			--			, strCategory
+			--			, intFutureMarketId
+			--			, strFutMarketName = strFutureMarket
+			--			, intFutureMonthId
+			--			, strFutureMonth
+			--			, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
+			--			, strBrokerTradeNo
+			--			, strNotes
+			--			, ysnPreCrush
+			--			, strTransactionReferenceId = NULL
+			--			, intTransactionReferenceId = NULL
+			--			, intTransactionReferenceDetailId = NULL
+			--		FROM @FinalHedgeByMonth
+			--		WHERE (dblTotal IS NULL
+			--			OR dblTotal <> 0)
+			--			AND strType NOT LIKE '%' + @strPurchaseSales + '%'
+			--			AND strType <> 'Net Hedge'
+			--			AND intRowNumber > @idControl
+			--			AND intRowNumber <= @idControl + @batchSize
+			--		ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
+			--			, intSeqNo
+			--			, strType
+			--		OPTION (LOOP JOIN)
 
-				SET @results = @@ROWCOUNT
-		   		SET @idControl = @idControl + @batchSize
-			END
-			-- END BATCH INSERT
+			--	SET @results = @@ROWCOUNT
+		 --  		SET @idControl = @idControl + @batchSize
+			--END
+			---- END BATCH INSERT
 
-			END
+			--END
 		END
 	END
 	ELSE
