@@ -159,16 +159,18 @@ BEGIN
 		SET @intWarrantStatus = @intOldWarrantStatus
 		SET @intTradeFinanceId = @intOldTradeFinanceId
 		
-		IF(@strClearField = 'Trade Finance No')
+		IF(@strClearField = 'Trade Finance No' OR @strClearField = 'All')
 		BEGIN
 			SET @strTradeFinanceNumber = ''
 			SET @intTradeFinanceId = NULL
 		END
-		ELSE IF(@strClearField = 'Warrant No')
+		
+		IF(@strClearField = 'Warrant No' OR @strClearField = 'All')
 		BEGIN
 			SET @strWarrantNo = ''
 		END
-		ELSE IF(@strClearField = 'Warrant Status')
+		
+		IF(@strClearField = 'Warrant Status' OR @strClearField = 'All')
 		BEGIN
 			SET @strWarrantStatus = ''
 			SET @intWarrantStatus = NULL
