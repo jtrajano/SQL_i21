@@ -414,13 +414,15 @@ OUTER APPLY(
 	SELECT TOP 1 ysnAllowIntraCompanyEntries
 	FROM tblARCompanyPreference
 ) ARCOMPANYPREFERENCE
-LEFT JOIN (
+OUTER APPLY (
 	SELECT TOP 1 intAccountId
 		 , strDescription 
 	FROM vyuGLCompanyAccountId WITH (NOLOCK)
-) GLCAI ON INV.intFreightCompanySegment = GLCAI.intAccountId
-LEFT JOIN (
+	WHERE intAccountId = INV.intFreightCompanySegment
+) GLCAI
+OUTER APPLY (
 	SELECT TOP 1 intAccountId
 		 , strDescription 
 	FROM vyuGLLocationAccountId WITH (NOLOCK)
-) GLLAI ON INV.intFreightLocationSegment = GLLAI.intAccountId
+	WHERE intAccountId = INV.intFreightLocationSegment
+) GLLAI
