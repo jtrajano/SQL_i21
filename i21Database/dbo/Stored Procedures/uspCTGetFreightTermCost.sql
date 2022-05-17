@@ -30,6 +30,7 @@ BEGIN TRY
 		, @intInsuranceItemId INT
 		, @ysnFreight BIT
 		, @ysnInsurance BIT
+		, @intOriginCountryId INT
 
 	DECLARE @CostItems AS TABLE (intCostItemId INT
 		, strCostItem NVARCHAR(100)
@@ -48,6 +49,9 @@ BEGIN TRY
 		, @intFreightItemId = intDefaultFreightItemId
 		, @intInsuranceItemId = intDefaultInsuranceItemId
 	FROM vyuCTCompanyPreference
+
+	SELECT @intOriginCountryId = intCountryId FROM tblSMCity
+	WHERE intCityId = @intFromPortId
 	
 	IF (@ysnFreightTermCost = 0)
 	BEGIN
@@ -110,7 +114,7 @@ BEGIN TRY
 			IF ISNULL(@intFreightRateMatrixId, 0) <> 0 AND ISNULL(@intCostItemId, 0) <> 0
 			BEGIN
 				INSERT INTO @CostItems
-				SELECT @intCostItemId
+				SELECT TOP 1 @intCostItemId
 					, @strCostItem
 					, frm.intEntityId
 					, strVendor = em.strName
@@ -130,6 +134,7 @@ BEGIN TRY
 				JOIN tblICCommodityAttribute cat ON cat.intCommodityAttributeId = ctq.intCommodityAttributeId
 				JOIN tblSMCurrency cur ON cur.intCurrencyID = frm.intCurrencyId
 				WHERE ctq.intCommodityId = @intCommodityId
+					AND cat.intCountryID = @intOriginCountryId
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
 			END
 			ELSE
