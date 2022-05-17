@@ -1522,6 +1522,9 @@ BEGIN TRY
 			,@Recap							= [ysnRecap] 
 			,@Post							= [ysnPost]
 			,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
+			,@FreightCharge					= [dblFreightCharge]
+			,@FreightCompanySegment			= [intFreightCompanySegment]
+			,@FreightLocationSegment		= [intFreightLocationSegment]
 		FROM
 			@InvoiceEntries
 		WHERE
@@ -1663,8 +1666,11 @@ BEGIN TRY
 			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
 			,[intEntityId]				= @EntityId
 			,[intTruckDriverId]			= @TruckDriverId
-			,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
+			,[intTruckDriverReferenceId]= @TruckDriverReferenceId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
+			,[dblFreightCharge]			= @FreightCharge 
+			,[intFreightCompanySegment]	= @FreightCompanySegment
+			,[intFreightLocationSegment]= @FreightLocationSegment
 		FROM
 			tblARCustomer C
 		LEFT OUTER JOIN
