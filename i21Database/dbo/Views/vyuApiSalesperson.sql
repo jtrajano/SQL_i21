@@ -13,6 +13,7 @@ SELECT
     , e.strZipCode as strEntityZipCode
     , e.strCountry as strEntityCountry
     , e.strPhone as strEntityPhone
+    , e.strEmail
     , created.dtmDate dtmDateCreated
 	, COALESCE(updated.dtmDate, created.dtmDate) dtmDateLastUpdated
 FROM vyuEMSalesperson e
