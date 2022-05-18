@@ -74,27 +74,31 @@ SELECT intEntityCustomerId	= I.intEntityCustomerId
 												 ELSE -I.dblInvoiceTotal
 											END 
 									   ELSE 0 
-								  END) - AVG(ISNULL(P.dblTotalPayment, 0))
+								  END) - SUM(ISNULL(P.dblTotalPayment, 0))
 	, dblTotalAR			= SUM(CASE WHEN I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') 
 									   THEN I.dblInvoiceTotal
 									   ELSE -I.dblInvoiceTotal
-								  END) - AVG(ISNULL(P.dblTotalPayment, 0))
+								  END) - SUM(ISNULL(P.dblTotalPayment, 0))
 FROM tblARInvoice I
 INNER JOIN #CUSTOMERDATES C ON I.intEntityCustomerId = C.intEntityCustomerId
 LEFT JOIN (
-	SELECT dblTotalPayment = SUM(dblAmountPaid)
+	SELECT intInvoiceId
+		 , dblTotalPayment = SUM((dblPayment + dblDiscount + dblWriteOffAmount) - dblInterest)
 		 , C.intEntityCustomerId
 		 , C.dtmDateFrom
-	FROM tblARPayment P 
+	FROM tblARPaymentDetail PD
+	INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId
 	INNER JOIN #CUSTOMERDATES C ON P.intEntityCustomerId = C.intEntityCustomerId
 	WHERE P.ysnPosted = 1
 	  AND P.dtmDatePaid <= C.dtmDateFrom
+	  AND P.intEntityCustomerId = C.intEntityCustomerId
 	  AND P.strReceivePaymentType <> 'Vendor Refund'
-	GROUP BY C.intEntityCustomerId, C.dtmDateFrom
-) P ON P.intEntityCustomerId = C.intEntityCustomerId
+	  AND P.ysnInvoicePrepayment = 0
+	GROUP BY PD.intInvoiceId, C.intEntityCustomerId, C.dtmDateFrom
+) P ON I.intInvoiceId = P.intInvoiceId
+   AND P.intEntityCustomerId = C.intEntityCustomerId
    AND P.dtmDateFrom = C.dtmDateFrom
-WHERE I.ysnPosted = 1
-  AND I.ysnForgiven = 0
+WHERE I.ysnPosted = 1  
   AND I.strTransactionType <> 'Cash Refund'
   AND I.dtmPostDate <= C.dtmDateFrom
   AND I.intEntityCustomerId = C.intEntityCustomerId
