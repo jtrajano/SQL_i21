@@ -4591,11 +4591,14 @@ BEGIN TRY
 
 				SELECT @strLoadDetailContainerLinkCondition = 'intLoadContainerId IN (' + LTRIM(@strLoadContainerId) + ')'
 
-				EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadDetailContainerLinkAckView'
-					,@strLoadDetailContainerLinkCondition
-					,@strAckLoadDetailContainerLinkXML OUTPUT
-					,NULL
-					,NULL
+				IF @strLoadDetailContainerLinkCondition IS NOT NULL
+				BEGIN
+					EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadDetailContainerLinkAckView'
+						,@strLoadDetailContainerLinkCondition
+						,@strAckLoadDetailContainerLinkXML OUTPUT
+						,NULL
+						,NULL
+				END
 
 				EXEC uspCTGetTableDataInXML 'vyuIPLoadCostAckView'
 					,@strHeaderCondition
@@ -4615,17 +4618,20 @@ BEGIN TRY
 
 				SELECT @strLoadWarehouseCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
 
-				EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadWarehouseServicesAckView'
-					,@strLoadWarehouseCondition
-					,@strAckLoadWarehouseServicesXML OUTPUT
-					,NULL
-					,NULL
+				IF @strLoadWarehouseCondition IS NOT NULL
+				BEGIN
+					EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadWarehouseServicesAckView'
+						,@strLoadWarehouseCondition
+						,@strAckLoadWarehouseServicesXML OUTPUT
+						,NULL
+						,NULL
 
-				EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadWarehouseContainerAckView'
-					,@strLoadWarehouseCondition
-					,@strAckLoadWarehouseContainerXML OUTPUT
-					,NULL
-					,NULL
+					EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadWarehouseContainerAckView'
+						,@strLoadWarehouseCondition
+						,@strAckLoadWarehouseContainerXML OUTPUT
+						,NULL
+						,NULL
+				END
 			END
 
 			SELECT @intLoadScreenId = intScreenId
