@@ -101,7 +101,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 	FROM tblRKCompanyPreference
 
 
-DECLARE @tmpAllocatedContracs TABLE (
+DECLARE @tmpAllocatedContracts TABLE (
 	intAllocatedContractsGainOrLossHeaderId INT
 	,strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strTransactionReferenceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -266,7 +266,7 @@ END
 
 
 
-INSERT INTO @tmpAllocatedContracs
+INSERT INTO @tmpAllocatedContracts
 SELECT
 	@intAllocatedContractsGainOrLossHeaderId
 	,strTransactionType = 'Physical'
@@ -480,34 +480,34 @@ BEGIN
 	IF @strTransactionShouldBeRelieved = 'Final Invoiced'
 	BEGIN
 
-		DELETE FROM @tmpAllocatedContracs 
+		DELETE FROM @tmpAllocatedContracts 
 		WHERE intSalesContractDetailId IN (
 			select distinct intContractDetailId 
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
-			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracts)
 			and I.strType IN ('Standard') and I.strTransactionType = 'Invoice'
 		)
 	END
 
 	IF @strTransactionShouldBeRelieved = 'Provisional Invoiced'
 	BEGIN
-		DELETE FROM @tmpAllocatedContracs 
+		DELETE FROM @tmpAllocatedContracts 
 		WHERE intSalesContractDetailId IN (
 			select distinct intContractDetailId 
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
-			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracts)
 			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
 		)
 	END
 
-	UPDATE @tmpAllocatedContracs SET strSalesInvoiceStatus = 'Provisional Invoiced'
+	UPDATE @tmpAllocatedContracts SET strSalesInvoiceStatus = 'Provisional Invoiced'
 	WHERE  intSalesContractDetailId IN (
 			select distinct intContractDetailId 
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
-			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracts)
 			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
 		)
 
@@ -533,16 +533,16 @@ select distinct BD.intContractDetailId
 into #tmpPurchaseWithVoucher 
 from tblAPBillDetail BD
 inner join tblAPBill B on B.intBillId = BD.intBillId
-where BD.intContractDetailId in (select intPurchaseContractDetailId from tblRKAllocatedContractsTransaction)
+where BD.intContractDetailId in (select intPurchaseContractDetailId from @tmpAllocatedContracts)
 
 	IF @strTransactionShouldBeRelieved = 'Final Invoiced'
 	BEGIN
-		DELETE FROM @tmpAllocatedContracs 
+		DELETE FROM @tmpAllocatedContracts 
 		WHERE intSalesContractDetailId IN (
 			select distinct intContractDetailId 
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
-			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracts)
 			and I.strType IN ('Standard') and I.strTransactionType = 'Invoice'
 		)
 		AND intPurchaseContractDetailId IN (select intContractDetailId from #tmpPurchaseWithVoucher)
@@ -550,39 +550,39 @@ where BD.intContractDetailId in (select intPurchaseContractDetailId from tblRKAl
 
 	IF @strTransactionShouldBeRelieved = 'Provisional Invoiced'
 	BEGIN
-		DELETE FROM @tmpAllocatedContracs 
+		DELETE FROM @tmpAllocatedContracts 
 		WHERE intSalesContractDetailId IN (
 			select distinct intContractDetailId 
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
-			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracts)
 			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
 		)
 		AND intPurchaseContractDetailId IN (select intContractDetailId from #tmpPurchaseWithVoucher)
 	END
 
 
-	UPDATE @tmpAllocatedContracs SET strSalesInvoiceStatus = 'Provisional Invoiced'
+	UPDATE @tmpAllocatedContracts SET strSalesInvoiceStatus = 'Provisional Invoiced'
 	WHERE  intSalesContractDetailId IN (
 			select distinct intContractDetailId 
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
-			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracts)
 			and I.strType IN ('Provisional')  and I.strTransactionType = 'Invoice'
 		)
 
-	UPDATE @tmpAllocatedContracs SET strSalesInvoiceStatus = 'Final Invoiced'
+	UPDATE @tmpAllocatedContracts SET strSalesInvoiceStatus = 'Final Invoiced'
 	WHERE  intSalesContractDetailId IN (
 			select distinct intContractDetailId 
 			from tblARInvoiceDetail ID
 			inner join tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
-			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracs)
+			where intContractDetailId in (select intSalesContractDetailId from @tmpAllocatedContracts)
 			and I.strType IN ('Standard')  and I.strTransactionType = 'Invoice'
 		)
 	
 	UPDATE AC 
 	SET AC.strPurchaseInvoiceStatus =  PWV.strTransactionType
-	FROM @tmpAllocatedContracs AC
+	FROM @tmpAllocatedContracts AC
 	INNER JOIN #tmpPurchaseWithVoucher PWV ON PWV.intContractDetailId = AC.intPurchaseContractDetailId
 	
 
@@ -663,7 +663,7 @@ SELECT DISTINCT
 	,intFutureMonthId
 	,dblSettlementPrice
 FROM @tblSettlementPrice SP
-INNER JOIN @tmpAllocatedContracs AC ON SP.intFutureMarketId = AC.intPurchaseFutureMarketId AND SP.intFutureMonthId = AC.intPurchaseFutureMonthId
+INNER JOIN @tmpAllocatedContracts AC ON SP.intFutureMarketId = AC.intPurchaseFutureMarketId AND SP.intFutureMonthId = AC.intPurchaseFutureMonthId
 WHERE AC.dblPurchaseContractFutures IS NULL
 
 UNION ALL
@@ -674,7 +674,7 @@ SELECT DISTINCT
 	,intFutureMonthId
 	,dblSettlementPrice
 FROM @tblSettlementPrice SP
-INNER JOIN @tmpAllocatedContracs AC ON SP.intFutureMarketId = AC.intSalesFutureMarketId AND SP.intFutureMonthId = AC.intSalesFutureMonthId
+INNER JOIN @tmpAllocatedContracts AC ON SP.intFutureMarketId = AC.intSalesFutureMarketId AND SP.intFutureMonthId = AC.intSalesFutureMonthId
 WHERE AC.dblSalesContractFutures IS NULL
 
 
@@ -682,13 +682,13 @@ WHERE AC.dblSalesContractFutures IS NULL
 
 UPDATE AC
 SET AC.dblPurchaseContractFutures = ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(AC.intPurchaseItemId,@intPriceUOMId,SP.intUnitMeasureId, SP.dblSettlementPrice),0)
-FROM @tmpAllocatedContracs AC
+FROM @tmpAllocatedContracts AC
 LEFT JOIN @tblSettlementPrice SP ON SP.intFutureMarketId = AC.intPurchaseFutureMarketId AND SP.intFutureMonthId = AC.intPurchaseFutureMonthId
 WHERE AC.dblPurchaseContractFutures IS NULL
 
 UPDATE AC
 SET AC.dblSalesContractFutures = ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(AC.intSalesItemId,@intPriceUOMId,SP.intUnitMeasureId, SP.dblSettlementPrice),0)
-FROM @tmpAllocatedContracs AC
+FROM @tmpAllocatedContracts AC
 LEFT JOIN @tblSettlementPrice SP ON SP.intFutureMarketId = AC.intSalesFutureMarketId AND SP.intFutureMonthId = AC.intSalesFutureMonthId
 WHERE AC.dblSalesContractFutures IS NULL
 
@@ -732,13 +732,13 @@ JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = temp.intCommodityId A
 WHERE temp.intM2MBasisId = @intBasisEntryId AND temp.intCommodityId = @intCommodityId
 
 
-IF EXISTS (SELECT * FROM @tmpAllocatedContracs WHERE dblPurchaseContractBasis IS NULL OR dblSalesContractBasis IS NULL)
+IF EXISTS (SELECT * FROM @tmpAllocatedContracts WHERE dblPurchaseContractBasis IS NULL OR dblSalesContractBasis IS NULL)
 BEGIN
 	
 	
 	SELECT DISTINCT basisDetail.*
 	INTO #tmpUsedBasisDetail
-	FROM @tmpAllocatedContracs AC
+	FROM @tmpAllocatedContracts AC
 	OUTER APPLY (
 		SELECT TOP 1 intM2MBasisDetailId
 		FROM #tmpBasisDetail tmp
@@ -780,7 +780,7 @@ BEGIN
 
 	UNION ALL
 	SELECT DISTINCT basisDetail.*
-	FROM @tmpAllocatedContracs AC
+	FROM @tmpAllocatedContracts AC
 	OUTER APPLY (
 		SELECT TOP 1 intM2MBasisDetailId
 		FROM #tmpBasisDetail tmp
@@ -878,7 +878,7 @@ BEGIN
 
 	--Purchase Contract
 	UPDATE AC SET dblPurchaseContractBasis = basisDetail.dblMarketBasis
-	FROM @tmpAllocatedContracs AC
+	FROM @tmpAllocatedContracts AC
 	OUTER APPLY (
 		SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId 
 		FROM #tmpBasisDetail tmp
@@ -921,7 +921,7 @@ BEGIN
 
 	--Sales Contract
 	UPDATE AC SET dblSalesContractBasis = basisDetail.dblMarketBasis
-	FROM @tmpAllocatedContracs AC
+	FROM @tmpAllocatedContracts AC
 	OUTER APPLY (
 		SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId 
 		FROM #tmpBasisDetail tmp
@@ -973,11 +973,11 @@ END
 --Start - Update Allocated Contracts Cash
 --=================================================
 
-UPDATE @tmpAllocatedContracs
+UPDATE @tmpAllocatedContracts
 SET dblPurchaseContractCash  = ISNULL(dblPurchaseContractBasis,0) + ISNULL(dblPurchaseContractFutures,0)
 WHERE dblPurchaseContractCash IS NULL
 
-UPDATE @tmpAllocatedContracs
+UPDATE @tmpAllocatedContracts
 SET dblSalesContractCash  = ISNULL(dblSalesContractBasis,0) + ISNULL(dblSalesContractFutures,0)
 WHERE dblSalesContractCash IS NULL
 
@@ -1004,7 +1004,7 @@ SELECT intContractDetailId = CC.intContractDetailId
 						WHEN CC.ysnAccrue = 0 AND CC.strCostMethod <> 'Per Unit' THEN 0 END
 INTO #tmpPurchaseContractCost
 FROM tblCTContractCost CC
-JOIN @tmpAllocatedContracs AC ON AC.intPurchaseContractDetailId = CC.intContractDetailId
+JOIN @tmpAllocatedContracts AC ON AC.intPurchaseContractDetailId = CC.intContractDetailId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = AC.intPurchaseContractDetailId
 JOIN tblICItem Item ON Item.intItemId = CC.intItemId 
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intItemUOMId
@@ -1015,7 +1015,7 @@ WHERE Item.strCostType <> 'Commission'
 
 UPDATE AC
 SET AC.dblPurchaseContractCosts = ((ISNULL(CC.dblTotalCost, 0) / CD.dblQuantity) * AC.dblPurchaseAllocatedQty)
-FROM @tmpAllocatedContracs AC
+FROM @tmpAllocatedContracts AC
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = AC.intPurchaseContractDetailId
 JOIN (SELECT intContractDetailId, SUM(ISNULL(dblTotalCost, 0)) dblTotalCost FROM #tmpPurchaseContractCost GROUP BY intContractDetailId) CC ON CC.intContractDetailId = AC.intPurchaseContractDetailId
 
@@ -1035,7 +1035,7 @@ SELECT intContractDetailId = CC.intContractDetailId
 						WHEN CC.ysnAccrue = 0 AND CC.strCostMethod <> 'Per Unit' THEN 0 END
 INTO #tmpSalesContractCost
 FROM tblCTContractCost CC
-JOIN @tmpAllocatedContracs AC ON AC.intSalesContractDetailId = CC.intContractDetailId
+JOIN @tmpAllocatedContracts AC ON AC.intSalesContractDetailId = CC.intContractDetailId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = AC.intSalesContractDetailId
 JOIN tblICItem Item ON Item.intItemId = CC.intItemId 
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intItemUOMId
@@ -1047,7 +1047,7 @@ WHERE Item.strCostType <> 'Commission'
 
 UPDATE AC
 SET AC.dblSalesContractCosts = ((ISNULL(CC.dblTotalCost, 0) / CD.dblQuantity) * AC.dblSalesAllocatedQty)
-FROM @tmpAllocatedContracs AC
+FROM @tmpAllocatedContracts AC
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = AC.intSalesContractDetailId
 JOIN (SELECT intContractDetailId, SUM(ISNULL(dblTotalCost, 0)) dblTotalCost FROM #tmpSalesContractCost GROUP BY intContractDetailId) CC ON CC.intContractDetailId = AC.intSalesContractDetailId
 
@@ -1060,11 +1060,11 @@ JOIN (SELECT intContractDetailId, SUM(ISNULL(dblTotalCost, 0)) dblTotalCost FROM
 --Start - Update Allocated Value
 --=================================================
 
-UPDATE @tmpAllocatedContracs
+UPDATE @tmpAllocatedContracts
 SET dblPurchaseValue  = (ISNULL(dblPurchaseContractCash,0) + ISNULL(dblPurchaseContractCosts,0)) * dblPurchaseAllocatedQty
 WHERE dblPurchaseValue IS NULL
 
-UPDATE @tmpAllocatedContracs
+UPDATE @tmpAllocatedContracts
 SET dblSalesValue  = (ISNULL(dblSalesContractCash,0) + ISNULL(dblSalesContractCosts,0)) * dblSalesAllocatedQty
 WHERE dblSalesValue IS NULL
 
@@ -1079,7 +1079,7 @@ WHERE dblSalesValue IS NULL
 --Start - Update Allocated MatchPnL for Allocated Contract
 --=========================================================
 
-UPDATE @tmpAllocatedContracs
+UPDATE @tmpAllocatedContracts
 SET dblMatchedPnL  = ISNULL(dblSalesValue,0) - ISNULL(dblPurchaseValue,0)
 WHERE dblMatchedPnL IS NULL
 
@@ -1091,7 +1091,7 @@ WHERE dblMatchedPnL IS NULL
 
 
 --Matched Derivatives
-INSERT INTO @tmpAllocatedContracs
+INSERT INTO @tmpAllocatedContracts
 SELECT
 	@intAllocatedContractsGainOrLossHeaderId
 	,strTransactionType = 'Derivative'
@@ -1231,7 +1231,7 @@ AND psh.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN psh.
 --Start - Update Allocated MatchPnL for Matched Derivatives
 --=========================================================
 
-UPDATE @tmpAllocatedContracs
+UPDATE @tmpAllocatedContracts
 SET dblMatchedPnL  = ISNULL(dblSalesValue,0) - ISNULL(dblPurchaseValue,0)
 WHERE dblMatchedPnL IS NULL
 AND strTransactionType = 'Derivative'
@@ -1249,7 +1249,7 @@ AND strTransactionType = 'Derivative'
 DELETE FROM tblRKAllocatedContractsTransaction WHERE intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 
 INSERT INTO tblRKAllocatedContractsTransaction
-SELECT *,intConcurrencyId = 1 FROM @tmpAllocatedContracs
+SELECT *,intConcurrencyId = 1 FROM @tmpAllocatedContracts
 
 --=========================================================
 --End - Inserting Transaction Data
@@ -1284,7 +1284,7 @@ SELECT intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLos
 	, dblFutures = SUM(ISNULL(dblSalesContractFutures, 0) - ISNULL(dblPurchaseContractFutures, 0) )
 	, dblBasis = SUM(ISNULL(dblSalesContractBasis, 0) - ISNULL(dblPurchaseContractBasis, 0) )
 	, dblCash = SUM(ISNULL(dblSalesContractCash, 0) - ISNULL(dblPurchaseContractCash, 0) )
-FROM @tmpAllocatedContracs
+FROM @tmpAllocatedContracts
 GROUP BY  strTransactionType
 	,strPurchaseCommodityCode
 ORDER BY strTransactionType DESC
