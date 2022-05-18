@@ -292,6 +292,7 @@ BEGIN
 					,dtmDateSubmitted = '1/1/1900'
 					,intApprovalStatusId = 0
 					,dtmDateApproved = '1/1/1900'
+					,dblInterestRate = null
 					,strFinanceTradeNo = CASE WHEN intApprovalStatusId in (3,4) then null else strFinanceTradeNo END
 				WHERE intApprovalStatusId in (3,4) and intContractDetailId = @intContractDetailId
 
