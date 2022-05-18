@@ -27,6 +27,7 @@ CREATE TABLE #AssetID(
 DECLARE @tblAsset TABLE (
 			[strAssetId] NVARCHAR (20) COLLATE Latin1_General_CI_AS NOT NULL,
 			[intAssetId] [int] NOT NULL,
+			dblAssetValue NUMERIC(18,6),
 			dtmDispose DATETIME NOT NULL,
 			ysnOpenPeriod BIT NOT NULL,
 			totalDepre NUMERIC(18,6),
@@ -43,6 +44,7 @@ INSERT INTO @tblAsset
 SELECT
 B.strAssetId,
 A.intAssetId,
+(B.dblCost - ISNULL(B.dblSalvageValue, 0)) + ISNULL(Adjustment.dblAdjustment, 0),
 B.dtmDispositionDate,
 F.ysnOpenPeriod,
 0,
@@ -61,6 +63,11 @@ OUTER APPLY(
 	D.dtmDepreciationToDate BETWEEN
 	dtmStartDate AND dtmEndDate
 )F
+OUTER APPLY(
+	SELECT ISNULL(SUM(BA.dblAdjustment), 0) dblAdjustment
+	FROM tblFABasisAdjustment BA
+	WHERE BA.intAssetId = A.intAssetId AND BA.intBookId = 1 AND BA.dtmDate <= D.dtmDepreciationToDate AND BA.strAdjustmentType = 'Basis'
+) Adjustment
 
 WHERE isnull(ysnAcquired,0) = 1 AND isnull(ysnDisposed,0) = 0 AND isnull(ysnDepreciated,0) = 1
 
@@ -334,9 +341,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= 0
-			,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0 THEN A.[dblCost] ELSE ROUND((A.[dblCost] * @dblRate), 2) END
+			,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0 THEN B.dblAssetValue ELSE ROUND((B.dblAssetValue * @dblRate), 2) END
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE A.[dblCost] END
+			,[dblCreditForeign]		= CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE B.dblAssetValue END
 			,[dblDebitReport]		= 0
 			,[dblCreditReport]		= 0
 			,[dblReportingRate]		= 0
@@ -375,38 +382,38 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= CASE WHEN @ysnMultiCurrency = 0
 										THEN
-											CASE WHEN (A.dblCost - B.totalDepre - @dblDispositionAmount) > 0 
-											THEN A.dblCost - B.totalDepre - @dblDispositionAmount ELSE 0 
+											CASE WHEN (B.dblAssetValue - B.totalDepre - @dblDispositionAmount) > 0 
+											THEN B.dblAssetValue - B.totalDepre - @dblDispositionAmount ELSE 0 
 											END
 										ELSE
-											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) > 0
-												THEN ROUND(((A.dblCost - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2) 
+											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) > 0
+												THEN ROUND(((B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2) 
 												ELSE 0
 										END
 									  END
 			,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0
 										THEN 
-											CASE WHEN (A.dblCost - B.totalDepre - @dblDispositionAmount) < 0 
-											THEN ABS(A.dblCost - B.totalDepre - @dblDispositionAmount) ELSE 0 
+											CASE WHEN (B.dblAssetValue - B.totalDepre - @dblDispositionAmount) < 0 
+											THEN ABS(B.dblAssetValue - B.totalDepre - @dblDispositionAmount) ELSE 0 
 											END
 										ELSE
-											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) < 0
-												THEN ROUND((ABS(A.dblCost - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2)
+											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) < 0
+												THEN ROUND((ABS(B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2)
 												ELSE 0
 										END
 									  END
 			,[dblDebitForeign]		= CASE WHEN @ysnMultiCurrency = 0
 										THEN 0
 										ELSE
-											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) > 0
-												THEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) ELSE 0
+											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) > 0
+												THEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) ELSE 0
 											END
 										END
 			,[dblCreditForeign]		= CASE WHEN @ysnMultiCurrency = 0
 										THEN 0
 										ELSE
-											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) < 0
-												THEN ABS(A.dblCost - B.totalForeignDepre - @dblDispositionAmount) ELSE 0
+											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) < 0
+												THEN ABS(B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) ELSE 0
 											END
 										END
 			,[dblDebitReport]		= 0
@@ -434,8 +441,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
 		
 		FROM tblFAFixedAsset A
-		JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost
-		AND ((A.dblCost - (CASE WHEN @ysnMultiCurrency = 0 THEN B.totalDepre ELSE B.totalForeignDepre END) - @dblDispositionAmount) <> 0) -- debit and credit should not be zero.
+		JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
+		AND ((B.dblAssetValue - (CASE WHEN @ysnMultiCurrency = 0 THEN B.totalDepre ELSE B.totalForeignDepre END) - @dblDispositionAmount) <> 0) -- debit and credit should not be zero.
 
 		-- Add Sales Offset Account entry if Disposition Amount has value, else no entry
 		UNION ALL
@@ -483,7 +490,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
 		
 			FROM tblFAFixedAsset A
-			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost 
+			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
 			WHERE @dblDispositionAmount > 0
 
 		-- Realized Gain or Loss GL Entry -> If multi currency, and if history rate and current rate is not equal
@@ -495,14 +502,14 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= CASE WHEN ROUND((A.dblCost * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) > 0
+			,[dblDebit]				= CASE WHEN ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) > 0
 										THEN 
-											ROUND((A.dblCost * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2)
+											ROUND((B.dblAssetValue* (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2)
 										ELSE 0
 									  END
-			,[dblCredit]			= CASE WHEN ROUND((A.dblCost * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) < 0
+			,[dblCredit]			= CASE WHEN ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) < 0
 										THEN 
-											ABS(ROUND((A.dblCost * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2))
+											ABS(ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2))
 										ELSE 0
 									  END
 			,[dblDebitForeign]		= 0
@@ -532,9 +539,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intCurrencyExchangeRateTypeId] = NULL
 				
 			FROM tblFAFixedAsset A
-			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost 
+			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
 			WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL 
-			AND @dblRate <> @dblCurrentRate AND ((A.dblCost - B.totalForeignDepre) <> 0)
+			AND @dblRate <> @dblCurrentRate AND ((B.dblAssetValue - B.totalForeignDepre) <> 0)
 
 
 		BEGIN TRY
