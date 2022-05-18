@@ -58,7 +58,7 @@ WHERE NOT EXISTS (
 )
 
 ALTER TABLE #tmpVoucherValidPayables DROP COLUMN intVoucherPayableId
-INSERT INTO @validPayables
+INSERT INTO @validPayables --DO NOT USE THIS UDT, THE DATA HERE IS NOT SORTED CORRECTLY BECAUSE OF TEMP TABLE NOT HAVING A SORT
 SELECT * FROM #tmpVoucherValidPayables
 
 --FILTER VALID PAYABLES TAX
@@ -108,7 +108,7 @@ ELSE SAVE TRAN @SavePoint
 	IF NOT EXISTS(
 		SELECT TOP 1 1
 			FROM tblAPVoucherPayable A
-			INNER JOIN @validPayables C
+			INNER JOIN @voucherPayable C --DO NOT USE THE @validPayables, THE SORTING HAS AN ISSUE
 				ON	A.intTransactionType = C.intTransactionType
 				AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 				AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
@@ -128,7 +128,7 @@ ELSE SAVE TRAN @SavePoint
 		AND NOT EXISTS(
 			SELECT TOP 1 1
 			FROM tblAPVoucherPayableCompleted A
-			INNER JOIN @validPayables C
+			INNER JOIN @voucherPayable C
 				ON 	A.intTransactionType = C.intTransactionType
 				AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 				AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
@@ -146,7 +146,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 	BEGIN
-		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
+		EXEC uspAPAddVoucherPayable @voucherPayable = @voucherPayable, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 		
 		IF @transCount = 0
 		BEGIN
@@ -164,7 +164,7 @@ ELSE SAVE TRAN @SavePoint
 		SELECT
 			intOldPayableId
 			,intNewPayableId
-		FROM dbo.fnAPGetPayableKeyInfo(@validPayables)
+		FROM dbo.fnAPGetPayableKeyInfo(@voucherPayable)
 
 		--UPDATE THE QTY BEFORE BACKING UP AND DELETING, SO WE COULD ACTUAL QTY WHEN RE-INSERTING
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
@@ -175,7 +175,7 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayable B
 		INNER JOIN @payablesKey B2
 			ON B.intVoucherPayableId = B2.intNewPayableId
-		INNER JOIN @validPayables C
+		INNER JOIN @voucherPayable C
 			ON B2.intOldPayableId = C.intVoucherPayableId
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
 			-- ON 	B.intTransactionType = C.intTransactionType
@@ -202,7 +202,7 @@ ELSE SAVE TRAN @SavePoint
 		-- 	ON A2.intOldPayableId = B.intVoucherPayableId
 		-- INNER JOIN tblAPVoucherPayable C
 		-- 	ON A2.intNewPayableId = C.intVoucherPayableId
-		INNER JOIN @validPayablesTax taxData
+		INNER JOIN @voucherPayableTax taxData
 			ON A2.intOldPayableId = taxData.intVoucherPayableId
 			AND A.intTaxGroupId = taxData.intTaxGroupId
 			AND A.intTaxCodeId = taxData.intTaxCodeId
@@ -600,7 +600,7 @@ ELSE SAVE TRAN @SavePoint
 		SELECT
 			intOldPayableId
 			,intNewPayableId
-		FROM dbo.fnAPGetPayableKeyInfo(@validPayables)
+		FROM dbo.fnAPGetPayableKeyInfo(@voucherPayable)
 
 		--UPDATE QTY FOR PARTIAL
 		UPDATE B
@@ -610,7 +610,7 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayable B
 		INNER JOIN @payablesKeyPartial B2
 			ON B2.intNewPayableId = B.intVoucherPayableId
-		INNER JOIN @validPayables C
+		INNER JOIN @voucherPayable C
 			ON C.intVoucherPayableId = B2.intOldPayableId
 
 		UPDATE A
@@ -624,7 +624,7 @@ ELSE SAVE TRAN @SavePoint
 		-- 	ON B.intVoucherPayableId = A2.intOldPayableId
 		-- INNER JOIN tblAPVoucherPayable C
 		-- 	ON A2.intNewPayableId = C.intVoucherPayableId
-		INNER JOIN @validPayablesTax taxData
+		INNER JOIN @voucherPayableTax taxData
 			ON A2.intOldPayableId = taxData.intVoucherPayableId
 			AND A.intTaxGroupId = taxData.intTaxGroupId
 			AND A.intTaxCodeId = taxData.intTaxCodeId
@@ -641,7 +641,7 @@ ELSE SAVE TRAN @SavePoint
 		SELECT
 			intOldPayableId
 			,intNewPayableId
-		FROM dbo.fnAPGetPayableCompletedKeyInfo(@validPayables) A
+		FROM dbo.fnAPGetPayableCompletedKeyInfo(@voucherPayable) A
 		WHERE A.intOldPayableId NOT IN
 		(
 			--exclude the partial
@@ -736,7 +736,7 @@ ELSE SAVE TRAN @SavePoint
 			-- FROM tblAPBillDetail A
 			-- INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 			-- INNER JOIN @voucherIds C ON B.intBillId = C.intId
-			FROM @validPayables B
+			FROM @voucherPayable B
 			INNER JOIN @payablesKey B2
 				ON B.intVoucherPayableId = B2.intOldPayableId
 			INNER JOIN tblAPVoucherPayableCompleted D --ON A.intBillDetailId = D.intBillDetailId
@@ -995,7 +995,7 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayable B
 		INNER JOIN @deleted B2
 			ON B.intVoucherPayableId = B2.intNewPayableId
-		INNER JOIN @validPayables C
+		INNER JOIN @voucherPayable C
 			ON B2.intVoucherPayableKey = C.intVoucherPayableId
 
 		UPDATE A
@@ -1007,7 +1007,7 @@ ELSE SAVE TRAN @SavePoint
 		-- 	ON del.intVoucherPayableKey = B.intVoucherPayableId
 		-- INNER JOIN tblAPVoucherPayable C
 		-- 	ON del.intNewPayableId = C.intVoucherPayableId
-		INNER JOIN @validPayablesTax taxData
+		INNER JOIN @voucherPayableTax taxData
 			ON del.intVoucherPayableKey = taxData.intVoucherPayableId
 			AND A.intTaxClassId = taxData.intTaxClassId
 				AND A.intTaxCodeId = taxData.intTaxCodeId
@@ -1075,8 +1075,8 @@ ELSE SAVE TRAN @SavePoint
 			-- 	RETURN;
 			-- END
 
-			EXEC uspAPRemoveVoucherPayable @voucherPayable = @validPayables, @throwError = 1
-			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax,  @throwError = 1
+			EXEC uspAPRemoveVoucherPayable @voucherPayable = @voucherPayable, @throwError = 1
+			EXEC uspAPAddVoucherPayable @voucherPayable = @voucherPayable, @voucherPayableTax = @voucherPayableTax,  @throwError = 1
 		END
 
 	END
