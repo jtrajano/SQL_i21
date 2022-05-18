@@ -196,6 +196,7 @@ BEGIN TRY
 		OR @intBookId IS NULL
 	BEGIN
 		SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
+					,@intPrevUnitMeasureId=intUnitMeasureId
 		FROM tblCTInvPlngReportMaster
 		WHERE ysnPost = 1
 			AND dtmDate <= @dtmDate
@@ -208,6 +209,7 @@ BEGIN TRY
 			OR @intSubBookId IS NULL
 		BEGIN
 			SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
+						,@intPrevUnitMeasureId=intUnitMeasureId
 			FROM tblCTInvPlngReportMaster
 			WHERE ysnPost = 1
 				AND dtmDate <= @dtmDate
@@ -218,6 +220,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
+						,@intPrevUnitMeasureId=intUnitMeasureId
 			FROM tblCTInvPlngReportMaster
 			WHERE ysnPost = 1
 				AND dtmDate <= @dtmDate
