@@ -197,8 +197,8 @@ SELECT
 	,ysnIntraCompany					= CASE WHEN ISNULL(INV.ysnIntraCompany,0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries,0) END
 	,strGoodsStatus						= INV.strGoodsStatus
 	,dblFreightCharge					= INV.dblFreightCharge
-	,strFreightCompanySegment			= INV.strFreightCompanySegment
-	,strFreightLocationSegment			= INV.strFreightLocationSegment
+	,strFreightCompanySegment			= GLCAI.strDescription
+	,strFreightLocationSegment			= GLLAI.strDescription
 	,intTaxLocationId                  	= INV.intTaxLocationId
 	,strTaxLocation						= TAXLOCATION.strLocationName
 	,strTaxPoint                        = INV.strTaxPoint
