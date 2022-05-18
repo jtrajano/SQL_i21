@@ -125,6 +125,10 @@ INSERT INTO #CUSTOMERINQUIRY (
 	 , dtmNextPaymentDate
 	 , dtmLastStatementDate
 	 , dtmBudgetMonth
+	 , dblHighestAR
+     , dtmHighestARDate
+     , dblHighestDueAR
+     , dtmHighestDueARDate
 )
 SELECT intEntityCustomerId          = CUSTOMER.intEntityId
      , intEntityId					= CUSTOMER.intEntityId
@@ -173,7 +177,11 @@ SELECT intEntityCustomerId          = CUSTOMER.intEntityId
 	 , intAveragePaymentDays		= 0
 	 , dtmNextPaymentDate			= BUDGETMONTH.dtmBudgetDate	 
 	 , dtmLastStatementDate			= SOA.dtmLastStatementDate
-	 , dtmBudgetMonth				= BUDGETMONTH.dtmBudgetDate	 
+	 , dtmBudgetMonth				= BUDGETMONTH.dtmBudgetDate
+	 , dblHighestAR					= ISNULL(CUSTOMER.dblHighestAR, 0)
+     , dtmHighestARDate				= CUSTOMER.dtmHighestARDate
+     , dblHighestDueAR				= ISNULL(CUSTOMER.dblHighestDueAR, 0)
+     , dtmHighestDueARDate			= CUSTOMER.dtmHighestDueARDate	 
 FROM vyuARCustomerSearch CUSTOMER
 LEFT JOIN tblARCustomerAgingStagingTable AGING ON CUSTOMER.intEntityCustomerId = AGING.intEntityCustomerId AND AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Summary'
 LEFT JOIN tblARStatementOfAccount SOA ON SOA.strEntityNo = CUSTOMER.strCustomerNumber
@@ -255,21 +263,6 @@ LEFT JOIN (
 WHERE @intEntityCustomerId IS NULL OR CUSTOMER.intEntityCustomerId = @intEntityCustomerId
 
 UPDATE CI
-SET dblHighestAR		= ISNULL(HIGHESTAR.dblInvoiceTotal, 0)
-  , dtmHighestARDate	= HIGHESTAR.dtmDate
-FROM #CUSTOMERINQUIRY CI
-CROSS APPLY (
-	SELECT TOP 1 dblInvoiceTotal
-		       , dtmDate
-	FROM dbo.tblARInvoice
-	WHERE ysnPosted = 1
-	  AND strTransactionType IN ('Invoice', 'Debit Memo')
-	  AND strType <> 'CF Tran'
-	  AND intEntityCustomerId = CI.intEntityCustomerId
-	ORDER BY dblInvoiceTotal DESC	  
-) HIGHESTAR
-
-UPDATE CI
 SET dblLastPayment		= ISNULL(PAYMENT.dblAmountPaid, 0)
   , dtmLastPaymentDate	= PAYMENT.dtmDatePaid
 FROM #CUSTOMERINQUIRY CI
@@ -286,31 +279,6 @@ CROSS APPLY (
 		AND PM.strPaymentMethod != 'CF Invoice'
 	ORDER BY P.intPaymentId DESC
 ) PAYMENT
-
-UPDATE CI
-SET dblHighestDueAR		= ISNULL(HIGHESTDUEAR.dblInvoiceTotal, 0)
-  , dtmHighestDueARDate	= HIGHESTDUEAR.dtmDate
-FROM #CUSTOMERINQUIRY CI
-CROSS APPLY (
-	SELECT TOP 1 I.dblInvoiceTotal
-			   , I.dtmDate
-	FROM dbo.tblARInvoice I WITH (NOLOCK)
-		LEFT JOIN (SELECT intInvoiceId
-						 , dtmDatePaid = MAX(P.dtmDatePaid)
-					FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-						INNER JOIN (SELECT intPaymentId
-										 , dtmDatePaid
-									FROM dbo.tblARPayment P WITH (NOLOCK)
-						) P ON P.intPaymentId = PD.intPaymentId 
-					GROUP BY intInvoiceId
-		) PD ON PD.intInvoiceId = I.intInvoiceId
-	WHERE ysnPosted = 1
-	AND strTransactionType IN ('Invoice', 'Debit Memo')
-	AND strType <> 'CF Tran'
-	AND intEntityCustomerId = CI.intEntityCustomerId
-	AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) > 0
-	ORDER BY DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) DESC
-) HIGHESTDUEAR
 
 UPDATE #CUSTOMERINQUIRY
 SET dblHighestDueAR = ISNULL(dblHighestDueAR, 0)

@@ -506,22 +506,6 @@ INNER JOIN
 		ON ARP.[intPaymentId] = ARPH.[intTransactionId]
 
 --UPDATE CUSTOMER AR BALANCE
---UPDATE CUSTOMER
---SET dblARBalance = dblARBalance - (CASE WHEN @Post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
---FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
---INNER JOIN (
---    SELECT intEntityCustomerId
---        , dblTotalPayment = ABS(SUM(ISNULL(PD.dblTotalPayment, 0) + CASE WHEN P.ysnInvoicePrepayment = 0 THEN ISNULL(P.dblUnappliedAmount, 0)ELSE 0 END))
---    FROM dbo.tblARPayment P WITH (NOLOCK)
---    LEFT JOIN (
---        SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount)) - SUM(PD.dblInterest)
---            , intPaymentId
---        FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
---        GROUP BY intPaymentId
---    ) PD ON PD.intPaymentId = P.intPaymentId
---    WHERE P.intPaymentId IN (SELECT intId FROM @PaymentIds)
---    GROUP BY intEntityCustomerId
---) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 UPDATE CUSTOMER
 SET dblARBalance = dblARBalance - (CASE WHEN @Post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
@@ -539,17 +523,6 @@ INNER JOIN (
 ) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
 --UPDATE CUSTOMER CREDIT LIMIT REACHED DATE
---UPDATE CUSTOMER
---SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN PAYMENT.dtmDatePaid ELSE NULL END
---FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
---CROSS APPLY (
---    SELECT TOP 1 P.dtmDatePaid
---    FROM dbo.tblARPayment P
---    INNER JOIN @PaymentIds U ON P.intPaymentId = U.intId
---    WHERE P.intEntityCustomerId = CUSTOMER.intEntityId
---    ORDER BY P.dtmDatePaid DESC
---) PAYMENT
---WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 UPDATE CUSTOMER
 SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN PAYMENT.dtmDatePaid ELSE NULL END
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
@@ -560,6 +533,48 @@ CROSS APPLY (
     ORDER BY P.dtmDatePaid DESC
 ) PAYMENT
 WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
+
+--UPDATE HIGHEST AR
+UPDATE CUSTOMER
+SET dblHighestAR		= CUSTOMER.dblARBalance
+  , dtmHighestARDate	= CAST(@PostDate AS DATE)
+FROM dbo.tblARCustomer CUSTOMER
+INNER JOIN (
+	SELECT DISTINCT intEntityCustomerId
+	FROM #ARPostPaymentHeader
+) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
+WHERE CUSTOMER.dblARBalance > ISNULL(CUSTOMER.dblHighestAR, 0)
+
+--UPDATE HIGHEST DUE AR
+UPDATE CUSTOMER
+SET dblHighestDueAR		= DUE.dblPastDue
+  , dtmHighestDueARDate	= CAST(@PostDate AS DATE)
+FROM dbo.tblARCustomer CUSTOMER
+INNER JOIN (
+    SELECT intEntityCustomerId	= I.intEntityCustomerId
+         , dblPastDue			= SUM(CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmPostDate) > 0
+                                        THEN 
+                                                CASE WHEN I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') 
+                                                    THEN I.dblAmountDue
+                                                    ELSE -I.dblAmountDue
+                                                END 
+                                        ELSE 0 
+                                    END) 
+    FROM tblARInvoice I
+    INNER JOIN (
+        SELECT DISTINCT intEntityCustomerId
+        FROM #ARPostPaymentHeader
+    ) PAYMENT ON I.intEntityCustomerId = PAYMENT.intEntityCustomerId
+    WHERE I.ysnPosted = 1
+      AND I.ysnForgiven = 0
+      AND I.ysnPaid = 0
+      AND I.dblAmountDue <> 0
+      AND I.strTransactionType <> 'Cash Refund'
+      AND I.dtmPostDate <= @PostDate
+    GROUP BY I.intEntityCustomerId
+) DUE ON CUSTOMER.intEntityId = DUE.intEntityCustomerId
+     AND DUE.dblPastDue > 0
+     AND DUE.dblPastDue > CUSTOMER.dblHighestDueAR
 
 --UPDATE CUSTOMER'S BUDGET
 EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @PaymentIds, @Post = @Post
