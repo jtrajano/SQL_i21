@@ -163,6 +163,7 @@ CREATE TABLE tblARPostInvoiceHeader (
 	,[intInterCompanyVendorId]				INT				NULL
 	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
     ,[strSessionId]			                NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
+    ,[dblFreightCharge]                     NUMERIC(18,6)   NULL DEFAULT 0
     ,[intLineOfBusinessId]				    INT												NULL
     ,[intFreightCompanySegment]			    INT												NULL
 	,[intFreightLocationSegment]			INT												NULL
