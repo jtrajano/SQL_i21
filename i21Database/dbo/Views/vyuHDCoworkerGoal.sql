@@ -2,7 +2,7 @@
 AS
 SELECT   [intCoworkerGoalId]				= CoworkerGoal.[intCoworkerGoalId]			
 		,[intEntityId]						= CoworkerGoal.[intEntityId]	
-		,[intReportToId]					= CoworkerGoal.[intReportsToId]
+		,[intReportsToId]					= CoworkerGoal.[intReportsToId]
 		,[strFiscalYear]					= CoworkerGoal.[strFiscalYear]	
 		,[intCurrencyId]					= CoworkerGoal.[intCurrencyId]		
 		,[intUtilizationTargetAnnual]		= CoworkerGoal.[intUtilizationTargetAnnual]
