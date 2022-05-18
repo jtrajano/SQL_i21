@@ -2200,7 +2200,7 @@ BEGIN
 		AND GLASM.intAccountId = I.[intSalesAccountId]
 	) GLSEGMENT
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
-	AND I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0
+	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 	AND I.strSessionId = @strSessionId
 
@@ -2241,7 +2241,7 @@ BEGIN
 		AND GLASM.intAccountId = I.[intAccountId]
 	) GLSEGMENT
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
-	AND I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0
+	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
 	AND I.strSessionId = @strSessionId
 
@@ -2265,8 +2265,36 @@ BEGIN
 		,[strPostingError]		= 'Sales and AR Account should have the same location segment.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
-	WHERE I.[ysnAllowIntraEntries] = 0
+	WHERE (I.[ysnAllowIntraEntries] = 0 OR I.dblFreightCharge > 0)
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check location segment
+	SELECT
+		 [intInvoiceId]				= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]					= I.[intItemId] 
+		,[strBatchId]					= I.[strBatchId]
+		,[strPostingError]		= 'Freight Revenue Account and/or Freight Expense Account is not yet configured.'
+		,[strSessionId]				= @strSessionId
+	FROM tblARPostInvoiceHeader I
+	OUTER APPLY (
+		SELECT TOP 1 intFreightRevenueAccount, intFreightExpenseAccount
+		FROM tblARCompanyPreference
+	) ARCP
+	WHERE I.dblFreightCharge > 0
+	AND (ISNULL(ARCP.intFreightRevenueAccount, 0) = 0 OR ISNULL(ARCP.intFreightExpenseAccount, 0) = 0)
 	AND I.strSessionId = @strSessionId
 END
 
