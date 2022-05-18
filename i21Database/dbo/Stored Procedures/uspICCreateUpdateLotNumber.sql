@@ -778,11 +778,27 @@ BEGIN
 													ELSE 
 														
 														CASE	-- Retain the same Wgt Per Qty if the incoming stock is in wgt. 
-																WHEN LotToUpdate.dblQty > 0 AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 
+																WHEN 
+																	LotToUpdate.dblQty > 0 
+																	AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId 
+																	AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId 
+																THEN 
+																	LotMaster.dblWeightPerQty
+
+																-- Retain the same Wgt Per Qty if the existing lot has the same UOM for the Pack and Wgt. 
+																WHEN 
+																	LotToUpdate.dblQty > 0 
+																	AND LotMaster.intWeightUOMId = LotMaster.intItemUOMId 
+																	AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId 
+																THEN 
 																	LotMaster.dblWeightPerQty
 
 																-- If lot master does not have weight uom, calculate a new one based on the incoming lot. 
-																WHEN LotToUpdate.dblQty > 0 AND LotMaster.intWeightUOMId IS NULL AND LotToUpdate.intWeightUOMId IS NOT NULL THEN 
+																WHEN 
+																	LotToUpdate.dblQty > 0 
+																	AND LotMaster.intWeightUOMId IS NULL 
+																	AND LotToUpdate.intWeightUOMId IS NOT NULL 
+																THEN 
 																	dbo.fnCalculateWeightUnitQty(
 																		(
 																			LotMaster.dblQty 
@@ -796,7 +812,11 @@ BEGIN
 																	)
 
 																-- Increase the weight per Qty if there is an incoming stock for the lot. 
-																WHEN LotToUpdate.dblQty > 0 AND LotMaster.intWeightUOMId IS NOT NULL AND LotToUpdate.dblWeightPerQty <> LotMaster.dblWeightPerQty THEN 
+																WHEN 
+																	LotToUpdate.dblQty > 0 
+																	AND LotMaster.intWeightUOMId IS NOT NULL 
+																	AND LotToUpdate.dblWeightPerQty <> LotMaster.dblWeightPerQty 
+																THEN 
 																	dbo.fnCalculateWeightUnitQty(
 																		(
 																			LotMaster.dblQty 
@@ -812,13 +832,19 @@ BEGIN
 														END 
 
 											END
-				,intItemUOMId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemUOMId ELSE LotMaster.intItemUOMId END
-				,intWeightUOMId			=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
-														LotToUpdate.intWeightUOMId 
-													WHEN ISNULL(LotMaster.dblQty, 0) < 0 AND LotMaster.intWeightUOMId IS NULL THEN 
-														LotToUpdate.intWeightUOMId 
-													ELSE 
-														LotMaster.intWeightUOMId 
+				,intItemUOMId			= 
+											CASE	
+												WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemUOMId 
+												ELSE LotMaster.intItemUOMId 
+											END
+				,intWeightUOMId			= 
+											CASE	
+												WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
+													LotToUpdate.intWeightUOMId 
+												WHEN ISNULL(LotMaster.dblQty, 0) < 0 AND LotMaster.intWeightUOMId IS NULL THEN 
+													LotToUpdate.intWeightUOMId 
+												ELSE 
+													LotMaster.intWeightUOMId 
 											END
 				,intSubLocationId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intSubLocationId ELSE LotMaster.intSubLocationId END
 				,intStorageLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
