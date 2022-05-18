@@ -41,15 +41,15 @@ BEGIN
 	SELECT 
 		--TC.strStoreTaxNumber		AS strTaxNumber
 		storeTax.strTaxCodeNumber	AS strTaxNumber
-		, TC.intSalesTaxAccountId	AS intAccountId
+		, NULL	AS intAccountId
 		, I.intItemId				AS intItemId
 		, I.strItemNo				AS strItemNo
 		, I.strDescription			AS strItemDescription
 	FROM tblSTStoreTaxTotals storeTax
 	JOIN tblSTStore store 
 		ON storeTax.intStoreId = store.intStoreId
-	JOIN tblSMTaxCode TC 
-		ON storeTax.intTaxCodeId = TC.intTaxCodeId
+	--JOIN tblSMTaxCode TC 
+	--	ON storeTax.intTaxCodeId = TC.intTaxCodeId
 	JOIN tblICItem I 
 		ON storeTax.intItemId = I.intItemId
 	WHERE storeTax.intStoreId = @intStoreId
