@@ -227,6 +227,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblAmountMinValue numeric (18,6),
 	dblQuantityMaxValue numeric (18,6),
 	dblAmountMaxValue numeric (18,6),
+	intVendorLocationId INT NULL,
 
 
 
