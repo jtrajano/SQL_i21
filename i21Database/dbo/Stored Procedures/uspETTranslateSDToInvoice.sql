@@ -399,7 +399,6 @@ BEGIN
 						,@RecomputeTax	= @ysnARCompute
 						,@ShipViaId = @ShipViaId
 						,@TruckDriverId = @intDriverEntityId
-						,@SourceId = 4
 
 					--GEt the created invoice number
 					SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
