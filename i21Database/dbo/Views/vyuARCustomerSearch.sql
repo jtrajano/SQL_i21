@@ -75,6 +75,10 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , dtmCreditLimitReached	= CUSTOMER.dtmCreditLimitReached
 	 , intCreditLimitReached	= DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
 	 , intInterCompanyId		= intInterCompanyId
+	 , dblHighestDueAR			= CUSTOMER.dblHighestDueAR
+     , dblHighestAR             = CUSTOMER.dblHighestAR
+     , dtmHighestARDate         = CUSTOMER.dtmHighestARDate
+     , dtmHighestDueARDate      = CUSTOMER.dtmHighestDueARDate
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -110,6 +114,10 @@ INNER JOIN (
 		 , strCreditCode
 		 , dtmCreditLimitReached
 		 , intInterCompanyId
+		 , dblHighestDueAR
+         , dblHighestAR
+         , dtmHighestARDate
+         , dtmHighestDueARDate
 	FROM dbo.tblARCustomer C WITH (NOLOCK)	
 	LEFT JOIN (
 		SELECT intTermID
