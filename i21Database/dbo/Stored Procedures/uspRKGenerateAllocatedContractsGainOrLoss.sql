@@ -286,7 +286,7 @@ SELECT
 	,strPurchaseCropYear = CASE WHEN @ysnEvaluationByCropYear = 0 THEN NULL ELSE P_cropYear.strCropYear END
 	,strPurchaseStorageLocation = CASE WHEN @ysnEvaluationByStorageLocation = 0 THEN NULL ELSE P_storageLocation.strSubLocationName END
 	,strPurchaseStorageUnit = CASE WHEN @ysnEvaluationByStorageUnit = 0 THEN NULL ELSE P_storageUnit.strName END
-	,dblPurchaseAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(P_I.intItemId,@intQuantityUOMId,ALD.intPUnitMeasureId, ALD.dblPAllocatedQty)
+	,dblPurchaseAllocatedQty = dbo.fnCalculateQtyBetweenUOM(P_ItemUOM.intItemUOMId,P_HeaderQtyUOM.intItemUOMId, ALD.dblPAllocatedQty)
 	,strPurchaseCommodityCode = P_COM.strCommodityCode
 	,strPurchaseItemNo = P_I.strItemNo
 	,strPurchaseOrgin = P_CA.strDescription
@@ -317,11 +317,11 @@ SELECT
 											ELSE ''
 										END	
 	,strPurchasePricingType = P_PT.strPricingType
-	,dblPurchaseContractBasis = CASE WHEN PCD.dblBasis IS NOT NULL THEN dbo.fnCTConvertQuantityToTargetItemUOM(P_I.intItemId,@intPriceUOMId,P_BasisUOM.intUnitMeasureId, PCD.dblBasis) ELSE PCD.dblBasis END
+	,dblPurchaseContractBasis = CASE WHEN PCD.dblBasis IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intBasisUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblBasis) ELSE PCD.dblBasis END
 	,strPurchaseInvoiceStatus = PCD.strFinancialStatus
 	,dblPurchaseContractRatio = PCD.dblRatio
-	,dblPurchaseContractFutures = CASE WHEN PCD.dblFutures IS NOT NULL THEN dbo.fnCTConvertQuantityToTargetItemUOM(P_I.intItemId,@intPriceUOMId,P_FM.intUnitMeasureId, PCD.dblFutures) ELSE PCD.dblFutures END
-	,dblPurchaseContractCash =  CASE WHEN PCD.dblCashPrice IS NOT NULL THEN dbo.fnCTConvertQuantityToTargetItemUOM(P_I.intItemId,@intPriceUOMId,P_CashUOM.intUnitMeasureId, PCD.dblCashPrice) ELSE PCD.dblCashPrice END
+	,dblPurchaseContractFutures = CASE WHEN PCD.dblFutures IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(P_FuturesUOM.intItemUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblFutures) ELSE PCD.dblFutures END
+	,dblPurchaseContractCash =  CASE WHEN PCD.dblCashPrice IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intPriceItemUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblCashPrice) ELSE PCD.dblCashPrice END
 	,dblPurchaseContractCosts = NULL
 	,dblPurchaseValue = NULL
 	,intPurchaseQuantityUnitMeasureId = ALD.intPUnitMeasureId
@@ -355,7 +355,7 @@ SELECT
 	,strSalesCropYear = CASE WHEN @ysnEvaluationByCropYear = 0 THEN NULL ELSE S_cropYear.strCropYear END
 	,strSalesStorageLocation = CASE WHEN @ysnEvaluationByStorageLocation = 0 THEN NULL ELSE S_storageLocation.strSubLocationName END
 	,strSalesStorageUnit = CASE WHEN @ysnEvaluationByStorageUnit = 0 THEN NULL ELSE S_storageUnit.strName END
-	,dblSalesAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(S_I.intItemId,@intQuantityUOMId,ALD.intSUnitMeasureId, ALD.dblSAllocatedQty)
+	,dblSalesAllocatedQty = dbo.fnCalculateQtyBetweenUOM(S_ItemUOM.intItemUOMId,S_HeaderQtyUOM.intItemUOMId, ALD.dblSAllocatedQty)
 	,strSalesCommodityCode = S_COM.strCommodityCode
 	,strSalesItemNo = S_I.strItemNo
 	,strSalesOrgin = S_CA.strDescription
@@ -386,11 +386,11 @@ SELECT
 											ELSE ''
 										END	
 	,strSalesPricingType = S_PT.strPricingType
-	,dblSalesContractBasis = CASE WHEN SCD.dblBasis IS NOT NULL THEN dbo.fnCTConvertQuantityToTargetItemUOM(P_I.intItemId,@intPriceUOMId,S_BasisUOM.intUnitMeasureId, SCD.dblBasis) ELSE SCD.dblBasis END
+	,dblSalesContractBasis = CASE WHEN SCD.dblBasis IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intBasisUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblBasis) ELSE SCD.dblBasis END
 	,strSalesInvoiceStatus = SCD.strFinancialStatus
 	,dblSalesContractRatio = SCD.dblRatio
-	,dblSalesContractFutures =  CASE WHEN SCD.dblFutures IS NOT NULL THEN dbo.fnCTConvertQuantityToTargetItemUOM(S_I.intItemId,@intPriceUOMId,S_FM.intUnitMeasureId,SCD.dblFutures) ELSE SCD.dblFutures END
-	,dblSalesContractCash = CASE WHEN SCD.dblCashPrice IS NOT NULL THEN dbo.fnCTConvertQuantityToTargetItemUOM(S_I.intItemId,@intPriceUOMId,S_CashUOM.intUnitMeasureId, SCD.dblCashPrice) ELSE SCD.dblCashPrice END
+	,dblSalesContractFutures =  CASE WHEN SCD.dblFutures IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(S_FuturesUOM.intItemUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblFutures) ELSE SCD.dblFutures END
+	,dblSalesContractCash = CASE WHEN SCD.dblCashPrice IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intPriceItemUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblCashPrice) ELSE SCD.dblCashPrice END
 	,dblSalesContractCosts = NULL
 	,dblSalesValue = NULL
 	,intSalesQuantityUnitMeasureId = ALD.intSUnitMeasureId
@@ -415,6 +415,9 @@ FROM tblLGAllocationDetail ALD
 		LEFT JOIN tblCTContractDetail PCD ON  PCD.intContractDetailId = ALD.intPContractDetailId
 		LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 		LEFT JOIN tblICItem P_I ON P_I.intItemId = PCD.intItemId
+		LEFT JOIN tblICItemUOM P_ItemUOM ON P_ItemUOM.intItemId = P_I.intItemId AND P_ItemUOM.intUnitMeasureId = ALD.intPUnitMeasureId
+		LEFT JOIN tblICItemUOM P_HeaderQtyUOM ON P_HeaderQtyUOM.intItemId = P_I.intItemId AND P_HeaderQtyUOM.intUnitMeasureId = @intQuantityUOMId
+		LEFT JOIN tblICItemUOM P_HeaderPriceUOM ON P_HeaderPriceUOM.intItemId = P_I.intItemId AND P_HeaderPriceUOM.intUnitMeasureId = @intPriceUOMId
 		LEFT JOIN tblICCommodity P_COM ON P_COM.intCommodityId = PCH.intCommodityId
 		LEFT JOIN tblEMEntity P_E ON P_E.intEntityId = PCH.intEntityId
 		LEFT JOIN tblRKFutureMarket P_FM ON P_FM.intFutureMarketId = PCD.intFutureMarketId
@@ -436,13 +439,15 @@ FROM tblLGAllocationDetail ALD
 		LEFT JOIN tblCTPosition P_PO ON P_PO.intPositionId = PCH.intPositionId
 		LEFT JOIN tblCTPriceFixation P_PF ON P_PF.intContractDetailId = PCD.intContractDetailId	
 		LEFT JOIN tblCTPricingType P_PT ON P_PT.intPricingTypeId = PCD.intPricingTypeId
-		LEFT JOIN tblICItemUOM P_BasisUOM ON P_BasisUOM.intItemUOMId = PCD.intBasisUOMId
-		LEFT JOIN tblICItemUOM P_CashUOM ON P_CashUOM.intItemUOMId = PCD.intPriceItemUOMId
+		LEFT JOIN tblICItemUOM P_FuturesUOM ON P_FuturesUOM.intItemId = P_I.intItemId AND P_FuturesUOM.intUnitMeasureId = P_FM.intUnitMeasureId
 
 		--Sales Contract
 		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = ALD.intSContractDetailId 
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblICItem S_I ON S_I.intItemId = SCD.intItemId
+		LEFT JOIN tblICItemUOM S_ItemUOM ON S_ItemUOM.intItemId = S_I.intItemId AND S_ItemUOM.intUnitMeasureId = ALD.intSUnitMeasureId
+		LEFT JOIN tblICItemUOM S_HeaderQtyUOM ON S_HeaderQtyUOM.intItemId = S_I.intItemId AND S_HeaderQtyUOM.intUnitMeasureId = @intQuantityUOMId
+		LEFT JOIN tblICItemUOM S_HeaderPriceUOM ON S_HeaderPriceUOM.intItemId = S_I.intItemId AND S_HeaderPriceUOM.intUnitMeasureId = @intPriceUOMId
 		LEFT JOIN tblICCommodity S_COM ON S_COM.intCommodityId = SCH.intCommodityId
 		LEFT JOIN tblEMEntity S_E ON S_E.intEntityId = SCH.intEntityId
 		LEFT JOIN tblRKFutureMarket S_FM ON S_FM.intFutureMarketId = SCD.intFutureMarketId
@@ -464,8 +469,7 @@ FROM tblLGAllocationDetail ALD
 		LEFT JOIN tblCTPosition S_PO ON S_PO.intPositionId = SCH.intPositionId
 		LEFT JOIN tblCTPriceFixation S_PF ON S_PF.intContractDetailId = SCD.intContractDetailId	
 		LEFT JOIN tblCTPricingType S_PT ON S_PT.intPricingTypeId = SCD.intPricingTypeId
-		LEFT JOIN tblICItemUOM S_BasisUOM ON S_BasisUOM.intItemUOMId = SCD.intBasisUOMId
-		LEFT JOIN tblICItemUOM S_CashUOM ON S_CashUOM.intItemUOMId = SCD.intPriceItemUOMId
+		LEFT JOIN tblICItemUOM S_FuturesUOM ON S_FuturesUOM.intItemId = S_I.intItemId AND S_FuturesUOM.intUnitMeasureId = S_FM.intUnitMeasureId
 	
 		
 WHERE P_COM.intCommodityId = @intCommodityId 
@@ -681,15 +685,19 @@ WHERE AC.dblSalesContractFutures IS NULL
 
 
 UPDATE AC
-SET AC.dblPurchaseContractFutures = ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(AC.intPurchaseItemId,@intPriceUOMId,SP.intUnitMeasureId, SP.dblSettlementPrice),0)
+SET AC.dblPurchaseContractFutures = ISNULL(dbo.fnCalculateQtyBetweenUOM(P_FuturesUOM.intItemUOMId, P_HeaderPriceUOM.intItemUOMId, SP.dblSettlementPrice),0)
 FROM @tmpAllocatedContracts AC
 LEFT JOIN @tblSettlementPrice SP ON SP.intFutureMarketId = AC.intPurchaseFutureMarketId AND SP.intFutureMonthId = AC.intPurchaseFutureMonthId
+LEFT JOIN tblICItemUOM P_HeaderPriceUOM ON P_HeaderPriceUOM.intItemId = AC.intPurchaseItemId AND P_HeaderPriceUOM.intUnitMeasureId = @intPriceUOMId
+LEFT JOIN tblICItemUOM P_FuturesUOM ON P_FuturesUOM.intItemId = AC.intPurchaseItemId AND P_FuturesUOM.intUnitMeasureId = SP.intUnitMeasureId
 WHERE AC.dblPurchaseContractFutures IS NULL
 
 UPDATE AC
-SET AC.dblSalesContractFutures = ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(AC.intSalesItemId,@intPriceUOMId,SP.intUnitMeasureId, SP.dblSettlementPrice),0)
+SET AC.dblSalesContractFutures = ISNULL(dbo.fnCalculateQtyBetweenUOM(S_FuturesUOM.intItemUOMId, S_HeaderPriceUOM.intItemUOMId, SP.dblSettlementPrice),0)
 FROM @tmpAllocatedContracts AC
 LEFT JOIN @tblSettlementPrice SP ON SP.intFutureMarketId = AC.intSalesFutureMarketId AND SP.intFutureMonthId = AC.intSalesFutureMonthId
+LEFT JOIN tblICItemUOM S_HeaderPriceUOM ON S_HeaderPriceUOM.intItemId = AC.intSalesItemId AND S_HeaderPriceUOM.intUnitMeasureId = @intPriceUOMId
+LEFT JOIN tblICItemUOM S_FuturesUOM ON S_FuturesUOM.intItemId = AC.intSalesItemId AND S_FuturesUOM.intUnitMeasureId = SP.intUnitMeasureId
 WHERE AC.dblSalesContractFutures IS NULL
 
 
