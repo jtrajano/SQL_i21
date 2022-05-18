@@ -157,7 +157,7 @@ FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId DESC
 
 --COMPANY INFO
-SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(ISNULL(strCity, ''), '') + ISNULL(', ' + ISNULL(strState, ''), '') + ISNULL(', ' + ISNULL(strZip, ''), '') + ISNULL(', ' + ISNULL(strCountry, ''), '')
 		   , @strCompanyName		= strCompanyName
 		   , @strPhone				= strPhone
 		   , @strEmail				= strEmail
@@ -169,7 +169,7 @@ SELECT intCompanyLocationId		= L.intCompanyLocationId
 	 , strLocationName			= L.strLocationName
 	 , strUseLocationAddress	= ISNULL(L.strUseLocationAddress, 'No')
 	 , strInvoiceComments		= L.strInvoiceComments
-	 , strFullAddress			= L.strAddress + CHAR(13) + char(10) + L.strCity + ', ' + L.strStateProvince + ', ' + L.strZipPostalCode + ', ' + L.strCountry 
+	 , strFullAddress			= L.strAddress + CHAR(13) + char(10) + ISNULL(ISNULL(L.strCity, ''), '') + ISNULL(', ' + ISNULL(L.strStateProvince, ''), '') + ISNULL(', ' + ISNULL(L.strZipPostalCode, ''), '') + ISNULL(', ' + ISNULL(L.strCountry, ''), '')
 INTO #LOCATIONS
 FROM tblSMCompanyLocation L
 
