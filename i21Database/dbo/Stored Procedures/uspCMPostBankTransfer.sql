@@ -851,16 +851,26 @@ IF @ysnPost = 1
     BEGIN    
       IF @ysnPostedInTransit = 1 --OR @intBankTransferTypeId = 1 --OR (@intBankTransferTypeId = 2 AND @ysnPosted = 1)  
       BEGIN  
-		 IF @ysnPosted = 1
-          DELETE FROM tblCMBankTransaction    
-          WHERE strLink = @strTransactionId    
-          AND ysnClr = 0    
-          AND intBankTransactionTypeId IN (@BANK_TRANSFER_DEP)      
+        IF @intBankTransferTypeId = 1
+        BEGIN
+          		DELETE FROM tblCMBankTransaction
+              WHERE	strLink = @strTransactionId
+                  AND ysnClr = 0
+                  AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
+        END
         ELSE
-          DELETE FROM tblCMBankTransaction    
-          WHERE strLink = @strTransactionId    
-          AND ysnClr = 0    
-          AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD)   
+        BEGIN
+          IF @ysnPosted = 1
+            DELETE FROM tblCMBankTransaction    
+            WHERE strLink = @strTransactionId    
+            AND ysnClr = 0    
+            AND intBankTransactionTypeId IN (@BANK_TRANSFER_DEP)      
+          ELSE
+            DELETE FROM tblCMBankTransaction    
+            WHERE strLink = @strTransactionId    
+            AND ysnClr = 0    
+            AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD)   
+        END
      
       END  
     END    
