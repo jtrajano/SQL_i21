@@ -16,10 +16,12 @@
 	[strCommissionType]					NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	[strRateType]					    NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	[intCommissionRate]					INT			   NULL,
+	[intReportsToId]					INT			   NULL,
 	[intConcurrencyId] [int]			NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDCoworkerGoal_intCoworkerGoalId] PRIMARY KEY CLUSTERED ([intCoworkerGoalId] ASC),
 	CONSTRAINT [FK_tblHDCoworkerGoal_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblHDCoworkerGoal_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
+	CONSTRAINT [FK_tblHDCoworkerGoal_tblEMEntity_intReportsToId] FOREIGN KEY ([intReportsToId]) REFERENCES [tblEMEntity]([intEntityId]),
     CONSTRAINT [UQ_tblHDCoworkerGoal_intEntityId_strFiscalYear] UNIQUE ([intEntityId],[strFiscalYear]),
 )
 
