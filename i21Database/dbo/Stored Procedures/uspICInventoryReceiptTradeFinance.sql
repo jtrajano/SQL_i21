@@ -15,6 +15,7 @@ DECLARE @TRFTradeFinance AS TRFTradeFinance
 
 		,@intTradeFinanceId	INT = NULL 
 		,@dtmDate DATETIME				
+		,@strTradeFinanceNumber NVARCHAR(100)			
 
 SELECT 
 	@dtmDate = dtmReceiptDate 
@@ -117,35 +118,76 @@ BEGIN
 			@TRFTradeFinance 
 		WHERE 
 			intTradeFinanceId IS NULL
-			--AND strTradeFinanceNumber IS NULL -- If strTradeFinanceNumber has a value, it means the TF record was deleted. Do not auto-create it. 
-			--AND (
-			--	intBankId IS NOT NULL 
-			--	OR intBankAccountId IS NOT NULL 
-			--	OR intBorrowingFacilityId IS NOT NULL 
-			--	OR intLimitTypeId IS NOT NULL 
-			--	OR intSublimitTypeId IS NOT NULL 
-			--	OR ysnSubmittedToBank IS NOT NULL 
-			--	OR dtmDateSubmitted IS NOT NULL 
-			--	OR strApprovalStatus IS NOT NULL 
-			--	OR dtmDateApproved IS NOT NULL 
-			--	OR strRefNo IS NOT NULL 
-			--	OR intOverrideFacilityValuation IS NOT NULL 
-			--	OR strCommnents IS NOT NULL 
-			--)
+			AND strTradeFinanceNumber IS NULL -- If strTradeFinanceNumber has a value, it means the TF record was deleted. Do not auto-create it. 
+			AND (
+				intBankId IS NOT NULL 
+				OR intBankAccountId IS NOT NULL 
+				OR intBorrowingFacilityId IS NOT NULL 
+				OR intLimitTypeId IS NOT NULL 
+				OR intSublimitTypeId IS NOT NULL 
+				OR ysnSubmittedToBank IS NOT NULL 
+				OR dtmDateSubmitted IS NOT NULL 
+				OR strApprovalStatus IS NOT NULL 
+				OR dtmDateApproved IS NOT NULL 
+				OR strRefNo IS NOT NULL 
+				OR intOverrideFacilityValuation IS NOT NULL 
+				OR strCommnents IS NOT NULL 
+			)
 	)
 	BEGIN 
-		---- Get the trade finance id. 
-		DECLARE @strTradeFinanceNumber NVARCHAR(100)	
-		
-		-- IF FROM LG, use same TF Number
-		--EXEC uspSMGetStartingNumber 166, @strTradeFinanceNumber OUT
+		-- Get a new trade finance id. 
+		EXEC uspSMGetStartingNumber 166, @strTradeFinanceNumber OUT
 
+		UPDATE @TRFTradeFinance 
+		SET strTradeFinanceNumber = @strTradeFinanceNumber
+
+		EXEC uspTRFCreateTFRecord
+			@records = @TRFTradeFinance
+			, @intUserId = @UserId
+			, @dtmTransactionDate = @dtmDate
+			, @intTradeFinanceId = @intTradeFinanceId OUTPUT 
+
+		IF @intTradeFinanceId IS NOT NULL 
+		BEGIN 
+			UPDATE r
+			SET 
+				r.strTradeFinanceNumber = @strTradeFinanceNumber
+			FROM 
+				tblICInventoryReceipt r
+			WHERE 
+				r.intInventoryReceiptId = @ReceiptId
+				AND @strTradeFinanceNumber IS NOT NULL 
+
+			SELECT @strAction = 'Created' WHERE @strAction IS NULL 
+		END 
+	END 
+	-- Create a new trade finance record. 
+	ELSE IF EXISTS (
+		SELECT TOP 1 1 
+		FROM 
+			@TRFTradeFinance 
+		WHERE 
+			intTradeFinanceId IS NULL
+			AND strTradeFinanceNumber IS NOT NULL -- If strTradeFinanceNumber has a value, it means the TF record was deleted. Do not auto-create it. 
+			AND (
+				intBankId IS NOT NULL 
+				OR intBankAccountId IS NOT NULL 
+				OR intBorrowingFacilityId IS NOT NULL 
+				OR intLimitTypeId IS NOT NULL 
+				OR intSublimitTypeId IS NOT NULL 
+				OR ysnSubmittedToBank IS NOT NULL 
+				OR dtmDateSubmitted IS NOT NULL 
+				OR strApprovalStatus IS NOT NULL 
+				OR dtmDateApproved IS NOT NULL 
+				OR strRefNo IS NOT NULL 
+				OR intOverrideFacilityValuation IS NOT NULL 
+				OR strCommnents IS NOT NULL 
+			)
+	)
+	BEGIN 
 		SELECT TOP 1 @strTradeFinanceNumber = strTradeFinanceNumber
 		FROM @TRFTradeFinance 
-		WHERE intTradeFinanceId IS NULL
-
-		--UPDATE @TRFTradeFinance 
-		--SET strTradeFinanceNumber = @strTradeFinanceNumber
+		WHERE strTradeFinanceNumber IS NOT NULL
 
 		EXEC uspTRFCreateTFRecord
 			@records = @TRFTradeFinance
