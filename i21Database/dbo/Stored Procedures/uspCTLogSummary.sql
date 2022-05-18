@@ -4288,7 +4288,8 @@ BEGIN TRY
 				, @dblQuantityAppliedAndPriced NUMERIC(18, 6)
 				, @dblCurrentQty NUMERIC(18, 6)
 				, @tmpTotal NUMERIC(18, 6)
-
+				, @dblCurrentLoad NUMERIC(18, 6)
+				, @dblLoadAppliedAndPriced NUMERIC(18, 6)
 			SELECT @dblRunningQty += @dblOrigQty
 				, @dblRemainingQty = 0
 				
@@ -4298,6 +4299,8 @@ BEGIN TRY
 				, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (dblLoadPriced - dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE dblQuantity - dblQuantityAppliedAndPriced END
 				, @dblCurrentQty = dblQuantity
 				, @dblQuantityAppliedAndPriced = dblQuantityAppliedAndPriced
+				, @dblCurrentLoad = dblLoadPriced
+				, @dblLoadAppliedAndPriced = dblLoadAppliedAndPriced
 			FROM tblCTPriceFixationDetail
 			WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
@@ -4306,13 +4309,21 @@ BEGIN TRY
 				-- 	1.1. Decrease available priced quantities
 				-- 	1.2. Increase available basis quantities
 				--  1.3. Increase basis deliveries if DWG
-				SET @FinalQty = CASE
-					WHEN @intContractStatusId IN (1, 4)
-					THEN
-						case when @dblCurrentQty < @TotalPriced then @dblCurrentQty else @TotalPriced end
-					ELSE 0
-				END
 				
+				if (isnull(@ysnLoadBased,0) = 0)
+				begin
+					SET @FinalQty = CASE
+						WHEN @intContractStatusId IN (1, 4)
+						THEN
+							case when @dblCurrentQty < @TotalPriced then @dblCurrentQty else @TotalPriced end
+						ELSE 0
+					END
+				end
+				else
+				begin
+					SET @FinalQty = CASE WHEN @intContractStatusId IN (1, 4) THEN (@dblCurrentLoad - @dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE 0 END
+				end
+
 				-- Negate all the priced quantities
                 -- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
 				UPDATE @cbLogSpecific SET dblQty = (
