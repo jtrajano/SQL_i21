@@ -80,6 +80,26 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intSrCurrentUserId'
 
+	DECLARE @imgLogo VARBINARY(MAX)
+		,@strLogoType NVARCHAR(50)
+		,@intCompanyLocationId INT
+
+	SELECT @intCompanyLocationId = intCompanyLocationId
+	FROM tblCTContractDetail
+	WHERE intContractDetailId = @intContractDetailId
+
+	SELECT TOP 1 @imgLogo = imgLogo
+		,@strLogoType = 'Logo'
+	FROM tblSMLogoPreference
+	WHERE ysnAllOtherReports = 1
+		AND intCompanyLocationId = @intCompanyLocationId
+
+	IF @imgLogo IS NULL
+	BEGIN
+		SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
+			,@strLogoType = 'Attachment'
+	END
+
 	SELECT	@strCurrentUser = strName FROM tblEMEntity WHERE intEntityId = @intSrCurrentUserId;
 	select top 1 @strReportDateFormat = strReportDateFormat from tblSMCompanyPreference;
 
@@ -134,6 +154,8 @@ BEGIN TRY
 			,strPositionLabel						=   (case when pos.strPositionType = 'Shipment' then 'Shipment' when pos.strPositionType = 'Spot' then 'Delivery' else '' end)
 			,strContractCondtionDescription			=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SAMPLE_INSTRUCTION%')
 			, blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+			,blbHeaderLogo = @imgLogo
+			,strLogoType = @strLogoType
 
 			,strStraussEntityName = LTRIM(RTRIM(EY.strEntityName))
 			,strStraussStreetAddress = ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'')
