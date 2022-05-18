@@ -170,6 +170,50 @@ BEGIN
 				INNER JOIN tblICItem ItemBundleDetail ON ItemBundleDetail.intItemId = ItemBundle.intItemId
 				LEFT JOIN tblICItemUOM ItemBundleUOM ON ItemBundleUOM.intItemUOMId = [dbo].[fnGetMatchingItemUOMId](ItemBundle.intItemId, ReceiptItem.intUnitMeasureId)
 			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId AND ReceiptItem.intChildItemLinkId IS NULL AND ItemBundleDetail.strBundleType = 'Option'
+
+			-- Log the Trade Finance data before save. 
+			DELETE FROM tblICInventoryReceiptBeforeSave WHERE intInventoryReceiptId = @TransactionId
+			INSERT INTO tblICInventoryReceiptBeforeSave (
+				[intInventoryReceiptId] 
+				,[strTradeFinanceNumber] 
+				,[intBankId] 
+				,[intBankAccountId] 
+				,[intBorrowingFacilityId] 
+				,[strBankReferenceNo] 
+				,[intLimitTypeId] 
+				,[intSublimitTypeId] 
+				,[ysnSubmittedToBank]
+				,[dtmDateSubmitted] 
+				,[strApprovalStatus] 
+				,[dtmDateApproved] 
+				,[strWarrantNo] 
+				,[intWarrantStatus] 
+				,[strReferenceNo] 
+				,[intOverrideFacilityValuation] 
+				,[strComments] 
+			)
+			SELECT
+				[intInventoryReceiptId] 
+				,[strTradeFinanceNumber] 
+				,[intBankId] 
+				,[intBankAccountId] 
+				,[intBorrowingFacilityId] 
+				,[strBankReferenceNo] 
+				,[intLimitTypeId] 
+				,[intSublimitTypeId] 
+				,[ysnSubmittedToBank]
+				,[dtmDateSubmitted] 
+				,[strApprovalStatus] 
+				,[dtmDateApproved] 
+				,[strWarrantNo] 
+				,[intWarrantStatus] 
+				,[strReferenceNo] 
+				,[intOverrideFacilityValuation] 
+				,[strComments] 
+			FROM 
+				tblICInventoryReceipt r
+			WHERE
+				r.intInventoryReceiptId = @TransactionId
 		END
 	END
 	ELSE IF (@TransactionType = @TransactionType_Shipment)

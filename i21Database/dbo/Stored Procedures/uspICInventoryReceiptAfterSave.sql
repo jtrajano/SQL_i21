@@ -1198,6 +1198,10 @@ DELETE	FROM tblICTransactionDetailLog
 WHERE	strTransactionType = 'Inventory Receipt' 
 		AND intTransactionId = @ReceiptId
 
+-- Delete the data snapshot for Trade Finance
+DELETE FROM tblICInventoryReceiptBeforeSave
+WHERE intInventoryReceiptId = @ReceiptId
+
 _Exit: 
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBeforeSaveReceiptItems')) DROP TABLE #tmpBeforeSaveReceiptItems
