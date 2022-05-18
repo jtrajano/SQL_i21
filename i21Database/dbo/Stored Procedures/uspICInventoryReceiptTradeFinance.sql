@@ -48,7 +48,7 @@ BEGIN
 	SELECT TOP 1 
 		tf.intTradeFinanceId 
 		, r.strTradeFinanceNumber 
-		, strTransactionType = CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
+		, strTransactionType = 'Inventory' --CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END  -- <-- This is module
 		, strTransactionNumber = r.strReceiptNumber
 		, intTransactionHeaderId = r.intInventoryReceiptId
 		, intTransactionDetailId = NULL 
@@ -67,11 +67,40 @@ BEGIN
 	FROM 
 		tblICInventoryReceipt r LEFT JOIN tblTRFTradeFinance tf
 			ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
+			--  Added strTransactionType since each module has separate Trade Finance Record.
+			AND tf.strTransactionType = 'Inventory'
+			AND tf.strTransactionNumber = r.strReceiptNumber
 	WHERE
 		r.intInventoryReceiptId = @ReceiptId
 
 	-- Update an existing trade finance record. 
 	IF EXISTS (SELECT TOP 1 1 FROM @TRFTradeFinance WHERE intTradeFinanceId IS NOT NULL)
+	AND EXISTS (
+		SELECT TOP 1 1 
+		FROM 
+			tblICInventoryReceipt currentSnapshot INNER JOIN tblICInventoryReceiptBeforeSave previousSnapshot
+				ON currentSnapshot.intInventoryReceiptId = previousSnapshot.intInventoryReceiptId
+		WHERE
+				currentSnapshot.intInventoryReceiptId = @ReceiptId
+				AND (
+					currentSnapshot.[strTradeFinanceNumber] <> previousSnapshot.[strTradeFinanceNumber] 
+					OR currentSnapshot.[intBankId] <> previousSnapshot.[intBankId] 
+					OR currentSnapshot.[intBankAccountId] <> previousSnapshot.[intBankAccountId] 
+					OR currentSnapshot.[intBorrowingFacilityId] <> previousSnapshot.[intBorrowingFacilityId] 
+					OR currentSnapshot.[strBankReferenceNo] <> previousSnapshot.[strBankReferenceNo] 
+					OR currentSnapshot.[intLimitTypeId] <> previousSnapshot.[intLimitTypeId] 
+					OR currentSnapshot.[intSublimitTypeId] <> previousSnapshot.[intSublimitTypeId] 
+					OR currentSnapshot.[ysnSubmittedToBank] <> previousSnapshot.[ysnSubmittedToBank]
+					OR currentSnapshot.[dtmDateSubmitted] <> previousSnapshot.[dtmDateSubmitted] 
+					OR currentSnapshot.[strApprovalStatus] <> previousSnapshot.[strApprovalStatus] 
+					OR currentSnapshot.[dtmDateApproved] <> previousSnapshot.[dtmDateApproved] 
+					OR currentSnapshot.[strWarrantNo] <> previousSnapshot.[strWarrantNo] 
+					OR currentSnapshot.[intWarrantStatus] <> previousSnapshot.[intWarrantStatus] 
+					OR currentSnapshot.[strReferenceNo] <> previousSnapshot.[strReferenceNo] 
+					OR currentSnapshot.[intOverrideFacilityValuation] <> previousSnapshot.[intOverrideFacilityValuation] 
+					OR currentSnapshot.[strComments] <> previousSnapshot.[strComments] 
+				)
+	)
 	BEGIN 
 		EXEC [uspTRFModifyTFRecord]
 			@records = @TRFTradeFinance
@@ -88,29 +117,35 @@ BEGIN
 			@TRFTradeFinance 
 		WHERE 
 			intTradeFinanceId IS NULL
-			AND strTradeFinanceNumber IS NULL -- If strTradeFinanceNumber has a value, it means the TF record was deleted. Do not auto-create it. 
-			AND (
-				intBankId IS NOT NULL 
-				OR intBankAccountId IS NOT NULL 
-				OR intBorrowingFacilityId IS NOT NULL 
-				OR intLimitTypeId IS NOT NULL 
-				OR intSublimitTypeId IS NOT NULL 
-				OR ysnSubmittedToBank IS NOT NULL 
-				OR dtmDateSubmitted IS NOT NULL 
-				OR strApprovalStatus IS NOT NULL 
-				OR dtmDateApproved IS NOT NULL 
-				OR strRefNo IS NOT NULL 
-				OR intOverrideFacilityValuation IS NOT NULL 
-				OR strCommnents IS NOT NULL 
-			)
+			--AND strTradeFinanceNumber IS NULL -- If strTradeFinanceNumber has a value, it means the TF record was deleted. Do not auto-create it. 
+			--AND (
+			--	intBankId IS NOT NULL 
+			--	OR intBankAccountId IS NOT NULL 
+			--	OR intBorrowingFacilityId IS NOT NULL 
+			--	OR intLimitTypeId IS NOT NULL 
+			--	OR intSublimitTypeId IS NOT NULL 
+			--	OR ysnSubmittedToBank IS NOT NULL 
+			--	OR dtmDateSubmitted IS NOT NULL 
+			--	OR strApprovalStatus IS NOT NULL 
+			--	OR dtmDateApproved IS NOT NULL 
+			--	OR strRefNo IS NOT NULL 
+			--	OR intOverrideFacilityValuation IS NOT NULL 
+			--	OR strCommnents IS NOT NULL 
+			--)
 	)
 	BEGIN 
-		-- Get the trade finance id. 
+		---- Get the trade finance id. 
 		DECLARE @strTradeFinanceNumber NVARCHAR(100)	
-		EXEC uspSMGetStartingNumber 166, @strTradeFinanceNumber OUT
+		
+		-- IF FROM LG, use same TF Number
+		--EXEC uspSMGetStartingNumber 166, @strTradeFinanceNumber OUT
 
-		UPDATE @TRFTradeFinance 
-		SET strTradeFinanceNumber = @strTradeFinanceNumber
+		SELECT TOP 1 @strTradeFinanceNumber = strTradeFinanceNumber
+		FROM @TRFTradeFinance 
+		WHERE intTradeFinanceId IS NULL
+
+		--UPDATE @TRFTradeFinance 
+		--SET strTradeFinanceNumber = @strTradeFinanceNumber
 
 		EXEC uspTRFCreateTFRecord
 			@records = @TRFTradeFinance
@@ -180,7 +215,7 @@ BEGIN
 		)
 		SELECT 
 			strAction = @strAction + ' ' + CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
-			, strTransactionType = CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
+			, strTransactionType = 'Inventory' --CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END  -- <-- This is module
 			, intTradeFinanceTransactionId = tf.intTradeFinanceId
 			, strTradeFinanceTransaction = tf.strTradeFinanceNumber
 			, intTransactionHeaderId = r.intInventoryReceiptId
@@ -227,6 +262,8 @@ BEGIN
 		FROM 
 			tblICInventoryReceipt r LEFT JOIN tblTRFTradeFinance tf
 				ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
+				--  Added strTransactionType since each module has separate Trade Finance Record.
+				AND tf.strTransactionType = 'Inventory'
 			LEFT JOIN vyuCMBankAccount ba 
 				ON ba.intBankAccountId = r.intBankAccountId
 			LEFT JOIN tblCMBorrowingFacility fa

@@ -9,6 +9,7 @@ AS
 		CROSS APPLY (
 			SELECT DISTINCT 
 				tfh.intTradeFinanceId
+				,tfh.strTradeFinanceNumber
 			FROM 
 				tblTRFTradeFinanceHistory tfh
 			WHERE
@@ -30,13 +31,13 @@ AS
 				* 
 			FROM 
 				tblTRFTradeFinanceHistory tfh
-			WHERE
-				tfh.intTradeFinanceId = tf.intTradeFinanceId
+			WHERE				
+				tfh.strTradeFinanceNumber = tf.strTradeFinanceNumber				
 				AND (
 					tfh.strTransactionNumber = r.strReceiptNumber
 					OR (
 						tfh.intTradeFinanceHistoryId <= firstLog.intTradeFinanceHistoryId
-						AND tfh.strTransactionType NOT IN ('Inventory Receipt', 'Inventory Return')
+						AND tfh.strTransactionType NOT IN ('Inventory')
 					)
-				)
+				)				
 		) tfh 
