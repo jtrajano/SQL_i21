@@ -73,7 +73,6 @@ END
 
 --SET @intPurchaseId = @intPurchaseId;
 
-SELECT 
-* 
+SELECT *, NULL strCorrected
 FROM [vyuAPRptPurchase]
 WHERE intPurchaseId = (CASE WHEN @intPurchaseId IS NOT NULL THEN @intPurchaseId ELSE 0 END)
