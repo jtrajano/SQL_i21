@@ -1669,7 +1669,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = @FreightRevenueAccount
+    ,[intAccountId]                 = FREIGHTACCOUNT.intRevenueExpenseAccount
     ,[dblDebit]                     = @ZeroDecimal
     ,[dblCredit]                    = I.[dblFreightCharge]
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1702,6 +1702,14 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceDetail I
+OUTER APPLY (
+	SELECT TOP 1 intRevenueExpenseAccount = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@FreightRevenueAccount, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+    AND intAccountId = I.[intAccountId]
+) FREIGHTACCOUNT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[dblFreightCharge] > 0
