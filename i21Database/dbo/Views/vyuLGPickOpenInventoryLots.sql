@@ -37,7 +37,7 @@ FROM (
        ,dblQty = Lot.dblQty
        ,dblUnPickedQty =	CASE WHEN Lot.intWarrantStatus = 2 THEN
 	   								CASE WHEN Lot.dblReleasedQty > 0.0 THEN 
-										Lot.dblReleasedQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+										Lot.dblReleasedQty - ISNULL(PC.dblPickedContainerQty, 0)
 									ELSE 0.0 END
 								ELSE
 									CASE WHEN Lot.dblQty > 0.0 THEN 
