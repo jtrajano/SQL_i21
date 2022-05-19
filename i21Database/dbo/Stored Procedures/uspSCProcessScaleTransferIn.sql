@@ -153,7 +153,7 @@ BEGIN TRY
 	LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
 	-- LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
 	OUTER APPLY(
-					SELECT dbo.fnDivide(SUM(dbo.fnMultiply(dblQty, dblCost)) , ICTD.dblNet) as dblCost, ICTran.intLotId, ICTran.intItemUOMId
+					SELECT dbo.fnDivide(SUM(dbo.fnMultiply(ICTran.dblQty, ICTran.dblCost)) , SUM(ICTran.dblQty)) as dblCost, ICTran.intLotId, ICTran.intItemUOMId
 						from tblICInventoryTransaction ICTran 
 							where 
 								ICTran.intTransactionId = ICTD.intInventoryTransferId 
