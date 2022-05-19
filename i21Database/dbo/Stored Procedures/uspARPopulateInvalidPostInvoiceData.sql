@@ -2180,7 +2180,7 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUEFROM.strAccountId) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the Due From Account that matches the location of the Sales Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUEFROM.strAccountId) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
@@ -2221,7 +2221,7 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUETO.strAccountId) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the Due To Account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUETO.strAccountId) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
@@ -2243,6 +2243,88 @@ BEGIN
 	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
 	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
 	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Freight Revenue Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the Freight Revenue Account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, FREIGHTREVENUE.strAccountId) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 ARCP.intFreightRevenueAccount, GLA.strAccountId
+		FROM tblARCompanyPreference ARCP
+		LEFT JOIN tblGLAccount GLA
+		ON ARCP.intDueToAccountId = GLA.intAccountId
+	) FREIGHTREVENUE
+	OUTER APPLY (
+		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
+		FROM tblGLAccountSegmentMapping GLASM
+		INNER JOIN tblGLAccountSegment GLAS
+		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+		LEFT JOIN tblGLAccount GLA
+		ON GLASM.intAccountId = GLA.intAccountId
+		WHERE GLAS.intAccountStructureId = 3
+		AND GLASM.intAccountId = I.[intAccountId]
+	) GLSEGMENT
+	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(FREIGHTREVENUE.[intFreightRevenueAccount], 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+	AND I.dblFreightCharge > 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], FREIGHTREVENUE.[intFreightRevenueAccount]) = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Freight Expense Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, FREIGHTEXPENSE.strAccountId) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 ARCP.intFreightExpenseAccount, GLA.strAccountId
+		FROM tblARCompanyPreference ARCP
+		LEFT JOIN tblGLAccount GLA
+		ON ARCP.intDueToAccountId = GLA.intAccountId
+	) FREIGHTEXPENSE
+	OUTER APPLY (
+		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
+		FROM tblGLAccountSegmentMapping GLASM
+		INNER JOIN tblGLAccountSegment GLAS
+		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+		LEFT JOIN tblGLAccount GLA
+		ON GLASM.intAccountId = GLA.intAccountId
+		WHERE GLAS.intAccountStructureId = 3
+		AND GLASM.intAccountId = I.[intAccountId]
+	) GLSEGMENT
+	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(FREIGHTEXPENSE.[intFreightExpenseAccount], 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+	AND I.dblFreightCharge > 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], FREIGHTEXPENSE.[intFreightExpenseAccount]) = 0
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
