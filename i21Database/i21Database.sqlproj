@@ -794,6 +794,7 @@
     <Build Include="dbo\User Defined Types\IdQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspICReleaseWarrant.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptBeforeSave.sql" />
+    <Build Include="dbo\Functions\fnCTGetCompanyLogo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

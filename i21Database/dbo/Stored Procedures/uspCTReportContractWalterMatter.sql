@@ -167,9 +167,19 @@ BEGIN TRY
 										  		), 1, 1, '')
 	END
 
+	--LOGO SETUP TAB IMPLEMENTATION
+	DECLARE @imgLocationLogo vARBINARY (MAX),
+			@strLogoType  NVARCHAR(50),
+			@intCompanyLocationId INT
+	
+	SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+	SELECT TOP 1 @imgLocationLogo = imgLogo, @strLogoType = 'Logo' FROM tblSMLogoPreference
+	WHERE (ysnDefault = 1 OR  ysnContract = 1)  AND  intCompanyLocationId = @intCompanyLocationId
+
 	SELECT
-		intContractHeaderId					= CH.intContractHeaderId
-		,blbHeaderLogo						    = dbo.fnSMGetCompanyLogo('Header')
+		intContractHeaderId					    = CH.intContractHeaderId
+		,blbHeaderLogo						    = dbo.[fnCTGetCompanyLogo]('Header', @intContractHeaderId)
+		,strLogoType							= ISNULL(@strLogoType,'Attachment')
 		,strContractTypeNumber					= TP.strContractType + ' Contract Nr. ' + CH.strContractNumber
 		,strContractType						= CASE WHEN CH.intContractTypeId = 1 THEN 'SELLER:' ELSE 'BUYER:' END
 		,dtmContractDate						= CH.dtmContractDate
