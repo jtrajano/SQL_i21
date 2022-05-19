@@ -34,6 +34,7 @@
 	[intSalesOrderDetailId] INT NULL,
 	[intInventoryTransferId] INT NULL, 
 	[intInventoryTransferDetailId] INT NULL,
+	[intTMSiteId] INT NULL,
 	[intTMDispatchId] INT NULL,
 	[intEntityShipViaId] INT NULL,
 	[intEntityShipViaTruckId] INT NULL, 
