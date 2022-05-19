@@ -47,7 +47,7 @@ BEGIN
 				DECLARE @strRegisterClass	NVARCHAR(50),
 						@intRegisterClassId INT
 
-				SELECT
+				SELECT TOP 1
 					@strRegisterClass	= r.strRegisterClass,
 					@intRegisterClassId = setup.intRegisterSetupId
 				FROM tblSTStore st
