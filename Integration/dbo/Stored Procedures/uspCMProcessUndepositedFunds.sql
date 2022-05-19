@@ -9,7 +9,7 @@
 -- If there is an integration with the origin system, this stored procedure will be used. 
 -- Otherwise, the stored procedure in the i21Database will be used. 
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 	EXEC('
 		IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspCMProcessUndepositedFunds'' and type = ''P'') 
