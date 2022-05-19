@@ -229,6 +229,21 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 										WHERE intEntityEmployeeId = @EntityNo
 											AND intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId)
 
+										INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+										SELECT TOP 1
+											  NEWID()
+											, guiApiImportLogId = @guiLogId
+											, strField = 'Employee Taxes'
+											, strValue = SE.strTaxId
+											, strLogLevel = 'Info'
+											, strStatus = 'Success'
+											, intRowNo = SE.intRowNumber
+											, strMessage = 'The employee taxes has been successfully updated.'
+										FROM tblApiSchemaEmployeeTaxes SE
+										LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+										WHERE SE.guiApiUniqueId = @guiApiUniqueId
+										AND SE.strTaxId = @TaxId
+
 										DELETE FROM #TempEmployeeTaxes WHERE LTRIM(RTRIM(intEntityNo)) = @strEmployeeId AND LTRIM(RTRIM(strTaxId)) = LTRIM(RTRIM(@TaxId))
 				
 									END
