@@ -969,6 +969,7 @@
     <Build Include="dbo\Tables\tblCFImportTransactionTaxType.sql" />
     <Build Include="dbo\Tables\tblCFImportTransactionTaxZeroQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
+    <Build Include="dbo\Tables\tblSMShipViaTrailerCompartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
