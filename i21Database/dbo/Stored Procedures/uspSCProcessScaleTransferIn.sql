@@ -161,6 +161,7 @@ BEGIN TRY
 								AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
 								AND ICTran.intTransactionTypeId = 13
 								and ICTran.intInTransitSourceLocationId is not null
+								AND ICTran.ysnIsUnposted = 0
 						group by ICTran.intLotId, ICTran.intItemUOMId
 
 		)InnerICTran
