@@ -193,6 +193,16 @@ BEGIN TRY
 	declare @bags nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'bags'),'bags');
 
 	select top 1 @ysnEnableFXFieldInContractPricing = ysnEnableFXFieldInContractPricing from tblCTCompanyPreference;
+	
+	--LOGO SETUP TAB IMPLEMENTATION
+	DECLARE @imgLocationLogo vARBINARY (MAX),
+			@strLogoType  NVARCHAR(50),
+			@intCompanyLocationId INT
+	
+	SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+	SELECT TOP 1 @imgLocationLogo = imgLogo, @strLogoType = 'Logo' FROM tblSMLogoPreference
+	WHERE (ysnDefault = 1 OR  ysnContract = 1)  AND  intCompanyLocationId = @intCompanyLocationId
+
 
 	SELECT	 DISTINCT 
 			PF.intPriceFixationId,
@@ -283,8 +293,9 @@ BEGIN TRY
 						END,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
-			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
+			blbHeaderLogo = dbo.[fnCTGetCompanyLogo]('Header', CH.intContractHeaderId),			
 			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
+			strLogoType	  = ISNULL(@strLogoType,'Attachment'),
 			strCurrencyExchangeRate = isnull((FY.strCurrency + '/' + TY.strCurrency), @strFinalCurrency),
 			dblRate = (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end),
 			strFXFinalPrice = LTRIM(
