@@ -46,6 +46,7 @@ BEGIN
 		DECLARE @dtmDateTo DATETIME
 		DECLARE @strName NVARCHAR(1000)
 		DECLARE @strLocationName NVARCHAR(1000)
+		DECLARE @strCurrency NVARCHAR(1000)
 		DECLARE @strReportComment NVARCHAR(1000)
 		DECLARE @imgLogo VARBINARY(MAX)
 
@@ -87,8 +88,9 @@ BEGIN
 		BEGIN
 			SELECT @dtmDateFrom = [from], @dtmDateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 			SELECT @strName = [from] FROM @temp_xml_table WHERE [fieldname] = 'strName';
-			SELECT @strReportComment = [from] FROM @temp_xml_table WHERE [fieldname] = 'strReportComment';
 			SELECT @strLocationName = [from] FROM @temp_xml_table WHERE [fieldname] = 'strLocationName';
+			SELECT @strCurrency = [from] FROM @temp_xml_table WHERE [fieldname] = 'strCurrency';
+			SELECT @strReportComment = [from] FROM @temp_xml_table WHERE [fieldname] = 'strReportComment';
 		END
 
 		SET @dtmDateFrom = ISNULL(@dtmDateFrom, '1/1/1900')
@@ -162,7 +164,9 @@ BEGIN
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = A.intEntityVendorId AND ysnDefaultLocation = 1
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 		INNER JOIN tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
-		WHERE (NULLIF(@strName, '') IS NULL OR @strName = E.strName) AND (NULLIF(@strLocationName, '') IS NULL OR @strLocationName = CL.strLocationName)
+		WHERE (NULLIF(@strName, '') IS NULL OR @strName = E.strName) 
+		      AND (NULLIF(@strLocationName, '') IS NULL OR @strLocationName = CL.strLocationName)
+			  AND (NULLIF(@strCurrency, '') IS NULL OR @strCurrency = C.strCurrency)
 		ORDER BY dtmBillDate, intOrder
 
 		SELECT * FROM @tblAPVendorStatement
