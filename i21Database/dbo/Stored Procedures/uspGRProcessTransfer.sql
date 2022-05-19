@@ -33,6 +33,7 @@ BEGIN
 	DECLARE @StorageHistoryStagingTable2 AS StorageHistoryStagingTable
 	DECLARE @intIdentityId INT
 	DECLARE @HistoryIds AS Id
+	DECLARE @RoundOff INT = 4;
 
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
@@ -79,7 +80,7 @@ BEGIN
 			,@dblTransferTotal		= ISNULL(dblTransferTotal,0)
 		FROM [dbo].[fnGRCheckStorageBalance](@intId2, @intTransferStorageId)
 
-		IF ROUND(@dblTransferTotal,4) > ROUND(@dblTotalUnits,4)
+		IF ROUND(@dblTransferTotal, @RoundOff) > ROUND(@dblTotalUnits, @RoundOff)
 		BEGIN
 			SELECT @TicketNo2 = STUFF((
 				SELECT ',' + @TicketNo
@@ -239,7 +240,7 @@ BEGIN
 			,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
-			,[dblQuantity]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[dblQuantity]						= round( SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100), @RoundOff)
 			,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
@@ -269,9 +270,9 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
-			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,20)
+			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity, @RoundOff)
 			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
-			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[dblUnitQty]						= round(SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100), @RoundOff)
 			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
 			,[intShipFromLocationId]			= CS.intShipFromLocationId
 			,[intShipFromEntityId]				= CS.intShipFromEntityId
