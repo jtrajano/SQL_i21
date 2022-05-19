@@ -282,6 +282,7 @@ BEGIN TRY
 	IF @intProductTypeId = 6
 		OR @intProductTypeId = 11
 	BEGIN
+		DECLARE @intLotLocationId INT
 		DECLARE @LotRecords TABLE (
 			intSeqNo INT IDENTITY(1, 1)
 			,intLotId INT
@@ -301,9 +302,15 @@ BEGIN TRY
 				,strLotNumber
 			FROM tblICLot
 			WHERE intParentLotId = @intProductValueId
+				AND dblQty > 0
 		END
 		ELSE
 		BEGIN
+			SELECT @strLotNumber = strLotNumber
+				,@intLotLocationId = intLocationId
+			FROM tblICLot
+			WHERE intLotId = @intProductValueId
+
 			INSERT INTO @LotRecords (
 				intLotId
 				,strLotNumber
@@ -311,7 +318,9 @@ BEGIN TRY
 			SELECT intLotId
 				,strLotNumber
 			FROM tblICLot
-			WHERE intLotId = @intProductValueId
+			WHERE strLotNumber = @strLotNumber
+				AND dblQty > 0
+				AND intLocationId = @intLotLocationId
 		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
