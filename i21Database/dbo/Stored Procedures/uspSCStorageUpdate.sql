@@ -62,6 +62,8 @@ DECLARE @ErrorState INT;
 DECLARE @PostShipment INT = 1;
 DECLARE @total AS INT;
 
+DECLARE @RoundOff AS INT = 4;
+
 DECLARE @ItemsForItemShipment AS ItemCostingTableType
 		,@ItemsForItemShipmentContract AS ItemCostingTableType
 		,@CustomerStorageStagingTable AS CustomerStorageStagingTable
@@ -461,11 +463,11 @@ BEGIN TRY
 			SELECT @intId = MIN(intDiscountScheduleCodeId) FROM @CalculatedDiscount WHERE intDiscountScheduleCodeId > @intId
 		END
 
-		SET @wsGrossShrinkWeight = (ISNULL(@finalGrossWeight, 0) * ISNULL(@totalShrinkPrice, 0)) / 100
+		SET @wsGrossShrinkWeight = round(     (ISNULL(@finalGrossWeight, 0) * ISNULL(@totalShrinkPrice, 0)) / 100,     @RoundOff)
         SET @wetWeight = (@finalGrossWeight - @wsGrossShrinkWeight)
-        SET @wsWetShrinkWeight = (ISNULL(@wetWeight, 0) * ISNULL(@totalWetShrink, 0) ) / 100
+        SET @wsWetShrinkWeight = round(     (ISNULL(@wetWeight, 0) * ISNULL(@totalWetShrink, 0) ) / 100,     @RoundOff)
         SET @wsWetWeight = (@wetWeight - @wsWetShrinkWeight)
-        SET @wsNetShrinkWeight = (ISNULL(@wsWetWeight, 0) * ISNULL(@totalNetShrink, 0)) / 100
+        SET @wsNetShrinkWeight = round(     (ISNULL(@wsWetWeight, 0) * ISNULL(@totalNetShrink, 0)) / 100,     @RoundOff)
         SET @finalShrinkUnits = (@wsGrossShrinkWeight + @wsWetShrinkWeight + @wsNetShrinkWeight)
 
 		UPDATE SCD SET SCD.dblGross = @finalGrossWeight, SCD.dblShrink = @finalShrinkUnits , SCD.dblNet = (@finalGrossWeight - @finalShrinkUnits)
