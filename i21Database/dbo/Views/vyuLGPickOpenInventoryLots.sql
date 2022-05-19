@@ -35,9 +35,15 @@ FROM (
        ,intStorageLocationId = Lot.intStorageLocationId
        ,strStorageLocation = StorageLocation.strName
        ,dblQty = Lot.dblQty
-       ,dblUnPickedQty = CASE WHEN Lot.dblQty > 0.0 THEN 
-							  Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
-						 ELSE 0.0 END
+       ,dblUnPickedQty =	CASE WHEN Lot.intWarrantStatus = 2 THEN
+	   								CASE WHEN Lot.dblReleasedQty > 0.0 THEN 
+										Lot.dblReleasedQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+								ELSE
+									CASE WHEN Lot.dblQty > 0.0 THEN 
+										Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+							END
        ,dblLastCost = Lot.dblLastCost
        ,dtmExpiryDate = Lot.dtmExpiryDate
        ,strLotAlias = Lot.strLotAlias
@@ -209,5 +215,6 @@ FROM (
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) AL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
+		AND Lot.intWarrantStatus <> 1 -- Not Pledged
 	) InvLots
 GO
