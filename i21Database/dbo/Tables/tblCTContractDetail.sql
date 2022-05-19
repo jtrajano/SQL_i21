@@ -241,7 +241,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intRefFuturesCurrencyId_intCurrencyId] FOREIGN KEY ([intRefFuturesCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
+	--CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractStatus_intContractStatusId] FOREIGN KEY ([intContractStatusId]) REFERENCES [tblCTContractStatus]([intContractStatusId]),
