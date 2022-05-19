@@ -117,6 +117,7 @@ DECLARE  @ZeroDecimal			NUMERIC(18, 6)
 		,@CurrencyId			INT
 		,@InitTranCount			INT
 		,@Savepoint				NVARCHAR(32)
+		,@strInvoiceId 			NVARCHAR(100)
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARAddItemToInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -127,6 +128,7 @@ SET @ZeroDecimal = 0.000000
 SELECT 
 	 @CompanyLocationId = [intCompanyLocationId]
 	 ,@CurrencyId		= [intCurrencyId]	
+	 ,@strInvoiceId		= CAST(intInvoiceId AS NVARCHAR(100))
 FROM
 	tblARInvoice
 WHERE
@@ -713,7 +715,10 @@ INNER JOIN (SELECT ARI.intInvoiceId, ARID.strDocumentNumber, strInvoiceNumber, i
 ) ABC ON tblARInvoiceDetail.intInvoiceId = ABC.intInvoiceId
 WHERE tblARInvoiceDetail.intInvoiceId = @InvoiceId
 
-
+EXEC [dbo].[uspARInitializeTempTableForPosting] 
+EXEC [dbo].[uspARPopulateInvoiceDetailForPosting] @Param = @strInvoiceId
+EXEC [dbo].[uspARPopulateInvoiceAccountForPosting] @Post = 1
+EXEC [dbo].[uspARUpdateTransactionAccountOnPost]
 EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
