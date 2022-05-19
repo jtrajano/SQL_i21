@@ -137,7 +137,7 @@ SELECT
 		
 		-- A/P Related fields: 
 		,strVendor = ISNULL(LTRIM(RTRIM(VENDOR.strVendorId)) + ' ', '-- ') + ISNULL(ISNULL(RTRIM(LTRIM(ENTITY.strName)) + ' ', RTRIM(LTRIM(CHK.strPayee))),'-- ') --+ RTRIM(LTRIM (COMPANY.strCompanyName))
-		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
+		,strVendorAccount = dbo.fnCMGetVendorAcctNoByLocation(BNKACCNT.intBankAccountId, VENDOR.intEntityId) --   ISNULL(VendorLocation.strVendorAccountNum, '--')
 		-- Used to change the sub-report during runtime. 
 		,CHK.intBankTransactionTypeId
 		--Use to display the MICR
