@@ -1,5 +1,5 @@
 ﻿GO
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 	EXEC('
 	IF EXISTS(select top 1 1 from sys.procedures where name = ''uspAPCreatePaymentFromOriginBill'')
