@@ -28,7 +28,7 @@ BEGIN
 		SELECT @month = MONTH(@dtmDate)
 
 		DECLARE @balance DECIMAL(18, 6)
-		SELECT @balance = beginBalance FROM fnGLGetBeginningBalanceAndUnitTB(@strAccountId, @dtmDate, -1)
+		SELECT @balance = ISNULL(beginBalance, 0) FROM fnGLGetBeginningBalanceAndUnitTB(@strAccountId, @dtmDate, -1)
 		SET @balance = @balance + @dblTotal
 		
 		DECLARE @budget DECIMAL(18, 6)
