@@ -1,5 +1,5 @@
 ﻿GO
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 	IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_insert_vyuCMBankAccount') DROP TRIGGER dbo.trg_insert_vyuCMBankAccount;
 	IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_delete_vyuCMBankAccount') DROP TRIGGER dbo.trg_delete_vyuCMBankAccount;

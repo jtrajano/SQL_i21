@@ -3,7 +3,7 @@
 -- It is used to retrieve the latest deposit entry records from origin. 
 -- The undeposited funds table is updated with the records from this view. 
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1 and
+IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'aptrxmst') = 1
 BEGIN
 	EXEC ('

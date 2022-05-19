@@ -26,7 +26,7 @@ Post-Deployment Script Template
 :r "..\dbo\Stored Procedures\uspAPImportVendorLocations.sql"
 
 -- DROP temp table created from PreDeployment script
-IF OBJECT_ID('tempdb..##tblOriginMod') IS NOT NULL DROP TABLE ##tblOriginMod
+IF OBJECT_ID('tempdb..#tblOriginMod') IS NOT NULL DROP TABLE #tblOriginMod
 GO
 
 :r "..\Scripts\AP\TransferImportedTermsData.sql"
