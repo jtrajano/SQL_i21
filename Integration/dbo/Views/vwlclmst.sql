@@ -6,7 +6,7 @@
 
 --GO
 ---- AG VIEW
---IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
+--IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG'	) = 1
 --	EXEC ('
 --		CREATE VIEW [dbo].[vwlclmst]
 --		AS
@@ -32,7 +32,7 @@
 --		')
 --GO
 ---- PT VIEW
---IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1
+--IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT'	) = 1
 --	EXEC ('
 --		CREATE VIEW [dbo].[vwlclmst]
 --		AS

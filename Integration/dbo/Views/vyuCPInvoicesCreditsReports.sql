@@ -7,7 +7,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCP
 	DROP VIEW vyuCPInvoicesCreditsReports
 GO
 -- AG VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG'	) = 1 and (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'EC') = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vyuCPInvoicesCreditsReports]
 		AS
@@ -54,7 +54,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 GO
 
 -- PETRO VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT'	) = 1 and (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'EC') = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vyuCPInvoicesCreditsReports]
 		AS
