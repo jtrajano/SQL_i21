@@ -205,6 +205,7 @@
 	[ysnProductCaseCodeScanningRequired] BIT NULL DEFAULT (0), 
 	[ysnYieldAdjustmentAllowed] BIT NULL DEFAULT (0), 
 	[ysnPrintInvTagOnReceivingComplete] BIT NULL DEFAULT (0), 
+    [intNoOfMonthsFromDemandToShipment] INT NOT NULL DEFAULT (0),
 	[strVendorRefNoPrefix] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strVatNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	---------------------------------------------------------------------
