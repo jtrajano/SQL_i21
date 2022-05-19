@@ -1626,6 +1626,27 @@ IF (@intTableCount = 3)
 		BEGIN
 			-- Version 3.3
 			SET @strRegisterClass		= N'RADIANT'
+			
+			SET @strXmlVersion	= N'3.4'
+
+			-- HEADER
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterClass = @strRegisterClass AND strXmlVersion = @strXmlVersion)
+				BEGIN				
+					-- Insert Header
+					INSERT INTO tblSTRegisterSetup
+					(
+						strRegisterClass,
+						strXmlVersion,
+						intConcurrencyId
+					)
+					SELECT 
+						strRegisterClass			= @strRegisterClass,
+						strXmlVersion	= @strXmlVersion,
+						intConcurrencyId		= 1
+
+
+				END
+
 			SET @strXmlVersion	= N'3.3'
 
 			-- HEADER
@@ -1658,6 +1679,7 @@ IF (@intTableCount = 3)
 						AND strXmlVersion = @strXmlVersion
 
 				END
+
 
 			-- DETAILS	
 			--Insert Details
