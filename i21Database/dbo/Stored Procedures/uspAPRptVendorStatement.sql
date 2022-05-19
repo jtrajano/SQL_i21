@@ -32,7 +32,7 @@ BEGIN
 		dblDebit DECIMAL(18, 6) NULL,
 		dblCredit DECIMAL(18, 6) NULL,
 		strCurrency NVARCHAR(1000) NULL,
-		strComment NVARCHAR(1000) NULL,
+		strReportComment NVARCHAR(1000) NULL,
 		intPartitionId INT NULL
 	)
 
@@ -46,7 +46,7 @@ BEGIN
 		DECLARE @dtmDateTo DATETIME
 		DECLARE @strName NVARCHAR(1000)
 		DECLARE @strLocationName NVARCHAR(1000)
-		DECLARE @strComment NVARCHAR(1000)
+		DECLARE @strReportComment NVARCHAR(1000)
 		DECLARE @imgLogo VARBINARY(MAX)
 
 		-- Declare XML document Id
@@ -87,7 +87,7 @@ BEGIN
 		BEGIN
 			SELECT @dtmDateFrom = [from], @dtmDateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 			SELECT @strName = [from] FROM @temp_xml_table WHERE [fieldname] = 'strName';
-			SELECT @strComment = [from] FROM @temp_xml_table WHERE [fieldname] = 'strComment';
+			SELECT @strReportComment = [from] FROM @temp_xml_table WHERE [fieldname] = 'strReportComment';
 			SELECT @strLocationName = [from] FROM @temp_xml_table WHERE [fieldname] = 'strLocationName';
 		END
 
@@ -130,7 +130,7 @@ BEGIN
 			   CASE WHEN A.dblTotal > 0 THEN ABS(A.dblTotal) ELSE 0 END,
 			   CASE WHEN A.dblTotal < 0 THEN ABS(A.dblTotal) ELSE 0 END,
 			   C.strCurrency,
-			   @strComment,
+			   @strReportComment,
 			   DENSE_RANK() OVER(ORDER BY A.intShipToId, A.intEntityVendorId, A.intCurrencyId)
 		FROM (
 			--INITIAL BALANCES
