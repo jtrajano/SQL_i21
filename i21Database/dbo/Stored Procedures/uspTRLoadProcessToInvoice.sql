@@ -1494,6 +1494,7 @@ BEGIN TRY
 		
 		SELECT @dblTotalCharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
 		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
+		WHERE STF.intId != 0
 
 		UPDATE E SET E.intFreightCompanySegment = S.intCompanySegmentId
 		, E.intFreightLocationSegment = S.intProfitCenterId
