@@ -5,7 +5,7 @@ C.intId,
 A.intImportBankStatementLogId,    
 C.intLineNo,    
 ISNULL(C.strTaskId, B.strABRActivityId) strTaskId,  
-ysnError = case when strError is null then cast(0 as bit) else cast(1 as bit) end ,    
+ysnError = case when C.ysnSuccess = 0 then cast(1 as bit) else cast( 0 as bit) end ,   
 C.strError,  
 ISNULL(B.strBankDescription, Task.strNotes) strBankDescription,
 strTransactionMatched = Match.strTransactionId  
