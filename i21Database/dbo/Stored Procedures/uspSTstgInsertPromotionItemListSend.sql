@@ -353,6 +353,9 @@ BEGIN
 					ON R.intStoreId = ST.intStoreId
 				JOIN tblSTPromotionItemList PIL 
 					ON PIL.intStoreId = ST.intStoreId 
+				INNER JOIN tblSTPromotionItemListDetail ILT
+					ON ILT.intItemUOMId = IUOM.intItemUOMId
+					AND PIL.intPromoItemListId = ILT.intPromoItemListId
 				WHERE I.ysnFuelItem = CAST(0 AS BIT) 
 				AND R.intRegisterId = @intRegisterId 
 				AND ST.intStoreId = @intStoreId 
