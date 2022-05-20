@@ -2692,9 +2692,9 @@ BEGIN TRY
 		FROM @tblOpenContractList cdPriced
 		INNER JOIN @tblOpenContractList cdBasis
 			ON cdBasis.intContractDetailId = cdPriced.intContractDetailId
-			AND cdBasis.intPricingTypeId = 2 
-			AND cdBasis.strPricingType = 'Basis'
-		WHERE cdPriced.intPricingTypeId = 2 AND cdPriced.strPricingType = 'Priced'
+			AND cdBasis.intPricingTypeId IN (2,8)
+			AND cdBasis.strPricingType IN ('Basis','Ratio')
+		WHERE cdPriced.intPricingTypeId IN (2,8) AND cdPriced.strPricingType = 'Priced'
 
 		---- contract
 		INSERT INTO @ListTransaction (intContractHeaderId
@@ -3036,7 +3036,7 @@ BEGIN TRY
 											END
 									-- IF PARTIAL PRICED
 											-- PRICED RECORD
-										ELSE CASE WHEN cd.intPricingTypeId = 2 AND cd.strPricingType = 'Priced'
+										ELSE CASE WHEN cd.intPricingTypeId IN (2,8) AND cd.strPricingType = 'Priced'
 											THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
 													THEN CASE WHEN partialPricedCT.dblPricedOpenQty > ISNULL(allocatedContract.dblAllocatedQty, 0)
 														THEN partialPricedCT.dblPricedOpenQty - ISNULL(allocatedContract.dblAllocatedQty, 0)
@@ -3048,7 +3048,7 @@ BEGIN TRY
 														END													
 													END
 											-- BASIS RECORD
-											WHEN cd.intPricingTypeId = 2 AND cd.strPricingType = 'Basis'
+											WHEN cd.intPricingTypeId IN (2,8) AND cd.strPricingType IN ('Basis','Ratio')
 											THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
 													THEN CASE WHEN partialPricedCT.dblPricedOpenQty >= ISNULL(allocatedContract.dblAllocatedQty, 0)
 														THEN cd.dblContractOriginalQty
