@@ -41,7 +41,9 @@ AS
 		,[strBudgetDescription] NVARCHAR(100)
 		,[dblAmountDue]			NUMERIC(18,6)
 		,[dblTotalAmount]		NUMERIC(18,6)
-		,[intServiceChargeDays]	INT NULL)
+		,[intServiceChargeDays]	INT NULL
+		,intContractDetailId	INT NULL
+	)
 
 	DECLARE @tempServiceChargeTableByCB TABLE (
 		 [intServiceChargeId]	INT
@@ -52,7 +54,9 @@ AS
 		,[strBudgetDescription] NVARCHAR(100)
 		,[dblAmountDue]			NUMERIC(18,6)
 		,[dblTotalAmount]		NUMERIC(18,6)
-		,[intServiceChargeDays]	INT NULL)
+		,[intServiceChargeDays]	INT NULL
+		,intContractDetailId	INT NULL
+	)
 
 	INSERT INTO @tempServiceChargeTable
 	SELECT * FROM @tblTypeServiceCharge 
@@ -65,7 +69,7 @@ AS
 	BEGIN
 		--INSERT INVOICE HEADER
 		INSERT INTO tblARInvoice(
-				[intEntityCustomerId]
+			 [intEntityCustomerId]
 			,[strInvoiceOriginId]
 			,[dtmDate]
 			,[dtmDueDate]
@@ -108,7 +112,7 @@ AS
 			,[strComments]
 		)
 		SELECT 
-				@intEntityCustomerId
+			 @intEntityCustomerId
 			,NULL --[strInvoiceOriginId]
 			,ISNULL(@dtmServiceChargeDate, @dateNow)
 			,[dbo].fnGetDueDateBasedOnTerm(ISNULL(@dtmServiceChargeDate, @dateNow), ISNULL(@intCompTermsId, intTermsId))
@@ -179,6 +183,8 @@ AS
 				,[dblQtyShipped]
 				,[dblPrice]
 				,[dblTotal]
+				,[dblServiceChargeAmountDue]
+				,[intContractDetailId]
 				,[intConcurrencyId]
 			)
 			SELECT 	
@@ -193,6 +199,8 @@ AS
 				,1.000000
 				,[dblTotalAmount]
 				,[dblTotalAmount]
+				,[dblAmountDue]
+				,[intContractDetailId]
 				,0
 			FROM @tblTypeServiceCharge WHERE intServiceChargeId = @intServiceChargeId
 
@@ -239,7 +247,7 @@ AS
 		
 		--INSERT INTO RECAP TABLE
 		INSERT INTO tblARServiceChargeRecap(
-				[strBatchId]
+			 [strBatchId]
 			,[intEntityId]
 			,[intServiceChargeAccountId]
 			,[dtmServiceChargeDate]
@@ -247,7 +255,7 @@ AS
 			,[intCurrencyId]
 		)
 		SELECT 
-				@batchId
+			 @batchId
 			,@intEntityCustomerId
 			,@intSCAccountId
 			,@dtmServiceChargeDate
@@ -262,7 +270,7 @@ AS
 			SELECT TOP 1 @intServiceChargeId = intServiceChargeId FROM @tempServiceChargeTable ORDER BY intServiceChargeId ASC
 
 			INSERT INTO [tblARServiceChargeRecapDetail](
-					[intSCRecapId]
+				 [intSCRecapId]
 				,[intInvoiceId]
 				,[strInvoiceNumber]
 				,[strBudgetDescription]
@@ -271,7 +279,7 @@ AS
 				,[intConcurrencyId]
 			)
 			SELECT 	
-					@newRecapId
+				 @newRecapId
 				,[intInvoiceId]
 				,[strInvoiceNumber]
 				,[strBudgetDescription]				

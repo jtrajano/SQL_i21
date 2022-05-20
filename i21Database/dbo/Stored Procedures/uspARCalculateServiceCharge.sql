@@ -58,6 +58,7 @@ BEGIN
 		,ysnCreditApplied     	BIT
 		,dtmDatePaid			DATETIME NULL
 		,ysnPaid				BIT
+		,intContractDetailId	INT NULL
 	)
 	DECLARE @tblCredits TABLE (
 		 intInvoiceId 			INT
@@ -240,6 +241,7 @@ BEGIN
 			,ysnCreditApplied
 			,dtmDatePaid
 			,ysnPaid
+			,intContractDetailId
 		)
 		SELECT 
 			 intInvoiceId		= INV.intInvoiceId
@@ -253,6 +255,7 @@ BEGIN
 			,ysnCreditApplied	= CAST(0 AS BIT)
 			,dtmDatePaid		= PAYMENT.dtmDatePaid
 			,ysnPaid			= INV.ysnPaid
+			,intContractDetailId= ARID.intContractDetailId
 		FROM tblARInvoice INV
 		INNER JOIN @tblCustomer CUST ON INV.intEntityCustomerId = CUST.intEntityId
 		INNER JOIN tblARServiceCharge SC ON CUST.intServiceChargeId = SC.intServiceChargeId
@@ -268,6 +271,11 @@ BEGIN
 				AND P.dtmDatePaid <= @asOfDate
 			GROUP BY PD.intInvoiceId
 		) AS PAYMENT ON PAYMENT.intInvoiceId = INV.intInvoiceId
+		OUTER APPLY (
+			SELECT TOP 1 intContractDetailId
+			FROM tblARInvoiceDetail
+			WHERE intInvoiceId = INV.intInvoiceId
+		) ARID
 		WHERE INV.ysnPosted = 1
 		AND (INV.ysnPaid = 0 OR (INV.ysnPaid = 1 AND @ysnIncludePaidInvoices = 1))
 		AND INV.ysnCancelled = 0
@@ -300,11 +308,11 @@ BEGIN
 	--PROCESS EACH CUSTOMER
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tblCustomer)
 	BEGIN
-		DECLARE  @entityId						INT
-					,@serviceChargeId			INT
+		DECLARE  @entityId				INT
+				,@serviceChargeId		INT
 				,@strCalculationType 	NVARCHAR (100)
-				,@dblServiceChargeAPR NUMERIC(18, 6)
-				,@dblPercentage				NUMERIC(18, 6) = 0
+				,@dblServiceChargeAPR 	NUMERIC(18, 6)
+				,@dblPercentage			NUMERIC(18, 6) = 0
 
 		SELECT TOP 1 @entityId = C.intEntityId,
 						@serviceChargeId 	= C.intServiceChargeId,
@@ -396,6 +404,7 @@ BEGIN
 													END, dbo.fnARGetDefaultDecimal()
 												)
 						,intServiceChargeDays	= DATEDIFF(DAYOFYEAR, I.dtmToCalculate, (CASE WHEN I.ysnPaid = 1 THEN I.dtmDatePaid ELSE @asOfDate END))
+						,intContractDetailId	= I.intContractDetailId
 					FROM @tblInvoices I
 					INNER JOIN @tblCustomer C ON I.intEntityCustomerId = C.intEntityId
 					INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -427,6 +436,7 @@ BEGIN
 																@dblPercentage	
 														END, dbo.fnARGetDefaultDecimal())
 							, 0
+							, NULL
 						FROM @tblComputedBalance BALANCE
 						WHERE BALANCE.intEntityId = @entityId
 					END
@@ -439,25 +449,25 @@ BEGIN
 				BEGIN
 					INSERT INTO @tempTblTypeServiceCharge
 					SELECT NULL
-							, CB.intCustomerBudgetId
-							, CB.intEntityCustomerId
-							, NULL
-							, 'Customer Budget For: ' + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)     
-							, CB.dblBudgetAmount				
-							, dblTotalAmount = dbo.fnRoundBanker(CASE WHEN strCalculationType = 'Percent'
+							,CB.intCustomerBudgetId
+							,CB.intEntityCustomerId
+							,NULL
+							,'Customer Budget For: ' + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)     
+							,CB.dblBudgetAmount				
+							,dblTotalAmount = dbo.fnRoundBanker(CASE WHEN strCalculationType = 'Percent'
 												THEN
 													CASE WHEN dblServiceChargeAPR > 0
 														THEN
 															CASE WHEN dblMinimumCharge > 
 																	CASE WHEN ISNULL(dblMinimumFinanceCharge, 0) > CB.dblBudgetAmount
 																			THEN 0
-																			ELSE ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate) * CB.dblBudgetAmount
+																			ELSE ((dblServiceChargeAPR / 365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate) * CB.dblBudgetAmount
 																	END
 																	THEN dblMinimumCharge
 																	ELSE 
 																	CASE WHEN ISNULL(dblMinimumFinanceCharge, 0) > CB.dblBudgetAmount
 																			THEN 0
-																			ELSE ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate) * CB.dblBudgetAmount
+																			ELSE ((dblServiceChargeAPR / 365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate) * CB.dblBudgetAmount
 																	END
 															END
 														ELSE 0
@@ -465,7 +475,8 @@ BEGIN
 												ELSE 
 													dblPercentage
 											END, dbo.fnARGetDefaultDecimal())
-						, DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate)
+						,DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate)
+						,NULL
 					FROM tblARCustomerBudget CB
 					INNER JOIN @tblCustomer C ON CB.intEntityCustomerId = C.[intEntityId]	
 					INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -495,14 +506,16 @@ BEGIN
 				BEGIN
 					--GET AMOUNT DUE PER INVOICE
 					INSERT INTO @tblTypeServiceCharge
-					SELECT intInvoiceId
-							, intBudgetId
-							, intEntityCustomerId
-							, strInvoiceNumber
-							, strBudgetDesciption
-							, dblAmountDue
-							, dblTotalAmount
-							, intServiceChargeDays 
+					SELECT 
+						 intInvoiceId
+						,intBudgetId
+						,intEntityCustomerId
+						,strInvoiceNumber
+						,strBudgetDesciption
+						,dblAmountDue
+						,dblTotalAmount
+						,intServiceChargeDays
+						,intContractDetailId
 					FROM @tempTblTypeServiceCharge 
 					WHERE ISNULL(dblAmountDue, @ZeroDecimal) <> @ZeroDecimal 
 						AND ISNULL(dblTotalAmount, @ZeroDecimal) <> @ZeroDecimal
@@ -539,6 +552,7 @@ BEGIN
 									END
 							END
 							, intServiceChargeDays
+							, NULL
 					FROM @tempTblTypeServiceCharge 
 					WHERE ISNULL(dblAmountDue, 0) > @ZeroDecimal 
 					AND ISNULL(dblTotalAmount, 0) > @ZeroDecimal
