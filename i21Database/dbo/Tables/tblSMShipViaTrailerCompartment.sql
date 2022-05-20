@@ -8,5 +8,6 @@
 
 	[intConcurrencyId]							INT				NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMShipViaTrailerCompartment] PRIMARY KEY CLUSTERED ([intEntityShipViaTrailerCompartmentId] ASC), 
-	CONSTRAINT [FK_dbo_tblSMShipViaTrailerCompartment_tblSMShipViaTrailer] FOREIGN KEY ([intEntityShipViaTrailerId]) REFERENCES [dbo].tblSMShipViaTrailer ([intEntityShipViaTrailerId]) ON DELETE CASCADE
+	CONSTRAINT [FK_dbo_tblSMShipViaTrailerCompartment_tblSMShipViaTrailer] FOREIGN KEY ([intEntityShipViaTrailerId]) REFERENCES [dbo].tblSMShipViaTrailer ([intEntityShipViaTrailerId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_dbo_tblSMShipViaTrailerCompartment_tblICCategory_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId])
 )
