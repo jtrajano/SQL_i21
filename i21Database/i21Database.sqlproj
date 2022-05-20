@@ -826,6 +826,9 @@
     <Build Include="dbo\Tables\tblAPVendorAccountNumLocation.sql" />
     <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
     <Build Include="dbo\Tables\tblSMShipViaTrailerCompartment.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerHierarchy.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerHierarchyDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDBuildHierarchyFilterString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
