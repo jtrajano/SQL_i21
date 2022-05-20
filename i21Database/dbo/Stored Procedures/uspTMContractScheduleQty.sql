@@ -57,10 +57,12 @@ BEGIN
 	ELSE
 	BEGIN
 	 	-- IF NEGATIVE QTY THEN REMOVE FROM SCHEDULED QTY
-		SELECT @intContractDetailId = intContractId
-			, @dblQuantity = (dblQuantity - ISNULL(dblOverageQty, 0)) * -1
-			, @intUserId = intUserID
-		FROM tblTMDispatch WHERE intSiteID = @intSiteId
+		SELECT @intContractDetailId = O.intContractDetailId  
+			, @dblQuantity = O.dblQuantity * -1
+			, @intUserId = D.intUserID
+		FROM tblTMOrder O 
+		INNER JOIN tblTMDispatch D ON D.intDispatchID = O.intDispatchId AND D.intContractId = O.intContractDetailId
+		WHERE D.intSiteID = @intSiteId
 
 		IF(@intContractDetailId IS NOT NULL)
 		BEGIN
