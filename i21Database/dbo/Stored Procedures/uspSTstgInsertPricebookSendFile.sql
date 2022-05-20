@@ -731,8 +731,8 @@ BEGIN
 							, 'addchange' [RecordActionType] 
 							, CONVERT(nvarchar(10), GETDATE(), 21) [RecordActionEffectiveDate]
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [ITTDetailRecordActionType] 
-							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN 'plu' ELSE 'upcA' END [POSCodeFormat]
-							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
+							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [POSCodeFormat]
+							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
 									ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
 								END [POSCode]
 							, IUM.strUnitMeasure [PosCodeModifierName] 
@@ -801,7 +801,7 @@ BEGIN
 							, CASE WHEN R.strRegisterClass = @strRegisterClass
 										THEN CASE WHEN R.strRegisterName = 'Sapphire' THEN RIGHT('0000000000000'+ISNULL(IUOM.strLongUPCCode,''),13) 
 											WHEN R.strRegisterName = 'Commander' THEN 
-												CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) 
+												CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL
 													THEN IUOM.strUpcCode 
 													ELSE RIGHT('0000000000000'+ISNULL(IUOM.strLongUPCCode,''),13) 
 												END
@@ -879,8 +879,8 @@ BEGIN
 							, 'addchange' [RecordActionType] 
 							, CONVERT(nvarchar(10), GETDATE(), 21) [RecordActionEffectiveDate]
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [ITTDetailRecordActionType] 
-							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN 'plu' ELSE 'upcA' END [POSCodeFormat]
-							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
+							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [POSCodeFormat]
+							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
 									ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
 								END [POSCode]
 							, IUM.strUnitMeasure [PosCodeModifierName] 
@@ -947,7 +947,7 @@ BEGIN
 							, CASE WHEN R.strRegisterClass = @strRegisterClass 
 										THEN CASE WHEN R.strRegisterName = 'Sapphire' THEN RIGHT('0000000000000'+ISNULL(IUOM.strLongUPCCode,''),13) 
 											WHEN R.strRegisterName = 'Commander' THEN 
-												CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) 
+												CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL
 													THEN IUOM.strUpcCode 
 													ELSE RIGHT('0000000000000'+ISNULL(IUOM.strLongUPCCode,''),13) 
 												END
