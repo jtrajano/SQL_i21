@@ -96,6 +96,7 @@ Begin
 	CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
 	CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
 	i.intCategoryId
+	,wi.intStorageLocationId 
 	into #tblWorkOrderInputParent
 	From tblMFWorkOrderInputParentLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
 	Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
