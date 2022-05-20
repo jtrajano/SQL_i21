@@ -147,5 +147,6 @@
 	[strBankName]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strIBAN]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strSWIFT]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strBICCode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
+	[strBICCode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[dblServiceChargeAPR]				NUMERIC (18, 6)	NULL
 );

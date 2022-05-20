@@ -405,6 +405,7 @@ BEGIN
 												)
 						,intServiceChargeDays	= DATEDIFF(DAYOFYEAR, I.dtmToCalculate, (CASE WHEN I.ysnPaid = 1 THEN I.dtmDatePaid ELSE @asOfDate END))
 						,intContractDetailId	= I.intContractDetailId
+						,dblServiceChargeAPR	= SC.dblServiceChargeAPR
 					FROM @tblInvoices I
 					INNER JOIN @tblCustomer C ON I.intEntityCustomerId = C.intEntityId
 					INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -419,24 +420,26 @@ BEGIN
 					IF EXISTS(SELECT TOP 1 NULL FROM @tblComputedBalance)
 					BEGIN
 						INSERT INTO @tempTblTypeServiceCharge
-						SELECT intInvoiceId				= NULL
-								, intBudgetId			= NULL
-								, intEntityCustomerId	= BALANCE.intEntityId
-								, strInvoiceNumber		= NULL
-								, strBudgetDescription 	= NULL
-								, dblAmountDue			= BALANCE.dblTotalAR
-								, dblTotalAmount       	= dbo.fnRoundBanker(CASE WHEN @strCalculationType = 'Percent'
-															THEN
-																CASE WHEN @dblServiceChargeAPR > 0
-																	THEN
-																		((@dblServiceChargeAPR / 12) * BALANCE.dblTotalAR) / 100
-																	ELSE 0
-																END
-															ELSE
-																@dblPercentage	
-														END, dbo.fnARGetDefaultDecimal())
-							, 0
-							, NULL
+						SELECT 
+							 intInvoiceId				= NULL
+							,intBudgetId			= NULL
+							,intEntityCustomerId	= BALANCE.intEntityId
+							,strInvoiceNumber		= NULL
+							,strBudgetDescription 	= NULL
+							,dblAmountDue			= BALANCE.dblTotalAR
+							,dblTotalAmount       	= dbo.fnRoundBanker(CASE WHEN @strCalculationType = 'Percent'
+														THEN
+															CASE WHEN @dblServiceChargeAPR > 0
+																THEN
+																	((@dblServiceChargeAPR / 12) * BALANCE.dblTotalAR) / 100
+																ELSE 0
+															END
+														ELSE
+															@dblPercentage	
+													END, dbo.fnARGetDefaultDecimal())
+							,0
+							,NULL
+							,0
 						FROM @tblComputedBalance BALANCE
 						WHERE BALANCE.intEntityId = @entityId
 					END
@@ -477,6 +480,7 @@ BEGIN
 											END, dbo.fnARGetDefaultDecimal())
 						,DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate)
 						,NULL
+						,0
 					FROM tblARCustomerBudget CB
 					INNER JOIN @tblCustomer C ON CB.intEntityCustomerId = C.[intEntityId]	
 					INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -516,6 +520,7 @@ BEGIN
 						,dblTotalAmount
 						,intServiceChargeDays
 						,intContractDetailId
+						,dblServiceChargeAPR
 					FROM @tempTblTypeServiceCharge 
 					WHERE ISNULL(dblAmountDue, @ZeroDecimal) <> @ZeroDecimal 
 						AND ISNULL(dblTotalAmount, @ZeroDecimal) <> @ZeroDecimal
@@ -534,12 +539,12 @@ BEGIN
 					--GET AMOUNT DUE PER CUSTOMER
 					INSERT INTO @tblTypeServiceCharge
 					SELECT NULL
-							, NULL
-							, @entityId
-							, 'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
-							, NULL
-							, ISNULL(dblAmountDue, 0)
-							, CASE WHEN ISNULL(@dblMinimumSC, 0) > 
+							,NULL
+							,@entityId
+							,'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
+							,NULL
+							,ISNULL(dblAmountDue, 0)
+							,CASE WHEN ISNULL(@dblMinimumSC, 0) > 
 									CASE WHEN ISNULL(@dblMinFinanceSC, 0) > ISNULL(dblAmountDue, 0)
 											THEN 0
 											ELSE ISNULL(dblTotalAmount, 0)
@@ -550,9 +555,10 @@ BEGIN
 											THEN 0
 											ELSE ISNULL(dblTotalAmount, 0)
 									END
-							END
-							, intServiceChargeDays
-							, NULL
+							 END
+							,intServiceChargeDays
+							,NULL
+							,0
 					FROM @tempTblTypeServiceCharge 
 					WHERE ISNULL(dblAmountDue, 0) > @ZeroDecimal 
 					AND ISNULL(dblTotalAmount, 0) > @ZeroDecimal

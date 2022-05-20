@@ -9,5 +9,6 @@
 	dblAmountDue			NUMERIC(18,6)	NULL,
 	dblTotalAmount   		NUMERIC(18,6)	NULL,
 	intServiceChargeDays    INT				NULL,
-	intContractDetailId    	INT				NULL
+	intContractDetailId    	INT				NULL,
+	dblServiceChargeAPR		NUMERIC (18, 6) NULL DEFAULT 0
 )

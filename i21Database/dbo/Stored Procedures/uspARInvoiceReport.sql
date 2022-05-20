@@ -115,6 +115,7 @@ CREATE TABLE #INVOICES (
 	 , ysnIncludeEntityName			BIT				NULL
 	 , strFooterComments			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	 , intOriginalInvoiceId			INT				NULL
+	 , dblServiceChargeAPR			NUMERIC(18, 6)	NULL DEFAULT 0
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -184,236 +185,237 @@ OR		dtmCreated IS NULL
 
 --MAIN QUERY
 INSERT INTO #INVOICES WITH (TABLOCK) (
-	   intInvoiceId
-	 , intCompanyLocationId
-	 , intEntityCustomerId
-	 , strCompanyName
-	 , strCompanyAddress
-	 , strCompanyInfo
-	 , strCompanyPhoneNumber
-	 , strCompanyEmail
-	 , strType
-     , strCustomerName
-	 , strCustomerNumber
-	 , strLocationName
-	 , dtmDate
-	 , dtmPostDate
-	 , strCurrency
-	 , strInvoiceNumber
-	 , strBillToLocationName
-	 , strBillTo
-	 , strShipTo
-	 , strSalespersonName
-	 , strPONumber
-	 , strBOLNumber
-	 , strShipVia
-	 , strTerm
-	 , dtmShipDate
-	 , dtmDueDate
-	 , strFreightTerm
-	 , strDeliverPickup
-	 , strComments
-	 , strInvoiceHeaderComment
-	 , strInvoiceFooterComment
-	 , dblInvoiceSubtotal
-	 , dblShipping
-	 , dblTax
-	 , dblInvoiceTotal
-	 , dblAmountDue
-	 , strItemNo
-	 , intInvoiceDetailId
-	 , dblContractBalance
-	 , strContractNumber
-	 , strContractNoSeq
-	 , strItem
-	 , strItemDescription
-	 , strUnitMeasure
-	 , dblQtyShipped
-	 , dblQtyOrdered
-	 , dblDiscount
-	 , dblTotalTax
-	 , dblPrice
-	 , dblItemPrice
-	 , strPaid
-	 , strPosted
-	 , strTransactionType
-	 , intRecipeId
-	 , intOneLinePrintId
-	 , strInvoiceComments
-	 , strPaymentComments
-	 , strCustomerComments
-	 , strItemType
-	 , dblTotalWeight
-	 , strVFDDocumentNumber
-	 , ysnHasEmailSetup
-	 , ysnHasRecipeItem
-	 , ysnHasVFDDrugItem
-	 , ysnHasProvisional
-	 , strProvisional
-	 , dblTotalProvisional
-	 , ysnPrintInvoicePaymentDetail
-	 , ysnListBundleSeparately
-	 , strTicketNumbers
-	 , strSiteNumber
-	 , dblEstimatedPercentLeft
-	 , dblPercentFull
-	 , strCustomerContract
-	 , strTicketNumber
-	 , strTicketNumberDate
-	 , strCustomerReference
-	 , strSalesReference
-	 , strPurchaseReference
-	 , strLoadNumber
-	 , strTruckDriver
-	 , strTrailer
-	 , strSeals
-	 , strLotNumber
-	 , blbLogo
-	 , strAddonDetailKey
-	 , strBOLNumberDetail
-	 , ysnHasAddOnItem
-	 , intEntityUserId
-	 , strRequestId
-	 , strInvoiceFormat
-	 , blbSignature
-	 , ysnStretchLogo
-	 , strSubFormula
-	 , dtmCreated
-	 , strServiceChargeItem
-	 , intDaysOld
-	 , strServiceChareInvoiceNumber
-	 , dtmDateSC
-	 , intSiteId
-	 , ysnIncludeEntityName
-	 , strFooterComments
-	 , intOriginalInvoiceId
+	 intInvoiceId
+	, intCompanyLocationId
+	, intEntityCustomerId
+	, strCompanyName
+	, strCompanyAddress
+	, strCompanyInfo
+	, strCompanyPhoneNumber
+	, strCompanyEmail
+	, strType
+	, strCustomerName
+	, strCustomerNumber
+	, strLocationName
+	, dtmDate
+	, dtmPostDate
+	, strCurrency
+	, strInvoiceNumber
+	, strBillToLocationName
+	, strBillTo
+	, strShipTo
+	, strSalespersonName
+	, strPONumber
+	, strBOLNumber
+	, strShipVia
+	, strTerm
+	, dtmShipDate
+	, dtmDueDate
+	, strFreightTerm
+	, strDeliverPickup
+	, strComments
+	, strInvoiceHeaderComment
+	, strInvoiceFooterComment
+	, dblInvoiceSubtotal
+	, dblShipping
+	, dblTax
+	, dblInvoiceTotal
+	, dblAmountDue
+	, strItemNo
+	, intInvoiceDetailId
+	, dblContractBalance
+	, strContractNumber
+	, strContractNoSeq
+	, strItem
+	, strItemDescription
+	, strUnitMeasure
+	, dblQtyShipped
+	, dblQtyOrdered
+	, dblDiscount
+	, dblTotalTax
+	, dblPrice
+	, dblItemPrice
+	, strPaid
+	, strPosted
+	, strTransactionType
+	, intRecipeId
+	, intOneLinePrintId
+	, strInvoiceComments
+	, strPaymentComments
+	, strCustomerComments
+	, strItemType
+	, dblTotalWeight
+	, strVFDDocumentNumber
+	, ysnHasEmailSetup
+	, ysnHasRecipeItem
+	, ysnHasVFDDrugItem
+	, ysnHasProvisional
+	, strProvisional
+	, dblTotalProvisional
+	, ysnPrintInvoicePaymentDetail
+	, ysnListBundleSeparately
+	, strTicketNumbers
+	, strSiteNumber
+	, dblEstimatedPercentLeft
+	, dblPercentFull
+	, strCustomerContract
+	, strTicketNumber
+	, strTicketNumberDate
+	, strCustomerReference
+	, strSalesReference
+	, strPurchaseReference
+	, strLoadNumber
+	, strTruckDriver
+	, strTrailer
+	, strSeals
+	, strLotNumber
+	, blbLogo
+	, strAddonDetailKey
+	, strBOLNumberDetail
+	, ysnHasAddOnItem
+	, intEntityUserId
+	, strRequestId
+	, strInvoiceFormat
+	, blbSignature
+	, ysnStretchLogo
+	, strSubFormula
+	, dtmCreated
+	, strServiceChargeItem
+	, intDaysOld
+	, strServiceChareInvoiceNumber
+	, dtmDateSC
+	, intSiteId
+	, ysnIncludeEntityName
+	, strFooterComments
+	, intOriginalInvoiceId
+	,dblServiceChargeAPR
 )
-SELECT intInvoiceId					= INV.intInvoiceId
-	 , intCompanyLocationId			= INV.intCompanyLocationId
-	 , intEntityCustomerId			= INV.intEntityCustomerId
-	 , strCompanyName				= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
-	 , strCompanyAddress			= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
-										   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
-										   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
-									  END
-	 , strCompanyInfo				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
-										   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
-										   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
-									  END  + CHAR(10) + ISNULL(@strEmail,'')   + CHAR(10) + ISNULL(@strPhone,'')
-	 , strCompanyPhoneNumber		= @strPhone
-	 , strCompanyEmail				= @strEmail
-	 , strType						= ISNULL(INV.strType, 'Standard')
-     , strCustomerName				= CAST('' AS NVARCHAR(100))
-	 , strCustomerNumber        	= CAST('' AS NVARCHAR(100))
-	 , strLocationName				= L.strLocationName
-	 , dtmDate						= CAST(INV.dtmDate AS DATE)
-	 , dtmPostDate					= INV.dtmPostDate
-	 , strCurrency					= CURRENCY.strCurrency	 	 
-	 , strInvoiceNumber				= INV.strInvoiceNumber
-	 , strBillToLocationName		= INV.strBillToLocationName
-	 , strBillTo					= ISNULL(RTRIM(ENTITYLOCATION.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + CHAR(10), '')	+ ISNULL(NULLIF(INV.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToState, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToCountry, ''), '')
-	 , strShipTo					= ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + CHAR(10), '') + ISNULL(NULLIF(INV.strShipToCity, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToState, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToZipCode, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToCountry, ''), '')	 
-	 , strSalespersonName			= SALESPERSON.strName
-	 , strPONumber					= INV.strPONumber
-	 , strBOLNumber					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
-										(CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
-											  THEN INV.strBOLNumber
-											ELSE INVOICEDETAIL.strBOLNumber									
-									    END)
-									  ELSE NULL END
-	 , strShipVia					= SHIPVIA.strName
-	 , strTerm						= TERM.strTerm
-	 , dtmShipDate					= INV.dtmShipDate
-	 , dtmDueDate					= INV.dtmDueDate
-	 , strFreightTerm				= FREIGHT.strFreightTerm
-	 , strDeliverPickup				= FREIGHT.strFobPoint
-	 , strComments					= INV.strComments
-	 , strInvoiceHeaderComment		= CAST('' AS NVARCHAR(MAX))
-	 , strInvoiceFooterComment		= CAST('' AS NVARCHAR(MAX))
-	 , dblInvoiceSubtotal			= (ISNULL(INV.dblInvoiceSubtotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END)
-	 , dblShipping					= ISNULL(INV.dblShipping, 0)
-	 , dblTax						= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) ELSE NULL END
-	 , dblInvoiceTotal				= ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
-	 , dblAmountDue					= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
-											THEN INVOICEDETAIL.dblServiceChargeAmountDue
-											ELSE ISNULL(INV.dblAmountDue, 0)
-									  END
-	 
-	 , strItemNo					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
-	 , intInvoiceDetailId			= ISNULL(INVOICEDETAIL.intInvoiceDetailId, 0)
-	 , dblContractBalance			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.dblBalance ELSE NULL END
-	 , strContractNumber			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END
-	 , strContractNoSeq				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber + ' / ' + CAST(INVOICEDETAIL.intContractSeq AS NVARCHAR(100)) ELSE NULL END
-	 , strItem						= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
-	 , strItemDescription			= INVOICEDETAIL.strItemDescription
-	 , strUnitMeasure				= INVOICEDETAIL.strUnitMeasure
-	 , dblQtyShipped				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) END
-	 , dblQtyOrdered				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyOrdered, 0) END
-	 , dblDiscount					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
-										ISNULL(INVOICEDETAIL.dblDiscount, 0) / 100
-									  ELSE NULL END
-	 , dblTotalTax					= CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END ELSE ISNULL(TOTALTAX.dblSSTTax, 0) END
-	 , dblPrice						= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) ELSE 0 END ELSE NULL END
-	 , dblItemPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) ELSE NULL END
-	 , strPaid						= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
-	 , strPosted					= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
-	 , strTransactionType			= INV.strTransactionType
-	 , intRecipeId					= INVOICEDETAIL.intRecipeId
-	 , intOneLinePrintId			= ISNULL(INVOICEDETAIL.intOneLinePrintId, 1)
-	 , strInvoiceComments			= INVOICEDETAIL.strInvoiceComments
-	 , strPaymentComments			= L.strInvoiceComments
-	 , strCustomerComments			= CAST('' AS NVARCHAR(MAX))
-	 , strItemType					= INVOICEDETAIL.strItemType
-	 , dblTotalWeight				= ISNULL(INV.dblTotalWeight, 0)
-	 , strVFDDocumentNumber			= INVOICEDETAIL.strVFDDocumentNumber
-	 , ysnHasEmailSetup				= CAST(0 AS BIT)
-	 , ysnHasRecipeItem				= CAST(0 AS BIT)
-	 , ysnHasVFDDrugItem        	= CAST(0 AS BIT)
-	 , ysnHasProvisional			= CAST(0 AS BIT)
-	 , strProvisional				= CAST('' AS NVARCHAR(500))
-	 , dblTotalProvisional			= CAST(0 AS NUMERIC(18, 6))
-	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
-	 , ysnListBundleSeparately		= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CAST(0 AS BIT))
-	 , strTicketNumbers				= INV.strTicketNumbers
-	 , strSiteNumber				= INVOICEDETAIL.strSiteNumber
-	 , dblEstimatedPercentLeft		= INVOICEDETAIL.dblEstimatedPercentLeft
-	 , dblPercentFull				= INVOICEDETAIL.dblPercentFull
-	 , strCustomerContract			= INVOICEDETAIL.strCustomerContract
-	 , strTicketNumber 				= INVOICEDETAIL.strTicketNumber
-	 , strTicketNumberDate			= INVOICEDETAIL.strTicketNumberDate
-	 , strCustomerReference			= INVOICEDETAIL.strCustomerReference
-	 , strSalesReference			= INVOICEDETAIL.strSalesReference
-	 , strPurchaseReference			= INVOICEDETAIL.strPurchaseReference
-	 , strLoadNumber				= INVOICEDETAIL.strLoadNumber
-	 , strTruckDriver				= INVOICEDETAIL.strTruckName
-	 , strTrailer					= INVOICEDETAIL.strTrailerNumber
-	 , strSeals						= INVOICEDETAIL.strSealNumber
-	 , strLotNumber					= CAST('' AS NVARCHAR(200))
-	 , blbLogo                  	= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
-	 , strAddonDetailKey			= INVOICEDETAIL.strAddonDetailKey
-	 , strBOLNumberDetail			= INVOICEDETAIL.strBOLNumberDetail
-	 , ysnHasAddOnItem				= CAST(0 AS BIT)
-	 , intEntityUserId				= @intEntityUserId
-	 , strRequestId					= @strRequestId
-	 , strInvoiceFormat				= SELECTEDINV.strInvoiceFormat
-	 , blbSignature					= INV.blbSignature
-	 , ysnStretchLogo				= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
-	 , strSubFormula				= INVOICEDETAIL.strSubFormula	
-	 , dtmCreated					= GETDATE()
-	 , strServiceChargeItem			= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
-											THEN 'Service Charge on Past Due ' + CHAR(13) + 'Balance as of: ' +  CONVERT(VARCHAR(10), INV.dtmDate, 101)
-											ELSE ''
-									  END
-	 , intDaysOld               	= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
-											THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmToCalculate, CAST(INV.dtmDate AS DATE))
-											ELSE 0
-									  END
-	 , strServiceChareInvoiceNumber = INVOICEDETAIL.strSCInvoiceNumber
-	 , dtmDateSC				 	= INVOICEDETAIL.dtmDateSC
-	 , intSiteId					= INVOICEDETAIL.intSiteID
-	 , ysnIncludeEntityName			= CAST(0 AS BIT)
-	 , strFooterComments			= INV.strFooterComments
-	 , intOriginalInvoiceId			= INV.intOriginalInvoiceId
+SELECT 
+	 intInvoiceId					= INV.intInvoiceId
+	, intCompanyLocationId			= INV.intCompanyLocationId
+	, intEntityCustomerId			= INV.intEntityCustomerId
+	, strCompanyName				= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
+	, strCompanyAddress				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+										WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
+										WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
+									END
+	, strCompanyInfo				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+										WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
+										WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
+									END  + CHAR(10) + ISNULL(@strEmail,'')   + CHAR(10) + ISNULL(@strPhone,'')
+	, strCompanyPhoneNumber			= @strPhone
+	, strCompanyEmail				= @strEmail
+	, strType						= ISNULL(INV.strType, 'Standard')
+	, strCustomerName				= CAST('' AS NVARCHAR(100))
+	, strCustomerNumber        		= CAST('' AS NVARCHAR(100))
+	, strLocationName				= L.strLocationName
+	, dtmDate						= CAST(INV.dtmDate AS DATE)
+	, dtmPostDate					= INV.dtmPostDate
+	, strCurrency					= CURRENCY.strCurrency	 	 
+	, strInvoiceNumber				= INV.strInvoiceNumber
+	, strBillToLocationName			= INV.strBillToLocationName
+	, strBillTo						= ISNULL(RTRIM(ENTITYLOCATION.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + CHAR(10), '')	+ ISNULL(NULLIF(INV.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToState, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(INV.strBillToCountry, ''), '')
+	, strShipTo						= ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + CHAR(10), '') + ISNULL(NULLIF(INV.strShipToCity, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToState, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToZipCode, ''), '') + ISNULL(', ' + NULLIF(INV.strShipToCountry, ''), '')	 
+	, strSalespersonName			= SALESPERSON.strName
+	, strPONumber					= INV.strPONumber
+	, strBOLNumber					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
+									(CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
+											THEN INV.strBOLNumber
+										ELSE INVOICEDETAIL.strBOLNumber									
+									END)
+									ELSE NULL END
+	, strShipVia					= SHIPVIA.strName
+	, strTerm						= TERM.strTerm
+	, dtmShipDate					= INV.dtmShipDate
+	, dtmDueDate					= INV.dtmDueDate
+	, strFreightTerm				= FREIGHT.strFreightTerm
+	, strDeliverPickup				= FREIGHT.strFobPoint
+	, strComments					= INV.strComments
+	, strInvoiceHeaderComment		= CAST('' AS NVARCHAR(MAX))
+	, strInvoiceFooterComment		= CAST('' AS NVARCHAR(MAX))
+	, dblInvoiceSubtotal			= (ISNULL(INV.dblInvoiceSubtotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END)
+	, dblShipping					= ISNULL(INV.dblShipping, 0)
+	, dblTax						= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) ELSE NULL END
+	, dblInvoiceTotal				= ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
+	, dblAmountDue					= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
+										THEN INVOICEDETAIL.dblServiceChargeAmountDue
+										ELSE ISNULL(INV.dblAmountDue, 0)
+									END
+	
+	, strItemNo						= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
+	, intInvoiceDetailId			= ISNULL(INVOICEDETAIL.intInvoiceDetailId, 0)
+	, dblContractBalance			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.dblBalance ELSE NULL END
+	, strContractNumber				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END
+	, strContractNoSeq				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber + ' / ' + CAST(INVOICEDETAIL.intContractSeq AS NVARCHAR(100)) ELSE NULL END
+	, strItem						= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
+	, strItemDescription			= INVOICEDETAIL.strItemDescription
+	, strUnitMeasure				= INVOICEDETAIL.strUnitMeasure
+	, dblQtyShipped					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) END
+	, dblQtyOrdered					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyOrdered, 0) END
+	, dblDiscount					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblDiscount, 0) / 100 ELSE NULL END
+	, dblTotalTax					= CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END ELSE ISNULL(TOTALTAX.dblSSTTax, 0) END
+	, dblPrice						= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) ELSE 0 END ELSE NULL END
+	, dblItemPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) ELSE NULL END
+	, strPaid						= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
+	, strPosted						= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
+	, strTransactionType			= INV.strTransactionType
+	, intRecipeId					= INVOICEDETAIL.intRecipeId
+	, intOneLinePrintId				= ISNULL(INVOICEDETAIL.intOneLinePrintId, 1)
+	, strInvoiceComments			= INVOICEDETAIL.strInvoiceComments
+	, strPaymentComments			= L.strInvoiceComments
+	, strCustomerComments			= CAST('' AS NVARCHAR(MAX))
+	, strItemType					= INVOICEDETAIL.strItemType
+	, dblTotalWeight				= ISNULL(INV.dblTotalWeight, 0)
+	, strVFDDocumentNumber			= INVOICEDETAIL.strVFDDocumentNumber
+	, ysnHasEmailSetup				= CAST(0 AS BIT)
+	, ysnHasRecipeItem				= CAST(0 AS BIT)
+	, ysnHasVFDDrugItem        		= CAST(0 AS BIT)
+	, ysnHasProvisional				= CAST(0 AS BIT)
+	, strProvisional				= CAST('' AS NVARCHAR(500))
+	, dblTotalProvisional			= CAST(0 AS NUMERIC(18, 6))
+	, ysnPrintInvoicePaymentDetail 	= @ysnPrintInvoicePaymentDetail
+	, ysnListBundleSeparately		= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CAST(0 AS BIT))
+	, strTicketNumbers				= INV.strTicketNumbers
+	, strSiteNumber					= INVOICEDETAIL.strSiteNumber
+	, dblEstimatedPercentLeft		= INVOICEDETAIL.dblEstimatedPercentLeft
+	, dblPercentFull				= INVOICEDETAIL.dblPercentFull
+	, strCustomerContract			= INVOICEDETAIL.strCustomerContract
+	, strTicketNumber 				= INVOICEDETAIL.strTicketNumber
+	, strTicketNumberDate			= INVOICEDETAIL.strTicketNumberDate
+	, strCustomerReference			= INVOICEDETAIL.strCustomerReference
+	, strSalesReference				= INVOICEDETAIL.strSalesReference
+	, strPurchaseReference			= INVOICEDETAIL.strPurchaseReference
+	, strLoadNumber					= INVOICEDETAIL.strLoadNumber
+	, strTruckDriver				= INVOICEDETAIL.strTruckName
+	, strTrailer					= INVOICEDETAIL.strTrailerNumber
+	, strSeals						= INVOICEDETAIL.strSealNumber
+	, strLotNumber					= CAST('' AS NVARCHAR(200))
+	, blbLogo                  		= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
+	, strAddonDetailKey				= INVOICEDETAIL.strAddonDetailKey
+	, strBOLNumberDetail			= INVOICEDETAIL.strBOLNumberDetail
+	, ysnHasAddOnItem				= CAST(0 AS BIT)
+	, intEntityUserId				= @intEntityUserId
+	, strRequestId					= @strRequestId
+	, strInvoiceFormat				= SELECTEDINV.strInvoiceFormat
+	, blbSignature					= INV.blbSignature
+	, ysnStretchLogo				= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
+	, strSubFormula					= INVOICEDETAIL.strSubFormula	
+	, dtmCreated					= GETDATE()
+	, strServiceChargeItem			= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
+										THEN 'Service Charge on Past Due ' + CHAR(13) + 'Balance as of: ' +  CONVERT(VARCHAR(10), INV.dtmDate, 101)
+										ELSE ''
+									END
+	, intDaysOld               		= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
+										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmToCalculate, CAST(INV.dtmDate AS DATE))
+										ELSE 0
+									END
+	, strServiceChareInvoiceNumber 	= INVOICEDETAIL.strSCInvoiceNumber
+	, dtmDateSC				 		= INVOICEDETAIL.dtmDateSC
+	, intSiteId						= INVOICEDETAIL.intSiteID
+	, ysnIncludeEntityName			= CAST(0 AS BIT)
+	, strFooterComments				= INV.strFooterComments
+	, intOriginalInvoiceId			= INV.intOriginalInvoiceId
+	, dblServiceChargeAPR			= ISNULL(INVOICEDETAIL.dblServiceChargeAPR, 0.00)
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -463,7 +465,8 @@ LEFT JOIN (
 		 , strSCInvoiceNumber			= INVSC.strInvoiceNumber
 		 , dtmDateSC					= INVSC.dtmDate
 		 , dtmToCalculate				= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END	
-		 , dblServiceChargeAmountDue	= ID.dblServiceChargeAmountDue	 
+		 , dblServiceChargeAmountDue	= ID.dblServiceChargeAmountDue
+		 ,dblServiceChargeAPR			= ID.dblServiceChargeAPR
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN tblARInvoice INVSC ON INVSC.intInvoiceId = ID.intSCInvoiceId
@@ -683,203 +686,206 @@ CROSS APPLY (
 ) LOT
 
 INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
-	   intInvoiceId
-	 , intCompanyLocationId
-	 , strCompanyName
-	 , strCompanyAddress
-	 , strCompanyInfo
-	 , strCompanyPhoneNumber
-	 , strCompanyEmail
-	 , strType
-	 , strCustomerName
-	 , strCustomerNumber
-	 , strLocationName
-	 , dtmDate
-	 , dtmPostDate
-	 , strCurrency
-	 , strInvoiceNumber
-	 , strBillToLocationName
-	 , strBillTo
-	 , strShipTo
-	 , strSalespersonName
-	 , strPONumber
-	 , strBOLNumber
-	 , strShipVia
-	 , strTerm
-	 , dtmShipDate
-	 , dtmDueDate
-	 , strFreightTerm
-	 , strDeliverPickup
-	 , strComments
-	 , strInvoiceHeaderComment
-	 , strInvoiceFooterComment
-	 , dblInvoiceSubtotal
-	 , dblShipping
-	 , dblTax
-	 , dblInvoiceTotal
-	 , dblAmountDue
-	 , strItemNo
-	 , intInvoiceDetailId
-	 , dblContractBalance
-	 , strContractNumber
-	 , strContractNoSeq
-	 , strItem
-	 , strItemDescription
-	 , strUnitMeasure
-	 , dblQtyShipped
-	 , dblQtyOrdered
-	 , dblDiscount
-	 , dblTotalTax
-	 , dblPrice
-	 , dblItemPrice
-	 , strPaid
-	 , strPosted
-	 , strTransactionType
-	 , intRecipeId
-	 , intOneLinePrintId
-	 , strInvoiceComments
-	 , strPaymentComments
-	 , strCustomerComments
-	 , strItemType
-	 , dblTotalWeight
-	 , strVFDDocumentNumber
-	 , ysnHasEmailSetup
-	 , ysnHasRecipeItem
-	 , ysnHasVFDDrugItem
-	 , ysnHasProvisional
-	 , strProvisional
-	 , dblTotalProvisional
-	 , ysnPrintInvoicePaymentDetail
-	 , ysnListBundleSeparately
-	 , strTicketNumbers
-	 , strSiteNumber
-	 , dblEstimatedPercentLeft
-	 , dblPercentFull
-	 , strEntityContract
-	 , strTicketNumber
-	 , strTicketNumberDate
-	 , strCustomerReference
-	 , strSalesReference
-	 , strPurchaseReference
-	 , strLoadNumber
-	 , strTruckDriver
-	 , strTrailer
-	 , strSeals
-	 , strLotNumber
-	 , blbLogo
-	 , strAddonDetailKey
-	 , strBOLNumberDetail
-	 , ysnHasAddOnItem
-	 , intEntityUserId
-	 , strRequestId
-	 , strInvoiceFormat
-	 , blbSignature
-	 , ysnStretchLogo
-	 , strSubFormula
-	 , dtmCreated
-	 , strServiceChargeItem
-	 , intDaysOld
-	 , strServiceChareInvoiceNumber
-	 , dtmDateSC
+	  intInvoiceId
+	, intCompanyLocationId
+	, strCompanyName
+	, strCompanyAddress
+	, strCompanyInfo
+	, strCompanyPhoneNumber
+	, strCompanyEmail
+	, strType
+	, strCustomerName
+	, strCustomerNumber
+	, strLocationName
+	, dtmDate
+	, dtmPostDate
+	, strCurrency
+	, strInvoiceNumber
+	, strBillToLocationName
+	, strBillTo
+	, strShipTo
+	, strSalespersonName
+	, strPONumber
+	, strBOLNumber
+	, strShipVia
+	, strTerm
+	, dtmShipDate
+	, dtmDueDate
+	, strFreightTerm
+	, strDeliverPickup
+	, strComments
+	, strInvoiceHeaderComment
+	, strInvoiceFooterComment
+	, dblInvoiceSubtotal
+	, dblShipping
+	, dblTax
+	, dblInvoiceTotal
+	, dblAmountDue
+	, strItemNo
+	, intInvoiceDetailId
+	, dblContractBalance
+	, strContractNumber
+	, strContractNoSeq
+	, strItem
+	, strItemDescription
+	, strUnitMeasure
+	, dblQtyShipped
+	, dblQtyOrdered
+	, dblDiscount
+	, dblTotalTax
+	, dblPrice
+	, dblItemPrice
+	, strPaid
+	, strPosted
+	, strTransactionType
+	, intRecipeId
+	, intOneLinePrintId
+	, strInvoiceComments
+	, strPaymentComments
+	, strCustomerComments
+	, strItemType
+	, dblTotalWeight
+	, strVFDDocumentNumber
+	, ysnHasEmailSetup
+	, ysnHasRecipeItem
+	, ysnHasVFDDrugItem
+	, ysnHasProvisional
+	, strProvisional
+	, dblTotalProvisional
+	, ysnPrintInvoicePaymentDetail
+	, ysnListBundleSeparately
+	, strTicketNumbers
+	, strSiteNumber
+	, dblEstimatedPercentLeft
+	, dblPercentFull
+	, strEntityContract
+	, strTicketNumber
+	, strTicketNumberDate
+	, strCustomerReference
+	, strSalesReference
+	, strPurchaseReference
+	, strLoadNumber
+	, strTruckDriver
+	, strTrailer
+	, strSeals
+	, strLotNumber
+	, blbLogo
+	, strAddonDetailKey
+	, strBOLNumberDetail
+	, ysnHasAddOnItem
+	, intEntityUserId
+	, strRequestId
+	, strInvoiceFormat
+	, blbSignature
+	, ysnStretchLogo
+	, strSubFormula
+	, dtmCreated
+	, strServiceChargeItem
+	, intDaysOld
+	, strServiceChareInvoiceNumber
+	, dtmDateSC
+	, dblServiceChargeAPR
 )
-SELECT intInvoiceId
-	 , intCompanyLocationId
-	 , strCompanyName
-	 , strCompanyAddress
-	 , strCompanyInfo
-	 , strCompanyPhoneNumber
-	 , strCompanyEmail
-	 , strType
-	 , strCustomerName
-	 , strCustomerNumber
-	 , strLocationName
-	 , dtmDate
-	 , dtmPostDate
-	 , strCurrency
-	 , strInvoiceNumber
-	 , strBillToLocationName
-	 , strBillTo
-	 , strShipTo
-	 , strSalespersonName
-	 , strPONumber
-	 , strBOLNumber
-	 , strShipVia
-	 , strTerm
-	 , dtmShipDate
-	 , dtmDueDate
-	 , strFreightTerm
-	 , strDeliverPickup
-	 , strComments
-	 , strInvoiceHeaderComment
-	 , strInvoiceFooterComment
-	 , dblInvoiceSubtotal
-	 , dblShipping
-	 , dblTax
-	 , dblInvoiceTotal
-	 , dblAmountDue
-	 , strItemNo
-	 , intInvoiceDetailId
-	 , dblContractBalance
-	 , strContractNumber
-	 , strContractNoSeq
-	 , strItem
-	 , strItemDescription
-	 , strUnitMeasure
-	 , dblQtyShipped
-	 , dblQtyOrdered
-	 , dblDiscount
-	 , dblTotalTax
-	 , dblPrice
-	 , dblItemPrice
-	 , strPaid
-	 , strPosted
-	 , strTransactionType
-	 , intRecipeId
-	 , intOneLinePrintId
-	 , strInvoiceComments
-	 , strPaymentComments
-	 , strCustomerComments
-	 , strItemType
-	 , dblTotalWeight
-	 , strVFDDocumentNumber
-	 , ysnHasEmailSetup
-	 , ysnHasRecipeItem
-	 , ysnHasVFDDrugItem
-	 , ysnHasProvisional
-	 , strProvisional
-	 , dblTotalProvisional
-	 , ysnPrintInvoicePaymentDetail
-	 , ysnListBundleSeparately
-	 , strTicketNumbers
-	 , strSiteNumber
-	 , dblEstimatedPercentLeft
-	 , dblPercentFull
-	 , strCustomerContract
-	 , strTicketNumber
-	 , strTicketNumberDate
-	 , strCustomerReference
-	 , strSalesReference
-	 , strPurchaseReference
-	 , strLoadNumber
-	 , strTruckDriver
-	 , strTrailer
-	 , strSeals
-	 , strLotNumber
-	 , blbLogo
-	 , strAddonDetailKey
-	 , strBOLNumberDetail
-	 , ysnHasAddOnItem
-	 , intEntityUserId
-	 , strRequestId
-	 , strInvoiceFormat
-	 , blbSignature
-	 , ysnStretchLogo
-	 , strSubFormula
-	 , dtmCreated
-	 , strServiceChargeItem
-	 , intDaysOld
-	 , strServiceChareInvoiceNumber
-	 , dtmDateSC
+SELECT 
+	 intInvoiceId
+	, intCompanyLocationId
+	, strCompanyName
+	, strCompanyAddress
+	, strCompanyInfo
+	, strCompanyPhoneNumber
+	, strCompanyEmail
+	, strType
+	, strCustomerName
+	, strCustomerNumber
+	, strLocationName
+	, dtmDate
+	, dtmPostDate
+	, strCurrency
+	, strInvoiceNumber
+	, strBillToLocationName
+	, strBillTo
+	, strShipTo
+	, strSalespersonName
+	, strPONumber
+	, strBOLNumber
+	, strShipVia
+	, strTerm
+	, dtmShipDate
+	, dtmDueDate
+	, strFreightTerm
+	, strDeliverPickup
+	, strComments
+	, strInvoiceHeaderComment
+	, strInvoiceFooterComment
+	, dblInvoiceSubtotal
+	, dblShipping
+	, dblTax
+	, dblInvoiceTotal
+	, dblAmountDue
+	, strItemNo
+	, intInvoiceDetailId
+	, dblContractBalance
+	, strContractNumber
+	, strContractNoSeq
+	, strItem
+	, strItemDescription
+	, strUnitMeasure
+	, dblQtyShipped
+	, dblQtyOrdered
+	, dblDiscount
+	, dblTotalTax
+	, dblPrice
+	, dblItemPrice
+	, strPaid
+	, strPosted
+	, strTransactionType
+	, intRecipeId
+	, intOneLinePrintId
+	, strInvoiceComments
+	, strPaymentComments
+	, strCustomerComments
+	, strItemType
+	, dblTotalWeight
+	, strVFDDocumentNumber
+	, ysnHasEmailSetup
+	, ysnHasRecipeItem
+	, ysnHasVFDDrugItem
+	, ysnHasProvisional
+	, strProvisional
+	, dblTotalProvisional
+	, ysnPrintInvoicePaymentDetail
+	, ysnListBundleSeparately
+	, strTicketNumbers
+	, strSiteNumber
+	, dblEstimatedPercentLeft
+	, dblPercentFull
+	, strCustomerContract
+	, strTicketNumber
+	, strTicketNumberDate
+	, strCustomerReference
+	, strSalesReference
+	, strPurchaseReference
+	, strLoadNumber
+	, strTruckDriver
+	, strTrailer
+	, strSeals
+	, strLotNumber
+	, blbLogo
+	, strAddonDetailKey
+	, strBOLNumberDetail
+	, ysnHasAddOnItem
+	, intEntityUserId
+	, strRequestId
+	, strInvoiceFormat
+	, blbSignature
+	, ysnStretchLogo
+	, strSubFormula
+	, dtmCreated
+	, strServiceChargeItem
+	, intDaysOld
+	, strServiceChareInvoiceNumber
+	, dtmDateSC
+	, dblServiceChargeAPR
 FROM #INVOICES
 
 --UPDATE STAGING

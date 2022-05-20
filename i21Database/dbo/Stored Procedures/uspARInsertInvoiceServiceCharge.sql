@@ -43,6 +43,7 @@ AS
 		,[dblTotalAmount]		NUMERIC(18,6)
 		,[intServiceChargeDays]	INT NULL
 		,intContractDetailId	INT NULL
+		,dblServiceChargeAPR	NUMERIC(18,6)
 	)
 
 	DECLARE @tempServiceChargeTableByCB TABLE (
@@ -56,6 +57,7 @@ AS
 		,[dblTotalAmount]		NUMERIC(18,6)
 		,[intServiceChargeDays]	INT NULL
 		,intContractDetailId	INT NULL
+		,dblServiceChargeAPR	NUMERIC(18,6)
 	)
 
 	INSERT INTO @tempServiceChargeTable
@@ -185,6 +187,7 @@ AS
 				,[dblTotal]
 				,[dblServiceChargeAmountDue]
 				,[intContractDetailId]
+				,[dblServiceChargeAPR]
 				,[intConcurrencyId]
 			)
 			SELECT 	
@@ -201,6 +204,7 @@ AS
 				,[dblTotalAmount]
 				,[dblAmountDue]
 				,[intContractDetailId]
+				,[dblServiceChargeAPR]
 				,0
 			FROM @tblTypeServiceCharge WHERE intServiceChargeId = @intServiceChargeId
 
