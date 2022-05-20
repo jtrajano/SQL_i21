@@ -320,7 +320,7 @@ BEGIN TRY
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNumber
 				AND dblQty > 0
-				AND intLocationId = @intLotLocationId
+				--AND intLocationId = @intLotLocationId
 		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
