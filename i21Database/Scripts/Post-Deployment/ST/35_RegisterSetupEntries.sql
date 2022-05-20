@@ -2009,7 +2009,7 @@ IF (@intTableCount = 3)
 			-- Version 3.3
 			SET @strRegisterClass		= N'RADIANT'
 			
-			SET @strXmlVersion	= N'3.4'
+			SET @strXmlVersion	= N'3.3'
 
 			-- HEADER
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterClass = @strRegisterClass AND strXmlVersion = @strXmlVersion)
@@ -2027,9 +2027,620 @@ IF (@intTableCount = 3)
 						intConcurrencyId		= 1
 
 
+					-- Get New created Id
+					SET @intRegisterSetupId = SCOPE_IDENTITY()
+
+				END
+			ELSE
+				BEGIN
+
+					SELECT TOP 1
+						@intRegisterSetupId = intRegisterSetupId
+					FROM tblSTRegisterSetup 
+					WHERE strRegisterClass = @strRegisterClass 
+						AND strXmlVersion = @strXmlVersion
+
 				END
 
-			SET @strXmlVersion	= N'3.3'
+
+			-- DETAILS	
+			--Insert Details
+					
+			-- MSM 3.3
+			BEGIN
+				SET @strImportFileHeader	= N'Radiant - MSM'
+				SET @strFileType			= N'Inbound'
+				SET @strFilePrefix			= N'MSM'
+				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
+				SET @strStoredProcedure		= N'uspSTCheckoutRadiantMSM'
+					
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+								
+			END
+
+
+			-- MCM 3.3
+			BEGIN
+				SET @strImportFileHeader	= N'Radiant - MCM'
+				SET @strFileType			= N'Inbound'
+				SET @strFilePrefix			= N'MCM'
+				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
+				SET @strStoredProcedure		= N'uspSTCheckoutRadiantMCM'
+					
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+			
+			END
+
+
+			-- ISM 3.3
+			BEGIN
+				SET @strImportFileHeader	= N'Radiant - ISM'
+				SET @strFileType			= N'Inbound'
+				SET @strFilePrefix			= N'ISM'
+				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
+				SET @strStoredProcedure		= N'uspSTCheckoutRadiantISM'
+					
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+								
+			END
+
+
+			-- FGM 3.3
+			BEGIN
+				SET @strImportFileHeader	= N'Radiant - FGM'
+				SET @strFileType			= N'Inbound'
+				SET @strFilePrefix			= N'FGM'
+				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
+				SET @strStoredProcedure		= N'uspSTCheckoutRadiantFGM'
+				
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+			
+			END
+			
+			-- POS Journal 3.3
+			BEGIN
+				SET @strImportFileHeader	= N'Radiant - POSJournal'
+				SET @strFileType			= N'Inbound'
+				SET @strFilePrefix			= N'POSJournal'
+				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
+				SET @strStoredProcedure		= N'uspSTCheckoutRadiantTranslog'
+				
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+			
+			END
+
+
+
+
+			-- ITT All version
+			BEGIN
+				SET @strImportFileHeader	= N'Pricebook File'
+				SET @strFileType			= N'Outbound'
+				SET @strFilePrefix			= N'ITT'
+				SET @strFileNamePattern		= N'[version]+[yyyyMMddHHmmss]'
+				SET @strStoredProcedure		= N'uspSTstgInsertPricebookSendFile'
+						
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+								
+			END
+
+
+			-- ILT All version
+			BEGIN
+				SET @strImportFileHeader	= N'Promotion Item List'
+				SET @strFileType			= N'Outbound'
+				SET @strFilePrefix			= N'ILT'
+				SET @strFileNamePattern		= N'[version]+[yyyyMMddHHmmss]'
+				SET @strStoredProcedure		= N'uspSTstgInsertPromotionItemListSend'
+						
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+
+			END
+
+
+			-- CBT All version
+			BEGIN
+				SET @strImportFileHeader	= N'Pricebook Combo'
+				SET @strFileType			= N'Outbound'
+				SET @strFilePrefix			= N'CBT'
+				SET @strFileNamePattern		= N'[version]+[yyyyMMddHHmmss]'
+				SET @strStoredProcedure		= N'uspSTstgInsertComboSalesFile'
+						
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+								
+			END
+
+
+			-- MMT All version
+			BEGIN
+				SET @strImportFileHeader	= N'Pricebook Mix Match'
+				SET @strFileType			= N'Outbound'
+				SET @strFilePrefix			= N'MMT'
+				SET @strFileNamePattern		= N'[version]+[yyyyMMddHHmmss]'
+				SET @strStoredProcedure		= N'uspSTstgInsertMixMatchFile'
+						
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+								
+			END
+			
+			SET @strXmlVersion	= N'3.4'
 
 			-- HEADER
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterClass = @strRegisterClass AND strXmlVersion = @strXmlVersion)
