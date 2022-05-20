@@ -14,7 +14,7 @@ GO
 IF EXISTS(select top 1 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'pxcycmst')
 AND EXISTS(select top 1 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'pxselmst')
 BEGIN
-	IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'TF') = 1
+	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'TF') = 1
 		EXEC ('
 			CREATE VIEW [dbo].[vyuTFTaxCycle]
 			AS

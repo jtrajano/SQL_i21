@@ -1,7 +1,7 @@
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'ptjddmst') RETURN
 
-IF  (((SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT') = 1)) and (SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1
+IF  (((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT') = 1)) and (SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1
 BEGIN
 	EXEC('
 	ALTER VIEW [dbo].[vyuGLPTDrillDownDifference]

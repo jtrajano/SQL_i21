@@ -1,6 +1,6 @@
 ﻿-- This function will return all the record that is a Deposit Entry transaction. 
 -- Otherwise, it will none. 
-IF	(SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
+IF	(SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 	EXEC ('
 		IF OBJECT_ID (N''dbo.fnGetDepositEntry'', N''FN'') IS NOT NULL

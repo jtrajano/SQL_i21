@@ -5,7 +5,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 	DROP VIEW vyuCMBankAccount
 GO
 
-IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
+IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 EXEC ('
 		CREATE VIEW [dbo].[vyuAPOriginBillsWithoutPayment]

@@ -8,11 +8,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTM
 	DROP VIEW vyuTMOriginDegreeOption
 GO
 
-IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1 AND OBJECT_ID('tempdb..#tblOriginMod') IS NOT NULL)
+IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1 AND OBJECT_ID('tempdb..##tblOriginMod') IS NOT NULL)
 BEGIN
 	
 	-- AG VIEW
-	IF  ((SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG') = 1 AND EXISTS(SELECT TOP 1 1 FROM sys.objects where name = 'adctlmst'))
+	IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1 AND EXISTS(SELECT TOP 1 1 FROM sys.objects where name = 'adctlmst'))
 	BEGIN
 		EXEC ('
 				CREATE VIEW [dbo].[vyuTMOriginDegreeOption]  
@@ -31,7 +31,7 @@ BEGIN
 			')
 	END
 	-- PT VIEW
-	IF  ((SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT') = 1 AND EXISTS(SELECT TOP 1 1 FROM sys.objects where name = 'pdctlmst'))
+	IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1 AND EXISTS(SELECT TOP 1 1 FROM sys.objects where name = 'pdctlmst'))
 	BEGIN
 		EXEC ('
 			CREATE VIEW [dbo].[vyuTMOriginDegreeOption]  

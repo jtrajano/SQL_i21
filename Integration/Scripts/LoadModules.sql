@@ -1,4 +1,4 @@
-﻿IF OBJECT_ID('tempdb..#tblOriginMod') IS NOT NULL DROP TABLE #tblOriginMod
+﻿IF OBJECT_ID('tempdb..##tblOriginMod') IS NOT NULL DROP TABLE ##tblOriginMod
 GO
 
 -- Validate if there are more than ONE record on coctlmst. if there are, raise error
@@ -13,9 +13,10 @@ BEGIN
 END
 
 
-CREATE TABLE #tblOriginMod
+CREATE TABLE ##tblOriginMod
 (
-	  intModId INT IDENTITY(1,1)
+	 intModId INT IDENTITY(1,1)
+	, strDBName nvarchar(50) NOT NULL 
 	, strPrefix NVARCHAR(5) NOT NULL UNIQUE
 	, strName NVARCHAR(30) NOT NULL UNIQUE
 	, ysnUsed BIT NOT NULL 
@@ -25,63 +26,63 @@ CREATE TABLE #tblOriginMod
 -- AG ACCOUNTING
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_ag')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''AG'', N''AG ACCOUNTING'', CASE ISNULL(coctl_ag, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''AG'', N''AG ACCOUNTING'', CASE ISNULL(coctl_ag, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 -- AG SPECIAL PRICES
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_sp_yn')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''ASP'', N''AG Special Price'', CASE ISNULL(coctl_sp_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''ASP'', N''AG Special Price'', CASE ISNULL(coctl_sp_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 
 -- PETRO ACCOUNTING
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_pt')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''PT'', N''PETRO ACCOUNTING'', CASE ISNULL(coctl_pt, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''PT'', N''PETRO ACCOUNTING'', CASE ISNULL(coctl_pt, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 -- PT SPECIAL PRICES
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_ps_yn')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''PSP'', N''PT Special Price'', CASE ISNULL(coctl_ps_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''PSP'', N''PT Special Price'', CASE ISNULL(coctl_ps_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 
 -- ACCOUNTS PAYABLE
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_ap')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''AP'', N''ACCOUNTS PAYABLE'', CASE ISNULL(coctl_ap, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''AP'', N''ACCOUNTS PAYABLE'', CASE ISNULL(coctl_ap, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 -- CONTRACTS
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_cn_yn')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''CN'', N''CONTRACTS'', CASE ISNULL(coctl_cn_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''CN'', N''CONTRACTS'', CASE ISNULL(coctl_cn_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 -- GRAINS
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_ga')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''GR'', N''GRAINS'', CASE ISNULL(coctl_ga, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''GR'', N''GRAINS'', CASE ISNULL(coctl_ga, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 -- TAX FORMS
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_px_yn')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''TF'', N''TAX FORMS'', CASE ISNULL(coctl_px_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''TF'', N''TAX FORMS'', CASE ISNULL(coctl_px_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 -- E-COMMERCE
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_ec')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''EC'', N''E-COMMERCE'', CASE ISNULL(coctl_ec, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''EC'', N''E-COMMERCE'', CASE ISNULL(coctl_ec, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 -- PAYROLL
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_pr')
 BEGIN
-	EXEC ('INSERT INTO #tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''PR'', N''PAYROLL'', CASE ISNULL(coctl_pr, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''PR'', N''PAYROLL'', CASE ISNULL(coctl_pr, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
 

@@ -45,7 +45,7 @@ BEGIN
 	)
 	BEGIN
 	-- AG VIEW
-		IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'AG'	) = 1
+		IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
 		BEGIN
 			EXEC ('
 				CREATE VIEW [dbo].[vwcusmst]  
@@ -171,7 +171,7 @@ BEGIN
 				')
 		END
 		-- PT VIEW
-		IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'PT') = 1
+		IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 		BEGIN
 			EXEC ('
 				CREATE VIEW [dbo].[vwcusmst]  

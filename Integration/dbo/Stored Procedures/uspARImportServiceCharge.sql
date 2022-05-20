@@ -3,7 +3,7 @@
 GO
 
 
-IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG') = 1
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN
 
 	EXEC('CREATE PROCEDURE [dbo].[uspARImportServiceCharge]
@@ -99,7 +99,7 @@ END
 ')
 END
 
-IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT') = 1
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
 	EXEC('CREATE PROCEDURE [dbo].[uspARImportServiceCharge]
 	@ServiceChargeCode NVARCHAR(2) = NULL,

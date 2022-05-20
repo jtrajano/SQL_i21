@@ -1,6 +1,6 @@
 ﻿-- This function will return true if the a record is a Deposit Entry transaction. 
 -- Otherwise, it will return false. 
-IF	(SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
+IF	(SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 	EXEC ('
 		IF OBJECT_ID (N''dbo.fnIsDepositEntry'', N''FN'') IS NOT NULL

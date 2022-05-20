@@ -1,5 +1,5 @@
 ﻿GO
-IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
+IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 /*
 	Dependencies: uspGLImportSubledger

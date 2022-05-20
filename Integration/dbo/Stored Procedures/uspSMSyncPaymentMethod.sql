@@ -5,7 +5,7 @@ IF EXISTS(select top 1 1 from sys.procedures where name = 'uspSMSyncPaymentMetho
 GO
 
 
-IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG' ORDER BY ysnUsed DESC) = 1
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name() ORDER BY ysnUsed DESC) = 1
 BEGIN
 
 	EXEC('CREATE PROCEDURE uspSMSyncPaymentMethod
@@ -499,7 +499,7 @@ BEGIN
 			END')
 END
 
-IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT') = 1
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
 	EXEC('CREATE PROCEDURE uspSMSyncPaymentMethod
 			@ToOrigin			bit				= 0

@@ -2,7 +2,7 @@
 	DROP PROCEDURE uspSMSyncCompanyLocation
 GO
 
-IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix IN ('AG', 'GR') ORDER BY ysnUsed DESC) = 1
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix IN ('AG', 'GR') and strDBName = db_name() ORDER BY ysnUsed DESC) = 1
 BEGIN
 
 	EXEC('CREATE PROCEDURE uspSMSyncCompanyLocation  
@@ -1714,7 +1714,7 @@ BEGIN
 			')
 END
 
-IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT') = 1
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
 	EXEC('CREATE PROCEDURE uspSMSyncCompanyLocation
 				@ToOrigin			bit				= 0

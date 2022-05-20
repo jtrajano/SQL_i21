@@ -34,7 +34,7 @@
 */
 GO
 IF	EXISTS(select top 1 1 from sys.procedures where name = 'uspCMImportBankReconciliationFromOrigin')
-	AND (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
+	AND (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN 
 	DROP PROCEDURE uspCMImportBankReconciliationFromOrigin
 

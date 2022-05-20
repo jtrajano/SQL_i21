@@ -6,7 +6,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwcls
 
 GO
 --AG view
-IF  ((SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG') = 1 and
+IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'agclsmst') = 1)
 BEGIN
 	EXEC ('
@@ -28,7 +28,7 @@ END
 GO
 
 --PT view
-IF  ((SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT') = 1 and
+IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'ptclsmst') = 1)
 BEGIN
 	EXEC ('
