@@ -31,12 +31,15 @@ begin
  
 	IF OBJECT_ID('tempdb..#tmpCOMM') IS NOT NULL DROP TABLE #tmpCOMM
  
-	SELECT
-		intCommodityId
-		,strCommodityCode
+	SELECT DISTINCT
+		A.intCommodityId
+		,A.strCommodityCode
 	INTO #tmpCOMM
-	FROM tblICCommodity
-	WHERE intCommodityId IN (1,2,3)
+	FROM tblICCommodity A
+	INNER JOIN tblICItem B
+		ON A.intCommodityId = B.intCommodityId
+	WHERE ysnUseWeighScales = 1
+	-- WHERE intCommodityId IN (1,2,3)
  
 	SET @intCommodity = NULL
 	SELECT TOP 1
@@ -412,14 +415,14 @@ SET @body = @body + ISNULL(CAST(@xhtmlBody AS NVARCHAR(MAX)), '')
   
  
 	
-	IF OBJECT_ID('tempdb..#tmpITM') IS NOT NULL DROP TABLE #tmpITM_diag_2
+	IF OBJECT_ID('tempdb..#tmpITM_diag_2') IS NOT NULL DROP TABLE #tmpITM_diag_2
  
 	SELECT
 		strItemNo
 		,intItemId
 	INTO #tmpITM_diag_2
 	FROM tblICItem
-	WHERE intCommodityId IN (1,2,3)
+	WHERE intCommodityId IN (SELECT intCommodityId FROM #tmpCOMM)
 		AND strType = 'Inventory'
 	ORDER BY strItemNo ASC
  
