@@ -574,8 +574,8 @@ BEGIN
 					, PSLD.intQuantity [MixMatchUnits]
 					, PSLD.dblPrice [MixMatchPrice]
 					, 'USD' [MixMatchPriceCurrency]	
-					, CONVERT(nvarchar(10), PSL.dtmPromoBegPeriod, 126) [StartDate]
-					, CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126) [StopDate]
+					, CONVERT(nvarchar(10), CAST(PSL.dtmPromoBegPeriod AS DATE), 126) [StartDate]
+					, CONVERT(nvarchar(10), CAST(PSL.dtmPromoEndPeriod AS DATE), 126) [StopDate]
 					, CASE 
 						WHEN R.strRegisterClass = 'RADIANT' 
 							THEN 0 
@@ -596,12 +596,12 @@ BEGIN
 					ON ST.intCompanyLocationId = L.intCompanyLocationId 
 				JOIN tblSTRegister R 
 					ON R.intStoreId = ST.intStoreId
-				JOIN tblSTPromotionItemList PIL 
-					ON PIL.intStoreId = ST.intStoreId
 				JOIN tblSTPromotionSalesList PSL 
 					ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
 				JOIN tblSTPromotionSalesListDetail PSLD 
 					ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+				JOIN tblSTPromotionItemList PIL 
+					ON PSLD.intPromoItemListId = PIL.intPromoItemListId
 				WHERE R.intRegisterId = @intRegisterId 
 					AND ST.intStoreId = @intStoreId 
 					AND PSL.strPromoType = 'M' -- <--- 'M' = Mix and Match
