@@ -1974,6 +1974,9 @@ BEGIN
 				,[intConcurrencyId]
 				,dtmDateCreated
 				,intCreatedByUserId
+				,dblStatedNetPerUnit
+				,dblStatedTotalNet
+				,dblPhysicalVsStated
 			)
 			SELECT
 				[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
@@ -2024,6 +2027,19 @@ BEGIN
 				,[intConcurrencyId] = 1
 				,[dtmDateCreated] = GETDATE()
 				,[intCreatedByUserId] = @intUserId
+				,dblStatedNetPerUnit = ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+				,dblStatedTotalNet = 
+					dbo.fnMultiply( 
+						ISNULL(ItemLot.dblQuantity, 0) 
+						,ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+					) 
+ 				,dblPhysicalVsStated = 
+					(ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0))
+					- dbo.fnMultiply( 
+						ISNULL(ItemLot.dblQuantity, 0) 
+						,ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+					) 
+
 			FROM	
 				@LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
