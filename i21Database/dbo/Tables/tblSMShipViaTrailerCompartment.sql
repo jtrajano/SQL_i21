@@ -2,11 +2,9 @@
 (
 	[intEntityShipViaTrailerCompartmentId]		INT				IDENTITY(1,1) NOT NULL,
 	[intEntityShipViaTrailerId]					INT				NOT NULL,
-	[strTrailerNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[strCompartmentNumber]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[strCategory]								NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL,
-	[strCapacity]								NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL,
-	
+	[dblCapacity]								NUMERIC (18, 6) NULL,
 
 	[intConcurrencyId]							INT				NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMShipViaTrailerCompartment] PRIMARY KEY CLUSTERED ([intEntityShipViaTrailerCompartmentId] ASC), 
