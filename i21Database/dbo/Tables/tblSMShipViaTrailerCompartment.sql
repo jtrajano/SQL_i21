@@ -3,7 +3,7 @@
 	[intEntityShipViaTrailerCompartmentId]		INT				IDENTITY(1,1) NOT NULL,
 	[intEntityShipViaTrailerId]					INT				NOT NULL,
 	[strCompartmentNumber]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
-	[strCategory]								NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL,
+	[intCategoryId]								INT				NULL,
 	[dblCapacity]								NUMERIC (18, 6) NULL,
 
 	[intConcurrencyId]							INT				NOT NULL DEFAULT (1), 
