@@ -161,6 +161,8 @@
 	[dblFreightCharge]					NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
 	[strFreightCompanySegment]			NVARCHAR(100)									NULL,
 	[strFreightLocationSegment]			NVARCHAR(100)									NULL,
+	[intTaxLocationId]					INT												NULL,
+	[strTaxPoint]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),

@@ -198,6 +198,11 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , dblFreightCharge						= INV.dblFreightCharge
 	 , strFreightCompanySegment				= INV.strFreightCompanySegment
 	 , strFreightLocationSegment			= INV.strFreightLocationSegment
+	 , intTaxLocationId                     = INV.intTaxLocationId
+     , strTaxLocation						= TAXLOCATION.strShipVia
+     , strTaxPoint                          = INV.strTaxPoint
+     , ysnOverrideTaxPoint                  = CAST(CASE WHEN ISNULL(INV.strTaxPoint, '') = '' THEN 0 ELSE 1 END AS BIT)
+     , ysnOverrideTaxLocation               = CAST(CASE WHEN ISNULL(INV.intTaxLocationId, 0) > 0 THEN 1 ELSE 0 END AS BIT)
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -257,6 +262,11 @@ LEFT JOIN (
 		 , strShipVia
 	FROM tblSMShipVia WITH (NOLOCK)
 ) SHIPVIA ON INV.intShipViaId = SHIPVIA.intEntityId
+LEFT JOIN (
+	SELECT intEntityId
+		 , strShipVia
+	FROM tblSMShipVia WITH (NOLOCK)
+) TAXLOCATION ON INV.intTaxLocationId = TAXLOCATION.intEntityId
 LEFT JOIN (
 	SELECT intAccountId
 		 , strAccountId 
