@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuPREmployeeTimeOff]  
 AS   
   
+
+
 SELECT ETO.intEntityEmployeeId        
  ,ET.intEntityId        
  ,ETO.intEmployeeTimeOffId        
