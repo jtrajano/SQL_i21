@@ -183,8 +183,6 @@ BEGIN
 			intTradeFinanceLogId INT
 			) 
 
-			select * into TFXMLTESTING from @TFXML
-
 			INSERT INTO @deletedSequence
 			SELECT MAX(intTradeFinanceLogId)
 			FROM tblTRFTradeFinanceLog TFL
