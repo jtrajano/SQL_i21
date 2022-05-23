@@ -10,7 +10,7 @@
 	[intUnitMeasureId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 0,
     CONSTRAINT [PK_tblICInsuranceRateDetail] PRIMARY KEY CLUSTERED ([intInsuranceRateDetailId] ASC),
-	CONSTRAINT [FK_tblICInsuranceRateDetail_tblICInsuranceRate] FOREIGN KEY ([intInsuranceRateId]) REFERENCES [tblICInsuranceRate]([intInsuranceRateId])
+	CONSTRAINT [FK_tblICInsuranceRateDetail_tblICInsuranceRate] FOREIGN KEY ([intInsuranceRateId]) REFERENCES [tblICInsuranceRate]([intInsuranceRateId]) ON UPDATE CASCADE ON DELETE CASCADE
 ) 
 GO
 
