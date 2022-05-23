@@ -53,6 +53,29 @@ BEGIN
 	----Check for clear field
 	IF(ISNULL(@strClearField,'') = '')
 	BEGIN
+
+		IF(ISNULL(@strWarrantNo,'') = '')
+		BEGIN
+			SET @strWarrantNo = @strOldWarrantNo
+		END
+		IF(ISNULL(@strWarrantStatus,'') = '')
+		BEGIN
+			SET @strWarrantStatus = @strOldWarrantStatus
+			SET @intWarrantStatus = @intOldWarrantStatus
+
+		END
+		IF(ISNULL(@intTradeFinanceId ,0) = 0)
+		BEGIN
+			SET @intTradeFinanceId = @intOldTradeFinanceId
+			SET @strTradeFinanceNumber = @strOldTradeFinanceNumber
+		END
+
+		--update data
+		UPDATE tblICLot
+		SET strWarrantNo = @strWarrantNo
+			,intWarrantStatus = @intWarrantStatus
+			,intTradeFinanceId =  @intTradeFinanceId 
+		WHERE intLotId = @intLotId
 		
 		---UPDATE released quantity to 0 pledged status 
 		IF(@intWarrantStatus = 1)
@@ -134,21 +157,7 @@ BEGIN
 		
 		
 		
-		IF(ISNULL(@strWarrantNo,'') = '')
-		BEGIN
-			SET @strWarrantNo = @strOldWarrantNo
-		END
-		IF(ISNULL(@strWarrantStatus,'') = '')
-		BEGIN
-			SET @strWarrantStatus = @strOldWarrantStatus
-			SET @intWarrantStatus = @intOldWarrantStatus
-
-		END
-		IF(ISNULL(@intTradeFinanceId ,0) = 0)
-		BEGIN
-			SET @intTradeFinanceId = @intOldTradeFinanceId
-			SET @strTradeFinanceNumber = @strOldTradeFinanceNumber
-		END
+		
 	END
 	ELSE
 	BEGIN
@@ -206,15 +215,17 @@ BEGIN
 			FROM tblICLot lot
 			WHERE intLotId = @intLotId
 		END
+
+		--update data
+		UPDATE tblICLot
+		SET strWarrantNo = @strWarrantNo
+			,intWarrantStatus = @intWarrantStatus
+			,intTradeFinanceId =  @intTradeFinanceId 
+		WHERE intLotId = @intLotId
 	END
 
 
-	--update data
-	UPDATE tblICLot
-	SET strWarrantNo = @strWarrantNo
-		,intWarrantStatus = @intWarrantStatus
-		,intTradeFinanceId =  @intTradeFinanceId 
-	WHERE intLotId = @intLotId
+	
 
 
 	--Audit Log for Warrant Status
