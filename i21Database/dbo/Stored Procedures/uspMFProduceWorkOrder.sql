@@ -34,6 +34,8 @@
 	,@intWorkOrderProducedLotId INT = NULL OUTPUT
 	,@intLotStatusId INT = NULL
 	,@intWorkOrderProducedLotParentId INT = NULL
+	,@strCertificationName NVARCHAR(100) = NULL
+	,@strCertificationId NVARCHAR(50) = NULL
 	)
 AS
 BEGIN
@@ -448,6 +450,11 @@ BEGIN
 			,NULL
 			,@strContainerNo
 			,@strMarkings
+			,NULL
+			,NULL
+			,NULL
+			,@strCertificationName
+			,@strCertificationId
 	END
 	ELSE
 	BEGIN
