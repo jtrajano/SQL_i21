@@ -27,7 +27,7 @@ BEGIN
 	INTO #tmpTRFLogNegateStaging
 	FROM tblTRFTradeFinanceLog
 	WHERE strTradeFinanceTransaction = @strTradeFinanceNumber
-	AND ysnDeleted = 0
+	AND ISNULL(ysnDeleted, 0) = 0
 	-- IF REVERSE, THE BASIS WILL BE ALL THE NEGATE LOG OF PREVIOUS TRANSACTION/MODULE.
 	AND ((@ysnReverse = 1 AND dblFinanceQty < 0)
 		  OR
@@ -75,6 +75,8 @@ BEGIN
 			, intUserId
 			, intConcurrencyId
 			, ysnNegateLog
+			, intOverrideBankValuationId
+			, strOverrideBankValuation
 		)
 		SELECT @strAction
 			, strTransactionType
@@ -109,6 +111,8 @@ BEGIN
 			, intUserId
 			, intConcurrencyId
 			, ysnNegateLog = CAST(1 AS BIT)
+			, intOverrideBankValuationId
+			, strOverrideBankValuation
 		FROM #tmpTRFLogNegateStaging
 	END
 	ELSE IF (@ysnReverse = 1)
@@ -149,6 +153,8 @@ BEGIN
 			, intConcurrencyId
 			, ysnNegateLog
 			, ysnReverseLog
+			, intOverrideBankValuationId
+			, strOverrideBankValuation
 		)
 		SELECT strAction = 'Moved to ' + strTransactionType --@strAction
 			, strTransactionType
@@ -184,6 +190,8 @@ BEGIN
 			, intConcurrencyId
 			, ysnNegateLog = CAST(1 AS BIT)
 			, ysnReverseLog = @ysnReverse
+			, intOverrideBankValuationId
+			, strOverrideBankValuation
 		FROM #tmpTRFLogNegateStaging
 	END
 

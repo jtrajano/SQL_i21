@@ -55,6 +55,8 @@ BEGIN
 		, @ysnNegateLog BIT
 		, @ysnDeleted BIT
 		, @ysnReverseLog BIT
+		, @intOverrideBankValuationId INT 
+		, @strOverrideBankValuation NVARCHAR(200)
 
 	DECLARE @FinalTable AS TABLE (
 		  strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -101,6 +103,8 @@ BEGIN
 		, ysnNegateLog BIT NULL DEFAULT(0)
 		, ysnDeleted BIT NULL DEFAULT(0)
 		, ysnReverseLog BIT NULL DEFAULT(0)
+		, intOverrideBankValuationId INT NULL
+		, strOverrideBankValuation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	)
 
 	DECLARE @deletedTable TABLE (
@@ -164,6 +168,8 @@ BEGIN
 			, @ysnNegateLog = NULL
 			, @ysnDeleted = NULL
 			, @ysnReverseLog = NULL
+			, @intOverrideBankValuationId = NULL
+			, @strOverrideBankValuation = NULL
 
 		SELECT TOP 1 
 		      @intId = tfLog.intId
@@ -211,6 +217,8 @@ BEGIN
 			, @ysnNegateLog = tfLog.ysnNegateLog
 			, @ysnDeleted = tfLog.ysnDeleted
 			, @ysnReverseLog = tfLog.ysnReverseLog
+			, @intOverrideBankValuationId = tfLog.intOverrideBankValuationId
+			, @strOverrideBankValuation = CASE WHEN ISNULL(tfLog.strOverrideBankValuation, '') <> '' THEN tfLog.strOverrideBankValuation ELSE bankValuation.strBankValuationRule END COLLATE Latin1_General_CI_AS
 		
 		FROM #tmpTradeFinanceLogs tfLog
 		LEFT JOIN tblCMBank bank
@@ -229,6 +237,8 @@ BEGIN
 			ON bankTrans.intTransactionId = tfLog.intBankTransactionId
 		LEFT JOIN tblCMBorrowingFacility facility
 			ON facility.intBorrowingFacilityId = tfLog.intBorrowingFacilityId
+		LEFT JOIN tblCMBankValuationRule bankValuation
+			ON bankValuation.intBankValuationRuleId = tfLog.intOverrideBankValuationId
 
 		INSERT INTO @FinalTable(
 				   strAction
@@ -275,6 +285,8 @@ BEGIN
 				 , ysnNegateLog
 				 , ysnDeleted
 				 , ysnReverseLog
+				 , intOverrideBankValuationId
+				 , strOverrideBankValuation
 			)
 			SELECT @strAction
 				 , @strTransactionType
@@ -320,6 +332,8 @@ BEGIN
 				 , @ysnNegateLog
 				 , @ysnDeleted
 				 , @ysnReverseLog
+				 , @intOverrideBankValuationId
+				 , @strOverrideBankValuation
 				 
 		-- CREATION OF NEGATE LOGS.
 		IF (ISNULL(@ysnNegateLog, 0) = 0 AND ISNULL(@ysnDeleted, 0) = 0)
@@ -404,6 +418,8 @@ BEGIN
 		, intContractHeaderId
 		, intContractDetailId
 		, ysnDeleted
+		, intOverrideBankValuationId
+		, strOverrideBankValuation
 	)
 							-- REMOVE MILLISECOND TO MAKE NEGATE/DELETE LOG RECORD APPEAR AS EARLIER THAN THE NEW LOG TO BE CREATED.
 	SELECT dtmCreatedDate = CASE WHEN (ISNULL(ysnNegateLog, 0) = 1 AND ISNULL(@ysnReverseLog, 0) = 0) OR ISNULL(@ysnDeleted, 0) = 1
@@ -453,6 +469,8 @@ BEGIN
 		, intContractHeaderId
 		, intContractDetailId
 		, ysnDeleted
+		, intOverrideBankValuationId
+		, strOverrideBankValuation
 	FROM @FinalTable F
 	ORDER BY dtmTransactionDate
 

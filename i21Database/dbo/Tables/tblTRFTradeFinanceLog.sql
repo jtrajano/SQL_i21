@@ -43,6 +43,8 @@ CREATE TABLE [dbo].[tblTRFTradeFinanceLog]
 	intWarrantStatusId INT NULL,
 	intUserId INT NULL, 
 	ysnDeleted BIT NULL DEFAULT(0),
+	intOverrideBankValuationId INT NULL,
+	strOverrideBankValuation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblTRFTradeFinanceLog] PRIMARY KEY ([intTradeFinanceLogId])
 )

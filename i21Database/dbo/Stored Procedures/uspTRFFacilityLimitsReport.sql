@@ -152,7 +152,7 @@ AS
  	AND tlog.intContractDetailId IS NOT NULL
  	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
  	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
-	AND tlog.ysnDeleted = 0
+	AND ISNULL(tlog.ysnDeleted, 0) = 0
 
 
  	SELECT  
@@ -181,13 +181,15 @@ AS
 		, strSublimit
 		, strTradeFinanceTransaction
 		, intBorrowingFacilityId
+		, tlog.intOverrideBankValuationId
+		, tlog.strOverrideBankValuation
  	INTO #tempTradeFinanceLog
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempTradeLogContracts tContract
  		ON	tContract.intContractDetailId = tlog.intContractDetailId
  		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
  		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
-	WHERE tlog.ysnDeleted = 0
+	WHERE ISNULL(tlog.ysnDeleted, 0) = 0
 
  	SELECT intContractHeaderId
  		, intContractDetailId
@@ -216,6 +218,8 @@ AS
 		, dblSublimit
 		, strTradeFinanceTransaction
 		, intBorrowingFacilityId
+		, intOverrideBankValuationId
+		, strOverrideBankValuation
  	INTO #tempLatestLogValues
  	FROM 
  	(
@@ -252,8 +256,14 @@ AS
 		, intSublimitId = latestLog.intSublimitId
 		, strSublimit = latestLog.strSublimit
 		, dblSublimit = latestLog.dblSublimit
-		, strBankValuationRule = valRule.strBankValuationRule
-		, intBankValuationRuleId = valRule.intBankValuationRuleId
+		, strBankValuationRule = CASE WHEN ISNULL(latestLog.intOverrideBankValuationId, 0) = 0 
+										THEN valRule.strBankValuationRule
+										ELSE latestLog.strOverrideBankValuation
+										END
+		, intBankValuationRuleId = CASE WHEN ISNULL(latestLog.intOverrideBankValuationId, 0) = 0 
+										THEN valRule.intBankValuationRuleId
+										ELSE latestLog.intOverrideBankValuationId
+										END 
 		, intUnitMeasureId = ctd.intPriceItemUOMId
  	INTO #tempPurchaseContracts
  	FROM tblCTContractDetail ctd
