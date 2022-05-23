@@ -69,6 +69,8 @@ BEGIN
 			,0 As intMainItemId
 			,'' As strMainItemNo
 			,'' As strMainItemDescription
+			,(SELECT TOP 1 intCertificationId FROM vyuCTItemCertification WHERE intItemId = I.intItemId ORDER BY intItemCertificationId) AS intCertificationId
+			,(SELECT TOP 1 strCertificationName FROM vyuCTItemCertification WHERE intItemId = I.intItemId ORDER BY intItemCertificationId) AS strCertificationName
 		FROM dbo.tblMFWorkOrderRecipe R
 		LEFT JOIN dbo.tblMFWorkOrderRecipeCategory RC ON RC.intRecipeId = R.intRecipeId
 			AND RC.intWorkOrderId = R.intWorkOrderId
@@ -138,6 +140,8 @@ BEGIN
 			,I1.intItemId As intMainItemId
 			,I1.strItemNo As strMainItemNo
 			,I1.strDescription As strMainItemDescription
+			,(SELECT TOP 1 intCertificationId FROM vyuCTItemCertification WHERE intItemId = I.intItemId ORDER BY intItemCertificationId) AS intCertificationId
+			,(SELECT TOP 1 strCertificationName FROM vyuCTItemCertification WHERE intItemId = I.intItemId ORDER BY intItemCertificationId) AS strCertificationName
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
