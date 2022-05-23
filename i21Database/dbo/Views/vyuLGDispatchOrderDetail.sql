@@ -39,6 +39,9 @@ SELECT
 	,DOD.intEntityShipViaTruckId 
 	,DOD.intEntityShipViaTrailerId
 	,DOD.intEntityShipViaCompartmentId
+	,SVTC.strCompartmentNumber
+	,SVTC.intCategoryId
+	,SVTC.dblCapacity
 	,DOD.intConcurrencyId
 FROM tblLGDispatchOrderDetail DOD 
 LEFT JOIN tblICItem I ON I.intItemId = DOD.intItemId
@@ -46,3 +49,4 @@ LEFT JOIN tblEMEntity E ON E.intEntityId = DOD.intEntityId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DOD.intEntityLocationId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = DOD.intCompanyLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = DOD.intCompanyLocationSubLocationId
+LEFT JOIN tblSMShipViaTrailerCompartment SVTC ON SVTC.intEntityShipViaTrailerCompartmentId = DOD.intEntityShipViaCompartmentId

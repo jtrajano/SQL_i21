@@ -829,6 +829,7 @@
     <Build Include="dbo\Tables\tblHDCoworkerHierarchy.sql" />
     <Build Include="dbo\Tables\tblHDCoworkerHierarchyDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspHDBuildHierarchyFilterString.sql" />
+    <Build Include="dbo\Views\vyuLGShipViaTrailerCompartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
