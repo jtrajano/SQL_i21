@@ -228,8 +228,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblQuantityMaxValue numeric (18,6),
 	dblAmountMaxValue numeric (18,6),
 	intVendorLocationId INT NULL,
-
-
+	ysnApplyDefaultTradeFinance bit null,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
