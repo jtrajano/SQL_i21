@@ -115,7 +115,8 @@ BEGIN
 				, ysnDeleted
 				)
 			select
-				strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' else 'Updated Contract' end)
+				strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' ELSE
+								CASE WHEN cd.intBankId <> et.intBankId THEN 'Bank Changed' ELSE 'Updated Contract' END end)
 				, strTransactionType = 'Contract'
 				, intTradeFinanceTransactionId = null
 				, strTradeFinanceTransaction = isnull(cd.strFinanceTradeNo,tf.strFinanceTradeNo)
@@ -165,7 +166,12 @@ BEGIN
 				left join tblCMBorrowingFacilityLimit limit on limit.intBorrowingFacilityLimitId = cd.intBorrowingFacilityLimitId
 				left join tblCMBorrowingFacilityLimitDetail sublimit on sublimit.intBorrowingFacilityLimitDetailId = cd.intBorrowingFacilityLimitDetailId
 				cross apply (
-					select intTradeFinanceLogId = max(intTradeFinanceLogId) from tblTRFTradeFinanceLog where intContractDetailId = tf.intContractDetailId and strTradeFinanceTransaction = cd.strFinanceTradeNo COLLATE Database_default
+					select TOP 1 intTradeFinanceLogId = max(intTradeFinanceLogId) ,
+							intBankId = max(intBankId)
+					FROM tblTRFTradeFinanceLog 
+					WHERE intContractDetailId = tf.intContractDetailId 
+						  AND strTradeFinanceTransaction = cd.strFinanceTradeNo COLLATE Database_default
+					ORDER BY intTradeFinanceLogId Desc
 				) et
 			where isnull(cd.intBankId,0) > 0 AND ISNULL(tf.strRowState, '') <> 'Delete'
 			;
