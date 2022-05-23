@@ -592,6 +592,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intShipmentId'
 						SET @SourceTable = 'tblLGShipment'
+						SET @SourcedFrom = 'Logistics'
 					END
 				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
 					BEGIN
@@ -612,6 +613,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intInventoryShipmentId'
 						SET @SourceTable = 'tblICInventoryShipment'
+						SET @SourcedFrom = 'Inventory Shipment'
 					END		
 
 				IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
@@ -624,6 +626,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intLoadId'
 						SET @SourceTable = 'tblLGLoad'
+						SET @SourcedFrom = 'Logistics'
 					END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')

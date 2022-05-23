@@ -441,7 +441,7 @@ FROM
 DECLARE @BorrowingFacilityLimitDetailId INT = NULL
 
 SELECT TOP 1
-	  @BorrowingFacilityLimitId = intBorrowingFacilityLimitId
+	@BorrowingFacilityLimitId = intBorrowingFacilityLimitId
 FROM
 	tblCMBorrowingFacilityLimit
 WHERE intBorrowingFacilityId = @BorrowingFacilityId

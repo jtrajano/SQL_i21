@@ -194,9 +194,16 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , intCompanyAccountSegmentId			= GLSEGMENT.intCompanyAccountSegmentId
 	 , ysnIntraCompany						= CASE WHEN ISNULL(INV.ysnIntraCompany, 0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries, 0) END
 	 , strGoodsStatus						= INV.strGoodsStatus
+	 , ysnOverrideFreightCharge				= INV.ysnOverrideFreightCharge
 	 , dblFreightCharge						= ISNULL(INV.dblFreightCharge, 0.00)
 	 , strFreightCompanySegment				= GLCAI.strDescription
 	 , strFreightLocationSegment			= GLLAI.strDescription
+	 , intTaxLocationId                     = INV.intTaxLocationId
+     , strTaxLocation						= TAXLOCATION.strShipVia
+     , strTaxPoint                          = INV.strTaxPoint
+     , ysnOverrideTaxPoint                  = CAST(CASE WHEN ISNULL(INV.strTaxPoint, '') = '' THEN 0 ELSE 1 END AS BIT)
+     , ysnOverrideTaxLocation               = CAST(CASE WHEN ISNULL(INV.intTaxLocationId, 0) > 0 THEN 1 ELSE 0 END AS BIT)
+	 ,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId, 0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
