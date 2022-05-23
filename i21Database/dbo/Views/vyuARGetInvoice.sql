@@ -203,6 +203,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , strTaxPoint                          = INV.strTaxPoint
      , ysnOverrideTaxPoint                  = CAST(CASE WHEN ISNULL(INV.strTaxPoint, '') = '' THEN 0 ELSE 1 END AS BIT)
      , ysnOverrideTaxLocation               = CAST(CASE WHEN ISNULL(INV.intTaxLocationId, 0) > 0 THEN 1 ELSE 0 END AS BIT)
+	,strSourcedFrom							= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId, 0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
