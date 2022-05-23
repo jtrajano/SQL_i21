@@ -16,6 +16,5 @@
 	CONSTRAINT [FK_tblCMCashFlowReport_tblCMBank] FOREIGN KEY ([intBankId]) REFERENCES [dbo].[tblCMBank]([intBankId]),
 	CONSTRAINT [FK_tblCMCashFlowReport_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount]([intBankAccountId]),
 	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrency_Filter] FOREIGN KEY ([intFilterCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
-	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrency_Reporting] FOREIGN KEY ([intReportingCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
-	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation]([intCompanyLocationId])
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrency_Reporting] FOREIGN KEY ([intReportingCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID])
 )
