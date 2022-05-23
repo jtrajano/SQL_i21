@@ -40,6 +40,8 @@ BEGIN
 	(
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY tfLog.strTradeFinanceTransaction, tfLog.strBank, tfLog.strLimit, tfLog.strSublimit
 										ORDER BY tfLog.dtmCreatedDate DESC)
+			, tfLog.intBankId
+			, intApprovalStatusId = approvalStatus.intApprovalStatusId
 			, tfLog.dtmCreatedDate
 			, tfLog.strTradeFinanceTransaction
 			, tfLog.strBank
@@ -50,7 +52,9 @@ BEGIN
 			, tfLog.strAction
 			, tfLog.dblFinanceQty
 			, tfLog.strBankApprovalStatus
-			, valRule.strBankValuationRule
+			, strBankValuationRule = CASE WHEN ISNULL(tfLog.intOverrideBankValuationId, 0) = 0 
+										THEN valRule.strBankValuationRule 
+										ELSE tfLog.strOverrideBankValuation END
 		FROM tblTRFTradeFinanceLog tfLog
 		LEFT JOIN tblCMBorrowingFacilityLimitDetail sublimit
 			ON sublimit.intBorrowingFacilityLimitDetailId = intSublimitId
@@ -58,12 +62,12 @@ BEGIN
 			ON valRule.intBankValuationRuleId = sublimit.intBankValuationRuleId
 		LEFT JOIN tblCTApprovalStatusTF approvalStatus
 			ON approvalStatus.strApprovalStatus COLLATE Latin1_General_CI_AS = tfLog.strBankApprovalStatus  COLLATE Latin1_General_CI_AS
-		WHERE ISNULL(tfLog.intBankId, 0) = ISNULL(@intBankId, ISNULL(tfLog.intBankId, 0))
-		AND ISNULL(approvalStatus.intApprovalStatusId, '') = ISNULL(@intApprovalStatusId, ISNULL(approvalStatus.intApprovalStatusId, ''))
-		AND ISNULL(tfLog.strLimit, '') = ISNULL(@strLimitType, ISNULL(tfLog.strLimit, ''))
-		AND CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) >= CONVERT(NVARCHAR, ISNULL(@dtmStartDate, tfLog.dtmCreatedDate), 111)
+		WHERE CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) >= CONVERT(NVARCHAR, ISNULL(@dtmStartDate, tfLog.dtmCreatedDate), 111)
 		AND CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) <= CONVERT(NVARCHAR, ISNULL(@dtmEndDate, tfLog.dtmCreatedDate), 111)
 		AND tfLog.dblFinanceQty >= 0
-		AND tfLog.ysnDeleted = 0
+		AND ISNULL(tfLog.ysnDeleted, 0) = 0
 	) t WHERE t.intRowNum = 1
+		AND ISNULL(t.intBankId, 0) = ISNULL(@intBankId, ISNULL(t.intBankId, 0))
+		AND ISNULL(t.intApprovalStatusId, '') = ISNULL(@intApprovalStatusId, ISNULL(t.intApprovalStatusId, ''))
+		AND ISNULL(t.strLimit, '') = ISNULL(@strLimitType, ISNULL(t.strLimit, ''))
 END
