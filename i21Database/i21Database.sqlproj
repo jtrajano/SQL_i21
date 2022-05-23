@@ -788,6 +788,7 @@
     <Build Include="dbo\Functions\fnCTGetQualityResultAmount.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptBeforeSave.sql" />
     <Build Include="dbo\Functions\fnCTGetCompanyLogo.sql" />
+    <Build Include="dbo\Functions\fnCTGetCompanyLocationCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
