@@ -9,8 +9,8 @@ select
 			,dblHours
 			,dblEstimatedHours
 			,convert(datetime,ceiling(convert(numeric(18,6), dtmDate))) dtmDate
-			,dtmStartTime
-			,dtmEndTime
+			,dtmStartTime 
+			,dtmEndTime  
 			,dblRate
 			,strDescription
 			,strJIRALink
@@ -19,7 +19,7 @@ select
 			,intBillId
 			,ysnBillable
 			,ysnReimburseable
-			,ysnBilled
+			,ysnBilled 
 			,dtmBilled
 			,intCreatedUserId
 			,intCreatedUserEntityId
@@ -50,7 +50,7 @@ select
 			,ysnVendor
 			,strServiceType
 			,ysnTimeOff
-			,strCustomerName 
+			,strName 
 from
 (
 		select
@@ -96,14 +96,14 @@ from
 			,strItemNo = h.strItemNo
 			,intTimeEntryId = 1
 			,i.strTicketNumber
-			,i.intCustomerId
+			,intCustomerId = ISNULL(a.intCustomerId, i.intCustomerId)
 			,dblExtendedRate = (case when (isnull(a.intHours, 0.00) = 0.00 or isnull(a.dblRate,0.00) = 0.00) then 0.00 else a.intHours * a.dblRate end)
-			,k.strProjectName
-			,k.intProjectId
+			,strProjectName = ISNULL(o.strProjectName, k.strProjectName) 
+			,intProjectId = ISNULL(a.intProjectId, k.intProjectId)
 			,ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType m where m.intEntityId = a.intAgentEntityId and m.strType = 'Vendor')
 			,strServiceType = h.strServiceType
 			,ysnTimeOff = convert(bit,0)
-			,strCustomerName = m.strName
+			,strName = ISNULL(m.strName, n.strName) 
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
@@ -117,7 +117,9 @@ from
 			left join tblHDProjectTask j on j.intTicketId = a.intTicketId
 			left join tblHDProject k on k.intProjectId = j.intProjectId
 			left join tblAPBill l on l.intBillId = a.intBillId
-			left join tblEMEntity m on m.intEntityId = i.intCustomerId
+			left join tblEMEntity m on m.intEntityId = a.intCustomerId
+			left join tblEMEntity n on n.intEntityId = i.intCustomerId
+			left join tblHDProject o on o.intProjectId = a.intProjectId
 
 union all
 
@@ -171,7 +173,7 @@ union all
 			,ysnVendor = convert(bit,0)
 			,strServiceType = null
 			,ysnTimeOff = convert(bit,1)
-			,strCustomerName = ''
+			,strName = ''
 		from
 			tblHDTimeOffRequest a
 			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
@@ -179,3 +181,4 @@ union all
 			inner join tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
 						
 ) as rawData
+GO
