@@ -300,7 +300,7 @@ BEGIN TRY
 						INNER JOIN tblICItem Item
 							ON MUD.intItemId = Item.intItemId
 						INNER JOIN tblICItemUOM ItemUOM
-							ON Item.intItemId = ItemUOM.intItemId
+							ON MUD.intItemUOMId = ItemUOM.intItemUOMId
 						INNER JOIN tblICItemLocation ItemLocation
 							ON ItemLocation.intItemId = Item.intItemId 
 							AND ItemLocation.intLocationId = @intLocationId 
