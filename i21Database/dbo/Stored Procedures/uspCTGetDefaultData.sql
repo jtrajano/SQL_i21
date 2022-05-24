@@ -263,13 +263,15 @@ BEGIN
 	IF @strType = 'BorrowingFacility'
 	BEGIN
 
-			SELECT TOP 1 BFL.intBorrowingFacilityLimitId, BFL.strBorrowingFacilityLimit , BFLD.intBorrowingFacilityLimitDetailId, BFLD.strLimitDescription
+			SELECT TOP 1 BFL.intBorrowingFacilityLimitId
+						,BFL.strBorrowingFacilityLimit
+						,BFLD.intBorrowingFacilityLimitDetailId
+						,BFLD.strLimitDescription
 						,BFLD.intBankValuationRuleId
-			FROM tblCMBorrowingFacilityLimitDetail BFLD
-			JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = BFLD.intBorrowingFacilityLimitId and BFL.strBorrowingFacilityLimit = 'Contract'
+			FROM tblCMBorrowingFacilityLimit BFL
 			JOIN tblCMBorrowingFacility BF on BF.intBorrowingFacilityId = BFL.intBorrowingFacilityId
-			LEFT JOIN tblCMBankValuationRule VR on VR.intBankValuationRuleId = BFLD.intBankValuationRuleId
-			WHERE BF.intBorrowingFacilityId = @intBorrowingFacilityId and BFLD.ysnDefault = 1
+			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitId = BFL.intBorrowingFacilityLimitId and BFLD.ysnDefault = 1
+			WHERE BF.intBorrowingFacilityId = @intBorrowingFacilityId and BFL.strBorrowingFacilityLimit = 'Contract'
 	END
 
 	IF @strType = 'Sublimit'
