@@ -9641,6 +9641,7 @@
     <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiCalculateTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiGetTaxDetails.sql" />
     <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractStaging.sql" />
