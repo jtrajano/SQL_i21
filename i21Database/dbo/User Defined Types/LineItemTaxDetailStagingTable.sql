@@ -10,7 +10,7 @@ CREATE TYPE [dbo].[LineItemTaxDetailStagingTable] AS TABLE
 	,[intTaxCodeId]							INT												NOT NULL	-- Key Value tblSMTaxCode.intTaxCodeId
 	,[intTaxClassId]						INT												NULL		-- Key Value tblSMTaxClass.intTaxClassId
 	,[strTaxableByOtherTaxes]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL		
-	,[strCalculationMethod]					NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NULL		
+	,[strCalculationMethod]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		
 	,[dblRate]								NUMERIC(18, 6)									NULL		-- Tax Rate
 	,[dblBaseRate]							NUMERIC(18, 6)									NULL		-- Base Tax Rate
 	,[intTaxAccountId]						INT												NULL		-- Key Value tblGLAccount.intAccountId
