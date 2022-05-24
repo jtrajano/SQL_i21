@@ -25,6 +25,7 @@
 	[intPercentageId]		   INT             NULL,
     [intSort]                  INT             NULL,
     [intConcurrencyId]         INT             DEFAULT 1 NOT NULL,
+    [ysnAbs]                   BIT             NULL,	
     CONSTRAINT [PK_tblFRColumnDesign] PRIMARY KEY CLUSTERED ([intColumnDetailId] ASC),
     CONSTRAINT [FK_tblFRColumnDesign_tblFRColumn] FOREIGN KEY([intColumnId]) REFERENCES [dbo].[tblFRColumn] ([intColumnId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblFRColumnDesign_tblFRSegmentFilterGroup] FOREIGN KEY([intSegmentFilterGroupId]) REFERENCES [dbo].[tblFRSegmentFilterGroup] ([intSegmentFilterGroupId]),
