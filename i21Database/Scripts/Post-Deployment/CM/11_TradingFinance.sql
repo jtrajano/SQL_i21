@@ -51,7 +51,8 @@ GO
 			SELECT id = 1,		name = 'Purchase Price'						 								 ,description = 'Price on the purchase contract'					UNION ALL 
 			SELECT id = 2,		name = 'Cost/M2M /(Lower of cost or market)' 								 ,description = 'Price on the purchase contract or the M2M'			UNION ALL 
 			SELECT id = 3,		name = 'Sale Price'							 								 ,description = 'Price on the sales contract'						UNION ALL 
-			SELECT id = 4,		name = 'LCM Lower of purchase or m2m unless sales is fixed then sales price' ,description = 'Lower of the cost of goods or M2M unless allocated to a sale and then it will be the sales price.'
+			SELECT id = 4,		name = 'LCM Lower of purchase or m2m unless sales is fixed then sales price' ,description = 'Lower of the cost of goods or M2M unless allocated to a sale and then it will be the sales price.' UNION ALL
+			SELECT id = 5,		name = 'M2M', description='Price on M2M'
 			
 	) AS BankValuationRuleHardCodedValues
 		ON  BankValuationRule.intBankValuationRuleId = BankValuationRuleHardCodedValues.id
