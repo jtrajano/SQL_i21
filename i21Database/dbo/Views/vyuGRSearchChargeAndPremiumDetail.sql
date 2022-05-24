@@ -21,6 +21,7 @@ SELECT
 	,CAPD.ysnDeductVendor
 	,CT_OTHER_CHARGE_ITEM.strItemNo AS strCtOtherChargeItemNo
 	,CT_OTHER_CHARGE_ITEM.intItemId AS intCtOtherChargeItemId
+	,CAPD.strCalculateOn
 FROM tblGRChargeAndPremiumDetail CAPD
 INNER JOIN tblGRChargeAndPremiumId CAP
 	ON CAP.intChargeAndPremiumId = CAPD.intChargeAndPremiumId
