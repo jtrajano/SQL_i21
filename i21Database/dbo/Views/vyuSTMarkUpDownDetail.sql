@@ -43,6 +43,8 @@ SELECT
 	--Item
 	item.strItemNo,
 	strItemDescription						=	item.strDescription,
+	intItemUOMId							=	UOM.intItemUOMId,
+	strUnitOfMeasure						=	UM.strUnitMeasure,
 
 	--CStore
 	store.intStoreId,
@@ -103,6 +105,10 @@ INNER JOIN tblICCategory cat
 LEFT JOIN tblICCategoryPricing catPricing
 	ON cat.intCategoryId = catPricing.intCategoryId
 		AND itemLoc.intItemLocationId = catPricing.intItemLocationId
+LEFT JOIN tblICItemUOM UOM
+	ON markDetail.intItemUOMId = UOM.intItemUOMId
+LEFT JOIN tblICUnitMeasure UM
+	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 
 
 

@@ -4,6 +4,7 @@
 	[intMarkUpDownId] INT NOT NULL,
 	[intItemId] INT NULL,
 	[intCategoryId] INT NULL,
+	[intItemUOMId] INT NULL,
 	[strMarkUpOrDown] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strRetailShrinkRS] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intQty] NUMERIC(18, 6) NULL, 
@@ -18,5 +19,6 @@
     CONSTRAINT [PK_tblSTMarkUpDownDetail] PRIMARY KEY CLUSTERED ([intMarkUpDownDetailId] ASC), 
 	CONSTRAINT [FK_tblSTMarkUpDownDetail_tblSTMarkUpDown_intMarkUpDownId] FOREIGN KEY ([intMarkUpDownId]) REFERENCES [dbo].[tblSTMarkUpDown] ([intMarkUpDownId]) ON DELETE CASCADE,  
 	CONSTRAINT [FK_tblSTMarkUpDownDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblSTMarkUpDownDetail_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblSTMarkUpDownDetail_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
 )
