@@ -7,6 +7,8 @@
 	,@intUserId INT
 	,@intBankTransactionTypeId INT
     ,@intParentTransId INT = NULL -- FOR FEE
+	,@dblAmountF NUMERIC(18,6) = 0 -- if bank account is foreign
+	,@intCurrencyExchangeRateTypeId INT = NULL
 	,@isAddSuccessful BIT = 0 OUTPUT
 	,@createdTransId NVARCHAR(20) = 0 OUTPUT
 AS
@@ -51,6 +53,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 --SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
 --FROM	dbo.tblSMStartingNumber
 --WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+
 IF @intBankTransactionTypeId = @BANK_FEE
 BEGIN
 	SELECT @createdTransId = strTransactionId + '-F' FROM tblCMBankTransaction WHERE intTransactionId = @intParentTransId
@@ -62,6 +65,15 @@ BEGIN
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @createdTransId OUTPUT
 	IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 END
+DECLARE @intCurrencyId INT,@intDefaultCurrencyId INT , @ysnFunctional BIT = 0
+
+SELECT TOP 1 @ysnFunctional = 1 FROM tblCMBankAccount A JOIN  tblSMCompanyPreference B 
+ON B.intDefaultCurrencyId = intCurrencyId
+WHERE @intBankAccountId = intBankAccountId
+
+
+
+
 
 -- Increment the next transaction number
 --UPDATE	dbo.tblSMStartingNumber
@@ -92,6 +104,7 @@ INSERT INTO tblCMBankTransaction(
 	,strState
 	,strCountry
 	,dblAmount
+	,intCurrencyExchangeRateTypeId
 	,strAmountInWords
 	,strMemo
 	,strReferenceNo
@@ -124,6 +137,7 @@ SELECT	strTransactionId			= @createdTransId
 		,strState					= ''
 		,strCountry					= ''
 		,dblAmount					= @dblAmount * -1
+		,intCurrencyExchangeRateTypeId = @intCurrencyExchangeRateTypeId
 		,strAmountInWords			= dbo.fnConvertNumberToWord(@dblAmount * -1)
 		,strMemo					= ISNULL(@strDescription, '')
 		,strReferenceNo				= ''
@@ -144,6 +158,28 @@ SELECT	strTransactionId			= @createdTransId
 SET @intTransactionId = @@IDENTITY 
 IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
+DECLARE @dblExchangeRate NUMERIC(18,6) = 1
+IF @ysnFunctional = 0 -- SWITCH THE AMOUNT
+BEGIN
+	DECLARE @dblAmountTemp NUMERIC(18,6)
+
+	SET @dblExchangeRate = ROUND( @dblAmountF/@dblAmount, 6)
+
+	SET @dblAmountTemp = @dblAmount
+	SET @dblAmount = @dblAmountF
+	SET @dblAmountF = @dblAmountTemp
+
+	
+
+END
+ELSE
+	SET @dblAmountF = 0
+
+
+
+
+
+
 -- Create the Bank Deposit DETAIL
 INSERT INTO tblCMBankTransactionDetail(
 	intTransactionId
@@ -152,6 +188,10 @@ INSERT INTO tblCMBankTransactionDetail(
 	,strDescription
 	,dblDebit
 	,dblCredit
+	,dblDebitForeign
+	,dblCreditForeign
+	,dblExchangeRate
+	,intCurrencyExchangeRateTypeId
 	,intUndepositedFundId
 	,intEntityId
 	,intCreatedUserId
@@ -166,6 +206,10 @@ SELECT	intTransactionId		= @intTransactionId
 		,strDescription			= tblGLAccount.strDescription
 		,dblDebit				= @dblAmount
 		,dblCredit				= 0
+		,dblDebitForeign 		= @dblAmountF
+		,dblCreditForeign		= 0
+		,dblExchangeRate 		= @dblExchangeRate
+		,intCurrencyExchangeRateTypeId = @intCurrencyExchangeRateTypeId
 		,intUndepositedFundId	= 0
 		,intEntityId			= NULL
 		,intCreatedUserId		= @intUserId
