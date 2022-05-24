@@ -206,133 +206,135 @@ SELECT
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
-    SELECT intEntityId
-		 , strCustomerNumber
-		 , intEntityLineOfBusinessIds
-		 , ysnCreditHold
-		 , dblCreditLimit
-		 , dblARBalance
-		 , ysnPORequired
-		 , strName
-		 , strCreditCode
-		 , intEntityContactId
-         , intCreditStopDays
-         , intInterCompanyId
+    SELECT 
+		 intEntityId
+		,strCustomerNumber
+		,intEntityLineOfBusinessIds
+		,ysnCreditHold
+		,dblCreditLimit
+		,dblARBalance
+		,ysnPORequired
+		,strName
+		,strCreditCode
+		,intEntityContactId
+		,intCreditStopDays
+		,intInterCompanyId
     FROM vyuARCustomerSearch WITH (NOLOCK)
 ) CUS ON CUS.intEntityId = INV.intEntityCustomerId
 INNER JOIN (
-	SELECT intCompanyLocationId
-		 , strLocationName 
+	SELECT 
+		 intCompanyLocationId
+		,strLocationName 
 	FROM tblSMCompanyLocation WITH (NOLOCK) 
 ) CLOC ON INV.intCompanyLocationId = CLOC.intCompanyLocationId
 LEFT JOIN (
 	SELECT intDocumentMaintenanceId
-		 , strCode
-		 , strTitle 
+		 ,strCode
+		 ,strTitle 
 	FROM tblSMDocumentMaintenance WITH (NOLOCK)
 ) DOC ON INV.intDocumentMaintenanceId = DOC.intDocumentMaintenanceId
 LEFT JOIN (
 	SELECT intLineOfBusinessId
- 	     , strLineOfBusiness 
+ 	     ,strLineOfBusiness 
 	FROM tblSMLineOfBusiness WITH (NOLOCK)
 ) LOB ON INV.intLineOfBusinessId = LOB.intLineOfBusinessId
 LEFT JOIN (
 	SELECT intCurrencyID
-		 , strCurrency 
+		 ,strCurrency 
 	FROM tblSMCurrency WITH (NOLOCK)  
 ) CUR ON INV.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (
 	SELECT intEntityId
-		 , strName
+		 ,strName
 	FROM tblEMEntity WITH (NOLOCK)
 ) SPER ON INV.intEntitySalespersonId = SPER.intEntityId
 LEFT JOIN (
 	SELECT intEntityId
-		 , strName
+		 ,strName
 	FROM tblEMEntity WITH (NOLOCK)
 ) INVCON ON INV.intEntityContactId = INVCON.intEntityId
 LEFT JOIN (
 	SELECT TOP 1 A.intEntityId
-			   , strName
-			   , B.strType
+			   ,strName
+			   ,B.strType
 	FROM tblEMEntity A WITH (NOLOCK)
 	INNER JOIN tblEMEntityType B WITH (NOLOCK) ON B.intEntityId = A.intEntityId
 ) APER ON INV.intEntityApplicatorId = APER.intEntityId
 LEFT JOIN (
 	SELECT intEntityId
-		 , strShipVia
+		 ,strShipVia
 	FROM tblSMShipVia WITH (NOLOCK)
 ) SHIPVIA ON INV.intShipViaId = SHIPVIA.intEntityId
 LEFT JOIN (
 	SELECT intAccountId
-		 , strAccountId 
+		 ,strAccountId 
 	FROM tblGLAccount WITH (NOLOCK)
 ) ACCT ON INV.intAccountId = ACCT.intAccountId
 LEFT JOIN (
 	SELECT intTermID
-		 , strTerm
-		 , dblDiscountEP
+		 ,strTerm
+		 ,dblDiscountEP
 	FROM tblSMTerm WITH (NOLOCK)
 ) TERM ON INV.intTermId = TERM.intTermID
 LEFT JOIN (
 	SELECT intFreightTermId
-		 , strFreightTerm
-		 , strFobPoint
+		 ,strFreightTerm
+		 ,strFobPoint
 	FROM tblSMFreightTerms WITH (NOLOCK)
 ) FTERMS ON INV.intFreightTermId = FTERMS.intFreightTermId
 LEFT JOIN (
 	SELECT intEntityId
-		 , strName
+		 ,strName
 	FROM tblEMEntity WITH (NOLOCK) 
 ) DPER ON INV.intTruckDriverId = DPER.intEntityId
 LEFT JOIN (
 	SELECT intTruckDriverReferenceId
-		 , strData 
+		 ,strData 
 	FROM tblSCTruckDriverReference  WITH (NOLOCK)
 ) TREF ON INV.intTruckDriverReferenceId = TREF.intTruckDriverReferenceId
 LEFT JOIN (
 	SELECT intSplitId
-		 , strSplitNumber 
+		 ,strSplitNumber 
 	FROM tblEMEntitySplit WITH (NOLOCK)
 ) SPLIT ON INV.intSplitId = SPLIT.intSplitId
 LEFT JOIN (
 	SELECT intPaymentMethodID
-		 , strPaymentMethod 
+		 ,strPaymentMethod 
 	FROM tblSMPaymentMethod WITH (NOLOCK)
 ) PMETHOD ON INV.intPaymentMethodId = PMETHOD.intPaymentMethodID
 LEFT JOIN ( 
 	SELECT intICTId
-		 , strICTName 
+		 ,strICTName 
 	FROM tblARICT WITH (NOLOCK)
 ) ICT ON INV.intICTId = ICT.intICTId
 LEFT JOIN ( 
 	SELECT intSalesOrderId
-		 , strSalesOrderNumber 
+		 ,strSalesOrderNumber 
 	FROM tblSOSalesOrder WITH (NOLOCK)
 ) SO ON INV.intSalesOrderId = SO.intSalesOrderId
 LEFT JOIN (
 	SELECT intBookId
-		 , strBook
+		 ,strBook
 	FROM tblCTBook WITH (NOLOCK)
 ) CBOOK ON INV.intBookId = CBOOK.intBookId
 LEFT JOIN (
 	SELECT intSubBookId
-		 , strSubBook
+		 ,strSubBook
 	FROM tblCTSubBook  WITH (NOLOCK)
 ) CSBOOK ON INV.intSubBookId = CSBOOK.intSubBookId
 LEFT JOIN (
 	SELECT intLoadId
-		 , intPurchaseSale
+		 ,intPurchaseSale
 	FROM dbo.tblLGLoad WITH (NOLOCK)
 ) LG ON INV.intLoadId = LG.intLoadId
 LEFT JOIN (
     SELECT intInvoiceId
-		 , intCreditMemoId
-         , strReceiptNumber
-         , strEODNo
-         , strPOSDrawerName
-		 , EOD.ysnClosed
-		 , POS.strComment
+		 ,intCreditMemoId
+         ,strReceiptNumber
+         ,strEODNo
+         ,strPOSDrawerName
+		 ,EOD.ysnClosed
+		 ,POS.strComment
     FROM dbo.tblARPOS POS WITH (NOLOCK)
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
@@ -341,12 +343,12 @@ LEFT JOIN (
      AND INV.strType = 'POS'
 LEFT OUTER JOIN (
 	SELECT intCreditMemoId
-         , ysnClosed
-         , strReceiptNumber
-         , strEODNo
-		 , intItemCount
-		 , dblTotal
-         , strPOSDrawerName
+         ,ysnClosed
+         ,strReceiptNumber
+         ,strEODNo
+		 ,intItemCount
+		 ,dblTotal
+         ,strPOSDrawerName
     FROM dbo.tblARPOS POS WITH (NOLOCK)
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId 
@@ -358,7 +360,7 @@ OUTER APPLY (
     SELECT TOP 1 ID.intInvoiceId
     FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
     WHERE INV.intInvoiceId = ID.intInvoiceId
-      AND (ISNULL(intTicketId, 0) <> 0 OR ISNULL(intInventoryShipmentItemId, 0) <> 0 OR ISNULL(intLoadDetailId, 0) <> 0)
+      AND (ISNULL(intTicketId,0) <> 0 OR ISNULL(intInventoryShipmentItemId,0) <> 0 OR ISNULL(intLoadDetailId,0) <> 0)
 ) INTEG
 LEFT JOIN (
     SELECT ID.intInvoiceId
@@ -367,7 +369,7 @@ LEFT JOIN (
     GROUP BY ID.intInvoiceId
 ) APAR ON APAR.intInvoiceId = INV.intInvoiceId
 LEFT OUTER JOIN (
-	SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
+	SELECT  intInvoiceId,PD.dblPayment,dblBasePayment,P.ysnPosted
 	FROM	tblARPaymentDetail PD
 	INNER JOIN tblARPayment P
 	ON PD.intPaymentId = P.intPaymentId
@@ -413,7 +415,7 @@ LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = I
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId,0)
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INV.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 OUTER APPLY(
-	SELECT TOP 1 intLocationAccountSegmentId, intCompanyAccountSegmentId
+	SELECT TOP 1 intLocationAccountSegmentId,intCompanyAccountSegmentId
 	FROM dbo.vyuARAccountDetail
 	WHERE intAccountId = INV.intAccountId
 ) GLSEGMENT

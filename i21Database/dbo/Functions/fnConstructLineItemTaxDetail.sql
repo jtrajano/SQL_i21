@@ -151,6 +151,7 @@ BEGIN
 						,@CurrencyId
 						,@CurrencyExchangeRateTypeId
 						,@CurrencyExchangeRate
+						,NULL
 					) 	
 		END
 
