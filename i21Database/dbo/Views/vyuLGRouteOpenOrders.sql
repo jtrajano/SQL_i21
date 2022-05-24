@@ -49,7 +49,7 @@ SELECT
 	,dblOnHand = NULL
 	,dblOrderedQty = NULL
 	,dblQuantity = TMO.dblQuantity
-	,dblStandardWeight = NULL
+	,dblStandardWeight = TMO.dblQuantity * ISNULL(SW.dblStandardWeight, 0)
 	,strCustomerReference = ''
 	,strOrderComments = TMO.strComments
 	,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
@@ -70,6 +70,7 @@ LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.int
 LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
 LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
+OUTER APPLY (SELECT TOP 1 dblStandardWeight FROM tblICItemUOM WHERE intItemId = TMS.intProduct AND ysnStockUnit = 1) SW
 WHERE TMO.strOrderStatus <> 'Delivered' AND TMO.strOrderStatus <> 'Routed'
 
 UNION ALL
