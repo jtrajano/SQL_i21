@@ -6070,9 +6070,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Coworker Hierarchy' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Coworker Hierarchy', N'Help Desk', @HelpDeskMaintenanceParentMenuId, N'Coworker Hierarchy', N'Maintenance', N'Screen', N'HelpDesk.view.CoworkerHierarchy', N'small-menu-maintenance', 0, 0, 0, 1, 11, 1)
+	VALUES (N'Coworker Hierarchy', N'Help Desk', @HelpDeskMaintenanceParentMenuId, N'Coworker Hierarchy', N'Maintenance', N'Screen', N'HelpDesk.view.CoworkerHierarchy?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 11, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'HelpDesk.view.CoworkerHierarchy' WHERE strMenuName = 'Coworker Hierarchy' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'HelpDesk.view.CoworkerHierarchy?showSearch=true' WHERE strMenuName = 'Coworker Hierarchy' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Summary' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
