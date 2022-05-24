@@ -299,6 +299,8 @@ SELECT @totalInvalid = COUNT(DISTINCT [intInvoiceId]) FROM ##ARInvalidInvoiceDat
 
 IF(@totalInvalid > 0)
 	BEGIN
+		IF @RaiseError = 1
+			SELECT TOP 1 @ErrorMerssage = strPostingError FROM ##ARInvalidInvoiceData
 
         UPDATE ILD
 		SET
@@ -390,8 +392,10 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 		IF @RaiseError = 1
 			BEGIN
-				SELECT TOP 1 @ErrorMerssage = [strPostingMessage] FROM tblARInvoiceIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId AND [ysnPost] IS NOT NULL
-				RAISERROR(@ErrorMerssage, 11, 1)							
+				IF ISNULL(@ErrorMerssage, '') = ''
+					SELECT TOP 1 @ErrorMerssage = [strPostingMessage] FROM tblARInvoiceIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId AND [ysnPost] IS NOT NULL
+
+				RAISERROR(@ErrorMerssage, 11, 1)
 			END				
 		GOTO Post_Exit	
 	END
