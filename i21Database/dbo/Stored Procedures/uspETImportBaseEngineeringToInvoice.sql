@@ -180,7 +180,7 @@ BEGIN
 			END
 			ELSE
 				BEGIN
-					SELECT @intLineItemTaxId =  dbo.fnGetTaxGroupIdForCustomer(@intCustomerEntityId,@intLocationId,@intItemId,null,null,null)
+					SELECT @intLineItemTaxId =  dbo.fnGetTaxGroupIdForCustomer(@intCustomerEntityId,@intLocationId,@intItemId,null,null,null,null)
 				END
 
 			---------------------------------------------------------------------------------------------------------------------------------------------------------------------

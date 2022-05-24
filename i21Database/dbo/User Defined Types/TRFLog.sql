@@ -44,4 +44,6 @@ CREATE TYPE [dbo].[TRFLog] AS TABLE (
 	, ysnNegateLog BIT NULL DEFAULT(0)
 	, ysnDeleted BIT NULL DEFAULT(0)
 	, ysnReverseLog BIT NULL DEFAULT(0)
+	, intOverrideBankValuationId INT NULL
+	, strOverrideBankValuation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )

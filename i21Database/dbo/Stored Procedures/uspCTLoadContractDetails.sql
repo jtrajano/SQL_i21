@@ -615,6 +615,7 @@ BEGIN TRY
 		, strLCTreasuryBank = credB.strBankName
 		, strLCBank = credB2.strBankName
 		, CT.dblRollArb
+		, CD.ysnApplyDefaultTradeFinance
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId

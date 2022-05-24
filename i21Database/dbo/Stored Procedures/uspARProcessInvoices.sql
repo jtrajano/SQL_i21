@@ -234,6 +234,7 @@ DECLARE  @Id									INT
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
+		,@SourcedFrom							NVARCHAR(100)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -579,6 +580,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intShipmentId'
 						SET @SourceTable = 'tblLGShipment'
+						SET @SourcedFrom = 'Logistics'
 					END
 				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
 					BEGIN
@@ -599,6 +601,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intInventoryShipmentId'
 						SET @SourceTable = 'tblICInventoryShipment'
+						SET @SourcedFrom = 'Inventory Shipment'
 					END		
 
 				IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
@@ -611,6 +614,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intLoadId'
 						SET @SourceTable = 'tblLGLoad'
+						SET @SourcedFrom = 'Logistics'
 					END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
@@ -735,6 +739,7 @@ BEGIN
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
+			,@SourcedFrom					= @SourcedFrom
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId

@@ -25,7 +25,8 @@ DECLARE  @CustomerId					INT
 		,@CustomerLocationId			INT
 		,@SubCurrencyRate				DECIMAL(18,6)
 		,@FreightTermId					INT
-		,@CurrencyId					INT		
+		,@CurrencyId					INT
+		,@FOB							NVARCHAR(100)
 						
 SELECT
 	 @CustomerId			= I.[intEntityCustomerId]
@@ -35,6 +36,7 @@ SELECT
 	,@CustomerLocationId	= (CASE WHEN ISNULL(F.[strFobPoint],'Destination') = 'Origin ' THEN I.[intBillToLocationId] ELSE I.[intShipToLocationId] END)
 	,@FreightTermId			= I.[intFreightTermId] 
 	,@CurrencyId			= I.[intCurrencyId]
+	,@FOB					= I.[strTaxPoint]
 FROM
 	tblARInvoice I
 LEFT OUTER JOIN
@@ -185,7 +187,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[intUnitMeasureId] 
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1, NULL, 1, 0, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1, NULL, 1, 0, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate, @FOB)
 		
 		
 		UPDATE IDT			

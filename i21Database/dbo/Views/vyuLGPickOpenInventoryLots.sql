@@ -149,7 +149,11 @@ FROM (
 	   ,strClass = Class.strDescription
 	   ,strProductLine = ProductLine.strDescription
 	   ,Item.strMarketValuation
+	   ,Lot.strWarrantNo
+	   ,Lot.intWarrantStatus
+	   ,WS.strWarrantStatus
 	FROM tblICLot Lot
+		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
