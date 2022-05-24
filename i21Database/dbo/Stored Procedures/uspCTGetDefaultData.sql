@@ -15,7 +15,9 @@
 	@intRateTypeId			INT = NULL,
 	@intInvoiceCurrencyId	INT = NULL,
 	@intLoggedInUserId		INT	= NULL,
-	@dtmEndDate				DATETIME = NULL
+	@dtmEndDate				DATETIME = NULL,
+	@intBorrowingFacilityId INT = NULL,
+	@intBorrowingFacilityLimitId INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -256,6 +258,30 @@ BEGIN
 		BEGIN
 			SELECT @intEntityId,@strEntityName,@intBrokerageAccountId,@strAccountNumber
 		END
+	END
+	
+	IF @strType = 'BorrowingFacility'
+	BEGIN
+
+			SELECT TOP 1 BFL.intBorrowingFacilityLimitId, BFL.strBorrowingFacilityLimit , BFLD.intBorrowingFacilityLimitDetailId, BFLD.strLimitDescription
+						,BFLD.intBankValuationRuleId
+			FROM tblCMBorrowingFacilityLimitDetail BFLD
+			JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = BFLD.intBorrowingFacilityLimitId and BFL.strBorrowingFacilityLimit = 'Contract'
+			JOIN tblCMBorrowingFacility BF on BF.intBorrowingFacilityId = BFL.intBorrowingFacilityId
+			LEFT JOIN tblCMBankValuationRule VR on VR.intBankValuationRuleId = BFLD.intBankValuationRuleId
+			WHERE BF.intBorrowingFacilityId = @intBorrowingFacilityId and BFLD.ysnDefault = 1
+	END
+
+	IF @strType = 'Sublimit'
+	BEGIN
+
+			SELECT TOP 1 BFL.intBorrowingFacilityLimitId, BFL.strBorrowingFacilityLimit , BFLD.intBorrowingFacilityLimitDetailId, BFLD.strLimitDescription
+						,BFLD.intBankValuationRuleId
+			FROM tblCMBorrowingFacilityLimitDetail BFLD
+			JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = BFLD.intBorrowingFacilityLimitId and BFL.intBorrowingFacilityLimitId = @intBorrowingFacilityLimitId
+			JOIN tblCMBorrowingFacility BF on BF.intBorrowingFacilityId = BFL.intBorrowingFacilityId
+			LEFT JOIN tblCMBankValuationRule VR on VR.intBankValuationRuleId = BFLD.intBankValuationRuleId
+			WHERE BF.intBorrowingFacilityId = @intBorrowingFacilityId and BFLD.ysnDefault = 1
 	END
 
 END
