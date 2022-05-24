@@ -97,7 +97,7 @@ BEGIN TRY
 						LEFT JOIN tblSMCompanyLocation cl 
 							ON cl.intCompanyLocationId = il.intLocationId 
 						INNER JOIN tblICItemUOM iu 
-							ON iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+							ON iu.intItemId = i.intItemId 
 						WHERE MUD.intCheckoutId = @intCheckoutId
 							AND il.intLocationId = @intLocationId
 							AND MUD.strUpDownNotes IS NOT NULL
