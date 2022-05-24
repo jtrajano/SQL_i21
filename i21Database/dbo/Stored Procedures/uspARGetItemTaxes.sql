@@ -17,12 +17,13 @@
 	,@CurrencyId					INT				= NULL
 	,@CurrencyExchangeRateTypeId	INT				= NULL
 	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
+	,@FOB							NVARCHAR(100)	= NULL
 AS
 	-- DECLARE @UOMId INT = 0;
 	-- SELECT @UOMId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @ItemUOMId
 
 	IF(ISNULL(@TaxGroupId,0) = 0)
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId)			
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId, @FOB)
 
 	DECLARE @IsCustomerSiteTaxable	BIT
 
