@@ -1759,7 +1759,7 @@ BEGIN TRY
 			, intPricingTypeId
 			, strPricingType
 			, dblRatio
-			, dblContractBasis = CASE WHEN ISNULL(intPricingTypeId, 0) = 3 THEN dblMarketBasis1 ELSE dblContractBasis END
+			, dblContractBasis 
 			, dblDummyContractBasis
 			, dblCash
 			, dblFuturesClosingPrice1
@@ -1854,8 +1854,19 @@ BEGIN TRY
 				, cd.intPricingTypeId
 				, cd.strPricingType
 				, cd.dblRatio
-				, dblContractBasis = ISNULL(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN ISNULL(cd.dblBasis, 0)
-												ELSE 0 END, 0) / CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END
+				, dblContractBasis = ISNULL(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN
+													CASE WHEN strPricingType = 'HTA' AND  strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
+													--HTA (Partially Priced) Priced Record
+													WHEN cd.intPricingTypeId = 3 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' THEN ISNULL(priceFixationDetailForHTA.dblBasis, 0)
+													-- Fully Priced but when backdated, not yet fully priced 
+													WHEN cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' AND priceFixationDetailForHTA.dblBasis IS NOT NULL THEN ISNULL(priceFixationDetailForHTA.dblBasis, 0)
+													ELSE 
+														CASE WHEN cd.intPricingTypeId IN (1, 2) 
+															THEN ISNULL(cd.dblBasis, 0) 
+															ELSE ISNULL(cd.dblBasis, 0) END 
+													END
+												ELSE 0 END, 0) 
+												/ CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END
 				, dblDummyContractBasis = ISNULL(cd.dblBasis, 0)
 				, dblCash = CASE WHEN cd.intPricingTypeId = 6 THEN dblCashPrice ELSE NULL END
 				, dblFuturesClosingPrice1 = dblFuturePrice
@@ -2020,6 +2031,38 @@ BEGIN TRY
 							
 				) t
 			) priceFixationDetail
+			OUTER APPLY (
+				-- Weighted Average Futures Price for Basis (Priced Qty) in Multiple Price Fixations
+				SELECT dblBasis = SUM(dblBasis) 
+				FROM
+				(
+					SELECT dblBasis = (pfd.dblBasis) * (pfd.dblQuantity / pricedTotal.dblTotalPricedQuantity)
+					FROM tblCTPriceFixation pfh
+					INNER JOIN tblCTPriceFixationDetail pfd
+						ON pfh.intPriceFixationId = pfd.intPriceFixationId
+						AND pfd.dtmFixationDate <= @dtmEndDate
+					OUTER APPLY 
+						(
+							SELECT dblTotalPricedQuantity = SUM(pfdi.dblQuantity)
+							FROM tblCTPriceFixationDetail pfdi
+							WHERE pfh.intPriceFixationId = pfdi.intPriceFixationId
+							AND pfdi.dtmFixationDate <= @dtmEndDate
+						) pricedTotal
+					WHERE (cd.ysnMultiplePriceFixation = 1 AND intContractHeaderId = cd.intContractHeaderId OR intContractDetailId = cd.intContractDetailId)
+						AND (   
+							-- Basis (Partially Priced) Priced Record
+							(cd.intPricingTypeId = 3 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
+							-- Backdated and not yet fully priced in that specific date
+							OR ((cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced') 
+									AND EXISTS (SELECT TOP 1 '' FROM @ContractBalance cb
+											WHERE cb.intContractDetailId = cd.intContractDetailId
+											AND cb.strPricingType = 'HTA'
+											)
+								)
+							)
+							
+				) t
+			) priceFixationDetailForHTA
 			WHERE cd.intCommodityId = @intCommodityId 
 		)t
 
