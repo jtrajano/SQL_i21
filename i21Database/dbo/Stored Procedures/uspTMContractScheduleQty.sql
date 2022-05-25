@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTMContractScheduleQty]
-	@intSiteId INT,
+	@intDispatchId INT,
 	@dblQuantity NUMERIC(18,6),
 	@strScreenName NVARCHAR(100),
 	@intContractDetailId INT = NULL,
@@ -37,7 +37,7 @@ BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
 					, @dblQuantityToUpdate = @dblRemainingQty
 					, @intUserId = @intUserId
-					, @intExternalId = @intSiteId
+					, @intExternalId = @intDispatchId
 					, @strScreenName = @strScreenName
 			END
 
@@ -53,24 +53,12 @@ BEGIN
 		SELECT @intContractDetailId = intContractId
 			, @dblQuantity = (dblQuantity - dblOverageQty) * -1
 			, @intUserId = intUserID
-		FROM tblTMDispatch WHERE intSiteID = @intSiteId
+		FROM tblTMDispatch WHERE intDispatchID = @intDispatchId
 
-		IF(@intContractDetailId IS NOT NULL)
-		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblCTSequenceUsageHistory WHERE intContractDetailId = @intContractDetailId
-			AND strScreenName = @strScreenName
-			AND strFieldName = 'Scheduled Quantity'
-			AND intExternalId = @intSiteId 
-			--AND dblTransactionQuantity = @dblQuantity
-			)
-			BEGIN
-				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
-					, @dblQuantityToUpdate = @dblQuantity 
-					, @intUserId = @intUserId
-					, @intExternalId = @intSiteId
-					, @strScreenName = @strScreenName
-			END
-		END
-
+		EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
+			, @dblQuantityToUpdate = @dblQuantity 
+			, @intUserId = @intUserId
+			, @intExternalId = @intDispatchId
+			, @strScreenName = @strScreenName
 	END
 END
