@@ -16,45 +16,42 @@ SET ANSI_WARNINGS OFF
 BEGIN
 	IF(@dblQuantity > 0)
 	BEGIN
-		IF(@intContractDetailId IS NOT NULL)
+		-- IF POSITIVE QTY THEN ADD FROM SCHEDULED QTY
+		DECLARE @dblBalance DECIMAL(18,6) = NULL
+
+		SELECT @dblBalance = B.dblBalance
+			FROM tblCTContractHeader A
+			INNER JOIN vyuCTContractHeaderNotMapped H
+				ON A.intContractHeaderId = H.intContractHeaderId
+			INNER JOIN tblCTContractDetail B
+				ON A.intContractHeaderId = B.intContractHeaderId
+			WHERE B.intContractDetailId = @intContractDetailId
+
+		IF(@dblBalance > 0)
 		BEGIN
-			-- IF POSITIVE QTY THEN ADD FROM SCHEDULED QTY
-			DECLARE @dblBalance DECIMAL(18,6) = NULL
-
-			SELECT @dblBalance = B.dblBalance
-				FROM tblCTContractHeader A
-				INNER JOIN vyuCTContractHeaderNotMapped H
-					ON A.intContractHeaderId = H.intContractHeaderId
-				INNER JOIN tblCTContractDetail B
-					ON A.intContractHeaderId = B.intContractHeaderId
-				WHERE B.intContractDetailId = @intContractDetailId
-
-			IF(@dblBalance > 0)
+			IF(@dblQuantity > @dblBalance)
 			BEGIN
-				IF(@dblQuantity > @dblBalance)
-				BEGIN
-					DECLARE @dblRemainingQty DECIMAL(18,6) = NULL
-					SET @dblRemainingQty = @dblQuantity - (@dblQuantity - @dblBalance)
-					
-					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
-						, @dblQuantityToUpdate = @dblRemainingQty
-						, @intUserId = @intUserId
-						, @intExternalId = @intSiteId
-						, @strScreenName = @strScreenName
-				END
-				ELSE
-				BEGIN
-					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
-						, @dblQuantityToUpdate = @dblQuantity
-						, @intUserId = @intUserId
-						, @intExternalId = @intSiteId
-						, @strScreenName = @strScreenName
-				END
+				DECLARE @dblRemainingQty DECIMAL(18,6) = NULL
+				SET @dblRemainingQty = @dblQuantity - (@dblQuantity - @dblBalance)
+				
+				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
+					, @dblQuantityToUpdate = @dblRemainingQty
+					, @intUserId = @intUserId
+					, @intExternalId = @intSiteId
+					, @strScreenName = @strScreenName
 			END
 			ELSE
 			BEGIN
-				RAISERROR('Contract has 0 balance',16, 1)
+				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
+					, @dblQuantityToUpdate = @dblQuantity
+					, @intUserId = @intUserId
+					, @intExternalId = @intSiteId
+					, @strScreenName = @strScreenName
 			END
+		END
+		ELSE
+		BEGIN
+			RAISERROR('Contract has 0 balance',16, 1)
 		END
 	END
 	ELSE
