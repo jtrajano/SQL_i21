@@ -151,10 +151,11 @@ WHERE B.intId IS NULL
 --BUT uspAPPostBill calls again for the same intBillId
 --DELETE THE intBillId ON THE LIST OF FOR POST VOUCHERS
 --THAT IS ALREADY PART OF tblAPBillForPosting
-DELETE A
-FROM #tmpPostBillData A
-LEFT JOIN @idForPost B ON A.intBillId = B.intId
-WHERE B.intId IS NULL
+DELETE A  
+FROM #tmpPostBillData A  
+LEFT JOIN @idForPost B ON A.intBillId = B.intId  
+LEFT JOIN tblAPBill C ON A.intBillId = C.intBillId
+WHERE B.intId IS NULL  OR C.ysnPosted = 1
 
 --SET THE UPDATED @billIds
 SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
@@ -163,7 +164,7 @@ ORDER BY intBillId
 
 IF NULLIF(@billIds, '') IS NULL
 BEGIN
-	RAISERROR('Posting/unposting already in process.', 16, 1);
+	RAISERROR('Posting/unposting already in process or already posted.', 16, 1);
 	GOTO Post_Rollback
 END
 
