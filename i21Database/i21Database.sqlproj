@@ -798,6 +798,7 @@
     <Build Include="dbo\Stored Procedures\uspLGUpdateReleasedQtyForPickLot.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateReleasedQtyForShipmentWithLot.sql" />
     <Build Include="dbo\Functions\fnCTGetCompanyLocationCount.sql" />
+    <Build Include="dbo\Views\vyuARTaxLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
