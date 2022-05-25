@@ -137,3 +137,5 @@ FROM tblRestApiItemTaxes t
 WHERE t.guiTaxesUniqueId = @guiTaxesUniqueId
 
 SELECT ISNULL(@dblTax, 0) as dblTax
+
+DELETE FROM tblRestApiItemTaxes WHERE guiTaxesUniqueId = @guiTaxesUniqueId
