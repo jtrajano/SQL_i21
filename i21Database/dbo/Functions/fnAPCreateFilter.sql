@@ -15,7 +15,7 @@ BEGIN
 
 	DECLARE @filter NVARCHAR(MAX)
 
-	SET @filter = CASE @dataType
+	SET @filter = CASE @datatype
 					WHEN 'Date'
 						THEN 'DATEADD(dd, DATEDIFF(dd, 0,' + @fieldname + '), 0)'
 					WHEN 'DateTime'
