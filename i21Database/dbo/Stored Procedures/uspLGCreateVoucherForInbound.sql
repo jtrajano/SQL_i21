@@ -13,6 +13,8 @@ BEGIN TRY
 	DECLARE @intMinRecord AS INT
 	DECLARE @voucherPayable AS VoucherPayable
 	DECLARE @voucherPayableToProcess AS VoucherPayable
+	DECLARE @voucherPayableTax AS VoucherDetailTax
+	DECLARE @intTaxGroupId INT
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @intPurchaseSale INT
@@ -148,6 +150,22 @@ BEGIN TRY
 			RAISERROR('Load/Shipment has FOB Point of ''Destination''. Create and post Inventory Receipt first before creating Voucher.',16,1)
 		END
 
+		-- Get tax group
+		SELECT TOP 1
+			@intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
+				LD.intVendorEntityId	-- @VendorId
+				,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
+				,NULL				--,@ItemId
+				,EL.intEntityLocationId		--,@VendorLocationId
+				,3--L.intFreightTermId	--,@FreightTermId
+			)
+		FROM tblLGLoad L
+		INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		INNER JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
+		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1	
+		WHERE L.intLoadId = @intLoadId
+
 		INSERT INTO @voucherPayable(
 			[intEntityVendorId]
 			,[intTransactionType]
@@ -209,7 +227,8 @@ BEGIN TRY
 			,[intBorrowingFacilityLimitDetailId]
 			,[strReferenceNo]
 			,[intBankValuationRuleId]
-			,[strComments])
+			,[strComments]
+			,[intPurchaseTaxGroupId])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -288,6 +307,7 @@ BEGIN TRY
 			,[strReferenceNo] = L.strTradeFinanceReferenceNo
 			,[intBankValuationRuleId] = L.intBankValuationRuleId
 			,[strComments] = L.strTradeFinanceComments
+			,[intPurchaseTaxGroupId] = @intTaxGroupId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -446,7 +466,8 @@ BEGIN TRY
 				,[intBorrowingFacilityLimitDetailId]
 				,[strReferenceNo]
 				,[intBankValuationRuleId]
-				,[strComments])
+				,[strComments]
+				,[intPurchaseTaxGroupId])
 			SELECT
 				[intEntityVendorId]
 				,[intTransactionType] = CASE WHEN @intType = 1 THEN 1 WHEN @intType = 2 THEN 16 END
@@ -509,14 +530,145 @@ BEGIN TRY
 				,[strReferenceNo]
 				,[intBankValuationRuleId]
 				,[strComments]
+				,[intPurchaseTaxGroupId]
 			FROM @voucherPayable
 			WHERE intEntityVendorId = @intVendorEntityId
+
+			-- Assemble Item Taxes
+			BEGIN
+				INSERT INTO @voucherPayableTax (
+					[intVoucherPayableId]
+					,[intTaxGroupId]				
+					,[intTaxCodeId]				
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[intAccountId]				
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[ysnTaxAdjusted]			
+					,[ysnSeparateOnBill]			
+					,[ysnCheckOffTax]		
+					,[ysnTaxExempt]	
+					,[ysnTaxOnly]
+				)
+				SELECT 
+					[intVoucherPayableId]			= payables.intVoucherPayableId
+					,[intTaxGroupId]				= @intTaxGroupId
+					,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
+					,[intTaxClassId]				= vendorTax.[intTaxClassId]
+					,[strTaxableByOtherTaxes]		= vendorTax.[strTaxableByOtherTaxes]
+					,[strCalculationMethod]			= vendorTax.[strCalculationMethod]
+					,[dblRate]						= vendorTax.[dblRate]
+					,[intAccountId]					= vendorTax.[intTaxAccountId]
+					,[dblTax]						=	CASE 
+															WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN 
+																vendorTax.[dblTax] 
+															ELSE 
+																CASE 
+																	WHEN payables.dblExchangeRate <> 0 THEN 
+																		ROUND(
+																			dbo.fnDivide(
+																				-- Convert the tax to the transaction currency. 
+																				vendorTax.[dblTax] 
+																				, payables.dblExchangeRate
+																			)
+																		, 2) 
+																	ELSE 
+																		vendorTax.[dblTax] 
+																END 
+														END 
+					,[dblAdjustedTax]				= 
+														CASE 
+															WHEN vendorTax.[ysnTaxAdjusted] = 1 THEN 
+																vendorTax.[dblAdjustedTax]
+															WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN 
+																vendorTax.[dblTax] 
+															ELSE 
+																CASE 
+																	WHEN payables.dblExchangeRate <> 0 THEN 
+																		ROUND(
+																			dbo.fnDivide(
+																				-- Convert the tax to the transaction currency. 
+																				vendorTax.[dblTax] 
+																				, payables.dblExchangeRate
+																			)
+																		, 2) 
+																	ELSE 
+																		vendorTax.[dblTax] 
+																END 
+														END
+					,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
+					,[ysnSeparateOnBill]			= vendorTax.[ysnSeparateOnInvoice]
+					,[ysnCheckoffTax]				= vendorTax.[ysnCheckoffTax]
+					,[ysnTaxExempt]					= vendorTax.[ysnTaxExempt]
+					,[ysnTaxOnly]					= 0
+				FROM @voucherPayableToProcess payables
+				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = payables.intLoadShipmentDetailId
+				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND payables.intLoadShipmentId = L.intLoadId
+				INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+				INNER JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
+				INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1
+				INNER JOIN tblICItem I ON I.intItemId = LD.intItemId
+				OUTER APPLY [dbo].[fnGetItemTaxComputationForVendor](
+						payables.intItemId,
+						payables.intEntityVendorId,
+						GETDATE(),
+						-- Cost
+						CASE WHEN payables.intWeightUOMId IS NOT NULL THEN 
+							dbo.fnCalculateCostBetweenUOM(
+								COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
+								, payables.intWeightUOMId
+								, CASE WHEN payables.ysnSubCurrency = 1 AND ISNULL(payables.intSubCurrencyCents, 0) <> 0 THEN 
+										dbo.fnDivide(payables.dblCost, payables.intSubCurrencyCents) 
+									ELSE
+										payables.dblCost
+								END
+							) 
+						ELSE 
+							dbo.fnCalculateCostBetweenUOM(
+								COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
+								, LD.intItemUOMId
+								, CASE WHEN payables.ysnSubCurrency = 1 AND ISNULL(payables.intSubCurrencyCents, 0) <> 0 THEN 
+										dbo.fnDivide(payables.dblCost, payables.intSubCurrencyCents) 
+									ELSE
+										payables.dblCost
+								END
+							)
+						END,
+						-- Qty
+						CASE	
+							WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN 
+								payables.dblNetWeight
+							ELSE 
+								payables.dblOrderQty 
+						END,
+						@intTaxGroupId,
+						CL.intCompanyLocationId,
+						EL.intEntityLocationId,
+						1,
+						0,
+						L.intFreightTermId,
+						0,
+						ISNULL(payables.intWeightUOMId, payables.intOrderUOMId),
+						NULL,
+						NULL,
+						NULL
+					) vendorTax
+				WHERE vendorTax.intTaxGroupId IS NOT NULL
+			END
+
+			SELECT * FROM @voucherPayableToProcess
+			SELECT * FROM @voucherPayableTax
 
 			IF (@intType = 1)
 			BEGIN
 				EXEC uspAPCreateVoucher 
 					@voucherPayables = @voucherPayableToProcess
-					,@voucherPayableTax = DEFAULT
+					,@voucherPayableTax = @voucherPayableTax
 					,@userId = @intEntityUserSecurityId
 					,@throwError = 1
 					,@error = @strErrorMessage OUTPUT
@@ -526,7 +678,7 @@ BEGIN TRY
 			BEGIN
 				EXEC uspAPCreateProvisional
 					@voucherPayables = @voucherPayableToProcess
-					,@voucherPayableTax = DEFAULT
+					,@voucherPayableTax = @voucherPayableTax
 					,@userId = @intEntityUserSecurityId
 					,@throwError = 1
 					,@error = @strErrorMessage OUTPUT
