@@ -189,9 +189,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , dblOptionalityPremium				= INV.dblOptionalityPremium
 	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
 	 , strReasonablenessComment				= INV.strReasonablenessComment
-	 , intNewTaxGroupId						= INV.intNewTaxGroupId
-	 , ysnOverrideTaxGroup               	= CAST(CASE WHEN ISNULL(INV.intNewTaxGroupId, 0) > 0 THEN 1 ELSE 0 END AS BIT)
-	 , strNewTaxGroup						= ISNULL(NEWTAXGROUP.strTaxGroup, '')
+	 , intOriginalTaxGroupId				= INV.intOriginalTaxGroupId
+	 , ysnOverrideTaxGroup               	= CAST(CASE WHEN INV.intOriginalTaxGroupId IS NULL OR INV.intOriginalTaxGroupId = INV.intTaxGroupId THEN 0 ELSE 1 END AS BIT)
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -264,11 +263,6 @@ LEFT JOIN (
 		 , strTaxGroup
 	FROM tblSMTaxGroup WITH(NOLOCK)
 ) TAXGROUP ON INV.intTaxGroupId = TAXGROUP.intTaxGroupId
-LEFT JOIN ( 
-	SELECT intTaxGroupId
-		 , strTaxGroup
-	FROM tblSMTaxGroup WITH(NOLOCK)
-) NEWTAXGROUP ON INV.intNewTaxGroupId = NEWTAXGROUP.intTaxGroupId
 LEFT JOIN (
 	SELECT intAccountId
 	     , strAccountId 

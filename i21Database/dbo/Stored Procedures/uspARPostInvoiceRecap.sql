@@ -185,6 +185,7 @@ BEGIN TRY
 		,[strAccountId]
 		,[strAccountGroup]
 		,[strRateType]
+		,[intCurrencyExchangeRateTypeId]
 	)
 	SELECT [strTransactionId]				= A.[strTransactionId]
 		,[intTransactionId]					= A.[intTransactionId]
@@ -214,6 +215,7 @@ BEGIN TRY
 		,[strAccountId]						= B.[strAccountId]
 		,[strAccountGroup]					= C.[strAccountGroup]
 		,[strRateType]						= RATETYPE.strCurrencyExchangeRateType
+		,[intCurrencyExchangeRateTypeId]	= RATETYPE.[intCurrencyExchangeRateTypeId]
 	FROM @GLEntries A
 	INNER JOIN dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
 	INNER JOIN dbo.tblGLAccountGroup C ON B.intAccountGroupId = C.intAccountGroupId			
@@ -222,7 +224,7 @@ BEGIN TRY
 	CROSS APPLY dbo.fnGetDebitUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) DebitUnit
 	CROSS APPLY dbo.fnGetCreditUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) CreditUnit
 	OUTER APPLY (
-		SELECT SMCERT.strCurrencyExchangeRateType,dblBaseInvoiceTotal,dblInvoiceTotal,dblCurrencyExchangeRate
+		SELECT SMCERT.strCurrencyExchangeRateType,dblBaseInvoiceTotal,dblInvoiceTotal,dblCurrencyExchangeRate,ID.[intCurrencyExchangeRateTypeId]
 		FROM dbo.tblARInvoice I
 		CROSS APPLY (
 			SELECT TOP 1 intCurrencyExchangeRateTypeId = ISNULL(intCurrencyExchangeRateTypeId, @DefaultCurrencyExchangeRateTypeId)

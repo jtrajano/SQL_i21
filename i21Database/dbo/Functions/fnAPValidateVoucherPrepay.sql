@@ -96,6 +96,19 @@ BEGIN
 			--amount due cannot be negative
 			(A.dblAmountDue < 0)
 		)
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'You cannot post for approved transaction.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			36
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intId] FROM @voucherPrepayIds) 
+		AND EXISTS (
+			SELECT 1 FROM vyuAPForApprovalTransaction B WHERE A.intBillId = B.intTransactionId --AND B.strScreenName = 'Voucher'
+		)
 	END
 	ELSE
 	BEGIN

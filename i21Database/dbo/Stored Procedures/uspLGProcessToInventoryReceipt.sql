@@ -888,7 +888,7 @@ BEGIN TRY
 			,[ysnAccrue] = 1
 			,[strReceiptType] = 'Purchase Contract'
 			,[intShipViaId] = NULL
-			,[intCurrencyId] = L.intCurrencyId
+			,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
 			,[intEntityVendorId] = LD.intVendorEntityId
 			,[intLocationId] = LD.intPCompanyLocationId
 			,[ysnPrice] = CV.ysnPrice
@@ -905,6 +905,9 @@ BEGIN TRY
 		JOIN tblICItem I ON I.intItemId = CV.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+		LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
 		WHERE CV.intLoadId = @intLoadId

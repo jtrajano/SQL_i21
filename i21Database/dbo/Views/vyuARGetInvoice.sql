@@ -195,12 +195,12 @@ SELECT
 	,intCompanyAccountSegmentId			= GLSEGMENT.intCompanyAccountSegmentId
 	,ysnIntraCompany					= CASE WHEN ISNULL(INV.ysnIntraCompany,0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries,0) END
 	,strGoodsStatus						= INV.strGoodsStatus
-	,ysnOverrideFreightCharge			= INV.ysnOverrideFreightCharge
 	,dblFreightCharge					= INV.dblFreightCharge
 	,strFreightCompanySegment			= INV.strFreightCompanySegment
 	,strFreightLocationSegment			= INV.strFreightLocationSegment
 	,intTaxLocationId                  	= INV.intTaxLocationId
 	,strTaxLocation						= TAXLOCATION.strLocationName
+	,strTaxLocationType					= INV.strTaxLocationType
 	,strTaxPoint                        = INV.strTaxPoint
 	,ysnOverrideTaxPoint                = CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
 	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
@@ -414,7 +414,7 @@ LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccount
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId,0)
 LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId,0)
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId,0)
-LEFT JOIN tblEMEntityLocation TAXLOCATION ON TAXLOCATION.intEntityLocationId = ISNULL(INV.intTaxLocationId,0)
+LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = INV.strTaxLocationType
 OUTER APPLY(
 	SELECT TOP 1 intLocationAccountSegmentId,intCompanyAccountSegmentId
 	FROM dbo.vyuARAccountDetail

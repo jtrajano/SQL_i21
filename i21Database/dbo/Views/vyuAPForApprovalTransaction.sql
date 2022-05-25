@@ -12,9 +12,9 @@ CROSS APPLY (
   B.strTransactionNo, B.intRecordId intTransactionId, B.intEntityId
  FROM tblSMTransaction B
  WHERE A.intScreenId = B.intScreenId
- AND (B.strApprovalStatus IS NOT NULL AND B.strApprovalStatus NOT IN ('No Need for Approval','Approved','Approved with Modifications'))
+ AND (B.strApprovalStatus IS NOT NULL AND B.strApprovalStatus NOT IN ('No Need for Approval','Approved','Approved with Modifications','Waiting for Submit'))
 ) APTransaction
-WHERE A.strScreenName IN ('Purchase Order','Voucher')
+WHERE A.strScreenName IN ('Purchase Order','Voucher','Debit Memo')
 -- AND EXISTS (
 --  --MAKE SURE THERE STILL HAS APPROVAL SETUP
 --  SELECT TOP 1 1 FROM tblEMEntityRequireApprovalFor em WHERE em.intScreenId = A.intScreenId AND em.intEntityId = APTransaction.intEntityId
