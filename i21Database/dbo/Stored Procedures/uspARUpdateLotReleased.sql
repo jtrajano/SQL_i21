@@ -32,29 +32,31 @@ INSERT INTO @ItemsToRelease (
 	,dtmDate
 )
 SELECT 
-	 intItemId				= intItemId
-	,intItemLocationId		= intItemLocationId
-	,intItemUOMId			= intItemUOMId
-	,intLotId				= intLotId
-	,intSubLocationId		= intSubLocationId
-	,intStorageLocationId	= intStorageLocationId
-	,dblQty					= SUM(dblQuantityShipped) * CASE WHEN @Post = 1 THEN 1 ELSE -1  END
-	,intTransactionId		= intInvoiceId
-	,strTransactionId		= strInvoiceNumber
+	 intItemId				= ARGIDL.intItemId
+	,intItemLocationId		= ARGIDL.intItemLocationId
+	,intItemUOMId			= ARGIDL.intItemUOMId
+	,intLotId				= ARGIDL.intLotId
+	,intSubLocationId		= ARGIDL.intSubLocationId
+	,intStorageLocationId	= ARGIDL.intStorageLocationId
+	,dblQty					= CASE WHEN @Post = 1 THEN ICL.dblReleasedQty - SUM(dblQuantityShipped) ELSE ICL.dblReleasedQty + SUM(dblQuantityShipped) END
+	,intTransactionId		= ARGIDL.intInvoiceId
+	,strTransactionId		= ARGIDL.strInvoiceNumber
 	,intTransactionTypeId	= @intLotTransactionType
 	,dtmDate				= GETDATE()
-FROM vyuARGetInvoiceDetailLot
+FROM vyuARGetInvoiceDetailLot ARGIDL
+INNER JOIN tblICLot ICL ON ARGIDL.intLotId = ICL.intLotId
 WHERE intInvoiceId = @InvoiceId
 GROUP BY
-	 intItemId
-	,intItemLocationId
-	,intItemUOMId
-	,intLotId
-	,intSubLocationId
-	,intStorageLocationId
-	,dblQuantityShipped
-	,intInvoiceId
-	,strInvoiceNumber
+	 ARGIDL.intItemId
+	,ARGIDL.intItemLocationId
+	,ARGIDL.intItemUOMId
+	,ARGIDL.intLotId
+	,ARGIDL.intSubLocationId
+	,ARGIDL.intStorageLocationId
+	,ICL.dblReleasedQty
+	,ARGIDL.dblQuantityShipped
+	,ARGIDL.intInvoiceId
+	,ARGIDL.strInvoiceNumber
  
 EXEC [uspICCreateLotRelease]
 	 @LotsToRelease 		= @ItemsToRelease
