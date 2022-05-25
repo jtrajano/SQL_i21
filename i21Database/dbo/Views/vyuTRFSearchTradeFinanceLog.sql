@@ -74,7 +74,6 @@ OUTER APPLY(
 		ON allocd.intSContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblCTContractHeader cth
 		ON ctd.intContractHeaderId = cth.intContractHeaderId
-	WHERE  tf.strTransactionType = 'Contract'
-	AND	intPContractDetailId = tf.intTransactionDetailId
+	WHERE intPContractDetailId = tf.intContractDetailId
 	ORDER BY allocd.dtmAllocatedDate DESC
 ) sold_to
