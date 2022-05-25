@@ -65,25 +65,25 @@ BEGIN TRY
 			RAISERROR('%s have empty pay to bank account.', 11, 1, @emptyBillPayToBankAccount);
 		END
 
-		--VALIDATE MULTIPLE PAY BANK ACCOUNT COMBINATIONS
-		SELECT @billPayBankAccountCount = COUNT(*) FROM @ids
-		IF @billPayBankAccountCount = 1
-		BEGIN
-			SELECT @billPayBankAccountCount = COUNT(intGroupCount)
-			FROM (
-				SELECT COUNT(*) intGroupCount
-				FROM tblAPPayment P
-				INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
-				INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-				WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND PD.dblPayment != 0 AND P.intPaymentMethodId = 2
-				GROUP BY B.intPayFromBankAccountId, B.intPayToBankAccountId
-			) A
+		-- --VALIDATE MULTIPLE PAY BANK ACCOUNT COMBINATIONS
+		-- SELECT @billPayBankAccountCount = COUNT(*) FROM @ids
+		-- IF @billPayBankAccountCount = 1
+		-- BEGIN
+		-- 	SELECT @billPayBankAccountCount = COUNT(intGroupCount)
+		-- 	FROM (
+		-- 		SELECT COUNT(*) intGroupCount
+		-- 		FROM tblAPPayment P
+		-- 		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		-- 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		-- 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND PD.dblPayment != 0 AND P.intPaymentMethodId = 2
+		-- 		GROUP BY B.intPayFromBankAccountId, B.intPayToBankAccountId
+		-- 	) A
 
-			IF @billPayBankAccountCount > 1
-			BEGIN
-				RAISERROR('Multiple sets of pay from and to bank account is not allowed.', 11, 1);
-			END
-		END
+		-- 	IF @billPayBankAccountCount > 1
+		-- 	BEGIN
+		-- 		RAISERROR('Multiple sets of pay from and to bank account is not allowed.', 11, 1);
+		-- 	END
+		-- END
 
 		--UPDATE PAYMENT SCHEDULE
 		UPDATE PS
