@@ -9178,6 +9178,8 @@
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
     <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intLFutOptTransactionId.sql" />
     <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
+    <Build Include="dbo\Tables\tblICRecostFormulation.sql" />
+    <Build Include="dbo\Tables\tblICRecostFormulationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
