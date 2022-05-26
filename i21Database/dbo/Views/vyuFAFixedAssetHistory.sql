@@ -54,6 +54,7 @@ SELECT
 	0 dblFunctionalSection179,
 	0 dblBonusDepreciation,
 	0 dblFunctionalBonusDepreciation,
+	CAST(0 AS BIT) ysnAddToBasis,
 	1 intConcurrencyId
  FROM FA
  LEFT JOIN tblGLDetail GL ON GL.intTransactionId = FA.intAssetId AND GL.strReference = FA.strAssetId
@@ -116,6 +117,7 @@ SELECT
 	CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblFunctionalSection179, 0) ELSE 0 END dblFunctionalSection179,
 	CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblBonusDepreciation, 0) ELSE 0 END dblBonusDepreciation,
 	CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblFunctionalBonusDepreciation, 0) ELSE 0 END dblFunctionalBonusDepreciation,
+	CAST(ISNULL(GAAP.ysnAddToBasis, ISNULL(Tax.ysnAddToBasis, 0)) AS BIT) ysnAddToBasis,
 	ISNULL(GAAP.intConcurrencyId, Tax.intConcurrencyId) intConcurrencyId
 FROM G 
 outer apply(
@@ -140,6 +142,7 @@ outer apply(
 	dblRate,
 	dblDepreciation,
 	dblFunctionalDepreciation,
+	ysnAddToBasis,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
 	LEFT JOIN tblFADepreciationMethod B ON A.intDepreciationMethodId = B.intDepreciationMethodId
@@ -170,6 +173,7 @@ OUTER APPLY(
 	A.dblRate,
 	dblDepreciation,
 	dblFunctionalDepreciation,
+	ysnAddToBasis,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
 	LEFT JOIN tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId

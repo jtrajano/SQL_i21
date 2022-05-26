@@ -498,7 +498,7 @@ BEGIN TRY
 				JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				WHERE L.intLotId = @intLotId
 
-				IF ISNULL(@strLotPrimaryStatus, '') <> @strOrgLotStatus
+				IF ISNULL(@strLotPrimaryStatus, '') <> @strOrgLotStatus AND IsNULL(@strLotPrimaryStatus,'')<>''
 				BEGIN
 					SELECT @strError = 'Lot Status is not matching with i21.'
 

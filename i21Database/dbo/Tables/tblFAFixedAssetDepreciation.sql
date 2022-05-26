@@ -23,6 +23,7 @@ CREATE TABLE [dbo].[tblFAFixedAssetDepreciation] (
 	[strType]					NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strConvention]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strBatchId]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[ysnAddToBasis]				BIT NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAssetDepreciation] PRIMARY KEY CLUSTERED ([intAssetDepreciationId] ASC),
     CONSTRAINT [FK_tblFAFixedAssetDepreciation_tblFAFixedAsset] FOREIGN KEY([intAssetId]) REFERENCES [dbo].[tblFAFixedAsset] ([intAssetId]) ON DELETE CASCADE

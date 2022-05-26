@@ -65,25 +65,25 @@ BEGIN TRY
 			RAISERROR('%s have empty pay to bank account.', 11, 1, @emptyBillPayToBankAccount);
 		END
 
-		--VALIDATE MULTIPLE PAY BANK ACCOUNT COMBINATIONS
-		SELECT @billPayBankAccountCount = COUNT(*) FROM @ids
-		IF @billPayBankAccountCount = 1
-		BEGIN
-			SELECT @billPayBankAccountCount = COUNT(intGroupCount)
-			FROM (
-				SELECT COUNT(*) intGroupCount
-				FROM tblAPPayment P
-				INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
-				INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-				WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND PD.dblPayment != 0 AND P.intPaymentMethodId = 2
-				GROUP BY B.intPayFromBankAccountId, B.intPayToBankAccountId
-			) A
+		-- --VALIDATE MULTIPLE PAY BANK ACCOUNT COMBINATIONS
+		-- SELECT @billPayBankAccountCount = COUNT(*) FROM @ids
+		-- IF @billPayBankAccountCount = 1
+		-- BEGIN
+		-- 	SELECT @billPayBankAccountCount = COUNT(intGroupCount)
+		-- 	FROM (
+		-- 		SELECT COUNT(*) intGroupCount
+		-- 		FROM tblAPPayment P
+		-- 		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		-- 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		-- 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND PD.dblPayment != 0 AND P.intPaymentMethodId = 2
+		-- 		GROUP BY B.intPayFromBankAccountId, B.intPayToBankAccountId
+		-- 	) A
 
-			IF @billPayBankAccountCount > 1
-			BEGIN
-				RAISERROR('Multiple sets of pay from and to bank account is not allowed.', 11, 1);
-			END
-		END
+		-- 	IF @billPayBankAccountCount > 1
+		-- 	BEGIN
+		-- 		RAISERROR('Multiple sets of pay from and to bank account is not allowed.', 11, 1);
+		-- 	END
+		-- END
 
 		--UPDATE PAYMENT SCHEDULE
 		UPDATE PS
@@ -99,7 +99,6 @@ BEGIN TRY
 			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1
 		) paySched
 		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
-		AND PD.dblPayment != 0
 
 		UPDATE tblAPBill 
 		SET
@@ -163,7 +162,6 @@ BEGIN TRY
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND (B.ysnPrepayHasPayment = 0 OR B.intTransactionType NOT IN (2, 13))
-		AND PD.dblPayment != 0
 	END
 	ELSE IF @post = 0
 	BEGIN
@@ -181,7 +179,6 @@ BEGIN TRY
 			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1 AND P2.intPaymentId <> PD.intPaymentId
 		) paySched
 		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
-		AND PD.dblPayment != 0
 
 		UPDATE tblAPBill 
 		SET
@@ -233,7 +230,6 @@ BEGIN TRY
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND (B.ysnPrepayHasPayment = 0 OR B.intTransactionType NOT IN (2, 13))
-		AND PD.dblPayment != 0
 	END
 
 	--SELECT NULLED BILLS

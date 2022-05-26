@@ -180,7 +180,7 @@ BEGIN
 			END
 			ELSE
 				BEGIN
-					SELECT @intLineItemTaxId =  dbo.fnGetTaxGroupIdForCustomer(@intCustomerEntityId,@intLocationId,@intItemId,null,null,null)
+					SELECT @intLineItemTaxId =  dbo.fnGetTaxGroupIdForCustomer(@intCustomerEntityId,@intLocationId,@intItemId,null,null,null,null)
 				END
 
 			---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -332,7 +332,6 @@ BEGIN
 								,@InvoiceOriginId         = @strOriginInvoiceNumber
 								,@ContractDetailId		= @intContractDetailId
 								,@RecomputeTax = @ysnRecomputeTax
-								,@SourceId = 4
 
 								--GEt the created invoice number
 								SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 

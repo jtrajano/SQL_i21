@@ -158,6 +158,7 @@
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
+	,@SourcedFrom							NVARCHAR(100)	= NULL
 AS
 
 BEGIN
@@ -434,7 +435,7 @@ FROM
 DECLARE @BorrowingFacilityLimitDetailId INT = NULL
 
 SELECT TOP 1
-	  @BorrowingFacilityLimitId = intBorrowingFacilityLimitId
+	@BorrowingFacilityLimitId = intBorrowingFacilityLimitId
 FROM
 	tblCMBorrowingFacilityLimit
 WHERE intBorrowingFacilityId = @BorrowingFacilityId
@@ -544,7 +545,9 @@ BEGIN TRY
 		,[intBankValuationRuleId]
 		,[strTradeFinanceComments]
 		,[strGoodsStatus]
-		,[intBorrowingFacilityLimitDetailId])
+		,[intBorrowingFacilityLimitDetailId]
+		,[intDefaultPayToBankAccountId]
+		,[strSourcedFrom])
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -642,6 +645,8 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
+		,[intDefaultPayToBankAccountId]  	= @BankAccountId
+		,[strSourcedFrom]					= @SourcedFrom
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN

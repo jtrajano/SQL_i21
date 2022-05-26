@@ -22,7 +22,9 @@
 	[strAppliedTo] NVARCHAR(20) COLLATE Latin1_General_CI_AS ,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 0,
     
-    CONSTRAINT [PK_tblICInsuranceChargeDetail] PRIMARY KEY CLUSTERED ([intInsuranceChargeDetailId] ASC)
+    CONSTRAINT [PK_tblICInsuranceChargeDetail] PRIMARY KEY CLUSTERED ([intInsuranceChargeDetailId] ASC),
+	CONSTRAINT [FK_tblICInsuranceChargeDetail_tblICInsuranceRateDetail] FOREIGN KEY ([intInsuranceRateDetailId]) REFERENCES [tblICInsuranceRateDetail]([intInsuranceRateDetailId]),
+	CONSTRAINT [FK_tblICInsuranceChargeDetail_tblICInsuranceCharge] FOREIGN KEY ([intInsuranceChargeId]) REFERENCES [tblICInsuranceCharge]([intInsuranceChargeId]) ON UPDATE CASCADE ON DELETE CASCADE
 ) 
 GO
 

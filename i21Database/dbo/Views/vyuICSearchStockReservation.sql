@@ -13,7 +13,11 @@ Item.strDescription,
 Category.strCategoryCode,
 Commodity.strCommodityCode,
 Transact.dblOnHandQty,
-dblReservedQty = Reservation.dblQty,
+CASE WHEN (Reservation.ysnPosted = 1 AND Invoice.ysnPosted = 1) THEN	
+	0
+ELSE
+	Reservation.dblQty
+END  dblReservedQty,
 dblTotalQty = ISNULL(Transact.dblOnHandQty, 0) + ISNULL(TotalReserved.dblQty, 0)
 FROM tblICStockReservation Reservation
 INNER JOIN (
@@ -48,3 +52,4 @@ OUTER APPLY
 		AND
 		intItemLocationId = Reservation.intItemLocationId
 ) AS TotalReserved
+LEFT JOIN tblARInvoice AS Invoice ON Reservation.strTransactionId  = Invoice.strInvoiceNumber 

@@ -30,6 +30,7 @@ FROM tblLGLoadDetail LD
 	LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
 WHERE L.intShipmentType = 1
+	AND L.intShipmentStatus <> 11
 	AND L.intSourceType IN (2, 4, 5, 6)
 	AND ISNULL(L.ysnCancelled, 0) = 0
 	AND (@dtmDateFrom IS NULL OR ISNULL(L.dtmCashFlowDate, L.dtmScheduledDate) >= @dtmDateFrom)

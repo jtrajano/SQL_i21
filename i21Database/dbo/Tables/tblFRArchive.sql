@@ -19,7 +19,10 @@ CREATE TABLE [dbo].[tblFRArchive] (
 	[intHierarchyConcurrencyId]	INT NULL,
 	[intEntityId]		INT NULL,
 	[intConcurrencyId]	INT NOT NULL,
-	[ysnIsPublished]			BIT             NULL,
+	[ysnIsPublished]	BIT             NULL,
+	[ysnDrilldown]		BIT             NULL,
+	[intFromArchiveId]	INT NULL,
+	[strDrillFilter]	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblFRArchive] PRIMARY KEY CLUSTERED ([intArchiveId] ASC)
 );
 

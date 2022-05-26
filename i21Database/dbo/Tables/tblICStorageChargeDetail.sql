@@ -34,7 +34,8 @@
     [strRateType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intInventoryStockMovementIdUsed] INT NULL,
     [intTotalAccumulatedDays] INT NOT NULL DEFAULT 0,
-    CONSTRAINT [PK_tblICStorageChargeDetail] PRIMARY KEY CLUSTERED ([intStorageChargeDetailId] ASC)
+    CONSTRAINT [PK_tblICStorageChargeDetail] PRIMARY KEY CLUSTERED ([intStorageChargeDetailId] ASC),
+    CONSTRAINT [FK_tblICStorageChargeDetail_tblICStorageCharge] FOREIGN KEY ([intStorageChargeId]) REFERENCES [tblICStorageCharge]([intStorageChargeId]) ON UPDATE CASCADE ON DELETE CASCADE
 ) 
 GO
 

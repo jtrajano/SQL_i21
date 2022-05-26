@@ -20,6 +20,7 @@
 	,@CurrencyId					INT				= NULL
 	,@CurrencyExchangeRateTypeId	INT				= NULL
 	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
+	,@FOB							NVARCHAR(100)	= NULL
 AS
 
 BEGIN
@@ -27,7 +28,7 @@ BEGIN
 	IF ISNULL(@TaxGroupId,0) = 0
 		BEGIN				
 			IF (@TransactionType = 'Sale')
-				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @SiteId, @FreightTermId)
+				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @SiteId, @FreightTermId,@FOB)
 			ELSE
 				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @FreightTermId)
 		END

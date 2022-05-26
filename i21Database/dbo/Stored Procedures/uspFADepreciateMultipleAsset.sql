@@ -376,7 +376,8 @@ BEGIN
                 [strTransactionId],  
                 [strType],  
                 [strConvention],
-                [strBatchId]
+                [strBatchId],
+                [ysnAddToBasis]
               )  
               SELECT  
                 @i,
@@ -400,7 +401,8 @@ BEGIN
                 @strAdjustmentTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention,
-                @strBatchId
+                @strBatchId,
+                [ysnAddToBasis]
                 FROM tblFAFixedAsset F 
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
@@ -452,7 +454,8 @@ BEGIN
                 [strTransactionId],  
                 [strType],  
                 [strConvention],
-                [strBatchId]
+                [strBatchId],
+                [ysnAddToBasis]
               )  
               SELECT  
                 @i,
@@ -476,7 +479,8 @@ BEGIN
                 @strDepAdjustmentTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention,
-                @strBatchId
+                @strBatchId,
+                ysnAddToBasis
                 FROM tblFAFixedAsset F 
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId

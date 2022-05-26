@@ -35,9 +35,15 @@ FROM (
        ,intStorageLocationId = Lot.intStorageLocationId
        ,strStorageLocation = StorageLocation.strName
        ,dblQty = Lot.dblQty
-       ,dblUnPickedQty = CASE WHEN Lot.dblQty > 0.0 THEN 
-							  Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
-						 ELSE 0.0 END
+       ,dblUnPickedQty =	CASE WHEN Lot.intWarrantStatus = 2 THEN
+	   								CASE WHEN Lot.dblReleasedQty > 0.0 THEN 
+										Lot.dblReleasedQty - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+								ELSE
+									CASE WHEN Lot.dblQty > 0.0 THEN 
+										Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+							END
        ,dblLastCost = Lot.dblLastCost
        ,dtmExpiryDate = Lot.dtmExpiryDate
        ,strLotAlias = Lot.strLotAlias
@@ -143,7 +149,11 @@ FROM (
 	   ,strClass = Class.strDescription
 	   ,strProductLine = ProductLine.strDescription
 	   ,Item.strMarketValuation
+	   ,Lot.strWarrantNo
+	   ,Lot.intWarrantStatus
+	   ,WS.strWarrantStatus
 	FROM tblICLot Lot
+		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -209,5 +219,9 @@ FROM (
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) AL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
+		AND (
+			Lot.intWarrantStatus IS NULL
+			OR Lot.intWarrantStatus <> 1 -- Not Pledged
+		)
 	) InvLots
 GO

@@ -6,7 +6,9 @@
 	@showDeferred BIT,
 	@vendorId INT = NULL,
 	@payToAddress INT = 0,
-	@paymentId INT = 0
+	@paymentId INT = 0,
+	@payFromBankAccountId INT = 0,
+	@payToBankAccountId INT = 0
 )
 RETURNS TABLE AS RETURN
 (
@@ -112,39 +114,20 @@ RETURNS TABLE AS RETURN
 	AND 1 = (CASE WHEN @vendorId > 0
 					THEN (CASE WHEN forPay.intEntityVendorId = @vendorId THEN 1 ELSE 0 END)
 			ELSE 1 END)
-	AND 1 = (CASE WHEN @paymentId > 0 
-					THEN 
-						(CASE WHEN payDetail.intPaymentDetailId > 0 AND payDetail.intPaymentId = @paymentId THEN 1 ELSE 0 END)
-					ELSE 1 END)
+	-- AND 1 = (CASE WHEN @paymentId > 0 
+	-- 				THEN 
+	-- 					(CASE WHEN payDetail.intPaymentDetailId > 0 AND payDetail.intPaymentId = @paymentId THEN 1 ELSE 0 END)
+	-- 				ELSE 1 END)
 	AND 1 = (CASE WHEN @paymentId = 0
 					THEN (CASE WHEN ((forPay.ysnInPayment IS NULL OR forPay.ysnInPayment = 0) OR forPay.ysnPrepayHasPayment <> 0) THEN 1 ELSE 0 END)
 					ELSE 1 END)
 	AND 1 = (CASE WHEN @paymentId = 0
 					THEN (CASE WHEN forPay.ysnInPaymentSched = 0 THEN 1 ELSE 0 END)
 					ELSE 1 END)
-	-- UNION ALL
-	-- SELECT
-	-- 	CAST(ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS INT) AS intForPaymentId
-	-- 	,NULL
-	-- 	,A.intInvoiceId
-	-- 	,A.intEntityCustomerId
-	-- 	,NULL
-	-- 	,strTransactionType
-	-- 	,NULL
-	-- 	,NULL
-	-- FROM vyuARInvoicesForPayment A
-	-- LEFT JOIN tblAPPaymentDetail payDetail
-	-- 	ON A.intInvoiceId = payDetail.intInvoiceId
-	-- WHERE 
-	-- 	A.strTransactionType IN ('Invoice','Debit Memo','Cash','Cash Refund')
-	-- AND A.dblAmountDue != 0
-	-- AND A.intCurrencyId = @currencyId
-	-- AND 1 = (CASE WHEN @vendorId > 0
-	-- 				THEN (CASE WHEN A.intEntityCustomerId = @vendorId THEN 1 ELSE 0 END)
-	-- 		ELSE 1 END)
-	-- AND 1 = (CASE WHEN @paymentId > 0 
-	-- 				THEN 
-	-- 					(CASE WHEN payDetail.intPaymentDetailId > 0 THEN 1 ELSE 0 END)
-	-- 				ELSE 0 END)
-
+	AND 1 = (CASE WHEN @payFromBankAccountId > 0 AND voucher.intPayFromBankAccountId > 0
+					THEN (CASE WHEN @payFromBankAccountId = voucher.intPayFromBankAccountId THEN 1 ELSE 0 END)
+					ELSE 1 END)
+	AND 1 = (CASE WHEN @payToBankAccountId > 0 AND voucher.intPayToBankAccountId > 0
+					THEN (CASE WHEN @payToBankAccountId = voucher.intPayToBankAccountId THEN 1 ELSE 0 END)
+					ELSE 1 END)
 )

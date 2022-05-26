@@ -1028,7 +1028,10 @@ BEGIN TRY
 			intAccountId			= NULL
 			,intItemId				= IC.intItemId
 			,strMiscDescription		= IC.strDescription
-			,dblQtyReceived			= CASE WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblQuantity ELSE CASE
+			,dblQtyReceived			= CASE WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblQuantity * CASE
+											WHEN QM.dblDiscountAmount < 0 THEN 1
+											WHEN QM.dblDiscountAmount > 0 THEN -1
+										END  ELSE CASE
 											WHEN QM.dblDiscountAmount < 0 THEN 1
 											WHEN QM.dblDiscountAmount > 0 THEN -1
 										END

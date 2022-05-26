@@ -13,7 +13,7 @@ SELECT
 ,cfTrans.strTransactionId
 ,cfTrans.intCardId
 ,cfTrans.intProductId
-,cfTrans.intARItemId
+,cfItem.intARItemId
 ,cfTrans.intTransactionId
 ,cfTrans.strPrintTimeStamp
 ,cfTrans.ysnPostedCSV

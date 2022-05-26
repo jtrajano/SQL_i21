@@ -60,7 +60,7 @@ BEGIN
             DECLARE @i int = 1
             WHILE @i <= @intL
             BEGIN
-                if @i > @intStart and @i < @intEnd
+                if @i > @intStart and @i <= @intEnd
                 BEGIN
                     SELECT @str+= @strSegment
                     SET @i = @i + @intLength

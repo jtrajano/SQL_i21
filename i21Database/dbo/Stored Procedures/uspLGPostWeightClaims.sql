@@ -6,6 +6,9 @@ AS
 BEGIN TRY
 DECLARE @strErrMsg NVARCHAR(MAX)
 DECLARE @intBillId INT
+DECLARE @actionType NVARCHAR(10)
+
+SET @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted' WHEN @ysnPost = 0 THEN 'Unposted' END
 
 	IF(@ysnPost = 0) 
 	BEGIN
@@ -23,6 +26,13 @@ DECLARE @intBillId INT
 	SET ysnPosted = @ysnPost
 		,dtmPosted = GETDATE()
 	WHERE intWeightClaimId = @intWeightClaimsId
+
+	EXEC uspSMAuditLog
+        @keyValue = @intWeightClaimsId,
+        @screenName = 'Logistics.view.WeightClaims',
+        @entityId = @intEntityUserSecurityId,
+        @actionType = @actionType
+
 END TRY
 
 BEGIN CATCH
