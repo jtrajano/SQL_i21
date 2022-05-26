@@ -19,13 +19,14 @@ SET @ZeroBit = CAST(0 AS BIT)
 DECLARE @OneBit BIT
 SET @OneBit = CAST(1 AS BIT)
 
+DECLARE  @OverrideCompanySegment    BIT
+        ,@OverrideLocationSegment   BIT
+
 IF @Post = @OneBit
 BEGIN
-    DECLARE  @OverrideCompanySegment     BIT
-            ,@OverrideLocationSegment    BIT
-
     SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverridelocationSegment = ysnOverrideLocationSegment
-    FROM tblARCompanyPreference
+    FROM tblARCompanyPreference WITH (NOLOCK)
+    ORDER BY intCompanyPreferenceId 
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
