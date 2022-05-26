@@ -832,7 +832,7 @@
     <Build Include="dbo\Views\vyuLGShipViaTrailerCompartment.sql" />
     <Build Include="dbo\Views\vyuLGGetDispatchOrderCompartmentData.sql" />
     <Build Include="dbo\Tables\tblLGDispatchOrderCompartment.sql" />
-    <Build Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
+    <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
