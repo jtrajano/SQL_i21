@@ -10,7 +10,7 @@ SELECT  [intTimeEntryPeriodNotificationId] = Notif.[intTimeEntryPeriodNotificati
 	   ,[intConcurrencyId]				   = Notif.[intConcurrencyId]
 	   ,[strRecipientFullName]			   = Entity.[strName]
 	   ,[strRecipientEmail]				   = Entity.[strEmail]
-	   ,[strBillingPeriodRange]			   = FORMAT(TimeEntryPeriodDetail.dtmBillingPeriodStart, 'MM/dd/yyyy') + ' - ' + FORMAT(TimeEntryPeriodDetail.dtmBillingPeriodEnd, 'MM/dd/yyyy')
+	   ,[strBillingPeriodRange]			   = CONVERT(VARCHAR(30), TimeEntryPeriodDetail.dtmBillingPeriodStart , 101)  + ' - ' + CONVERT(VARCHAR(30), TimeEntryPeriodDetail.dtmBillingPeriodEnd, 101)
 FROM tblHDTimeEntryPeriodNotification Notif
 		INNER JOIN vyuEMEntityContact Entity
 ON Entity.[intEntityId] = Notif.[intEntityRecipientId] AND Entity.ysnDefaultContact = 1 

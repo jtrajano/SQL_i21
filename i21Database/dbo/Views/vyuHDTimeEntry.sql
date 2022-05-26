@@ -25,7 +25,7 @@ ON Entity.intEntityId = TimeEntry.intEntityId
 	) Setting
 	CROSS APPLY
 	(
-		SELECT TOP 1 strPeriodDisplay			= TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName] --+ ' (' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodStart], 'MM/dd/yy') + '-' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodEnd], 'MM/dd/yy') + ')'
+		SELECT TOP 1 strPeriodDisplay			= TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName]
 					,[strBillingPeriodStatus] = TimeEntryPeriodDetail.strBillingPeriodStatus
 		FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail 
 			INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod

@@ -6,7 +6,7 @@ AS
 		  ,[dtmBillingPeriodStart]			= TimeEntryPeriodDetail.[dtmBillingPeriodStart]
 		  ,[dtmBillingPeriodEnd]			= TimeEntryPeriodDetail.[dtmBillingPeriodEnd]
 		  ,[intRequiredHours]				= TimeEntryPeriodDetail.[intRequiredHours]
-		  ,[strPeriodDisplay]				= TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName] --+ ' (' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodStart], 'MM/dd/yy') + '-' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodEnd], 'MM/dd/yy') + ')'
+		  ,[strPeriodDisplay]				= TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName]
 		  ,[intConcurrencyId]				= TimeEntryPeriodDetail.[intConcurrencyId]
 	FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail 
 		INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod
