@@ -101,13 +101,13 @@ BEGIN
 								JOIN tblSTCheckoutPaymentOptions CPO 
 									ON CPO.intPaymentOptionId = PO.intPaymentOptionId
 								WHERE Store.intStoreId = @intStoreId
-								AND Chk.strMiscellaneousSummaryCode = 'sales' 
-								AND Chk.strMiscellaneousSummarySubCode = 'MOP'
+								AND Chk.strMiscellaneousSummaryCode = '19' 
+								AND Chk.strMiscellaneousSummarySubCode = '1'
 								AND ISNULL(Chk.strMiscellaneousSummarySubCodeModifier, '') != ''
 							) AS tbl
 						)
-						AND Chk.strMiscellaneousSummaryCode = 'sales' 
-						AND Chk.strMiscellaneousSummarySubCode = 'MOP'
+						AND Chk.strMiscellaneousSummaryCode = '19' 
+						AND Chk.strMiscellaneousSummarySubCode = '1'
 						AND ISNULL(Chk.strMiscellaneousSummarySubCodeModifier, '') != ''
 					END	
 				-- ------------------------------------------------------------------------------------------------------------------  
@@ -165,8 +165,8 @@ BEGIN
 				INNER JOIN tblSTCheckoutPaymentOptions CPO 
 					ON CPO.intPaymentOptionId = PO.intPaymentOptionId
 				WHERE Store.intStoreId = @intStoreId
-					AND chk.strMiscellaneousSummaryCode = 'sales' 
-					AND chk.strMiscellaneousSummarySubCode = 'MOP'
+					AND chk.strMiscellaneousSummaryCode = '19' 
+					AND chk.strMiscellaneousSummarySubCode = '1'
 					AND intCheckoutId = @intCheckoutId
 					AND (
 							(

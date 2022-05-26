@@ -210,6 +210,7 @@
     <Build Include="dbo\Stored Procedures\uspApiGetItemStockByUom.sql" />
     <Build Include="dbo\Tables\tblApiInventoryItemStock.sql" />
     <Build Include="dbo\Views\vyuApiStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuApiGetTaxDetail.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
@@ -414,6 +415,7 @@
     <Build Include="dbo\Tables\tblMBILLoadHeader.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <Build Include="dbo\Views\vyuMBILExportItemAddOn.sql" />
+    <Build Include="Scripts\Post-Deployment\MB\InsertLongTruckScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
