@@ -10137,6 +10137,13 @@
     <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateContractInSettlement.sql" />
 	<Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
+    <Build Include="dbo\Tables\tblICRecostFormulation.sql" />
+    <Build Include="dbo\Tables\tblICRecostFormulationDetail.sql" />
+    <Build Include="dbo\Views\vyuICRecostFormulation.sql" />
+    <Build Include="dbo\Views\vyuICRecostFormulationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLoadRecostFormulationItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
+    <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
