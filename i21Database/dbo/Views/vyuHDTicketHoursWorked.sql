@@ -51,6 +51,7 @@ select
 			,strServiceType
 			,ysnTimeOff
 			,strName 
+			,ysnOverride
 from
 (
 		select
@@ -103,7 +104,8 @@ from
 			,ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType m where m.intEntityId = a.intAgentEntityId and m.strType = 'Vendor')
 			,strServiceType = h.strServiceType
 			,ysnTimeOff = convert(bit,0)
-			,strName = ISNULL(m.strName, n.strName) 
+			,strName = ISNULL(m.strName, n.strName)
+			,ysnOverride = a.ysnOverride
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
@@ -174,6 +176,7 @@ union all
 			,strServiceType = null
 			,ysnTimeOff = convert(bit,1)
 			,strName = ''
+			,ysnOverride = convert(bit,0)
 		from
 			tblHDTimeOffRequest a
 			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId

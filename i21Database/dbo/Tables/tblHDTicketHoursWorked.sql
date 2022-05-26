@@ -30,6 +30,7 @@
 	[intTimeEntryId] [int] null,
     [intProjectId]				INT NULL,
     [intCustomerId]				INT NULL,
+    [ysnOverride]				BIT	 NOT NULL	CONSTRAINT [DF_tblHDTicketHoursWorked_ysnOverride] DEFAULT ((0)),
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketHoursWorked] PRIMARY KEY CLUSTERED ([intTicketHoursWorkedId] ASC),
     CONSTRAINT [FK_TicketHoursWorked_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])  on delete cascade,
