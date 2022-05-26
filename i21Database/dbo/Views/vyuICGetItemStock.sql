@@ -47,6 +47,7 @@ SELECT
 	strIssueUOMType = IssueUOM.strUnitType,
 	strReceiveUOM = ReceiveUOM.strUnitMeasure,
 	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, ReceiveUOM.strUpcCode, ''),
+	strReceiveLongUPC = COALESCE(ReceiveUOM.strLongUPCCode, ''),
 	strReceieveLongUPC = COALESCE(ReceiveUOM.strLongUPCCode, ''),
 	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),
 	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, 0),

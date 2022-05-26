@@ -156,7 +156,7 @@ DELETE A
 FROM #tmpPostBillData A  
 LEFT JOIN @idForPost B ON A.intBillId = B.intId  
 LEFT JOIN tblAPBill C ON A.intBillId = C.intBillId
-WHERE B.intId IS NULL  OR C.ysnPosted = 1
+WHERE B.intId IS NULL OR (C.ysnPosted = 1 AND @post = 1) OR (C.ysnPosted = 0 AND @post = 0)
 
 --SET THE UPDATED @billIds
 SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
