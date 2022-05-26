@@ -800,6 +800,7 @@
     <Build Include="dbo\Functions\fnCTGetCompanyLocationCount.sql" />
     <Build Include="dbo\Views\vyuARTaxLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateLotReleased.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
