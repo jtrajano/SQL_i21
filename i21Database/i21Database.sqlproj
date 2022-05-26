@@ -415,6 +415,7 @@
     <Build Include="dbo\Tables\tblMBILLoadHeader.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <Build Include="dbo\Views\vyuMBILExportItemAddOn.sql" />
+    <Build Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -510,6 +511,7 @@
     <Folder Include="Scripts\Utility\IC\DPR" />
     <Folder Include="Scripts\Utility\SC" />
     <Folder Include="Scripts\Utility\GR\" />
+    <Folder Include="Scripts\Post-Deployment\MBIL" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
