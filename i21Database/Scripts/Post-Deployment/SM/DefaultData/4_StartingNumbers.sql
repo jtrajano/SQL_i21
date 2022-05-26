@@ -4,6 +4,9 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Delivery Notice'
 	WHERE strModule = 'Logistics' AND strTransactionType = 'Weight Claims' AND intStartingNumberId = 86
 
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Batch Load'
+	WHERE strModule = 'Logistics' AND strTransactionType = 'Generate Loads' AND intStartingNumberId = 40
+
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Document Maintenance'
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Comment Maintenance'
 
@@ -412,13 +415,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Schedule')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 40
-			,[strTransactionType]	= N'Generate Loads'
-			,[strPrefix]			= N'GL-'
+			,[strTransactionType]	= N'Batch Load'
+			,[strPrefix]			= N'BLS-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Generate Loads')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Load')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 41
 			,[strTransactionType]	= N'Inventory Transfer'
@@ -1483,7 +1486,37 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'LSI and LS Acknowledgement' and strModule = 'Manufacturing')
 
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 155
+	SELECT	[intStartingNumberId]	= 152
+			,[strTransactionType]	= N'Pick Containers'
+			,[strPrefix]			= N'PC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Containers' and strModule = 'Logistics')
+	
+	--UNION ALL
+	--SELECT	[intStartingNumberId]	= 153
+	--		,[strTransactionType]	= N'Container ID'
+	--		,[strPrefix]			= N''
+	--		,[intNumber]			= 1
+	--		,[strModule]			= 'Logistics'
+	--		,[ysnEnable]			= 1
+	--		,[intConcurrencyId]		= 1
+	--WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Container ID' and strModule = 'Logistics')
+	
+	-- UNION ALL
+	-- SELECT	[intStartingNumberId]	= 154
+	-- 		,[strTransactionType]	= N'Payable Batch'
+	-- 		,[strPrefix]			= N'BPAY-'
+	-- 		,[intNumber]			= 1
+	-- 		,[strModule]			= 'Accounts Payable'
+	-- 		,[ysnEnable]			= 1
+	-- 		,[intConcurrencyId]		= 1
+	-- WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Payable Batch' and strModule = 'Accounts Payable')
+	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 155	
 			,[strTransactionType]	= N'Receipt Item and Charge Update'
 			,[strPrefix]			= N'RIDetail-'
 			,[intNumber]			= 1
@@ -1501,15 +1534,43 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Responsible Party Task' and strModule = 'Cash Management')
+	UNION ALL 
+		SELECT	[intStartingNumberId]	= 157
+			,[strTransactionType]	= N'AG Work Order'
+			,[strPrefix]			= N'AGWO-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Agronomy'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order' and strModule = 'Agronomy')
+	--Make sure to check with 19.1 and lower version. 142 is the last number
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 157
+	SELECT	[intStartingNumberId]	= 158
+			,[strTransactionType]	= N'Contract Release Instruction'
+			,[strPrefix]			= N'REL-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Contract Release Instruction' and strModule = 'Contract Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 159
+			,[strTransactionType]	= N'Pricing Number'
+			,[strPrefix]			= N'CP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pricing Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 160
 			,[strTransactionType]	= N'Grain Receipt'
 			,[strPrefix]			= N'GR-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' and strModule = 'Ticket Management')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' AND strModule = 'Ticket Management')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 176
 				,[strTransactionType]	= N'Recost Formulation'
