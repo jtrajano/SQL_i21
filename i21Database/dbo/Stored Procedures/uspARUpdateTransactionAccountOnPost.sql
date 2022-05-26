@@ -179,7 +179,7 @@ SET ANSI_WARNINGS OFF
 	WHERE LIA.strSessionId = @strSessionId
 
 	--UPDATE INVOICE TAX DETAIL ACCOUNTS
-	IF EXISTS(SELECT TOP 1 1 FROM tblARCompanyPreference WHERE ysnOverrideTaxAccountLocation = 1 OR ysnOverrideTaxAccountCompany = 1) 
+	IF EXISTS(SELECT TOP 1 1 FROM tblARCompanyPreference WHERE ysnOverrideLocationSegment = 1) 
 	BEGIN
 		UPDATE ARITD
 		SET ARITD.intSalesTaxAccountId = ISNULL(dbo.fnGetGLAccountIdFromProfitCenter(ARITD.intSalesTaxAccountId, ARID.intProfitCenter), ARITD.intSalesTaxAccountId)
