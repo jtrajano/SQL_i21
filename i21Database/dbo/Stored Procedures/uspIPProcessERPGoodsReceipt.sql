@@ -317,7 +317,7 @@ BEGIN TRY
 					FROM tblICInventoryReceipt R
 					JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = R.intInventoryReceiptId
 						AND R.strReceiptType = 'Transfer Order'
-						AND RI.intOrderId = @intInventoryTransferId
+						AND RI.intInventoryTransferId = @intInventoryTransferId
 					)
 			BEGIN
 				SELECT @strError = 'Receipt already exists for the Transfer Order No.'
