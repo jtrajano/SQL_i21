@@ -18,6 +18,8 @@
 	[intCommissionRate]					INT			   NULL,
 	[intReportsToId]					INT			   NULL,
 	[intConcurrencyId] [int]			NOT NULL DEFAULT 1,
+	[ysnActive]							BIT	 NOT NULL	CONSTRAINT [DF_tblHDCoworkerGoal_ysnActive] DEFAULT ((0)),
+	[ysnCanViewOtherCoworker]			BIT	 NOT NULL	CONSTRAINT [DF_tblHDCoworkerGoal_ysnCanViewOtherCoworker] DEFAULT ((0)),
 	CONSTRAINT [PK_tblHDCoworkerGoal_intCoworkerGoalId] PRIMARY KEY CLUSTERED ([intCoworkerGoalId] ASC),
 	CONSTRAINT [FK_tblHDCoworkerGoal_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblHDCoworkerGoal_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
