@@ -16,6 +16,7 @@
 		FT.strINCOLocationType,
 		FT.intConcurrencyId,
 		FT.ysnInsuranceCertificateNoRequired,
+		FT.intLastWeighingDays,
 
 		IB.strInsuranceBy,
 		IT.strInvoiceType,
