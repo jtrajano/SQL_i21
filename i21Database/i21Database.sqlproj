@@ -831,6 +831,7 @@
     <Build Include="dbo\Stored Procedures\uspHDBuildHierarchyFilterString.sql" />
     <Build Include="dbo\Views\vyuLGShipViaTrailerCompartment.sql" />
     <Build Include="dbo\Views\vyuLGGetDispatchOrderCompartmentData.sql" />
+    <Build Include="dbo\Tables\tblLGDispatchOrderCompartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -2942,6 +2943,7 @@
     <Build Include="dbo\Views\vyuSTPricebookMaster.sql" />
     <Build Include="dbo\Views\vyuSTItemDetailSearch.sql" />
     <Build Include="dbo\Views\vyuSTItemSearch.sql" />
+    <Build Include="dbo\Views\vyuSTItemVendorSearch.sql" />
     <Build Include="dbo\Views\vyuSTRetailChangeReportViewer.sql" />
     <Build Include="dbo\Stored Procedures\uspSTInventoryMassUpdate.sql" />
     <Build Include="dbo\Tables\tblAROriginCompanies.sql" />

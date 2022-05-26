@@ -202,6 +202,7 @@ AS
 		, CD.dblAverageQuantity
 		, IAU.strUnitMeasure AS strAverageUOM
 		, CD.intVendorLocationId
+		, CD.ysnApplyDefaultTradeFinance
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

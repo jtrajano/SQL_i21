@@ -138,7 +138,8 @@ BEGIN TRY
 				@intCurrencyId				=	CD.intCurrencyId,
 				@intBasisCurrencyId			=	CD.intBasisCurrencyId,
 				@ysnBasisSubCurrency		=	AY.ysnSubCurrency,
-				@ysnSeqSubCurrency			=	SY.ysnSubCurrency
+				@ysnSeqSubCurrency			=	SY.ysnSubCurrency,
+				@dblFixationFX				=	(case when @intFinalCurrencyId = CD.intCurrencyId or @intFinalCurrencyId = CD.intInvoiceCurrencyId then 1 else @dblFixationFX end)
 
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
@@ -760,7 +761,7 @@ BEGIN TRY
 						CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
 						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END,
 						CD.dblRate	= case when @ysnEnableFXFieldInContractPricing = 1 then @dblFixationFX else CD.dblRate end,
-						CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 then 1 else CD.ysnUseFXPrice end
+						CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 and isnull(@dblFixationFX,0) <> 0 and isnull(@dblFixationFX,0) <> 1 then 1 else CD.ysnUseFXPrice end
 				FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
 				JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 				JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
@@ -854,7 +855,7 @@ BEGIN TRY
 						CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
 						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END,
 						CD.dblRate	= case when @ysnEnableFXFieldInContractPricing = 1 then @dblFixationFX else CD.dblRate end,
-						CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 then 1 else CD.ysnUseFXPrice end
+						CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 and isnull(@dblFixationFX,0) <> 0 and isnull(@dblFixationFX,0) <> 1 then 1 else CD.ysnUseFXPrice end
 				FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
 				JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 				JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
