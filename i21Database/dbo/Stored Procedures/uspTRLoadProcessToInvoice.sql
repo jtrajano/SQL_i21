@@ -36,6 +36,7 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
 	SELECT DISTINCT [strSourceTransaction]		= 'Transport Load'
+		,[strType] 								= CASE WHEN DD.intSiteId IS NULL THEN 'Transport Delivery' ELSE 'Tank Delivery' END
 		,[intLoadDistributionHeaderId]			= DH.intLoadDistributionHeaderId
 		,[intLoadDistributionDetailId]			= DD.intLoadDistributionDetailId
 		,[intSourceId]							= DH.intLoadDistributionHeaderId
@@ -137,7 +138,7 @@ BEGIN TRY
 		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[intTicketId]							= NULL
 		,[intTicketHoursWorkedId]				= NULL
-		,[intSiteId]							= NULL
+		,[intSiteId]							= DD.intSiteId
 		,[strBillingBy]							= ''
 		,[dblPercentFull]						= NULL
 		,[dblNewMeterReading]					= NULL
@@ -865,6 +866,7 @@ BEGIN TRY
 
 	INSERT INTO @EntriesForInvoice(
 		 [strSourceTransaction]
+		,[strType]
 		,[intSourceId]
 		,[strSourceId]
 		,[intInvoiceId]
@@ -947,6 +949,7 @@ BEGIN TRY
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
+		,[strType]								= TR.strType
 		,[intSourceId]							= TR.intSourceId
 		,[strSourceId]							= TR.strSourceId
 		,[intInvoiceId]							= TR.intInvoiceId
