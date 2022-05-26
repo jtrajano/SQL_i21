@@ -18,22 +18,24 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE	@ARAccount              INT
-       ,@DiscountAccount        INT
-       ,@WriteOffAccount        INT
-       ,@IncomeInterestAccount  INT
-       ,@GainLossAccount        INT
-       ,@DefaultCurrencyId      INT
-       ,@CFAccount              INT
-       ,@NewAccountId           INT
-       ,@CreditCardAccountId    INT
-       ,@AllowOtherUserToPost   BIT
-       ,@ZeroBit                BIT
-       ,@OneBit                 BIT
-       ,@ZeroDecimal            DECIMAL(18,6)
-       ,@OneDecimal             DECIMAL(18,6)
-       ,@OneHundredDecimal      DECIMAL(18,6)
-       ,@Param2                 NVARCHAR(MAX)
+DECLARE	@ARAccount                  INT
+       ,@DiscountAccount            INT
+       ,@WriteOffAccount            INT
+       ,@IncomeInterestAccount      INT
+       ,@GainLossAccount            INT
+       ,@DefaultCurrencyId          INT
+       ,@CFAccount                  INT
+       ,@NewAccountId               INT
+       ,@CreditCardAccountId        INT
+       ,@AllowOtherUserToPost       BIT
+       ,@ZeroBit                    BIT
+       ,@OneBit                     BIT
+       ,@ZeroDecimal                DECIMAL(18,6)
+       ,@OneDecimal                 DECIMAL(18,6)
+       ,@OneHundredDecimal          DECIMAL(18,6)
+       ,@Param2                     NVARCHAR(MAX)
+       ,@OverrideCompanySegment     BIT
+       ,@OverrideLocationSegment    BIT
 
 SET @ZeroDecimal = 0.000000
 SET @OneDecimal = 1.000000
@@ -53,6 +55,10 @@ SET @NewAccountId = (SELECT TOP 1 [intGLAccountId] FROM tblCMBankAccount WHERE [
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
 SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
 SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblSMCompanyPreference WHERE intFeeGeneralLedgerAccountId IS NOT NULL AND intFeeGeneralLedgerAccountId <> 0)
+SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
+
+SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverridelocationSegment = ysnOverrideLocationSegment
+FROM tblARCompanyPreference
 
 --Header
 INSERT INTO #ARPostPaymentHeader
@@ -165,13 +171,13 @@ SELECT
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = @PostDate
     ,[intWriteOffAccountId]             = ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount)
-    ,[intAccountId]                     = ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId])
+    ,[intAccountId]                     = CASE WHEN @OverrideLocationSegment = 1 THEN UNDEPOSITED.intAccountId ELSE ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]) END
     ,[intBankAccountId]                 = ARP.[intBankAccountId]
     ,[intARAccountId]                   = ISNULL(SMCL.[intARAccount], @ARAccount)
     ,[intDiscountAccount]               = ISNULL(SMCL.[intSalesDiscounts], @DiscountAccount)
     ,[intInterestAccount]               = ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount)
     ,[intCFAccountId]                   = @CFAccount
-    ,[intGainLossAccount]               = @GainLossAccount
+    ,[intGainLossAccount]               = CASE WHEN @OverrideLocationSegment = 1 THEN GAINLOSS.intAccountId ELSE @GainLossAccount END
     ,[intCreditCardFeeAccountId]        = @CreditCardAccountId
     ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
@@ -182,7 +188,7 @@ SELECT
     ,[intEntityId]                      = ARP.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
-    ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ARP.[dtmDatePaid]), @ZeroBit)
+    ,[ysnWithinAccountingDate]          = @ZeroBit
     ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
     ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
@@ -251,6 +257,22 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+OUTER APPLY (
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]), ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+	AND intAccountId = ISNULL(SMCL.[intARAccount], @ARAccount)
+) UNDEPOSITED
+OUTER APPLY (
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@GainLossAccount, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+	AND intAccountId = ISNULL(SMCL.[intARAccount], @ARAccount)
+) GAINLOSS
 WHERE
 	NOT EXISTS(SELECT NULL FROM #ARPostPaymentHeader PH WHERE PH.[intTransactionId] = ARP.[intPaymentId])
     AND (
@@ -367,7 +389,7 @@ SELECT
                                                 THEN (
 		    									    CASE WHEN (CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END) <> 'CF Invoice' 
                                                             THEN ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId])
-                                                            ELSE ISNULL(ARP.intAccountId,ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]))
+                                                            ELSE ISNULL(ARP.intAccountId, ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]))
                                                     END
                                                     )
                                                 ELSE
@@ -791,7 +813,7 @@ SELECT
 	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = CAST(ARP.[dtmDatePaid] AS DATE)
     ,[dtmPostDate]                      = ARP.[dtmPostDate]
-    ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
+    ,[intWriteOffAccountId]             = CASE WHEN @OverrideLocationSegment = 1 THEN WRITEOFF.intAccountId ELSE ARP.[intWriteOffAccountId] END
     ,[intAccountId]                     = ARP.[intAccountId]
     ,[intBankAccountId]                 = ARP.[intBankAccountId]
     ,[intARAccountId]                   = ARP.[intARAccountId]
@@ -840,7 +862,7 @@ SELECT
     ,[ysnExcludedFromPayment]           = ARI.[ysnExcludeFromPayment]
     ,[ysnForgiven]                      = ARI.[ysnForgiven]
 	,[intBillId]                        = NULL
-    ,[intWriteOffAccountDetailId]       = ARPD.[intWriteOffAccountId]
+    ,[intWriteOffAccountDetailId]       = CASE WHEN @OverrideLocationSegment = 1 THEN WRITEOFFDETAIL.intAccountId ELSE ARPD.[intWriteOffAccountId] END
     ,[strTransactionNumber]             = ARI.[strInvoiceNumber]
     ,[strTransactionType]               = ARI.[strTransactionType]
     ,[strType]                          = ARI.[strType]
@@ -871,6 +893,22 @@ INNER JOIN
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+OUTER APPLY (
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARP.[intWriteOffAccountId], ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+	AND intAccountId = ARP.[intARAccountId]
+) WRITEOFF
+OUTER APPLY (
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPD.[intWriteOffAccountId], ISNULL(GLAS.intAccountSegmentId, 0)), 0)
+	FROM tblGLAccountSegmentMapping GLASM
+	INNER JOIN tblGLAccountSegment GLAS
+	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	WHERE intAccountStructureId = 3
+	AND intAccountId = ARP.[intARAccountId]
+) WRITEOFFDETAIL
 
 INSERT INTO #ARPostPaymentDetail
     ([intTransactionId]
