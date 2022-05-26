@@ -615,7 +615,7 @@ BEGIN TRY
 						payables.intEntityVendorId,
 						GETDATE(),
 						-- Cost
-						CASE WHEN payables.intWeightUOMId IS NOT NULL THEN 
+						CASE WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN
 							dbo.fnCalculateCostBetweenUOM(
 								COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
 								, payables.intWeightUOMId
@@ -624,7 +624,7 @@ BEGIN TRY
 									ELSE
 										payables.dblCost
 								END
-							) 
+							)
 						ELSE 
 							dbo.fnCalculateCostBetweenUOM(
 								COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
@@ -637,7 +637,7 @@ BEGIN TRY
 							)
 						END,
 						-- Qty
-						CASE	
+						CASE
 							WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN 
 								payables.dblNetWeight
 							ELSE 
@@ -658,8 +658,6 @@ BEGIN TRY
 				WHERE vendorTax.intTaxGroupId IS NOT NULL
 			END
 
-			SELECT * FROM @voucherPayableToProcess
-			SELECT * FROM @voucherPayableTax
 
 			IF (@intType = 1)
 			BEGIN
