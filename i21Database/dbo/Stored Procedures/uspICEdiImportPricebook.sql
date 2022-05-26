@@ -40,13 +40,12 @@ DECLARE
 	,@updatedItemLocation AS INT = 0
 	,@insertedItemLocation AS INT = 0 
 	,@insertedProductClass AS INT = 0 
-	,@insertedFamilyClass AS INT = 0 
-	
+	,@insertedFamilyClass AS INT = 0
 	,@originalPricebookCount AS INT = 0 
 	,@duplicatePricebookCount AS INT = 0 
 	,@missingVendorCategoryXRef AS INT = 0 
 	,@duplicate2ndUOMUPCCode AS INT = 0 
-	
+	,@warningNotImported AS INT = 0
 DECLARE 
 	@TotalRowsUpdated AS INT = 0 
 	,@TotalRowsInserted AS INT = 0 
@@ -667,7 +666,7 @@ FROM (
 			p.strUniqueId = @UniqueId		
 	) AS Source_Query  
 		ON Item.intItemId = Source_Query.intItemId 
-	   
+
 	-- If matched and it is allowed to update, update the item record. 
 	WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN 
 		UPDATE 
@@ -716,6 +715,7 @@ FROM (
 			,2--,intDataSourceId
 			,1--,intConcurrencyId
 		)
+	
 	OUTPUT 
 	$action
 	, deleted.intBrandId
@@ -740,6 +740,7 @@ FROM (
 
 SELECT @updatedItem = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItem WHERE strAction = 'UPDATE'
 SELECT @insertedItem = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItem WHERE strAction = 'INSERT'
+SELECT @warningNotImported = COUNT(1) FROM tblICEdiPricebook WHERE strUniqueId = @UniqueId AND ysnAddNewRecords = 0 AND ysnUpdateExistingRecords = 0 AND ysnAddOrderingUPC = 0 AND ysnUpdatePrice = 0
 
 -- Update or Insert Item UOM
 INSERT INTO #tmpICEdiImportPricebook_tblICItemUOM (
@@ -2327,6 +2328,35 @@ BEGIN
 	WHERE 
 		intImportLogId = @LogId
 		AND @ErrorCount > 0
+	
+	-- Log when Add Ordering UPC, Add Record, Update Record or Update Price was not checked.
+	IF @warningNotImported <> 0
+	BEGIN
+		INSERT INTO tblICImportLogDetail
+		( intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId)
+
+		SELECT @LogId
+			 , 'Warning'
+			 , intRecordNumber
+			 , 'Vendor Category'
+			 , strVendorCategory
+			 , 'Import does not happen because the Vendor Category is not enabled for Add Ordering UPC, Add Record, Update Record or Update Price.'
+			 , 'Skipped'
+			 , 'Record not imported.'
+			 , 1
+		FROM tblICEdiPricebook 
+		WHERE strUniqueId = @UniqueId AND ysnAddNewRecords = 0 AND ysnUpdateExistingRecords = 0 AND ysnAddOrderingUPC = 0 AND ysnUpdatePrice = 0;
+	END;
+
+
 
 	-- Log the inserted items. 
 	IF @insertedItem <> 0 
