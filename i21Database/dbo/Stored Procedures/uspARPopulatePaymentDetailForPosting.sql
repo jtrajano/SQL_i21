@@ -57,7 +57,7 @@ SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
 SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblSMCompanyPreference WHERE intFeeGeneralLedgerAccountId IS NOT NULL AND intFeeGeneralLedgerAccountId <> 0)
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 
-SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverridelocationSegment = ysnOverrideLocationSegment
+SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverrideLocationSegment = ysnOverrideLocationSegment
 FROM tblARCompanyPreference
 
 --Header

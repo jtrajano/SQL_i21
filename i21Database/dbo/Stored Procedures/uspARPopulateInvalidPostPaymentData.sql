@@ -24,7 +24,7 @@ BEGIN
     DECLARE  @OverrideCompanySegment     BIT
             ,@OverrideLocationSegment    BIT
 
-    SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverridelocationSegment = ysnOverrideLocationSegment
+    SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverrideLocationSegment = ysnOverrideLocationSegment
     FROM tblARCompanyPreference
 
     INSERT INTO #ARInvalidPaymentData
@@ -972,7 +972,7 @@ BEGIN
     WHERE P.[ysnPost] = @OneBit
     AND P.[intInvoiceId] IS NOT NULL
     AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
-    AND @OverridelocationSegment = 1
+    AND @OverrideLocationSegment = 1
     AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intWriteOffAccountDetailId]) = 0
 
     INSERT INTO #ARInvalidPaymentData
@@ -1008,7 +1008,7 @@ BEGIN
 	) GLSEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND ISNULL(P.[intUndepositedFundsId], 0) = 0
-    AND @OverridelocationSegment = 1
+    AND @OverrideLocationSegment = 1
     AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intAccountId]) = 0
 
     INSERT INTO #ARInvalidPaymentData
@@ -1049,7 +1049,7 @@ BEGIN
     AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
     AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount] - P.[dblWriteOffAmount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount] + P.[dblWriteOffAmount])
     AND ISNULL(P.intCurrencyExchangeRateTypeId, 0) <> 0
-    AND @OverridelocationSegment = 1
+    AND @OverrideLocationSegment = 1
     AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intGainLossAccount]) = 0
 
     INSERT INTO #ARInvalidPaymentData
