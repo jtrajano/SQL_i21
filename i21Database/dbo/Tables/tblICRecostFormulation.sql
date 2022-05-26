@@ -3,6 +3,7 @@
 	[intRecostFormulationId] INT NOT NULL PRIMARY KEY
 	,[strRecostFormulationId] NVARCHAR(50) NOT NULL 
 	,[dtmDate] DATETIME NOT NULL 
+	,[intRounding] TINYINT NOT NULL DEFAULT(6)
 	,[strDescription] NVARCHAR(500) NULL 
 	,[intLocationFromId] INT NOT NULL
 	,[intLocationToId] INT NULL 
