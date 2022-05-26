@@ -1571,7 +1571,18 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' AND strModule = 'Ticket Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 176
+				,[strTransactionType]	= N'Recost Formulation'
+				,[strPrefix]			= N'RF-'
+				,[intNumber]			= 1
+				,[strModule]			= 'Inventory'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Recost Formulation' AND [strModule] = 'Inventory')
 
+
+	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
