@@ -170,6 +170,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCommodityContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetItemStock.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetItemStockByUom.sql" />
+    <Build Include="dbo\Views\vyuApiGetTaxDetail.sql" />
     <Build Include="dbo\Tables\tblApiInventoryItemStock.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
