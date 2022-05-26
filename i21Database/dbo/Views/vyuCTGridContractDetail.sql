@@ -322,6 +322,7 @@ AS
 			, strLCPaymentTerm = credT.strTerm
 			, strLCTreasuryBank = credB.strBankName
 			, strLCBank = credB2.strBankName
+			, CD.intVendorLocationId
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId

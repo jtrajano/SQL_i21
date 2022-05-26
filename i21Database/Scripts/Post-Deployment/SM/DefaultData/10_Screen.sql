@@ -947,6 +947,16 @@ GO
 		VALUES (N'Banks', N'Banks', N'CashManagement.view.Banks', N'Cash Management', N'tblCMBank', 1, N'Cash Management')
 	END
 
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.BankTransactions') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName], [ysnApproval]) 
+		VALUES (N'Bank Transactions', N'Bank Transactions', N'CashManagement.view.BankTransactions', N'Cash Management', N'tblCMBankTransaction', 1, N'Cash Management', 1)
+	END
+	ELSE
+		UPDATE tblSMScreen SET ysnApproval =1 WHERE strNamespace = 'CashManagement.view.BankTransactions' 
+
+
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.BankAccounts') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
@@ -1224,6 +1234,20 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Warrant', N'Warrant', N'Inventory.view.Warrant', N'Inventory', NULL, 1, N'Inventory')
 	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'HelpDesk.view.TimeEntry')
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [ysnApproval], [intConcurrencyId])
+			VALUES (N'Time Entry', N'Time Entry', N'HelpDesk.view.TimeEntry', N'HelpDesk', 1, 0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET  ysnApproval = 1
+			WHERE strNamespace = 'HelpDesk.view.TimeEntry'
+		END
+
+
 	
 
 	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')

@@ -56,7 +56,7 @@ SELECT DISTINCT a.intEntityId
 FROM vyuHDAgentDetail a
 	 INNER JOIN tblEMEntity b
 ON a.intEntityId = b.intEntityId
-WHERE b.strEmail <> ''
+WHERE ISNULL(a.strEmail, '') <> ''
 
 OPEN EmployeeLoop
 FETCH NEXT FROM EmployeeLoop INTO @EntityId

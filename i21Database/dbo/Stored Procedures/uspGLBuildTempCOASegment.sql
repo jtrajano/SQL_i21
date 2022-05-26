@@ -94,13 +94,11 @@ BEGIN
 	
 	--this will ensure there is company column in tblGLTempCOASegment
 	IF NOT EXISTS(
-
 		SELECT 1 
           FROM   INFORMATION_SCHEMA.COLUMNS
           WHERE  TABLE_NAME = 'tblGLTempCOASegment'
                  AND COLUMN_NAME = 'Company'
 	)
-
 	ALTER TABLE tblGLTempCOASegment ADD [Company] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
 
 	--this will ensure there is [Primary Account] column in tblGLTempCOASegmen
@@ -110,8 +108,16 @@ BEGIN
 			WHERE  TABLE_NAME = 'tblGLTempCOASegment'
 					AND COLUMN_NAME = 'Primary Account'
 	)
-
 	ALTER TABLE tblGLTempCOASegment ADD [Primary Account] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
+
+	--this will ensure there is intLedgerId column in tblGLPosted
+	IF NOT EXISTS(
+		SELECT 1 
+			FROM   INFORMATION_SCHEMA.COLUMNS
+			WHERE  TABLE_NAME = 'tblGLPosted'
+					AND COLUMN_NAME = 'intLedgerId'
+	)
+	ALTER TABLE tblGLPosted ADD intLedgerId int NULL
 			
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLDetailView') 
 	BEGIN 
@@ -141,7 +147,7 @@ BEGIN
 		EXEC ('CREATE VIEW [dbo].[vyuGLSummary]
 			AS
 			SELECT * FROM (
-			  SELECT  A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'''') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit, A.intCurrencyId, F.strCurrency,B.intUnnaturalAccountId     
+			  SELECT  A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'''') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit, A.intCurrencyId, F.strCurrency,B.intUnnaturalAccountId,A.intLedgerId      
 				  FROM  dbo.tblGLPosted AS A   
 					  INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId   
 					  INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId  

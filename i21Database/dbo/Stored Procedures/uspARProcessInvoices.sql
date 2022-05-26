@@ -234,6 +234,9 @@ DECLARE  @Id									INT
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
+		,@FreightCharge							NUMERIC(18, 6)
+		,@FreightCompanySegment					INT
+		,@FreightLocationSegment				INT
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -454,6 +457,9 @@ BEGIN
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
+		,@FreightCharge					= [dblFreightCharge]
+		,@FreightCompanySegment			= [intFreightCompanySegment]
+		,@FreightLocationSegment		= [intFreightLocationSegment]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -737,6 +743,9 @@ BEGIN
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
+			,@FreightCharge					= @FreightCharge
+			,@FreightCompanySegment			= @FreightCompanySegment
+			,@FreightLocationSegment		= @FreightLocationSegment
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -1502,6 +1511,9 @@ BEGIN TRY
 			,@Recap							= [ysnRecap] 
 			,@Post							= [ysnPost]
 			,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
+			,@FreightCharge					= [dblFreightCharge]
+			,@FreightCompanySegment			= [intFreightCompanySegment]
+			,@FreightLocationSegment		= [intFreightLocationSegment]
 		FROM
 			@InvoiceEntries
 		WHERE
@@ -1643,8 +1655,11 @@ BEGIN TRY
 			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
 			,[intEntityId]				= @EntityId
 			,[intTruckDriverId]			= @TruckDriverId
-			,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
+			,[intTruckDriverReferenceId]= @TruckDriverReferenceId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
+			,[dblFreightCharge]			= @FreightCharge 
+			,[intFreightCompanySegment]	= @FreightCompanySegment
+			,[intFreightLocationSegment]= @FreightLocationSegment
 		FROM
 			tblARCustomer C
 		LEFT OUTER JOIN

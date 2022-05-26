@@ -192,6 +192,7 @@ SELECT compLoc.[intCompanyLocationId]
 ,compLoc.[ysnProductCaseCodeScanningRequired]
 ,compLoc.[ysnYieldAdjustmentAllowed]
 ,compLoc.[ysnPrintInvTagOnReceivingComplete]
+,compLoc.[intNoOfMonthsFromDemandToShipment]
 ,compLoc.[intConcurrencyId]
 ,ISNULL(acctSgmt.strCode, '') strCode
 ,ISNULL(cash.[strAccountId], '') as strCashAccount

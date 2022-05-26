@@ -15,18 +15,18 @@ BEGIN TRY
 	DECLARE @tblShipment TABLE (
 		intContractHeaderId INT
 		, intContractDetailId INT
-		, dblQuantity NUMERIC(18, 6)
-		, dblDestinationQuantity NUMERIC(18, 6)
+		, dblQuantity NUMERIC(38, 20)
+		, dblDestinationQuantity NUMERIC(38, 20)
 	);
 
 	DECLARE @tblInvoice TABLE (  
 		intContractDetailId  INT,        
-		dblQuantity    NUMERIC(18,6)
+		dblQuantity    NUMERIC(38, 20)
 	); 
 
 	DECLARE @tblBill TABLE (
 		intContractDetailId INT
-		, dblQuantity NUMERIC(18, 6)
+		, dblQuantity NUMERIC(38, 20)
 	);
 
 	DECLARE @OpenLoad TABLE (
@@ -345,7 +345,7 @@ BEGIN TRY
 		, CD.intInvoiceCurrencyId
 		, CD.dtmFXValidFrom
 		, CD.dtmFXValidTo
-		, dblRate = isnull(CD.dblRate,1)
+		, dblRate = case when CD.intInvoiceCurrencyId = CD.intCurrencyId or CD.intInvoiceCurrencyId = CY.intCurrencyID then 1 else CD.dblRate end
 		, CD.dblFXPrice
 		, CD.ysnUseFXPrice
 		, CD.intFXPriceUOMId
@@ -448,7 +448,7 @@ BEGIN TRY
 		, strDiscountDescription = dbo.[fnCTGetSeqDisplayField](CD.intDiscountScheduleId, 'tblGRDiscountSchedule')
 		, strScheduleCode = dbo.[fnCTGetSeqDisplayField](CD.intDiscountScheduleCodeId, 'tblGRDiscountScheduleCode')
 		, strScheduleDescription = dbo.[fnCTGetSeqDisplayField](CD.intStorageScheduleRuleId, 'tblGRStorageScheduleRule')
-		, strCategoryCode = NULL
+		, strCategoryCode = ICCA.strCategoryCode
 		, strDestinationCity = dbo.[fnCTGetSeqDisplayField](CD.intDestinationCityId, 'tblSMCity')
 		, strInvoiceCurrency = IY.strCurrency
 		, strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
@@ -615,6 +615,9 @@ BEGIN TRY
 		, strLCTreasuryBank = credB.strBankName
 		, strLCBank = credB2.strBankName
 		, CT.dblRollArb
+		, strVendorLocation = dbo.[fnCTGetSeqDisplayField](CD.intVendorLocationId, 'tblEMEntityLocation')
+		, CD.intVendorLocationId
+		, CD.ysnApplyDefaultTradeFinance
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -697,6 +700,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU	ON	AU.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
+	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
 	ORDER BY CD.intContractSeq
 
 	DROP TABLE #tmpContractDetail

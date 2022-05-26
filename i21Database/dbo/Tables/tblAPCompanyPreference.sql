@@ -29,5 +29,6 @@
 	[intDueToAccountId]				INT NULL DEFAULT(0), 
     [intDueFromAccountId]			INT NULL DEFAULT(0),
     [intFreightTermId]              INT NULL,
+    [intBudgetCode]                 INT NULL,
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );

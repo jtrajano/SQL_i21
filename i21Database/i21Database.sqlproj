@@ -342,6 +342,7 @@
     <Build Include="dbo\Tables\tblFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
+    <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
     <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
@@ -791,6 +792,46 @@
     <Build Include="dbo\Views\vyuLGCustomerConsumptionSite.sql" />
     <Build Include="dbo\Views\vyuTMSiteCustomerLocation.sql" />
     <Build Include="dbo\Tables\tblGLLedger.sql" />
+    <Build Include="dbo\Views\vyuLGOpenTankManagementOrders.sql" />
+    <Build Include="dbo\Tables\tblFRLedger.sql" />
+    <Build Include="dbo\User Defined Types\IdQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReleaseWarrant.sql" />
+    <Build Include="dbo\Tables\tblARReserve.sql" />
+    <Build Include="dbo\Views\vyuARReserve.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGetLedger.sql" />
+    <Build Include="dbo\Tables\tblFAGLAccountChangeLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAAddGLAccountChangeLog.sql" />
+    <Build Include="dbo\Views\vyuFAGLAccountChangeLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAPostGLAccountChange.sql" />
+    <Build Include="dbo\Functions\fnGLGetOverrideAccountBySegment2.sql" />
+    <Build Include="dbo\Tables\tblGLEliminate.sql" />
+    <Build Include="dbo\Views\vyuGLEliminate.sql" />
+    <Build Include="dbo\Tables\tblGLEliminateDetail.sql" />
+    <Build Include="dbo\Views\vyuGLEliminateDetail.sql" />
+    <Build Include="dbo\Tables\tblARReserveDetail.sql" />
+    <Build Include="dbo\Views\vyuARReserveDetailTemp.sql" />
+    <Build Include="dbo\User Defined Types\FixedAssetLedgerTypeTable.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntry.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryBillingPeriod.sql" />
+    <Build Include="dbo\Tables\tblHDAgentTimeEntryPeriodDetailSummary.sql" />
+    <Build Include="dbo\Views\vyuHDGetAgentTimeEntryPeriodDetailInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateUpdateAgentTimeEntryPeriodDetailSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateAgentTimeEntry.sql" />
+    <Build Include="dbo\Tables\tblAPReserve.sql" />
+    <Build Include="dbo\Tables\tblAPReserveDetail.sql" />
+    <Build Include="dbo\Views\vyuAPReserve.sql" />
+    <Build Include="dbo\Views\vyuAPReserveDetailTemp.sql" />
+    <Build Include="dbo\Functions\fnAPGetAccountBudgetWarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateTimeEntryPeriodDetailStatus.sql" />
+    <Build Include="dbo\Tables\tblAPVendorAccountNumLocation.sql" />
+    <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
+    <Build Include="dbo\Tables\tblSMShipViaTrailerCompartment.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerHierarchy.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerHierarchyDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDBuildHierarchyFilterString.sql" />
+    <Build Include="dbo\Views\vyuLGShipViaTrailerCompartment.sql" />
+    <Build Include="dbo\Views\vyuLGGetDispatchOrderCompartmentData.sql" />
+    <Build Include="dbo\Tables\tblLGDispatchOrderCompartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1717,6 +1758,8 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateParentCompany.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCreateInterCompanyBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
     <Build Include="dbo\Views\vyuSMContacts.sql" />
@@ -2382,6 +2425,8 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeviceActions.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceActions.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountTemplateGroupToCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
     <Build Include="dbo\Functions\fnAPCreateFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAgingSummary.sql" />
     <Build Include="dbo\Views\vyuARReceivables.sql" />
@@ -2898,6 +2943,7 @@
     <Build Include="dbo\Views\vyuSTPricebookMaster.sql" />
     <Build Include="dbo\Views\vyuSTItemDetailSearch.sql" />
     <Build Include="dbo\Views\vyuSTItemSearch.sql" />
+    <Build Include="dbo\Views\vyuSTItemVendorSearch.sql" />
     <Build Include="dbo\Views\vyuSTRetailChangeReportViewer.sql" />
     <Build Include="dbo\Stored Procedures\uspSTInventoryMassUpdate.sql" />
     <Build Include="dbo\Tables\tblAROriginCompanies.sql" />
@@ -6981,7 +7027,7 @@
     <None Include="Scripts\Post-Deployment\PAT\3_UpdateIssueStockNo.sql" />
     <None Include="Scripts\Post-Deployment\PAT\4_UpdateRetiredStockNo.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
-    <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
+    <Build Include="dbo\Tables\tblSMLogoPreferenceFooter.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityBeginEndInventory.sql" />
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCompanyLocationFreightTerm.sql" />
@@ -10561,6 +10607,9 @@
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intLFutOptTransactionId.sql" />
+    <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateContractInSettlement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10930,6 +10979,9 @@
     <Build Include="dbo\Tables\tblARPostItemsForStorageCosting.sql" />
     <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
     <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
+    <Build Include="dbo\Views\vyuARPaymentMethodForPortal.sql" />
+    <Build Include="dbo\Views\vyuARSearchCreditCards.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateEFTInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

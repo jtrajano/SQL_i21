@@ -13,7 +13,7 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			--SELECT id = 3,name = 'Begin Inventory'UNION ALL 
 			--SELECT id = 4,name = 'Broker Expense'UNION ALL 
 			SELECT id = 5,name = 'Cash Account'UNION ALL 
-			--SELECT id = 6,name = 'Cash Over/Short'UNION ALL 
+			SELECT id = 6,name = 'Investment in Subsidiary'UNION ALL 
 			--SELECT id = 7,name = 'Contract Equity'UNION ALL 
 			--SELECT id = 8,name = 'Contract Purchase Gain/Loss'UNION ALL 
 			--SELECT id = 9,name = 'Contract Sales Gain/Loss'UNION ALL 

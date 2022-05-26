@@ -20,16 +20,16 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	intItemId int NULL,
 	strItemSpecification nvarchar(MAX) COLLATE Latin1_General_CI_AS NULL,
 	intCategoryId INT NULL,
-	dblQuantity numeric(18, 6) NOT NULL,
+	dblQuantity numeric(38, 20) NOT NULL,
 	intItemUOMId int NULL,	
-	dblOriginalQty NUMERIC(18, 6) NULL, 
-    dblBalance NUMERIC(18, 6) NULL, 
+	dblOriginalQty NUMERIC(38, 20) NULL, 
+    dblBalance NUMERIC(38, 20) NULL, 
     dblIntransitQty NUMERIC(18, 6) NULL, 
-    dblScheduleQty NUMERIC(18, 6) NULL, 
+    dblScheduleQty NUMERIC(38, 20) NULL, 
 	dblBalanceLoad	NUMERIC(18, 6) NULL, 
 	dblScheduleLoad	NUMERIC(18, 6) NULL, 
     dblShippingInstructionQty NUMERIC(18, 6) NULL, 
-	dblNetWeight NUMERIC(18, 6) NULL, 
+	dblNetWeight NUMERIC(38, 20) NULL, 
 	intNetWeightUOMId int NULL,	
 	intUnitMeasureId int NULL,
 	intCategoryUOMId INT NULL, 	
@@ -227,8 +227,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblAmountMinValue numeric (18,6),
 	dblQuantityMaxValue numeric (18,6),
 	dblAmountMaxValue numeric (18,6),
-
-
+	intVendorLocationId INT NULL,
+	ysnApplyDefaultTradeFinance bit null,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
@@ -240,7 +240,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intRefFuturesCurrencyId_intCurrencyId] FOREIGN KEY ([intRefFuturesCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
+	--CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractStatus_intContractStatusId] FOREIGN KEY ([intContractStatusId]) REFERENCES [tblCTContractStatus]([intContractStatusId]),

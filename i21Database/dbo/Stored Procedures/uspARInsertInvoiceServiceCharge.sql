@@ -173,6 +173,7 @@ AS
 					,[strSCInvoiceNumber]
 					,[strSCBudgetDescription]
 					,[intServiceChargeAccountId]
+					,[intSalesAccountId]
 					,[dblQtyOrdered]
 					,[dblQtyShipped]
 					,[dblPrice]
@@ -184,6 +185,7 @@ AS
 					,[intBudgetId]
 					,[strInvoiceNumber]
 					,[strBudgetDesciption]
+					,@intSCAccountId
 					,@intSCAccountId
 					,1.000000
 					,1.000000

@@ -83,7 +83,8 @@ BEGIN TRY
 		dblFutures					NUMERIC(18,6),	dblBasis			NUMERIC(18,6),	dblCashPrice		NUMERIC(18,6),	intPriceItemUOMId	INT,
 		intStorageScheduleRuleId	INT,			intCurrencyId		INT,			dtmCreated			DATETIME,		intCreatedById		INT,
 		intConcurrencyId			INT,			dblTotalCost		NUMERIC(18,6),	intUnitMeasureId	INT,			strRemark			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
-		dtmM2MDate					DATETIME
+		dtmM2MDate					DATETIME,
+		intInvoiceCurrencyId int
 	); 
 
 	IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -101,9 +102,11 @@ BEGIN TRY
 
 	IF	@strScreenName = 'Scale'
 	BEGIN
+
+		
 		INSERT	INTO	#tmpExtracted
 		(	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,
-			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,dtmM2MDate
+			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,dtmM2MDate,intInvoiceCurrencyId
 		)
 		SELECT	intContractTypeId	=	CASE WHEN SC.strInOutFlag = 'I' THEN 1 ELSE 2 END,
 				intEntityId			=	@intEntityId,		
@@ -126,7 +129,8 @@ BEGIN TRY
 				intPricingTypeId	=	5,					dtmCreated					=	GETDATE(),
 				intConcurrencyId	=	1,					intCreatedById				=	@intUserId,
 				intUnitMeasureId	=	QU.intUnitMeasureId,
-				dtmM2MDate			=	getdate()
+				dtmM2MDate			=	getdate(),
+				intInvoiceCurrencyId = CASE WHEN SC.strInOutFlag = 'I' THEN ve.intCurrencyId ELSE cus.intCurrencyId END 
 												
 		FROM	tblSCTicket					SC	CROSS 
 		JOIN	tblCTCompanyPreference		CP
@@ -138,6 +142,8 @@ BEGIN TRY
 		JOIN	tblSCTicketSplit			SP	ON	SP.intTicketId		=	SC.intTicketId
 												AND	SP.intCustomerId	=	ISNULL(@intEntityId,SC.intEntityId)
 												AND SP.strDistributionOption = 'DP'
+		left join tblAPVendor ve on ve.intEntityId = SC.intEntityId
+		left join tblARCustomer cus on cus.intEntityId = SC.intEntityId
 		WHERE	SC.intTicketId	= @intExternalId	
 
 		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
@@ -150,7 +156,7 @@ BEGIN TRY
 		INSERT	INTO	#tmpExtracted
 		(	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,
 			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,
-			intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,intCurrencyId
+			intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,intCurrencyId,intInvoiceCurrencyId
 		)
 		SELECT	intContractTypeId	= 	SC.intTicketTypeId,
 				intEntityId			=	@intEntityId,			
@@ -172,7 +178,7 @@ BEGIN TRY
 				dblBalance			=	0,					dtmStartDate				=	SC.dtmDeliverySheetDate,
 				intPricingTypeId	=	5,					dtmCreated					=	GETDATE(),
 				intConcurrencyId	=	1,					intCreatedById				=	@intUserId,
-				intUnitMeasureId	=	QU.intUnitMeasureId,intCurrencyId				=	SC.intCurrencyId
+				intUnitMeasureId	=	QU.intUnitMeasureId,intCurrencyId				=	SC.intCurrencyId,intInvoiceCurrencyId = CASE WHEN SC.intTicketTypeId = 1 THEN ve.intCurrencyId ELSE cus.intCurrencyId END 
 												
 		FROM	tblSCDeliverySheet			SC	CROSS 
 		JOIN	tblCTCompanyPreference		CP
@@ -183,6 +189,8 @@ BEGIN TRY
 												AND	CU.intUnitMeasureId		=	QU.intUnitMeasureId	LEFT 
 		JOIN	tblSCDeliverySheetSplit		SP	ON	SP.intDeliverySheetId	=	SC.intDeliverySheetId 
 												AND SP.intEntityId = @intEntityId
+		left join tblAPVendor ve on ve.intEntityId = SC.intEntityId
+		left join tblARCustomer cus on cus.intEntityId = SC.intEntityId
 		WHERE	SC.intDeliverySheetId	= @intExternalId	
 
 		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
@@ -195,7 +203,7 @@ BEGIN TRY
 		INSERT	INTO	#tmpExtracted
 		(	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,
 			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,
-			intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,dtmM2MDate
+			intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,dtmM2MDate,intInvoiceCurrencyId
 		)
 		SELECT	intContractTypeId	= 1, --Purchase
 				intEntityId			= @intEntityId, 
@@ -227,7 +235,8 @@ BEGIN TRY
 				intConcurrencyId	=	1,
 				intCreatedById		=	1,
 				intUnitMeasureId	=	ItemUOM.intUnitMeasureId,
-				dtmM2MDate = GETDATE()
+				dtmM2MDate = GETDATE(),
+				intInvoiceCurrencyId = ve.intCurrencyId
 
 		FROM	tblGRTransferStorageSplit	TSS
 		JOIN	tblGRTransferStorage		TS		ON  TS.intTransferStorageId =	TSS.intTransferStorageId
@@ -237,6 +246,7 @@ BEGIN TRY
 		JOIN	tblICCommodity				CM		ON	CM.intCommodityId		=	Item.intCommodityId
 		JOIN	tblICCommodityUnitMeasure	CU		ON	CU.intCommodityId		=	CM.intCommodityId
 													AND CU.intUnitMeasureId		=	ItemUOM.intUnitMeasureId 
+		left join tblAPVendor ve on ve.intEntityId = TSS.intEntityId
 		WHERE TSS.intTransferStorageSplitId = @intExternalId 
 
 		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
@@ -250,7 +260,7 @@ BEGIN TRY
 		(
 			intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,
 			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId, dtmM2MDate
+			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId, dtmM2MDate,intInvoiceCurrencyId
 		)
 		SELECT	DISTINCT			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 				intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmStartDate,
@@ -283,7 +293,8 @@ BEGIN TRY
 				dblTotalCost		=	CI.dblCashPrice * CI.dblQuantity,
 				intCurrencyId		=	CY.intCurrencyID,
 				intUnitMeasureId	=	QU.intUnitMeasureId,
-				dtmM2MDate 			= 	ISNULL(CI.dtmM2MDate,getdate())
+				dtmM2MDate 			= 	ISNULL(CI.dtmM2MDate,getdate()),
+				intInvoiceCurrencyId = CASE WHEN CI.strContractType IN ('B','Purchase') THEN ve.intCurrencyId ELSE cus.intCurrencyId END 
 
 		FROM	tblCTContractImport			CI	LEFT
 		JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -307,6 +318,8 @@ BEGIN TRY
 												AND	EY.strEntityType	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 'Vendor' ELSE 'Customer' END LEFT
 		JOIN	vyuCTEntity					SY	ON	SY.strEntityName	=	CI.strSalesperson
 												AND	SY.strEntityType	=	'Salesperson'
+		left join tblAPVendor ve on ve.intEntityId = EY.intEntityId
+		left join tblARCustomer cus on cus.intEntityId = EY.intEntityId
 		
 		WHERE	intContractImportId	= @intExternalId
 	END
@@ -336,10 +349,10 @@ BEGIN TRY
 		INSERT	INTO #tmpContractDetail
 				(
 					intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-					intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL
+					intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL, intInvoiceCurrencyId
 				)
 		SELECT	@intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-				intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblQuantity,intItemUOMId,dtmM2MDate, 0, 0
+				intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblQuantity,intItemUOMId,dtmM2MDate, 0, 0, intInvoiceCurrencyId
 		FROM	#tmpExtracted
 		
 		EXEC	uspCTGetTableDataInXML '#tmpContractDetail',null,@strTblXML OUTPUT,'tblCTContractDetail'
@@ -359,10 +372,10 @@ BEGIN TRY
 		INSERT	INTO #tmpContractDetail
 				(
 					intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-					intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL
+					intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL, intInvoiceCurrencyId
 				)
 		SELECT	@intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-				intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblQuantity,intItemUOMId,dtmM2MDate, 0, 0
+				intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblQuantity,intItemUOMId,dtmM2MDate, 0, 0, intInvoiceCurrencyId
 		FROM	#tmpExtracted
 		
 		EXEC	uspCTGetTableDataInXML '#tmpContractDetail',null,@strTblXML OUTPUT,'tblCTContractDetail'

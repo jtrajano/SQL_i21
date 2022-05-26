@@ -361,7 +361,7 @@ AS
 			SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId FROM  #tmpAddItemReceiptResult	
 
 			DECLARE @intInventoryReceiptItemId	INT = NULL,
-					@dblQty						NUMERIC(18,6) = 0
+					@dblQty						NUMERIC(38,20) = 0
 
 			SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
 			FROM	tblICInventoryReceiptItem

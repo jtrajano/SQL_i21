@@ -4,6 +4,7 @@ SELECT
 	DOD.intDispatchOrderDetailId
 	,DOD.intDispatchOrderId
 	,DOD.intSequence
+	,DOD.intLoadSeq
 	,DOD.intStopType
 	,strStopType = CASE DOD.intStopType 
 		WHEN 1 THEN 'Pick Up'
@@ -31,8 +32,16 @@ SELECT
 	,strItemNo = ISNULL(I.strItemNo, DOD.strItemNo)
 	,strItemDescription = I.strDescription
 	,DOD.dblQuantity
+	,DOD.dblStandardWeight
 	,DOD.strOrderComments
 	,DOD.strDeliveryComments
+	,DOD.intEntityShipViaId
+	,DOD.intEntityShipViaTruckId 
+	,DOD.intEntityShipViaTrailerId
+	,DOD.intEntityShipViaCompartmentId
+	,SVTC.strCompartmentNumber
+	,SVTC.intCategoryId
+	,SVTC.dblCapacity
 	,DOD.intConcurrencyId
 FROM tblLGDispatchOrderDetail DOD 
 LEFT JOIN tblICItem I ON I.intItemId = DOD.intItemId
@@ -40,3 +49,4 @@ LEFT JOIN tblEMEntity E ON E.intEntityId = DOD.intEntityId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DOD.intEntityLocationId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = DOD.intCompanyLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = DOD.intCompanyLocationSubLocationId
+LEFT JOIN tblSMShipViaTrailerCompartment SVTC ON SVTC.intEntityShipViaTrailerCompartmentId = DOD.intEntityShipViaCompartmentId

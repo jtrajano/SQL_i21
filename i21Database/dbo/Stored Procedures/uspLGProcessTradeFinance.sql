@@ -100,7 +100,7 @@ BEGIN
 	ORDER BY intTradeFinanceId DESC
 
 	/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel the previous */
-	IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') <> 'Canceled' 
+	IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') NOT IN ('Canceled', 'Cancelled')
 		AND ISNULL(@strLastTradeFinanceNo, '') <> ISNULL(@strTradeFinanceNumber, ''))
 	BEGIN 
 		INSERT INTO @TRFTradeFinanceCancel
@@ -138,7 +138,7 @@ BEGIN
 			,intSublimitTypeId
 			,ysnSubmittedToBank
 			,dtmDateSubmitted
-			,strApprovalStatus = 'Canceled'
+			,strApprovalStatus = 'Cancelled'
 			,dtmDateApproved
 			,strRefNo
 			,intOverrideFacilityValuation
@@ -264,7 +264,7 @@ BEGIN
 	IF EXISTS (SELECT 1 FROM @TRFLog)
 	BEGIN
 		/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel the previous */
-		IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') <> 'Canceled' 
+		IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') NOT IN ('Canceled', 'Cancelled')
 			AND ISNULL(@strLastTradeFinanceNo, '') <> ISNULL(@strTradeFinanceNumber, ''))
 		BEGIN
 

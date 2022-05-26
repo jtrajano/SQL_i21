@@ -16,15 +16,18 @@ SELECT
 	,strDriver = DV.strName
 	,strTruckNumber = SVT.strTruckNumber
 	,strTrailerNumber = SVTL.strTrailerNumber
+	,strTrailerType = SVTL.strTrailerDescription --temp placeholder for trailer type
+	,dblMaxWeight = DO.dblMaxWeight
+	,dblLoadWeight = DO.dblLoadWeight
 	,strDispatchStatus = CASE (DO.intDispatchStatus) 
 		WHEN 1 THEN 'Scheduled'
-		WHEN 2 THEN 'TM Orders'
+		WHEN 2 THEN 'In Progress'
 		WHEN 3 THEN 'Complete'
 		WHEN 4 THEN 'Cancelled'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,strSourceType = CASE (DO.intSourceType)
 		WHEN 1 THEN 'LG Loads - Outbound'
-		WHEN 2 THEN 'In Progress'
+		WHEN 2 THEN 'TM Orders'
 		WHEN 3 THEN 'LG Loads - Inbound'
 		WHEN 4 THEN 'TM Sites'
 		WHEN 5 THEN 'Entities'

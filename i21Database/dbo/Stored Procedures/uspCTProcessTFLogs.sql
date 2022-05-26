@@ -27,6 +27,7 @@ BEGIN
 			intContractDetailId INT
 			,strFinanceTradeNo nvarchar(50)
 			,ysnStatusChange bit
+			,strRowState nvarchar(50)
 		) 
 
 		EXEC sp_xml_preparedocument @xmlDocumentId output, @strXML
@@ -36,15 +37,18 @@ BEGIN
 			intContractDetailId
 			,strFinanceTradeNo
 			,ysnStatusChange
+			,strRowState
 		)
 		SELECT
 			intContractDetailId
 			,strFinanceTradeNo = null
 			,ysnStatusChange
+			,strRowState
 		FROM OPENXML(@xmlDocumentId, 'rows/row', 2)
 		WITH (
 			intContractDetailId INT
 			,ysnStatusChange bit
+			,strRowState nvarchar(50)
 		)
 
 
@@ -52,15 +56,19 @@ BEGIN
 		while (@intActiveContractDetailId is not null)
 		begin
 			
-			select @TFTransNo = strFinanceTradeNo from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId ;
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail where intContractDetailId = @intActiveContractDetailId and intBankId IS NOT NULL)
+			BEGIN
+				select @TFTransNo = strFinanceTradeNo from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId  ;
 		
-			if (@TFTransNo is null)
-			begin
-				EXEC uspSMGetStartingNumber 166, @TFTransNo OUTPUT;
-				update tblCTContractDetail set strFinanceTradeNo = @TFTransNo where intContractDetailId = @intActiveContractDetailId;
-			end
+				if (@TFTransNo is null)
+				begin
+					EXEC uspSMGetStartingNumber 166, @TFTransNo OUTPUT;
+					update tblCTContractDetail set strFinanceTradeNo = @TFTransNo where intContractDetailId = @intActiveContractDetailId;
+				end
 			
-			update @TFXML set strFinanceTradeNo = @TFTransNo where intContractDetailId = @intActiveContractDetailId;
+				update @TFXML set strFinanceTradeNo = @TFTransNo where intContractDetailId = @intActiveContractDetailId;
+			END
+				
 			
 			select top 1 @intActiveContractDetailId = min(intContractDetailId) from @TFXML where intContractDetailId > @intActiveContractDetailId;
 		end
@@ -104,6 +112,7 @@ BEGIN
 				, dblFinanceQty
 				, dblFinancedAmount
 				, strBorrowingFacilityBankRefNo
+				, ysnDeleted
 				)
 			select
 				strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' else 'Updated Contract' end)
@@ -138,13 +147,14 @@ BEGIN
 				, strBankApprovalStatus = STF.strApprovalStatus
 				, dblLimit = limit.dblLimit
 				, dblSublimit = sublimit.dblLimit
-				, dblFinanceQty = CASE WHEN cd.intApprovalStatusId = 4 THEN 0 
+				, dblFinanceQty = CASE WHEN cd.intApprovalStatusId in (3,4) THEN 0 
 										ELSE  case when cd.intContractStatusId <> 6 then cd.dblQuantity else (cd.dblQuantity - cd.dblBalance) END 
 								  END
-				, dblFinancedAmount = (CASE WHEN cd.intApprovalStatusId = 4 THEN 0 
+				, dblFinancedAmount = (CASE WHEN cd.intApprovalStatusId in (3,4) THEN 0 
 											ELSE case when cd.intContractStatusId <> 6 then cd.dblTotalCost else cd.dblTotalCost * ((cd.dblQuantity - cd.dblBalance) / cd.dblQuantity) end
 									  END) * (case when cd.intCurrencyId <> cd.intInvoiceCurrencyId and isnull(cd.dblRate,0) <> 0 then cd.dblRate else 1 end)
 				, strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
+				, ysnDelete = CASE WHEN cd.intContractStatusId = 3 THEN 1 ELSE 0 END
 			
 			from
 				@TFXML tf
@@ -157,13 +167,119 @@ BEGIN
 				cross apply (
 					select intTradeFinanceLogId = max(intTradeFinanceLogId) from tblTRFTradeFinanceLog where intContractDetailId = tf.intContractDetailId
 				) et
-			where isnull(cd.intBankId,0) > 0
+			where isnull(cd.intBankId,0) > 0 AND ISNULL(tf.strRowState, '') <> 'Delete'
 			;
 
 			if exists (select top 1 1 from @TRFLog)
 			begin
 				exec uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
 			end
+
+
+
+			DELETE FROM @TRFLog
+
+			DECLARE @deletedSequence TABLE(
+			intTradeFinanceLogId INT
+			) 
+
+			INSERT INTO @deletedSequence
+			SELECT MAX(intTradeFinanceLogId)
+			FROM tblTRFTradeFinanceLog TFL
+			INNER JOIN @TFXML tf on TFL.intContractDetailId = tf.intContractDetailId
+			WHERE strRowState = 'Delete'
+			GROUP BY TFL.intContractDetailId
+			
+
+
+			insert into @TRFLog
+			(
+				strAction
+				, strTransactionType
+				, intTradeFinanceTransactionId
+				, strTradeFinanceTransaction
+				, intTransactionHeaderId
+				, intTransactionDetailId
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intBankTransactionId
+				, strBankTransactionId
+				, dblTransactionAmountAllocated
+				, dblTransactionAmountActual
+				, intLoanLimitId
+				, strLoanLimitNumber
+				, strLoanLimitType
+				, dtmAppliedToTransactionDate
+				, intStatusId
+				, intWarrantId
+				, strWarrantId
+				, intUserId
+				, intConcurrencyId
+				, intContractHeaderId
+				, intContractDetailId
+				, intBankId
+				, intBankAccountId
+				, intBorrowingFacilityId
+				, intLimitId
+				, intSublimitId
+				, strBankTradeReference
+				, strBankApprovalStatus
+				, dblLimit
+				, dblSublimit
+				, dblFinanceQty
+				, dblFinancedAmount
+				, strBorrowingFacilityBankRefNo
+				, ysnDeleted
+					
+				)
+			select
+				strAction = 'Deleted Contract'
+				, strTransactionType = 'Contract'
+				, intTradeFinanceTransactionId = null
+				, strTradeFinanceTransaction = isnull(TFL.strTradeFinanceTransaction,tf.strFinanceTradeNo)
+				, intTransactionHeaderId = TFL.intTransactionHeaderId
+				, intTransactionDetailId = TFL.intTransactionDetailId
+				, strTransactionNumber = TFL.strTransactionNumber 
+				, dtmTransactionDate = getdate()
+				, intBankTransactionId = null
+				, strBankTransactionId = null
+				, dblTransactionAmountAllocated = TFL.dblTransactionAmountAllocated
+				, dblTransactionAmountActual = TFL.dblTransactionAmountActual
+				, intLoanLimitId = TFL.intLoanLimitId
+				, strLoanLimitNumber = TFL.strLoanLimitNumber
+				, strLoanLimitType = TFL.strLoanLimitType
+				, dtmAppliedToTransactionDate = getdate()
+				, intStatusId = TFL.intStatusId
+				, intWarrantId = null
+				, strWarrantId = null
+				, intUserId = @intUserId
+				, intConcurrencyId = 1
+				, intContractHeaderId = TFL.intContractHeaderId
+				, intContractDetailId = TFL.intContractDetailId
+				, intBankId = TFL.intBankId
+				, intBankAccountId = TFL.intBankAccountId
+				, intBorrowingFacilityId = TFL.intBorrowingFacilityId
+				, intLimitId = TFL.intLimitId
+				, intSublimitId = TFL.intSublimitId
+				, strBankTradeReference = TFL.strBankTradeReference
+				, strBankApprovalStatus = TFL.strBankApprovalStatus
+				, dblLimit = TFL.dblLimit
+				, dblSublimit = TFL.dblSublimit
+				, dblFinanceQty = TFL.dblFinanceQty
+				, dblFinancedAmount = TFL.dblFinancedAmount
+				, strBorrowingFacilityBankRefNo = TFL.strBorrowingFacilityBankRefNo
+				, ysnDelete = 1
+			from
+				@TFXML tf
+				INNER JOIN tblTRFTradeFinanceLog TFL on TFL.intContractDetailId = tf.intContractDetailId
+				INNER JOIN @deletedSequence ds on ds.intTradeFinanceLogId = TFL.intTradeFinanceLogId
+			;
+
+			if exists (select top 1 1 from @TRFLog)
+			begin
+				exec uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
+			end
+
 
 
 
@@ -223,7 +339,7 @@ BEGIN
 		WHERE intTradeFinanceId = @intTradeFinanceId
 
 
-		IF  (@strCurrentStatus in ('Rejected', 'Canceled'))
+		IF  (@strCurrentStatus in ('Rejected', 'Cancelled'))
 		BEGIN
 			SET @strAction = 'UPDATE'
 		END
@@ -288,7 +404,8 @@ BEGIN
 					,dtmDateSubmitted = '1/1/1900'
 					,intApprovalStatusId = 0
 					,dtmDateApproved = '1/1/1900'
-					,strFinanceTradeNo = CASE WHEN intApprovalStatusId = 4 then null else strFinanceTradeNo END
+					,dblInterestRate = null
+					,strFinanceTradeNo = CASE WHEN intApprovalStatusId in (3,4) then null else strFinanceTradeNo END
 				WHERE intApprovalStatusId in (3,4) and intContractDetailId = @intContractDetailId
 
 

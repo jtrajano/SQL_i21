@@ -276,6 +276,17 @@ FROM tblARPostInvoiceHeader PID
 INNER JOIN tblHDTicketHoursWorked HDTHW WITH (NOLOCK) ON PID.[intInvoiceId] = HDTHW.[intInvoiceId]
 WHERE PID.strSessionId = @strSessionId
 
+--HELPDESK SYNC
+IF EXISTS (
+	SELECT TOP 1 ''
+	FROM tblARPostInvoiceHeader PID
+	INNER JOIN tblHDTicketHoursWorked HDTHW WITH (NOLOCK) ON PID.[intInvoiceId] = HDTHW.[intInvoiceId]
+	WHERE PID.strSessionId = @strSessionId
+)
+BEGIN
+	EXEC [dbo].[uspHDUpdateTimeEntryPeriodDetailStatus]
+END
+
 --TANK DELIVERY SYNC
 BEGIN
 DECLARE @TankDeliveryForSync TABLE ([intInvoiceId] INT, UNIQUE (intInvoiceId))
@@ -674,7 +685,7 @@ FROM tblARInvoiceIntegrationLogDetail ILD
 INNER JOIN tblARPostInvoiceHeader PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
 	AND ILD.[ysnPost] IS NOT NULL
-	AND PID.strType = 'Store Checkout'
+	--AND PID.strType = 'Store Checkout'
 	AND PID.strSessionId = @strSessionId
 
 DELETE FROM tblARPostInvoiceHeader WHERE strSessionId = @strSessionId

@@ -20,6 +20,7 @@ BEGIN
 		strFullAddress NVARCHAR(1000) NULL,
 		intEntityVendorId INT NULL,
 		strVendorId NVARCHAR(1000) NULL,
+		strVendorAccountNo NVARCHAR(1000) NULL,
 		strVendorVatNo NVARCHAR(1000) NULL,
 		strVendorName NVARCHAR(1000) NULL,
 		dtmBillDate DATETIME NULL,
@@ -118,6 +119,7 @@ BEGIN
 			   dbo.fnAPFormatAddress(E.strName, NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, NULL),
 			   E.intEntityId,
 			   V.strVendorId,
+			   ISNULL(VANL.strVendorAccountNum, V.strVendorAccountNum),
 			   ISNULL(EL.strVATNo, V.strVATNo),
 			   E.strName,
 			   A.dtmBillDate,
@@ -159,6 +161,7 @@ BEGIN
 		CROSS APPLY tblSMCompanySetup CS
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intShipToId
 		INNER JOIN (tblAPVendor V INNER JOIN tblEMEntity E ON V.intEntityId = E.intEntityId) ON V.intEntityId = A.intEntityVendorId
+		LEFT JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = E.intEntityId AND VANL.intCompanyLocationId = CL.intCompanyLocationId
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = A.intEntityVendorId AND ysnDefaultLocation = 1
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 		INNER JOIN tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId

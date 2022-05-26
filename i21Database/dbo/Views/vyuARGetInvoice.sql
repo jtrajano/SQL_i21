@@ -194,10 +194,9 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , intCompanyAccountSegmentId			= GLSEGMENT.intCompanyAccountSegmentId
 	 , ysnIntraCompany						= CASE WHEN ISNULL(INV.ysnIntraCompany, 0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries, 0) END
 	 , strGoodsStatus						= INV.strGoodsStatus
-	 , ysnOverrideFreightCharge				= INV.ysnOverrideFreightCharge
-	 , dblFreightCharge						= INV.dblFreightCharge
-	 , strFreightCompanySegment				= INV.strFreightCompanySegment
-	 , strFreightLocationSegment			= INV.strFreightLocationSegment
+	 , dblFreightCharge						= ISNULL(INV.dblFreightCharge, 0.00)
+	 , strFreightCompanySegment				= GLCAI.strDescription
+	 , strFreightLocationSegment			= GLLAI.strDescription
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -414,3 +413,15 @@ OUTER APPLY(
 	SELECT TOP 1 ysnAllowIntraCompanyEntries
 	FROM tblARCompanyPreference
 ) ARCOMPANYPREFERENCE
+OUTER APPLY (
+	SELECT TOP 1 intAccountId
+		 , strDescription 
+	FROM vyuGLCompanyAccountId WITH (NOLOCK)
+	WHERE intAccountId = INV.intFreightCompanySegment
+) GLCAI
+OUTER APPLY (
+	SELECT TOP 1 intAccountId
+		 , strDescription 
+	FROM vyuGLLocationAccountId WITH (NOLOCK)
+	WHERE intAccountId = INV.intFreightLocationSegment
+) GLLAI
