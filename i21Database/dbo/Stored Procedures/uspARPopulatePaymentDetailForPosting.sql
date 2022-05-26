@@ -58,7 +58,8 @@ SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblSM
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 
 SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverridelocationSegment = ysnOverrideLocationSegment
-FROM tblARCompanyPreference
+FROM tblARCompanyPreference WITH (NOLOCK)
+ORDER BY intCompanyPreferenceId 
 
 --Header
 INSERT INTO #ARPostPaymentHeader
