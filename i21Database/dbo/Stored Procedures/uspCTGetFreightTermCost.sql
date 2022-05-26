@@ -108,6 +108,8 @@ BEGIN TRY
 														JOIN tblSMCity LP ON LP.strCity = FRM.strOriginPort
 														JOIN tblSMCity DP ON DP.strCity = FRM.strDestinationCity
 														WHERE LP.intCityId = @intFromPortId
+															AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) >= FRM.dtmValidFrom
+															AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
 															AND DP.intCityId = @intToPortId)
 			END
 
