@@ -726,6 +726,9 @@ print 'BEGIN POST DEPLOYMENT'
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
 
+-- MBIL - Mobile Billing
+:r .\MBIL\InsertLongTruckScreen.sql
+
 -- Clean up i21 database objects
 :r .\SM\01_CleanupObjects.sql
 :r .\IC\29_CleanupObjects.sql
