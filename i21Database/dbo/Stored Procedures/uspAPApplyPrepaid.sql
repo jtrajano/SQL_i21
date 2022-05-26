@@ -38,7 +38,7 @@ BEGIN
     UPDATE A
         SET A.ysnApplied = 1
         ,A.dblAmountApplied = CASE WHEN A.dblBalance <= B2.dblAmountDue THEN A.dblBalance ELSE B2.dblAmountDue END
-        ,A.dblBalance = 0
+        ,A.dblBalance = A.dblTotal - CASE WHEN A.dblBalance <= B2.dblAmountDue THEN A.dblBalance ELSE B2.dblAmountDue END
     FROM tblAPAppliedPrepaidAndDebit A
     INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId --prepaid/dm
     INNER JOIN tblAPBill B2 ON A.intBillId = B2.intBillId --Voucher
