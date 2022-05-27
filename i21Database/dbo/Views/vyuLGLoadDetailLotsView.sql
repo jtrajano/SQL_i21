@@ -24,8 +24,8 @@ SELECT L.strLoadNumber
 	  ,CLSL.strSubLocationName
 	  ,strStorageLocation = SL.strName
 	  ,LDL.intConcurrencyId
-	  ,strWarrantNo = ISNULL(ReceiptLot.strWarrantNo, Receipt.strWarrantNo)
-	  ,strWarrantStatus = CASE ISNULL(ReceiptLot.intWarrantStatus, Receipt.intWarrantStatus)
+	  ,strWarrantNo = LOT.strWarrantNo
+	  ,strWarrantStatus = CASE LOT.intWarrantStatus
 			WHEN 1 THEN 'Pledged' 
 			WHEN 2 THEN 'Partially Released'
 			WHEN 3 THEN 'Released'
