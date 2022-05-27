@@ -8,6 +8,8 @@
 	, @intToTermId INT
 	, @dtmDate DATETIME
 	, @intMarketZoneId INT
+	, @intInvoiceCurrencyId INT
+	, @intRateTypeId INT
 	, @ysnWarningMessage BIT = 1
 
 AS
@@ -42,7 +44,8 @@ BEGIN TRY
 		, strUnitMeasure NVARCHAR(100)
 		, strCostMethod NVARCHAR(50)
 		, dblRate NUMERIC(18, 6)
-		, dblAmount NUMERIC(18, 6))
+		, dblAmount NUMERIC(18, 6)
+		, dblFX NUMERIC(18, 6))
 
 	SELECT TOP 1 @ysnFreightTermCost = ISNULL(ysnFreightTermCost, 0)
 		, @ysnAutoCalc = ISNULL(ysnAutoCalculateFreightTermCost, 0)
@@ -127,6 +130,7 @@ BEGIN TRY
 					, 'Per Unit'
 					, dblRate = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
 					, dblAmount = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
+					, dblFX = NULL
 				FROM tblLGFreightRateMatrix frm
 				JOIN tblEMEntity em ON em.intEntityId = frm.intEntityId
 				JOIN tblLGContainerType cnt ON cnt.intContainerTypeId = frm.intContainerTypeId
@@ -153,6 +157,7 @@ BEGIN TRY
 					, 'Per Unit'
 					, dblRate = 0
 					, dblAmount = 0
+					, dblFX = NULL
 			END
 		END
 		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
@@ -174,6 +179,7 @@ BEGIN TRY
 				, 'Amount'
 				, dblRate = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
 				, dblAmount = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
+				, dblFX = NULL
 			FROM tblLGInsurancePremiumFactor ipf
 			JOIN tblLGInsurancePremiumFactorDetail detail ON detail.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId
 			JOIN tblEMEntity em ON em.intEntityId = ipf.intEntityId
@@ -201,6 +207,7 @@ BEGIN TRY
 				, @strCostMethod
 				, dblRate = @dblValue
 				, dblAmount = @dblValue
+				, dblFX = NULL
 		END
 
 		DELETE FROM #tmpCosts WHERE intTermCostDetailId = @intTermCostDetailId
@@ -216,7 +223,29 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			SELECT * FROM @CostItems
+			SELECT ci.intCostItemId
+				, ci.strCostItem
+				, ci.intEntityId
+				, ci.strEntityName
+				, ci.intCurrencyId
+				, ci.strCurrency
+				, ci.intItemUOMId
+				, ci.strUnitMeasure
+				, ci.strCostMethod
+				, ci.dblRate
+				, ci.dblAmount
+				, dblFX = ISNULL(CASE WHEN @intInvoiceCurrencyId = ci.intCurrencyId THEN 1 ELSE tbl.dblRate END, 1)
+			FROM @CostItems ci
+			LEFT JOIN (
+				SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY cerd.intCurrencyExchangeRateId ORDER BY cerd.dtmValidFromDate DESC)
+					, cerd.dblRate
+					, cer.intFromCurrencyId
+					, cer.intToCurrencyId
+				FROM tblSMCurrencyExchangeRate cer 
+				LEFT JOIN tblSMCurrencyExchangeRateDetail cerd ON cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId AND cerd.intRateTypeId = @intRateTypeId
+				WHERE cer.intFromCurrencyId = @intInvoiceCurrencyId
+					AND CAST(FLOOR(CAST(cerd.dtmValidFromDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)
+			) tbl ON tbl.intToCurrencyId = ci.intCurrencyId
 		END
 	END
 
