@@ -801,6 +801,7 @@
     <Build Include="dbo\Views\vyuARTaxLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateLotReleased.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
