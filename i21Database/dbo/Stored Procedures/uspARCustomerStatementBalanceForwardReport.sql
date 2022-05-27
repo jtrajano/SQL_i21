@@ -165,11 +165,12 @@ CREATE TABLE #STATEMENTTABLE (
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_A1] ON [#STATEMENTTABLE]([intEntityCustomerId], [intInvoiceId], [strTransactionType], [strType])
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_A2] ON [#STATEMENTTABLE]([strTransactionType]) INCLUDE ([dblPayment])
 CREATE TABLE #CFTABLE (
-	  intInvoiceId				INT NOT NULL PRIMARY KEY
+	  intInvoiceId				INT NOT NULL
 	, strInvoiceNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, strInvoiceReportNumber	NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, dtmInvoiceDate			DATETIME NULL
 )
+CREATE NONCLUSTERED INDEX [NC_Index_#CFTABLE_intInvoiceId] ON [#CFTABLE]([intInvoiceId])
 CREATE TABLE #CUSTOMERS (
 	  intEntityCustomerId		INT NOT NULL PRIMARY KEY	  
     , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL

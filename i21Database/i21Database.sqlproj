@@ -351,8 +351,7 @@
     <Build Include="dbo\Views\vyuMFLotDetailViewForDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdatePlannedAvailabilityDate.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />    
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerPricing.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
@@ -10679,10 +10678,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\97_RefreshARTempTable.sql" />
-  </ItemGroup>
+  </ItemGroup>  
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />
   </ItemGroup>
