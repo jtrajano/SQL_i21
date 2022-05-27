@@ -2001,6 +2001,29 @@ BEGIN
 	FROM 
 		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @OneBit)
 
+	--INVOICE HAS EARLIER DATE COMPARE TO STOCK DATE
+		INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= COSTING.[intTransactionDetailId]
+		,[intItemId]			= COSTING.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Stock is not available for ' + ITEM.strItemNo + ' at ' + LOC.strLocationName + ' as of ' + CONVERT(NVARCHAR(30), CAST(COSTING.dtmDate AS DATETIME), 101) + '. Use the nearest stock available date of ' + CONVERT(NVARCHAR(30), CAST(STOCKDATE.dtmDate AS DATETIME), 101) + ' or later.'	
+	FROM ##ARPostInvoiceHeader I
+		INNER JOIN ##ARItemsForCosting COSTING  ON I.intInvoiceId =  COSTING.intTransactionId
+		INNER JOIN  tblICInventoryStockAsOfDate STOCKDATE ON COSTING.intItemId = STOCKDATE.intItemId
+		INNER JOIN tblICItem ITEM ON  ITEM.intItemId = COSTING.intItemId
+		INNER JOIN tblSMCompanyLocation LOC ON COSTING.intItemLocationId = LOC.intCompanyLocationId
+		WHERE COSTING.dtmDate < STOCKDATE.dtmDate
 
 	-- IC In Transit Costing
 	DELETE FROM @ItemsForInTransitCosting
