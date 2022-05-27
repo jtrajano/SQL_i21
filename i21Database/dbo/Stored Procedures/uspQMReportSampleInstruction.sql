@@ -17,11 +17,11 @@ BEGIN TRY
 			@strState				NVARCHAR(500),
 			@strZip					NVARCHAR(500),
 			@strCountry				NVARCHAR(500),
-			@intContractDetailId	INT,
+			@ContractDetailId		Id,
 			@intLaguageId			INT,
 			@intSrCurrentUserId		INT,
 			@strCurrentUser			NVARCHAR(100),
-			@strReportDateFormat	nvarchar(50)
+			@strReportDateFormat	NVARCHAR(50)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -68,7 +68,8 @@ BEGIN TRY
 				[datatype]		NVARCHAR(50)  
 	)  
     
-	SELECT	@intContractDetailId = [from]
+	INSERT INTO @ContractDetailId
+	SELECT	[from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intContractDetailId'
 	
@@ -86,7 +87,7 @@ BEGIN TRY
 
 	SELECT @intCompanyLocationId = intCompanyLocationId
 	FROM tblCTContractDetail
-	WHERE intContractDetailId = @intContractDetailId
+	WHERE intContractDetailId IN (SELECT intId FROM @ContractDetailId)
 
 	SELECT TOP 1 @imgLogo = imgLogo
 		,@strLogoType = 'Logo'
@@ -101,7 +102,7 @@ BEGIN TRY
 	END
 
 	SELECT	@strCurrentUser = strName FROM tblEMEntity WHERE intEntityId = @intSrCurrentUserId;
-	select top 1 @strReportDateFormat = strReportDateFormat from tblSMCompanyPreference;
+	SELECT TOP 1 @strReportDateFormat = strReportDateFormat from tblSMCompanyPreference;
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strAddress)) END,
@@ -111,12 +112,11 @@ BEGIN TRY
 			@strZip			=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strZip)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strZip)) END,
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt9.strTranslation,tblSMCompanySetup.strCountry))) END
 	FROM	tblSMCompanySetup WITH (NOLOCK)
-	left join tblSMCountry				rtc9 WITH (NOLOCK) on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
-	left join tblSMScreen				rts9 WITH (NOLOCK) on rts9.strNamespace = 'i21.view.Country'
-	left join tblSMTransaction			rtt9 WITH (NOLOCK) on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
-	left join tblSMReportTranslation	rtrt9 WITH (NOLOCK) on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
+	LEFT JOIN tblSMCountry				rtc9 WITH (NOLOCK) on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
+	LEFT JOIN tblSMScreen				rts9 WITH (NOLOCK) on rts9.strNamespace = 'i21.view.Country'
+	LEFT JOIN tblSMTransaction			rtt9 WITH (NOLOCK) on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
+	LEFT JOIN tblSMReportTranslation	rtrt9 WITH (NOLOCK) on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
-	
 
 	SELECT	 intContractHeaderId					=	CH.intContractHeaderId
 			,strBuyerRefNo							=	CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END
@@ -195,8 +195,8 @@ LEFT	JOIN	(
 					LEFT JOIN	tblSMCity				DP	WITH (NOLOCK) ON	DP.intCityId				=	CD.intDestinationPortId	
 				)										SQ	ON	SQ.intContractDetailId		=	CD.intContractDetailId
 														--AND SQ.intRowNum = 1
-left join tblCTPosition pos on pos.intPositionId = CH.intPositionId
-WHERE	CD.intContractDetailId	=	@intContractDetailId
+LEFT	JOIN tblCTPosition pos on pos.intPositionId = CH.intPositionId
+WHERE	CD.intContractDetailId IN (SELECT intId FROM @ContractDetailId)
 
 
 END TRY
