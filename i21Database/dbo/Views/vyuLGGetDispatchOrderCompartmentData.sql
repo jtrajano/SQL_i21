@@ -10,7 +10,7 @@ SELECT
 	,CAT.strCategoryCode
 	,DOC.dblCapacity 
 	,DOC.dblLoadWeight
-	,dblPercentageFull = (DOC.dblLoadWeight / ISNULL(DOC.dblCapacity, 1)) * 100
+	,dblPercentageFull = (DOC.dblLoadWeight / ISNULL(DOC.dblCapacity, 1))
 FROM tblLGDispatchOrderCompartment DOC
 LEFT JOIN tblSMShipViaTrailerCompartment SVTC ON SVTC.intEntityShipViaTrailerCompartmentId = DOC.intEntityShipViaTrailerCompartmentId
 LEFT JOIN tblICCategory CAT ON CAT.intCategoryId = DOC.intCategoryId
