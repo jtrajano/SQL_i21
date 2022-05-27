@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnRKGetOpenContractHistory] (
+﻿ALTER FUNCTION [dbo].[fnRKGetOpenContractHistory] (
 	@dtmFromDate DATETIME
 	, @dtmToDate DATETIME)
 
@@ -36,8 +36,8 @@ BEGIN
 	GROUP BY mf.intSFutOptTransactionId
 
 	UNION ALL 
-	
-	SELECT  mf.intLFutOptTransactionId
+
+	SELECT mf.intLFutOptTransactionId
 		, 'Futures' as strInstrumentType
 		, 'Buy' as strBuySell
 		, SUM(mf.dblMatchQty) as dblMatchContract
@@ -45,9 +45,9 @@ BEGIN
 	WHERE CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
 		AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
 	GROUP BY mf.intLFutOptTransactionId
-	
 
 	UNION ALL 
+
 	SELECT mf.intSFutOptTransactionId
 		, 'Futures' as strInstrumentType
 		, 'Sell' as strBuySell
@@ -56,7 +56,6 @@ BEGIN
 	WHERE CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
 		AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
 	GROUP BY mf.intSFutOptTransactionId
-	
 
 	RETURN
 END
