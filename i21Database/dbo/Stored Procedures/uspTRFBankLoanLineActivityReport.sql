@@ -67,6 +67,7 @@ BEGIN
 		AND tfLog.dblFinanceQty >= 0
 		AND ISNULL(tfLog.ysnDeleted, 0) = 0
 	) t WHERE t.intRowNum = 1
+		AND t.dblFinanceQty > 0
 		AND ISNULL(t.intBankId, 0) = ISNULL(@intBankId, ISNULL(t.intBankId, 0))
 		AND ISNULL(t.intApprovalStatusId, '') = ISNULL(@intApprovalStatusId, ISNULL(t.intApprovalStatusId, ''))
 		AND ISNULL(t.strLimit, '') = ISNULL(@strLimitType, ISNULL(t.strLimit, ''))
