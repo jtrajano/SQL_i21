@@ -52,25 +52,27 @@ BEGIN TRY
 		END
 		
 		UPDATE  CC
-		SET	    CC.dblAccruedAmount	=	( (CASE	
-												WHEN	CC.strCostMethod = 'Per Unit'	THEN 
-																							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
-												WHEN	CC.strCostMethod = 'Amount'		THEN
-																							CC.dblRate * isnull(CC.dblFX,1)
-												WHEN	CC.strCostMethod = 'Percentage' THEN 
-																							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
-										END)*CC.dblRemainingPercent/100
-									) / (case when isnull(CY.ysnSubCurrency,convert(bit,0)) = convert(bit,1) then isnull(CY.intCent,1) else 1 end)
+		SET	    CC.dblAccruedAmount	=	(CASE	WHEN CC.strCostMethod = 'Per Unit'
+													THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, CM.intUnitMeasureId, CD.dblQuantity) * CC.dblRate * ISNULL(CC.dblFX, 1)
+												WHEN CC.strCostMethod = 'Amount'
+													THEN CC.dblRate * ISNULL(CC.dblFX, 1)
+												WHEN CC.strCostMethod = 'Per Container'
+													THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * ISNULL(CC.dblFX, 1)
+												WHEN CC.strCostMethod = 'Percentage'
+													THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
+														* (CD.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+														* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+												END)
+										/ (CASE WHEN ISNULL(CY.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY.intCent, 1) ELSE 1 END)
 		FROM	tblCTContractCost	CC
 		JOIN	tblCTContractDetail	CD	   ON CD.intContractDetailId	=	CC.intContractDetailId
 		LEFT JOIN	tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
 		LEFT JOIN	tblICItemUOM		PU ON PU.intItemUOMId			=	CD.intPriceItemUOMId	
 		LEFT JOIN	tblICItemUOM		QU ON QU.intItemUOMId			=	CD.intItemUOMId	
 		LEFT JOIN	tblICItemUOM		CM ON CM.intUnitMeasureId		=	IU.intUnitMeasureId
-									    AND CM.intItemId				=	CD.intItemId		
-		
+									    AND CM.intItemId				=	CD.intItemId
 		LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
-
+		LEFT JOIN	tblSMCurrency		CY2	ON	CY2.intCurrencyID		=	CD.intCurrencyId
 		WHERE	CC.intContractDetailId = @intContractDetailId
 
 		UPDATE  CC
