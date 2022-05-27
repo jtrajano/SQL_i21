@@ -1,4 +1,3 @@
-
 -- =============================================
 -- Author:		Jeffrey Trajano
 -- Create date: 13-05-2020
@@ -31,29 +30,28 @@ WITH (
 	, [join] nvarchar(10)
 	, [datatype] nvarchar(50)
 )
+DECLARE @dtmDateCurrent DATETIME
+SELECT @dtmDateCurrent = CAST(CONVERT(nvarchar(20), GETDATE(), 101) AS DATETIME)
 
 DECLARE @dtmDateFrom DATETIME,@dtmDateTo DATETIME,@dtmCMDate DATETIME, @dtmTemp DATETIME,@condition NVARCHAR(40)
+
+SELECT 
+	@dtmDateFrom = [from],
+	@dtmTemp = [from],
+	@dtmDateTo =  [to],
+	@condition  = condition 
+FROM @temp_xml_table WHERE [fieldname] = 'dtmDate' 
 
 IF EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	
-
-	SELECT 
-		@dtmDateFrom = [from],
-		@dtmTemp = [from],
-		@dtmDateTo =  [to],
-		@condition  = condition 
-	FROM @temp_xml_table WHERE [fieldname] = 'dtmDate' --and @condition <> 'Equal To'
-
-	IF @condition IS NULL RETURN;
-
+	IF @dtmDateFrom IS NULL 
+	BEGIN
+		SET @condition = 'As Of'
+	END 
 
 	IF @condition <> 'Equal To'
 	BEGIN
-		
-
-		DECLARE @dtmDateCurrent DATETIME
-		select @dtmDateCurrent = CAST(CONVERT(nvarchar(20), GETDATE(), 101) AS DATETIME)
 
 		SELECT
 			@dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900')
@@ -73,7 +71,11 @@ BEGIN
 		SELECT @dtmCMDate = DATEADD( SECOND, 1, @dtmDateTo) 
 	END
 
-	DECLARE @intUserId INT
+	--SELECT @dtmDateFrom, @dtmDateTo,@dtmCMDate
+
+	--RETURN
+
+	DECLARE @intUserId INT, @intBankAccountId INT
 	select TOP 1 @intUserId = intEntityId from tblSMConnectedUser order by dtmConnectDate desc
 	EXEC [dbo].[uspCMRefreshUndepositedFundsFromOrigin]	@intBankAccountId = NULL,@intUserId = @intUserId
 
@@ -135,28 +137,4 @@ BEGIN
 
 	WHERE ISNULL(@strLocation, a.strLocationName) = a.strLocationName
 
-END
-ELSE
-BEGIN
-	select
-	0 as rowId,
-	@dtmDateFrom as [dtmDateFrom],
-	@dtmDateTo as [dtmDateTo],
-	@dtmCMDate as dtmCMDateParam,
-	null as dtmDate,
-	'' AS strName,
-	'' AS strSourceTransactionId,
-	'' AS strPaymentMethod,
-	'' AS strSourceSystem,
-	'' AS strEODNumber,
-	'' AS strEODDrawer,
-	cast(0 as bit) AS ysnEODComplete,
-	'' AS strCardType,
-	'' AS strLocationName,
-	'' AS strUserName,
-	'' AS strTransactionId,
-	cast(0 as bit)  AS ysnPosted,
-	null AS dtmCMDate,
-	0 AS dblAmount,
-	'' AS strBatchId
 END
