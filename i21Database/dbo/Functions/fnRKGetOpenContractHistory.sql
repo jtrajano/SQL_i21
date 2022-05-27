@@ -1,4 +1,4 @@
-﻿ALTER FUNCTION [dbo].[fnRKGetOpenContractHistory] (
+﻿CREATE FUNCTION [dbo].[fnRKGetOpenContractHistory] (
 	@dtmFromDate DATETIME
 	, @dtmToDate DATETIME)
 
