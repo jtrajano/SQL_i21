@@ -23,6 +23,8 @@ AS
 		,K.strFillMethod
 		,strItemDescription = I.strDescription		
 		,strAccountStatus = C.strAcctStatus	
+		,strRouteId = R.strRouteId
+		,C.intRouteId
 	FROM tblTMSite C 
 	INNER JOIN tblTMCustomer E 
 		ON C.intCustomerID = E.intCustomerID
@@ -38,4 +40,6 @@ AS
 		ON G.intEntitySalespersonId = H.intEntityId
 	LEFT JOIN tblTMFillMethod K
 		ON C.intFillMethodId = K.intFillMethodId
+	LEFT JOIN tblTMRoute R
+		ON R.intRouteId = C.intRouteId
 GO
