@@ -10984,6 +10984,7 @@
     <Build Include="dbo\Views\vyuARPaymentMethodForPortal.sql" />
     <Build Include="dbo\Views\vyuARSearchCreditCards.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateEFTInformation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
