@@ -9180,6 +9180,8 @@
     <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
     <Build Include="dbo\Tables\tblICRecostFormulation.sql" />
     <Build Include="dbo\Tables\tblICRecostFormulationDetail.sql" />
+    <Build Include="dbo\Views\vyuICRecostFormulation.sql" />
+    <Build Include="dbo\Views\vyuICRecostFormulationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
