@@ -8055,6 +8055,7 @@
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

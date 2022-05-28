@@ -68,7 +68,11 @@ CREATE TABLE #CUSTOMERINQUIRY (
 DECLARE @strCustomerIds NVARCHAR(100) = NULL
 
 IF @intEntityCustomerId IS NOT NULL
-	SET @strCustomerIds = CAST(@intEntityCustomerId AS NVARCHAR(100))
+	BEGIN
+		SET @strCustomerIds = CAST(@intEntityCustomerId AS NVARCHAR(100))
+
+		EXEC dbo.uspARUpdateCustomerHighestAR @intEntityCustomerId
+	END
 
 IF @intEntityUserId IS NULL
 	SELECT TOP 1 @intEntityUserId = ISNULL(@intEntityUserId, 1)
