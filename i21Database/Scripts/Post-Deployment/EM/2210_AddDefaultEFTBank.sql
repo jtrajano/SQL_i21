@@ -104,4 +104,57 @@
 	DEALLOCATE temp_cursor_header
 
 	PRINT ('*****End ADD EFT Header table*****')
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	PRINT ('*****BEGIN ADD EFT Domestic VALUE*****')
+	--WE NEED TO CONVERT ALL EXISTING VALUE TO DOMESTIC WHEN THE DATABASE IS FROM 21.2 OR LOWER
+	
+	DECLARE @versionNo NVARCHAR(30)
+	DECLARE @version INT
+
+	SELECT TOP 1 @versionNo = strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC
+	IF ISNULL(@versionNo, '') != ''
+	BEGIN
+		IF EXISTS (SELECT TOP 1 1 FROM dbo.fnSplitStringWithTrim(@versionNo, ','))
+		BEGIN
+			SELECT TOP 1 @version = CAST(Item AS INT) FROM fnSplitStringWithTrim(@versionNo, '.')
+			IF ISNULL(@version, 0) != 0 AND @version < 22
+			BEGIN
+				IF OBJECT_ID('tempdb..#TempUpdateEFTInformation') IS NOT NULL
+					DROP TABLE #TempUpdateEFTInformation
+
+				CREATE TABLE #TempUpdateEFTInformation
+				(
+					[intEntityId]			INT	NOT NULL,
+					[intEntityEFTInfoId]	INT	NOT NULL
+				)
+
+				INSERT INTO #TempUpdateEFTInformation ([intEntityId], [intEntityEFTInfoId])
+				SELECT intEntityId, intEntityEFTInfoId
+				FROM tblEMEntityEFTInformation
+				ORDER BY intEntityId
+
+				DECLARE temp_cursor_info CURSOR FOR
+				SELECT [intEntityId], [intEntityEFTInfoId]
+				FROM #TempUpdateEFTInformation
+
+				OPEN temp_cursor_info
+				FETCH NEXT FROM temp_cursor_info into @intEntityId, @intEntityEFTInfoId
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					UPDATE tblEMEntityEFTInformation SET ysnDomestic = 1 WHERE [intEntityEFTInfoId] = @intEntityEFTInfoId
+
+					FETCH NEXT FROM temp_cursor_info into @intEntityId, @intEntityEFTInfoId
+				END
+
+				CLOSE temp_cursor_info
+				DEALLOCATE temp_cursor_info
+			END
+		END
+	END
+	
+	PRINT ('*****END ADD EFT Domestic VALUE*****')
+
 GO
