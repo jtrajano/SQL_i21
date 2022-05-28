@@ -79,7 +79,11 @@ SET @intEntityCustomerId = NULLIF(@intEntityCustomerId, 0)
 SET @intEntityUserId 	 = ISNULL(@intEntityUserId, 1)
 
 IF @intEntityCustomerId IS NOT NULL
-	SET @strCustomerIds = CAST(@intEntityCustomerId AS NVARCHAR(100))
+	BEGIN
+		SET @strCustomerIds = CAST(@intEntityCustomerId AS NVARCHAR(100))
+
+		EXEC dbo.uspARUpdateCustomerHighestAR @intEntityCustomerId
+	END
 
 IF @intEntityUserId IS NULL
 	SELECT TOP 1 @intEntityUserId = ISNULL(@intEntityUserId, 1)
