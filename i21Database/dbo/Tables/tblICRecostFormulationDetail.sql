@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblICRecostFormulationDetail]
 (
-	[intRecostFormulationDetailId] INT NOT NULL PRIMARY KEY
+	[intRecostFormulationDetailId] INT NOT NULL IDENTITY PRIMARY KEY
 	,[intRecostFormulationId] INT NOT NULL 
 	,[intItemId] INT NOT NULL 
 	,[intLocationId] INT NOT NULL

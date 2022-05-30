@@ -1,13 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblICRecostFormulation]
 (
-	[intRecostFormulationId] INT NOT NULL PRIMARY KEY
+	[intRecostFormulationId] INT NOT NULL IDENTITY PRIMARY KEY
 	,[strRecostFormulationId] NVARCHAR(50) NOT NULL 
 	,[dtmDate] DATETIME NOT NULL 
 	,[intRounding] TINYINT NOT NULL DEFAULT(6)
 	,[strDescription] NVARCHAR(500) NULL 
 	,[intLocationFromId] INT NOT NULL
 	,[intLocationToId] INT NULL 
-	,[intCategoryFromId] INT NOT NULL 
+	,[intCategoryFromId] INT NULL 
 	,[intCategoryToId] INT NULL
 	,[ysnPosted] BIT NULL DEFAULT ((0))
     ,[intConcurrencyId] INT NULL DEFAULT ((1))
