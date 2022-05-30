@@ -9182,6 +9182,7 @@
     <Build Include="dbo\Tables\tblICRecostFormulationDetail.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulation.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLoadRecostFormulationItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
