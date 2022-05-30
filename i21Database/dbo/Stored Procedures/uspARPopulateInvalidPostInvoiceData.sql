@@ -1929,7 +1929,7 @@ BEGIN
 		INNER JOIN tblICItem ITEM ON  ITEM.intItemId = COSTING.intItemId
 		INNER JOIN tblSMCompanyLocation LOC ON COSTING.intItemLocationId = LOC.intCompanyLocationId
 		WHERE COSTING.dtmDate < STOCKDATE.dtmDate
-		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCostingZeroCostValidation, @OneBit)
+		
 
 	-- IC In Transit Costing
 	DELETE FROM @ItemsForInTransitCosting
