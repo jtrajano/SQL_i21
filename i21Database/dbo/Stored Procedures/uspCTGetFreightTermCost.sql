@@ -234,7 +234,7 @@ BEGIN TRY
 				, ci.strCostMethod
 				, ci.dblRate
 				, ci.dblAmount
-				, dblFX = ISNULL(CASE WHEN @intInvoiceCurrencyId = ci.intCurrencyId THEN 1 ELSE tbl.dblRate END, 1)
+				, dblFX = ISNULL(CASE WHEN @intInvoiceCurrencyId = ci.intCurrencyId THEN 1 ELSE tbl.dblRate END, NULL)
 			FROM @CostItems ci
 			LEFT JOIN (
 				SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY cerd.intCurrencyExchangeRateId ORDER BY cerd.dtmValidFromDate DESC)
