@@ -241,7 +241,7 @@ BEGIN
 	BEGIN
 		DECLARE @invalidAmountAppliedIds NVARCHAR(MAX);
 		--undo updating of transactions for those invalid only
-		SELECT 
+		SELECT DISTINCT
 			@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
 		FROM #tmpInvalidBillData
 		--WHERE intErrorKey = 1 OR intErrorKey = 33
