@@ -35,7 +35,6 @@
 	[strFiftySevenFormat]								NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strFiftySixFormat]									NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyId]										INT				NULL,
-	[ysnDomestic]										BIT				NULL,
 	[intConcurrencyId]									INT            NOT NULL,
 
     CONSTRAINT [PK_tblEMEntityEFTInformation] PRIMARY KEY CLUSTERED ([intEntityEFTInfoId] ASC),
