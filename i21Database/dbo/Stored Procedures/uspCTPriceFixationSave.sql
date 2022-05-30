@@ -139,7 +139,7 @@ BEGIN TRY
 				@intBasisCurrencyId			=	CD.intBasisCurrencyId,
 				@ysnBasisSubCurrency		=	AY.ysnSubCurrency,
 				@ysnSeqSubCurrency			=	SY.ysnSubCurrency,
-				@dblFixationFX				=	(case when @intFinalCurrencyId = CD.intCurrencyId or @intFinalCurrencyId = CD.intInvoiceCurrencyId then 1 else @dblFixationFX end)
+				@dblFixationFX				=	(case when @intFinalCurrencyId = CD.intCurrencyId or @intFinalCurrencyId = SY.intMainCurrencyId then 1 else @dblFixationFX end)
 
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
