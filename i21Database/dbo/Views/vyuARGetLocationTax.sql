@@ -46,3 +46,11 @@ LEFT JOIN (
 		FROM dbo.tblSMTaxClass WITH (NOLOCK)
 	) TCC ON TC.intTaxClassId = TCC.intTaxClassId
 ) TAX ON TAX.intTaxGroupId = LOCATIONS.intTaxGroupId
+GROUP BY 
+	 LOCATIONS.intCompanyLocationId
+	,LOCATIONS.intShipToLocationId
+	,TAX.intTaxGroupId
+	,LOCATIONS.strLocationName
+	,TAX.strTaxGroup
+	,TAX.strTaxCode
+	,TAX.strTaxClass
