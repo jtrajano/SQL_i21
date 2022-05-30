@@ -16,7 +16,7 @@ SELECT
 	 intTaxLocationId	= intEntityLocationId
 	,strLocationName
 	,strAddress
-	,strFobPoint
+	,strFobPoint		= 'Destination'
 	,intEntityId
 	,strType			= 'Entity'
 FROM vyuEMEntityLocationSearch EMELS
