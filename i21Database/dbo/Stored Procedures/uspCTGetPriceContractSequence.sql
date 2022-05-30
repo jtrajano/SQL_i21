@@ -90,7 +90,7 @@ BEGIN TRY
 				, intDetailSubBookId = NULL
 				, CD.intContractStatusId
 				, CH.ysnReadOnlyInterCoContract
-				, dblFX = CD.dblRate
+				, dblFX = case when CD.intInvoiceCurrencyId <> CD.intCurrencyId and CD.intInvoiceCurrencyId <> CD.intMainCurrencyId then CD.dblRate else 1 end
 				, CD.strItemNo
 				, CD.strOrigin
 				, CD.strProductType
@@ -136,6 +136,8 @@ BEGIN TRY
 					, ICC.strSeason
 					, ICC.strClass
 					, ICC.strProductLine
+					, CDetail.intInvoiceCurrencyId
+					, intMainCurrencyId = CU.intMainCurrencyId
 				FROM tblCTContractDetail CDetail
 				JOIN tblCTContractHeader header ON header.intContractHeaderId = CDetail.intContractHeaderId
 				LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CDetail.intCurrencyId
@@ -230,7 +232,7 @@ BEGIN TRY
 				, intDetailSubBookId = CD.intSubBookId
 				, CD.intContractStatusId
 				, CD.ysnReadOnlyInterCoContract
-				, dblFX = CD.dblRate
+				, dblFX = case when CD.intInvoiceCurrencyId <> CD.intCurrencyId and CD.intInvoiceCurrencyId <> CD.intMainCurrencyId then CD.dblRate else 1 end
 				, ICC.strItemNo
 				, ICC.strOrigin
 				, ICC.strProductType
