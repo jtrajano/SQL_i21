@@ -12,14 +12,20 @@ SELECT
 	Item.strLifeTimeType,
 	Item.strLotTracking,
 	Item.ysnLotWeightsRequired,
-	dblLastCost = COALESCE(ItemPricing.dblLastCost, 0),
+	ItemPricing.strPricingMethod,
+	dblLastCost = COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(Item.intItemId, ItemLocation.intItemLocationId, COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId, GrossUOM.intItemUOMId), GETDATE()), EffectiveCost.dblCost, ItemPricing.dblLastCost, 0),
 	dblStandardCost = COALESCE(ItemPricing.dblStandardCost, 0),
-	dblSalePrice = ISNULL(ItemPricing.dblSalePrice, 0),
+	dblSalePrice = COALESCE(EffectivePrice.dblRetailPrice, ItemPricing.dblSalePrice, 0),
 	dblReceiveUOMConvFactor = COALESCE(ReceiveUOM.dblUnitQty, ItemUOM.dblUnitQty, 0),
 	strReceiveUOM = COALESCE(rUOM.strUnitMeasure, iUOM.strUnitMeasure),
 	strReceiveUOMType = COALESCE(rUOM.strUnitType, iUOM.strUnitType),
 	intReceiveUOMId = COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId),
 	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, ItemUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode, '')),
+	COALESCE(ReceiveUOM.strLongUPCCode, ItemUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode, '')) AS strLongUPCCode,
+	ISNULL(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode) AS strShortUpc,
+	ISNULL(ReceiveUOM.strUPCDescription, ItemUOM.strUPCDescription) AS strUPCDescription,
+	ISNULL(ReceiveUOM.intCheckDigit, ItemUOM.intCheckDigit) AS intCheckDigit,
+	ISNULL(ReceiveUOM.intModifier, ItemUOM.intModifier) AS intModifier,
 	intReceiveUnitMeasureId = COALESCE(ReceiveUOM.intUnitMeasureId, ItemUOM.intUnitMeasureId),
 	intGrossUOMId = GrossUOM.intItemUOMId,
 	strGrossUOM = gUOM.strUnitMeasure,
@@ -39,7 +45,8 @@ SELECT
 					ItemLocation.intCostingMethod
 			END,
 	ysnHasAddOn = CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT),
-	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT)
+	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT),
+	Item.intComputeItemTotalOption
 FROM tblICItem Item
 LEFT JOIN (
 	tblICItemLocation ItemLocation INNER JOIN tblSMCompanyLocation l 
@@ -65,7 +72,8 @@ LEFT JOIN (
 		ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 )
 	ON ItemUOM.intItemId = Item.intItemId
-
+OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(GETDATE(), Item.intItemId, ItemLocation.intItemLocationId, DEFAULT) EffectiveCost
+OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(GETDATE(), Item.intItemId, ItemLocation.intItemLocationId, COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId, GrossUOM.intItemUOMId), DEFAULT) EffectivePrice
 LEFT JOIN tblICItemPricing ItemPricing 
 	ON ItemLocation.intItemId = ItemPricing.intItemId 
 	AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId
