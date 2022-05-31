@@ -33,6 +33,7 @@ SELECT intEntityId					= C.[intEntityId]
 												THEN 'Approved'
 											ELSE 'Not Yet Approved'
 									  END 
+	 , ysnLegacyWeek				= HW.ysnLegacyWeek
 FROM dbo.tblHDTicketHoursWorked HW WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId

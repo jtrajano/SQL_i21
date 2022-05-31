@@ -834,6 +834,7 @@
     <Build Include="dbo\Tables\tblLGDispatchOrderCompartment.sql" />
     <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
     <Build Include="dbo\Views\vyuHDCoworkerIssue.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryLegacyBillingPeriod.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10987,7 +10988,7 @@
     <Build Include="dbo\Stored Procedures\uspARCreateEFTInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
     <Build Include="dbo\Tables\tblARScheduledPaymentMethod.sql" />
-    <Build Include="dbo\Views\vyuARGetScheduledPaymentMethods.sql" />    
+    <Build Include="dbo\Views\vyuARGetScheduledPaymentMethods.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
