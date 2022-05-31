@@ -258,6 +258,8 @@
 	,SCT.dblDWGSpotPrice
 	,SCT.intFreightCostUOMId
 	,SCT.ysnApplyOverageToSpot
+	,SCT.intDecimalAdjustment
+	,SCT.ysnFixRounding
   FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId

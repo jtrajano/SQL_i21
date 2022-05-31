@@ -10581,6 +10581,7 @@
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
+    <Build Include="dbo\Views\vyuGRSearchUOMRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
