@@ -852,6 +852,49 @@ BEGIN
 		JOIN tblCTContractDetail ctd
 		ON ctd.intContractDetailId = sh.intContractDetailId
 
+		UNION ALL -- Scenario: Short Closed Contracts (Was updated to Short Closed and Updated Balance Qty as well.)
+		SELECT 
+			dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblBalance  = sh.dblBalance - sh.dblOldBalance
+			, strTransactionReference = 'Contract Sequence Balance Change'
+			, @intContractHeaderId
+			, @intContractDetailId
+			, intPricingTypeId  = sh.intPricingTypeId
+			, intTransactionReferenceId = sh.intContractHeaderId
+			, strTransactionReferenceNo = strContractNumber + '-' + cast(sh.intContractSeq as nvarchar(10))
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, @intUserId 
+		FROM 
+		(	SELECT *
+			FROM tblCTSequenceHistory ctsh
+			WHERE ctsh.intContractDetailId = @intContractDetailId
+			AND ctsh.intContractStatusId IN (6) -- Short Closed
+			AND ctsh.ysnStatusChange = 1
+			AND ctsh.ysnBalanceChange = 1
+		) sh 
+		JOIN tblCTContractDetail ctd
+		ON ctd.intContractDetailId = sh.intContractDetailId
+
 		DELETE FROM #tempContracts WHERE intContractDetailId = @intContractDetailId  
 
 	END
