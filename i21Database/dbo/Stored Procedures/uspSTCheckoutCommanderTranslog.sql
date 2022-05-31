@@ -378,15 +378,6 @@ BEGIN
 
 							[strTrpCardInfoTrpcAcquirerBatchNr],
 
-							-- trlMatchLine
-							[strTrlMatchLineTrlMatchName],
-							[dblTrlMatchLineTrlMatchQuantity],
-							[dblTrlMatchLineTrlMatchPrice],
-							[intTrlMatchLineTrlMatchMixes],
-							[dblTrlMatchLineTrlPromoAmount],
-							[strTrlMatchLineTrlPromotionID],
-							[strTrlMatchLineTrlPromotionIDPromoType],
-							[intTrlMatchLineTrlMatchNumber],
 
 							[intRegisterClassId],
 							[intStoreId],
@@ -624,15 +615,6 @@ BEGIN
 
 							[strTrpCardInfoTrpcAcquirerBatchNr]		= strTrpCardInfoTrpcAcquirerBatchNr,
 
-							-- trlMatchLine
-							[strTrlMatchLineTrlMatchName]			= strTrlMatchLineTrlMatchName,
-							[dblTrlMatchLineTrlMatchQuantity]		= dblTrlMatchLineTrlMatchQuantity,
-							[dblTrlMatchLineTrlMatchPrice]			= dblTrlMatchLineTrlMatchPrice,
-							[intTrlMatchLineTrlMatchMixes]			= intTrlMatchLineTrlMatchMixes,
-							[dblTrlMatchLineTrlPromoAmount]			= dblTrlMatchLineTrlPromoAmount,
-							[strTrlMatchLineTrlPromotionID]			= strTrlMatchLineTrlPromotionID,
-							[strTrlMatchLineTrlPromotionIDPromoType]	= strTrlMatchLineTrlPromotionIDPromoType,
-							[intTrlMatchLineTrlMatchNumber]				= intTrlMatchLineTrlMatchNumber,
 
 							[intRegisterClassId]					= @intRegisterClassId,
 							[intStoreId]							= @intStoreId,
