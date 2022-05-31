@@ -334,7 +334,7 @@ SET
    , iu.dblMaxQty = ux.dblMaxQty
    , iu.dblVolume = ux.dblVolume
    , iu.dblWeight = ux.dblWeight
-   , iu.ysnStockUnit = ux.ysnIsStockUnit
+   , iu.ysnStockUnit = CASE WHEN hasStockUnit.ysnYes = 1 THEN 0 ELSE ux.ysnIsStockUnit END
    , iu.ysnAllowPurchase = ux.ysnAllowPurchase
    , iu.ysnAllowSale = ux.ysnAllowSale
    , iu.dtmDateModified = GETUTCDATE()
@@ -346,6 +346,12 @@ JOIN tblICItem i ON i.intItemId = iu.intItemId
 JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
 JOIN tblApiSchemaTransformItemUOM ux ON ux.strUOM = u.strUnitMeasure
    AND ux.strItemNo = i.strItemNo
+OUTER APPLY (
+   SELECT CAST(1 AS BIT) ysnYes
+   FROM tblICItemUOM 
+   WHERE intItemId = i.intItemId
+      AND ysnStockUnit = 1
+) hasStockUnit
 WHERE ux.guiApiUniqueId = @guiApiUniqueId
    AND @OverwriteExisting = 1
    AND NOT EXISTS(
@@ -391,7 +397,7 @@ SELECT
 	, ux.dblMaxQty
 	, ux.dblVolume
 	, ux.dblWeight
-	, ux.ysnIsStockUnit
+	, CASE WHEN hasStockUnit.ysnYes = 1 THEN 0 ELSE ux.ysnIsStockUnit END
 	, ux.ysnAllowPurchase
 	, ux.ysnAllowSale
 	, GETUTCDATE()
@@ -408,6 +414,12 @@ OUTER APPLY (
 	WHERE xi.intItemId = i.intItemId
 		AND xu.intUnitMeasureId = u.intUnitMeasureId
 ) ex
+OUTER APPLY (
+   SELECT CAST(1 AS BIT) ysnYes
+   FROM tblICItemUOM 
+   WHERE intItemId = i.intItemId
+      AND ysnStockUnit = 1
+) hasStockUnit
 WHERE ux.guiApiUniqueId = @guiApiUniqueId
 	AND ex.intCount IS NULL
 	AND NOT EXISTS(
