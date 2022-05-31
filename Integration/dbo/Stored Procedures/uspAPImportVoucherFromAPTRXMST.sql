@@ -391,17 +391,18 @@ SELECT
 										THEN -(ABS(ISNULL(NULLIF(C.apegl_gl_un,0),1))) --when line total is negative, get the cost by dividing to negative as well
 										ELSE ISNULL(NULLIF(C.apegl_gl_un,0),1) 
 									END)),
-	[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.aptrx_1099_amt > 0)
-								THEN 
-									(
-										((CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN ISNULL(C.apegl_gl_amt, C2.aptrx_net_amt) * -1 ELSE ISNULL(C.apegl_gl_amt, C2.aptrx_net_amt) END)
-											/
-											(A.dblTotal)
-										)
-										*
-										A.dblTotal
-									)
-								ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
+	[dbl1099]					=	0,--This should always 0, this will be updated upon payment. We do not import unpaid voucher.
+	-- [dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.aptrx_1099_amt > 0)
+	-- 							THEN 
+	-- 								(
+	-- 									((CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN ISNULL(C.apegl_gl_amt, C2.aptrx_net_amt) * -1 ELSE ISNULL(C.apegl_gl_amt, C2.aptrx_net_amt) END)
+	-- 										/
+	-- 										(A.dblTotal)
+	-- 									)
+	-- 									*
+	-- 									A.dblTotal
+	-- 								)
+	-- 							ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
 	[int1099Form]			=	(CASE WHEN C2.aptrx_1099_amt > 0 
 										THEN (
 											CASE WHEN entity.str1099Form = '1099-MISC' THEN 1
