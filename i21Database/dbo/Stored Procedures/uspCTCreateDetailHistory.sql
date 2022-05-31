@@ -34,6 +34,7 @@ BEGIN TRY
         , @ysnAddAmendmentForNonDraftContract BIT = 0
         , @ysnPricingAsAmendment BIT = 1
 		, @ysnAmendmentForCashFuture BIT = 0
+		, @intPricingTypeId INT
 		;
 	
 	DECLARE @tblHeader AS TABLE (intContractHeaderId INT
@@ -387,11 +388,16 @@ BEGIN TRY
 					, @dblFutures = dblFutures
 					, @dblBasis = dblBasis
 					, @dblCashPrice = dblCashPrice
+					, @intPricingTypeId = intPricingTypeId
 				FROM tblCTSequenceHistory
 				WHERE intSequenceHistoryId = @intSequenceHistoryId;
 				
 				IF ISNULL(@dblPrevQty, 0) <> ISNULL(@dblQuantity, 0)
 				BEGIN
+					IF (ISNULL(@dblQuantity, 0) > ISNULL(@dblPrevQty, 0) AND @strSource <> 'Contract' AND @intPricingTypeId <> 5)
+					BEGIN
+						SET @strSource = 'Contract'
+					END
 					UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty
 						, ysnQtyChange = 1
 					WHERE intSequenceHistoryId = @intSequenceHistoryId;
