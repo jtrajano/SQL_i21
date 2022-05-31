@@ -237,14 +237,16 @@ BEGIN
 	-- FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
-	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
+	--IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
+	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData)
 	BEGIN
 		DECLARE @invalidAmountAppliedIds NVARCHAR(MAX);
 		--undo updating of transactions for those invalid only
-		SELECT 
+		SELECT DISTINCT
 			@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
 		FROM #tmpInvalidBillData
-		WHERE intErrorKey = 1 OR intErrorKey = 33
+		--WHERE intErrorKey = 1 OR intErrorKey = 33
+		--Invalid automatic undo of prepaid, this should not be part of posting
 		EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
 	END
 
@@ -300,6 +302,12 @@ BEGIN
 		SET A.strBatchNumber = @batchId
 	FROM tblAPPostResult A
 	INNER JOIN @postResult B ON A.intId = B.id
+
+	-- --undo updating of transactions for those invalid only
+	-- SELECT 
+	-- 	@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
+	-- FROM #tmpPostBillData A
+	-- EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
 
 	SET @successfulCount = 0;
 	SET @success = 0
