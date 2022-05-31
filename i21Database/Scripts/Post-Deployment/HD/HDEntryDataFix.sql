@@ -883,4 +883,37 @@ GO
 
 GO
 	PRINT N'End fixing HD Ticket Customer Number';
+	PRINT N'Start Update Existing tblHDTicketHoursWorked to ysnLegacyWeek = 1';
+GO
+
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicketHoursWorked' AND COLUMN_NAME = 'ysnLegacyWeek' ) AND
+   NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDTicketHoursWorked ysnLegacyWeek')
+BEGIN
+	UPDATE tblHDTicketHoursWorked
+	SET ysnLegacyWeek = 1
+
+	
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDTicketHoursWorked ysnLegacyWeek','1')
+
+END
+
+GO
+	PRINT N'End Update Existing tblHDTicketHoursWorked to ysnLegacyWeek = 1';
+	PRINT N'Start Update Existing tblHDTimeOffRequest to ysnLegacyWeek = 1';
+GO
+
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTimeOffRequest' AND COLUMN_NAME = 'ysnLegacyWeek') AND
+   NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDTimeOffRequest ysnLegacyWeek')
+BEGIN
+	UPDATE tblHDTimeOffRequest
+	SET ysnLegacyWeek = 1
+
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDTimeOffRequest ysnLegacyWeek','1')
+
+END
+
+GO
+	PRINT N'End Update Existing tblHDTimeOffRequest to ysnLegacyWeek = 1';
 GO
