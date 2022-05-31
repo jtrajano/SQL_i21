@@ -110,7 +110,7 @@ BEGIN TRY
 	END
 
 
-	IF (@intShipmentStatus = 4 AND @ysnAllowReweighs = 0)
+	IF (@intShipmentStatus = 4 AND ISNULL(@ysnAllowReweighs, 0) = 0)
 	BEGIN
 		--If Shipment is already received, call the IR to Voucher procedure
 		SELECT DISTINCT 
