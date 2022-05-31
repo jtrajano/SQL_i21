@@ -10,7 +10,7 @@ DECLARE @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Det
  ,@MODULE_NAME AS NVARCHAR(100)    = 'Cash Management' -- Module where this posting code belongs.      
  ,@TRANSACTION_FORM AS NVARCHAR(100)   = 'Bank Transfer'      
  ,@intBTInTransitAccountId INT  
- ,@intBTForexDiffAccountId INT
+ ,@intRealizedGainOnSwap INT
  ,@dtmDate DATETIME  
   
   
@@ -21,10 +21,10 @@ BEGIN
     RETURN  
 END   
 
-SELECT TOP 1 @intBTForexDiffAccountId = intBTForexDiffAccountId FROM tblCMCompanyPreferenceOption    
-  IF @intBTForexDiffAccountId IS NULL    
+SELECT TOP 1 @intRealizedGainOnSwap = intGainOnSwapRealizedId FROM tblSMMultiCurrency
+  IF @intRealizedGainOnSwap IS NULL    
 BEGIN    
-    RAISERROR('Cannot find the Forex Difference GL Account ID Setting in Company Configuration.', 11, 1)      
+    RAISERROR('Cannot find the Realized Gin on Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
@@ -141,21 +141,21 @@ BEGIN
 END  
 ELSE  
 BEGIN  
-DECLARE @intBTForwardToFXGLAccountId INT  -- payable
-, @intBTForwardFromFXGLAccountId INT -- receivable
+DECLARE @intBTSwapToFXGLAccountId INT  -- payable
+, @intBTSwapFromFXGLAccountId INT -- receivable
 
-SELECT TOP 1 @intBTForwardToFXGLAccountId = intBTForwardToFXGLAccountId,@intBTForwardFromFXGLAccountId = intBTForwardFromFXGLAccountId 
+SELECT TOP 1 @intBTSwapToFXGLAccountId = intBTSwapToFXGLAccountId, @intBTSwapFromFXGLAccountId = intBTSwapFromFXGLAccountId 
 FROM tblCMCompanyPreferenceOption    
 
-IF @intBTForwardToFXGLAccountId IS NULL    
+IF @intBTSwapToFXGLAccountId IS NULL    
 BEGIN    
-    RAISERROR('Cannot find the Accrued Payable Forward GL Account ID Setting in Company Configuration.', 11, 1)      
+    RAISERROR('Cannot find the Account Payable Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
-IF @intBTForwardFromFXGLAccountId IS NULL    
+IF @intBTSwapFromFXGLAccountId IS NULL    
 BEGIN    
-    RAISERROR('Cannot find the Accrued Receivable Forward GL Account ID Setting in Company Configuration.', 11, 1)      
+    RAISERROR('Cannot find the Account Receivable Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
@@ -257,7 +257,7 @@ END
         ,[intTransactionId]      = intTransactionId      
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
-        ,[intAccountId]          = @intBTForexDiffAccountId  
+        ,[intAccountId]          = @intRealizedGainOnSwap  
         ,[dblDebit]              = 0  
         ,[dblCredit]             = dblDifference  
         ,[dblDebitForeign]       = 0  
@@ -287,7 +287,7 @@ END
         ,[intTransactionId]      = intTransactionId      
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
-        ,[intAccountId]          = @intBTForwardToFXGLAccountId
+        ,[intAccountId]          = @intBTSwapToFXGLAccountId
         ,[dblDebit]              = 0
         ,[dblCredit]             = dblAmountFrom
         ,[dblDebitForeign]       = 0
@@ -317,7 +317,7 @@ END
         ,[intTransactionId]      = intTransactionId      
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
-        ,[intAccountId]          = @intBTForwardFromFXGLAccountId
+        ,[intAccountId]          = @intBTSwapFromFXGLAccountId
         ,[dblDebit]              = dblAmountFrom
         ,[dblCredit]             = 0
         ,[dblDebitForeign]       = dblAmountFrom
