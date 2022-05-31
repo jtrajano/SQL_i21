@@ -944,6 +944,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
+		,[intLoadDistributionDetailId]
 		,[intTruckDriverId]
 		,[intTruckDriverReferenceId]
 		,[ysnImpactInventory]
@@ -1027,6 +1028,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= TR.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= TR.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
+		,[intLoadDistributionDetailId]			= TR.intLoadDistributionDetailId
 		,intTruckDriverId						= TR.intTruckDriverId
 		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
 		,ysnImpactInventory                     = ISNULL(TR.ysnImpactInventory, 0)
