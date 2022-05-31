@@ -142,13 +142,28 @@ WHERE
 				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
 	
 
+SELECT
+     [intId]                = IT.[intId]
+    ,[strMessage]           = 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(IT.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.'
+    ,[strTransactionType]   = IT.[strTransactionType]
+    ,[strType]              = IT.[strType]
+    ,[strSourceTransaction] = IT.[strSourceTransaction]
+    ,[intSourceId]          = IT.[intSourceId]
+    ,[strSourceId]          = IT.[strSourceId]
+    ,[intInvoiceId]         = IT.[intInvoiceId]
+FROM @ItemEntries IT
+INNER JOIN tblCTContractDetail CTD ON IT.intContractDetailId = CTD.intContractDetailId
+INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+WHERE IT.strTransactionType = 'Invoice'
+  AND IT.strType = 'Tank Delivery'
+  AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
+
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
 	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM @InvalidRecords ORDER BY [intId])
 	RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END
-
 
 DELETE FROM V
 FROM @ItemEntries V
@@ -839,6 +854,7 @@ LEFT OUTER JOIN
 		AND (IE.[intId] = IP.[intId]
 			OR
 			IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId])
+
 --No need for this; accounts are being updated during posting (uspARUpdateTransactionAccounts)
 --And this has been causing performance issue
 --LEFT OUTER JOIN
@@ -1226,7 +1242,7 @@ VALUES(
 	,[intConcurrencyId]
 )
 	OUTPUT  
-		ISNULL(@IntegrationLogId, -9999)						--[intIntegrationLogId]
+		ISNULL(@IntegrationLogId, -9999)		--[intIntegrationLogId]
 		,INSERTED.[intInvoiceId]				--[intInvoiceId]
 		,INSERTED.[intInvoiceDetailId]			--[intInvoiceDetailId]
 		,Source.[intTempDetailIdForTaxes]		--[intTempDetailIdForTaxes]	
@@ -1271,64 +1287,6 @@ VALUES(
 
 	IF ISNULL(@IntegrationLogId, 0) <> 0
 		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
-
-	DECLARE @tblInvoicesContracts TABLE (
-		  intInvoiceId 			INT
-		, intContractSeq		INT NULL
-		, strContractNumber		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
-		, dblBalance			NUMERIC(18, 6)
-		, dblScheduleQty		NUMERIC(18, 6)
-		, dblQtyShipped			NUMERIC(18, 6)
-	)
-
-	INSERT INTO @tblInvoicesContracts
-	SELECT intInvoiceId			= ID.intInvoiceId
-		 , intContractSeq		= CTD.intContractSeq
-		 , strContractNumber	= CTH.strContractNumber
-		 , dblBalance			= ISNULL(CTD.dblBalance, 0)
-		 , dblScheduleQty		= ISNULL(CTD.dblScheduleQty, 0)
-		 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
-	FROM tblARInvoiceIntegrationLogDetail ILD
-	INNER JOIN tblARInvoiceDetail ID ON ILD.intInvoiceId = ID.intInvoiceId
-	INNER JOIN tblCTContractDetail CTD ON ID.[intContractDetailId] = CTD.[intContractDetailId]
-	INNER JOIN tblCTContractHeader CTH ON CTD.[intContractHeaderId] = CTH.[intContractHeaderId]
-	WHERE intIntegrationLogId = @IntegrationLogId
-	  AND ID.intContractDetailId IS NOT NULL
-	  AND ILD.strTransactionType = 'Invoice'
-	  AND ILD.strType = 'Tank Delivery'
-	  AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
-
-	WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesContracts) 
-		BEGIN
-			DECLARE @intInvoiceId 		INT = NULL
-				  , @intContractSeq		INT = NULL
-				  , @strContractNumber  NVARCHAR(100) = NULL
-				  , @dblBalance			NUMERIC(18, 6) = 0
-				  , @dblScheduleQty		NUMERIC(18, 6) = 0
-				  , @dblQtyShipped		NUMERIC(18, 6) = 0
-
-			SELECT TOP 1 @intInvoiceId	 	= intInvoiceId 
-					  , @intContractSeq		= intContractSeq
-		 			  , @strContractNumber	= strContractNumber
-		 			  , @dblBalance			= dblBalance
-		 			  , @dblScheduleQty		= dblScheduleQty
-		 			  , @dblQtyShipped		= dblQtyShipped
-			FROM @tblInvoicesContracts
-
-			EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 			= @intInvoiceId
-											   , @intScaleUOMId 		= NULL
-											   , @intUserId 			= @UserId
-											   , @dblNetWeight 			= 0
-											   , @ysnFromSalesOrder 	= 0
-											   , @ysnFromImport			= 1
-
-			UPDATE tblARInvoiceIntegrationLogDetail
-			SET strMessage = 'Available quantity for the contract ' + @strContractNumber + ' and sequence ' + CAST(@intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(@dblBalance, 0) - ISNULL(@dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(@dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '. Overfill was implemented on this transaction.'  
-			WHERE intIntegrationLogId = @IntegrationLogId
-			  AND intInvoiceId = @intInvoiceId
-
-			DELETE FROM @tblInvoicesContracts WHERE intInvoiceId = @intInvoiceId
-		END
 
 END TRY
 BEGIN CATCH
