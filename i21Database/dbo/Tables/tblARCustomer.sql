@@ -30,7 +30,7 @@
     [ysnStatementDetail]              BIT             DEFAULT ((0)) NOT NULL,
 	[ysnStatementCreditLimit]		  BIT             DEFAULT ((0)) NOT NULL,
     [strStatementFormat]              NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
-    [intCreditStopDays]               INT             NULL,
+    [intCreditStopDays]               BIGINT          NULL,
     [strTaxAuthority1]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTaxAuthority2]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPrintPriceOnPrintTicket]      BIT             NULL,
