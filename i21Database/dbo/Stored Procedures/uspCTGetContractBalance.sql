@@ -362,7 +362,7 @@ BEGIN
 					, strPricingType				=	CASE WHEN CBL.intPricingTypeId = 1 THEN 'P' ELSE 'B' END
 					, strContractDate				=	LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 					, strShipMethod					=	FT.strFreightTerm
-					, strShipmentPeriod				=	LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate)) + ' - ' + LTRIM(DATEPART(mm,CD.dtmEndDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
+					, strShipmentPeriod				=	LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(YYYY,CD.dtmStartDate)) + ' - ' + LTRIM(DATEPART(mm,CD.dtmEndDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate)) + '/' + LTRIM(DATEPART(yyyy,CD.dtmEndDate))
 					, CBL.intFutureMarketId
 					, CBL.intFutureMonthId
 					, strDeliveryMonth				=	LEFT(DATENAME(MONTH, CD.dtmEndDate), 3) + ' ' + RIGHT(DATENAME(YEAR, CD.dtmEndDate),2)
