@@ -1,18 +1,21 @@
 CREATE PROCEDURE dbo.uspApiGetTaxDetails (
-	  @ItemId INT
+	  @UniqueId UNIQUEIDENTIFIER
+	, @ItemId INT
 	, @UOMId INT
 	, @LocationId INT
 	, @CustomerId INT
+	, @CustomerLocationId INT
 	, @TransactionDate DATETIME
 	, @TaxGroupId INT
 	, @CurrencyId INT
 	, @Amount NUMERIC(18, 6)
 	, @Price NUMERIC(18, 6)
 	, @FreightTermId INT
+	, @ItemTaxIdentifier UNIQUEIDENTIFIER
 )
 AS
 
-DECLARE @guiTaxesUniqueId UNIQUEIDENTIFIER = NEWID()
+DECLARE @guiTaxesUniqueId UNIQUEIDENTIFIER = @UniqueId
 DECLARE @ItemUOMId INT
 
 SELECT @ItemUOMId = i.intItemUOMId
@@ -49,6 +52,7 @@ DECLARE @tblRestApiItemTaxes TABLE (
 	, strUnitMeasure NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
 	, strTaxClass NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, ysnAddToCost BIT NULL
+	, ysnTaxAdjusted BIT NULL
 )
 
 INSERT INTO @tblRestApiItemTaxes (
@@ -84,7 +88,7 @@ EXEC [dbo].[uspARGetItemTaxes]
 	@ItemId= @ItemId,
 	@LocationId= @LocationId,
 	@CustomerId= @CustomerId,
-	@CustomerLocationId= default,
+	@CustomerLocationId= @CustomerLocationId,
 	@TransactionDate= @TransactionDate,
 	@TaxGroupId= @TaxGroupId,
 	@SiteId= default,
@@ -126,41 +130,80 @@ INSERT INTO tblRestApiItemTaxes (
 	, intUnitMeasureId
 	, strUnitMeasure
 	, strTaxClass
-	, ysnAddToCost)
-SELECT @guiTaxesUniqueId, 1, *
-FROM @tblRestApiItemTaxes
+	, ysnAddToCost
+	, ysnTaxAdjusted)
+SELECT @guiTaxesUniqueId
+	, null
+	, it.intTransactionDetailTaxId
+	, it.intInvoiceDetailId
+	, it.intTaxGroupMasterId
+	, it.intTaxGroupId
+	, it.intTaxCodeId
+	, it.intTaxClassId
+	, it.strTaxableByOtherTaxes
+	, it.strCalculationMethod
+	, it.dblRate
+	, it.dblBaseRate
+	, it.dblExemptionPercent
+	, it.dblTax
+	, COALESCE(adj.dblAdjustedTax, it.dblAdjustedTax)
+	, COALESCE(adj.dblAdjustedTax, it.dblAdjustedTax)
+	, it.intSalesTaxAccountId
+	, it.intSalesTaxExemptionAccountId
+	, it.ysnSeparateOnInvoice
+	, it.ysnCheckoffTax
+	, it.strTaxCode
+	, COALESCE(adj.ysnExempt, it.ysnTaxExempt)
+	, it.ysnTaxOnly
+	, it.ysnInvalidSetup
+	, it.strTaxGroup
+	, it.strNotes
+	, it.intUnitMeasureId
+	, it.strUnitMeasure
+	, it.strTaxClass
+	, it.ysnAddToCost
+	, CAST(CASE WHEN (adj.dblAdjustedTax IS NOT NULL AND it.dblTax != adj.dblAdjustedTax) THEN 1 ELSE 0 END AS BIT)
+FROM @tblRestApiItemTaxes it
+OUTER APPLY(
+	SELECT TOP 1 a.dblAdjustedTax, a.ysnExempt
+	FROM tblApiTaxAdjustment a
+	WHERE a.guiItemTaxIdentifier = @ItemTaxIdentifier
+		AND a.guiUniqueId = @UniqueId
+		AND a.intItemId = @ItemId
+		AND a.intTaxCodeId = it.intTaxCodeId
+) adj
 
 SELECT
-	  intRestApiItemTaxesId
-	, intItemContractDetailId
-	, guiTaxesUniqueId
-	, intTransactionDetailTaxId
-	, intInvoiceDetailId
-	, intTaxGroupMasterId
-	, intTaxGroupId
-	, intTaxCodeId
-	, intTaxClassId
-	, strTaxableByOtherTaxes
-	, strCalculationMethod
-	, dblRate
-	, dblBaseRate
-	, dblExemptionPercent
-	, dblTax
-	, dblAdjustedTax
-	, dblBaseAdjustedTax
-	, intSalesTaxAccountId
-	, intSalesTaxExemptionAccountId
-	, ysnSeparateOnInvoice
-	, ysnCheckoffTax
-	, strTaxCode
-	, ysnTaxExempt
-	, ysnTaxOnly
-	, ysnInvalidSetup
-	, strTaxGroup
-	, strNotes
-	, intUnitMeasureId
-	, strUnitMeasure
-	, strTaxClass
-	, ysnAddToCost
-FROM tblRestApiItemTaxes
-WHERE guiTaxesUniqueId = @guiTaxesUniqueId
+	  x.intRestApiItemTaxesId
+	, x.intItemContractDetailId
+	, x.guiTaxesUniqueId
+	, x.intTransactionDetailTaxId
+	, x.intInvoiceDetailId
+	, x.intTaxGroupMasterId
+	, x.intTaxGroupId
+	, x.intTaxCodeId
+	, x.intTaxClassId
+	, x.strTaxableByOtherTaxes
+	, x.strCalculationMethod
+	, x.dblRate
+	, x.dblBaseRate
+	, x.dblExemptionPercent
+	, dblTax = dbo.fnRestApiCalculateItemtax(@Amount, @Price, @UOMId, NULL, @guiTaxesUniqueId, intRestApiItemTaxesId)
+	, dblAdjustedTax = CASE WHEN x.ysnTaxExempt = 1 THEN 0.00 ELSE CASE WHEN x.ysnTaxAdjusted = 1 THEN x.dblAdjustedTax ELSE dbo.fnRestApiCalculateItemtax(@Amount, @Price, @UOMId, NULL, @guiTaxesUniqueId, x.intRestApiItemTaxesId) END END
+	, dblBaseAdjustedTax = CASE WHEN x.ysnTaxExempt = 1 THEN 0.00 ELSE CASE WHEN x.ysnTaxAdjusted = 1 THEN x.dblAdjustedTax ELSE dbo.fnRestApiCalculateItemtax(@Amount, @Price, @UOMId, NULL, @guiTaxesUniqueId, x.intRestApiItemTaxesId) END END
+	, x.intSalesTaxAccountId
+	, x.intSalesTaxExemptionAccountId
+	, x.ysnSeparateOnInvoice
+	, x.ysnCheckoffTax
+	, x.strTaxCode
+	, x.ysnTaxExempt
+	, x.ysnTaxOnly
+	, x.ysnInvalidSetup
+	, x.strTaxGroup
+	, x.strNotes
+	, x.intUnitMeasureId
+	, x.strUnitMeasure
+	, x.strTaxClass
+	, x.ysnAddToCost
+FROM tblRestApiItemTaxes x
+WHERE x.guiTaxesUniqueId = @guiTaxesUniqueId
