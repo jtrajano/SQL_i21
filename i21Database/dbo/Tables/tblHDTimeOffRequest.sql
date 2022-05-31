@@ -9,6 +9,7 @@
 	[dblPRRequest] [numeric](18,6) null,
 	[intPRNoOfDays] [int] null,
 	[ysnSent] [bit] default convert(bit,0),
+	[ysnLegacyWeek]				BIT	 NOT NULL	CONSTRAINT [DF_tblHDTimeOffRequest_ysnLegacyWeek] DEFAULT ((0)),
 	[intConcurrencyId] [int] NOT NULL default convert(bit,1),
     CONSTRAINT [PK_tblHDTimeOffRequest_intTimeOffRequestId] PRIMARY KEY CLUSTERED ([intTimeOffRequestId] ASC)
 )
