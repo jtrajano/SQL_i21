@@ -11,7 +11,7 @@ CREATE TYPE [dbo].[VoucherDetailTax] AS TABLE
     [intTaxCodeId]				INT NOT NULL, 
     [intTaxClassId]				INT NOT NULL, 
 	[strTaxableByOtherTaxes]	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strCalculationMethod]		NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+    [strCalculationMethod]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblRate]					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [intAccountId]				INT NOT NULL, 
     [dblTax]					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
