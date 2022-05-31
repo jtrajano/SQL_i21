@@ -617,8 +617,8 @@ ORDER BY intImportLogDetailId
 IF EXISTS  (SELECT TOP 1 NULL FROM @InvoicesForImport  where strTransactionType <> 'Sales Order' AND ISNULL(ysnImported, 0) = 0 AND ISNULL(ysnSuccess, 0) = 1 AND ISNULL(ysnRecap, 0) = 0)
 BEGIN 
 	INSERT INTO @EntriesForInvoice(
-				[intId]
-			, [strSourceTransaction]
+			 [intId]
+			,[strSourceTransaction]
 			,[strTransactionType]
 			,[intSourceId]
 			,[strSourceId]
@@ -710,8 +710,8 @@ BEGIN
 			)
 			SELECT 
 			D.intImportLogDetailId
-			, [strSourceTransaction]		= 'Import'
-			,[strTransactionType]		= 'Invoice'
+			, [strSourceTransaction]	= 'Import'
+			,[strTransactionType]		= D.strTransactionType
 			,[intSourceId]				= D.intImportLogDetailId
 			,[strSourceId]				= CAST(D.intImportLogDetailId AS NVARCHAR(250))
 			,[intInvoiceId]				= NULL
@@ -840,9 +840,9 @@ BEGIN
 	
 			UNION ALL
 			SELECT 
-						ILD.intImportLogDetailId
-				 ,[strSourceTransaction]		= 'Import'
-				,[strTransactionType]		= 'Invoice'
+				 ILD.intImportLogDetailId
+				,[strSourceTransaction]		= 'Import'
+				,[strTransactionType]		= ILD.strTransactionType
 				,[intSourceId]				= ILD.intImportLogDetailId
 				,[strSourceId]				= CAST(ILD.intImportLogDetailId AS NVARCHAR(250))
 				,[intInvoiceId]				= NULL
@@ -997,9 +997,9 @@ BEGIN
 
 			UNION ALL
 			SELECT 
-				  D.intImportLogDetailId
-				 ,[strSourceTransaction]		= 'Import'
-				,[strTransactionType]		= 'Invoice'
+				 D.intImportLogDetailId
+				,[strSourceTransaction]		= 'Import'
+				,[strTransactionType]		= D.strTransactionType
 				,[intSourceId]				= D.intImportLogDetailId
 				,[strSourceId]				= CAST(D.intImportLogDetailId AS NVARCHAR(250))
 				,[intInvoiceId]				= NULL
@@ -1111,10 +1111,10 @@ BEGIN
 
 			IF @IsTank = 1
 			BEGIN
-			UPDATE ILD
-			SET dblTotal = @Total, strTransactionType = 'Invoice'
-			FROM  tblARImportLogDetail ILD
-			INNER JOIN tblARImportLog IL ON ILD.intImportLogId=IL.intImportLogId
+				UPDATE ILD
+				SET dblTotal = @Total, strTransactionType = 'Invoice'
+				FROM  tblARImportLogDetail ILD
+				INNER JOIN tblARImportLog IL ON ILD.intImportLogId=IL.intImportLogId
 			END
 
 			IF @ImportFormat = @IMPORTFORMAT_CARQUEST
