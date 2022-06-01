@@ -2331,7 +2331,8 @@ BEGIN TRY
 							,CS.intItemId --Inventory Item Id
 							,CS.intCompanyLocationId --Copany Location Id
 							,SVC.dblUnits --Net Units
-							,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							--,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							,(SVC.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --Gross Units
 							,@dblTotalUnits --Transaction/Voucher Total Units
 							,@tblQMDiscountIds --Storage Ticket Discount Ids
 							,SVC.dblCashPrice --Inventory Item Cash Price
@@ -2415,7 +2416,7 @@ BEGIN TRY
 						,[intOtherChargeItemId]			= CAP.intOtherChargeItemId
 						,[intInventoryItemId]			= CAP.intInventoryItemId
 						,[dblInventoryItemNetUnits]		= SVC.dblUnits
-						,[dblInventoryItemGrossUnits]	= SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits)
+						,[dblInventoryItemGrossUnits]	= (SVC.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits)
 						,[dblGradeReading]				= CAP.dblGradeReading
 						,[intCtOtherChargeItemId]		= CAP.intCtOtherChargeItemId
 					FROM (
@@ -2442,7 +2443,8 @@ BEGIN TRY
 							,CS.intItemId --Inventory Item Id
 							,CS.intCompanyLocationId --Company Location Id
 							,SVC.dblUnits --Net Units
-							,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							--,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							,(SVC.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --Gross Units
 							,SVC.dblUnits --Transaction/Voucher Total Units
 							,@tblQMDiscountIds --Storage Ticket Discount Ids
 							,SVC.dblTotalAmount / SVC.dblUnits --Inventory Item Cost
