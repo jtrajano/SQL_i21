@@ -82,6 +82,7 @@ BEGIN
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 				,A.intFillGroupId
 				,O.strFillGroupCode
+				,A.dtmOnHoldEndDate
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -180,6 +181,7 @@ BEGIN
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 				,A.intFillGroupId
 				,N.strFillGroupCode
+				,A.dtmOnHoldEndDate
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
