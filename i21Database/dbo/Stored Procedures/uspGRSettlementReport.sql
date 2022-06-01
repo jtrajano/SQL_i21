@@ -41,7 +41,13 @@ DECLARE @temp_xml_table TABLE
 	,[endgroup] NVARCHAR(50)
 	,[datatype] NVARCHAR(50)
 )
-	
+/*
+	Dev Note 
+	-- please update tblGRAPISettlementReport as well if there are new fields for this table variable
+	-- We have an actual table using the result of this procedure to export data 
+	-- So we have to make sure that the result of this procedure and the column fields on that table match	
+	-- MonGonzales
+*/
 DECLARE @Settlement AS TABLE 
 (
 	intBankAccountId					INT
