@@ -95,8 +95,6 @@
     [strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnExportDataProcessEnabled]					BIT NOT NULL DEFAULT 0,
 	[strExportFilePath]								NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-	[ysnLogPerformanceRuntime]						BIT NOT NULL DEFAULT 0,
-    [dtmPerformanceLoggingEffectivity]				DATETIME NULL,
     [strApiHostUrl] 								NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     [ysnLogPerformanceRuntime]                      BIT NOT NULL DEFAULT 0,
     [dtmPerformanceLoggingEffectivity]              DATETIME NULL,
