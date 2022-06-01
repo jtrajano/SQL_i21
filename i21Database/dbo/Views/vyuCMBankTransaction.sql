@@ -24,8 +24,19 @@ strSocialSecurity = ISNULL((
 ),''),  
 strAccountClassification = ISNULL(EFT.strAccountClassification,''),  
 dblDebit = ISNULL(Detail.dblDebit,0),  
-dblCredit = ISNULL(Detail.dblCredit,0)  
+dblCredit = ISNULL(Detail.dblCredit,0),
+strBankName = B.strBankName,
+strBankAccountType = BAT.strBankAccountType,
+strBrokerageAccount = BRA.strAccountNumber
 FROM tblCMBankTransaction A  
+LEFT JOIN tblCMBankAccount BA 
+	ON BA.intBankAccountId = A.intBankAccountId
+LEFT JOIN tblCMBank B
+	ON B.intBankId = BA.intBankId
+LEFT JOIN tblCMBankAccountType BAT
+	ON BAT.intBankAccountTypeId = BA.intBankAccountTypeId
+LEFT JOIN tblRKBrokerageAccount BRA
+	ON BRA.intBrokerageAccountId = BA.intBrokerageAccountId
 OUTER APPLY (  
  SELECT SUM(ISNULL(dblDebit,0)) dblDebit, SUM(ISNULL(dblCredit,0)) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = A.intTransactionId  
 )Detail  
