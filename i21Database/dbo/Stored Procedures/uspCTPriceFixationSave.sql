@@ -69,7 +69,9 @@ BEGIN TRY
 			@dblTotalSpread numeric(18,6),
 			@intSpreadUOMId int,
 			@ysnEnableFXFieldInContractPricing BIT = 0,
-			@dblFixationFX numeric(18,6)
+			@dblFixationFX numeric(18,6),
+			@intMainCurrencyId int,
+			@ysnApplyFuturesFromPricing bit = 0
 			;
 
 	SET		@ysnMultiplePriceFixation = 0
@@ -117,13 +119,15 @@ BEGIN TRY
 	select @intDWGIdId = intWeightGradeId from tblCTWeightGrade where strWhereFinalized = 'Destination';
 		
 	select
-		@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
+		@ysnDestinationWeightsAndGrades = (case when ch.intContractTypeId = 2 and (ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId) then 1 else 0 end)
+		,@intMainCurrencyId = cu.intMainCurrencyId
+		,@ysnApplyFuturesFromPricing = case when @ysnEnableFXFieldInContractPricing = 1 and @intFinalCurrencyId <> cd.intCurrencyId and @intFinalCurrencyId <> cu.intMainCurrencyId then 1 else 0 end
 	from
 		tblCTContractDetail cd
 		inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+		inner join tblSMCurrency cu on cu.intCurrencyID = cd.intCurrencyId
 	where
 		cd.intContractDetailId = @intContractDetailId
-  		and ch.intContractTypeId = 2  
 
 	IF ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -800,30 +804,32 @@ BEGIN TRY
 			end
 			else
 			begin
+
+				
 				UPDATE	CD
 				SET		CD.intPricingTypeId		=	1,
-						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
+						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(dblPriceWORollArb,0) end))  / 
 													CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 															WHEN	@intFinalCurrencyId <> @intCurrencyId	
 															AND		@ysnFinalSubCurrency = 1				THEN 100 
-															ELSE	0.01 
+															ELSE	1
 													END,
 						CD.dblCashPrice			=	(
 														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
 														CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																WHEN	@intBasisCurrencyId <> @intCurrencyId	
 																AND		@ysnBasisSubCurrency = 1				THEN 100 
-																ELSE	0.01 
+																ELSE	1
 														END
 													) + 
 													(
 														CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 														(
-															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)) / 
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(dblPriceWORollArb,0) end)) / 
 															CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 																	WHEN	@intFinalCurrencyId <> @intCurrencyId	
 																	AND		@ysnFinalSubCurrency = 1				THEN 100 
-																	ELSE	0.01 
+																	ELSE	1
 															END									
 														) 
 													),	
@@ -834,17 +840,17 @@ BEGIN TRY
 															CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																	WHEN	@intBasisCurrencyId <> @intCurrencyId	
 																	AND		@ysnBasisSubCurrency = 1				THEN 100 
-																	ELSE	0.01 
+																	ELSE	1
 															END
 														) + 
 														(
 															CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 															(
-																dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
+																dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(dblPriceWORollArb,0) end))  / 
 																CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 																		WHEN	@intFinalCurrencyId <> @intCurrencyId	
 																		AND		@ysnFinalSubCurrency = 1				THEN 100 
-																		ELSE	0.01 
+																		ELSE	1
 																END
 															)
 														)
