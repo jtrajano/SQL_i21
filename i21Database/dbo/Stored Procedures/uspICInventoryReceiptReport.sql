@@ -54,6 +54,8 @@ SELECT
 	, '' AS 'strWarehouseRefNo'
 	, '' AS 'strVendorRefNo'
 	, '' AS 'strReceiver'
+	, '' AS 'blbHeaderLogo'
+	, '' AS 'strLogoType'
 	RETURN
 END
 
@@ -95,6 +97,30 @@ BEGIN
 	SELECT 
 		@intInventoryReceiptId = CASE WHEN ISNULL([from],'') = '' THEN NULL ELSE [from] END
 	FROM @temp_xml_table WHERE [fieldname] = 'intInventoryReceiptId'
+END
+
+
+DECLARE 
+	@imgLogo VARBINARY(MAX)
+    ,@strLogoType NVARCHAR(50)
+    ,@intCompanyLocationId INT
+
+SELECT @intCompanyLocationId = intLocationId
+FROM tblICInventoryReceipt r 
+WHERE r.strReceiptNumber = @strReceiptNumber
+
+SELECT TOP 1 
+	@imgLogo = imgLogo
+    ,@strLogoType = 'Logo'
+FROM 
+	tblSMLogoPreference
+WHERE 
+	ysnAllOtherReports = 1
+    AND intCompanyLocationId = @intCompanyLocationId
+
+IF @imgLogo IS NULL
+BEGIN
+    SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header') ,@strLogoType = 'Attachment'
 END
 
 SELECT
@@ -145,6 +171,9 @@ SELECT
 	, r.strWarehouseRefNo
 	, r.strVendorRefNo
 	, strReceiver = us.strUserName
+	, blbHeaderLogo = @imgLogo 
+	, strLogoType = @strLogoType 
+
 FROM tblICInventoryReceipt r
 	LEFT JOIN vyuICGetInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 	LEFT JOIN tblICInventoryReceiptItem rr ON rr.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
