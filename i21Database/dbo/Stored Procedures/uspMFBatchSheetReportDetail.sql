@@ -21,6 +21,7 @@ BEGIN TRY
 		,dblQuantity NUMERIC(18, 6)
 		,ysnAdditionalItem BIT
 		,dblPartialQuantity NUMERIC(18, 6)
+		,strUnitMeasure NVARCHAR(50)
 		)
 	DECLARE @strBatches NVARCHAR(MAX)
 		,@startnum INT
@@ -64,6 +65,7 @@ BEGIN TRY
 		)
 	SELECT @strBatches = COALESCE(@strBatches + ' ', '') + CONVERT(NVARCHAR, num)
 	FROM CTE
+	OPTION (MAXRECURSION 0)
 
 	IF @intNoOfBatches = 0
 		SELECT @strBatches = ''
@@ -78,6 +80,7 @@ BEGIN TRY
 		,dblQuantity
 		,ysnAdditionalItem
 		,dblPartialQuantity
+		,strUnitMeasure
 		)
 	SELECT I.intItemId
 		,(
@@ -101,6 +104,7 @@ BEGIN TRY
 				ELSE (@dblPartialQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(r.intItemId, UM1.intUnitMeasureId, @intStdUnitMeasureId, r.dblQuantity)) * ri.dblCalculatedQuantity
 				END
 			)
+		,UM.strUnitMeasure
 	FROM tblMFRecipeItem ri
 	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intLocationId = @intLocationId
@@ -157,6 +161,11 @@ BEGIN TRY
 			END AS strItemType
 		,t.ysnAdditionalItem
 		,t.intId
+		,CASE 
+			WHEN t.ysnAdditionalItem = 0
+				THEN ''
+			ELSE t.strUnitMeasure
+			END AS strAdditionalItemUOM
 	FROM @tblMFItems t
 	JOIN dbo.tblICItem I ON I.intItemId = t.intItemId
 END TRY
