@@ -916,4 +916,26 @@ END
 
 GO
 	PRINT N'End Update Existing tblHDTimeOffRequest to ysnLegacyWeek = 1';
+	PRINT N'Start Update Existing status of tblHDTimeEntryPeriodDetail to closed';
+GO
+
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTimeEntryPeriodDetail' AND COLUMN_NAME = 'strBillingPeriodStatus') AND
+   NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDTimeEntryPeriodDetail strBillingPeriodStatus')
+BEGIN
+	IF EXISTS(
+		SELECT TOP 1 ''
+		FROM tblHDTimeEntryPeriodDetail
+	)
+	BEGIN
+		UPDATE tblHDTimeEntryPeriodDetail
+		SET strBillingPeriodStatus = 'Closed'
+		WHERE dtmBillingPeriodEnd < CONVERT(DATE, GETDATE())
+	END
+
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDTimeEntryPeriodDetail strBillingPeriodStatus','1')
+
+END
+GO
+	PRINT N'End Update Existing status of tblHDTimeEntryPeriodDetail to closed';
 GO
