@@ -513,7 +513,8 @@ BEGIN TRY
                 ,CS.intItemId --Inventory Item Id
                 ,CS.intCompanyLocationId --Company Location Id
                 ,@dblVoucherUnits --Net Units
-                ,@dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits) --Gross Units
+                --,@dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits) --Gross Units
+                ,(@dblVoucherUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --Gross Units
                 ,@dblVoucherUnits --Transaction/Voucher Total Units
                 ,@tblQMDiscountIds --Storage Ticket Discount Ids
                 ,@dblVoucherAmount / @dblVoucherUnits --Inventory Item Cost
@@ -619,7 +620,7 @@ BEGIN TRY
             ,[intInventoryItemId]			= CAP.intInventoryItemId
             ,[strInventoryItemNo]			= CAP.strInventoryItemNo
             ,[dblInventoryItemNetUnits]		= @dblVoucherUnits
-            ,[dblInventoryItemGrossUnits]	= @dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits)
+            ,[dblInventoryItemGrossUnits]	= (@dblVoucherUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --Gross Units--@dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits)
 			,[dblGradeReading]				= CAP.dblGradeReading
         FROM tblGRCustomerStorage CS
         INNER JOIN @SettleStorageTicketInput SSTI
@@ -631,7 +632,8 @@ BEGIN TRY
                 ,CS.intItemId --Inventory Item Id
                 ,CS.intCompanyLocationId --Company Location Id
                 ,@dblVoucherUnits --Net Units
-                ,@dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits) --Gross Units
+                --,@dblVoucherUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * @dblVoucherUnits) --Gross Units
+                ,(@dblVoucherUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --Gross Units
                 ,@dblVoucherUnits --Transaction/Voucher Total Units
                 ,@tblQMDiscountIds --Storage Ticket Discount Ids
                 ,@dblVoucherAmount / @dblVoucherUnits --Inventory Item Cost
