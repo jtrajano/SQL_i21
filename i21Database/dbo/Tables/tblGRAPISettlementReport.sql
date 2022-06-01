@@ -33,6 +33,8 @@
 	,strDiscountReadings				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,lblFarmField						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strFarmField						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strDriverName						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strTruckName						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
 	,dtmDate							DATETIME NULL
 	,dblGrossWeight						DECIMAL(24,10)
 	,dblTareWeight						DECIMAL(24,10)
