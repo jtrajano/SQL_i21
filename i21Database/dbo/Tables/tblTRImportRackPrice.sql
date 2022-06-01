@@ -14,3 +14,8 @@
     CONSTRAINT [PK_tblTRImportRackPrice] PRIMARY KEY ([intImportRackPriceId]), 
     CONSTRAINT [FK_tblTRImportRackPrice_tblSMImportFileHeader] FOREIGN KEY ([intFieldMappingId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTRImportRackPrice_intFieldMappingId] ON [dbo].[tblTRImportRackPrice] ([intFieldMappingId])
+GO
+
