@@ -245,7 +245,7 @@ BEGIN TRY
 				LEFT JOIN tblSMCurrencyExchangeRateDetail cerd ON cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId AND cerd.intRateTypeId = @intRateTypeId
 				WHERE cer.intFromCurrencyId = @intInvoiceCurrencyId
 					AND CAST(FLOOR(CAST(cerd.dtmValidFromDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)
-			) tbl ON tbl.intToCurrencyId = ci.intCurrencyId
+			) tbl ON tbl.intToCurrencyId = ci.intCurrencyId AND intRowId = 1
 		END
 	END
 
