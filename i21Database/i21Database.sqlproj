@@ -835,6 +835,7 @@
     <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
     <Build Include="dbo\Views\vyuHDCoworkerIssue.sql" />
     <Build Include="dbo\Views\vyuHDTimeEntryLegacyBillingPeriod.sql" />
+    <Build Include="dbo\Tables\tblSMTaxCodeRateLoadingFee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
