@@ -983,6 +983,29 @@ BEGIN
 		left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = rtc5.intCountryID
 		left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Country'
 
+		OUTER APPLY (
+			SELECT TOP 1
+				[blbLogo] = imgLogo
+			FROM tblSMLogoPreference
+			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+				AND intCompanyLocationId = CD.intCompanyLocationId
+			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+		) CLLH
+		OUTER APPLY (
+			SELECT TOP 1 [blbLogo] = imgLogo
+			FROM tblSMLogoPreferenceFooter
+			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+				AND intCompanyLocationId = CD.intCompanyLocationId
+			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+		) CLLF
+		OUTER APPLY (
+			SELECT
+				blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+				,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+				,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+		) LOGO
+
 		WHERE L.intLoadId = @intLoadId
 		) tbl
 END
