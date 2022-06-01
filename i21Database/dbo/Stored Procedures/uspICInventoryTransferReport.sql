@@ -1,4 +1,5 @@
-CREATE PROCEDURE uspICInventoryTransferReport @xmlParam NVARCHAR(MAX) = NULL
+CREATE PROCEDURE uspICInventoryTransferReport 
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -15,7 +16,15 @@ DECLARE @xmlDocumentId AS INT;
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT *, CAST(0 AS BIT) ysnHasHeaderLogo FROM [vyuICGetInventoryTransferDetail] WHERE intInventoryTransferId = 1 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT 
+		*
+		, CAST(0 AS BIT) ysnHasHeaderLogo 
+		, '' AS 'blbHeaderLogo'
+		, '' AS 'strLogoType'
+	FROM 
+		[vyuICGetInventoryTransferDetail] 
+	WHERE 
+		intInventoryTransferId = 1 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 -- Create a table variable to hold the XML data. 		
@@ -64,6 +73,30 @@ IF EXISTS(SELECT TOP 1 1 FROM vyuSMCompanyLogo WHERE strComment = 'HeaderLogo')
 	SET @HasHeaderLogo = 1
 ELSE
 	SET @HasHeaderLogo = 0
+
+DECLARE 
+	@imgLogo VARBINARY(MAX)
+	,@strLogoType NVARCHAR(50)
+	,@intCompanyLocationId INT
+
+SELECT @intCompanyLocationId = intFromLocationId
+FROM [vyuICGetInventoryTransferDetail]  
+WHERE strTransferNo = @strTransferNo
+
+SELECT TOP 1 
+	@imgLogo = imgLogo
+	,@strLogoType = 'Logo'
+FROM 
+	tblSMLogoPreference
+WHERE 
+	ysnAllOtherReports = 1
+	AND intCompanyLocationId = @intCompanyLocationId
+
+IF @imgLogo IS NULL
+BEGIN
+	SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header') ,@strLogoType = 'Attachment'
+END
+
 
 SELECT 
 	v.*
@@ -134,6 +167,8 @@ SELECT
 	WHEN Location.strUseLocationAddress = 'Letterhead' 
 	THEN '' END AS strCompanyAddress
 	, ysnHasHeaderLogo = CAST(@HasHeaderLogo AS BIT)
+	,blbHeaderLogo = @imgLogo 
+	,strLogoType = @strLogoType 
 FROM [vyuICGetInventoryTransferDetail] v
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = v.intFromLocationId
 WHERE v.strTransferNo = @strTransferNo
