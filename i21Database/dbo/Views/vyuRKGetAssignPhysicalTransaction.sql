@@ -38,8 +38,8 @@ FROM (
 			, CD.intContractStatusId
 			, CD.intPricingTypeId
 			, strPricingStatus = CASE WHEN CD.intPricingStatus = 0 THEN 'Unpriced' WHEN CD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CD.intPricingStatus = 2 THEN 'Priced' END
-			, dblLotsPriced = CASE WHEN CD.intPricingTypeId = 1 THEN (CD.dblQuantity / M.dblContractSize)  ELSE ISNULL(PFD.dblQuantity, 0) / M.dblContractSize END
-			, dblLotsUnpriced = CASE WHEN CD.intPricingTypeId = 1 THEN 0 ELSE ((CD.dblQuantity - ISNULL(PFD.dblQuantity, 0)) / M.dblContractSize) END
+			, dblLotsPriced = CASE WHEN CD.intPricingTypeId = 1 THEN (CD.dblQuantity / M.dblContractSize)  ELSE ISNULL(priceFixation.dblQuantity, 0) / M.dblContractSize END
+			, dblLotsUnpriced = CASE WHEN CD.intPricingTypeId = 1 THEN 0 ELSE ((CD.dblQuantity - ISNULL(priceFixation.dblQuantity, 0)) / M.dblContractSize) END
 			, compactItem.strOrigin
 			, compactItem.strProductType
 			, compactItem.strGrade
@@ -58,8 +58,12 @@ FROM (
 		JOIN tblICUnitMeasure UC ON CD.intUnitMeasureId = UC.intUnitMeasureId
 		LEFT JOIN tblCTBook B ON CD.intBookId = B.intBookId
 		LEFT JOIN tblCTSubBook SB ON CD.intSubBookId = SB.intSubBookId 
-		LEFT JOIN tblCTPriceFixation PF on PF.intContractDetailId = CD.intContractDetailId
-		LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
+		OUTER APPLY (
+			SELECT dblQuantity = SUM(PFD.dblQuantity)
+			FROM tblCTPriceFixation PF
+			LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
+			WHERE PF.intContractDetailId = CD.intContractDetailId
+		) priceFixation
 		LEFT JOIN tblICItem item ON item.intItemId = CD.intItemId
 		LEFT JOIN vyuICGetCompactItem compactItem ON item.intItemId = compactItem.intItemId
 		WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 0
@@ -99,8 +103,8 @@ FROM (
 			, CD.intContractStatusId
 			, CH.intPricingTypeId
 			, strPricingStatus = CASE WHEN CDD.intPricingStatus = 0 THEN 'Unpriced' WHEN CDD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CDD.intPricingStatus = 2 THEN 'Priced' END
-			, dblLotsPriced = CASE WHEN CDD.intPricingTypeId = 1 THEN (CDD.dblQuantity / M.dblContractSize)  ELSE ISNULL(PFD.dblQuantity, 0) / M.dblContractSize END
-			, dblLotsUnpriced = CASE WHEN CDD.intPricingTypeId = 1 THEN 0 ELSE ((CDD.dblQuantity - ISNULL(PFD.dblQuantity, 0)) / M.dblContractSize) END
+			, dblLotsPriced = CASE WHEN CDD.intPricingTypeId = 1 THEN (CDD.dblQuantity / M.dblContractSize)  ELSE ISNULL(priceFixation.dblQuantity, 0) / M.dblContractSize END
+			, dblLotsUnpriced = CASE WHEN CDD.intPricingTypeId = 1 THEN 0 ELSE ((CDD.dblQuantity - ISNULL(priceFixation.dblQuantity, 0)) / M.dblContractSize) END
 			, compactItem.strOrigin
 			, compactItem.strProductType
 			, compactItem.strGrade
@@ -120,8 +124,12 @@ FROM (
 		LEFT JOIN tblCTBook B ON B.intBookId = (SELECT TOP 1 intBookId FROM tblCTContractDetail CD WHERE CD.intContractHeaderId = CH.intContractHeaderId)
 		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = (SELECT TOP 1 intSubBookId FROM tblCTContractDetail CD WHERE CD.intContractHeaderId = CH.intContractHeaderId)
 		LEFT JOIN tblCTContractDetail CDD ON CDD.intContractHeaderId = CH.intContractHeaderId
-		LEFT JOIN tblCTPriceFixation PF on PF.intContractDetailId = CDD.intContractDetailId
-		LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
+		OUTER APPLY (
+			SELECT dblQuantity = SUM(PFD.dblQuantity)
+			FROM tblCTPriceFixation PF
+			LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
+			WHERE PF.intContractDetailId = CDD.intContractDetailId
+		) priceFixation
 		LEFT JOIN tblICItem item ON item.intItemId = CDD.intItemId
 		LEFT JOIN vyuICGetCompactItem compactItem ON item.intItemId = compactItem.intItemId
 		WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 1

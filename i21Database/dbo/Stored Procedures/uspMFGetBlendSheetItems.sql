@@ -241,6 +241,7 @@ a.dblLowerToleranceQty,a.dblUpperToleranceQty,
 a.ysnMinorIngredient,a.ysnScaled,a.dblRecipeQty,
 a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation,a.intConsumptionMethodId,ISNULL(i.ysnHandAddIngredient,0) AS ysnHandAddIngredient,@intRecipeId AS intRecipeId,a.intConsumptionStorageLocationId,
 @intManufacturingProcessId AS intManufacturingProcessId,@strBlendItemLotTracking AS strBlendItemLotTracking,IsNULL(cq.dblConfirmedQty,0) AS dblConfirmedQty
+,a.dblRequiredQty AS dblOrgRequiredQty
 from @tblRequiredQty a 
 Left Join @tblPhysicalQty b on a.intItemId=b.intItemId
 Left Join @tblReservedQty c on a.intItemId=c.intItemId

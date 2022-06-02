@@ -218,6 +218,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FA\DefaultData\FixedAssetGroup.sql
 :r .\FA\01_UpdateMultiCurrencyFields.sql
 :r .\FA\02_UpdateMonthlyAssetDepreciation.sql
+:r .\FA\03_UpdateAssetDepreciationCurrency.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql

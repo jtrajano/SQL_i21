@@ -459,6 +459,7 @@ begin try
 					, [strReferenceNo]
 					, [intBankValuationRuleId]
 					, [strComments]
+					, [intFreightTermId]
 				)
 				select
 					intPartitionId = vp.intPartitionId
@@ -586,6 +587,7 @@ begin try
 					, vp.strReferenceNo
 					, vp.intBankValuationRuleId
 					, vp.strComments
+					, vp.intFreightTermId
 				from
 					@voucherPayables vp
 					LEFT JOIN tblEMEntityLocation em 

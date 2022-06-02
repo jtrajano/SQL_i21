@@ -31,12 +31,12 @@ OUTER APPLY(
  )C  
   
 OUTER APPLY(  
- SELECT TOP 1 strBankAccountNo strBankAccountNoFrom, strCurrency strCurrencyFrom, strGLAccountId strGLAccountIdFrom, strCbkNo strCbkNoFrom
+ SELECT TOP 1 strBankName strBankFrom, strBankAccountNo strBankAccountNoFrom, strCurrency strCurrencyFrom, strGLAccountId strGLAccountIdFrom, strCbkNo strCbkNoFrom
  FROM vyuCMBankAccount 
  WHERE intBankAccountId =  A.intBankAccountIdFrom  
 )D  
 OUTER APPLY(  
- SELECT TOP 1 strBankAccountNo strBankAccountNoTo, strCurrency strCurrencyTo, strGLAccountId strGLAccountIdTo, strCbkNo strCbkNoTo
+ SELECT TOP 1  strBankName strBankTo, strBankAccountNo strBankAccountNoTo, strCurrency strCurrencyTo, strGLAccountId strGLAccountIdTo, strCbkNo strCbkNoTo
  FROM vyuCMBankAccount WHERE intBankAccountId =  A.intBankAccountIdTo  
 )E  
 OUTER APPLY(  

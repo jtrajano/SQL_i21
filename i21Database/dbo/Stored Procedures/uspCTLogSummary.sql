@@ -557,6 +557,7 @@ BEGIN TRY
 		FROM tblCTSequenceHistory sh
 		INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 		WHERE intSequenceUsageHistoryId IS NULL
+			OR (intSequenceUsageHistoryId IS NOT NULL AND ISNULL(sh.ysnQtyChange, 0) = 1 AND sh.dblQuantity > sh.dblOldQuantity AND sh.intPricingTypeId <> 5)
 
 		INSERT INTO @cbLogTemp (strBatchId
 			, dtmTransactionDate

@@ -45,7 +45,7 @@ CREATE TABLE #tmpGLDetail (
  ,[dblExchangeRate] [numeric](38, 20) NOT NULL    
  ,[dtmDateEntered] [datetime] NOT NULL    
  ,[dtmTransactionDate] [datetime] NULL    
- ,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL    
+ ,[strJournalLineDescription] [nvarchar](300)  COLLATE Latin1_General_CI_AS NULL    
  ,[intJournalLineNo] [int]    
  ,[ysnIsUnposted] [bit] NOT NULL    
  ,[intUserId] [int] NULL    

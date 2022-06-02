@@ -303,8 +303,10 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			WI.intWarehouseInstructionHeaderId,
 			LW.intLoadWarehouseId,
 			Via.strName strShipVia,
-			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
-			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
+			blbHeaderLogo = LOGO.blbHeaderLogo,
+			blbFooterLogo = LOGO.blbFooterLogo,
+			strHeaderLogoType = LOGO.strHeaderLogoType,
+			strFooterLogoType = LOGO.strFooterLogoType,
 			strCompanyName = @strCompanyName,
 			strCompanyAddress = @strCompanyAddress,
 			strCompanyContactName = @strContactName,
@@ -638,7 +640,29 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation CNCompanyLocation ON CNCompanyLocation.intCompanyLocationId = CLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationId
-		CROSS APPLY tblLGCompanyPreference CP
+		CROSS APPLY tblLGCompanyPreference CP		
+		OUTER APPLY (
+			SELECT TOP 1
+				[blbLogo] = imgLogo
+			FROM tblSMLogoPreference
+			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+				AND intCompanyLocationId = CD.intCompanyLocationId
+			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+		) CLLH
+		OUTER APPLY (
+			SELECT TOP 1 [blbLogo] = imgLogo
+			FROM tblSMLogoPreferenceFooter
+			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+				AND intCompanyLocationId = CD.intCompanyLocationId
+			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+		) CLLF
+		OUTER APPLY (
+			SELECT
+				blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+				,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+				,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+		) LOGO
 		WHERE L.strLoadNumber = @strTrackingNumber) tbl
 	END
 	ELSE
@@ -749,8 +773,10 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			WI.intWarehouseInstructionHeaderId,
 			LW.intLoadWarehouseId,
 			Via.strName strShipVia,
-			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
-			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
+			blbHeaderLogo = LOGO.blbHeaderLogo,
+			blbFooterLogo = LOGO.blbFooterLogo,
+			strHeaderLogoType = LOGO.strHeaderLogoType,
+			strFooterLogoType = LOGO.strFooterLogoType,
 			strCompanyName = @strCompanyName,
 			strCompanyAddress = @strCompanyAddress,
 			strCompanyContactName = @strContactName,
@@ -843,7 +869,32 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		LEFT JOIN	tblSMFreightTerms Basis ON Basis.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN	tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-		CROSS APPLY tblLGCompanyPreference CP
+		CROSS APPLY tblLGCompanyPreference CP		
+		OUTER APPLY (
+			SELECT TOP 1
+				[blbLogo] = imgLogo
+				,[strLogoType] = 'Logo'
+			FROM tblSMLogoPreference
+			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+				AND intCompanyLocationId = L.intCompanyLocationId
+			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+		) CLLH
+		OUTER APPLY (
+			SELECT TOP 1
+				[blbLogo] = imgLogo
+				,[strLogoType] = 'Logo'
+			FROM tblSMLogoPreferenceFooter
+			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+				AND intCompanyLocationId = L.intCompanyLocationId
+			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+		) CLLF
+		OUTER APPLY (
+			SELECT
+				blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+				,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+				,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+		) LOGO
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	END
 END
