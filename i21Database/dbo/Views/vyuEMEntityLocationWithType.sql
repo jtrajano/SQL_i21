@@ -47,6 +47,7 @@ SELECT intEntityLocationId			= EL.intEntityLocationId
 	 , strSalesPersonName			= SALESPERSON.strSalesPersonName
 	 , strFreightSalesUnit			= SP.strFreightSalesUnit
 	 , strVATNo						= EL.strVATNo
+	 , strSaleUnits					= EL.strSaleUnits
 FROM tblEMEntityLocation EL
 JOIN vyuEMEntityType ET ON EL.intEntityId = ET.intEntityId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = EL.intEntityLocationId 
