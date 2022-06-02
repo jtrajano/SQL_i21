@@ -1472,8 +1472,8 @@ BEGIN TRY
 					,[ysnResetDetails] = 0
 					,[intItemId] = ICI.intItemId
 					,[strItemDescription] = ICI.strItemNo
-					,[intOrderUOMId]= CTDC.intItemUOMId
-					,[intItemUOMId] = CTDC.intItemUOMId
+					,[intOrderUOMId]= ISNULL(CTDC.intItemUOMId,SC.intItemUOMIdTo)
+					,[intItemUOMId] = ISNULL(CTDC.intItemUOMId,SC.intItemUOMIdTo)
 					,[dblQtyOrdered] = Staging.dblQtyOrdered 
 					,[dblQtyShipped] = Staging.dblQtyShipped 
 					,[dblDiscount] = 0
@@ -1499,12 +1499,12 @@ BEGIN TRY
 				INNER JOIN tblICItem ICI 
 					ON ICI.intItemId = SCS.intFreightItemId	
 				------******* START Contract Cost *****----------------
-				INNER JOIN tblCTContractDetail CTD
+				LEFT JOIN tblCTContractDetail CTD
 					ON SC.intContractId = CTD.intContractDetailId
-				INNER JOIN tblCTContractCost CTDC
+				LEFT JOIN tblCTContractCost CTDC
 					ON CTD.intContractDetailId = CTDC.intContractDetailId
 						AND CTDC.intItemId = SCS.intFreightItemId
-				INNER JOIN tblICItemUOM CTCITM		
+				LEFT JOIN tblICItemUOM CTCITM		
 					ON CTCITM.intItemUOMId = CTDC.intItemUOMId
 				------******* END Contract Cost *****----------------
 				WHERE SC.intTicketId = @intTicketId 
