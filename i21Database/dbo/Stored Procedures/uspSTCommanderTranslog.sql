@@ -599,7 +599,7 @@ BEGIN
 							, [intConcurrencyId])
 						SELECT 
 							[intTermMsgSN]
-							, DENSE_RANK() OVER(PARTITION BY intTermMsgSN ORDER BY intTransCount, intTermMsgSN ASC)
+							, intTransCount
 							, [strTrlMatchLineTrlMatchName] 
 							, [dblTrlMatchLineTrlMatchQuantity] 
 							, [dblTrlMatchLineTrlMatchPrice] 
