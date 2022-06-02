@@ -3,6 +3,7 @@ AS
 
 SELECT intTranslogId AS intId
 	, strUniqueId 
+	, intTrlDeptNumber
 	, strTrlDeptNumber
 	, strTrlDept
 	, strTrlNetwCode
@@ -72,6 +73,7 @@ FROM
 		, CAST(TR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TR.intStoreId AS NVARCHAR(MAX)) 
                 --+ CAST(USec.intEntityId AS NVARCHAR(MAX)) 
                 COLLATE Latin1_General_CI_AS AS strUniqueId
+       , TR.intTrlDeptNumber
        , TR.strTrlDeptNumber
        , TR.strTrlDept
        , TR.strTrlNetwCode
@@ -142,7 +144,7 @@ FROM
 
 	    --,dblTrlUnitPrice * dblTrlQty * dblTrlSign as dblTrlLineTot
 		,dblTrlSign -- Added 10/12/2021		
-		,TR.strTrlMatchLineTrlMatchName  -- Added 09/26/2021
+		,TRM.strTrlMatchLineTrlMatchName  -- Added 09/26/2021
 
        FROM tblSTTranslogRebates TR 
 	   LEFT JOIN (
