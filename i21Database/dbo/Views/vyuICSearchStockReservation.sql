@@ -13,7 +13,7 @@ Item.strDescription,
 Category.strCategoryCode,
 Commodity.strCommodityCode,
 Transact.dblOnHandQty,
-CASE WHEN (Reservation.ysnPosted = 1 AND Invoice.ysnPosted = 1) THEN	
+CASE WHEN (Reservation.ysnPosted = 1 OR Invoice.ysnPosted = 1) THEN	
 	0
 ELSE
 	Reservation.dblQty
