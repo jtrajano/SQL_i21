@@ -110,6 +110,12 @@ INNER JOIN(
 								THEN 0
 							WHEN ET.dtmLastAward = CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE) 
 								THEN 0 END
+					WHEN ET.strAwardPeriod = 'End of Week' THEN
+						CASE 
+							WHEN ET.dtmLastAward = DATEADD(DD, -7, CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE))
+								THEN 0
+							WHEN ET.dtmLastAward = CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())) + 7, GETDATE()) AS DATE)
+								THEN 0 END
 					ELSE dblHours END 
 				END
 
@@ -189,6 +195,12 @@ INNER JOIN(
 							WHEN ET.dtmLastAward = CAST(DATEADD(WK, DATEDIFF(WK, 0, GETDATE()), 0) AS DATE) 
 								THEN 0
 							WHEN ET.dtmLastAward = CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE) 
+								THEN 0 END
+					WHEN ET.strAwardPeriod = 'End of Week' THEN
+						CASE 
+							WHEN ET.dtmLastAward = DATEADD(DD, -7, CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE))
+								THEN 0
+							WHEN ET.dtmLastAward = CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())) + 7, GETDATE()) AS DATE)
 								THEN 0 END
 					ELSE dblHours END 
 				END
