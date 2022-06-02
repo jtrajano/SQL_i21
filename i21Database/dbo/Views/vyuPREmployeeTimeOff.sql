@@ -100,6 +100,8 @@ INNER JOIN(
 						THEN 0 
 					WHEN ET.dtmLastAward = CAST(DATEADD(D, -1, DATEADD(Q, DATEDIFF(Q, 0, GETDATE()) + 1, 0)) AS DATE) AND ET.strAwardPeriod = 'End of Quarter' 
 						THEN 0 
+					WHEN ET.dtmLastAward = CAST(DATEADD(M, DATEDIFF(M, 0, GETDATE()), 0) AS DATE) AND ET.strAwardPeriod = 'Start of Month' 
+						THEN 0 
 					ELSE dblHours END 
 				END
 
@@ -169,6 +171,8 @@ INNER JOIN(
 					WHEN ET.dtmLastAward = CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE) AND ET.strAwardPeriod = 'Start of Quarter' 
 						THEN 0 
 					WHEN ET.dtmLastAward = CAST(DATEADD(D, -1, DATEADD(Q, DATEDIFF(Q, 0, GETDATE()) + 1, 0)) AS DATE) AND ET.strAwardPeriod = 'End of Quarter' 
+						THEN 0 
+					WHEN ET.dtmLastAward = CAST(DATEADD(M, DATEDIFF(M, 0, GETDATE()), 0) AS DATE) AND ET.strAwardPeriod = 'Start of Month' 
 						THEN 0 
 					ELSE dblHours END 
 				END
