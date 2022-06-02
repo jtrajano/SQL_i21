@@ -223,18 +223,28 @@ BEGIN TRY
 			, TR.intTermMsgSN AS strTransactionIdCode
 			, ST.intStoreNo AS strStoreNumber
 			, ST.strDescription AS strStoreName
-			, REPLACE(REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') AS strStoreAddress
-			, ST.strCity AS strStoreCity
-			, UPPER(LEFT(ST.strState, 2)) AS strStoreState
-			, ST.strZipCode AS intStoreZipCode
+			, REPLACE(REPLACE(REPLACE(REPLACE(CL.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') AS strStoreAddress
+			, CL.strCity AS strStoreCity
+			, UPPER(LEFT(CL.strStateProvince, 2)) AS strStoreState
+			, CL.strZipPostalCode AS intStoreZipCode
 			, strTrlDept AS strCategory
 			, EM.strName AS strManufacturerName
 			, strTrlUPC AS strSKUCode		-- 4
 			, strTrlUPC AS strUpcCode		-- Check digit is included. Since RJ and PM requires check digits
 			, strTrlDesc AS strSkuUpcDescription
-			, CASE WHEN DEPT.ysnTobacco = 1 THEN 'PACKS' ELSE 'CANS' END AS strUnitOfMeasure
+			, CASE WHEN UM.strUnitMeasure IS NOT NULL 
+				THEN UM.strUnitMeasure
+				ELSE
+					CASE WHEN DEPT.ysnTobacco = 1 
+						THEN 'PACKS' 
+						ELSE 'CANS' 
+					END 
+				END AS strUnitOfMeasure
 			, CASE WHEN strTrpPaycode != 'Change' THEN CAST(dblTrlQty as INT) ELSE 0 END AS intQuantitySold
-			, 1 AS intConsumerUnits
+			, CASE WHEN UOM.dblUnitQty IS NOT NULL
+						THEN UOM.dblUnitQty
+					ELSE 1
+				END AS intConsumerUnits
 			-- , CASE WHEN DEPT.ysnTobacco = 1 
 			-- 	AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 			-- 	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -337,11 +347,16 @@ BEGIN TRY
 			AND TRR.ysnPMMSubmitted = CASE WHEN @ysnResubmit = CAST(0 AS BIT) THEN CAST(0 AS BIT) WHEN @ysnResubmit = CAST(1 AS BIT) THEN TRR.ysnPMMSubmitted END
 		) TR
 		INNER JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
+		JOIN tblSMCompanyLocation CL ON ST.intCompanyLocationId = CL.intCompanyLocationId
 		INNER JOIN tblSTStoreRebates SR ON SR.intStoreId = ST.intStoreId
  		JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
 		JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
 		LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON CONVERT(NUMERIC(32, 0),CAST(TR.strTrlUPCwithoutCheckDigit AS FLOAT)) = CRP.intUpcCode ---->   Always compare UPC without check digit since Inventory UPC has no check digit, use IC intUpcCode
 		AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)	
+		LEFT JOIN tblICItemUOM UOM
+			ON UOM.intUpcCode = CAST(TR.strTrlUPCwithoutCheckDigit AS BIGINT)
+		LEFT JOIN tblICUnitMeasure UM
+			ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 		INNER JOIN (
 			SELECT DISTINCT intStoreId = Rebates.intStoreId
 				,ysnTobacco = Rebates.ysnTobacco
@@ -355,7 +370,7 @@ BEGIN TRY
 				ON Category.intCategoryId = CatLoc.intCategoryId
 				AND Store.intCompanyLocationId = CatLoc.intLocationId
 		) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber
-		WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL) -- Filter Store without Address
+		WHERE (CL.strAddress !='' OR CL.strAddress IS NOT NULL) -- Filter Store without Address
 		AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 		AND TR.strTrpPaycode != 'Change' --ST-680
 			) as innerquery
@@ -414,11 +429,11 @@ BEGIN TRY
 		FROM ( 
 			SELECT DISTINCT intScanTransactionId ,(CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 				, ST.intStoreNo as intOutletNumber
-				, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
+				, REPLACE(REPLACE(REPLACE(CL.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 				, '' as strOutletAddressTwo
-				, CASE WHEN ST.strCity IS NULL THEN '' ELSE REPLACE(ST.strCity, @Delimiter, '') END as strOutletCity
-				, UPPER(LEFT(ST.strState, 2)) as strOutletState
-				,  CASE WHEN ST.strZipCode IS NULL THEN '' ELSE ST.strZipCode END as strOutletZipCode
+				, CASE WHEN CL.strCity IS NULL THEN '' ELSE REPLACE(CL.strCity, @Delimiter, '') END as strOutletCity
+				, UPPER(LEFT(CL.strStateProvince, 2)) as strOutletState
+				,  CASE WHEN CL.strZipPostalCode IS NULL THEN '' ELSE CL.strZipPostalCode END as strOutletZipCode
 				, CONVERT(NVARCHAR, TR.dtmDate, 120) as strTransactionDateTime
 				, CAST(TR.intTermMsgSN AS NVARCHAR(50)) as strMarketBasketTransactionId
 				, CAST(intScanTransactionId AS NVARCHAR(20)) as strScanTransactionId
@@ -554,6 +569,7 @@ BEGIN TRY
 					AND TRR.ysnRJRSubmitted = CASE WHEN @ysnResubmit = CAST(0 AS BIT) THEN CAST(0 AS BIT) WHEN @ysnResubmit = CAST(1 AS BIT) THEN TRR.ysnRJRSubmitted END
 			) TR
 			JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
+			JOIN tblSMCompanyLocation CL ON ST.intCompanyLocationId = CL.intCompanyLocationId
 			INNER JOIN tblSTStoreRebates SR ON SR.intStoreId = ST.intStoreId
 			LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON CONVERT(NUMERIC(32, 0),CAST(TR.strTrlUPCwithoutCheckDigit AS FLOAT)) = CRP.intUpcCode 
 				AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
@@ -590,7 +606,7 @@ BEGIN TRY
 				AND TR.dtmDate = tblSumQty.dtmDate
 				AND TR.intStoreId = tblSumQty.intStoreId
 				AND TR.strTrlMatchLineTrlPromotionID = tblSumQty.strTrlMatchLineTrlPromotionID
-			WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL)
+			WHERE (CL.strAddress !='' OR CL.strAddress IS NOT NULL)
 				AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 		) as innerquery
 		WHERE dblPrice < 200
@@ -617,7 +633,8 @@ BEGIN TRY
 					SET ysnPMMSubmitted = 1
 				WHERE intStoreId IN (SELECT DISTINCT ST.intStoreId FROM tblSTStore ST 
 						INNER JOIN tblSTStoreRebates SR ON SR.intStoreId = ST.intStoreId  
-						WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL))
+						JOIN tblSMCompanyLocation CL ON ST.intCompanyLocationId = CL.intCompanyLocationId
+						WHERE (CL.strAddress !='' OR CL.strAddress IS NOT NULL))
 					AND CAST(dtmDate as DATE) >= @dtmBeginningDate
 					AND CAST(dtmDate as DATE) <= @dtmEndingDate
 					AND ysnPMMSubmitted = CASE WHEN @ysnResubmit = CAST(0 AS BIT)
@@ -651,7 +668,8 @@ BEGIN TRY
 					SET ysnRJRSubmitted = 1
 				WHERE intStoreId IN (SELECT DISTINCT ST.intStoreId FROM tblSTStore ST 
 						INNER JOIN tblSTStoreRebates SR ON SR.intStoreId = ST.intStoreId  
-						WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL))
+						JOIN tblSMCompanyLocation CL ON ST.intCompanyLocationId = CL.intCompanyLocationId
+						WHERE (CL.strAddress !='' OR CL.strAddress IS NOT NULL))
 					AND CAST(dtmDate as DATE) >= @dtmBeginningDate
 					AND CAST(dtmDate as DATE) <= @dtmEndingDate
 					AND ysnRJRSubmitted = CASE WHEN @ysnResubmit = CAST(0 AS BIT)
