@@ -62,7 +62,7 @@ INNER JOIN(
   SELECT * FROM   
   (  
    SELECT       
-    intYear = YEAR(dtmPayDate)  
+    intYear = YEAR(dtmDateFrom)  
     ,PC.intEntityEmployeeId      
     ,intTypeTimeOffId = PCE.intEmployeeTimeOffId      
     ,ET.strAwardPeriod  
@@ -70,27 +70,40 @@ INNER JOIN(
     ,ISNULL(ET.dtmLastAward, EMP.dtmDateHired) AS dtmLastAwardPC  
     ,dblHours =  
 		CASE   
-			WHEN YEAR(dtmPayDate) IS NOT NULL AND (ET.strAwardPeriod = 'Anniversary Date') THEN   
+			WHEN YEAR(dtmDateFrom) IS NOT NULL AND (ET.strAwardPeriod = 'Anniversary Date') THEN   
 				CASE WHEN (  
 				(dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(EMP.dtmDateHired), EMP.dtmDateHired)  OR YEAR(dtmDateFrom) =  YEAR(GETDATE())))   
 					THEN dblHours  
 			ELSE   
 				CASE WHEN DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired) > ET.dtmLastAward THEN 0 ELSE dblHours END   
 			END  
-			WHEN YEAR(dtmPayDate) IS NOT NULL AND (ET.strAwardPeriod = 'End of Year') THEN   
+			WHEN YEAR(dtmDateFrom) IS NOT NULL AND (ET.strAwardPeriod = 'End of Year') THEN   
 				CASE WHEN (dtmDateFrom < DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1))   
 					THEN dblHours  
 			ELSE 
 				CASE WHEN ET.dtmLastAward = DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1) THEN 0 ELSE dblHours END 
 			END  
-			WHEN YEAR(dtmPayDate) IS NOT NULL  AND (ET.strAwardPeriod = 'Start of Year') THEN  
-				CASE WHEN YEAR(dtmPayDate) = YEAR(GETDATE())  
+			
+			WHEN YEAR(dtmDateFrom) IS NOT NULL  AND (ET.strAwardPeriod = 'Start of Year') THEN  
+				CASE WHEN YEAR(dtmDateFrom) = YEAR(GETDATE())  
 					THEN dblHours  
 			ELSE 
 				CASE WHEN YEAR(ET.dtmLastAward) = YEAR(GETDATE()) THEN 0 ELSE dblHours END 
 			END  
+
+			WHEN YEAR(dtmDateFrom) IS NOT NULL THEN  
+				CASE WHEN dtmDateFrom >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired)   AND YEAR(dtmDateFrom) = YEAR(ISNULL(ET.dtmLastAward,EMP.dtmDateHired))
+					THEN dblHours 
+				ELSE
+					CASE 
+					WHEN ET.dtmLastAward = CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE) AND ET.strAwardPeriod = 'Start of Quarter' 
+						THEN 0 
+					ELSE dblHours END 
+				END
+
+		
 		ELSE   
-			CASE WHEN YEAR(dtmPayDate) IS NOT NULL AND (YEAR(dtmPayDate) = YEAR(GETDATE())) THEN  
+			CASE WHEN YEAR(dtmDateFrom) IS NOT NULL AND (YEAR(dtmDateFrom) = YEAR(GETDATE())) THEN  
 				dblHours  
 			ELSE 
 				CASE WHEN YEAR(ET.dtmLastAward) = YEAR(GETDATE()) THEN dblHours ELSE 0 END
@@ -145,6 +158,16 @@ INNER JOIN(
 			ELSE   
 				CASE WHEN YEAR(ET.dtmLastAward) = YEAR(GETDATE()) THEN 0 ELSE dblRequest END
 			END  
+
+			WHEN YEAR(dtmDateFrom) IS NOT NULL THEN  
+				CASE WHEN dtmDateFrom >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired)   AND YEAR(dtmDateFrom) = YEAR(ISNULL(ET.dtmLastAward,EMP.dtmDateHired))
+					THEN dblHours 
+				ELSE
+					CASE 
+					WHEN ET.dtmLastAward = CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE) AND ET.strAwardPeriod = 'Start of Quarter' 
+						THEN 0 
+					ELSE dblHours END 
+				END
 		ELSE   
 			CASE WHEN YEAR(dtmDateFrom) IS NOT NULL AND (YEAR(dtmDateFrom) =  YEAR(dtmLastAward))  
 				THEN dblRequest  
@@ -179,5 +202,4 @@ INNER JOIN(
 ) TOYTD       
  ON ETO.intEntityEmployeeId = TOYTD.intEntityId       
  AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId 
-  
 GO
