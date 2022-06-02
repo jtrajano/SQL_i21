@@ -1923,13 +1923,18 @@ BEGIN
 		,[intInvoiceDetailId]	= COSTING.[intTransactionDetailId]
 		,[intItemId]			= COSTING.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Stock is not available for ' + ITEM.strItemNo + ' at ' + LOC.strLocationName + ' as of ' + CONVERT(NVARCHAR(30), CAST(COSTING.dtmDate AS DATETIME), 101) + '. Use the nearest stock available date of ' + CONVERT(NVARCHAR(30), CAST(STOCKDATE.dtmDate AS DATETIME), 101) + ' or later.'	
-		,[strSessionId]			= @strSessionId
+		,[strPostingError]		= 'Stock is not available for ' + ITEM.strItemNo + ' at ' + CLOC.strLocationName + ' as of ' + CONVERT(NVARCHAR(30), CAST(COSTING.dtmDate AS DATETIME), 101) + '. Use the nearest stock available date of ' + CONVERT(NVARCHAR(30), CAST(STOCKDATE.dtmDate AS DATETIME), 101) + ' or later.'	
 	FROM tblARPostInvoiceHeader I
 		INNER JOIN tblARPostItemsForCosting COSTING  ON I.intInvoiceId =  COSTING.intTransactionId
-		INNER JOIN  tblICInventoryStockAsOfDate STOCKDATE ON COSTING.intItemId = STOCKDATE.intItemId
+		INNER JOIN  
+		(
+		SELECT intItemId,intItemLocationId,intItemUOMId,MAX(dtmDate)[dtmDate] 
+		FROM tblICInventoryStockAsOfDate 
+		GROUP BY  intItemId,intItemLocationId,intItemUOMId
+		)STOCKDATE ON COSTING.intItemId = STOCKDATE.intItemId AND COSTING.intItemUOMId = STOCKDATE.intItemUOMId AND STOCKDATE.intItemLocationId=COSTING.intItemLocationId
 		INNER JOIN tblICItem ITEM ON  ITEM.intItemId = COSTING.intItemId
-		INNER JOIN tblSMCompanyLocation LOC ON COSTING.intItemLocationId = LOC.intCompanyLocationId
+		INNER JOIN tblICItemLocation LOC ON COSTING.intItemLocationId = LOC.intItemLocationId
+		INNER JOIN tblSMCompanyLocation CLOC ON LOC.intLocationId = CLOC.intCompanyLocationId
 		WHERE COSTING.dtmDate < STOCKDATE.dtmDate
 		
 
