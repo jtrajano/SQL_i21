@@ -22,6 +22,7 @@ SELECT
     , st.strCalculationMethod
     , st.ysnTaxAdjusted
     , st.dblAdjustedTax
+    , st.intSalesOrderDetailId
 FROM tblSOSalesOrderDetail sod
 JOIN tblSOSalesOrderDetailTax st ON st.intSalesOrderDetailId = sod.intSalesOrderDetailId
 JOIN tblSMTaxClass tc ON tc.intTaxClassId = st.intTaxClassId
