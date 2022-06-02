@@ -258,20 +258,14 @@ LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OUTER APPLY (
-	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]), ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = ISNULL(SMCL.[intARAccount], @ARAccount)
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]), ISNULL(intAccountSegmentId, 0)), 0)
+	FROM vyuGLLocationAccountId
+	WHERE intAccountId = ISNULL(SMCL.[intARAccount], @ARAccount)
 ) UNDEPOSITED
 OUTER APPLY (
-	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@GainLossAccount, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = ISNULL(SMCL.[intARAccount], @ARAccount)
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@GainLossAccount, ISNULL(intAccountSegmentId, 0)), 0)
+	FROM vyuGLLocationAccountId
+	WHERE intAccountId = ISNULL(SMCL.[intARAccount], @ARAccount)
 ) GAINLOSS
 WHERE
 	NOT EXISTS(SELECT NULL FROM #ARPostPaymentHeader PH WHERE PH.[intTransactionId] = ARP.[intPaymentId])
@@ -894,20 +888,14 @@ LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OUTER APPLY (
-	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARP.[intWriteOffAccountId], ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = ARP.[intARAccountId]
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARP.[intWriteOffAccountId], ISNULL(intAccountSegmentId, 0)), 0)
+	FROM vyuGLLocationAccountId
+	WHERE intAccountId = ARP.[intARAccountId]
 ) WRITEOFF
 OUTER APPLY (
-	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPD.[intWriteOffAccountId], ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = ARP.[intARAccountId]
+	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPD.[intWriteOffAccountId], ISNULL(intAccountSegmentId, 0)), 0)
+	FROM vyuGLLocationAccountId
+	WHERE intAccountId = ARP.[intARAccountId]
 ) WRITEOFFDETAIL
 
 INSERT INTO #ARPostPaymentDetail
