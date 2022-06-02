@@ -9,7 +9,7 @@ SELECT DISTINCT
 	, dblCNFCost = ISNULL(BD.dblBasisOrDiscount, 0.0) + ISNULL((((1 * BookPort.dblTotalCostPerContainer) / 
 								dbo.fnCalculateCostBetweenUOM(
 									(SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId=BD.intItemId AND intUnitMeasureId=BD.intUnitMeasureId), 
-									(SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId=BD.intItemId AND ysnStockUOM=1), 
+									(SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId=BD.intItemId AND ysnStockUnit=1), 
 									19200)) * CASE WHEN Cur.ysnSubCurrency = 1 THEN Cur.intCent ELSE 1 END), 0.0)
 FROM tblRKM2MBasisDetail BD
 JOIN (

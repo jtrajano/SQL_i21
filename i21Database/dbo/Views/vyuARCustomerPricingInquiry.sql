@@ -21,7 +21,7 @@ CROSS APPLY (
 		 , strLocationName	= L.strLocationName
 		 , strUnitMeasure	= UOM.strUnitMeasure
 	FROM tblICItem I
-	INNER JOIN tblICItemUOM IUOM ON I.intItemId = IUOM.intItemId AND IUOM.ysnStockUOM = 1
+	INNER JOIN tblICItemUOM IUOM ON I.intItemId = IUOM.intItemId AND IUOM.ysnStockUnit = 1
 	INNER JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
 	LEFT JOIN tblSMCompanyLocation L ON IL.intLocationId = L.intCompanyLocationId
 	LEFT JOIN tblICUnitMeasure UOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId

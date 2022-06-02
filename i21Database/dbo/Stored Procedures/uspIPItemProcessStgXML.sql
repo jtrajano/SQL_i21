@@ -3214,7 +3214,7 @@ BEGIN TRY
 				,intVolumeUOMId INT
 				,strVolumeUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,dblMaxQty NUMERIC(18, 6)
-				,ysnStockUOM BIT
+				,ysnSubUnit BIT
 				,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 				,intUpcCode BIGINT
 				,intSort INT
@@ -3242,7 +3242,7 @@ BEGIN TRY
 				,dblVolume NUMERIC(18, 6) NULL DEFAULT((0))
 				,intVolumeUOMId INT NULL
 				,dblMaxQty NUMERIC(18, 6) NULL DEFAULT((0))
-				,ysnStockUOM BIT NULL
+				,ysnSubUnit BIT NULL
 				,intSort INT NULL
 				,intConcurrencyId INT NULL DEFAULT((0))
 				,dtmDateCreated DATETIME NULL
@@ -3271,7 +3271,7 @@ BEGIN TRY
 				,intVolumeUOMId
 				,strVolumeUnitMeasure
 				,dblMaxQty
-				,ysnStockUOM
+				,ysnSubUnit
 				,strSourceName
 				,intSort
 				,intConcurrencyId
@@ -3297,7 +3297,7 @@ BEGIN TRY
 				,intVolumeUOMId
 				,strVolumeUnitMeasure
 				,dblMaxQty
-				,ysnStockUOM
+				,ysnSubUnit
 				,strSourceName
 				,intSort
 				,intConcurrencyId
@@ -3323,7 +3323,7 @@ BEGIN TRY
 					,intVolumeUOMId INT
 					,strVolumeUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,dblMaxQty NUMERIC(18, 6)
-					,ysnStockUOM BIT
+					,ysnSubUnit BIT
 					,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 					,intSort INT
 					,intConcurrencyId INT
@@ -3485,7 +3485,7 @@ BEGIN TRY
 					,dblVolume
 					,intVolumeUOMId
 					,dblMaxQty
-					,ysnStockUOM
+					,ysnSubUnit
 					,intSort
 					,intConcurrencyId
 					,dtmDateCreated
@@ -3511,7 +3511,7 @@ BEGIN TRY
 					,dblVolume
 					,@intVolumeUOMId
 					,dblMaxQty
-					,ysnStockUOM
+					,ysnSubUnit
 					,intSort
 					,intConcurrencyId
 					,dtmDateCreated
@@ -3553,7 +3553,7 @@ BEGIN TRY
 				,dblVolume = IA.dblVolume
 				,intVolumeUOMId = IA.intVolumeUOMId
 				,dblMaxQty = IA.dblMaxQty
-				,ysnStockUOM = IA.ysnStockUOM
+				,ysnSubUnit = IA.ysnSubUnit
 				,intSort = IA.intSort
 				,intConcurrencyId = IA.intConcurrencyId
 				,dtmDateCreated = IA.dtmDateCreated
@@ -3583,7 +3583,7 @@ BEGIN TRY
 				,dblVolume
 				,intVolumeUOMId
 				,dblMaxQty
-				,ysnStockUOM
+				,ysnSubUnit
 				,intSort
 				,intConcurrencyId
 				,dtmDateCreated
@@ -3609,7 +3609,7 @@ BEGIN TRY
 				,dblVolume
 				,intVolumeUOMId
 				,dblMaxQty
-				,ysnStockUOM
+				,ysnSubUnit
 				,intSort
 				,intConcurrencyId
 				,dtmDateCreated

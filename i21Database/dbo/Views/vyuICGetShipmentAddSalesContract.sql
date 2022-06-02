@@ -87,7 +87,7 @@ FROM	vyuCTContractAddOrdersLookup ContractView
 				ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
 		)
 			ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, ContractView.intSeqPriceUOMId)
-		--INNER JOIN tblICItemUOM Iuom ON Iuom.intItemId = Item.intItemId AND Iuom.ysnStockUOM = 1
+		--INNER JOIN tblICItemUOM Iuom ON Iuom.intItemId = Item.intItemId AND Iuom.ysnSubUnit = 1
 		--LEFT JOIN (
 		--	tblICItemUOM ItemPriceUOM INNER JOIN tblICUnitMeasure PriceUOM
 		--		ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId

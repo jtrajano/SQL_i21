@@ -10,7 +10,7 @@ SELECT
 	CommodityUnitMeasure.dblUnitQty,
 	CommodityUnitMeasure.ysnStockUnit,
 	CommodityUnitMeasure.ysnDefault,
-	CommodityUnitMeasure.ysnStockUOM,
+	CommodityUnitMeasure.ysnSubUnit,
 	CommodityUnitMeasure.dblPremiumDiscount,
 	CommodityUnitMeasure.intCurrencyId,
 	Currency.strCurrency,

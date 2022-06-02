@@ -34,7 +34,7 @@ Type the overview for the table here.
 		[intVolumeUOMId] INT NULL,
 		[dblMaxQty] NUMERIC(18, 6) NULL DEFAULT ((0)),
         [dblStandardWeight] NUMERIC(38, 20) NULL DEFAULT ((0)),
-		[ysnStockUOM] BIT NULL,
+		[ysnSubUnit] BIT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
         [dtmDateCreated] DATETIME NULL,

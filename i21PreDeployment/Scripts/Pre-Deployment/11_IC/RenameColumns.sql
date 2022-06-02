@@ -20,3 +20,25 @@ BEGIN
     END
 END 
 GO
+
+-- Rename tblICItemUOM.ysnStockUOM to tblICItemUOM.ysnSubUnit
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblICItemUOM]') AND type in (N'U')) 
+BEGIN 
+    IF	NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnSubUnit' AND OBJECT_ID = OBJECT_ID(N'tblICItemUOM')) 
+		AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnStockUOM' AND OBJECT_ID = OBJECT_ID(N'tblICItemUOM'))
+    BEGIN
+        EXEC sp_rename 'tblICItemUOM.ysnStockUOM', 'ysnSubUnit' , 'COLUMN'
+    END
+END 
+GO
+
+-- Rename tblICCommodityUnitMeasure.ysnStockUOM to tblICCommodityUnitMeasure.ysnSubUnit
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblICCommodityUnitMeasure]') AND type in (N'U')) 
+BEGIN 
+    IF	NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnSubUnit' AND OBJECT_ID = OBJECT_ID(N'tblICCommodityUnitMeasure')) 
+		AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnStockUOM' AND OBJECT_ID = OBJECT_ID(N'tblICCommodityUnitMeasure'))
+    BEGIN
+        EXEC sp_rename 'tblICCommodityUnitMeasure.ysnStockUOM', 'ysnSubUnit' , 'COLUMN'
+    END
+END 
+GO

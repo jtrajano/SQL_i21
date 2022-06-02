@@ -18,7 +18,7 @@ Type the overview for the table here.
 		[dblUnitQty] NUMERIC(38, 20) NULL,
 		[ysnStockUnit] BIT NULL DEFAULT ((0)), 
 		[ysnDefault] BIT NULL DEFAULT ((0)),
-		[ysnStockUOM] BIT NULL, 
+		[ysnSubUnit] BIT NULL, 
 		[dblPremiumDiscount] NUMERIC(38,20) NULL,
 		[intCurrencyId] INT NULL,
 		[intPriceUnitMeasureId] INT NULL,

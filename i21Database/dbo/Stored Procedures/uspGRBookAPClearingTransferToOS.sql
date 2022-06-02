@@ -270,7 +270,7 @@ BEGIN TRY
         AND IUOM_DISC.intUnitMeasureId = DSC.intUnitMeasureId
     LEFT JOIN tblICItemUOM IUOM_ITEM
         ON IUOM_ITEM.intItemId = DSC.intItemId
-        AND IUOM_ITEM.ysnStockUOM = 1
+        AND IUOM_ITEM.ysnStockUnit = 1
     OUTER APPLY (
         SELECT [intAccountId] = dbo.fnGetItemGLAccount(DSC.intItemId, CS_FROM.intCompanyLocationId, 'AP Clearing')
     ) APC

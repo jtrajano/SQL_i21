@@ -185,7 +185,7 @@ BEGIN
 			, dblTransactionPrice = CASE WHEN ISNULL(Detail.intContractDetailId, 0) <> 0 THEN
 										ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intPriceItemUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblCashPrice, Detail.intContractDetailId), 0)
 									ELSE
-										ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', (select intItemUOMId from tblICItemUOM where intItemId=Item.intItemId and ysnStockUOM=1), TonUOM.intItemUOMId, 1, @intCurrencyId, @intCurrencyId, Lots.dblLastCost, NULL), 0)
+										ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', (select intItemUOMId from tblICItemUOM where intItemId=Item.intItemId and ysnStockUnit=1), TonUOM.intItemUOMId, 1, @intCurrencyId, @intCurrencyId, Lots.dblLastCost, NULL), 0)
 									END
 			, dblContractDifferential = CASE WHEN ISNULL(Detail.intContractDetailId, 0) <> 0 THEN
 											ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intBasisUOMId, TonUOM.intItemUOMId, 1, Detail.intBasisCurrencyId, @intCurrencyId, Detail.dblBasis, Detail.intContractDetailId), 0)

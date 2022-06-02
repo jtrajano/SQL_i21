@@ -164,7 +164,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = LD.intItemId
 			AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(LD.intItemId, LD.intPCompanyLocationId)
 		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId) LCUOM
-		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND ysnStockUOM = 1) StkUOM
+		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND ysnStockUnit = 1) StkUOM
 		OUTER APPLY (
 			SELECT 				
 				dblCost = 

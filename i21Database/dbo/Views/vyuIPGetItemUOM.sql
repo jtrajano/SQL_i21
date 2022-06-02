@@ -18,7 +18,7 @@ SELECT intItemId
 	,intVolumeUOMId
 	,VUM.strUnitMeasure AS strVolumeUnitMeasure
 	,IU.dblMaxQty
-	,IU.ysnStockUOM
+	,ysnStockUOM = IU.ysnStockUnit
 	,DS.strSourceName
 	,IU.intUpcCode
 	,IU.intSort
