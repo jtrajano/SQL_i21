@@ -30,5 +30,6 @@
 	[ysnUpdateSMTransaction] BIT NULL DEFAULT(0),
 	[ysnUpdateInventoryTransactionAccountId] BIT NULL DEFAULT(0),
 	[strSingleOrMultipleLots] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strUOMConversionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Stock Unit Based',
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
