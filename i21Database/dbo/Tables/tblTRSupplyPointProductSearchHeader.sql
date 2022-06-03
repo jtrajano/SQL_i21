@@ -6,6 +6,6 @@
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRSupplyPointProductSearchHeader] PRIMARY KEY ([intSupplyPointProductSearchHeaderId]),
 	CONSTRAINT [FK_tblTRSupplyPointProductSearchHeader_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
-	CONSTRAINT [FK_tblTRSupplyPointProductSearchHeader_tblTRSupplyPoint_intSupplyPointId] FOREIGN KEY ([intSupplyPointId]) REFERENCES [dbo].[tblTRSupplyPoint] ([intSupplyPointId]) ON DELETE CASCADE
-	
+	CONSTRAINT [FK_tblTRSupplyPointProductSearchHeader_tblTRSupplyPoint_intSupplyPointId] FOREIGN KEY ([intSupplyPointId]) REFERENCES [dbo].[tblTRSupplyPoint] ([intSupplyPointId]) ON DELETE CASCADE,
+	CONSTRAINT [UK_tblTRSupplyPointProductSearchHeader_ItemSupplyPoint] UNIQUE ([intItemId], [intSupplyPointId])
 )
