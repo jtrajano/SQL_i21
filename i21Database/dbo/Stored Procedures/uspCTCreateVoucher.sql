@@ -948,6 +948,7 @@ begin try
 					, [strReferenceNo]
 					, [intBankValuationRuleId]
 					, [strComments]
+					, [intFreightTermId]
 		)
 		SELECT
 			intPartitionId = vp.intPartitionId
@@ -1056,6 +1057,7 @@ begin try
 			, [strReferenceNo]
 			, [intBankValuationRuleId]
 			, [strComments]
+			, [intFreightTermId]
 		from
 			@voucherPayables vp
 		where
