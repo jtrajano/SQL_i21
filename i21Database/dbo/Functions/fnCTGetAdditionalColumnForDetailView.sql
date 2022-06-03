@@ -121,8 +121,8 @@ BEGIN
   SELECT @intSeqCurrencyId,  
     0,  
     @intFXPriceUOMId,  
-    dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intPriceItemUOMId,@dblMainCashPrice) * @dblRate,  
-    dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intPriceItemUOMId,@dblMainPartialCashPrice) * @dblRate,  
+    CASE WHEN @ysnUseFXPrice = 1 THEN @dblMainCashPrice * @dblRate ELSE dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intPriceItemUOMId,@dblMainCashPrice) * @dblRate END,   --CT-7022 DETAIL CASH PRICE MULTIPLY BY FX RATE
+    CASE WHEN @ysnUseFXPrice = 1 THEN @dblMainCashPrice * @dblRate ELSE dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intPriceItemUOMId,@dblMainPartialCashPrice) * @dblRate END,   --CT-7022 DETAIL CASH PRICE MULTIPLY BY FX RATE
     @strSeqCurrency,  
     @strFXPriceUOM,  
     dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intFXPriceUOMId,1),  

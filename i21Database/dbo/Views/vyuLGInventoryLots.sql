@@ -22,8 +22,8 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.intItemId
 	,Lot.intCommodityId
 	,Lot.strWarehouseRefNo
-	,strWarrantNo = ISNULL(IRIL.strWarrantNo, IR.strWarrantNo)
-	,strWarrantStatus = CASE ISNULL(IRIL.intWarrantStatus, IR.intWarrantStatus)
+	,strWarrantNo = Lot.strWarrantNo
+	,strWarrantStatus = CASE Lot.intWarrantStatus
 		WHEN 1 THEN 'Pledged' 
 		WHEN 2 THEN 'Partially Released' 
 		WHEN 3 THEN 'Released'

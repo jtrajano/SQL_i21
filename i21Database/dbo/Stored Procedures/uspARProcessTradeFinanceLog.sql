@@ -68,6 +68,7 @@ BEGIN TRY
 		, intSublimitId
 		, strSublimit
 		, dblSublimit
+		, ysnDeleted
 	)
 	SELECT
 		  strAction						= CASE WHEN @strAction = '' 
@@ -117,6 +118,7 @@ BEGIN TRY
 		, intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
 		, strSublimit					= CMBFLD.strLimitDescription
 		, dblSublimit					= CMBFLD.dblLimit
+		, ysnDeleted					= @ForDelete
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
 	ON ARI.intInvoiceId = ARID.intInvoiceId
@@ -275,10 +277,7 @@ BEGIN TRY
 	CLOSE TFLogCursor
 	DEALLOCATE TFLogCursor
 
-	IF @ForDelete <> 1
-	BEGIN
-		EXEC uspTRFLogTradeFinance @TradeFinanceLogs
-	END
+	EXEC uspTRFLogTradeFinance @TradeFinanceLogs
 
 	IF @intTranCount = 0
 		COMMIT;

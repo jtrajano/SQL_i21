@@ -63,7 +63,9 @@ AS
 							WHEN CC.strCostMethod = 'Per Container'
 								THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * ISNULL(CC.dblFX, 1)
 							WHEN CC.strCostMethod = 'Percentage'
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) * CD.dblCashPrice * CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
+									* (CD.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+									* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
 							END)
 					/ (CASE WHEN ISNULL(CY.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY.intCent, 1) ELSE 1 END)
 		, RT.strCurrencyExchangeRateType
@@ -71,6 +73,7 @@ AS
 		, intHeaderSubBookId = CH.intSubBookId
 		, intDetailBookId = CD.intBookId
 		, intDetailSubBookId = CD.intSubBookId
+		, CD.dblQuantity
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 										AND CC.intContractDetailId  =	@intContractDetailId	
@@ -79,6 +82,7 @@ AS
 	LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CC.intItemUOMId
 	LEFT JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	IU.intUnitMeasureId
 	LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
+	LEFT JOIN	tblSMCurrency		CY2	ON	CY2.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblSMCurrency		MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId
 	LEFT JOIN	tblEMEntity			EY	ON	EY.intEntityId			=	CC.intVendorId
 	LEFT JOIN	tblEMEntityType		ET	ON	ET.intEntityId			=	EY.intEntityId

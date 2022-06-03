@@ -317,11 +317,20 @@ SELECT
 											ELSE ''
 										END	
 	,strPurchasePricingType = P_PT.strPricingType
-	,dblPurchaseContractBasis = CASE WHEN PCD.dblBasis IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intBasisUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblBasis) ELSE PCD.dblBasis END
+	,dblPurchaseContractBasis = (CASE WHEN PCD.dblBasis IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intBasisUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblBasis) ELSE PCD.dblBasis END / CASE WHEN P_BasisCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_BasisCur.ysnSubCurrency = 1 then  P_BasisCur.intMainCurrencyId else  P_BasisCur.intCurrencyID end, @intCurrencyId) 
+									ELSE  CASE WHEN case when P_BasisCur.ysnSubCurrency = 1 then  P_BasisCur.intMainCurrencyId else  P_BasisCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
+									END)
 	,strPurchaseInvoiceStatus = PCD.strFinancialStatus
 	,dblPurchaseContractRatio = PCD.dblRatio
-	,dblPurchaseContractFutures = CASE WHEN PCD.dblFutures IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(P_FuturesUOM.intItemUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblFutures) ELSE PCD.dblFutures END
-	,dblPurchaseContractCash =  CASE WHEN PCD.dblCashPrice IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intPriceItemUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblCashPrice) ELSE PCD.dblCashPrice END
+	,dblPurchaseContractFutures = (CASE WHEN PCD.dblFutures IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intPriceItemUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblFutures) ELSE PCD.dblFutures END / CASE WHEN P_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end, @intCurrencyId) 
+									ELSE  CASE WHEN case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
+									END)
+	,dblPurchaseContractCash =  (CASE WHEN PCD.dblCashPrice IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intPriceItemUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblCashPrice) ELSE PCD.dblCashPrice END / CASE WHEN P_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end, @intCurrencyId) 
+									ELSE  CASE WHEN case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
+									END)
 	,dblPurchaseContractCosts = NULL
 	,dblPurchaseValue = NULL
 	,intPurchaseQuantityUnitMeasureId = ALD.intPUnitMeasureId
@@ -386,11 +395,20 @@ SELECT
 											ELSE ''
 										END	
 	,strSalesPricingType = S_PT.strPricingType
-	,dblSalesContractBasis = CASE WHEN SCD.dblBasis IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intBasisUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblBasis) ELSE SCD.dblBasis END
+	,dblSalesContractBasis = (CASE WHEN SCD.dblBasis IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intBasisUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblBasis) ELSE SCD.dblBasis END / CASE WHEN S_BasisCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+							* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_BasisCur.ysnSubCurrency = 1 then  S_BasisCur.intMainCurrencyId else  S_BasisCur.intCurrencyID end, @intCurrencyId) 
+									ELSE  CASE WHEN case when S_BasisCur.ysnSubCurrency = 1 then  S_BasisCur.intMainCurrencyId else  S_BasisCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
+									END)
 	,strSalesInvoiceStatus = SCD.strFinancialStatus
 	,dblSalesContractRatio = SCD.dblRatio
-	,dblSalesContractFutures =  CASE WHEN SCD.dblFutures IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(S_FuturesUOM.intItemUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblFutures) ELSE SCD.dblFutures END
-	,dblSalesContractCash = CASE WHEN SCD.dblCashPrice IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intPriceItemUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblCashPrice) ELSE SCD.dblCashPrice END
+	,dblSalesContractFutures =  (CASE WHEN SCD.dblFutures IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intPriceItemUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblFutures) ELSE SCD.dblFutures END / CASE WHEN S_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end, @intCurrencyId) 
+									ELSE  CASE WHEN case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
+									END)
+	,dblSalesContractCash = (CASE WHEN SCD.dblCashPrice IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intPriceItemUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblCashPrice) ELSE SCD.dblCashPrice END / CASE WHEN S_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+							* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end, @intCurrencyId) 
+									ELSE  CASE WHEN case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
+									END)
 	,dblSalesContractCosts = NULL
 	,dblSalesValue = NULL
 	,intSalesQuantityUnitMeasureId = ALD.intSUnitMeasureId
@@ -418,6 +436,8 @@ FROM tblLGAllocationDetail ALD
 		LEFT JOIN tblICItemUOM P_ItemUOM ON P_ItemUOM.intItemId = P_I.intItemId AND P_ItemUOM.intUnitMeasureId = ALD.intPUnitMeasureId
 		LEFT JOIN tblICItemUOM P_HeaderQtyUOM ON P_HeaderQtyUOM.intItemId = P_I.intItemId AND P_HeaderQtyUOM.intUnitMeasureId = @intQuantityUOMId
 		LEFT JOIN tblICItemUOM P_HeaderPriceUOM ON P_HeaderPriceUOM.intItemId = P_I.intItemId AND P_HeaderPriceUOM.intUnitMeasureId = @intPriceUOMId
+		LEFT JOIN tblSMCurrency P_PriceCur ON P_PriceCur.intCurrencyID = PCD.intCurrencyId
+		LEFT JOIN tblSMCurrency P_BasisCur ON P_BasisCur.intCurrencyID = PCD.intBasisCurrencyId
 		LEFT JOIN tblICCommodity P_COM ON P_COM.intCommodityId = PCH.intCommodityId
 		LEFT JOIN tblEMEntity P_E ON P_E.intEntityId = PCH.intEntityId
 		LEFT JOIN tblRKFutureMarket P_FM ON P_FM.intFutureMarketId = PCD.intFutureMarketId
@@ -439,7 +459,7 @@ FROM tblLGAllocationDetail ALD
 		LEFT JOIN tblCTPosition P_PO ON P_PO.intPositionId = PCH.intPositionId
 		LEFT JOIN tblCTPriceFixation P_PF ON P_PF.intContractDetailId = PCD.intContractDetailId	
 		LEFT JOIN tblCTPricingType P_PT ON P_PT.intPricingTypeId = PCD.intPricingTypeId
-		LEFT JOIN tblICItemUOM P_FuturesUOM ON P_FuturesUOM.intItemId = P_I.intItemId AND P_FuturesUOM.intUnitMeasureId = P_FM.intUnitMeasureId
+		--LEFT JOIN tblICItemUOM P_FuturesUOM ON P_FuturesUOM.intItemId = P_I.intItemId AND P_FuturesUOM.intUnitMeasureId = P_FM.intUnitMeasureId
 
 		--Sales Contract
 		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = ALD.intSContractDetailId 
@@ -448,6 +468,8 @@ FROM tblLGAllocationDetail ALD
 		LEFT JOIN tblICItemUOM S_ItemUOM ON S_ItemUOM.intItemId = S_I.intItemId AND S_ItemUOM.intUnitMeasureId = ALD.intSUnitMeasureId
 		LEFT JOIN tblICItemUOM S_HeaderQtyUOM ON S_HeaderQtyUOM.intItemId = S_I.intItemId AND S_HeaderQtyUOM.intUnitMeasureId = @intQuantityUOMId
 		LEFT JOIN tblICItemUOM S_HeaderPriceUOM ON S_HeaderPriceUOM.intItemId = S_I.intItemId AND S_HeaderPriceUOM.intUnitMeasureId = @intPriceUOMId
+		LEFT JOIN tblSMCurrency S_PriceCur ON S_PriceCur.intCurrencyID = PCD.intCurrencyId
+		LEFT JOIN tblSMCurrency S_BasisCur ON S_BasisCur.intCurrencyID = PCD.intBasisCurrencyId
 		LEFT JOIN tblICCommodity S_COM ON S_COM.intCommodityId = SCH.intCommodityId
 		LEFT JOIN tblEMEntity S_E ON S_E.intEntityId = SCH.intEntityId
 		LEFT JOIN tblRKFutureMarket S_FM ON S_FM.intFutureMarketId = SCD.intFutureMarketId
@@ -469,7 +491,7 @@ FROM tblLGAllocationDetail ALD
 		LEFT JOIN tblCTPosition S_PO ON S_PO.intPositionId = SCH.intPositionId
 		LEFT JOIN tblCTPriceFixation S_PF ON S_PF.intContractDetailId = SCD.intContractDetailId	
 		LEFT JOIN tblCTPricingType S_PT ON S_PT.intPricingTypeId = SCD.intPricingTypeId
-		LEFT JOIN tblICItemUOM S_FuturesUOM ON S_FuturesUOM.intItemId = S_I.intItemId AND S_FuturesUOM.intUnitMeasureId = S_FM.intUnitMeasureId
+		--LEFT JOIN tblICItemUOM S_FuturesUOM ON S_FuturesUOM.intItemId = S_I.intItemId AND S_FuturesUOM.intUnitMeasureId = S_FM.intUnitMeasureId
 	
 		
 WHERE P_COM.intCommodityId = @intCommodityId 

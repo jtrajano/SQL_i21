@@ -9,16 +9,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE  @blbLogo				VARBINARY (MAX)  = NULL
-		,@strCompanyName		NVARCHAR(200) = NULL
-		,@strCompanyFullAddress	NVARCHAR(500) = NULL
+DECLARE  @blbLogo				VARBINARY (MAX)	= NULL
+		,@strCompanyName		NVARCHAR(200)	= NULL
+		,@strCompanyFullAddress	NVARCHAR(500)	= NULL
 
---LOGO
-SELECT TOP 1 @blbLogo = imgLogo 
-FROM tblSMLogoPreference
-WHERE ysnARInvoice = 1
-OR ysnDefault = 1
-ORDER BY ysnARInvoice DESC
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 
 SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 		   , @strCompanyName		= strCompanyName
@@ -60,6 +55,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	,strMVessel
 	,strPaymentComments
 	,blbLogo
+	,strLogoType
 	,strBankName
 	,strIBAN
 	,strSWIFT
@@ -98,7 +94,8 @@ SELECT
 	,strDestinationCity		= LGL.strDestinationCity
 	,strMVessel				= LGL.strMVessel
 	,strPaymentComments		= ARI.strTradeFinanceComments
-	,blbLogo                = @blbLogo
+	,blbLogo                = ISNULL(SMLP.imgLogo, @blbLogo)
+	,strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 	,strBankName			= CMB.strBankName
 	,strIBAN				= CMBA.strIBAN
 	,strSWIFT				= CMBA.strSWIFT
@@ -114,3 +111,4 @@ LEFT JOIN tblLGLoad LGL WITH (NOLOCK) ON ARGID.strDocumentNumber = LGL.strLoadNu
 LEFT JOIN tblSMTerm SMT WITH (NOLOCK) ON ARI.intTermId = SMT.intTermID
 LEFT JOIN tblCMBankAccount CMBA WITH (NOLOCK) ON ISNULL(ISNULL(ARI.intPayToCashBankAccountId, ARI.intDefaultPayToBankAccountId), 0) = CMBA.intBankAccountId
 LEFT JOIN tblCMBank CMB WITH (NOLOCK) ON CMBA.intBankId = CMB.intBankId
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARI.intCompanyLocationId AND ysnARInvoice = 1 OR ysnDefault = 1

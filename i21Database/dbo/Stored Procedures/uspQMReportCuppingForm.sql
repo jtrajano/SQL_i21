@@ -14,7 +14,7 @@ BEGIN TRY
 		,strChildSampleNumber			= QMS.strSampleNumber
 		,strVendorName					= EME.strName
 		,QMS.strSentBy
-		,QMS.dtmSampleSentDate
+		,dtmSampleSentDate				= CASE WHEN CAST(QMS.dtmSampleSentDate AS DATE) IN ('12/30/1899', '1900-01-01') THEN NULL ELSE QMS.dtmSampleSentDate END
 		,ICI.strItemNo
 		,strCommodity					= ICC.strDescription
 		,QMS.strRepresentLotNumber
@@ -24,7 +24,7 @@ BEGIN TRY
 		,QMCS.dtmCuppingTime
 		,QMCSD.intRank
 		,strOrigin						= ICCAO.strDescription
-		,QMS.dtmSampleReceivedDate
+		,dtmSampleReceivedDate			= CASE WHEN CAST(QMS.dtmSampleReceivedDate AS DATE) IN ('12/30/1899', '1900-01-01') THEN NULL ELSE QMS.dtmSampleReceivedDate END
 		,strExtension					= ICCPL.strDescription
 		,strVisualAspect				= VISUAL_ASPECT.strPropertyValue
 		,strHumidity					= HUMIDITY.strPropertyValue

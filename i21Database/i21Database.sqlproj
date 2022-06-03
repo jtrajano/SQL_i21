@@ -801,6 +801,7 @@
     <Build Include="dbo\Views\vyuARTaxLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateLotReleased.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10946,6 +10947,7 @@
     <Build Include="dbo\Tables\tblARPostItemsForStorageCosting.sql" />
     <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
     <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

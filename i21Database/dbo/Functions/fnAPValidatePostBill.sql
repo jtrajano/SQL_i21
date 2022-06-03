@@ -595,6 +595,20 @@ BEGIN
 		AND A.intPayToBankAccountId IS NULL
 		AND B.intPaymentMethodId = 2 --ACH
 
+		--VALIDATE PAY TO BANK ACCOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'The Tax Adjustment account of Tax Code - ' + TC.strTaxCode + ' was not set.',
+			'Bill',
+			B.strBillId,
+			B.intBillId,
+			37
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
+		LEFT JOIN tblSMTaxCode TC ON TC.intTaxCodeId = BDT.intTaxCodeId
+		WHERE B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
+
 		--You cannot post intra-location transaction without due to account. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
@@ -674,20 +688,6 @@ BEGIN
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		  AND APCP.[ysnAllowSingleLocationEntries] = 1
 		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
-
-		--VALIDATE PAY TO BANK ACCOUNT
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
-		SELECT
-			'The Tax Adjustment account of Tax Code - ' + TC.strTaxCode + ' was not set.',
-			'Bill',
-			B.strBillId,
-			B.intBillId,
-			37
-		FROM tblAPBill B
-		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
-		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
-		LEFT JOIN tblSMTaxCode TC ON TC.intTaxCodeId = BDT.intTaxCodeId
-		WHERE B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
 
 	END
 	ELSE

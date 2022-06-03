@@ -110,7 +110,7 @@ BEGIN TRY
 	END
 
 
-	IF (@intShipmentStatus = 4 AND @ysnAllowReweighs = 0)
+	IF (@intShipmentStatus = 4 AND ISNULL(@ysnAllowReweighs, 0) = 0)
 	BEGIN
 		--If Shipment is already received, call the IR to Voucher procedure
 		SELECT DISTINCT 
@@ -255,10 +255,7 @@ BEGIN TRY
 			,[dblQuantityToBill] = LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = dbo.fnCalculateCostBetweenUOM(
-				CT.intPriceItemUOMId,
-				(CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END),
-				(CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END))
+			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
 			,[dblOptionalityPremium] = LD.dblOptionalityPremium
 			,[dblQualityPremium] = LD.dblQualityPremium
 			,[dblCostUnitQty] = CAST(ISNULL(AD.dblCostUnitQty,1) AS DECIMAL(38,20))
@@ -618,7 +615,7 @@ BEGIN TRY
 						payables.intEntityVendorId,
 						GETDATE(),
 						-- Cost
-						CASE WHEN payables.intWeightUOMId IS NOT NULL THEN 
+						CASE WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN
 							dbo.fnCalculateCostBetweenUOM(
 								COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
 								, payables.intWeightUOMId
@@ -627,7 +624,7 @@ BEGIN TRY
 									ELSE
 										payables.dblCost
 								END
-							) 
+							)
 						ELSE 
 							dbo.fnCalculateCostBetweenUOM(
 								COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
@@ -640,7 +637,7 @@ BEGIN TRY
 							)
 						END,
 						-- Qty
-						CASE	
+						CASE
 							WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN 
 								payables.dblNetWeight
 							ELSE 
@@ -661,8 +658,6 @@ BEGIN TRY
 				WHERE vendorTax.intTaxGroupId IS NOT NULL
 			END
 
-			SELECT * FROM @voucherPayableToProcess
-			SELECT * FROM @voucherPayableTax
 
 			IF (@intType = 1)
 			BEGIN
