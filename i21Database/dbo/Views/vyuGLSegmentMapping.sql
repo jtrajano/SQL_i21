@@ -5,7 +5,7 @@ A.intAccountSegmentId,
 S.intAccountId,
 A.strCode,
 A.strDescription,
-D.strAccountId COLLATE Latin1_General_CI_AS strAccountId,
+D.strAccountId,
 C.intSegmentTypeId
 FROM tblGLAccountSegmentMapping S 
 JOIN tblGLAccount D on D.intAccountId = S.intAccountId
