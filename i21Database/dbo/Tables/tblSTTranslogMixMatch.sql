@@ -4,6 +4,7 @@ CREATE TABLE [tblSTTranslogMixMatch]
 	-- trHeader
     [intTermMsgSN] bigint NULL,
     [intScanTransactionId] INT NULL,
+    [intStoreId] INT NULL,
 	-- trlMatchLine
 	[strTrlMatchLineTrlMatchName] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
     [dblTrlMatchLineTrlMatchQuantity] decimal(18, 3) NULL,
