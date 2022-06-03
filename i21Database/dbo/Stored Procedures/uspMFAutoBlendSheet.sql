@@ -1,100 +1,112 @@
-﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendSheet]
-    @intLocationId INT,                            
-    @intBlendRequirementId INT,    
-    @dblQtyToProduce NUMERIC(38,20),                                  
-    @strXml NVARCHAR(MAX)=NULL  
+﻿-- =============================================
+-- Date Modified: June 06, 2022
+-- Description:	  Returns BlendSheet Input Lots (Selected Lot)
+-- =============================================
+
+CREATE PROCEDURE [dbo].[uspMFAutoBlendSheet]
+    @intLocationId			INT
+  , @intBlendRequirementId	INT
+  , @dblQtyToProduce		NUMERIC(38,20)
+  , @strXml					NVARCHAR(MAX) = NULL  
 AS
-	SET QUOTED_IDENTIFIER OFF
-	SET ANSI_NULLS ON
-	SET NOCOUNT ON
-	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
 
-Declare @intBlendItemId int
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
-Select @intBlendItemId=intItemId From tblMFBlendRequirement Where intBlendRequirementId=@intBlendRequirementId
+DECLARE @intBlendItemId INT
 
-IF(SELECT ISNULL(COUNT(1),0) FROM tblMFBlendRequirementRule WHERE intBlendRequirementId=@intBlendRequirementId) = 0  
-	RAISERROR('Unable to create auto blend sheet as business rules are not added to the blend requirement.',16,1)
+SELECT @intBlendItemId = intItemId 
+FROM tblMFBlendRequirement 
+WHERE intBlendRequirementId=@intBlendRequirementId
 
-IF EXISTS(SELECT * FROM tblMFBlendRequirementRule a JOIN tblMFBlendSheetRule b ON a.intBlendSheetRuleId=b.intBlendSheetRuleId
-WHERE b.strName='Is Quality Data Applicable?' AND a.strValue='No' and a.intBlendRequirementId=@intBlendRequirementId)
-BEGIN
+IF (SELECT ISNULL(COUNT(1), 0) 
+	FROM tblMFBlendRequirementRule 
+	WHERE intBlendRequirementId=@intBlendRequirementId) = 0 RAISERROR('Unable to create auto blend sheet as business rules are not added to the blend requirement.', 16, 1)
 
-Declare @tblPickedLots AS table
-( 
-	intWorkOrderInputLotId int,
-	intLotId int,
-	strLotNumber nvarchar(50),
-	strItemNo nvarchar(50),
-	strDescription nvarchar(200),
-	dblQuantity numeric(38,20),
-	intItemUOMId int,
-	strUOM nvarchar(50),
-	dblIssuedQuantity numeric(38,20),
-	intItemIssuedUOMId int,
-	strIssuedUOM nvarchar(50),
-	intItemId int,
-	intRecipeItemId int,
-	dblUnitCost numeric(38,20),
-	dblDensity numeric(38,20),
-	dblRequiredQtyPerSheet numeric(38,20),
-	dblWeightPerUnit numeric(38,20),
-	dblRiskScore numeric(38,20),
-	intStorageLocationId int,
-	strStorageLocationName nvarchar(50),
-	strLocationName nvarchar(50),
-	intLocationId int,
-	strSubLocationName nvarchar(50),
-	intSubLocationId int,
-	strLotAlias nvarchar(50),
-	ysnParentLot bit,
-	strRowState nvarchar(50)
-)
+IF EXISTS(SELECT * 
+		  FROM tblMFBlendRequirementRule a JOIN tblMFBlendSheetRule b ON a.intBlendSheetRuleId=b.intBlendSheetRuleId
+		  WHERE b.strName='Is Quality Data Applicable?' AND a.strValue='No' and a.intBlendRequirementId=@intBlendRequirementId)
+	BEGIN
+		DECLARE @tblPickedLots AS TABLE
+		(	
+			intWorkOrderInputLotId	INT
+		  , intLotId				INT
+		  , strLotNumber			NVARCHAR(50)
+		  , strItemNo				NVARCHAR(50)
+		  , strDescription			NVARCHAR(200)
+		  , dblQuantity				NUMERIC(38, 20)
+		  , intItemUOMId			INT
+		  , strUOM					NVARCHAR(50)
+		  , dblIssuedQuantity		NUMERIC(38, 20)
+		  , intItemIssuedUOMId		INT
+		  , strIssuedUOM			NVARCHAR(50)
+		  , intItemId				INT
+		  , intRecipeItemId			INT
+		  , dblUnitCost				NUMERIC(38, 20)
+		  , dblDensity				NUMERIC(38, 20)
+		  , dblRequiredQtyPerSheet	NUMERIC(38, 20)
+		  , dblWeightPerUnit		NUMERIC(38, 20)
+		  , dblRiskScore			NUMERIC(38, 20)
+		  , intStorageLocationId	INT
+		  , strStorageLocationName	NVARCHAR(50)
+		  , strLocationName			NVARCHAR(50)
+		  , intLocationId			INT
+		  , strSubLocationName		NVARCHAR(50)
+		  , intSubLocationId		INT
+		  , strLotAlias				NVARCHAR(50)
+		  , ysnParentLot			BIT
+		  , strRowState				NVARCHAR(50)
+		  , strSecondaryStatus		NVARCHAR(50)
+		)
 
-	INSERT INTO @tblPickedLots
-	EXEC [uspMFAutoBlendSheetFIFO] 
-			@intLocationId=@intLocationId,
-			@intBlendRequirementId=@intBlendRequirementId,
-			@dblQtyToProduce=@dblQtyToProduce,
-			@strXml=@strXml,
-			@ysnFromPickList=0
+		INSERT INTO @tblPickedLots EXEC uspMFAutoBlendSheetFIFO @intLocationId         = @intLocationId
+															  , @intBlendRequirementId = @intBlendRequirementId
+															  , @dblQtyToProduce	   = @dblQtyToProduce
+															  , @strXml				   = @strXml
+															  , @ysnFromPickList	   = 0
 
---Delete items if consumption method is not By Lot
-Delete tpl From @tblPickedLots tpl 
-Join tblMFRecipeItem ri on tpl.intItemId=ri.intItemId 
-Join tblMFRecipe r on ri.intRecipeId=r.intRecipeId 
-Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+		--Delete items if consumption method is not By Lot
+		DELETE tpl 
+		FROM @tblPickedLots tpl 
+		JOIN tblMFRecipeItem ri ON tpl.intItemId=ri.intItemId 
+		JOIN tblMFRecipe r ON ri.intRecipeId=r.intRecipeId 
+		WHERE r.intItemId=@intBlendItemId AND r.intLocationId = @intLocationId AND r.ysnActive = 1 AND ri.intConsumptionMethodId <> 1 
 
---Sub Items
-Delete tpl From @tblPickedLots tpl
-Join tblMFRecipeSubstituteItem rs on tpl.intItemId=rs.intSubstituteItemId 
-Join tblMFRecipeItem ri on ri.intItemId=rs.intItemId 
-Join tblMFRecipe r on ri.intRecipeId=r.intRecipeId 
-Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+		--Sub Items
+		DELETE tpl 
+		FROM @tblPickedLots tpl
+		JOIN tblMFRecipeSubstituteItem rs ON tpl.intItemId=rs.intSubstituteItemId 
+		JOIN tblMFRecipeItem ri ON ri.intItemId=rs.intItemId 
+		JOIN tblMFRecipe r ON ri.intRecipeId=r.intRecipeId 
+		WHERE r.intItemId = @intBlendItemId AND r.intLocationId = @intLocationId AND r.ysnActive = 1 AND ri.intConsumptionMethodId <> 1 
 
---Delete shortage of item records
-Delete From @tblPickedLots Where ISNULL(intLotId,0)=0
+		--Delete shortage of item records
+		DELETE FROM @tblPickedLots WHERE ISNULL(intLotId, 0) = 0
 
---Sub Items
-Delete tpl From @tblPickedLots tpl
-Join tblMFRecipeSubstituteItem rs on tpl.intItemId=rs.intSubstituteItemId 
-Join tblMFRecipeItem ri on ri.intItemId=rs.intItemId 
-Join tblMFRecipe r on ri.intRecipeId=r.intRecipeId 
-Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+		--Sub Items
+		DELETE tpl 
+		FROM @tblPickedLots tpl
+		JOIN tblMFRecipeSubstituteItem rs ON tpl.intItemId=rs.intSubstituteItemId 
+		JOIN tblMFRecipeItem ri ON ri.intItemId=rs.intItemId 
+		JOIN tblMFRecipe r ON ri.intRecipeId=r.intRecipeId 
+		WHERE r.intItemId = @intBlendItemId AND r.intLocationId = @intLocationId AND r.ysnActive = 1 AND ri.intConsumptionMethodId <> 1 
 
---Delete shortage of item records
-Delete From @tblPickedLots Where ISNULL(intLotId,0)=0
+		--Delete shortage of item records
+		DELETE FROM @tblPickedLots WHERE ISNULL(intLotId, 0) = 0
 
-Select p.*,i.intCategoryId From @tblPickedLots p join tblICItem i on p.intItemId=i.intItemId
+		SELECT p.*
+			 , i.intCategoryId 
+		FROM @tblPickedLots p 
+		JOIN tblICItem i ON p.intItemId = i.intItemId
 
-END
-
+	END
 ELSE
-BEGIN
-	EXEC [uspMFAutoBlendSheetQuality] 
-			@intLocationId=@intLocationId,
-			@intBlendRequirementId=@intBlendRequirementId,
-			@dblQtyToProduce=@dblQtyToProduce,
-			@strXml=@strXml
-END
+	BEGIN
+		EXEC [uspMFAutoBlendSheetQuality] @intLocationId		 = @intLocationId
+										, @intBlendRequirementId = @intBlendRequirementId
+										, @dblQtyToProduce		 = @dblQtyToProduce
+										, @strXml				 = @strXml
+	END

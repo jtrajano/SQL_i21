@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendSheetQuality] @intLocationId INT
+﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendSheetQuality]  @intLocationId INT
 	,@intBlendRequirementId INT
 	,@dblQtyToProduce NUMERIC(38, 20)
 	,@strXml NVARCHAR(MAX) = NULL
@@ -1976,9 +1976,11 @@ BEGIN TRY
 			,L.strLotAlias
 			,CAST(0 AS BIT) ysnParentLot
 			,'Added' AS strRowState
+			,LS.strSecondaryStatus
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICLot L ON BS.intParentLotId = L.intLotId
 			AND L.dblWeight > 0
+		INNER JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 		INNER JOIN tblICItem I ON I.intItemId = L.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId
@@ -2034,8 +2036,10 @@ BEGIN TRY
 			,CSL.strSubLocationName
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
+			, LS.strSecondaryStatus
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
+		INNER JOIN tblICLotStatus LS ON PL.intLotStatusId = LS.intLotStatusId
 		INNER JOIN tblICItem I ON I.intItemId = BS.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId
@@ -2084,8 +2088,10 @@ BEGIN TRY
 			,@intLocationId AS intLocationId
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
+			, LS.strSecondaryStatus
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
+		INNER JOIN tblICLotStatus LS ON PL.intLotStatusId = LS.intLotStatusId
 		INNER JOIN tblICItem I ON I.intItemId = BS.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId
