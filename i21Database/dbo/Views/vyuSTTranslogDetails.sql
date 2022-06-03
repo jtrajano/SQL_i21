@@ -151,6 +151,7 @@ FROM
 			SELECT 
 				[intTermMsgSN]
 				, [intScanTransactionId]
+				, [intStoreId]
 				, [strTrlMatchLineTrlMatchName] 
 				, SUM([dblTrlMatchLineTrlMatchQuantity]) AS [dblTrlMatchLineTrlMatchQuantity]
 				, SUM([dblTrlMatchLineTrlPromoAmount]) AS [dblTrlMatchLineTrlPromoAmount]
@@ -161,6 +162,7 @@ FROM
 			GROUP BY
 				[intTermMsgSN],
 				[intScanTransactionId],
+				[intStoreId],
 				[strTrlMatchLineTrlMatchName],
 				[strTrlMatchLineTrlPromotionID],
 				[strTrlMatchLineTrlPromotionIDPromoType],
@@ -168,6 +170,7 @@ FROM
 	   ) TRM
 		ON TR.intTermMsgSN = TRM.intTermMsgSN
 		AND TR.intScanTransactionId = TRM.intScanTransactionId
+		AND TR.intStoreId = TRM.intStoreId
 	    -- Change to improve query performance - 02/11/2022
 		--Where (strTransRollback IS NULL 
 		--AND strTransFuelPrepay IS NULL 
