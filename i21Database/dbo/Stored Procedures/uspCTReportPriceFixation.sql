@@ -294,7 +294,7 @@ BEGIN TRY
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			blbHeaderLogo = dbo.[fnCTGetCompanyLogo]('Header', CH.intContractHeaderId),			
-			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
+			blbFooterLogo = dbo.[fnCTGetCompanyFooterLogo]('Footer',  CH.intContractHeaderId),
 			strLogoType	  = CASE WHEN dbo.[fnCTGetCompanyLocationCount](@intContractHeaderId) > 1 THEN 'Attachment' ELSE ISNULL(@strLogoType,'Attachment') END,
 			strCurrencyExchangeRate = isnull((FY.strCurrency + '/' + TY.strCurrency), @strFinalCurrency),
 			dblRate = (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end),

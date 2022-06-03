@@ -181,6 +181,7 @@ BEGIN TRY
 	SELECT
 		intContractHeaderId					    = CH.intContractHeaderId
 		,blbHeaderLogo						    = dbo.[fnCTGetCompanyLogo]('Header', @intContractHeaderId)
+		,blbFooterLogo						    = dbo.[fnCTGetCompanyFooterLogo]('Footer', @intContractHeaderId)
 		,strLogoType							= CASE WHEN dbo.[fnCTGetCompanyLocationCount](@intContractHeaderId) > 1 THEN 'Attachment' ELSE ISNULL(@strLogoType,'Attachment') END
 		,strContractTypeNumber					= TP.strContractType + ' Contract Nr. ' + CH.strContractNumber
 		,strContractType						= CASE WHEN CH.intContractTypeId = 1 THEN 'SELLER:' ELSE 'BUYER:' END
