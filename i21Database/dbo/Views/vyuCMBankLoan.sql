@@ -20,11 +20,7 @@ CASE
   WHEN intLoanTypeId = 1 THEN 'Bank Loan'
   WHEN intLoanTypeId = 2 THEN 'Trade Limit'
 END,
-strBorrowingFacilityId,
-ISNULL(Detail.ysnHasFunds, CAST(0 AS BIT)) ysnHasFunds
+strBorrowingFacilityId
 FROM tblCMBankLoan L
-OUTER APPLY(
-  SELECT TOP 1 CAST(1 AS BIT) ysnHasFunds FROM vyuCMBankLoanDetail WHERE intBankTransactionTypeId = 10
-)Detail
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = L.intBorrowingFacilityId
