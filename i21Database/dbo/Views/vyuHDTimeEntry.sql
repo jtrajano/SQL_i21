@@ -15,6 +15,7 @@ SELECT [intTimeEntryId]					= TimeEntry.[intTimeEntryId]
 	  ,[intTimeEntryPeriodDetailId]		= TimeEntry.[intTimeEntryPeriodDetailId] 
 	  ,[strPeriodDisplay]				= TimeEntryPeriodDetail.[strPeriodDisplay]
 	  ,[strBillingPeriodStatus]			= TimeEntryPeriodDetail.[strBillingPeriodStatus]
+	  ,[ysnCanViewOtherCoworker]		= CONVERT(BIT, 0)				
 FROM tblHDTimeEntry TimeEntry
 		LEFT JOIN tblEMEntity Entity
 ON Entity.intEntityId = TimeEntry.intEntityId
@@ -25,7 +26,7 @@ ON Entity.intEntityId = TimeEntry.intEntityId
 	) Setting
 	CROSS APPLY
 	(
-		SELECT TOP 1 strPeriodDisplay			= TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName]
+		SELECT TOP 1 strPeriodDisplay		  = TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName] --+ ' (' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodStart], 'MM/dd/yy') + '-' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodEnd], 'MM/dd/yy') + ')'
 					,[strBillingPeriodStatus] = TimeEntryPeriodDetail.strBillingPeriodStatus
 		FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail 
 			INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod

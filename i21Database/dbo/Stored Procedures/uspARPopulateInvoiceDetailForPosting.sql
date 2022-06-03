@@ -1399,7 +1399,7 @@ INNER JOIN (
 WHERE ID.strSessionId = @strSessionId
 
 UPDATE ID
-SET dblQtyUnitOrGross = CASE WHEN SP.strGrossOrNet = 'Net' THEN DI.dblUnits ELSE DI.dblUnits END
+SET dblQtyUnitOrGross = CASE WHEN SP.strGrossOrNet = 'Net' THEN DI.dblDistributionNetSalesUnits ELSE DI.dblDistributionGrossSalesUnits END
 FROM tblARPostInvoiceHeader I
 INNER JOIN tblARPostInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadDistributionHeaderId = I.intLoadDistributionHeaderId
