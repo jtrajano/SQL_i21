@@ -587,6 +587,7 @@ BEGIN
 						INSERT INTO tblSTTranslogMixMatch(
 							[intTermMsgSN]
 							, [intScanTransactionId]
+							, [intStoreId]
 							, [strTrlMatchLineTrlMatchName] 
 							, [dblTrlMatchLineTrlMatchQuantity] 
 							, [dblTrlMatchLineTrlMatchPrice] 
@@ -600,6 +601,7 @@ BEGIN
 						SELECT 
 							[intTermMsgSN]
 							, intTransCount
+							, @intStoreId
 							, [strTrlMatchLineTrlMatchName] 
 							, [dblTrlMatchLineTrlMatchQuantity] 
 							, [dblTrlMatchLineTrlMatchPrice] 
