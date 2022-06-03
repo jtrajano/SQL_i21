@@ -195,7 +195,7 @@ SELECT
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
-    ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = @ZeroDecimal
     ,[dblBasePayment]                   = @ZeroDecimal
     ,[dblDiscount]                      = @ZeroDecimal
@@ -420,7 +420,7 @@ SELECT
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
-    ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = @ZeroDecimal
     ,[dblBasePayment]                   = @ZeroDecimal
     ,[dblDiscount]                      = @ZeroDecimal
@@ -617,14 +617,14 @@ SELECT
     ,[intEntityId]                      = ARP.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
-    ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ARP.[dtmDatePaid]), @ZeroBit)
+    ,[ysnWithinAccountingDate]          = @ZeroBit
     ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
     ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
-    ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = @ZeroDecimal
     ,[dblBasePayment]                   = @ZeroDecimal
     ,[dblDiscount]                      = @ZeroDecimal
@@ -846,11 +846,11 @@ SELECT
     ,[dblBaseInterest]                  = ROUND(ARPD.[dblInterest] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblAdjustedBaseInterest]          = ROUND(ARPD.[dblInterest] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblInvoiceTotal]                  = ARPD.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ARPD.[dblBaseInvoiceTotal]
+    ,[dblBaseInvoiceTotal]              = ROUND(ARPD.[dblInvoiceTotal] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblAmountDue]                     = ARPD.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARPD.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARPD.[dblAmountDue] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,[dblCreditCardFee]					= ARPD.[dblCreditCardFee]
-	,[dblBaseCreditCardFee]				= ARPD.[dblBaseCreditCardFee]
+	,[dblBaseCreditCardFee]				= ROUND(ARPD.[dblCreditCardFee] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 
     ,[intInvoiceId]                     = ARI.[intInvoiceId]
     ,[ysnExcludedFromPayment]           = ARI.[ysnExcludeFromPayment]
@@ -866,13 +866,13 @@ SELECT
     ,[ysnTransactionProcessed]          = ARI.[ysnProcessed]
     ,[dtmTransactionPostDate]           = ARI.[dtmPostDate]
 	,[dblTransactionDiscount]           = ARI.[dblDiscount]
-    ,[dblBaseTransactionDiscount]       = ARI.[dblBaseDiscount]
+    ,[dblBaseTransactionDiscount]       = ROUND(ARI.[dblDiscount] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblTransactionInterest]           = ARI.[dblInterest]
-    ,[dblBaseTransactionInterest]       = ARI.[dblBaseInterest]
+    ,[dblBaseTransactionInterest]       = ROUND(ARI.[dblInterest] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblTransactionAmountDue]          = ARI.[dblAmountDue]
-    ,[dblBaseTransactionAmountDue]      = ARI.[dblBaseAmountDue]
+    ,[dblBaseTransactionAmountDue]      = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblTransactionPayment]			= ARI.[dblPayment]
-    ,[dblBaseTransactionPayment]		= ARI.[dblBasePayment]
+    ,[dblBaseTransactionPayment]		= ROUND(ARI.[dblPayment] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
@@ -882,7 +882,7 @@ INNER JOIN
     #ARPostPaymentHeader ARP
         ON ARPD.[intPaymentId] = ARP.[intTransactionId]
 INNER JOIN
-    (SELECT [intInvoiceId], [ysnExcludeFromPayment], [ysnForgiven], [strInvoiceNumber], [strTransactionType], [strType], [ysnPosted], [ysnPaid], [ysnProcessed], [dtmPostDate], [dblDiscount], [dblBaseDiscount], [dblInterest], [dblBaseInterest], [dblAmountDue], [dblBaseAmountDue], [dblPayment], [dblBasePayment] FROM tblARInvoice) ARI
+    (SELECT [intInvoiceId], [ysnExcludeFromPayment], [ysnForgiven], [strInvoiceNumber], [strTransactionType], [strType], [ysnPosted], [ysnPaid], [ysnProcessed], [dtmPostDate], [dblDiscount], [dblInterest], [dblAmountDue], [dblPayment], [dblCurrencyExchangeRate] FROM tblARInvoice) ARI
         ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
@@ -1046,11 +1046,11 @@ SELECT
     ,[dblBaseInterest]                  = ROUND(ARPD.[dblInterest] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblAdjustedBaseInterest]          = ROUND(ARPD.[dblInterest] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblInvoiceTotal]                  = ARPD.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ARPD.[dblBaseInvoiceTotal]
+    ,[dblBaseInvoiceTotal]              = ROUND(ARPD.[dblInvoiceTotal] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblAmountDue]                     = ARPD.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARPD.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARPD.[dblBaseAmountDue] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,[dblCreditCardFee]					= ARPD.[dblCreditCardFee]
-	,[dblBaseCreditCardFee]				= ARPD.[dblBaseCreditCardFee]
+	,[dblBaseCreditCardFee]				= ROUND(ARPD.[dblCreditCardFee] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 
     ,[intInvoiceId]                     = NULL
     ,[ysnExcludedFromPayment]           = @ZeroBit

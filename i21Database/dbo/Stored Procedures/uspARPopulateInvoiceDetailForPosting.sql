@@ -275,7 +275,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -535,7 +535,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -862,7 +862,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -1237,7 +1237,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
