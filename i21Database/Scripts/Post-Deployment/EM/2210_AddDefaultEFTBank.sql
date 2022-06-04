@@ -104,4 +104,43 @@
 	DEALLOCATE temp_cursor_header
 
 	PRINT ('*****End ADD EFT Header table*****')
+
+	-------------------------------------------------------------------------------------------------------------
+	PRINT ('*****Begin ADD EFT Default Branch Code*****')
+
+	IF OBJECT_ID('tempdb..#TempUpdateEFTBranchCode') IS NOT NULL
+		DROP TABLE #TempUpdateEFTBranchCode
+
+	CREATE TABLE #TempUpdateEFTBranchCode
+	(
+		[intEntityId]			INT	NOT NULL,
+		[intEntityEFTInfoId]	INT	NOT NULL
+	)
+
+	INSERT INTO #TempUpdateEFTBranchCode ([intEntityId], [intEntityEFTInfoId])
+	SELECT intEntityId, intEntityEFTInfoId
+	FROM tblEMEntityEFTInformation 
+	WHERE ISNULL([strBranchCode], '') = ''
+	ORDER BY intEntityId
+
+	DECLARE temp_cursor_branch_code CURSOR FOR
+	SELECT [intEntityId], [intEntityEFTInfoId]
+	FROM #TempUpdateEFTBranchCode
+
+	OPEN temp_cursor_branch_code
+	FETCH NEXT FROM temp_cursor_branch_code into @intEntityId, @intEntityEFTInfoId
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		UPDATE tblEMEntityEFTInformation 
+		SET [strBranchCode] = 'XXX' WHERE intEntityEFTInfoId = @intEntityEFTInfoId
+		
+		FETCH NEXT FROM temp_cursor_branch_code into @intEntityId, @intEntityEFTInfoId
+	END
+
+	CLOSE temp_cursor_branch_code
+	DEALLOCATE temp_cursor_branch_code
+
+	PRINT ('*****End ADD EFT Default Branch Code*****')
+
 GO
