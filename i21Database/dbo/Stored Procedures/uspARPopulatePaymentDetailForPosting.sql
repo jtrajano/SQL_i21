@@ -44,7 +44,6 @@ SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
 SET @ZeroDecimal = 0.000000
-SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPreference WHERE intWriteOffAccountId IS NOT NULL AND intWriteOffAccountId <> 0)
 SET @IncomeInterestAccount = (SELECT TOP 1 intInterestIncomeAccountId FROM tblARCompanyPreference WHERE intInterestIncomeAccountId IS NOT NULL AND intInterestIncomeAccountId <> 0)
@@ -177,7 +176,7 @@ SELECT
     ,[intDiscountAccount]               = ISNULL(SMCL.[intSalesDiscounts], @DiscountAccount)
     ,[intInterestAccount]               = ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount)
     ,[intCFAccountId]                   = @CFAccount
-    ,[intGainLossAccount]               = CASE WHEN @OverrideLocationSegment = 1 THEN GAINLOSS.intAccountId ELSE @GainLossAccount END
+    ,[intGainLossAccount]               = CASE WHEN @OverrideLocationSegment = 1 AND GAINLOSS.intAccountId <> 0 THEN GAINLOSS.intAccountId ELSE @GainLossAccount END
     ,[intCreditCardFeeAccountId]        = @CreditCardAccountId
     ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]

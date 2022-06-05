@@ -807,7 +807,8 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" />
-    <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />    
+    <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
+    <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
