@@ -542,8 +542,7 @@ BEGIN
         AND P.[intInvoiceId] IS NOT NULL
         AND ISNULL(P.[intGainLossAccount],0) = 0
 		AND P.[strTransactionType] <> 'Claim'
-		AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
-		AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount] - P.[dblWriteOffAmount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount] + P.[dblWriteOffAmount])
+		AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) <> @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -952,28 +951,17 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the writeoff account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, WRITEOFF.strAccountId) + ' to the chart of accounts.'
+        ,[strError]                 = 'Unable to find the writeoff account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 	FROM #ARPostPaymentDetail P
     OUTER APPLY (
-		SELECT TOP 1 strAccountId
-		FROM tblGLAccount 
-        WHERE intAccountId = P.[intWriteOffAccountDetailId]
-	) WRITEOFF
-	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		LEFT JOIN tblGLAccount GLA
-		ON GLASM.intAccountId = GLA.intAccountId
-		WHERE GLAS.intAccountStructureId = 3
-		AND GLASM.intAccountId = P.[intARAccountId]
-	) GLSEGMENT
+		SELECT strOverrideAccount, bitSameLocation
+		FROM dbo.[fnARGetOverrideAccount](3, P.[intARAccountId], P.[intWriteOffAccountDetailId])
+	) OVERRIDESEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND P.[intInvoiceId] IS NOT NULL
     AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
     AND @OverrideLocationSegment = 1
-    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intWriteOffAccountDetailId]) = 0
+    AND OVERRIDESEGMENT.bitSameLocation = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -989,27 +977,16 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the undeposited fund account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, UNDEPOSITED.strAccountId) + ' to the chart of accounts.'
+        ,[strError]                 = 'Unable to find the undeposited fund account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 	FROM #ARPostPaymentHeader P
     OUTER APPLY (
-		SELECT TOP 1 strAccountId
-		FROM tblGLAccount
-		WHERE intAccountId = P.[intAccountId]
-	) UNDEPOSITED
-	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		LEFT JOIN tblGLAccount GLA
-		ON GLASM.intAccountId = GLA.intAccountId
-		WHERE GLAS.intAccountStructureId = 3
-		AND GLASM.intAccountId = P.[intARAccountId]
-	) GLSEGMENT
+		SELECT strOverrideAccount, bitSameLocation
+		FROM dbo.[fnARGetOverrideAccount](3, P.[intARAccountId], P.[intAccountId])
+	) OVERRIDESEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND ISNULL(P.[intUndepositedFundsId], 0) = 0
     AND @OverrideLocationSegment = 1
-    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intAccountId]) = 0
+    AND OVERRIDESEGMENT.bitSameLocation = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1025,32 +1002,19 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the realized gain or loss account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, GAINLOSS.strAccountId) + ' to the chart of accounts.'
+        ,[strError]                 = 'Unable to find the realized gain or loss account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 	FROM #ARPostPaymentDetail P
     OUTER APPLY (
-		SELECT TOP 1 strAccountId
-		FROM tblGLAccount
-		WHERE intAccountId = P.[intGainLossAccount]
-	) GAINLOSS
-	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		LEFT JOIN tblGLAccount GLA
-		ON GLASM.intAccountId = GLA.intAccountId
-		WHERE GLAS.intAccountStructureId = 3
-		AND GLASM.intAccountId = P.[intARAccountId]
-	) GLSEGMENT
+		SELECT strOverrideAccount, bitSameLocation
+		FROM dbo.[fnARGetOverrideAccount](3, P.[intARAccountId], P.[intGainLossAccount])
+	) OVERRIDESEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND P.[intInvoiceId] IS NOT NULL
-    AND ISNULL(P.[intGainLossAccount],0) = 0
+    AND ISNULL(P.[intGainLossAccount],0) <> 0
     AND P.[strTransactionType] <> 'Claim'
-    AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
-    AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount] - P.[dblWriteOffAmount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount] + P.[dblWriteOffAmount])
-    AND ISNULL(P.intCurrencyExchangeRateTypeId, 0) <> 0
+    AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount]))  <> @ZeroDecimal
     AND @OverrideLocationSegment = 1
-    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intGainLossAccount]) = 0
+    AND OVERRIDESEGMENT.bitSameLocation = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
