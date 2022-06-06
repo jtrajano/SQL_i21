@@ -12,7 +12,7 @@
 	[ysnHistoricalJournalImported] BIT NULL,
 	[ysnShowAccountingPeriod] BIT NULL,
 	[ysnRequireLocation] BIT NULL,
-	[strSubsidiaryCompanyJson] NVARCHAR(MAX),
+	[strSubsidiaryCompanyJson] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL ,
 	/*Override RE Settings*/
 	[ysnREOverride] BIT NULL,
 	[ysnREOverrideLocation] BIT NULL,
