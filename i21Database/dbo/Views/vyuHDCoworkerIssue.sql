@@ -23,12 +23,12 @@ FROM (
 																		THEN 'No Time Entry or insufficient time entry. '
 																	ELSE ''
 															  END
-			,strInactiveWithTimeEntry						=  CASE WHEN CoworkerGoalTimeEntryperiodDetails.ysnActive = 0 AND 
-																			 AgentTimeEntryPeriodDetailSummaries.intRequiredHours - AgentTimeEntryPeriodDetailSummaries.dblTotalHours > 0
+			,strInactiveWithTimeEntry						=  CASE WHEN ISNULL(CoworkerGoalTimeEntryperiodDetails.ysnActive, 0) = 0 AND AgentTimeEntryPeriodDetailSummaries.dblTotalHours > 0
 																			THEN 'Inactive but has a Time Entry. '
 																		ELSE ''
 																  END
-			 ,strUnapprovedTimeEntry					 =  CASE WHEN ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval'))
+			 ,strUnapprovedTimeEntry					 =  CASE WHEN  ISNULL(CoworkerGoalTimeEntryperiodDetails.ysnActive, 0) = 1 AND
+			                                                           ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval'))
 																		THEN 'Has unapproved Time Entry.'
 																	ELSE ''
 															END 
@@ -59,10 +59,10 @@ FROM (
 				  AgentTimeEntryPeriodDetailSummary.intTimeEntryPeriodDetailId = CoworkerGoalTimeEntryperiodDetails.intTimeEntryPeriodDetailId
 		) AgentTimeEntryPeriodDetailSummaries
 		OUTER APPLY(
-		SELECT TOP 1 TimeEntry.intTimeEntryId
-		FROM tblHDTimeEntry TimeEntry
-		WHERE TimeEntry.intTimeEntryPeriodDetailId = CoworkerGoalTimeEntryperiodDetails.intTimeEntryPeriodDetailId AND
-			  TimeEntry.intEntityId = Agent.intEntityId
+			SELECT TOP 1 TimeEntry.intTimeEntryId
+			FROM tblHDTimeEntry TimeEntry
+			WHERE TimeEntry.intTimeEntryPeriodDetailId = CoworkerGoalTimeEntryperiodDetails.intTimeEntryPeriodDetailId AND
+				  TimeEntry.intEntityId = Agent.intEntityId
 		) TimeEntry
 		OUTER APPLY(
 			SELECT  strStatus = Approval.strStatus 
