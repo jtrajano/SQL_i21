@@ -2262,7 +2262,31 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError]
 		,[strSessionId])
-	-- Check location segment
+	-- Check company segment
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Sales and AR Account should have the same company segment.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	WHERE I.[ysnAllowIntraEntries] = 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check line of business segment
 	SELECT
 		 [intInvoiceId]			= ARPID.[intInvoiceId]
 		,[strInvoiceNumber]		= ARPID.[strInvoiceNumber]		
@@ -2285,31 +2309,8 @@ BEGIN
 	) LOB
 	WHERE ARCP.ysnOverrideLineOfBusinessSegment = 1
 	AND ISNULL(LOB.intAccountId, 0) = 0
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
 	AND ARPID.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Check company segment
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Sales and AR Account should have the same company segment.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	WHERE I.[ysnAllowIntraEntries] = 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
-	AND I.strSessionId = @strSessionId
 END
 
 IF @Post = @ZeroBit
