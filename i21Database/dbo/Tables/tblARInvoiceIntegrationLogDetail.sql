@@ -29,4 +29,10 @@
 	--,CONSTRAINT [FK_tblARInvoiceIntegrationLogDetail_tblARInvoiceIntegrationLog] FOREIGN KEY ([intIntegrationLogId]) REFERENCES [dbo].[tblARInvoiceIntegrationLog] ([intIntegrationLogId]) ON DELETE CASCADE
 );
 GO
-CREATE INDEX [idx_tblARInvoiceIntegrationLogDetail] ON [dbo].[tblARInvoiceIntegrationLogDetail] (intIntegrationLogId, intIntegrationLogDetailId)
+CREATE INDEX [idx_tblARInvoiceIntegrationLogDetail] 
+	ON [dbo].[tblARInvoiceIntegrationLogDetail] (intIntegrationLogId, intIntegrationLogDetailId)
+GO
+CREATE NONCLUSTERED INDEX [idx_tblARInvoiceIntegrationLogDetail_ysnHeader] 
+	ON [dbo].[tblARInvoiceIntegrationLogDetail] ([ysnHeader],[ysnSuccess],[ysnPost]) 
+INCLUDE ([intIntegrationLogId],[strPostingMessage],[strBatchId])
+GO
