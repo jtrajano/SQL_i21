@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSMBatchPostingResult]
 AS
-SELECT CAST(intRowId AS INT)	AS		intBatchPostingResultId,
+SELECT intRowId					AS		intBatchPostingResultId,
 intResultId						AS		intResultId,
 strBatchId						AS		strBatchId,
 intTransactionId                AS		intTransactionId,
