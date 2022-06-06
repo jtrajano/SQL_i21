@@ -6898,8 +6898,8 @@ BEGIN
 
 	IF (@strTransactionType != 'Foreign Sale')
 	BEGIN
-		SELECT @intDupTransCount = COUNT(*)
-		FROM tblCFTransaction
+		SELECT @intDupTransCount = COUNT(1)
+		FROM tblCFTransaction WITH (NOLOCK)
 		WHERE intNetworkId = @intNetworkId
 		AND intSiteId = @intSiteId
 		AND dtmTransactionDate = @dtmTransactionDate
@@ -6917,8 +6917,8 @@ BEGIN
 			
 		END
 
-		SELECT @intDupTransCount = COUNT(*)
-		FROM tblCFTransaction
+		SELECT @intDupTransCount = COUNT(1)
+		FROM tblCFTransaction WITH (NOLOCK)
 		LEFT JOIN tblCFCard 
 		ON tblCFCard.intCardId = tblCFTransaction.intCardId
 		WHERE tblCFTransaction.intNetworkId = @intNetworkId
@@ -8192,7 +8192,7 @@ BEGIN
 
 	DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId AND strNote = @noErrorText
 
-	SELECT @transactionErrorCount = COUNT(*) FROM tblCFTransactionNote  WHERE intTransactionId = @intTransactionId  AND strErrorTitle = @currentErrorText
+	SELECT @transactionErrorCount = COUNT(1) FROM tblCFTransactionNote WITH (NOLOCK) WHERE intTransactionId = @intTransactionId  AND strErrorTitle = @currentErrorText
 	IF(@transactionErrorCount = 0)
 	BEGIN
 		INSERT INTO tblCFTransactionNote
