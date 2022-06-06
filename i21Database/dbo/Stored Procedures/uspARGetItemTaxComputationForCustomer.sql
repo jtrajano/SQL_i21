@@ -296,7 +296,10 @@ BEGIN
 	WHERE ysnComputed = 0
 
 	UPDATE ##ITEMTAXES
-	SET dblItemTaxAmount = CASE WHEN strCalculationMethod = 'Percentage' THEN dblTaxableAmount * (dblRate/100) ELSE dblQtyShipped * dblRate END
+	SET dblItemTaxAmount = CASE WHEN strCalculationMethod = 'Percentage' THEN dblTaxableAmount * (dblRate/100) 
+							    WHEN strCalculationMethod = 'Percentage of Tax Only' THEN dblOtherTaxAmount * dblRate
+								ELSE dblQtyShipped * dblRate 
+						   END
 	WHERE ysnComputed = 0
 
 	UPDATE ##ITEMTAXES
