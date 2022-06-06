@@ -25,7 +25,7 @@ ISNULL(Detail.ysnHasFunds, CAST(0 AS BIT)) ysnHasFunds
 FROM tblCMBankLoan L
 OUTER APPLY(
   SELECT TOP 1 CAST(1 AS BIT) ysnHasFunds FROM vyuCMBankLoanDetail WHERE intBankTransactionTypeId = 10
-  AND intBankLoanId = L.intBankLoandId
+  AND intBankLoanId = L.intBankLoanId
 )Detail
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = L.intBorrowingFacilityId
