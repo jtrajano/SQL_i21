@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspARConstructLineItemTaxDetail]
 	  @ConstructLineItemTaxDetail		ConstructLineItemTaxDetailParam	READONLY
 	, @LineItemTaxEntries				LineItemTaxDetailStagingTable	READONLY
+	, @strRequestId						NVARCHAR(200)
 AS
 BEGIN
 	DECLARE @intDefaultDecimal					INT = [dbo].[fnARGetDefaultDecimal]()
@@ -8,27 +9,6 @@ BEGIN
 	DECLARE @CustomerTaxCodeExemptionParam		CustomerTaxCodeExemptionParam
 	DECLARE @ConstructLineItemTaxDetailParam	ConstructLineItemTaxDetailParam
 	
-	DECLARE @returntable TABLE (
-		 [intTaxGroupId]				INT
-		,[intTaxCodeId]					INT
-		,[intTaxClassId]				INT
-		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-		,[strCalculationMethod]			NVARCHAR(30)
-		,[dblRate]						NUMERIC(18,6)
-		,[dblBaseRate]					NUMERIC(18,6)
-		,[dblExemptionPercent]			NUMERIC(18,6)
-		,[dblTax]						NUMERIC(18,6)
-		,[dblAdjustedTax]				NUMERIC(18,6)
-		,[intTaxAccountId]				INT
-		,[ysnCheckoffTax]				BIT
-		,[strTaxCode]					NVARCHAR(100)						
-		,[ysnTaxExempt]					BIT
-		,[ysnTaxOnly]					BIT
-		,[ysnInvalidSetup]				BIT
-		,[strNotes]						NVARCHAR(500)
-		,[dblExemptionAmount]			NUMERIC(18,6)
-		,[intLineItemId]				INT NULL --intDetailId
-	) 
 	DECLARE @ItemTaxes AS TABLE(
 		 [Id]							INT IDENTITY(1,1)
 		,[intTaxGroupId]				INT
@@ -941,8 +921,9 @@ BEGIN
 	FROM @ItemTaxes IT
 	WHERE IT.ysnInvalidSetup = 0 
 	  AND IT.ysnComputed = 0
-				
-	INSERT INTO @returntable(
+
+	TRUNCATE TABLE tblARConstructLineItemTaxDetailResult				
+	INSERT INTO tblARConstructLineItemTaxDetailResult WITH (TABLOCK) (
 		  [intTaxGroupId]
 		, [intTaxCodeId]
 		, [intTaxClassId]
@@ -961,6 +942,7 @@ BEGIN
 		, [strNotes]
 		, [dblExemptionAmount]
 		, [intLineItemId]
+		, [strRequestId] 
 	)
 	SELECT [intTaxGroupId]
 		, [intTaxCodeId]
@@ -980,8 +962,6 @@ BEGIN
 		, [strNotes]
 		, [dblExemptionAmount]
 		, [intLineItemId]
+		, @strRequestId
 	FROM @ItemTaxes
-
-	SELECT * FROM @returntable		
-
 END
