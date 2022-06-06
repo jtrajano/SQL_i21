@@ -29,5 +29,8 @@
 	[intDueToAccountId]				INT NULL DEFAULT(0), 
     [intDueFromAccountId]			INT NULL DEFAULT(0),
     [intFreightTermId]              INT NULL,
+    [ysnOverrideCompanySegment]		    BIT NOT NULL DEFAULT(0),
+	[ysnOverrideLocationSegment]	    BIT NOT NULL DEFAULT(0),
+	[ysnOverrideLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0),
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
