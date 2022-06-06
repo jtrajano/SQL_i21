@@ -2250,7 +2250,7 @@ BEGIN
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	WHERE I.[ysnAllowIntraEntries] = 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2264,21 +2264,51 @@ BEGIN
 		,[strSessionId])
 	-- Check location segment
 	SELECT
+		 [intInvoiceId]			= ARPID.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPID.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPID.[strTransactionType]
+		,[intInvoiceDetailId]	= ARPID.[intInvoiceDetailId] 
+		,[intItemId]			= ARPID.[intItemId] 
+		,[strBatchId]			= ARPID.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due to account that matches the line of business. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](ARPID.[intSalesAccountId], NULL, LOB.intSegmentCodeId, NULL) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader ARPIH
+	INNER JOIN tblARPostInvoiceDetail ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
+	OUTER APPLY (
+		SELECT TOP 1 ysnOverrideLineOfBusinessSegment
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPID.[intSalesAccountId], ISNULL(intSegmentCodeId, 0)), 0), intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
+	) LOB
+	WHERE ARCP.ysnOverrideLineOfBusinessSegment = 1
+	AND ISNULL(LOB.intAccountId, 0) = 0
+	AND ARPID.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check company segment
+	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
 		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
 		,[strTransactionType]	= I.[strTransactionType]
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Sales and AR Account should have the same location segment.'
+		,[strPostingError]		= 'Sales and AR Account should have the same company segment.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], I.[intSalesAccountId], 0, 1, 0)
-	) OVERRIDESEGMENT
 	WHERE I.[ysnAllowIntraEntries] = 0
-	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
 	AND I.strSessionId = @strSessionId
 END
 
