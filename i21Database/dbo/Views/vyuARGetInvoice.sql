@@ -200,7 +200,6 @@ SELECT
 	,strFreightLocationSegment			= INV.strFreightLocationSegment
 	,intTaxLocationId                  	= INV.intTaxLocationId
 	,strTaxLocation						= TAXLOCATION.strLocationName
-	,strTaxLocationType					= INV.strTaxLocationType
 	,strTaxPoint                        = INV.strTaxPoint
 	,ysnOverrideTaxPoint                = CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
 	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
@@ -414,7 +413,7 @@ LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccount
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId,0)
 LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId,0)
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId,0)
-LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = INV.strTaxLocationType
+LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INV.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 OUTER APPLY(
 	SELECT TOP 1 intLocationAccountSegmentId,intCompanyAccountSegmentId
 	FROM dbo.vyuARAccountDetail
