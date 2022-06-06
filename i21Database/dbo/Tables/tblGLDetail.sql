@@ -211,5 +211,3 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Document' , @l
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Comments' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'strComments' 
 GO
-
-CREATE NONCLUSTERED INDEX [IX_tblGLDetail_ysnIsUnposted] ON [dbo].[tblGLDetail] ([ysnIsUnposted])
