@@ -818,7 +818,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = DUEACCOUNT.intDueFromAccountId
+    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
@@ -852,13 +852,9 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceDetail I
 OUTER APPLY (
-	SELECT TOP 1 intDueFromAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = I.[intSalesAccountId]
-) DUEACCOUNT
+	SELECT intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], @DueFromAccountId, 0, 1, 0)
+) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
@@ -1158,7 +1154,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = DUEACCOUNT.intDueToAccountId
+    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
@@ -1192,13 +1188,9 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceDetail I
 OUTER APPLY (
-	SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = I.[intAccountId]
-) DUEACCOUNT
+	SELECT intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, 0, 1, 0)
+) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
@@ -2417,7 +2409,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = DUEACCOUNT.intDueToAccountId
+    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
 	,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 
                                            THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARIDT.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
                                            ELSE (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblBaseAdjustedTax] END)
@@ -2502,18 +2494,15 @@ FROM (
 ) ARIDT
 INNER JOIN tblARPostInvoiceDetail I ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 OUTER APPLY (
-	SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = I.[intAccountId]
-) DUEACCOUNT
+	SELECT intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, 0, 1, 0)
+) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND (ARIDT.[dblAdjustedTax] <> @ZeroDecimal
    OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 AND [ysnInvalidSetup] = 0))
   AND @AllowIntraEntries = 1
   AND @DueToAccountId <> 0
+  AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0
   AND I.strSessionId = @strSessionId
 
 --SALES DISCOUNT
