@@ -27,8 +27,7 @@ BEGIN
 			,@bitSameLocationSegment			BIT			= 1
 			,@bitSameLineOfBusinessSegment		BIT			= 1
 
-	SELECT
-		 @strAccountIdToBeOverriden = strAccountId
+	SELECT @strAccountIdToBeOverriden = strAccountId
 	FROM tblGLAccount
 	WHERE intAccountId = @intAccountIdToBeOverriden
 

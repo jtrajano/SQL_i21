@@ -382,5 +382,35 @@ INNER JOIN tblARInvoice I ON GL.strTransactionId = I.strInvoiceNumber
 						 AND GL.intTransactionId = I.intInvoiceId
 WHERE GL.intSourceEntityId IS NULL
   AND GL.strSessionId = @strSessionId
+
+IF EXISTS(
+	SELECT TOP 1 1
+	FROM tblARCompanyPreference
+	WHERE ysnOverrideLineOfBusinessSegment = 1
+)
+BEGIN
+	UPDATE ARPIGLE
+	SET ARPIGLE.intAccountId = ISNULL(LOB.intAccountId, ARPIGLE.intAccountId)
+	FROM tblARPostInvoiceGLEntries ARPIGLE
+	OUTER APPLY (
+		SELECT TOP 1 intLineOfBusinessId
+		FROM tblARInvoice
+		WHERE intInvoiceId = ARPIGLE.intTransactionId
+		AND  strTransactionForm = 'Invoice'
+	) INVOICE
+	OUTER APPLY (
+		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPIGLE.[intAccountId], ISNULL(intSegmentCodeId, 0)), 0)
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(INVOICE.intLineOfBusinessId, 0)
+	) LOB
+	OUTER APPLY (
+		SELECT TOP 1 strAccountGroup
+		FROM tblGLAccountGroup GLAC
+		INNER JOIN tblGLAccount GLA ON GLAC.intAccountGroupId = GLA.intAccountGroupId
+		WHERE GLA.intAccountId = ARPIGLE.intAccountId
+	) ACCOUNTGROUP
+	WHERE strBatchId = @BatchId
+	AND ACCOUNTGROUP.strAccountGroup IN ('Cost of Goods Sold', 'Sales', 'Expense')
+END
  
 RETURN 0

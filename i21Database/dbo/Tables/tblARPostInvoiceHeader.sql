@@ -166,6 +166,7 @@ CREATE TABLE tblARPostInvoiceHeader (
     ,[ysnSkipIntraEntriesValiation]         BIT             NULL DEFAULT 0
     ,[strSessionId]			                NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
     ,[dblFreightCharge]                     NUMERIC(18,6)   NULL DEFAULT 0
+    ,[intLineOfBusinessId]				    INT												NULL
 );
 GO
 CREATE INDEX [idx_tblARPostInvoiceHeader_intInvoiceId] ON [dbo].[tblARPostInvoiceHeader] (intInvoiceId)

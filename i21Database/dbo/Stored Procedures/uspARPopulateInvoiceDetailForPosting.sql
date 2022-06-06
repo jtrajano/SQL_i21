@@ -244,6 +244,7 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[dblFreightCharge]
+    ,[intLineOfBusinessId]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -332,6 +333,7 @@ SELECT
     ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ARI.dblFreightCharge
+    ,[intLineOfBusinessId]              = ARI.[intLineOfBusinessId]
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
