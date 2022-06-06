@@ -2367,6 +2367,7 @@ BEGIN
 	) LOB
 	WHERE ARCP.ysnOverrideLineOfBusinessSegment = 1
 	AND ISNULL(LOB.intAccountId, 0) = 0
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
 	AND ARPID.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
