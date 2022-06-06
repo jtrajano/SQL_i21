@@ -276,7 +276,14 @@ BEGIN
 			INNER JOIN tblAPBill voucher ON voucher.intBillId = B.intBillId
 			-- INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON voucher.intBillId = paymentForex.intBillId
 			-- INNER JOIN tblAPBillDetail voucherDetail ON voucherDetail.intBillId = voucher.intBillId
-			INNER JOIN dbo.fnAPGetVoucherAverageRate() voucherRate ON voucher.intBillId = voucherRate.intBillId
+			-- INNER JOIN dbo.fnAPGetVoucherAverageRate() voucherRate ON voucher.intBillId = voucherRate.intBillId
+			INNER JOIN (
+				SELECT
+					AAA.intBillId
+					,[dblExchangeRate] = SUM(ISNULL(NULLIF(AAA.dblRate,0), 1)) / COUNT(*)
+				FROM tblAPBillDetail AAA
+				GROUP BY AAA.intBillId
+			) voucherRate ON voucher.intBillId = voucherRate.intBillId
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
@@ -483,7 +490,14 @@ BEGIN
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
 			INNER JOIN tblAPBill voucher ON voucher.intBillId = B.intBillId
 			--INNER JOIN tblAPBillDetail voucherDetail ON voucherDetail.intBillId = voucher.intBillId
-			INNER JOIN dbo.fnAPGetVoucherAverageRate() voucherRate ON voucher.intBillId = voucherRate.intBillId
+			-- INNER JOIN dbo.fnAPGetVoucherAverageRate() voucherRate ON voucher.intBillId = voucherRate.intBillId
+			INNER JOIN (
+				SELECT
+					AAA.intBillId
+					,[dblExchangeRate] = SUM(ISNULL(NULLIF(AAA.dblRate,0), 1)) / COUNT(*)
+				FROM tblAPBillDetail AAA
+				GROUP BY AAA.intBillId
+			) voucherRate ON voucher.intBillId = voucherRate.intBillId
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
