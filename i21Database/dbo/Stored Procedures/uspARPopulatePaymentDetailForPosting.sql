@@ -262,11 +262,11 @@ LEFT OUTER JOIN
         ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OUTER APPLY (
 	SELECT TOP 1 intAccountId = intOverrideAccount
-    FROM dbo.[fnARGetOverrideAccount](ISNULL(SMCL.[intARAccount], @ARAccount), ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]), @OverrideCompanySegment, @OverridelocationSegment, 0)
+    FROM dbo.[fnARGetOverrideAccount](ISNULL(SMCL.[intARAccount], @ARAccount), ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]), @OverrideCompanySegment, @OverrideLocationSegment, 0)
 ) UNDEPOSITED
 OUTER APPLY (
 	SELECT TOP 1 intAccountId = intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](ISNULL(SMCL.[intARAccount], @ARAccount), @GainLossAccount, @OverrideCompanySegment, @OverridelocationSegment, @OverrideLineOfBusinessSegment)
+	FROM dbo.[fnARGetOverrideAccount](ISNULL(SMCL.[intARAccount], @ARAccount), @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 ) GAINLOSS
 WHERE
 	NOT EXISTS(SELECT NULL FROM #ARPostPaymentHeader PH WHERE PH.[intTransactionId] = ARP.[intPaymentId])
@@ -890,11 +890,11 @@ LEFT OUTER JOIN
         ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OUTER APPLY (
 	SELECT TOP 1 intAccountId = intOverrideAccount
-    FROM dbo.[fnARGetOverrideAccount](ARP.[intARAccountId], ARP.[intWriteOffAccountId], @OverrideCompanySegment, @OverridelocationSegment, @OverrideLineOfBusinessSegment)
+    FROM dbo.[fnARGetOverrideAccount](ARP.[intARAccountId], ARP.[intWriteOffAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 ) WRITEOFF
 OUTER APPLY (
 	SELECT TOP 1 intAccountId = intOverrideAccount
-    FROM dbo.[fnARGetOverrideAccount](ARP.[intARAccountId], ARPD.[intWriteOffAccountId], @OverrideCompanySegment, @OverridelocationSegment, @OverrideLineOfBusinessSegment)
+    FROM dbo.[fnARGetOverrideAccount](ARP.[intARAccountId], ARPD.[intWriteOffAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 ) WRITEOFFDETAIL
 
 INSERT INTO #ARPostPaymentDetail
