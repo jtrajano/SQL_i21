@@ -215,6 +215,11 @@ BEGIN TRY
 
 	DROP TABLE #tmpCosts
 
+	IF ISNULL(@intFreightRateMatrixId, 0) = 0 AND ISNULL(@ysnInsurance, 0) = 0
+	BEGIN
+		delete @CostItems;
+	END
+
 	IF EXISTS (SELECT TOP 1 1 FROM @CostItems WHERE ISNULL(dblRate, 0) <> 0)
 	BEGIN
 		IF @ysnWarningMessage = 1 AND @ysnAutoCalc = 0
