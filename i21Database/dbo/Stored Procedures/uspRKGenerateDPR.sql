@@ -3331,6 +3331,7 @@ BEGIN TRY
 				AND intLocationId = ISNULL(@intLocationId, intLocationId)
 				AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 				AND ISNULL(t.ysnPreCrush, 0) = 0
+				AND t.strInstrumentType = 'Futures'
 		) t
 				
 		-- Option NetHEdge
@@ -5207,62 +5208,62 @@ BEGIN TRY
 		) t
 			
 		--Option NetHEdge
-		INSERT INTO @FinalHedgeByMonth (strCommodityCode
-			, intCommodityId
-			, strInternalTradeNo
-			, intFutOptTransactionHeaderId
-			, strType
-			, strLocationName
-			, strContractEndMonth
-			, strContractEndMonthNearBy
-			, dblTotal
-			, intFromCommodityUnitMeasureId
-			, strAccountNumber
-			, strTranType
-			, dblNoOfLot
-			, dblDelta
-			, intBrokerageAccountId
-			, strInstrumentType
-			, ysnPreCrush
-			, strNotes
-			, strBrokerTradeNo
-			, strFutureMarket)
-		SELECT t.strCommodityCode
-			, intCommodityId
-			, t.strInternalTradeNo
-			, intFutOptTransactionHeaderId
-			, 'Net Hedge' COLLATE Latin1_General_CI_AS
-			, t.strLocationName
-			, strFutureMonth = dbo.fnRKFormatDate(dtmFutureMonthsDate, 'MMM yyyy') COLLATE Latin1_General_CI_AS
-			, dtmFutureMonthsDate = dtmFutureMonthsDate
-			, dblTotal = (dblOpenContract * ISNULL((SELECT TOP 1 dblDelta
-													FROM tblRKFuturesSettlementPrice sp
-													INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-													WHERE intFutureMarketId = intFutureMarketId AND mm.intOptionMonthId = intOptionMonthId 
-														AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
-														AND t.dblStrike = mm.dblStrike
-													ORDER BY dtmPriceDate DESC), 0) * dblContractSize)
-			, intUnitMeasureId 
-			, strAccountNumber = strBroker + '-' + strBrokerAccount COLLATE Latin1_General_CI_AS
-			, TranType = strBuySell
-			, dblNoOfLot = dblOpenContract
-			, dblDelta = ISNULL((SELECT TOP 1 dblDelta
-										FROM tblRKFuturesSettlementPrice sp
-										INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-										WHERE intFutureMarketId = intFutureMarketId AND mm.intOptionMonthId = intOptionMonthId
-											AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
-											AND t.dblStrike = mm.dblStrike
-										ORDER BY dtmPriceDate DESC), 0)
-			, intBrokerageAccountId
-			, strInstrumentType = 'Options' COLLATE Latin1_General_CI_AS
-			, ysnPreCrush
-			, t.strNotes
-			, strBrokerTradeNo
-			, t.strFutureMarket
-		FROM #tempFutures t
-		WHERE strInstrumentType = 'Options'
-			AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
-			AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
+		--INSERT INTO @FinalHedgeByMonth (strCommodityCode
+		--	, intCommodityId
+		--	, strInternalTradeNo
+		--	, intFutOptTransactionHeaderId
+		--	, strType
+		--	, strLocationName
+		--	, strContractEndMonth
+		--	, strContractEndMonthNearBy
+		--	, dblTotal
+		--	, intFromCommodityUnitMeasureId
+		--	, strAccountNumber
+		--	, strTranType
+		--	, dblNoOfLot
+		--	, dblDelta
+		--	, intBrokerageAccountId
+		--	, strInstrumentType
+		--	, ysnPreCrush
+		--	, strNotes
+		--	, strBrokerTradeNo
+		--	, strFutureMarket)
+		--SELECT t.strCommodityCode
+		--	, intCommodityId
+		--	, t.strInternalTradeNo
+		--	, intFutOptTransactionHeaderId
+		--	, 'Net Hedge' COLLATE Latin1_General_CI_AS
+		--	, t.strLocationName
+		--	, strFutureMonth = dbo.fnRKFormatDate(dtmFutureMonthsDate, 'MMM yyyy') COLLATE Latin1_General_CI_AS
+		--	, dtmFutureMonthsDate = dtmFutureMonthsDate
+		--	, dblTotal = (dblOpenContract * ISNULL((SELECT TOP 1 dblDelta
+		--											FROM tblRKFuturesSettlementPrice sp
+		--											INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+		--											WHERE intFutureMarketId = intFutureMarketId AND mm.intOptionMonthId = intOptionMonthId 
+		--												AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
+		--												AND t.dblStrike = mm.dblStrike
+		--											ORDER BY dtmPriceDate DESC), 0) * dblContractSize)
+		--	, intUnitMeasureId 
+		--	, strAccountNumber = strBroker + '-' + strBrokerAccount COLLATE Latin1_General_CI_AS
+		--	, TranType = strBuySell
+		--	, dblNoOfLot = dblOpenContract
+		--	, dblDelta = ISNULL((SELECT TOP 1 dblDelta
+		--								FROM tblRKFuturesSettlementPrice sp
+		--								INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+		--								WHERE intFutureMarketId = intFutureMarketId AND mm.intOptionMonthId = intOptionMonthId
+		--									AND mm.intTypeId = CASE WHEN t.strOptionType = 'Put' THEN 1 ELSE 2 END
+		--									AND t.dblStrike = mm.dblStrike
+		--								ORDER BY dtmPriceDate DESC), 0)
+		--	, intBrokerageAccountId
+		--	, strInstrumentType = 'Options' COLLATE Latin1_General_CI_AS
+		--	, ysnPreCrush
+		--	, t.strNotes
+		--	, strBrokerTradeNo
+		--	, t.strFutureMarket
+		--FROM #tempFutures t
+		--WHERE strInstrumentType = 'Options'
+		--	AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
+		--	AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 			
 		--Net Hedge option end			
 		INSERT INTO @ListHedgeByMonth (strCommodityCode
@@ -7254,6 +7255,7 @@ BEGIN TRY
 				, oc.ysnPreCrush
 			FROM #tempFutures oc
 			WHERE ISNULL(oc.ysnPreCrush, 0) = 0
+			AND oc.strInstrumentType = 'Futures'
 		) t
 
 		INSERT INTO @ListCrushDetail (strCommodityCode
