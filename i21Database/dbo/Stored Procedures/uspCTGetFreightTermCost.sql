@@ -129,8 +129,8 @@ BEGIN TRY
 					, iUOM.intItemUOMId
 					, UOM.strUnitMeasure
 					, 'Per Unit'
-					, dblRate = CASE WHEN ISNULL(ctq.dblQuantity, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblQuantity) END
-					, dblAmount = CASE WHEN ISNULL(ctq.dblQuantity, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblQuantity) END
+					, dblRate = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
+					, dblAmount = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
 					, dblFX = NULL
 				FROM tblLGFreightRateMatrix frm
 				JOIN tblEMEntity em ON em.intEntityId = frm.intEntityId
