@@ -183,6 +183,7 @@ AS
 		, intBorrowingFacilityId
 		, tlog.intOverrideBankValuationId
 		, tlog.strOverrideBankValuation
+		, tlog.strBankTradeReference
  	INTO #tempTradeFinanceLog
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempTradeLogContracts tContract
@@ -220,6 +221,7 @@ AS
 		, intBorrowingFacilityId
 		, intOverrideBankValuationId
 		, strOverrideBankValuation
+		, strBankTradeReference
  	INTO #tempLatestLogValues
  	FROM 
  	(
@@ -255,7 +257,7 @@ AS
 		, dblLimit = latestLog.dblLimit
 		, intSublimitId = latestLog.intSublimitId
 		, strSublimit = latestLog.strSublimit
-		, dblSublimit = latestLog.dblSublimit
+		, dblSublimit = latestLog.dblSublimit 
 		, strBankValuationRule = CASE WHEN ISNULL(latestLog.intOverrideBankValuationId, 0) = 0 
 										THEN valRule.strBankValuationRule
 										ELSE latestLog.strOverrideBankValuation
@@ -264,6 +266,7 @@ AS
 										THEN valRule.intBankValuationRuleId
 										ELSE latestLog.intOverrideBankValuationId
 										END 
+		, latestLog.strBankTradeReference
 		, intUnitMeasureId = ctd.intPriceItemUOMId
  	INTO #tempPurchaseContracts
  	FROM tblCTContractDetail ctd
@@ -313,7 +316,7 @@ AS
  		, strLimit = tempLogCT.strLimit
  		, dblLimitAmount = tempLogCT.dblLimit
  		, strReference = tempLogCT.strTradeFinanceTransaction
- 		, strPContractBankRef = ctd.strReferenceNo
+ 		, strPContractBankRef = tempLogCT.strBankTradeReference
  		, dtmTransactionDate = tempLogCT.dtmOpened
  		, dtmMaturityDate = tempLogCT.dtmMaturity
  		, cth.intCommodityId
