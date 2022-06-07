@@ -21,10 +21,14 @@ SET @OneBit = CAST(1 AS BIT)
 
 IF @Post = @OneBit
 BEGIN
-    DECLARE  @OverrideCompanySegment     BIT
-            ,@OverrideLocationSegment    BIT
+    DECLARE  @OverrideCompanySegment        BIT
+            ,@OverrideLocationSegment       BIT
+            ,@OverrideLineOfBusinessSegment BIT
 
-    SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverrideLocationSegment = ysnOverrideLocationSegment
+    SELECT TOP 1 
+         @OverrideCompanySegment        = ysnOverrideCompanySegment
+        ,@OverrideLocationSegment       = ysnOverrideLocationSegment
+        ,@OverrideLineOfBusinessSegment = ysnOverrideLineOfBusinessSegment 
     FROM tblARCompanyPreference
 
     INSERT INTO #ARInvalidPaymentData
@@ -201,7 +205,7 @@ BEGIN
     WHERE P.[ysnPost] = @OneBit
     AND P.[intInvoiceId] IS NOT NULL
     AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
-    AND @OverrideLocationSegment = 1
+    AND @OverrideLineOfBusinessSegment = 1
     AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
 
     INSERT INTO #ARInvalidPaymentData
@@ -335,7 +339,7 @@ BEGIN
     AND ISNULL(P.[intGainLossAccount],0) <> 0
     AND P.[strTransactionType] <> 'Claim'
     AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount]))  <> @ZeroDecimal
-    AND @OverrideLocationSegment = 1
+    AND @OverrideLineOfBusinessSegment = 1
     AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
 
     INSERT INTO #ARInvalidPaymentData
