@@ -20,6 +20,12 @@ DECLARE @tblPostError TABLE(
 )  
   
 --BEGIN TRANSACTION  
+
+  IF NOT EXISTS(SELECT 1 FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId )
+  BEGIN
+    SELECT  @strMessage = 'There are no transactions to revalue'
+    GOTO _error
+  END
   
   DECLARE @errorNum INT  
   DECLARE @dateNow DATETIME  
@@ -384,7 +390,9 @@ DECLARE @tblPostError TABLE(
   
   
   --BEGIN TODO : transfer this on this procedure  
-  
+ 
+
+
   DECLARE @dtmReverseDate DATETIME  
   SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId  
   IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)  
