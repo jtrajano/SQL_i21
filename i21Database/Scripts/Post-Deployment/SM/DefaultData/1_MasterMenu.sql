@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Performance Logs' AND strModuleName = 'System Manager')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -4898,6 +4898,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Yield Vie
 	VALUES (N'Yield View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Yield View', N'View', N'Screen', N'Manufacturing.view.YieldView', N'small-menu-view', 0, 0, 0, 1, 8, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Manufacturing.view.YieldView' WHERE strMenuName = 'Yield View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Short Term Planning View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Short Term Planning View', N'View', N'Screen', N'Manufacturing.view.ShortTermPlanningView', N'small-menu-view', 0, 0, 0, 1, 9, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Manufacturing.view.ShortTermPlanningView' WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
 
 -- Report
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ingredient Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingReportParentMenuId)
