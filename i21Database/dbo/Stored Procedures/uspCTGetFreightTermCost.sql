@@ -11,6 +11,7 @@
 	, @intInvoiceCurrencyId INT
 	, @intRateTypeId INT
 	, @ysnWarningMessage BIT = 1
+	, @intSequenceCurrencyId INT
 
 AS
 	
@@ -128,8 +129,8 @@ BEGIN TRY
 					, iUOM.intItemUOMId
 					, UOM.strUnitMeasure
 					, 'Per Unit'
-					, dblRate = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
-					, dblAmount = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
+					, dblRate = CASE WHEN ISNULL(ctq.dblQuantity, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblQuantity) END
+					, dblAmount = CASE WHEN ISNULL(ctq.dblQuantity, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblQuantity) END
 					, dblFX = NULL
 				FROM tblLGFreightRateMatrix frm
 				JOIN tblEMEntity em ON em.intEntityId = frm.intEntityId
@@ -239,7 +240,7 @@ BEGIN TRY
 				, ci.strCostMethod
 				, ci.dblRate
 				, ci.dblAmount
-				, dblFX = ISNULL(CASE WHEN @intInvoiceCurrencyId = ci.intCurrencyId THEN 1 ELSE tbl.dblRate END, NULL)
+				, dblFX = ISNULL(CASE WHEN (@intSequenceCurrencyId = ci.intCurrencyId or ci.intCurrencyId = seqCurrency.intMainCurrencyId) THEN 1 ELSE tbl.dblRate END, NULL)
 			FROM @CostItems ci
 			LEFT JOIN (
 				SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY cerd.intCurrencyExchangeRateId ORDER BY cerd.dtmValidFromDate DESC)
@@ -248,9 +249,10 @@ BEGIN TRY
 					, cer.intToCurrencyId
 				FROM tblSMCurrencyExchangeRate cer 
 				LEFT JOIN tblSMCurrencyExchangeRateDetail cerd ON cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId AND cerd.intRateTypeId = @intRateTypeId
-				WHERE cer.intFromCurrencyId = @intInvoiceCurrencyId
+				WHERE cer.intFromCurrencyId = @intSequenceCurrencyId
 					AND CAST(FLOOR(CAST(cerd.dtmValidFromDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)
 			) tbl ON tbl.intToCurrencyId = ci.intCurrencyId AND intRowId = 1
+			cross apply (select * from tblSMCurrency where intCurrencyID = @intSequenceCurrencyId) seqCurrency
 		END
 	END
 
