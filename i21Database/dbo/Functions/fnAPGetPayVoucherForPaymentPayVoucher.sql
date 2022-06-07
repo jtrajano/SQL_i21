@@ -11,7 +11,8 @@
 RETURNS TABLE AS RETURN
 (
 	SELECT
-		forPay.intForPaymentId
+		-- forPay.intForPaymentId
+		CAST(ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS INT) AS intForPaymentId
 		,forPay.intBillId
 		,forPay.intEntityVendorId
 		,forPay.intTransactionType
