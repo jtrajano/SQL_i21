@@ -56,21 +56,21 @@ SELECT
 	--,intContractHeaderId          	= CASE WHEN ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId ELSE NULL END
  --   ,intContractDetailId		  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN SC.intContractId ELSE NULL END
  --   ,strContractNumber			  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN CH.strContractNumber ELSE NULL END
-	,intContractHeaderId            = case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else
+	,intContractHeaderId            = case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else
 										CASE 
 											WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId 
 											WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.intContractHeaderId
 											ELSE NULL
 										END
 									end
-    ,intContractDetailId			= case when (CS.intStorageTypeId = 2 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else 
+    ,intContractDetailId			= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else 
 										CASE 
 											WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN SC.intContractId 
 											WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CD_Transfer.intContractDetailId 
 											ELSE NULL
 										END
 									end
-    ,strContractNumber				= case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else 
+    ,strContractNumber				= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else 
 										CASE 
 											WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.strContractNumber 
 											WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.strContractNumber 
@@ -151,6 +151,7 @@ LEFT JOIN (
 		ON IR.intInventoryReceiptId = SH.intInventoryReceiptId
 	LEFT JOIN tblICInventoryReceiptItem IRI
 		ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
+			AND IRI.intContractHeaderId = SH.intContractHeaderId
 	) 
 	ON SC.intTicketId = CS.intTicketId
 		AND IR.intEntityVendorId = CS.intEntityId
