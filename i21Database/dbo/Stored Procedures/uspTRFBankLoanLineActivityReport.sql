@@ -67,7 +67,7 @@ BEGIN
 			LEFT JOIN tblCMBankValuationRule valRule
 				ON valRule.intBankValuationRuleId = sublimit.intBankValuationRuleId
 			LEFT JOIN tblCTApprovalStatusTF approvalStatus
-				ON approvalStatus.strApprovalStatus COLLATE Latin1_General_CI_AS = tfLog.strBankApprovalStatus  COLLATE Latin1_General_CI_AS
+				ON approvalStatus.strApprovalStatus COLLATE Latin1_General_CI_AS = tfLog.strBankApprovalStatus
 			WHERE CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) >= CONVERT(NVARCHAR, ISNULL(@dtmStartDate, tfLog.dtmCreatedDate), 111)
 			AND CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) <= CONVERT(NVARCHAR, ISNULL(@dtmEndDate, tfLog.dtmCreatedDate), 111)
 			AND tfLog.dblFinanceQty >= 0
@@ -76,7 +76,6 @@ BEGIN
 		WHERE t1.intGroupNum = 1
 
 	) t WHERE t.intRowNum = 1
-		AND t.dblFinanceQty > 0
 		AND ISNULL(t.intBankId, 0) = ISNULL(@intBankId, ISNULL(t.intBankId, 0))
 		AND ISNULL(t.intApprovalStatusId, '') = ISNULL(@intApprovalStatusId, ISNULL(t.intApprovalStatusId, ''))
 		AND ISNULL(t.strLimit, '') = ISNULL(@strLimitType, ISNULL(t.strLimit, ''))
