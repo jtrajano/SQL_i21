@@ -25,6 +25,8 @@ BEGIN TRY
 		, @intTermCostDetailId INT
 		, @intCurrencyId INT
 		, @strCurrency NVARCHAR(100)
+		, @strInvoiceCurrency NVARCHAR(100)
+		, @strSequenceCurrency NVARCHAR(100)
 		, @intItemUOMId INT
 		, @strUnitMeasure NVARCHAR(100)
 		, @dblValue NUMERIC(18, 6)
@@ -53,6 +55,9 @@ BEGIN TRY
 		, @intFreightItemId = intDefaultFreightItemId
 		, @intInsuranceItemId = intDefaultInsuranceItemId
 	FROM vyuCTCompanyPreference
+
+	SELECT @strInvoiceCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intInvoiceCurrencyId;
+	SELECT @strSequenceCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSequenceCurrencyId;
 
 	SELECT @intOriginCountryId = intCountryId FROM tblSMCity
 	WHERE intCityId = @intFromPortId
@@ -151,8 +156,8 @@ BEGIN TRY
 					, @strCostItem
 					, NULL
 					, NULL
-					, NULL
-					, NULL
+					, @intSequenceCurrencyId
+					, @strSequenceCurrency
 					, NULL
 					, NULL
 					, 'Per Unit'
@@ -173,8 +178,8 @@ BEGIN TRY
 				, @strCostItem
 				, ipf.intEntityId
 				, strVendor = em.strName
-				, NULL
-				, NULL
+				, @intInvoiceCurrencyId
+				, @strInvoiceCurrency
 				, NULL
 				, NULL
 				, 'Amount'
