@@ -837,6 +837,8 @@
     <Build Include="dbo\Views\vyuHDTimeEntryLegacyBillingPeriod.sql" />
     <Build Include="dbo\Tables\tblSMTaxCodeRateLoadingFee.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetOpenOrdersForDispatch.sql" />
+    <Build Include="dbo\Views\vyuLGDispatchSupplier.sql" />
+    <Build Include="dbo\Views\vyuLGDispatchSupplyPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
