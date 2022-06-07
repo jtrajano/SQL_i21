@@ -1243,7 +1243,8 @@ GO
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
-			SET  ysnApproval = 1
+			SET   ysnApproval = 1
+			    , strScreenName = N'Time Entry'
 			WHERE strNamespace = 'HelpDesk.view.TimeEntry'
 		END
 
