@@ -650,6 +650,12 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', intMasterId = 1301679
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', intMasterId = 1301680
 
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'RMFT-5', strScheduleCode = 'DD-1', strType = '', intMasterId = 1301681
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'RMFT-5', strScheduleCode = 'DD-1', strType = '', intMasterId = 1301682
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'RMFT-5', strScheduleCode = 'DD-1', strType = '', intMasterId = 1301683
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'RMFT-5', strScheduleCode = 'DD-1', strType = '', intMasterId = 1301684
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D11', strFormCode = 'RMFT-5', strScheduleCode = 'DD-1', strType = '', intMasterId = 1301685
+	
 
 	INSERT INTO @ValidOriginStates(
 		intValidOriginStateId
