@@ -297,7 +297,7 @@ BEGIN TRY
 			blbFooterLogo = dbo.[fnCTGetCompanyFooterLogo]('Footer',  CH.intContractHeaderId),
 			strLogoFooterType	= CASE WHEN dbo.[fnCTGetCompanyLocationCount](@intContractHeaderId) > 1 THEN 'Attachment' 
 									   WHEN EXISTS (SELECT 1 FROM tblSMLogoPreferenceFooter where intCompanyLocationId = @intCompanyLocationId AND  ysnContract = 0 ) THEN 'Attachment' 
-								  ELSE ISNULL(@strLogoType,'Attachment') END,
+								  ELSE ISNULL(@strLogoType,'Attachment') END, 
 			strLogoType			= CASE WHEN dbo.[fnCTGetCompanyLocationCount](@intContractHeaderId) > 1 THEN 'Attachment' 
 									   WHEN EXISTS (SELECT 1 FROM tblSMLogoPreference where intCompanyLocationId = @intCompanyLocationId AND  ysnContract = 0 ) THEN 'Attachment' 
 								  ELSE ISNULL(@strLogoType,'Attachment') END,
