@@ -19,7 +19,9 @@ SELECT
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2,13) AND A.ysnPrepayHasPayment = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2,13) AND A.ysnPrepayHasPayment = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
 	A.dtmDate,
-	FP.strPeriod,
+	-- FP.strPeriod,
+	[strPeriod] = (SELECT TOP 1 strPeriod FROM dbo.tblGLFiscalYearPeriod FP
+		WHERE A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate),
 	A.dtmBillDate,
 	A.dtmDueDate,
 	A.strVendorOrderNumber,
@@ -55,6 +57,6 @@ FROM
 		ON A.intStoreLocationId = G.intCompanyLocationId
 	LEFT JOIN dbo.tblEMEntityLocation EL 
 		ON EL.intEntityLocationId = A.intPayToAddressId
-	LEFT JOIN dbo.tblGLFiscalYearPeriod FP
-		ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
+	-- LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	-- 	ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 	
