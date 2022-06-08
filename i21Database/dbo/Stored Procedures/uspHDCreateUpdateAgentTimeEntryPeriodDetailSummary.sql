@@ -86,26 +86,56 @@ SELECT      [intEntityId]							    = @EntityId
 		 ) CoworkerGoals
 		LEFT JOIN
 
-		( SELECT   [intTimeEntryPeriodDetailId]		= TimeEntryPeriodDetail.[intTimeEntryPeriodDetailId]
-				  ,[dblTotalHours]					= AgentInfoWeekly.[totalHours]
-				  ,[totalBillableHours]				= AgentInfoWeekly.[totalBillableHours]
-				  ,[totalNonBillableHours]			= AgentInfoWeekly.[totalNonBillableHours]
-				  ,[vlHolidaySickHours]				= VacationHolidaySick.dblRequest
-				  ,[intRequiredHours]				= ISNULL(TimeEntryPeriodDetail.intRequiredHours, 0)
-				  ,[dblActualUtilizationWeekly]		= AgentInfoWeekly.[totalBillableHours] / ( TotalWeeklyRequiredHours.totalHours - ISNULL(VacationHolidaySick.dblRequest, 0) ) * 100
-				  ,[dblActualUtilizationAnnually]	= AgentInfoAnnually.[totalBillableHours] / ( TotalAnnualRequiredHours.totalHours - ISNULL(VacationHolidaySick.dblRequest, 0) ) * 100
-				  ,[dblActualUtilizationMonthly]	= AgentInfoMonthly.[totalBillableHours] / ( TotalMonthlyRequiredHours.totalHours - ISNULL(VacationHolidaySick.dblRequest, 0) ) * 100
+		(
+			SELECT   [intTimeEntryPeriodDetailId]		= TimeEntryPeriodDetail.[intTimeEntryPeriodDetailId]
+					,[dblTotalHours]					= AgentInfoWeekly.[totalHours]
+					,[totalBillableHours]				= AgentInfoWeekly.[totalBillableHours]
+					,[totalNonBillableHours]			= AgentInfoWeekly.[totalNonBillableHours]
+					,[vlHolidaySickHours]				= WeeklyVacationHolidaySick.dblRequest
+					,[intRequiredHours]					= ISNULL(TimeEntryPeriodDetail.intRequiredHours, 0)
+					,[dblActualUtilizationWeekly]		= CASE WHEN ISNULL(TotalWeeklyRequiredHours.totalHours, 0) - ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) = 0
+																	THEN 0
+															   ELSE AgentInfoWeekly.[totalBillableHours] / ( ISNULL(TotalWeeklyRequiredHours.totalHours, 0) - ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) ) * 100
+														  END 
+					,[dblActualUtilizationAnnually]		= CASE WHEN ISNULL(TotalAnnualRequiredHours.totalHours, 0) - ISNULL(AnnuallyVacationHolidaySick.dblRequest, 0) = 0
+																	THEN 0
+															   ELSE AgentInfoAnnually.[totalBillableHours] / ( ISNULL(TotalAnnualRequiredHours.totalHours, 0) - ISNULL(AnnuallyVacationHolidaySick.dblRequest, 0) ) * 100
+														   END 
+					,[dblActualUtilizationMonthly]		= CASE WHEN ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) = 0
+																	THEN 0
+															   ELSE AgentInfoMonthly.[totalBillableHours] / ( ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) ) * 100
+														  END 				  											
 			FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail 
 				INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod
 			ON TimeEntryPeriod.intTimeEntryPeriodId = TimeEntryPeriodDetail.intTimeEntryPeriodId
-				CROSS APPLY(
-					SELECT SUM(b.dblRequest)  dblRequest FROM tblHDTimeOffRequest a
+				OUTER APPLY(
+					SELECT SUM(a.dblPRRequest)  dblRequest FROM tblHDTimeOffRequest a
 					INNER JOIN  tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
 					INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
 					INNER JOIN  tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
-					WHERE d.intEntityId = @EntityId
+					WHERE d.intEntityId = @EntityId AND
+						  a.dtmPRDate >= TimeEntryPeriodDetail.[dtmBillingPeriodStart] AND
+						  a.dtmPRDate <= TimeEntryPeriodDetail.[dtmBillingPeriodEnd]
 		
-				) VacationHolidaySick
+				) WeeklyVacationHolidaySick
+				OUTER APPLY(
+					SELECT SUM(a.dblPRRequest)  dblRequest FROM tblHDTimeOffRequest a
+					INNER JOIN  tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
+					INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
+					INNER JOIN  tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
+					WHERE d.intEntityId = @EntityId AND
+						  DATEPART(YEAR, a.dtmPRDate) = TimeEntryPeriod.strFiscalYear
+		
+				) AnnuallyVacationHolidaySick
+				OUTER APPLY(
+					SELECT SUM(a.dblPRRequest)  dblRequest FROM tblHDTimeOffRequest a
+					INNER JOIN  tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
+					INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
+					INNER JOIN  tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
+					WHERE d.intEntityId = @EntityId AND
+						  DATEPART(YEAR, a.dtmPRDate) = TimeEntryPeriod.strFiscalYear AND
+						  DATEPART(month, a.dtmPRDate) = DATEPART(month, TimeEntryPeriodDetail.dtmBillingPeriodStart)
+				) MonthlyVacationHolidaySick
 				CROSS APPLY
 				(
 					SELECT  [totalHours]			= SUM([totalHours])
@@ -145,7 +175,6 @@ SELECT      [intEntityId]							    = @EntityId
 																  END								
 								FROM vyuHDTicketHoursWorked
 								WHERE DATEPART(YEAR, dtmDate) = TimeEntryPeriod.strFiscalYear AND
-										  DATEPART(month, dtmDate) = DATEPART(month, TimeEntryPeriodDetail.dtmBillingPeriodStart) AND
 										  intAgentEntityId = @EntityId
 								GROUP BY [ysnBillable]
 					) TotalHours
@@ -199,11 +228,6 @@ SELECT      [intEntityId]							    = @EntityId
 				) TotalMonthlyRequiredHours
 		) TimeEntryPeriodDetailInfo
 		ON TimeEntryPeriodDetailInfo.intTimeEntryPeriodDetailId = TimeEntryPeriodDetail.intTimeEntryPeriodDetailId
-
-
-
-
-
-
 END
+
 GO
