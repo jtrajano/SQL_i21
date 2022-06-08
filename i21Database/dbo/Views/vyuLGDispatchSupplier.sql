@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuLGDispatchSupplier]
 AS
 SELECT 
-	intKeyColumn = ROW_NUMBER() OVER (ORDER BY strEntityName ASC)
+	intKeyColumn = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strEntityName ASC))
 	,SUP.* 
 FROM
    (SELECT 
@@ -17,5 +17,4 @@ FROM
 	FROM tblEMEntity E 
 	INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId AND V.ysnTransportTerminal = 1
 	) SUP
-
 GO

@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuLGDispatchSupplyPoint]
 AS
 SELECT 
-	intKeyColumn = ROW_NUMBER() OVER (ORDER BY strLocationName ASC)
+	intKeyColumn = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strLocationName ASC))
 	,LOC.* 
 FROM
    (SELECT 
