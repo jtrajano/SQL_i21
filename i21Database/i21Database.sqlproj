@@ -810,6 +810,7 @@
     <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" />
     <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
     <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
+    <Build Include="dbo\Tables\tblIPBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
