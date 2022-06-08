@@ -206,7 +206,7 @@ BEGIN
 			UPDATE #tempAmount SET Amount = 0 WHERE strCriteria = @strCriteria      
 		END      
     
-		IF @dblAmount >= 0      
+		IF @dblAmount <> 0      
 		BEGIN           
 			SET @strName  = (SELECT TOP 1       
 			CASE       
