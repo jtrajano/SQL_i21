@@ -351,7 +351,7 @@
     <Build Include="dbo\Views\vyuMFLotDetailViewForDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdatePlannedAvailabilityDate.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />    
+    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerPricing.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
@@ -415,6 +415,7 @@
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <Build Include="dbo\Views\vyuMBILExportItemAddOn.sql" />
     <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
+    <Build Include="dbo\Tables\tblIPBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10407,7 +10408,7 @@
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
-    <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />    
+    <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
@@ -10690,7 +10691,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
-  </ItemGroup>  
+  </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />
   </ItemGroup>

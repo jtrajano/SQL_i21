@@ -44,6 +44,7 @@ BEGIN TRY
 		,@dblTotal NUMERIC(18, 6)
 		,@strRemarks NVARCHAR(200)
 		,@strERPVoucherNo NVARCHAR(50)
+		,@dblCost NUMERIC(18, 6)
 	DECLARE @intBillDetailId INT
 		,@strContractNumber NVARCHAR(50)
 		,@strSequenceNo NVARCHAR(3)
@@ -72,6 +73,7 @@ BEGIN TRY
 		,@intNoOfItem INT
 		,@intLocationId int
 		,@dblResidue NUMERIC(18, 6)
+		,@intInventoryReceiptItemId int
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
 	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT,intRecordId int identity(1,1),strType nvarchar(50))
 	DECLARE @tblOutput AS TABLE (
@@ -407,6 +409,7 @@ BEGIN TRY
 				,@strReceiptNumber = NULL
 				,@strContainerNumber = NULL
 				,@intNoOfReceipt = NULL
+				,@dblCost=NULL
 
 			SELECT @intItemId = BD.intItemId
 			FROM dbo.tblAPBillDetail BD
@@ -466,6 +469,7 @@ BEGIN TRY
 				,@intContractDetailId = BD.intContractDetailId
 				,@strType = I.strType
 				,@intLoadDetailId=BD.intLoadDetailId
+				,@dblCost=dblCost
 			FROM tblAPBillDetail BD
 			JOIN tblICItem I ON I.intItemId = BD.intItemId
 			JOIN dbo.tblSMCurrency C ON C.intCurrencyID = BD.intCurrencyId
@@ -544,6 +548,7 @@ BEGIN TRY
 			IF @intTransactionType = 3 -- Claim
 			BEGIN
 				SELECT @strReceiptNumber = R.strReceiptNumber
+						,@intInventoryReceiptItemId=RI.intInventoryReceiptItemId
 				FROM tblAPBillDetail BD
 				JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimDetailId = BD.intWeightClaimDetailId
 					AND BD.intContractDetailId IS NOT NULL
@@ -555,6 +560,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @strReceiptNumber = R.strReceiptNumber
 					,@strContainerNumber = LC.strContainerNumber
+					,@intInventoryReceiptItemId=RI.intInventoryReceiptItemId
 				FROM tblAPBillDetail BD
 				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
 					AND BD.intContractDetailId IS NOT NULL
@@ -581,6 +587,7 @@ BEGIN TRY
 				BEGIN
 					SELECT TOP 1 @strReceiptNumber = R.strReceiptNumber
 						,@strContainerNumber = LC.strContainerNumber
+						,@intInventoryReceiptItemId=RI.intInventoryReceiptItemId
 					FROM tblLGLoad L WITH (NOLOCK)
 					JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 						AND L.intShipmentType = 1
@@ -726,7 +733,7 @@ BEGIN TRY
 
 			IF @intOrgTransactionType = 1
 				AND ISNULL(@strContainerNumber, '') <> ''
-				SELECT @strItemXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + ' ' + @strContainerNumber + '</ReceiptNo>'
+				SELECT @strItemXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + @strContainerNumber + '</ReceiptNo>'
 			ELSE
 				SELECT @strItemXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + '</ReceiptNo>'
 
@@ -741,6 +748,9 @@ BEGIN TRY
 
 				GOTO NextRec
 			END
+
+			Delete from tblIPBillDetail Where intBillDetailId=@intBillDetailId
+			Insert into tblIPBillDetail Select @intBillDetailId,@intInventoryReceiptItemId,Round(@dblDetailTotal/@dblCost,2)
 
 			SELECT @strDetailXML = @strDetailXML + @strItemXML
 
