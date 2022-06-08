@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspPRProcessTimecardToPayGroup]        
+﻿ALTER PROCEDURE [dbo].[uspPRProcessTimecardToPayGroup]        
  @strDepartmentIds NVARCHAR(MAX) = ''        
  ,@dtmBeginDate  DATETIME        
  ,@dtmEndDate  DATETIME        
@@ -210,6 +210,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard WHERE ysnProcessed = 0)
     AND TC.intWorkersCompensationId = @intWorkersCompensationId      
     AND TC.intEntityEmployeeId = @intEntityEmployeeId        
     AND EE.strCalculationType IN ('Hourly Rate', 'Fixed Amount', 'Salary')        
+	AND TC.dblRegularHours > 0
         
   /* Get the Created Pay Group Detail Id*/        
   SELECT @intPayGroupDetailId = @@IDENTITY        
@@ -296,22 +297,21 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard WHERE ysnProcessed = 0)
    ,1        
   FROM tblPREmployeeEarning EL         
   INNER JOIN (SELECT   
-                EE.intTypeEarningId       
-                ,EE.intEntityEmployeeId      
-                ,EE.intEmployeeEarningId      
-                ,intEmployeeDepartmentId      
-                ,SUM(dblOvertimeHours) dblOvertimeHours --SELECT EE.*, TC.dblRegularHours, TC.dblOvertimeHours, TC.intEmployeeDepartmentId         
-                ,TC.intWorkersCompensationId      
-                ,EE.intPayGroupId  
+  EE.intTypeEarningId       
+      ,EE.intEntityEmployeeId      
+      ,EE.intEmployeeEarningId      
+      ,intEmployeeDepartmentId      
+      ,SUM(dblOvertimeHours) dblOvertimeHours --SELECT EE.*, TC.dblRegularHours, TC.dblOvertimeHours, TC.intEmployeeDepartmentId         
+            ,TC.intWorkersCompensationId      
+   ,EE.intPayGroupId  
             FROM #tmpTimecard TC INNER JOIN tblPREmployeeEarning EE         
-                ON TC.intEmployeeEarningId = EE.intEmployeeEarningId      
-                AND TC.intEmployeeEarningId = @intEmployeeEarningId
+            ON TC.intEmployeeEarningId = EE.intEmployeeEarningId      
             GROUP BY EE.intTypeEarningId       
-                    ,EE.intEntityEmployeeId      
-                    ,EE.intEmployeeEarningId      
-                    ,intEmployeeDepartmentId      
-                    ,TC.intWorkersCompensationId      
-                    ,EE.intPayGroupId  
+          ,EE.intEntityEmployeeId      
+          ,EE.intEmployeeEarningId      
+          ,intEmployeeDepartmentId      
+                ,TC.intWorkersCompensationId      
+    ,EE.intPayGroupId  
     ) TCE        
    ON EL.intEmployeeEarningLinkId = TCE.intTypeEarningId        
     AND EL.intEntityEmployeeId = TCE.intEntityEmployeeId         
@@ -494,8 +494,74 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard WHERE ysnProcessed = 0)
     ,SD.intEmployeeDepartmentId        
    ,SD.intWorkersCompensationId      
     ,EL.strCalculationType        
-        
+  
+  
+  
+
+  --OT
+  /************************************************************************************************************************************************/
+  /************************************************************************************************************************************************/
+
+  --set @intPayGroupDetailId = NULL
+/* Insert Overtime Hours To Pay Group Detail */      
+INSERT INTO tblPRPayGroupDetail      
+ (intPayGroupId      
+ ,intEntityEmployeeId      
+ ,intEmployeeEarningId      
+ ,intTypeEarningId      
+ ,intDepartmentId      
+ ,intWorkersCompensationId      
+ ,strCalculationType      
+ ,dblDefaultHours      
+ ,dblHoursToProcess      
+ ,dblAmount      
+ ,dblTotal      
+ ,dtmDateFrom      
+ ,dtmDateTo      
+ ,intSource      
+ ,intSort      
+ ,intConcurrencyId)      
+ 
+ --OUTPUT inserted.intPayGroupDetailId         
+ --INTO @OTPayGroupDetail
+ 
+SELECT DISTINCT       
+ intPayGroupId      
+ ,intEntityEmployeeId      
+ ,intEmployeeEarningId      
+ ,intTypeEarningId      
+ ,intDepartmentId      
+ ,intWorkersCompensationId      
+ ,strCalculationType      
+ ,dblDefaultHours = SUM(ISNULL(dblDefaultHours,0))      
+ ,dblHoursToProcess = SUM(ISNULL(dblHoursToProcess,0))      
+ ,dblAmount = SUM(ISNULL(dblAmount,0))      
+ ,dblTotal = SUM(ISNULL(dblTotal,0))      
+ ,dtmDateFrom      
+ ,dtmDateTo      
+ ,intSource      
+ ,intSort      
+ ,1      
+FROM @TimecardOvertime      
+GROUP BY intPayGroupId      
+ ,intEntityEmployeeId      
+ ,intEmployeeEarningId      
+ ,intTypeEarningId      
+ ,intDepartmentId      
+ ,intWorkersCompensationId      
+ ,strCalculationType      
+ ,dtmDateFrom      
+ ,dtmDateTo      
+ ,intSource      
+ ,intSort      
+
+ /**override value if there is no regular hours, use the paygroupdetail inserted for overtime **/ 
+ IF(@intPayGroupDetailId IS NULL )  
+ SET @intPayGroupDetailId =  @@IDENTITY
+  
+  /***********************************************************************************************************************************************/              
   /* Update Processed Timecards */        
+  /***********************************************************************************************************************************************/      
   UPDATE tblPRTimecard        
   SET 
    -- dblRegularHours = Y.dblRegularHours        
@@ -568,64 +634,22 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard WHERE ysnProcessed = 0)
     ,EE.dblDefaultHours) X        
    ) Y        
   WHERE tblPRTimecard.intTimecardId = Y.intTimecardId        
-        
-  /* Loop Control */        
- UPDATE #tmpTimecard       
- SET ysnProcessed = 1      
-  WHERE intEmployeeEarningId = @intEmployeeEarningId        
-   AND intEmployeeDepartmentId = @intEmployeeDepartmentId         
-   AND intEntityEmployeeId = @intEntityEmployeeId        
-  AND intWorkersCompensationId = @intWorkersCompensationId      
-  AND ysnProcessed = 0      
+  AND  intPaycheckId IS NULL
+  
+  /***********************************************************************************************************************************************/      
+          
+	/* Loop Control */        
+	UPDATE #tmpTimecard       
+	SET ysnProcessed = 1      
+	WHERE intEmployeeEarningId = @intEmployeeEarningId        
+		AND intEmployeeDepartmentId = @intEmployeeDepartmentId         
+		AND intEntityEmployeeId = @intEntityEmployeeId        
+		AND intWorkersCompensationId = @intWorkersCompensationId      
+		AND ysnProcessed = 0      
+
+	DELETE FROM @TimecardOvertime
+
  END        
-        
-/* Insert Overtime Hours To Pay Group Detail */      
-INSERT INTO tblPRPayGroupDetail      
- (intPayGroupId      
- ,intEntityEmployeeId      
- ,intEmployeeEarningId      
- ,intTypeEarningId      
- ,intDepartmentId      
- ,intWorkersCompensationId      
- ,strCalculationType      
- ,dblDefaultHours      
- ,dblHoursToProcess      
- ,dblAmount      
- ,dblTotal      
- ,dtmDateFrom      
- ,dtmDateTo      
- ,intSource      
- ,intSort      
- ,intConcurrencyId)      
-SELECT DISTINCT       
- intPayGroupId      
- ,intEntityEmployeeId      
- ,intEmployeeEarningId      
- ,intTypeEarningId      
- ,intDepartmentId      
- ,intWorkersCompensationId      
- ,strCalculationType      
- ,dblDefaultHours = SUM(ISNULL(dblDefaultHours,0))      
- ,dblHoursToProcess = SUM(ISNULL(dblHoursToProcess,0))      
- ,dblAmount = SUM(ISNULL(dblAmount,0))      
- ,dblTotal = SUM(ISNULL(dblTotal,0))      
- ,dtmDateFrom      
- ,dtmDateTo      
- ,intSource      
- ,intSort      
- ,1      
-FROM @TimecardOvertime      
-GROUP BY intPayGroupId      
- ,intEntityEmployeeId      
- ,intEmployeeEarningId      
- ,intTypeEarningId      
- ,intDepartmentId      
- ,intWorkersCompensationId      
- ,strCalculationType      
- ,dtmDateFrom      
- ,dtmDateTo      
- ,intSource      
- ,intSort      
       
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTimecard')) DROP TABLE #tmpTimecard        
         
