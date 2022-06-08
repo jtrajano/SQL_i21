@@ -5,6 +5,7 @@ SELECT DISTINCT
 	I.intItemId,
 	IV.strVendorProduct AS strVendorItemNo,
 	I.strDescription,
+	I.strItemNo,
 	V.strName AS strVendorId,
 	CV.strVendorDepartment,
 	CAT.strCategoryCode,

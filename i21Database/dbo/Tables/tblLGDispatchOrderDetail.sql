@@ -14,6 +14,8 @@
 	[intEntityLocationId] INT NULL,
 	[intCompanyLocationId] INT NULL, 
 	[intCompanyLocationSubLocationId] INT NULL,
+	[intVendorId] INT NULL, 
+	[intVendorLocationId] INT NULL,
 	[intEntityContactId] INT NULL,
 	[strEntityType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strEntityContact] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,

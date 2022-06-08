@@ -16,10 +16,11 @@ SELECT
 	,strDriver = DV.strName
 	,strTruckNumber = SVT.strTruckNumber
 	,strTrailerNumber = SVTL.strTrailerNumber
-	,strTrailerType = SVTL.strTrailerDescription --temp placeholder for trailer type
+	,strTrailerType = SVTL.strType
 	,dblMaxWeight = DO.dblMaxWeight
 	,dblLoadWeight = DO.dblLoadWeight
 	,strDispatchStatus = CASE (DO.intDispatchStatus) 
+		WHEN 0 THEN 'Created'
 		WHEN 1 THEN 'Scheduled'
 		WHEN 2 THEN 'In Progress'
 		WHEN 3 THEN 'Complete'

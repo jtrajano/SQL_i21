@@ -274,68 +274,68 @@ EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
 SELECT @totalInvalid = COUNT(DISTINCT [intInvoiceId]) FROM tblARPostInvalidInvoiceData WHERE strSessionId = @strRequestId
 
 IF(@totalInvalid > 0)
-	BEGIN
-		IF @raiseError = 1 AND @recap = 1
-			SELECT TOP 1 @ErrorMerssage = strPostingError FROM tblARPostInvalidInvoiceData WHERE strSessionId = @strRequestId
+BEGIN
+	IF @raiseError = 1 AND @recap = 1
+		SELECT TOP 1 @ErrorMerssage = strPostingError FROM tblARPostInvalidInvoiceData WHERE strSessionId = @strRequestId
 
-		--Insert Invalid Post transaction result
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT [strPostingError]
-			 , [strTransactionType]
-			 , [strInvoiceNumber]
-			 , [strBatchId]
-			 , [intInvoiceId]
-		FROM tblARPostInvalidInvoiceData
-		WHERE strSessionId = @strRequestId
+	--Insert Invalid Post transaction result
+	INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	SELECT [strPostingError]
+			, [strTransactionType]
+			, [strInvoiceNumber]
+			, [strBatchId]
+			, [intInvoiceId]
+	FROM tblARPostInvalidInvoiceData
+	WHERE strSessionId = @strRequestId
 
-		SET @invalidCount = @totalInvalid
+	SET @invalidCount = @totalInvalid
 
-		--DELETE Invalid Transaction From temp table
-		DELETE A
-		FROM tblARPostInvoiceHeader A
-		INNER JOIN tblARPostInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
-		WHERE A.strSessionId = @strRequestId
-		  AND B.strSessionId = @strRequestId
+	--DELETE Invalid Transaction From temp table
+	DELETE A
+	FROM tblARPostInvoiceHeader A
+	INNER JOIN tblARPostInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
+	WHERE A.strSessionId = @strRequestId
+		AND B.strSessionId = @strRequestId
 
-		DELETE A
-		FROM tblARPostInvoiceDetail A
-		INNER JOIN tblARPostInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
-		WHERE A.strSessionId = @strRequestId
-		  AND B.strSessionId = @strRequestId
+	DELETE A
+	FROM tblARPostInvoiceDetail A
+	INNER JOIN tblARPostInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
+	WHERE A.strSessionId = @strRequestId
+		AND B.strSessionId = @strRequestId
 
-		DELETE A
-		FROM tblARPostItemsForCosting A
-		INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
-		WHERE A.strSessionId = @strRequestId
-		  AND B.strSessionId = @strRequestId
+	DELETE A
+	FROM tblARPostItemsForCosting A
+	INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+	WHERE A.strSessionId = @strRequestId
+		AND B.strSessionId = @strRequestId
 
-		DELETE A
-		FROM tblARPostItemsForInTransitCosting A
-		INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
-		WHERE A.strSessionId = @strRequestId
-		  AND B.strSessionId = @strRequestId
+	DELETE A
+	FROM tblARPostItemsForInTransitCosting A
+	INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+	WHERE A.strSessionId = @strRequestId
+		AND B.strSessionId = @strRequestId
 
-		DELETE A
-		FROM tblARPostItemsForStorageCosting A
-		INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
-		WHERE A.strSessionId = @strRequestId
-		  AND B.strSessionId = @strRequestId
+	DELETE A
+	FROM tblARPostItemsForStorageCosting A
+	INNER JOIN tblARPostInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+	WHERE A.strSessionId = @strRequestId
+		AND B.strSessionId = @strRequestId
 
-		DELETE A
-		FROM tblARPostItemsForContracts A
-		INNER JOIN tblARPostInvalidInvoiceData B ON A.[intInvoiceId] = B.[intInvoiceId]
-		WHERE A.strSessionId = @strRequestId
-		  AND B.strSessionId = @strRequestId
+	DELETE A
+	FROM tblARPostItemsForContracts A
+	INNER JOIN tblARPostInvalidInvoiceData B ON A.[intInvoiceId] = B.[intInvoiceId]
+	WHERE A.strSessionId = @strRequestId
+		AND B.strSessionId = @strRequestId
 
-		DELETE GL
-  		FROM tblARPostInvoiceGLEntries GL
-  		INNER JOIN tblARPostInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId] AND GL.[strTransactionId] = B.[strInvoiceNumber]
-		WHERE GL.strSessionId = @strRequestId
-		  AND B.strSessionId = @strRequestId
+	DELETE GL
+	FROM tblARPostInvoiceGLEntries GL
+	INNER JOIN tblARPostInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId] AND GL.[strTransactionId] = B.[strInvoiceNumber]
+	WHERE GL.strSessionId = @strRequestId
+		AND B.strSessionId = @strRequestId
 
-        DELETE FROM tblARPostInvalidInvoiceData
-		WHERE strSessionId = @strRequestId
-	END
+	DELETE FROM tblARPostInvalidInvoiceData
+	WHERE strSessionId = @strRequestId
+END
 
 SELECT @totalRecords = COUNT([intInvoiceId]) FROM tblARPostInvoiceHeader WHERE strSessionId = @strRequestId
 			

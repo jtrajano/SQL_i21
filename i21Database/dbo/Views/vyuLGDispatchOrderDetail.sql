@@ -21,6 +21,8 @@ SELECT
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOD.strOrderNumber
 	,DOD.strOrderType
+	,strFromEntity = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN V.strName ELSE CL.strLocationName END
+	,strFromLocation = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN VL.strLocationName ELSE CLSL.strSubLocationName END
 	,strEntityName = CASE WHEN (DOD.strOrderType IN ('Outbound', 'Sales') AND DOD.intStopType = 1) OR (DOD.strOrderType IN ('Transfer')) THEN CL.strLocationName ELSE E.strName END
 	,strLocationName = CASE WHEN (DOD.strOrderType IN ('Outbound', 'Sales') AND DOD.intStopType = 1) OR (DOD.strOrderType IN ('Transfer')) THEN CLSL.strSubLocationName ELSE EL.strLocationName END
 	,strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS
@@ -50,5 +52,7 @@ LEFT JOIN tblEMEntity E ON E.intEntityId = DOD.intEntityId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DOD.intEntityLocationId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = DOD.intCompanyLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = DOD.intCompanyLocationSubLocationId
+LEFT JOIN tblEMEntity V ON V.intEntityId = DOD.intVendorId
+LEFT JOIN tblEMEntityLocation VL ON VL.intEntityLocationId = DOD.intVendorLocationId
 LEFT JOIN tblSMShipViaTrailerCompartment SVTC ON SVTC.intEntityShipViaTrailerCompartmentId = DOD.intEntityShipViaCompartmentId
 LEFT JOIN tblTMSite TMS ON TMS.intSiteID = DOD.intTMSiteId
