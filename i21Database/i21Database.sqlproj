@@ -439,7 +439,8 @@
 	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
     <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
-  </ItemGroup>
+    <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" /> 
+ </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="dbo\" />
