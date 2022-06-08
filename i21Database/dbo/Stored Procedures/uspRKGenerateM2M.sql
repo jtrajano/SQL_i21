@@ -2725,7 +2725,7 @@ BEGIN TRY
 			WHERE strContractOrInventoryType = case when @ysnIncludeInventoryM2M = 1 THEN 'Inventory (P)' ELSE '' END
 		END
 
-		-- Partial Priced Contracts
+		-- Partial Priced Contracts (Used in deduction of Allocated Qty.)
 		SELECT 
 			  cdBasis.intContractDetailId
 			, dblPricedOpenQty = cdPriced.dblContractOriginalQty
@@ -2735,9 +2735,9 @@ BEGIN TRY
 		FROM @tblOpenContractList cdPriced
 		INNER JOIN @tblOpenContractList cdBasis
 			ON cdBasis.intContractDetailId = cdPriced.intContractDetailId
-			AND cdBasis.intPricingTypeId IN (2,8)
-			AND cdBasis.strPricingType IN ('Basis','Ratio')
-		WHERE cdPriced.intPricingTypeId IN (2,8) AND cdPriced.strPricingType = 'Priced'
+			AND cdBasis.intPricingTypeId IN (2, 3, 8)
+			AND cdBasis.strPricingType IN ('Basis', 'HTA', 'Ratio')
+		WHERE cdPriced.intPricingTypeId IN (2, 3, 8) AND cdPriced.strPricingType = 'Priced'
 
 		---- contract
 		INSERT INTO @ListTransaction (intContractHeaderId
@@ -3066,7 +3066,7 @@ BEGIN TRY
 						, dblContractOriginalQty = 
 							CASE WHEN ISNULL(allocatedContract.dblAllocatedQty, 0) = 0 THEN cd.dblContractOriginalQty
 								ELSE
-									-- COMPUTE OPEN QTY. INCLUDE REDUCTION OF ALLOCATED QTY
+									-- COMPUTE OPEN QTY. (INCLUDE REDUCTION OF ALLOCATED QTY)
 									-- IF NOT PARTIAL PRICED
 									CASE WHEN ISNULL(partialPricedCT.intContractDetailId, 0) = 0 
 										THEN CASE WHEN cd.dblDetailQuantity = cd.dblContractOriginalQty
@@ -3078,8 +3078,8 @@ BEGIN TRY
 												END
 											END
 									-- IF PARTIAL PRICED
-											-- PRICED RECORD
-										ELSE CASE WHEN cd.intPricingTypeId IN (2,8) AND cd.strPricingType = 'Priced'
+											-- PRICED PART
+										ELSE CASE WHEN cd.intPricingTypeId IN (2, 3, 8) AND cd.strPricingType = 'Priced'
 											THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
 													THEN CASE WHEN partialPricedCT.dblPricedOpenQty > ISNULL(allocatedContract.dblAllocatedQty, 0)
 														THEN partialPricedCT.dblPricedOpenQty - ISNULL(allocatedContract.dblAllocatedQty, 0)
@@ -3090,8 +3090,8 @@ BEGIN TRY
 														ELSE 0
 														END													
 													END
-											-- BASIS RECORD
-											WHEN cd.intPricingTypeId IN (2,8) AND cd.strPricingType IN ('Basis','Ratio')
+											-- UNPRICED PART
+											WHEN cd.intPricingTypeId IN (2, 3, 8) AND cd.strPricingType IN ('Basis', 'HTA', 'Ratio')
 											THEN CASE WHEN cd.dblDetailQuantity = (partialPricedCT.dblPricedOpenQty + partialPricedCT.dblBasisOpenQty)
 													THEN CASE WHEN partialPricedCT.dblPricedOpenQty >= ISNULL(allocatedContract.dblAllocatedQty, 0)
 														THEN cd.dblContractOriginalQty
