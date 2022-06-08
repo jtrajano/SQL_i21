@@ -13,7 +13,7 @@ SELECT
 	Item.strLotTracking,
 	Item.ysnLotWeightsRequired,
 	ItemPricing.strPricingMethod,
-	dblLastCost = COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(Item.intItemId, ItemLocation.intItemLocationId, COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId, GrossUOM.intItemUOMId), TranSession.dtmTransactionDate), EffectiveCost.dblCost, ItemPricing.dblLastCost, 0),
+	dblLastCost = COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(Item.intItemId, ItemLocation.intItemLocationId, COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId, GrossUOM.intItemUOMId), GETDATE()), EffectiveCost.dblCost, ItemPricing.dblLastCost, 0),
 	dblStandardCost = COALESCE(ItemPricing.dblStandardCost, 0),
 	dblSalePrice = COALESCE(EffectivePrice.dblRetailPrice, ItemPricing.dblSalePrice, 0),
 	dblReceiveUOMConvFactor = COALESCE(ReceiveUOM.dblUnitQty, ItemUOM.dblUnitQty, 0),
@@ -47,8 +47,6 @@ SELECT
 			END,
 	ysnHasAddOn = CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT),
 	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT),
-	TranSession.guiSessionId,
-	dtmSessionDate = TranSession.dtmTransactionDate,
 	Item.intComputeItemTotalOption
 FROM tblICItem Item
 LEFT JOIN (
@@ -75,9 +73,8 @@ LEFT JOIN (
 		ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 )
 	ON ItemUOM.intItemId = Item.intItemId
-OUTER APPLY tblICTransactionSession TranSession
-OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(TranSession.dtmTransactionDate, Item.intItemId, ItemLocation.intItemLocationId, DEFAULT) EffectiveCost
-OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(TranSession.dtmTransactionDate, Item.intItemId, ItemLocation.intItemLocationId, COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId, GrossUOM.intItemUOMId), DEFAULT) EffectivePrice
+OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(GETDATE(), Item.intItemId, ItemLocation.intItemLocationId, DEFAULT) EffectiveCost
+OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(GETDATE(), Item.intItemId, ItemLocation.intItemLocationId, COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId, GrossUOM.intItemUOMId), DEFAULT) EffectivePrice
 LEFT JOIN tblICItemPricing ItemPricing 
 	ON ItemLocation.intItemId = ItemPricing.intItemId 
 	AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId
