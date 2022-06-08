@@ -90,7 +90,7 @@ BEGIN TRY
 				, intDetailSubBookId = NULL
 				, CD.intContractStatusId
 				, CH.ysnReadOnlyInterCoContract
-				, dblFX = case when CD.intInvoiceCurrencyId <> CD.intCurrencyId and CD.intInvoiceCurrencyId <> CD.intMainCurrencyId then CD.dblRate else 1 end
+				, dblFX = case when CD.intInvoiceCurrencyId <> CD.intCurrencyId and CD.intInvoiceCurrencyId <> isnull(CD.intMainCurrencyId,0) then CD.dblRate else 1 end
 				, CD.strItemNo
 				, CD.strOrigin
 				, CD.strProductType
@@ -232,7 +232,7 @@ BEGIN TRY
 				, intDetailSubBookId = CD.intSubBookId
 				, CD.intContractStatusId
 				, CD.ysnReadOnlyInterCoContract
-				, dblFX = case when CD.intInvoiceCurrencyId <> CD.intCurrencyId and CD.intInvoiceCurrencyId <> CD.intMainCurrencyId then CD.dblRate else 1 end
+				, dblFX = case when CD.intInvoiceCurrencyId <> CD.intCurrencyId and CD.intInvoiceCurrencyId <> isnull(CD.intMainCurrencyId,0) then CD.dblRate else 1 end
 				, ICC.strItemNo
 				, ICC.strOrigin
 				, ICC.strProductType
