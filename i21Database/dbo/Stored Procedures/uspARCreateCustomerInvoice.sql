@@ -162,6 +162,10 @@
 	,@FreightCharge							NUMERIC(18, 6)	= 0
 	,@FreightCompanySegment					INT				= NULL
 	,@FreightLocationSegment				INT				= NULL
+	,@SourcedFrom							NVARCHAR(100)	= NULL
+	,@TaxLocationId							INT				= NULL
+	,@TaxPoint								NVARCHAR(50)	= NULL
+	,@ItemOriginalTaxGroupId				INT				= 0
 AS
 
 BEGIN
@@ -552,7 +556,10 @@ BEGIN TRY
 		,[dblFreightCharge]
 		,[intFreightCompanySegment]
 		,[intFreightLocationSegment]
-		,[intDefaultPayToBankAccountId])
+		,[intDefaultPayToBankAccountId]
+		,[strSourcedFrom]
+		,[intTaxLocationId]
+		,[strTaxPoint])
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -654,6 +661,9 @@ BEGIN TRY
 		,[intFreightCompanySegment]			= @FreightCompanySegment
 		,[intFreightLocationSegment]		= @FreightLocationSegment
 		,[intDefaultPayToBankAccountId]		= @BankAccountId
+		,[strSourcedFrom]					= @SourcedFrom
+		,[intTaxLocationId]					= @TaxLocationId
+		,[strTaxPoint]						= @TaxPoint
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
@@ -805,6 +815,7 @@ BEGIN TRY
 		,@ItemQualityPremium			= @ItemQualityPremium
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
 		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+		,@ItemOriginalTaxGroupId		= @ItemOriginalTaxGroupId
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

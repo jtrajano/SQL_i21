@@ -237,6 +237,9 @@ DECLARE  @Id									INT
 		,@FreightCharge							NUMERIC(18, 6)
 		,@FreightCompanySegment					INT
 		,@FreightLocationSegment				INT
+		,@SourcedFrom							NVARCHAR(100)
+		,@TaxLocationId							INT
+		,@TaxPoint								NVARCHAR(50)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -334,6 +337,7 @@ DECLARE  @Id									INT
 		,@ItemQualityPremium					NUMERIC(18, 6)
 		,@ItemOptionalityPremium				NUMERIC(18, 6)
 		,@ItemComputedGrossPrice				NUMERIC(18, 6)
+		,@ItemOriginalTaxGroupId				INT
 
 --INSERT
 BEGIN TRY
@@ -460,6 +464,8 @@ BEGIN
 		,@FreightCharge					= [dblFreightCharge]
 		,@FreightCompanySegment			= [intFreightCompanySegment]
 		,@FreightLocationSegment		= [intFreightLocationSegment]
+		,@TaxLocationId					= [intTaxLocationId]
+		,@TaxPoint						= [strTaxPoint]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -551,6 +557,7 @@ BEGIN
 		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
 		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
 		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
+		,@ItemOriginalTaxGroupId		= (CASE WHEN @GroupingOption = 0 THEN [intOriginalTaxGroupId] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -746,6 +753,9 @@ BEGIN
 			,@FreightCharge					= @FreightCharge
 			,@FreightCompanySegment			= @FreightCompanySegment
 			,@FreightLocationSegment		= @FreightLocationSegment
+			,@SourcedFrom					= @SourcedFrom
+			,@TaxLocationId					= @TaxLocationId
+			,@TaxPoint						= @TaxPoint
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -836,6 +846,7 @@ BEGIN
 			,@ItemQualityPremium			= @ItemQualityPremium
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+			,@ItemOriginalTaxGroupId		= @ItemOriginalTaxGroupId
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1021,6 +1032,7 @@ BEGIN
 					,@ItemQualityPremium            = [dblQualityPremium]
 					,@ItemOptionalityPremium        = [dblOptionalityPremium]
 					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+					,@ItemOriginalTaxGroupId		= [intOriginalTaxGroupId]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1125,6 +1137,7 @@ BEGIN
 						,@ItemQualityPremium            = @ItemQualityPremium
 						,@ItemOptionalityPremium        = @ItemOptionalityPremium
 						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+						,@ItemOriginalTaxGroupId		= @ItemOriginalTaxGroupId
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1799,7 +1812,7 @@ BEGIN TRY
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 						,@ItemConversionAccountId		= [intConversionAccountId]
-						,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
+						,@ItemCurrencyExchangeRateTypeId= [intCurrencyExchangeRateTypeId]
 						,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
 						,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
@@ -1814,6 +1827,7 @@ BEGIN TRY
 						,@ItemQualityPremium            = [dblQualityPremium]
                         ,@ItemOptionalityPremium        = [dblOptionalityPremium]
 						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+						,@ItemOriginalTaxGroupId		= [intOriginalTaxGroupId]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1910,6 +1924,7 @@ BEGIN TRY
 							,@ItemQualityPremium            = @ItemQualityPremium
 							,@ItemOptionalityPremium        = @ItemOptionalityPremium
 							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+							,@ItemOriginalTaxGroupId		= @ItemOriginalTaxGroupId
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
