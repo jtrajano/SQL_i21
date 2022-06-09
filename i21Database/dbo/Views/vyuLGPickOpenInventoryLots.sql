@@ -136,7 +136,7 @@ FROM (
 	FROM tblICLot Lot
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId AND Receipt.ysnPosted = 1
 		LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 		LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
 		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CTDetail.intContractDetailId
