@@ -480,7 +480,7 @@ BEGIN TRY
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END
 		ELSE IF @dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots <> @dblLotsFixed AND
-			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 1)
+			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId IN(1,2))
 		BEGIN
 			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 		END		
