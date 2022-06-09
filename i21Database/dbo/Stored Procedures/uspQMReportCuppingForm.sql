@@ -31,7 +31,7 @@ BEGIN TRY
 		,strRoasting					= ROASTING.strPropertyValue
 		,QMST.strSampleTypeName
 		,strProductType					= ICCAPT.strDescription
-		,strShipmentPeriod				= FORMAT(CTC.dtmStartDate, 'dd.MM.yyyy') + ' - ' + FORMAT(CTC.dtmEndDate, 'dd.MM.yyyy')
+		,strShipmentPeriod				= CONVERT(VARCHAR(10), CTC.dtmStartDate, 104) + ' - ' + CONVERT(VARCHAR(10), CTC.dtmEndDate, 104)
 		,QMS.strCourier
 		,QMS.strCourierRef
 		,QMSC.strSamplingCriteria
