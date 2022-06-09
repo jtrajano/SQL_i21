@@ -173,42 +173,45 @@ BEGIN
 			,[dblQtyToBillUnitQty]				=	A.dblQtyToBillUnitQty
 			,[intQtyToBillUOMId]				=	A.intQtyToBillUOMId
 			,[strQtyToBillUOM]					=	qtyUOM.strUnitMeasure
-			,[dblCost]							=	CASE 
-													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
-													THEN 
-													(
-														CASE 
-														WHEN A.intContractDetailId > 0 AND A.dblCost = 0 AND ctDetail.dblSeqPrice > 0 AND ctDetail.intPricingTypeId <> 5
-														THEN ctDetail.dblSeqPrice
-														ELSE A.dblCost
-														END
-													)
-													ELSE A.dblCost
-													END
-			,[dblCostUnitQty]					=	CASE 
-													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
-													THEN
-													(
-														CASE 
-														WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
-														THEN contractItemCostUOM.dblUnitQty
-														ELSE A.dblCostUnitQty 
-														END
-													)
-													ELSE A.dblCostUnitQty 
-													END
-			,[intCostUOMId]						=	CASE 
-													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN 
-													(
-														CASE 
-														WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
-														THEN ctDetail.intPriceItemUOMId
-														ELSE A.intCostUOMId 
-														END
-													)
-													ELSE A.intCostUOMId 
-													END
+			,[dblCost]							=	A.dblCost
+													-- CASE 
+													-- WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
+													-- THEN 
+													-- (
+													-- 	CASE 
+													-- 	WHEN A.intContractDetailId > 0 AND A.dblCost = 0 AND ctDetail.dblSeqPrice > 0 AND ctDetail.intPricingTypeId <> 5
+													-- 	THEN ctDetail.dblSeqPrice
+													-- 	ELSE A.dblCost
+													-- 	END
+													-- )
+													-- ELSE A.dblCost
+													-- END
+			,[dblCostUnitQty]					=	A.dblCostUnitQty 
+													-- CASE 
+													-- WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
+													-- THEN
+													-- (
+													-- 	CASE 
+													-- 	WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
+													-- 	THEN contractItemCostUOM.dblUnitQty
+													-- 	ELSE A.dblCostUnitQty 
+													-- 	END
+													-- )
+													-- ELSE A.dblCostUnitQty 
+													-- END
+			,[intCostUOMId]						=	A.intCostUOMId
+													-- CASE 
+													-- WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+													-- THEN 
+													-- (
+													-- 	CASE 
+													-- 	WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
+													-- 	THEN ctDetail.intPriceItemUOMId
+													-- 	ELSE A.intCostUOMId 
+													-- 	END
+													-- )
+													-- ELSE A.intCostUOMId 
+													-- END
 			,[strCostUOM]						=	CASE 
 													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
