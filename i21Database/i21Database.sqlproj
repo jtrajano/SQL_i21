@@ -291,6 +291,7 @@
     <Build Include="dbo\Tables\tblTMOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchyParam.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
