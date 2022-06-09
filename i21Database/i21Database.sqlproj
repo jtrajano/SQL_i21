@@ -389,7 +389,6 @@
     <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessERPFeed.sql" />
     <Build Include="dbo\Views\vyuTRCustomerFreightList.sql" />
-    <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <Build Include="dbo\Tables\tblIPBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>

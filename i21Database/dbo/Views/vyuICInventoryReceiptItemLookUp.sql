@@ -250,7 +250,6 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		,dblLotTotalTare = ISNULL(receiptLot.dblLotTotalTare, 0)
 		,dblLotTotalNet = ISNULL(receiptLot.dblLotTotalNet, 0)
 		,ReceiptItem.intComputeItemTotalOption
-		,strLongUPCCode = COALESCE(ItemWeightUOM.strLongUPCCode, ItemUOM.strLongUPCCode, '')
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
