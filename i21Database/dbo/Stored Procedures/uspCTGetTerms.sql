@@ -10,7 +10,8 @@ BEGIN
 	IF (SELECT COUNT(*) FROM  tblAPVendorTerm WHERE intEntityVendorId = ISNULL(@intEntityId,0)) <= 1
 	BEGIN
 		SELECT	TM.intTermID,
-				TM.strTerm
+				TM.strTerm,
+				TM.intBalanceDue
 		FROM	tblSMTerm	TM
 		WHERE	TM.strTerm    LIKE	'%' + @strTerm COLLATE Latin1_General_CI_AS + '%'
 		AND		TM.intTermID	=	(CASE WHEN @intTermID > 0 THEN @intTermID ELSE TM.intTermID END)
@@ -19,7 +20,8 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT	TM.intTermID,
-				TM.strTerm
+				TM.strTerm,
+				TM.intBalanceDue
 		FROM	tblAPVendorTerm	VT
 		JOIN	tblSMTerm	TM ON VT.intTermId = TM.intTermID AND VT.intEntityVendorId = @intEntityId
 		WHERE	TM.strTerm	  LIKE	'%' + @strTerm COLLATE Latin1_General_CI_AS + '%'
