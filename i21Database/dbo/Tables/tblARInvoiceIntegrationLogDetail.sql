@@ -30,3 +30,8 @@
 );
 GO
 CREATE INDEX [idx_tblARInvoiceIntegrationLogDetail] ON [dbo].[tblARInvoiceIntegrationLogDetail] (intIntegrationLogId, intIntegrationLogDetailId)
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceIntegrationLogDetail_ysnHeader] 
+	ON [dbo].[tblARInvoiceIntegrationLogDetail] ([ysnHeader],[ysnSuccess],[ysnPost]) 
+INCLUDE ([intIntegrationLogId],[strPostingMessage],[strBatchId])
+GO
