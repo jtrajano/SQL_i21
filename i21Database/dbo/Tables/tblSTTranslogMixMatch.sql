@@ -18,3 +18,7 @@ CREATE TABLE [tblSTTranslogMixMatch]
 	[intConcurrencyId] int NULL
 )
 
+CREATE NONCLUSTERED INDEX [IX_intTermMsgSN]
+    ON [dbo].[tblSTTranslogMixMatch]([intTermMsgSN] ASC);
+
+
