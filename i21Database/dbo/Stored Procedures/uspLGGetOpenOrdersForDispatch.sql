@@ -74,5 +74,8 @@ BEGIN
 	LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
 	OUTER APPLY (SELECT TOP 1 dblStandardWeight FROM tblICItemUOM WHERE intItemId = TMS.intProduct AND ysnStockUnit = 1) SW
 	WHERE TMO.strOrderStatus = 'Generated'
+	AND NOT EXISTS (SELECT 1 FROM tblLGDispatchOrderDetail DOD 
+		INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOD.intDispatchOrderId 
+		WHERE DO.intSourceType = 2 AND DOD.intTMDispatchId = TMO.intDispatchId)
 END
 GO
