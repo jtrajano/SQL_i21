@@ -139,6 +139,9 @@
     [ysnConsMeterReadingsForDollars] BIT NOT NULL DEFAULT 1,
     [ysnConsAddOutsideFuelDiscounts] BIT NOT NULL DEFAULT 1,
     [dblConsCommissionPerGallonOfDealer] DECIMAL(18,6) NOT NULL DEFAULT 0,
+    [ysnConsBankDepositDraft] BIT NOT NULL DEFAULT 1,
+    [intConsBankDepositDraftId] INT NULL,
+    [intConsARAccountId] INT NULL,
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
@@ -158,7 +161,9 @@
 	--CONSTRAINT [FK_tblSTStore_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblSTStore_tblEMEntity_intCheckoutCustomerId] FOREIGN KEY ([intCheckoutCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerChargesItemId] FOREIGN KEY ([intCustomerChargesItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblSTStore_tblICItem_intOverShortItemId] FOREIGN KEY ([intOverShortItemId]) REFERENCES [tblICItem]([intItemId])
+	CONSTRAINT [FK_tblSTStore_tblICItem_intOverShortItemId] FOREIGN KEY ([intOverShortItemId]) REFERENCES [tblICItem]([intItemId]),
+    CONSTRAINT [FK_tblSTStore_tblGLAccount_intConsBankDepositDraftId] FOREIGN KEY([intConsBankDepositDraftId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+    CONSTRAINT [FK_tblSTStore_tblGLAccount_intConsARAccountId] FOREIGN KEY([intConsARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
   );
   GO
 
