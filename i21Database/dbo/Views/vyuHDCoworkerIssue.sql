@@ -27,7 +27,7 @@ FROM (
 																			THEN 'Inactive but has a Time Entry. '
 																		ELSE ''
 																  END
-		   ,strUnapprovedTimeEntry					      =  CASE WHEN  ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval'))
+		   ,strUnapprovedTimeEntry					      =  CASE WHEN  hw.intTicketHoursWorkedId IS NOT NULL AND ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval'))
 																		THEN 'Has unapproved Time Entry.'
 																	ELSE ''
 															 END 
