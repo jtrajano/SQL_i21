@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspPRProcessTimecardToPayGroup]        
+﻿CREATE PROCEDURE [dbo].[uspPRProcessTimecardToPayGroup]        
  @strDepartmentIds NVARCHAR(MAX) = ''        
  ,@dtmBeginDate  DATETIME        
  ,@dtmEndDate  DATETIME        
