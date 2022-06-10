@@ -151,6 +151,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
 	AND ID.intContractDetailId IS NOT NULL
 	AND ID.strSessionId = @strSessionId
+	AND ID.strType <> 'Service Charge'
 
 --DESTINATION WEIGHTS/GRADES
 IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
