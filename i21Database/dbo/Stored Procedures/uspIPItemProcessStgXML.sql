@@ -3553,7 +3553,7 @@ BEGIN TRY
 				,dblVolume = IA.dblVolume
 				,intVolumeUOMId = IA.intVolumeUOMId
 				,dblMaxQty = IA.dblMaxQty
-				,ysnStockUOM = IA.ysnStockUOM
+				--,ysnStockUOM = IA.ysnStockUOM
 				,intSort = IA.intSort
 				,intConcurrencyId = IA.intConcurrencyId
 				,dtmDateCreated = IA.dtmDateCreated
@@ -3583,7 +3583,7 @@ BEGIN TRY
 				,dblVolume
 				,intVolumeUOMId
 				,dblMaxQty
-				,ysnStockUOM
+				--,ysnStockUOM
 				,intSort
 				,intConcurrencyId
 				,dtmDateCreated
@@ -3609,7 +3609,7 @@ BEGIN TRY
 				,dblVolume
 				,intVolumeUOMId
 				,dblMaxQty
-				,ysnStockUOM
+				--,ysnStockUOM
 				,intSort
 				,intConcurrencyId
 				,dtmDateCreated

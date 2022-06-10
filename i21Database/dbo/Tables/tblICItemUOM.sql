@@ -33,8 +33,8 @@ Type the overview for the table here.
 		[dblVolume] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intVolumeUOMId] INT NULL,
 		[dblMaxQty] NUMERIC(18, 6) NULL DEFAULT ((0)),
-        [dblStandardWeight] NUMERIC(38, 20) NULL DEFAULT ((0)),
-		[ysnStockUOM] BIT NULL,
+        [dblStandardWeight] NUMERIC(38, 20) NULL DEFAULT ((0)),		
+		[ysnStockUOM] AS ([ysnStockUnit]), --[ysnStockUOM] BIT NULL, -- Convert ysnStockUOM into a calculated column to minimize code impact.
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
         [dtmDateCreated] DATETIME NULL,

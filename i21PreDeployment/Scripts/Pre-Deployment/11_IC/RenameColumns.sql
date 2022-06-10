@@ -20,3 +20,15 @@ BEGIN
     END
 END 
 GO
+
+-- Convert ysnStockUOM into a calculated column. 
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblICItemUOM]') AND type in (N'U')) 
+BEGIN 
+    IF	NOT EXISTS (SELECT TOP 1 1 FROM sys.computed_columns WHERE NAME  = N'ysnStockUOM' AND OBJECT_ID = OBJECT_ID(N'tblICItemUOM')) 
+		AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnStockUOM' AND OBJECT_ID = OBJECT_ID(N'tblICItemUOM'))
+    BEGIN
+        EXEC ('ALTER TABLE tblICItemUOM DROP COLUMN ysnStockUOM')
+		EXEC ('ALTER TABLE tblICItemUOM ADD [ysnStockUOM] AS ([ysnStockUnit])')
+    END
+END 
+GO
