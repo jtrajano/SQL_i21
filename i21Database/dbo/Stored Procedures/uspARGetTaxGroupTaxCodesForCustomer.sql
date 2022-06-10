@@ -202,12 +202,14 @@ BEGIN
 		  AND EX.intTaxGroupId = P.intTaxGroupId 
 		  AND EX.intTaxCodeId = TC.intTaxCodeId
 		  AND EX.intTaxClassId= TC.intTaxClassId
+		  AND EX.intLineItemId = P.intLineItemId
 	) E
 	OUTER APPLY (
 		SELECT * 
 		FROM ##TAXCODERATEDETAILS CRD 
 		WHERE CRD.intTaxGroupId = P.intTaxGroupId 
 		  AND CRD.intTaxCodeId = TC.intTaxCodeId
+		  AND CRD.intLineItemId = P.intLineItemId
 		  AND (P.intItemUOMId IS NULL OR CRD.intItemUOMId = P.intItemUOMId)
 		  AND (P.intCurrencyId IS NULL OR CRD.intCurrencyId = P.intCurrencyId)
 	) R
