@@ -223,5 +223,6 @@ FROM (
 			Lot.intWarrantStatus IS NULL
 			OR Lot.intWarrantStatus <> 1 -- Not Pledged
 		)
+		AND Receipt.ysnPosted = 1
 	) InvLots
 GO
