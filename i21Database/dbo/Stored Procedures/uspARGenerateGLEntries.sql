@@ -28,8 +28,8 @@ DECLARE @ItemsForPost AS ItemCostingTableType
 
 IF @Post = 1
 
-INSERT INTO @ItemsForPost
-    ([intItemId]
+INSERT INTO @ItemsForPost(
+	 [intItemId]
     ,[intItemLocationId]
     ,[intItemUOMId]
     ,[dtmDate]
@@ -152,10 +152,10 @@ END
 DECLARE  @InTransitItems                ItemInTransitCostingTableType 
 		,@FOB_ORIGIN                    INT = 1
 		,@FOB_DESTINATION               INT = 2	
-				
+
 IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM tblARPostInvoiceDetail WHERE intSourceId = 2 AND strSessionId = @strSessionId))
-INSERT INTO @InTransitItems
-    ([intItemId] 
+INSERT INTO @InTransitItems(
+	 [intItemId] 
     ,[intItemLocationId] 
     ,[intItemUOMId] 
     ,[dtmDate] 
@@ -214,8 +214,8 @@ WHERE strSessionId = @strSessionId
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 BEGIN		 --Call the post routine 
-	INSERT INTO tblARPostInvoiceGLEntries
-		([dtmDate] 
+	INSERT INTO tblARPostInvoiceGLEntries(
+		 [dtmDate] 
 		,[strBatchId]
 		,[intAccountId]
 		,[dblDebit]
@@ -383,34 +383,24 @@ INNER JOIN tblARInvoice I ON GL.strTransactionId = I.strInvoiceNumber
 WHERE GL.intSourceEntityId IS NULL
   AND GL.strSessionId = @strSessionId
 
-IF EXISTS(
+IF @Post = 1 AND EXISTS(
 	SELECT TOP 1 1
 	FROM tblARCompanyPreference
 	WHERE ysnOverrideLineOfBusinessSegment = 1
 )
 BEGIN
 	UPDATE ARPIGLE
-	SET ARPIGLE.intAccountId = ISNULL(LOB.intAccountId, ARPIGLE.intAccountId)
+	SET ARPIGLE.intAccountId = LOB.intAccountId
 	FROM tblARPostInvoiceGLEntries ARPIGLE
+	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPIGLE.intTransactionId = ARPIH.intInvoiceId
 	OUTER APPLY (
-		SELECT TOP 1 intLineOfBusinessId
-		FROM tblARInvoice
-		WHERE intInvoiceId = ARPIGLE.intTransactionId
-		AND  strTransactionForm = 'Invoice'
-	) INVOICE
-	OUTER APPLY (
-		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPIGLE.[intAccountId], ISNULL(intSegmentCodeId, 0)), 0)
+		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPIGLE.intAccountId, ISNULL(intSegmentCodeId, 0)), ARPIGLE.intAccountId)
 		FROM tblSMLineOfBusiness
-		WHERE intLineOfBusinessId = ISNULL(INVOICE.intLineOfBusinessId, 0)
+		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
 	) LOB
-	OUTER APPLY (
-		SELECT TOP 1 strAccountGroup
-		FROM tblGLAccountGroup GLAC
-		INNER JOIN tblGLAccount GLA ON GLAC.intAccountGroupId = GLA.intAccountGroupId
-		WHERE GLA.intAccountId = ARPIGLE.intAccountId
-	) ACCOUNTGROUP
-	WHERE strBatchId = @BatchId
-	AND ACCOUNTGROUP.strAccountGroup IN ('Cost of Goods Sold', 'Sales', 'Expense')
+	WHERE ARPIGLE.strSessionId = @strSessionId
+	AND ARPIGLE.strCode = 'IC'
+	AND ARPIGLE.[dblDebit] > 0 -- COGS Only
 END
- 
+
 RETURN 0
