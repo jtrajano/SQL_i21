@@ -652,7 +652,25 @@ BEGIN
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
 				--FOR Price hierarchy --
-				INNER JOIN vyuSTItemHierarchyPricing vyupriceHierarchy
+				INNER JOIN ( 
+					SELECT SIP.intItemId, intItemLocationId, SIP.intItemUOMId,
+						CASE WHEN UOM.ysnStockUnit = 1
+							THEN dblSalePrice 
+						 ELSE 
+							(
+								SELECT UOM.dblUnitQty * HP.dblSalePrice 
+								FROM vyuSTItemHierarchyPricing HP
+								JOIN tblICItemUOM UOMM
+									ON HP.intItemUOMId = UOMM.intItemUOMId
+									AND UOMM.ysnStockUnit = 1
+								WHERE HP.intItemId = SIP.intItemId
+								AND HP.intItemLocationId = SIP.intItemLocationId
+							)
+						END AS dblSalePrice
+					 FROM vyuSTItemHierarchyPricing SIP
+					 JOIN tblICItemUOM UOM
+					 ON SIP.intItemUOMId = UOM.intItemUOMId
+				 ) vyupriceHierarchy
 					ON I.intItemId = vyupriceHierarchy.intItemId 
 					AND IL.intItemLocationId = vyupriceHierarchy.intItemLocationId
 					AND UOM.intItemUOMId = vyupriceHierarchy.intItemUOMId
