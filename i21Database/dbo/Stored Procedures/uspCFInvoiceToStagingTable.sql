@@ -147,517 +147,600 @@ BEGIN TRY
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
-	DELETE FROM tblCFInvoiceStagingTable WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
-	INSERT INTO tblCFInvoiceStagingTable
-	(
-	 intCustomerGroupId
-	,intTransactionId
-	,intOdometer
-	,intOdometerAging 
-	,intInvoiceId
-	,intProductId
-	,intCardId
-	,intAccountId
-	,intInvoiceCycle
-	,intSubAccountId
-	,intCustomerId
-	,intDiscountScheduleId
-	,intTermsCode
-	,intTermsId
-	,intARItemId
-	,intSalesPersonId
-	,intTermID
-	,intBalanceDue
-	,intDiscountDay
-	,intDayofMonthDue
-	,intDueNextMonth
-	,intSort
-	,strGroupName
-	,strCustomerNumber
-	,strShipTo
-	,strBillTo
-	,strCompanyName
-	,strCompanyAddress
-	,strType
-	,strCustomerName
-	,strLocationName
-	,strInvoiceNumber
-	,strTransactionId
-	,strTransactionType
-	,strInvoiceReportNumber
-	,strTempInvoiceReportNumber
-	,strMiscellaneous
-	,strName
-	,strCardNumber
-	,strCardDescription
-	,strNetwork
-	,strInvoiceCycle
-	,strPrimarySortOptions
-	,strSecondarySortOptions
-	,strPrintRemittancePage
-	,strPrintPricePerGallon
-	,strPrintSiteAddress
-	,strSiteNumber
-	,strSiteName
-	,strProductNumber
-	,strItemNo
-	,strDescription
-	,strVehicleNumber
-	,strVehicleDescription
-	,strTaxState
-	,strDepartment
-	,strSiteType
-	,strState
-	,strSiteAddress
-	,strSiteCity
-	,strPrintTimeStamp
-	,strEmailDistributionOption 
-	,strEmail
-	,strDepartmentDescription
-	,strShortName
-	,strProductDescription
-	,strItemNumber
-	,strItemDescription
-	,strTerm
-	,strTermCode
-	,strTermType
-	,dtmTransactionDate
-	,dtmBillingDate
-	,dtmDate
-	,dtmPostedDate
-	,dtmDiscountDate
-	,dtmDueDate
-	,dtmInvoiceDate
-	,dblTotalMiles
-	,dblQuantity
-	,dblCalculatedTotalAmount
-	,dblOriginalTotalAmount
-	,dblCalculatedGrossAmount
-	,dblOriginalGrossAmount
-	,dblCalculatedNetAmount
-	,dblOriginalNetAmount
-	,dblMargin
-	,dblTotalTax
-	,dblTotalSST
-	,dblTaxExceptSST
-	,dblInvoiceTotal
-	,dblTotalQuantity
-	,dblTotalGrossAmount
-	,dblTotalNetAmount
-	,dblTotalAmount
-	,dblTotalTaxAmount
-	,dblEligableGallon
-	,TotalFET
-	,TotalSET
-	,TotalSST
-	,TotalLC
-	,dblDiscountRate
-	,dblDiscount
-	,dblAccountTotalAmount
-	,dblAccountTotalDiscount
-	,dblAccountTotalLessDiscount
-	,dblAccountTotalDiscountQuantity
-	,dblDiscountEP
-	,dblAPR
-	,ysnPrintMiscellaneous
-	,ysnSummaryByCard
-	,ysnSummaryByDepartmentProduct
-	,ysnSummaryByDepartment
-	,ysnSummaryByMiscellaneous
-	,ysnSummaryByProduct
-	,ysnSummaryByVehicle
-	,ysnSummaryByCardProd	 
-	,ysnSummaryByDeptCardProd
-	,ysnPrintTimeOnInvoices
-	,ysnPrintTimeOnReports
-	,ysnInvalid
-	,ysnPosted
-	,ysnIncludeInQuantityDiscount	
-	,ysnMPGCalculation
-	,ysnShowOnCFInvoice
-	,strDiscountSchedule
-	,ysnPostForeignSales
-	,ysnSummaryByDeptVehicleProd
-	,ysnDepartmentGrouping
-	,ysnPostedCSV
-	,strGuid
-	,strUserId
-	,ysnExpensed
-	,strStatementType
-	,strDriverPinNumber		
-	,strDriverDescription	
-	,intDriverPinId			
-	,ysnSummaryByDriverPin	
-	,strDetailDisplay
-	,strDetailDisplayValue
-	,strDetailDisplayLabel	
-	,ysnShowVehicleDescriptionOnly	
-	,ysnShowDriverPinDescriptionOnly
-	,ysnPageBreakByPrimarySortOrder
-	,ysnSummaryByDeptDriverPinProd
-	,strDepartmentGrouping
-	)
-	SELECT 
-	 intCustomerGroupId
-	,cfInvRpt.intTransactionId
-	,cfInvRpt.intOdometer
-	----------------------------------------------------------------------------------
-	,intOdometerAging = (CASE 
-						WHEN cfInvRpt.strPrimarySortOptions = 'Card' 
-						THEN 
-							CASE WHEN (cfCardOdom.intOdometer IS NULL)
-							THEN 
-								ISNULL(cfInvRpt.intOdometer,0)
-							ELSE
-								cfCardOdom.intOdometer
-       						END
-                        WHEN cfInvRpt.strPrimarySortOptions = 'Vehicle' 
-							THEN 
-								CASE 
-								WHEN ISNULL(cfInvRpt.intVehicleId, 0) =  0
-									THEN 
-										CASE WHEN (cfCardOdom.intOdometer IS NULL)
-										THEN 
-											ISNULL(cfInvRpt.intOdometer,0)
-										ELSE
-											cfCardOdom.intOdometer
-       									END
-									ELSE
-										CASE WHEN (cfVehicleOdom.intOdometer IS NULL)
-										THEN 
-											ISNULL(cfInvRpt.intOdometer,0)
-										ELSE
-											cfVehicleOdom.intOdometer
-       									END 
-								END
-						 WHEN cfInvRpt.strPrimarySortOptions = 'Miscellaneous' 
-							THEN 
-								CASE 
-								WHEN strMiscellaneous =  '' OR strMiscellaneous IS NULL
-									THEN 
-										CASE WHEN (cfCardOdom.intOdometer IS NULL)
-										THEN 
-											ISNULL(cfInvRpt.intOdometer,0)
-										ELSE
-											cfCardOdom.intOdometer
-       									END
-									ELSE ISNULL((SELECT TOP 1 ISNULL(intOdometer,0) AS intOdometer FROM (
-											SELECT iocftran.*  
-												FROM   dbo.tblCFTransaction as iocftran
-												LEFT JOIN tblCFItem as iocfitem
-												ON iocftran.intProductId = iocfitem.intItemId
-												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
-												AND strMiscellaneous IS NOT NULL
-												AND strMiscellaneous != ''
-												AND ISNULL(ysnPosted,0) = 1
-											) as miscBase
-										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
-										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
-										ORDER  BY dtmTransactionDate DESC),ISNULL(cfInvRpt.intOdometer,0))
-								END
-						ELSE 0
-					END)
-	----------------------------------------------------------------------------------
-	,intInvoiceId
-	,intProductId
-	,intCardId
-	,cfInvRpt.intAccountId
-	,intInvoiceCycle
-	,intSubAccountId
-	,intCustomerId
-	,intDiscountScheduleId
-	,intTermsCode
-	,intTermsId
-	,intARItemId
-	,intSalesPersonId
-	,intTermID
-	,intBalanceDue
-	,intDiscountDay
-	,intDayofMonthDue
-	,intDueNextMonth
-	,intSort
-	,strGroupName
-	,strCustomerNumber
-	,strShipTo
-	,strBillTo
-	,strCompanyName
-	,strCompanyAddress
-	,strType
-	,strCustomerName
-	,strLocationName
-	,strInvoiceNumber
-	,strTransactionId
-	,strTransactionType
-	,strInvoiceReportNumber
-	,strTempInvoiceReportNumber
-	,ISNULL(strMiscellaneous,'')
-	,strName
-	,strCardNumber = CASE WHEN ((select top 1 strNetworkType from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) = 'Voyager')
-					 THEN  
-						RTRIM(LTRIM(strCardNumber + dbo.fnCFGetLuhn(((select top 1 strIso from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) + strCardNumber ) ,0)))
-					 ELSE 
-						strCardNumber
-					 END
-	,strCardDescription
-	,strNetwork
-	,strInvoiceCycle
-	,strPrimarySortOptions
-	,strSecondarySortOptions
-	,strPrintRemittancePage
-	,strPrintPricePerGallon
-	,strPrintSiteAddress
-	,strSiteNumber
-	,strSiteName
-	,strProductNumber
-	,strItemNo
-	,strDescription
-	,strVehicleNumber
-	,strVehicleDescription
-	,strTaxState
-	,strDepartment
-	,strSiteType
-	,strState
-	,strSiteAddress
-	,strSiteCity
-	,strPrintTimeStamp
-	,ISNULL(strEmailDistributionOption,'') 
-	,strEmail
-	,cfInvRpt.strDepartmentDescription
-	,strShortName
-	,strProductDescription
-	,strItemNumber
-	,strItemDescription
-	,strTerm
-	,strTermCode
-	,strTermType
-	,dtmTransactionDate
-	,dtmBillingDate
-	,dtmDate
-	,dtmPostedDate
-	,dtmDiscountDate
-	,dtmDueDate
-	,@dtmInvoiceDate
-	,dblTotalMiles = (CASE 
-						WHEN cfInvRpt.strPrimarySortOptions = 'Card' 
-						THEN
-							CASE WHEN  cfCardOdom.intOdometer IS NULL 
-								THEN 0
-								ELSE cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
-							END
-                        WHEN cfInvRpt.strPrimarySortOptions = 'Vehicle' 
-						THEN 
-							CASE 
-								WHEN ISNULL(cfInvRpt.intVehicleId, 0) =  0
-								THEN 
-									CASE WHEN  cfCardOdom.intOdometer IS NULL 
-										THEN 0
-										ELSE cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
-									END
-								ELSE 
-									CASE WHEN  cfVehicleOdom.intOdometer IS NULL 
-										THEN 0
-										ELSE cfInvRpt.intOdometer -	ISNULL (cfVehicleOdom.intOdometer, 0) 
-									END
-							END
-							WHEN cfInvRpt.strPrimarySortOptions = 'Miscellaneous' 
-							THEN 
-								CASE 
-								WHEN cfInvRpt.strMiscellaneous =  '' OR cfInvRpt.strMiscellaneous IS NULL
-								THEN 
-									CASE WHEN  cfCardOdom.intOdometer IS NULL 
-										THEN 0
-										ELSE cfInvRpt.intOdometer -	ISNULL (cfCardOdom.intOdometer, 0) 
-									END
-								ELSE 
-									CASE
-										WHEN  
-										(SELECT TOP 1 ISNULL(intOdometer,0) AS intOdometer FROM (
-											SELECT iocftran.*  
-												FROM   dbo.tblCFTransaction as iocftran
-												LEFT JOIN tblCFItem as iocfitem
-												ON iocftran.intProductId = iocfitem.intItemId
-												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
-												AND strMiscellaneous IS NOT NULL
-												AND strMiscellaneous != ''
-												AND ISNULL(ysnPosted,0) = 1
-											) as miscBase
-										WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
-										AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
-										ORDER  BY dtmTransactionDate DESC)  IS NULL
+	
+	IF OBJECT_ID('tempdb..#TEMPSTAGINGTABLE') IS NOT NULL DROP TABLE #TEMPSTAGINGTABLE
+	SELECT intCustomerGroupId
+		,cfInvRpt.intTransactionId
+		,cfInvRpt.intOdometer
+		,intOdometerAging = CAST(0 AS INT)
+		,intInvoiceId
+		,intProductId
+		,intCardId
+		,cfInvRpt.intAccountId
+		,intInvoiceCycle
+		,intSubAccountId
+		,intCustomerId
+		,intDiscountScheduleId
+		,intTermsCode
+		,intTermsId
+		,intARItemId
+		,intSalesPersonId
+		,intTermID
+		,intBalanceDue
+		,intDiscountDay
+		,intDayofMonthDue
+		,intDueNextMonth
+		,intSort
+		,strGroupName
+		,strCustomerNumber
+		,strShipTo
+		,strBillTo
+		,strCompanyName
+		,strCompanyAddress
+		,strType
+		,strCustomerName
+		,strLocationName
+		,strInvoiceNumber
+		,strTransactionId
+		,strTransactionType
+		,strInvoiceReportNumber
+		,strTempInvoiceReportNumber
+		,strMiscellaneous = ISNULL(strMiscellaneous,'')
+		,strName
+		,strCardNumber = strCardNumber 
+		,strCardDescription
+		,strNetwork
+		,strInvoiceCycle
+		,strPrimarySortOptions
+		,strSecondarySortOptions
+		,strPrintRemittancePage
+		,strPrintPricePerGallon
+		,strPrintSiteAddress
+		,strSiteNumber
+		,strSiteName
+		,strProductNumber
+		,strItemNo
+		,strDescription
+		,strVehicleNumber
+		,strVehicleDescription
+		,strTaxState
+		,strDepartment
+		,strSiteType
+		,strState
+		,strSiteAddress
+		,strSiteCity
+		,strPrintTimeStamp
+		,strEmailDistributionOption	= ISNULL(strEmailDistributionOption,'') 
+		,strEmail
+		,cfInvRpt.strDepartmentDescription
+		,strShortName
+		,strProductDescription
+		,strItemNumber
+		,strItemDescription
+		,strTerm
+		,strTermCode
+		,strTermType
+		,dtmTransactionDate
+		,dtmBillingDate
+		,dtmDate
+		,dtmPostedDate
+		,dtmDiscountDate
+		,dtmDueDate
+		,dtmInvoiceDate	= @dtmInvoiceDate
+		,dblTotalMiles		= CAST(0 AS NUMERIC(18,6))
+		,ISNULL(dblQuantity					  ,0) AS dblQuantity
+		,ISNULL(dblCalculatedTotalAmount	  ,0) AS dblCalculatedTotalAmount
+		,ISNULL(dblOriginalTotalAmount		  ,0) AS dblOriginalTotalAmount
+		,ISNULL(dblCalculatedGrossAmount	  ,0) AS dblCalculatedGrossAmount
+		,ISNULL(dblOriginalGrossAmount		  ,0) AS dblOriginalGrossAmount
+		,ISNULL(dblCalculatedNetAmount		  ,0) AS dblCalculatedNetAmount
+		,ISNULL(dblOriginalNetAmount		  ,0) AS dblOriginalNetAmount
+		,ISNULL(dblMargin					  ,0) AS dblMargin
+		,ISNULL(dblTotalTax					  ,0) AS dblTotalTax
+		,ISNULL(dblTotalSST					  ,0) AS dblTotalSST
+		,ISNULL(dblTaxExceptSST				  ,0) AS dblTaxExceptSST
+		,ISNULL(dblAccountTotalAmount 		  ,0) AS dblInvoiceTotal--dblAccountTotalAmount 
+		,ISNULL(dblTotalQuantity			  ,0) AS dblTotalQuantity
+		,ISNULL(dblTotalGrossAmount			  ,0) AS dblTotalGrossAmount
+		,ISNULL(dblTotalNetAmount			  ,0) AS dblTotalNetAmount
+		,ISNULL(dblTotalAmount				  ,0) AS dblTotalAmount
+		,ISNULL(dblTotalTaxAmount			  ,0) AS dblTotalTaxAmount
+		,ISNULL(dblEligableGallon			  ,0) AS dblEligableGallon
+		,TotalFET
+		,TotalSET
+		,TotalSST
+		,TotalLC
+		,ISNULL(dblDiscountRate						,0) AS dblDiscountRate
+		,ISNULL(dblDiscount							,0) AS dblDiscount
+		,ISNULL(dblAccountTotalAmount				,0) AS dblAccountTotalAmount
+		,ISNULL(dblAccountTotalDiscount				,0) AS dblAccountTotalDiscount
+		,ISNULL(dblAccountTotalLessDiscount			,0) AS dblAccountTotalLessDiscount
+		,ISNULL(dblAccountTotalDiscountQuantity		,0) AS dblAccountTotalDiscountQuantity
+		,ISNULL(dblDiscountEP						,0) AS dblDiscountEP
+		,dblAPR
+		,ysnPrintMiscellaneous
+		,ysnSummaryByCard			
+		,ysnSummaryByDepartmentProduct
+		,ysnSummaryByDepartment		
+		,ysnSummaryByMiscellaneous	
+		,ysnSummaryByProduct			
+		,ysnSummaryByVehicle			
+		,ysnSummaryByCardProd	 	
+		,ysnSummaryByDeptCardProd	
+		,ysnPrintTimeOnInvoices		
+		,ysnPrintTimeOnReports		
+		,ysnInvalid
+		,ysnPosted
+		,ysnIncludeInQuantityDiscount
+		,cfInvRpt.ysnMPGCalculation
+		,cfInvRptDcnt.ysnShowOnCFInvoice
+		,cfInvRptDcnt.strDiscountSchedule
+		,cfInvRpt.ysnPostForeignSales
+		,ysnSummaryByDeptVehicleProd
+		,ysnDepartmentGrouping
+		,ysnPostedCSV
+		,strGuid = @Guid
+		,strUserId = @UserId
+		,ysnExpensed
+		,strStatementType = @StatementType 
+		,strDriverPinNumber		
+		,strDriverDescription	
+		,intDriverPinId			
+		,ysnSummaryByDriverPin	
+		,strDetailDisplay	
+		,strDetailDisplayValue = CASE WHEN LOWER(strDetailDisplay) = 'card'
+										THEN strCardNumber + ' - ' + strCardDescription
 
-										THEN 0 
-
-										ELSE 
-											cfInvRpt.intOdometer -	(SELECT TOP 1 ISNULL(intOdometer,0) AS intOdometer FROM (
-											SELECT iocftran.*  
-												FROM   dbo.tblCFTransaction as iocftran
-												LEFT JOIN tblCFItem as iocfitem
-												ON iocftran.intProductId = iocfitem.intItemId
-												WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
-												AND strMiscellaneous IS NOT NULL
-												AND strMiscellaneous != ''
-												AND ISNULL(ysnPosted,0) = 1
-											) as miscBase
-											WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
-											AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
-											ORDER  BY dtmTransactionDate DESC) 
-									END
-							END
-						ELSE 0
-					END)
-
-	,ISNULL(dblQuantity					  ,0) AS dblQuantity
-	,ISNULL(dblCalculatedTotalAmount	  ,0) AS dblCalculatedTotalAmount
-	,ISNULL(dblOriginalTotalAmount		  ,0) AS dblOriginalTotalAmount
-	,ISNULL(dblCalculatedGrossAmount	  ,0) AS dblCalculatedGrossAmount
-	,ISNULL(dblOriginalGrossAmount		  ,0) AS dblOriginalGrossAmount
-	,ISNULL(dblCalculatedNetAmount		  ,0) AS dblCalculatedNetAmount
-	,ISNULL(dblOriginalNetAmount		  ,0) AS dblOriginalNetAmount
-	,ISNULL(dblMargin					  ,0) AS dblMargin
-	,ISNULL(dblTotalTax					  ,0) AS dblTotalTax
-	,ISNULL(dblTotalSST					  ,0) AS dblTotalSST
-	,ISNULL(dblTaxExceptSST				  ,0) AS dblTaxExceptSST
-	,ISNULL(dblAccountTotalAmount 		  ,0) AS dblAccountTotalAmount 
-	,ISNULL(dblTotalQuantity			  ,0) AS dblTotalQuantity
-	,ISNULL(dblTotalGrossAmount			  ,0) AS dblTotalGrossAmount
-	,ISNULL(dblTotalNetAmount			  ,0) AS dblTotalNetAmount
-	,ISNULL(dblTotalAmount				  ,0) AS dblTotalAmount
-	,ISNULL(dblTotalTaxAmount			  ,0) AS dblTotalTaxAmount
-	,ISNULL(dblEligableGallon			  ,0) AS dblEligableGallon
-	,TotalFET
-	,TotalSET
-	,TotalSST
-	,TotalLC
-	,ISNULL(dblDiscountRate						,0) AS dblDiscountRate
-	,ISNULL(dblDiscount							,0) AS dblDiscount
-	,ISNULL(dblAccountTotalAmount				,0) AS dblAccountTotalAmount
-	,ISNULL(dblAccountTotalDiscount				,0) AS dblAccountTotalDiscount
-	,ISNULL(dblAccountTotalLessDiscount			,0) AS dblAccountTotalLessDiscount
-	,ISNULL(dblAccountTotalDiscountQuantity		,0) AS dblAccountTotalDiscountQuantity
-	,ISNULL(dblDiscountEP						,0) AS dblDiscountEP
-	,dblAPR
-	,ysnPrintMiscellaneous
-	,ysnSummaryByCard			
-	,ysnSummaryByDepartmentProduct
-	,ysnSummaryByDepartment		
-	,ysnSummaryByMiscellaneous	
-	,ysnSummaryByProduct			
-	,ysnSummaryByVehicle			
-	,ysnSummaryByCardProd	 	
-	,ysnSummaryByDeptCardProd	
-	,ysnPrintTimeOnInvoices		
-	,ysnPrintTimeOnReports		
-	,ysnInvalid
-	,ysnPosted
-	,ysnIncludeInQuantityDiscount
-	,cfInvRpt.ysnMPGCalculation
-	,cfInvRptDcnt.ysnShowOnCFInvoice
-	,cfInvRptDcnt.strDiscountSchedule
-	,cfInvRpt.ysnPostForeignSales
-	,ysnSummaryByDeptVehicleProd
-	,ysnDepartmentGrouping
-	,ysnPostedCSV
-	,@Guid
-	,@UserId
-	,ysnExpensed
-	,@StatementType 
-	,strDriverPinNumber		
-	,strDriverDescription	
-	,intDriverPinId			
-	,ysnSummaryByDriverPin	
-	,strDetailDisplay	
-	,strDetailDisplayValue = CASE WHEN LOWER(strDetailDisplay) = 'card'
-									THEN strCardNumber + ' - ' + strCardDescription
-
-								  WHEN LOWER(strDetailDisplay) = 'vehicle'
-									THEN (CASE	
-											WHEN ISNULL(strVehicleNumber,'') != '' THEN 
-												CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
-											ELSE (CASE	
-													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 
-														CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
-													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN strCardNumber + ' - ' + strCardDescription
-													WHEN LOWER(strPrimarySortOptions) = 'driver pin' THEN strCardNumber + ' - ' + strCardDescription
-													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 
-														CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
-												  END)
-										  END)
-
-								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
-									THEN (CASE
-											WHEN ISNULL(strDriverPinNumber,'') != '' THEN
-												CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
-											ELSE (CASE 
-													WHEN LOWER(strPrimarySortOptions) = 'card' THEN CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
-													WHEN LOWER(strPrimarySortOptions) = 'vehicle' THEN strCardNumber + ' - ' + strCardDescription
-													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
-												  END)
+									WHEN LOWER(strDetailDisplay) = 'vehicle'
+										THEN (CASE	
+												WHEN ISNULL(strVehicleNumber,'') != '' THEN 
+													CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
+												ELSE (CASE	
+														WHEN LOWER(strPrimarySortOptions) = 'card' THEN 
+															CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
+														WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN strCardNumber + ' - ' + strCardDescription
+														WHEN LOWER(strPrimarySortOptions) = 'driver pin' THEN strCardNumber + ' - ' + strCardDescription
+														WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 
+															CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
+													END)
 											END)
-							 END
 
-	,strDetailDisplayLabel = CASE WHEN LOWER(strDetailDisplay) = 'card'
-									THEN 'Card'
+									WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
+										THEN (CASE
+												WHEN ISNULL(strDriverPinNumber,'') != '' THEN
+													CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
+												ELSE (CASE 
+														WHEN LOWER(strPrimarySortOptions) = 'card' THEN CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
+														WHEN LOWER(strPrimarySortOptions) = 'vehicle' THEN strCardNumber + ' - ' + strCardDescription
+														WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
+													END)
+												END)
+								END
 
-								  WHEN LOWER(strDetailDisplay) = 'vehicle'
-									THEN 'Vehicle'
+		,strDetailDisplayLabel = CASE WHEN LOWER(strDetailDisplay) = 'card'
+										THEN 'Card'
 
-								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
-									THEN  'Driver Pin'
-							 END
-	,ysnShowVehicleDescriptionOnly	
-	,ysnShowDriverPinDescriptionOnly
-	,ysnPageBreakByPrimarySortOrder
-	,ysnSummaryByDeptDriverPinProd
-	,strDepartmentGrouping
+									WHEN LOWER(strDetailDisplay) = 'vehicle'
+										THEN 'Vehicle'
+
+									WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
+										THEN  'Driver Pin'
+								END
+		,ysnShowVehicleDescriptionOnly	
+		,ysnShowDriverPinDescriptionOnly
+		,ysnPageBreakByPrimarySortOrder
+		,ysnSummaryByDeptDriverPinProd
+		,strDepartmentGrouping
+		,intVehicleId
+	INTO #TEMPSTAGINGTABLE
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
-	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
-	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 
-	INNER JOIN ( SELECT * FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId) AS cfInvRptDcnt
-	ON cfInvRpt.intTransactionId = cfInvRptDcnt.intTransactionId 
-	-------------------------------------------------------------
-	OUTER APPLY (
-		SELECT TOP (1) ISNULL(intOdometer,0) AS intOdometer
-			  FROM   dbo.tblCFTransaction as iocftran
-			  LEFT JOIN tblCFItem as iocfitem
-			  ON iocftran.intProductId = iocfitem.intItemId
-			  WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
-			  AND ( dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
-			  AND ( intCardId = cfInvRpt.intCardId ) 
-			  AND (ISNULL(iocftran.ysnPosted,0) = 1) 
-			  ORDER  BY dtmTransactionDate DESC
-	) AS cfCardOdom
-	-----------------------------------------------------------
-	OUTER APPLY (
-		SELECT TOP (1) ISNULL(intOdometer,0) AS intOdometer
-			  FROM   dbo.tblCFTransaction as iocftran
-			  LEFT JOIN tblCFItem as iocfitem
-			  ON iocftran.intProductId = iocfitem.intItemId
-			  WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
-			  AND ( dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
-			  AND ( intVehicleId = cfInvRpt.intVehicleId ) 
-			  AND intVehicleId IS NOT NULL
-			  AND intVehicleId != 0
-			  AND (ISNULL(iocftran.ysnPosted,0) = 1) 
-			  ORDER  BY dtmTransactionDate DESC
-	) AS cfVehicleOdom
-	-----------------------------------------------------------
-	--OUTER APPLY (
-	--	SELECT TOP 1 intOdometer FROM (
-	--		SELECT iocftran.*  
-	--			FROM   dbo.tblCFTransaction as iocftran
-	--			LEFT JOIN tblCFItem as iocfitem
-	--			ON iocftran.intProductId = iocfitem.intItemId
-	--			WHERE ISNULL(iocfitem.ysnMPGCalculation,0) = 1 
-	--			AND strMiscellaneous IS NOT NULL
-	--			AND strMiscellaneous != ''
-	--			AND ISNULL(ysnPosted,0) = 1
-	--		) as miscBase
-	--	WHERE  (dtmTransactionDate < cfInvRpt.dtmTransactionDate ) 
-	--	AND ( strMiscellaneous = cfInvRpt.strMiscellaneous ) 
-	--	ORDER  BY dtmTransactionDate DESC
-	--) AS cfMiscOdom
-	-----------------------------------------------------------
+	INNER JOIN ( 
+		SELECT * FROM 
+		tblCFInvoiceSummaryTempTable 
+		WHERE strUserId = @UserId
+	) AS cfInvRptSum ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 
+	INNER JOIN ( 
+		SELECT * 
+		FROM tblCFInvoiceDiscountTempTable 
+		WHERE strUserId = @UserId
+	) AS cfInvRptDcnt ON cfInvRpt.intTransactionId = cfInvRptDcnt.intTransactionId 
 	WHERE cfInvRpt.strUserId = @UserId 
+
+	---------------------------CARD NUMBER----------------------------------------------
+	UPDATE STAGING
+	SET strCardNumber = RTRIM(LTRIM(STAGING.strCardNumber + dbo.fnCFGetLuhn((CFN.strIso + STAGING.strCardNumber ) ,0)))
+	FROM #TEMPSTAGINGTABLE STAGING
+	INNER JOIN tblCFNetwork CFN ON STAGING.strNetwork = CFN.strNetwork
+	WHERE CFN.strNetworkType = 'Voyager'
+	---------------------------CARD NUMBER----------------------------------------------
+
+	---------------------------ODOMETER AGING AND TOTAL MILES---------------------------
+	IF OBJECT_ID('tempdb..#CARDODOM') IS NOT NULL DROP TABLE #CARDODOM	
+	SELECT iocftran.intOdometer, iocftran.intCardId, iocftran.dtmTransactionDate
+	INTO #CARDODOM
+	FROM dbo.tblCFTransaction as iocftran  
+	INNER JOIN tblCFItem as iocfitem ON iocftran.intProductId = iocfitem.intItemId  
+	INNER JOIN (
+		SELECT DISTINCT intCardId
+		FROM #TEMPSTAGINGTABLE
+		WHERE intCardId IS NOT NULL
+	) STAGING ON iocftran.intCardId = STAGING.intCardId
+	WHERE iocfitem.ysnMPGCalculation = 1  
+	AND iocftran.intCardId IS NOT NULL  
+	AND iocftran.ysnPosted = 1
+
+	UPDATE STAGING
+	SET intOdometerAging = cfCardOdom.intOdometer
+	, dblTotalMiles	 = CASE WHEN ISNULL(cfCardOdom.intOdometer, 0) > 0 THEN STAGING.intOdometer - cfCardOdom.intOdometer ELSE 0 END
+	FROM #TEMPSTAGINGTABLE STAGING
+	CROSS APPLY (
+		SELECT TOP (1) intOdometer  
+		FROM #CARDODOM  
+		WHERE dtmTransactionDate < STAGING.dtmTransactionDate
+		AND intCardId = STAGING.intCardId
+		ORDER BY dtmTransactionDate DESC  
+	) cfCardOdom
+	WHERE(
+			STAGING.strPrimarySortOptions = 'Card'
+		OR (STAGING.strPrimarySortOptions = 'Vehicle' AND STAGING.intVehicleId IS NULL)
+		OR (STAGING.strPrimarySortOptions = 'Miscellaneous' AND (strMiscellaneous IS NULL OR strMiscellaneous = ''))
+	)
+
+	IF OBJECT_ID('tempdb..#VEHICLEODOM') IS NOT NULL DROP TABLE #VEHICLEODOM	
+	SELECT iocftran.intOdometer, iocftran.intVehicleId, iocftran.dtmTransactionDate
+	INTO #VEHICLEODOM
+	FROM dbo.tblCFTransaction as iocftran  
+	INNER JOIN tblCFItem as iocfitem ON iocftran.intProductId = iocfitem.intItemId
+	INNER JOIN (
+		SELECT DISTINCT intVehicleId
+		FROM #TEMPSTAGINGTABLE
+		WHERE intVehicleId IS NOT NULL
+	) STAGING ON iocftran.intVehicleId = STAGING.intVehicleId
+	WHERE iocfitem.ysnMPGCalculation = 1  
+	AND iocftran.intVehicleId IS NOT NULL  
+	AND iocftran.ysnPosted = 1
+
+	UPDATE STAGING
+	SET intOdometerAging = cfVehicleOdom.intOdometer
+	, dblTotalMiles	 = CASE WHEN ISNULL(cfVehicleOdom.intOdometer, 0) > 0 THEN STAGING.intOdometer - cfVehicleOdom.intOdometer ELSE 0 END
+	FROM #TEMPSTAGINGTABLE STAGING
+	CROSS APPLY (
+		SELECT TOP (1) intOdometer  
+		FROM #VEHICLEODOM
+		WHERE dtmTransactionDate < STAGING.dtmTransactionDate
+		AND intVehicleId = STAGING.intVehicleId
+		ORDER BY dtmTransactionDate DESC  
+	) cfVehicleOdom
+	WHERE STAGING.strPrimarySortOptions = 'Vehicle' 
+	AND STAGING.intVehicleId IS NOT NULL
+
+	IF OBJECT_ID('tempdb..#MISCODOM') IS NOT NULL DROP TABLE #MISCODOM	
+	SELECT iocftran.intOdometer, iocftran.strMiscellaneous, iocftran.dtmTransactionDate
+	INTO #MISCODOM
+	FROM dbo.tblCFTransaction as iocftran  
+	INNER JOIN tblCFItem as iocfitem ON iocftran.intProductId = iocfitem.intItemId  
+	INNER JOIN (
+		SELECT DISTINCT strMiscellaneous
+		FROM #TEMPSTAGINGTABLE 
+		WHERE strMiscellaneous IS NOT NULL 
+		AND strMiscellaneous != ''
+	) STAGING ON iocftran.strMiscellaneous = STAGING.strMiscellaneous
+	WHERE iocfitem.ysnMPGCalculation = 1  
+	AND iocftran.strMiscellaneous IS NOT NULL
+	AND iocftran.strMiscellaneous != ''
+	AND iocftran.ysnPosted = 1
+
+	UPDATE STAGING
+	SET intOdometerAging = cfMiscOdom.intOdometer
+	, dblTotalMiles	 = CASE WHEN ISNULL(cfMiscOdom.intOdometer, 0) > 0 THEN STAGING.intOdometer - cfMiscOdom.intOdometer ELSE 0 END
+	FROM #TEMPSTAGINGTABLE STAGING
+	CROSS APPLY (
+		SELECT TOP (1) intOdometer 
+		FROM #MISCODOM
+		WHERE dtmTransactionDate < STAGING.dtmTransactionDate
+		AND strMiscellaneous = STAGING.strMiscellaneous
+		ORDER BY dtmTransactionDate DESC
+	) cfMiscOdom
+	WHERE STAGING.strPrimarySortOptions = 'Miscellaneous' 
+	AND STAGING.strMiscellaneous IS NOT NULL
+	---------------------------ODOMETER AGING AND TOTAL MILES---------------------------
+
+	INSERT INTO tblCFInvoiceStagingTable WITH (TABLOCK) (
+		intCustomerGroupId
+		,intTransactionId
+		,intOdometer
+		,intOdometerAging 
+		,intInvoiceId
+		,intProductId
+		,intCardId
+		,intAccountId
+		,intInvoiceCycle
+		,intSubAccountId
+		,intCustomerId
+		,intDiscountScheduleId
+		,intTermsCode
+		,intTermsId
+		,intARItemId
+		,intSalesPersonId
+		,intTermID
+		,intBalanceDue
+		,intDiscountDay
+		,intDayofMonthDue
+		,intDueNextMonth
+		,intSort
+		,strGroupName
+		,strCustomerNumber
+		,strShipTo
+		,strBillTo
+		,strCompanyName
+		,strCompanyAddress
+		,strType
+		,strCustomerName
+		,strLocationName
+		,strInvoiceNumber
+		,strTransactionId
+		,strTransactionType
+		,strInvoiceReportNumber
+		,strTempInvoiceReportNumber
+		,strMiscellaneous
+		,strName
+		,strCardNumber
+		,strCardDescription
+		,strNetwork
+		,strInvoiceCycle
+		,strPrimarySortOptions
+		,strSecondarySortOptions
+		,strPrintRemittancePage
+		,strPrintPricePerGallon
+		,strPrintSiteAddress
+		,strSiteNumber
+		,strSiteName
+		,strProductNumber
+		,strItemNo
+		,strDescription
+		,strVehicleNumber
+		,strVehicleDescription
+		,strTaxState
+		,strDepartment
+		,strSiteType
+		,strState
+		,strSiteAddress
+		,strSiteCity
+		,strPrintTimeStamp
+		,strEmailDistributionOption 
+		,strEmail
+		,strDepartmentDescription
+		,strShortName
+		,strProductDescription
+		,strItemNumber
+		,strItemDescription
+		,strTerm
+		,strTermCode
+		,strTermType
+		,dtmTransactionDate
+		,dtmBillingDate
+		,dtmDate
+		,dtmPostedDate
+		,dtmDiscountDate
+		,dtmDueDate
+		,dtmInvoiceDate
+		,dblTotalMiles
+		,dblQuantity
+		,dblCalculatedTotalAmount
+		,dblOriginalTotalAmount
+		,dblCalculatedGrossAmount
+		,dblOriginalGrossAmount
+		,dblCalculatedNetAmount
+		,dblOriginalNetAmount
+		,dblMargin
+		,dblTotalTax
+		,dblTotalSST
+		,dblTaxExceptSST
+		,dblInvoiceTotal
+		,dblTotalQuantity
+		,dblTotalGrossAmount
+		,dblTotalNetAmount
+		,dblTotalAmount
+		,dblTotalTaxAmount
+		,dblEligableGallon
+		,TotalFET
+		,TotalSET
+		,TotalSST
+		,TotalLC
+		,dblDiscountRate
+		,dblDiscount
+		,dblAccountTotalAmount
+		,dblAccountTotalDiscount
+		,dblAccountTotalLessDiscount
+		,dblAccountTotalDiscountQuantity
+		,dblDiscountEP
+		,dblAPR
+		,ysnPrintMiscellaneous
+		,ysnSummaryByCard
+		,ysnSummaryByDepartmentProduct
+		,ysnSummaryByDepartment
+		,ysnSummaryByMiscellaneous
+		,ysnSummaryByProduct
+		,ysnSummaryByVehicle
+		,ysnSummaryByCardProd	 
+		,ysnSummaryByDeptCardProd
+		,ysnPrintTimeOnInvoices
+		,ysnPrintTimeOnReports
+		,ysnInvalid
+		,ysnPosted
+		,ysnIncludeInQuantityDiscount	
+		,ysnMPGCalculation
+		,ysnShowOnCFInvoice
+		,strDiscountSchedule
+		,ysnPostForeignSales
+		,ysnSummaryByDeptVehicleProd
+		,ysnDepartmentGrouping
+		,ysnPostedCSV
+		,strGuid
+		,strUserId
+		,ysnExpensed
+		,strStatementType
+		,strDriverPinNumber		
+		,strDriverDescription	
+		,intDriverPinId			
+		,ysnSummaryByDriverPin	
+		,strDetailDisplay
+		,strDetailDisplayValue
+		,strDetailDisplayLabel	
+		,ysnShowVehicleDescriptionOnly	
+		,ysnShowDriverPinDescriptionOnly
+		,ysnPageBreakByPrimarySortOrder
+		,ysnSummaryByDeptDriverPinProd
+		,strDepartmentGrouping
+	)
+	SELECT intCustomerGroupId
+		,intTransactionId
+		,intOdometer
+		,intOdometerAging 
+		,intInvoiceId
+		,intProductId
+		,intCardId
+		,intAccountId
+		,intInvoiceCycle
+		,intSubAccountId
+		,intCustomerId
+		,intDiscountScheduleId
+		,intTermsCode
+		,intTermsId
+		,intARItemId
+		,intSalesPersonId
+		,intTermID
+		,intBalanceDue
+		,intDiscountDay
+		,intDayofMonthDue
+		,intDueNextMonth
+		,intSort
+		,strGroupName
+		,strCustomerNumber
+		,strShipTo
+		,strBillTo
+		,strCompanyName
+		,strCompanyAddress
+		,strType
+		,strCustomerName
+		,strLocationName
+		,strInvoiceNumber
+		,strTransactionId
+		,strTransactionType
+		,strInvoiceReportNumber
+		,strTempInvoiceReportNumber
+		,strMiscellaneous
+		,strName
+		,strCardNumber
+		,strCardDescription
+		,strNetwork
+		,strInvoiceCycle
+		,strPrimarySortOptions
+		,strSecondarySortOptions
+		,strPrintRemittancePage
+		,strPrintPricePerGallon
+		,strPrintSiteAddress
+		,strSiteNumber
+		,strSiteName
+		,strProductNumber
+		,strItemNo
+		,strDescription
+		,strVehicleNumber
+		,strVehicleDescription
+		,strTaxState
+		,strDepartment
+		,strSiteType
+		,strState
+		,strSiteAddress
+		,strSiteCity
+		,strPrintTimeStamp
+		,strEmailDistributionOption 
+		,strEmail
+		,strDepartmentDescription
+		,strShortName
+		,strProductDescription
+		,strItemNumber
+		,strItemDescription
+		,strTerm
+		,strTermCode
+		,strTermType
+		,dtmTransactionDate
+		,dtmBillingDate
+		,dtmDate
+		,dtmPostedDate
+		,dtmDiscountDate
+		,dtmDueDate
+		,dtmInvoiceDate
+		,dblTotalMiles
+		,dblQuantity
+		,dblCalculatedTotalAmount
+		,dblOriginalTotalAmount
+		,dblCalculatedGrossAmount
+		,dblOriginalGrossAmount
+		,dblCalculatedNetAmount
+		,dblOriginalNetAmount
+		,dblMargin
+		,dblTotalTax
+		,dblTotalSST
+		,dblTaxExceptSST
+		,dblInvoiceTotal
+		,dblTotalQuantity
+		,dblTotalGrossAmount
+		,dblTotalNetAmount
+		,dblTotalAmount
+		,dblTotalTaxAmount
+		,dblEligableGallon
+		,TotalFET
+		,TotalSET
+		,TotalSST
+		,TotalLC
+		,dblDiscountRate
+		,dblDiscount
+		,dblAccountTotalAmount
+		,dblAccountTotalDiscount
+		,dblAccountTotalLessDiscount
+		,dblAccountTotalDiscountQuantity
+		,dblDiscountEP
+		,dblAPR
+		,ysnPrintMiscellaneous
+		,ysnSummaryByCard
+		,ysnSummaryByDepartmentProduct
+		,ysnSummaryByDepartment
+		,ysnSummaryByMiscellaneous
+		,ysnSummaryByProduct
+		,ysnSummaryByVehicle
+		,ysnSummaryByCardProd	 
+		,ysnSummaryByDeptCardProd
+		,ysnPrintTimeOnInvoices
+		,ysnPrintTimeOnReports
+		,ysnInvalid
+		,ysnPosted
+		,ysnIncludeInQuantityDiscount	
+		,ysnMPGCalculation
+		,ysnShowOnCFInvoice
+		,strDiscountSchedule
+		,ysnPostForeignSales
+		,ysnSummaryByDeptVehicleProd
+		,ysnDepartmentGrouping
+		,ysnPostedCSV
+		,strGuid
+		,strUserId
+		,ysnExpensed
+		,strStatementType
+		,strDriverPinNumber		
+		,strDriverDescription	
+		,intDriverPinId			
+		,ysnSummaryByDriverPin	
+		,strDetailDisplay
+		,strDetailDisplayValue
+		,strDetailDisplayLabel	
+		,ysnShowVehicleDescriptionOnly	
+		,ysnShowDriverPinDescriptionOnly
+		,ysnPageBreakByPrimarySortOrder
+		,ysnSummaryByDeptDriverPinProd
+		,strDepartmentGrouping 
+	FROM #TEMPSTAGINGTABLE
+
 
 
 
