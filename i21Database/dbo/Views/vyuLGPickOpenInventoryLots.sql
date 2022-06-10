@@ -189,6 +189,6 @@ FROM (
 					WHERE SR.intLotId = Lot.intLotId AND SR.ysnPosted <> 1) SR
 		OUTER APPLY (SELECT dblAllocatedQty = SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL 
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) AL
-	WHERE Lot.dblQty > 0 
+	WHERE Lot.dblQty > 0 AND Receipt.ysnPosted = 1
 	) InvLots
 GO
