@@ -78,6 +78,7 @@ BEGIN TRY
 	SET		dblRemainingQuantity -= @dblQuantityToUpdate
 	WHERE	intCollateralId	= @intCollateralId
 
+	EXEC uspRKSaveCollateral  @intCollateralId, @intUserId
 END TRY
 
 BEGIN CATCH
