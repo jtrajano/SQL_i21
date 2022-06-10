@@ -287,6 +287,9 @@ CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K27_K1_K29_K31
 INCLUDE ( 	[strTransactionType]) 
 GO
 
+CREATE NONCLUSTERED INDEX [tblCFTransaction_ysnInvoiced]
+	 ON [dbo].[tblCFTransaction]([ysnInvoiced]);
+GO
 
 CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K27_K1_K29_K31_13_25] ON [dbo].[tblCFTransaction]
 (
