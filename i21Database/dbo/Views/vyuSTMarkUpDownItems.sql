@@ -12,6 +12,8 @@ I.strItemNo
 ,ST.intStoreId
 ,ST.intStoreNo
 ,vyupriceHierarchy.dblSalePrice
+,vyupriceHierarchyStockUnit.dblSalePrice AS dblRetailItemPerUnit
+,vyupriceHierarchyStockUnit.dblSalePrice AS dblStockUnitPrice
 ,I.intCategoryId
 FROM tblICItem I 
 INNER JOIN tblICItemLocation IL 
@@ -25,6 +27,28 @@ INNER JOIN vyuSTItemHierarchyPricing vyupriceHierarchy
 	ON I.intItemId = vyupriceHierarchy.intItemId 
 	AND IL.intItemLocationId = vyupriceHierarchy.intItemLocationId
 	AND UOM.intItemUOMId = vyupriceHierarchy.intItemUOMId
+INNER JOIN ( 
+	SELECT SIP.intItemId, intItemLocationId, SIP.intItemUOMId, 
+		CASE WHEN UOM.ysnStockUnit = 1
+			THEN dblSalePrice 
+			ELSE 
+			(
+				SELECT UOM.dblUnitQty * HP.dblSalePrice 
+				FROM vyuSTItemHierarchyPricing HP
+				JOIN tblICItemUOM UOMM
+					ON HP.intItemUOMId = UOMM.intItemUOMId
+					AND UOMM.ysnStockUnit = 1
+				WHERE HP.intItemId = SIP.intItemId
+				AND HP.intItemLocationId = SIP.intItemLocationId
+			)
+		END AS dblSalePrice
+		FROM vyuSTItemHierarchyPricing SIP
+		JOIN tblICItemUOM UOM
+		ON SIP.intItemUOMId = UOM.intItemUOMId
+	) vyupriceHierarchyStockUnit
+	ON I.intItemId = vyupriceHierarchyStockUnit.intItemId 
+	AND IL.intItemLocationId = vyupriceHierarchyStockUnit.intItemLocationId
+	AND UOM.intItemUOMId = vyupriceHierarchyStockUnit.intItemUOMId
 INNER JOIN tblSTStore ST 
 	ON IL.intLocationId = ST.intCompanyLocationId
 WHERE I.strLotTracking = 'No'

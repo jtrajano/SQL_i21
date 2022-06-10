@@ -10,6 +10,8 @@
 	[intQty] NUMERIC(18, 6) NULL, 
     [dblRetailPerUnit] NUMERIC(18, 6) NULL, 
     [dblTotalRetailAmount] NUMERIC(18, 6) NULL, 
+    [dblRetailItemPerUnit] NUMERIC(18, 6) NULL, 
+    [dblTotalItemRetailAmount] NUMERIC(18, 6) NULL, 
     [dblTotalCostAmount] NUMERIC(18, 6) NULL, 
     [strNote] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
     [dblActulaGrossProfit] NUMERIC(18, 6) NULL, 
