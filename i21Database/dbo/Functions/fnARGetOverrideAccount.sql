@@ -13,11 +13,12 @@ RETURNS @returntable TABLE
 	,[bitSameCompanySegment]		BIT
 	,[bitSameLocationSegment]		BIT
 	,[bitSameLineOfBusinessSegment]	BIT
+	,[bitOverriden]					BIT
 )
 AS
 BEGIN
 	DECLARE  @strOverrideAccount				NVARCHAR(40)= NULL
-			,@intOverrideAccount				INT			= 0
+			,@intOverrideAccount				INT			= @intAccountIdToBeOverriden
 			,@strAccountIdToBeOverriden			NVARCHAR(40)
 			,@strAccountIdUseToOverride			NVARCHAR(40)
 			,@intAccountSegmentIdCompany		INT
@@ -81,12 +82,12 @@ BEGIN
 		AND intSegmentTypeId = 5
 	END
 
-	SELECT TOP 1 @intOverrideAccount = ISNULL(intAccountId, 0)
+	SELECT TOP 1 @intOverrideAccount = intAccountId
 	FROM tblGLAccount
 	WHERE strAccountId = ISNULL(@strOverrideAccount, '')
 
 	INSERT INTO @returntable
-	SELECT @strOverrideAccount, @intOverrideAccount, @bitSameCompanySegment, @bitSameLocationSegment, @bitSameLineOfBusinessSegment
+	SELECT @strOverrideAccount, @intOverrideAccount, @bitSameCompanySegment, @bitSameLocationSegment, @bitSameLineOfBusinessSegment, CASE WHEN @intAccountIdToBeOverriden = @intOverrideAccount THEN 0 ELSE 1 END
 
 	RETURN
 END
