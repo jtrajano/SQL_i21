@@ -578,7 +578,7 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced'))
 				OR
 					(ISNULL(P.intPriceFixationId, 0) = 0
 					AND SH.ysnFuturesChange = 1
@@ -653,7 +653,7 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced'))
 				OR
 					(ISNULL(P.intPriceFixationId, 0) = 0
 					AND SH.ysnFuturesChange = 1
