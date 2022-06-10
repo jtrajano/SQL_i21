@@ -289,7 +289,7 @@ BEGIN TRY
 								,dblUnitRetail			= MUD.dblTotalRetailAmount
 								,intCategoryId			= MUD.intCategoryId 
 								,dblAdjustCostValue		= MUD.dblTotalCostAmount
-								,dblAdjustRetailValue	= MUD.dblTotalRetailAmount
+								,dblAdjustRetailValue	= MUD.dblTotalRetailAmount - MUD.dblTotalItemRetailAmount
 						FROM tblSTMarkUpDownDetail MUD
 						INNER JOIN tblSTMarkUpDown MU 
 							ON MU.intMarkUpDownId = MUD.intMarkUpDownId	
@@ -331,6 +331,7 @@ BEGIN TRY
 						--	WHERE Item.intCategoryId = MUD.intCategoryId
 						--) CategoryItem
 						WHERE MU.intMarkUpDownId = @intMarkUpDownId
+						AND (MUD.dblTotalRetailAmount - MUD.dblTotalItemRetailAmount) != 0
 
 				END
 			ELSE IF(@strAdjustmentType = @AdjustmentType_WriteOff)
