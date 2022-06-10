@@ -79,7 +79,7 @@ BEGIN TRY
 			isnull(rtrt.strTranslation,MA.strFutMarketName) AS strFutMarketName,
 			MO.strFutureMonth,
 			dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]) AS [dblNoOfLots],
-			CASE WHEN CP.strDefaultContractReport = 'ContractBeGreen' THEN CONVERT(NVARCHAR,CAST(PD.dblFutures  AS Money),1) ELSE dbo.fnCTChangeNumericScale(PD.dblFutures,2) END + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPrice,
+			CASE WHEN CP.strDefaultContractReport = 'ContractBeGreen' THEN CONVERT(NVARCHAR,CAST(PD.dblFutures  AS Money),1) ELSE dbo.fnCTChangeNumericScale(PD.dblFutures,2) END + ' ' + (CASE WHEN @ysnEnableFXFieldInContractPricing = 1 THEN CD.strInvoiceCurrency ELSE CY.strCurrency END) + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPrice,
 			PD.strNotes,
 			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPriceDesc,
 			FLOOR(PD.[dblNoOfLots]) AS intNoOfLots,
@@ -108,6 +108,8 @@ BEGIN TRY
 	LEFT	JOIN	tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.ReportTranslation'
 	LEFT	JOIN	tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = CM.intUnitMeasureId
 	LEFT	JOIN	tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
+	
+
 	CROSS JOIN tblCTCompanyPreference   CP		
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
