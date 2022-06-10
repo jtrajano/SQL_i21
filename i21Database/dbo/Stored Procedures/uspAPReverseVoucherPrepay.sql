@@ -53,6 +53,8 @@ UPDATE A
 FROM tblAPBill A
 WHERE A.intBillId = @createdReversal
 
+DECLARE @reversalDate DATETIME = GETDATE();
+
 --IF OLD PREPAYMENT, DO NOT REVERSE GL ENTRIES AS THERE ARE NO GL ENTRIES
 IF @oldPrepay = 0
 BEGIN
@@ -128,7 +130,7 @@ BEGIN
 	    dblReportingRate ,
 	    dblForeignRate ,
 	    strRateType 
-	FROM dbo.fnAPReverseGLEntries(@ids, 'Bill', DEFAULT, @userId, @batchId)
+	FROM dbo.fnAPReverseGLEntries(@ids, 'Bill', @reversalDate, @userId, @batchId)
 	UPDATE glEntries
 		SET glEntries.intTransactionId = @createdReversal,
 		glEntries.strTransactionId = @newBillId,
