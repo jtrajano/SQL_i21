@@ -282,9 +282,9 @@ IF EXISTS (
 	FROM tblARPostInvoiceHeader PID
 	INNER JOIN tblHDTicketHoursWorked HDTHW WITH (NOLOCK) ON PID.[intInvoiceId] = HDTHW.[intInvoiceId]
 	WHERE PID.strSessionId = @strSessionId
-)
+) AND  @Post = 1
 BEGIN
-	EXEC [dbo].[uspHDUpdateTimeEntryPeriodDetailStatus]
+	EXEC [dbo].[uspHDUpdateTimeEntryPeriodDetailStatus] @strSessionId
 END
 
 --TANK DELIVERY SYNC
