@@ -299,7 +299,7 @@ BEGIN
 		LEFT JOIN tblTRFTradeFinance tf
 			ON itf.strTradeFinanceNumber = tf.strTradeFinanceNumber
 
-		LEFT JOIN (
+		INNER JOIN (
 			tblICInventoryTradeFinanceLot itfLot INNER JOIN tblICLot lot
 				ON itfLot.intLotId = lot.intLotId
 		)
