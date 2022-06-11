@@ -331,5 +331,5 @@ FROM (
 		AND A.ysnPrepay = 1
 		AND NOT EXISTS (SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId)
 ) tbl
-JOIN tblEMEntityClass ec ON ec.intEntityClassId = tbl.intEntityClassId
-JOIN tblGLAccount gl ON gl.intAccountId = tbl.intAccountId
+LEFT JOIN tblEMEntityClass ec ON ec.intEntityClassId = tbl.intEntityClassId
+LEFT JOIN tblGLAccount gl ON gl.intAccountId = tbl.intAccountId
