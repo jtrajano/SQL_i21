@@ -314,5 +314,5 @@ FROM (
 	WHERE A.ysnPosted = 1
 		AND C.intTransactionType IN (11)
 ) tbl
-JOIN tblEMEntityClass ec ON ec.intEntityClassId = tbl.intEntityClassId
-JOIN tblGLAccount gl ON gl.intAccountId = tbl.intAccountId
+LEFT JOIN tblEMEntityClass ec ON ec.intEntityClassId = tbl.intEntityClassId
+LEFT JOIN tblGLAccount gl ON gl.intAccountId = tbl.intAccountId
