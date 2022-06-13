@@ -390,11 +390,12 @@ INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAc
 WHERE ysnPosted = 1
   AND ysnProcessedToNSF = 0	
   AND strTransactionType <> 'Cash Refund'
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
 		SC.intInvoiceId IS NOT NULL
-  )  
+  )
 
 IF @strSourceTransactionLocal IS NOT NULL
 	DELETE FROM #AGINGPOSTEDINVOICES WHERE strType <> @strSourceTransactionLocal
@@ -568,8 +569,6 @@ FROM
 	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 90 THEN 'Over 90' END
 				 END
 FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
-WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
-
 ) AS A  
 
 LEFT JOIN
