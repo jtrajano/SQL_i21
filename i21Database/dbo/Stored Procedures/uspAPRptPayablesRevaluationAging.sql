@@ -161,7 +161,7 @@ SET @innerQuery = 'SELECT --DISTINCT
 					,dblInterest
 					,dtmDate
 					,FP.strPeriod
-				  FROM dbo.vyuAPPayables
+				  FROM dbo.vyuAPPayablesForeign
 				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 				  ON dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR dtmDate = FP.dtmStartDate OR dtmDate = FP.dtmEndDate'
 
@@ -176,7 +176,7 @@ SET @deletedQuery = 'SELECT --DISTINCT
 					,dtmDate
 					,intCount
 					,strPeriod
-				  FROM dbo.vyuAPPayablesAgingDeleted
+				  FROM dbo.vyuAPPayablesAgingDeletedForeign
 				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 				  ON dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR dtmDate = FP.dtmStartDate OR dtmDate = FP.dtmEndDate'
 
@@ -192,7 +192,7 @@ SET @prepaidInnerQuery = 'SELECT --DISTINCT
 					,dtmDate
 					,intPrepaidRowType
 					,FP.strPeriod
-				  FROM dbo.vyuAPPrepaidPayables
+				  FROM dbo.vyuAPPrepaidPayablesForeign
 				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 				  ON dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR dtmDate = FP.dtmStartDate OR dtmDate = FP.dtmEndDate'
 
@@ -218,7 +218,7 @@ SET @arQuery = 'SELECT --DISTINCT
 					,dblInterest
 					,dtmDate
 					,FP.strPeriod
-				  FROM dbo.vyuAPSalesForPayables
+				  FROM dbo.vyuAPSalesForPayablesForeign
 				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 				  ON dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR dtmDate = FP.dtmStartDate OR dtmDate = FP.dtmEndDate'
 
@@ -498,7 +498,7 @@ SET @query = '
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,CUR.strCurrency
 		,A.dblAverageExchangeRate as dblHistoricRate
-		,tmpAgingSummaryTotal.dblAmountDue as dblHistoricAmount
+		,(tmpAgingSummaryTotal.dblAmountDue * A.dblAverageExchangeRate) as dblHistoricAmount
 		,ISNULL(GLRD.dblNewForexRate, 0) as dblCurrencyRevalueRate
 		,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
 		FROM  
@@ -560,7 +560,7 @@ SET @query = '
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,CUR.strCurrency
 		,A.dblAverageExchangeRate as dblHistoricRate
-		,tmpAgingSummaryTotal.dblAmountDue as dblHistoricAmount
+		,(tmpAgingSummaryTotal.dblAmountDue * A.dblAverageExchangeRate) as dblHistoricAmount
 		,ISNULL(GLRD.dblNewForexRate, 0) as dblCurrencyRevalueRate
 		,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
 		FROM  
@@ -611,7 +611,7 @@ SET @query = '
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,CUR.strCurrency
 		,A.dblCurrencyExchangeRate as dblHistoricRate
-		,tmpAgingSummaryTotal.dblAmountDue as dblHistoricAmount
+		,(tmpAgingSummaryTotal.dblAmountDue * A.dblCurrencyExchangeRate) as dblHistoricAmount
 		,ISNULL(GLRD.dblNewForexRate, 0) as dblCurrencyRevalueRate
 		,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
 		FROM  

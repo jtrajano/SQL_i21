@@ -811,6 +811,10 @@
     <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
     <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
     <Build Include="dbo\Tables\tblIPBillDetail.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
