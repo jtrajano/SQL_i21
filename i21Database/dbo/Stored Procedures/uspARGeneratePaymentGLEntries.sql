@@ -587,9 +587,7 @@ BEGIN
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
-		AND ((P.[dblInterest] <> @ZeroDecimal AND P.[dblPayment] = @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
-			OR
-			(P.[dblBaseInterest] <> @ZeroDecimal AND P.[dblBasePayment] = @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
+		AND P.[dblInterest] <> @ZeroDecimal
 
     --CREDIT PAYMENT DETAILS
     INSERT #ARPaymentGLEntries
@@ -1077,9 +1075,7 @@ BEGIN
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
-		AND ((P.[dblInterest] <> @ZeroDecimal AND P.[dblPayment] = @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
-			OR
-			(P.[dblBaseInterest] <> @ZeroDecimal AND P.[dblBasePayment] = @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
+		AND P.[dblInterest] <> @ZeroDecimal
 
     DECLARE @TempPaymentIds AS [dbo].[Id]
     DELETE FROM @TempPaymentIds
