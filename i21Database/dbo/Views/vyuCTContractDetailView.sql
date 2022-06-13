@@ -170,7 +170,7 @@ AS
 			CD.intFreightBasisUOMId,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
-		, CD.strFinanceTradeNo
+		, CD.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
 		, CD.intBankAccountId
 		, BA.intBankId
 		, strBankName = BN.strBankName
@@ -179,11 +179,11 @@ AS
 		, strFacility = FA.strBorrowingFacilityId
 		, CD.intLoanLimitId
 		, strLoanLimit = BL.strBankLoanId
-		, strLoanReferenceNo = BL.strLimitDescription
+		, strLoanReferenceNo = BL.strLimitDescription COLLATE Latin1_General_CI_AS
 		, CD.dblLoanAmount
 		, intOverrideFacilityId
 		, strOverrideFacility = BVR.strBankValuationRule
-		, CD.strBankReferenceNo
+		, CD.strBankReferenceNo COLLATE Latin1_General_CI_AS AS strBankReferenceNo
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
 		, CD.dblPrepaymentAmount
