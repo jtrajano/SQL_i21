@@ -364,12 +364,24 @@ BEGIN TRY
 					   ,[intCommissionAccountId]		= @intCommissionAccount
 					   ,[intRevenueAccountId]			= @intRevenueAccount
 					   ,[strGoal]						= @Goal
-					   ,[strCommissionType]				= @CommisionType
-					   ,[strRateType]					= @RateType
+					   ,[strCommissionType]				= CASE WHEN LOWER(@CommisionType) = 'hourly no hurdle'
+																	THEN 'Hourly no hurdle' 
+															   WHEN LOWER(@CommisionType) = 'hourly hurdle annual'
+																	THEN 'Hourly hurdle annual' 
+															   WHEN LOWER(@CommisionType) = 'hourly hurdle per period'
+																	THEN 'Hourly hurdle per period' 
+															   ELSE ''
+														  END
+					   ,[strRateType]					= CASE WHEN LOWER(@RateType) = 'flat amount'
+																	THEN 'Flat amount' 
+															   WHEN LOWER(@RateType) = 'percentage'
+																	THEN 'Percentage' 
+															   ELSE ''
+														  END
 					   ,[intCommissionRate]				= CASE WHEN @CommissionRate IS NULL OR LTRIM(RTRIM(@CommissionRate)) = '' THEN 0 ELSE CAST(@IncentiveRate AS NUMERIC(18, 6)) END
 					   ,[intReportsToId]				= @intReportsToId
 					   ,[intConcurrencyId]				= 1
-					   ,[ysnActive]						= CASE WHEN @Active IS NULL OR LTRIM(RTRIM(@Active)) = '' THEN 0 ELSE @ysnActive END
+					   ,[ysnActive]						= CASE WHEN @Active IS NULL OR LTRIM(RTRIM(@Active)) = '' THEN 1 ELSE @ysnActive END
 					   ,[ysnCanViewOtherCoworker]		= CASE WHEN @ysnCanViewOtherCoworker IS NULL OR LTRIM(RTRIM(@ysnCanViewOtherCoworker)) = '' THEN 0 ELSE @ysnCanViewOtherCoworker END
 
 	END
