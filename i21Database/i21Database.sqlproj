@@ -815,6 +815,7 @@
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
     <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
+    <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
