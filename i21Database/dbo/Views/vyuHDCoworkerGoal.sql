@@ -23,8 +23,8 @@ SELECT   [intCoworkerGoalId]				= CoworkerGoal.[intCoworkerGoalId]
 		,[strFullName]						= Entity.[strName]
 		,[strReportsTo]						= ReportsTo.[strName]
 		,[strCurrency]						= Currency.[strCurrency]
-		,[strCommissionAccount]				= GLAccountCommission.strDescription
-		,[strRevenueAccount]				= GLAccountRevenue.strDescription
+		,[strCommissionAccount]				= GLAccountCommission.strAccountId
+		,[strRevenueAccount]				= GLAccountRevenue.strAccountId
 FROM tblHDCoworkerGoal CoworkerGoal
 		INNER JOIN tblEMEntity Entity
 ON Entity.intEntityId = CoworkerGoal.intEntityId
@@ -37,5 +37,5 @@ ON GLAccountCommission.intAccountId = CoworkerGoal.intCommissionAccountId
 		LEFT JOIN tblGLAccount GLAccountRevenue
 ON GLAccountRevenue.intAccountId = CoworkerGoal.intRevenueAccountId
 
-		
-GO 
+
+GO
