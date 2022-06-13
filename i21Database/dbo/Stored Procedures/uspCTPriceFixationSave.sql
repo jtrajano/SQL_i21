@@ -869,12 +869,27 @@ BEGIN TRY
 				AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
 				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
-
 				UPDATE CD
 				SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
-					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost)
+					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost),
+					CD.dblFXPrice = dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,CD.intFXPriceUOMId,CD.dblCashPrice) *
+					(
+						case
+						when CD.intCurrencyId = CD.intInvoiceCurrencyId or CD.intCurrencyId = isnull(ICY.intMainCurrencyId,0)
+						then 1
+						else CD.dblRate
+						end
+					) *
+					(
+						case
+						when isnull(ICY.intMainCurrencyId,0) > 0
+						then 100
+						else 1
+						end
+					)
 				FROM tblCTContractDetail	CD WITH (ROWLOCK) 
 				JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
+				LEFT JOIN	tblSMCurrency		ICY	ON	ICY.intCurrencyID = CD.intInvoiceCurrencyId
 				where PF.intPriceFixationId = @intPriceFixationId
 
 
