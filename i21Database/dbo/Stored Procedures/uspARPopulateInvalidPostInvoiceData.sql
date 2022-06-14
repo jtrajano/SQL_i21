@@ -2274,24 +2274,16 @@ BEGIN
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
-		SELECT TOP 1 ARCP.intFreightRevenueAccount, GLA.strAccountId
-		FROM tblARCompanyPreference ARCP
-		LEFT JOIN tblGLAccount GLA
-		ON ARCP.intDueToAccountId = GLA.intAccountId
-	) FREIGHTREVENUE
+		SELECT TOP 1 intFreightRevenueAccount
+		FROM tblARCompanyPreference
+	) ARCP
 	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		LEFT JOIN tblGLAccount GLA
-		ON GLASM.intAccountId = GLA.intAccountId
-		WHERE GLAS.intAccountStructureId = 3
-		AND GLASM.intAccountId = I.[intAccountId]
-	) GLSEGMENT
-	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(FREIGHTREVENUE.[intFreightRevenueAccount], 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.intFreightRevenueAccount, 0, 1, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
 	AND I.dblFreightCharge > 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], FREIGHTREVENUE.[intFreightRevenueAccount]) = 0
+	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2315,24 +2307,16 @@ BEGIN
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
-		SELECT TOP 1 ARCP.intFreightExpenseAccount, GLA.strAccountId
-		FROM tblARCompanyPreference ARCP
-		LEFT JOIN tblGLAccount GLA
-		ON ARCP.intDueToAccountId = GLA.intAccountId
-	) FREIGHTEXPENSE
+		SELECT TOP 1 intFreightExpenseAccount
+		FROM tblARCompanyPreference
+	) ARCP
 	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		LEFT JOIN tblGLAccount GLA
-		ON GLASM.intAccountId = GLA.intAccountId
-		WHERE GLAS.intAccountStructureId = 3
-		AND GLASM.intAccountId = I.[intAccountId]
-	) GLSEGMENT
-	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(FREIGHTEXPENSE.[intFreightExpenseAccount], 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.intFreightExpenseAccount, 0, 1, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
 	AND I.dblFreightCharge > 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], FREIGHTEXPENSE.[intFreightExpenseAccount]) = 0
+	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
