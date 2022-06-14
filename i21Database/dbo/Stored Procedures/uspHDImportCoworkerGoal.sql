@@ -224,8 +224,8 @@ BEGIN TRY
 	IF (@ReportsTo IS NOT NULL AND LTRIM(RTRIM(@ReportsTo)) <> '')
 	BEGIN
 		SELECT TOP 1 @intReportsToId = intEntityId
-		FROM tblEMEntity
-		WHERE lower(strName) = LTRIM(RTRIM(lower(@ReportsTo)))
+		FROM vyuHDAgentDetail
+		WHERE LTRIM(RTRIM(lower(strFullName))) = LTRIM(RTRIM(lower(@ReportsTo)))
 	END
 
 	/*Set currency*/
