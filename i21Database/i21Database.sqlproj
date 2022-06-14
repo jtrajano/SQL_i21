@@ -849,6 +849,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutProcess.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutProcessErrorWarning.sql" />
     <Build Include="dbo\Tables\tblSMCityLeadtimeStaging.sql" />
+    <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

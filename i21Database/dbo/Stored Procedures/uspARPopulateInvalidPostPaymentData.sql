@@ -1189,7 +1189,7 @@ BEGIN
     AND P.[intInvoiceId] IS NOT NULL
     AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
     AND @OverrideLocationSegment = 1
-    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intWriteOffAccountDetailId]) = 0
+    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intWriteOffAccountDetailId], 3) = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1225,7 +1225,7 @@ BEGIN
     WHERE P.[ysnPost] = @OneBit
     AND ISNULL(P.[intUndepositedFundsId], 0) = 0
     AND @OverrideLocationSegment = 1
-    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intAccountId]) = 0
+    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intAccountId], 3) = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1266,7 +1266,7 @@ BEGIN
     AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount] - P.[dblWriteOffAmount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount] + P.[dblWriteOffAmount])
     AND ISNULL(P.intCurrencyExchangeRateTypeId, 0) <> 0
     AND @OverrideLocationSegment = 1
-    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intGainLossAccount]) = 0
+    AND [dbo].[fnARCompareAccountSegment](P.[intARAccountId], P.[intGainLossAccount], 3) = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
