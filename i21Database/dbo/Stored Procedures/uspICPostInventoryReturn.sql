@@ -368,8 +368,11 @@ BEGIN
 							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
 						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
 							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
-				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
-				GROUP BY AggregrateLot.intInventoryReceiptItemId
+				WHERE	
+					tblICInventoryReceipt.strReceiptNumber = @strTransactionId
+					AND AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed')
+				GROUP BY 
+					AggregrateLot.intInventoryReceiptItemId
 			) ItemLot
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
