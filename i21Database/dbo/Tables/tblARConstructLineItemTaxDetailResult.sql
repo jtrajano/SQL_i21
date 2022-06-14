@@ -9,6 +9,8 @@ CREATE TABLE tblARConstructLineItemTaxDetailResult  (
 	,[dblExemptionPercent]			NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
+	,[dblOrigTax]					NUMERIC(18,6)
+	,[dblOrigAdjustedTax]			NUMERIC(18,6)
 	,[intTaxAccountId]				INT
 	,[ysnCheckoffTax]				BIT
 	,[strTaxCode]					NVARCHAR(100)						
@@ -17,6 +19,7 @@ CREATE TABLE tblARConstructLineItemTaxDetailResult  (
 	,[ysnInvalidSetup]				BIT
 	,[strNotes]						NVARCHAR(500)
 	,[dblExemptionAmount]			NUMERIC(18,6)
+	,[dblOrigExemptionAmount]		NUMERIC(18,6)
 	,[intLineItemId]				INT NULL --intDetailId
 	,[strRequestId]					NVARCHAR(100)
 ); 

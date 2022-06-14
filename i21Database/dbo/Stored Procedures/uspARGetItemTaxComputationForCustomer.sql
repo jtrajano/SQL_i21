@@ -35,6 +35,8 @@ BEGIN
 		,[dblExemptionPercent]				NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6) DEFAULT 0
 		,[dblAdjustedTax]					NUMERIC(18,6) DEFAULT 0
+		,[dblOrigTax]						NUMERIC(18,6) DEFAULT 0
+		,[dblOrigAdjustedTax]				NUMERIC(18,6) DEFAULT 0
 		,[intTaxAccountId]					INT
 		,[intSalesTaxExemptionAccountId] 	INT
 		,[ysnSeparateOnInvoice]				BIT DEFAULT 0
@@ -315,9 +317,11 @@ BEGIN
 	  AND ysnExcludeCheckOff = 0
 
 	UPDATE ##ITEMTAXES
-	SET dblTax			= dbo.fnRoundBanker(dblItemTaxAmount,[dbo].[fnARGetDefaultDecimal]())
-	  , dblAdjustedTax	= dbo.fnRoundBanker(dblItemTaxAmount,[dbo].[fnARGetDefaultDecimal]())
-	  , ysnComputed		= 1 
+	SET dblTax				= dbo.fnRoundBanker(dblItemTaxAmount,[dbo].[fnARGetDefaultDecimal]())
+	  , dblAdjustedTax		= dbo.fnRoundBanker(dblItemTaxAmount,[dbo].[fnARGetDefaultDecimal]())
+	  , dblOrigTax			= dblItemTaxAmount
+	  , dblOrigAdjustedTax	= dblItemTaxAmount
+	  , ysnComputed			= 1 
 	
 	SELECT [intTransactionDetailTaxId]
 		,[intTransactionDetailId]
@@ -331,6 +335,8 @@ BEGIN
 		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]
+		,[dblOrigTax]
+	    ,[dblOrigAdjustedTax]
 		,[ysnSeparateOnInvoice]
 		,[intTaxAccountId]
 		,[intSalesTaxExemptionAccountId]
