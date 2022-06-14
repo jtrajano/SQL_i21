@@ -21,6 +21,8 @@ BEGIN
 		,[dblExemptionPercent]			NUMERIC(18,6)
 		,[dblTax]						NUMERIC(18,6)
 		,[dblAdjustedTax]				NUMERIC(18,6)
+		,[dblOrigTax]					NUMERIC(18,6)
+		,[dblOrigAdjustedTax]			NUMERIC(18,6)
 		,[intTaxAccountId]				INT
 		,[ysnCheckoffTax]				BIT
 		,[strTaxCode]					NVARCHAR(100)						
@@ -34,6 +36,7 @@ BEGIN
 		,[ysnComputed]					BIT
 		,[ysnTaxableFlagged]			BIT
 		,[dblExemptionAmount]			NUMERIC(18,6)
+		,[dblOrigExemptionAmount]		NUMERIC(18,6)
 		,[dblStateExciseTax]			NUMERIC(18,6) NULL DEFAULT 0
 		,[dblStateSalesTax]				NUMERIC(18,6) NULL DEFAULT 0
 		,[dblFederalExciseTax]			NUMERIC(18,6) NULL DEFAULT 0
@@ -159,6 +162,8 @@ BEGIN
 				, [dblExemptionPercent]
 				, [dblTax]
 				, [dblAdjustedTax]
+				, [dblOrigTax]
+	    		, [dblOrigAdjustedTax]
 				, [ysnSeparateOnInvoice]
 				, [intTaxAccountId]
 				, [intSalesTaxExemptionAccountId]
@@ -914,10 +919,13 @@ BEGIN
 	  AND IT.ysnCheckoffTax = 1
 	
 	UPDATE IT
-	SET dblTax				= ROUND(ROUND(IT.dblItemTaxAmount, 3), @intDefaultDecimal)
-	  , dblAdjustedTax		= ROUND(ROUND(IT.dblItemTaxAmount, 3), @intDefaultDecimal)
-	  , dblExemptionAmount	= ROUND(ROUND(IT.dblItemExemptedTaxAmount, 3), @intDefaultDecimal)
-	  , ysnComputed			= 1 
+	SET dblTax					= ROUND(ROUND(IT.dblItemTaxAmount, 3), @intDefaultDecimal)
+	  , dblAdjustedTax			= ROUND(ROUND(IT.dblItemTaxAmount, 3), @intDefaultDecimal)
+	  , dblExemptionAmount		= ROUND(ROUND(IT.dblItemExemptedTaxAmount, 3), @intDefaultDecimal)
+	  , dblOrigTax				= IT.dblItemTaxAmount
+	  , dblOrigAdjustedTax		= IT.dblItemTaxAmount
+	  , dblOrigExemptionAmount	= IT.dblItemExemptedTaxAmount
+	  , ysnComputed				= 1 
 	FROM @ItemTaxes IT
 	WHERE IT.ysnInvalidSetup = 0 
 	  AND IT.ysnComputed = 0
@@ -934,6 +942,8 @@ BEGIN
 		, [dblExemptionPercent]
 		, [dblTax]
 		, [dblAdjustedTax]
+		, [dblOrigTax]
+		, [dblOrigAdjustedTax]
 		, [intTaxAccountId]
 		, [ysnCheckoffTax]
 		, [ysnTaxExempt]
@@ -941,6 +951,7 @@ BEGIN
 		, [ysnInvalidSetup]
 		, [strNotes]
 		, [dblExemptionAmount]
+		, [dblOrigExemptionAmount]
 		, [intLineItemId]
 		, [strRequestId] 
 	)
@@ -954,6 +965,8 @@ BEGIN
 		, [dblExemptionPercent]
 		, [dblTax]
 		, [dblAdjustedTax]
+		, [dblOrigTax]
+		, [dblOrigAdjustedTax]
 		, [intTaxAccountId]
 		, [ysnCheckoffTax]
 		, [ysnTaxExempt]
@@ -961,6 +974,7 @@ BEGIN
 		, [ysnInvalidSetup]
 		, [strNotes]
 		, [dblExemptionAmount]
+		, [dblOrigExemptionAmount]
 		, [intLineItemId]
 		, @strRequestId
 	FROM @ItemTaxes
