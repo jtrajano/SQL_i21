@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblSMTaxXRef](
 	[strOrgState] [char](2) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strOrgLocal1] [char](3) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strOrgLocal2] [char](3) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strOrgTaxType] [char](3) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strOrgTaxType] [char](4) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strOrgCalcMethod] [char](1) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dblRate] [decimal](9, 6) NULL,
 	[intTaxGroupId] [int] NULL,
