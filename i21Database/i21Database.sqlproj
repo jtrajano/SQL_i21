@@ -850,6 +850,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutProcessErrorWarning.sql" />
     <Build Include="dbo\Tables\tblSMCityLeadtimeStaging.sql" />
     <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
