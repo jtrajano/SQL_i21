@@ -177,7 +177,9 @@ BEGIN
 		[intBorrowingFacilityLimitDetailId]	,
 		[strReferenceNo]					,
 		[intBankValuationRuleId]			,
-		[strComments]
+		[strComments]						,
+		[strTaxPoint]						,
+		[intTaxLocationId]
 	)
 	SELECT
 		[intPartitionId]		=	A.intPartitionId,
