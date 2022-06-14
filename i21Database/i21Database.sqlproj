@@ -846,6 +846,7 @@
     <Build Include="dbo\Stored Procedures\uspHDImportCoworkerGoal.sql" />
     <Build Include="dbo\Stored Procedures\uspHDInsertCoworkerGoal.sql" />
     <Build Include="dbo\Views\vyuSTFuelSalesReconciliationReport.sql" />
+    <Build Include="dbo\Tables\tblSMCityLeadtimeStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
