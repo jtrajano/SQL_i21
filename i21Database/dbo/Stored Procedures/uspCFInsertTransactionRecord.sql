@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿
+
+CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						    NVARCHAR(MAX)
 	,@intUserId							INT				= NULL
@@ -24,7 +26,7 @@ BEGIN
 	BEGIN TRANSACTION 
 	
 
-
+	PROCESSOVERFILL:
 
 	/**********************************
 		IF(LOWER(@strTransactionType) LIKE '%foreign%')
@@ -40,6 +42,20 @@ BEGIN
 	UPDATE tblCFImportTransactionStagingTable 
 	SET strTransactionType = 'Foreign Sale' 
 	WHERE strTransactionType = '%Foreign%'
+	AND strGUID = @strGUID
+
+
+	UPDATE tblCFImportTransactionStagingTable
+	SET 
+		strTrimedVehicleNumber = LTRIM(RTRIM(strVehicleNumber))
+	WHERE strGUID = @strGUID
+	
+
+	UPDATE tblCFImportTransactionStagingTable
+	SET 
+		 ysnNumericVehicle = 1 
+		,strNumericVehicleNumber = CAST(strTrimedVehicleNumber AS BIGINT)
+	WHERE ISNUMERIC(strTrimedVehicleNumber) = 1
 	AND strGUID = @strGUID
 	
 
@@ -1896,15 +1912,19 @@ BEGIN
 	WHERE tblCFImportTransactionStagingTable.strVehicleId IS NOT NULL
 	AND strGUID = @strGUID
 
+	
+
 	INSERT INTO tblCFImportTransactionNumericVehicleStagingTable(
 		 intVehicleId			
 		,strVehicleNumber
 		,intAccountId
+		,strGUID
 	)	
 	SELECT 
 		 tblCFVehicle.intVehicleId			
 		,tblCFVehicle.strVehicleNumber	
 		,tblCFVehicle.intAccountId		
+		,@strGUID
 	FROM tblCFImportTransactionStagingTable
 	INNER JOIN tblCFVehicle 
 	ON tblCFImportTransactionStagingTable.intAccountId = tblCFVehicle.intAccountId
@@ -1916,25 +1936,38 @@ BEGIN
 		 intVehicleId			
 		,strVehicleNumber
 		,intAccountId
+		,strGUID
 	)	
 	SELECT 
 		 tblCFVehicle.intVehicleId			
 		,tblCFVehicle.strVehicleNumber	
 		,tblCFVehicle.intAccountId		
+		,@strGUID
 	FROM tblCFImportTransactionStagingTable
 	INNER JOIN tblCFVehicle 
 	ON tblCFImportTransactionStagingTable.intAccountId = tblCFVehicle.intAccountId
 	WHERE RTRIM(LTRIM(tblCFVehicle.strVehicleNumber)) like '%[^0-9]%' and RTRIM(LTRIM(tblCFVehicle.strVehicleNumber)) != ''
 	AND strGUID = @strGUID
+	
 
-
+	--UPDATE tblCFImportTransactionStagingTable
+	--SET tblCFImportTransactionStagingTable.intVehicleId = CASE 
+	--														WHEN ISNUMERIC(tblCFImportTransactionStagingTable.strVehicleId) = 1
+	--														THEN (SELECT TOP 1 intVehicleId FROM tblCFImportTransactionNumericVehicleStagingTable WHERE strGUID = @strGUID AND LTRIM(RTRIM(strVehicleNumber)) = tblCFImportTransactionStagingTable.strNumericVehicleNumber) 
+	--														WHEN ISNUMERIC(tblCFImportTransactionStagingTable.strVehicleId) = 0
+	--														THEN (SELECT TOP 1 intVehicleId FROM tblCFImportTransactionStringVehicleStagingTable WHERE strGUID = @strGUID AND strVehicleNumber COLLATE Latin1_General_CI_AS = tblCFImportTransactionStagingTable.strTrimedVehicleNumber) 
+	--														ELSE NULL
+	--													  END
+	--FROM tblCFImportTransactionStagingTable
+	--WHERE (tblCFImportTransactionStagingTable.intAccountId != 0 OR tblCFImportTransactionStagingTable.intAccountId IS NOT NULL)
+	--AND strGUID = @strGUID
 
 	UPDATE tblCFImportTransactionStagingTable
 	SET tblCFImportTransactionStagingTable.intVehicleId = CASE 
-															WHEN ISNUMERIC(tblCFImportTransactionStagingTable.strVehicleId) = 1
-															THEN (SELECT TOP 1 intVehicleId FROM tblCFImportTransactionNumericVehicleStagingTable WHERE CAST(LTRIM(RTRIM(strVehicleNumber)) AS BIGINT) = CAST(LTRIM(RTRIM(tblCFImportTransactionStagingTable.strVehicleId)) AS BIGINT))
-															WHEN ISNUMERIC(tblCFImportTransactionStagingTable.strVehicleId) = 0
-															THEN (SELECT TOP 1 intVehicleId FROM tblCFImportTransactionStringVehicleStagingTable WHERE LTRIM(RTRIM(strVehicleNumber COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(tblCFImportTransactionStagingTable.strVehicleId COLLATE Latin1_General_CI_AS)))
+															WHEN  ISNULL(ysnNumericVehicle,0) = 1
+															THEN (SELECT TOP 1 intVehicleId FROM tblCFImportTransactionNumericVehicleStagingTable WHERE strGUID = @strGUID AND LTRIM(RTRIM(strVehicleNumber)) = tblCFImportTransactionStagingTable.strNumericVehicleNumber) 
+															WHEN  ISNULL(ysnNumericVehicle,0) = 0
+															THEN (SELECT TOP 1 intVehicleId FROM tblCFImportTransactionStringVehicleStagingTable WHERE strGUID = @strGUID AND strVehicleNumber COLLATE Latin1_General_CI_AS = tblCFImportTransactionStagingTable.strTrimedVehicleNumber) 
 															ELSE NULL
 														  END
 	FROM tblCFImportTransactionStagingTable
@@ -1942,13 +1975,26 @@ BEGIN
 	AND strGUID = @strGUID
 
 
+
+
+	--UPDATE tblCFImportTransactionStagingTable
+	--SET 
+	-- tblCFImportTransactionStagingTable.ysnIgnoreVehicleError = (CASE 
+	--																 WHEN ISNUMERIC(tblCFImportTransactionStagingTable.strVehicleId) = 1
+	--																 THEN (CASE WHEN CAST(LTRIM(RTRIM(strVehicleNumber)) AS BIGINT) = 0 THEN 1 END)
+	--																 WHEN LTRIM(RTRIM(ISNULL(strVehicleNumber,''))) = '' THEN 1
+	--																 ELSE 0
+	--															END)
+	--FROM tblCFImportTransactionStagingTable 
+	--WHERE strGUID = @strGUID
+
 	UPDATE tblCFImportTransactionStagingTable
 	SET 
 	 tblCFImportTransactionStagingTable.ysnIgnoreVehicleError = (CASE 
-																	 WHEN ISNUMERIC(tblCFImportTransactionStagingTable.strVehicleId) = 1
-																	 THEN (CASE WHEN CAST(LTRIM(RTRIM(strVehicleNumber)) AS BIGINT) = 0 THEN 1 END)
-																	 WHEN LTRIM(RTRIM(ISNULL(strVehicleNumber,''))) = '' THEN 1
-																	 ELSE 0
+																	 WHEN ISNULL(ysnNumericVehicle,0) = 1
+																		THEN (CASE WHEN strNumericVehicleNumber = 0 THEN 1 END)
+																	 WHEN ISNULL(strTrimedVehicleNumber,'') = '' THEN 1
+																		ELSE 0
 																END)
 	FROM tblCFImportTransactionStagingTable 
 	WHERE strGUID = @strGUID
@@ -2534,6 +2580,9 @@ BEGIN
 		,@dtmProcessDate				=@dtmProcessDate
 		,@IsImporting					=1
 
+
+		select  *from tblCFImportTransactionTaxType
+
 		--DECLARE @dblGrossTransferCost		NUMERIC(18,6)	
 		--DECLARE @dblNetTransferCost		NUMERIC(18,6)	
 
@@ -2768,8 +2817,8 @@ BEGIN
 				,dblInventoryCost			= tblCFImportTransactionPricingType.dblInventoryCost	
 				,dblMargin					= tblCFImportTransactionPricingType.dblMargin
 				,strPriceMethod 			= tblCFImportTransactionPricingType.strPriceMethod
-				,intItemContractId 			= tblCFImportTransactionPricingType.intItemContractHeaderId
-				,intItemContractDetailId 	= tblCFImportTransactionPricingType.intItemContractDetailId
+				,intContractId 				= tblCFImportTransactionPricingType.intContractHeaderId
+				,intContractDetailId 		= tblCFImportTransactionPricingType.intContractDetailId
 				,dblQuantity 				= tblCFImportTransactionPricingType.dblQuantity
 				,intPriceProfileId 			= null
 				,intPriceIndexId			= null
@@ -2871,22 +2920,227 @@ BEGIN
 	AND tblCFTransactionTaxTotal.strGUID = @strGUID
 
 
-	DELETE FROM tblCFImportTransactionTaxType							WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionPricingType						WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionRemoteOriginalTax					WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionRemoteCalculatedTax				WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionRemoteTax							WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionOriginalTax						WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionCalculatedTax						WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionCalculatedTaxExempt				WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionTax								WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionOriginalTaxZeroQuantity			WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionCalculatedTaxZeroQuantity			WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionCalculatedTaxExemptZeroQuantity	WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionTaxZeroQuantity					WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionTaxType							WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionPricingType						WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionCalculatedTaxZeroQuantity			WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionCFNTaxDetailStagingTable			WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionNumericVehicleStagingTable		WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionOriginalTax						WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionOriginalTaxExempt					WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionOriginalTaxExemptZeroQuantity		WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionOriginalTaxZeroQuantity			WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionPriceProfile						WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionPriceType							WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionPricingType						WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionRemoteCalculatedTax				WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionRemoteOriginalTax					WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionRemoteTax							WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionStagingTable						WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionStringVehicleStagingTable			WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionTax								WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionTaxType							WHERE strGUID = @strGUID
+	DELETE FROM tblCFImportTransactionTaxZeroQuantity					WHERE strGUID = @strGUID
+
+	
+
+	--SELECT 'tblCFImportTransactionContractOverfillStagingTable',* FROM tblCFImportTransactionContractOverfillStagingTable
+
+	IF EXISTS(SELECT(1) FROM tblCFImportTransactionContractOverfillStagingTable WHERE strGUID = @strGUID)
+	BEGIN
+		SELECT 'overfill'
+		INSERT INTO tblCFImportTransactionStagingTable (
+		 strGUID                     
+		,strProcessDate              
+		,strPostedDate               
+		,strLaggingDate              
+		,strCreatedDate              
+		,strCardId                   
+		,strVehicleId                
+		,strProductId                
+		,strNetworkId                
+		,intTransTime                
+		,intOdometer                 
+		,intPumpNumber               
+		,intContractId               
+		,intSalesPersonId            
+		,dtmBillingDate              
+		,dtmTransactionDate          
+		,strSequenceNumber           
+		,strPONumber                 
+		,strMiscellaneous            
+		,strPriceMethod              
+		,strPriceBasis               
+		,dblQuantity                 
+		,dblTransferCost             
+		,dblOriginalTotalPrice       
+		,dblCalculatedTotalPrice     
+		,dblOriginalGrossPrice
+		,dblCalculatedGrossPrice
+		,dblCalculatedNetPrice
+		,dblOriginalNetPrice			
+		,dblCalculatedPumpPrice		
+		,dblOriginalPumpPrice		
+		,intNetworkId				
+		,strCreditCard				
+		,intSiteId					
+		,strSiteId					
+		,strSiteName					
+		,strTransactionType			
+		,strDeliveryPickupInd
+		,strTaxState							                   
+		,dblFederalExciseTaxRate				                   
+		,dblStateExciseTaxRate1                                 
+		,dblStateExciseTaxRate2                                 
+		,dblCountyExciseTaxRate                                 
+		,dblCityExciseTaxRate                                   
+		,dblStateSalesTaxPercentageRate                         
+		,dblCountySalesTaxPercentageRate                        
+		,dblCitySalesTaxPercentageRate                          
+		,dblOtherSalesTaxPercentageRate                         
+		,strFederalExciseTaxRateReference                       
+		,strStateExciseTaxRate1Reference                        
+		,strStateExciseTaxRate2Reference                        
+		,strCountyExciseTaxRateReference                        
+		,strCityExciseTaxRateReference                          
+		,strStateSalesTaxPercentageRateReference                
+		,strCountySalesTaxPercentageRateReference               
+		,strCitySalesTaxPercentageRateReference                 
+		,strOtherSalesTaxPercentageRateReference                
+		,strSiteTaxLocation                                     
+		,strTax1                                     
+		,strTax2                                     
+		,strTax3                                     
+		,strTax4                                     
+		,strTax5                                     
+		,strTax6                                     
+		,strTax7                                     
+		,strTax8                                     
+		,strTax9                                     
+		,strTax10                                    
+		,dblTaxValue1                                
+		,dblTaxValue2                                
+		,dblTaxValue3                                
+		,dblTaxValue4                                
+		,dblTaxValue5                                
+		,dblTaxValue6                                
+		,dblTaxValue7                                
+		,dblTaxValue8                                
+		,dblTaxValue9                                
+		,dblTaxValue10                               
+		,strSiteState                                
+		,strSiteAddress                              
+		,strSiteCity                                 
+		,intPPHostId                                 
+		,strPPSiteType                               
+		,strSiteType                                 
+		,intSellingHost                              
+		,intBuyingHost                               
+		,strCardNumberForDualCard                    
+		,strVehicleNumberForDualCard                 
+		,strDriverPin                                
+		,intUserId
+		)
+		SELECT 
+		strGUID                     
+		,strProcessDate              
+		,strPostedDate               
+		,strLaggingDate              
+		,strCreatedDate              
+		,strCardId                   
+		,strVehicleId                
+		,strProductId                
+		,strNetworkId                
+		,intTransTime                
+		,intOdometer                 
+		,intPumpNumber               
+		,intContractId               
+		,intSalesPersonId            
+		,dtmBillingDate              
+		,dtmTransactionDate          
+		,strSequenceNumber           
+		,strPONumber                 
+		,strMiscellaneous            
+		,strPriceMethod              
+		,strPriceBasis               
+		,dblQuantity                 
+		,dblTransferCost             
+		,dblOriginalTotalPrice       
+		,dblCalculatedTotalPrice     
+		,dblOriginalGrossPrice
+		,dblCalculatedGrossPrice
+		,dblCalculatedNetPrice
+		,dblOriginalNetPrice			
+		,dblCalculatedPumpPrice		
+		,dblOriginalPumpPrice		
+		,intNetworkId				
+		,strCreditCard				
+		,intSiteId					
+		,strSiteId					
+		,strSiteName					
+		,strTransactionType			
+		,strDeliveryPickupInd
+		,strTaxState							                   
+		,dblFederalExciseTaxRate				                   
+		,dblStateExciseTaxRate1                                 
+		,dblStateExciseTaxRate2                                 
+		,dblCountyExciseTaxRate                                 
+		,dblCityExciseTaxRate                                   
+		,dblStateSalesTaxPercentageRate                         
+		,dblCountySalesTaxPercentageRate                        
+		,dblCitySalesTaxPercentageRate                          
+		,dblOtherSalesTaxPercentageRate                         
+		,strFederalExciseTaxRateReference                       
+		,strStateExciseTaxRate1Reference                        
+		,strStateExciseTaxRate2Reference                        
+		,strCountyExciseTaxRateReference                        
+		,strCityExciseTaxRateReference                          
+		,strStateSalesTaxPercentageRateReference                
+		,strCountySalesTaxPercentageRateReference               
+		,strCitySalesTaxPercentageRateReference                 
+		,strOtherSalesTaxPercentageRateReference                
+		,strSiteTaxLocation                                     
+		,strTax1                                     
+		,strTax2                                     
+		,strTax3                                     
+		,strTax4                                     
+		,strTax5                                     
+		,strTax6                                     
+		,strTax7                                     
+		,strTax8                                     
+		,strTax9                                     
+		,strTax10                                    
+		,dblTaxValue1                                
+		,dblTaxValue2                                
+		,dblTaxValue3                                
+		,dblTaxValue4                                
+		,dblTaxValue5                                
+		,dblTaxValue6                                
+		,dblTaxValue7                                
+		,dblTaxValue8                                
+		,dblTaxValue9                                
+		,dblTaxValue10                               
+		,strSiteState                                
+		,strSiteAddress                              
+		,strSiteCity                                 
+		,intPPHostId                                 
+		,strPPSiteType                               
+		,strSiteType                                 
+		,intSellingHost                              
+		,intBuyingHost                               
+		,strCardNumberForDualCard                    
+		,strVehicleNumberForDualCard                 
+		,strDriverPin                                
+		,intUserId
+		FROM tblCFImportTransactionContractOverfillStagingTable
+		WHERE strGUID = @strGUID
+
+
+		DELETE FROM tblCFImportTransactionContractOverfillStagingTable
+		WHERE strGUID = @strGUID
+
+		GOTO PROCESSOVERFILL
+	END
 
 	COMMIT TRANSACTION
 
