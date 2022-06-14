@@ -141,7 +141,7 @@ BEGIN TRY
 				JOIN tblEMEntity em ON em.intEntityId = frm.intEntityId
 				JOIN tblLGContainerType cnt ON cnt.intContainerTypeId = frm.intContainerTypeId
 				JOIN tblLGContainerTypeCommodityQty ctq ON ctq.intContainerTypeId = cnt.intContainerTypeId
-				LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemId = @intCostItemId AND iUOM.intUnitMeasureId = ctq.intUnitMeasureId
+				LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemId = @intCostItemId AND iUOM.intUnitMeasureId = ctq.intWeightUnitMeasureId
 				LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = iUOM.intUnitMeasureId
 				JOIN tblICCommodityAttribute cat ON cat.intCommodityAttributeId = ctq.intCommodityAttributeId
 				JOIN tblSMCurrency cur ON cur.intCurrencyID = frm.intCurrencyId
