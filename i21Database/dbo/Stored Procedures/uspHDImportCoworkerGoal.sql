@@ -216,8 +216,8 @@ BEGIN TRY
 	IF (@User IS NOT NULL AND LTRIM(RTRIM(@User)) <> '')
 	BEGIN
 		SELECT TOP 1 @intEntityId = intEntityId
-		FROM tblEMEntity
-		WHERE lower(strName) = LTRIM(RTRIM(lower(@User)))
+		FROM vyuHDAgentDetail
+		WHERE LTRIM(RTRIM(lower(strFullName))) = LTRIM(RTRIM(lower(@User)))
 	END
 
 	/*Set @intReportsToId*/
