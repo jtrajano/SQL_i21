@@ -47,6 +47,7 @@ BEGIN
 		,dblToLatitude = TMO.dblLatitude
 		,strOrderStatus = TMO.strOrderStatus
 		,strDriver = TMO.strDriverName
+		,intItemId = TMS.intProduct
 		,strItemNo = TMO.strProduct
 		,dblOnHand = NULL
 		,dblOrderedQty = NULL
@@ -66,16 +67,16 @@ BEGIN
 		,ysnRoutingAlert = TMO.ysnRoutingAlert
 		,strRoute = TMR.strRouteId
 	FROM vyuTMGeneratedCallEntry TMO 
-	LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
-	LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
-	LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
-	LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
-	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
-	LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
-	OUTER APPLY (SELECT TOP 1 dblStandardWeight FROM tblICItemUOM WHERE intItemId = TMS.intProduct AND ysnStockUnit = 1) SW
+		LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
+		LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
+		LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
+		LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
+		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
+		LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
+		OUTER APPLY (SELECT TOP 1 dblStandardWeight FROM tblICItemUOM WHERE intItemId = TMS.intProduct AND ysnStockUnit = 1) SW
 	WHERE TMO.strOrderStatus = 'Generated'
-	AND NOT EXISTS (SELECT 1 FROM tblLGDispatchOrderDetail DOD 
-		INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOD.intDispatchOrderId 
-		WHERE DO.intSourceType = 2 AND DOD.intTMDispatchId = TMO.intDispatchId)
+		AND NOT EXISTS (SELECT 1 FROM tblLGDispatchOrderDetail DOD 
+			INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOD.intDispatchOrderId 
+			WHERE DO.intSourceType = 2 AND DOD.intTMDispatchId = TMO.intDispatchId)
 END
 GO
