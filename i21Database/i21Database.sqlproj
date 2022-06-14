@@ -852,6 +852,7 @@
     <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoal.sql" />
     <Build Include="dbo\Functions\fnLGGetSupplyPointContractData.sql" />
+    <Build Include="dbo\Views\vyuSTPollingStatusReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
