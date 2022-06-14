@@ -97,8 +97,7 @@ FROM
 	   , TR.strTrLoyaltyProgramProgramID	
 	   , TR.strTrLoyaltyProgramTrloAccount	
 	   , TR.strTrLoyaltyProgramTrloEntryMeth
-    --    , CONVERT(VARCHAR, TR.dtmDate, 23) AS dtmDate
-       , TR.dtmDate AS dtmDate
+       , CONVERT(VARCHAR, TR.dtmDate, 23) AS dtmDate
        , CAST(TR.intCashierPosNum AS INT) AS intCashierPosNum
        , CAST(TR.intStoreId AS INT) AS intStoreId
        , CAST(TR.intStoreNumber AS INT) AS intStoreNo
