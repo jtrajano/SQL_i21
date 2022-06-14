@@ -292,7 +292,7 @@ BEGIN TRY
 	   ) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId	  
 	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'	   
 	   	AND InvTran.ysnIsUnposted = 0
-	   	AND dbo.fnRemoveTimeOnDate(Shipment.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(Shipment.dtmCreated) END
+	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND intContractTypeId = 2
 	   	AND InvTran.intInTransitSourceLocationId IS NULL
 	   GROUP BY 
