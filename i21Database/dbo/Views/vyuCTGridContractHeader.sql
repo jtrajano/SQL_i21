@@ -102,6 +102,7 @@ AS
 			NM.strSampleTypeName,
 			NM.strWeight,
 			NM.strTerm,
+			NM.intBalanceDue,
 			NM.strEntityName,
 			NM.strSalesperson,
 			NM.strContact,

@@ -371,7 +371,7 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
           AND @DueFromAccountId <> 0
-          AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId]) = 0
+          AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId], 3) = 0
 		  AND A.intTransactionType <> 15
 
 	--PREPAY, DEBIT MEMO ENTRIES
@@ -632,7 +632,7 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	      AND @AllowIntraEntries = 1
 	      AND @DueToAccountId <> 0
-	      AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId) = 0
+	      AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId, 3) = 0
 		  AND A.intTransactionType <> 15
 
 	-- UNION ALL
@@ -1111,7 +1111,7 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
 	  	  AND @DueToAccountId <> 0
-	  	  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId) = 0
+	  	  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId, 3) = 0
 		  AND A.intTransactionType <> 15
 	
 	--TAX ADJUSTMENT

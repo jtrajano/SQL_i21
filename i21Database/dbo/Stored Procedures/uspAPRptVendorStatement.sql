@@ -33,6 +33,7 @@ BEGIN
 		dblCredit DECIMAL(18, 6) NULL,
 		strCurrency NVARCHAR(1000) NULL,
 		strReportComment NVARCHAR(1000) NULL,
+		intOrder INT NULL,
 		intPartitionId INT NULL
 	)
 
@@ -133,6 +134,7 @@ BEGIN
 			   CASE WHEN A.dblTotal < 0 THEN ABS(A.dblTotal) ELSE 0 END,
 			   C.strCurrency,
 			   @strReportComment,
+			   A.intOrder,
 			   DENSE_RANK() OVER(ORDER BY A.intShipToId, A.intEntityVendorId, A.intCurrencyId)
 		FROM (
 			--INITIAL BALANCES
@@ -167,8 +169,7 @@ BEGIN
 		WHERE (NULLIF(@strName, '') IS NULL OR @strName = E.strName) 
 		      AND (NULLIF(@strLocationName, '') IS NULL OR @strLocationName = CL.strLocationName)
 			  AND (NULLIF(@strCurrency, '') IS NULL OR @strCurrency = C.strCurrency)
-		ORDER BY dtmBillDate, intOrder
 
-		SELECT * FROM @tblAPVendorStatement
+		SELECT * FROM @tblAPVendorStatement ORDER BY dtmBillDate, intOrder
 	END
 END

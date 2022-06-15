@@ -11,6 +11,7 @@
 	, @intInvoiceCurrencyId INT
 	, @intRateTypeId INT
 	, @ysnWarningMessage BIT = 1
+	, @intSequenceCurrencyId INT
 
 AS
 	
@@ -24,6 +25,8 @@ BEGIN TRY
 		, @intTermCostDetailId INT
 		, @intCurrencyId INT
 		, @strCurrency NVARCHAR(100)
+		, @strInvoiceCurrency NVARCHAR(100)
+		, @strSequenceCurrency NVARCHAR(100)
 		, @intItemUOMId INT
 		, @strUnitMeasure NVARCHAR(100)
 		, @dblValue NUMERIC(18, 6)
@@ -52,6 +55,9 @@ BEGIN TRY
 		, @intFreightItemId = intDefaultFreightItemId
 		, @intInsuranceItemId = intDefaultInsuranceItemId
 	FROM vyuCTCompanyPreference
+
+	SELECT @strInvoiceCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intInvoiceCurrencyId;
+	SELECT @strSequenceCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSequenceCurrencyId;
 
 	SELECT @intOriginCountryId = intCountryId FROM tblSMCity
 	WHERE intCityId = @intFromPortId
@@ -135,7 +141,7 @@ BEGIN TRY
 				JOIN tblEMEntity em ON em.intEntityId = frm.intEntityId
 				JOIN tblLGContainerType cnt ON cnt.intContainerTypeId = frm.intContainerTypeId
 				JOIN tblLGContainerTypeCommodityQty ctq ON ctq.intContainerTypeId = cnt.intContainerTypeId
-				LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemId = @intCostItemId AND iUOM.intUnitMeasureId = ctq.intUnitMeasureId
+				LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemId = @intCostItemId AND iUOM.intUnitMeasureId = ctq.intWeightUnitMeasureId
 				LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = iUOM.intUnitMeasureId
 				JOIN tblICCommodityAttribute cat ON cat.intCommodityAttributeId = ctq.intCommodityAttributeId
 				JOIN tblSMCurrency cur ON cur.intCurrencyID = frm.intCurrencyId
@@ -150,8 +156,8 @@ BEGIN TRY
 					, @strCostItem
 					, NULL
 					, NULL
-					, NULL
-					, NULL
+					, @intSequenceCurrencyId
+					, @strSequenceCurrency
 					, NULL
 					, NULL
 					, 'Per Unit'
@@ -172,8 +178,8 @@ BEGIN TRY
 				, @strCostItem
 				, ipf.intEntityId
 				, strVendor = em.strName
-				, NULL
-				, NULL
+				, @intInvoiceCurrencyId
+				, @strInvoiceCurrency
 				, NULL
 				, NULL
 				, 'Amount'
@@ -215,6 +221,11 @@ BEGIN TRY
 
 	DROP TABLE #tmpCosts
 
+	IF ISNULL(@intFreightRateMatrixId, 0) = 0 AND ISNULL(@ysnInsurance, 0) = 0
+	BEGIN
+		delete @CostItems;
+	END
+
 	IF EXISTS (SELECT TOP 1 1 FROM @CostItems WHERE ISNULL(dblRate, 0) <> 0)
 	BEGIN
 		IF @ysnWarningMessage = 1 AND @ysnAutoCalc = 0
@@ -234,7 +245,7 @@ BEGIN TRY
 				, ci.strCostMethod
 				, ci.dblRate
 				, ci.dblAmount
-				, dblFX = ISNULL(CASE WHEN @intInvoiceCurrencyId = ci.intCurrencyId THEN 1 ELSE tbl.dblRate END, NULL)
+				, dblFX = ISNULL(CASE WHEN (@intSequenceCurrencyId = ci.intCurrencyId or ci.intCurrencyId = seqCurrency.intMainCurrencyId) THEN 1 ELSE tbl.dblRate END, NULL)
 			FROM @CostItems ci
 			LEFT JOIN (
 				SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY cerd.intCurrencyExchangeRateId ORDER BY cerd.dtmValidFromDate DESC)
@@ -243,9 +254,11 @@ BEGIN TRY
 					, cer.intToCurrencyId
 				FROM tblSMCurrencyExchangeRate cer 
 				LEFT JOIN tblSMCurrencyExchangeRateDetail cerd ON cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId AND cerd.intRateTypeId = @intRateTypeId
-				WHERE cer.intFromCurrencyId = @intInvoiceCurrencyId
+				left join tblSMCurrency cu on cu.intCurrencyID = @intSequenceCurrencyId
+				WHERE (cer.intFromCurrencyId = @intSequenceCurrencyId or cer.intFromCurrencyId = cu.intMainCurrencyId)
 					AND CAST(FLOOR(CAST(cerd.dtmValidFromDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)
-			) tbl ON tbl.intToCurrencyId = ci.intCurrencyId
+			) tbl ON tbl.intToCurrencyId = ci.intCurrencyId AND intRowId = 1
+			cross apply (select * from tblSMCurrency where intCurrencyID = @intSequenceCurrencyId) seqCurrency
 		END
 	END
 

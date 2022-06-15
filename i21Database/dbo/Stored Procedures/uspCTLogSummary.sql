@@ -4382,6 +4382,12 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
+
+						if (@TotalPriced = 0 and @TotalBasis > 0 and @TotalBasis < @FinalQty)
+						begin
+							select @FinalQty = @TotalBasis;
+						end
+						
 						-- If Reassign prices, do not bring back Basis qty
 						IF (@ysnReassign = 0)
 						BEGIN

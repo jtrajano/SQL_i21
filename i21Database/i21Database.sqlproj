@@ -802,6 +802,13 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateLotReleased.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
+    <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
+    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" /> 
+    <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3822,6 +3829,7 @@
     <Build Include="dbo\Tables\tblMFItemDemand.sql" />
     <Build Include="dbo\Views\vyuCTEventMatrixDetailView.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
+    <Build Include="dbo\Views\vyuGLSegmentMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiry.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
@@ -9785,6 +9793,7 @@
     <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLogActivityDetail.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
     <Build Include="dbo\Views\vyuIPContractCostView.sql" />
@@ -10948,6 +10957,7 @@
     <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
     <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
+    <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -846,13 +846,13 @@ BEGIN TRY
 				strNewData,
 				strActionType,
 
-				intItemId,
-				intItemUOMId,
-				intItemLocationId,
-				intTableIdentityId,
-				strTableName,
-				strColumnName,
-				strColumnDataType,
+				--intItemId,
+				--intItemUOMId,
+				--intItemLocationId,
+				--intTableIdentityId,
+				--strTableName,
+				--strColumnName,
+				--strColumnDataType,
 				intConcurrencyId
 			)
 			SELECT DISTINCT 
@@ -866,13 +866,13 @@ BEGIN TRY
 				, strPreviewNewData
 				, strAction
 
-				, intItemId
-				, intItemUOMId
-				, intItemLocationId
-				, intPrimaryKeyId
-				, strTableName
-				, strTableColumnName
-				, strTableColumnDataType
+				--, intItemId
+				--, intItemUOMId
+				--, intItemLocationId
+				--, intPrimaryKeyId
+				--, strTableName
+				--, strTableColumnName
+				--, strTableColumnDataType
 				, 1
 			FROM @tblPreview
 			WHERE ysnPreview = 1
