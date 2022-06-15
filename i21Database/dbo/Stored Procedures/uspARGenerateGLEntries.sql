@@ -394,13 +394,14 @@ BEGIN
 	FROM tblARPostInvoiceGLEntries ARPIGLE
 	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPIGLE.intTransactionId = ARPIH.intInvoiceId
 	OUTER APPLY (
-		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPIGLE.intAccountId, ISNULL(intSegmentCodeId, 0)), ARPIGLE.intAccountId)
+		SELECT TOP 1 intAccountId = dbo.[fnGetGLAccountIdFromProfitCenter](ARPIGLE.intAccountId, ISNULL(intSegmentCodeId, 0))
 		FROM tblSMLineOfBusiness
 		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
 	) LOB
 	WHERE ARPIGLE.strSessionId = @strSessionId
 	AND ARPIGLE.strCode = 'IC'
-	AND ARPIGLE.[dblDebit] > 0 -- COGS Only
+	AND ARPIGLE.[dblCredit] > 0 -- COGS Only
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
 END
 
 RETURN 0

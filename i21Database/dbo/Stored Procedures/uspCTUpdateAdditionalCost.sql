@@ -53,15 +53,15 @@ BEGIN TRY
 		
 		UPDATE  CC
 		SET	    CC.dblAccruedAmount	=	(CASE	WHEN CC.strCostMethod = 'Per Unit'
-													THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, CM.intUnitMeasureId, CD.dblQuantity) * CC.dblRate * ISNULL(CC.dblFX, 1)
+													THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, CM.intUnitMeasureId, CD.dblQuantity) * CC.dblRate * CASE WHEN CC.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 												WHEN CC.strCostMethod = 'Amount'
-													THEN CC.dblRate * ISNULL(CC.dblFX, 1)
+													THEN CC.dblRate *  CASE WHEN CC.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END 
 												WHEN CC.strCostMethod = 'Per Container'
 													THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * ISNULL(CC.dblFX, 1)
 												WHEN CC.strCostMethod = 'Percentage'
 													THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
 														* (CD.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
-														* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+														* CC.dblRate/100 *  CASE WHEN CC.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 												END)
 										/ (CASE WHEN ISNULL(CY.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY.intCent, 1) ELSE 1 END)
 		FROM	tblCTContractCost	CC
