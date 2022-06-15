@@ -3892,13 +3892,6 @@ BEGIN TRY
 			BEGIN
 				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1 --, intActionId = 61
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
-
-				if (@strProcess = 'Do Roll')
-				begin
-					UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
-				end
-
 			END
 			ELSE IF @total = 0-- No changes with dblQty
 			BEGIN
@@ -4221,7 +4214,6 @@ BEGIN TRY
 				BEGIN
 					IF (ISNULL(@TotalBasis, 0) <> 0)
 					BEGIN
-
 						-- Negate AND add previous record
 						insert into @cbLastLogPrev
 						(
@@ -4310,13 +4302,13 @@ BEGIN TRY
 						from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
 
 						UPDATE @cbLastLogPrev
-						SET dblQty = @TotalBasis * - 1
+						SET dblQty = (case when @ysnLoadBased = 1 then curr.dblOrigQty else @TotalBasis end) * - 1
 							, intPricingTypeId = 2
 							, dblFutures = NULL
 							, intActionId = 43
 							, strBatchId = @strBatchId
 							, strProcess = @strProcess
-							, dtmTransactionDate = curr.dtmTransactionDate
+							, dtmTransactionDate = @_dtmCurrent
 							, intPriceUOMId = curr.intPriceUOMId
 							, strTransactionReference = curr.strTransactionReference
 							, strTransactionReferenceNo = curr.strTransactionReferenceNo
@@ -4325,11 +4317,11 @@ BEGIN TRY
 							, intUserId = curr.intUserId
 							, dblOrigQty = curr.dblOrigQty
 							, strNotes = ''
-						FROM (SELECT top 1 * FROM @cbLogSpecific) curr
+						FROM (SELECT * FROM @cbLogSpecific) curr
 						EXEC uspCTLogContractBalance @cbLastLogPrev, 0
 
 						UPDATE @cbLogSpecific
-						SET dblQty = @TotalBasis
+						SET dblQty = (case when @ysnLoadBased = 1 then dblOrigQty else @TotalBasis end)
 							, intPricingTypeId = 2
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END		
