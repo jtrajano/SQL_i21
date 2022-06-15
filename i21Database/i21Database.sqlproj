@@ -10650,6 +10650,7 @@
     <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intLFutOptTransactionId.sql" />
     <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateContractInSettlement.sql" />
+	<Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
