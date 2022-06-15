@@ -853,7 +853,9 @@
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoal.sql" />
     <Build Include="dbo\Functions\fnLGGetSupplyPointContractData.sql" />
     <Build Include="dbo\Views\vyuSTPollingStatusReport.sql" />
-	<Build Include="dbo\Stored Procedures\uspTRBestBuy.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRBestBuy.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerIssue.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDCreateUpdateCoworkerIssue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
