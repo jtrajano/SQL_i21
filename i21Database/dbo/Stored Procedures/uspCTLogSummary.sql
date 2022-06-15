@@ -4217,6 +4217,48 @@ BEGIN TRY
 
 						-- Negate AND add previous record
 						insert into @cbLastLogPrev
+						(
+							strBatchId
+							, dtmTransactionDate 
+							, strTransactionType 
+							, strTransactionReference 
+							, intTransactionReferenceId
+							, intTransactionReferenceDetailId 
+							, strTransactionReferenceNo 
+							, intContractDetailId 
+							, intContractHeaderId 
+							, strContractNumber 
+							, intContractSeq 
+							, intContractTypeId
+							, intEntityId 
+							, intCommodityId
+							, intItemId 
+							, intLocationId
+							, intPricingTypeId
+							, intFutureMarketId
+							, intFutureMonthId
+							, dblBasis 
+							, dblFutures
+							, intQtyUOMId
+							, intQtyCurrencyId 
+							, intBasisUOMId 
+							, intBasisCurrencyId
+							, intPriceUOMId
+							, dtmStartDate
+							, dtmEndDate 
+							, dblQty 
+							, dblOrigQty
+							, intContractStatusId 
+							, intBookId 
+							, intSubBookId
+							, strNotes 
+							, intUserId
+							, intActionId
+							, strProcess 
+							, ysnDeleted
+							, dblDynamic
+							, strInvoiceType
+						)
 						select top 1
 							strBatchId
 							, dtmTransactionDate 
@@ -4257,6 +4299,7 @@ BEGIN TRY
 							, strProcess 
 							, ysnDeleted
 							, dblDynamic
+							, strInvoiceType
 						from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
 
 						UPDATE @cbLastLogPrev
