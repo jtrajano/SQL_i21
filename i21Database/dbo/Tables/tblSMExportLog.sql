@@ -22,3 +22,6 @@
     [intConcurrencyId]      [int] NOT NULL DEFAULT (1),
     CONSTRAINT [FK_tblSMExportLog_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]) ON DELETE CASCADE
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblSMExportLog_strStatus] on [dbo].[tblSMExportLog] ([strStatus])
+GO
