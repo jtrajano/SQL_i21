@@ -397,6 +397,7 @@ BEGIN TRY
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
+				AND intItemId=@intItemId
 
 			IF @intLotId IS NULL
 				AND @intTransactionTypeId NOT IN (
