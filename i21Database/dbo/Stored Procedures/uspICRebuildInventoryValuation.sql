@@ -827,6 +827,7 @@ BEGIN
 							, 20
 						) THEN 4 
 						WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
+						WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
 						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo', 'Outbound Shipment') THEN 3 
 						WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
 						WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
@@ -848,7 +849,7 @@ BEGIN
 				,dblCost
 				,dblValue
 				,dblSalesPrice
-				,intCurrencyId
+				,t.intCurrencyId
 				,dblExchangeRate
 				,intTransactionId
 				,t.strTransactionId
@@ -862,14 +863,14 @@ BEGIN
 				,strRelatedTransactionId
 				,t.strTransactionForm
 				,intCostingMethod
-				,dtmCreated
+				,t.dtmCreated
 				,strDescription
-				,intCreatedUserId
+				,t.intCreatedUserId
 				,intCreatedEntityId
-				,intConcurrencyId  
+				,t.intConcurrencyId  
 				,intForexRateTypeId
 				,dblForexRate 
-				,strActualCostId
+				,t.strActualCostId
 				,intCategoryId
 				,dblUnitRetail
 				,dblCategoryCostValue
@@ -880,6 +881,9 @@ BEGIN
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 				LEFT JOIN tblICInventoryTransactionType  ty
 					ON t.intTransactionTypeId = ty.intTransactionTypeId
+				LEFT JOIN tblICInventoryReceipt r 
+					ON r.strReceiptNumber = t.strTransactionId
+					AND t.strTransactionForm = 'Inventory Receipt'
 		ORDER BY 
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
 			,CASE 
@@ -913,6 +917,7 @@ BEGIN
 					, 20
 				) THEN 4 
 				WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
+				WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
 				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo', 'Outbound Shipment') THEN 3 
 				WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
 				WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
@@ -5559,4 +5564,4 @@ BEGIN
 		DROP TABLE #tmpAutoVarianceBatchesForAVGCosting
 END 
 
-RETURN @intReturnValue; 
+RETURN @intReturnValue;
