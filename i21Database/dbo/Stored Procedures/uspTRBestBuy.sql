@@ -13,6 +13,7 @@ BEGIN
 		strSupplierEntityNo NVARCHAR(100),
 		strSupplierName NVARCHAR(200),
 		intSupplyPointId INT NOT NULL,
+		intEntityLocationId INT NOT NULL,
 		strSupplyPointName NVARCHAR(200),
 		strSupplypointZipCode NVARCHAR(50) NULL, 
 		--intContractDetailId INT NULL,
@@ -59,11 +60,12 @@ BEGIN
 			@strZipCode NVARCHAR(50) = NULL,
 			@strVendorName NVARCHAR(500) = NULL,
 			@strVendorEntityNo NVARCHAR(100) = NULL,
-			@strLocationName NVARCHAR(500) = NULL
+			@strLocationName NVARCHAR(500) = NULL,
+			@intEntityLocationId INT = NULL
 		
 		DECLARE @CursorSupplyPoint AS CURSOR
 		SET @CursorSupplyPoint = CURSOR FOR
-			SELECT SP.intSupplyPointId, V.intEntityId, EL.strZipCode, EL.strLocationName, E.strName, E.strEntityNo 
+			SELECT SP.intSupplyPointId, V.intEntityId, EL.strZipCode, EL.strLocationName, E.strName, E.strEntityNo, SP.intEntityLocationId
 			FROM tblTRSupplyPoint SP 
 			INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SP.intEntityLocationId
 			INNER JOIN tblAPVendor V ON V.intEntityId = EL.intEntityId
@@ -71,7 +73,7 @@ BEGIN
 			WHERE V.ysnTransportTerminal = 1
 
 		OPEN @CursorSupplyPoint
-		FETCH NEXT FROM @CursorSupplyPoint INTO @intSupplyPointId, @intVendorId, @strZipCode, @strLocationName, @strVendorName, @strVendorEntityNo
+		FETCH NEXT FROM @CursorSupplyPoint INTO @intSupplyPointId, @intVendorId, @strZipCode, @strLocationName, @strVendorName, @strVendorEntityNo, @intEntityLocationId
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			DECLARE @dblRackPrice NUMERIC(18,6) = NULL,
@@ -118,6 +120,7 @@ BEGIN
 				dtmEffectiveDate, 
 				intSupplierId, 
 				intSupplyPointId, 
+				intEntityLocationId,
 				strSupplierEntityNo, 
 				strSupplierName, 
 				strSupplyPointName, 
@@ -130,6 +133,7 @@ BEGIN
 				@dtmTransactionDate, 
 				@intVendorId, 
 				@intSupplyPointId, 
+				@intEntityLocationId,
 				@strVendorEntityNo, 
 				@strVendorName, 
 				@strLocationName, 
@@ -139,7 +143,7 @@ BEGIN
 				@dblInvoiceFreightRate, 
 				@dblTotalCostPrice)
 
-			FETCH NEXT FROM @CursorSupplyPoint INTO @intSupplyPointId, @intVendorId, @strZipCode, @strLocationName, @strVendorName, @strVendorEntityNo
+			FETCH NEXT FROM @CursorSupplyPoint INTO @intSupplyPointId, @intVendorId, @strZipCode, @strLocationName, @strVendorName, @strVendorEntityNo, @intEntityLocationId
 		END
 		CLOSE @CursorSupplyPoint
 		DEALLOCATE @CursorSupplyPoint
@@ -163,6 +167,7 @@ BEGIN
 			strSupplierEntityNo,
 			strSupplierName,
 			intSupplyPointId,
+			intEntityLocationId,
 			strSupplyPointName,
 			strSupplypointZipCode, 
 			dtmEffectiveDate,
@@ -181,6 +186,7 @@ BEGIN
 			strSupplierEntityNo,
 			strSupplierName,
 			intSupplyPointId,
+			intEntityLocationId,
 			strSupplyPointName,
 			strSupplypointZipCode, 
 			dtmEffectiveDate,
@@ -195,6 +201,7 @@ BEGIN
 			strSupplierEntityNo,
 			strSupplierName,
 			intSupplyPointId,
+			intEntityLocationId,
 			strSupplyPointName,
 			strSupplypointZipCode,
 			dtmEffectiveDate
