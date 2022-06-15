@@ -327,7 +327,7 @@ SELECT
 	, strShipVia					= SHIPVIA.strName
 	, strTerm						= TERM.strTerm
 	, dtmShipDate					= INV.dtmShipDate
-	, dtmDueDate					= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
+	, dtmDueDate					= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') AND INV.strType <> 'Service Charge'
 										THEN INVOICEDETAIL.dtmDueDate
 										ELSE INV.dtmDueDate
 									  END
