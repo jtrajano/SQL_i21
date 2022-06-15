@@ -359,39 +359,3 @@ LEFT JOIN tblAPBill F ON F.intBillId = prepaid.intPrepayTransactionId
  WHERE A.ysnPosted = 1  
 	AND C.intTransactionType IN (11)
 
-	--CLAIM TRANSACTION IN AR
-	UNION ALL SELECT A.dtmDatePaid AS dtmDate
-		, F.intBillId AS intTransactionId
-		, F.strBillId
-		, (B.dblPayment + prepaid.dblFranchiseAmount) * ISNULL(A.dblExchangeRate,1) * - 1 AS dblAmountPaid
-		, dblTotal = 0 
-		, dblAmountDue = 0 
-		, dblWithheld = 0
-		, CASE WHEN F.intTransactionType NOT IN (1,2) AND abs(B.dblDiscount) > 0 THEN B.dblDiscount * -1 ELSE B.dblDiscount END AS dblDiscount
-		, CASE WHEN F.intTransactionType NOT IN (1,2) AND abs(B.dblInterest) > 0 THEN B.dblInterest * -1 ELSE B.dblInterest END AS dblInterest 
-		, dblPrepaidAmount = 0 
-		, C.strVendorId 
-		, ISNULL(C.strVendorId,'') + ' - ' + ISNULL(C.strName,'') as strVendorIdName 
-		, C.dtmDueDate 
-		, C.ysnPosted 
-		, C.ysnPaid
-		, B.intAccountId
-		, 2
-		, C.intEntityClassId
-	FROM dbo.tblARPayment A
-	LEFT JOIN dbo.tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
-	LEFT JOIN BillVendorEntity C ON B.intBillId = C.intBillId
-	LEFT JOIN dbo.tblCMBankTransaction E ON A.strRecordNumber = E.strTransactionId
-	OUTER APPLY (
-		--claim transaction
-		SELECT TOP 1 C2.intPrepayTransactionId
-			, C2.dblFranchiseAmount
-		FROM tblAPBillDetail C2
-		WHERE C2.intBillId = C.intBillId
-	) prepaid
-	LEFT JOIN tblAPBill F ON F.intBillId = prepaid.intPrepayTransactionId
-	WHERE A.ysnPosted = 1
-		AND C.intTransactionType IN (11)
-) tbl
-LEFT JOIN tblEMEntityClass ec ON ec.intEntityClassId = tbl.intEntityClassId
-LEFT JOIN tblGLAccount gl ON gl.intAccountId = tbl.intAccountId
