@@ -155,8 +155,7 @@ BEGIN
 		, TranType = strContractType
 		, CustVendor = strEntityName
 		, dblNoOfLot = dblNoOfLots
-		, dblQuantity = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN ISNULL(dblBalance, 0) 
-				ELSE (CASE WHEN intContractStatusId = 6 THEN (ISNULL(dblDetailQuantity, 0) - ISNULL(dblBalance, 0)) ELSE dblDetailQuantity END) END)
+		, dblQuantity = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN ISNULL(dblBalance, 0) ELSE dblDetailQuantity END)
 		, cv.intContractHeaderId
 		, intFutOptTransactionHeaderId = NULL
 		, intPricingTypeId
