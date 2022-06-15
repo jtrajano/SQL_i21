@@ -92,8 +92,6 @@ begin
 			,@sFrom = replace(@sFrom, '/', '-') 
 	
 	declare @final_condition nvarchar(max) = ''
-	update @temp_xml_table set [to] = convert(nvarchar, dateadd(day, 1,cast([to] as date)), 101) where datatype like 'Date%' and ([to] is not null and [to] <> '')
-	
 	select @final_condition  = @final_condition + ' '  + dbo.fnAPCreateFilter(fieldname, condition, [from], [to], [join], begingroup, endgroup, datatype) + ' ' + [join]  
 		from @temp_xml_table xml_table 
 			where condition <> 'Dummy'
