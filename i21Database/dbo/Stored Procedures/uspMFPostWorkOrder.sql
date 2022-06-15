@@ -1530,7 +1530,7 @@ BEGIN TRY
 					)
 				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
 					,@intEntityUserSecurityId = @userId
-					,@AccountCategory_Cost_Adjustment = 'Inventory Adjustment'
+					,@AccountCategory_Cost_Adjustment = 'Work In Progress'
 			END
 
 			IF EXISTS (
