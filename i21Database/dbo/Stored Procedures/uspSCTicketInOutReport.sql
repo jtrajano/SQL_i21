@@ -18,7 +18,8 @@ begin
 	-- XML Parameter Table
 	DECLARE @temp_xml_table TABLE 
 	(
-		[fieldname] NVARCHAR(50)
+		id int identity(1,1)
+		,[fieldname] NVARCHAR(50)
 		,[condition] NVARCHAR(20)
 		,[from] NVARCHAR(MAX)
 		,[to] NVARCHAR(MAX)
@@ -44,7 +45,16 @@ begin
 		,[endgroup] NVARCHAR(50)
 		,[datatype] NVARCHAR(50)
 	)
+	
 
+	declare @final_condition nvarchar(max) = ''
+	select @final_condition  = @final_condition + ' '  + dbo.fnAPCreateFilter(fieldname, condition, [from], [to], [join], begingroup, endgroup, datatype) + ' ' + [join]  
+		from @temp_xml_table xml_table 
+			where condition <> 'Dummy'
+		order by id asc
+
+	set @final_condition = @final_condition + ' 1 = 1' 
+	--select @final_condition
 	-- Query Parameters
 	DECLARE 
 		@dtmTicketDateTimeFrom DATETIME
@@ -88,9 +98,10 @@ begin
 							, strTicketNumber as strModTicketNumber
 							, *  
 					from vyuSCTicketInOutReport 
-					where (dtmTicketDateTime between ''' + @sFrom + ''' and  ''' + @sTo + ''')'
+					where ' + @final_condition
 
 
+	print @sqlcmd
 	exec (@sqlcmd)
 	
 
@@ -189,6 +200,8 @@ begin
 		,AllExport.strUnitMeasure
 		,AllExport.dblComputedGrossUnits
 		,AllExport.strStationUnitMeasure
+		,AllExport.dblNetUnits
+		,AllExport.dblComputedNetUnits
 		from #tmpSampleExport AllExport				
 			left join tblSMCompanyLocation CompanyLocation
 				on AllExport.intProcessingLocationId = CompanyLocation.intCompanyLocationId
