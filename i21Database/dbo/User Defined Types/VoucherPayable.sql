@@ -161,5 +161,6 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
  	[dblOptionalityPremium] DECIMAL(18, 6) DEFAULT 0,
 	 /*Tax Override*/
 	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	[intTaxLocationId] INT NULL
+	[intTaxLocationId] INT NULL,
+	[intOriginalTaxGroupId] INT NULL
 )

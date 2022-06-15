@@ -276,6 +276,7 @@ SELECT TOP 100 PERCENT
 	,dblCashPrice 						= 	A.dblCost
 	,dblQualityPremium					=	ISNULL(A.dblQualityPremium, 0)
 	,dblOptionalityPremium				= 	ISNULL(A.dblOptionalityPremium, 0)
+	,intOriginalTaxGroupId				=	A.intOriginalTaxGroupId
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -370,7 +371,8 @@ UPDATE A
 								@qtyToBillFromDev
 							END,
 		A.dblTax = ISNULL(vp.dblTax, A.dblTax), --UPDATE THE TAX IF WE GENERATED IT
-		A.intTaxGroupId = ISNULL(vp.intPurchaseTaxGroupId, A.intTaxGroupId)
+		A.intTaxGroupId = ISNULL(vp.intPurchaseTaxGroupId, A.intTaxGroupId),
+		A.intOriginalTaxGroupId = ISNULL(A.intOriginalTaxGroupId, A.intTaxGroupId)
 FROM #tmpVoucherPayableData A
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
@@ -495,6 +497,7 @@ INSERT
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	,intOriginalTaxGroupId
 )
 VALUES
 (
@@ -597,6 +600,7 @@ VALUES
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	,intOriginalTaxGroupId
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
 
