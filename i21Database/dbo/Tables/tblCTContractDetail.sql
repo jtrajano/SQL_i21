@@ -228,14 +228,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblQuantityMaxValue numeric (18,6),
 	dblAmountMaxValue numeric (18,6),
 	ysnApplyDefaultTradeFinance bit null,
-	ysnTaxOverride BIT NULL,
-	strTaxPoint nvarchar(50) COLLATE Latin1_General_CI_AS null,
-	intTaxGroupId int null,
-	strTaxLocation nvarchar(50) COLLATE Latin1_General_CI_AS null,
-
-
-
-
 
 
 
