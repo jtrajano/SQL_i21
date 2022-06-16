@@ -235,8 +235,6 @@ BEGIN
 	AND strGUID = @strGUID
 
 	
-	--TEST--
-	SELECT intSiteId FROM tblCFImportTransactionStagingTable
 
 	UPDATE tblCFImportTransactionStagingTable
 	SET

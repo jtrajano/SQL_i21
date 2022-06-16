@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFCalculateTransaction] 
+﻿
+CREATE PROCEDURE [dbo].[uspCFCalculateTransaction] 
 	 @strGUID						NVARCHAR(MAX)
 	,@intUserId						INT				
 	,@dtmProcessDate				DATETIME
@@ -2126,8 +2127,8 @@ SELECT
 , [dblRate]
 , [dblBaseRate]
 , [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
+, [dblTax] = (CASE WHEN [ysnTaxExempt] = 1 THEN 0 ELSE [dblTax] END)
+, [dblAdjustedTax] --= (CASE WHEN [ysnTaxExempt] = 1 THEN 0 ELSE [dblAdjustedTax] END)
 , [intTaxAccountId]
 , [ysnCheckoffTax]
 , [ysnTaxExempt]
@@ -2138,9 +2139,10 @@ SELECT
 , [intLineItemId]
 , @strGUID
 , [intLineItemId],
-		@intUserId
+  @intUserId
 FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
+
 INSERT INTO tblCFImportTransactionCalculatedTaxZeroQuantity(
   [intTaxGroupId]
 , [intTaxCodeId]
@@ -2173,8 +2175,8 @@ SELECT
 , [dblRate]
 , [dblBaseRate]
 , [dblExemptionPercent]
-, [dblOrigTax]
-, [dblOrigAdjustedTax]
+, [dblOrigTax] = (CASE WHEN [ysnTaxExempt] = 1 THEN 0 ELSE [dblOrigTax] END)
+, [dblOrigAdjustedTax] --= (CASE WHEN [ysnTaxExempt] = 1 THEN 0 ELSE [dblOrigAdjustedTax] END)
 , [intTaxAccountId]
 , [ysnCheckoffTax]
 , [ysnTaxExempt]
@@ -2188,6 +2190,7 @@ SELECT
   @intUserId
 FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
+
 INSERT INTO tblCFImportTransactionCalculatedTaxExempt(
   [intTaxGroupId]
 , [intTaxCodeId]
