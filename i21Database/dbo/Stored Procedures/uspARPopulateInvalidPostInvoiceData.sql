@@ -1889,14 +1889,15 @@ BEGIN
 		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCostingZeroCostValidation, @OneBit)
 
 	--INVOICE HAS EARLIER DATE COMPARE TO STOCK DATE
-		INSERT INTO ##ARInvalidInvoiceData
+		INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
 		,[strTransactionType]
 		,[intInvoiceDetailId]
 		,[intItemId]
 		,[strBatchId]
-		,[strPostingError])
+		,[strPostingError]
+		,[strSessionId])
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
 		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
@@ -1905,8 +1906,9 @@ BEGIN
 		,[intItemId]			= COSTING.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'Stock is not available for ' + ITEM.strItemNo + ' at ' + CLOC.strLocationName + ' as of ' + CONVERT(NVARCHAR(30), CAST(COSTING.dtmDate AS DATETIME), 101) + '. Use the nearest stock available date of ' + CONVERT(NVARCHAR(30), CAST(STOCKDATE.dtmDate AS DATETIME), 101) + ' or later.'	
-	FROM ##ARPostInvoiceHeader I
-		INNER JOIN ##ARItemsForCosting COSTING  ON I.intInvoiceId =  COSTING.intTransactionId
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader I
+		INNER JOIN tblARPostItemsForCosting COSTING  ON I.intInvoiceId =  COSTING.intTransactionId
 		INNER JOIN  
 		(
 		SELECT intItemId,intItemLocationId,intItemUOMId,MAX(dtmDate)[dtmDate] 
