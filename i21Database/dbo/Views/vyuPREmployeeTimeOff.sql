@@ -28,7 +28,6 @@ SELECT ETO.intEntityEmployeeId
  ,dblBalance = (ETO.dblHoursCarryover + ETO.dblHoursEarned) - ETO.dblHoursUsed - ISNULL(TOYTD.dblHoursUsedYTD,0)      
  ,ETO.dblHoursCarryover       
  ,dblAdjustments =  ETO.dblHoursUsed     
- ,TOYTD.intYear  
 FROM tblPREmployeeTimeOff ETO      
 LEFT JOIN(      
  SELECT intEntityId      
@@ -52,7 +51,6 @@ LEFT JOIN(
 INNER JOIN(      
        
   SELECT E.intEntityId    
-  ,intYear  
      ,dblHoursUsedYTD = SUM(CASE WHEN U.intYear IS NOT NULL THEN ISNULL(U.dblHours, 0) ELSE 0 END)      
      ,T.intTypeTimeOffId      
    FROM tblPREmployee E INNER JOIN tblPREmployeeTimeOff T  ON E.intEntityId = T.intEntityEmployeeId        
@@ -174,8 +172,7 @@ INNER JOIN(
   
  GROUP BY       
   E.intEntityId      
-    ,T.intTypeTimeOffId       
-    ,U.intYear  
+    ,T.intTypeTimeOffId      
 ) TOYTD       
  ON ETO.intEntityEmployeeId = TOYTD.intEntityId       
  AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId 
