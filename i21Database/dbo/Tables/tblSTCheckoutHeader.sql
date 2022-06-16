@@ -34,6 +34,9 @@
     [dblFuelAdjustmentAmount] DECIMAL(18, 6) NULL,
     [dblTotalRefundCount] DECIMAL(18, 6) NULL,
     [dblTotalRefundAmount] DECIMAL(18, 6) NULL,
+    [dblLoyaltyPpgDiscount] DECIMAL(18, 6) NULL,
+	[dblSummaryInfoFuelSales] DECIMAL(18, 6) NULL,
+	[dblSummaryInfoPopPredispensedAmount] DECIMAL(18, 6) NULL,
 
 	-- ATM
 	[dblATMBegBalance]					DECIMAL(18, 6) NULL,

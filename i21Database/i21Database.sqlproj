@@ -856,6 +856,8 @@
     <Build Include="dbo\Stored Procedures\uspTRBestBuy.sql" />
     <Build Include="dbo\Tables\tblHDCoworkerIssue.sql" />
     <Build Include="dbo\Stored Procedures\uspHDCreateUpdateCoworkerIssue.sql" />
+    <Build Include="dbo\Functions\fnSTGetLatestProcessId.sql" />
+    <Build Include="dbo\Functions\fnSTGetAggregateMeterReadingsForDollars.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

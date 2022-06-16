@@ -301,6 +301,43 @@ BEGIN
           -------------------------------------------------------------------------------------------------------------
           ----------------------------------------- END PAID OUTS -----------------------------------------------------
           -------------------------------------------------------------------------------------------------------------
+
+
+
+		  -------------------------------------------------------------------------------------------------------------
+          --------------------------------------CONSIGNMENT DATA-------------------------------------------------------
+          -------------------------------------------------------------------------------------------------------------
+		  DECLARE @dblAggregateMeterReadingsForDollars DECIMAL(18, 6)
+		  DECLARE @dblSummaryInfoFuelSales DECIMAL(18, 6)
+		  
+		  SELECT 		TOP 1
+						@dblSummaryInfoFuelSales = CAST(ISNULL(dblSummaryInfoFuelSales, 0) AS DECIMAL(18, 6))
+		  FROM 			@UDT_TransSummary
+		  
+          UPDATE dbo.tblSTCheckoutHeader
+          SET dblSummaryInfoFuelSales = @dblSummaryInfoFuelSales 
+          WHERE intCheckoutId = @intCheckoutId
+
+		  UPDATE dbo.tblSTCheckoutHeader
+          SET dblSummaryInfoPopPredispensedAmount = (
+									SELECT TOP 1 CAST(ISNULL(dblSummaryInfoPopPredispensedAmount, 0) AS DECIMAL(18, 6))
+									FROM @UDT_TransSummary
+								 ) 
+          WHERE intCheckoutId = @intCheckoutId
+		  
+		  SET @dblAggregateMeterReadingsForDollars = dbo.fnSTGetAggregateMeterReadingsForDollars(@intCheckoutId)
+		  
+		  IF (@dblAggregateMeterReadingsForDollars != @dblSummaryInfoFuelSales)
+			BEGIN
+				INSERT INTO tblSTCheckoutProcess (intCheckoutId, dtmCheckoutProcessDate, strGuid, intConcurrencyId)
+				VALUES (@intCheckoutId, GETDATE(), 'Dummy Guid', 1)
+
+				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
+				VALUES (dbo.fnSTGetLatestProcessId(@intCheckoutId), '1', 'Aggregate Meter Readings does not Match the Register''s Summary File value', 1)
+			END
+          -------------------------------------------------------------------------------------------------------------
+          ------------------------------------- END CONSIGNMENT DATA --------------------------------------------------
+          -------------------------------------------------------------------------------------------------------------
 		 
 		  
 
