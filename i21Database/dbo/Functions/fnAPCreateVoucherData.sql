@@ -260,19 +260,8 @@ BEGIN
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
 									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END,
 
-		[intPayFromBankAccountId]	= ISNULL(A.intPayFromBankAccountId, ISNULL(vendor.intPayFromBankAccountId, payFrom.intBankAccountId)),
-		[strFinancingSourcedFrom] = CASE 
-										WHEN A.intPayFromBankAccountId > 0 THEN ISNULL(A.strFinancingSourcedFrom, 'Not Provided')
-									ELSE 
-										CASE 
-											WHEN vendor.intPayFromBankAccountId > 0 THEN 'Vendor Default' 
-											ELSE
-												CASE
-													WHEN payFrom.intBankAccountId > 0 THEN 'Company Default'
-													ELSE 'None'
-												END
-										END 
-									END,
+		[intPayFromBankAccountId]	= ISNULL(A.intPayFromBankAccountId, PFBA.intPayFromBankAccountId),
+		[strFinancingSourcedFrom] 	= CASE WHEN A.intPayFromBankAccountId > 0 THEN ISNULL(A.strFinancingSourcedFrom, 'Not Provided') ELSE PFBA.strSourcedFrom END,
 		[strFinancingTransactionNumber] 	= A.strFinancingTransactionNumber,
 		[intPayToBankAccountId]				= EFT.intEntityEFTInfoId,
 		[strFinanceTradeNo]					= A.strFinanceTradeNo,
@@ -298,8 +287,8 @@ BEGIN
 	LEFT JOIN tblSMUserSecurity userData ON userData.intEntityId = @userId
 	LEFT JOIN tblSMCompanyLocation userCompLoc ON userData.intCompanyLocationId = userCompLoc.intCompanyLocationId
 	LEFT JOIN tblSMCurrency subCur ON subCur.intMainCurrencyId = ISNULL(A.intCurrencyId, vendor.intCurrencyId) AND subCur.ysnSubCurrency = 1
-	LEFT JOIN tblAPDefaultPayFromBankAccount payFrom ON payFrom.intCurrencyId = ISNULL(A.intCurrencyId, vendor.intCurrencyId)
 	LEFT JOIN vyuAPEntityEFTInformation EFT ON EFT.intEntityId = vendor.intEntityId AND EFT.intCurrencyId = ISNULL(A.intCurrencyId, vendor.intCurrencyId) AND EFT.ysnDefaultAccount = 1
+	CROSS APPLY dbo.fnAPGetVendorPayFromBankAccount(A.intEntityVendorId, A.intShipToId, A.intCurrencyId) PFBA
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM (
