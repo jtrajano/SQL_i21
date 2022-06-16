@@ -858,6 +858,8 @@
     <Build Include="dbo\Stored Procedures\uspHDCreateUpdateCoworkerIssue.sql" />
     <Build Include="dbo\Functions\fnSTGetLatestProcessId.sql" />
     <Build Include="dbo\Functions\fnSTGetAggregateMeterReadingsForDollars.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutDealerCommission.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelTotalSold.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

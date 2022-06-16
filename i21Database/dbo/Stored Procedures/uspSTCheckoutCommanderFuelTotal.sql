@@ -6,6 +6,8 @@
 	@intCountRows							INT				OUTPUT
 AS
 BEGIN
+	--SET NOCOUNT ON
+    SET XACT_ABORT ON
 	BEGIN TRY
 		
 		DECLARE @intStoreId INT
@@ -13,6 +15,7 @@ BEGIN
 		DECLARE @intPreviousCheckoutId INT
 		DECLARE @ysnConsStopAutoProcessIfValuesDontMatch BIT
         DECLARE @ysnConsMeterReadingsForDollars BIT
+		DECLARE @ysnConsignmentStore BIT
 
 		SELECT	@intStoreId = intStoreId,
 				@dtmCheckoutDate = dtmCheckoutDate
@@ -25,7 +28,8 @@ BEGIN
 				dtmCheckoutDate = DATEADD(day, -1, @dtmCheckoutDate)
 
 		SELECT	@ysnConsStopAutoProcessIfValuesDontMatch = ysnConsStopAutoProcessIfValuesDontMatch, 
-				@ysnConsMeterReadingsForDollars = ysnConsAddOutsideFuelDiscounts 
+				@ysnConsMeterReadingsForDollars = ysnConsAddOutsideFuelDiscounts,
+				@ysnConsignmentStore = ysnConsignmentStore
 		FROM	tblSTStore
 		WHERE	intStoreId = @intStoreId
 
@@ -205,17 +209,24 @@ BEGIN
 						 , [intProductNumber]
 						 , [dblDollarsSold]
 						 , [dblGallonsSold]
-						 , [ysnImbalanceAccepted]
 						 , [intConcurrencyId])
 			SELECT		@intCheckoutId,
 						b.intProductNumber ,
-						b.sumDblFuelVolume - a.sumDblFuelVolume,
-						b.sumDblFuelMoney - a.sumDblFuelMoney,
-						0,
+						ISNULL(b.sumDblFuelMoney, 0) - ISNULL(a.sumDblFuelMoney, 0),
+						ISNULL(b.sumDblFuelVolume, 0) - ISNULL(a.sumDblFuelVolume, 0),
 						0
-			FROM		previous_day_reading a
-			INNER JOIN	current_day_reading b
+			FROM		current_day_reading b
+			LEFT JOIN	previous_day_reading a
 			ON			a.intProductNumber = b.intProductNumber
+
+			IF (@ysnConsignmentStore = 1)
+			BEGIN
+				INSERT INTO tblSTCheckoutDealerCommission (intCheckoutId, dblCommissionAmount, intConcurrencyId)
+				SELECT		@intCheckoutId,
+							SUM(dblGallonsSold) * (SELECT dblConsCommissionPerGallonOfDealer FROM tblSTStore WHERE intStoreId = @intStoreId),
+							1
+				FROM		tblSTCheckoutFuelTotalSold a
+			END
 		END
 		ELSE
 		BEGIN
