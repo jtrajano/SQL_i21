@@ -385,6 +385,7 @@ BEGIN TRY
 	LEFT JOIN tblICItem					IM	ON	IM.intItemId					=	CD.intItemId			
 	LEFT JOIN tblICItemUOM				QM	ON	QM.intItemUOMId					=	CD.intItemUOMId			
 	LEFT JOIN tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	QM.intUnitMeasureId		
+	LEFT JOIN tblCTPriceContract		PC	ON  PC.intPriceContractId			=	PF.intPriceContractId
 	LEFT JOIN tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		
 	LEFT JOIN tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId	
 	LEFT JOIN tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId		
@@ -394,7 +395,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrencyExchangeRate	ER	ON	ER.intCurrencyExchangeRateId	=	CD.intCurrencyExchangeRateId	
 	LEFT JOIN tblSMCurrency				FY	ON	FY.intCurrencyID				=	ER.intFromCurrencyId	
 	LEFT JOIN tblSMCurrency				TY	ON	TY.intCurrencyID				=	ER.intToCurrencyId		
-	LEFT JOIN tblSMCurrency				IC	ON	IC.intCurrencyID				=	CD.intInvoiceCurrencyId		
+	LEFT JOIN tblSMCurrency				IC	ON	IC.intCurrencyID				=	PC.intFinalCurrencyId
 	LEFT JOIN tblICItemUOM				FU	ON	FU.intItemUOMId					=	CD.intFXPriceUOMId		
 	LEFT JOIN tblICCommodityUnitMeasure	FC	ON	FC.intCommodityId				=	CH.intCommodityId		
 			 									AND FC.intUnitMeasureId			=	FU.intUnitMeasureId		
