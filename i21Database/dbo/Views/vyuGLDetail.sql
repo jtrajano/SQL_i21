@@ -3,7 +3,7 @@ AS
         SELECT 
 		A.intGLDetailId,
 		A.intAccountId,
-		dtmDate = A.dtmDateNoTime,
+		A.dtmDate,
         A.strBatchId COLLATE Latin1_General_CI_AS strBatchId,
         B.strAccountId COLLATE Latin1_General_CI_AS strAccountId,
         RTRIM(LTRIM(ISNULL(B.strDescription,''))) COLLATE Latin1_General_CI_AS strAccountDescription,
