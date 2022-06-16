@@ -454,8 +454,8 @@ BEGIN TRY
                 SELECT intTransactionId FROM #tmpTransaction
             )
 
-            INSERT INTO tblTFTransactionDynamicIL (intTransactionId, strCustomerBillToAddress, strCustomerBillToCity, strCustomerBillToState, strCustomerBillToZipCode)
-            SELECT Trans.intTransactionId, tblEMEntityLocation.strAddress, tblEMEntityLocation.strCity, tblEMEntityLocation.strState, tblEMEntityLocation.strZipCode
+            INSERT INTO tblTFTransactionDynamicIL (intTransactionId, strILCustomerBillToAddress, strILCustomerBillToCity, strILCustomerBillToState, strILCustomerBillToZipCode)
+			SELECT Trans.intTransactionId, tblEMEntityLocation.strAddress, tblEMEntityLocation.strCity, tblEMEntityLocation.strState, tblEMEntityLocation.strZipCode
             FROM tblTFTransaction Trans
             INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
             INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
