@@ -811,6 +811,7 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" />
+    <None Include="Scripts\Post-Deployment\GL\03_UpdateForeignDebitCredit.sql" />
     <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
     <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
     <Build Include="dbo\Tables\tblIPBillDetail.sql" />
