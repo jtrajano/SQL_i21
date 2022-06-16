@@ -156,6 +156,12 @@ begin try
 		,intCompanyLocationId int
 		,intPriceContractId int
 		,strPriceContractNo NVARCHAR(50)
+		,intContractDetailId int
+	);
+
+	declare @consumedPrice as table (
+		intPriceFixationDetailId int
+		,dblConsumedPriceQuantity numeric(18,6)
 	);
 
 	declare 
@@ -182,6 +188,7 @@ begin try
 		,@intCompanyLocationId int
 		,@intPriceContractId int
 		,@strPriceContractNo NVARCHAR(50)
+		,@intPricingContractDetailId int
 		;
 
 	declare @CreatedVoucher as table(
@@ -256,25 +263,27 @@ begin try
 			delete from @availablePrice;
 			insert into @availablePrice
 			select
-				intId = intId
-				,intPriceFixationId = intPriceFixationId  
-				,intPriceFixationDetailId = intPriceFixationDetailId  
-				,dblFinalPrice = dblFinalprice  
-				,dblAvailablePriceQuantity = dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId,@intQtyToBillUOMId,dblAvailableQuantity)--dblAvailableQuantity
-				,dtmFixationDate = dtmFixationDate  
-				,dblPriceQuantity = dblQuantity  
-				,intAvailablePriceLoad = intAvailableLoad  
-				,intPriceItemUOMId = intPriceItemUOMId
-				,intPricingTypeId = intPricingTypeId
-				,intFreightTermId = intFreightTermId
-				,intCompanyLocationId = intCompanyLocationId
-				,intPriceContractId = intPriceContractId
-				,strPriceContractNo = strPriceContractNo
+				intId = ap.intId
+				,intPriceFixationId = ap.intPriceFixationId  
+				,intPriceFixationDetailId = ap.intPriceFixationDetailId
+				,dblFinalPrice = ap.dblFinalprice  
+				,dblAvailablePriceQuantity = dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId,@intQtyToBillUOMId,ap.dblAvailableQuantity) - isnull(cp.dblConsumedPriceQuantity,0)
+				,dtmFixationDate = ap.dtmFixationDate  
+				,dblPriceQuantity = ap.dblQuantity  
+				,intAvailablePriceLoad = ap.intAvailableLoad  
+				,intPriceItemUOMId = ap.intPriceItemUOMId
+				,intPricingTypeId = ap.intPricingTypeId
+				,intFreightTermId = ap.intFreightTermId
+				,intCompanyLocationId = ap.intCompanyLocationId
+				,intPriceContractId = ap.intPriceContractId
+				,strPriceContractNo = ap.strPriceContractNo
+				,intContractDetailId = ap.intContractDetailId
 			from  
-				vyuCTGetAvailablePriceForVoucher  
+				vyuCTGetAvailablePriceForVoucher  ap
+				left join @consumedPrice cp on cp.intPriceFixationDetailId = isnull(ap.intPriceFixationDetailId,ap.intContractDetailId)
 			where  
-				intContractDetailId = @intContractDetailId  
-			order by intPriceFixationDetailId 
+				ap.intContractDetailId = @intContractDetailId  
+			order by ap.intPriceFixationDetailId 
 
 			/*Loop Pricing*/
 			select @intId = min(intId) from @availablePrice where (isnull(dblAvailablePriceQuantity,0) > 0 or isnull(intAvailablePriceLoad,0) > 0);
@@ -296,6 +305,7 @@ begin try
 					,@intCompanyLocationId = intCompanyLocationId
 					,@intPriceContractId = intPriceContractId
 					,@strPriceContractNo = strPriceContractNo
+					,@intPricingContractDetailId = intContractDetailId
 				from  
 					@availablePrice  
 				where  
@@ -348,6 +358,15 @@ begin try
 				set @dblNetWeight = (@dblNetWeight - @dblTransactionNetWeight);
 				update @voucherPayablesDataTemp set dblQuantityToBill = (dblQuantityToBill - @dblTransactionQuantity), dblNetWeight = (dblNetWeight - @dblTransactionNetWeight) where intVoucherPayableId = @intVoucherPayableId;
 				update @availablePrice set dblAvailablePriceQuantity = (dblAvailablePriceQuantity - @dblTransactionQuantity) where intPriceFixationDetailId = @intPriceFixationDetailId;
+
+				if exists (select top 1 1 from @consumedPrice where intPriceFixationDetailId = @intPriceFixationDetailId)
+				begin
+					update @consumedPrice set dblConsumedPriceQuantity = dblConsumedPriceQuantity - @dblTransactionQuantity where intPriceFixationDetailId = isnull(@intPriceFixationDetailId,@intPricingContractDetailId)
+				end
+				else
+				begin
+					insert into @consumedPrice (intPriceFixationDetailId,dblConsumedPriceQuantity) select intPriceFixationDetailId = isnull(@intPriceFixationDetailId,@intPricingContractDetailId),dblConsumedPriceQuantity = @dblTransactionQuantity
+				end
 				
 				--Construct voucher data
 				insert into @voucherPayablesFinal (
