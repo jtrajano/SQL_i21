@@ -17,8 +17,9 @@ AS
 
 DECLARE @guiTaxesUniqueId UNIQUEIDENTIFIER = @UniqueId
 DECLARE @ItemUOMId INT
+DECLARE @strUnitMeasure NVARCHAR(200)
 
-SELECT @ItemUOMId = i.intItemUOMId
+SELECT @ItemUOMId = i.intItemUOMId, @strUnitMeasure = u.strUnitMeasure
 FROM tblICItemUOM i
 JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
 WHERE i.intItemId = @ItemId
@@ -158,8 +159,8 @@ SELECT @guiTaxesUniqueId
 	, it.ysnInvalidSetup
 	, it.strTaxGroup
 	, it.strNotes
-	, it.intUnitMeasureId
-	, it.strUnitMeasure
+	, ISNULL(NULLIF(it.intUnitMeasureId, 0), @UOMId)
+	, ISNULL(NULLIF(it.strUnitMeasure, ''), @strUnitMeasure)
 	, it.strTaxClass
 	, it.ysnAddToCost
 	, CAST(CASE WHEN (adj.dblAdjustedTax IS NOT NULL AND it.dblTax != adj.dblAdjustedTax) THEN 1 ELSE 0 END AS BIT)
