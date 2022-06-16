@@ -926,6 +926,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutDealerCommission.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelTotalSold.sql" />
     <Build Include="dbo\Views\vyuCTTaxLocation.sql" />
+    <None Include="Scripts\Post-Deployment\GL\03_UpdateForeignDebitCredit.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDeliveryFee.sql" />
     <Build Include="dbo\Functions\fnGetIncrementalAmount.sql" />
     <Build Include="dbo\Functions\fnCalculateTexasFee.sql" />
