@@ -3892,6 +3892,13 @@ BEGIN TRY
 			BEGIN
 				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1 --, intActionId = 61
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+				if (@strProcess = 'Do Roll')
+				begin
+					UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				end
+
 			END
 			ELSE IF @total = 0-- No changes with dblQty
 			BEGIN
