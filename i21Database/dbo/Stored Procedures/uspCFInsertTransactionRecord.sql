@@ -1,5 +1,4 @@
 ﻿
-
 CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						    NVARCHAR(MAX)
@@ -9,6 +8,13 @@ CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 
 AS
 BEGIN
+
+	DECLARE @tblCFSiteToCreate TABLE 
+	(
+		strSiteId			 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+		,intNetworkId		 INT NULL
+		,intRowId			 INT NULL
+	)
 
 	---- clear the buffers before time monitoring
 	--dbcc dropcleanbuffers;
@@ -27,7 +33,8 @@ BEGIN
 	
 
 	PROCESSOVERFILL:
-
+	DECLARE @ysnAssignSite INT
+	SET @ysnAssignSite = 0 
 	/**********************************
 		IF(LOWER(@strTransactionType) LIKE '%foreign%')
 		BEGIN
@@ -210,6 +217,10 @@ BEGIN
 		END
 	***************************************/
 
+	REASSIGNSITE:
+
+	
+
 	UPDATE tblCFImportTransactionStagingTable
 	SET
 	 intSiteId					= tblCFSite.intSiteId 
@@ -220,9 +231,12 @@ BEGIN
 	FROM tblCFSite
 	WHERE tblCFSite.intSiteId = tblCFImportTransactionStagingTable.intSiteId
 	AND tblCFSite.intNetworkId = tblCFImportTransactionStagingTable.intNetworkId
-	AND tblCFImportTransactionStagingTable.intSiteId != 0 OR tblCFImportTransactionStagingTable.intSiteId IS NOT NULL
+	AND (tblCFImportTransactionStagingTable.intSiteId != 0 OR tblCFImportTransactionStagingTable.intSiteId IS NOT NULL)
 	AND strGUID = @strGUID
 
+	
+	--TEST--
+	SELECT intSiteId FROM tblCFImportTransactionStagingTable
 
 	UPDATE tblCFImportTransactionStagingTable
 	SET
@@ -234,14 +248,22 @@ BEGIN
 	FROM tblCFSite
 	WHERE tblCFSite.strSiteNumber COLLATE Latin1_General_CI_AS = tblCFImportTransactionStagingTable.strSiteId COLLATE Latin1_General_CI_AS
 	AND tblCFSite.intNetworkId = tblCFImportTransactionStagingTable.intNetworkId
-	AND tblCFImportTransactionStagingTable.intSiteId = 0 OR tblCFImportTransactionStagingTable.intSiteId IS NULL
+	AND (tblCFImportTransactionStagingTable.intSiteId = 0 OR tblCFImportTransactionStagingTable.intSiteId IS NULL)
 	AND strGUID = @strGUID
+
+	
+	--TEST--
+	SELECT intSiteId FROM tblCFImportTransactionStagingTable
 
 	UPDATE tblCFImportTransactionStagingTable
 	SET
 	 intSiteId					= NULL
 	WHERE tblCFImportTransactionStagingTable.intSiteId = 0
 	AND strGUID = @strGUID
+
+
+	--TEST--
+	SELECT intSiteId FROM tblCFImportTransactionStagingTable
 
 
 	/******************************
@@ -1127,60 +1149,88 @@ BEGIN
 	***********************************/
 
 
-
-	INSERT INTO tblCFSite
+	
+			
+	DELETE FROM @tblCFSiteToCreate 
+	INSERT INTO @tblCFSiteToCreate
 	(
-		 intNetworkId		
-		,strSiteNumber	
-		,strSiteName
-		,strDeliveryPickup	
-		,intARLocationId	
-		,strControllerType	
-		,strTaxState		
-		,strSiteAddress		
-		,strSiteCity		
-		,intPPHostId		
-		,strPPSiteType		
-		,strSiteType
-		,strAllowExemptionsOnExtAndRetailTrans
+		 strSiteId			
+		,intNetworkId		
 	)
-	SELECT
-		intNetworkId			= tblCFImportTransactionStagingTable.intNetworkId
-		,strSiteNumber			= tblCFImportTransactionStagingTable.strSiteId
-		,strSiteName			= tblCFImportTransactionStagingTable.strSiteId -- default site name to site number
-		,strDeliveryPickup		= 'Pickup'
-		,intARLocationId		= tblCFImportTransactionStagingTable.intNetworkLocation
-		,strControllerType		= (CASE strNetworkType 
-									WHEN 'PacPride' 
-										THEN 'PacPride'
-									ELSE 'CFN'
-									END)
-		,strTaxState			= tblCFImportTransactionStagingTable.strSiteState
-		,strSiteAddress			= tblCFImportTransactionStagingTable.strSiteAddress	
-		,strSiteCity			= tblCFImportTransactionStagingTable.strSiteCity	
-		,intPPHostId			= tblCFImportTransactionStagingTable.intSellingHost	
-		,strPPSiteType			= (CASE tblCFImportTransactionStagingTable.strPPSiteType 
-									WHEN 'N' 
-										THEN 'Network'
-									WHEN 'X' 
-										THEN 'Exclusive'
-									WHEN 'R' 
-										THEN 'Retail'
-									END)	
-		,strSiteType			= (CASE tblCFImportTransactionStagingTable.strPPSiteType 
-									WHEN 'N' 
-										THEN 'Remote'
-									WHEN 'R' 
-										THEN 'Extended Remote'
-									END)
-		,strAllowExemptionsOnExtAndRetailTrans = tblCFImportTransactionStagingTable.strAllowExemptionsOnExtAndRetailTrans
+	SELECT 
+		 strSiteId			
+		,intNetworkId	
 	FROM tblCFImportTransactionStagingTable
 	WHERE (tblCFImportTransactionStagingTable.intSiteId IS NULL OR tblCFImportTransactionStagingTable.intSiteId = 0)
 	AND (tblCFImportTransactionStagingTable.intNetworkId IS NOT NULL OR tblCFImportTransactionStagingTable.intNetworkId != 0)
 	AND (tblCFImportTransactionStagingTable.strPPSiteType = 'N' OR tblCFImportTransactionStagingTable.strPPSiteType = 'R')
 	AND tblCFImportTransactionStagingTable.strNetworkType = 'PacPride'
 	AND strGUID = @strGUID
+	GROUP BY 
+		 strSiteId			
+		,intNetworkId		
 
+	UPDATE @tblCFSiteToCreate
+	SET intRowId = (SELECT TOP 1 intRowId 
+					FROM tblCFImportTransactionStagingTable 
+					WHERE strSiteId			=  [@tblCFSiteToCreate].strSiteId		
+					AND intNetworkId		=  [@tblCFSiteToCreate].intNetworkId
+					)
+
+
+	IF(SELECT COUNT(1) FROM @tblCFSiteToCreate) > 0 
+	BEGIN
+		INSERT INTO tblCFSite
+		(
+			 intNetworkId		
+			,strSiteNumber	
+			,strSiteName
+			,strDeliveryPickup	
+			,intARLocationId	
+			,strControllerType	
+			,strTaxState		
+			,strSiteAddress		
+			,strSiteCity		
+			,intPPHostId		
+			,strPPSiteType		
+			,strSiteType
+			,strAllowExemptionsOnExtAndRetailTrans
+
+		)
+		SELECT
+			intNetworkId			= tblCFImportTransactionStagingTable.intNetworkId
+			,strSiteNumber			= tblCFImportTransactionStagingTable.strSiteId
+			,strSiteName			= tblCFImportTransactionStagingTable.strSiteId -- default site name to site number
+			,strDeliveryPickup		= 'Pickup'
+			,intARLocationId		= tblCFImportTransactionStagingTable.intNetworkLocation
+			,strControllerType		= (CASE strNetworkType 
+										WHEN 'PacPride' 
+											THEN 'PacPride'
+										ELSE 'CFN'
+										END)
+			,strTaxState			= tblCFImportTransactionStagingTable.strSiteState
+			,strSiteAddress			= tblCFImportTransactionStagingTable.strSiteAddress	
+			,strSiteCity			= tblCFImportTransactionStagingTable.strSiteCity	
+			,intPPHostId			= tblCFImportTransactionStagingTable.intSellingHost	
+			,strPPSiteType			= (CASE tblCFImportTransactionStagingTable.strPPSiteType 
+										WHEN 'N' 
+											THEN 'Network'
+										WHEN 'X' 
+											THEN 'Exclusive'
+										WHEN 'R' 
+											THEN 'Retail'
+										END)	
+			,strSiteType			= (CASE tblCFImportTransactionStagingTable.strPPSiteType 
+										WHEN 'N' 
+											THEN 'Remote'
+										WHEN 'R' 
+											THEN 'Extended Remote'
+										END)
+			,strAllowExemptionsOnExtAndRetailTrans = tblCFImportTransactionStagingTable.strAllowExemptionsOnExtAndRetailTrans
+		FROM tblCFImportTransactionStagingTable
+		INNER JOIN @tblCFSiteToCreate
+		ON [@tblCFSiteToCreate].intRowId = tblCFImportTransactionStagingTable.intRowId
+	END
 
 	/*********************************
 	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'Voyager')
@@ -1255,39 +1305,71 @@ BEGIN
 	AND strGUID = @strGUID
 
 
-	INSERT INTO tblCFSite
+
+	DELETE FROM @tblCFSiteToCreate 
+	INSERT INTO @tblCFSiteToCreate
 	(
-		 intNetworkId		
-		,strSiteNumber	
-		,strSiteName
-		,strDeliveryPickup	
-		,intARLocationId	
-		,strControllerType	
-		,strTaxState		
-		,strSiteAddress		
-		,strSiteCity			
-		,strSiteType
-		,intTaxGroupId
-		,strAllowExemptionsOnExtAndRetailTrans
+		 strSiteId			
+		,intNetworkId		
 	)
-	SELECT
-		intNetworkId							= tblCFImportTransactionStagingTable.intNetworkId
-		,strSiteNumber							= tblCFImportTransactionStagingTable.strSiteId
-		,strSiteName							= tblCFImportTransactionStagingTable.strSiteName
-		,strDeliveryPickup						= 'Pickup'
-		,intARLocationId						= tblCFImportTransactionStagingTable.intNetworkLocation
-		,strControllerType						= 'Voyager'
-		,strTaxState							= tblCFImportTransactionStagingTable.strSiteState
-		,strSiteAddress							= tblCFImportTransactionStagingTable.strSiteAddress	
-		,strSiteCity							= tblCFImportTransactionStagingTable.strSiteCity	
-		,strSiteType							= 'Extended Remote'
-		,intTaxGroupId							= tblCFImportTransactionStagingTable.intTaxGroupByState
-		,strAllowExemptionsOnExtAndRetailTrans	= tblCFImportTransactionStagingTable.strAllowExemptionsOnExtAndRetailTrans
+	SELECT 
+		 strSiteId			
+		,intNetworkId	
 	FROM tblCFImportTransactionStagingTable
 	WHERE (tblCFImportTransactionStagingTable.intSiteId IS NULL OR tblCFImportTransactionStagingTable.intSiteId = 0)
 	AND (tblCFImportTransactionStagingTable.intNetworkId IS NOT NULL OR tblCFImportTransactionStagingTable.intNetworkId != 0)
 	AND tblCFImportTransactionStagingTable.strNetworkType = 'Voyager'
 	AND strGUID = @strGUID
+	GROUP BY 
+		 strSiteId			
+		,intNetworkId		
+
+	UPDATE @tblCFSiteToCreate
+	SET intRowId = (SELECT TOP 1 intRowId 
+					FROM tblCFImportTransactionStagingTable 
+					WHERE strSiteId			=  [@tblCFSiteToCreate].strSiteId		
+					AND intNetworkId		=  [@tblCFSiteToCreate].intNetworkId
+					)
+
+
+	IF(SELECT COUNT(1) FROM @tblCFSiteToCreate) > 0 
+	BEGIN
+
+
+		INSERT INTO tblCFSite
+		(
+			 intNetworkId		
+			,strSiteNumber	
+			,strSiteName
+			,strDeliveryPickup	
+			,intARLocationId	
+			,strControllerType	
+			,strTaxState		
+			,strSiteAddress		
+			,strSiteCity			
+			,strSiteType
+			,intTaxGroupId
+			,strAllowExemptionsOnExtAndRetailTrans
+
+		)
+		SELECT
+			intNetworkId							= tblCFImportTransactionStagingTable.intNetworkId
+			,strSiteNumber							= tblCFImportTransactionStagingTable.strSiteId
+			,strSiteName							= tblCFImportTransactionStagingTable.strSiteName
+			,strDeliveryPickup						= 'Pickup'
+			,intARLocationId						= tblCFImportTransactionStagingTable.intNetworkLocation
+			,strControllerType						= 'Voyager'
+			,strTaxState							= tblCFImportTransactionStagingTable.strSiteState
+			,strSiteAddress							= tblCFImportTransactionStagingTable.strSiteAddress	
+			,strSiteCity							= tblCFImportTransactionStagingTable.strSiteCity	
+			,strSiteType							= 'Extended Remote'
+			,intTaxGroupId							= tblCFImportTransactionStagingTable.intTaxGroupByState
+			,strAllowExemptionsOnExtAndRetailTrans	= tblCFImportTransactionStagingTable.strAllowExemptionsOnExtAndRetailTrans
+		FROM tblCFImportTransactionStagingTable
+		INNER JOIN @tblCFSiteToCreate
+		ON [@tblCFSiteToCreate].intRowId = tblCFImportTransactionStagingTable.intRowId
+
+	END
 
 
 
@@ -1342,43 +1424,73 @@ BEGIN
 	AND tblCFImportTransactionStagingTable.strNetworkType = 'CFN'
 	AND strGUID = @strGUID
 
-	INSERT INTO tblCFSite
+	DELETE FROM @tblCFSiteToCreate 
+	INSERT INTO @tblCFSiteToCreate
 	(
-		 intNetworkId		
-		,strSiteNumber	
-		,strSiteName
-		,strDeliveryPickup	
-		,intARLocationId	
-		,strControllerType	
-		,strTaxState		
-		,strSiteAddress		
-		,strSiteCity			
-		,strSiteType
-		,intTaxGroupId
-		,strAllowExemptionsOnExtAndRetailTrans
+		 strSiteId			
+		,intNetworkId		
 	)
-	SELECT
-		intNetworkId							= tblCFImportTransactionStagingTable.intNetworkId
-		,strSiteNumber							= tblCFImportTransactionStagingTable.strSiteId
-		,strSiteName							= tblCFImportTransactionStagingTable.strSiteName
-		,strDeliveryPickup						= 'Pickup'
-		,intARLocationId						= tblCFImportTransactionStagingTable.intNetworkLocation
-		,strControllerType						= 'CFN'
-		,strTaxState							= tblCFImportTransactionStagingTable.strSiteState
-		,strSiteAddress							= tblCFImportTransactionStagingTable.strSiteAddress	
-		,strSiteCity							= tblCFImportTransactionStagingTable.strSiteCity	
-		,strSiteType							= CASE tblCFImportTransactionStagingTable.strTransactionType 
-													WHEN 'Foreign Sale' 
-														THEN 'Local/Network'
-													ELSE tblCFImportTransactionStagingTable.strTransactionType
-												   END
-		,intTaxGroupId							= tblCFImportTransactionStagingTable.intTaxGroupByState
-		,strAllowExemptionsOnExtAndRetailTrans	= tblCFImportTransactionStagingTable.strAllowExemptionsOnExtAndRetailTrans
+	SELECT 
+		 strSiteId			
+		,intNetworkId	
 	FROM tblCFImportTransactionStagingTable
 	WHERE (tblCFImportTransactionStagingTable.intSiteId IS NULL OR tblCFImportTransactionStagingTable.intSiteId = 0)
 	AND (tblCFImportTransactionStagingTable.intNetworkId IS NOT NULL OR tblCFImportTransactionStagingTable.intNetworkId != 0)
 	AND tblCFImportTransactionStagingTable.strNetworkType = 'CFN'
 	AND strGUID = @strGUID
+	GROUP BY 
+		 strSiteId			
+		,intNetworkId		
+
+	UPDATE @tblCFSiteToCreate
+	SET intRowId = (SELECT TOP 1 intRowId 
+					FROM tblCFImportTransactionStagingTable 
+					WHERE strSiteId			=  [@tblCFSiteToCreate].strSiteId		
+					AND intNetworkId		=  [@tblCFSiteToCreate].intNetworkId
+					)
+
+
+	IF(SELECT COUNT(1) FROM @tblCFSiteToCreate) > 0 
+	BEGIN
+
+
+		INSERT INTO tblCFSite
+		(
+			 intNetworkId		
+			,strSiteNumber	
+			,strSiteName
+			,strDeliveryPickup	
+			,intARLocationId	
+			,strControllerType	
+			,strTaxState		
+			,strSiteAddress		
+			,strSiteCity			
+			,strSiteType
+			,intTaxGroupId
+			,strAllowExemptionsOnExtAndRetailTrans
+		)
+		SELECT
+			intNetworkId							= tblCFImportTransactionStagingTable.intNetworkId
+			,strSiteNumber							= tblCFImportTransactionStagingTable.strSiteId
+			,strSiteName							= tblCFImportTransactionStagingTable.strSiteName
+			,strDeliveryPickup						= 'Pickup'
+			,intARLocationId						= tblCFImportTransactionStagingTable.intNetworkLocation
+			,strControllerType						= 'CFN'
+			,strTaxState							= tblCFImportTransactionStagingTable.strSiteState
+			,strSiteAddress							= tblCFImportTransactionStagingTable.strSiteAddress	
+			,strSiteCity							= tblCFImportTransactionStagingTable.strSiteCity	
+			,strSiteType							= CASE tblCFImportTransactionStagingTable.strTransactionType 
+														WHEN 'Foreign Sale' 
+															THEN 'Local/Network'
+														ELSE tblCFImportTransactionStagingTable.strTransactionType
+													   END
+			,intTaxGroupId							= tblCFImportTransactionStagingTable.intTaxGroupByState
+			,strAllowExemptionsOnExtAndRetailTrans	= tblCFImportTransactionStagingTable.strAllowExemptionsOnExtAndRetailTrans
+		FROM tblCFImportTransactionStagingTable
+		INNER JOIN @tblCFSiteToCreate
+		ON [@tblCFSiteToCreate].intRowId = tblCFImportTransactionStagingTable.intRowId
+
+	END
 
 
 	/*****************************************
@@ -1459,39 +1571,68 @@ BEGIN
 	AND strGUID = @strGUID
 
 
-	INSERT INTO tblCFSite
+	DELETE FROM @tblCFSiteToCreate 
+	INSERT INTO @tblCFSiteToCreate
 	(
-		 intNetworkId		
-		,strSiteNumber	
-		,strSiteName
-		,strDeliveryPickup	
-		,intARLocationId	
-		,strControllerType	
-		,strTaxState		
-		,strSiteAddress		
-		,strSiteCity			
-		,strSiteType
-		,intTaxGroupId
-		,strAllowExemptionsOnExtAndRetailTrans
+		 strSiteId			
+		,intNetworkId		
 	)
-	SELECT
-		intNetworkId							= tblCFImportTransactionStagingTable.intNetworkId
-		,strSiteNumber							= tblCFImportTransactionStagingTable.strSiteId
-		,strSiteName							= tblCFImportTransactionStagingTable.strSiteName
-		,strDeliveryPickup						= 'Pickup'
-		,intARLocationId						= tblCFImportTransactionStagingTable.intNetworkLocation
-		,strControllerType						= 'AutoGas'
-		,strTaxState							= tblCFImportTransactionStagingTable.strSiteState
-		,strSiteAddress							= tblCFImportTransactionStagingTable.strSiteAddress	
-		,strSiteCity							= tblCFImportTransactionStagingTable.strSiteCity	
-		,strSiteType							= 'Extended Remote'
-		,intTaxGroupId							= tblCFImportTransactionStagingTable.intTaxGroupByState
-		,strAllowExemptionsOnExtAndRetailTrans	= tblCFImportTransactionStagingTable.strAllowExemptionsOnExtAndRetailTrans
+	SELECT 
+		 strSiteId			
+		,intNetworkId	
 	FROM tblCFImportTransactionStagingTable
 	WHERE (tblCFImportTransactionStagingTable.intSiteId IS NULL OR tblCFImportTransactionStagingTable.intSiteId = 0)
 	AND (tblCFImportTransactionStagingTable.intNetworkId IS NOT NULL OR tblCFImportTransactionStagingTable.intNetworkId != 0)
 	AND tblCFImportTransactionStagingTable.strNetworkType = 'Wright Express'
 	AND strGUID = @strGUID
+	GROUP BY 
+		 strSiteId			
+		,intNetworkId		
+
+	UPDATE @tblCFSiteToCreate
+	SET intRowId = (SELECT TOP 1 intRowId 
+					FROM tblCFImportTransactionStagingTable 
+					WHERE strSiteId			=  [@tblCFSiteToCreate].strSiteId		
+					AND intNetworkId		=  [@tblCFSiteToCreate].intNetworkId
+					)
+
+
+	IF(SELECT COUNT(1) FROM @tblCFSiteToCreate) > 0 
+	BEGIN
+
+		INSERT INTO tblCFSite
+		(
+			 intNetworkId		
+			,strSiteNumber	
+			,strSiteName
+			,strDeliveryPickup	
+			,intARLocationId	
+			,strControllerType	
+			,strTaxState		
+			,strSiteAddress		
+			,strSiteCity			
+			,strSiteType
+			,intTaxGroupId
+			,strAllowExemptionsOnExtAndRetailTrans
+		)
+		SELECT
+			intNetworkId							= tblCFImportTransactionStagingTable.intNetworkId
+			,strSiteNumber							= tblCFImportTransactionStagingTable.strSiteId
+			,strSiteName							= tblCFImportTransactionStagingTable.strSiteName
+			,strDeliveryPickup						= 'Pickup'
+			,intARLocationId						= tblCFImportTransactionStagingTable.intNetworkLocation
+			,strControllerType						= 'AutoGas'
+			,strTaxState							= tblCFImportTransactionStagingTable.strSiteState
+			,strSiteAddress							= tblCFImportTransactionStagingTable.strSiteAddress	
+			,strSiteCity							= tblCFImportTransactionStagingTable.strSiteCity	
+			,strSiteType							= 'Extended Remote'
+			,intTaxGroupId							= tblCFImportTransactionStagingTable.intTaxGroupByState
+			,strAllowExemptionsOnExtAndRetailTrans	= tblCFImportTransactionStagingTable.strAllowExemptionsOnExtAndRetailTrans
+		FROM tblCFImportTransactionStagingTable
+		INNER JOIN @tblCFSiteToCreate
+		ON [@tblCFSiteToCreate].intRowId = tblCFImportTransactionStagingTable.intRowId
+
+	END
 
 	/************************
 	ELSE IF (@strNetworkType = 'Non Network')
@@ -1544,6 +1685,12 @@ BEGIN
 		END
 	END
 	**********************************/
+
+	IF(@ysnAssignSite = 0)
+	BEGIN
+		SET @ysnAssignSite =1 
+		GOTO REASSIGNSITE
+	END
 
 
 	UPDATE tblCFImportTransactionStagingTable
@@ -2581,7 +2728,7 @@ BEGIN
 		,@IsImporting					=1
 
 
-		select  *from tblCFImportTransactionTaxType
+		--select  *from tblCFImportTransactionTaxType
 
 		--DECLARE @dblGrossTransferCost		NUMERIC(18,6)	
 		--DECLARE @dblNetTransferCost		NUMERIC(18,6)	
