@@ -30,6 +30,7 @@ BEGIN
 	DECLARE @strRowDetailId NVARCHAR(MAX) = CAST(@intRowDetailId AS NVARCHAR(MAX))
 	DECLARE @strBalanceSide NVARCHAR(MAX)        
 	DECLARE @str1stAccountType NVARCHAR(MAX)
+	DECLARE @str2ndAccountType NVARCHAR(MAX)  
 	DECLARE @strAccountType NVARCHAR(MAX)
 
        
@@ -182,14 +183,21 @@ BEGIN
         
 		INSERT INTO #tempAmount       
 		SELECT 0,@strCriteria,0,0      
-      
-		SET @queryString = 'UPDATE #tempAmount SET Amount = (SELECT '+@strFormula+' FROM vyuGLSummary WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime)       
+
+		SET @queryString = 'UPDATE #tempAmount SET Amount = (SELECT CASE WHEN '+@strFormula+' < 0 THEN 0 ELSE '+@strFormula+' END FROM vyuGLSummary WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime)       
 		BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'' AND ISNULL(intUnnaturalAccountId,0) = 0 '+@strLocation+' '+@strCurrency+') ,      
 		intUnnaturalAccountId = (SELECT TOP 1 intUnnaturalAccountId FROM vyuGLSummary       
 		WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime) BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+'''       
 		AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'')      
 		WHERE strCriteria = '''+@strCriteria+''''        
-		EXEC(@queryString)        
+		EXEC(@queryString)     
+
+		--Return original Amount if Positive
+		SET @queryString = 
+		'UPDATE #tempAmount SET Amount = (SELECT CASE WHEN Amount < 0 THEN 0 ELSE (SELECT '+@strFormula+' FROM vyuGLSummary WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime)         
+		BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'' '+@strLocation+' '+@strCurrency+') END FROM #tempAmount WHERE strCriteria = '''+@strCriteria+''')
+		WHERE strCriteria = '''+@strCriteria+''''          
+		EXEC(@queryString)  
          
 		DELETE #tempFormula WHERE intRowDetailId = @intRowDetailId and strCriteria = @strCriteria      
 	END       
@@ -226,25 +234,75 @@ BEGIN
 			SET @queryString = 'INSERT INTO #tempAmount2 SELECT strAccountType,'+@strFormula+',intUnnaturalAccountId,'''+@strBalanceSide+''',strUnAccountType FROM vyuGLSummary WHERE CAST(FLOOR(CAST(dtmDate AS float)) AS datetime)       
 			BETWEEN '''+@dtmBeginDate+''' AND '''+@dtmEndDate+''' AND  ('+@strName+' '+@strCondition+' '''+@strCriteria+''' ) AND  strCode NOT IN (''CY'', ''RE'')  AND vyuGLSummary.strCode <> ''AA'' '+@strLocation+' '+@strCurrency+'       
 			GROUP BY strAccountType,intUnnaturalAccountId,strUnAccountType'      
-			EXEC(@queryString)  
-			print(@queryString)
+			EXEC(@queryString) 
 	 	
 			SET @dblAmount  = (SELECT TOP 1 Amount FROM #tempAmount2)      
 			SET @intUnnaturalAccountId  = (SELECT TOP 1 intUnnaturalAccountId FROM #tempAmount2)     
 			SET @str1stAccountType  = (SELECT TOP 1 strAccountType FROM #tempAmount2)     
+			SET @str2ndAccountType  = (SELECT TOP 1 strUnAccountType FROM #tempAmount2)      
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------   	 
-	
-		IF ISNULL(@intUnnaturalAccountId,0) <> 0      
-			BEGIN       
-				IF @str1stAccountType = 'Asset' and  @strBalanceSide = 'Debit'
-					BEGIN
-						UPDATE #tempAmount SET Amount = Amount + @dblAmount WHERE strCriteria = @strCriteria       
+			--SELECT @dblAmount
+			--SELECT @str1stAccountType
+			--SELECT @str2ndAccountType
+			--SELECT @strBalanceSide	
+
+			--IF ISNULL(@intUnnaturalAccountId,0) <> 0      
+			--	BEGIN       
+			--		IF @str1stAccountType = 'Asset' and  @strBalanceSide = 'Debit'
+			--			BEGIN
+			--				UPDATE #tempAmount SET Amount = Amount + @dblAmount WHERE strCriteria = @strCriteria       
+			--			END
+			--		ELSE
+			--			BEGIN
+			--				UPDATE #tempAmount SET Amount = Amount + ABS(@dblAmount) WHERE strCriteria = @strCriteria       
+			--			END
+			--		END                           
+
+			IF @str1stAccountType = 'Asset' and @str2ndAccountType = 'Asset'
+			BEGIN 
+				IF	@dblAmount < 0
+				BEGIN 
+					UPDATE #tempAmount SET Amount = Amount + @dblAmount WHERE strCriteria = @strCriteria         
+				END
+			END
+
+			IF @str1stAccountType = 'Asset' and @str2ndAccountType = 'Liability'
+			BEGIN 
+				IF	@dblAmount > 0
+				BEGIN
+					IF	@strBalanceSide = 'Credit'
+					BEGIN 
+						UPDATE #tempAmount SET Amount = Amount + ABS(@dblAmount) WHERE strCriteria = @strCriteria         
 					END
-				ELSE
-					BEGIN
-						UPDATE #tempAmount SET Amount = Amount + ABS(@dblAmount) WHERE strCriteria = @strCriteria       
+				END
+				IF	@dblAmount < 0
+				BEGIN
+					IF	@strBalanceSide = 'Debit'
+					BEGIN 
+						UPDATE #tempAmount SET Amount = Amount + @dblAmount WHERE strCriteria = @strCriteria         
 					END
-				END                           
+				END
+			END
+
+	   
+			IF @str1stAccountType = 'Liability' and @str2ndAccountType = 'Asset'
+			BEGIN 
+				IF	@dblAmount < 0
+				BEGIN 
+					IF	@strBalanceSide = 'Credit'
+					BEGIN 
+						UPDATE #tempAmount SET Amount = Amount + ABS(@dblAmount) WHERE strCriteria = @strCriteria         
+					END
+				END
+				IF	@dblAmount > 0
+				BEGIN 
+					IF	@strBalanceSide = 'Debit'
+					BEGIN 
+						UPDATE #tempAmount SET Amount = Amount + ABS(@dblAmount) WHERE strCriteria = @strCriteria         
+					END
+				END
+			END
+
 			TRUNCATE TABLE #tempAmount2  
 			TRUNCATE TABLE #tempBalanceSide    
 			END      
