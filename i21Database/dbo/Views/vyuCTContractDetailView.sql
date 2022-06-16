@@ -203,6 +203,10 @@ AS
 		, IAU.strUnitMeasure AS strAverageUOM
 		, CD.intVendorLocationId
 		, CD.ysnApplyDefaultTradeFinance
+		, CD.ysnTaxOverride
+		, CD.strTaxPoint
+		, CD.strTaxLocation
+		, CD.intTaxGroupId
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
