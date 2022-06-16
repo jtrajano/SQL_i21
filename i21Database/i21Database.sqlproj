@@ -11039,6 +11039,7 @@
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <None Include="Scripts\Post-Deployment\DB\7_RiskDemoData.sql" />
     <None Include="Scripts\Post-Deployment\GL\02_UpdateGeneralJournalDetailCurrency.sql" />
+    <None Include="Scripts\Post-Deployment\GL\03_UpdateForeignDebitCredit.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <Build Include="dbo\Functions\fnCTCashFlowTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBTOverrideGLAccount.sql" />
