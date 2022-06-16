@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuCTContractDetailView]
+﻿
+Create VIEW [dbo].[vyuCTContractDetailView]
 
 AS
 
@@ -170,7 +171,7 @@ AS
 			CD.intFreightBasisUOMId,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
-		, CD.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
+		, CD.strFinanceTradeNo
 		, CD.intBankAccountId
 		, BA.intBankId
 		, strBankName = BN.strBankName
@@ -179,11 +180,11 @@ AS
 		, strFacility = FA.strBorrowingFacilityId
 		, CD.intLoanLimitId
 		, strLoanLimit = BL.strBankLoanId
-		, strLoanReferenceNo = BL.strLimitDescription COLLATE Latin1_General_CI_AS
+		, strLoanReferenceNo = BL.strLimitDescription
 		, CD.dblLoanAmount
 		, intOverrideFacilityId
 		, strOverrideFacility = BVR.strBankValuationRule
-		, CD.strBankReferenceNo COLLATE Latin1_General_CI_AS AS strBankReferenceNo
+		, CD.strBankReferenceNo
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
 		, CD.dblPrepaymentAmount
@@ -201,7 +202,12 @@ AS
 		, CD.intAverageUOMId
 		, CD.dblAverageQuantity
 		, IAU.strUnitMeasure AS strAverageUOM
+		, CD.intVendorLocationId
 		, CD.ysnApplyDefaultTradeFinance
+		, CD.ysnTaxOverride
+		, CD.strTaxPoint
+		, CD.strTaxLocation
+		, CD.intTaxGroupId
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
