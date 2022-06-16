@@ -817,6 +817,7 @@
     <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
     <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
     <Build Include="dbo\Views\vyuCTTaxLocation.sql" />
+    <None Include="Scripts\Post-Deployment\GL\03_UpdateForeignDebitCredit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
