@@ -131,8 +131,8 @@ BEGIN
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
-			,DebitForeign.Value
-            ,CreditForeign.Value
+			,[dblDebitForeign] = CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN Debit.Value ELSE DebitForeign.Value END -- Exchange Rate is 1, Debit/Credit should be the same as Foreign Debit/Credit (GL-9147)
+            ,[dblCreditForeign] = CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN Credit.Value ELSE CreditForeign.Value END
             ,ISNULL([dblDebitReport],0)
             ,ISNULL([dblCreditReport],0)
             ,[dblForeignRate]
@@ -181,8 +181,10 @@ BEGIN
 				FROM	@GLEntries GLEntries
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
-						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
-						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
+						CROSS APPLY dbo.fnGetDebit(ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblDebit ELSE GLEntries.dblDebitForeign END, 0)
+												- ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblCredit ELSE GLEntries.dblCreditForeign END, 0)) DebitForeign
+						CROSS APPLY dbo.fnGetCredit(ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblDebit ELSE GLEntries.dblDebitForeign END, 0)
+												- ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblCredit ELSE GLEntries.dblCreditForeign END, 0))  CreditForeign
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
 				GROUP BY intAccountId, dbo.fnRemoveTimeOnDate(GLEntries.dtmDate), strCode
