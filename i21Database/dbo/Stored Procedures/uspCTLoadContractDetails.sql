@@ -618,12 +618,6 @@ BEGIN TRY
 		, strVendorLocation = dbo.[fnCTGetSeqDisplayField](CD.intVendorLocationId, 'tblEMEntityLocation')
 		, CD.intVendorLocationId
 		, CD.ysnApplyDefaultTradeFinance
-		, CD.ysnTaxOverride
-		, CD.strTaxPoint
-		, CD.intTaxGroupId
-		, CD.strTaxLocation
-		, CD.intTaxGroupId
-		, TG.strTaxGroup
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -706,7 +700,6 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU	ON	AU.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
-	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
 	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
 	ORDER BY CD.intContractSeq
 

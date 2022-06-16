@@ -860,13 +860,6 @@
     <Build Include="dbo\Functions\fnSTGetAggregateMeterReadingsForDollars.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDealerCommission.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelTotalSold.sql" />
-    <Build Include="dbo\Tables\tblIPBillDetail.sql" />
-    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
-    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
-    <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
-    <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
-    <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
-    <Build Include="dbo\Views\vyuCTTaxLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

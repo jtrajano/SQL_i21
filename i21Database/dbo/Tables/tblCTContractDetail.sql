@@ -229,14 +229,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblAmountMaxValue numeric (18,6),
 	intVendorLocationId INT NULL,
 	ysnApplyDefaultTradeFinance bit null,
-	ysnTaxOverride BIT NULL,
-	strTaxPoint nvarchar(50) COLLATE Latin1_General_CI_AS null,
-	intTaxGroupId int null,
-	strTaxLocation nvarchar(50) COLLATE Latin1_General_CI_AS null,
-
-
-
-
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
