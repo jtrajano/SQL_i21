@@ -2,7 +2,7 @@
     [intGLDetailId]             INT              IDENTITY (1, 1) NOT NULL,
     [intSubsidiaryCompanyId] [int] NULL,
     [intMultiCompanyId] [int]   NULL,
-    [dtmDate]                   DATE         NOT NULL,
+    [dtmDate]                   DATETIME         NOT NULL,
     [strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NOT NULL,
     [dblDebit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblDebit]  DEFAULT ((0)),
