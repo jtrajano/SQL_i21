@@ -416,6 +416,10 @@
     <Build Include="dbo\Views\vyuMBILExportItemAddOn.sql" />
     <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
     <Build Include="dbo\Tables\tblIPBillDetail.sql" />
+    <Build Include="dbo\Tables\tblMFShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Views\vyuMFGetShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
