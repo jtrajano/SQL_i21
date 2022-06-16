@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFCalculateTransaction] 
+﻿CREATE PROCEDURE [dbo].[uspCFCalculateTransaction] 
 	 @strGUID						NVARCHAR(MAX)
 	,@intUserId						INT				
 	,@dtmProcessDate				DATETIME
@@ -1838,28 +1837,28 @@ AND tblCFImportTransactionStagingTable.strGUID = @strGUID AND tblCFImportTransac
 
 DECLARE @RemoteLineItemTaxEntries LineItemTaxDetailStagingTable
 
-DECLARE @CalculatedTaxExemptParam ConstructLineItemTaxDetailParam
-DECLARE @CalculatedTaxExemptParamZeroQty ConstructLineItemTaxDetailParam
+--DECLARE @CalculatedTaxExemptParam ConstructLineItemTaxDetailParam
+--DECLARE @CalculatedTaxExemptParamZeroQty ConstructLineItemTaxDetailParam
 
-DECLARE @OriginalTaxExemptParam ConstructLineItemTaxDetailParam
-DECLARE @OriginalTaxExemptParamZeroQty ConstructLineItemTaxDetailParam
+--DECLARE @OriginalTaxExemptParam ConstructLineItemTaxDetailParam
+--DECLARE @OriginalTaxExemptParamZeroQty ConstructLineItemTaxDetailParam
 
 
 DECLARE @CalculatedTaxParam ConstructLineItemTaxDetailParam
-DECLARE @CalculatedTaxParamZeroQty ConstructLineItemTaxDetailParam
+--DECLARE @CalculatedTaxParamZeroQty ConstructLineItemTaxDetailParam
 
 DECLARE @OriginalTaxParam ConstructLineItemTaxDetailParam
-DECLARE @OriginalTaxParamZeroQty ConstructLineItemTaxDetailParam
+--DECLARE @OriginalTaxParamZeroQty ConstructLineItemTaxDetailParam
 
 DELETE FROM @RemoteLineItemTaxEntries 
-DELETE FROM @CalculatedTaxExemptParam 
-DELETE FROM @CalculatedTaxExemptParamZeroQty 
-DELETE FROM @OriginalTaxExemptParam 
-DELETE FROM @OriginalTaxExemptParamZeroQty 
 DELETE FROM @CalculatedTaxParam 
-DELETE FROM @CalculatedTaxParamZeroQty 
 DELETE FROM @OriginalTaxParam 
-DELETE FROM @OriginalTaxParamZeroQty 
+--DELETE FROM @CalculatedTaxExemptParam 
+--DELETE FROM @CalculatedTaxExemptParamZeroQty 
+--DELETE FROM @OriginalTaxExemptParam 
+--DELETE FROM @OriginalTaxExemptParamZeroQty 
+--DELETE FROM @CalculatedTaxParamZeroQty 
+--DELETE FROM @OriginalTaxParamZeroQty 
 	
 
 INSERT INTO @RemoteLineItemTaxEntries(
@@ -1957,295 +1956,6 @@ WHERE strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @int
 --FROM tblCFImportTransactionStagingTable
 --WHERE strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
 
-
-INSERT INTO @CalculatedTaxExemptParam
-(
-  dblQuantity						
-, dblGrossAmount					
-, ysnReversal						
-, intItemId							
-, intEntityCustomerId				
-, intCompanyLocationId				
-, intTaxGroupId						
-, dblPrice							
-, dtmTransactionDate				
-, intShipToLocationId				
-, ysnIncludeExemptedCodes			
-, ysnIncludeInvalidCodes			
-, intSiteId							
-, intFreightTermId					
-, intCardId							
-, intVehicleId						
-, ysnDisregardExemptionSetup		
-, ysnExcludeCheckOff				
-, intItemUOMId						
-, intCFSiteId						
-, ysnDeliver						
-, ysnCFQuote					    
-, intCurrencyId						
-, intCurrencyExchangeRateTypeId		
-, dblCurrencyExchangeRate				
-, intLineItemId						
-)
-SELECT 
- tblCFImportTransactionStagingTable.dblQuantity
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE ISNULL(tblCFImportTransactionStagingTable.dblQuantity,0) * ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) END 
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE 1 END
-,tblCFImportTransactionStagingTable.intARItemId
-,tblCFImportTransactionStagingTable.intPrcCustomerId
-,tblCFImportTransactionStagingTable.intARItemLocationId
-,tblCFImportTransactionStagingTable.intTaxGroupId
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) ELSE 0 END 
-,tblCFImportTransactionStagingTable.dtmTransactionDate
-,NULL
-,1
-,0			--@IncludeInvalidCodes
-,NULL
-,tblCFImportTransactionStagingTable.intFreightTermId
-,tblCFImportTransactionStagingTable.intCardId		
-,tblCFImportTransactionStagingTable.intVehicleId
-,1 --@DisregardExemptionSetup
-,0
-,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
-,tblCFImportTransactionStagingTable.intSiteId
-,0		--@IsDeliver	
-,tblCFImportTransactionStagingTable.isQuote								 
-,NULL	--@CurrencyId
-,NULL	--@@CurrencyExchangeRateTypeId
-,NULL	--@@CurrencyExchangeRate	
-,tblCFImportTransactionStagingTable.intTransactionId
-FROM tblCFImportTransactionStagingTable
-WHERE 
---(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
---AND 
-(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
-AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
---AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
---AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
---AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup IS NULL OR tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup = 0 )
-AND ISNULL(tblCFImportTransactionStagingTable.ysnDisregardTaxExemption,0) = 0 
-AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
-
-
---SELECT '@CalculatedTaxExemptParam'
---SELECT '@CalculatedTaxExemptParam', * FROM @CalculatedTaxExemptParam
-
-INSERT INTO @CalculatedTaxExemptParamZeroQty
-(
-  dblQuantity						
-, dblGrossAmount					
-, ysnReversal						
-, intItemId							
-, intEntityCustomerId				
-, intCompanyLocationId				
-, intTaxGroupId						
-, dblPrice							
-, dtmTransactionDate				
-, intShipToLocationId				
-, ysnIncludeExemptedCodes			
-, ysnIncludeInvalidCodes			
-, intSiteId							
-, intFreightTermId					
-, intCardId							
-, intVehicleId						
-, ysnDisregardExemptionSetup		
-, ysnExcludeCheckOff				
-, intItemUOMId						
-, intCFSiteId						
-, ysnDeliver						
-, ysnCFQuote					    
-, intCurrencyId						
-, intCurrencyExchangeRateTypeId		
-, dblCurrencyExchangeRate				
-, intLineItemId						
-)
-SELECT 
- tblCFImportTransactionStagingTable.dblZeroQuantity
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE tblCFImportTransactionStagingTable.dblZeroQuantity * ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) END 
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE 1 END
-,tblCFImportTransactionStagingTable.intARItemId
-,tblCFImportTransactionStagingTable.intPrcCustomerId
-,tblCFImportTransactionStagingTable.intARItemLocationId
-,tblCFImportTransactionStagingTable.intTaxGroupId
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) ELSE 0 END 
-,tblCFImportTransactionStagingTable.dtmTransactionDate
-,NULL
-,1
-,0			--@IncludeInvalidCodes
-,NULL
-,tblCFImportTransactionStagingTable.intFreightTermId
-,tblCFImportTransactionStagingTable.intCardId		
-,tblCFImportTransactionStagingTable.intVehicleId
-,1 --@DisregardExemptionSetup
-,0
-,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
-,tblCFImportTransactionStagingTable.intSiteId
-,0		--@IsDeliver	
-,tblCFImportTransactionStagingTable.isQuote								 
-,NULL	--@CurrencyId
-,NULL	--@@CurrencyExchangeRateTypeId
-,NULL	--@@CurrencyExchangeRate	
-,tblCFImportTransactionStagingTable.intTransactionId
-FROM tblCFImportTransactionStagingTable
-WHERE 
---(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
---AND
- (tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
-AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
---AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
---AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
---AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup IS NULL OR tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup = 0 )
-AND ISNULL(tblCFImportTransactionStagingTable.ysnDisregardTaxExemption,0) = 0 
-AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
-
---SELECT '@CalculatedTaxExemptParamZeroQty'
---SELECT '@CalculatedTaxExemptParamZeroQty', * FROM @CalculatedTaxExemptParamZeroQty
-
-INSERT INTO @OriginalTaxExemptParam
-(
-  dblQuantity						
-, dblGrossAmount					
-, ysnReversal						
-, intItemId							
-, intEntityCustomerId				
-, intCompanyLocationId				
-, intTaxGroupId						
-, dblPrice							
-, dtmTransactionDate				
-, intShipToLocationId				
-, ysnIncludeExemptedCodes			
-, ysnIncludeInvalidCodes			
-, intSiteId							
-, intFreightTermId					
-, intCardId							
-, intVehicleId						
-, ysnDisregardExemptionSetup		
-, ysnExcludeCheckOff				
-, intItemUOMId						
-, intCFSiteId						
-, ysnDeliver						
-, ysnCFQuote					    
-, intCurrencyId						
-, intCurrencyExchangeRateTypeId		
-, dblCurrencyExchangeRate				
-, intLineItemId						
-)
-SELECT 
- tblCFImportTransactionStagingTable.dblQuantity
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE tblCFImportTransactionStagingTable.dblQuantity * tblCFImportTransactionStagingTable.dblOriginalPrice END 
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE 1 END
-,tblCFImportTransactionStagingTable.intARItemId
-,tblCFImportTransactionStagingTable.intPrcCustomerId
-,tblCFImportTransactionStagingTable.intARItemLocationId
-,tblCFImportTransactionStagingTable.intTaxGroupId
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN tblCFImportTransactionStagingTable.dblOriginalPrice ELSE 0 END 
-,tblCFImportTransactionStagingTable.dtmTransactionDate
-,NULL
-,1
-,0			--@IncludeInvalidCodes
-,NULL
-,tblCFImportTransactionStagingTable.intFreightTermId
-,tblCFImportTransactionStagingTable.intCardId		
-,tblCFImportTransactionStagingTable.intVehicleId
-,1 --@DisregardExemptionSetup
-,0
-,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
-,tblCFImportTransactionStagingTable.intSiteId
-,0		--@IsDeliver	
-,tblCFImportTransactionStagingTable.isQuote								 
-,NULL	--@CurrencyId
-,NULL	--@@CurrencyExchangeRateTypeId
-,NULL	--@@CurrencyExchangeRate	
-,tblCFImportTransactionStagingTable.intTransactionId
-FROM tblCFImportTransactionStagingTable
-WHERE 
---(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
---AND 
-(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
-AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
---AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
---AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
---AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup IS NULL OR tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup = 0 )
-AND ISNULL(tblCFImportTransactionStagingTable.ysnDisregardTaxExemption,0) = 0 
-AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
-
-
---SELECT '@OriginalTaxExemptParam'
---SELECT '@OriginalTaxExemptParam', * FROM @OriginalTaxExemptParam
-
-
-INSERT INTO @OriginalTaxExemptParamZeroQty
-(
-  dblQuantity						
-, dblGrossAmount					
-, ysnReversal						
-, intItemId							
-, intEntityCustomerId				
-, intCompanyLocationId				
-, intTaxGroupId						
-, dblPrice							
-, dtmTransactionDate				
-, intShipToLocationId				
-, ysnIncludeExemptedCodes			
-, ysnIncludeInvalidCodes			
-, intSiteId							
-, intFreightTermId					
-, intCardId							
-, intVehicleId						
-, ysnDisregardExemptionSetup		
-, ysnExcludeCheckOff				
-, intItemUOMId						
-, intCFSiteId						
-, ysnDeliver						
-, ysnCFQuote					    
-, intCurrencyId						
-, intCurrencyExchangeRateTypeId		
-, dblCurrencyExchangeRate				
-, intLineItemId						
-)
-SELECT 
- tblCFImportTransactionStagingTable.dblZeroQuantity
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE tblCFImportTransactionStagingTable.dblZeroQuantity * tblCFImportTransactionStagingTable.dblOriginalPrice END 
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE 1 END
-,tblCFImportTransactionStagingTable.intARItemId
-,tblCFImportTransactionStagingTable.intPrcCustomerId
-,tblCFImportTransactionStagingTable.intARItemLocationId
-,tblCFImportTransactionStagingTable.intTaxGroupId
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN tblCFImportTransactionStagingTable.dblOriginalPrice ELSE 0 END 
-,tblCFImportTransactionStagingTable.dtmTransactionDate
-,NULL
-,1
-,0			--@IncludeInvalidCodes
-,NULL
-,tblCFImportTransactionStagingTable.intFreightTermId
-,tblCFImportTransactionStagingTable.intCardId		
-,tblCFImportTransactionStagingTable.intVehicleId
-,1 --@DisregardExemptionSetup
-,0
-,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
-,tblCFImportTransactionStagingTable.intSiteId
-,0		--@IsDeliver	
-,tblCFImportTransactionStagingTable.isQuote								 
-,NULL	--@CurrencyId
-,NULL	--@@CurrencyExchangeRateTypeId
-,NULL	--@@CurrencyExchangeRate	
-,tblCFImportTransactionStagingTable.intTransactionId
-FROM tblCFImportTransactionStagingTable
-WHERE 
---(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
---AND 
-(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
-AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
---AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
---AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
---AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup IS NULL OR tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup = 0 )
-AND ISNULL(tblCFImportTransactionStagingTable.ysnDisregardTaxExemption,0) = 0 
-AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
-
-
---SELECT '@OriginalTaxExemptParamZeroQty'
---SELECT '@OriginalTaxExemptParamZeroQty', * FROM @OriginalTaxExemptParamZeroQty
-
 INSERT INTO @CalculatedTaxParam
 (
   dblQuantity						
@@ -2309,78 +2019,6 @@ WHERE
 (tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
 AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
 AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
-
---SELECT '@CalculatedTaxParam'
---SELECT '@CalculatedTaxParam', * FROM @CalculatedTaxParam
-
-INSERT INTO @CalculatedTaxParamZeroQty
-(
-  dblQuantity						
-, dblGrossAmount					
-, ysnReversal						
-, intItemId							
-, intEntityCustomerId				
-, intCompanyLocationId				
-, intTaxGroupId						
-, dblPrice							
-, dtmTransactionDate				
-, intShipToLocationId				
-, ysnIncludeExemptedCodes			
-, ysnIncludeInvalidCodes			
-, intSiteId							
-, intFreightTermId					
-, intCardId							
-, intVehicleId						
-, ysnDisregardExemptionSetup		
-, ysnExcludeCheckOff				
-, intItemUOMId						
-, intCFSiteId						
-, ysnDeliver						
-, ysnCFQuote					    
-, intCurrencyId						
-, intCurrencyExchangeRateTypeId		
-, dblCurrencyExchangeRate				
-, intLineItemId						
-)
-SELECT 
- tblCFImportTransactionStagingTable.dblZeroQuantity
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE ISNULL(tblCFImportTransactionStagingTable.dblZeroQuantity,0) * ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) END 
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE 1 END
-,tblCFImportTransactionStagingTable.intARItemId
-,tblCFImportTransactionStagingTable.intPrcCustomerId
-,tblCFImportTransactionStagingTable.intARItemLocationId
-,tblCFImportTransactionStagingTable.intTaxGroupId
-,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) ELSE 0 END 
-,tblCFImportTransactionStagingTable.dtmTransactionDate
-,NULL
-,1
-,0			--@IncludeInvalidCodes
-,NULL
-,tblCFImportTransactionStagingTable.intFreightTermId
-,tblCFImportTransactionStagingTable.intCardId		
-,tblCFImportTransactionStagingTable.intVehicleId
-,tblCFImportTransactionStagingTable.ysnDisregardExemptionSetup
-,0
-,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
-,tblCFImportTransactionStagingTable.intSiteId
-,0		--@IsDeliver	
-,tblCFImportTransactionStagingTable.isQuote								 
-,NULL	--@CurrencyId
-,NULL	--@@CurrencyExchangeRateTypeId
-,NULL	--@@CurrencyExchangeRate	
-,tblCFImportTransactionStagingTable.intTransactionId
-FROM tblCFImportTransactionStagingTable
-WHERE 
---(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
---AND 
-(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
-AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
---AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
---AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
-AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
-
---SELECT '@CalculatedTaxParamZeroQty'
---SELECT '@CalculatedTaxParamZeroQty', * FROM @CalculatedTaxParamZeroQty
 
 INSERT INTO @OriginalTaxParam
 (
@@ -2446,344 +2084,16 @@ WHERE
 AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
 AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
 
---SELECT '@OriginalTaxParam'
---SELECT '@OriginalTaxParam', * FROM @OriginalTaxParam
-
-INSERT INTO @OriginalTaxParamZeroQty
-(
-  dblQuantity						
-, dblGrossAmount					
-, ysnReversal						
-, intItemId							
-, intEntityCustomerId				
-, intCompanyLocationId				
-, intTaxGroupId						
-, dblPrice							
-, dtmTransactionDate				
-, intShipToLocationId				
-, ysnIncludeExemptedCodes			
-, ysnIncludeInvalidCodes			
-, intSiteId							
-, intFreightTermId					
-, intCardId							
-, intVehicleId						
-, ysnDisregardExemptionSetup		
-, ysnExcludeCheckOff				
-, intItemUOMId						
-, intCFSiteId						
-, ysnDeliver						
-, ysnCFQuote					    
-, intCurrencyId						
-, intCurrencyExchangeRateTypeId		
-, dblCurrencyExchangeRate				
-, intLineItemId						
-)
-SELECT 
- tblCFImportTransactionStagingTable.dblZeroQuantity
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE tblCFImportTransactionStagingTable.dblZeroQuantity * tblCFImportTransactionStagingTable.dblOriginalPrice END 
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE 1 END
-,tblCFImportTransactionStagingTable.intARItemId
-,tblCFImportTransactionStagingTable.intPrcCustomerId
-,tblCFImportTransactionStagingTable.intARItemLocationId
-,tblCFImportTransactionStagingTable.intTaxGroupId
-,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN tblCFImportTransactionStagingTable.dblOriginalPrice ELSE 0 END 
-,tblCFImportTransactionStagingTable.dtmTransactionDate
-,NULL
-,1
-,0			--@IncludeInvalidCodes
-,NULL
-,tblCFImportTransactionStagingTable.intFreightTermId
-,tblCFImportTransactionStagingTable.intCardId		
-,tblCFImportTransactionStagingTable.intVehicleId
-,1 --@DisregardExemptionSetup
-,0
-,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
-,tblCFImportTransactionStagingTable.intSiteId
-,0		--@IsDeliver	
-,tblCFImportTransactionStagingTable.isQuote								 
-,NULL	--@CurrencyId
-,NULL	--@@CurrencyExchangeRateTypeId
-,NULL	--@@CurrencyExchangeRate	
-,tblCFImportTransactionStagingTable.intTransactionId
-FROM tblCFImportTransactionStagingTable
-WHERE
--- (tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
---AND 
-(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
-AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
---AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
---AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
-AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
-
---SELECT '@OriginalTaxParamZeroQty'
---SELECT '@OriginalTaxParamZeroQty', * FROM @OriginalTaxParamZeroQty
-
-
 
 DELETE FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
 
 
---SELECT '@RemoteLineItemTaxEntries', * FROM @RemoteLineItemTaxEntries
-
-
-EXEC uspARConstructLineItemTaxDetail
-@CalculatedTaxExemptParam,
-@RemoteLineItemTaxEntries,
-@strGUID
-
-INSERT INTO tblCFImportTransactionCalculatedTaxExempt(
-  [intTaxGroupId]
-, [intTaxCodeId]
-, [intTaxClassId]
-, [strTaxableByOtherTaxes]
-, [strCalculationMethod]
-, [dblRate]
-, [dblBaseRate]
-, [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
-, [intTaxAccountId]
-, [ysnCheckoffTax]
-, [ysnTaxExempt]
-, [ysnTaxOnly]
-, [ysnInvalidSetup]
-, [strNotes]
-, [dblExemptionAmount]
-, [intLineItemId]
-, [strGUID]
-, [intTransactionId],
-		intUserId
-)
-SELECT 
-  [intTaxGroupId]
-, [intTaxCodeId]
-, [intTaxClassId]
-, [strTaxableByOtherTaxes]
-, [strCalculationMethod]
-, [dblRate]
-, [dblBaseRate]
-, [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
-, [intTaxAccountId]
-, [ysnCheckoffTax]
-, [ysnTaxExempt]
-, [ysnTaxOnly]
-, [ysnInvalidSetup]
-, [strNotes]
-, [dblExemptionAmount]
-, [intLineItemId]
-, @strGUID
-, [intLineItemId],
- @intUserId
-FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-DELETE FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-
-SELECT 'tblCFImportTransactionCalculatedTaxExempt',* FROM tblCFImportTransactionCalculatedTaxExempt
-
-
-EXEC uspARConstructLineItemTaxDetail
-@CalculatedTaxExemptParamZeroQty,
-@RemoteLineItemTaxEntries,	
-@strGUID
-
-INSERT INTO tblCFImportTransactionCalculatedTaxExemptZeroQuantity(
-  [intTaxGroupId]
-, [intTaxCodeId]
-, [intTaxClassId]
-, [strTaxableByOtherTaxes]
-, [strCalculationMethod]
-, [dblRate]
-, [dblBaseRate]
-, [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
-, [intTaxAccountId]
-, [ysnCheckoffTax]
-, [ysnTaxExempt]
-, [ysnTaxOnly]
-, [ysnInvalidSetup]
-, [strNotes]
-, [dblExemptionAmount]
-, [intLineItemId]
-, [strGUID]
-, [intTransactionId],
-		intUserId
-)
-SELECT 
-  [intTaxGroupId]
-, [intTaxCodeId]
-, [intTaxClassId]
-, [strTaxableByOtherTaxes]
-, [strCalculationMethod]
-, [dblRate]
-, [dblBaseRate]
-, [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
-, [intTaxAccountId]
-, [ysnCheckoffTax]
-, [ysnTaxExempt]
-, [ysnTaxOnly]
-, [ysnInvalidSetup]
-, [strNotes]
-, [dblExemptionAmount]
-, [intLineItemId]
-, @strGUID
-, [intLineItemId],
-		@intUserId
-FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-DELETE FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-
-SELECT 'tblCFImportTransactionCalculatedTaxExemptZeroQuantity',* FROM tblCFImportTransactionCalculatedTaxExemptZeroQuantity
-
-
---UPDATE tblCFImportTransactionCalculatedTaxExemptZeroQuantity
---SET intTransactionId = intLineItemId
---SELECT * FROM tblCFImportTransactionCalculatedTaxExemptZeroQuantity
-
-
-EXEC uspARConstructLineItemTaxDetail
-@OriginalTaxExemptParam,
-@RemoteLineItemTaxEntries,
-@strGUID
-
-INSERT INTO tblCFImportTransactionOriginalTaxExempt(
-  [intTaxGroupId]
-, [intTaxCodeId]
-, [intTaxClassId]
-, [strTaxableByOtherTaxes]
-, [strCalculationMethod]
-, [dblRate]
-, [dblBaseRate]
-, [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
-, [intTaxAccountId]
-, [ysnCheckoffTax]
-, [ysnTaxExempt]
-, [ysnTaxOnly]
-, [ysnInvalidSetup]
-, [strNotes]
-, [dblExemptionAmount]
-, [intLineItemId]
-, [strGUID]
-, [intTransactionId],
-		intUserId
-)
-SELECT 
-  [intTaxGroupId]
-, [intTaxCodeId]
-, [intTaxClassId]
-, [strTaxableByOtherTaxes]
-, [strCalculationMethod]
-, [dblRate]
-, [dblBaseRate]
-, [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
-, [intTaxAccountId]
-, [ysnCheckoffTax]
-, [ysnTaxExempt]
-, [ysnTaxOnly]
-, [ysnInvalidSetup]
-, [strNotes]
-, [dblExemptionAmount]
-, [intLineItemId]
-, @strGUID
-, [intLineItemId],
-		@intUserId
-FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-DELETE FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
---UPDATE tblCFImportTransactionOriginalTaxExempt
---SET intTransactionId = intLineItemId
-SELECT * FROM tblCFImportTransactionOriginalTaxExempt
-
-EXEC uspARConstructLineItemTaxDetail
-@OriginalTaxExemptParamZeroQty,
-@RemoteLineItemTaxEntries,	
-@strGUID
-
-INSERT INTO tblCFImportTransactionOriginalTaxExemptZeroQuantity(
-  [intTaxGroupId]
-, [intTaxCodeId]
-, [intTaxClassId]
-, [strTaxableByOtherTaxes]
-, [strCalculationMethod]
-, [dblRate]
-, [dblBaseRate]
-, [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
-, [intTaxAccountId]
-, [ysnCheckoffTax]
-, [ysnTaxExempt]
-, [ysnTaxOnly]
-, [ysnInvalidSetup]
-, [strNotes]
-, [dblExemptionAmount]
-, [intLineItemId]
-, [strGUID]
-, [intTransactionId],
-		intUserId
-)
-SELECT 
-  [intTaxGroupId]
-, [intTaxCodeId]
-, [intTaxClassId]
-, [strTaxableByOtherTaxes]
-, [strCalculationMethod]
-, [dblRate]
-, [dblBaseRate]
-, [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
-, [intTaxAccountId]
-, [ysnCheckoffTax]
-, [ysnTaxExempt]
-, [ysnTaxOnly]
-, [ysnInvalidSetup]
-, [strNotes]
-, [dblExemptionAmount]
-, [intLineItemId]
-, @strGUID
-, [intLineItemId],
-		@intUserId
-FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-DELETE FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-
---UPDATE tblCFImportTransactionOriginalTaxExemptZeroQuantity
---SET intTransactionId = intLineItemId
-SELECT * FROM tblCFImportTransactionOriginalTaxExemptZeroQuantity
-
-
-
-
+-->> tblCFImportTransactionCalculatedTax <<--
 EXEC uspARConstructLineItemTaxDetail
 @CalculatedTaxParam,
 @RemoteLineItemTaxEntries,
 @strGUID
-
-SELECT '@CalculatedTaxParam',* FROM @CalculatedTaxParam
-SELECT 'tblARConstructLineItemTaxDetailResult',* FROM tblARConstructLineItemTaxDetailResult
-
 INSERT INTO tblCFImportTransactionCalculatedTax(
   [intTaxGroupId]
 , [intTaxCodeId]
@@ -2831,21 +2141,6 @@ SELECT
 		@intUserId
 FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
-
-DELETE FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-
---UPDATE tblCFImportTransactionCalculatedTax
---SET intTransactionId = intLineItemId
-SELECT 'tblCFImportTransactionCalculatedTax',* FROM tblCFImportTransactionCalculatedTax
-
-
-EXEC uspARConstructLineItemTaxDetail
-@CalculatedTaxParamZeroQty,
-@RemoteLineItemTaxEntries,
-@strGUID
-
 INSERT INTO tblCFImportTransactionCalculatedTaxZeroQuantity(
   [intTaxGroupId]
 , [intTaxCodeId]
@@ -2867,9 +2162,33 @@ INSERT INTO tblCFImportTransactionCalculatedTaxZeroQuantity(
 , [intLineItemId]
 , [strGUID]
 , [intTransactionId],
-		intUserId
+  intUserId
 )
 SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblOrigTax]
+, [dblOrigAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblOrigExemptionAmount]
+, [intLineItemId]
+, @strGUID
+, [intLineItemId],
+  @intUserId
+FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+INSERT INTO tblCFImportTransactionCalculatedTaxExempt(
   [intTaxGroupId]
 , [intTaxCodeId]
 , [intTaxClassId]
@@ -2888,24 +2207,113 @@ SELECT
 , [strNotes]
 , [dblExemptionAmount]
 , [intLineItemId]
+, [strGUID]
+, [intTransactionId],
+  intUserId
+)
+SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, CASE WHEN ([ysnTaxExempt] = 1) THEN [dblExemptionAmount] ELSE [dblTax] END 
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
 , @strGUID
 , [intLineItemId],
-		@intUserId
+  @intUserId
+FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+INSERT INTO tblCFImportTransactionCalculatedTaxExemptZeroQuantity(
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, [strGUID]
+, [intTransactionId],
+  intUserId
+)
+SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, CASE WHEN ([ysnTaxExempt] = 1) THEN [dblOrigExemptionAmount] ELSE [dblTax] END 
+, [dblOrigAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblOrigExemptionAmount]
+, [intLineItemId]
+, @strGUID
+, [intLineItemId],
+  @intUserId
 FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
 
+UPDATE tblCFImportTransactionCalculatedTaxZeroQuantity
+SET 
+	 [dblTax] = ([dblTax] / dblQuantity) * dblZeroQuantity
+	,[dblAdjustedTax] = ([dblAdjustedTax] / dblQuantity) * dblZeroQuantity
+	,[dblExemptionAmount]= ([dblExemptionAmount] / dblQuantity) * dblZeroQuantity
+FROM tblCFImportTransactionStagingTable
+WHERE tblCFImportTransactionStagingTable.intTransactionId = tblCFImportTransactionCalculatedTaxZeroQuantity.intTransactionId
+AND tblCFImportTransactionStagingTable.strGUID = tblCFImportTransactionCalculatedTaxZeroQuantity.strGUID
+AND tblCFImportTransactionStagingTable.strGUID = @strGUID
+AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+UPDATE tblCFImportTransactionCalculatedTaxExemptZeroQuantity
+SET 
+	 [dblTax] = ([dblTax] / dblQuantity) * dblZeroQuantity
+	,[dblAdjustedTax] = ([dblAdjustedTax] / dblQuantity) * dblZeroQuantity
+	,[dblExemptionAmount]= ([dblExemptionAmount] / dblQuantity) * dblZeroQuantity
+FROM tblCFImportTransactionStagingTable
+WHERE tblCFImportTransactionStagingTable.intTransactionId = tblCFImportTransactionCalculatedTaxExemptZeroQuantity.intTransactionId
+AND tblCFImportTransactionStagingTable.strGUID = tblCFImportTransactionCalculatedTaxExemptZeroQuantity.strGUID
+AND tblCFImportTransactionStagingTable.strGUID = @strGUID
+AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+
 DELETE FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
+-->> tblCFImportTransactionCalculatedTax <<--
 
---UPDATE tblCFImportTransactionCalculatedTaxZeroQuantity
---SET intTransactionId = intLineItemId
-SELECT 'tblCFImportTransactionCalculatedTaxZeroQuantity',* FROM tblCFImportTransactionCalculatedTaxZeroQuantity
 
+-->> tblCFImportTransactionOriginalTax <<--
 EXEC uspARConstructLineItemTaxDetail
 @OriginalTaxParam,
 @RemoteLineItemTaxEntries,
 @strGUID
-
 INSERT INTO tblCFImportTransactionOriginalTax(
   [intTaxGroupId]
 , [intTaxCodeId]
@@ -2953,22 +2361,6 @@ SELECT
 		@intUserId
 FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
-
-SELECT 'tblCFImportTransactionOriginalTax',* FROM tblCFImportTransactionOriginalTax
-
-DELETE FROM tblARConstructLineItemTaxDetailResult
-WHERE strRequestId = @strGUID
-
-
---UPDATE tblCFImportTransactionOriginalTax
---SET intTransactionId = intLineItemId
-SELECT * FROM tblCFImportTransactionOriginalTax
-
-EXEC uspARConstructLineItemTaxDetail
-@OriginalTaxParamZeroQty,
-@RemoteLineItemTaxEntries,
-@strGUID
-
 INSERT INTO tblCFImportTransactionOriginalTaxZeroQuantity(
   [intTaxGroupId]
 , [intTaxCodeId]
@@ -2990,7 +2382,7 @@ INSERT INTO tblCFImportTransactionOriginalTaxZeroQuantity(
 , [intLineItemId]
 , [strGUID]
 , [intTransactionId],
-		intUserId
+  intUserId
 )
 SELECT 
   [intTaxGroupId]
@@ -3001,29 +2393,38 @@ SELECT
 , [dblRate]
 , [dblBaseRate]
 , [dblExemptionPercent]
-, [dblTax]
-, [dblAdjustedTax]
+, [dblOrigTax]
+, [dblOrigAdjustedTax]
 , [intTaxAccountId]
 , [ysnCheckoffTax]
 , [ysnTaxExempt]
 , [ysnTaxOnly]
 , [ysnInvalidSetup]
 , [strNotes]
-, [dblExemptionAmount]
+, [dblOrigExemptionAmount]
 , [intLineItemId]
 , @strGUID
 , [intLineItemId],
-		@intUserId
+  @intUserId
 FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
 
+UPDATE tblCFImportTransactionOriginalTaxZeroQuantity
+SET 
+	 [dblTax] = ([dblTax] / dblQuantity) * dblZeroQuantity
+	,[dblAdjustedTax] = ([dblAdjustedTax] / dblQuantity) * dblZeroQuantity
+	,[dblExemptionAmount]= ([dblExemptionAmount] / dblQuantity) * dblZeroQuantity
+FROM tblCFImportTransactionStagingTable
+WHERE tblCFImportTransactionStagingTable.intTransactionId = tblCFImportTransactionOriginalTaxZeroQuantity.intTransactionId
+AND tblCFImportTransactionStagingTable.strGUID = tblCFImportTransactionOriginalTaxZeroQuantity.strGUID
+AND tblCFImportTransactionStagingTable.strGUID = @strGUID
+AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+
+
 DELETE FROM tblARConstructLineItemTaxDetailResult
 WHERE strRequestId = @strGUID
+-->> tblCFImportTransactionOriginalTax <<--
 
---UPDATE tblCFImportTransactionOriginalTaxZeroQuantity
---SET intTransactionId = intLineItemId
-SELECT 'tblCFImportTransactionOriginalTaxZeroQuantity',* FROM tblCFImportTransactionOriginalTaxZeroQuantity
---*/
 
 
 
@@ -3208,7 +2609,7 @@ CROSS APPLY (
 	) AS calculatedTax
 WHERE strGUID = @strGUID AND intUserId = @intUserId
 
-SELECT 'tblCFImportTransactionTax',* FROM tblCFImportTransactionTax
+
 
 INSERT INTO tblCFImportTransactionTaxZeroQuantity
 (
@@ -3281,13 +2682,6 @@ CROSS APPLY (
 WHERE strGUID = @strGUID AND originalTax.intUserId = @intUserId
 
 
-	SELECT 'tblCFImportTransactionTaxZeroQuantity',* FROM tblCFImportTransactionTaxZeroQuantity
-
-	
-	SELECT 'tblCFImportTransactionOriginalTax',* FROM tblCFImportTransactionOriginalTax
-
-	
-	SELECT 'tblCFImportTransactionCalculatedTax',* FROM tblCFImportTransactionCalculatedTax
 		
 ---SPECIAL TAX RULE--
 				
@@ -4370,7 +3764,6 @@ AND strGUID = @strGUID AND tblCFImportTransactionTaxZeroQuantity.intUserId = @in
 			,intUserId 
 			,dblQuantity
 		)
-		
 		SELECT 
 			 intTransactionId 
 			,intContractDetailId 
@@ -4380,7 +3773,7 @@ AND strGUID = @strGUID AND tblCFImportTransactionTaxZeroQuantity.intUserId = @in
 		WHERE LOWER(strPriceMethod) = 'contracts'
 		AND strGUID = @strGUID AND intUserId = @intUserId
 
-		SELECT * FROM @tblCFUpdateContractQuantity
+		--SELECT * FROM @tblCFUpdateContractQuantity
 
 		DECLARE @intLoopContractTransactionId	INT
 		DECLARE @intLoopContractDetailId		INT
@@ -4783,42 +4176,42 @@ AND strGUID = @strGUID AND tblCFImportTransactionTaxZeroQuantity.intUserId = @in
 	-------------------------------------------------------
 
 
-	--UPDATE tblCFImportTransactionStagingTable
-	--SET intDupTransCount = 
-	--( 
-	--	SELECT 
-	--		 intDupTransCount = COUNT(1)
-	--	FROM tblCFTransaction
-	--	WHERE intNetworkId		= tblCFImportTransactionStagingTable.intNetworkId
-	--	AND intSiteId			= tblCFImportTransactionStagingTable.intSiteId
-	--	AND dtmTransactionDate	= tblCFImportTransactionStagingTable.dtmTransactionDate
-	--	AND intCardId			= tblCFImportTransactionStagingTable.intCardId
-	--	AND intProductId		= tblCFImportTransactionStagingTable.intProductId
-	--	AND intPumpNumber		= tblCFImportTransactionStagingTable.intPumpNumber
-	--	AND intTransactionId   != tblCFImportTransactionStagingTable.intTransactionId
-	--	AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
-	--)
-	--WHERE strTransactionType != 'Foreign Sale'
-	--AND strGUID = @strGUID AND intUserId = @intUserId
+	UPDATE tblCFImportTransactionStagingTable
+	SET intDupTransCount = 
+	( 
+		SELECT 
+			 intDupTransCount = COUNT(1)
+		FROM tblCFTransaction
+		WHERE intNetworkId		= tblCFImportTransactionStagingTable.intNetworkId
+		AND intSiteId			= tblCFImportTransactionStagingTable.intSiteId
+		AND dtmTransactionDate	= tblCFImportTransactionStagingTable.dtmTransactionDate
+		AND intCardId			= tblCFImportTransactionStagingTable.intCardId
+		AND intProductId		= tblCFImportTransactionStagingTable.intProductId
+		AND intPumpNumber		= tblCFImportTransactionStagingTable.intPumpNumber
+		AND intTransactionId   != tblCFImportTransactionStagingTable.intTransactionId
+		AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
+	)
+	WHERE strTransactionType != 'Foreign Sale'
+	AND strGUID = @strGUID AND intUserId = @intUserId
 
 
-	--UPDATE tblCFImportTransactionStagingTable
-	--SET intDupTransCount = 
-	--( 
-	--	SELECT 
-	--		 intDupTransCount = COUNT(1)
-	--	FROM tblCFTransaction
-	--	WHERE intNetworkId		= tblCFImportTransactionStagingTable.intNetworkId
-	--	AND intSiteId			= tblCFImportTransactionStagingTable.intSiteId
-	--	AND dtmTransactionDate	= tblCFImportTransactionStagingTable.dtmTransactionDate
-	--	AND strForeignCardId	= tblCFImportTransactionStagingTable.strForeignCardId
-	--	AND intProductId		= tblCFImportTransactionStagingTable.intProductId
-	--	AND intPumpNumber		= tblCFImportTransactionStagingTable.intPumpNumber
-	--	AND intTransactionId   != tblCFImportTransactionStagingTable.intTransactionId
-	--	AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
-	--)
-	--WHERE strTransactionType = 'Foreign Sale'
-	--AND strGUID = @strGUID AND intUserId = @intUserId
+	UPDATE tblCFImportTransactionStagingTable
+	SET intDupTransCount = 
+	( 
+		SELECT 
+			 intDupTransCount = COUNT(1)
+		FROM tblCFTransaction
+		WHERE intNetworkId		= tblCFImportTransactionStagingTable.intNetworkId
+		AND intSiteId			= tblCFImportTransactionStagingTable.intSiteId
+		AND dtmTransactionDate	= tblCFImportTransactionStagingTable.dtmTransactionDate
+		AND strForeignCardId	= tblCFImportTransactionStagingTable.strForeignCardId
+		AND intProductId		= tblCFImportTransactionStagingTable.intProductId
+		AND intPumpNumber		= tblCFImportTransactionStagingTable.intPumpNumber
+		AND intTransactionId   != tblCFImportTransactionStagingTable.intTransactionId
+		AND (intOverFilledTransactionId IS NULL OR intOverFilledTransactionId = 0)
+	)
+	WHERE strTransactionType = 'Foreign Sale'
+	AND strGUID = @strGUID AND intUserId = @intUserId
 
 
 	UPDATE tblCFImportTransactionStagingTable
@@ -5682,3 +5075,793 @@ AND strGUID = @strGUID AND tblCFImportTransactionTaxZeroQuantity.intUserId = @in
 	-------------------------------------------------------
 
 	END
+
+
+
+
+
+/* NOTES 
+
+
+-->> tblCFImportTransactionOriginalTaxExemptZeroQuantity <<--
+/*
+
+
+INSERT INTO @OriginalTaxExemptParam
+(
+  dblQuantity						
+, dblGrossAmount					
+, ysnReversal						
+, intItemId							
+, intEntityCustomerId				
+, intCompanyLocationId				
+, intTaxGroupId						
+, dblPrice							
+, dtmTransactionDate				
+, intShipToLocationId				
+, ysnIncludeExemptedCodes			
+, ysnIncludeInvalidCodes			
+, intSiteId							
+, intFreightTermId					
+, intCardId							
+, intVehicleId						
+, ysnDisregardExemptionSetup		
+, ysnExcludeCheckOff				
+, intItemUOMId						
+, intCFSiteId						
+, ysnDeliver						
+, ysnCFQuote					    
+, intCurrencyId						
+, intCurrencyExchangeRateTypeId		
+, dblCurrencyExchangeRate				
+, intLineItemId						
+)
+SELECT 
+ tblCFImportTransactionStagingTable.dblQuantity
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE tblCFImportTransactionStagingTable.dblQuantity * tblCFImportTransactionStagingTable.dblOriginalPrice END 
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE 1 END
+,tblCFImportTransactionStagingTable.intARItemId
+,tblCFImportTransactionStagingTable.intPrcCustomerId
+,tblCFImportTransactionStagingTable.intARItemLocationId
+,tblCFImportTransactionStagingTable.intTaxGroupId
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN tblCFImportTransactionStagingTable.dblOriginalPrice ELSE 0 END 
+,tblCFImportTransactionStagingTable.dtmTransactionDate
+,NULL
+,1
+,0			--@IncludeInvalidCodes
+,NULL
+,tblCFImportTransactionStagingTable.intFreightTermId
+,tblCFImportTransactionStagingTable.intCardId		
+,tblCFImportTransactionStagingTable.intVehicleId
+,1 --@DisregardExemptionSetup
+,0
+,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
+,tblCFImportTransactionStagingTable.intSiteId
+,0		--@IsDeliver	
+,tblCFImportTransactionStagingTable.isQuote								 
+,NULL	--@CurrencyId
+,NULL	--@@CurrencyExchangeRateTypeId
+,NULL	--@@CurrencyExchangeRate	
+,tblCFImportTransactionStagingTable.intTransactionId
+FROM tblCFImportTransactionStagingTable
+WHERE 
+--(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
+--AND 
+(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
+AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
+--AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
+--AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
+--AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup IS NULL OR tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup = 0 )
+AND ISNULL(tblCFImportTransactionStagingTable.ysnDisregardTaxExemption,0) = 0 
+AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+
+
+--SELECT '@OriginalTaxExemptParam'
+--SELECT '@OriginalTaxExemptParam', * FROM @OriginalTaxExemptParam
+
+
+INSERT INTO @OriginalTaxExemptParamZeroQty
+(
+  dblQuantity						
+, dblGrossAmount					
+, ysnReversal						
+, intItemId							
+, intEntityCustomerId				
+, intCompanyLocationId				
+, intTaxGroupId						
+, dblPrice							
+, dtmTransactionDate				
+, intShipToLocationId				
+, ysnIncludeExemptedCodes			
+, ysnIncludeInvalidCodes			
+, intSiteId							
+, intFreightTermId					
+, intCardId							
+, intVehicleId						
+, ysnDisregardExemptionSetup		
+, ysnExcludeCheckOff				
+, intItemUOMId						
+, intCFSiteId						
+, ysnDeliver						
+, ysnCFQuote					    
+, intCurrencyId						
+, intCurrencyExchangeRateTypeId		
+, dblCurrencyExchangeRate				
+, intLineItemId						
+)
+SELECT 
+ tblCFImportTransactionStagingTable.dblZeroQuantity
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE tblCFImportTransactionStagingTable.dblZeroQuantity * tblCFImportTransactionStagingTable.dblOriginalPrice END 
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE 1 END
+,tblCFImportTransactionStagingTable.intARItemId
+,tblCFImportTransactionStagingTable.intPrcCustomerId
+,tblCFImportTransactionStagingTable.intARItemLocationId
+,tblCFImportTransactionStagingTable.intTaxGroupId
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN tblCFImportTransactionStagingTable.dblOriginalPrice ELSE 0 END 
+,tblCFImportTransactionStagingTable.dtmTransactionDate
+,NULL
+,1
+,0			--@IncludeInvalidCodes
+,NULL
+,tblCFImportTransactionStagingTable.intFreightTermId
+,tblCFImportTransactionStagingTable.intCardId		
+,tblCFImportTransactionStagingTable.intVehicleId
+,1 --@DisregardExemptionSetup
+,0
+,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
+,tblCFImportTransactionStagingTable.intSiteId
+,0		--@IsDeliver	
+,tblCFImportTransactionStagingTable.isQuote								 
+,NULL	--@CurrencyId
+,NULL	--@@CurrencyExchangeRateTypeId
+,NULL	--@@CurrencyExchangeRate	
+,tblCFImportTransactionStagingTable.intTransactionId
+FROM tblCFImportTransactionStagingTable
+WHERE 
+--(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
+--AND 
+(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
+AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
+--AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
+--AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
+--AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup IS NULL OR tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup = 0 )
+AND ISNULL(tblCFImportTransactionStagingTable.ysnDisregardTaxExemption,0) = 0 
+AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+
+
+--SELECT '@OriginalTaxExemptParamZeroQty'
+--SELECT '@OriginalTaxExemptParamZeroQty', * FROM @OriginalTaxExemptParamZeroQty
+
+
+EXEC uspARConstructLineItemTaxDetail
+@OriginalTaxExemptParamZeroQty,
+@RemoteLineItemTaxEntries,	
+@strGUID
+INSERT INTO tblCFImportTransactionOriginalTaxExemptZeroQuantity(
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, [strGUID]
+, [intTransactionId],
+		intUserId
+)
+SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, @strGUID
+, [intLineItemId],
+		@intUserId
+FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+DELETE FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+-->> tblCFImportTransactionOriginalTaxExemptZeroQuantity <<--
+
+
+-->> tblCFImportTransactionOriginalTaxExempt <<--
+EXEC uspARConstructLineItemTaxDetail
+@OriginalTaxExemptParam,
+@RemoteLineItemTaxEntries,
+@strGUID
+INSERT INTO tblCFImportTransactionOriginalTaxExempt(
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, [strGUID]
+, [intTransactionId],
+		intUserId
+)
+SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, @strGUID
+, [intLineItemId],
+		@intUserId
+FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+DELETE FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+-->> tblCFImportTransactionOriginalTaxExempt <<--
+
+
+
+
+
+-->> tblCFImportTransactionOriginalTaxZeroQuantity <<--
+EXEC uspARConstructLineItemTaxDetail
+@OriginalTaxParamZeroQty,
+@RemoteLineItemTaxEntries,
+@strGUID
+INSERT INTO tblCFImportTransactionOriginalTaxZeroQuantity(
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, [strGUID]
+, [intTransactionId],
+		intUserId
+)
+SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, @strGUID
+, [intLineItemId],
+		@intUserId
+FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+DELETE FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+-->> tblCFImportTransactionOriginalTaxZeroQuantity <<--
+
+
+
+-->> tblCFImportTransactionCalculatedTaxExempt <<--
+EXEC uspARConstructLineItemTaxDetail
+@CalculatedTaxExemptParam,
+@RemoteLineItemTaxEntries,
+@strGUID
+INSERT INTO tblCFImportTransactionCalculatedTaxExempt(
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, [strGUID]
+, [intTransactionId],
+		intUserId
+)
+SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, @strGUID
+, [intLineItemId],
+ @intUserId
+FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+DELETE FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+-->> tblCFImportTransactionCalculatedTaxExempt <<--
+
+
+-->> tblCFImportTransactionCalculatedTaxExemptZeroQuantity <<--
+EXEC uspARConstructLineItemTaxDetail
+@CalculatedTaxExemptParamZeroQty,
+@RemoteLineItemTaxEntries,	
+@strGUID
+INSERT INTO tblCFImportTransactionCalculatedTaxExemptZeroQuantity(
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, [strGUID]
+, [intTransactionId],
+		intUserId
+)
+SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, @strGUID
+, [intLineItemId],
+		@intUserId
+FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+DELETE FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+-->> tblCFImportTransactionCalculatedTaxExemptZeroQuantity <<--
+
+
+-->> tblCFImportTransactionCalculatedTaxZeroQuantity <<--
+EXEC uspARConstructLineItemTaxDetail
+@CalculatedTaxParamZeroQty,
+@RemoteLineItemTaxEntries,
+@strGUID
+INSERT INTO tblCFImportTransactionCalculatedTaxZeroQuantity(
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, [strGUID]
+, [intTransactionId],
+		intUserId
+)
+SELECT 
+  [intTaxGroupId]
+, [intTaxCodeId]
+, [intTaxClassId]
+, [strTaxableByOtherTaxes]
+, [strCalculationMethod]
+, [dblRate]
+, [dblBaseRate]
+, [dblExemptionPercent]
+, [dblTax]
+, [dblAdjustedTax]
+, [intTaxAccountId]
+, [ysnCheckoffTax]
+, [ysnTaxExempt]
+, [ysnTaxOnly]
+, [ysnInvalidSetup]
+, [strNotes]
+, [dblExemptionAmount]
+, [intLineItemId]
+, @strGUID
+, [intLineItemId],
+		@intUserId
+FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+DELETE FROM tblARConstructLineItemTaxDetailResult
+WHERE strRequestId = @strGUID
+-->> tblCFImportTransactionCalculatedTaxZeroQuantity <<--
+
+
+
+
+INSERT INTO @CalculatedTaxParamZeroQty
+(
+  dblQuantity						
+, dblGrossAmount					
+, ysnReversal						
+, intItemId							
+, intEntityCustomerId				
+, intCompanyLocationId				
+, intTaxGroupId						
+, dblPrice							
+, dtmTransactionDate				
+, intShipToLocationId				
+, ysnIncludeExemptedCodes			
+, ysnIncludeInvalidCodes			
+, intSiteId							
+, intFreightTermId					
+, intCardId							
+, intVehicleId						
+, ysnDisregardExemptionSetup		
+, ysnExcludeCheckOff				
+, intItemUOMId						
+, intCFSiteId						
+, ysnDeliver						
+, ysnCFQuote					    
+, intCurrencyId						
+, intCurrencyExchangeRateTypeId		
+, dblCurrencyExchangeRate				
+, intLineItemId						
+)
+SELECT 
+ tblCFImportTransactionStagingTable.dblZeroQuantity
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE ISNULL(tblCFImportTransactionStagingTable.dblZeroQuantity,0) * ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) END 
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE 1 END
+,tblCFImportTransactionStagingTable.intARItemId
+,tblCFImportTransactionStagingTable.intPrcCustomerId
+,tblCFImportTransactionStagingTable.intARItemLocationId
+,tblCFImportTransactionStagingTable.intTaxGroupId
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) ELSE 0 END 
+,tblCFImportTransactionStagingTable.dtmTransactionDate
+,NULL
+,1
+,0			--@IncludeInvalidCodes
+,NULL
+,tblCFImportTransactionStagingTable.intFreightTermId
+,tblCFImportTransactionStagingTable.intCardId		
+,tblCFImportTransactionStagingTable.intVehicleId
+,tblCFImportTransactionStagingTable.ysnDisregardExemptionSetup
+,0
+,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
+,tblCFImportTransactionStagingTable.intSiteId
+,0		--@IsDeliver	
+,tblCFImportTransactionStagingTable.isQuote								 
+,NULL	--@CurrencyId
+,NULL	--@@CurrencyExchangeRateTypeId
+,NULL	--@@CurrencyExchangeRate	
+,tblCFImportTransactionStagingTable.intTransactionId
+FROM tblCFImportTransactionStagingTable
+WHERE 
+--(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
+--AND 
+(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
+AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
+--AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
+--AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
+AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+INSERT INTO @CalculatedTaxExemptParam
+(
+  dblQuantity						
+, dblGrossAmount					
+, ysnReversal						
+, intItemId							
+, intEntityCustomerId				
+, intCompanyLocationId				
+, intTaxGroupId						
+, dblPrice							
+, dtmTransactionDate				
+, intShipToLocationId				
+, ysnIncludeExemptedCodes			
+, ysnIncludeInvalidCodes			
+, intSiteId							
+, intFreightTermId					
+, intCardId							
+, intVehicleId						
+, ysnDisregardExemptionSetup		
+, ysnExcludeCheckOff				
+, intItemUOMId						
+, intCFSiteId						
+, ysnDeliver						
+, ysnCFQuote					    
+, intCurrencyId						
+, intCurrencyExchangeRateTypeId		
+, dblCurrencyExchangeRate				
+, intLineItemId						
+)
+SELECT 
+ tblCFImportTransactionStagingTable.dblQuantity
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE ISNULL(tblCFImportTransactionStagingTable.dblQuantity,0) * ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) END 
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE 1 END
+,tblCFImportTransactionStagingTable.intARItemId
+,tblCFImportTransactionStagingTable.intPrcCustomerId
+,tblCFImportTransactionStagingTable.intARItemLocationId
+,tblCFImportTransactionStagingTable.intTaxGroupId
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) ELSE 0 END 
+,tblCFImportTransactionStagingTable.dtmTransactionDate
+,NULL
+,1
+,0			--@IncludeInvalidCodes
+,NULL
+,tblCFImportTransactionStagingTable.intFreightTermId
+,tblCFImportTransactionStagingTable.intCardId		
+,tblCFImportTransactionStagingTable.intVehicleId
+,1 --@DisregardExemptionSetup
+,0
+,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
+,tblCFImportTransactionStagingTable.intSiteId
+,0		--@IsDeliver	
+,tblCFImportTransactionStagingTable.isQuote								 
+,NULL	--@CurrencyId
+,NULL	--@@CurrencyExchangeRateTypeId
+,NULL	--@@CurrencyExchangeRate	
+,tblCFImportTransactionStagingTable.intTransactionId
+FROM tblCFImportTransactionStagingTable
+WHERE 
+--(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
+--AND 
+(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
+AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
+--AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
+--AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
+--AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup IS NULL OR tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup = 0 )
+AND ISNULL(tblCFImportTransactionStagingTable.ysnDisregardTaxExemption,0) = 0 
+AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+
+
+--SELECT '@CalculatedTaxExemptParam'
+--SELECT '@CalculatedTaxExemptParam', * FROM @CalculatedTaxExemptParam
+
+INSERT INTO @CalculatedTaxExemptParamZeroQty
+(
+  dblQuantity						
+, dblGrossAmount					
+, ysnReversal						
+, intItemId							
+, intEntityCustomerId				
+, intCompanyLocationId				
+, intTaxGroupId						
+, dblPrice							
+, dtmTransactionDate				
+, intShipToLocationId				
+, ysnIncludeExemptedCodes			
+, ysnIncludeInvalidCodes			
+, intSiteId							
+, intFreightTermId					
+, intCardId							
+, intVehicleId						
+, ysnDisregardExemptionSetup		
+, ysnExcludeCheckOff				
+, intItemUOMId						
+, intCFSiteId						
+, ysnDeliver						
+, ysnCFQuote					    
+, intCurrencyId						
+, intCurrencyExchangeRateTypeId		
+, dblCurrencyExchangeRate				
+, intLineItemId						
+)
+SELECT 
+ tblCFImportTransactionStagingTable.dblZeroQuantity
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE tblCFImportTransactionStagingTable.dblZeroQuantity * ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) END 
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN 0 ELSE 1 END
+,tblCFImportTransactionStagingTable.intARItemId
+,tblCFImportTransactionStagingTable.intPrcCustomerId
+,tblCFImportTransactionStagingTable.intARItemLocationId
+,tblCFImportTransactionStagingTable.intTaxGroupId
+,CASE WHEN (ysnBackOutCalculationForCalculatedTax = 0) THEN ISNULL(tblCFImportTransactionStagingTable.dblPrice,0) ELSE 0 END 
+,tblCFImportTransactionStagingTable.dtmTransactionDate
+,NULL
+,1
+,0			--@IncludeInvalidCodes
+,NULL
+,tblCFImportTransactionStagingTable.intFreightTermId
+,tblCFImportTransactionStagingTable.intCardId		
+,tblCFImportTransactionStagingTable.intVehicleId
+,1 --@DisregardExemptionSetup
+,0
+,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
+,tblCFImportTransactionStagingTable.intSiteId
+,0		--@IsDeliver	
+,tblCFImportTransactionStagingTable.isQuote								 
+,NULL	--@CurrencyId
+,NULL	--@@CurrencyExchangeRateTypeId
+,NULL	--@@CurrencyExchangeRate	
+,tblCFImportTransactionStagingTable.intTransactionId
+FROM tblCFImportTransactionStagingTable
+WHERE 
+--(tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
+--AND
+ (tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
+AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
+--AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
+--AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
+--AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup IS NULL OR tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup = 0 )
+AND ISNULL(tblCFImportTransactionStagingTable.ysnDisregardTaxExemption,0) = 0 
+AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+
+--SELECT '@CalculatedTaxExemptParamZeroQty'
+--SELECT '@CalculatedTaxExemptParamZeroQty', * FROM @CalculatedTaxExemptParamZeroQty
+
+
+--SELECT '@OriginalTaxParam'
+--SELECT '@OriginalTaxParam', * FROM @OriginalTaxParam
+
+INSERT INTO @OriginalTaxParamZeroQty
+(
+  dblQuantity						
+, dblGrossAmount					
+, ysnReversal						
+, intItemId							
+, intEntityCustomerId				
+, intCompanyLocationId				
+, intTaxGroupId						
+, dblPrice							
+, dtmTransactionDate				
+, intShipToLocationId				
+, ysnIncludeExemptedCodes			
+, ysnIncludeInvalidCodes			
+, intSiteId							
+, intFreightTermId					
+, intCardId							
+, intVehicleId						
+, ysnDisregardExemptionSetup		
+, ysnExcludeCheckOff				
+, intItemUOMId						
+, intCFSiteId						
+, ysnDeliver						
+, ysnCFQuote					    
+, intCurrencyId						
+, intCurrencyExchangeRateTypeId		
+, dblCurrencyExchangeRate				
+, intLineItemId						
+)
+SELECT 
+ tblCFImportTransactionStagingTable.dblZeroQuantity
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE tblCFImportTransactionStagingTable.dblZeroQuantity * tblCFImportTransactionStagingTable.dblOriginalPrice END 
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN 0 ELSE 1 END
+,tblCFImportTransactionStagingTable.intARItemId
+,tblCFImportTransactionStagingTable.intPrcCustomerId
+,tblCFImportTransactionStagingTable.intARItemLocationId
+,tblCFImportTransactionStagingTable.intTaxGroupId
+,CASE WHEN (ysnBackOutCalculationForOriginalTax = 0) THEN tblCFImportTransactionStagingTable.dblOriginalPrice ELSE 0 END 
+,tblCFImportTransactionStagingTable.dtmTransactionDate
+,NULL
+,1
+,0			--@IncludeInvalidCodes
+,NULL
+,tblCFImportTransactionStagingTable.intFreightTermId
+,tblCFImportTransactionStagingTable.intCardId		
+,tblCFImportTransactionStagingTable.intVehicleId
+,1 --@DisregardExemptionSetup
+,0
+,tblCFImportTransactionStagingTable.intItemUOMId	--intItemUOMId			
+,tblCFImportTransactionStagingTable.intSiteId
+,0		--@IsDeliver	
+,tblCFImportTransactionStagingTable.isQuote								 
+,NULL	--@CurrencyId
+,NULL	--@@CurrencyExchangeRateTypeId
+,NULL	--@@CurrencyExchangeRate	
+,tblCFImportTransactionStagingTable.intTransactionId
+FROM tblCFImportTransactionStagingTable
+WHERE
+-- (tblCFImportTransactionStagingTable.ysnReRunForSpecialTax = 0 OR tblCFImportTransactionStagingTable.ysnReRunCalcTax = 1)
+--AND 
+(tblCFImportTransactionStagingTable.ysnPostedCSV IS NULL OR tblCFImportTransactionStagingTable.ysnPostedCSV = 0)
+AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransactionStagingTable.ysnPostedOrigin IS NULL)
+--AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
+--AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
+AND strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
+
+--SELECT '@OriginalTaxParamZeroQty'
+--SELECT '@OriginalTaxParamZeroQty', * FROM @OriginalTaxParamZeroQty
+
+
+*/
+
+*/
