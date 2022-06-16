@@ -208,8 +208,8 @@ BEGIN
 		FROM ##TAXCODERATEDETAILS CRD 
 		WHERE CRD.intTaxGroupId = P.intTaxGroupId 
 		  AND CRD.intTaxCodeId = TC.intTaxCodeId
-		  AND CRD.intItemUOMId = P.intItemUOMId
-		  AND CRD.intCurrencyId = P.intCurrencyId
+		  AND (P.intItemUOMId IS NULL OR CRD.intItemUOMId = P.intItemUOMId)
+		  AND (P.intCurrencyId IS NULL OR CRD.intCurrencyId = P.intCurrencyId)
 	) R
 	WHERE (ISNULL(E.ysnTaxExempt, 0) = 0 OR ISNULL(P.ysnIncludeExemptedCodes, 0) = 1)
 	 AND ((ISNULL(E.[ysnInvalidSetup], 0) = 0 AND ISNULL(R.[ysnInvalidSetup], 0) = 0) OR ISNULL(P.ysnIncludeInvalidCodes, 0) = 1)

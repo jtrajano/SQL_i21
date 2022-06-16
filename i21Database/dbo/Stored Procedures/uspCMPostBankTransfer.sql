@@ -115,6 +115,8 @@ DECLARE
  ,@strReferenceTo NVARCHAR(150)
  ,@dblAmountSettlementTo DECIMAL(18,6)
  ,@dblRateAmountSettlementTo DECIMAL(18,6)
+ ,@intBankLoanIdFrom INT 
+ ,@intBankLoanIdTo INT
  
  -- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.     
      
@@ -157,7 +159,8 @@ SELECT TOP 1
   ,@intGLAccountIdTo = intGLAccountIdTo  
   ,@strReferenceFrom = strReferenceFrom
   ,@strReferenceTo =  strReferenceTo
-
+  ,@intBankLoanIdFrom = CASE WHEN intBankLoanIdFrom = 0 THEN NULL ELSE intBankLoanIdFrom END
+  ,@intBankLoanIdTo =CASE WHEN intBankLoanIdTo = 0 THEN NULL ELSE intBankLoanIdTo END
 FROM [dbo].tblCMBankTransfer A JOIN    
 [dbo].tblCMBankAccount B ON B.intBankAccountId = A.intBankAccountIdFrom JOIN    
 [dbo].tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountIdTo    
@@ -723,6 +726,7 @@ IF @ysnPost = 1
             strTransactionId    
             ,intBankTransactionTypeId    
             ,intBankAccountId    
+            ,intBankLoanId
             ,intCurrencyId    
             ,intCurrencyExchangeRateTypeId    
             ,dblExchangeRate    
@@ -757,6 +761,7 @@ IF @ysnPost = 1
             SELECT TOP 1 strTransactionId     = A.strTransactionId + @BANK_TRANSFER_WD_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_WD    
               ,intBankAccountId      = @intBankAccountIdFrom
+              ,intBankLoanId =  @intBankLoanIdFrom
               ,intCurrencyId        = intCurrencyId    
               ,intCurrencyExchangeRateTypeId  = intCurrencyExchangeRateTypeId
               ,dblExchangeRate      = dblExchangeRate
@@ -803,6 +808,7 @@ IF @ysnPost = 1
             SELECT TOP 1 strTransactionId     = A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_DEP    
               ,intBankAccountId      = @intBankAccountIdTo
+              ,intBankLoanId = @intBankLoanIdTo
               ,intCurrencyId        = intCurrencyId
               ,intCurrencyExchangeRateTypeId  =intCurrencyExchangeRateTypeId
               ,dblExchangeRate       =  dblExchangeRate

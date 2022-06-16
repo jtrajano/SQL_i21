@@ -110,7 +110,7 @@ BEGIN
 		,strTransactionType = ct.strContractType
 		,intCurrencyId  = cd.intInvoiceCurrencyId
 		,dtmDate = isnull(cd.dtmCashFlowDate,cd.dtmEndDate)
-		,dblAmount = c.dblAmount
+		,dblAmount = (c.dblAmount / cd.dblQuantity) * (isnull(cd.dblBalance,0) - isnull(dblScheduleQty,0))
 		,intBankAccountId = cd.intBankAccountId
 		,intGLAccountId = null
 		,intCompanyLocationId = cd.intCompanyLocationId

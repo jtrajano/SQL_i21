@@ -327,7 +327,10 @@ SELECT
 	, strShipVia					= SHIPVIA.strName
 	, strTerm						= TERM.strTerm
 	, dtmShipDate					= INV.dtmShipDate
-	, dtmDueDate					= INV.dtmDueDate
+	, dtmDueDate					= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') AND INV.strType <> 'Service Charge'
+										THEN INVOICEDETAIL.dtmDueDate
+										ELSE INV.dtmDueDate
+									  END
 	, strFreightTerm				= FREIGHT.strFreightTerm
 	, strDeliverPickup				= FREIGHT.strFobPoint
 	, strComments					= INV.strComments
@@ -340,7 +343,7 @@ SELECT
 	, dblAmountDue					= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
 										THEN INVOICEDETAIL.dblServiceChargeAmountDue
 										ELSE ISNULL(INV.dblAmountDue, 0)
-									END
+									  END
 	
 	, strItemNo						= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	, intInvoiceDetailId			= ISNULL(INVOICEDETAIL.intInvoiceDetailId, 0)
@@ -421,52 +424,54 @@ INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intIn
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
 INNER JOIN tblSMTerm TERM ON INV.intTermId = TERM.intTermID
 LEFT JOIN (
-	SELECT intInvoiceId					= ID.intInvoiceId
-	     , intInvoiceDetailId			= ID.intInvoiceDetailId
-		 , intCommentTypeId				= ID.intCommentTypeId
-		 , dblTotalTax					= CASE WHEN ISNULL(ID.dblComputedGrossPrice, 0) = 0 THEN ID.dblTotalTax ELSE 0 END
-		 , dblQtyShipped				= ID.dblQtyShipped
-		 , dblQtyOrdered				= ID.dblQtyOrdered
-		 , dblDiscount					= ID.dblDiscount
-		 , dblComputedGrossPrice		= ID.dblComputedGrossPrice	
-		 , dblPrice                 	= CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
-		 , dblTotal						= ID.dblTotal
-		 , strVFDDocumentNumber			= ID.strVFDDocumentNumber
-		 , strUnitMeasure				= UM.strUnitMeasure
-		 , intContractSeq				= CD.intContractSeq
-		 , dblBalance					= CD.dblBalance
-		 , strContractNumber			= CH.strContractNumber
-		 , strCustomerContract			= CH.strCustomerContract
-		 , strItemNo					= ITEM.strItemNo
-		 , strInvoiceComments			= ITEM.strInvoiceComments
-		 , strItemType					= ITEM.strType
-		 , strItemDescription			= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
-		 , strBOLNumber					= SO.strBOLNumber
-		 , ysnListBundleSeparately		= ITEM.ysnListBundleSeparately
-		 , intRecipeId					= RECIPE.intRecipeId
-		 , intOneLinePrintId			= RECIPE.intOneLinePrintId
-		 , intSiteID					= [SITE].intSiteID
-		 , strSiteNumber				= (CASE WHEN [SITE].intSiteNumber < 9 THEN '00' + CONVERT(VARCHAR, [SITE].intSiteNumber) ELSE '0' + CONVERT(VARCHAR,intSiteNumber) END ) + ' - ' + [SITE].strDescription
-		 , dblEstimatedPercentLeft		= [SITE].dblEstimatedPercentLeft
-		 , strTicketNumber				= SC.strTicketNumber
-		 , strTicketNumberDate			= SC.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SC.dtmTicketDateTime, 101) 
-		 , strTrailerNumber				= SVT.strTrailerNumber
-		 , strSealNumber				= SCN.strSealNumber
-		 , strCustomerReference			= ISNULL(NULLIF(SC.strCustomerReference,''), ISNULL(NULLIF(CH.strCustomerContract,''), ISNULL(LGLOAD.strCustomerReference,'')))
-		 , strSalesReference			= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), LGS.strCustomerReference)
-	 	 , strPurchaseReference			= ISNULL(NULLIF(LGLOAD.strExternalLoadNumber, ''), LGS.strExternalLoadNumber)
-		 , strLoadNumber				= ISNULL(LGLOAD.strLoadNumber, LGS.strLoadNumber)
-		 , strTruckName					= SC.strTruckName
-		 , dblPercentFull				= ID.dblPercentFull
-		 , strAddonDetailKey			= NULL
-		 , ysnAddonParent				= CAST(0 AS BIT)
-		 , strBOLNumberDetail			= ID.strBOLNumberDetail
-		 , strSubFormula				= ID.strSubFormula
-		 , strSCInvoiceNumber			= INVSC.strInvoiceNumber
-		 , dtmDateSC					= INVSC.dtmDate
-		 , dtmToCalculate				= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END	
-		 , dblServiceChargeAmountDue	= ID.dblServiceChargeAmountDue
-		 ,dblServiceChargeAPR			= ID.dblServiceChargeAPR
+	SELECT 
+		 intInvoiceId				= ID.intInvoiceId
+		,intInvoiceDetailId			= ID.intInvoiceDetailId
+		,intCommentTypeId			= ID.intCommentTypeId
+		,dblTotalTax				= CASE WHEN ISNULL(ID.dblComputedGrossPrice, 0) = 0 THEN ID.dblTotalTax ELSE 0 END
+		,dblQtyShipped				= ID.dblQtyShipped
+		,dblQtyOrdered				= ID.dblQtyOrdered
+		,dblDiscount				= ID.dblDiscount
+		,dblComputedGrossPrice		= ID.dblComputedGrossPrice	
+		,dblPrice                 	= CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
+		,dblTotal					= ID.dblTotal
+		,strVFDDocumentNumber		= ID.strVFDDocumentNumber
+		,strUnitMeasure				= UM.strUnitMeasure
+		,intContractSeq				= CD.intContractSeq
+		,dblBalance					= CD.dblBalance
+		,strContractNumber			= CH.strContractNumber
+		,strCustomerContract		= CH.strCustomerContract
+		,strItemNo					= ITEM.strItemNo
+		,strInvoiceComments			= ITEM.strInvoiceComments
+		,strItemType				= ITEM.strType
+		,strItemDescription			= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
+		,strBOLNumber				= SO.strBOLNumber
+		,ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
+		,intRecipeId				= RECIPE.intRecipeId
+		,intOneLinePrintId			= RECIPE.intOneLinePrintId
+		,intSiteID					= [SITE].intSiteID
+		,strSiteNumber				= (CASE WHEN [SITE].intSiteNumber < 9 THEN '00' + CONVERT(VARCHAR, [SITE].intSiteNumber) ELSE '0' + CONVERT(VARCHAR,intSiteNumber) END ) + ' - ' + [SITE].strDescription
+		,dblEstimatedPercentLeft	= [SITE].dblEstimatedPercentLeft
+		,strTicketNumber			= SC.strTicketNumber
+		,strTicketNumberDate		= SC.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SC.dtmTicketDateTime, 101) 
+		,strTrailerNumber			= SVT.strTrailerNumber
+		,strSealNumber				= SCN.strSealNumber
+		,strCustomerReference		= ISNULL(NULLIF(SC.strCustomerReference,''), ISNULL(NULLIF(CH.strCustomerContract,''), ISNULL(LGLOAD.strCustomerReference,'')))
+		,strSalesReference			= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), LGS.strCustomerReference)
+		,strPurchaseReference		= ISNULL(NULLIF(LGLOAD.strExternalLoadNumber, ''), LGS.strExternalLoadNumber)
+		,strLoadNumber				= ISNULL(LGLOAD.strLoadNumber, LGS.strLoadNumber)
+		,strTruckName				= SC.strTruckName
+		,dblPercentFull				= ID.dblPercentFull
+		,strAddonDetailKey			= NULL
+		,ysnAddonParent				= CAST(0 AS BIT)
+		,strBOLNumberDetail			= ID.strBOLNumberDetail
+		,strSubFormula				= ID.strSubFormula
+		,strSCInvoiceNumber			= INVSC.strInvoiceNumber
+		,dtmDateSC					= INVSC.dtmDate
+		,dtmToCalculate				= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END	
+		,dblServiceChargeAmountDue	= ID.dblServiceChargeAmountDue
+		,dblServiceChargeAPR		= ID.dblServiceChargeAPR
+		,dtmDueDate					= INVSC.dtmDueDate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN tblARInvoice INVSC ON INVSC.intInvoiceId = ID.intSCInvoiceId

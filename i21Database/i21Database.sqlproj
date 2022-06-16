@@ -791,6 +791,7 @@
     <Build Include="dbo\User Defined Types\StagingCommanderFuelTotal.sql" />
     <Build Include="dbo\Functions\fnCTGetQualityResultAmount.sql" />
     <Build Include="dbo\Views\vyuARCreditCardByExpiration.sql" />
+    <Build Include="dbo\Tables\tblAPVendorAccountNumLocation.sql" />
     <Build Include="dbo\Tables\tblSTSiteStatus.sql" />
     <Build Include="dbo\Views\vyuSTSiteStatusSearch.sql" />
     <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
@@ -807,6 +808,14 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" />
+    <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
+    <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
+    <Build Include="dbo\Tables\tblIPBillDetail.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
+    <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3827,6 +3836,7 @@
     <Build Include="dbo\Tables\tblMFItemDemand.sql" />
     <Build Include="dbo\Views\vyuCTEventMatrixDetailView.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
+    <Build Include="dbo\Views\vyuGLSegmentMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiry.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
@@ -10955,6 +10965,7 @@
     <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
     <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
+    <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

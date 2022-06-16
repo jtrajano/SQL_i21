@@ -35,6 +35,8 @@ CREATE TYPE dbo.ItemTaxComputationForCustomerParam AS TABLE (
 	, dblExemptionPercent			NUMERIC(18,6) DEFAULT 0
 	, dblTax						NUMERIC(18,6) DEFAULT 0
 	, dblAdjustedTax				NUMERIC(18,6) DEFAULT 0
+	, dblOrigTax					NUMERIC(18,6) DEFAULT 0
+	, dblOrigAdjustedTax			NUMERIC(18,6) DEFAULT 0
 	, ysnSeparateOnInvoice			BIT NULL DEFAULT 0
 	, intTaxAccountId				INT NULL
 	, intSalesTaxExemptionAccountId	INT NULL

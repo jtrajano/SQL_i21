@@ -607,12 +607,13 @@ BEGIN
 		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
 		LEFT JOIN tblSMTaxCode TC ON TC.intTaxCodeId = BDT.intTaxCodeId
-		WHERE B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
+		WHERE B.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
 
 		--You cannot post intra-location transaction without due to account. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
-			'Unable to find the due to account that matches the location of the AP Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUETO.strAccountId) + ' to the chart of accounts.',
+			'Unable to find the due to account that matches the location of the AP Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
 			'Bill',
 			A.strBillId,
 			A.intBillId,
@@ -620,30 +621,21 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		OUTER APPLY (
-			SELECT TOP 1 APCP.intDueToAccountId, GLA.strAccountId, APCP.ysnAllowSingleLocationEntries
-			FROM tblAPCompanyPreference APCP
-			LEFT JOIN tblGLAccount GLA
-			ON APCP.intDueToAccountId = GLA.intAccountId
-		) DUETO
+			SELECT TOP 1 intDueToAccountId, ysnAllowIntraLocationEntries, ysnOverrideCompanySegment, ysnOverrideLocationSegment, ysnOverrideLineOfBusinessSegment
+			FROM tblAPCompanyPreference
+		) APCP
 		OUTER APPLY (
-			SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-			FROM tblGLAccountSegmentMapping GLASM
-			INNER JOIN tblGLAccountSegment GLAS
-			ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-			LEFT JOIN tblGLAccount GLA
-			ON GLASM.intAccountId = GLA.intAccountId
-			WHERE GLAS.intAccountStructureId = 3
-			AND GLASM.intAccountId = B.[intAccountId]
-		) GLSEGMENT
+			SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], APCP.intDueToAccountId, APCP.ysnOverrideCompanySegment, APCP.ysnOverrideLocationSegment, APCP.ysnOverrideLineOfBusinessSegment)
+		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		AND ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
-		AND DUETO.[ysnAllowSingleLocationEntries] = 0
-		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
+		AND APCP.[ysnAllowIntraLocationEntries] = 1
+		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--You cannot post intra-location transaction without due from account. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
-			'Unable to find the due from account that matches the location of the Payables Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUEFROM.strAccountId) + ' to the chart of accounts.',
+			'Unable to find the due from account that matches the location of the Payables Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
 			'Bill',
 			A.strBillId,
 			A.intBillId,
@@ -651,25 +643,16 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		OUTER APPLY (
-			SELECT TOP 1 APCP.intDueFromAccountId, GLA.strAccountId, APCP.ysnAllowSingleLocationEntries
-			FROM tblAPCompanyPreference APCP
-			LEFT JOIN tblGLAccount GLA
-			ON APCP.intDueFromAccountId = GLA.intAccountId
-		) DUEFROM
+			SELECT TOP 1 intDueFromAccountId, ysnAllowIntraLocationEntries, ysnOverrideCompanySegment, ysnOverrideLocationSegment, ysnOverrideLineOfBusinessSegment
+			FROM tblAPCompanyPreference
+		) APCP
 		OUTER APPLY (
-			SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-			FROM tblGLAccountSegmentMapping GLASM
-			INNER JOIN tblGLAccountSegment GLAS
-			ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-			LEFT JOIN tblGLAccount GLA
-			ON GLASM.intAccountId = GLA.intAccountId
-			WHERE GLAS.intAccountStructureId = 3
-			AND GLASM.intAccountId = A.[intAccountId]
-		) GLSEGMENT
+			SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], APCP.intDueFromAccountId, APCP.ysnOverrideCompanySegment, APCP.ysnOverrideLocationSegment, APCP.ysnOverrideLineOfBusinessSegment)
+		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		  AND ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
-		  AND DUEFROM.[ysnAllowSingleLocationEntries] = 0
-		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
+		AND APCP.[ysnAllowIntraLocationEntries] = 1
+		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--You cannot post if location segment of AP Account and Payable Account when single location entry is enabled. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
@@ -686,9 +669,8 @@ BEGIN
 			FROM tblAPCompanyPreference
 		) APCP
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		  AND APCP.[ysnAllowSingleLocationEntries] = 1
-		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
-
+		AND APCP.[ysnAllowSingleLocationEntries] = 1
+		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId], 3) = 0
 	END
 	ELSE
 	BEGIN

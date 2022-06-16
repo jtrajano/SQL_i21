@@ -243,6 +243,7 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
+    ,[intLineOfBusinessId]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -275,7 +276,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -330,6 +331,7 @@ SELECT
     ,[ysnAllowIntraEntries]             = @AllowIntraEntries
     ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
+    ,[intLineOfBusinessId]              = ARI.[intLineOfBusinessId]
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -535,7 +537,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -862,7 +864,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -1237,7 +1239,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]

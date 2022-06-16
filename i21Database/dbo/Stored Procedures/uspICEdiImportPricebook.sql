@@ -68,6 +68,33 @@ FROM
 WHERE 
 	p.strUniqueId = @UniqueId
 
+-- Get the data for Vendor Item XRef
+DECLARE @vendorItemXRef AS TABLE (
+	strSellingUpcNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strVendorsItemNumberForOrdering NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strSellingUpcLongDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strUniqueId UNIQUEIDENTIFIER NULL
+)
+
+INSERT INTO @vendorItemXRef (
+	strSellingUpcNumber 
+	,strVendorsItemNumberForOrdering 
+	,strSellingUpcLongDescription 
+	,strVendorId 
+	,strUniqueId 
+)
+SELECT DISTINCT 
+	strSellingUpcNumber 
+	,strVendorsItemNumberForOrdering 
+	,strSellingUpcLongDescription 
+	,strVendorId 
+	,strUniqueId 
+FROM 
+	tblICEdiPricebook p
+WHERE 
+	p.strUniqueId = @UniqueId
+
 -- Remove the duplicate records in tblICEdiPricebook
 ;WITH deleteDuplicate_CTE (
 	intEdiPricebookId
@@ -2182,7 +2209,7 @@ FROM (
 				,u.intItemUOMId 
 				,u.dblUnitQty
 			FROM 
-				tblICEdiPricebook p 
+				@vendorItemXRef p 
 				INNER JOIN tblICItemUOM u 
 					--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 					ON (

@@ -16,7 +16,7 @@ SELECT tc.intTermCostId
 	, tcd.intTermCostDetailId
 	, tcd.intCostId
 	, strCostItem = it.strItemNo
-	, tcd.strCostMethod
+	, tcd.strCostMethod  COLLATE Latin1_General_CI_AS AS strCostMethod
 	, tcd.intCurrencyId
 	, cur.strCurrency
 	, tcd.dblValue

@@ -18,24 +18,25 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE	@ARAccount                  INT
-       ,@DiscountAccount            INT
-       ,@WriteOffAccount            INT
-       ,@IncomeInterestAccount      INT
-       ,@GainLossAccount            INT
-       ,@DefaultCurrencyId          INT
-       ,@CFAccount                  INT
-       ,@NewAccountId               INT
-       ,@CreditCardAccountId        INT
-       ,@AllowOtherUserToPost       BIT
-       ,@ZeroBit                    BIT
-       ,@OneBit                     BIT
-       ,@ZeroDecimal                DECIMAL(18,6)
-       ,@OneDecimal                 DECIMAL(18,6)
-       ,@OneHundredDecimal          DECIMAL(18,6)
-       ,@Param2                     NVARCHAR(MAX)
-       ,@OverrideCompanySegment     BIT
-       ,@OverrideLocationSegment    BIT
+DECLARE	@ARAccount                      INT
+       ,@DiscountAccount                INT
+       ,@WriteOffAccount                INT
+       ,@IncomeInterestAccount          INT
+       ,@GainLossAccount                INT
+       ,@DefaultCurrencyId              INT
+       ,@CFAccount                      INT
+       ,@NewAccountId                   INT
+       ,@CreditCardAccountId            INT
+       ,@AllowOtherUserToPost           BIT
+       ,@ZeroBit                        BIT
+       ,@OneBit                         BIT
+       ,@ZeroDecimal                    DECIMAL(18,6)
+       ,@OneDecimal                     DECIMAL(18,6)
+       ,@OneHundredDecimal              DECIMAL(18,6)
+       ,@Param2                         NVARCHAR(MAX)
+       ,@OverrideCompanySegment         BIT
+       ,@OverrideLocationSegment        BIT
+       ,@OverrideLineOfBusinessSegment  BIT
 
 SET @ZeroDecimal = 0.000000
 SET @OneDecimal = 1.000000
@@ -44,7 +45,6 @@ SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
 SET @ZeroDecimal = 0.000000
-SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPreference WHERE intWriteOffAccountId IS NOT NULL AND intWriteOffAccountId <> 0)
 SET @IncomeInterestAccount = (SELECT TOP 1 intInterestIncomeAccountId FROM tblARCompanyPreference WHERE intInterestIncomeAccountId IS NOT NULL AND intInterestIncomeAccountId <> 0)
@@ -57,7 +57,10 @@ SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
 SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblSMCompanyPreference WHERE intFeeGeneralLedgerAccountId IS NOT NULL AND intFeeGeneralLedgerAccountId <> 0)
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 
-SELECT TOP 1 @OverrideCompanySegment = ysnOverrideCompanySegment, @OverrideLocationSegment = ysnOverrideLocationSegment
+SELECT TOP 1 
+     @OverrideCompanySegment        = ysnOverrideCompanySegment
+    ,@OverrideLocationSegment       = ysnOverrideLocationSegment
+    ,@OverrideLineOfBusinessSegment = ysnOverrideLineOfBusinessSegment
 FROM tblARCompanyPreference
 
 --Header
@@ -171,13 +174,13 @@ SELECT
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = @PostDate
     ,[intWriteOffAccountId]             = ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount)
-    ,[intAccountId]                     = CASE WHEN @OverrideLocationSegment = 1 THEN UNDEPOSITED.intAccountId ELSE ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]) END
+    ,[intAccountId]                     = CASE WHEN (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1) AND UNDEPOSITED.intAccountId <> 0 THEN UNDEPOSITED.intAccountId ELSE ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]) END
     ,[intBankAccountId]                 = ARP.[intBankAccountId]
     ,[intARAccountId]                   = ISNULL(SMCL.[intARAccount], @ARAccount)
     ,[intDiscountAccount]               = ISNULL(SMCL.[intSalesDiscounts], @DiscountAccount)
     ,[intInterestAccount]               = ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount)
     ,[intCFAccountId]                   = @CFAccount
-    ,[intGainLossAccount]               = CASE WHEN @OverrideLocationSegment = 1 THEN GAINLOSS.intAccountId ELSE @GainLossAccount END
+    ,[intGainLossAccount]               = CASE WHEN (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1) AND GAINLOSS.intAccountId <> 0 THEN GAINLOSS.intAccountId ELSE @GainLossAccount END
     ,[intCreditCardFeeAccountId]        = @CreditCardAccountId
     ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
@@ -195,7 +198,7 @@ SELECT
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
-    ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = @ZeroDecimal
     ,[dblBasePayment]                   = @ZeroDecimal
     ,[dblDiscount]                      = @ZeroDecimal
@@ -258,20 +261,12 @@ LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OUTER APPLY (
-	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]), ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = ISNULL(SMCL.[intARAccount], @ARAccount)
+	SELECT TOP 1 intAccountId = intOverrideAccount
+    FROM dbo.[fnARGetOverrideAccount](ISNULL(SMCL.[intARAccount], @ARAccount), ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]), @OverrideCompanySegment, @OverrideLocationSegment, 0)
 ) UNDEPOSITED
 OUTER APPLY (
-	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@GainLossAccount, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = ISNULL(SMCL.[intARAccount], @ARAccount)
+	SELECT TOP 1 intAccountId = intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](ISNULL(SMCL.[intARAccount], @ARAccount), @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 ) GAINLOSS
 WHERE
 	NOT EXISTS(SELECT NULL FROM #ARPostPaymentHeader PH WHERE PH.[intTransactionId] = ARP.[intPaymentId])
@@ -426,7 +421,7 @@ SELECT
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
-    ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = @ZeroDecimal
     ,[dblBasePayment]                   = @ZeroDecimal
     ,[dblDiscount]                      = @ZeroDecimal
@@ -623,14 +618,14 @@ SELECT
     ,[intEntityId]                      = ARP.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
-    ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ARP.[dtmDatePaid]), @ZeroBit)
+    ,[ysnWithinAccountingDate]          = @ZeroBit
     ,[ysnProcessCreditCard]             = ARP.[ysnProcessCreditCard]
     ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
-    ,[dblBaseUnappliedAmount]           = ARP.[dblBaseUnappliedAmount]
+    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = @ZeroDecimal
     ,[dblBasePayment]                   = @ZeroDecimal
     ,[dblDiscount]                      = @ZeroDecimal
@@ -813,7 +808,7 @@ SELECT
 	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = CAST(ARP.[dtmDatePaid] AS DATE)
     ,[dtmPostDate]                      = ARP.[dtmPostDate]
-    ,[intWriteOffAccountId]             = CASE WHEN @OverrideLocationSegment = 1 THEN WRITEOFF.intAccountId ELSE ARP.[intWriteOffAccountId] END
+    ,[intWriteOffAccountId]             = CASE WHEN (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1) AND ISNULL(WRITEOFF.intAccountId, 0) <> 0 THEN WRITEOFF.intAccountId ELSE ARP.[intWriteOffAccountId] END
     ,[intAccountId]                     = ARP.[intAccountId]
     ,[intBankAccountId]                 = ARP.[intBankAccountId]
     ,[intARAccountId]                   = ARP.[intARAccountId]
@@ -852,17 +847,17 @@ SELECT
     ,[dblBaseInterest]                  = ROUND(ARPD.[dblInterest] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblAdjustedBaseInterest]          = ROUND(ARPD.[dblInterest] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblInvoiceTotal]                  = ARPD.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ARPD.[dblBaseInvoiceTotal]
+    ,[dblBaseInvoiceTotal]              = ROUND(ARPD.[dblInvoiceTotal] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblAmountDue]                     = ARPD.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARPD.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARPD.[dblAmountDue] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,[dblCreditCardFee]					= ARPD.[dblCreditCardFee]
-	,[dblBaseCreditCardFee]				= ARPD.[dblBaseCreditCardFee]
+	,[dblBaseCreditCardFee]				= ROUND(ARPD.[dblCreditCardFee] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 
     ,[intInvoiceId]                     = ARI.[intInvoiceId]
     ,[ysnExcludedFromPayment]           = ARI.[ysnExcludeFromPayment]
     ,[ysnForgiven]                      = ARI.[ysnForgiven]
 	,[intBillId]                        = NULL
-    ,[intWriteOffAccountDetailId]       = CASE WHEN @OverrideLocationSegment = 1 THEN WRITEOFFDETAIL.intAccountId ELSE ARPD.[intWriteOffAccountId] END
+    ,[intWriteOffAccountDetailId]       = CASE WHEN (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1) AND ISNULL(WRITEOFFDETAIL.intAccountId, 0) <> 0 THEN WRITEOFFDETAIL.intAccountId ELSE ARPD.[intWriteOffAccountId] END
     ,[strTransactionNumber]             = ARI.[strInvoiceNumber]
     ,[strTransactionType]               = ARI.[strTransactionType]
     ,[strType]                          = ARI.[strType]
@@ -872,13 +867,13 @@ SELECT
     ,[ysnTransactionProcessed]          = ARI.[ysnProcessed]
     ,[dtmTransactionPostDate]           = ARI.[dtmPostDate]
 	,[dblTransactionDiscount]           = ARI.[dblDiscount]
-    ,[dblBaseTransactionDiscount]       = ARI.[dblBaseDiscount]
+    ,[dblBaseTransactionDiscount]       = ROUND(ARI.[dblDiscount] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblTransactionInterest]           = ARI.[dblInterest]
-    ,[dblBaseTransactionInterest]       = ARI.[dblBaseInterest]
+    ,[dblBaseTransactionInterest]       = ROUND(ARI.[dblInterest] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblTransactionAmountDue]          = ARI.[dblAmountDue]
-    ,[dblBaseTransactionAmountDue]      = ARI.[dblBaseAmountDue]
+    ,[dblBaseTransactionAmountDue]      = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblTransactionPayment]			= ARI.[dblPayment]
-    ,[dblBaseTransactionPayment]		= ARI.[dblBasePayment]
+    ,[dblBaseTransactionPayment]		= ROUND(ARI.[dblPayment] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
@@ -888,26 +883,18 @@ INNER JOIN
     #ARPostPaymentHeader ARP
         ON ARPD.[intPaymentId] = ARP.[intTransactionId]
 INNER JOIN
-    (SELECT [intInvoiceId], [ysnExcludeFromPayment], [ysnForgiven], [strInvoiceNumber], [strTransactionType], [strType], [ysnPosted], [ysnPaid], [ysnProcessed], [dtmPostDate], [dblDiscount], [dblBaseDiscount], [dblInterest], [dblBaseInterest], [dblAmountDue], [dblBaseAmountDue], [dblPayment], [dblBasePayment] FROM tblARInvoice) ARI
+    (SELECT [intInvoiceId], [ysnExcludeFromPayment], [ysnForgiven], [strInvoiceNumber], [strTransactionType], [strType], [ysnPosted], [ysnPaid], [ysnProcessed], [dtmPostDate], [dblDiscount], [dblInterest], [dblAmountDue], [dblPayment], [dblCurrencyExchangeRate] FROM tblARInvoice) ARI
         ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OUTER APPLY (
-	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARP.[intWriteOffAccountId], ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = ARP.[intARAccountId]
+	SELECT TOP 1 intAccountId = intOverrideAccount
+    FROM dbo.[fnARGetOverrideAccount](ARP.[intARAccountId], ARP.[intWriteOffAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 ) WRITEOFF
 OUTER APPLY (
-	SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPD.[intWriteOffAccountId], ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = ARP.[intARAccountId]
+	SELECT TOP 1 intAccountId = intOverrideAccount
+    FROM dbo.[fnARGetOverrideAccount](ARP.[intARAccountId], ARPD.[intWriteOffAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 ) WRITEOFFDETAIL
 
 INSERT INTO #ARPostPaymentDetail
@@ -1058,11 +1045,11 @@ SELECT
     ,[dblBaseInterest]                  = ROUND(ARPD.[dblInterest] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblAdjustedBaseInterest]          = ROUND(ARPD.[dblInterest] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblInvoiceTotal]                  = ARPD.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ARPD.[dblBaseInvoiceTotal]
+    ,[dblBaseInvoiceTotal]              = ROUND(ARPD.[dblInvoiceTotal] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblAmountDue]                     = ARPD.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARPD.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARPD.[dblBaseAmountDue] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,[dblCreditCardFee]					= ARPD.[dblCreditCardFee]
-	,[dblBaseCreditCardFee]				= ARPD.[dblBaseCreditCardFee]
+	,[dblBaseCreditCardFee]				= ROUND(ARPD.[dblCreditCardFee] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 
     ,[intInvoiceId]                     = NULL
     ,[ysnExcludedFromPayment]           = @ZeroBit

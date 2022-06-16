@@ -121,7 +121,7 @@ BEGIN TRY
 	select
 		@ysnDestinationWeightsAndGrades = (case when ch.intContractTypeId = 2 and (ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId) then 1 else 0 end)
 		,@intMainCurrencyId = cu.intMainCurrencyId
-		,@ysnApplyFuturesFromPricing = case when @ysnEnableFXFieldInContractPricing = 1 and @intFinalCurrencyId <> cd.intCurrencyId and @intFinalCurrencyId <> cu.intMainCurrencyId then 1 else 0 end
+		,@ysnApplyFuturesFromPricing = case when @ysnEnableFXFieldInContractPricing = 1 and @intFinalCurrencyId <> cd.intCurrencyId and @intFinalCurrencyId <> isnull(cu.intMainCurrencyId,0) then 1 else 0 end
 	from
 		tblCTContractDetail cd
 		inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -708,7 +708,7 @@ BEGIN TRY
 			if (@ysnEnableDerivativeInArbitrage = 1 and @ysnPriceImpact = 1)
 			begin
 			
-			select @toCurrencyId = case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyID end, @toSubCurrency = isnull(ysnSubCurrency,0) from tblSMCurrency where intCurrencyID = @intFinalCurrencyId
+				select @toCurrencyId = case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyID end, @toSubCurrency = isnull(ysnSubCurrency,0) from tblSMCurrency where intCurrencyID = @intFinalCurrencyId
 
 				UPDATE	CD
 				SET		CD.intPricingTypeId		=	1,
@@ -869,12 +869,27 @@ BEGIN TRY
 				AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
 				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
-
 				UPDATE CD
 				SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
-					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost)
+					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost),
+					CD.dblFXPrice = dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,CD.intFXPriceUOMId,CD.dblCashPrice) *
+					(
+						case
+						when CD.intCurrencyId = CD.intInvoiceCurrencyId or CD.intCurrencyId = isnull(ICY.intMainCurrencyId,0)
+						then 1
+						else CD.dblRate
+						end
+					) *
+					(
+						case
+						when isnull(ICY.intMainCurrencyId,0) > 0
+						then 100
+						else 1
+						end
+					)
 				FROM tblCTContractDetail	CD WITH (ROWLOCK) 
 				JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
+				LEFT JOIN	tblSMCurrency		ICY	ON	ICY.intCurrencyID = CD.intInvoiceCurrencyId
 				where PF.intPriceFixationId = @intPriceFixationId
 
 

@@ -30,6 +30,8 @@ BEGIN TRY
 	DECLARE @imgLogo VARBINARY(MAX)
 		,@strLogoType NVARCHAR(50)
 		,@intCompanyLocationId INT
+		,@imgFooterLogo VARBINARY(MAX)
+		,@strLogoFooterType NVARCHAR(50)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -63,6 +65,8 @@ BEGIN TRY
 			,@strCountry AS strCompanyCountry
 			,@imgLogo AS blbHeaderLogo
 			,@strLogoType AS strLogoType
+			,@imgFooterLogo AS blbFooterLogo
+			,@strLogoFooterType AS strLogoFooterType
 
 		RETURN
 	END
@@ -134,6 +138,8 @@ BEGIN TRY
 			,@strCountry AS strCompanyCountry
 			,@imgLogo AS blbHeaderLogo
 			,@strLogoType AS strLogoType
+			,@imgFooterLogo AS blbFooterLogo
+			,@strLogoFooterType AS strLogoFooterType
 
 		RETURN
 	END
@@ -152,6 +158,18 @@ BEGIN TRY
 	BEGIN
 		SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
 			,@strLogoType = 'Attachment'
+	END
+
+	SELECT TOP 1 @imgFooterLogo = imgLogo
+		,@strLogoFooterType = 'Logo'
+	FROM tblSMLogoPreferenceFooter
+	WHERE ysnAllOtherReports = 1
+		AND intCompanyLocationId = @intCompanyLocationId
+
+	IF @imgFooterLogo IS NULL
+	BEGIN
+		SELECT @imgFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+			,@strLogoFooterType = 'Attachment'
 	END
 
 	SELECT S.intSampleId
@@ -181,6 +199,8 @@ BEGIN TRY
 		,@strCountry AS strCompanyCountry
 		,blbHeaderLogo = @imgLogo
 		,strLogoType = @strLogoType
+		,blbFooterLogo = @imgFooterLogo
+		,strLogoFooterType = @strLogoFooterType
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		AND S.intSampleId = @intSampleId

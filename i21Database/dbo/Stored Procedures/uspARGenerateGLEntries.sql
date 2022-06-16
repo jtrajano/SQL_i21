@@ -28,8 +28,8 @@ DECLARE @ItemsForPost AS ItemCostingTableType
 
 IF @Post = 1
 
-INSERT INTO @ItemsForPost
-    ([intItemId]
+INSERT INTO @ItemsForPost(
+	 [intItemId]
     ,[intItemLocationId]
     ,[intItemUOMId]
     ,[dtmDate]
@@ -152,10 +152,10 @@ END
 DECLARE  @InTransitItems                ItemInTransitCostingTableType 
 		,@FOB_ORIGIN                    INT = 1
 		,@FOB_DESTINATION               INT = 2	
-				
+
 IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM tblARPostInvoiceDetail WHERE intSourceId = 2 AND strSessionId = @strSessionId))
-INSERT INTO @InTransitItems
-    ([intItemId] 
+INSERT INTO @InTransitItems(
+	 [intItemId] 
     ,[intItemLocationId] 
     ,[intItemUOMId] 
     ,[dtmDate] 
@@ -214,8 +214,8 @@ WHERE strSessionId = @strSessionId
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 BEGIN		 --Call the post routine 
-	INSERT INTO tblARPostInvoiceGLEntries
-		([dtmDate] 
+	INSERT INTO tblARPostInvoiceGLEntries(
+		 [dtmDate] 
 		,[strBatchId]
 		,[intAccountId]
 		,[dblDebit]
@@ -382,5 +382,26 @@ INNER JOIN tblARInvoice I ON GL.strTransactionId = I.strInvoiceNumber
 						 AND GL.intTransactionId = I.intInvoiceId
 WHERE GL.intSourceEntityId IS NULL
   AND GL.strSessionId = @strSessionId
- 
+
+IF @Post = 1 AND EXISTS(
+	SELECT TOP 1 1
+	FROM tblARCompanyPreference
+	WHERE ysnOverrideLineOfBusinessSegment = 1
+)
+BEGIN
+	UPDATE ARPIGLE
+	SET ARPIGLE.intAccountId = LOB.intAccountId
+	FROM tblARPostInvoiceGLEntries ARPIGLE
+	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPIGLE.intTransactionId = ARPIH.intInvoiceId
+	OUTER APPLY (
+		SELECT TOP 1 intAccountId = dbo.[fnGetGLAccountIdFromProfitCenter](ARPIGLE.intAccountId, ISNULL(intSegmentCodeId, 0))
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
+	) LOB
+	WHERE ARPIGLE.strSessionId = @strSessionId
+	AND ARPIGLE.strCode = 'IC'
+	AND ARPIGLE.[dblCredit] > 0 -- COGS Only
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
+END
+
 RETURN 0

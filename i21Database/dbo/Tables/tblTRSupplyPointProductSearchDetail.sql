@@ -9,7 +9,7 @@
 )
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblTRSupplyPointProductSearchDetail_intSupplyPointProductSearchHeaderId] ON [dbo].[tblTRSupplyPointProductSearchDetail] ([intSupplyPointProductSearchHeaderId])
+CREATE NONCLUSTERED INDEX [IX_tblTRSupplyPointProductSearchDetail_intSupplyPointProductSearchHeaderId] ON [dbo].[tblTRSupplyPointProductSearchDetail] ([intSupplyPointProductSearchHeaderId]) INCLUDE ([strSearchValue])
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblTRSupplyPointProductSearchDetail_strSearchValue] ON [dbo].[tblTRSupplyPointProductSearchDetail] ([strSearchValue])

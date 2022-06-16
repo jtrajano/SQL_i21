@@ -86,7 +86,13 @@ BEGIN
 					INSERT INTO @avoidColumn(strColumn)
 					VALUES('strCustomerNumber')
 					SET @getAllColumn = 0
-				END				
+				END
+				
+				--we need to update status to 5 to bypass the trigger
+				IF EXISTS (SELECT TOP 1 1 FROM tblARPayment WHERE intEntityCustomerId = @CurMergeId)
+				BEGIN
+					UPDATE tblARPayment SET intCurrentStatus = 5 WHERE intEntityCustomerId = @CurMergeId AND ysnPosted = 1
+				END
 			END
 			ELSE IF @curtype = 'Vendor'
 			BEGIN
@@ -323,6 +329,18 @@ BEGIN
 		END TRY
 		BEGIN CATCH
 			ROLLBACK TRANSACTION
+
+			DECLARE @ErrorMessage NVARCHAR(4000);
+			DECLARE @ErrorSeverity INT;
+			DECLARE @ErrorState INT;
+
+			SELECT 
+				@ErrorMessage = ERROR_MESSAGE(),
+				@ErrorSeverity = ERROR_SEVERITY(),
+				@ErrorState = ERROR_STATE();
+
+			RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+
 		END CATCH		
 GoHere:
 		DELETE FROM #tmpMerge WHERE Item = @CurMergeItem

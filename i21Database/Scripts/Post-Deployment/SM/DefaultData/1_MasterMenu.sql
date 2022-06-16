@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Performance Logs' AND strModuleName = 'System Manager')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1014,6 +1014,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'User Preferences' AND strModule
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Zip Codes' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tax Type' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Motor Fuel Tax Cycle' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Motor Fuel Tax Cycle' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerMaintenanceParentMenuId
 
 /* END OF DELETING */
 
@@ -1367,7 +1368,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Hi
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Report Hierarchy Schedule', N'Financial Report Designer', @FinancialReportsMaintenanceParentMenuId, N'Report Hierarchy Schedule', N'Maintenance', N'Screen', N'FinancialReportDesigner.view.ReportHierarchySchedule?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'FinancialReportDesigner.view.ReportHierarchySchedule?showSearch=true' WHERE strMenuName = 'Report Hierarchy' AND strModuleName = 'Financial Report Designer' AND intParentMenuID = @FinancialReportsMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'FinancialReportDesigner.view.ReportHierarchySchedule?showSearch=true' WHERE strMenuName = 'Report Hierarchy Schedule' AND strModuleName = 'Financial Report Designer' AND intParentMenuID = @FinancialReportsMaintenanceParentMenuId
 
 /* CASH MANAGEMENT */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cash Management' AND strModuleName = 'Cash Management' AND intParentMenuID = 0)
@@ -4898,6 +4899,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Yield Vie
 	VALUES (N'Yield View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Yield View', N'View', N'Screen', N'Manufacturing.view.YieldView', N'small-menu-view', 0, 0, 0, 1, 8, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Manufacturing.view.YieldView' WHERE strMenuName = 'Yield View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Short Term Planning View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Short Term Planning View', N'View', N'Screen', N'Manufacturing.view.ShortTermPlanningView', N'small-menu-view', 0, 0, 0, 1, 9, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Manufacturing.view.ShortTermPlanningView' WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
 
 -- Report
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ingredient Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingReportParentMenuId)
