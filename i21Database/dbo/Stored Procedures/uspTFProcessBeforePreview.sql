@@ -299,7 +299,7 @@ BEGIN TRY
 				SELECT intTransactionId FROM #tmpTransaction
 			)
 
-			INSERT INTO tblTFTransactionDynamicIL (intTransactionId, strCustomerBillToAddress, strCustomerBillToCity, strCustomerBillToState, strCustomerBillToZipCode)
+			INSERT INTO tblTFTransactionDynamicIL (intTransactionId, strILCustomerBillToAddress, strILCustomerBillToCity, strILCustomerBillToState, strILCustomerBillToZipCode)
 			SELECT Trans.intTransactionId, tblEMEntityLocation.strAddress, tblEMEntityLocation.strCity, tblEMEntityLocation.strState, tblEMEntityLocation.strZipCode
 			FROM tblTFTransaction Trans
 			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
