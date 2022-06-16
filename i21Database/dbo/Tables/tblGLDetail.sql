@@ -3,7 +3,6 @@
     [intSubsidiaryCompanyId] [int] NULL,
     [intMultiCompanyId] [int]   NULL,
     [dtmDate]                   DATETIME         NOT NULL,
-    --[dtmDateNoTime]             AS CAST(dtmDate AS DATE) PERSISTED,
     [strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NOT NULL,
     [dblDebit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblDebit]  DEFAULT ((0)),
