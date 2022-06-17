@@ -652,7 +652,7 @@ BEGIN
 		FROM tblAPPayment P
 		OUTER APPLY (
 			SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
-			FROM dbo.[fnARGetOverrideAccount](P.[intAccountId], @GainLossAccount, 0, @OverrideLocationSegment, 0)
+			FROM dbo.[fnARGetOverrideAccount](P.[intAccountId], @gainLossAccount, 0, @OverrideLocationSegment, 0)
 		) OVERRIDESEGMENT
 		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND OVERRIDESEGMENT.intOverrideAccount = 0
@@ -668,7 +668,7 @@ BEGIN
 		FROM tblAPPayment P
 		OUTER APPLY (
 			SELECT intOverrideAccount, strOverrideAccount, bitSameLineOfBusinessSegment
-			FROM dbo.[fnARGetOverrideAccount](P.[intAccountId], @GainLossAccount, 0, 0, @OverrideLineOfBusinessSegment)
+			FROM dbo.[fnARGetOverrideAccount](P.[intAccountId], @gainLossAccount, 0, 0, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND OVERRIDESEGMENT.intOverrideAccount = 0
