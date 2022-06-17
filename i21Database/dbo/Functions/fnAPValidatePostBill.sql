@@ -639,6 +639,7 @@ BEGIN
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND @AllowIntraEntries = 1
+		AND OVERRIDESEGMENT.intOverrideAccount = 0
 		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--You cannot post intra-location transaction without due from account. 
@@ -657,6 +658,7 @@ BEGIN
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND @AllowIntraEntries = 1
+		AND OVERRIDESEGMENT.intOverrideAccount = 0
 		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--You cannot post if location segment of AP Account and Payable Account when single location entry is enabled. 
@@ -692,6 +694,7 @@ BEGIN
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, 0, @OverrideLocationSegment, 0)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND OVERRIDESEGMENT.intOverrideAccount = 0
 		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--VALIDATE TAX ACCOUNT OVERRIDE
@@ -710,6 +713,7 @@ BEGIN
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], C.intAccountId, 0, @OverrideLocationSegment, 0)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND OVERRIDESEGMENT.intOverrideAccount = 0
 		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 	END
 	ELSE
