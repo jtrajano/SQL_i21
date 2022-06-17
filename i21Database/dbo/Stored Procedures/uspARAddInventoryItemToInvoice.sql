@@ -97,7 +97,6 @@
 	,@ItemQualityPremium			NUMERIC(18, 6)	= 0.000000
 	,@ItemOptionalityPremium		NUMERIC(18, 6)	= 0.000000
 	,@ItemComputedGrossPrice		NUMERIC(18, 6)	= 0.000000
-	,@ItemOriginalTaxGroupId		INT				= 0
 AS
 
 BEGIN
@@ -395,8 +394,7 @@ BEGIN TRY
 				,[intConcurrencyId]
 				,[dblQualityPremium]
 				,[dblOptionalityPremium]
-				,[dblComputedGrossPrice]
-				,[intOriginalTaxGroupId])
+				,[dblComputedGrossPrice])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
 				,[intItemId]						= IC.[intItemId]
@@ -520,7 +518,6 @@ BEGIN TRY
 				,[dblQualityPremium]				= @ItemQualityPremium
 				,[dblOptionalityPremium]			= @ItemOptionalityPremium
 				,[dblComputedGrossPrice]			= @ItemComputedGrossPrice
-				,[intOriginalTaxGroupId]			= @ItemOriginalTaxGroupId
 			FROM tblICItem IC
 			INNER JOIN tblICItemLocation IL ON IC.intItemId = IL.intItemId
 			WHERE IC.[intItemId] = @ItemId
