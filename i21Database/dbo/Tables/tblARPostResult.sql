@@ -8,4 +8,7 @@
     [intTransactionId]   INT            NULL,
     CONSTRAINT [PK_tblARPostResult] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
-
+GO
+CREATE INDEX [IX_tblARPostResult_strBatchNumber]
+ON [dbo].[tblARPostResult] (strBatchNumber)
+GO
