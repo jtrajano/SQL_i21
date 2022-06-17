@@ -11,7 +11,7 @@ dtmDate                         AS		dtmDate,
 intEntityId						AS		intEntityId
 FROM
 (
-	SELECT ROW_NUMBER() OVER (ORDER BY dtmDate DESC) AS intRowId, intPostForeignTransResultId as intResultId, strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
+	SELECT ROW_NUMBER() OVER (ORDER BY dtmDate DESC) AS intRowId, intPostForeignTransResultId as intResultId, CAST(strBatchId AS NVARCHAR(50)) strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
 	FROM tblCFPostForeignTransResult
 	UNION ALL
 	SELECT ROW_NUMBER() OVER (ORDER BY dtmDate DESC) AS intRowId, intResult as intResultId, strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
