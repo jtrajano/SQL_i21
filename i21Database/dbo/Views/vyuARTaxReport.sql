@@ -182,7 +182,7 @@ INNER JOIN (
 		,strUnitOfMeasure		= ICUM.strUnitMeasure
 		,strAccountId			= SALESACCOUNT.strAccountId
 		,intSalesAccountId		= ID.intSalesAccountId
-		,ysnOverrideTaxGroup    = CAST(CASE WHEN ID.intOriginalTaxGroupId IS NULL OR ID.intOriginalTaxGroupId = ID.intTaxGroupId THEN 0 ELSE 1 END AS BIT)
+		,ysnOverrideTaxGroup    = ISNULL(ID.ysnOverrideTaxGroup, 0)
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN (
 		SELECT 
