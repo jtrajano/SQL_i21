@@ -146,11 +146,23 @@ AS
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempFacilityInfo facility
  		ON tlog.intBorrowingFacilityId = facility.intBorrowingFacilityId
+	OUTER APPLY (
+		SELECT TOP 1 ysnDeleted = CAST(1 AS BIT)
+		FROM tblTRFTradeFinanceLog delTLog
+		WHERE tlog.ysnDeleted = 1
+		AND CAST(delTLog.dtmCreatedDate AS DATE) >= CAST(ISNULL(@dtmStartDate, delTLog.dtmCreatedDate) AS DATE)
+		AND CAST(delTLog.dtmCreatedDate AS DATE) <= CAST(ISNULL(@dtmEndDate, delTLog.dtmCreatedDate) AS DATE)
+		AND UPPER(LEFT(strAction, 6)) = 'DELETE'
+		AND tlog.strTransactionNumber = delTLog.strTransactionNumber
+		AND tlog.intTransactionHeaderId = delTLog.intTransactionHeaderId
+		AND tlog.intTransactionDetailId = delTLog.intTransactionDetailId
+		AND tlog.strTradeFinanceTransaction = delTLog.strTradeFinanceTransaction
+	) deletedRecord
  	WHERE tlog.intContractHeaderId IS NOT NULL 
  	AND tlog.intContractDetailId IS NOT NULL
  	AND CAST(tlog.dtmCreatedDate AS DATE) >= @dtmStartDate
  	AND CAST(tlog.dtmCreatedDate AS DATE) <= @dtmEndDate
-	AND ISNULL(tlog.ysnDeleted, 0) = 0
+	AND ISNULL(deletedRecord.ysnDeleted, 0) = 0
 
 
  	SELECT  
@@ -187,9 +199,21 @@ AS
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempTradeLogContracts tContract
  		ON	tContract.intContractDetailId = tlog.intContractDetailId
- 		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
- 		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
-	WHERE ISNULL(tlog.ysnDeleted, 0) = 0
+ 		AND CAST(tlog.dtmCreatedDate AS DATE) >= @dtmStartDate
+ 		AND CAST(tlog.dtmCreatedDate AS DATE) <= @dtmEndDate
+	OUTER APPLY (
+		SELECT TOP 1 ysnDeleted = CAST(1 AS BIT)
+		FROM tblTRFTradeFinanceLog delTLog
+		WHERE tlog.ysnDeleted = 1
+		AND CAST(delTLog.dtmCreatedDate AS DATE) >= CAST(ISNULL(@dtmStartDate, delTLog.dtmCreatedDate) AS DATE)
+		AND CAST(delTLog.dtmCreatedDate AS DATE) <= CAST(ISNULL(@dtmEndDate, delTLog.dtmCreatedDate) AS DATE)
+		AND UPPER(LEFT(strAction, 6)) = 'DELETE'
+		AND tlog.strTransactionNumber = delTLog.strTransactionNumber
+		AND tlog.intTransactionHeaderId = delTLog.intTransactionHeaderId
+		AND tlog.intTransactionDetailId = delTLog.intTransactionDetailId
+		AND tlog.strTradeFinanceTransaction = delTLog.strTradeFinanceTransaction
+	) deletedRecord
+	WHERE ISNULL(deletedRecord.ysnDeleted, 0) = 0
 
  	SELECT intContractHeaderId
  		, intContractDetailId
