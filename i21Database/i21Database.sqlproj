@@ -288,6 +288,7 @@
     <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

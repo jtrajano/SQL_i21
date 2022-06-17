@@ -101,6 +101,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_UpdateAuditLogs.sql
 :r .\SM\2110_AddIDPToCustomerLicenseModule.sql
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
+:r .\SM\2110_FixUserSecurityAdminData.sql
 
 
 -- Canned Report
