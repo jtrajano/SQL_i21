@@ -227,5 +227,4 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[dblComputedGrossPrice]				NUMERIC(18, 6)									NULL
 	,[intTaxLocationId]						INT												NULL
 	,[strTaxPoint]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
-	,[intOriginalTaxGroupId]				INT												NULL
 )

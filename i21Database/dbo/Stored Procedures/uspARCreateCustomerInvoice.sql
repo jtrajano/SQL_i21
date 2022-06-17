@@ -161,7 +161,6 @@
 	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
-	,@ItemOriginalTaxGroupId				INT				= 0
 AS
 
 BEGIN
@@ -792,7 +791,6 @@ BEGIN TRY
 		,@ItemQualityPremium			= @ItemQualityPremium
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
 		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
-		,@ItemOriginalTaxGroupId		= @ItemOriginalTaxGroupId
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
