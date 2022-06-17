@@ -821,6 +821,7 @@
     <Build Include="dbo\Views\vyuMFGetShortTermPlanningViewDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateAccountOnPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

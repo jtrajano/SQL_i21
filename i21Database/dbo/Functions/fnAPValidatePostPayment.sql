@@ -20,11 +20,14 @@ BEGIN
 	DECLARE @gainLossAccount INT;
 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
-	-- SET @gainLossAccount = (SELECT TOP 1 intAccountsPayableRealizedId FROM tblSMMultiCurrency)
-	--DECLARE @tmpPayments TABLE(
-	--	[intPaymentId] [int]
-	--);
-	--INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
+	SET @gainLossAccount = (SELECT TOP 1 intAccountsPayableRealizedId FROM tblSMMultiCurrency)
+
+	DECLARE	@OverrideCompanySegment BIT,
+			@OverrideLocationSegment BIT
+
+	SELECT TOP 1 @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+				 @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0)
+	FROM tblAPCompanyPreference
 
 	SELECT TOP 1 @userLocation = intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId;
 	IF (@userLocation IS NOT NULL AND @userLocation > 0)
@@ -636,6 +639,21 @@ BEGIN
 		AND PD.dblPayment <> 0
 		AND PD.dblDiscount <> 0
 		AND CL.intDiscountAccountId IS NULL
+
+		--VALIDATE FOREX GAIN OR LOSS ACCOUNT OVERRIDE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Unable to find the forex gain or loss account that matches the location of the Payables Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
+			'Bill',
+			P.strPaymentRecordNum,
+			P.intPaymentId
+		FROM tblAPPayment P
+		OUTER APPLY (
+			SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+			FROM dbo.[fnARGetOverrideAccount](P.[intAccountId], @GainLossAccount, 0, @OverrideLocationSegment, 0)
+		) OVERRIDESEGMENT
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 	END
 	ELSE
