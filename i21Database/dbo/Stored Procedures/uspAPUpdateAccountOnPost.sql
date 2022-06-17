@@ -12,10 +12,12 @@ BEGIN TRY
 	DECLARE @ids Id;
 
 	DECLARE	@OverrideCompanySegment BIT,
-			@OverrideLocationSegment BIT
+			@OverrideLocationSegment BIT,
+			@OverrideLineOfBusinessSegment BIT
 
 	SELECT TOP 1 @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
-				 @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0)
+				 @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+				 @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
 	FROM tblAPCompanyPreference
 
 	DECLARE @transCount INT = @@TRANCOUNT;
@@ -31,7 +33,7 @@ BEGIN TRY
 		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 		OUTER APPLY (
 			SELECT intOverrideAccount
-			FROM dbo.[fnARGetOverrideAccount](B.intAccountId, BD.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
+			FROM dbo.[fnARGetOverrideAccount](B.intAccountId, BD.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 
 		--TAXES
@@ -43,7 +45,7 @@ BEGIN TRY
 		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
 		OUTER APPLY (
 			SELECT intOverrideAccount
-			FROM dbo.[fnARGetOverrideAccount](B.intAccountId, BDT.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
+			FROM dbo.[fnARGetOverrideAccount](B.intAccountId, BDT.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 
 	IF @transCount = 0 COMMIT TRANSACTION

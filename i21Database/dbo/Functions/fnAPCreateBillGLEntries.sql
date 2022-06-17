@@ -67,12 +67,14 @@ BEGIN
 			,@DueFromAccountId  INT
 			,@OverrideCompanySegment  BIT
 			,@OverrideLocationSegment  BIT
+			,@OverrideLineOfBusinessSegment BIT
 	SELECT TOP 1
 		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END, 
 		  @DueToAccountId	= ISNULL([intDueToAccountId], 0), 
 		  @DueFromAccountId = ISNULL([intDueFromAccountId], 0),
 		  @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
-		  @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0)
+		  @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+		  @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
 	FROM tblAPCompanyPreference
 	-- Get Total Value of Other Charges Taxes
 	 --SELECT @ReceiptId = IRI.intInventoryReceiptId
@@ -366,7 +368,7 @@ BEGIN
             ) Details
 			OUTER APPLY (
 				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
+				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
@@ -623,7 +625,7 @@ BEGIN
 				ON A.intEntityVendorId = C.[intEntityId]
 	OUTER APPLY (
 		SELECT intOverrideAccount
-		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	      AND @AllowIntraEntries = 1
@@ -1098,7 +1100,7 @@ BEGIN
 				ON voucherDetails.intBillDetailId = B.intBillDetailId
 			OUTER APPLY (
 				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
+				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
