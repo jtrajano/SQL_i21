@@ -18,7 +18,8 @@
 	[dtmLastWeightInspectionDate]	DATETIME		NULL,
 	[strTruckStatus]				NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL,
 	[dtmStatusEffectiveDate]		DATETIME		NULL,
-
+	[dblLongitude]					NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
+    [dblLatitude]					NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,	
 	[intConcurrencyId]				INT				NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMShipViaTruck] PRIMARY KEY CLUSTERED ([intEntityShipViaTruckId] ASC), 
 	CONSTRAINT [FK_dbo_tblSMShipViaTruck_tblSMShipVia_] FOREIGN KEY ([intEntityShipViaId]) REFERENCES [dbo].tblSMShipVia ([intEntityId]) ON DELETE CASCADE,
