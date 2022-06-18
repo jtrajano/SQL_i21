@@ -865,6 +865,7 @@
     <Build Include="dbo\Functions\fnGetIncrementalAmount.sql" />
     <Build Include="dbo\Functions\fnCalculateTexasFee.sql" />
     <Build Include="dbo\Tables\tblLGDispatchOrderRoute.sql" />
+    <Build Include="dbo\Views\vyuARTaxLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
