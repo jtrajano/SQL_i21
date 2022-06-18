@@ -1,12 +1,38 @@
 ﻿CREATE VIEW [dbo].[vyuCTTaxLocation]
 AS
-	SELECT 1 intContractTypeId, 'Origin' strTaxPoint, strLocationName strTaxLocation, 0 intEntityId from tblSMCompanyLocation
+	SELECT intCompanyLocationId intTaxLocationId
+		  , 1 intContractTypeId
+		  , 'Origin' strTaxPoint
+		  , strLocationName strTaxLocation
+		  , 0 intEntityId 
+	FROM tblSMCompanyLocation
+
 	UNION ALL
-	SELECT 2 intContractTypeId, 'Destination' strTaxPoint, strLocationName strTaxLocation, 0 intEntityId from tblSMCompanyLocation
+
+	SELECT intCompanyLocationId intTaxLocationId
+		 , 2 intContractTypeId
+		 , 'Destination' strTaxPoint
+		 , strLocationName strTaxLocation
+		 , 0 intEntityId 
+	FROM tblSMCompanyLocation
+
 	UNION ALL
-	SELECT 1 intContractTypeId, 'Destination' strTaxPoint, strLocationName strTaxLocation, intEntityId from tblEMEntityLocation
+
+	SELECT  intTaxLocationId	= intEntityLocationId
+		, 1 intContractTypeId
+		, 'Destination' strTaxPoint
+		, strLocationName strTaxLocation
+		, intEntityId 
+		FROM tblEMEntityLocation
+
 	UNION ALL
-	SELECT 2 intContractTypeId, 'Origin' strTaxPoint, strLocationName strTaxLocation, intEntityId from tblEMEntityLocation
+
+	SELECT  intTaxLocationId	= intEntityLocationId
+		, 2 intContractTypeId
+		, 'Origin' strTaxPoint
+		, strLocationName strTaxLocation
+		, intEntityId 
+	FROM tblEMEntityLocation
 GO
 
 

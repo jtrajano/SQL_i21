@@ -327,6 +327,7 @@ AS
 			, CD.intTaxGroupId
 			, TG.strTaxGroup
 			, CD.strTaxLocation
+			, CD.intTaxLocationId
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
