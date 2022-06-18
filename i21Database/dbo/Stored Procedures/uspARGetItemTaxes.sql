@@ -32,12 +32,12 @@ BEGIN
 	IF(@FOB IS NOT NULL)
 		SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @TaxLocationId, @ItemId, @TaxLocationId, @SiteId, @FreightTermId, @FOB), 0)
 
-	SET @TaxGroupId = IIF(@NewTaxGroupId = 0, @OriginalTaxGroupId, @NewTaxGroupId)
-	SET @IsOverrideTaxGroup = IIF(@OriginalTaxGroupId <> @NewTaxGroupId, 1, 0)
+	SET @TaxGroupId = CASE WHEN @NewTaxGroupId = 0 THEN @OriginalTaxGroupId ELSE @NewTaxGroupId END
+	SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> @NewTaxGroupId THEN 1 ELSE 0 END
 END
 ELSE
 BEGIN
-	SET @IsOverrideTaxGroup = IIF(@OriginalTaxGroupId <> ISNULL(@TaxGroupId, 0), 1, 0)
+	SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> ISNULL(@TaxGroupId, 0) THEN 1 ELSE 0 END
 END
 
 IF ISNULL(@TaxGroupId, 0) <> 0 AND ISNULL(@SiteId, 0) <> 0
