@@ -29,7 +29,13 @@ AS
 							  FROM tblTMDeliveryHistory 
 							  WHERE intSiteID = F.intSiteID 
 								AND dtmInvoiceDate >= ISNULL(HH.dtmStartDate, DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))
-								AND dtmInvoiceDate <=  DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)), 0.0)  
+								AND dtmInvoiceDate <=  DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)), 0.0)
+			,dblPreviousTotalUsage = ISNULL((SELECT 
+								SUM(ISNULL(dblQuantityDelivered,0.0)) 
+							  FROM tblTMDeliveryHistory 
+							  WHERE intSiteID = F.intSiteID
+							  AND dtmInvoiceDate >= ISNULL(DATEADD(yyyy,-1 ,HH.dtmStartDate), '1/1/1900')
+							  AND dtmInvoiceDate <=  ISNULL(DATEADD(dd,-1 ,HH.dtmStartDate), '1/1/1900')), 0.0)  
 			,dblLeaseBillingMinimum = (SELECT TOP 1 dblMinimumUsage 
 												FROM tblTMLeaseMinimumUse 
 												WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 
