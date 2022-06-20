@@ -1,6 +1,10 @@
   
 CREATE FUNCTION fnGLOverridePostAccounts(  
-    @PostGLEntries RecapTableType READONLY  
+    @PostGLEntries RecapTableType READONLY,
+    @ysnOverrideLocation BIT =1,
+    @ysnOverrideLOB BIT = 1,
+    @ysnOverrideCompany BIT = 1
+
  )  
 RETURNS   
  @tbl  TABLE(  
@@ -172,7 +176,7 @@ from @PostGLEntries
 UPDATE A   
 SET strNewAccountIdOverride = dbo.fnGLGetOverrideAccountByAccount(   
     A.intAccountIdOverride,   
-    A.intAccountId,1,1,1)  
+    A.intAccountId,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)  
 FROM @tbl A   
 WHERE ISNULL(intAccountIdOverride,0) <> 0  
   
@@ -196,7 +200,7 @@ dbo.fnGLGetOverrideAccountBySegment(
      A.intCompanySegmentOverrideId)  
 FROM @tbl A   
 WHERE (  
- ISNULL(intLocationSegmentOverrideId,0)<> 0  
+ISNULL(intLocationSegmentOverrideId,0)<> 0  
 OR ISNULL(intLOBSegmentOverrideId,0) <> 0  
 OR ISNULL(intCompanySegmentOverrideId,0) <> 0)  
 AND ISNULL(intAccountIdOverride,0) = 0  
