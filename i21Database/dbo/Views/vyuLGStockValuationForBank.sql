@@ -166,7 +166,7 @@ SELECT DISTINCT CH.intContractHeaderId
 		) * dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId, CD.intFutureMonthId, GeTdate()) AS dblUnsoldCommodityMarketValue
 	,LD.dblQuantity AS dblLGLoadQty
 	,(
-		SELECT TOP 1 strLocationName
+		SELECT TOP 1 strSubLocationName
 		FROM tblSMCompanyLocationSubLocation CLSL
 		WHERE CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		) AS strWarehouse
