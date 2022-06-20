@@ -2,7 +2,7 @@
 AS
 	SELECT  intTaxLocationId = intEntityLocationId
 			, 1 intContractTypeId
-			, 'Origin' strTaxPoint
+			, 'Origin' COLLATE Latin1_General_CI_AS strTaxPoint
 			, strLocationName strTaxLocation
 			, intEntityId 
 	FROM tblEMEntityLocation
@@ -11,7 +11,7 @@ AS
 
 	SELECT  intTaxLocationId = intCompanyLocationId
 			, 1 intContractTypeId
-			, 'Destination' strTaxPoint
+			, 'Destination' COLLATE Latin1_General_CI_AS strTaxPoint
 			, strLocationName strTaxLocation
 			, 0 intEntityId 
 	FROM tblSMCompanyLocation
@@ -20,7 +20,7 @@ AS
 
 	SELECT  intTaxLocationId = intCompanyLocationId
 			,2 intContractTypeId
-			, 'Origin' strTaxPoint
+			, 'Origin' COLLATE Latin1_General_CI_AS strTaxPoint
 			, strLocationName strTaxLocation
 			, 0 intEntityId 
 	FROM tblSMCompanyLocation
@@ -29,7 +29,7 @@ AS
 
 	SELECT  intTaxLocationId = intEntityLocationId
 			, 2 intContractTypeId
-			, 'Destination' strTaxPoint
+			, 'Destination' COLLATE Latin1_General_CI_AS strTaxPoint
 			, strLocationName strTaxLocation
 			, intEntityId 
 	FROM tblEMEntityLocation
