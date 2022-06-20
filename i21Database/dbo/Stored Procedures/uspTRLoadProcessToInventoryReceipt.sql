@@ -204,7 +204,7 @@ END
 		,dblSurcharge			= dblSurcharge
 		,ysnFreightInPrice		= ysnFreightInPrice
 		,strActualCostId		= strActualCostId
-		,intTaxGroupId			= intTaxGroupId
+		,intTaxGroupId			= CASE WHEN intTaxGroupId IS NULL AND dblCost = 0 THEN -1 ELSE intTaxGroupId END
 		,strVendorRefNo			= strVendorRefNo
 		,strSourceId			= strSourceId
 		,strSourceScreenName	= strSourceScreenName
