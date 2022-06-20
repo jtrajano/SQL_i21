@@ -1164,7 +1164,7 @@ BEGIN
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NULL
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
@@ -1222,7 +1222,7 @@ BEGIN
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NULL
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
