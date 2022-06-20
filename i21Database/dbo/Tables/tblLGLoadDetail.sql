@@ -64,6 +64,9 @@
 	[strExternalBatchNo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[ysnNoClaim] BIT,
 	[intLoadDetailRefId] INT NULL,
+	[ysnTaxGroupOverride] BIT NULL,
+	[strTaxGroup] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxGroupId] INT NULL, 
 
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 
