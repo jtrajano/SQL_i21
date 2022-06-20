@@ -262,97 +262,119 @@ END
 				@colstry AS NVARCHAR(MAX) = '',
 				@query  AS NVARCHAR(MAX),
 				@intColCount AS INT,
-				@colCtr as int = 2
+				@colCtr as int = 3
 
 
 		DECLARE  @tmpColList TABLE(
-			strType nvarchar(max),
-			intSeqNo int
+			strContractEndMonth nvarchar(max)
 		)
 
-		select @cols = STUFF((select ',' + QUOTENAME(strType) 
+		--select @cols = STUFF((select ',' + QUOTENAME(strType) 
+		--					from @List
+		--					where strType not in('Position') and strType <> CASE WHEN isnull(@intVendorId,0) = 0 THEN '' ELSE 'Net Hedge' END
+		--					group by strType, intSeqNo
+		--					order by intSeqNo, strType
+		--			FOR XML PATH(''), TYPE
+		--			).value('.', 'NVARCHAR(MAX)') 
+		--		,1,1,'')
+
+	
+		select @cols = STUFF((select ',' + QUOTENAME(strContractEndMonth) 
 							from @List
-							where strType not in('Position') and strType <> CASE WHEN isnull(@intVendorId,0) = 0 THEN '' ELSE 'Net Hedge' END
-							group by strType, intSeqNo
-							order by intSeqNo, strType
+							group by strContractEndMonth
+							order by case when strContractEndMonth = 'Near By' then 0 else 1 end
 					FOR XML PATH(''), TYPE
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
 
-		insert into @tmpColList (strType,intSeqNo)
-		SELECT DISTINCT strType,intSeqNo
+		insert into @tmpColList (strContractEndMonth)
+		SELECT DISTINCT strContractEndMonth
 					from @List
 					where strType not in('Position') and strType <> CASE WHEN isnull(@intVendorId,0) = 0 THEN '' ELSE 'Net Hedge' END
-					order by intSeqNo, strType
-					--group by strType
+					--order by case when strContractEndMonth = 'Near By' then 0 else 1 end
+					--group by strContractEndMonth
 
 
-				WHILE EXISTS (SELECT TOP 1 strType FROM @tmpColList)
+				WHILE EXISTS (SELECT TOP 1 strContractEndMonth FROM @tmpColList)
 				BEGIN
 					DECLARE @strCol AS NVARCHAR(max)
 					SET @colCtr = @colCtr + 1;
 
-					SELECT TOP 1 @strCol = strType FROM @tmpColList ORDER BY intSeqNo, strType
+					SELECT TOP 1 @strCol = strContractEndMonth FROM @tmpColList order by case when strContractEndMonth = 'Near By' then 0 else 1 end
 			
 
 					SET @colstry = @colstry + '''' + @strCol + ''' as col' + cast(@colCtr as nvarchar(20)) + ','
 			
-					DELETE FROM @tmpColList WHERE strType = @strCol 
+					DELETE FROM @tmpColList WHERE strContractEndMonth = @strCol 
 
 				END
 			
-			IF @ysnIsCrushPosition = 1
-			BEGIN
-				SET @colstry = SUBSTRING(@colstry,0,LEN(@colstry))
-			END
-			ELSE
-			BEGIN
-				SET @colstry = @colstry + '''Position''as col' +  cast(@colCtr + 1 as nvarchar(20)) +' '
-				SET @cols = @cols + ',[Position]'
-			END
-	
+
+			SET @colstry = SUBSTRING(@colstry,0,LEN(@colstry))
+
+			--IF @ysnIsCrushPosition = 1
+			--BEGIN
+			--	SET @colstry = SUBSTRING(@colstry,0,LEN(@colstry))
+			--END
+			--ELSE
+			--BEGIN
+			--	SET @colstry = @colstry + '''Position''as col' +  cast(@colCtr + 1 as nvarchar(20)) +' '
+			--	SET @cols = @cols + ',[Position]'
+			--END
+
+			DECLARE @GrandTotalCol	NVARCHAR (MAX)
+
+			SELECT @GrandTotalCol = COALESCE (@GrandTotalCol + 'ISNULL ([' + CAST (strContractEndMonth AS VARCHAR) +'],0) + ', 'ISNULL([' + CAST(strContractEndMonth AS VARCHAR)+ '],0) + ')
+			FROM	tblRKDPRContractHedgeByMonth
+			GROUP BY strContractEndMonth
+			ORDER BY strContractEndMonth
+			SET @GrandTotalCol = LEFT (@GrandTotalCol, LEN (@GrandTotalCol)-1)
+			
+			
 			set @query = N'
 
-					SELECT 1 as col1 ,strContractEndMonth,' + @cols + N' into ##tmpTry from 
+					SELECT intSeqNo as col1 ,strType,  ('+ @GrandTotalCol + ') AS [dblTotal],' + @cols + N' into ##tmpTry from 
 					 (
                			select * from (
-							select strCommodityCode, strType, sum(dblTotal) as dblTotal, strContractEndMonth
+							select strCommodityCode, strType, sum(dblTotal) as dblTotal, strContractEndMonth, intSeqNo
 							from #tmpList
-							group by strContractEndMonth,strCommodityCode,strType
+							group by strContractEndMonth,strCommodityCode,strType, intSeqNo
 						) t
 					) x
 					pivot 
 					(
 						sum(dblTotal)
-						for strType in (' + @cols + N')
-					) p  order by CASE WHEN  strContractEndMonth not in(''Near By'',''Total'') THEN CONVERT(DATETIME,''01 ''+strContractEndMonth) END
+						for strContractEndMonth in (' + @cols + N')
+					) p
 			 
 
 					'
-					 
+	 
 		exec (@query)
 
 
-		exec ('select 0 as col1,''Year'' as col2, '+ @colstry +' into ##tmpTry2')
+		exec ('select 0 as col1,''     '' as col2, ''Total'' as col3, '+ @colstry +' into ##tmpTry2')
 
 
 		 DECLARE @colCAST AS NVARCHAR(MAX)
 
 		 select @colCAST = STUFF((SELECT ',CAST(CONVERT(varchar,cast(round(' + QUOTENAME([name]) + ',2)as money),1) as nvarchar(max))'
-							from tempdb.sys.columns where object_id = (SELECT object_id FROM tempdb.sys.objects WHERE name = '##tmpTry') and [name] not in ('col1','strContractEndMonth')
+							from tempdb.sys.columns where object_id = (SELECT object_id FROM tempdb.sys.objects WHERE name = '##tmpTry') and [name] not in ('col1','strType')
 							ORDER BY column_id
 					FOR XML PATH(''), TYPE
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
 
+
+	
 		 DECLARE @colSUM AS NVARCHAR(MAX)
 
-		 select @colSUM = STUFF((SELECT ',CAST(CONVERT(varchar,cast(sum(' + QUOTENAME([name]) + ')as money),1) as nvarchar(max))'
-							from tempdb.sys.columns where object_id = (SELECT object_id FROM tempdb.sys.objects WHERE name = '##tmpTry') and [name] not in ('col1','strContractEndMonth')
-							ORDER BY column_id
-					FOR XML PATH(''), TYPE
-					).value('.', 'NVARCHAR(MAX)') 
-				,1,1,'')
+	--	 select @colSUM = STUFF((SELECT ',CAST(CONVERT(varchar,cast(sum(' + QUOTENAME([name]) + ')as money),1) as nvarchar(max))'
+	--						from tempdb.sys.columns where object_id = (SELECT object_id FROM tempdb.sys.objects WHERE name = '##tmpTry') and [name] not in ('col1','strContractEndMonth')
+	--						ORDER BY column_id
+	--				FOR XML PATH(''), TYPE
+	--				).value('.', 'NVARCHAR(MAX)') 
+	--			,1,1,'')
 
 		exec (N' SELECT *, '''+ @xmlParam +''' AS xmlParam 
 		, '''+ @strCommodityCode +''' AS strCommodityCode
@@ -363,17 +385,13 @@ END
 		, '''+ @strEntityName +''' AS strEntityName 
 		FROM (
 			select * from ##tmpTry2
-		union all
-		select col1,strContractEndMonth,
-			' + @colCAST +'
-		from ##tmpTry
-		union all
-		select 2 as col1,''Total'' strContractEndMonth,
-			' + @colSUM +'
-		from ##tmpTry
-		) t ORDER BY col1 , CASE WHEN  col2 not in(''Near By'',''Year'',''Total'') THEN CONVERT(DATETIME,''01 ''+col2) END'
+			union all
+			select col1,strType,
+				' + @colCAST +'
+			from ##tmpTry
+		
+		) t ORDER BY col1 '
 		)
-
 
 	END
 	ELSE
