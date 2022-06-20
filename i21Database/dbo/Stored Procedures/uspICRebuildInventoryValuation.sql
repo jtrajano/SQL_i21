@@ -1573,18 +1573,18 @@ BEGIN
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END
 
-			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Produce', 'Consume'))
-			BEGIN 
-				--PRINT 'Reposting MFG Cost Adjustments: ' + @strTransactionId
+			--ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Produce', 'Consume'))
+			--BEGIN 
+			--	--PRINT 'Reposting MFG Cost Adjustments: ' + @strTransactionId
 				
-				-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
-				EXEC @intReturnValue = uspMFRepostCostAdjustment
-					@strBatchId
-					,@intEntityUserSecurityId
-					,@dtmDate
+			--	-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
+			--	EXEC @intReturnValue = uspMFRepostCostAdjustment
+			--		@strBatchId
+			--		,@intEntityUserSecurityId
+			--		,@dtmDate
 
-				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
-			END
+			--	IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+			--END
 
 			-- Repost 'Consume' and 'Produce'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Consume', 'Produce'))
@@ -1663,26 +1663,26 @@ BEGIN
 							OR intTransactionTypeId = 8 
 						)
 
-				-- Check if lot is involved in an item change. 
-				-- If it is, then update the consume to the new lot id, item id, and item uom id. 
-				BEGIN 
-					UPDATE	ItemsToConsume
-					SET		ItemsToConsume.intItemId = Lot.intItemId
-							,ItemsToConsume.intItemUOMId = dbo.fnGetMatchingItemUOMId(Lot.intItemId, ItemsToConsume.intItemUOMId)
-							,ItemsToConsume.intItemLocationId = Lot.intItemLocationId 
-							,ItemsToConsume.intSubLocationId = Lot.intSubLocationId
-							,ItemsToConsume.intStorageLocationId = Lot.intStorageLocationId							
-							,ItemsToConsume.intLotId = Lot.intLotId 
-					FROM	@ItemsToPost ItemsToConsume LEFT JOIN dbo.tblICLot Lot
-								ON ItemsToConsume.intLotId = Lot.intSplitFromLotId
-					WHERE	EXISTS (
-								SELECT	TOP 1 1
-								FROM	#tmpICInventoryTransaction InvTrans
-								WHERE	InvTrans.intLotId = Lot.intLotId 
-										AND InvTrans.intTransactionTypeId = 15
-							)
-							AND Lot.intLotId IS NOT NULL
-				END 
+				---- Check if lot is involved in an item change. 
+				---- If it is, then update the consume to the new lot id, item id, and item uom id. 
+				--BEGIN 
+				--	UPDATE	ItemsToConsume
+				--	SET		ItemsToConsume.intItemId = Lot.intItemId
+				--			,ItemsToConsume.intItemUOMId = dbo.fnGetMatchingItemUOMId(Lot.intItemId, ItemsToConsume.intItemUOMId)
+				--			,ItemsToConsume.intItemLocationId = Lot.intItemLocationId 
+				--			,ItemsToConsume.intSubLocationId = Lot.intSubLocationId
+				--			,ItemsToConsume.intStorageLocationId = Lot.intStorageLocationId							
+				--			,ItemsToConsume.intLotId = Lot.intLotId 
+				--	FROM	@ItemsToPost ItemsToConsume LEFT JOIN dbo.tblICLot Lot
+				--				ON ItemsToConsume.intLotId = Lot.intSplitFromLotId
+				--	WHERE	EXISTS (
+				--				SELECT	TOP 1 1
+				--				FROM	#tmpICInventoryTransaction InvTrans
+				--				WHERE	InvTrans.intLotId = Lot.intLotId 
+				--						AND InvTrans.intTransactionTypeId = 15
+				--			)
+				--			AND Lot.intLotId IS NOT NULL
+				--END 
 
 				EXEC @intReturnValue = dbo.uspICRepostCosting
 					@strBatchId
@@ -1778,6 +1778,20 @@ BEGIN
 					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+
+
+				-- Call the MFG Cost Adjustment if Produce has zero cost and Consume has non-zero cost. 
+				IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strTransactionId = @strTransactionId AND t.strTransactionForm = 'Produce' AND t.dblCost = 0 AND t.dblQty > 0)
+				AND EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strTransactionId = @strTransactionId AND t.strTransactionForm = 'Consume' AND t.dblCost <> 0 AND t.dblQty < 0)
+				AND EXISTS (SELECT TOP 1 1 FROM tblMFWorkOrder wo WHERE strWorkOrderNo = @strTransactionId AND strCostAdjustmentBatchId IS NOT NULL) 
+				AND NOT EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction t WHERE t.strTransactionId = @strTransactionId AND t.dblQty <> 0 AND t.strBatchId <> @strBatchId)
+				BEGIN 
+					EXEC uspMFRepostCostAdjustment 
+						@strCostAdjustmentBatchId = NULL 
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
+						,@dtmDate = @dtmDate
+						,@strWorkOrderNo = @strTransactionId
+				END 
 
 				-- Special delete on #tmpICInventoryTransaction
 				-- Produce and Consume transactions typically shares a batch but hold different transaction ids. 
