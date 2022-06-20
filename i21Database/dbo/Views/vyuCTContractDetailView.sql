@@ -8,7 +8,8 @@ AS
 			IU.intUnitMeasureId,				CD.intPricingTypeId,			CD.dblQuantity					AS	dblDetailQuantity,				
 			CD.dblFutures,						CD.dblBasis,					CD.intFutureMarketId,							
 			CD.intFutureMonthId,				CD.dblCashPrice,				CD.intCurrencyId,			
-			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) as dblRate,								CD.intContractStatusId,			CD.intMarketZoneId,								
+			CASE WHEN CD.dblRate <> 0 THEN CD.dblRate ELSE dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) END as dblRate,										
+			CD.intContractStatusId,				CD.intMarketZoneId,								
 			CD.intDiscountTypeId,				CD.intDiscountId,				CD.intContractOptHeaderId,						
 			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
 			CD.strFobBasis,						CD.intRailGradeId,				CD.strRemark,
@@ -202,6 +203,10 @@ AS
 		, CD.dblAverageQuantity
 		, IAU.strUnitMeasure AS strAverageUOM
 		, CD.ysnApplyDefaultTradeFinance
+		, CD.ysnTaxOverride
+		, CD.strTaxPoint
+		, CD.strTaxLocation
+		, CD.intTaxGroupId
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

@@ -65,12 +65,16 @@ BEGIN
 	DECLARE	 @AllowIntraEntries BIT
 			,@DueToAccountId	INT
 			,@DueFromAccountId  INT
+			,@OverrideCompanySegment  BIT
 			,@OverrideLocationSegment  BIT
+			,@OverrideLineOfBusinessSegment BIT
 	SELECT TOP 1
 		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END, 
 		  @DueToAccountId	= ISNULL([intDueToAccountId], 0), 
 		  @DueFromAccountId = ISNULL([intDueFromAccountId], 0),
-		  @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0)
+		  @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+		  @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+		  @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
 	FROM tblAPCompanyPreference
 	-- Get Total Value of Other Charges Taxes
 	 --SELECT @ReceiptId = IRI.intInventoryReceiptId
@@ -364,7 +368,7 @@ BEGIN
             ) Details
 			OUTER APPLY (
 				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, 0, @OverrideLocationSegment, 0)
+				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
@@ -511,7 +515,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
+		[intAccountId]					=	voucherDetails.intAccountId,
 		[dblDebit]						=	voucherDetails.dblTotal,
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	ISNULL(voucherDetails.dblTotalUnits,0),
@@ -561,10 +565,6 @@ BEGIN
 			CROSS APPLY dbo.fnAPGetVoucherDetailDebitEntry(A.intBillId) voucherDetails
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
-			OUTER APPLY (
-				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, 0, @OverrideLocationSegment, 0)
-			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType <> 15
 	
@@ -625,7 +625,7 @@ BEGIN
 				ON A.intEntityVendorId = C.[intEntityId]
 	OUTER APPLY (
 		SELECT intOverrideAccount
-		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, 0, @OverrideLocationSegment, 0)
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	      AND @AllowIntraEntries = 1
@@ -977,7 +977,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
+		[intAccountId]					=	voucherDetails.intAccountId,
 		[dblDebit]						=	voucherDetails.dblTotal,
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -1019,10 +1019,6 @@ BEGIN
 			CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
-			OUTER APPLY (
-				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, 0, @OverrideLocationSegment, 0)
-			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	/*AND 1 = (
 		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227) // third party inv shipment vendor tax // PO Tax
@@ -1104,7 +1100,7 @@ BEGIN
 				ON voucherDetails.intBillDetailId = B.intBillDetailId
 			OUTER APPLY (
 				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, 0, @OverrideLocationSegment, 0)
+				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
@@ -1119,7 +1115,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
+		[intAccountId]					=	D.intAccountId,
 		-- [dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
 		-- 											THEN (CASE 
 		-- 													--IF CHARGE IS THE ITEM FOR ysnPrice, REVERSE THE TAX SIGN
@@ -1218,10 +1214,6 @@ BEGIN
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			LEFT JOIN tblICItem F
 				ON B.intItemId = F.intItemId
-			OUTER APPLY (
-				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], D.intAccountId, 0, @OverrideLocationSegment, 0)
-			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType IN (1,3)
 		  AND A.intTransactionType <> 15
@@ -1230,7 +1222,7 @@ BEGIN
 		  --AND (B.intInventoryReceiptItemId > 0 OR B.intInventoryShipmentChargeId > 0 OR B.intCustomerStorageId > 0) --create tax adjustment only for integration
 	GROUP BY A.dtmDate
 	,D.ysnTaxAdjusted
-	,OVERRIDESEGMENT.intOverrideAccount
+	,D.intAccountId
 	,A.strReference
 	,A.strVendorOrderNumber
 	,C.strVendorId

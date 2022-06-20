@@ -425,29 +425,18 @@ BEGIN TRY
 			SELECT @strRestrictPickQtyByRequiredQty = 'True'
 		END
 
-		IF @strPickByFullPallet = 'False'
-			AND @strRestrictPickQtyByRequiredQty = 'True'
-		BEGIN
-			IF EXISTS (
-					SELECT 1
-					FROM tblMFOrderDetail OD
-					LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
-						AND OD.intOrderHeaderId = T.intOrderHeaderId
-					WHERE OD.intOrderHeaderId = @intOrderHeaderId
-						AND OD.intItemId = @intItemId
-						AND OD.dblQty > 0
-					GROUP BY OD.dblWeight
-					HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) > OD.dblWeight
-					)
+		IF @strPickByFullPallet = 'False' AND @strRestrictPickQtyByRequiredQty = 'True' AND EXISTS(SELECT 1
+																								   FROM tblMFOrderDetail OD
+																								   LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId AND OD.intOrderHeaderId = T.intOrderHeaderId
+																								   LEFT JOIN tblMFStageWorkOrder SWO ON OD.intOrderHeaderId = SWO.intOrderHeaderId
+																								   LEFT JOIN tblMFRecipe R ON SWO.intItemId = R.intItemId 
+																								   LEFT JOIN tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId AND RI.intItemId = @intItemId 
+																								   WHERE OD.intOrderHeaderId = @intOrderHeaderId AND OD.intItemId = @intItemId 
+																								   GROUP BY RI.dblUpperTolerance,T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight
+																								   HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) > (ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight), 0) * dblUpperTolerance / 100) + (ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight), 0)))
 			BEGIN
-				RAISERROR (
-						'Task Qty cannot be greater than Items required Qty.'
-						,16
-						,1
-						)
-
+				RAISERROR ('Task Qty cannot be greater than Upper Tolerance.', 16, 1)
 				RETURN
-			END
 		END
 	END
 

@@ -816,6 +816,13 @@
     <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
     <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
+    <Build Include="dbo\Views\vyuCTTaxLocation.sql" />
+    <Build Include="dbo\Tables\tblMFShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Views\vyuMFGetShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateAccountOnPost.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10595,6 +10602,7 @@
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
     <Build Include="dbo\Views\vyuGRSearchUOMRounding.sql" />
+	<Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -29,8 +29,20 @@
 	left join tblEMEntity e on e.intEntityId = d.intResourcesEntityId  
 	left join tblEMEntityToContact f on f.intEntityId = e.intEntityId and f.ysnDefaultContact = convert(bit,1)  
 	left join tblEMEntity g on g.intEntityId = f.intEntityContactId  
-	left join tblHDTimeEntryTimeOffNotification h on h.intTimeOffRequestId = a.intTimeOffRequestId and h.intEntityRecipientId = d.intResourcesEntityId 
+	--left join tblHDTimeEntryTimeOffNotification h on h.intTimeOffRequestId = a.intTimeOffRequestId and h.intEntityRecipientId = d.intResourcesEntityId 
+	outer apply(
+		select top 1 ysnSent
+					,intEntityRecipientId
+					,intTimeOffRequestId
+					,dtmDateSent
+		from tblHDTimeEntryTimeOffNotification
+		where intTimeOffRequestId = a.intTimeOffRequestId and 
+			  intEntityRecipientId = d.intResourcesEntityId 
+	) h
 	where  
 	convert(int, convert(nvarchar(8), getdate(), 112)) >= convert(int, convert(nvarchar(8), a.dtmDateFrom, 112))  
 	and convert(int, convert(nvarchar(8), getdate(), 112)) <= convert(int, convert(nvarchar(8), a.dtmDateTo, 112))  
 	and DATEpart(weekday,getdate()) between 2 and 6
+	and isnull(g.strEmail, '') <> ''
+	and isnull(h.ysnSent,convert(bit,0)) = 0
+GO

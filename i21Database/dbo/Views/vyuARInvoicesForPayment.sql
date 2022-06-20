@@ -71,7 +71,7 @@ SELECT
  	,intSourceId						= ARIFP.intSourceId 
 	,ysnClosed							= ARIFP.ysnClosed
 	,ysnForgiven						= ARIFP.ysnForgiven
-	,intDaysOld							= DATEDIFF(DAYOFYEAR, ARIFP.[dtmDate], CAST(GETDATE() AS DATE))
+	,intDaysOld							= DATEDIFF(DAYOFYEAR, CAST(ARIFP.[dtmDate] AS DATE), CAST(GETUTCDATE() AS DATE))
 	,intPayToBankAccountId				= ARIFP.intPayToBankAccountId
 	,strPayToBankAccountNo				= ISNULL(ARIFP.strPayToBankAccountNo, '')
 FROM (
