@@ -9,3 +9,7 @@
 	CONSTRAINT [FK_tblTRRackPriceHeader_tblTRSupplyPoint_intSupplyPointId] FOREIGN KEY ([intSupplyPointId]) REFERENCES [dbo].[tblTRSupplyPoint] ([intSupplyPointId]) ON DELETE CASCADE, 
     CONSTRAINT [AK_tblTRRackPriceHeader] UNIQUE ([intSupplyPointId], [dtmEffectiveDateTime])
 )
+GO
+
+CREATE INDEX [IX_tblTRRackPriceHeader_dtmEffectiveDateTime] ON [dbo].[tblTRRackPriceHeader] ([dtmEffectiveDateTime])
+GO
