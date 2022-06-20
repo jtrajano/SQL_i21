@@ -55,6 +55,7 @@ DECLARE @tblRestApiItemTaxes TABLE (
 	, strTaxClass NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, ysnAddToCost BIT NULL
 	, ysnTaxAdjusted BIT NULL
+	, ysnOverrideTaxGroup BIT NULL
 )
 
 INSERT INTO @tblRestApiItemTaxes (
@@ -85,7 +86,8 @@ INSERT INTO @tblRestApiItemTaxes (
 	, intUnitMeasureId
 	, strUnitMeasure
 	, strTaxClass
-	, ysnAddToCost)
+	, ysnAddToCost
+	, ysnOverrideTaxGroup)
 EXEC [dbo].[uspARGetItemTaxes]
 	@ItemId= @ItemId,
 	@LocationId= @LocationId,
