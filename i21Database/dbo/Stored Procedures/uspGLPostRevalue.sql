@@ -19,14 +19,9 @@ DECLARE @tblPostError TABLE(
  strTransactionId NVARCHAR(40)  
 )  
   
---BEGIN TRANSACTION  
+  DECLARE @ysnHasDetails BIT = 0
+  SELECT @ysnHasDetails = 1 FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId
 
-  IF NOT EXISTS(SELECT 1 FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId )
-  BEGIN
-    SELECT  @strMessage = 'There are no transactions to revalue'
-    GOTO _error
-  END
-  
   DECLARE @errorNum INT  
   DECLARE @dateNow DATETIME  
   SELECT @dateNow = GETDATE()  
@@ -114,7 +109,8 @@ DECLARE @tblPostError TABLE(
   DECLARE @defaultType NVARCHAR(20)   
   SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable() f   
   WHERE f.strModule COLLATE Latin1_General_CI_AS = @strTransactionType;  
-    
+
+  IF @ysnHasDetails = 1
   WITH cte as(  
    SELECT   
     [strTransactionId]  = B.strConsolidationNumber  
