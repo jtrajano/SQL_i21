@@ -872,7 +872,7 @@ BEGIN TRY
 				UPDATE CD
 				SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
 					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost),
-					CD.dblFXPrice = dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,CD.intFXPriceUOMId,CD.dblCashPrice) *
+					CD.dblFXPrice = ((CD.dblCashPrice * (sUOM.dblUnitQty / fUOM.dblUnitQty)) * tUOM.dblUnitQty) * 
 					(
 						case
 						when CD.intCurrencyId = CD.intInvoiceCurrencyId or CD.intCurrencyId = isnull(ICY.intMainCurrencyId,0)
@@ -887,9 +887,12 @@ BEGIN TRY
 						else 1
 						end
 					)
-				FROM tblCTContractDetail	CD WITH (ROWLOCK) 
+				FROM tblCTContractDetail	CD WITH (ROWLOCK)
+				join tblICItemUOM fUOM on fUOM.intItemUOMId = CD.intPriceItemUOMId
+				join tblICItemUOM tUOM on tUOM.intItemUOMId = CD.intFXPriceUOMId
 				JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
 				LEFT JOIN	tblSMCurrency		ICY	ON	ICY.intCurrencyID = CD.intInvoiceCurrencyId
+				cross apply (select top 1 *  from tblICItemUOM where ysnStockUnit = 1) sUOM
 				where PF.intPriceFixationId = @intPriceFixationId
 
 
@@ -926,7 +929,8 @@ BEGIN TRY
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
 					CD.dblBasis 			=	CASE WHEN CH.intPricingTypeId = 3 THEN null ELSE CD.dblBasis END,
 					CD.dblRate	= case when @ysnEnableFXFieldInContractPricing = 1 then @dblFixationFX else CD.dblRate end,
-					CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 then 1 else CD.ysnUseFXPrice end
+					CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 then 1 else CD.ysnUseFXPrice end,
+					CD.dblFXPrice			=	null
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intContractDetailId, CD.intSplitFromId)
