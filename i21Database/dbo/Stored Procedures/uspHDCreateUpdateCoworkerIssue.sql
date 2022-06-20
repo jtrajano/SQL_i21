@@ -66,7 +66,7 @@ BEGIN
 											  ,ysnActive				  = CoworkerGoals.ysnActive 
 								FROM tblHDCoworkerGoal CoworkerGoals
 										INNER JOIN tblHDCoworkerGoalDetail CoworkerGoalDetail
-								ON CoworkerGoals.intCoworkerGoalId = CoworkerGoalDetail.intCoworkerGoalDetailId
+								ON CoworkerGoals.intCoworkerGoalId = CoworkerGoalDetail.intCoworkerGoalId
 								WHERE CoworkerGoals.intEntityId = Agent.intEntityId AND
 									  CoworkerGoalDetail.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
 						) CoworkerGoalTimeEntryperiodDetails
