@@ -88,6 +88,10 @@ BEGIN
 		,intAttributeId INT
 		)
 
+	DELETE
+	FROM tblMFShortTermPlanningViewDetail
+	WHERE intUserId = @intUserId
+
 	INSERT INTO #tblMFShortTermDemand (
 		intItemId
 		,intLocationId
@@ -206,13 +210,9 @@ BEGIN
 		AND F.intLocationId = Inv.intLocationId
 	WHERE Inv.intAttributeId = 5
 
-	DELETE
-	FROM tblMFShortTermPlanningViewDetail
-	WHERE intUserId = @intUserId
-
 	IF @strColumnName IN (
 			'Approved Qty'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -251,7 +251,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'Not Approved Qty'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -290,7 +290,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'In-Transit to WHSE'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -331,7 +331,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'Arrived in Port'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -376,7 +376,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'CBS'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -412,7 +412,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'Scheduled'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		
@@ -447,7 +447,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'Late Open Contracts'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -475,7 +475,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'Forward Open Contracts'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -504,7 +504,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'No ETA'
-			,''
+			,'All Item'
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
