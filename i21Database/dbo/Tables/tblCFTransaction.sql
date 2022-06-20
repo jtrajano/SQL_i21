@@ -315,4 +315,6 @@ CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K27_K1_K29_K31
 INCLUDE ( 	[dblQuantity],
 	[strTransactionType])
 GO
-
+CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_dtmTransactionDate]
+    ON [dbo].[tblCFTransaction]([dtmTransactionDate] ASC);
+GO
