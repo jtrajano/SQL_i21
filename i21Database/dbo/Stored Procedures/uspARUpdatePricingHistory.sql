@@ -19,22 +19,12 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 	BEGIN
 
 		UPDATE  ARPH
-		SET
-			[ysnApplied] = 0
-		FROM
-			tblARPricingHistory ARPH
-		INNER JOIN
-			tblSOSalesOrderDetail SOSOD
-				ON ARPH.intTransactionDetailId = SOSOD.intSalesOrderDetailId
-		INNER JOIN
-			tblSOSalesOrder SO
-				ON SOSOD.intSalesOrderId = SO.intSalesOrderId
-		INNER JOIN
-			tblARTransactionDetail ARTD
-				ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId 
-				AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
-		WHERE
-			ARPH.[intSourceTransactionId] = @SourceTransactionId
+		SET [ysnApplied] = 0
+		FROM tblARPricingHistory ARPH
+		INNER JOIN tblSOSalesOrderDetail SOSOD ON ARPH.intTransactionDetailId = SOSOD.intSalesOrderDetailId
+		INNER JOIN tblSOSalesOrder SO ON SOSOD.intSalesOrderId = SO.intSalesOrderId
+		INNER JOIN tblARTransactionDetail ARTD ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
+		WHERE ARPH.[intSourceTransactionId] = @SourceTransactionId
 			AND ARPH.[intTransactionId] = @TransactionId
 			AND (
 					(
@@ -42,26 +32,17 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 						AND
 						(SOSOD.dblPrice <> ARTD.dblPrice OR SOSOD.strPricing <> ARTD.strPricing) 
 					)
-				--OR
-				--	()
 				)
 
 		UPDATE  ARPH
-		SET
-			 [ysnApplied]	= 0
+		SET [ysnApplied]	= 0
 			,[ysnDeleted]	= 1
-		FROM
-			tblARPricingHistory ARPH
-		INNER JOIN
-			tblARTransactionDetail ARTD
-				ON ARPH.intTransactionDetailId = ARTD.intTransactionDetailId
-		INNER JOIN
-			tblSOSalesOrder SO
-				ON ARTD.intTransactionId = SO.intSalesOrderId
-		WHERE
-			ARPH.[intSourceTransactionId] = @SourceTransactionId
-			AND ARPH.[intTransactionId] = @TransactionId
-			AND ARTD.intTransactionDetailId NOT IN (SELECT intSalesOrderDetailId FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @TransactionId)
+		FROM tblARPricingHistory ARPH
+		INNER JOIN tblARTransactionDetail ARTD ON ARPH.intTransactionDetailId = ARTD.intTransactionDetailId
+		INNER JOIN tblSOSalesOrder SO ON ARTD.intTransactionId = SO.intSalesOrderId
+		WHERE ARPH.[intSourceTransactionId] = @SourceTransactionId
+		  AND ARPH.[intTransactionId] = @TransactionId
+		  AND ARTD.intTransactionDetailId NOT IN (SELECT intSalesOrderDetailId FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @TransactionId)
 
 
 		INSERT INTO tblARPricingHistory
@@ -94,20 +75,13 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
 			,[intEntityId]				= @EntityId
-		FROM 
-			tblSOSalesOrderDetail SOSOD
-		INNER JOIN
-			tblSOSalesOrder SO
-				ON SOSOD.intSalesOrderId = SO.intSalesOrderId
-		INNER JOIN
-			tblARTransactionDetail ARTD
-				ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId 
-				AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
-		WHERE 
-			SO.intSalesOrderId = @TransactionId
-			AND SOSOD.intItemId = ARTD.intItemId		
-			AND (SOSOD.dblPrice <> ARTD.dblPrice OR SOSOD.[strPricing] <> ARTD.[strPricing])
-			AND NOT (SOSOD.dblPrice = ARTD.dblPrice AND SOSOD.[strPricing] = ARTD.[strPricing])
+		FROM tblSOSalesOrderDetail SOSOD
+		INNER JOIN tblSOSalesOrder SO ON SOSOD.intSalesOrderId = SO.intSalesOrderId
+		INNER JOIN tblARTransactionDetail ARTD ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
+		WHERE SO.intSalesOrderId = @TransactionId
+		  AND SOSOD.intItemId = ARTD.intItemId		
+		  AND (SOSOD.dblPrice <> ARTD.dblPrice OR SOSOD.[strPricing] <> ARTD.[strPricing])
+		  AND NOT (SOSOD.dblPrice = ARTD.dblPrice AND SOSOD.[strPricing] = ARTD.[strPricing])
 						
 		UNION ALL	
 
@@ -126,18 +100,11 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
 			,[intEntityId]				= @EntityId
-		FROM 
-			tblSOSalesOrderDetail SOSOD
-		INNER JOIN
-			tblSOSalesOrder SO
-				ON SOSOD.intSalesOrderId = SO.intSalesOrderId
-		INNER JOIN
-			tblARTransactionDetail ARTD
-				ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId 
-				AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
-		WHERE 
-			SO.intSalesOrderId = @TransactionId
-			AND SOSOD.intItemId <> ARTD.intItemId			
+		FROM tblSOSalesOrderDetail SOSOD
+		INNER JOIN tblSOSalesOrder SO ON SOSOD.intSalesOrderId = SO.intSalesOrderId
+		INNER JOIN tblARTransactionDetail ARTD ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
+		WHERE SO.intSalesOrderId = @TransactionId
+		  AND SOSOD.intItemId <> ARTD.intItemId			
 
 		UNION ALL
 
@@ -156,64 +123,40 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
 			,[intEntityId]				= @EntityId
-		FROM 
-			tblSOSalesOrderDetail SOSOD
-		INNER JOIN
-			tblSOSalesOrder SO
-				ON SOSOD.intSalesOrderId = SO.intSalesOrderId
-		WHERE 
-			SO.intSalesOrderId = @TransactionId
-			AND SOSOD.intSalesOrderDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)		
+		FROM tblSOSalesOrderDetail SOSOD
+		INNER JOIN tblSOSalesOrder SO ON SOSOD.intSalesOrderId = SO.intSalesOrderId
+		WHERE SO.intSalesOrderId = @TransactionId
+		  AND SOSOD.intSalesOrderDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)		
 	END
 
 IF @SourceTransactionId = 2 -- INVOICE
 	BEGIN
 
 		UPDATE  ARPH
-		SET
-			[ysnApplied] = 0
-		FROM
-			tblARPricingHistory ARPH
-		INNER JOIN
-			tblARInvoiceDetail ARID
-				ON ARPH.intTransactionDetailId = ARID.[intInvoiceDetailId]
-		INNER JOIN
-			tblARInvoice ARI
-				ON ARID.intInvoiceId = ARI.intInvoiceId
-		INNER JOIN
-			tblARTransactionDetail ARTD
-				ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
-				AND ARID.intInvoiceId = ARTD.intTransactionId 
-		WHERE
-			ARPH.[intSourceTransactionId] = @SourceTransactionId
-			AND ARPH.[intTransactionId] = @TransactionId
+		SET [ysnApplied] = 0
+		FROM tblARPricingHistory ARPH
+		INNER JOIN tblARInvoiceDetail ARID ON ARPH.intTransactionDetailId = ARID.[intInvoiceDetailId]
+		INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+		INNER JOIN tblARTransactionDetail ARTD ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId AND ARID.intInvoiceId = ARTD.intTransactionId 
+		WHERE ARPH.[intSourceTransactionId] = @SourceTransactionId
+		  AND ARPH.[intTransactionId] = @TransactionId
 			AND (
 					(
 						ARID.intItemId = ARTD.intItemId		
 						AND
 						(ARID.dblPrice <> ARTD.dblPrice OR ARID.strPricing <> ARTD.strPricing)
 					)
-				--OR
-				--	()
 				)
 
-
-		UPDATE  ARPH
-		SET
-			 [ysnApplied]	= 0
-			,[ysnDeleted]	= 1
-		FROM
-			tblARPricingHistory ARPH
-		INNER JOIN
-			tblARTransactionDetail ARTD
-				ON ARPH.intTransactionDetailId = ARTD.intTransactionDetailId
-		INNER JOIN
-			tblARInvoice ARI
-				ON ARTD.intTransactionId = ARI.intInvoiceId 
-		WHERE
-			ARPH.[intSourceTransactionId] = @SourceTransactionId
-			AND ARPH.[intTransactionId] = @TransactionId
-			AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
+		UPDATE ARPH
+		SET [ysnApplied]	= 0
+		  , [ysnDeleted]	= 1
+		FROM tblARPricingHistory ARPH
+		INNER JOIN tblARTransactionDetail ARTD ON ARPH.intTransactionDetailId = ARTD.intTransactionDetailId
+		INNER JOIN tblARInvoice ARI ON ARTD.intTransactionId = ARI.intInvoiceId 
+		WHERE ARPH.[intSourceTransactionId] = @SourceTransactionId
+		  AND ARPH.[intTransactionId] = @TransactionId
+		  AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
 
 		INSERT INTO tblARPricingHistory
 			([intSourceTransactionId]
@@ -245,20 +188,13 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
 			,[intEntityId]				= @EntityId
-		FROM 
-			tblARInvoiceDetail ARID
-		INNER JOIN
-			tblARInvoice ARI
-				ON ARID.intInvoiceId = ARI.intInvoiceId
-		INNER JOIN
-			tblARTransactionDetail ARTD
-				ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
-				AND ARID.intInvoiceId = ARTD.intTransactionId 
-		WHERE 
-			ARI.intInvoiceId = @TransactionId
-			AND ARID.intItemId = ARTD.intItemId		
-			AND (ARID.dblPrice <> ARTD.dblPrice OR ARID.[strPricing] <> ARTD.[strPricing])
-			AND NOT (ARID.dblPrice = ARTD.dblPrice AND ARID.[strPricing] = ARTD.[strPricing])
+		FROM tblARInvoiceDetail ARID
+		INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+		INNER JOIN tblARTransactionDetail ARTD ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId AND ARID.intInvoiceId = ARTD.intTransactionId 
+		WHERE ARI.intInvoiceId = @TransactionId
+		  AND ARID.intItemId = ARTD.intItemId		
+		  AND (ARID.dblPrice <> ARTD.dblPrice OR ARID.[strPricing] <> ARTD.[strPricing])
+		  AND NOT (ARID.dblPrice = ARTD.dblPrice AND ARID.[strPricing] = ARTD.[strPricing])
 						
 		UNION ALL	
 
@@ -277,18 +213,11 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
 			,[intEntityId]				= @EntityId
-		FROM 
-			tblARInvoiceDetail ARID
-		INNER JOIN
-			tblARInvoice ARI
-				ON ARID.intInvoiceId = ARI.intInvoiceId
-		INNER JOIN
-			tblARTransactionDetail ARTD
-				ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
-				AND ARID.intInvoiceId = ARTD.intTransactionId 
-		WHERE 
-			ARI.intInvoiceId = @TransactionId
-			AND ARID.intItemId <> ARTD.intItemId		
+		FROM tblARInvoiceDetail ARID
+		INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+		INNER JOIN tblARTransactionDetail ARTD ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId AND ARID.intInvoiceId = ARTD.intTransactionId 
+		WHERE ARI.intInvoiceId = @TransactionId
+		  AND ARID.intItemId <> ARTD.intItemId		
 
 		UNION ALL
 
@@ -307,14 +236,10 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
 			,[intEntityId]				= @EntityId
-		FROM 
-			tblARInvoiceDetail ARID
-		INNER JOIN
-			tblARInvoice ARI
-				ON ARID.intInvoiceId = ARI.intInvoiceId
-		WHERE 
-			ARI.intInvoiceId = @TransactionId
-			AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)		
+		FROM tblARInvoiceDetail ARID
+		INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+		WHERE ARI.intInvoiceId = @TransactionId
+		  AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)		
 	END
 		
 	
