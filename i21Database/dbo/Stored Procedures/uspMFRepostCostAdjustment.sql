@@ -2,6 +2,7 @@
 	@strCostAdjustmentBatchId AS NVARCHAR(50)
 	,@intEntityUserSecurityId AS INT
 	,@dtmDate AS DATETIME = NULL -- This is used to fix the stock rebuild.
+	,@strWorkOrderNo AS NVARCHAR(50) = NULL 
 AS
 BEGIN TRY
 	DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
@@ -20,7 +21,7 @@ BEGIN TRY
 		,@GLEntries AS RecapTableType
 		,@intTransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
-		,@strWorkOrderNo NVARCHAR(50)
+		--,@strWorkOrderNo NVARCHAR(50)
 		,@intManufacturingProcessId INT
 		,@intTransactionId INT
 		,@strConsumeBatchId NVARCHAR(50)
@@ -54,7 +55,8 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@intWOItemUOMId = intItemUOMId
 	FROM tblMFWorkOrder
-	WHERE strCostAdjustmentBatchId = @strCostAdjustmentBatchId
+	WHERE --strCostAdjustmentBatchId = @strCostAdjustmentBatchId
+		strWorkOrderNo = @strWorkOrderNo
 
 	SELECT @intUnitMeasureId = intUnitMeasureId
 	FROM tblICItemUOM
@@ -480,9 +482,9 @@ BEGIN TRY
 			FROM @adjustedEntries
 			)
 	BEGIN
-		---- Get a new batch id to repost the cost adjustment. 
-		--EXEC uspSMGetStartingNumber 3
-		--	,@strBatchIdForRepost OUT
+		-- Get a new batch id to repost the cost adjustment. 
+		EXEC uspSMGetStartingNumber 3
+			,@strBatchIdForRepost OUT
 
 		SET @intReturnValue = 0
 
