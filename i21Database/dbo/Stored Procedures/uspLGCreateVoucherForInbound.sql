@@ -228,7 +228,9 @@ BEGIN TRY
 			,[strReferenceNo]
 			,[intBankValuationRuleId]
 			,[strComments]
-			,[intPurchaseTaxGroupId])
+			,[intPurchaseTaxGroupId]
+			,[strTaxPoint]
+			,[intTaxLocationId])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -310,7 +312,9 @@ BEGIN TRY
 			,[strReferenceNo] = L.strTradeFinanceReferenceNo
 			,[intBankValuationRuleId] = L.intBankValuationRuleId
 			,[strComments] = L.strTradeFinanceComments
-			,[intPurchaseTaxGroupId] = @intTaxGroupId
+			,[intPurchaseTaxGroupId] = CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
+			,[strTaxPoint] = L.strTaxPoint
+			,[intTaxLocationId] = L.intTaxLocationId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -472,7 +476,9 @@ BEGIN TRY
 				,[strReferenceNo]
 				,[intBankValuationRuleId]
 				,[strComments]
-				,[intPurchaseTaxGroupId])
+				,[intPurchaseTaxGroupId]
+				,[strTaxPoint]
+				,[intTaxLocationId])
 			SELECT
 				[intEntityVendorId]
 				,[intTransactionType] = CASE WHEN @intType = 1 THEN 1 WHEN @intType = 2 THEN 16 END
@@ -536,6 +542,8 @@ BEGIN TRY
 				,[intBankValuationRuleId]
 				,[strComments]
 				,[intPurchaseTaxGroupId]
+				,[strTaxPoint]
+				,[intTaxLocationId]
 			FROM @voucherPayable
 			WHERE intEntityVendorId = @intVendorEntityId
 
@@ -560,7 +568,7 @@ BEGIN TRY
 				)
 				SELECT 
 					[intVoucherPayableId]			= payables.intVoucherPayableId
-					,[intTaxGroupId]				= @intTaxGroupId
+					,[intTaxGroupId]				= CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
 					,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
 					,[intTaxClassId]				= vendorTax.[intTaxClassId]
 					,[strTaxableByOtherTaxes]		= vendorTax.[strTaxableByOtherTaxes]

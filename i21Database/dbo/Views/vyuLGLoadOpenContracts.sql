@@ -118,6 +118,8 @@ SELECT CD.intContractDetailId
 	,ysnAllowReweighs = WW.ysnPayablesOnShippedWeights
 	,ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CD.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 	,CH.intTermId
+	,GCD.intTaxGroupId
+	,GCD.strTaxGroup
 FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 CROSS JOIN tblCTContractHeader CH
 INNER JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -157,6 +159,7 @@ LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
 LEFT JOIN tblSMTerm TM ON TM.intTermID = CH.intTermId
+LEFT JOIN vyuCTGridContractDetail GCD ON GCD.intContractDetailId = CD.intContractDetailId
 OUTER APPLY (
 	SELECT TOP 1
 		S.intContractDetailId
