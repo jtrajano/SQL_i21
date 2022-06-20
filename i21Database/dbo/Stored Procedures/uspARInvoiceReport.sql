@@ -359,7 +359,7 @@ SELECT
 	, dblTotalTax					= CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END ELSE ISNULL(TOTALTAX.dblSSTTax, 0) END
 	, dblPrice						= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) ELSE 0 END ELSE NULL END
 	, dblItemPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) ELSE NULL END
-	, strPaid						= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
+	, strPaid						= CASE WHEN INV.ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	, strPosted						= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
 	, strTransactionType			= INV.strTransactionType
 	, intRecipeId					= INVOICEDETAIL.intRecipeId
@@ -409,7 +409,7 @@ SELECT
 										ELSE ''
 									END
 	, intDaysOld               		= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
-										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmToCalculate, CAST(INV.dtmDate AS DATE))
+										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmToCalculate, CAST((CASE WHEN INVOICEDETAIL.ysnPaid = 1 THEN PAYMENT.dtmDatePaid ELSE INV.dtmDate END) AS DATE))
 										ELSE 0
 									END
 	, strServiceChareInvoiceNumber 	= INVOICEDETAIL.strSCInvoiceNumber
@@ -472,6 +472,8 @@ LEFT JOIN (
 		,dblServiceChargeAmountDue	= ID.dblServiceChargeAmountDue
 		,dblServiceChargeAPR		= ID.dblServiceChargeAPR
 		,dtmDueDate					= INVSC.dtmDueDate
+		,ysnPaid					= INVSC.ysnPaid
+		,intSCInvoiceId				= ID.intSCInvoiceId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN tblARInvoice INVSC ON INVSC.intInvoiceId = ID.intSCInvoiceId
@@ -520,6 +522,14 @@ LEFT JOIN (
 	  AND (@intItemForFreightId IS NULL OR ID.intItemId <> @intItemForFreightId)
 	GROUP BY ID.intInvoiceId
 ) TOTALTAX ON TOTALTAX.intInvoiceId = INV.intInvoiceId
+LEFT JOIN (
+	SELECT 
+		 dtmDatePaid		= MAX(dtmDatePaid)
+		,ARPD.intInvoiceId
+	FROM tblARPaymentDetail ARPD
+	INNER JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
+	GROUP BY ARPD.intInvoiceId
+) PAYMENT ON INVOICEDETAIL.intSCInvoiceId = PAYMENT.intInvoiceId
 
 --CUSTOMERS
 SELECT intEntityCustomerId	= C.intEntityId
