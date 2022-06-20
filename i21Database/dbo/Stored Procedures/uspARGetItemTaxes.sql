@@ -25,7 +25,7 @@ DECLARE  @IsCustomerSiteTaxable	BIT
 		,@NewTaxGroupId			INT = 0
 		,@IsOverrideTaxGroup	BIT = 0
 
-SELECT @OriginalTaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId, NULL)
+SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId, NULL), 0)
 
 IF(ISNULL(@TaxGroupId,0) = 0)
 BEGIN
