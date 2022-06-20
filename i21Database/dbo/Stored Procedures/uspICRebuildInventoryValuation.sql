@@ -1658,26 +1658,26 @@ BEGIN
 							OR intTransactionTypeId = 8 
 						)
 
-				-- Check if lot is involved in an item change. 
-				-- If it is, then update the consume to the new lot id, item id, and item uom id. 
-				BEGIN 
-					UPDATE	ItemsToConsume
-					SET		ItemsToConsume.intItemId = Lot.intItemId
-							,ItemsToConsume.intItemUOMId = dbo.fnGetMatchingItemUOMId(Lot.intItemId, ItemsToConsume.intItemUOMId)
-							,ItemsToConsume.intItemLocationId = Lot.intItemLocationId 
-							,ItemsToConsume.intSubLocationId = Lot.intSubLocationId
-							,ItemsToConsume.intStorageLocationId = Lot.intStorageLocationId							
-							,ItemsToConsume.intLotId = Lot.intLotId 
-					FROM	@ItemsToPost ItemsToConsume LEFT JOIN dbo.tblICLot Lot
-								ON ItemsToConsume.intLotId = Lot.intSplitFromLotId
-					WHERE	EXISTS (
-								SELECT	TOP 1 1
-								FROM	#tmpICInventoryTransaction InvTrans
-								WHERE	InvTrans.intLotId = Lot.intLotId 
-										AND InvTrans.intTransactionTypeId = 15
-							)
-							AND Lot.intLotId IS NOT NULL
-				END 
+				---- Check if lot is involved in an item change. 
+				---- If it is, then update the consume to the new lot id, item id, and item uom id. 
+				--BEGIN 
+				--	UPDATE	ItemsToConsume
+				--	SET		ItemsToConsume.intItemId = Lot.intItemId
+				--			,ItemsToConsume.intItemUOMId = dbo.fnGetMatchingItemUOMId(Lot.intItemId, ItemsToConsume.intItemUOMId)
+				--			,ItemsToConsume.intItemLocationId = Lot.intItemLocationId 
+				--			,ItemsToConsume.intSubLocationId = Lot.intSubLocationId
+				--			,ItemsToConsume.intStorageLocationId = Lot.intStorageLocationId							
+				--			,ItemsToConsume.intLotId = Lot.intLotId 
+				--	FROM	@ItemsToPost ItemsToConsume LEFT JOIN dbo.tblICLot Lot
+				--				ON ItemsToConsume.intLotId = Lot.intSplitFromLotId
+				--	WHERE	EXISTS (
+				--				SELECT	TOP 1 1
+				--				FROM	#tmpICInventoryTransaction InvTrans
+				--				WHERE	InvTrans.intLotId = Lot.intLotId 
+				--						AND InvTrans.intTransactionTypeId = 15
+				--			)
+				--			AND Lot.intLotId IS NOT NULL
+				--END 
 
 				EXEC @intReturnValue = dbo.uspICRepostCosting
 					@strBatchId
