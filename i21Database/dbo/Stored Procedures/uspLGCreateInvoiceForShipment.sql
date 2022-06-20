@@ -252,7 +252,6 @@ DECLARE
 			,[dtmMaintenanceDate]
 			,[dblMaintenanceAmount]
 			,[dblLicenseAmount]
-			,[intTaxGroupId]
 			,[intStorageLocationId]
 			,[ysnRecomputeTax]
 			,[intSCInvoiceId]
@@ -293,7 +292,10 @@ DECLARE
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
 			,[dblQualityPremium]
-			,[dblOptionalityPremium])
+			,[dblOptionalityPremium]
+			,[strTaxPoint]
+			,[intTaxLocationId]
+			,[intTaxGroupId])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -373,7 +375,6 @@ DECLARE
 			,[dtmMaintenanceDate]					= NULL
 			,[dblMaintenanceAmount]					= @ZeroDecimal 
 			,[dblLicenseAmount]						= @ZeroDecimal
-			,[intTaxGroupId]						= NULL
 			,[intStorageLocationId]					= NULL 
 			,[ysnRecomputeTax]						= 1
 			,[intSCInvoiceId]						= NULL
@@ -418,6 +419,9 @@ DECLARE
 														END
 			,[dblQualityPremium]					= LD.dblQualityPremium
 			,[dblOptionalityPremium]				= LD.dblOptionalityPremium
+			,[strTaxPoint]							= L.strTaxPoint
+			,[intTaxLocationId]						= L.intTaxLocationId
+			,[intTaxGroupId]						= LD.intTaxGroupId
 		FROM tblLGLoad L
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -530,7 +534,6 @@ DECLARE
 			,[dtmMaintenanceDate]
 			,[dblMaintenanceAmount]
 			,[dblLicenseAmount]
-			,[intTaxGroupId]
 			,[intStorageLocationId]
 			,[ysnRecomputeTax]
 			,[intSCInvoiceId]
@@ -585,7 +588,9 @@ DECLARE
 			,[intBankValuationRuleId]
 			,[strTradeFinanceComments]
 			,[strGoodsStatus]
-			)
+			,[strTaxPoint]
+			,[intTaxLocationId]
+			,[intTaxGroupId])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -655,7 +660,6 @@ DECLARE
 			,[dtmMaintenanceDate]					= NULL
 			,[dblMaintenanceAmount]					= @ZeroDecimal 
 			,[dblLicenseAmount]						= @ZeroDecimal
-			,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
 			,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
 			,[ysnRecomputeTax]						= 1
 			,[intSCInvoiceId]						= NULL
@@ -710,8 +714,12 @@ DECLARE
 			,[intBankValuationRuleId]				= TF.intBankValuationRuleId
 			,[strTradeFinanceComments]				= TF.strTradeFinanceComments
 			,[strGoodsStatus]						= TF.strGoodsStatus
+			,[strTaxPoint]							= L.strTaxPoint
+			,[intTaxLocationId]						= L.intTaxLocationId
+			,[intTaxGroupId]						= CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN ARSI.[intTaxGroupId] ELSE LD.intTaxGroupId END
 		FROM vyuARShippedItems ARSI
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARSI.intLoadDetailId
+			LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 			OUTER APPLY (
 				SELECT cp.* 
 					,dblPrevRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice prcp
