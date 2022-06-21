@@ -63,56 +63,61 @@ BEGIN
 		)
 	AND ID.strSessionId = @strSessionId
 
-	DECLARE @TransactionDate DATE
-	DECLARE @tblItemsToUpdateByDate InTransitTableType
+	IF EXISTS (SELECT TOP 1 NULL FROM @tblItemsToUpdate)
+		EXEC dbo.uspICIncreaseInTransitOutBoundQty @tblItemsToUpdate
 
-	DECLARE MY_CURSOR CURSOR 
-	  LOCAL STATIC READ_ONLY FORWARD_ONLY
-	FOR 
-	SELECT DISTINCT @TransactionDate 
-	FROM @tblItemsToUpdate
+	--DECLARE @TransactionDate DATE
+	--DECLARE @tblItemsToUpdateByDate InTransitTableType
 
-	OPEN MY_CURSOR
-	FETCH NEXT FROM MY_CURSOR INTO @TransactionDate
-	WHILE @@FETCH_STATUS = 0
-	BEGIN 
+	--DECLARE MY_CURSOR CURSOR 
+	--  LOCAL STATIC READ_ONLY FORWARD_ONLY
+	--FOR 
+	--SELECT DISTINCT @TransactionDate 
+	--FROM @tblItemsToUpdate
 
-		 INSERT INTO @tblItemsToUpdateByDate 
-			( [intItemId]
-			, [intItemLocationId]
-			, [intItemUOMId]
-			, [intLotId]
-			, [intSubLocationId]
-			, [intStorageLocationId]
-			, [dblQty]
-			, [intTransactionId]
-			, [strTransactionId]
-			, [intTransactionTypeId]
-			, [intFOBPointId]
-			, [dtmTransactionDate] )
-		 SELECT [intItemId]
-			, [intItemLocationId]
-			, [intItemUOMId]
-			, [intLotId]
-			, [intSubLocationId]
-			, [intStorageLocationId]
-			, [dblQty]
-			, [intTransactionId]
-			, [strTransactionId]
-			, [intTransactionTypeId]
-			, [intFOBPointId]
-			, [dtmTransactionDate]	
-		 FROM @tblItemsToUpdate ItemsToUpdate
-		 WHERE dtmTransactionDate = @TransactionDate
+	--OPEN MY_CURSOR
+	--FETCH NEXT FROM MY_CURSOR INTO @TransactionDate
+	--WHILE @@FETCH_STATUS = 0
+	--BEGIN 
 
-		 EXEC dbo.uspICIncreaseInTransitOutBoundQty @tblItemsToUpdateByDate
+	--	 INSERT INTO @tblItemsToUpdateByDate 
+	--		( [intItemId]
+	--		, [intItemLocationId]
+	--		, [intItemUOMId]
+	--		, [intLotId]
+	--		, [intSubLocationId]
+	--		, [intStorageLocationId]
+	--		, [dblQty]
+	--		, [intTransactionId]
+	--		, [strTransactionId]
+	--		, [intTransactionTypeId]
+	--		, [intFOBPointId]
+	--		, [dtmTransactionDate] )
+	--	 SELECT [intItemId]
+	--		, [intItemLocationId]
+	--		, [intItemUOMId]
+	--		, [intLotId]
+	--		, [intSubLocationId]
+	--		, [intStorageLocationId]
+	--		, [dblQty]
+	--		, [intTransactionId]
+	--		, [strTransactionId]
+	--		, [intTransactionTypeId]
+	--		, [intFOBPointId]
+	--		, [dtmTransactionDate]	
+	--	 FROM @tblItemsToUpdate ItemsToUpdate
+	--	 WHERE dtmTransactionDate = @TransactionDate
 
-		 DELETE FROM @tblItemsToUpdateByDate 
-		 WHERE dtmTransactionDate = @TransactionDate
+	--	 SELECT '@tblItemsToUpdateByDate', * FROM @tblItemsToUpdateByDate
 
-		 FETCH NEXT FROM MY_CURSOR INTO @TransactionDate
-	END
-	CLOSE MY_CURSOR
-	DEALLOCATE MY_CURSOR
+	--	 EXEC dbo.uspICIncreaseInTransitOutBoundQty @tblItemsToUpdateByDate
+
+	--	 DELETE FROM @tblItemsToUpdateByDate 
+	--	 WHERE dtmTransactionDate = @TransactionDate
+
+	--	 FETCH NEXT FROM MY_CURSOR INTO @TransactionDate
+	--END
+	--CLOSE MY_CURSOR
+	--DEALLOCATE MY_CURSOR
 
 END
