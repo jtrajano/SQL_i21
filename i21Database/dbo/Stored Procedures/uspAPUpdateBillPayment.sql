@@ -78,7 +78,8 @@ BEGIN
 			SELECT 
 				B.dblPayment,
 				CASE WHEN B.dblPayment + B.dblDiscount = B.dblAmountDue THEN B.dblDiscount 
-				WHEN C.ysnDiscountOverride = 1 THEN B.dblDiscount ELSE 0 END
+				--WHEN C.ysnDiscountOverride = 1 THEN B.dblDiscount 
+				ELSE 0 END
 				AS dblDiscount,
 				CASE WHEN B.dblPayment - B.dblInterest = B.dblAmountDue THEN B.dblInterest 
 				ELSE 0 END
@@ -136,7 +137,10 @@ BEGIN
 												CASE WHEN C.intTransactionType = 1 
 													THEN 
 														(CASE WHEN C.ysnDiscountOverride = 0 AND @amountDue = 0
+															--recalculate if not paid and not discount override
 															THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, @amountDue) 
+															WHEN C.dblAmountDue != 0 AND C.ysnDiscountOverride = 1
+															THEN C.dblDiscount
 															ELSE ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
 														END)
 												ELSE 0 END
@@ -183,7 +187,8 @@ BEGIN
 				B.dblPayment,
 				--if voucher amount due the same as the payment detail payment, use discount
 				CASE WHEN B.dblPayment + B.dblDiscount - B.dblInterest = C.dblAmountDue THEN B.dblDiscount 
-				WHEN C.ysnDiscountOverride = 1 THEN B.dblDiscount ELSE 0 END
+				--WHEN C.ysnDiscountOverride = 1 THEN B.dblDiscount 
+				ELSE 0 END
 				AS dblDiscount,
 				CASE WHEN B.dblPayment + B.dblDiscount - B.dblInterest = C.dblAmountDue THEN B.dblInterest 
 				ELSE 0 END
