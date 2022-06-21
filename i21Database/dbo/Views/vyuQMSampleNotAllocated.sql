@@ -4,7 +4,7 @@ SELECT
    A.intAllocationDetailId,
    A.dtmPStartDate dtmStartDateP,
    A.dtmPEndDate dtmEndDateP,
-   A.intPContractSeq intSequenceP,
+   ISNULL(A.intPContractSeq, S1.intContractSequence) intSequenceP,
    A.intSContractSeq intSequenceS,
    A.dtmPStartDate dtmStartDateS,
    A.dtmPEndDate dtmEndDateS,
