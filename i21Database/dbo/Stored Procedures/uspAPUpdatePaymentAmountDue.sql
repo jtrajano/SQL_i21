@@ -29,8 +29,16 @@ BEGIN
 								(
 									--GET THE AMOUNT DUE ON VOUCHER FOR ACCURACY OF VALUE
 									(C.dblAmountDue * (CASE WHEN B.ysnOffset = 1 THEN -1 ELSE 1 END)) 
-									+ B.dblPayment + B.dblDiscount - B.dblInterest)
+									+ B.dblPayment - B.dblInterest
+									-- + (CASE WHEN C.ysnDiscountOverride = 1 THEN B.dblDiscount --DISCOUNT IS VALID BECAUSE IT IS OVERRIDE
+									-- 		WHEN C.dblAmountDue = 0 THEN B.dblDiscount --DISCOUNT IS VALID BECAUSE AMOUNT DUE IS 0
+									-- 		ELSE 0 END)
+									--ONLY INCLUDE THE DISCOUNT IF VOUCHER IS FULLY PAID
+									--THIS SHOULD HANDLE MULTIPLE PARTIAL
+									--IF FIRST PARTIAL HAS BEEN POSTED, THAT PAYMENT SHOULD HAVE 0 DISCOUNT, IF NOT, DO A DATA FIX
+									+ (CASE WHEN C.dblAmountDue = 0 THEN B.dblDiscount ELSE 0 END)
 								)
+							)
 							ELSE B.dblDiscount
 							END
 					ELSE 0 END,
@@ -64,7 +72,6 @@ BEGIN
 													+  (B.dblInterest) --Interest should be part of the amount due computation if not fully paid.
 													AS DECIMAL(18,2)) END
 			--Do not update the discount/interest, we are using these fields to update the bill
-			--We are not honoring the discount if not fully paid and not override discount
 			-- B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
 			-- 					THEN B.dblDiscount ELSE 0 END,
 			-- B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
