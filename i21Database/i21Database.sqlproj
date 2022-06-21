@@ -9845,7 +9845,7 @@
     <Build Include="dbo\Tables\tblCFImportTransactionTaxType.sql" />
     <Build Include="dbo\Tables\tblCFImportTransactionTaxZeroQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
-	<Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
+	  <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10174,6 +10174,7 @@
     <Build Include="dbo\User Defined Types\SettleStorageTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
     <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
+    <Build Include="dbo\Functions\fnCTGetOverage.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
