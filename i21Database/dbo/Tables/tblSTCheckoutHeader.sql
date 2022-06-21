@@ -34,9 +34,6 @@
     [dblFuelAdjustmentAmount] DECIMAL(18, 6) NULL,
     [dblTotalRefundCount] DECIMAL(18, 6) NULL,
     [dblTotalRefundAmount] DECIMAL(18, 6) NULL,
-    [dblLoyaltyPpgDiscount] DECIMAL(18, 6) NULL,
-	[dblSummaryInfoFuelSales] DECIMAL(18, 6) NULL,
-	[dblSummaryInfoPopPredispensedAmount] DECIMAL(18, 6) NULL,
 
 	-- ATM
 	[dblATMBegBalance]					DECIMAL(18, 6) NULL,
@@ -89,6 +86,12 @@
 	-- 2 = Currently being Un-Posted
 	[intCheckoutCurrentProcess]	INT NOT NULL DEFAULT(0), 
     [dtmCheckoutProcessDate] DATETIME NULL,
+
+    --Consignment
+    [dblLoyaltyPpgDiscount] DECIMAL(18, 6) NULL,
+	[dblSummaryInfoFuelSales] DECIMAL(18, 6) NULL,
+	[dblSummaryInfoPopPredispensedAmount] DECIMAL(18, 6) NULL,
+    [dblEditableAggregateMeterReadingsForDollars] DECIMAL(18, 6) NULL,
 
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC),

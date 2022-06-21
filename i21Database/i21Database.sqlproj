@@ -867,6 +867,8 @@
     <Build Include="dbo\Tables\tblLGDispatchOrderRoute.sql" />
     <Build Include="dbo\Views\vyuARTaxLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspARCalculateInvoiceDeliveryFee.sql" />
+    <Build Include="dbo\Functions\fnSTGetGrossFuelSalesByCheckoutId.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCreateDepositToBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
