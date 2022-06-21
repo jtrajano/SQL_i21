@@ -1932,12 +1932,12 @@ BEGIN
 		SELECT intItemId,intItemLocationId,intItemUOMId,MAX(dtmDate)[dtmDate] 
 		FROM tblICInventoryStockAsOfDate 
 		GROUP BY  intItemId,intItemLocationId,intItemUOMId
-		)STOCKDATE ON COSTING.intItemId = STOCKDATE.intItemId AND COSTING.intItemUOMId = STOCKDATE.intItemUOMId AND STOCKDATE.intItemLocationId=COSTING.intItemLocationId
-		INNER JOIN tblICItem ITEM ON  ITEM.intItemId = COSTING.intItemId
-		INNER JOIN tblICItemLocation LOC ON COSTING.intItemLocationId = LOC.intItemLocationId
-		INNER JOIN tblSMCompanyLocation CLOC ON LOC.intLocationId = CLOC.intCompanyLocationId
-		WHERE COSTING.dtmDate < STOCKDATE.dtmDate
-		
+	) STOCKDATE ON COSTING.intItemId = STOCKDATE.intItemId AND COSTING.intItemUOMId = STOCKDATE.intItemUOMId AND STOCKDATE.intItemLocationId = COSTING.intItemLocationId
+	INNER JOIN tblICItem ITEM ON  ITEM.intItemId = COSTING.intItemId
+	INNER JOIN tblICItemLocation LOC ON COSTING.intItemLocationId = LOC.intItemLocationId
+	INNER JOIN tblSMCompanyLocation CLOC ON LOC.intLocationId = CLOC.intCompanyLocationId
+	WHERE COSTING.dtmDate < STOCKDATE.dtmDate
+	AND I.[strType] = 'POS'	
 
 	-- IC In Transit Costing
 	DELETE FROM @ItemsForInTransitCosting
