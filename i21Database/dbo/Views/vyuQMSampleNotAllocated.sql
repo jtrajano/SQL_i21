@@ -9,7 +9,7 @@ SELECT
    A.dtmPStartDate dtmStartDateS,
    A.dtmPEndDate dtmEndDateS,
    A.intPContractDetailId intContractDetailIdP,
-   A.strPContractNumber strContractNumberP,
+   ISNULL(A.strPContractNumber, S1.strContractNumber) strContractNumberP,
    A.intSContractDetailId intContractDetailIdS,
    A.strSContractNumber strContractNumberS,
    A.dblSAllocatedQty,
