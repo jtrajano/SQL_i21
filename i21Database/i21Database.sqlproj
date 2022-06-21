@@ -830,6 +830,7 @@
     <Build Include="dbo\Tables\tblARCustomerDefaultPayToBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
     <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCreditLineCurrencyRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
