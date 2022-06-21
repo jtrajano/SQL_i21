@@ -300,7 +300,7 @@ END
 					DECLARE @strCol AS NVARCHAR(max)
 					SET @colCtr = @colCtr + 1;
 
-					SELECT TOP 1 @strCol = strContractEndMonth FROM @tmpColList order by case when strContractEndMonth = 'Near By' then 0 else 1 end
+					SELECT TOP 1 @strCol = strContractEndMonth FROM @tmpColList order by case when strContractEndMonth = 'Near By' then 0 else 1 end , CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END
 			
 
 					SET @colstry = @colstry + '''' + @strCol + ''' as col' + cast(@colCtr as nvarchar(20)) + ','
