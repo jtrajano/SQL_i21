@@ -158,7 +158,7 @@
 	[strGoodsStatus]					NVARCHAR (100)	COLLATE Latin1_General_CI_AS	NULL,
 	[strTicketNumbers]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
 	[strCustomerReferences]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
-	[dblFreightCharge]					NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
+	[dblFreightCharge]					NUMERIC(18, 6)									NULL		DEFAULT ((0)),
 	[intFreightCompanySegment]			INT												NULL,
 	[intFreightLocationSegment]			INT												NULL,
 	[intTaxLocationId]					INT												NULL,
