@@ -150,7 +150,7 @@ BEGIN TRY
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end),
 			strWalterPositionLabel	= ISNULL(strPosition,'') + ' ' + 'Period',
 			strWalterOrigin			= dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin'),
-			strWalterPricing		= CASE WHEN CH.intPricingTypeId in (1,6) THEN 'Priced at ' + LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) +' ' + CY.strCurrency + '/' + PU.strUnitMeasure ELSE 
+			strWalterPricing		= CASE WHEN CD.intPricingTypeId in (1,6) THEN 'Priced at ' + LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) +' ' + CY.strCurrency + '/' + PU.strUnitMeasure ELSE 
 									   'To be fixed at ' + CASE WHEN ISNULL(CD.strFixationBy,'') <> '' THEN CD.strFixationBy +'''s Call, against '  ELSE '' END
 									   +  MA.strFutMarketName +	' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + '-' + CAST(MO.intYear AS NVARCHAR) + ' '
 									   +  CASE WHEN CD.intPricingTypeId in (2) AND CD.dblBasis > 0	  THEN '  +' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure  ELSE '     ' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure END + ''	
