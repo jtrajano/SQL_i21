@@ -53,6 +53,21 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('"Total Quantity Sold" should be greater than 0.', 16, 1)
 	END
+
+	-- Meter Dollars Sold should be >= 0 
+	IF EXISTS(SELECT TOP 1 1 FROM tblMBMeterReadingDetail WHERE intMeterReadingId = @intMeterReadingId AND dblCurrentDollars < dblLastDollars)
+	BEGIN
+		IF(@ysnRaiseError = 1)
+		BEGIN
+			RAISERROR('"Dollars Sold" should be greater than or equal to 0.', 16, 1)
+		END
+		ELSE
+		BEGIN
+			SET @strError = '"Dollars Sold" should be greater than or equal to 0.'
+			SET @ynsValid = 0
+		END
+		RETURN
+	END
 	
 	-- Posting and Unposting of Meter Reading should be by sequence
 	IF (@Post = 1)
