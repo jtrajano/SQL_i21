@@ -811,6 +811,7 @@
     <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
     <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
