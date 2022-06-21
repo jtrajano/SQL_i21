@@ -866,6 +866,7 @@
     <Build Include="dbo\Functions\fnCalculateTexasFee.sql" />
     <Build Include="dbo\Tables\tblLGDispatchOrderRoute.sql" />
     <Build Include="dbo\Views\vyuARTaxLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCalculateInvoiceDeliveryFee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10650,7 +10651,7 @@
     <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intLFutOptTransactionId.sql" />
     <Build Include="dbo\Index\IX_tblRKMatchFuturesPSDetail_intSFutOptTransactionId.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateContractInSettlement.sql" />
-	<Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
