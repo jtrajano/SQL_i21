@@ -150,12 +150,13 @@ BEGIN TRY
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end),
 			strWalterPositionLabel	= ISNULL(strPosition,'') + ' ' + 'Period',
 			strWalterOrigin			= dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin'),
-			strWalterPricing		= 'To be fixed at ' + CASE WHEN ISNULL(CD.strFixationBy,'') <> '' THEN CD.strFixationBy +'''s Call, against '  ELSE '' END
+			strWalterPricing		= CASE WHEN CH.intPricingTypeId in (1,6) THEN 'Priced at ' + LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) +' ' + CY.strCurrency + '/' + PU.strUnitMeasure ELSE 
+									   'To be fixed at ' + CASE WHEN ISNULL(CD.strFixationBy,'') <> '' THEN CD.strFixationBy +'''s Call, against '  ELSE '' END
 									   +  MA.strFutMarketName +	' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + '-' + CAST(MO.intYear AS NVARCHAR) + ' '
-									   +  CASE	WHEN CD.intPricingTypeId IN (6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure 
-												WHEN CD.intPricingTypeId in (1,2) AND CD.dblBasis > 0	  THEN '  +' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure  ELSE '     ' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure END + ''	
+									   +  CASE WHEN CD.intPricingTypeId in (2) AND CD.dblBasis > 0	  THEN '  +' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure  ELSE '     ' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure END + ''	
 									   +  CASE WHEN CD.intPricingTypeId = 2 AND CO.strCommodityCode != 'Cocoa' THEN @space+'(Lots to be fixed:' + LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNoOfLots)) +')'
 											   ELSE '' END
+									 END 
 											
 
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)
