@@ -105,6 +105,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2120_UpdateAddonComponents.sql
 :r .\SM\2120_InsertOtherLabels.sql
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
+:r .\SM\2210_RemoveOldPowerBIData.sql
 
 
 -- Canned Report
