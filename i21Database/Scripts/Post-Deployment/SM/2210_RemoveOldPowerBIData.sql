@@ -9,6 +9,8 @@ BEGIN
 	DELETE FROM tblSMPowerBIScheduleHistory
 	DELETE FROM tblSMPowerBIDataset
 	DELETE FROM tblSMPowerBIReport
+
+	UPDATE tblSMCompanyPreference set strPowerBIAdminUsername = NULL, strPowerBIAdminPassword = NULL
 END
 
 PRINT('/*******************  END DELETING OLD POWER BI DATA *******************/')
