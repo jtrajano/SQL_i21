@@ -88,8 +88,10 @@ BEGIN TRY
 			dbo.fnRemoveTrailingZeroes(PD.dblFutures) + CY.strCurrency + '-' + isnull(rtrt2.strTranslation,CM.strUnitMeasure)	AS strGABPrice,
 			CD.dblRatio,
 			dbo.fnRemoveTrailingZeroes(PD.dblQuantity) + ' ' + CD.strItemUOM AS strQtyWithUOM,
-			PD.dblFX
-		   ,ysnEnableFXFieldInContractPricing = @ysnEnableFXFieldInContractPricing
+			lblFX = CASE WHEN PD.dblFX != 1  AND PD.dblFX IS NOT NULL THEN 'FX' ELSE NULL  END,
+			strFX = CASE WHEN PD.dblFX != 1  AND PD.dblFX IS NOT NULL THEN LTRIM(CAST( PD.dblFX AS NUMERIC(18, 6)))  ELSE NULL END,
+			dblFX = PD.dblFX,
+		    ysnEnableFXFieldInContractPricing = @ysnEnableFXFieldInContractPricing
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
