@@ -827,6 +827,7 @@
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCreditLineCurrencyRate.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
+    <Build Include="dbo\Views\vyuRKGetCollateral.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
