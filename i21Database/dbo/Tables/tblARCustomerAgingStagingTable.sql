@@ -47,7 +47,9 @@
     [dblEndOfMonthRate]			NUMERIC(18, 6) NULL,
     [dblEndOfMonthAmount]		NUMERIC(18, 6) NULL,
     [intCurrencyId]			    INT NULL,
-    [intAccountId]			    INT NULL
+    [intAccountId]			    INT NULL,
+    [strLogoType]               NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
+    [blbLogo]					VARBINARY (MAX) NULL
 );
 
 GO

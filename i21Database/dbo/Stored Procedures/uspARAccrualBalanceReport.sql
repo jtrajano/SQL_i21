@@ -31,6 +31,7 @@ DECLARE @dtmAsOfDate			DATETIME
 	  , @begingroup				NVARCHAR(50)
 	  , @endgroup				NVARCHAR(50)
 	  , @datatype				NVARCHAR(50)
+	  , @blbLogo				VARBINARY (MAX)	= NULL
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -80,6 +81,8 @@ ELSE
 
 SET @strCustomerName = NULLIF(@strCustomerName, '')
 
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+
 SELECT intInvoiceId					= I.intInvoiceId
 	 , intEntityCustomerId			= CUSTOMER.intEntityCustomerId
 	 , intPeriodsToAccrue			= intPeriodsToAccrue
@@ -96,6 +99,8 @@ SELECT intInvoiceId					= I.intInvoiceId
 	 , dblMonthlyAccrual			= dbo.fnRoundBanker(dblInvoiceTotal / intPeriodsToAccrue, 2)
 	 , dblRunningAccrualBalance		= dbo.fnRoundBanker(ACCRUAL.dblRunningAccrualBalance, 2)
 	 , dtmAsOfDate					= @dtmAsOfDate
+	 , strLogoType					= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	 , blbLogo						= ISNULL(SMLP.imgLogo, @blbLogo)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityCustomerId	= C.intEntityId
@@ -119,6 +124,7 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = I.intCompanyLocationId
 WHERE I.ysnPosted = 1
   AND dblInvoiceTotal > 0
   AND ISNULL(I.intPeriodsToAccrue, 0) > 1
