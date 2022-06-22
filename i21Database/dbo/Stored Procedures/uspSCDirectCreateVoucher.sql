@@ -116,7 +116,7 @@ BEGIN TRY
 					,dblUnitQty					= ICUOM.dblUnitQty
 					,dblDiscount				= 0
 					,dblCost					= ISNULL(CNT.dblCashPrice,LGD.dblUnitPrice)
-					,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCL.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCL.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 					,intInvoiceId				= null
 					,intScaleTicketId			= SC.intTicketId
 					,intUnitOfMeasureId			= SC.intItemUOMIdTo
@@ -244,7 +244,7 @@ BEGIN TRY
 						,dblUnitQty					= ICUOM.dblUnitQty
 						,dblDiscount				= 0
 						,dblCost					= SCLC.dblPrice
-						,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCL.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCL.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 						,intInvoiceId				= null
 						,intScaleTicketId			= SC.intTicketId
 						,intUnitOfMeasureId			= SC.intItemUOMIdTo
@@ -362,7 +362,7 @@ BEGIN TRY
 					,dblUnitQty					= ICUOM.dblUnitQty
 					,dblDiscount				= 0
 					,dblCost					= CTD.dblCashPrice
-					,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCC.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCC.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 					,intInvoiceId				= null
 					,intScaleTicketId			= SC.intTicketId
 					,intUnitOfMeasureId			= SC.intItemUOMIdTo
@@ -486,7 +486,7 @@ BEGIN TRY
 						,dblUnitQty					= ICUOM.dblUnitQty
 						,dblDiscount				= 0
 						,dblCost					= SCBC.dblPrice
-						,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCC.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCC.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 						,intInvoiceId				= null
 						,intScaleTicketId			= SC.intTicketId
 						,intUnitOfMeasureId			= SC.intItemUOMIdTo
@@ -612,7 +612,7 @@ BEGIN TRY
 				,dblCost					= (SELECT TOP 1 
 													ISNULL(dblSettlementPrice,0) + ISNULL(dblBasis,0)
 											   FROM dbo.fnRKGetFutureAndBasisPrice(1,@intTicketCommodityId,SeqMonth.strSeqMonth,3,@intFutureMarketId,@intFutureMonthId,SC.intProcessingLocationId,null,0,SC.intItemId,null))
-				,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCS.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+				,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCS.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 				,intInvoiceId				= null
 				,intScaleTicketId			= SC.intTicketId
 				,intUnitOfMeasureId			= SC.intItemUOMIdTo
@@ -700,7 +700,7 @@ BEGIN TRY
 				,dblUnitQty					= ICUOM.dblUnitQty
 				,dblDiscount				= 0
 				,dblCost					= ISNULL(SCS.dblUnitFuture,0) + ISNULL(SCS.dblUnitBasis,0)
-				,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCS.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+				,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCS.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 				,intInvoiceId				= null
 				,intScaleTicketId			= SC.intTicketId
 				,intUnitOfMeasureId			= SC.intItemUOMIdTo
