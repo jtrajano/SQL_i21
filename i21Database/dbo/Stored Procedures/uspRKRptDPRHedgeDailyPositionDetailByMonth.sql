@@ -287,6 +287,7 @@ END
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
 
+
 		insert into @tmpColList (strContractEndMonth)
 		SELECT DISTINCT strContractEndMonth
 					from @List
@@ -311,6 +312,8 @@ END
 			
 
 			SET @colstry = SUBSTRING(@colstry,0,LEN(@colstry))
+
+
 
 			--IF @ysnIsCrushPosition = 1
 			--BEGIN
