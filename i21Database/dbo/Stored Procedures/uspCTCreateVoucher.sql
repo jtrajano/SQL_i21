@@ -563,6 +563,7 @@ begin try
 									,vp.intItemId
 									,em.intEntityLocationId
 									,@intFreightTermId
+									,default
 								) 
 							ELSE 
 								vp.intPurchaseTaxGroupId 

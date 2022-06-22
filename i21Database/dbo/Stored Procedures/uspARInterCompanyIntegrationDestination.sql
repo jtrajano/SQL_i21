@@ -49,7 +49,7 @@ AS
 		,[dblCost]				= ARIRS.dblCost
 		,[intSourceId]			= ARIRS.intInvoiceId
 		,[intSourceType]		= 0
-		,[intTaxGroupId]		= ISNULL([dbo].[fnGetTaxGroupIdForVendor](ARIRS.intVendorId, SMCL.intCompanyLocationId, ICI.intItemId, EMEL.intEntityLocationId, SMFT.intFreightTermId), SMTG.intTaxGroupId)
+		,[intTaxGroupId]		= ISNULL([dbo].[fnGetTaxGroupIdForVendor](ARIRS.intVendorId, SMCL.intCompanyLocationId, ICI.intItemId, EMEL.intEntityLocationId, SMFT.intFreightTermId, default), SMTG.intTaxGroupId)
 		,[intFreightTermId]		= SMFT.intFreightTermId
 	FROM
 		tblARInventoryReceiptStaging ARIRS

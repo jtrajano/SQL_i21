@@ -1604,6 +1604,7 @@ BEGIN
 								,NULL							--,@ItemId
 								,RawData.intShipFromId			--,@VendorLocationId
 								,NULL							--,@FreightTermId -- NOTE: There is no freight terms for Other Charges. 
+								,default						--,@FOB
 							)
 							AND RawData.intTaxGroupId IS NULL 			
 				) taxHierarcy 

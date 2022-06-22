@@ -5,24 +5,26 @@
 	,@ItemId				INT
 	,@VendorLocationId		INT
 	,@FreightTermId			INT
+	,@FOB					NVARCHAR(100)
 )
 RETURNS INT
 AS
 BEGIN
-	
-	DECLARE @FOB NVARCHAR(150)
-	SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
+	IF ISNULL(@FOB, '') = ''
+		SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
+	ELSE
+		SET @FOB = LOWER(@FOB)
 
 	IF ISNULL(@FreightTermId,0) <> 0 AND @FOB <> 'origin'
 		SET @VendorLocationId = NULL
 
-	DECLARE @TaxVendorId INT
-			,@ItemCategoryId INT
+	DECLARE  @TaxVendorId		INT
+			,@ItemCategoryId	INT
 			
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
 
 	SELECT
-		 @TaxVendorId			= VI.intVendorId
+		 @TaxVendorId = VI.intVendorId
 	FROM
 		tblICItem I
 	INNER JOIN
