@@ -1194,7 +1194,9 @@ AS
  									WHEN pContract.intBankValuationRuleId = 2 -- BANK VALUATION: Cost/M2M/Lower of Cost or Market
  										THEN 
  											 CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
-											 WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
+											 WHEN purchaseCTSeqHist.ysnPriced = 0
+													OR
+												(purchaseCB.dblBasis + purchaseCB.dblFutures) > 
  												(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
  												THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
  												ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
@@ -1326,7 +1328,7 @@ AS
  		ON purchaseCTSeqHist.intContractDetailId = pContract.intContractDetailId
  		AND purchaseCTSeqHist.intContractTypeId = 1
 	LEFT JOIN #tempContractSeqHistory saleCTSeqHist
- 		ON saleCTSeqHist.intContractDetailId = pContract.intContractDetailId
+ 		ON saleCTSeqHist.intContractDetailId = sContract.intContractDetailId
  		AND saleCTSeqHist.intContractTypeId = 2
 	OUTER APPLY (
 		SELECT TOP 1 * 
