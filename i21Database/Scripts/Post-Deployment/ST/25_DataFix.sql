@@ -149,4 +149,23 @@ IF EXISTS(SELECT intItemUOMId FROM tblSTLotteryBook WHERE intItemUOMId IS NULL)
 -- [END]: Update tblSTLotteryBook - Add default intItemUOMId with stock unit of Item UOM
 ----------------------------------------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Update tblSTRegister - Add default store app parameters if NULL  ST-890
+----------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE tblSTRegister
+SET ysnDeleteRegisterFileInbound = ISNULL(ysnDeleteRegisterFileInbound, 1),
+	strRegisterFolderInbound = ISNULL(strRegisterFolderInbound, 'C:\irely\Import'),
+	strRegisterFolderOutbound = ISNULL(strRegisterFolderOutbound, 'C:\irely\Export'),
+	strHandheldImportFolderPath = ISNULL(strHandheldImportFolderPath, 'C:\irely\Import'),
+	strHandheldExportFolderPath = ISNULL(strHandheldExportFolderPath, 'C:\irely\Import'),
+	strDeleteLogsOlderDays = ISNULL(strDeleteLogsOlderDays, '7'),
+	strUpdateStoreAppInterval = ISNULL(strUpdateStoreAppInterval, '60'),
+	ysnAllowAutoUpdate = ISNULL(ysnAllowAutoUpdate, 1),
+	strDaysToRetrieveTranslog = ISNULL(strDaysToRetrieveTranslog, '7')
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Update tblSTRegister - Add default store app parameters if NULL  ST-890
+----------------------------------------------------------------------------------------------------------------------------------
+
 GO
