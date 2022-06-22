@@ -35,7 +35,7 @@ FROM
  LEFT JOIN tblPRDepartment DEP ON REQ.intDepartmentId = DEP.intDepartmentId   
  
  LEFT JOIN tblEMEntityRequireApprovalFor EntityAPP
-  ON EMP.intEntityId = EntityAPP.intEntityId 
+  ON EMP.intEntityId = EntityAPP.intEntityId AND EntityAPP.intScreenId =  (SELECT TOP 1 intScreenId FROM tblSMScreen WHERE strNamespace = 'Payroll.view.TimeOffRequest')
  LEFT JOIN tblSMScreen EScreen
   ON EScreen.intScreenId = EntityAPP.intScreenId 
 

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderTranslog]
 	@intCheckoutId							INT,
 	@UDT_Translog StagingTransactionLog		READONLY,
+	@UDT_TranslogMixMatch StagingTransactionLogMixMatch		READONLY,
 	@ysnSuccess								BIT				OUTPUT,
 	@strMessage								NVARCHAR(1000)	OUTPUT,
 	@intCountRows							INT				OUTPUT
@@ -73,7 +74,7 @@ BEGIN
 						@strRegisterClass	NVARCHAR(50),
 						@intRegisterClassId INT
 
-				SELECT
+				SELECT TOP 1
 					@intStoreId			= chk.intStoreId,
 					@strRegisterClass	= r.strRegisterClass,
 					@intRegisterClassId = setup.intRegisterSetupId
@@ -378,15 +379,6 @@ BEGIN
 
 							[strTrpCardInfoTrpcAcquirerBatchNr],
 
-							-- trlMatchLine
-							[strTrlMatchLineTrlMatchName],
-							[dblTrlMatchLineTrlMatchQuantity],
-							[dblTrlMatchLineTrlMatchPrice],
-							[intTrlMatchLineTrlMatchMixes],
-							[dblTrlMatchLineTrlPromoAmount],
-							[strTrlMatchLineTrlPromotionID],
-							[strTrlMatchLineTrlPromotionIDPromoType],
-							[intTrlMatchLineTrlMatchNumber],
 
 							[intRegisterClassId],
 							[intStoreId],
@@ -624,15 +616,6 @@ BEGIN
 
 							[strTrpCardInfoTrpcAcquirerBatchNr]		= strTrpCardInfoTrpcAcquirerBatchNr,
 
-							-- trlMatchLine
-							[strTrlMatchLineTrlMatchName]			= strTrlMatchLineTrlMatchName,
-							[dblTrlMatchLineTrlMatchQuantity]		= dblTrlMatchLineTrlMatchQuantity,
-							[dblTrlMatchLineTrlMatchPrice]			= dblTrlMatchLineTrlMatchPrice,
-							[intTrlMatchLineTrlMatchMixes]			= intTrlMatchLineTrlMatchMixes,
-							[dblTrlMatchLineTrlPromoAmount]			= dblTrlMatchLineTrlPromoAmount,
-							[strTrlMatchLineTrlPromotionID]			= strTrlMatchLineTrlPromotionID,
-							[strTrlMatchLineTrlPromotionIDPromoType]	= strTrlMatchLineTrlPromotionIDPromoType,
-							[intTrlMatchLineTrlMatchNumber]				= intTrlMatchLineTrlMatchNumber,
 
 							[intRegisterClassId]					= @intRegisterClassId,
 							[intStoreId]							= @intStoreId,
@@ -673,7 +656,36 @@ BEGIN
 							AND chk.dtmDate IS NOT NULL
 							ORDER BY chk.intTermMsgSNterm ASC
 
-
+							
+							INSERT INTO tblSTTranslogMixMatch(
+								[intTermMsgSN]
+								, [intScanTransactionId]
+								, [intStoreId]
+								, [strTrlMatchLineTrlMatchName] 
+								, [dblTrlMatchLineTrlMatchQuantity] 
+								, [dblTrlMatchLineTrlMatchPrice] 
+								, [intTrlMatchLineTrlMatchMixes] 
+								, [dblTrlMatchLineTrlPromoAmount] 
+								, [strTrlMatchLineTrlPromotionID] 
+								, [strTrlMatchLineTrlPromotionIDPromoType] 
+								, [intTrlMatchLineTrlMatchNumber] 
+								, [dtmDateAdded] 
+								, [intConcurrencyId])
+							SELECT 
+								[intTermMsgSN]
+								, intTransCount
+								, @intStoreId
+								, [strTrlMatchLineTrlMatchName] 
+								, [dblTrlMatchLineTrlMatchQuantity] 
+								, [dblTrlMatchLineTrlMatchPrice] 
+								, [intTrlMatchLineTrlMatchMixes] 
+								, [dblTrlMatchLineTrlPromoAmount] 
+								, [strTrlMatchLineTrlPromotionID] 
+								, [strTrlMatchLineTrlPromotionIDPromoType] 
+								, [intTrlMatchLineTrlMatchNumber] 
+								, GETDATE()
+								, 1
+							FROM @UDT_TranslogMixMatch
 
 							SET @ysnSuccess = CAST(1 AS BIT)
 							SET @strMessage = 'Success'

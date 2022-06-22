@@ -33,258 +33,179 @@ BEGIN TRY
 				@dblSchQuantityToUpdate			NUMERIC(12,4),
 				@intLoadDetailId				INT
 
-	DECLARE @tblToProcess TABLE
-	(
-		intUniqueId					INT IDENTITY,
-		intInvoiceDetailId			INT,
-		intContractDetailId			INT,
-		intTicketId					INT,
-		intInventoryShipmentItemId	INT,
-		intItemUOMId				INT,
-		dblQty						NUMERIC(12,4),
-		intLoadDetailId				INT
+	DECLARE @tblToProcess TABLE (
+		  intUniqueId					INT IDENTITY
+		, intInvoiceDetailId			INT
+		, intContractDetailId			INT
+		, intTicketId					INT
+		, intInventoryShipmentItemId	INT
+		, intItemUOMId					INT
+		, dblQty						NUMERIC(12,4)
+		, intLoadDetailId				INT
+		, intSiteId						INT NULL
 	)
 
-	INSERT INTO @tblToProcess(
-		 [intInvoiceDetailId]
-		,[intContractDetailId]
-		,[intTicketId]
-		,[intInventoryShipmentItemId]
-		,[intItemUOMId]
-		,[dblQty]
-		,[intLoadDetailId])
-
+	INSERT INTO @tblToProcess (
+		  [intInvoiceDetailId]
+		, [intContractDetailId]
+		, [intTicketId]
+		, [intInventoryShipmentItemId]
+		, [intItemUOMId]
+		, [dblQty]
+		, [intLoadDetailId]
+		, [intSiteId]
+	)
 	--Quantity/UOM Changed
-	SELECT
-		 I.[intInvoiceDetailId]
-		,D.[intContractDetailId]
-		,D.[intTicketId]
-		,D.[intInventoryShipmentItemId]
-		,D.[intItemUOMId]
-		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE (D.dblQtyShipped - TD.dblQtyShipped) END))
-		, I.intLoadDetailId
-	FROM
-		@ItemsFromInvoice I
-	INNER JOIN
-		tblARInvoiceDetail D
-			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
-	INNER JOIN
-		tblICItem ITEM
-			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
-	INNER JOIN
-		tblARInvoice H
-			ON	D.[intInvoiceId] = H.[intInvoiceId]			
-	INNER JOIN
-		tblARTransactionDetail TD
-			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
-			AND D.intInvoiceId = TD.intTransactionId 
-			AND TD.strTransactionType IN ('Cash', 'Invoice')
-	INNER JOIN
-		tblCTContractDetail CD
-			ON D.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
-	WHERE
-		D.intContractDetailId IS NOT NULL
+	SELECT [intInvoiceDetailId]			= I.[intInvoiceDetailId]
+		, [intContractDetailId]			= D.[intContractDetailId]
+		, [intTicketId]					= D.[intTicketId]
+		, [intInventoryShipmentItemId]	= D.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= D.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE (D.dblQtyShipped - TD.dblQtyShipped) END))
+		, [intLoadDetailId]				= I.[intLoadDetailId]
+		, [intSiteId]					= D.[intSiteId]
+	FROM @ItemsFromInvoice I
+	INNER JOIN tblARInvoiceDetail D ON I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN tblARInvoice H ON D.[intInvoiceId] = H.[intInvoiceId]			
+	INNER JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+										AND D.intInvoiceId = TD.intTransactionId 
+										AND TD.strTransactionType IN ('Cash', 'Invoice')
+	INNER JOIN tblCTContractDetail CD ON D.intContractDetailId = CD.intContractDetailId
+	WHERE D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId = TD.intContractDetailId		
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND (D.[intSalesOrderDetailId] IS NULL OR D.strPricing = 'MANUAL OVERRIDE')
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.[intItemId] = TD.[intItemId]
 		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyShipped <> TD.dblQtyShipped)
-		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
-		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
+		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)		
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4) )
 		
 	UNION ALL
 
 	--New Contract Selected
-	SELECT
-		 I.[intInvoiceDetailId]
-		,D.[intContractDetailId]
-		,D.[intTicketId]
-		,D.[intInventoryShipmentItemId]
-		,D.[intItemUOMId]
-		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
-		,I.[intLoadDetailId]
-	FROM
-		@ItemsFromInvoice I
-	INNER JOIN
-		tblARInvoiceDetail D
-			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
-	INNER JOIN
-		tblICItem ITEM
-			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
-	INNER JOIN
-		tblARInvoice H
-			ON	D.[intInvoiceId] = H.[intInvoiceId]				
-	INNER JOIN
-		tblARTransactionDetail TD
-			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
-			AND D.intInvoiceId = TD.intTransactionId 
-			AND TD.strTransactionType IN ('Cash', 'Invoice')
-	INNER JOIN
-		tblCTContractDetail CD
-			ON D.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
-	WHERE
-		D.intContractDetailId IS NOT NULL
+	SELECT [intInvoiceDetailId]			= I.[intInvoiceDetailId]
+		, [intContractDetailId]			= D.[intContractDetailId]
+		, [intTicketId]					= D.[intTicketId]
+		, [intInventoryShipmentItemId]	= D.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= D.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
+		, [intLoadDetailId]				= I.[intLoadDetailId]
+		, [intSiteId]					= D.[intSiteId]
+	FROM @ItemsFromInvoice I
+	INNER JOIN tblARInvoiceDetail D ON I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN tblARInvoice H ON D.[intInvoiceId] = H.[intInvoiceId]				
+	INNER JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+										AND D.intInvoiceId = TD.intTransactionId 
+										AND TD.strTransactionType IN ('Cash', 'Invoice')
+	INNER JOIN tblCTContractDetail CD ON D.intContractDetailId = CD.intContractDetailId
+	WHERE D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND (D.[intSalesOrderDetailId] IS NULL OR D.strPricing = 'MANUAL OVERRIDE')
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
-		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4) )
 		
 	UNION ALL
 
 	--Replaced Contract
-	SELECT
-		 I.[intInvoiceDetailId]
-		,TD.[intContractDetailId]
-		,D.[intTicketId]
-		,D.[intInventoryShipmentItemId]
-		,TD.[intItemUOMId]
-		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
-		,I.[intLoadDetailId]
-	FROM
-		@ItemsFromInvoice I
-	INNER JOIN
-		tblARInvoiceDetail D
-			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
-	INNER JOIN
-		tblICItem ITEM
-			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
-	INNER JOIN
-		tblARInvoice H
-			ON	D.[intInvoiceId] = H.[intInvoiceId]				
-	INNER JOIN
-		tblARTransactionDetail TD
-			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
-			AND D.intInvoiceId = TD.intTransactionId 
-			AND TD.strTransactionType IN ('Cash', 'Invoice')
-	INNER JOIN
-		tblCTContractDetail CD
-			ON TD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
-	WHERE
-		D.intContractDetailId IS NOT NULL
+	SELECT [intInvoiceDetailId]			= I.[intInvoiceDetailId]
+		, [intContractDetailId]			= TD.[intContractDetailId]
+		, [intTicketId]					= D.[intTicketId]
+		, [intInventoryShipmentItemId]	= D.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= TD.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+		, [intLoadDetailId]				= I.[intLoadDetailId]
+		, [intSiteId]					= D.[intSiteId]
+	FROM @ItemsFromInvoice I
+	INNER JOIN tblARInvoiceDetail D ON I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN tblARInvoice H ON D.[intInvoiceId] = H.[intInvoiceId]				
+	INNER JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+										AND D.intInvoiceId = TD.intTransactionId 
+										AND TD.strTransactionType IN ('Cash', 'Invoice')
+	INNER JOIN tblCTContractDetail CD ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND (D.[intSalesOrderDetailId] IS NULL OR D.strPricing = 'MANUAL OVERRIDE')
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
-		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4) )
 		
 	UNION ALL
 		
 	--Removed Contract
-	SELECT
-		 I.[intInvoiceDetailId]
-		,TD.[intContractDetailId]
-		,D.[intTicketId]
-		,D.[intInventoryShipmentItemId]
-		,TD.[intItemUOMId]
-		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
-		,I.[intLoadDetailId]
-	FROM
-		@ItemsFromInvoice I
-	INNER JOIN
-		tblARInvoiceDetail D
-			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
-	INNER JOIN
-		tblICItem ITEM
-			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
-	INNER JOIN
-		tblARInvoice H
-			ON	D.[intInvoiceId] = H.[intInvoiceId]				
-	INNER JOIN
-		tblARTransactionDetail TD
-			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
-			AND D.intInvoiceId = TD.intTransactionId 
-			AND TD.strTransactionType IN ('Cash', 'Invoice')
-	INNER JOIN
-		tblCTContractDetail CD
-			ON TD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
-	WHERE
-		D.intContractDetailId IS NULL
+	SELECT [intInvoiceDetailId]			= I.[intInvoiceDetailId]
+		, [intContractDetailId]			= TD.[intContractDetailId]
+		, [intTicketId]					= D.[intTicketId]
+		, [intInventoryShipmentItemId]	= D.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= TD.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+		, [intLoadDetailId]				= I.[intLoadDetailId]
+		, [intSiteId]					= D.[intSiteId]
+	FROM @ItemsFromInvoice I
+	INNER JOIN tblARInvoiceDetail D ON I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN tblARInvoice H ON D.[intInvoiceId] = H.[intInvoiceId]				
+	INNER JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+										AND D.intInvoiceId = TD.intTransactionId 
+										AND TD.strTransactionType IN ('Cash', 'Invoice')
+	INNER JOIN tblCTContractDetail CD ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE D.intContractDetailId IS NULL
 		AND TD.intContractDetailId IS NOT NULL
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
-		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4))
 		
 	UNION ALL	
 
 	--Deleted Item
-	SELECT
-		 TD.intTransactionDetailId
-		,TD.[intContractDetailId]
-		,TD.[intTicketId]
-		,TD.[intInventoryShipmentItemId]
-		,TD.[intItemUOMId]
-		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
-		,TD.[intLoadDetailId]
-	FROM
-		tblARTransactionDetail TD
-	INNER JOIN
-		tblICItem ITEM
-			ON TD.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
-	INNER JOIN
-		tblARInvoice H
-			ON	TD.[intTransactionId] = H.[intInvoiceId]		
-	INNER JOIN
-		tblCTContractDetail CD
-			ON TD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblMBILInvoice MBIL ON H.intInvoiceId = MBIL.inti21InvoiceId
-	WHERE
-		TD.intTransactionId = @TransactionId 
+	SELECT [intInvoiceDetailId]			= TD.intTransactionDetailId
+		, [intContractDetailId]			= TD.[intContractDetailId]
+		, [intTicketId]					= TD.[intTicketId]
+		, [intInventoryShipmentItemId]	= TD.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= TD.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+		, [intLoadDetailId]				= TD.[intLoadDetailId]
+		, [intSiteId]					= TD.intSiteId
+	FROM tblARTransactionDetail TD
+	INNER JOIN tblICItem ITEM ON TD.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN tblARInvoice H ON TD.[intTransactionId] = H.[intInvoiceId]		
+	INNER JOIN tblCTContractDetail CD ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE TD.intTransactionId = @TransactionId 
 		AND TD.strTransactionType IN ('Cash', 'Invoice')
 		AND TD.intContractDetailId IS NOT NULL
 		AND TD.[intInventoryShipmentItemId] IS NULL
 		AND TD.[intSalesOrderDetailId] IS NULL
-		-- AND TD.[intLoadDetailId] IS NULL FOR AR-8652
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
-		-- AND ISNULL(H.intLoadId, 0) = 0 FOR AR-8652
 		AND ISNULL(H.intTransactionId, 0) = 0
-		AND (H.strType <> 'Tank Delivery' OR (H.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND H.intSourceId <> 4))
 		
 	UNION ALL
 		
 	--Added Item
-	SELECT
-		 Detail.intInvoiceDetailId
-		,Detail.[intContractDetailId]
-		,Detail.[intTicketId]
-		,Detail.[intInventoryShipmentItemId]
-		,Detail.[intItemUOMId]
-		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
-		,Detail.[intLoadDetailId]
-	FROM
-		tblARInvoiceDetail Detail
-	INNER JOIN
-		tblICItem ITEM
-			ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
-	INNER JOIN
-		tblARInvoice Header
-			ON Detail.intInvoiceId = Header.intInvoiceId 
-	INNER JOIN
-		tblCTContractDetail CD
-			ON Detail.intContractDetailId = CD.intContractDetailId
+	SELECT [intInvoiceDetailId]			= Detail.intInvoiceDetailId
+		, [intContractDetailId]			= Detail.[intContractDetailId]
+		, [intTicketId]					= Detail.[intTicketId]
+		, [intInventoryShipmentItemId]	= Detail.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= Detail.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
+		, [intLoadDetailId]				= Detail.[intLoadDetailId]
+		, [intSiteId]					= Detail.[intSiteId]
+	FROM tblARInvoiceDetail Detail
+	INNER JOIN tblICItem ITEM ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN tblARInvoice Header ON Detail.intInvoiceId = Header.intInvoiceId 
+	INNER JOIN tblCTContractDetail CD ON Detail.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblMBILInvoice MBIL ON Header.intInvoiceId = MBIL.inti21InvoiceId
-	WHERE
-		Detail.intInvoiceId = @TransactionId 
+	WHERE Detail.intInvoiceId = @TransactionId 
 		AND Header.strTransactionType IN ('Cash', 'Invoice')
 		AND Detail.intContractDetailId IS NOT NULL
 		AND (Detail.[intInventoryShipmentItemId] IS NULL OR (Detail.[intInventoryShipmentItemId] IS NOT NULL AND Detail.strPricing = 'Subsystem - Direct'))
@@ -292,22 +213,20 @@ BEGIN TRY
 		AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
 		AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)
-		-- AND ISNULL(Detail.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(Header.intTransactionId, 0) = 0
 		AND Header.ysnFromProvisional = 0
-		AND (Header.strType <> 'Tank Delivery' OR (Header.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND Header.intSourceId <> 4))
 
 	UNION ALL
 
     --Added Item From Batch Invoice
-    SELECT
-         Detail.intInvoiceDetailId
-        ,Detail.[intContractDetailId]
-        ,Detail.[intTicketId]
-        ,Detail.[intInventoryShipmentItemId]
-        ,Detail.[intItemUOMId]
-        ,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped]) * CASE WHEN ISNULL(IDS.ysnForDelete, 0) = 0 THEN 1 ELSE -1 END
-        ,Detail.[intLoadDetailId]
+    SELECT [intInvoiceDetailId]			= Detail.intInvoiceDetailId
+		, [intContractDetailId]			= Detail.[intContractDetailId]
+		, [intTicketId]					= Detail.[intTicketId]
+		, [intInventoryShipmentItemId]	= Detail.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= Detail.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped]) * CASE WHEN ISNULL(IDS.ysnForDelete, 0) = 0 THEN 1 ELSE -1 END
+		, [intLoadDetailId]				= Detail.[intLoadDetailId]
+		, [intSiteId]					= Detail.[intSiteId]
     FROM tblARInvoiceDetail Detail
     INNER JOIN @InvoiceIds IDS ON Detail.intInvoiceId = IDS.intHeaderId
     INNER JOIN tblICItem ITEM ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
@@ -322,18 +241,17 @@ BEGIN TRY
       AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)    
       AND ISNULL(Header.intTransactionId, 0) = 0
       AND @TransactionId IS NULL
-	  AND (Header.strType <> 'Tank Delivery' OR (Header.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND Header.intSourceId <> 4))
 
 	UNION ALL
 
-	SELECT
-		 I.[intInvoiceDetailId]
-		,D.[intContractDetailId]
-		,D.[intTicketId]
-		,D.[intInventoryShipmentItemId]
-		,D.[intItemUOMId]
-		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE -D.dblQtyShipped END))
-		, I.intLoadDetailId
+	SELECT [intInvoiceDetailId]			= I.[intInvoiceDetailId]
+		, [intContractDetailId]			= D.[intContractDetailId]
+		, [intTicketId]					= D.[intTicketId]
+		, [intInventoryShipmentItemId]	= D.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= D.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE -D.dblQtyShipped END))
+		, [intLoadDetailId]				= I.intLoadDetailId
+		, [intSiteId]					= D.[intSiteId]
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail D ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN tblARInvoice Header ON D.intInvoiceId = Header.intInvoiceId 
@@ -351,8 +269,64 @@ BEGIN TRY
 		AND TD.intId IS NULL
 		AND T.strDistributionOption = 'SO'
 		AND I.strTransactionType IN ('Cash', 'Invoice')
-		AND (Header.strType <> 'Tank Delivery' OR (Header.strType = 'Tank Delivery' AND MBIL.inti21InvoiceId IS NULL AND Header.intSourceId <> 4))
-
+			
+	--UPDATE TM QTY
+	INSERT INTO @tblToProcess (
+		  intInvoiceDetailId
+		, intContractDetailId
+		, intTicketId
+		, intInventoryShipmentItemId
+		, intItemUOMId
+		, dblQty
+		, intLoadDetailId
+	)
+	SELECT intInvoiceDetailId			= P.intInvoiceDetailId
+		, intContractDetailId			= P.intContractDetailId
+		, intTicketId					= P.intTicketId
+		, intInventoryShipmentItemId	= P.intInventoryShipmentItemId
+		, intItemUOMId					= P.intItemUOMId
+		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL
+													THEN 
+														CASE WHEN ABS(P.dblQty) > TMO.dblQuantity
+																THEN (ABS(P.dblQty) - TMO.dblQuantity)
+															 WHEN ABS(P.dblQty) < TMO.dblQuantity
+																THEN -(TMO.dblQuantity - ABS(P.dblQty))
+														END 
+												ELSE 
+													P.dblQty * CASE WHEN ID.dblQtyShipped < TMO.dblQuantity AND P.dblQty > TMO.dblQuantity THEN -1 ELSE 1 END
+											END)
+		, intLoadDetailId				= P.intLoadDetailId
+	FROM @tblToProcess P
+	LEFT JOIN tblARInvoiceDetail ID ON P.intInvoiceDetailId = ID.intInvoiceDetailId AND ID.intSiteId IS NOT NULL
+	CROSS APPLY ( 
+		SELECT TOP 1 TMO.dblQuantity
+			       , TMO.intContractDetailId
+		FROM tblTMOrder TMO 
+		WHERE TMO.intSiteId = P.intSiteId
+		  AND TMO.intContractDetailId = P.intContractDetailId
+		ORDER BY TMO.dtmTransactionDate DESC
+	) TMO
+	OUTER APPLY (
+		SELECT TOP 1 TD.intTransactionDetailId
+		FROM tblARTransactionDetail TD 
+		WHERE P.intInvoiceDetailId = TD.intTransactionDetailId 
+	      AND TD.strTransactionType IN ('Cash', 'Invoice')
+	) TRD
+	WHERE TMO.intContractDetailId IS NOT NULL
+	  AND P.intSiteId IS NOT NULL
+	  AND (ABS(P.dblQty) <> TMO.dblQuantity OR (ABS(P.dblQty) = TMO.dblQuantity AND TRD.intTransactionDetailId IS NOT NULL))
+	  
+	DELETE P 
+	FROM @tblToProcess P
+	CROSS APPLY ( 
+		SELECT TOP 1 TMO.*
+		FROM tblTMOrder TMO 
+		WHERE TMO.intSiteId = P.intSiteId
+		  AND TMO.intContractDetailId = P.intContractDetailId
+		ORDER BY TMO.dtmTransactionDate DESC
+	) TMO 
+	WHERE P.intSiteId IS NOT NULL
+	
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
 	WHILE ISNULL(@intUniqueId,0) > 0

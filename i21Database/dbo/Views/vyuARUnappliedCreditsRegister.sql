@@ -1,23 +1,24 @@
 ﻿CREATE VIEW [dbo].[vyuARUnappliedCreditsRegister]
 AS
-SELECT CREDITS.*
-	 , strCustomerNumber	= CUSTOMER.strCustomerNumber
-	 , strCustomerName		= CUSTOMER.strCustomerName
-	 , strName				= CUSTOMER.strDisplayName
-	 , strContact			= CUSTOMER.strContact
-	 , strLocationName		= LOCATION.strLocationName
-	 , strCompanyName		= COMPANY.strCompanyName
-	 , strCompanyAddress	= COMPANY.strCompanyAddress
+SELECT 
+	 CREDITS.*
+	,strCustomerNumber	= CUSTOMER.strCustomerNumber
+	,strCustomerName	= CUSTOMER.strCustomerName
+	,strName			= CUSTOMER.strDisplayName
+	,strContact			= CUSTOMER.strContact
+	,strLocationName	= LOCATION.strLocationName
+	,strCompanyName		= COMPANY.strCompanyName
+	,strCompanyAddress	= COMPANY.strCompanyAddress
 FROM (
 	SELECT DISTINCT 
-		  I.intEntityCustomerId
-		, strInvoiceNumber
-		, strTransactionType	
-		, I.intCompanyLocationId
-		, dtmDate
-		, dblAmount				= ISNULL(dblInvoiceTotal, 0) * -1
-		, dblUsed				= ISNULL(PD.dblPayment, 0)
-		, dblRemaining			= (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)) * -1
+		 I.intEntityCustomerId
+		,strInvoiceNumber
+		,strTransactionType	
+		,I.intCompanyLocationId
+		,dtmDate
+		,dblAmount				= ISNULL(dblInvoiceTotal, 0) * -1
+		,dblUsed				= ISNULL(PD.dblPayment, 0)
+		,dblRemaining			= (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)) * -1
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT dblPayment = SUM(dblPayment)
@@ -34,6 +35,7 @@ FROM (
 	  AND I.ysnPaid = 0
 	  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	  AND I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Customer Prepayment')
+	  AND NOT (I.strType = 'CF Tran' AND strTransactionType = 'Credit Memo')
 	  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 
 	UNION ALL

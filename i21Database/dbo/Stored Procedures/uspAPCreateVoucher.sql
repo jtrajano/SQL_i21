@@ -571,7 +571,9 @@ BEGIN TRY
 	DECLARE @billCounter INT = 0;
 	DECLARE @totalRecords INT;
 	DECLARE @billId INT;
+	DECLARE @tranType INT;
 	DECLARE @tmpBillDetailDelete TABLE(intBillId INT)
+	DECLARE @screenName NVARCHAR(100);
 	SELECT @actionType = 'Deleted'
 
 	INSERT INTO @tmpBillDetailDelete
@@ -582,17 +584,23 @@ BEGIN TRY
 	WHILE(@billCounter != (@totalRecords))
 	BEGIN
 
-		SELECT TOP(1) @billId = A.intBillId
+		SELECT TOP(1) @billId = A.intBillId, @tranType = B.intTransactionType
 		FROM @tmpBillDetailDelete A
-			
-		EXEC dbo.uspSMAuditLog 
-			@screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
-			,@keyValue = @billId								-- Primary Key Value of the Voucher. 
-			,@entityId = @userId									-- Entity Id.
-			,@actionType = 'Created'                        -- Action Type
-			,@changeDescription = 'Integration'				-- Description
-			,@fromValue = ''									-- Previous Value
-			,@toValue = ''									-- New Value
+		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+
+		SET @screenName = CASE WHEN @tranType IN (1,2,13) THEN 'AccountsPayable.view.Voucher' ELSE 'AccountsPayable.view.DebitMemo' END 		
+
+		IF @tranType IN (1,2,3,13)
+		BEGIN
+			EXEC dbo.uspSMAuditLog 
+				@screenName = @screenName		-- Screen Namespace
+				,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+				,@entityId = @userId									-- Entity Id.
+				,@actionType = 'Created'                        -- Action Type
+				,@changeDescription = 'Integration'				-- Description
+				,@fromValue = ''									-- Previous Value
+				,@toValue = ''	
+		END							-- New Value
 
 	SET @billCounter = @billCounter + 1
 	DELETE FROM @tmpBillDetailDelete WHERE intBillId = @billId

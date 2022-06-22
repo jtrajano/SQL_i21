@@ -247,6 +247,11 @@ BEGIN TRY
 				AND intItemId = @intNewItemId
 				AND intStorageLocationId = @intStorageLocationId
 		END
+		IF NOT EXISTS(SELECT *FROM tblMFLotInventory WHERE intLotId=@intNewLotId)
+		BEGIN
+			INSERT INTO dbo.tblMFLotInventory(intLotId)
+			SELECT @intNewLotId
+		END
 
 		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 			,@intTransactionTypeId = 15

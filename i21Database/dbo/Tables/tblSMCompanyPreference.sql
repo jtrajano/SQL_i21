@@ -12,7 +12,7 @@
     [strSMTPHost]									NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
     [intSMTPPort]									INT NOT NULL,
     [strSMTPUserName]								NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
-    [strSMTPPassword]								NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+    [strSMTPPassword]								NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
     [strSMTPFromEmail]								NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
     [strSMTPFromName]								NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
     [ysnSMTPAuthentication]							BIT NOT NULL,
@@ -95,8 +95,8 @@
     [strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnExportDataProcessEnabled]					BIT NOT NULL DEFAULT 0,
 	[strExportFilePath]								NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-	[ysnLogPerformanceRuntime]						BIT NOT NULL DEFAULT 0,
-    [dtmPerformanceLoggingEffectivity]				DATETIME NULL,
-    [intConcurrencyId]								INT NOT NULL DEFAULT 1,
-	[strApiHostUrl] 								NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+    [strApiHostUrl] 								NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
+    [ysnLogPerformanceRuntime]                      BIT NOT NULL DEFAULT 0,
+    [dtmPerformanceLoggingEffectivity]              DATETIME NULL,
+    [intConcurrencyId]								INT NOT NULL DEFAULT 1
 )

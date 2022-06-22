@@ -13,10 +13,10 @@ SELECT strCustomerName				= CUSTOMER.strName
      , dblInvoiceTotal				= ISNULL(AGING.dblInvoiceTotal, 0)
      , dblYTDSales					= ISNULL(YTDSALES.dblYTDSales, 0)
      , dblYDTServiceCharge			= ISNULL(YTDSERVICECHARGE.dblYDTServiceCharge, 0)
-     , dblHighestAR					= ISNULL(HIGHESTAR.dblInvoiceTotal, 0)
-     , dtmHighestARDate				= HIGHESTAR.dtmDate
-     , dblHighestDueAR				= ISNULL(HIGHESTDUEAR.dblInvoiceTotal, 0)
-     , dtmHighestDueARDate			= HIGHESTDUEAR.dtmDate
+     , dblHighestAR					= ISNULL(CUSTOMER.dblHighestAR, 0)
+     , dtmHighestARDate				= CUSTOMER.dtmHighestARDate
+     , dblHighestDueAR				= ISNULL(CUSTOMER.dblHighestDueAR, 0)
+     , dtmHighestDueARDate			= CUSTOMER.dtmHighestDueARDate
      , dblLastYearSales				= ISNULL(LASTYEARSALES.dblLastYearSales, 0)
      , dblLastPayment				= ISNULL(PAYMENT.dblAmountPaid, 0)
      , dtmLastPaymentDate			= PAYMENT.dtmDatePaid
@@ -166,52 +166,6 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-LEFT JOIN (
-	SELECT dblInvoiceTotal		= MAX(dblInvoiceTotal)
-		 , dtmDate				= MAX(dtmDate)
-		 , intEntityCustomerId
-	FROM (
-		SELECT dblInvoiceTotal		
-			 , dtmDate				
-			 , intEntityCustomerId
-			 , intRowNumber			=  ROW_NUMBER() OVER(PARTITION BY intEntityCustomerId ORDER BY dblInvoiceTotal DESC) 
-		FROM dbo.tblARInvoice
-		WHERE ysnPosted = 1
-			AND strTransactionType IN ('Invoice', 'Debit Memo')
-			AND strType <> 'CF Tran'
-	) I 
-	WHERE I.intRowNumber = 1
-	GROUP BY intEntityCustomerId	  
-) HIGHESTAR ON HIGHESTAR.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-LEFT JOIN (
-	SELECT dblInvoiceTotal		= MAX(dblInvoiceTotal)
-		 , dtmDate				= MAX(dtmDate)
-		 , intEntityCustomerId
-	FROM (
-		SELECT dblInvoiceTotal		
-			 , dtmDate				
-			 , intEntityCustomerId
-			 , intRowNumber			=  ROW_NUMBER() OVER(PARTITION BY intEntityCustomerId ORDER BY DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) DESC) 
-		FROM dbo.tblARInvoice I WITH (NOLOCK)
-		LEFT JOIN (
-			SELECT intInvoiceId
-				 , dtmDatePaid = MAX(P.dtmDatePaid)
-			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-			INNER JOIN (
-				SELECT intPaymentId
-					 , dtmDatePaid
-				FROM dbo.tblARPayment P WITH (NOLOCK)
-			) P ON P.intPaymentId = PD.intPaymentId 
-			GROUP BY intInvoiceId
-		) PD ON PD.intInvoiceId = I.intInvoiceId
-		WHERE I.ysnPosted = 1
-		  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
-		  AND I.strType <> 'CF Tran'
-		  AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) > 0
-	) I 
-	WHERE I.intRowNumber = 1
-	GROUP BY intEntityCustomerId
-) HIGHESTDUEAR ON HIGHESTDUEAR.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 LEFT JOIN (
 	SELECT dblYDTServiceCharge = SUM(ISNULL(dblInvoiceTotal, 0))
 		 , intEntityCustomerId

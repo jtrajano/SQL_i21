@@ -317,7 +317,7 @@ BEGIN TRY
 					FROM tblICInventoryReceipt R
 					JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = R.intInventoryReceiptId
 						AND R.strReceiptType = 'Transfer Order'
-						AND RI.intOrderId = @intInventoryTransferId
+						AND RI.intInventoryTransferId = @intInventoryTransferId
 					)
 			BEGIN
 				SELECT @strError = 'Receipt already exists for the Transfer Order No.'
@@ -498,7 +498,7 @@ BEGIN TRY
 				JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				WHERE L.intLotId = @intLotId
 
-				IF ISNULL(@strLotPrimaryStatus, '') <> @strOrgLotStatus
+				IF ISNULL(@strLotPrimaryStatus, '') <> @strOrgLotStatus AND IsNULL(@strLotPrimaryStatus,'')<>''
 				BEGIN
 					SELECT @strError = 'Lot Status is not matching with i21.'
 

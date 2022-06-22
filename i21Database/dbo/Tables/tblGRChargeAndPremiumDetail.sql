@@ -14,6 +14,7 @@ CREATE TABLE [dbo].[tblGRChargeAndPremiumDetail]
 	[dtmDateCreated] DATETIME NULL DEFAULT(GETDATE()),
 	[intConcurrencyId] INT NULL DEFAULT ((1)),
 	[ysnDeductVendor] BIT DEFAULT ((0)),
+	[strCalculateOn] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblGRChargeAndPremiumDetail_intChargeAndPremiumDetailId] PRIMARY KEY ([intChargeAndPremiumDetailId]),
 	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intChargeAndPremiumId] FOREIGN KEY ([intChargeAndPremiumId]) REFERENCES [tblGRChargeAndPremiumId]([intChargeAndPremiumId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRChargeAndPremiumDetail_intChargeAndPremiumItemId] FOREIGN KEY ([intChargeAndPremiumItemId]) REFERENCES [tblICItem]([intItemId]),

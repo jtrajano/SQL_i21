@@ -18,7 +18,7 @@
     [strSourceTransaction]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strType]					NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
     [strTransactionType]		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
-	[strCompanyName]            NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strCompanyName]            NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strCompanyAddress]         NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strAgingType]				NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 	[strEntityNo]				NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL,

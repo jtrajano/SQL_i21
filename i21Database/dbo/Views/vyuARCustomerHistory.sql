@@ -30,7 +30,15 @@ FROM (
 		 , intEntityCustomerId
 		 , ysnPaid				= I.ysnPaid
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
-	WHERE (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0))
+		OUTER APPLY
+		(
+		   SELECT ISC.strInvoiceNumber from tblARInvoiceDetail ID
+		   INNER JOIN tblARInvoice II ON II.intInvoiceId=ID.intInvoiceId
+		   INNER JOIN tblARInvoice ISC ON ISC.strInvoiceNumber = ID.strDocumentNumber
+		   WHERE ISC.strInvoiceNumber=I.strInvoiceNumber AND II.strTransactionType ='Credit Memo'
+		   AND ID.strDocumentNumber like '%SC%'  AND ISC.ysnForgiven =1
+		)SCCM
+	WHERE (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND  (ysnForgiven = 0 OR SCCM.strInvoiceNumber IS NOT NULL)))
 	   AND I.ysnRecurring = 0
 
 	UNION	

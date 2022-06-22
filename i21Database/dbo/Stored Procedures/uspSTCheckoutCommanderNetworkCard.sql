@@ -34,7 +34,8 @@ BEGIN
 		        @intRegisterId		INT,
 				@strRegisterClass	NVARCHAR(50),
 				@intRegisterClassId INT
-		SELECT 
+
+		SELECT  TOP 1
 			@intStoreId				= st.intStoreId
 			, @intRegisterId		= reg.intRegisterId
 			, @strRegisterClass		= reg.strRegisterClass

@@ -99,6 +99,12 @@ BEGIN TRY
 		AND R.ysnPosted = 1
 		AND RI.ysnExported IS NULL
 		AND ISNULL(CD.strERPPONumber, '') <> ''
+		AND ISNULL(RI.intLoadShipmentId, 0) NOT IN (
+			SELECT ISNULL(intLoadId, 0)
+			FROM tblLGLoadCondition LC
+			JOIN tblCTCondition C ON C.intConditionId = LC.intConditionId
+			WHERE C.strConditionName = 'CBS'
+			)
 
 	SELECT @FirstCount = COUNT(1)
 	FROM @tblICInventoryReceipt
@@ -302,7 +308,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<ReceiptDate>' + ISNULL(CONVERT(VARCHAR, @dtmReceiptDate, 112), '') + '</ReceiptDate>'
 
-		SELECT @strXML += '<BOLNo>' + ISNULL(@strBillOfLading, '') + '</BOLNo>'
+		SELECT @strXML += '<BOLNo>' + dbo.fnEscapeXML(ISNULL(@strBillOfLading, '')) + '</BOLNo>'
 
 		SELECT @strXML += '<WarehouseRefNo>' + dbo.fnEscapeXML(ISNULL(@strWarehouseRefNo, '')) + '</WarehouseRefNo>'
 

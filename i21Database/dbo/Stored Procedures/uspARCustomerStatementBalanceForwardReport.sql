@@ -140,14 +140,14 @@ CREATE TABLE #STATEMENTTABLE (
 	, intPaymentId				INT NULL
 	, strCustomerName			NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
     , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL    
-	, strInvoiceNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
-	, strRecordNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
-	, strBOLNumber				NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
+	, strInvoiceNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strRecordNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strBOLNumber				NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	, strTransactionType		NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, strType					NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
-	, strPaymentInfo			NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
+	, strPaymentInfo			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	, strSalespersonName		NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
-	, strTicketNumbers			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL	
+	, strTicketNumbers			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL	
 	, strLocationName			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
     , strFullAddress			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	, strComment				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
@@ -165,11 +165,12 @@ CREATE TABLE #STATEMENTTABLE (
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_A1] ON [#STATEMENTTABLE]([intEntityCustomerId], [intInvoiceId], [strTransactionType], [strType])
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_A2] ON [#STATEMENTTABLE]([strTransactionType]) INCLUDE ([dblPayment])
 CREATE TABLE #CFTABLE (
-	  intInvoiceId				INT NOT NULL PRIMARY KEY
+	  intInvoiceId				INT NOT NULL
 	, strInvoiceNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, strInvoiceReportNumber	NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, dtmInvoiceDate			DATETIME NULL
 )
+CREATE NONCLUSTERED INDEX [NC_Index_#CFTABLE_intInvoiceId] ON [#CFTABLE]([intInvoiceId])
 CREATE TABLE #CUSTOMERS (
 	  intEntityCustomerId		INT NOT NULL PRIMARY KEY	  
     , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
@@ -204,8 +205,8 @@ CREATE TABLE #INVOICES (
 	, dtmDatePaid				DATETIME NULL
 	, dtmPostDate				DATETIME NULL
 	, strType					NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL DEFAULT 'Standard' 
-	, strComment				NVARCHAR(500) COLLATE Latin1_General_CI_AS  NULL
-	, strTicketNumbers			NVARCHAR(500) COLLATE Latin1_General_CI_AS  NULL
+	, strComment				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS  NULL
+	, strTicketNumbers			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS  NULL
 	, ysnServiceChargeCredit	BIT NULL 
 )
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTINVOICE_A1] ON [#INVOICES]([intEntityCustomerId]) INCLUDE ([strTransactionType])
@@ -214,8 +215,8 @@ CREATE TABLE #PAYMENTS (
 	, intEntityCustomerId		INT NOT NULL
 	, intCompanyLocationId		INT NOT NULL
 	, intPaymentMethodId		INT NULL
-	, strRecordNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
-	, strPaymentInfo			NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
+	, strRecordNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strPaymentInfo			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	, strNotes					NVARCHAR(250) COLLATE Latin1_General_CI_AS	NULL
 	, dblAmountPaid				NUMERIC(18, 6)	NULL DEFAULT 0
 	, dtmDatePaid				DATETIME NOT NULL
@@ -226,8 +227,8 @@ CREATE TABLE #PAYMENTSFORCF (
 	  intPaymentId				INT NOT NULL
 	, intEntityCustomerId		INT NOT NULL
 	, intCompanyLocationId		INT NOT NULL
-	, strRecordNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
-	, strPaymentInfo			NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
+	, strRecordNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strPaymentInfo			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	, strTransactionType		NVARCHAR(25) COLLATE Latin1_General_CI_AS   NOT	NULL
 	, strComment				NVARCHAR(500) COLLATE Latin1_General_CI_AS  NULL
 	, dblInvoiceTotal			NUMERIC(18, 6)	NULL DEFAULT 0   

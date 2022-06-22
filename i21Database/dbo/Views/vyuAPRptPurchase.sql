@@ -31,7 +31,7 @@ SELECT
 	,A.dblShipping
 	,D.intItemId
 	,D.strItemNo
-	,B.strMiscDescription AS strDescription
+	,B.strMiscDescription + CASE WHEN G.strVendorItemXref IS NULL THEN '' ELSE CHAR(13) + CHAR(10) + G.strVendorItemXref END AS strDescription
 	,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) COLLATE Latin1_General_CI_AS as strCompanyAddress
 	,F.strFreightTerm
 FROM dbo.tblPOPurchase A
@@ -46,4 +46,16 @@ FROM dbo.tblPOPurchase A
 	LEFT JOIN tblSMFreightTerms F ON F.intFreightTermId = A.intFreightTermId
 	LEFT JOIN tblSMTerm term ON term.intTermID = A.intTermsId
 	LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = A.intShipViaId
-	
+	OUTER APPLY (
+		SELECT TOP 1 (strVendorProduct + ' ' + strProductDescription) strVendorItemXref
+		FROM (
+			SELECT strVendorProduct, strProductDescription
+			FROM tblICItemVendorXref XREF
+			LEFT JOIN tblICItemLocation IL ON IL.intItemLocationId = XREF.intItemLocationId
+			WHERE IL.intLocationId = A.intShipToId AND XREF.intVendorId = A.intEntityVendorId AND XREF.intItemId = B.intItemId
+			UNION ALL
+			SELECT strVendorProduct, strProductDescription
+			FROM tblICItemVendorXref XREF
+			WHERE XREF.intItemLocationId IS NULL AND XREF.intVendorId = A.intEntityVendorId AND XREF.intItemId = B.intItemId
+		) H
+	) G

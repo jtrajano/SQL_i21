@@ -152,10 +152,11 @@ WHERE B.intId IS NULL
 --BUT uspAPPostBill calls again for the same intBillId
 --DELETE THE intBillId ON THE LIST OF FOR POST VOUCHERS
 --THAT IS ALREADY PART OF tblAPBillForPosting
-DELETE A
-FROM #tmpPostBillData A
-LEFT JOIN @idForPost B ON A.intBillId = B.intId
-WHERE B.intId IS NULL
+DELETE A  
+FROM #tmpPostBillData A  
+LEFT JOIN @idForPost B ON A.intBillId = B.intId  
+LEFT JOIN tblAPBill C ON A.intBillId = C.intBillId
+WHERE B.intId IS NULL OR (C.ysnPosted = 1 AND @post = 1) OR (C.ysnPosted = 0 AND @post = 0)
 
 --SET THE UPDATED @billIds
 SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
@@ -164,7 +165,7 @@ ORDER BY intBillId
 
 IF NULLIF(@billIds, '') IS NULL
 BEGIN
-	RAISERROR('Posting/unposting already in process.', 16, 1);
+	RAISERROR('Posting/unposting already in process or already posted.', 16, 1);
 	GOTO Post_Rollback
 END
 
@@ -237,14 +238,16 @@ BEGIN
 	-- FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
-	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
+	--IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
+	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData)
 	BEGIN
 		DECLARE @invalidAmountAppliedIds NVARCHAR(MAX);
 		--undo updating of transactions for those invalid only
-		SELECT 
+		SELECT DISTINCT
 			@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
 		FROM #tmpInvalidBillData
-		WHERE intErrorKey = 1 OR intErrorKey = 33
+		--WHERE intErrorKey = 1 OR intErrorKey = 33
+		--Invalid automatic undo of prepaid, this should not be part of posting
 		EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
 	END
 
@@ -300,6 +303,12 @@ BEGIN
 		SET A.strBatchNumber = @batchId
 	FROM tblAPPostResult A
 	INNER JOIN @postResult B ON A.intId = B.id
+
+	-- --undo updating of transactions for those invalid only
+	-- SELECT 
+	-- 	@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
+	-- FROM #tmpPostBillData A
+	-- EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
 
 	SET @successfulCount = 0;
 	SET @success = 0

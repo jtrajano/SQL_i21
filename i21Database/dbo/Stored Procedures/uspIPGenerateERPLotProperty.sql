@@ -75,8 +75,10 @@ BEGIN TRY
 					SELECT *
 					FROM tblICInventoryReceiptItem RI
 					JOIN tblICInventoryReceiptItemLot RL ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
+					JOIN tblICInventoryReceipt R on R.intInventoryReceiptId =RI.intInventoryReceiptId 
 					WHERE RL.intLotId = @intLotId
 						AND IsNULL(RI.ysnExported, 0) = 0
+						AND R.strReceiptType ='Purchase Contract'
 					) AND @intLotId IS NOT NULL
 			BEGIN
 				GOTO NextPO

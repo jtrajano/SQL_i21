@@ -22,6 +22,32 @@ SET @OneBit = CAST(1 AS BIT)
 
 IF @Post = @OneBit
 BEGIN
+    DELETE PQ
+    FROM tblARPostingQueue PQ
+    WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) >= 60
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Undeposited Funds Account	
+    SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'There''s an on-going posting for other transactions. Please try again later.'
+    FROM #ARPostPaymentHeader P
+    CROSS APPLY (
+        SELECT TOP 1 intTransactionId 
+        FROM tblARPostingQueue 
+        WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) <= 60
+    ) PQ
+
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
@@ -98,7 +124,7 @@ BEGIN
         ,[strBatchId]               = [strBatchId]
         ,[strError]                 = 'The GL account has not been set up for the ''Customer Prepaid'' selection (Company Location > GL Accounts Tab).  This invoice is not able to be posted without this information supplied.'
     FROM #ARPostPaymentHeader
-	WHERE strPaymentMethod = 'Prepay' 
+	WHERE (strPaymentMethod = 'Prepay' OR (strPaymentMethod <> 'Prepay' AND dblAmountPaid = dblUnappliedAmount))
 	  AND ISNULL(intSalesAdvAcct, 0) = 0
 
     INSERT INTO #ARInvalidPaymentData (

@@ -44,7 +44,7 @@ BEGIN TRY
 		,@dblProduceQty NUMERIC(38, 20)
 		,@GLEntries AS RecapTableType
 		,@STARTING_NUMBER_BATCH AS INT = 3
-		,@strCostDistribution NVARCHAR(50)
+		--,@strCostDistribution NVARCHAR(50)
 		,@intReturnValue AS INT
 		,@ErrorMessage AS NVARCHAR(4000)
 		,@strPickLot NVARCHAR(50)
@@ -371,281 +371,281 @@ BEGIN TRY
 		AND dtmPlannedDate = @dtmPlannedDate
 		AND intExecutionOrder > @intExecutionOrder
 
-	SELECT @strCostDistribution = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND intAttributeId = 107 --Cost Distribution during close work order
+	--SELECT @strCostDistribution = strAttributeValue
+	--FROM tblMFManufacturingProcessAttribute
+	--WHERE intManufacturingProcessId = @intManufacturingProcessId
+	--	AND intLocationId = @intLocationId
+	--	AND intAttributeId = 107 --Cost Distribution during close work order
 
-	IF @strCostDistribution IS NULL
-		OR @strCostDistribution = ''
-	BEGIN
-		SELECT @strCostDistribution = 'False'
-	END
+	--IF @strCostDistribution IS NULL
+	--	OR @strCostDistribution = ''
+	--BEGIN
+	--	SELECT @strCostDistribution = 'False'
+	--END
 
-	IF @strCostDistribution = 'True'
-	BEGIN
-		SELECT @dblProduceQty = SUM(dblQuantity)
-		FROM dbo.tblMFWorkOrderProducedLot WP
-		WHERE WP.intWorkOrderId = @intWorkOrderId
-			AND WP.ysnProductionReversed = 0
-			AND WP.intItemId IN (
-				SELECT intItemId
-				FROM dbo.tblMFWorkOrderRecipeItem
-				WHERE intRecipeItemTypeId = 2
-					AND ysnConsumptionRequired = 1
-					AND intWorkOrderId = @intWorkOrderId
-				)
+	--IF @strCostDistribution = 'True'
+	--BEGIN
+	--	SELECT @dblProduceQty = SUM(dblQuantity)
+	--	FROM dbo.tblMFWorkOrderProducedLot WP
+	--	WHERE WP.intWorkOrderId = @intWorkOrderId
+	--		AND WP.ysnProductionReversed = 0
+	--		AND WP.intItemId IN (
+	--			SELECT intItemId
+	--			FROM dbo.tblMFWorkOrderRecipeItem
+	--			WHERE intRecipeItemTypeId = 2
+	--				AND ysnConsumptionRequired = 1
+	--				AND intWorkOrderId = @intWorkOrderId
+	--			)
 
-		SELECT @dblOtherCost = 0
+	--	SELECT @dblOtherCost = 0
 
-		SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
-		FROM tblMFWorkOrderProducedLot PL
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND PL.ysnProductionReversed = 0
-			AND PL.intItemId IN (
-				SELECT RI.intItemId
-				FROM dbo.tblMFWorkOrderRecipeItem RI
-				WHERE RI.intRecipeItemTypeId = 2
-					AND RI.ysnConsumptionRequired = 1
-					AND RI.intWorkOrderId = @intWorkOrderId
-				)
+	--	SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
+	--	FROM tblMFWorkOrderProducedLot PL
+	--	WHERE intWorkOrderId = @intWorkOrderId
+	--		AND PL.ysnProductionReversed = 0
+	--		AND PL.intItemId IN (
+	--			SELECT RI.intItemId
+	--			FROM dbo.tblMFWorkOrderRecipeItem RI
+	--			WHERE RI.intRecipeItemTypeId = 2
+	--				AND RI.ysnConsumptionRequired = 1
+	--				AND RI.intWorkOrderId = @intWorkOrderId
+	--			)
 
-		WHILE @intWorkOrderProducedLotId IS NOT NULL
-		BEGIN
-			SELECT @intTransactionId = NULL
-				,@strBatchId = NULL
+	--	WHILE @intWorkOrderProducedLotId IS NOT NULL
+	--	BEGIN
+	--		SELECT @intTransactionId = NULL
+	--			,@strBatchId = NULL
 
-			SELECT @intTransactionId = PL.intBatchId
-				,@strBatchId = PL.strBatchId
-			FROM tblMFWorkOrderProducedLot PL
-			WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+	--		SELECT @intTransactionId = PL.intBatchId
+	--			,@strBatchId = PL.strBatchId
+	--		FROM tblMFWorkOrderProducedLot PL
+	--		WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
-			SELECT @dblOtherCost = @dblOtherCost + ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId), 0)
+	--		SELECT @dblOtherCost = @dblOtherCost + ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId), 0)
 
-			SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
-			FROM tblMFWorkOrderProducedLot PL
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND PL.ysnProductionReversed = 0
-				AND PL.intItemId IN (
-					SELECT RI.intItemId
-					FROM dbo.tblMFWorkOrderRecipeItem RI
-					WHERE RI.intRecipeItemTypeId = 2
-						AND RI.ysnConsumptionRequired = 1
-						AND RI.intWorkOrderId = @intWorkOrderId
-					)
-				AND intWorkOrderProducedLotId > @intWorkOrderProducedLotId
-		END
+	--		SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
+	--		FROM tblMFWorkOrderProducedLot PL
+	--		WHERE intWorkOrderId = @intWorkOrderId
+	--			AND PL.ysnProductionReversed = 0
+	--			AND PL.intItemId IN (
+	--				SELECT RI.intItemId
+	--				FROM dbo.tblMFWorkOrderRecipeItem RI
+	--				WHERE RI.intRecipeItemTypeId = 2
+	--					AND RI.ysnConsumptionRequired = 1
+	--					AND RI.intWorkOrderId = @intWorkOrderId
+	--				)
+	--			AND intWorkOrderProducedLotId > @intWorkOrderProducedLotId
+	--	END
 
-		SELECT @dblOtherCharges = SUM(dblOtherCharges)
-		FROM tblMFWorkOrderProducedLot
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND ysnProductionReversed = 0
+	--	SELECT @dblOtherCharges = SUM(dblOtherCharges)
+	--	FROM tblMFWorkOrderProducedLot
+	--	WHERE intWorkOrderId = @intWorkOrderId
+	--		AND ysnProductionReversed = 0
 
-		IF @dblOtherCharges IS NOT NULL
-		BEGIN
-			SELECT @dblOtherCost = abs(@dblOtherCost) + @dblOtherCharges
-		END
+	--	IF @dblOtherCharges IS NOT NULL
+	--	BEGIN
+	--		SELECT @dblOtherCost = abs(@dblOtherCost) + @dblOtherCharges
+	--	END
 
-		SET @dblNewCost = ISNULL(@dblOtherCost, 0)
-		SET @dblNewCost = ABS(@dblNewCost)
+	--	SET @dblNewCost = ISNULL(@dblOtherCost, 0)
+	--	SET @dblNewCost = ABS(@dblNewCost)
 
-		EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-			,@intItemId = NULL
-			,@intManufacturingId = NULL
-			,@intSubLocationId = NULL
-			,@intLocationId = @intLocationId
-			,@intOrderTypeId = NULL
-			,@intBlendRequirementId = NULL
-			,@intPatternCode = 33
-			,@ysnProposed = 0
-			,@strPatternString = @intBatchId OUTPUT
+	--	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+	--		,@intItemId = NULL
+	--		,@intManufacturingId = NULL
+	--		,@intSubLocationId = NULL
+	--		,@intLocationId = @intLocationId
+	--		,@intOrderTypeId = NULL
+	--		,@intBlendRequirementId = NULL
+	--		,@intPatternCode = 33
+	--		,@ysnProposed = 0
+	--		,@strPatternString = @intBatchId OUTPUT
 
-		INSERT INTO @adjustedEntries (
-			[intItemId]
-			,[intItemLocationId]
-			,[intItemUOMId]
-			,[dtmDate]
-			,[dblQty]
-			,[dblUOMQty]
-			,[intCostUOMId]
-			,[dblNewValue]
-			,[intCurrencyId]
-			--,[dblExchangeRate]
-			,[intTransactionId]
-			,[intTransactionDetailId]
-			,[strTransactionId]
-			,[intTransactionTypeId]
-			,[intLotId]
-			,[intSubLocationId]
-			,[intStorageLocationId]
-			,[ysnIsStorage]
-			,[strActualCostId]
-			,[intSourceTransactionId]
-			,[intSourceTransactionDetailId]
-			,[strSourceTransactionId]
-			,intFobPointId
-			)
-		SELECT [intItemId] = PL.intItemId
-			,[intItemLocationId] = IL.intItemLocationId
-			,[intItemUOMId] = PL.intItemUOMId
-			,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDate)
-			,[dblQty] = PL.dblQuantity
-			,[dblUOMQty] = 1
-			,[intCostUOMId] = PL.intItemUOMId
-			,[dblNewCost] = CASE 
-				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewCost
-				ELSE (@dblNewCost * RI.dblPercentage / 100) * (PL.dblQuantity / SUM(PL.dblQuantity) OVER (PARTITION BY PL.intItemId))
-				END - ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
-			,[intCurrencyId] = (
-				SELECT TOP 1 intDefaultReportingCurrencyId
-				FROM tblSMCompanyPreference
-				)
-			--,[dblExchangeRate] = 0
-			,[intTransactionId] = @intBatchId
-			,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
-			,[strTransactionId] = W.strWorkOrderNo
-			,[intTransactionTypeId] = 9
-			,[intLotId] = PL.intLotId
-			,[intSubLocationId] = SL.intSubLocationId
-			,[intStorageLocationId] = PL.intStorageLocationId
-			,[ysnIsStorage] = NULL
-			,[strActualCostId] = NULL
-			,[intSourceTransactionId] = intBatchId
-			,[intSourceTransactionDetailId] = PL.intWorkOrderProducedLotId
-			,[strSourceTransactionId] = strWorkOrderNo
-			,intFobPointId = 2
-		FROM dbo.tblMFWorkOrderProducedLot PL
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
-		JOIN tblICItemLocation IL ON IL.intItemId = PL.intItemId
-			AND IL.intLocationId = @intLocationId
-		LEFT JOIN tblICLot L ON L.intLotId = PL.intLotId
-		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = PL.intStorageLocationId
-		LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
-			AND RI.intItemId = PL.intItemId
-			AND RI.intRecipeItemTypeId = 2
-		WHERE PL.intWorkOrderId = @intWorkOrderId
-			AND PL.ysnProductionReversed = 0
-			AND PL.intItemId IN (
-				SELECT intItemId
-				FROM dbo.tblMFWorkOrderRecipeItem
-				WHERE intRecipeItemTypeId = 2
-					AND ysnConsumptionRequired = 1
-					AND intWorkOrderId = @intWorkOrderId
-				)
+	--	INSERT INTO @adjustedEntries (
+	--		[intItemId]
+	--		,[intItemLocationId]
+	--		,[intItemUOMId]
+	--		,[dtmDate]
+	--		,[dblQty]
+	--		,[dblUOMQty]
+	--		,[intCostUOMId]
+	--		,[dblNewValue]
+	--		,[intCurrencyId]
+	--		--,[dblExchangeRate]
+	--		,[intTransactionId]
+	--		,[intTransactionDetailId]
+	--		,[strTransactionId]
+	--		,[intTransactionTypeId]
+	--		,[intLotId]
+	--		,[intSubLocationId]
+	--		,[intStorageLocationId]
+	--		,[ysnIsStorage]
+	--		,[strActualCostId]
+	--		,[intSourceTransactionId]
+	--		,[intSourceTransactionDetailId]
+	--		,[strSourceTransactionId]
+	--		,intFobPointId
+	--		)
+	--	SELECT [intItemId] = PL.intItemId
+	--		,[intItemLocationId] = IL.intItemLocationId
+	--		,[intItemUOMId] = PL.intItemUOMId
+	--		,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDate)
+	--		,[dblQty] = PL.dblQuantity
+	--		,[dblUOMQty] = 1
+	--		,[intCostUOMId] = PL.intItemUOMId
+	--		,[dblNewCost] = CASE 
+	--			WHEN IsNULL(RI.dblPercentage, 0) = 0
+	--				THEN @dblNewCost
+	--			ELSE (@dblNewCost * RI.dblPercentage / 100) * (PL.dblQuantity / SUM(PL.dblQuantity) OVER (PARTITION BY PL.intItemId))
+	--			END - ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
+	--		,[intCurrencyId] = (
+	--			SELECT TOP 1 intDefaultReportingCurrencyId
+	--			FROM tblSMCompanyPreference
+	--			)
+	--		--,[dblExchangeRate] = 0
+	--		,[intTransactionId] = @intBatchId
+	--		,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
+	--		,[strTransactionId] = W.strWorkOrderNo
+	--		,[intTransactionTypeId] = 9
+	--		,[intLotId] = PL.intLotId
+	--		,[intSubLocationId] = SL.intSubLocationId
+	--		,[intStorageLocationId] = PL.intStorageLocationId
+	--		,[ysnIsStorage] = NULL
+	--		,[strActualCostId] = NULL
+	--		,[intSourceTransactionId] = intBatchId
+	--		,[intSourceTransactionDetailId] = PL.intWorkOrderProducedLotId
+	--		,[strSourceTransactionId] = strWorkOrderNo
+	--		,intFobPointId = 2
+	--	FROM dbo.tblMFWorkOrderProducedLot PL
+	--	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
+	--	JOIN tblICItemLocation IL ON IL.intItemId = PL.intItemId
+	--		AND IL.intLocationId = @intLocationId
+	--	LEFT JOIN tblICLot L ON L.intLotId = PL.intLotId
+	--	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = PL.intStorageLocationId
+	--	LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
+	--		AND RI.intItemId = PL.intItemId
+	--		AND RI.intRecipeItemTypeId = 2
+	--	WHERE PL.intWorkOrderId = @intWorkOrderId
+	--		AND PL.ysnProductionReversed = 0
+	--		AND PL.intItemId IN (
+	--			SELECT intItemId
+	--			FROM dbo.tblMFWorkOrderRecipeItem
+	--			WHERE intRecipeItemTypeId = 2
+	--				AND ysnConsumptionRequired = 1
+	--				AND intWorkOrderId = @intWorkOrderId
+	--			)
 
-		-- Get the next batch number
-		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
-			,@strBatchId OUTPUT
+	--	-- Get the next batch number
+	--	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+	--		,@strBatchId OUTPUT
 
-		DELETE
-		FROM @GLEntries
+	--	DELETE
+	--	FROM @GLEntries
 
-		IF EXISTS (
-				SELECT TOP 1 1
-				FROM @adjustedEntries
-				)
-		BEGIN
-			EXEC @intReturnValue = uspICPostCostAdjustment @adjustedEntries
-				,@strBatchId
-				,@userId
-				,1
-				,1
+	--	IF EXISTS (
+	--			SELECT TOP 1 1
+	--			FROM @adjustedEntries
+	--			)
+	--	BEGIN
+	--		EXEC @intReturnValue = uspICPostCostAdjustment @adjustedEntries
+	--			,@strBatchId
+	--			,@userId
+	--			,1
+	--			,1
 
-			IF @intReturnValue <> 0
-			BEGIN
-				SELECT TOP 1 @ErrorMessage = strMessage
-				FROM tblICPostResult
-				WHERE strBatchNumber = @strBatchId
+	--		IF @intReturnValue <> 0
+	--		BEGIN
+	--			SELECT TOP 1 @ErrorMessage = strMessage
+	--			FROM tblICPostResult
+	--			WHERE strBatchNumber = @strBatchId
 
-				RAISERROR (
-						@ErrorMessage
-						,11
-						,1
-						);
-			END
-			ELSE
-			BEGIN
-				IF @strInstantConsumption = 'True'
-				BEGIN
-					SELECT @AccountCategory_Cost_Adjustment = 'Inventory'
-				END
-				ELSE
-				BEGIN
-					SELECT @AccountCategory_Cost_Adjustment = 'Work In Progress'
-				END
+	--			RAISERROR (
+	--					@ErrorMessage
+	--					,11
+	--					,1
+	--					);
+	--		END
+	--		ELSE
+	--		BEGIN
+	--			IF @strInstantConsumption = 'True'
+	--			BEGIN
+	--				SELECT @AccountCategory_Cost_Adjustment = 'Inventory'
+	--			END
+	--			ELSE
+	--			BEGIN
+	--				SELECT @AccountCategory_Cost_Adjustment = 'Work In Progress'
+	--			END
 
-				INSERT INTO @GLEntries (
-					dtmDate
-					,strBatchId
-					,intAccountId
-					,dblDebit
-					,dblCredit
-					,dblDebitUnit
-					,dblCreditUnit
-					,strDescription
-					,strCode
-					,strReference
-					,intCurrencyId
-					,dblExchangeRate
-					,dtmDateEntered
-					,dtmTransactionDate
-					,strJournalLineDescription
-					,intJournalLineNo
-					,ysnIsUnposted
-					,intUserId
-					,intEntityId
-					,strTransactionId
-					,intTransactionId
-					,strTransactionType
-					,strTransactionForm
-					,strModuleName
-					,intConcurrencyId
-					,dblDebitForeign
-					,dblDebitReport
-					,dblCreditForeign
-					,dblCreditReport
-					,dblReportingRate
-					,dblForeignRate
-					,intSourceEntityId
-					,intCommodityId
-					)
-				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
-					,@intEntityUserSecurityId = @userId
-					,@AccountCategory_Cost_Adjustment = @AccountCategory_Cost_Adjustment
-			END
+	--			INSERT INTO @GLEntries (
+	--				dtmDate
+	--				,strBatchId
+	--				,intAccountId
+	--				,dblDebit
+	--				,dblCredit
+	--				,dblDebitUnit
+	--				,dblCreditUnit
+	--				,strDescription
+	--				,strCode
+	--				,strReference
+	--				,intCurrencyId
+	--				,dblExchangeRate
+	--				,dtmDateEntered
+	--				,dtmTransactionDate
+	--				,strJournalLineDescription
+	--				,intJournalLineNo
+	--				,ysnIsUnposted
+	--				,intUserId
+	--				,intEntityId
+	--				,strTransactionId
+	--				,intTransactionId
+	--				,strTransactionType
+	--				,strTransactionForm
+	--				,strModuleName
+	--				,intConcurrencyId
+	--				,dblDebitForeign
+	--				,dblDebitReport
+	--				,dblCreditForeign
+	--				,dblCreditReport
+	--				,dblReportingRate
+	--				,dblForeignRate
+	--				,intSourceEntityId
+	--				,intCommodityId
+	--				)
+	--			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
+	--				,@intEntityUserSecurityId = @userId
+	--				,@AccountCategory_Cost_Adjustment = @AccountCategory_Cost_Adjustment
+	--		END
 
-			IF EXISTS (
-					SELECT TOP 1 1
-					FROM @GLEntries
-					)
-			BEGIN
-				IF EXISTS (
-						SELECT *
-						FROM tblMFWorkOrderRecipeItem WRI
-						JOIN tblICItem I ON I.intItemId = WRI.intItemId
-						WHERE I.strType = 'Other Charge'
-							AND WRI.intWorkOrderId = @intWorkOrderId
-						)
-				BEGIN
-					EXEC dbo.uspGLBookEntries @GLEntries
-						,1
-						,1
-						,1
-				END
-				ELSE
-				BEGIN
-					EXEC dbo.uspGLBookEntries @GLEntries
-						,1
-				END
-			END
+	--		IF EXISTS (
+	--				SELECT TOP 1 1
+	--				FROM @GLEntries
+	--				)
+	--		BEGIN
+	--			IF EXISTS (
+	--					SELECT *
+	--					FROM tblMFWorkOrderRecipeItem WRI
+	--					JOIN tblICItem I ON I.intItemId = WRI.intItemId
+	--					WHERE I.strType = 'Other Charge'
+	--						AND WRI.intWorkOrderId = @intWorkOrderId
+	--					)
+	--			BEGIN
+	--				EXEC dbo.uspGLBookEntries @GLEntries
+	--					,1
+	--					,1
+	--					,1
+	--			END
+	--			ELSE
+	--			BEGIN
+	--				EXEC dbo.uspGLBookEntries @GLEntries
+	--					,1
+	--			END
+	--		END
 
-			UPDATE tblMFWorkOrder
-			SET strCostAdjustmentBatchId = @strBatchId
-			WHERE intWorkOrderId = @intWorkOrderId
-		END
-	END
+	--		UPDATE tblMFWorkOrder
+	--		SET strCostAdjustmentBatchId = @strBatchId
+	--		WHERE intWorkOrderId = @intWorkOrderId
+	--	END
+	--END
 
 	SELECT @strPickLot = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute

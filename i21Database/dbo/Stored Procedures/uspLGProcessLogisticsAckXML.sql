@@ -351,7 +351,7 @@ BEGIN TRY
 
 			UPDATE LD
 			SET LD.intLoadDocumentRefId = XMLDocument.intLoadDocumentId
-			FROM OPENXML(@idoc, 'tblLGLoadDocumentss/tblLGLoadDocuments', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadDocumentsAckViews/vyuIPLoadDocumentsAckView', 2) WITH (
 					intLoadDocumentId INT
 					,intLoadDocumentRefId INT
 					) XMLDocument
@@ -367,7 +367,7 @@ BEGIN TRY
 
 			UPDATE LC
 			SET LC.intLoadContainerRefId = XMLContainer.intLoadContainerId
-			FROM OPENXML(@idoc, 'tblLGLoadContainers/tblLGLoadContainer', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadContainerAckViews/vyuIPLoadContainerAckView', 2) WITH (
 					intLoadContainerId INT
 					,intLoadContainerRefId INT
 					) XMLContainer
@@ -383,7 +383,7 @@ BEGIN TRY
 
 			UPDATE LDCL
 			SET LDCL.intLoadDetailContainerLinkRefId = XMLContainerLink.intLoadDetailContainerLinkId
-			FROM OPENXML(@idoc, 'tblLGLoadDetailContainerLinks/tblLGLoadDetailContainerLink', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadDetailContainerLinkAckViews/vyuIPLoadDetailContainerLinkAckView', 2) WITH (
 					intLoadDetailContainerLinkId INT
 					,intLoadDetailContainerLinkRefId INT
 					) XMLContainerLink
@@ -400,7 +400,7 @@ BEGIN TRY
 
 			UPDATE LW
 			SET LW.intLoadWarehouseRefId = XMLWarehouse.intLoadWarehouseId
-			FROM OPENXML(@idoc, 'tblLGLoadWarehouses/tblLGLoadWarehouse', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadWarehouseAckViews/vyuIPLoadWarehouseAckView', 2) WITH (
 					intLoadWarehouseId INT
 					,intLoadWarehouseRefId INT
 					) XMLWarehouse
@@ -416,7 +416,7 @@ BEGIN TRY
 
 			UPDATE LCO
 			SET LCO.intLoadCostRefId = XMLCost.intLoadCostId
-			FROM OPENXML(@idoc, 'tblLGLoadCosts/tblLGLoadCost', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadCostAckViews/vyuIPLoadCostAckView', 2) WITH (
 					intLoadCostId INT
 					,intLoadCostRefId INT
 					) XMLCost
@@ -432,7 +432,7 @@ BEGIN TRY
 
 			UPDATE LSC
 			SET LSC.intLoadStorageCostRefId = XMLStorageCost.intLoadStorageCostId
-			FROM OPENXML(@idoc, 'tblLGLoadStorageCosts/tblLGLoadStorageCost', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadStorageCostAckViews/vyuIPLoadStorageCostAckView', 2) WITH (
 					intLoadStorageCostId INT
 					,intLoadStorageCostRefId INT
 					) XMLStorageCost
@@ -448,7 +448,7 @@ BEGIN TRY
 
 			UPDATE LWS
 			SET LWS.intLoadWarehouseServicesRefId = XMLStorageCost.intLoadWarehouseServicesId
-			FROM OPENXML(@idoc, 'tblLGLoadWarehouseServicess/tblLGLoadWarehouseServices', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadWarehouseServicesAckViews/vyuIPLoadWarehouseServicesAckView', 2) WITH (
 					intLoadWarehouseServicesId INT
 					,intLoadWarehouseServicesRefId INT
 					) XMLStorageCost
@@ -465,7 +465,7 @@ BEGIN TRY
 
 			UPDATE LWC
 			SET LWC.intLoadWarehouseContainerRefId = XMLStorageCost.intLoadWarehouseContainerId
-			FROM OPENXML(@idoc, 'tblLGLoadWarehouseContainers/tblLGLoadWarehouseContainer', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadWarehouseContainerAckViews/vyuIPLoadWarehouseContainerAckView', 2) WITH (
 					intLoadWarehouseContainerId INT
 					,intLoadWarehouseContainerRefId INT
 					) XMLStorageCost

@@ -11,3 +11,10 @@
 	CONSTRAINT [FK_tblTRRackPriceDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]), 
     CONSTRAINT [AK_tblTRRackPriceDetail_intItemId] UNIQUE ([intRackPriceHeaderId], [intItemId])	
 )
+GO
+
+CREATE INDEX [IX_tblTRRackPriceDetail_intRackPriceHeaderId] ON [dbo].[tblTRRackPriceDetail] ([intRackPriceHeaderId])
+GO
+
+CREATE INDEX [IX_tblTRRackPriceDetail_intItemId] ON [dbo].[tblTRRackPriceDetail] ([intItemId])
+GO

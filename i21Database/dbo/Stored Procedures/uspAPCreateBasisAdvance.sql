@@ -492,18 +492,24 @@ OUTER APPLY (
 ) ticketSelected
 WHERE ticketSelected.ysnSelected IS NULL
 
--- SELECT @createdBasisAdvance = COALESCE(@createdBasisAdvance + ',', '') +  CONVERT(VARCHAR(12),intBillId)
--- FROM #tmpVoucherCreated
--- ORDER BY intBillId
+DECLARE @forPost NVARCHAR(MAX);
+SELECT @forPost = COALESCE(@forPost + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+FROM @vouchers A
+LEFT JOIN vyuAPForApprovalTransaction B ON A.intBillId = B.intTransactionId
+WHERE B.intTransactionId IS NULL
+ORDER BY intBillId
 
+IF NULLIF(@forPost,'') IS NOT NULL
+BEGIN
 EXEC uspAPPostVoucherPrepay 
     @post = 1,
-    @param = @createdBasisAdvance,
+    @param = @forPost,
     @userId = @userId,
     @recap = 0,
     @invalidCount = @postFailedCount OUT,
     @success = @postSuccess OUT,
     @batchIdUsed = @postBatchId OUT
+END
 
 IF @postFailedCount > 0
 BEGIN 

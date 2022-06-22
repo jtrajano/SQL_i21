@@ -105,6 +105,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2120_UpdateAddonComponents.sql
 :r .\SM\2120_InsertOtherLabels.sql
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
+:r .\SM\2110_FixUserSecurityAdminData.sql
 
 
 -- Canned Report
@@ -286,7 +287,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
-:r .\AR\DefaultData\97_RefreshARTempTable.sql
 :r .\AR\DefaultData\96_RebuildReportFields.sql
 
 --Accounts Payable
@@ -565,10 +565,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
 :r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
+:r .\ST\41_Checkout_Radiant_POSJournal.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
-:r .\ST\41_Checkout_Radiant_POSJournal.sql
 
 
 
@@ -695,6 +695,9 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
+
+-- MBIL - Mobile Billing
+:r .\MBIL\InsertLongTruckScreen.sql
 
 -- Clean up i21 database objects
 :r .\SM\01_CleanupObjects.sql

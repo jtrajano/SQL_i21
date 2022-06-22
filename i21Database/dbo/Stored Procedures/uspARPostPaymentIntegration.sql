@@ -16,6 +16,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal    DECIMAL(18,6) = 0
 DECLARE @ZeroBit        BIT = CAST(0 AS BIT)
 DECLARE @OneBit         BIT = CAST(1 AS BIT)
+DECLARE @strSessionId   NVARCHAR(50) = NEWID()
 
 DECLARE @PaymentIds AS Id
 DECLARE @NonZeroPaymentIds AS Id
@@ -512,6 +513,48 @@ CROSS APPLY (
 ) PAYMENT
 WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 
+--UPDATE HIGHEST AR
+UPDATE CUSTOMER
+SET dblHighestAR		= CUSTOMER.dblARBalance
+  , dtmHighestARDate	= CAST(@PostDate AS DATE)
+FROM dbo.tblARCustomer CUSTOMER
+INNER JOIN (
+	SELECT DISTINCT intEntityCustomerId
+	FROM #ARPostPaymentHeader
+) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
+WHERE CUSTOMER.dblARBalance > ISNULL(CUSTOMER.dblHighestAR, 0)
+
+--UPDATE HIGHEST DUE AR
+UPDATE CUSTOMER
+SET dblHighestDueAR		= DUE.dblPastDue
+  , dtmHighestDueARDate	= CAST(@PostDate AS DATE)
+FROM dbo.tblARCustomer CUSTOMER
+INNER JOIN (
+    SELECT intEntityCustomerId	= I.intEntityCustomerId
+         , dblPastDue			= SUM(CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmPostDate) > 0
+                                        THEN 
+                                                CASE WHEN I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') 
+                                                    THEN I.dblAmountDue
+                                                    ELSE -I.dblAmountDue
+                                                END 
+                                        ELSE 0 
+                                    END) 
+    FROM tblARInvoice I
+    INNER JOIN (
+        SELECT DISTINCT intEntityCustomerId
+        FROM #ARPostPaymentHeader
+    ) PAYMENT ON I.intEntityCustomerId = PAYMENT.intEntityCustomerId
+    WHERE I.ysnPosted = 1
+      AND I.ysnForgiven = 0
+      AND I.ysnPaid = 0
+      AND I.dblAmountDue <> 0
+      AND I.strTransactionType <> 'Cash Refund'
+      AND I.dtmPostDate <= @PostDate
+    GROUP BY I.intEntityCustomerId
+) DUE ON CUSTOMER.intEntityId = DUE.intEntityCustomerId
+     AND DUE.dblPastDue > 0
+     AND DUE.dblPastDue > CUSTOMER.dblHighestDueAR
+
 --UPDATE CUSTOMER'S BUDGET
 EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @PaymentIds, @Post = @Post
 
@@ -569,7 +612,7 @@ INSERT INTO @PaymentStaging(intId, intInvoiceId, dblBasePayment, strTransactionN
 SELECT A.[intTransactionId], A.[intInvoiceId], A.[dblBaseAmountPaid], A.[strTransactionId], '0', '0', 1, 1, 1, getdate(), 1, 1
 FROM #ARPostPaymentDetail A 
 
-EXEC dbo.uspARPaymentIntegration @InvoiceId, @Post, @PaymentStaging
+EXEC dbo.uspARPaymentIntegration @InvoiceId, @Post, @PaymentStaging, @strSessionId
 
 IF @Post = 0
 	BEGIN			
