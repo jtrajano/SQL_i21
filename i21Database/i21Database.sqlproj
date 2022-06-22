@@ -9847,6 +9847,7 @@
     <Build Include="dbo\Tables\tblCFImportTransactionTaxZeroQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
 	  <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
+    <Build Include="dbo\Views\vyuRKGetCollateral.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
