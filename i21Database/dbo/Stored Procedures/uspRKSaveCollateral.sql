@@ -131,11 +131,11 @@ BEGIN
 		LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = C.intUnitMeasureId AND CUM.intCommodityId = C.intCommodityId
 		WHERE intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId
 				FROM tblRKCollateralAdjustment adj
-				JOIN tblRKSummaryLog history ON history.intTransactionRecordId = adj.intCollateralId AND strTransactionType = 'Collateral Adjustments'
+				JOIN tblRKSummaryLog history ON history.intTransactionRecordHeaderId = adj.intCollateralId AND strTransactionType = 'Collateral Adjustments'
 					AND adj.dtmAdjustmentDate = history.dtmTransactionDate
 					AND adj.strAdjustmentNo = history.strTransactionNumber
-					AND adj.dblAdjustmentAmount = history.dblOrigQty
-				WHERE intCollateralId = @intCollateralId)
+					AND ABS(adj.dblAdjustmentAmount) = ABS(history.dblOrigQty)
+				WHERE adj.intCollateralId = @intCollateralId)
 	END
 	ELSE
 	BEGIN
