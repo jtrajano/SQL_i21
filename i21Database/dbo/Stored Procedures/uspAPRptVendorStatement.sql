@@ -160,7 +160,7 @@ BEGIN
 			GROUP BY intShipToId, intEntityVendorId, intCurrencyId
 			UNION ALL
 			--DETAILS
-			SELECT * FROM vyuAPVendorStatement WHERE dtmBillDate BETWEEN @dtmDateFrom AND @dtmDateTo
+			SELECT * FROM vyuAPVendorStatement WHERE dtmBillDate BETWEEN DATEADD(DAY, 1, @dtmDateFrom) AND @dtmDateTo
 		) A
 		CROSS APPLY tblSMCompanySetup CS
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intShipToId
