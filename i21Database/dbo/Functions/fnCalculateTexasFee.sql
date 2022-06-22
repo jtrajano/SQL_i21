@@ -3,13 +3,13 @@
 	, @dtmTransDate AS DATETIME	
 	, @dblTotalGals DECIMAL(18, 6) = 0
 	, @dblTotalGasGals DECIMAL(18, 6) = 0
-	, @dblFeeAmountOut NUMERIC(18, 6) = 0
 )
 RETURNS DECIMAL (18, 6)
 AS
 BEGIN
 	DECLARE @dtmEffectiveDate AS DATETIME
 	DECLARE @intTaxCodeRateId AS INT
+	DECLARE @dblFeeAmountOut AS NUMERIC(18, 6) = 0 
 	DECLARE @tblTaxCodeLoadingFee TABLE(intTaxCodeRateLoadingFeeId INT
 		, dblTotalGalsFrom DECIMAL(18, 6)
 		, dblTotalGalsTo DECIMAL(18, 6)
