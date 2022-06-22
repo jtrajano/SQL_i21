@@ -37,7 +37,7 @@
     [strInvoiceNumber]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTransactionId]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTransactionType]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strInvoiceReportNumber]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceReportNumber]				NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strTempInvoiceReportNumber]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strMiscellaneous]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strName]								NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -164,6 +164,8 @@
     CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC) WITH (FILLFACTOR = 70),
 	CONSTRAINT [PK_tblCFInvoiceHistoryStagingTable] PRIMARY KEY CLUSTERED ([intInvoiceHistoryStagingId] ASC)
 );
+GO
 
-
-
+CREATE NONCLUSTERED INDEX [IX_tblCFInvoiceHistoryStagingTable_strInvoiceReportNumber]
+ON [dbo].[tblCFInvoiceHistoryStagingTable]([strInvoiceReportNumber])
+GO
