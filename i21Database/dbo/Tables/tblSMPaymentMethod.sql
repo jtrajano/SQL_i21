@@ -11,6 +11,7 @@
     [intSort]                       INT NOT NULL DEFAULT 0,
 	[intOriginalId]                 INT NULL,
     [strComment]                    NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [ysnUserDefined]		BIT NULL,
 
     [intConcurrencyId]              INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMPaymentMethod] PRIMARY KEY CLUSTERED ([intPaymentMethodID] ASC), 
