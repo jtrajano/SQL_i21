@@ -1,12 +1,12 @@
 CREATE FUNCTION dbo.fnCMGetDetailsOfCharges
 (
-	@intEntityId AS INT
+	@intEntityEFTInfoId AS INT
 )
 RETURNS NVARCHAR(50)
 BEGIN
     DECLARE @strDetailsOfCharges NVARCHAR(50)
 
-    SELECT TOP 1 @strDetailsOfCharges = strDetailsOfCharges FROM tblEMEntityEFTInformation WHERE intEntityId = @intEntityId
+    SELECT TOP 1 @strDetailsOfCharges = strDetailsOfCharges FROM tblEMEntityEFTInformation WHERE intEntityEFTInfoId = @intEntityEFTInfoId
     IF ISNULL(@strDetailsOfCharges,'') = ''
     SELECT TOP 1 @strDetailsOfCharges = strDetailsOfCharges FROM tblAPCompanyPreference
 
