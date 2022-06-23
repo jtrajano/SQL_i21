@@ -17,7 +17,8 @@
 	@intLoggedInUserId		INT	= NULL,
 	@dtmEndDate				DATETIME = NULL,
 	@intBorrowingFacilityId INT = NULL,
-	@intBorrowingFacilityLimitId INT = NULL
+	@intBorrowingFacilityLimitId INT = NULL,
+	@intLoadingPointId		INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -30,7 +31,8 @@ BEGIN
 			@strContractItemName	NVARCHAR(100),
 			@strEntityName			NVARCHAR(100),
 			@intBrokerageAccountId	INT,
-			@strAccountNumber		NVARCHAR(100)
+			@strAccountNumber		NVARCHAR(100),
+			@intFreightMatrixLeadTime INT
 
 	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
 			@intSubLocationId		= CASE WHEN @intSubLocationId= 0 THEN NULL ELSE @intSubLocationId END,
@@ -108,13 +110,24 @@ BEGIN
 		SELECT @strCity = strCity FROM tblEMEntityLocation WHERE intEntityId = @intVendorId AND ysnDefaultLocation = 1
 		SELECT @intCityId = intCityId, @ysnPort = ysnPort, @ysnRegion = ysnRegion FROM tblSMCity WHERE strCity = @strCity
 
+
 		IF @intCityId IS NOT NULL
 		BEGIN
+			if (isnull(@intLoadingPointId,0) > 0)
+			begin
+				select
+					@intFreightMatrixLeadTime = frm.intLeadTime 
+				from tblSMCity c
+				join tblLGFreightRateMatrix frm on frm.strOriginPort = c.strCity and frm.strDestinationCity = @strCity
+				where c.intCityId = @intLoadingPointId
+			end
+
 			SELECT @intCityId AS intCityId, CASE	WHEN @ysnPort = 1 THEN 'Port' 
 													WHEN @ysnRegion = 1 THEN 'Region'
 													ELSE 'City'
 											END	AS strDestinationPointType
 											,@strCity AS strDestinationPoint
+											,isnull(@intFreightMatrixLeadTime,0) as intFreightMatrixLeadTime
 		END
 		ELSE
 		BEGIN
