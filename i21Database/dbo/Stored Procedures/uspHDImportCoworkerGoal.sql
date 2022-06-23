@@ -5,14 +5,16 @@
 	,@Currency NVARCHAR(100)
 	,@CommissionAccount NVARCHAR(100)
 	,@RevenueAccount NVARCHAR(100)
-	,@CommisionType NVARCHAR(100)
-	,@RateType NVARCHAR(100)
 	,@Active NVARCHAR(100)
 	,@UtilizationTargetAnnual NVARCHAR(100)
 	,@UtilizationTargetWeekly NVARCHAR(100)
 	,@UtilizationTargetMonthly NVARCHAR(100)
-	,@IncentiveRate NVARCHAR(100)
+	,@CommissionType NVARCHAR(100)
+	,@CommissionRateType NVARCHAR(100)
 	,@CommissionRate NVARCHAR(100)
+	,@IncentiveType NVARCHAR(100)
+	,@IncentiveRateType NVARCHAR(100)
+	,@IncentiveRate NVARCHAR(100)
 	,@AnnualHurdle NVARCHAR(100)
 	,@AnnualBudget NVARCHAR(100)
 	,@CanViewOtherCoworker NVARCHAR(100)
@@ -81,20 +83,38 @@ BEGIN TRY
 	END
 
 	/*Validate Commission Type*/
-	IF (@CommisionType IS NOT NULL AND LTRIM(RTRIM(@CommisionType)) <> '')
+	IF (@CommissionType IS NOT NULL AND LTRIM(RTRIM(@CommissionType)) <> '')
 	BEGIN
-		IF lower(@CommisionType) NOT IN ('hourly no hurdle', 'hourly hurdle annual', 'hourly hurdle per period')
+		IF lower(@CommissionType) NOT IN ('hourly no hurdle', 'hourly hurdle annual', 'hourly hurdle per period')
 		BEGIN
-			SET @message = @message + '- Commision Type should be Hourly no hurdle, Hourly hurdle annual or Hourly hurdle per period.' + @newLine;
+			SET @message = @message + '- Commission Type should be Hourly no hurdle, Hourly hurdle annual or Hourly hurdle per period.' + @newLine;
 		END
 	END
 
-	/*Validate Rate Type*/
-	IF (@RateType IS NOT NULL AND LTRIM(RTRIM(@RateType)) <> '')
+	/*Validate Incentive Type*/
+	IF (@IncentiveType IS NOT NULL AND LTRIM(RTRIM(@IncentiveType)) <> '')
 	BEGIN
-		IF lower(@RateType) NOT IN ('flat amount', 'percentage')
+		IF lower(@IncentiveType) NOT IN ('hourly no hurdle', 'hourly hurdle annual', 'hourly hurdle per period')
 		BEGIN
-			SET @message = @message + '- Rate Type should be Flat Amount or Percentage.' + @newLine;
+			SET @message = @message + '- Incentive Type should be Hourly no hurdle, Hourly hurdle annual or Hourly hurdle per period.' + @newLine;
+		END
+	END
+
+	/*Validate Commission Rate Type*/
+	IF (@CommissionRateType IS NOT NULL AND LTRIM(RTRIM(@CommissionRateType)) <> '')
+	BEGIN
+		IF lower(@CommissionRateType) NOT IN ('flat amount', 'percentage')
+		BEGIN
+			SET @message = @message + '- Commission Rate Type should be Flat Amount or Percentage.' + @newLine;
+		END
+	END
+
+	/*Validate Incentive Rate Type*/
+	IF (@IncentiveRateType IS NOT NULL AND LTRIM(RTRIM(@IncentiveRateType)) <> '')
+	BEGIN
+		IF lower(@IncentiveRateType) NOT IN ('flat amount', 'percentage')
+		BEGIN
+			SET @message = @message + '- Incentive Rate Type should be Flat Amount or Percentage.' + @newLine;
 		END
 	END
 
@@ -121,7 +141,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SET @message = @message + '- Utilization Target Weekly Annual have a value between 1-150.' + @newLine;
+		SET @message = @message + '- Utilization Target Annual have a value between 1-150.' + @newLine;
 	END
 
 	/*Validate Utilization Target Weekly*/
@@ -338,15 +358,17 @@ BEGIN TRY
 					,[intUtilizationTargetAnnual]	
 					,[intUtilizationTargetWeekly]	
 					,[intUtilizationTargetMonthly]	
-					,[dblAnnualHurdle]				
-					,[dblIncentiveRate]				
+					,[dblAnnualHurdle]						
 					,[dblAnnualBudget]				
 					,[intCommissionAccountId]		
 					,[intRevenueAccountId]			
 					,[strGoal]						
 					,[strCommissionType]				
-					,[strRateType]					
-					,[intCommissionRate]				
+					,[strCommissionRateType]					
+					,[dblCommissionRate]
+					,[strIncentiveType]				
+					,[strIncentiveRateType]
+					,[dblIncentiveRate]		
 					,[intReportsToId]				
 					,[intConcurrencyId]		
 					,[ysnActive]						
@@ -359,26 +381,40 @@ BEGIN TRY
 					   ,[intUtilizationTargetWeekly]	= CAST(@UtilizationTargetWeekly AS INT)
 					   ,[intUtilizationTargetMonthly]	= CAST(@UtilizationTargetMonthly AS INT)
 					   ,[dblAnnualHurdle]				= CASE WHEN @AnnualHurdle IS NULL OR LTRIM(RTRIM(@AnnualHurdle)) = '' THEN 0 ELSE CAST(@AnnualHurdle AS NUMERIC(18, 6)) END
-					   ,[dblIncentiveRate]				= CASE WHEN @IncentiveRate IS NULL OR LTRIM(RTRIM(@IncentiveRate)) = '' THEN 0 ELSE CAST(@IncentiveRate AS NUMERIC(18, 6)) END
-					   ,[dblAnnualBudget]				= CASE WHEN @AnnualBudget IS NULL OR LTRIM(RTRIM(@IncentiveRate)) = '' THEN 0 ELSE CAST(@AnnualBudget AS NUMERIC(18, 6)) END
+					   ,[dblAnnualBudget]				= CASE WHEN @AnnualBudget IS NULL OR LTRIM(RTRIM(@AnnualBudget)) = '' THEN 0 ELSE CAST(@AnnualBudget AS NUMERIC(18, 6)) END
 					   ,[intCommissionAccountId]		= @intCommissionAccount
 					   ,[intRevenueAccountId]			= @intRevenueAccount
 					   ,[strGoal]						= @Goal
-					   ,[strCommissionType]				= CASE WHEN LOWER(@CommisionType) = 'hourly no hurdle'
+					   ,[strCommissionType]				= CASE WHEN LOWER(@CommissionType) = 'hourly no hurdle'
 																	THEN 'Hourly no hurdle' 
-															   WHEN LOWER(@CommisionType) = 'hourly hurdle annual'
+															   WHEN LOWER(@CommissionType) = 'hourly hurdle annual'
 																	THEN 'Hourly hurdle annual' 
-															   WHEN LOWER(@CommisionType) = 'hourly hurdle per period'
+															   WHEN LOWER(@CommissionType) = 'hourly hurdle per period'
 																	THEN 'Hourly hurdle per period' 
 															   ELSE ''
 														  END
-					   ,[strRateType]					= CASE WHEN LOWER(@RateType) = 'flat amount'
+					   ,[strCommissionRateType]					= CASE WHEN LOWER(@CommissionRateType) = 'flat amount'
 																	THEN 'Flat amount' 
-															   WHEN LOWER(@RateType) = 'percentage'
+															   WHEN LOWER(@CommissionRateType) = 'percentage'
 																	THEN 'Percentage' 
 															   ELSE ''
 														  END
-					   ,[intCommissionRate]				= CASE WHEN @CommissionRate IS NULL OR LTRIM(RTRIM(@CommissionRate)) = '' THEN 0 ELSE CAST(@IncentiveRate AS NUMERIC(18, 6)) END
+					   ,[dblCommissionRate]				= CASE WHEN @CommissionRate IS NULL OR LTRIM(RTRIM(@CommissionRate)) = '' THEN 0 ELSE CAST(@CommissionRate AS NUMERIC(18, 6)) END
+					   ,[strIncentiveType]				= CASE WHEN LOWER(@IncentiveType) = 'hourly no hurdle'
+																	THEN 'Hourly no hurdle' 
+															   WHEN LOWER(@IncentiveType) = 'hourly hurdle annual'
+																	THEN 'Hourly hurdle annual' 
+															   WHEN LOWER(@IncentiveType) = 'hourly hurdle per period'
+																	THEN 'Hourly hurdle per period' 
+															   ELSE ''
+														  END
+					   ,[strIncentiveRateType]					= CASE WHEN LOWER(@IncentiveRateType) = 'flat amount'
+																	THEN 'Flat amount' 
+															   WHEN LOWER(@IncentiveRateType) = 'percentage'
+																	THEN 'Percentage' 
+															   ELSE ''
+														  END
+					   ,[dblIncentiveRate]				= CASE WHEN @IncentiveRate IS NULL OR LTRIM(RTRIM(@IncentiveRate)) = '' THEN 0 ELSE CAST(@IncentiveRate AS NUMERIC(18, 6)) END
 					   ,[intReportsToId]				= @intReportsToId
 					   ,[intConcurrencyId]				= 1
 					   ,[ysnActive]						= CASE WHEN @Active IS NULL OR LTRIM(RTRIM(@Active)) = '' THEN 1 ELSE @ysnActive END

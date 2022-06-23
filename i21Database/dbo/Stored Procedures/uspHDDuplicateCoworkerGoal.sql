@@ -7,6 +7,7 @@ AS
 
 BEGIN
 
+
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
@@ -131,15 +132,17 @@ BEGIN
 			,[intUtilizationTargetAnnual]		
 			,[intUtilizationTargetWeekly]		
 			,[intUtilizationTargetMonthly]		
-			,[dblAnnualHurdle]					
-			,[dblIncentiveRate]					
+			,[dblAnnualHurdle]									
 			,[dblAnnualBudget]					
 			,[intCommissionAccountId]			
 			,[intRevenueAccountId]				
 			,[strGoal]							
 			,[strCommissionType]					
-			,[strRateType]					    
-			,[intCommissionRate]					
+			,[strCommissionRateType]					    
+			,[dblCommissionRate]
+			,[strIncentiveType]					
+			,[strIncentiveRateType]
+			,[dblIncentiveRate]	
 			,[intReportsToId]					
 			,[intConcurrencyId] 			
 			,[ysnActive]							
@@ -153,15 +156,17 @@ BEGIN
 			,[intUtilizationTargetAnnual]		=	CoworkerGoal.[intUtilizationTargetAnnual]	
 			,[intUtilizationTargetWeekly]		=	CoworkerGoal.[intUtilizationTargetWeekly]	
 			,[intUtilizationTargetMonthly]		=	CoworkerGoal.[intUtilizationTargetMonthly]	
-			,[dblAnnualHurdle]					=	CoworkerGoal.[dblAnnualHurdle]				
-			,[dblIncentiveRate]					=	CoworkerGoal.[dblIncentiveRate]				
+			,[dblAnnualHurdle]					=	CoworkerGoal.[dblAnnualHurdle]							
 			,[dblAnnualBudget]					=	CoworkerGoal.[dblAnnualBudget]				
 			,[intCommissionAccountId]			=	CoworkerGoal.[intCommissionAccountId]		
 			,[intRevenueAccountId]				=	CoworkerGoal.[intRevenueAccountId]			
 			,[strGoal]							=	CoworkerGoal.[strGoal]						
 			,[strCommissionType]				=	CoworkerGoal.[strCommissionType]			
-			,[strRateType]					    =	CoworkerGoal.[strRateType]					
-			,[intCommissionRate]				=	CoworkerGoal.[intCommissionRate]			
+			,[strCommissionRateType]		    =	CoworkerGoal.[strCommissionRateType]	
+			,[dblCommissionRate]				=	CoworkerGoal.[dblCommissionRate]
+			,[strIncentiveType]					=	CoworkerGoal.[strIncentiveType]			
+			,[strIncentiveRateType]				=	CoworkerGoal.[strIncentiveRateType]	
+			,[dblIncentiveRate]					=	CoworkerGoal.[dblIncentiveRate]	
 			,[intReportsToId]					=	CoworkerGoal.[intReportsToId]				
 			,[intConcurrencyId] 				=	1 			
 			,[ysnActive]						=	CoworkerGoal.[ysnActive]					
