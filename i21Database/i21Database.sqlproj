@@ -869,6 +869,7 @@
     <Build Include="dbo\Stored Procedures\uspARCalculateInvoiceDeliveryFee.sql" />
     <Build Include="dbo\Functions\fnSTGetGrossFuelSalesByCheckoutId.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCreateDepositToBankAccount.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

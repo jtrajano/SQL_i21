@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCRMCoalesceModule](@intEntityCustomerId int, @strCompanyId nvarchar(max))
+﻿CREATE FUNCTION [dbo].[fnCRMCoalesceAddon](@intEntityCustomerId int, @strCompanyId nvarchar(max))
 RETURNS nvarchar(max)
 AS
 BEGIN
@@ -13,7 +13,7 @@ BEGIN
 	where
 		a.intEntityCustomerId = @intEntityCustomerId
 		and a.strCompanyId = @strCompanyId
-		and b.ysnAddonComponent = 0
+		and b.ysnAddonComponent = 1
 		and b.ysnEnabled = convert(bit,1)
 		
 
