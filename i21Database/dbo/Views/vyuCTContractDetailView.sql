@@ -307,7 +307,7 @@ AS
 	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
 	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
 	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	 
-	LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
 	LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intBorrowingFacilityId
 	LEFT JOIN tblCMBorrowingFacilityLimit FAL ON FAL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
