@@ -876,7 +876,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				,[strLogoType] = 'Logo'
 			FROM tblSMLogoPreference
 			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
-				AND intCompanyLocationId = L.intCompanyLocationId
+				AND intCompanyLocationId = CD.intCompanyLocationId
 			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
 		) CLLH
 		OUTER APPLY (
@@ -885,7 +885,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				,[strLogoType] = 'Logo'
 			FROM tblSMLogoPreferenceFooter
 			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
-				AND intCompanyLocationId = L.intCompanyLocationId
+				AND intCompanyLocationId = CD.intCompanyLocationId
 			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
 		) CLLF
 		OUTER APPLY (
