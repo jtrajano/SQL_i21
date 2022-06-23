@@ -142,6 +142,7 @@
     [ysnConsBankDepositDraft] BIT NOT NULL DEFAULT 1,
     [intConsBankDepositDraftId] INT NULL,
     [intConsARAccountId] INT NULL,
+    [intConsFuelOverShortItemId] INT NULL,
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
@@ -163,7 +164,8 @@
 	CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerChargesItemId] FOREIGN KEY ([intCustomerChargesItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intOverShortItemId] FOREIGN KEY ([intOverShortItemId]) REFERENCES [tblICItem]([intItemId]),
     CONSTRAINT [FK_tblSTStore_tblGLAccount_intConsBankDepositDraftId] FOREIGN KEY([intConsBankDepositDraftId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblSTStore_tblGLAccount_intConsARAccountId] FOREIGN KEY([intConsARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+    CONSTRAINT [FK_tblSTStore_tblGLAccount_intConsARAccountId] FOREIGN KEY([intConsARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+    CONSTRAINT [FK_tblSTStore_tblICItem_intConsFuelOverShortItemId] FOREIGN KEY ([intConsFuelOverShortItemId]) REFERENCES [tblICItem]([intItemId])
   );
   GO
 
