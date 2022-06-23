@@ -5607,7 +5607,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE (strMenuName = 'SubCateg
 	VALUES (N'Subcategory', N'Store', @StoreMaintenanceParentMenuId, N'Subcategory', N'Maintenance', N'Screen', N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
 ELSE
 BEGIN
-	UPDATE tblSMMasterMenu SET strMenuName = 'Subcategory' intSort = 7, strCommand = N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory' WHERE strMenuName = 'SubCategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strMenuName = 'Subcategory', intSort = 7, strCommand = N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory' WHERE strMenuName = 'SubCategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory' WHERE strMenuName = 'Subcategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 END
 
