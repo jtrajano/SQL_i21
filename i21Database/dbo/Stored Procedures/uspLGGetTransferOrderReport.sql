@@ -129,6 +129,10 @@ BEGIN
 		,strQtyUOM = QtyUOM.strUnitMeasure
 		,LD.dblGross
 		,strWeightUOM = WeightUOM.strUnitMeasure
+		,blbHeaderLogo = LOGO.blbHeaderLogo
+		,blbFooterLogo = LOGO.blbFooterLogo
+		,strHeaderLogoType = LOGO.strHeaderLogoType
+		,strFooterLogoType = LOGO.strFooterLogoType
 	FROM tblLGLoadDetail LD 
 	LEFT JOIN tblLGLoad L ON L.intLoadId = @intLoadId
 	OUTER APPLY
@@ -146,5 +150,30 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure QtyUOM ON QtyUOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = L.intWeightUnitMeasureId
+	OUTER APPLY (
+		SELECT TOP 1
+			[blbLogo] = imgLogo
+			,[strLogoType] = 'Logo'
+		FROM tblSMLogoPreference
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = LD.intSCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLH
+	OUTER APPLY (
+		SELECT TOP 1
+			[blbLogo] = imgLogo
+			,[strLogoType] = 'Logo'
+		FROM tblSMLogoPreferenceFooter
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = LD.intSCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLF
+	OUTER APPLY (
+		SELECT
+			blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+			,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+			,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+			,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	) LOGO
 	WHERE LD.intLoadId = @intLoadId
 END
