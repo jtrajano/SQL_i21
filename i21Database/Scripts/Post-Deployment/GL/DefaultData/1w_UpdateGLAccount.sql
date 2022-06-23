@@ -1,8 +1,11 @@
 GO
-    IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLDataFixLog WHERE strDescription= 'Update Account Location ID.')
-    BEGIN
-        EXEC dbo.uspGLUpdateAccountLocationId
-        INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), 'Update Account Location ID.')
-    END
+    
+    EXEC dbo.uspGLUpdateAccountLocationId
 GO
+    UPDATE A SET ysnRevalue = 1
+    FROM tblGLAccount A 
+    JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId
+    WHERE strAccountType IN ('Asset','Liability', 'Equity') AND ysnRevalue IS NULL
+GO
+
 
