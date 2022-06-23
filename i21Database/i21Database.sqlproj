@@ -870,6 +870,8 @@
     <Build Include="dbo\Functions\fnSTGetGrossFuelSalesByCheckoutId.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCreateDepositToBankAccount.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
+    <Build Include="dbo\Tables\tblCTBasisCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadBasisCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
