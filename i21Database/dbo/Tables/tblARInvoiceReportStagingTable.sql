@@ -104,5 +104,6 @@
 	[dtmDueDate]						DATETIME		NULL,
 	[dtmLoadedDate]						DATETIME		NULL,
 	[dtmScaleDate]						DATETIME		NULL,
+	[dtmCreated]						DATETIME		NULL,
 	[blbLogo]							VARBINARY (MAX) NULL
 );
