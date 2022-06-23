@@ -223,22 +223,22 @@ FROM	MissingLotsCTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
-		) DebitForeign
+		) Debit
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
-		) CreditForeign
-		CROSS APPLY dbo.fnGetDebitFunctional(
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
-			,MissingLotsCTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,MissingLotsCTE.dblForexRate
-		) Debit
-		CROSS APPLY dbo.fnGetCreditFunctional(
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
-			,MissingLotsCTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,MissingLotsCTE.dblForexRate
 		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,MissingLotsCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,MissingLotsCTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,MissingLotsCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,MissingLotsCTE.dblForexRate
+		) CreditForeign
 		CROSS APPLY dbo.fnGetDebitUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) DebitUnit
@@ -301,22 +301,22 @@ FROM	MissingLotsCTE
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
-		) DebitForeign
+		) Debit
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
-		) CreditForeign
-		CROSS APPLY dbo.fnGetDebitFunctional(
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
-			,MissingLotsCTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,MissingLotsCTE.dblForexRate
-		) Debit
-		CROSS APPLY dbo.fnGetCreditFunctional(
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
-			,MissingLotsCTE.intCurrencyId
-			,@intFunctionalCurrencyId
-			,MissingLotsCTE.dblForexRate
 		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,MissingLotsCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,MissingLotsCTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,MissingLotsCTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,MissingLotsCTE.dblForexRate
+		) CreditForeign
 		CROSS APPLY dbo.fnGetDebitUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) DebitUnit
@@ -550,4 +550,4 @@ BEGIN
 END 
 
 RETURN 0; 
-_Exit: 
+_Exit:
