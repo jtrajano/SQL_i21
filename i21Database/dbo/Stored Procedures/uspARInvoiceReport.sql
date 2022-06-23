@@ -10,7 +10,18 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat <> 'Format 1 - MCP'
+DELETE FROM tblARInvoiceReportStagingTable 
+WHERE	
+(
+   intEntityUserId = @intEntityUserId 
+   AND strRequestId = @strRequestId 
+   AND strInvoiceFormat <> 'Format 1 - MCP'
+)
+OR		dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) 
+OR		dtmCreated IS NULL
+
+
+
 INSERT INTO tblARInvoiceReportStagingTable (
 	   intInvoiceId
 	 , intCompanyLocationId
@@ -96,6 +107,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , intEntityUserId
 	 , strRequestId
 	 , strInvoiceFormat
+	 , dtmCreated
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -213,6 +225,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
+	 , dtmCreated				= GETDATE()
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
