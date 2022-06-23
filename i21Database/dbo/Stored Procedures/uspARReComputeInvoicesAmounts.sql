@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspARReComputeInvoicesAmounts]
+﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoicesAmounts]
 	@InvoiceIds		InvoiceId	READONLY
 AS
 
