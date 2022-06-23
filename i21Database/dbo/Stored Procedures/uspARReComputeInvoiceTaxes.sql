@@ -5,7 +5,6 @@ AS
 
 BEGIN
 
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -37,14 +36,9 @@ SELECT
 	,@FreightTermId			= I.[intFreightTermId] 
 	,@CurrencyId			= I.[intCurrencyId]
 	,@FOB					= I.[strTaxPoint]
-FROM
-	tblARInvoice I
-LEFT OUTER JOIN
-	tblSMFreightTerms F
-		ON I.[intFreightTermId] = F.[intFreightTermId] 
-WHERE
-	I.[intInvoiceId] = @InvoiceIdLocal
-
+FROM tblARInvoice I
+LEFT OUTER JOIN tblSMFreightTerms F ON I.[intFreightTermId] = F.[intFreightTermId] 
+WHERE I.[intInvoiceId] = @InvoiceIdLocal
 
 DECLARE @InvoiceDetail AS TABLE  (
 	intInvoiceDetailId	INT PRIMARY KEY,
@@ -57,24 +51,13 @@ DECLARE @AdjustedTaxCode AS TABLE  (
 	dblAdjustedTax		NUMERIC(18,6)
 );
 
-
-
 INSERT INTO @InvoiceDetail (intInvoiceDetailId, intItemId)
-SELECT
-	 [intInvoiceDetailId]
-	,[intItemId]
-FROM
-	tblARInvoiceDetail
-WHERE
-	[intInvoiceId] = @InvoiceIdLocal
-	AND (
-		ISNULL(@DetailId,0) = 0
-			OR
-		[intInvoiceDetailId] = @DetailId
-		)
-ORDER BY
-	[intInvoiceDetailId]
-	
+SELECT [intInvoiceDetailId]
+	 , [intItemId]
+FROM tblARInvoiceDetail
+WHERE [intInvoiceId] = @InvoiceIdLocal
+  AND (ISNULL(@DetailId,0) = 0 OR [intInvoiceDetailId] = @DetailId)
+ORDER BY [intInvoiceDetailId]	
 	
 WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 	BEGIN
@@ -91,15 +74,11 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,@SiteId						INT
 				,@ItemUOMId						INT
 
-		SELECT TOP 1
-			 @InvoiceDetailId		= [intInvoiceDetailId]
-		FROM
-			@InvoiceDetail
-		ORDER BY
-			[intInvoiceDetailId]
-			
-		SELECT
-			 @ItemId						= tblARInvoiceDetail.[intItemId]
+		SELECT TOP 1 @InvoiceDetailId		= [intInvoiceDetailId]
+		FROM @InvoiceDetail
+		ORDER BY [intInvoiceDetailId]
+
+		SELECT @ItemId						= tblARInvoiceDetail.[intItemId]
 			,@ItemPrice						= 
 												(CASE WHEN ISNULL(tblARInvoiceDetail.[intLoadDetailId],0) = 0 
 													THEN 
@@ -114,10 +93,8 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,@CurrencyExchangeRateTypeId	= tblARInvoiceDetail.[intCurrencyExchangeRateTypeId]
 			,@CurrencyExchangeRate			= ISNULL(tblARInvoiceDetail.[dblCurrencyExchangeRate], 1)
 			,@ItemUOMId						= tblARInvoiceDetail.intItemUOMId 
-		FROM
-			tblARInvoiceDetail
-		WHERE
-			[intInvoiceDetailId] = @InvoiceDetailId
+		FROM tblARInvoiceDetail
+		WHERE [intInvoiceDetailId] = @InvoiceDetailId
 			
 		SELECT @ItemType = [strType] FROM tblICItem WHERE intItemId = @ItemId
 			
@@ -133,8 +110,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				UPDATE tblARInvoiceDetail SET dblTotalTax = @ZeroDecimal, intTaxGroupId = @TaxGroupId WHERE [intInvoiceDetailId] = @InvoiceDetailId					
 				DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
 				CONTINUE
-			END
-												
+			END												
 		
 		INSERT INTO [tblARInvoiceDetailTax]
            ([intInvoiceDetailId]
@@ -189,40 +165,29 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		FROM
 			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1, NULL, 1, 0, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate, @FOB)
 		
-		
 		UPDATE IDT			
-		SET
-			 [ysnTaxAdjusted]		= 1
-			,[dblAdjustedTax]		= ATC.[dblAdjustedTax]
-			,[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ATC.[dblAdjustedTax] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
-		FROM
-			[tblARInvoiceDetailTax] IDT
-		INNER JOIN
-			@AdjustedTaxCode ATC
-				ON IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
-		WHERE
-			IDT.[intInvoiceDetailId] = @InvoiceDetailId
+		SET [ysnTaxAdjusted]		= 1
+ 	   	  , [dblAdjustedTax]		= ATC.[dblAdjustedTax]
+		  , [dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ATC.[dblAdjustedTax] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+		FROM [tblARInvoiceDetailTax] IDT
+		INNER JOIN @AdjustedTaxCode ATC ON IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
+		WHERE IDT.[intInvoiceDetailId] = @InvoiceDetailId
 				
-		SELECT
-			 @TotalItemTax		= SUM([dblAdjustedTax])
-			,@TotalBaseItemTax	= SUM([dblBaseAdjustedTax])
-			,@TaxGroupId		= MAX([intTaxGroupId]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
+		SELECT @TotalItemTax		= SUM([dblAdjustedTax])
+			 , @TotalBaseItemTax	= SUM([dblBaseAdjustedTax])
+			 , @TaxGroupId			= MAX([intTaxGroupId]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
 
 		IF @TaxGroupId = 0
 			SET @TaxGroupId = NULL
 								
 		UPDATE tblARInvoiceDetail 
-		SET
-			 dblTotalTax		= @TotalItemTax
-			,dblBaseTotalTax	= @TotalBaseItemTax
-		--	,intTaxGroupId		= @TaxGroupId
+		SET dblTotalTax		= @TotalItemTax
+		  , dblBaseTotalTax	= @TotalBaseItemTax
 		WHERE [intInvoiceDetailId] = @InvoiceDetailId
 					
 		DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
 	END
 	
-	
 EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceIdLocal
-
 
 END

@@ -5,6 +5,7 @@ CREATE TABLE [dbo].[tblARInvoiceDeliveryFee]
     [intTaxGroupId]					INT NULL, 
     [intTaxCodeId]					INT NOT NULL, 
     [dblTax]						NUMERIC(18, 6) NULL DEFAULT 0, 
+    [dblBaseTax]					NUMERIC(18, 6) NULL DEFAULT 0,
     [intConcurrencyId]				INT CONSTRAINT [DF_tblARInvoiceDeliveryFee_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [FK_tblARInvoiceDeliveryFee_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoiceDeliveryFee_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),

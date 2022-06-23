@@ -2370,6 +2370,83 @@ INNER JOIN tblICItemLocation ICIL WITH(NOLOCK) ON I.[intItemId] = ICIL.[intItemI
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
+--TEXAS LOADING FEE CREDIT
+INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[intSourceEntityId]
+    ,[strSessionId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = TC.intSalesTaxAccountId
+    ,[dblDebit]                     = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN @ZeroDecimal ELSE IDF.[dblTax] END
+    ,[dblCredit]                    = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN IDF.[dblTax] ELSE @ZeroDecimal END
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = 'Texas Loading Fee for: ' + TC.strTaxCode
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = @POSTDESC + I.[strTransactionType]
+    ,[intJournalLineNo]             = IDF.[intInvoiceDeliveryFeeId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN @ZeroDecimal ELSE IDF.[dblTax] END
+    ,[dblDebitReport]               = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN @ZeroDecimal ELSE IDF.[dblTax] END
+    ,[dblCreditForeign]             = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN IDF.[dblTax] ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN IDF.[dblTax] ELSE @ZeroDecimal END
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[strSessionId]                 = @strSessionId
+FROM tblARPostInvoiceHeader I
+INNER JOIN tblARInvoiceDeliveryFee IDF ON I.intInvoiceId = IDF.intInvoiceId
+INNER JOIN tblSMTaxCode TC ON IDF.intTaxCodeId = TC.intTaxCodeId
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.strSessionId = @strSessionId
+
 --TAX DETAIL OF DUE TO ACCOUNT FOR LOCATION
 INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
      [dtmDate]

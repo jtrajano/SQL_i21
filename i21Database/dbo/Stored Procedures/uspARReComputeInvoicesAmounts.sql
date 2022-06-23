@@ -1,9 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoicesAmounts]
+﻿ALTER PROCEDURE [dbo].[uspARReComputeInvoicesAmounts]
 	@InvoiceIds		InvoiceId	READONLY
 AS
 
 BEGIN
-
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,64 +10,54 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @tblInvoiceIds Id
 DECLARE  @ZeroDecimal	DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000
 
+INSERT INTO @tblInvoiceIds
+SELECT DISTINCT intHeaderId FROM @InvoiceIds
+
+EXEC dbo.uspARCalculateInvoiceDeliveryFee @tblInvoiceIds
+
 UPDATE ARID
-SET
-	 ARID.[dblCurrencyExchangeRate]	= CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END
-FROM
-	tblARInvoiceDetail ARID
-INNER JOIN
-	(SELECT [intInvoiceId], [intCurrencyId] FROM tblARInvoice) ARI
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-INNER JOIN
-	@InvoiceIds IID
-		ON ARID.[intInvoiceId] = IID.[intHeaderId]
+SET dblCurrencyExchangeRate	= CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END
+FROM tblARInvoiceDetail ARID
+INNER JOIN (
+	SELECT [intInvoiceId]
+		 , [intCurrencyId] 
+	FROM tblARInvoice
+) ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+INNER JOIN @InvoiceIds IID ON ARID.[intInvoiceId] = IID.[intHeaderId]
 
 UPDATE ARI	
-SET
-	 ARI.[dblCurrencyExchangeRate]	= [dbo].fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
-FROM
-	tblARInvoice ARI
-LEFT OUTER JOIN
-	(
-		SELECT 
-			 [dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
-			,[intCount]					= COUNT([intInvoiceId])
-			,[intInvoiceId]				= [intInvoiceId]
-		FROM
-			tblARInvoiceDetail
-		GROUP BY
-			[intInvoiceId]
-	)
-	 T
-	 ON ARI.[intInvoiceId] = T.[intInvoiceId] 
-INNER JOIN
-	@InvoiceIds IID
-		ON ARI.[intInvoiceId] = IID.[intHeaderId]
+SET dblCurrencyExchangeRate	= [dbo].fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
+FROM tblARInvoice ARI
+LEFT OUTER JOIN (
+	SELECT [dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
+		 , [intCount]					= COUNT([intInvoiceId])
+		 , [intInvoiceId]				= [intInvoiceId]
+	FROM tblARInvoiceDetail
+	GROUP BY [intInvoiceId]
+) T ON ARI.[intInvoiceId] = T.[intInvoiceId] 
+INNER JOIN @InvoiceIds IID ON ARI.[intInvoiceId] = IID.[intHeaderId]
 						
 UPDATE ARIDT
-SET
-	 ARIDT.[dblRate]			= ISNULL(ARIDT.[dblRate], @ZeroDecimal)
-	,ARIDT.[dblBaseRate]		= ISNULL(ARIDT.[dblBaseRate], ISNULL(ARIDT.[dblRate], @ZeroDecimal))
-	,ARIDT.[dblTax]				= ISNULL(ARIDT.[dblTax], @ZeroDecimal)
-	,ARIDT.[dblAdjustedTax]		= [dbo].fnRoundBanker(ISNULL(ARIDT.[dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-	,ARIDT.[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ISNULL(ARIDT.[dblBaseAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-	,ARIDT.[ysnTaxAdjusted]		= ISNULL(ARIDT.[ysnTaxAdjusted], 0)
-FROM
-	tblARInvoiceDetailTax ARIDT
-INNER JOIN
-	(SELECT [intInvoiceDetailId], [intInvoiceId] FROM tblARInvoiceDetail) ARID
-		ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-INNER JOIN
-	@InvoiceIds IID
-		ON ARID.[intInvoiceId] = IID.[intHeaderId]
-	
+SET ARIDT.[dblRate]				= ISNULL(ARIDT.[dblRate], @ZeroDecimal)
+  , ARIDT.[dblBaseRate]			= ISNULL(ARIDT.[dblBaseRate], ISNULL(ARIDT.[dblRate], @ZeroDecimal))
+  , ARIDT.[dblTax]				= ISNULL(ARIDT.[dblTax], @ZeroDecimal)
+  , ARIDT.[dblAdjustedTax]		= [dbo].fnRoundBanker(ISNULL(ARIDT.[dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+  , ARIDT.[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ISNULL(ARIDT.[dblBaseAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+  , ARIDT.[ysnTaxAdjusted]		= ISNULL(ARIDT.[ysnTaxAdjusted], 0)
+FROM tblARInvoiceDetailTax ARIDT
+INNER JOIN (
+	SELECT [intInvoiceDetailId]
+		 , [intInvoiceId] 
+	FROM tblARInvoiceDetail
+) ARID ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+INNER JOIN @InvoiceIds IID ON ARID.[intInvoiceId] = IID.[intHeaderId]
 	
 UPDATE ARID
-SET
-	 ARID.[dblQtyOrdered]					= ISNULL(ARID.[dblQtyOrdered], @ZeroDecimal)
+SET ARID.[dblQtyOrdered]					= ISNULL(ARID.[dblQtyOrdered], @ZeroDecimal)
 	,ARID.[dblQtyShipped]					= ISNULL(ARID.[dblQtyShipped], @ZeroDecimal)
 	,ARID.[dblDiscount]						= ISNULL(ARID.[dblDiscount], @ZeroDecimal)
 	,ARID.[dblItemWeight]					= ISNULL(ARID.[dblItemWeight], 1.000000)
@@ -116,20 +105,17 @@ SET
 	,ARID.[dblBaseLicenseAmount]			= ISNULL(ISNULL(ARID.[dblLicenseAmount], @ZeroDecimal) * ARID.[dblCurrencyExchangeRate], @ZeroDecimal)
 	,ARID.[dblMaintenanceAmount]			= ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal)
 	,ARID.[dblBaseMaintenanceAmount]		= ISNULL(ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblCurrencyExchangeRate], @ZeroDecimal)
-FROM
-	tblARInvoiceDetail ARID
-INNER JOIN
-	(SELECT [intInvoiceId], [intCurrencyId], [dblCurrencyExchangeRate] FROM tblARInvoice) ARI
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-INNER JOIN
-	@InvoiceIds IID
-		ON ARID.[intInvoiceId] = IID.[intHeaderId]
+FROM tblARInvoiceDetail ARID
+INNER JOIN (
+	SELECT [intInvoiceId]
+		 , [intCurrencyId]
+		 , [dblCurrencyExchangeRate] 
+	FROM tblARInvoice
+) ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+INNER JOIN @InvoiceIds IID ON ARID.[intInvoiceId] = IID.[intHeaderId]
 	
-	
-UPDATE
-	tblARInvoice
-SET
-	 [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
+UPDATE tblARInvoice
+SET [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 	,[dblBaseInvoiceSubtotal]				= ISNULL([dblBaseInvoiceSubtotal], @ZeroDecimal)
 	,[dblShipping]							= ISNULL([dblShipping], @ZeroDecimal)
 	,[dblBaseShipping]						= ISNULL([dblBaseShipping], @ZeroDecimal)
@@ -157,70 +143,44 @@ SET
 	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 	,[ysnImpactInventory]					= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = [intInvoiceId])
-
+WHERE EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = [intInvoiceId])
 
 UPDATE ARI
-SET
-	 [dblDiscountAvailable]					= ROUND(CASE WHEN ARI.strType NOT IN ('CF Invoice','CF Tran') THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END, 2)
+SET [dblDiscountAvailable]					= ROUND(CASE WHEN ARI.strType NOT IN ('CF Invoice','CF Tran') THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END, 2)
 	,[dblBaseDiscountAvailable]				= ROUND(CASE WHEN ARI.strType NOT IN ('CF Invoice','CF Tran') THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END, 2)
 	,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
 	,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
 	,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
 	,[dblBaseTotalTermDiscountExemption]	= ISNULL(T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
-FROM
-	tblARInvoice ARI
-LEFT OUTER JOIN
-	(
+FROM tblARInvoice ARI
+LEFT OUTER JOIN (
 	SELECT 
 		 [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
 		,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
 		,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
 		,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
 		,[intInvoiceId]						= [intInvoiceId]
-	FROM
-		tblARInvoiceDetail
-	GROUP BY
-		[intInvoiceId]
-	)
-	 T
-	ON ARI.[intInvoiceId] = T.[intInvoiceId]
-	AND ARI.[ysnPaid] = 0
-INNER JOIN
-	@InvoiceIds IID
-		ON ARI.[intInvoiceId] = IID.[intHeaderId]
-
-
+	FROM tblARInvoiceDetail
+	GROUP BY [intInvoiceId]
+) T ON ARI.[intInvoiceId] = T.[intInvoiceId]
+   AND ARI.[ysnPaid] = 0
+INNER JOIN @InvoiceIds IID ON ARI.[intInvoiceId] = IID.[intHeaderId]
 
 UPDATE ARID
-SET
-	  ARID.[dblTotalTax]		= ISNULL(T.[dblAdjustedTax], @ZeroDecimal)
-	 ,ARID.[dblBaseTotalTax]	= ISNULL(T.[dblBaseAdjustedTax], @ZeroDecimal)
-FROM
-	tblARInvoiceDetail ARID
-LEFT OUTER JOIN
-	(
-		SELECT
-			 SUM(ISNULL([dblAdjustedTax], @ZeroDecimal)) [dblAdjustedTax]
-			,SUM(ISNULL([dblBaseAdjustedTax], @ZeroDecimal)) [dblBaseAdjustedTax]
-			,[intInvoiceDetailId]
-		FROM
-			tblARInvoiceDetailTax
-		GROUP BY
-			[intInvoiceDetailId]	
-	)
-	 T
-	 ON ARID.[intInvoiceDetailId] = T.[intInvoiceDetailId] 
-INNER JOIN
-	@InvoiceIds IID
-		ON ARID.[intInvoiceId] = IID.[intHeaderId]
-		AND ISNULL(IID.[ysnUpdateAvailableDiscountOnly],0) = 0
+SET ARID.[dblTotalTax]		= ISNULL(T.[dblAdjustedTax], @ZeroDecimal)
+  , ARID.[dblBaseTotalTax]	= ISNULL(T.[dblBaseAdjustedTax], @ZeroDecimal)
+FROM tblARInvoiceDetail ARID
+LEFT OUTER JOIN (
+	SELECT SUM(ISNULL([dblAdjustedTax], @ZeroDecimal)) [dblAdjustedTax]
+		 , SUM(ISNULL([dblBaseAdjustedTax], @ZeroDecimal)) [dblBaseAdjustedTax]
+		 , [intInvoiceDetailId]
+	FROM tblARInvoiceDetailTax
+	GROUP BY [intInvoiceDetailId]	
+) T ON ARID.[intInvoiceDetailId] = T.[intInvoiceDetailId] 
+INNER JOIN @InvoiceIds IID ON ARID.[intInvoiceId] = IID.[intHeaderId] AND ISNULL(IID.[ysnUpdateAvailableDiscountOnly],0) = 0
 
-UPDATE
-	ARID
-SET
-	ARID.[dblTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN @ZeroDecimal
+UPDATE ARID
+SET ARID.[dblTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN @ZeroDecimal
 							ELSE
 								--[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblUnitQuantity]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblUnitQuantity]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 								(	CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0 AND ISNULL(ARID.[intItemWeightUOMId],0) <> 0)
@@ -232,60 +192,54 @@ SET
 								  )
 							END)
 	
-FROM
-	tblARInvoiceDetail ARID
-LEFT OUTER JOIN
-	(SELECT [intItemId], [strType] FROM tblICItem) ICI
-		ON ARID.[intItemId] = ICI.[intItemId] 
-INNER JOIN
-	@InvoiceIds IID
-		ON ARID.[intInvoiceId] = IID.[intHeaderId]
+FROM tblARInvoiceDetail ARID
+LEFT OUTER JOIN tblICItem ICI ON ARID.[intItemId] = ICI.[intItemId] 
+INNER JOIN @InvoiceIds IID ON ARID.[intInvoiceId] = IID.[intHeaderId]
 
-UPDATE
-	ARID
-SET
-	ARID.[dblBaseTotal]	= [dbo].fnRoundBanker(ARID.[dblTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())	
-FROM
-	tblARInvoiceDetail ARID
-INNER JOIN
-	(SELECT [intInvoiceId], [dblCurrencyExchangeRate] FROM tblARInvoice) ARI
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
-		
-	
+UPDATE ARID
+SET ARID.[dblBaseTotal]	= [dbo].fnRoundBanker(ARID.[dblTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())	
+FROM tblARInvoiceDetail ARID
+INNER JOIN (
+	SELECT [intInvoiceId]
+	     , [dblCurrencyExchangeRate] 
+	FROM tblARInvoice
+) ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+WHERE EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
+
+UPDATE ARI
+SET dblTax		= DF.dblTotalTax
+  , dblBaseTax	= DF.dblBaseTotalTax
+FROM tblARInvoice ARI
+INNER JOIN @InvoiceIds IID ON ARI.[intInvoiceId] = IID.[intHeaderId]
+INNER JOIN (
+	SELECT intInvoiceId 
+		 , dblTotalTax		= SUM(dblTax)
+		 , dblBaseTotalTax	= SUM(dblBaseTax)
+	FROM tblARInvoiceDeliveryFee 
+	GROUP BY intInvoiceId
+) DF ON ARI.intInvoiceId = DF.intInvoiceId
+
 UPDATE ARI	
-SET
-	 ARI.[dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal)
-	,ARI.[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
+SET ARI.[dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal) + ISNULL(ARI.dblTax, @ZeroDecimal)
+	,ARI.[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) + ISNULL(ARI.dblBaseTax, @ZeroDecimal)
 	,ARI.[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
 	,ARI.[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
 	,ARI.[dblTotalStandardWeight]	= ISNULL(T.[dblTotalStandardWeight], @ZeroDecimal)
-FROM
-	tblARInvoice ARI
-LEFT OUTER JOIN
-	(
-		SELECT 
-			 [dblTotalTax]				= SUM([dblTotalTax])
-			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
-			,[dblTotal]					= SUM([dblTotal])
-			,[dblBaseTotal]				= SUM([dblBaseTotal])
-			,[dblTotalStandardWeight]	= SUM([dbo].fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()))
-			,[intInvoiceId]				= [intInvoiceId]
-		FROM
-			tblARInvoiceDetail
-		GROUP BY
-			[intInvoiceId]
-	)
-	 T
-	 ON ARI.[intInvoiceId] = T.[intInvoiceId] 
-INNER JOIN
-	@InvoiceIds IID
-		ON ARI.[intInvoiceId] = IID.[intHeaderId]
+FROM tblARInvoice ARI
+LEFT OUTER JOIN (
+	SELECT [dblTotalTax]			= SUM([dblTotalTax])
+		,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
+		,[dblTotal]					= SUM([dblTotal])
+		,[dblBaseTotal]				= SUM([dblBaseTotal])
+		,[dblTotalStandardWeight]	= SUM([dbo].fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()))
+		,[intInvoiceId]				= [intInvoiceId]
+	FROM tblARInvoiceDetail
+	GROUP BY [intInvoiceId]
+) T ON ARI.[intInvoiceId] = T.[intInvoiceId] 
+INNER JOIN @InvoiceIds IID ON ARI.[intInvoiceId] = IID.[intHeaderId]
 	
 UPDATE ARI	
-SET
-	 ARI.[dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])
+SET ARI.[dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])
 	,ARI.[dblBaseInvoiceTotal]	= (ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping])
 	,[dblAmountDue]			= ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal)
 								-
@@ -301,8 +255,6 @@ SET
 								END
 FROM tblARInvoice ARI
 LEFT JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
-INNER JOIN
-	@InvoiceIds IID
-		ON ARI.[intInvoiceId] = IID.[intHeaderId]
+INNER JOIN @InvoiceIds IID ON ARI.[intInvoiceId] = IID.[intHeaderId]
 
 END
