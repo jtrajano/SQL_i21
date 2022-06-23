@@ -17,7 +17,7 @@
     [dblLongitude] NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [strInternalNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strUseLocationAddress] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[strFEIN] NVARCHAR(9) COLLATE Latin1_General_CI_AS NULL, 
+	[strFEIN] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
 	[strSkipSalesmanDefault] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnSkipTermsDefault] BIT NULL DEFAULT (1),
 	[strOrderTypeDefault] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
