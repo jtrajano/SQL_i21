@@ -17,6 +17,7 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.dblLongitude
 ,compLoc.strInternalNotes
 ,compLoc.strUseLocationAddress
+,compLoc.strFEIN
 ,compLoc.strSkipSalesmanDefault
 ,compLoc.ysnSkipTermsDefault
 ,compLoc.strOrderTypeDefault
