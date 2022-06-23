@@ -154,7 +154,11 @@ OUTER APPLY(
 	AND A.intAssetId = G.intAssetId
 	AND intBookId = 1
 	AND A.strTransaction = G.strTransaction
-	AND L.intLedgerId = G.intLedgerId
+	AND (
+			CASE WHEN G.intLedgerId IS NOT NULL 
+			THEN CASE WHEN (L.intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
+			ELSE 1 END
+        ) = 1
 )GAAP
 OUTER APPLY(
 	SELECT 
@@ -187,7 +191,13 @@ OUTER APPLY(
 	AND A.intAssetId = G.intAssetId
 	AND intBookId = 2
 	AND A.strTransaction = G.strTransaction
-	AND L.intLedgerId = G.intLedgerId
+	AND (
+			CASE WHEN G.intLedgerId IS NOT NULL 
+			THEN CASE WHEN (L.intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
+			ELSE 1 END
+        ) = 1
+	
+	
 )Tax
 OUTER APPLY (
 	SELECT TOP 1 FAD.dblDepreciationToDate, FAD.intAssetDepreciationId, FAD.dblFunctionalDepreciationToDate, FAD.dtmDepreciationToDate

@@ -305,7 +305,7 @@ BEGIN
                   [strBatchId],
                   [intLedgerId]
                 )  
-                  SELECT  
+                  SELECT DISTINCT
                   @i,  
                   @BookId,
                   D.intDepreciationMethodId,  
@@ -343,7 +343,10 @@ BEGIN
                   )Depreciation
                   WHERE F.intAssetId = @i
                   AND BD.intBookId = @BookId
-                  AND BD.intLedgerId = E.intLedgerId
+                  AND (CASE WHEN E.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (BD.intLedgerId = E.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
+
 
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId, ysnDepreciated = 1 WHERE intAssetId = @i
                   DELETE FROM @IdIterate WHERE intId = @i
@@ -535,7 +538,7 @@ BEGIN
                 [strBatchId],
                 [intLedgerId]
               )  
-              SELECT  
+              SELECT DISTINCT
                 @i,
                 @BookId,
                 D.intDepreciationMethodId,
@@ -567,7 +570,11 @@ BEGIN
                 ) E
                 WHERE F.intAssetId = @i
                 AND BD.intBookId = @BookId
-                AND BD.intLedgerId = E.intLedgerId
+                AND (
+                    CASE WHEN E.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (BD.intLedgerId = E.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END
+                    ) = 1
 
                 UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
                 DELETE FROM @IdIterate WHERE intId = @i
