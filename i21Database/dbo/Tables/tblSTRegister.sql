@@ -96,8 +96,8 @@
 
 	--Store App Tab fields
 	[strIrelyUsername]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
-	[strIrelyPassword]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
-	[strIrelyReEnterPassword]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strIrelyPassword]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strIrelyReEnterPassword]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL, 
 	[strIrelyCompanyNumber]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
 	[ysnDeleteRegisterFileInbound]		BIT	NULL, 
 	[strRegisterFolderInbound]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 

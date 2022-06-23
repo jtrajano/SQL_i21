@@ -5602,11 +5602,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Family & 
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Store.view.FamilyAndClass?showSearch=true&searchCommand=SearchFamilyAndClass' WHERE strMenuName = 'Family & Class' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'SubCategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE (strMenuName = 'SubCategory' OR strMenuName = 'Subcategory') AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'SubCategory', N'Store', @StoreMaintenanceParentMenuId, N'SubCategory', N'Maintenance', N'Screen', N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
+	VALUES (N'Subcategory', N'Store', @StoreMaintenanceParentMenuId, N'Subcategory', N'Maintenance', N'Screen', N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory' WHERE strMenuName = 'SubCategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
+BEGIN
+	UPDATE tblSMMasterMenu SET strMenuName = 'Subcategory' intSort = 7, strCommand = N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory' WHERE strMenuName = 'SubCategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory' WHERE strMenuName = 'Subcategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
+END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Checkout Transaction Journal' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
