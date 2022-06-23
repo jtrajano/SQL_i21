@@ -660,10 +660,10 @@ BEGIN
 	IF ISNULL(@Type, '') = ''
 		SET @Type = 'Standard'
 	
-	IF ISNULL(@LoadDistributionHeaderId, 0) > 0
-		BEGIN
-			SET @Type = 'Transport Delivery'
-		END
+	IF (ISNULL(@LoadDistributionHeaderId, 0) > 0 AND (ISNULL(@SourceTransaction,'') <> 'Transport Load')) OR ((ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@Type, '') = ''))
+	BEGIN
+		SET @Type = 'Transport Delivery'
+	END
 
 	SET @NewSourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
 
