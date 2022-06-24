@@ -30,7 +30,8 @@ BEGIN
 			@strEntityName			NVARCHAR(100),
 			@intBrokerageAccountId	INT,
 			@strAccountNumber		NVARCHAR(100),
-			@intFreightMatrixLeadTime INT
+			@intFreightMatrixLeadTime INT,
+			@intDestinationLeadTime int
 
 	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
 			@intSubLocationId		= CASE WHEN @intSubLocationId= 0 THEN NULL ELSE @intSubLocationId END,
@@ -106,7 +107,7 @@ BEGIN
 	BEGIN
 		SELECT @intVendorId = intVendorId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId
 		SELECT @strCity = strCity FROM tblEMEntityLocation WHERE intEntityId = @intVendorId AND ysnDefaultLocation = 1
-		SELECT @intCityId = intCityId, @ysnPort = ysnPort, @ysnRegion = ysnRegion FROM tblSMCity WHERE strCity = @strCity
+		SELECT @intCityId = intCityId, @ysnPort = ysnPort, @ysnRegion = ysnRegion, @intDestinationLeadTime = intLeadTime FROM tblSMCity WHERE strCity = @strCity
 
 
 		IF @intCityId IS NOT NULL
@@ -126,6 +127,7 @@ BEGIN
 											END	AS strDestinationPointType
 											,@strCity AS strDestinationPoint
 											,isnull(@intFreightMatrixLeadTime,0) as intFreightMatrixLeadTime
+											,isnull(@intDestinationLeadTime,0) as intDestinationLeadTime
 		END
 		ELSE
 		BEGIN
