@@ -347,6 +347,11 @@ IF(@totalInvalid > 0)
 		DELETE GL
   		FROM ##ARInvoiceGLEntries GL
   		INNER JOIN ##ARInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId] AND GL.[strTransactionId] = B.[strInvoiceNumber]
+
+		DELETE PQ
+		FROM tblARPostingQueue PQ
+		INNER JOIN ##ARInvalidInvoiceData B ON PQ.[intTransactionId] = B.[intInvoiceId] AND PQ.[strTransactionNumber] = B.[strInvoiceNumber]
+		WHERE PQ.strTransactionType = 'Invoice'
 							
         DELETE FROM ##ARInvalidInvoiceData
 					
