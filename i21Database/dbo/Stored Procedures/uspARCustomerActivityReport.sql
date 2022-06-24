@@ -792,9 +792,9 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			, strFormattingOptions	= @strFormattingOptions
 			, dtmFilterFrom			= @dtmDateFrom
 			, dtmFilterTo			= @dtmDateTo
-		FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
-		INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-		INNER JOIN #TRANSACTIONS TRANSACTIONS ON AGING.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
+		FROM @tblCustomers CUSTOMER 
+		INNER JOIN #TRANSACTIONS TRANSACTIONS ON CUSTOMER.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
+		LEFT JOIN tblARCustomerAgingStagingTable AGING ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId AND AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Summary'
 		LEFT JOIN (
 			SELECT dblAmountPaid		= MAX(dblAmountPaid)
 				 , dtmDatePaid			= MAX(dtmDatePaid)
@@ -810,9 +810,7 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			) I 
 			WHERE I.intRowNumber = 1
 			GROUP BY intEntityCustomerId
-		) PAYMENT ON PAYMENT.intEntityCustomerId = AGING.intEntityCustomerId
-		WHERE AGING.intEntityUserId = @intEntityUserId
-		  AND AGING.strAgingType = 'Summary'
+		) PAYMENT ON PAYMENT.intEntityCustomerId = CUSTOMER.intEntityCustomerId 		
 		ORDER BY TRANSACTIONS.dtmTransactionDate
 	END
 
