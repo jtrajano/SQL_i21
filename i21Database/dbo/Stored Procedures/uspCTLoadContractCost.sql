@@ -89,3 +89,5 @@ AS
 	LEFT JOIN	tblICItemUOM		CM	ON	CM.intUnitMeasureId		=	IU.intUnitMeasureId
 										AND CM.intItemId			=	CD.intItemId	
 	LEFT JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CC.intRateTypeId
+	LEFT JOIN	tblCTBasisCost	    BC	ON	BC.intItemId			=	CC.intItemId
+	ORDER BY BC.intSort ASC
