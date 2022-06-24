@@ -22,6 +22,11 @@ SELECT
 	, EntityLocation.strState
 	, EntityLocation.strZipCode
 	, EntityLocation.strNotes
+	, r.strName strRole
+	, r.strDescription strRoleDescription
+	, r.intUserRoleID intRoleId
+	, r.strRoleType
+	, r.ysnAdmin
 FROM tblEMEntityCredential ec
 JOIN vyuEMEntity e ON e.intEntityId = ec.intEntityId
 JOIN tblEMEntityToContact EntityContact ON EntityContact.intEntityId = ec.intEntityId
@@ -32,4 +37,6 @@ JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityId = EntityCo
 	AND EntityLocation.intEntityLocationId = EntityContact.intEntityLocationId
 JOIN tblEMEntityType EntityType ON EntityType.intEntityId = EntityContact.intEntityId
 	AND EntityType.strType = 'User'
+LEFT JOIN tblSMUserRole r ON r.intUserRoleID = Sec.intUserRoleID
 WHERE EntityContact.ysnDefaultContact = 1
+AND e.strType = 'User'
