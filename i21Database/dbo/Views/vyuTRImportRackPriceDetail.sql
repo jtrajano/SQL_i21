@@ -15,6 +15,7 @@ SELECT
 	, IRD.ysnDelete
 	, CASE WHEN IRDI.intImportRackPriceDetailItemId IS NOT NULL THEN IRDI.strMessage ELSE IRD.strMessage END strMessage
 	, IRDI.dblVendorPrice
+	, IRDI.strItemNo
 FROM            
 	dbo.tblTRImportRackPriceDetail AS IRD 
 	INNER JOIN dbo.tblTRImportRackPrice AS IR ON IRD.intImportRackPriceId = IR.intImportRackPriceId
