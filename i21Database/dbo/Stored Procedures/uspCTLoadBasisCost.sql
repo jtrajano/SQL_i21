@@ -33,4 +33,4 @@ AS
 			,SourceData.[intPriority]
 			,SourceData.[intSort]
 			,SourceData.[intConcurrencyId]
-		);=
+		);
