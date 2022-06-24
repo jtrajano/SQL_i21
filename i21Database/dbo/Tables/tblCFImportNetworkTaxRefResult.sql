@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCFImportNetworkTaxRefResult] (
     [intResultId]         INT            IDENTITY (1, 1) NOT NULL,
 	[intEntityId] INT NOT NULL, 
-    [strNote] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strNote] NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[strItemCategory] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strNetworkTaxCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

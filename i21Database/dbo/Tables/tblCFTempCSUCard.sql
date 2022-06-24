@@ -18,13 +18,13 @@
     [ysnCardLocked]              BIT            NULL,
     [strCardPinNumber]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [dtmCardExpiratioYearMonth]  DATETIME       NULL,
-    [strCardValidationCode]      NVARCHAR (MAX) COLLATE Latin1_General_CI_AS  NULL,
+    [strCardValidationCode]      NVARCHAR (100) COLLATE Latin1_General_CI_AS  NULL,
     [intNumberOfCardsIssued]     INT            NULL,
     [intCardLimitedCode]         INT            NULL,
     [intCardFuelCode]            INT            NULL,
-    [strCardTierCode]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strCardOdometerCode]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strCardWCCode]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strCardTierCode]            NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strCardOdometerCode]        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strCardWCCode]              NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strSplitNumber]             NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intCardManCode]             INT            NULL,
     [intCardShipCat]             INT            NULL,
@@ -39,7 +39,7 @@
     [dtmLastModified]            DATETIME       NULL,
     [ysnCardForOwnUse]           BIT            NULL,
     [ysnIgnoreCardTransaction]   BIT            NULL,
-    [strComment]                 NVARCHAR (MAX) COLLATE Latin1_General_CI_AS  NULL,
+    [strComment]                 NVARCHAR (500) COLLATE Latin1_General_CI_AS  NULL,
     CONSTRAINT [PK_tblCFTempCSUCard] PRIMARY KEY CLUSTERED ([intCardId] ASC) WITH (FILLFACTOR = 70)
 );
 

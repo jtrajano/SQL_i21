@@ -105,8 +105,8 @@ SELECT S.intSampleId
 	,CSH.intCuppingSessionId
 	,CSH.dtmCuppingDate
 	,CSH.dtmCuppingTime
-	,CSD.intRank
-    ,CSD.intCuppingSessionDetailId
+	,CSH.intRank
+    ,CSH.intCuppingSessionDetailId
 	,strMethodology = ''
 	,strExtension = EX.strDescription
 	,intContractSequence = CD.intContractSeq
@@ -151,8 +151,18 @@ LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND ETC.ysnDefaultContact = 1
 LEFT JOIN tblQMSample RS ON RS.intRelatedSampleId = S.intSampleId
-LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intSampleId = S.intSampleId
-LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
+OUTER APPLY (
+	SELECT TOP 1 CSH.strCuppingSessionNumber
+			   , CSH.intCuppingSessionId
+			   , CSH.dtmCuppingDate
+			   , CSH.dtmCuppingTime
+			   , CSD.intRank
+			   , CSD.intCuppingSessionDetailId
+	FROM tblQMCuppingSessionDetail CSD
+	INNER JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
+	WHERE CSD.intSampleId = S.intSampleId
+	ORDER BY CSH.intCuppingSessionId DESC
+) CSH
 LEFT JOIN tblICCommodityAttribute PT ON I.intProductTypeId = PT.intCommodityAttributeId AND PT.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute O ON I.intOriginId = O.intCommodityAttributeId AND O.strType = 'Origin'
 LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId

@@ -34,16 +34,16 @@
 		,dblAccountTotalDiscountQuantity	NUMERIC(18,6)			  NULL
 		,dblDiscountEP						NUMERIC(18,6)			  NULL
 		,dblAPR								NUMERIC(18,6)			  NULL
-		,strTerm							NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strType							NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strTermCode						NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strNetwork							NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strCustomerName					NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strInvoiceCycle					NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strGroupName						NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strInvoiceNumber					NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strInvoiceReportNumber				NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
-		,strTempInvoiceReportNumber			NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
+		,strTerm							NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strType							NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strTermCode						NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strNetwork							NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strCustomerName					NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strInvoiceCycle					NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strGroupName						NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strInvoiceNumber					NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strInvoiceReportNumber				NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,strTempInvoiceReportNumber			NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
 		,strUserId							NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
 		,strDiscountSchedule				NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
 )

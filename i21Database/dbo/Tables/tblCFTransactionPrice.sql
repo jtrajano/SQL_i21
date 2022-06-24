@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCFTransactionPrice] (
     [intTransactionPriceId] INT             IDENTITY (1, 1) NOT NULL,
     [intTransactionId]      INT             NOT NULL,
-    [strTransactionPriceId] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strTransactionPriceId] NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [dblOriginalAmount]     NUMERIC (18, 6) NULL,
     [dblCalculatedAmount]   NUMERIC (18, 6) NULL,
     [intConcurrencyId]      INT             CONSTRAINT [DF_tblTransactionPrice_intConcurrencyId] DEFAULT ((1)) NOT NULL,

@@ -11,7 +11,7 @@
     [intEntityId] INT NULL, 
 	[intRecordNo] INT NULL, 
 	[ysnInvalidData]	BIT NULL,
-	[strInvalidDataReason] NVARCHAR(MAX),
+	[strInvalidDataReason] NVARCHAR(250) COLLATE Latin1_General_CI_AS ,
 	[intConcurrencyId] INT CONSTRAINT [DF_tblCFNetworkTaxRefStaging_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFNetworkTaxRefStaging] PRIMARY KEY CLUSTERED (intNetworkTaxRefStagingId ASC),
  );

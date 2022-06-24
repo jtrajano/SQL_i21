@@ -88,11 +88,10 @@ BEGIN
 	CROSS APPLY(
 		SELECT TOP (intPeriodsToAccrue) DATEADD(m, ROW_NUMBER() OVER(ORDER BY Id),DATEADD(MONTH, -1, dtmPostDate)) dtmAccrualMonth	
 		FROM sysobjects
-		OUTER APPLY tblARInvoice
-		WHERE intInvoiceId = @intInvoiceId
+		OUTER APPLY tblARInvoice I
+		INNER JOIN #ACCRUALS IH ON I.intInvoiceId = IH.intInvoiceId
 	) AccrualDate
-	WHERE ID.intInvoiceId = @intInvoiceId 
-	  AND ID.dblTotal <> 0
+	WHERE ID.dblTotal <> 0
 	  AND dblDifference <> 0
 	ORDER BY dtmAccrualMonth
 
@@ -110,15 +109,15 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 NULL FROM #ACCRUALS WHERE dblDifference <> 0)
 	BEGIN
 		UPDATE IA
-		SET dblAmount = CASE WHEN ACC.dblDifference > 0 THEN dblAmount + ACC.dblDifference ELSE dblAmount - ACC.dblDifference END
+		SET dblAmount = dblAmount + ACC.dblDifference
 		FROM tblARInvoiceAccrual IA
 		INNER JOIN #ACCRUALS ACC ON IA.intInvoiceId = ACC.intInvoiceId
 		INNER JOIN (
-			SELECT intInvoiceId		= AVG(intInvoiceId)				 
-				 , dtmAccrualDate	= MAX(dtmAccrualDate)
+			SELECT intInvoiceId			= intInvoiceId
+				 , intInvoiceAccrualId	= MAX(intInvoiceAccrualId)
 			FROM tblARInvoiceAccrual
 			GROUP BY intInvoiceId
-		) SORTED ON IA.intInvoiceId = SORTED.intInvoiceId AND IA.dtmAccrualDate = SORTED.dtmAccrualDate		
+		) SORTED ON IA.intInvoiceAccrualId = SORTED.intInvoiceAccrualId AND ACC.intInvoiceId = SORTED.intInvoiceId
 		WHERE ACC.dblDifference <> 0
 	END
 

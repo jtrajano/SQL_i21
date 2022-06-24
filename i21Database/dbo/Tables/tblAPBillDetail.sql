@@ -81,6 +81,7 @@
 	[ysnRestricted] BIT NOT NULL DEFAULT 0 ,
 	[ysnSubCurrency] BIT NOT NULL DEFAULT 0 ,
 	[ysnStage] BIT NOT NULL DEFAULT 0 ,
+	[ysnManualCreation] BIT NOT NULL DEFAULT 0,
     [intLineNo] INT NOT NULL DEFAULT 1,
     [intTaxGroupId] INT NULL, 
 	[intOriginalTaxGroupId] INT NULL, 

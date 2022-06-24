@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspRKRealizedPnL]
-	@dtmFromDate DATETIME
-	, @dtmToDate DATETIME
+	@dtmFromDate DATE
+	, @dtmToDate DATE
 	, @intCommodityId INT = NULL
 	, @ysnExpired BIT
 	, @intFutureMarketId INT = NULL
@@ -52,8 +52,8 @@ BEGIN
 		SET @strBuySell = NULL
 	END
 
-	SET @dtmFromDate = CAST(FLOOR(CAST(@dtmFromDate AS FLOAT)) AS DATETIME)
-	SET @dtmToDate = CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)
+	--SET @dtmFromDate = CAST(FLOOR(CAST(@dtmFromDate AS FLOAT)) AS DATETIME)
+	--SET @dtmToDate = CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)
 
 	SELECT CONVERT(INT, DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum
 		, strMonthOrder = strFutureMarket + ' - ' + strFutureMonth + ' - ' + strName
@@ -155,7 +155,8 @@ BEGIN
 					AND ISNULL(ot.intBrokerageAccountId, 0) = ISNULL(@intBrokerageAccountId, ISNULL(ot.intBrokerageAccountId, 0))
 					AND ISNULL(ot.intFutureMonthId, 0) = ISNULL(@intFutureMonthId, ISNULL(ot.intFutureMonthId, 0))
 					AND ot.strNewBuySell = ISNULL(@strBuySell, ot.strNewBuySell)
-					AND CAST(FLOOR(CAST(psh.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate AND CAST(FLOOR(CAST(psh.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+					AND CAST(psh.dtmMatchDate AS DATE) >= @dtmFromDate 
+					AND CAST(psh.dtmMatchDate AS DATE) <= @dtmToDate
 					AND psh.strType = 'Realize'
 					AND ISNULL(ot.ysnExpired, 0) = ISNULL(@ysnExpired, ISNULL(ot.ysnExpired, 0))
 					AND ot.intInstrumentTypeId = 1
