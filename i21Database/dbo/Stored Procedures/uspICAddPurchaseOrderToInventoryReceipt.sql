@@ -211,6 +211,7 @@ BEGIN
 		,[strTaxGroup]			NVARCHAR(100)
 		,[strNotes]				NVARCHAR(500)
 		,[ysnBookToExemptionAccount] BIT
+		,[ysnOverrideTaxGroup]	BIT
 	)
 
 	-- Create the cursor
@@ -273,6 +274,7 @@ BEGIN
 			,[strTaxGroup]
 			,[strNotes]
 			,[ysnBookToExemptionAccount]
+			,[ysnOverrideTaxGroup]
 		)
 		EXEC dbo.uspSMGetItemTaxes
 			 @ItemId				= @ItemId
