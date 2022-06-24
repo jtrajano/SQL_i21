@@ -20,7 +20,7 @@ SELECT
 	,strDriverPin = cfDriverPin.strDriverPinNumber
 	,strVehicleNumber = cfVehicle.strVehicleNumber
 	,intTransactionId = cfTransaction.intTransactionId
-	,strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, emcuslocation.strLocationName, emcuslocation.strAddress, emcuslocation.strCity, emcuslocation.strState, emcuslocation.strZipCode, emcuslocation.strCountry, NULL, 0) 
+	,strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, emcuslocation.strLocationName, emcuslocation.strAddress, emcuslocation.strCity, emcuslocation.strState, emcuslocation.strZipCode, emcuslocation.strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	,intEntityId = cfcustomer.intEntityId
 	,ysnPosted = cfTransaction.ysnPosted
 FROM dbo.tblCFTransaction cfTransaction 

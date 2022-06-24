@@ -45,7 +45,7 @@ SELECT
 ,emEntity.strCustomerNumber
 ,emEntity.intTermsId
 ----------------------------------------------
-,arInv.strBillTo
+,strBillTo = arInv.strBillTo COLLATE Latin1_General_CI_AS
 ----------------------------------------------
 ,cfCard.strCardNumber
 ,cfCard.strCardDescription

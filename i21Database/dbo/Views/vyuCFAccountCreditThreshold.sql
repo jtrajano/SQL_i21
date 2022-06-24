@@ -10,13 +10,13 @@ mainQuery.dblTotalAR,
 mainQuery.dblOverLimit, 
 ARCust.strCreditCode, 
 CFAccnt.intAccountId, 
-CASE 
+ strReason = CASE 
 WHEN (dblOverLimit > 0 AND dblTotalDue > 0) 
 	THEN 'Both' 
 WHEN (dblOverLimit <= 0 AND dblTotalDue > 0) 
 	THEN 'Past Due' 
 WHEN (dblOverLimit > 0 AND dblTotalDue <= 0) 
-	THEN 'Over Credit Limit' END AS strReason
+	THEN 'Over Credit Limit' END COLLATE Latin1_General_CI_AS 
 
 FROM   (
 SELECT 

@@ -64,12 +64,14 @@ SELECT
 ,cfAccount.ysnShowDriverPinDescriptionOnly
 ,cfAccount.ysnPageBreakByPrimarySortOrder
 ,cfAccount.ysnSummaryByDeptDriverPinProd
-,cfAccount.strDepartmentGrouping
+,strDepartmentGrouping = cfAccount.strDepartmentGrouping COLLATE Latin1_General_CI_AS
 ----------------------------------------------
 ,strCustomerName = emEntity.strName
 ,emEntity.strName
 ,emEntity.strCustomerNumber
 ----------------------------------------------
+
+ 
 ,strBillTo =  dbo.fnARFormatCustomerAddress (
 				 NULL
 				,NULL
@@ -80,8 +82,8 @@ SELECT
 				,emEntity.strBillToZipCode
 				,emEntity.strBillToCountry
 				,emEntity.strName
-				,1)
-,arInv.strShipTo
+				,1)  COLLATE Latin1_General_CI_AS
+,strShipTo = arInv.strShipTo COLLATE Latin1_General_CI_AS
 ,arInv.strType
 ,arInv.strLocationName
 ,arInv.intInvoiceId
@@ -274,7 +276,7 @@ SELECT
 		WHEN (  (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
 			THEN 'print'
 		ELSE 'print'
-	END))
+	END)) COLLATE Latin1_General_CI_AS
 ,cfDriverPin.strDriverPinNumber
 ,cfDriverPin.strDriverDescription
 ,cfDriverPin.intDriverPinId
