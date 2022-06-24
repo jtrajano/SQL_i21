@@ -282,7 +282,7 @@ END
 		select @cols = STUFF((select ',' + QUOTENAME(strContractEndMonth) 
 							from @List
 							group by strContractEndMonth
-							order by case when strContractEndMonth = 'Near By' then 0 else 1 end
+							order by case when strContractEndMonth = 'Near By' then 0 else 1 end , CASE WHEN  strContractEndMonth not in('Near By','Total') THEN CONVERT(DATETIME,'01 '+strContractEndMonth) END
 					FOR XML PATH(''), TYPE
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
