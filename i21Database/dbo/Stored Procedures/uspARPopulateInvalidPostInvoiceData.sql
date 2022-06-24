@@ -1371,6 +1371,32 @@ BEGIN
 	  AND (Acct.[intOtherChargeIncomeAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
 	  AND I.strSessionId = @strSessionId
 	  AND Acct.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+         ([intInvoiceId]
+         ,[strInvoiceNumber]
+         ,[strTransactionType]
+         ,[intInvoiceDetailId]
+         ,[intItemId]
+         ,[strBatchId]
+         ,[strPostingError]
+		 ,[strSessionId])
+     --Sales Account Misc Items
+	SELECT
+          [intInvoiceId]         	= I.[intInvoiceId]
+         ,[strInvoiceNumber]     	= I.[strInvoiceNumber]        
+         ,[strTransactionType]   	= I.[strTransactionType]
+         ,[intInvoiceDetailId]   	= I.[intInvoiceDetailId]
+         ,[intItemId]            	= I.[intItemId]
+         ,[strBatchId]           	= I.[strBatchId]
+         ,[strPostingError]      	= 'The Sales Account for Company Location - ' + CL.[strLocationName] + ' was not specified.'
+		 ,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE I.intItemId IS NULL
+	  AND I.strItemDescription IS NOT NULL
+	  AND CL.intSalesAccount IS NULL
+	  AND I.strSessionId = @strSessionId
 	
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
