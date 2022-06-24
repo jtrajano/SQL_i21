@@ -1346,8 +1346,30 @@ BEGIN
 		AND I.[strTransactionType] = 'Debit Memo'
 		AND I.[strType] NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
 		AND I.[intPeriodsToAccrue] <= 1
-		AND (ISNULL(I.[intSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)			
+		AND (ISNULL(I.[intSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)	
 
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Sales Account Misc Items
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The Sales Account for Company Location - ' + CL.[strLocationName] + ' was not specified.'
+	FROM ##ARPostInvoiceDetail I
+	INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE I.intItemId IS NULL
+	  AND I.strItemDescription IS NOT NULL
+	  AND CL.intSalesAccount IS NULL
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
