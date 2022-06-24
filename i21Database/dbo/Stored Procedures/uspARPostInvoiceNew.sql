@@ -364,6 +364,12 @@ IF(@totalInvalid > 0)
   		INNER JOIN tblARPostInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId] AND GL.[strTransactionId] = B.[strInvoiceNumber]
 		WHERE GL.strSessionId = @strRequestId
 		  AND B.strSessionId = @strRequestId
+
+		DELETE PQ
+		FROM tblARPostingQueue PQ
+		INNER JOIN tblARPostInvalidInvoiceData B ON PQ.[intTransactionId] = B.[intInvoiceId] AND PQ.[strTransactionNumber] = B.[strInvoiceNumber]
+		WHERE PQ.strTransactionType = 'Invoice'
+		  AND B.strSessionId = @strRequestId
 							
         DELETE FROM tblARPostInvalidInvoiceData
 		WHERE strSessionId = @strRequestId
