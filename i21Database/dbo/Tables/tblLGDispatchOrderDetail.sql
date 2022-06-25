@@ -24,6 +24,8 @@
 	[strState] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strZipCode] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strCountry] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[dblLongitude] NUMERIC(18, 6) NULL,
+	[dblLatitude] NUMERIC(18, 6) NULL,
 	[intItemId] INT NULL,
 	[strItemNo] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[dblQuantity] NUMERIC(18, 6) NULL,
