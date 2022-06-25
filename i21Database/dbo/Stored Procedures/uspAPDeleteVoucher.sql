@@ -71,6 +71,13 @@ BEGIN TRY
 			RAISERROR('Unable to delete. Please use pricing screen to delete the voucher.', 16, 1);
 			RETURN;	
 		END
+
+		IF @callerModule = 0 AND EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblSCTicket B
+				ON A.intScaleTicketId = B.intTicketId WHERE B.intTicketTypeId = 8 AND A.intBillId = @intBillId)  
+		BEGIN  
+			RAISERROR('Unable to delete. Please use ticket screen to delete the voucher.', 16, 1);    
+			RETURN;   
+		END 
 		--WILL REVERT ONCE SCALE WITH CONTRACT FIXATION IS RELATED
 		UPDATE tblCTPriceFixationDetail SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 
@@ -94,6 +101,16 @@ BEGIN TRY
 		-- Mon
 		update tblGRStorageHistory set intBillId = null Where intBillId=@intBillId 
 	END
+	ELSE IF EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblSCTicket B
+		ON A.intScaleTicketId = B.intTicketId WHERE B.intTicketTypeId = 8 AND A.intBillId = @intBillId)
+	BEGIN
+		IF @callerModule = 0
+		BEGIN  
+			RAISERROR('Unable to delete. Please use ticket screen to delete the voucher.', 16, 1);  
+		RETURN;   
+		END 
+	END
+
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
 	UPDATE tblGRSettleStorage SET intBillId = NULL WHERE intBillId = @intBillId
