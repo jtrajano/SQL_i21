@@ -43,7 +43,7 @@ SELECT
 	,DOD.intEntityShipViaTrailerId
 	,DOD.intEntityShipViaCompartmentId
 	,SVTC.strCompartmentNumber
-	,SVTC.intCategoryId
+	,I.intCategoryId
 	,SVTC.dblCapacity
 	,DOD.intConcurrencyId
 FROM tblLGDispatchOrderDetail DOD 
