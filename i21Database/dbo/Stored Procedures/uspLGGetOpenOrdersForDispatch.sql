@@ -49,6 +49,7 @@ BEGIN
 		,strDriver = TMO.strDriverName
 		,intItemId = TMS.intProduct
 		,strItemNo = TMO.strProduct
+		,intCategoryId = I.intCategoryId
 		,dblOnHand = NULL
 		,dblOrderedQty = NULL
 		,dblQuantity = TMO.dblQuantity
@@ -73,6 +74,7 @@ BEGIN
 		LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
 		LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
+		LEFT JOIN tblICItem I ON I.intItemId = TMS.intProduct
 		OUTER APPLY (SELECT TOP 1 dblStandardWeight FROM tblICItemUOM WHERE intItemId = TMS.intProduct AND ysnStockUnit = 1) SW
 	WHERE TMO.strOrderStatus = 'Generated'
 		AND NOT EXISTS (SELECT 1 FROM tblLGDispatchOrderDetail DOD 
