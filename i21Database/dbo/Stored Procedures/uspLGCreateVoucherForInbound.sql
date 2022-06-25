@@ -230,8 +230,7 @@ BEGIN TRY
 			,[strComments]
 			,[intPurchaseTaxGroupId]
 			,[strTaxPoint]
-			,[intTaxLocationId]
-			,[ysnTaxGroupOverride])
+			,[intTaxLocationId])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -310,7 +309,6 @@ BEGIN TRY
 			,[intPurchaseTaxGroupId] = CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
 			,[strTaxPoint] = L.strTaxPoint
 			,[intTaxLocationId] = L.intTaxLocationId
-			,[ysnTaxGroupOverride] = LD.ysnTaxGroupOverride
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -472,8 +470,7 @@ BEGIN TRY
 				,[strComments]
 				,[intPurchaseTaxGroupId]
 				,[strTaxPoint]
-				,[intTaxLocationId]
-				,[ysnTaxGroupOverride])
+				,[intTaxLocationId])
 			SELECT
 				[intEntityVendorId]
 				,[intTransactionType] = CASE WHEN @intType = 1 THEN 1 WHEN @intType = 2 THEN 16 END
@@ -539,7 +536,6 @@ BEGIN TRY
 				,[intPurchaseTaxGroupId]
 				,[strTaxPoint]
 				,[intTaxLocationId]
-				,[ysnTaxGroupOverride]
 			FROM @voucherPayable
 			WHERE intEntityVendorId = @intVendorEntityId
 
