@@ -102,9 +102,9 @@ FROM
 				AND separateUOM.intItemLocationId = cd.intItemLocationId
 				AND separateUOM.intItemUOMId = cd.intItemUOMId
 				AND (
-					((CASE WHEN cd.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL THEN 0 ELSE 1 END) = 0) OR
-					((CASE WHEN cd.intSubLocationId = separateUOM.intSubLocationId AND cd.intStorageLocationId = separateUOM.intStorageLocationId THEN 0 ELSE 1 END) = 0) OR
-					((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = separateUOM.intSubLocationId THEN 0 ELSE 1 END) = 0)
+					(cd.intSubLocationId IS NULL AND separateUOM.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL AND separateUOM.intStorageLocationId IS NULL)
+					OR (cd.intSubLocationId = separateUOM.intSubLocationId AND cd.intStorageLocationId IS NULL AND separateUOM.intStorageLocationId IS NULL)
+					OR (cd.intSubLocationId = separateUOM.intSubLocationId AND cd.intStorageLocationId = separateUOM.intStorageLocationId )
 				)
 				AND FLOOR(CAST(separateUOM.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 				AND Item.strLotTracking = 'No'
@@ -120,10 +120,10 @@ FROM
 				byStockUOM.intItemId = cd.intItemId
 				AND byStockUOM.intItemLocationId = cd.intItemLocationId
 				AND byStockUOM.intItemUOMId = cd.intItemUOMId
-				AND (
-					((CASE WHEN cd.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL THEN 0 ELSE 1 END) = 0) OR
-					((CASE WHEN cd.intSubLocationId = byStockUOM.intSubLocationId AND cd.intStorageLocationId = byStockUOM.intStorageLocationId THEN 0 ELSE 1 END) = 0) OR
-					((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = byStockUOM.intSubLocationId THEN 0 ELSE 1 END) = 0)
+				AND (					
+					(cd.intSubLocationId IS NULL AND byStockUOM.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL AND byStockUOM.intStorageLocationId IS NULL)
+					OR (cd.intSubLocationId = byStockUOM.intSubLocationId AND cd.intStorageLocationId IS NULL AND byStockUOM.intStorageLocationId IS NULL)
+					OR (cd.intSubLocationId = byStockUOM.intSubLocationId AND cd.intStorageLocationId = byStockUOM.intStorageLocationId )
 				)
 				AND FLOOR(CAST(byStockUOM.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 				AND Item.strLotTracking = 'No'
@@ -154,8 +154,14 @@ FROM
 			WHERE
 				t.intItemId = Item.intItemId
 				AND t.intItemLocationId = ItemLocation.intItemLocationId
-				AND t.intSubLocationId = cd.intSubLocationId
-				AND t.intStorageLocationId = cd.intStorageLocationId
+				AND (
+					t.intSubLocationId = cd.intSubLocationId
+					OR (t.intSubLocationId IS NULL AND cd.intSubLocationId IS NULL) 
+				)
+				AND (
+					t.intStorageLocationId = cd.intStorageLocationId
+					OR (t.intStorageLocationId IS NULL AND cd.intStorageLocationId IS NULL) 
+				)
 				AND t.intLotId = cd.intLotId
 				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 		) LotTransactions
@@ -201,9 +207,9 @@ FROM
 				AND t.intItemLocationId = ItemLocation.intItemLocationId
 				
 				AND (
-					((CASE WHEN cd.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL THEN 1 ELSE 0 END) = 1) OR
-					((CASE WHEN cd.intSubLocationId = t.intSubLocationId AND cd.intStorageLocationId = t.intStorageLocationId THEN 1 ELSE 0 END) = 1) OR
-					((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = t.intSubLocationId THEN 1 ELSE 0 END) = 1)
+					(cd.intSubLocationId IS NULL AND t.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL AND t.intStorageLocationId IS NULL)
+					OR (cd.intSubLocationId = t.intSubLocationId AND cd.intStorageLocationId IS NULL AND t.intStorageLocationId IS NULL)
+					OR (cd.intSubLocationId = t.intSubLocationId AND cd.intStorageLocationId = t.intStorageLocationId )
 				)
 				AND ISNULL(t.intLotId, 0) = ISNULL(cd.intLotId, 0) 
 				AND t.ysnIsUnposted = 0 
@@ -237,3 +243,4 @@ GROUP BY x.intInventoryCountId
 	, x.strLotNo
 HAVING 
 	((ROUND((SUM(x.dblNewOnHand) - CASE WHEN x.ysnExcludeReserved = 1 THEN x.dblReservedQty ELSE 0 END) - x.dblCountOnHand, 6) <> 0))
+
