@@ -424,6 +424,7 @@ ELSE
 			, dblStateSalesTax
 			, dblTonnageTax
 			, blbCompanyLogo
+			, strLogoType
 		)
 		SELECT intEntityCustomerId			= TAX.intEntityCustomerId
 			, strDisplayName				= TAX.strDisplayName
