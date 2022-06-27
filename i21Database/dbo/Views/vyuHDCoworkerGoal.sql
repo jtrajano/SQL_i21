@@ -8,18 +8,18 @@ SELECT   [intCoworkerGoalId]				= CoworkerGoal.[intCoworkerGoalId]
 		,[intUtilizationTargetAnnual]		= CoworkerGoal.[intUtilizationTargetAnnual]
 		,[intUtilizationTargetWeekly]		= CoworkerGoal.[intUtilizationTargetWeekly]
 		,[intUtilizationTargetMonthly]		= CoworkerGoal.[intUtilizationTargetMonthly]
-		,[dblAnnualHurdle]					= CoworkerGoal.[dblAnnualHurdle]
+		,[dblAnnualHurdle]					= ISNULL(CoworkerGoal.[dblAnnualHurdle], 0)
 		,[strIncentiveType]					= CoworkerGoal.[strIncentiveType]
 		,[strIncentiveRateType]				= CoworkerGoal.[strIncentiveRateType]
-		,[dblIncentiveRate]					= CoworkerGoal.[dblIncentiveRate]
-		,[dblAnnualBudget]					= CoworkerGoal.[dblAnnualBudget]
+		,[dblIncentiveRate]					= ISNULL(CoworkerGoal.[dblIncentiveRate], 0)
+		,[dblAnnualBudget]					= ISNULL(CoworkerGoal.[dblAnnualBudget], 0)
 		,[intCommissionAccountId]			= CoworkerGoal.[intCommissionAccountId]
 		,[intRevenueAccountId]				= CoworkerGoal.[intRevenueAccountId]
 		,[strGoal]							= CoworkerGoal.[strGoal]
 		,[strCommissionType]				= CoworkerGoal.[strCommissionType]
 		,[strCommissionRateType]			= CoworkerGoal.[strCommissionRateType]
-		,[dblCommissionRate]				= CoworkerGoal.[dblCommissionRate]
-		,[dblUnderAllocated]				= CoworkerGoal.[dblUnderAllocated]
+		,[dblCommissionRate]				= ISNULL(CoworkerGoal.[dblCommissionRate], 0)
+		,[dblUnderAllocated]				= ISNULL(CoworkerGoal.[dblUnderAllocated], 0)
 		,[ysnActive]						= CoworkerGoal.[ysnActive]
 		,[ysnCanViewOtherCoworker]			= CoworkerGoal.[ysnCanViewOtherCoworker]
 		,[intConcurrencyId] 				= CoworkerGoal.[intConcurrencyId]
@@ -39,6 +39,6 @@ ON Currency.intCurrencyID = CoworkerGoal.intCurrencyId
 ON GLAccountCommission.intAccountId = CoworkerGoal.intCommissionAccountId
 		LEFT JOIN tblGLAccount GLAccountRevenue
 ON GLAccountRevenue.intAccountId = CoworkerGoal.intRevenueAccountId
-
+ON GLAccountRevenue.intAccountId = CoworkerGoal.intRevenueAccountId
 
 GO
