@@ -42,6 +42,8 @@ SELECT
 	, strPhysicalItem 		= PhysicalItem.strItemNo
 	, strPatronageCategory 	= PatronageCategory.strCategoryCode
 	, strDirectSaleCategory	= PatronageDirect.strCategoryCode
+	, intSubcategoryId = subcategory.intSubcategoryId
+ 	, strSubcategoryId = subcategory.strSubcategoryId
 	, strGrade				= Grade.strDescription
 	, strOrigin 			= Origin.strDescription
 	, strProductType		= ProductType.strDescription
@@ -135,3 +137,6 @@ LEFT JOIN tblICCommodityAttribute3 attribute3
 
 LEFT JOIN tblICCommodityAttribute4 attribute4
 	ON attribute4.intCommodityAttributeId4 = Item.intCommodityAttributeId4
+
+LEFT JOIN tblSTSubcategory subcategory  
+ ON subcategory.intSubcategoryId = Item.intSubcategoryId
