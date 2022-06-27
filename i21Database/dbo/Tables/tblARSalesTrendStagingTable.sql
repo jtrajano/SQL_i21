@@ -58,5 +58,7 @@
     [dblSalesOctober]			NUMERIC(18, 6) NULL,
     [dblSalesNovember]			NUMERIC(18, 6) NULL,
     [dblSalesDecember]			NUMERIC(18, 6) NULL,
-    [strMonth]		            NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+    [strMonth]		            NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strLogoType]				NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
+    [blbLogo]			        VARBINARY(MAX) NULL
 )
