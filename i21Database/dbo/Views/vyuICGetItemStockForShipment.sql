@@ -7,6 +7,7 @@ v.intKey
 , v.strItemNo
 , v.strShortName
 , v.strType
+, v.ysnActive
 , v.strManufactureType
 , v.strBundleType
 , v.strDescription
