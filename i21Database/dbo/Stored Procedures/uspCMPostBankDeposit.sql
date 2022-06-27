@@ -67,7 +67,7 @@ DECLARE
 		,[dblCreditForeign] [numeric](18, 6) NULL
 		,[dblDebitUnit] [numeric](18, 6) NULL
 		,[dblCreditUnit] [numeric](18, 6) NULL
-		,[strDescription] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[strDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
 		,[strCode] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 		,[strTransactionId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 		,[intTransactionId] [int] NULL
@@ -77,7 +77,7 @@ DECLARE
 		,[dblExchangeRate] [numeric](38, 20) NOT NULL
 		,[dtmDateEntered] [datetime] NOT NULL
 		,[dtmTransactionDate] [datetime] NULL
-		,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
+		,[strJournalLineDescription] [nvarchar](300)  COLLATE Latin1_General_CI_AS NULL
 		,[intJournalLineNo] [int]
 		,[ysnIsUnposted] [bit] NOT NULL
 		,[intUserId] [int] NULL
