@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspGLBookEntries
+﻿CREATE PROCEDURE uspGLBookEntries
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
 	,@SkipGLValidation BIT = 0
@@ -112,13 +111,13 @@ BEGIN
 			,[dblCredit] = Credit.Value 
 			,[dblDebitUnit]
 			,[dblCreditUnit]
-			,[strDescription]
+			,GLEntries.[strDescription]
 			,[strCode]
 			,[strReference]
 			,[strDocument]
 			,[strComments]
 			,[intCurrencyId]
-			,[intCurrencyExchangeRateTypeId]
+			,ISNULL(GLEntries.[intCurrencyExchangeRateTypeId], forexRateType.intCurrencyExchangeRateTypeId) 
 			,[dblExchangeRate]
 			,@dtmDateEntered
 			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])
@@ -146,7 +145,7 @@ BEGIN
 			,ISNULL(dblSourceUnitCredit,0)
 			,intCommodityId
 			,intSourceEntityId
-			,[intConcurrencyId]
+			,GLEntries.[intConcurrencyId]
 			,@ysnPost
 			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
 			,[intLedgerId]
@@ -156,6 +155,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
 			CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F
+			LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON forexRateType.strCurrencyExchangeRateType = GLEntries.strRateType
 
 END
 ;
