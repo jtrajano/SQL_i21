@@ -1,0 +1,599 @@
+CREATE PROCEDURE [dbo].[uspPRImportEmployeePaycheck](      
+    @guiApiUniqueId UNIQUEIDENTIFIER,      
+    @guiLogId UNIQUEIDENTIFIER       
+)      
+      
+AS      
+      
+BEGIN      
+      
+--DECLARE @guiApiUniqueId UNIQUEIDENTIFIER = N'30278E67-E6EB-4122-8F66-3251689D711F'      
+--DECLARE @guiLogId UNIQUEIDENTIFIER = NEWID()      
+DECLARE @NewId AS INT      
+DECLARE @EmployeeEntityNo AS INT      
+DECLARE @intEntityNo AS INT      
+DECLARE @intOriginalPaycheckId AS INT      
+    
+DECLARE @intTaxCount AS INT      
+DECLARE @intEarningCount AS INT    
+DECLARE @intEarningTaxToCount AS INT    
+DECLARE @intDeductionCount AS INT      
+DECLARE @intNewPaycheckId AS INT      
+DECLARE @intEmployeeDeductionId AS INT    
+DECLARE @intEmployeeEarningId AS INT   
+DECLARE @intEmployeeEarningTaxId AS INT   
+DECLARE @intEmployeeTaxId AS INT 
+    
+DECLARE @strEmployeeId AS NVARCHAR(100)      
+DECLARE @strRecordType AS NVARCHAR(100)      
+DECLARE @strRecordId AS NVARCHAR(100)     
+DECLARE @strAccountId AS NVARCHAR(100)      
+DECLARE @strExpenseAccountId AS NVARCHAR(100)      
+DECLARE @strBankAccountNumber AS NVARCHAR(100)      
+DECLARE @strReferenceNumber AS NVARCHAR(100)      
+DECLARE @strPaycheckId NVARCHAR(50)     
+DECLARE @strPaycheckEarningId NVARCHAR(50)    
+DECLARE @strPayGroupIds AS NVARCHAR(MAX)      
+DECLARE @strDepartmentIds AS NVARCHAR(MAX)      
+DECLARE @strExcludeDeductions AS NVARCHAR(MAX)      
+    
+DECLARE @dblEarningHour AS FLOAT(50)       
+DECLARE @dblAmount AS FLOAT(50)       
+DECLARE @dblTotal AS FLOAT(50)       
+    
+DECLARE @dtmPayDate AS NVARCHAR(100)      
+DECLARE @dtmPayFrom AS NVARCHAR(100)      
+DECLARE @dtmPayTo AS NVARCHAR(100)      
+    
+DECLARE @EmployeeCount AS INT      
+    
+DECLARE @ysnPost AS BIT      
+DECLARE @ysnImportEarning AS BIT      
+DECLARE @ysnImportDeduction AS BIT      
+DECLARE @ysnImportTax AS BIT      
+DECLARE @ysnImportPaycheck AS BIT    
+DECLARE @ysnOverrideDD BIT     
+    
+DECLARE @xmlDepartments XML       
+DECLARE @xmlPayGroups XML        
+DECLARE @xmlExcludeDeductions XML         
+    
+     
+DECLARE @intUserId AS INT      
+DECLARE @PaycheckGroupId AS INT      
+    
+      
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)      
+SELECT      
+ guiApiImportLogDetailId = NEWID()      
+ ,guiApiImportLogId = @guiLogId      
+ ,strField  = 'Employee ID'      
+ ,strValue  = SE.strEntityNo      
+ ,strLogLevel  = 'Error'      
+ ,strStatus  = 'Failed'      
+ ,intRowNo  = SE.intRowNumber      
+ ,strMessage  = 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.strEntityNo, '') AS NVARCHAR(100)) + '.'      
+ FROM tblApiSchemaEmployeePaycheck SE      
+ LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.strEntityNo)      
+ WHERE SE.guiApiUniqueId = @guiApiUniqueId      
+ AND SE.strEntityNo IS NULL      
+     
+--GETING ALL DATA
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeePaycheck'))       
+DROP TABLE #TempEmployeePaycheck       
+      
+SELECT * INTO #TempEmployeePaycheck FROM tblApiSchemaEmployeePaycheck where guiApiUniqueId = @guiApiUniqueId
+order by intOriginalPaycheckId ASC      
+    
+--GETTING ALL ORIGINAL ID
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempPaycheckGroupId'))       
+DROP TABLE #TempPaycheckGroupId    
+    
+SELECT intOriginalPaycheckId INTO #TempPaycheckGroupId FROM tblApiSchemaEmployeePaycheck where guiApiUniqueId = @guiApiUniqueId     
+GROUP BY intOriginalPaycheckId    
+ORDER By intOriginalPaycheckId ASC  
+  
+WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeePaycheck)      
+BEGIN    
+	SELECT TOP 1 @PaycheckGroupId = intOriginalPaycheckId FROM #TempPaycheckGroupId  
+
+	--GETTING ALL DATA FILTERED WITH ORIGINAL ID
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeePaycheckPerGroup'))       
+	DROP TABLE #TempEmployeePaycheckPerGroup 
+
+	SELECT * INTO #TempEmployeePaycheckPerGroup FROM #TempEmployeePaycheck
+	WHERE intOriginalPaycheckId = @PaycheckGroupId
+
+	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeePaycheckPerGroup)
+	BEGIN
+		 --DECLARE @ysnImportPaycheck AS BIT    
+		 SELECT TOP 1 
+		 @ysnImportPaycheck = COUNT(strEntityNo) 
+		 FROM #TempEmployeePaycheckPerGroup WHERE intOriginalPaycheckId = @PaycheckGroupId AND strRecordType = 'PAYCHECK'  
+
+		 IF(@ysnImportPaycheck = 1)
+			BEGIN
+			EXEC uspSMGetStartingNumber 32, @strPaycheckId OUT
+
+			SELECT TOP 1       
+				 @strEmployeeId   = LTRIM(RTRIM(strEntityNo))      
+				,@intEntityNo   = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(strEntityNo)))      
+				,@intOriginalPaycheckId = intOriginalPaycheckId      
+				,@strRecordType   = CASE WHEN strRecordType <> '' AND strRecordType       
+				IN(      
+				'PAYCHECK',      
+				'EARNING',   
+				'EARNING TAX', 
+				'DEDUCTION',      
+				'TAX'      
+				) THEN strRecordType ELSE '' END      
+				,@strRecordId   = strRecordId      
+				,@dblEarningHour  = dblEarningHour      
+				,@dblAmount    = dblAmount      
+				,@dblTotal    = dblTotal      
+				,@dtmPayDate   = CAST(dtmPayDate AS NVARCHAR)       
+				,@dtmPayFrom   = CAST(dtmPayFrom AS NVARCHAR)       
+				,@dtmPayTo    = CAST(dtmPayTo AS NVARCHAR)       
+				,@strAccountId   = LTRIM(RTRIM(strAccountId))      
+				,@strExpenseAccountId = LTRIM(RTRIM(strExpenseAccountId))      
+				,@strBankAccountNumber = LTRIM(RTRIM(strBankAccountNumber))      
+				,@strReferenceNumber = LTRIM(RTRIM(strReferenceNumber))      
+			FROM #TempEmployeePaycheck     
+			WHERE intOriginalPaycheckId = @PaycheckGroupId    
+			AND strRecordType = 'PAYCHECK' 
+
+			INSERT INTO [dbo].[tblPRPaycheck]            
+				([strPaycheckId]            
+				,[intEntityEmployeeId]            
+				,[dtmPayDate]            
+				,[strPayPeriod]            
+				,[dtmDateFrom]            
+				,[dtmDateTo]            
+				,[intBankAccountId]            
+				,[strReferenceNo]            
+				,[dblTotalHours]            
+				,[dblGross]            
+				,[dblAdjustedGross]            
+				,[dblTaxTotal]            
+				,[dblDeductionTotal]            
+				,[dblNetPayTotal]            
+				,[dblCompanyTaxTotal]            
+				,[dtmPosted]            
+				,[ysnPosted]            
+				,[ysnPrinted]            
+				,[ysnVoid]            
+				,[ysnDirectDeposit]            
+				,[intCreatedUserId]            
+				,[dtmCreated]            
+				,[intLastModifiedUserId]            
+				,[dtmLastModified]            
+				,[intConcurrencyId])            
+			VALUES            
+				(@strPaycheckId            
+				,@intEntityNo            
+				,CONVERT(DATE, @dtmPayDate)  
+				,(SELECT TOP 1 strPayPeriod FROM tblPREmployee WHERE intEntityId = @intEntityNo)            
+				,CONVERT(DATE, @dtmPayFrom) 
+				,CONVERT(DATE, @dtmPayTo)          
+				,(SELECT TOP 1 intBankAccountId FROM tblPRPayGroup WHERE strPayGroup = (SELECT TOP 1 strPayPeriod FROM tblPREmployee where intEntityId = @intEntityNo))         
+				,''            
+				,0            
+				,0            
+				,0            
+				,0            
+				,0            
+				,0            
+				,0            
+				,NULL            
+				,0            
+				,0            
+				,0            
+				,0        
+				,@intUserId      -- int user id temporary      
+				,GETDATE()            
+				,@intUserId      -- int user id temporary      
+				,GETDATE()            
+				,1 )
+			SET @intNewPaycheckId = SCOPE_IDENTITY()  
+			--SET @ysnImportPaycheck = 0  
+
+			INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)      
+			SELECT TOP 1      
+				NEWID()      
+				, guiApiImportLogId = @guiLogId      
+				, strField = 'Paycheck Record'      
+				, strValue = @strRecordType      
+				, strLogLevel = 'Info'      
+				, strStatus = 'Success'      
+				, intRowNo = SE.intRowNumber      
+				, strMessage = 'The employee paycheck record ('+ @strPaycheckId +') has been successfully imported.'      
+			FROM tblApiSchemaEmployeePaycheck SE      
+			LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)      
+			WHERE SE.guiApiUniqueId = @guiApiUniqueId      
+			AND SE.strRecordId = @strRecordId  
+
+			   
+			
+			
+
+			DELETE FROM #TempEmployeePaycheckPerGroup WHERE intOriginalPaycheckId = @PaycheckGroupId AND strRecordType = @strRecordType and strEntityNo = @strEmployeeId AND strRecordId = @strRecordId
+			DELETE FROM #TempEmployeePaycheck WHERE intOriginalPaycheckId = @PaycheckGroupId AND strRecordType = @strRecordType and strEntityNo = @strEmployeeId AND strRecordId = @strRecordId
+		 END
+		 ELSE
+			BEGIN
+
+			SELECT TOP 1     
+			   @strEmployeeId   = LTRIM(RTRIM(strEntityNo))    
+			  ,@intEntityNo   = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = LTRIM(RTRIM(strEntityNo)))    
+			  ,@intOriginalPaycheckId = intOriginalPaycheckId    
+			  ,@strRecordType   = CASE WHEN strRecordType <> '' AND strRecordType     
+			   IN(    
+				'PAYCHECK',    
+				'EARNING',
+				'EARNING TAX', 
+				'DEDUCTION',    
+				'TAX'    
+			   ) THEN strRecordType ELSE '' END    
+			  ,@strRecordId   = strRecordId   
+			  ,@strPaycheckEarningId = strPaycheckEarningId
+			  ,@dblEarningHour  = dblEarningHour    
+			  ,@dblAmount    = dblAmount    
+			  ,@dblTotal    = dblTotal    
+			  ,@dtmPayDate   = CAST(dtmPayDate AS NVARCHAR)     
+			  ,@dtmPayFrom   = CAST(dtmPayFrom AS NVARCHAR)     
+			  ,@dtmPayTo    = CAST(dtmPayTo AS NVARCHAR)     
+			  ,@strAccountId   = LTRIM(RTRIM(strAccountId))    
+			  ,@strExpenseAccountId = LTRIM(RTRIM(strExpenseAccountId))    
+			  ,@strBankAccountNumber = LTRIM(RTRIM(strBankAccountNumber))    
+			  ,@strReferenceNumber = LTRIM(RTRIM(strReferenceNumber))    
+			 FROM #TempEmployeePaycheck  
+			 WHERE intOriginalPaycheckId = @PaycheckGroupId 
+
+
+			 --Categorization of record type
+			 IF(@strRecordType = 'EARNING')
+			 BEGIN
+				SELECT TOP 1 @intEarningCount = COUNT(intTypeEarningId) FROM tblPRTypeEarning WHERE strEarning = @strRecordId 
+				IF(@intEarningCount != 0)
+					BEGIN
+						SELECT TOP 1 @intEmployeeEarningId = intTypeEarningId FROM tblPRTypeEarning WHERE LTRIM(RTRIM(strEarning)) = LTRIM(RTRIM(@strRecordId))
+						INSERT INTO tblPRPaycheckEarning        
+							  ([intPaycheckId]        
+							  ,[intEmployeeEarningId]        
+							  ,[intTypeEarningId]        
+							  ,[strCalculationType]        
+							  ,[dblHours]        
+							  ,[dblAmount]        
+							  ,[dblTotal]        
+							  ,[strW2Code]        
+							  ,[intEmployeeDepartmentId]        
+							  ,[intWorkersCompensationId]        
+							  ,[intEmployeeTimeOffId]        
+							  ,[intEmployeeEarningLinkId]        
+							  ,[intAccountId]        
+							  ,[intTaxCalculationType]          
+							  ,[intSort]        
+							  ,[intConcurrencyId])       
+						SELECT        
+							   @intNewPaycheckId    
+							  ,P.intEmployeeEarningId        
+							  ,P.intTypeEarningId        
+							  ,P.strCalculationType        
+							  ,ISNULL(@dblEarningHour,0)   
+							  ,ISNULL(@dblAmount,0)          
+							  ,ISNULL(@dblTotal,0)   
+							  ,P.strW2Code        
+							  ,(SELECT TOP 1 intDepartmentId from tblPREmployeeDepartment where intEntityEmployeeId = @intEntityNo)      
+							  ,(SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE intEntityId = @intEntityNo)       
+							  ,P.intEmployeeTimeOffId        
+							  ,P.intEmployeeEarningLinkId        
+							  ,P.intAccountId        
+							  ,P.intTaxCalculationType    
+							  ,P.intSort        
+							  ,1       
+								FROM tblPREmployeeEarning P    
+								WHERE P.intEntityEmployeeId = @intEntityNo      
+								AND P.intTypeEarningId = @intEmployeeEarningId        
+								--AND P.ysnDefault = 1  
+
+						INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+						SELECT TOP 1    
+							NEWID()    
+						, guiApiImportLogId = @guiLogId    
+						, strField = 'Paycheck Earning Record'    
+						, strValue = @strRecordType    
+						, strLogLevel = 'Info'    
+						, strStatus = 'Success'    
+						, intRowNo = SE.intRowNumber    
+						, strMessage = 'The paycheck earning record has been successfully imported.'    
+						FROM tblApiSchemaEmployeePaycheck SE    
+						LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+						WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+						AND SE.strRecordId = @strRecordId  
+
+					END
+				ELSE
+					BEGIN
+						 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+						 SELECT TOP 1    
+						  NEWID()    
+						  , guiApiImportLogId = @guiLogId    
+						  , strField = 'Paycheck Earning'    
+						  , strValue = @strRecordType    
+						  , strLogLevel = 'Error'    
+						  , strStatus = 'Failed'    
+						  , intRowNo = SE.intRowNumber    
+						  , strMessage = 'Wrong input/format for Record Type. Please try again.'    
+						 FROM tblApiSchemaEmployeePaycheck SE    
+						 LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+						 WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+						 AND SE.strRecordId = @strRecordId
+					END
+			 END
+
+			 IF(@strRecordType = 'DEDUCTION')
+			 BEGIN
+				SELECT TOP 1 @intDeductionCount = COUNT(intTypeDeductionId) FROM tblPRTypeDeduction WHERE strDeduction = @strRecordId 
+				IF(@intDeductionCount != 0)
+					BEGIN
+						SELECT TOP 1 @intEmployeeDeductionId = intTypeDeductionId FROM tblPRTypeDeduction WHERE LTRIM(RTRIM(strDeduction)) = LTRIM(RTRIM(@strRecordId))
+						INSERT INTO tblPRPaycheckDeduction        
+						  ([intPaycheckId]        
+						  ,[intEmployeeDeductionId]        
+						  ,[intTypeDeductionId]        
+						  ,[dblPaycheckMax]        
+						  ,[strDeductFrom]        
+						  ,[strCalculationType]        
+						  ,[dblAmount]        
+						  ,[dblLimit]        
+						  ,[dblTotal]        
+						  ,[dtmBeginDate]        
+						  ,[dtmEndDate]        
+						  ,[intAccountId]        
+						  ,[intExpenseAccountId]        
+						  ,[strPaidBy]        
+						  ,[intSort]        
+						  ,[intConcurrencyId])           
+						  SELECT        
+							@intNewPaycheckId        
+						   ,intEmployeeDeductionId        
+						   ,[intTypeDeductionId]        
+						   ,[dblPaycheckMax]        
+						   ,[strDeductFrom]        
+						   ,[strCalculationType]        
+						   ,@dblAmount        
+						   ,[dblLimit]        
+						   ,@dblTotal     
+						   ,[dtmBeginDate]        
+						   ,[dtmEndDate]        
+						   ,[intAccountId]        
+						   ,[intExpenseAccountId]        
+						   ,[strPaidBy]        
+						   ,[intSort]        
+						   ,1        
+						   FROM tblPREmployeeDeduction        
+						   WHERE [intEntityEmployeeId] = @intEntityNo        
+						   AND intTypeDeductionId = @intEmployeeDeductionId        
+						   --AND ysnDefault = 1      
+         
+						  INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+						   SELECT TOP 1    
+							 NEWID()    
+							, guiApiImportLogId = @guiLogId    
+							, strField = 'Paycheck Deduction Record'    
+							, strValue = @strRecordType    
+							, strLogLevel = 'Info'    
+							, strStatus = 'Success'    
+							, intRowNo = SE.intRowNumber    
+							, strMessage = 'The paycheck deduction record has been successfully imported.'    
+						   FROM tblApiSchemaEmployeePaycheck SE    
+						   LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+						   WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+						   AND SE.strRecordId = @strRecordId  
+					END
+				ELSE
+					BEGIN
+						 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+						 SELECT TOP 1    
+						  NEWID()    
+						  , guiApiImportLogId = @guiLogId    
+						  , strField = 'Paycheck Deduction'    
+						  , strValue = @strRecordType    
+						  , strLogLevel = 'Error'    
+						  , strStatus = 'Failed'    
+						  , intRowNo = SE.intRowNumber    
+						  , strMessage = 'Wrong input/format for Record Type. Please try again.'    
+						 FROM tblApiSchemaEmployeePaycheck SE    
+						 LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+						 WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+						 AND SE.strRecordId = @strRecordId 
+					END
+			 END
+
+			 IF(@strRecordType = 'TAX')
+			 BEGIN
+				SELECT TOP 1 @intTaxCount = COUNT(intTypeTaxId) FROM tblPRTypeTax WHERE strTax = @strRecordId
+				IF(@intTaxCount != 0)
+				BEGIN
+					SELECT TOP 1 @intEmployeeTaxId = intTypeTaxId FROM tblPRTypeTax WHERE LTRIM(RTRIM(strTax)) = LTRIM(RTRIM(@strRecordId))
+					INSERT INTO [dbo].[tblPRPaycheckTax]        
+						([intPaycheckId]        
+						,[intTypeTaxId]        
+						,[strCalculationType]        
+						,[strFilingStatus]        
+						,[intTypeTaxStateId]        
+						,[intTypeTaxLocalId]        
+						,[dblAmount]        
+						,[dblExtraWithholding]        
+						,[dblLimit]        
+						,[dblTotal]  
+						,[intAccountId]        
+						,[intExpenseAccountId]        
+						,[intAllowance]        
+						,[strPaidBy]        
+						,[strVal1]        
+						,[strVal2]        
+						,[strVal3]        
+						,[strVal4]        
+						,[strVal5]        
+						,[strVal6]        
+						,[ysnSet]        
+						,[intSort]        
+						,[ysnW42020]    
+						,[ysnW4Step2c]    
+						,[dblW4ClaimDependents]    
+						,[dblW4OtherIncome]    
+						,[dblW4Deductions]   
+						,[intConcurrencyId])        
+					SELECT        
+						 @intNewPaycheckId        
+						,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strRecordId)        
+						,[strCalculationType]        
+						,[strFilingStatus]        
+						,[intTypeTaxStateId]        
+						,[intTypeTaxLocalId]        
+						,@dblAmount        
+						,[dblExtraWithholding]        
+						,[dblLimit]        
+						,@dblTotal  
+						,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId)    
+						,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strExpenseAccountId)    
+						,[intAllowance]        
+						,[strPaidBy]        
+						,[strVal1]        
+						,[strVal2]        
+						,[strVal3]        
+						,[strVal4]        
+						,[strVal5]        
+						,[strVal6]        
+						,0        
+						,[intSort]        
+						,[ysnW42020]    
+						,[ysnW4Step2c]    
+						,[dblW4ClaimDependents]    
+						,[dblW4OtherIncome]    
+						,[dblW4Deductions]    
+						,1        
+					   FROM [dbo].[tblPREmployeeTax]        
+					   WHERE [intEntityEmployeeId] = @intEntityNo     
+					   AND [intTypeTaxId] = @intEmployeeTaxId
+						 --AND [ysnDefault] = 1    
+  
+					INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+					SELECT TOP 1    
+						NEWID()    
+					, guiApiImportLogId = @guiLogId    
+					, strField = 'Paycheck Tax Record'    
+					, strValue = @strRecordType    
+					, strLogLevel = 'Info'    
+					, strStatus = 'Success'    
+					, intRowNo = SE.intRowNumber    
+					, strMessage = 'The paycheck tax record has been successfully imported.'    
+					FROM tblApiSchemaEmployeePaycheck SE    
+					LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+					WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+					AND SE.strRecordId = @strRecordId  
+				END
+				ELSE
+				BEGIN
+					 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+					 SELECT TOP 1    
+					  NEWID()    
+					  , guiApiImportLogId = @guiLogId    
+					  , strField = 'Paycheck Tax'    
+					  , strValue = @strRecordType    
+					  , strLogLevel = 'Error'    
+					  , strStatus = 'Failed'    
+					  , intRowNo = SE.intRowNumber    
+					  , strMessage = 'Wrong input/format for Record Type. Please try again.'    
+					 FROM tblApiSchemaEmployeePaycheck SE    
+					 LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+					 WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+					 AND SE.strRecordId = @strRecordId  
+				END
+			 END
+
+			 IF(@strRecordType = 'EARNING TAX')
+			 BEGIN
+				SELECT TOP 1 @intTaxCount = COUNT(intTypeTaxId) FROM tblPRTypeTax WHERE strTax = @strRecordId
+				IF(@intTaxCount != 0)
+				BEGIN
+					SELECT TOP 1 @intEarningTaxToCount = COUNT(intTypeEarningId) FROM tblPRTypeEarning WHERE strEarning = @strPaycheckEarningId
+					IF(@intEarningTaxToCount != 0)
+					BEGIN
+						SELECT TOP 1 @intEmployeeEarningTaxId = intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strPaycheckEarningId
+						INSERT INTO tblPRPaycheckEarningTax
+						(
+							intPaycheckEarningId
+							,intTypeTaxId
+							,intConcurrencyId
+						)
+						VALUES
+						(
+							 (SELECT TOP 1 intPaycheckEarningId FROM tblPRPaycheckEarning where intPaycheckId = @intNewPaycheckId AND intTypeEarningId = @intEmployeeEarningTaxId)
+							,(SELECT TOP 1  intTypeTaxId FROM tblPRTypeTax WHERE LTRIM(RTRIM(strTax)) = LTRIM(RTRIM(@strRecordId)))
+							,1
+						)
+					END
+					ELSE
+					BEGIN
+						INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+						 SELECT TOP 1    
+						  NEWID()    
+						  , guiApiImportLogId = @guiLogId    
+						  , strField = 'Paycheck Earning Tax'    
+						  , strValue = @strRecordId    
+						  , strLogLevel = 'Error'    
+						  , strStatus = 'Failed'    
+						  , intRowNo = SE.intRowNumber    
+						  , strMessage = 'Wrong input/format for Record Type. Please try again.'    
+						 FROM tblApiSchemaEmployeePaycheck SE    
+						 LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+						 WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+						 AND SE.strRecordId = @strRecordId 
+					END
+
+					
+				END
+				ELSE
+				BEGIN
+					INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+					 SELECT TOP 1    
+					  NEWID()    
+					  , guiApiImportLogId = @guiLogId    
+					  , strField = 'Paycheck Earning Tax'    
+					  , strValue = @strRecordType    
+					  , strLogLevel = 'Error'    
+					  , strStatus = 'Failed'    
+					  , intRowNo = SE.intRowNumber    
+					  , strMessage = 'Wrong input/format for Record Type. Please try again.'    
+					 FROM tblApiSchemaEmployeePaycheck SE    
+					 LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+					 WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+					 AND SE.strRecordId = @strRecordId  
+				END
+			 END
+
+
+			DELETE FROM #TempEmployeePaycheckPerGroup WHERE intOriginalPaycheckId = @PaycheckGroupId AND strRecordType = @strRecordType and strEntityNo = @strEmployeeId AND strRecordId = @strRecordId
+			DELETE FROM #TempEmployeePaycheck WHERE intOriginalPaycheckId = @PaycheckGroupId AND strRecordType = @strRecordType and strEntityNo = @strEmployeeId AND strRecordId = @strRecordId
+		 END
+
+	END
+	
+	--DELETE GROUPINGS    
+	DELETE FROM #TempPaycheckGroupId WHERE intOriginalPaycheckId = @PaycheckGroupId    
+
+END  
+    
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeePaycheck'))       
+DROP TABLE #TempEmployeePaycheck       
+    
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempPaycheckGroupId'))       
+DROP TABLE #TempPaycheckGroupId    
+  
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeePaycheckPerGroup'))       
+DROP TABLE #TempEmployeePaycheckPerGroup 
+
+    
+END 
