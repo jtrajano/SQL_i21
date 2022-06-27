@@ -101,7 +101,10 @@ JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciatio
 JOIN @Id I on I.intId = A.intAssetId
 OUTER APPLY(
 	SELECT TOP 1 dblDepreciationToDate, dtmDepreciationToDate, strTransaction, dblDepreciationBasis, dblBasis FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
-	AND ISNULL(intBookId,1) = @BookId AND strTransaction <> 'Place in service' AND intLedgerId = BD.intLedgerId
+	AND ISNULL(intBookId,1) = @BookId AND strTransaction <> 'Place in service' 
+	AND (CASE WHEN BD.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = BD.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 	ORDER BY intAssetDepreciationId DESC
 )Depreciation
 OUTER APPLY (
