@@ -368,7 +368,8 @@ BEGIN TRY
 					,[dblCommissionRate]
 					,[strIncentiveType]				
 					,[strIncentiveRateType]
-					,[dblIncentiveRate]		
+					,[dblIncentiveRate]	
+					,[dblUnderAllocated]
 					,[intReportsToId]				
 					,[intConcurrencyId]		
 					,[ysnActive]						
@@ -415,6 +416,7 @@ BEGIN TRY
 															   ELSE ''
 														  END
 					   ,[dblIncentiveRate]				= CASE WHEN @IncentiveRate IS NULL OR LTRIM(RTRIM(@IncentiveRate)) = '' THEN 0 ELSE CAST(@IncentiveRate AS NUMERIC(18, 6)) END
+					   ,[dblUnderAllocated]				= 0
 					   ,[intReportsToId]				= @intReportsToId
 					   ,[intConcurrencyId]				= 1
 					   ,[ysnActive]						= CASE WHEN @Active IS NULL OR LTRIM(RTRIM(@Active)) = '' THEN 1 ELSE @ysnActive END

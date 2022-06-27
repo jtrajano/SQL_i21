@@ -19,6 +19,7 @@
 	[strIncentiveType]					NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	[strIncentiveRateType]				NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	[dblIncentiveRate]					NUMERIC(18, 6) NULL DEFAULT 0, 
+	[dblUnderAllocated]					NUMERIC(18, 6) NULL DEFAULT 0,
 	[intConcurrencyId] [int]			NOT NULL DEFAULT 1,
 	[ysnActive]							BIT	 NOT NULL	CONSTRAINT [DF_tblHDCoworkerGoal_ysnActive] DEFAULT ((0)),
 	[ysnCanViewOtherCoworker]			BIT	 NOT NULL	CONSTRAINT [DF_tblHDCoworkerGoal_ysnCanViewOtherCoworker] DEFAULT ((0)),

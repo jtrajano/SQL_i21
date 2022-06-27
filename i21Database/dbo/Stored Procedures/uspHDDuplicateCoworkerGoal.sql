@@ -7,7 +7,6 @@ AS
 
 BEGIN
 
-
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
@@ -143,6 +142,7 @@ BEGIN
 			,[strIncentiveType]					
 			,[strIncentiveRateType]
 			,[dblIncentiveRate]	
+			,[dblUnderAllocated]
 			,[intReportsToId]					
 			,[intConcurrencyId] 			
 			,[ysnActive]							
@@ -167,6 +167,7 @@ BEGIN
 			,[strIncentiveType]					=	CoworkerGoal.[strIncentiveType]			
 			,[strIncentiveRateType]				=	CoworkerGoal.[strIncentiveRateType]	
 			,[dblIncentiveRate]					=	CoworkerGoal.[dblIncentiveRate]	
+			,[dblUnderAllocated]				= 0
 			,[intReportsToId]					=	CoworkerGoal.[intReportsToId]				
 			,[intConcurrencyId] 				=	1 			
 			,[ysnActive]						=	CoworkerGoal.[ysnActive]					
