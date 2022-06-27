@@ -167,7 +167,7 @@ BEGIN
 			,[strIncentiveType]					=	CoworkerGoal.[strIncentiveType]			
 			,[strIncentiveRateType]				=	CoworkerGoal.[strIncentiveRateType]	
 			,[dblIncentiveRate]					=	CoworkerGoal.[dblIncentiveRate]	
-			,[dblUnderAllocated]				= 0
+			,[dblUnderAllocated]				=   CoworkerGoal.[dblAnnualBudget]
 			,[intReportsToId]					=	CoworkerGoal.[intReportsToId]				
 			,[intConcurrencyId] 				=	1 			
 			,[ysnActive]						=	CoworkerGoal.[ysnActive]					

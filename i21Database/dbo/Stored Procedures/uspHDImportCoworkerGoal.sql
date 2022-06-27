@@ -416,7 +416,7 @@ BEGIN TRY
 															   ELSE ''
 														  END
 					   ,[dblIncentiveRate]				= CASE WHEN @IncentiveRate IS NULL OR LTRIM(RTRIM(@IncentiveRate)) = '' THEN 0 ELSE CAST(@IncentiveRate AS NUMERIC(18, 6)) END
-					   ,[dblUnderAllocated]				= 0
+					   ,[dblUnderAllocated]				= CASE WHEN @AnnualBudget IS NULL OR LTRIM(RTRIM(@AnnualBudget)) = '' THEN 0 ELSE CAST(@AnnualBudget AS NUMERIC(18, 6)) END
 					   ,[intReportsToId]				= @intReportsToId
 					   ,[intConcurrencyId]				= 1
 					   ,[ysnActive]						= CASE WHEN @Active IS NULL OR LTRIM(RTRIM(@Active)) = '' THEN 1 ELSE @ysnActive END
