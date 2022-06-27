@@ -75,7 +75,7 @@ SELECT S.intSampleId
 			THEN CL1.strLocationName
 		ELSE E2.strName
 		END AS strSentByValue
-	,LTRIM(CD.intContractSeq) AS strSequenceNumber
+	,LTRIM(CD.intContractSeq) COLLATE Latin1_General_CI_AS AS strSequenceNumber
 	,SCS.dblQuantity AS dblAssignedQty
 	,UOM.strUnitMeasure AS strAssignedQtyUOM
 	,S.dtmCreated
