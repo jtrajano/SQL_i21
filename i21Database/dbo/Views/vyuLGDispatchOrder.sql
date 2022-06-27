@@ -24,6 +24,26 @@ SELECT
 	,strVendorLocation = VL.strLocationName
 	,strCompanyLocation = CL.strLocationName
 	,strSubLocation = CLSL.strSubLocationName
+	,strFromAddress = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.strAddress 
+		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.strAddress 
+		ELSE CL.strAddress END
+	,strFromCity = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.strCity 
+		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.strCity 
+		ELSE CL.strCity END
+	,strFromState = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.strState 
+		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.strState 
+		ELSE CL.strStateProvince END
+	,strFromCountry = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.strCountry  
+		ELSE CL.strCountry END
+	,strFromZipCode = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.strZipCode 
+		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.strZipCode 
+		ELSE CL.strZipPostalCode END
+	,dblFromLongitude = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.dblLongitude 
+		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.dblLongitude 
+		ELSE CL.dblLongitude END
+	,dblFromLatitude = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.dblLatitude 
+		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.dblLatitude 
+		ELSE CL.dblLatitude END
 	,strShipVia = SV.strName
 	,strDriver = DV.strName
 	,strTruckNumber = SVT.strTruckNumber
