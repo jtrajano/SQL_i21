@@ -90,7 +90,7 @@ SELECT	[dtmDate]
 		,[strCode]
 		,[strReference]
 		,[intCurrencyId] = udtRecap.intCurrencyId
-		,[intCurrencyExchangeRateTypeId] = udtRecap.[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateTypeId] = ISNULL(udtRecap.[intCurrencyExchangeRateTypeId], forexRateType.intCurrencyExchangeRateTypeId) 
 		,[dblExchangeRate]
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
@@ -104,7 +104,7 @@ SELECT	[dtmDate]
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		,[strRateType] =  Rate.strCurrencyExchangeRateType
+		,[strRateType] = ISNULL(Rate.strCurrencyExchangeRateType, forexRateType.strCurrencyExchangeRateType) 
 		,strOverrideAccountError
 		,strNewAccountIdOverride
 		,[intConcurrencyId] = 1
@@ -113,6 +113,7 @@ FROM	@RecapTable udtRecap LEFT JOIN tblGLAccount gl
 		LEFT JOIN tblSMCurrencyExchangeRateType Rate on udtRecap.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
 		LEFT JOIN tblGLAccountGroup gg
 			ON gg.intAccountGroupId = gl.intAccountGroupId
+		LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON forexRateType.strCurrencyExchangeRateType = udtRecap.strRateType
 
 
 
