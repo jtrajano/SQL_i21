@@ -39,6 +39,5 @@ ON Currency.intCurrencyID = CoworkerGoal.intCurrencyId
 ON GLAccountCommission.intAccountId = CoworkerGoal.intCommissionAccountId
 		LEFT JOIN tblGLAccount GLAccountRevenue
 ON GLAccountRevenue.intAccountId = CoworkerGoal.intRevenueAccountId
-ON GLAccountRevenue.intAccountId = CoworkerGoal.intRevenueAccountId
 
 GO
