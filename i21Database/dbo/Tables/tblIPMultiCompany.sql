@@ -7,10 +7,10 @@
 	[intBookId] INT
 	,strApprover nvarchar(100) COLLATE Latin1_General_CI_AS
 	,ysnCurrentCompany BIT
-	,strServerName nvarchar(max)
-	,strDatabaseName nvarchar(max)
-	,strUserName nvarchar(max)
-	,strPassword nvarchar(max)
+	,strServerName nvarchar(max) COLLATE Latin1_General_CI_AS
+	,strDatabaseName nvarchar(max) COLLATE Latin1_General_CI_AS
+	,strUserName nvarchar(max) COLLATE Latin1_General_CI_AS
+	,strPassword nvarchar(max) COLLATE Latin1_General_CI_AS
 	,ysnPandSContractPositionSame Bit 
 	,CONSTRAINT [PK_tblIPMultiCompany] PRIMARY KEY ([intMultiCompanyId])
 )

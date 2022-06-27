@@ -6,7 +6,7 @@ SELECT intSampleId				= S.intSampleId
 	 , intSampleStatusId		= S.intSampleStatusId
 	 , strStatus				= SS.strStatus
 	 , dtmCuppingDate			= CS.dtmCuppingDate
-	 , strCuppingTime			= CONVERT(VARCHAR(8), CS.dtmCuppingTime, 8)
+	 , strCuppingTime			= CONVERT(VARCHAR(8), CS.dtmCuppingTime, 8) COLLATE Latin1_General_CI_AS
 FROM tblQMSample S
 INNER JOIN tblQMCuppingSessionDetail CSD ON CSD.intSampleId = S.intSampleId
 INNER JOIN tblQMCuppingSession CS ON CS.intCuppingSessionId = CSD.intCuppingSessionId

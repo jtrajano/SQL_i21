@@ -88,11 +88,11 @@ SELECT S.intSampleId
 	,S.ysnImpactPricing
 	,strOrigin	= O.strDescription
 	,strProductType	= PT.strDescription	
-	,strGrade = ''
-	,strRegion = ''
-	,strSeason = ''
-	,strClass = ''
-	,strProductLine = ''
+	,strGrade = '' COLLATE Latin1_General_CI_AS
+	,strRegion = '' COLLATE Latin1_General_CI_AS
+	,strSeason = '' COLLATE Latin1_General_CI_AS
+	,strClass = '' COLLATE Latin1_General_CI_AS
+	,strProductLine = '' COLLATE Latin1_General_CI_AS
 	,S.dtmRequestedDate
 	,S.dtmSampleSentDate
 	,SC.strSamplingCriteria
@@ -107,11 +107,11 @@ SELECT S.intSampleId
 	,CSH.dtmCuppingTime
 	,CSH.intRank
     ,CSH.intCuppingSessionDetailId
-	,strMethodology = ''
+	,strMethodology = '' COLLATE Latin1_General_CI_AS
 	,strExtension = EX.strDescription
 	,intContractSequence = CD.intContractSeq
 	,strContractType = CT.strContractType
-	,strPacking = ''
+	,strPacking = '' COLLATE Latin1_General_CI_AS
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
