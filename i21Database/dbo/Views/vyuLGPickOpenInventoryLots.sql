@@ -219,10 +219,6 @@ FROM (
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) AL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
-		AND (
-			Lot.intWarrantStatus IS NULL
-			OR Lot.intWarrantStatus <> 1 -- Not Pledged
-		)
 		AND Receipt.ysnPosted = 1
 	) InvLots
 GO
