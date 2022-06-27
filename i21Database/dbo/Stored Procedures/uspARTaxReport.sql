@@ -51,6 +51,7 @@ DECLARE @dtmDateFrom			DATETIME
 	  , @strReportLogId			NVARCHAR(MAX)
 	  , @intNewPerformanceLogId	INT 
 	  , @strRequestId 			NVARCHAR(200) = NEWID()
+	  , @blbLogo				VARBINARY(MAX)	= NULL
 
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -256,6 +257,8 @@ ELSE
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 	END
 
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+
 TRUNCATE TABLE tblARTaxStagingTable
 
 IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
@@ -319,6 +322,7 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 			, strFederalTaxId
 			, strStateTaxId
 			, blbCompanyLogo
+			, strLogoType
 		)
 		SELECT intEntityCustomerId			= TAX.intEntityCustomerId
 			, intEntitySalespersonId		= TAX.intEntitySalespersonId
@@ -377,11 +381,13 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 			, ysnTaxExempt					= TAX.ysnTaxExempt
 			, strFederalTaxId				= TAX.strFederalTaxId
 			, strStateTaxId					= TAX.strStateTaxId
-			, blbCompanyLogo				= dbo.fnSMGetCompanyLogo('Header')
+			, blbCompanyLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
+			, strLogoType					= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 		FROM dbo.vyuARSalesTaxReport TAX WITH (NOLOCK)
 		INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
 		INNER JOIN #INVOICES I ON TAX.intInvoiceId = I.intInvoiceId
+		LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = TAX.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
 		WHERE CAST(TAX.dtmDate AS DATETIME) BETWEEN @dtmDateFrom AND @dtmDateTo
 		AND (@strTaxCode IS NULL OR TAX.strTaxCode LIKE '%'+ @strTaxCode +'%')
 		AND (@strTaxAgency IS NULL OR TAX.strTaxAgency LIKE '%'+ @strTaxAgency +'%')
@@ -444,6 +450,7 @@ ELSE
 			, dblStateSalesTax		 		= SUM(CASE WHEN TRT.strType = 'State Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END)
 			, dblTonnageTax			 		= SUM(CASE WHEN TRT.strType = 'Tonnage Tax' THEN TAX.dblTaxAmount ELSE 0 END)
 			, blbCompanyLogo				= dbo.fnSMGetCompanyLogo('Header')
+			, strLogoType					= 'Attachment'
 		FROM dbo.vyuARSalesTaxReport TAX WITH (NOLOCK)
 		LEFT JOIN tblSMTaxClass TCLASS ON TAX.intTaxClassId = TCLASS.intTaxClassId
 		LEFT JOIN tblSMTaxReportType TRT ON TCLASS.intTaxReportTypeId = TRT.intTaxReportTypeId

@@ -677,7 +677,7 @@ LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT
 	AND AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
 	AND AGINGREPORT.strAgingType = 'Summary'
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = @strCompanyLocationIdsLocal
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = @strCompanyLocationIdsLocal AND (ysnARInvoice = 1 OR ysnDefault = 1)
 
 
 UPDATE tblARCustomerStatementStagingTable

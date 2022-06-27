@@ -791,7 +791,7 @@ BEGIN
 
 	WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 	INNER JOIN @ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-	LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = AGING.intCompanyLocationId
+	LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = AGING.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
 
 	DELETE AGING
 	FROM @returntable AGING

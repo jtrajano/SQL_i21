@@ -31,6 +31,7 @@ DECLARE @dtmTransactionDateTo			DATETIME
 	  , @strSources						NVARCHAR(MAX)
 	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
+	  , @blbLogo						VARBINARY(MAX)
 
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -124,6 +125,8 @@ IF @dtmTransactionDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmTransactionDateFrom = CAST(-53690 AS DATETIME)
 
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+
 DELETE FROM tblARSalesTrendStagingTable
 
 INSERT INTO tblARSalesTrendStagingTable
@@ -166,7 +169,10 @@ SELECT *
 	WHEN 11 THEN 'November' 
 	WHEN 12 THEN 'December' 
 	ELSE '' END AS strMonth
-FROM vyuARTransactionSummary 
+, strLogoType	= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+, blbLogo		= ISNULL(SMLP.imgLogo, @blbLogo)
+FROM vyuARTransactionSummary ARTS
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARTS.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
 WHERE dtmTransactionDate BETWEEN @dtmTransactionDateFrom AND @dtmTransactionDateTo
   AND (intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCustomerIds, '|^|', ','))) OR ISNULL(@strCustomerIds, '') = '')
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
@@ -180,7 +186,7 @@ WHERE dtmTransactionDate BETWEEN @dtmTransactionDateFrom AND @dtmTransactionDate
 			FROM tblICItem
 			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
 		)) OR ISNULL(@strItemDescriptions, '') = '')
-  AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
+  AND (ARTS.intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
   AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
   AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
 
