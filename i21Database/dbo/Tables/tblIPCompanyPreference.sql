@@ -2,7 +2,7 @@
 (
 	[intCompanyPreferenceId] INT NOT NULL IDENTITY,
 	[strCommonDataFolderPath] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
-	strCustomerCode nvarchar(50),
+	strCustomerCode nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnReplicationEnabled BIT CONSTRAINT [DF_ttblIPCompanyPreference_ysnReplicationEnabled] DEFAULT 1, 
 	intThirdPartyContractWaitingPeriod int,
 	ysnDestinationPortMandatoryInPOExport BIT,

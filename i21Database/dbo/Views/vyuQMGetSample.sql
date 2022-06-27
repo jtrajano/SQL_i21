@@ -22,8 +22,8 @@ SELECT SPS.intSamplePreStageId AS TrxSequenceNo
 	,SPS.strMarks AS Marks
 	,SPS.strLotNumber AS MotherLotNo
 	,CONVERT(NUMERIC(18, 0), ISNULL(SPS.dblRepresentingQty, 0)) AS Qty
-	,CONVERT(VARCHAR, CD.dtmStartDate, 112) AS ContractDeliveryMonth
-	,CONVERT(VARCHAR, SPS.dtmSampleReceivedDate, 112) AS SampleReceivedDate
+	,CONVERT(VARCHAR, CD.dtmStartDate, 112) COLLATE Latin1_General_CI_AS AS ContractDeliveryMonth
+	,CONVERT(VARCHAR, SPS.dtmSampleReceivedDate, 112) COLLATE Latin1_General_CI_AS AS SampleReceivedDate
 	,SPS.dtmCreated AS CreatedDateTime
 	,CE.strName AS CreatedBy
 	,C.strCountry AS Origin

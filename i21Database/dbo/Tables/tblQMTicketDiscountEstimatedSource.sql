@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblQMTicketDiscountEstimatedSource]
 (
 	[intTicketDiscountEstimatedSourceId] INT NOT NULL IDENTITY
-	,[strGrade] NVARCHAR(50) NOT NULL 
+	,[strGrade] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL 
 	,[intConcurrencyId] INT NULL DEFAULT(0)
 	,[dblMin] DECIMAL(24, 10) NULL
 	,[dblMax] DECIMAL(24, 10) NULL
