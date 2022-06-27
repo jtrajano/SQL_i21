@@ -186,11 +186,11 @@ BEGIN
 				WHEN F.dblQty = 0
 					THEN 1
 				ELSE F.dblQty
-				END, 1)
+				END, 1)*30
 		,4 AS intAttributeId -->DOH
 	FROM #tblMFShortTermDemand Inv
 	LEFT JOIN #tblMFShortTermDemand F ON F.intItemId = Inv.intItemId
-		AND F.intLocationId = Inv.intLocationId
+		AND F.intLocationId = Inv.intLocationId AND F.intAttributeId=3
 	WHERE Inv.intAttributeId = 5
 
 	DELETE
