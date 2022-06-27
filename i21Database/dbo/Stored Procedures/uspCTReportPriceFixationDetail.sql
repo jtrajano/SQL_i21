@@ -88,8 +88,13 @@ BEGIN TRY
 			dbo.fnRemoveTrailingZeroes(PD.dblFutures) + CY.strCurrency + '-' + isnull(rtrt2.strTranslation,CM.strUnitMeasure)	AS strGABPrice,
 			CD.dblRatio,
 			dbo.fnRemoveTrailingZeroes(PD.dblQuantity) + ' ' + CD.strItemUOM AS strQtyWithUOM,
-			lblFX = CASE WHEN PD.dblFX != 1  AND PD.dblFX IS NOT NULL THEN 'FX' ELSE NULL  END,
-			strFX = CASE WHEN PD.dblFX != 1  AND PD.dblFX IS NOT NULL THEN LTRIM(CAST( PD.dblFX AS NUMERIC(18, 6)))  ELSE NULL END,
+			lblFX = CASE WHEN 
+							  PD.dblFX != 1  AND PD.dblFX IS NOT NULL THEN 'FX' ELSE NULL  END,
+			 CD.intInvoiceCurrencyId,
+			 ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) as intMainCurrencyId,
+			strFX = CASE WHEN CD.intInvoiceCurrencyId != ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) THEN LTRIM(CAST( PD.dblFX AS NUMERIC(18, 6))) 
+						 WHEN CD.intInvoiceCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) AND PD.dblFX = 1 THEN NULL
+						 ELSE NULL END,
 			dblFX = PD.dblFX,
 		    ysnEnableFXFieldInContractPricing = @ysnEnableFXFieldInContractPricing
 
