@@ -41,6 +41,7 @@ FROM (
 		 , strTransactionType		= 'Invoice' COLLATE Latin1_General_CI_AS
 		 , dblAdjustedTax			= ISNULL(DF.dblTax, 0.00)
 		 , ysnInvalidSetup			= CONVERT(BIT, 0)
+		 , dblRate					= 0 -- MON
 	FROM dbo.tblARInvoiceDeliveryFee DF WITH (NOLOCK)
 	INNER JOIN tblSMTaxCode TC ON DF.intTaxCodeId = TC.intTaxCodeId
 

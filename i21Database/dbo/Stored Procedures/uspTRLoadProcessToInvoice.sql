@@ -1503,7 +1503,8 @@ BEGIN TRY
 		SELECT @dblTotalCharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
 		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
 		WHERE STF.intId != 0
-
+		--MON
+		/*
 		UPDATE E SET E.intFreightCompanySegment = S.intCompanySegmentId
 		, E.intFreightLocationSegment = S.intProfitCenterId
 		, E.dblFreightCharge = @dblTotalCharge
@@ -1514,6 +1515,7 @@ BEGIN TRY
 			LEFT JOIN tblSMShipVia SI ON SI.intEntityId = EI.intShipViaId
 			WHERE EI.intLoadDistributionHeaderId IS NOT NULL AND SI.strFreightBilledBy = 'Internal Carrier'
 		)
+		*/
 	END
 
 	EXEC [dbo].[uspARProcessInvoices]
