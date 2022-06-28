@@ -36,7 +36,5 @@ JOIN tblEMEntityCredential Cre ON Cre.intEntityId = EntityContact.intEntityId
 JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityId = EntityContact.intEntityId
 	AND EntityLocation.intEntityLocationId = EntityContact.intEntityLocationId
 JOIN tblEMEntityType EntityType ON EntityType.intEntityId = EntityContact.intEntityId
-	AND EntityType.strType = 'User'
 LEFT JOIN tblSMUserRole r ON r.intUserRoleID = Sec.intUserRoleID
 WHERE EntityContact.ysnDefaultContact = 1
-AND e.strType = 'User'
