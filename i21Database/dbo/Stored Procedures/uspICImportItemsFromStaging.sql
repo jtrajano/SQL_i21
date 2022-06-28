@@ -59,6 +59,7 @@ CREATE TABLE #tmp_validRecords (
 	, strFuelInspectFee NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, ysnSeparateStockForUOMs BIT NULL DEFAULT ((0))
     , ysn1099Box3 BIT NULL
+	, intSubcategoryId INT NULL
 	, dtmDateCreated DATETIME NULL
 	, intCreatedByUserId INT NULL
 )
@@ -259,6 +260,7 @@ INSERT INTO #tmp_validRecords(
 	, strFuelInspectFee
 	, ysnSeparateStockForUOMs
 	, ysn1099Box3
+	, intSubcategoryId
 	, dtmDateCreated
 	, intCreatedByUserId
 )
@@ -312,8 +314,10 @@ SELECT
 	, strFuelInspectFee				= s.strFuelInspectFee
 	, ysnSeparateStockForUOMs		= s.ysnSeparateStockForUOMs
 	, ysn1099Box3					= s.ysn1099Box3
+	, intSubcategoryId				= subcat.intSubcategoryId
 	, dtmDateCreated				= s.dtmDateCreated
 	, intCreatedByUserId			= s.intCreatedByUserId
+
 FROM tblICImportStagingItem s
 	OUTER APPLY (
 		SElECT strType
@@ -359,6 +363,7 @@ FROM tblICImportStagingItem s
 	LEFT OUTER JOIN tblICTag med ON med.strTagNumber = s.strMedicationTag AND med.strType = 'Medication Tag'
 	LEFT OUTER JOIN tblICTag ing ON ing.strTagNumber = s.strIngredientTag AND ing.strType = 'Ingredient Tag'
 	LEFT OUTER JOIN tblICRinFuelCategory rin ON rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(s.strFuelCategory)))
+	INNER JOIN tblSTSubcategory subcat ON subcat.strSubcategoryId = s.strSubcategory
 	LEFT JOIN #tmp_lotTrackingChange v1 ON v1.strItemNo = s.strItemNo
 	LEFT JOIN #tmp_itemTypeChange v2 ON v2.strItemNo = s.strItemNo
 	LEFT JOIN #tmp_commodityChange v3 ON v3.strItemNo = s.strItemNo
@@ -423,6 +428,7 @@ USING
 		, strFuelInspectFee
 		, ysnSeparateStockForUOMs
 		, ysn1099Box3
+		, intSubcategoryId
 		, dtmDateCreated
 		, intCreatedByUserId
 	FROM #tmp_validRecords s
@@ -482,6 +488,7 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 		, strFuelInspectFee = source.strFuelInspectFee
 		, ysnSeparateStockForUOMs = source.ysnSeparateStockForUOMs
 		, ysn1099Box3 = source.ysn1099Box3
+		, intSubcategoryId = source.intSubcategoryId
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
 WHEN NOT MATCHED THEN
@@ -537,6 +544,7 @@ WHEN NOT MATCHED THEN
 		, strFuelInspectFee
 		, ysnSeparateStockForUOMs
 		, ysn1099Box3
+		, intSubcategoryId
 		, dtmDateCreated
 		, intDataSourceId
 	)
@@ -594,6 +602,7 @@ WHEN NOT MATCHED THEN
 		, strFuelInspectFee
 		, ysnSeparateStockForUOMs
 		, ysn1099Box3
+		, intSubcategoryId
 		, dtmDateCreated
 		, @intDataSourceId
 	)
