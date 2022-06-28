@@ -3,18 +3,18 @@ CREATE TABLE tblApiImportLog (
     guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
     guiSubscriptionId UNIQUEIDENTIFIER NOT NULL,
     guiUserId UNIQUEIDENTIFIER NOT NULL,
-    strDefinition NVARCHAR(250) NOT NULL,
-    strSubscription NVARCHAR(200) NOT NULL,
-    strStatus NVARCHAR(150) NOT NULL, -- Pending, Running, Completed, Cancelled, Success, Failed
-    strResult NVARCHAR(150) NULL,
-    strTrigger NVARCHAR(150) NULL,
-    strUsername NVARCHAR(200) NOT NULL,
-    strTemplate NVARCHAR(250) NULL,
+    strDefinition NVARCHAR(250) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+    strSubscription NVARCHAR(200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+    strStatus NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL, -- Pending, Running, Completed, Cancelled, Success, Failed
+    strResult NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+    strTrigger NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+    strUsername NVARCHAR(200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+    strTemplate NVARCHAR(250) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
     guiTemplateId UNIQUEIDENTIFIER NULL,
-    strFileName NVARCHAR(500) NULL,
-    strApiBuildNumber NVARCHAR(200) NULL,
-    strApiVersion NVARCHAR(200) NULL,
-    strI21Version NVARCHAR(200) NULL,
+    strFileName NVARCHAR(500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+    strApiBuildNumber NVARCHAR(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+    strApiVersion NVARCHAR(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+    strI21Version NVARCHAR(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
     intTotalRecordsCreated INT NULL, -- Total rows added
     intTotalRecordsUpdated INT NULL, -- Total rows updated
     intTotalRows INT NULL, -- Totals rows in the source file
