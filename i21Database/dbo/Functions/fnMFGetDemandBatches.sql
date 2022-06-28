@@ -15,5 +15,5 @@ BEGIN
 	IF LEN(@strBatches) > 0
 		SET @strBatches = Left(@strBatches, LEN(@strBatches) - 1)
 
-	RETURN @strBatches
+	RETURN @strBatches COLLATE Latin1_General_CI_AS
 END
