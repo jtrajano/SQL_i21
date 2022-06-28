@@ -20,8 +20,9 @@ G AS(
 		dtmDepreciationToDate
 		,intAssetId
 		,strTransaction
+		,intLedgerId
 	FROM tblFAFixedAssetDepreciation 
-	GROUP BY dtmDepreciationToDate,intAssetId,strTransaction
+	GROUP BY dtmDepreciationToDate,intAssetId,strTransaction,intLedgerId
 )
 SELECT
 	dtmDepreciationToDate = CASE WHEN ISNULL(FA.ysnImported, 0) = 1 AND FA.dtmCreateAssetPostDate IS NOT NULL THEN FA.dtmCreateAssetPostDate ELSE FA.dtmDateInService END,
@@ -58,6 +59,8 @@ SELECT
 	CAST(0 AS BIT) ysnAddToBasis,
 	strCurrencyForeign = Currency.strCurrency,
 	strFunctionalCurrency = CurrencyFN.strCurrency,
+	NULL strGAAPLedgerName,
+	NULL strTaxLedgerName,
 	1 intConcurrencyId
  FROM FA
  LEFT JOIN tblGLDetail GL ON GL.intTransactionId = FA.intAssetId AND GL.strReference = FA.strAssetId
@@ -127,6 +130,8 @@ SELECT
 	CAST(ISNULL(GAAP.ysnAddToBasis, ISNULL(Tax.ysnAddToBasis, 0)) AS BIT) ysnAddToBasis,
 	GAAP.strCurrency strCurrencyForeign,
 	ISNULL(GAAP.strFunctionalCurrency, Tax.strFunctionalCurrency) strFunctionalCurrency,
+	GAAP.strLedgerName strGAAPLedgerName,
+	Tax.strLedgerName strTaxLedgerName,
 	ISNULL(GAAP.intConcurrencyId, Tax.intConcurrencyId) intConcurrencyId
 FROM G 
 outer apply(
@@ -154,15 +159,22 @@ outer apply(
 	ysnAddToBasis,
 	Currency.strCurrency,
 	CurrencyFN.strCurrency strFunctionalCurrency,
+	L.strLedgerName,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
 	LEFT JOIN tblFADepreciationMethod B ON A.intDepreciationMethodId = B.intDepreciationMethodId
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = A.intCurrencyId
 	LEFT JOIN tblSMCurrency CurrencyFN ON CurrencyFN.intCurrencyID = A.intFunctionalCurrencyId
+	LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
 	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
 	AND A.intAssetId = G.intAssetId
 	AND intBookId = 1
 	AND A.strTransaction = G.strTransaction
+	AND (
+			CASE WHEN G.intLedgerId IS NOT NULL 
+			THEN CASE WHEN (L.intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
+			ELSE 1 END
+        ) = 1
 )GAAP
 OUTER APPLY(
 	SELECT 
@@ -189,15 +201,22 @@ OUTER APPLY(
 	ysnAddToBasis,
 	Currency.strCurrency,
 	CurrencyFN.strCurrency strFunctionalCurrency,
+	L.strLedgerName,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
-	LEFT JOIN tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
+	LEFT JOIN tblFADepreciationMethod B ON A.intDepreciationMethodId = B.intDepreciationMethodId
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = A.intCurrencyId
 	LEFT JOIN tblSMCurrency CurrencyFN ON CurrencyFN.intCurrencyID = A.intFunctionalCurrencyId
+	LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
 	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
 	AND A.intAssetId = G.intAssetId
 	AND A.intBookId = 2
 	AND A.strTransaction = G.strTransaction
+	AND (
+			CASE WHEN G.intLedgerId IS NOT NULL 
+			THEN CASE WHEN (L.intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
+			ELSE 1 END
+        ) = 1
 )Tax
 OUTER APPLY (
 	SELECT TOP 1 FAD.dblDepreciationToDate, FAD.intAssetDepreciationId, FAD.dblFunctionalDepreciationToDate, FAD.dtmDepreciationToDate
