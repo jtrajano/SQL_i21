@@ -205,13 +205,11 @@ BEGIN
 						 , [intProductNumber]
 						 , [dblDollarsSold]
 						 , [dblGallonsSold]
-						 , [ysnImbalanceAccepted]
 						 , [intConcurrencyId])
 			SELECT		@intCheckoutId,
 						b.intProductNumber ,
 						b.sumDblFuelVolume - a.sumDblFuelVolume,
 						b.sumDblFuelMoney - a.sumDblFuelMoney,
-						0,
 						0
 			FROM		previous_day_reading a
 			INNER JOIN	current_day_reading b
