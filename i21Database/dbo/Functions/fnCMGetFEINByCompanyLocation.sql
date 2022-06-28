@@ -1,7 +1,6 @@
 CREATE FUNCTION  dbo.fnCMGetFEINByCompanyLocation
 (
-	@intBankAccountId INT,
-	@intEntityVendorId INT
+	@intBankAccountId INT
 )
 RETURNS  NVARCHAR(10)
 AS
@@ -23,12 +22,12 @@ WHERE intProfitCenter = @intLocationSegmentId
 
 
 IF @intLocationSegmentId IS NULL AND @intCompanySegmentId IS NOT NULL
-SELECT TOP 1 @strFEIN = '' from tblSMCompanyLocation A
+SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
 WHERE intCompanySegment = @intCompanySegmentId
 
 
 IF @intLocationSegmentId IS NOT NULL AND @intCompanySegmentId IS NOT NULL
-SELECT TOP 1 @strFEIN = '' from tblSMCompanyLocation A
+SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
 WHERE intCompanySegment = @intCompanySegmentId AND intProfitCenter = @intLocationSegmentId
 
 RETURN  @strFEIN

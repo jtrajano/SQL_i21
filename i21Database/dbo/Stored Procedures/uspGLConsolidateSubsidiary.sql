@@ -59,6 +59,7 @@ BEGIN
 			LEFT JOIN [ParentDbName].dbo.tblGLAccount B
 			on A.strAccountId= B.strAccountId
 			WHERE A.dtmDate BETWEEN @dtmStartDate AND @dtmEndDate AND B.strAccountId IS NULL
+			AND intSubsidiaryCompanyId IS NULL
 			GROUP BY A.strAccountId
 
 
@@ -77,6 +78,7 @@ BEGIN
 			LEFT JOIN [ParentDbName].dbo.tblSMCurrency B
 			on A.strCurrency= B.strCurrency
 			WHERE A.dtmDate BETWEEN @dtmStartDate AND @dtmEndDate AND B.strCurrency IS NULL
+			AND intSubsidiaryCompanyId IS NULL
 			GROUP BY A.strCurrency
 
 		IF EXISTS (SELECT 1 FROM @tbl1)
@@ -178,6 +180,7 @@ BEGIN
 
 				WHERE dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
 				AND ysnIsUnposted =0
+				AND intSubsidiaryCompanyId IS NULL
 			UPDATE [ParentDbName].dbo.tblGLConsolidateLog
 			SET strComment= ''Successfully consolidated'' ,
 			intRowInserted = @@ROWCOUNT,
