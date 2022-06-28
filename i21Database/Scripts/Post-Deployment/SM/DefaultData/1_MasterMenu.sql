@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Automated Process Status Quote' AND strModuleName = 'Transports')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -5940,6 +5940,29 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Automated
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.AutomatedProcessStatus', intSort = 5 WHERE strMenuName = 'Automated Process Status' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Automated Process Status BOL' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Automated Process Status BOL', N'Transports', @TransportsActivitiesParentMenuId, N'Automated Process Status BOL', N'Activity', N'Screen', N'Transports.view.AutomatedProcessStatusBol?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.AutomatedProcessStatusBol?showSearch=true', intSort = 6 WHERE strMenuName = 'Automated Process Status BOL' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Automated Process Status BOL Image' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Automated Process Status BOL Image', N'Transports', @TransportsActivitiesParentMenuId, N'Automated Process Status BOL Image', N'Activity', N'Screen', N'Transports.view.AutomatedProcessStatusBolImage?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.AutomatedProcessStatusBolImage?showSearch=true', intSort = 7 WHERE strMenuName = 'Automated Process Status BOL Image' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Automated Process Status Rack Price' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Automated Process Status Rack Price', N'Transports', @TransportsActivitiesParentMenuId, N'Automated Process Status Rack Price', N'Activity', N'Screen', N'Transports.view.AutomatedProcessStatusRackPrice?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 8, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.AutomatedProcessStatusRackPrice?showSearch=true', intSort = 8 WHERE strMenuName = 'Automated Process Status Rack Price' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Automated Process Status Quote' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Automated Process Status Quote', N'Transports', @TransportsActivitiesParentMenuId, N'Automated Process Status Quote', N'Activity', N'Screen', N'Transports.view.AutomatedProcessStatusQuote?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.AutomatedProcessStatusQuote?showSearch=true', intSort = 9 WHERE strMenuName = 'Automated Process Status Quote' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bulk Plant Freight' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -6023,6 +6046,7 @@ ELSE
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Quote Report' AND strModuleName = 'Transports'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reports' and strModuleName = 'Transports'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Supply Point' AND strModuleName = 'Transports'
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Automated Process Status' AND strModuleName = 'Transports'
 
 
 
