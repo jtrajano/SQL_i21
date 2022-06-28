@@ -12,7 +12,7 @@ BEGIN
 
     SELECT * INTO tblGLOverrideAccount FROM tblGLTempCOASegment
     ALTER TABLE dbo.tblGLOverrideAccount ADD strOverrideAccount AS ( [Primary Account] +
-    IIF( Location IS NULL, '', '-' +Location ) + 
+    IIF( [Location] IS NULL, '', '-' +[Location] ) + 
     IIF( [Line of business] IS NULL, '', '-' +[Line of business] ) + 
     IIF( [Company] IS NULL, '','-'+ [Company]))
 
