@@ -905,6 +905,16 @@
     <Build Include="dbo\Tables\tblCTBasisCost.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadBasisCost.sql" />
     <Build Include="dbo\Views\vyuCTContractBasisCostView.sql" />
+    <Build Include="dbo\Tables\tblSCRailSheet.sql" />
+    <Build Include="dbo\Tables\tblSCRailSheetApply.sql" />
+    <Build Include="dbo\Tables\tblSCRailSheetTicket.sql" />
+    <Build Include="dbo\Tables\tblSCRailSheetTicketApply.sql" />
+    <Build Include="dbo\Tables\tblSCRailSheetTicketLog.sql" />
+    <Build Include="dbo\Tables\tblSCRailSheetLog.sql" />
+    <Build Include="dbo\Functions\fnSCGetTicketDiscount.sql" />
+    <Build Include="dbo\Views\vyuSCRailSheetGet.sql" />
+    <Build Include="dbo\Views\vyuSCRailSheetTicketGet.sql" />
+    <Build Include="dbo\Views\vyuSCRailSheetApplyGet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
