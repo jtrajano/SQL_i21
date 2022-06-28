@@ -121,10 +121,10 @@ BEGIN TRY
 		, dblCashPrice NUMERIC(24, 10) NULL
 		, dblTotalCost NUMERIC(24, 10) NULL
 		, intProducerId INT NULL
-		, dblNetWeight NUMERIC(24, 10) NULL
+		, dblNetWeight NUMERIC(38, 20) NULL
 		, dtmPlannedAvailabilityDate DATETIME NULL
 		, intFutureMonthId INT NULL
-		, dblOriginalQty NUMERIC(24, 10) NULL
+		, dblOriginalQty NUMERIC(38, 20) NULL
 		, ysnPriceChanged BIT NULL
 		, dblOriginalBasis NUMERIC(24, 10) NULL
 		, dblConvertedBasis NUMERIC(24, 10) NULL
@@ -132,7 +132,7 @@ BEGIN TRY
 		, intCurrencyId INT NULL
 		, intItemUOMId INT NULL
 		, intPriceItemUOMId INT NULL
-		, dblQuantity NUMERIC(24, 10) NULL
+		, dblQuantity NUMERIC(38, 20) NULL
 		, dblBasis NUMERIC(24, 10) NULL
 		, intBasisUOMId INT NULL
 		, intBasisCurrencyId INT NULL
@@ -454,9 +454,9 @@ BEGIN TRY
 		EXEC uspLGUpdateLoadItem @intContractDetailId
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
 		BEGIN
-			DECLARE @previousQty NUMERIC(18, 6)
+			DECLARE @previousQty NUMERIC(38, 20)
 				, @previousLocation INT
-				, @curQty NUMERIC(18, 6)
+				, @curQty NUMERIC(38, 20)
 				, @curLocation INT
 
 			SELECT TOP 1 @previousQty = dblQuantity

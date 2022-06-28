@@ -133,6 +133,7 @@ BEGIN TRY
 				CD.strContractNumber,
 				CASE 
 					WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis
+					WHEN @ysnEnableFXFieldInContractPricing = 1 and CD.intCurrencyId <> CD.intInvoiceCurrencyId and isnull(CD.intMainCurrencyId,0) <> CD.intInvoiceCurrencyId then CD.dblBasis * CD.dblRate
 					ELSE
 						dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
 						CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1

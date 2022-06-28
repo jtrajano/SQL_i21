@@ -15,7 +15,8 @@ SELECT strJournalType,
            total.dblDebit,
            strCurrency COLLATE Latin1_General_CI_AS strCurrency,
            ysnRecurringTemplate,
-           fp.strPeriod
+           fp.strPeriod,
+           l.strLedgerName
    FROM tblGLJournal j
    OUTER APPLY (SELECT  j.strJournalId,
           SUM(ISNULL(d.dblCredit,0.0)) dblCredit,
@@ -24,6 +25,7 @@ SELECT strJournalType,
    LEFT JOIN tblEMEntity e ON e.intEntityId = j.intEntityId
    LEFT JOIN tblSMCurrency C ON C.intCurrencyID = j.intCurrencyId
    LEFT JOIN tblGLFiscalYearPeriod fp ON fp.intGLFiscalYearPeriodId = j.intFiscalPeriodId
+   LEFT JOIN tblGLLedger l ON l.intLedgerId = j.intLedgerId
    WHERE  strTransactionType IN ('General Journal','Recurring')
    AND  ISNULL(strSourceType,'') <> 'AA'
 GO

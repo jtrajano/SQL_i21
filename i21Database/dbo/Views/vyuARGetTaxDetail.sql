@@ -32,6 +32,20 @@ FROM (
 
 	UNION ALL
 
+	SELECT intTransactionId			= DF.intInvoiceId
+		 , intItemId				= NULL
+		 , intTaxClassId			= TC.intTaxClassId
+		 , intTaxCodeId				= DF.intTaxCodeId
+		 , ysnSpecialTax			= CONVERT(BIT, 0)
+		 , ysnTaxExempt				= CONVERT(BIT, 0)
+		 , strTransactionType		= 'Invoice' COLLATE Latin1_General_CI_AS
+		 , dblAdjustedTax			= ISNULL(DF.dblTax, 0.00)
+		 , ysnInvalidSetup			= CONVERT(BIT, 0)
+	FROM dbo.tblARInvoiceDeliveryFee DF WITH (NOLOCK)
+	INNER JOIN tblSMTaxCode TC ON DF.intTaxCodeId = TC.intTaxCodeId
+
+	UNION ALL
+
 	SELECT intTransactionId			= SOD.intSalesOrderId
 		 , intItemId				= SOD.intItemId
 		 , intTaxClassId			= SODT.intTaxClassId
@@ -64,7 +78,7 @@ INNER JOIN (
 		 , strTaxClass
 	FROM dbo.tblSMTaxClass WITH (NOLOCK)
 ) TAXCLASS ON TRANSACTIONS.intTaxClassId = TAXCLASS.intTaxClassId
-INNER JOIN (
+LEFT JOIN (
 	SELECT intItemId
 		 , intCategoryId
 		 , strItemNo

@@ -1,7 +1,8 @@
 ﻿CREATE FUNCTION [dbo].[fnFAGetNextDepreciationDate]
 (
 	@intAssetId INT,
-	@intBookId INT = 1
+	@intBookId INT = 1,
+	@intLedgerId INT = NULL
 )
 RETURNS DATETIME
 AS
@@ -22,7 +23,11 @@ BEGIN
 	FROM tblFAFixedAsset A
 	OUTER APPLY (
 		SELECT TOP 1 dtmDepreciationToDate, strTransaction FROM tblFAFixedAssetDepreciation
-		WHERE intAssetId = A.intAssetId AND intBookId = @intBookId ORDER BY intAssetDepreciationId DESC
+		WHERE intAssetId = A.intAssetId AND intBookId = @intBookId 
+			AND (CASE WHEN @intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = @intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
+		ORDER BY intAssetDepreciationId DESC
 	) Depreciation
 
 	WHERE A.intAssetId = @intAssetId
