@@ -1,9 +1,10 @@
 CREATE PROCEDURE [dbo].[uspQMReportCuppingForm]
-     @intCuppingSessionId INT
+     @strCuppingSessionDetailId NVARCHAR(MAX) = NULL
 AS
 
 BEGIN TRY
-	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @ErrMsg			NVARCHAR(MAX),
+			@xmlDocumentId	INT
 
 	SELECT
 		 QMCS.intCuppingSessionId
@@ -36,7 +37,7 @@ BEGIN TRY
 		,QMS.strCourierRef
 		,QMSC.strSamplingCriteria
 	FROM tblQMCuppingSession QMCS
-	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
+	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCSD.intCuppingSessionDetailId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@strCuppingSessionDetailId))
 	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
 	INNER JOIN tblQMSampleType QMST ON QMS.intSampleTypeId = QMST.intSampleTypeId
 	LEFT JOIN tblQMSample QMSP ON QMS.intParentSampleId = QMSP.intSampleId
