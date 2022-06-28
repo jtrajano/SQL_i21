@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rail Sheet Scale Ticket' AND strModuleName = 'Ticket Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -4123,6 +4123,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Seal Numb
 	VALUES (N'Seal Numbers', N'Ticket Management', @TicketManagementActivitiesParentMenuId, N'Seal Numbers', N'Activity', N'Screen', N'Grain.view.TicketSealNumber', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.TicketSealNumber', intSort = 3, strCategory = 'Activity', strIcon = 'small-menu-activity' WHERE strMenuName = 'Seal Numbers' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rail Sheet' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Rail Sheet', N'Ticket Management', @TicketManagementActivitiesParentMenuId, N'Rail Sheet', N'Activity', N'Screen', N'Grain.view.RailSheet?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.RailSheet?showSearch=true', intSort = 5, strCategory = 'Activity', strIcon = 'small-menu-activity' WHERE strMenuName = 'Rail Sheet' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rail Sheet Scale Ticket' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Rail Sheet Scale Ticket', N'Ticket Management', @TicketManagementActivitiesParentMenuId, N'Rail Sheet Scale Ticket', N'Activity', N'Screen', N'Grain.view.RailSheetScaleTicket?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.RailSheetScaleTicket?showSearch=true', intSort = 6, strCategory = 'Activity', strIcon = 'small-menu-activity' WHERE strMenuName = 'Rail Sheet Scale Ticket' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Canadian Storage Receipt' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
