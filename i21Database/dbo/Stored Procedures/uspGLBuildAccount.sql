@@ -112,5 +112,6 @@
 		
 	EXEC dbo.uspGLUpdateAccountLocationId
 	EXEC uspGLBuildTempCOASegment
+	EXEC uspGLRefreshOverrideAccountTable
 
 	
