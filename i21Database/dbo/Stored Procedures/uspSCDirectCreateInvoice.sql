@@ -1857,7 +1857,7 @@ BEGIN TRY
 					,[dblQtyOrdered] = Staging.dblQtyOrdered
 					,[dblQtyShipped] = Staging.dblQtyShipped
 					,[dblDiscount] = 0
-					,[dblPrice] = QM.dblDiscountAmount
+					,[dblPrice] = QM.dblDiscountAmount * -1
 					,[ysnRefreshPrice] = 0
 					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 					,[ysnRecomputeTax] = 1
