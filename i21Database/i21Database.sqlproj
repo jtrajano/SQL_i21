@@ -388,6 +388,14 @@
     <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
     <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUpdatePlannedAvailabilityDate.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSite.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSite.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceCardFuelingSite.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSiteType.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSiteType.sql" />
+    <Build Include="dbo\Tables\tblTMOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessERPFeed.sql" />
     <Build Include="dbo\Views\vyuTRCustomerFreightList.sql" />
@@ -396,8 +404,9 @@
     <Build Include="dbo\Views\vyuMFGetShortTermPlanningViewDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
-    <Build Include="dbo\Tables\tblTMOrder.sql" />
-    <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeePaycheck.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchyParam.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
@@ -9759,6 +9768,7 @@
     <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
     <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummaryByLocation.sql" />
+    <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
     <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
