@@ -187,6 +187,8 @@ BEGIN TRY
 			,@dtmReceiptDate = R.dtmReceiptDate
 			,@strBillOfLading = R.strBillOfLading
 			,@strWarehouseRefNo = R.strWarehouseRefNo
+			--,@strTransferNo = ''
+			--,@strERPTransferOrderNo = ''
 			,@strCurrency = C.strCurrency
 			,@strReceiptType = strReceiptType
 		FROM dbo.tblICInventoryReceipt R
@@ -198,7 +200,7 @@ BEGIN TRY
 		IF @intActionId = 2
 		BEGIN
 			SELECT TOP 1 @strTransferNo = IT.strTransferNo
-				,@strERPTransferOrderNo = IT.strERPTransferNo
+				,@strERPTransferOrderNo = ''
 			FROM tblICInventoryReceiptItem RI
 			JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = RI.intInventoryTransferId
 				AND RI.intInventoryReceiptId = @intInventoryReceiptId

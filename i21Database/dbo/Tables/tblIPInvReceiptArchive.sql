@@ -10,15 +10,6 @@
 	dtmCreated					DATETIME,
 	strTrackingNo				INT,
 
-	intTrxSequenceNo			BIGINT,
-	intActionId					INT,
-	strVendorAccountNo			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strVendorRefNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	strERPReceiptNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	strWarehouseRefNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	strTransferOrderNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	strERPTransferOrderNo		NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-
 	strTransactionType			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strErrorMessage				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strImportStatus				NVARCHAR(50) COLLATE Latin1_General_CI_AS,

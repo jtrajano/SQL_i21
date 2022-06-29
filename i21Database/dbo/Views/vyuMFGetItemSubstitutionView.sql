@@ -15,8 +15,6 @@ SELECT ROW_NUMBER() OVER(ORDER BY i.strItemNo) intRowNo
 	,sd.dblPercent
 	,ri1.dblQuantity dblSubstitutedItemQuantity
 	,um2.strUnitMeasure strSubstitutedItemUOM
-	,sd.ysnComplianceItem
-	,sd.dblCompliancePercent
 	,CASE 
 		WHEN s.intItemSubstitutionTypeId = 1 
 			THEN sd.dtmValidFrom

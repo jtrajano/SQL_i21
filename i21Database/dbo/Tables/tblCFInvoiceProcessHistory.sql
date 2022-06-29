@@ -18,7 +18,11 @@
     [intConcurrencyId]            INT             CONSTRAINT [DF_tblCFInvoiceProcessHistoryId_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFInvoiceProcessHistoryId] PRIMARY KEY CLUSTERED ([intInvoiceProcessHistoryId] ASC)
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblCFInvoiceProcessHistory_intCustomerId]
+ON [dbo].[tblCFInvoiceProcessHistory]([intCustomerId])
+GO
 
 
 

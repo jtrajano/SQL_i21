@@ -287,50 +287,5 @@ BEGIN
 				AND ItemBundleDetail.strBundleType = 'Option'
 		END
 	END
-	ELSE IF (@TransactionType = @TransactionType_Transfer)
-	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @TransactionId)
-		BEGIN
-			DELETE FROM tblICTransactionDetailLog WHERE strTransactionType = 'Inventory Transfer' AND intTransactionId = @TransactionId
 
-			INSERT INTO tblICTransactionDetailLog(
-				strTransactionType
-				,intTransactionId 
-				,intTransactionDetailId
-				--,intOrderNumberId
-				--,intOrderType
-				--,intSourceNumberId
-				--,intSourceType
-				,intLineNo
-				,intItemId
-				,strItemType
-				,intItemUOMId
-				,dblQuantity
-				,ysnLoad
-				,intLoadReceive
-			)
-			SELECT 
-				strTransactionType = 'Inventory Transfer'
-				,intTransactionId = t.intInventoryTransferId
-				,intTransactionDetailId = td.intInventoryTransferDetailId
-				--,intOrderNumberId = NULL 
-				--,intOrderType = NULL 
-				--,intSourceNumberId = NULL 
-				--,intSourceType = NULL 
-				,intLineNo = td.intSort
-				,intItemId = td.intItemId
-				,strItemType = NULL 
-				,intItemUOMId = td.intItemUOMId
-				,dblQuantity = td.dblQuantity
-				,ysnLoad = NULL 
-				,intLoadReceive = NULL 
-			FROM
-				tblICInventoryTransfer t INNER JOIN tblICInventoryTransferDetail td
-					ON t.intInventoryTransferId = td.intInventoryTransferId
-				INNER JOIN tblICItem i 
-					ON i.intItemId = td.intItemId
-			WHERE 
-				t.intInventoryTransferId = @TransactionId 
-		END
-	END
 END

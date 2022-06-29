@@ -542,12 +542,6 @@ BEGIN
     VALUES(2,'Packed')
 END
 GO
-IF NOT EXISTS(SELECT * FROM tblMFMachineIssuedUOMType WHERE intIssuedUOMTypeId = 3)
-BEGIN
-    INSERT INTO tblMFMachineIssuedUOMType(intIssuedUOMTypeId,strName)
-    VALUES(3,'Hybrid')
-END
-GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendValidationMessageType WHERE intMessageTypeId = 1)
 BEGIN
     INSERT INTO tblMFBlendValidationMessageType(intMessageTypeId,strName)

@@ -66,8 +66,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intServiceChargeId		= CUSTOMER.intServiceChargeId
 	 , intPaymentMethodId		= CUSTOMER.intPaymentMethodId
 	 , strPaymentMethod			= CUSTOMER.strPaymentMethod
-	 , ysnCreditHold			= CUSTOMER.ysnCreditHold
-	 , ysnExemptCreditCardFee	= CUSTOMER.ysnExemptCreditCardFee
+	 , ysnCreditHold
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
 	 , strSaleUnits				= SHIPTOLOCATION.strSaleUnits
@@ -112,7 +111,6 @@ INNER JOIN (
 		 , intPaymentMethodId	= C.intPaymentMethodId
 		 , strPaymentMethod		= PAYMENTMETHOD.strPaymentMethod
 		 , ysnCreditHold
-		 , ysnExemptCreditCardFee
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached

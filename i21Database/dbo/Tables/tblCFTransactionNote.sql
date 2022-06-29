@@ -11,6 +11,11 @@
     CONSTRAINT [PK_tblCFTransactionNote] PRIMARY KEY CLUSTERED ([intTransactionNoteId] ASC),
     CONSTRAINT [FK_tblCFTransactionNote_tblCFTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblCFTransaction] ([intTransactionId]) ON DELETE CASCADE
 );
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCFTransactionNote_intTransactionId]
+ON [dbo].[tblCFTransactionNote] ([intTransactionId])
+GO
 
 
 

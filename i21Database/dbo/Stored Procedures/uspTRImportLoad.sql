@@ -103,7 +103,6 @@ BEGIN
 			AND LR.strBillOfLading = @strBillOfLading)
 			BEGIN
 				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Load has already been imported')
-				UPDATE tblTRImportLoadDetail SET strStatus = 'Duplicate' WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
 			-- SHIP VIA / CARRIER
@@ -366,14 +365,6 @@ BEGIN
 			ELSE
 			BEGIN
 				UPDATE tblTRImportLoadDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
-			END
-
-			IF(ISNULL(@strMessage, '') != '')
-			BEGIN
-				IF(NOT EXISTS(SELECT TOP 1 1 FROM tblTRImportLoadDetail WHERE intImportLoadDetailId = @intImportLoadDetailId AND strStatus = 'Duplicate'))
-				BEGIN
-					UPDATE tblTRImportLoadDetail SET strStatus = 'Failure' WHERE intImportLoadDetailId = @intImportLoadDetailId
-				END
 			END
 
 			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate, @strSource

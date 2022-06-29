@@ -11,3 +11,8 @@
 	ysnMailSent						BIT DEFAULT 0,
 	strMessage						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblAPBillPreStage_intBillId]
+ON [dbo].[tblAPBillPreStage]([intBillId])
+GO

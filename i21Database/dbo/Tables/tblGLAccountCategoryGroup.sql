@@ -11,7 +11,7 @@
 
 GO
 
-ALTER TABLE [dbo].[tblGLAccountCategoryGroup] ADD  CONSTRAINT [FK_tblGLAccountCategoryGroup_tblGLAccountCategory] FOREIGN KEY([intAccountCategoryId])
+ALTER TABLE [dbo].[tblGLAccountCategoryGroup]  WITH CHECK ADD  CONSTRAINT [FK_tblGLAccountCategoryGroup_tblGLAccountCategory] FOREIGN KEY([intAccountCategoryId])
 REFERENCES [dbo].[tblGLAccountCategory] ([intAccountCategoryId])
 GO
 

@@ -157,6 +157,11 @@ BEGIN TRY
 									END
 	WHERE	intContractDetailId =	@intContractDetailId
 
+	update ch set ch.intConcurrencyId = ch.intConcurrencyId + 1
+	from tblCTContractDetail cd
+	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	where cd.intContractDetailId = @intContractDetailId
+
 	 /*
 	 CT-4516
 	 Check if the Sales Contract is allocated and get the Purchase Contract allocated on it and update the Status
@@ -178,6 +183,13 @@ BEGIN TRY
 									ELSE 5     
 									END    
 		WHERE intContractDetailId = @intAllocatedPurchaseContractDetailId  
+
+
+		update ch set ch.intConcurrencyId = ch.intConcurrencyId + 1
+		from tblCTContractDetail cd
+		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+		where cd.intContractDetailId = @intAllocatedPurchaseContractDetailId
+	
 		select @intAllocatedPurchaseContractDetailId = min(intPContractDetailId) from tblLGAllocationDetail where intSContractDetailId = @intContractDetailId and intPContractDetailId > @intAllocatedPurchaseContractDetailId;
 
 	end  

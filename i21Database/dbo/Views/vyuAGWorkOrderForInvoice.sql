@@ -48,7 +48,7 @@ SELECT intWorkOrderId					= WO.intWorkOrderId
 FROM tblAGWorkOrder WO  
 INNER JOIN tblAGWorkOrderDetail WOD WITH (NOLOCK) ON WOD.intWorkOrderId = WO.intWorkOrderId  
 INNER JOIN tblICInventoryShipment ICSHIP WITH (NOLOCK) ON ICSHIP.strReferenceNumber = WO.strOrderNumber COLLATE Latin1_General_CI_AS
-INNER JOIN tblICInventoryShipmentItem SHIPITEM WITH (NOLOCK) ON SHIPITEM.intInventoryShipmentId = ICSHIP.intInventoryShipmentId AND SHIPITEM.intItemId = WOD.intItemId
+INNER JOIN tblICInventoryShipmentItem SHIPITEM WITH (NOLOCK) ON SHIPITEM.intInventoryShipmentId = ICSHIP.intInventoryShipmentId
 INNER JOIN tblICItem ICITEM WITH (NOLOCK) ON WOD.intItemId = ICITEM.intItemId
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = WOD.intContractDetailId    
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId    

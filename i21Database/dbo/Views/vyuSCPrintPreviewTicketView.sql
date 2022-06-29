@@ -152,32 +152,6 @@ AS SELECT
 
 	,tblEMEntity.strName
 	,tblEMEntity.strEntityNo
-    ,strShipToLocationName  = ShipToLocation.strLocationName
-	,strShipToLocationAddress = LTRIM(RTRIM(CASE   
-       WHEN ISNULL(ShipToLocation.strLocationName, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strLocationName + ' '  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strAddress, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strAddress + CHAR(13)  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strCity, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strCity + ', '  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strState, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strState + ', '  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strZipCode, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strZipCode + ', '  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strCountry, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strCountry  
-       END))  
 	,tblEMEntitySplit.strSplitNumber
 	,vyuEMSearchShipVia.strName AS strHaulerName
 	--,EMDriver.strName AS strDriverName
@@ -281,7 +255,6 @@ AS SELECT
   LEFT JOIN tblICLot ICLot ON ICLot.intLotId = SC.intLotId
   LEFT JOIN tblEMEntityLocation EMScaleOps on EMScaleOps.intEntityId = SC.intEntityScaleOperatorId
 		AND ysnDefaultLocation = 1
-  LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = SC.intShipToLocationId
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber

@@ -78,7 +78,6 @@ INSERT INTO @ItemEntries
 	,[dblWriteOffAmount]
 	,[dblInterest]
 	,[dblPayment]
-	,[dblCreditCardFee]
 	,[dblAmountDue]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
@@ -163,11 +162,6 @@ SELECT
 	,[dblPayment]						= ABS([dbo].fnRoundBanker(ISNULL(PE.[dblPayment], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
 										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
-												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
-										   END)
-	,[dblCreditCardFee]					= ABS([dbo].fnRoundBanker(ISNULL(PE.[dblCreditCardFee], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
-										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL AND dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType]) = -1.000000
-												THEN @ZeroDecimal
 												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 										   END)
 	,[dblAmountDue]						= ISNULL(PE.dblAmountDue, ABS([dbo].fnRoundBanker(ISNULL(RFP.[dblAmountDue], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
@@ -489,6 +483,21 @@ INSERT INTO @InvalidRecords(
 )
 SELECT
 	 [intId]				= IT.[intId]
+	,[strMessage]			= 'Payment on ' + IT.[strTransactionNumber] + ' is over the transaction''s amount due.'
+	,[strSourceTransaction]	= IT.[strSourceTransaction]
+	,[intSourceId]			= IT.[intSourceId]
+	,[strSourceId]			= IT.[strSourceId]
+	,[intPaymentId]			= IT.[intPaymentId]
+FROM
+	@ItemEntries IT
+WHERE
+	((IT.[dblAmountDue] > 0) AND (IT.[dblAmountDue] + IT.[dblInterest]) < (IT.[dblPayment] + IT.[dblDiscount] +IT.[dblWriteOffAmount]))
+	AND IT.[ysnFromAP] = 0
+
+UNION ALL
+
+SELECT
+	 [intId]				= IT.[intId]
 	,[strMessage]			= 'Positive payment amount is not allowed for invoice(' + IT.[strTransactionNumber] + ') of type ''' + IT.[strTransactionType] + '''.'
 	,[strSourceTransaction]	= IT.[strSourceTransaction]
 	,[intSourceId]			= IT.[intSourceId]
@@ -605,7 +614,6 @@ SET
 	,IE.[dblBaseAmountDue]		= [dbo].fnRoundBanker([dblAmountDue] * ISNULL(P.[dblExchangeRate], 1.000000), [dbo].[fnARGetDefaultDecimal]())
 	,IE.[dblBasePayment]		= [dbo].fnRoundBanker([dblPayment] * ISNULL(P.[dblExchangeRate], 1.000000), [dbo].[fnARGetDefaultDecimal]())
 	,IE.[dblBaseWriteOffAmount] = [dbo].fnRoundBanker([dblWriteOffAmount] * ISNULL(P.[dblExchangeRate], 1.000000), [dbo].[fnARGetDefaultDecimal]())
-	,IE.[dblBaseCreditCardFee]	= [dbo].fnRoundBanker([dblCreditCardFee] * ISNULL(P.[dblExchangeRate], 1.000000), [dbo].[fnARGetDefaultDecimal]())
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -640,8 +648,6 @@ USING
 		,[dblBaseAmountDue]					= [dblBaseAmountDue]
 		,[dblPayment]						= [dblPayment]
 		,[dblBasePayment]					= [dblBasePayment]
-		,[dblCreditCardFee]					= [dblCreditCardFee]
-		,[dblBaseCreditCardFee]				= [dblBaseCreditCardFee]
 		,[strInvoiceReportNumber]			= [strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]	= [intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]		= [intCurrencyExchangeRateId]
@@ -681,8 +687,6 @@ INSERT(
 	,[dblBaseAmountDue]
 	,[dblPayment]
 	,[dblBasePayment]
-	,[dblCreditCardFee]
-	,[dblBaseCreditCardFee]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]
@@ -711,8 +715,6 @@ VALUES(
 	,[dblBaseAmountDue]
 	,[dblPayment]
 	,[dblBasePayment]
-	,[dblCreditCardFee]
-	,[dblBaseCreditCardFee]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]

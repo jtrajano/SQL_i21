@@ -52,8 +52,6 @@ SET
 	,ARPD.[dblBaseAmountDue]			= [dbo].fnRoundBanker(ISNULL(ARPD.[dblAmountDue], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblPayment]					= ISNULL(ARPD.[dblPayment], @ZeroDecimal)
 	,ARPD.[dblBasePayment]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblPayment], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
-	,ARPD.[dblCreditCardFee]			= ISNULL(ARPD.[dblCreditCardFee], @ZeroDecimal)
-	,ARPD.[dblBaseCreditCardFee]		= [dbo].fnRoundBanker(ISNULL(ARPD.[dblCreditCardFee], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
 INNER JOIN
@@ -109,16 +107,19 @@ UPDATE ARP
 SET
 	 ARP.[dblAmountPaid]		= PD.[dblPaymentTotal]
 	,ARP.[dblBaseAmountPaid]	= PD.[dblBasePaymentTotal]
-	,ARP.[intCurrentStatus] 	=  2
+	,ARP.[intCurrentStatus] =  2
 FROM tblARPayment ARP
-INNER JOIN (
-	SELECT [intPaymentId]			= [intPaymentId]
-		  ,[dblPaymentTotal]		= SUM([dblPayment]) + SUM([dblCreditCardFee])
-		  ,[dblBasePaymentTotal]	= SUM([dblBasePayment]) + SUM([dblBaseCreditCardFee])
-	FROM tblARPaymentDetail 
-	GROUP BY intPaymentId
-) PD ON ARP.[intPaymentId] = PD.[intPaymentId]
-WHERE EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
+INNER JOIN 
+	(SELECT
+		 [intPaymentId]			= [intPaymentId]
+		,[dblPaymentTotal]		= SUM([dblPayment])
+		,[dblBasePaymentTotal]	= SUM([dblBasePayment])
+	FROM
+		tblARPaymentDetail GROUP BY intPaymentId
+	) PD
+		ON ARP.[intPaymentId] = PD.[intPaymentId]
+WHERE
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
 
 UPDATE ARP
 SET
@@ -128,13 +129,37 @@ SET
 	,ARP.[dblBaseOverpayment]		= ARP.[dblBaseAmountPaid] - PD.[dblBasePaymentTotal]
 	,ARP.[intCurrentStatus] =  2
 FROM tblARPayment ARP
-INNER JOIN (
-	SELECT [intPaymentId]			= [intPaymentId]
-		  ,[dblPaymentTotal]		= SUM([dblPayment]) + SUM([dblCreditCardFee])
-		  ,[dblBasePaymentTotal]	= SUM([dblBasePayment]) + SUM([dblBaseCreditCardFee])
-	FROM tblARPaymentDetail 
-	GROUP BY intPaymentId
-) PD ON ARP.[intPaymentId] = PD.[intPaymentId]
-WHERE EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
+INNER JOIN 
+	(SELECT
+		 [intPaymentId]			= [intPaymentId]
+		,[dblPaymentTotal]		= SUM([dblPayment])
+		,[dblBasePaymentTotal]	= SUM([dblBasePayment])
+	FROM
+		tblARPaymentDetail GROUP BY intPaymentId
+	) PD
+		ON ARP.[intPaymentId] = PD.[intPaymentId]
+WHERE
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
+
+--UPDATE ARP
+--SET
+--	 ARP.[dblAmountPaid]			= PD.[dblPaymentTotal]
+--	,ARP.[dblBaseAmountPaid]		= PD.[dblBasePaymentTotal]
+--	,ARP.[dblUnappliedAmount]		= @ZeroDecimal
+--	,ARP.[dblBaseUnappliedAmount]	= @ZeroDecimal
+--	,ARP.[dblOverpayment]			= @ZeroDecimal
+--	,ARP.[dblBaseOverpayment]		= @ZeroDecimal
+--FROM tblARPayment ARP
+--INNER JOIN 
+--	(SELECT
+--		 [intPaymentId]			= [intPaymentId]
+--		,[dblPaymentTotal]		= SUM([dblPayment])
+--		,[dblBasePaymentTotal]	= SUM([dblBasePayment])
+--	FROM
+--		tblARPaymentDetail GROUP BY intPaymentId
+--	) PD
+--		ON ARP.[intPaymentId] = PD.[intPaymentId]
+--WHERE
+--	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
 
 END

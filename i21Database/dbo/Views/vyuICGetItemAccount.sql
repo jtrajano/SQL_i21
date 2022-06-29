@@ -6,7 +6,6 @@ intAccountKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intKey, ItemAccount.intItem
 Item.intKey,
 intItemAccountId,
 ItemAccount.intItemId,
-Item.strItemNo,
 ItemAccount.intAccountId,
 GLAccount.strAccountId,
 GLAccount.strDescription,

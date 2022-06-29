@@ -9,8 +9,7 @@
 		b.ysnContract,
 		b.ysnBuyback,
 		b.ysnQuote,
-		b.ysnVolumeDiscount,
-		b.ysnAutomatedQuoting
+		b.ysnVolumeDiscount
 	from tblARCustomerGroup a
 		join tblARCustomerGroupDetail  b
 			on a.intCustomerGroupId = b.intCustomerGroupId

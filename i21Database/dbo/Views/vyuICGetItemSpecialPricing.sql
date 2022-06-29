@@ -23,7 +23,6 @@ SELECT	intItemSpecialPricingId		= SpecialPricing.intItemSpecialPricingId
 		,dblDiscount				= SpecialPricing.dblDiscount
 		,dblUnitAfterDiscount		= SpecialPricing.dblUnitAfterDiscount
 		,intCurrencyId				= SpecialPricing.intCurrencyId
-		,dblCost					= SpecialPricing.dblCost
 		,strCurrency				= Currency.strCurrency
 		,dblDiscountedPrice			= CASE	
 											WHEN SpecialPricing.strDiscountBy = 'Percent'

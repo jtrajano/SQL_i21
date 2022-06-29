@@ -44,6 +44,7 @@ v.intKey
 , COALESCE(v.strIssueUOMType, stockUnit.strUnitType) strIssueUOMType
 , COALESCE(v.strReceiveUOM, stockUnit.strUnitMeasure) strReceiveUOM
 , v.strReceiveUPC
+, v.strReceiveLongUPC
 , v.strReceieveLongUPC
 , COALESCE(EffectivePrice.dblRetailPrice, v.dblReceiveSalePrice) dblReceiveSalePrice
 , v.dblReceiveMSRPPrice

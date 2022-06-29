@@ -59,8 +59,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intServiceChargeId		= CUSTOMER.intServiceChargeId
 	 , intPaymentMethodId		= CUSTOMER.intPaymentMethodId
 	 , strPaymentMethod			= CUSTOMER.strPaymentMethod
-	 , ysnCreditHold			= CUSTOMER.ysnCreditHold
-	 , ysnExemptCreditCardFee	= CUSTOMER.ysnExemptCreditCardFee
+	 , ysnCreditHold
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
 	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS
@@ -100,7 +99,6 @@ INNER JOIN (
 		 , intPaymentMethodId	= C.intPaymentMethodId
 		 , strPaymentMethod		= PAYMENTMETHOD.strPaymentMethod
 		 , ysnCreditHold
-		 , ysnExemptCreditCardFee
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached		 
@@ -110,7 +108,7 @@ INNER JOIN (
 					strCustomerNumber, strVatNumber, strFLOId, strStockStatus, strStatementFormat, strAccountNumber,
 					dtmMembershipDate, dtmBirthDate, dtmLastActivityDate, dblCreditLimit, dblARBalance, ysnIncludeEntityName,
 					ysnStatementCreditLimit, ysnPORequired, ysnTaxExempt, 
-					intServiceChargeId, intPaymentMethodId, ysnCreditHold, ysnExemptCreditCardFee, intCreditStopDays, strCreditCode, dtmCreditLimitReached
+					intServiceChargeId, intPaymentMethodId, ysnCreditHold, intCreditStopDays, strCreditCode, dtmCreditLimitReached
 			
 				FROM dbo.tblARCustomer WITH (NOLOCK) 
 			UNION ALL
@@ -118,7 +116,7 @@ INNER JOIN (
 					strCustomerNumber = strVendorId,  strVatNumber = '', strFLOId, strStockStatus = '', strStatementFormat = '', strAccountNumber = strVendorAccountNum,
 					dtmMembershipDate = null, dtmBirthDate = null,dtmLastActivityDate = dtmLastModified, dblCreditLimit, dblARBalance = 0, ysnIncludeEntityName = 0,
 					ysnStatementCreditLimit = 0, ysnPORequired = 0, ysnTaxExempt=0,  
-					intServiceChargeId=null, intPaymentMethodId, ysnCreditHold=0, ysnExemptCreditCardFee=0, intCreditStopDays=null, strCreditCode='', dtmCreditLimitReached=null
+					intServiceChargeId=null, intPaymentMethodId, ysnCreditHold=0, intCreditStopDays=null, strCreditCode='', dtmCreditLimitReached=null
 				FROM dbo.tblAPVendor WITH (NOLOCK) where intEntityId not in ( select intEntityId from tblARCustomer)
 		) C
 	LEFT JOIN (

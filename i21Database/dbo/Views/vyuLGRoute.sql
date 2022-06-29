@@ -14,8 +14,6 @@ SELECT
 								'TM Sites'
 						  WHEN Rte.intSourceType = 5 THEN
 								'Entities'
-						  WHEN Rte.intSourceType = 6 THEN
-								'Sales/Transfer Orders'
 						END COLLATE Latin1_General_CI_AS
 	,Rte.intDriverEntityId
 	,strDriver = Driver.strName
