@@ -215,31 +215,30 @@ DECLARE @BankCount AS INT
 											AND SE.strBankName = @strBankName
 											AND SE.strAccountNumber = @strAccountNumber
 
-											DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
-
+											DELETE FROM #TempEmployeeDirectDeposit WHERE LTRIM(RTRIM(intEntityNo)) = LTRIM(RTRIM(@strEmployeeId)) AND LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)) AND LTRIM(RTRIM(strAccountNumber)) = LTRIM(RTRIM(@strAccountNumber))
 									END
 							END
 
 							ELSE
-							BEGIN
-								INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-								SELECT TOP 1
-									NEWID()
-									, guiApiImportLogId = @guiLogId
-									, strField = 'Employee Direct Deposit'
-									, strValue = @strClassification
-									, strLogLevel = 'Error'
-									, strStatus = 'Failed'
-									, intRowNo = SE.intRowNumber
-									, strMessage = 'Account Classification is on wrong format. Please try again.'
-								FROM tblApiSchemaEmployeeDirectDeposit SE
-								LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = @intEntityNo
-								WHERE SE.guiApiUniqueId = @guiApiUniqueId
-								AND SE.strBankName = @strBankName
-								AND SE.strAccountNumber = @strAccountNumber
+								BEGIN
+									INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+									SELECT TOP 1
+										NEWID()
+										, guiApiImportLogId = @guiLogId
+										, strField = 'Employee Direct Deposit'
+										, strValue = @strClassification
+										, strLogLevel = 'Error'
+										, strStatus = 'Failed'
+										, intRowNo = SE.intRowNumber
+										, strMessage = 'Account Classification is on wrong format. Please try again.'
+									FROM tblApiSchemaEmployeeDirectDeposit SE
+									LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = @intEntityNo
+									WHERE SE.guiApiUniqueId = @guiApiUniqueId
+									AND SE.strBankName = @strBankName
+									AND SE.strAccountNumber = @strAccountNumber
 
-								DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
-							END
+									DELETE FROM #TempEmployeeDirectDeposit WHERE LTRIM(RTRIM(intEntityNo)) = LTRIM(RTRIM(@strEmployeeId)) AND LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)) AND LTRIM(RTRIM(strAccountNumber)) = LTRIM(RTRIM(@strAccountNumber))
+								END
 
 							
 						END
@@ -261,7 +260,7 @@ DECLARE @BankCount AS INT
 							AND SE.strBankName = @strBankName
 							AND SE.strAccountNumber = @strAccountNumber
 
-							DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
+							DELETE FROM #TempEmployeeDirectDeposit WHERE LTRIM(RTRIM(intEntityNo)) = LTRIM(RTRIM(@strEmployeeId)) AND LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)) AND LTRIM(RTRIM(strAccountNumber)) = LTRIM(RTRIM(@strAccountNumber))
 						END
 					END
 				ELSE
@@ -282,7 +281,7 @@ DECLARE @BankCount AS INT
 					AND SE.strBankName = @strBankName
 					AND SE.strAccountNumber = @strAccountNumber
 
-					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
+					DELETE FROM #TempEmployeeDirectDeposit WHERE LTRIM(RTRIM(intEntityNo)) = LTRIM(RTRIM(@strEmployeeId)) AND LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)) AND LTRIM(RTRIM(strAccountNumber)) = LTRIM(RTRIM(@strAccountNumber))
 				END
 			END
 
@@ -304,7 +303,7 @@ DECLARE @BankCount AS INT
 				AND SE.strBankName = @strBankName
 				AND SE.strAccountNumber = @strAccountNumber
 
-				DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
+				DELETE FROM #TempEmployeeDirectDeposit WHERE LTRIM(RTRIM(intEntityNo)) = LTRIM(RTRIM(@strEmployeeId)) AND LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)) AND LTRIM(RTRIM(strAccountNumber)) = LTRIM(RTRIM(@strAccountNumber))
 			END
 		END
 		ELSE
@@ -325,7 +324,7 @@ DECLARE @BankCount AS INT
 				AND SE.strBankName = @strBankName
 				AND SE.strAccountNumber = @strAccountNumber
 
-			   DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
+			   DELETE FROM #TempEmployeeDirectDeposit WHERE LTRIM(RTRIM(intEntityNo)) = LTRIM(RTRIM(@strEmployeeId)) AND LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)) AND LTRIM(RTRIM(strAccountNumber)) = LTRIM(RTRIM(@strAccountNumber))
 		END
 
 	END

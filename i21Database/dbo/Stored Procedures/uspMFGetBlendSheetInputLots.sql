@@ -31,13 +31,11 @@ Begin
 		ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
 		CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
 		CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
-		i.intCategoryId,
-		LS.strSecondaryStatus
+		i.intCategoryId
 		From tblMFWorkOrderInputLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICLot l on wi.intLotId=l.intLotId
-		join tblICLotStatus LS ON l.intLotStatusId = LS.intLotStatusId
 		Join tblICItem i on l.intItemId=i.intItemId
 		Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId
 		Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
@@ -64,13 +62,11 @@ Begin
 		ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
 		CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
 		CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
-		i.intCategoryId,
-		LS.strSecondaryStatus
+		i.intCategoryId
 		From tblMFWorkOrderConsumedLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICLot l on wi.intLotId=l.intLotId
-		join tblICLotStatus LS ON l.intLotStatusId = LS.intLotStatusId
 		Join tblICItem i on l.intItemId=i.intItemId
 		Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId
 		Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
@@ -101,13 +97,11 @@ Begin
 	CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
 	i.intCategoryId
 	,wi.intStorageLocationId 
-    ,LS.strSecondaryStatus
 	into #tblWorkOrderInputParent
 	From tblMFWorkOrderInputParentLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
 	Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICParentLot pl on wi.intParentLotId=pl.intParentLotId
-	join tblICLotStatus LS ON pl.intLotStatusId = LS.intLotStatusId
 	--Join tblICLot l on pl.intParentLotId=l.intParentLotId
 	Join tblICItem i on pl.intItemId=i.intItemId
 	Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId

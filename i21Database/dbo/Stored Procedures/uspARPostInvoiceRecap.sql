@@ -4,8 +4,7 @@
     ,@BatchId           NVARCHAR(40)
     ,@PostDate          DATETIME                
     ,@UserId            INT
-	,@BatchIdUsed		NVARCHAR(40)	= NULL OUTPUT
-	,@strSessionId		NVARCHAR(50)	= NULL
+	,@BatchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -48,12 +47,15 @@ BEGIN TRY
 	SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 	SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 intAccountsReceivableRateTypeId FROM tblSMMultiCurrency)
 	
-	EXEC dbo.uspARGenerateGLEntries @Post			= @Post
-								  , @Recap			= 1
-								  , @PostDate		= @PostDate
-								  , @BatchId		= @BatchIdUsed
-								  , @UserId			= @UserId
-								  , @strSessionId 	= @strSessionId 
+	EXEC dbo.uspARGenerateGLEntries @Post		= @Post
+								  , @Recap		= 1
+								  , @PostDate	= @PostDate
+								  , @BatchId	= @BatchIdUsed
+								  , @UserId		= @UserId 
+
+    DELETE  Q
+    FROM tblARPostingQueue Q
+    INNER JOIN ##ARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
 
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -141,19 +143,13 @@ BEGIN TRY
 		,[intCommodityId]
 		,[intSourceEntityId]
 		,[ysnRebuild]
-	FROM tblARPostInvoiceGLEntries
-	WHERE strSessionId = @strSessionId
+	FROM ##ARInvoiceGLEntries
 
 	IF @InitTranCount = 0
 		ROLLBACK TRANSACTION
 	ELSE
 		ROLLBACK TRANSACTION @Savepoint
-    
-    DELETE  Q
-    FROM tblARPostingQueue Q
-    INNER JOIN tblARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
-	WHERE I.strSessionId = @strSessionId
-    
+							  
     DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchIdUsed
 		 
 	INSERT INTO tblGLPostRecap WITH (TABLOCK) (

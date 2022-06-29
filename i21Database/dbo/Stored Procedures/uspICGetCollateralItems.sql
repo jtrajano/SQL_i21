@@ -209,7 +209,7 @@ FROM
 		SELECT TOP 1
 			t.* 
 		FROM 
-			tblICInventoryTransaction t
+			tblICInventoryTransaction 
 		WHERE
 			t.intItemId = i.intItemId
 			AND t.dblQty <> 0 
