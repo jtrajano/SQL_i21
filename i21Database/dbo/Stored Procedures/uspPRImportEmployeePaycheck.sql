@@ -636,6 +636,7 @@ BEGIN
 	ON PC.intPaycheckId = PCTC.intPaycheckId
 	WHERE PC.intPaycheckId = @intNewPaycheckId
 	)PCS
+	WHERE intPaycheckId = @intNewPaycheckId
 
 	--DELETE GROUPINGS    
 	DELETE FROM #TempPaycheckGroupId WHERE intOriginalPaycheckId = @PaycheckGroupId    
