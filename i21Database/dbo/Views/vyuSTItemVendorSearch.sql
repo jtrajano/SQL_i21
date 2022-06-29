@@ -4,7 +4,7 @@ AS
 SELECT DISTINCT
 	I.intItemId,
 	IV.strVendorProduct AS strVendorItemNo,
-	I.strDescription,
+	IV.strProductDescription AS strDescription,
 	I.strItemNo,
 	V.strName AS strVendorId,
 	CV.strVendorDepartment,
