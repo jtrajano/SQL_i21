@@ -130,7 +130,8 @@ BEGIN
 			[ysnPrinted],
 			[ysnDeleted],
 			[dtmDateDeleted],
-			[ysnPrepay]
+			[ysnPrepay],
+			[ysnNewFlag]
 		)
 		VALUES
 		(
@@ -161,7 +162,8 @@ BEGIN
 			p.[ysnPrinted],
 			p.[ysnDeleted],
 			p.[dtmDateDeleted],
-			p.[ysnPrepay]
+			p.[ysnPrepay],
+			1
 		)
 		OUTPUT p.intPaymentId, inserted.intPaymentId INTO #tmpPayables(intPaymentId, intNewPaymentId); --get the new and old payment id
 
@@ -375,26 +377,28 @@ BEGIN
 			ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
+	--UPDATE PAYMENT SCHEDULE
+	UPDATE A
+		SET A.ysnPaid = 0
+	FROM tblAPVoucherPaymentSchedule A
+	INNER JOIN tblAPPaymentDetail C ON C.intPayScheduleId = A.intId
+	WHERE C.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 	UPDATE C
-		SET C.dblAmountDue = ABS(B.dblAmountDue),
-			C.ysnPaid = 0,
+		SET C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END
-			-- C.ysnPrepayHasPayment = CASE WHEN C.intTransactionType IN (2,13)
-			-- 							THEN (
-			-- 								CASE WHEN B.ysnOffset = 0
-			-- 								THEN 0 ELSE 1 END
-			-- 							)
-			-- 							ELSE 0 END
-			--C.ysnPosted = CASE WHEN A.ysnPrepay = 1 THEN 0 ELSE 1 END
+			C.dblPayment = CASE WHEN (C.dblPayment - ABS( + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END,
+			C.dblAmountDue = C.dblTotal - (CASE WHEN (C.dblPayment - ABS( + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END)
 	FROM tblAPPayment A
-				INNER JOIN tblAPPaymentDetail B 
-						ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPBill C
-						ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
-				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+	INNER JOIN (
+		SELECT intPaymentId, intBillId, intOrigBillId, SUM(dblPayment) dblPayment, SUM(dblDiscount) dblDiscount, SUM(dblAmountDue) dblAmountDue
+		FROM tblAPPaymentDetail
+		GROUP BY intPaymentId, intBillId, intOrigBillId
+	) B ON B.intPaymentId = A.intPaymentId
+	INNER JOIN tblAPBill C ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
+	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--UPDATE 1099 AMOUNT
 	UPDATE BD
