@@ -35,6 +35,8 @@ SET @xmlParam = '
 </xmlparam>'
 
 DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX),  @originInnerQuery NVARCHAR(MAX), @prepaidInnerQuery NVARCHAR(MAX), @deletedQuery NVARCHAR(MAX);
+DECLARE @deletedForeignQuery NVARCHAR(MAX);
+DECLARE @payablesForeignQuery NVARCHAR(MAX);
 DECLARE @filter NVARCHAR(MAX) = '';
 DECLARE @arQuery NVARCHAR(MAX);
 DECLARE @dateFrom DATETIME = NULL;
@@ -166,6 +168,18 @@ SET @deletedQuery = 'SELECT --DISTINCT
 					,intCount
 				  FROM dbo.vyuAPPayablesAgingDeleted'
 
+SET @deletedForeignQuery = 'SELECT --DISTINCT 
+					intBillId
+					--,strAccountId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+					,intCount
+				  FROM dbo.vyuAPPayablesAgingDeletedForeign'
+
 SET @prepaidInnerQuery = 'SELECT --DISTINCT 
 					intBillId
 					,intAccountId
@@ -199,6 +213,16 @@ SET @arQuery = 'SELECT --DISTINCT
 					,dtmDate
 				  FROM dbo.vyuAPSalesForPayables'
 
+SET @payablesForeignQuery = 'SELECT --DISTINCT 
+					intBillId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+				  FROM dbo.vyuAPPayablesForeign'
+
 IF @dateFrom IS NOT NULL
 BEGIN	
 	SET @ysnFilter = 1
@@ -206,18 +230,22 @@ BEGIN
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @deletedQuery = @deletedQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @deletedForeignQuery = @deletedForeignQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @arQuery = @arQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @payablesForeignQuery = @payablesForeignQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dateFrom, 101) +''')';
 	END
     ELSE 
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 		SET @deletedQuery = @deletedQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @deletedForeignQuery = @deletedForeignQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 		SET @arQuery = @arQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+		SET @payablesForeignQuery = @payablesForeignQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dateTo, 101) +''')';
 	END  
 END
@@ -231,18 +259,22 @@ BEGIN
 	BEGIN 
 		SET @innerQuery = @innerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @deletedQuery = @deletedQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @deletedForeignQuery = @deletedForeignQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @originInnerQuery = @originInnerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @arQuery = @arQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @payablesForeignQuery = @payablesForeignQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dtmDate, 101) +''')';
 	END
     ELSE 
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @deletedQuery = @deletedQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+		SET @deletedForeignQuery = @deletedForeignQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @arQuery = @arQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+		SET @payablesForeignQuery = @payablesForeignQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dtmDateTo, 101) +''')';
 	END  
 	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
@@ -270,6 +302,11 @@ BEGIN
 										THEN ' AND strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
 										ELSE ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
 										END
+		SET @deletedForeignQuery = @deletedForeignQuery + CASE 
+										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										ELSE ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										END
 		SET @prepaidInnerQuery = @prepaidInnerQuery + 
 										CASE 
 										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
@@ -277,6 +314,12 @@ BEGIN
 										ELSE ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
 										END
 		SET @arQuery = @arQuery + 
+										CASE 
+										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										ELSE ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										END
+		SET @payablesForeignQuery = @payablesForeignQuery + 
 										CASE 
 										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
 										THEN ' AND strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
@@ -397,8 +440,8 @@ END
 
 SET @query = '
 	SELECT
-        SUM(dblAmountDue) AS dblAmountDue
-    FROM (
+		SUM(dblAmountDue) AS dblAmountDue
+	FROM (
 		SELECT
 		A.dtmDate
 		,A.dtmDueDate
@@ -456,6 +499,18 @@ SET @query = '
 				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 			FROM ('
 					+ @innerQuery +
+				') tmpAPPayables 
+			GROUP BY intBillId
+			UNION ALL
+			SELECT 
+				intBillId
+				,SUM(tmpAPPayables.dblTotal) AS dblTotal
+				,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
+				,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
+				,SUM(tmpAPPayables.dblInterest) AS dblInterest
+				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			FROM ('
+					+ @payablesForeignQuery +
 				') tmpAPPayables 
 			GROUP BY intBillId
 			UNION ALL
@@ -538,6 +593,19 @@ SET @query = '
 				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 			FROM ('
 					+ @deletedQuery +
+				') tmpAPPayables 
+			GROUP BY intBillId
+			HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
+			UNION ALL
+			SELECT 
+				intBillId
+				,SUM(tmpAPPayables.dblTotal) AS dblTotal
+				,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
+				,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
+				,SUM(tmpAPPayables.dblInterest) AS dblInterest
+				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			FROM ('
+					+ @deletedForeignQuery +
 				') tmpAPPayables 
 			GROUP BY intBillId
 			HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
