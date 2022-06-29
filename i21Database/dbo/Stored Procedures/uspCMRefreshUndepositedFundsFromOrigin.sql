@@ -49,7 +49,7 @@ BEGIN
 	IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
 END
-;;WITH dup AS(
+;WITH dup AS(
 	SELECT  ROW_NUMBER() OVER ( PARTITION BY d.strSourceTransactionId ORDER BY d.intUndepositedFundId ) rowId, d.intUndepositedFundId
 	FROM	dbo.tblCMUndepositedFund d 
 	LEFT JOIN tblCMBankTransactionDetail CM 
