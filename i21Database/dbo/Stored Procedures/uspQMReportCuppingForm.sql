@@ -9,7 +9,7 @@ BEGIN TRY
 	SELECT
 		 QMCS.intCuppingSessionId
 		,QMS.intSampleId
-		,CTC.intContractDetailId
+		,intContractDetailId			= ISNULL(CTC.intContractDetailId, 0)
 		,strContractNumberSequence		= CTC.strContractNumber + '/' + CAST(CTC.intContractSeq AS NVARCHAR(MAX))
 		,strSampleNumber				= ISNULL(QMSP.strSampleNumber, QMS.strSampleNumber)
 		,strChildSampleNumber			= QMS.strSampleNumber
