@@ -9855,6 +9855,9 @@
     <Build Include="dbo\Stored Procedures\uspICLoadRecostFormulationItems.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10184,6 +10187,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
     <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
     <Build Include="dbo\Functions\fnCTGetOverage.sql" />
+    <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
