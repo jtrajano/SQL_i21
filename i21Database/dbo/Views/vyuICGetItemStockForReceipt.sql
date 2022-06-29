@@ -46,7 +46,7 @@ SELECT
 	stock.strIssueUOMType,
 	stock.strReceiveUOM,
 	stock.strReceiveUPC,
-	stock.strReceieveLongUPC,
+	stock.strReceiveLongUPC,
 	COALESCE(EffectivePrice.dblRetailPrice, stock.dblReceiveSalePrice) dblReceiveSalePrice,
 	stock.dblReceiveMSRPPrice,
 	COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(stock.intItemId, stock.intItemLocationId, COALESCE(stock.intStockUOMId, stock.intReceiveUOMId, stock.intIssueUOMId, stock.intGrossUOMId), tsession.dtmTransactionDate), EffectiveCost.dblCost, stock.dblReceiveLastCost) dblReceiveLastCost,
