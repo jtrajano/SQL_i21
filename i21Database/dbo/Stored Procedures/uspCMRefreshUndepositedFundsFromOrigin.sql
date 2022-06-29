@@ -49,9 +49,7 @@ BEGIN
 	IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
 END
-
--- remove duplicates
-;WITH dup AS(
+;;WITH dup AS(
 	SELECT  ROW_NUMBER() OVER ( PARTITION BY d.strSourceTransactionId ORDER BY d.intUndepositedFundId ) rowId, d.intUndepositedFundId
 	FROM	dbo.tblCMUndepositedFund d 
 	LEFT JOIN tblCMBankTransactionDetail CM 
@@ -60,7 +58,6 @@ END
 )
 DELETE A FROM tblCMUndepositedFund A JOIN dup B ON A.intUndepositedFundId = B.intUndepositedFundId
 WHERE B.rowId > 1
-
 -- Insert records from the Deposit Entry
 ;WITH CTE AS (
 SELECT	
@@ -90,16 +87,16 @@ SELECT
 		
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
-WHERE	NOT EXISTS (
-			SELECT TOP 1 1
-			FROM	tblCMUndepositedFund f
-			WHERE	f.strSourceTransactionId = ( 
-							CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
-							+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
-							+ CAST(v.aptrx_cbk_no AS NVARCHAR(2)) 
-							+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
-						) COLLATE Latin1_General_CI_AS
-		)
+--WHERE	NOT EXISTS (
+--			SELECT TOP 1 1
+--			FROM	tblCMUndepositedFund f
+--			WHERE	f.strSourceTransactionId = ( 
+--							CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
+--							+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
+--							+ CAST(v.aptrx_cbk_no AS NVARCHAR(2)) 
+--							+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
+--						) COLLATE Latin1_General_CI_AS
+--		)
 
 UNION SELECT DISTINCT
 	ISNULL(v.intBankAccountId,@intBankAccountId)  intBankAccountId,
@@ -121,8 +118,13 @@ UNION SELECT DISTINCT
     ysnEODComplete = ysnCompleted ,
 	v.intCurrencyId
 FROM vyuARUndepositedPayment v
+
 LEFT JOIN tblARPayment p on p.strRecordNumber = v.strSourceTransactionId
-WHERE isnull(p.intPaymentMethodId,0) <> 9 -- EXEMPT CF INVOICE
+--WHERE	NOT EXISTS (
+--			SELECT TOP 1 1
+--			FROM	tblCMUndepositedFund f
+--			WHERE	f.strSourceTransactionId = v.strSourceTransactionId)
+		AND isnull(p.intPaymentMethodId,0) <> 9 -- EXEMPT CF INVOICE
 )
 
 INSERT INTO tblCMUndepositedFund (
@@ -166,9 +168,8 @@ SELECT
 		,intCurrencyId
 		
 FROM CTE
-WHERE 
-strSourceTransactionId NOT IN (SELECT strSourceTransactionId FROM tblCMundepositedFund)
-AND dblAmount <> 0
+WHERE dblAmount <> 0
+AND strSourceTransactionId  NOT IN(SELECT  strSourceTransactionId FROM tblCMUndepositedFund)
 
 
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
