@@ -1392,6 +1392,8 @@
     <Build Include="dbo\Views\vyuCMBankTransferRateType.sql" />
     <Build Include="dbo\Views\vyuCMGetBankTransaction.sql" />
     <Build Include="dbo\Tables\tblEMEntityCredential.sql" />
+    <Build Include="dbo\Tables\tblCMABRActivityMatched.sql" />
+    <Build Include="dbo\Tables\tblCMABRActivity.sql" />
     <Build Include="dbo\Tables\tblCMAptrxmstArchive.sql" />
     <Build Include="dbo\Tables\tblCMApchkmstArchive.sql" />
     <Build Include="dbo\Tables\tblCMApeglmstArchive.sql" />
