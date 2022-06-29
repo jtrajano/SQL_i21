@@ -5,10 +5,8 @@ AS
 		,strVendorName = E.strName
 		,strCustomerLocation = F.strLocationName
 		,strCustomerId = D.strVendorSoldTo
-		,A.intInvoiceId
 		,A.strInvoiceNumber
 		,A.dtmShipDate
-		,G.intItemId
 		,G.strItemNo
 		,strItemDescription = G.strDescription
 		,H.strCategoryCode

@@ -4,7 +4,6 @@ AS
 		A.* 
 		,strCustomerNumber =  N.strVendorSoldTo
 		,strCustomerLocation = K.strLocationName
-		,C.intInvoiceId
 		,C.strInvoiceNumber
 		,dtmInvoiceDate = C.dtmDate
 		,strItemNumber = D.strItemNo

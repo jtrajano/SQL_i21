@@ -111,7 +111,6 @@ CREATE TABLE #ARPostPaymentHeader
     ,[intInterestAccount]               INT             NULL
     ,[intCFAccountId]                   INT             NULL
     ,[intGainLossAccount]               INT             NULL
-	,[intCreditCardFeeAccountId]		INT             NULL
     ,[intEntityCardInfoId]              INT             NULL
 	,[ysnPosted]                        BIT             NULL
 	,[ysnInvoicePrepayment]             BIT             NULL
@@ -140,8 +139,6 @@ CREATE TABLE #ARPostPaymentHeader
     ,[dblBaseInvoiceTotal]              NUMERIC(18,6)   NULL
     ,[dblAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblBaseAmountDue]                 NUMERIC(18,6)   NULL
-	,[dblCreditCardFee]					NUMERIC(18,6)   NULL
-	,[dblBaseCreditCardFee]				NUMERIC(18,6)   NULL
 
     ,[intInvoiceId]                     INT             NULL
     ,[ysnExcludedFromPayment]           BIT             NULL
@@ -197,7 +194,6 @@ CREATE TABLE #ARPostPaymentDetail
     ,[intInterestAccount]               INT             NULL
     ,[intCFAccountId]                   INT             NULL
     ,[intGainLossAccount]               INT             NULL
-	,[intCreditCardFeeAccountId]		INT             NULL
     ,[intEntityCardInfoId]              INT             NULL
 	,[ysnPosted]                        BIT             NULL
 	,[ysnInvoicePrepayment]             BIT             NULL
@@ -228,8 +224,6 @@ CREATE TABLE #ARPostPaymentDetail
     ,[dblBaseInvoiceTotal]              NUMERIC(18,6)   NULL
     ,[dblAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblBaseAmountDue]                 NUMERIC(18,6)   NULL
-	,[dblCreditCardFee]					NUMERIC(18,6)   NULL
-	,[dblBaseCreditCardFee]				NUMERIC(18,6)   NULL
 
     ,[intInvoiceId]                     INT             NULL
     ,[ysnExcludedFromPayment]           BIT             NULL

@@ -109,10 +109,6 @@ BEGIN
 				,i21.intPayToDown
 				,i21.intResponsibleEntityId
 				,strResponsibleEntity = E.strName
-				--Advanced Bank Recon
-				,i21.ysnABREnable
-				,i21.intABRDaysNoRef
-				--Advanced Bank Recon
 				-- The following fields are from the origin system		
 				,apcbk_comment = origin.apcbk_comment COLLATE Latin1_General_CI_AS			-- CHAR (30) 
 				,apcbk_password =  ISNULL(origin.apcbk_password, '''') COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -330,8 +326,6 @@ BEGIN
 					,strCbkNo
 					,intPayToDown
 					,intResponsibleEntityId
-					,ysnABREnable
-					,intABRDaysNoRef
 			)
 			OUTPUT 	inserted.intBankAccountId
 			SELECT	intBankId							= i.intBankId
@@ -416,8 +410,6 @@ BEGIN
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
 					,intResponsibleEntityId				= i.intResponsibleEntityId
-					,ysnABREnable						= i.ysnABREnable
-					,intABRDaysNoRef					= i.intABRDaysNoRef
 			FROM	inserted i 
 
 			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -620,8 +612,6 @@ BEGIN
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
 					,intResponsibleEntityId				= i.intResponsibleEntityId
-					,ysnABREnable						= i.ysnABREnable
-					,intABRDaysNoRef					= i.intABRDaysNoRef
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 

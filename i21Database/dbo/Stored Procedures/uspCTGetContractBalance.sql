@@ -27,22 +27,28 @@ BEGIN
 			@strCompanyName			NVARCHAR(500),
 			@intPricingDecimals		INT
 		
-	SELECT	@strCompanyName	= CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL
-								ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END
+	SELECT	@strCompanyName	=	CASE 
+									WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL 
+									ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) 
+								END
 	FROM	tblSMCompanySetup
 
-	SELECT TOP 1 @intPricingDecimals = intPricingDecimals FROM tblCTCompanyPreference
+	select top 1 @intPricingDecimals = intPricingDecimals from tblCTCompanyPreference
 
 	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 
-	DECLARE @tblStatus TABLE (intContractDetailId INT
-		, intContractStatusId INT
-		, dblFutures NUMERIC(18, 6)
-		, dblBasis NUMERIC(18, 6))
+	DECLARE @tblStatus TABLE
+	(
+		intContractDetailId INT,
+		intContractStatusId INT,
+		dblFutures NUMERIC(18, 6),
+		dblBasis NUMERIC(18, 6)
+	)
 
 	INSERT INTO @tblStatus(intContractDetailId, intContractStatusId, dblFutures, dblBasis)
 	SELECT intContractDetailId, intContractStatusId, dblFutures, dblBasis
-	FROM (
+	FROM
+	(
 		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY cb.intContractDetailId ORDER BY cb.dtmCreatedDate DESC)
 			, cb.intContractDetailId
 			, cb.intContractStatusId

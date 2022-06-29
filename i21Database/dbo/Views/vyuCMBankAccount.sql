@@ -102,11 +102,6 @@ SELECT	i21.intBankAccountId
 		,i21.intPayToDown
 		,i21.intResponsibleEntityId
 		,strResponsibleEntity = E.strName
-		--Advanced Bank Recon
-		,i21.ysnABREnable
-		,i21.intABRDaysNoRef
-		--Advanced Bank Recon
-		
 		-- The following fields are from the origin system		
 		,apcbk_comment = CAST(NULL AS NVARCHAR(30))	 COLLATE Latin1_General_CI_AS -- CHAR (30)
 		,apcbk_password = CAST(NULL AS NVARCHAR(16)) COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -237,8 +232,6 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strCbkNo
 						,intPayToDown
 						,intResponsibleEntityId
-						,ysnABREnable
-						,intABRDaysNoRef
 				)
 				OUTPUT 	inserted.intBankAccountId
 				SELECT	intBankId							= i.intBankId
@@ -323,8 +316,6 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strCbkNo							= i.strCbkNo
 						,intPayToDown						= i.intPayToDown
 						,intResponsibleEntityId				= i.intResponsibleEntityId
-						,ysnABREnable						= i.ysnABREnable
-						,intABRDaysNoRef					= i.intABRDaysNoRef
 				FROM	inserted i 
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
@@ -432,8 +423,6 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
 					,intResponsibleEntityId				= i.intResponsibleEntityId
-					,ysnABREnable						= i.ysnABREnable
-					,intABRDaysNoRef					= i.intABRDaysNoRef
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 

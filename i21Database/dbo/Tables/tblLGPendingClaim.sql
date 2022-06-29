@@ -26,7 +26,6 @@
 	[ysnSeqSubCurrency] BIT NULL,
 	[dblSeqPriceInWeightUOM] NUMERIC(18, 6) NULL,
 	[dblSeqPriceConversionFactoryWeightUOM] NUMERIC(18, 6) NULL,
-	[dtmReceiptDate] DATETIME NULL,
 	[dtmDateAdded] DATETIME NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	

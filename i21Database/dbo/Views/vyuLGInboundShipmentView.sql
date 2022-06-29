@@ -58,7 +58,6 @@ SELECT
 	dtmDispatchedDate = L.dtmDispatchedDate,
 	strComments = L.strComments,
 	strExternalShipmentNumber = L.strExternalShipmentNumber,
-	ysnArrivedInPort = L.ysnArrivedInPort,
 
 	---- Purchase Contract Details
 	intContractDetailId = PCT.intContractDetailId,
@@ -97,7 +96,6 @@ SELECT
 	dblFranchise = IsNull(WG.dblFranchise, 0),
 	dtmStartDate = PCT.dtmStartDate,
 	dtmEndDate = PCT.dtmEndDate,
-	dtmUpdatedAvailabilityDate = PCT.dtmUpdatedAvailabilityDate,
 	ysnOnTime = CAST(CASE WHEN DATEDIFF (DAY, L.dtmPostedDate, PCT.dtmEndDate) >= 0 THEN 1 ELSE 0 END as Bit),
 	strERPPONumber = PCT.strERPPONumber,
 

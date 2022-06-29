@@ -1,9 +1,9 @@
 ﻿PRINT 'Begin IC Clean up Objects - Drop obsolete objects'
 GO
 
-IF OBJECT_ID('fnICCalculatePricingLevelUnitPrice ', 'FN') IS NOT NULL
+IF object_id('fnICCalculatePricingLevelUnitPrice ', 'FN') IS NOT NULL
 BEGIN
-    EXEC('DROP FUNCTION [dbo].[fnICCalculatePricingLevelUnitPrice]')
+    DROP FUNCTION [dbo].[fnICCalculatePricingLevelUnitPrice]
 END
 GO
 

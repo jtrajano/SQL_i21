@@ -84,10 +84,6 @@
     [intConcurrencyId]                 INT            DEFAULT 1 NOT NULL,
     [intPayToDown]                     INT            DEFAULT 0 NULL,
     [intResponsibleEntityId]           INT            NULL,
-    --Advance Bank Recon fields
-    [ysnABREnable]                     BIT            NULL,
-    [intABRDaysNoRef]                  INT            NULL,
-    --Advance Bank Recon fields
     CONSTRAINT [PK_tblCMBankAccount] PRIMARY KEY CLUSTERED ([intBankAccountId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
     CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_EFT] FOREIGN KEY ([intEFTBankFileFormatId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),

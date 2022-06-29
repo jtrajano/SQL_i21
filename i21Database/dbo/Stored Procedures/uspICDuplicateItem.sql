@@ -644,7 +644,6 @@ BEGIN
 		dblDiscountThruAmount,
 		dblAccumulatedQty,
 		dblAccumulatedAmount,
-		dblCost,
 		intSort )
 	SELECT @NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
@@ -660,7 +659,6 @@ BEGIN
 		dblDiscountThruAmount,
 		dblAccumulatedQty,
 		dblAccumulatedAmount,
-		dblCost,
 		intSort 
 	FROM tblICItemSpecialPricing
 	WHERE intItemId = @ItemId

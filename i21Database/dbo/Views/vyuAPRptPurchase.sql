@@ -20,11 +20,9 @@ SELECT
 	,strTerm = term.strTerm
 	,B.dblQtyOrdered
 	,E.strUnitMeasure
-	,A.dblTotalWeight
 	,B.dblCost
 	,B.dblDiscount / 100 AS dblDiscount
 	,B.dblTotal AS dblDetailTotal
-	,B.dblStandardWeight
 	,A.dblTotal
 	,A.dblSubtotal
 	,A.dblTax

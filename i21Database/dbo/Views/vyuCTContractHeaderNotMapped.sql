@@ -79,8 +79,7 @@ AS
 						FT.strFreightTerm,
 						BE.strName					AS strBroker,
 						BA.strAccountNumber			AS strBrokerAccount,
-						intCommodityFutureMarketId = CY.intFutureMarketId, -- CT-5315
-						strEntitySelectedLocation = ESL.strLocationName -- CT-5315
+						intCommodityFutureMarketId = CY.intFutureMarketId
 
 				FROM	tblCTContractHeader						CH	
 				
@@ -139,6 +138,5 @@ AS
 			LEFT	JOIN	tblSMFreightTerms					FT	ON	FT.intFreightTermId					=		CH.intFreightTermId					
 			LEFT	JOIN	tblEMEntity							BE	ON	BE.intEntityId						=		CH.intBrokerId										
 			LEFT	JOIN	tblRKBrokerageAccount				BA	ON	BA.intBrokerageAccountId			=		CH.intBrokerageAccountId							
-			LEFT	JOIN	tblEMEntityLocation					ESL	ON	ESL.intEntityLocationId				=		CH.intEntitySelectedLocationId  -- CT-5315
 
 			)t

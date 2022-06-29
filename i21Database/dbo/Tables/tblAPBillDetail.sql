@@ -163,6 +163,10 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBillDetail]
 INCLUDE ( 	[dblTotal],
 	[dblRate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+
+CREATE NONCLUSTERED INDEX [dpa_tblAPBillDetail_1] ON [dbo].[tblAPBillDetail] ([dblTax]) INCLUDE ([intBillId],[dblRate])
+GO
+
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_voucherPayable]
     ON [dbo].[tblAPBillDetail](intPurchaseDetailId
 								,intContractDetailId

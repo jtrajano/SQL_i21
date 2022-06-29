@@ -41,8 +41,7 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 																										-- If [ysnPost] IS NULL > No action will be made
 	,[ysnRecap]								BIT												NULL		-- If [ysnRecap] = 1 > Recap Payments
 	,[ysnUnPostAndUpdate]					BIT												NULL		-- 
-	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity
-	,[intEntityCardInfoId]					INT												NULL		-- Credit Card Info Id (tblEMEntityCardInformation)
+	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity			
 
 	
 
@@ -67,9 +66,7 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[dblInterest]							NUMERIC(18, 6)									NULL		-- Interest
 	,[dblBaseInterest]						NUMERIC(18, 6)									NULL		-- Interest
 	,[dblPayment]							NUMERIC(18, 6)									NULL		-- Payment	
-	,[dblBasePayment]						NUMERIC(18, 6)									NULL		-- Payment
-	,[dblCreditCardFee]						NUMERIC(18, 6)									NULL		-- CC Fee
-	,[dblBaseCreditCardFee]					NUMERIC(18, 6)									NULL		-- CC Fee
+	,[dblBasePayment]						NUMERIC(18, 6)									NULL		-- Payment	
 	,[dblAmountDue]							NUMERIC(18, 6)									NULL		-- Invoice Total
 	,[dblBaseAmountDue]						NUMERIC(18, 6)									NULL		-- Base Invoice Total
 	,[strInvoiceReportNumber]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL		-- Transaction Number	

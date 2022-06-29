@@ -82,6 +82,8 @@
     [intDriverPinId]			INT NULL, 
     [intUserId]			        INT NULL, 
     [ysnImported]               BIT             NULL,
+	[intImportInstanceId]		int NULL,
+	[strImportInstanceId]		nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),
@@ -113,21 +115,28 @@ CREATE TRIGGER [dbo].[trgCFTransactionRecordNumber]
 ON [dbo].[tblCFTransaction]
 AFTER INSERT
 AS
-	DECLARE @CFID NVARCHAR(50)
-
-	-- IF STARTING NUMBER IS EDITABLE --
-		 -- FIX STARTING NUMBER --
-
-	EXEC uspSMGetStartingNumber 52, @CFID OUT
 	
-	IF(@CFID IS NOT NULL)
-	BEGIN
-		UPDATE tblCFTransaction
-			SET tblCFTransaction.strTransactionId = @CFID,
-				tblCFTransaction.intForDeleteTransId = CAST(REPLACE(@CFID,'CFDT-','') AS int)
-		FROM tblCFTransaction A
-			INNER JOIN INSERTED B ON A.intTransactionId = B.intTransactionId
-	END
+
+DECLARE @CFID NVARCHAR(50)
+EXEC uspSMGetStartingNumber 52, @CFID OUT
+
+DECLARE @intStartingNumber INT
+SELECT @intStartingNumber = CAST(Record as INT) - 1 FROM dbo.fnCFSplitString(@CFID,'-') WHERE RecordKey = 2
+
+DECLARE @intCount INT
+SELECT @intCount = COUNT(1) FROM INSERTED
+
+UPDATE tblSMStartingNumber 
+SET intNumber = @intStartingNumber + @intCount
+WHERE intStartingNumberId = 52 AND strPrefix = 'CFDT-'
+	
+UPDATE tblCFTransaction
+SET tblCFTransaction.strTransactionId = ('CFDT-' + CAST((@intStartingNumber + intRowId) AS NVARCHAR(MAX))),
+	tblCFTransaction.intForDeleteTransId = (CAST((@intStartingNumber + intRowId) AS NVARCHAR(MAX)))
+FROM tblCFTransaction A
+INNER JOIN (SELECT intTransactionId ,ROW_NUMBER() OVER(ORDER BY intTransactionId) as intRowId FROM INSERTED) AS B 
+ON A.intTransactionId = B.intTransactionId
+
 GO
 -- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intVehicleId]
 --     ON [dbo].[tblCFTransaction]([intVehicleId] ASC);
@@ -287,6 +296,13 @@ CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K27_K1_K29_K31
 INCLUDE ( 	[strTransactionType]) 
 GO
 
+CREATE NONCLUSTERED INDEX [tblCFTransaction_ysnInvoiced]
+	 ON [dbo].[tblCFTransaction]([ysnInvoiced]);
+GO
+
+CREATE NONCLUSTERED INDEX [tblCFTransaction_dtmPostedDate]
+	 ON [dbo].[tblCFTransaction]([dtmPostedDate]);
+GO
 
 CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K27_K1_K29_K31_13_25] ON [dbo].[tblCFTransaction]
 (
@@ -299,4 +315,6 @@ CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K27_K1_K29_K31
 INCLUDE ( 	[dblQuantity],
 	[strTransactionType])
 GO
-
+CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_dtmTransactionDate]
+    ON [dbo].[tblCFTransaction]([dtmTransactionDate] ASC);
+GO

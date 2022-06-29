@@ -14,14 +14,14 @@
 
 GO
 
-ALTER TABLE [dbo].[tblGLCrossReferenceMapping] ADD  CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccount] FOREIGN KEY([intAccountId])
+ALTER TABLE [dbo].[tblGLCrossReferenceMapping]  WITH CHECK ADD  CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccount] FOREIGN KEY([intAccountId])
 REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 GO
 
 ALTER TABLE [dbo].[tblGLCrossReferenceMapping] CHECK CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccount]
 GO
 
-ALTER TABLE [dbo].[tblGLCrossReferenceMapping] ADD  CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccountSystem] FOREIGN KEY([intAccountSystemId])
+ALTER TABLE [dbo].[tblGLCrossReferenceMapping]  WITH CHECK ADD  CONSTRAINT [FK_tblGLCrossReferenceMapping_tblGLAccountSystem] FOREIGN KEY([intAccountSystemId])
 REFERENCES [dbo].[tblGLAccountSystem] ([intAccountSystemId])
 ON DELETE CASCADE
 GO
