@@ -742,8 +742,6 @@ BEGIN TRY
 	FROM #TEMPSTAGINGTABLE
 
 
-
-
 	--AZ TAX--
 	DECLARE @intAZTaxCodeId INT 
 	SELECT TOP 1 @intAZTaxCodeId = intAZTaxCodeId FROM tblCFCompanyPreference
