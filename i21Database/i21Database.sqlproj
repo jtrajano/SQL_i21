@@ -9842,11 +9842,17 @@
     <Build Include="dbo\Tables\tblCFImportTransactionTaxZeroQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
+    <Build Include="dbo\Tables\tblMBILDatacenter.sql" />
     <Build Include="dbo\Tables\tblICRecostFormulation.sql" />
     <Build Include="dbo\Tables\tblICRecostFormulationDetail.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulation.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICLoadRecostFormulationItems.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
+    <Build Include="dbo\Views\vyuRKGetCollateral.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
   </ItemGroup>
@@ -10163,7 +10169,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
     <Build Include="dbo\Tables\tblGRChargeAndPremiumId.sql" />
     <Build Include="dbo\Tables\tblGRCalculationType.sql" />
     <Build Include="dbo\Tables\tblGRChargeAndPremiumDetail.sql" />
@@ -10177,6 +10182,9 @@
     <Build Include="dbo\User Defined Types\SettleStorageTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
     <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
+    <Build Include="dbo\Functions\fnCTGetOverage.sql" />
+    <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

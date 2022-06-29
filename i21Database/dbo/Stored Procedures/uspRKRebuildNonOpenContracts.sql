@@ -578,7 +578,7 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced'))
 				OR
 					(ISNULL(P.intPriceFixationId, 0) = 0
 					AND SH.ysnFuturesChange = 1
@@ -653,7 +653,7 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced'))
 				OR
 					(ISNULL(P.intPriceFixationId, 0) = 0
 					AND SH.ysnFuturesChange = 1
@@ -695,14 +695,18 @@ BEGIN
 			, @intSubBookId
 			, P.intUserId 
 		from  (
-			select 
-				ysnIsPricing = CASE WHEN dblQtyPriced <> LAG(dblQtyPriced) OVER (ORDER BY intSequenceHistoryId) THEN 1 ELSE 0 END
-				,dblActualPriceFixation = dblQtyPriced -  LAG(dblQtyPriced) OVER (ORDER BY intSequenceHistoryId) 
-				,dblCumulativeBalance =  dblQuantity - dblBalance
-				,dblCumulativeQtyPriced = LAG(dblQtyPriced) OVER (ORDER BY intSequenceHistoryId) 
-				,* 
-			from tblCTSequenceHistory
-			where intContractDetailId = @intContractDetailId
+			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced THEN 1 ELSE 0 END
+				,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
+				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
+				,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+				,intLagPricingTypeId = lagctsh.intPricingTypeId
+				,origctsh.* 
+			FROM #tmpCTSequenceHistory origctsh
+			OUTER APPLY 
+			(
+				SELECT TOP 1 * FROM #tmpCTSequenceHistory ictsh
+				WHERE ictsh.rowNum = origctsh.rowNum - 1
+			) lagctsh
 		) SH 
 		cross apply (
 			select top 1 PF.intPriceFixationId, PC.strPriceContractNo, intUserId from tblCTPriceFixation PF
@@ -744,14 +748,18 @@ BEGIN
 			, @intSubBookId
 			, P.intUserId  
 		from  (
-			select 
-				ysnIsPricing = CASE WHEN dblQtyPriced <> LAG(dblQtyPriced) OVER (ORDER BY intSequenceHistoryId) THEN 1 ELSE 0 END
-				,dblActualPriceFixation = dblQtyPriced -  LAG(dblQtyPriced) OVER (ORDER BY intSequenceHistoryId) 
-				,dblCumulativeBalance =  dblQuantity - dblBalance
-				,dblCumulativeQtyPriced = LAG(dblQtyPriced) OVER (ORDER BY intSequenceHistoryId) 
-				,* 
-			from tblCTSequenceHistory
-			where intContractDetailId = @intContractDetailId
+			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced THEN 1 ELSE 0 END
+				,dblActualPriceFixation = origctsh.dblQtyPriced - lagctsh.dblQtyPriced
+				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
+				,dblCumulativeQtyPriced = lagctsh.dblQtyPriced
+				,intLagPricingTypeId = lagctsh.intPricingTypeId
+				,origctsh.* 
+			FROM #tmpCTSequenceHistory origctsh
+			OUTER APPLY 
+			(
+				SELECT TOP 1 * FROM #tmpCTSequenceHistory ictsh
+				WHERE ictsh.rowNum = origctsh.rowNum - 1
+			) lagctsh
 		) SH 
 		cross apply (
 			select top 1  PF.intPriceFixationId, PC.strPriceContractNo, intUserId from tblCTPriceFixation PF
