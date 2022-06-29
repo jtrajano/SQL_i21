@@ -118,13 +118,8 @@ UNION SELECT DISTINCT
     ysnEODComplete = ysnCompleted ,
 	v.intCurrencyId
 FROM vyuARUndepositedPayment v
-
 LEFT JOIN tblARPayment p on p.strRecordNumber = v.strSourceTransactionId
---WHERE	NOT EXISTS (
---			SELECT TOP 1 1
---			FROM	tblCMUndepositedFund f
---			WHERE	f.strSourceTransactionId = v.strSourceTransactionId)
-		AND isnull(p.intPaymentMethodId,0) <> 9 -- EXEMPT CF INVOICE
+WHERE isnull(p.intPaymentMethodId,0) <> 9 -- EXEMPT CF INVOICE
 )
 
 INSERT INTO tblCMUndepositedFund (
