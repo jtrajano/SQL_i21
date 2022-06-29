@@ -353,7 +353,7 @@ BEGIN TRY
 		,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
 		,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
 		,ri.ysnComplianceItem
-		,ri.dblCompliancePercent
+		,ri.dblCompliancePercent  
 	FROM tblMFRecipeItem ri
 	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 	WHERE r.intRecipeId = @intRecipeId
