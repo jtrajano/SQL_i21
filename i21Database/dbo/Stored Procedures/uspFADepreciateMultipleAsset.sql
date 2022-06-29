@@ -174,9 +174,9 @@ BEGIN
         strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
       )
   
-      INSERT INTO @tblDepComputation(intAssetId,dblBasis, dblDepreciationBasis,dblMonth, dblDepre, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction)
-        SELECT intAssetId, dblBasis,dblDepreciationBasis,dblMonth,dblDepre, dblFunctionalBasis,dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction
-        FROM dbo.fnFAComputeMultipleDepreciation(@IdGood, @BookId) 
+      --INSERT INTO @tblDepComputation(intAssetId,dblBasis, dblDepreciationBasis,dblMonth, dblDepre, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction)
+      --  SELECT intAssetId, dblBasis,dblDepreciationBasis,dblMonth,dblDepre, dblFunctionalBasis,dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction
+      --  FROM dbo.fnFAComputeMultipleDepreciation(@IdGood, @BookId) 
 
       DELETE FROM @IdGood
 
@@ -279,71 +279,71 @@ BEGIN
               SELECT TOP 1 @i = intId FROM @IdIterate 
               EXEC uspSMGetStartingNumber  @intStartingNumberId = 113 , @strID= @strTransactionId OUTPUT  
 
-              INSERT INTO tblFAFixedAssetDepreciation (  
-                  [intAssetId],  
-                  [intBookId],
-                  [intDepreciationMethodId],  
-                  [dblBasis],
-                  [dblDepreciationBasis],
-                  [dtmDateInService],  
-                  [dtmDispositionDate],  
-                  [dtmDepreciationToDate],  
-                  [dblDepreciationToDate],
-                  [dblDepreciation],
-                  [dblFunctionalDepreciation],  
-                  [dblSalvageValue],
-                  [dblFunctionalBasis],
-                  [dblFunctionalDepreciationBasis],
-                  [dblFunctionalDepreciationToDate],
-                  [dblFunctionalSalvageValue],
-                  [dblRate],
-                  [strTransaction],  
-                  [strTransactionId],  
-                  [strType],  
-                  [strConvention],
-                  [strBatchId],
-                  [intCurrencyId],
-                  [intFunctionalCurrencyId]
-                )  
-                  SELECT  
-                  @i,  
-                  @BookId,
-                  D.intDepreciationMethodId,  
-                  E.dblBasis,
-                  E.dblDepreciationBasis,
-                  BD.dtmPlacedInService,  
-                  NULL,  
-				  [dbo].[fnFAGetNextDepreciationDate](@i, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
-                  E.dblDepre,
-                  E.dblMonth,
-                  E.dblFunctionalMonth,
-                  BD.dblSalvageValue,
-                  CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
-                  CASE WHEN ISNULL(E.dblFunctionalDepreciationBasis, 0) > 0 THEN E.dblFunctionalDepreciationBasis ELSE E.dblDepreciationBasis END,
-                  CASE WHEN ISNULL(E.dblFunctionalDepre, 0) > 0 THEN E.dblFunctionalDepre ELSE E.dblDepre END,
-                  CASE WHEN ISNULL(BD.dblFunctionalSalvageValue, 0) > 0 THEN BD.dblFunctionalSalvageValue ELSE BD.dblSalvageValue END,
-                  CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,
-                  ISNULL(E.strTransaction, 'Depreciation'),  
-                  @strTransactionId,  
-                  D.strDepreciationType,
-                  D.strConvention,
-                  @strBatchId,
-                  BD.intCurrencyId,
-                  BD.intFunctionalCurrencyId
-                  FROM tblFAFixedAsset F 
-                  JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
-                  JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
-                  OUTER APPLY (
-                    SELECT dblDepre,dblBasis, dblDepreciationBasis, dblRate, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction 
-                    FROM @tblDepComputation WHERE intAssetId = @i
-                  ) E
-                  OUTER APPLY(
-                    SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
-                    WHERE [intAssetId] = @i AND intBookId = @BookId
-                    ORDER BY dtmDepreciationToDate DESC
-                  )Depreciation
-                  WHERE F.intAssetId = @i
-                  AND BD.intBookId = @BookId
+      --        INSERT INTO tblFAFixedAssetDepreciation (  
+      --            [intAssetId],  
+      --            [intBookId],
+      --            [intDepreciationMethodId],  
+      --            [dblBasis],
+      --            [dblDepreciationBasis],
+      --            [dtmDateInService],  
+      --            [dtmDispositionDate],  
+      --            [dtmDepreciationToDate],  
+      --            [dblDepreciationToDate],
+      --            [dblDepreciation],
+      --            [dblFunctionalDepreciation],  
+      --            [dblSalvageValue],
+      --            [dblFunctionalBasis],
+      --            [dblFunctionalDepreciationBasis],
+      --            [dblFunctionalDepreciationToDate],
+      --            [dblFunctionalSalvageValue],
+      --            [dblRate],
+      --            [strTransaction],  
+      --            [strTransactionId],  
+      --            [strType],  
+      --            [strConvention],
+      --            [strBatchId],
+      --            [intCurrencyId],
+      --            [intFunctionalCurrencyId]
+      --          )  
+      --            SELECT  
+      --            @i,  
+      --            @BookId,
+      --            D.intDepreciationMethodId,  
+      --            E.dblBasis,
+      --            E.dblDepreciationBasis,
+      --            BD.dtmPlacedInService,  
+      --            NULL,  
+				  --[dbo].[fnFAGetNextDepreciationDate](@i, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
+      --            E.dblDepre,
+      --            E.dblMonth,
+      --            E.dblFunctionalMonth,
+      --            BD.dblSalvageValue,
+      --            CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
+      --            CASE WHEN ISNULL(E.dblFunctionalDepreciationBasis, 0) > 0 THEN E.dblFunctionalDepreciationBasis ELSE E.dblDepreciationBasis END,
+      --            CASE WHEN ISNULL(E.dblFunctionalDepre, 0) > 0 THEN E.dblFunctionalDepre ELSE E.dblDepre END,
+      --            CASE WHEN ISNULL(BD.dblFunctionalSalvageValue, 0) > 0 THEN BD.dblFunctionalSalvageValue ELSE BD.dblSalvageValue END,
+      --            CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,
+      --            ISNULL(E.strTransaction, 'Depreciation'),  
+      --            @strTransactionId,  
+      --            D.strDepreciationType,
+      --            D.strConvention,
+      --            @strBatchId,
+      --            BD.intCurrencyId,
+      --            BD.intFunctionalCurrencyId
+      --            FROM tblFAFixedAsset F 
+      --            JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
+      --            JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+      --            OUTER APPLY (
+      --              SELECT dblDepre,dblBasis, dblDepreciationBasis, dblRate, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction 
+      --              FROM @tblDepComputation WHERE intAssetId = @i
+      --            ) E
+      --            OUTER APPLY(
+      --              SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
+      --              WHERE [intAssetId] = @i AND intBookId = @BookId
+      --              ORDER BY dtmDepreciationToDate DESC
+      --            )Depreciation
+      --            WHERE F.intAssetId = @i
+      --            AND BD.intBookId = @BookId
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId, ysnDepreciated = 1 WHERE intAssetId = @i
                   DELETE FROM @IdIterate WHERE intId = @i
           END
@@ -521,65 +521,65 @@ BEGIN
           BEGIN
               SELECT TOP 1 @i = intId FROM @IdIterate 
               EXEC uspSMGetStartingNumber  @intStartingNumberId = 113 , @strID= @strTransactionId OUTPUT  
-              INSERT INTO tblFAFixedAssetDepreciation (  
-                [intAssetId],  
-                [intBookId],
-                [intDepreciationMethodId],  
-                [dblBasis],  
-                [dblDepreciationBasis],  
-                [dtmDateInService],  
-                [dtmDispositionDate],  
-                [dtmDepreciationToDate],  
-                [dblDepreciationToDate],  
-                [dblDepreciation],
-                [dblFunctionalDepreciation],  
-                [dblSalvageValue],
-                [dblFunctionalBasis],
-                [dblFunctionalDepreciationBasis],
-                [dblFunctionalDepreciationToDate],
-                [dblFunctionalSalvageValue],
-                [dblRate],  
-                [strTransaction],  
-                [strTransactionId],  
-                [strType],  
-                [strConvention],
-                [strBatchId],
-                [intCurrencyId],
-                [intFunctionalCurrencyId]
-              )  
-              SELECT  
-                @i,
-                @BookId,
-                D.intDepreciationMethodId,
-                E.dblBasis,  
-                E.dblDepreciationBasis,
-                BD.dtmPlacedInService,  
-                NULL,  
-				        dbo.fnFAGetNextDepreciationDate(@i, @BookId),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
-                E.dblDepre,  
-                E.dblMonth,
-                E.dblFunctionalMonth,
-                BD.dblSalvageValue,
-                CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
-                CASE WHEN ISNULL(E.dblFunctionalDepreciationBasis, 0) > 0 THEN E.dblFunctionalDepreciationBasis ELSE E.dblDepreciationBasis END,
-                CASE WHEN ISNULL(E.dblFunctionalDepre, 0) > 0 THEN E.dblFunctionalDepre ELSE E.dblDepre END,
-                CASE WHEN ISNULL(BD.dblFunctionalSalvageValue, 0) > 0 THEN BD.dblFunctionalSalvageValue ELSE BD.dblSalvageValue END,
-                CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,  
-                ISNULL(E.strTransaction, 'Depreciation'),  
-                @strTransactionId,  
-                D.strDepreciationType,  
-                D.strConvention,
-                @strBatchId,
-                BD.intCurrencyId,
-                BD.intFunctionalCurrencyId
-                FROM tblFAFixedAsset F 
-                JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
-                JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
-                OUTER APPLY (
-                  SELECT dblDepre,dblBasis, dblDepreciationBasis, dblRate, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
-                ) E
-                WHERE F.intAssetId = @i
-                AND BD.intBookId = @BookId
+            --  INSERT INTO tblFAFixedAssetDepreciation (  
+            --    [intAssetId],  
+            --    [intBookId],
+            --    [intDepreciationMethodId],  
+            --    [dblBasis],  
+            --    [dblDepreciationBasis],  
+            --    [dtmDateInService],  
+            --    [dtmDispositionDate],  
+            --    [dtmDepreciationToDate],  
+            --    [dblDepreciationToDate],  
+            --    [dblDepreciation],
+            --    [dblFunctionalDepreciation],  
+            --    [dblSalvageValue],
+            --    [dblFunctionalBasis],
+            --    [dblFunctionalDepreciationBasis],
+            --    [dblFunctionalDepreciationToDate],
+            --    [dblFunctionalSalvageValue],
+            --    [dblRate],  
+            --    [strTransaction],  
+            --    [strTransactionId],  
+            --    [strType],  
+            --    [strConvention],
+            --    [strBatchId],
+            --    [intCurrencyId],
+            --    [intFunctionalCurrencyId]
+            --  )  
+            --  SELECT  
+            --    @i,
+            --    @BookId,
+            --    D.intDepreciationMethodId,
+            --    E.dblBasis,  
+            --    E.dblDepreciationBasis,
+            --    BD.dtmPlacedInService,  
+            --    NULL,  
+				        --dbo.fnFAGetNextDepreciationDate(@i, @BookId),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
+            --    E.dblDepre,  
+            --    E.dblMonth,
+            --    E.dblFunctionalMonth,
+            --    BD.dblSalvageValue,
+            --    CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
+            --    CASE WHEN ISNULL(E.dblFunctionalDepreciationBasis, 0) > 0 THEN E.dblFunctionalDepreciationBasis ELSE E.dblDepreciationBasis END,
+            --    CASE WHEN ISNULL(E.dblFunctionalDepre, 0) > 0 THEN E.dblFunctionalDepre ELSE E.dblDepre END,
+            --    CASE WHEN ISNULL(BD.dblFunctionalSalvageValue, 0) > 0 THEN BD.dblFunctionalSalvageValue ELSE BD.dblSalvageValue END,
+            --    CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,  
+            --    ISNULL(E.strTransaction, 'Depreciation'),  
+            --    @strTransactionId,  
+            --    D.strDepreciationType,  
+            --    D.strConvention,
+            --    @strBatchId,
+            --    BD.intCurrencyId,
+            --    BD.intFunctionalCurrencyId
+            --    FROM tblFAFixedAsset F 
+            --    JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
+            --    JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+            --    OUTER APPLY (
+            --      SELECT dblDepre,dblBasis, dblDepreciationBasis, dblRate, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
+            --    ) E
+            --    WHERE F.intAssetId = @i
+            --    AND BD.intBookId = @BookId
 
                 UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
                 DELETE FROM @IdIterate WHERE intId = @i
