@@ -1,103 +1,17 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceWalterMatterReport]
-	@xmlParam NVARCHAR(MAX) = NULL
+	  @intEntityUserId		AS INT	= NULL
+	, @strRequestId			AS NVARCHAR(MAX) = NULL
 AS 
 
+SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
-DECLARE  @dtmDateTo				DATETIME
-		,@dtmDateFrom			DATETIME
-		,@intInvoiceIdTo		INT
-		,@intInvoiceIdFrom		INT
-		,@xmlDocumentId			INT
-		,@strReportLogId		NVARCHAR(MAX)
-		,@blbLogo				VARBINARY (MAX)	= NULL
+DECLARE  @blbLogo				VARBINARY (MAX)	= NULL
 		,@strCompanyName		NVARCHAR(200)	= NULL
 		,@strCompanyFullAddress	NVARCHAR(500)	= NULL
-		,@intPerformanceLogId	INT = NULL
-		,@intEntityUserId		INT
-		,@strInvoiceIds			AS NVARCHAR(MAX)
-
--- Sanitize the @xmlParam
-IF LTRIM(RTRIM(@xmlParam)) = ''
-BEGIN 
-	SET @xmlParam = NULL
-END
-			
--- Create a table variable to hold the XML data. 		
-DECLARE @temp_xml_table TABLE (
-	 [id]			INT IDENTITY(1,1)
-	,[fieldname]	NVARCHAR(50)
-	,[condition]	NVARCHAR(20)
-	,[from]			NVARCHAR(MAX)
-	,[to]			NVARCHAR(MAX)
-	,[join]			NVARCHAR(10)
-	,[begingroup]	NVARCHAR(50)
-	,[endgroup]		NVARCHAR(50)
-	,[datatype]		NVARCHAR(50)
-)
-
--- Prepare the XML 
-EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
-
--- Insert the XML to the xml table. 		
-INSERT INTO @temp_xml_table
-SELECT *
-FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
-WITH (
-	  [fieldname]  NVARCHAR(50)
-	, [condition]  NVARCHAR(20)
-	, [from]	   NVARCHAR(MAX)
-	, [to]		   NVARCHAR(MAX)
-	, [join]	   NVARCHAR(10)
-	, [begingroup] NVARCHAR(50)
-	, [endgroup]   NVARCHAR(50)
-	, [datatype]   NVARCHAR(50)
-)
-
--- Insert the XML Dummies to the xml table. 		
-INSERT INTO @temp_xml_table
-SELECT *
-FROM OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)
-WITH (
-	  [fieldname]  NVARCHAR(50)
-	, [condition]  NVARCHAR(20)
-	, [from]	   NVARCHAR(MAX)
-	, [to]		   NVARCHAR(MAX)
-	, [join]	   NVARCHAR(10)
-	, [begingroup] NVARCHAR(50)
-	, [endgroup]   NVARCHAR(50)
-	, [datatype]   NVARCHAR(50)
-)
-
-SELECT	@intEntityUserId = [from]
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'intSrCurrentUserId'
-
-SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] = 'strReportLogId'
-
-SELECT  @dtmDateFrom = CASE WHEN ISNULL([from], '') <> '' THEN CONVERT(DATETIME, [from], 103) ELSE CAST(-53690 AS DATETIME) END
- 	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN CONVERT(DATETIME, [to], 103) ELSE GETDATE() END AS DATETIME)
-FROM	@temp_xml_table 
-WHERE	[fieldname] = 'dtmDate'
-
-SELECT  @intInvoiceIdFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 0 END AS INT)
- 	   ,@intInvoiceIdTo   = CASE WHEN [condition] = 'BETWEEN' THEN CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE 0 END AS INT)
-							     WHEN [condition] = 'EQUAL TO' THEN CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 0 END AS INT)
-						    END
-FROM	@temp_xml_table 
-WHERE	[fieldname] = 'intInvoiceId'
-
-SELECT @strInvoiceIds = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] = 'strInvoiceIds'
-
-IF EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId) RETURN
-
-EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceWalterMatterReport', @strReportLogId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 
@@ -106,9 +20,53 @@ SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 7 - Walter Matter'
+INSERT INTO tblARInvoiceReportStagingTable (
+	 intInvoiceId
+	,intInvoiceDetailId
+	,intEntityUserId
+	,strInvoiceFormat
+	,strRequestId
+	,strCompanyName
+	,strCompanyAddress
+	,strInvoiceNumber
+	,strCustomerName
+	,strLocationName
+	,strContractNumber
+	,strOrigin
+	,strFreightTerm
+	,strWeight
+	,strCustomerReference
+	,strFLOId
+	,strGrade
+	,dtmDueDate
+	,strTerm
+	,strItemDescription
+	,strQtyShipped
+	,strShipmentGrossWt
+	,strShipmentTareWt
+	,strShipmentNetWt
+	,strPrice
+	,dblInvoiceTotal
+	,strEDICode
+	,ysnCustomsReleased
+	,strBOLNumber
+	,strDestinationCity
+	,strMVessel
+	,strPaymentComments
+	,blbLogo
+	,strLogoType
+	,strBankName
+	,strIBAN
+	,strSWIFT
+	,strBICCode
+)
 SELECT
 	 intInvoiceId			= ARI.intInvoiceId
-	,intInvoiceDetailId		= ISNULL(ARGID.intInvoiceDetailId, 0)
+	,intInvoiceDetailId		= ARGID.intInvoiceDetailId
+	,intEntityUserId		= @intEntityUserId
+	,strInvoiceFormat		= SELECTEDINV.strInvoiceFormat
+	,strRequestId			= @strRequestId
 	,strCompanyName			= @strCompanyName
 	,strCompanyAddress		= @strCompanyFullAddress
 	,strInvoiceNumber		= ARI.strInvoiceNumber
@@ -124,12 +82,12 @@ SELECT
 	,dtmDueDate				= CAST(ARI.dtmDueDate AS DATE)
 	,strTerm				= SMT.strTerm
 	,strItemDescription		= ARGID.strItemDescription
-	,strQtyShipped			= CONVERT(VARCHAR,CAST(ARGID.dblQtyShipped AS MONEY),1) + ' ' + ARGID.strUnitMeasure
-	,strShipmentGrossWt		= CONVERT(VARCHAR,CAST(ARGID.dblShipmentGrossWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
-	,strShipmentTareWt		= CONVERT(VARCHAR,CAST(ARGID.dblShipmentTareWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
-	,strShipmentNetWt		= CONVERT(VARCHAR,CAST(ARGID.dblShipmentNetWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
-	,strCurrenyPriceUOM		= ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARGID.dblPrice AS MONEY),1), '.00','') + ' ' + ARGID.strPriceUnitMeasure
-	,dblTotal				= ARGID.dblTotal
+	,strQtyShipped			= FORMAT(ARGID.dblQtyShipped, '#,###.00') + ' ' + ARGID.strUnitMeasure
+	,strShipmentGrossWt		= FORMAT(ARGID.dblShipmentGrossWt, '#,###.00') + ' ' + ARGID.strWeightUnitMeasure
+	,strShipmentTareWt		= FORMAT(ARGID.dblShipmentTareWt, '#,###.00') + ' ' + ARGID.strWeightUnitMeasure
+	,strShipmentNetWt		= FORMAT(ARGID.dblShipmentNetWt, '#,###.00') + ' ' + ARGID.strWeightUnitMeasure
+	,strPrice				= ARGID.strCurrency + ' ' + FORMAT(ARGID.dblPrice, '#,###.00') + ' ' + ARGID.strPriceUnitMeasure
+	,dblInvoiceTotal		= ARGID.dblTotal
 	,strEDICode				= ICC.strEDICode
 	,ysnCustomsReleased		= ISNULL(LGL.ysnCustomsReleased, 0)
 	,strBOLNumber			= LGL.strBLNumber + ' dd ' + [dbo].[fnConvertDateToReportDateFormat](LGL.dtmBLDate, 0)
@@ -143,7 +101,8 @@ SELECT
 	,strSWIFT				= CMBA.strSWIFT
 	,strBICCode				= CMBA.strBICCode
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
-INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
+INNER JOIN #WALTERMATTERINVOICES SELECTEDINV ON ARI.intInvoiceId = SELECTEDINV.intInvoiceId
+INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
 LEFT JOIN vyuARGetInvoiceDetail ARGID WITH (NOLOCK) ON ARI.intInvoiceId = ARGID.intInvoiceId
 LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON ARGID.intContractDetailId = CTCDV.intContractDetailId
@@ -152,9 +111,4 @@ LEFT JOIN tblLGLoad LGL WITH (NOLOCK) ON ARGID.strDocumentNumber = LGL.strLoadNu
 LEFT JOIN tblSMTerm SMT WITH (NOLOCK) ON ARI.intTermId = SMT.intTermID
 LEFT JOIN tblCMBankAccount CMBA WITH (NOLOCK) ON ISNULL(ISNULL(ARI.intPayToCashBankAccountId, ARI.intDefaultPayToBankAccountId), 0) = CMBA.intBankAccountId
 LEFT JOIN tblCMBank CMB WITH (NOLOCK) ON CMBA.intBankId = CMB.intBankId
-LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARI.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
-WHERE ARI.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo 
-OR ARI.intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
-OR ARI.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-
-EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceWalterMatterReport', @strReportLogId, 0, @intEntityUserId, @intPerformanceLogId, NULL
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARI.intCompanyLocationId AND ysnARInvoice = 1 OR ysnDefault = 1

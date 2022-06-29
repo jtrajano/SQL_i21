@@ -26,7 +26,6 @@ CREATE TABLE [dbo].[tblFAFixedAssetDepreciation] (
 	[ysnAddToBasis]				BIT NULL,
 	[intCurrencyId]				INT NULL,
 	[intFunctionalCurrencyId]	INT NULL,
-	[intLedgerId]				INT NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAssetDepreciation] PRIMARY KEY CLUSTERED ([intAssetDepreciationId] ASC),
     CONSTRAINT [FK_tblFAFixedAssetDepreciation_tblFAFixedAsset] FOREIGN KEY([intAssetId]) REFERENCES [dbo].[tblFAFixedAsset] ([intAssetId]) ON DELETE CASCADE

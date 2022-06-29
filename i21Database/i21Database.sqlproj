@@ -842,9 +842,10 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateLotReleased.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
-    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" />
-    <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
     <Build Include="dbo\Tables\tblIPBillDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
+    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" /> 
+    <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
     <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />

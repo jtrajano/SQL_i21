@@ -65,7 +65,7 @@ AS
 							WHEN CC.strCostMethod = 'Percentage'
 								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
 									* (CD.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
-									* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+									* CC.dblRate/100 * CASE WHEN CC.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 							END)
 					/ (CASE WHEN ISNULL(CY.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY.intCent, 1) ELSE 1 END)
 		, RT.strCurrencyExchangeRateType
@@ -92,5 +92,3 @@ AS
 	LEFT JOIN	tblICItemUOM		CM	ON	CM.intUnitMeasureId		=	IU.intUnitMeasureId
 										AND CM.intItemId			=	CD.intItemId	
 	LEFT JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CC.intRateTypeId
-	LEFT JOIN	tblCTBasisCost	    BC	ON	BC.intItemId			=	CC.intItemId
-	ORDER BY BC.intSort ASC

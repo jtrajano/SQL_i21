@@ -7,7 +7,3 @@ GO
     WHERE strAccountType IN ('Asset','Liability', 'Equity')
     AND A.ysnRevalue IS NULL
 GO
-    EXEC uspGLRefreshOverrideAccountTable 1
-GO
-
-

@@ -1371,32 +1371,6 @@ BEGIN
 	  AND (Acct.[intOtherChargeIncomeAccountId] IS NULL OR GLA.[intAccountId] IS NULL)
 	  AND I.strSessionId = @strSessionId
 	  AND Acct.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-         ([intInvoiceId]
-         ,[strInvoiceNumber]
-         ,[strTransactionType]
-         ,[intInvoiceDetailId]
-         ,[intItemId]
-         ,[strBatchId]
-         ,[strPostingError]
-		 ,[strSessionId])
-     --Sales Account Misc Items
-	SELECT
-          [intInvoiceId]         	= I.[intInvoiceId]
-         ,[strInvoiceNumber]     	= I.[strInvoiceNumber]        
-         ,[strTransactionType]   	= I.[strTransactionType]
-         ,[intInvoiceDetailId]   	= I.[intInvoiceDetailId]
-         ,[intItemId]            	= I.[intItemId]
-         ,[strBatchId]           	= I.[strBatchId]
-         ,[strPostingError]      	= 'The Sales Account for Company Location - ' + CL.[strLocationName] + ' was not specified.'
-		 ,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-	WHERE I.intItemId IS NULL
-	  AND I.strItemDescription IS NOT NULL
-	  AND CL.intSalesAccount IS NULL
-	  AND I.strSessionId = @strSessionId
 	
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
@@ -1930,40 +1904,7 @@ BEGIN
 		,[strPostingError]
 		,[strSessionId]			= @strSessionId
 	FROM 
-		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @OneBit)
-
-	--INVOICE HAS EARLIER DATE COMPARE TO STOCK DATE
-		INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= COSTING.[intTransactionDetailId]
-		,[intItemId]			= COSTING.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Stock is not available for ' + ITEM.strItemNo + ' at ' + CLOC.strLocationName + ' as of ' + CONVERT(NVARCHAR(30), CAST(COSTING.dtmDate AS DATETIME), 101) + '. Use the nearest stock available date of ' + CONVERT(NVARCHAR(30), CAST(STOCKDATE.dtmDate AS DATETIME), 101) + ' or later.'	
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceHeader I
-		INNER JOIN tblARPostItemsForCosting COSTING  ON I.intInvoiceId =  COSTING.intTransactionId
-		INNER JOIN  
-		(
-		SELECT intItemId,intItemLocationId,intItemUOMId,MAX(dtmDate)[dtmDate] 
-		FROM tblICInventoryStockAsOfDate 
-		GROUP BY  intItemId,intItemLocationId,intItemUOMId
-	) STOCKDATE ON COSTING.intItemId = STOCKDATE.intItemId AND COSTING.intItemUOMId = STOCKDATE.intItemUOMId AND STOCKDATE.intItemLocationId = COSTING.intItemLocationId
-	INNER JOIN tblICItem ITEM ON  ITEM.intItemId = COSTING.intItemId
-	INNER JOIN tblICItemLocation LOC ON COSTING.intItemLocationId = LOC.intItemLocationId
-	INNER JOIN tblSMCompanyLocation CLOC ON LOC.intLocationId = CLOC.intCompanyLocationId
-	WHERE COSTING.dtmDate < STOCKDATE.dtmDate
-	AND I.[strType] = 'POS'	
+		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCostingZeroCostValidation, @OneBit)
 
 	-- IC In Transit Costing
 	DELETE FROM @ItemsForInTransitCosting

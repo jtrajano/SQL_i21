@@ -7,7 +7,7 @@ CL.strLocationName,
 RT.strCurrencyExchangeRateType,
 FP.strPeriod,
 CASE WHEN CHARINDEX ('-F', Related.strTransactionId) > 0 THEN Related.strTransactionId ELSE '' END strBankFeesId,
-CASE WHEN CHARINDEX ('-F', Related.strTransactionId) > 0 THEN CAST(ISNULL(Related.dblAmount,0) AS BIT) ELSE CAST(0 AS BIT) END dblAmountFees,
+CASE WHEN CHARINDEX ('-F', Related.strTransactionId) > 0 THEN ISNULL(Related.dblAmount,0) ELSE 0 END dblAmountFees,
 CASE WHEN CHARINDEX ('-F', Related.strTransactionId) > 0 THEN CAST(ISNULL(Related.ysnPosted,0) AS BIT) ELSE CAST(0 AS BIT) END ysnPostedFees,
 CASE WHEN CHARINDEX ('-F', Related.strTransactionId) > 0 THEN Related.strMemo ELSE '' END strDescFees,
 CASE WHEN CHARINDEX ('-F', Related.strTransactionId) > 0 THEN (ISNULL(Related.dblAmount,0) +  

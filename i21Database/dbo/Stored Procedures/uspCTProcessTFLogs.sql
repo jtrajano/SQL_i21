@@ -118,9 +118,7 @@ BEGIN
 				)
 			select
 				strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' ELSE
-								CASE WHEN cd.intBankId <> et.intBankId THEN 'Bank Changed' 
-									 WHEN cd.intContractStatusId = 3 THEN 'Deleted Contract (Cancelled Sequence)'
-										ELSE 'Updated Contract' END end)
+								CASE WHEN cd.intBankId <> et.intBankId THEN 'Bank Changed' ELSE 'Updated Contract' END end)
 				, strTransactionType = 'Contract'
 				, intTradeFinanceTransactionId = null
 				, strTradeFinanceTransaction = isnull(cd.strFinanceTradeNo,tf.strFinanceTradeNo)
@@ -148,8 +146,8 @@ BEGIN
 				, intBorrowingFacilityId = cd.intBorrowingFacilityId
 				, intLimitId = cd.intBorrowingFacilityLimitId
 				, intSublimitId = cd.intBorrowingFacilityLimitDetailId
-				, strBankTradeReference = isnull(TFL.strBankTradeReference, cd.strReferenceNo)
-				, strBankApprovalStatus = isnull(TFL.strBankApprovalStatus, STF.strApprovalStatus)
+				, strBankTradeReference = cd.strReferenceNo
+				, strBankApprovalStatus = STF.strApprovalStatus
 				, dblLimit = limit.dblLimit
 				, dblSublimit = sublimit.dblLimit
 				, dblFinanceQty = CASE WHEN cd.intApprovalStatusId in (3,4) OR cd.intContractStatusId = 3 THEN 0 
@@ -159,7 +157,7 @@ BEGIN
 											ELSE case when cd.intContractStatusId <> 6 then cd.dblTotalCost else cd.dblTotalCost * ((cd.dblQuantity - cd.dblBalance) / cd.dblQuantity) end
 									  END) * (case when cd.intCurrencyId <> cd.intInvoiceCurrencyId and isnull(cd.dblRate,0) <> 0 then cd.dblRate else 1 end)
 				, strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
-				, ysnDelete =  CASE WHEN cd.intContractStatusId = 3 then 1 ELSE 0 end
+				, ysnDelete = 0
 				, VR.intBankValuationRuleId
 				, VR.strBankValuationRule
 			
@@ -180,7 +178,6 @@ BEGIN
 						  AND strTradeFinanceTransaction = cd.strFinanceTradeNo COLLATE Database_default
 					ORDER BY intTradeFinanceLogId Desc
 				) et
-				left join tblTRFTradeFinanceLog TFL on TFL.intTradeFinanceLogId = et.intTradeFinanceLogId
 			where isnull(cd.intBankId,0) > 0 AND ISNULL(tf.strRowState, '') <> 'Delete'
 			;
 

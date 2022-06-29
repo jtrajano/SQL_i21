@@ -22,7 +22,6 @@ BEGIN
 				,NULL				--,@ItemId
 				,EL.intEntityLocationId		--,@VendorLocationId
 				,3--L.intFreightTermId	--,@FreightTermId
-				,default --,@FOB
 			)
 		FROM tblLGLoad L
 		INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId

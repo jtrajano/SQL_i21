@@ -116,7 +116,6 @@ CREATE TABLE #INVOICES (
 	 , strFooterComments			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	 , intOriginalInvoiceId			INT				NULL
 	 , dblServiceChargeAPR			NUMERIC(18, 6)	NULL DEFAULT 0
-	 , strLogoType					NVARCHAR(10)	COLLATE Latin1_General_CI_AS NULL
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -289,8 +288,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	, ysnIncludeEntityName
 	, strFooterComments
 	, intOriginalInvoiceId
-	, dblServiceChargeAPR
-	, strLogoType
+	,dblServiceChargeAPR
 )
 SELECT 
 	 intInvoiceId					= INV.intInvoiceId
@@ -329,7 +327,7 @@ SELECT
 	, strShipVia					= SHIPVIA.strName
 	, strTerm						= TERM.strTerm
 	, dtmShipDate					= INV.dtmShipDate
-	, dtmDueDate					= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') AND INV.strType <> 'Service Charge'
+	, dtmDueDate					= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
 										THEN INVOICEDETAIL.dtmDueDate
 										ELSE INV.dtmDueDate
 									  END
@@ -395,7 +393,7 @@ SELECT
 	, strTrailer					= INVOICEDETAIL.strTrailerNumber
 	, strSeals						= INVOICEDETAIL.strSealNumber
 	, strLotNumber					= CAST('' AS NVARCHAR(200))
-	, blbLogo                  		= ISNULL(SMLP.imgLogo, CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END)
+	, blbLogo                  		= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
 	, strAddonDetailKey				= INVOICEDETAIL.strAddonDetailKey
 	, strBOLNumberDetail			= INVOICEDETAIL.strBOLNumberDetail
 	, ysnHasAddOnItem				= CAST(0 AS BIT)
@@ -421,7 +419,6 @@ SELECT
 	, strFooterComments				= INV.strFooterComments
 	, intOriginalInvoiceId			= INV.intOriginalInvoiceId
 	, dblServiceChargeAPR			= ISNULL(INVOICEDETAIL.dblServiceChargeAPR, 0.00)
-	, strLogoType					= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -533,7 +530,6 @@ LEFT JOIN (
 	INNER JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
 	GROUP BY ARPD.intInvoiceId
 ) PAYMENT ON INVOICEDETAIL.intSCInvoiceId = PAYMENT.intInvoiceId
-LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = INV.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
 
 --CUSTOMERS
 SELECT intEntityCustomerId	= C.intEntityId
@@ -804,7 +800,6 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	, strServiceChareInvoiceNumber
 	, dtmDateSC
 	, dblServiceChargeAPR
-	, strLogoType
 )
 SELECT 
 	 intInvoiceId
@@ -906,7 +901,6 @@ SELECT
 	, strServiceChareInvoiceNumber
 	, dtmDateSC
 	, dblServiceChargeAPR
-	, strLogoType
 FROM #INVOICES
 
 --UPDATE STAGING
