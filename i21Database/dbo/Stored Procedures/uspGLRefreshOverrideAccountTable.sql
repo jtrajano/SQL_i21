@@ -14,7 +14,7 @@ BEGIN
     ALTER TABLE dbo.tblGLOverrideAccount ADD strOverrideAccount AS (
         [Primary Account] +
         CASE WHEN [Location] IS NULL THEN '' ELSE  '-' +[Location]  END + 
-        CASE WHEN [Line of business] IS NULL THEN  '' ELSE '-' +[Line of business] END + 
+        CASE WHEN [Line Of business] IS NULL THEN  '' ELSE '-' +[Line Of business] END + 
         CASE WHEN [Company] IS NULL THEN '' ELSE '-'+ [Company] END 
     )
 
@@ -25,8 +25,8 @@ BEGIN
     IF @ysnMissingAccounts = 1
     BEGIN
         EXEC(
-        'INSERT INTO tblGLOverrideAccount (strAccountId, intAccountId,[Primary Account], [Location], [Line of business], [Company])
-        SELECT strAccountId, intAccountId,[Primary Account], [Location], [Line of business], [Company]  
+        'INSERT INTO tblGLOverrideAccount (strAccountId, intAccountId,[Primary Account], [Location], [Line Of business], [Company])
+        SELECT strAccountId, intAccountId,[Primary Account], [Location], [Line Of business], [Company]  
         FROM tblGLTempCOASegment WHERE intAccountId NOT IN (SELECT intAccountId FROM tblGLOverrideAccount)')
     END
 END
@@ -64,7 +64,7 @@ BEGIN
         SELECT @intStructureType=intStructureType,@intLength = intLength FROM @tblTemp WHERE intRowId = @i 
 
         IF @intStructureType = 3 SET @colName = '[Location]'
-        IF @intStructureType = 5 SET @colName = '[Line of business]'
+        IF @intStructureType = 5 SET @colName = '[Line Of business]'
         IF @intStructureType = 6 SET @colName = '[Company]'
 
         SET @sqlExec = 'UPDATE tblGLOverrideAccount SET '+ @colName +' = REPLICATE(''X'',' + cast(@intLength as nvarchar(2)) +')'
