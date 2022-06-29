@@ -177,8 +177,7 @@ BEGIN
   EXEC ('CREATE VIEW [dbo].[vyuGLSummary]  
    AS  
    SELECT * FROM (  
-     SELECT  A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'''') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit, A.intCurrenc
-yId, F.strCurrency,B.intUnnaturalAccountId,A.intLedgerId        
+     SELECT  A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'''') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit, A.intCurrencyId, F.strCurrency,B.intUnnaturalAccountId,A.intLedgerId        
       FROM  dbo.tblGLPosted AS A     
        INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId     
        INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId    
