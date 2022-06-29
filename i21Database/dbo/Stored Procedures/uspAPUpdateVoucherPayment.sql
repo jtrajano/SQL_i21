@@ -87,11 +87,10 @@ BEGIN TRY
 
 		--UPDATE PAYMENT SCHEDULE
 		UPDATE PS
-		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) <> 0 THEN 1 ELSE 0 END
+		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) > 0 THEN 1 ELSE 0 END
 		FROM tblAPPayment P
 		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
-		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intBillId = B.intBillId
+		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
 		OUTER APPLY (
 			SELECT SUM(PD2.dblPayment) dblPayment
 			FROM tblAPPaymentDetail PD2
@@ -167,11 +166,10 @@ BEGIN TRY
 	BEGIN
 		--UPDATE PAYMENT SCHEDULE
 		UPDATE PS
-		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) <> 0 THEN 1 ELSE 0 END
+		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) > 0 THEN 1 ELSE 0 END
 		FROM tblAPPayment P
 		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
-		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intBillId = B.intBillId
+		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
 		OUTER APPLY (
 			SELECT SUM(PD2.dblPayment) dblPayment
 			FROM tblAPPaymentDetail PD2

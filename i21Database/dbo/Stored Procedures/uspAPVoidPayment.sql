@@ -130,7 +130,8 @@ BEGIN
 			[ysnPrinted],
 			[ysnDeleted],
 			[dtmDateDeleted],
-			[ysnPrepay]
+			[ysnPrepay],
+			[ysnNewFlag]
 		)
 		VALUES
 		(
@@ -161,7 +162,8 @@ BEGIN
 			p.[ysnPrinted],
 			p.[ysnDeleted],
 			p.[dtmDateDeleted],
-			p.[ysnPrepay]
+			p.[ysnPrepay],
+			1
 		)
 		OUTPUT p.intPaymentId, inserted.intPaymentId INTO #tmpPayables(intPaymentId, intNewPaymentId); --get the new and old payment id
 
@@ -384,11 +386,11 @@ BEGIN
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 	UPDATE C
-		SET C.dblAmountDue = ABS(B.dblAmountDue),
-			C.ysnPaid = 0,
+		SET C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - ABS( + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END
+			C.dblPayment = CASE WHEN (C.dblPayment - ABS( + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END,
+			C.dblAmountDue = C.dblTotal - (CASE WHEN (C.dblPayment - ABS( + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END)
 	FROM tblAPPayment A
 	INNER JOIN (
 		SELECT intPaymentId, intBillId, intOrigBillId, SUM(dblPayment) dblPayment, SUM(dblDiscount) dblDiscount, SUM(dblAmountDue) dblAmountDue
