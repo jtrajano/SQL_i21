@@ -422,6 +422,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeePaycheck.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -581,6 +581,62 @@ BEGIN
 
 	END
 	
+	--Recalculate  
+	 UPDATE tblPRPaycheck
+	 SET dblTotalHours = PCS.dblTotalHours
+	 ,dblGross = PCS.dblTotalEarning
+	 ,dblAdjustedGross = PCS.dblAdjustedGross
+	 ,dblTaxTotal = PCS.dblTotalTax
+	 ,dblDeductionTotal = PCS.dblTotalDeduction
+	 ,dblNetPayTotal = PCS.dblTotalNetPay
+	 ,dblCompanyTaxTotal = PCS.dblTotalCompanyTax
+	 FROM
+	 (
+	 SELECT 
+		 PCE.dblTotalHours
+		,PCE.dblTotalEarning
+		,(PCE.dblTotalEarning - PCD.dblTotalDeduction) AS dblAdjustedGross
+		,PCTE.dblTotalTax
+		,PCD.dblTotalDeduction
+		,(PCE.dblTotalEarning - (PCTE.dblTotalTax + PCD.dblTotalDeduction)) AS dblTotalNetPay
+		,ISNULL(PCTC.dblTotalTax,0) AS dblTotalCompanyTax
+	FROM tblPRPaycheck PC
+	LEFT JOIN 
+	(
+		select intPaycheckId,SUM(dblHours) AS dblTotalHours, SUM(dblTotal) AS dblTotalEarning from tblPRPaycheckEarning
+		group by intPaycheckId
+	) PCE
+	ON PC.intPaycheckId = PCE.intPaycheckId
+	LEFT JOIN 
+	(
+		select intPaycheckId,SUM(dblTotal) AS dblTotalDeduction from tblPRPaycheckDeduction D
+		left join tblPRTypeDeduction TD
+		on TD.intTypeDeductionId = D.intTypeDeductionId
+		where TD.strPaidBy = 'Employee'
+		group by intPaycheckId
+	) PCD
+	ON PC.intPaycheckId = PCD.intPaycheckId
+	LEFT JOIN 
+	(
+		select intPaycheckId,SUM(dblTotal) AS dblTotalTax from tblPRPaycheckTax PCT 
+		LEFT JOIN tblPRTypeTax T
+		ON T.intTypeTaxId = PCT.intTypeTaxId
+		where T.strPaidBy = 'Employee'
+		group BY intPaycheckId
+	) PCTE
+	ON PC.intPaycheckId = PCTE.intPaycheckId
+	LEFT JOIN 
+	(
+		select intPaycheckId,ISNULL(SUM(dblTotal),0) AS dblTotalTax from tblPRPaycheckTax PCT 
+		LEFT JOIN tblPRTypeTax T
+		ON T.intTypeTaxId = PCT.intTypeTaxId
+		where T.strPaidBy = 'Company'
+		group BY intPaycheckId
+	) PCTC
+	ON PC.intPaycheckId = PCTC.intPaycheckId
+	WHERE PC.intPaycheckId = @intNewPaycheckId
+	)PCS
+
 	--DELETE GROUPINGS    
 	DELETE FROM #TempPaycheckGroupId WHERE intOriginalPaycheckId = @PaycheckGroupId    
 
