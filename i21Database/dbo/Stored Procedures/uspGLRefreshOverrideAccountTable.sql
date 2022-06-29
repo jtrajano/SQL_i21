@@ -11,10 +11,12 @@ BEGIN
         EXEC ('DROP TABLE tblGLOverrideAccount')
 
     SELECT * INTO tblGLOverrideAccount FROM tblGLTempCOASegment
-    ALTER TABLE dbo.tblGLOverrideAccount ADD strOverrideAccount AS ( [Primary Account] +
-    IIF( [Location] IS NULL, '', '-' +[Location] ) + 
-    IIF( [Line of business] IS NULL, '', '-' +[Line of business] ) + 
-    IIF( [Company] IS NULL, '','-'+ [Company]))
+    ALTER TABLE dbo.tblGLOverrideAccount ADD strOverrideAccount AS (
+        [Primary Account] +
+        CASE WHEN [Location] IS NULL THEN '' ELSE  '-' +[Location]  END + 
+        CASE WHEN [Line of business] IS NULL THEN  '' ELSE '-' +[Line of business] END + 
+        CASE WHEN [Company] IS NULL THEN '' ELSE '-'+ [Company] END 
+    )
 
 END
 ELSE
@@ -22,9 +24,10 @@ BEGIN
     SELECT TOP 1 @ysnMissingAccounts = 1  FROM tblGLTempCOASegment WHERE intAccountId NOT IN (SELECT intAccountId FROM tblGLOverrideAccount)
     IF @ysnMissingAccounts = 1
     BEGIN
-        INSERT INTO tblGLOverrideAccount (strAccountId, intAccountId,[Primary Account], [Location], [Line of business], [Company])
+        EXEC(
+        'INSERT INTO tblGLOverrideAccount (strAccountId, intAccountId,[Primary Account], [Location], [Line of business], [Company])
         SELECT strAccountId, intAccountId,[Primary Account], [Location], [Line of business], [Company]  
-        FROM tblGLTempCOASegment WHERE intAccountId NOT IN (SELECT intAccountId FROM tblGLOverrideAccount)
+        FROM tblGLTempCOASegment WHERE intAccountId NOT IN (SELECT intAccountId FROM tblGLOverrideAccount)')
     END
 END
 
