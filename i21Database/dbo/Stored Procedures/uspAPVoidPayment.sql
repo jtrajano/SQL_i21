@@ -389,8 +389,8 @@ BEGIN
 		SET C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - ABS( + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END,
-			C.dblAmountDue = C.dblTotal - (CASE WHEN (C.dblPayment - ABS( + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END)
+			C.dblPayment = (CASE WHEN C.intTransactionType IN (2, 13) AND C.dblPayment = 0 THEN C.dblTotal ELSE C.dblPayment END) - ABS(B.dblPayment + B.dblDiscount),
+			C.dblAmountDue = C.dblTotal - (((CASE WHEN C.intTransactionType IN (2, 13) AND C.dblPayment = 0 THEN C.dblTotal ELSE C.dblPayment END) - ABS(B.dblPayment + B.dblDiscount)))
 	FROM tblAPPayment A
 	INNER JOIN (
 		SELECT intPaymentId, intBillId, intOrigBillId, SUM(dblPayment) dblPayment, SUM(dblDiscount) dblDiscount, SUM(dblAmountDue) dblAmountDue
