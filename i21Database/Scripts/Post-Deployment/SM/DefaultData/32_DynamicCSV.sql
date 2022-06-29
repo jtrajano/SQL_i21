@@ -482,6 +482,11 @@ UPDATE tblSMCSVDynamicImport SET
 		declare @taxgroupId							int
 		declare @lobid								int
 
+		if ISNULL(@entityno, '''') = '''' AND ISNULL(@detailcustomerno, '''') <> ''''
+		begin
+			SET @entityno = @detailcustomerno
+		end
+		
 		if @entityno <> '''' 
 		begin
 			if exists(select top 1 intEntityId from tblEMEntity where strEntityNo = @entityno)
@@ -1715,14 +1720,22 @@ UPDATE tblSMCSVDynamicImport SET
 	DECLARE @ShipViaId		INT
 	DECLARE @AmountS		NVARCHAR(100)
 	DECLARE @Amount			NUMERIC (18, 6)	
-	DECLARE @RateS			NVARCHAR(100)
-	DECLARE @Rate			NUMERIC (18, 6)
+	DECLARE @FreightOutStr	NVARCHAR(100)
+	DECLARE @FreightOut		NUMERIC (18, 6)
+	DECLARE @FreightInStr	NVARCHAR(100)
+	DECLARE @FreightIn		NUMERIC (18, 6)
 	DECLARE @MilesS			NVARCHAR(100)
 	DECLARE @Miles			NUMERIC (18, 6)
 	DECLARE @FreightPrice	NVARCHAR(100)
 	DECLARE @FreightPriceB	BIT
 	DECLARE @UnitS			NVARCHAR(100)
-	DECLARE @Unit			NUMERIC (18, 6)	
+	DECLARE @Unit			NUMERIC (18, 6)
+	DECLARE @UnitInS		NVARCHAR(100)
+	DECLARE @UnitIn			NUMERIC (18, 6)
+	DECLARE @TariffType		NVARCHAR(100)
+	DECLARE @TariffTypeId	INT
+	DECLARE @SurchargeOutS	NVARCHAR(100)
+	DECLARE @SurchargeOut	NUMERIC (18, 6)
 
 	SELECT
 			@EntityNo 		= ''@entityCustomerId@'',
@@ -1733,21 +1746,29 @@ UPDATE tblSMCSVDynamicImport SET
 			@FreightType 	= ''@freighttype@'',
 			@ShipVia 		= ''@freightshipvia@'',
 			@AmountS		= ''@freightamount@'',
-			@RateS			= ''@freightrate@'',
+			@FreightOutStr	= ''@freightrateout@'',
+			@FreightInStr	= ''@freightratein@'',
 			@MilesS			= ''@freightmiles@'',
 			@FreightPrice	= LOWER(''@freightprice@''),
 			@UnitS			= ''@freightunit@'',
+			@UnitInS		= ''@freightunitIn@'',
+			@TariffType		= ''@tarifftype@'',
+			@SurchargeOutS  = ''@surchargeout@'',
 			
 			@CusLocId 		= NULL,
 			@ItemCatId		= NULL,
 			@FreightOnlyB	= 0,
 			@ShipViaId		= NULL,
 			@Amount			= 0,
-			@Rate			= 0,
+			@FreightOut		= 0,
+			@FreightIn		= 0,
 			@Miles			= 0,
 			@FreightPriceB	= 0,
 			@Unit			= 0,
-			@EntityId		= NULL
+			@UnitIn			= 0,
+			@EntityId		= NULL,
+			@TariffTypeId	= NULL,
+			@SurchargeOut   = 0
 
 	
 
@@ -1785,6 +1806,18 @@ UPDATE tblSMCSVDynamicImport SET
 		END			
 
 	END
+
+
+	IF @TariffType <> ''''   
+	BEGIN    
+		SELECT @TariffTypeId = ET.intEntityTariffTypeId    FROM      tblEMEntityTariffType ET   WHERE ET.strTariffType = @TariffType      
+		IF ISNULL(@TariffTypeId, 0) <= 0    
+		BEGIN     
+			SET @ValidationMessage = @ValidationMessage + '',Tariff Type does not exists.''     
+			SET @IsValid = 0    
+		END     
+	END 
+
 		
 	IF @AmountS <> ''''
 	BEGIN
@@ -1798,13 +1831,25 @@ UPDATE tblSMCSVDynamicImport SET
 
 	END
 	
-	IF @RateS <> ''''
+	IF @FreightOutStr <> ''''
 	BEGIN
-		IF ISNUMERIC(@RateS) = 1
-			SELECT @Rate = CAST(@RateS AS NUMERIC(18,6))
+		IF ISNUMERIC(@FreightOutStr) = 1
+			SELECT @FreightOut = CAST(@FreightOutStr AS NUMERIC(18,6))
 		ELSE
 		BEGIN
-			SET @ValidationMessage	= @ValidationMessage + '',Rate is invalid.''
+			SET @ValidationMessage	= @ValidationMessage + '',Freight Rate Out is invalid.''
+			SET @IsValid = 0
+		END
+
+	END
+
+	IF @FreightInStr <> ''''
+	BEGIN
+		IF ISNUMERIC(@FreightInStr) = 1
+			SELECT @FreightIn = CAST(@FreightInStr AS NUMERIC(18,6))
+		ELSE
+		BEGIN
+			SET @ValidationMessage	= @ValidationMessage + '',Freight Rate In is invalid.''
 			SET @IsValid = 0
 		END
 
@@ -1828,12 +1873,37 @@ UPDATE tblSMCSVDynamicImport SET
 			SELECT @Unit = CAST(@UnitS AS NUMERIC(18,6))
 		ELSE
 		BEGIN
-			SET @ValidationMessage	= @ValidationMessage + '',Unit is invalid.''
+			SET @ValidationMessage	= @ValidationMessage + '',Minimum Units Out is invalid.''
 			SET @IsValid = 0
 		END
 
 	END
 
+
+	IF @UnitInS <> ''''
+	BEGIN
+		IF ISNUMERIC(@UnitInS) = 1
+			SELECT @UnitIn = CAST(@UnitInS AS NUMERIC(18,6))
+		ELSE
+		BEGIN
+			SET @ValidationMessage	= @ValidationMessage + '',Mininum Units In is invalid.''
+			SET @IsValid = 0
+		END
+
+	END
+
+
+	IF @SurchargeOutS <> ''''
+	BEGIN
+		IF ISNUMERIC(@SurchargeOutS) = 1
+			SELECT @SurchargeOut = CAST(@SurchargeOutS AS NUMERIC(18,6))
+		ELSE
+		BEGIN
+			SET @ValidationMessage	= @ValidationMessage + '',Surcharge-Out is invalid.''
+			SET @IsValid = 0
+		END
+
+	END
 
 	
 
@@ -1869,27 +1939,36 @@ UPDATE tblSMCSVDynamicImport SET
 		BEGIN
 			IF LOWER(@FreightType) = ''amount''
 			BEGIN
-				SELECT @ShipViaId = NULL, 	
-						@Rate = 0,			@Miles = 0,
-						@Unit = 0
+				SELECT  @ShipViaId = NULL, 	
+						@FreightIn = 0,			@Miles = 0, 
+						@FreightOut = 0,
+						@Unit = 0,
+						@UnitIn = 0,
+						@SurchargeOut = 0
+
 			END
 			ELSE IF LOWER(@FreightType) = ''miles''
 			BEGIN
-				SELECT @Amount = 0,
-						@Rate = 0,			
-						@Unit = 0
+				SELECT  @Amount = 0,
+						@FreightIn = 0,		
+						@FreightOut = 0,			
+						@Unit = 0,
+						@UnitIn = 0,
+						@SurchargeOut = 0
 
 			END
 			ELSE IF LOWER(@FreightType) = ''rate''
 			BEGIN
-				SELECT @ShipViaId = NULL, 	@Amount = 0,
-						@Miles = 0
+				SELECT @Amount = 0, @Miles = 0
 			END
 			ELSE
 			BEGIN
-				SELECT @ShipViaId = NULL, 	@Amount = 0,
-						@Rate = 0,			@Miles = 0,
-						@Unit = 0
+				SELECT 	@Amount = 0,
+						@FreightIn = 0,			
+						@FreightOut = 0,	
+						@Unit = 0,
+						@Miles = 0,
+						@UnitIn = 0
 			END
 			BEGIN TRY
 				INSERT INTO tblARCustomerFreightXRef(
@@ -1899,16 +1978,20 @@ UPDATE tblSMCSVDynamicImport SET
 					dblMinimumUnits,			ysnFreightInPrice,
 					dblFreightMiles,			intShipViaId,
 					intEntityLocationId,		strZipCode,
-					intConcurrencyId	
+					intEntityTariffTypeId,		intConcurrencyId,
+					dblFreightRateIn,			dblMinimumUnitsIn,
+					dblSurchargeOut
 				)
 				SELECT
 					@EntityId,					@ItemCatId,
 					@FreightOnlyB,				@FreightType,
-					@Amount,					@Rate,
+					@Amount,					@FreightOut,
 					@Unit,						@FreightPriceB,
 					@Miles,						@ShipViaId,
 					@CusLocId,					@ZipCode,
-					0
+					@TariffTypeId,				0,
+					@FreightIn,					@UnitIn,
+					@SurchargeOut
 			END TRY
 			BEGIN CATCH
 				DECLARE @Err NVARCHAR(MAX)
@@ -1916,7 +1999,7 @@ UPDATE tblSMCSVDynamicImport SET
 				SELECT @Err
 				IF CHARINDEX(''uk_tblarcustomerfreightxref_reference_columns'', LOWER(@Err)) > 0
 				BEGIN
-					SET @ValidationMessage = ''Duplicate combination of (Location, Zip Code & Category) entry for Customer (@entityCustomerId@).''
+					SET @ValidationMessage = ''Duplicate combination of (Location, Zip Code, Category, and Fixed Ship Via) entry for Customer (@entityCustomerId@).''
 				END
 				ELSE
 				BEGIN
@@ -1957,13 +2040,21 @@ UPDATE tblSMCSVDynamicImport SET
 	Union All
 	SELECT @NewHeaderId, 'freightamount', 'Freight Amount', 0
 	Union All
-	SELECT @NewHeaderId, 'freightrate', 'Freight Rate', 0
+	SELECT @NewHeaderId, 'freightrateout', 'Freight-Out', 0
+	Union All
+	SELECT @NewHeaderId, 'freightratein', 'Freight-In', 0
 	Union All
 	SELECT @NewHeaderId, 'freightmiles', 'Freight Miles', 0
 	Union All
 	SELECT @NewHeaderId, 'freightprice', 'Freight in Price', 0
 	Union All
-	SELECT @NewHeaderId, 'freightunit', 'Minimum Units', 0
+	SELECT @NewHeaderId, 'freightunit', 'Minimum Unit-Out', 0
+	Union All
+	SELECT @NewHeaderId, 'freightunitin', 'Minimum Unit-In', 0
+	Union All
+	SELECT @NewHeaderId, 'surchargeout', 'Surcharge-Out', 0
+	Union All
+	SELECT @NewHeaderId, 'tarifftype', 'Tariff Type', 1
 
 --Transport Freight Tab End
 
