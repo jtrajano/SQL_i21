@@ -45,7 +45,6 @@ v.intKey
 , COALESCE(v.strReceiveUOM, stockUnit.strUnitMeasure) strReceiveUOM
 , v.strReceiveUPC
 , v.strReceiveLongUPC
-, v.strReceieveLongUPC
 , COALESCE(EffectivePrice.dblRetailPrice, v.dblReceiveSalePrice) dblReceiveSalePrice
 , v.dblReceiveMSRPPrice
 , COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(v.intItemId, v.intItemLocationId, intReceiveUOMId, tsession.dtmTransactionDate), EffectiveCost.dblCost, v.dblReceiveLastCost) dblReceiveLastCost

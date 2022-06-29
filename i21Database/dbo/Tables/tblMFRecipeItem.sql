@@ -36,6 +36,8 @@
 	[intSequenceNo] INT NULL,
 	ysnPartialFillConsumption BIT NOT NULL CONSTRAINT [DF_tblMFRecipeItem_ysnPartialFillConsumption] DEFAULT 1,
 	[intManufacturingCellId] [int] NULL,
+	ysnComplianceItem BIT NOT NULL CONSTRAINT [DF_tblMFRecipeItem_ysnComplianceItem] DEFAULT 0,
+	dblCompliancePercent NUMERIC(18, 6),
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
