@@ -51,7 +51,7 @@ BEGIN
 END
 
 -- remove duplicates
-WITH dup AS(
+;WITH dup AS(
 	SELECT  ROW_NUMBER() OVER ( PARTITION BY d.strSourceTransactionId ORDER BY d.intUndepositedFundId ) rowId, d.intUndepositedFundId
 	FROM	dbo.tblCMUndepositedFund d 
 	LEFT JOIN tblCMBankTransactionDetail CM 
@@ -168,7 +168,7 @@ SELECT
 FROM CTE
 WHERE 
 strSourceTransactionId NOT IN (SELECT strSourceTransactionId FROM tblCMundepositedFund)
-dblAmount <> 0
+AND dblAmount <> 0
 
 
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
