@@ -89,18 +89,7 @@ SELECT
 		,b.intCurrencyId
 		
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
-			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
---WHERE	NOT EXISTS (
---			SELECT TOP 1 1
---			FROM	tblCMUndepositedFund f
---			WHERE	f.strSourceTransactionId = ( 
---							CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
---							+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
---							+ CAST(v.aptrx_cbk_no AS NVARCHAR(2)) 
---							+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
---						) COLLATE Latin1_General_CI_AS
---		)
-
+			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS
 UNION SELECT DISTINCT
 	ISNULL(v.intBankAccountId,@intBankAccountId)  intBankAccountId,
 	strSourceTransactionId,
@@ -123,7 +112,7 @@ UNION SELECT DISTINCT
 	v.intCurrencyId
 FROM vyuARUndepositedPayment v
 LEFT JOIN tblARPayment p on p.strRecordNumber = v.strSourceTransactionId
-		AND isnull(p.intPaymentMethodId,0) <> 9 -- EXEMPT CF INVOICE
+WHERE ISNULL(p.intPaymentMethodId,0) <> 9 -- EXEMPT CF INVOICE
 )
 
 INSERT INTO tblCMUndepositedFund (
