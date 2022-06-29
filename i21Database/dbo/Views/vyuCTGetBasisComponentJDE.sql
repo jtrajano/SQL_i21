@@ -47,7 +47,7 @@ SELECT DISTINCT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intCo
         FROM
             CTECert where intContractDetailId = CD.intContractDetailId
         FOR XML PATH('')),' #!',', '), 1, 2, '')
-    )
+    )  COLLATE Latin1_General_CI_AS
     , ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
     , strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS
     , strOrigin = ISNULL(RY.strCountry, OG.strCountry)

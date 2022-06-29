@@ -595,6 +595,21 @@ BEGIN
 		AND A.intPayToBankAccountId IS NULL
 		AND B.intPaymentMethodId = 2 --ACH
 
+		--VALIDATE PAY TO BANK ACCOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'The Tax Adjustment account of Tax Code - ' + TC.strTaxCode + ' was not set.',
+			'Bill',
+			B.strBillId,
+			B.intBillId,
+			37
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
+		LEFT JOIN tblSMTaxCode TC ON TC.intTaxCodeId = BDT.intTaxCodeId
+		WHERE B.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
+
 		--You cannot post intra-location transaction without due to account. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
@@ -624,7 +639,7 @@ BEGIN
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
 		AND DUETO.[ysnAllowSingleLocationEntries] = 0
-		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
+		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId], 3) = 0
 
 		--You cannot post intra-location transaction without due from account. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
@@ -655,7 +670,7 @@ BEGIN
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		  AND ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
 		  AND DUEFROM.[ysnAllowSingleLocationEntries] = 0
-		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
+		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId], 3) = 0
 
 		--You cannot post if location segment of AP Account and Payable Account when single location entry is enabled. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
@@ -673,21 +688,7 @@ BEGIN
 		) APCP
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		  AND APCP.[ysnAllowSingleLocationEntries] = 1
-		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId]) = 0
-
-		--VALIDATE PAY TO BANK ACCOUNT
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
-		SELECT
-			'The Tax Adjustment account of Tax Code - ' + TC.strTaxCode + ' was not set.',
-			'Bill',
-			B.strBillId,
-			B.intBillId,
-			37
-		FROM tblAPBill B
-		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
-		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
-		LEFT JOIN tblSMTaxCode TC ON TC.intTaxCodeId = BDT.intTaxCodeId
-		WHERE B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
+		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId], 3) = 0
 
 	END
 	ELSE

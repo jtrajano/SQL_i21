@@ -70,7 +70,7 @@ strISO = (CASE WHEN (LOWER(cfNet.strNetworkType) != 'nbs')
 ,cfCard.dtmCardExpiratioYearMonth
 ,cfNet.dtmGlobalCardExpirationDate
 ,strCompanyName				= smCompSetup.strCompanyName
-,strCompanyAddress			= smCompSetup.strCompanyAddress
+,strCompanyAddress			= smCompSetup.strCompanyAddress COLLATE Latin1_General_CI_AS
 ,strCompanyPhone		 = smCompSetup.strPhone
 ,strCompanyEmail		 = smCompSetup.strEmail
 ,strBillTo =  dbo.fnARFormatCustomerAddress (
@@ -83,7 +83,7 @@ strISO = (CASE WHEN (LOWER(cfNet.strNetworkType) != 'nbs')
 				,emEnt.strBillToZipCode
 				,emEnt.strBillToCountry
 				,emEnt.strName
-				,NULL)
+				,NULL) COLLATE Latin1_General_CI_AS
 FROM tblCFEncodeCard as cfEncodeCard
 INNER JOIN tblCFCard as cfCard
 ON cfEncodeCard.intCardId = cfCard.intCardId
@@ -105,5 +105,3 @@ OUTER APPLY (
 ) AS smCompSetup
 
 GO
-
-

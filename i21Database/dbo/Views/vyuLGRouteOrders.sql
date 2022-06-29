@@ -33,20 +33,15 @@ SELECT
  ,Rte.strToState
  ,Rte.strToZipCode
  ,Rte.strToCountry
- ,Rte.strRoute
  ,Rte.dblBalance
  ,Rte.strOrderNumber
  ,Rte.dtmScheduledDate 
- ,Rte.dtmHoursFrom
- ,Rte.dtmHoursTo
  ,Rte.strEntityName 
  ,Rte.strOrderStatus
  ,Rte.strItemNo
  ,Rte.dblQuantity
  ,Rte.strCustomerReference
  ,Rte.strOrderComments
- ,Rte.strOneTimeComments
- ,Rte.strDeliveryComments
  ,Rte.strLocationType
  ,strDestination = Rte.strToAddress + ', ' + Rte.strToCity + ', ' + Rte.strToState + ' ' + Rte.strToZipCode 
  ,Rte.strLocationName

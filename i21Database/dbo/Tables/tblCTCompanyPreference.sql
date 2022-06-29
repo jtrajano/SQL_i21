@@ -5,7 +5,7 @@
     ysnAssignPurchaseContract BIT NULL,
 	ysnRequireDPContract BIT NULL,
 	ysnApplyScaleToBasis BIT NULL,
-	intPriceCalculationTypeId INT NULL,
+	intPriceCalculationTypeId INT NOT NULL DEFAULT 3,
 	intConcurrencyId INT NOT NULL DEFAULT 1,
 	strLotCalculationType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	ysnPartialPricing BIT,

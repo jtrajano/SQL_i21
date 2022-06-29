@@ -67,7 +67,8 @@ BEGIN
 	SELECT
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
-		,[intAccountId]                 = (CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
+		,[intAccountId]                 = (CASE WHEN P.[ysnUserDefinedPaymentMethod] = 1 AND P.[intPaymentMethodAccountId] <> 0 THEN P.[intPaymentMethodAccountId]
+                                                WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
 												WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
 												ELSE P.[intAccountId]
 										  END)
@@ -587,9 +588,7 @@ BEGIN
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
-		AND ((P.[dblInterest] <> @ZeroDecimal AND P.[dblPayment] = @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
-			OR
-			(P.[dblBaseInterest] <> @ZeroDecimal AND P.[dblBasePayment] = @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
+		AND P.[dblInterest] <> @ZeroDecimal
 
     --CREDIT PAYMENT DETAILS
     INSERT #ARPaymentGLEntries
@@ -1077,12 +1076,9 @@ BEGIN
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
-		AND ((P.[dblInterest] <> @ZeroDecimal AND P.[dblPayment] = @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
-			OR
-			(P.[dblBaseInterest] <> @ZeroDecimal AND P.[dblBasePayment] = @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
+		AND P.[dblInterest] <> @ZeroDecimal
 
     --CREDIT CONVENIENCE FEE
-    --CREDIT INTEREST
     INSERT #ARPaymentGLEntries
         ([dtmDate]
         ,[strBatchId]

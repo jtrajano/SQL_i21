@@ -235,6 +235,8 @@ DECLARE  @Id									INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
 		,@SourcedFrom							NVARCHAR(100)
+		,@TaxLocationId							INT
+		,@TaxPoint								NVARCHAR(50)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -454,6 +456,8 @@ BEGIN
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
+		,@TaxLocationId					= [intTaxLocationId]
+		,@TaxPoint						= [strTaxPoint]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -740,6 +744,8 @@ BEGIN
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
 			,@SourcedFrom					= @SourcedFrom
+			,@TaxLocationId					= @TaxLocationId
+			,@TaxPoint						= @TaxPoint
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -1783,7 +1789,7 @@ BEGIN TRY
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 						,@ItemConversionAccountId		= [intConversionAccountId]
-						,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
+						,@ItemCurrencyExchangeRateTypeId= [intCurrencyExchangeRateTypeId]
 						,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
 						,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 						,@ItemSubCurrencyId				= [intSubCurrencyId]

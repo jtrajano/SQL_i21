@@ -13,6 +13,7 @@ BEGIN
 	where
 		a.intEntityCustomerId = @intEntityCustomerId
 		and a.strCompanyId = @strCompanyId
+		and b.ysnAddonComponent = 0
 		and b.ysnEnabled = convert(bit,1)
 		
 

@@ -114,7 +114,16 @@ Type the overview for the table here.
 		ON [dbo].[tblICInventoryReceiptItem] ([intInventoryTransferId])
 
 	GO
+
+	CREATE NONCLUSTERED INDEX IX_tblICInventoryReceiptItem_Lookup1
+		ON tblICInventoryReceiptItem (intInventoryReceiptId ASC)
+		INCLUDE (intLineNo, intOrderId, intSourceId, intContainerId, intSubLocationId, intStorageLocationId, intUnitMeasureId, intWeightUOMId)
+	GO
 		
+	CREATE NONCLUSTERED INDEX IX_tblICInventoryReceiptItem_Lookup2
+		ON tblICInventoryReceiptItem (intItemId ASC)
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Inventory Receipt Id',
 		@level0type = N'SCHEMA',

@@ -2651,9 +2651,9 @@ BEGIN TRY
 							,strPriceUOM NVARCHAR(50) Collate Latin1_General_CI_AS
 							,intContractSeq INT
 							,dtmEndDate DATETIME
-							,dblDetailQuantity NUMERIC(18, 6)
-							,dblOriginalQty NUMERIC(18, 6)
-							,dblBalance NUMERIC(18, 6)
+							,dblDetailQuantity NUMERIC(38, 20)
+							,dblOriginalQty NUMERIC(38, 20)
+							,dblBalance NUMERIC(38, 20)
 							,dtmStartDate DATETIME
 							,dblTotalCost NUMERIC(18, 6)
 							,dblAvailableNetWeight NUMERIC(18, 6)
@@ -2705,7 +2705,7 @@ BEGIN TRY
 							,dblOriginalBasis NUMERIC(18, 6)
 							,strFixationBy NVARCHAR(50)
 							,dblConvertedBasis NUMERIC(18, 6)
-							,dblNetWeight NUMERIC(18, 6)
+							,dblNetWeight NUMERIC(38, 20)
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -4020,7 +4020,7 @@ BEGIN TRY
 						,intContractDetailId INT
 						,strCertificationId NVARCHAR(50)
 						,strTrackingNumber NVARCHAR(50)
-						,dblQuantity NUMERIC(18, 6)
+						,dblQuantity NUMERIC(38, 20)
 						) x
 				LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
 				LEFT JOIN tblICCertification CF ON CF.strCertificationName = x.strCertificationName

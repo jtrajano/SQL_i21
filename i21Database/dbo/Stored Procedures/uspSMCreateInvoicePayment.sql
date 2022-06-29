@@ -11,6 +11,7 @@
 	,@strPaymentMethod 		AS NVARCHAR(50)		= NULL
 	,@ysnScheduledPayment	AS BIT 				= 0
 	,@dtmScheduledPayment	AS DATETIME 		= NULL
+	,@intBankAccountId		INT 				= NULL
 	,@strPaymentIdNew 		AS NVARCHAR(50) 	= NULL OUTPUT
 	,@intPaymentIdNew 		AS INT 				= NULL OUTPUT
 	,@ErrorMessage 			AS NVARCHAR(250)	= NULL OUTPUT
@@ -33,14 +34,16 @@ BEGIN
 	DECLARE @intPaymentMethodId		INT = NULL
 		  , @intUndepositedFundId 	INT	= NULL
 		  , @intCompanyLocationId	INT = NULL
-		  , @intBankAccountId		INT = NULL
+		  , @intEFTARFileFormatId	INT = NULL
 		  , @strLocationName		NVARCHAR(100) = NULL
+		  , @strBankName 			NVARCHAR(100) = NULL
+		  , @strAccountNo 			NVARCHAR(500) = NULL
 	      , @dblTotalPayment		NUMERIC(18, 6) = 0
 
 	--GET DEFAULT VALUES
 	SELECT TOP 1 @intCompanyLocationId	= CL.intCompanyLocationId
 			   , @intUndepositedFundId	= CL.intUndepositedFundsId
-			   , @intBankAccountId		= BA.intBankAccountId
+			   , @intBankAccountId		= CASE WHEN @strPaymentMethod <> 'ACH' THEN BA.intBankAccountId ELSE @intBankAccountId END
 			   , @strLocationName		= CL.strLocationName
 	FROM tblSMCompanyLocation CL
 	LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
@@ -50,24 +53,29 @@ BEGIN
 	FROM tblSMPaymentMethod
 	WHERE strPaymentMethod = @strPaymentMethod
 
-	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@ysnScheduledPayment, 0) = 0
+	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ((@ysnScheduledPayment = 1 AND @intBankAccountId IS NOT NULL) OR ISNULL(@ysnScheduledPayment, 0) = 0)
 		BEGIN
 			SET @intCompanyLocationId	= NULL
 			SET @intUndepositedFundId	= NULL
-			SET @intBankAccountId		= NULL
 
 			SELECT TOP 1 @intCompanyLocationId	= CL.intCompanyLocationId
 					   , @intUndepositedFundId	= CL.intUndepositedFundsId
-					   , @intBankAccountId		= BA.intBankAccountId
 					   , @strLocationName		= CL.strLocationName
 			FROM tblSMCompanyLocation CL
 			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 			WHERE CL.ysnLocationActive = 1
 			  AND ISNULL(BA.intEFTARFileFormatId, 0) <> 0
 
-			IF ISNULL(@intBankAccountId, 0) = 0
+			SELECT TOP 1 @strBankName 			= B.strBankName
+					   , @strAccountNo			= dbo.fnAESDecryptASym(BA.strBankAccountNo)
+				       , @intEFTARFileFormatId 	= BA.intEFTARFileFormatId
+			FROM tblCMBank B 
+			INNER JOIN tblCMBankAccount BA ON B.intBankId = BA.intBankId
+			WHERE BA.intBankAccountId = @intBankAccountId
+
+			IF @strPaymentMethod = 'ACH' AND ISNULL(@intEFTARFileFormatId, 0) = 0
 				BEGIN
-					SET @ErrorMessage = 'Location: ' + @strLocationName + ' bank account with ACH file format setup is required for payment with ACH payment method!'
+					SET @ErrorMessage = 'Bank ' + @strBankName + ' with Bank Account No. ' + @strAccountNo + ' requires ACH/NACHA AR setup for ACH payment method!'
 					RAISERROR(@ErrorMessage, 16, 1);
 					GOTO Exit_Routine
 				END
@@ -195,14 +203,14 @@ BEGIN
 				, intCompanyLocationId			= @intCompanyLocationId
 				, intCurrencyId					= INVOICE.intCurrencyId
 				, dtmDatePaid					= CASE WHEN @ysnScheduledPayment = 1 THEN @dtmScheduledPayment ELSE GETDATE() END
-				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@ysnScheduledPayment, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
+				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
 				, strPaymentMethod				= ISNULL(@strCreditCardNumber, @strPaymentMethod)
 				, strPaymentInfo				= NULL
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
 				, intBankAccountId				= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0) OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN @intBankAccountId ELSE NULL END
 				, dblAmountPaid					= ISNULL(@dblTotalPayment, 0)
-				, ysnPost						= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@intPaymentMethodId, 0) <> 0) OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN 1 ELSE 0 END
+				, ysnPost						= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND @strPaymentMethod <> 'ACH') OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 				, intEntityCardInfoId			= NULLIF(@intEntityCardInfoId, 0)
 				, intInvoiceId					= INVOICE.intInvoiceId

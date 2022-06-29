@@ -21,8 +21,6 @@ SELECT r.intRecipeId
 	,r.dtmValidFrom AS dtmRecipeValidFrom
 	,r.dtmValidTo AS dtmRecipeValidTo
 	,r.strComment
-	,ri.ysnComplianceItem
-	,ri.dblCompliancePercent
 	,ri.dblLowerTolerance
 	,ri.dblUpperTolerance
 	,cm.strName AS strConsumptionMethod
@@ -78,7 +76,7 @@ SELECT r.intRecipeId
 				THEN 'Active'
 			ELSE 'In-Active'
 			END
-		) AS strItemStatus
+		) COLLATE Latin1_General_CI_AS AS strItemStatus
 	,(
 		CASE 
 			WHEN ri.intRecipeItemTypeId = 2

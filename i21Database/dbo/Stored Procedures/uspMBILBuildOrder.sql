@@ -192,6 +192,7 @@ CREATE TABLE #tempOrderTaxCode (
 	,[strUnitMeasure]			NVARCHAR(MAX)
 	,[strTaxClass]				NVARCHAR(MAX)
 	,[ysnAddToCost]				BIT
+	,[ysnOverrideTaxGroup]		BIT
 );
 
 WHILE EXISTS(SELECT 1 FROM #tempDriverOrder)
@@ -245,7 +246,8 @@ BEGIN
 									,[intUnitMeasureId]
 									,[strUnitMeasure]
 									,[strTaxClass]
-									,[ysnAddToCost])
+									,[ysnAddToCost]
+									,[ysnOverrideTaxGroup])
 	EXEC uspARGetItemTaxes @ItemId
 						  ,@LocationId
 						  ,@CustomerId

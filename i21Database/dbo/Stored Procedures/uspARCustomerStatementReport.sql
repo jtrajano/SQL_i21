@@ -584,6 +584,8 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, intEntityUserId
 	, strStatementFormat
 	, ysnStatementCreditLimit
+	, strLogoType
+	, blbLogo
 )
 SELECT MAINREPORT.* 
 	 , dblCreditAvailable	= CASE WHEN (MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)) < 0 THEN 0 ELSE MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0) END
@@ -600,6 +602,8 @@ SELECT MAINREPORT.*
 	 , intEntityUserId		= @intEntityUserIdLocal
 	 , strStatementFormat	= @strStatementFormatLocal
 	 , ysnStatementCreditLimit	= CUSTOMER.ysnStatementCreditLimit
+	 , strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	 , blbLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
 FROM (
 	SELECT STATEMENTREPORT.strReferenceNumber
 		 , STATEMENTREPORT.intEntityCustomerId
@@ -673,11 +677,12 @@ LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT
 	AND AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
 	AND AGINGREPORT.strAgingType = 'Summary'
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = @strCompanyLocationIdsLocal AND (ysnARInvoice = 1 OR ysnDefault = 1)
 
 
 UPDATE tblARCustomerStatementStagingTable
 SET strComment			= dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
-  , blbLogo				= CASE WHEN ISNULL(@ysnStretchLogo, 0) = 1 THEN ISNULL(@blbStretchedLogo, @blbLogo) ELSE @blbLogo END
+  , blbLogo				= ISNULL(blbLogo, CASE WHEN ISNULL(@ysnStretchLogo, 0) = 1 THEN ISNULL(@blbStretchedLogo, @blbLogo) ELSE @blbLogo END)
   , strCompanyName		= @strCompanyName
   , strCompanyAddress	= @strCompanyAddress
   , ysnStretchLogo 		= ISNULL(@ysnStretchLogo, 0)

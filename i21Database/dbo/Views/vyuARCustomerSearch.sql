@@ -66,10 +66,10 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intServiceChargeId		= CUSTOMER.intServiceChargeId
 	 , intPaymentMethodId		= CUSTOMER.intPaymentMethodId
 	 , strPaymentMethod			= CUSTOMER.strPaymentMethod
-	 , ysnCreditHold			= CUSTOMER.ysnCreditHold
-	 , ysnExemptCreditCardFee	= CUSTOMER.ysnExemptCreditCardFee
+	 , ysnCreditHold
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
+	 , strSaleUnits				= SHIPTOLOCATION.strSaleUnits
 	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS
 	 , intCreditStopDays		= CUSTOMER.intCreditStopDays
 	 , strCreditCode			= CUSTOMER.strCreditCode
@@ -111,7 +111,6 @@ INNER JOIN (
 		 , intPaymentMethodId	= C.intPaymentMethodId
 		 , strPaymentMethod		= PAYMENTMETHOD.strPaymentMethod
 		 , ysnCreditHold
-		 , ysnExemptCreditCardFee
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached
@@ -218,6 +217,7 @@ LEFT JOIN (
 		 , strCountry
 		 , intWarehouseId
 		 , strWarehouseName
+		 , strSaleUnits
 	FROM dbo.tblEMEntityLocation EL WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCompanyLocationId

@@ -41,10 +41,25 @@
 		end as dblComputedGrossUnits
 
 		,isnull(ScaleSetupUOM.strUnitMeasure, UOM.strUnitMeasure) as strStationUnitMeasure
+		,strStorageType = StorageType.strStorageTypeCode + ':' + StorageType.strStorageTypeDescription
+
+		
+		, Ticket.dblNetUnits
+		,case when ScaleSetupUOM.intUnitMeasureId is not null and 
+			ScaleSetupUOM.intUnitMeasureId != UOM.intUnitMeasureId then
+			round(dbo.fnGRConvertQuantityToTargetItemUOM(
+									Ticket.intItemId
+									, UOM.intUnitMeasureId
+									, ScaleSetupUOM.intUnitMeasureId
+									, Ticket.dblNetUnits) , 4)
+		else
+			Ticket.dblNetUnits
+		end as dblComputedNetUnits
 
 		from tblSCTicket Ticket
 			join tblICItem Item
 				on Ticket.intItemId = Item.intItemId
+				
 			join tblICCommodity Commodity
 				on Item.intCommodityId = Commodity.intCommodityId
 			join tblEMEntity Entity
@@ -100,19 +115,33 @@
 									Ticket.intItemId
 									, UOM.intUnitMeasureId
 									, ScaleSetupUOM.intUnitMeasureId
-									, Ticket.dblGrossUnits)
+									, Ticket.dblGrossUnits) * -1
 		else
-			Ticket.dblGrossUnits
+			Ticket.dblGrossUnits * -1
 		end as dblComputedGrossUnits
 
 		,isnull(ScaleSetupUOM.strUnitMeasure, UOM.strUnitMeasure) as strStationUnitMeasure
+		,strStorageType = 'Transfer' --StorageType.strStorageTypeCode + ':' + StorageType.strStorageTypeDescription
+
+		
+		, Ticket.dblNetUnits * -1
+		,case when ScaleSetupUOM.intUnitMeasureId is not null and 
+			ScaleSetupUOM.intUnitMeasureId != UOM.intUnitMeasureId then
+			round(dbo.fnGRConvertQuantityToTargetItemUOM(
+									Ticket.intItemId
+									, UOM.intUnitMeasureId
+									, ScaleSetupUOM.intUnitMeasureId
+									, Ticket.dblNetUnits) , 4)* -1
+		else
+			Ticket.dblNetUnits * -1
+		end as dblComputedNetUnits
 		from tblSCTicket Ticket	
 			join tblICItem Item
 				on Ticket.intItemId = Item.intItemId
 			join tblICCommodity Commodity
 				on Item.intCommodityId = Commodity.intCommodityId		
 			join tblSMCompanyLocation CompanyLocation
-				on Ticket.intProcessingLocationId = CompanyLocation.intCompanyLocationId
+				on Ticket.intProcessingLocationId = CompanyLocation.intCompanyLocationId			
 			join tblSMCompanyLocation EntityCompanyLocation
 				on Ticket.intTransferLocationId= EntityCompanyLocation.intCompanyLocationId	
 			join tblSCListTicketTypes TicketType
@@ -166,6 +195,20 @@
 		end as dblComputedGrossUnits
 
 		,isnull(ScaleSetupUOM.strUnitMeasure, UOM.strUnitMeasure) as strStationUnitMeasure
+		,strStorageType = 'Transfer' --StorageType.strStorageTypeCode + ':' + StorageType.strStorageTypeDescription
+
+		
+		, Ticket.dblNetUnits
+		,case when ScaleSetupUOM.intUnitMeasureId is not null and 
+			ScaleSetupUOM.intUnitMeasureId != UOM.intUnitMeasureId then
+			round(dbo.fnGRConvertQuantityToTargetItemUOM(
+									Ticket.intItemId
+									, UOM.intUnitMeasureId
+									, ScaleSetupUOM.intUnitMeasureId
+									, Ticket.dblNetUnits) , 4)
+		else
+			Ticket.dblNetUnits
+		end as dblComputedNetUnits
 		from tblSCTicket Ticket		
 			join tblICItem Item
 				on Ticket.intItemId = Item.intItemId
@@ -174,7 +217,8 @@
 			join tblSMCompanyLocation CompanyLocation
 				on Ticket.intTransferLocationId = CompanyLocation.intCompanyLocationId		
 			join tblSMCompanyLocation EntityCompanyLocation
-				on Ticket.intProcessingLocationId= EntityCompanyLocation.intCompanyLocationId		
+				on Ticket.intProcessingLocationId= EntityCompanyLocation.intCompanyLocationId	
+			
 			join tblSCListTicketTypes TicketType
 				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
 

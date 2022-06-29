@@ -1904,7 +1904,40 @@ BEGIN
 		,[strPostingError]
 		,[strSessionId]			= @strSessionId
 	FROM 
-		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCostingZeroCostValidation, @OneBit)
+		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @OneBit)
+
+	--INVOICE HAS EARLIER DATE COMPARE TO STOCK DATE
+		INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= COSTING.[intTransactionDetailId]
+		,[intItemId]			= COSTING.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Stock is not available for ' + ITEM.strItemNo + ' at ' + CLOC.strLocationName + ' as of ' + CONVERT(NVARCHAR(30), CAST(COSTING.dtmDate AS DATETIME), 101) + '. Use the nearest stock available date of ' + CONVERT(NVARCHAR(30), CAST(STOCKDATE.dtmDate AS DATETIME), 101) + ' or later.'	
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader I
+		INNER JOIN tblARPostItemsForCosting COSTING  ON I.intInvoiceId =  COSTING.intTransactionId
+		INNER JOIN  
+		(
+		SELECT intItemId,intItemLocationId,intItemUOMId,MAX(dtmDate)[dtmDate] 
+		FROM tblICInventoryStockAsOfDate 
+		GROUP BY  intItemId,intItemLocationId,intItemUOMId
+	) STOCKDATE ON COSTING.intItemId = STOCKDATE.intItemId AND COSTING.intItemUOMId = STOCKDATE.intItemUOMId AND STOCKDATE.intItemLocationId = COSTING.intItemLocationId
+	INNER JOIN tblICItem ITEM ON  ITEM.intItemId = COSTING.intItemId
+	INNER JOIN tblICItemLocation LOC ON COSTING.intItemLocationId = LOC.intItemLocationId
+	INNER JOIN tblSMCompanyLocation CLOC ON LOC.intLocationId = CLOC.intCompanyLocationId
+	WHERE COSTING.dtmDate < STOCKDATE.dtmDate
+	AND I.[strType] = 'POS'	
 
 	-- IC In Transit Costing
 	DELETE FROM @ItemsForInTransitCosting
@@ -2180,28 +2213,20 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUEFROM.strAccountId) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
-		SELECT TOP 1 intDueFromAccountId, GLA.strAccountId
-		FROM tblARCompanyPreference ARCP
-		LEFT JOIN tblGLAccount GLA
-		ON ARCP.intDueFromAccountId = GLA.intAccountId
-	) DUEFROM
+		SELECT TOP 1 intDueFromAccountId
+		FROM tblARCompanyPreference
+	) ARCP
 	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		LEFT JOIN tblGLAccount GLA
-		ON GLASM.intAccountId = GLA.intAccountId
-		WHERE GLAS.intAccountStructureId = 3
-		AND GLASM.intAccountId = I.[intSalesAccountId]
-	) GLSEGMENT
-	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUEFROM.intDueFromAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], ARCP.intDueFromAccountId, 0, 1, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
 	AND I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
+	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2221,28 +2246,20 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account. Please add ' + dbo.[fnGLGetOverrideAccount](3, GLSEGMENT.strAccountId, DUETO.strAccountId) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
-		SELECT TOP 1 ARCP.intDueToAccountId, GLA.strAccountId
-		FROM tblARCompanyPreference ARCP
-		LEFT JOIN tblGLAccount GLA
-		ON ARCP.intDueToAccountId = GLA.intAccountId
-	) DUETO
+		SELECT TOP 1 intDueToAccountId
+		FROM tblARCompanyPreference
+	) ARCP
 	OUTER APPLY (
-		SELECT TOP 1 GLAS.intAccountSegmentId, GLA.strAccountId
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		LEFT JOIN tblGLAccount GLA
-		ON GLASM.intAccountId = GLA.intAccountId
-		WHERE GLAS.intAccountStructureId = 3
-		AND GLASM.intAccountId = I.[intAccountId]
-	) GLSEGMENT
-	WHERE ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(DUETO.intDueToAccountId, 0), ISNULL(GLSEGMENT.intAccountSegmentId, 0)), 0) = 0
+		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.intDueToAccountId, 0, 1, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
 	AND I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
+	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2254,7 +2271,7 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError]
 		,[strSessionId])
-	-- Check location segment
+	-- Check company segment
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
 		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
@@ -2262,12 +2279,71 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Sales and AR Account should have the same location segment.'
+		,[strPostingError]		= 'Sales and AR Account should have the same company segment.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	WHERE I.[ysnAllowIntraEntries] = 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId]) = 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
 	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check company segment
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Sales and AR Account should have the same company segment.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	WHERE I.[ysnAllowIntraEntries] = 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check line of business segment
+	SELECT
+		 [intInvoiceId]			= ARPID.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPID.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPID.[strTransactionType]
+		,[intInvoiceDetailId]	= ARPID.[intInvoiceDetailId] 
+		,[intItemId]			= ARPID.[intItemId] 
+		,[strBatchId]			= ARPID.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due to account that matches the line of business. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](ARPID.[intSalesAccountId], NULL, LOB.intSegmentCodeId, NULL) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader ARPIH
+	INNER JOIN tblARPostInvoiceDetail ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
+	OUTER APPLY (
+		SELECT TOP 1 ysnOverrideLineOfBusinessSegment
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPID.[intSalesAccountId], ISNULL(intSegmentCodeId, 0)), 0), intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
+	) LOB
+	WHERE ARCP.ysnOverrideLineOfBusinessSegment = 1
+	AND ISNULL(LOB.intAccountId, 0) = 0
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
+	AND ARPID.strSessionId = @strSessionId
 END
 
 IF @Post = @ZeroBit

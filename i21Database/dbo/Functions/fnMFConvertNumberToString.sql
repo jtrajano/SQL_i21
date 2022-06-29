@@ -18,5 +18,5 @@ BEGIN
 				END
 			)
 
-	RETURN @strQty
+	RETURN @strQty COLLATE Latin1_General_CI_AS
 END

@@ -32,6 +32,8 @@ DECLARE @dtmBeginningDateTo				DATETIME
 	  , @strSources						NVARCHAR(MAX)
 	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
+	  , @blbLogo						VARBINARY(MAX)
+	  , @strLogoType					NVARCHAR(10)
 
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -140,6 +142,15 @@ IF @dtmEndingDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmEndingDateFrom = CAST(-53690 AS DATETIME)
 
+-- SET LOGO
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header'), @strLogoType = 'Attachment'
+
+SELECT TOP 1 @blbLogo = ISNULL(imgLogo, @blbLogo), @strLogoType = CASE WHEN imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+FROM tblSMLogoPreference 
+WHERE (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
+	AND (ysnARInvoice = 1 OR ysnDefault = 1)
+
+
 SELECT 
 	   dtmBeginDate				= MIN(CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) )
      , dtmEndingDate			= MIN(CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) )
@@ -169,6 +180,8 @@ SELECT
 	 , dblEndQuantity 			= 0
 	 , strCompanyName		    = strCompanyName
 	 , strCompanyAddress		= strCompanyAddress
+	 , blbLogo					= @blbLogo
+	 , strLogoType				= @strLogoType
 
  FROM (
       SELECT dtmBeginDate		= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 

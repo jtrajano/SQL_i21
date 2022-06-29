@@ -111,6 +111,7 @@ BEGIN
 		  intId INT
 		, strTradeFinanceTransaction NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		, strTransactionNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL
 		, intTransactionHeaderId INT NULL
 		, intTransactionDetailId INT NULL
 		, dtmTransactionDate DATETIME NULL
@@ -356,6 +357,7 @@ BEGIN
 				  intId
 				, strTradeFinanceTransaction
 				, strTransactionType
+				, strTransactionNumber
 				, intTransactionHeaderId
 				, intTransactionDetailId
 				, dtmTransactionDate
@@ -363,6 +365,7 @@ BEGIN
 			SELECT @intId
 				, @strTradeFinanceTransaction
 				, @strTransactionType
+				, @strTransactionNumber
 				, @intTransactionHeaderId
 				, @intTransactionDetailId
 				, @dtmTransactionDate
@@ -482,6 +485,7 @@ BEGIN
 		BEGIN
 			SELECT @intId = NULL
 				, @strTradeFinanceTransaction = NULL
+				, @strTransactionNumber = NULL
 				, @strTransactionType = NULL
 				, @dtmTransactionDate = NULL
 				, @intTransactionHeaderId = NULL
@@ -489,6 +493,7 @@ BEGIN
 
 			SELECT TOP 1 @intId = intId
 				, @strTradeFinanceTransaction = strTradeFinanceTransaction
+				, @strTransactionNumber = strTransactionNumber
 				, @strTransactionType = strTransactionType
 				, @intTransactionHeaderId = intTransactionHeaderId
 				, @intTransactionDetailId = intTransactionDetailId
@@ -499,6 +504,7 @@ BEGIN
 			UPDATE tblTRFTradeFinanceLog
 			SET ysnDeleted = 1
 			WHERE strTradeFinanceTransaction = @strTradeFinanceTransaction
+			AND strTransactionNumber = @strTransactionNumber
 			AND strTransactionType = @strTransactionType
 			AND intTransactionHeaderId = @intTransactionHeaderId
 			AND intTransactionDetailId = @intTransactionDetailId

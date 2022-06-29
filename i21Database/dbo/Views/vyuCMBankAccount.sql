@@ -470,3 +470,22 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 
 			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 END
+GO
+
+CREATE TRIGGER trg_delete_vyuCMBankAccount
+ON [dbo].vyuCMBankAccount
+INSTEAD OF DELETE
+AS
+BEGIN 
+	IF EXISTS(SELECT 1 FROM deleted i JOIN dbo.tblCMBankTransaction B
+	ON i.intBankAccountId = B.intBankAccountId)
+	BEGIN
+		RAISERROR('Delete operation not allowed. Bank Account have transaction(s).',16,1)
+		RETURN
+	END
+
+	DELETE B FROM 
+	deleted i JOIN dbo.tblCMBankAccount B
+	ON i.intBankAccountId = B.intBankAccountId
+END
+GO

@@ -92,7 +92,7 @@ SELECT
 	,intTicketId					= SCALETICKETID.intTicketId
 	,strPOSPayMethods				= PAYMETHODS.strPOSPayMethods
 	,strAccountingPeriod            = AccPeriod.strAccountingPeriod
-	,intDaysOld						= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETDATE() AS DATE))
+	,intDaysOld						= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETUTCDATE() AS DATE))
 	,intDaysToPay					= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 										   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
 									  END

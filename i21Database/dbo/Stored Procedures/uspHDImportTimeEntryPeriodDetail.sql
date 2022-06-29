@@ -180,7 +180,10 @@ BEGIN TRY
 			   ,[dtmFirstWarningDate]		 = @dtmFirstWarningDate
 			   ,[dtmSecondWarningDate]		 = @dtmSecondWarningDate
 			   ,[dtmLockoutDate]			 = @dtmLockoutDate
-			   ,[strBillingPeriodStatus]     = 'Open'
+			   ,[strBillingPeriodStatus]     = CASE WHEN CONVERT(DATE, @BillingPeriodEnd) < CONVERT(DATE, GETDATE())
+														THEN 'Closed'
+													ELSE 'Open'
+											   END			   
 			   ,[intRequiredHours]			 = CAST(@RequiredHours AS INT)
 
 	END

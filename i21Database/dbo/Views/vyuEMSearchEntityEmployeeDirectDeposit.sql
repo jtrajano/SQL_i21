@@ -23,6 +23,6 @@
 				on b.intEntityId = a.intEntityId and b.strType = 'Employee'
 			join tblPREmployee c
 				on a.intEntityId = c.[intEntityId]
-			join tblEMEntityEFTInformation d
+			join vyuEntityEFTInformation d
 				on d.intEntityId = a.intEntityId
 		

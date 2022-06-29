@@ -110,7 +110,7 @@ BEGIN TRY
 	END
 
 
-	IF (@intShipmentStatus = 4 AND @ysnAllowReweighs = 0)
+	IF (@intShipmentStatus = 4 AND ISNULL(@ysnAllowReweighs, 0) = 0)
 	BEGIN
 		--If Shipment is already received, call the IR to Voucher procedure
 		SELECT DISTINCT 
@@ -158,6 +158,7 @@ BEGIN TRY
 				,NULL				--,@ItemId
 				,EL.intEntityLocationId		--,@VendorLocationId
 				,3--L.intFreightTermId	--,@FreightTermId
+				,default --,@FOB
 			)
 		FROM tblLGLoad L
 		INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
@@ -615,7 +616,7 @@ BEGIN TRY
 						payables.intEntityVendorId,
 						GETDATE(),
 						-- Cost
-						CASE WHEN payables.intWeightUOMId IS NOT NULL THEN 
+						CASE WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN
 							dbo.fnCalculateCostBetweenUOM(
 								COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
 								, payables.intWeightUOMId
@@ -624,7 +625,7 @@ BEGIN TRY
 									ELSE
 										payables.dblCost
 								END
-							) 
+							)
 						ELSE 
 							dbo.fnCalculateCostBetweenUOM(
 								COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
@@ -637,7 +638,7 @@ BEGIN TRY
 							)
 						END,
 						-- Qty
-						CASE	
+						CASE
 							WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN 
 								payables.dblNetWeight
 							ELSE 
@@ -658,8 +659,6 @@ BEGIN TRY
 				WHERE vendorTax.intTaxGroupId IS NOT NULL
 			END
 
-			SELECT * FROM @voucherPayableToProcess
-			SELECT * FROM @voucherPayableTax
 
 			IF (@intType = 1)
 			BEGIN

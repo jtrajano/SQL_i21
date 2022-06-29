@@ -6,8 +6,6 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	
-	 
-
 	DECLARE @strCompanyName				NVARCHAR(500),
 			@strAddress					NVARCHAR(500),
 			@strCounty					NVARCHAR(500),
@@ -54,7 +52,6 @@ BEGIN TRY
 			[endgroup]		NVARCHAR(50),  
 			[datatype]		NVARCHAR(50) 
 	)  
-  
   
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
   
@@ -203,7 +200,6 @@ BEGIN TRY
 	SELECT TOP 1 @imgLocationLogo = imgLogo, @strLogoType = 'Logo' FROM tblSMLogoPreference
 	WHERE (ysnDefault = 1 OR  ysnContract = 1)  AND  intCompanyLocationId = @intCompanyLocationId
 
-
 	SELECT	 DISTINCT 
 			PF.intPriceFixationId,
 			PF.intContractHeaderId,
@@ -215,7 +211,6 @@ BEGIN TRY
 			CH.strCustomerContract,
 			strDescription = isnull(rtrt.strTranslation,IM.strDescription),
 			strQuantity = dbo.fnRemoveTrailingZeroes(CD.dblQuantity)+ ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) ,
-			--strPeriod = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) ,
 			strPeriod = datename(dd,CD.dtmStartDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,CD.dtmStartDate)),datename(mm,CD.dtmStartDate)) + ' ' + datename(yyyy,CD.dtmStartDate) + ' - ' + datename(dd,CD.dtmEndDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,CD.dtmEndDate)),datename(mm,CD.dtmEndDate)) + ' ' + datename(yyyy,CD.dtmEndDate),
 			strAtlasPeriod = CONVERT(NVARCHAR(50),CD.dtmStartDate,106) + ' to ' + CONVERT(NVARCHAR(50),CD.dtmEndDate,106) ,
 			strStatus = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
@@ -272,13 +267,25 @@ BEGIN TRY
 											ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
 											ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,''),
 
-			strTotal = CONVERT(NVARCHAR,CAST(PF.dblPriceWORollArb  AS Money),1) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),			
-			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			lblAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN 'Additional Cost' ELSE NULL END,
-			lblAdditionalCostColon = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN ':' ELSE NULL END,
-			strEQTAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ELSE NULL END, 
+			strTotal = CONVERT(NVARCHAR,CAST(PF.dblPriceWORollArb  AS Money),1) + ' ' + 
+					   CASE WHEN isnull(@ysnEnableFXFieldInContractPricing,0) = 1 THEN IC.strCurrency ELSE  CY.strDescription END + 
+					   ' ' + @per + ' ' + ISNULL(rtrt3.strTranslation,CM.strUnitMeasure),			
+			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),2) + 
+					   ' ' + CASE WHEN ISNULL(@ysnEnableFXFieldInContractPricing,0) = 1 THEN IC.strCurrency ELSE  CY.strDescription END + ' ' + @per +
+					   ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			lblAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 
+									 THEN 'Additional Cost' ELSE NULL 
+								END,
+			lblAdditionalCostColon = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 
+										  THEN ':' ELSE NULL 
+									 END,
+			strEQTAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 
+										THEN dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) 
+								   ELSE NULL END, 
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			strFinalPrice =	CONVERT(NVARCHAR,CAST(PF.dblFinalPrice  AS Money),1) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strFinalPrice =	CONVERT(NVARCHAR,CAST(PF.dblFinalPrice  AS Money),1) + 
+							' ' + CASE WHEN isnull(@ysnEnableFXFieldInContractPricing,0) = 1 THEN IC.strCurrency ELSE  CY.strDescription END + 
+							' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(ROUND(
 								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
 										THEN	NULL
@@ -294,10 +301,19 @@ BEGIN TRY
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			blbHeaderLogo = dbo.[fnCTGetCompanyLogo]('Header', CH.intContractHeaderId),			
-			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
-			strLogoType	  = CASE WHEN dbo.[fnCTGetCompanyLocationCount](@intContractHeaderId) > 1 THEN 'Attachment' ELSE ISNULL(@strLogoType,'Attachment') END,
-			strCurrencyExchangeRate = isnull((FY.strCurrency + '/' + TY.strCurrency), @strFinalCurrency),
-			dblRate = (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end),
+			blbFooterLogo = dbo.[fnCTGetCompanyFooterLogo]('Footer',  CH.intContractHeaderId),
+			strLogoFooterType	= CASE WHEN dbo.[fnCTGetCompanyLocationCount](@intContractHeaderId) > 1 THEN 'Attachment' 
+									   WHEN EXISTS (SELECT 1 FROM tblSMLogoPreferenceFooter where intCompanyLocationId = @intCompanyLocationId AND  ysnContract = 0 ) THEN 'Attachment' 
+								  ELSE ISNULL(@strLogoType,'Attachment') END,
+			strLogoType			= CASE WHEN dbo.[fnCTGetCompanyLocationCount](@intContractHeaderId) > 1 THEN 'Attachment' 
+									   WHEN EXISTS (SELECT 1 FROM tblSMLogoPreference where intCompanyLocationId = @intCompanyLocationId AND  ysnContract = 0 ) THEN 'Attachment' 
+								  ELSE ISNULL(@strLogoType,'Attachment') END,
+			strCurrencyExchangeRate = CASE  WHEN CD.intInvoiceCurrencyId != ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) THEN ISNULL((FY.strCurrency + '/' + TY.strCurrency), @strFinalCurrency)
+											WHEN CD.intInvoiceCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) AND PF.dblFX = 1 THEN NULL
+											ELSE NULL END,
+			dblRate =  CASE WHEN CD.intInvoiceCurrencyId != ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) THEN (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end)
+							WHEN CD.intInvoiceCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) AND PF.dblFX = 1 THEN NULL
+							ELSE NULL END,
 			strFXFinalPrice = LTRIM(
 									dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)*
 									CASE WHEN  isnull(@ysnEnableFXFieldInContractPricing,0) = 1 
@@ -362,72 +378,72 @@ BEGIN TRY
 									 WHEN SPC.strStatus = 'Partially Priced' THEN 'Average Fixed Price'
 								ELSE 'Average Fixed Price' END)
 			
-	FROM	tblCTPriceFixation			PF
+	FROM	tblCTPriceFixation PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	CROSS	APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) SQ
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	SQ.intContractDetailId
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId			=	CD.intCompanyLocationId
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
-												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
-	JOIN	vyuCTEntity					EC	ON	EC.intEntityId					=	CH.intCounterPartyId  
-												AND EC.strEntityType				=	'Customer'			LEFT
-	JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId			LEFT
-	JOIN	tblICItemUOM				QM	ON	QM.intItemUOMId					=	CD.intItemUOMId			LEFT
-	JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	QM.intUnitMeasureId		LEFT	
-	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		LEFT
-	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId	LEFT	
-	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId		LEFT	
-	JOIN	tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intPriceItemUOMId	LEFT
-	JOIN	tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId				=	CH.intCommodityId		AND 
-												PU.intUnitMeasureId				=	PM.intUnitMeasureId		LEFT
-	JOIN	tblSMCurrencyExchangeRate	ER	ON	ER.intCurrencyExchangeRateId	=	CD.intCurrencyExchangeRateId	LEFT	
-	JOIN	tblSMCurrency				FY	ON	FY.intCurrencyID				=	ER.intFromCurrencyId	LEFT					
-	JOIN	tblSMCurrency				TY	ON	TY.intCurrencyID				=	ER.intToCurrencyId		LEFT	
-	JOIN	tblICItemUOM				FU	ON	FU.intItemUOMId					=	CD.intFXPriceUOMId		LEFT
-	JOIN	tblICCommodityUnitMeasure	FC	ON	FC.intCommodityId				=	CH.intCommodityId		AND 
-												FC.intUnitMeasureId				=	FU.intUnitMeasureId		LEFT
-	JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId					=	CD.intNetWeightUOMId	LEFT
-	JOIN	tblICUnitMeasure			U7	ON	U7.intUnitMeasureId				=	WU.intUnitMeasureId		LEFT	
-	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId		LEFT
-	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		LEFT
-	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	CD.intFutureMarketId	LEFT
-	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	CD.intFutureMonthId		LEFT
+												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	
+	LEFT JOIN	vyuCTEntity				EC	ON	EC.intEntityId					=	CH.intCounterPartyId  AND EC.strEntityType	=	'Customer'			
+	LEFT JOIN tblICItem					IM	ON	IM.intItemId					=	CD.intItemId			
+	LEFT JOIN tblICItemUOM				QM	ON	QM.intItemUOMId					=	CD.intItemUOMId			
+	LEFT JOIN tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	QM.intUnitMeasureId		
+	LEFT JOIN tblCTPriceContract		PC	ON  PC.intPriceContractId			=	PF.intPriceContractId
+	LEFT JOIN tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		
+	LEFT JOIN tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId	
+	LEFT JOIN tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId		
+	LEFT JOIN tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intPriceItemUOMId	
+	LEFT JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId				=	CH.intCommodityId		
+			 									AND  PU.intUnitMeasureId		=	PM.intUnitMeasureId		
+	LEFT JOIN tblSMCurrencyExchangeRate	ER	ON	ER.intCurrencyExchangeRateId	=	CD.intCurrencyExchangeRateId	
+	LEFT JOIN tblSMCurrency				FY	ON	FY.intCurrencyID				=	ER.intFromCurrencyId	
+	LEFT JOIN tblSMCurrency				TY	ON	TY.intCurrencyID				=	ER.intToCurrencyId		
+	LEFT JOIN tblSMCurrency				IC	ON	IC.intCurrencyID				=	PC.intFinalCurrencyId
+	LEFT JOIN tblICItemUOM				FU	ON	FU.intItemUOMId					=	CD.intFXPriceUOMId		
+	LEFT JOIN tblICCommodityUnitMeasure	FC	ON	FC.intCommodityId				=	CH.intCommodityId		
+			 									AND FC.intUnitMeasureId			=	FU.intUnitMeasureId		
+	LEFT JOIN tblICItemUOM				WU	ON	WU.intItemUOMId					=	CD.intNetWeightUOMId	
+	LEFT JOIN tblICUnitMeasure			U7	ON	U7.intUnitMeasureId				=	WU.intUnitMeasureId		
+	LEFT JOIN tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId		
+	LEFT JOIN tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		
+	LEFT JOIN tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	CD.intFutureMarketId	
+	LEFT JOIN tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	CD.intFutureMonthId		
+	LEFT JOIN tblSMCurrency				IY	ON	IY.intCurrencyID				=	CD.intInvoiceCurrencyId	
+	LEFT JOIN tblICItemUOM				FO	ON	FO.intItemUOMId					=	CD.intFXPriceUOMId		
+	LEFT JOIN tblICUnitMeasure			FN	ON	FN.intUnitMeasureId				=	FO.intUnitMeasureId		
 
-	JOIN	tblSMCurrency				IY	ON	IY.intCurrencyID				=	CD.intInvoiceCurrencyId	LEFT
-	JOIN	tblICItemUOM				FO	ON	FO.intItemUOMId					=	CD.intFXPriceUOMId		LEFT	
-	JOIN	tblICUnitMeasure			FN	ON	FN.intUnitMeasureId				=	FO.intUnitMeasureId		
+	LEFT JOIN tblSMScreen				rts   ON rts.strNamespace = 'Inventory.view.Item'
+	LEFT JOIN tblSMTransaction			rtt   ON rtt.intScreenId = rts.intScreenId and rtt.intRecordId = IM.intItemId
+	LEFT JOIN tblSMReportTranslation	rtrt  ON rtrt.intLanguageId = @intLaguageId and rtrt.intTransactionId = rtt.intTransactionId and rtrt.strFieldName = 'Description'
+	
+	LEFT JOIN tblSMScreen				rts1  ON rts1.strNamespace = 'RiskManagement.view.FuturesTradingMonths'
+	LEFT JOIN tblSMTransaction			rtt1  ON rtt1.intScreenId = rts1.intScreenId and rtt1.intRecordId = MO.intFutureMonthId
+	LEFT JOIN tblSMReportTranslation	rtrt1 ON rtrt1.intLanguageId = @intLaguageId and rtrt1.intTransactionId = rtt1.intTransactionId and rtrt1.strFieldName = 'Future Trading Month'
+	
+	LEFT JOIN tblSMScreen				rts2  ON rts2.strNamespace = 'Inventory.view.ReportTranslation'
+	LEFT JOIN tblSMTransaction			rtt2  ON rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = UM.intUnitMeasureId
+	LEFT JOIN tblSMReportTranslation	rtrt2 ON rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
+	
+	LEFT JOIN tblSMScreen				rts3  ON rts3.strNamespace = 'Inventory.view.ReportTranslation'
+	LEFT JOIN tblSMTransaction			rtt3  ON rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = CM.intUnitMeasureId
+	LEFT JOIN tblSMReportTranslation	rtrt3 ON rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt3.strFieldName = 'Name'
+	
+	LEFT JOIN tblSMScreen				rts4  ON rts4.strNamespace = 'Inventory.view.ReportTranslation'
+	LEFT JOIN tblSMTransaction			rtt4  ON rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = U7.intUnitMeasureId
+	LEFT JOIN tblSMReportTranslation	rtrt4 ON rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Name'
+	
+	LEFT JOIN tblSMScreen				rts5  ON rts5.strNamespace = 'Inventory.view.ReportTranslation'
+	LEFT JOIN tblSMTransaction			rtt5  ON rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = FM.intUnitMeasureId
+	LEFT JOIN tblSMReportTranslation	rtrt5 ON rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Name'
+	
+	LEFT JOIN tblSMScreen				rts6  ON rts6.strNamespace = 'RiskManagement.view.FuturesMarket'
+	LEFT JOIN tblSMTransaction			rtt6  ON rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = MA.intFutureMarketId
+	LEFT JOIN tblSMReportTranslation	rtrt6 ON rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Market Name'
 
-	left join tblSMScreen				rts on rts.strNamespace = 'Inventory.view.Item'
-	left join tblSMTransaction			rtt on rtt.intScreenId = rts.intScreenId and rtt.intRecordId = IM.intItemId
-	left join tblSMReportTranslation	rtrt on rtrt.intLanguageId = @intLaguageId and rtrt.intTransactionId = rtt.intTransactionId and rtrt.strFieldName = 'Description'
-	
-	left join tblSMScreen				rts1 on rts1.strNamespace = 'RiskManagement.view.FuturesTradingMonths'
-	left join tblSMTransaction			rtt1 on rtt1.intScreenId = rts1.intScreenId and rtt1.intRecordId = MO.intFutureMonthId
-	left join tblSMReportTranslation	rtrt1 on rtrt1.intLanguageId = @intLaguageId and rtrt1.intTransactionId = rtt1.intTransactionId and rtrt1.strFieldName = 'Future Trading Month'
-	
-	left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.ReportTranslation'
-	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = UM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
-	
-	left join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.ReportTranslation'
-	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = CM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt3.strFieldName = 'Name'
-	
-	left join tblSMScreen				rts4 on rts4.strNamespace = 'Inventory.view.ReportTranslation'
-	left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = U7.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Name'
-	
-	left join tblSMScreen				rts5 on rts5.strNamespace = 'Inventory.view.ReportTranslation'
-	left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = FM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Name'
-	
-	left join tblSMScreen				rts6 on rts6.strNamespace = 'RiskManagement.view.FuturesMarket'
-	left join tblSMTransaction			rtt6 on rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = MA.intFutureMarketId
-	left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Market Name'
-
-	LEFT JOIN tblSMCountry				rtc10 on lower(rtrim(ltrim(rtc10.strCountry))) = lower(rtrim(ltrim(EY.strEntityCountry)))
-	LEFT JOIN tblSMCountry				rtc12 on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
-	LEFT JOIN vyuCTPriceContractStatus	SPC ON  SPC.intContractHeaderId = PF.intContractHeaderId AND SPC.intPriceFixationId = @intPriceFixationId
+	LEFT JOIN tblSMCountry				rtc10 ON lower(rtrim(ltrim(rtc10.strCountry))) = lower(rtrim(ltrim(EY.strEntityCountry)))
+	LEFT JOIN tblSMCountry				rtc12 ON lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
+	LEFT JOIN vyuCTPriceContractStatus	SPC   ON  SPC.intContractHeaderId = PF.intContractHeaderId AND SPC.intPriceFixationId = @intPriceFixationId
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 

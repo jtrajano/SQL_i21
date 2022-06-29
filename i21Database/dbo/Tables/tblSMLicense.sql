@@ -6,6 +6,8 @@
 	[dtmSupportExpiration]	DATETIME NOT NULL DEFAULT(GETDATE()),
 	[intNumberOfAdmin]		INT NOT NULL DEFAULT(1),
 	[intNumberOfUser]		INT NOT NULL,
+	[intMaxStores]				INT NOT NULL DEFAULT 0,
+	[intMaxConsignmentStores]	INT NOT NULL DEFAULT 0,
 	[strCompanyId]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCustomer]			NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription]		NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL,

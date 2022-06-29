@@ -168,6 +168,8 @@
     [dblDWGSpotPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [intFreightCostUOMId] INT NULL, 
     [ysnApplyOverageToSpot] BIT NOT NULL DEFAULT 0,
+    [intDecimalAdjustment] INT NOT NULL DEFAULT 4, 
+    [ysnFixRounding] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

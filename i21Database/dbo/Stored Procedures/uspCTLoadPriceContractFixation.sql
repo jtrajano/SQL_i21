@@ -6,7 +6,10 @@ AS
 
 BEGIN TRY
 	
-	DECLARE	@ErrMsg	NVARCHAR(MAX)
+	DECLARE
+		@ErrMsg	NVARCHAR(MAX)
+		,@ysnEnableFXFieldInContractPricing bit = 0
+		;
 	
 		--DECLARE @temp AS TABLE
 		--(
@@ -81,6 +84,7 @@ BEGIN TRY
 			DROP TABLE #MultiPriceFixation					
 
 		SELECT * INTO #tblCTPriceFixation FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId
+		select @ysnEnableFXFieldInContractPricing = ysnEnableFXFieldInContractPricing from tblCTCompanyPreference;
 
 		--INSERT INTO @temp 
 

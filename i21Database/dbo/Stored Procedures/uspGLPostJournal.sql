@@ -165,7 +165,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]			
-			
+			,[intLedgerId]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -220,7 +220,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger'
-
+			,[intLedgerId]			= B.[intLedgerId]
 		
 
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
@@ -267,7 +267,8 @@ ELSE
 			,[strCode]
 			,[strTransactionType]
 			,[strTransactionForm]
-			,[strModuleName]			
+			,[strModuleName]		
+			,[intLedgerId]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -303,6 +304,7 @@ ELSE
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger' 
+			,[intLedgerId]			= B.[intLedgerId]
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 

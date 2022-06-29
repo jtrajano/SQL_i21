@@ -3,7 +3,7 @@
 
 CREATE VIEW [dbo].[vyuCFBatchPostTransactions]
 AS
-SELECT   cfNetwork.ysnPostForeignSales,cfTrans.strTransactionType as strTransType, cfTrans.dtmTransactionDate, cfTrans.strTransactionId, 'Card Fueling' AS strTransactionType, cfTrans.ysnPosted, 
+SELECT   cfNetwork.ysnPostForeignSales,cfTrans.strTransactionType COLLATE Latin1_General_CI_AS as strTransType, cfTrans.dtmTransactionDate, cfTrans.strTransactionId, 'Card Fueling' COLLATE Latin1_General_CI_AS AS strTransactionType, cfTrans.ysnPosted, 
                          'Network: ' + cfNetwork.strNetwork + ' ,Site: ' + cfSiteItem.strSiteName + ' ,Quantity: ' + CAST(cfTrans.dblQuantity AS nvarchar) AS strDescription, 
                          cfTrans.dblCalculatedTotalPrice AS dblAmount, cfTrans.intTransactionId,
                              (SELECT   TOP (1) intEntityId

@@ -136,9 +136,9 @@ begin
 									BinDetails.intItemId
 									, BinDetails.intUnitMeasureId
 									, Bin.intUnitMeasureId
-									, BinDetails.dblAvailable) 
+									, isnull(BinDetails.dblAvailable, BinDefaults.dblAvailable)) 
 							else 
-								BinDetails.dblAvailable
+								isnull(BinDetails.dblAvailable, BinDefaults.dblAvailable)
 							end  as dblSpaceAvailable
 						, case when Bin.intUnitMeasureId is not null and Bin.intUnitMeasureId != BinDetails.intUnitMeasureId then 
 								dbo.fnGRConvertQuantityToTargetItemUOM(
@@ -154,9 +154,10 @@ begin
 									BinDetails.intItemId
 									, BinDetails.intUnitMeasureId
 									, Bin.intUnitMeasureId
-									, BinDetails.dblCapacity) 
+									, isnull(BinDetails.dblCapacity, BinDefaults.dblCapacity)
+									) 
 							else 
-								BinDetails.dblCapacity
+								isnull(BinDetails.dblCapacity, BinDefaults.dblCapacity)
 							end as dblCapacity
 						, Bin.strComBinNotesColor
 						, Bin.strComBinNotesBackgroundColor
@@ -189,6 +190,21 @@ begin
 									on StorageBinDetails.intItemUOMId = ItemUOM.intItemUOMId
 								where StorageBinDetails.intStorageLocationId = Bin.intStorageLocationId
 						)BinDetails
+						outer apply (
+							
+							select * 
+								, round( dbo.fnMultiply( dbo.fnDivide( ( Passer.dblCapacity -  Passer.dblAvailable),   Passer.dblCapacity) , 100), 2) as dblPercentageFull
+							from (
+							select 
+									intStorageLocationId
+									
+									, CAST(StorageBinDetails.dblEffectiveDepth *  StorageBinDetails.dblUnitPerFoot AS NUMERIC(28, 6)) as dblCapacity
+									, CAST(StorageBinDetails.dblEffectiveDepth *  StorageBinDetails.dblUnitPerFoot AS NUMERIC(28, 6)) as dblAvailable									
+								from tblICStorageLocation StorageBinDetails								
+								where StorageBinDetails.intStorageLocationId = Bin.intStorageLocationId
+							) Passer
+
+						)BinDefaults
 						
 						inner join #tmpLocationFilter locationFilter
 							on SubLocation.intCompanyLocationSubLocationId = locationFilter.intStorageLocationId

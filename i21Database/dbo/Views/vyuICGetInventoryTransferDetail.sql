@@ -158,18 +158,10 @@ AS
 	, Currency.strCurrency
 	, TransferDetail.strMarks
 	, TransferDetail.dblTransferPrice
-	, [Transfer].dtmBolDate
-	, [Transfer].dtmBolReceivedDate
-	, [Transfer].strBolNumber
-	, [Transfer].intBrokerId
-	, [Broker].strName AS strBroker
-	, [Transfer].strTrailerId
-	, [Transfer].strERPTransferNo
-	, TransferDetail.strComment 	
+	, TransferDetail.strComment 
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
-		LEFT JOIN tblEMEntity [Broker] ON [Broker].intEntityId = [Transfer].intBrokerId
 		LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
 		LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 		LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId

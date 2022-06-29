@@ -24,6 +24,7 @@ select
 	Vendor,
 	Customer,
 	Employee,
+	intCurrencyId,
 	strCurrency,
 	strIBANWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strIBAN), 4),
     strIBAN = dbo.fnAESDecryptASym(strIBAN),
@@ -43,6 +44,9 @@ select
 	strIntermediaryIBANWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strIntermediaryIBAN), 4),
     strIntermediaryIBAN = dbo.fnAESDecryptASym(strIntermediaryIBAN),
 	intEntityEFTHeaderId,
+	strDistributionType,
+	dblAmount,
+	intOrder,
 	ysnDomestic,
 	intConcurrencyId
 
@@ -53,7 +57,7 @@ FROM tblEMEntityEFTInformation EFT
 			FROM tblEMEntity )  ENT
 
 		ON EFT.intEntityId = ENT.intEntityId
-	LEFT OUTER JOIN 
+	INNER JOIN 
 		(SELECT intBankId, strBankName 
 			FROM tblCMBank 
 		)Bank ON EFT.intBankId = Bank.intBankId

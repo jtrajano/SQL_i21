@@ -66,3 +66,18 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Default Curren
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Default Currency Exchange Rate Type' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccount', @level2type=N'COLUMN',@level2name=N'intCurrencyExchangeRateTypeId'
 GO
+
+CREATE TRIGGER dbo.trgInsertGLAccount
+ON dbo.tblGLAccount
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (
+        SELECT 1 FROM vyuGLAccountDetail A JOIN inserted I ON A.intAccountId = I.intAccountId
+        WHERE strAccountType IN ( 'Asset', 'Liability', 'Equity')) -- SET ysnRevalue for all balance sheet GL Accounts
+        UPDATE A SET  ysnRevalue = 1  FROM tblGLAccount A JOIN inserted I ON A.intAccountId = I.intAccountId
+END
+
+GO

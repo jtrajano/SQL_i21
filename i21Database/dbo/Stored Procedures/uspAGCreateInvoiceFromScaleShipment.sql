@@ -63,7 +63,7 @@ DECLARE @newInvoiceIds NVARCHAR(MAX) = N'';
 DECLARE @newIvoiceId   INT
 
 
-IF EXISTS (SELECT TOP 1 1 FROM #tmpAGShipment)
+WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAGShipment)
 BEGIN
 
 DECLARE @id INT = NULL
@@ -77,11 +77,10 @@ DECLARE @intInventoryShipmentId INT = NULL
 		EXEC uspAGCreateInvoiceFromShipment
 				@ShipmentId		 = @intInventoryShipmentId
 				,@UserId		 = @UserId
-				,@intAGWorkOrderId = @intWorkOrderId
 				,@NewInvoiceId	 = @NewInvoiceId OUTPUT
 	 	
 
-	 DELETE FROM #tmpAGShipment --WHERE id = @id
+	 DELETE FROM #tmpAGShipment WHERE id = @id
 END
 
 SELECT @NewInvoiceId

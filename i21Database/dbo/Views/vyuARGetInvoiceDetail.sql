@@ -86,6 +86,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intCustomerStorageId					= INV.intCustomerStorageId
 	 , intSiteDetailId						= INV.intSiteDetailId
 	 , intLoadDetailId						= INV.intLoadDetailId
+	 , intLoadDistributionDetailId			= INV.intLoadDistributionDetailId
 	 , intLotId								= INV.intLotId
 	 , intSiteId							= INV.intSiteId
 	 , strBillingBy							= INV.strBillingBy
@@ -189,8 +190,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , dblOptionalityPremium				= INV.dblOptionalityPremium
 	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
 	 , strReasonablenessComment				= INV.strReasonablenessComment
-	 , intOriginalTaxGroupId				= INV.intOriginalTaxGroupId
-	 , ysnOverrideTaxGroup               	= CAST(CASE WHEN INV.intOriginalTaxGroupId IS NULL OR INV.intOriginalTaxGroupId = INV.intTaxGroupId THEN 0 ELSE 1 END AS BIT)
+	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (

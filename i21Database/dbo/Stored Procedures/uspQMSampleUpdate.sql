@@ -54,6 +54,7 @@ BEGIN TRY
 		,@intOrgItemId INT
 		,@intOrgCountryID INT
 		,@intOrgCompanyLocationSubLocationId INT
+		,@intRelatedSampleId INT
 
 	SELECT @strErrorSampleNumber = NULL
 
@@ -64,11 +65,13 @@ BEGIN TRY
 		,@intOrgItemId = intItemId
 		,@intOrgCountryID = intCountryID
 		,@intOrgCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+		,@intRelatedSampleId = intRelatedSampleId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intItemId INT
 			,intCountryID INT
 			,intCompanyLocationSubLocationId INT
+			,intRelatedSampleId INT
 			)
 	
 	SELECT @intSampleId = intSampleId
@@ -259,6 +262,11 @@ BEGIN TRY
 			AND x.strRowState = 'MODIFIED'
 	END
 
+		
+	-- Unlink related sample if not null before update
+	IF @intRelatedSampleId IS NOT NULL
+		UPDATE tblQMSample SET intRelatedSampleId = NULL WHERE @intRelatedSampleId = intRelatedSampleId
+
 	-- Sample Header Update
 	UPDATE tblQMSample
 	SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
@@ -396,6 +404,7 @@ BEGIN TRY
 			) x
 	WHERE dbo.tblQMSample.intSampleId = @intSampleId
 		AND x.strRowState = 'MODIFIED'
+
 
 	-- If sample status is not in Approved and Rejected, then set the previous sample status
 	IF @intPreviousSampleStatusId <> 3 AND @intPreviousSampleStatusId <> 4

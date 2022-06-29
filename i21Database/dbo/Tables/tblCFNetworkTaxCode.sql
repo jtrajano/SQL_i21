@@ -3,7 +3,7 @@
     [intNetworkId]        INT            NULL,
     [intItemCategory]     INT            NULL,
     [strNetworkTaxCode]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-    [strDescription]      NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strDescription]      NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strState]            NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [intTaxCodeId]        INT            NULL,
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblCFNetworkTaxCode_intConcurrencyId] DEFAULT ((1)) NULL,

@@ -17,11 +17,11 @@ BEGIN TRY
 		, @ysnAmdWoAppvl BIT
 		, @intSequenceHistoryId INT
 		, @intPrevHistoryId INT
-		, @dblPrevQty NUMERIC(18, 6)
-		, @dblPrevBal NUMERIC(18, 6)
+		, @dblPrevQty NUMERIC(38, 20)
+		, @dblPrevBal NUMERIC(38, 20)
 		, @intPrevStatusId INT
-		, @dblQuantity NUMERIC(18, 6)
-		, @dblBalance NUMERIC(18, 6)
+		, @dblQuantity NUMERIC(38, 20)
+		, @dblBalance NUMERIC(38, 20)
 		, @intContractStatusId INT
 		, @dblPrevFutures NUMERIC(18, 6)
 		, @dblPrevBasis NUMERIC(18, 6)
@@ -37,6 +37,7 @@ BEGIN TRY
 		, @ysnAmendmentForCashFuture BIT = 0
 		, @ysnHasModification Bit = 0
 		, @ysnAmmendmentLogged bit = 0
+		, @intPricingTypeId INT
 		;
 	
 	DECLARE @tblHeader AS TABLE (intContractHeaderId INT
@@ -439,14 +440,22 @@ BEGIN TRY
 					, @dblFutures = dblFutures
 					, @dblBasis = dblBasis
 					, @dblCashPrice = dblCashPrice
+					, @intPricingTypeId = intPricingTypeId
 				FROM tblCTSequenceHistory
 				WHERE intSequenceHistoryId = @intSequenceHistoryId;
 				
 				IF ISNULL(@dblPrevQty, 0) <> ISNULL(@dblQuantity, 0)
 				BEGIN
-					UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty,ysnQtyChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
-				END
-				IF ISNULL(@dblPrevBal,0) <> ISNULL(@dblBalance,0)
+					IF (ISNULL(@dblQuantity, 0) > ISNULL(@dblPrevQty, 0) AND @strSource <> 'Contract' AND @intPricingTypeId <> 5)
+					BEGIN
+						SET @strSource = 'Contract'
+					END
+					UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty
+						, ysnQtyChange = 1
+					WHERE intSequenceHistoryId = @intSequenceHistoryId;
+				END;
+				
+				IF ISNULL(@dblPrevBal, 0) <> ISNULL(@dblBalance, 0)
 				BEGIN
 					UPDATE tblCTSequenceHistory SET dblOldBalance = @dblPrevBal,ysnBalanceChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
 				END

@@ -18,20 +18,31 @@ SET ANSI_WARNINGS OFF
 		,[intLicenseAccountId]			INT
 		,[intMaintenanceAccountId]		INT
 	)
+	DECLARE  @AllowIntraCompanyEntries		BIT
+			,@AllowIntraLocationEntries		BIT
+			,@AllowSingleLocationEntries	BIT
+			,@OverrideCompanySegment		BIT
+			,@OverrideLocationSegment		BIT
+			,@OverrideLineOfBusinessSegment	BIT
+
+	SELECT TOP 1
+		 @AllowIntraCompanyEntries		= ysnAllowIntraCompanyEntries
+		,@AllowIntraLocationEntries		= ysnAllowIntraLocationEntries
+		,@AllowSingleLocationEntries	= ysnAllowSingleLocationEntries
+		,@OverrideCompanySegment		= ysnOverrideCompanySegment
+		,@OverrideLocationSegment		= ysnOverrideLocationSegment
+		,@OverrideLineOfBusinessSegment	= ysnOverrideLineOfBusinessSegment
+	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 	
 	--AR ACCOUNT	
 	UPDATE ARI
-	SET ARI.intAccountId = CASE WHEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter) IS NOT NULL AND ISNULL(GL.ysnActive, 0) = 1 AND ARCP.ysnAllowIntraCompanyEntries = 0 AND ARCP.ysnAllowIntraLocationEntries = 0 AND ARCP.ysnAllowSingleLocationEntries = 0
+	SET ARI.intAccountId = CASE WHEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter) IS NOT NULL AND ISNULL(GL.ysnActive, 0) = 1 AND @AllowIntraCompanyEntries = 0 AND @AllowIntraLocationEntries = 0 AND @AllowSingleLocationEntries = 0
 								THEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
 								ELSE ARI.intAccountId
 							END
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	INNER JOIN tblARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
 	LEFT JOIN tblGLAccount GL ON GL.intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
-	OUTER APPLY(
-		SELECT TOP 1 ysnAllowIntraCompanyEntries, ysnAllowIntraLocationEntries, ysnAllowSingleLocationEntries
-		FROM tblARCompanyPreference
-	) ARCP
 	WHERE PID.strSessionId = @strSessionId
 
 	INSERT INTO @LineItemAccounts (
@@ -57,48 +68,92 @@ SET ANSI_WARNINGS OFF
 
 	--INVENTORY
 	UPDATE LIA
-	SET LIA.[intAccountId]			= IA.[intSalesAccountId]
-	  , LIA.[intSalesAccountId]		= CASE WHEN ARID.[strTransactionType] = 'Debit Memo' OR ARCP.ysnAllowIntraCompanyEntries = 1 OR ARCP.ysnAllowIntraLocationEntries = 1 OR ARCP.ysnAllowSingleLocationEntries = 1
-											THEN ARID.[intSalesAccountId] 
-											ELSE IA.[intSalesAccountId] 
+	SET LIA.[intAccountId]			= OVERRIDESEGMENTSALES.intOverrideAccount
+	  , LIA.[intSalesAccountId]		= CASE WHEN @OverrideLineOfBusinessSegment  = 1 
+										THEN ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](OVERRIDESEGMENTSALES.intOverrideAccount, ISNULL(LOB.intSegmentCodeId, 0)), OVERRIDESEGMENTSALES.intOverrideAccount)
+										ELSE OVERRIDESEGMENTSALES.intOverrideAccount 
 									  END
-	  , LIA.[intCOGSAccountId]		= IA.[intCOGSAccountId]
-	  , LIA.[intInventoryAccountId]	= IA.[intInventoryAccountId]
+	  , LIA.[intCOGSAccountId]		= CASE WHEN @OverrideLineOfBusinessSegment  = 1 
+										THEN ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](OVERRIDESEGMENTCOGS.intOverrideAccount, ISNULL(LOB.intSegmentCodeId, 0)), OVERRIDESEGMENTCOGS.intOverrideAccount)
+										ELSE OVERRIDESEGMENTCOGS.intOverrideAccount 
+									  END
+	  , LIA.[intInventoryAccountId]	= OVERRIDESEGMENTINVENTORY.intOverrideAccount
 	FROM @LineItemAccounts LIA
 	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.[intDetailId] = ARID.[intInvoiceDetailId]
-	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId]
-									   AND ARID.[intCompanyLocationId] = IA.[intLocationId]
-	OUTER APPLY(
-		SELECT TOP 1 ysnAllowIntraCompanyEntries, ysnAllowIntraLocationEntries, ysnAllowSingleLocationEntries
-		FROM tblARCompanyPreference
-	) ARCP
+	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+	OUTER APPLY (
+		SELECT TOP 1 intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARI.intLineOfBusinessId, 0)
+	) LOB
+	LEFT OUTER JOIN(
+		SELECT 
+			 [intItemId]
+			,[intLocationId]
+			,[intItemLocationId] 
+		FROM dbo.tblICItemLocation
+	) AS ICIL ON ARID.[intItemId] = ICIL.[intItemId] AND ICIL.[intLocationId] IS NOT NULL
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](
+			 ARI.[intAccountId]
+			,ARID.[intSalesAccountId]
+			,@OverrideCompanySegment
+			,@OverrideLocationSegment
+			,0
+		)
+	) OVERRIDESEGMENTSALES
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](
+			 ARI.[intAccountId]
+			,ARID.[intCOGSAccountId]
+			,@OverrideCompanySegment
+			,@OverrideLocationSegment
+			,0
+		)
+	) OVERRIDESEGMENTCOGS
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](
+			 ARI.[intAccountId]
+			,ARID.[intInventoryAccountId]
+			,0
+			,0
+			,0
+		)
+	) OVERRIDESEGMENTINVENTORY
 	WHERE ARID.[strItemType] NOT IN ('Non-Inventory', 'Service', 'Other Charge', 'Software')
 	  AND ARID.strSessionId = @strSessionId
-	  AND IA.strSessionId = @strSessionId
 
 	--NON-INVENTORY, SERVICE, OTHER CHARGE
 	UPDATE LIA
-	SET LIA.[intAccountId] = (CASE WHEN ARID.[strItemType] = 'Service'
-										THEN
-										(CASE WHEN ARID.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], IA.[intGeneralAccountId]) ELSE IA.[intGeneralAccountId] END)
-									WHEN ARID.[strItemType] = 'Non-Inventory'
-										THEN
-										(CASE WHEN ARID.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], ISNULL(IA.[intSalesAccountId], IA.[intGeneralAccountId])) ELSE ISNULL(IA.[intSalesAccountId], IA.[intGeneralAccountId]) END)
-									WHEN ARID.[strItemType] = 'Other Charge'
-										THEN
-										(CASE WHEN ARID.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], IA.[intOtherChargeIncomeAccountId]) ELSE IA.[intOtherChargeIncomeAccountId] END)
-									ELSE
-										(CASE WHEN ARID.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END))) 
-											ELSE
-												ISNULL(ARID.[intConversionAccountId],(CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END)) 
-										END)											
-								END)
+	SET LIA.[intAccountId] = CASE WHEN @OverrideLineOfBusinessSegment  = 1 
+								THEN ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](OVERRIDESEGMENT.intOverrideAccount , ISNULL(LOB.intSegmentCodeId, 0)), OVERRIDESEGMENT.intOverrideAccount)
+								ELSE OVERRIDESEGMENT.intOverrideAccount 
+							 END
 	FROM @LineItemAccounts LIA
 	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	
-	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId]
-									   AND ARID.[intCompanyLocationId] = IA.[intLocationId]
+	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+	OUTER APPLY (
+		SELECT TOP 1 intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARI.intLineOfBusinessId, 0)
+	) LOB
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](
+			 ARI.[intAccountId]
+			,CASE WHEN ARID.[strItemType] IN ('Service', 'Non-Inventory', 'Other Charge')
+				THEN ARID.[intSalesAccountId]
+				ELSE ISNULL(ARID.[intConversionAccountId], (CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END))
+			 END
+			,@OverrideCompanySegment
+			,@OverrideLocationSegment
+			,0
+		)
+	) OVERRIDESEGMENT
 	WHERE ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
-	  AND IA.strSessionId = @strSessionId
 
 	UPDATE LIA
 	SET LIA.[intSalesAccountId] = LIA.[intAccountId]
@@ -158,13 +213,14 @@ SET ANSI_WARNINGS OFF
 		
 	--UPDATE INVOICE DETAIL ACCOUNTS
 	UPDATE ARID
-	SET ARID.intAccountId					= LIA.intAccountId
-	  , ARID.intCOGSAccountId				= LIA.intCOGSAccountId
-	  , ARID.intSalesAccountId				= LIA.intSalesAccountId
-	  , ARID.intInventoryAccountId			= LIA.intInventoryAccountId
-	  , ARID.intServiceChargeAccountId		= ISNULL(ARID.intServiceChargeAccountId ,LIA.intServiceChargeAccountId)
-	  , ARID.intLicenseAccountId			= LIA.intLicenseAccountId
-	  , ARID.intMaintenanceAccountId		= LIA.intMaintenanceAccountId
+	SET 
+		 ARID.intAccountId				= LIA.intAccountId
+		,ARID.intCOGSAccountId			= LIA.intCOGSAccountId
+		,ARID.intSalesAccountId			= LIA.intSalesAccountId
+		,ARID.intInventoryAccountId		= LIA.intInventoryAccountId
+		,ARID.intServiceChargeAccountId	= ISNULL(ARID.intServiceChargeAccountId ,LIA.intServiceChargeAccountId)
+		,ARID.intLicenseAccountId		= LIA.intLicenseAccountId
+		,ARID.intMaintenanceAccountId	= LIA.intMaintenanceAccountId
 	FROM tblARInvoiceDetail ARID
 	INNER JOIN @LineItemAccounts LIA ON ARID.intInvoiceDetailId = LIA.intDetailId
 
@@ -179,14 +235,16 @@ SET ANSI_WARNINGS OFF
 	WHERE LIA.strSessionId = @strSessionId
 
 	--UPDATE INVOICE TAX DETAIL ACCOUNTS
-	IF EXISTS(SELECT TOP 1 1 FROM tblARCompanyPreference WHERE ysnOverrideTaxAccountLocation = 1 OR ysnOverrideTaxAccountCompany = 1) 
-	BEGIN
-		UPDATE ARITD
-		SET ARITD.intSalesTaxAccountId = ISNULL(dbo.fnGetGLAccountIdFromProfitCenter(ARITD.intSalesTaxAccountId, ARID.intProfitCenter), ARITD.intSalesTaxAccountId)
-		FROM tblARInvoiceDetailTax ARITD
-		INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
-		WHERE ARID.strSessionId = @strSessionId
-	END
+	UPDATE ARITD
+	SET ARITD.intSalesTaxAccountId = OVERRIDESEGMENT.intOverrideAccount
+	FROM tblARInvoiceDetailTax ARITD
+	INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](ARITD.intSalesTaxAccountId, ARID.[intAccountId], @OverrideCompanySegment, @OverrideLocationSegment, 0)
+	) OVERRIDESEGMENT
+	WHERE ARID.strSessionId = @strSessionId
+	AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
 
 	--UPDATE FINAL
 	UPDATE PIH
@@ -196,7 +254,8 @@ SET ANSI_WARNINGS OFF
 	WHERE PIH.strSessionId = @strSessionId
 
     UPDATE PID
-    SET  PID.[intItemAccountId]             = ARID.[intAccountId]
+    SET  
+		 PID.[intItemAccountId]             = ARID.[intAccountId]
         ,PID.[intSalesAccountId]            = ARID.[intSalesAccountId]
         ,PID.[intServiceChargeAccountId]    = ARID.[intServiceChargeAccountId]
         ,PID.[intLicenseAccountId]          = ARID.[intLicenseAccountId]

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdateSequenceBalance]
 	@intContractDetailId			INT,
-	@dblQuantityToUpdate			NUMERIC(18,6),
+	@dblQuantityToUpdate			NUMERIC(38,20),
 	@intUserId						INT,
 	@intExternalId					INT,
 	@strScreenName					NVARCHAR(50),
@@ -12,12 +12,12 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@dblQuantity			NUMERIC(18,6),
-			@dblOldBalance			NUMERIC(18,6),
-			@dblNewBalance			NUMERIC(18,6),
+			@dblQuantity			NUMERIC(38,20),
+			@dblOldBalance			NUMERIC(38,20),
+			@dblNewBalance			NUMERIC(38,20),
 			@strAdjustmentNo		NVARCHAR(50),
-			@dblTransactionQuantity	NUMERIC(18,6),
-			@dblQuantityToIncrease	NUMERIC(18,6),
+			@dblTransactionQuantity	NUMERIC(38,20),
+			@dblQuantityToIncrease	NUMERIC(38,20),
 			@ysnUnlimitedQuantity	BIT,
 			@ysnCompleted			BIT	= 0,
 			@intPricingTypeId		INT,
@@ -157,6 +157,11 @@ BEGIN TRY
 									END
 	WHERE	intContractDetailId =	@intContractDetailId
 
+	update ch set ch.intConcurrencyId = ch.intConcurrencyId + 1
+	from tblCTContractDetail cd
+	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	where cd.intContractDetailId = @intContractDetailId
+
 	 /*
 	 CT-4516
 	 Check if the Sales Contract is allocated and get the Purchase Contract allocated on it and update the Status
@@ -178,6 +183,13 @@ BEGIN TRY
 									ELSE 5     
 									END    
 		WHERE intContractDetailId = @intAllocatedPurchaseContractDetailId  
+
+
+		update ch set ch.intConcurrencyId = ch.intConcurrencyId + 1
+		from tblCTContractDetail cd
+		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+		where cd.intContractDetailId = @intAllocatedPurchaseContractDetailId
+	
 		select @intAllocatedPurchaseContractDetailId = min(intPContractDetailId) from tblLGAllocationDetail where intSContractDetailId = @intContractDetailId and intPContractDetailId > @intAllocatedPurchaseContractDetailId;
 
 	end  

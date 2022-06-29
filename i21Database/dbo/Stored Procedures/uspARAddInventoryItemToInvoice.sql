@@ -68,6 +68,7 @@
 	,@ItemCustomerStorageId			INT				= NULL		
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL		
+	,@ItemLoadDistributionDetailId	INT 			= NULL
 	,@ItemLotId						INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
@@ -369,6 +370,7 @@ BEGIN TRY
 				,[intCustomerStorageId]
 				,[intSiteDetailId]
 				,[intLoadDetailId]
+				,[intLoadDistributionDetailId]
 				,[intLotId]
 				,[intOriginalInvoiceDetailId]
 				,[intSiteId]
@@ -491,6 +493,7 @@ BEGIN TRY
 				,[intCustomerStorageId]				= @ItemCustomerStorageId
 				,[intSiteDetailId]					= @ItemSiteDetailId
 				,[intLoadDetailId]					= @ItemLoadDetailId
+				,[intLoadDistributionDetailId]		= @ItemLoadDistributionDetailId
 				,[intLotId]							= @ItemLotId
 				,[intOriginalInvoiceDetailId]		= @ItemOriginalInvoiceDetailId 
 				,[intSiteId]						= @ItemSiteId

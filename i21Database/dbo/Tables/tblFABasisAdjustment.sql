@@ -12,8 +12,8 @@
 	[dtmDate] DATETIME NOT NULL,
 	[dtmDateEntered] DATETIME NOT NULL,
 	[ysnAddToBasis] BIT NOT NULL DEFAULT(0),
-	[strReason] NVARCHAR(255) NULL,
-	[strAdjustmentType] NVARCHAR(100) NULL,
+	[strReason] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL ,
+	[strAdjustmentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL,
 
 	CONSTRAINT [PK_tblFABasisAdjustment] PRIMARY KEY CLUSTERED ([intBasisAdjustmentId] ASC),

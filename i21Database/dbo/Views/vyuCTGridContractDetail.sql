@@ -322,6 +322,13 @@ AS
 			, strLCPaymentTerm = credT.strTerm
 			, strLCTreasuryBank = credB.strBankName
 			, strLCBank = credB2.strBankName
+			, CD.intVendorLocationId
+			, CD.ysnTaxOverride
+			, CD.strTaxPoint
+			, CD.intTaxGroupId
+			, TG.strTaxGroup
+			, CD.strTaxLocation
+			, CD.intTaxLocationId
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -339,6 +346,7 @@ AS
 	LEFT    JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId					=		CD.intPricingTypeId			--strPricingType
 	LEFT    JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId					=		CD.intRailGradeId
 	LEFT	JOIN	tblCTSubBook					SK	ON	SK.intSubBookId						=		CD.intSubBookId				--strSubBook
+	LEFT	JOIN	tblSMTaxGroup					TG	ON	TG.intTaxGroupId					=		CD.intTaxGroupId
 
 	-- Reference Pricing
 	LEFT JOIN tblRKFutureMarket RefFuturesMarket ON RefFuturesMarket.intFutureMarketId = CD.intRefFuturesMarketId

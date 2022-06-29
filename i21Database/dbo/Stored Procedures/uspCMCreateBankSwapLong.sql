@@ -6,12 +6,11 @@ DECLARE @intBankSwapId INT, @intSwapLongId INT, @strTransactionId NVARCHAR(40)
 select @intBankSwapId = intBankSwapId --, @intSwapLongId = intSwapLongId 
 from tblCMBankSwap WHERE @intSwapShortId = intSwapShortId
 
-DECLARE @intBTForwardToFXGLAccountId INT,@intBTForwardFromFXGLAccountId INT
+DECLARE @intBTSwapToFXGLAccountId INT,@intBTSwapFromFXGLAccountId INT
 SELECT TOP 1 
-@intBTForwardToFXGLAccountId = intBTForwardToFXGLAccountId,
-@intBTForwardFromFXGLAccountId = intBTForwardFromFXGLAccountId
-     
-    FROM tblCMCompanyPreferenceOption  
+	@intBTSwapToFXGLAccountId = intBTSwapToFXGLAccountId,
+	@intBTSwapFromFXGLAccountId = intBTSwapFromFXGLAccountId
+FROM tblCMCompanyPreferenceOption  
 
 DECLARE @dblCreditForeign DECIMAL(18,6)
 DECLARE @defaultCurrencyId INT
@@ -75,7 +74,7 @@ from tblCMBankTransfer  A
 OUTER APPLY(
 	SELECT TOP 1 dblCreditForeign, dblExchangeRate, intCurrencyExchangeRateTypeId, dblCredit
     FROM tblGLDetail 
-	WHERE intAccountId = @intBTForwardToFXGLAccountId
+	WHERE intAccountId = @intBTSwapToFXGLAccountId
 	AND strTransactionId =A.strTransactionId
 	AND ysnIsUnposted = 0
 	ORDER by intGLDetailId DESC

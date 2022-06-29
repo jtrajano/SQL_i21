@@ -3,11 +3,11 @@
     [intTermsCode]                 INT             NULL,
     [intTermsId]                   INT             NULL,
     [intARItemId]                  INT             NULL,
-    [strDepartmentDescription]     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strShortName]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strProductDescription]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strItemNumber]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strItemDescription]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strDepartmentDescription]     NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strShortName]                 NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strProductDescription]        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strItemNumber]                NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strItemDescription]           NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [dblTotalQuantity]             NUMERIC (18, 6) NULL,
     [dblTotalGrossAmount]          NUMERIC (18, 6) NULL,
     [dblTotalNetAmount]            NUMERIC (18, 6) NULL,
@@ -20,9 +20,9 @@
     [ysnIncludeInQuantityDiscount] BIT             NULL,
     [intAccountId]                 INT             NULL,
     [intTransactionId]             INT             NULL,
-    [strGuid]                      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
-    [strUserId]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
-    [strStatementType]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL
+    [strGuid]                      NVARCHAR (100)  COLLATE Latin1_General_CI_AS  NULL,
+    [strUserId]                    NVARCHAR (100)  COLLATE Latin1_General_CI_AS  NULL,
+    [strStatementType]             NVARCHAR (100)  COLLATE Latin1_General_CI_AS  NULL
 );
 
 

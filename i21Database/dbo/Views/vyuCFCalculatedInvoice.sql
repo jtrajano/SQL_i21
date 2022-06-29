@@ -17,7 +17,7 @@ SELECT
 	 strCustomerName, 
 	 strEmail, 
 	 strEmailDistributionOption, 
-	 strStatus,
+	 strStatus = strStatus COLLATE Latin1_General_CI_AS,
 	 strStatementType,
 	 CASE 
 			WHEN (ISNULL(strEmail,'') != '') AND (strEmailDistributionOption like '%CF Invoice%') THEN CAST(1 AS BIT)

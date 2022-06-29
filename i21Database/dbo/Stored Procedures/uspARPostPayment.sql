@@ -1,23 +1,23 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostPayment]
-	@batchId			AS NVARCHAR(40)		= NULL
-	,@post				AS BIT				= 0
-	,@recap				AS BIT				= 0
-	,@param				AS NVARCHAR(MAX)	= NULL
+	@batchId				AS NVARCHAR(40)		= NULL
+	,@post					AS BIT				= 0
+	,@recap					AS BIT				= 0
+	,@param					AS NVARCHAR(MAX)	= NULL
 	,@userId				AS INT				= 1
-	,@beginDate			AS DATE				= NULL
-	,@endDate			AS DATE				= NULL
-	,@beginTransaction	AS NVARCHAR(50)		= NULL
+	,@beginDate				AS DATE				= NULL
+	,@endDate				AS DATE				= NULL
+	,@beginTransaction		AS NVARCHAR(50)		= NULL
 	,@endTransaction		AS NVARCHAR(50)		= NULL
-	,@exclude			AS NVARCHAR(MAX)	= NULL
-	,@successfulCount	AS INT				= 0 OUTPUT
-	,@invalidCount		AS INT				= 0 OUTPUT
-	,@success			AS BIT				= 0 OUTPUT
-	,@batchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
-	,@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
-	,@transType			AS NVARCHAR(25)		= 'all'
-	,@raiseError		AS BIT				= 0
-	,@bankAccountId	AS INT				= NULL
-	,@ysnForFinalInvoice	AS BIT = 0
+	,@exclude				AS NVARCHAR(MAX)	= NULL
+	,@successfulCount		AS INT				= 0 OUTPUT
+	,@invalidCount			AS INT				= 0 OUTPUT
+	,@success				AS BIT				= 0 OUTPUT
+	,@batchIdUsed			AS NVARCHAR(40)		= NULL OUTPUT
+	,@recapId				AS NVARCHAR(250)	= NEWID OUTPUT
+	,@transType				AS NVARCHAR(25)		= 'all'
+	,@raiseError			AS BIT				= 0
+	,@bankAccountId			AS INT				= NULL
+	,@ysnForFinalInvoice	AS BIT 				= 0
 
 WITH RECOMPILE
 AS
@@ -111,7 +111,6 @@ CREATE TABLE #ARPostPaymentHeader
     ,[intInterestAccount]               INT             NULL
     ,[intCFAccountId]                   INT             NULL
     ,[intGainLossAccount]               INT             NULL
-	,[intCreditCardFeeAccountId]		INT             NULL
     ,[intEntityCardInfoId]              INT             NULL
 	,[ysnPosted]                        BIT             NULL
 	,[ysnInvoicePrepayment]             BIT             NULL
@@ -140,8 +139,6 @@ CREATE TABLE #ARPostPaymentHeader
     ,[dblBaseInvoiceTotal]              NUMERIC(18,6)   NULL
     ,[dblAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblBaseAmountDue]                 NUMERIC(18,6)   NULL
-	,[dblCreditCardFee]					NUMERIC(18,6)   NULL
-	,[dblBaseCreditCardFee]				NUMERIC(18,6)   NULL
 
     ,[intInvoiceId]                     INT             NULL
     ,[ysnExcludedFromPayment]           BIT             NULL
@@ -153,7 +150,7 @@ CREATE TABLE #ARPostPaymentHeader
 	,[intTransactionAccountId]          INT             NULL
     ,[ysnTransactionPosted]             BIT             NULL
 	,[ysnTransactionPaid]               BIT             NULL
-	,[ysnTransactionProcessed]          BIT             NULL    
+	,[ysnTransactionProcessed]          BIT             NULL
     ,[dtmTransactionPostDate]           DATETIME        NULL
 	,[dblTransactionDiscount]           NUMERIC(18,6)   NULL
     ,[dblBaseTransactionDiscount]       NUMERIC(18,6)   NULL
@@ -163,7 +160,10 @@ CREATE TABLE #ARPostPaymentHeader
     ,[dblBaseTransactionAmountDue]      NUMERIC(18,6)   NULL
 	,[intCurrencyExchangeRateTypeId]    INT             NULL
     ,[dblCurrencyExchangeRate]          NUMERIC(18,6)   NULL
-    ,[strRateType]                      NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL)
+    ,[strRateType]                      NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
+	,[ysnUserDefinedPaymentMethod]      BIT             NULL
+	,[intPaymentMethodAccountId]		INT             NULL
+)
 
 IF(OBJECT_ID('tempdb..#ARPostPaymentDetail') IS NOT NULL)
 BEGIN
@@ -197,7 +197,6 @@ CREATE TABLE #ARPostPaymentDetail
     ,[intInterestAccount]               INT             NULL
     ,[intCFAccountId]                   INT             NULL
     ,[intGainLossAccount]               INT             NULL
-	,[intCreditCardFeeAccountId]		INT             NULL
     ,[intEntityCardInfoId]              INT             NULL
 	,[ysnPosted]                        BIT             NULL
 	,[ysnInvoicePrepayment]             BIT             NULL
@@ -232,8 +231,6 @@ CREATE TABLE #ARPostPaymentDetail
     ,[dblBaseInvoiceTotal]              NUMERIC(18,6)   NULL
     ,[dblAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblBaseAmountDue]                 NUMERIC(18,6)   NULL
-	,[dblCreditCardFee]					NUMERIC(18,6)   NULL
-	,[dblBaseCreditCardFee]				NUMERIC(18,6)   NULL
 
     ,[intInvoiceId]                     INT             NULL
     ,[ysnExcludedFromPayment]           BIT             NULL
@@ -332,12 +329,10 @@ EXEC [dbo].[uspARPopulateInvalidPostPaymentData]
 
 SET @totalInvalid = ISNULL((SELECT COUNT(DISTINCT [intTransactionId]) FROM #ARInvalidPaymentData),0)
 
-
-
 IF(@totalInvalid = 0)
 BEGIN
 	IF @post = @OneBit
-		 EXEC [dbo].[uspARPopulatePaymentAccountForPosting]
+		EXEC [dbo].[uspARPopulatePaymentAccountForPosting]
 END
 
 IF(@totalInvalid > 0)
@@ -358,9 +353,7 @@ BEGIN
     DELETE A
     FROM
         #ARPostPaymentHeader A
-    INNER JOIN 
-        #ARInvalidPaymentData I
-			ON A.intTransactionId = I.intTransactionId
+    INNER JOIN #ARInvalidPaymentData I ON A.intTransactionId = I.intTransactionId
 
     DELETE A
     FROM
@@ -382,32 +375,32 @@ END
 SELECT @totalRecords = (SELECT COUNT(DISTINCT [intTransactionId]) FROM #ARPostPaymentHeader)
 
 IF(@totalInvalid >= 1 AND @totalRecords <= 0)
+BEGIN
+	IF @raiseError = @ZeroBit
 	BEGIN
-		IF @raiseError = @ZeroBit
+		IF @InitTranCount = 0
 		BEGIN
-			IF @InitTranCount = 0
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION
-					IF (XACT_STATE()) = 1
-						COMMIT TRANSACTION
-				END		
-			ELSE
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION  @Savepoint
-					--IF (XACT_STATE()) = 1
-					--	COMMIT TRANSACTION  @Savepoint
-				END	
-		END
-		IF @raiseError = @OneBit
-			BEGIN
-				SELECT TOP 1 @ErrorMerssage = strError FROM #ARInvalidPaymentData
-				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
-			END	
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+		ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+	END
+	IF @raiseError = @OneBit
+	BEGIN
+		SELECT TOP 1 @ErrorMerssage = strError FROM #ARInvalidPaymentData
+		RAISERROR(@ErrorMerssage, 11, 1)							
 		GOTO Post_Exit
 	END	
+	GOTO Post_Exit
+END	
 
 IF(OBJECT_ID('tempdb..#ARPostOverPayment') IS NOT NULL)
 BEGIN
@@ -420,8 +413,7 @@ IF(OBJECT_ID('tempdb..#ARPostPrePayment') IS NOT NULL)
 BEGIN
     DROP TABLE #ARPostPrePayment
 END
-CREATE TABLE #ARPostPrePayment
-    ([intTransactionId]                 INT             NOT NULL PRIMARY KEY)
+CREATE TABLE #ARPostPrePayment ([intTransactionId] INT NOT NULL PRIMARY KEY)
 
 IF @post = @OneBit
 BEGIN

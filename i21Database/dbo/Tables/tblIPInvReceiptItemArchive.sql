@@ -22,9 +22,6 @@
 	strContainerNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strTrackingNo				INT,
 
-	intTrxSequenceNo			BIGINT,
-	intParentTrxSequenceNo		BIGINT,
-
 	CONSTRAINT [PK_tblIPInvReceiptItemArchive_intStageReceiptItemId] PRIMARY KEY (intStageReceiptItemId),
 	CONSTRAINT [FK_tblIPInvReceiptItemArchive_tblIPInvReceiptArchive_intStageReceiptId] FOREIGN KEY (intStageReceiptId) REFERENCES [tblIPInvReceiptArchive](intStageReceiptId) ON DELETE CASCADE
 )

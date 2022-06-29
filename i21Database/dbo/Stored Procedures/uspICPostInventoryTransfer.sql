@@ -337,14 +337,6 @@ BEGIN
 	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
 END 
 
--- Call any integration sp before doing the post/unpost. 
-BEGIN 
-	EXEC dbo.uspICBeforePostInventoryTransferIntegration
-			@ysnPost
-			,@intTransactionId 
-			,@intEntityUserSecurityId
-END 
-
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
@@ -1174,12 +1166,6 @@ BEGIN
 		SET		intStatusId = 1 -- Status: Open
 		WHERE	strTransferNo = @strTransactionId
 	END
-
-	-- Call the integration sp. 
-	EXEC dbo.uspICAfterPostInventoryTransferIntegration
-		@ysnPost
-		,@intTransactionId 
-		,@intEntityUserSecurityId
 
 	-- If shipment required, then update the in-transit quantities. 
 	IF @ysnShipmentRequired = 1

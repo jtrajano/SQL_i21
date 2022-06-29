@@ -87,9 +87,10 @@
 	[ysnEnableUserActivityLog]						BIT NOT NULL DEFAULT 0,
 	[strPowerBIAdminUsername]						NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIAdminPassword]						NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
-	[strClientId]									NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[strSecretId]									NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[strWorkspaceId]								NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBIClientId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBISecretId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBIWorkspaceId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBITenantId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPDefaultModel]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPDefaultModelId]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPSasURI]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -102,8 +103,8 @@
 	[strAzureLink]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strAzureContainer]								NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strAzureReference]								NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
-	[ysnLogPerformanceRuntime]						BIT NOT NULL DEFAULT 0,
-    [dtmPerformanceLoggingEffectivity]				DATETIME NULL,
-    [intConcurrencyId]								INT NOT NULL DEFAULT 1,
-	[strApiHostUrl] 								NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+    [strApiHostUrl] 								NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
+    [ysnLogPerformanceRuntime]                      BIT NOT NULL DEFAULT 0,
+    [dtmPerformanceLoggingEffectivity]              DATETIME NULL,
+    [intConcurrencyId]								INT NOT NULL DEFAULT 1
 )

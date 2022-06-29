@@ -135,6 +135,7 @@ BEGIN TRY
 	DECLARE @dtmCalculateChargeAndPremiumOn DATETIME
 	DECLARE @SettleStorageChargeAndPremium SettleStorageChargeAndPremium
 
+	DECLARE @intPricingTypeHeader INT
 	DECLARE @SettleStorage AS TABLE 
 	(
 		 intSettleStorageKey INT IDENTITY(1, 1)
@@ -166,6 +167,7 @@ BEGIN TRY
 		,strPricingType NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,strPricingTypeHeader NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intFuturesMonthId int null
+		,intPricingTypeHeader INT
 	)
 	
 	DECLARE @tblDepletion AS TABLE 
@@ -180,6 +182,7 @@ BEGIN TRY
 		,dblUnits DECIMAL(24, 10)
 		,intSourceItemUOMId INT
 		,dblCost DECIMAL(24, 10)
+		,intPricingTypeHeader INT
 	)
 	
 	DECLARE @SettleVoucherCreate AS SettleVoucherCreate
@@ -303,10 +306,13 @@ BEGIN TRY
 
 			IF ROUND((@dblSettlementTotal + @dblTransferTotal),4) > ROUND(@dblHistoryTotal,4) OR (@dblSettlementTotal - @dblHistoryTotal) > 0.1
 			BEGIN
+				--DECLARE @msg AS NVARCHAR(MAX)
+				--SET @msg = 'The record has changed. Please refresh screen. @dblSettlementTotal = ' + CAST(@dblSettlementTotal AS NVARCHAR) + ' @dblTransferTotal = ' + CAST(@dblSettlementTotal AS NVARCHAR) + ' @dblHistoryTotal = ' + CAST(@dblHistoryTotal AS NVARCHAR)
+				--RAISERROR(@msg,16,1,1)
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
 			END
-			DELETE FROM @CustomerStorageIds WHERE intId = @intId
+			DELETE FROM @CustomerStorageIds WHERE intId = @intId			
 		END
 	END
 
@@ -360,14 +366,12 @@ BEGIN TRY
 		DELETE FROM @tblDepletion
 		DELETE FROM @SettleVoucherCreate
 
-		select @TicketNo = dbo.fnGRGetStorageTicket(@intSettleStorageId)
-
 		SELECT 
 			@intCreatedUserId 				= intCreatedUserId
 			,@EntityId 						= intEntityId
 			,@LocationId 					= intCompanyLocationId
 			,@ItemId 						= intItemId
-			,@TicketNo 						= case when isnull(@TicketNo , '') = '' then strStorageTicket else @TicketNo end 
+			,@TicketNo 						= strStorageTicket
 			,@strStorageAdjustment 			= strStorageAdjustment
 			,@dtmCalculateStorageThrough 	= dtmCalculateStorageThrough
 			,@dblAdjustPerUnit 				= dblAdjustPerUnit
@@ -506,6 +510,7 @@ BEGIN TRY
 				,strPricingType
 				,strPricingTypeHeader
 				,intFuturesMonthId
+				,intPricingTypeHeader
 			)
 			SELECT 
 				 intSettleContractId 	= SSC.intSettleContractId 
@@ -518,8 +523,9 @@ BEGIN TRY
 				,intContractUOMId	 	= CD.intContractUOMId
 				,dblCostUnitQty		 	= CD.dblCostUnitQty
 				,strPricingType			= CD.strPricingType
-				,strPricingTypeHeader			= CD.strPricingTypeHeader
+				,strPricingTypeHeader	= CD.strPricingTypeHeader
 				,intFuturesMonthId		= CD.intGetContractDetailFutureMonthId
+				,intPricingTypeHeader	= CD.intPricingTypeHeader
 			FROM tblGRSettleContract SSC
 			JOIN vyuGRGetContracts CD 
 				ON CD.intContractDetailId = SSC.intContractDetailId
@@ -629,7 +635,8 @@ BEGIN TRY
 				outer apply (
 					select sum(dblQtyReceived) as dblTotal
 						from tblAPBillDetail 
-							where intSettleStorageId = @intSettleStorageId
+							where intBillId in 
+								(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
 							and intContractDetailId = a.intContractDetailId
 				) total_bill
 					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
@@ -663,8 +670,8 @@ BEGIN TRY
 
 						 select @cur_billed_per_contract_id = sum(ISNULL(dblQtyReceived,0))
 							from tblAPBillDetail 
-								where 
-								intSettleStorageId = @intSettleStorageId
+								where intBillId in 
+									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
 								and intContractDetailId = @cur_contract_id
 
 						--select '@cur_billed_per_contract_id',@cur_billed_per_contract_id
@@ -1043,16 +1050,18 @@ BEGIN TRY
 						,intCustomerStorageId
 						,dblUnits
 						,intSourceItemUOMId
+						,intPricingTypeHeader
 					)
 					SELECT 
-						 intSettleStorageTicketId = @intSettleStorageTicketId
-						,intPricingTypeId		  = 5
-						,strDepletionType		  = 'DP Contract'
-						,intContractHeaderId      = @DPContractHeaderId
-						,intContractDetailId      = @ContractDetailId
-						,intCustomerStorageId     = @intCustomerStorageId
-						,dblUnits                 = - @dblStorageUnits
-						,intSourceItemUOMId       = @CommodityStockUomId
+						 intSettleStorageTicketId	= @intSettleStorageTicketId
+						,intPricingTypeId			= 5
+						,strDepletionType			= 'DP Contract'
+						,intContractHeaderId		= @DPContractHeaderId
+						,intContractDetailId		= @ContractDetailId
+						,intCustomerStorageId		= @intCustomerStorageId
+						,dblUnits					= - @dblStorageUnits
+						,intSourceItemUOMId			= @CommodityStockUomId
+						,intPricingTypeHeader		= 5
 				END
 
 				IF EXISTS (
@@ -1083,6 +1092,7 @@ BEGIN TRY
 							,@dblContractBasis		= dblBasis
 							,@intContractUOMId		= intContractUOMId
 							,@dblCostUnitQty		= dblCostUnitQty
+							,@intPricingTypeHeader	= intPricingTypeHeader
 						FROM @SettleContract
 						WHERE intSettleContractKey 	= @SettleContractKey
 
@@ -1126,15 +1136,18 @@ BEGIN TRY
 								,intContractDetailId
 								,intCustomerStorageId
 								,dblUnits
+								,intPricingTypeHeader
 							 )
 							SELECT 
-								 intSettleStorageTicketId = @intSettleStorageTicketId
-								,intPricingTypeId		  = @intPricingTypeId
-								,strDepletionType         = 'Contract'
-								,intContractHeaderId      = 0 
-								,intContractDetailId      = @intContractDetailId
-								,intCustomerStorageId     = @intCustomerStorageId
-								,dblUnits                 = @dblUnitsForContract
+								 intSettleStorageTicketId	= @intSettleStorageTicketId
+								,intPricingTypeId			= @intPricingTypeId
+								,strDepletionType			= 'Contract'
+								,intContractHeaderId		= 0 
+								,intContractDetailId		= @intContractDetailId
+								,intCustomerStorageId		= @intCustomerStorageId
+								,dblUnits					= @dblUnitsForContract
+								,intPricingTypeHeader		= @intPricingTypeHeader
+
 
 							INSERT INTO @SettleVoucherCreate 
 							(
@@ -1197,15 +1210,17 @@ BEGIN TRY
 								,intContractDetailId
 								,intCustomerStorageId
 								,dblUnits
+								,intPricingTypeHeader
 							)
 							SELECT 
-								 intSettleStorageTicketId = @intSettleStorageTicketId
-								,intPricingTypeId		  = 1 
-								,strDepletionType         = 'Contract' 
-								,intContractHeaderId      = 0
-								,intContractDetailId      = @intContractDetailId 
-								,intCustomerStorageId     = @intCustomerStorageId 
-								,dblUnits                 = @dblUnitsForContract
+								 intSettleStorageTicketId	= @intSettleStorageTicketId
+								,intPricingTypeId			= 1 
+								,strDepletionType			= 'Contract' 
+								,intContractHeaderId		= 0
+								,intContractDetailId		= @intContractDetailId 
+								,intCustomerStorageId		= @intCustomerStorageId 
+								,dblUnits					= @dblUnitsForContract
+								,intPricingTypeHeader		= @intPricingTypeHeader
 
 							INSERT INTO @SettleVoucherCreate 
 							(
@@ -1638,7 +1653,7 @@ BEGIN TRY
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
 					,intTransactionDetailId		=  case when SC.intContractDetailId is not null then SC.intSettleContractId else @intSettleStorageTicketId end
-					,strTransactionId			= @strSettleTicket--@TicketNo
+					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
@@ -1710,7 +1725,7 @@ BEGIN TRY
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
 					,intTransactionDetailId		= case when SC.intContractDetailId is not null then SC.intSettleContractId else @intSettleStorageTicketId end
-					,strTransactionId			= @strSettleTicket--@TicketNo
+					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
@@ -2315,7 +2330,8 @@ BEGIN TRY
 							,CS.intItemId --Inventory Item Id
 							,CS.intCompanyLocationId --Copany Location Id
 							,SVC.dblUnits --Net Units
-							,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							--,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							,(SVC.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --Gross Units
 							,@dblTotalUnits --Transaction/Voucher Total Units
 							,@tblQMDiscountIds --Storage Ticket Discount Ids
 							,SVC.dblCashPrice --Inventory Item Cash Price
@@ -2399,7 +2415,7 @@ BEGIN TRY
 						,[intOtherChargeItemId]			= CAP.intOtherChargeItemId
 						,[intInventoryItemId]			= CAP.intInventoryItemId
 						,[dblInventoryItemNetUnits]		= SVC.dblUnits
-						,[dblInventoryItemGrossUnits]	= SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits)
+						,[dblInventoryItemGrossUnits]	= (SVC.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits)
 						,[dblGradeReading]				= CAP.dblGradeReading
 						,[intCtOtherChargeItemId]		= CAP.intCtOtherChargeItemId
 					FROM (
@@ -2426,7 +2442,8 @@ BEGIN TRY
 							,CS.intItemId --Inventory Item Id
 							,CS.intCompanyLocationId --Company Location Id
 							,SVC.dblUnits --Net Units
-							,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							--,SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits) --Gross Units
+							,(SVC.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity --Gross Units
 							,SVC.dblUnits --Transaction/Voucher Total Units
 							,@tblQMDiscountIds --Storage Ticket Discount Ids
 							,SVC.dblTotalAmount / SVC.dblUnits --Inventory Item Cost
@@ -2507,7 +2524,7 @@ BEGIN TRY
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
 					,[intShipFromId]				= @intShipFrom	
-					,[intShipFromEntityId]			= @shipFromEntityId					
+					,[intShipFromEntityId]			= @shipFromEntityId
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription]			= c.[strItemNo]
 					,[intItemId]					= a.[intItemId]
@@ -2727,7 +2744,8 @@ BEGIN TRY
 																								@LocationId,
 																								a.intItemId,
 																								coalesce(@intShipFrom, EM.intEntityLocationId),
-																								EM.intFreightTermId
+																								EM.intFreightTermId,
+																								default
 																							)
 														ELSE RI.intTaxGroupId
 													END
@@ -2903,7 +2921,8 @@ BEGIN TRY
 															@LocationId,
 															ACAP.intChargeAndPremiumItemId,
 															coalesce(@intShipFrom, EM.intEntityLocationId),
-															EM.intFreightTermId
+															EM.intFreightTermId,
+															default
 														)
 					,[dtmDate]						= @dtmClientPostDate
 					,[dtmVoucherDate]				= @dtmClientPostDate
@@ -2956,7 +2975,7 @@ BEGIN TRY
 										and a.intSettleStorageId = c.intSettleStorageId
 								join tblAPBill d
 									on c.intBillId = d.intBillId
-										
+										and d.strVendorOrderNumber = @TicketNo
 							)
 							
 				---we should update the voucher payable to remove the contract detail that has a null contract header
@@ -3035,7 +3054,7 @@ BEGIN TRY
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
 					,[intShipFromId]				= @intShipFrom	
-					,[intShipFromEntityId]			= @shipFromEntityId					
+					,[intShipFromEntityId]			= @shipFromEntityId
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription] 			= Item.[strItemNo]
 					,[intItemId] 					= ReceiptCharge.[intChargeId]
@@ -3155,7 +3174,7 @@ BEGIN TRY
 					,[intLocationId]		= @LocationId
 					,[intShipToId]			= @LocationId
 					,[intShipFromId]		= @intShipFrom	
-					,[intShipFromEntityId]	= @shipFromEntityId					
+					,[intShipFromEntityId]	= @shipFromEntityId
 					,[strVendorOrderNumber]	= @TicketNo
 					,[strMiscDescription]	= Item.[strItemNo]
 					,[intItemId]			= CC.[intItemId]
@@ -3305,7 +3324,8 @@ BEGIN TRY
 							APB.intShipToId,
 							APD.intItemId,
 							APB.intShipFromId,
-							EM.intFreightTermId
+							EM.intFreightTermId,
+							default
 						)
 					FROM tblAPBillDetail APD 
 					INNER JOIN tblAPBill APB
@@ -3439,7 +3459,6 @@ BEGIN TRY
 			---6.DP Contract Depletion, Purchase Contract Depletion,Storage Ticket Depletion
 			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
-
 				SELECT @intDepletionKey = MIN(intDepletionKey)
 				FROM @tblDepletion
 
@@ -3452,6 +3471,7 @@ BEGIN TRY
 					SET @dblUnits = NULL
 					SET @CommodityStockUomId = NULL
 					SET @dblCost = NULL
+					SET @intPricingTypeHeader = NULL
 
 					SELECT 
 						 @intSettleStorageTicketId 	= intSettleStorageTicketId
@@ -3461,22 +3481,31 @@ BEGIN TRY
 						,@dblUnits 					= dblUnits
 						,@CommodityStockUomId 		= intSourceItemUOMId
 						,@dblCost 					= dblCost
+						,@intPricingTypeHeader		= intPricingTypeHeader
 					FROM @tblDepletion
-					WHERE intDepletionKey = @intDepletionKey					
-
+					WHERE intDepletionKey = @intDepletionKey
 					
-					IF @intPricingTypeId = 5
-					BEGIN
+					DECLARE @dblCurrentContractBalance DECIMAL(38,20)
+					DECLARE @strUnitMeasure NVARCHAR(50)
+					DECLARE @dblNewContractBalance DECIMAL(38,20)
+					DECLARE @dblDiff DECIMAL(38,20)
+					
+					SET @dblCurrentContractBalance = NULL
+					SET @strUnitMeasure = NULL
+					SET @dblNewContractBalance = NULL
 
-						declare @dblCurrentContractBalance DECIMAL(24, 10)
-						select @dblCurrentContractBalance = dblBalance 
-							from tblCTContractDetail where intContractDetailId = @intContractDetailId						
-							
-						if( (@dblCurrentContractBalance) + (@dblUnits)  < 0.01)
-						begin
-							set @dblUnits = @dblCurrentContractBalance * -1
-						end
-						
+					SELECT @dblCurrentContractBalance = dblBalance 
+					FROM tblCTContractDetail 
+					WHERE intContractDetailId = @intContractDetailId
+
+					SET @dblDiff = @dblUnits - @dblCurrentContractBalance
+					
+					IF @intPricingTypeId = 5 --DP
+					BEGIN											
+						IF( (@dblCurrentContractBalance) + (@dblUnits)  < 0.01)
+						BEGIN
+							SET @dblUnits = @dblCurrentContractBalance * -1
+						END						
 
 						IF (SELECT dblDetailQuantity FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId) > 0
 						EXEC uspCTUpdateSequenceQuantityUsingUOM 
@@ -3489,12 +3518,41 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
+						--add the microbalance in the contract
+						IF @dblDiff > 0 AND @intPricingTypeHeader <> 2--DO NOT HANDLE BASIS CONTRACTS FOR NOW 
+						BEGIN
+							EXEC uspGRUpdateContractInSettlement @intContractDetailId,2, @dtmClientPostDate, @intCreatedUserId,@dblDiff
+						END
+
 						EXEC uspCTUpdateSequenceBalance 
 							 @intContractDetailId = @intContractDetailId
 							,@dblQuantityToUpdate = @dblUnits
 							,@intUserId = @intCreatedUserId
 							,@intExternalId = @intSettleStorageTicketId
 							,@strScreenName = 'Settle Storage'
+
+						--short-close the contract if there is a microbalance left in the sequence
+						--check first if the auto-short close config is enabled
+						IF (SELECT ysnAutoShortCloseContractInSettlement FROM tblGRCompanyPreference) = 1 
+							AND @intPricingTypeHeader <> 2 --DO NOT HANDLE BASIS CONTRACTS FOR NOW 
+						BEGIN
+							SET @strUnitMeasure = NULL
+							SET @dblNewContractBalance = NULL
+
+							SELECT @dblNewContractBalance = dblBalance
+								,@strUnitMeasure = UM.strUnitMeasure
+							FROM tblCTContractDetail CD
+							INNER JOIN tblICUnitMeasure UM
+								ON UM.intUnitMeasureId = CD.intUnitMeasureId
+							WHERE intContractDetailId = @intContractDetailId
+
+							--SHORT-CLOSE CONTRACT WITH MICROBALANCE LEFT IN THE BALANCE
+							IF ((@dblNewContractBalance <= 0.000001 AND (LOWER(@strUnitMeasure) = 'ton' OR LOWER(@strUnitMeasure) = 'tonne'))
+								OR (@dblNewContractBalance <= 0.0001 AND (LOWER(@strUnitMeasure) = 'bushel'))) AND ISNULL(@dblDiff,0) < 0
+							BEGIN
+								EXEC uspGRUpdateContractInSettlement @intContractDetailId,1, @dtmClientPostDate, @intCreatedUserId,@dblDiff
+							END
+						END
 					END
 
 					SELECT @intDepletionKey = MIN(intDepletionKey)

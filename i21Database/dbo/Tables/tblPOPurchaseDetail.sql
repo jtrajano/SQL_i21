@@ -15,7 +15,6 @@
     [dblQtyOrdered] NUMERIC(38, 15) NOT NULL DEFAULT 0, 
 	[dblQtyContract] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblQtyReceived] NUMERIC(38, 15) NOT NULL DEFAULT 0, 
-	[dblStandardWeight] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblWeightUnitQty] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblCostUnitQty] DECIMAL(38, 20) NOT NULL DEFAULT 0,
 	[dblUnitQty] DECIMAL(18, 6) NOT NULL DEFAULT 0, 

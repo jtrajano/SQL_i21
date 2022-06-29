@@ -113,6 +113,8 @@ BEGIN
 				, dblFinancedAmount
 				, strBorrowingFacilityBankRefNo
 				, ysnDeleted
+				, [intOverrideBankValuationId]
+				, [strOverrideBankValuation]
 				)
 			select
 				strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' ELSE
@@ -144,8 +146,8 @@ BEGIN
 				, intBorrowingFacilityId = cd.intBorrowingFacilityId
 				, intLimitId = cd.intBorrowingFacilityLimitId
 				, intSublimitId = cd.intBorrowingFacilityLimitDetailId
-				, strBankTradeReference = cd.strReferenceNo
-				, strBankApprovalStatus = STF.strApprovalStatus
+				, strBankTradeReference = isnull(TFL.strBankTradeReference, cd.strReferenceNo)
+				, strBankApprovalStatus = isnull(TFL.strBankApprovalStatus, STF.strApprovalStatus)
 				, dblLimit = limit.dblLimit
 				, dblSublimit = sublimit.dblLimit
 				, dblFinanceQty = CASE WHEN cd.intApprovalStatusId in (3,4) OR cd.intContractStatusId = 3 THEN 0 
@@ -156,6 +158,8 @@ BEGIN
 									  END) * (case when cd.intCurrencyId <> cd.intInvoiceCurrencyId and isnull(cd.dblRate,0) <> 0 then cd.dblRate else 1 end)
 				, strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
 				, ysnDelete = 0
+				, VR.intBankValuationRuleId
+				, VR.strBankValuationRule
 			
 			from
 				@TFXML tf
@@ -165,6 +169,7 @@ BEGIN
 				left join tblCTApprovalStatusTF STF on STF.intApprovalStatusId = cd.intApprovalStatusId
 				left join tblCMBorrowingFacilityLimit limit on limit.intBorrowingFacilityLimitId = cd.intBorrowingFacilityLimitId
 				left join tblCMBorrowingFacilityLimitDetail sublimit on sublimit.intBorrowingFacilityLimitDetailId = cd.intBorrowingFacilityLimitDetailId
+				left join tblCMBankValuationRule  VR on VR.intBankValuationRuleId = cd.intBankValuationRuleId
 				cross apply (
 					select TOP 1 intTradeFinanceLogId = max(intTradeFinanceLogId) ,
 							intBankId = max(intBankId)
@@ -173,6 +178,7 @@ BEGIN
 						  AND strTradeFinanceTransaction = cd.strFinanceTradeNo COLLATE Database_default
 					ORDER BY intTradeFinanceLogId Desc
 				) et
+				left join tblTRFTradeFinanceLog TFL on TFL.intTradeFinanceLogId = et.intTradeFinanceLogId
 			where isnull(cd.intBankId,0) > 0 AND ISNULL(tf.strRowState, '') <> 'Delete'
 			;
 
@@ -236,6 +242,8 @@ BEGIN
 				, dblFinancedAmount
 				, strBorrowingFacilityBankRefNo
 				, ysnDeleted
+				, [intOverrideBankValuationId]
+				, [strOverrideBankValuation]
 					
 				)
 			select
@@ -275,6 +283,8 @@ BEGIN
 				, dblFinancedAmount = TFL.dblFinancedAmount
 				, strBorrowingFacilityBankRefNo = TFL.strBorrowingFacilityBankRefNo
 				, ysnDelete = 1
+				, TFL.[intOverrideBankValuationId]
+				, TFL.[strOverrideBankValuation]
 			from
 				@TFXML tf
 				INNER JOIN tblTRFTradeFinanceLog TFL on TFL.intContractDetailId = tf.intContractDetailId

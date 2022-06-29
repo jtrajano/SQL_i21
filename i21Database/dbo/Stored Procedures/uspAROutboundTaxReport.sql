@@ -56,6 +56,8 @@ DECLARE @strTaxCode             NVARCHAR(100)
 	  , @id						INT 
 	  , @from					NVARCHAR(100)
 	  , @to						NVARCHAR(100)
+	  , @blbLogo				VARBINARY(MAX)
+	  , @strLogoType			NVARCHAR(10)
 
 SELECT TOP 1 @strCompanyName    = strCompanyName
 		   , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
@@ -420,6 +422,16 @@ LEFT JOIN (
 WHERE CAST(I.dtmDate AS DATE) BETWEEN @dtmDateFrom AND @dtmDateTo
   AND (@strInvoiceNumber IS NULL OR strInvoiceNumber = @strInvoiceNumber)
 
+-- SET LOGO
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header'), @strLogoType = 'Attachment'
+
+SELECT TOP 1 
+	  @blbLogo = ISNULL(imgLogo, @blbLogo)
+	, @strLogoType = CASE WHEN imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+FROM tblSMLogoPreference 
+WHERE intCompanyLocationId IN (SELECT TOP 1 intCompanyLocationId FROM #LOCATIONS)
+    AND (ysnARInvoice = 1 OR ysnDefault = 1)
+
 IF @strSubTotalBy = 'Tax Group'
 BEGIN
     SELECT [strInvoiceNumber]             = I.[strInvoiceNumber]
@@ -483,6 +495,8 @@ BEGIN
          , [dblSSTOnStateExciseTax]       = OT.[dblSSTOnStateExciseTax]
          , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
          , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
+		 , [blbLogo]					  = @blbLogo
+		 , [strLogoType]				  = @strLogoType
       FROM (
            SELECT OTR.intTaxGroupId AS intTaxGroupId
 			    , OTR.strTaxGroup AS strTaxGroup
@@ -624,6 +638,8 @@ BEGIN
          , [dblSSTOnStateExciseTax]       = OT.[dblSSTOnStateExciseTax]
          , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
          , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
+		 , [blbLogo]					  = @blbLogo
+		 , [strLogoType]				  = @strLogoType
       FROM (
            SELECT intEntityCustomerId
 			    , intInvoiceDetailId
@@ -764,6 +780,8 @@ BEGIN
          , [dblSSTOnStateExciseTax]       = OT.[dblSSTOnStateExciseTax]
          , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
          , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
+		 , [blbLogo]					  = @blbLogo
+		 , [strLogoType]				  = @strLogoType
       FROM (
            SELECT OTR.intTaxCodeId AS intTaxCodeId
 				, OTR.strTaxCode AS strTaxCode

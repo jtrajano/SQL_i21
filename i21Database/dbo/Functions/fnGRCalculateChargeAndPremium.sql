@@ -207,7 +207,7 @@ BEGIN
     OUTER APPLY (
         SELECT
             [dblQty]    =   CASE CAPD.strRateType
-                                WHEN 'Per Unit' THEN @dblNetUnits
+                                WHEN 'Per Unit' THEN CASE WHEN CAPD.strCalculateOn = 'Net Units' THEN @dblNetUnits ELSE @dblGrossUnits END
                                 WHEN 'Flat' THEN 1
                             END
                             --The "Rate From Location" takes precedence over the default rate.
@@ -216,13 +216,13 @@ BEGIN
 									CASE CAPD.strRateType
 										WHEN 'Per Unit' THEN _OVERRIDE.dblRate
 										-- Get prorated cost when rate type is "Flat"
-										WHEN 'Flat' THEN (@dblNetUnits * _OVERRIDE.dblRate) / @dblTransactionUnits
+										WHEN 'Flat' THEN (CASE WHEN CAPD.strCalculateOn = 'Net Units' THEN @dblNetUnits ELSE @dblGrossUnits END * _OVERRIDE.dblRate) / @dblTransactionUnits
 									END
 								ELSE
 									CASE CAPD.strRateType
 										WHEN 'Per Unit' THEN ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0))
 										-- Get prorated cost when rate type is "Flat"
-										WHEN 'Flat' THEN (@dblNetUnits * ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0))) / @dblTransactionUnits
+										WHEN 'Flat' THEN (CASE WHEN CAPD.strCalculateOn = 'Net Units' THEN @dblNetUnits ELSE @dblGrossUnits END * ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0))) / @dblTransactionUnits
 									END
 							END							
             ,[dblRate]  =   CASE WHEN _OVERRIDE.ysnOverride = 1 THEN _OVERRIDE.dblRate ELSE ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0)) END
@@ -312,7 +312,7 @@ BEGIN
     OUTER APPLY (
         SELECT
             [dblQty]    =   CASE CAPD.strRateType
-                                WHEN 'Per Unit' THEN @dblNetUnits
+                                WHEN 'Per Unit' THEN CASE WHEN CAPD.strCalculateOn = 'Net Units' THEN @dblNetUnits ELSE @dblGrossUnits END
                                 WHEN 'Flat' THEN 1
                             END
                             --The "Rate From Location" takes precedence over the default rate.
@@ -322,14 +322,14 @@ BEGIN
 										CASE CAPD.strRateType
 											WHEN 'Per Unit' THEN _OVERRIDE.dblRate
 											-- Get prorated cost when rate type is "Flat"
-											WHEN 'Flat' THEN (@dblNetUnits * _OVERRIDE.dblRate) / @dblTransactionUnits
+											WHEN 'Flat' THEN (CASE WHEN CAPD.strCalculateOn = 'Net Units' THEN @dblNetUnits ELSE @dblGrossUnits END * _OVERRIDE.dblRate) / @dblTransactionUnits
 										END
 									) * CC.dblRate
 								ELSE (
 										CASE CAPD.strRateType
 											WHEN 'Per Unit' THEN ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0))
 											-- Get prorated cost when rate type is "Flat"
-											WHEN 'Flat' THEN (@dblNetUnits * ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0))) / @dblTransactionUnits
+											WHEN 'Flat' THEN (CASE WHEN CAPD.strCalculateOn = 'Net Units' THEN @dblNetUnits ELSE @dblGrossUnits END * ISNULL(CAPD_LOC.dblLocationRate, ISNULL(CAPD2.dblRate, 0))) / @dblTransactionUnits
 										END
 									) * CC.dblRate
 							END							

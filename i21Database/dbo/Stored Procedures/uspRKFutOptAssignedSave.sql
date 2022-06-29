@@ -65,7 +65,34 @@ BEGIN TRY
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKAssignFuturesToContractSummary WHERE intFutOptAssignedId = @intFutOptTransactionId)
 	BEGIN
-		IF (ISNULL(@strContractSeq,'') <> '')
+		IF ((ISNULL(@strContractSeq,'') <> '') AND (ISNULL(@intContractHeaderId, '') = 0))
+		BEGIN
+			INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId) VALUES (1)
+			
+			SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY()
+			
+			INSERT INTO tblRKAssignFuturesToContractSummary (intAssignFuturesToContractHeaderId
+				, intConcurrencyId
+				, intContractHeaderId
+				, intContractDetailId
+				, dtmMatchDate
+				, intFutOptTransactionId
+				, dblAssignedLots
+				, dblHedgedLots
+				, ysnIsHedged
+				, intFutOptAssignedId)
+			SELECT @intAssignFuturesToContractHeaderId
+				, 1
+				, NULL
+				, @intContractDetailId
+				, @dtmMatchDate
+				, @intFutOptTransactionId
+				, @dblAssignedLots
+				, 0
+				, 0
+				, @intFutOptTransactionId
+		END
+		ELSE IF (ISNULL(@strContractSeq,'') <> '')
 		BEGIN
 			INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId) VALUES (1)
 			

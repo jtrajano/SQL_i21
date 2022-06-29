@@ -61,7 +61,7 @@
     [ysnShowDriverPinDescriptionOnly] BIT             NULL,
     [ysnPageBreakByPrimarySortOrder]  BIT             NULL,
 	[ysnSummaryByDeptDriverPinProd]   BIT			  NULL,
-	[strDepartmentGrouping]           NVARCHAR(MAX)   NULL,
+	[strDepartmentGrouping]           NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblCFAccount] PRIMARY KEY CLUSTERED ([intAccountId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFAccount_tblARAccountStatus] FOREIGN KEY ([intAccountStatusCodeId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblCFAccount_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),

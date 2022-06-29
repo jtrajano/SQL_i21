@@ -219,6 +219,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FA\DefaultData\FixedAssetGroup.sql
 :r .\FA\01_UpdateMultiCurrencyFields.sql
 :r .\FA\02_UpdateMonthlyAssetDepreciation.sql
+:r .\FA\03_UpdateAssetDepreciationCurrency.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
@@ -247,6 +248,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1v_PostHistoryGroupings.sql
 :r .\GL\DefaultData\1w_UpdateGLAccount.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
+:r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
 
 -- Financial Report Designer

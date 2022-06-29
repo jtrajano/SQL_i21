@@ -448,7 +448,7 @@ BEGIN TRY
 		, strDiscountDescription = dbo.[fnCTGetSeqDisplayField](CD.intDiscountScheduleId, 'tblGRDiscountSchedule')
 		, strScheduleCode = dbo.[fnCTGetSeqDisplayField](CD.intDiscountScheduleCodeId, 'tblGRDiscountScheduleCode')
 		, strScheduleDescription = dbo.[fnCTGetSeqDisplayField](CD.intStorageScheduleRuleId, 'tblGRStorageScheduleRule')
-		, strCategoryCode = NULL
+		, strCategoryCode = ICCA.strCategoryCode
 		, strDestinationCity = dbo.[fnCTGetSeqDisplayField](CD.intDestinationCityId, 'tblSMCity')
 		, strInvoiceCurrency = IY.strCurrency
 		, strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
@@ -615,7 +615,16 @@ BEGIN TRY
 		, strLCTreasuryBank = credB.strBankName
 		, strLCBank = credB2.strBankName
 		, CT.dblRollArb
+		, strVendorLocation = dbo.[fnCTGetSeqDisplayField](CD.intVendorLocationId, 'tblEMEntityLocation')
+		, CD.intVendorLocationId
 		, CD.ysnApplyDefaultTradeFinance
+		, CD.ysnTaxOverride
+		, CD.strTaxPoint
+		, CD.intTaxGroupId
+		, CD.strTaxLocation
+		, CD.intTaxGroupId
+		, TG.strTaxGroup
+		, CD.intTaxLocationId
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -699,6 +708,9 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU	ON	AU.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
+	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
+	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
+
 	ORDER BY CD.intContractSeq
 
 	DROP TABLE #tmpContractDetail

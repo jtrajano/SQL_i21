@@ -20,27 +20,14 @@ SELECT CP.intCompanyPreferenceId
 											ELSE NULL END) COLLATE Latin1_General_CI_AS
 	, CP.intRackPriceImportMappingId
 	, strRackPriceImportMapping = Import.strLayoutTitle
-	, strBolImportFormat = ImportBol.strLayoutTitle
-	, strRackPriceImportFormat = ImportRack.strLayoutTitle
     , CP.ysnImportSupplyPoint
     , CP.ysnImportTrucks
-	, CP.intBolImportFormatId
-	, CP.strBolImportReceivingFolder
-	, CP.strBolImportProcessingFolder
-	, CP.strBolImportArchiveFolder
-	, CP.strBolImageImportReceivingFolder
-	, CP.strBolImageImportProcessingFolder
-	, CP.intRackPriceImportFormatId
-	, CP.strRackPriceImportReceivingFolder
-	, CP.strRackPriceImportProcessingFolder
-	, CP.strRackPriceImportArchiveFolder
 	, CP.intConcurrencyId
 	, CP.ysnFreightInRequired
 	, CP.ysnComboFreight
+	, CP.ysnAllowDifferentUnits
 FROM tblTRCompanyPreference CP
 LEFT JOIN tblSMImportFileHeader Import on Import.intImportFileHeaderId = CP.intRackPriceImportMappingId
-LEFT JOIN tblSMImportFileHeader ImportBol ON ImportBol.intImportFileHeaderId = CP.intBolImportFormatId 
-LEFT JOIN tblSMImportFileHeader ImportRack ON ImportRack.intImportFileHeaderId = CP.intRackPriceImportFormatId
 LEFT JOIN tblSMShipVia ShipVia on ShipVia.intEntityId = CP.intShipViaId
 LEFT JOIN tblSMShipVia Seller on Seller.intEntityId = CP.intSellerId
 LEFT JOIN tblICItem FreightItem on FreightItem.intItemId = CP.intItemForFreightId

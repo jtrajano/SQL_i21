@@ -93,6 +93,22 @@
     [strFTPPassword] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
 	-- [strArchivePath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[intPurgeInterval] INT NULL,
+
+	--Store App Tab fields
+	[strIrelyUsername]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strIrelyPassword]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strIrelyReEnterPassword]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strIrelyCompanyNumber]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[ysnDeleteRegisterFileInbound]		BIT	NULL, 
+	[strRegisterFolderInbound]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strRegisterFolderOutbound]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strHandheldImportFolderPath]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strHandheldExportFolderPath]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strDeleteLogsOlderDays]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[strUpdateStoreAppInterval]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+	[ysnAllowAutoUpdate]				BIT	NULL, 
+	[strDaysToRetrieveTranslog]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTRegister] PRIMARY KEY CLUSTERED ([intRegisterId] ASC), 
     CONSTRAINT [AK_tblSTRegister_intStoreId_strRegisterName_strRegisterClass] UNIQUE NONCLUSTERED ([intStoreId],[strRegisterName],[strRegisterClass] ASC), 

@@ -1,20 +1,21 @@
 CREATE PROCEDURE [dbo].[uspQMReportCuppingForm]
-     @intCuppingSessionId INT
+     @strCuppingSessionDetailId NVARCHAR(MAX) = NULL
 AS
 
 BEGIN TRY
-	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @ErrMsg			NVARCHAR(MAX),
+			@xmlDocumentId	INT
 
 	SELECT
 		 QMCS.intCuppingSessionId
 		,QMS.intSampleId
-		,CTC.intContractDetailId
+		,intContractDetailId			= ISNULL(CTC.intContractDetailId, 0)
 		,strContractNumberSequence		= CTC.strContractNumber + '/' + CAST(CTC.intContractSeq AS NVARCHAR(MAX))
 		,strSampleNumber				= ISNULL(QMSP.strSampleNumber, QMS.strSampleNumber)
 		,strChildSampleNumber			= QMS.strSampleNumber
 		,strVendorName					= EME.strName
 		,QMS.strSentBy
-		,QMS.dtmSampleSentDate
+		,dtmSampleSentDate				= CASE WHEN CAST(QMS.dtmSampleSentDate AS DATE) IN ('12/30/1899', '1900-01-01') THEN NULL ELSE QMS.dtmSampleSentDate END
 		,ICI.strItemNo
 		,strCommodity					= ICC.strDescription
 		,QMS.strRepresentLotNumber
@@ -24,19 +25,19 @@ BEGIN TRY
 		,QMCS.dtmCuppingTime
 		,QMCSD.intRank
 		,strOrigin						= ICCAO.strDescription
-		,QMS.dtmSampleReceivedDate
+		,dtmSampleReceivedDate			= CASE WHEN CAST(QMS.dtmSampleReceivedDate AS DATE) IN ('12/30/1899', '1900-01-01') THEN NULL ELSE QMS.dtmSampleReceivedDate END
 		,strExtension					= ICCPL.strDescription
 		,strVisualAspect				= VISUAL_ASPECT.strPropertyValue
 		,strHumidity					= HUMIDITY.strPropertyValue
 		,strRoasting					= ROASTING.strPropertyValue
 		,QMST.strSampleTypeName
 		,strProductType					= ICCAPT.strDescription
-		,strShipmentPeriod				= FORMAT(CTC.dtmStartDate, 'dd.MM.yyyy') + ' - ' + FORMAT(CTC.dtmEndDate, 'dd.MM.yyyy')
+		,strShipmentPeriod				= CONVERT(VARCHAR(10), CTC.dtmStartDate, 104) + ' - ' + CONVERT(VARCHAR(10), CTC.dtmEndDate, 104)
 		,QMS.strCourier
 		,QMS.strCourierRef
 		,QMSC.strSamplingCriteria
 	FROM tblQMCuppingSession QMCS
-	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
+	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCSD.intCuppingSessionDetailId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@strCuppingSessionDetailId))
 	INNER JOIN tblQMSample QMS ON QMCSD.intSampleId = QMS.intSampleId
 	INNER JOIN tblQMSampleType QMST ON QMS.intSampleTypeId = QMST.intSampleTypeId
 	LEFT JOIN tblQMSample QMSP ON QMS.intParentSampleId = QMSP.intSampleId
