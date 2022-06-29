@@ -17,6 +17,10 @@ RETURNS @CTCashFlowTransactions TABLE(
 )
 AS 
 BEGIN 
+	
+	Declare @ysnEnableBudgetForBasisPricing BIT
+	SELECT TOP 1 @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing FROM tblCTCompanyPreference
+
 	insert into @CTCashFlowTransactions (
 		intTransactionId
 		,strTransactionId
@@ -130,7 +134,9 @@ BEGIN
 					(
 						CASE
 							WHEN CC.strCostMethod = 'Per Unit'
-							THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD1.dblQuantity)*CC.dblRate
+							--THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD1.dblQuantity)*CC.dblRate
+							THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD1.dblQuantity)*CC.dblRate * CASE WHEN CD1.intCurrencyId != CD1.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
+
 							WHEN CC.strCostMethod = 'Amount'
 							THEN CC.dblRate * isnull(CC.dblFX,1)
 							WHEN CC.strCostMethod = 'Per Container'
@@ -141,9 +147,17 @@ BEGIN
 										else isnull(CD1.intNumberOfContainers,1)
 									end
 								)
-							)
+							) * CASE WHEN CD1.intCurrencyId != CD1.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 							WHEN CC.strCostMethod = 'Percentage'
-							THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD1.dblQuantity)*CD1.dblCashPrice*CC.dblRate/100
+							THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD1.dblQuantity)
+							*	(CASE WHEN ISNULL(CD1.dblCashPrice, 0.00) <> 0.00 THEN CD1.dblCashPrice
+																 WHEN CD1.intPricingTypeId = 2 THEN
+																	CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT,1) THEN ISNULL(CD1.dblBudgetPrice,0) ELSE ISNULL(FSPM.dblLastSettle,0) + CD1.dblBasis END
+															ELSE NULL END
+																		
+									/ (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+							
+							* (CC.dblRate/100) * ISNULL(CC.dblFX, 1)
 						END
 					)
 					/
@@ -163,6 +177,9 @@ BEGIN
 				LEFT JOIN tblICItemUOM CM ON CM.intUnitMeasureId = IU.intUnitMeasureId AND CM.intItemId = CD1.intItemId	
 				LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = CD1.intPriceItemUOMId
 				LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CC.intCurrencyId
+				LEFT JOIN	tblSMCurrency		CY2	ON	CY2.intCurrencyID		=	CD1.intCurrencyId
+				LEFT JOIN  tblRKFuturesSettlementPrice FSP on FSP.intFutureMarketId = CD1.intFutureMarketId
+				LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD1.intFutureMonthId = FSPM.intFutureMonthId
 			WHERE
 				CD1.intContractDetailId = cd.intContractDetailId
 			GROUP BY
