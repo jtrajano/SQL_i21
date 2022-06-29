@@ -9,7 +9,8 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Printing' AND strModuleName = 'Payroll')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Performance Logs' AND strModuleName = 'System Manager')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -581,6 +582,12 @@ ELSE
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Imports and Conversions' AND strModuleName = N'System Manager' AND intParentMenuID = @UtilitiesParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'i21.view.OriginConversion' WHERE strMenuName = N'Imports and Conversions' AND strModuleName = N'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Performance Logs' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES ( N'Performance Logs', N'System Manager', @UtilitiesParentMenuId, N'Performance Logs', N'Utility', N'Screen', N'i21.view.PerformanceRuntimeLogReport?showSearch=true', N'small-menu-utility', 0, 0, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strType = 'Screen', strCommand = N'i21.view.PerformanceRuntimeLogReport?showSearch=true' WHERE strMenuName = 'Performance Logs' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
 
 -- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Intercompany Transaction Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId)
 -- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -3985,11 +3992,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Destinati
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=DestinationWeightVarianceReport&direct=true' WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
---IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
---	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
---	VALUES (N'Unsent Tickets', N'Ticket Management', @TicketManagementReportParentMenuId, N'Unsent Tickets', N'Report', N'Screen', N'Unsent Tickets Report', N'small-menu-report', 0, 0, 0, 1, 6, 1)
---ELSE
---	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Unsent Tickets Report' WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Split View' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Split View', N'Ticket Management', @TicketManagementReportParentMenuId, N'Split View', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=SplitView&direct=true', N'small-menu-report', 0, 0, 0, 1, 7, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Reporting.view.ReportManager?group=Grain&report=SplitView&direct=true' WHERE strMenuName = 'Split View' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Ticket' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
@@ -6482,12 +6490,14 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsActivitiesParentMenuId 
 UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsMaintenanceParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Maintenance'
 UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsReportsParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Reports'
 
+--ACTIVITIES
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Fixed Assets', N'Fixed Assets', @FixedAssetsActivitiesParentMenuId, N'Fixed Assets', N'Activity', N'Screen', N'FixedAssets.view.FixedAssets?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssets?showSearch=true' WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsActivitiesParentMenuId
 
+--MAINTENANCE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Depreciation Methods' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Depreciation Methods', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Depreciation Methods', N'Maintenance', N'Screen', N'FixedAssets.view.DepreciationMethods?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
@@ -6500,11 +6510,20 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Ass
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssetGroups' WHERE strMenuName = 'Fixed Asset Groups' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Departments' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Departments', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Departments', N'Maintenance', N'Screen', N'FixedAssets.view.FixedAssetDepartments', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssetDepartments' WHERE strMenuName = 'Departments' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
+
+--REPORTS
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax vs Book' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsReportsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Tax vs Book', N'Fixed Assets', @FixedAssetsReportsParentMenuId, N'Tax vs Book', N'Maintenance', N'Screen', N'FixedAssets.view.BookDepreciationReport?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.BookDepreciationReport?showSearch=true' WHERE strMenuName = 'Tax vs Book' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsReportsParentMenuId
+
+
 
 
 /* VENDOR REBATES */
