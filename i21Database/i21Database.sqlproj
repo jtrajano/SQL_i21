@@ -348,7 +348,6 @@
     <Build Include="dbo\Views\vyuCTCombinePriceFixation.sql" />
     <Build Include="dbo\Views\vyuCTCombinePriceFixationDetail.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Tables\tblApiSchemaTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPEmail.sql" />
@@ -356,8 +355,6 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdatePlannedAvailabilityDate.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
-=======
->>>>>>> 21.1Dev
     <Build Include="dbo\Functions\fnARGetPriceBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerPricing.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerPricing.sql" />
@@ -377,13 +374,10 @@
     <Build Include="dbo\Stored Procedures\uspTRComboFreight.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerLocation.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Functions\fnICIsUpcExists2.sql" />
     <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
-=======
->>>>>>> 21.1Dev
     <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
     <Build Include="dbo\Views\vyuApiRecordAuditPivot.sql" />
     <Build Include="dbo\Views\vyuApiSalesperson.sql" />
@@ -402,7 +396,6 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSiteType.sql" />
     <Build Include="dbo\Tables\tblTMOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Stored Procedures\uspMFReportGRA.sql" />
     <Build Include="dbo\User Defined Types\SingleAuditLogParam.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
@@ -434,12 +427,10 @@
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeePaycheck.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
-=======
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchyParam.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Views\vyuAPGetVoucher.sql" />
->>>>>>> 21.1Dev
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -9757,12 +9748,9 @@
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
-<<<<<<< HEAD
     <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummaryByLocation.sql" />
-=======
     <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
->>>>>>> 21.1Dev
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
     <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
@@ -9787,7 +9775,6 @@
     <Build Include="dbo\Tables\tblIPPaymentStatusStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPPaymentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPPaymentStatus.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Tables\tblSMIDPProcessResult.sql" />
     <Build Include="dbo\Tables\tblIPBillStage.sql" />
     <Build Include="dbo\Tables\tblIPBillDetailStage.sql" />
@@ -9803,8 +9790,6 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessImportBolImage.sql" />
     <Build Include="dbo\Functions\fnStripHtmlAndFixSpecial.sql" />
     <Build Include="dbo\Tables\tblQMSampleContractSequence.sql" />
-=======
->>>>>>> 21.1Dev
     <None Include="Scripts\Post-Deployment\SM\2110_UpdateAuditLogs.sql" />
     <None Include="Scripts\Post-Deployment\DropEncryptionCertificateAndSymmetricKey.sql" />
     <None Include="Scripts\Post-Deployment\MF\13_CleanupObjects.sql" />
@@ -10078,7 +10063,6 @@
     <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\User Defined Types\CustomerTaxGroupParam.sql" />
     <Build Include="dbo\User Defined Types\CustomerTaxGroupIdParam.sql" />
     <Build Include="dbo\User Defined Types\TaxCodeRateParam.sql" />
@@ -10091,8 +10075,6 @@
     <Build Include="dbo\Stored Procedures\uspARGetTaxCodeRateDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetTaxGroupTaxCodesForCustomer.sql" />
-=======
->>>>>>> 21.1Dev
     <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
