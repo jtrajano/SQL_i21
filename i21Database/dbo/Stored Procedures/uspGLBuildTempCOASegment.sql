@@ -1,8 +1,6 @@
-﻿﻿CREATE PROCEDURE [dbo].[uspGLBuildTempCOASegment]  
-   
-AS  
-BEGIN  
-  
+﻿CREATE PROCEDURE [dbo].[uspGLBuildTempCOASegment]
+AS
+BEGIN
  DELETE FROM tblGLCOATemplateDetail WHERE intAccountStructureId   
  NOT IN (SELECT DISTINCT(intAccountStructureId) FROM tblGLAccountSegment)  
    
@@ -19,7 +17,7 @@ BEGIN
   
  IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment')   
  BEGIN   
-  EXEC ('DROP TABLE tblGLTempCOASegment');  
+  EXEC ('DROP TABLE tblGLTempCOASegment');
  END   
   
  BEGIN  
@@ -34,8 +32,7 @@ BEGIN
  BEGIN   
   IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Segment' and (strStructureName = N'Location' OR strStructureName LIKE N'Profit Center%'))  
   BEGIN  
-   INSERT tblGLAccountStructure ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Segment', 
-4, N'0', 2, 1, 1, 5, NULL, NULL)  
+   INSERT tblGLAccountStructure ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Segment', 4, N'0', 2, 1, 1, 5, NULL, NULL)  
    PRINT 'No Location and Profit Center segment. Inserted Location Segment'  
   END  
   ELSE  
@@ -177,8 +174,7 @@ BEGIN
   EXEC ('CREATE VIEW [dbo].[vyuGLSummary]  
    AS  
    SELECT * FROM (  
-     SELECT  A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'''') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit, A.intCurrenc
-yId, F.strCurrency,B.intUnnaturalAccountId,A.intLedgerId        
+     SELECT  A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'''') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit, A.intCurrencyId, F.strCurrency,B.intUnnaturalAccountId,A.intLedgerId        
       FROM  dbo.tblGLPosted AS A     
        INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId     
        INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId    
