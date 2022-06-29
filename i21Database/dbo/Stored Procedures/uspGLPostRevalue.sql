@@ -463,8 +463,9 @@ DECLARE @tblPostError TABLE(
       EXEC uspGLPostRecap @PostGLEntries2, @intEntityId  
       GOTO _overrideError
     END
-    
-   EXEC uspGLBookEntries @PostGLEntries2, @ysnPost, 1 ,1  
+  
+   IF EXISTS ( SELECT 1 FROM @PostGLEntries2 )
+      EXEC uspGLBookEntries @PostGLEntries2, @ysnPost, 1 ,1  
   
    IF @@ERROR <> 0 RETURN  
   
