@@ -150,7 +150,11 @@ LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND ETC.ysnDefaultContact = 1
-LEFT JOIN tblQMSample RS ON RS.intRelatedSampleId = S.intSampleId
+OUTER APPLY (
+	SELECT TOP 1 strSampleNumber
+	FROM tblQMSample RS 
+	WHERE RS.intRelatedSampleId = S.intSampleId
+) RS
 OUTER APPLY (
 	SELECT TOP 1 CSH.strCuppingSessionNumber
 			   , CSH.intCuppingSessionId
