@@ -25,9 +25,7 @@ BEGIN
 	SELECT @gainLossForeign= sum(dblDebitForeign - dblCreditForeign) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
 	IF @gainLoss <> 0
 	BEGIN
-
-
-	INSERT INTO #tmpGLDetail (
+			INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
 			,[dtmDate]
@@ -54,22 +52,22 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intEntityId]
-	)
-	SELECT	TOP 1
+			)
+			SELECT	TOP 1
 			 [strTransactionId]		= A.strTransactionId
 			,[intTransactionId]		= A.intTransactionId
 			,[dtmDate]				= A.dtmDate
 			,[strBatchId]			= A.strBatchId
 			,[intAccountId]			= @intRealizedGainAccountId
-			,[dblDebit]				= case when @gainLoss < 0 then @gainLoss * -1  else 0 end
-			,[dblCredit]			= case when @gainLoss >= 0 then @gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
-			,[dblDebitForeign]		= case when @gainLoss < 0 then @gainLoss * -1  else 0 end
-			,[dblCreditForeign]		= case when @gainLoss >= 0 then @gainLoss  else 0 end
+			,[dblDebit]				= case when BankFrom.gainLoss < 0 then BankFrom.gainLoss * -1  else 0 end
+			,[dblCredit]			= case when BankFrom.gainLoss >= 0 then BankFrom.gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
+			,[dblDebitForeign]		= case when BankFrom.gainLoss < 0 then BankFrom.gainLoss * -1  else 0 end
+			,[dblCreditForeign]		= case when BankFrom.gainLoss >= 0 then BankFrom.gainLoss  else 0 end
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
 			,[strCode]				= A.strCode
-			,[strReference]			= A.strReference
+			,[strReference]			= BankFrom.strReferenceFrom
 			,[intCurrencyId]		= @intDefaultCurrencyId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
@@ -82,19 +80,52 @@ BEGIN
 			,[strTransactionForm]	= A.[strTransactionForm]
 			,[strModuleName]		= A.[strModuleName]
 			,[intEntityId]			= A.intEntityId
-	FROM	#tmpGLDetail A
-	CROSS APPLY (
-		SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
-	)GL
+			FROM	#tmpGLDetail A
+			CROSS APPLY(
+				SELECT dblGainLossFrom *-1 gainLoss, strReferenceFrom FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossFrom <> 0
+			)BankFrom
+			CROSS APPLY (
+				SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
+			)GL
+			UNION
+			SELECT	TOP 1
+			 [strTransactionId]		= A.strTransactionId
+			,[intTransactionId]		= A.intTransactionId
+			,[dtmDate]				= A.dtmDate
+			,[strBatchId]			= A.strBatchId
+			,[intAccountId]			= @intRealizedGainAccountId
+			,[dblDebit]				= case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end
+			,[dblCredit]			= case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
+			,[dblDebitForeign]		= case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end
+			,[dblCreditForeign]		= case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end
+			,[dblDebitUnit]			= 0
+			,[dblCreditUnit]		= 0
+			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
+			,[strCode]				= A.strCode
+			,[strReference]			= BankTo.strReferenceTo
+			,[intCurrencyId]		= @intDefaultCurrencyId
+			,[dblExchangeRate]		= 1
+			,[dtmDateEntered]		= GETDATE()
+			,[dtmTransactionDate]	= A.dtmDate
+			,[strJournalLineDescription] = GL.strDescription
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyId]		= 1
+			,[intUserId]			= A.[intUserId]
+			,[strTransactionType]	= A.[strTransactionType]
+			,[strTransactionForm]	= A.[strTransactionForm]
+			,[strModuleName]		= A.[strModuleName]
+			,[intEntityId]			= A.intEntityId
+			FROM	#tmpGLDetail A
+			CROSS APPLY(
+				SELECT dblGainLossTo gainLoss, strReferenceTo FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossTo <> 0
+			)BankTo
+			CROSS APPLY (
+				SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
+			)GL
 	END
-
 	GOTO _end
-
 	_raiserror:
 	RAISERROR(@strErrorMessage,16,1 )
-
 	_end:
-
 END
 GO
-
