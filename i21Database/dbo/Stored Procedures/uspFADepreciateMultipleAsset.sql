@@ -303,6 +303,8 @@ BEGIN
                   [strType],  
                   [strConvention],
                   [strBatchId],
+                  [intCurrencyId],
+                  [intFunctionalCurrencyId],
                   [intLedgerId]
                 )  
                   SELECT DISTINCT
@@ -328,6 +330,8 @@ BEGIN
                   D.strDepreciationType,
                   D.strConvention,
                   @strBatchId,
+                  BD.intCurrencyId,
+                  BD.intFunctionalCurrencyId,
                   E.intLedgerId
                   FROM tblFAFixedAsset F 
                   JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
@@ -384,7 +388,10 @@ BEGIN
                 [strTransactionId],  
                 [strType],  
                 [strConvention],
-                [strBatchId]
+                [strBatchId],
+                [ysnAddToBasis],
+                [intCurrencyId],
+                [intFunctionalCurrencyId]
               )  
               SELECT  
                 @i,
@@ -408,7 +415,10 @@ BEGIN
                 @strAdjustmentTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention,
-                @strBatchId
+                @strBatchId,
+                [ysnAddToBasis],
+                BD.intCurrencyId,
+                BD.intFunctionalCurrencyId
                 FROM tblFAFixedAsset F 
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
@@ -460,7 +470,10 @@ BEGIN
                 [strTransactionId],  
                 [strType],  
                 [strConvention],
-                [strBatchId]
+                [strBatchId],
+                [ysnAddToBasis],
+                [intCurrencyId],
+                [intFunctionalCurrencyId]
               )  
               SELECT  
                 @i,
@@ -484,7 +497,10 @@ BEGIN
                 @strDepAdjustmentTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention,
-                @strBatchId
+                @strBatchId,
+                ysnAddToBasis,
+                BD.intCurrencyId,
+                BD.intFunctionalCurrencyId
                 FROM tblFAFixedAsset F 
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
@@ -536,6 +552,8 @@ BEGIN
                 [strType],  
                 [strConvention],
                 [strBatchId],
+                [intCurrencyId],
+                [intFunctionalCurrencyId],
                 [intLedgerId]
               )  
               SELECT DISTINCT
@@ -561,6 +579,8 @@ BEGIN
                 D.strDepreciationType,  
                 D.strConvention,
                 @strBatchId,
+                BD.intCurrencyId,
+                BD.intFunctionalCurrencyId,
                 E.intLedgerId
                 FROM tblFAFixedAsset F 
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
