@@ -45,12 +45,15 @@ BEGIN
 			,[dblActualUtilizationAnnually]			
 			,[dblActualUtilizationMonthly]	
 			,[dblAnnualHurdle]	
+			,[dblAnnualBudget]
+			,[dblActualAnnualBudget]
+			,[dblActualWeeklyBudget]
 			,[intRequiredHours]						
 			,[intConcurrencyId] 
 	)
 
 	
-SELECT      [intEntityId]							    = @EntityId
+SELECT      [intEntityId]							= @EntityId
 		   ,[intTimeEntryPeriodDetailId]			= TimeEntryPeriodDetail.[intTimeEntryPeriodDetailId]
 		   ,[dtmBillingPeriodStart]					= TimeEntryPeriodDetail.[dtmBillingPeriodStart]
 		   ,[dtmBillingPeriodEnd]					= TimeEntryPeriodDetail.[dtmBillingPeriodEnd]
@@ -66,6 +69,9 @@ SELECT      [intEntityId]							    = @EntityId
 		   ,[dblActualUtilizationAnnually]			= ISNULL(TimeEntryPeriodDetailInfo.[dblActualUtilizationAnnually], 0) 
 		   ,[dblActualUtilizationMonthly]			= ISNULL(TimeEntryPeriodDetailInfo.[dblActualUtilizationMonthly], 0) 
 		   ,[dblAnnualHurdle]						= ISNULL(CoworkerGoals.[dblAnnualHurdle], 0) 
+		   ,[dblAnnualBudget]						= ISNULL(CoworkerGoals.[dblAnnualBudget], 0) 
+		   ,[dblActualAnnualBudget]					= ISNULL(TimeEntryPeriodDetailInfo.[dblActualAnnualBudget], 0) 
+		   ,[dblActualWeeklyBudget]					= ISNULL(TimeEntryPeriodDetailInfo.[dblActualWeeklyBudget], 0) 
 		   ,[intRequiredHours]						= ISNULL(TimeEntryPeriodDetailInfo.[intRequiredHours], 0) 
 		   ,[intConcurrencyId]						= 1
 		FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail
@@ -76,6 +82,7 @@ SELECT      [intEntityId]							    = @EntityId
 				  ,intUtilizationTargetMonthly
 				  ,intUtilizationTargetWeekly
 				  ,dblAnnualHurdle
+				  ,dblAnnualBudget
 				  ,dblBudget
 		   FROM tblHDCoworkerGoal CoworkerGoal
 				INNER JOIN tblHDCoworkerGoalDetail CoworkerGoalDetail
@@ -104,7 +111,9 @@ SELECT      [intEntityId]							    = @EntityId
 					,[dblActualUtilizationMonthly]		= CASE WHEN ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) = 0
 																	THEN 0
 															   ELSE AgentInfoMonthly.[totalBillableHours] / ( ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) ) * 100
-														  END 				  											
+														  END 
+					,[dblActualAnnualBudget]			= AgentInfoAnnually.[totalBaseAmount]
+					,[dblActualWeeklyBudget]			= AgentInfoWeekly.[totalBaseAmount]
 			FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail 
 				INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod
 			ON TimeEntryPeriod.intTimeEntryPeriodId = TimeEntryPeriodDetail.intTimeEntryPeriodId
@@ -141,6 +150,7 @@ SELECT      [intEntityId]							    = @EntityId
 					SELECT  [totalHours]			= SUM([totalHours])
 						   ,[totalBillableHours]	= SUM([totalBillableHours])
 						   ,[totalNonBillableHours]	= SUM([totalNonBillableHours])
+						   ,[totalBaseAmount]		= SUM([totalBaseAmount])
 					FROM (		
 								SELECT  [totalHours]			= SUM(dblHours)
 									   ,[totalBillableHours]	= CASE WHEN ysnBillable = 1
@@ -150,7 +160,11 @@ SELECT      [intEntityId]							    = @EntityId
 									   ,[totalNonBillableHours]	= CASE WHEN ysnBillable = 0
 																			THEN SUM(dblHours)
 																		ELSE 0
-																  END								
+																  END
+									   ,[totalBaseAmount] = CASE WHEN ysnBillable = 1
+																			THEN SUM(dblBaseAmount)
+																		ELSE 0
+																  END
 								FROM vyuHDTicketHoursWorked
 								WHERE [dtmDate] >= TimeEntryPeriodDetail.[dtmBillingPeriodStart] AND
 									  [dtmDate] <= TimeEntryPeriodDetail.[dtmBillingPeriodEnd] AND
@@ -163,6 +177,7 @@ SELECT      [intEntityId]							    = @EntityId
 					SELECT  [totalHours]			= SUM([totalHours])
 						   ,[totalBillableHours]	= SUM([totalBillableHours])
 						   ,[totalNonBillableHours]	= SUM([totalNonBillableHours])
+						   ,[totalBaseAmount]		= SUM([totalBaseAmount])
 					FROM (		
 								SELECT  [totalHours]			= SUM(dblHours)
 									   ,[totalBillableHours]	= CASE WHEN ysnBillable = 1
@@ -172,7 +187,11 @@ SELECT      [intEntityId]							    = @EntityId
 									   ,[totalNonBillableHours]	= CASE WHEN ysnBillable = 0
 																			THEN SUM(dblHours)
 																		ELSE 0
-																  END								
+																  END	
+										,[totalBaseAmount]      = CASE WHEN ysnBillable = 1
+																			THEN SUM(dblBaseAmount)
+																		ELSE 0
+																  END
 								FROM vyuHDTicketHoursWorked
 								WHERE DATEPART(YEAR, dtmDate) = TimeEntryPeriod.strFiscalYear AND
 										  intAgentEntityId = @EntityId
