@@ -11,7 +11,7 @@ SELECT intCurrencyExposureId
 	, e.intCommodityId
 	, c.strCommodityCode
 	, dtmFutureClosingDate
-	, intCurrencyId
+	, e.intCurrencyId
 	, cur.strCurrency
 	, e.intConcurrencyId
 FROM tblRKCurrencyExposure e
