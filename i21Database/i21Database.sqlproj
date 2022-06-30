@@ -1005,6 +1005,8 @@
     <Build Include="dbo\Stored Procedures\uspGLInsertChangeCategoryAuditLog.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
     <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
+    
+    <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
