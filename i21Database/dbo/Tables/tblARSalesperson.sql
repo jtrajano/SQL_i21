@@ -31,6 +31,7 @@
 	[intCompanyId]			    INT			    NULL,	
     [intShipViaId]              INT             NULL,
     [intConcurrencyId]          INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+    [intCompanyLocationId]  	INT				NULL,
     CONSTRAINT [PK_tblARSalesperson_intEntityId] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_tblARSalesperson_tblEMEntity_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [FK_tblARSalesperson_tblSMAttachment_intTerritoryId] FOREIGN KEY ([intAttachmentSignatureId]) REFERENCES [dbo].[tblSMAttachment] ([intAttachmentId]),
