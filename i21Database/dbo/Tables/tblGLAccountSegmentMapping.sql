@@ -31,3 +31,24 @@ GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountSegmentMapping', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
 GO
 
+CREATE TRIGGER [dbo].[trgInsertGLSegmentMapping]
+ON [dbo].[tblGLAccountSegmentMapping]
+FOR INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+	DECLARE @i INT
+
+	SELECT @i = intAccountId 
+	FROM INSERTED ins JOIN tblGLAccountSegment seg ON ins.intAccountSegmentId = seg.intAccountSegmentId
+	JOIN tblGLAccountStructure st ON st.intAccountStructureId = seg.intAccountStructureId
+	JOIN tblGLAccountGroup gr ON gr.intAccountGroupId = seg.intAccountGroupId
+	WHERE strType = 'Primary' AND strAccountType IN ('Asset', 'Liability', 'Equity')
+
+	IF @i IS NOT NULL
+		UPDATE A SET  ysnRevalue = 1  FROM tblGLAccount A  WHERE @i = intAccountId
+
+
+END
+
+GO
