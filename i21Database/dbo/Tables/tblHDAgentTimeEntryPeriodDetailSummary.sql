@@ -17,9 +17,14 @@
 	[dblActualUtilizationAnnually]			 NUMERIC(18, 6) NULL DEFAULT 0,
 	[dblActualUtilizationMonthly]			 NUMERIC(18, 6) NULL DEFAULT 0,
 	[dblAnnualHurdle]						 NUMERIC(18, 6) NULL DEFAULT 0,
+	[dblAnnualBudget]						 NUMERIC(18, 6) NULL DEFAULT 0,
+	[dblActualAnnualBudget]					 NUMERIC(18, 6) NULL DEFAULT 0,
+	[dblActualWeeklyBudget]					 NUMERIC(18, 6) NULL DEFAULT 0,
 	[intRequiredHours]						 INT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDAgentTimeEntryPeriodDetailSummary_intAgentTimeEntryPeriodDetailSummaryId] PRIMARY KEY CLUSTERED ([intAgentTimeEntryPeriodDetailSummaryId] ASC),
 	CONSTRAINT [UQ_tblHDAgentTimeEntryPeriodDetailSummary_intEntityId_intTimeEntryPeriodDetailId] UNIQUE ([intEntityId],[intTimeEntryPeriodDetailId]),
 	CONSTRAINT [FK_tblHDAgentTimeEntryPeriodDetailSummary_tblHDTimeEntryPeriodDetail_intTimeEntryPeriodDetailId] FOREIGN KEY ([intTimeEntryPeriodDetailId]) REFERENCES [dbo].[tblHDTimeEntryPeriodDetail] ([intTimeEntryPeriodDetailId])
 )
+
+GO

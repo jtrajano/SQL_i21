@@ -8,7 +8,7 @@ select
 			,intHours
 			,dblHours
 			,dblEstimatedHours
-			,convert(datetime,ceiling(convert(numeric(18,6), dtmDate))) dtmDate
+			,convert(date,convert(datetime,ceiling(convert(numeric(18,6), dtmDate)))) dtmDate
 			,dtmStartTime 
 			,dtmEndTime  
 			,dblRate
@@ -45,6 +45,7 @@ select
 			,strTicketNumber
 			,intCustomerId
 			,dblExtendedRate
+			,dblBaseAmount
 			,strProjectName
 			,intProjectId
 			,ysnVendor
@@ -99,6 +100,10 @@ from
 			,i.strTicketNumber
 			,intCustomerId = ISNULL(a.intCustomerId, i.intCustomerId)
 			,dblExtendedRate = (case when (isnull(a.intHours, 0.00) = 0.00 or isnull(a.dblRate,0.00) = 0.00) then 0.00 else a.intHours * a.dblRate end)
+			,dblBaseAmount = (case when (isnull(a.intHours, 0.00) = 0.00 or isnull(a.dblRate,0.00) = 0.00) 
+										then 0.00 
+									else a.intHours * a.dblRate * (case when isnull(a.dblCurrencyRate, 0.00) = 0.00 then 1.00 else a.dblCurrencyRate end)
+							  end)
 			,strProjectName = ISNULL(o.strProjectName, k.strProjectName) 
 			,intProjectId = ISNULL(a.intProjectId, k.intProjectId)
 			,ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType m where m.intEntityId = a.intAgentEntityId and m.strType = 'Vendor')
@@ -170,6 +175,7 @@ union all
 			,strTicketNumber = null
 			,intCustomerId = 0
 			,dblExtendedRate = null
+			,dblBaseAmount = null
 			,strProjectName = null
 			,intProjectId = null
 			,ysnVendor = convert(bit,0)
