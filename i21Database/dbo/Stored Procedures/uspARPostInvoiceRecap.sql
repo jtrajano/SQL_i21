@@ -4,7 +4,8 @@
     ,@BatchId           NVARCHAR(40)
     ,@PostDate          DATETIME                
     ,@UserId            INT
-	,@BatchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
+	,@BatchIdUsed		AS NVARCHAR(40)	= NULL OUTPUT
+	,@strSessionId 		NVARCHAR(200)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -52,6 +53,11 @@ BEGIN TRY
 								  , @PostDate	= @PostDate
 								  , @BatchId	= @BatchIdUsed
 								  , @UserId		= @UserId 
+
+    DELETE  Q
+    FROM tblARPostingQueue Q
+    INNER JOIN tblARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
+	WHERE I.strSessionId = @strSessionId
 
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -139,17 +145,14 @@ BEGIN TRY
 		,[intCommodityId]
 		,[intSourceEntityId]
 		,[ysnRebuild]
-	FROM ##ARInvoiceGLEntries
+	FROM tblARPostInvoiceGLEntries
+	WHERE strSessionId = @strSessionId
 
 	IF @InitTranCount = 0
 		ROLLBACK TRANSACTION
 	ELSE
 		ROLLBACK TRANSACTION @Savepoint
-    
-    DELETE  Q
-    FROM tblARPostingQueue Q
-    INNER JOIN ##ARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
-    
+							  
     DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchIdUsed
 		 
 	INSERT INTO tblGLPostRecap WITH (TABLOCK) (
