@@ -19,6 +19,26 @@ LEFT JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 LEFT JOIN tblICItem C ON C.intItemId = B.intItemId
 WHERE A.ysnPosted = 1
 
+--PAID PREPAYMENTS
+UNION ALL
+SELECT
+	A.intBillId,
+	A.strBillId,
+	dbo.fnAPGetVoucherTransactionType2(A.intTransactionType),
+	A.dtmBillDate,
+	A.dtmDueDate,
+	A.intCurrencyId,
+	(B.dblTotal + B.dblTax) * -1,
+	B.intContractHeaderId,
+	C.strDescription,
+	A.intEntityVendorId,
+	A.intShipToId,
+	1 intOrder
+FROM tblAPBill A
+LEFT JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
+LEFT JOIN tblICItem C ON C.intItemId = B.intItemId
+WHERE A.ysnPosted = 1 AND A.intTransactionType IN (2, 13)
+
 --DELETED VOUCHERS
 UNION ALL
 SELECT 
@@ -79,26 +99,6 @@ FROM tblARPayment A
 INNER JOIN tblARPaymentDetail B ON B.intPaymentId = A.intPaymentId
 LEFT JOIN tblAPBill C ON C.intBillId = B.intBillId
 WHERE A.ysnPosted = 1
-
---PAID PREPAYMENTS
-UNION ALL
-SELECT
-	A.intBillId,
-	A.strBillId,
-	dbo.fnAPGetVoucherTransactionType2(A.intTransactionType),
-	A.dtmBillDate,
-	A.dtmDueDate,
-	A.intCurrencyId,
-	(B.dblTotal + B.dblTax) * -1,
-	B.intContractHeaderId,
-	C.strDescription,
-	A.intEntityVendorId,
-	A.intShipToId,
-	4 intOrder
-FROM tblAPBill A
-LEFT JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
-LEFT JOIN tblICItem C ON C.intItemId = B.intItemId
-WHERE A.ysnPosted = 1 AND A.ysnPrepayHasPayment = 1 AND A.intTransactionType IN (2, 13)
 
 --PREPAYMENTS APPLIED TO PAYMENT
 UNION ALL
