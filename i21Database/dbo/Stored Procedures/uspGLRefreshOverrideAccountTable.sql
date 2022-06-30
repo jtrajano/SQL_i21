@@ -1,7 +1,6 @@
 CREATE PROCEDURE uspGLRefreshOverrideAccountTable
 @ysnForceReset BIT = 0
 AS
-
 DECLARE @objectId INT
 DECLARE @ysnMissingAccounts BIT = 0
 SELECT @objectId = OBJECT_ID (N'tblGLOverrideAccount', N'U') 
