@@ -15,6 +15,7 @@ BEGIN
 		EXEC uspLGRecalculateLoadCosts @intLoadId, @intEntityUserSecurityId
 
 		-- Get tax group
+		/*
 		SELECT TOP 1
 			@intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
 				LD.intVendorEntityId	-- @VendorId
@@ -29,7 +30,8 @@ BEGIN
 		INNER JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1	
 		WHERE L.intLoadId = @intLoadId
-
+		*/
+		--MON ^
 		INSERT INTO @voucherPayable(
 			[intEntityVendorId]
 			,[intTransactionType]

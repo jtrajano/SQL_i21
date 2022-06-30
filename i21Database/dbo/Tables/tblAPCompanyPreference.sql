@@ -33,5 +33,7 @@
     [ysnOverrideCompanySegment]		    BIT NOT NULL DEFAULT(0),
 	[ysnOverrideLocationSegment]	    BIT NOT NULL DEFAULT(0),
 	[ysnOverrideLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0),
+    strDetailsOfCharges  NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+    intBudgetCode int, 
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );

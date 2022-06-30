@@ -69,7 +69,7 @@ BEGIN
 		,dblDamagedQty = ISNULL(DBags.dblDamagedQty, 0)
 		,dblDamagedNet = ISNULL(DBags.dblDamagedNet, 0)
 		,dblSlackQty = ISNULL(SBags.dblSlackQty, 0)
-		,dblNet = ISNULL(PC.dblReceivedNetWt, IR.dblNet)
+		,dblNet = 0 --ISNULL(PC.dblReceivedNetWt, IR.dblNet) --MON
 		,IR.strWeightUOM
 		,blbFooterLogo = Footer.blbFile
 	FROM 

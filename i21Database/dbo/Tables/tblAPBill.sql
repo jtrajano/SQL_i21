@@ -49,7 +49,7 @@
 	[dblTempPayment] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblInterest] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblTempInterest] DECIMAL(18, 6) NOT NULL DEFAULT 0,
-	[dblAverageExchangeRate] DECIMAL (18, 6) NULL,
+	--[dblAverageExchangeRate] DECIMAL (18, 6) NULL, -- MON
     [intTransactionType] INT NOT NULL DEFAULT 0, 
     [intPurchaseOrderId] INT NULL,
 	[strCreatedWith] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, -- Possible values: "IDP" which indicates that the bill was created through IDP, or null if created the usual way

@@ -28,8 +28,8 @@
 	[dblSeqPriceConversionFactoryWeightUOM] NUMERIC(18, 6) NULL,
 	[dtmDateAdded] DATETIME NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
-	[dtmReceiptDate] DATETIME NULL,
-	
+	--MON
+	dtmReceiptDate DATETIME NULL,
 	CONSTRAINT [PK_tblLGPendingClaim_intPendingClaimId] PRIMARY KEY ([intPendingClaimId]), 
 	CONSTRAINT [FK_tblLGPendingClaim_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
 	CONSTRAINT [PK_tblLGPendingClaim_tblLGLoadContainer] FOREIGN KEY ([intLoadContainerId]) REFERENCES tblLGLoadContainer([intLoadContainerId]),
