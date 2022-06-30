@@ -19,7 +19,6 @@ DECLARE @intBankAccountId AS INT
 	,@strPaymentNo AS NVARCHAR(40)
 
 DECLARE @xmlDocumentId AS INT
-DECLARE @companyLogo varbinary(max)
 
 DECLARE	@strCompanyName		NVARCHAR(500)
 	,@strAddress			NVARCHAR(500)
@@ -115,7 +114,6 @@ DECLARE @Settlement AS TABLE
 	,dblPartialPrepaymentSubTotal		DECIMAL(24,10)
 	,dblPartialPrepayment				DECIMAL(24,10)
 	,lblPartialPrepayment			    NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-	,blbHeaderLogo				    VARBINARY(max)
 	,intEntityId						INT
 	,strDeliveryDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strDeliverySheetNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -132,18 +130,6 @@ DECLARE @tblPayment AS TABLE
 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParam
 
-SELECT
-	@companyLogo = blbFile
-FROM tblSMUpload
-WHERE intAttachmentId = 
-(
-	SELECT TOP 1
-		intAttachmentId
-	FROM tblSMAttachment
-	WHERE strScreen = 'SystemManager.CompanyPreference'
-		AND strComment = 'Header'
-	ORDER BY intAttachmentId DESC
-)
 
 INSERT INTO @temp_xml_table
 SELECT *
@@ -270,8 +256,7 @@ BEGIN
 				,lblCustomerPrepayment		    
 				,dblPartialPrepaymentSubTotal		
 				,dblPartialPrepayment				
-				,lblPartialPrepayment			    
-				,blbHeaderLogo
+				,lblPartialPrepayment
 				,intEntityId
 				,strDeliveryDate
 				,strDeliverySheetNumber
@@ -442,7 +427,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,strDeliverySheetNumber			= NULL
@@ -714,7 +698,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' 
 													ELSE NULL 
 												END
-			   ,blbHeaderLogo				 	= @companyLogo
 			   ,VENDOR.[intEntityId]
 			   ,strDeliveryDate				 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 			   ,strDeliverySheetNumber			= NULL
@@ -1009,7 +992,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' 
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
 				,strDeliverySheetNumber			= DS.strDeliverySheetNumber
@@ -1336,7 +1318,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,strDeliverySheetNumber			= NULL
@@ -1604,7 +1585,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' 
 													ELSE NULL 
 												END
-			   ,blbHeaderLogo				 	= @companyLogo
 			   ,VENDOR.[intEntityId]
 			   ,strDeliveryDate				 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 			   ,strDeliverySheetNumber			= NULL
@@ -1892,7 +1872,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' 
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
 				,strDeliverySheetNumber			= DS.strDeliverySheetNumber
