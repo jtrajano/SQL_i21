@@ -10924,7 +10924,6 @@
     <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcTrialBalance.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLRefreshOverrideAccountTable.sql" />
     <None Include="Scripts\Post-Deployment\LG\2_DataFixes.sql" />
     <Build Include="dbo\Stored Procedures\uspMBImportMeterReading.sql" />
     <Build Include="dbo\Tables\tblMBImportMeterReadingDetail.sql" />
