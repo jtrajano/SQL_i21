@@ -78,6 +78,7 @@ INSERT INTO @ItemEntries
 	,[dblWriteOffAmount]
 	,[dblInterest]
 	,[dblPayment]
+	,[dblCreditCardFee]
 	,[dblAmountDue]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
@@ -164,6 +165,11 @@ SELECT
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
 												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 										   END)
+	,[dblCreditCardFee]                 = ABS([dbo].fnRoundBanker(ISNULL(PE.[dblCreditCardFee], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
+                                        * (CASE WHEN RFP.[intInvoiceId] IS NOT NULL AND dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType]) = -1.000000
+                                                THEN @ZeroDecimal
+                                                ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
+                                           END)
 	,[dblAmountDue]						= ISNULL(PE.dblAmountDue, ABS([dbo].fnRoundBanker(ISNULL(RFP.[dblAmountDue], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
 										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
@@ -614,6 +620,7 @@ SET
 	,IE.[dblBaseAmountDue]		= [dbo].fnRoundBanker([dblAmountDue] * ISNULL(P.[dblExchangeRate], 1.000000), [dbo].[fnARGetDefaultDecimal]())
 	,IE.[dblBasePayment]		= [dbo].fnRoundBanker([dblPayment] * ISNULL(P.[dblExchangeRate], 1.000000), [dbo].[fnARGetDefaultDecimal]())
 	,IE.[dblBaseWriteOffAmount] = [dbo].fnRoundBanker([dblWriteOffAmount] * ISNULL(P.[dblExchangeRate], 1.000000), [dbo].[fnARGetDefaultDecimal]())
+	,IE.[dblBaseCreditCardFee]    = [dbo].fnRoundBanker([dblCreditCardFee] * ISNULL(P.[dblExchangeRate], 1.000000), [dbo].[fnARGetDefaultDecimal]())
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -648,6 +655,8 @@ USING
 		,[dblBaseAmountDue]					= [dblBaseAmountDue]
 		,[dblPayment]						= [dblPayment]
 		,[dblBasePayment]					= [dblBasePayment]
+		,[dblCreditCardFee]                 = [dblCreditCardFee]
+        ,[dblBaseCreditCardFee]             = [dblBaseCreditCardFee]
 		,[strInvoiceReportNumber]			= [strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]	= [intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]		= [intCurrencyExchangeRateId]
@@ -687,6 +696,8 @@ INSERT(
 	,[dblBaseAmountDue]
 	,[dblPayment]
 	,[dblBasePayment]
+	,[dblCreditCardFee]
+    ,[dblBaseCreditCardFee]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]
@@ -715,6 +726,8 @@ VALUES(
 	,[dblBaseAmountDue]
 	,[dblPayment]
 	,[dblBasePayment]
+	,[dblCreditCardFee]
+    ,[dblBaseCreditCardFee]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]

@@ -26,6 +26,7 @@
     [strTaxState]                     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [ysnPORequired]                   BIT             DEFAULT ((0)) NOT NULL,
     [ysnCreditHold]                   BIT             DEFAULT ((0)) NOT NULL,
+    [ysnExemptCreditCardFee]          BIT             DEFAULT ((0)) NOT NULL,
     [ysnStatementDetail]              BIT             DEFAULT ((0)) NOT NULL,
 	[ysnStatementCreditLimit]		  BIT             DEFAULT ((0)) NOT NULL,
     [strStatementFormat]              NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
