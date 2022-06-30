@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuHDGetAgentTimeEntryPeriodDetailInfo]
 AS 
-	SELECT [intId]							= CONVERT(int,ROW_NUMBER() OVER(ORDER BY AgentTimeEntryPeriodDetailSummary.[intTimeEntryPeriodDetailId])) 
+	SELECT [intId]							= AgentTimeEntryPeriodDetailSummary.intAgentTimeEntryPeriodDetailSummaryId
 		  ,[intTimeEntryPeriodDetailId]		= AgentTimeEntryPeriodDetailSummary.intTimeEntryPeriodDetailId
 		  ,[intAgentEntityId]				= AgentTimeEntryPeriodDetailSummary.intEntityId
 		  ,[dtmBillingPeriodStart]			= AgentTimeEntryPeriodDetailSummary.[dtmBillingPeriodStart]
@@ -18,6 +18,9 @@ AS
 		  ,[dblActualUtilizationAnnually]	= AgentTimeEntryPeriodDetailSummary.[dblActualUtilizationAnnually]
 		  ,[dblActualUtilizationMonthly]	= AgentTimeEntryPeriodDetailSummary.dblActualUtilizationMonthly
 		  ,[dblAnnualHurdle]				= AgentTimeEntryPeriodDetailSummary.[dblAnnualHurdle]
+		  ,[dblAnnualBudget]				= AgentTimeEntryPeriodDetailSummary.[dblAnnualBudget]
+		  ,[dblActualAnnualBudget]			= AgentTimeEntryPeriodDetailSummary.[dblActualAnnualBudget]
+		  ,[dblActualWeeklyBudget]			= AgentTimeEntryPeriodDetailSummary.[dblActualWeeklyBudget]
 		  ,[intConcurrencyId]				= AgentTimeEntryPeriodDetailSummary.[intConcurrencyId]
 	FROM tblHDAgentTimeEntryPeriodDetailSummary AgentTimeEntryPeriodDetailSummary
 GO
