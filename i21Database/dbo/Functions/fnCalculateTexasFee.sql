@@ -63,7 +63,7 @@ BEGIN
 				, @feeAmount = dblFeeAmount
 			FROM @tblTaxCodeLoadingFee
 
-			SET @dblFeeAmountOut = ISNULL(@feeAmount, 0) + dbo.[fnTRGetIncrementalAmount](@dblTotalGals, @totalGalsFrom, @incrementalGals, @incrementalFeeAmount)
+			SET @dblFeeAmountOut = ISNULL(@feeAmount, 0) + dbo.[fnGetIncrementalAmount](@dblTotalGals, @totalGalsFrom, @incrementalGals, @incrementalFeeAmount)
 		END
 		ELSE
 		BEGIN
@@ -81,7 +81,7 @@ BEGIN
 
 		IF(ISNULL(@incrementalGals, 0) > 0)
 		BEGIN
-			SET @dblFeeAmountOut = ISNULL(@feeAmount, 0) + dbo.[fnTRGetIncrementalAmount](@dblTotalGals, @totalGalsFrom, @incrementalGals, @incrementalFeeAmount)
+			SET @dblFeeAmountOut = ISNULL(@feeAmount, 0) + dbo.[fnGetIncrementalAmount](@dblTotalGals, @totalGalsFrom, @incrementalGals, @incrementalFeeAmount)
 		END
 		ELSE
 		BEGIN
