@@ -26,6 +26,7 @@ SELECT PAYMENTS.intPaymentId
 	 , PAYMENTS.dblInterest
 	 , PAYMENTS.dblDiscount
 	 , PAYMENTS.dblWriteOffAmount
+	 , PAYMENTS.dblCreditCardFee
 	 , PAYMENTS.dblPayment
 	 , ysnStretchLogo		= ISNULL(COMPANYPREF.ysnStretchLogo, 0)
 	 , blbLogo				= CASE WHEN ISNULL(COMPANYPREF.ysnStretchLogo, 0) = 1 THEN ISNULL(STRETCHEDLOGO.blbLogo, LOGO.blbLogo) ELSE LOGO.blbLogo END
@@ -58,14 +59,16 @@ FROM (
 		 , dtmDueDate           = ARPD.dtmDueDate
 		 , dblInterest          = ISNULL(ARPD.dblInterest, 0.00)
 		 , dblDiscount          = ISNULL(ARPD.dblDiscount, 0.00)
-		 , dblWriteOffAmount		= ISNULL(ARPD.dblWriteOffAmount, 0.00)
-		 , dblPayment           = ISNULL(ARPD.dblPayment, 0.00)     
+		 , dblWriteOffAmount    = ISNULL(ARPD.dblWriteOffAmount, 0.00)
+         , dblCreditCardFee     = ISNULL(ARPD.dblCreditCardFee, 0.00)
+         , dblPayment           = ISNULL(ARPD.dblPayment, 0.00) + ISNULL(ARPD.dblCreditCardFee, 0.00)
 	FROM tblARPayment ARP
 	LEFT OUTER JOIN (
 		SELECT PD.intPaymentId
 			 , PD.dblDiscount
 			 , PD.dblWriteOffAmount
 			 , PD.dblInterest
+			 , PD.dblCreditCardFee
 			 , PD.dblPayment
 			 , ARI.*
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
@@ -100,7 +103,8 @@ FROM (
 		 , dtmDueDate           = I.dtmDueDate
 		 , dblInterest          = I.dblInterest
 		 , dblDiscount          = I.dblDiscount
-		 , dblWriteOffAmount	  = 0.00
+		 , dblWriteOffAmount	= 0.00
+		 , dblCreditCardFee     = 0.00
 		 , dblPayment           = I.dblInvoiceTotal
 	FROM tblARPayment ARP
 	INNER JOIN (

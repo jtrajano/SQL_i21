@@ -205,6 +205,7 @@ BEGIN
 		,[ysnRecap]
 		,[ysnUnPostAndUpdate]
 		,[intEntityId]
+		,[intEntityCardInfoId]
 		--Detail																																															
 		,[intPaymentDetailId]
 		,[intInvoiceId]
@@ -221,6 +222,7 @@ BEGIN
 		,[dblBaseWriteOffAmount]
 		,[dblInterest]
 		,[dblPayment]
+		,[dblCreditCardFee]
 		,[dblAmountDue]
 		,[strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]
@@ -262,6 +264,7 @@ BEGIN
 		,[ysnRecap]								= IE.[ysnRecap]
 		,[ysnUnPostAndUpdate]					= IE.[ysnUnPostAndUpdate]
 		,[intEntityId]							= IE.[intEntityId]
+		,[intEntityCardInfoId]                  = IE.[intEntityCardInfoId]
 		--Detail																																															
 		,[intPaymentDetailId]					= IE.[intPaymentDetailId]
 		,[intInvoiceId]							= (CASE WHEN @GroupingOption = 0 THEN IE.[intInvoiceId] ELSE NULL END)
@@ -278,6 +281,7 @@ BEGIN
 		,[dblBaseWriteOffAmount]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblBaseWriteOffAmount] ELSE NULL END)
 		,[dblInterest]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblInterest] ELSE NULL END) 
 		,[dblPayment]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblPayment] ELSE NULL END) 
+		,[dblCreditCardFee]                     = (CASE WHEN @GroupingOption = 0 THEN IE.[dblCreditCardFee] ELSE NULL END) 
 		,[dblAmountDue]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblAmountDue] ELSE NULL END) 
 		,[strInvoiceReportNumber]				= (CASE WHEN @GroupingOption = 0 THEN IE.[strInvoiceReportNumber] ELSE NULL END) 
 		,[intCurrencyExchangeRateTypeId]		= (CASE WHEN @GroupingOption = 0 THEN IE.[intCurrencyExchangeRateTypeId] ELSE NULL END) 
@@ -415,6 +419,7 @@ BEGIN
 			,[dblBaseWriteOffAmount]
 			,[dblInterest]
 			,[dblPayment]
+			,[dblCreditCardFee]
 			,[dblAmountDue]
 			,[strInvoiceReportNumber]
 			,[intCurrencyExchangeRateTypeId]
@@ -471,6 +476,7 @@ BEGIN
 			,[dblBaseWriteOffAmount]				= ITG.[dblBaseWriteOffAmount]
 			,[dblInterest]							= ITG.[dblInterest]
 			,[dblPayment]							= ITG.[dblPayment]
+			,[dblCreditCardFee]                     = ITG.[dblCreditCardFee]
 			,[dblAmountDue]							= ITG.[dblAmountDue]
 			,[strInvoiceReportNumber]				= ITG.[strInvoiceReportNumber]
 			,[intCurrencyExchangeRateTypeId]		= ITG.[intCurrencyExchangeRateTypeId]

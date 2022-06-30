@@ -66,7 +66,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intServiceChargeId		= CUSTOMER.intServiceChargeId
 	 , intPaymentMethodId		= CUSTOMER.intPaymentMethodId
 	 , strPaymentMethod			= CUSTOMER.strPaymentMethod
-	 , ysnCreditHold
+	 , ysnCreditHold            = CUSTOMER.ysnCreditHold
+     , ysnExemptCreditCardFee   = CUSTOMER.ysnExemptCreditCardFee
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
 	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS
@@ -110,6 +111,7 @@ INNER JOIN (
 		 , intPaymentMethodId	= C.intPaymentMethodId
 		 , strPaymentMethod		= PAYMENTMETHOD.strPaymentMethod
 		 , ysnCreditHold
+		 , ysnExemptCreditCardFee
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached

@@ -7,6 +7,7 @@
     [ysnBuyback]               BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnBuyback] DEFAULT ((0)) NOT NULL,
     [ysnQuote]                 BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnQuote] DEFAULT ((0)) NOT NULL,
 	[ysnVolumeDiscount]		   BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnVolumeDiscount] DEFAULT ((0)) NOT NULL,
+    [ysnAutomatedQuoting]      BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnAutomatedQuoting] DEFAULT ((0)) NOT NULL,
 	[intCompanyId]			   INT NULL,
     [intConcurrencyId]         INT NOT NULL,
     CONSTRAINT [PK_tblARCustomerGroupDetail_1] PRIMARY KEY CLUSTERED ([intCustomerGroupDetailId] ASC),	

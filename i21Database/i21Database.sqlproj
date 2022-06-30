@@ -10497,6 +10497,7 @@
     <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
