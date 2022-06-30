@@ -28,10 +28,14 @@ SELECT
 	,intLocationId = items.intLocationId
 	,intRecipeId = items.intRecipeId
 	,dblOldStandardCost = items.dblStandardCost
-	,dblNewStandardCost = items.dblStandardCost
-	,dblDifference = 0.00
+	,dblNewStandardCost = 
+		ISNULL(receiptOutputNewStandardCost.dblNewStandardCost, items.dblStandardCost) 
+	,dblDifference = 		
+		ISNULL(receiptOutputNewStandardCost.dblNewStandardCost, items.dblStandardCost) 
+		- ISNULL(items.dblStandardCost, 0)
 	,dblOldRetailPrice = items.dblSalePrice
-	,dblNewRetailPrice = items.dblSalePrice
+	,dblNewRetailPrice = 
+		ISNULL(pricing.dblNewSalePrice, items.dblSalePrice) 
 	,intConcurrencyId = 1
 FROM 
 	tblICRecostFormulation r 
@@ -48,6 +52,7 @@ FROM
 		SELECT 
 			i.intItemId
 			,il.intLocationId
+			,il.intItemLocationId
 			,recipe.intRecipeId
 			,p.dblStandardCost
 			,p.dblSalePrice
@@ -103,8 +108,89 @@ FROM
 			
 			)
 	) items
+
+	CROSS APPLY (
+		SELECT 
+			dblTotalInputCost = 
+					SUM (
+						dbo.fnMultiply (
+							dbo.fnCalculateCostBetweenUOM (stockUOM.intItemUOMId, ri.intItemUOMId, p.dblStandardCost) 	
+							,ri.dblQuantity
+						)
+					) 
+			
+		FROM 
+			tblMFRecipeItem ri INNER JOIN tblICItem i
+				ON ri.intItemId = i.intItemId
+			INNER JOIN tblICItemLocation il
+				ON il.intItemId = i.intItemId
+			INNER JOIN tblICItemPricing p
+				ON p.intItemId = i.intItemId
+				AND p.intItemLocationId = il.intItemLocationId
+			INNER JOIN tblICItemUOM stockUOM
+				ON stockUOM.intItemId = i.intItemId
+				AND stockUOM.ysnStockUnit = 1
+		WHERE
+			ri.intRecipeId = items.intRecipeId
+			AND il.intLocationId = items.intLocationId	
+			AND ri.intRecipeItemTypeId = 1 -- INPUT 
+	) recipeInput
+
+	CROSS APPLY (
+		SELECT 
+			ri.* 			
+		FROM 
+			tblMFRecipeItem ri INNER JOIN tblICItem i
+				ON ri.intItemId = i.intItemId
+			INNER JOIN tblICItemLocation il
+				ON il.intItemId = i.intItemId
+			INNER JOIN tblICItemPricing p
+				ON p.intItemId = i.intItemId
+				AND p.intItemLocationId = il.intItemLocationId
+			INNER JOIN tblICItemUOM stockUOM
+				ON stockUOM.intItemId = i.intItemId
+				AND stockUOM.ysnStockUnit = 1
+		WHERE
+			ri.intRecipeId = items.intRecipeId
+			AND ri.intItemId = items.intItemId
+			AND il.intLocationId = items.intLocationId				
+			AND ri.intRecipeItemTypeId = 2 -- OUTPUT
+	) recipeOutput
+
+	CROSS APPLY (
+		SELECT 
+			dblNewStandardCost = 			
+			dbo.fnMultiply(
+				ISNULL(recipeInput.dblTotalInputCost, 0)
+				,dbo.fnDivide(ISNULL(recipeOutput.dblCostAllocationPercentage, 100), 100) 
+			)	
+	) receiptOutputNewStandardCost 
+
+	CROSS APPLY (
+		SELECT 
+			dblNewSalePrice = 
+				CASE	WHEN p.strPricingMethod = 'Markup Standard Cost' THEN 
+							ROUND(
+ 								ISNULL(receiptOutputNewStandardCost.dblNewStandardCost, 0) 
+								* (p.dblAmountPercent / 100) 
+								+ ISNULL(receiptOutputNewStandardCost.dblNewStandardCost, 0) 
+								, r.intRounding
+							) 
+						WHEN p.strPricingMethod = 'Markup Last Cost' THEN 
+							ROUND(p.dblLastCost * p.dblAmountPercent / 100 + p.dblLastCost, r.intRounding) 
+						WHEN p.strPricingMethod = 'Markup Avg Cost' THEN 
+							ROUND(p.dblAverageCost * p.dblAmountPercent / 100 + p.dblAverageCost, r.intRounding) 
+						ELSE 
+							p.dblSalePrice
+				END 
+		FROM	
+			tblICItemPricing p
+		WHERE	
+			p.intItemId = items.intItemId
+			AND p.intItemLocationId = items.intItemLocationId
+	) pricing 
+
 WHERE
 	r.intRecostFormulationId = @intRecostFormulationId
-
 
 RETURN 0

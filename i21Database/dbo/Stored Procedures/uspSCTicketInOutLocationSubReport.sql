@@ -18,7 +18,8 @@ begin
 	-- XML Parameter Table
 	DECLARE @temp_xml_table TABLE 
 	(
-		[fieldname] NVARCHAR(50)
+		id int identity(1,1)
+		,[fieldname] NVARCHAR(50)
 		,[condition] NVARCHAR(20)
 		,[from] NVARCHAR(MAX)
 		,[to] NVARCHAR(MAX)
@@ -89,16 +90,28 @@ begin
 	
 	select @sTo = replace(@sTo, '/', '-') 
 			,@sFrom = replace(@sFrom, '/', '-') 
+	
+	declare @final_condition nvarchar(max) = ''
+	update @temp_xml_table set [to] = convert(nvarchar, dateadd(day, 1,cast([to] as date)), 101) where datatype like 'Date%' and ([to] is not null and [to] <> '')
+	
+	select @final_condition  = @final_condition + ' '  + dbo.fnAPCreateFilter(fieldname, condition, [from], [to], [join], begingroup, endgroup, datatype) + ' ' + [join]  
+		from @temp_xml_table xml_table 
+			where condition <> 'Dummy'
+		order by id asc
 
-	declare @sqlcmd nvarchar(500)
+	set @final_condition = @final_condition + ' 1 = 1' 
+
+
+	declare @sqlcmd nvarchar(max)
 	set @sqlcmd = 'select 
 					   strGroupIndicator as strStorageTypeDescription
 					   , strCommodityCode
 					   , strLocationName 
 					   , sum(dblComputedGrossUnits) as dblGrossUnits 
+					   , sum(dblComputedNetUnits) as dblNetUnits 
 					   , strStationUnitMeasure
 					from vyuSCTicketInOutReport
-						where (dtmTicketDateTime between ''' + @sFrom + ''' and  ''' + @sTo + ''')
+						where ' + @final_condition + '
 						group by strGroupIndicator, strCommodityCode, strLocationName, strStationUnitMeasure
 					'
 						

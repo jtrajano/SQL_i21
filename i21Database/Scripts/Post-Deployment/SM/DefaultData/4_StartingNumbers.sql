@@ -1513,7 +1513,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 176
 				,[strTransactionType]	= N'Recost Formulation'
-				,[strPrefix]			= N'RCF-'
+				,[strPrefix]			= N'RF-'
 				,[intNumber]			= 1
 				,[strModule]			= 'Inventory'
 				,[ysnEnable]			= 1
