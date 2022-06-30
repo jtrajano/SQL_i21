@@ -9,13 +9,14 @@ BEGIN
     IF @objectId IS NOT NULL 
         EXEC ('DROP TABLE tblGLOverrideAccount')
 
-    SELECT * INTO tblGLOverrideAccount FROM tblGLTempCOASegment
+       SELECT * INTO tblGLOverrideAccount FROM tblGLTempCOASegment
+    EXEC ('
     ALTER TABLE dbo.tblGLOverrideAccount ADD strOverrideAccount AS (
         [Primary Account] +
-        CASE WHEN [Location] IS NULL THEN '' ELSE  '-' +[Location]  END + 
-        CASE WHEN [Line Of Business] IS NULL THEN  '' ELSE '-' +[Line Of Business] END + 
-        CASE WHEN [Company] IS NULL THEN '' ELSE '-'+ [Company] END 
-    )
+        CASE WHEN [Location] IS NULL THEN '''' ELSE  ''-'' +[Location]  END + 
+        CASE WHEN [Line Of Business] IS NULL THEN  '''' ELSE ''-'' +[Line Of Business] END + 
+        CASE WHEN [Company] IS NULL THEN '''' ELSE ''-''+ [Company] END 
+    )')
 
 END
 ELSE
