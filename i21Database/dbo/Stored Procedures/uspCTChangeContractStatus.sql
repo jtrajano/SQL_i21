@@ -110,6 +110,8 @@ BEGIN TRY
 										 @strProcess		  = 'Change Contract Status',
 										 @intUserId			  = @intEntityId										 
 
+		EXEC [uspCTContractToFeed] @intId
+
 		SELECT @intId = MIN(intId) FROM @ids WHERE intId > @intId
 	END
 

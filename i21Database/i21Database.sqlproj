@@ -360,7 +360,7 @@
     <Build Include="dbo\Tables\tblTRComboFreightCustomer.sql" />
     <Build Include="dbo\Views\vyuTRComboFreightCustomer.sql" />
     <Build Include="dbo\Views\vyuTRComboFreightShipVia.sql" />
-	<Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSite.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSite.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSite.sql" />
     <Build Include="dbo\Functions\fnTFCoalesceCardFuelingSite.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSiteType.sql" />
@@ -394,6 +394,7 @@
     <Build Include="dbo\Views\vyuMFGetShortTermPlanningViewDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10367,7 +10368,7 @@
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
     <Build Include="dbo\Views\vyuARGetEntityLocation.sql" />
     <Build Include="dbo\Views\vyuARGetCustomer.sql" />
-	<Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
