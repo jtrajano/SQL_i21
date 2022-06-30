@@ -1137,6 +1137,7 @@
     <Build Include="dbo\Tables\tblGLLedgerAccount.sql" />
     <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncTimeOffRequest.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
