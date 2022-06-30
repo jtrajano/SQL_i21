@@ -1759,8 +1759,12 @@ BEGIN TRY
 		END
 
 		-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+		--update the In-transit fields
 		UPDATE tblSCTicket
 		SET dblDWGOriginalNetUnits = 0
+			,dblInTransitQuantity = 0
+			,ysnTicketInTransit = 0
+			,ysnTicketApplied = 0
 			,dtmDateModifiedUtc = GETUTCDATE()
 		WHERE intTicketId = @intTicketId
 
