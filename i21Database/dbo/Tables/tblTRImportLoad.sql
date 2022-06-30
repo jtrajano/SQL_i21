@@ -7,6 +7,10 @@
 	[dtmImportDate] DATETIME NOT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
     [strSource] NVARCHAR(50) NULL,
+
+    --MON
+    [strFileName] NVARCHAR(50) NULL,
+    strFileExtension NVARCHAR(50) NULL,
     CONSTRAINT [PK_tblTRImportLoad] PRIMARY KEY ([intImportLoadId]),
 	CONSTRAINT [FK_tblTRImportLoad_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )

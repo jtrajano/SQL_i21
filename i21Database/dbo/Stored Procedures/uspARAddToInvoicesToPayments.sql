@@ -280,7 +280,7 @@ SELECT
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
 												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 										   END)
-	,[dblCreditCardFee]					= @ZeroDecimal
+	--,[dblCreditCardFee]					= @ZeroDecimal
 	,[dblAmountDue]						= ISNULL(PE.dblAmountDue, ABS([dbo].fnRoundBanker(ISNULL(RFP.[dblAmountDue], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
 										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])

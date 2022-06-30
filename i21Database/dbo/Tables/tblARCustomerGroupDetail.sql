@@ -9,6 +9,8 @@
 	[ysnVolumeDiscount]		   BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnVolumeDiscount] DEFAULT ((0)) NOT NULL,
 	[intCompanyId]			   INT NULL,
     [intConcurrencyId]         INT NOT NULL,
+    -- MON
+    ysnAutomatedQuoting BIT null,
     CONSTRAINT [PK_tblARCustomerGroupDetail_1] PRIMARY KEY CLUSTERED ([intCustomerGroupDetailId] ASC),	
 	CONSTRAINT [FK_tblARCustomerGroupDetail_tblARCustomerGroup] FOREIGN KEY ([intCustomerGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]) ON DELETE CASCADE,
 );

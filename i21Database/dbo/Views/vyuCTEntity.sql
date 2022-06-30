@@ -29,7 +29,9 @@ AS
 			MY.strCurrency		AS	strMainCurrency,
 			ISNULL(V.strFLOId,U.strFLOId) AS strFLOId,
 			NULL AS intContainerTypeId,
-			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer
+			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer,
+			--MON
+			1 as intEntitySelectedLocationId 
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
 	LEFT JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 

@@ -18,5 +18,16 @@
 	ysnMailSent					BIT DEFAULT 0,
 	intStatusId					INT,
 
+
+	intTrxSequenceNo int,
+	strERPTransferOrderNo  NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intActionId int,
+	strVendorAccountNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strVendorRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strERPReceiptNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strWarehouseRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strTransferOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+
+
 	CONSTRAINT [PK_tblIPInvReceiptStage_intStageReceiptId] PRIMARY KEY (intStageReceiptId)
 )
