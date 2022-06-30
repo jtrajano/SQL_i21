@@ -431,6 +431,7 @@
     <Build Include="dbo\Tables\tblFRReportHierarchyParam.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Views\vyuAPGetVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
