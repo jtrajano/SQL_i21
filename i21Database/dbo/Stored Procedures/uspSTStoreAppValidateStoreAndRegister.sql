@@ -19,6 +19,7 @@
 	, @strBasePassword AS NVARCHAR(100) OUTPUT
 	, @intPasswordIntervalDays AS INT OUTPUT
 	, @intPasswordIncrementNo AS INT OUTPUT
+	, @ysnConsignmentStore AS BIT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -59,6 +60,7 @@ BEGIN
 			, @strBasePassword = ISNULL(dbo.fnAESDecryptASym(Reg.strSAPPHIREBasePassword), '')
 			, @intPasswordIntervalDays = Reg.intSAPPHIREPasswordIntervalDays
 			, @intPasswordIncrementNo = Reg.intSAPPHIREPasswordIncrementNo
+			, @ysnConsignmentStore = ST.ysnConsignmentStore
 		FROM tblSTRegister Reg
 		JOIN tblSTStore ST
 			ON Reg.intRegisterId = ST.intRegisterId
