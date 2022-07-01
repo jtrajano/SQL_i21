@@ -31,7 +31,10 @@ AS
 			NULL AS intContainerTypeId,
 			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer,
 			--MON
-			1 as intEntitySelectedLocationId 
+			1 as intEntitySelectedLocationId,
+			strAddressName = null,
+			strMainAddress = null,
+			ysnDefaultLocation = L.ysnDefaultLocation
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
 	LEFT JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
