@@ -179,6 +179,20 @@ Begin
 		AND ISNULL(LD.strExternalShipmentItemNumber, '') = ''
 		AND ISNULL(L.strExternalShipmentNumber, '') <> ''
 		AND L.strLoadNumber LIKE 'LS-%'
+
+	-- Below query returns data only between 1:00 AM and 2:00 AM
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + ISNULL(strLoadNumber,'') + '</td>'
+		+ '<td>&nbsp;' + CASE WHEN UPPER(strMessageState)='ADDED' THEN 'Create' When UPPER(strMessageState)='DELETE' THEN 'Delete' Else 'Update' End + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strExternalShipmentNumber,'') + '</td>'
+		+ '<td>&nbsp;' + 'Awt Ack' + '</td>'
+		+ '<td>&nbsp;' + 'Check the Log table and resend the LS feed' + '</td>
+	</tr>'
+	FROM tblLGLoadStg WITH (NOLOCK)
+	WHERE ISNULL(strFeedStatus, '') = 'Awt Ack'
+		--AND dtmFeedCreated > '2022-01-01'
+		AND DATEPART(hh,GETDATE()) = 1
 End
 
 If @strMessageType='Receipt'
