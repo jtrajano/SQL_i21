@@ -27,6 +27,7 @@ Type the overview for the table here.
 		[dblDiscountThruAmount] NUMERIC(18,6) NULL DEFAULT ((0)),
 		[dblAccumulatedQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblAccumulatedAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intCurrencyId] [int] NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
