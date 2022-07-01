@@ -71,10 +71,10 @@ ON [dbo].[tblAPPaymentDetail] ([intPaymentId],[intInvoiceId])
 INCLUDE ([intBillId],[dblPayment],[dblWithheld])
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intPaymentId_intInvoiceId]
-ON [dbo].[tblAPPaymentDetail] ([intPaymentId],[intInvoiceId])
-INCLUDE ([intBillId],[dblPayment],[dblWithheld])
-GO
+--CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intPaymentId_intInvoiceId]
+--ON [dbo].[tblAPPaymentDetail] ([intPaymentId],[intInvoiceId])
+--INCLUDE ([intBillId],[dblPayment],[dblWithheld])
+--GO
 
 CREATE TRIGGER trg_tblAPPaymentDetail
 ON dbo.tblAPPaymentDetail
