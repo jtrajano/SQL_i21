@@ -287,6 +287,7 @@ END
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
 
+
 		insert into @tmpColList (strContractEndMonth)
 		SELECT DISTINCT strContractEndMonth
 					from @List
@@ -312,6 +313,8 @@ END
 
 			SET @colstry = SUBSTRING(@colstry,0,LEN(@colstry))
 
+
+
 			--IF @ysnIsCrushPosition = 1
 			--BEGIN
 			--	SET @colstry = SUBSTRING(@colstry,0,LEN(@colstry))
@@ -325,7 +328,8 @@ END
 			DECLARE @GrandTotalCol	NVARCHAR (MAX)
 
 			SELECT @GrandTotalCol = COALESCE (@GrandTotalCol + 'ISNULL ([' + CAST (strContractEndMonth AS VARCHAR) +'],0) + ', 'ISNULL([' + CAST(strContractEndMonth AS VARCHAR)+ '],0) + ')
-			FROM @List
+			FROM	tblRKDPRContractHedgeByMonth
+			WHERE intDPRHeaderId = @intDPRHeaderId
 			GROUP BY strContractEndMonth
 			ORDER BY strContractEndMonth
 			SET @GrandTotalCol = LEFT (@GrandTotalCol, LEN (@GrandTotalCol)-1)
@@ -375,9 +379,6 @@ END
 	--				FOR XML PATH(''), TYPE
 	--				).value('.', 'NVARCHAR(MAX)') 
 	--			,1,1,'')
-
-		set @strLocationName =  replace( @strLocationName,'''','''''')
-		set @strEntityName =  replace( @strEntityName,'''','''''')
 
 		exec (N' SELECT *, '''+ @xmlParam +''' AS xmlParam 
 		, '''+ @strCommodityCode +''' AS strCommodityCode
