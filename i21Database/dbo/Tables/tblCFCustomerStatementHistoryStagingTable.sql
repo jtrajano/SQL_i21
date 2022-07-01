@@ -22,7 +22,7 @@
     [strAccountStatusCode]         NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strLocationName]              NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strFullAddress]               NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
-    [strStatementFooterComment]    NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
+    [strStatementFooterComment]    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strContact]                   NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strPaid]                      NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strPaymentMethod]             NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
