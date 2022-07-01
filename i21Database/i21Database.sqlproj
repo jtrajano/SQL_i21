@@ -820,7 +820,7 @@
     <Build Include="dbo\Functions\fnGLGetOverrideAccountBySegment2.sql" />
     <Build Include="dbo\Tables\tblGLEliminate.sql" />
     <Build Include="dbo\Views\vyuGLEliminate.sql" />
-    <Build Include="dbo\Views\vyuGLOverrideAccount.sql"/>
+    <Build Include="dbo\Views\vyuGLOverrideAccount.sql" />
     <Build Include="dbo\Tables\tblGLEliminateDetail.sql" />
     <Build Include="dbo\Views\vyuGLEliminateDetail.sql" />
     <Build Include="dbo\Tables\tblARReserveDetail.sql" />
@@ -852,7 +852,7 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
     <Build Include="dbo\Tables\tblIPBillDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
-    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" /> 
+    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
@@ -931,6 +931,7 @@
     <Build Include="dbo\Views\vyuAPGetVoucher.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptTax.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptTax.sql" />
+    <Build Include="dbo\Views\vyuLGDispatchScheduleViewSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
