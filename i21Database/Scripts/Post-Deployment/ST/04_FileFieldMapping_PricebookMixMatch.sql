@@ -23,6 +23,8 @@ DECLARE @intImportFileHeaderId Int, @intImportFileColumnDetailId Int
 
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM [dbo].[tblSMImportFileHeader]
 WHERE strLayoutTitle = 'Pricebook Mix Match' AND strFileType = 'XML' AND [strXMLType] = 'Outbound'
+	
+DELETE FROM [dbo].[tblSMImportFileColumnDetail] WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'NAXML-MaintenanceRequest')
 BEGIN
