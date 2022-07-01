@@ -29,6 +29,7 @@
 	[dtmReceiptDate] DATETIME NULL,
 	[dtmDateAdded] DATETIME NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
+	[dtmReceiptDate] DATETIME NULL,
 	
 	CONSTRAINT [PK_tblLGPendingClaim_intPendingClaimId] PRIMARY KEY ([intPendingClaimId]), 
 	CONSTRAINT [FK_tblLGPendingClaim_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
