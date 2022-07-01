@@ -329,11 +329,8 @@ BEGIN
 		  
 		  IF (@dblAggregateMeterReadingsForDollars != @dblSummaryInfoFuelSales)
 			BEGIN
-				INSERT INTO tblSTCheckoutProcess (intCheckoutId, dtmCheckoutProcessDate, strGuid, intConcurrencyId)
-				VALUES (@intCheckoutId, GETDATE(), 'Dummy Guid', 1)
-
 				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-				VALUES (dbo.fnSTGetLatestProcessId(@intCheckoutId), '1', 'Aggregate Meter Readings does not Match the Register''s Summary File value', 1)
+				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Aggregate Meter Readings does not Match the Register''s Summary File value', 1)
 			END
           -------------------------------------------------------------------------------------------------------------
           ------------------------------------- END CONSIGNMENT DATA --------------------------------------------------

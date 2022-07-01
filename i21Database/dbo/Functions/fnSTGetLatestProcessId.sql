@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnSTGetLatestProcessId] 
 (
-	@intCheckoutId AS INT
+	@intStoreId AS INT
 )
 RETURNS INT
 AS BEGIN
@@ -10,7 +10,7 @@ AS BEGIN
     SELECT		TOP 1
                 @intCheckoutProcessId = intCheckoutProcessId
     FROM		tblSTCheckoutProcess
-    WHERE		intCheckoutId = @intCheckoutId
+    WHERE		intStoreId = @intStoreId
     ORDER BY    dtmCheckoutProcessDate  DESC
 
     RETURN @intCheckoutProcessId
