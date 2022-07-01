@@ -13,6 +13,7 @@ BEGIN
 			,dtmReceivedDate = NULL
 	FROM @RouteOrder A
 	WHERE tblTMDispatch.intDispatchID = A.intOrderId
+	AND strWillCallStatus <> 'Delivered'
 
 
 	---Update Site
