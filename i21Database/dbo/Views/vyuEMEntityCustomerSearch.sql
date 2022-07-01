@@ -56,6 +56,7 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, ysnProspect			= entityType.Prospect
 	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
+	, ysnExemptCreditCardFee= CUSTOMER.ysnExemptCreditCardFee
 	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
 	, strFobPoint			= fTerms.strFobPoint
