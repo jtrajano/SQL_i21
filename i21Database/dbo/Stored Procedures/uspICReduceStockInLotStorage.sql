@@ -65,7 +65,7 @@ BEGIN
 					@intItemLocationId
 					,NULL -- @intSubLocationId
 					,NULL -- @intStorageLocationId
-			)
+			) COLLATE Latin1_General_CI_AS
 						
 	-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'	
 	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName) 

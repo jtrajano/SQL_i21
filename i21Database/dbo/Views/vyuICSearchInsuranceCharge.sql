@@ -10,10 +10,10 @@ SELECT
 	,A.intConcurrencyId
 	,strCommodity = C.strCommodityCode
 	,strInsurerName = B.strName
-	,strStorageLocation = ISNULL(D.strSubLocationName,'')
+	,strStorageLocation = ISNULL(D.strSubLocationName,'') COLLATE Latin1_General_CI_AS
 	,strM2MBatch = E.strRecordName
 	----Detail
-	,strCompanyLocation = ISNULL(G.strLocationName,'')
+	,strCompanyLocation = ISNULL(G.strLocationName,'') COLLATE Latin1_General_CI_AS
 	,F.dblQuantity
 	,strQuantityUOM = K.strUnitMeasure
 	,F.dblWeight

@@ -286,5 +286,5 @@ BEGIN
 		WHEN @msgId = 80270 THEN 'Available Qty in %s is %f. Releasing %f is not allowed.'
 	END 
 
-	RETURN @msg
+	RETURN @msg COLLATE Latin1_General_CI_AS
 END 

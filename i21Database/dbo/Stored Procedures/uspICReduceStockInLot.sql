@@ -56,7 +56,7 @@ BEGIN
 		AND intSubLocationId = @intSubLocationId
 		AND intStorageLocationId = @intStorageLocationId
 
-	SELECT	@strItemNo = i.strItemNo
+	SELECT	@strItemNo = i.strItemNo 
 			,@CostBucketId = cb.intInventoryLotId
 			,@AllowNegativeInventory = il.intAllowNegativeInventory
 	FROM	tblICItem i INNER JOIN tblICItemLocation il
@@ -133,7 +133,7 @@ BEGIN
 			SET @dblTotalCostBucketQty += @dblCostBucketQty
 			IF @dblTotalCostBucketQty >= ROUND(@dblQty, 6)
 			BEGIN 
-				SET @strCostBucketDate = CONVERT(NVARCHAR(40), @dtmCostBucketDate, 101) 
+				SET @strCostBucketDate = CONVERT(NVARCHAR(40), @dtmCostBucketDate, 101)  COLLATE Latin1_General_CI_AS
 				GOTO breakLoopFindBestDateToPost
 			END 
 			

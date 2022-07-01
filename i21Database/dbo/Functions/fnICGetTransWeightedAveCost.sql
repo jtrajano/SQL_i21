@@ -15,7 +15,7 @@ BEGIN
 					,SUM(t.dblQty)
 				)
 	FROM	tblICInventoryTransaction t 
-	WHERE	t.strTransactionId = @strTransactionId
+	WHERE	t.strTransactionId = @strTransactionId COLLATE Latin1_General_CI_AS
 			AND t.intTransactionId = @intTransactionId
 			AND t.intTransactionDetailId = @intTransactionDetail			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 

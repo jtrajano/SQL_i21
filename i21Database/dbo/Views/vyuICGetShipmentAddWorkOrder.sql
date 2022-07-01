@@ -11,7 +11,7 @@ SELECT
  , EM.strCustomerName  
  , intLineNo = intWorkOrderDetailId  
  , intOrderId = WO.intWorkOrderId  
- , strOrderNumber = WO.strOrderNumber  
+ , strOrderNumber = WO.strOrderNumber COLLATE Latin1_General_CI_AS
  , intSourceId = NULL  
  , strSourceNumber = NULL  
  , WODetail.intItemId  
