@@ -7,7 +7,7 @@ SELECT DISTINCT
 		WHEN LotQuality.intComponentMapId = ComponentPropertyMap.intComponentMapId
 		THEN LotQuality.strValue
 		ELSE NULL
-	END,
+	END COLLATE Latin1_General_CI_AS,
 	ComponentPropertyMap.intComponentMapId,
 	ComponentPropertyMap.strComponent,
 	ComponentPropertyMap.intPropertyId,

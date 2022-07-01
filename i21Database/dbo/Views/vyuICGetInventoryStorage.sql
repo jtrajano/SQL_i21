@@ -109,7 +109,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionStorageId, 
 		,t.dtmCreated
 		,ScaleView.intTicketId
 		,strTransactionUOM			= transactionUOM.strUnitMeasure 
-		,strDescription				= '' --t.strDescription 
+		,strDescription				= '' COLLATE Latin1_General_CI_AS --t.strDescription 
 		,intItemStockUOM			= iuStock.intItemUOMId 
 		,intUnitMeasureStockUOM		= iuStock.intUnitMeasureId
 FROM 	tblICInventoryTransactionStorage t 

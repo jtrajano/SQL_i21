@@ -19,8 +19,8 @@ SELECT
 	, bank.strBankName
 	, bankAccount.strBankAccountNo
 	, borrowingFacility.strBorrowingFacilityId
-	, strLimit = limit.strBorrowingFacilityLimit
-	, strSublimit = sublimit.strLimitDescription
+	, strLimit = limit.strBorrowingFacilityLimit COLLATE Latin1_General_CI_AS
+	, strSublimit = sublimit.strLimitDescription COLLATE Latin1_General_CI_AS
 	, strOverrideFacilityValuation = overrideFacilityValuation.strBankValuationRule
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.[intEntityId] = Receipt.intEntityVendorId

@@ -7,7 +7,7 @@ AS
 BEGIN
 	DECLARE @ysnExists BIT = 0
 
-	IF  (@strLongUPCCode IS NULL OR LTRIM(RTRIM(@strLongUPCCode)) = '') 
+	IF  (@strLongUPCCode COLLATE Latin1_General_CI_AS IS NULL OR LTRIM(RTRIM(@strLongUPCCode COLLATE Latin1_General_CI_AS)) = '') 
 		OR @intItemUOMId IS NULL 
 	BEGIN 
 		RETURN @ysnExists;
@@ -17,11 +17,11 @@ BEGIN
 	SET @intUpcCode = 
 			CASE 
 				WHEN 
-					@strLongUPCCode IS NOT NULL 
-					AND ISNUMERIC(RTRIM(LTRIM(@strLongUPCCode))) = 1 
-					AND NOT (@strLongUPCCode LIKE '%.%' OR @strLongUPCCode LIKE '%e%' OR @strLongUPCCode LIKE '%E%') 
+					@strLongUPCCode COLLATE Latin1_General_CI_AS IS NOT NULL 
+					AND ISNUMERIC(RTRIM(LTRIM(@strLongUPCCode COLLATE Latin1_General_CI_AS))) = 1 
+					AND NOT (@strLongUPCCode COLLATE Latin1_General_CI_AS LIKE '%.%' OR @strLongUPCCode COLLATE Latin1_General_CI_AS LIKE '%e%' OR @strLongUPCCode COLLATE Latin1_General_CI_AS LIKE '%E%') 
 				THEN 				
-					CAST(RTRIM(LTRIM(@strLongUPCCode)) AS BIGINT) 
+					CAST(RTRIM(LTRIM(@strLongUPCCode COLLATE Latin1_General_CI_AS)) AS BIGINT) 
 				ELSE 
 					CAST(NULL AS BIGINT) 
 			END
@@ -31,11 +31,11 @@ BEGIN
 		FROM tblICItemUOM 
 		WHERE 
 			(
-				strLongUPCCode = @strLongUPCCode 
+				strLongUPCCode = @strLongUPCCode COLLATE Latin1_General_CI_AS
 				OR intUpcCode = @intUpcCode
 			)
 			AND intItemUOMId <> @intItemUOMId
-			AND strLongUPCCode IS NOT NULL 
+			AND strLongUPCCode COLLATE Latin1_General_CI_AS IS NOT NULL 
 	)
 	BEGIN 
 		SET @ysnExists = 1

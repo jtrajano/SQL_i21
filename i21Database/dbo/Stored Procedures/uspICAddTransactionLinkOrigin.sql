@@ -27,9 +27,9 @@ SELECT
 FROM (
 	SELECT
 		@intTransactionId AS intDestId, 
-		@strTransactionNo AS strDestTransactionNo, 
-		@strTransactionType AS strDestTransactionType,
-		@strModuleName AS strDestModuleName
+		@strTransactionNo COLLATE Latin1_General_CI_AS AS strDestTransactionNo, 
+		@strTransactionType COLLATE Latin1_General_CI_AS AS strDestTransactionType,
+		@strModuleName COLLATE Latin1_General_CI_AS AS strDestModuleName
 ) AS TransactionOrigin
 LEFT JOIN
 tblICTransactionNodes Nodes
@@ -60,9 +60,9 @@ FROM (
 	SELECT 
 		@GraphId AS guiTransactionGraphId, 
 		@intTransactionId AS intDestId, 
-		@strTransactionNo AS strDestTransactionNo, 
-		@strModuleName AS strDestModuleName, 
-		@strTransactionType AS strDestTransactionType
+		@strTransactionNo COLLATE Latin1_General_CI_AS AS strDestTransactionNo, 
+		@strModuleName COLLATE Latin1_General_CI_AS AS strDestModuleName, 
+		@strTransactionType COLLATE Latin1_General_CI_AS AS strDestTransactionType
 ) AS TransactionOrigin
 OUTER APPLY (
 	SELECT TOP 1 nodes.guiTransactionGraphId
@@ -75,11 +75,11 @@ WHERE NOT EXISTS(
 	(
 		intDestId = @intTransactionId 
 		AND 
-		strDestTransactionNo = @strTransactionNo 
+		strDestTransactionNo = @strTransactionNo COLLATE Latin1_General_CI_AS
 		AND 
-		strDestTransactionType = @strTransactionType
+		strDestTransactionType = @strTransactionType COLLATE Latin1_General_CI_AS
 		AND
-		strDestModuleName = @strModuleName
+		strDestModuleName = @strModuleName COLLATE Latin1_General_CI_AS
 	)
 )
 

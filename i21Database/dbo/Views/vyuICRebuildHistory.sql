@@ -17,7 +17,7 @@ SELECT
 		WHEN BackupLog.ysnFailed = 1
 		THEN 'Failed'
 		ELSE 'Success'
-	END
+	END COLLATE Latin1_General_CI_AS
 FROM
 	tblICBackup BackupLog
 INNER JOIN

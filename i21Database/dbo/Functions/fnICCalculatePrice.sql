@@ -10,20 +10,20 @@ RETURNS NUMERIC(16, 9)
 AS
 BEGIN
 	DECLARE @dblSalePrice NUMERIC(16, 9) = 0.00
-	IF @strPricingMethod = 'Fixed Dollar Amount'
+	IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Fixed Dollar Amount'
 		SET @dblSalePrice = @dblStandardCost + @dblAmount
-	ELSE IF @strPricingMethod = 'Markup Standard Cost'
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Standard Cost'
 		SET @dblSalePrice = (@dblStandardCost * (@dblAmount / 100.00)) + @dblStandardCost
-	ELSE IF @strPricingMethod = 'Percent of Margin'
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Percent of Margin'
 		SET @dblSalePrice = CASE WHEN @dblAmount < 100 THEN (@dblStandardCost / (1 - (@dblAmount / 100.00))) ELSE NULL END
-	ELSE IF @strPricingMethod = 'Markup Last Cost'
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Last Cost'
 		SET @dblSalePrice = (@dblLastCost * (@dblAmount / 100.00)) + @dblLastCost
-	ELSE IF @strPricingMethod = 'Markup Avg Cost'
+	ELSE IF @strPricingMethod COLLATE Latin1_General_CI_AS = 'Markup Avg Cost'
 		SET @dblSalePrice = (@dblAvgCost * (@dblAmount / 100.00)) + @dblAvgCost
 	ELSE
 		SET @dblSalePrice = @dblProposedSalePrice
 	
-	IF NOT (@strPricingMethod IS NULL OR @strPricingMethod = 'None')
+	IF NOT (@strPricingMethod COLLATE Latin1_General_CI_AS IS NULL OR @strPricingMethod COLLATE Latin1_General_CI_AS = 'None')
 	BEGIN
 		IF @dblAmount <> 0 AND @dblStandardCost <> 0
 			SET @dblSalePrice = @dblProposedSalePrice
