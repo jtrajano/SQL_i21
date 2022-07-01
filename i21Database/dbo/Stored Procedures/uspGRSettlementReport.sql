@@ -742,7 +742,7 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
+				-- ,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,strDeliverySheetNumber			= NULL
@@ -1931,7 +1931,7 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
+				-- ,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,strDeliverySheetNumber			= NULL
