@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[tblCMBankStatementImportLogDetail](
 	ysnSuccess BIT NULL,
 	[intConcurrencyId] [int] NULL,
 	[strTaskId] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,
+	[intABRActivityId] [int] NULL,
+	[strABRActivityId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblCMBankStatementImportLogDetail] PRIMARY KEY CLUSTERED
 (
 	[intId] ASC

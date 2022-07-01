@@ -432,6 +432,8 @@
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Views\vyuAPGetVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
+    <Build Include="dbo\Tables\tblCMABRActivityMatched.sql" />
+    <Build Include="dbo\Tables\tblCMABRActivity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
