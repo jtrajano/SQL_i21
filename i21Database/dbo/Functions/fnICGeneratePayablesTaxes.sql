@@ -157,6 +157,48 @@ BEGIN
 		WHERE 
 			Item.strType = @ItemType_OtherCharge COLLATE Latin1_General_CI_AS
 			AND voucherItems.dblTax != 0
+
+		-- Texas Loading Fee (For Transport Load Only)
+		INSERT INTO @table
+		SELECT	intVoucherPayableId			= voucherItems.intVoucherPayableId
+				,intTaxGroupId				= ReceiptTax.intTaxGroupId
+				,intTaxCodeId				= ReceiptTax.intTaxCodeId
+				,intTaxClassId				= ReceiptTax.intTaxClassId
+				,strTaxableByOtherTaxes		= ReceiptTax.strTaxableByOtherTaxes
+				,strCalculationMethod		= ReceiptTax.strCalculationMethod
+				,dblRate					= ISNULL(ReceiptTax.dblRate, 0) 
+				,intAccountId				= ReceiptTax.intTaxAccountId
+				,dblTax						= 
+					CASE 
+						--WHEN voucherItems.ysnReturn = 1 THEN -ReceiptTax.dblTax
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-ReceiptTax.dblTax -- -ROUND(dbo.fnMultiply(ReceiptTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+						ELSE 							
+							ReceiptTax.dblTax --ROUND(dbo.fnMultiply(ReceiptTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+					END
+
+				,dblAdjustedTax				= 
+					CASE 
+						--WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ItemTax.dblAdjustedTax, 0)
+						WHEN @billTypeToUse = @type_DebitMemo THEN 							
+							ReceiptTax.dblAdjustedTax-- -ROUND(dbo.fnMultiply(ReceiptTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+						ELSE 
+							ReceiptTax.dblAdjustedTax --ROUND(dbo.fnMultiply(ReceiptTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+					END
+				,ysnTaxAdjusted				= ISNULL(ReceiptTax.ysnTaxAdjusted, 0)
+				,ysnSeparateOnBill			= ISNULL(ReceiptTax.ysnSeparateOnInvoice, 0)
+				,ysnCheckoffTax				= ISNULL(ReceiptTax.ysnCheckoffTax, 0) 
+				,ysnTaxExempt				= CAST(ISNULL(ReceiptTax.ysnTaxExempt, 0) AS BIT)
+				,ysnTaxOnly					= ISNULL(ReceiptTax.ysnTaxOnly, 0) 
+		FROM 
+			tblICInventoryReceiptTax ReceiptTax
+			CROSS APPLY (
+				SELECT TOP 1
+					v.intVoucherPayableId
+				FROM @voucherItems v
+			) voucherItems
+		WHERE 
+			ReceiptTax.intInventoryReceiptId = @intReceiptId
 	END 
 	
 	-- Shipment Charges Taxes
