@@ -326,6 +326,7 @@ END
 
 			SELECT @GrandTotalCol = COALESCE (@GrandTotalCol + 'ISNULL ([' + CAST (strContractEndMonth AS VARCHAR) +'],0) + ', 'ISNULL([' + CAST(strContractEndMonth AS VARCHAR)+ '],0) + ')
 			FROM	tblRKDPRContractHedgeByMonth
+			WHERE intDPRHeaderId = @intDPRHeaderId
 			GROUP BY strContractEndMonth
 			ORDER BY strContractEndMonth
 			SET @GrandTotalCol = LEFT (@GrandTotalCol, LEN (@GrandTotalCol)-1)
