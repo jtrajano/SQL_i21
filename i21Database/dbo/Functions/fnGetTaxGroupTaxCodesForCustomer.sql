@@ -141,6 +141,7 @@ BEGIN
 		TG.intTaxGroupId = @TaxGroupId
 		AND (ISNULL(E.ysnTaxExempt, @ZeroBit) = @ZeroBit OR ISNULL(@IncludeExemptedCodes, @ZeroBit) = @OneBit)
 		AND ((ISNULL(E.[ysnInvalidSetup], @ZeroBit) = @ZeroBit AND ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @ZeroBit) OR ISNULL(@IncludeInvalidCodes, @ZeroBit) = @OneBit)
+		AND (TC.ysnTexasLoadingFee IS NULL OR TC.ysnTexasLoadingFee = 0)
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
 
