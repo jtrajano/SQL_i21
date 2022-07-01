@@ -3280,13 +3280,14 @@ BEGIN
 			,[intTransactionDetailId] = 
 				COALESCE(
 					intInventoryReceiptItemId
-					,intInventoryReceiptChargeId					
+					,intInventoryReceiptChargeId
+					,0
 				)
 			,[intAccountId]
-			,[intItemId]
-			,[intItemUOMId]
-			,[dblQuantity]
-			,[dblAmount] = g.dblAmount
+			,[intItemId] = ISNULL([intItemId], 0) 
+			,[intItemUOMId] = ISNULL([intItemUOMId], 0) 
+			,[dblQuantity] = ISNULL([dblQuantity], 0) 
+			,[dblAmount] = ISNULL(g.dblAmount, 0) 
 			,[strCode] = 'IR'
 		FROM 
 			tblICAPClearing ap
@@ -3300,6 +3301,7 @@ BEGIN
 					AND (
 						(g.intInventoryReceiptItemId = ap.intInventoryReceiptItemId AND ap.intInventoryReceiptItemId IS NOT NULL)
 						OR (g.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId AND ap.intInventoryReceiptChargeId IS NOT NULL)
+						OR (g.intInventoryReceiptItemId IS NULL AND g.intInventoryReceiptChargeId IS NULL )
 					)
 			) g
 		WHERE

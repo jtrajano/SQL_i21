@@ -20,6 +20,17 @@ DECLARE	@OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
+DECLARE @SourceType_NONE AS INT = 0
+		,@SourceType_SCALE AS INT = 1
+		,@SourceType_INBOUND_SHIPMENT AS INT = 2
+		,@SourceType_TRANSPORT AS INT = 3
+		,@SourceType_SETTLE_STORAGE AS INT = 4
+		,@SourceType_DELIVERY_SHEET AS INT = 5
+		,@SourceType_PURCHASE_ORDER AS INT = 6
+		,@SourceType_STORE AS INT = 7
+		,@SourceType_STORE_LOTTERY_MODULE AS INT = 8
+		,@SourceType_TRANSFER_SHIPMENT AS INT = 9
+
 DECLARE	@ItemId				INT
 		,@LocationId		INT
 		,@TransactionDate	DATETIME
@@ -318,6 +329,124 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		) Taxes
 			ON ReceiptItem.intInventoryReceiptItemId = Taxes.intInventoryReceiptItemId
 WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
+
+-- Calculate the Texas Loading Fee (Transport Load Only) 
+BEGIN 
+
+	DECLARE @ReceiptItems AS TABLE (
+		  intInventoryReceiptId INT
+		, intTaxGroupId INT
+		, intTaxCodeId INT
+		, dblQty NUMERIC(38, 20)
+		, ysnGas BIT
+		, dtmDate DATETIME
+	)
+	
+	INSERT INTO @ReceiptItems (
+		  intInventoryReceiptId
+		, intTaxGroupId
+		, intTaxCodeId
+		, dblQty
+		, ysnGas
+		, dtmDate
+	)
+	SELECT 
+		intInventoryReceiptId = Receipt.intInventoryReceiptId
+		 , intTaxGroupId = TG.intTaxGroupId
+		 , intTaxCodeId = TC.intTaxCodeId
+		 , dblQty = 
+				CASE	
+					WHEN ReceiptItem.intWeightUOMId IS NOT NULL AND ReceiptItem.intComputeItemTotalOption = 0 THEN 
+						ReceiptItem.dblNet 
+					ELSE 
+						ReceiptItem.dblOpenReceive 
+				END 
+		 , ysnGas = 
+				CASE 
+					WHEN Item.intCategoryId = TCR.intGasolineItemCategoryId THEN CAST(1 AS BIT) 
+					ELSE CAST(0 AS BIT) 
+				END
+		, dtmDate = Receipt.dtmReceiptDate
+
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			LEFT JOIN tblICItem Item
+				ON Item.intItemId = ReceiptItem.intItemId
+			LEFT JOIN dbo.tblICItemUOM ReceiveUOM 
+				ON ReceiveUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+			LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
+				ON GrossNetUOM.intItemUOMId = ReceiptItem.intWeightUOMId
+			LEFT JOIN dbo.tblICItemUOM CostUOM
+				ON CostUOM.intItemUOMId = ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId) 	
+			LEFT JOIN tblSMTaxGroup TG 
+				ON ReceiptItem.intTaxGroupId = TG.intTaxGroupId
+			INNER JOIN tblSMTaxGroupCode TGC 
+				ON TG.intTaxGroupId = TGC.intTaxGroupId
+			INNER JOIN tblSMTaxCode TC 
+				ON TGC.intTaxCodeId = TC.intTaxCodeId 
+			INNER JOIN tblSMTaxCodeRate TCR 
+				ON TCR.intTaxCodeId = TC.intTaxCodeId 
+	WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
+			AND TC.ysnTexasLoadingFee = 1
+			AND Receipt.intSourceType = @SourceType_TRANSPORT
+
+	IF EXISTS (SELECT TOP 1 1 FROM @ReceiptItems)
+	BEGIN
+		DELETE ReceiptTax
+		FROM tblICInventoryReceiptTax ReceiptTax
+		WHERE ReceiptTax.intInventoryReceiptId = @inventoryReceiptId
+
+		INSERT INTO tblICInventoryReceiptTax (
+			[intInventoryReceiptId]
+			,[intTaxGroupId]
+			,[intTaxCodeId]
+			,[intTaxClassId]
+			,[strTaxableByOtherTaxes]
+			,[strCalculationMethod]
+			,[dblTax]
+			,[dblAdjustedTax]
+			,[intTaxAccountId]
+			,[strTaxCode]
+			,[dblQty]
+			,[intConcurrencyId]
+		)
+		SELECT 
+			[intInventoryReceiptId] = RI.intInventoryReceiptId
+			,[intTaxGroupId] = RI.intTaxGroupId
+			,[intTaxCodeId] = RI.intTaxCodeId
+			,[intTaxClassId] = TC.intTaxClassId 
+			,[strTaxableByOtherTaxes] = TC.strTaxableByOtherTaxes
+			,[strCalculationMethod] = TCR.strCalculationMethod
+			,[dblTax] = dbo.[fnCalculateTexasFee](RI.intTaxCodeId, RI.dtmDate, RI.dblQty, CASE WHEN ysnGas = 1 THEN RI.dblQty ELSE 0 END)
+			,[dblAdjustedTax] = dbo.[fnCalculateTexasFee](RI.intTaxCodeId, RI.dtmDate, RI.dblQty, CASE WHEN ysnGas = 1 THEN RI.dblQty ELSE 0 END)
+			,[intTaxAccountId] = TC.intPurchaseTaxAccountId
+			,[strTaxCode] = TC.strTaxCode
+			,[dblQty] = RI.dblQty
+			,[intConcurrencyId] = 1
+		FROM (
+				SELECT 
+					RI.intInventoryReceiptId
+					, RI.intTaxCodeId			
+					, RI.intTaxGroupId
+					, RI.dtmDate
+					, RI.ysnGas
+					, dblQty = SUM(ISNULL(RI.dblQty, 0)) 
+				FROM 
+					@ReceiptItems RI
+				GROUP BY
+					RI.intInventoryReceiptId
+					, RI.intTaxCodeId			
+					, RI.intTaxGroupId
+					, RI.dtmDate
+					, RI.ysnGas
+			) RI
+			INNER JOIN tblSMTaxCode TC 
+				ON RI.intTaxCodeId = TC.intTaxCodeId 			
+			INNER JOIN tblSMTaxCodeRate TCR 
+				ON TCR.intTaxCodeId = TC.intTaxCodeId 
+	END
+
+END 
 
 _EXIT: 
 

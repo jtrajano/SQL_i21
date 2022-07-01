@@ -929,6 +929,8 @@
     <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchyParam.sql" />
     <Build Include="dbo\Views\vyuAPGetVoucher.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptTax.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

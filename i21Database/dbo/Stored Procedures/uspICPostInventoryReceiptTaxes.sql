@@ -5,6 +5,17 @@
 	,@intTransactionTypeId AS INT 
 AS
 
+DECLARE @SourceType_NONE AS INT = 0
+		,@SourceType_SCALE AS INT = 1
+		,@SourceType_INBOUND_SHIPMENT AS INT = 2
+		,@SourceType_TRANSPORT AS INT = 3
+		,@SourceType_SETTLE_STORAGE AS INT = 4
+		,@SourceType_DELIVERY_SHEET AS INT = 5
+		,@SourceType_PURCHASE_ORDER AS INT = 6
+		,@SourceType_STORE AS INT = 7
+		,@SourceType_STORE_LOTTERY_MODULE AS INT = 8
+		,@SourceType_TRANSFER_SHIPMENT AS INT = 9
+
 -- Get the A/P Clearing account 
 BEGIN 
 	DECLARE @AccountCategory_APClearing AS NVARCHAR(30) = 'AP Clearing';
@@ -287,11 +298,13 @@ BEGIN
 		,strInventoryTransactionTypeName
 		,strTransactionForm
 		,intPurchaseTaxAccountId
+		,intAPClearingAccountId
 		,dblForexRate 
 		,strRateType
 		,strItemNo
 		,intSourceEntityId
 		,intCommodityId
+		,intTaxTransactionTypeId 
 	)
 	AS 
 	(
@@ -323,11 +336,13 @@ BEGIN
 						ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
 						END
 					END
+				,intAPClearingAccountId				= CAST(NULL AS INT) 
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
 				,intSourceEntityId					= Receipt.intEntityVendorId 
 				,intCommodityId						= item.intCommodityId
+				,intTaxTransactionTypeId			= 1
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -391,11 +406,13 @@ BEGIN
 						ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
 						END
 					END
+				,intAPClearingAccountId				= CAST(NULL AS INT) 
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
 				,intSourceEntityId					= Receipt.intEntityVendorId
 				,intCommodityId						= item.intCommodityId
+				,intTaxTransactionTypeId			= 2
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -455,11 +472,13 @@ BEGIN
 						ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId)
 						END
 					END
+				,intAPClearingAccountId				= CAST(NULL AS INT) 
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
 				,intSourceEntityId					= ReceiptCharge.intEntityVendorId
 				,intCommodityId						= item.intCommodityId
+				,intTaxTransactionTypeId			= 3
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -486,6 +505,45 @@ BEGIN
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				AND ReceiptCharge.ysnAccrue = 1 
 				AND ReceiptCharge.ysnPrice = 1 
+		
+		-- Receipt Taxes
+		UNION ALL 
+		SELECT	dtmDate								= Receipt.dtmReceiptDate
+				,intItemId							= NULL 
+				,intItemLocationId					= NULL 
+				,intTransactionId					= Receipt.intInventoryReceiptId				
+				,strTransactionId					= Receipt.strReceiptNumber
+				,intInventoryReceiptTaxId			= ReceiptTaxes.intInventoryReceiptTaxId
+				,dblTax								= 
+													-- Negate the tax if it is an Inventory Return 
+													CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN
+															-(ReceiptTaxes.dblTax)
+														ELSE
+															ReceiptTaxes.dblTax 
+													END 
+				,intTransactionTypeId				= TransType.intTransactionTypeId
+				,intCurrencyId						= Receipt.intCurrencyId
+				,dblExchangeRate					= 1
+				,strInventoryTransactionTypeName	= TransType.strName
+				,strTransactionForm					= @strTransactionForm
+				,intPurchaseTaxAccountId			= ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
+				,intAPClearingAccountId				= ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId), TaxCode.intAPClearingAccountId) 
+				,dblForexRate						= 1
+				,strRateType						= NULL 
+				,strItemNo							= TaxCode.strTaxCode
+				,intSourceEntityId					= Receipt.intEntityVendorId 
+				,intCommodityId						= NULL 
+				,intTaxTransactionTypeId			= 4
+		FROM	dbo.tblICInventoryReceipt Receipt 
+				INNER JOIN dbo.vyuICGetInventoryReceiptTax ReceiptTaxes
+					ON Receipt.intInventoryReceiptId = ReceiptTaxes.intInventoryReceiptId
+				INNER JOIN dbo.tblSMTaxCode TaxCode
+					ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
+				LEFT JOIN dbo.tblICInventoryTransactionType TransType
+					ON TransType.intTransactionTypeId = @intTransactionTypeId
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND Receipt.intSourceType = @SourceType_TRANSPORT
+
 	)
 	
 	-------------------------------------------------------------------------------------------
@@ -543,6 +601,8 @@ BEGIN
 			) Credit
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) CreditForeign
+	WHERE
+		ForGLEntries_CTE.intTaxTransactionTypeId <> 4
 
 	UNION ALL 
 	SELECT	
@@ -617,6 +677,123 @@ BEGIN
 			) Credit
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) CreditForeign
+	WHERE
+		ForGLEntries_CTE.intTaxTransactionTypeId <> 4
+
+	-------------------------------------------------------------------------------------------
+	-- GL ENTRIES for Texas Loading Fee
+	-- Dr...... Purchase Tax Id 
+	-- Cr..................... A/P Clearing 
+	-------------------------------------------------------------------------------------------
+	UNION ALL
+	SELECT	
+			dtmDate						= ForGLEntries_CTE.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= GLAccount.strDescription + ', ' +  ISNULL(strItemNo, '') 
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+			,strJournalLineDescription  = '' 
+			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= @intEntityUserSecurityId 
+			,strTransactionId			= ForGLEntries_CTE.strTransactionId
+			,intTransactionId			= ForGLEntries_CTE.intTransactionId
+			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType 
+			,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+			,intCommodityId				= ForGLEntries_CTE.intCommodityId
+	FROM	ForGLEntries_CTE LEFT JOIN dbo.tblGLAccount GLAccount 
+				ON GLAccount.intAccountId = ForGLEntries_CTE.intPurchaseTaxAccountId
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				ForGLEntries_CTE.dblTax
+				,ForGLEntries_CTE.intCurrencyId
+				,@intFunctionalCurrencyId
+				,ForGLEntries_CTE.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				ForGLEntries_CTE.dblTax
+				,ForGLEntries_CTE.intCurrencyId
+				,@intFunctionalCurrencyId
+				,ForGLEntries_CTE.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) CreditForeign
+	WHERE
+		ForGLEntries_CTE.intTaxTransactionTypeId = 4
+
+	UNION ALL 
+	SELECT	
+			dtmDate						= ForGLEntries_CTE.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= GLAccount.strDescription + ', ' + ISNULL(ForGLEntries_CTE.strItemNo, '') 
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+			,strJournalLineDescription  = '' 
+			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= @intEntityUserSecurityId
+			,strTransactionId			= ForGLEntries_CTE.strTransactionId
+			,intTransactionId			= ForGLEntries_CTE.intTransactionId
+			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType 
+			,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+			,intCommodityId				= ForGLEntries_CTE.intCommodityId
+	FROM	ForGLEntries_CTE LEFT JOIN dbo.tblGLAccount GLAccount 
+				ON GLAccount.intAccountId = ForGLEntries_CTE.intAPClearingAccountId
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				ForGLEntries_CTE.dblTax
+				,ForGLEntries_CTE.intCurrencyId
+				,@intFunctionalCurrencyId
+				,ForGLEntries_CTE.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				ForGLEntries_CTE.dblTax
+				,ForGLEntries_CTE.intCurrencyId
+				,@intFunctionalCurrencyId
+				,ForGLEntries_CTE.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) CreditForeign
+	WHERE
+		ForGLEntries_CTE.intTaxTransactionTypeId = 4
 	;
 END
 ;
@@ -921,6 +1098,95 @@ BEGIN
 		AND ReceiptCharge.ysnAccrue = 1 
 		AND ReceiptCharge.ysnPrice = 1 
 		AND ReceiptCharge.intEntityVendorId IS NOT NULL 
+
+	-- Receipt Taxes
+	INSERT INTO tblICAPClearing (
+		[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionType]
+		,[strReferenceNumber]
+		,[dtmDate]
+		,[intEntityVendorId]
+		,[intLocationId]
+		,[intInventoryReceiptItemId]
+		,[intInventoryReceiptItemTaxId]
+		,[intInventoryReceiptTaxId]
+		,[intInventoryReceiptChargeId]
+		,[intInventoryReceiptChargeTaxId]
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentChargeTaxId]
+		,[intAccountId]
+		,[intItemId]
+		,[intItemUOMId]
+		,[dblQuantity]
+		,[dblAmount]
+		,[strBatchId]
+	)
+	SELECT 
+		[intTransactionId] = Receipt.intInventoryReceiptId
+		,[strTransactionId] = Receipt.strReceiptNumber
+		,[intTransactionType] = 1
+		,[strReferenceNumber] = 
+			CASE 
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					CASE 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN Receipt.strBillOfLading 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN Receipt.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(Receipt.strBillOfLading)), ''), Receipt.strVendorRefNo)
+					END 
+				ELSE
+					CASE 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN Receipt.strBillOfLading 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN Receipt.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(Receipt.strBillOfLading)), ''), Receipt.strVendorRefNo)
+					END 						
+			END	
+		,[dtmDate] = Receipt.dtmReceiptDate
+		,[intEntityVendorId] = Receipt.intEntityVendorId
+		,[intLocationId] = Receipt.intLocationId
+		,[intInventoryReceiptItemId] = NULL 
+		,[intInventoryReceiptItemTaxId] = NULL
+		,[intInventoryReceiptTaxId] = ReceiptTaxes.intInventoryReceiptTaxId
+		,[intInventoryReceiptChargeId] = NULL 
+		,[intInventoryReceiptChargeTaxId] = NULL 
+		,[intInventoryShipmentChargeId] = NULL 
+		,[intInventoryShipmentChargeTaxId] = NULL 
+		,[intAccountId] = ga.intAccountId
+		,[intItemId] = NULL 
+		,[intItemUOMId] = NULL 
+		,[dblQuantity] = 
+			CASE 
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					-ReceiptTaxes.dblQty
+				ELSE
+					ReceiptTaxes.dblQty
+			END
+		,[dblAmount] = 
+			CASE 
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					-ReceiptTaxes.dblTax 
+				ELSE
+					ReceiptTaxes.dblTax 
+			END
+		,strBatchId = @strBatchId
+	FROM	
+		dbo.tblICInventoryReceipt Receipt 
+		INNER JOIN dbo.vyuICGetInventoryReceiptTax ReceiptTaxes
+			ON Receipt.intInventoryReceiptId = ReceiptTaxes.intInventoryReceiptId
+		INNER JOIN dbo.tblSMTaxCode TaxCode
+			ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
+		CROSS APPLY (
+			SELECT intAccountId = ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId), TaxCode.intAPClearingAccountId) 
+		) apClearing
+
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = apClearing.intAccountId
+	WHERE	
+		Receipt.intInventoryReceiptId = @intInventoryReceiptId
+		AND Receipt.intEntityVendorId IS NOT NULL  
+
 END
 
 -- Exit point
