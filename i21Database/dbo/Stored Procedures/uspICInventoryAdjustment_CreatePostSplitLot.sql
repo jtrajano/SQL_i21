@@ -100,7 +100,7 @@ END
 BEGIN 
 	SELECT	@intLotId = Lot.intLotId
 	FROM	dbo.tblICLot Lot 
-	WHERE	Lot.strLotNumber = @strLotNumber
+	WHERE	Lot.strLotNumber = @strLotNumber COLLATE Latin1_General_CI_AS
 			AND Lot.intItemId = @intItemId
 			AND ISNULL(Lot.intLocationId, 0) = ISNULL(@intLocationId, ISNULL(Lot.intLocationId, 0)) 
 			AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, ISNULL(Lot.intSubLocationId, 0))
@@ -159,7 +159,7 @@ IF NOT EXISTS (
 BEGIN 
 	-- Item UOM is invalid or missing.
 	DECLARE @strText_cirkkf90 NVARCHAR(200)
-	SET @strText_cirkkf90 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+	SET @strText_cirkkf90 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId) COLLATE Latin1_General_CI_AS
 	EXEC uspICRaiseError 80048, @strText_cirkkf90
 	GOTO _Exit
 END 
@@ -175,7 +175,7 @@ IF NOT EXISTS (
 BEGIN 
 	-- Item UOM is invalid or missing.
 	DECLARE @strText_ofpv8 NVARCHAR(200)
-	SET @strText_ofpv8 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+	SET @strText_ofpv8 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId) COLLATE Latin1_General_CI_AS
 	EXEC uspICRaiseError 80048, @strText_ofpv8
 	GOTO _Exit
 END
@@ -213,8 +213,8 @@ BEGIN
 	SELECT	intLocationId				= @intLocationId
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
 			,intAdjustmentType			= @ADJUSTMENT_TYPE_SplitLot
-			,strAdjustmentNo			= @strAdjustmentNo
-			,strDescription				= @strDescription
+			,strAdjustmentNo			= @strAdjustmentNo COLLATE Latin1_General_CI_AS
+			,strDescription				= @strDescription COLLATE Latin1_General_CI_AS
 			,intSort					= 1
 			,ysnPosted					= 0
 			,intEntityId				= @intEntityUserSecurityId
@@ -266,7 +266,7 @@ BEGIN
 			,intStorageLocationId		= Lot.intStorageLocationId
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
-			,strNewLotNumber			= @strNewLotNumber	
+			,strNewLotNumber			= @strNewLotNumber COLLATE Latin1_General_CI_AS
 			,intItemUOMId				= @intItemUOMId 
 			,intOwnershipType			= Lot.intOwnershipType
 			,intNewItemUOMId			= @intNewItemUOMId

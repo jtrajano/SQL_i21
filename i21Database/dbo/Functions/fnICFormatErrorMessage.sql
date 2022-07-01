@@ -36,7 +36,7 @@ BEGIN
 	END 
 	ELSE 
 	BEGIN 
-		SET @msgString = COALESCE(@msgString, CAST(@msgIdOrString AS NVARCHAR(MAX))) 
+		SET @msgString = COALESCE(@msgString, CAST(@msgIdOrString AS NVARCHAR(MAX))) COLLATE Latin1_General_CI_AS
 	END 
 
 	SET @pos = 0	
@@ -78,7 +78,7 @@ BEGIN
 						END 
 						,'<null>'
 					)					
-			END 
+			END COLLATE Latin1_General_CI_AS
 		WHERE @pos > 0
 				
 		SELECT @msgString = 
@@ -87,11 +87,11 @@ BEGIN
 					STUFF(@msgString, @pos, 2, @value) 
 				ELSE 
 					@msgString
-			END 
+			END COLLATE Latin1_General_CI_AS
 		
 		SET @pos = @pos + LEN(ISNULL(@value, 0)) 
 		SET @pId += 1 	
 	END 
 		
-	RETURN @msgString
+	RETURN @msgString COLLATE Latin1_General_CI_AS
 END 

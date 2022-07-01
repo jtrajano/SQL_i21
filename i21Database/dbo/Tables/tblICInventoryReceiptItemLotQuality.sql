@@ -3,7 +3,7 @@
 	[intInventoryReceiptItemLotQualityId] INT NOT NULL IDENTITY, 
 	[intInventoryReceiptItemLotId] INT NOT NULL,
 	[intComponentMapId] INT NULL,
-	[strValue] NVARCHAR(200) NULL,
+	[strValue] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((0)),
 	[dtmDateCreated] DATETIME NULL,
 	[dtmDateModified] DATETIME NULL,

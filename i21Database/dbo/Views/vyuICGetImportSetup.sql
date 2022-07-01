@@ -43,7 +43,7 @@ SELECT
 			,DEFAULT 
 			,DEFAULT 
 			,DEFAULT 
-		) 
+		) COLLATE Latin1_General_CI_AS
 FROM
 	tblICImportSetup s LEFT JOIN tblSCHSchedule schedule 
 		ON s.intScheduleId = schedule.intScheduleId

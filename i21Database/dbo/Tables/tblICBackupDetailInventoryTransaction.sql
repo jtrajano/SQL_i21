@@ -43,9 +43,9 @@
 	[intCreatedUserId] INT NULL, 
 	[intCreatedEntityId] INT NULL, 
 	[intCompanyId] INT NULL, 
-	[strSourceType] NVARCHAR(100) NULL,
-	[strSourceNumber] NVARCHAR(100) NULL,
-	[strBOLNumber] NVARCHAR(100) NULL,
+	[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intTicketId] INT NULL,
 	CONSTRAINT [PK_tblICBackupDetailInventoryTransaction] PRIMARY KEY ([intBackupDetailId]),
 	CONSTRAINT [FK_tblICBackupDetailInventoryTransaction_tblICBackup] FOREIGN KEY ([intBackupId]) REFERENCES [tblICBackup]([intBackupId])

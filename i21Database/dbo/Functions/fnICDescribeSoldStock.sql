@@ -25,14 +25,14 @@ BEGIN
 						, DEFAULT
 						, DEFAULT
 						, DEFAULT
-					)	
+					) COLLATE Latin1_General_CI_AS
 		RETURN @result;	
 	END 
 
 	ELSE 
 	BEGIN 
-		DECLARE @strQty AS NVARCHAR(50) = dbo.fnFormatNumber(@dblQty) 
-		DECLARE @strCost AS NVARCHAR(50) = dbo.fnFormatNumber(@dblCost) 
+		DECLARE @strQty AS NVARCHAR(50) = dbo.fnFormatNumber(@dblQty) COLLATE Latin1_General_CI_AS
+		DECLARE @strCost AS NVARCHAR(50) = dbo.fnFormatNumber(@dblCost) COLLATE Latin1_General_CI_AS
 		
 		-- 'Item: %s, Qty: %s, Cost: %s'
 		SET @result = dbo.fnFormatMessage(
@@ -47,7 +47,7 @@ BEGIN
 						, DEFAULT
 						, DEFAULT
 						, DEFAULT
-					)	
+					) COLLATE Latin1_General_CI_AS	
 	END 
-	RETURN @result;
+	RETURN @result COLLATE Latin1_General_CI_AS;
 END

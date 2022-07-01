@@ -6,7 +6,7 @@ SELECT
 	A.[intStorageRateDetailId]
 	,A.[intStorageRateId]
 	,A.[dblNoOfDays]
-	,A.[strRateType]
+	,A.[strRateType] COLLATE Latin1_General_CI_AS AS strRateType
 	,A.[dblRate]
 	,A.[intCommodityUnitMeasureId]
 	,A.[intConcurrencyId]

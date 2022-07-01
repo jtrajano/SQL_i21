@@ -92,7 +92,7 @@ SELECT
 	,Receipt.intSubBookId
 	/*Payment Info*/
 	, [intPayFromBankAccountId]		= Receipt.intBankAccountId
-	, [strFinancingSourcedFrom] 	= 'Inventory Receipt'
+	, [strFinancingSourcedFrom] 	= 'Inventory Receipt' COLLATE Latin1_General_CI_AS
 	, [strFinancingTransactionNumber] = Receipt.strReceiptNumber 
 	/*Trade Finance Info*/
 	, [strFinanceTradeNo]			= Receipt.strTradeFinanceNumber
