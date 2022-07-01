@@ -14,10 +14,12 @@ SELECT
 	,A.strChargeNo
 	,A.ysnPosted
 	,A.intConcurrencyId
+	,A.intCompanyLocationId
 	,strCommodity = C.strCommodityCode
 	,strInsurerName = B.strName
 	-- ,strStorageLocation = D.strSubLocationName
 	,strM2MBatch = E.strRecordName
+	,strCompanyLocation = F.strLocationName
 FROM tblICInsuranceCharge A
 LEFT JOIN tblEMEntity B
 	ON A.intInsurerId = B.intEntityId
@@ -50,5 +52,7 @@ LEFT JOIN tblICCommodity C
 -- ) D
 LEFT JOIN vyuRKGetM2MHeader E
 	ON A.intM2MBatchId = E.intM2MHeaderId
+LEFT JOIN tblSMCompanyLocation F
+	ON A.intCompanyLocationId = F.intCompanyLocationId
 
 
