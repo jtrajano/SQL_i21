@@ -18,6 +18,7 @@ a.intCompanyLocationId
 ,a.dblLatitude
 ,a.strInternalNotes
 ,a.strUseLocationAddress
+,a.strFEIN
 ,a.strSkipSalesmanDefault
 ,a.ysnSkipTermsDefault
 ,a.strOrderTypeDefault
