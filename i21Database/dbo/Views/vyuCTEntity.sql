@@ -29,18 +29,16 @@ AS
 			MY.strCurrency		AS	strMainCurrency,
 			ISNULL(V.strFLOId,U.strFLOId) AS strFLOId,
 			NULL AS intContainerTypeId,
-			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer, -- CT-5315
-			strAddressName = L.strLocationName, -- CT-5315
-			strMainAddress = LL.strLocationName, -- CT-5315
-			intEntitySelectedLocationId = L.intEntityLocationId, -- CT-5315
-			ysnDefaultLocation = isnull(L.ysnDefaultLocation,0)
+			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer,
+			--MON
+			1 as intEntitySelectedLocationId,
+			strAddressName = null,
+			strMainAddress = null,
+			ysnDefaultLocation = L.ysnDefaultLocation
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
-	CROSS APPLY	(SELECT TOP 1 * FROM tblCTCompanyPreference) CTCP -- CT-5315
 	LEFT JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
-											AND L.ysnDefaultLocation	=	(case when isnull(CTCP.ysnListAllCustomerVendorLocations,0) = 0 then 1 else L.ysnDefaultLocation end) -- CT-5315
-	LEFT JOIN	[tblEMEntityLocation]	LL	ON	E.intEntityId			=	LL.intEntityId  -- CT-5315
-											AND LL.ysnDefaultLocation	=	1 -- CT-5315
+											AND L.ysnDefaultLocation	=	1
 	LEFT JOIN	[tblEMEntityType]		Y	ON	Y.intEntityId			=	E.intEntityId
 	LEFT JOIN	[tblEMEntityToContact]	C	ON	C.intEntityId			=	E.intEntityId 
 											AND C.ysnDefaultContact		=	1
@@ -105,4 +103,4 @@ AS
 				) defaultCurrency
 		WHERE	CY.intCurrencyID = COALESCE(vendorCurrency.intCurrencyID, customerCurrency.intCurrencyID, defaultCurrency.intCurrencyID)
 	) CY 	
-	LEFT JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId
+	LEFT JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId		
