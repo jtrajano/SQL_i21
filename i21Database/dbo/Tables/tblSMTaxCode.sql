@@ -17,6 +17,7 @@
 	[intSalesTaxAccountId]				INT		NULL, 
 	[intTaxAdjustmentAccountId]			INT		NULL, 
     [intPurchaseTaxAccountId]			INT		NULL, 
+	[intAPClearingAccountId]			INT		NULL, 
 	[ysnExpenseAccountOverride]			BIT		NOT NULL	DEFAULT 0,
     [strTaxableByOtherTaxes]			NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS NULL,
 	[ysnTaxOnly]						BIT		NOT NULL	DEFAULT 0,

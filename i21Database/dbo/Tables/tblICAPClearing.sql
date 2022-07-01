@@ -13,6 +13,7 @@
 	--DETAIL
 	,[intInventoryReceiptItemId] INT NULL
 	,[intInventoryReceiptItemTaxId] INT NULL
+	,[intInventoryReceiptTaxId] INT NULL
 	,[intInventoryReceiptChargeId] INT NULL
 	,[intInventoryReceiptChargeTaxId] INT NULL
 	,[intInventoryShipmentChargeId] INT NULL

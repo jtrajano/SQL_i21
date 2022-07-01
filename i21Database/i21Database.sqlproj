@@ -875,6 +875,8 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadBasisCost.sql" />
     <Build Include="dbo\Views\vyuCTContractBasisCostView.sql" />
     <Build Include="dbo\Views\vyuLGDispatchScheduleViewSearch.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptTax.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
