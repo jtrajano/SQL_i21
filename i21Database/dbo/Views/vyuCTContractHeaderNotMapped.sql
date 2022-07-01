@@ -140,5 +140,4 @@ AS
 			LEFT	JOIN	tblEMEntity							BE	ON	BE.intEntityId						=		CH.intBrokerId										
 			LEFT	JOIN	tblRKBrokerageAccount				BA	ON	BA.intBrokerageAccountId			=		CH.intBrokerageAccountId							
 			LEFT	JOIN	tblEMEntityLocation					ESL	ON	ESL.intEntityLocationId				=		CH.intEntitySelectedLocationId  -- CT-5315
-
 			)t
