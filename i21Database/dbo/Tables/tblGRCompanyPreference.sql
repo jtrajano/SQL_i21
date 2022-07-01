@@ -29,7 +29,7 @@
     [ysnDoNotAllowUndistributePostedInvoice] BIT NOT NULL DEFAULT(0), 
     [intSettlementReportId] TINYINT NULL,
     [ysnRailXMLExport] BIT NOT NULL DEFAULT (0), 
-    [strRailXMLDocumentPath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''),
+    [strRailXMLDocumentPath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''),    
     [ysnEnableBOLOnScale] BIT NOT NULL DEFAULT(0), 
     [ysnEnableCanadianGrainReceipt] BIT NOT NULL DEFAULT(0),
     [strDefaultGrainReceiptReport] NVARCHAR(MAX) COLLATE  Latin1_General_CI_AS NULL,
