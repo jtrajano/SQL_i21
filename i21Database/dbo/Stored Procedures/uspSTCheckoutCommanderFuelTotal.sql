@@ -6,6 +6,8 @@
 	@intCountRows							INT				OUTPUT
 AS
 BEGIN
+	--SET NOCOUNT ON
+    SET XACT_ABORT ON
 	BEGIN TRY
 		
 		DECLARE @intStoreId INT
@@ -13,6 +15,7 @@ BEGIN
 		DECLARE @intPreviousCheckoutId INT
 		DECLARE @ysnConsStopAutoProcessIfValuesDontMatch BIT
         DECLARE @ysnConsMeterReadingsForDollars BIT
+		DECLARE @ysnConsignmentStore BIT
 
 		SELECT	@intStoreId = intStoreId,
 				@dtmCheckoutDate = dtmCheckoutDate
@@ -25,7 +28,8 @@ BEGIN
 				dtmCheckoutDate = DATEADD(day, -1, @dtmCheckoutDate)
 
 		SELECT	@ysnConsStopAutoProcessIfValuesDontMatch = ysnConsStopAutoProcessIfValuesDontMatch, 
-				@ysnConsMeterReadingsForDollars = ysnConsAddOutsideFuelDiscounts 
+				@ysnConsMeterReadingsForDollars = ysnConsAddOutsideFuelDiscounts,
+				@ysnConsignmentStore = ysnConsignmentStore
 		FROM	tblSTStore
 		WHERE	intStoreId = @intStoreId
 
@@ -157,9 +161,8 @@ BEGIN
 									a.dblFuelMoney > b.dblFuelMoney)
 			BEGIN
 				--true
-				INSERT INTO tblSTCheckoutErrorLogs (strErrorType, strErrorMessage , strRegisterTag, strRegisterTagValue, 
-													intCheckoutId, intConcurrencyId)
-				VALUES('Record', 'Fuel Dispencer Rollover Encountered and Compensated for', '', '', @intCheckoutId, 0)
+				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
+				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'W', 'Fuel Dispencer Rollover Encountered and Compensated for', 1)
 
 				--LOGIC OF ADDING 1M TO THE METERS THAT ROLLEDBACK
 				--FOR FUEL VOLUME
@@ -208,33 +211,47 @@ BEGIN
 						 , [intConcurrencyId])
 			SELECT		@intCheckoutId,
 						b.intProductNumber ,
-						b.sumDblFuelVolume - a.sumDblFuelVolume,
-						b.sumDblFuelMoney - a.sumDblFuelMoney,
+						ISNULL(b.sumDblFuelMoney, 0) - ISNULL(a.sumDblFuelMoney, 0),
+						ISNULL(b.sumDblFuelVolume, 0) - ISNULL(a.sumDblFuelVolume, 0),
 						0
-			FROM		previous_day_reading a
-			INNER JOIN	current_day_reading b
+			FROM		current_day_reading b
+			LEFT JOIN	previous_day_reading a
 			ON			a.intProductNumber = b.intProductNumber
+
+			UPDATE		tblSTCheckoutHeader
+			SET			dblEditableAggregateMeterReadingsForDollars = (	SELECT		ISNULL(SUM(dblDollarsSold),0)
+																		FROM		tblSTCheckoutFuelTotalSold 
+																		WHERE		intCheckoutId = @intCheckoutId)
+			WHERE intCheckoutId = @intCheckoutId
+
+			IF (@ysnConsignmentStore = 1)
+			BEGIN
+				INSERT INTO tblSTCheckoutDealerCommission (intCheckoutId, dblCommissionAmount, intConcurrencyId)
+				SELECT		@intCheckoutId,
+							SUM(dblGallonsSold) * (SELECT dblConsCommissionPerGallonOfDealer FROM tblSTStore WHERE intStoreId = @intStoreId),
+							1
+				FROM		tblSTCheckoutFuelTotalSold a
+			END
 		END
 		ELSE
 		BEGIN
 			--false
-			INSERT INTO tblSTCheckoutErrorLogs (strErrorType, strErrorMessage , strRegisterTag, strRegisterTagValue, 
-													intCheckoutId, intConcurrencyId)
-			VALUES('Record', 'Missing Dispenser Data', '', '', @intCheckoutId, 0)
+			INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
+			VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'W', 'Missing Dispenser Data', 1)
 
 			IF @ysnConsStopAutoProcessIfValuesDontMatch = 1
 			BEGIN
 				--INSERT STOP CONDITION
-				INSERT INTO tblSTCheckoutErrorLogs (strErrorType, strErrorMessage , strRegisterTag, strRegisterTagValue, intCheckoutId, intConcurrencyId)
-					VALUES('Stop Condition', 'Missing Dispenser Data', '', '', @intCheckoutId, 0)
+				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
+				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Missing Dispenser Data', 1)
 			END
 			ELSE
 			BEGIN
 				IF @ysnConsMeterReadingsForDollars = 1
 				BEGIN
 					--INSERT STOP CONDITION
-					INSERT INTO tblSTCheckoutErrorLogs (strErrorType, strErrorMessage , strRegisterTag, strRegisterTagValue, intCheckoutId, intConcurrencyId)
-					VALUES('Stop Condition', 'Missing Dispenser Data', '', '', @intCheckoutId, 0)
+					INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
+					VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Missing Dispenser Data', 1)
 				END
 			END
 		END
