@@ -10,6 +10,7 @@
 	[strChargeNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 0,
 	[ysnPosted] [bit] NOT NULL DEFAULT 0,
+	[intCompanyLocationId] [int] NULL,
     CONSTRAINT [PK_tblICInsuranceCharge] PRIMARY KEY CLUSTERED ([intInsuranceChargeId] ASC)
 ) 
 GO
