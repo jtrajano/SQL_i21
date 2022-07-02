@@ -825,6 +825,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateAccountOnPost.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
+    <Build Include="dbo\Tables\tblEMCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10977,6 +10978,7 @@
     <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
     <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
+    <None Include="Scripts\Post-Deployment\EM\2210_CompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
