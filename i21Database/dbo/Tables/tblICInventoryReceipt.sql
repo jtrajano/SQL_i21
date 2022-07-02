@@ -97,8 +97,8 @@ Type the overview for the table here.
 		[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strRemarks] NVARCHAR(2000) COLLATE Latin1_General_CI_AS NULL,
 		[dtmLastCargoInsuranceDate] [datetime] NULL,
-		[dblTotalItemTax] NUMERIC(38, 15) NOT NULL DEFAULT(0),
-		[dblTotalReceiptTax] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblTotalItemTax] NUMERIC(38, 15) NULL DEFAULT(0),
+		[dblTotalReceiptTax] NUMERIC(38, 15) NULL DEFAULT(0),
 
 		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICInventoryReceipt] PRIMARY KEY ([intInventoryReceiptId]), 
