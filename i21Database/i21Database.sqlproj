@@ -932,6 +932,8 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptTax.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptTax.sql" />
     <Build Include="dbo\Views\vyuLGDispatchScheduleViewSearch.sql" />
+    <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
+    <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
