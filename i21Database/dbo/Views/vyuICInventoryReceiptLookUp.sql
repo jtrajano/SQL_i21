@@ -24,7 +24,7 @@ SELECT
 	, strOverrideFacilityValuation = overrideFacilityValuation.strBankValuationRule
 	, ysnOverrideTaxPoint = overrideTaxPoint.ysnOverrideTaxPoint
 	, ysnOverrideTaxLocation = overrideTaxLocation.ysnOverrideTaxLocation
-
+	, strTaxLocation = ISNULL(CompanyLocationTaxLocation.strTaxLocation, EntityLocationTaxLocation.strTaxLocation) 
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation [Location] 
@@ -65,6 +65,24 @@ FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor
 	OUTER APPLY (
 		SELECT ysnOverrideTaxLocation = CAST(1 AS BIT) WHERE NULLIF(Receipt.intTaxLocationId, 0) IS NOT NULL 
 	) overrideTaxLocation 
+	OUTER APPLY (
+		SELECT 
+			strTaxLocation = v.strLocationName
+		FROM tblSMCompanyLocation v
+		WHERE 
+			v.intCompanyLocationId = Receipt.intTaxLocationId
+			AND v.ysnLocationActive = 1
+			AND Receipt.strTaxPoint = 'Destination'
+	) CompanyLocationTaxLocation
+	OUTER APPLY (
+		SELECT 
+			strTaxLocation = v.strLocationName 
+		FROM tblEMEntityLocation v
+		WHERE 
+			v.intEntityLocationId = Receipt.intTaxLocationId
+			AND v.ysnActive = 1 
+			AND Receipt.strTaxPoint = 'Origin'
+	) EntityLocationTaxLocation
 
 	--LEFT JOIN tblSMCompanyLocation Transferor 
 	--	ON Transferor.intCompanyLocationId = Receipt.intTransferorId
