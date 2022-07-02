@@ -549,6 +549,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\1810_Fix_Check_Payee_Name.sql
 :r .\EM\1910_Set_Contact_Location.sql
 :r .\EM\2210_AddDefaultEFTBank.sql
+:r .\EM\2210_CompanyPreference.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
