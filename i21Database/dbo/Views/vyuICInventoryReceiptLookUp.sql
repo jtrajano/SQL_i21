@@ -22,6 +22,9 @@ SELECT
 	, strLimit = limit.strBorrowingFacilityLimit COLLATE Latin1_General_CI_AS
 	, strSublimit = sublimit.strLimitDescription COLLATE Latin1_General_CI_AS
 	, strOverrideFacilityValuation = overrideFacilityValuation.strBankValuationRule
+	, ysnOverrideTaxPoint = overrideTaxPoint.ysnOverrideTaxPoint
+	, ysnOverrideTaxLocation = overrideTaxLocation.ysnOverrideTaxLocation
+
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation [Location] 
@@ -56,6 +59,12 @@ FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor
 		ON sublimit.intBorrowingFacilityLimitDetailId = Receipt.intSublimitTypeId
 	LEFT JOIN tblCMBankValuationRule overrideFacilityValuation
 		ON overrideFacilityValuation.intBankValuationRuleId = Receipt.intOverrideFacilityValuation
+	OUTER APPLY (
+		SELECT ysnOverrideTaxPoint = CAST(1 AS BIT) WHERE NULLIF(Receipt.strTaxPoint, '') IS NOT NULL 
+	) overrideTaxPoint 
+	OUTER APPLY (
+		SELECT ysnOverrideTaxLocation = CAST(1 AS BIT) WHERE NULLIF(Receipt.intTaxLocationId, 0) IS NOT NULL 
+	) overrideTaxLocation 
 
 	--LEFT JOIN tblSMCompanyLocation Transferor 
 	--	ON Transferor.intCompanyLocationId = Receipt.intTransferorId
