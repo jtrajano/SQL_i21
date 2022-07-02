@@ -928,6 +928,7 @@
     <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchyParam.sql" />
     <Build Include="dbo\Views\vyuAPGetVoucher.sql" />
+    <Build Include="dbo\Tables\tblEMCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11091,6 +11092,7 @@
     <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
+    <None Include="Scripts\Post-Deployment\EM\2210_CompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
