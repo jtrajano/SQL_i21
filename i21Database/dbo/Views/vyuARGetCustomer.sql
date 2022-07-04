@@ -175,8 +175,6 @@ SELECT intEntityId							= C.intEntityId
      , dtmBatchTimeTo						= C.dtmBatchTimeTo
      , intConcurrencyId						= E.intConcurrencyId
 	 , ysnExemptCreditCardFee				= C.ysnExemptCreditCardFee
-	 , intDefaultPayToBankAccountId		    = C.intDefaultPayToBankAccountId
-	 , strDefaultPayToBankAccountNo		    = C.strDefaultPayToBankAccountNo
      , ysnLoadToLoad		                = C.ysnLoadToLoad
 FROM tblARCustomer C
 INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
