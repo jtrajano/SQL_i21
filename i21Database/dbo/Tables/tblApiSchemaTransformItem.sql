@@ -67,6 +67,6 @@ CREATE TABLE [dbo].[tblApiSchemaTransformItem] (
 	strBarcodePrint NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The item barcode print.
 	strFuelInspectFee NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The item fuel inspect fee.
 	ysnSeparateStockForUOMs BIT NULL DEFAULT ((1)), -- Check if separate stocks for UOMs.
-	strSubcategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The item subcategory.
+	strSubcategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL -- The item subcategory.
 
 )
