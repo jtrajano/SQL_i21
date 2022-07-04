@@ -317,8 +317,8 @@ BEGIN
 	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND EL.ysnDefaultLocation=1 and ISNULL(F.intFreightTermId, 0) = 0) 
 	
 	UPDATE tblARImportLog 
-	SET  [intSuccessCount]	= intSuccessCount - @FailedCount
-		,[intFailedCount]	= intFailedCount + @FailedCount
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
 	WHERE [intImportLogId]  = @ImportLogId
 END
 
@@ -823,7 +823,7 @@ BEGIN
 			LEFT JOIN tblARCustomer C ON C.strCustomerNumber=D.strCustomerNumber
 			LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = D.strLocationName
 			LEFT JOIN tblTMSite S ON S.intSiteNumber=D.strSiteNumber
-			LEFT JOIN tblARSalesperson SP ON CONVERT(INT, D.strSalespersonNumber) = SP.intEntityId
+			LEFT JOIN tblARSalesperson SP ON D.strSalespersonNumber = SP.strSalespersonId
 			LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = D.strTaxGroup
 			LEFT JOIN (
 				SELECT TOP 1 		 TMS.strBillingBy
@@ -1106,7 +1106,7 @@ BEGIN
 				 LEFT JOIN tblARCustomer C ON C.strCustomerNumber=D.strCustomerNumber
 				 LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = D.strLocationName
 				 LEFT JOIN tblTMSite S ON S.intSiteNumber=D.strSiteNumber
-				 LEFT JOIN tblARSalesperson SP ON CONVERT(INT, D.strSalespersonNumber) = SP.intEntityId
+				 LEFT JOIN tblARSalesperson SP ON D.strSalespersonNumber = SP.strSalespersonId
 				 LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = D.strTaxGroup
 				 LEFT JOIN tblSMTerm T ON T.strTerm = D.strTerms
 				 WHERE @ImportFormat <> @IMPORTFORMAT_CARQUEST AND @IsTank = 0   AND H.intImportLogId=@ImportLogId AND ISNULL(ysnImported, 0) = 0 AND ISNULL(ysnSuccess, 0) = 1
