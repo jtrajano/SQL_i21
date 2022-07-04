@@ -436,7 +436,7 @@ DECLARE @tblPostError TABLE(
   
    INSERT INTO @PostGLEntries2  
    SELECT *  
-   from fnGLOverridePostAccounts(@PostGLEntries) A   
+   from fnGLOverridePostAccounts(@PostGLEntries,DEFAULT,DEFAULT,DEFAULT) A   
      
       
     IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
@@ -516,7 +516,7 @@ DECLARE @tblPostError TABLE(
   
    INSERT INTO @PostGLEntries2  
    SELECT *  
-   from fnGLOverridePostAccounts(@PostGLEntries) A   
+   from fnGLOverridePostAccounts(@PostGLEntries, DEFAULT,DEFAULT,DEFAULT) A   
   
    EXEC uspGLPostRecap @PostGLEntries2, @intEntityId  
   

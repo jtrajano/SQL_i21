@@ -1,5 +1,4 @@
 GO
-    
     EXEC dbo.uspGLUpdateAccountLocationId
 GO
     UPDATE A SET A.ysnRevalue = 1
@@ -8,5 +7,3 @@ GO
     WHERE strAccountType IN ('Asset','Liability', 'Equity')
     AND A.ysnRevalue IS NULL
 GO
-
-
