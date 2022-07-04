@@ -574,7 +574,6 @@ BEGIN TRY
 		,[dblDiscount]						= @ZeroDecimal
 		,[dblAmountDue]						= @ZeroDecimal
 		,[dblPayment]						= @ZeroDecimal
-		
 		,[intEntitySalespersonId]			= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[intEntityContactId]				= @EntityContactId
 		,[intFreightTermId]					= ISNULL(@FreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))

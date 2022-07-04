@@ -827,6 +827,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCreditLineCurrencyRate.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
     <Build Include="dbo\Tables\tblEMCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblARCustomerDefaultPayToAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
