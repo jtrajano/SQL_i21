@@ -27,6 +27,13 @@ SELECT intEntityId					= C.[intEntityId]
 	 , intSubCurrencyId				= NULLIF(HW.[intCurrencyId], 0)
 	 , dblSubCurrencyRate			= HW.[dblCurrencyRate]
 	 , intEntityWarehouseId			= EML.[intWarehouseId]
+	 , intTimeEntryPeriodDetailId	= BillingPeriod.intTimeEntryPeriodDetailId
+	 , strPeriodDisplay				= BillingPeriod.strPeriodDisplay
+	 , strApprovalStatus			= CASE WHEN ApprovalInfo.strStatus = 'Approved' OR ApprovalInfo.strStatus = 'No Need for Approval'
+												THEN 'Approved'
+											ELSE 'Not Yet Approved'
+									  END 
+	 , ysnLegacyWeek				= HW.ysnLegacyWeek
 FROM dbo.tblHDTicketHoursWorked HW WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
@@ -67,8 +74,35 @@ OUTER APPLY (
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
 	WHERE ysnLocationActive = 1
 ) CL
+OUTER APPLY(
+	SELECT TOP 1	 BillingPeriod.strPeriodDisplay
+					,BillingPeriod.intTimeEntryPeriodDetailId
+	FROM vyuHDTimeEntryBillingPeriod BillingPeriod
+	WHERE BillingPeriod.dtmBillingPeriodStart <= HW.dtmDate AND
+		  BillingPeriod.dtmBillingPeriodEnd >= HW.dtmDate
+
+) BillingPeriod
+OUTER APPLY(
+	SELECT TOP 1 TimeEntry.intTimeEntryId
+	FROM tblHDTimeEntry TimeEntry
+	WHERE TimeEntry.intTimeEntryPeriodDetailId = BillingPeriod.intTimeEntryPeriodDetailId AND
+		  TimeEntry.intEntityId = HW.intAgentEntityId
+	ORDER BY intTimeEntryId DESC
+) TimeEntry
+OUTER APPLY(
+	SELECT  strStatus = Approval.strStatus 
+	FROM tblSMApproval Approval
+			INNER JOIN tblSMScreen Screen
+	ON Approval.intScreenId = Screen.intScreenId
+			INNER JOIN tblSMTransaction SMTransaction
+	ON Approval.intTransactionId = SMTransaction.intTransactionId
+	WHERE Screen.strScreenName = 'Time Entry' AND
+		  SMTransaction.intRecordId = TimeEntry.intTimeEntryId AND
+		  Approval.ysnCurrent = 1
+) ApprovalInfo
 WHERE HW.[ysnBillable] = 1
   AND HW.[ysnBilled] = 0
   AND (HW.[intInvoiceId] IS NULL OR HW.[intInvoiceId] = 0)
   AND ISNULL(HW.dblRate, 0) <> 0
   AND ISNULL(HW.intHours, 0) <> 0
+GO
