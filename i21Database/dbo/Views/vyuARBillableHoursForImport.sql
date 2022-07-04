@@ -87,6 +87,7 @@ OUTER APPLY(
 	FROM tblHDTimeEntry TimeEntry
 	WHERE TimeEntry.intTimeEntryPeriodDetailId = BillingPeriod.intTimeEntryPeriodDetailId AND
 		  TimeEntry.intEntityId = HW.intAgentEntityId
+	ORDER BY intTimeEntryId DESC
 ) TimeEntry
 OUTER APPLY(
 	SELECT  strStatus = Approval.strStatus 
