@@ -243,7 +243,7 @@ BEGIN TRY
 				, ICC.strProductLine
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
-			JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
+			LEFT JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
 			 									AND PU.intUnitMeasureId =	IM.intUnitMeasureId
 			JOIN tblRKFutureMarket			MA	ON	MA.intFutureMarketId=	CD.intFutureMarketId
 			JOIN tblSMCurrency				CY	ON	CY.intCurrencyID	=	MA.intCurrencyId
