@@ -240,7 +240,7 @@ BEGIN
 	DECLARE @imgContactPhoto	varbinary(MAX)
 
 	--Locations
-	DECLARE	@strLocationName     NVARCHAR (50) 
+	DECLARE	@strLocationName     NVARCHAR (200) 
 	DECLARE	@strLocationContactName      NVARCHAR (255)
 	DECLARE	@strAddress          NVARCHAR (255)
 	DECLARE	@strCity             NVARCHAR (255)
