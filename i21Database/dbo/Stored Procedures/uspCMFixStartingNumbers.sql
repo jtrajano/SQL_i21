@@ -138,7 +138,7 @@ BEGIN
 		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))	
 		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
 					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
-		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
+		WHERE	t_type.strBankTransactionTypeName IN (@strTransactionType, 'Broker Commission', 'Broker Settlement') -- Broker Commission and Broker Settlement are Bank Transactions posted by Post Commissions
 		
 		IF (@intNumber IS NOT NULL)	
 		BEGIN 	
