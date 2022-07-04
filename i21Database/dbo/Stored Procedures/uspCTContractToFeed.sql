@@ -13,7 +13,7 @@ BEGIN TRY
 			SELECT CAST(@intContractDetailId as varchar)
 
 				SELECT @strRowState= 'Added'
-				DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId
+				--DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId
 				INSERT INTO tblCTContractFeed
 				(
 						intContractHeaderId,		intContractDetailId,		strCommodityCode,		strCommodityDesc,
