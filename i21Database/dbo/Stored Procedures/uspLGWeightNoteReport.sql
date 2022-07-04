@@ -59,7 +59,7 @@ BEGIN
 		,strAttn = EC.strName
 		,strSupplierReference = CH.strCustomerContract
 		,strItemDescription = I.strDescription
-		,dtmReceiptDate = IR.dtmReceiptDate
+		,dtmReceiptDate = ISNULL(PC.dtmReceiptDate, IR.dtmReceiptDate)
 		,LC.strContainerNumber
 		,LC.strMarks
 		,LC.strSealNumber
@@ -77,6 +77,7 @@ BEGIN
 		INNER JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 		INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblLGPendingClaim PC ON PC.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -101,7 +102,8 @@ BEGIN
 						LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = iri.intSubLocationId
 					WHERE ir.ysnPosted = 1 AND iri.intOrderId = CH.intContractHeaderId 
 						AND ir.strReceiptType <> 'Inventory Return'
-						AND iri.intContainerId = LC.intLoadContainerId) IR
+						AND iri.intContainerId = LC.intLoadContainerId
+					ORDER BY ir.dtmReceiptDate DESC) IR
 		OUTER APPLY (SELECT dblDamagedQty = SUM(ISNULL(dblQuantity, 0))
 							,dblDamagedNet = SUM(ISNULL(iril.dblGrossWeight, 0) - ISNULL(iril.dblTareWeight, 0)) 
 					 FROM tblICLot lot 
