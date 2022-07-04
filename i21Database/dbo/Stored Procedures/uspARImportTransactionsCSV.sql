@@ -821,7 +821,7 @@ BEGIN
 			LEFT JOIN tblARCustomer C ON C.strCustomerNumber=D.strCustomerNumber
 			LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = D.strLocationName
 			LEFT JOIN tblTMSite S ON S.intSiteNumber=D.strSiteNumber
-			LEFT JOIN tblARSalesperson SP ON CONVERT(INT, D.strSalespersonNumber) = SP.intEntityId
+			LEFT JOIN tblARSalesperson SP ON D.strSalespersonNumber = SP.strSalespersonId
 			LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = D.strTaxGroup
 			LEFT JOIN (
 				SELECT TOP 1 		 TMS.strBillingBy
@@ -1104,7 +1104,7 @@ BEGIN
 				 LEFT JOIN tblARCustomer C ON C.strCustomerNumber=D.strCustomerNumber
 				 LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = D.strLocationName
 				 LEFT JOIN tblTMSite S ON S.intSiteNumber=D.strSiteNumber
-				 LEFT JOIN tblARSalesperson SP ON CONVERT(INT, D.strSalespersonNumber) = SP.intEntityId
+				 LEFT JOIN tblARSalesperson SP ON D.strSalespersonNumber = SP.strSalespersonId
 				 LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = D.strTaxGroup
 				 LEFT JOIN tblSMTerm T ON T.strTerm = D.strTerms
 				 WHERE @ImportFormat <> @IMPORTFORMAT_CARQUEST AND @IsTank = 0   AND H.intImportLogId=@ImportLogId AND ISNULL(ysnImported, 0) = 0 AND ISNULL(ysnSuccess, 0) = 1
