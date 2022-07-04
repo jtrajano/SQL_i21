@@ -31,7 +31,7 @@ CREATE TABLE [dbo].[tblCFImportTransactionCalculatedTaxExempt](
 	[ysnTaxOnly] [bit] NULL,
 	[dblExemptionAmount] [numeric](18, 6) NULL,
 	[intLineItemId] [int] NULL,
-	[strGuid] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
+	-- [strGuid] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
 	[strGUID] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
 	[intUserId] [int] NULL
 ) 
