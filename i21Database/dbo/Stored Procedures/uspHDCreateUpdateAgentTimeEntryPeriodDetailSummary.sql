@@ -1,79 +1,67 @@
 ﻿CREATE PROCEDURE [dbo].[uspHDCreateUpdateAgentTimeEntryPeriodDetailSummary]
 (
-	  @EntityId INT
+	    @EntityId INT
+	   ,@TimeEntryPeriodDetailId int 
+	   ,@TimeEntryId INT 
 )
 AS
 BEGIN
 
-	IF @EntityId IS NULL
+	IF @EntityId IS NULL OR @TimeEntryPeriodDetailId IS NULL
 		RETURN
 
-		
-	IF @EntityId IS NULL
+	IF @TimeEntryPeriodDetailId = 0 AND @TimeEntryId = 0
 		RETURN
 
+	IF @TimeEntryPeriodDetailId = 0
+	BEGIN
+		SELECT TOP 1 @TimeEntryPeriodDetailId = intTimeEntryPeriodDetailId
+		FROM tblHDTimeEntry
+		WHERE intTimeEntryId = @TimeEntryId
 
-	DELETE FROM tblHDAgentTimeEntryPeriodDetailSummary
-	WHERE [intEntityId] = @EntityId
+	END
 
-	DECLARE @dblUtilizationWeekly INT = 0,
-			@dblUtilizationAnnually INT = 0,
-			@dblUtilizationMonthly INT = 0
+	DECLARE  @intTimeEntryPeriodDetailId		INT
+			,@dtmBillingPeriodStart				DATETIME
+			,@dtmBillingPeriodEnd				DATETIME
+			,@dblTotalHours						NUMERIC(18,6)
+		    ,@dblBillableHours					NUMERIC(18,6)
+			,@dblNonBudgetedHours				NUMERIC(18,6)
+			,@dblBudgetedHours					NUMERIC(18,6)
+			,@dblVacationHolidaySick			NUMERIC(18,6)
+			,@intUtilizationWeekly			    INT
+			,@intUtilizationAnnually		    INT
+			,@intUtilizationMonthly		        INT
+			,@dblActualUtilizationWeekly		NUMERIC(18,6)
+			,@dblActualUtilizationAnnually		NUMERIC(18,6)
+			,@dblActualUtilizationMonthly		NUMERIC(18,6)
+			,@dblAnnualHurdle					NUMERIC(18,6)
+			,@dblAnnualBudget					NUMERIC(18,6)
+			,@dblActualAnnualBudget				NUMERIC(18,6)
+			,@dblActualWeeklyBudget				NUMERIC(18,6)
+			,@intRequiredHours					INT
 
-	SELECT TOP 1 @dblUtilizationWeekly	 = intUtilizationTargetWeekly
-				,@dblUtilizationAnnually = intUtilizationTargetAnnual
-				,@dblUtilizationMonthly  = intUtilizationTargetMonthly
-	FROM tblHDCoworkerGoal
-	WHERE intEntityId = @EntityId
-
-
-	INSERT INTO tblHDAgentTimeEntryPeriodDetailSummary
-	(
-		     [intEntityId]							
-			,[intTimeEntryPeriodDetailId]			
-			,[dtmBillingPeriodStart]					
-			,[dtmBillingPeriodEnd]					
-			,[dblTotalHours]							
-			,[dblBillableHours]						
-			,[dblNonBillableHours]					
-			,[dblBudgetedHours]					
-			,[dblVacationHolidaySick]				
-			,[intUtilizationWeekly]					
-			,[intUtilizationAnnually]					
-			,[intUtilizationMonthly]					
-			,[dblActualUtilizationWeekly]			
-			,[dblActualUtilizationAnnually]			
-			,[dblActualUtilizationMonthly]	
-			,[dblAnnualHurdle]	
-			,[dblAnnualBudget]
-			,[dblActualAnnualBudget]
-			,[dblActualWeeklyBudget]
-			,[intRequiredHours]						
-			,[intConcurrencyId] 
-	)
-
-	
-SELECT      [intEntityId]							= @EntityId
-		   ,[intTimeEntryPeriodDetailId]			= TimeEntryPeriodDetail.[intTimeEntryPeriodDetailId]
-		   ,[dtmBillingPeriodStart]					= TimeEntryPeriodDetail.[dtmBillingPeriodStart]
-		   ,[dtmBillingPeriodEnd]					= TimeEntryPeriodDetail.[dtmBillingPeriodEnd]
-		   ,[dblTotalHours]							= ISNULL(TimeEntryPeriodDetailInfo.[dblTotalHours], 0) 
-		   ,[dblBillableHours]						= ISNULL(TimeEntryPeriodDetailInfo.[totalBillableHours], 0)  
-		   ,[dblNonBudgetedHours]					= ISNULL(TimeEntryPeriodDetailInfo.[totalNonBillableHours], 0)  
-		   ,[dblBudgetedHours]						= ISNULL(CoworkerGoals.dblBudget, 0)  
-		   ,[dblVacationHolidaySick]				= ISNULL(TimeEntryPeriodDetailInfo.[vlHolidaySickHours], 0)  
-		   ,[intUtilizationWeekly]					= ISNULL(CoworkerGoals.intUtilizationTargetWeekly, 0) 
-		   ,[intUtilizationAnnually]				= ISNULL(CoworkerGoals.intUtilizationTargetAnnual, 0) 
-		   ,[intUtilizationMonthly]					= ISNULL(CoworkerGoals.intUtilizationTargetMonthly, 0) 
-		   ,[dblActualUtilizationWeekly]			= ISNULL(TimeEntryPeriodDetailInfo.[dblActualUtilizationWeekly], 0)  
-		   ,[dblActualUtilizationAnnually]			= ISNULL(TimeEntryPeriodDetailInfo.[dblActualUtilizationAnnually], 0) 
-		   ,[dblActualUtilizationMonthly]			= ISNULL(TimeEntryPeriodDetailInfo.[dblActualUtilizationMonthly], 0) 
-		   ,[dblAnnualHurdle]						= ISNULL(CoworkerGoals.[dblAnnualHurdle], 0) 
-		   ,[dblAnnualBudget]						= ISNULL(CoworkerGoals.[dblAnnualBudget], 0) 
-		   ,[dblActualAnnualBudget]					= ISNULL(TimeEntryPeriodDetailInfo.[dblActualAnnualBudget], 0) 
-		   ,[dblActualWeeklyBudget]					= ISNULL(TimeEntryPeriodDetailInfo.[dblActualWeeklyBudget], 0) 
-		   ,[intRequiredHours]						= ISNULL(TimeEntryPeriodDetailInfo.[intRequiredHours], 0) 
-		   ,[intConcurrencyId]						= 1
+	SELECT  --[intEntityId]							= @EntityId
+		    @intTimeEntryPeriodDetailId				= TimeEntryPeriodDetail.[intTimeEntryPeriodDetailId]
+		   ,@dtmBillingPeriodStart					= TimeEntryPeriodDetail.[dtmBillingPeriodStart]
+		   ,@dtmBillingPeriodEnd					= TimeEntryPeriodDetail.[dtmBillingPeriodEnd]
+		   ,@dblTotalHours							= ISNULL(TimeEntryPeriodDetailInfo.[dblTotalHours], 0) 
+		   ,@dblBillableHours						= ISNULL(TimeEntryPeriodDetailInfo.[totalBillableHours], 0)  
+		   ,@dblNonBudgetedHours					= ISNULL(TimeEntryPeriodDetailInfo.[totalNonBillableHours], 0)  
+		   ,@dblBudgetedHours						= ISNULL(CoworkerGoals.dblBudget, 0)  
+		   ,@dblVacationHolidaySick					= ISNULL(TimeEntryPeriodDetailInfo.[vlHolidaySickHours], 0)  
+		   ,@intUtilizationWeekly					= ISNULL(CoworkerGoals.intUtilizationTargetWeekly, 0) 
+		   ,@intUtilizationAnnually					= ISNULL(CoworkerGoals.intUtilizationTargetAnnual, 0) 
+		   ,@intUtilizationMonthly					= ISNULL(CoworkerGoals.intUtilizationTargetMonthly, 0) 
+		   ,@dblActualUtilizationWeekly				= ISNULL(TimeEntryPeriodDetailInfo.[dblActualUtilizationWeekly], 0)  
+		   ,@dblActualUtilizationAnnually			= ISNULL(TimeEntryPeriodDetailInfo.[dblActualUtilizationAnnually], 0) 
+		   ,@dblActualUtilizationMonthly			= ISNULL(TimeEntryPeriodDetailInfo.[dblActualUtilizationMonthly], 0) 
+		   ,@dblAnnualHurdle						= ISNULL(CoworkerGoals.[dblAnnualHurdle], 0) 
+		   ,@dblAnnualBudget						= ISNULL(CoworkerGoals.[dblAnnualBudget], 0) 
+		   ,@dblActualAnnualBudget					= ISNULL(TimeEntryPeriodDetailInfo.[dblActualAnnualBudget], 0) 
+		   ,@dblActualWeeklyBudget					= ISNULL(TimeEntryPeriodDetailInfo.[dblActualWeeklyBudget], 0) 
+		   ,@intRequiredHours						= ISNULL(TimeEntryPeriodDetailInfo.[intRequiredHours], 0) 
+		   --,[intConcurrencyId]						= 1
 		FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail
 				INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod
 		ON TimeEntryPeriod.intTimeEntryPeriodId = TimeEntryPeriodDetail.intTimeEntryPeriodId
@@ -245,8 +233,110 @@ SELECT      [intEntityId]							= @EntityId
 					WHERE b.strFiscalYear = TimeEntryPeriod.strFiscalYear AND
 						  DATEPART(month, a.dtmBillingPeriodStart) = DATEPART(month, TimeEntryPeriodDetail.dtmBillingPeriodStart)
 				) TotalMonthlyRequiredHours
+		WHERE TimeEntryPeriodDetail.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
 		) TimeEntryPeriodDetailInfo
 		ON TimeEntryPeriodDetailInfo.intTimeEntryPeriodDetailId = TimeEntryPeriodDetail.intTimeEntryPeriodDetailId
+		WHERE TimeEntryPeriodDetail.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+
+	IF EXISTS (  SELECT TOP 1 ''
+				 FROM tblHDAgentTimeEntryPeriodDetailSummary
+				 WHERE [intEntityId] = @EntityId AND
+					  [intTimeEntryPeriodDetailId] = @TimeEntryPeriodDetailId
+			  )
+	BEGIN 
+			UPDATE tblHDAgentTimeEntryPeriodDetailSummary
+			SET [dtmBillingPeriodStart]					= @dtmBillingPeriodStart					
+		       ,[dtmBillingPeriodEnd]					= @dtmBillingPeriodEnd					
+		       ,[dblTotalHours]							= @dblTotalHours							
+		       ,[dblBillableHours]						= @dblBillableHours						
+		       ,[dblNonBillableHours]					= @dblNonBudgetedHours					
+		       ,[dblBudgetedHours]						= @dblBudgetedHours						
+		       ,[dblVacationHolidaySick]				= @dblVacationHolidaySick					
+		       ,[intUtilizationWeekly]					= @intUtilizationWeekly					
+		       ,[intUtilizationAnnually]				= @intUtilizationAnnually					
+		       ,[intUtilizationMonthly]					= @intUtilizationMonthly					
+		       ,[dblActualUtilizationWeekly]			= @dblActualUtilizationWeekly				
+		       ,[dblActualUtilizationAnnually]			= @dblActualUtilizationAnnually			
+		       ,[dblActualUtilizationMonthly]			= @dblActualUtilizationMonthly			
+		       ,[dblAnnualHurdle]						= @dblAnnualHurdle						
+		       ,[dblAnnualBudget]						= @dblAnnualBudget						
+		       ,[dblActualAnnualBudget]					= @dblActualAnnualBudget					
+		       ,[dblActualWeeklyBudget]					= @dblActualWeeklyBudget					
+		       ,[intRequiredHours]						= @intRequiredHours		
+			WHERE [intEntityId] = @EntityId AND
+				  [intTimeEntryPeriodDetailId] = @TimeEntryPeriodDetailId 
+
+	END
+	ELSE 
+	BEGIN
+	
+		INSERT INTO tblHDAgentTimeEntryPeriodDetailSummary
+		(
+				 [intEntityId]							
+				,[intTimeEntryPeriodDetailId]			
+				,[dtmBillingPeriodStart]					
+				,[dtmBillingPeriodEnd]					
+				,[dblTotalHours]							
+				,[dblBillableHours]						
+				,[dblNonBillableHours]					
+				,[dblBudgetedHours]					
+				,[dblVacationHolidaySick]				
+				,[intUtilizationWeekly]					
+				,[intUtilizationAnnually]					
+				,[intUtilizationMonthly]					
+				,[dblActualUtilizationWeekly]			
+				,[dblActualUtilizationAnnually]			
+				,[dblActualUtilizationMonthly]	
+				,[dblAnnualHurdle]	
+				,[dblAnnualBudget]
+				,[dblActualAnnualBudget]
+				,[dblActualWeeklyBudget]
+				,[intRequiredHours]						
+				,[intConcurrencyId] 
+		)
+
+		SELECT  [intEntityId]							= @EntityId
+		       ,[intTimeEntryPeriodDetailId]			= @TimeEntryPeriodDetailId				
+		       ,[dtmBillingPeriodStart]					= @dtmBillingPeriodStart					
+		       ,[dtmBillingPeriodEnd]					= @dtmBillingPeriodEnd					
+		       ,[dblTotalHours]							= @dblTotalHours							
+		       ,[dblBillableHours]						= @dblBillableHours						
+		       ,[dblNonBillableHours]					= @dblNonBudgetedHours					
+		       ,[dblBudgetedHours]						= @dblBudgetedHours						
+		       ,[dblVacationHolidaySick]				= @dblVacationHolidaySick					
+		       ,[intUtilizationWeekly]					= @intUtilizationWeekly					
+		       ,[intUtilizationAnnually]				= @intUtilizationAnnually					
+		       ,[intUtilizationMonthly]					= @intUtilizationMonthly					
+		       ,[dblActualUtilizationWeekly]			= @dblActualUtilizationWeekly				
+		       ,[dblActualUtilizationAnnually]			= @dblActualUtilizationAnnually			
+		       ,[dblActualUtilizationMonthly]			= @dblActualUtilizationMonthly			
+		       ,[dblAnnualHurdle]						= @dblAnnualHurdle						
+		       ,[dblAnnualBudget]						= @dblAnnualBudget						
+		       ,[dblActualAnnualBudget]					= @dblActualAnnualBudget					
+		       ,[dblActualWeeklyBudget]					= @dblActualWeeklyBudget					
+		       ,[intRequiredHours]						= @intRequiredHours						
+		       ,[intConcurrencyId]						= 1
+
+	END
+
+	--DELETE FROM tblHDAgentTimeEntryPeriodDetailSummary
+	--WHERE [intEntityId] = @EntityId AND
+	--	  [intTimeEntryPeriodDetailId] = @TimeEntryPeriodDetailId
+
+	--DECLARE @dblUtilizationWeekly INT = 0,
+	--		@dblUtilizationAnnually INT = 0,
+	--		@dblUtilizationMonthly INT = 0
+
+	--SELECT TOP 1 @dblUtilizationWeekly	 = intUtilizationTargetWeekly
+	--			,@dblUtilizationAnnually = intUtilizationTargetAnnual
+	--			,@dblUtilizationMonthly  = intUtilizationTargetMonthly
+	--FROM tblHDCoworkerGoal
+	--WHERE intEntityId = @EntityId
+
+
+	
+
+
 END
 
 GO
