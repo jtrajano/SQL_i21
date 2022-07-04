@@ -30,7 +30,6 @@
 	[dblOriginalTax] numeric(18, 10) NULL,
 	[dblExemptionAmount] numeric(18, 6) NULL,
 	[ysnTaxOnly]bit NULL,
-	[strGuid] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
 	[intLineItemId] INT NULL,
 	[strGUID] nvarchar(max) COLLATE Latin1_General_CI_AS  NULL,
 	[intUserId] INT NULL

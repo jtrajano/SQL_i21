@@ -165,7 +165,7 @@ CREATE TABLE [dbo].[tblCFImportTransactionStagingTable](
 	[intItemContractSeq] int NULL,
 	[dblAvailableQuantity] numeric(18, 10) NULL,
 	[ysnPostedOrigin] bit NULL,
-	[strGuid] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	-- [strGuid] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[strRunDate] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[intPriceProfileId] int NULL,
 	[intPriceProfileDetailId] int NULL,

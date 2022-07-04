@@ -30,7 +30,7 @@ CREATE TABLE [dbo].[tblCFImportTransactionOriginalTax](
 	[ysnTaxOnly] bit NULL,
 	[dblExemptionAmount] numeric(18, 6) NULL,
 	[strTaxCode] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
-	[strGuid] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	-- [strGuid] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[intLineItemId] int NULL,
 	[strGUID] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[intUserId] int NULL
