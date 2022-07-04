@@ -1,6 +1,6 @@
 CREATE VIEW vyuQMAllocation    
 AS    
-SELECT     
+SELECT  
 A.strAllocationNumber,    
 A.intAllocationDetailId,    
 A.dtmPStartDate dtmStartDateP,    
@@ -19,7 +19,7 @@ U.*,
 V.*    
 FROM  vyuLGAllocatedContracts A     
 OUTER APPLY (    
-    SELECT     
+    SELECT  
     S1.intSampleId intSampleIdP,    
     V1.strEntityName strEntityNameP,    
     S1.dblSampleQty dblSampleQtyP,    
@@ -51,7 +51,7 @@ OUTER APPLY (
 AND V1.intContractStatusId NOT IN( 3, 5, 6 )    
 ) U    
 OUTER APPLY(    
-    SELECT     
+    SELECT 
     S2.intSampleId intSampleIdS,    
     S2.dblSampleQty dblSampleQtyS,    
     S2.strSampleUOM strSampleUOMS,    
