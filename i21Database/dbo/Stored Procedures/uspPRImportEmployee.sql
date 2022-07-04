@@ -226,6 +226,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 
 		SELECT CASE WHEN @strGender <> '' AND @strGender IN('Male','Female') THEN @strType ELSE '' END
 
+		--Setting back import value
+		SET @ysnImport = 0
+
 		--Combo validation
 		IF(@CountryCount IS NOT NULL AND @CountryCount != 0)
 			BEGIN
