@@ -17,6 +17,7 @@ CREATE TABLE [dbo].[tblMBILPickupDetail]
 	[dtmActualPickupFrom] [datetime] NULL,
 	[dtmActualPickupTo] [datetime] NULL,
 	[strPONumber] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strLoadRefNo] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strBOL] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strNote] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] [int] NULL,
