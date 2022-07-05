@@ -23,6 +23,8 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strTrailerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[strERPTransferNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[dtmCreated] DATETIME NULL DEFAULT (GETDATE()),
 	[intCompanyId] INT NULL, 
 	[dtmDateCreated] DATETIME NULL,
@@ -30,8 +32,6 @@
 	[intCreatedByUserId] INT NULL,
 	[intModifiedByUserId] INT NULL,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
-    --MON
-    strTrailerId NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblICInventoryTransfer] PRIMARY KEY ([intInventoryTransferId]), 
     CONSTRAINT [AK_tblICInventoryTransfer_strTransferNo] UNIQUE ([strTransferNo]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblEMEntity_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES tblEMEntity([intEntityId]), 
