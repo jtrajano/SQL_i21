@@ -46,7 +46,6 @@
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 	[intRowNumber] INT NULL,
 	ysnImported INT NULL,
-
 	CONSTRAINT [PK_tblMFRecipeItem_intRecipeItemId] PRIMARY KEY ([intRecipeItemId]), 
     CONSTRAINT [FK_tblMFRecipeItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblMFRecipeItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
