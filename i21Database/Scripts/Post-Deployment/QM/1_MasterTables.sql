@@ -1173,6 +1173,15 @@ BEGIN
 	VALUES('Offer Sample Label','OfferSampleLabel',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strReportName = 'SampleLabelMP')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	SELECT 'Sample Label - MP','SampleLabelMP',intControlPointId,1
+	FROM tblQMControlPoint
+	WHERE intControlPointId NOT IN (3, 11, 12, 13, 14)
+	ORDER BY intControlPointId
+END
+GO
 
 UPDATE tblQMSampleType
 SET ysnAdjustInventoryQtyBySampleQty = 0

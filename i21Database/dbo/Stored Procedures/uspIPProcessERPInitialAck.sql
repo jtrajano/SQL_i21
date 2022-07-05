@@ -380,10 +380,9 @@ BEGIN TRY
 					WHERE intInventoryTransferId = @intInventoryTransferId
 						AND ISNULL(intStatusId, 1) = 1
 
-					--Change to correct field and Enable in 21.2 since they added new field in 21.2
 					UPDATE tblICInventoryTransfer
 					SET intConcurrencyId = intConcurrencyId + 1
-						--,strERPTransferNo = @ERPTransferOrderNo
+						,strERPTransferNo = @ERPTransferOrderNo
 					WHERE intInventoryTransferId = @intInventoryTransferId
 
 					INSERT INTO @tblMessage (
