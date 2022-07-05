@@ -15,8 +15,8 @@
 	,intDiscountId int not null
 
 
-	,strLeadCarNo nvarchar(100) null
-	,strBOLNo nvarchar(100) null
+	,strLeadCarNo nvarchar(100) COLLATE Latin1_General_CI_AS null  
+	,strBOLNo nvarchar(100) COLLATE Latin1_General_CI_AS null
 	,dtmBOLDate datetime null
 	,intCityLoadingPortId int null
 	,intCityDestinationPortId int null

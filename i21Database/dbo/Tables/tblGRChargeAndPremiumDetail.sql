@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[tblGRChargeAndPremiumDetail]
 	[intOtherChargeItemId] INT NULL,
 	[intCtOtherChargeItemId] INT NULL,
 	[dblRate] DECIMAL(18,6) NULL DEFAULT ((0)),
-	[strRateType] NVARCHAR(30) NULL,
+	[strRateType] NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmEffectiveDate] DATETIME NULL,
 	[dtmTerminationDate] DATETIME NULL,	
 	[dtmDateCreated] DATETIME NULL DEFAULT(GETDATE()),

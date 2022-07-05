@@ -81,7 +81,7 @@
     [strFTPKeyFilePath] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strFTPPassphrase] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strFTPHostKeyFingerPrint] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strFTPExportValidURL] NVARCHAR (MAX) NULL,
+	[strFTPExportValidURL] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strFTPDirectory] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 
     [intStorageLocationId] INT NULL,
