@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMPaymentMethod] (
     [intPaymentMethodID]            INT IDENTITY (1, 1) NOT NULL,
     [strPaymentMethod]              NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strDescription]                NVARCHAR (1000) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strDescription]                NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,
 	[strPaymentMethodCode]          NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [strPrefix]                     NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '',
     [intNumber]                     INT NOT NULL DEFAULT 1,
