@@ -37,7 +37,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 				12
 				,13
 				)
-			THEN CD.dblQuantity
+			THEN CD.dblQuantity- IsNULL(CD.dblScheduleQty, 0) 
 		ELSE LC.dblQuantity
 		END dblQty
 	,CASE 
