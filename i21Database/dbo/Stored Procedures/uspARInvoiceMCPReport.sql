@@ -120,7 +120,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery' THEN ISNULL(INV.strComments, '') ELSE ISNULL(INV.strFooterComments, '') END
 	 , strItemComments          = CAST('' AS NVARCHAR(500))
 	 , strOrigin				= CAST(REPLACE(INV.strComments, 'Origin:', '') AS NVARCHAR(MAX))
-	 , blbLogo					= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
+	 , blbLogo					= ISNULL(SMLP.imgLogo, CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END)
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
@@ -138,6 +138,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , dtmCreated				= @dtmDateNow
 	 , strType					= INV.strType
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
+	 , strLogoType				= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 INTO #INVOICES
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
@@ -173,6 +174,7 @@ LEFT JOIN tblEMEntity EMST ON SHIPTO.intEntityId = EMST.intEntityId
 LEFT JOIN tblSMShipVia SHIPVIA WITH (NOLOCK) ON INV.intShipViaId = SHIPVIA.intEntityId
 LEFT JOIN tblSMPaymentMethod PAYMENTMETHOD ON INV.intPaymentMethodId = PAYMENTMETHOD.intPaymentMethodID
 LEFT JOIN tblSOSalesOrder SO ON INV.intSalesOrderId = SO.intSalesOrderId
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = INV.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
 
 --CUSTOMERS
 SELECT intEntityCustomerId	= C.intEntityId
@@ -335,6 +337,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , strPaymentInfo
 	 , dtmCreated
 	 , ysnPrintInvoicePaymentDetail
+	 , strLogoType
 )
 SELECT strCompanyName
 	 , strCompanyAddress
@@ -397,6 +400,7 @@ SELECT strCompanyName
 	 , strPaymentInfo
 	 , dtmCreated
 	 , ysnPrintInvoicePaymentDetail
+	 , strLogoType
 FROM #INVOICES
 
 UPDATE STAGING
