@@ -2,7 +2,7 @@
 (
 	intRailSheetTicketLogId int not null identity(1,1) primary key
 	,intRailSheetTicketId int not null
-	,strLog nvarchar(100)
+	,strLog nvarchar(100) COLLATE Latin1_General_CI_AS 
 	,ysnError bit not null default(0)
 	,dtmDate datetime default(getdate())
 	,intConcurrencyId int default(1)
