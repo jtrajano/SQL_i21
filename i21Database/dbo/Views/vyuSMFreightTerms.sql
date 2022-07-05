@@ -20,7 +20,8 @@
 
 		IB.strInsuranceBy,
 		IT.strInvoiceType,
-		PO.strPosition
+		PO.strPosition,
+		FT.ysnInstore
 	   FROM		tblSMFreightTerms	 FT
   LEFT JOIN		tblCTInsuranceBy	 IB	ON  IB.intInsuranceById	    =   FT.intInsuranceById
   LEFT JOIN		tblCTInvoiceType	 IT ON  IT.intInvoiceTypeId	    =   FT.intInvoiceTypeId
