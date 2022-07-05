@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspIPGenerateERPVoucher] (
+﻿CREATE PROCEDURE dbo.uspIPGenerateERPVoucher (
 	@strCompanyLocation NVARCHAR(6) = NULL
 	,@ysnUpdateFeedStatus BIT = 1
 	)
