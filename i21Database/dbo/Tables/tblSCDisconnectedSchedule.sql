@@ -3,7 +3,7 @@ CREATE TABLE [dbo].[tblSCDisconnectedSchedule]
 	[intScheduleId]				INT IDENTITY (1, 1) NOT NULL,
 	[strFrequency]				[nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[strType]					[nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
-	[strDescription]			NVARCHAR(MAX) NULL,
+	[strDescription]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [intDay]					[int] NULL,
 	[intDayOfMonth]				[int] NULL,
 	[dtmRunTime]				DATETIME NULL,
