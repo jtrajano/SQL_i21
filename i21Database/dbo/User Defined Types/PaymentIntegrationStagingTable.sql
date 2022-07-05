@@ -42,7 +42,7 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[ysnRecap]								BIT												NULL		-- If [ysnRecap] = 1 > Recap Payments
 	,[ysnUnPostAndUpdate]					BIT												NULL		-- 
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity			
-
+	,[intEntityCardInfoId]					INT												NULL		-- Credit Card Info Id (tblEMEntityCardInformation)
 	
 
 	--Detail																																															
