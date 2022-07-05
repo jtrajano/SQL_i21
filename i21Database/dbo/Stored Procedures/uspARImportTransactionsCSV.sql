@@ -322,27 +322,29 @@ BEGIN
 	WHERE [intImportLogId]  = @ImportLogId
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
-INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
-LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
-LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
-WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0  AND ysnDefaultLocation = 1 AND ISNULL(EL.intShipViaId,0) = 0)
+IF EXISTS (
+	SELECT TOP 1 1 FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId AND IL.intImportLogId = @ImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber = ILD.strCustomerNumber
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityId AND ysnDefaultLocation = 1
+	WHERE @IsTank = 0 AND ISNULL(ILD.strShipVia, '') <> '' AND ISNULL(EL.intShipViaId,0) = 0
+)
 BEGIN 
 	UPDATE ILD
 	SET [ysnImported]		= 0
 	   ,[ysnSuccess]        = 0
 	   ,[strEventResult]	= 'The Ship Via provided does not exists. '
 	FROM tblARImportLogDetail ILD
-	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
-	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
-	LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
-	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0  AND ysnDefaultLocation = 1 AND ISNULL(EL.intShipViaId,0) = 0
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId AND IL.intImportLogId = @ImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber = ILD.strCustomerNumber
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityId AND ysnDefaultLocation = 1
+	WHERE @IsTank = 0 AND ISNULL(ILD.strShipVia, '') <> '' AND ISNULL(EL.intShipViaId,0) = 0
 
 	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
-	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
-	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
-	LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
-	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0  AND ysnDefaultLocation = 1 AND ISNULL(EL.intShipViaId,0) = 0) 
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId AND IL.intImportLogId = @ImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber = ILD.strCustomerNumber
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityId AND ysnDefaultLocation = 1
+	WHERE @IsTank = 0 AND ISNULL(ILD.strShipVia, '') <> '' AND ISNULL(EL.intShipViaId,0) = 0) 
 	
 	UPDATE tblARImportLog 
 	SET [intSuccessCount]	= intSuccessCount - @FailedCount
