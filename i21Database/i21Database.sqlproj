@@ -829,6 +829,7 @@
     <Build Include="dbo\Tables\tblEMCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblARCompanyDefaultPayToBankAccount.sql" />
     <Build Include="dbo\Tables\tblARCustomerDefaultPayToBankAccount.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultPayToBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
