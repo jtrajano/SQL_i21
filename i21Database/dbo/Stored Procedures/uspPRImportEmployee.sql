@@ -1366,7 +1366,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					DELETE FROM tblEMEntityLineOfBusiness WHERE intEntityId = @EntityId
 
 					--UPDATE LINE OF BUSINESS
-					IF @LineOfBusiness1 IS NOT NULL
+					IF @LineOfBusiness1 IS NOT NULL  AND @LineOfBusiness1 != ''
 						BEGIN
 							IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness1)
 							BEGIN
@@ -1378,7 +1378,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 							END
 						END
 
-					IF @LineOfBusiness2 IS NOT NULL
+					IF @LineOfBusiness2 IS NOT NULL  AND @LineOfBusiness2 != ''
 						BEGIN
 							IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness2)
 							BEGIN
@@ -1390,7 +1390,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 							END
 						END
 
-					IF @LineOfBusiness3 IS NOT NULL
+					IF @LineOfBusiness3 IS NOT NULL  AND @LineOfBusiness3 != ''
 						BEGIN
 							IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness3)
 							BEGIN
@@ -1402,7 +1402,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 							END
 						END
 
-					IF @LineOfBusiness4 IS NOT NULL
+					IF @LineOfBusiness4 IS NOT NULL  AND @LineOfBusiness4 != ''
 						BEGIN
 							IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness4)
 							BEGIN
@@ -1414,7 +1414,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 							END
 						END
 
-					IF @LineOfBusiness5 IS NOT NULL
+					IF @LineOfBusiness5 IS NOT NULL  AND @LineOfBusiness5 != ''
 						BEGIN
 							IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness5)
 							BEGIN
