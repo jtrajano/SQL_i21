@@ -21,6 +21,7 @@
 	[dblBaseAmountDue]				NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblBaseAmountDue] DEFAULT ((0)) NULL,
     [dblPayment]					NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblPayment] DEFAULT ((0)) NULL,	
 	[dblBasePayment]				NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblBasePayment] DEFAULT ((0)) NULL,	
+	[dblCreditCardFee]				NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblCreditCardFee] DEFAULT ((0)) NULL,
 	[strInvoiceReportNumber]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyExchangeRateTypeId]	INT				NULL,
 	[intCurrencyExchangeRateId]		INT				NULL,
