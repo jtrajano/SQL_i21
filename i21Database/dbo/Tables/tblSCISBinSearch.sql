@@ -4,13 +4,13 @@
 	,intStorageLocationId int not null
 	,intCommodityId int not null
 	-- ,intItemId int null
-	,strBinType nvarchar(50)
-	,strBinType2 nvarchar(50)
-	,strBinNotes nvarchar(50)
-	,strBinNotesColor nvarchar(50)
-	,strBinNotesBackgroundColor nvarchar(50)
-	,strComBinNotesColor nvarchar(50)
-	,strComBinNotesBackgroundColor nvarchar(50)
+	,strBinType nvarchar(50)  COLLATE Latin1_General_CI_AS 
+	,strBinType2 nvarchar(50) COLLATE Latin1_General_CI_AS 
+	,strBinNotes nvarchar(50) COLLATE Latin1_General_CI_AS 
+	,strBinNotesColor nvarchar(50) COLLATE Latin1_General_CI_AS 
+	,strBinNotesBackgroundColor nvarchar(50) COLLATE Latin1_General_CI_AS 
+	,strComBinNotesColor nvarchar(50) COLLATE Latin1_General_CI_AS 
+	,strComBinNotesBackgroundColor nvarchar(50) COLLATE Latin1_General_CI_AS 
 	,dtmTrackingDate datetime null
 	,intUnitMeasureId int null
 
