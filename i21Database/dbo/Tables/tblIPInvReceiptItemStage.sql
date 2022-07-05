@@ -21,8 +21,10 @@
 	strCostCurrency				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strContainerNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strTrackingNo				INT,
-	intTrxSequenceNo	int,
-	intParentTrxSequenceNo int,
+
+	intTrxSequenceNo			BIGINT,
+	intParentTrxSequenceNo		BIGINT,
+
 	CONSTRAINT [PK_tblIPInvReceiptItemStage_intStageReceiptItemId] PRIMARY KEY (intStageReceiptItemId),
 	CONSTRAINT [FK_tblIPInvReceiptItemStage_tblIPInvReceiptStage_intStageReceiptId] FOREIGN KEY (intStageReceiptId) REFERENCES [tblIPInvReceiptStage](intStageReceiptId) ON DELETE CASCADE
 )
