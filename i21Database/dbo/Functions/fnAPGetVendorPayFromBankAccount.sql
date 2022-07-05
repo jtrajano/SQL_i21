@@ -16,7 +16,7 @@ RETURNS TABLE AS RETURN
 		FROM tblAPVendor V
 		INNER JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = V.intEntityId
 		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = VANL.intPayFromBankAccountId
-		WHERE V.intEntityId = @vendorId AND VANL.intCompanyLocationId = @locationId AND BA.intCurrencyId = @currencyId
+		WHERE V.intEntityId = @vendorId AND VANL.intCompanyLocationId = @locationId AND VANL.intCurrencyId = @currencyId
 		--VENDOR DEFAULT
 		UNION
 		SELECT V.intPayFromBankAccountId intPayFromBankAccountId, 
@@ -26,7 +26,7 @@ RETURNS TABLE AS RETURN
 		FROM tblAPVendor V
 		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = V.intPayFromBankAccountId
 		WHERE V.intEntityId = @vendorId AND BA.intCurrencyId = @currencyId
-		--COMPANY CONFIGURATION DEFAULT
+		--COMPANY CONFIGURATION PER LOCATION
 		UNION
 		SELECT DPFBA.intBankAccountId intPayFromBankAccountId, 
 			   BA.strBankAccountNo strPayFromBankAccount, 
@@ -34,7 +34,7 @@ RETURNS TABLE AS RETURN
 			   3 intOrder
 		FROM tblAPDefaultPayFromBankAccount DPFBA
 		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = DPFBA.intBankAccountId
-		WHERE DPFBA.intCurrencyId = @currencyId
+		WHERE DPFBA.intCompanyLocationId = @locationId AND DPFBA.intCurrencyId = @currencyId
 		--NONE
 		UNION
 		SELECT NULL intPayFromBankAccountId, 
