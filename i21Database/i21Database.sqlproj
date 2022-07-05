@@ -826,6 +826,7 @@
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
     <Build Include="dbo\Tables\tblEMCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblARCompanyDefaultPayToBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1230,7 +1231,7 @@
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
     <Build Include="dbo\Views\vyuGLAccountSegmentPartition.sql" />
-    <Build Include="dbo\Views\vyuGLOverrideAccount.sql"/>
+    <Build Include="dbo\Views\vyuGLOverrideAccount.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
     <Build Include="dbo\Views\vyuAPBillBatch.sql" />
     <Build Include="dbo\Views\vyuAPPayments.sql" />
@@ -10606,7 +10607,7 @@
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
     <Build Include="dbo\Views\vyuGRSearchUOMRounding.sql" />
-	<Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
