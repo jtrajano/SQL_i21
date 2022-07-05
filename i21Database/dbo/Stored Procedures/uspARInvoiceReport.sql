@@ -533,7 +533,7 @@ LEFT JOIN (
 	INNER JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
 	GROUP BY ARPD.intInvoiceId
 ) PAYMENT ON INVOICEDETAIL.intSCInvoiceId = PAYMENT.intInvoiceId
-LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = INV.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = INV.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
 
 --CUSTOMERS
 SELECT intEntityCustomerId	= C.intEntityId

@@ -98,6 +98,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strSalesOrderNumber
 	 , strPaymentInfo
 	 , dtmCreated
+	 , strLogoType
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -160,7 +161,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 									THEN CONSUMPTIONSITE.strLocationName
 	   								  	ELSE REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
 								  END
-	 , blbLogo					= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
+	 , blbLogo					= ISNULL(SMLP.imgLogo, CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END)
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
@@ -176,6 +177,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strSalesOrderNumber		= SO.strSalesOrderNumber
 	 , strPaymentInfo			= CASE WHEN INV.strTransactionType = 'Cash' THEN ISNULL(PAYMENTMETHOD.strPaymentMethod, '') + ' - ' + ISNULL(INV.strPaymentInfo, '') ELSE NULL END
 	 , dtmCreated				= GETDATE()
+	 , strLogoType				= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (
@@ -321,6 +323,7 @@ OUTER APPLY (
 	WHERE DETAIL.intInvoiceId = INV.intInvoiceId
 		AND DETAIL.intTicketId IS NOT NULL
 ) TICKETDETAILS
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = INV.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
 
 UPDATE STAGING
 SET strComments = ISNULL(MESSAGES.strMessage, '')
