@@ -165,6 +165,12 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 		SELECT TOP 1 @LineOfBusiness4Count = COUNT(strLineOfBusiness) FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness4
 		SELECT TOP 1 @LineOfBusiness5Count = COUNT(strLineOfBusiness) FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness5
 
+		SET @LineOfBusiness1 = CASE WHEN @LineOfBusiness1Count = 0 THEN '' ELSE @LineOfBusiness1 END
+		SET @LineOfBusiness2 = CASE WHEN @LineOfBusiness2Count = 0 THEN '' ELSE @LineOfBusiness2 END
+		SET @LineOfBusiness3 = CASE WHEN @LineOfBusiness3Count = 0 THEN '' ELSE @LineOfBusiness3 END
+		SET @LineOfBusiness4 = CASE WHEN @LineOfBusiness4Count = 0 THEN '' ELSE @LineOfBusiness4 END
+		SET @LineOfBusiness5 = CASE WHEN @LineOfBusiness5Count = 0 THEN '' ELSE @LineOfBusiness5 END
+
 		--checking Country
 		SELECT TOP 1 @CountryCount = COUNT(strCountry) FROM tblSMCountry WHERE strCountry = @strCountry
 
@@ -232,21 +238,21 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 		--Combo validation
 		IF(@CountryCount IS NOT NULL AND @CountryCount != 0)
 			BEGIN
-				IF(@LineOfBusiness1Count IS NOT NULL AND @LineOfBusiness1Count != 0)
+				IF(@LineOfBusiness1Count IS NOT NULL)
 					BEGIN
-						IF(@LineOfBusiness2Count IS NOT NULL AND @LineOfBusiness2Count != 0)
+						IF(@LineOfBusiness2Count IS NOT NULL)
 							BEGIN
-								IF(@LineOfBusiness3Count IS NOT NULL AND @LineOfBusiness3Count != 0)
+								IF(@LineOfBusiness3Count IS NOT NULL)
 									BEGIN
-										IF(@LineOfBusiness4Count IS NOT NULL AND @LineOfBusiness4Count != 0)
+										IF(@LineOfBusiness4Count IS NOT NULL)
 											BEGIN
-												IF(@LineOfBusiness5Count IS NOT NULL AND @LineOfBusiness5Count != 0)
+												IF(@LineOfBusiness5Count IS NOT NULL)
 													BEGIN
-														IF(@strDocumentDelivery1 IS NOT NULL AND @strDocumentDelivery1 != '')
+														IF(@strDocumentDelivery1 IS NOT NULL)
 															BEGIN
-																IF(@strDocumentDelivery2 IS NOT NULL AND @strDocumentDelivery2 != '')
+																IF(@strDocumentDelivery2 IS NOT NULL)
 																	BEGIN
-																		IF(@strDocumentDelivery3 IS NOT NULL AND @strDocumentDelivery3 != '')
+																		IF(@strDocumentDelivery3 IS NOT NULL)
 																		BEGIN
 																			IF(@strType IS NOT NULL AND @strType != '')
 																				BEGIN
@@ -913,7 +919,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 
 					--SET IDENTITY_INSERT tblEMEntityLineOfBusiness ON
 
-					IF @LineOfBusiness1 IS NOT NULL
+					IF @LineOfBusiness1 IS NOT NULL AND @LineOfBusiness1 != ''
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness1)
 						BEGIN
@@ -924,7 +930,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						END
 					END
 
-					IF @LineOfBusiness2 IS NOT NULL
+					IF @LineOfBusiness2 IS NOT NULL AND @LineOfBusiness2 != ''
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness2)
 						BEGIN
@@ -935,7 +941,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						END
 					END
 
-					IF @LineOfBusiness3 IS NOT NULL
+					IF @LineOfBusiness3 IS NOT NULL AND @LineOfBusiness3 != ''
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness3)
 						BEGIN
@@ -946,7 +952,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						END
 					END
 
-					IF @LineOfBusiness4 IS NOT NULL
+					IF @LineOfBusiness4 IS NOT NULL AND @LineOfBusiness4 != ''
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness4)
 						BEGIN
@@ -957,7 +963,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						END
 					END
 
-					IF @LineOfBusiness5 IS NOT NULL
+					IF @LineOfBusiness5 IS NOT NULL AND @LineOfBusiness5 != ''
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness5)
 						BEGIN
