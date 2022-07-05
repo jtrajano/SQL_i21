@@ -30,6 +30,8 @@ Declare @ysnYearValidationRequired bit
 Declare @dblSubstituteRatio numeric(18,6)
 Declare @dblMaxSubstituteRatio numeric(18,6)
 Declare @strItemNo nvarchar(50)
+DECLARE @ysnComplianceItem BIT
+	,@dblCompliancePercent NUMERIC(18, 6)
 
 Select @intInputItemId=intItemId,@intItemSubstitutionTypeId=intItemSubstitutionTypeId,@ysnProcessed=ISNULL(ysnProcessed,0),@ysnCancelled=ISNULL(ysnCancelled,0)  
 From tblMFItemSubstitution Where intItemSubstitutionId=@intItemSubstitutionId
@@ -71,7 +73,8 @@ Begin
 		Begin
 			--Get the substitute item details
 			Select @intItemId=intItemId,@dtmValidFrom=dtmValidFrom,@dtmValidTo=dtmValidTo,
-			@ysnYearValidationRequired=ysnYearValidationRequired,@dblPercent=dblPercent
+			@ysnYearValidationRequired=ysnYearValidationRequired,@dblPercent=dblPercent,
+			@ysnComplianceItem = ysnComplianceItem, @dblCompliancePercent = dblCompliancePercent
 			From tblMFItemSubstitutionDetail Where intItemSubstitutionDetailId=@intMinSubstitutionDetail
 
 			--Get Stock UOM
@@ -81,6 +84,7 @@ Begin
 			Insert Into tblMFRecipeItem(intRecipeId,intItemId,dblQuantity,dblCalculatedQuantity,intItemUOMId,intRecipeItemTypeId,strItemGroupName,
 			dblUpperTolerance,dblLowerTolerance,dblCalculatedUpperTolerance,dblCalculatedLowerTolerance,dblShrinkage,ysnScaled,
 			intConsumptionMethodId,intStorageLocationId,dtmValidFrom,dtmValidTo,ysnYearValidationRequired,ysnMinorIngredient,
+			ysnComplianceItem,dblCompliancePercent,
 			intReferenceRecipeId,ysnOutputItemMandatory,dblScrap,ysnConsumptionRequired,dblCostAllocationPercentage,intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
 			Select @intRecipeId,@intItemId,(ri.dblQuantity * (@dblPercent/100)) AS dblQuantity,
 			dbo.fnMFCalculateRecipeItemQuantity(@intRecipeTypeId,(ri.dblQuantity * (@dblPercent/100)),ri.dblShrinkage) AS dblCalculatedQuantity,
@@ -89,6 +93,7 @@ Begin
 			dbo.fnMFCalculateRecipeItemUpperTolerance(@intRecipeTypeId,(ri.dblQuantity * (@dblPercent/100)),ri.dblShrinkage,ri.dblUpperTolerance) AS dblCalculatedUpperTolerance,
 			dbo.fnMFCalculateRecipeItemLowerTolerance(@intRecipeTypeId,(ri.dblQuantity * (@dblPercent/100)),ri.dblShrinkage,ri.dblLowerTolerance) AS dblCalculatedLowerTolerance,
 			ri.dblShrinkage,ri.ysnScaled,ri.intConsumptionMethodId,ri.intStorageLocationId,@dtmValidFrom,@dtmValidTo,@ysnYearValidationRequired,ri.ysnMinorIngredient,
+			@ysnComplianceItem,@dblCompliancePercent,
 			null intReferenceRecipeId,ri.ysnOutputItemMandatory,ri.dblScrap,ri.ysnConsumptionRequired,ri.dblCostAllocationPercentage,@intUserId,@dtmDate,@intUserId,@dtmDate
 			From tblMFRecipeItem ri 
 			Where ri.intRecipeItemId=@intInputRecipeItemId
