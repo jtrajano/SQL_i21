@@ -29,7 +29,7 @@ SELECT intEntityId					= C.[intEntityId]
 	 , intEntityWarehouseId			= EML.[intWarehouseId]
 	 , intTimeEntryPeriodDetailId	= BillingPeriod.intTimeEntryPeriodDetailId
 	 , strPeriodDisplay				= BillingPeriod.strPeriodDisplay
-	 , strApprovalStatus			= CASE WHEN ApprovalInfo.strStatus = 'Approved' OR ApprovalInfo.strStatus = 'No Need for Approval'
+	 , strApprovalStatus			= CASE WHEN ApprovalInfo.strStatus = 'Approved' OR ApprovalInfo.strStatus = 'No Need for Approval' OR ApprovalInfo.strStatus = 'Approved with Modifications'
 												THEN 'Approved'
 											ELSE 'Not Yet Approved'
 									  END 
