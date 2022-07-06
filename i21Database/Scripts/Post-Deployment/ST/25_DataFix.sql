@@ -101,4 +101,24 @@ IF EXISTS(SELECT intCheckoutId FROM tblSTCheckoutHeader
 -- [END]: Update tblSTCheckoutHeader.dblTotalToDeposit additional of ATM Replenished to the computation of Total To Deposit
 ----------------------------------------------------------------------------------------------------------------------------------
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Update tblSTRegister for password
+----------------------------------------------------------------------------------------------------------------------------------
+
+-- Note: <= 100 in length are the not encrypted passwords
+--       344 in length are the encrypted passwords
+UPDATE tblSTRegister
+SET strSAPPHIREPassword = dbo.fnAESEncryptASym(strSAPPHIREPassword)
+WHERE LEN(strSAPPHIREPassword) <= 100 
+
+UPDATE tblSTRegister
+SET strSAPPHIREBasePassword = dbo.fnAESEncryptASym(strSAPPHIREBasePassword)
+WHERE LEN(strSAPPHIREBasePassword) <= 100 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Update tblSTRegister for password
+----------------------------------------------------------------------------------------------------------------------------------
+
+
 GO
