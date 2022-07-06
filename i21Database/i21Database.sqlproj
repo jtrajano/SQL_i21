@@ -827,8 +827,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCreditLineCurrencyRate.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
     <Build Include="dbo\Tables\tblEMCompanyPreference.sql" />
-    <Build Include="dbo\Tables\tblARCustomerDefaultPayToAccount.sql" />
     <Build Include="dbo\Tables\tblARCompanyDefaultPayToBankAccount.sql" />
+    <Build Include="dbo\Tables\tblARCustomerDefaultPayToBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1233,7 +1233,7 @@
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
     <Build Include="dbo\Views\vyuGLAccountSegmentPartition.sql" />
-    <Build Include="dbo\Views\vyuGLOverrideAccount.sql"/>
+    <Build Include="dbo\Views\vyuGLOverrideAccount.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
     <Build Include="dbo\Views\vyuAPBillBatch.sql" />
     <Build Include="dbo\Views\vyuAPPayments.sql" />
