@@ -120,7 +120,7 @@ LEFT JOIN vyuLGAdditionalColumnForContractDetailView LGACFDDV ON LGACFDDV.intCon
 WHERE [intInvoiceId] = @InvoiceIdLocal	
 	
 UPDATE tblARInvoice
-SET [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
+SET  [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 	,[dblBaseInvoiceSubtotal]				= ISNULL([dblBaseInvoiceSubtotal], @ZeroDecimal)
 	,[dblShipping]							= ISNULL([dblShipping], @ZeroDecimal)
 	,[dblBaseShipping]						= ISNULL([dblBaseShipping], @ZeroDecimal)
@@ -148,6 +148,7 @@ SET [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 	,[ysnImpactInventory]					= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
+	,[dblLoanAmount]						= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 WHERE [intInvoiceId] = @InvoiceIdLocal
 
 UPDATE I
