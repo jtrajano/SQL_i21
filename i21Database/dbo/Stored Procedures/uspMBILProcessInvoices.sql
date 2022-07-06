@@ -330,29 +330,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 				RAISERROR(@ErrorMessage,16,1)
 			END
 		END
-	END
-	
-
-	IF @BatchId IS NULL
-	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId)
-		BEGIN
-			SELECT TOP 1 @ErrorMessage = ISNULL(strPostingMessage, strMessage) FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId
-			
-
-			IF @ErrorMessage like '%was not set up to be available on the specified location%'
-			BEGIN
-				SET @ErrorMessage = @ErrorMessage
-				RAISERROR(@ErrorMessage,16,1)
-			END
-			ELSE IF @ErrorMessage <> 'Transaction successfully posted.'
-			BEGIN
-				SET @ErrorMessage = @ErrorMessage + ' Kindly check the created invoice for details.'
-				RAISERROR(@ErrorMessage,16,1)
-			END
-		END
-	END
-	
+	END	
 
 END
 
