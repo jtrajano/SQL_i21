@@ -89,7 +89,7 @@ IF @Unship = 1
 				BEGIN
 					DECLARE @InventoryShipment Id
 					DECLARE @intInventoryShipmentId INT
-					DECLARE @strSalesOrderNumber	NVARCHAR(100) = NULL
+					DECLARE @strSalesOrderNumber    NVARCHAR(100) = NULL
 
 					INSERT INTO @InventoryShipment
 					SELECT DISTINCT ISH.intInventoryShipmentId
@@ -117,12 +117,12 @@ IF @Unship = 1
 				END
 			
 				UPDATE tblSOSalesOrder 
-				SET ysnShipped 				= CASE WHEN ISNULL(@PostedShipmentNos, '') <> '' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END 
-				  , @strSalesOrderNumber	= strSalesOrderNumber
-				WHERE intSalesOrderId = @SalesOrderId
+                SET ysnShipped              = CASE WHEN ISNULL(@PostedShipmentNos, '') <> '' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END 
+                  , @strSalesOrderNumber    = strSalesOrderNumber
+                WHERE intSalesOrderId = @SalesOrderId
 
-				--DELETE FROM INVENTORY LINK
-				EXEC dbo.[uspICDeleteTransactionLinks] @SalesOrderId, @strSalesOrderNumber, 'Sales Order', 'Accounts Receivable'
+                --DELETE FROM INVENTORY LINK
+                EXEC dbo.[uspICDeleteTransactionLinks] @SalesOrderId, @strSalesOrderNumber, 'Sales Order', 'Accounts Receivable'
 
 				RETURN 1
 			END
@@ -390,10 +390,10 @@ ELSE
 		  , ysnShipped     = 1
 		WHERE intSalesOrderId = @SalesOrderId
 
-		--INSERT TO TRANSACTION LINKS
-		DECLARE @tblTransactionLinks    udtICTransactionLinks
+		        --INSERT TO TRANSACTION LINKS
+        DECLARE @tblTransactionLinks    udtICTransactionLinks
 
-		INSERT INTO @tblTransactionLinks (
+        INSERT INTO @tblTransactionLinks (
               intSrcId
             , strSrcTransactionNo
             , strSrcTransactionType
@@ -404,7 +404,7 @@ ELSE
             , strDestModuleName
             , strOperation
         )
-        SELECT intSrcId					= SO.intSalesOrderId
+        SELECT intSrcId                    = SO.intSalesOrderId
             , strSrcTransactionNo       = SO.strSalesOrderNumber
             , strSrcTransactionType     = 'Sales Order'
             , strSrcModuleName          = 'Accounts Receivable'
@@ -414,14 +414,14 @@ ELSE
             , strDestModuleName         = 'Inventory'
             , strOperation              = 'Process'
         FROM tblSOSalesOrder SO
-		INNER JOIN (
-			SELECT DISTINCT SHIPD.intOrderId
-				 , SHIP.strShipmentNumber 
-				 , SHIP.intInventoryShipmentId
-			FROM tblICInventoryShipmentItem SHIPD
-			INNER JOIN tblICInventoryShipment SHIP ON SHIPD.intInventoryShipmentId = SHIP.intInventoryShipmentId
-			WHERE SHIP.intOrderType = 2
-		) SHIPMENT ON SO.intSalesOrderId = SHIPMENT.intOrderId
+        INNER JOIN (
+            SELECT DISTINCT SHIPD.intOrderId
+                 , SHIP.strShipmentNumber 
+                 , SHIP.intInventoryShipmentId
+            FROM tblICInventoryShipmentItem SHIPD
+            INNER JOIN tblICInventoryShipment SHIP ON SHIPD.intInventoryShipmentId = SHIP.intInventoryShipmentId
+            WHERE SHIP.intOrderType = 2
+        ) SHIPMENT ON SO.intSalesOrderId = SHIPMENT.intOrderId
         WHERE SO.intSalesOrderId = @SalesOrderId
           AND SO.strTransactionType = 'Order'
 

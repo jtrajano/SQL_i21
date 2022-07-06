@@ -4,7 +4,7 @@
     ,@UserId            INT
 	,@IntegrationLogId	INT             = NULL
 	,@raiseError  		BIT   = 0
-	,@strSessionId		NVARCHAR(50) 	= NULL
+	,@strSessionId 		NVARCHAR(200)	= NULL
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -118,15 +118,15 @@ BEGIN
       , ARPD.dblBaseAmountDue		= (ARI.dblBaseInvoiceTotal + ISNULL(ARPD.dblBaseInterest, @ZeroDecimal))  - (ISNULL(ARPD.dblBasePayment, @ZeroDecimal) + ISNULL(ARPD.dblBaseDiscount, @ZeroDecimal))
     FROM tblARPostInvoiceHeader PID
     INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PID.intInvoiceId = ARI.intInvoiceId
-    INNER JOIN tblARPaymentDetail ARPD WITH (NOLOCK) ON ARI.intInvoiceId = ARPD.intInvoiceId
+    INNER JOIN tblARPaymentDetail ARPD WITH (NOLOCK) ON ARI.intInvoiceId = ARPD.intInvoiceId 
 	WHERE PID.strSessionId = @strSessionId
 	END
 
 	--CREATE PAYMENT FOR PREPAIDS/CREDIT MEMO TAB
-	EXEC dbo.uspARCreateRCVForCreditMemo @intUserId = @UserId, @strSessionId = @strSessionId
+	EXEC dbo.uspARCreateRCVForCreditMemo @intUserId = @UserId
 	
 	--AUTO APPLY PREPAIDS
-	EXEC dbo.uspARAutoApplyPrepaids @intEntityUserId = @UserId, @strSessionId = @strSessionId
+	EXEC dbo.uspARAutoApplyPrepaids @intEntityUserId = @UserId
 END
 
 IF @PostTemp = 0
@@ -322,7 +322,7 @@ INNER JOIN (
 		  AND CM.ysnPosted = 1
 		  AND R.ysnReturned = 1
 		  AND CM.strTransactionType = 'Credit Memo'
-		  AND IH.strTransactionType = 'Cash Refund'
+		  AND IH.strTransactionType = 'Cash Refund'		  
 	) REFUND
 	WHERE IH.strTransactionType <> 'Cash'
 	  AND IH.strSessionId = @strSessionId
@@ -330,7 +330,7 @@ INNER JOIN (
 ) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]	
 
 --UPDATE INVOICE TRANSACTION HISTORY
-EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds = @tblInvoicesToUpdate, @Post = @Post, @strSessionId = @strSessionId
+EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @tblInvoicesToUpdate, @Post
 
 --PATRONAGE
 BEGIN
@@ -400,6 +400,25 @@ BEGIN
 	--LOAD SHIPMENT
 	IF @ysnFromProvisional = 0 OR @ysnProvisionalWithGL = 0
 		EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost] @InvoiceId = @intInvoiceId, @Post = @Post, @LoadId = @intLoadId, @UserId = @UserId
+	
+	--UNPOST AND CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+	IF ISNULL(@ysnFromReturn, 0) = 1 AND @intLoadId IS NOT NULL
+		BEGIN
+			IF @Post = 1
+				BEGIN
+					EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 0, @intEntityUserSecurityId = @UserId
+
+					IF ISNULL(@intPurchaseSaleId, 0) <> 3
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 1, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
+				END
+			ELSE
+				BEGIN
+					IF ISNULL(@intPurchaseSaleId, 0) <> 3
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
+
+					EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
+				END
+		END
 
 	DELETE FROM @tblLoadShipment WHERE [intInvoiceId] = @intInvoiceId
 END
@@ -470,7 +489,7 @@ BEGIN
 	INNER JOIN tblARInvoiceDetail PrepaidDetail ON PrepaidDetail.intInvoiceId = Prepaid.intPrepaymentId
 	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = PrepaidDetail.intItemId AND ItemLocation.intLocationId = Inv.intCompanyLocationId
 	INNER JOIN tblICItemUOM iu ON iu.intItemId = PrepaidDetail.intItemId AND iu.intItemUOMId = PrepaidDetail.intItemUOMId
-	WHERE Inv.strTransactionType IN ('Cash Refund')
+	WHERE Inv.strTransactionType IN ('Cash Refund')	
 	  AND I.strSessionId = @strSessionId
 
 	UPDATE u
@@ -500,7 +519,8 @@ SET dblHighestAR		= CUSTOMER.dblARBalance
 FROM dbo.tblARCustomer CUSTOMER
 INNER JOIN (
 	SELECT DISTINCT intEntityCustomerId
-	FROM ##ARPostInvoiceHeader
+	FROM tblARPostInvoiceHeader
+	WHERE strSessionId = @strSessionId
 ) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 WHERE CUSTOMER.dblARBalance > ISNULL(CUSTOMER.dblHighestAR, 0)
 
@@ -522,7 +542,8 @@ INNER JOIN (
     FROM tblARInvoice I
     INNER JOIN (
         SELECT DISTINCT intEntityCustomerId
-        FROM ##ARPostInvoiceHeader
+        FROM tblARPostInvoiceHeader
+		WHERE strSessionId = @strSessionId
     ) INVOICE ON I.intEntityCustomerId = INVOICE.intEntityCustomerId
     WHERE I.ysnPosted = 1
       AND I.ysnForgiven = 0
@@ -545,7 +566,7 @@ INNER JOIN tblARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
 WHERE PID.strSessionId = @strSessionId
 
 --UPDATE CONTRACT BALANCE
-EXEC dbo.uspARUpdateContractOnPost @UserIdTemp, @Post, @strSessionId
+EXEC dbo.uspARUpdateContractOnPost @UserIdTemp, @Post
 
 --UPDATE CONTRACTS FINANCIAL STATUS
 BEGIN
@@ -617,13 +638,13 @@ EXEC dbo.uspCTItemContractInvoicePosted @tblItemContracts, @UserId
 END
 
 --UPDATE INVENTORY ITEM COMMITTED
-EXEC dbo.[uspARUpdateCommitted] @strSessionId = @strSessionId
+EXEC dbo.[uspARUpdateCommitted]
 
 --IN TRANSIT OUTBOUND QTY
-EXEC dbo.[uspARUpdateInTransit] @strSessionId = @strSessionId
+EXEC dbo.[uspARUpdateInTransit]
 
 --IN TRANSIT DIRECT QTY
-EXEC dbo.[uspARUpdateInTransitDirect] @strSessionId = @strSessionId
+EXEC dbo.[uspARUpdateInTransitDirect]
 
 DELETE A
 FROM tblARPrepaidAndCredit A
@@ -665,7 +686,7 @@ EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdat
 									    , @intUserId		= @UserIdTemp		
 
 --CREATE INVENTORY RECEIPT TO ANOTHER COMPANY
-EXEC dbo.uspARInterCompanyIntegrationSource @BatchId = @BatchId, @Post = @Post, @strSessionId = @strSessionId
+EXEC dbo.uspARInterCompanyIntegrationSource @BatchId = @BatchId, @Post = @Post
 
 --DELETE FROM POSTING QUEUE
 DELETE PQ
@@ -704,31 +725,6 @@ FROM tblARPostInvoiceHeader
 WHERE strSessionId = @strSessionId
 
 EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
-
-UPDATE ILD
-SET
-	 ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
-	,ILD.[ysnUnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
-	,ILD.[strPostingMessage]		= CASE WHEN ILD.[ysnPost] = 1 THEN 'Transaction successfully posted.' ELSE 'Transaction successfully unposted.' END
-	,ILD.[strBatchId]				= @BatchId
-	,ILD.[strPostedTransactionId]	= PID.[strInvoiceNumber] 
-FROM tblARInvoiceIntegrationLogDetail ILD
-INNER JOIN tblARPostInvoiceHeader PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
-	AND ILD.[ysnPost] IS NOT NULL
-	--AND PID.strType = 'Store Checkout'
-	AND PID.strSessionId = @strSessionId
-
-DELETE FROM tblARPostInvoiceHeader WHERE strSessionId = @strSessionId
-DELETE FROM tblARPostInvoiceDetail WHERE strSessionId = @strSessionId
-DELETE FROM tblARPostInvoiceItemAccount WHERE strSessionId = @strSessionId
-DELETE FROM tblARPostInvalidInvoiceData WHERE strSessionId = @strSessionId
-DELETE FROM tblARPostItemsForCosting WHERE strSessionId = @strSessionId
-DELETE FROM tblARPostItemsForInTransitCosting WHERE strSessionId = @strSessionId
-DELETE FROM tblARPostItemsForContracts WHERE strSessionId = @strSessionId
-DELETE FROM tblARPostItemsForStorageCosting WHERE strSessionId = @strSessionId
-DELETE FROM tblARPostInvoiceGLEntries WHERE strSessionId = @strSessionId
-
 END
 
 END TRY

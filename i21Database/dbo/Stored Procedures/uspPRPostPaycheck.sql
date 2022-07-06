@@ -31,7 +31,7 @@ DECLARE @intPaycheckId INT
 SELECT @intPaycheckId = intPaycheckId
 	  ,@intEmployeeId = [intEntityEmployeeId]
 	  ,@strTransactionId = strPaycheckId
-	  ,@dtmPayDate = dtmPayDate
+	  ,@dtmPayDate = dtmPosted
 	  ,@intCreatedEntityId = intCreatedUserId
 	  ,@intBankAccountId = intBankAccountId
 	  ,@ysnPaycheckPosted = ysnPosted
@@ -1419,7 +1419,7 @@ BEGIN
 			/* If Unposting succeeds, mark transaction as unposted */
 			UPDATE tblPRPaycheck SET 
 				ysnPosted = 0
-				,dtmPosted = NULL 
+				--,dtmPosted = NULL 
 			WHERE strPaycheckId = @strTransactionId
 
 			/* Delete Any Direct Deposit Entry */

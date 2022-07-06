@@ -61,7 +61,7 @@ INNER JOIN vyuARCustomerSearch C ON C.intEntityId = P.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = P.intLocationId
 INNER JOIN tblSMCurrency CUR ON CUR.intCurrencyID = P.intCurrencyId
 INNER JOIN vyuARPaymentMethodForReceivePayments PM ON (P.intPaymentMethodId <> 11 AND P.intPaymentMethodId = PM.intPaymentMethodID) 
-												   OR (P.intPaymentMethodId = 11 AND PM.intEntityCardInfoId = P.intEntityCardInfoId)
+                                                   OR (P.intPaymentMethodId = 11 AND PM.intEntityCardInfoId = P.intEntityCardInfoId)
 LEFT JOIN tblGLAccount GL ON P.intWriteOffAccountId = GL.intAccountId
 LEFT JOIN tblSMCurrencyExchangeRateType SERT ON SERT.intCurrencyExchangeRateTypeId = P.intCurrencyExchangeRateTypeId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = P.intBankAccountId

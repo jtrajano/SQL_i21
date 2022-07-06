@@ -23,16 +23,17 @@ DELETE FROM cte WHERE RowNumber > 1;
 
 DECLARE @intImportLogId INT = (SELECT TOP 1 intImportLogId FROM tblICImportLog WHERE strUniqueId = @strIdentifier)
 
+
+DECLARE @tblDuplicateItemNo TABLE(  
+   strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
+  ,intId INT   
+ )
+
 -------------------------------------------------------------------------  
 -- BEGIN Validate records  
 -------------------------------------------------------------------------  
 BEGIN  
  -- Get the duplicate records  
- DECLARE @tblDuplicateItemNo TABLE(  
-   strItemNo NVARCHAR(200)  
-  ,intId INT   
- )
- 
  INSERT INTO @tblDuplicateItemNo (strItemNo, intId)  
  SELECT strItemNo, intId  
 	 FROM  
@@ -210,7 +211,7 @@ FROM tblICImportStagingItemCostWithEffectiveDate s
   AND il.intItemId = i.intItemId  
 WHERE s.strImportIdentifier = @strIdentifier  
 AND s.intImportStagingItemCostWithEffectiveDateId NOT IN (SELECT intImportStagingItemCostWithEffectiveDateId FROM @tblErrorItemCost)
-  
+AND s.strItemNo NOT IN (SELECT strItemNo FROM @tblDuplicateItemNo)
 
 -- Generate successful import logs..
 
