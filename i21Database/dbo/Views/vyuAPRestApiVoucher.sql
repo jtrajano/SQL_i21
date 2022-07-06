@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuAPRestApiVoucher]
+﻿CREATE VIEW [dbo].[vyuAPRestApiVoucher]
 AS
 SELECT
 	bill.strBillId strVoucherNo,
@@ -73,4 +73,4 @@ OUTER APPLY (
 	WHERE au.intRecordId = bill.intBillId
 		AND au.strAction = 'Updated'
 		AND au.strNamespace = 'AccountsPayable.view.Voucher'
-) updated	
+) updated

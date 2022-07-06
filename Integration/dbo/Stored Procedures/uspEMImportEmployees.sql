@@ -303,7 +303,7 @@ BEGIN
                 @originEmployee		=  LTRIM(RTRIM((premp_emp))),
 				@dtmOrigHireDate	= case when premp_orig_hire_dt = 0 then null else premp_orig_hire_dt end,
 				@dtmLastHireDate	= case when premp_last_hire_dt = 0 then null else premp_last_hire_dt end,
-				@dtmBirthDate		= case when premp_last_hire_dt = 0 then null else premp_birth_dt end,
+				@dtmBirthDate		= case when premp_birth_dt = 0 then null else premp_birth_dt end,
 				@strSex				= CASE WHEN premp_sex = ''M'' THEN ''Male'' 
 										WHEN premp_sex = ''F'' THEN ''Female'' end ,
 				@strType			= Case when premp_employment = ''F'' then ''Full-Time''

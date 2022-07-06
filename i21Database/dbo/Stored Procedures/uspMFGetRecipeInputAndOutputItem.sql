@@ -483,6 +483,8 @@ BEGIN TRY
 		,IsNULL(IU1.intItemUOMId, IU2.intItemUOMId) AS intProduceUnitMeasureId
 		,Prod.intWeightItemUOMId
 		,IsNULL(I.intUnitPerLayer * I.intLayerPerPallet, 0) AS intCasesPerPallet
+		,(SELECT TOP 1 intCertificationId FROM vyuCTItemCertification WHERE intItemId = I.intItemId ORDER BY intItemCertificationId) AS intCertificationId
+		,(SELECT TOP 1 strCertificationName FROM vyuCTItemCertification WHERE intItemId = I.intItemId ORDER BY intItemCertificationId) AS strCertificationName
 	INTO #ProductionDetail
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
@@ -612,6 +614,8 @@ BEGIN TRY
 			,strLotNumber
 			,intLotId
 			,intProduceUnitMeasureId
+			,intCertificationId
+			,strCertificationName
 		FROM #ProductionDetail DT
 	END
 	ELSE
@@ -731,6 +735,8 @@ BEGIN TRY
 			,strLotNumber
 			,intLotId
 			,intProduceUnitMeasureId
+			,intCertificationId
+			,strCertificationName
 		FROM #ProductionDetail DT
 		JOIN @tblMFFinalItem I ON I.intItemId = DT.intActualItemId
 	END
