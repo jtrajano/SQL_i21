@@ -23,7 +23,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[strTrailerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [strTrailerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strERPTransferNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[dtmCreated] DATETIME NULL DEFAULT (GETDATE()),
 	[intCompanyId] INT NULL, 

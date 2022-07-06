@@ -6,6 +6,7 @@
 	[intUserId] INT NOT NULL,
 	[dtmImportDate] DATETIME NOT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
+	[strFileName] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTRImportDtn] PRIMARY KEY ([intImportDtnId]),
 	CONSTRAINT [FK_tblTRImportDtn_tblTRDtnImportSetup_intDtnImportSetupId] FOREIGN KEY ([intDtnImportSetupId]) REFERENCES [tblTRDtnImportSetup]([intDtnImportSetupId])
 )

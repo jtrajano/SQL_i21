@@ -198,16 +198,7 @@
 	[strTrpCardInfoMerchInfoTrpcmMerchID] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrpCardInfoMerchInfoTrpcmTermID] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,	
 
-	[strTrpCardInfoTrpcAcquirerBatchNr] INT NULL,
+	[strTrpCardInfoTrpcAcquirerBatchNr] INT NULL
 
-	-- trlMatchLine
-	[strTrlMatchLineTrlMatchName] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-    [dblTrlMatchLineTrlMatchQuantity] decimal(18, 3) NULL,
-    [dblTrlMatchLineTrlMatchPrice] decimal(18, 3) NULL,
-    [intTrlMatchLineTrlMatchMixes] int NULL,
-    [dblTrlMatchLineTrlPromoAmount] decimal(18, 3) NULL,
-    [strTrlMatchLineTrlPromotionID] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-    [strTrlMatchLineTrlPromotionIDPromoType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[intTrlMatchLineTrlMatchNumber] int NULL
 )
 

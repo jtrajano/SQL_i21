@@ -25,3 +25,7 @@
 );
 GO
 CREATE INDEX [idx_tblARPaymentIntegrationLogDetail] ON [dbo].[tblARPaymentIntegrationLogDetail] (intIntegrationLogId, intIntegrationLogDetailId)
+GO
+CREATE INDEX [IX_tblARPaymentIntegrationLogDetail_strBatchId]
+ON [dbo].[tblARPaymentIntegrationLogDetail] (strBatchId)
+GO

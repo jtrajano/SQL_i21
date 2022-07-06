@@ -163,7 +163,7 @@ Begin
 		Update tblLGLoadStg Set strMessage='ETA POD is empty.'  Where intLoadStgId=@intLoadStgId
 		GOTO NEXT_SHIPMENT
 	End
-	If @dtmPlannedAvailabilityDate is null
+	If @dtmPlannedAvailabilityDate is null AND UPPER(@strHeaderRowState) <> 'DELETE'
 	Begin
 		Update tblLGLoadStg Set strMessage='Planned Availability Date is empty.'  Where intLoadStgId=@intLoadStgId
 		GOTO NEXT_SHIPMENT
