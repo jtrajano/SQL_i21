@@ -79,8 +79,12 @@
     [strCFTermCode]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strComment]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCFInvoiceNumber]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strInvoiceNumberHistory]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceNumberHistory]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmDueDateBaseOnTermsHistory] DATETIME		   NULL,
 	[dtmDiscountDateBaseOnTermsHistory] DATETIME   NULL
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblCFCustomerStatementHistoryStagingTable_strInvoiceNumberHistory]
+ON [dbo].[tblCFCustomerStatementHistoryStagingTable]([strInvoiceNumberHistory])
+GO

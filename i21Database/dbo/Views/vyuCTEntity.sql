@@ -10,8 +10,9 @@ AS
 			L.strZipCode		AS strEntityZipCode,
 			L.strCountry		AS strEntityCountry,
 			T.strPhone			AS strEntityPhone,
-			LL.intEntityLocationId	AS	 intDefaultLocationId, -- CT-5315
-			LL.strLocationName	AS	strDefaultLocation, -- CT-5315
+			T.strEmail			AS strEntityEmail,
+			L.intEntityLocationId	AS	 intDefaultLocationId,
+			L.strLocationName	AS	strDefaultLocation,
 			CASE	WHEN Y.strType IN('Vendor','Shipping Line','Producer') THEN V.ysnPymtCtrlActive 
 					WHEN Y.strType = 'Customer' THEN U.ysnActive
 					WHEN Y.strType = 'Salesperson' THEN P.ysnActive

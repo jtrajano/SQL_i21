@@ -9,6 +9,8 @@
     CONSTRAINT [FK_tblCFIndexPricingBySiteGroup_tblCFIndexPricingBySiteGroupHeader] FOREIGN KEY ([intIndexPricingBySiteGroupHeaderId]) REFERENCES [dbo].[tblCFIndexPricingBySiteGroupHeader] ([intIndexPricingBySiteGroupHeaderId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCFIndexPricingBySiteGroup_tblICItem] FOREIGN KEY ([intARItemID]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+GO
 
-
-
+CREATE NONCLUSTERED INDEX [IX_tblCFIndexPricingBySiteGroup_intIndexPricingBySiteGroupHeaderId]
+ON [dbo].[tblCFIndexPricingBySiteGroup]([intIndexPricingBySiteGroupHeaderId])
+GO
