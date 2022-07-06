@@ -41,6 +41,7 @@ BEGIN
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
@@ -98,6 +99,8 @@ BEGIN
 			,[intLoadShipmentId]				=	A.intLoadShipmentId
 			,[intLoadShipmentDetailId]			=	A.intLoadShipmentDetailId
 			,[intLoadShipmentCostId]			=	A.intLoadShipmentCostId
+			,[intWeightClaimId]					=	A.intWeightClaimId
+			,[intWeightClaimDetailId]			=	A.intWeightClaimDetailId
 			,[intCustomerStorageId]				=	A.intCustomerStorageId
 			,[intSettleStorageId]				=	A.intSettleStorageId
 			,[intTicketDistributionAllocationId]=	A.intTicketDistributionAllocationId
@@ -273,6 +276,8 @@ BEGIN
 			,[intSubLocationId]					=	A.intSubLocationId
 			,[strSubLocationName]				=	subLoc.strSubLocationName
 			,[intLineNo]						=	A.intLineNo
+			,[intBookId]						=	A.intBookId
+			,[intSubBookId]						=	A.intSubBookId
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -345,6 +350,8 @@ BEGIN
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		
 		,[intLoadShipmentCostId]	
+		,[intWeightClaimId]
+		,[intWeightClaimDetailId]
 		,[intCustomerStorageId]	
 		,[intSettleStorageId]
 		,[intItemId]						
@@ -398,6 +405,8 @@ BEGIN
 		,[strStorageLocationName]
 		,[intSubLocationId]
 		,[strSubLocationName]
+		,[intBookId]
+		,[intSubBookId]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -430,7 +439,9 @@ BEGIN
 		,[intInventoryShipmentChargeId]
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]	
-		,[intLoadShipmentCostId]		
+		,[intLoadShipmentCostId]	
+		,[intWeightClaimId]				
+		,[intWeightClaimDetailId]	
 		,[intCustomerStorageId]
 		,[intSettleStorageId]
 		,[intItemId]						
@@ -484,6 +495,8 @@ BEGIN
 		,[strStorageLocationName]
 		,[intSubLocationId]
 		,[strSubLocationName]
+		,[intBookId]
+		,[intSubBookId]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,

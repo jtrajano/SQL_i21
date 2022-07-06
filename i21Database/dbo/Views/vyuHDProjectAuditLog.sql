@@ -14,10 +14,7 @@
 		,strLastUpdated = CONVERT(VARCHAR(10),a.dtmLastUpdated,101) COLLATE Latin1_General_CI_AS
 	from
 		tblHDProjectAuditLog a
-		,tblEMEntity b
-		,tblHDTicket c
-		,tblHDProject d
-	where
-		b.intEntityId = a.intLastUpdatedByEnityId
-		and c.intTicketId = a.intLinkId
-		and d.intProjectId = a.intProjectId
+		inner join tblEMEntity b on b.intEntityId = a.intLastUpdatedByEnityId
+		inner join tblHDTicket c on c.intTicketId = a.intLinkId
+		inner join tblHDProject d on d.intProjectId = a.intProjectId
+	

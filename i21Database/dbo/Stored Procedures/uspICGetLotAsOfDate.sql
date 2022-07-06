@@ -34,7 +34,10 @@ DECLARE @tblInventoryTransaction TABLE(
 	dblQty					NUMERIC(38, 20),
 	dblUnitStorage			NUMERIC(38, 20),
 	dblCost					NUMERIC(38, 20),
-	intOwnershipType		INT
+	intOwnershipType		INT,
+	strContainerNo          NVARCHAR(50), 
+	strMarkings				NVARCHAR(MAX),
+	dblStandardWeight		NUMERIC(38, 20)
 );
 
 INSERT INTO @tblInventoryTransaction (
@@ -50,6 +53,9 @@ INSERT INTO @tblInventoryTransaction (
 	,dblUnitStorage
 	,dblCost
 	,intOwnershipType
+	,strContainerNo
+	,strMarkings
+	,dblStandardWeight
 )
 -- Get the Lot that is Company-Owned 
 SELECT	
@@ -72,6 +78,9 @@ SELECT
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
 	,dblLastCost = dbo.fnCalculateCostBetweenUOM(iu.intItemUOMId, Lot.intItemUOMId, Lot.dblLastCost)
 	,intOwnershipType	= 1
+	,Lot.strContainerNo
+	,Lot.strMarkings
+	,iu.dblStandardWeight
 FROM	
 	tblICInventoryTransaction t
 	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
@@ -81,10 +90,11 @@ FROM
 		AND iu.ysnStockUnit = 1		
 WHERE	
 	t.intItemId = @intItemId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	--AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	AND IL.intLocationId = @intLocationId
-	AND (@intSubLocationId IS NULL OR @intSubLocationId = Lot.intSubLocationId)
-	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = Lot.intStorageLocationId)
+	AND (NULLIF(@intSubLocationId, 0) IS NULL OR @intSubLocationId = Lot.intSubLocationId)
+	AND (NULLIF(@intStorageLocationId, 0) IS NULL OR @intStorageLocationId = Lot.intStorageLocationId)
 	AND (@intLotId IS NULL OR @intLotId = t.intLotId)
 	AND (@strLotNumber IS NULL OR Lot.strLotNumber LIKE @strLotNumber + '%' COLLATE Latin1_General_CI_AS)
 	AND @intOwnershipType = 1
@@ -106,19 +116,26 @@ SELECT	t.intItemId
 							END
 		,dblCost
 		,intOwnershipType	= 2
+		,Lot.strContainerNo
+		,Lot.strMarkings
+		,ItemUOM.dblStandardWeight
 FROM	
 	tblICInventoryTransactionStorage t 
 	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
 	INNER JOIN tblICLot Lot ON Lot.intLotId = t.intLotId
+	INNER JOIN tblICItemUOM ItemUOM ON Lot.intItemId = ItemUOM.intItemId
 WHERE 
 	t.intItemId = @intItemId
 	AND IL.intLocationId = @intLocationId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	--AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	AND (@intSubLocationId IS NULL OR  @intSubLocationId = Lot.intSubLocationId)
 	AND (@intStorageLocationId IS NULL OR  @intStorageLocationId = Lot.intStorageLocationId)
 	AND (@intLotId IS NULL OR @intLotId = t.intLotId)
 	AND (@strLotNumber IS NULL OR Lot.strLotNumber LIKE @strLotNumber + '%' COLLATE Latin1_General_CI_AS)
 	AND @intOwnershipType = 2
+
+
 
 -- Return the result back. 
 SELECT 
@@ -158,7 +175,12 @@ SELECT
 	,dblStorageAvailableQty			= SUM(t.dblUnitStorage) 
 	,dblCost						= MAX(t.dblCost)
 	,Lot.strWarehouseRefNo
-	,strCondition					= COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition) 
+	,strCondition					= COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition)
+	,Lot.strContainerNo
+	,Lot.strMarkings
+	,ItemUOM.dblStandardWeight
+	,dblReservedQty					= ISNULL(Reserve.dblTotalQty, 0)
+	,dblAvailableQty				= ISNULL(Lot.dblQty, 0) - ISNULL(Reserve.dblTotalQty, 0)
 FROM 
 	@tblInventoryTransaction t 
 	INNER JOIN tblICItem i 
@@ -190,6 +212,28 @@ FROM
 		ON ItemOwner.intItemOwnerId = Lot.intItemOwnerId
 	LEFT JOIN tblEMEntity LotEntity
 		ON LotEntity.intEntityId = ItemOwner.intOwnerId
+	LEFT JOIN (
+		SELECT intItemId
+			, intItemLocationId
+			, intItemUOMId
+			, intSubLocationId
+			, intStorageLocationId
+			, intLotId
+			, dblTotalQty = SUM(dblQty)
+		FROM tblICStockReservation
+		WHERE ysnPosted = 0
+		GROUP BY intItemId
+			, intItemLocationId
+			, intItemUOMId
+			, intSubLocationId
+			, intStorageLocationId
+			, intLotId
+	) Reserve ON Reserve.intItemId = Lot.intItemId
+	AND Reserve.intItemLocationId = Lot.intItemLocationId
+	AND Reserve.intItemUOMId = Lot.intItemUOMId
+	AND Reserve.intSubLocationId = Lot.intSubLocationId
+	AND Reserve.intStorageLocationId = Lot.intStorageLocationId
+	AND Reserve.intLotId = Lot.intLotId
 GROUP BY i.intItemId
 		,i.strItemNo
 		,ItemUOM.intItemUOMId
@@ -211,6 +255,9 @@ GROUP BY i.intItemId
 		,Lot.dblWeight
 		,Lot.dblWeightPerQty
 		,Lot.intWeightUOMId
+		,Lot.strContainerNo
+		,Lot.strMarkings
+		,Lot.dblQty
 		,wUOM.strUnitMeasure
 		,LotWeightUOM.dblUnitQty
 		,Lot.intLotStatusId
@@ -223,5 +270,7 @@ GROUP BY i.intItemId
 		,CostMethod.strCostingMethod
 		,Lot.strWarehouseRefNo
 		,Lot.strCondition
+		,ItemUOM.dblStandardWeight
+		,Reserve.dblTotalQty
 HAVING	(@ysnHasStockOnly = 1 AND (SUM(t.dblQty) <> 0 OR SUM(t.dblUnitStorage) <> 0))
-		OR @ysnHasStockOnly = 0 
+		OR @ysnHasStockOnly = 0

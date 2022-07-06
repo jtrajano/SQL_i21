@@ -46,7 +46,8 @@ BEGIN
 		,[dtmDate]
 		,[strMemo]
 		,[intEntityId]
-		,[intCompanyLocationId])
+		,[intCompanyLocationId]
+		,[ysnCCTransaction])
 	SELECT 
 		[intBankAccountId] = ccSiteHeader.intBankAccountId
 		,[strTransactionId] = @strTransactionId
@@ -56,6 +57,7 @@ BEGIN
 		,[strMemo] = ccSiteHeader.strCcdReference
 		,[intEntityId] = @userId
 		,[intCompanyLocationId] = ccSiteHeader.intCompanyLocationId
+		,[ysnCCTransaction] = 1
 	FROM tblCCSiteHeader ccSiteHeader
 	INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
 	LEFT JOIN tblAPVendor apVendor ON apVendor.[intEntityId] =  ccVendorDefault.intVendorId

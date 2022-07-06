@@ -208,27 +208,18 @@ DECLARE	 @Price							NUMERIC(18,6)
 				--Item Standard Pricing
 				IF ISNULL(@UOMQuantity,0) = 0
 					SET @UOMQuantity = 1
-				SET @Price = @UOMQuantity *	
-									( 
-										SELECT
-											P.dblSalePrice
-										FROM
-											tblICItemPricing P
-										WHERE
-											P.intItemId = @ItemId
-											AND P.intItemLocationId = @ItemLocationId
-										)
 
-				SET @OriginalGrossPrice = @UOMQuantity *	
-									( 
-										SELECT
-											P.dblDefaultGrossPrice
-										FROM
-											tblICItemPricing P
-										WHERE
-											P.intItemId = @ItemId
-											AND P.intItemLocationId = @ItemLocationId
-										)
+				SELECT @Price = ep.dblRetailPrice
+				FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, @ItemUOMId, DEFAULT) ep
+
+				IF ISNULL(@Price, 0) = 0
+				BEGIN
+					SET @Price = @UOMQuantity *	(SELECT	P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
+				END
+
+				SELECT @OriginalGrossPrice = @UOMQuantity * P.dblDefaultGrossPrice
+				FROM tblICItemPricing P
+				WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
 
 				IF @Price < @ContractPrice
 				BEGIN
@@ -365,6 +356,13 @@ DECLARE	 @Price							NUMERIC(18,6)
 	IF @ItemPricingOnly = 0								
 	BEGIN
 	--Customer Special Pricing		
+		IF ISNULL(@ShipToLocationId, 0) = 0 AND @CustomerId IS NOT NULL
+			BEGIN
+				SELECT @ShipToLocationId = intShipToId
+				FROM tblARCustomer 
+				WHERE intEntityId = @CustomerId 
+			END
+
 		IF @GetAllAvailablePricing = 0 
 			BEGIN
 				SELECT TOP 1
@@ -725,9 +723,19 @@ DECLARE	 @Price							NUMERIC(18,6)
 		END	
 	
 	SET @dblCalculatedExchangeRate = ISNULL(@dblCalculatedExchangeRate, 1)
-	SET @Price = @UOMQuantity *	(SELECT P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
+	SELECT @Price = ep.dblRetailPrice
+	FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, @ItemUOMId, DEFAULT) ep
+
+	IF ISNULL(@Price, 0) = 0
+	BEGIN
+		SET @Price = @UOMQuantity *	(SELECT	P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
+	END
+
 	SET @Price = (CASE WHEN @ysnToBse = 1 THEN @Price / @dblCalculatedExchangeRate ELSE @Price * @dblCalculatedExchangeRate END)
-	SET @OriginalGrossPrice = @UOMQuantity * (SELECT P.dblDefaultGrossPrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)	
+	SELECT @OriginalGrossPrice = @UOMQuantity * P.dblDefaultGrossPrice
+	FROM tblICItemPricing P
+	WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
+
 	SET @OriginalGrossPrice = (CASE WHEN @ysnToBse = 1 THEN @OriginalGrossPrice / @dblCalculatedExchangeRate ELSE @OriginalGrossPrice * @dblCalculatedExchangeRate END)
 
 	IF(@Price IS NOT NULL)

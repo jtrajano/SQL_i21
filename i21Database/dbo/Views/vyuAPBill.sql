@@ -25,11 +25,13 @@ SELECT
 	A.ysnReadyForPayment,
 	ysnRestricted = ISNULL((SELECT TOP 1 ysnRestricted FROM dbo.tblAPBillDetail H WHERE A.intBillId = H.intBillId),0),
 	A.dtmDate,
+	FP.strPeriod,
 	A.dtmDatePaid,
 	A.dtmBillDate,
 	A.dtmDueDate,
 	A.strVendorOrderNumber,
 	A.strReference,
+	A.strCreatedWith,
 	A.dtmDateCreated,
 	A.intTransactionType,
 	A.intEntityVendorId,
@@ -60,7 +62,7 @@ SELECT
 	--CASE WHEN A.ysnForApproval = 1 THEN G.strApprovalList ELSE NULL END AS strApprover,
 	Approvals.strName as strApprover,
 	Approvals.dtmApprovalDate,
-	'' COLLATE Latin1_General_CI_AS AS strBatchId,--GL.strBatchId,
+	'' AS strBatchId,--GL.strBatchId,
 	EL.strLocationName AS strVendorLocation,
 	strPayeeName = (SELECT EL2.strCheckPayeeName FROM dbo.tblEMEntityLocation EL2 WHERE EL2.intEntityLocationId = A.intPayToAddressId),
 	A.strComment,
@@ -96,11 +98,14 @@ FROM
 		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
 		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
 		WHERE detail.intBillId = A.intBillId
+		ORDER BY detail.intLineNo
 	) commodity
 	LEFT JOIN dbo.tblSMShipVia SV
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN
-		ON EN.intEntityId = A.intContactId	
+		ON EN.intEntityId = A.intContactId
+	LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+			ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate	
 	OUTER APPLY dbo.fnAPGetVoucherLatestPayment(A.intBillId) Payment
 	-- LEFT JOIN
 	-- (

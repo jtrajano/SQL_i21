@@ -8,6 +8,7 @@
 	,@intEntityCustomerId	AS INT 				= NULL
 	,@intEntityCardInfoId 	AS INT 				= NULL
 	,@intPaymentId 			AS INT 				= NULL
+	,@strPaymentMethod 		AS NVARCHAR(50)		= NULL
 	,@strPaymentIdNew 		AS NVARCHAR(50) 	= NULL OUTPUT
 	,@intPaymentIdNew 		AS INT 				= NULL OUTPUT
 	,@ErrorMessage 			AS NVARCHAR(250)	= NULL OUTPUT
@@ -45,7 +46,7 @@ BEGIN
 
 	SELECT TOP 1 @intPaymentMethodId = intPaymentMethodID
 	FROM tblSMPaymentMethod
-	WHERE strPaymentMethod = 'ACH'
+	WHERE strPaymentMethod = @strPaymentMethod
 
 	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0
 		BEGIN
@@ -65,6 +66,27 @@ BEGIN
 			IF ISNULL(@intBankAccountId, 0) = 0
 				BEGIN
 					SET @ErrorMessage = 'Location: ' + @strLocationName + ' bank account with ACH file format setup is required for payment with ACH payment method!'
+					RAISERROR(@ErrorMessage, 16, 1);
+					GOTO Exit_Routine
+				END
+		END
+	ELSE
+		BEGIN
+			DECLARE @strCreditCardConvenienceFee NVARCHAR(100) = NULL
+				   ,@intPaymentsLocationId INT = NULL
+
+			SELECT @intPaymentsLocationId = intPaymentsLocationId,
+				   @strCreditCardConvenienceFee = strCreditCardConvenienceFee
+			FROM tblSMCompanyPreference
+
+			IF @intPaymentsLocationId IS NOT NULL
+			BEGIN
+				SET @intCompanyLocationId = @intPaymentsLocationId
+			END
+
+			IF ISNULL(@intPaymentsLocationId, 0) = 0 AND ISNULL(@strCreditCardConvenienceFee, '') != 'None'
+				BEGIN
+					SET @ErrorMessage = 'Payments Location is required when processing Credit Card!'
 					RAISERROR(@ErrorMessage, 16, 1);
 					GOTO Exit_Routine
 				END
@@ -99,15 +121,17 @@ BEGIN
 			SELECT strInvoiceNumber	= INVOICENUM.POS COLLATE Latin1_General_CI_AS
 				, dblPayment		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, PAYMENT.POS + 1, DISCOUNT.POS - PAYMENT.POS - 1))
 				, dblDiscount		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, DISCOUNT.POS + 1, INTEREST.POS - DISCOUNT.POS -1))
-				, dblInterest		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, INTEREST.POS + 1, 100))
+				, dblInterest		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, INTEREST.POS + 1, CREDITCARDFEE.POS - INTEREST.POS -1))
+				, dblCreditCardFee	= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, CREDITCARDFEE.POS + 1, 100))
 			INTO #INVOICEANDPAYMENT
 			FROM #RAWVALUE
 			CROSS APPLY (SELECT LEFT(strRawValue, CHARINDEX('|', strRawValue) - 1)) AS INVOICENUM(POS)
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue))) AS PAYMENT(POS)
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, PAYMENT.POS+1))) AS DISCOUNT(POS)
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, DISCOUNT.POS+1))) AS INTEREST(POS)
+			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, INTEREST.POS+1))) AS CREDITCARDFEE(POS)
 
-			SELECT @dblTotalPayment = SUM(ISNULL(dblPayment, 0)) 
+			SELECT @dblTotalPayment = SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblCreditCardFee, 0))
 			FROM #INVOICEANDPAYMENT
 			
 			INSERT INTO @EntriesForPayment (
@@ -129,6 +153,7 @@ BEGIN
 				, dblAmountPaid
 				, ysnPost
 				, intEntityId
+				, intEntityCardInfoId
 				, intInvoiceId
 				, strTransactionType
 				, strTransactionNumber
@@ -143,6 +168,7 @@ BEGIN
 				, dblBaseWriteOffAmount
 				, dblInterest
 				, dblPayment
+				, dblCreditCardFee
 				, dblAmountDue
 				, dblBaseAmountDue
 				, strInvoiceReportNumber
@@ -163,7 +189,7 @@ BEGIN
 				, intCurrencyId					= INVOICE.intCurrencyId
 				, dtmDatePaid					= GETDATE()
 				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
-				, strPaymentMethod				= ISNULL(@strCreditCardNumber, 'ACH')
+				, strPaymentMethod				= ISNULL(@strCreditCardNumber, @strPaymentMethod)
 				, strPaymentInfo				= NULL
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
@@ -171,6 +197,7 @@ BEGIN
 				, dblAmountPaid					= ISNULL(@dblTotalPayment, 0)
 				, ysnPost						= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
+				, intEntityCardInfoId			= NULLIF(@intEntityCardInfoId, 0)
 				, intInvoiceId					= INVOICE.intInvoiceId
 				, strTransactionType			= INVOICE.strTransactionType
 				, strTransactionNumber			= INVOICE.strTransactionNumber
@@ -185,6 +212,7 @@ BEGIN
 				, dblBaseWriteOffAmount			= 0
 				, dblInterest					= PAYMENTS.dblInterest
 				, dblPayment					= PAYMENTS.dblPayment
+				, dblCreditCardFee				= PAYMENTS.dblCreditCardFee
 				, dblAmountDue					= (INVOICE.dblAmountDue + PAYMENTS.dblInterest) - PAYMENTS.dblPayment - PAYMENTS.dblDiscount
 				, dblBaseAmountDue				= (INVOICE.dblBaseAmountDue + PAYMENTS.dblInterest) - PAYMENTS.dblPayment - PAYMENTS.dblDiscount
 				, strInvoiceReportNumber		= INVOICE.strInvoiceReportNumber
@@ -238,7 +266,7 @@ BEGIN
 				, intCurrencyId					= C.intCurrencyId
 				, dtmDatePaid					= GETDATE()
 				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
-				, strPaymentMethod				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN 'ACH' ELSE @strCreditCardNumber END
+				, strPaymentMethod				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @strPaymentMethod ELSE @strCreditCardNumber END
 				, strPaymentInfo				= NULL
 				, strNotes						= 'Prepayment from Portal.'
 				, intAccountId					= @intUndepositedFundId
@@ -285,6 +313,11 @@ END
 --================================================================
 IF @strAction = 'Post'
 BEGIN
+	UPDATE tblARPayment 
+	SET ysnProcessCreditCard = 1
+	  , intCurrentStatus = 5
+	WHERE intPaymentId = @intPaymentId
+
 	EXEC [dbo].[uspARPostPayment]
 			@batchId = NULL,
 			@post = 1,
@@ -304,7 +337,7 @@ BEGIN
 	--Set the Card Info Id and Process Credit Card
 	UPDATE tblARPayment 
 	SET intEntityCardInfoId = @intEntityCardInfoId
-	  , ysnProcessCreditCard = 1 
+	  --, ysnProcessCreditCard = 1 
 	  , intCurrentStatus = 5
 	WHERE intPaymentId = @intPaymentId
 

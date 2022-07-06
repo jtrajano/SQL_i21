@@ -139,7 +139,7 @@ WITH vouchertransactions AS ( --voucher transactions
 )
 
 SELECT
-	[Description] COLLATE Latin1_General_CI_AS AS [Description]
+	[Description]
 	,[Total]
 FROM (
 	SELECT 

@@ -25,5 +25,6 @@ CREATE TABLE [dbo].[tblRestApiSchemaItemContract]
     dblContractedQty NUMERIC(32,20) NOT NULL,
     dblPrice NUMERIC(18,6) NULL,
     strTaxGroup NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
+    intRowNumber INT NULL,
     CONSTRAINT PK_tblRestApiSchemaItemContract PRIMARY KEY (guiRestApiSchemaId)
 )

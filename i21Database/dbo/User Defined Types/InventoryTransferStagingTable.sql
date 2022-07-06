@@ -16,7 +16,13 @@ CREATE TYPE [dbo].[InventoryTransferStagingTable] AS TABLE
 	,[intStatusId]			INT NOT NULL										-- Values can be: 1 (Open), 2 (Partial), 3 (Closed), 4 (Short Closed). 
     ,[intShipViaId]			INT NULL											-- Ship Via from Entity. 
     ,[intFreightUOMId]		INT NULL											-- Unit of Measure. 
-	,[strActualCostId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
+	,[strActualCostId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL		-- Direct Cost Id
+	,[intBrokerId]			INT NULL
+    ,[strBolNumber]			NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL
+    ,[dtmBolDate]			DATETIME NULL
+    ,[dtmBolReceivedDate]	DATETIME NULL
+	,[strTrailerId]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
+	,[strERPTransferNo]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
 
 	-- Detail 
 	,[intItemId]				INT NOT NULL									-- Item id to transfer

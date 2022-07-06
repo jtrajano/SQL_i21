@@ -22,7 +22,10 @@
 	[intConcurrencyId]							[int] DEFAULT 1,
 
 	CONSTRAINT [PK_tblSCHReportDistribution] PRIMARY KEY CLUSTERED ([intReportDistributionId] ASC),
-	CONSTRAINT [UC_tblSCHReportDistribution] UNIQUE (strDescription)
+	CONSTRAINT [UC_tblSCHReportDistribution] UNIQUE (strDescription),
+
+	CONSTRAINT [FK_tblSCHReportDistribution_tblSCHSchedule_intScheduleId] FOREIGN KEY (intScheduleId) REFERENCES tblSCHSchedule(intScheduleId),
+	CONSTRAINT [FK_tblSCHReportDistribution_tblDBPanel_intPanelId] FOREIGN KEY (intDashboardPanelId) REFERENCES tblDBPanel(intPanelId),
 )
 GO
 

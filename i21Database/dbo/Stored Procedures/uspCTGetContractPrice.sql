@@ -139,7 +139,7 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 									WHERE
 										AD.intContractDetailId = @intContractDetailId
 										and isnull(AD.intInventoryShipmentChargeId,0) = 0
-										and isnull(AD.ysnReturned,0) = 0
+                                        and isnull(AD.ysnReturned,0) = 0
 										and I.strTransactionType = 'Invoice'
 								)
 							else

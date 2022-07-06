@@ -277,6 +277,7 @@ DECLARE  @Id									INT
 		,@ItemShipmentPurchaseSalesContractId	INT
 		,@ItemWeightUOMId						INT
 		,@ItemWeight							NUMERIC(38, 20)
+		,@ItemStandardWeight					NUMERIC(38, 20)
 		,@ItemShipmentGrossWt					NUMERIC(38, 20)
 		,@ItemShipmentTareWt					NUMERIC(38, 20)
 		,@ItemShipmentNetWt						NUMERIC(38, 20)
@@ -480,6 +481,7 @@ BEGIN
 		,@ItemShipmentPurchaseSalesContractId = (CASE WHEN @GroupingOption = 0 THEN [intShipmentPurchaseSalesContractId] ELSE NULL END)
 		,@ItemWeightUOMId				= (CASE WHEN @GroupingOption = 0 THEN [intItemWeightUOMId] ELSE NULL END)
 		,@ItemWeight					= (CASE WHEN @GroupingOption = 0 THEN [dblItemWeight] ELSE NULL END)
+		,@ItemStandardWeight			= (CASE WHEN @GroupingOption = 0 THEN [dblStandardWeight] ELSE NULL END)
 		,@ItemShipmentGrossWt			= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentGrossWt] ELSE NULL END)
 		,@ItemShipmentTareWt			= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentTareWt] ELSE NULL END)
 		,@ItemShipmentNetWt				= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentNetWt] ELSE NULL END)
@@ -518,7 +520,7 @@ BEGIN
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
 		AND ([intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND ([intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND ([intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL([intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST([dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -747,6 +749,7 @@ BEGIN
 			,@ItemShipmentPurchaseSalesContractId = @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
 			,@ItemWeight					= @ItemWeight
+			,@ItemStandardWeight			= @ItemStandardWeight
 			,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 			,@ItemShipmentTareWt			= @ItemShipmentTareWt
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt		
@@ -841,7 +844,7 @@ BEGIN
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -925,6 +928,7 @@ BEGIN
 					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 					,@ItemWeightUOMId				= [intItemWeightUOMId]
 					,@ItemWeight					= [dblItemWeight]
+					,@ItemStandardWeight			= [dblStandardWeight]
 					,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
 					,@ItemShipmentTareWt			= [dblShipmentTareWt]
 					,@ItemShipmentNetWt				= [dblShipmentNetWt]
@@ -1027,6 +1031,7 @@ BEGIN
 						,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 						,@ItemWeightUOMId				= @ItemWeightUOMId
 						,@ItemWeight					= @ItemWeight
+						,@ItemStandardWeight			= @ItemStandardWeight
 						,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 						,@ItemShipmentTareWt			= @ItemShipmentTareWt
 						,@ItemShipmentNetWt				= @ItemShipmentNetWt
@@ -1217,7 +1222,7 @@ BEGIN
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -1525,7 +1530,7 @@ BEGIN TRY
 			[tblARInvoice]
 		SET 
 			 [strTransactionType]		= CASE WHEN ISNULL(@TransactionType, '') NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment', 'Proforma Invoice') THEN [tblARInvoice].[strTransactionType] ELSE @TransactionType END
-			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling') THEN [tblARInvoice].[strType] ELSE @Type END
+			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'Agronomy') THEN [tblARInvoice].[strType] ELSE @Type END
 			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
 			--,[intAccountId]				= @AccountId 
@@ -1704,6 +1709,7 @@ BEGIN TRY
 						,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 						,@ItemWeightUOMId				= [intItemWeightUOMId]
 						,@ItemWeight					= [dblItemWeight]
+						,@ItemStandardWeight			= [dblStandardWeight]
 						,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
 						,@ItemShipmentTareWt			= [dblShipmentTareWt]
 						,@ItemShipmentNetWt				= [dblShipmentNetWt]
@@ -1821,6 +1827,7 @@ BEGIN TRY
 							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 							,@ItemWeightUOMId				= @ItemWeightUOMId
 							,@ItemWeight					= @ItemWeight
+							,@ItemStandardWeight			= @ItemStandardWeight
 							,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 							,@ItemDestinationGradeId		= @ItemDestinationGradeId
 							,@ItemDestinationWeightId		= @ItemDestinationWeightId
@@ -2031,6 +2038,7 @@ BEGIN TRY
 					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 					,@ItemWeightUOMId				= [intItemWeightUOMId]
 					,@ItemWeight					= [dblItemWeight]
+					,@ItemStandardWeight			= [dblStandardWeight]
 					,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
 					,@ItemShipmentTareWt			= [dblShipmentTareWt]
 					,@ItemShipmentNetWt				= [dblShipmentNetWt]
@@ -2196,6 +2204,7 @@ BEGIN TRY
 						,[intShipmentPurchaseSalesContractId]	= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentPurchaseSalesContractId ELSE [intShipmentPurchaseSalesContractId] END
 						,[intItemWeightUOMId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemWeightUOMId ELSE [intItemWeightUOMId] END
 						,[dblItemWeight]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemWeight ELSE [dblItemWeight] END
+						,[dblStandardWeight]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemStandardWeight ELSE [dblStandardWeight] END
 						,[dblShipmentGrossWt]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentGrossWt ELSE [dblShipmentGrossWt] END
 						,[dblShipmentTareWt]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentTareWt ELSE [dblShipmentTareWt] END
 						,[dblShipmentNetWt]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentNetWt ELSE [dblShipmentNetWt] END

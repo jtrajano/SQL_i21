@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAPRestApiVoucherDetail]
+CREATE VIEW [dbo].[vyuAPRestApiVoucherDetail]
 AS
 SELECT
 	  bd.intBillDetailId intVoucherDetailId
@@ -102,6 +102,3 @@ LEFT JOIN tblSMCurrencyExchangeRateType exchange ON bd.intCurrencyExchangeRateTy
 LEFT JOIN tblLGLoadDetail loadDetail ON bd.intLoadDetailId = loadDetail.intLoadDetailId
 LEFT JOIN tblLGLoad load ON loadDetail.intLoadId = load.intLoadId
 LEFT JOIN vyuAPBillDetailTax tax ON bd.intBillDetailId = tax.intBillDetailId
-GO
-
-

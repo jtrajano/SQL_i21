@@ -316,6 +316,22 @@ BEGIN
 	RETURN -80202
 END 
 
+-- Check if the storage location is invalid 
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@intItemId = Errors.intItemId 
+		,@intErrorCode = Errors.intErrorCode
+		,@strText = Errors.strText
+FROM	#FoundErrors Errors 
+WHERE	intErrorCode IN (80261)
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- 'The Storage Location invalid in {Storage Unit} for {Item No}.'
+	EXEC uspICRaiseError @strText
+	RETURN -@intErrorCode
+END 
+
 -- Check for non-inventory items. 
 SELECT @strItemNo = NULL, @intItemId = NULL
 SELECT TOP 1 

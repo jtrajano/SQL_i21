@@ -27,8 +27,16 @@ SELECT intInventoryTransferId
 	, InvTransfer.intConcurrencyId
 	, ShipVia.strShipVia
 	, InvTransfer.intShipViaId
+	, InvTransfer.dtmBolDate
+	, InvTransfer.dtmBolReceivedDate
+	, InvTransfer.strBolNumber
+	, InvTransfer.intBrokerId
+	, Broker.strName AS strBroker
+	, InvTransfer.strTrailerId
+	, InvTransfer.strERPTransferNo
 FROM tblICInventoryTransfer InvTransfer
 	LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = InvTransfer.intTransferredById
+	LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = InvTransfer.intBrokerId
 	LEFT JOIN tblSMCompanyLocation FromLocation ON FromLocation.intCompanyLocationId = InvTransfer.intFromLocationId
 	LEFT JOIN tblSMCompanyLocation ToLocation ON ToLocation.intCompanyLocationId = InvTransfer.intToLocationId
 	LEFT JOIN tblICStatus InvStatus ON InvStatus.intStatusId = InvTransfer.intStatusId

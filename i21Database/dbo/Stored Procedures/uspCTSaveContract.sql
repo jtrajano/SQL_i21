@@ -270,6 +270,12 @@ BEGIN TRY
 
 		IF @intConcurrencyId = 1
 		BEGIN
+			-- Newly created sequence - CT-5847
+			EXEC uspICAddTransactionLinkOrigin @intTransactionId = @intContractHeaderId
+				, @strTransactionNo = @strContractNumber
+				, @strTransactionType = 'Contract'
+				, @strModuleName = 'Contract Management'
+
 			UPDATE @CDTableUpdate SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
 		END
 
@@ -409,7 +415,21 @@ BEGIN TRY
 		END
 		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
 
-		EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+		if (@ysnMultiplePriceFixation = 1)
+		begin
+			declare @intPriceContractId int;
+
+			select top 1 @intPriceContractId = intPriceContractId from tblCTPriceFixationMultiplePrice where intContractDetailId = @intContractDetailId;
+			
+			exec uspCTProcessPriceFixationMultiplePrice
+				@intPriceContractId = @intPriceContractId
+				,@intUserId = @intLastModifiedById
+
+		end
+		else
+		begin
+			EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+		end
 
 		IF	@intContractStatusId	=	1	AND
 			@ysnOnceApproved		=	1	AND
@@ -481,7 +501,7 @@ BEGIN TRY
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END
 		ELSE IF @dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots <> @dblLotsFixed AND
-			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 1)
+			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId IN(1,2))
 		BEGIN
 			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 		END		

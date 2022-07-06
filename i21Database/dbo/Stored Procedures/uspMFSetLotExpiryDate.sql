@@ -26,6 +26,14 @@ BEGIN TRY
 		,@strDescription NVARCHAR(MAX)
 		,@intTransactionCount INT
 		,@ysnApplyTransactionByParentLot BIT
+		,@intUnitMeasureId INT
+		,@strUserName NVARCHAR(50)
+		,@strItemNo NVARCHAR(50)
+		,@strSubLocationName NVARCHAR(50)
+		,@strName NVARCHAR(50)
+		,@strParentLotNumber NVARCHAR(50)
+		,@strLotOrigin NVARCHAR(50)
+		,@strAdjustmentNo NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -62,7 +70,7 @@ BEGIN TRY
 		FROM tblICLot
 		WHERE intParentLotId = @intParentLotId
 			AND intItemId = @intItemId
-			AND intLocationId=@intLocationId
+			AND intLocationId = @intLocationId
 	END
 	ELSE
 	BEGIN
@@ -134,8 +142,8 @@ BEGIN TRY
 			,intLocationId
 		FROM tblICLot
 		WHERE intParentLotId = @intParentLotId
-		AND intItemId = @intItemId
-			AND intLocationId=@intLocationId
+			AND intItemId = @intItemId
+			AND intLocationId = @intLocationId
 
 		SELECT @intLotRecordId = MIN(intLotRecordId)
 		FROM @tblLotsWithSameParentLot
@@ -185,6 +193,74 @@ BEGIN TRY
 				,@intLocationId = @intLocationId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
+			SELECT @intUnitMeasureId = NULL
+				,@strUserName = NULL
+				,@strItemNo = NULL
+				,@strSubLocationName = NULL
+				,@strName = NULL
+				,@strParentLotNumber = NULL
+				,@strLotOrigin = NULL
+				,@strAdjustmentNo = NULL
+
+			SELECT @strUserName = strUserName
+			FROM tblSMUserSecurity
+			WHERE intEntityId = @intUserId
+
+			SELECT @strItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intItemId
+
+			SELECT @strLotOrigin = strLotOrigin
+			FROM tblSMCompanyLocation
+			WHERE intCompanyLocationId = @intLocationId
+
+			SELECT @strSubLocationName = strSubLocationName
+			FROM tblSMCompanyLocationSubLocation
+			WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+			SELECT @strName = strName
+			FROM tblICStorageLocation
+			WHERE intStorageLocationId = @intStorageLocationId
+
+			SELECT @strParentLotNumber = strParentLotNumber
+			FROM tblICParentLot
+			WHERE intParentLotId = @intParentLotId
+
+			SELECT @strAdjustmentNo = strAdjustmentNo
+			FROM dbo.tblICInventoryAdjustment
+			WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+			INSERT INTO tblIPLotPropertyFeed (
+				strCompanyLocation
+				,intActionId
+				,dtmCreatedDate
+				,strCreatedByUser
+				,intTransactionTypeId
+				,strStorageLocation
+				,strItemNo
+				,strMotherLotNo
+				,strLotNo
+				,strStorageUnit
+				,strAdjustmentNo
+				,dtmNewExpiryDate
+				,strReasonCode
+				,strNotes
+				)
+			SELECT strCompanyLocation = @strLotOrigin
+				,intActionId = 1
+				,dtmCreatedDate = @dtmDate
+				,strCreatedByUser = @strUserName
+				,intTransactionTypeId = 18
+				,strStorageLocation = @strSubLocationName
+				,strItemNo = @strItemNo
+				,strMotherLotNo = @strParentLotNumber
+				,strLotNo = @strLotNumber
+				,strStorageUnit = @strName
+				,strAdjustmentNo = @strAdjustmentNo
+				,dtmNewExpiryDate = @dtmNewExpiryDate
+				,strReasonCode = @strReasonCode
+				,strNotes = @strNotes
+
 			SELECT @intLotRecordId = MIN(intLotRecordId)
 			FROM @tblLotsWithSameParentLot
 			WHERE intLotRecordId > @intLotRecordId
@@ -222,6 +298,65 @@ BEGIN TRY
 			,@strReason = @strReasonCode
 			,@intLocationId = @intLocationId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+		SELECT @strUserName = strUserName
+		FROM tblSMUserSecurity
+		WHERE intEntityId = @intUserId
+
+		SELECT @strItemNo = strItemNo
+		FROM tblICItem
+		WHERE intItemId = @intItemId
+
+		SELECT @strLotOrigin = strLotOrigin
+		FROM tblSMCompanyLocation
+		WHERE intCompanyLocationId = @intLocationId
+
+		SELECT @strSubLocationName = strSubLocationName
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+		SELECT @strName = strName
+		FROM tblICStorageLocation
+		WHERE intStorageLocationId = @intStorageLocationId
+
+		SELECT @strParentLotNumber = strParentLotNumber
+		FROM tblICParentLot
+		WHERE intParentLotId = @intParentLotId
+
+		SELECT @strAdjustmentNo = strAdjustmentNo
+		FROM dbo.tblICInventoryAdjustment
+		WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+		INSERT INTO tblIPLotPropertyFeed (
+			strCompanyLocation
+			,intActionId
+			,dtmCreatedDate
+			,strCreatedByUser
+			,intTransactionTypeId
+			,strStorageLocation
+			,strItemNo
+			,strMotherLotNo
+			,strLotNo
+			,strStorageUnit
+			,strAdjustmentNo
+			,dtmNewExpiryDate
+			,strReasonCode
+			,strNotes
+			)
+		SELECT strCompanyLocation = @strLotOrigin
+			,intActionId = 1
+			,dtmCreatedDate = @dtmDate
+			,strCreatedByUser = @strUserName
+			,intTransactionTypeId = 18
+			,strStorageLocation = @strSubLocationName
+			,strItemNo = @strItemNo
+			,strMotherLotNo = @strParentLotNumber
+			,strLotNo = @strLotNumber
+			,strStorageUnit = @strName
+			,strAdjustmentNo = @strAdjustmentNo
+			,dtmNewExpiryDate = @dtmNewExpiryDate
+			,strReasonCode = @strReasonCode
+			,strNotes = @strNotes
 	END
 
 	IF @intTransactionCount = 0

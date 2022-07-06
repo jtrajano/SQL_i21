@@ -1,13 +1,16 @@
 ﻿PRINT 'Import Customer Scripts'
 GO
 
-IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportCustomer')
-	DROP PROCEDURE uspARImportCustomer
-GO
-
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
+IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG') = 1
 BEGIN
 
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportCustomer')
+BEGIN
+	PRINT 'DROP PROCEDURE uspARImportCustomer'
+	DROP PROCEDURE uspARImportCustomer
+END
+
+	PRINT 'CREATE PROCEDURE uspARImportCustomer'
 EXEC(
 '
 CREATE PROCEDURE [dbo].[uspARImportCustomer]
@@ -915,9 +918,16 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	)
 END
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
+IF (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT') = 1
 BEGIN
 
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportCustomer')
+BEGIN
+	PRINT 'DROP PROCEDURE uspARImportCustomer'
+	DROP PROCEDURE uspARImportCustomer
+END
+
+	PRINT 'CREATE PROCEDURE uspARImportCustomer'
 EXEC(
 '
 CREATE PROCEDURE [dbo].[uspARImportCustomer]

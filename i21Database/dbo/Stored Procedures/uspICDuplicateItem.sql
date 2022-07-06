@@ -169,7 +169,8 @@ BEGIN
 		intTonnageTaxUOMId, 
 		ysnLotWeightsRequired, 
 		dtmDateCreated,
-		ysnSeparateStockForUOMs
+		ysnSeparateStockForUOMs,
+		intComputeItemTotalOption
 	)
 	SELECT @NewItemNo,
 		strType,
@@ -308,7 +309,8 @@ BEGIN
 		intTonnageTaxUOMId,
 		ysnLotWeightsRequired = CASE WHEN strLotTracking = 'No' THEN 0 ELSE ysnLotWeightsRequired END,
 		GETUTCDATE(),
-		ysnSeparateStockForUOMs
+		ysnSeparateStockForUOMs,
+		intComputeItemTotalOption
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
@@ -445,7 +447,9 @@ BEGIN
 		intSort,
 		ysnStorageUnitRequired,
 		intCostAdjustmentType,
-		intAllowZeroCostTypeId
+		ysnActive,
+		intAllowZeroCostTypeId,
+		dblTransactionQtyLimit
 	)
 	SELECT @NewItemId,
 		intLocationId,
@@ -509,7 +513,9 @@ BEGIN
 		intSort,
 		ysnStorageUnitRequired,
 		intCostAdjustmentType,
-		intAllowZeroCostTypeId
+		ysnActive,
+		intAllowZeroCostTypeId,
+		dblTransactionQtyLimit
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------
@@ -638,6 +644,7 @@ BEGIN
 		dblDiscountThruAmount,
 		dblAccumulatedQty,
 		dblAccumulatedAmount,
+		dblCost,
 		intSort )
 	SELECT @NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
@@ -653,6 +660,7 @@ BEGIN
 		dblDiscountThruAmount,
 		dblAccumulatedQty,
 		dblAccumulatedAmount,
+		dblCost,
 		intSort 
 	FROM tblICItemSpecialPricing
 	WHERE intItemId = @ItemId

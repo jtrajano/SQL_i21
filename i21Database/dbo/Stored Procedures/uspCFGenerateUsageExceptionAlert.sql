@@ -119,7 +119,13 @@ BEGIN
 		,dtmTransactionDate = B.dtmTransactionDate
 		,dblQuantity = B.dblQuantity
 		,dblTotalAmount = B.dblTotal
-		,strDriverPin = B.strDriverPin
+		,strDriverPin = (CASE 
+							WHEN ISNULL(B.strVehicleNumber,'') != '' 
+							THEN B.strVehicleNumber
+							WHEN ISNULL(B.strVehicleNumber,'') = '' AND ISNULL(B.strDriverPin,'') != ''
+							THEN B.strDriverPin
+							ELSE ''
+						END)
 		,ysnSendEmail = CAST((CASE WHEN ISNULL(B.strEmail,'') = '' THEN 0 ELSE 1 END) AS BIT)
 		,intTransactionCount = C.intTransactionCount
 		,intUserId = @intEntityId

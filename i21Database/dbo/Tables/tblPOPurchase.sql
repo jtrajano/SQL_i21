@@ -19,6 +19,7 @@
 	[intContractHeaderId] INT NULL,
 	[intTransactionType] INT NOT NULL DEFAULT 5,
 	[intSubCurrencyCents] INT NOT NULL DEFAULT 0,
+	[dblTotalWeight] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 	[dblTotal] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 	[dblSubtotal] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 	[dblShipping] NUMERIC(18, 6) NOT NULL DEFAULT 0,

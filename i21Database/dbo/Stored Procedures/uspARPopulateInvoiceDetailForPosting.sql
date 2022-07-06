@@ -13,11 +13,27 @@
     ,@AccrueLicense     BIT             = 0
     ,@TransType         NVARCHAR(25)    = 'all'
     ,@UserId            INT				= 1
+
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
+
+--PARAMETER SNIFFING
+DECLARE @ParamTemp             NVARCHAR(MAX)	= @Param
+      , @BeginDateTemp         DATE				= @BeginDate
+      , @EndDateTemp           DATE				= @EndDate
+      , @BeginTransactionTemp  NVARCHAR(50)		= @BeginTransaction
+      , @EndTransactionTemp    NVARCHAR(50)		= @EndTransaction
+      , @IntegrationLogIdTemp  INT				= @IntegrationLogId
+      , @PostTemp              BIT				= @Post
+      , @RecapTemp             BIT				= @Recap
+      , @PostDateTemp          DATETIME			= @PostDate
+      , @BatchIdTemp           NVARCHAR(40)		= @BatchId
+      , @AccrueLicenseTemp     BIT				= @AccrueLicense
+      , @TransTypeTemp         NVARCHAR(25)		= @TransType
+      , @UserIdTemp            INT				= @UserId
 
 DECLARE	@DiscountAccountId          INT
        ,@DeferredRevenueAccountId   INT
@@ -207,6 +223,12 @@ INSERT ##ARPostInvoiceHeader WITH (TABLOCK)
     
     ,[intDiscountAccountId]
     ,[strDescription]
+    ,[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]
+    ,[intInterCompanyId]
+    ,[strReceiptNumber]
+    ,[ysnInterCompany]
+    ,[intInterCompanyVendorId]
 	,[strBOLNumber]
 )
 SELECT 
@@ -282,10 +304,16 @@ SELECT
     
     ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[strDescription]                   = CASE WHEN ARI.[strType] = 'Provisional' AND @ImpactForProvisional = @OneBit THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + EM.[strName]),'')), 1, 255)
-                                                WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + EM.[strName]),'')), 1 , 255)
-                                                ELSE ARI.[strTransactionType] + ' for ' + ISNULL(EM.strName, '')
-                                            END		
-    ,[strBOLNumber]						= ARI.strBOLNumber
+                                               WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + EM.[strName]),'')), 1 , 255)
+                                               ELSE ARI.[strTransactionType] + ' for ' + ISNULL(EM.strName, '')
+                                          END	
+    ,[strInterCompanyVendorId]          = ARC.[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]        = ARC.[strInterCompanyLocationId]
+    ,[intInterCompanyId]                = ARC.[intInterCompanyId]
+    ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
+    ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
+    ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
+	,[strBOLNumber]						= ARI.[strBOLNumber]
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -315,7 +343,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[dtmShipDate]
     ,[intEntityCustomerId]
     ,[strCustomerNumber]
-    ,[ysnCustomerActive]
+	,[ysnCustomerActive]
     ,[dblCustomerCreditLimit]
     ,[intCompanyLocationId]
     ,[strCompanyLocationName]
@@ -326,7 +354,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[intUndepositedFundsId]
     ,[intProfitCenter]
     ,[intLocationSalesAccountId]
-    ,[intCurrencyId]
+	,[intCurrencyId]
     ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]

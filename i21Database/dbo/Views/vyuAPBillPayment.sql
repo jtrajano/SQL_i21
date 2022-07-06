@@ -20,8 +20,8 @@ intId
 ,Payments.ysnVoid
 ,Payments.ysnPrepay
 ,Payments.ysnPosted AS ysnPaymentPosted
-,Payments.strPaymentInfo COLLATE Latin1_General_CI_AS AS strPaymentInfo
-,Payments.strBankAccountNo COLLATE Latin1_General_CI_AS AS strBankAccountNo
+,Payments.strPaymentInfo
+,Payments.strBankAccountNo
 ,Payments.intPaymentId
 ,Payments.intARPaymentId
 ,Payments.dtmDatePaid

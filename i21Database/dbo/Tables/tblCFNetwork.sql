@@ -57,6 +57,7 @@
 	[ysnCardEncodingIntegration]			BIT				NULL,
 	[dtmGlobalCardExpirationDate]			DATETIME		NULL,
     [strAutoAssignCardNumber]               NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
+    [intLinkedNetworkId]                    INT             NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
     CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblCFNetwork_tblCFAdvanceMapping] FOREIGN KEY ([intAdvanceMappingId]) REFERENCES [dbo].[tblCFAdvanceMapping] ([intAdvanceMappingId]),

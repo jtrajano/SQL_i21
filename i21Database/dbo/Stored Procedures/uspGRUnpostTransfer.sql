@@ -554,6 +554,15 @@ BEGIN
 		CLOSE c; DEALLOCATE c;
 		--/*end === FOR DP to DP only*/
 
+		-- Unpost AP clearing entries from tblAPClearing
+		EXEC uspGRUnpostAPClearingTransfer @intTransferStorageId;
+
+		-- Removing Transaction links
+		exec [uspSCAddTransactionLinks]
+			@intTransactionType = 7
+			,@intTransactionId = @intTransferStorageId
+			,@intAction = 2
+
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 		--DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)

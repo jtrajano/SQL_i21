@@ -20,6 +20,11 @@ BEGIN TRY
 		,@strWorkOrderNos nvarchar(max)
 		,@strPickListNo nvarchar(50)
 		,@intTransactionFrom int
+		,@strERPOrderNo nvarchar(50) 
+		,@strUserName nvarchar(50)
+		,@strCompanyLocation nvarchar(6)
+		,@strSubLocationName nvarchar(50)
+		,@strWorkOrderType nvarchar(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -36,9 +41,14 @@ BEGIN TRY
 		intExecutionOrder int,
 		intUserId int,
 		intTransactionFrom int
+		,strERPOrderNo nvarchar(50) 
+		,strUserName nvarchar(50)
+		,strCompanyLocation nvarchar(6)
+		,strSubLocationName nvarchar(50)
+		,strWorkOrderType nvarchar(50)
 	)
 
-	insert into @tblWO(intWorkOrderId,intStatusId,dblQuantity,strWorkOrderNo,intBlendRequirementId,intManufacturingCellId,dtmDueDate,intExecutionOrder,intUserId,intTransactionFrom)
+	insert into @tblWO(intWorkOrderId,intStatusId,dblQuantity,strWorkOrderNo,intBlendRequirementId,intManufacturingCellId,dtmDueDate,intExecutionOrder,intUserId,intTransactionFrom,strERPOrderNo,strUserName,strCompanyLocation,strSubLocationName,strWorkOrderType)
 	SELECT	 w.intWorkOrderId
 			,w.intStatusId
 			,w.dblQuantity
@@ -49,10 +59,20 @@ BEGIN TRY
 			,w.intExecutionOrder
 			,x.intUserId
 			,IsNULL(w.intTransactionFrom,0)
+			,w.strERPOrderNo
+			,US.strUserName
+			,CL.strLotOrigin 
+			,CLSL.strSubLocationName
+			,(Case When CLSL.ysnExternal =1 Then 'Offsite' Else 'Inhouse' End) AS strWorkOrderType
 	FROM OPENXML(@idoc, 'root/workorder', 2) WITH (
 			 intWorkOrderId INT
 			,intUserId INT
-			) x Join tblMFWorkOrder w on x.intWorkOrderId=w.intWorkOrderId
+			) x 
+	Join dbo.tblMFWorkOrder w on x.intWorkOrderId=w.intWorkOrderId
+	JOIN dbo.tblSMUserSecurity US on US.intEntityId =x.intUserId
+	JOIN dbo.tblSMCompanyLocation CL on CL.intCompanyLocationId =w.intLocationId 
+	JOIN dbo.tblMFManufacturingCell MC on MC.intManufacturingCellId =w.intManufacturingCellId 
+	JOIN dbo.tblSMCompanyLocationSubLocation  CLSL on CLSL.intCompanyLocationSubLocationId =MC.intSubLocationId 
 
 	Select @intRowCount=Min(intRowNo) from @tblWO
 
@@ -63,7 +83,8 @@ BEGIN TRY
 		Select @intWorkOrderId=intWorkOrderId,@intStatusId=intStatusId,@dblQuantity=dblQuantity,
 				@strWorkOrderNo=strWorkOrderNo,@intBlendRequirementId=intBlendRequirementId,@intManufacturingCellId=intManufacturingCellId,
 				@dtmDueDate=dtmDueDate,@intExecutionOrder=intExecutionOrder,
-				@intUserId=intUserId,@intTransactionFrom=intTransactionFrom from @tblWO where intRowNo=@intRowCount
+				@intUserId=intUserId,@intTransactionFrom=intTransactionFrom,
+				@strERPOrderNo=strERPOrderNo,@strUserName=strUserName,@strCompanyLocation=strCompanyLocation,@strSubLocationName=strSubLocationName,@strWorkOrderType=strWorkOrderType from @tblWO where intRowNo=@intRowCount
 
 		Select @intPickListId=ISNULL(intPickListId,0) From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 
@@ -118,7 +139,35 @@ BEGIN TRY
 				Update tblMFPickList Set strWorkOrderNo=@strWorkOrderNos Where intPickListId=@intPickListId
 			End
 		End
-							
+
+		DELETE
+		FROM dbo.tblMFWorkOrderPreStage
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND strRowState = 'Modified'
+			AND intStatusId IS NULL
+
+		INSERT INTO dbo.tblMFWorkOrderPreStage (
+			intWorkOrderId
+			,intWorkOrderStatusId
+			,intUserId
+			,strRowState
+			,strERPOrderNo 
+			,strWorkOrderNo 
+			,strUserName 
+			,strCompanyLocation 
+			,strSubLocationName
+			,strWorkOrderType
+			)
+		SELECT @intWorkOrderId
+			,9
+			,@intUserId
+			,'Deleted'
+			,@strERPOrderNo 
+			,@strWorkOrderNo 
+			,@strUserName 
+			,@strCompanyLocation 
+			,@strSubLocationName
+			,@strWorkOrderType				
 		Select @intRowCount=Min(intRowNo) from @tblWO where intRowNo>@intRowCount	
 	End
 

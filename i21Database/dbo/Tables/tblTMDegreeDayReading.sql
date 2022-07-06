@@ -10,6 +10,8 @@
     [dtmLastUpdated]          DATETIME        DEFAULT 0 NULL,
     [intClockID]              INT             DEFAULT 0 NOT NULL,
     [ysnSeasonStart] BIT NOT NULL DEFAULT 0, 
+    [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+    [intRowNumber] INT NULL,
     CONSTRAINT [PK_tblTMDDReading] PRIMARY KEY CLUSTERED ([intDegreeDayReadingID] ASC),
 	CONSTRAINT [UQ_tblTMDegreeDayReading] UNIQUE NONCLUSTERED 
 	(

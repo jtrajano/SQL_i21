@@ -16,6 +16,7 @@ AS
 			,CP.intCleanCostCurrencyId
 			,CP.intCleanCostUOMId
 			,CP.strDefaultContractReport
+			,CP.strDefaultContractReportFuture
 			,CP.ysnShowReportLangaugeSelection
 			,CP.strDefaultAmendmentReport
 			,CP.strDefaultPricingConfirmation
@@ -74,6 +75,11 @@ AS
 			,CP.ysnDocumentByBookAndSubBook
 			,CP.ysnUpdatedAvailabilityPurchase
 			,CP.ysnUpdatedAvailabilitySales
+			,CP.ysnAllowFutureTypeContractsPurchase
+			,CP.ysnAllowFutureTypeContractsSales
+			,CP.ysnAllowAutoShortCloseFutureTypeContracts
+			,CP.strDefaultReleaseReport
+			,CP.ysnEnableReleaseInstructionsTab
 			,strCleanCostUOM = U1.strUnitMeasure
 			,strCleanCostCurrency = C1.strCurrency
 			,strDefContractStatus = CS.strContractStatus
@@ -98,8 +104,11 @@ AS
 			,CP.ysnAutoCompleteDPDeliveryDate
 			,CP.intPricingDecimals
 			,CP.strContractApprovalIncrements
+			,CP.ysnListAllCustomerVendorLocations -- CT-5315
 			,CP.ysnAllowBasisSequencePriceChangeWhenPartiallyPriced
 			,CP.ysnStayAsDraftContractUntilApproved
+			,CP.ysnCalculatePlannedAvailabilityPurchase
+			,CP.ysnCalculatePlannedAvailabilitySale
 			,CP.ysnPricingAsAmendment
 			,CP.ysnEnableHTAMultiplePricing
 			,CP.ysnAllowHeaderSaveWithNoSequence

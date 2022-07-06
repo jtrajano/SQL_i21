@@ -67,7 +67,7 @@ DECLARE
 		,[dblCreditForeign] [numeric](18, 6) NULL
 		,[dblDebitUnit] [numeric](18, 6) NULL
 		,[dblCreditUnit] [numeric](18, 6) NULL
-		,[strDescription] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[strDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
 		,[strCode] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 		,[strTransactionId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 		,[intTransactionId] [int] NULL
@@ -77,7 +77,7 @@ DECLARE
 		,[dblExchangeRate] [numeric](38, 20) NOT NULL
 		,[dtmDateEntered] [datetime] NOT NULL
 		,[dtmTransactionDate] [datetime] NULL
-		,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
+		,[strJournalLineDescription] [nvarchar](300)  COLLATE Latin1_General_CI_AS NULL
 		,[intJournalLineNo] [int]
 		,[ysnIsUnposted] [bit] NOT NULL
 		,[intUserId] [int] NULL
@@ -354,7 +354,7 @@ BEGIN
 			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GLAccnt.strDescription
+			,[strJournalLineDescription] = A.strMemo
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
@@ -392,7 +392,7 @@ BEGIN
 			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GLAccnt.strDescription
+			,[strJournalLineDescription] = A.strMemo
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
@@ -430,7 +430,7 @@ BEGIN
 			,[dblExchangeRate]		= CASE WHEN @ysnForeignTransaction = 0 THEN 1 ELSE B.dblExchangeRate END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GLAccnt.strDescription
+			,[strJournalLineDescription] = B.strDescription
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
@@ -515,7 +515,7 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]	
 			) 
-SELECT
+	SELECT
 			[strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
@@ -544,7 +544,7 @@ SELECT
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]	 
-FROM #tmpGLDetail
+	FROM #tmpGLDetail
 
 
 	DECLARE @PostResult INT
@@ -552,12 +552,16 @@ FROM #tmpGLDetail
 		
 	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 
+	UPDATE 	A 
+	SET		ysnPosted = @ysnPost
+			,intFiscalPeriodId = F.intGLFiscalYearPeriodId
+			,intConcurrencyId += 1 
+	FROM tblCMBankTransaction A
+	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
+	WHERE	strTransactionId = @strTransactionId
 
-	UPDATE tblCMBankTransaction
-		SET		ysnPosted = @ysnPost
-				,intConcurrencyId += 1 
-		WHERE	strTransactionId = @strTransactionId
-		IF @@ERROR <> 0	GOTO Post_Rollback
+	IF @@ERROR <> 0	GOTO Post_Rollback
+
 END -- @ysnRecap = 0
 
 --=====================================================================================================================================

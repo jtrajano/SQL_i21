@@ -316,6 +316,28 @@ BEGIN
 	FROM tblAPBill B
 	INNER JOIN @validVoucherPrepay VP ON VP.intId = B.intBillId
 	WHERE B.ysnPrepayHasPayment = 0 AND @post = 1
+
+	DECLARE @totalPosted INT = 0
+	DECLARE @postedCtr INT = 0
+	DECLARE @postedId INT = 0
+	SELECT @totalPosted = COUNT(*) FROM @validVoucherPrepay
+	DECLARE @actionType AS NVARCHAR(10)
+	SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
+
+	WHILE (@postedCtr <> @totalPosted)
+	BEGIN
+		SET @postedCtr = @postedCtr + 1
+
+		SELECT @postedId = intId 
+		FROM ( SELECT intId, ROW_NUMBER() OVER (ORDER BY intId ASC) intRow FROM @validVoucherPrepay ) auditId
+		WHERE intRow = @postedCtr
+
+		EXEC dbo.uspSMAuditLog 
+		@screenName = 'AccountsPayable.view.Voucher'			-- Screen Namespace
+		,@keyValue = @postedId									-- Primary Key Value
+		,@entityId = @userId									-- Entity Id
+		,@actionType = @actionType								-- Action Type
+	END
 END
 ELSE
 BEGIN

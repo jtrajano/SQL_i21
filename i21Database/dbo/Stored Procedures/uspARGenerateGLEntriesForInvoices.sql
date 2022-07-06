@@ -1528,6 +1528,7 @@ FROM (
 		 , IDT.[dblBaseAdjustedTax]
 		 , [ysnAddToCost]  = ISNULL(TC.[ysnAddToCost], 0)
 		 , [ysnTaxExempt]  = ISNULL(IDT.[ysnTaxExempt], 0)
+         , [ysnInvalidSetup]  = ISNULL(IDT.[ysnInvalidSetup], 0)
 		 , IDT.[dblRate]
     FROM tblARInvoiceDetailTax IDT WITH (NOLOCK)
 	INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
@@ -1535,7 +1536,7 @@ FROM (
 INNER JOIN ##ARPostInvoiceDetail I ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 WHERE I.[intPeriodsToAccrue] <= 1
   AND (ARIDT.[dblAdjustedTax] <> @ZeroDecimal
-   OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1))
+   OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 AND [ysnInvalidSetup] = 0))
 
 --TAX DETAIL CREDIT
 INSERT ##ARInvoiceGLEntries WITH (TABLOCK) (
@@ -1644,6 +1645,7 @@ FROM (
 	  AND IDT.ysnTaxExempt = 1
 	  AND (IDT.intSalesTaxExemptionAccountId IS NOT NULL OR TC.intSalesTaxExemptionAccountId IS NOT NULL)
 	  AND IDT.dblAdjustedTax = 0
+      AND IDT.ysnInvalidSetup = 0
 ) ARIDT
 INNER JOIN ##ARPostInvoiceDetail I ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 INNER JOIN tblICItemLocation ICIL WITH(NOLOCK) ON I.[intItemId] = ICIL.[intItemId] AND I.[intCompanyLocationId] = ICIL.[intLocationId]

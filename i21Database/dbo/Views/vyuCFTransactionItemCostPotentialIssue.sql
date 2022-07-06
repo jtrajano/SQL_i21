@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuCFTransactionItemCostPotentialIssue
 AS
 
+
 SELECT 
 	intTransactionId,
 	strTransactionId,
@@ -24,11 +25,11 @@ SELECT
 INNER JOIN tblICItem ON tblICItem.intItemId = tblCFTransaction.intARItemId
 INNER JOIN tblICItemLocation IL ON IL.intItemId = tblCFTransaction.intARItemId AND IL.intLocationId = tblCFTransaction.intARLocationId
 INNER JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = IL.intLocationId
-INNER JOIN vyuICGetInventoryValuation ON vyuICGetInventoryValuation.intItemId =  tblICItem.intItemId AND vyuICGetInventoryValuation.intLocationId = tblCFTransaction.intARLocationId AND vyuICGetInventoryValuation.dblQuantity > 0 
 WHERE ISNULL(tblCFTransaction.dblQuantity, 0) > 0
 AND ISNULL(tblCFTransaction.ysnPosted,0) = 0
 ) as subQuery
 WHERE dblCost = 0 
+
 
 GO
 

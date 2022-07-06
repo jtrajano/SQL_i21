@@ -45,6 +45,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND C.ysnStage = 1
@@ -64,6 +65,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
@@ -105,6 +107,8 @@ SELECT TOP 100 PERCENT
 	,intLoadDetailId					=	A.intLoadShipmentDetailId
 	,intLoadId							=	A.intLoadShipmentId
 	,intLoadShipmentCostId				=	A.intLoadShipmentCostId
+	,intWeightClaimId					=	A.intWeightClaimId
+	,intWeightClaimDetailId				=	A.intWeightClaimDetailId
 	,intScaleTicketId					=	A.intScaleTicketId
 	,intTicketId						=	A.intTicketId
 	,intCCSiteDetailId					=	A.intCCSiteDetailId
@@ -197,6 +201,10 @@ SELECT TOP 100 PERCENT
 													WHEN entity.str1099Form = '1099-MISC' THEN 1
 													WHEN entity.str1099Form = '1099-INT' THEN 2
 													WHEN entity.str1099Form = '1099-B' THEN 3
+													WHEN entity.str1099Form = '1099-PATR' THEN 4
+													WHEN entity.str1099Form = '1099-DIV' THEN 5
+													WHEN entity.str1099Form = '1099-K' THEN 6
+													WHEN entity.str1099Form = '1099-NEC' THEN 7
 												ELSE 0 END)
 											) ELSE 0 END
 	,int1099Category					=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
@@ -209,7 +217,17 @@ SELECT TOP 100 PERCENT
 														AND item.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
 														THEN 3
-												ELSE ISNULL(category1099.int1099CategoryId, 0) END
+												ELSE
+													CASE
+														WHEN entity.str1099Form = '1099-MISC' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-INT' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-B' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-PATR' THEN ISNULL(categoryPATR.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-DIV' THEN ISNULL(categoryDIV.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-K' THEN ISNULL(category1099K.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-NEC' THEN ISNULL(category1099.int1099CategoryId, 0) 
+													ELSE 0 END
+												END
 											) ELSE 0 END
 	,dbl1099							=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
 											THEN ISNULL(A.dbl1099, 0) ELSE 0 END
@@ -273,6 +291,9 @@ OUTER APPLY (
 ) prepayRec
 LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
+LEFT JOIN tblAP1099KCategory category1099K ON LTRIM(entity.str1099Type) = category1099K.strCategory
+LEFT JOIN tblAP1099PATRCategory categoryPATR ON entity.str1099Type = categoryPATR.strCategory
+LEFT JOIN tblAP1099DIVCategory categoryDIV ON entity.str1099Type = categoryDIV.strCategory
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
 LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
@@ -383,7 +404,9 @@ INSERT
 	,intLocationId						
 	,intLoadDetailId
 	,intLoadShipmentCostId					
-	,intLoadId							
+	,intLoadId	
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId					
 	,intTicketId					
 	,intCCSiteDetailId					
@@ -476,7 +499,9 @@ VALUES
 	,intLocationId						
 	,intLoadDetailId	
 	,intLoadShipmentCostId				
-	,intLoadId							
+	,intLoadId				
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId					
 	,intTicketId					
 	,intCCSiteDetailId					

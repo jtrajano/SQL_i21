@@ -69,6 +69,7 @@ BEGIN TRY
 		,@ysnProductionReversal BIT
 		,@ysnLotExistsInDestinationLocation BIT
 		,@intNewParentLotId INT
+		,@strAdjustmentNo nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -225,6 +226,10 @@ BEGIN TRY
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 			,@strDescription = @strDescription
 
+							SELECT @strAdjustmentNo = strAdjustmentNo
+				FROM dbo.tblICInventoryAdjustment
+				WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+
 		IF @ysnLotExistsInDestinationLocation = 0
 		BEGIN
 			SELECT TOP 1 @strNewLotNumber = strLotNumber
@@ -241,6 +246,11 @@ BEGIN TRY
 			WHERE strLotNumber = @strLotNumber
 				AND intItemId = @intNewItemId
 				AND intStorageLocationId = @intStorageLocationId
+		END
+		IF NOT EXISTS(SELECT *FROM tblMFLotInventory WHERE intLotId=@intNewLotId)
+		BEGIN
+			INSERT INTO dbo.tblMFLotInventory(intLotId)
+			SELECT @intNewLotId
 		END
 
 		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
@@ -267,6 +277,76 @@ BEGIN TRY
 			SET intParentLotId = @intParentLotId
 			WHERE intLotId = @intNewLotId
 		END
+
+		DECLARE @strUserName NVARCHAR(50)
+			,@strOldItemNo NVARCHAR(50)
+			,@strNewItemNo NVARCHAR(50)
+			,@strSubLocationName NVARCHAR(50)
+			,@strName NVARCHAR(50)
+			,@strNewSubLocationName NVARCHAR(50)
+			,@strNewName NVARCHAR(50)
+			,@strLotOrigin NVARCHAR(50)
+			,@strSplitUnitMeasure NVARCHAR(50)
+			,@intStockItemUOMId INT
+
+		SELECT @strUserName = strUserName
+		FROM tblSMUserSecurity
+		WHERE intEntityId = @intUserId
+
+		SELECT @strOldItemNo = strItemNo
+		FROM tblICItem
+		WHERE intItemId = @intItemId
+
+		SELECT @strNewItemNo = strItemNo
+		FROM tblICItem
+		WHERE intItemId = @intNewItemId
+
+		SELECT @strLotOrigin = strLotOrigin
+		FROM tblSMCompanyLocation
+		WHERE intCompanyLocationId = @intLocationId
+
+		SELECT @strSubLocationName = strSubLocationName
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+		SELECT @strName = strName
+		FROM tblICStorageLocation
+		WHERE intStorageLocationId = @intStorageLocationId
+
+		SELECT @strParentLotNumber = strParentLotNumber
+		FROM tblICParentLot
+		WHERE intParentLotId = @intParentLotId
+
+		INSERT INTO tblIPLotItemChangeFeed (
+			strCompanyLocation
+			,intActionId
+			,dtmCreatedDate
+			,strCreatedByUser
+			,intTransactionTypeId
+			,strStorageLocation
+			,strOldItemNo
+			,strNewItemNo
+			,strMotherLotNo
+			,strLotNo
+			,strStorageUnit
+			,strReasonCode
+			,strNotes
+			,strAdjustmentNo
+			)
+		SELECT strCompanyLocation = @strLotOrigin
+			,intActionId = 1
+			,dtmCreatedDate = @dtmDate
+			,strCreatedByUser = @strUserName
+			,intTransactionTypeId = 15
+			,strStorageLocation = @strSubLocationName
+			,strOldItemNo = @strOldItemNo
+			,strNewItemNo = @strNewItemNo
+			,strMotherLotNo = @strParentLotNumber
+			,strLotNo = @strLotNumber
+			,strStorageUnit = @strName
+			,strReasonCode = @strReasonCode
+			,strNotes = @strNotes
+			,strAdjustmentNo=@strAdjustmentNo
 	END
 	ELSE
 	BEGIN

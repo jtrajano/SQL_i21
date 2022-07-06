@@ -6,6 +6,7 @@
 	[intItemId] INT NOT NULL,	
 	[intContractDetailId] INT NULL,
 	[dblUnits] DECIMAL(18, 6) NULL DEFAULT 0, 
+	[dblFreightUnit] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblPrice] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0,
 	[dblDistSurcharge] DECIMAL(18, 6) NULL DEFAULT 0,
@@ -15,6 +16,13 @@
 	[intLoadDetailId] INT NULL,
 	[ysnBlendedItem] BIT NOT NULL DEFAULT((0)),
 	[intConcurrencyId] INT NOT NULL,
+	[dblStickStartReading] DECIMAL(18, 6) NULL,
+	[dblStickEndReading] DECIMAL(18, 6) NULL,
+	[dblMinimumUnits] DECIMAL(18, 6) NULL,
+	[dblComboFreightRate] DECIMAL(18, 6) NULL,
+	[ysnComboFreight] BIT NULL,
+	[dblComboMinimumUnits] DECIMAL(18, 6) NULL,
+	[dblComboSurcharge] DECIMAL(18, 6) NULL,
 	CONSTRAINT [PK_tblTRLoadDistributionDetail] PRIMARY KEY ([intLoadDistributionDetailId]),
 	CONSTRAINT [FK_tblTRLoadDistributionDetail_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [dbo].[tblTRLoadDistributionHeader] ([intLoadDistributionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRLoadDistributionDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),	
@@ -31,4 +39,7 @@ CREATE INDEX [IX_tblTRLoadDistributionDetail_strReceiptLink] ON [dbo].[tblTRLoad
 GO 
 
 CREATE INDEX [IX_tblTRLoadDistributionDetail_intItemId] ON [dbo].[tblTRLoadDistributionDetail] ([intItemId] ASC)
+GO 
+
+CREATE INDEX [IX_tblTRLoadDistributionDetail_strBillOfLading] ON [dbo].[tblTRLoadDistributionDetail] ([strBillOfLading] ASC)
 GO 

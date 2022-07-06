@@ -15,7 +15,8 @@ BEGIN TRY
 
 	DECLARE @intSampleId INT
 	DECLARE @strMarks NVARCHAR(100)
-	DECLARE @intPreviousSampleStatusId INT
+	DECLARE @intPreviousSampleStatusId INT -- New Sample Status Id
+	DECLARE @intCurrentSampleStatusId INT
 	DECLARE @intShipperEntityId INT
 	DECLARE @ysnEnableParentLot BIT
 			,@intSampleTypeId INT
@@ -39,10 +40,27 @@ BEGIN TRY
 	DECLARE @intRepresentingUOMId INT
 		,@dblRepresentingQty NUMERIC(18, 6)
 		,@dblConvertedSampleQty NUMERIC(18, 6)
+		,@intContractHeaderId INT
+		,@ysnMultipleContractSeq BIT
+	DECLARE @intOrgSampleTypeId INT
+		,@intOrgItemId INT
+		,@intOrgCountryID INT
+		,@intOrgCompanyLocationSubLocationId INT
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblQMCompanyPreference
 
+	SELECT @intOrgSampleTypeId = intSampleTypeId
+		,@intOrgItemId = intItemId
+		,@intOrgCountryID = intCountryID
+		,@intOrgCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intSampleTypeId INT
+			,intItemId INT
+			,intCountryID INT
+			,intCompanyLocationSubLocationId INT
+			)
+	
 	SELECT @intSampleId = intSampleId
 		,@strMarks = strMarks
 		,@intPreviousSampleStatusId = intSampleStatusId
@@ -51,6 +69,8 @@ BEGIN TRY
 		,@dblRepresentingQty = dblRepresentingQty
 		,@intRepresentingUOMId = intRepresentingUOMId
 		,@intItemId = intItemId
+		,@intSampleTypeId = intSampleTypeId
+		,@intContractHeaderId = intContractHeaderId
 		,@intConcurrencyId = intConcurrencyId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
@@ -61,6 +81,8 @@ BEGIN TRY
 			,dblRepresentingQty NUMERIC(18, 6)
 			,intRepresentingUOMId INT
 			,intItemId INT
+			,intSampleTypeId INT
+			,intContractHeaderId INT
 			,intConcurrencyId INT
 			)
 
@@ -121,10 +143,38 @@ BEGIN TRY
 		END
 	END
 
+	SELECT @ysnMultipleContractSeq = ysnMultipleContractSeq
+	FROM tblQMSampleType
+	WHERE intSampleTypeId = @intSampleTypeId
+
+	-- Contract Sequences check for Assign Contract to Multiple Sequences scenario
+	IF @ysnMultipleContractSeq = 1
+		AND ISNULL(@intContractHeaderId, 0) > 0
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+						intContractDetailId INT
+						,strRowState NVARCHAR(50)
+						) x
+				JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = x.intContractDetailId
+					AND x.strRowState <> 'DELETE'
+				WHERE CD.intContractHeaderId <> @intContractHeaderId
+				)
+		BEGIN
+			RAISERROR (
+					'Assigned Sequences should belongs to the same Contract. '
+					,16
+					,1
+					)
+		END
+	END
+
 	BEGIN TRAN
 
 	SELECT @dblOldSampleQty = dblSampleQty
 		,@intCurrentConcurrencyId = intConcurrencyId
+		,@intCurrentSampleStatusId = intSampleStatusId
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
 
@@ -162,7 +212,7 @@ BEGIN TRY
 		,intSampleStatusId = x.intSampleStatusId
 		,intItemId = x.intItemId
 		,intItemContractId = x.intItemContractId
-		--,intContractHeaderId = x.intContractHeaderId
+		,intContractHeaderId = x.intContractHeaderId
 		,intContractDetailId = x.intContractDetailId
 		--,intShipmentBLContainerContractId = x.intShipmentBLContainerContractId
 		--,intShipmentId = x.intShipmentId
@@ -185,7 +235,7 @@ BEGIN TRY
 		,strLotNumber = x.strLotNumber
 		,strSampleNote = x.strSampleNote
 		,dtmSampleReceivedDate = x.dtmSampleReceivedDate
-		,dtmTestedOn = x.dtmTestedOn
+		--,dtmTestedOn = x.dtmTestedOn
 		--,intTestedById = x.intTestedById
 		,dblSampleQty = x.dblSampleQty
 		,intSampleUOMId = x.intSampleUOMId
@@ -221,7 +271,7 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT
-			--,intContractHeaderId INT
+			,intContractHeaderId INT
 			,intContractDetailId INT
 			--,intShipmentBLContainerId INT
 			--,intShipmentBLContainerContractId INT
@@ -243,7 +293,7 @@ BEGIN TRY
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
-			,dtmTestedOn DATETIME
+			--,dtmTestedOn DATETIME
 			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
@@ -283,6 +333,24 @@ BEGIN TRY
 		UPDATE tblQMSample
 		SET intPreviousSampleStatusId = @intPreviousSampleStatusId
 		WHERE intSampleId = @intSampleId
+
+		UPDATE tblQMSample
+		SET dtmTestedOn = NULL
+			,intTestedById = NULL
+		WHERE intSampleId = @intSampleId
+	END
+
+	-- If current sample status is Approved / Rejected and new sample status is not Approved / Rejected, then it is reversal
+	-- Reverse the lot status
+	IF @intCurrentSampleStatusId IN (3, 4)
+		AND @intPreviousSampleStatusId NOT IN (3, 4)
+	BEGIN
+		UPDATE tblQMSample
+		SET intLotStatusId = 3 -- Quarantine
+		WHERE intSampleId = @intSampleId
+			AND intLotStatusId IS NOT NULL
+
+		EXEC uspQMSetLotStatus @intSampleId
 	END
 
 	-- Sample Detail Create, Update, Delete
@@ -348,6 +416,71 @@ BEGIN TRY
 					,strRowState NVARCHAR(50)
 					) x
 			WHERE x.intSampleDetailId = dbo.tblQMSampleDetail.intSampleDetailId
+				AND x.strRowState = 'DELETE'
+			)
+
+	-- Sample Contract Sequences Create, Update, Delete
+	INSERT INTO dbo.tblQMSampleContractSequence (
+		intConcurrencyId
+		,intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT 1
+		,@intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+			intContractDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intUnitMeasureId INT
+			,intCreatedUserId INT
+			,dtmCreated DATETIME
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.strRowState = 'ADDED'
+
+	UPDATE dbo.tblQMSampleContractSequence
+	SET intContractDetailId = x.intContractDetailId
+		,dblQuantity = x.dblQuantity
+		,intUnitMeasureId = x.intUnitMeasureId
+		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+		,intLastModifiedUserId = x.intLastModifiedUserId
+		,dtmLastModified = x.dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+			intSampleContractSequenceId INT
+			,intContractDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intUnitMeasureId INT
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intSampleContractSequenceId = dbo.tblQMSampleContractSequence.intSampleContractSequenceId
+		AND x.strRowState = 'MODIFIED'
+
+	DELETE
+	FROM dbo.tblQMSampleContractSequence
+	WHERE intSampleId = @intSampleId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+					intSampleContractSequenceId INT
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intSampleContractSequenceId = dbo.tblQMSampleContractSequence.intSampleContractSequenceId
 				AND x.strRowState = 'DELETE'
 			)
 
@@ -605,6 +738,14 @@ BEGIN TRY
 	END
 
 	EXEC uspQMInterCompanyPreStageSample @intSampleId
+
+	EXEC uspQMPreStageSample @intSampleId
+		,'Modified'
+		,@strSampleNumber
+		,@intOrgSampleTypeId
+		,@intOrgItemId
+		,@intOrgCountryID
+		,@intOrgCompanyLocationSubLocationId
 
 	COMMIT TRAN
 END TRY

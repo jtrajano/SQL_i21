@@ -17,5 +17,4 @@
 		,b.dblOverShort
 		,b.intCustomerId
 		,b.intCustomerContactId
-	from tblHDProjectDetail a,vyuHDProjectSearch b
-	where b.intProjectId = a.intDetailProjectId
+	from tblHDProjectDetail a inner join vyuHDProjectSearch b on b.intProjectId = a.intDetailProjectId

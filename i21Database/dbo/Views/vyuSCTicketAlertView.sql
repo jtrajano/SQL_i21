@@ -117,7 +117,8 @@
 	,SCTicket.intDeliverySheetId
 	,SCTicket.strDeliverySheetNumber
 	,SCTicket.strElevatorReceiptNumber
-	FROM tblSCUncompletedTicketAlert SCAlert,vyuSCTicketView SCTicket
+	FROM tblSCUncompletedTicketAlert SCAlert
+    inner join vyuSCTicketView SCTicket on 1=1
 	WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
 	AND ysnHasGeneratedTicketNumber = 1
 	AND (SCTicket.strTicketStatus = 'O' OR SCTicket.strTicketStatus = 'A')

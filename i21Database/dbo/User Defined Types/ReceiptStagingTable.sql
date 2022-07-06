@@ -29,6 +29,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intSubBookId] INT NULL 
 	,[intShipFromEntityId] INT NULL 
 	,[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[strWarehouseRefNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 
@@ -57,6 +58,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[dblUnitRetail] NUMERIC(38, 20) NULL 
 	,[ysnAllowVoucher] BIT NULL
 	,[ysnAddPayable] BIT NULL
+	,[strImportDescription] NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	

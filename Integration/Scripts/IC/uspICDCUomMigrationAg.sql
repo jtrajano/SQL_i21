@@ -40,7 +40,7 @@ SELECT * FROM (
 				) ALLUOM
 	WHERE UPPER(RTRIM(UnitMeasure)) COLLATE SQL_Latin1_General_CP1_CS_AS NOT IN (SELECT UPPER(RTRIM(strUnitMeasure)) COLLATE SQL_Latin1_General_CP1_CS_AS FROM tblICUnitMeasure)
 
-	select 'debug #tmpImportUnitMeasure', * from #tmpImportUnitMeasure
+	--select 'debug #tmpImportUnitMeasure', * from #tmpImportUnitMeasure
 
 INSERT INTO tblICUnitMeasure (strUnitMeasure)
 SELECT UnitMeasure FROM #tmpImportUnitMeasure

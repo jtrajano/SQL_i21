@@ -106,6 +106,7 @@ SELECT w.intWorkOrderId
 	,um1.intUnitMeasureId AS intNoOfUnitsUnitMeasureId
 	,um1.strUnitMeasure AS strNoOfUnitsUnitMeasure
 	,w.strReferenceNo
+	,i.intCategoryId
 FROM tblMFWorkOrder w
 JOIN tblICItem i ON w.intItemId = i.intItemId
 JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId

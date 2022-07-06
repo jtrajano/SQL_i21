@@ -21,6 +21,8 @@ SELECT r.intRecipeId
 	,r.dtmValidFrom AS dtmRecipeValidFrom
 	,r.dtmValidTo AS dtmRecipeValidTo
 	,r.strComment
+	,ri.ysnComplianceItem
+	,ri.dblCompliancePercent
 	,ri.dblLowerTolerance
 	,ri.dblUpperTolerance
 	,cm.strName AS strConsumptionMethod
@@ -90,6 +92,9 @@ SELECT r.intRecipeId
 			ELSE ISNULL(ip.dblStandardCost, 0)
 			END
 		) AS dblCost
+	,B.strBook
+	,SB.strSubBook
+	,r.ysnVirtualRecipe
 FROM tblMFRecipe r
 LEFT JOIN tblICItem rhi ON r.intItemId = rhi.intItemId
 LEFT JOIN tblMFRecipeItem ri ON r.intRecipeId = ri.intRecipeId
@@ -115,3 +120,5 @@ LEFT JOIN tblICItemLocation il ON ri.intItemId = il.intItemId
 	AND il.intLocationId = r.intLocationId
 LEFT JOIN tblICItemPricing ip ON ip.intItemId = ri.intItemId
 	AND ip.intItemLocationId = il.intItemLocationId
+LEFT JOIN tblCTBook B ON B.intBookId = r.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = r.intSubBookId

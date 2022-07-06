@@ -48,6 +48,7 @@ DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
 		@intLotType INT;
 
+DECLARE @AGWorkOrderType AS INT = 59
 SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @intLoadId = SC.intLoadId
 , @intLoadDetailId = SC.intLoadDetailId
@@ -249,8 +250,8 @@ BEGIN
 											END
 										END
 		,intWeightUOMId				= CASE WHEN SC.intLotId > 0 THEN ICL.intItemUOMId ELSE LI.intItemUOMId END
-		,intSubLocationId			= SC.intSubLocationId
-		,intStorageLocationId		= SC.intStorageLocationId
+		,intSubLocationId			= case when SC.strDistributionOption = 'AWO' then LI.intSubLocationId else SC.intSubLocationId end 
+		,intStorageLocationId		= case when SC.strDistributionOption = 'AWO' then LI.intStorageLocationId else SC.intStorageLocationId end 
 		,intStorageScheduleTypeId	= CASE
 									  WHEN LI.ysnIsStorage = 0 THEN  
 										CASE 

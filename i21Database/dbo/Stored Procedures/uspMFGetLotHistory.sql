@@ -16,7 +16,7 @@ BEGIN
 		,strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strSubLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strStorageLocation NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS
-		,strTransaction NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strTransaction NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,dblWeight NUMERIC(38, 20)
 		,dblTransactionWeight NUMERIC(38, 20)
 		,strTransactionWeightUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -66,7 +66,7 @@ BEGIN
 		,strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strSubLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strStorageLocation NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS
-		,strTransaction NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strTransaction NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,dblWeight NUMERIC(38, 20)
 		,dblTransactionWeight NUMERIC(38, 20)
 		,strTransactionWeightUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS

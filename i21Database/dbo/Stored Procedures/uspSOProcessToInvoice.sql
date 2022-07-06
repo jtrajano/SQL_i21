@@ -13,9 +13,9 @@ SET NOCOUNT ON
 SET XACT_ABORT OFF  
 SET ANSI_WARNINGS OFF
 
-SET @dtmDateProcessed	= CAST(ISNULL(@dtmDateProcessed, GETDATE()) AS DATE)
-
 DECLARE @strErrorMessage NVARCHAR(MAX)
+
+SET @dtmDateProcessed	= CAST(ISNULL(@dtmDateProcessed, GETDATE()) AS DATE)
 
 --VALIDATE IF SO IS ALREADY CLOSED
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 

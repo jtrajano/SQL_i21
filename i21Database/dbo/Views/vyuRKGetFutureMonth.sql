@@ -20,4 +20,4 @@ FROM tblRKFuturesMonth s
 join tblRKFutureMarket m on m.intFutureMarketId=s.intFutureMarketId
 join tblRKCommodityMarketMapping mm on m.intFutureMarketId=mm.intFutureMarketId
 join tblICCommodity c on mm.intCommodityId=c.intCommodityId
-order by 1 desc
+--order by 1 desc

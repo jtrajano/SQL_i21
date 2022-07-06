@@ -42,7 +42,10 @@ BEGIN
 		END
 
 		IF @dblRepresentingQty >= @dblQuantity
+			BEGIN
+			SET @dblRepresentingQty = @dblQuantity
 			SET @strSampleStatus = 'Approved'
+			END
 		ELSE
 			SET @strSampleStatus = 'Partially Approved'
 	END		

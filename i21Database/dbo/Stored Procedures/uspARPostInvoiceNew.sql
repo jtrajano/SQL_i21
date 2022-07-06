@@ -254,12 +254,15 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
 
 
 IF @Post = 1 AND @Recap = 0
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+	EXEC [dbo].[uspARProcessSplitOnInvoicePost]
 		  @ysnPost	  	= 1
 		, @ysnRecap	  	= 0
 		, @dtmDatePost	= @PostDate
 		, @strBatchId	= @BatchIdUsed
-		, @intUserId	= @UserId
+		, @intUserId	= @UserId		
+
+IF @Recap = 0
+	EXEC [dbo].[uspARLogInventorySubLedger] 1, @UserId
 
 --Removed excluded Invoices to post/unpost
 IF(@Exclude IS NOT NULL)
@@ -421,20 +424,24 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @UserId
 		       ,@BatchIdUsed     = @BatchIdUsed OUT
+		
+		DELETE 
+		FROM tblARPostingQueue
+		WHERE intTransactionId IN (SELECT intInvoiceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @IntegrationLogId)
 
         GOTO Do_Commit
     END
 
 	IF @Post = 1 AND @Recap = 1
-    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-		  @ysnPost	  	= 1
-		, @ysnRecap	  	= 1
-		, @dtmDatePost	= @PostDate
-		, @strBatchId	= @BatchIdUsed
-		, @intUserId	= @UserId
+		EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+			  @ysnPost	  	= 1
+			, @ysnRecap	  	= 1
+			, @dtmDatePost	= @PostDate
+			, @strBatchId	= @BatchIdUsed
+			, @intUserId	= @UserId
 	
 	IF @Post = 1
-    EXEC [dbo].[uspARPrePostInvoiceIntegration]	
+    	EXEC [dbo].[uspARPrePostInvoiceIntegration]	
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
@@ -601,6 +608,8 @@ BEGIN TRY
         ,[intErrorCode]     INT
         ,[strModuleName]    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL)
 
+	IF  EXISTS (SELECT TOP  1 NULL FROM @GLEntries)
+	BEGIN
     INSERT INTO @InvalidGLEntries (
 		  [strTransactionId]
         , [strText]
@@ -613,6 +622,7 @@ BEGIN TRY
         , [intErrorCode]
         , [strModuleName]
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @Post)
+	END
 
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries WHERE [strTransactionId] IS NOT NULL), 0)

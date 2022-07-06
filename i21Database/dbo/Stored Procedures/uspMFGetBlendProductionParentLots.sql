@@ -138,7 +138,7 @@ Begin
 	wi.dblIssuedQuantity,wi.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM,ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
 	from tblMFWorkOrderInputParentLot wi
 	Join tblICParentLot pl on wi.intParentLotId=pl.intParentLotId
-	Join tblICItem i on pl.intItemId=i.intItemId
+	Join tblICItem i on wi.intItemId=i.intItemId
 	Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId

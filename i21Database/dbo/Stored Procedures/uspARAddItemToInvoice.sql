@@ -60,7 +60,8 @@
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
-	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemWeight					NUMERIC(38,20)	= 0.000000
+	,@ItemStandardWeight			NUMERIC(38,20)	= 0.000000
 	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000			
@@ -213,6 +214,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
 			,@ItemWeight					= @ItemWeight
+			,@ItemStandardWeight			= @ItemStandardWeight
 			,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 			,@ItemShipmentTareWt			= @ItemShipmentTareWt
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt
@@ -467,7 +469,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
 				,[dblAddOnQuantity]
-				,[intInventoryShipmentChargeId])
+				,[intInventoryShipmentChargeId]
+				,[dblStandardWeight])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -559,6 +562,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemAddonParent
 				,@ItemAddOnQuantity
 				,@ItemInventoryShipmentChargeId
+				,@ItemStandardWeight
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()

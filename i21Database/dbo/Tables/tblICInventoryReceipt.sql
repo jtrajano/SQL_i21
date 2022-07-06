@@ -73,7 +73,8 @@ Type the overview for the table here.
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
 		[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-		guiApiUniqueId UNIQUEIDENTIFIER NULL,
+		[strInternalComments] NVARCHAR(2000) COLLATE Latin1_General_CI_AS NULL,
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICInventoryReceipt] PRIMARY KEY ([intInventoryReceiptId]), 
 		CONSTRAINT [AK_tblICInventoryReceipt_strReceiptNumber] UNIQUE ([strReceiptNumber]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
@@ -97,6 +98,12 @@ Type the overview for the table here.
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceipt_strReceiptNumber]
 		ON [dbo].[tblICInventoryReceipt]([strReceiptNumber] ASC)
 		INCLUDE (intInventoryReceiptId, intEntityVendorId, strBillOfLading)
+
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceipt_strDataSource]
+		ON [dbo].[tblICInventoryReceipt]([strDataSource] ASC)
+		INCLUDE (ysnPosted, strReceiptNumber)
 
 	GO
 

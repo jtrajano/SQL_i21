@@ -426,92 +426,40 @@ BEGIN
 			,@intCurrencyId				= i2p.intCurrencyId
 	FROM	@StockToPost i2p 
 
-	IF EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
+	DECLARE 
+		@dblAutoVariance AS NUMERIC(18, 6) 
+		,@strAutoVarianceDescription NVARCHAR(255) 
+		,@InventoryTransactionIdentityId AS INT 
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
 	BEGIN 
-		INSERT INTO dbo.tblICInventoryTransaction (
-					[intItemId]
-					,[intItemLocationId]
-					,[intItemUOMId]
-					,[intSubLocationId]
-					,[intStorageLocationId]
-					,[dtmDate]
-					,[dblQty]
-					,[dblUOMQty]
-					,[dblCost]
-					,[dblValue]
-					,[dblSalesPrice]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[intTransactionId]
-					,[strTransactionId]
-					,[strBatchId]
-					,[intTransactionTypeId]
-					,[intLotId]
-					,[ysnIsUnposted]
-					,[intRelatedInventoryTransactionId]
-					,[intRelatedTransactionId]
-					,[strRelatedTransactionId]
-					,[strTransactionForm]
-					,[dtmCreated]
-					,[intCreatedEntityId]
-					,[intConcurrencyId]
-					,[intCostingMethod]
-					,[strDescription]
-					,[intFobPointId]
-					,[intInTransitSourceLocationId]
-					,[intForexRateTypeId]
-					,[dblForexRate]
-					,[intCompanyLocationId]
-					,[dtmDateCreated]
-			)			
+		SELECT TOP 1 
+			@intItemId = intItemId
+			,@intItemLocationId = intItemLocationId
+		FROM @ItemsWithZeroStock
+
+		SET @dblAutoVariance = NULL		
+		SET @strAutoVarianceDescription = NULL 
+		SET @InventoryTransactionIdentityId = NULL 
+
 		SELECT	
-				[intItemId]								= iWithZeroStock.intItemId
-				,[intItemLocationId]					= iWithZeroStock.intItemLocationId
-				,[intItemUOMId]							= NULL 
-				,[intSubLocationId]						= NULL 
-				,[intStorageLocationId]					= NULL 
-				,[dtmDate]								= @dtmDate
-				,[dblQty]								= 0
-				,[dblUOMQty]							= 0
-				,[dblCost]								= 0
-				,[dblValue]								= -currentValuation.floatingValue
-				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= @intCurrencyId
-				,[dblExchangeRate]						= 1 -- @dblExchangeRate
-				,[intTransactionId]						= @intTransactionId
-				,[strTransactionId]						= @strTransactionId
-				,[strBatchId]							= @strBatchId
-				,[intTransactionTypeId]					= @AUTO_VARIANCE
-				,[intLotId]								= NULL 
-				,[ysnIsUnposted]						= 0
-				,[intRelatedInventoryTransactionId]		= NULL 
-				,[intRelatedTransactionId]				= NULL 
-				,[strRelatedTransactionId]				= NULL 
-				,[strTransactionForm]					= @strTransactionForm
-				,[dtmCreated]							= GETDATE()
-				,[intCreatedEntityId]					= @intEntityUserSecurityId
-				,[intConcurrencyId]						= 1
-				,[intCostingMethod]						= @ACTUALCOST
-				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
-														dbo.fnFormatMessage(
-																dbo.fnICGetErrorMessage(80093) 
-																, i.strItemNo
-																, CAST(il.strDescription AS NVARCHAR(100)) 
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-																, DEFAULT
-														)
-				,[intFobPointId]						= @FOB_DESTINATION 
-				,[intInTransitSourceLocationId]			= @intInTransitSourceLocationId
-				,[intForexRateTypeId]					= @intForexRateTypeId
-				,[dblForexRate]							= @dblForexRate
-				,[intCompanyLocationId]					= [location].intCompanyLocationId
-				,[dtmDateCreated]						= GETUTCDATE()
+				
+				@dblAutoVariance = -currentValuation.floatingValue
+				,@strAutoVarianceDescription = 
+					-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
+					dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80093) 
+							, i.strItemNo
+							, CAST(il.strDescription AS NVARCHAR(100)) 
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+					)
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItem i
 					ON i.intItemId = iWithZeroStock.intItemId
 				INNER JOIN tblICItemLocation il
@@ -530,17 +478,45 @@ BEGIN
 		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
 				AND ISNULL(currentValuation.dblQty, 0) = 0 
 
-		SET @intInventoryTransactionIdentityId = SCOPE_IDENTITY();
-
-		-----------------------------------------
-		-- Log the Daily Stock Quantity
-		-----------------------------------------
-		IF @intInventoryTransactionIdentityId IS NOT NULL 
+		IF @dblAutoVariance IS NOT NULL 
 		BEGIN 
-			EXEC uspICPostStockDailyQuantity 
-				@intInventoryTransactionId = @intInventoryTransactionIdentityId
+			EXEC [dbo].[uspICPostInventoryTransaction]
+				@intItemId = @intItemId
+				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = NULL 
+				,@intSubLocationId = NULL
+				,@intStorageLocationId = NULL 
+				,@dtmDate = @dtmDate
+				,@dblQty  = @dblQty
+				,@dblUOMQty = 0
+				,@dblCost = 0
+				,@dblValue = @dblAutoVariance
+				,@dblSalesPrice = 0
+				,@intCurrencyId = NULL 
+				,@intTransactionId = @intTransactionId
+				,@intTransactionDetailId = @intTransactionDetailId
+				,@strTransactionId = @strTransactionId
+				,@strBatchId = @strBatchId
+				,@intTransactionTypeId = @AUTO_VARIANCE
+				,@intLotId = NULL 
+				,@intRelatedInventoryTransactionId = NULL 
+				,@intRelatedTransactionId = NULL 
+				,@strRelatedTransactionId = NULL 
+				,@strTransactionForm = @strTransactionForm
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@intCostingMethod = @ACTUALCOST
+				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+				,@intFobPointId = NULL 
+				,@intForexRateTypeId = NULL
+				,@dblForexRate = 1
+				,@strDescription = @strAutoVarianceDescription 
+				,@intSourceEntityId = @intSourceEntityId
 		END 
 
+		DELETE FROM @ItemsWithZeroStock
+		WHERE
+			@intItemId = intItemId
+			AND @intItemLocationId = intItemLocationId
 	END 
 END 
 

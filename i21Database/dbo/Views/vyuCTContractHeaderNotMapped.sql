@@ -79,7 +79,8 @@ AS
 						FT.strFreightTerm,
 						BE.strName					AS strBroker,
 						BA.strAccountNumber			AS strBrokerAccount,
-						intCommodityFutureMarketId = CY.intFutureMarketId
+						intCommodityFutureMarketId = CY.intFutureMarketId, -- CT-5315
+						strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 
 				FROM	tblCTContractHeader						CH	
 				
@@ -128,12 +129,16 @@ AS
 				
 			LEFT	JOIN	tblCTBook							BK	ON	BK.intBookId						=		CH.intBookId						
 			LEFT	JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						
-			
-			LEFT	JOIN	tblCTPriceFixation					PF	ON	CH.intContractHeaderId				=		PF.intContractHeaderId 
-																	AND CH.ysnMultiplePriceFixation			=		1									
-				
+						
+			OUTER APPLY (
+			SELECT TOP 1 PF.intPriceFixationId, 
+						PF.intPriceContractId
+						FROM tblCTPriceFixation PF
+						WHERE  CH.intContractHeaderId =	PF.intContractHeaderId  AND CH.ysnMultiplePriceFixation	= 1	
+			) PF				
 			LEFT	JOIN	tblSMFreightTerms					FT	ON	FT.intFreightTermId					=		CH.intFreightTermId					
 			LEFT	JOIN	tblEMEntity							BE	ON	BE.intEntityId						=		CH.intBrokerId										
 			LEFT	JOIN	tblRKBrokerageAccount				BA	ON	BA.intBrokerageAccountId			=		CH.intBrokerageAccountId							
+			LEFT	JOIN	tblEMEntityLocation					ESL	ON	ESL.intEntityLocationId				=		CH.intEntitySelectedLocationId  -- CT-5315
 
 			)t

@@ -53,8 +53,8 @@ CREATE TABLE #INVOICES (
 	 , dblContractBalance			NUMERIC(18, 6)	NULL DEFAULT 0
 	 , strContractNumber			NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
 	 , strContractNoSeq				NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
-	 , strItem						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
-	 , strItemDescription			NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL
+	 , strItem						NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strItemDescription			NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
 	 , strUnitMeasure				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 	 , dblQtyShipped				NUMERIC(18, 6)	NULL DEFAULT 0
 	 , dblQtyOrdered				NUMERIC(18, 6)	NULL DEFAULT 0
@@ -136,7 +136,7 @@ ORDER BY intCompanyPreferenceId DESC
 SELECT TOP 1 @blbLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
   AND A.strComment = 'Header'
 ORDER BY A.intAttachmentId DESC
 
@@ -144,7 +144,7 @@ ORDER BY A.intAttachmentId DESC
 SELECT TOP 1 @blbStretchedLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
   AND A.strComment = 'Stretched Header'
 ORDER BY A.intAttachmentId DESC
 

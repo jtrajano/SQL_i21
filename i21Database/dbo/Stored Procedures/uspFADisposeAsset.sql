@@ -2,9 +2,8 @@ CREATE PROCEDURE [dbo].[uspFADisposeAsset]
 	@Param				AS NVARCHAR(MAX)	= '',	
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
-	@strBatchId			AS NVARCHAR(100)	= '',
-	@strTransactionId	AS NVARCHAR(100)	= '',
 	@intEntityId		AS INT				= 1,
+	@strTransactionId	AS NVARCHAR(20)	= '' OUTPUT,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
 AS
@@ -16,17 +15,89 @@ SET XACT_ABORT ON
 
 BEGIN TRANSACTION;
 
-
+DECLARE @strAssetId NVARCHAR(20)
+DECLARE @ErrorMessage NVARCHAR(MAX)
 --=====================================================================================================================================
 -- 	POPULATE FIXEDASSETS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #AssetID(
+			[intAssetId] [int] NOT NULL
+		)
+
+DECLARE @tblAsset TABLE (
+			[strAssetId] NVARCHAR (20) COLLATE Latin1_General_CI_AS NOT NULL,
 			[intAssetId] [int] NOT NULL,
+			dtmDispose DATETIME NOT NULL,
+			ysnOpenPeriod BIT NOT NULL,
+			totalDepre NUMERIC(18,6),
+			strTransactionId NVARCHAR(20)
 		)
 IF (ISNULL(@Param, '') <> '') 
 	INSERT INTO #AssetID EXEC (@Param)
 ELSE
-	INSERT INTO #AssetID SELECT [intAssetId] FROM tblFAFixedAsset
+	INSERT INTO #AssetID( intAssetid ) SELECT [intAssetId] FROM tblFAFixedAsset
+
+--START GETTING THE DISPOSAL DATE AND CHECKING IT AGAINST FISCAL PERIOD
+INSERT INTO @tblAsset
+SELECT
+B.strAssetId,
+A.intAssetId,
+D.dtmDepreciationToDate,
+ISNULL(F.ysnOpenPeriod, 0),
+0,
+NULL
+FROM #AssetID A 
+JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+OUTER APPLY(
+	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate 
+	FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intAssetId
+	ORDER BY dtmDepreciationToDate DESC
+)D
+OUTER APPLY(
+	SELECT ISNULL(ysnOpen,0) &  ISNULL(ysnFAOpen,0) ysnOpenPeriod FROM tblGLFiscalYearPeriod WHERE 
+	D.dtmDepreciationToDate BETWEEN
+	dtmStartDate AND dtmEndDate
+)F
+WHERE isnull(ysnAcquired,0) = 1 AND isnull(ysnDisposed,0) = 0 AND isnull(ysnDepreciated,0) = 1
+
+UPDATE A SET 
+dtmDispose = F.dtmStartDate,
+ysnOpenPeriod = 1
+FROM @tblAsset A 
+CROSS APPLY(
+	SELECT TOP 1 dtmStartDate FROM tblGLFiscalYearPeriod 
+	WHERE dtmDispose < dtmStartDate
+	AND (ISNULL(ysnOpen,0) &  ISNULL(ysnFAOpen,0)) = 1
+	ORDER BY dtmStartDate 
+)F
+WHERE ysnOpenPeriod = 0
+
+IF EXISTS(SELECT TOP 1 1 FROM @tblAsset WHERE ysnOpenPeriod = 0)
+BEGIN
+	SELECT TOP 1 @strAssetId = strAssetId FROM @tblAsset WHERE ysnOpenPeriod = 0
+	SET @ErrorMessage = @strAssetId + ' does not have an open fiscal period to dispose'
+	RAISERROR(@ErrorMessage, 16,1)
+	GOTO Post_Rollback
+END
+
+IF NOT EXISTS(SELECT 1 FROM @tblAsset)
+BEGIN
+	RAISERROR('There are no assets for disposal or asset is not yet depreciated', 16,1)
+	GOTO Post_Rollback
+END
+
+WHILE EXISTS( SELECT TOP 1 1 FROM @tblAsset WHERE strTransactionId IS NULL)
+BEGIN
+	SELECT TOP 1 @strAssetId = strAssetId FROM @tblAsset WHERE strTransactionId IS NULL
+	EXEC uspSMGetStartingNumber 111, @strTransactionId OUTPUT
+	UPDATE @tblAsset SET strTransactionId = @strTransactionId FROM @tblAsset where strAssetId = @strAssetId
+END
+
+
+--END GETTING THE DISPOSAL DATE AND CHECKING IT AGAINST FISCAL PERIOD
+
+DECLARE @strBatchId AS NVARCHAR(100)= ''
+EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT
 	
 --=====================================================================================================================================
 -- 	UNPOSTING FIXEDASSETS TRANSACTIONS ysnPost = 0
@@ -34,7 +105,6 @@ ELSE
 IF ISNULL(@ysnPost, 0) = 0
 	BEGIN
 		DECLARE @intCount AS INT	
-		DECLARE @strAssetId NVARCHAR(20)
 		SELECT TOP 1 @strAssetId= strAssetId FROM tblFAFixedAsset A JOIN #AssetID B on A.intAssetId = B.intAssetId
 		SET @Param = 'SELECT intGLDetailId FROM tblGLDetail WHERE strReference = ''' + @strAssetId + ''' AND strCode = ''AMDIS'' AND ysnIsUnposted=0'
 		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
@@ -59,23 +129,71 @@ IF ISNULL(@ysnPost, 0) = 0
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Transaction:
 
-DECLARE @ErrorMessage NVARCHAR(MAX)
+
 DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
-
 DECLARE @dblDailyRate	NUMERIC (18,6)
+DECLARE @dtmDispose DATETIME
+
+
 
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN				
-		DECLARE @totalDepre NUMERIC(18,6)			
+		--DECLARE @totalDepre NUMERIC(18,6)			
 
-		SELECT @totalDepre = SUM(dblCredit-dblDebit) 
+		UPDATE A 
+		SET totalDepre =G.S
+		FROM  @tblAsset A
+		OUTER APPLY(
+			SELECT 
+			SUM(dblCredit-dblDebit) S
 			FROM tblGLDetail GL
-			JOIN tblFAFixedAsset FA ON FA.strAssetId = GL.strReference
-			JOIN #AssetID A ON A.intAssetId = FA.intAssetId
+			JOIN tblFAFixedAsset FA ON FA.intAssetId = A.intAssetId
 			WHERE FA.intAccumulatedAccountId = GL.intAccountId
 			AND strCode = 'AMDPR'
 			AND ysnIsUnposted = 0
+			AND A.strAssetId = GL.strReference
+			GROUP BY FA.strAssetId
+		) G
+
+
+		 INSERT INTO tblFAFixedAssetDepreciation (  
+                [intAssetId],  
+                [intBookId],
+                [intDepreciationMethodId],  
+                [dblBasis],  
+                [dtmDateInService],  
+                [dtmDispositionDate],  
+                [dtmDepreciationToDate],  
+                [dblDepreciationToDate],  
+                [dblSalvageValue],  
+                [strTransaction],  
+                [strTransactionId],  
+                [strType],  
+                [strConvention],
+                [strBatchId]
+              )  
+              SELECT  
+                F.intAssetId,
+                1,
+                D.intDepreciationMethodId,
+                BD.dblCost - BD.dblSalvageValue,  
+                BD.dtmPlacedInService,  
+                A.dtmDispose,
+				A.dtmDispose,
+				A.totalDepre,  
+                BD.dblSalvageValue,  
+                'Dispose',  
+                A.strTransactionId,  
+                D.strDepreciationType,  
+                D.strConvention,
+                @strBatchId
+                FROM tblFAFixedAsset F 
+				JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+                JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
+                JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+                WHERE BD.intBookId = 1
+
 
 
 		DECLARE @GLEntries RecapTableType				
@@ -116,13 +234,13 @@ IF ISNULL(@ysnRecap, 0) = 0
 			
 		)
 		SELECT 
-			 [strTransactionId]		= @strTransactionId
+			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intAccumulatedAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= @totalDepre
+			,[dblDebit]				= B.totalDepre
 			,[dblCredit]			= 0
 			,[dblDebitForeign]		= 0
 			,[dblCreditForeign]		= 0
@@ -132,11 +250,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= B.[dtmDispose]
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -150,12 +268,14 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]		= 'Fixed Assets'
 		
 		FROM tblFAFixedAsset A 
-		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
+
+		--WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
 		UNION ALL
 		SELECT 
-			 [strTransactionId]		= @strTransactionId
+			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= A.[intAccumulatedAccountId]
+			,[intAccountId]			= A.[intAssetAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -169,11 +289,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= B.[dtmDispose]
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -187,17 +307,18 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]		= 'Fixed Assets'
 		
 		FROM tblFAFixedAsset A
-		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
+		
 		UNION ALL
 		SELECT 
-			 [strTransactionId]		= @strTransactionId
+			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intGainLossAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= CASE WHEN A.dblCost > @totalDepre THEN A.dblCost - @totalDepre ELSE 0 END
-			,[dblCredit]			= CASE WHEN @totalDepre > A.dblCost THEN @totalDepre - A.dblCost ELSE 0 END
+			,[dblDebit]				= CASE WHEN A.dblCost > B.totalDepre THEN A.dblCost - B.totalDepre ELSE 0 END
+			,[dblCredit]			= CASE WHEN B.totalDepre > A.dblCost THEN B.totalDepre - A.dblCost ELSE 0 END
 			,[dblDebitForeign]		= 0
 			,[dblCreditForeign]		= 0
 			,[dblDebitReport]		= 0
@@ -206,11 +327,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= B.[dtmDispose]
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -224,8 +345,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]		= 'Fixed Assets'
 		
 		FROM tblFAFixedAsset A
-		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
-		AND @totalDepre <> A.dblCost
+		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
+		AND B.totalDepre <> A.dblCost
 
 
 		
@@ -249,10 +370,18 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	UPDATE FIXEDASSETS TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
-UPDATE tblFAFixedAsset
-	SET [ysnDisposed] = 1
-	WHERE [intAssetId] IN (SELECT intAssetId From #AssetID)
+UPDATE A
+SET [ysnDisposed] = 1,
+dtmDispositionDate = dtmDispose,
+strDispositionNumber = @strTransactionId
+FROM
+tblFAFixedAsset A
+JOIN @tblAsset B ON B.intAssetId = A.intAssetId
 
+
+--remove from undepreciated
+DELETE A FROM tblFAFiscalAsset A JOIN
+@tblAsset B on B.intAssetId = A.intAssetId
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -260,7 +389,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID FIXEDASSETS
 ---------------------------------------------------------------------------------------------------------------------------------------
-SET @successfulCount = ISNULL(@successfulCount,0) + (SELECT COUNT(*) FROM #AssetID)
+SET @successfulCount = ISNULL(@successfulCount,0) + (SELECT COUNT(*) FROM @tblAsset)
 
 
 --=====================================================================================================================================

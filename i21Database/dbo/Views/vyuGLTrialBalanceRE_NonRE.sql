@@ -21,12 +21,13 @@ ISNULL(A.strDescription,'') strDescription,
 ISNULL(A.strNote,'')strNote,
 ISNULL(U.strUOMCode,'')strUOMCode,
 ISNULL(A.ysnActive,0) ysnActive,
-period.dtmStartDate dtmDateFrom,
-period.dtmEndDate dtmDateTo,
-B.intGLFiscalYearPeriodId
+F.dtmStartDate dtmDateFrom,
+F.dtmEndDate dtmDateTo,
+B.intGLFiscalYearPeriodId,
+F.strPeriod
 FROM tblGLAccount A
 LEFT JOIN BeginningBalance B ON A.intAccountId = B.intAccountId
-LEFT JOIN tblGLFiscalYearPeriod period on period.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
+LEFT JOIN tblGLFiscalYearPeriod F on F.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
 LEFT JOIN tblSMCurrency C on C.intCurrencyID = A.intCurrencyID
 LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
 LEFT JOIN tblGLAccountUnit U on U.intAccountUnitId = A.intAccountUnitId

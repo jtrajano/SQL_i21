@@ -750,16 +750,6 @@ BEGIN TRY
 			,striDealAssociation					=	@rtStriDealAssociation
 														+ ' ' + dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
 			,strEQTAssociation						=	@rtStrAssociation1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment)+' '+@rtStrAssociation2+'.'
-			/*
-			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + 
-														CASE
-														WHEN DAY(CH.dtmContractDate) In (1,21,31)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'st'))
-														WHEN DAY(CH.dtmContractDate) In (2,22)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'nd'))
-														WHEN DAY(CH.dtmContractDate) In (3,23)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'rd'))
-														ELSE LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'th'))
-														END 
-														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH,CH.dtmContractDate)), DATENAME(MONTH,CH.dtmContractDate)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
-			*/
 			,strCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2)
 														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
 			
@@ -810,22 +800,13 @@ BEGIN TRY
 															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(SQ.dblBasis),2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
 														ELSE
 															'' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + ' ' + strPriceCurrencyAndUOMForPriced2	
-															--'Priced ' + strFutMarketName + ' ' + 
-															--strFutureMonthYear + ' ' +
-															--SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
 														END
-			--,strStraussCondition					=	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + strDestinationPointName + ' ' + W1.strWeightGradeDesc
 			,strStraussCondition     				= 	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + isnull(CT.strCity,'') + ' ' + isnull(W1.strWeightGradeDesc,'')  
 			,strStraussApplicableLaw				=	@strApplicableLaw
 			,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
-			--,strStrussOtherCondition				=	W2.strWeightGradeDesc +  CHAR(13)+CHAR(10) + @strGeneralCondition
-		   --,strStrussOtherCondition    = isnull(W2.strWeightGradeDesc,'') +  CHAR(13)+CHAR(10) + isnull(@strGeneralCondition,'')    
-		   ,strStrussOtherCondition    = '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  isnull(@strGeneralCondition,'') + '</span>'
-			--,strStraussShipment						=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
-		   --,strStraussShipment      = REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment'    
-		   --,strStraussShipment      = substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),1,4) + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end) 
-		   ,strStraussShipment      = datename(m,SQ.dtmEndDate) + ' ' + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end)   
-		   ,strStraussShipmentLabel      = (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end) 
+		    ,strStrussOtherCondition    = '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  isnull(@strGeneralCondition,'') + '</span>'
+		    ,strStraussShipment      = datename(m,SQ.dtmEndDate) + ' ' + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end)   
+		    ,strStraussShipmentLabel      = (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end) 
 			,intContractTypeId						=	CH.intContractTypeId
 
 	FROM	tblCTContractHeader				CH
@@ -927,8 +908,8 @@ BEGIN TRY
 				LEFT JOIN	tblCTPriceFixation		PF	WITH (NOLOCK) ON	PF.intContractDetailId		=	CD.intContractDetailId		
 				LEFT JOIN	tblICItemUOM			IU	WITH (NOLOCK) ON	IU.intItemUOMId				=	CD.intPriceItemUOMId		
 				LEFT JOIN	tblICUnitMeasure		UM	WITH (NOLOCK) ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
-				LEFT JOIN   tblICItemUOM			BU	WITH (NOLOCK) ON	BU.intItemUOMId				=	CD.intBasisUOMId
-				LEFT JOIN   tblICUnitMeasure		BM	WITH (NOLOCK) ON	BM.intUnitMeasureId			=	BU.intUnitMeasureId
+				LEFT JOIN  tblICItemUOM				BU	WITH (NOLOCK) ON	BU.intItemUOMId				=	CD.intBasisUOMId
+				LEFT JOIN  tblICUnitMeasure			BM	WITH (NOLOCK) ON	BM.intUnitMeasureId			=	BU.intUnitMeasureId
 				LEFT JOIN	tblICItem				BI	WITH (NOLOCK) ON	BI.intItemId				=	CD.intItemBundleId
 
 			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
@@ -937,6 +918,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCountry				rtc11 on lower(rtrim(ltrim(rtc11.strCountry))) = lower(rtrim(ltrim(EV.strEntityCountry)))
 	LEFT JOIN tblSMCountry				rtc12 on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
 	LEFT JOIN tblCTPricingType pricingType on pricingType.intPricingTypeId = CH.intPricingTypeId
+	ORDER BY CH.intContractHeaderId DESC
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
 
@@ -951,4 +933,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
-GO

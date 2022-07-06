@@ -21,7 +21,14 @@
 			,a.intAssignedTo
 			,a.ysnPrivate
 			,a.intCreatedBy
-			,intAttachment = (select convert(int,count(tblSMAttachment.intAttachmentId)) from tblSMAttachment where tblSMAttachment.strScreen = 'GlobalComponentEngine.view.Activity' and convert(int, tblSMAttachment.strRecordNo) = a.intActivityId)
+			,intAttachment = (	SELECT		CONVERT(int, COUNT(b.intAttachmentId)) 
+								FROM		tblSMAttachment AS b
+								INNER JOIN	tblSMTransaction AS c
+								ON			b.intTransactionId = c.intTransactionId
+								INNER JOIN	tblSMScreen AS d
+								ON			c.intScreenId = d.intScreenId
+								WHERE		d.strNamespace = 'GlobalComponentEngine.view.Activity' 
+										AND CONVERT(int, c.intRecordId) = a.intActivityId)
 			,a.strDetails
 		from tblSMActivity a
 			left join tblEMEntity b on b.intEntityId = a.intEntityId

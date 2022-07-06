@@ -35,7 +35,7 @@ FROM (
        ,strStorageLocation = StorageLocation.strName
        ,dblQty = Lot.dblQty
        ,dblUnPickedQty = CASE WHEN Lot.dblQty > 0.0 THEN 
-							  Lot.dblQty - IsNull(SR.dblReservedQty, 0) 
+							  Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
 						 ELSE 0.0 END
        ,dblLastCost = Lot.dblLastCost
        ,dtmExpiryDate = Lot.dtmExpiryDate
@@ -48,10 +48,10 @@ FROM (
        ,dblGrossWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
                                                        IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty) + Lot.dblWeight, 0.0) 
                                                   ELSE
-                                                       ISNULL(Lot.dblGrossWeight, ISNULL(Lot.dblWeight, 0.0))
+                                                       ISNULL(Lot.dblGrossWeight, ISNULL(Lot.dblWeight, 0.0)) - ISNULL(PC.dblPickedContainerGrossWt, 0)
                                                   END
        ,dblTareWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
-                                                      IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty), 0.0)
+                                                      IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty), 0.0) - ISNULL(PC.dblPickedContainerNetWt, 0)
                                                ELSE
                                                       0.0
                                                END
@@ -143,6 +143,10 @@ FROM (
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
+		OUTER APPLY (SELECT dblPickedContainerQty = SUM(PLC.dblLotPickedQty)
+							,dblPickedContainerGrossWt = SUM(PLC.dblGrossWt)
+							,dblPickedContainerNetWt = SUM(PLC.dblNetWt)
+							FROM tblLGPickLotDetail PLC WHERE intContainerId = LC.intLoadContainerId) PC
 		LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId   
 		LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId

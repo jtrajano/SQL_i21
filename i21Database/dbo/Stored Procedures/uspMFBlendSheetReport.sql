@@ -93,18 +93,42 @@ AS
 	Declare @intLocationId int
 	Declare @dblCost NUMERIC(38,20)
 	Declare @dblTotalCost NUMERIC(38,20)
+	DECLARE @ysnEnableParentLot BIT = 0
+		,@ysnDietarySupplements BIT = 0
+		,@strCompletedByLabel NVARCHAR(50) = NULL
+		,@strVerifiedByLabel NVARCHAR(50) = NULL
 
-	Select @intPickListId=intPickListId,@dblProduceQty=dblQuantity,@intLocationId=intLocationId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+	Select @intPickListId=intPickListId,@dblProduceQty=dblQuantity,@intLocationId=intLocationId,@ysnDietarySupplements=ISNULL(ysnDietarySupplements, 0) From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+
+	IF @ysnDietarySupplements = 1
+	BEGIN
+		SELECT @strCompletedByLabel = 'Completed By:'
+			,@strVerifiedByLabel = 'Verified By:'
+	END
+	
+	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference
+
+	IF @ysnEnableParentLot = 1
+	BEGIN
+		SELECT @strCompanyName = NULL
+			,@strCompanyAddress = NULL
+			,@strCity = NULL
+			,@strState = NULL
+			,@strZip = NULL
+			,@strCountry = NULL
+	END
 
 	If Exists (Select 1 From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
 	Begin
 		Insert Into @tblBlendSheet(intWorkOrderId,strLotNumber,strLotAlias,strRawItemNo,strRawItemDesc,
 		dblQuantity,strUOM,dblIssuedQuantity,strIssuedUOM,strVendor,dblBSPercentage,dblCost,strStorageLocation,intSequenceNo)
-		Select @intWorkOrderId,l.strLotNumber,l.strLotAlias,i.strItemNo,i.strDescription ,
+		Select @intWorkOrderId,CASE WHEN @ysnEnableParentLot = 1 THEN PL.strParentLotNumber ELSE l.strLotNumber END,'' strLotAlias,i.strItemNo,i.strDescription ,
 		wcl.dblQuantity,um.strUnitMeasure,wcl.dblIssuedQuantity,um1.strUnitMeasure,v.strName,
 		ROUND(100 * (wcl.dblQuantity / SUM(wcl.dblQuantity) OVER()),2) AS dblBSPercentage,
 		dbo.fnICConvertUOMtoStockUnit(wcl.intItemId,wcl.intItemUOMId,wcl.dblQuantity) * ISNULL(l.dblLastCost,0),sl.strName,0
-		From tblMFWorkOrderConsumedLot wcl Join tblICLot l on wcl.intLotId=l.intLotId 
+		From tblMFWorkOrderConsumedLot wcl
+		Join tblICLot l on wcl.intLotId=l.intLotId 
+		JOIN tblICParentLot PL ON PL.intParentLotId = l.intParentLotId
 		Join tblICItem i on l.intItemId=i.intItemId
 		Join tblICItemUOM iu on wcl.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -255,8 +279,8 @@ AS
 	bs.dblBlendReqQuantity=w.dblQuantity,bs.dblBlendActualQuantity=wpl.dblQuantity,
 	bs.strBlendUOM=um.strUnitMeasure,bs.strBlendLotNumber=l.strLotNumber,bs.strBlendLotAlias=l.strLotAlias,
 	bs.strShift=s.strShiftName,bs.dtmCreatedDate=w.dtmCreated,bs.dtmCreatedTime=Convert(char,l.dtmDateCreated,108),
-	bs.strBlender=us.strUserName,bs.strVesselNo=sl.strName,bs.strReferenceNo=ISNULL(w.strReferenceNo,''),bs.strERPOrderNo=ISNULL(w.strERPOrderNo,''),
-	bs.dtmCompletedDate=IsNULL(wpl.dtmProductionDate,w.dtmCompletedDate)
+	bs.strBlender=(CASE WHEN @ysnEnableParentLot = 1 THEN '' ELSE us.strUserName END),bs.strVesselNo=sl.strName,bs.strReferenceNo=ISNULL(w.strReferenceNo,''),bs.strERPOrderNo=ISNULL(w.strERPOrderNo,''),
+	bs.dtmCompletedDate=(CASE WHEN @ysnEnableParentLot = 1 THEN wpl.dtmCreated ELSE IsNULL(wpl.dtmProductionDate,w.dtmCompletedDate) END)
 	From @tblBlendSheet bs Join tblMFWorkOrder w on bs.intWorkOrderId=w.intWorkOrderId 
 	join tblICItem i on w.intItemId=i.intItemId
 	Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
@@ -326,5 +350,8 @@ AS
 			,strERPOrderNo
 			,dtmCompletedDate
 			,@strQuality AS strQuality
+			,@ysnDietarySupplements AS ysnDietarySupplements
+			,@strCompletedByLabel AS strCompletedByLabel
+			,@strVerifiedByLabel AS strVerifiedByLabel
 			From @tblBlendSheet
 			Order By intSequenceNo

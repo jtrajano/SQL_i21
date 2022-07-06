@@ -18,6 +18,7 @@ SELECT
 	,dblQuantity = cfTransaction.dblQuantity
 	,dblTotal = cfTransaction.dblCalculatedTotalPrice
 	,strDriverPin = cfDriverPin.strDriverPinNumber
+	,strVehicleNumber = cfVehicle.strVehicleNumber
 	,intTransactionId = cfTransaction.intTransactionId
 	,strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, emcuslocation.strLocationName, emcuslocation.strAddress, emcuslocation.strCity, emcuslocation.strState, emcuslocation.strZipCode, emcuslocation.strCountry, NULL, 0) 
 	,intEntityId = cfcustomer.intEntityId

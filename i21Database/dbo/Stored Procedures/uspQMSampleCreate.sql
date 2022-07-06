@@ -43,7 +43,24 @@ BEGIN TRY
 	DECLARE @intRepresentingUOMId INT
 		,@dblRepresentingQty NUMERIC(18, 6)
 		,@dblConvertedSampleQty NUMERIC(18, 6)
+		,@intContractHeaderId INT
+		,@ysnMultipleContractSeq BIT
+	DECLARE @intOrgSampleTypeId INT
+		,@intOrgItemId INT
+		,@intOrgCountryID INT
+		,@intOrgCompanyLocationSubLocationId INT
 
+	SELECT @intOrgSampleTypeId = intSampleTypeId
+		,@intOrgItemId = intItemId
+		,@intOrgCountryID = intCountryID
+		,@intOrgCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intSampleTypeId INT
+			,intItemId INT
+			,intCountryID INT
+			,intCompanyLocationSubLocationId INT
+			)
+	
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
 		,@intLocationId = intLocationId
@@ -60,6 +77,7 @@ BEGIN TRY
 		,@intPreviousSampleStatusId = intSampleStatusId
 		,@intItemId = intItemId
 		,@intCreatedUserId = intCreatedUserId
+		,@intContractHeaderId = intContractHeaderId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
@@ -77,6 +95,7 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intCreatedUserId INT
+			,intContractHeaderId INT
 			)
 
 	-- Quantity Check
@@ -263,6 +282,7 @@ BEGIN TRY
 	END
 
 	SELECT @ysnAdjustInventoryQtyBySampleQty = ysnAdjustInventoryQtyBySampleQty
+		,@ysnMultipleContractSeq = ysnMultipleContractSeq
 	FROM tblQMSampleType
 	WHERE intSampleTypeId = @intSampleTypeId
 
@@ -286,6 +306,25 @@ BEGIN TRY
 		END
 	END
 
+	-- Contract Sequences check for Assign Contract to Multiple Sequences scenario
+	IF @ysnMultipleContractSeq = 1
+		AND ISNULL(@intContractHeaderId, 0) > 0
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (intContractDetailId INT) x
+				JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = x.intContractDetailId
+				WHERE CD.intContractHeaderId <> @intContractHeaderId
+				)
+		BEGIN
+			RAISERROR (
+					'Assigned Sequences should belongs to the same Contract. '
+					,16
+					,1
+					)
+		END
+	END
+
 	BEGIN TRAN
 
 	INSERT INTO dbo.tblQMSample (
@@ -300,7 +339,7 @@ BEGIN TRY
 		,intPreviousSampleStatusId
 		,intItemId
 		,intItemContractId
-		--,intContractHeaderId
+		,intContractHeaderId
 		,intContractDetailId
 		--,intShipmentBLContainerContractId
 		--,intShipmentId
@@ -323,7 +362,7 @@ BEGIN TRY
 		,strLotNumber
 		,strSampleNote
 		,dtmSampleReceivedDate
-		,dtmTestedOn
+		--,dtmTestedOn
 		--,intTestedById
 		,dblSampleQty
 		,intSampleUOMId
@@ -369,7 +408,7 @@ BEGIN TRY
 		,@intPreviousSampleStatusId
 		,intItemId
 		,intItemContractId
-		--,intContractHeaderId
+		,intContractHeaderId
 		,intContractDetailId
 		--,intShipmentBLContainerContractId
 		--,intShipmentId
@@ -392,7 +431,7 @@ BEGIN TRY
 		,strLotNumber
 		,strSampleNote
 		,dtmSampleReceivedDate
-		,dtmTestedOn
+		--,dtmTestedOn
 		--,intTestedById
 		,dblSampleQty
 		,intSampleUOMId
@@ -435,7 +474,7 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT
-			--,intContractHeaderId INT
+			,intContractHeaderId INT
 			,intContractDetailId INT
 			--,intShipmentBLContainerId INT
 			--,intShipmentBLContainerContractId INT
@@ -456,7 +495,7 @@ BEGIN TRY
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
-			,dtmTestedOn DATETIME
+			--,dtmTestedOn DATETIME
 			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
@@ -516,6 +555,36 @@ BEGIN TRY
 			,strAttributeValue NVARCHAR(50)
 			,ysnIsMandatory BIT
 			,intListItemId INT
+			,intCreatedUserId INT
+			,dtmCreated DATETIME
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			)
+
+	INSERT INTO dbo.tblQMSampleContractSequence (
+		intConcurrencyId
+		,intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT 1
+		,@intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+			intContractDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intUnitMeasureId INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
@@ -714,6 +783,14 @@ BEGIN TRY
 	END
 
 	EXEC uspQMInterCompanyPreStageSample @intSampleId
+
+	EXEC uspQMPreStageSample @intSampleId
+		,'Added'
+		,@strSampleNumber
+		,@intOrgSampleTypeId
+		,@intOrgItemId
+		,@intOrgCountryID
+		,@intOrgCompanyLocationSubLocationId
 
 	EXEC sp_xml_removedocument @idoc
 

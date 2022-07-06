@@ -147,6 +147,11 @@ SELECT
 	, dtmFinalPNL
 	, intPricingStatus
 	, dtmStartDateUTC
+	, dblRefFuturesQty
+	, intRefFuturesItemUOMId
+	, intRefFuturesCurrencyId
+	, intRefFuturesMarketId
+	, intRefFuturesMonthId
 	, strLocationName
 	, strLocationNumber
 	, dblRate

@@ -40,6 +40,7 @@
 	--This is to track the used pricing for load
 	[dblLoadApplied]				NUMERIC(18,6) NULL,
 	[ysnToBeDeleted]				BIT NOT NULL DEFAULT 0,
+	[intAssignFuturesToContractSummaryId] INT NULL,
 	[dblPreviousQty]				NUMERIC(18,6) NULL,
 	[intConcurrencyId]				INT NOT NULL,
 
@@ -61,7 +62,8 @@
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblAPBillDetail_intBillDetailId] FOREIGN KEY (intBillDetailId) REFERENCES tblAPBillDetail(intBillDetailId),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblARInvoice_intInvoiceId] FOREIGN KEY (intInvoiceId) REFERENCES tblARInvoice(intInvoiceId),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY (intInvoiceDetailId) REFERENCES tblARInvoiceDetail(intInvoiceDetailId),
-	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKDailyAveragePriceDetail_intDailyAveragePriceDetailId] FOREIGN KEY (intDailyAveragePriceDetailId) REFERENCES tblRKDailyAveragePriceDetail(intDailyAveragePriceDetailId)
+	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKDailyAveragePriceDetail_intDailyAveragePriceDetailId] FOREIGN KEY (intDailyAveragePriceDetailId) REFERENCES tblRKDailyAveragePriceDetail(intDailyAveragePriceDetailId),
+	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKAssignFuturesToContractSummary_intAssignFuturesToContractSummaryId] FOREIGN KEY (intAssignFuturesToContractSummaryId) REFERENCES tblRKAssignFuturesToContractSummary(intAssignFuturesToContractSummaryId)
 )
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCTPriceFixationDetail_intPriceFixationId] ON [dbo].[tblCTPriceFixationDetail](intPriceFixationId);

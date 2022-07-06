@@ -35,6 +35,10 @@ DECLARE @ErrorMessage AS NVARCHAR(4000)
 		,@TransCount AS INT = @@TRANCOUNT 
 		,@IsEscalate AS BIT = 0 
 
+DECLARE 
+	@costAdjustmentType_DETAILED AS TINYINT = 1
+	,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+
 -- Clean-up for the temp tables. 
 IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
 	DROP TABLE #tmpRevalueProducedItems  
@@ -357,35 +361,86 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST) AND (@strActualCostId IS NULL)
 	BEGIN TRY
-		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveAvg
-			@dtmDate
-			,@intItemId 
-			,@intItemLocationId 
-			,@intSubLocationId
-			,@intStorageLocationId 
-			,@intItemUOMId
-			,@dblQty
-			,@intCostUOMId 
-			,@dblNewCost
-			,@dblNewValue 
-			,@intTransactionId 
-			,@intTransactionDetailId 
-			,@strTransactionId 
-			,@intSourceTransactionId 
-			,@intSourceTransactionDetailId 
-			,@strSourceTransactionId 
-			,@strBatchId 
-			,@intTransactionTypeId 
-			,@intEntityUserSecurityId 
-			,@intRelatedInventoryTransactionId 
-			,@TransactionFormName 
-			,@intFobPointId 
-			,@intInTransitSourceLocationId 
-			,@ysnPost
-			,@intOtherChargeItemId 
-			,@ysnUpdateItemCostAndPrice
-			,@IsEscalate
-			,@intSourceEntityId
+	
+		-- Get the cost bucket date. 
+		DECLARE @cbDate AS DATETIME 
+		SELECT	TOP 1 
+				@cbDate = cb.dtmDate
+		FROM	tblICInventoryFIFO cb
+		WHERE	cb.intItemId = @intItemId
+				AND cb.intItemLocationId = @intItemLocationId
+				AND cb.intTransactionId = @intSourceTransactionId
+				AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+				AND cb.strTransactionId = @strSourceTransactionId
+				AND ISNULL(cb.ysnIsUnposted, 0) = 0 		
+		
+		-- Do the simplified AVG if cost adjustment date is more than a month (30 days)
+		IF	dbo.fnICGetCostAdjustmentSetup(@intItemId, @intItemLocationId) = @costAdjustmentType_SUMMARIZED 
+			AND DATEDIFF(DAY, @cbDate, @dtmDate) > 30
+		BEGIN 
+			EXEC @ReturnValue = dbo.uspICPostCostAdjustmentSimplifiedAvg
+				@dtmDate
+				,@intItemId 
+				,@intItemLocationId 
+				,@intSubLocationId
+				,@intStorageLocationId 
+				,@intItemUOMId
+				,@dblQty
+				,@intCostUOMId 
+				,@dblNewCost
+				,@dblNewValue 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@intSourceTransactionId 
+				,@intSourceTransactionDetailId 
+				,@strSourceTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@intEntityUserSecurityId 
+				,@intRelatedInventoryTransactionId 
+				,@TransactionFormName 
+				,@intFobPointId 
+				,@intInTransitSourceLocationId 
+				,@ysnPost
+				,@intOtherChargeItemId 
+				,@ysnUpdateItemCostAndPrice
+				,@IsEscalate
+				,@intSourceEntityId
+		END 
+		-- Do the retroactive average cost if cost adjustment is within a month. 
+		ELSE 
+		BEGIN 
+			EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveAvg
+				@dtmDate
+				,@intItemId 
+				,@intItemLocationId 
+				,@intSubLocationId
+				,@intStorageLocationId 
+				,@intItemUOMId
+				,@dblQty
+				,@intCostUOMId 
+				,@dblNewCost
+				,@dblNewValue 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@intSourceTransactionId 
+				,@intSourceTransactionDetailId 
+				,@strSourceTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@intEntityUserSecurityId 
+				,@intRelatedInventoryTransactionId 
+				,@TransactionFormName 
+				,@intFobPointId 
+				,@intInTransitSourceLocationId 
+				,@ysnPost
+				,@intOtherChargeItemId 
+				,@ysnUpdateItemCostAndPrice
+				,@IsEscalate
+				,@intSourceEntityId
+		END 
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 

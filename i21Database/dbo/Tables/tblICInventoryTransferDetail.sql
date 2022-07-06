@@ -35,6 +35,7 @@
     [dblGross] NUMERIC(38,20) NULL,
     [dblTare] NUMERIC(38,20) NULL,
     [dblNet] NUMERIC(38,20) NULL,
+    [dblStandardWeight] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [intNewLotStatusId] INT NULL,
     [intGrossNetUOMId] INT NULL,
     [dblGrossNetUnitQty] NUMERIC(38,20) NULL,
@@ -42,11 +43,19 @@
 	[dblWeightPerQty] NUMERIC(38, 20) NULL,
 	[strLotCondition] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intCostingMethod] INT NULL,
+	[ysnWeighed] BIT NULL DEFAULT ((0)),
+	[strComment] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     [dtmDateCreated] DATETIME NULL,
     [dtmDateModified] DATETIME NULL,
     [intCreatedByUserId] INT NULL,
     [intModifiedByUserId] INT NULL,   
+	[dtmDeliveryDate] DATETIME NULL,
+	[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strMarks] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
+	[dblTransferPrice] NUMERIC(18, 6) NULL,
+	[intCurrencyId] INT NULL,
     CONSTRAINT [PK_tblICInventoryTransferDetail] PRIMARY KEY ([intInventoryTransferDetailId]), 
+	CONSTRAINT [FK_PK_tblICInventoryTransferDetail_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]) ON DELETE NO ACTION,
     CONSTRAINT [FK_tblICInventoryTransferDetail_tblICInventoryTransfer] FOREIGN KEY ([intInventoryTransferId]) REFERENCES [tblICInventoryTransfer]([intInventoryTransferId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICInventoryTransferDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICInventoryTransferDetail_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
@@ -61,6 +70,16 @@
 )
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransferDetail_intInventoryTransferDetailId]
+	ON [dbo].[tblICInventoryTransferDetail]([intInventoryTransferDetailId] ASC)
+	INCLUDE (intInventoryTransferId)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransferDetail_intInventoryTransferId]
+	ON [dbo].[tblICInventoryTransferDetail]([intInventoryTransferId] ASC)
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

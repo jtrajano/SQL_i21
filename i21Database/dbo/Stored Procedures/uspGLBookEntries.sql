@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspGLBookEntries
+﻿
+CREATE PROCEDURE uspGLBookEntries
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
 	,@SkipGLValidation BIT = 0
@@ -90,6 +91,7 @@ BEGIN
             ,[dblForeignRate]
 			,[dblReportingRate]
 			,strSourceDocumentId
+			,intFiscalPeriodId
 			,intSourceLocationId
 			,intSourceUOMId
 			,dblSourceUnitDebit
@@ -101,7 +103,7 @@ BEGIN
 			,dtmDateEnteredMin
 	)
 	SELECT 
-			dbo.fnRemoveTimeOnDate([dtmDate])
+			dbo.fnRemoveTimeOnDate(dtmDate)
 			,[strBatchId]
 			,@intMultCompanyId
 			,[intAccountId]
@@ -136,6 +138,7 @@ BEGIN
             ,[dblForeignRate]
 			,ISNULL([dblReportingRate],0)
 			,ISNULL(strSourceDocumentId,'')
+			,F.intGLFiscalYearPeriodId
 			,intSourceLocationId
 			,intSourceUOMId
 			,ISNULL(dblSourceUnitDebit,0)
@@ -150,7 +153,10 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
-END;
+			CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F
+
+END
+;
 
 EXEC uspGLInsertAuditLog @ysnPost, @GLEntries
 EXEC uspGLUpdateTrialBalance @GLEntries

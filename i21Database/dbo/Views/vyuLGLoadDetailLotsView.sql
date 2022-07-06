@@ -12,18 +12,26 @@ SELECT L.strLoadNumber
 	  ,LDL.dblNet
 	  ,LDL.intWeightUOMId
 	  ,LDL.strWarehouseCargoNumber
-	  ,UM.strUnitMeasure AS strItemUnitMeasure
-	  ,WUM.strUnitMeasure AS strWeightUnitMeasure
+	  ,LDL.strID1
+	  ,LDL.strID2
+	  ,LDL.strID3
+	  ,strItemUnitMeasure = UM.strUnitMeasure
+	  ,strWeightUnitMeasure = WUM.strUnitMeasure
 	  ,LOT.strLotNumber 
-	  ,Receipt.strWarehouseRefNo
+	  ,strWarehouseRefNo = ISNULL(Receipt.strWarehouseRefNo,LOT.strWarehouseRefNo)
+	  ,CLSL.strSubLocationName
+	  ,strStorageLocation = SL.strName
+	  ,LDL.intConcurrencyId
 FROM tblLGLoad L
-JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
-JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LOT.intItemUOMId, LDL.intItemUOMId)
-JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-JOIN tblICItemUOM WU ON WU.intItemUOMId = ISNULL(LOT.intWeightUOMId, LDL.intWeightUOMId)
-JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WU.intUnitMeasureId
-LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = LOT.intLotId
-LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+	JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LOT.intItemUOMId, LDL.intItemUOMId)
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = ISNULL(LOT.intWeightUOMId, LDL.intWeightUOMId)
+	LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WU.intUnitMeasureId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LOT.intSubLocationId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LOT.intStorageLocationId
+	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = LOT.intLotId
+	LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

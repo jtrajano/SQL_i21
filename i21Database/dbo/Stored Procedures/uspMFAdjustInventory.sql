@@ -40,6 +40,7 @@
 	,@strNewWarehouseRefNo NVARCHAR(50) = NULL
 	,@strOldContainerNo NVARCHAR(50) = NULL
 	,@strNewContainerNo NVARCHAR(50) = NULL
+	,@strReferenceNo NVARCHAR(50) = NULL
 	)
 AS
 BEGIN TRY
@@ -110,6 +111,7 @@ BEGIN TRY
 		,strNewWarehouseRefNo
 		,strOldContainerNo
 		,strNewContainerNo
+		,strReferenceNo
 		)
 	SELECT @dtmDate
 		,@intTransactionTypeId
@@ -154,6 +156,7 @@ BEGIN TRY
 		,@strNewWarehouseRefNo
 		,@strOldContainerNo
 		,@strNewContainerNo
+		,@strReferenceNo
 
 	UPDATE tblMFLotInventory
 	SET dtmLastMoveDate = @dtmDate

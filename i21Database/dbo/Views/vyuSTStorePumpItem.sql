@@ -4,6 +4,7 @@ SELECT
 	PU.intStorePumpItemId
 	, PU.intStoreId
 	, PU.intItemUOMId
+	, PU.strUnitMeasure
 	, PU.dblPrice
 	, PU.intTaxGroupId
 	, PU.intCategoryId
@@ -23,4 +24,4 @@ JOIN tblICItem I
 JOIN tblSTStore ST
 	ON PU.intStoreId = ST.intStoreId
 JOIN tblSMTaxGroup TG
-	ON ST.intTaxGroupId = TG.intTaxGroupId
+	ON PU.intTaxGroupId = TG.intTaxGroupId

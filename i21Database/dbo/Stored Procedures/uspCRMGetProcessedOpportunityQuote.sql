@@ -19,11 +19,10 @@ SET ANSI_WARNINGS OFF
 				,c.intSalesOrderId
 			from
 				tblCRMOpportunityQuote a
-				,tblSOSalesOrder b
-				,tblSOSalesOrder c
+				inner join tblSOSalesOrder b on b.intSalesOrderId = a.intSalesOrderId 
+				inner join tblSOSalesOrder c on c.strSalesOrderOriginId = b.strSalesOrderNumber
 			where
-				b.intSalesOrderId = a.intSalesOrderId and b.strTransactionType = 'Quote'
-				and c.strSalesOrderOriginId = b.strSalesOrderNumber
+				b.strTransactionType = 'Quote'
 
 		OPEN @queryResult
 		fetch next

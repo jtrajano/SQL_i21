@@ -29,14 +29,14 @@ BEGIN TRY
 	WHERE intCompanyId IS NULL
 
 	IF EXISTS (
-			SELECT 1
+			SELECT TOP 1 1
 			FROM tblSMInterCompanyTransactionConfiguration TC
 			JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 			WHERE TT.strTransactionType = 'Purchase Contract'
 			)
 	BEGIN
 		IF EXISTS (
-				SELECT 1
+				SELECT TOP 1 1
 				FROM tblCTContractHeader CH
 				JOIN tblCTBookVsEntity BVE ON BVE.intBookId = CH.intBookId
 					AND BVE.intEntityId = CH.intEntityId
@@ -60,7 +60,7 @@ BEGIN TRY
 			IF @strInsert = 'Insert'
 			BEGIN
 				IF EXISTS (
-						SELECT 1
+						SELECT TOP 1 1
 						FROM tblCTContractHeader
 						WHERE intContractHeaderId = @ContractHeaderId
 							AND intConcurrencyId = 1
@@ -74,7 +74,7 @@ BEGIN TRY
 						,'Added'
 				END
 				ELSE IF EXISTS (
-						SELECT 1
+						SELECT TOP 1 1
 						FROM tblCTContractHeader
 						WHERE intContractHeaderId = @ContractHeaderId
 							AND intConcurrencyId > 1
@@ -92,7 +92,7 @@ BEGIN TRY
 	END
 
 	IF EXISTS (
-			SELECT 1
+			SELECT TOP 1 1
 			FROM tblSMInterCompanyTransactionConfiguration TC
 			JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 			JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
@@ -142,7 +142,7 @@ BEGIN TRY
 		IF @strUpdate in ('Update','Update on Approval')
 		BEGIN
 			IF EXISTS (
-					SELECT 1
+					SELECT TOP 1 1
 					FROM tblCTContractPreStage
 					WHERE intContractHeaderId = @ContractHeaderId
 					)
@@ -166,7 +166,7 @@ BEGIN TRY
 		END
 
 		IF NOT EXISTS (
-				SELECT *
+				SELECT TOP 1 1
 				FROM tblCTContractHeader
 				WHERE intContractHeaderId = @ContractHeaderId
 				)

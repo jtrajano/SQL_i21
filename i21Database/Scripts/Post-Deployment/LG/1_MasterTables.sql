@@ -18,6 +18,34 @@ END
 GO
 
 /*
+* Company Preferences Default Values 
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGCompanyPreference') AND name = 'intDefaultPickType')
+BEGIN
+	EXEC ('UPDATE tblLGCompanyPreference SET intDefaultPickType = 1 WHERE intDefaultPickType IS NULL')
+END
+GO
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGCompanyPreference') AND name = 'intWeightClaimsBy')
+BEGIN
+	EXEC ('UPDATE tblLGCompanyPreference SET intWeightClaimsBy = 1 WHERE intWeightClaimsBy IS NULL')
+END
+GO
+
+/*
+* Set Document Received value 
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGCompanyPreference') AND name = 'ysnDocumentsReceived')
+BEGIN
+	EXEC ('UPDATE tblLGLoad
+			SET ysnDocumentsReceived = CASE WHEN NOT EXISTS(SELECT TOP 1 1 FROM tblLGLoadDocuments WHERE intLoadId = tblLGLoad.intLoadId) THEN NULL
+											WHEN EXISTS(SELECT TOP 1 1 FROM tblLGLoadDocuments WHERE intLoadId = tblLGLoad.intLoadId AND ISNULL(ysnReceived, 0) = 0) THEN 0 
+										ELSE 1 END
+			WHERE ysnDocumentsReceived IS NULL AND EXISTS(SELECT TOP 1 1 FROM tblLGLoadDocuments WHERE intLoadId = tblLGLoad.intLoadId)
+	')
+END
+GO
+
+/*
 * Set Document Received value 
 */
 IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'ysnDocumentsReceived')
@@ -204,6 +232,18 @@ BEGIN
 END
 GO
 
+/*
+* Set default data for Pick Lot/Container Type
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGPickLotHeader') AND name = 'intType')
+BEGIN
+	EXEC ('UPDATE tblLGPickLotHeader
+			SET intType = 1
+			WHERE intType IS NULL
+	')
+END
+GO
+
 /* 
 * Populate Pending Claims table
 */
@@ -213,6 +253,7 @@ BEGIN
 		INSERT INTO tblLGPendingClaim 
 			([intPurchaseSale]
 			,[intLoadId]
+			,[intLoadContainerId]
 			,[intContractDetailId]
 			,[intEntityId]
 			,[intPartyEntityId]
@@ -240,6 +281,7 @@ BEGIN
 		SELECT 
 			[intPurchaseSale]
 			,[intLoadId]
+			,[intLoadContainerId]
 			,[intContractDetailId]
 			,[intEntityId]
 			,[intPartyEntityId]
@@ -276,6 +318,7 @@ BEGIN
 											THEN EMPH.intEntityId
 										ELSE EM.intEntityId END
 				,intLoadId = L.intLoadId
+				,intLoadContainerId = LC.intLoadContainerId
 				,intWeightUnitMeasureId = L.intWeightUnitMeasureId
 				,intWeightId = CH.intWeightId
 				,dblShippedNetWt = (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0))
@@ -316,7 +359,9 @@ BEGIN
 				JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
-				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId AND WG.dblFranchise IS NOT NULL
+				OUTER APPLY (SELECT TOP 1 ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 0) FROM tblLGCompanyPreference) CP
+				LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1 AND CP.ysnWeightClaimsByContainer = 1
 				LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 				LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 				LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
@@ -326,25 +371,36 @@ BEGIN
 				OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = L.intWeightUnitMeasureId) WUI
 				OUTER APPLY (SELECT TOP 1 intPriceUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemUOMId = AD.intSeqPriceUOMId) PUI
 				OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
-				OUTER APPLY (SELECT dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
+				OUTER APPLY (SELECT dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink 
+									 WHERE intLoadDetailId = LD.intLoadDetailId 
+									 AND (LC.intLoadContainerId IS NULL OR intLoadContainerId = LC.intLoadContainerId)) CLNW
 				CROSS APPLY (SELECT dblNet = SUM(ISNULL(IRI.dblNet,0)),dblGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 								JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 								WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+									AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
 									AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> ''Inventory Return'') RI
 				CROSS APPLY (SELECT dblIRNet = SUM(ISNULL(IRI.dblNet,0)),dblIRGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 								JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 								WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+									AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
 									AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType = ''Inventory Return'') IRN
 				WHERE 
-					L.intPurchaseSale IN (1, 3)
-					AND ((L.intPurchaseSale = 1 AND L.intShipmentStatus = 4
-							AND NOT EXISTS(SELECT 1 from tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId AND ISNULL(dblReceivedQty, 0) = 0)) 
-						OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
+					L.intShipmentType = 1 AND L.intPurchaseSale IN (1, 3)
+					AND ((L.intPurchaseSale = 1 
+						AND ((ISNULL(CP.ysnWeightClaimsByContainer, 0) = 1 AND L.intShipmentStatus IN (3, 4) AND RI.dblGross <> 0
+							AND CASE WHEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
+										THEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100))
+										ELSE (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
+									END <> 0)
+						 OR (ISNULL(CP.ysnWeightClaimsByContainer, 0) = 0 AND L.intShipmentStatus = 4 
+							AND NOT EXISTS(SELECT 1 from tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId AND ISNULL(dblReceivedQty, 0) = 0))))
+					 OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
 					AND WC.intWeightClaimId IS NULL
 					AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
-					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 1)
-
-			UNION ALL
+					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 1
+										AND (LC.intLoadContainerId IS NULL OR (LC.intLoadContainerId IS NOT NULL AND intLoadContainerId = LC.intLoadContainerId)))
+					
+		UNION ALL
 
 			SELECT
 				intPurchaseSale = 2
@@ -355,6 +411,7 @@ BEGIN
 											THEN EMPH.intEntityId
 										ELSE EM.intEntityId END
 				,intLoadId = L.intLoadId
+				,intLoadContainerId = NULL
 				,intWeightUnitMeasureId = L.intWeightUnitMeasureId
 				,intWeightId = CH.intWeightId
 				,dblShippedNetWt = CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END
@@ -387,7 +444,7 @@ BEGIN
 				JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
-				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId AND WG.dblFranchise IS NOT NULL
 				LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 				LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 				LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
@@ -401,13 +458,60 @@ BEGIN
 				OUTER APPLY (SELECT intCount = COUNT(1) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
 				OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt),dblLinkGrossWt = SUM(dblLinkGrossWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
 				WHERE 
-					L.intPurchaseSale IN (2, 3)
+					L.intShipmentType = 1 AND L.intPurchaseSale IN (2, 3)
 					AND L.intShipmentStatus IN (6, 11)
 					AND WC.intWeightClaimId IS NULL
 					AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 2)
 				) LI
 			WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1
+	')
+END
+GO
+
+/*
+* Update AP Claim/Voucher Detail reference to Weight Claims table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblAPBillDetail') AND name = 'intWeightClaimDetailId')
+BEGIN
+	EXEC ('UPDATE BD
+			SET intWeightClaimId = WD.intWeightClaimId
+				,intWeightClaimDetailId = WD.intWeightClaimDetailId 
+			FROM tblAPBillDetail BD
+			INNER JOIN tblLGWeightClaimDetail WD ON WD.intBillId = BD.intBillId AND WD.intItemId = BD.intItemId
+			WHERE BD.intWeightClaimDetailId IS NULL
+	')
+END
+GO
+
+/*
+* Update Freight Rate field on Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'dblFreightRate')
+BEGIN
+	EXEC ('UPDATE L
+			SET dblFreightRate = FR.dblRate
+			FROM tblLGLoad L
+			OUTER APPLY (SELECT TOP 1 intDefaultFreightItemId FROM tblLGCompanyPreference) FI
+			OUTER APPLY (SELECT TOP 1 dblRate FROM tblLGLoadCost LC 
+						 WHERE LC.intLoadId = L.intLoadId AND LC.intItemId = FI.intDefaultFreightItemId) FR
+			WHERE FI.intDefaultFreightItemId IS NOT NULL AND FR.dblRate IS NOT NULL AND dblFreightRate <> FR.dblRate
+	')
+END
+GO
+
+/*
+* Update Surcharge field on Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'dblSurcharge')
+BEGIN
+	EXEC ('UPDATE L
+			SET dblSurcharge = SR.dblRate
+			FROM tblLGLoad L
+			OUTER APPLY (SELECT TOP 1 intDefaultSurchargeItemId FROM tblLGCompanyPreference) SI
+			OUTER APPLY (SELECT TOP 1 dblRate FROM tblLGLoadCost LC 
+						 WHERE LC.intLoadId = L.intLoadId AND LC.intItemId = SI.intDefaultSurchargeItemId) SR
+			WHERE SI.intDefaultSurchargeItemId IS NOT NULL AND SR.dblRate IS NOT NULL AND dblSurcharge <> SR.dblRate
 	')
 END
 GO

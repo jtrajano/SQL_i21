@@ -253,6 +253,7 @@ BEGIN TRY
 						AND IsNULL(strSubstituteItemNo, '') = IsNULL(@strSubstituteItemNo, IsNULL(strSubstituteItemNo, ''))
 						AND IsNULL(strLocationName, '') = IsNULL(@strLocationName, IsNULL(strLocationName, ''))
 						AND Datepart(mm, Convert(datetime,dtmDemandDate,@intConvertYear)) = Datepart(mm, Convert(datetime,@dtmDemandDate,@intConvertYear))
+						AND Datepart(yy, Convert(datetime,dtmDemandDate,@intConvertYear)) = Datepart(yy, Convert(datetime,@dtmDemandDate,@intConvertYear))
 					) > 1
 			BEGIN
 				IF @strSubstituteItemNo <> ''

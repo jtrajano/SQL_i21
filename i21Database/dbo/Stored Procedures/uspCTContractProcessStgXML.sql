@@ -3896,6 +3896,7 @@ BEGIN TRY
 				--			,1
 				--			)
 				--END
+
 				DELETE
 				FROM tblCTContractDocument
 				WHERE intContractHeaderId = @intNewContractHeaderId
@@ -3941,6 +3942,7 @@ BEGIN TRY
 						FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (intContractDocumentId INT) x
 						WHERE CD.intContractDocumentRefId = x.intContractDocumentId
 						)*/
+
 				EXEC sp_xml_removedocument @idoc
 
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -4450,7 +4452,7 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT 1
-						FROM master.dbo.sysdatabases
+						FROM sys.databases
 						WHERE name = @strDatabaseName
 						)
 				BEGIN

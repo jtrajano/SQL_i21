@@ -202,9 +202,6 @@ BEGIN
 	END 
 END 
 
-
-
-
 -- Create the G/L Entries
 BEGIN 
 	-- Create the variables used by fnGetItemGLAccount
@@ -708,9 +705,9 @@ BEGIN
 			,strTransactionForm			= InventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblCreditForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
@@ -769,9 +766,9 @@ BEGIN
 			,strTransactionForm			= InventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END
+			,dblDebitForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END   
+			,dblCreditForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END   
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
@@ -836,9 +833,9 @@ BEGIN
 			,strTransactionForm			= InventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
@@ -894,9 +891,9 @@ BEGIN
 			,strTransactionForm			= InventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN SUM(CreditForeign.Value) ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN SUM(CreditForeign.Value) ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN SUM(DebitForeign.Value) ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN SUM(DebitForeign.Value) ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
@@ -975,9 +972,9 @@ BEGIN
 			,strTransactionForm			= InventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
@@ -1033,9 +1030,9 @@ BEGIN
 			,strTransactionForm			= InventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN SUM(CreditForeign.Value) ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN SUM(CreditForeign.Value) ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN SUM(DebitForeign.Value) ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN SUM(DebitForeign.Value) ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
@@ -1218,9 +1215,9 @@ BEGIN
 			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
@@ -1278,9 +1275,9 @@ BEGIN
 			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
@@ -1345,9 +1342,9 @@ BEGIN
 			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
@@ -1403,9 +1400,9 @@ BEGIN
 			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
@@ -1469,9 +1466,9 @@ BEGIN
 			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
@@ -1526,9 +1523,9 @@ BEGIN
 			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
@@ -1591,6 +1588,137 @@ BEGIN
 			,[intSourceEntityId]
 			,[intCommodityId]
 	FROM	@ChargesGLEntries
+END
+
+-- Create the AP Clearing
+IF @ysnPost = 1 
+BEGIN 
+	DECLARE 
+	@intVoucherInvoiceNoOption TINYINT
+	,	@voucherInvoiceOption_Blank TINYINT = 1 
+	,	@voucherInvoiceOption_BOL TINYINT = 2
+	,	@voucherInvoiceOption_VendorRefNo TINYINT = 3
+	,@intDebitMemoInvoiceNoOption TINYINT
+	,	@debitMemoInvoiceOption_Blank TINYINT = 1
+	,	@debitMemoInvoiceOption_BOL TINYINT = 2
+	,	@debitMemoInvoiceOption_VendorRefNo TINYINT = 3	
+
+	SELECT TOP 1 
+		@intVoucherInvoiceNoOption = intVoucherInvoiceNoOption
+		,@intDebitMemoInvoiceNoOption = intDebitMemoInvoiceNoOption
+	FROM tblAPCompanyPreference
+
+	INSERT INTO tblICAPClearing (
+		[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionType]
+		,[strReferenceNumber]
+		,[dtmDate]
+		,[intEntityVendorId]
+		,[intLocationId]
+		,[intInventoryReceiptItemId]
+		,[intInventoryReceiptItemTaxId]
+		,[intInventoryReceiptChargeId]
+		,[intInventoryReceiptChargeTaxId]
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentChargeTaxId]
+		,[intAccountId]
+		,[intItemId]
+		,[intItemUOMId]
+		,[dblQuantity]
+		,[dblAmount]
+		,[strBatchId]
+	)
+	SELECT
+		[intTransactionId] = Receipt.intInventoryReceiptId
+		,[strTransactionId] = Receipt.strReceiptNumber
+		,[intTransactionType] = 2 -- 'RECEIPT CHARGE 
+		,[strReferenceNumber] = 
+			CASE 
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					CASE 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN Receipt.strBillOfLading 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN Receipt.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(Receipt.strBillOfLading)), ''), Receipt.strVendorRefNo)
+					END 
+				ELSE
+					CASE 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN Receipt.strBillOfLading 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN Receipt.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(Receipt.strBillOfLading)), ''), Receipt.strVendorRefNo)
+					END 						
+			END			
+			
+		,[dtmDate] = Receipt.dtmReceiptDate
+		,[intEntityVendorId] = 
+			CASE 
+				WHEN ISNULL(ReceiptCharges.ysnPrice, 0) = 1 THEN Receipt.intEntityVendorId
+				WHEN ISNULL(ReceiptCharges.ysnAccrue, 0) = 1 THEN ReceiptCharges.intEntityVendorId
+			END 
+		,[intLocationId] = Receipt.intLocationId
+		--DETAIL
+		--,[intTransactionDetailId] = ReceiptCharges.intInventoryReceiptChargeId
+		,[intInventoryReceiptItemId] = NULL 
+		,[intInventoryReceiptItemTaxId] = NULL 
+		,[intInventoryReceiptChargeId] = ReceiptCharges.intInventoryReceiptChargeId
+		,[intInventoryReceiptChargeTaxId] = NULL 
+		,[intInventoryShipmentChargeId] = NULL 
+		,[intInventoryShipmentChargeTaxId] = NULL 
+		,[intAccountId] = GLAccount.intAccountId
+		,[intItemId] = Charge.intItemId
+		,[intItemUOMId] = ReceiptCharges.intCostUOMId
+		,[dblQuantity] = 
+			CASE 
+				/*Negate the other charge if it is an Inventory Return*/
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					-ReceiptCharges.dblQuantity 
+
+				/*Negate the other charge if it is a "Charge Entity"*/
+				WHEN ISNULL(ReceiptCharges.ysnPrice, 0) = 1 THEN 
+					-ReceiptCharges.dblQuantity 
+
+				ELSE 
+					ReceiptCharges.dblQuantity
+			END	
+		,[dblAmount] = 
+			CASE 
+				/*Negate the other charge if it is an Inventory Return*/
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					-ReceiptCharges.dblAmount
+
+				/*Negate the other charge if it is a "Charge Entity"*/
+				WHEN ISNULL(ReceiptCharges.ysnPrice, 0) = 1 THEN 
+					-ReceiptCharges.dblAmount
+
+				ELSE 
+					ReceiptCharges.dblAmount
+			END			
+		,strBatchId = @strBatchId
+	FROM	dbo.tblICInventoryReceipt Receipt 
+			INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
+				ON ReceiptCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId		
+			INNER JOIN tblICItem Charge
+				ON Charge.intItemId = ReceiptCharges.intChargeId
+			INNER JOIN dbo.tblICItemLocation ChargeItemLocation
+				ON ChargeItemLocation.intItemId = ReceiptCharges.intChargeId
+				AND ChargeItemLocation.intLocationId = Receipt.intLocationId
+			INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
+				ON ReceiptCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+				AND ChargeItemLocation.intItemLocationId = OtherChargesGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = OtherChargesGLAccounts.intAPClearing 				
+
+			LEFT JOIN dbo.tblICInventoryTransactionType TransType
+				ON TransType.intTransactionTypeId = @intTransactionTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND (
+				ISNULL(ReceiptCharges.ysnAccrue, 0) = 1
+				OR ISNULL(ReceiptCharges.ysnPrice, 0) = 1	
+			)
 END
 
 -- Exit point

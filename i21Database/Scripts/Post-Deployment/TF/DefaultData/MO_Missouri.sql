@@ -1,13 +1,16 @@
-﻿-- Declare the Tax Authority Code that will be used all throughout Michigan Default Data
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MO' AND ysnFilingForThisTA = 1)
+BEGIN
+	PRINT ('Deploying Missouri Tax Forms')
+END
+GO
+
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MO'
 	, @TaxAuthorityId INT
 	
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 IF(@TaxAuthorityId IS NOT NULL)
-BEGIN
-    PRINT ('Deploying Missouri Tax Forms')
-    
+BEGIN   
     -- Product Codes
 	/* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
     select 'UNION ALL SELECT intProductCodeId = ' + CAST(0 AS NVARCHAR(10)) 

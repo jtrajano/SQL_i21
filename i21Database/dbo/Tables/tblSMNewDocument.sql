@@ -7,6 +7,7 @@
 	[intEntityId]				INT				NOT NULL,
 	[intUploadId]				INT				NOT NULL,
 	[ysnPending]				BIT				NULL,
+	[ysnForAttachment]			BIT				NULL,
     [intConcurrencyId]			INT				NOT NULL,
 	CONSTRAINT [FK_tblSMNewDocument_tblSMUpload] FOREIGN KEY ([intUploadId]) REFERENCES [dbo].[tblSMUpload] ([intUploadId]),
 	CONSTRAINT [FK_tblSMNewDocument_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),

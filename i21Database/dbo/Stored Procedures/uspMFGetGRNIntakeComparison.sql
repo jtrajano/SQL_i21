@@ -61,7 +61,7 @@ JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 		)
 JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-	AND ST.intControlPointId = 5
+	AND ST.intControlPointId IN(4,5)
 	AND TR.intSampleId IN (
 		SELECT Max(S1.intSampleId)
 		FROM tblQMSample S1

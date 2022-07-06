@@ -267,7 +267,7 @@ CREATE TABLE #ARInvalidPaymentData
     ,[intTransactionDetailId]   INT             NULL
     ,[strBatchId]               NVARCHAR(40)    COLLATE Latin1_General_CI_AS    NULL
     ,[strError]                 NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL)
-
+		
 EXEC [dbo].[uspARPopulateInvalidPostPaymentData]
      @Post     = @Post
     ,@Recap    = 1
@@ -280,7 +280,7 @@ WHERE [strError] NOT IN ('There was no payment to receive.' )
 
 IF LTRIM(RTRIM(ISNULL(@ErrorMessage, ''))) <> ''
 BEGIN
-    IF(@RetryDataFix = 1)
+	IF(@RetryDataFix = 1)
 	BEGIN
 		SET @RetryDataFix = 0
 		SET @ErrorMessage = ''

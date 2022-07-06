@@ -2,10 +2,11 @@
     AS
 		with projectnonbillable as (
 			select aa.intProjectId, dblNonBillableHours = isnull(sum(ad.intHours),0)
-			from tblHDProject aa, tblHDProjectTask ab, tblHDTicketHoursWorked ad
-			where ab.intProjectId = aa.intProjectId
-			and ad.intTicketId = ab.intTicketId
-			and ad.ysnBillable = convert(bit,0)
+			from 
+				tblHDProject aa
+				inner join tblHDProjectTask ab on ab.intProjectId = aa.intProjectId
+				inner join tblHDTicketHoursWorked ad on ad.intTicketId = ab.intTicketId
+			where ad.ysnBillable = convert(bit,0)
 			group by aa.intProjectId
 		),
 		projecthours as (
@@ -13,8 +14,9 @@
 			from
 			(
 			select aa.intProjectId, dblQuotedHours = (select sum(ae.dblEstimatedHours) from tblHDTicketHoursWorked ae where ae.intTicketId = ab.intTicketId), dblActualHours = (select sum(af.dblActualHours) from tblHDTicket af where af.intTicketId = ab.intTicketId)
-			from tblHDProject aa, tblHDProjectTask ab
-			where ab.intProjectId = aa.intProjectId
+			from 
+				tblHDProject aa
+				inner join tblHDProjectTask ab on ab.intProjectId = aa.intProjectId
 			group by aa.intProjectId,ab.intTicketId
 			) as projecthoursraw
 			group by intProjectId
@@ -72,6 +74,8 @@
 					,strProduct
 					,intProductId
 					,dtmGoLive
+					,strStatusFontColor
+					,strStatusBackColor
 		from 
 				(
 				select
@@ -126,6 +130,8 @@
 					,strProduct = (select prod.strProduct from tblHDTicketProduct prod where prod.intTicketProductId = (select top 1 prodver.intProductId from tblARCustomerProductVersion prodver where prodver.intCustomerId = proj.intCustomerId))
 					,intProductId = (select top 1 prodver.intProductId from tblARCustomerProductVersion prodver where prodver.intCustomerId = proj.intCustomerId)
 					,proj.dtmGoLive
+					,strStatusFontColor = sta.strFontColor
+					,strStatusBackColor = sta.strBackColor
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
@@ -142,4 +148,5 @@
 					left join tblHDProject pp on pp.intProjectId = pd.intProjectId
 					left join tblEMEntity salesrep on salesrep.intEntityId = proj.intInternalSalesPerson
 					left join tblHDVersion tv on tv.intVersionId = proj.intTargetVersionId
+					left join tblHDTicketStatus sta on sta.intTicketStatusId = proj.intTicketStatusId
 				) as query1

@@ -413,6 +413,8 @@ BEGIN
 			,intConcurrencyId	
 			,dtmDateCreated
 			,intCreatedByUserId
+			,dblQty
+			,dblCost
 	)
 	SELECT	
 			ri.intInventoryReceiptItemId
@@ -433,6 +435,8 @@ BEGIN
 			,intConcurrencyId = 1
 			,GETDATE()
 			,@intEntityUserSecurityId
+			,tx.dblQty
+			,tx.dblCost
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblICInventoryReceiptItemTax tx

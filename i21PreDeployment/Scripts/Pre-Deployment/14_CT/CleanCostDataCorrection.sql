@@ -104,3 +104,27 @@ GO
 		');
 	END
 GO
+	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intBookId' AND object_id = OBJECT_ID(N'tblCTRawToWipConversion'))
+	BEGIN
+		EXEC 
+		('
+			DELETE FROM tblCTRawToWipConversion WHERE intBookId NOT IN (SELECT DISTINCT intBookId FROM tblCTBook)
+		');
+	END
+GO
+	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intSubBookId' AND object_id = OBJECT_ID(N'tblCTRawToWipConversion'))
+	BEGIN
+		EXEC 
+		('
+			DELETE FROM tblCTRawToWipConversion WHERE intSubBookId NOT IN (SELECT DISTINCT intSubBookId FROM tblCTSubBook)
+		');
+	END
+GO
+	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intFuturesMarketId' AND object_id = OBJECT_ID(N'tblCTRawToWipConversion'))
+	BEGIN
+		EXEC 
+		('
+			DELETE FROM tblCTRawToWipConversion WHERE intFuturesMarketId NOT IN (SELECT DISTINCT intFutureMarketId FROM tblRKFutureMarket)
+		');
+	END
+GO

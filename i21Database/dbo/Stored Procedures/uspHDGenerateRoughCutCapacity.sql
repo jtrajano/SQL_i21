@@ -59,10 +59,10 @@ with booked as (
   ,intDate = convert(int, convert(nvarchar(8), a.dtmDate, 112))  
   ,ysnBillable = (CASE WHEN ISNULL(@ysnBillable, -1) <> -1 THEN a.ysnBillable ELSE -1 END)
  from  
-  tblHDTicketHoursWorked a, tblHDTicket b  
+  tblHDTicketHoursWorked a
+  inner join tblHDTicket b   on a.intTicketId = b.intTicketId  
  where  
   convert(int, convert(nvarchar(8), a.dtmDate, 112)) between @intDateFrom and @intDateTo  
-  and a.intTicketId = b.intTicketId  
 
  group by  
   a.intAgentEntityId  
@@ -92,16 +92,13 @@ planed as (
   ,ysnBillable = (CASE WHEN ISNULL(@ysnBillable, -1) <> -1 THEN d.ysnBillable ELSE -1 END)
  from  
   tblHDTicket a  
-  ,tblSMTransaction b  
-  ,tblSMScreen c  
-  ,tblSMActivity d  
+  inner join tblSMTransaction b  on b.intRecordId = a.intTicketId  
+  inner join tblSMScreen c   on b.intScreenId = c.intScreenId  
+  inner join tblSMActivity d   on d.intTransactionId = b.intTransactionId  
  where
   convert(int, convert(nvarchar(8), d.dtmStartDate, 112)) between @intDateFrom and @intDateTo  
   and c.strModule = 'Help Desk'  
   and c.strNamespace = 'HelpDesk.view.Ticket'  
-  and b.intRecordId = a.intTicketId  
-  and b.intScreenId = c.intScreenId  
-  and d.intTransactionId = b.intTransactionId  
   and d.dtmStartDate is not null  
   and d.dtmEndDate is not null  
  group by   

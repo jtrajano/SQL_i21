@@ -323,7 +323,7 @@ BEGIN TRY
 	Select Top 1 @intLogId=intLogId
 	from dbo.tblSMLog
 	Where intTransactionId=@intTransactionId
-	Order by 1 desc
+	Order by intLogId desc
 
 	SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
 
@@ -374,7 +374,7 @@ BEGIN TRY
 	END
 	IF EXISTS (
 			SELECT 1
-			FROM master.dbo.sysdatabases
+			FROM sys.databases
 			WHERE name = @strDatabaseName
 			)
 	BEGIN

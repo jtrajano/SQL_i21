@@ -19,6 +19,7 @@
     [strTransRecalled]                       NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [strTransRollback]                       NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [strTransFuelPrepayCompletion]           NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
+    [strTransFuelPrepay]					 NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [intTermMsgSN]                           BIGINT          NULL,
     [strTermMsgSNtype]                       NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [intTermMsgSNterm]                       INT             NULL,
@@ -111,6 +112,7 @@
     [strTrlFlagsTrlMatch]                    NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlDept]                             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intTrlDeptNumber]                       INT             NULL,
+    [strTrlDeptNumber]                       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlDeptType]                         NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlCat]                              NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intTrlCatNumber]                        INT             NULL,
@@ -383,4 +385,9 @@ CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_strTrlUPCwithoutCheckDigit_idx]
 GO
 CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_dtmDate_idx]
     ON [dbo].[tblSTTranslogRebates]([dtmDate] ASC);
+	
+GO
+CREATE NONCLUSTERED INDEX [IX_intStoreNumber]
+    ON [dbo].[tblSTTranslogRebates]([intStoreNumber] ASC, [dtmDate] ASC);
+
 

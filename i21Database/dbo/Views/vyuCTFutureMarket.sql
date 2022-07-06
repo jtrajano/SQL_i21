@@ -18,7 +18,6 @@ AS
 					,MY.intMainCurrencyId
 					,CY.ysnSubCurrency
 					,CY.intCent
-
 	FROM			tblICCommodity				CO 
 			JOIN	tblRKCommodityMarketMapping CM	ON	CO.intCommodityId		=	CM.intCommodityId
 			JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CM.intFutureMarketId

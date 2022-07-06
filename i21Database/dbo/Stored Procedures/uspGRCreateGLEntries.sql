@@ -218,22 +218,22 @@ BEGIN
 	)
 	--Discounts
 	SELECT
-		 [intItemId]						= ISNULL(IC.intItemId, IC2.intItemId)
-		,[strItemNo]						= ISNULL(IC.strItemNo, IC2.strItemNo)	
+		 [intItemId]						= IC.intItemId
+		,[strItemNo]						= IC.strItemNo	
 		,[intEntityVendorId]				= @intEntityVendorId	
 		,[intCurrencyId]  					= @intCurrencyId
 		,[intCostCurrencyId]  				= @intCurrencyId
-		,[intChargeId]						= ISNULL(IC.intItemId, IC2.intItemId)
+		,[intChargeId]						= IC.intItemId
 		,[intForexRateTypeId]				= NULL
 		,[dblForexRate]						= NULL
-		,[ysnInventoryCost]					= ISNULL(QMII.ysnInventoryCost, ISNULL(IC.ysnInventoryCost, IC2.ysnInventoryCost))
-		,[strCostMethod]					= ISNULL(IC.strCostMethod, IC2.strCostMethod)
+		,[ysnInventoryCost]					= ISNULL(QMII.ysnInventoryCost, IC.ysnInventoryCost)
+		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE WHEN CD.intPricingTypeId = 2 THEN --Basis
 											  	CASE
 													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN @ysnPost = 1 THEN (CD.dblBasis + @dblFutureMarketPrice) ELSE 										CASE WHEN ISNULL(Vouchered.ysnVouchered,0)=0 THEN SC.dblPrice ELSE SC.dblCost END
 													END)
 													* 
-															case when isnull(ISNULL(IC.strCostType, IC2.strCostType), '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+															case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
 															else  -1 end
 													
 													)
@@ -241,7 +241,7 @@ BEGIN
 													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN @ysnPost = 1 THEN (CD.dblBasis + @dblFutureMarketPrice) ELSE 										CASE WHEN ISNULL(Vouchered.ysnVouchered,0)=0 THEN SC.dblPrice ELSE SC.dblCost END
 													END))
 													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
-													case when isnull(ISNULL(IC.strCostType, IC2.strCostType), '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+													case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
 															else  -1 end
 													)
 													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
@@ -250,14 +250,14 @@ BEGIN
 												CASE
 													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN PricedBasis.intPriceFixationDetailId IS NULL THEN (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) ELSE PricedBasis.dblCashPrice END) --+ 8888888888888
 													* 
-															case when isnull(ISNULL(IC.strCostType, IC2.strCostType), '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+															case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
 															else  -1 end
 													
 													)
 
 													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN PricedBasis.intPriceFixationDetailId IS NULL THEN (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) ELSE PricedBasis.dblCashPrice END)) --+ 9999999999
 													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
-													case when isnull(ISNULL(IC.strCostType, IC2.strCostType), '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+													case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
 															else  -1 end --+ 77777777777777777
 													)
 													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount --+ 66666666666666
@@ -266,14 +266,14 @@ BEGIN
 
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
 		,[dblAmount]						= CASE
-												WHEN ISNULL(IC.strCostMethod, IC2.strCostMethod) = 'Per Unit' THEN 0
-												WHEN ISNULL(IC.strCostMethod, IC2.strCostMethod) = 'Amount' THEN 
+												WHEN IC.strCostMethod = 'Per Unit' THEN 0
+												WHEN IC.strCostMethod = 'Amount' THEN 
 													CASE 
 														WHEN @ysnIsStorage = 1 THEN 0
 														WHEN @ysnIsStorage = 0 THEN 0												
 													END
 											END
-		,[ysnAccrue]						= case when isnull(ISNULL(IC.strCostType, IC2.strCostType), '') = 'Grain Discount' then
+		,[ysnAccrue]						= case when isnull(IC.strCostType, '') = 'Grain Discount' then
 												0 
 											else
 												CASE
@@ -315,10 +315,8 @@ BEGIN
 		ON QM.intTicketDiscountId = QMII.intTicketDiscountId
 	JOIN tblGRDiscountScheduleCode GR 
 		ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
-	LEFT JOIN tblICItem IC 
-		ON IC.intItemId = QMII.intItemId
-	LEFT JOIN tblICItem IC2
-		ON IC2.intItemId = GR.intItemId
+	JOIN tblICItem IC 
+		ON IC.intItemId = isnull(QMII.intItemId, GR.intItemId)
 	OUTER APPLY (
 		SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId AND intSettleContractId = SC.intSettleContractId
 	) PricedBasis

@@ -11,7 +11,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
 		SET @xmlParam = NULL
 		
-		SELECT * FROM tblARCustomerActivityStagingTable
+		SELECT *,0 [dblUnitsRecap], 0 [dblAmountsRecap] FROM tblARCustomerActivityStagingTable
 	END
 
 -- Declare the variables.
@@ -39,6 +39,8 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@intEntityUserId				AS INT
 		,@ysnExcludeAccountStatus		AS BIT = 0
 		,@ysnExcludePaymentMethods		AS BIT = 0
+		,@strCompanyName				NVARCHAR(100)	= NULL
+		,@strCompanyAddress				NVARCHAR(500)	= NULL
 
 DECLARE @tblAccountStatus	TABLE (intAccountStatusId	INT)
 DECLARE @tblInvoices		TABLE (intInvoiceId			INT)
@@ -51,6 +53,11 @@ DECLARE @tblCustomers		TABLE (
 	, strCustomerNumber		NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strCustomerAddress	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )
+
+SELECT TOP 1 @strCompanyName	= strCompanyName
+		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+ORDER BY intCompanySetupID DESC
 
 IF(OBJECT_ID('tempdb..#TRANSACTIONS') IS NOT NULL)
 BEGIN
@@ -612,8 +619,7 @@ FROM (
 	FOR XML PATH ('')
 ) C (intEntityCustomerId)
 
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom		= @dtmDateFrom
-										, @dtmDateTo		= @dtmDateTo
+EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo		= @dtmDateTo
 										, @strCustomerIds	= @strCustomerIds
 										, @intEntityUserId	= @intEntityUserId
 
@@ -742,14 +748,14 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 		SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) + ' To ' + CONVERT(NVARCHAR(50), @dtmDateTo, 101)
 			, dtmLastPaymentDate	= PAYMENT.dtmDatePaid
 			, dblLastPayment		= ISNULL(PAYMENT.dblAmountPaid, 0)
-			, intEntityCustomerId	= AGING.intEntityCustomerId
+			, intEntityCustomerId	= CUSTOMER.intEntityCustomerId
 			, intInvoiceDetailId	= TRANSACTIONS.intInvoiceDetailId
 			, intEntityUserId		= @intEntityUserId
-			, strCustomerNumber		= AGING.strCustomerNumber
-			, strCustomerName		= AGING.strCustomerName	 
+			, strCustomerNumber		= CUSTOMER.strCustomerNumber
+			, strCustomerName		= CUSTOMER.strCustomerName	 
 			, strCustomerAddress	= CUSTOMER.strCustomerAddress
-			, strCompanyName		= AGING.strCompanyName
-			, strCompanyAddress		= AGING.strCompanyAddress
+			, strCompanyName		= @strCompanyName
+			, strCompanyAddress		= @strCompanyAddress
 			, strTransactionNumber	= TRANSACTIONS.strTransactionNumber
 			, intTransactionId		= TRANSACTIONS.intTransactionId
 			, strInvoiceNumber		= TRANSACTIONS.strTransactionType
@@ -792,9 +798,9 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			, strFormattingOptions	= @strFormattingOptions
 			, dtmFilterFrom			= @dtmDateFrom
 			, dtmFilterTo			= @dtmDateTo
-		FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
-		INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-		INNER JOIN #TRANSACTIONS TRANSACTIONS ON AGING.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
+		FROM @tblCustomers CUSTOMER 
+		INNER JOIN #TRANSACTIONS TRANSACTIONS ON CUSTOMER.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
+		LEFT JOIN tblARCustomerAgingStagingTable AGING ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId AND AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Summary'
 		LEFT JOIN (
 			SELECT dblAmountPaid		= MAX(dblAmountPaid)
 				 , dtmDatePaid			= MAX(dtmDatePaid)
@@ -810,9 +816,7 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			) I 
 			WHERE I.intRowNumber = 1
 			GROUP BY intEntityCustomerId
-		) PAYMENT ON PAYMENT.intEntityCustomerId = AGING.intEntityCustomerId
-		WHERE AGING.intEntityUserId = @intEntityUserId
-		  AND AGING.strAgingType = 'Summary'
+		) PAYMENT ON PAYMENT.intEntityCustomerId = CUSTOMER.intEntityCustomerId 		
 		ORDER BY TRANSACTIONS.dtmTransactionDate
 	END
 
@@ -838,13 +842,15 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			ARI.dtmPostDate
 			FROM dbo.tblARInvoice ARI
 		)  PostDateInvoice ON PostDateInvoice.strInvoiceNumber2=ARST.strTransactionNumber 
-
 		LEFT  JOIN(
 		SELECT 
 			ARI.strRecordNumber[strRecordNumber2],
 			ARI.dtmDatePaid
 			FROM dbo.tblARPayment ARI
 		)  PostDatePayment ON PostDatePayment.strRecordNumber2=ARST.strTransactionNumber 
+		OUTER APPLY(
+		SELECT SUM(ISNULL(dblUnits,0))[dblUnitsRecap],SUM(ISNULL(dblAmounts,0))[dblAmountsRecap] FROM dbo.tblARProductRecapStagingTable
+		)Recap
 
 		WHERE intEntityUserId = @intEntityUserId)NST
 		ORDER BY NST.PostDate 
@@ -852,6 +858,9 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 ELSE 
 	BEGIN
 		SELECT * FROM tblARCustomerActivityStagingTable 
+		OUTER APPLY(
+		SELECT SUM(ISNULL(dblUnits,0))[dblUnitsRecap],SUM(ISNULL(dblAmounts,0))[dblAmountsRecap] FROM dbo.tblARProductRecapStagingTable
+		)Recap
 		WHERE intEntityUserId = @intEntityUserId 
 		ORDER BY strCustomerName
 	END

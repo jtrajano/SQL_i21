@@ -93,7 +93,7 @@ BEGIN
 						,[strLocation] = vwcntmst.vwcnt_loc_no
 						,[strItemOrClass] = vwcntmst.vwcnt_itm_or_cls
 						,[strCustomerNumber] = vwcntmst.vwcnt_cus_no
-					FROM vwcntmst, vwitmmst
+					FROM vwcntmst inner join vwitmmst on 1=1
 					WHERE vwcntmst.vwcnt_cus_no = @strCustomerNumber
 						AND vwcntmst.vwcnt_loc_no <> ''000''
 						--AND vwcntmst.vwcnt_loc_no = @strLocationNo

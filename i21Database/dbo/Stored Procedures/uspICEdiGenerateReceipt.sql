@@ -4,6 +4,8 @@
 	, @StoreLocations UdtCompanyLocations READONLY
 	, @UniqueId NVARCHAR(100)
 	, @UserId INT
+	, @strFileName NVARCHAR(500) = NULL 
+	, @strFileType NVARCHAR(50) = NULL 
 	, @ErrorCount INT OUTPUT
 	, @TotalRows INT OUTPUT
 AS
@@ -95,7 +97,7 @@ WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICEdiPricebook)
 IF(@LogId IS NULL)
 BEGIN
 	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, intConcurrencyId)
-	SELECT 'Import Receipts successful', 'EDI', 'Plain Text', '', GETDATE(), @UserId, 1
+	SELECT 'Import Receipts successful', 'EDI', @strFileType, @strFileName, GETDATE(), @UserId, 1
 	SET @LogId = @@IDENTITY
 END
 
@@ -161,7 +163,6 @@ FROM
 WHERE 
 	CAST(s.StoreNumber AS INT) = st.intStoreNo
 
-
 /**********************************************************************************************
 	BEGIN VALIDATION
 **********************************************************************************************/
@@ -180,13 +181,13 @@ BEGIN
 	)
 	SELECT 
 		@LogId
-		, 'Error'
+		, 'Warning'
 		, i.RecordIndex
 		, 'Item UPC'
 		, i.ItemUpc
 		, 'Cannot find the item that matches the UPC or Vendor Item Code Xref.: ' + i.ItemUpc
-		, 'Skipped'
-		, 'Record not imported.'
+		, 'Imported'
+		, 'Record imported.'
 		, 1
 	FROM 
 		@Items i INNER JOIN @Invoices inv
@@ -212,10 +213,10 @@ BEGIN
 				SELECT TOP 1 
 					it.intItemId
 				FROM 
-					tblICItemUOM iu INNER JOIN tblICItem it 
-						ON it.intItemId = iu.intItemId
+					tblICItemUOM u INNER JOIN tblICItem it 
+						ON it.intItemId = u.intItemId
 				WHERE
-					SUBSTRING(ISNULL(iu.strLongUPCCode, iu.strUpcCode), PATINDEX('%[^0]%', ISNULL(iu.strLongUPCCode, iu.strUpcCode)+'.'), LEN(ISNULL(iu.strLongUPCCode, iu.strUpcCode)))
+					SUBSTRING(ISNULL(u.strLongUPCCode, u.strUpcCode), PATINDEX('%[^0]%', ISNULL(u.strLongUPCCode, u.strUpcCode)+'.'), LEN(ISNULL(u.strLongUPCCode, u.strUpcCode)))
 					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))		
 			) itemBasedOnUpcCode
 			FULL OUTER JOIN (
@@ -254,13 +255,13 @@ BEGIN
 	)
 	SELECT 
 		@LogId
-		, 'Error'
+		, 'Warning'
 		, i.RecordIndex
 		, 'Item Location'
 		, i.ItemUpc
 		, 'Item: ' + i.ItemUpc + ' does not belong to store location: ' + st.StoreNumber
-		, 'Skipped'
-		, 'Record not imported.'
+		, 'Imported'
+		, 'Record imported.'
 		, 1
 	FROM 
 		@Invoices inv INNER JOIN @ReceiptStore st 
@@ -312,9 +313,9 @@ BEGIN
 					)
 			) itemBasedOnVendorItemNo
 				ON 1 = 1
-		) it
+		) lookupUom
 		LEFT JOIN tblICItemLocation il 
-			ON il.intItemId = it.intItemId
+			ON il.intItemId = lookupUom.intItemId
 			AND il.intLocationId = st.intLocationId
 	WHERE 
 		il.intLocationId IS NULL
@@ -362,7 +363,7 @@ BEGIN
 			ON i.FileIndex = inv.FileIndex
 		CROSS APPLY (
 			SELECT 
-				intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
+				intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId, itemNotFound.intItemId) 
 			FROM 
 				(
 					SELECT TOP 1 
@@ -392,6 +393,14 @@ BEGIN
 						)
 				) itemBasedOnVendorItemNo
 					ON 1 = 1
+				FULL OUTER JOIN (
+					SELECT TOP 1 
+						item.intItemId
+					FROM 
+						tblICItem item inner join tblICCompanyPreference pref
+							ON item.intItemId = pref.intItemIdHolderForReceiptImport
+				) itemNotFound
+					ON 1 = 1 
 		) it
 		LEFT OUTER JOIN tblICItemUOM stockUnit 
 			ON stockUnit.intItemId = it.intItemId
@@ -476,6 +485,8 @@ INSERT INTO @ReceiptStagingTable(
 	, intShipViaId
 	, dblUnitRetail
 	, intSort
+	, strImportDescription
+	, strDataSource
 )
 SELECT 
 	strReceiptType = 'Direct' 
@@ -485,7 +496,7 @@ SELECT
 	,dtmDate = CASE WHEN ISDATE(inv.InvoiceDate) = 1 THEN CAST(inv.InvoiceDate AS DATETIME) ELSE NULL END
 	,intSourceId = 0 
 	,intItemId = it.intItemId 
-	,intItemLocationId = il.intItemLocationId
+	,intItemLocationId = ISNULL(il.intItemLocationId, -1) 
 	,intItemUOMId = ISNULL(symbolItemUOM.intItemUOMId, stockUnit.intItemUOMId) 
 	,dblQuantity = 
 		CASE 
@@ -521,6 +532,8 @@ SELECT
 			, 0
 		) 
 	,intSort = i.RecordIndex
+	,strImportDescription = i.ItemDescription
+	,strDataSource = 'EdiGenerateReceipt'
 FROM 
 	@Invoices inv INNER JOIN @ReceiptStore st 
 		ON inv.FileIndex = st.FileIndex
@@ -542,7 +555,7 @@ FROM
 		ON i.FileIndex = inv.FileIndex
 	CROSS APPLY (
 		SELECT 
-			intItemId = ISNULL(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
+			intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId, itemNotFound.intItemId) 
 		FROM 
 			(
 				SELECT TOP 1 
@@ -572,12 +585,20 @@ FROM
 					)
 			) itemBasedOnVendorItemNo
 				ON 1 = 1
+			FULL OUTER JOIN (
+				SELECT TOP 1 
+					item.intItemId
+				FROM 
+					tblICItem item inner join tblICCompanyPreference pref
+						ON item.intItemId = pref.intItemIdHolderForReceiptImport
+			) itemNotFound
+				ON 1 = 1 
 	) it
 	LEFT OUTER JOIN tblEMEntityLocation el 
 		ON el.intEntityId = v.intEntityId
 		AND el.ysnActive = 1
 		AND el.intEntityLocationId = v.intDefaultLocationId
-	INNER JOIN tblICItemLocation il 
+	LEFT JOIN tblICItemLocation il 
 		ON il.intItemId = it.intItemId
 		AND il.intLocationId = st.intLocationId
 	LEFT OUTER JOIN tblICItemUOM stockUnit 
@@ -595,7 +616,6 @@ FROM
 		WHERE
 			p.intItemId = it.intItemId
 			AND p.intItemLocationId = il.intItemLocationId
-
 	) pricing
 ORDER BY 
 	i.RecordIndex ASC
@@ -689,6 +709,7 @@ BEGIN
 		, 'No record(s) imported.'
 		, 1 
 	GOTO LogErrors;
+	RETURN
 END
 
 -- Log valid items
@@ -717,7 +738,6 @@ FROM
 	@ReceiptStagingTable rs	INNER JOIN tblICItem i 
 		ON rs.intItemId = i.intItemId
 
-
 LogErrors:
 
 SELECT 
@@ -726,7 +746,16 @@ FROM
 	tblICImportLogDetail 
 WHERE 
 	intImportLogId = @LogId 
-	AND strType = 'Error'
+	AND strType IN ('Error') 
+
+DECLARE @WarningCount AS INT = 0 
+SELECT 
+	@WarningCount = COUNT(*) 
+FROM 
+	tblICImportLogDetail 
+WHERE 
+	intImportLogId = @LogId 
+	AND strType = 'Warning'
 
 SELECT @TotalRows = COUNT(*) FROM @Items
 
@@ -736,21 +765,34 @@ SELECT @TotalRowsImported = COUNT(*) FROM @ReceiptStagingTable
 DECLARE @ElapsedInMs INT = DATEDIFF(MILLISECOND, @Start, DATEADD(SECOND, 3, GETDATE())) -- Add 3 seconds for importing to staging table
 DECLARE @ElapsedInSec FLOAT = CAST(@ElapsedInMs / 1000.00 AS FLOAT)
 
-IF @ErrorCount > 0
+IF @ErrorCount > 0 OR @WarningCount > 0 
 BEGIN
 	UPDATE tblICImportLog SET 
-		strDescription = 'Import finished with ' + CAST(@ErrorCount AS NVARCHAR(50))+ ' error(s).',
-		intTotalErrors = @ErrorCount,
-		intTotalRows = @TotalRows,
-		intTotalWarnings = 0,
-		intRowsImported = @TotalRowsImported,
-		dblTimeSpentInSeconds = @ElapsedInSec,
-		intRowsUpdated = 0 --CASE WHEN (@TotalRows - @ErrorCount) < 0 THEN 0 ELSE @TotalRows - @ErrorCount END
+		strDescription = 
+			dbo.fnICFormatErrorMessage (
+				'Import finished with %i error(s) and %i warning(s).'
+				,@ErrorCount 
+				,@WarningCount 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+			) 	
+		,intTotalErrors = @ErrorCount
+		,intTotalRows = @TotalRows
+		,intTotalWarnings = @WarningCount
+		,intRowsImported = @TotalRowsImported
+		,dblTimeSpentInSeconds = @ElapsedInSec
+		,intRowsUpdated = 0 
 	WHERE 
 		intImportLogId = @LogId
 END
 
-IF(@TotalRows <= 0 AND @ErrorCount <= 0)
+IF(@TotalRows = 0 AND @ErrorCount = 0 AND @WarningCount = 0)
 BEGIN
 	UPDATE tblICImportLog 
 	SET 
@@ -760,13 +802,13 @@ BEGIN
 END
 ELSE
 BEGIN
-	IF @ErrorCount <= 0
+	IF @ErrorCount = 0 AND @WarningCount = 0 
 	BEGIN
 		UPDATE tblICImportLog SET 
 			strDescription = 'Import Receipts successful.',
 			intTotalErrors = @ErrorCount,
 			intTotalRows = @TotalRows,
-			intTotalWarnings = 0,
+			intTotalWarnings = @WarningCount,
 			intRowsImported = @TotalRowsImported,
 			dblTimeSpentInSeconds = @ElapsedInSec,
 			intRowsUpdated = 0 --CASE WHEN (@TotalRows - @ErrorCount) < 0 THEN 0 ELSE @TotalRows - @ErrorCount END

@@ -8,7 +8,7 @@ SELECT DISTINCT
 , CatLoc.intGeneralItemId AS intItemId
 , Item.strItemNo
 , Item.strDescription AS strItemDescription
-, CatLoc.intRegisterDepartmentId
+, CatLoc.strCashRegisterDepartment
 , Item.strLotTracking
 FROM dbo.tblICCategory AS Cat 
 INNER JOIN dbo.tblICCategoryLocation AS CatLoc 

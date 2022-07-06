@@ -38,6 +38,8 @@
 	,@strRecalculateTaxesOnRemote					NVARCHAR(MAX)	 =	 ''
 	,@strImportContainsMultipleSites				NVARCHAR(MAX)	 =	 ''
 	,@strCaptiveSite								NVARCHAR(MAX)	 =	 ''
+	
+	,@ysnOverwriteRecords							BIT				 =	 0
 
 
 AS
@@ -46,6 +48,8 @@ BEGIN
 	----				    VARIABLES		   			 ----
 	---------------------------------------------------------
 	DECLARE @ysnHasError							  BIT = 0
+	DECLARE @ysnAllowBlankValues					  BIT = 0
+	DECLARE @intSiteId								  INT = 0
 
 	DECLARE @intDuplicateSite					      INT = 0
 
@@ -70,6 +74,53 @@ BEGIN
 	---------------------------------------------------------
 	----				    VALIDATION		   			 ----
 	---------------------------------------------------------
+
+	---------------------------------------------------------
+	----				    OPTIONS			   			 ----
+	---------------------------------------------------------
+	IF(ISNULL(@ysnOverwriteRecords,0) = 1)
+	BEGIN
+		IF (@strNetworkId != '')
+		BEGIN 
+			SELECT 
+			 @intNetworkId = n.intNetworkId
+			,@strNetworkType = strNetworkType
+			FROM tblCFNetwork as n
+			WHERE strNetwork = @strNetworkId
+
+			IF (ISNULL(@intNetworkId,0) = 0)
+			BEGIN
+				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+				VALUES (@strSiteNumber,'Unable to find match for '+ @strNetworkId +' on network list')
+				SET @ysnHasError = 1
+			END
+			ELSE
+			BEGIN
+				IF(@strSiteNumber = NULL OR @strSiteNumber = '')
+				BEGIN
+					SET @strSiteNumber = NEWID()
+					INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+					VALUES (@strSiteNumber,'Site number is required')
+					SET @ysnHasError = 1
+				END
+				ELSE
+				BEGIN
+					SELECT @intDuplicateSite = COUNT(*) FROM tblCFSite WHERE strSiteNumber = @strSiteNumber AND intNetworkId = @intNetworkId
+					IF (@intDuplicateSite > 0)
+					BEGIN
+						SET @ysnAllowBlankValues = 1
+					END
+				END
+			END
+		END
+	
+		IF(@ysnHasError = 1)
+		BEGIN
+			RETURN
+		END
+	
+	END
+
 
 	---------------------------------------------------------
 	--					 REQUIRED FIELDS				   --
@@ -103,18 +154,13 @@ BEGIN
 		SET @ysnHasError = 1
 	END
 	---------------------------------------------------------
-
-	IF(@ysnHasError = 1)
+	IF(ISNULL(@ysnAllowBlankValues,0) = 0)
 	BEGIN
-		RETURN
+		IF(@ysnHasError = 1)
+		BEGIN
+			RETURN
+		END
 	END
-
-	
-
-	--IF(@ysnHasError = 1)
-	--BEGIN
-	--	RETURN
-	--END
 
 	---------------------------------------------------------
 	--				VALID VALUE TO OTHER TABLE		       --
@@ -143,8 +189,19 @@ BEGIN
 				SELECT @intDuplicateSite = COUNT(*) FROM tblCFSite WHERE strSiteNumber = @strSiteNumber AND intNetworkId = @intNetworkId 
 				IF (@intDuplicateSite > 0)
 				BEGIN
-					INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-					VALUES (@strSiteNumber,'Duplicate site for '+ @strSiteNumber)
+					
+
+					IF(ISNULL(@ysnAllowBlankValues,0) = 1)
+					BEGIN
+						INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+						VALUES (@strSiteNumber,'[Overwrite Records] Duplicate site for '+ @strSiteNumber)
+					END
+					ELSE
+					BEGIN
+						INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+						VALUES (@strSiteNumber,'[Skipped Records] Duplicate site for '+ @strSiteNumber)
+					END
+
 					SET @ysnHasError = 1
 				END
 	
@@ -156,10 +213,12 @@ BEGIN
 			SET @intNetworkId = NULL
 		END
 
-
-	IF(@ysnHasError = 1)
+	IF(ISNULL(@ysnAllowBlankValues,0) = 0)
 	BEGIN
-		RETURN
+		IF(@ysnHasError = 1)
+		BEGIN
+			RETURN
+		END
 	END
 
 	--Location
@@ -283,6 +342,10 @@ BEGIN
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strSiteNumber,'Invalid Site Accepts Credit Card '+ @strSiteAcceptsCreditCards +'. Value should be Y or N only')
 			SET @ysnHasError = 1
+
+			SET @strSiteAcceptsCreditCards = NULL
+			SET @ysnSiteAcceptsCreditCards = NULL
+
 		END
 
 	--ProcessCashSales
@@ -299,6 +362,9 @@ BEGIN
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strSiteNumber,'Invalid Process Cash Sales '+ @strProcessCashSales +'. Value should be Y or N only')
 			SET @ysnHasError = 1
+
+			SET @strProcessCashSales = NULL
+			SET @ysnProcessCashSales = NULL
 		END
 
 	--Import Triple E Stock
@@ -315,6 +381,9 @@ BEGIN
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strSiteNumber,'Invalid Import Triple E Stock '+ @strImportTripleEStock +'. Value should be Y or N only')
 			SET @ysnHasError = 1
+
+			SET @strImportTripleEStock = NULL
+			SET @ysnImportTripleEStock = NULL
 		END
 
 	--PumpCalculatesExemptPrice
@@ -331,6 +400,9 @@ BEGIN
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strSiteNumber,'Invalid Pump Calculates Exempt Price '+ @strPumpCalculatesExemptPrice +'. Value should be Y or N only')
 			SET @ysnHasError = 1
+
+			SET @strPumpCalculatesExemptPrice = NULL
+			SET @ysnPumpCalculatesExemptPrice = NULL
 		END
 
 	--Recalculate Taxes On Remote
@@ -347,6 +419,9 @@ BEGIN
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strSiteNumber,'Invalid Recalculate Taxes On Remote '+ @strRecalculateTaxesOnRemote +'. Value should be Y or N only')
 			SET @ysnHasError = 1
+
+			SET @strRecalculateTaxesOnRemote = NULL
+			SET @ysnRecalculateTaxesOnRemote = NULL
 		END
 
 		
@@ -364,6 +439,10 @@ BEGIN
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strSiteNumber,'Invalid Import Contains Multiple Sites '+ @strImportContainsMultipleSites +'. Value should be Y or N only')
 			SET @ysnHasError = 1
+
+			
+			SET @strImportContainsMultipleSites = NULL
+			SET @ysnImportContainsMultipleSites = NULL
 		END
 
 		--CaptiveSite
@@ -377,7 +456,15 @@ BEGIN
 		END
 	ELSE
 		BEGIN 
-			SET @ysnCaptiveSite = 0
+			
+			IF(ISNULL(@ysnAllowBlankValues,0) = 0)
+			BEGIN
+				SET @ysnCaptiveSite = 0
+			END
+			ELSE
+			BEGIN
+				SET @ysnCaptiveSite = NULL
+			END
 		END
 
 
@@ -391,12 +478,20 @@ BEGIN
 			SET @strAllowExemptionsOnExtAndRetailTrans = 'Yes'
 		END
 	ELSE
-		BEGIN 
+	BEGIN 
+			IF(ISNULL(@ysnAllowBlankValues,0) = 0)
+			BEGIN
 				SELECT TOP 1 
 				@strAllowExemptionsOnExtAndRetailTrans = strAllowExemptionsOnExtAndRetailTrans
 				FROM tblCFNetwork
 				WHERE intNetworkId = @intNetworkId
-		END
+			END
+			ELSE
+			BEGIN
+				SET @strAllowExemptionsOnExtAndRetailTrans = NULL
+			END
+
+	END
 
 
 
@@ -409,6 +504,8 @@ BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strSiteNumber,'Invalid Delivery Pickup '+ @strDeliveryPickup +'. Value should be Delivery or Pickup only')
 		SET @ysnHasError = 1
+
+		SET @strDeliveryPickup = NULL
 	END
 	
 	---------------------------------------------------------
@@ -420,6 +517,9 @@ BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strSiteNumber,'Invalid Site Type '+ @strSiteType +'. Value should be Local/Network or Remote or Extended Remote only')
 		SET @ysnHasError = 1
+
+		
+		SET @strSiteType = NULL
 	END
 	
 	---------------------------------------------------------
@@ -443,6 +543,9 @@ BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strSiteNumber,'Invalid Controller Type '+ @strControllerType +'. Value should be AutoGas,Gasboy,Tech-21,Mannatec,WetHosing,CCIS,EEE,PetroVend,CFN,PacPride,Voyager only')
 		SET @ysnHasError = 1
+
+		
+		SET @strControllerType = NULL
 	END
 	
 	---------------------------------------------------------
@@ -455,6 +558,9 @@ BEGIN
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 			VALUES (@strSiteNumber,'Invalid PP SiteType '+ @strPPSiteType +'. Value should be Network or Exclusive or Retail only')
 			SET @ysnHasError = 1
+
+			
+		SET @strPPSiteType = NULL
 		END
 	END
 	ELSE
@@ -465,9 +571,12 @@ BEGIN
 	
 	---------------------------------------------------------
 
-	IF(@ysnHasError = 1)
+	IF(ISNULL(@ysnAllowBlankValues,0) = 0)
 	BEGIN
-		RETURN
+		IF(@ysnHasError = 1)
+		BEGIN
+			RETURN
+		END
 	END
 
 
@@ -490,65 +599,98 @@ BEGIN
 	---------------------------------------------------------
 	BEGIN TRANSACTION
 		BEGIN TRY
-
-			INSERT INTO tblCFSite
-			(
-				 intNetworkId					
-				,intARLocationId					
-				,intAdjustmentSiteGroupId					
-				,intTaxGroupId					
-				,intCashCustomerID				
-				,intImportMapperId				
-				,strSiteNumber					
-				,strSiteName					
-				,strSiteAddress					
-				,strSiteCity						
-				,strTaxState						
-				,intPPHostId				
-				,strImportPath				
-				,strImportFileName				
-				,strDeliveryPickup				
-				,strSiteType					
-				,strControllerType				
-				,strPPSiteType					
-				,ysnSiteAcceptsMajorCreditCards		
-				,ysnProcessCashSales			
-				,ysnEEEStockItemDetail			
-				,ysnPumpCalculatesTaxes	
-				,ysnRecalculateTaxesOnRemote	
-				,ysnMultipleSiteImport
-				,strAllowExemptionsOnExtAndRetailTrans
-				,ysnCaptiveSite
-	        )
-			VALUES
-			(
-				 @intNetworkId					
-				,@intARLocation					
-				,@intSiteGroup					
-				,@intTaxGroup					
-				,@intARCashCustomer				
-				,@intImportMapping				
-				,@strSiteNumber					
-				,@strSiteName					
-				,@strAddress					
-				,@strCity						
-				,@strState						
-				,@strPacPrideHostId				
-				,@strImportFilePath				
-				,@strImportFileName				
-				,@strDeliveryPickup				
-				,@strSiteType					
-				,@strControllerType				
-				,@strPPSiteType					
-				,@ysnSiteAcceptsCreditCards		
-				,@ysnProcessCashSales			
-				,@ysnImportTripleEStock			
-				,@ysnPumpCalculatesExemptPrice	
-				,@ysnRecalculateTaxesOnRemote	
-				,@ysnImportContainsMultipleSites
-				,@strAllowExemptionsOnExtAndRetailTrans
-				,@ysnCaptiveSite
-			)
+			IF(ISNULL(@ysnAllowBlankValues,0) = 0)
+			BEGIN
+				INSERT INTO tblCFSite
+				(
+					 intNetworkId					
+					,intARLocationId					
+					,intAdjustmentSiteGroupId					
+					,intTaxGroupId					
+					,intCashCustomerID				
+					,intImportMapperId				
+					,strSiteNumber					
+					,strSiteName					
+					,strSiteAddress					
+					,strSiteCity						
+					,strTaxState						
+					,intPPHostId				
+					,strImportPath				
+					,strImportFileName				
+					,strDeliveryPickup				
+					,strSiteType					
+					,strControllerType				
+					,strPPSiteType					
+					,ysnSiteAcceptsMajorCreditCards		
+					,ysnProcessCashSales			
+					,ysnEEEStockItemDetail			
+					,ysnPumpCalculatesTaxes	
+					,ysnRecalculateTaxesOnRemote	
+					,ysnMultipleSiteImport
+					,strAllowExemptionsOnExtAndRetailTrans
+					,ysnCaptiveSite
+				)
+				VALUES
+				(
+					 @intNetworkId
+					,@intARLocation					
+					,@intSiteGroup					
+					,@intTaxGroup					
+					,@intARCashCustomer				
+					,@intImportMapping		
+					,@strSiteNumber		
+					,@strSiteName					
+					,@strAddress					
+					,@strCity						
+					,@strState						
+					,@strPacPrideHostId				
+					,@strImportFilePath				
+					,@strImportFileName				
+					,@strDeliveryPickup				
+					,@strSiteType					
+					,@strControllerType				
+					,@strPPSiteType					
+					,@ysnSiteAcceptsCreditCards		
+					,@ysnProcessCashSales			
+					,@ysnImportTripleEStock			
+					,@ysnPumpCalculatesExemptPrice	
+					,@ysnRecalculateTaxesOnRemote	
+					,@ysnImportContainsMultipleSites
+					,@strAllowExemptionsOnExtAndRetailTrans
+					,@ysnCaptiveSite
+				)
+			END
+			ELSE
+			BEGIN
+				UPDATE tblCFSite 
+				SET  intARLocationId						=  (CASE WHEN ISNULL(@intARLocation,0)					!= 0		THEN @intARLocation ELSE selector.intARLocationId END)
+					,intAdjustmentSiteGroupId				=  (CASE WHEN ISNULL(@intSiteGroup,0)					!= 0		THEN @intSiteGroup ELSE selector.intAdjustmentSiteGroupId END)       							
+					,intTaxGroupId							=  (CASE WHEN ISNULL(@intTaxGroup,0)					!= 0		THEN @intTaxGroup ELSE selector.intTaxGroupId END)       										
+					,intCashCustomerID						=  (CASE WHEN ISNULL(@intARCashCustomer,0)				!= 0		THEN @intARCashCustomer ELSE selector.intCashCustomerID END)       									
+					,intImportMapperId						=  (CASE WHEN ISNULL(@intImportMapping,0)				!= 0		THEN @intImportMapping ELSE selector.intImportMapperId END)       											
+					,strSiteName							=  (CASE WHEN ISNULL(@strSiteName,'')					!= ''		THEN @strSiteName ELSE selector.strSiteName END)       										
+					,strSiteAddress							=  (CASE WHEN ISNULL(@strAddress,'')					!= ''		THEN @strAddress ELSE selector.strSiteAddress END)       										
+					,strSiteCity							=  (CASE WHEN ISNULL(@strCity,'')						!= '' 		THEN @strCity ELSE selector.strSiteCity END)       										
+					,strTaxState							=  (CASE WHEN ISNULL(@strState,'')						!= '' 		THEN @strState ELSE selector.strTaxState END)       										
+					,intPPHostId							=  (CASE WHEN ISNULL(@strPacPrideHostId,'')				!= '' 		THEN @strPacPrideHostId ELSE selector.intPPHostId END)       										
+					,strImportPath							=  (CASE WHEN ISNULL(@strImportFilePath,'')				!= '' 		THEN @strImportFilePath ELSE selector.strImportPath END)       										
+					,strImportFileName						=  (CASE WHEN ISNULL(@strImportFileName,'')				!= '' 		THEN @strImportFileName ELSE selector.strImportFileName END)       									
+					,strDeliveryPickup						=  (CASE WHEN ISNULL(@strDeliveryPickup,'')				!= '' 		THEN @strDeliveryPickup ELSE selector.strDeliveryPickup END)       									
+					,strSiteType							=  (CASE WHEN ISNULL(@strSiteType,'')					!= '' 		THEN @strSiteType ELSE selector.strSiteType END)       										
+					,strControllerType						=  (CASE WHEN ISNULL(@strControllerType,'')				!= '' 		THEN @strControllerType ELSE selector.strControllerType END)       									
+					,strPPSiteType							=  (CASE WHEN ISNULL(@strPPSiteType,'')					!= '' 		THEN @strPPSiteType ELSE selector.strPPSiteType END)       										
+					,ysnSiteAcceptsMajorCreditCards			=  (CASE WHEN @ysnSiteAcceptsCreditCards				IS NOT NULL THEN @ysnSiteAcceptsCreditCards ELSE selector.ysnSiteAcceptsMajorCreditCards END)       						
+					,ysnProcessCashSales					=  (CASE WHEN @ysnProcessCashSales						IS NOT NULL THEN @ysnProcessCashSales ELSE selector.ysnProcessCashSales END)       								
+					,ysnEEEStockItemDetail					=  (CASE WHEN @ysnImportTripleEStock					IS NOT NULL THEN @ysnImportTripleEStock ELSE selector.ysnEEEStockItemDetail END)       								
+					,ysnPumpCalculatesTaxes					=  (CASE WHEN @ysnPumpCalculatesExemptPrice				IS NOT NULL THEN @ysnPumpCalculatesExemptPrice ELSE selector.ysnPumpCalculatesTaxes END)       								
+					,ysnRecalculateTaxesOnRemote			=  (CASE WHEN @ysnRecalculateTaxesOnRemote				IS NOT NULL THEN @ysnRecalculateTaxesOnRemote ELSE selector.ysnRecalculateTaxesOnRemote END)       						
+					,ysnMultipleSiteImport					=  (CASE WHEN @ysnImportContainsMultipleSites			IS NOT NULL THEN @ysnImportContainsMultipleSites ELSE selector.ysnMultipleSiteImport END)       								
+					,strAllowExemptionsOnExtAndRetailTrans	=  (CASE WHEN @strAllowExemptionsOnExtAndRetailTrans	IS NOT NULL THEN @strAllowExemptionsOnExtAndRetailTrans ELSE selector.strAllowExemptionsOnExtAndRetailTrans END)       				
+					,ysnCaptiveSite							=  (CASE WHEN @ysnCaptiveSite							IS NOT NULL THEN @ysnCaptiveSite ELSE selector.ysnCaptiveSite END)       		
+				FROM tblCFSite AS selector
+				WHERE strSiteNumber = @strSiteNumber 
+				AND intNetworkId = @intNetworkId
+			END
 
 			COMMIT TRANSACTION
 			RETURN 1

@@ -58,11 +58,13 @@
 [intTerminalEntityId] INT NULL,
 [intShippingLineEntityId] INT NULL,
 [strServiceContractNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strFreightInfo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strPackingDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strMVessel] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strMVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strFVessel] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strFVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strIMONumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intForwardingAgentEntityId] INT NULL,
 [strForwardingAgentRef] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intInsurerEntityId] INT NULL,
@@ -98,6 +100,7 @@
 [dtmArrivedInPort] DATETIME NULL,
 [dtmDocumentsApproved] DATETIME NULL,
 [dtmCustomsReleased] DATETIME NULL,
+[dtmLoadExpiration] DATETIME NULL,
 
 [strVessel1] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strOriginPort1] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -139,9 +142,14 @@
 [intShipmentType] INT NULL,
 [intLoadShippingInstructionId]  INT NULL,
 [strExternalShipmentNumber]  NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+
 [ysn4cRegistration] [bit] NULL,
 [ysnInvoice] [bit] NULL,
 [ysnProvisionalInvoice] [bit] NULL,
+[strCourierTrackingNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[str4CLicenseNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strExternalERPReferenceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+
 [ysnQuantityFinal] [bit] NULL,
 [ysnCancelled] [bit] NULL,
 [intShippingModeId] INT NULL,
@@ -164,6 +172,9 @@
 [intSubBookId] INT NULL,
 [intLoadRefId] INT NULL,
 [ysnLoadBased] BIT NULL DEFAULT ((0)),
+[ysnAllowReweighs] BIT NULL DEFAULT ((0)),
+[dblFreightRate] NUMERIC(18, 6) NULL,
+[dblSurcharge] NUMERIC(18, 6) NULL,
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -301,3 +312,8 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K1_K5] ON [dbo].
 )WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
 CREATE STATISTICS [_dta_stat_1172915250_103_5_1] ON [dbo].[tblLGLoad]([ysnQuantityFinal], [intPurchaseSale], [intLoadId])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblLGLoad_intLoadShippingInstructionId]
+ON [dbo].[tblLGLoad] ([intLoadShippingInstructionId] ASC)
+GO

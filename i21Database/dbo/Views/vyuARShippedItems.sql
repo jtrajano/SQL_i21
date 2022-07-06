@@ -107,6 +107,7 @@ SELECT id							= NEWID()
 	 , ysnShowForShipment			= isnull(SCALETICKET.ysnShowForShipment, 1)
 	 , intItemContractHeaderId		= SHIPPEDITEMS.intItemContractHeaderId
 	 , intItemContractDetailId		= SHIPPEDITEMS.intItemContractDetailId
+	 , dblStandardWeight			= ITEMUOM.dblStandardWeight
 	 , ysnDestinationWeightsAndGrades   = SHIPPEDITEMS.ysnDestinationWeightsAndGrades
 	 , dblDestinationQuantity		= SHIPPEDITEMS.dblDestinationQuantity
 FROM (
@@ -1381,6 +1382,7 @@ LEFT OUTER JOIN (
 		 , intItemId
 		 , IU.intUnitMeasureId
 		 , UM.strUnitMeasure
+		 , IU.dblStandardWeight
 	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intUnitMeasureId

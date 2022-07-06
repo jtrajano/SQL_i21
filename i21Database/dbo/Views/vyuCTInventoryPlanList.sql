@@ -25,8 +25,10 @@ SELECT RM.intInvPlngReportMasterID
 	,RM.ysnAllItem
 	,RM.strComment
 	,RM.ysnPost
+	,RM.strExternalGroup
+	,RM.intDayLeftInMonth
 FROM tblCTInvPlngReportMaster AS RM
-JOIN tblICCategory AS C ON C.intCategoryId = RM.intCategoryId
+LEFT JOIN tblICCategory AS C ON C.intCategoryId = RM.intCategoryId
 LEFT JOIN tblMFDemandHeader DH ON DH.intDemandHeaderId = RM.intDemandHeaderId
 LEFT JOIN tblICUnitMeasure AS UOM ON UOM.intUnitMeasureId = RM.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = RM.intCompanyLocationId

@@ -13,7 +13,7 @@ END
 
 -- If fyp is Open and the log is more than a day old, continue with the rebuild. 
 -- Otherwise, exit immediately. Do not rebuild the valuation summary. 
-IF EXISTS (
+IF NOT EXISTS (
 	SELECT TOP 1 1 
 	FROM 
 		tblICInventoryValuationSummaryLog (NOLOCK) l INNER JOIN tblGLFiscalYearPeriod fyp
@@ -21,7 +21,7 @@ IF EXISTS (
 	WHERE 
 		l.strPeriod = @strPeriod
 		AND fyp.ysnINVOpen = 1 
-		AND ABS(DATEDIFF(DAY, l.dtmLastRun, GETDATE())) <= 1
+		AND ABS(DATEDIFF(DAY, l.dtmLastRun, GETDATE())) > 1
 )
 AND @ysnForceRebuild <> 1
 BEGIN 
@@ -90,9 +90,40 @@ USING (
 			END
 		,dblRunningQuantity = ISNULL(ROUND(t.dblQuantityInStockUOM, 6), 0)
 		,dblRunningValue = ISNULL(ROUND(t.dblValue, 6), 0) 
-		,dblRunningLastCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblLastCost, 2), 0)
+		,dblRunningLastCost = 
+			ISNULL(
+				ROUND(
+					t.dblQuantityInStockUOM 
+					* COALESCE(
+						dbo.fnCalculateCostBetweenUOM( 
+							positiveStock.intItemUOMId
+							,Item.intItemUOMId 
+							,positiveStock.dblCost 
+						)
+						,NULLIF(ItemPricing.dblLastCost, 0)
+						,dbo.fnCalculateCostBetweenUOM( 
+							negativeStock.intItemUOMId
+							,Item.intItemUOMId 
+							,negativeStock.dblCost 
+						)
+					)
+					,2
+				)
+				, 0
+			)
 		,dblRunningStandardCost = ISNULL(ROUND(dblQuantityInStockUOM * ItemPricing.dblStandardCost, 2),0)
-		,dblRunningAverageCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblAverageCost, 2), 0)
+		,dblRunningAverageCost = 
+			ISNULL(
+				ROUND(
+					t.dblQuantityInStockUOM 
+					* COALESCE(
+						movingAvgCost.dblAverageCost
+						,ItemPricing.dblAverageCost
+					)				
+					, 2
+				)
+				, 0
+			)
 		,strStockUOM = Item.strUnitMeasure
 		,Item.strCategoryCode
 		,Item.strCommodityCode
@@ -198,6 +229,50 @@ USING (
 			LEFT JOIN tblICItemPricing ItemPricing 
 				ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 				AND ItemPricing.intItemId = Item.intItemId
+			OUTER APPLY (
+				SELECT	TOP 1 
+						t2.intItemUOMId 
+						,t2.dblCost
+				FROM	dbo.tblICInventoryTransaction t2 
+				WHERE	t2.intItemId = ItemPricing.intItemId
+						AND t2.intItemLocationId = ItemPricing.intItemLocationId
+						AND t2.dblQty > 0 
+						AND ISNULL(t2.ysnIsUnposted, 0) = 0
+						AND FLOOR(CAST(t2.dtmDate AS FLOAT)) <= FLOOR(CAST(f.dtmEndDate AS FLOAT))
+				ORDER BY t2.intInventoryTransactionId DESC 						
+			) positiveStock 
+			OUTER APPLY (
+				SELECT	TOP 1 					
+						t3.intItemUOMId 
+						,t3.dblCost
+				FROM	dbo.tblICInventoryTransaction t3 
+				WHERE	t3.intItemId = ItemPricing.intItemId
+						AND t3.intItemLocationId = ItemPricing.intItemLocationId
+						AND t3.dblQty < 0 
+						AND ISNULL(t3.ysnIsUnposted, 0) = 0
+						AND FLOOR(CAST(t3.dtmDate AS FLOAT)) <= FLOOR(CAST(f.dtmEndDate AS FLOAT))
+				ORDER BY t3.intInventoryTransactionId DESC 						
+			) negativeStock
+			OUTER APPLY (
+				SELECT TOP 1 
+					t4.intInventoryTransactionId
+				FROM 
+					tblICInventoryTransaction t4
+				WHERE
+					t4.intItemId = Item.intItemId
+					AND t4.intItemLocationId = ItemLocation.intItemLocationId
+				ORDER BY
+					t4.intInventoryTransactionId DESC 
+			) lastTransaction
+			OUTER APPLY (
+				SELECT dblAverageCost = 
+					dbo.fnICGetMovingAverageCost (
+						Item.intItemId
+						,ItemLocation.intItemLocationId
+						,lastTransaction.intInventoryTransactionId
+					)		
+			) movingAvgCost 
+
 	WHERE
 		ItemLocation.intItemLocationId IS NOT NULL
 		AND f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
@@ -283,4 +358,3 @@ SET l.ysnRebuilding = 0
 	,l.dtmEnd = GETDATE() 
 FROM tblICInventoryValuationSummaryLog l
 WHERE l.strPeriod = @strPeriod
-	

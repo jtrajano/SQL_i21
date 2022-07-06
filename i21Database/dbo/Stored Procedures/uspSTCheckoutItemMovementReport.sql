@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutItemMovementReport]
 	@strStoreIdList AS NVARCHAR(MAX) = '',
+	@strStoreGroupIdList AS NVARCHAR(MAX) = '',
 	@strCategoryIdList AS NVARCHAR(MAX) = '',
 	@strFamilyIdList AS NVARCHAR(MAX) = '', 
 	@strClassIdList AS NVARCHAR(MAX) = '', 
@@ -21,12 +22,13 @@ SELECT
 	 , EM.strName AS strVendorName
 	 , tblIMQty.dtmCheckoutDateMin
 	 , tblIMQty.dtmCheckoutDateMax
+	 , tblIMQty.strUnitMeasure
 	 , tblIMQty.strLongUPCCode
 	 , tblIMQty.strItemNo
 	 , tblIMQty.strItemDescription
 	 , tblIMQty.intQtySoldSum AS intQtySold
-	 , ItemPricing.dblSalePrice AS dblCurrentPrice
-
+	--  , ItemPricing.dblSalePrice AS dblCurrentPrice
+	 , vyupriceHierarchy.dblSalePrice AS dblCurrentPrice
 	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) AS dblTotalSales
 
 	 -- ADDED
@@ -61,6 +63,7 @@ FROM
 	      ST.intStoreId
 		, UOM.intItemUOMId
 		, UOM.strLongUPCCode
+		, UM.strUnitMeasure
 		, Item.intItemId
 		, Item.strItemNo
 		, Item.strDescription AS strItemDescription
@@ -83,6 +86,8 @@ FROM
 		ON ST.intCompanyLocationId = CL.intCompanyLocationId
 	INNER JOIN dbo.tblICItemUOM UOM 
 		ON UOM.intItemUOMId = IM.intItemUPCId
+	INNER JOIN dbo.tblICUnitMeasure UM 
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	INNER JOIN tblICItem Item
 		ON UOM.intItemId = Item.intItemId
 	INNER JOIN tblICItemLocation IL
@@ -104,6 +109,16 @@ FROM
 		ON IL.intFamilyId = Class.intSubcategoryId
 		AND Class.strSubcategoryType = 'C'
 	WHERE UOM.strLongUPCCode IS NOT NULL 
+		AND (
+				ST.intStoreId IN (SELECT DISTINCT stgd.intStoreId FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreGroupIdList) list
+									JOIN tblSTStoreGroupDetail stgd
+										ON stgd.intStoreGroupId = list.intID)
+				OR 1 = CASE 
+							WHEN @strStoreGroupIdList = ''
+								THEN 1
+							ELSE 0
+					   END
+			)
 		AND (
 				ST.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 				OR 1 = CASE 
@@ -154,6 +169,7 @@ FROM
 			)
 	GROUP BY  ST.intStoreId
 			, UOM.intItemUOMId
+			, UM.strUnitMeasure
 			, UOM.strLongUPCCode
 			, Item.intItemId
 			, Item.strDescription
@@ -184,7 +200,12 @@ LEFT JOIN dbo.tblICItemSpecialPricing ItemSpecial
 	AND IL.intItemLocationId = ItemSpecial.intItemLocationId 
 LEFT JOIN dbo.tblICItemPricing ItemPricing 
 	ON tblIMQty.intItemId = ItemPricing.intItemId
-	AND IL.intItemLocationId = ItemPricing.intItemLocationId 
+	AND IL.intItemLocationId = ItemPricing.intItemLocationId
+	--FOR Price hierarchy --
+INNER JOIN vyuSTItemHierarchyPricing vyupriceHierarchy
+	ON tblIMQty.intItemId = vyupriceHierarchy.intItemId 
+	AND IL.intItemLocationId = vyupriceHierarchy.intItemLocationId
+	AND tblIMQty.intItemUOMId = vyupriceHierarchy.intItemUOMId
 ORDER BY Cat.intCategoryId
        , tblIMQty.strLongUPCCode ASC
 

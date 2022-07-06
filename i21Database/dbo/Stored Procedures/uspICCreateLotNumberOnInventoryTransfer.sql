@@ -171,6 +171,11 @@ BEGIN
 			,[strCertificateId]
 			,[strTrackingNumber]
 			,[strWarehouseRefNo]
+			,intContractHeaderId
+			,intContractDetailId
+			,ysnWeighed
+			,strSealNo
+			,intLotStatusId
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -219,6 +224,11 @@ BEGIN
 			,[strCertificateId]			= SourceLot.strCertificateId
 			,[strTrackingNumber]		= SourceLot.strTrackingNumber 
 			,[strWarehouseRefNo]		= CASE WHEN ISNULL(TransferItem.strNewWarehouseRefNo, '') = '' THEN SourceLot.strWarehouseRefNo ELSE TransferItem.strNewWarehouseRefNo END 
+			,intContractHeaderId		= SourceLot.intContractHeaderId
+			,intContractDetailId		= SourceLot.intContractDetailId
+			,ysnWeighed					= SourceLot.ysnWeighed
+			,strSealNo					= SourceLot.strSealNo
+			,intLotStatusId				= SourceLot.intLotStatusId 
 	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId
 			INNER JOIN dbo.tblICItem Item

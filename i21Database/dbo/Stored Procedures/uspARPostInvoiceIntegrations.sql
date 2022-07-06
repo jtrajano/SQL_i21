@@ -12,6 +12,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
+--PARAMETER SNIFFING
+DECLARE @PostTemp           	BIT				= @Post
+	  , @BatchIdTemp           	NVARCHAR(40) 	= @BatchId
+      , @UserIdTemp            	INT				= @UserId
+	  , @IntegrationLogIdTemp	INT             = @IntegrationLogId
+	  , @raiseErrorTemp  		BIT   			= @raiseError
+
 DECLARE @ZeroDecimal	DECIMAL(18,6) = 0.000000
 DECLARE @OneDecimal		DECIMAL(18,6) = 1.000000
 
@@ -23,7 +30,7 @@ DECLARE  @InitTranCount				INT
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
-IF ISNULL(@raiseError,0) = 0
+IF ISNULL(@raiseErrorTemp,0) = 0
 BEGIN
 	IF @InitTranCount = 0
 		BEGIN TRANSACTION
@@ -118,7 +125,7 @@ BEGIN
 	EXEC dbo.uspARAutoApplyPrepaids @intEntityUserId = @UserId
 END
 
-IF @Post = 0
+IF @PostTemp = 0
 BEGIN
 	--REVERSE BLEND FOR FINISHED GOODS
 	BEGIN
@@ -472,7 +479,7 @@ BEGIN
 	WHERE Inv.strTransactionType IN ('Cash Refund')	
 
 	UPDATE u
-	SET u.dblQty = CASE WHEN @Post = 1 THEN u.dblQty ELSE -u.dblQty END 
+	SET u.dblQty = CASE WHEN @PostTemp = 1 THEN u.dblQty ELSE -u.dblQty END 
 	FROM @UsageItems u
 
 	EXEC uspICIncreaseUsageQty @UsageItems, @UserId
@@ -541,7 +548,7 @@ FROM tblARInvoice INV
 INNER JOIN ##ARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
 
 --UPDATE CONTRACT BALANCE
-EXEC dbo.uspARUpdateContractOnPost @UserId
+EXEC dbo.uspARUpdateContractOnPost @UserIdTemp, @Post
 
 --UPDATE CONTRACTS FINANCIAL STATUS
 BEGIN
@@ -625,7 +632,7 @@ INNER JOIN ##ARPostInvoiceHeader B ON A.intInvoiceId = B.intInvoiceId
 WHERE ysnApplied = 0
 
 --POST RESULT
-IF @IntegrationLogId IS NULL
+IF @IntegrationLogIdTemp IS NULL
 	BEGIN
 		INSERT INTO tblARPostResult(
 			  strMessage
@@ -635,7 +642,7 @@ IF @IntegrationLogId IS NULL
 			, intTransactionId
 		)
 		SELECT CASE WHEN [ysnPost] = 1 THEN 'Transaction successfully posted.'  ELSE 'Transaction successfully unposted.' END
-			, [strTransactionType]
+			, [strTransactionType] = CASE strTransactionType WHEN 'Debit Memo' THEN 'Debit Memo (Sales)' ELSE strTransactionType END
 			, [strInvoiceNumber]
 			, [strBatchId]
 			, [intInvoiceId]
@@ -654,7 +661,10 @@ EXEC dbo.uspARInvoiceGrossMarginSummary @ysnRebuild = 0
 
 --INTER COMPANY PRE-STAGE
 EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdate
-									    , @intUserId		= @UserId		
+									    , @intUserId		= @UserIdTemp		
+
+--CREATE INVENTORY RECEIPT TO ANOTHER COMPANY
+EXEC dbo.uspARInterCompanyIntegrationSource @BatchId = @BatchId, @Post = @Post
 
 --DELETE FROM POSTING QUEUE
 DELETE PQ
@@ -698,7 +708,7 @@ BEGIN CATCH
     DECLARE @ErrorMerssage NVARCHAR(MAX)
 	SELECT @ErrorMerssage = ERROR_MESSAGE()
 
-	IF @raiseError = 0
+	IF @raiseErrorTemp = 0
 	BEGIN
 		IF @InitTranCount = 0
 			IF (XACT_STATE()) <> 0

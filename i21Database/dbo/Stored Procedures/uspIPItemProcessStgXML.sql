@@ -7636,6 +7636,8 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
+			
+
 			------------------Item UOM UPC------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strItemUOMUpcXML
@@ -7680,6 +7682,8 @@ BEGIN TRY
 				AND IU.intUnitMeasureId = UM.intUnitMeasureId
 
 			EXEC sp_xml_removedocument @idoc
+
+			
 
 			---******************************** Item Substitute ********************************************
 			DECLARE @intItemSubstituteId INT

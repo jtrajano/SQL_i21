@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE uspLGPostLoadSchedule
 	@intLoadId INT,
 	@intEntityUserSecurityId INT,
-	@ysnPost BIT
+	@ysnPost BIT,
+	@ysnRecap BIT = 0,
+	@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS
 BEGIN TRY
 	DECLARE @intPurchaseSale INT
@@ -14,11 +16,13 @@ BEGIN TRY
 	DECLARE @intSourceType INT
 	DECLARE @strInvoiceNo NVARCHAR(1000)
 	DECLARE @strMsg NVARCHAR(MAX)
+	DECLARE @ysnCancel BIT
 	DECLARE @strAuditLogActionType NVARCHAR(200)
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
 		  ,@intSourceType = intSourceType
+		  ,@ysnCancel = ISNULL(ysnCancelled, 0)
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -34,7 +38,7 @@ BEGIN TRY
 
 	IF ISNULL(@intSourceType,0) = 1
 	BEGIN
-		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
+		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId AND @ysnRecap = 0
 
 		SELECT @strAuditLogActionType = CASE WHEN ISNULL(@ysnPost,0) = 1 THEN 'Posted' ELSE 'Unposted' END
 		EXEC uspSMAuditLog	
@@ -48,7 +52,7 @@ BEGIN TRY
 	ELSE 
 	BEGIN
 		--Validate if Load has posted Weight Claim
-		IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+		IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId AND ysnPosted = 1 AND @ysnRecap = 0)
 			BEGIN
 				SELECT TOP 1 @strInvoiceNo = tblLGWeightClaim.strReferenceNumber 
 				FROM tblLGWeightClaim WHERE intLoadId = @intLoadId
@@ -81,7 +85,7 @@ BEGIN TRY
 		IF @intPurchaseSale = 1
 		BEGIN
 		
-			IF ISNULL(@ysnValidateExternalShipmentNo,0) = 1 
+			IF ISNULL(@ysnValidateExternalShipmentNo,0) = 1 AND @ysnRecap = 0
 			BEGIN
 				SELECT @strExternalShipmentNumber = strExternalShipmentNumber
 				FROM tblLGLoad
@@ -100,13 +104,16 @@ BEGIN TRY
 					,@ysnPost = @ysnPost
 					,@intPurchaseSale = 1
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
+					,@ysnRecap = @ysnRecap
+					,@strBatchId = @strBatchId OUTPUT
 
 				-- Increase the Inbound In-Transit Qty.
-				EXEC uspLGUpdateInboundIntransitQty 
-					@intLoadId = @intLoadId
-					,@ysnInventorize = @ysnPost
-					,@ysnUnShip = @ysnUnShip
-					,@intEntityUserSecurityId = @intEntityUserSecurityId
+				IF (@ysnRecap = 0)
+					EXEC uspLGUpdateInboundIntransitQty 
+						@intLoadId = @intLoadId
+						,@ysnInventorize = @ysnPost
+						,@ysnUnShip = @ysnUnShip
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
 			END
 			ELSE
 			BEGIN
@@ -120,19 +127,27 @@ BEGIN TRY
 						@details	=	''
 			END
 
-			IF(@ysnPost = 0)
+			IF (@ysnRecap = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
-			END
-			ELSE 
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
+				IF(@ysnPost = 0)
+				BEGIN
+					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+				END
+				ELSE 
+				BEGIN
+					UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+					EXEC uspLGProcessReweighs @intLoadId, NULL, NULL
+				END
+
+				IF(ISNULL(@strFOBPoint,'') = 'Origin')
+				BEGIN	
+					IF (@ysnCancel = 1) 
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+					ELSE
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				END
 			END
 
-			IF(ISNULL(@strFOBPoint,'') = 'Origin')
-			BEGIN	
-				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
-			END
 		END
 		ELSE IF @intPurchaseSale = 2
 		BEGIN
@@ -150,7 +165,10 @@ BEGIN TRY
 				WHERE L.intLoadId = @intLoadId
 					AND I.ysnReturned = 0 and I.strTransactionType NOT IN ('Credit Memo', 'Proforma Invoice')
 
-				SET @strMsg = 'Invoice ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot unpost. Please delete the invoice and try again.';
+				IF (@ysnRecap = 1)
+					SET @strMsg = 'Invoice ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot show unpost preview.';
+				ELSE
+					SET @strMsg = 'Invoice ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot unpost. Please delete the invoice and try again.';
 
 				RAISERROR (@strMsg,16,1);
 
@@ -161,15 +179,26 @@ BEGIN TRY
 					@ysnPost = @ysnPost
 					,@strTransactionId = @strLoadNumber
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
+					,@ysnRecap = @ysnRecap
+					,@strBatchId = @strBatchId OUTPUT
 
-			IF(@ysnPost = 0)
+			IF (@ysnRecap = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
-			END
+				IF(@ysnPost = 0)
+				BEGIN
+					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+				END
 
-			IF(ISNULL(@strFOBPoint,'') = 'Origin')
-			BEGIN	
-				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				IF(ISNULL(@strFOBPoint,'') = 'Origin')
+				BEGIN	
+					IF (@ysnCancel = 1) 
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+					ELSE
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				END
+
+				--Insert Pending Claim for Outbound
+				EXEC dbo.uspLGAddPendingClaim @intLoadId, 2, @ysnPost
 			END
 		END
 		ELSE IF @intPurchaseSale = 3
@@ -179,31 +208,39 @@ BEGIN TRY
 				,@ysnPost = @ysnPost
 				,@intPurchaseSale = @intPurchaseSale
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@ysnRecap = @ysnRecap
+				,@strBatchId = @strBatchId OUTPUT
 
-			-- Increase the Inbound In-Transit Qty.
-			EXEC uspLGUpdateInboundIntransitQty 
-				@intLoadId = @intLoadId
-				,@ysnInventorize = @ysnPost
-				,@ysnUnShip = @ysnUnShip
-				,@intEntityUserSecurityId = @intEntityUserSecurityId
+			IF (@ysnRecap = 0)
+			BEGIN
+				-- Increase the Inbound In-Transit Qty.
+				EXEC uspLGUpdateInboundIntransitQty 
+					@intLoadId = @intLoadId
+					,@ysnInventorize = @ysnPost
+					,@ysnUnShip = @ysnUnShip
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
 
-			UPDATE tblLGLoad
-			SET ysnPosted = @ysnPost
-				,dtmPostedDate = GETDATE()
-				,intShipmentStatus = CASE 
-					WHEN @ysnPost = 1
-						THEN 6
-					ELSE 1
-					END
-			WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad
+				SET ysnPosted = @ysnPost
+					,dtmPostedDate = GETDATE()
+					,intShipmentStatus = CASE 
+						WHEN @ysnPost = 1
+							THEN 6
+						ELSE 1
+						END
+				WHERE intLoadId = @intLoadId
+					AND @ysnCancel = 0
 
-			--Add Pending Claim Entries for Inbound and Outbound
-			EXEC uspLGAddPendingClaim @intLoadId, 1, @ysnPost
-			EXEC uspLGAddPendingClaim @intLoadId, 2, @ysnPost
-
-			IF(ISNULL(@strFOBPoint,'') = 'Origin')
-			BEGIN	
-				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				IF(ISNULL(@strFOBPoint,'') = 'Origin')
+				BEGIN	
+					IF (@ysnCancel = 1) 
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+					ELSE
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				END
+			
+				--Insert Pending Claim for Inbound and Outbound
+				EXEC dbo.uspLGAddPendingClaim @intLoadId, 3, @ysnPost
 			END
 		END
 	END

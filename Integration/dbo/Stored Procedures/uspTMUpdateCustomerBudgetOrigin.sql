@@ -47,7 +47,7 @@ BEGIN
 		ON C.intCustomerNumber = D.A4GLIdentity	
 	GROUP BY A4GLIdentity
 	
-	IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
+	IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'AG'	) = 1
 	BEGIN
 		UPDATE agcusmst
 		SET agcus_budget_amt = A.dblBudget
@@ -55,7 +55,7 @@ BEGIN
 		WHERE A.A4GLIdentity = agcusmst.A4GLIdentity
 	END
 	
-	IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
+	IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'PT') = 1
 	BEGIN
 		UPDATE ptcusmst
 		SET  ptcus_budget_amt = A.dblBudget

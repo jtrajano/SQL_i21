@@ -33,7 +33,7 @@ BEGIN
 	RETURN;
 END
 
-IF NULLIF(@param, '') IS NULL
+IF NULLIF(@param, '') IS NULL AND NULLIF(@billBatchId, '') IS NULL
 BEGIN
 	RAISERROR('@param is empty. No voucher to post.', 16, 1);
 	RETURN;
@@ -77,6 +77,7 @@ DECLARE @billIds NVARCHAR(MAX)
 DECLARE @totalRecords INT
 DECLARE @costAdjustmentResult INT;
 DECLARE @voucherPayables AS VoucherPayable;
+DECLARE @billIdsInventoryLog AS Id;
 
 -- Get the functional currency
 BEGIN 
@@ -1195,6 +1196,45 @@ BEGIN
 				GOTO Post_Rollback
 			END CATCH
 		END
+
+		--LOG TO tblAPClearing
+		BEGIN TRY
+			DECLARE @clearingIds AS Id
+			DECLARE @APClearing AS APClearing
+
+			INSERT INTO @clearingIds
+			SELECT intBillId FROM #tmpPostBillData
+
+			IF EXISTS(
+				SELECT 1
+				FROM tblAPBillDetail A
+				INNER JOIN #tmpPostBillData B ON A.intBillId = B.intBillId
+				WHERE
+					A.intInventoryReceiptItemId > 0
+				OR A.intInventoryReceiptChargeId > 0
+				OR A.intInventoryShipmentChargeId > 0
+				OR A.intLoadDetailId > 0
+				OR A.intLoadShipmentCostId > 0
+				OR A.intSettleStorageId > 0
+			)
+			BEGIN
+				INSERT INTO @APClearing
+				SELECT * FROM fnAPClearing(@clearingIds)
+
+				IF EXISTS(SELECT 1 FROM @APClearing)
+				BEGIN
+					EXEC uspAPClearing @APClearing = @APClearing, @post = @post
+				END
+			END
+
+		END TRY
+		BEGIN CATCH
+				DECLARE @errorClearing NVARCHAR(200) = ERROR_MESSAGE()
+				SET @invalidCount = @invalidCount + 1;
+				SET @totalRecords = @totalRecords - 1;
+				RAISERROR(@errorClearing, 16, 1);
+				GOTO Post_Rollback
+		END CATCH
 	END
 	ELSE
 	BEGIN
@@ -1203,6 +1243,37 @@ BEGIN
 		RAISERROR(@postError, 16, 1);
 		GOTO Post_Rollback
 	END
+
+	BEGIN TRY
+		--POST INTEGRATION
+		DECLARE @postIntegrationError TABLE(intBillId INT, strBillId NVARCHAR(50), strError NVARCHAR(200));
+
+		--DECLARE THE TEMP TABLE HERE NOT IS SP AND RETURN, NESTED INSERT EXEC IS NOT ALLOWED
+		IF OBJECT_ID(N'tempdb..#tmpPostVoucherIntegrationError') IS NOT NULL DROP TABLE #tmpPostVoucherIntegrationError
+		CREATE TABLE #tmpPostVoucherIntegrationError(intBillId INT, strBillId NVARCHAR(50), strError NVARCHAR(200));
+		
+		DECLARE @voucherIdsIntegration AS Id;
+		INSERT INTO @voucherIdsIntegration
+		SELECT DISTINCT intBillId FROM #tmpPostBillData	
+
+		EXEC uspAPCallPostVoucherIntegration @billIds = @voucherIdsIntegration, @post = @post, @intUserId = @userId
+
+		IF EXISTS(SELECT 1 FROM #tmpPostVoucherIntegrationError)
+		BEGIN
+			--REMOVE FAILED POST VOUCHER INTEGRATION FROM UPDATING VOUCHER TABLE
+			DELETE A
+			FROM #tmpPostBillData A
+			INNER JOIN #tmpPostVoucherIntegrationError B ON A.intBillId = B.intBillId
+		END
+	END TRY
+	BEGIN CATCH
+		DECLARE @errorPostIntegration NVARCHAR(200) = ERROR_MESSAGE()
+		SET @invalidCount = @invalidCount + 1;
+		SET @totalRecords = @totalRecords - 1;
+		RAISERROR(@errorPostIntegration, 16, 1);
+		--ROLLBACK ALL IF UNKNOWN ERROR OCCURS
+		GOTO Post_Rollback
+	END CATCH
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -1326,6 +1397,10 @@ BEGIN
 			WHERE Bill.intContractCostId > 0 
 			GROUP BY intContractCostId
 		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
+
+		INSERT INTO @billIdsInventoryLog
+		SELECT intBillId FROM #tmpPostBillData
+		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 1, @userId = @userId
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1457,6 +1532,10 @@ BEGIN
 			GROUP BY intContractCostId
 		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
 
+		INSERT INTO @billIdsInventoryLog
+		SELECT intBillId FROM #tmpPostBillData
+		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 0, @userId = @userId
+		
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 

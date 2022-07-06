@@ -10,6 +10,8 @@
 	,@ysnPostGL BIT = 1
 	,@ysnRecap BIT = 0
 	,@dtmDate DATETIME = NULL
+	,@intManufacturingProcessId int=NULL
+	,@intLocationId int=NULL
 	)
 AS
 BEGIN
@@ -18,6 +20,9 @@ BEGIN
 		,@dblQuantity NUMERIC(38, 20)
 		,@intItemUOMId INT
 		,@intLotTransactionId INT
+		,@intAdjustmentId int
+		,@dblQty NUMERIC(38, 20)
+		,@strLastBagAdjustment nvarchar(50)
 	DECLARE @ConsumeData TABLE (
 		ConsumeDataKey INT IDENTITY(1, 1)
 		,intLotId INT
@@ -47,13 +52,59 @@ BEGIN
 		RETURN
 	END
 
+	SELECT @strLastBagAdjustment = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 128
+
+	if @strLastBagAdjustment is null or @strLastBagAdjustment=''
+	Begin
+		Select @strLastBagAdjustment='False'
+	End
+
 	WHILE (@ConsumeDataKey > 0)
 	BEGIN
+		SELECT @intLotId = NULL
+			,@dblQuantity = NULL
+			,@intItemUOMId =NULL
+			,@dblQty=NULL
+
 		SELECT @intLotId = intLotId
 			,@dblQuantity = dblQuantity
 			,@intItemUOMId = intItemUOMId
 		FROM @ConsumeData
 		WHERE ConsumeDataKey = @ConsumeDataKey
+
+		IF @strLastBagAdjustment = 'True'
+		BEGIN
+			SELECT @dblQty = (
+					CASE 
+						WHEN IsNULL(dblWeight, 0) = 0
+							THEN dblQty
+						ELSE dblWeight
+						END
+					)
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+
+			IF @dblQty - @dblQuantity < 0
+				AND abs(@dblQuantity - @dblQty) < 1
+			BEGIN
+				EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
+					,@dblNewLotQty = @dblQuantity
+					,@intAdjustItemUOMId = @intItemUOMId
+					,@intUserId = 1
+					,@strReasonCode = '90'
+					,@blnValidateLotReservation = 0
+					,@strNotes = 'Last Bag Adjustment'
+					,@dtmDate = NULL
+					,@ysnBulkChange = 0
+					,@strReferenceNo = NULL
+					,@intAdjustmentId = @intAdjustmentId OUTPUT
+					,@ysnDifferenceQty = 0
+			END
+		END
 
 		EXEC dbo.uspMFValidateConsumeLot @intLotId = @intLotId
 			,@dblConsumeQty = @dblQuantity
@@ -68,7 +119,6 @@ BEGIN
 	END
 
 	DECLARE @intAttributeTypeId INT
-		,@intManufacturingProcessId INT
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 	FROM tblMFWorkOrder

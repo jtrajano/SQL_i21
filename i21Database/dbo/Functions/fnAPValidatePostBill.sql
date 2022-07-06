@@ -177,7 +177,7 @@ BEGIN
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) 
 		AND EXISTS (
-			SELECT 1 FROM vyuAPForApprovalTransaction B WHERE A.intBillId = B.intTransactionId AND B.strScreenName = 'Voucher'
+			SELECT 1 FROM vyuAPForApprovalTransaction B WHERE A.intBillId = B.intTransactionId --AND B.strScreenName = 'Voucher'
 		)
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)

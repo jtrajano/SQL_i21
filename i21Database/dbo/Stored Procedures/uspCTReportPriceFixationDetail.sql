@@ -68,6 +68,7 @@ BEGIN TRY
 	declare @Lotsfixed nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Lot(s) fixed'),'Lot(s) fixed');
 			
 	SELECT	DISTINCT 
+			PD.intPriceFixationDetailId,
 			PF.intPriceFixationId,
 			PD.dtmFixationDate,
 			strFixationDate = datename(dd,PD.dtmFixationDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,PD.dtmFixationDate)),datename(mm,PD.dtmFixationDate)) + ' ' + datename(yyyy,PD.dtmFixationDate),

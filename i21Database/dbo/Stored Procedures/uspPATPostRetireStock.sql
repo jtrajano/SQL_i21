@@ -1,14 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATPostRetireStock]
-	@intRetireStockId INT = NULL,
-	@ysnPosted BIT = NULL,
-	@ysnRecap BIT = NULL,
-	@intCompanyLocationId INT = NULL,
-	@intUserId INT = NULL,
-	@batchIdUsed NVARCHAR(40) = NULL OUTPUT,
-	@error NVARCHAR(200) = NULL OUTPUT,
-	@successfulCount INT = 0 OUTPUT,
-	@invalidCount INT = 0 OUTPUT,
-	@success BIT = 0 OUTPUT
+	@intRetireStockId 		INT = NULL,
+	@ysnPosted 				BIT = NULL,
+	@ysnRecap 				BIT = NULL,
+	@intCompanyLocationId 	INT = NULL,
+	@intUserId 				INT = NULL,
+	@batchIdUsed 			NVARCHAR(40) = NULL OUTPUT,
+	@error 					NVARCHAR(200) = NULL OUTPUT,
+	@successfulCount 		INT = 0 OUTPUT,
+	@invalidCount 			INT = 0 OUTPUT,
+	@success 				BIT = 0 OUTPUT
 AS
 BEGIN
 
@@ -32,6 +32,7 @@ DECLARE @MODULE_CODE NVARCHAR(5)  = 'PAT';
 DECLARE @batchId2 AS NVARCHAR(40);
 DECLARE @voidRetire AS BIT = 0;
 DECLARE @voucherId as Id;
+DECLARE @strRetireNumber AS NVARCHAR(100) = NULL
 
 CREATE TABLE #tempValidateTable (
 	[strError] [NVARCHAR](MAX),
@@ -45,28 +46,29 @@ IF(@batchId IS NULL)
 
 SET @batchIdUsed = @batchId;
 
-	SELECT	RetireStk.intRetireStockId,
-			RetireStk.strRetireNo,
-			RetireStk.dtmRetireDate,
-			CS.strCertificateNo,
-			CS.strStockStatus,
-			RetireStk.intCustomerStockId,
-			RetireStk.intCustomerPatronId,
-			RetireStk.dblSharesNo,
-			RetireStk.dblParValue,
-			RetireStk.dblFaceValue,
-			RetireStk.intBillId,
-			RetireStk.ysnPosted
-	INTO #tempCustomerStock
-	FROM tblPATRetireStock RetireStk
-	INNER JOIN tblPATCustomerStock CS
-		ON CS.intCustomerStockId = RetireStk.intCustomerStockId
-	WHERE RetireStk.intRetireStockId = @intRetireStockId
-		
+SELECT intRetireStockId		= RetireStk.intRetireStockId
+	 , strRetireNo			= RetireStk.strRetireNo
+	 , dtmRetireDate		= RetireStk.dtmRetireDate
+	 , strCertificateNo		= CS.strCertificateNo
+	 , strStockStatus		= CS.strStockStatus
+	 , intCustomerStockId	= RetireStk.intCustomerStockId
+	 , intCustomerPatronId	= RetireStk.intCustomerPatronId
+	 , dblSharesNo			= RetireStk.dblSharesNo
+	 , dblParValue			= RetireStk.dblParValue
+	 , dblFaceValue			= RetireStk.dblFaceValue
+	 , intBillId			= RetireStk.intBillId
+	 , ysnPosted			= RetireStk.ysnPosted
+INTO #tempCustomerStock
+FROM tblPATRetireStock RetireStk
+INNER JOIN tblPATCustomerStock CS ON CS.intCustomerStockId = RetireStk.intCustomerStockId
+WHERE RetireStk.intRetireStockId = @intRetireStockId		
 
+SELECT @strRetireNumber = strRetireNo
+FROM tblPATRetireStock
+WHERE intRetireStockId = @intRetireStockId
+---------------- VALIDATE IF CAN BE UNPOSTED----------------
 IF(ISNULL(@ysnPosted,0) = 0)
-BEGIN
-	-------- VALIDATE IF CAN BE UNPOSTED
+BEGIN	
 	INSERT INTO #tempValidateTable
 	SELECT * FROM fnPATValidateAssociatedTransaction((SELECT intCustomerStockId FROM #tempCustomerStock), 2, @MODULE_NAME)
 
@@ -79,11 +81,9 @@ BEGIN
 	END
 END
 
-
+------------------------CREATE GL ENTRIES---------------------
 IF(@ysnPosted = 1)
 BEGIN
-
-------------------------CREATE GL ENTRIES---------------------
 	INSERT INTO @GLEntries(
 		[dtmDate], 
 		[strBatchId], 
@@ -148,8 +148,9 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	0,
 		[strRateType]					=	NULL
-	FROM	#tempCustomerStock A
-			CROSS JOIN tblPATCompanyPreference ComPref
+	FROM #tempCustomerStock A
+	CROSS JOIN tblPATCompanyPreference ComPref
+
 	UNION ALL
 	--AP CLEARING
 	SELECT	
@@ -183,16 +184,14 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	0,
 		[strRateType]					=	NULL
-	FROM	#tempCustomerStock A
-			CROSS JOIN tblPATCompanyPreference ComPref
-		
-
+	FROM #tempCustomerStock A
+	CROSS JOIN tblPATCompanyPreference ComPref
 END
 ELSE
 BEGIN
 ------------------------REVERSE GL ENTRIES---------------------
 	INSERT INTO @GLEntries(
-		[strTransactionId]
+		 [strTransactionId]
 		,[intTransactionId]
 		,[dtmDate]
 		,[strBatchId]
@@ -225,7 +224,7 @@ BEGIN
 		,[strRateType]
 	)
 	SELECT	
-		[strTransactionId]
+		 [strTransactionId]
 		,[intTransactionId]
 		,[dtmDate]
 		,strBatchId = @batchId COLLATE Latin1_General_CI_AS
@@ -256,14 +255,18 @@ BEGIN
 		,[dblReportingRate]          
 		,[dblForeignRate]
 		,NULL
-	FROM	tblGLDetail 
-	WHERE	intTransactionId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intRetireStockId))
-	AND ysnIsUnposted = 0 AND strTransactionForm = @RETIRE_STOCK AND strModuleName = @MODULE_NAME
+	FROM tblGLDetail 
+	WHERE intTransactionId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intRetireStockId))
+	  AND ysnIsUnposted = 0 
+	  AND strTransactionForm = @RETIRE_STOCK 
+	  AND strModuleName = @MODULE_NAME
 	ORDER BY intGLDetailId
 
-	UPDATE tblGLDetail SET ysnIsUnposted = 1
+	UPDATE tblGLDetail 
+	SET ysnIsUnposted = 1
 	WHERE intTransactionId = @intRetireStockId 
-		AND strModuleName = @MODULE_NAME AND strTransactionForm = @RETIRE_STOCK
+	 AND strModuleName = @MODULE_NAME 
+	 AND strTransactionForm = @RETIRE_STOCK
 END
 
 BEGIN TRY
@@ -328,10 +331,8 @@ BEGIN
 			,B.strAccountId
 			,C.strAccountGroup
 		FROM @GLEntries A
-		INNER JOIN dbo.tblGLAccount B 
-			ON A.intAccountId = B.intAccountId
-		INNER JOIN dbo.tblGLAccountGroup C
-			ON B.intAccountGroupId = C.intAccountGroupId
+		INNER JOIN dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
+		INNER JOIN dbo.tblGLAccountGroup C ON B.intAccountGroupId = C.intAccountGroupId
 END
 END TRY
 BEGIN CATCH
@@ -340,18 +341,16 @@ BEGIN CATCH
 	GOTO Post_Rollback
 END CATCH
 
-
-
-
 IF(@isGLSucces = 1)
 BEGIN
 	IF(@batchId2 IS NULL)
-		EXEC uspSMGetStartingNumber 3, @batchId2 OUT
+		EXEC uspSMGetStartingNumber 3, @batchId2 OUT	
 
 	--------------------- RETIRED STOCKS ------------------	
 		IF(@ysnPosted = 1)
 		BEGIN
 			DECLARE @voucherPayable AS VoucherPayable;
+			DECLARE @voucherPayableTax	AS VoucherDetailTax;
 			DECLARE @intCustomerId AS INT;
 			DECLARE @dblNoOfShares AS NUMERIC(18,6);
 			DECLARE @dblPARValue AS NUMERIC(18,6);
@@ -359,12 +358,11 @@ BEGIN
 			DECLARE @apClearing AS INT;
 			DECLARE @createdVouchersId NVARCHAR(MAX);
 
-			SELECT TOP 1
-				@apClearing = ComPref.intAPClearingGLAccount
+			SELECT TOP 1 @apClearing = ComPref.intAPClearingGLAccount
 			FROM tblPATCompanyPreference ComPref
 
 			INSERT INTO @voucherPayable(
-				[intEntityVendorId]
+				 [intEntityVendorId]
 				,[intTransactionType]
 				,[strVendorOrderNumber]
 				,[strSourceNumber]
@@ -373,89 +371,182 @@ BEGIN
 				,[dblQuantityToBill]
 				,[dblCost]
 			)
-			SELECT	intCustomerPatronId
-					,intTransactionType = 1
-					,strCertificateNo
-					,strRetireNo
-					,'Patronage Retired Stock'
-					,intAccountId = @apClearing
-					,ROUND(dblSharesNo, 2)
-					,ROUND(dblParValue, 2)
+			SELECT [intEntityVendorId]		= intCustomerPatronId
+				 , [intTransactionType]		= 1
+				 , [strVendorOrderNumber]	= strCertificateNo
+				 , [strSourceNumber]		= strRetireNo
+				 , [strMiscDescription]		= 'Patronage Retired Stock'
+				 , [intAccountId]			= @apClearing
+				 , [dblQuantityToBill]		= ROUND(dblSharesNo, 2)
+				 , [dblCost]				= ROUND(dblParValue, 2)
 			FROM #tempCustomerStock RetireStock
 
-
-			EXEC  [dbo].[uspAPCreateVoucher]
-				@voucherPayables = @voucherPayable
-				,@userId = @intUserId
-				,@throwError = 0
-				,@error  = @error OUTPUT
-				,@createdVouchersId = @createdVouchersId OUTPUT
+			EXEC  [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable
+										   , @voucherPayableTax = @voucherPayableTax
+										   , @userId = @intUserId
+										   , @throwError = 0
+										   , @error  = @error OUTPUT
+										   , @createdVouchersId = @createdVouchersId OUTPUT
 
 			IF (@error != '')
 			BEGIN
 				GOTO Post_Rollback;
 			END
 
-			UPDATE tblPATRetireStock SET intBillId = @createdVouchersId 
-			WHERE intRetireStockId = @intRetireStockId;
+			UPDATE RS
+			SET intBillId = BILL.intBillId 
+			FROM tblPATRetireStock RS
+			CROSS APPLY (
+				SELECT intBillId
+				FROM tblAPBill BILL
+				INNER JOIN dbo.fnGetRowsFromDelimitedValues(@createdVouchersId) DV ON BILL.intBillId = DV.intID
+			) BILL
+			WHERE RS.intRetireStockId = @intRetireStockId
 
-			EXEC [dbo].[uspAPPostBill]
-				@batchId = @batchId2,
-				@billBatchId = NULL,
-				@transactionType = NULL,
-				@post = 1,
-				@recap = 0,
-				@isBatch = 0,
-				@param = @createdVouchersId,
-				@userId = @intUserId,
-				@beginTransaction = NULL,
-				@endTransaction = NULL,
-				@success = @success OUTPUT
+			--LINK TRANSACTION
+			DECLARE @tblTransactionLinks    udtICTransactionLinks
 
-				UPDATE tblPATCustomerStock
-				SET dblSharesNo = 0,
-					strActivityStatus = 'Retired'
-				WHERE intCustomerStockId IN (SELECT intCustomerStockId FROM #tempCustomerStock);
+			INSERT INTO @tblTransactionLinks (
+				  intSrcId
+				, strSrcTransactionNo
+				, strSrcTransactionType
+				, strSrcModuleName
+				, intDestId
+				, strDestTransactionNo
+				, strDestTransactionType
+				, strDestModuleName
+				, strOperation
+			)
+			SELECT intSrcId					= RS.intRetireStockId
+				, strSrcTransactionNo       = RS.strRetireNo
+				, strSrcTransactionType     = @RETIRE_STOCK
+				, strSrcModuleName          = @MODULE_NAME
+				, intDestId                 = BILL.intBillId
+				, strDestTransactionNo      = BILL.strBillId
+				, strDestTransactionType    = 'Voucher'
+				, strDestModuleName         = 'Purchasing'
+				, strOperation              = 'Process'
+			FROM tblPATRetireStock RS
+			INNER JOIN tblAPBill BILL ON BILL.intBillId = RS.intBillId
+			WHERE RS.intRetireStockId = @intRetireStockId
+			
+			EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks			
+
+			EXEC [dbo].[uspAPPostBill] @batchId = @batchId2
+									 , @billBatchId = NULL
+									 , @transactionType = NULL
+									 , @post = 1
+									 , @recap = 0
+									 , @isBatch = 0
+									 , @param = @createdVouchersId
+									 , @userId = @intUserId
+									 , @beginTransaction = NULL
+									 , @endTransaction = NULL
+									 , @success = @success OUTPUT
+
+			UPDATE CS
+			SET dblSharesNo = 0
+			  , strActivityStatus = 'Retired'
+			FROM tblPATCustomerStock CS
+			INNER JOIN #tempCustomerStock TCS ON TCS.intCustomerStockId = CS.intCustomerStockId
 		END
 		ELSE
 		BEGIN
-
 			DECLARE @voucher AS NVARCHAR(MAX);
 			SELECT @voucher = intBillId FROM tblPATRetireStock WHERE intRetireStockId = @intRetireStockId;
 
-			EXEC [dbo].[uspAPPostBill]
-					@batchId = NULL,
-					@billBatchId = NULL,
-					@transactionType = @MODULE_NAME,
-					@post = 0,
-					@recap = 0,
-					@isBatch = 0,
-					@param = @voucher,
-					@userId = @intUserId,
-					@beginTransaction = NULL,
-					@endTransaction = NULL,
-					@success = @success OUTPUT
+			EXEC [dbo].[uspAPPostBill] @batchId = NULL
+									 , @billBatchId = NULL
+									 , @transactionType = @MODULE_NAME
+									 , @post = 0
+									 , @recap = 0
+									 , @isBatch = 0
+									 , @param = @voucher
+									 , @userId = @intUserId
+									 , @beginTransaction = NULL
+									 , @endTransaction = NULL
+									 , @success = @success OUTPUT
 
 			IF(@success = 0)
 			BEGIN
-				SET @error = 'Unable to unpost transaction';
+				SELECT TOP 1 @error = strMessage 
+				FROM tblAPPostResult 
+				WHERE intTransactionId = @voucher 
+				ORDER BY intId DESC
+
 				RAISERROR(@error, 16, 1);
 				GOTO Post_Rollback;
 			END
-			
-			DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tempCustomerStock) AND ysnPaid <> 1;
+
+			DELETE BILL 
+			FROM tblAPBill BILL
+			INNER JOIN #tempCustomerStock TCS ON BILL.intBillId = TCS.intBillId
+			WHERE ysnPaid <> 1
+
+			EXEC dbo.[uspICDeleteTransactionLinks] @intRetireStockId, @strRetireNumber, @RETIRE_STOCK, @MODULE_NAME
 			
 			UPDATE CS 
-			SET CS.dblSharesNo = tmpCS.dblSharesNo,
-				CS.strActivityStatus = 'Open'
+			SET dblSharesNo = tmpCS.dblSharesNo
+			  , strActivityStatus = 'Open'
 			FROM tblPATCustomerStock CS
-			INNER JOIN #tempCustomerStock tmpCS
-				ON tmpCS.intCustomerStockId = CS.intCustomerStockId
-				
-		END
+			INNER JOIN #tempCustomerStock tmpCS ON tmpCS.intCustomerStockId = CS.intCustomerStockId				
+		END		
 
 		UPDATE tblPATRetireStock SET ysnPosted = @ysnPosted WHERE intRetireStockId = @intRetireStockId;
-	END
+	
+		--------------------- AP CLEARING -----------------------
+		DECLARE @APClearingtbl		APClearing
+		DECLARE @intLocationId	INT = NULL
+
+		SELECT @intLocationId = dbo.fnGetUserDefaultLocation(@intUserId)
+
+		INSERT INTO @APClearingtbl (
+			  [intTransactionId]
+			, [strTransactionId]
+			, [intTransactionType]
+			, [strReferenceNumber]
+			, [dtmDate]
+			, [intEntityVendorId]
+			, [intLocationId]
+			, [intTransactionDetailId]
+			, [intAccountId]
+			, [intItemId]
+			, [intItemUOMId]
+			, [dblQuantity]
+			, [dblAmount]
+			, [intOffsetId]
+			, [strOffsetId]
+			, [intOffsetDetailId]
+			, [intOffsetDetailTaxId]
+			, [strCode]
+			, [strRemarks]
+		)
+		SELECT [intTransactionId]		= RS.intRetireStockId
+			, [strTransactionId]		= RS.strRetireNo
+			, [intTransactionType]		= 9
+			, [strReferenceNumber]		= RS.strRetireNo
+			, [dtmDate]					= RS.dtmRetireDate
+			, [intEntityVendorId]		= RS.intCustomerPatronId
+			, [intLocationId]			= @intLocationId	
+			, [intTransactionDetailId]	= RS.intRetireStockId
+			, [intAccountId]			= E.intAPClearingGLAccount
+			, [intItemId]				= NULL
+			, [intItemUOMId]			= NULL
+			, [dblQuantity]				= ROUND(RS.dblSharesNo, 2)
+			, [dblAmount]				= ROUND(RS.dblFaceValue, 2)	
+			, [intOffsetId]				= NULL
+			, [strOffsetId]				= NULL
+			, [intOffsetDetailId]		= NULL
+			, [intOffsetDetailTaxId]	= NULL		
+			, [strCode]					= 'PAT'
+			, [strRemarks]				= NULL
+		FROM tblPATRetireStock RS
+		CROSS JOIN tblPATCompanyPreference E
+		WHERE RS.intRetireStockId = @intRetireStockId
+
+		IF EXISTS(SELECT TOP 1 NULL FROM @APClearingtbl)
+			EXEC dbo.uspAPClearing @APClearing = @APClearingtbl, @post = @ysnPosted
+END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF @@ERROR <> 0 GOTO Post_Rollback;

@@ -1062,7 +1062,36 @@ END
 IF(@ReceiptType = @ReceiptType_TransferOrder)
 BEGIN
 	IF @ForDelete = 0 
+	BEGIN
 		EXEC dbo.[uspICUpdateTransferOrderStatus] @ReceiptId, 3 -- Set status of the transfer order to 'Closed'
+
+		-- Update logistics information
+		UPDATE td
+		SET td.strContainerNumber = lc.strContainerNumber, td.strMarks = marks.strMarks
+		FROM tblICInventoryTransferDetail td
+		JOIN tblICInventoryReceiptItem ri ON ri.intOrderId = td.intInventoryTransferId
+		JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		JOIN tblLGLoadContainer lc ON lc.intLoadContainerId = ri.intContainerId
+		OUTER APPLY (
+			SELECT strMarks = 
+				LEFT(LTRIM(
+					STUFF(
+							(
+								SELECT  ', ' + rl.strMarkings
+								FROM tblICInventoryReceiptItemLot rl
+								WHERE rl.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+								AND NULLIF(rl.strMarkings, '') IS NOT NULL
+								FOR xml path('')
+							)
+						, 1
+						, 1
+						, ''
+					)
+				), 800)
+		) marks 
+		WHERE ri.intInventoryReceiptId = @ReceiptId
+		AND r.strReceiptType = 'Transfer Order'
+	END
 	ELSE 
 		EXEC dbo.[uspICUpdateTransferOrderStatus] @ReceiptId, 1 -- Set status of the transfer order to 'Open'
 END
@@ -1122,4 +1151,7 @@ IF @ForDelete = 0
 BEGIN
 	-- Recalculate Totals
 	EXEC dbo.uspICInventoryReceiptCalculateTotals @ReceiptId = @ReceiptId, @ForceRecalc = 0
+
+	-- Updates cargo #, warrant #, etc.
+	EXEC dbo.uspICInventoryReceiptUpdateInternalComments @ReceiptId = @ReceiptId, @UserId = @UserId
 END

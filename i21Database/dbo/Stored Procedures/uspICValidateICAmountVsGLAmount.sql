@@ -51,13 +51,6 @@ DECLARE @glTransactions TABLE (
 	,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
-DECLARE @icGLAccounts TABLE (
-	intItemId INT
-	,intItemLocationId INT 
-	,intInventoryAccountId INT NULL 
-	,intWIPAccountId INT NULL
-)
-
 INSERT INTO @glTransactions (
 	strTransactionId
 	,strBatchId
@@ -94,37 +87,6 @@ BEGIN
 	FROM @GLEntries
 END 
 
--- Get the GL Account Id
-BEGIN 
-	INSERT INTO @icGLAccounts (
-		intItemId
-		,intItemLocationId
-		,intInventoryAccountId
-		,intWIPAccountId
-	)
-	SELECT 
-		query.intItemId
-		,query.intItemLocationId
-		,intInventoryAccountId = dbo.fnGetItemGLAccount(query.intItemId, query.intItemLocationId, 'Inventory')
-		,intWIPAccountId = dbo.fnGetItemGLAccount(query.intItemId, query.intItemLocationId, 'Work In Progress')
-	FROM (
-		SELECT
-			DISTINCT 
-			t.intItemId
-			,t.intItemLocationId 
-		FROM 
-			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId			
-			INNER JOIN tblICItem i
-				ON i.intItemId = t.intItemId 
-			INNER JOIN @glTransactions gl
-				ON t.strTransactionId = gl.strTransactionId 
-				AND t.strBatchId = gl.strBatchId
-		WHERE
-			t.intInTransitSourceLocationId IS NULL 
-	) query
-END 
-
 -- Validate the account ids. 
 IF EXISTS (
 	SELECT TOP 1 1 
@@ -136,24 +98,27 @@ IF EXISTS (
 )
 BEGIN 
 	-- Check the 'Inventory' Account
-	SELECT 
-		TOP 1 
-		@strAccountCategory = ac.strAccountCategory
-		,@strItemNo = i.strItemNo
+	SELECT TOP 1 
+		@strItemNo = items.strItemNo 
 		,@strAccountCategory = ac.strAccountCategory
-	FROM	
-		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-			ON t.intTransactionTypeId = ty.intTransactionTypeId			
-		INNER JOIN tblICItem i
-			ON i.intItemId = t.intItemId 
-		INNER JOIN @glTransactions gl
-			ON t.strTransactionId = gl.strTransactionId 
-			AND t.strBatchId = gl.strBatchId
-		INNER JOIN @icGLAccounts icGLAccount
-			ON icGLAccount.intItemId = t.intItemId
-			AND icGLAccount.intItemLocationId = t.intItemLocationId
-		INNER JOIN tblGLAccount ga
-			ON ga.intAccountId = icGLAccount.intInventoryAccountId
+	FROM (
+			SELECT DISTINCT 
+				i.strItemNo
+				,i.intItemId 
+				,t.intItemLocationId 
+			FROM 
+				tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+					ON t.intTransactionTypeId = ty.intTransactionTypeId			
+				INNER JOIN tblICItem i
+					ON i.intItemId = t.intItemId 
+				INNER JOIN @glTransactions gl
+					ON t.strTransactionId = gl.strTransactionId 
+					AND t.strBatchId = gl.strBatchId
+			WHERE
+				t.intInTransitSourceLocationId IS NULL 
+		) items
+		CROSS APPLY dbo.fnGetItemGLAccountAsTable(items.intItemId, items.intItemLocationId, 'Inventory') itemAccount
+		INNER JOIN tblGLAccount ga ON ga.intAccountId = itemAccount.intAccountId 
 		INNER JOIN tblGLAccountSegmentMapping gs
 			ON gs.intAccountId = ga.intAccountId
 		INNER JOIN tblGLAccountSegment gm
@@ -163,9 +128,8 @@ BEGIN
 		INNER JOIN tblGLAccountStructure gst
 			ON gm.intAccountStructureId = gst.intAccountStructureId
 	WHERE
-		gst.strType = 'Primary'
+		gst.strType = 'Primary'		
 		AND ac.strAccountCategory NOT IN ('Inventory')
-		AND t.intInTransitSourceLocationId IS NULL 
 
 	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
 	BEGIN 
@@ -231,7 +195,7 @@ BEGIN
 				SUM (
 					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
-			,[intAccountId] = icGLAccount.intInventoryAccountId
+			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -240,16 +204,13 @@ BEGIN
 			INNER JOIN @glTransactions gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
-			INNER JOIN @icGLAccounts icGLAccount
-				ON icGLAccount.intItemId = t.intItemId
-				AND icGLAccount.intItemLocationId = t.intItemLocationId
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
 		GROUP BY 
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
-			,icGLAccount.intInventoryAccountId
+			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
 
 		---- Get the Consume Inventory Transactions 
 		--INSERT INTO #uspICValidateICAmountVsGLAmount_result (

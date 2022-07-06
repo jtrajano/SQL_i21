@@ -41,23 +41,23 @@ BEGIN TRY
 		,[intTransactionTypeId]
 		)
 	 SELECT 
-	   LD.intItemId
-	  ,intItemLocationId = IL.intItemLocationId
-	  ,CT.intItemUOMId
-	  ,NULL
-	  ,ISNULL(LW.intSubLocationId, LD.intPSubLocationId)
-	  ,NULL
-	  ,CASE WHEN (@ysnUnShip = 1 OR @ysnCancel = 1)
-		THEN -LD.dblQuantity
-		ELSE LD.dblQuantity
-	   END
-	  ,LD.intLoadId
-	  ,CAST(L.strLoadNumber AS VARCHAR(100))
-	  ,22
+	   [intItemId] = LD.intItemId
+	  ,[intItemLocationId] = IL.intItemLocationId
+	  ,[intItemUOMId] = CT.intItemUOMId
+	  ,[intLotId] = NULL
+	  ,[intSubLocationId] = ISNULL(LW.intSubLocationId, LD.intPSubLocationId)
+	  ,[intStorageLocationId] = NULL
+	  ,[dblQty] = CASE WHEN (@ysnUnShip = 1 OR @ysnCancel = 1)
+						THEN -LD.dblQuantity
+						ELSE LD.dblQuantity
+					   END
+	  ,[intTransactionId] = LD.intLoadId
+	  ,[strTransactionId] = CAST(L.strLoadNumber AS VARCHAR(100))
+	  ,[intTransactionTypeId] = 22
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId= L.intLoadId
-	LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intPContractDetailId
+	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
 	LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CT.intCompanyLocationId 
 	WHERE L.intLoadId = @intLoadId AND IL.intItemId = LD.intItemId;
 

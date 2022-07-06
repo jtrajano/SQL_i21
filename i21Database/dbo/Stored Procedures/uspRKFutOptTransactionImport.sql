@@ -118,7 +118,9 @@ BEGIN TRY
 				, dtmFilledDate
 				, intBookId
 				, intSubBookId
-				, dtmCreateDateTime)
+				, dtmCreateDateTime
+				, dblSContractBalanceLots
+				, dblPContractBalanceLots)
 			SELECT @intInstrument
 				, intFutOptTransactionHeaderId
 				, intConcurrencyId
@@ -145,7 +147,9 @@ BEGIN TRY
 				, dtmFilledDate
 				, intBookId
 				, intSubBookId
-				, dtmCreateDateTime				
+				, dtmCreateDateTime
+				, dblNoOfContract
+				, dblNoOfContract
 			FROM #temp 
 			WHERE strInternalTradeNo = @id
 

@@ -19,6 +19,7 @@ BEGIN TRY
 	DECLARE @intLotStatusId INT
 	DECLARE @intOrgLotStatusId INT
 	DECLARE @intLastModifiedUserId INT
+		,@intTestedById INT
 	DECLARE @dtmLastModified DATETIME
 	DECLARE @strLotNumber NVARCHAR(50)
 	DECLARE @intItemId INT
@@ -45,6 +46,8 @@ BEGIN TRY
 		,@intParentLotId INT
 	DECLARE @ysnEnableParentLot BIT = 0
 		,@strChildLotNumber NVARCHAR(50)
+		,@intSampleTypeId INT
+		,@strMarks NVARCHAR(100)
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -52,6 +55,7 @@ BEGIN TRY
 		,@intLotStatusId = intLotStatusId
 		,@intLastModifiedUserId = intLastModifiedUserId
 		,@dtmLastModified = dtmLastModified
+		,@intTestedById = intTestedById
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
 			,intProductTypeId INT
@@ -59,7 +63,11 @@ BEGIN TRY
 			,intLotStatusId INT
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
+			,intTestedById INT
 			)
+
+	IF @intTestedById IS NULL
+		SELECT @intTestedById = @intLastModifiedUserId
 
 	SELECT @intOrgLotStatusId = @intLotStatusId
 
@@ -81,6 +89,8 @@ BEGIN TRY
 		,@strApprovalBase = ISNULL(ST.strApprovalBase, '')
 		,@strContainerNumber = S.strContainerNumber
 		,@strChildLotNumber = strChildLotNumber
+		,@intSampleTypeId = ST.intSampleTypeId
+		,@strMarks=S.strMarks 
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	WHERE S.intSampleId = @intSampleId
@@ -97,22 +107,22 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intProductValueId
 
-	if @intProductTypeId=11
-	Begin
+	IF @intProductTypeId = 11
+	BEGIN
 		SELECT @strWarehouseRefNo = LI.strWarehouseRefNo
 			,@intParentLotId = L.intParentLotId
 		FROM dbo.tblICLot L
 		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		WHERE L.strLotNumber = @strChildLotNumber
-	End
-	Else
-	Begin
+	END
+	ELSE
+	BEGIN
 		SELECT @strWarehouseRefNo = LI.strWarehouseRefNo
 			,@intParentLotId = L.intParentLotId
 		FROM dbo.tblICLot L
 		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		WHERE L.strLotNumber = @strLotNumber
-	End
+	END
 
 	IF @intProductTypeId = 6
 		AND @intSampleControlPointId = 14
@@ -272,6 +282,7 @@ BEGIN TRY
 	IF (
 			@intProductTypeId = 6
 			OR @intProductTypeId = 11
+			OR @intProductTypeId = 9
 			)
 		AND (@strApprovalBase <> '')
 	BEGIN
@@ -490,8 +501,8 @@ BEGIN TRY
 					,L.intStorageLocationId
 					,L.intLotStatusId
 				FROM tblICLot L
-				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-				WHERE RIL.strContainerNo = @strContainerNumber
+				WHERE L.strContainerNo = @strContainerNumber
+				AND IsNULL(L.strMarkings,'')=IsNULL(@strMarks,'')
 			END
 		END
 		ELSE IF @strApprovalBase = 'Work Order'
@@ -569,6 +580,7 @@ BEGIN TRY
 			FROM tblICLot
 			WHERE intParentLotId = @intParentLotId
 				AND intItemId = @intSampleItemId
+				AND intStorageLocationId IS NOT NULL
 		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
@@ -609,6 +621,13 @@ BEGIN TRY
 					AND ysnApprove = 1
 			END
 
+			IF @intProductTypeId=9
+			BEGIN
+				SELECT @intLotStatusId = intApprovalLotStatusId
+				FROM tblQMSampleType
+				WHERE intSampleTypeId = @intSampleTypeId
+			END
+
 			IF @intCurrentLotStatusId <> @intLotStatusId
 				AND @intSampleControlPointId <> 14
 				AND IsNULL(@intLotStatusId, 0) <> 0
@@ -631,18 +650,21 @@ BEGIN TRY
 			CASE 
 				WHEN @intProductTypeId IN (
 						6
+						,9
 						,11
 						)
 					THEN @intLotStatusId
 				ELSE intLotStatusId
 				END
 			)
-		,intTestedById = x.intLastModifiedUserId
-		,dtmTestedOn = x.dtmLastModified
+		,intTestedById = x.intTestedById
+		,dtmTestedOn = x.dtmTestedOn
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intLastModifiedUserId INT
+			intTestedById INT
+			,dtmTestedOn DATETIME
+			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			) x
 	WHERE dbo.tblQMSample.intSampleId = @intSampleId
@@ -651,7 +673,7 @@ BEGIN TRY
 	BEGIN
 		EXEC uspSMAuditLog @keyValue = @intSampleId
 			,@screenName = 'Quality.view.QualitySample'
-			,@entityId = @intLastModifiedUserId
+			,@entityId = @intTestedById
 			,@actionType = 'Approved'
 			,@changeDescription = ''
 			,@fromValue = ''

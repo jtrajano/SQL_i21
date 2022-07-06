@@ -40,7 +40,7 @@ SELECT
 	,[intContractHeaderId]		=	G1.intContractHeaderId
 	,[intContractDetailId]		=	G2.intContractDetailId
 	,[intScaleTicketId]			=	NULL
-	,[strScaleTicketNumber]		=	N'' COLLATE Latin1_General_CI_AS
+	,[strScaleTicketNumber]		=	N''
 	,[intShipmentId]			=	0            
 	,[intShipmentContractQtyId]	=	NULL
 	,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId

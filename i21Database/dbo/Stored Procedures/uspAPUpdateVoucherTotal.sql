@@ -13,6 +13,7 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;
 DECLARE @posted BIT;
 DECLARE @shipToId INT;
+DECLARE @detailTotal DECIMAL(18,2);
 
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -24,7 +25,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--UPDATE DETAIL TOTAL
 	UPDATE A
 		SET --A.dblTotal = CAST((A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL (18,2)) 
-			[dblTotal]					=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL--C.intTransactionType = 11
+			@detailTotal					=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL--C.intTransactionType = 11
 											THEN 
 												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN
@@ -50,6 +51,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END)
 												END),0)
 											END,	
+			[dblTotal]					=	@detailTotal,
 			[dblClaimAmount]			=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL --C.intTransactionType = 11 
 											THEN 
 												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
@@ -58,6 +60,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE 
 													CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
 												END),0)
+											ELSE 0 END,
+			[dbl1099]					=	CASE WHEN C.intTransactionType = 9 
+											THEN @detailTotal
 											ELSE 0 END
 
 	FROM tblAPBillDetail A

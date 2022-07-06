@@ -62,8 +62,10 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intOwnershipType INT
 		,@intDefaultConsumptionLocationId INT
-		,@intLotWeightUOMId int
+		,@intLotWeightUOMId INT
 		,@dblSplitAndPickWeight NUMERIC(18, 6)
+		,@dblWeightPerUnit NUMERIC(18, 6)
+		,@dblPackQty NUMERIC(18, 6)
 
 	SELECT @ysnPickByQty = 1
 
@@ -82,12 +84,15 @@ BEGIN TRY
 		,@strPackagingCategory NVARCHAR(50)
 		,@intPMCategoryId INT
 		,@strPickByFullPallet NVARCHAR(50)
+		,@strPickByFullBag NVARCHAR(50)
 		,@intCustomerLabelTypeId INT
 		,@intOrderId INT
 		,@intLocationId INT
 		,@strInventoryTracking NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
-		,@intRequiredWeightUOMId int
+		,@intRequiredWeightUOMId INT
+		,@strPickByStorageLocation NVARCHAR(50)
+		,@intSubLocationId INT
 
 	SELECT @strOrderType = OT.strOrderType
 		,@strOrderNo = OH.strOrderNo
@@ -106,8 +111,30 @@ BEGIN TRY
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@strWorkOrderNo = strWorkOrderNo
+		,@intSubLocationId = intSubLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strPickByStorageLocation = ISNULL(pa.strAttributeValue, '')
+	FROM tblMFManufacturingProcessAttribute pa
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND pa.intAttributeId = 123
+
+	DECLARE @tblSourceSubLocation AS TABLE (intSubLocationId INT)
+
+	IF IsNULL(@strPickByStorageLocation, '') = 'True'
+	BEGIN
+		INSERT INTO @tblSourceSubLocation
+		SELECT @intSubLocationId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblSourceSubLocation
+		SELECT intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationId = @intLocationId
+	END
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -133,6 +160,16 @@ BEGIN TRY
 	IF @strPickByFullPallet IS NULL
 		OR @strPickByFullPallet = ''
 		SELECT @strPickByFullPallet = 'False'
+
+	SELECT @strPickByFullBag = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = 125
+		AND intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+
+	IF @strPickByFullBag IS NULL
+		OR @strPickByFullBag = ''
+		SELECT @strPickByFullBag = 'False'
 
 	SELECT @intPartialPickSubLocationId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -213,6 +250,7 @@ BEGIN TRY
 			,intGroupId INT
 			,intSubLocationId INT
 			,intStorageLocationId INT
+			,dblWeightPerUnit NUMERIC(18, 6)
 			)
 
 		UPDATE tblMFOrderDetail
@@ -320,7 +358,7 @@ BEGIN TRY
 
 			SELECT @intDefaultConsumptionLocationId = NULL
 
-			Select @intRequiredWeightUOMId=NULL
+			SELECT @intRequiredWeightUOMId = NULL
 
 			DELETE
 			FROM @tblLot
@@ -330,7 +368,7 @@ BEGIN TRY
 				,@dblRequiredQty = dblRequiredQty
 				,@dblRequiredWeight = dblRequiredWeight
 				,@intRequiredUOMId = intItemUOMId
-				,@intRequiredWeightUOMId=intWeightUOMId
+				,@intRequiredWeightUOMId = intWeightUOMId
 				,@ysnStrictTracking = ysnStrictTracking
 				,@intLineItemLotId = intLotId
 				,@intCategoryId = intCategoryId
@@ -451,6 +489,7 @@ BEGIN TRY
 					,intGroupId
 					,intSubLocationId
 					,intStorageLocationId
+					,dblWeightPerUnit
 					)
 				SELECT NULL
 					,S.intItemId
@@ -464,6 +503,7 @@ BEGIN TRY
 					,1
 					,S.intSubLocationId
 					,S.intStorageLocationId
+					,1
 				FROM tblICItemStockUOM S
 				JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 					AND IU.ysnStockUnit = 1
@@ -548,6 +588,7 @@ BEGIN TRY
 					,intGroupId
 					,intSubLocationId
 					,intStorageLocationId
+					,dblWeightPerUnit
 					)
 				SELECT L.intLotId
 					,L.intItemId
@@ -561,6 +602,7 @@ BEGIN TRY
 					,1
 					,L.intSubLocationId
 					,L.intStorageLocationId
+					,L.dblWeightPerQty
 				FROM tblICLot L
 				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
@@ -573,6 +615,7 @@ BEGIN TRY
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+				JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
 				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
 					AND IsNULL(L.intStorageLocationId, 0) = (
 						CASE 
@@ -629,6 +672,7 @@ BEGIN TRY
 					,I.intLayerPerPallet
 					,L.intSubLocationId
 					,L.intStorageLocationId
+					,L.dblWeightPerQty
 				HAVING (
 						CASE 
 							WHEN L.intWeightUOMId IS NULL
@@ -717,6 +761,7 @@ BEGIN TRY
 					,intGroupId
 					,intSubLocationId
 					,intStorageLocationId
+					,dblWeightPerUnit
 					)
 				SELECT L.intLotId
 					,L.intItemId
@@ -730,6 +775,7 @@ BEGIN TRY
 					,2
 					,L.intSubLocationId
 					,L.intStorageLocationId
+					,L.dblWeightPerQty
 				FROM tblICLot L
 				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
@@ -742,6 +788,7 @@ BEGIN TRY
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+				JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
 				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
 					AND IsNULL(L.intStorageLocationId, 0) = (
 						CASE 
@@ -801,6 +848,7 @@ BEGIN TRY
 					,I.intLayerPerPallet
 					,L.intSubLocationId
 					,L.intStorageLocationId
+					,L.dblWeightPerQty
 				HAVING (
 						CASE 
 							WHEN L.intWeightUOMId IS NULL
@@ -917,7 +965,10 @@ BEGIN TRY
 				SELECT @dblRemainingLotWeight = NULL
 
 				SELECT @intLotItemUOMId = NULL
-				Select @intLotWeightUOMId=NULL
+
+				SELECT @intLotWeightUOMId = NULL
+
+				SELECT @dblWeightPerUnit = NULL
 
 				SELECT @dblQty = dblQty
 					,@intLotId = intLotId
@@ -939,6 +990,7 @@ BEGIN TRY
 					,@intLotItemUOMId = intItemUOMId
 					,@intStorageLocationId = intStorageLocationId
 					,@intLotWeightUOMId = intWeightUOMId
+					,@dblWeightPerUnit = dblWeightPerUnit
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
@@ -1000,6 +1052,56 @@ BEGIN TRY
 					END
 				END
 				ELSE IF (
+						@strPickByFullBag = 'True'
+						AND @strOrderType = 'WO PROD STAGING'
+						)
+				BEGIN
+					SELECT @dblSplitAndPickWeight = NULL
+
+					SELECT @dblSplitAndPickWeight = (
+							CASE 
+								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotWeightUOMId, @intRequiredWeightUOMId, @dblRemainingLotWeight) >= @dblRequiredWeight
+									THEN dbo.fnMFConvertQuantityToTargetItemUOM(@intRequiredWeightUOMId, @intLotWeightUOMId, @dblRequiredWeight)
+								ELSE @dblRemainingLotWeight
+								END
+							)
+
+					IF @dblWeightPerUnit IS NULL
+						OR @dblWeightPerUnit = 0
+					BEGIN
+						SELECT @dblWeightPerUnit = 1
+					END
+
+					SELECT @dblPackQty = NULL
+
+					SELECT @dblPackQty = Round(@dblSplitAndPickWeight / @dblWeightPerUnit, 0)
+
+					IF @dblPackQty = 0
+					BEGIN
+						SELECT @dblPackQty = 1
+					END
+
+					EXEC uspMFCreateSplitAndPickTask @intOrderHeaderId = @intOrderHeaderId
+						,@intLotId = @intLotId
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
+						,@dblSplitAndPickWeight = @dblPackQty
+						,@intTaskTypeId = 2
+						,@intItemId = @intItemId
+						,@intOrderDetailId = @intOrderDetailId
+						,@intFromStorageLocationId = @intStorageLocationId
+						,@intItemUOMId = @intLotWeightUOMId
+						,@ysnPickByBag = 1
+
+					SELECT @dblSplitAndPickWeight = @dblPackQty * @dblWeightPerUnit
+
+					SET @dblRequiredWeight = @dblRequiredWeight - dbo.fnMFConvertQuantityToTargetItemUOM(@intLotWeightUOMId, @intRequiredWeightUOMId, @dblSplitAndPickWeight)
+
+					IF @dblRequiredWeight <= 0
+					BEGIN
+						BREAK;
+					END
+				END
+				ELSE IF (
 						@strPickByFullPallet = 'False'
 						AND @strOrderType = 'WO PROD STAGING'
 						)
@@ -1028,7 +1130,7 @@ BEGIN TRY
 							CASE 
 								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotWeightUOMId, @intRequiredWeightUOMId, @dblRemainingLotWeight) >= @dblRequiredWeight
 									THEN @dblRequiredWeight
-								ELSE dbo.fnMFConvertQuantityToTargetItemUOM(@intLotWeightUOMId, @intRequiredWeightUOMId, @dblRemainingLotWeight) 
+								ELSE dbo.fnMFConvertQuantityToTargetItemUOM(@intLotWeightUOMId, @intRequiredWeightUOMId, @dblRemainingLotWeight)
 								END
 							)
 
@@ -1232,7 +1334,7 @@ BEGIN TRY
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFTask T
-				JOIN tblICLot L1 on L1.intLotId=T.intLotId
+				JOIN tblICLot L1 ON L1.intLotId = T.intLotId
 				WHERE T.intOrderHeaderId = @intOrderHeaderId
 					AND L1.strLotNumber = L.strLotNumber
 				)
