@@ -10,6 +10,7 @@
 	,@ysnTaxFlag2 BIT = NULL
 	,@ysnTaxFlag3 BIT = NULL
 	,@ysnTaxFlag4 BIT = NULL
+	,@dblTransactionQtyLimit NUMERIC(18, 6) = NULL 
 	,@ysnDepositRequired BIT = NULL
 	,@intDepositPLUId INT = NULL 
 	,@ysnQuantityRequired BIT = NULL 
@@ -33,6 +34,7 @@
 	,@intMinimumAge INT = NULL 
 	,@dblMinOrder NUMERIC(18, 6) = NULL 
 	,@dblSuggestedQty NUMERIC(18, 6) = NULL
+	,@strStorageUnitNo NVARCHAR(1000) = NULL
 	,@intCountGroupId INT = NULL 
 	,@intStorageLocationId INT = NULL 
 	,@dblReorderPoint NUMERIC(18, 6) = NULL
@@ -82,6 +84,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,ysnTaxFlag2_Original BIT NULL
 		,ysnTaxFlag3_Original BIT NULL
 		,ysnTaxFlag4_Original BIT NULL
+		,dblTransactionQtyLimit_Original NUMERIC(18, 6) NULL 
 		,ysnDepositRequired_Original BIT NULL
 		,intDepositPLUId_Original INT NULL 
 		,ysnQuantityRequired_Original BIT NULL 
@@ -105,6 +108,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,intMinimumAge_Original INT NULL 
 		,dblMinOrder_Original NUMERIC(18, 6) NULL 
 		,dblSuggestedQty_Original NUMERIC(18, 6) NULL
+		,strStorageUnitNo_Original NVARCHAR(1000) NULL
 		,intCountGroupId_Original INT NULL 
 		,intStorageLocationId_Original INT NULL 
 		,dblReorderPoint_Original NUMERIC(18, 6) NULL
@@ -114,6 +118,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,ysnTaxFlag2_New BIT NULL
 		,ysnTaxFlag3_New BIT NULL
 		,ysnTaxFlag4_New BIT NULL
+		,dblTransactionQtyLimit_New NUMERIC(18, 6) NULL 
 		,ysnDepositRequired_New BIT NULL
 		,intDepositPLUId_New INT NULL 
 		,ysnQuantityRequired_New BIT NULL 
@@ -137,6 +142,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,intMinimumAge_New INT NULL 
 		,dblMinOrder_New NUMERIC(18, 6) NULL 
 		,dblSuggestedQty_New NUMERIC(18, 6) NULL
+		,strStorageUnitNo_New NVARCHAR(1000) NULL
 		,intCountGroupId_New INT NULL 
 		,intStorageLocationId_New INT NULL 
 		,dblReorderPoint_New NUMERIC(18, 6) NULL
@@ -149,11 +155,12 @@ BEGIN
 	INSERT INTO #tmpUpdateItemLocationForCStore_itemLocationAuditLog (
 		intItemId 
 		,intItemLocationId 
-		-- Original values
+		-- Original values 
 		, ysnTaxFlag1_Original
 		, ysnTaxFlag2_Original
 		, ysnTaxFlag3_Original
 		, ysnTaxFlag4_Original
+		, dblTransactionQtyLimit_Original
 		, ysnDepositRequired_Original
 		, intDepositPLUId_Original
 		, ysnQuantityRequired_Original
@@ -177,6 +184,7 @@ BEGIN
 		, intMinimumAge_Original
 		, dblMinOrder_Original
 		, dblSuggestedQty_Original
+		, strStorageUnitNo_Original
 		, intCountGroupId_Original
 		, intStorageLocationId_Original
 		, dblReorderPoint_Original
@@ -184,8 +192,9 @@ BEGIN
 		-- Modified values 
 		, ysnTaxFlag1_New
 		, ysnTaxFlag2_New
-		, ysnTaxFlag3_New
+		, ysnTaxFlag3_New 
 		, ysnTaxFlag4_New
+		, dblTransactionQtyLimit_New
 		, ysnDepositRequired_New
 		, intDepositPLUId_New
 		, ysnQuantityRequired_New
@@ -209,6 +218,7 @@ BEGIN
 		, intMinimumAge_New
 		, dblMinOrder_New
 		, dblSuggestedQty_New
+		, strStorageUnitNo_New
 		, intCountGroupId_New
 		, intStorageLocationId_New
 		, dblReorderPoint_New
@@ -221,6 +231,7 @@ BEGIN
 			, [Changes].ysnTaxFlag2_Original
 			, [Changes].ysnTaxFlag3_Original
 			, [Changes].ysnTaxFlag4_Original
+			, [Changes].dblTransactionQtyLimit_Original
 			, [Changes].ysnDepositRequired_Original
 			, [Changes].intDepositPLUId_Original
 			, [Changes].ysnQuantityRequired_Original
@@ -244,6 +255,7 @@ BEGIN
 			, [Changes].intMinimumAge_Original
 			, [Changes].dblMinOrder_Original
 			, [Changes].dblSuggestedQty_Original
+			, [Changes].strStorageUnitNo_Original
 			, [Changes].intCountGroupId_Original
 			, [Changes].intStorageLocationId_Original
 			, [Changes].dblReorderPoint_Original
@@ -251,8 +263,9 @@ BEGIN
 			-- Modified values 
 			, [Changes].ysnTaxFlag1_New
 			, [Changes].ysnTaxFlag2_New
-			, [Changes].ysnTaxFlag3_New
+			, [Changes].ysnTaxFlag3_New 
 			, [Changes].ysnTaxFlag4_New
+			, [Changes].dblTransactionQtyLimit_New
 			, [Changes].ysnDepositRequired_New
 			, [Changes].intDepositPLUId_New
 			, [Changes].ysnQuantityRequired_New
@@ -276,6 +289,7 @@ BEGIN
 			, [Changes].intMinimumAge_New
 			, [Changes].dblMinOrder_New
 			, [Changes].dblSuggestedQty_New
+			, [Changes].strStorageUnitNo_New
 			, [Changes].intCountGroupId_New
 			, [Changes].intStorageLocationId_New
 			, [Changes].dblReorderPoint_New
@@ -348,6 +362,7 @@ BEGIN
 							,ysnTaxFlag2 = ISNULL(@ysnTaxFlag2, itemLocation.ysnTaxFlag2) 
 							,ysnTaxFlag3 = ISNULL(@ysnTaxFlag3, itemLocation.ysnTaxFlag3) 
 							,ysnTaxFlag4 = ISNULL(@ysnTaxFlag4, itemLocation.ysnTaxFlag4) 
+							,dblTransactionQtyLimit = ISNULL(@dblTransactionQtyLimit, itemLocation.dblTransactionQtyLimit)
 							,ysnDepositRequired = ISNULL(@ysnDepositRequired, itemLocation.ysnDepositRequired) 
 							,intDepositPLUId = ISNULL(@intDepositPLUId, itemLocation.intDepositPLUId) 
 							,ysnQuantityRequired = ISNULL(@ysnQuantityRequired, itemLocation.ysnQuantityRequired) 
@@ -383,6 +398,7 @@ BEGIN
 							,intMinimumAge = ISNULL(@intMinimumAge, itemLocation.intMinimumAge) 
 							,dblMinOrder = ISNULL(@dblMinOrder, itemLocation.dblMinOrder) 
 							,dblSuggestedQty = ISNULL(@dblSuggestedQty, itemLocation.dblSuggestedQty) 
+							,strStorageUnitNo = ISNULL(@strStorageUnitNo, itemLocation.strStorageUnitNo) 
 							,intCountGroupId = ISNULL(@intCountGroupId, itemLocation.intCountGroupId) 
 							,intStorageLocationId = ISNULL(@intStorageLocationId, itemLocation.intStorageLocationId) 
 							,dblReorderPoint = ISNULL(@dblReorderPoint, itemLocation.dblReorderPoint) 
@@ -398,6 +414,7 @@ BEGIN
 						, deleted.ysnTaxFlag2
 						, deleted.ysnTaxFlag3
 						, deleted.ysnTaxFlag4
+						, deleted.dblTransactionQtyLimit
 						, deleted.ysnDepositRequired
 						, deleted.intDepositPLUId
 						, deleted.ysnQuantityRequired
@@ -421,6 +438,7 @@ BEGIN
 						, deleted.intMinimumAge
 						, deleted.dblMinOrder
 						, deleted.dblSuggestedQty
+						, deleted.strStorageUnitNo
 						, deleted.intCountGroupId
 						, deleted.intStorageLocationId
 						, deleted.dblReorderPoint
@@ -430,6 +448,7 @@ BEGIN
 						, inserted.ysnTaxFlag2
 						, inserted.ysnTaxFlag3
 						, inserted.ysnTaxFlag4
+						, inserted.dblTransactionQtyLimit
 						, inserted.ysnDepositRequired
 						, inserted.intDepositPLUId
 						, inserted.ysnQuantityRequired
@@ -453,6 +472,7 @@ BEGIN
 						, inserted.intMinimumAge
 						, inserted.dblMinOrder
 						, inserted.dblSuggestedQty
+						, inserted.strStorageUnitNo
 						, inserted.intCountGroupId
 						, inserted.intStorageLocationId
 						, inserted.dblReorderPoint
@@ -466,6 +486,7 @@ BEGIN
 				, ysnTaxFlag2_Original
 				, ysnTaxFlag3_Original
 				, ysnTaxFlag4_Original
+				, dblTransactionQtyLimit_Original
 				, ysnDepositRequired_Original
 				, intDepositPLUId_Original
 				, ysnQuantityRequired_Original
@@ -489,6 +510,7 @@ BEGIN
 				, intMinimumAge_Original
 				, dblMinOrder_Original
 				, dblSuggestedQty_Original
+				, strStorageUnitNo_Original
 				, intCountGroupId_Original
 				, intStorageLocationId_Original
 				, dblReorderPoint_Original
@@ -498,6 +520,7 @@ BEGIN
 				, ysnTaxFlag2_New
 				, ysnTaxFlag3_New
 				, ysnTaxFlag4_New
+				, dblTransactionQtyLimit_New
 				, ysnDepositRequired_New
 				, intDepositPLUId_New
 				, ysnQuantityRequired_New
@@ -521,6 +544,7 @@ BEGIN
 				, intMinimumAge_New
 				, dblMinOrder_New
 				, dblSuggestedQty_New
+				, strStorageUnitNo_New
 				, intCountGroupId_New
 				, intStorageLocationId_New
 				, dblReorderPoint_New
@@ -541,8 +565,9 @@ BEGIN
 		-- Original Fields
 		,@auditLog_ysnTaxFlag1_Original BIT
 		,@auditLog_ysnTaxFlag2_Original BIT
-		,@auditLog_ysnTaxFlag3_Original BIT
+		,@auditLog_ysnTaxFlag3_Original BIT 
 		,@auditLog_ysnTaxFlag4_Original BIT
+		,@auditLog_dblTransactionQtyLimit_Original NUMERIC(18, 6)
 		,@auditLog_ysnDepositRequired_Original BIT
 		,@auditLog_intDepositPLUId_Original INT
 		,@auditLog_ysnQuantityRequired_Original BIT 
@@ -566,6 +591,7 @@ BEGIN
 		,@auditLog_intMinimumAge_Original INT
 		,@auditLog_dblMinOrder_Original NUMERIC(18, 6)
 		,@auditLog_dblSuggestedQty_Original NUMERIC(18, 6)
+		,@auditLog_strStorageUnitNo_Original NVARCHAR(1000)
 		,@auditLog_intCountGroupId_Original INT
 		,@auditLog_intStorageLocationId_Original INT
 		,@auditLog_dblReorderPoint_Original NUMERIC(18, 6)
@@ -573,8 +599,9 @@ BEGIN
 		-- Modified Fields
 		,@auditLog_ysnTaxFlag1_New BIT
 		,@auditLog_ysnTaxFlag2_New BIT
-		,@auditLog_ysnTaxFlag3_New BIT
+		,@auditLog_ysnTaxFlag3_New BIT 
 		,@auditLog_ysnTaxFlag4_New BIT
+		,@auditLog_dblTransactionQtyLimit_New NUMERIC(18, 6)
 		,@auditLog_ysnDepositRequired_New BIT
 		,@auditLog_intDepositPLUId_New INT
 		,@auditLog_ysnQuantityRequired_New BIT
@@ -598,6 +625,7 @@ BEGIN
 		,@auditLog_intMinimumAge_New INT 
 		,@auditLog_dblMinOrder_New NUMERIC(18, 6)
 		,@auditLog_dblSuggestedQty_New NUMERIC(18, 6)
+		,@auditLog_strStorageUnitNo_New NVARCHAR(1000)
 		,@auditLog_intCountGroupId_New INT
 		,@auditLog_intStorageLocationId_New INT
 		,@auditLog_dblReorderPoint_New NUMERIC(18, 6)
@@ -612,8 +640,9 @@ BEGIN
 			-- Original Fields
 			,ysnTaxFlag1_Original
 			,ysnTaxFlag2_Original
-			,ysnTaxFlag3_Original
+			,ysnTaxFlag3_Original 
 			,ysnTaxFlag4_Original
+			,dblTransactionQtyLimit_Original
 			,ysnDepositRequired_Original
 			,intDepositPLUId_Original
 			,ysnQuantityRequired_Original
@@ -637,6 +666,7 @@ BEGIN
 			,intMinimumAge_Original 
 			,dblMinOrder_Original 
 			,dblSuggestedQty_Original 
+			,strStorageUnitNo_Original 
 			,intCountGroupId_Original 
 			,intStorageLocationId_Original 
 			,dblReorderPoint_Original 
@@ -646,6 +676,7 @@ BEGIN
 			,ysnTaxFlag2_New
 			,ysnTaxFlag3_New
 			,ysnTaxFlag4_New
+			,dblTransactionQtyLimit_New
 			,ysnDepositRequired_New
 			,intDepositPLUId_New 
 			,ysnQuantityRequired_New 
@@ -669,6 +700,7 @@ BEGIN
 			,intMinimumAge_New 
 			,dblMinOrder_New 
 			,dblSuggestedQty_New 
+			,strStorageUnitNo_New 
 			,intCountGroupId_New 
 			,intStorageLocationId_New 
 			,dblReorderPoint_New 
@@ -683,8 +715,9 @@ BEGIN
 		-- Original Fields
 		,@auditLog_ysnTaxFlag1_Original 
 		,@auditLog_ysnTaxFlag2_Original 
-		,@auditLog_ysnTaxFlag3_Original 
+		,@auditLog_ysnTaxFlag3_Original  
 		,@auditLog_ysnTaxFlag4_Original 
+		,@auditLog_dblTransactionQtyLimit_Original 
 		,@auditLog_ysnDepositRequired_Original 
 		,@auditLog_intDepositPLUId_Original 
 		,@auditLog_ysnQuantityRequired_Original 
@@ -708,6 +741,7 @@ BEGIN
 		,@auditLog_intMinimumAge_Original 
 		,@auditLog_dblMinOrder_Original 
 		,@auditLog_dblSuggestedQty_Original 
+		,@auditLog_strStorageUnitNo_Original 
 		,@auditLog_intCountGroupId_Original 
 		,@auditLog_intStorageLocationId_Original 
 		,@auditLog_dblReorderPoint_Original 
@@ -715,8 +749,9 @@ BEGIN
 		-- Modified Fields
 		,@auditLog_ysnTaxFlag1_New 
 		,@auditLog_ysnTaxFlag2_New 
-		,@auditLog_ysnTaxFlag3_New 
+		,@auditLog_ysnTaxFlag3_New  
 		,@auditLog_ysnTaxFlag4_New 
+		,@auditLog_dblTransactionQtyLimit_New 
 		,@auditLog_ysnDepositRequired_New 
 		,@auditLog_intDepositPLUId_New 
 		,@auditLog_ysnQuantityRequired_New 
@@ -740,6 +775,7 @@ BEGIN
 		,@auditLog_intMinimumAge_New 
 		,@auditLog_dblMinOrder_New 
 		,@auditLog_dblSuggestedQty_New 
+		,@auditLog_strStorageUnitNo_New 
 		,@auditLog_intCountGroupId_New 
 		,@auditLog_intStorageLocationId_New 
 		,@auditLog_dblReorderPoint_New 
@@ -782,7 +818,7 @@ BEGIN
 				,@fromValue = @auditLog_ysnTaxFlag3_Original
 				,@toValue = @auditLog_ysnTaxFlag3_New
 		END
-
+		
 		IF ISNULL(@auditLog_ysnTaxFlag4_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag4_New, 0)
 		BEGIN 
 			EXEC dbo.uspSMAuditLog 
@@ -793,6 +829,18 @@ BEGIN
 				,@changeDescription = 'C-Store updates the Tax Flag 4'
 				,@fromValue = @auditLog_ysnTaxFlag4_Original
 				,@toValue = @auditLog_ysnTaxFlag4_New
+		END
+		
+		IF ISNULL(@auditLog_dblTransactionQtyLimit_Original, 0) <> ISNULL(@auditLog_dblTransactionQtyLimit_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Transaction Qty Limit'
+				,@fromValue = @auditLog_dblTransactionQtyLimit_Original
+				,@toValue = @auditLog_dblTransactionQtyLimit_New
 		END
 
 		IF ISNULL(@auditLog_ysnDepositRequired_Original, 0) <> ISNULL(@auditLog_ysnDepositRequired_New, 0)
@@ -1072,6 +1120,18 @@ BEGIN
 				,@fromValue = @auditLog_dblSuggestedQty_Original
 				,@toValue = @auditLog_dblSuggestedQty_New
 		END
+		
+		IF ISNULL(@auditLog_strStorageUnitNo_Original, 0) <> ISNULL(@auditLog_strStorageUnitNo_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Storage Unit No'
+				,@fromValue = @auditLog_strStorageUnitNo_Original
+				,@toValue = @auditLog_strStorageUnitNo_New
+		END
 
 		IF ISNULL(@auditLog_intCountGroupId_Original, 0) <> ISNULL(@auditLog_intCountGroupId_New, 0)
 		BEGIN 
@@ -1128,8 +1188,9 @@ BEGIN
 			-- Original Fields
 			,@auditLog_ysnTaxFlag1_Original 
 			,@auditLog_ysnTaxFlag2_Original 
-			,@auditLog_ysnTaxFlag3_Original 
+			,@auditLog_ysnTaxFlag3_Original  
 			,@auditLog_ysnTaxFlag4_Original 
+			,@auditLog_dblTransactionQtyLimit_Original 
 			,@auditLog_ysnDepositRequired_Original 
 			,@auditLog_intDepositPLUId_Original 
 			,@auditLog_ysnQuantityRequired_Original 
@@ -1153,6 +1214,7 @@ BEGIN
 			,@auditLog_intMinimumAge_Original 
 			,@auditLog_dblMinOrder_Original 
 			,@auditLog_dblSuggestedQty_Original 
+			,@auditLog_strStorageUnitNo_Original 
 			,@auditLog_intCountGroupId_Original 
 			,@auditLog_intStorageLocationId_Original 
 			,@auditLog_dblReorderPoint_Original 
@@ -1162,6 +1224,7 @@ BEGIN
 			,@auditLog_ysnTaxFlag2_New 
 			,@auditLog_ysnTaxFlag3_New 
 			,@auditLog_ysnTaxFlag4_New 
+			,@auditLog_dblTransactionQtyLimit_New 
 			,@auditLog_ysnDepositRequired_New 
 			,@auditLog_intDepositPLUId_New 
 			,@auditLog_ysnQuantityRequired_New 
@@ -1185,6 +1248,7 @@ BEGIN
 			,@auditLog_intMinimumAge_New 
 			,@auditLog_dblMinOrder_New 
 			,@auditLog_dblSuggestedQty_New 
+			,@auditLog_strStorageUnitNo_New 
 			,@auditLog_intCountGroupId_New 
 			,@auditLog_intStorageLocationId_New 
 			,@auditLog_dblReorderPoint_New 
@@ -1193,4 +1257,4 @@ BEGIN
 	END 
 	CLOSE loopAuditLog;
 	DEALLOCATE loopAuditLog;
-END 
+END

@@ -4,7 +4,11 @@ AS
 SELECT 
 	  ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.intInventoryReceiptItemId
-	, ReceiptItem.intOrderId
+	, intOrderId = 
+		CASE 
+			WHEN Receipt.intSourceType = 3 THEN COALESCE(ReceiptItem.intOrderId, LoadReceipt.intLoadHeaderId) 
+			ELSE COALESCE(ReceiptItem.intOrderId, ReceiptItem.intSourceId)
+		END 
 	, Receipt.strReceiptType
 	, Receipt.intSourceType
 	, dblAvailableQty = [Contract].dblAvailableQty
@@ -202,6 +206,17 @@ SELECT
 				END
 			ELSE NULL
 		END
+	, strMarkings =
+		CASE
+			-- Purchase Contract
+			WHEN Receipt.strReceiptType = 'Purchase Contract' THEN
+				CASE
+					-- Inbound Shipment
+					WHEN Receipt.intSourceType = 2 THEN Logistics.strMarks
+					ELSE NULL
+				END
+			ELSE NULL
+		END
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	OUTER APPLY (
@@ -266,6 +281,7 @@ FROM tblICInventoryReceiptItem ReceiptItem
 			, LogisticsLookup.dblContainerWeightPerQty
 			, LogisticsLookup.dblFranchise
 			, LogisticsLookup.strContainerNumber
+			, LogisticsLookup.strMarks
 		FROM vyuICLoadContainers LogisticsLookup
 		WHERE LogisticsLookup.intLoadDetailId = ReceiptItem.intSourceId 
 			AND LogisticsLookup.intLoadContainerId = ReceiptItem.intContainerId
@@ -324,11 +340,12 @@ FROM tblICInventoryReceiptItem ReceiptItem
 					AND t.intSourceType = 3
 			) transportSource
 
-	) InventoryTransfer ON InventoryTransfer.intInventoryTransferDetailId = ReceiptItem.intInventoryTransferDetailId
+	) InventoryTransfer ON InventoryTransfer.intInventoryTransferDetailId = (COALESCE(ReceiptItem.intInventoryTransferDetailId, ReceiptItem.intOrderId))
 		AND Receipt.strReceiptType = 'Transfer Order'
 	OUTER APPLY (
 		SELECT
-			  LoadHeader.strTransaction
+			  LoadHeader.intLoadHeaderId
+			, LoadHeader.strTransaction
 			, dblOrderedQuantity = 
 				CASE
 					WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Net' THEN LoadReceipt.dblNet

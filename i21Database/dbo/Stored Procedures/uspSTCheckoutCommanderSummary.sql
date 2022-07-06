@@ -347,10 +347,52 @@ BEGIN
 								AND chkMet.intRegisterImportFieldId = @intCustomerCount
 						END
 			  END
-		  -------------------------------------------------------------------------------------------------------------
-		  -- [END] - METRICS TAB 
-		  -------------------------------------------------------------------------------------------------------------
+		-------------------------------------------------------------------------------------------------------------
+		-- [END] - METRICS TAB 
+		-------------------------------------------------------------------------------------------------------------
+		
+		-- ======================================================================================================================
+		-- [START] - INSERT CASHIER DETAIL 
+		-- ======================================================================================================================
+			IF NOT EXISTS (SELECT 1 FROM dbo.tblSTCheckoutCashiers WHERE intCheckoutId = @intCheckoutId)
+				BEGIN
+					INSERT INTO dbo.tblSTCheckoutCashiers (
+						 [intCheckoutId]
+						,[intCashierId]
+						,[dblTotalPaymentOption]
+						,[intNumberOfVoids]
+						,[dblVoidAmount]
+						,[intOverrideCount]
+						,[intCustomerCount]
+						,[dblTotalDeposit]
+						)
+					SELECT
+						@intCheckoutId  
+						, (SELECT TOP 1 intCashierId FROM tblSTCashier WHERE strCashierName = CAST(ISNULL(UDT.strCashier, '') AS NVARCHAR(50)) COLLATE SQL_Latin1_General_CP1_CS_AS)
+						, CAST(UDT.dblCashierTotalPaymentOption AS DECIMAL(18,6))
+						, CAST(UDT.dblCashierVoidLineNumberOfVoids  AS DECIMAL(18,6))
+						, CAST(UDT.dblCashierVoidLineAmountOfVoids AS DECIMAL(18,6))
+						, CAST(UDT.dblCashierSummaryInfoNumberOfOverrides AS DECIMAL(18,6))
+						, CAST(UDT.dblCashierSummaryInfoNumberOfCustomerCount AS DECIMAL(18,6))
+						, CAST(UDT.dblTotalDeposit AS DECIMAL(18,6))
+					FROM @UDT_TransSummary UDT
+				END
+			ELSE
+				BEGIN
+					UPDATE dbo.tblSTCheckoutCashiers
+						SET dblTotalPaymentOption		= ISNULL(UDT.dblCashierTotalPaymentOption, 0)
+						, intNumberOfVoids		= ISNULL(UDT.dblCashierVoidLineNumberOfVoids, 0)
+						, dblVoidAmount			= ISNULL(UDT.dblCashierVoidLineAmountOfVoids, 0)
+						, intOverrideCount			= ISNULL(UDT.dblCashierSummaryInfoNumberOfOverrides, 0)
+						, intCustomerCount			= ISNULL(UDT.dblCashierSummaryInfoNumberOfCustomerCount, 0)
+						, dblTotalDeposit         =ISNULL(UDT.dblTotalDeposit , 0)
+					FROM @UDT_TransSummary UDT
+					WHERE tblSTCheckoutCashiers.intCheckoutId = @intCheckoutId
 
+				END
+		-- ======================================================================================================================
+		-- [ENDT] - INSERT CASHIER DETAIL 
+		-- ======================================================================================================================
 
 
 

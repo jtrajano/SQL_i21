@@ -71,6 +71,8 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
 	, Receipt.dtmCreated 
+	, Receipt.strInternalComments
+	, fiscal.strPeriod strAccountingPeriod
 	, Receipt.intBookId
 	, Receipt.intSubBookId
 	--, WeightLoss.dblClaimableWt
@@ -89,3 +91,8 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN tblCTBook Book ON Book.intBookId = Receipt.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Receipt.intSubBookId
 	--LEFT JOIN vyuLGWeightLoss WeightLoss ON WeightLoss.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal

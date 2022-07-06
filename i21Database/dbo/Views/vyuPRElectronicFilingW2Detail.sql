@@ -107,6 +107,9 @@ SELECT
 	,W2.dblTaxableLocal
 	,W2.dblLocalTax
 	,W2.strLocality
+	,strTaxWithholdingAcctNo = ''
+	,strDateCreated = CONVERT(VARCHAR(8), GETDATE(), 112)
+	,strTimeCreated = SUBSTRING(REPLACE((REPLACE(CONVERT(VARCHAR(16), SYSDATETIME(), 114) ,':', '')),'.',''),1,8)	
 FROM
 	tblPREmployeeW2 W2
 	INNER JOIN tblPREmployee EMP ON W2.intEntityEmployeeId = EMP.[intEntityId]

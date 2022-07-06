@@ -93,6 +93,22 @@ AS
 		--WHERE storage.intParentSettleStorageId IS NULL AND ticket.intCustomerStorageId = voucherDetail.intCustomerStorageId
 	) storage
 	WHERE voucherDetail.intCustomerStorageId IS NOT NULL AND voucherDetail.intCustomerStorageId > 0
+	UNION ALL
+	SELECT
+	voucherDetail.intBillDetailId
+	,intInventoryReceiptItemId = NULL
+	,intPurchaseDetailId = NULL
+	,strSourceNumber = claim.strReferenceNumber
+	FROM tblAPBillDetail voucherDetail
+	OUTER APPLY (
+		SELECT TOP 1
+			wc.strReferenceNumber
+			  FROM tblLGWeightClaim wc
+			  WHERE wc.intWeightClaimId = voucherDetail.intWeightClaimId
+		--INNER JOIN tblGRSettleStorageTicket ticket ON storage.intSettleStorageId = ticket.intSettleStorageId
+		--WHERE storage.intParentSettleStorageId IS NULL AND ticket.intCustomerStorageId = voucherDetail.intCustomerStorageId
+	) claim
+	WHERE voucherDetail.intWeightClaimId IS NOT NULL AND voucherDetail.intWeightClaimId > 0
 	--INNER JOIN
 	--(
 	--	--PO Items

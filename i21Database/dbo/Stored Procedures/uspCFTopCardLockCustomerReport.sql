@@ -79,6 +79,29 @@ BEGIN
 
 		DECLARE @intCounter INT
 		DECLARE @strField	NVARCHAR(MAX)
+		
+		SELECT TOP 1
+			 @From = [from]
+			,@To = [to]
+			,@Condition = [condition]
+			,@Fieldname = [fieldname]
+		FROM @temp_params WHERE [fieldname] = 'strDateType'
+		
+		IF(ISNULL(@From,'') = '' OR ISNULL(@From,'') = 'Transaction')
+		BEGIN
+			UPDATE @tblCFFieldList SET strFieldId = 'dtmTransactionDate' WHERE strFieldId = 'dtmDate'
+			UPDATE @temp_params SET [fieldname] = 'dtmTransactionDate' WHERE [fieldname] = 'dtmDate'
+		END
+		ELSE IF( ISNULL(@From,'') = 'Posted')
+		BEGIN
+			UPDATE @tblCFFieldList SET strFieldId = 'dtmPostedDate' WHERE strFieldId = 'dtmDate'
+			UPDATE @temp_params SET [fieldname] = 'dtmPostedDate' WHERE [fieldname] = 'dtmDate'
+		END
+		ELSE IF( ISNULL(@From,'') = 'Invoice')
+		BEGIN
+			UPDATE @tblCFFieldList SET strFieldId = 'dtmInvoiceDate' WHERE strFieldId = 'dtmDate'
+			UPDATE @temp_params SET [fieldname] = 'dtmInvoiceDate' WHERE [fieldname] = 'dtmDate'
+		END
 
 		WHILE (EXISTS(SELECT 1 FROM @tblCFFieldList))
 			BEGIN
@@ -94,7 +117,7 @@ BEGIN
 			FROM @temp_params WHERE [fieldname] = @strField
 			IF (UPPER(@Condition) = 'BETWEEN')
 			BEGIN
-				IF(@Fieldname = 'dtmDate')
+				IF(@Fieldname IN ('dtmInvoiceDate','dtmTransactionDate','dtmPosted'))
 				BEGIN
 					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) ' + @Condition + ' ' + '''' + CONVERT(varchar, DATEADD(year, -1, @From), 120) + '''' + ' AND ' +  '''' + CONVERT(varchar, DATEADD(year, -1, @To), 120) + '''' + ' )'
@@ -113,7 +136,7 @@ BEGIN
 			END
 			ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
 			BEGIN
-				IF(@Fieldname = 'dtmDate')
+				IF(@Fieldname IN ('dtmInvoiceDate','dtmTransactionDate','dtmPosted'))
 				BEGIN
 					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) ' + ' = ' + '''' + @From  + '''' + ' )'
@@ -140,7 +163,7 @@ BEGIN
 			END
 			ELSE IF (UPPER(@Condition) = 'GREATER THAN')
 			BEGIN
-				IF(@Fieldname = 'dtmDate')
+				IF(@Fieldname IN ('dtmInvoiceDate','dtmTransactionDate','dtmPosted'))
 				BEGIN
 					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) '  + ' >= ' + '''' + @From + '''' + ' )'
@@ -159,7 +182,7 @@ BEGIN
 			END
 			ELSE IF (UPPER(@Condition) = 'LESS THAN')
 			BEGIN
-				IF(@Fieldname = 'dtmDate')
+				IF(@Fieldname IN ('dtmInvoiceDate','dtmTransactionDate','dtmPosted'))
 				BEGIN
 					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) '  + ' <= ' + '''' + @From + '''' + ' )'
@@ -286,7 +309,7 @@ BEGIN
 		,ytd.dblQtyShipped as dblYTDQtyShipped
 		,ytd.dblQtyOrdered as dblYTDQtyOrdered
 		,ytd.dblInvoiceTotal as dblYTDInvoiceTotal
-		,ytd.dblInvoiceTotal / ISNULL(@dblTotal,0) as dblPercentOfTotal
+		,((ytd.dblInvoiceTotal / ISNULL(@dblTotal,0)) * 100 ) as dblPercentOfTotal
 		,pytd.dblQtyShipped as dblPYTDQtyShipped
 		,pytd.dblQtyOrdered as dblPYTDQtyOrdered
 		,pytd.dblInvoiceTotal as dblPYTDInvoiceTotal

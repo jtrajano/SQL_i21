@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[intPrimaryAccountId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[strLocationSearch] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL,
- CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED
 (
 	[intResponsiblePartyMatchingId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]

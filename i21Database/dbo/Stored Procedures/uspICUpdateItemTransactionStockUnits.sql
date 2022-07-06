@@ -61,7 +61,7 @@ BEGIN
 
     -- Update the dblUOMQty of all the inventory transactions 
     UPDATE	t
-    SET		t.dblUOMQty = iUOM.dblUnitQty, dtmDateModified = GETUTCDATE()
+    SET		t.dblUOMQty = iUOM.dblUnitQty
     FROM	tblICInventoryTransaction t INNER JOIN tblICItemUOM iUOM
                 ON t.intItemId = iUOM.intItemId
                 AND t.intItemUOMId = iUOM.intItemUOMId 

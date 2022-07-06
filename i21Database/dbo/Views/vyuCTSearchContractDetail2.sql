@@ -51,7 +51,7 @@ WITH shipmentstatus AS (
 
 , approved AS (
 	SELECT intContractDetailId
-		, dblRepresentingQty = CASE WHEN SUM(dblRepresentingQty) > dblQuantity THEN dblQuantity ELSE SUM(dblRepresentingQty) END
+		, dblRepresentingQty = CASE WHEN SUM(dblRepresentingQty) >= dblQuantity THEN dblQuantity ELSE SUM(dblRepresentingQty) END
 	FROM (
 		SELECT ccc.intContractDetailId
 			,ccc.dblQuantity
@@ -59,17 +59,14 @@ WITH shipmentstatus AS (
 										WHEN ISNULL(eee.dblUnitQty, 0) = ISNULL(fff.dblUnitQty, 0) THEN ddd.dblRepresentingQty
 										ELSE ddd.dblRepresentingQty * (ISNULL(eee.dblUnitQty, 0) / ISNULL(fff.dblUnitQty, 0)) END)
 		FROM tblCTContractDetail ccc WITH(NOLOCK)
-			, tblQMSample ddd WITH(NOLOCK)
-			, tblICItemUOM eee WITH(NOLOCK)
-			, tblICItemUOM fff WITH(NOLOCK)
+			inner join tblQMSample ddd WITH(NOLOCK) on ddd.intProductValueId = ccc.intContractDetailId
+			inner join tblICItemUOM eee WITH(NOLOCK) on eee.intUnitMeasureId = ddd.intRepresentingUOMId
+			inner join tblICItemUOM fff WITH(NOLOCK) on fff.intItemId = ccc.intItemId and fff.intUnitMeasureId = ccc.intUnitMeasureId
 			
-		WHERE ddd.intProductValueId = ccc.intContractDetailId
-			AND intProductTypeId = 8
+		WHERE 
+			intProductTypeId = 8
 			AND intSampleStatusId = 3
-			AND eee.intUnitMeasureId = ddd.intRepresentingUOMId
 			AND eee.intItemId = ccc.intItemId
-			AND fff.intUnitMeasureId = ccc.intUnitMeasureId
-			AND fff.intItemId = ccc.intItemId
 	) AS qasample
 	GROUP BY intContractDetailId, dblQuantity)
 
@@ -77,9 +74,9 @@ WITH shipmentstatus AS (
 	SELECT jjj.intContractHeaderId
 		, intRecordCount = COUNT(*)
 	FROM tblAPBillDetail jjj WITH(NOLOCK)
-		, tblAPBill kkk WITH(NOLOCK)
-	WHERE kkk.intBillId = jjj.intBillId
-		AND kkk.intTransactionType = 2
+		inner join tblAPBill kkk WITH(NOLOCK) on kkk.intBillId = jjj.intBillId
+	WHERE 
+		kkk.intTransactionType = 2
 	GROUP BY jjj.intContractHeaderId)
 
 , hedge AS (
@@ -168,9 +165,10 @@ SELECT a.intContractDetailId
 	, y.strUnitMeasure
 	, a.dblAdjustment
 	, z.dblAllocatedQty
-	, strApprovalBasis = au.strWeightGradeDesc
+	, za.strApprovalBasis
+	--, strApprovalBasis = au.strWeightGradeDesc
 	, ysnApproved = ISNULL(TR.ysnOnceApproved, 0)
-	, dblApprovedQty = QA.dblApprovedQty
+	, dblApprovedQty = aa.dblRepresentingQty
 	, strAssociationName = zb.strName
 	, a.dblAssumedFX
 	, dblBalLotsToHedge = a.dblNoOfLots - ISNULL(ab.dblHedgedLots, 0)
@@ -268,7 +266,8 @@ SELECT a.intContractDetailId
 	, dblQtyInCommodityDefaultUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bt.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bt.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bt.dblUnitQty, 0)) END)
-	, strQualityApproval = QA1.strSampleStatus
+	, strQualityApproval = bh.strGrade
+	--, strQualityApproval = QA.strSampleStatus
 	, dblQtyInCommodityStockUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bu.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bu.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bu.dblUnitQty, 0)) END)
@@ -310,6 +309,9 @@ SELECT a.intContractDetailId
 	, intHeaderSubBookId = b.intSubBookId
 	, intDetailBookId = a.intBookId
 	, intDetailSubBookId = a.intSubBookId
+	--, b.ysnStrategic
+	, strStrategic = (case when isnull(b.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
+	, strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId
@@ -339,6 +341,7 @@ LEFT JOIN tblICItemUOM w WITH(NOLOCK) ON w.intItemId = a.intItemId AND w.intUnit
 LEFT JOIN tblICItemUOM x WITH(NOLOCK) ON x.intItemUOMId = a.intAdjItemUOMId
 LEFT JOIN tblICUnitMeasure y WITH(NOLOCK) ON y.intUnitMeasureId = x.intUnitMeasureId
 LEFT JOIN lgalloationP z ON z.intContractDetailId = a.intContractDetailId
+left join tblCTApprovalBasis za  with (nolock) on za.intApprovalBasisId = b.intApprovalBasisId 
 LEFT JOIN approved aa ON aa.intContractDetailId = a.intContractDetailId
 LEFT JOIN tblCTAssociation zb WITH(NOLOCK) ON zb.intAssociationId = b.intAssociationId
 LEFT JOIN hedge ab ON ab.intContractDetailId = a.intContractDetailId
@@ -405,7 +408,8 @@ LEFT JOIN tblCTWeightGrade cl WITH(NOLOCK) ON cl.intWeightGradeId = b.intWeightI
 LEFT JOIN tblICItemUOM cm WITH(NOLOCK) ON cm.intItemUOMId = a.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure cn WITH(NOLOCK) ON cn.intUnitMeasureId = cm.intUnitMeasureId
 LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
-OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
+LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = a.intShipToId -- CT-5315
+--OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
 LEFT JOIN (
     SELECT *
     FROM
@@ -418,6 +422,7 @@ LEFT JOIN (
 		WHERE SC.strNamespace IN('ContractManagement.view.Contract', 'ContractManagement.view.Amendments')
 	) t WHERE intRowNum = 1
 ) TR ON TR.intRecordId = b.intContractHeaderId
+/*
 OUTER APPLY (
 	SELECT TOP 1 strSampleStatus = CASE WHEN s.intSampleStatusId = 3 THEN (CASE WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(c.intItemId, s.intRepresentingUOMId, c.intUnitMeasureId, s.dblRepresentingQty)) >= 100 THEN 'Approved'
 																				ELSE 'Partially Approved' END)
@@ -429,4 +434,5 @@ OUTER APPLY (
 	GROUP BY s.intSampleId
 		, s.intSampleStatusId
 	ORDER BY s.intSampleId DESC
-) QA1
+) QA
+*/

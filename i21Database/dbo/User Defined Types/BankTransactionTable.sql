@@ -1,5 +1,6 @@
 ﻿CREATE TYPE [dbo].[BankTransactionTable] AS TABLE (
 	[intTransactionId]         INT              IDENTITY (1, 1) NOT NULL,
+    [intTaskId]                INT              NULL,
     [strTransactionId]         NVARCHAR (40)    COLLATE Latin1_General_CI_AS NOT NULL,
     [intBankTransactionTypeId] INT              NOT NULL,
     [intBankAccountId]         INT              NOT NULL,
@@ -26,6 +27,7 @@
     [strLink]                  NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [ysnClr]                   BIT              DEFAULT 0 NOT NULL,
 	[ysnEmailSent]			   BIT				NULL,
+    [ysnCCTransaction]         BIT              DEFAULT 0 NOT NULL,
 	[strEmailStatus]		   NVARCHAR (250)	COLLATE Latin1_General_CI_AS NULL,
     [dtmDateReconciled]        DATETIME         NULL,
 	[intBankStatementImportId] INT              NULL,

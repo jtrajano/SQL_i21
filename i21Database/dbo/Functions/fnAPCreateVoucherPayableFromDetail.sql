@@ -47,6 +47,8 @@ RETURNS TABLE AS RETURN
 		,[intLoadShipmentId]				=	B.intLoadId
 		,[intLoadShipmentDetailId]			=	B.intLoadDetailId
 		,[intLoadShipmentCostId]			=	B.intLoadShipmentCostId
+		,[intWeightClaimId]					=	B.intLoadId
+		,[intWeightClaimDetailId]			=	B.intWeightClaimDetailId
 		,[intPaycheckHeaderId]				=	B.intPaycheckHeaderId
 		,[intCustomerStorageId]				=	B.intCustomerStorageId
 		,[intSettleStorageId]				=	B.intSettleStorageId

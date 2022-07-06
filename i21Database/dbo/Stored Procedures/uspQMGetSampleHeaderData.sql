@@ -1,11 +1,12 @@
 ﻿CREATE PROCEDURE uspQMGetSampleHeaderData @intProductTypeId INT
 	,@intProductValueId INT
+	,@intLotId INT = 0
 AS
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+--SET QUOTED_IDENTIFIER OFF
+--SET ANSI_NULLS ON
+--SET NOCOUNT ON
+--SET XACT_ABORT ON
+--SET ANSI_WARNINGS OFF
 
 DECLARE @intInventoryReceiptId INT
 DECLARE @intWorkOrderId INT
@@ -99,6 +100,9 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM vyuCTContractDetailView C
 	JOIN tblICItem I ON I.intItemId = C.intItemId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
@@ -133,7 +137,7 @@ BEGIN
 		,ISNULL(C.strItemContractOrigin, C.strItemOriginCountry) AS strCountry
 		,S.strMarks
 		,S.intPSubLocationId AS intCompanyLocationSubLocationId
-		,S.strSubLocationName
+		,CL.strSubLocationName
 		,C.intContractTypeId
 		,C.strItemSpecification
 		,(
@@ -154,11 +158,15 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
 	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
+	LEFT JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = S.intPSubLocationId
 	WHERE S.intLoadDetailContainerLinkId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 10 -- Shipment Line Item  
@@ -205,6 +213,9 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
@@ -259,13 +270,13 @@ BEGIN
 			) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 		,UOM.strUnitMeasure AS strRepresentingUOM
-		,I.intOriginId AS intCountryId
-		,CA.strDescription AS strCountry
+		,ISNULL(C.intItemContractOriginId, I.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, CA.strDescription) AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
-		,@strContainerNumber AS strContainerNumber
+		,ISNULL(@strContainerNumber, L.strContainerNo) AS strContainerNumber
 		,L.intStorageLocationId
 		,SL.strName AS strStorageLocationName
 		,CL.intCompanyLocationSubLocationId
@@ -281,9 +292,12 @@ BEGIN
 		,C.strContractItemName
 		,ISNULL(C.intEntityId, R.intEntityVendorId) AS intEntityId
 		,ISNULL(C.strEntityName, E.strName) AS strPartyName
-		,S.strMarks
+		,ISNULL(S.strMarks, L.strMarkings) AS strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		AND L.intLotId = @intProductValueId
@@ -314,8 +328,10 @@ BEGIN
 
 	SELECT @dblRepresentingQty = SUM(CASE 
 				WHEN IU.intItemUOMId = L.intWeightUOMId
-					THEN ISNULL(L.dblWeight, L.dblQty)
-				ELSE L.dblQty
+					THEN ISNULL(L.dblWeight, 0)
+				WHEN IU.intItemUOMId = L.intItemUOMId
+					THEN ISNULL(L.dblQty, 0)
+				ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU.intItemUOMId, L.dblQty)
 				END)
 		,@intRepresentingUOMId = MAX(IU.intUnitMeasureId)
 		,@strRepresentingUOM = MAX(UOM.strUnitMeasure)
@@ -360,13 +376,17 @@ BEGIN
 		,@dblRepresentingQty AS dblRepresentingQty
 		,@intRepresentingUOMId AS intRepresentingUOMId
 		,@strRepresentingUOM AS strRepresentingUOM
-		,I.intOriginId AS intCountryId
-		,CA.strDescription AS strCountry
+		,ISNULL(C.intItemContractOriginId, I.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, CA.strDescription) AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
-		,@strContainerNumber AS strContainerNumber
+		,ISNULL(@strContainerNumber, L.strContainerNo) AS strContainerNumber
+		,L.intStorageLocationId
+		,SL.strName AS strStorageLocationName
+		,CL.intCompanyLocationSubLocationId
+		,CL.strSubLocationName
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.intLoadContainerId
@@ -378,15 +398,27 @@ BEGIN
 		,C.strContractItemName
 		,ISNULL(C.intEntityId, R.intEntityVendorId) AS intEntityId
 		,ISNULL(C.strEntityName, E.strName) AS strPartyName
-		,S.strMarks
+		,ISNULL(S.strMarks, L.strMarkings) AS strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM tblICParentLot PL
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = PL.intLotStatusId
+		AND PL.intParentLotId = @intProductValueId
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	LEFT JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId
-		AND L.intParentLotId = @intProductValueId
+		AND L.intLotId = (
+				CASE 
+					WHEN ISNULL(@intLotId, 0) > 0
+						THEN @intLotId
+					ELSE L.intLotId
+					END
+				)
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = L.intSubLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId

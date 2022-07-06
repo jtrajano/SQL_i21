@@ -102,5 +102,5 @@ LEFT JOIN (
 		GROUP BY intSiteID
 	) M
 		ON A.intSiteID = M.intSiteId
-,(SELECT TOP 1 [ysnUseDeliveryTermOnCS] = ISNULL([ysnUseDeliveryTermOnCS],0) FROM tblTMPreferenceCompany) Z
+LEFT JOIN (SELECT TOP 1 [ysnUseDeliveryTermOnCS] = ISNULL([ysnUseDeliveryTermOnCS],0) FROM tblTMPreferenceCompany) Z ON 1=1
 WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0

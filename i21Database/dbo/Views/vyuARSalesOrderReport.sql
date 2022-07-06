@@ -84,6 +84,8 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Pick Ticket') COLLATE Latin1_General_CI_AS
 	 , ysnListBundleSeparately	= ISNULL(SALESORDERDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 	 , dblTotalDiscount			= ISNULL(dblTotalDiscount,0) * -1
+	 , dblTotalStandardWeight	= ISNULL(SO.dblTotalStandardWeight, 0)
+	 , dblStandardWeight		= SALESORDERDETAIL.dblStandardWeight
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 LEFT JOIN (
 	SELECT intSalesOrderId
@@ -114,6 +116,7 @@ LEFT JOIN (
 		 , strContractNumber		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END
 		 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
 		 , ysnListBundleSeparately	= I.ysnListBundleSeparately
+		 , dblStandardWeight		= ISNULL(SD.dblStandardWeight, 0)
 	FROM dbo.tblSOSalesOrderDetail SD WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId

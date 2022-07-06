@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @intShipTo INT
 	DECLARE @intCurrencyId INT
 	DECLARE @intShipmentStatus INT
+	DECLARE @ysnAllowReweighs BIT = 0
 	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 	DECLARE @distinctVendor TABLE 
@@ -28,7 +29,9 @@ BEGIN TRY
 		(intItemRecordId INT Identity(1, 1)
 		,intItemId INT)
 
-	SELECT @strLoadNumber = strLoadNumber FROM tblLGLoad WHERE intLoadId = @intLoadId
+	SELECT @strLoadNumber = strLoadNumber 
+		,@ysnAllowReweighs = ysnAllowReweighs
+	FROM tblLGLoad WHERE intLoadId = @intLoadId
 
 	IF OBJECT_ID('tempdb..#tempVoucherId') IS NOT NULL
 		DROP TABLE #tempVoucherId
@@ -83,7 +86,7 @@ BEGIN TRY
 	END
 
 
-	IF (@intShipmentStatus = 4)
+	IF (@intShipmentStatus = 4 AND @ysnAllowReweighs = 0)
 	BEGIN
 		--If Shipment is already received, call the IR to Voucher procedure
 		SELECT DISTINCT 
@@ -98,6 +101,9 @@ BEGIN TRY
 			AND receipt.intSourceType = 2
 			AND receipt.intSourceInventoryReceiptId IS NULL 
 			AND receipt.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse')
+
+		--Delete the Payables created by LS to allow IR to regenerate the payables
+		DELETE FROM tblAPVoucherPayable WHERE intLoadShipmentId = @intLoadId AND intLoadShipmentCostId IS NULL
 
 		DECLARE @intInventoryReceiptId INT = NULL
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInventoryReceipts)

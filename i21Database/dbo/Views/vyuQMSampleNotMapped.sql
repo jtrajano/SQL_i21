@@ -6,6 +6,7 @@ SELECT S.intSampleId
 	,IR.strReceiptNumber
 	,INVS.strShipmentNumber
 	,CH.intContractTypeId
+	,CD.intContractHeaderId AS intLinkContractHeaderId
 	,ST.strSampleTypeName
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber
 	,L.strLoadNumber
@@ -32,6 +33,9 @@ SELECT S.intSampleId
 		ELSE E2.strName
 		END AS strSentByValue
 	,ST.ysnPartyMandatory
+	,ST.ysnMultipleContractSeq
+	,CH.dblQuantity AS dblHeaderQuantity
+	,U2.strUnitMeasure AS strHeaderUnitMeasure
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -49,6 +53,8 @@ LEFT JOIN tblMFWorkOrder W ON W.intWorkOrderId = S.intWorkOrderId
 LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = S.intLotStatusId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = S.intSampleUOMId
 LEFT JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = S.intRepresentingUOMId
+LEFT JOIN tblICCommodityUnitMeasure CM ON CM.intCommodityUnitMeasureId = CH.intCommodityUOMId
+LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = CM.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId

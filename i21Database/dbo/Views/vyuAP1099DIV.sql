@@ -45,7 +45,7 @@ AS
 									, B.strState
 									, +' ' + B.strZip
 									, B.strCountry
-									, B.strPhone) COLLATE Latin1_General_CI_AS
+									, B.strPhone)
 	, B.strCompanyName
 	, strEIN = B.strEin--B.strFederalTaxID
 	, A.strFederalTaxId

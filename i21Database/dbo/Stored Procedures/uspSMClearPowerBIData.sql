@@ -1,0 +1,29 @@
+﻿CREATE PROCEDURE [dbo].[uspSMClearPowerBIData]
+	
+AS
+	BEGIN TRY
+	BEGIN TRANSACTION
+		DELETE FROM tblSMEntityMenuFavorite WHERE ysnPBIReport = 1
+		DELETE FROM tblSMPowerBIUserRoleReport
+		DELETE FROM tblSMPowerBIScheduleHistory
+		DELETE FROM tblSMPowerBIScheduleRunTime
+		DELETE FROM tblSMPowerBIDataset
+		DELETE FROM tblSMPowerBIReport
+	COMMIT TRANSACTION
+END TRY
+
+BEGIN CATCH	
+	IF @@TRANCOUNT > 0 
+		ROLLBACK TRANSACTION  
+
+
+	DECLARE @ErrorMerssage NVARCHAR(MAX)
+	SELECT @ErrorMerssage = ERROR_MESSAGE()									
+	RAISERROR(@ErrorMerssage, 11, 1);
+	RETURN 0	
+
+END CATCH	
+
+RETURN 1
+
+

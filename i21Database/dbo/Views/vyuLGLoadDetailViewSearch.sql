@@ -118,6 +118,8 @@ SELECT   L.intLoadId
 		,strVendorFax = VEN.strFax
 		,strVendorMobile = VEN.strMobile
 		,strVendorPhone = VEN.strPhone
+		,LoadDetail.intSellerId
+		,strSeller = Seller.strName
 
 		,strPContractNumber = PHeader.strContractNumber
 		,intPContractSeq = PDetail.intContractSeq
@@ -142,6 +144,8 @@ SELECT   L.intLoadId
 		,strSLocationMail = SCL.strEmail
 		,strSLocationFax = SCL.strFax
 		,strSLocationPhone = SCL.strPhone
+		,LoadDetail.intSalespersonId
+		,strSalesperson = Salesperson.strName
 
 		,Commodity.strCommodityCode AS strCommodity
 		,Item.strItemNo
@@ -180,7 +184,11 @@ SELECT   L.intLoadId
 		,CO.strCountry AS strOrigin
 		,LoadDetail.intNumberOfContainers
 		,strShipmentStatus = CASE L.intShipmentStatus
-			WHEN 1 THEN 'Scheduled'
+			WHEN 1 THEN 
+				CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
+						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
+				THEN 'Expired'
+				ELSE 'Scheduled' END
 			WHEN 2 THEN 'Dispatched'
 			WHEN 3 THEN 
 				CASE WHEN (L.ysnDocumentsApproved = 1 
@@ -269,6 +277,8 @@ LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = LoadDetail.intSellerId
+LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = LoadDetail.intSalespersonId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
 LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId

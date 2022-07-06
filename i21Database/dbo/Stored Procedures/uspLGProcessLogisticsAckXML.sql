@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [uspLGProcessLogisticsAckXML] (@ysnReplication BIT = 1)
+﻿CREATE PROCEDURE [dbo].[uspLGProcessLogisticsAckXML] (@ysnReplication BIT = 1)
 AS
 BEGIN TRY
 	SET NOCOUNT ON

@@ -2,20 +2,21 @@
 	AS
 		with closed as (
 			select b.intRecordId, intClosed = convert(numeric(16,8),count(c.intActivityId))
-			from tblSMScreen a, tblSMTransaction b,tblSMActivity c
-			where a.strNamespace = 'CRM.view.Opportunity'
-			and b.intScreenId = a.intScreenId
-			and c.intTransactionId = b.intTransactionId
-			and c.strStatus = 'Closed'
+			from tblSMScreen a
+				inner join tblSMTransaction b on b.intScreenId = a.intScreenId
+				inner join tblSMActivity c on c.intTransactionId = b.intTransactionId
+			where 
+				a.strNamespace = 'CRM.view.Opportunity'
+				and c.strStatus = 'Closed'
 			group by b.intRecordId
 		),
 		notclosed as (
 			select b.intRecordId, intOpen = convert(numeric(16,8),count(c.intActivityId))
-			from tblSMScreen a, tblSMTransaction b,tblSMActivity c
+			from 
+				tblSMScreen a
+				inner join tblSMTransaction b on b.intScreenId = a.intScreenId
+				inner join tblSMActivity c on c.intTransactionId = b.intTransactionId
 			where a.strNamespace = 'CRM.view.Opportunity'
-			and b.intScreenId = a.intScreenId
-			and c.intTransactionId = b.intTransactionId
-			--and c.strStatus <> 'Closed'
 			group by b.intRecordId
 		)
 		select

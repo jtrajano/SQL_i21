@@ -28,6 +28,9 @@
 -- Delete Objects
 :r .\DeleteScripts.sql
 
+-- AR This should be executed before 1_TM\4_1420_to_1430.sql
+:r .\7_AR\15_FixtblARCustomer_MissingColumn.sql
+
 -- TM
 :r .\1_TM\1_1320_to_1340.sql
 :r .\1_TM\2_DropUniqueConstraints.sql
@@ -40,6 +43,7 @@
 
 -- CM
 :r .\2_CM\1_CM.sql
+:r .\2_CM\2_DataFix.sql
 
 -- DB
 :r .\3_DB\1_1340_to_1410.sql
@@ -65,6 +69,8 @@
 :r .\4_SM\1810_Fix_GL_Account.sql
 :r .\4_SM\11_RemoveDuplicateTaxCodeUnderTaxGroup.sql
 :r .\4_SM\12_MigrateRecentlyViewed.sql
+:r .\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql
+:r .\4_SM\2120_DropAxxisTempTables.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
@@ -73,6 +79,7 @@
 :r .\6_GL\4_1440_to_1530.sql
 :r .\6_GL\5_1710.sql
 :r .\6_GL\6_1910.sql
+:r .\6_GL\7_2110.sql
 
 -- AR
 :r .\7_AR\00_DropTriggers.sql
@@ -118,6 +125,7 @@
 :r .\8_AP\UpdateVoucherDetailRate.sql
 :r .\8_AP\DeleteOld1099PATRData.sql
 :r .\8_AP\ChangePrimaryKeyToIdentity.sql
+:r .\8_AP\DROPAxxisTable.sql
 
 -- FRD
 :r .\9_FRD\1_1420_to_1430.sql
@@ -142,6 +150,10 @@
 :r .\11_IC\FixFKItemPricingLevel.sql 
 :r .\11_IC\ImproveValuationReport.sql
 :r .\11_IC\DropIndexes.sql
+:r .\11_IC\AddEffectiveItemPriceUOMColumn.sql 
+:r .\11_IC\UpdateEDIPricebookWithCaseRetailPrice.sql
+:r .\11_IC\RemoveUPCIndependentUniqueIndexes.sql
+:r .\11_IC\RenameAndAlterCashRegisterDepartment.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
@@ -200,6 +212,7 @@
 :r .\18_IU\1_DataCleanUp.sql
 
 --MF
+:r .\19_MF\DropConstraints.sql
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
@@ -242,3 +255,6 @@
 
 --LG
 :r .\26_LG\0_DataCleanup.sql
+
+--SCH
+:r .\27_SCH\1_FixOrphanDistribution.sql

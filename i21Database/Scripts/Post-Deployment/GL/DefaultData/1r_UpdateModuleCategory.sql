@@ -59,7 +59,8 @@ SELECT 'Sales Discount' strAccountCategory,'Sales' strModule, 'Company Location'
 SELECT 'Sales Tax Account' strAccountCategory,'Sales' strModule, 'Tax Code' strScreen, 'i21.view.TaxCode' strView, 'Details' strTab UNION
 SELECT 'Service Charges' strAccountCategory,'Sales' strModule,  'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
 SELECT 'Unrealized Gain or Loss Accounts Receivable' strAccountCategory,'Sales' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
-SELECT 'Unrealized Gain or Loss Offset AR' strAccountCategory,'Sales' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab 
+SELECT 'Unrealized Gain or Loss Offset AR' strAccountCategory,'Sales' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Deferred Expense' strAccountCategory, 'Inventory' strModule, 'Item' strScreen, 'Inventory.view.Item' strView, 'Setup' strTab
 
 
 UPDATE cat 

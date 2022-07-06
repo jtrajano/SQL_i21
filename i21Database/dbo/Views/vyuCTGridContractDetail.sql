@@ -257,8 +257,17 @@ AS
 				ELSE CD.strFinancialStatus --FS.strFinancialStatus
 			END AS strFinancialStatus,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
-			strFreightBasisBaseUOM = FBBUM.strUnitMeasure			
-
+			strFreightBasisBaseUOM = FBBUM.strUnitMeasure,
+			CD.intRefFuturesMarketId,
+			CD.intRefFuturesMonthId,
+			CD.intRefFuturesItemUOMId,
+			CD.intRefFuturesCurrencyId,
+			CD.dblRefFuturesQty,
+			RefFuturesMarket.strFutMarketName  strRefFuturesMarket,
+			REPLACE(RefFuturesMonth.strFutureMonth, ' ', '(' + RefFuturesMonth.strSymbol + ') ') strRefFuturesMonth,
+			RefFuturesCurrency.strCurrency strRefFuturesCurrency,
+			RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure,
+			ysnWithPriceFix = convert(bit, isnull(PF.intPriceFixationId,0))
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
@@ -271,6 +280,13 @@ AS
 	LEFT    JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId					=		CD.intPricingTypeId			--strPricingType
 	LEFT    JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId					=		CD.intRailGradeId
 	LEFT	JOIN	tblCTSubBook					SK	ON	SK.intSubBookId						=		CD.intSubBookId				--strSubBook
+
+	-- Reference Pricing
+	LEFT JOIN tblRKFutureMarket RefFuturesMarket ON RefFuturesMarket.intFutureMarketId = CD.intRefFuturesMarketId
+	LEFT JOIN tblRKFuturesMonth RefFuturesMonth ON RefFuturesMonth.intFutureMonthId = CD.intRefFuturesMonthId
+	LEFT JOIN tblSMCurrency RefFuturesCurrency ON RefFuturesCurrency.intCurrencyID = CD.intRefFuturesCurrencyId
+	LEFT JOIN tblICItemUOM RefFuturesItemUOMId ON RefFuturesItemUOMId.intItemUOMId = CD.intRefFuturesItemUOMId
+	LEFT JOIN tblICUnitMeasure RefFturesUnitMeasure ON RefFturesUnitMeasure.intUnitMeasureId = RefFuturesItemUOMId.intUnitMeasureId
 	
 	LEFT	JOIN	tblEMEntity						BT	ON	BT.intEntityId						=		CD.intBillTo				--strBillTo
 	LEFT	JOIN	tblEMEntity						SH	ON	SH.intEntityId						=		CD.intShipperId				--strShipper

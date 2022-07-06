@@ -15,10 +15,7 @@
 		,tblHDProjectContactInfo.intSort
 		,tblHDProjectContactInfo.intConcurrencyId
 	from tblHDProjectContactInfo
-		,tblEMEntity
-		,[tblEMEntityToContact]
-		,[tblEMEntityLocation]
-	where
-		tblEMEntity.intEntityId = tblHDProjectContactInfo.intEntityId
-		and [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId
-		and [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId
+		inner join tblEMEntity on tblEMEntity.intEntityId = tblHDProjectContactInfo.intEntityId
+		inner join [tblEMEntityToContact] on [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId
+		inner join [tblEMEntityLocation] on [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId
+	

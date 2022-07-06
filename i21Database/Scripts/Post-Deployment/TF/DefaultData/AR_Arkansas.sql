@@ -1,13 +1,16 @@
-﻿DECLARE @TaxAuthorityCode NVARCHAR(10) = 'AR'
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'AR' AND ysnFilingForThisTA = 1)
+BEGIN
+	PRINT ('Deploying Arkansas Tax Forms')
+END
+GO
+
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'AR'
 	, @TaxAuthorityId INT
 
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN
-
-	PRINT ('Deploying Arkansas Tax Forms')
-
 -- Product Codes
 /* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
 select 'UNION ALL SELECT intProductCodeId = ' + CAST(0 AS NVARCHAR(10)) 
@@ -117,6 +120,8 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'AR D', strFormName = 'AR Disbursement Schedules', strScheduleCode = '10A', strScheduleName = 'Gallons Delivered to Exempt Customers for Non-highway Use', strType = 'Diesel Undyed', strNote = '', strTransactionType = 'Invoice', intSort = 460, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 42134, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'AR D', strFormName = 'AR Disbursement Schedules', strScheduleCode = '10A', strScheduleName = 'Gallons Delivered to Exempt Customers for Non-highway Use', strType = 'LP', strNote = '', strTransactionType = 'Invoice', intSort = 470, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 42135, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'AR EDI', strFormName = 'AR EDI File', strScheduleCode = '', strScheduleName = '', strType = '', strNote = '', strTransactionType = '', intSort = 600, strStoredProcedure = '', intMasterId = 42136, intComponentTypeId = 3
+
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'AR XML', strFormName = 'Arkansas XML', strScheduleCode = 'XML', strScheduleName = 'Arkansas XML', strType = '', strNote = '', strTransactionType = '', intSort = 610, strStoredProcedure = NULL, intMasterId = 42137,  intComponentTypeId = 6
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -481,6 +486,17 @@ WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR EDI', strScheduleCode = '', strType = '', strTemplateItemId = 'AREDI-ARLicTypeP', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '31', strDescription = 'AR License Type for Propane', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '32', ysnOutputDesigner = 0, strInputType = NULL, intMasterId = 41279
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR EDI', strScheduleCode = '', strType = '', strTemplateItemId = 'AREDI-ARLicP', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '32', strDescription = 'AR License Number for Propane', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '33', ysnOutputDesigner = 0, strInputType = NULL, intMasterId = 41280
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR EDI', strScheduleCode = '', strType = '', strTemplateItemId = 'AREDI-ST03', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '20', strDescription = ' Implementation Convention Reference', strScheduleList = NULL, strConfiguration = '1', ysnConfiguration = '1', ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '21', ysnOutputDesigner = 0, strInputType = NULL, intMasterId = 41281
+
+
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', strTemplateItemId = 'ARXML-TransmissionId', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Next Transmission Id', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '34', ysnOutputDesigner = NULL, strInputType = 'integer', intMasterId = 41282
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', strTemplateItemId = 'ARXML-ProcessType', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Test / Production Indicator (T or P)', strScheduleList = NULL, strConfiguration = 'T', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '35', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 41283
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', strTemplateItemId = 'ARXML-FilerNameControl', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Filer - Name Control (provided by state)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '36', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 41284
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', strTemplateItemId = 'ARXML-SubmissionId', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Next Submission Id', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '37', ysnOutputDesigner = NULL, strInputType = 'integer', intMasterId = 41285
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', strTemplateItemId = 'ARXML-SoftwareId', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Software ID', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '38', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 41286
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', strTemplateItemId = 'ARXML-SoftwareVersion', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Software Version', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '39', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 41287
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', strTemplateItemId = 'ARXML-AmendedReason', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Amended Reason (Resubmission, Supplemental, or Corrected)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '40', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 41288
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', strTemplateItemId = 'ARXML-LicenseNumber', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Filer/StateLicenseNumber - Taxpayer’s state issued account ID', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '41', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 41289
+
 
 	EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
 
@@ -1000,6 +1016,8 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'AR R', strScheduleCode = '3', strType = 'Diesel Undyed', ysnStatus = 1, intFrequency = 1, intMasterId = 43207
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'AR R', strScheduleCode = '3', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 43205
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'AR R', strScheduleCode = '3', strType = 'LP', ysnStatus = 1, intFrequency = 1, intMasterId = 43208
+
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'AR XML', strScheduleCode = 'XML', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 43238
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 

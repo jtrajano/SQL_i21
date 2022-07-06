@@ -48,7 +48,7 @@ BEGIN
 						@strRegisterClass	NVARCHAR(50),
 						@intRegisterClassId INT
 
-				SELECT
+				SELECT TOP 1
 					@intStoreId			= st.intStoreId,
 					@strRegisterClass	= r.strRegisterClass,
 					@intRegisterClassId = setup.intRegisterSetupId
@@ -241,7 +241,7 @@ BEGIN
 										[strTrlFlagsTrlMatch],
 
 										[strTrlDept],
-										[intTrlDeptNumber],
+										[strTrlDeptNumber],
 										[strTrlDeptType],
 										[strTrlCat],
 										[intTrlCatNumber],
@@ -464,7 +464,7 @@ BEGIN
 										[strTrlFlagsTrlMatch]				= NULL,
 
 										[strTrlDept]						= chk.strMerchandiseCodeLineDescription,
-										[intTrlDeptNumber]					= chk.intLineMerchandiseCode,
+										[strTrlDeptNumber]					= chk.intLineMerchandiseCode,
 										[strTrlDeptType]					= NULL,
 										[strTrlCat]							= NULL,
 										[intTrlCatNumber]					= NULL,

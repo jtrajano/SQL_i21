@@ -51,7 +51,8 @@ BEGIN TRY
 			, intSubBookId
 			, ysnMonthExpired
 			, strUserName
-			, strAction)
+			, strAction
+			, strNotes)
 		SELECT H.intFutOptTransactionHeaderId
 			, H.strSelectedInstrumentType
 			, T.intFutOptTransactionId
@@ -88,6 +89,7 @@ BEGIN TRY
 			, ysnMonthExpired = FMonth.ysnExpired
 			, strUserName = @strUserName
 			, 'DELETE'
+			, T.strReference
 		FROM tblRKFutOptTransaction T
 		JOIN tblRKFutOptTransactionHeader H ON T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId
@@ -170,7 +172,8 @@ BEGIN TRY
 			, intSubBookId
 			, ysnMonthExpired
 			, strUserName
-			, strAction)
+			, strAction
+			, strNotes)
 		SELECT H.intFutOptTransactionHeaderId
 			, H.strSelectedInstrumentType
 			, T.intFutOptTransactionId
@@ -207,6 +210,7 @@ BEGIN TRY
 			, ysnMonthExpired = FMonth.ysnExpired
 			, strUserName = @strUserName
 			, @action
+			, T.strReference
 		FROM tblRKFutOptTransaction T
 		JOIN tblRKFutOptTransactionHeader H on T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId

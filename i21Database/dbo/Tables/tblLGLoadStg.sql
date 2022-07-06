@@ -17,6 +17,7 @@
 	[strMVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strFVessel] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strFVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	dtmPlannedAvailabilityDate DATETIME,
 	[dtmETAPOD] DATETIME, 
 	[dtmETAPOL] DATETIME, 
 	[dtmETSPOL] DATETIME, 

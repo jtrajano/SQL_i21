@@ -3,6 +3,7 @@
 	[intPendingClaimId] INT NOT NULL IDENTITY (1, 1),
 	[intPurchaseSale] INT NOT NULL,
 	[intLoadId] INT NOT NULL,
+	[intLoadContainerId] INT NULL,
 	[intContractDetailId] INT NULL,
 	[intEntityId] INT NULL,
 	[intPartyEntityId] INT NULL,
@@ -25,11 +26,13 @@
 	[ysnSeqSubCurrency] BIT NULL,
 	[dblSeqPriceInWeightUOM] NUMERIC(18, 6) NULL,
 	[dblSeqPriceConversionFactoryWeightUOM] NUMERIC(18, 6) NULL,
+	[dtmReceiptDate] DATETIME NULL,
 	[dtmDateAdded] DATETIME NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	
 	CONSTRAINT [PK_tblLGPendingClaim_intPendingClaimId] PRIMARY KEY ([intPendingClaimId]), 
 	CONSTRAINT [FK_tblLGPendingClaim_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
+	CONSTRAINT [PK_tblLGPendingClaim_tblLGLoadContainer] FOREIGN KEY ([intLoadContainerId]) REFERENCES tblLGLoadContainer([intLoadContainerId]),
 	CONSTRAINT [FK_tblLGPendingClaim_tblCTContractDetail] FOREIGN KEY ([intContractDetailId]) REFERENCES tblCTContractDetail([intContractDetailId]),
 	CONSTRAINT [FK_tblLGPendingClaim_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblLGPendingClaim_tblEMEntity_intPartyEntityId] FOREIGN KEY ([intPartyEntityId]) REFERENCES tblEMEntity([intEntityId]),
@@ -40,3 +43,10 @@
 	CONSTRAINT [FK_tblLGPendingClaim_tblICItemUOM_intSeqPriceUOMId] FOREIGN KEY ([intSeqPriceUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblLGPendingClaim_tblICUnitMeasure] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblLGPendingClaim_intLoadId] ON [dbo].[tblLGPendingClaim]
+(
+	[intLoadId], [intPurchaseSale], [intContractDetailId], [intLoadContainerId]
+)
+GO

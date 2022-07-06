@@ -39,6 +39,13 @@
 	[ysnForTheWeekOf]			[bit] NULL,
 	[dblNumberOfHours]			NUMERIC (10, 2) NULL,
 	[ysnBillable]				[bit] NULL,
+	[strAddress]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strCity]						NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strCountry]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strState]						NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strZipCode]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dblLongitude]					NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
+    [dblLatitude]					NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
 	[intConcurrencyId]			[int] NOT NULL DEFAULT ((1)), 
 
     CONSTRAINT [FK_tblSMActivity_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE,

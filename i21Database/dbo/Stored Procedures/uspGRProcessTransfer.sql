@@ -1255,6 +1255,58 @@ BEGIN
 		END
 		CLOSE c; DEALLOCATE c;
 		
+		-- Start Booking AP Clearing to tblAPClearing
+		DECLARE
+			@intTransferStorageReferenceId3 INT
+			,@ysnIsSourceDP BIT
+			,@ysnIsTargetDP BIT;
+
+		DECLARE CC CURSOR LOCAL FAST_FORWARD
+		FOR
+		SELECT TSR.intTransferStorageReferenceId, ST_FROM.ysnDPOwnedType, ST_TO.ysnDPOwnedType
+		FROM tblGRTransferStorageReference TSR
+		INNER JOIN tblGRTransferStorage TS
+			ON TSR.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRCustomerStorage CS_FROM
+			ON TSR.intSourceCustomerStorageId = CS_FROM.intCustomerStorageId
+		INNER JOIN tblGRStorageType ST_FROM
+			ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId
+		INNER JOIN tblGRCustomerStorage  CS_TO
+			ON TSR.intToCustomerStorageId = CS_TO.intCustomerStorageId
+		INNER JOIN tblGRStorageType ST_TO
+			ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+		WHERE TS.intTransferStorageId = @intTransferStorageId
+		
+		OPEN CC;
+		FETCH CC INTO @intTransferStorageReferenceId3, @ysnIsSourceDP, @ysnIsTargetDP
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			-- DP to OS
+			IF @ysnIsSourceDP = 1 AND @ysnIsTargetDP = 0
+				EXEC uspGRBookAPClearingTransferToOS @intTransferStorageReferenceId3
+			-- OS to DP
+			ELSE IF @ysnIsSourceDP = 0 AND @ysnIsTargetDP = 1
+				EXEC uspGRBookAPClearingTransferToDP @intTransferStorageReferenceId3
+			-- DP to DP
+			ELSE IF @ysnIsSourceDP = 1 AND @ysnIsTargetDP = 1
+			BEGIN
+				EXEC uspGRBookAPClearingTransferToOS @intTransferStorageReferenceId3 -- Offset APC from source vendor
+				EXEC uspGRBookAPClearingTransferToDP @intTransferStorageReferenceId3 -- Book APC to target vendor
+			END
+			FETCH CC INTO @intTransferStorageReferenceId3, @ysnIsSourceDP, @ysnIsTargetDP
+		END
+		CLOSE CC; DEALLOCATE CC;
+		-- End booking AP clearing
+
+
+
+		-- Adding Transaction links
+		exec [uspSCAddTransactionLinks]
+			@intTransactionType = 7
+			,@intTransactionId = @intTransferStorageId
+			,@intAction = 1
+
 		--RISK SUMMARY LOG
 		EXEC [dbo].[uspGRRiskSummaryLog2]
 			@StorageHistoryIds = @HistoryIds

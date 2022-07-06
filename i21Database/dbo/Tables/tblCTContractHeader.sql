@@ -48,7 +48,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [intCountryId] INT NULL, 
     [intCompanyLocationPricingLevelId] INT NULL, 
     [ysnProvisional] BIT NULL, 
-    [ysnLoad] BIT NULL, 
+    [ysnLoad] BIT NULL DEFAULT ((0)), 
     [intNoOfLoad] INT NULL, 
     [dblQuantityPerLoad] NUMERIC(18, 6) NULL, 
     [intLoadUOMId] INT NULL, 
@@ -85,7 +85,12 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	strExternalContractNumber [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	ysnReceivedSignedFixationLetter	BIT NOT NULL DEFAULT 0,
 	ysnReadOnlyInterCoContract BIT NOT NULL DEFAULT 0,
+	ysnEnableFutures BIT NULL DEFAULT 0,
+	guiApiUniqueId UNIQUEIDENTIFIER NULL,
+	intApiRowNumber INT NULL,
 
+    [ysnStrategic] BIT NULL DEFAULT 0, 
+    [intEntitySelectedLocationId] INT NULL,  -- CT-5315
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber],[intEntityId],[intCommodityId]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),

@@ -29,7 +29,7 @@ FROM (
 		, strBrokerageAccount = acc.strAccountNumber
 		, dblGetNoOfContract = CASE WHEN (N'Sell' = ft.[strBuySell]) THEN - (ft.[dblNoOfContract]) ELSE ft.[dblNoOfContract] END
 		, fot.dblContractSize
-		, dblOpenContract = (CASE WHEN intSelectedInstrumentTypeId = 3 THEN (SELECT CONVERT(DECIMAL(18,6), SUM(goc.dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
+		, dblOpenContract = (CASE WHEN ft.intSelectedInstrumentTypeId = 3 THEN (SELECT CONVERT(DECIMAL(18,6), SUM(goc.dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
 								ELSE (SELECT CONVERT(DECIMAL(18,6), SUM(goc.dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
 								END)
 		, um.strUnitMeasure
@@ -47,9 +47,9 @@ FROM (
 		, ft.intCommodityId
 		, strBankName
 		, strBankAccountNo
-		, intSelectedInstrumentTypeId
-		, strSelectedInstrumentType = (CASE WHEN intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' 
-											WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
+		, ft.intSelectedInstrumentTypeId
+		, strSelectedInstrumentType = (CASE WHEN ft.intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' 
+											WHEN ft.intSelectedInstrumentTypeId = 2 THEN 'OTC'
 										ELSE 'OTC - Others' END) COLLATE Latin1_General_CI_AS
 		, ft.dtmMaturityDate
 		, ft.intCurrencyId
@@ -81,6 +81,9 @@ FROM (
 		, ft.intTraderId
 		, sp.strName strSalespersonId
 		, ft.strReference
+		, ysnSlicedTrade = ISNULL(ft.ysnSlicedTrade, CAST(0 AS BIT))
+		, ft.intOrigSliceTradeId
+		, strOriginalTradeNo = ST.strInternalTradeNo
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN tblEMEntity sp ON sp.intEntityId = ft.intTraderId
@@ -100,5 +103,6 @@ LEFT OUTER JOIN tblCMBankAccount AS ba ON ft.[intBankAccountId] = ba.[intBankAcc
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ft.intContractHeaderId
 LEFT OUTER JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ft.intContractDetailId
+LEFT JOIN tblRKFutOptTransaction ST ON ST.intFutOptTransactionId = ft.intOrigSliceTradeId
 )t 
 ORDER BY intFutOptTransactionId ASC

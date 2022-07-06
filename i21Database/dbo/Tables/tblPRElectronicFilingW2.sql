@@ -55,5 +55,10 @@
 	[dtmCreated]					DATETIME		NOT NULL,
 	[intLastModifiedUserId]			INT				NULL,
 	[dtmLastModified]				DATETIME		NULL,
+    [strRepresentativeName]         NVARCHAR(57)	COLLATE Latin1_General_CI_AS NULL, 
+    [strRepresentativeTitle]        NVARCHAR(25)	COLLATE Latin1_General_CI_AS NULL, 
+    [strRepresentativePhone]        NVARCHAR(15)	COLLATE Latin1_General_CI_AS NULL,
+    [strNAICSCode]                  NVARCHAR(10)	COLLATE Latin1_General_CI_AS NULL,
+	[strCentralRegistrationNo]      NVARCHAR(15)	COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]				INT				NOT NULL DEFAULT ((1))
 )

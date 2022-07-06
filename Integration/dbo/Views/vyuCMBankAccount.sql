@@ -1,10 +1,10 @@
 ﻿GO
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
-IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_insert_vyuCMBankAccount') DROP TRIGGER dbo.trg_insert_vyuCMBankAccount;
-IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_delete_vyuCMBankAccount') DROP TRIGGER dbo.trg_delete_vyuCMBankAccount;
-IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_insert_vyuCMBankAccount') DROP TRIGGER dbo.trg_insert_vyuCMBankAccount;
-IF EXISTS (select 1 FROM sys.views where name = 'vyuCMBankAccount') DROP VIEW dbo.vyuCMBankAccount;
+	IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_insert_vyuCMBankAccount') DROP TRIGGER dbo.trg_insert_vyuCMBankAccount;
+	IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_delete_vyuCMBankAccount') DROP TRIGGER dbo.trg_delete_vyuCMBankAccount;
+	IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_insert_vyuCMBankAccount') DROP TRIGGER dbo.trg_insert_vyuCMBankAccount;
+	IF EXISTS (select 1 FROM sys.views where name = 'vyuCMBankAccount') DROP VIEW dbo.vyuCMBankAccount;
 
 
 	EXEC('CREATE VIEW [dbo].vyuCMBankAccount
@@ -109,6 +109,10 @@ IF EXISTS (select 1 FROM sys.views where name = 'vyuCMBankAccount') DROP VIEW db
 				,i21.intPayToDown
 				,i21.intResponsibleEntityId
 				,strResponsibleEntity = E.strName
+				--Advanced Bank Recon
+				,i21.ysnABREnable
+				,i21.intABRDaysNoRef
+				--Advanced Bank Recon
 				-- The following fields are from the origin system		
 				,apcbk_comment = origin.apcbk_comment COLLATE Latin1_General_CI_AS			-- CHAR (30) 
 				,apcbk_password =  ISNULL(origin.apcbk_password, '''') COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -326,6 +330,8 @@ IF EXISTS (select 1 FROM sys.views where name = 'vyuCMBankAccount') DROP VIEW db
 					,strCbkNo
 					,intPayToDown
 					,intResponsibleEntityId
+					,ysnABREnable
+					,intABRDaysNoRef
 			)
 			OUTPUT 	inserted.intBankAccountId
 			SELECT	intBankId							= i.intBankId
@@ -410,6 +416,8 @@ IF EXISTS (select 1 FROM sys.views where name = 'vyuCMBankAccount') DROP VIEW db
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
 					,intResponsibleEntityId				= i.intResponsibleEntityId
+					,ysnABREnable						= i.ysnABREnable
+					,intABRDaysNoRef					= i.intABRDaysNoRef
 			FROM	inserted i 
 
 			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -612,6 +620,8 @@ IF EXISTS (select 1 FROM sys.views where name = 'vyuCMBankAccount') DROP VIEW db
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
 					,intResponsibleEntityId				= i.intResponsibleEntityId
+					,ysnABREnable						= i.ysnABREnable
+					,intABRDaysNoRef					= i.intABRDaysNoRef
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 

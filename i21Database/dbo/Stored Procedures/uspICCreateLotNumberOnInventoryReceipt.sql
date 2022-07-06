@@ -300,8 +300,14 @@ BEGIN
 			,strCertificateId
 			,strTrackingNumber
 			,strWarehouseRefNo
+			,strCargoNo
+			,strWarrantNo
 			,intSourceType
 			,intLotStatusId
+			,intContractHeaderId
+			,intContractDetailId
+			,ysnWeighed
+			,strSealNo
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -324,13 +330,13 @@ BEGIN
 			,dtmExpiryDate			= ItemLot.dtmExpiryDate
 			,dtmManufacturedDate	= ItemLot.dtmManufacturedDate
 			,intOriginId			= ItemLot.intOriginId
-			,intGradeId				= ISNULL(ItemLot.intGradeId, ReceiptItem.intGradeId)
+			,intGradeId				= COALESCE(ItemLot.intGradeId, ReceiptItem.intGradeId, SourceLot.intGradeId)
 			,strBOLNo				= Receipt.strBillOfLading
 			,strVessel				= Receipt.strVessel
 			,strReceiptNumber		= Receipt.strReceiptNumber
-			,strMarkings			= ItemLot.strMarkings
+			,strMarkings			= COALESCE(ItemLot.strMarkings, SourceLot.strMarkings)
 			,strNotes				= ItemLot.strRemarks
-			,intEntityVendorId		= ISNULL(ItemLot.intEntityVendorId, Receipt.intEntityVendorId)  
+			,intEntityVendorId		= COALESCE(ItemLot.intEntityVendorId, Receipt.intEntityVendorId, SourceLot.intEntityVendorId)  
 			,strVendorLotNo			= ItemLot.strVendorLotId
 			,strGarden				= ItemLot.strGarden
 			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
@@ -342,7 +348,7 @@ BEGIN
 			,strSourceTransactionId		= Receipt.strReceiptNumber
 			,intSourceTransactionTypeId = @InventoryTransactionType_InventoryReceipt
 			,strContainerNo			= ItemLot.strContainerNo
-			,strCondition			= ISNULL(NULLIF(ItemLot.strCondition, ''), @DefaultLotCondition)
+			,strCondition			= COALESCE(NULLIF(ItemLot.strCondition, ''), SourceLot.strCondition, @DefaultLotCondition)
 			,intInventoryReceiptId			= Receipt.intInventoryReceiptId
 			,intInventoryReceiptItemId		= ReceiptItem.intInventoryReceiptItemId
 			,intInventoryReceiptItemLotId	= ItemLot.intInventoryReceiptItemLotId
@@ -355,8 +361,14 @@ BEGIN
 			,strCertificateId		= ItemLot.strCertificateId
 			,strTrackingNumber		= ItemLot.strTrackingNumber
 			,strWarehouseRefNo		= ItemLot.strWarehouseRefNo
+			,strCargoNo				= ItemLot.strCargoNo
+			,strCargoNo				= ItemLot.strWarrantNo
 			,intSourceType			= Receipt.intSourceType
 			,intLotStatusId			= ItemLot.intLotStatusId
+			,intContractHeaderId	= ISNULL(SourceLot.intContractHeaderId, ReceiptItem.intContractHeaderId) 
+			,intContractDetailId	= ISNULL(SourceLot.intContractDetailId, ReceiptItem.intContractDetailId)
+			,ysnWeighed				= ISNULL(SourceLot.ysnWeighed, ReceiptItem.ysnWeighed) 
+			,strSealNo				= ISNULL(SourceLot.strSealNo, Receipt.strSealNo) 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -368,6 +380,8 @@ BEGIN
 				ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
 				ON StorageLocation.intStorageLocationId = ISNULL(ItemLot.intStorageLocationId, ReceiptItem.intStorageLocationId)
+			LEFT JOIN tblICLot SourceLot
+				ON SourceLot.intLotId = ItemLot.intSourceLotId
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
 
 END 

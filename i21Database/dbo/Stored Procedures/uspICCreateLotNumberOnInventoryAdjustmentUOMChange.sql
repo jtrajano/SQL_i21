@@ -41,6 +41,13 @@ BEGIN
 			,[strTransactionId]
 			,[intWeightUOMId]
 			,[dblWeight]
+			,intContractHeaderId
+			,intContractDetailId
+			,ysnWeighed
+			,strSealNo
+			,intParentLotId
+			,dtmManufacturedDate
+			,dtmExpiryDate
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -56,6 +63,13 @@ BEGIN
 			,[strTransactionId]			= Header.strAdjustmentNo
 			,[intWeightUOMId]           = Detail.intWeightUOMId
 			,[dblWeightQty]             = Detail.dblWeight
+			,intContractHeaderId		= SourceLot.intContractHeaderId
+			,intContractDetailId		= SourceLot.intContractDetailId
+			,ysnWeighed					= SourceLot.ysnWeighed
+			,strSealNo					= SourceLot.strSealNo
+			,intParentLotId				= SourceLot.intParentLotId
+			,dtmManufacturedDate		= SourceLot.dtmManufacturedDate
+			,dtmExpiryDate				= SourceLot.dtmExpiryDate
 	FROM tblICInventoryAdjustment Header
 		INNER JOIN tblICInventoryAdjustmentDetail Detail 
 			ON Detail.intInventoryAdjustmentId = Header.intInventoryAdjustmentId

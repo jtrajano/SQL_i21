@@ -658,6 +658,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , strItemDescription
 			 , strFullAddress
 			 , strStatementFooterComment
+			 , strPaymentMethod
 		)
 		SELECT intEntityCustomerId		= C.intEntityCustomerId
 			 , intInvoiceId				= CB.intCustomerBudgetId
@@ -671,7 +672,8 @@ IF @ysnIncludeBudgetLocal = 1
 			 , strInvoiceType			= 'Customer Budget'
 			 , strItemDescription		= 'Budget due for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
 			 , strFullAddress			= C.strFullAddress
-			 , strStatementFooterComment = C.strStatementFooterComment
+			 , strStatementFooterComment= C.strStatementFooterComment
+			 , strPaymentMethod			= NULL
 		FROM tblARCustomerBudget CB
 		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityId

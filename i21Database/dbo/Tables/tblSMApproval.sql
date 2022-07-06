@@ -27,6 +27,7 @@
 )
 
 GO
+
 	CREATE NONCLUSTERED INDEX [IX_tblSMApproval_intTransactionId] ON dbo.tblSMApproval ([intTransactionId],[ysnCurrent]) INCLUDE([intApproverId],[dtmDate])
 GO
 	CREATE NONCLUSTERED INDEX [IX_tblSMApproval_strStatus] ON [dbo].[tblSMApproval] ([strStatus] ASC) INCLUDE ([intTransactionId],[intSubmittedById])

@@ -25,6 +25,7 @@
 	[dblSubtotal]          DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [ysnPosted]            BIT             NOT NULL DEFAULT 0,
     [ysnPaid]              BIT             NOT NULL DEFAULT 0,
+	[ysnProcessedClaim]    BIT			   NOT NULL DEFAULT 0,
     [strBillId]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblAmountDue]         DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [dtmDatePaid]          DATETIME        NULL ,
@@ -50,7 +51,8 @@
 	[dblTempInterest] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblAverageExchangeRate] DECIMAL (18, 6) NULL,
     [intTransactionType] INT NOT NULL DEFAULT 0, 
-    [intPurchaseOrderId] INT NULL, 
+    [intPurchaseOrderId] INT NULL,
+	[strCreatedWith] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, -- Possible values: "IDP" which indicates that the bill was created through IDP, or null if created the usual way
 	[strPONumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipToAttention] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipToAddress] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
@@ -92,7 +94,7 @@
 	[dtmExportedDate] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
 	[dblPaymentTemp] DECIMAL(18, 6) NOT NULL DEFAULT 0,
-	[ysnInPayment] BIT NULL DEFAULT 0,
+	[ysnInPayment] BIT NULL DEFAULT 0
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     -- CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),

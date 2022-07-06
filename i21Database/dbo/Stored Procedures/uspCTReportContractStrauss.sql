@@ -212,14 +212,11 @@ BEGIN TRY
 		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
 	from
 		tblCTContractHeader ch
-		,tblSMMultiCompany smc
-		,tblIPMultiCompany mc
-		,tblSMUserSecurity us
+		inner join tblSMMultiCompany smc on smc.intMultiCompanyId = ch.intCompanyId
+		inner join tblIPMultiCompany mc on mc.intCompanyId = smc.intMultiCompanyId
+		inner join tblSMUserSecurity us on lower(us.strUserName) = lower(mc.strApprover)
 	where
 		ch.intContractHeaderId = @intContractHeaderId
-		and smc.intMultiCompanyId = ch.intCompanyId
-		and mc.intCompanyId = smc.intMultiCompanyId
-		and lower(us.strUserName) = lower(mc.strApprover)
 
 	select
 		@ysnIsParent = t.ysnIsParent

@@ -424,16 +424,24 @@ BEGIN
 				,[strTransactionForm]
 				,[strModuleName]	 
 	FROM #tmpGLDetail
-	DECLARE @PostResult INT
 
-	EXEC @PostResult = uspGLBookEntries @GLEntries, @ysnPost
+	DECLARE @PostResult INT
+	EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
 		
 	IF @@ERROR <> 0	 OR @PostResult <> 0 GOTO Post_Rollback
+
 	UPDATE tblCMBankTransaction
 	SET		ysnPosted = @ysnPost
+			,intFiscalPeriodId = F.intGLFiscalYearPeriodId
 			,intConcurrencyId += 1 
+	FROM tblCMBankTransaction A
+	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
 	WHERE	strTransactionId = @strTransactionId
+	
 	IF @@ERROR <> 0	GOTO Post_Rollback
+
+	
+	
 END
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP

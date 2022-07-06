@@ -15,7 +15,12 @@ BEGIN
 
 	DECLARE @filter NVARCHAR(MAX)
 
-	SET @filter = @fieldname
+	SET @filter = CASE @datatype
+					WHEN 'Date'
+						THEN 'DATEADD(dd, DATEDIFF(dd, 0,' + @fieldname + '), 0)'
+					WHEN 'DateTime'
+						THEN 'DATEADD(dd, DATEDIFF(dd, 0,' + @fieldname + '), 0)'
+					ELSE @fieldname END
 
 	SET @filter = @filter + CASE @datatype
 				WHEN 'Date'
@@ -23,8 +28,8 @@ BEGIN
 				WHEN 'DateTime'
 					THEN
 						CASE UPPER(@condition)
-						WHEN UPPER('Between') THEN ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
 						WHEN UPPER('Equal To') THEN ' = ''' + @from + ''''
+						ELSE ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
 						END
 				WHEN 'String'
 					THEN

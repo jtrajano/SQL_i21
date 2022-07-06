@@ -96,6 +96,8 @@ RETURNS @table TABLE
 , [intLoadShipmentId]				INT NULL	
 , [intLoadShipmentDetailId]			INT NULL	
 , [intLoadShipmentCostId]			INT NULL	
+, [intBookId]						INT NULL
+, [intSubBookId]					INT NULL
 )
 AS
 BEGIN
@@ -332,6 +334,8 @@ SELECT DISTINCT
 	,[intLoadShipmentId]			 = B.intLoadShipmentId
 	,[intLoadShipmentDetailId]	     = B.intLoadShipmentDetailId
 	,[intLoadShipmentCostId]	     = NULL 
+	,[intBookId] = A.intBookId
+	,[intSubBookId] = A.intSubBookId
 
 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -576,7 +580,8 @@ WHERE
 					FROM tblAPVoucherPayable 
 					WHERE intEntityVendorId = A.intEntityVendorId 
 					AND intContractDetailId = Contracts.intContractDetailId
-					AND strSourceNumber <> A.strReceiptNumber
+					--AND strSourceNumber <> A.strReceiptNumber
+					AND strSourceNumber IN (LogisticsView2.strLoadNumber, LogisticsView.strLoadNumber)
 					AND intInventoryReceiptItemId IS NULL
 					AND intInventoryReceiptChargeId IS NULL 
 					AND intInventoryShipmentChargeId IS NULL
@@ -769,6 +774,8 @@ SELECT DISTINCT
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
 		,[intLoadShipmentDetailId]	     			= NULL 
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
+		,[intBookId]								= A.intBookId
+		,[intSubBookId]								= A.intSubBookId
 FROM 
 	[vyuICChargesForBilling] A
 	INNER JOIN (
@@ -918,7 +925,8 @@ WHERE
 						FROM tblAPVoucherPayable 
 						WHERE intEntityVendorId = A.intEntityVendorId 
 						AND intContractDetailId = CD.intContractDetailId
-						AND strSourceNumber <> A.strSourceNumber
+						--AND strSourceNumber <> A.strSourceNumber
+						AND strSourceNumber IN (A.strLoadNumber)
 						AND intInventoryReceiptItemId IS NULL 
 						AND intInventoryReceiptChargeId IS NULL 
 						AND intInventoryShipmentChargeId IS NULL						

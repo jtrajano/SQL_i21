@@ -32,6 +32,7 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL, 
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICCategoryVendor] PRIMARY KEY ([intCategoryVendorId]), 
 		CONSTRAINT [FK_tblICCategoryVendor_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICCategoryVendor_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
@@ -40,6 +41,11 @@ Type the overview for the table here.
 	)
 
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICCategoryVendor_VendorCategoryXRef]
+		ON [dbo].[tblICCategoryVendor]([strVendorDepartment] ASC)
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
 		@level0type = N'SCHEMA',

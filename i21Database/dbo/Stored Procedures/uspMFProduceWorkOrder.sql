@@ -34,6 +34,8 @@
 	,@intWorkOrderProducedLotId INT = NULL OUTPUT
 	,@intLotStatusId INT = NULL
 	,@intWorkOrderProducedLotParentId INT = NULL
+	,@strCertificationName NVARCHAR(100) = NULL
+	,@strCertificationId NVARCHAR(50) = NULL
 	)
 AS
 BEGIN
@@ -55,6 +57,9 @@ BEGIN
 		,@ysnLotWeightsRequired BIT
 		,@ysnConcatenateParentLotonProduction BIT
 		,@intLoadId INT
+		,@strOffsiteProduction nvarchar(50)
+		,@strContainerNo nvarchar(50)
+		,@strMarkings nvarchar(MAX)
 
 	SELECT @dtmCreated = Getdate()
 
@@ -313,6 +318,24 @@ BEGIN
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	SELECT @strOffsiteProduction = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 129
+
+	if @strOffsiteProduction is null or @strOffsiteProduction=''
+	Begin
+		Select @strOffsiteProduction='False'
+	End
+
+	if @strOffsiteProduction='True'
+	Begin
+		Select @strContainerNo=@strReferenceNo
+			,@strMarkings=@strComment
+			,@strComment=NULL
+	End
+
 	SELECT @intAttributeTypeId = intAttributeTypeId
 	FROM dbo.tblMFManufacturingProcess
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
@@ -422,6 +445,16 @@ BEGIN
 			,NULL
 			,@strComment
 			,@intLotStatusId
+			,NULL
+			,NULL
+			,NULL
+			,@strContainerNo
+			,@strMarkings
+			,NULL
+			,NULL
+			,NULL
+			,@strCertificationName
+			,@strCertificationId
 	END
 	ELSE
 	BEGIN

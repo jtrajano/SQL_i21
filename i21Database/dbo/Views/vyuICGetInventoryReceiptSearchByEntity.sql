@@ -70,6 +70,8 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
 	, permission.intEntityContactId
+	, Receipt.strInternalComments
+	, fiscal.strPeriod strAccountingPeriod
 	, Receipt.dtmCreated 
 	, Receipt.intBookId
 	, Receipt.intSubBookId
@@ -103,5 +105,10 @@ FROM tblICInventoryReceipt Receipt
 		WHERE sl.intCompanyLocationId = Receipt.intLocationId
 			AND sl.intVendorId = permission.intEntityId
 	) accessibleReceipts
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal
 WHERE Receipt.strReceiptType = 'Purchase Contract'
 	AND Receipt.intSourceType = 2

@@ -130,11 +130,17 @@ BEGIN TRY
 			
 	);  
 
-	SELECT @dblTotalPriced = ISNULL(SUM(ISNULL(pfd.dblQuantity, 0)), 0)
-	FROM tblCTPriceFixation pf
-	JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
-	WHERE intContractHeaderId = @intContractHeaderId 
+	SELECT @dblTotalPriced = ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+	FROM (
+		SELECT dblQty = ISNULL(pfd.dblQuantity, 0) --dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, tCum.intUnitMeasureId, fCum.intUnitMeasureId, ISNULL(pfd.dblQuantity, 0))
+		FROM tblCTPriceFixation pf
+		JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
+		--JOIN tblICCommodityUnitMeasure fCum ON fCum.intCommodityUnitMeasureId = @intCommodityUOMId
+		--JOIN tblICItemUOM tCum ON tCum.intItemUOMId = pfd.intQtyItemUOMId
+		WHERE intContractHeaderId = @intContractHeaderId 
+	) tbl
 	
+
 	IF @RowState = 'Added'
 	BEGIN
 		IF	@intContractTypeId IS NULL
@@ -253,12 +259,6 @@ BEGIN TRY
 			IF ISNULL(@dblQuantity,0) > 0 AND ISNULL(@dblNoOfLots,0) = 0
 			BEGIN
 				SET @ErrMsg = 'No Of Lots is missing while creating contract.'
-				RAISERROR(@ErrMsg,16,1)
-			END
-			
-			IF (ISNULL(@dblQuantity, 0) <> 0 AND (ISNULL(@dblQuantity, 0) < ISNULL(@dblTotalPriced, 0)))
-			BEGIN
-				SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
 				RAISERROR(@ErrMsg,16,1)
 			END
 		END
@@ -398,7 +398,7 @@ BEGIN TRY
 			END
 		END
 
-		IF (@ysnMultiplePriceFixation = 1) AND (ISNULL(@dblQuantity, 0) <> 0 AND (ISNULL(@dblQuantity, 0) < ISNULL(@dblTotalPriced, 0)))
+		IF (@ysnMultiplePriceFixation = 1) AND (ISNULL(@dblQuantity, 0) < ISNULL(@dblTotalPriced, 0))
 		BEGIN
 			SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
 			RAISERROR(@ErrMsg,16,1)

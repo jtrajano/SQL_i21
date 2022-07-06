@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICCompareValuationVsGL
+CREATE PROCEDURE uspICCompareValuationVsGL
 	@dtmAsOfDate AS DATETIME = NULL 
 	,@resultAsHTML AS NVARCHAR(MAX) OUTPUT
 AS 

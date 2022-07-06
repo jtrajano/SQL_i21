@@ -225,16 +225,18 @@ BEGIN
 									, NULL as dblMFGDealDiscountAmountTWO
 									, '' as strMFGDealNameTHREE
 									, NULL as dblMFGDealDiscountAmountTHREE
-
-									, ((TR.dblTrlLineTot) - (CASE WHEN DEPT.ysnTobacco = 1  
-																	AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-																	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-																	AND TR.dblTrlQty >= 2
-																		THEN TR.dblTrlMatchLineTrlPromoAmount
-																WHEN TR.strTrpPaycode IN ('LOTTERY PO', 'COUPONS')
-																	THEN TR.dblTrpAmt
-																ELSE 0
-															 END)) as dblFinalSalesPrice
+									, CASE WHEN DEPT.ysnTobacco = 1   
+											AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+											AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+											AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
+											WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+											AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
+											WHEN TR.strTrpPaycode IN ('COUPONS')
+										THEN (TR.dblTrlUnitPrice - (TR.dblTrpAmt))
+											ELSE dblTrlUnitPrice * TR.dblTrlQty
+										END as  dblFinalSalesPrice
 
 									-- Optional Fields
 									, NULL AS intStoreTelephone
@@ -282,7 +284,7 @@ BEGIN
 					INNER JOIN (
 						SELECT DISTINCT intStoreId = Rebates.intStoreId
 							,ysnTobacco = Rebates.ysnTobacco
-							,intRegisterDepartmentId = CatLoc.intRegisterDepartmentId
+							,strCashRegisterDepartment = CatLoc.strCashRegisterDepartment
 						FROM tblSTStoreRebates Rebates
 						INNER JOIN tblSTStore Store
 							ON Rebates.intStoreId = Store.intStoreId
@@ -291,7 +293,7 @@ BEGIN
 						INNER JOIN tblICCategoryLocation CatLoc
 							ON Category.intCategoryId = CatLoc.intCategoryId
 							AND Store.intCompanyLocationId = CatLoc.intLocationId
-					) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.intRegisterDepartmentId = TR.intTrlDeptNumber
+					) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS
 
 					 WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL)
 						AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
@@ -391,18 +393,18 @@ BEGIN
 				, CASE WHEN ST.strCity IS NULL THEN '' ELSE REPLACE(ST.strCity, @Delimiter, '') END as strOutletCity
 				, UPPER(LEFT(ST.strState, 2)) as strOutletState
 				,  CASE WHEN ST.strZipCode IS NULL THEN '' ELSE ST.strZipCode END as strOutletZipCode
-				, CONVERT(NVARCHAR, dtmDate, 120) as strTransactionDateTime
-				, CAST(intTermMsgSN AS NVARCHAR(50)) as strMarketBasketTransactionId
+				, CONVERT(NVARCHAR, TR.dtmDate, 120) as strTransactionDateTime
+				, CAST(TR.intTermMsgSN AS NVARCHAR(50)) as strMarketBasketTransactionId
 				, CAST(intScanTransactionId AS NVARCHAR(20)) as strScanTransactionId
 				, CAST(intTrTickNumPosNum AS NVARCHAR(50)) as strRegisterId
 				, dblTrlQty as intQuantity
-				,CASE WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
+				,CASE WHEN TR.intTrlDeptNumber IN (SELECT strCashRegisterDepartment FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 							AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 							AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-							AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+							AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 								THEN TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
 						WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
-							AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+							AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 							THEN TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
 						WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
 							THEN (TR.dblTrlUnitPrice - TR.dblTrpAmt)
@@ -416,34 +418,34 @@ BEGIN
 					THEN 'Y'
 				WHEN CRP.strPromotionType = 'B2S$' 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+					AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 'Y'
 					WHEN DEPT.ysnTobacco = 1
 					AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 'Y' -- 2 Can Deal
 					WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 'Y'
 					ELSE 'N' END AS strPromotionFlag
 
 				, CASE WHEN DEPT.ysnTobacco = 1
 					AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 'Y' -- 2 Can Deal
 					WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 					THEN 'N' 
 					WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 'Y'
 					ELSE 'N' END AS strOutletMultipackFlag
 
 				, CASE WHEN DEPT.ysnTobacco = 1
 					AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 2 -- 2 Can Deal
 					WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 					THEN 0 	
@@ -454,12 +456,12 @@ BEGIN
 				, CASE WHEN DEPT.ysnTobacco = 1
 					AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN TR.dblTrlMatchLineTrlPromoAmount / dblTrlQty -- 2 Can Deal
 					WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 					THEN 0 
 					WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
 					ELSE 0 END AS dblOutletMultipackDiscountAmount
 				, '' AS strAccountPromotionName --21
@@ -480,25 +482,25 @@ BEGIN
 				, CASE WHEN DEPT.ysnTobacco = 1
 					AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 'Y' -- 2 Can Deal
 					ELSE 'N' END AS strManufacturerMultipackFlag
 				, CASE WHEN DEPT.ysnTobacco = 1 
 					AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 2 -- 2 Can Deal
 					ELSE 0 END AS intManufacturerMultipackQuantity
 				, CASE WHEN DEPT.ysnTobacco = 1
 					AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty -- 2 Can Deal
 					ELSE 0 END AS dblManufacturerMultipackDiscountAmount
 				, CASE WHEN DEPT.ysnTobacco = 1
 					AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 'Two Can Deal' -- 2 Can Deal
 					WHEN CRP.strPromotionType IN ('VAPS') -- This part is relaated to column 'dblManufacturerDiscountAmount'
 					THEN CRP.strManufacturerPromotionDescription
@@ -509,7 +511,7 @@ BEGIN
 				, CASE WHEN DEPT.ysnTobacco = 1
 					AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-						AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
 					THEN 'Two Can Deal' -- 2 Can Deal
 					ELSE '' END AS strManufacturerMultiPackDescription
 				, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
@@ -524,7 +526,9 @@ BEGIN
 				(   
 					SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId,intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
 					FROM tblSTTranslogRebates
-					WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
+					WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
+						AND ((strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE '%suspended%' AND strTransType NOT LIKE '%void%' AND strTrLineType<>'preFuel' AND strTransFuelPrepayCompletion IS NULL) 
+						OR     (strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE '%suspended%' AND strTransType NOT LIKE '%void%' AND strTrLineType='postFuel' AND strTransFuelPrepayCompletion IS NOT NULL))	
 				) TRR WHERE TRR.rn = 1		
 					AND TRR.ysnRJRSubmitted = CASE WHEN @ysnResubmit = CAST(0 AS BIT) 
 														THEN CAST(0 AS BIT) 
@@ -545,7 +549,7 @@ BEGIN
 			INNER JOIN (
 				SELECT DISTINCT intStoreId = Rebates.intStoreId
 					,ysnTobacco = Rebates.ysnTobacco
-					,intRegisterDepartmentId = CatLoc.intRegisterDepartmentId
+					,strCashRegisterDepartment = CatLoc.strCashRegisterDepartment
 				FROM tblSTStoreRebates Rebates
 				INNER JOIN tblSTStore Store
 					ON Rebates.intStoreId = Store.intStoreId
@@ -554,7 +558,27 @@ BEGIN
 				INNER JOIN tblICCategoryLocation CatLoc
 					ON Category.intCategoryId = CatLoc.intCategoryId
 					AND Store.intCompanyLocationId = CatLoc.intLocationId
-			) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.intRegisterDepartmentId = TR.intTrlDeptNumber
+			) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS
+			LEFT JOIN (
+				SELECT 
+					intTermMsgSN,
+					dtmDate,
+					intStoreId,
+					strTrlMatchLineTrlPromotionID,
+				SUM(dblTrlQty) AS dblSumTrlQty
+				FROM tblSTTranslogRebates 
+				WHERE ((strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE '%suspended%' AND strTransType NOT LIKE '%void%' AND strTrLineType<>'preFuel' AND strTransFuelPrepayCompletion IS NULL) 
+					OR     (strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE '%suspended%' AND strTransType NOT LIKE '%void%' AND strTrLineType='postFuel' AND strTransFuelPrepayCompletion IS NOT NULL))
+				GROUP BY 
+					intTermMsgSN, 
+					dtmDate,
+					intStoreId, 
+					strTrlMatchLineTrlPromotionID
+			) AS tblSumQty
+				ON TR.intTermMsgSN = tblSumQty.intTermMsgSN
+				AND TR.dtmDate = tblSumQty.dtmDate
+				AND TR.intStoreId = tblSumQty.intStoreId
+				AND TR.strTrlMatchLineTrlPromotionID = tblSumQty.strTrlMatchLineTrlPromotionID
 			WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL)
 				AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 		) as innerquery

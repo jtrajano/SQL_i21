@@ -12,6 +12,7 @@ SET ANSI_WARNINGS ON
 DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@COST_METHOD_Percentage AS NVARCHAR(50) = 'Percentage'
 		,@COST_METHOD_Amount AS NVARCHAR(50) = 'Amount'
+		,@COST_METHOD_CUSTOM_UNIT AS NVARCHAR(50) = 'Custom Unit'
 
 		,@ALLOCATE_COST_BY_Unit AS NVARCHAR(50) = 'Unit'
 
@@ -56,7 +57,7 @@ BEGIN
 					)
 				,dblTotalUnits = 
 					CASE 
-						WHEN CalculatedCharges.strCostMethod = 'Amount' THEN
+						WHEN CalculatedCharges.strCostMethod IN ('Amount', 'Custom Unit') THEN
 							ISNULL(TotalAmountOnSameChargesLink.dblTotalUnits, TotalUnitsOfAllItems.dblTotalUnits) 
 						ELSE 
 							TotalUnitsOnSameChargesLink.dblTotalUnits 
@@ -99,7 +100,7 @@ BEGIN
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 					AND (
 						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
-						OR (CalculatedCharges.strChargesLink IS NULL AND CalculatedCharges.strCostMethod = 'Amount') 
+						OR (CalculatedCharges.strChargesLink IS NULL AND CalculatedCharges.strCostMethod IN ('Amount', 'Custom Unit')) 
 					)
 				OUTER APPLY (
 					SELECT 

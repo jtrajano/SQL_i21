@@ -101,7 +101,7 @@ FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
 	AND TR.intProductTypeId = 6
 	AND TR.intControlPointId IN (
-		5
+		4,5
 		,9
 		)
 JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
@@ -113,7 +113,7 @@ JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND ST.intControlPointId IN (
-		5
+		4,5
 		,9
 		)
 	AND S.intSampleId IN (

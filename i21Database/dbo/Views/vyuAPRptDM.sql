@@ -20,9 +20,9 @@ SELECT
 										THEN  'Container Rejection - Commodity cost' 
 										WHEN DMDetails.intLoadId > 0 THEN 'Weight Claim'
 										ELSE ''
-										END COLLATE Latin1_General_CI_AS
+										END
 		,strUOM					=	QtyUOMDetails.strUnitMeasure
-		,strClaimUOM			=	'' COLLATE Latin1_General_CI_AS
+		,strClaimUOM			=	''
 		,strCostUOM				=	CASE WHEN DMDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
 		,strLPlant				=	LPlant.strSubLocationName
 		,intContractSeqId		=	ContractDetail.intContractSeq

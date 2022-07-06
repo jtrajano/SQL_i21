@@ -2,7 +2,8 @@
 CREATE PROCEDURE uspCMReconcileBankRecords
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL,
-	@intUserId AS INT
+	@intUserId AS INT,
+	@dtmDateEntered AS DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -102,8 +103,14 @@ IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 --IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 
 -- Mark all CM transactions as cleared.
-UPDATE	[dbo].[tblCMBankTransaction]
-SET		dtmDateReconciled = @dtmDate
+
+--UPDATE	[dbo].[tblCMBankTransaction]
+--SET		dtmDateReconciled = @dtmDateEntered
+DECLARE @Id Id
+
+INSERT INTO @Id
+SELECT intTransactionId
+FROM tblCMBankTransaction
 WHERE	intBankAccountId = @intBankAccountId
 		AND ysnPosted = 1
 		AND ysnClr = 1
@@ -111,6 +118,18 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
 		--AND dbo.fnIsDepositEntry(strLink) = 0
 		AND strLink NOT IN (SELECT strLink COLLATE Latin1_General_CI_AS  FROM #tmpOriginDepositTransaction) --This is to improved the query by not using fnIsDespositEntry
+
+UPDATE t
+SET dtmDateReconciled =  @dtmDate
+FROM  tblCMBankTransaction t 
+JOIN @Id i on i.intId = t.intTransactionId
+
+UPDATE t
+SET dtmDateReconciled =  @dtmDate
+FROM  tblCMABRActivityMatched t 
+JOIN @Id i on i.intId = t.intTransactionId
+
+
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 		
 --=====================================================================================================================================

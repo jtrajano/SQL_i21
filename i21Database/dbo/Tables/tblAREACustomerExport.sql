@@ -5,6 +5,7 @@
 	[strEntityNo]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,	
 	--Description
     [strName]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
+    [strAccountType]		NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
 	--GroupRequired
 	[ysnGroupRequired]		BIT NOT NULL DEFAULT(1),
 	--LocationRequired
@@ -30,6 +31,7 @@
 	strAddress2				NVARCHAR(1000) COLLATE Latin1_General_CI_AS NOT NULL,	
 	--City
 	strCity					NVARCHAR(1000) COLLATE Latin1_General_CI_AS NOT NULL,	
+	strCountry				NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,	
 	--StateProv
 	strStateProv			NVARCHAR(1000) COLLATE Latin1_General_CI_AS NOT NULL,	
 	--PostalCode
@@ -55,7 +57,5 @@
 	dblShipToLongitude NUMERIC(18, 6) NULL,
 	dtmDateCreated DATETIME2 NULL,
 	dtmDateModified DATETIME2 NULL,
-	dtmDateLastUpdated AS COALESCE(dtmDateModified, dtmDateCreated),
-	strAccountType NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
-	strCountry NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+	dtmDateLastUpdated AS COALESCE(dtmDateModified, dtmDateCreated)
 )

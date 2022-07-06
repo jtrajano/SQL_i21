@@ -16,7 +16,8 @@ SELECT
 	, Cat.intCategoryId
 	, Cat.strCategoryCode
 	, Cat.strDescription AS categoryDesc
-	, IP.dblSalePrice AS dblPrice
+	, UM.strUnitMeasure AS strUnitMeasure
+	, itemPricing.dblSalePrice AS dblPrice
 	, IL.intFamilyId
 	, IL.intClassId
 	, IL.intVendorId
@@ -24,7 +25,10 @@ SELECT
 	, Family.strSubcategoryId AS strFamily
 	, Class.strSubcategoryId AS strClass
 	, ST.intStoreId
+	, I.intItemId
 FROM tblICItemUOM UOM
+JOIN tblICUnitMeasure UM
+	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 JOIN tblICItemLocation IL 
 	ON UOM.intItemId = IL.intItemId 
 JOIN tblSTStore ST 
@@ -37,10 +41,11 @@ LEFT JOIN tblAPVendor vendor
 	ON IL.intVendorId = vendor.intEntityId
 JOIN tblSMCompanyLocation CL 
 	ON CL.intCompanyLocationId = IL.intLocationId 
-JOIN tblICItemPricing IP 
-	ON IP.intItemLocationId = IL.intItemLocationId 
 JOIN tblICItem I 
 	ON I.intItemId = UOM.intItemId 
 JOIN tblICCategory Cat 
 	ON I.intCategoryId = Cat.intCategoryId
-WHERE UOM.ysnStockUnit = CAST(1 AS BIT)
+JOIN vyuSTItemHierarchyPricing itemPricing
+	ON I.intItemId = itemPricing.intItemId
+	AND IL.intItemLocationId = itemPricing.intItemLocationId
+	AND UOM.intItemUOMId = itemPricing.intItemUOMId

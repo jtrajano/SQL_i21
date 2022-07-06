@@ -142,14 +142,14 @@ INNER JOIN (
 			 , intTaxCodeId
 			 , intTaxGroupId
 			 , intTaxClassId
+			 , intSalesTaxAccountId
 			 , strCalculationMethod
 			 , dblRate
 			 , dblAdjustedTax		
 			 , dblTax				
 			 , ysnTaxExempt
 			 , ysnTaxAdjusted
-			 , ysnInvalidSetup
-			 , intSalesTaxAccountId
+			 , ysnInvalidSetup			 
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	LEFT JOIN (
@@ -167,7 +167,7 @@ INNER JOIN (
 			 , strItemNo
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
-	CROSS APPLY (
+	OUTER APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
 		FROM dbo.tblARInvoiceDetailTax TCT_IDT WITH (NOLOCK)
 		INNER JOIN tblARInvoiceDetail TCT_ID WITH (NOLOCK)

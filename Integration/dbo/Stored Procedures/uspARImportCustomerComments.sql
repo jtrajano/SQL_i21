@@ -89,6 +89,10 @@ BEGIN
 	AND (@Checking = 0) 
 	
 	BEGIN
+		
+		UPDATE  ptcmtmst SET ptcmt_comment = REPLACE( REPLACE(ptcmt_comment,CHAR(0x0001),'') ,CHAR(0x0002),'')   
+		WHERE CHARINDEX(CHAR(1), ptcmt_comment) <> 0 OR CHARINDEX( CHAR(0x0002), ptcmt_comment ) <> 0
+
 		INSERT INTO [dbo].[tblEMEntityMessage]
 				   ([intEntityId]
 				   ,[strMessageType]

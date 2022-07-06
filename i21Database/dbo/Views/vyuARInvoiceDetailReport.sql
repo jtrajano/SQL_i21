@@ -21,6 +21,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strItemDescription		= ITEM.strDescription
 	 , strComments				= I.strComments
 	 , dblQtyShipped			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ID.dblQtyShipped, 0) * -1 END
+	 , strUnitMeasure 			= ID.[strUnitMeasure]
 	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblShipmentNetWt, 0) ELSE ISNULL(ID.dblShipmentNetWt, 0) * -1 END
 	 , dblUnitCost				= CASE WHEN CT.intContractHeaderId IS NOT NULL AND ISNUlL(ID.dblUnitPrice, 0) <> 0 THEN ISNUlL(ID.dblUnitPrice, 0) ELSE ISNULL( ID.dblPrice, 0) END
 	 , dblCostPerUOM			= ISNULL(ID.dblPrice, 0)
@@ -53,7 +54,7 @@ INNER JOIN (
 		 , intInvoiceDetailId
 		 , intContractHeaderId
 		 , intContractDetailId
-		 , intItemId
+		 , ID.intItemId
 		 , dblQtyShipped
 		 , dblItemWeight
 		 , dblPrice
@@ -62,17 +63,33 @@ INNER JOIN (
 		 , dblDiscount
 		 , dblTotal
 		 , strUnitCostCurrency = SC.strCurrency
-		 , dblShipmentNetWt
-		 , intEntitySalespersonId
+		 , ID.intItemUOMId
+		 , strUnitMeasure
 		 , strBinNumber
 		 , strGroupNumber
 		 , strFeedDiet
+		 , dblShipmentNetWt
+		 , intEntitySalespersonId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID
 		     , strCurrency
 		FROM dbo.tblSMCurrency
 	) SC ON ID.intSubCurrencyId = SC.intCurrencyID
+	LEFT JOIN (
+		SELECT intItemUOMId
+				, intItemId
+				, IU.intUnitMeasureId
+				, IU.strUpcCode
+				,strUnitMeasure
+		FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intUnitMeasureId
+					, strUnitMeasure
+			FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+		) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+	) U ON ID.intItemId = U.intItemId 
+	   AND U.intItemUOMId = ID.intItemUOMId
 ) ID ON I.intInvoiceId = ID.intInvoiceId
 INNER JOIN (
 	SELECT EME.intEntityId
@@ -92,6 +109,7 @@ LEFT JOIN (
 		 , strDescription
 	FROM dbo.tblICItem WITH (NOLOCK)
 ) ITEM ON ID.intItemId = ITEM.intItemId
+
 LEFT JOIN (
 	SELECT intCategoryId
 		 , strCategoryCode

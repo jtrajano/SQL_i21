@@ -13,6 +13,7 @@ SELECT	L.strLoadNumber
 		,intWeightUOMId = WeightItemUOM.intItemUOMId
 		,dblWeightUOMConvFactor = WeightItemUOM.dblUnitQty 
 		,LC.dblNetWt
+		,strMarkings = LC.strMarks 
 FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 			ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblICItemUOM ItemUOM 
@@ -28,7 +29,7 @@ FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 		LEFT JOIN tblCTWeightGrade PWG 
 			ON PWG.intWeightGradeId = CH.intWeightId
 		OUTER APPLY 
-			(SELECT LC.intLoadContainerId, LC.strContainerNumber, LC.dblNetWt, LDCL.dblQuantity, LDCL.dblReceivedQty FROM tblLGLoadDetailContainerLink LDCL 
+			(SELECT LC.intLoadContainerId, LC.strContainerNumber, LC.dblNetWt, LDCL.dblQuantity, LDCL.dblReceivedQty, LC.strMarks FROM tblLGLoadDetailContainerLink LDCL 
 				INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			 WHERE LD.intLoadDetailId = LDCL.intLoadDetailId AND ISNULL(LC.ysnRejected, 0) = 0) LC
 		WHERE L.intShipmentType = 1

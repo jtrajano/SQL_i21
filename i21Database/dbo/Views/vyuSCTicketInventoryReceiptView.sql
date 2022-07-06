@@ -6,6 +6,7 @@ ICRI.intInventoryReceiptId,
 ICRI.intInventoryReceiptItemId,
 ICRI.strReceiptNumber,
 ICRI.strReceiptType,
+ICRI.strCommodityCode,
 ICRI.strItemNo,
 ICRI.strItemDescription,
 	

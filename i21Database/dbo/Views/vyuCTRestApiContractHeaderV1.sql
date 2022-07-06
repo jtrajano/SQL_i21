@@ -83,6 +83,7 @@ SELECT
 	, strExternalContractNumber
 	, ysnReceivedSignedFixationLetter
 	, ysnReadOnlyInterCoContract
+	, ysnEnableFutures
 	, strPricingType
 	, strContractType
 	, strStatuses

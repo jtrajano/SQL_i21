@@ -24,9 +24,9 @@
 		,intEntityId = us.[intEntityId]
 		,ysnDisabled = (case when convert(bit, us.ysnActive) = 0 then convert(bit, 1) else convert(bit, 0) end)
 	from
-		tblARSalesperson us, [tblEMEntityToContact] etc, tblEMEntity en, [tblEMEntityCredential] ec
+		tblARSalesperson us
+		inner join [tblEMEntityToContact] etc on etc.intEntityId = us.[intEntityId]
+		inner join tblEMEntity en on en.intEntityId = etc.intEntityContactId
+		inner join [tblEMEntityCredential] ec on ec.intEntityId = etc.intEntityContactId
 	where
 		us.[intEntityId] is not null
-		and etc.intEntityId = us.[intEntityId]
-		and en.intEntityId = etc.intEntityContactId
-		and ec.intEntityId = etc.intEntityContactId

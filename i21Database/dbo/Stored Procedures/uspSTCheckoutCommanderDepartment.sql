@@ -69,7 +69,7 @@ BEGIN
 		)
 		SELECT DISTINCT
 			strErrorType			= 'NO MATCHING TAG'
-			, strErrorMessage		= 'No Matching Register Department Setup in Category'
+			, strErrorMessage		= 'No Matching Cash Register Department Setup in Category'
 			, strRegisterTag		= 'deptBase sysid'
 			, strRegisterTagValue	= ISNULL(Chk.strSysId, '')
 			, intCheckoutId			= @intCheckoutId
@@ -85,7 +85,7 @@ BEGIN
 					Chk.strSysId AS strXmlRegisterMerchandiseCode
 				FROM @UDT_TransDept Chk
 				JOIN dbo.tblICCategoryLocation Cat 
-					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50))
 				LEFT JOIN dbo.tblICItem I 
 					ON Cat.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 
@@ -163,7 +163,7 @@ BEGIN
 					, 0 [ysnLotteryItemAdded]
 				FROM @UDT_TransDept Chk
 				JOIN dbo.tblICCategoryLocation Cat 
-					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50))
 				--JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
 				LEFT JOIN dbo.tblICItem I 
 					ON Cat.intGeneralItemId = I.intItemId
@@ -216,7 +216,7 @@ BEGIN
 				JOIN tblICCategoryLocation CatLoc 
 					ON Cat.intCategoryId = CatLoc.intCategoryId
 				JOIN @UDT_TransDept Chk 
-					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.intRegisterDepartmentId AS NVARCHAR(50))
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.strCashRegisterDepartment AS NVARCHAR(50))
 				LEFT JOIN dbo.tblICItem I 
 					ON CatLoc.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 
@@ -233,7 +233,46 @@ BEGIN
 				
 			END
 
-
+--Cashier Department Totals Part
+		--CHECK if their a record on the tblSTCheckoutCashiers equal to checkout id if thier existing record UPDATE if none INSERT
+		IF NOT EXISTS (SELECT 1 FROM dbo.tblSTCheckoutCashiers WHERE intCheckoutId = @intCheckoutId)
+			BEGIN
+				INSERT INTO dbo.tblSTCheckoutCashiers (
+					 [intCheckoutId]
+					,[intCashierId]
+					,[dblTotalSales]
+					,[dblRefundAmount]
+					,[intNumberOfRefunds]
+					,[intNoSalesCount]
+					)
+				SELECT
+					@intCheckoutId  
+					, ISNULL((SELECT intCashierId FROM tblSTCashier WHERE strCashierName = Chk.strCashierName COLLATE Latin1_General_CI_AS) , 0)
+					, CAST(Chk.dblCashierSaleAmount AS DECIMAL(18,6))
+					, CAST(Chk.dblCashierRefundAmount  AS DECIMAL(18,6))
+					, CAST(Chk.intCashierRefundCount AS INT) 
+					, CAST(Chk.intCashierSaleCount AS INT) 
+				FROM @UDT_TransDept Chk
+			END
+		ELSE
+			BEGIN
+				UPDATE STC  
+				SET	 [intCashierId]   = ISNULL((SELECT intCashierId FROM tblSTCashier WHERE strCashierName = Chk.strCashierName COLLATE Latin1_General_CI_AS) , 0)
+				    , [dblTotalSales] = CAST(Chk.dblCashierSaleAmount AS DECIMAL(18,6))
+					, [dblRefundAmount]	= CAST(Chk.dblCashierRefundAmount  AS DECIMAL(18,6))
+					, [intNumberOfRefunds] = CAST(Chk.intCashierRefundCount AS INT)
+					, [intNoSalesCount] = CAST(Chk.intCashierSaleCount AS INT) 
+				FROM tblSTCheckoutCashiers STC
+				JOIN dbo.tblSTCheckoutDepartmetTotals DT 
+					ON STC.intCheckoutId = DT.intCheckoutId
+				JOIN tblICCategory Cat 
+					ON DT.intCategoryId = Cat.intCategoryId
+				JOIN tblICCategoryLocation CatLoc 
+					ON Cat.intCategoryId = CatLoc.intCategoryId
+				JOIN @UDT_TransDept Chk 
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.strCashRegisterDepartment AS NVARCHAR(50))
+				WHERE STC.intCheckoutId = @intCheckoutId 
+			END
 		
 
 		-- Update Register Amount

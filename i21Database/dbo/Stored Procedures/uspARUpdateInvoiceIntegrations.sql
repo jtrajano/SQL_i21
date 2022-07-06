@@ -5,6 +5,7 @@
 	,@InvoiceDetailId 	INT = NULL
 	,@ysnLogRisk		BIT = 1
 	,@Post				BIT	= 0
+	,@Recap				BIT	= 1
 	,@FromPosting		BIT = 0
 AS  
 
@@ -119,10 +120,16 @@ BEGIN TRY
 	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
 
 	--UPDATE PREPAID ITEM CONTRACT
-	IF ISNULL(@ysnFromItemContract, 0) <> 0
+	IF(ISNULL(@intTransactionDetailId, 0) <> 0 AND ISNULL(@ysnFromItemContract, 0) = 0 AND @strTransactionType != 'Customer Prepayment' AND @Recap = 0)
 	BEGIN
-		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId,  @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName,  @strRowState, @intInvoiceId
-	END	
+		IF(@Post = 0)
+		BEGIN
+			SET @dblValueToUpdate = @dblValueToUpdate * -1
+		END
+
+		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId, @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName,  @strRowState, @intInvoiceId
+	END
+
 	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 	EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
 	IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
@@ -131,7 +138,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, @FromPosting, @Post
 	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId	
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
-	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
+	IF @FromPosting = 0 EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
 	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 	IF @ForDelete = 1 AND @InvoiceDetailId IS NULL EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
@@ -150,7 +157,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateInvoiceReportFields] @InvoiceIds, 0
 	
 	IF ISNULL(@ysnLogRisk, 0) = 1
-		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
+		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
 
 	IF @ForDelete = 1
 	BEGIN
@@ -160,6 +167,9 @@ BEGIN TRY
 		WHERE intTransactionId = @InvoiceId
 		AND intSourceTransactionId = 2
 	END
+
+	--INSERT TO TRANSACTION LINKS
+	EXEC dbo.[uspARInsertInvoiceTransactionLink] @InvoiceIds
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
@@ -185,4 +195,3 @@ BEGIN CATCH
 	EXEC sp_executesql @strThrow
 
 END CATCH
-

@@ -105,6 +105,7 @@
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
 	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemStandardWeight			NUMERIC(38,20)  = 0.000000
 	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000			
@@ -385,7 +386,7 @@ IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Ca
 		RETURN 0;
 	END
 
-IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Cash Refund'))
+IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Cash Refund', 'Agronomy', 'Dealer Credit Card'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('%s is not a valid invoice type!', 16, 1, @TransactionType);
@@ -735,6 +736,7 @@ BEGIN TRY
 		,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 		,@ItemWeightUOMId				= @ItemWeightUOMId
 		,@ItemWeight					= @ItemWeight
+		,@ItemStandardWeight			= @ItemStandardWeight
 		,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 		,@ItemShipmentTareWt			= @ItemShipmentTareWt
 		,@ItemShipmentNetWt				= @ItemShipmentNetWt

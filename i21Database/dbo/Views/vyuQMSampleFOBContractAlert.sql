@@ -62,6 +62,6 @@ FROM (
 		,CA1.strDescription
 		,CD.intContractHeaderId
 	) t
-	,tblCTEvent EV
+	inner join tblCTEvent EV on 1=1
 WHERE EV.strEventName = 'Unapproved FOB Contract Samples'
 	AND t.dtmDate < (GETDATE() - EV.intDaysToRemind)

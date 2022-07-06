@@ -128,7 +128,9 @@ BEGIN TRY
 						INSERT INTO #TempResults
 						SELECT CA.strCode + @strDivider + PA.strCode AS strCode, CA.strPrimary + @strDivider + PA.strCode AS strPrimary, '' as strSegment, CA.strDescription + @strDivider + PA.strDescription AS strDescription,
 							PA.strAccountGroup, PA.intAccountGroupId, SE.intAccountCategoryId, PA.intAccountStructureId, PA.intAccountSegmentId, PA.intAccountSegmentId AS strAccountSegmentId
-						FROM #ConstructAccount CA , #PrimaryAccounts PA LEFT JOIN tblGLAccountSegment SE on
+						FROM #ConstructAccount CA 
+							inner join #PrimaryAccounts PA  on 1=1
+							LEFT JOIN tblGLAccountSegment SE on
 						PA.intAccountSegmentId = SE.intAccountSegmentId
 						WHERE PA.intAccountStructureId = @iStructureType
 					END
@@ -155,7 +157,8 @@ BEGIN TRY
 								SELECT CA.strCode + @strDivider + S.strCode AS strCode, strPrimary, CA.strSegment + '' + S.strCode AS strSegment, CA.strDescription + @strDivider + S.strDescription AS strDescription
 									 ,CA.strAccountGroup, CA.intAccountGroupId, CA.intAccountStructureId, S.intAccountSegmentId, CA.strAccountSegmentId + ';' + CAST(S.intAccountSegmentId as NVARCHAR(50)) AS strAccountSegmentId
 									 ,CA.intAccountCategoryId AS intAccountCategoryId
-								FROM #ConstructAccount CA, #Segments S
+								FROM #ConstructAccount CA
+									inner join #Segments S on 1=1
 								WHERE S.intAccountStructureId = @iStructureType  							
 							END
 						 END

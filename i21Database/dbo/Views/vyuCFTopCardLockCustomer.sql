@@ -1,5 +1,4 @@
-﻿
-CREATE VIEW [dbo].[vyuCFTopCardLockCustomer]
+﻿CREATE VIEW [dbo].[vyuCFTopCardLockCustomer]
 AS
 
 
@@ -10,7 +9,9 @@ SELECT
 ,dblQuantity as dblQtyShipped
 ,dblQuantity as dblQtyOrdered
 ,dblCalculatedTotalPrice as dblInvoiceTotal
-,dtmTransactionDate as dtmDate
+,dtmTransactionDate
+,dtmInvoiceDate
+,dtmPostedDate
 ,emCont.strName AS strContactName
 ,emCont.strPhone AS strPhoneNumber
 FROM tblCFAccount as cfAccnt
@@ -25,3 +26,5 @@ ON emEnt.intEntityId = emCont.intEntityId
 AND emCont.ysnDefaultContact = 1
 WHERE ISNULL(cfTran.ysnPosted,0) = 1
 GO
+
+

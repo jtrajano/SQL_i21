@@ -7,7 +7,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCP
 	DROP VIEW vyuCPInvoicesCreditsReports
 GO
 -- AG VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG'	) = 1 and (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'EC') = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vyuCPInvoicesCreditsReports]
 		AS
@@ -39,19 +39,22 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,dblTaxUnitPrice = round(cast(dd.agstm_lc1_rt as float), 4)
 			--,dblTaxExtended = convert(decimal(10,2), (((dd.agstm_un * dd.agstm_un_prc) * dd.agstm_lc1_rt)/100))
 			,dblTaxExtended = convert(decimal(10,2), ((dd.agstm_pkg_ship * dd.agstm_un_per_pak) * dd.agstm_un_prc))
-		from coctlmst c, agcusmst t, agivcmst v, agstmmst d, agstmmst dd
-		where v.agivc_bill_to_cus = t.agcus_key
-			and d.agstm_bill_to_cus = t.agcus_key
+		from 
+			coctlmst c
+			inner join agcusmst t on 1=1
+			inner join agivcmst v on v.agivc_bill_to_cus = t.agcus_key
+			inner join agstmmst d on d.agstm_bill_to_cus = t.agcus_key
+			inner join agstmmst dd on dd.agstm_bill_to_cus = t.agcus_key
+		where 
 			and d.agstm_ivc_no = v.agivc_ivc_no
 			and d.agstm_rec_type = 1
-			and dd.agstm_bill_to_cus = t.agcus_key
 			and dd.agstm_ivc_no = v.agivc_ivc_no
 			and dd.agstm_rec_type = 5
 		')
 GO
 
 -- PETRO VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT'	) = 1 and (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'EC') = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vyuCPInvoicesCreditsReports]
 		AS
@@ -83,12 +86,15 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 			,dblTaxUnitPrice = round(cast(dd.ptstm_lc1_rt as float), 4)
 			--,dblTaxExtended = convert(decimal(10,2), (((dd.agstm_un * dd.agstm_un_prc) * dd.agstm_lc1_rt)/100))
 			,dblTaxExtended = convert(decimal(10,2), (dd.ptstm_pak_qty * dd.ptstm_un_prc))
-		from coctlmst c, ptcusmst t, ptivcmst v, ptstmmst d, ptstmmst dd
-		where v.ptivc_cus_no = t.ptcus_cus_no
-			and d.ptstm_bill_to_cus = t.ptcus_cus_no
+		from 
+			coctlmst c
+			inner join ptcusmst t on 1=1
+			inner join ptivcmst v on v.ptivc_cus_no = t.ptcus_cus_no
+			inner join ptstmmst d on d.ptstm_bill_to_cus = t.ptcus_cus_no
+			inner join ptstmmst dd on dd.ptstm_bill_to_cus = t.ptcus_cus_no
+		where 
 			and d.ptstm_ivc_no = v.ptivc_invc_no
 			and d.ptstm_rec_type = 1
-			and dd.ptstm_bill_to_cus = t.ptcus_cus_no
 			and dd.ptstm_ivc_no = v.ptivc_invc_no
 			and dd.ptstm_rec_type = 5
 		')

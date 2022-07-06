@@ -19,6 +19,3 @@ AS BEGIN
 
     RETURN @strResultUPC
 END
-GO
-
-

@@ -2,7 +2,7 @@
 AS 
 
 SELECT 
-	 ISNULL(A2.strVoucherIds, 'New Voucher') COLLATE Latin1_General_CI_AS AS strVoucherIds
+	 ISNULL(A2.strVoucherIds, 'New Voucher') AS strVoucherIds
 	--A2.strVoucherIds
 	,ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 	THEN (CASE 
@@ -29,6 +29,7 @@ SELECT
 	,A.intCurrencyId
 	,A.strCurrency
 	,A.dtmDate
+	,FP.strPeriod
 	,A.strReference
 	,A.strSourceNumber
 	,A.intPurchaseDetailId
@@ -168,3 +169,6 @@ AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(A2.intInventoryReceiptItemId
 AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(A2.intLoadDetailId,-1)
 AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(A2.intInventoryShipmentChargeId,-1)
 AND ISNULL(A.intItemId,-1) = ISNULL(A2.intItemId,-1)
+
+LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate

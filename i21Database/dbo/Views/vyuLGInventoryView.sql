@@ -3,7 +3,11 @@ AS
 SELECT TOP 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY strStatus)) as intKeyColumn,*  
 FROM (
 	SELECT
-		'In-transit' COLLATE Latin1_General_CI_AS AS strStatus
+		strStatus = CASE WHEN (CP.ysnIncludeStrippingInstructionStatus = 1 AND Shipment.intStorageLocationId IS NOT NULL) 
+							THEN 'Stripping Instruction Created' 
+						 WHEN (CP.ysnIncludeArrivedInPortStatus = 1 AND Shipment.ysnArrivedInPort = 1) 
+							THEN 'Arrived in Port'
+						ELSE 'In-transit' END COLLATE Latin1_General_CI_AS
 		,strContractNumber = Shipment.strContractNumber
 		,intContractSeq = Shipment.intContractSeq
 		,intContractDetailId = Shipment.intContractDetailId
@@ -43,6 +47,7 @@ FROM (
 		,dtmETAPOL = Shipment.dtmETAPOL
 		,dtmETSPOL = Shipment.dtmETSPOL
 		,dtmETAPOD = Shipment.dtmETAPOD
+		,dtmUpdatedAvailabilityDate = Shipment.dtmUpdatedAvailabilityDate
 		,strTrackingNumber = '' COLLATE Latin1_General_CI_AS
 		,strBLNumber = Shipment.strBLNumber
 		,dtmBLDate = Shipment.dtmBLDate
@@ -88,6 +93,7 @@ FROM (
 		,strCertification = Shipment.strCertification
 		,strCertificationId = Shipment.strCertificationId
 	FROM vyuLGInboundShipmentView Shipment
+		OUTER APPLY (SELECT ysnIncludeArrivedInPortStatus, ysnIncludeStrippingInstructionStatus FROM tblLGCompanyPreference) CP
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
 
@@ -123,6 +129,7 @@ FROM (
 		,dtmETAPOL = CAST(NULL AS DATETIME)
 		,dtmETSPOL = CAST(NULL AS DATETIME)
 		,dtmETAPOD = CAST(NULL AS DATETIME)
+		,dtmUpdatedAvailabilityDate = CAST(NULL AS DATETIME)
 		,strTrackingNumber = Spot.strLoadNumber
 		,strBLNumber = Spot.strBLNumber
 		,dtmBLDate = Spot.dtmBLDate
@@ -201,6 +208,7 @@ FROM (
 		,dtmETAPOL = L.dtmETAPOL
 		,dtmETSPOL = L.dtmETSPOL
 		,dtmETAPOD = L.dtmETAPOD
+		,dtmUpdatedAvailabilityDate = PCD.dtmUpdatedAvailabilityDate
 		,strTrackingNumber = L.strLoadNumber
 		,strBLNumber = L.strBLNumber
 		,dtmBLDate = L.dtmBLDate
@@ -288,4 +296,124 @@ FROM (
 	WHERE L.intPurchaseSale = 3 AND L.ysnPosted = 1
 		AND IV.strInvoiceNumber IS NULL
 		AND LD.intPickLotDetailId IS NULL
+
+	UNION ALL
+
+	--Open
+	SELECT 
+		'Open' COLLATE Latin1_General_CI_AS AS strStatus
+		,strContractNumber = PCH.strContractNumber
+		,intContractSeq = PCD.intContractSeq
+		,intContractDetailId = PCD.intContractDetailId
+		,dtmStartDate = PCD.dtmStartDate
+		,dtmEndDate = PCD.dtmEndDate
+		,dblOriginalQty = PCD.dblOriginalQty
+		,strOriginalQtyUOM = PUM.strUnitMeasure
+		,dblStockQty = (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0))
+		,strStockUOM = IUM.strUnitMeasure
+		,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(PCD.intItemUOMId, ISNULL(PCD.intNetWeightUOMId, PCD.intItemUOMId), (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0)))
+		,strWeightUOM = WUM.strUnitMeasure
+		,intEntityVendorId = PCH.intEntityId
+		,strVendor = V.strName
+		,intCustomerEntityId = NULL
+		,strCustomer = NULL
+		,strCommodity = CMDT.strCommodityCode
+		,strItemNo = I.strItemNo
+		,strItemDescription = I.strDescription
+		,strItemType = I.strType
+		,strItemSpecification = PCD.strItemSpecification
+		,strBundleItemNo = PBun.strItemNo
+		,strGrade = GRADE.strDescription
+		,strOrigin = ORIGIN.strDescription
+		,strVessel = PCD.strVessel
+		,strDestinationCity = DC.strCity
+		,dtmETAPOL = NULL
+		,dtmETSPOL = NULL
+		,dtmETAPOD = PCD.dtmUpdatedAvailabilityDate
+		,dtmUpdatedAvailabilityDate = PCD.dtmUpdatedAvailabilityDate
+		,strTrackingNumber = NULL
+		,strBLNumber = NULL
+		,dtmBLDate = NULL
+		,strContainerNumber = NULL
+		,strMarks = NULL
+		,strLotNumber = NULL
+		,strWarehouse = WH.strSubLocationName
+		,strLocationName = WHU.strName
+		,strCondition = '' COLLATE Latin1_General_CI_AS
+		,dtmPostedDate = NULL
+		,dblQtyInStockUOM = (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0)) * dbo.fnICConvertUOMtoStockUnit (I.intItemId, PCD.intItemUOMId, 1)
+		,intItemId = I.intItemId
+		,intWeightItemUOMId = PCD.intNetWeightUOMId
+		,strWarehouseRefNo = '' COLLATE Latin1_General_CI_AS
+		,dtmReceiptDate = CAST(NULL AS DATETIME)
+		,dblTotalCost = CAST(ISNULL((dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(PCD.intNetWeightUOMId, PCD.intItemUOMId), PCD.intPriceItemUOMId, (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0)))) 
+										* dbo.fnCTGetSequencePrice(PCD.intContractDetailId,NULL),0) AS NUMERIC(18,6)) / CASE WHEN (BC.ysnSubCurrency = 1) THEN BC.intCent ELSE 1 END
+		,dblFutures = PCD.dblFutures
+		,dblCashPrice = PCD.dblCashPrice
+		,dblBasis = PCD.dblBasis
+		,strPricingType = CASE WHEN PCH.intPricingTypeId = 2 
+							THEN  CASE WHEN ISNULL(PF.dblTotalLots,0) > 0 AND ISNULL(PF.dblLotsFixed,0) = 0 THEN 'Unfixed'
+										WHEN ISNULL(PF.dblTotalLots,0) = ISNULL(PF.dblLotsFixed,0) THEN 'Fully Fixed'
+										ELSE 'Partially Fixed' END
+							WHEN PCH.intPricingTypeId = 1 THEN 'Priced'
+							ELSE '' END COLLATE Latin1_General_CI_AS
+		,strPriceBasis = CAST(BC.strCurrency as VARCHAR(100)) + '/' + CAST(BUM.strUnitMeasure as VARCHAR(100))
+		,strINCOTerm = CB.strContractBasis
+		,strTerm = Term.strTerm
+		,strExternalShipmentNumber = NULL
+		,strERPPONumber = PCD.strERPPONumber
+		,strPosition = PO.strPosition
+		,intLoadId = NULL
+		,intCompanyLocationId = PCD.intCompanyLocationId
+		,intBookId = PCH.intBookId
+		,strBook = BK.strBook
+		,intSubBookId = PCH.intSubBookId
+		,strSubBook = SBK.strSubBook
+		,intCropYear = PCH.intCropYearId
+		,strCropYear = CRY.strCropYear
+		,strProducer = PRO.strName
+		,strCertification = CER.strCertificationName
+		,strCertificationId = '' COLLATE Latin1_General_CI_AS
+	FROM 
+		tblCTContractDetail PCD
+		INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
+		LEFT JOIN tblICItem I ON I.intItemId = PCD.intItemId
+		LEFT JOIN tblICCommodity CMDT ON CMDT.intCommodityId = I.intCommodityId
+		LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = I.intGradeId
+		LEFT JOIN tblICCommodityAttribute ORIGIN ON ORIGIN.intCommodityAttributeId = I.intOriginId
+		LEFT JOIN tblCTPosition PO ON PO.intPositionId = PCH.intPositionId
+		LEFT JOIN tblSMCity DC ON DC.intCityId = PCH.intINCOLocationTypeId
+		LEFT JOIN tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = PCD.intSubLocationId
+		LEFT JOIN tblICStorageLocation WHU ON WHU.intStorageLocationId = PCD.intStorageLocationId
+		LEFT JOIN tblCTBook BK ON BK.intBookId = PCH.intBookId
+		LEFT JOIN tblCTSubBook SBK ON SBK.intSubBookId = PCH.intSubBookId
+		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PCD.intUnitMeasureId
+		LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = PCD.intItemUOMId 
+		LEFT JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = PCD.intNetWeightUOMId
+		LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WUOM.intUnitMeasureId
+		LEFT JOIN tblEMEntity V ON V.intEntityId = PCH.intEntityId
+		LEFT JOIN tblSMCurrency BC ON BC.intCurrencyID = PCD.intBasisCurrencyId
+		LEFT JOIN tblICItemUOM BIU ON BIU.intItemUOMId = PCD.intBasisUOMId
+		LEFT JOIN tblICUnitMeasure BUM ON BUM.intUnitMeasureId = BIU.intUnitMeasureId
+		LEFT JOIN tblICItem PBun ON PBun.intItemId = PCD.intItemBundleId
+		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = PCH.intFreightTermId
+		LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
+		LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCH.intProducerId
+		LEFT JOIN tblSMTerm Term ON Term.intTermID = PCH.intTermId
+		OUTER APPLY fnCTGetSeqPriceFixationInfo(PCD.intContractDetailId) PF
+		OUTER APPLY (SELECT TOP 1 CER.strCertificationName FROM tblCTContractCertification CC 
+					JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId 
+					WHERE CC.intContractDetailId = PCD.intContractDetailId) CER
+		OUTER APPLY (SELECT dblInTransitQty = SUM(LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity, 0))
+						FROM tblLGLoadDetail LD
+						INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+						INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+					WHERE L.ysnPosted = 1 AND ISNULL(L.ysnCancelled, 0) = 0
+						AND LD.intPContractDetailId = PCD.intContractDetailId
+						AND L.intPurchaseSale = 1
+						AND LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity, 0) > 0) InTrans
+	WHERE (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0)) > 0
+		AND PCH.intContractTypeId = 1 AND PCD.intContractStatusId IN (1, 4)
+		AND EXISTS (SELECT 1 FROM tblLGCompanyPreference WHERE ysnIncludeOpenContractsOnInventoryView = 1)
 	) t1

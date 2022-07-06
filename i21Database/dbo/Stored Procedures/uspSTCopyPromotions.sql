@@ -10,6 +10,7 @@ BEGIN TRY
 	         @idoc				          INT,
 	     	 @intFromStoreId              INT,
 	         @ToStore                     NVARCHAR(MAX),
+	         @ToStoreGroup                NVARCHAR(MAX),
 			 @intBeginningComboID         INT,
 			 @intEndingComboID            INT,
              @intBeginingMixMatchID       INT,
@@ -46,6 +47,7 @@ BEGIN TRY
     SELECT	
 			@intFromStoreId		            =	FromStore,
             @ToStore						=   ToStore,
+            @ToStoreGroup					=   ToStoreGroup,
 			@intBeginningComboID            =   BeginingCombo,
 			@intEndingComboID               =   EndingCombo,
             @intBeginingMixMatchID          =   BeginingMixMatchID,
@@ -61,6 +63,7 @@ BEGIN TRY
 	(
 			FromStore		              INT,
 			ToStore	     	              NVARCHAR(MAX),
+			ToStoreGroup	     	      NVARCHAR(MAX),
 			BeginingCombo		          INT,
 			EndingCombo	     	          INT,
 			BeginingMixMatchID	     	  INT,
@@ -137,6 +140,25 @@ BEGIN TRY
 			 SELECT [intID] AS intStoreId
 			 FROM [dbo].[fnGetRowsFromDelimitedValues](@ToStore)
 		END
+		
+	 IF(@ToStoreGroup != '')
+		BEGIN
+			-- Insert all intStoreId's to a temp table
+			 INSERT INTO @temptblStore 
+			 (
+				intStoreId
+			 )
+			SELECT DISTINCT st.intStoreId AS intLocationId
+			FROM [dbo].[fnGetRowsFromDelimitedValues](@ToStoreGroup)
+			INNER JOIN tblSTStoreGroup sg
+				ON sg.intStoreGroupId = intID
+			INNER JOIN tblSTStoreGroupDetail sgt
+				ON sgt.intStoreGroupId = sg.intStoreGroupId
+			INNER JOIN tblSTStore st
+				ON st.intStoreId = sgt.intStoreId
+			WHERE st.intStoreId != @intFromStoreId
+		END
+	 
 
 	
 	
@@ -844,6 +866,7 @@ BEGIN TRY
 							   (
 									intPromoSalesListId
 									, intPromoItemListId
+									, dblCost
 									, intQuantity
 									, dblPrice
 									, intConcurrencyId
@@ -851,6 +874,7 @@ BEGIN TRY
 							   SELECT DISTINCT
 									 @intNewPromotionCOMBOListId AS intPromoSalesListId
 									 , ItemListTwo.intPromoItemListId
+									 , SalesListDetail.dblCost
 									 , SalesListDetail.intQuantity
 									 , SalesListDetail.dblPrice
 									 , SalesListDetail.intConcurrencyId
@@ -951,26 +975,26 @@ BEGIN TRY
 									, ysnSentToRuby
 									, dtmLastUpdateDate
 									, ysnWeekDayPromotionSunday
-									, ysnWeekDayPromotionMonday
-									, ysnWeekDayPromotionTuesday
-									, ysnWeekDayPromotionWednesday
-									, ysnWeekDayPromotionThursday
-									, ysnWeekDayPromotionFriday
-									, ysnWeekDayPromotionSaturday
-									, dtmStartTimePromotionSunday
-									, dtmStartTimePromotionMonday
-									, dtmStartTimePromotionTuesday
-									, dtmStartTimePromotionWednesday
-									, dtmStartTimePromotionThursday
-									, dtmStartTimePromotionFriday
-									, dtmStartTimePromotionSaturday
-									, dtmEndTimePromotionSunday
-									, dtmEndTimePromotionMonday
-									, dtmEndTimePromotionTuesday
-									, dtmEndTimePromotionWednesday
-									, dtmEndTimePromotionThursday
-									, dtmEndTimePromotionFriday
-									, dtmEndTimePromotionSaturday
+                                    , ysnWeekDayPromotionMonday
+                                    , ysnWeekDayPromotionTuesday
+                                    , ysnWeekDayPromotionWednesday
+                                    , ysnWeekDayPromotionThursday
+                                    , ysnWeekDayPromotionFriday
+                                    , ysnWeekDayPromotionSaturday
+                                    , dtmStartTimePromotionSunday
+                                    , dtmStartTimePromotionMonday
+                                    , dtmStartTimePromotionTuesday
+                                    , dtmStartTimePromotionWednesday
+                                    , dtmStartTimePromotionThursday
+                                    , dtmStartTimePromotionFriday
+                                    , dtmStartTimePromotionSaturday
+                                    , dtmEndTimePromotionSunday
+                                    , dtmEndTimePromotionMonday
+                                    , dtmEndTimePromotionTuesday
+                                    , dtmEndTimePromotionWednesday
+                                    , dtmEndTimePromotionThursday
+                                    , dtmEndTimePromotionFriday
+                                    , dtmEndTimePromotionSaturday
 									, intConcurrencyId
 								) 
 								SELECT 
@@ -1006,26 +1030,26 @@ BEGIN TRY
 									, ysnSentToRuby
 									, dtmLastUpdateDate
 									, ysnWeekDayPromotionSunday
-									, ysnWeekDayPromotionMonday
-									, ysnWeekDayPromotionTuesday
-									, ysnWeekDayPromotionWednesday
-									, ysnWeekDayPromotionThursday
-									, ysnWeekDayPromotionFriday
-									, ysnWeekDayPromotionSaturday
-									, dtmStartTimePromotionSunday
-									, dtmStartTimePromotionMonday
-									, dtmStartTimePromotionTuesday
-									, dtmStartTimePromotionWednesday
-									, dtmStartTimePromotionThursday
-									, dtmStartTimePromotionFriday
-									, dtmStartTimePromotionSaturday
-									, dtmEndTimePromotionSunday
-									, dtmEndTimePromotionMonday
-									, dtmEndTimePromotionTuesday
-									, dtmEndTimePromotionWednesday
-									, dtmEndTimePromotionThursday
-									, dtmEndTimePromotionFriday
-									, dtmEndTimePromotionSaturday
+                                    , ysnWeekDayPromotionMonday
+                                    , ysnWeekDayPromotionTuesday
+                                    , ysnWeekDayPromotionWednesday
+                                    , ysnWeekDayPromotionThursday
+                                    , ysnWeekDayPromotionFriday
+                                    , ysnWeekDayPromotionSaturday
+                                    , dtmStartTimePromotionSunday
+                                    , dtmStartTimePromotionMonday
+                                    , dtmStartTimePromotionTuesday
+                                    , dtmStartTimePromotionWednesday
+                                    , dtmStartTimePromotionThursday
+                                    , dtmStartTimePromotionFriday
+                                    , dtmStartTimePromotionSaturday
+                                    , dtmEndTimePromotionSunday
+                                    , dtmEndTimePromotionMonday
+                                    , dtmEndTimePromotionTuesday
+                                    , dtmEndTimePromotionWednesday
+                                    , dtmEndTimePromotionThursday
+                                    , dtmEndTimePromotionFriday
+                                    , dtmEndTimePromotionSaturday
 									, intConcurrencyId
 								FROM tblSTPromotionSalesList 
 								WHERE intPromoSalesId = @intPromotionMixMatchListId 
@@ -1074,6 +1098,7 @@ BEGIN TRY
 								(
 									intPromoSalesListId
 									, intPromoItemListId
+									, dblCost
 									, intQuantity
 									, dblPrice
 									, intConcurrencyId
@@ -1081,6 +1106,7 @@ BEGIN TRY
 								SELECT DISTINCT
 										@intNewPromotionMIXMATCHListId AS intPromoSalesListId
 										, ItemListTwo.intPromoItemListId
+										, SalesListDetail.dblCost
 										, SalesListDetail.intQuantity
 										, SalesListDetail.dblPrice
 										, SalesListDetail.intConcurrencyId

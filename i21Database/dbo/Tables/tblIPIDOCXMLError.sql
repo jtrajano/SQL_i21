@@ -4,6 +4,7 @@
 	,strType NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strFileName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strMsg NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strCompany NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmCreatedDate DATETIME CONSTRAINT [DF_tblIPIDOCXMLError_dtmCreatedDate] DEFAULT GETDATE()
 	,CONSTRAINT [PK_tblIPIDOCXMLError_intIDOCXMLErrorId] PRIMARY KEY (intIDOCXMLErrorId)
 	)

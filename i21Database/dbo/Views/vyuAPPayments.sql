@@ -8,6 +8,7 @@ SELECT
 	ISNULL(A.dblWithheld,0) AS dblWithheld,
 	A.dtmDatePaid ,
 	A.dtmDateCreated,
+	FP.strPeriod,
 	A.intAccountId ,
 	A.intBankAccountId ,
 	A.intCurrencyId ,
@@ -25,7 +26,7 @@ SELECT
 	CAST(CASE WHEN E.dtmCheckPrinted IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnPrinted,
 	ISNULL(E.ysnCheckVoid,0) AS ysnVoid,
 	C.strBankName,
-	dbo.[fnAESDecryptASym](B.strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo,
+	dbo.[fnAESDecryptASym](B.strBankAccountNo) AS strBankAccountNo,
 	ISNULL(D.dblCreditLimit,0) AS dblCredit,
 	D.strVendorId,
 	D1.strName,
@@ -33,7 +34,9 @@ SELECT
 	ISNULL(E.ysnClr,0) AS ysnClear,
 	F.strPaymentMethod,
 	entityGroup.strEntityGroupName,
-	G.strCurrency
+	G.strCurrency,
+	A.strCheckMessage,
+	CASE WHEN A.ysnEFTImported = 1 THEN A.dtmDateCreated ELSE NULL END dtmEFTImportDate
 	FROM dbo.tblAPPayment A
 		LEFT JOIN dbo.tblCMBankAccount B
 			ON A.intBankAccountId = B.intBankAccountId
@@ -48,6 +51,8 @@ SELECT
 		LEFT JOIN dbo.tblSMPaymentMethod F
 			ON A.intPaymentMethodId = F.intPaymentMethodID
 		LEFT JOIN  dbo.tblSMCurrency G on G.intCurrencyID = A.intCurrencyId
+		LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+			ON A.dtmDatePaid BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDatePaid = FP.dtmStartDate OR A.dtmDatePaid = FP.dtmEndDate
 		OUTER APPLY (
 			SELECT TOP 1
 				eg.strEntityGroupName,

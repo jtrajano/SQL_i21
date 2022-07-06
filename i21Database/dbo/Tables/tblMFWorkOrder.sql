@@ -37,6 +37,7 @@
     [intBlendRequirementId] INT NULL, 
     [intPickListId] INT NULL, 
     [ysnKittingEnabled] BIT NULL CONSTRAINT [DF_tblMFWorkOrder_ysnKittingEnabled] DEFAULT 0,
+	ysnDietarySupplements BIT NULL CONSTRAINT [DF_tblMFWorkOrder_ysnDietarySupplements] DEFAULT 0,
 	[intKitStatusId] INT NULL,
     [intProductOwnerId] INT NULL,  
     [intCustomerId] INT NULL, 
@@ -84,6 +85,8 @@
 	dblNoOfUnits NUMERIC(18, 6) NULL, 
 	intNoOfUnitsItemUOMId int,
 	intLoadId int,
+	intWarehouseRateMatrixHeaderId int,
+	strERPServicePONumber nvarchar(50) COLLATE Latin1_General_CI_AS,
     CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -98,7 +101,10 @@
 	CONSTRAINT [FK_tblMFWorkOrder_intCountStatusId_tblMFWorkOrderStatus_intStatusId] FOREIGN KEY ([intCountStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId]), 
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFDepartment_intDepartmentId] FOREIGN KEY ([intDepartmentId]) REFERENCES [tblMFDepartment]([intDepartmentId]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblMFWorkOrder_tblMFWorkOrderStatus_intKitStatusId] FOREIGN KEY ([intKitStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId])
+	CONSTRAINT [FK_tblMFWorkOrder_tblMFWorkOrderStatus_intKitStatusId] FOREIGN KEY ([intKitStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId]),
+	CONSTRAINT [FK_tblMFWorkOrder_tblLGWarehouseRateMatrixHeader_intWarehouseRateMatrixHeaderId] FOREIGN KEY (intWarehouseRateMatrixHeaderId) REFERENCES tblLGWarehouseRateMatrixHeader(intWarehouseRateMatrixHeaderId),
+	CONSTRAINT [FK_tblMFWorkOrder_tblMFMachine_intMachineId] FOREIGN KEY (intMachineId) REFERENCES tblMFMachine(intMachineId)
+    
 )
 Go
 CREATE NONCLUSTERED INDEX IX_tblMFWorkOrder_intWorkOrderId ON [dbo].[tblMFWorkOrder]

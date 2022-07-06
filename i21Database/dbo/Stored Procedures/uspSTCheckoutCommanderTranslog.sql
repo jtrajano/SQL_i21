@@ -73,7 +73,7 @@ BEGIN
 						@strRegisterClass	NVARCHAR(50),
 						@intRegisterClassId INT
 
-				SELECT
+				SELECT TOP 1
 					@intStoreId			= chk.intStoreId,
 					@strRegisterClass	= r.strRegisterClass,
 					@intRegisterClassId = setup.intRegisterSetupId
@@ -200,6 +200,7 @@ BEGIN
 							[strTransRecalled],
 							[strTransRollback],
 							[strTransFuelPrepayCompletion],
+							[strTransFuelPrepay],
 							-- trHeader
 							[intTermMsgSN],
 							[strTermMsgSNtype],
@@ -312,7 +313,7 @@ BEGIN
 							[strTrlFlagsTrlMatch],
 
 							[strTrlDept],
-							[intTrlDeptNumber],
+							[strTrlDeptNumber],
 							[strTrlDeptType],
 							[strTrlCat],
 							[intTrlCatNumber],
@@ -432,6 +433,7 @@ BEGIN
 							[strTransRecalled]					= strTransRecalled,
 							[strTransRollback]					= strTransRollback,
 							[strTransFuelPrepayCompletion]		= strTransFuelPrepayCompletion,
+							[strTransFuelPrepay]				= strTransFuelPrepay,
 							-- trHeader
 							[intTermMsgSN]						= intTermMsgSN,
 							[strTermMsgSNtype]					= strTermMsgSNtype,
@@ -544,7 +546,7 @@ BEGIN
 							[strTrlFlagsTrlMatch]				= strTrlFlagsTrlMatch,
 
 							[strTrlDept]						= strTrlDept,
-							[intTrlDeptNumber]					= intTrlDeptNumber,
+							[strTrlDeptNumber]					= intTrlDeptNumber,
 							[strTrlDeptType]					= strTrlDeptType,
 							[strTrlCat]							= strTrlCat,
 							[intTrlCatNumber]					= intTrlCatNumber,

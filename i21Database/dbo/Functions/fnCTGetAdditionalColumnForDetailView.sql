@@ -61,9 +61,7 @@ BEGIN
 			,PF.intContractDetailId
 		from
 			tblCTPriceFixation PF
-			,tblCTPriceFixationDetail PFD
-		where
-			PFD.intPriceFixationId = PF.intPriceFixationId
+		inner join tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
 		group by
 			PF.intContractDetailId
  )

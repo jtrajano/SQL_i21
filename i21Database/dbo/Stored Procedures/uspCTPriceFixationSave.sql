@@ -79,6 +79,19 @@ BEGIN TRY
 	JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	PC.intFinalCurrencyId
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
+	if exists (
+		select
+			top 1 1
+		from
+			tblCTContractDetail cd
+		where
+			cd.intContractStatusId = 3
+			and cd.intContractDetailId = @intContractDetailId
+	)
+	begin
+		RAISERROR ('Cancelled sequences cannot be priced.',18,1,'WITH NOWAIT');
+	end
+
 	SELECT	@dblTotalPFDetailNoOfLots	=	SUM([dblNoOfLots]),
 			@dblTotalPFDetailQuantiy	=	SUM(dblQuantity)
 	FROM	tblCTPriceFixationDetail
@@ -97,10 +110,9 @@ BEGIN TRY
 		@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
 	from
 		tblCTContractDetail cd
-		,tblCTContractHeader ch
+		inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	where
 		cd.intContractDetailId = @intContractDetailId
-		and ch.intContractHeaderId = cd.intContractHeaderId
   		and ch.intContractTypeId = 2  
 
 	IF ISNULL(@intContractDetailId,0) > 0

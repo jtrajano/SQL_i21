@@ -379,6 +379,8 @@ AS
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
 					,DEFAULT 
+					,ri.intComputeItemTotalOption
+					,ri.dblOpenReceive
 				)
 		,intSourceEntityId = r.intEntityVendorId
 		,intCommodityId = i.intCommodityId
@@ -540,3 +542,115 @@ FROM	ForGLEntries_CTE INNER JOIN @NonStockGLAccounts GLAccounts
 		) CreditUnit 
 
 WHERE	ForGLEntries_CTE.dblLineTotal <> 0 
+;
+
+-- Create the AP Clearing
+BEGIN 
+	DECLARE 
+	@intVoucherInvoiceNoOption TINYINT
+	,	@voucherInvoiceOption_Blank TINYINT = 1 
+	,	@voucherInvoiceOption_BOL TINYINT = 2
+	,	@voucherInvoiceOption_VendorRefNo TINYINT = 3
+	,@intDebitMemoInvoiceNoOption TINYINT
+	,	@debitMemoInvoiceOption_Blank TINYINT = 1
+	,	@debitMemoInvoiceOption_BOL TINYINT = 2
+	,	@debitMemoInvoiceOption_VendorRefNo TINYINT = 3	
+
+	SELECT TOP 1 
+		@intVoucherInvoiceNoOption = intVoucherInvoiceNoOption
+		,@intDebitMemoInvoiceNoOption = intDebitMemoInvoiceNoOption
+	FROM tblAPCompanyPreference
+
+	INSERT INTO tblICAPClearing (
+		[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionType]
+		,[strReferenceNumber]
+		,[dtmDate]
+		,[intEntityVendorId]
+		,[intLocationId]
+		,[intInventoryReceiptItemId]
+		,[intInventoryReceiptItemTaxId]
+		,[intInventoryReceiptChargeId]
+		,[intInventoryReceiptChargeTaxId]
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentChargeTaxId]
+		,[intAccountId]
+		,[intItemId]
+		,[intItemUOMId]
+		,[dblQuantity]
+		,[dblAmount]
+		,[strBatchId]
+	)
+	SELECT 
+		[intTransactionId] = t.intTransactionId
+		,[strTransactionId] = t.strTransactionId
+		,[intTransactionType] = 1 -- RECEIPT 
+		,[strReferenceNumber] =
+			CASE 
+				WHEN r.strReceiptType = 'Inventory Return' THEN 
+					CASE 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN r.strBillOfLading 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN r.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
+					END 
+				ELSE
+					CASE 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN r.strBillOfLading 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN r.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
+					END 						
+			END	
+		,[dtmDate] = t.dtmDate
+		,[intEntityVendorId] = r.intEntityVendorId
+		,[intLocationId] = r.intLocationId
+		,[intInventoryReceiptItemId] = t.intTransactionDetailId
+		,[intInventoryReceiptItemTaxId] = NULL 
+		,[intInventoryReceiptChargeId] = NULL 
+		,[intInventoryReceiptChargeTaxId] = NULL 
+		,[intInventoryShipmentChargeId] = NULL 
+		,[intInventoryShipmentChargeTaxId] = NULL 
+		,[intAccountId] = 1
+		,[intItemId] = t.intItemId
+		,[intItemUOMId] = t.intItemUOMId
+		,[dblQuantity] = t.dblQty
+		,[dblAmount] = 
+				t.dblQty *
+				dbo.fnCalculateReceiptUnitCost(
+					ri.intItemId
+					,ri.intUnitMeasureId		
+					,ri.intCostUOMId
+					,ri.intWeightUOMId
+					,ri.dblUnitCost
+					,ri.dblNet
+					,t.intLotId
+					,t.intItemUOMId
+					,NULL --AggregrateItemLots.dblTotalNet
+					,ri.ysnSubCurrency
+					,r.intSubCurrencyCents
+					,DEFAULT
+					,ri.intComputeItemTotalOption
+					,ri.dblOpenReceive
+				)
+		,strBatchId = @strBatchId
+	FROM 
+		@NonInventoryItem t INNER JOIN tblICInventoryTransactionType TransType 
+			ON t.intTransactionTypeId = TransType.intTransactionTypeId
+		INNER JOIN tblICItem i 
+			ON i.intItemId = t.intItemId
+		INNER JOIN tblICInventoryReceipt r 
+			ON r.strReceiptNumber = t.strTransactionId
+			AND r.intInventoryReceiptId = t.intTransactionId			
+		INNER JOIN tblICInventoryReceiptItem ri 
+			ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+			AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+		CROSS APPLY dbo.fnGetItemGLAccountAsTable(
+			i.intItemId
+			,t.intItemLocationId
+			,'AP Clearing'
+		) apClearing
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = apClearing.intAccountId
+END

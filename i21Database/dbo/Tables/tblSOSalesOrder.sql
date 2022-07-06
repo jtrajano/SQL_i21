@@ -72,6 +72,7 @@
     [strLostQuoteReason]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL,
 	[strQuoteType]				NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,     
 	[dblTotalWeight]			NUMERIC(18, 6)	NULL DEFAULT 0,
+	[dblTotalStandardWeight]	NUMERIC(18, 6)	NULL DEFAULT 0,
 	[intEntityContactId]		INT				NULL,
 	[dblTotalTermDiscount]		NUMERIC(18, 6)	NULL DEFAULT 0,	
 	[intDocumentMaintenanceId]  INT				NULL,

@@ -45,16 +45,29 @@ BEGIN
 							,ItemUOMTo.dblUnitQty 
 						)					
 			END 
-	FROM	(
+	FROM	
+	--		(
+	--			SELECT	ItemUOM.dblUnitQty 
+	--			FROM	dbo.tblICItemUOM ItemUOM 
+	--			WHERE	ItemUOM.intItemUOMId = @intItemUOMIdFrom
+	--		) ItemUOMFrom
+	--		, (
+	--			SELECT	ItemUOM.dblUnitQty 
+	--			FROM	dbo.tblICItemUOM ItemUOM 
+	--			WHERE	ItemUOM.intItemUOMId = @intItemUOMIdTo
+	--		) ItemUOMTo
+			(
 				SELECT	ItemUOM.dblUnitQty 
 				FROM	dbo.tblICItemUOM ItemUOM 
 				WHERE	ItemUOM.intItemUOMId = @intItemUOMIdFrom
 			) ItemUOMFrom
-			, (
+			inner join (
 				SELECT	ItemUOM.dblUnitQty 
 				FROM	dbo.tblICItemUOM ItemUOM 
 				WHERE	ItemUOM.intItemUOMId = @intItemUOMIdTo
 			) ItemUOMTo
+			on 1=1
+
 
 	RETURN @result;		
 END

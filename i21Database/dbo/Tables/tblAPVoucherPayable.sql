@@ -37,6 +37,8 @@
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intWeightClaimId]				INT NULL,
+	[intWeightClaimDetailId]		INT NULL,
 	[intCustomerStorageId]			INT NULL,
 	[intSettleStorageId]			INT NULL,
 	[intTicketId]					INT NULL,
@@ -118,6 +120,8 @@
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
 	[ysnReturn]						BIT NULL,
 	[intLineNo]						INT NULL,
+	[intBookId]						INT NULL,
+	[intSubBookId]					INT NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO
@@ -135,6 +139,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
 								,intSettleStorageId
 								,intLoadShipmentCostId
 								,intLoadShipmentDetailId
+								,intWeightClaimDetailId
 								,intItemId DESC);
 -- GO
 -- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intPurchaseDetailId]
@@ -165,6 +170,7 @@ INCLUDE (
 	,intInventoryShipmentChargeId
 	,intLoadShipmentDetailId
 	,intLoadShipmentCostId
+	,intWeightClaimDetailId
 	,intEntityVendorId
 	,intCustomerStorageId
 	,intSettleStorageId

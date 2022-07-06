@@ -14,6 +14,7 @@ INSERT INTO tblPRPaycheckTimeOff (
 	,dblRateFactor
 	,dblMaxEarned
 	,dblMaxCarryover
+	,dblMaxBalance
 	,dblHoursAccrued
 	,dblHoursUsed
 	,dblHoursYTD
@@ -28,6 +29,7 @@ SELECT
 	,dblRateFactor
 	,dblMaxEarned 
 	,dblMaxCarryover
+	,dblMaxBalance
 	,dblHoursAccrued
 	,dblHoursUsed = ISNULL(vyuPREmployeeTimeOffUsedYTD.dblHoursUsed, 0)
 	,dblHoursYTD = (dblHoursCarryover + dblHoursEarned) - (tblPREmployeeTimeOff.dblHoursUsed + ISNULL(vyuPREmployeeTimeOffUsedYTD.dblHoursUsed, 0))

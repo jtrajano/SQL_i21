@@ -29,6 +29,7 @@ SELECT
 	intTerminalEntityId = L.intTerminalEntityId,
 	strTerminal = Terminal.strName,
 	intShippingLineEntityId = L.intShippingLineEntityId,
+	strShippingLine = ShipLine.strName,
 	strMVessel = L.strMVessel,
 	strMVoyageNumber = L.strMVoyageNumber,
 	strFVessel = L.strFVessel,
@@ -37,6 +38,8 @@ SELECT
 	intStorageLocationId = LW.intStorageLocationId,
 	intSubLocationId = LW.intSubLocationId,
 	strSubLocationName = SubLocation.strSubLocationName,
+	dtmLastFreeDate = LW.dtmLastFreeDate,
+	dtmEmptyContainerReturn = LW.dtmEmptyContainerReturn,
 	strTruckNo = L.strTruckNo,
 	intForwardingAgentEntityId = L.intForwardingAgentEntityId,
 	strForwardingAgent = FwdAgent.strName,
@@ -55,6 +58,7 @@ SELECT
 	dtmDispatchedDate = L.dtmDispatchedDate,
 	strComments = L.strComments,
 	strExternalShipmentNumber = L.strExternalShipmentNumber,
+	ysnArrivedInPort = L.ysnArrivedInPort,
 
 	---- Purchase Contract Details
 	intContractDetailId = PCT.intContractDetailId,
@@ -93,6 +97,7 @@ SELECT
 	dblFranchise = IsNull(WG.dblFranchise, 0),
 	dtmStartDate = PCT.dtmStartDate,
 	dtmEndDate = PCT.dtmEndDate,
+	dtmUpdatedAvailabilityDate = PCT.dtmUpdatedAvailabilityDate,
 	ysnOnTime = CAST(CASE WHEN DATEDIFF (DAY, L.dtmPostedDate, PCT.dtmEndDate) >= 0 THEN 1 ELSE 0 END as Bit),
 	strERPPONumber = PCT.strERPPONumber,
 

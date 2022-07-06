@@ -21,6 +21,7 @@ SELECT LR.intLoadReceiptId
 	, LR.intLoadDetailId
 	, LD.strLoadNumber
 	, strZipCode = (CASE WHEN ISNULL(LR.intSupplyPointId, '') <> '' THEN ISNULL(SP.strZipCode, CL.strZipPostalCode) ELSE CL.strZipPostalCode END)
+	, SP.strFreightSalesUnit
 FROM tblTRLoadReceipt LR 
 LEFT JOIN vyuTRTerminal TM ON TM.intEntityVendorId = LR.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = LR.intSupplyPointId

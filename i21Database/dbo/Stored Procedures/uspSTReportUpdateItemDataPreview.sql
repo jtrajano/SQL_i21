@@ -364,8 +364,8 @@ BEGIN TRY
 						)
 				END 
 
-
-				-- Item Audit Log
+				
+				-- Create the temp table for the audit log. 
 				IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NULL  
 					CREATE TABLE #tmpUpdateItemForCStore_itemAuditLog (
 						intItemId INT
@@ -373,10 +373,16 @@ BEGIN TRY
 						,intCategoryId_Original INT NULL
 						,strCountCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 						,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strItemNo_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strShortName_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strStatus_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 						-- Modified Fields
 						,intCategoryId_New INT NULL
 						,strCountCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 						,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strItemNo_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strShortName_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strStatus_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 					)
 				;
 

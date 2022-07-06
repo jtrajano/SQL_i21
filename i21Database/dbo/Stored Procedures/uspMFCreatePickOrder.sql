@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].uspMFCreatePickOrder (
+﻿CREATE PROCEDURE [dbo].[uspMFCreatePickOrder] (
 	@strXML NVARCHAR(MAX)
 	,@intOrderHeaderId INT OUTPUT
 	)
@@ -59,6 +59,10 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@intRecipeTypeId INT
 		,@intIncludeConsumptionByLocationInPickOrder INT
+		,@intSubLocationId int
+		,@intWorkOrderItemId int
+		,@intRecipeId int
+		,@strConsumeSourceLocation NVARCHAR(50)
 
 	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
 		,@intIncludeConsumptionByLocationInPickOrder = CASE 
@@ -86,6 +90,16 @@ BEGIN TRY
 			,ysnPickRemainingQty BIT
 			) x
 
+	SELECT @strConsumeSourceLocation = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 124
+
+	IF @strConsumeSourceLocation='True'
+	BEGIN
+		SELECT @ysnPickRemainingQty = 0
+	END
 	--Select @ysnPickRemainingQty=0
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT
@@ -263,10 +277,12 @@ BEGIN TRY
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
-	SELECT @strReferernceNo = ''
+	SELECT @strReferernceNo = '',@intSubLocationId=NULL,@intWorkOrderItemId=NULL
 
 	SELECT @strReferernceNo = @strReferernceNo + strWorkOrderNo + ', '
 		,@intRecipeTypeId = intRecipeTypeId
+		,@intSubLocationId=intSubLocationId
+		,@intWorkOrderItemId=intItemId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId IN (
 			SELECT intWorkOrderId
@@ -456,6 +472,44 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+		Declare @strSubLocationName nvarchar(50)
+
+
+		SELECT @intRecipeId = intRecipeId
+		FROM dbo.tblMFRecipe
+		WHERE intItemId = @intWorkOrderItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+			AND intSubLocationId = @intSubLocationId
+
+		IF @intRecipeId IS NULL
+		BEGIN
+			SELECT @intRecipeId = intRecipeId
+			FROM dbo.tblMFRecipe
+			WHERE intItemId = @intWorkOrderItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+				AND intSubLocationId IS NULL
+		END
+
+		IF @intRecipeId IS NULL
+		BEGIN
+			Select @strSubLocationName =Left(strSubLocationName,2) 
+			from tblSMCompanyLocationSubLocation 
+			Where  intCompanyLocationSubLocationId = @intSubLocationId
+
+			Select @intSubLocationId = intCompanyLocationSubLocationId
+			from tblSMCompanyLocationSubLocation 
+			Where  strSubLocationName = @strSubLocationName
+
+			SELECT @intRecipeId = intRecipeId
+			FROM dbo.tblMFRecipe
+			WHERE intItemId = @intWorkOrderItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+				AND intSubLocationId = @intSubLocationId
+		END
+
 		INSERT INTO @OrderDetail (
 			intOrderHeaderId
 			,intItemId
@@ -619,6 +673,7 @@ BEGIN TRY
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.ysnActive = 1
 			AND r.intLocationId = @intLocationId
+			AND r.intRecipeId=@intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ri.intItemUOMId
 		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId

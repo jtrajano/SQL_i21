@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblICImportStagingItem] (
 	[strItemNo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strType] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strShortName] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[strManufacturer] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strCommodity] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strBrand] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,

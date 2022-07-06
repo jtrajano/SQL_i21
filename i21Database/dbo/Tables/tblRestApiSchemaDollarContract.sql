@@ -20,5 +20,7 @@ CREATE TABLE [dbo].[tblRestApiSchemaDollarContract]
     dtmDueDate DATETIME NULL,
     dblContractValue NUMERIC(38, 20) NOT NULL,
     strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
+    intRowNumber INT NULL,
+    strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT PK_tblRestApiSchemaDollarContract PRIMARY KEY (guiRestApiSchemaId)
 )
