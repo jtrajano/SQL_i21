@@ -1,8 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRFFacilityLimitsReport]
 	  @intBankId INT
 	, @intFacilityId INT = NULL
-	, @dtmStartDate DATETIME
-	, @dtmEndDate DATETIME
+	, @dtmStartDate DATE
+	, @dtmEndDate DATE
 	, @intCurrencyId INT = NULL
 
 AS
@@ -32,10 +32,6 @@ AS
 
  	SELECT @intKilogramUnitMeasureId = intUnitMeasureId FROM tblICUnitMeasure
  	WHERE strUnitMeasure = 'Kilogram'
-
- 	-- Format as date only
- 	SELECT @dtmStartDate = DATEADD(dd, 0, DATEDIFF(dd, 0, @dtmStartDate))
- 	SELECT @dtmEndDate = DATEADD(dd, 0, DATEDIFF(dd, 0, @dtmEndDate)) 
 
  	-- Company Preference values
  	DECLARE @ysnEnterForwardCurveForMarketBasisDifferential BIT
@@ -121,6 +117,8 @@ AS
  		DROP TABLE #tempM2MBasisDetail
  	IF OBJECT_ID('tempdb..#tempContractCost') IS NOT NULL
  		DROP TABLE #tempContractCost
+ 	IF OBJECT_ID('tempdb..#tempContractSeqHistory') IS NOT NULL
+ 		DROP TABLE #tempContractSeqHistory
 
  	-- Start
  	-- Filter by Loan/Limit of selected bank and facility.
@@ -148,11 +146,23 @@ AS
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempFacilityInfo facility
  		ON tlog.intBorrowingFacilityId = facility.intBorrowingFacilityId
+	OUTER APPLY (
+		SELECT TOP 1 ysnDeleted = CAST(1 AS BIT)
+		FROM tblTRFTradeFinanceLog delTLog
+		WHERE tlog.ysnDeleted = 1
+		AND CAST(delTLog.dtmCreatedDate AS DATE) >= CAST(ISNULL(@dtmStartDate, delTLog.dtmCreatedDate) AS DATE)
+		AND CAST(delTLog.dtmCreatedDate AS DATE) <= CAST(ISNULL(@dtmEndDate, delTLog.dtmCreatedDate) AS DATE)
+		AND UPPER(LEFT(strAction, 6)) = 'DELETE'
+		AND tlog.strTransactionNumber = delTLog.strTransactionNumber
+		AND tlog.intTransactionHeaderId = delTLog.intTransactionHeaderId
+		AND tlog.intTransactionDetailId = delTLog.intTransactionDetailId
+		AND tlog.strTradeFinanceTransaction = delTLog.strTradeFinanceTransaction
+	) deletedRecord
  	WHERE tlog.intContractHeaderId IS NOT NULL 
  	AND tlog.intContractDetailId IS NOT NULL
- 	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
- 	AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
-	AND ISNULL(tlog.ysnDeleted, 0) = 0
+ 	AND CAST(tlog.dtmCreatedDate AS DATE) >= @dtmStartDate
+ 	AND CAST(tlog.dtmCreatedDate AS DATE) <= @dtmEndDate
+	AND ISNULL(deletedRecord.ysnDeleted, 0) = 0
 
 
  	SELECT  
@@ -184,13 +194,26 @@ AS
 		, tlog.intOverrideBankValuationId
 		, tlog.strOverrideBankValuation
 		, tlog.strBankTradeReference
+		, tlog.dblFinanceQty
  	INTO #tempTradeFinanceLog
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempTradeLogContracts tContract
  		ON	tContract.intContractDetailId = tlog.intContractDetailId
- 		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) >= @dtmStartDate
- 		AND DATEADD(dd, 0, DATEDIFF(dd, 0, tlog.dtmCreatedDate)) <= @dtmEndDate
-	WHERE ISNULL(tlog.ysnDeleted, 0) = 0
+ 		AND CAST(tlog.dtmCreatedDate AS DATE) >= @dtmStartDate
+ 		AND CAST(tlog.dtmCreatedDate AS DATE) <= @dtmEndDate
+	OUTER APPLY (
+		SELECT TOP 1 ysnDeleted = CAST(1 AS BIT)
+		FROM tblTRFTradeFinanceLog delTLog
+		WHERE tlog.ysnDeleted = 1
+		AND CAST(delTLog.dtmCreatedDate AS DATE) >= CAST(ISNULL(@dtmStartDate, delTLog.dtmCreatedDate) AS DATE)
+		AND CAST(delTLog.dtmCreatedDate AS DATE) <= CAST(ISNULL(@dtmEndDate, delTLog.dtmCreatedDate) AS DATE)
+		AND UPPER(LEFT(strAction, 6)) = 'DELETE'
+		AND tlog.strTransactionNumber = delTLog.strTransactionNumber
+		AND tlog.intTransactionHeaderId = delTLog.intTransactionHeaderId
+		AND tlog.intTransactionDetailId = delTLog.intTransactionDetailId
+		AND tlog.strTradeFinanceTransaction = delTLog.strTradeFinanceTransaction
+	) deletedRecord
+	WHERE ISNULL(deletedRecord.ysnDeleted, 0) = 0
 
  	SELECT intContractHeaderId
  		, intContractDetailId
@@ -222,6 +245,7 @@ AS
 		, intOverrideBankValuationId
 		, strOverrideBankValuation
 		, strBankTradeReference
+		, dblFinanceQty
  	INTO #tempLatestLogValues
  	FROM 
  	(
@@ -268,6 +292,7 @@ AS
 										END 
 		, latestLog.strBankTradeReference
 		, intUnitMeasureId = ctd.intPriceItemUOMId
+		, latestLog.dblFinanceQty
  	INTO #tempPurchaseContracts
  	FROM tblCTContractDetail ctd
  	JOIN tblCTContractHeader cth
@@ -436,6 +461,7 @@ AS
 										END
 									END
 								END
+		, dblFinanceQty
  	INTO #tempPurchaseContractInfo 
  	FROM tblCTContractHeader cth
  	JOIN #tempPurchaseContracts tempLogCT
@@ -504,7 +530,7 @@ AS
 		AND		LGLoad.intShipmentType = 1 -- SHIPMENT ONLY
 		AND		ISNULL(LD.intSContractDetailId, LD.intPContractDetailId) = ctd.intContractDetailId 
 		AND		(LGLoad.dtmDispatchedDate IS NOT NULL OR LGLoad.dtmPostedDate IS NOT NULL) -- LOAD SHIPMENT AFLOAT
-		AND		LEFT(CONVERT(VARCHAR, ISNULL(LGLoad.dtmDispatchedDate, LGLoad.dtmPostedDate), 101), 10) <= @dtmEndDate
+		AND		CAST(ISNULL(LGLoad.dtmDispatchedDate, LGLoad.dtmPostedDate) AS DATE) <= @dtmEndDate
 	) loadShipmentWarehouse
 	OUTER APPLY (
 		SELECT TOP 1 
@@ -525,7 +551,7 @@ AS
 		WHERE cth.intContractTypeId = 1 -- PURCHASE CONTRACTS ONLY
 		AND receiptItem.intContractDetailId = ctd.intContractDetailId
 		AND invReceipt.dtmReceiptDate IS NOT NULL
-		AND LEFT(CONVERT(VARCHAR, invReceipt.dtmReceiptDate, 101), 10) <= @dtmEndDate
+		AND CAST(invReceipt.dtmReceiptDate AS DATE) <= @dtmEndDate
 		AND receipt.ysnPosted = 1
 	) receiptWarehouse
 	OUTER APPLY (
@@ -547,7 +573,7 @@ AS
 		WHERE cth.intContractTypeId = 2 -- SALE CONTRACTS ONLY
 		AND invShipment.intLineNo = ctd.intContractDetailId
 		AND invShip.dtmShipDate IS NOT NULL
-		AND LEFT(CONVERT(VARCHAR, invShip.dtmShipDate, 101), 10) <= @dtmEndDate
+		AND CAST(invShip.dtmShipDate AS DATE) <= @dtmEndDate
 		AND shipment.ysnPosted = 1
 	) invShipWarehouse
 
@@ -922,7 +948,7 @@ AS
  		WHERE cb.intContractDetailId = pContract.intContractDetailId
  		ORDER BY cb.dtmTransactionDate DESC
  	) ctBalance
-	
+
  	INSERT INTO #tempContractBalance (
  		  intContractHeaderId
  		, intContractDetailId
@@ -945,6 +971,44 @@ AS
  		WHERE cb.intContractDetailId = sContract.intContractDetailId
  		ORDER BY cb.dtmTransactionDate DESC
  	) ctBalance
+			
+ 	-- Get Latest Pricing Status
+ 	SELECT 
+ 	  pContract.intContractHeaderId
+ 	, pContract.intContractDetailId
+ 	, ctSeqHist.ysnPriced
+	, pContract.intContractTypeId
+ 	INTO #tempContractSeqHistory
+ 	FROM #tempPurchaseContracts pContract
+ 	OUTER APPLY (
+ 		SELECT TOP 1 
+ 			  ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+ 		FROM tblCTSequenceHistory cb
+ 		WHERE cb.intContractDetailId = pContract.intContractDetailId
+		AND CAST(cb.dtmHistoryCreated AS DATE) <= @dtmEndDate
+ 		ORDER BY cb.dtmHistoryCreated DESC
+ 	) ctSeqHist
+	
+ 	INSERT INTO #tempContractSeqHistory (
+ 		  intContractHeaderId
+ 		, intContractDetailId
+ 		, ysnPriced
+		, intContractTypeId
+ 	) 
+ 	SELECT 
+ 	  sContract.intContractHeaderId
+ 	, sContract.intContractDetailId
+ 	, ctSeqHist.ysnPriced
+	, sContract.intContractTypeId
+ 	FROM #tempSaleContractInfo sContract
+ 	OUTER APPLY (
+ 		SELECT TOP 1 
+ 			  ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+ 		FROM tblCTSequenceHistory cb
+ 		WHERE cb.intContractDetailId = sContract.intContractDetailId
+		AND CAST(cb.dtmHistoryCreated AS DATE) <= @dtmEndDate
+ 		ORDER BY cb.dtmHistoryCreated DESC
+ 	) ctSeqHist
 
  	-- Get Latest Market Price
  	SELECT *
@@ -957,7 +1021,7 @@ AS
  			, ROW_NUMBER() OVER (PARTITION BY p.intFutureMarketId, pm.intFutureMonthId ORDER BY dtmPriceDate DESC) intRowNum
  		FROM tblRKFuturesSettlementPrice p
  		INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
- 		WHERE CONVERT(NVARCHAR, dtmPriceDate, 111) <= CONVERT(NVARCHAR, @dtmEndDate, 111)
+ 		WHERE CAST(dtmPriceDate AS DATE) <= @dtmEndDate
  	) t WHERE intRowNum = 1
 
 	
@@ -967,7 +1031,7 @@ AS
  	SELECT TOP 1 @intM2MBasisId = intM2MBasisId 
  	FROM tblRKM2MBasis 
  	WHERE strPricingType = 'Mark to Market' 
- 	AND CONVERT(NVARCHAR, dtmM2MBasisDate, 111) <= CONVERT(NVARCHAR, @dtmEndDate, 111)
+ 	AND CAST(dtmM2MBasisDate AS DATE) <= @dtmEndDate
  	ORDER BY dtmM2MBasisDate DESC
 
  	SELECT dblRatio
@@ -1130,31 +1194,63 @@ AS
  							ISNULL(marketBasis.dblMarketBasis, @dblZero)) * 0.9 -- Reduced by 10%
  						END
  		, pContract.strBankValuationRule
- 		, dblBankValuation = CASE WHEN pContract.intBankValuationRuleId = 1 THEN purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
- 								WHEN pContract.intBankValuationRuleId = 2 
- 									THEN 
- 										 CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
-										 WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
- 											(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
- 											THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
- 											ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
- 											END
- 								WHEN pContract.intBankValuationRuleId = 3
- 									THEN saleCB.dblBasis + saleCB.dblFutures -- Sale Price
- 								WHEN pContract.intBankValuationRuleId = 4
- 									THEN 
- 										CASE WHEN ISNULL(sContract.strSContractNumber, '') = ''
- 											THEN 
-												CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
- 												WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
- 													(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
- 													THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
- 													ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
+		
+		---- TESTING COLUMNS: FOR CHECKING BANK VALUATION COMPUTATIONS.
+		--, pContract.dblFinanceQty
+		--, pContract.intBankValuationRuleId
+		--, purchaseCTSeqHist.ysnPriced
+		--, secondFutureMonth.intSecondFutureMonthID
+		--, dblMarketBasis
+		--, firstMonthSettle = marketFutures.dblLastSettle
+		--, secondMonthSettle = secondMonthSettlementPrice.dblLastSettle
+
+ 		, dblBankValuation =  pContract.dblFinanceQty * 
+							(CASE	WHEN pContract.intBankValuationRuleId = 1 -- BANK VALUATION: Purchase Price
+										THEN 
+											CASE WHEN purchaseCTSeqHist.ysnPriced = 1 
+												THEN (purchaseCB.dblBasis + purchaseCB.dblFutures)  -- Purchase Price
+												ELSE 
+													-- Market Price
+													CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
+													ELSE ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero)
  													END
- 											ELSE saleCB.dblBasis + saleCB.dblFutures -- Sale Price
+												END
+ 									WHEN pContract.intBankValuationRuleId = 2 -- BANK VALUATION: Cost/M2M/Lower of Cost or Market
+ 										THEN 
+ 											 CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
+											 WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
+ 												(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
+ 												THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
+ 												ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
+ 												END
+ 									WHEN pContract.intBankValuationRuleId = 3 -- BANK VALUATION: Sale Price
+ 										THEN 
+											CASE WHEN saleCTSeqHist.ysnPriced = 1 
+												THEN (saleCB.dblBasis + saleCB.dblFutures) -- Sale Price
+												ELSE @dblZero
+												END
+ 									WHEN pContract.intBankValuationRuleId = 4 -- BANK VALUATION: LCM Lower of purchase or M2M unless sale is fixed
+ 										THEN 
+ 											CASE WHEN ISNULL(sContract.strSContractNumber, '') = '' OR saleCTSeqHist.ysnPriced <> 1
+ 												THEN 
+													CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
+ 													WHEN purchaseCTSeqHist.ysnPriced = 0 
+														OR ((purchaseCB.dblBasis + purchaseCB.dblFutures) > 
+ 															(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
+														   )
+ 														THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
+ 														ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
+ 														END
+ 												ELSE saleCB.dblBasis + saleCB.dblFutures -- Sale Price
+ 												END
+ 									WHEN pContract.intBankValuationRuleId = 5 -- BANK VALUATION: M2M
+										THEN 
+											CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
+											ELSE ISNULL(secondMonthSettlementPrice.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero)
  											END
- 								ELSE @dblZero
- 								END
+ 									ELSE @dblZero
+ 									END
+								)
 
  	FROM #tempPurchaseContractInfo pContract
  	LEFT JOIN #tempShipmentDetails pShipment
@@ -1207,7 +1303,7 @@ AS
  		ON pContractCost.intContractDetailId = pContract.intContractDetailId
  	LEFT JOIN #tempSettlePrice marketFutures
  		ON marketFutures.intFutureMarketId = pContract.intPFutureMarketId
- 		AND marketFutures.intFutureMonthId = pContract.intPFutureMonthId
+ 		AND marketFutures.intFutureMonthId = pContract.intPFutureMonthId	
  	OUTER APPLY (
  		SELECT TOP 1 dblRatio
  				, dblMarketBasis
@@ -1250,7 +1346,28 @@ AS
 												END
 			AND tmp.strContractInventory = 'Contract' 
  	) marketBasis
-
+	LEFT JOIN #tempContractSeqHistory purchaseCTSeqHist
+ 		ON purchaseCTSeqHist.intContractDetailId = pContract.intContractDetailId
+ 		AND purchaseCTSeqHist.intContractTypeId = 1
+	LEFT JOIN #tempContractSeqHistory saleCTSeqHist
+ 		ON saleCTSeqHist.intContractDetailId = pContract.intContractDetailId
+ 		AND saleCTSeqHist.intContractTypeId = 2
+	OUTER APPLY (
+		SELECT TOP 1 * 
+		FROM
+		(
+			SELECT
+				  intFirstFutureMonthId = intFutureMonthId
+				, intSecondFutureMonthID = LEAD(intFutureMonthId) OVER (ORDER BY intYear, strSymbol)
+			FROM tblRKFuturesMonth
+			WHERE intFutureMarketId = pContract.intPFutureMarketId
+		) t 
+		WHERE t.intFirstFutureMonthId = pContract.intPFutureMonthId
+		
+	) secondFutureMonth
+	LEFT JOIN #tempSettlePrice secondMonthSettlementPrice
+ 		ON secondMonthSettlementPrice.intFutureMarketId = pContract.intPFutureMarketId
+ 		AND secondMonthSettlementPrice.intFutureMonthId = secondFutureMonth.intSecondFutureMonthID
 
  	DROP TABLE #tempFacilityInfo
  	DROP TABLE #tempTradeLogContracts
@@ -1281,6 +1398,7 @@ AS
  	DROP TABLE #tempSettlePrice
  	DROP TABLE #tempM2MBasisDetail
  	DROP TABLE #tempContractCost
+ 	DROP TABLE #tempContractSeqHistory
 
  END TRY
 

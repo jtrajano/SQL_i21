@@ -160,16 +160,16 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dtmCashFlowDate datetime NULL,
 
 	-- Trade Finance Fields
-	strFinanceTradeNo NVARCHAR(50) NULL,
+	strFinanceTradeNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intBankAccountId INT NULL,
 	intBankId INT NULL,
 	intBorrowingFacilityId INT NULL,
 	intBorrowingFacilityLimitId INT NULL,
 	intBorrowingFacilityLimitDetailId INT NULL,
-	strReferenceNo NVARCHAR(100) NULL,
+	strReferenceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	dblLoanAmount NUMERIC(18, 6) NULL,
 	intBankValuationRuleId INT NULL,
-	strBankReferenceNo NVARCHAR(100) NULL,
+	strBankReferenceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	intFacilityId INT NULL,
 	intLoanLimitId INT NULL,
@@ -228,7 +228,11 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblQuantityMaxValue numeric (18,6),
 	dblAmountMaxValue numeric (18,6),
 	ysnApplyDefaultTradeFinance bit null,
-
+	[ysnTaxOverride] [bit] NULL,
+	[strTaxPoint] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxGroupId] [int] NULL,
+	[strTaxLocation] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxLocationId] [int] NULL,
 
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),

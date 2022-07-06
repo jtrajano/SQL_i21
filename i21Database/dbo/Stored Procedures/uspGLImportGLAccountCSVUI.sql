@@ -4,7 +4,7 @@ CREATE PROCEDURE uspGLImportGLAccountCSVUI (@strGUID     NVARCHAR(40),
                                             @importLogId INT OUT)
 AS
     IF Object_id('tblGLAccountImportDataStaging2') IS NOT NULL
-      DROP TABLE DBO.tblGLAccountImportDataStaging2
+      DROP TABLE dbo.tblGLAccountImportDataStaging2
 
     --Check the content of the table.  
     CREATE TABLE tblGLAccountImportDataStaging2

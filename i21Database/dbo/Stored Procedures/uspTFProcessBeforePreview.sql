@@ -292,22 +292,195 @@ BEGIN TRY
 			AND Trans.strTransactionType = 'Invoice'
 			AND Trans.intTransactionId IS NOT NULL
 		END
-		ELSE IF (@TaxAuthorityCode = 'IL' AND @ScheduleCode = 'DD-1')
+		ELSE IF (@TaxAuthorityCode = 'MD')
 		BEGIN
-			DELETE FROM tblTFTransactionDynamicIL
+			DELETE FROM tblTFTransactionDynamicMD
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+			
+			INSERT INTO tblTFTransactionDynamicMD (intTransactionId, strMDDeliveryMethod, strMDFreightPaidBy, strMDConsignorAddress, strMDProductCode, strMDTransportationMode, intConcurrencyId)
+			SELECT Trans.intTransactionId, 
+				CASE WHEN tblSMShipVia.ysnCompanyOwnedCarrier = 1 THEN 'COT' ELSE 'CCT' END, 
+				'', 
+				SellerLoc.strAddress + ', ' +  SellerLoc.strCity + ', ' + SellerLoc.strState,
+				CASE WHEN Trans.strProductCode = '125' THEN 'AG' 
+					WHEN Trans.strProductCode = '065' THEN 'G' 
+					WHEN Trans.strProductCode IN ('124','241') THEN 'GH' 	
+					WHEN Trans.strProductCode = '150' THEN 'F.O.' 
+					WHEN Trans.strProductCode IN ('072','142') THEN 'K' 
+					WHEN Trans.strProductCode IN ('160','170','171','228') THEN 'D'
+					WHEN Trans.strProductCode = '130' THEN 'A'
+				ELSE '' END,
+				CASE WHEN Trans.strTransportationMode = 'J' THEN 'TR' ELSE Trans.strTransportationMode END,
+				1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
+			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+			LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblTRLoadHeader.intShipViaId
+			LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
+			LEFT JOIN tblEMEntityLocation SellerLoc ON SellerLoc.intEntityId = Seller.intEntityId
+			WHERE Trans.uniqTransactionGuid = @Guid
+			AND Trans.intReportingComponentId = @ReportingComponentId
+			AND Trans.strTransactionType = 'Invoice'
+			AND Trans.intTransactionId IS NOT NULL
+
+			UNION ALL
+
+			SELECT Trans.intTransactionId, 
+				CASE WHEN tblSMShipVia.ysnCompanyOwnedCarrier = 1 THEN 'COT' ELSE 'CCT' END, 
+				'', 
+				SellerLoc.strAddress + ', ' +  SellerLoc.strCity + ', ' + SellerLoc.strState,
+				CASE WHEN Trans.strProductCode = '125' THEN 'AG' 
+					WHEN Trans.strProductCode = '065' THEN 'G' 
+					WHEN Trans.strProductCode IN ('124','241') THEN 'GH' 
+					WHEN Trans.strProductCode = '150' THEN 'F.O.' 
+					WHEN Trans.strProductCode IN ('072','142') THEN 'K' 
+					WHEN Trans.strProductCode IN ('160','170','171','228') THEN 'D'
+					WHEN Trans.strProductCode = '130' THEN 'A'
+				ELSE '' END,
+				CASE WHEN Trans.strTransportationMode = 'J' THEN 'TR' ELSE Trans.strTransportationMode END,
+				1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblICInventoryReceiptItem ON tblICInventoryReceiptItem.intInventoryReceiptItemId =  Trans.intTransactionNumberId
+			INNER JOIN tblICInventoryReceipt ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+			INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
+			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+			LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblTRLoadHeader.intShipViaId
+			LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
+			LEFT JOIN tblEMEntityLocation SellerLoc ON SellerLoc.intEntityId = Seller.intEntityId
+			WHERE Trans.uniqTransactionGuid = @Guid
+			AND Trans.intReportingComponentId = @ReportingComponentId
+			AND Trans.strTransactionType = 'Receipt'
+			AND Trans.intTransactionId IS NOT NULL
+
+		END
+		ELSE IF (@TaxAuthorityCode = 'VA')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicVA
 			WHERE intTransactionId IN (
 				SELECT intTransactionId FROM #tmpTransaction
 			)
 
-			INSERT INTO tblTFTransactionDynamicIL (intTransactionId, strILCustomerBillToAddress, strILCustomerBillToCity, strILCustomerBillToState, strILCustomerBillToZipCode)
-			SELECT Trans.intTransactionId, tblEMEntityLocation.strAddress, tblEMEntityLocation.strCity, tblEMEntityLocation.strState, tblEMEntityLocation.strZipCode
+			INSERT INTO tblTFTransactionDynamicVA 
+			(intTransactionId, strVALocalityCode, strVALocalityName, strVADestinationAddress, strVADestinationZipCode, intConcurrencyId)
+			SELECT Trans.intTransactionId, tblTFLocality.strLocalityCode, tblTFLocality.strLocalityName, tblEMEntityLocation.strAddress, tblEMEntityLocation.strZipCode, 1
 			FROM tblTFTransaction Trans
-			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
 			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
-			INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intBillToLocationId
+			INNER JOIN tblTFReportingComponent ON tblTFReportingComponent.intReportingComponentId = Trans.intReportingComponentId
+			INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
+				LEFT JOIN tblTFLocality ON tblTFLocality.strLocalityZipCode = tblEMEntityLocation.strZipCode AND tblTFLocality.strLocalityCode = tblEMEntityLocation.strOregonFacilityNumber
 			WHERE Trans.uniqTransactionGuid = @Guid
 			AND Trans.intReportingComponentId = @ReportingComponentId
 			AND Trans.strTransactionType = 'Invoice'
+			AND tblTFReportingComponent.strScheduleCode IN ('16A', '16B', '17A', '17B')
+			AND Trans.intTransactionId IS NOT NULL
+
+		END
+		ELSE IF (@TaxAuthorityCode = 'GA')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicGA
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicGA (intTransactionId
+				, strGAOriginAddress
+				, strGADestinationAddress
+				, intConcurrencyId)
+			SELECT Trans.intTransactionId
+					, [strGAOriginAddress] = tblEMEntityLocation.strAddress
+					, [strGADestinationAddress] = tblSMCompanyLocation.strAddress
+					, 1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = Trans.intTransactionNumberId
+			INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = Receipt.intShipFromEntityId
+				LEFT JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = Receipt.intLocationId
+			WHERE Trans.uniqTransactionGuid = @Guid
+				AND Trans.strTransactionType = 'Receipt'
+				AND Trans.intTransactionId IS NOT NULL
+			UNION ALL
+			SELECT Trans.intTransactionId
+					, [strGAOriginAddress] = tblSMCompanyLocation.strAddress
+					, [strGADestinationAddress] = tblEMEntityLocation.strAddress
+					, 1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+			 	LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
+				LEFT JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblARInvoice.intCompanyLocationId
+			WHERE Trans.uniqTransactionGuid = @Guid
+				AND Trans.strTransactionType = 'Invoice'
+				AND Trans.intTransactionId IS NOT NULL
+
+		END
+		ELSE IF (@TaxAuthorityCode = 'FL' AND @ScheduleCode = '5LO_Sum')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicFL
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicFL (intTransactionId
+				, strFLCountyCode
+				, strFLCounty
+				, dblFLRate1
+				, dblFLRate2
+				, dblFLEntitled
+				, dblFLNotEntitled
+				, intConcurrencyId)
+			SELECT Trans.intTransactionId
+					, CL.strLocation
+					, CL.strCounty
+					, CL.dblRate1
+					, CL.dblRate2
+					, ISNULL(Trans.dblNet, 0) * ISNULL(CL.dblRate1, 0)
+					, ISNULL(Trans.dblNet, 0) * ISNULL(CL.dblRate2, 0)
+					, 1
+			FROM #tmpTransaction Trans
+			INNER JOIN tblTFTaxAuthorityCountyLocation TCL ON TCL.intTaxAuthorityCountyLocationId = Trans.intTaxAuthorityCountyLocationId
+			INNER JOIN tblTFCountyLocation CL ON CL.intCountyLocationId = TCL.intCountyLocationId
+			WHERE Trans.uniqTransactionGuid = @Guid
+				AND Trans.intTransactionId IS NOT NULL
+		END
+		ELSE IF (@TaxAuthorityCode = 'IL' AND @ScheduleCode = 'DD-1')
+        BEGIN
+            DELETE FROM tblTFTransactionDynamicIL
+            WHERE intTransactionId IN (
+                SELECT intTransactionId FROM #tmpTransaction
+            )
+
+            INSERT INTO tblTFTransactionDynamicIL (intTransactionId, strILCustomerBillToAddress, strILCustomerBillToCity, strILCustomerBillToState, strILCustomerBillToZipCode)
+			SELECT Trans.intTransactionId, tblEMEntityLocation.strAddress, tblEMEntityLocation.strCity, tblEMEntityLocation.strState, tblEMEntityLocation.strZipCode
+            FROM tblTFTransaction Trans
+            INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+            INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+            INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intBillToLocationId
+            WHERE Trans.uniqTransactionGuid = @Guid
+            AND Trans.intReportingComponentId = @ReportingComponentId
+            AND Trans.strTransactionType = 'Invoice'
+            AND Trans.intTransactionId IS NOT NULL
+		END
+		ELSE IF (@TaxAuthorityCode = 'WV' AND @FormCode = 'MFT-507')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicWV
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicWV (intTransactionId
+				,strWVLegalCustomerName
+				,intConcurrencyId)
+			SELECT Trans.intTransactionId
+				, tblEMEntity.str1099Name  AS strCustomerLegalName
+				,1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = Trans.intCustomerId
+			WHERE Trans.uniqTransactionGuid = @Guid
 			AND Trans.intTransactionId IS NOT NULL
 		END
 

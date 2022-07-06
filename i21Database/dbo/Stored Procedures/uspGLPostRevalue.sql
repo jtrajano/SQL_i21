@@ -19,8 +19,9 @@ DECLARE @tblPostError TABLE(
  strTransactionId NVARCHAR(40)  
 )  
   
---BEGIN TRANSACTION  
-  
+  DECLARE @ysnHasDetails BIT = 0
+  SELECT @ysnHasDetails = 1 FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId
+
   DECLARE @errorNum INT  
   DECLARE @dateNow DATETIME  
   SELECT @dateNow = GETDATE()  
@@ -108,7 +109,8 @@ DECLARE @tblPostError TABLE(
   DECLARE @defaultType NVARCHAR(20)   
   SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable() f   
   WHERE f.strModule COLLATE Latin1_General_CI_AS = @strTransactionType;  
-    
+
+  IF @ysnHasDetails = 1
   WITH cte as(  
    SELECT   
     [strTransactionId]  = B.strConsolidationNumber  
@@ -384,9 +386,12 @@ DECLARE @tblPostError TABLE(
   
   
   --BEGIN TODO : transfer this on this procedure  
-  
+ 
+
+
   DECLARE @dtmReverseDate DATETIME  
   SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId  
+  IF EXISTS(SELECT 1 FROM  @PostGLEntries)
   IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)  
   BEGIN  
     GOTO _error

@@ -59,7 +59,10 @@ RETURNS @returntable TABLE
 	[intBorrowingFacilityLimitDetailId] INT NULL,
 	[strReferenceNo] 					NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intBankValuationRuleId] 			INT NULL,
-	[strComments] 						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
+	[strComments] 						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	--Tax Override
+	[strTaxPoint] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxLocationId] 	INT NULL
 )
 AS
 BEGIN
@@ -174,7 +177,9 @@ BEGIN
 		[intBorrowingFacilityLimitDetailId]	,
 		[strReferenceNo]					,
 		[intBankValuationRuleId]			,
-		[strComments]
+		[strComments]						,
+		[strTaxPoint]						,
+		[intTaxLocationId]
 	)
 	SELECT
 		[intPartitionId]		=	A.intPartitionId,
@@ -267,7 +272,9 @@ BEGIN
 		[intBorrowingFacilityLimitDetailId]	= A.intBorrowingFacilityLimitDetailId,
 		[strReferenceNo]					= A.strReferenceNo,
 		[intBankValuationRuleId]			= A.intBankValuationRuleId,
-		[strComments]						= A.strComments 
+		[strComments]						= A.strComments,
+		[strTaxPoint]						= A.strTaxPoint,
+		[intTaxLocationId]					= A.intTaxLocationId
 	FROM voucherPayables A
 	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.intEntityId
 	-- LEFT JOIN tblEMEntityLocation B ON vendor.intEntityId = B.intEntityId AND B.ysnDefaultLocation = 1--vendor default location

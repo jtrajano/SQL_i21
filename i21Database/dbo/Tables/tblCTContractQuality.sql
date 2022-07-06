@@ -13,7 +13,7 @@
 		[dblPremium] [numeric](18, 6) NULL,
 		[dblFactorUnderTarget] [numeric](18, 6) NULL,
 		[dblDiscount] [numeric](18, 6) NULL,
-		[strCostMethod] [nvarchar](100) NULL,
+		[strCostMethod] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 		[intCurrencyId] [int] NULL,
 		[intUnitMeasureId] [int] NULL,
 		[strCurrency] [nvarchar](100) COLLATE Latin1_General_CI_AS  NULL,

@@ -49,7 +49,7 @@ SELECT 	 SQ.intContractDetailId
 		,BK.strBook						
 		,SK.strSubBook					
 		,CD.strInvoiceNo						
-		,dbo.[fnCTCoalesceCertificates](CD.intContractDetailId)  AS strCertificationName	
+		,dbo.[fnCTCoalesceCertificates](CD.intContractDetailId)  COLLATE Latin1_General_CI_AS  AS strCertificationName	
 		,CH.intContractHeaderId				
 		,ISNULL(CD.dblScheduleQty, 0)			AS dblScheduleQty
 		,CASE 	WHEN ISNULL(CD.ysnInvoice, 0) = 0 	

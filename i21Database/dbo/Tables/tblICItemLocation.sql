@@ -104,7 +104,7 @@ Type the overview for the table here.
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intItemId_intLocationId]
 		ON [dbo].[tblICItemLocation]([intItemId] ASC, [intLocationId] ASC)
-		INCLUDE ([intCostingMethod])
+		INCLUDE ([intCostingMethod], [intAllowZeroCostTypeId], [ysnStorageUnitRequired])
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intCountGroupId]
@@ -114,7 +114,7 @@ Type the overview for the table here.
 	
 	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intLocationId]
 		ON [dbo].[tblICItemLocation]([intLocationId] ASC)
-		INCLUDE ([intItemId], [intCostingMethod])
+		INCLUDE ([intItemId], [intCostingMethod], [intAllowZeroCostTypeId], [ysnStorageUnitRequired])
 	GO
 
 	EXEC sp_addextendedproperty @name = N'MS_Description',

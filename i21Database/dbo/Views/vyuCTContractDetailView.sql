@@ -8,7 +8,8 @@ AS
 			IU.intUnitMeasureId,				CD.intPricingTypeId,			CD.dblQuantity					AS	dblDetailQuantity,				
 			CD.dblFutures,						CD.dblBasis,					CD.intFutureMarketId,							
 			CD.intFutureMonthId,				CD.dblCashPrice,				CD.intCurrencyId,			
-			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) as dblRate,								CD.intContractStatusId,			CD.intMarketZoneId,								
+			CASE WHEN CD.dblRate <> 0 THEN CD.dblRate ELSE dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) END as dblRate,										
+			CD.intContractStatusId,				CD.intMarketZoneId,								
 			CD.intDiscountTypeId,				CD.intDiscountId,				CD.intContractOptHeaderId,						
 			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
 			CD.strFobBasis,						CD.intRailGradeId,				CD.strRemark,
@@ -170,7 +171,7 @@ AS
 			CD.intFreightBasisUOMId,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
-		, CD.strFinanceTradeNo
+		, CD.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
 		, CD.intBankAccountId
 		, BA.intBankId
 		, strBankName = BN.strBankName
@@ -179,11 +180,11 @@ AS
 		, strFacility = FA.strBorrowingFacilityId
 		, CD.intLoanLimitId
 		, strLoanLimit = BL.strBankLoanId
-		, strLoanReferenceNo = BL.strLimitDescription
+		, strLoanReferenceNo = BL.strLimitDescription COLLATE Latin1_General_CI_AS
 		, CD.dblLoanAmount
 		, intOverrideFacilityId
 		, strOverrideFacility = BVR.strBankValuationRule
-		, CD.strBankReferenceNo
+		, CD.strBankReferenceNo COLLATE Latin1_General_CI_AS AS strBankReferenceNo
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
 		, CD.dblPrepaymentAmount
@@ -202,6 +203,11 @@ AS
 		, CD.dblAverageQuantity
 		, IAU.strUnitMeasure AS strAverageUOM
 		, CD.ysnApplyDefaultTradeFinance
+		, CD.ysnTaxOverride
+		, CD.strTaxPoint
+		, CD.strTaxLocation
+		, CD.intTaxGroupId
+		, CD.intTaxLocationId
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

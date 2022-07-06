@@ -54,14 +54,14 @@ DECLARE @intLoopDPContractDetailId		INT
 DECLARE @dblLoopPDContractAdjustment	NUMERIC (38,20)
 DECLARE @intDSLocationId				INT
 DECLARE @intDSItemId					INT
-DECLARE @dblDSShrink					NUMERIC (18,6)
+DECLARE @dblDSShrink					NUMERIC (38,20)
 
 
 DECLARE @_intLoopEntityId				INT
-DECLARE @_dblLoopSplitPercentage		NUMERIC(18,6)
+DECLARE @_dblLoopSplitPercentage		NUMERIC(38,20)
 DECLARE @_intLoopCurrentEntityId		INT
 DECLARE	@dtmDeliverySheetDate			DATETIME
-DECLARE @_dblCompanyOwnedPercentage		NUMERIC(18,6)
+DECLARE @_dblCompanyOwnedPercentage		NUMERIC(38,20)
 DECLARE @intTicketScaleSetupId			INT
 		
 DECLARE @splitTable TABLE(
@@ -109,7 +109,15 @@ BEGIN TRY
 	WHERE intDeliverySheetId = @intDeliverySheetId
 
 	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
-	SET @currencyDecimal = 4
+
+	SELECT TOP 1
+		@currencyDecimal = ISNULL(intDecimalAdjustment,4)
+	FROM tblSCTicket
+	WHERE intDeliverySheetId = @intDeliverySheetId
+		AND strTicketStatus = 'C'
+	ORDER BY intTicketId DESC
+
+	-- SET @currencyDecimal = 4
 
 	INSERT INTO @splitTable(
 		[intEntityId]

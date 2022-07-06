@@ -110,6 +110,7 @@
     <Build Include="dbo\Tables\tblRestApiSchemaDollarContract.sql" />
     <Build Include="dbo\Tables\tblRestApiSchemaItemContract.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCommodityContract.sql" />
+    <Build Include="dbo\Tables\tblApiTaxAdjustment.sql" />
     <Build Include="dbo\Tables\tblRestApiItemTaxes.sql" />
     <Build Include="dbo\Tables\tblRestApiInvoiceStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptStaging.sql" />
@@ -211,6 +212,7 @@
     <Build Include="dbo\Views\vyuCTFutureMarketItem.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetItemStock.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetItemStockByUom.sql" />
+    <Build Include="dbo\Views\vyuApiGetTaxDetail.sql" />
     <Build Include="dbo\Tables\tblApiInventoryItemStock.sql" />
     <Build Include="dbo\Views\vyuApiStorageLocation.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
@@ -250,6 +252,7 @@
     <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
     <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
+    <Build Include="dbo\Functions\fnApiCalculateTaxOnTax.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryAccount.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
@@ -806,11 +809,20 @@
     <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
     <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" /> 
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
+    <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
+    <Build Include="dbo\Tables\tblIPBillDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
     <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
     <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
+    <Build Include="dbo\Views\vyuCTTaxLocation.sql" />
+    <Build Include="dbo\Tables\tblMFShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Views\vyuMFGetShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateAccountOnPost.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -10607,6 +10619,7 @@
     <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\Views\vyuGRSearchUOMRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10978,7 +10991,7 @@
     <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
     <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
-    <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
+    <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

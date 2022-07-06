@@ -287,6 +287,16 @@ END
 
 SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
 
+IF EXISTS(SELECT 1 FROM #tmpPostBillData)
+BEGIN
+	--CREATE TEMP GL ENTRIES
+	SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+	FROM #tmpPostBillData
+	ORDER BY intBillId
+
+	EXEC uspAPUpdateAccountOnPost @validBillIds
+END
+
 COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
 IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
@@ -313,11 +323,6 @@ BEGIN
 	SET @success = 0
 	GOTO Post_Exit
 END
-
---CREATE TEMP GL ENTRIES
-SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
-FROM #tmpPostBillData
-ORDER BY intBillId
 
 BEGIN TRANSACTION
 

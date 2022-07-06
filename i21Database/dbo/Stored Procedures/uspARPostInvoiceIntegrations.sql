@@ -500,7 +500,8 @@ SET dblHighestAR		= CUSTOMER.dblARBalance
 FROM dbo.tblARCustomer CUSTOMER
 INNER JOIN (
 	SELECT DISTINCT intEntityCustomerId
-	FROM ##ARPostInvoiceHeader
+	FROM tblARPostInvoiceHeader
+	WHERE strSessionId = @strSessionId
 ) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 WHERE CUSTOMER.dblARBalance > ISNULL(CUSTOMER.dblHighestAR, 0)
 
@@ -522,7 +523,8 @@ INNER JOIN (
     FROM tblARInvoice I
     INNER JOIN (
         SELECT DISTINCT intEntityCustomerId
-        FROM ##ARPostInvoiceHeader
+        FROM tblARPostInvoiceHeader
+		WHERE strSessionId = @strSessionId
     ) INVOICE ON I.intEntityCustomerId = INVOICE.intEntityCustomerId
     WHERE I.ysnPosted = 1
       AND I.ysnForgiven = 0

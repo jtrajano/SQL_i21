@@ -430,17 +430,19 @@ WHERE ux.guiApiUniqueId = @guiApiUniqueId
 			AND (xx.strLongUPCCode = ux.strUPCCode OR xx.strUpcCode = ux.strShortUPCCode)
 	)
 -- Global cleanup
-UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
-UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
+-- UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+-- UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
 
 -- Remove duplicate stock unit
-;WITH cte AS
-(
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY intItemId ORDER BY intItemId, ysnStockUnit) AS RowNumber
-   FROM tblICItemUOM
-   WHERE ysnStockUnit = 1
-)
-UPDATE cte SET ysnStockUnit = 0 WHERE RowNumber > 1;
+-- ;WITH cte AS
+-- (
+--    SELECT *, ROW_NUMBER() OVER(PARTITION BY intItemId ORDER BY intItemId, ysnStockUnit) AS RowNumber
+--    FROM tblICItemUOM
+--    WHERE ysnStockUnit = 1
+-- )
+-- UPDATE cte SET ysnStockUnit = 0 WHERE RowNumber > 1;
+
+-- Log duplicate stock units
 
 -- Log successful imports
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -458,6 +460,20 @@ FROM tblICItemUOM iu
 JOIN tblICItem i ON i.intItemId = iu.intItemId
 JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
 WHERE iu.guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Is Stock Unit'
+    , strValue = 'false'
+    , strLogLevel = 'Info'
+    , strStatus = 'Warning'
+    , intRowNo = -1
+    , strMessage = 'The item "' + sr.strItemNo + '" doesn''t have a stock unit setup.'
+FROM tblICItem sr
+INNER JOIN tblApiSchemaTransformItemUOM u ON u.strItemNo = sr.strItemNo
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = sr.intItemId AND ysnStockUnit = 1)
 
 UPDATE log
 SET log.intTotalRowsImported = r.intCount

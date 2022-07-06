@@ -478,7 +478,9 @@ BEGIN TRY
 		[intBorrowingFacilityLimitDetailId]	,
 		[strReferenceNo]					,
 		[intBankValuationRuleId]			,
-		[strComments]
+		[strComments]			,
+		[strTaxPoint]			,
+		[intTaxLocationId]
 	)
 	VALUES (
 		[intTermsId]			,
@@ -534,7 +536,9 @@ BEGIN TRY
 		[intBorrowingFacilityLimitDetailId]	,
 		[strReferenceNo]					,
 		[intBankValuationRuleId]			,
-		[strComments]
+		[strComments]			,
+		[strTaxPoint]			,
+		[intTaxLocationId]
 	)
 	OUTPUT 
 		inserted.intBillId 

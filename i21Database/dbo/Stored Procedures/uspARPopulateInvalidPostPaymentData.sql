@@ -19,34 +19,17 @@ SET @ZeroBit = CAST(0 AS BIT)
 DECLARE @OneBit BIT
 SET @OneBit = CAST(1 AS BIT)
 
-
 IF @Post = @OneBit
 BEGIN
-    DELETE PQ
-    FROM tblARPostingQueue PQ
-    WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) >= 60
+    DECLARE  @OverrideCompanySegment        BIT
+            ,@OverrideLocationSegment       BIT
+            ,@OverrideLineOfBusinessSegment BIT
 
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Undeposited Funds Account	
-    SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'There''s an on-going posting for other transactions. Please try again later.'
-    FROM #ARPostPaymentHeader P
-    CROSS APPLY (
-        SELECT TOP 1 intTransactionId 
-        FROM tblARPostingQueue 
-        WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) <= 60
-    ) PQ
+    SELECT TOP 1 
+         @OverrideCompanySegment        = ysnOverrideCompanySegment
+        ,@OverrideLocationSegment       = ysnOverrideLocationSegment
+        ,@OverrideLineOfBusinessSegment = ysnOverrideLineOfBusinessSegment 
+    FROM tblARCompanyPreference
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -124,7 +107,7 @@ BEGIN
         ,[strBatchId]               = [strBatchId]
         ,[strError]                 = 'The GL account has not been set up for the ''Customer Prepaid'' selection (Company Location > GL Accounts Tab).  This invoice is not able to be posted without this information supplied.'
     FROM #ARPostPaymentHeader
-	WHERE strPaymentMethod = 'Prepay' 
+	WHERE (strPaymentMethod = 'Prepay' OR (strPaymentMethod <> 'Prepay' AND dblAmountPaid = dblUnappliedAmount))
 	  AND ISNULL(intSalesAdvAcct, 0) = 0
 
     INSERT INTO #ARInvalidPaymentData (
@@ -146,6 +129,218 @@ BEGIN
     INNER JOIN vyuGLAccountDetail GLAD ON P.intWriteOffAccountId = GLAD.intAccountId
     WHERE UPPER(PM.strPaymentMethod) = 'WRITE OFF'
       AND GLAD.strAccountCategory = 'AR Account'
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Company segment override for writeoff
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the writeoff account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+	FROM #ARPostPaymentDetail P
+    OUTER APPLY (
+		SELECT strOverrideAccount, bitSameCompanySegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountDetailId], 1, 0, 0)
+	) OVERRIDESEGMENT
+    WHERE P.[ysnPost] = @OneBit
+    AND P.[intInvoiceId] IS NOT NULL
+    AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
+    AND @OverrideCompanySegment = 1
+    AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Location segment override for writeoff
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the writeoff account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+	FROM #ARPostPaymentDetail P
+    OUTER APPLY (
+		SELECT strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountDetailId], 0, 1, 0)
+	) OVERRIDESEGMENT
+    WHERE P.[ysnPost] = @OneBit
+    AND P.[intInvoiceId] IS NOT NULL
+    AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
+    AND @OverrideLocationSegment = 1
+    AND OVERRIDESEGMENT.bitSameLocationSegment = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Line of Business segment override for writeoff
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the writeoff account that matches the line of business of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+	FROM #ARPostPaymentDetail P
+    OUTER APPLY (
+		SELECT strOverrideAccount, bitSameLineOfBusinessSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountDetailId], 0, 0, 1)
+	) OVERRIDESEGMENT
+    WHERE P.[ysnPost] = @OneBit
+    AND P.[intInvoiceId] IS NOT NULL
+    AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
+    AND @OverrideLineOfBusinessSegment = 1
+    AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Company segment override for undeposited fund
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the undeposited fund account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+	FROM #ARPostPaymentHeader P
+    OUTER APPLY (
+		SELECT strOverrideAccount, bitSameCompanySegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intAccountId], 1, 0, 0)
+	) OVERRIDESEGMENT
+    WHERE P.[ysnPost] = @OneBit
+    AND ISNULL(P.[intUndepositedFundsId], 0) = 0
+    AND @OverrideLocationSegment = 1
+    AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Location segment override for undeposited fund
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the undeposited fund account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+	FROM #ARPostPaymentHeader P
+    OUTER APPLY (
+		SELECT strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intAccountId], 0, 1, 0)
+	) OVERRIDESEGMENT
+    WHERE P.[ysnPost] = @OneBit
+    AND ISNULL(P.[intUndepositedFundsId], 0) = 0
+    AND @OverrideLocationSegment = 1
+    AND OVERRIDESEGMENT.bitSameLocationSegment = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Company segment override for realized gain or loss account
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the realized gain or loss account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+	FROM #ARPostPaymentDetail P
+    OUTER APPLY (
+		SELECT strOverrideAccount, bitSameCompanySegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], 1, 0, 0)
+	) OVERRIDESEGMENT
+    WHERE P.[ysnPost] = @OneBit
+    AND P.[intInvoiceId] IS NOT NULL
+    AND ISNULL(P.[intGainLossAccount],0) <> 0
+    AND P.[strTransactionType] <> 'Claim'
+    AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount]))  <> @ZeroDecimal
+    AND @OverrideLocationSegment = 1
+    AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Location segment override for realized gain or loss account
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the realized gain or loss account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+	FROM #ARPostPaymentDetail P
+    OUTER APPLY (
+		SELECT strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], 0, 1, 0)
+	) OVERRIDESEGMENT
+    WHERE P.[ysnPost] = @OneBit
+    AND P.[intInvoiceId] IS NOT NULL
+    AND ISNULL(P.[intGainLossAccount],0) <> 0
+    AND P.[strTransactionType] <> 'Claim'
+    AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount]))  <> @ZeroDecimal
+    AND @OverrideLocationSegment = 1
+    AND OVERRIDESEGMENT.bitSameLocationSegment = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Line of business segment override for realized gain or loss account
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the realized gain or loss account that matches the line of business of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+	FROM #ARPostPaymentDetail P
+    OUTER APPLY (
+		SELECT strOverrideAccount, bitSameLineOfBusinessSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], 0, 0, 1)
+	) OVERRIDESEGMENT
+    WHERE P.[ysnPost] = @OneBit
+    AND P.[intInvoiceId] IS NOT NULL
+    AND ISNULL(P.[intGainLossAccount],0) <> 0
+    AND P.[strTransactionType] <> 'Claim'
+    AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount]))  <> @ZeroDecimal
+    AND @OverrideLineOfBusinessSegment = 1
+    AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -248,54 +443,6 @@ BEGIN
       AND P.strTransactionType IN ('Customer Prepayment','Credit Memo','Overpayment')
 	  AND P.dblDiscount <> 0
 
- --   INSERT INTO #ARInvalidPaymentData
- --       ([intTransactionId]
- --       ,[strTransactionId]
- --       ,[strTransactionType]
- --       ,[intTransactionDetailId]
- --       ,[strBatchId]
- --       ,[strError])
-	----Invoice Prepayment
-	--SELECT
- --        [intTransactionId]         = P.[intTransactionId]
- --       ,[strTransactionId]         = P.[strTransactionId]
- --       ,[strTransactionType]       = @TransType
- --       ,[intTransactionDetailId]   = P.[intTransactionDetailId]
- --       ,[strBatchId]               = P.[strBatchId]
- --       ,[strError]                 = P.[strTransactionId] + '''s payment amount must be equal to ' + P.[strTransactionNumber] + '''s prepay amount!'
-	--FROM
-	--	#ARPostPaymentDetail P
- --   WHERE
- --           P.[ysnPost] = 1
- --       AND P.[intTransactionDetailId] IS NOT NULL
- --       AND P.[intInvoiceId] IS NOT NULL
- --       AND P.[ysnInvoicePrepayment] = 1
- --       AND (P.[dblInvoiceTotal] <> P.[dblPayment] OR P.[dblInvoiceTotal] <> P.[dblAmountPaid])
-
-    -- INSERT INTO #ARInvalidPaymentData
-    --     ([intTransactionId]
-    --     ,[strTransactionId]
-    --     ,[strTransactionType]
-    --     ,[intTransactionDetailId]
-    --     ,[strBatchId]
-    --     ,[strError])
-	-- --Forgiven Invoice(s)
-	-- SELECT
-    --      [intTransactionId]         = P.[intTransactionId]
-    --     ,[strTransactionId]         = P.[strTransactionId]
-    --     ,[strTransactionType]       = @TransType
-    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-    --     ,[strBatchId]               = P.[strBatchId]
-    --     ,[strError]                 = 'Invoice ' + P.[strTransactionNumber] + ' has been forgiven!'
-	-- FROM
-	-- 	#ARPostPaymentDetail P
-    -- WHERE
-    --         P.[ysnPost] = 1
-    --     AND P.[intInvoiceId] IS NOT NULL
-    --     AND P.[strType] = 'Service Charge'
-    --     AND P.[ysnForgiven] = 1
-    --     AND P.[dblPayment] <> @ZeroDecimal
-
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
@@ -319,27 +466,28 @@ BEGIN
         AND P.[ysnInvoicePrepayment] = @ZeroBit
         AND P.[dblAmountPaid] < @ZeroDecimal
 
- --   This is being handled by [uspGLValidateGLEntries]
- --   INSERT INTO #ARInvalidPaymentData
- --       ([intTransactionId]
- --       ,[strTransactionId]
- --       ,[strTransactionType]
- --       ,[intTransactionDetailId]
- --       ,[strBatchId]
- --       ,[strError])
-	----Fiscal Year
-	--SELECT
- --        [intTransactionId]         = P.[intTransactionId]
- --       ,[strTransactionId]         = P.[strTransactionId]
- --       ,[strTransactionType]       = @TransType
- --       ,[intTransactionDetailId]   = P.[intTransactionDetailId]
- --       ,[strBatchId]               = P.[strBatchId]
- --       ,[strError]                 = P.[strTransactionId] + '- Unable to find an open fiscal year period to match the transaction date.'
-	--FROM
-	--	#ARPostPaymentHeader P
- --   WHERE
- --           P.[ysnPost] = 1
- --       AND P.[ysnWithinAccountingDate] = 0
+
+    INSERT INTO #ARInvalidPaymentData
+	([intTransactionId]
+	,[strTransactionId]
+	,[strTransactionType]
+	,[intTransactionDetailId]
+	,[strBatchId]
+	,[strError])
+	--0.00 Amount paid in ACH is not allowed.
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = P.[strPaymentMethod] + '''s ' + 'must have a non $0.00 value.  Please adjust the payment method to ''Debit Memos and Payments'''
+	FROM
+		#ARPostPaymentHeader P
+    WHERE
+            P.[ysnPost] = @OneBit
+        AND P.[strPaymentMethod]  = 'ACH'
+        AND P.[dblAmountPaid] = @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -447,6 +595,31 @@ BEGIN
         AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
         AND ISNULL(P.[intWriteOffAccountDetailId], 0) = 0
 
+	 INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Write off Amount Greater than amount due on detail
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = NULL
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Write off amount of ' + P.[strTransactionNumber] + ' should be less than or equal to ' + CAST(CONVERT(DECIMAL(10,2), ISNULL(I.[dblAmountDue], 0) * (CASE WHEN I.strInvoiceNumber LIKE '%COP%' THEN -1 ELSE 1 END)) AS NVARCHAR(100))
+	FROM
+		#ARPostPaymentDetail P
+		INNER JOIN tblARInvoice I
+		ON P.intInvoiceId = I.intInvoiceId
+    WHERE
+            P.[ysnPost] = @OneBit
+        AND P.[intInvoiceId] IS NOT NULL
+        AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
+		AND ISNULL(I.[dblAmountDue], 0) * (CASE WHEN I.strTransactionType IN ('Overpayment', 'Customer Prepayment', 'Credit Memo') THEN -1 ELSE 1 END) <  (ISNULL(P.[dblWriteOffAmount], 0))
+
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
@@ -472,31 +645,6 @@ BEGIN
         AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
 		AND 0 < ISNULL(P.[dblWriteOffAmount], 0)
         AND I.strInvoiceNumber LIKE '%COP%'
-
-	 INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Write off Amount Greater than amount due on detail
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = NULL
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Write off Amount of ' + P.[strTransactionNumber] + ' should be less than or equal to '+CAST(CONVERT(DECIMAL(10,2), ISNULL(I.[dblAmountDue], 0)) AS NVARCHAR(100))
-	FROM
-		#ARPostPaymentDetail P
-		INNER JOIN tblARInvoice I
-		ON P.intInvoiceId = I.intInvoiceId
-    WHERE
-            P.[ysnPost] = @OneBit
-        AND P.[intInvoiceId] IS NOT NULL
-        AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
-		AND ISNULL(I.[dblAmountDue], 0) * (CASE WHEN I.strTransactionType IN ('Overpayment', 'Customer Prepayment', 'Credit Memo') THEN -1 ELSE 1 END) <  (ISNULL(P.[dblWriteOffAmount], 0))
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -542,27 +690,6 @@ BEGIN
             P.[ysnPost] = @OneBit
         AND UPPER(P.[strPaymentMethod]) = UPPER('Write Off')
         AND ISNULL(P.[intWriteOffAccountId], 0) = 0
-
-    -- INSERT INTO #ARInvalidPaymentData
-    --     ([intTransactionId]
-    --     ,[strTransactionId]
-    --     ,[strTransactionType]
-    --     ,[intTransactionDetailId]
-    --     ,[strBatchId]
-    --     ,[strError])
-	-- --Write Off Account Category
-	-- SELECT
-    --      [intTransactionId]         = P.[intTransactionId]
-    --     ,[strTransactionId]         = P.[strTransactionId]
-    --     ,[strTransactionType]       = @TransType
-    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-    --     ,[strBatchId]               = P.[strBatchId]
-    --     ,[strError]                 = 'The Write Off account selected: ' + GLAD.strAccountId + ' is a non-write-off Account Category.'
-	-- FROM #ARPostPaymentHeader P
-    -- INNER JOIN vyuGLAccountDetail GLAD ON P.intWriteOffAccountId = GLAD.intAccountId
-    -- WHERE P.[ysnPost] = @OneBit
-    --   AND UPPER(P.[strPaymentMethod]) = UPPER('Write Off')
-    --   AND ISNULL(GLAD.[strAccountCategory], '') <> 'Write Off'
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -631,8 +758,7 @@ BEGIN
         AND P.[intInvoiceId] IS NOT NULL
         AND ISNULL(P.[intGainLossAccount],0) = 0
 		AND P.[strTransactionType] <> 'Claim'
-		AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
-		AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount] - P.[dblWriteOffAmount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount] + P.[dblWriteOffAmount])
+		AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) <> @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -655,34 +781,6 @@ BEGIN
             P.[ysnPost] = @OneBit
         AND ISNULL(P.[intBankAccountId], 0) = 0
         AND P.[strPaymentMethod] = 'ACH'
-
- --   INSERT INTO #ARInvalidPaymentData
- --       ([intTransactionId]
- --       ,[strTransactionId]
- --       ,[strTransactionType]
- --       ,[intTransactionDetailId]
- --       ,[strBatchId]
- --       ,[strError])
-	----Prepaid Account
-	--SELECT
- --        [intTransactionId]         = P.[intTransactionId]
- --       ,[strTransactionId]         = P.[strTransactionId]
- --       ,[strTransactionType]       = @TransType
- --       ,[intTransactionDetailId]   = NULL
- --       ,[strBatchId]               = P.[strBatchId]
- --       ,[strError]                 = 'The Customer Prepaid account in Company Location - ' + MAX(ISNULL(P.[strLocationName],''))  + ' was not set.'
-	--FROM
-	--	#ARPostPaymentHeader P
- --   WHERE
- --           P.[ysnPost] = @OneBit
- --   GROUP BY
- --        P.[intTransactionId]
- --       ,P.[strTransactionId]
- --       ,P.[strBatchId]
- --   HAVING
- --           MAX(ISNULL(P.[intSalesAdvAcct],0)) = 0
- --       AND AVG(P.[dblAmountPaid]) <> @ZeroDecimal
- --       AND SUM(P.[dblBasePayment]) = @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -884,32 +982,6 @@ BEGIN
         AND P.[intUndepositedFundsId] IS NOT NULL
         AND GLA.[ysnActive] != @OneBit
 
-	-- INSERT INTO #ARInvalidPaymentData
-    --     ([intTransactionId]
-    --     ,[strTransactionId]
-    --     ,[strTransactionType]
-    --     ,[intTransactionDetailId]
-    --     ,[strBatchId]
-    --     ,[strError])
-	-- -- GL Account Does not Exist
-	-- SELECT
-    --      [intTransactionId]         = P.[intTransactionId]
-    --     ,[strTransactionId]         = P.[strTransactionId]
-    --     ,[strTransactionType]       = @TransType
-    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-    --     ,[strBatchId]               = P.[strBatchId]
-    --     ,[strError]                 = 'Undeposited Funds Account : ' + GLA.[strAccountId] + ' does not exist.'
-	-- FROM
-	-- 	#ARPostPaymentHeader P
-    -- LEFT OUTER JOIN 
-	-- 	#ARPaymentAccount GLA
-	-- 		ON P.[intUndepositedFundsId] = GLA.[intAccountId] 
-    -- WHERE
-    --         P.[ysnPost] = @OneBit
-    --     AND P.[intCompanyLocationId] IS NOT NULL
-    --     AND P.[intUndepositedFundsId] IS NOT NULL
-    --     AND GLA.[intAccountId] IS NULL
-
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
@@ -1005,7 +1077,7 @@ BEGIN
     WHERE
             P.[ysnPost] = @OneBit
         AND P.[dblCurrencyExchangeRate] = 1.000000
-        AND (P.[dblPayment] <> P.[dblBasePayment] OR P.[dblDiscount] <> P.[dblBaseDiscount] OR P.[dblInterest] <> P.[dblBaseInterest])
+        AND (P.[dblPayment] <> P.[dblBasePayment] OR P.[dblDiscount] <> P.[dblBaseDiscount] OR P.[dblInterest] <> P.[dblBaseInterest] OR P.[dblCreditCardFee] <> P.[dblBaseCreditCardFee])
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1060,6 +1132,26 @@ BEGIN
 		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId]), @ZeroDecimal) = @ZeroDecimal	
 		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId] AND [dblPayment] <> @ZeroDecimal))
     )
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Invalid Convenience Fee Account
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'The Convenience Fee Account in Company Configuration was not set.'
+	FROM #ARPostPaymentDetail P
+    WHERE P.[ysnPost] = @OneBit      
+      AND ISNULL(P.[dblCreditCardFee], 0) <> 0
+      AND ISNULL(P.[intCreditCardFeeAccountId], 0) = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1190,7 +1282,6 @@ BEGIN
         , [strBatchId]				= DI.strBatchId
         , [strError]				= 'Payment on ' + DI.strInvoiceNumber +  '(' + DI.[strTransactionId] + ') will be over the transaction''s amount due' 
     FROM #DUPLICATEINVOICES DI
-
 END
 
 IF @Post = @ZeroBit

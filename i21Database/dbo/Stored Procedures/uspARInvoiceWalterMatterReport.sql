@@ -82,11 +82,11 @@ SELECT
 	,dtmDueDate				= CAST(ARI.dtmDueDate AS DATE)
 	,strTerm				= SMT.strTerm
 	,strItemDescription		= ARGID.strItemDescription
-	,strQtyShipped			= FORMAT(ARGID.dblQtyShipped, '#,###.00') + ' ' + ARGID.strUnitMeasure
-	,strShipmentGrossWt		= FORMAT(ARGID.dblShipmentGrossWt, '#,###.00') + ' ' + ARGID.strWeightUnitMeasure
-	,strShipmentTareWt		= FORMAT(ARGID.dblShipmentTareWt, '#,###.00') + ' ' + ARGID.strWeightUnitMeasure
-	,strShipmentNetWt		= FORMAT(ARGID.dblShipmentNetWt, '#,###.00') + ' ' + ARGID.strWeightUnitMeasure
-	,strPrice				= ARGID.strCurrency + ' ' + FORMAT(ARGID.dblPrice, '#,###.00') + ' ' + ARGID.strPriceUnitMeasure
+	,strQtyShipped			= CONVERT(VARCHAR,CAST(ARGID.dblQtyShipped AS MONEY),1) + ' ' + ARGID.strUnitMeasure
+	,strShipmentGrossWt		= CONVERT(VARCHAR,CAST(ARGID.dblShipmentGrossWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
+	,strShipmentTareWt		= CONVERT(VARCHAR,CAST(ARGID.dblShipmentTareWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
+	,strShipmentNetWt		= CONVERT(VARCHAR,CAST(ARGID.dblShipmentNetWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
+	,strPrice				= ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARGID.dblPrice AS MONEY),1), '.00','') + ' ' + ARGID.strPriceUnitMeasure
 	,dblInvoiceTotal		= ARGID.dblTotal
 	,strEDICode				= ICC.strEDICode
 	,ysnCustomsReleased		= ISNULL(LGL.ysnCustomsReleased, 0)

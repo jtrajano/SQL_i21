@@ -84,6 +84,7 @@
 	[ysnManualCreation] BIT NOT NULL DEFAULT 0,
     [intLineNo] INT NOT NULL DEFAULT 1,
     [intTaxGroupId] INT NULL, 
+	[intOriginalTaxGroupId] INT NULL, 
 	[intFreightTermId] INT NULL, 
 	[intInventoryShipmentChargeId] INT NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
