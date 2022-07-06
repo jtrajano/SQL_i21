@@ -34,7 +34,7 @@ ISNULL([dblCreditForeign], 0.000000) as dblCreditForeign,
 [strCurrencyExchangeRateType]
 FROM
 (
-	SELECT [intGLDetailId], [dtmDate], [strBatchId], [intAccountId], [strAccountId], [strAccountGroup], [dblDebit], [dblCredit], [dblDebitUnit], [dblCreditUnit], GLPR.[strDescription], [strCode], [strReference], [intCurrencyId], [dblExchangeRate], [dtmDateEntered], [dtmTransactionDate], [strJournalLineDescription], [intJournalLineNo], [ysnIsUnposted], [intUserId], [intEntityId], [strTransactionId], [intTransactionId], [strTransactionType], [strTransactionForm], [strModuleName]
+	SELECT [intGLDetailId], [dtmDate], [strBatchId], [intAccountId], [strAccountId], [strAccountGroup], [dblDebit], [dblCredit], [dblDebitUnit], [dblCreditUnit], GLPR.[strDescription], [strCode], [strReference], GLPR.[intCurrencyId], [dblExchangeRate], [dtmDateEntered], [dtmTransactionDate], [strJournalLineDescription], [intJournalLineNo], [ysnIsUnposted], [intUserId], [intEntityId], [strTransactionId], [intTransactionId], [strTransactionType], [strTransactionForm], [strModuleName]
 	, [dblDebitForeign], [dblCreditForeign]
 	, SMCur.strCurrency as strCurrency
 	, SMCurExRateType.strCurrencyExchangeRateType as strCurrencyExchangeRateType
