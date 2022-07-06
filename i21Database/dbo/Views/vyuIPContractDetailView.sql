@@ -98,6 +98,9 @@ SELECT CD.intContractDetailId
 	,FBUM.strUnitMeasure AS strFreightBasisUnitMeasure
 	,FBBUM.strUnitMeasure AS strFreightBasisBaseUnitMeasure
 	,CPCU.strCurrency AS strConvPriceCurrency
+	,CD.dtmHistoricalDate
+	,CD.dblHistoricalRate
+	,CD.intHistoricalRateTypeId
 FROM tblCTContractDetail CD
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId

@@ -625,6 +625,10 @@ BEGIN TRY
 		, CD.intTaxGroupId
 		, TG.strTaxGroup
 		, CD.intTaxLocationId
+		, CD.dtmHistoricalDate
+		, CD.dblHistoricalRate
+		, CD.intHistoricalRateTypeId
+		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -662,6 +666,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 	LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intDestinationPortId
 	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
+	LEFT JOIN tblSMCurrencyExchangeRateType HRT ON HRT.intCurrencyExchangeRateTypeId = CD.intHistoricalRateTypeId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	LEFT JOIN tblICCommodityUnitMeasure CO ON CO.intCommodityUnitMeasureId =  CT.intCommodityUOMId
