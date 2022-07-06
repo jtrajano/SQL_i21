@@ -105,7 +105,7 @@ SELECT
 	dblHistoricAmount, dblAmountDifference = 0, strModule = 'INV'  COLLATE Latin1_General_CI_AS , strType = 'Payables'  COLLATE Latin1_General_CI_AS 
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intLOBSegmentCodeId
 FROM vyuICMultiCurrencyRevalueReceipt
 UNION ALL
 SELECT 
@@ -117,7 +117,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intLOBSegmentCodeId
 FROM vyuICMultiCurrencyRevalueReceiptOtherCharges
 UNION ALL
 SELECT 
@@ -129,7 +129,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables' COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intLOBSegmentCodeId
 FROM vyuICMultiCurrencyRevalueShipment
 UNION ALL
 SELECT 
@@ -142,7 +142,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intLOBSegmentCodeId
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnPayable = 1
 UNION ALL
 SELECT 
@@ -155,7 +155,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intLOBSegmentCodeId
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnReceivable = 1
 )
 INSERT INTO  @tblMulti
@@ -176,10 +176,10 @@ BEGIN
 	strItemId  COLLATE Latin1_General_CI_AS strItemId,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType COLLATE Latin1_General_CI_AS strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0,
 	strModule = 'CM'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS,
-	intAccountId = NULL
-	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
-	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
+	intAccountId = intAccountId,
+	intCompanyLocationId,
+	intLOBSegmentCodeId = NULL,
+	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCMMultiCurrencyRevalue A
 LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
@@ -336,7 +336,7 @@ SELECT
 	strItemId  COLLATE Latin1_General_CI_AS strItemId,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'GL'  COLLATE Latin1_General_CI_AS, 
 	strType = 'Receivables'  COLLATE Latin1_General_CI_AS
-	,intAccountId = NULL
+	,intAccountId = intAccountId
 	,intCompanyLocationId = NULL
 	,intLOBSegmentCodeId = NULL
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
@@ -345,39 +345,55 @@ WHERE strTransactionDate <= @dtmDate
 AND ISNULL(dblForexRate, 1) <> 1
 END
 
-SELECT 
+;WITH finalQuery AS(
+SELECT  
 A.strTransactionType,
-A.strTransactionId , 
-A.dtmDate, 
-A.dtmDueDate,
-A.strVendorName  ,
-A.strCommodity,
-A.strLineOfBusiness ,
-A.strLocation ,
-A.strTicket, 
-A.strContractId,
-A.strItemId,
-A.dblQuantity,
-A.dblUnitPrice,  
 A.dblTransactionAmount,
-A.intCurrencyId,  
-A.intCurrencyExchangeRateTypeId, 
-A.strForexRateType, 
+A.intCurrencyId,
 A.dblHistoricForexRate,
 A.dblHistoricAmount, 
-A.dblAmountDifference , 
-A.strModule, 
+A.dblAmountDifference,
 A.strType,
 B.strCurrency,
 intAccountIdOverride = A.intAccountId,
-intLOBSegmentOverrideId = NULL,
+intLOBSegmentOverrideId = intLOBSegmentCodeId,
+C.strAccountId,
 CL.* 
 FROM @tblMulti A 
+JOIN tblGLAccount C ON C.intAccountId = A.intAccountId
 LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
 OUTER APPLY(
 	SELECT	
-	intLocationSegmentCodeId = intProfitCenter  , 
+	intLocationSegmentCodeId = intProfitCenter,
 	intCompanySegmentCodeId = intCompanySegment 
 	FROM dbo.tblSMCompanyLocation 
 	WHERE intCompanyLocationId = A.intCompanyLocationId
 )CL
+)
+SELECT 
+strTransactionType,
+intAccountIdOverride,
+strForexRateType = 'Avg',
+intCurrencyId,
+strCurrency,
+strAccountId,
+AVG(dblTransactionAmount) dblTransactionAmount,
+AVG(dblHistoricAmount) dblHistoricAmount,
+AVG(dblHistoricForexRate) dblHistoricForexRate,
+AVG(dblAmountDifference) dblAmountDifference,
+intLOBSegmentOverrideId,
+intLocationSegmentCodeId,
+intCompanySegmentCodeId,
+strType
+FROM 
+finalQuery
+GROUP BY
+intCurrencyId,
+strCurrency,
+intAccountIdOverride,
+intLOBSegmentOverrideId,
+intLocationSegmentCodeId,
+intCompanySegmentCodeId,
+strType,
+strAccountId,
+strTransactionType
