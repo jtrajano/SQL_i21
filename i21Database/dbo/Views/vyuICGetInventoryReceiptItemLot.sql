@@ -33,6 +33,7 @@ SELECT
 	,receiptItemLot.dblGrossWeight
 	,receiptItemLot.dblTareWeight
 	,dblNetWeight = ISNULL(receiptItemLot.dblGrossWeight, 0) - ISNULL(receiptItemLot.dblTareWeight, 0)
+	,receiptItemLot.dblTarePerQuantity
 	,receiptItemLot.dblCost
 	,receiptItemLot.intUnitPallet
 	,receiptItemLot.dblStatedGrossPerUnit
@@ -77,11 +78,16 @@ SELECT
 	,receiptItem.strCategory
 	,receiptItem.intCategoryId
 	,receiptItem.intCommodityId
+	,receiptItemLot.strCargoNo
+	,receiptItemLot.strWarrantNo
+	,receiptItemLot.intWarrantStatus
+	, fiscal.strPeriod strAccountingPeriod
 	,receiptItem.intBookId
-	,receiptItem.intSubBookId
+	,receiptItem.intSubBookId	
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
-LEFT JOIN tblICInventoryReceiptItem rItem ON rItem.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+INNER JOIN tblICInventoryReceiptItem rItem ON rItem.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = rItem.intInventoryReceiptId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = receiptItem.intSubLocationId
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = receiptItemLot.intStorageLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = receiptItemLot.intItemUnitMeasureId
@@ -92,3 +98,8 @@ LEFT JOIN tblAPVendor Vendor ON Vendor.[intEntityId] = receiptItemLot.intEntityV
 LEFT JOIN tblSMCountry Origin ON Origin.intCountryID = receiptItemLot.intOriginId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = receiptItemLot.intGradeId
 LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = receiptItemLot.intProducerId
+OUTER APPLY (
+	SELECT TOP 1 fp.strPeriod
+	FROM tblGLFiscalYearPeriod fp
+	WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+) fiscal

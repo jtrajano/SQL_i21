@@ -25,6 +25,7 @@
 	[intContractDetailId]			INT NULL,
 	[intPriceFixationDetailId]		INT NULL,
 	[intContractSeqId]				INT NULL,
+	[intLotId] 						INT NULL,
 	[intContractCostId]				INT NULL,
 	[strContractNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intScaleTicketId]				INT NULL,
@@ -37,6 +38,8 @@
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intWeightClaimId]				INT NULL,
+	[intWeightClaimDetailId]		INT NULL,
 	[intCustomerStorageId]			INT NULL,
 	[intSettleStorageId]			INT NULL,
 	[intTicketId]					INT NULL,
@@ -49,10 +52,13 @@
 	[intTicketDistributionAllocationId] INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intFreightTermId]				INT NULL,
+	[strFreightTerm]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
 	[strTaxGroup]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intItemLocationId]				INT NULL,
 	[strItemLocationName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[intStorageChargeId] 			INT NULL,
+	[intInsuranceChargeDetailId]	INT NULL,
 	[intStorageLocationId]			INT NULL,
 	[strStorageLocationName]		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intSubLocationId]				INT NULL,
@@ -118,6 +124,11 @@
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
 	[ysnReturn]						BIT NULL,
 	[intLineNo]						INT NULL,
+	[intBookId]						INT NULL,
+	[intSubBookId]					INT NULL,
+	[intComputeTotalOption] 		TINYINT NOT NULL DEFAULT(0),
+	[intPayFromBankAccountId] 		INT NULL,
+	[strPayFromBankAccount]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO
@@ -135,6 +146,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
 								,intSettleStorageId
 								,intLoadShipmentCostId
 								,intLoadShipmentDetailId
+								,intWeightClaimDetailId
 								,intItemId DESC);
 -- GO
 -- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intPurchaseDetailId]
@@ -165,6 +177,7 @@ INCLUDE (
 	,intInventoryShipmentChargeId
 	,intLoadShipmentDetailId
 	,intLoadShipmentCostId
+	,intWeightClaimDetailId
 	,intEntityVendorId
 	,intCustomerStorageId
 	,intSettleStorageId

@@ -226,6 +226,15 @@ BEGIN
 			PRINT('updating transaction')
 		END
 
+	--transactionNo is missing when the transaction was created using [uspSMAuditLog]
+	--i.e. voucher was created in IR or other modules
+	IF ISNULL(@transactionNo, '') != '' AND ISNULL((SELECT TOP 1 strTransactionNo FROM tblSMTransaction WHERE intTransactionId = @transactionId), '') = ''
+	BEGIN
+		UPDATE tblSMTransaction
+		SET strTransactionNo = @transactionNo
+		WHERE intTransactionId = @transactionId
+	END
+
 	--Delete Approval History
 	DELETE FROM tblSMApprovalHistory
 	WHERE intApprovalId = ISNULL((

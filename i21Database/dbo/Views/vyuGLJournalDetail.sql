@@ -8,7 +8,7 @@ CREATE VIEW [dbo].[vyuGLJournalDetail]
        ,A.strTransactionType COLLATE Latin1_General_CI_AS strTransactionType
        ,A.dtmDate
        ,A.strReverseLink COLLATE Latin1_General_CI_AS strReverseLink
-       ,A.intCurrencyId
+       ,ISNULL(DC.intCurrencyID, ISNULL(S.intCurrencyID, A.intCurrencyId)) intCurrencyId
        ,A.dblExchangeRate
        ,A.dtmPosted
        ,A.strDescription COLLATE Latin1_General_CI_AS AS strHeaderDescription
@@ -51,7 +51,7 @@ CREATE VIEW [dbo].[vyuGLJournalDetail]
        ,C.strAccountId COLLATE Latin1_General_CI_AS strAccountId
        ,C.intAccountId
        ,C.strDescription COLLATE Latin1_General_CI_AS AS strAccountDescription
-       ,S.strCurrency COLLATE Latin1_General_CI_AS strCurrency
+       ,ISNULL(DC.strCurrency, S.strCurrency) COLLATE Latin1_General_CI_AS strCurrency
 
        FROM tblGLJournal A
        INNER JOIN tblGLJournalDetail B
@@ -61,8 +61,5 @@ CREATE VIEW [dbo].[vyuGLJournalDetail]
        on C.intAccountId = B.intAccountId
        LEFT JOIN tblSMCurrency S
        ON C.intCurrencyID = S.intCurrencyID
-
-
-
-
-
+       LEFT JOIN tblSMCurrency DC
+       ON DC.intCurrencyID = B.intCurrencyId

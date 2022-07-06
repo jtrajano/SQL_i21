@@ -92,6 +92,16 @@ SELECT
 		)
 	, itemUOM.ysnStockUnit
 	, dblInTransitDirect = CAST(COALESCE(stockInStockUOM.dblInTransitDirect, stockUOM.dblInTransitDirect, 0) AS NUMERIC(28, 6))
+
+	, Certification.intCertificationId
+	, Certification.strCertificationName
+	, strGrade			= Grade.strDescription
+	, strOrigin 		= Origin.strDescription
+	, strProductType	= ProductType.strDescription
+	, strRegion 		= Region.strDescription
+	, strSeason 		= Season.strDescription
+	, strClass 			= Class.strDescription
+	, strProductLine	= ProductLine.strDescription
 FROM
 	tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitmeasure
 		ON itemUOM.intUnitMeasureId = unitmeasure.intUnitMeasureId
@@ -177,3 +187,19 @@ FROM
 		ON storageLocation.intStorageLocationId = stockUOM.intStorageLocationId	
 	LEFT JOIN tblSMCompanyLocationSubLocation subLocation 
 		ON subLocation.intCompanyLocationSubLocationId = stockUOM.intSubLocationId
+	LEFT JOIN tblICCertification Certification
+		ON Certification.intCertificationId = item.intCertificationId
+	LEFT JOIN tblICCommodityAttribute Grade
+		ON Grade.intCommodityAttributeId = item.intGradeId
+	LEFT JOIN tblICCommodityAttribute Origin
+		ON Origin.intCommodityAttributeId = item.intOriginId
+	LEFT JOIN tblICCommodityAttribute ProductType
+		ON ProductType.intCommodityAttributeId = item.intProductTypeId
+	LEFT JOIN tblICCommodityAttribute Region
+		ON Region.intCommodityAttributeId = item.intRegionId
+	LEFT JOIN tblICCommodityAttribute Season
+		ON Season.intCommodityAttributeId = item.intSeasonId
+	LEFT JOIN tblICCommodityAttribute Class
+		ON Class.intCommodityAttributeId = item.intClassVarietyId
+	LEFT JOIN tblICCommodityProductLine ProductLine
+		ON ProductLine.intCommodityProductLineId = item.intProductLineId

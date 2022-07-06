@@ -6,7 +6,8 @@
 RETURNS @tbl TABLE (
 strAccountId NVARCHAR(100),
 beginBalance NUMERIC (18,6),
-beginBalanceUnit NUMERIC(18,6)
+beginBalanceUnit NUMERIC(18,6),
+beginBalanceForeign NUMERIC (18,6)
 )
 
 AS
@@ -28,7 +29,12 @@ BEGIN
 						WHEN D.dtmDateFrom IS NULL THEN 0 
 						WHEN @accountType = 'Revenue' THEN dblCreditUnit - dblDebitUnit
 							ELSE dblDebitUnit - dblCreditUnit
-					END)  beginBalanceUnit
+					END)  beginBalanceUnit,
+					SUM ( CASE 
+						  WHEN D.dtmDateFrom IS NULL THEN 0 
+						  WHEN @accountType = 'Revenue' THEN (dblCreditForeign - dblDebitForeign)*-1
+						  ELSE dblDebitForeign - dblCreditForeign
+					END)  beginBalanceForeign
 			FROM tblGLAccount A
 				LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 				LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
@@ -46,7 +52,11 @@ BEGIN
 				SUM( 
 				CASE WHEN B.strAccountType = 'Asset' THEN dblDebitUnit - dblCreditUnit
 						ELSE dblCreditUnit - dblDebitUnit
-				END)  beginBalanceUnit
+				END)  beginBalanceUnit,
+				SUM( 
+				CASE WHEN B.strAccountType = 'Asset' THEN dblDebitForeign - dblCreditForeign
+						ELSE (dblCreditForeign - dblDebitForeign)*-1
+				END)  beginBalanceForeign
 		
 		FROM tblGLAccount A
 			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId

@@ -124,3 +124,4 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
 		INCLUDE (dblStockIn, dblStockOut);
 	GO	
+	GO	

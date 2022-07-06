@@ -26,6 +26,7 @@ AS
 			CH.ysnPrinted,
 			CH.intSalespersonId,
 			CH.intGradeId,
+			CH.intSampleTypeId,
 			CH.intWeightId,
 			CH.intCropYearId,
 			CH.strInternalComment,
@@ -98,8 +99,10 @@ AS
 			NM.strCommodityUOM,
 			NM.strPosition,
 			NM.strGrade,
+			NM.strSampleTypeName,
 			NM.strWeight,
 			NM.strTerm,
+			NM.intBalanceDue,
 			NM.strEntityName,
 			NM.strSalesperson,
 			NM.strContact,
@@ -146,8 +149,20 @@ AS
 			AP.strApprovalStatus,
 			P.strPositionType,
 			CH.ysnReadOnlyInterCoContract,
+			CH.ysnEnableFutures,
 			intCommodityFutureMarketId = NM.intCommodityFutureMarketId,
-			ysnContractRequiresApproval = (case when ue.countValue > 0 then convert(bit,1) else convert(bit,0) end)
+			CH.ysnStrategic, -- CT-5315
+			CH.intEntitySelectedLocationId, -- CT-5315
+			NM.strEntitySelectedLocation, -- CT-5315
+			ysnContractRequiresApproval = (case when ue.countValue > 0 then convert(bit,1) else convert(bit,0) end),
+			CH.intCompanyLocationId,
+			NM.strLocationName,
+			CH.intDaysForFinance,
+			CH.ysnLocalCurrency,
+			NM.ysnProvisionalVoucher,
+			NM.strProvisionalVoucherIds,
+			CH.ysnPrintCropYear,
+			NM.ysnCheckMissingStandardPriceInContract
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY

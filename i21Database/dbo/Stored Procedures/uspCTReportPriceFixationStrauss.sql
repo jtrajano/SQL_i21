@@ -127,14 +127,11 @@ BEGIN TRY
 		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
 	from
 		tblCTContractHeader ch
-		,tblSMMultiCompany smc
-		,tblIPMultiCompany mc
-		,tblSMUserSecurity us
+		inner join tblSMMultiCompany smc on smc.intMultiCompanyId = ch.intCompanyId
+		inner join tblIPMultiCompany mc on mc.intCompanyId = smc.intMultiCompanyId
+		inner join tblSMUserSecurity us on lower(us.strUserName) = lower(mc.strApprover)
 	where
 		ch.intContractHeaderId = @intContractHeaderId
-		and smc.intMultiCompanyId = ch.intCompanyId
-		and mc.intCompanyId = smc.intMultiCompanyId
-		and lower(us.strUserName) = lower(mc.strApprover)
 
 	select
 		@ysnIsParent = t.ysnIsParent
@@ -236,7 +233,7 @@ BEGIN TRY
 								+ ' per ' + FM.strUnitMeasure,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
-			
+	
 			SubmitterSign =		case
 								when CH.intContractTypeId = 1
 								then 

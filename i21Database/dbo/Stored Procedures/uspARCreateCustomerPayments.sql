@@ -65,6 +65,9 @@ INSERT INTO @PaymentsToGenerate (
 	,[ysnPost]
 	,[ysnRecap]
 	,[intEntityId]
+	,[intEntityCardInfoId]
+	,[ysnScheduledPayment]
+	,[dtmScheduledPayment]
 	,[intPaymentDetailId]
 	,[intInvoiceId]
 	,[intBillId]
@@ -78,6 +81,7 @@ INSERT INTO @PaymentsToGenerate (
 	,[dblBaseWriteOffAmount]
 	,[dblInterest]
 	,[dblPayment]
+	,[dblCreditCardFee]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]
@@ -116,6 +120,9 @@ SELECT
 	,[ysnPost]								= [ysnPost]
 	,[ysnRecap]								= [ysnRecap]
 	,[intEntityId]							= [intEntityId]
+	,[intEntityCardInfoId]					= [intEntityCardInfoId]
+	,[ysnScheduledPayment]					= [ysnScheduledPayment]
+	,[dtmScheduledPayment]					= [dtmScheduledPayment]
 	,[intPaymentDetailId]					= [intPaymentDetailId]
 	,[intInvoiceId]							= [intInvoiceId]
 	,[intBillId]							= [intBillId]
@@ -129,6 +136,7 @@ SELECT
 	,[dblBaseWriteOffAmount]				= [dblBaseWriteOffAmount]
 	,[dblInterest]							= [dblInterest]
 	,[dblPayment]							= [dblPayment]
+	,[dblCreditCardFee]						= [dblCreditCardFee]
 	,[strInvoiceReportNumber]				= [strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]		= [intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]			= [intCurrencyExchangeRateId]
@@ -303,44 +311,10 @@ WHERE
 	ITG.strNotes = 'Store Payment '
 	AND ISNULL(SMCL.intSalesAdvAcct, 0) = 0
 
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'This will create a prepayment which has not been allowed!'
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE	
---	ITG.[ysnAllowPrepayment] = 0
---	AND ITG.[intInvoiceId] IS NULL
---	AND ITG.[dblAmountPaid] > @ZeroDecimal
-
-
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'This will create a overpayment which has not been allowed!'
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE	
---	ITG.[ysnAllowOverpayment] = 0
---	AND ITG.[intInvoiceId] IS NOT NULL
---	AND ITG.[dblAmountPaid] > ([dblPayment] + [dblDiscount] - [dblInterest])
-
 
 DELETE FROM V
 FROM @PaymentsToGenerate V
 WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
-
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
@@ -476,6 +450,9 @@ USING
 		,[ysnImportedFromOrigin]			= ITG.[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]				= ITG.[ysnImportedAsPosted]
 		,[intEntityId]						= ITG.[intEntityId]
+		,[intEntityCardInfoId]				= ITG.[intEntityCardInfoId]
+		,[ysnScheduledPayment]				= ITG.[ysnScheduledPayment]
+		,[dtmScheduledPayment]				= ITG.[dtmScheduledPayment]
 		,[intWriteOffAccountId]				= ITG.[intWriteOffAccountId]
 		,[strPaymentMethod]					= ITG.[strPaymentMethod]
 		,[dblTotalAR]						= @ZeroDecimal
@@ -487,15 +464,9 @@ USING
 		,[ysnPost]							= ITG.[ysnPost]
 		,[ysnRecap]							= ITG.[ysnRecap]
 		,[intPaymentId]						= ITG.[intPaymentId]
-		,[ysnPosted]						= ITG.[ysnImportedAsPosted]	
-	FROM	
-		@PaymentsToGenerate ITG --WITH (NOLOCK)
-	-- INNER JOIN
-	-- 	(SELECT intId FROM @PaymentsToGenerate) ITG2  --WITH (NOLOCK)) ITG2
-	-- 		ON ITG.[intId] = ITG2.[intId]
-	--INNER JOIN
-	--	(SELECT [intEntityId], [dblARBalance], [intCurrencyId] FROM tblARCustomer WITH (NOLOCK)) ARC
-	--		ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 	
+		,[ysnPosted]						= ITG.[ysnImportedAsPosted]
+		,[strCreditCardStatus]				= CASE WHEN intEntityCardInfoId IS NOT NULL THEN 'Ready' ELSE NULL END
+	FROM @PaymentsToGenerate ITG
 	)
 AS Source
 ON Target.[intPaymentId] = Source.[intPaymentId]
@@ -528,9 +499,13 @@ INSERT(
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
 	,[intEntityId]
+	,[intEntityCardInfoId]
+	,[ysnScheduledPayment]
+	,[dtmScheduledPayment]
 	,[intWriteOffAccountId]
 	,[strPaymentMethod]
 	,[dblTotalAR]
+	,[strCreditCardStatus]
 	,[intConcurrencyId]
 	)
 VALUES(
@@ -561,9 +536,13 @@ VALUES(
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
 	,[intEntityId]
+	,[intEntityCardInfoId]
+	,[ysnScheduledPayment]
+	,[dtmScheduledPayment]
 	,[intWriteOffAccountId]
 	,[strPaymentMethod]
 	,[dblTotalAR]
+	,[strCreditCardStatus]
 	,[intConcurrencyId]
 )
 	OUTPUT  
@@ -707,6 +686,7 @@ BEGIN TRY
 		,[dblBaseWriteOffAmount]
 		,[dblInterest]
 		,[dblPayment]
+		,[dblCreditCardFee]
 		,[strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]
@@ -759,6 +739,7 @@ BEGIN TRY
 		,[dblBaseWriteOffAmount]			= ITG.[dblBaseWriteOffAmount]
 		,[dblInterest]						= ITG.[dblInterest]
 		,[dblPayment]						= ITG.[dblPayment]
+		,[dblCreditCardFee]					= ITG.[dblCreditCardFee]
 		,[strInvoiceReportNumber]			= ITG.[strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]	= ITG.[intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]		= ITG.[intCurrencyExchangeRateId]

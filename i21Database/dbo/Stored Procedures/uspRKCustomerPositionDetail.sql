@@ -85,7 +85,7 @@ BEGIN
 				AND intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId
 				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 		) dblTotal1
-		, (SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
+		INNER JOIN (SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
 			FROM (
 				SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount
 					, c.intContractHeaderId
@@ -99,8 +99,8 @@ BEGIN
 				GROUP BY c.intContractHeaderId
 			) t
 			WHERE dblAdjustmentAmount <> dblOriginalQuantity
-		) AS CollateralSale
-		, (SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralPurchases
+		) AS CollateralSale ON 1=1
+		INNER JOIN (SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralPurchases
 			FROM (
 				SELECT isnull(SUM(dblAdjustmentAmount), 0) dblAdjustmentAmount
 					, c.intContractHeaderId
@@ -114,7 +114,7 @@ BEGIN
 				GROUP BY c.intContractHeaderId
 			) t
 			WHERE dblAdjustmentAmount <> dblOriginalQuantity
-		) AS CollateralPurchases
+		) AS CollateralPurchases ON 1=1
 		
 		UNION ALL SELECT 7 AS intSeqId
 			, 'Total Receipted Sales' COLLATE Latin1_General_CI_AS AS [strType]
@@ -126,7 +126,7 @@ BEGIN
 				AND intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId
 				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 		) dblTotal1
-		, (SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
+		INNER JOIN (SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
 			FROM (
 				SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount
 					, c.intContractHeaderId
@@ -140,8 +140,8 @@ BEGIN
 				GROUP BY c.intContractHeaderId
 			) t
 			WHERE dblAdjustmentAmount <> dblOriginalQuantity
-		) AS CollateralSale
-		, (SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralPurchases
+		) AS CollateralSale ON 1=1
+		INNER JOIN (SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralPurchases
 			FROM (
 				SELECT isnull(SUM(dblAdjustmentAmount), 0) dblAdjustmentAmount
 					, c.intContractHeaderId
@@ -155,7 +155,7 @@ BEGIN
 				GROUP BY c.intContractHeaderId
 			) t
 			WHERE dblAdjustmentAmount <> dblOriginalQuantity
-		) AS CollateralPurchases
+		) AS CollateralPurchases ON 1=1
 		
 		UNION ALL SELECT 8 AS intSeqId
 			, 'Purchase Priced' COLLATE Latin1_General_CI_AS [strType]

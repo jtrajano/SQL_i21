@@ -303,7 +303,6 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for serial lot items.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt to raise error 80006.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICCreatePOInventoryTransaction for creating the PO transaction to tblICInventoryTransaction.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for reversing GL entries.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries from inventory transaction.sql" />

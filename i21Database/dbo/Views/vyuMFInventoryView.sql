@@ -143,6 +143,19 @@ SELECT l.intLotId
 	,ISNULL(RCC1.strReportName, 'InventoryReceiptReport') AS strReceiptReportName -- 2 - Receipt Report Name
 	,LO.intLoadId
 	,LO.strLoadNumber
+	,Com.strCommodityCode
+	,l.strCondition
+	,l.dblQtyInTransit
+	,l.dblWeightInTransit
+	,l.ysnWeighed
+	,l.strSealNo
+	,CH.strContractNumber
+	,CD.intContractSeq
+	,CD.strERPPONumber
+	,CD.strERPItemNumber
+	,CD.strERPBatchNumber
+	,i.strExternalGroup
+	,PT.strPricingType
 FROM dbo.tblICLot l
 JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 JOIN dbo.tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -150,6 +163,7 @@ JOIN dbo.tblICLotStatus ls ON ls.intLotStatusId = l.intLotStatusId
 LEFT JOIN dbo.tblSMUserSecurity us ON us.[intEntityId] = l.intCreatedUserId
 JOIN dbo.tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
 JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+LEFT JOIN dbo.tblICCommodity Com ON Com.intCommodityId = i.intCommodityId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 LEFT JOIN dbo.tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 LEFT JOIN dbo.tblICRestriction R ON R.intRestrictionId = sl.intRestrictionId
@@ -174,3 +188,6 @@ LEFT JOIN dbo.tblMFManufacturingProcess mp ON LI.intManufacturingProcessId = mp.
 LEFT JOIN dbo.tblMFCompanyPreference CP ON 1 = 1
 LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = LI.intWorkOrderId
 LEFT JOIN dbo.tblLGLoad LO ON LO.intLoadId = LI.intLoadId
+LEFT JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = l.intContractDetailId
+LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = l.intContractHeaderId
+LEFT JOIN dbo.tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId

@@ -24,26 +24,26 @@ BEGIN
 		fyp.strPeriod = @strFYMonth
 END 
 
--- 'Unable to find an open fiscal year period to match the transaction date.'
-IF (dbo.isOpenAccountingDate(@dtmStartDate) = 0) 
-BEGIN 	
-	EXEC uspICRaiseError 80177, @dtmStartDate; 
-	RETURN -80177; 
-END 
+---- 'Unable to find an open fiscal year period to match the transaction date.'
+--IF (dbo.isOpenAccountingDate(@dtmStartDate) = 0) 
+--BEGIN 	
+--	EXEC uspICRaiseError 80177, @dtmStartDate; 
+--	RETURN -80177; 
+--END 
 
--- Unable to find an open fiscal year period for %s module to match the transaction date.
-IF (dbo.isOpenAccountingDateByModule(@dtmStartDate, 'Inventory') = 0)
-BEGIN 
-	EXEC uspICRaiseError 80178, 'Inventory', @dtmStartDate; 
-	RETURN -80178; 
-END 
+---- Unable to find an open fiscal year period for %s module to match the transaction date.
+--IF (dbo.isOpenAccountingDateByModule(@dtmStartDate, 'Inventory') = 0)
+--BEGIN 
+--	EXEC uspICRaiseError 80178, 'Inventory', @dtmStartDate; 
+--	RETURN -80178; 
+--END 
 
--- Unable to find an open fiscal year period for %s module to match the transaction date.
-IF (dbo.isOpenAccountingDateByModule(@dtmStartDate, 'Accounts Receivable') = 0)
-BEGIN 
-	EXEC uspICRaiseError 80178, 'Accounts Receivable', @dtmStartDate; 
-	RETURN -80178; 
-END 
+---- Unable to find an open fiscal year period for %s module to match the transaction date.
+--IF (dbo.isOpenAccountingDateByModule(@dtmStartDate, 'Accounts Receivable') = 0)
+--BEGIN 
+--	EXEC uspICRaiseError 80178, 'Accounts Receivable', @dtmStartDate; 
+--	RETURN -80178; 
+--END 
 
 DECLARE 
 	@intInventoryTransactionIdStart AS INT 

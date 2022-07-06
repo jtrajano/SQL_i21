@@ -235,6 +235,8 @@ BEGIN
 		, strProductType
 		, strCurrency = @strCurrency
 		, strUnitMeasure = @strUnitMeasure
+		, strFutureMarket
+		, strFutureMonth
 	FROM (
 		SELECT intRowNum
 			, intContractDetailId
@@ -261,6 +263,8 @@ BEGIN
 			, strPricingType
 			, strItemNo
 			, strProductType
+			, strFutureMarket
+			, strFutureMonth
 		FROM (
 			SELECT intRowNum
 				, t.intContractDetailId
@@ -303,9 +307,12 @@ BEGIN
 				, cd.intCurrencyId
 				, ysnSubCurrency
 				, cd.intUnitMeasureId
+				, strFutureMarket = m.strFutMarketName
+				, strFutureMonth = fm.strFutureMonth
 			FROM @GetStandardQty t
 			JOIN tblCTContractDetail cd ON t.intContractDetailId = cd.intContractDetailId
 			JOIN tblRKFutureMarket m ON cd.intFutureMarketId = m.intFutureMarketId
+			JOIN tblRKFuturesMonth fm ON cd.intFutureMonthId = fm.intFutureMonthId
 			JOIN tblICItemUOM i ON cd.intPriceItemUOMId = i.intItemUOMId
 			JOIN tblICItemUOM j ON cd.intBasisUOMId = j.intItemUOMId
 			JOIN tblCTPricingType pt ON cd.intPricingTypeId = pt.intPricingTypeId
@@ -356,6 +363,8 @@ BEGIN
 		, strProductType
 		, strCurrency = @strCurrency
 		, strUnitMeasure = @strUnitMeasure
+		, strFutureMarket
+		, strFutureMonth
 	FROM (
 		SELECT intRowNum
 			, intContractDetailId
@@ -372,6 +381,8 @@ BEGIN
 			, strPricingType
 			, strItemNo
 			, strProductType
+			, strFutureMarket
+			, strFutureMonth
 		FROM (
 			SELECT intRowNum
 				, t.intContractDetailId
@@ -401,9 +412,12 @@ BEGIN
 				, cd.intCurrencyId
 				, ysnSubCurrency
 				, cd.intUnitMeasureId
+				, strFutureMarket = m.strFutMarketName
+				, strFutureMonth = fm.strFutureMonth
 			FROM @GetStandardQty t
 			JOIN tblCTContractDetail cd ON t.intContractDetailId = cd.intContractDetailId
 			LEFT JOIN tblRKFutureMarket m ON cd.intFutureMarketId = m.intFutureMarketId
+			LEFT JOIN tblRKFuturesMonth fm ON cd.intFutureMonthId = fm.intFutureMonthId
 			LEFT JOIN tblICItemUOM i ON cd.intPriceItemUOMId = i.intItemUOMId
 			LEFT JOIN tblCTPricingType pt ON cd.intPricingTypeId = pt.intPricingTypeId
 			LEFT JOIN tblSMCompanyLocation l ON cd.intCompanyLocationId = l.intCompanyLocationId

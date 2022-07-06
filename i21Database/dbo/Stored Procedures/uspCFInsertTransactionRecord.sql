@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿
+CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -119,7 +120,7 @@
 	,@VehicleNumberForDualCard			NVARCHAR(MAX)	= NULL
 	,@strDriverPin						NVARCHAR(MAX)	= NULL
 	,@intUserId							INT				= NULL
-
+	,@LinkedNetworkCardNumber			NVARCHAR(MAX)	= NULL
 	
 
 
@@ -382,6 +383,16 @@ BEGIN
 		--TAX PERCENTAGE CONVERSION--
 
 
+	END
+	ELSE IF (@strNetworkType = 'NBS')
+	BEGIN
+			IF(@strCardId LIKE '%X%')
+			BEGIN
+				SET @strTransactionType = 'Foreign Sale'
+				SET @dblTransferCost = @dblOriginalGrossPrice
+				SET @dblOriginalGrossPrice = @dblTransferCost
+				SET @intCustomerId = @intForeignCustomerId
+			END
 	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
@@ -880,6 +891,36 @@ BEGIN
 			END
 		END
 	END
+
+	DECLARE @ysnSkipTransactionOnImport BIT 
+	SELECT TOP 1 @ysnSkipTransactionOnImport = ysnSkipTransactionOnImport FROM tblCFSite WHERE intSiteId = @intSiteId
+
+	IF(ISNULL(@ysnSkipTransactionOnImport,0) = 1)
+	BEGIN
+
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason)
+			VALUES (0, 'Skipped transaction of Site ' + @strSiteId + ' - ' + @strSiteName)
+
+
+			--INSERT INTO tblCFTransactionPrice
+			--(
+			--	 intTransactionId
+			--	,strTransactionPriceId
+			--	,dblOriginalAmount
+			--	,dblCalculatedAmount
+			--)
+			--VALUES 
+			-- (@Pk,'Gross Price',@dblOriginalGrossPrice,0.0)
+			--,(@Pk,'Net Price',0.0,0.0)
+			--,(@Pk,'Total Amount',0.0,0.0)
+
+			
+			COMMIT TRANSACTION
+			RETURN;
+
+	END
+
+
 	
 	--FIND CARD--
 	
@@ -960,6 +1001,7 @@ BEGIN
 				ON C.intAccountId = A.intAccountId
 				WHERE C.strCardNumber = @strCardId 
 				AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+				AND C.intNetworkId = @intNetworkId
 			END
 			ELSE
 			BEGIN
@@ -974,6 +1016,7 @@ BEGIN
 					ON C.intAccountId = A.intAccountId
 					WHERE C.strCardNumber = @strCardId
 					AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+					AND C.intNetworkId = @intNetworkId
 				END
 				ELSE
 				BEGIN
@@ -984,7 +1027,7 @@ BEGIN
 					ON C.intAccountId = A.intAccountId
 					WHERE C.intCardId = @intCardId
 					AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
-
+					AND C.intNetworkId = @intNetworkId
 					SET @ysnCreditCardUsed = 1
 
 				END
@@ -1001,6 +1044,7 @@ BEGIN
 				ON C.intAccountId = A.intAccountId
 				WHERE C.strCardNumber = @strCardId
 				AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+				AND C.intNetworkId = @intNetworkId
 			END
 		END
 	END
@@ -1015,8 +1059,31 @@ BEGIN
 			ON C.intAccountId = A.intAccountId
 			WHERE C.strCardNumber = @strCardId
 			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+			AND C.intNetworkId = @intNetworkId
 		END
 	END
+	
+	
+
+	--FIND CARD IN LINKED NETWORK CARDS--
+	DECLARE @intLinkedNetworkId INT
+	IF(ISNULL(@intCardId,0) = 0)
+	BEGIN
+		SELECT TOP 1 @intLinkedNetworkId = intLinkedNetworkId FROM tblCFNetwork WHERE intNetworkId = @intNetworkId
+		IF(ISNULL(@intLinkedNetworkId,0) != 0)
+		BEGIN
+			SELECT TOP 1 
+				 @intCardId = C.intCardId
+				,@intCustomerId = A.intCustomerId
+			FROM tblCFCard C
+			INNER JOIN tblCFAccount A
+			ON C.intAccountId = A.intAccountId
+			WHERE C.strCardNumber = @LinkedNetworkCardNumber
+			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+			AND C.intNetworkId = @intLinkedNetworkId
+		END
+	END
+
 
 	IF(LOWER(@strTransactionType) LIKE '%foreign%')
 	BEGIN
@@ -1047,19 +1114,8 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		AND intNetworkId = @intNetworkId
-		AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+		AND (intSiteId = @intSiteId)
 	END
-
-	-- IF(@intProductId = 0)
-	-- BEGIN
-	-- 	SELECT TOP 1 
-	-- 		 @intProductId = intItemId
-	-- 		,@intARItemId = intARItemId
-	-- 	FROM tblCFItem 
-	-- 	WHERE strProductNumber = @strProductId
-	-- 	AND intNetworkId = @intNetworkId
-	-- 	AND (intSiteId = 0 OR intSiteId IS NULL)
-	-- END
 
 	IF(@intProductId = 0)
 	BEGIN
@@ -1069,7 +1125,7 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = RTRIM(LTRIM(@strProductId))
 		AND intNetworkId = @intNetworkId
-		AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+		AND (intSiteId = @intSiteId)
 	END
 
 	IF(@intProductId = 0)
@@ -1078,7 +1134,7 @@ BEGIN
 		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
 		BEGIN
 
-			SELECT * INTO #tempProduct FROM tblCFItem 
+			SELECT * INTO #tempProduct1 FROM tblCFItem 
 			WHERE intNetworkId = @intNetworkId
 			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
 			AND ISNUMERIC(strProductNumber) = 1 
@@ -1086,10 +1142,53 @@ BEGIN
 			SELECT TOP 1 
 				@intProductId = intItemId
 				,@intARItemId = intARItemId
-			FROM #tempProduct 
+			FROM #tempProduct1 
 			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
 			AND intNetworkId = @intNetworkId
+			AND (intSiteId = @intSiteId )
+		END
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = @strProductId
+		AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = RTRIM(LTRIM(@strProductId))
+		AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+
+		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
+		BEGIN
+
+			SELECT * INTO #tempProduct2 FROM tblCFItem 
+			WHERE intNetworkId = @intNetworkId
 			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+			AND ISNUMERIC(strProductNumber) = 1 
+
+			SELECT TOP 1 
+				@intProductId = intItemId
+				,@intARItemId = intARItemId
+			FROM #tempProduct2 
+			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
+			AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
 		END
 	END
 

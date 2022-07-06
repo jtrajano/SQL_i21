@@ -9,15 +9,15 @@ BEGIN
 
 	SELECT
 		@cost = CASE WHEN B.intTransactionType = 2 OR B.intTransactionType = 13
-					THEN	(A.dblCost / 
+					THEN	[dbo].[fnCalculateCostBetweenUOM](A.intCostUOMId, A.intUnitOfMeasureId, ((A.dblCost / 
 								(CASE WHEN A.ysnSubCurrency = 1 THEN B.intSubCurrencyCents ELSE 1 END) --check if sub currency
-							) 
+							)))
 							*
 							(
-								(CASE WHEN A.dblUnitQty > 0 THEN A.dblUnitQty ELSE 1 END) --Contract already sent converted UOM unit qty
+								(CASE WHEN A.dblUnitQty > 0 THEN CAST(A.dblUnitQty AS DECIMAL(30, 20)) ELSE 1 END) --Contract already sent converted UOM unit qty
 							)
 					 ELSE
-						 CASE WHEN A.dblNetWeight > 0 
+						 CAST(CASE WHEN A.dblNetWeight > 0 
 								THEN
 								(A.dblCost /
 								(CASE WHEN A.ysnSubCurrency = 1 THEN B.intSubCurrencyCents ELSE 1 END)) 
@@ -37,6 +37,7 @@ BEGIN
 									(CASE WHEN A.dblCostUnitQty > 0 THEN A.dblCostUnitQty ELSE 1 END)
 								)
 								END
+							AS DECIMAL(30,20))
 					 END
 	FROM tblAPBillDetail A
 	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId

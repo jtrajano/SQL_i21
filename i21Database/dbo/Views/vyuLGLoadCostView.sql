@@ -17,7 +17,11 @@ SELECT LC.intLoadCostId
 	  ,E.strName AS strEntityName
 	  ,L.strLoadNumber
 	  ,strShipmentStatus = CASE L.intShipmentStatus
-			WHEN 1 THEN 'Scheduled'
+			WHEN 1 THEN 
+				CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
+						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
+				THEN 'Expired'
+				ELSE 'Scheduled' END
 			WHEN 2 THEN 'Dispatched'
 			WHEN 3 THEN 
 				CASE WHEN (L.ysnDocumentsApproved = 1 
@@ -54,6 +58,7 @@ SELECT LC.intLoadCostId
 			WHEN 9 THEN 'Full Shipment Created'
 			WHEN 10 THEN 'Cancelled'
 			WHEN 11 THEN 'Invoiced'
+			WHEN 12 THEN 'Rejected'
 			ELSE '' END COLLATE Latin1_General_CI_AS
 	  ,UM.strUnitMeasure
 	  ,I.strItemNo

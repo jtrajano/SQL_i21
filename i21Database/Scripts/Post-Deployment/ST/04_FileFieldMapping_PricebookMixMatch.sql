@@ -24,6 +24,8 @@ DECLARE @intImportFileHeaderId Int, @intImportFileColumnDetailId Int
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM [dbo].[tblSMImportFileHeader]
 WHERE strLayoutTitle = 'Pricebook Mix Match' AND strFileType = 'XML' AND [strXMLType] = 'Outbound'
 
+DELETE FROM [dbo].[tblSMImportFileColumnDetail] WHERE intImportFileHeaderId = @intImportFileHeaderId
+
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'NAXML-MaintenanceRequest')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -227,308 +229,74 @@ BEGIN
 			   , NULL, 9, '', 1, 1
 END
 
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictHighFlag')
+IF EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictHighFlag')
 BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 16,		5, 'MixMatchStrictHighFlag', NULL, NULL
-			   , NULL, 9, '0', 1, 1
+	DELETE FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictHighFlag'
 END
 
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictHighFlag')
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictHighFlag' 
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'value')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'value',	'tblSTstgMixMatchFile',	'MixMatchStrictHighFlagValue',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0
-				   
-END 
-
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictLowFlag')
+IF EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictLowFlag')
 BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 17,		6, 'MixMatchStrictLowFlag', NULL, NULL
-			   , NULL, 9, '0', 1, 1
+	DELETE FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictLowFlag'
 END
-
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictLowFlag')
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchStrictLowFlag' 
-
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'value')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'value',	'tblSTstgMixMatchFile',	'MixMatchStrictLowFlagValue',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0
-				   
-END 
 
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'ItemListID')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 18,		7, 'ItemListID', 'tblSTstgMixMatchFile', 'ItemListID'
+	SELECT @intImportFileHeaderId, NULL, 16,		5, 'ItemListID', 'tblSTstgMixMatchFile', 'ItemListID'
 			   , NULL, 9, '', 1, 1
 END
 
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'StartDate')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 19,		8, 'StartDate', 'tblSTstgMixMatchFile', 'StartDate'
+	SELECT @intImportFileHeaderId, NULL, 17,		6, 'StartDate', 'tblSTstgMixMatchFile', 'StartDate'
 			   , NULL, 9, '', 1, 1
 END
 
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'StartTime')
+IF EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'StartTime')
 BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 20,		9, 'StartTime', 'tblSTstgMixMatchFile', 'StartTime'
-			   , NULL, 9, '', 1, 1
+	DELETE FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'StartTime'
 END
 
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'StopDate')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 21,		10, 'StopDate', 'tblSTstgMixMatchFile', 'StopDate'
+	SELECT @intImportFileHeaderId, NULL, 18,		7, 'StopDate', 'tblSTstgMixMatchFile', 'StopDate'
 			   , NULL, 9, '', 1, 1
 END
 
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'StopTime')
+IF EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'StopTime')
 BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 22,		11, 'StopTime', 'tblSTstgMixMatchFile', 'StopTime'
-			   , NULL, 9, '', 1, 1
+	DELETE FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'StopTime'
 END
 
-IF NOT EXISTS(SELECT * FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 23)
+IF EXISTS(SELECT * FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability')
 BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 23,		12, 'WeekdayAvailability', NULL, NULL
-			   , NULL, 9, '', 1, 1
+	DELETE FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability'
 			   
 END
 
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 23 )
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 23
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'avaialble')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'avaialble',	'tblSTstgMixMatchFile',	'WeekdayAvailabilitySunday',	'', 1, 1	
-	END
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'weekday')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	2,	'weekday',	'tblSTstgMixMatchFile',	'WeekdaySunday',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0			
-			   
-END
-
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 24)
-BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 24,		13, 'WeekdayAvailability', NULL, NULL
-			   , NULL, 9, '', 1, 1
-			   
-END
-
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 24 )
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 24
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'avaialble')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'avaialble',	'tblSTstgMixMatchFile',	'WeekdayAvailabilityMonday',	'', 1, 1	
-	END
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'weekday')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	2,	'weekday',	'tblSTstgMixMatchFile',	'WeekdayMonday',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0			
-			   
-END
-
-
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 25)
-BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 25,		14, 'WeekdayAvailability', NULL, NULL
-			   , NULL, 9, '', 1, 1
-END
-
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 25 )
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 25
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'avaialble')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'avaialble',	'tblSTstgMixMatchFile',	'WeekdayAvailabilityTuesday',	'', 1, 1	
-	END
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'weekday')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	2,	'weekday',	'tblSTstgMixMatchFile',	'WeekdayTuesday',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0			
-
-END
-
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability'  AND intLevel = 26)
-BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 26,		15, 'WeekdayAvailability', NULL, NULL
-			   , NULL, 9, '', 1, 1
-END
-
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 26 )
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 26
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'avaialble')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'avaialble',	'tblSTstgMixMatchFile',	'WeekdayAvailabilityWednesday',	'', 1, 1	
-	END
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'weekday')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	2,	'weekday',	'tblSTstgMixMatchFile',	'WeekdayWednesday',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0			
-
-END
-
-
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 27)
-BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 27,		16, 'WeekdayAvailability',  NULL, NULL
-			   , NULL, 9, '', 1, 1
-END
-
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 27 )
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 27
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'avaialble')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'avaialble',	'tblSTstgMixMatchFile',	'WeekdayAvailabilityThursday',	'', 1, 1	
-	END
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'weekday')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	2,	'weekday',	'tblSTstgMixMatchFile',	'WeekdayThursday',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0			
-
-END
-
-
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 28)
-BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 28,		17, 'WeekdayAvailability', NULL, NULL
-			   , NULL, 9, '', 1, 1
-END
-
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 28 )
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 28
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'avaialble')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'avaialble',	'tblSTstgMixMatchFile',	'WeekdayAvailabilityFriday',	'', 1, 1	
-	END
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'weekday')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	2,	'weekday',	'tblSTstgMixMatchFile',	'WeekdayFriday',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0			
-
-END
-
-
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability'  AND intLevel = 29)
-BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 29,		18, 'WeekdayAvailability',  NULL, NULL
-			   , NULL, 9, '', 1, 1
-END
-
-IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 29 )
-BEGIN			   
-	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM [dbo].[tblSMImportFileColumnDetail] 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'WeekdayAvailability' AND intLevel = 29
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'avaialble')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'avaialble',	'tblSTstgMixMatchFile',	'WeekdayAvailabilitySaturday',	'', 1, 1	
-	END
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'weekday')
-	BEGIN	
-		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	2,	'weekday',	'tblSTstgMixMatchFile',	'WeekdaySaturday',	'', 1, 1	
-	END
-	
-	SET @intImportFileColumnDetailId = 0			
-
-END
 
 
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchEntry')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 30,		19, 'MixMatchEntry', 'tblSTstgMixMatchFile', NULL
+	SELECT @intImportFileHeaderId, NULL, 19,		8, 'MixMatchEntry', 'tblSTstgMixMatchFile', NULL
 			   , 'Header', 9, '', 1, 1
 END
 
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchUnits')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 31,		1, 'MixMatchUnits', 'tblSTstgMixMatchFile', 'MixMatchUnits'
-			   , NULL, 30, '', 1, 1
+	SELECT @intImportFileHeaderId, NULL, 20,		1, 'MixMatchUnits', 'tblSTstgMixMatchFile', 'MixMatchUnits'
+			   , NULL, 19, '', 1, 1
 END
 
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchPrice')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 32,		2, 'MixMatchPrice', 'tblSTstgMixMatchFile', 'MixMatchPrice'
-			   , NULL, 30, '', 1, 1
+	SELECT @intImportFileHeaderId, NULL, 21,		2, 'MixMatchPrice', 'tblSTstgMixMatchFile', 'MixMatchPrice'
+			   , NULL, 19, '', 1, 1
 END
 
 IF EXISTS (SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MixMatchPrice'  )
@@ -550,7 +318,7 @@ END
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'Priority')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 33,		20, 'Priority', 'tblSTstgMixMatchFile', 'Priority'
+	SELECT @intImportFileHeaderId, NULL, 22,		9, 'Priority', 'tblSTstgMixMatchFile', 'Priority'
 			   , NULL, 9, '', 1, 1
 		   
 END
@@ -558,15 +326,15 @@ END
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'Extension')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 34,		21, 'Extension', 'tblSTstgMixMatchFile', NULL
+	SELECT @intImportFileHeaderId, NULL, 23,		10, 'Extension', 'tblSTstgMixMatchFile', NULL
 			   , 'Header', 9, '', 1, 1
 END
 
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'radiant:DiscountExternalID')
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 35,		1, 'radiant:DiscountExternalID', 'tblSTstgMixMatchFile', 'DiscountExternalID'
-			   , NULL, 34, '', 1, 1
+	SELECT @intImportFileHeaderId, NULL, 24,		1, 'radiant:DiscountExternalID', 'tblSTstgMixMatchFile', 'DiscountExternalID'
+			   , NULL, 23, '', 1, 1
 	
 	--SET @intImportFileColumnDetailId = @@IDENTITY
 	

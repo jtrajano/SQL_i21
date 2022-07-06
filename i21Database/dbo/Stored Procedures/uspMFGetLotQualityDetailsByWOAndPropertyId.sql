@@ -32,7 +32,7 @@ BEGIN
 	JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId
 	JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
 		AND WPL.intWorkOrderId = @intWorkOrderId
-	JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
+	JOIN tblQMSample S ON S.intSampleId = TR.intSampleId AND S.intTypeId = 1
 	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 	WHERE P.intPropertyId = @intPropertyId
 	ORDER BY S.intSampleId
@@ -52,7 +52,7 @@ BEGIN
 		AND TR.intProductTypeId = 12
 		AND ISNUMERIC(TR.strPropertyValue) = 1
 		AND W.intWorkOrderId = @intWorkOrderId
-	JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
+	JOIN tblQMSample S ON S.intSampleId = TR.intSampleId AND S.intTypeId = 1
 	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 	WHERE P.intPropertyId = @intPropertyId
 	ORDER BY S.intSampleId
@@ -73,7 +73,7 @@ BEGIN
 		AND ISNUMERIC(TR.strPropertyValue) = 1
 		AND WPL.intWorkOrderId = @intWorkOrderId
 	JOIN tblICLot L ON L.intLotId = WPL.intLotId
-	JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
+	JOIN tblQMSample S ON S.intSampleId = TR.intSampleId AND S.intTypeId = 1
 	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 	WHERE P.intPropertyId = @intPropertyId
 	ORDER BY S.intSampleId

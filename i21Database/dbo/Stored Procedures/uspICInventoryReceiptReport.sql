@@ -54,6 +54,8 @@ SELECT
 	, '' AS 'strWarehouseRefNo'
 	, '' AS 'strVendorRefNo'
 	, '' AS 'strReceiver'
+	, '' AS 'blbHeaderLogo'
+	, '' AS 'strLogoType'
 	RETURN
 END
 
@@ -97,12 +99,45 @@ BEGIN
 	FROM @temp_xml_table WHERE [fieldname] = 'intInventoryReceiptId'
 END
 
+
+DECLARE 
+	@imgLogo VARBINARY(MAX)
+    ,@strLogoType NVARCHAR(50)
+    ,@intCompanyLocationId INT
+
+SELECT @intCompanyLocationId = intLocationId
+FROM tblICInventoryReceipt r 
+WHERE r.strReceiptNumber = @strReceiptNumber
+
+SELECT TOP 1 
+	@imgLogo = imgLogo
+    ,@strLogoType = 'Logo'
+FROM 
+	tblSMLogoPreference
+WHERE 
+	ysnAllOtherReports = 1
+    AND intCompanyLocationId = @intCompanyLocationId
+
+IF @imgLogo IS NULL
+BEGIN
+    SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header') ,@strLogoType = 'Attachment'
+END
+
 SELECT
 	  r.intInventoryReceiptId
 	, r.strReceiptNumber
 	, strOrderType = r.strReceiptType
 	, r.dtmReceiptDate
-	, strSourceType = CASE r.intSourceType WHEN 1 THEN 'Scale' WHEN 2 THEN 'Inbound Shipment' WHEN 3 THEN 'Transport' WHEN 4 THEN 'Settle Storage' WHEN 5 THEN 'Delivery Sheet' ELSE 'None' END
+	, strSourceType = 
+		CASE r.intSourceType 
+			WHEN 1 THEN 'Scale' 
+			WHEN 2 THEN 'Inbound Shipment' 
+			WHEN 3 THEN 'Transport' 
+			WHEN 4 THEN 'Settle Storage' 
+			WHEN 5 THEN 'Delivery Sheet' 
+			WHEN 9 THEN 'Transfer Shipment' 
+			ELSE 'None' 
+		END
 	, strShipTo = cl.strLocationName
 	, strVendor = e.strName
 	, strShipFrom = el.strLocationName
@@ -136,6 +171,9 @@ SELECT
 	, r.strWarehouseRefNo
 	, r.strVendorRefNo
 	, strReceiver = us.strUserName
+	, blbHeaderLogo = @imgLogo 
+	, strLogoType = @strLogoType 
+
 FROM tblICInventoryReceipt r
 	LEFT JOIN vyuICGetInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 	LEFT JOIN tblICInventoryReceiptItem rr ON rr.intInventoryReceiptItemId = ri.intInventoryReceiptItemId

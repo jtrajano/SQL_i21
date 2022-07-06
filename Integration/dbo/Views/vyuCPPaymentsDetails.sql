@@ -7,7 +7,7 @@ GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPaymentsDetails')
 	DROP VIEW vyuCPPaymentsDetails
 GO
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AG'	) = 1 and (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'EC') = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vyuCPPaymentsDetails]
 		AS
@@ -23,7 +23,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,strNote = agpay_note
 			,strInvoiceNo = agpay_ivc_no
 		from
-			agpaymst a, agcusmst c where c.agcus_key = agpay_cus_no
+			agpaymst a inner join agcusmst c on c.agcus_key = agpay_cus_no
 		--where agpay_orig_rev_dt between 20120816 and 20131211 and agpay_cus_no = ''0000000505''
 		union all
 		select
@@ -59,11 +59,10 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,strNote = a.agcrd_note
 			,strInvoiceNo = null
 		FROM
-			agcrdmst a, agcusmst c
+			agcrdmst a inner join agcusmst c on c.agcus_key = a.agcrd_cus_no
 		WHERE
 			(a.agcrd_amt_used <> a.agcrd_amt)
 			AND (a.agcrd_type IN (''P'', ''A''))
-			and c.agcus_key = a.agcrd_cus_no
 		--	and agcrd_rev_dt between 20120816 and 20131211 and agcrd_cus_no = ''0000000505''
 		GROUP BY
 			c.agcus_first_name
@@ -78,7 +77,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 
 GO
 
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'PT'	) = 1 and (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'EC') = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vyuCPPaymentsDetails]
 		AS

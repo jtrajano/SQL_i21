@@ -11,6 +11,9 @@
     [dtmDateCreated]		DATETIME	NULL,
     [dtmTokenExpired]		DATETIME	NULL,
     [intEntityUserId]		INT			NOT NULL,
+	[ysnActive]				BIT			NOT NULL DEFAULT (1),
+    [ysnAutoPay]            BIT			NOT NULL DEFAULT (0),
+    [intDayOfMonth]         INT         NULL,
     [intConcurrencyId]		INT			NOT NULL,
     CONSTRAINT [PK_tblEMEntityCardInformation] PRIMARY KEY CLUSTERED ([intEntityCardInfoId] ASC)
 );

@@ -85,6 +85,9 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 75,name = 'Unrealized Futures Gain or Loss' UNION ALL --GL-3464
 			SELECT id = 76,name = 'Futures Trade Equity' UNION ALL --GL-3464
 			SELECT id = 77,name = 'Futures Gain or Loss Realized' UNION ALL --GL-3464
+			
+
+
 			SELECT id = 100, name = 'Mark to Market P&L' UNION ALL
 			SELECT id = 101, name = 'Mark to Market Offset' UNION ALL
 
@@ -106,7 +109,39 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 135, name = 'Unrealized Loss on Cash (Inventory Offset)' UNION ALL
 			SELECT id = 136, name = 'Unrealized Loss on Ratio (Inventory Offset)' UNION ALL
 			SELECT id = 137, name = 'Unrealized Loss on Intransit (Inventory Offset)' UNION ALL
-			SELECT id = 138, name = 'Futures Gain or Loss Realized Offset' 
+			SELECT id = 138, name = 'Futures Gain or Loss Realized Offset' UNION ALL
+			SELECT id = 139, name = 'Deferred Expense' UNION ALL 
+
+			SELECT id = 140, name = 'Unrealized Gain on Inventory (Inventory Offset)' UNION ALL
+			SELECT id = 141, name = 'Unrealized Loss on Inventory (Inventory Offset)' UNION ALL
+			SELECT id = 142, name = 'Unrealized Gain on Purchasing (AP Clearing)' UNION ALL
+			SELECT id = 143, name = 'Unrealized Loss on Purchasing (AP Clearing)' UNION ALL
+			
+			-- Fixed Asset Category
+			SELECT id = 144, name = 'Fixed Assets' UNION ALL
+			SELECT id = 145, name = 'Accumulated Depreciation' UNION ALL
+			SELECT id = 146, name = 'Fixed Asset Gain or Loss' UNION ALL
+			SELECT id = 147, name = 'Depreciation Expense' UNION ALL
+			SELECT id = 148, name = 'Realized Gain or Loss Fixed Asset' UNION --GL-8416
+
+			-- Bank Transfer Category
+			SELECT id = 150, name = 'Forex AP/AR' UNION ALL --GL-8243
+			SELECT id = 151, name = 'Forward Accrual Unrealized Gain or Loss' UNION ALL --GL-8410
+			SELECT id = 152, name = 'Swap Accrual Unrealized Gain or Loss' UNION ALL --GL-8410
+			SELECT id = 153, name = 'Forward Accrual Realized Gain or Loss' UNION ALL --GL-8410
+			SELECT id = 154, name = 'Swap Accrual Realized Gain or Loss' UNION ALL --GL-8410
+			SELECT id = 155, name = 'Bank Transfer In-Transit' UNION ALL --GL-8411 for intransit account 
+			SELECT id = 156, name = 'Cash Management Realized Gain or Loss' UNION ALL --GL-8529 For bank transfer gain loss intransit / transfer only
+
+			-- Fixed Asset Unrealized Gain or Loss
+			SELECT id = 160, name = 'Unrealized Gain or Loss Fixed Asset' UNION ALL --GL-8450
+			SELECT id = 161, name = 'Unrealized Gain or Loss Offset Fixed Asset' UNION ALL--GL-8450
+			
+			-- GL Revalue Accounts
+			SELECT id = 162, name = 'General Ledger Unrealized Gain or Loss' UNION ALL--GL-8450
+			SELECT id = 163, name = 'General Ledger Unrealized Gain or Loss Offset' UNION ALL --GL-8450
+			SELECT id = 164, name = 'In-Transit Direct'
+
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
@@ -359,6 +394,44 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
 	END	
+	SET @strAccountCategory  = 'Deferred Expense'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+
+	SET @strAccountCategory  = 'Unrealized Gain on Inventory (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Inventory (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Gain on Purchasing (AP Clearing)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Purchasing (AP Clearing)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'In-Transit Direct'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+
 
 END
 GO
@@ -399,5 +472,57 @@ GO
 GO
 	PRINT 'Finished converting account group to category'
 GO
+
+-- This will limit on what account type can be set on an account category
+BEGIN 
+	SET  IDENTITY_INSERT tblGLAccountCategoryType ON
+	MERGE 
+	INTO	dbo.tblGLAccountCategoryType
+	WITH	(HOLDLOCK) 
+	AS		CategoryTypeTable
+	USING	(
+		SELECT id = 1, categoryId = 5, name = 'Asset' UNION ALL --Cash Account
+		SELECT id = 2, categoryId = 5, name = 'Liability' UNION ALL --Cash Account
+		SELECT id = 3, categoryId = 100, name = 'Expense' UNION ALL --Mark to Market
+		SELECT id = 4, categoryId = 100, name = 'Revenue' UNION ALL --Mark to Market
+		SELECT id = 5, categoryId = 101, name = 'Asset' UNION ALL --Mark to Market Offset
+		SELECT id = 6, categoryId = 101, name = 'Liability' UNION ALL --Mark to Market Offset
+		SELECT id = 7, categoryId = 144, name = 'Asset' UNION ALL --Fixed Assets 
+		SELECT id = 8, categoryId = 144, name = 'Liability' UNION ALL --Fixed Assets 
+		SELECT id = 9, categoryId = 145, name = 'Asset' UNION ALL --Accumulated depreciation
+		SELECT id = 10, categoryId = 145, name = 'Liability' UNION ALL --Accumulated depreciation
+		SELECT id = 11, categoryId = 146, name = 'Expense' UNION ALL--Fixed asset Gain or loss
+		SELECT id = 12, categoryId = 146, name = 'Revenue' UNION ALL--Fixed asset Gain or loss
+		SELECT id = 13, categoryId = 147, name = 'Revenue' UNION ALL --Depreciation Expense
+		SELECT id = 14, categoryId = 147, name = 'Expense' --Depreciation Expense
+
+
+
+		
+	) AS CategoryTypeHardCodedValues
+			ON  CategoryTypeTable.intAccountCategoryTypeId = CategoryTypeHardCodedValues.id
+
+	-- When id is matched, make sure the name and form are up-to-date.
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET 	CategoryTypeTable.intAccountCategoryId = CategoryTypeHardCodedValues.categoryId,
+		CategoryTypeTable.strAccountType = CategoryTypeHardCodedValues.name
+	-- When id is missing, then do an insert. 
+	WHEN NOT MATCHED BY TARGET THEN
+		INSERT (
+			intAccountCategoryTypeId
+			,intAccountCategoryId
+			,strAccountType
+		)
+		VALUES (
+			CategoryTypeHardCodedValues.id,
+			CategoryTypeHardCodedValues.categoryId,
+			CategoryTypeHardCodedValues.name
+		);
+	--WHEN NOT MATCHED BY SOURCE THEN
+	--DELETE;
+	SET  IDENTITY_INSERT tblGLAccountCategoryType OFF
 	
+END
+GO
 

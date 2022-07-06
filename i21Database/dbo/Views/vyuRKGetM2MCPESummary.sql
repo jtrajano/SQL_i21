@@ -20,9 +20,10 @@ SELECT intM2MCPESummaryId = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY strEntityNam
 	, dblPotentialAdditionalVolume = CASE WHEN (ISNULL(dblPotentialAdditionalVolume, 0) - ISNULL(dblTotalCommittedVolume, 0)) < 0 THEN 0
 										ELSE (ISNULL(dblPotentialAdditionalVolume, 0) - ISNULL(dblTotalCommittedVolume, 0)) END
 	, intConcurrencyId = 0
+	, strCountry
 FROM (
 	SELECT strEntityName
-		, intEntityId
+		, t3.intEntityId
 		, intM2MHeaderId
 		, strRiskIndicator
 		, dblFixedPurchaseVolume
@@ -43,6 +44,7 @@ FROM (
 												<= (dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier, 0) = 0 THEN 1 ELSE dblShareWithSupplier END) * dblSupplierSalesPercentage
 												THEN (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend, 0) = 0 THEN 1 ELSE dblTotalSpend END) * dblCompanyExposurePercentage
 											ELSE (dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier, 0) = 0 THEN 1 ELSE dblShareWithSupplier END) * dblSupplierSalesPercentage END
+		, Loc.strCountry
 	FROM (
 		SELECT strEntityName
 			, intEntityId
@@ -93,7 +95,7 @@ FROM (
 					SELECT CPE.*
 						, strRiskIndicator
 						, dblRiskTotalBusinessVolume = dbo.fnCTConvertQuantityToTargetCommodityUOM(toUOM.intCommodityUnitMeasureId
-																				, CASE WHEN ISNULL(M2M.intQtyUOMId, 0) = 0 THEN toUOM.intCommodityUnitMeasureId ELSE M2M.intQtyUOMId END
+																				, CASE WHEN ISNULL(fromUOM.intCommodityUnitMeasureId, 0) = 0 THEN toUOM.intCommodityUnitMeasureId ELSE fromUOM.intCommodityUnitMeasureId END
 																				, ISNULL(dblRiskTotalBusinessVolume, 0.00))
 						, intRiskUnitOfMeasureId
 						, dblCompanyExposurePercentage = ROUND(ISNULL(dblCompanyExposurePercentage, 0.00), 2)
@@ -117,4 +119,5 @@ FROM (
 			)t2
 		)t2
 	)t3
+	LEFT JOIN tblEMEntityLocation AS Loc ON t3.intEntityId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 )t4

@@ -41,9 +41,18 @@ AS
 								
 			CASE WHEN NM.strINCOLocationType = 'City' THEN NM.strINCOLocation ELSE NM.strSubLocationName	END	AS	strINCOLocation,
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId) COLLATE Latin1_General_CI_AS AS	strStatuses,
-			SP.intAttachmentSignatureId
-			
-	FROM	tblCTContractHeader					CH	
+			SP.intAttachmentSignatureId, -- CT-5315
+			CH.intEntitySelectedLocationId, -- CT-5315
+			NM.strEntitySelectedLocation, -- CT-5315
+			CH.intCompanyLocationId,
+			NM.strLocationName,
+			CH.intDaysForFinance,
+			CH.intSampleTypeId,
+			NM.strSampleTypeName,
+			CH.ysnLocalCurrency,
+			CH.ysnPrintCropYear
+	FROM	tblCTContractHeader					CH
+	cross apply (select * from tblCTCompanyPreference) CP
 	jOIN	vyuCTContractHeaderNotMapped		NM	ON	NM.intContractHeaderId				=		CH.intContractHeaderId
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		CH.intEntityId			AND
 														-------------------------------------------------------------------------------------------
@@ -56,7 +65,8 @@ AS
 																WHEN CH.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
 																ELSE 0
 															END
-														) 
+														)
+														AND EY.intEntitySelectedLocationId = (case when isnull(CP.ysnListAllCustomerVendorLocations,0) = 0 then EY.intEntitySelectedLocationId else CH.intEntitySelectedLocationId end)
 LEFT	JOIN	tblARSalesperson					SP	ON	SP.intEntityId						=		CH.intSalespersonId					
 LEFT	JOIN	tblEMEntity							SY	ON	SY.intEntityId						=		CH.intSalespersonId
 LEFT	JOIN	tblCTApprovalBasis					AB	ON	AB.intApprovalBasisId				=		CH.intApprovalBasisId				

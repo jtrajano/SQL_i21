@@ -40,6 +40,7 @@
     [ysnProcessCashSales]                   BIT            NULL,
     [ysnAssignBatchByDate]                  BIT            NULL,
     [ysnMultipleSiteImport]                 BIT            NULL,
+    [ysnSkipTransactionOnImport]            BIT            NULL,
     [strSiteName]                           NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strDeliveryPickup]                     NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strSiteAddress]                        NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,

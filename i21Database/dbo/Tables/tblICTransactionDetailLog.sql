@@ -20,6 +20,26 @@
 	[intSourceInventoryDetailId] INT NULL,
 	[intCompanyId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
+
+	[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[dtmReceiptDate] [datetime] NULL DEFAULT (GETDATE()),
+	[strTradeFinanceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intBankId] INT NULL,
+	[intBankAccountId] INT NULL,
+	[intBorrowingFacilityId] INT NULL,
+	[strBankReferenceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
+	[intLimitTypeId] INT NULL,
+	[intSublimitTypeId] INT NULL,
+	[ysnSubmittedToBank] BIT NULL, 
+	[dtmDateSubmitted] DATETIME NULL,
+	[strApprovalStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
+	[dtmDateApproved] DATETIME NULL,
+	[strWarrantNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
+	[intWarrantStatus] INT NULL,
+	[strReferenceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
+	[intOverrideFacilityValuation] INT NULL,
+	[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,	
+
     CONSTRAINT [PK_tblICTransactionDetailLog] PRIMARY KEY ([intTransactionDetailLogId]) 
 )
 GO

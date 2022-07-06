@@ -8,6 +8,7 @@ SELECT *,
 	dblNetWeight = dbo.fnMultiply(dbo.fnDivide(dblNetWeightFull, dblQty), dblUnPickedQty),
 	dblGrossWeight = dbo.fnMultiply(dbo.fnDivide(dblGrossWeightFull, dblQty), dblUnPickedQty),
 	dblTareWeight = dbo.fnMultiply(dbo.fnDivide(dblTareWeightFull, dblQty), dblUnPickedQty)
+	,dblTarePerQty = dbo.fnDivide(dblTareWeightFull, dblQty)
 FROM (
 	SELECT 
 		intLotId = Lot.intLotId
@@ -34,9 +35,15 @@ FROM (
        ,intStorageLocationId = Lot.intStorageLocationId
        ,strStorageLocation = StorageLocation.strName
        ,dblQty = Lot.dblQty
-       ,dblUnPickedQty = CASE WHEN Lot.dblQty > 0.0 THEN 
-							  Lot.dblQty - IsNull(SR.dblReservedQty, 0) 
-						 ELSE 0.0 END
+       ,dblUnPickedQty =	CASE WHEN Lot.intWarrantStatus = 2 THEN
+	   								CASE WHEN Lot.dblReleasedQty > 0.0 THEN 
+										Lot.dblReleasedQty - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+								ELSE
+									CASE WHEN Lot.dblQty > 0.0 THEN 
+										Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+							END
        ,dblLastCost = Lot.dblLastCost
        ,dtmExpiryDate = Lot.dtmExpiryDate
        ,strLotAlias = Lot.strLotAlias
@@ -48,10 +55,10 @@ FROM (
        ,dblGrossWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
                                                        IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty) + Lot.dblWeight, 0.0) 
                                                   ELSE
-                                                       ISNULL(Lot.dblGrossWeight, ISNULL(Lot.dblWeight, 0.0))
+                                                       ISNULL(Lot.dblGrossWeight, ISNULL(Lot.dblWeight, 0.0)) - ISNULL(PC.dblPickedContainerGrossWt, 0)
                                                   END
        ,dblTareWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
-                                                      IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty), 0.0)
+                                                      IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty), 0.0) - ISNULL(PC.dblPickedContainerNetWt, 0)
                                                ELSE
                                                       0.0
                                                END
@@ -61,7 +68,7 @@ FROM (
        ,dblWeightUOMConv = ItemWeightUOM.dblUnitQty
        ,dblWeightPerQty = Lot.dblWeightPerQty
        ,intOriginId = OG.intCountryID
-	   ,strOrigin = OG.strCountry
+	   ,strOrigin = ISNULL(OG.strCountry, Origin.strDescription)
        ,strBOLNo = Lot.strBOLNo
        ,strVessel = Lot.strVessel
 	   ,strDestinationCity = L.strDestinationCity
@@ -71,7 +78,7 @@ FROM (
        ,strReceiptNumber = Lot.strReceiptNumber
        ,strMarkings = LC.strMarks
        ,strNotes = Lot.strNotes
-       ,intEntityVendorId = Lot.intEntityVendorId
+       ,intEntityVendorId = EY.intEntityId
        ,strVendorLotNo = Lot.strVendorLotNo
        ,strGarden = Lot.strGarden
        ,strContractNo = Lot.strContractNo
@@ -133,7 +140,20 @@ FROM (
 	   ,strCertificationId = '' COLLATE Latin1_General_CI_AS
 	   ,intCustomerEntityId = LD.intCustomerEntityId
 	   ,strCustomer = Customer.strName
+	   ,ysnRejected = CAST((CASE WHEN RJTD.intLotId IS NULL THEN 0 ELSE 1 END ) AS BIT)
+	   ,RJTD.strCustomerRejected
+	   ,Item.dblGAShrinkFactor
+	   ,strProductType = ProductType.strDescription
+	   ,strRegion = Region.strDescription
+	   ,strSeason = Season.strDescription
+	   ,strClass = Class.strDescription
+	   ,strProductLine = ProductLine.strDescription
+	   ,Item.strMarketValuation
+	   ,Lot.strWarrantNo
+	   ,Lot.intWarrantStatus
+	   ,WS.strWarrantStatus
 	FROM tblICLot Lot
+		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -143,8 +163,19 @@ FROM (
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
+		OUTER APPLY (SELECT dblPickedContainerQty = SUM(PLC.dblLotPickedQty)
+							,dblPickedContainerGrossWt = SUM(PLC.dblGrossWt)
+							,dblPickedContainerNetWt = SUM(PLC.dblNetWt)
+							FROM tblLGPickLotDetail PLC WHERE intContainerId = LC.intLoadContainerId) PC
 		LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId   
 		LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
+		LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = Item.intOriginId
+		LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId
+		LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
+		LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = Item.intRegionId
+		LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = Item.intSeasonId
+		LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.intClassVarietyId
+		LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = Item.intProductLineId
 		LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId
 		LEFT JOIN tblICItem ConBundle ON ConBundle.intItemId = CTDetail.intItemBundleId
 		LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = Lot.intLocationId
@@ -178,6 +209,7 @@ FROM (
 		LEFT JOIN tblCTContractDetail SCTDetail ON SCTDetail.intContractDetailId = LD.intSContractDetailId
 		LEFT JOIN tblCTContractHeader SCTHeader ON SCTHeader.intContractHeaderId = SCTDetail.intContractHeaderId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+		LEFT JOIN vyuLGRejectedLotNumber RJTD ON Lot.intLotId = RJTD.intLotId
 		OUTER APPLY (SELECT TOP 1 strBundleItemNo = BI.strItemNo FROM tblICItem BI 
 						INNER JOIN tblICItemBundle IB ON IB.intItemId = BI.intItemId
 					 WHERE IB.intBundleItemId = Item.intItemId) Bundle
@@ -186,5 +218,10 @@ FROM (
 		OUTER APPLY (SELECT dblAllocatedQty = SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL 
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) AL
 	WHERE Lot.dblQty > 0 
+		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
+		AND (
+			Lot.intWarrantStatus IS NULL
+			OR Lot.intWarrantStatus <> 1 -- Not Pledged
+		)
 	) InvLots
 GO

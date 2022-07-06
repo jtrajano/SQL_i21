@@ -43,6 +43,7 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 3 THEN 'LG Loads - Inbound'
 		WHEN 4 THEN 'TM Sites'
 		WHEN 5 THEN 'Entities'
+		WHEN 6 THEN 'Sales/Transfer Orders'
 		END COLLATE Latin1_General_CI_AS
 	,CP.strALKMapKey
 	,CP.intTransUsedBy
@@ -54,6 +55,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnAlertApprovedQty
 	,CP.ysnUpdateVesselInfo
 	,CP.ysnValidateExternalPONo
+	,CP.ysnValidateTransportModeAgainstPosition
 	,CP.ysnETAMandatory
 	,CP.ysnPOETAFeedToERP
 	,CP.ysnFeedETAToUpdatedAvailabilityDate
@@ -73,6 +75,8 @@ SELECT CP.intCompanyPreferenceId
 	,strFreightItem = FI.strItemNo
 	,CP.intDefaultSurchargeItemId
 	,strSurchargeItem = SI.strItemNo
+	,CP.intDefaultInsuranceItemId
+	,strInsuranceItem = II.strItemNo
 	,CP.intDefaultShipmentType
 	,strDefaultShipmentType = CASE CP.intDefaultShipmentType
 		WHEN 1 THEN 'Shipment'
@@ -119,6 +123,10 @@ SELECT CP.intCompanyPreferenceId
 	,CP.intPreArrivalNotificationReportFormat
 	,strPreArrivalNotificationReportFormat = CASE WHEN CP.intPreArrivalNotificationReportFormat IS NOT NULL 
 		THEN 'Pre Arrival Notification Report Format - ' + CAST(CP.intPreArrivalNotificationReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
+	,CP.intTransferOrderReportFormat
+	,strTransferOrderReportFormat = CASE WHEN CP.intTransferOrderReportFormat IS NOT NULL 
+		THEN 'Transfer Order Report Format - ' + CAST(CP.intPreArrivalNotificationReportFormat AS NVARCHAR(10)) 
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intBOLReportFormat
 	,strBOLReportFormat = CASE WHEN CP.intBOLReportFormat IS NOT NULL 
@@ -176,6 +184,21 @@ SELECT CP.intCompanyPreferenceId
 	,strReserveBCategory = RB.strCategoryCode
 	,CP.intPurchaseContractBasisItemId
 	,strPurchaseContractBasisItem = PCBI.strItemNo
+	,CP.intDefaultPickType
+	,strDefaultPickType = CASE WHEN CP.intDefaultPickType = 2 THEN 'Containers' ELSE 'Lots' END COLLATE Latin1_General_CI_AS
+	,CP.ysnIncludeOpenContractsOnInventoryView
+	,CP.ysnIncludeArrivedInPortStatus
+	,CP.ysnIncludeStrippingInstructionStatus
+	,CP.ysnWeightClaimsByContainer
+	,CP.intExpirationDays
+	,CP.intExpirationDateBasis
+	,strExpirationDateBasis = CASE CP.intExpirationDateBasis
+		WHEN 1 THEN 'Scheduled Date' 
+		WHEN 2 THEN 'Contract End Date'
+		ELSE '' END COLLATE Latin1_General_CI_AS 
+	,CP.strFullCalendarKey
+	,CP.ysnReverseRoute
+	,CP.ysnDisplaySalesContractAsNegative
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
@@ -186,6 +209,7 @@ LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CP.intCompanyLoca
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CP.intDefaultFreightTermId
 LEFT JOIN tblICItem FI ON CP.intDefaultFreightItemId = FI.intItemId
 LEFT JOIN tblICItem SI ON CP.intDefaultSurchargeItemId = SI.intItemId
+LEFT JOIN tblICItem II ON CP.intDefaultInsuranceItemId = II.intItemId
 LEFT JOIN tblICCategory RA ON RA.intCategoryId = CP.intPnLReportReserveACategoryId
 LEFT JOIN tblICCategory RB ON RB.intCategoryId = CP.intPnLReportReserveBCategoryId
 LEFT JOIN tblICItem PCBI ON PCBI.intItemId = CP.intPurchaseContractBasisItemId

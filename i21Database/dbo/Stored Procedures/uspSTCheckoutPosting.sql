@@ -496,11 +496,11 @@ BEGIN
 									,[intHeaderId]
 									,[dtmDate]
 						)
-						SELECT
+						SELECT DISTINCT
 									 [intId] = CPT.intPumpTotalsId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
-									,[intTaxGroupId] = TAX.intTaxGroupId
+									,[intTaxGroupId] = TPI.intTaxGroupId
 									,[intTaxCodeId] = TAX.intTaxCodeId
 									,[intTaxClassId] = TAX.intTaxClassId
 									,[strTaxableByOtherTaxes] = TAX.strTaxableByOtherTaxes
@@ -555,6 +555,8 @@ BEGIN
 
 							JOIN tblSTStore ST 
 								ON IL.intLocationId = ST.intCompanyLocationId
+							LEFT JOIN tblSTPumpItem TPI 
+								ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 								AND CH.intStoreId = ST.intStoreId	
 							JOIN vyuEMEntityCustomerSearch vC 
 								ON ST.intCheckoutCustomerId = vC.intEntityId
@@ -566,7 +568,7 @@ BEGIN
 																				, I.intItemId							-- Item Id
 																				, ST.intCheckoutCustomerId				-- Customer Id
 																				, ST.intCompanyLocationId				-- Company Location Id
-																				, ST.intTaxGroupId						-- Tax Group Id
+																				, TPI.intTaxGroupId						-- Tax Group Id
 																				, 0										-- 0 Price if not reversal
 																				, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																				, vC.intShipToId						-- Ship to Location
@@ -690,7 +692,7 @@ BEGIN
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
-									SELECT 
+									SELECT DISTINCT
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										,[strType]					= @strInvoiceTypeMain
@@ -761,7 +763,7 @@ BEGIN
 
 										,[dblDiscount]				= 0
 										
-										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - CAST(Tax.[dblAdjustedTax] AS DECIMAL(18,8))) / CAST(CPT.dblQuantity AS DECIMAL(18,8)),6) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
+										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -769,7 +771,7 @@ BEGIN
 										,[dtmMaintenanceDate]		= NULL
 										,[dblMaintenanceAmount]		= NULL
 										,[dblLicenseAmount]			= NULL
-										,[intTaxGroupId]			= @intTaxGroupId
+										,[intTaxGroupId]			= TPI.intTaxGroupId
 										,[ysnRecomputeTax]			= 0 -- Should recompute tax only for Pump Total Items
 										,[intSCInvoiceId]			= NULL
 										,[strSCInvoiceNumber]		= NULL
@@ -811,6 +813,8 @@ BEGIN
 								ON UOM.intItemId = I.intItemId
 							JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
+							JOIN tblSTPumpItem TPI 
+								ON UOM.intItemUOMId = TPI.intItemUOMId
 							
 							-- http://jira.irelyserver.com/browse/ST-1316
 							--JOIN tblICItemPricing IP 
@@ -934,7 +938,7 @@ BEGIN
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
-									SELECT 
+									SELECT DISTINCT
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										,[strType]					= @strInvoiceTypeMain
@@ -2073,7 +2077,7 @@ BEGIN
 										 [intId] = CC.intCustChargeId
 										,[intDetailId] = NULL
 										,[intDetailTaxId] = NULL
-										,[intTaxGroupId] = FuelTax.intTaxGroupId
+										,[intTaxGroupId] = TPI.intTaxGroupId
 										,[intTaxCodeId] = FuelTax.intTaxCodeId
 										,[intTaxClassId] = FuelTax.intTaxClassId
 										,[strTaxableByOtherTaxes] = FuelTax.strTaxableByOtherTaxes
@@ -2133,6 +2137,8 @@ BEGIN
 							LEFT JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
 								AND ST.intCompanyLocationId = IL.intLocationId
+							LEFT JOIN tblSTPumpItem TPI 
+								ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 
 							-- http://jira.irelyserver.com/browse/ST-1316
 							--LEFT JOIN tblICItemPricing IP 
@@ -2176,7 +2182,7 @@ BEGIN
 																				END
 																				, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
 																				, ST.intCompanyLocationId				-- Company Location Id
-																				, ST.intTaxGroupId						-- Tax Group Id
+																				, TPI.intTaxGroupId						-- Tax Group Id
 																				, 0										-- 0 Price if not reversal
 																				, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																				, vC.intShipToId						-- Ship to Location
@@ -2468,7 +2474,7 @@ BEGIN
 											,[intTaxGroupId]			= CASE 
 																				-- IF Item is Fuel
 																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
-																					THEN @intTaxGroupId
+																					THEN TPI.intTaxGroupId
 																				ELSE NULL
 																		END	
 																			 
@@ -2530,6 +2536,8 @@ BEGIN
 								LEFT JOIN tblICItemLocation IL 
 									ON I.intItemId = IL.intItemId
 									AND ST.intCompanyLocationId = IL.intLocationId
+								LEFT JOIN tblSTPumpItem TPI
+									ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 
 								-- http://jira.irelyserver.com/browse/ST-1316
 								--LEFT JOIN tblICItemPricing IP 
@@ -3684,7 +3692,7 @@ BEGIN
 									 [intId] = CC.intCustChargeId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
-									,[intTaxGroupId] = FuelTax.intTaxGroupId
+									,[intTaxGroupId] = TPI.intTaxGroupId
 									,[intTaxCodeId] = FuelTax.intTaxCodeId
 									,[intTaxClassId] = FuelTax.intTaxClassId
 									,[strTaxableByOtherTaxes] = FuelTax.strTaxableByOtherTaxes
@@ -3725,10 +3733,12 @@ BEGIN
 													ELSE STUOM.intItemUOMId
 												END
 						LEFT JOIN tblICItem I 
-									ON UOM.intItemId = I.intItemId
+							ON UOM.intItemId = I.intItemId
 						LEFT JOIN tblICItemLocation IL 
 							ON I.intItemId = IL.intItemId
 							AND ST.intCompanyLocationId = IL.intLocationId
+						LEFT JOIN tblSTPumpItem TPI 
+							ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 
 						-- http://jira.irelyserver.com/browse/ST-1316
 						--LEFT JOIN tblICItemPricing IP 
@@ -3759,7 +3769,7 @@ BEGIN
 																			END
 																			, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
 																			, ST.intCompanyLocationId				-- Company Location Id
-																			, ST.intTaxGroupId						-- Tax Group Id
+																			, TPI.intTaxGroupId						-- Tax Group Id
 																			, 0										-- 0 Price if not reversal
 																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
@@ -4068,7 +4078,7 @@ BEGIN
 											,[intTaxGroupId]			= CASE 
 																				-- IF Item is Fuel
 																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
-																					THEN @intTaxGroupId
+																					THEN TPI.intTaxGroupId
 																				ELSE NULL
 																		END	
 											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
@@ -4145,6 +4155,8 @@ BEGIN
 								LEFT JOIN tblICItemLocation IL 
 									ON I.intItemId = IL.intItemId
 									AND ST.intCompanyLocationId = IL.intLocationId
+								LEFT JOIN tblSTPumpItem TPI 
+									ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 
 								-- http://jira.irelyserver.com/browse/ST-1316
 								--LEFT JOIN tblICItemPricing IP 
@@ -4226,8 +4238,9 @@ BEGIN
 
 					WHILE EXISTS (SELECT TOP 1 * FROM #tblSTTempReceiveLottery )
 					BEGIN
-
+						-- VALIDATE IF VALID ITEMS BEFORE CREATING IR
 						SELECT TOP 1 @loopId = intReceiveLotteryId FROM #tblSTTempReceiveLottery
+
 						-- Validate if there is Item UOM setup
 						IF EXISTS(SELECT TOP 1 1 FROM tblSTReceiveLottery RL
 							INNER JOIN tblSTStore S ON S.intStoreId = RL.intStoreId
@@ -4240,6 +4253,38 @@ BEGIN
 						BEGIN
 							-- SET @Success = CAST(0 AS BIT)
 							SET @strStatusMsg = 'Missing Sale UOM setup on Item Location.'
+							GOTO ExitWithRollback
+							RETURN
+						END
+
+						DECLARE @strErrorItem AS VARCHAR(250) = (SELECT TOP 1 tblSTLotteryGame.strGame FROM tblSTReceiveLottery
+									INNER JOIN tblSTStore 
+									ON tblSTReceiveLottery.intStoreId = tblSTStore.intStoreId
+									INNER JOIN tblSTLotteryGame 
+									ON tblSTReceiveLottery.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+									INNER JOIN tblICItemLocation 
+									ON tblICItemLocation.intLocationId = tblSTStore.intCompanyLocationId
+										AND tblSTLotteryGame.intItemId = tblICItemLocation.intItemId
+									INNER JOIN tblICItemPricing
+										ON tblICItemPricing.intItemLocationId = tblICItemLocation.intItemLocationId
+										AND tblICItemPricing.intItemId = tblICItemLocation.intItemId
+									LEFT JOIN tblAPVendor 
+									ON tblAPVendor.intEntityId = tblICItemLocation.intVendorId
+									LEFT JOIN tblICItemUOM 
+									ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+									LEFT JOIN tblSMCompanyLocation
+									ON tblSTStore.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
+									WHERE tblSTReceiveLottery.intCheckoutId = @intCheckoutId
+									AND (SELECT intShipFromId FROM tblAPVendor WHERE intEntityId = tblICItemLocation.intVendorId) IS NULL)
+
+
+
+
+						-- Validate if there is Item setup for Vendor
+						IF @strErrorItem IS NOT NULL
+						BEGIN
+							-- SET @Success = CAST(0 AS BIT)
+							SET @strStatusMsg = 'Item of Game ' + @strErrorItem + ' is missing Vendor on Item Location setup.'
 							GOTO ExitWithRollback
 							RETURN
 						END
@@ -4326,7 +4371,7 @@ BEGIN
 					,strSourceId			= NULL
 					,intPaymentOn			= NULL
 					,strChargesLink			= NULL
-					,dblUnitRetail			= NULL
+					,dblUnitRetail			= tblSTLotteryGame.dblTicketValue
 					,intSort				= NULL
 					,strDataSource			= @strSourceScreenName
 					FROM tblSTReceiveLottery
@@ -5449,7 +5494,6 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				------------------------------------------------------
 
 				
-
 
 
 				------------------------------------------------------

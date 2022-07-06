@@ -13,12 +13,15 @@ SELECT
 		 WHEN 12 THEN 'Prepayment Reversal'
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
+		 WHEN 15 THEN 'Tax Adjustment'
+		 WHEN 16 THEN 'Provisional Voucher'
 		 ELSE 'Invalid Type'
 	END COLLATE Latin1_General_CI_AS AS strTransactionType,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2,13) AND A.ysnPrepayHasPayment = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2,13) AND A.ysnPrepayHasPayment = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2,13) AND A.ysnPrepayHasPayment = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
 	A.dtmDate,
+	FP.strPeriod,
 	A.dtmBillDate,
 	A.dtmDueDate,
 	A.strVendorOrderNumber,
@@ -48,10 +51,13 @@ FROM
 		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
 		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
 		WHERE detail.intBillId = A.intBillId
+		ORDER BY detail.intLineNo
 	) commodity
 	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId
 	LEFT JOIN dbo.tblSMCompanyLocation G
 		ON A.intStoreLocationId = G.intCompanyLocationId
 	LEFT JOIN dbo.tblEMEntityLocation EL 
 		ON EL.intEntityLocationId = A.intPayToAddressId
+	LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+		ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 	

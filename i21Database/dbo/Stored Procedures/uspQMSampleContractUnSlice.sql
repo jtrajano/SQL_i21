@@ -99,6 +99,7 @@ BEGIN TRY
 		FROM tblQMSample
 		WHERE intProductTypeId = 8
 			AND intProductValueId = @intContractDetailId
+			AND intTypeId = 1
 		ORDER BY intSampleId DESC
 
 		DELETE
@@ -114,6 +115,7 @@ BEGIN TRY
 		FROM tblQMSample
 		WHERE intProductTypeId = 8
 			AND intProductValueId = @intMergeContractDetailId
+			AND intTypeId = 1
 
 		SELECT @intParentRowNo = MIN(intRowNo)
 		FROM @ParentContractSample
@@ -217,18 +219,21 @@ BEGIN TRY
 		SELECT intSampleId
 		FROM tblQMSample
 		WHERE intContractDetailId = @intMergeContractDetailId
+		AND intTypeId = 1
 
 		-- Contract Available Places
 		UPDATE tblQMSample
 		SET intContractDetailId = @intContractDetailId
 			,intConcurrencyId = (intConcurrencyId + 1)
 		WHERE intContractDetailId = @intMergeContractDetailId
+		AND intTypeId = 1
 
 		-- Contract Samples
 		UPDATE tblQMSample
 		SET intProductValueId = @intContractDetailId
 		WHERE intProductTypeId = 8
 			AND intProductValueId = @intMergeContractDetailId
+			AND intTypeId = 1
 
 		UPDATE tblQMTestResult
 		SET intProductValueId = @intContractDetailId

@@ -247,13 +247,13 @@
 		WHERE APD.intCustomerStorageId = ISNULL(STORAGE_DS.intCustomerStorageId, STORAGE_TICKET.intCustomerStorageId)
 		AND APD.intItemId = ISNULL(STORAGE_DS.intItemId, STORAGE_TICKET.intItemId)
 	) VOUCHER_STORAGE
-	,(	SELECT TOP 1
+	inner join(	SELECT TOP 1
 			strCompanyName
 			,strAddress AS strCompanyAddress
 			,strPhone AS strCompanyPhone
 			,strCity AS strCompanyCity
 			,strCountry AS strCompanyCountry
 		FROM tblSMCompanySetup
-	) tblSMCompanySetup
+	) tblSMCompanySetup on 1=1
 
   GO

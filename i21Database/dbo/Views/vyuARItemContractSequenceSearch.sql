@@ -30,7 +30,8 @@ SELECT intItemContractHeaderId		= ICH.intItemContractHeaderId
 	 , intStorageLocationId			= IL.intStorageLocationId
 	 , strStorageLocation			= STOLOC.strName
 	 , strSubLocationName			= SUBLOC.strSubLocationName
-	 , strLotTracking				= I.strLotTracking		
+	 , strLotTracking				= I.strLotTracking
+	 , dblScheduled					= ICD.dblScheduled
 FROM dbo.tblCTItemContractDetail ICD
 INNER JOIN dbo.tblCTItemContractHeader ICH ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId
 INNER JOIN dbo.tblICItem I ON ICD.intItemId = I.intItemId

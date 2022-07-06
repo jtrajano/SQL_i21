@@ -350,8 +350,154 @@ BEGIN
 				,ForGLEntries_CTE.dblForexRate
 			) Credit
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) DebitForeign
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) CreditForeign
-	;
+			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) CreditForeign	
+END;
+
+-- Create the AP Clearing
+BEGIN 
+	DECLARE 
+	@intVoucherInvoiceNoOption TINYINT
+	,	@voucherInvoiceOption_Blank TINYINT = 1 
+	,	@voucherInvoiceOption_BOL TINYINT = 2
+	,	@voucherInvoiceOption_VendorRefNo TINYINT = 3
+	,@intDebitMemoInvoiceNoOption TINYINT
+	,	@debitMemoInvoiceOption_Blank TINYINT = 1
+	,	@debitMemoInvoiceOption_BOL TINYINT = 2
+	,	@debitMemoInvoiceOption_VendorRefNo TINYINT = 3	
+
+	SELECT TOP 1 
+		@intVoucherInvoiceNoOption = intVoucherInvoiceNoOption
+		,@intDebitMemoInvoiceNoOption = intDebitMemoInvoiceNoOption
+	FROM tblAPCompanyPreference
+
+	INSERT INTO tblICAPClearing (
+		[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionType]
+		,[strReferenceNumber]
+		,[dtmDate]
+		,[intEntityVendorId]
+		,[intLocationId]
+		,[intInventoryReceiptItemId]
+		,[intInventoryReceiptItemTaxId]
+		,[intInventoryReceiptChargeId]
+		,[intInventoryReceiptChargeTaxId]
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentChargeTaxId]
+		,[intAccountId]
+		,[intItemId]
+		,[intItemUOMId]
+		,[dblQuantity]
+		,[dblAmount]
+		,[strBatchId]
+	)
+	SELECT 
+		[intTransactionId] = Shipment.intInventoryShipmentId
+		,[strTransactionId] = Shipment.strShipmentNumber
+		,[intTransactionType] = 3 -- Shipment Charge
+		,[strReferenceNumber] = NULL 
+		,[dtmDate] = Shipment.dtmShipDate
+		,[intEntityVendorId] = ShipmentCharge.intEntityVendorId
+		,[intLocationId] = chargeLocation.intLocationId
+		,[intInventoryReceiptItemId] = NULL 
+		,[intInventoryReceiptItemTaxId] = NULL 
+		,[intInventoryReceiptChargeId] = NULL 
+		,[intInventoryReceiptChargeTaxId] = NULL 
+		,[intInventoryShipmentChargeId] = ShipmentCharge.intInventoryShipmentChargeId
+		,[intInventoryShipmentChargeTaxId] = ChargeTaxes.intInventoryShipmentChargeTaxId
+		,[intAccountId] = ga.intAccountId
+		,[intItemId] = ShipmentCharge.intChargeId
+		,[intItemUOMId] = ShipmentCharge.intCostUOMId
+		,[dblQuantity] = ChargeTaxes.dblQty
+		,[dblAmount] = CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -ChargeTaxes.dblTax ELSE ChargeTaxes.dblTax END
+		,[strBatchId] = @strBatchId
+	FROM	
+		dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
+			ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
+		INNER JOIN dbo.tblICItemLocation chargeLocation
+			ON chargeLocation.intItemId = ShipmentCharge.intChargeId
+			AND chargeLocation.intLocationId = Shipment.intShipFromLocationId		
+		INNER JOIN tblICItem charge
+			ON charge.intItemId = ShipmentCharge.intChargeId 				
+		INNER JOIN dbo.tblICInventoryShipmentChargeTax ChargeTaxes
+			ON ShipmentCharge.intInventoryShipmentChargeId = ChargeTaxes.intInventoryShipmentChargeId
+		INNER JOIN dbo.tblSMTaxCode TaxCode
+			ON TaxCode.intTaxCodeId = ChargeTaxes.intTaxCodeId
+		CROSS APPLY dbo.fnGetItemGLAccountAsTable(
+			charge.intItemId
+			,chargeLocation.intItemLocationId
+			,'AP Clearing'
+		) apClearing
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = apClearing.intAccountId
+	WHERE	
+		Shipment.intInventoryShipmentId = @intInventoryShipmentId	
+		AND (ShipmentCharge.ysnAccrue = 1 OR ShipmentCharge.ysnPrice = 1) -- Note: Tax is only computed if ysnAccrue is Y or ysnPrice is Y. 
+
+	INSERT INTO tblICAPClearing (
+		[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionType]
+		,[strReferenceNumber]
+		,[dtmDate]
+		,[intEntityVendorId]
+		,[intLocationId]
+		,[intInventoryReceiptItemId]
+		,[intInventoryReceiptItemTaxId]
+		,[intInventoryReceiptChargeId]
+		,[intInventoryReceiptChargeTaxId]
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentChargeTaxId]
+		,[intAccountId]
+		,[intItemId]
+		,[intItemUOMId]
+		,[dblQuantity]
+		,[dblAmount]
+		,[strBatchId]
+	)
+	SELECT 
+		[intTransactionId] = Shipment.intInventoryShipmentId
+		,[strTransactionId] = Shipment.strShipmentNumber
+		,[intTransactionType] = 3 -- Shipment Charge
+		,[strReferenceNumber] = NULL 
+		,[dtmDate] = Shipment.dtmShipDate
+		,[intEntityVendorId] = ShipmentCharge.intEntityVendorId
+		,[intLocationId] = chargeLocation.intLocationId
+		,[intInventoryReceiptItemId] = NULL 
+		,[intInventoryReceiptItemTaxId] = NULL 
+		,[intInventoryReceiptChargeId] = NULL 
+		,[intInventoryReceiptChargeTaxId] = NULL 
+		,[intInventoryShipmentChargeId] = ShipmentCharge.intInventoryShipmentChargeId
+		,[intInventoryShipmentChargeTaxId] = ChargeTaxes.intInventoryShipmentChargeTaxId
+		,[intAccountId] = ga.intAccountId
+		,[intItemId] = ShipmentCharge.intChargeId
+		,[intItemUOMId] = ShipmentCharge.intCostUOMId
+		,[dblQuantity] = ChargeTaxes.dblQty
+		,[dblAmount] = ChargeTaxes.dblTax
+		,[strBatchId] = @strBatchId
+	FROM	
+		dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
+			ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
+		INNER JOIN dbo.tblICItemLocation chargeLocation
+			ON chargeLocation.intItemId = ShipmentCharge.intChargeId
+			AND chargeLocation.intLocationId = Shipment.intShipFromLocationId		
+		INNER JOIN tblICItem charge
+			ON charge.intItemId = ShipmentCharge.intChargeId 				
+		INNER JOIN dbo.tblICInventoryShipmentChargeTax ChargeTaxes
+			ON ShipmentCharge.intInventoryShipmentChargeId = ChargeTaxes.intInventoryShipmentChargeId
+		INNER JOIN dbo.tblSMTaxCode TaxCode
+			ON TaxCode.intTaxCodeId = ChargeTaxes.intTaxCodeId
+		CROSS APPLY dbo.fnGetItemGLAccountAsTable(
+			charge.intItemId
+			,chargeLocation.intItemLocationId
+			,'AP Clearing'
+		) apClearing
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = apClearing.intAccountId
+	WHERE	
+		Shipment.intInventoryShipmentId = @intInventoryShipmentId
+		AND ShipmentCharge.ysnAccrue = 1 
+		AND ShipmentCharge.ysnPrice = 1 
 END
 
 -- Exit point

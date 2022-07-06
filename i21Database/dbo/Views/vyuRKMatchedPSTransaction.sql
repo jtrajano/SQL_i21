@@ -28,7 +28,7 @@ SELECT dblGrossPL = ISNULL(dblGrossPL, 0.00)
 	, strMainCurrency
 	, intCent
 	, ysnSubCurrency
-	, dblNetPL = ISNULL((dblGrossPL + dblFutCommission), 0.00)
+	, dblNetPL = ISNULL(dblGrossPL, 0.00) -- ISNULL((dblGrossPL + dblFutCommission), 0.00)
 	, dtmLFilledDate
 	, dtmSFilledDate
 	, intLFutureMonthId

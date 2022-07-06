@@ -35,6 +35,7 @@ DECLARE @InvoiceDetail AS TABLE(
 	,[strItemType]						NVARCHAR(100)
 	,[intSiteId]						INT
 	,[intItemUOMId]						INT
+	,[strTaxPoint]						NVARCHAR(50)
 	UNIQUE ([intInvoiceDetailId])
 );
 
@@ -58,7 +59,9 @@ INSERT INTO @InvoiceDetail
 	,[intTaxGroupId]
 	,[strItemType]
 	,[intSiteId]
-	,[intItemUOMId])
+	,[intItemUOMId]
+	,[strTaxPoint]
+)
 SELECT DISTINCT
 	 [intInvoiceDetailId]				= ARID.[intInvoiceDetailId]
 	,[intInvoiceId]						= ARI.[intInvoiceId]
@@ -78,7 +81,8 @@ SELECT DISTINCT
 	,[intTaxGroupId]					= CASE WHEN ISNULL(ARID.[intTaxGroupId],0) = 0 THEN NULL ELSE ARID.[intTaxGroupId] END
 	,[strItemType]						= ICI.[strType]
 	,[intSiteId]						= ARID.[intSiteId]
-	,[intItemUOMId]						= ARID.[intItemUOMId] 
+	,[intItemUOMId]						= ARID.[intItemUOMId]
+	,[strTaxPoint]						= ARI.[strTaxPoint]
 FROM tblARInvoiceDetail ARID WITH (NOLOCK)
 INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN @InvoiceIds ID ON ID.[intHeaderId] = ARI.[intInvoiceId] --((ID.[intHeaderId] = ARI.[intInvoiceId] AND ISNULL(ID.[intDetailId],0) = 0) OR ID.[intDetailId] = ARID.[intInvoiceDetailId])
@@ -151,7 +155,7 @@ SELECT
 FROM
 	@InvoiceDetail IDs
 CROSS APPLY
-	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, 0, IDs.[intItemUOMId], IDs.[intCurrencyId], IDs.[intCurrencyExchangeRateTypeId], IDs.[dblCurrencyExchangeRate]) TD
+	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, 0, IDs.[intItemUOMId], IDs.[intCurrencyId], IDs.[intCurrencyExchangeRateTypeId], IDs.[dblCurrencyExchangeRate], IDs.[strTaxPoint]) TD
 WHERE
 	NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 

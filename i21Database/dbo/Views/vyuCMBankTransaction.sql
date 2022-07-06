@@ -1,55 +1,54 @@
-﻿CREATE  VIEW [dbo].[vyuCMBankTransaction]
-AS 
-SELECT 
-A.*,
-strBankTransactionTypeName = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = A.intBankTransactionTypeId),
-ysnPayeeEFTInfoActive = ISNULL((
-		SELECT TOP 1 ysnActive FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),0),
-dtmEFTEffectiveDate = 
-		(SELECT TOP 1 dtmEffectiveDate  FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 
-		AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc),
-ysnPrenoteSent = ISNULL((
-		SELECT TOP 1 ysnPrenoteSent FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),0),
-strAccountType = ISNULL((
-		SELECT TOP 1 strAccountType FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),''),
-strPayeeBankName = ISNULL((
-		SELECT TOP 1 strBankName FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),''),
-strPayeeBankAccountNumber  = ISNULL((
-		SELECT TOP 1 strAccountNumber FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),''),
-strPayeeBankRoutingNumber = ISNULL((
-		SELECT TOP 1 strRTN FROM [tblEMEntityEFTInformation] EFTInfo 
-		INNER JOIN tblCMBank BANK ON EFTInfo.intBankId = BANK.intBankId
-		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),''),
-strEntityNo = ISNULL((
-		SELECT strEntityNo FROM tblEMEntity
-		WHERE intEntityId = intPayeeId
-),''),
-strSocialSecurity = ISNULL((
-		SELECT Emp.strSocialSecurity FROM 
-		tblPRPaycheck PayCheck  INNER JOIN
-		tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.[intEntityId]
-		WHERE PayCheck.strPaycheckId = A.strTransactionId 
-),''),
-strAccountClassification = ISNULL((
-		SELECT TOP 1 strAccountClassification FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),''),
-dblDebit = ISNULL(Detail.dblDebit,0),
-dblCredit = ISNULL(Detail.dblCredit,0)
-FROM tblCMBankTransaction A
-OUTER APPLY (
-	SELECT SUM(ISNULL(dblDebit,0)) dblDebit, SUM(ISNULL(dblCredit,0)) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = A.intTransactionId
-)Detail
-GO
+﻿CREATE VIEW dbo.vyuCMBankTransaction
+AS
+SELECT   
+A.*,  
+intEntityEFTInfoId = ISNULL(A.intEFTInfoId, EFT.intEntityEFTInfoId),  
+EFT.ysnDefaultAccount,  
+strBankTransactionTypeName = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = A.intBankTransactionTypeId),  
+ysnPayeeEFTInfoActive =ISNULL(EFT.ysnActive,0),  
+dtmEFTEffectiveDate = EFT.dtmEffectiveDate,  
+ysnPrenoteSent = ISNULL(EFT.ysnPrenoteSent,0),  
+strAccountType = ISNULL(EFT.strAccountType,''),   
+strPayeeBankName = ISNULL(EFT.strBankName, ''),  
+strPayeeBankAccountNumber  = ISNULL(EFT.strAccountNumber,''),  
+strPayeeBankRoutingNumber = ISNULL(EFT.strRTN,''),  
+strEntityNo = ISNULL((  
+  SELECT strEntityNo FROM tblEMEntity  
+  WHERE intEntityId = intPayeeId  
+),''),  
+strSocialSecurity = ISNULL((  
+  SELECT Emp.strSocialSecurity FROM   
+  tblPRPaycheck PayCheck  INNER JOIN  
+  tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.[intEntityId]  
+  WHERE PayCheck.strPaycheckId = A.strTransactionId   
+),''),  
+strAccountClassification = ISNULL(EFT.strAccountClassification,''),  
+dblDebit = ISNULL(Detail.dblDebit,0),  
+dblCredit = ISNULL(Detail.dblCredit,0),
+strBankName = B.strBankName,
+strBankAccountType = BAT.strBankAccountType,
+strBrokerageAccount = BRA.strAccountNumber
+FROM tblCMBankTransaction A  
+LEFT JOIN tblCMBankAccount BA 
+	ON BA.intBankAccountId = A.intBankAccountId
+LEFT JOIN tblCMBank B
+	ON B.intBankId = BA.intBankId
+LEFT JOIN tblCMBankAccountType BAT
+	ON BAT.intBankAccountTypeId = BA.intBankAccountTypeId
+LEFT JOIN tblRKBrokerageAccount BRA
+	ON BRA.intBrokerageAccountId = BA.intBrokerageAccountId
+OUTER APPLY (  
+ SELECT SUM(ISNULL(dblDebit,0)) dblDebit, SUM(ISNULL(dblCredit,0)) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = A.intTransactionId  
+)Detail  
+OUTER APPLY (  
+ SELECT TOP 1 intEntityId, ysnActive, ysnPrenoteSent,strAccountType, BANK.strBankName, strAccountNumber, 
+ strRTN, strAccountClassification, intEntityEFTInfoId, dtmEffectiveDate, ysnDefaultAccount 
+ FROM [tblEMEntityEFTInformation] E   
+ LEFT JOIN vyuCMBank BANK ON E.intBankId = BANK.intBankId  
+  WHERE ysnActive = 1    
+  AND intEntityId = intPayeeId
+  ORDER BY dtmEffectiveDate desc  
+  
+
+)EFT
+

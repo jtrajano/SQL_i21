@@ -13,6 +13,141 @@ AS
 
 BEGIN
 
+	-- START TR-1611 - Sub ledger Transaction traceability
+	IF (ISNULL(@ForDelete, 0) = 0)
+	BEGIN
+
+		-- REMOVE THE SOURCE CONTRACT
+		DECLARE @intLinkTransactionId INT = NULL
+		DECLARE @strLinkTransaction NVARCHAR(100) = NULL
+		DECLARE @strLinkSourceType NVARCHAR(100) = NULL
+		
+		-- DECLARE @CursorLink AS CURSOR
+		-- SET @CursorLink = CURSOR FOR
+		-- SELECT DISTINCT CH.intContractHeaderId, CH.strContractNumber, TDL.strSourceType
+		-- FROM tblTRLoadReceipt LR
+		-- INNER JOIN tblTRTransactionDetailLog TDL ON TDL.intTransactionId = LR.intLoadHeaderId AND TDL.intTransactionDetailId = LR.intLoadReceiptId
+		-- LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = TDL.intContractDetailId
+		-- LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		-- WHERE LR.intLoadHeaderId = @LoadHeaderId
+		-- AND TDL.strSourceType = 'Inventory Receipt'
+		-- AND ((TDL.intContractDetailId IS NOT NULL AND LR.intContractDetailId IS NULL)
+		-- 	OR (TDL.intContractDetailId IS NOT NULL AND LR.intContractDetailId IS NOT NULL AND TDL.intContractDetailId != LR.intContractDetailId))
+		-- UNION ALL
+		-- SELECT DISTINCT CH.intContractHeaderId, CH.strContractNumber, TDL.strSourceType
+		-- FROM tblTRLoadDistributionDetail DD
+		-- INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+		-- INNER JOIN tblTRTransactionDetailLog TDL ON TDL.intTransactionId = DH.intLoadHeaderId AND TDL.intTransactionDetailId = DD.intLoadDistributionDetailId
+		-- LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = TDL.intContractDetailId
+		-- LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		-- WHERE DH.intLoadHeaderId = @LoadHeaderId
+		-- AND TDL.strSourceType = 'Invoice'
+		-- AND  ((TDL.intContractDetailId IS NOT NULL AND DD.intContractDetailId IS NULL)
+		-- OR (TDL.intContractDetailId IS NOT NULL AND DD.intContractDetailId IS NOT NULL AND TDL.intContractDetailId != DD.intContractDetailId))
+
+
+		-- OPEN @CursorLink
+		-- FETCH NEXT FROM @CursorLink INTO @intLinkTransactionId, @strLinkTransaction, @strLinkSourceType
+		-- WHILE @@FETCH_STATUS = 0
+		-- BEGIN
+		-- 	IF(@strLinkSourceType = 'Inventory Receipt')
+		-- 	BEGIN
+		-- 		EXEC dbo.[uspICDeleteTransactionLinks] @intLinkTransactionId, @strLinkTransaction, 'Purchase Contract', 'Contract'	
+		-- 	END
+		-- 	ELSE
+		-- 	BEGIN
+		-- 		EXEC dbo.[uspICDeleteTransactionLinks] @intLinkTransactionId, @strLinkTransaction, 'Sale Contract', 'Contract'
+		-- 	END
+		-- 	ELSE 	
+		-- 	FETCH NEXT FROM @CursorLink INTO @intLinkTransactionId, @strLinkTransaction, @strLinkSourceType
+		-- END
+		-- CLOSE @CursorLink  
+		-- DEALLOCATE @CursorLink
+
+		SELECT @intLinkTransactionId = LH.intLoadHeaderId,  @strLinkTransaction = LH.strTransaction, @strLinkSourceType = 'Transport' 
+		FROM tblTRLoadHeader LH
+		WHERE LH.intLoadHeaderId = @LoadHeaderId
+		
+		EXEC dbo.[uspICDeleteTransactionLinks] @intLinkTransactionId, @strLinkTransaction, 'Transport', 'Transport'
+
+		DECLARE @tblTransactionLinks udtICTransactionLinks
+		
+		INSERT INTO @tblTransactionLinks (
+			strOperation
+			, intSrcId
+			, strSrcTransactionNo
+			, strSrcTransactionType
+			, strSrcModuleName
+			, intDestId
+			, strDestTransactionNo
+			, strDestTransactionType
+			, strDestModuleName
+		)
+		SELECT DISTINCT strOperation
+			, intSrcId
+			, strSrcTransactionNo
+			, strSrcTransactionType
+			, strSrcModuleName
+			, intDestId
+			, strDestTransactionNo 
+			, strDestTransactionType
+			, strDestModuleName 
+		FROM (
+			SELECT strOperation	= 'Create'
+				, intSrcId = CH.intContractHeaderId
+				, strSrcTransactionNo = CH.strContractNumber
+				, strSrcTransactionType = 'Purchase Contract'
+				, strSrcModuleName	= 'Contract'
+				, intDestId	= LH.intLoadHeaderId
+				, strDestTransactionNo = LH.strTransaction
+				, strDestTransactionType = 'Transport'
+				, strDestModuleName = 'Transport'
+			FROM tblTRLoadHeader LH
+			INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = LH.intLoadHeaderId
+			INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LR.intContractDetailId
+			INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			WHERE LH.intLoadHeaderId = @LoadHeaderId
+			UNION ALL
+			SELECT strOperation	= 'Create'
+				, intSrcId = CH.intContractHeaderId
+				, strSrcTransactionNo = CH.strContractNumber
+				, strSrcTransactionType = 'Sale Contract'
+				, strSrcModuleName	= 'Contract'
+				, intDestId	= LH.intLoadHeaderId
+				, strDestTransactionNo = LH.strTransaction
+				, strDestTransactionType = 'Transport'
+				, strDestModuleName = 'Transport'
+			FROM tblTRLoadHeader LH
+			INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+			INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = DD.intContractDetailId
+			INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			WHERE LH.intLoadHeaderId = @LoadHeaderId
+		) A
+
+		IF EXISTS(SELECT TOP 1 1 FROM @tblTransactionLinks)
+		BEGIN
+			EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
+		END
+		ELSE
+		BEGIN
+			DECLARE @intCreateLinkTransactionId INT, 
+				@strCreateLinkTransactionNo NVARCHAR(50),
+				@strCreateLinkTransactionType NVARCHAR(100),
+				@strCreateLinkModuleName NVARCHAR(100)
+
+			SELECT @intCreateLinkTransactionId = LH.intLoadHeaderId
+				, @strCreateLinkTransactionNo = LH.strTransaction
+				, @strCreateLinkTransactionType  = 'Transport'
+				, @strCreateLinkModuleName = 'Transport'
+			FROM tblTRLoadHeader LH
+			WHERE LH.intLoadHeaderId = @LoadHeaderId
+
+			EXEC dbo.uspICAddTransactionLinkOrigin @intCreateLinkTransactionId, @strCreateLinkTransactionNo, @strCreateLinkTransactionType, @strCreateLinkModuleName
+		END
+	END
+	-- END TR-1611
+
 	DECLARE @TransactionType_TransportLoad NVARCHAR(50) = 'Transport Load'
 
 	DECLARE @SourceType_InventoryReceipt NVARCHAR(50) = 'Inventory Receipt'

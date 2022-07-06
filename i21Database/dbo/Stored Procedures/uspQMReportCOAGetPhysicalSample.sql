@@ -34,6 +34,7 @@ BEGIN TRY
 	FROM dbo.tblQMSample S
 	JOIN dbo.tblQMTestResult TR ON TR.intSampleId = S.intSampleId
 		AND S.intSampleStatusId = 3
+		AND S.intTypeId = 1
 		AND S.intProductTypeId = @intProductTypeId
 		AND S.intProductValueId = @intProductValueId
 
@@ -60,6 +61,7 @@ BEGIN TRY
 	JOIN dbo.tblQMSample S ON S.intSampleId = TR.intSampleId
 		AND S.intSampleId = @intSampleId
 		AND S.intSampleStatusId = 3
+		AND S.intTypeId = 1
 		AND TR.intProductValueId = @intProductValueId
 		AND TR.intProductTypeId = @intProductTypeId
 	JOIN dbo.tblQMProduct PRD ON PRD.intProductId = TR.intProductId

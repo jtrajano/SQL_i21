@@ -30,7 +30,7 @@ SET ANSI_WARNINGS OFF
 				,strFieldNameColumnWithValue = 'str' + replace(b.strLineOfBusiness, ' ', '') + ' = null'
 			from
 				tblICCategory a
-				,(
+				inner join(
 					select
 						intLineOfBusinessId
 						,strLineOfBusiness = replace(REPLACE(strLineOfBusiness, '&', 'And'), '-', '')
@@ -42,9 +42,8 @@ SET ANSI_WARNINGS OFF
 						,intConcurrencyId
 					from
 						tblSMLineOfBusiness
-				) b
-			where
-				b.intLineOfBusinessId = a.intLineOfBusinessId
+				) b on b.intLineOfBusinessId = a.intLineOfBusinessId
+				
 			union all
 			select
 				strLineOfBusiness = 'Undefined LOB'

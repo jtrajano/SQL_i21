@@ -1,11 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceIntegrations] 
-	 @InvoiceId			INT = NULL	
-	,@ForDelete			BIT = 0    
-	,@UserId			INT = NULL
-	,@InvoiceDetailId 	INT = NULL
-	,@ysnLogRisk		BIT = 1
-	,@Post				BIT	= 0
-	,@FromPosting		BIT = 0
+	 @InvoiceId				INT = NULL	
+	,@ForDelete				BIT = 0    
+	,@UserId				INT = NULL
+	,@InvoiceDetailId 		INT = NULL
+	,@ysnLogRisk			BIT = 1
+	,@Post					BIT	= 0
+	,@Recap					BIT	= 1
+	,@FromPosting			BIT = 0
+	,@LogTradeFinanceInfo	BIT = 0
+	,@strSessionId			NVARCHAR(50) = NULL
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -34,6 +37,7 @@ DECLARE @dblValueToUpdate NUMERIC(18, 6),
 		@PreStageInvoice InvoiceId
 
 SET @intTranCount = @@trancount;
+SET @strSessionId = ISNULL(@strSessionId, NEWID())
 
 BEGIN TRY
 	IF @intTranCount = 0
@@ -44,18 +48,30 @@ BEGIN TRY
 	SET @intInvoiceId = @InvoiceId
 	SET @intUserId = @UserId
 
-	SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
-			, @intSalesOrderId = intSalesOrderId
-			, @strTransactionType = strTransactionType
-			, @ysnFromItemContract = ISNULL(ysnFromItemContract, 0)
+	SELECT TOP 1 
+			  @intOriginalInvoiceId = intOriginalInvoiceId
+			, @intSalesOrderId		= intSalesOrderId
+			, @strTransactionType	= strTransactionType
+			, @ysnFromItemContract	= ISNULL(ysnFromItemContract, 0)
 			, @strBatchId			= strBatchId
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
+
+	INSERT INTO @InvoiceIds(
+		  intHeaderId
+		, ysnForDelete
+		, strBatchId
+	) 
+	SELECT intHeaderId 	= @intInvoiceId
+		 , ysnForDelete = ISNULL(@ForDelete, 0)
+		 , strBatchId 	= @strBatchId
 
 	IF @strTransactionType = 'Proforma Invoice'
 		BEGIN
 			IF @intTranCount = 0
 				COMMIT TRANSACTION
+
+			EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @Post, @FromPosting, @LogTradeFinanceInfo
 
 			RETURN
 		END
@@ -119,10 +135,16 @@ BEGIN TRY
 	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
 
 	--UPDATE PREPAID ITEM CONTRACT
-	IF ISNULL(@ysnFromItemContract, 0) <> 0
+	IF(ISNULL(@intTransactionDetailId, 0) <> 0 AND ISNULL(@ysnFromItemContract, 0) = 0 AND @strTransactionType != 'Customer Prepayment' AND @Recap = 0)
 	BEGIN
-		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId,  @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName,  @strRowState, @intInvoiceId
-	END	
+		IF(@Post = 0)
+		BEGIN
+			SET @dblValueToUpdate = @dblValueToUpdate * -1
+		END
+
+		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId, @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName,  @strRowState, @intInvoiceId
+	END
+
 	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 	EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
 	IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
@@ -131,26 +153,17 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, @FromPosting, @Post
 	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId	
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
-	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
+	IF @FromPosting = 0 EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
 	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 	IF @ForDelete = 1 AND @InvoiceDetailId IS NULL EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
-	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId	
-	
-	INSERT INTO @InvoiceIds(
-		  intHeaderId
-		, ysnForDelete
-		, strBatchId
-	) 
-	SELECT intHeaderId 	= @intInvoiceId
-		 , ysnForDelete = ISNULL(@ForDelete, 0)
-		 , strBatchId 	= @strBatchId	
-
-	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
+	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId, @strSessionId	
+	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds = @InvoiceIds, @strSessionId = @strSessionId
 	EXEC dbo.[uspARUpdateInvoiceReportFields] @InvoiceIds, 0
+	IF @FromPosting = 1 EXEC dbo.[uspARUpdateLotReleased] @intInvoiceId, @intUserId, @Post
 	
 	IF ISNULL(@ysnLogRisk, 0) = 1
-		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
+		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
 
 	IF @ForDelete = 1
 	BEGIN
@@ -160,6 +173,11 @@ BEGIN TRY
 		WHERE intTransactionId = @InvoiceId
 		AND intSourceTransactionId = 2
 	END
+
+	--INSERT TO TRANSACTION LINKS
+	EXEC dbo.[uspARInsertInvoiceTransactionLink] @InvoiceIds
+
+	EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @Post, @FromPosting, @LogTradeFinanceInfo
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
@@ -185,4 +203,3 @@ BEGIN CATCH
 	EXEC sp_executesql @strThrow
 
 END CATCH
-

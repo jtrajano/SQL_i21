@@ -29,6 +29,7 @@ BEGIN
 	DECLARE @ysnShowVehicleDescriptionOnly		BIT
 	DECLARE @ysnPageBreakByPrimarySortOrder		BIT
 	DECLARE @ysnSummaryByDeptDriverPinProd		BIT
+	DECLARE @strDepartmentGrouping				NVARCHAR(MAX)
 	
 	
 
@@ -60,6 +61,8 @@ BEGIN
 	,@ysnShowVehicleDescriptionOnly		 =  ysnShowVehicleDescriptionOnly
 	,@ysnPageBreakByPrimarySortOrder	 =  ysnPageBreakByPrimarySortOrder
 	,@ysnSummaryByDeptDriverPinProd		 =  ysnSummaryByDeptDriverPinProd
+	,@strDepartmentGrouping	 			 =  strDepartmentGrouping
+	
 	
 	FROM tblCFAccount
 	WHERE intCustomerId = @intCustomerId
@@ -92,6 +95,7 @@ BEGIN
 	,ysnSummaryByDriverPin			  =		 @ysnSummaryByDriverPin
 	,ysnPageBreakByPrimarySortOrder	  =		 @ysnPageBreakByPrimarySortOrder
 	,ysnSummaryByDeptDriverPinProd    =		 @ysnSummaryByDeptDriverPinProd
+	,strDepartmentGrouping	  		  = 	 @strDepartmentGrouping
 	WHERE strInvoiceNumberHistory = @strInvoiceNumber
 
 	UPDATE tblCFInvoiceHistoryStagingTable  

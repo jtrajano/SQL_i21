@@ -45,6 +45,7 @@ FROM (
 			,'Partially Rejected'
 			,'Partially Approved'
 			)
+		AND S.intTypeId = 1
 	GROUP BY CD.intContractDetailId
 		,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq)
 		,CD.dblQuantity
@@ -62,6 +63,6 @@ FROM (
 		,CA1.strDescription
 		,CD.intContractHeaderId
 	) t
-	,tblCTEvent EV
+	inner join tblCTEvent EV on 1=1
 WHERE EV.strEventName = 'Unapproved FOB Contract Samples'
 	AND t.dtmDate < (GETDATE() - EV.intDaysToRemind)

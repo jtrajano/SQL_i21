@@ -1,4 +1,5 @@
-﻿/*
+﻿---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
 	Used to reverse the stocks from a posted transaction.
 */
 CREATE PROCEDURE [dbo].[uspICUnpostReturnCosting]
@@ -117,7 +118,6 @@ BEGIN
 			,dblQty
 			,intSubLocationId
 			,intStorageLocationId
-			,intInventoryTransactionId		
 	)
 	SELECT	intItemId
 			,intItemLocationId
@@ -126,7 +126,6 @@ BEGIN
 			,SUM(ISNULL(dblQty, 0))				
 			,intSubLocationId
 			,intStorageLocationId
-			,intInventoryTransactionId
 	FROM	@ItemsToUnpost
 	WHERE	ISNULL(intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
 	GROUP BY 
@@ -135,8 +134,7 @@ BEGIN
 		, intItemUOMId
 		, intLotId
 		, intSubLocationId
-		, intStorageLocationId
-		, intInventoryTransactionId
+		, intStorageLocationId		
 
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ValidateItemsToUnpost
@@ -186,10 +184,10 @@ END
 -- Call the LOT unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	--EXEC dbo.uspICUnpostLotIn 
-	--	@strTransactionId
-	--	,@intTransactionId
-	--	,@ysnRecap
+	EXEC dbo.uspICUnpostLotIn 
+		@strTransactionId
+		,@intTransactionId
+		,@ysnRecap
 
 	EXEC dbo.uspICUnpostLotOut
 		@strTransactionId
@@ -268,6 +266,8 @@ BEGIN
 			,[strSourceNumber]
 			,[strBOLNumber]
 			,[intTicketId]
+			,[strAccountIdInventory]
+			,[strAccountIdInTransit]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -310,10 +310,26 @@ BEGIN
 			,[strSourceNumber]						= ActualTransaction.strSourceNumber
 			,[strBOLNumber]							= ActualTransaction.strBOLNumber
 			,[intTicketId]							= ActualTransaction.intTicketId
+			,[strAccountIdInventory]				= glAccountIdInventory.strAccountId
+			,[strAccountIdInTransit]				= glAccountIdInTransit.strAccountId
 
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
-	
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				ActualTransaction.intItemId
+				,ISNULL(ActualTransaction.intInTransitSourceLocationId, ActualTransaction.intItemLocationId)
+				,'Inventory'
+			) accountIdInventory
+			LEFT JOIN tblGLAccount glAccountIdInventory
+				ON accountIdInventory.intAccountId = glAccountIdInventory.intAccountId
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				ActualTransaction.intItemId
+				,ISNULL(ActualTransaction.intInTransitSourceLocationId, ActualTransaction.intItemLocationId)
+				,'Inventory In-Transit'
+			) accountIdInTransit
+			LEFT JOIN tblGLAccount glAccountIdInTransit
+				ON accountIdInTransit.intAccountId = glAccountIdInTransit.intAccountId
+
 	----------------------------------------------------
 	-- Create reversal of the inventory LOT transactions
 	----------------------------------------------------
@@ -382,7 +398,7 @@ BEGIN
 	-- Update the ysnIsUnposted flag for related transactions 
 	--------------------------------------------------------------
 	UPDATE	Relatedtactions
-	SET		ysnIsUnposted = 1, dtmDateModified = GETUTCDATE()
+	SET		ysnIsUnposted = 1
 	FROM	dbo.tblICInventoryTransaction Relatedtactions 
 	WHERE	Relatedtactions.intRelatedTransactionId = @intTransactionId
 			AND Relatedtactions.strRelatedTransactionId = @strTransactionId
@@ -611,6 +627,9 @@ BEGIN
 						,[strDescription]
 						,[dtmDateCreated]
 						,[intCompanyLocationId]
+						,[strAccountIdInventory]
+						,[strAccountIdInTransit]
+
 				)			
 			SELECT	
 					[intItemId]								= @intItemId
@@ -656,6 +675,9 @@ BEGIN
 															)
 					,[dtmDateCreated]						= GETUTCDATE()
 					,[intCompanyLocationId]					= [location].intCompanyLocationId
+					,[strAccountIdInventory]				= glAccountIdInventory.strAccountId
+					,[strAccountIdInTransit]				= glAccountIdInTransit.strAccountId
+
 			FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 						ON ItemPricing.intItemId = Stock.intItemId
 						AND ItemPricing.intItemLocationId = Stock.intItemLocationId
@@ -663,6 +685,21 @@ BEGIN
 						@intItemLocationId
 						, NULL --@intInTransitSourceLocationId
 					) [location]
+					OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+						@intItemId
+						,@intItemLocationId
+						,'Inventory'
+					) accountIdInventory
+					LEFT JOIN tblGLAccount glAccountIdInventory
+						ON accountIdInventory.intAccountId = glAccountIdInventory.intAccountId
+					OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+						@intItemId
+						,@intItemLocationId
+						,'Inventory In-Transit'
+					) accountIdInTransit
+					LEFT JOIN tblGLAccount glAccountIdInTransit
+						ON accountIdInTransit.intAccountId = glAccountIdInTransit.intAccountId	
+
 			WHERE	ItemPricing.intItemId = @intItemId
 					AND ItemPricing.intItemLocationId = @intItemLocationId			
 					AND dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
@@ -697,6 +734,108 @@ BEGIN
 	;
 END 
 
+-------------------------------------------
+-- Update the Valuation Summary
+-------------------------------------------
+BEGIN
+	DECLARE @UpdateValuationSummary AS TABLE (
+		intId INT IDENTITY(1, 1) 
+		,intItemId INT 
+		,intItemLocationId INT 
+		,intItemUOMId INT
+		,intInTransitSourceLocationId INT 
+		,dtmDate DATETIME
+		,dblCost NUMERIC(18, 6) NULL 
+		,dblQty NUMERIC(18, 6) NULL 
+		,dblValue NUMERIC(18, 6) NULL 
+	)
+
+	INSERT INTO @UpdateValuationSummary (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intInTransitSourceLocationId
+		,dtmDate
+		,dblCost
+		,dblQty 
+		,dblValue 
+	)
+	SELECT 
+		t.intItemId
+		,t.intItemLocationId
+		,t.intItemUOMId
+		,t.intInTransitSourceLocationId
+		,t.dtmDate
+		,t.dblCost
+		,dblQty = SUM(t.dblQty) 		
+		,dblValue = SUM(t.dblValue) 
+	FROM 
+		tblICInventoryTransaction t 
+	WHERE
+		t.strTransactionId = @strTransactionId
+		AND t.strBatchId = @strBatchId
+	GROUP BY 
+		t.intItemId
+		,t.intItemLocationId
+		,t.intItemUOMId
+		,t.intInTransitSourceLocationId
+		,t.dtmDate
+		,t.dblCost
+
+	DECLARE 
+		@intIdSummaryValuation INT
+		,@intItemIdSummaryValuation INT 
+		,@intItemLocationIdSummaryValuation INT 
+		,@intItemUOMIdSummaryValuation INT
+		,@intInTransitSourceLocationIdSummaryValuation INT 
+		,@dtmDateSummaryValuation DATETIME
+		,@dblCostSummaryValuation NUMERIC(18, 6) 
+		,@dblQtySummaryValuation NUMERIC(18, 6) 
+		,@dblValueSummaryValuation NUMERIC(18, 6) 
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM @UpdateValuationSummary) 
+	BEGIN 
+		SELECT 
+			@intIdSummaryValuation = NULL 
+			,@intItemIdSummaryValuation = NULL 
+			,@intItemLocationIdSummaryValuation = NULL 
+			,@intItemUOMIdSummaryValuation = NULL 
+			,@intInTransitSourceLocationIdSummaryValuation = NULL 
+			,@dtmDateSummaryValuation = NULL 
+			,@dblCostSummaryValuation = NULL 
+			,@dblQtySummaryValuation = NULL 
+			,@dblValueSummaryValuation = NULL 
+
+		SELECT TOP 1 
+			@intIdSummaryValuation = intId
+			,@intItemIdSummaryValuation = intItemId
+			,@intItemLocationIdSummaryValuation = intItemLocationId
+			,@intItemUOMIdSummaryValuation = intItemUOMId
+			,@intInTransitSourceLocationIdSummaryValuation = intInTransitSourceLocationId
+			,@dtmDateSummaryValuation = dtmDate
+			,@dblCostSummaryValuation = dblCost
+			,@dblQtySummaryValuation = dblQty
+			,@dblValueSummaryValuation = dblValue
+		FROM @UpdateValuationSummary 
+
+		EXEC dbo.[uspICUpdateInventoryValuationSummary]
+			@intItemId = @intItemIdSummaryValuation
+			,@intItemLocationId = @intItemLocationIdSummaryValuation
+			,@intSubLocationId = NULL 
+			,@intStorageLocationId = NULL 
+			,@intItemUOMId = @intItemUOMIdSummaryValuation
+			,@dblQty = @dblQtySummaryValuation
+			,@dblCost = @dblCostSummaryValuation
+			,@dblValue = @dblValueSummaryValuation 
+			,@intTransactionTypeId = NULL 
+			,@dtmTransactionDate = @dtmDateSummaryValuation
+			,@intInTransitSourceLocationId = @intInTransitSourceLocationIdSummaryValuation
+
+		DELETE FROM @UpdateValuationSummary
+		WHERE intId = @intIdSummaryValuation
+	END 
+END 
+
 -----------------------------------------
 -- Call the Risk Log sp
 -----------------------------------------
@@ -705,4 +844,4 @@ BEGIN
 		@strBatchId
 		,@strTransactionId
 		,@intEntityUserSecurityId
-END 
+END

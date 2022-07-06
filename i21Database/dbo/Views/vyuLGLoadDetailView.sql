@@ -16,8 +16,10 @@ SELECT LD.intLoadDetailId
 	, LD.dblDeliveredTare
 	, LD.dblDeliveredNet
 	, LD.intPSubLocationId
-	, PCLSL.strSubLocationName AS strPSubLocationName
-	, SCLSL.strSubLocationName AS strSSubLocationName
+	, strPSubLocationName = PCLSL.strSubLocationName
+	, strSSubLocationName = SCLSL.strSubLocationName
+	, strPStorageLocation = PSTL.strName
+	, strSStorageLocation = SSTL.strName
 	, strWeightItemUOM = WeightUOM.strUnitMeasure
 	, LD.intVendorEntityId
 	, dblItemUOMCF = ItemUOM.dblUnitQty
@@ -61,9 +63,12 @@ SELECT LD.intLoadDetailId
 	, ysnPSubCurrency = AD.ysnSeqSubCurrency
 	, dblPMainCashPrice = PDetail.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END
 	, dblPFranchise = CASE WHEN PWG.dblFranchise > 0 THEN PWG.dblFranchise / 100 ELSE 0 END
+	, intSellerId = LD.intSellerId
+	, strSeller = Seller.strName
 
 -- Inbound Company Location
 	, LD.intPCompanyLocationId
+	, LD.intPStorageLocationId
 	, strPLocationName = PCL.strLocationName
 	, strPLocationAddress = PCL.strAddress
 	, strPLocationCity = PCL.strCity
@@ -73,6 +78,8 @@ SELECT LD.intLoadDetailId
 	, strPLocationMail = PCL.strEmail
 	, strPLocationFax = PCL.strFax
 	, strPLocationPhone = PCL.strPhone
+	, strPContractLoadingPort = PLPort.strCity
+	, strPContractDestinationPort = PDPort.strCity
 
 -- Customer Info
 	, LD.intCustomerEntityId
@@ -113,9 +120,11 @@ SELECT LD.intLoadDetailId
 	, ysnSSubCurrency = ADS.ysnSeqSubCurrency
 	, dblSMainCashPrice = SDetail.dblCashPrice / CASE WHEN ISNULL(CUS.intCent,0) = 0 THEN 1 ELSE CUS.intCent END
 	, dblSFranchise = CASE WHEN SWG.dblFranchise > 0 THEN SWG.dblFranchise / 100 ELSE 0 END
+	, strSalesperson = Salesperson.strName
 
 -- Outbound Company Location
 	, LD.intSCompanyLocationId
+	, LD.intSStorageLocationId
 	, strSLocationName = SCL.strLocationName
 	, strSLocationAddress = SCL.strAddress
 	, strSLocationCity = SCL.strCity
@@ -125,6 +134,9 @@ SELECT LD.intLoadDetailId
 	, strSLocationMail = SCL.strEmail
 	, strSLocationFax = SCL.strFax
 	, strSLocationPhone = SCL.strPhone
+	, strSContractLoadingPort = SLPort.strCity
+	, strSContractDestinationPort = SDPort.strCity
+	, strSContractCropYear = SCY.strCropYear
 
 -- Schedule, L Directions
 	, LD.strScheduleInfoMsg
@@ -134,6 +146,10 @@ SELECT LD.intLoadDetailId
 	, LD.ysnUpdateLoadDirections
 	, LD.ysnPrintLoadDirections
 	, Item.strLotTracking
+	, LD.dtmPickUpFrom
+	, LD.dtmPickUpTo
+	, LD.dtmDeliveryFrom
+	, LD.dtmDeliveryTo
 
 -- Load Header
 	, L.intLoadId
@@ -150,9 +166,12 @@ SELECT LD.intLoadDetailId
 	, L.intDriverEntityId
 	, L.intDispatcherId
 	, L.strExternalLoadNumber
-	, strType = CASE WHEN L.intPurchaseSale = 1 THEN 'Inbound'
-					ELSE CASE WHEN L.intPurchaseSale = 2 THEN 'Outbound' 
-							ELSE 'Drop Ship' END END COLLATE Latin1_General_CI_AS
+	, strType = CASE L.intPurchaseSale 
+		WHEN 1 THEN 'Inbound'
+		WHEN 2 THEN 'Outbound'
+		WHEN 3 THEN 'Drop Ship'
+		WHEN 4 THEN 'Transfer'
+		END COLLATE Latin1_General_CI_AS
 	, intGenerateReferenceNumber = GLoad.intReferenceNumber
 	, intGenerateSequence = L.intGenerateSequence
 	, intNumberOfLoads = GLoad.intNumberOfLoads
@@ -212,6 +231,9 @@ SELECT LD.intLoadDetailId
 	, LD.intNumberOfContainers
 	, strDetailVendorReference = LD.strVendorReference 
 	, strDetailCustomerReference = LD.strCustomerReference
+	, strDetailTerminalReference = LD.strTerminalReference
+	, LD.intCropYearId
+	, strCropYear = CPY.strCropYear
 
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -231,10 +253,16 @@ LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEnt
 LEFT JOIN tblSMTaxGroup CustomerTax ON CustomerTax.intTaxGroupId = CEL.intTaxGroupId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = LD.intSellerId
+LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = LD.intSalespersonId
 LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
 LEFT JOIN tblCTPricingType PPricingType ON PPricingType.intPricingTypeId = PDetail.intPricingTypeId
+LEFT JOIN tblCTCropYear PCY ON PCY.intCropYearId = PHeader.intCropYearId
 LEFT JOIN tblCTIndex PIndex ON PIndex.intIndexId = PDetail.intIndexId
+LEFT JOIN tblSMCity PLPort ON PLPort.intCityId = PDetail.intLoadingPortId
+LEFT JOIN tblSMCity PDPort ON PDPort.intCityId = PDetail.intDestinationPortId
+LEFT JOIN tblCTCropYear CPY ON CPY.intCropYearId = LD.intCropYearId
 LEFT JOIN tblTRSupplyPoint PSP ON PSP.intEntityVendorId = PIndex.intVendorId AND PSP.intEntityLocationId = PIndex.intVendorLocationId
 LEFT JOIN tblICItem	IM ON IM.intItemId = PDetail.intItemId
 LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = PDetail.intContractDetailId
@@ -243,7 +271,10 @@ LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
 LEFT JOIN tblCTPricingType SPricingType ON SPricingType.intPricingTypeId = SDetail.intPricingTypeId
+LEFT JOIN tblCTCropYear SCY ON SCY.intCropYearId = SHeader.intCropYearId
 LEFT JOIN tblCTIndex SIndex ON SIndex.intIndexId = SDetail.intIndexId
+LEFT JOIN tblSMCity SLPort ON SLPort.intCityId = SDetail.intLoadingPortId
+LEFT JOIN tblSMCity SDPort ON SDPort.intCityId = SDetail.intDestinationPortId
 LEFT JOIN tblTRSupplyPoint SSP ON SSP.intEntityVendorId = SIndex.intVendorId AND SSP.intEntityLocationId = SIndex.intVendorLocationId
 LEFT JOIN tblICItem	IMS ON IMS.intItemId = SDetail.intItemId
 LEFT JOIN vyuLGAdditionalColumnForContractDetailView ADS ON AD.intContractDetailId = SDetail.intContractDetailId
@@ -257,3 +288,5 @@ LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PHeader.intWeightId
 LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SHeader.intWeightId
 LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LD.intSSubLocationId
+LEFT JOIN tblICStorageLocation PSTL ON PSTL.intStorageLocationId = LD.intPStorageLocationId
+LEFT JOIN tblICStorageLocation SSTL ON SSTL.intStorageLocationId = LD.intSStorageLocationId

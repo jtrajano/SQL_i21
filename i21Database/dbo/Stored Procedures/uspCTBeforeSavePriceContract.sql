@@ -38,7 +38,7 @@ BEGIN TRY
 	--	END
 	--END
 
-	SELECT @intContractTypeId = b.intContractTypeId
+	SELECT @intContractTypeId = b.intContractTypeId, @intContractDetailId = a.intContractDetailId
 	FROM tblCTPriceFixation a
 	INNER JOIN tblCTContractHeader b on a.intContractHeaderId = b.intContractHeaderId
 	WHERE a.intPriceContractId = @intPriceContractId
@@ -52,6 +52,9 @@ BEGIN TRY
 		EXEC [dbo].[uspCTInterCompanyPriceContract] @intPriceContractId = @intPriceContractId
 													,@ysnApprove = 0
 													,@strRowState = 'Delete'
+
+		UPdate tblICInventoryShipmentItem set ysnAllowInvoice = 0 where intLineNo = @intContractDetailId;
+
 	END
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML

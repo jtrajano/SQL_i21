@@ -7,7 +7,6 @@
 	[intCurrencyId]            INT              NULL,
     [dblExchangeRate]          DECIMAL (38, 20) DEFAULT 1 NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
-
     [dtmDate]                  DATETIME         NOT NULL,
     [strPayee]                 NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
     [intPayeeId]               INT              NULL,
@@ -43,13 +42,17 @@
 	[ysnRecurring]			   BIT              DEFAULT 0 NOT NULL,
 	[ysnHold]				   BIT				DEFAULT 0 NOT NULL,
 	[ysnPOS]				   BIT				DEFAULT 0 NULL,
+    [ysnCCTransaction]         BIT              DEFAULT 0 NULL,
 	[strHoldReason]			   NVARCHAR (250)	COLLATE Latin1_General_CI_AS NULL,
 	[ysnDelete]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
 	[dtmClr]				   DATETIME	        NULL,
     [ysnHasDetailOverflow]     BIT              NULL,
     [ysnHasBasisPrepayOverflow]BIT              NULL,
-    [intAPPaymentId]             INT              NULL, 
+    [intFiscalPeriodId]        INT              NULL,
+    [intTaskId]                INT              NULL,
+    [intAPPaymentId]           INT              NULL, 
+    [intEFTInfoId]             INT              NULL, 
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
 	CONSTRAINT [PK_tblCMBankTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
@@ -100,7 +103,13 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblCMBankTransaction]
 INCLUDE ( 	[intBankTransactionTypeId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
 
-CREATE NONCLUSTERED INDEX IX_NC_tblCMBankTransaction ON [dbo].[tblCMBankTransaction] ([intBankTransactionTypeId],[intBankAccountId],[dblAmount]) 
-INCLUDE ([strTransactionId],[dblExchangeRate],[strPayee],[intPayeeId],[dtmCheckPrinted],[dtmDateReconciled])
-
+CREATE NONCLUSTERED INDEX [idx_tblCMBankTransaction_RunningBalance] ON [dbo].[tblCMBankTransaction]
+(
+	[ysnPosted] ASC
+)
+INCLUDE ([intBankTransactionTypeId],
+	[intBankAccountId],
+	[dtmDate],
+	[dblAmount]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
+

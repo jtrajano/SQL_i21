@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICProcessToBill]
 	@intReceiptId int,
 	@intUserId int,
+	@strType NVARCHAR(50) = NULL,
 	@intBillId int OUTPUT,
 	@strBillIds NVARCHAR(MAX) = NULL OUTPUT,
 	@intScreenId int = NULL
@@ -31,14 +32,41 @@ BEGIN
 END 
 ELSE IF @receiptType <> 'Transfer Order'
 BEGIN 
-
 	EXEC @intReturnValue = uspICConvertReceiptToVoucher
 		@intReceiptId 
 		,@intUserId 
+		,@strType 
 		,@intBillId OUTPUT
 		,@strBillIds OUTPUT
 		,@intScreenId
 END 
+
+BEGIN 
+			
+	DECLARE @TransactionLinks udtICTransactionLinks
+	DELETE FROM @TransactionLinks
+	
+	IF EXISTS (SELECT intDestinationId FROM dbo.vyuICGetReceiptItemVoucherDestination WHERE intInventoryReceiptId = @intReceiptId AND intDestinationId IS NOT NULL)
+	BEGIN
+	
+		INSERT INTO @TransactionLinks (
+			strOperation, -- Operation
+			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+		)
+		SELECT 'Create',
+			@intReceiptId, Voucher.strReceiptNumber, 'Inventory', 'Inventory Receipt',
+			Voucher.intDestinationId, 
+			COALESCE(Voucher.strDestinationNo, 'Missing Transaction No'), 
+			'Purchasing', 
+			'Voucher'
+		FROM dbo.vyuICGetReceiptItemVoucherDestination Voucher
+		WHERE intInventoryReceiptId = @intReceiptId AND Voucher.intDestinationId = @intBillId
+
+		EXEC dbo.uspICAddTransactionLinks @TransactionLinks
+
+	END
+END
 
 Post_Exit: 
 RETURN @intReturnValue

@@ -73,7 +73,7 @@ AS
 				(
 					SELECT 	(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, intRepresentingUOMId, CD.intUnitMeasureId,dblRepresentingQty) ) qty
 					FROM	tblQMSample 
-					WHERE	intProductTypeId = 8  AND intSampleStatusId = 3 AND intProductValueId = CD.intContractDetailId
+					WHERE	intProductTypeId = 8  AND intSampleStatusId = 3 AND intProductValueId = CD.intContractDetailId AND tblQMSample.intTypeId = 1
 				)t
 			) AS dblApprovedQty,
 			SB.strSubLocationName,
@@ -121,6 +121,7 @@ AS
 			case when CH.strHeaderPricingType = 'Basis' then CD.dblQuantity - ISNULL(FI.dblQuantityPriceFixed, 0) else null end AS dblUnPricedQty
 			,strDetailFreightTerm = CDFT.strFreightTerm
 			,intDetailFreightTermId = CDFT.intFreightTermId
+			,CD.dblInterestRate
 
 	FROM	tblCTContractDetail				CD LEFT	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT

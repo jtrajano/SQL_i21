@@ -2,6 +2,7 @@
 	@intPriceFixationDetailId	int					--= 1858
 	,@dblPricedQuantity 		numeric(18,6) 		--= 350
 	,@strTransaction 			nvarchar(10) 		--= 'delete'
+	,@dblFuturePrice			numeric(18,6) = null
 
 AS
 
@@ -20,6 +21,9 @@ begin try
 	declare @intActiveInvoiceDetailId int;
 	declare @dblActiveQtyShipped numeric(18,6);
 	declare @dblCommulativeQtyShipped numeric(18,6);
+	
+	declare @dblTotalBilledQuantity numeric(18,6);
+	declare @dblCurrentFuturePrice numeric(18,6);
 
 	declare @strPostedInvoices nvarchar(max) = '';
 	declare @strErrorMessageForDeletingWithPostedInvoice nvarchar(1000) = 'X0';
@@ -43,12 +47,11 @@ begin try
 		@ysnLoad = isnull(ch.ysnLoad,0)
 	from
 		tblCTPriceFixationDetail pfd
-		,tblCTPriceFixation pf
-		,tblCTContractHeader ch
+		inner join tblCTPriceFixation pf on pf.intPriceFixationId = pfd.intPriceFixationId
+		inner join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
 	where
 		pfd.intPriceFixationDetailId = @intPriceFixationDetailId
-		and pf.intPriceFixationId = pfd.intPriceFixationId
-		and ch.intContractHeaderId = pf.intContractHeaderId
+
 
 
 	if (@strTransaction = 'update')
@@ -265,6 +268,46 @@ begin try
 					,strMessage = 'success'
 			end
 
+		end
+		else if exists (
+			select
+				top 1 1
+			from
+				tblCTPriceFixationDetailAPAR ar
+				join tblAPBillDetail bd on bd.intBillDetailId = ar.intBillDetailId
+			where ar.intPriceFixationDetailId = @intPriceFixationDetailId
+		)
+		begin
+			select
+				@dblTotalBilledQuantity = isnull(sum(b.dblQtyReceived),0)
+				,@dblCurrentFuturePrice = fd.dblFutures
+			from
+				tblCTPriceFixationDetailAPAR a
+				inner join tblAPBillDetail b on a.intBillDetailId = b.intBillDetailId
+				inner join tblCTPriceFixationDetail fd on fd.intPriceFixationDetailId = a.intPriceFixationDetailId
+			where
+				a.intPriceFixationDetailId = @intPriceFixationDetailId
+				and b.intBillId = a.intBillId and b.intInventoryReceiptChargeId is null
+			group by
+				fd.dblFutures
+
+			if (@dblPricedQuantity < @dblTotalBilledQuantity)
+			begin
+				insert into @ReturnTable
+				select
+					intInvoiceId = 0
+					,intInvoiceDetailId = 0
+					,strMessage = 'The quantity cannot be changed below quantity applied/priced.'
+			end
+
+			if (@dblFuturePrice is not null and @dblFuturePrice <> @dblCurrentFuturePrice)
+			begin
+				insert into @ReturnTable
+				select
+					intInvoiceId = 0
+					,intInvoiceDetailId = 0
+					,strMessage = 'Voucher has been created for this pricing. The Price cannot be changed.'
+			end
 		end
 		else
 		begin

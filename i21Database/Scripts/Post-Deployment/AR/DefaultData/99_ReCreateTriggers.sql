@@ -110,6 +110,10 @@ BEGIN
 			,p.intPostedById                  = i.intPostedById                 
 			,p.intConcurrencyId               = i.intConcurrencyId 
 			,p.intCurrentStatus				  = i.intCurrentStatus
+			,p.intPeriodId                    = i.intPeriodId
+			,p.dtmScheduledPayment			  = i.dtmScheduledPayment   
+			,p.strCreditCardStatus			  = i.strCreditCardStatus
+			,p.strCreditCardNote			  = i.strCreditCardNote
 		FROM tblARPayment p
 		INNER JOIN inserted i
 			ON i.intPaymentId = p.intPaymentId

@@ -9,10 +9,10 @@ BEGIN
 		@strJiraTickets = (case when @ysnDisplay = convert(bit,1) then COALESCE(@strJiraTickets + ',<br>', '') + '<a href="#" onclick="i21.controller.ModuleManager.HelpDesk.timeEntryGotoTicket('''+ tblHDTicket.strTicketNumber +'''); return false;" title="Click to view ' + tblHDTicket.strTicketNumber + '.">' + tblHDTicket.strTicketNumber + '</a>' else COALESCE(@strJiraTickets + ',', '') + tblHDTicket.strTicketNumber end)
 		,@strJiraTicketIds = COALESCE(@strJiraTicketIds + ',', '') + convert(nvarchar(20),tblHDTicket.intTicketId)
 	FROM
-		tblHDTicketJIRAIssue, tblHDTicket
+		tblHDTicketJIRAIssue
+	inner join tblHDTicket on tblHDTicket.intTicketId = tblHDTicketJIRAIssue.intTicketId
 	WHERE
 		tblHDTicketJIRAIssue.strJiraKey = @jiraKey
-		and tblHDTicket.intTicketId = tblHDTicketJIRAIssue.intTicketId
 
 	if (@isId = convert(bit,1))
 	begin

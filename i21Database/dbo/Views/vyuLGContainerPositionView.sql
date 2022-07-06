@@ -63,6 +63,7 @@ FROM (
 		JOIN tblQMSampleStatus SampStatus ON SampStatus.intSampleStatusId = Samp.intSampleStatusId
 			AND SampStatus.strStatus = 'Approved'
 		JOIN tblCTContractDetail Seq ON Seq.intContractDetailId = Samp.intContractDetailId
+		WHERE Samp.intTypeId = 1
 		GROUP BY Seq.intItemId
 			,Seq.intContractHeaderId
 			,Seq.intContractDetailId
@@ -81,6 +82,7 @@ FROM (
 		JOIN tblQMSampleStatus SampStatus ON SampStatus.intSampleStatusId = Samp.intSampleStatusId
 			AND SampStatus.strStatus = 'Rejected'
 		JOIN tblCTContractDetail Seq ON Seq.intContractDetailId = Samp.intContractDetailId
+		WHERE Samp.intTypeId = 1
 		GROUP BY Seq.intItemId
 			,Seq.intContractHeaderId
 			,Seq.intContractDetailId

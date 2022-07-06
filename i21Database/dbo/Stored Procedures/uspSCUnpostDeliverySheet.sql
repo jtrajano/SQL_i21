@@ -429,6 +429,11 @@ BEGIN TRY
 				EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 1;
 			END
 		
+
+		-- Update the exported status of the delivery sheet
+		UPDATE tblSCDeliverySheet SET ysnExport = 0
+		WHERE intDeliverySheetId = @intDeliverySheetId
+		
 		--Audit Log
 		
 		EXEC dbo.uspSMAuditLog 

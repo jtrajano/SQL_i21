@@ -32,6 +32,26 @@ SELECT
 	, lot.strWarehouseRefNo
 	, intQtyUOMDecimalPlaces = uom.intDecimalPlaces
 	, intGrossUOMDecimalPlaces = weightUOM.intDecimalPlaces
+	, strCargoNo = lot.strCargoNo
+	, strWarrantNo = lot.strWarrantNo
+	, WarrantStatus.strWarrantStatus
+	, lot.strCondition 
+	, item.intCertificationId
+	, Certification.strCertificationName
+	, strGrade = Grade.strDescription
+	, strOrigin = Origin.strDescription
+	, strRegion = Region.strDescription
+	, strSeason = Season.strDescription
+	, strClass = Class.strDescription
+	, strProductLine = ProductLine.strDescription
+	, lot.dblTare
+	, lot.dblTarePerQty
+	, lot.ysnInsuranceClaimed
+	, lot.ysnRejected
+	, lot.strRejectedBy
+	, tf.strTradeFinanceNumber
+	, tf.intTradeFinanceId
+	, lot.dblReleasedQty
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
@@ -51,3 +71,12 @@ FROM tblICLot lot
 	LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = lot.intSubBookId
 	LEFT JOIN tblICParentLot ParentLot ON ParentLot.intItemId = lot.intItemId
 		AND ParentLot.intParentLotId = lot.intParentLotId
+	LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = item.intCertificationId
+	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = item.intGradeId
+	LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = item.intOriginId
+	LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = item.intRegionId
+	LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = item.intSeasonId
+	LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = item.intClassVarietyId
+	LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = item.intProductLineId
+	LEFT JOIN tblICWarrantStatus WarrantStatus ON WarrantStatus.intWarrantStatus = lot.intWarrantStatus
+	LEFT JOIN tblTRFTradeFinance tf ON tf.intTradeFinanceId = lot.intTradeFinanceId

@@ -38,6 +38,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @strSourceTransaction			NVARCHAR(100)
 	  , @ysnPrintOnlyOverCreditLimit	BIT
 	  , @ysnRollCredits					BIT
+	  , @ysnOverrideCashFlow			BIT = 0
 	  , @ysnExcludeAccountStatus		BIT
 	  , @strReportLogId					NVARCHAR(MAX)
 	  , @intNewPerformanceLogId			INT 
@@ -265,6 +266,10 @@ SELECT	@ysnRollCredits = CASE WHEN ISNULL([from], 'False') = 'False' THEN 0 ELSE
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'ysnRollCredits'
 
+SELECT	@ysnOverrideCashFlow = CASE WHEN ISNULL([from], 'False') = 'False' THEN 0 ELSE 1 END
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'ysnOverrideCashFlow'
+
 SELECT  @intEntityUserId = NULLIF(CAST(ISNULL([from], '') AS INT), 0)
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'intSrCurrentUserId'
@@ -306,6 +311,7 @@ BEGIN
 											, @strAccountStatusIds		= @strAccountStatusIds
 											, @strSourceTransaction		= @strSourceTransaction										
 											, @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
+											, @ysnOverrideCashFlow		= @ysnOverrideCashFlow
 											, @strReportLogId			= @strReportLogId
 
 	EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo

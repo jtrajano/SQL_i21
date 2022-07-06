@@ -15,6 +15,7 @@ BEGIN
     JOIN	tblQMProperty	PR	ON	PR.intPropertyId	=	TR.intPropertyId AND PR.strPropertyName = @strPropertyName COLLATE Latin1_General_CI_AS
     WHERE   intContractDetailId = @intContractDetailId
     AND		SA.intSampleStatusId = 3 AND ISNULL(TR.strPropertyValue,'0') NOT IN ('0','')
+    AND     SA.intTypeId = 1
 	
 	RETURN @dblAvg
 END

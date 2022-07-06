@@ -28,7 +28,7 @@ BEGIN TRY
   JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
   JOIN dbo.tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
   JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
-  JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId'
+  JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId AND S.intTypeId = 1'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN

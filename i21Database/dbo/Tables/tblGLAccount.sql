@@ -2,7 +2,7 @@
     [intAccountId]      INT             IDENTITY (1, 1) NOT NULL,
     [strAccountId]      NVARCHAR (40)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]    NVARCHAR (255)  COLLATE Latin1_General_CI_AS NOT NULL,
-    [strNote]           NTEXT           COLLATE Latin1_General_CI_AS NULL,
+    [strNote]           NVARCHAR(MAX)           COLLATE Latin1_General_CI_AS NULL,
     [intAccountGroupId] INT             NULL,
     [ysnIsUsed]         BIT             CONSTRAINT [DF_tblGLAccount_ysnIsUsed] DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]  INT             DEFAULT 1 NOT NULL,
@@ -14,8 +14,10 @@
     [strCashFlow]       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intEntityIdLastModified] INT NULL, 
     [intCurrencyID] INT NULL, 
+    [intLocationSegmentId] INT NULL, 
     [intCurrencyExchangeRateTypeId] INT NULL, 
 	[strOldAccountId]   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [intUnnaturalAccountId] INT NULL,
     CONSTRAINT [PK_GLAccount_AccountId] PRIMARY KEY CLUSTERED ([intAccountId] ASC),
     CONSTRAINT [FK_tblGLAccount_tblGLAccountGroup] FOREIGN KEY ([intAccountGroupId]) REFERENCES [dbo].[tblGLAccountGroup] ([intAccountGroupId]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_tblGLAccount_tblGLAccountUnit] FOREIGN KEY ([intAccountUnitId]) REFERENCES [dbo].[tblGLAccountUnit] ([intAccountUnitId]),
@@ -63,4 +65,19 @@ GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Default Currency ID' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccount', @level2type=N'COLUMN',@level2name=N'intCurrencyID'
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Default Currency Exchange Rate Type' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccount', @level2type=N'COLUMN',@level2name=N'intCurrencyExchangeRateTypeId'
+GO
+
+CREATE TRIGGER dbo.trgInsertGLAccount
+ON dbo.tblGLAccount
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (
+        SELECT 1 FROM vyuGLAccountDetail A JOIN inserted I ON A.intAccountId = I.intAccountId
+        WHERE strAccountType IN ( 'Asset', 'Liability', 'Equity')) -- SET ysnRevalue for all balance sheet GL Accounts
+        UPDATE A SET  ysnRevalue = 1  FROM tblGLAccount A JOIN inserted I ON A.intAccountId = I.intAccountId
+END
+
 GO

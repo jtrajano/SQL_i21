@@ -1,10 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMBankFileGenerationLog]
 	@intBankAccountId INT = NULL,
-	@strTransactionIds NVARCHAR(MAX) = NULL,
+	@strTransactionIds NVARCHAR(MAX) = NULL, -- intTransactionIds in string
 	@strFileName NVARCHAR(100) = NULL,
 	@strProcessType NVARCHAR(50) = NULL,
 	@intBankFileFormatId INT = NULL,
-	@intEntityId INT = NULL
+	@intEntityId INT = NULL,
+	@intBatchId INT =NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -12,10 +13,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
-DECLARE @intBatchId INT = 0
-SELECT TOP 1 @intBatchId =  ISNULL(MAX(intBatchId),0) + 1 from tblCMBankFileGenerationLog
-
 
 IF (@strProcessType = 'ACH From Customer')
 BEGIN
@@ -52,6 +49,8 @@ BEGIN
 	,@intEntityId
 	FROM tblCMUndepositedFund
 	WHERE intUndepositedFundId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
+
+	EXEC uspCMProcessTradeFinanceLog @strTransactionIds, 'ACH Generated', @intEntityId
 
 END
 ELSE
@@ -96,6 +95,7 @@ BEGIN
 		UPDATE tblCMBankTransaction SET dtmCheckPrinted = GETDATE()
 		WHERE  intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
 		AND dtmCheckPrinted IS NULL
+
 
 	END
 	ELSE
@@ -145,6 +145,14 @@ BEGIN
 			INNER JOIN tblCMBankTransaction B ON A.strCheckNo = B.strReferenceNo
 		WHERE A.intBankAccountId = @intBankAccountId
 		AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+
+
+		--UPDATE LINKS
+		DECLARE @BankTransactionIds Id
+		INSERT INTO @BankTransactionIds 
+		SELECT intTransactionId from tblCMBankTransaction WHERE strTransactionId IN(
+		SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+		EXEC uspCMUpdateTransactionLinks @BankTransactionIds
 
 		--Update the reference no of other module's transaction
 		--AP
@@ -222,3 +230,4 @@ BEGIN
 
 	END
 END
+

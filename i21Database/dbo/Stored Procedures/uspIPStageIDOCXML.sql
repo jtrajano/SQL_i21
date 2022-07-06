@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspIPStageIDOCXML @strXml NVARCHAR(MAX) = ''
 	,@strType NVARCHAR(100) = ''
+	,@strCompany NVARCHAR(50) = ''
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -14,10 +15,12 @@ BEGIN TRY
 		INSERT INTO tblIPIDOCXMLStage (
 			strXml
 			,strType
+			,strCompany
 			,dtmCreatedDate
 			)
 		SELECT @strXml
 			,@strType
+			,@strCompany
 			,GETDATE()
 	END
 END TRY

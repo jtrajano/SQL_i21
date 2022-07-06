@@ -29,6 +29,15 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@intBookId INT = NULL
 	,@intSubBookId INT = NULL
 	,@intOriginId INT = NULL
+	,@strContainerNo nvarchar(50)=NULL
+	,@strMarkings nvarchar(50)=NULL
+	,@intEntityVendorId int=NULL
+	,@strCondition NVARCHAR(50)=NULL
+	,@dtmExpiryDate Datetime=NULL
+	,@strCertificate NVARCHAR(50)=NULL
+	,@strCertificateId NVARCHAR(50)=NULL
+	,@intContractHeaderId INT =NULL -- Contract Header Id
+	,@intContractDetailId INT =NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -52,7 +61,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@ItemsThatNeedLotId AS dbo.ItemLotTableType
 	,@strLifeTimeType NVARCHAR(50)
 	,@intLifeTime INT
-	,@dtmExpiryDate DATETIME
+	--,@dtmExpiryDate DATETIME
 	,@ItemsForPost AS ItemCostingTableType
 	,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 	,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
@@ -316,6 +325,13 @@ BEGIN
 		,strParentLotNumber
 		,intBookId
 		,intSubBookId
+		,strContainerNo
+		,dblWeightPerQty
+		,strCondition
+		,strCertificate
+		,strCertificateId
+		,intContractHeaderId
+	    ,intContractDetailId
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -334,9 +350,9 @@ BEGIN
 		,strBOLNo = NULL
 		,strVessel = @strVessel
 		,strReceiptNumber = NULL
-		,strMarkings = NULL
+		,strMarkings = @strMarkings
 		,strNotes = @strNotes
-		,intEntityVendorId = NULL
+		,intEntityVendorId =@intEntityVendorId
 		,strVendorLotNo = @strVendorLotNo
 		,strGarden = NULL
 		,intDetailId = @intTransactionId
@@ -348,6 +364,13 @@ BEGIN
 		,strParentLotNumber = @strParentLotNumber
 		,intBookId = @intBookId
 		,intSubBookId = @intSubBookId
+		,strContainerNo = @strContainerNo
+		,dblWeightPerQty=@dblUnitQty
+		,strCondition=@strCondition
+		,strCertificate=@strCertificate
+		,strCertificateId=@strCertificateId
+		,intContractHeaderId=@intContractHeaderId
+	    ,intContractDetailId=@intContractDetailId
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
@@ -855,7 +878,7 @@ BEGIN
 	-- After sorting out the Batch for the Consume and Produce, the Produce still need to be posted using the original @strBatchId. 
 	BEGIN
 		UPDATE t
-		SET t.strBatchId = @strBatchId, dtmDateModified = GETUTCDATE()
+		SET t.strBatchId = @strBatchId
 		FROM tblICInventoryTransaction t
 		WHERE t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
@@ -910,6 +933,23 @@ BEGIN
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
 	END
+
+	IF ISNULL(@ysnRecap, 0) = 0
+	BEGIN
+
+		UPDATE WRD
+		SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)
+			,WRD.dblActualAmount = (IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)) * dblUnitRate
+			,WRD.dblDifference = CASE 
+				WHEN ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)) * dblUnitRate) > 0
+					THEN IsNULL(dblEstimatedAmount,0) - ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)) * dblUnitRate)
+				ELSE NULL
+				END
+		FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
+		JOIN dbo.tblLGWarehouseRateMatrixDetail RD ON RD.intWarehouseRateMatrixDetailId = WRD.intWarehouseRateMatrixDetailId
+		WHERE WRD.intWorkOrderId = @intWorkOrderId
+
+	End
 
 	IF ISNULL(@ysnRecap, 0) = 1
 	BEGIN

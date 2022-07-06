@@ -39,6 +39,8 @@ RETURNS TABLE AS RETURN
 		,[intContractSeqId]					=	B.intContractSeq
 		,[intContractDetailId]				=	B.intContractDetailId
 		,[intPriceFixationDetailId]			=	B.intPriceFixationDetailId
+		,[intInsuranceChargeDetailId]		=	B.intInsuranceChargeDetailId
+		,[intStorageChargeId]				=	B.intStorageChargeId
 		,[intScaleTicketId]					=	B.intScaleTicketId
 		,[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	B.intInventoryReceiptChargeId
@@ -47,6 +49,8 @@ RETURNS TABLE AS RETURN
 		,[intLoadShipmentId]				=	B.intLoadId
 		,[intLoadShipmentDetailId]			=	B.intLoadDetailId
 		,[intLoadShipmentCostId]			=	B.intLoadShipmentCostId
+		,[intWeightClaimId]					=	B.intLoadId
+		,[intWeightClaimDetailId]			=	B.intWeightClaimDetailId
 		,[intPaycheckHeaderId]				=	B.intPaycheckHeaderId
 		,[intCustomerStorageId]				=	B.intCustomerStorageId
 		,[intSettleStorageId]				=	B.intSettleStorageId
@@ -54,6 +58,8 @@ RETURNS TABLE AS RETURN
 		,[intInvoiceId]						=	B.intInvoiceId
 		,[intBuybackChargeId]				=	B.intBuybackChargeId
 		,[intLinkingId]						=	B.intLinkingId
+		,[intComputeTotalOption]			=	B.intComputeTotalOption
+		,[intLotId]							=	B.intLotId
 		,[intTicketDistributionAllocationId]=	B.intTicketDistributionAllocationId
 		,[dblOrderQty]						=	B.dblQtyOrdered
 		,[dblOrderUnitQty]					=	B.dblUnitQty
@@ -113,6 +119,8 @@ RETURNS TABLE AS RETURN
 		OR	B.intScaleTicketId > 0
 		OR	B.intInventoryShipmentChargeId > 0
 		OR	B.intPriceFixationDetailId > 0
+		OR	B.intInsuranceChargeDetailId > 0
+		OR	B.intStorageChargeId > 0
 	)
 )
 

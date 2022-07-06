@@ -13,9 +13,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
   
+BEGIN TRANSACTION;  
+
+
 
 DECLARE @tmpPostJournals JournalIDTableType  
-INSERT INTO @tmpPostJournals(intJournalId) EXEC (@strParams)  
+INSERT INTO @tmpPostJournals EXEC (@strParams)  
 
   DECLARE @GLEntries RecapTableType  
   INSERT INTO @GLEntries (  
@@ -93,16 +96,28 @@ ELSE
     IF @@ERROR <> 0 RETURN -1
  END  
   
-
+IF @@ERROR <> 0 GOTO Post_Rollback;  
   
 --=====================================================================================================================================  
 --  RETURN TOTAL NUMBER OF VALID GL ENTRIES  
 ---------------------------------------------------------------------------------------------------------------------------------------  
 
   
-IF @@ERROR <> 0 RETURN -1
+IF @@ERROR <> 0 GOTO Post_Rollback;  
   
 --=====================================================================================================================================  
 --  FINALIZING STAGE  
 ---------------------------------------------------------------------------------------------------------------------------------------  
-RETURN 0
+Post_Commit:  
+IF @@TRANCOUNT > 0  
+ COMMIT TRANSACTION  
+ 
+
+ GOTO Post_Exit  
+  
+Post_Rollback:  
+IF @@TRANCOUNT > 0  
+ ROLLBACK TRANSACTION                
+ 
+  
+Post_Exit:

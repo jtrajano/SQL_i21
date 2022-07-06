@@ -4,5 +4,6 @@
     [strCurrencyExchangeRateType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
+    [strCashFlows] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [AK_tblSMCurrencyExchangeRateType_strCurrencyExchangeRateType] UNIQUE ([strCurrencyExchangeRateType])
 )

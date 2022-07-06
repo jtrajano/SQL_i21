@@ -47,6 +47,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[strBillOfLading]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strCheckComment]				NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[intAPAccount]					INT NULL, --if null, we will use default setup
+	[intComputeTotalOption] 		TINYINT NOT NULL DEFAULT(0),
 	/*Detail info*/
 	[strMiscDescription]			NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId]						INT NULL,
@@ -74,12 +75,17 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intWeightClaimId]				INT NULL,
+	[intWeightClaimDetailId]		INT NULL,
 	[intPaycheckHeaderId]			INT NULL,
 	[intCustomerStorageId]			INT NULL,
 	[intSettleStorageId]			INT NULL,
 	[intCCSiteDetailId]				INT NULL,
 	[intInvoiceId]					INT NULL,
 	[intBuybackChargeId]			INT NULL,
+	[intStorageChargeId] 			INT NULL,
+	[intInsuranceChargeDetailId]	INT NULL,
+	[intLotId] 						INT NULL,
 	[intTicketId]					INT NULL,
 	[intLinkingId]					INT NULL,
 	[intTicketDistributionAllocationId] INT NULL,
@@ -131,5 +137,26 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[int1099Category]				INT NULL,
 	[dbl1099]						DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[ysnStage]						BIT DEFAULT(1),
-	[dblRatio]						NUMERIC(38, 20) NULL DEFAULT(1) 
+	[dblRatio]						NUMERIC(38, 20) NULL DEFAULT(1) ,
+	/*Book Inf*/
+	[intBookId]						INT NULL,
+	[intSubBookId]					INT NULL,
+	/*Payment Info*/
+	[intPayFromBankAccountId]			INT NULL, --DEFAULT PAY FROM BANK ACCOUNT
+	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --MODULE OR PROCESS WHERE THE INFORMATION CAME FROM E.G. LOGISTICS
+	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --TRANSACTION WHERE THE INFORMATION CAME FORM E.G. LS-0001
+	/*Trade Finance Info*/
+	[strFinanceTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --TRANSACTION NUMBER
+	[intBankId] INT NULL, --BANK NAME
+	[intBankAccountId] INT NULL, --BANK ACCOUNT NO.
+	[intBorrowingFacilityId] INT NULL, --FACILITY
+	[strBankReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --BANK REFERENCE NO.
+	[intBorrowingFacilityLimitId] INT NULL, --LIMIT
+	[intBorrowingFacilityLimitDetailId] INT NULL, --SUBLIMIT
+	[strReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --BANK TRADE REFERENCE NO.
+	[intBankValuationRuleId] INT NULL, --OVERRIDE FACILITY VALUATION
+	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --COMMENTS
+	/*Quality and Optionality Premium*/
+	[dblQualityPremium] DECIMAL(18, 6) DEFAULT 0,
+ 	[dblOptionalityPremium] DECIMAL(18, 6) DEFAULT 0
 )

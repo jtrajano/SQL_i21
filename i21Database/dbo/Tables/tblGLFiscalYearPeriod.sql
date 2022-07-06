@@ -5,6 +5,7 @@
     [dtmStartDate]				DATETIME		DEFAULT (CONVERT([datetime],CONVERT([char](4),datepart(year,getdate()),(0))+'/01/01',(0))) NULL,
     [dtmEndDate]				DATETIME		DEFAULT (CONVERT([datetime],CONVERT([char](4),datepart(year,getdate()),(0))+'/12/31',(0))) NULL,
     [ysnOpen]					BIT				DEFAULT 1 NULL,
+    [ysnRevalued]				BIT				DEFAULT 0 NULL,
 	[ysnAPOpen]					BIT				DEFAULT 1 NULL,
 	[ysnAROpen]					BIT				DEFAULT 1 NULL,
 	[ysnINVOpen]				BIT				DEFAULT 1 NULL,
@@ -17,13 +18,19 @@
 	[ysnINVRevalued]			BIT				DEFAULT 0 NULL,
 	[ysnCTRevalued]				BIT				DEFAULT 0 NULL,
     [ysnCMRevalued]				BIT				DEFAULT 0 NULL,
+    [ysnFARevalued]				BIT				DEFAULT 0 NULL,
+    [ysnCMForwardsRevalued]		BIT				DEFAULT 0 NULL,
+    [ysnCMInTransitRevalued]	BIT				DEFAULT 0 NULL,
+    [ysnCMSwapsRevalued]		BIT				DEFAULT 0 NULL,
 	[ysnConsolidated]			BIT				DEFAULT 0 NULL,
     [intConcurrencyId]			INT				DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED ([intGLFiscalYearPeriodId] ASC, [intFiscalYearId] ASC),
-    CONSTRAINT [FK_tblGLPeriod_tblGLFiscalYearPeriod] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId]) ON DELETE CASCADE
-);
+   CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED 
+(
+	[intGLFiscalYearPeriodId] ASC,
+	[intFiscalYearId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 70) ON [PRIMARY]
+) ON [PRIMARY]
 GO
-
 CREATE NONCLUSTERED INDEX [IX_tblGLFiscalYearPeriod_intFiscalYearId]
     ON [dbo].[tblGLFiscalYearPeriod](intFiscalYearId ASC)
 GO
@@ -39,6 +46,10 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblGLFiscalYearPeriod_dtmEndDate]
     ON [dbo].[tblGLFiscalYearPeriod]([dtmEndDate] ASC)
+GO
+ALTER TABLE [dbo].[tblGLFiscalYearPeriod] ADD CONSTRAINT [FK_tblGLFiscalYearPeriod_tblGLFiscalYear] FOREIGN KEY([intFiscalYearId])
+REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId])
+ON DELETE CASCADE
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLFiscalYearPeriod', @level2type=N'COLUMN',@level2name=N'intGLFiscalYearPeriodId' 
 GO

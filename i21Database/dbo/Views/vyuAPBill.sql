@@ -16,6 +16,8 @@ SELECT
 		 WHEN 12 THEN 'Prepayment Reversal'
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
+		 WHEN 15 THEN 'Tax Adjustment'
+		 WHEN 16 THEN 'Provisional Voucher'
 		 ELSE 'Invalid Type'
 	END COLLATE Latin1_General_CI_AS AS strTransactionType,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
@@ -25,11 +27,15 @@ SELECT
 	A.ysnReadyForPayment,
 	ysnRestricted = ISNULL((SELECT TOP 1 ysnRestricted FROM dbo.tblAPBillDetail H WHERE A.intBillId = H.intBillId),0),
 	A.dtmDate,
+	FP.strPeriod,
 	A.dtmDatePaid,
 	A.dtmBillDate,
 	A.dtmDueDate,
+	ISNULL(A.ysnOverrideCashFlow, 0) ysnOverrideCashFlow,
+	ISNULL(A.dtmCashFlowDate, A.dtmDueDate) dtmCashFlowDate,
 	A.strVendorOrderNumber,
 	A.strReference,
+	A.strCreatedWith,
 	A.dtmDateCreated,
 	A.intTransactionType,
 	A.intEntityVendorId,
@@ -60,7 +66,7 @@ SELECT
 	--CASE WHEN A.ysnForApproval = 1 THEN G.strApprovalList ELSE NULL END AS strApprover,
 	Approvals.strName as strApprover,
 	Approvals.dtmApprovalDate,
-	'' COLLATE Latin1_General_CI_AS AS strBatchId,--GL.strBatchId,
+	'' AS strBatchId,--GL.strBatchId,
 	EL.strLocationName AS strVendorLocation,
 	strPayeeName = (SELECT EL2.strCheckPayeeName FROM dbo.tblEMEntityLocation EL2 WHERE EL2.intEntityLocationId = A.intPayToAddressId),
 	A.strComment,
@@ -74,7 +80,12 @@ SELECT
 	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
 	A.ysnPrepayHasPayment,
-	A.intShipToId
+	A.intShipToId,
+	ISNULL(A.dblAverageExchangeRate, 1) dblAverageExchangeRate,
+	(A.dblTax * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END) AS dblTaxForeign,
+	(A.dblTotal * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END) AS dblTotalForeign,
+	(A.dblAmountDue * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END) AS dblAmountDueForeign,
+	(A.dblPayment * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN  -1 ELSE 1 END) AS dblPaymentForeign
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -96,11 +107,14 @@ FROM
 		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
 		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
 		WHERE detail.intBillId = A.intBillId
+		ORDER BY detail.intLineNo
 	) commodity
 	LEFT JOIN dbo.tblSMShipVia SV
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN
-		ON EN.intEntityId = A.intContactId	
+		ON EN.intEntityId = A.intContactId
+	LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+			ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate	
 	OUTER APPLY dbo.fnAPGetVoucherLatestPayment(A.intBillId) Payment
 	-- LEFT JOIN
 	-- (

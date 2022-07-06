@@ -21,7 +21,8 @@ AS
 
 			@ReceiptStagingTable		ReceiptStagingTable,
 			@OtherCharges				ReceiptOtherChargesTableType,
-			@ReceiptItemLotStagingTable	ReceiptItemLotStagingTable
+			@ReceiptItemLotStagingTable	ReceiptItemLotStagingTable,
+			@ReceiptTradeFinance		ReceiptTradeFinance
 	
 	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
 
@@ -99,12 +100,18 @@ AS
 				intGrossNetUOMId			=	ISNULL(CD.intNetWeightUOMId,0),	
 				dblGross					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblNet						=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
+				--CT-7100 (ECOM commented this line for ECOM) --dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
+				--CT-7100 (ECOM commented this line for ECOM) --										THEN	ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
+				--CT-7100 (ECOM commented this line for ECOM) --												ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis),0)
+				--CT-7100 (ECOM commented this line for ECOM) --										ELSE	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice),0)
+				--CT-7100 (ECOM commented this line for ECOM) --								END,
+				--CT-7100 (ECOM commented this line for ECOM) --intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
 				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
 														THEN	ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
-																ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis),0)
-														ELSE	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice),0)
+																ISNULL(CD.dblBasis,0)
+														ELSE	ISNULL(AD.dblSeqPrice,0)
 												END,
-				intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
+				intCostUOMId				=	case when CD.intPricingTypeId = 2 then CD.intBasisUOMId else CD.intPriceItemUOMId end,
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SY.intCent, 1), 
 				dblExchangeRate				=	1,
@@ -127,8 +134,7 @@ AS
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-		JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CD.intItemId	
-												AND	IU.ysnStockUnit			=	1		
+		--CT-7100 (ECOM commented this line for ECOM) --JOIN tblICItemUOM IU ON IU.intItemId = CD.intItemId AND IU.ysnStockUnit = 1		
 
 		CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 
@@ -160,7 +166,9 @@ AS
 				[ysnPrice],
 				[ysnSubCurrency],
 				[intCostCurrencyId],
-				[ysnInventoryCost]
+				[ysnInventoryCost],
+				[dblForexRate],
+				[intForexRateTypeId]
 		) 
 		
 		SELECT	CC.intVendorId,
@@ -181,7 +189,9 @@ AS
 				CC.ysnPrice,
 				CY.ysnSubCurrency,
 				CY.intCurrencyID,
-				CC.ysnInventoryCost
+				CC.ysnInventoryCost,
+				CC.dblFX,
+				CC.intRateTypeId
 								
 		FROM	vyuCTContractCostView	CC
 		JOIN	vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -280,7 +290,71 @@ AS
 			RAISERROR('Please verify the stock unit for the item or default location is available for the entity.',16,1)
 		END
 
-		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId, @ReceiptItemLotStagingTable;
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND strFinanceTradeNo IS NOT NULL )
+		BEGIN
+			INSERT INTO @ReceiptTradeFinance
+			(
+				[strReceiptType]
+				,[intEntityVendorId]
+				,[intCurrencyId]
+				,[intLocationId]
+				,[intShipFromId]
+				,[intShipViaId]
+				,[intShipFromEntityId]
+				,[strTradeFinanceNumber]
+				,[intBankId]
+				,[intBankAccountId]
+				,[intBorrowingFacilityId]
+				,[strBankReferenceNo]
+				,[intLimitTypeId]
+				,[intSublimitTypeId]
+				,[ysnSubmittedToBank]
+				,[dtmDateSubmitted]
+				,[strApprovalStatus]
+				,[dtmDateApproved]
+				,[strWarrantNo]
+				,[intWarrantStatus]
+				,[strReferenceNo]
+				,[intOverrideFacilityValuation]
+				,[strComments]
+			)
+			SELECT	 [strReceiptType]				=   'Purchase Contract'
+					,[intEntityVendorId]			=   CH.intEntityId
+					,[intCurrencyId]				=   ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+					,[intLocationId]				= CD.intCompanyLocationId
+					,[intShipFromId]				=   CASE	WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = CH.intEntityId), 0) > 0
+														THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = CH.intEntityId)
+														ELSE (SELECT TOP 1 intEntityLocationId from tblEMEntityLocation where intEntityId = CH.intEntityId AND ysnDefaultLocation = 1)
+														END
+					,[intShipViaId]					=   CD.intShipViaId
+					,[intShipFromEntityId]			=   CH.intEntityId
+					,[strTradeFinanceNumber]		=	CD.strFinanceTradeNo
+					,[intBankId]					=	CD.intBankId
+					,[intBankAccountId]				=	CD.intBankAccountId
+					,[intBorrowingFacilityId]		=	CD.intBorrowingFacilityId
+					,[strBankReferenceNo]			=	CD.strBankReferenceNo
+					,[intLimitTypeId]				=	CD.intBorrowingFacilityLimitId
+					,[intSublimitTypeId]			=	CD.intBorrowingFacilityLimitDetailId
+					,[ysnSubmittedToBank]			=	CD.ysnSubmittedToBank
+					,[dtmDateSubmitted]				=	CD.dtmDateSubmitted
+					,[strApprovalStatus]			=	ASTF.strApprovalStatus
+					,[dtmDateApproved]				=	CD.dtmDateApproved
+					,[strWarrantNo]					=	null
+					,[intWarrantStatus]				=	null
+					,[strReferenceNo]				=	CD.strReferenceNo
+					,[intOverrideFacilityValuation]	=	CD.intBankValuationRuleId
+					,[strComments]					=	CD.strComments
+			FROM tblCTContractDetail CD
+			JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
+			LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = CD.intApprovalStatusId
+			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)AD
+			LEFT  JOIN		tblSMCurrency				SC	ON	SC.intCurrencyID		=	AD.intSeqCurrencyId
+			where CD.intContractDetailId = @intContractDetailId
+			
+			
+		END
+	
+		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId, @ReceiptItemLotStagingTable, @ReceiptTradeFinance;
 		
 		IF EXISTS(SELECT * FROM #tmpAddItemReceiptResult)
 		BEGIN

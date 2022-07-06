@@ -17,9 +17,10 @@ BEGIN
 
 	-- Get the total transaction value of an item per location. 
 	SELECT	@totalItemValuation = SUM(
-				dbo.fnCalculateStockUnitQty(A.dblQty, A.dblUOMQty) 
-				* dbo.fnCalculateUnitCost(A.dblCost, A.dblUOMQty)
-				+ ISNULL(A.dblValue, 0)
+				ROUND(
+					dbo.fnMultiply(A.dblQty, A.dblCost) + ISNULL(A.dblValue, 0)
+					,2 
+				)
 			) 
 	FROM	[dbo].[tblICInventoryTransaction] A
 	WHERE	A.intItemId = @intItemId

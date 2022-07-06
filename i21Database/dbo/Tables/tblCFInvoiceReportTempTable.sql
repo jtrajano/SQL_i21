@@ -101,6 +101,8 @@
     [ysnShowDriverPinDescriptionOnly] BIT             NULL,
 	[ysnPageBreakByPrimarySortOrder]  BIT			  NULL,
 	[ysnSummaryByDeptDriverPinProd]   BIT			  NULL,
+	[strDepartmentGrouping]           NVARCHAR(MAX)	  NULL,
+    
 );
 
 

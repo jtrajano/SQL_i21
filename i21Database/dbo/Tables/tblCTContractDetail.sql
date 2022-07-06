@@ -79,6 +79,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     intLoadingPortId INT NULL, 
 	strDestinationPointType nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
     intDestinationPortId INT NULL, 
+	intCostTermId INT NULL,
     strShippingTerm NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
     intShippingLineId INT NULL, 
 	strVessel NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
@@ -148,13 +149,99 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     dtmFinalPNL DATETIME NULL,
 	intPricingStatus INT,
 	dtmStartDateUTC datetime NULL,
+	-- Reference Pricing
+	dblRefFuturesQty NUMERIC(18, 6) NULL,
+	intRefFuturesItemUOMId INT NULL,
+	intRefFuturesCurrencyId INT NULL,
+	intRefFuturesMarketId INT NULL,
+	intRefFuturesMonthId INT NULL,
+	ysnAutoShortClosed BIT NULL,
+	ysnCashFlowOverride BIT NOT NULL DEFAULT 0,
+	dtmCashFlowDate datetime NULL,
+
+	-- Trade Finance Fields
+	strFinanceTradeNo NVARCHAR(50) NULL,
+	intBankAccountId INT NULL,
+	intBankId INT NULL,
+	intBorrowingFacilityId INT NULL,
+	intBorrowingFacilityLimitId INT NULL,
+	intBorrowingFacilityLimitDetailId INT NULL,
+	strReferenceNo NVARCHAR(100) NULL,
+	dblLoanAmount NUMERIC(18, 6) NULL,
+	intBankValuationRuleId INT NULL,
+	strBankReferenceNo NVARCHAR(100) NULL,
+	strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	intFacilityId INT NULL,
+	intLoanLimitId INT NULL,
+	intOverrideFacilityId INT NULL,
+
+	ysnSubmittedToBank  BIT NULL,
+	dtmDateSubmitted DATETIME NULL,
+	intApprovalStatusId INT NULL,
+	dtmDateApproved DATETIME NULL,
+	dblInterestRate numeric(18, 6) NULL,
+	dtmPrepaymentDate datetime NULL,
+	dblPrepaymentAmount numeric(18, 6) NULL,
+
+	 
+	-- Quality/Optionality
+	dblQualityPremium numeric(18, 6) NULL,
+	dblOptionalityPremium numeric(18, 6) NULL,
+
+	dblBudgetPrice numeric(18, 6) NULL,
+	dblTotalBudget numeric(18, 6) NULL,
+	intLocalCurrencyId INT NULL,
+	intLocalUOMId INT NULL,
+	dblLocalCashPrice NUMERIC (18, 6) NULL,
+
+	intAverageUOMId INT NULL,
+	dblAverageQuantity NUMERIC (18, 6) NULL,
+
+	--Letter of Credit
+	strLCNumber nvarchar(50) COLLATE Latin1_General_CI_AS null,
+	intLCApplicantId INT NULL,
+	strLCType nvarchar(100) COLLATE Latin1_General_CI_AS null,
+	strLCStatus nvarchar(100) COLLATE Latin1_General_CI_AS null,
+	strLCConfirmation nvarchar(100) COLLATE Latin1_General_CI_AS null,
+	dtmLCDate2 datetime null,
+	dtmLCValidityDate datetime null,
+	dtmLCLatestDateOfReceipt datetime null,
+	intLCPlaceOfIssuingId int null,
+	intLCPaymentTermId int null,
+	strLCReference nvarchar(100) COLLATE Latin1_General_CI_AS null,
+	strLCFeesBreakdown nvarchar(100) COLLATE Latin1_General_CI_AS null,
+	dtmLCStartPeriod datetime null,
+	dtmLCEndPeriod datetime null,
+	strLCPresentation nvarchar(100) COLLATE Latin1_General_CI_AS null,
+	intLCTreasuryBankId int null,
+	intLCBankId int null,
+	strLCBankRole nvarchar(50) COLLATE Latin1_General_CI_AS null,
+	ysnTransportPartialShipment bit null,
+	ysnTransportTransShipment bit null,
+	ysnTransportMultiplePorts bit null,
+	dblQuantityMinRate numeric (18,6),
+	dblAmountMinRate numeric (18,6),
+	dblQuantityMaxRate numeric (18,6),
+	dblAmountMaxRate numeric (18,6),
+	dblQuantityMinValue numeric (18,6),
+	dblAmountMinValue numeric (18,6),
+	dblQuantityMaxValue numeric (18,6),
+	dblAmountMaxValue numeric (18,6),
+	ysnApplyDefaultTradeFinance bit null,
+
+
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
 
-	
+	-- Reference Pricing Constraints
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intRefFuturesItemUOMId_intItemUOMId] FOREIGN KEY (intRefFuturesItemUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblRKFutureMarket_intRefFuturesMarketId_intFutureMarketId] FOREIGN KEY ([intRefFuturesMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblRKFuturesMonth_intRefFuturesMonthId_intFutureMonthId] FOREIGN KEY ([intRefFuturesMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intRefFuturesCurrencyId_intCurrencyId] FOREIGN KEY ([intRefFuturesCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
+	--CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractStatus_intContractStatusId] FOREIGN KEY ([intContractStatusId]) REFERENCES [tblCTContractStatus]([intContractStatusId]),
@@ -589,7 +676,10 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 
 	begin try
 
-		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity, @dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then i.dblBalance else i.dblBalanceLoad end) from inserted i, tblCTContractHeader ch where ch.intContractHeaderId = i.intContractHeaderId;  
+		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity, @dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then i.dblBalance else i.dblBalanceLoad end) 
+		from 
+			inserted i
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = i.intContractHeaderId;  
 
 		if (@intPricingTypeId = 1)
 		begin
@@ -605,11 +695,19 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 
 			if @ysnMultiPrice = 1
 			begin
-				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd with (updlock) where pf.intContractHeaderId = @intActiveContractHeaderId and pfd.intPriceFixationId = pf.intPriceFixationId
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) 
+				from 
+					tblCTPriceFixation pf
+					inner join tblCTPriceFixationDetail pfd with (updlock) on pfd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractHeaderId = @intActiveContractHeaderId 
 			end
 			else
 			begin
-				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd with (updlock) where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) 
+				from 
+					tblCTPriceFixation pf 
+					inner join tblCTPriceFixationDetail pfd with (updlock) on pfd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractDetailId = @intActiveContractDetailId 
 			end			
 			
 			if (@dblPricedQuantity = 0)

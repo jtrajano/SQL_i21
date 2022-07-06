@@ -41,6 +41,7 @@ BEGIN TRY
 		,strComment NVARCHAR(Max)
 		,ysnUseTemplate BIT
 		,ysnKittingEnabled BIT
+		,ysnDietarySupplements BIT
 		,intLocationId INT
 		,intPlannedShiftId INT
 		,intUserId INT
@@ -84,6 +85,7 @@ BEGIN TRY
 		,strComment
 		,ysnUseTemplate
 		,ysnKittingEnabled
+		,ysnDietarySupplements
 		,intLocationId
 		,intPlannedShiftId
 		,intUserId
@@ -103,6 +105,7 @@ BEGIN TRY
 		,strComment
 		,ysnUseTemplate
 		,ysnKittingEnabled
+		,ysnDietarySupplements
 		,intLocationId
 		,intPlannedShiftId
 		,intUserId
@@ -122,6 +125,7 @@ BEGIN TRY
 			,strComment NVARCHAR(Max)
 			,ysnUseTemplate BIT
 			,ysnKittingEnabled BIT
+			,ysnDietarySupplements BIT
 			,intLocationId INT
 			,intPlannedShiftId INT
 			,intUserId INT
@@ -301,6 +305,7 @@ BEGIN TRY
 			,dblPlannedQuantity
 			,intBlendRequirementId
 			,ysnKittingEnabled
+			,ysnDietarySupplements
 			,ysnUseTemplate
 			,strComment
 			,dtmCreated
@@ -328,6 +333,7 @@ BEGIN TRY
 			,dblPlannedQuantity
 			,intBlendRequirementId
 			,ysnKittingEnabled
+			,ysnDietarySupplements
 			,ysnUseTemplate
 			,strComment
 			,GetDate()
@@ -351,6 +357,7 @@ BEGIN TRY
 			,a.dtmExpectedDate = b.dtmDueDate
 			,a.dblPlannedQuantity = b.dblPlannedQuantity
 			,a.ysnKittingEnabled = b.ysnKittingEnabled
+			,a.ysnDietarySupplements = b.ysnDietarySupplements
 			,a.ysnUseTemplate = b.ysnUseTemplate
 			,a.strComment = b.strComment
 			,a.intLastModifiedUserId = b.intUserId

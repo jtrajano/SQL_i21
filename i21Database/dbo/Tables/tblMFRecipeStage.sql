@@ -30,5 +30,11 @@
 	ysnImport Bit Constraint DF_tblMFRecipeStage_ysnImport Default 1,
 	ysnMailSent BIT NULL,
 	intStatusId int,
+	intTrxSequenceNo BIGINT,
+	strERPRecipeNo nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intActive int,
+	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	ysnInitialAckSent BIT, 
+	ysnVirtualRecipe BIT Constraint DF_tblMFRecipeStage_ysnVirtualRecipe DEFAULT 0,
 	CONSTRAINT [PK_tblMFRecipeStage_intRecipeStageId] PRIMARY KEY ([intRecipeStageId])
 )

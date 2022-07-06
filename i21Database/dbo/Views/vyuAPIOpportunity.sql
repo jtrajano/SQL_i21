@@ -26,6 +26,7 @@ SELECT
     , s.strCurrentSolution
     , o.ysnInitialDataCollectionComplete
     , s.strCustomerName
+	, s.intCustomerId
     , link.strContactName
     , contact.strPhone
     , link.strDescription strExecutiveUpdate

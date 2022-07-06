@@ -7,6 +7,7 @@
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
 	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@ysnRebuild AS BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -299,6 +300,7 @@ WITH ForGLEntries_CTE (
 	,intSourceEntityId
 	,intCommodityId
 	,intReference
+	,strLotNumber 
 )
 AS 
 (
@@ -338,12 +340,15 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
+							,ri.intComputeItemTotalOption
+							,ri.dblOpenReceive
 						)	
 					)
 			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,intReference = CAST(1 AS TINYINT)
+			,lot.strLotNumber
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
@@ -375,6 +380,8 @@ AS
 			) AggregrateItemLots
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblICLot lot
+				ON lot.intLotId = t.intLotId
 	WHERE	t.strBatchId = @strBatchId
 
 	-- Resolve the 0.01 discrepancy between the inventory transaction value and the receipt line total. 
@@ -416,6 +423,7 @@ AS
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,intReference = CAST(2 AS TINYINT)
+			,lot.strLotNumber
 	FROM	(
 				SELECT 
 					i.strItemNo
@@ -438,6 +446,8 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 									,t.intItemUOMId
+									,ri.intComputeItemTotalOption
+									,ri.dblOpenReceive
 								)
 								,2 
 							)
@@ -506,6 +516,9 @@ AS
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 
+			LEFT JOIN tblICLot lot
+				ON lot.intLotId = t.intLotId
+
 	WHERE	
 			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 
 
@@ -544,6 +557,8 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
+							,ri.intComputeItemTotalOption
+							,ri.dblOpenReceive
 						)						
 					)
 					,2
@@ -574,6 +589,8 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
+							,ri.intComputeItemTotalOption
+							,ri.dblOpenReceive
 						)	
 						, t.dblCost
 						, (
@@ -599,6 +616,8 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 									,t.intItemUOMId
+									,ri.intComputeItemTotalOption
+									,ri.dblOpenReceive
 								)
 								,2
 							)
@@ -615,6 +634,7 @@ AS
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,intReference = CAST(3 AS TINYINT)
+			,lot.strLotNumber
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TransType.intTransactionTypeId = t.intTransactionTypeId
@@ -652,6 +672,8 @@ AS
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON 
 				currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblICLot lot
+				ON lot.intLotId = t.intLotId
 
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intInTransitSourceLocationId IS NULL
@@ -679,6 +701,8 @@ AS
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
 						,t.intItemUOMId
+						,ri.intComputeItemTotalOption
+						,ri.dblOpenReceive
 					)
 					,2 
 				)
@@ -699,7 +723,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= DebitUnit.Value 
 		,dblCreditUnit				= CreditUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -775,7 +799,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= CreditUnit.Value
 		,dblCreditUnit				= DebitUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -925,7 +949,7 @@ WHERE	ForGLEntries_CTE.dblQty <> 0
 --		,dblCredit					= Debit.Value
 --		,dblDebitUnit				= 0
 --		,dblCreditUnit				= 0
---		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+--		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 --		,strCode					= 'IC' 
 --		,strReference				= '' 
 --		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -1001,7 +1025,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= DebitUnit.Value
 		,dblCreditUnit				= CreditUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IAV'
 		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -1073,7 +1097,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= CreditUnit.Value
 		,dblCreditUnit				= DebitUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IAV' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -1152,7 +1176,7 @@ SELECT
 		,dblDebitUnit				= DebitUnit.Value
 		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
-										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 										+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IAN' 
 		,strReference				= '' 
@@ -1225,7 +1249,7 @@ SELECT
 		,dblDebitUnit				= CreditUnit.Value
 		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
-									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 									+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IAN' 
 		,strReference				= '' 
@@ -1305,7 +1329,7 @@ SELECT
 		,dblDebitUnit				= DebitUnit.Value
 		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
-										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 										+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -1384,7 +1408,7 @@ SELECT
 		,dblDebitUnit				= CreditUnit.Value
 		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
-									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 									+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -1471,7 +1495,7 @@ SELECT
 		,dblDebitUnit				= DebitUnit.Value
 		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
-										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 										+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -1550,7 +1574,7 @@ SELECT
 		,dblDebitUnit				= CreditUnit.Value
 		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
-									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 									+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -1619,3 +1643,116 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 		AND ISNULL(dblValue, 0) <> 0 
 		AND ForGLEntries_CTE.intReference = 2
 ;
+
+-- Create the AP Clearing
+-- Do not re-add the AP clearing when rebuilding stocks. 
+IF ISNULL(@ysnRebuild, 0) = 0 
+BEGIN 
+	DECLARE 
+	@intVoucherInvoiceNoOption TINYINT
+	,	@voucherInvoiceOption_Blank TINYINT = 1 
+	,	@voucherInvoiceOption_BOL TINYINT = 2
+	,	@voucherInvoiceOption_VendorRefNo TINYINT = 3
+	,@intDebitMemoInvoiceNoOption TINYINT
+	,	@debitMemoInvoiceOption_Blank TINYINT = 1
+	,	@debitMemoInvoiceOption_BOL TINYINT = 2
+	,	@debitMemoInvoiceOption_VendorRefNo TINYINT = 3	
+
+	SELECT TOP 1 
+		@intVoucherInvoiceNoOption = intVoucherInvoiceNoOption
+		,@intDebitMemoInvoiceNoOption = intDebitMemoInvoiceNoOption
+	FROM tblAPCompanyPreference
+
+	INSERT INTO tblICAPClearing (
+		[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionType]
+		,[strReferenceNumber]
+		,[dtmDate]
+		,[intEntityVendorId]
+		,[intLocationId]
+		,[intInventoryReceiptItemId]
+		,[intInventoryReceiptItemTaxId]
+		,[intInventoryReceiptChargeId]
+		,[intInventoryReceiptChargeTaxId]
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentChargeTaxId]
+		,[intAccountId]
+		,[intItemId]
+		,[intItemUOMId]
+		,[dblQuantity]
+		,[dblAmount]
+		,[strBatchId]
+	)
+	SELECT 
+		[intTransactionId] = r.intInventoryReceiptId
+		,[strTransactionId] = r.strReceiptNumber
+		,[intTransactionType] = 1 -- RECEIPT
+		,[strReferenceNumber] = 
+			CASE 
+				WHEN r.strReceiptType = 'Inventory Return' THEN 
+					CASE 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN r.strBillOfLading 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN r.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
+					END 
+				ELSE
+					CASE 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN r.strBillOfLading 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN r.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
+					END 						
+			END			
+		,[dtmDate] = r.dtmReceiptDate
+		,[intEntityVendorId] = r.intEntityVendorId
+		,[intLocationId] = r.intLocationId
+		,[intInventoryReceiptItemId] = ri.intInventoryReceiptItemId
+		,[intInventoryReceiptItemTaxId] = NULL
+		,[intInventoryReceiptChargeId] = NULL
+		,[intInventoryReceiptChargeTaxId] = NULL
+		,[intInventoryShipmentChargeId] = NULL
+		,[intInventoryShipmentChargeTaxId] = NULL
+		,[intAccountId] = ga.intAccountId
+		,[intItemId] = i.intItemId
+		,[intItemUOMId] = ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId) 			
+		,[dblQuantity] = 
+			CASE 
+				WHEN ri.intWeightUOMId IS NOT NULL AND i.intComputeItemTotalOption = 0 THEN ri.dblNet 
+				ELSE ri.dblOpenReceive
+			END 
+		,[dblAmount] = ri.dblLineTotal
+		,strBatchId = @strBatchId	
+	FROM (
+			SELECT DISTINCT 
+				t.strTransactionId
+				,t.intItemId
+				,t.intTransactionDetailId
+			FROM	
+				tblICInventoryTransaction t 
+			WHERE
+				t.strBatchId = @strBatchId
+				AND t.dblQty <> 0 
+		) t
+		INNER JOIN tblICInventoryReceipt r 
+			ON r.strReceiptNumber = t.strTransactionId
+		INNER JOIN tblICInventoryReceiptItem ri 
+			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			AND ri.intItemId = t.intItemId
+			AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+		INNER JOIN tblICItem i 
+			ON i.intItemId = ri.intItemId
+		INNER JOIN tblICItemLocation il
+			ON il.intItemId = i.intItemId
+			AND il.intLocationId = r.intLocationId
+		CROSS APPLY dbo.fnGetItemGLAccountAsTable(
+			i.intItemId
+			,il.intItemLocationId
+			,'AP Clearing'
+		) apClearing
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = apClearing.intAccountId
+	WHERE
+		r.strReceiptType NOT IN ('Transfer Order')
+END

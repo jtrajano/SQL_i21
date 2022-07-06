@@ -131,6 +131,7 @@ BEGIN TRY
 		,dtmStartDate
 		,dtmEndDate
 		,dtmPlannedAvailabilityDate
+		,dtmLoadExpiration
 		,strVessel1
 		,strOriginPort1
 		,strDestinationPort1
@@ -252,6 +253,7 @@ BEGIN TRY
 		,dtmStartDate
 		,dtmEndDate
 		,dtmPlannedAvailabilityDate
+		,dtmLoadExpiration
 		,strVessel1
 		,strOriginPort1
 		,strDestinationPort1
@@ -329,8 +331,11 @@ BEGIN TRY
 		,ysnPrintLoadDirections
 		,strVendorReference
 		,strCustomerReference
+		,strTerminalReference
 		,intAllocationDetailId
 		,intPickLotDetailId
+		,intSellerId
+		,intSalespersonId
 		,intPSubLocationId
 		,intSSubLocationId
 		,strExternalShipmentItemNumber
@@ -368,8 +373,11 @@ BEGIN TRY
 		,ysnPrintLoadDirections
 		,strVendorReference
 		,strCustomerReference
+		,strTerminalReference
 		,intAllocationDetailId
 		,intPickLotDetailId
+		,intSellerId
+		,intSalespersonId
 		,@intNewContractSubLocationId
 		,intSSubLocationId
 		,NULL

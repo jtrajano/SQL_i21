@@ -149,7 +149,21 @@ END
 
 BEGIN 
 	-- Generate Payables
-	DECLARE @voucherPayable VoucherPayable
+	DECLARE 
+		@voucherPayable VoucherPayable
+		, @intVoucherInvoiceNoOption TINYINT
+		,	@voucherInvoiceOption_Blank TINYINT = 1 
+		,	@voucherInvoiceOption_BOL TINYINT = 2
+		,	@voucherInvoiceOption_VendorRefNo TINYINT = 3
+		, @intDebitMemoInvoiceNoOption TINYINT
+		,	@debitMemoInvoiceOption_Blank TINYINT = 1
+		,	@debitMemoInvoiceOption_BOL TINYINT = 2
+		,	@debitMemoInvoiceOption_VendorRefNo TINYINT = 3
+
+	SELECT TOP 1 
+		@intVoucherInvoiceNoOption = intVoucherInvoiceNoOption
+		,@intDebitMemoInvoiceNoOption = intDebitMemoInvoiceNoOption
+	FROM tblAPCompanyPreference
 
 	INSERT INTO @voucherPayable(
 		[intEntityVendorId]			
@@ -207,6 +221,21 @@ BEGIN
 		,[ysnReturn]
 		,[ysnStage]
 		,[dblRatio]
+		/*Payment Info*/
+		, [intPayFromBankAccountId]
+		, [strFinancingSourcedFrom]
+		, [strFinancingTransactionNumber]
+		/*Trade Finance Info*/
+		, [strFinanceTradeNo]
+		, [intBankId]
+		, [intBankAccountId]
+		, [intBorrowingFacilityId]
+		, [strBankReferenceNo]
+		, [intBorrowingFacilityLimitId]
+		, [intBorrowingFacilityLimitDetailId]
+		, [strReferenceNo]
+		, [intBankValuationRuleId]
+		, [strComments]
 	)
 	SELECT
 		[intEntityVendorId]	= A.intEntityVendorId
@@ -218,7 +247,25 @@ BEGIN
 		,[intPayToAddressId] = payToAddress.intEntityLocationId
 		,[intCurrencyId] = A.intCurrencyId
 		,[dtmDate]	= A.dtmDate
-		,[strVendorOrderNumber] = ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo) 
+		,[strVendorOrderNumber] = 
+				--ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo) 
+				CASE 
+					WHEN A.strReceiptType = 'Inventory Return' THEN 
+						CASE 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN r.strBillOfLading 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN r.strVendorRefNo 
+							ELSE  ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
+						END 
+					ELSE
+						CASE 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN r.strBillOfLading 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN r.strVendorRefNo 
+							ELSE  ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
+						END 						
+				END 
+
 		,[strReference] = r.strVendorRefNo
 		,[strSourceNumber] = A.strSourceNumber			
 		,[intPurchaseDetailId] = NULL --PurchaseOrder.intPurchaseDetailId
@@ -328,6 +375,21 @@ BEGIN
 		,ysnStage = 
 			CASE WHEN hasExistingPayable.intVoucherPayableId IS NOT NULL THEN 1 ELSE 0 END 
 		,dblRatio = @dblRatio
+		/*Payment Info*/
+		, A.[intPayFromBankAccountId]
+		, A.[strFinancingSourcedFrom]
+		, A.[strFinancingTransactionNumber]
+		/*Trade Finance Info*/
+		, A.[strFinanceTradeNo]
+		, A.[intBankId]
+		, A.[intBankAccountId]
+		, A.[intBorrowingFacilityId]
+		, A.[strBankReferenceNo]
+		, A.[intBorrowingFacilityLimitId]
+		, A.[intBorrowingFacilityLimitDetailId]
+		, A.[strReferenceNo]
+		, A.[intBankValuationRuleId]
+		, A.[strComments]
 	FROM 
 		vyuICChargesForBilling A 
 		INNER JOIN tblICInventoryReceipt r
@@ -370,7 +432,7 @@ BEGIN
 		) hasExistingPayable
 	WHERE
 		A.intInventoryReceiptId = @intInventoryReceiptId
-		AND A.intEntityVendorId = r.intEntityVendorId 
+		AND A.intEntityVendorId = r.intEntityVendorId
 		AND ISNULL(A.intContractHeaderId, 0) = ISNULL(@intContractHeaderId, 0)
 		AND ISNULL(A.intContractDetailId, 0) = ISNULL(@intContractDetailId, 0)
 		AND ISNULL(rc.strChargesLink, '') = ISNULL(@strChargesLink, '')
@@ -431,5 +493,20 @@ SELECT
 	,[ysnReturn]
 	,[ysnStage]
 	,[dblRatio]
+	/*Payment Info*/
+	, [intPayFromBankAccountId]
+	, [strFinancingSourcedFrom]
+	, [strFinancingTransactionNumber]
+	/*Trade Finance Info*/
+	, [strFinanceTradeNo]
+	, [intBankId]
+	, [intBankAccountId]
+	, [intBorrowingFacilityId]
+	, [strBankReferenceNo]
+	, [intBorrowingFacilityLimitId]
+	, [intBorrowingFacilityLimitDetailId]
+	, [strReferenceNo]
+	, [intBankValuationRuleId]
+	, [strComments]
 FROM 
 	@voucherPayable

@@ -121,22 +121,29 @@ BEGIN TRY
 		DROP TABLE #tmpExpireDeletedHeader
 
 		SELECT DISTINCT intFutOptTransactionId
+			,dtmExpiredDate
 		INTO #tmpExpireDeleted
 		FROM tblRKOptionsPnSExpired WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
 		
 		DECLARE @intExpireDeletedId INT
+			,@dtmExpiredDate DATETIME
 
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpExpireDeleted)
 		BEGIN
-			SELECT TOP 1 @intExpireDeletedId = intFutOptTransactionId FROM #tmpExpireDeleted
+			SELECT TOP 1 
+				@intExpireDeletedId = intFutOptTransactionId 
+				,@dtmExpiredDate = dtmExpiredDate
+			FROM #tmpExpireDeleted
 
 			INSERT INTO @SummaryLog(strTransactionType
 				, intTransactionRecordId
+				, dtmTransactionDate
 				, ysnDelete
 				, intUserId
 				, strNotes)
 			SELECT strTransactionType = 'Expired Options'
 				, intTransactionRecordId = @intExpireDeletedId
+				, @dtmExpiredDate
 				, ysnDelete = 1
 				, intUserId = @intUserId
 				, strNotes = 'Delete Expired Options'
@@ -177,22 +184,29 @@ BEGIN TRY
 										WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExercisedAssignedDelete))
 		
 		SELECT DISTINCT intFutOptTransactionId
+			,dtmTranDate
 		INTO #tmpExerciseDeleted
 		FROM tblRKOptionsPnSExercisedAssigned WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExercisedAssignedDelete)
 		
 		DECLARE @intExerciseAssignDeletedId INT
+			,@dtmTransactionDate DATETIME
 
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpExerciseDeleted)
 		BEGIN
-			SELECT TOP 1 @intExerciseAssignDeletedId = intFutOptTransactionId FROM #tmpExerciseDeleted
+			SELECT TOP 1 
+				@intExerciseAssignDeletedId = intFutOptTransactionId 
+				,@dtmTransactionDate = dtmTranDate
+			FROM #tmpExerciseDeleted
 
 			INSERT INTO @SummaryLog(strTransactionType
 				, intTransactionRecordId
+				, dtmTransactionDate
 				, ysnDelete
 				, intUserId
 				, strNotes)
 			SELECT strTransactionType = 'Excercised/Assigned Options'
 				, intTransactionRecordId = @intExerciseAssignDeletedId
+				, @dtmTransactionDate
 				, ysnDelete = 1
 				, intUserId = @intUserId
 				, strNotes = 'Delete Excercised/Assigned Options'
@@ -500,7 +514,7 @@ BEGIN TRY
 			, intEntityId
 			, intBrokerageAccountId
 			, intFutureMarketId
-			, intInstrumentTypeId
+			, intInstrumentTypeId 
 			, intCommodityId
 			, intLocationId
 			, intTraderId
@@ -520,7 +534,10 @@ BEGIN TRY
 			, intBookId
 			, intSubBookId
 			, ysnOffset
-			, dtmCreateDateTime)
+			, dtmCreateDateTime
+			, dblSContractBalanceLots
+			, dblPContractBalanceLots
+			)
 		SELECT @NewFutOptTransactionHeaderId
 			, 1
 			, 1
@@ -550,6 +567,8 @@ BEGIN TRY
 			, t.intSubBookId
 			, t.ysnOffset
 			, GETDATE() 
+			, dblSContractBalanceLots = dblNoOfContract
+			, dblPContractBalanceLots = dblNoOfContract
 		FROM tblRKFutOptTransaction t
 		JOIN tblRKOptionsMonth om ON t.intOptionMonthId = om.intOptionMonthId
 		WHERE intFutOptTransactionId = @intFutOptTransactionId

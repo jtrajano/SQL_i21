@@ -30,7 +30,7 @@ EXEC uspAPUpdateIntegrationPayableAvailableQty
 EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @ids, @remove = 1
 
 INSERT INTO @voucherIds
-SELECT A.intBillId FROM tblAPBillDetail A
+SELECT DISTINCT A.intBillId FROM tblAPBillDetail A
 INNER JOIN @ids B ON A.intBillDetailId = B.intId
 
 DECLARE @strDescription AS NVARCHAR(100) 

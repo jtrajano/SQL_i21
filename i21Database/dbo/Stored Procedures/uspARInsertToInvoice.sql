@@ -109,7 +109,8 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId			INT,
 							intCompanyLocationSubLocationId	INT NULL,
 							strAddonDetailKey				VARCHAR(MAX) NULL,
 							ysnAddonParent					BIT NULL,
-							dblAddOnQuantity              NUMERIC(38,20) NULL)
+							dblAddOnQuantity              	NUMERIC(38,20) NULL,
+							dblStandardWeight				NUMERIC(38,20) NULL)
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId		INT IDENTITY (1, 1),
 							intItemId						INT, 
@@ -167,7 +168,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId		INT IDENTITY (1, 1),
 							intCompanyLocationSubLocationId	INT NULL,
 							strAddonDetailKey				VARCHAR(MAX) NULL,
 							ysnAddonParent					BIT NULL,
-							dblAddOnQuantity              NUMERIC(38,20) NULL)
+							dblAddOnQuantity              	NUMERIC(38,20) NULL,
+							dblStandardWeight				NUMERIC(38,20) NULL)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -233,9 +235,10 @@ SELECT intItemId						= SI.intItemId
 	 , intSalesOrderId					= SI.intSalesOrderId
 	 , intStorageLocationId				= SOD.intStorageLocationId
 	 , intCompanyLocationSubLocationId	= SOD.intSubLocationId
-	 ,strAddonDetailKey					= SOD.strAddonDetailKey
-	 ,ysnAddonParent					= SOD.ysnAddonParent
-	 ,dblAddOnQuantity					= SOD.dblAddOnQuantity
+	 , strAddonDetailKey				= SOD.strAddonDetailKey
+	 , ysnAddonParent					= SOD.ysnAddonParent
+	 , dblAddOnQuantity					= SOD.dblAddOnQuantity
+	 , dblStandardWeight				= SOD.dblStandardWeight
 FROM tblSOSalesOrder SO 
 INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -306,9 +309,10 @@ SELECT intItemId						= SOD.intItemId
 	 , intSalesOrderId					= NULL
 	 , intStorageLocationId				= NULL
 	 , intCompanyLocationSubLocationId	= NULL
-	 ,strAddonDetailKey					= SOD.strAddonDetailKey
-	 ,ysnAddonParent					= SOD.ysnAddonParent
-	 ,dblAddOnQuantity					= SOD.dblAddOnQuantity
+	 , strAddonDetailKey				= SOD.strAddonDetailKey
+	 , ysnAddonParent					= SOD.ysnAddonParent
+	 , dblAddOnQuantity					= SOD.dblAddOnQuantity
+	 , dblStandardWeight				= SOD.dblStandardWeight
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -369,9 +373,10 @@ SELECT intItemId						= ICSI.intItemId
 	 , intSalesOrderId					= SO.intSalesOrderId
 	 , intStorageLocationId				= SOD.intStorageLocationId
 	 , intCompanyLocationSubLocationId	= SOD.intSubLocationId
-	 ,strAddonDetailKey					= SOD.strAddonDetailKey
-	 ,ysnAddonParent					= SOD.ysnAddonParent
-	 ,dblAddOnQuantity					= SOD.dblAddOnQuantity
+	 , strAddonDetailKey				= SOD.strAddonDetailKey
+	 , ysnAddonParent					= SOD.ysnAddonParent
+	 , dblAddOnQuantity					= SOD.dblAddOnQuantity
+	 , dblStandardWeight				= SOD.dblStandardWeight
 FROM tblSOSalesOrder SO 
 INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
@@ -436,9 +441,10 @@ SELECT intItemId						= ARSI.intItemId
 	 , intSalesOrderId					= ARSI.intSalesOrderId
 	 , intStorageLocationId				= ARSI.intStorageLocationId
 	 , intCompanyLocationSubLocationId	= ARSI.intSubLocationId
-	 ,strAddonDetailKey					= ARSI.strAddonDetailKey
-	 ,ysnAddonParent					= ARSI.ysnAddonParent
-	 ,dblAddOnQuantity					= ARSI.dblAddOnQuantity
+	 , strAddonDetailKey				= ARSI.strAddonDetailKey
+	 , ysnAddonParent					= ARSI.ysnAddonParent
+	 , dblAddOnQuantity					= ARSI.dblAddOnQuantity
+	 , dblStandardWeight				= ARSI.dblStandardWeight
 FROM vyuARGetSalesOrderItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -808,7 +814,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intStorageLocationId]
 					,[strAddonDetailKey]
 					,[ysnAddonParent]
-					,[dblAddOnQuantity])
+					,[dblAddOnQuantity]
+					,[dblStandardWeight])
 				SELECT 	
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
@@ -856,6 +863,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strAddonDetailKey]
 					,[ysnAddonParent]
 					,[dblAddOnQuantity]
+					,[dblStandardWeight]
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -977,7 +985,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemStorageLocationId				INT,
 						@ItemAddonDetailKey					VARCHAR(MAX),
 						@ItemAddonParent					BIT,
-						@ItemAddOnQuantity                  NUMERIC(38,20)
+						@ItemAddOnQuantity                  NUMERIC(38,20),
+						@ItemStandardWeight					NUMERIC(38,20)
 
 				SELECT TOP 1
 						@intItemToInvoiceId					= intItemToInvoiceId,
@@ -1029,7 +1038,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemCompanyLocationSubLocationId	= intCompanyLocationSubLocationId,
 						@ItemAddonDetailKey					= strAddonDetailKey,
 						@ItemAddonParent					= ysnAddonParent,
-						@ItemAddOnQuantity                  = dblAddOnQuantity
+						@ItemAddOnQuantity                  = dblAddOnQuantity,
+						@ItemStandardWeight					= dblStandardWeight
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -1086,6 +1096,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemAddonDetailKey				= @ItemAddonDetailKey
 							,@ItemAddonParent					= @ItemAddonParent
 							,@ItemAddOnQuantity					= @ItemAddOnQuantity
+							,@ItemStandardWeight				= @ItemStandardWeight
 
 				IF ISNULL(@ItemContractHeaderId, 0) <> 0 AND ISNULL(@ItemContractDetailId, 0) <> 0
 					BEGIN
@@ -1323,15 +1334,17 @@ BEGIN
 		dblItemTermDiscount = CopySO.dblItemTermDiscount, intStorageScheduleTypeId = CopySO.intStorageScheduleTypeId
 		,intSubLocationId = CopySO.intSubLocationId
 		,intStorageLocationId = CopySO.intStorageLocationId
+		,intCategoryId = CopySO.intCategoryId
 		
 					
 	FROM(
 		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight,
-			SOD.dblItemTermDiscount, SOD.intStorageScheduleTypeId, intSubLocationId , intStorageLocationId
+			SOD.dblItemTermDiscount, SOD.intStorageScheduleTypeId, intSubLocationId , intStorageLocationId , PCD.intCategoryId	
 		FROM tblSOSalesOrder SO 
-		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount, intStorageScheduleTypeId,intSubLocationId , intStorageLocationId
+		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount, intStorageScheduleTypeId,intSubLocationId , intStorageLocationId , intItemContractHeaderId
 					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
+		LEFT JOIN ( SELECT intItemContractHeaderId,intCategoryId FROM vyuARPrepaymentContractDefault) PCD ON PCD.intItemContractHeaderId=SOD.intItemContractHeaderId
 		WHERE strSalesOrderNumber = @SalesOrderNumber
 	) CopySO
 	WHERE intInvoiceId = @NewInvoiceId AND tblARInvoiceDetail.intItemId = CopySO.intItemId AND tblARInvoiceDetail.intItemUOMId = CopySO.intItemUOMId AND tblARInvoiceDetail.strSalesOrderNumber = CopySO.strSalesOrderNumber

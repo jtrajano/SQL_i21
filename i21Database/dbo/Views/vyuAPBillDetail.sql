@@ -15,13 +15,16 @@ SELECT
 		 WHEN 12 THEN 'Prepayment Reversal'
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
+		 WHEN 15 THEN 'Tax Adjustment'
+		 WHEN 16 THEN 'Provisional Voucher'
 		 ELSE 'Invalid Type'
-	END COLLATE Latin1_General_CI_AS AS strTransactionType,
+	END AS strTransactionType,
 	G2.strName,
 	G2.strEntityNo,
 	A.strVendorOrderNumber,
 	A.intBillId,
 	A.dtmDate,
+	dbo.fnAPGetFiscalPeriod(A.dtmDate) strPeriod,
 	A.dtmDateCreated,
 	A.ysnPosted,
 	B.intBillDetailId,
@@ -82,13 +85,17 @@ SELECT
 	PG.strName as strPurchasingGroupName,
 	CB.strContractBasis as strINCO,
 	ISNULL(A2.ysnPaid,0) AS ysnPaid,
-	A2.strPaymentInfo COLLATE Latin1_General_CI_AS AS strPaymentInfo,
+	A2.strPaymentInfo,
 	A2.dtmDatePaid,
 	A2.dtmPaymentDateReconciled,
 	ISNULL(A2.dblPayment,0) AS dblPayment,
 	ISNULL(A2.ysnClr,0) AS ysnClr,
 	A2.dtmClr,
-	A.intShipToId
+	A.intShipToId,
+	CASE WHEN B.dblCashPrice = 0 THEN B.dblCost ELSE B.dblCashPrice END dblCashPrice,
+	B.dblQualityPremium,
+	B.dblOptionalityPremium,
+	lot.strLotNumber
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -162,3 +169,5 @@ LEFT JOIN (tblLGLoad receiptLoad INNER JOIN tblLGLoadDetail receiptLoadDetail ON
 	ON receiptLoadDetail.intLoadDetailId = IRE.intSourceId 
 			AND IR.intSourceType = 2
 			AND (IR.strReceiptType = 'Purchase Contract' OR IR.strReceiptType = 'Inventory Return')
+LEFT JOIN tblICLot lot
+	ON lot.intLotId = B.intLotId

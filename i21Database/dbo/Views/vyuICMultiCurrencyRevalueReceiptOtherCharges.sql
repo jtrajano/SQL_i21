@@ -26,9 +26,12 @@ SELECT
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
+	,intCompanyLocationId 		= rc.intLocationId
+	,intLOBSegmentCodeId		= lob.intSegmentCodeId
 FROM 
 	vyuICChargesForBilling rc
 	LEFT JOIN tblICItem i ON i.intItemId = rc.intItemId
+	JOIN  tblICItemLocation iLoc ON iLoc.intItemId = i.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = rc.intLocationId
 	LEFT JOIN tblSMCurrencyExchangeRateType ex ON ex.intCurrencyExchangeRateTypeId = rc.intForexRateTypeId
 	LEFT JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId

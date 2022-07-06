@@ -110,6 +110,7 @@ DECLARE
 	,@intDefaultCurrencyId INT 
 	,@intCurrencyId INT
 	,@dblExchangeRate DECIMAL(18,6)
+	,@dblAmountDetailTotalForeign DECIMAL(18,6)
 	,@ysnForeignTransaction AS BIT = 0 
 	-- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.	
 	
@@ -131,7 +132,6 @@ SELECT	TOP 1
 		,@intCreatedEntityId = intEntityId
 		,@intCurrencyId = intCurrencyId
 		,@ysnPOS = ysnPOS
-		,@dblExchangeRate = ISNULL(dblExchangeRate,1)
 		,@ysnForeignTransaction = CASE WHEN @intDefaultCurrencyId <> intCurrencyId THEN CAST(1 as bit) ELSE CAST(0 AS BIT) END
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
@@ -148,8 +148,12 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 		
 -- Read the detail table and populate the variables. 
 SELECT	@dblAmountDetailTotal = ISNULL(SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0)), 0)
+,@dblAmountDetailTotalForeign = ISNULL(SUM(ISNULL(dblCreditForeign, 0) - ISNULL(dblDebitForeign, 0)), 0)
 FROM	[dbo].tblCMBankTransactionDetail
 WHERE	intTransactionId = @intTransactionId 
+
+select @dblExchangeRate = @dblAmountDetailTotal / CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END
+
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
 -- Determine the CODE to use based from the bank transaction type. 
@@ -261,7 +265,8 @@ BEGIN
 	END
 
 	-- Check the bank transaction balance. 
-	IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0)
+	IF ISNULL(CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END, 0) <>
+	 ISNULL(@dblAmount, 0)
 	BEGIN
 		-- The debit and credit amounts are not balanced.
 		RAISERROR('The debit and credit amounts are not balanced.', 11, 1)
@@ -278,11 +283,12 @@ BEGIN
 
 	DECLARE @GLAccountSetupIsValid INT = 0
 
-	SELECT	@GLAccountSetupIsValid = COUNT(1),	@ysnBankAccountActive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
-	FROM	tblCMBankAccount CM JOIN vyuGLAccountDetail GL 
-	ON GL.intAccountId = CM.intGLAccountId
+	SELECT TOP 1 @GLAccountSetupIsValid= 1,	@ysnBankAccountActive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
+	FROM	tblCMBankAccount CM 
+	OUTER APPLY(
+	SELECT TOP 1 ysnActive from vyuGLAccountDetail 
+	where intAccountId = CM.intGLAccountId) GL
 	WHERE	intBankAccountId = @intBankAccountId
-	GROUP BY intBankAccountId, CM.ysnActive, GL.ysnActive
 
 	IF @ysnBankAccountActive = 0
 	BEGIN
@@ -379,9 +385,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE ROUND(@dblAmountDetailTotal * @dblExchangeRate,2) END  
+			,[dblDebit]				= @dblAmountDetailTotal
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE @dblAmountDetailTotal END
+			,[dblDebitForeign]		= @dblAmountDetailTotalForeign
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -404,7 +410,7 @@ BEGIN
 			,[intJournalLineNo]		= NULL
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
-			INNER JOIN vyuGLAccountDetail GLAccnt
+			INNER JOIN tblGLAccount GLAccnt
 				ON BankAccnt.intGLAccountId = GLAccnt.intAccountId
 	WHERE	A.strTransactionId = @strTransactionId
 	
@@ -416,9 +422,9 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
 			,[dblDebit]				= 0
-			,[dblCredit]			= ROUND((ISNULL(B.dblCredit, 0) - ISNULL(B.dblDebit, 0)) * CASE WHEN @ysnForeignTransaction = 0 THEN 1 ELSE @dblExchangeRate END ,2) 
+			,[dblCredit]			= ISNULL(B.dblCredit, 0) - ISNULL(B.dblDebit, 0)
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE ISNULL(B.dblCredit, 0) - ISNULL(B.dblDebit, 0)  END
+			,[dblCreditForeign]		= ISNULL(B.dblCreditForeign, 0) - ISNULL(B.dblDebitForeign, 0)
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
@@ -426,7 +432,7 @@ BEGIN
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= @dblExchangeRate
+			,[dblExchangeRate]		= B.dblExchangeRate
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -440,17 +446,11 @@ BEGIN
 			,[intJournalLineNo]		= B.intTransactionDetailId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
 				ON A.intTransactionId = B.intTransactionId
-			INNER JOIN vyuGLAccountDetail GLAccnt
+			INNER JOIN tblGLAccount GLAccnt
 				ON B.intGLAccountId = GLAccnt.intAccountId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
-	DECLARE @gainLoss DECIMAL (18,6)
-	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
-
-	if(@gainLoss <> 0  AND @intDefaultCurrencyId <> @intCurrencyId)
-		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 
-		'Gain / Loss on Multicurrency Bank Transaction'
 	
 END --@ysnPost = 1
 ELSE IF @ysnPost = 0
@@ -537,10 +537,123 @@ BEGIN
 		
 	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 
+	-- POST MATCHED DERIVATIVES ON SUCCESSFUL POSTING
+	IF (@BANK_TRANSACTION_TYPE_Id = 25)
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId 
+				AND strSourceModule = 'Risk Management' 
+				AND intMatchDerivativeNo IS NOT NULL
+		)
+		BEGIN
+			DECLARE
+				@tblMatchNo Id,
+				@strUser NVARCHAR(100)
+
+			SELECT @strUser = EC.strUserName 
+			FROM tblEMEntity EM
+			JOIN tblEMEntityCredential EC
+				ON EC.intEntityId = EM.intEntityId
+			WHERE EM.intEntityId = @intEntityId
+
+			INSERT INTO @tblMatchNo
+			SELECT intMatchDerivativeNo 
+			FROM tblCMBankTransactionDetail 
+			WHERE
+				intTransactionId = @intTransactionId
+				AND strSourceModule = 'Risk Management'
+				AND intMatchDerivativeNo IS NOT NULL
+
+			WHILE EXISTS(SELECT TOP 1 1 FROM @tblMatchNo)
+			BEGIN
+				DECLARE @intMatchNo INT
+				SELECT TOP 1 @intMatchNo = intId FROM @tblMatchNo
+
+				EXEC [dbo].[uspRKRecordPostedMatchPnS] @intMatchNo = @intMatchNo, @dblGrossPL = 0, @dblNetPnL = 0, @strUserName = @strUser
+
+				DELETE @tblMatchNo WHERE intId = @intMatchNo
+			END
+		END
+	END
+
+
 	UPDATE tblCMBankTransaction
 	SET		ysnPosted = @ysnPost
+			,intFiscalPeriodId = F.intGLFiscalYearPeriodId
 			,intConcurrencyId += 1 
+	FROM tblCMBankTransaction A
+	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
 	WHERE	strTransactionId = @strTransactionId
+	
+	--DELETE FEES ON UNPOSTING
+	IF @ysnPost =0
+	BEGIN
+		DELETE FROM tblGLDetail WHERE strTransactionId = @strTransactionId + '-F'
+		DELETE FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId + '-F'
+		DELETE FROM tblCMBankTransactionAdjustment WHERE intTransactionId = @intTransactionId OR intRelatedId = @intTransactionId
+
+
+		-- UNPOST DERIVATIVES ON UNPOSTING
+		IF (@BANK_TRANSACTION_TYPE_Id = 26)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId AND strSourceModule = 'Risk Management')
+			BEGIN
+				DECLARE @Derivatives PostCommissionDerivativeEntryTable
+				DECLARE @derivativeSuccessCount INT
+				INSERT INTO @Derivatives 
+				SELECT
+					  intMatchDerivativeNo -- intMatchNo
+					, strSourceTransactionId -- strInternalTradeNo
+					, NULL
+					, NULL
+					, NULL
+					, @strTransactionId
+				FROM tblCMBankTransactionDetail
+				WHERE intTransactionId = @intTransactionId
+				AND strSourceModule = 'Risk Management'
+
+				EXEC [dbo].[uspCMUpdatePostedDerivativeEntries] @Derivatives, 0, @derivativeSuccessCount
+			END
+		END
+
+		-- UNPOST MATCHED DERIVATIVES ON UNPOSTING
+		IF (@BANK_TRANSACTION_TYPE_Id = 25)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId 
+					AND strSourceModule = 'Risk Management' 
+					AND intMatchDerivativeNo IS NOT NULL
+			)
+			BEGIN
+				DECLARE
+					@tblMatchDerivativeNo Id,
+					@strUserName NVARCHAR(100)
+
+				SELECT @strUserName = EC.strUserName 
+				FROM tblEMEntity EM
+				JOIN tblEMEntityCredential EC
+					ON EC.intEntityId = EM.intEntityId
+				WHERE EM.intEntityId = @intEntityId
+
+				INSERT INTO @tblMatchDerivativeNo
+				SELECT intMatchDerivativeNo 
+				FROM tblCMBankTransactionDetail 
+				WHERE
+					intTransactionId = @intTransactionId
+					AND strSourceModule = 'Risk Management'
+					AND intMatchDerivativeNo IS NOT NULL
+
+				WHILE EXISTS(SELECT TOP 1 1 FROM @tblMatchDerivativeNo)
+				BEGIN
+					DECLARE @intCurrentMatchNo INT
+					SELECT TOP 1 @intCurrentMatchNo = intId FROM @tblMatchDerivativeNo
+
+					EXEC [dbo].[uspRKUnpostMatchPnS] @intMatchNo = @intCurrentMatchNo, @strUserName = @strUserName
+
+					DELETE @tblMatchDerivativeNo WHERE intId = @intCurrentMatchNo
+				END
+			END
+		END
+		
+	END
 
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END --@ysnRecap = 0

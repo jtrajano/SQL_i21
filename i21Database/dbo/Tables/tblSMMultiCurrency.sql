@@ -8,6 +8,7 @@
 	[intContractRateTypeId]							INT NULL, 
     [intAccountsReceivableRateTypeId]				INT NULL, 
 	[intGeneralJournalRateTypeId]					INT NULL, 
+	[intFixedAssetsRateTypeId]						INT NULL, 
 	/* Unrealized */
 	[intAccountsPayableUnrealizedId]				INT NULL,
 	[intAccountsReceivableUnrealizedId]				INT NULL, 
@@ -18,6 +19,11 @@
 	[intRiskManagementBasisUnrealizedId]			INT NULL,
 	[intRiskManagementFutureUnrealizedId]			INT NULL,
 	[intRiskManagementCashUnrealizedId]				INT NULL,
+	[intFixedAssetsUnrealizedId]					INT NULL,
+	[intGainOnForwardUnrealizedId]					INT NULL,
+	[intGainOnSwapUnrealizedId]						INT NULL,
+	[intGainOnGLUnrealizedId]						INT NULL,
+
 	/* Offset */
 	[ysnRevalue]									BIT NULL DEFAULT 0,
 	[intAccountsPayableOffsetId]					INT NULL,
@@ -29,10 +35,22 @@
 	[intRiskManagementBasisOffsetId]				INT NULL,
 	[intRiskManagementFutureOffsetId]				INT NULL,
 	[intRiskManagementCashOffsetId]					INT NULL,
+	[intFixedAssetsOffsetId]						INT NULL,
+	[intGainOnForwardOffsetId]						INT NULL,
+	[intGainOnSwapOffsetId]							INT NULL,
+	[intGainOnGLOffsetId]							INT NULL,
 	/* Offset */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
-    [intConcurrencyId]								INT NOT NULL DEFAULT 1, 
+	[intFixedAssetsRealizedId]						INT NULL,
+	[intCashManagementRealizedId]					INT NULL,
+	[intGainOnForwardRealizedId]					INT NULL,
+	[intGainOnSwapRealizedId]						INT NULL,
+	[intForexDifferenceRealizedId]					INT NULL,
+	/* Bank Transfer */
+
+	[intConcurrencyId]								INT NOT NULL DEFAULT 1, 
+
     CONSTRAINT [FK_tblSMMultiCurrency_RateType_AccountsPayable] FOREIGN KEY ([intAccountsPayableRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_CashManagement] FOREIGN KEY ([intCashManagementRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_Inventory] FOREIGN KEY ([intInventoryRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),

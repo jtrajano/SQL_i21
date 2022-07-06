@@ -223,6 +223,18 @@ DECLARE  @Id									INT
 		,@UpdateAvailableDiscount				BIT
 		,@ServiceChargeCredit					BIT
 		,@ImportFormat							NVARCHAR(50)
+		,@TransactionNo							NVARCHAR(50)
+		,@BankId								INT
+		,@BankAccountId							INT
+		,@BorrowingFacilityId					INT
+		,@BorrowingFacilityLimitId				INT
+		,@BankReferenceNo						NVARCHAR(100)
+		,@BankTransactionId						NVARCHAR(100)
+		,@LoanAmount							NUMERIC(18, 6)
+		,@BankValuationRuleId					INT
+		,@TradeFinanceComments					NVARCHAR(MAX)
+		,@GoodsStatus							NVARCHAR(100)
+		,@SourcedFrom							NVARCHAR(100)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -277,6 +289,7 @@ DECLARE  @Id									INT
 		,@ItemShipmentPurchaseSalesContractId	INT
 		,@ItemWeightUOMId						INT
 		,@ItemWeight							NUMERIC(38, 20)
+		,@ItemStandardWeight					NUMERIC(38, 20)
 		,@ItemShipmentGrossWt					NUMERIC(38, 20)
 		,@ItemShipmentTareWt					NUMERIC(38, 20)
 		,@ItemShipmentNetWt						NUMERIC(38, 20)
@@ -315,6 +328,9 @@ DECLARE  @Id									INT
 		,@ItemContractHeaderId					INT
 		,@ItemContractDetailId					INT
 		,@NewInvoiceNumber						NVARCHAR(50) = ''
+		,@ItemQualityPremium					NUMERIC(18, 6)
+		,@ItemOptionalityPremium				NUMERIC(18, 6)
+		,@ItemComputedGrossPrice				NUMERIC(18, 6)
 
 --INSERT
 BEGIN TRY
@@ -427,6 +443,17 @@ BEGIN
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ServiceChargeCredit			= ISNULL([ysnServiceChargeCredit],0)
 		,@ImportFormat					= [strImportFormat]
+		,@TransactionNo					= [strTradeFinanceNo]
+		,@BankId						= [intBankId]
+		,@BankAccountId					= [intBankAccountId]
+		,@BorrowingFacilityId			= [intBorrowingFacilityId]
+		,@BorrowingFacilityLimitId		= [intBorrowingFacilityLimitId]
+		,@BankReferenceNo				= [strBankReferenceNo]
+		,@BankTransactionId				= [strBankTransactionId]
+		,@LoanAmount					= [dblLoanAmount]
+		,@BankValuationRuleId			= [intBankValuationRuleId]
+		,@TradeFinanceComments			= [strTradeFinanceComments]
+		,@GoodsStatus					= [strGoodsStatus]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -480,6 +507,7 @@ BEGIN
 		,@ItemShipmentPurchaseSalesContractId = (CASE WHEN @GroupingOption = 0 THEN [intShipmentPurchaseSalesContractId] ELSE NULL END)
 		,@ItemWeightUOMId				= (CASE WHEN @GroupingOption = 0 THEN [intItemWeightUOMId] ELSE NULL END)
 		,@ItemWeight					= (CASE WHEN @GroupingOption = 0 THEN [dblItemWeight] ELSE NULL END)
+		,@ItemStandardWeight			= (CASE WHEN @GroupingOption = 0 THEN [dblStandardWeight] ELSE NULL END)
 		,@ItemShipmentGrossWt			= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentGrossWt] ELSE NULL END)
 		,@ItemShipmentTareWt			= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentTareWt] ELSE NULL END)
 		,@ItemShipmentNetWt				= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentNetWt] ELSE NULL END)
@@ -513,12 +541,15 @@ BEGIN
         ,@ItemAddonDetailKey            = (CASE WHEN @GroupingOption = 0 THEN [strAddonDetailKey] ELSE NULL END)
         ,@ItemAddonParent               = (CASE WHEN @GroupingOption = 0 THEN [ysnAddonParent] ELSE NULL END)
         ,@ItemAddOnQuantity             = (CASE WHEN @GroupingOption = 0 THEN [dblAddOnQuantity] ELSE NULL END)
+		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
+		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
+		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
 		AND ([intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND ([intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND ([intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL([intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST([dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -549,6 +580,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intShipmentId'
 						SET @SourceTable = 'tblLGShipment'
+						SET @SourcedFrom = 'Logistics'
 					END
 				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
 					BEGIN
@@ -569,6 +601,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intInventoryShipmentId'
 						SET @SourceTable = 'tblICInventoryShipment'
+						SET @SourcedFrom = 'Inventory Shipment'
 					END		
 
 				IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
@@ -581,6 +614,7 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intLoadId'
 						SET @SourceTable = 'tblLGLoad'
+						SET @SourcedFrom = 'Logistics'
 					END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
@@ -694,6 +728,18 @@ BEGIN
 			,@ImportFormat					= @ImportFormat
 			,@TruckDriverId					= @TruckDriverId
 			,@TruckDriverReferenceId		= @TruckDriverReferenceId
+			,@TransactionNo					= @TransactionNo
+			,@BankId						= @BankId
+			,@BankAccountId					= @BankAccountId
+			,@BorrowingFacilityId			= @BorrowingFacilityId
+			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
+			,@BankReferenceNo				= @BankReferenceNo
+			,@BankTransactionId				= @BankTransactionId
+			,@LoanAmount					= @LoanAmount
+			,@BankValuationRuleId			= @BankValuationRuleId
+			,@TradeFinanceComments			= @TradeFinanceComments
+			,@GoodsStatus					= @GoodsStatus
+			,@SourcedFrom					= @SourcedFrom
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -747,6 +793,7 @@ BEGIN
 			,@ItemShipmentPurchaseSalesContractId = @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
 			,@ItemWeight					= @ItemWeight
+			,@ItemStandardWeight			= @ItemStandardWeight
 			,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 			,@ItemShipmentTareWt			= @ItemShipmentTareWt
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt		
@@ -768,7 +815,7 @@ BEGIN
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@ItemConversionAccountId		= @ItemConversionAccountId
 			,@ItemSalesAccountId			= @ItemSalesAccountId
-			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -779,7 +826,9 @@ BEGIN
             ,@ItemAddonDetailKey            = @ItemAddonDetailKey
             ,@ItemAddonParent               = @ItemAddonParent
             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
-			
+			,@ItemQualityPremium			= @ItemQualityPremium
+			,@ItemOptionalityPremium		= @ItemOptionalityPremium
+			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -841,7 +890,7 @@ BEGIN
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -925,6 +974,7 @@ BEGIN
 					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 					,@ItemWeightUOMId				= [intItemWeightUOMId]
 					,@ItemWeight					= [dblItemWeight]
+					,@ItemStandardWeight			= [dblStandardWeight]
 					,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
 					,@ItemShipmentTareWt			= [dblShipmentTareWt]
 					,@ItemShipmentNetWt				= [dblShipmentNetWt]
@@ -960,6 +1010,9 @@ BEGIN
 					,@ItemAddonDetailKey            = [strAddonDetailKey]
                     ,@ItemAddonParent               = [ysnAddonParent]
                     ,@ItemAddOnQuantity             = [dblAddOnQuantity]
+					,@ItemQualityPremium            = [dblQualityPremium]
+					,@ItemOptionalityPremium        = [dblOptionalityPremium]
+					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1027,6 +1080,7 @@ BEGIN
 						,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 						,@ItemWeightUOMId				= @ItemWeightUOMId
 						,@ItemWeight					= @ItemWeight
+						,@ItemStandardWeight			= @ItemStandardWeight
 						,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 						,@ItemShipmentTareWt			= @ItemShipmentTareWt
 						,@ItemShipmentNetWt				= @ItemShipmentNetWt
@@ -1046,7 +1100,7 @@ BEGIN
 						,@ItemPerformerId				= @ItemPerformerId
 						,@ItemLeaseBilling				= @ItemLeaseBilling
 						,@ItemConversionAccountId		= @ItemConversionAccountId
-						,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+						,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 						,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 						,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 						,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -1059,6 +1113,9 @@ BEGIN
                         ,@ItemAddonDetailKey            = @ItemAddonDetailKey
                         ,@ItemAddonParent               = @ItemAddonParent
                         ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+						,@ItemQualityPremium            = @ItemQualityPremium
+						,@ItemOptionalityPremium        = @ItemOptionalityPremium
+						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1217,7 +1274,7 @@ BEGIN
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -1525,7 +1582,7 @@ BEGIN TRY
 			[tblARInvoice]
 		SET 
 			 [strTransactionType]		= CASE WHEN ISNULL(@TransactionType, '') NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment', 'Proforma Invoice') THEN [tblARInvoice].[strTransactionType] ELSE @TransactionType END
-			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling') THEN [tblARInvoice].[strType] ELSE @Type END
+			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'Agronomy') THEN [tblARInvoice].[strType] ELSE @Type END
 			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
 			--,[intAccountId]				= @AccountId 
@@ -1704,6 +1761,7 @@ BEGIN TRY
 						,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 						,@ItemWeightUOMId				= [intItemWeightUOMId]
 						,@ItemWeight					= [dblItemWeight]
+						,@ItemStandardWeight			= [dblStandardWeight]
 						,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
 						,@ItemShipmentTareWt			= [dblShipmentTareWt]
 						,@ItemShipmentNetWt				= [dblShipmentNetWt]
@@ -1737,6 +1795,9 @@ BEGIN TRY
                         ,@ItemAddonDetailKey            = [strAddonDetailKey]
                         ,@ItemAddonParent               = [ysnAddonParent]
                         ,@ItemAddOnQuantity             = [dblAddOnQuantity]
+						,@ItemQualityPremium            = [dblQualityPremium]
+                        ,@ItemOptionalityPremium        = [dblOptionalityPremium]
+						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1814,13 +1875,14 @@ BEGIN TRY
 							,@ItemPerformerId				= @ItemPerformerId
 							,@ItemLeaseBilling				= @ItemLeaseBilling
 							,@ItemConversionAccountId		= @ItemConversionAccountId
-							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+							,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 							,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 							,@ItemSubCurrencyId				= @ItemSubCurrencyId
 							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 							,@ItemWeightUOMId				= @ItemWeightUOMId
 							,@ItemWeight					= @ItemWeight
+							,@ItemStandardWeight			= @ItemStandardWeight
 							,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 							,@ItemDestinationGradeId		= @ItemDestinationGradeId
 							,@ItemDestinationWeightId		= @ItemDestinationWeightId
@@ -1828,6 +1890,9 @@ BEGIN TRY
                             ,@ItemAddonDetailKey            = @ItemAddonDetailKey
                             ,@ItemAddonParent               = @ItemAddonParent
                             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+							,@ItemQualityPremium            = @ItemQualityPremium
+							,@ItemOptionalityPremium        = @ItemOptionalityPremium
+							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
@@ -2031,6 +2096,7 @@ BEGIN TRY
 					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 					,@ItemWeightUOMId				= [intItemWeightUOMId]
 					,@ItemWeight					= [dblItemWeight]
+					,@ItemStandardWeight			= [dblStandardWeight]
 					,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
 					,@ItemShipmentTareWt			= [dblShipmentTareWt]
 					,@ItemShipmentNetWt				= [dblShipmentNetWt]
@@ -2196,6 +2262,7 @@ BEGIN TRY
 						,[intShipmentPurchaseSalesContractId]	= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentPurchaseSalesContractId ELSE [intShipmentPurchaseSalesContractId] END
 						,[intItemWeightUOMId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemWeightUOMId ELSE [intItemWeightUOMId] END
 						,[dblItemWeight]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemWeight ELSE [dblItemWeight] END
+						,[dblStandardWeight]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemStandardWeight ELSE [dblStandardWeight] END
 						,[dblShipmentGrossWt]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentGrossWt ELSE [dblShipmentGrossWt] END
 						,[dblShipmentTareWt]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentTareWt ELSE [dblShipmentTareWt] END
 						,[dblShipmentNetWt]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentNetWt ELSE [dblShipmentNetWt] END

@@ -5,6 +5,7 @@ SELECT DISTINCT PL.intPickLotDetailId,
   PLH.strCustomer,
   PLH.intCustomerEntityId,
   PLH.[strPickLotNumber],
+  PLH.strType,
   PLH.dtmPickDate,
   PLH.strCommodity,
   PLH.strLocationName,
@@ -16,8 +17,10 @@ SELECT DISTINCT PL.intPickLotDetailId,
   PLH.strSubBook,
   PL.intAllocationDetailId,
   PL.intLotId,
+  PL.intContainerId,
   PL.dblSalePickedQty,
   PL.dblLotPickedQty,
+  dblLotPickedQtyFromParent = PL.dblLotPickedQty - ISNULL(PCPL.dblLotPickedQtyFromParent, 0),
   PL.intSaleUnitMeasureId,
   PL.intLotUnitMeasureId,
   PL.dblGrossWt,
@@ -29,14 +32,16 @@ SELECT DISTINCT PL.intPickLotDetailId,
   Lot.strLotNumber,
   Lot.strReceiptNumber,
   Lot.strMarkings,
+  Con.strContainerNumber,
+  strContainerID = Con.strContainerNumber, --TO BE REPLACED BY CONTAINER Unique ID
   IM.intItemId,
   Lot.intItemUOMId,
   IM.strItemNo,
   IM.strDescription as strItemDescription,
   IM.strLotTracking as strLotTracking,
   IM.intCommodityId as intCommodityId,
-  PLH.intSubLocationId,
-  SubLocation.strSubLocationName,
+  intSubLocationId = ISNULL(PLH.intSubLocationId, Lot.intSubLocationId),
+  strSubLocationName = ISNULL(SubLocation.strSubLocationName, Lot.strSubLocationName),
   Lot.intStorageLocationId,
   Lot.strStorageLocation,
   PCD.intContractHeaderId as intPContractHeaderId,
@@ -73,11 +78,18 @@ SELECT DISTINCT PL.intPickLotDetailId,
 					END,
   strSplitFrom = PPL.strPickLotNumber,
   strAllocationNumber = AH.strAllocationNumber,
-  strAllocationDetailRefNo = AD.strAllocationDetailRefNo
+  strAllocationDetailRefNo = AD.strAllocationDetailRefNo,
+  PLH.dblGAShrinkFactor,
+  PLH.strOrigin,
+  PLH.strProductType,
+  PLH.strGrade,
+  PLH.strRegion,
+  PLH.strSeason,
+  PLH.strClass,
+  PLH.strProductLine,
+  PLH.strMarketValuation
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
-JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
-JOIN tblICItem    IM ON IM.intItemId    = Lot.intItemId
 JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PL.intAllocationDetailId
 JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = AD.intPContractDetailId
@@ -89,10 +101,21 @@ JOIN tblICUnitMeasure SaleUOM ON SaleUOM.intUnitMeasureId = PL.intSaleUnitMeasur
 JOIN tblSMCurrency SCurrency ON SCurrency.intCurrencyID = SCD.intCurrencyId
 JOIN tblICItemUOM SItemUOM ON SItemUOM.intItemUOMId = SCD.intPriceItemUOMId
 JOIN tblICUnitMeasure SUOM ON SUOM.intUnitMeasureId = SItemUOM.intUnitMeasureId
-JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
+JOIN tblICItem IM ON IM.intItemId = SCD.intItemId 
+LEFT JOIN tblLGLoadContainer Con ON Con.intLoadContainerId = PL.intContainerId
+LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
+LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = PL.intLotId
 LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblLGLoadDetail LD ON LD.intPickLotDetailId = PL.intPickLotDetailId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGPickLotHeader PPL ON PPL.intPickLotHeaderId = PLH.intParentPickLotHeaderId
+OUTER APPLY 
+	(SELECT dblLotPickedQtyFromParent = SUM(PL1.dblLotPickedQty) 
+	 FROM tblLGPickLotDetail PL1
+	 LEFT JOIN tblLGPickLotHeader PH1 ON PH1.intPickLotHeaderId = PL1.intPickLotHeaderId
+	 WHERE PH1.intParentPickLotHeaderId = PLH.intPickLotHeaderId
+		AND PH1.intType = 1
+		AND PL1.intLotId = PL.intLotId 
+	) PCPL

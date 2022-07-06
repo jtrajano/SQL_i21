@@ -38,7 +38,6 @@ DECLARE @LotType_Manual AS INT = 1
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@strItemNo2 AS NVARCHAR(50) 
 
-DECLARE @intParentLotId AS INT = NULL
 DECLARE @intReturnCode AS INT = 0 
 
 -- Lot Number batch number in the starting numbers table. 
@@ -115,6 +114,21 @@ DECLARE
 	,@strCertificateId			AS NVARCHAR(50)
 	,@strTrackingNumber			AS NVARCHAR(255) 
 	,@strWarehouseRefNo			AS NVARCHAR(255)
+	,@strCargoNo			AS NVARCHAR(50)
+	,@strWarrantNo			AS NVARCHAR(50)
+	,@intWarrantStatus			AS TINYINT
+	,@intContractHeaderId		AS INT 
+	,@intContractDetailId		AS INT 
+	,@ysnWeighed				AS BIT 
+	,@strSealNo			AS NVARCHAR(100)
+	,@ysnProducePartialPacking BIT 
+	,@intParentLotId AS INT 
+	,@dblTare AS NUMERIC(38,20) 
+	,@dblTarePerQty AS NUMERIC(38,20) 
+	,@intTradeFinanceId AS INT 
+
+	,@ysnRejected BIT 
+
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
 		,@intEntityProducerId AS INT 
@@ -223,6 +237,17 @@ SELECT  intId
 		,strCertificateId
 		,strTrackingNumber
 		,strWarehouseRefNo
+		,strCargoNo
+		,strWarrantNo
+		,intWarrantStatus
+		,intContractHeaderId
+		,intContractDetailId
+		,ysnWeighed
+		,strSealNo
+		,intParentLotId
+		,dblTare		
+		,dblTarePerQty
+		,intTradeFinanceId
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -284,6 +309,17 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strCertificateId
 		,@strTrackingNumber
 		,@strWarehouseRefNo
+		,@strCargoNo
+		,@strWarrantNo
+		,@intWarrantStatus
+		,@intContractHeaderId
+		,@intContractDetailId
+		,@ysnWeighed
+		,@strSealNo
+		,@intParentLotId
+		,@dblTare		
+		,@dblTarePerQty
+		,@intTradeFinanceId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -295,7 +331,18 @@ BEGIN
 	SET @strLotNumber = RTRIM(LTRIM(ISNULL(@strLotNumber, ''))) 
 
 	-- Get the type of lot (if manual or serialized)
-	SELECT @intLotTypeId = dbo.fnGetItemLotType(@intItemId);
+	--SELECT @intLotTypeId = dbo.fnGetItemLotType(@intItemId);
+	SELECT	
+			@intLotTypeId =  
+				CASE	WHEN Item.strLotTracking = 'Yes - Manual' THEN 1
+						WHEN Item.strLotTracking = 'Yes - Serial Number' THEN 2
+						WHEN Item.strLotTracking = 'Yes - Manual/Serial Number' THEN 3
+						ELSE 0 
+				END 
+			,@ysnProducePartialPacking = ysnProducePartialPacking
+			,@strItemNo = strItemNo
+	FROM	dbo.tblICItem Item
+	WHERE	Item.intItemId = @intItemId
 
 	-- Get the Item UOM Unit Type
 	SELECT @strUnitType = dbo.fnGetItemUnitType(@intItemUOMId);
@@ -308,9 +355,9 @@ BEGIN
 	-- Validate if the Manual lot item does not have a lot number. 
 	IF @strLotNumber = '' AND @intLotTypeId = @LotType_Manual
 	BEGIN 
-		SELECT	@strItemNo = strItemNo
-		FROM	dbo.tblICItem Item
-		WHERE	Item.intItemId = @intItemId
+		--SELECT	@strItemNo = strItemNo
+		--FROM	dbo.tblICItem Item
+		--WHERE	Item.intItemId = @intItemId
 
 		--Please specify the lot numbers for {Item}.
 		EXEC uspICRaiseError 80005, @strItemNo;
@@ -602,9 +649,17 @@ BEGIN
 		AND @intItemUOMId <> @intWeightUOMId
 		AND @dblQty % 1 <> 0 
 		AND @strUnitType NOT IN ('Weight','Volume') -- do not convert if Item UOM is Unit Type Weight/Volume
+		AND ISNULL(@ysnProducePartialPacking, 0) = 0 
 	BEGIN 
 		SET @intItemUOMId = @intWeightUOMId
 		SET	@dblQty = @dblWeight
+
+	END 
+
+	-- Recalculate the Tare Per Qty if Pack and Wgt UOM is the same. 
+	IF @intItemUOMId = @intWeightUOMId
+	BEGIN
+		SET @dblTarePerQty = CASE WHEN @dblWeight <> 0 THEN dbo.fnDivide(@dblTare, @dblWeight) ELSE 0 END 
 	END 
 
 	-- Upsert (update or insert) the record to the lot master table. 
@@ -656,11 +711,12 @@ BEGIN
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
-		-- Get Date Created from Source Lot
-		SELECT @dtmCreatedDate = Lot.dtmDateCreated
+		-- Get Date Created and Rejected Status from Source Lot
+		SELECT 
+				@dtmCreatedDate = Lot.dtmDateCreated
+				,@ysnRejected = Lot.ysnRejected
 		FROM	dbo.tblICLot Lot
 		WHERE	Lot.intLotId = @intSplitFromLotId
-
 
 		-- Get the Lot id or insert a new record on the Lot master table. 
 		MERGE	
@@ -688,6 +744,16 @@ BEGIN
 						,intBookId = @intBookId
 						,intSubBookId = @intSubBookId 
 						,strWarehouseRefNo = @strWarehouseRefNo
+						,strCargoNo = @strCargoNo
+						,strWarrantNo = @strWarrantNo
+						,intWarrantStatus = @intWarrantStatus
+						,intContractHeaderId = @intContractHeaderId
+						,intContractDetailId = @intContractDetailId
+						,ysnWeighed = @ysnWeighed
+						,strSealNo = @strSealNo
+						,intParentLotId = @intParentLotId 
+						,dblTare = @dblTare
+						,dblTarePerQty = @dblTarePerQty
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -720,7 +786,11 @@ BEGIN
 				,intUnitPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intUnitPallet ELSE LotMaster.intUnitPallet END 
 				,strContainerNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContainerNo ELSE LotMaster.strContainerNo END 
 				,strCondition			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strCondition ELSE LotMaster.strCondition END 
-				,intSeasonCropYear		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSeasonCropYear ELSE LotMaster.intSeasonCropYear END 				
+				,intSeasonCropYear		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSeasonCropYear ELSE LotMaster.intSeasonCropYear END 	
+				,strCargoNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strCargoNo ELSE LotMaster.strCargoNo END 	
+				,strWarrantNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strWarrantNo ELSE LotMaster.strWarrantNo END 	
+				,intWarrantStatus		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intWarrantStatus ELSE LotMaster.intWarrantStatus END
+				,intTradeFinanceId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intTradeFinanceId ELSE LotMaster.intTradeFinanceId END
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
 													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Incoming lot is already in wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
@@ -824,7 +894,12 @@ BEGIN
 				,intStorageLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
 				,intItemOwnerId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemOwnerId ELSE LotMaster.intItemOwnerId END
 				,strWarehouseRefNo		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.strWarehouseRefNo ELSE LotMaster.strWarehouseRefNo END
+				,intContractHeaderId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intContractHeaderId ELSE LotMaster.intContractHeaderId END
+				,intContractDetailId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intContractDetailId ELSE LotMaster.intContractDetailId END
+				,ysnWeighed				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.ysnWeighed ELSE LotMaster.ysnWeighed END
+				,strSealNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.strSealNo ELSE LotMaster.strSealNo END
 
+				,dblTarePerQty		    = CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.dblTarePerQty ELSE LotMaster.dblTarePerQty END	
 				-- The following fields are always updated if it has the same: 
 				-- 1. Quantity UOM
 				-- 2. Weight UOM
@@ -933,6 +1008,8 @@ BEGIN
 											ELSE 
 												LotMaster.strTrackingNumber 
 										END
+				,intParentLotId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intParentLotId ELSE LotMaster.intParentLotId END
+							
 
 				-- The following field are returned from the lot master if:
 				-- 1. It is editing from the source transaction id
@@ -1028,6 +1105,17 @@ BEGIN
 				,strCertificateId
 				,strTrackingNumber
 				,strWarehouseRefNo
+				,strCargoNo
+				,strWarrantNo
+				,intWarrantStatus
+				,intContractHeaderId
+				,intContractDetailId
+				,ysnWeighed
+				,strSealNo
+				,intParentLotId 
+				,dblTare
+				,dblTarePerQty
+				,intTradeFinanceId
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -1084,6 +1172,17 @@ BEGIN
 				,@strCertificateId
 				,@strTrackingNumber
 				,@strWarehouseRefNo
+				,@strCargoNo
+				,@strWarrantNo
+				,@intWarrantStatus
+				,@intContractHeaderId
+				,@intContractDetailId
+				,@ysnWeighed
+				,@strSealNo
+				,@intParentLotId 
+				,0 -- @dblTare
+				,@dblTarePerQty
+				,@intTradeFinanceId
 			)
 		;
 	
@@ -1095,9 +1194,9 @@ BEGIN
 		END 
 
 		-- Insert the parent lot 
-		IF ISNULL(@intInsertedLotId, 0) <> 0 
+		IF	ISNULL(@intInsertedLotId, 0) <> 0
+			AND @intParentLotId IS NULL 
 		BEGIN 
-			SET @intParentLotId = NULL
 			SET @intReturnCode = 0
 
 			EXEC @intReturnCode = dbo.uspMFCreateUpdateParentLotNumber 
@@ -1140,6 +1239,11 @@ BEGIN
 					,@intParentLotId
 					,@strParentLotNumber
 			WHERE ISNULL(@intLotId, 0) <> 0 
+		END 
+
+		-- Update the rejected lot
+		BEGIN 
+			EXEC uspICMoveRejectLot @intSplitFromLotId, @intInsertedLotId
 		END 
 	END 
 
@@ -1279,6 +1383,17 @@ BEGIN
 		,@strCertificateId
 		,@strTrackingNumber
 		,@strWarehouseRefNo
+		,@strCargoNo
+		,@strWarrantNo
+		,@intWarrantStatus
+		,@intContractHeaderId
+		,@intContractDetailId
+		,@ysnWeighed
+		,@strSealNo
+		,@intParentLotId
+		,@dblTare		
+		,@dblTarePerQty
+		,@intTradeFinanceId
 	;
 END
 

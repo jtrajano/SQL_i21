@@ -3,7 +3,8 @@
 AS 
 
 	SELECT	*,
-			CAST(CASE WHEN ISNULL(strPrepaidIds,'') = '' THEN 0 ELSE 1 END AS BIT) ysnPrepaid
+			CAST(CASE WHEN ISNULL(strPrepaidIds,'') = '' THEN 0 ELSE 1 END AS BIT) ysnPrepaid,
+			CAST(CASE WHEN ISNULL(strProvisionalVoucherIds,'') = '' THEN 0 ELSE 1 END AS BIT) ysnProvisionalVoucher
 	FROM	(
 				SELECT	CH.intContractHeaderId,
 						PF.intPriceFixationId, 
@@ -19,6 +20,7 @@ AS
 
 						dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intLoadUOMId,CH.intCommodityUOMId,1)	AS	dblCommodityUOMConversionFactor,
 						dbo.fnCTGetPrepaidIds(CH.intContractHeaderId)  COLLATE Latin1_General_CI_AS AS strPrepaidIds,
+						dbo.fnCTGetProvisionalIds(CH.intContractHeaderId)  COLLATE Latin1_General_CI_AS AS strProvisionalVoucherIds,
 						
 						EY.strName					AS	strEntityName,
 						SP.strName					AS	strSalesperson,
@@ -47,7 +49,8 @@ AS
 						PO.strPosition,						
 						PT.strPricingType,						
 						TM.strTerm,						
-						TM.strTermCode,						
+						TM.strTermCode,	
+						TM.intBalanceDue,
 						TP.strContractType,						
 						TX.strTextCode,						
 						U2.strUnitMeasure			AS	strCommodityUOM,		
@@ -79,7 +82,11 @@ AS
 						FT.strFreightTerm,
 						BE.strName					AS strBroker,
 						BA.strAccountNumber			AS strBrokerAccount,
-						intCommodityFutureMarketId = CY.intFutureMarketId
+						intCommodityFutureMarketId = CY.intFutureMarketId, -- CT-5315
+						strEntitySelectedLocation = ESL.strLocationName, -- CT-5315
+						COL.strLocationName,
+						ST.strSampleTypeName,
+						CY.ysnCheckMissingStandardPriceInContract
 
 				FROM	tblCTContractHeader						CH	
 				
@@ -128,12 +135,18 @@ AS
 				
 			LEFT	JOIN	tblCTBook							BK	ON	BK.intBookId						=		CH.intBookId						
 			LEFT	JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						
-			
-			LEFT	JOIN	tblCTPriceFixation					PF	ON	CH.intContractHeaderId				=		PF.intContractHeaderId 
-																	AND CH.ysnMultiplePriceFixation			=		1									
-				
+						
+			OUTER APPLY (
+			SELECT TOP 1 PF.intPriceFixationId, 
+						PF.intPriceContractId
+						FROM tblCTPriceFixation PF
+						WHERE  CH.intContractHeaderId =	PF.intContractHeaderId  AND CH.ysnMultiplePriceFixation	= 1	
+			) PF				
 			LEFT	JOIN	tblSMFreightTerms					FT	ON	FT.intFreightTermId					=		CH.intFreightTermId					
 			LEFT	JOIN	tblEMEntity							BE	ON	BE.intEntityId						=		CH.intBrokerId										
 			LEFT	JOIN	tblRKBrokerageAccount				BA	ON	BA.intBrokerageAccountId			=		CH.intBrokerageAccountId							
+			LEFT	JOIN	tblEMEntityLocation					ESL	ON	ESL.intEntityLocationId				=		CH.intEntitySelectedLocationId  -- CT-5315
+			LEFT JOIN tblSMCompanyLocation COL on COL.intCompanyLocationId = CH.intCompanyLocationId
+			LEFT JOIN tblQMSampleType ST on ST.intSampleTypeId = CH.intSampleTypeId
 
 			)t

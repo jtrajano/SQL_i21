@@ -49,6 +49,7 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnTaxFlag2
 	, ItemLocation.ysnTaxFlag3
 	, ItemLocation.ysnTaxFlag4
+	, ItemLocation.ysnActive
 	, ItemLocation.ysnPromotionalItem
 	, ItemLocation.intMixMatchId
 	, MixMatch.strPromoItemListId
@@ -75,7 +76,7 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnApplyBlueLaw2
 	, ItemLocation.ysnCarWash
 	, ItemLocation.intItemTypeCode
-	, strItemTypeCode = CAST(ISNULL(ItemTypeCode.intRadiantItemTypeCode, '') AS NVARCHAR) COLLATE Latin1_General_CI_AS
+	, strItemTypeCode = ItemTypeCode.strDescription
 	, ItemLocation.intItemTypeSubCode
 	, ItemLocation.ysnAutoCalculateFreight
 	, ItemLocation.intFreightMethodId
@@ -97,9 +98,23 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnStorageUnitRequired
 	, ItemLocation.intCostAdjustmentType
 	, ItemLocation.intAllowZeroCostTypeId
+	, dblOnHandQty = CASE 
+						WHEN Transact.dblOnHandQty IS NULL
+						THEN 0
+						ELSE Transact.dblOnHandQty
+					END
 FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
+	OUTER APPLY (
+		SELECT TOP 1 
+			SUM(dblQty) AS dblOnHandQty 
+			FROM tblICInventoryTransaction 
+			WHERE 
+			intItemId = ItemLocation.intItemId 
+			AND
+			intItemLocationId = ItemLocation.intItemLocationId
+	) AS Transact
 	LEFT JOIN tblICCommodity ItemCommodity ON Item.intCommodityId = ItemCommodity.intCommodityId
 	LEFT JOIN tblICCategory ItemCategory ON Item.intCategoryId = ItemCategory.intCategoryId
 	LEFT JOIN tblICManufacturer ItemManufacturer ON Item.intManufacturerId = ItemManufacturer.intManufacturerId

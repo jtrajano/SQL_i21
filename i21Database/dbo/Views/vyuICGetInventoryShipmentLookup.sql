@@ -96,6 +96,8 @@ FROM
 		UNION ALL SELECT intOrderType = 2,  strOrderType = 'Sales Order' COLLATE Latin1_General_CI_AS
 		UNION ALL SELECT intOrderType = 3,  strOrderType = 'Transfer Order' COLLATE Latin1_General_CI_AS
 		UNION ALL SELECT intOrderType = 4,  strOrderType = 'Direct' COLLATE Latin1_General_CI_AS
+		UNION ALL SELECT intOrderType = 5,  strOrderType = 'Item Contract' COLLATE Latin1_General_CI_AS
+		UNION ALL SELECT intOrderType = 6,  strOrderType = 'AG Work Order' COLLATE Latin1_General_CI_AS
 	) OrderTypes
 		ON OrderTypes.intOrderType = Shipment.intOrderType
 	LEFT JOIN (

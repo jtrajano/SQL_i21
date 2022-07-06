@@ -89,6 +89,10 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnDisplayRestrictedBookInDemandView
 	,CP.intNoofdaystoconsiderforDemandBatches
 	,CP.intDemandAnalysisMonthlyCutOffDay
+	,CP.ysnForecastedConsumptionByRemainingDays
+	,CP.ysnEnableItemMenuOnHandheld
+	,CP.ysnSkipStorageUnitScreenInHandheld
+	,CP.ysnWOAutoSelectBOMServiceItems
 	,SL.strName AS strShipmentStagingLocation
 	,SL1.strName AS strShipmentDockDoorLocation
 	,LS.strSecondaryStatus AS strBondLotStatus

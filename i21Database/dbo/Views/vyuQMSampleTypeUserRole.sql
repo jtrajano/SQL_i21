@@ -11,6 +11,7 @@ SELECT S.intSampleTypeId
 	,SU.intUserRoleID
 	,S.ysnAdjustInventoryQtyBySampleQty
 	,S.ysnPartyMandatory
+	,S.ysnMultipleContractSeq
 FROM tblQMSampleType S
 JOIN tblQMControlPoint CP ON CP.intControlPointId = S.intControlPointId
 JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId

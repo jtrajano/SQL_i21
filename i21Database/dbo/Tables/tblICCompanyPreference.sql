@@ -24,5 +24,11 @@
     [intCreatedByUserId] INT NULL,
     [intModifiedByUserId] INT NULL,
     [ysnIsCountSheetMultiFilter] BIT NULL DEFAULT(1),
+	[ysnPriceFixWarningInReceipt] BIT NULL DEFAULT(0),
+    [ysnValidateReceiptTotal] BIT NULL DEFAULT(0),
+	[intItemIdHolderForReceiptImport] INT NULL, 
+	[ysnUpdateSMTransaction] BIT NULL DEFAULT(0),
+	[ysnUpdateInventoryTransactionAccountId] BIT NULL DEFAULT(0),
+	[strSingleOrMultipleLots] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

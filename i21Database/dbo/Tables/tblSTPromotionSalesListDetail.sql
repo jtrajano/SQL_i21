@@ -3,6 +3,7 @@
 	[intPromoSalesListDetailId] INT NOT NULL IDENTITY, 
     [intPromoSalesListId] INT NOT NULL, 
     [intPromoItemListId] INT NOT NULL, 
+    [dblCost] NUMERIC(18, 6) NULL, 
     [intQuantity] INT NULL, 
     [dblPrice] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NOT NULL, 

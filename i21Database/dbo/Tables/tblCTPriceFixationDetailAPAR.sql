@@ -18,7 +18,7 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblCTPriceFixationDetail_intPriceFixationDetailId] FOREIGN KEY (intPriceFixationDetailId) REFERENCES tblCTPriceFixationDetail(intPriceFixationDetailId) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId] FOREIGN KEY (intBillId) REFERENCES tblAPBill(intBillId),
-	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId] FOREIGN KEY (intBillDetailId) REFERENCES tblAPBillDetail(intBillDetailId),
+	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId] FOREIGN KEY (intBillDetailId) REFERENCES tblAPBillDetail(intBillDetailId) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblARInvoice_intInvoiceId] FOREIGN KEY (intInvoiceId) REFERENCES tblARInvoice(intInvoiceId),
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY (intInvoiceDetailId) REFERENCES tblARInvoiceDetail(intInvoiceDetailId) ON DELETE CASCADE
 )
@@ -41,16 +41,11 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 			,@dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then cd.dblBalance else cd.dblBalanceLoad end)
 		from
 			inserted i
-			,tblCTPriceFixationDetail pfd
-			,tblCTPriceFixation pf
-			,tblCTContractDetail cd
-			,tblCTContractHeader ch
-		where
-			pfd.intPriceFixationDetailId = i.intPriceFixationDetailId
-			and pf.intPriceFixationId = pfd.intPriceFixationId
-			and cd.intContractDetailId = pf.intContractDetailId
-			and ch.intContractHeaderId = pf.intContractHeaderId;  
-
+			inner join tblCTPriceFixationDetail pfd on pfd.intPriceFixationDetailId = i.intPriceFixationDetailId
+			inner join tblCTPriceFixation pf on pf.intPriceFixationId = pfd.intPriceFixationId
+			inner join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
+		
 		exec uspCTUpdateAppliedAndPrice
 			@intContractDetailId = @intActiveContractDetailId
 			,@dblBalance = @dblBalance

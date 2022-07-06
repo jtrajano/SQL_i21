@@ -4,7 +4,8 @@
 	@intPriceFixationDetailId	INT = NULL,
 	@intPriceFixationTicketId	INT = NULL,
 	@intUserId					INT,
-	@ysnDeleteFromInvoice bit = 0
+	@ysnDeleteFromInvoice bit = 0,
+	@ysnDeleteWholePricing bit = 0
 	
 AS
 BEGIN TRY
@@ -21,7 +22,8 @@ BEGIN TRY
 			@Quantity		NUMERIC(18,6),
 			@ysnSuccess		BIT,
 			@intContractHeaderId int,
-			@intContractDetailId int;
+			@intContractDetailId int,
+			@strSummaryLogProcess nvarchar(50);
 
 			DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 			declare @strFinalMessage nvarchar(max);
@@ -40,11 +42,33 @@ BEGIN TRY
 
 	if (@intPriceFixationId is null or @intPriceFixationId < 1)
 	begin
-		set @intContractDetailId = (select top 1 pf.intContractDetailId from tblCTPriceFixationDetail pfd inner join tblCTPriceFixation pf on pfd.intPriceFixationId = pf.intPriceFixationId where intPriceFixationDetailId = @intPriceFixationDetailId)
+		set @intContractDetailId = (
+			select top 1
+				isnull(pf.intContractDetailId,pfm.intContractDetailId)
+			from
+				tblCTPriceFixationDetail pfd
+				left join tblCTPriceFixation pf
+					on pfd.intPriceFixationId = pf.intPriceFixationId
+				left join tblCTPriceFixationMultiplePrice pfm
+					on pfm.intPriceFixationId = pfd.intPriceFixationId
+			where
+				intPriceFixationDetailId = @intPriceFixationDetailId
+		
+		)
 	end
 	else
 	begin
-		set @intContractDetailId = (select top 1 intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId)
+		set @intContractDetailId = (
+			select top 1
+				isnull(pf.intContractDetailId,pfm.intContractDetailId)
+			from
+				tblCTPriceFixation pf
+				left join tblCTPriceFixationMultiplePrice pfm
+					on pfm.intPriceFixationId = pf.intPriceFixationId
+			where
+				pf.intPriceFixationId = @intPriceFixationId
+		
+		)
 	end
 
 	declare @intDWGIdId int
@@ -138,112 +162,18 @@ BEGIN TRY
 				SET @ysnDeleteVoucher = 0
 		END
 		
-		IF @Count > 0 AND ISNULL(@intPriceFixationId,0) = 0 AND @ysnDeleteVoucher = 0--@Count > 0 AND @intPriceFixationTicketId IS NOT NULL AND @Count > 1
+		IF @Count > 0 AND ISNULL(@intPriceFixationId,0) = 0 AND @ysnDeleteVoucher = 0
 		BEGIN	
-			-- -- UPDATE ITEM BILL QTY
-			-- SELECT @ItemId = intInventoryReceiptItemId, @Quantity = dblQtyReceived
-			-- FROM tblAPBillDetail 
-			-- WHERE intBillDetailId = @DetailId
-
-			-- DECLARE @receiptDetails AS InventoryUpdateBillQty
-			-- DELETE FROM @receiptDetails
-			-- INSERT INTO @receiptDetails
-			-- (
-			-- 	[intInventoryReceiptItemId],
-			-- 	[intInventoryReceiptChargeId],
-			-- 	[intInventoryShipmentChargeId],
-			-- 	[intSourceTransactionNoId],
-			-- 	[strSourceTransactionNo],
-			-- 	[intItemId],
-			-- 	[intToBillUOMId],
-			-- 	[dblToBillQty]
-			-- )
-			-- SELECT * FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @DetailId, @Quantity * -1, 0)
-
-			-- EXEC uspICUpdateBillQty @updateDetails = @receiptDetails	
-			-- -----------------------------------------
 			-- -- CT-4094	
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
-			--DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
 			
 			INSERT INTO @voucherIds			
 			SELECT @DetailId
 
-			-- EXEC uspAPUpdateVoucherTotal @voucherIds
-
-			-- --Audit Log
-			-- DECLARE @details NVARCHAR(max) = '{"change": "tblAPBillDetails", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@DetailId as varchar(15))+'", "keyValue": '+CAST(@DetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
-
-			-- EXEC uspSMAuditLog
-			-- @screenName = 'AccountsPayable.view.Voucher',
-			-- @entityId = @intUserId,
-			-- @actionType = 'Updated',
-			-- @actionIcon = 'small-tree-modified',
-			-- @keyValue = @Id,
-			-- @details = @details
-
 			EXEC uspAPDeleteVoucherDetail @voucherIds, @intUserId
-
-			---- DELETE VOUCHER IF ALL TICKETS WHERE DELETED
-			--IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 0
-			--BEGIN
-				-- -- Disable constraints
-				-- ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId  
-				-- ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId
-
-				-- EXEC uspAPDeleteVoucher @Id,@intUserId,4
-
-				-- -- Enable constraints
-				-- ALTER TABLE tblCTPriceFixationDetailAPAR CHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId  
-				-- ALTER TABLE tblCTPriceFixationDetailAPAR CHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId        
-
-				-- --Audit Log
-				-- EXEC uspSMAuditLog
-				-- @screenName = 'AccountsPayable.view.Voucher',
-				-- @entityId = @intUserId,
-				-- @actionType = 'Deleted',
-				-- @actionIcon = 'small-tree-deleted',
-				-- @keyValue = @Id
-				-- END	
 		END
 		ELSE
 		BEGIN
-			-- Adjust Item Bill Quantity			
-			--INSERT INTO @tblItemBillDetail
-			--SELECT intInventoryReceiptItemId, @Id, intBillDetailId, dblQtyReceived
-			--FROM tblAPBillDetail a
-			--INNER JOIN #ItemBill b ON a.intBillDetailId = b.BillDetailId
-			--WHERE intBillId = @Id
-
-			--SELECT @BillDetailId = MIN(intBillDetailId) FROM @tblItemBillDetail
-			--WHILE ISNULL(@BillDetailId,0) > 0
-			--BEGIN
-			--	SELECT @ItemId = intInventoryReceiptItemId, @BillDetailId = intBillDetailId, @Quantity = dblReceived
-			--	FROM @tblItemBillDetail
-			--	WHERE intBillDetailId = @BillDetailId
-				
-			--	DECLARE @receiptDetails AS InventoryUpdateBillQty
-			--	DELETE FROM @receiptDetails
-			--	INSERT INTO @receiptDetails
-			--	(
-			--		[intInventoryReceiptItemId],
-			--		[intInventoryReceiptChargeId],
-			--		[intInventoryShipmentChargeId],
-			--		[intSourceTransactionNoId],
-			--		[strSourceTransactionNo],
-			--		[intItemId],
-			--		[intToBillUOMId],
-			--		[dblToBillQty]
-			--	)
-			--	SELECT * FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @BillDetailId, @Quantity * -1, 0)
-			
-			--	EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
-
-			--	SELECT @BillDetailId = MIN(intBillDetailId) FROM @tblItemBillDetail WHERE intBillDetailId > @BillDetailId
-			--END
-			--DELETE FROM @tblItemBillDetail
-
-			----------------------------------------		
 			-- Disable constraints
 			ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId  
 			ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId
@@ -291,13 +221,15 @@ BEGIN TRY
 				CD.intContractStatusId	=	case when CD.intContractStatusId = 5 and @ysnDestinationWeightsAndGrades = 0 then 1 else CD.intContractStatusId end
 		FROM	tblCTContractDetail	CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-		JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
-		AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+		JOIN	tblCTPriceFixation	PF	ON PF.intContractHeaderId = CH.intContractHeaderId and	isnull(PF.intContractDetailId,0) = (case when CH.ysnMultiplePriceFixation = 1 then isnull(PF.intContractDetailId,0) else CD.intContractDetailId end) OR PF.intContractDetailId = CD.intSplitFromId
+		AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation pff WHERE pff.intContractHeaderId = CH.intContractHeaderId and isnull(pff.intContractDetailId,0) = (case when CH.ysnMultiplePriceFixation = 1 then isnull(pff.intContractDetailId,0) else ISNULL(CD.intContractDetailId,0) end))
 		WHERE	PF.intPriceFixationId	=	@tempPriceFixationId
 
-		SELECT @intContractHeaderId = intContractHeaderId
-			, @intContractDetailId = intContractDetailId
-		FROM tblCTPriceFixation WHERE intPriceFixationId = @tempPriceFixationId
+		SELECT @intContractHeaderId = pf.intContractHeaderId
+			, @intContractDetailId = isnull(pf.intContractDetailId,pfm.intContractDetailId)
+		FROM tblCTPriceFixation pf
+		left join tblCTPriceFixationMultiplePrice pfm on pfm.intPriceFixationId = pf.intPriceFixationId
+		WHERE pf.intPriceFixationId = @tempPriceFixationId
 	END
 
 	IF ISNULL(@intPriceFixationId,0) = 0 AND ISNULL(@intPriceFixationDetailId, 0) <> 0
@@ -305,27 +237,67 @@ BEGIN TRY
 		UPDATE tblCTPriceFixationDetail SET ysnToBeDeleted = 1
 		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
+		UPDATE tblCTPriceFixationDetailMultiplePrice SET ysnToBeDeleted = 1
+		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+
 		DECLARE @QtyToDelete NUMERIC(24, 10)
 		SELECT @QtyToDelete = dblQuantity FROM tblCTPriceFixationDetail
 		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
-		EXEC uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
-								  @intContractDetailId 	= @intContractDetailId, 
-								  @strSource 			= 'Pricing',
-								  @strProcess 			= 'Fixation Detail Delete',
-								  @intUserId			=  @intUserId
+		select @strSummaryLogProcess = (case when @ysnDeleteWholePricing = 1 then 'Price Delete' else 'Fixation Detail Delete' end)
 
-		-- Summary Log
-		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							@intContractDetailId 	= 	@intContractDetailId,
-							@strSource			 	= 	'Pricing',
-							@strProcess		 	    = 	'Fixation Detail Delete',
-							@contractDetail 		= 	@contractDetails,
-							@intUserId				= 	@intUserId,
-							@intTransactionId		= 	@intPriceFixationDetailId,
-							@dblTransactionQty		= 	@QtyToDelete
+		IF OBJECT_ID('tempdb..#tmpPriceFixationDetailMultiplePrice') IS NOT NULL DROP TABLE #tmpPriceFixationDetailMultiplePrice
 
-		-- Summary Log
+		select distinct pf.intContractDetailId
+		into #tmpPriceFixationDetailMultiplePrice
+		from tblCTPriceFixationDetailMultiplePrice pfd
+		join tblCTPriceFixationMultiplePrice pf on pf.intPriceFixationMultiplePriceId = pfd.intPriceFixationMultiplePriceId
+		where pfd.intPriceFixationDetailId = @intPriceFixationDetailId
+
+		if exists(select top 1 1 from #tmpPriceFixationDetailMultiplePrice)
+		begin
+			select @intContractDetailId = null;
+			select @intContractDetailId = min(intContractDetailId) from #tmpPriceFixationDetailMultiplePrice
+			while (@intContractDetailId is not null)
+			begin
+				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+									@intContractDetailId 	= 	@intContractDetailId,
+									@strSource			 	= 	'Pricing',
+									@strProcess		 	    = 	'Fixation Detail Delete',
+									@contractDetail 		= 	@contractDetails,
+									@intUserId				= 	@intUserId,
+									@intTransactionId		= 	@intPriceFixationDetailId,
+									@dblTransactionQty		= 	@QtyToDelete
+				
+				delete #tmpPriceFixationDetailMultiplePrice where intContractDetailId = @intContractDetailId;
+				select @intContractDetailId = min(intContractDetailId) from #tmpPriceFixationDetailMultiplePrice;
+			end
+
+		end
+		else
+		begin
+
+			EXEC uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
+									  @intContractDetailId 	= @intContractDetailId, 
+									  @strSource 			= 'Pricing',
+									  @strProcess 			= @strSummaryLogProcess,
+									  @intUserId			=  @intUserId
+
+			-- Summary Log
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess		 	    = 	'Fixation Detail Delete',
+								@contractDetail 		= 	@contractDetails,
+								@intUserId				= 	@intUserId,
+								@intTransactionId		= 	@intPriceFixationDetailId,
+								@dblTransactionQty		= 	@QtyToDelete
+			-- Summary Log
+
+		end
+
+		IF OBJECT_ID('tempdb..#tmpPriceFixationDetailMultiplePrice') IS NOT NULL DROP TABLE #tmpPriceFixationDetailMultiplePrice
+
 		IF EXISTS (SELECT TOP 1 1 FROM tblCTContractHeader ch
 					INNER JOIN tblCTWeightGrade wg ON wg.intWeightGradeId IN (ch.intWeightId, ch.intGradeId) AND wg.strWhereFinalized = 'Destination'
 					WHERE intContractHeaderId = @intContractHeaderId AND intContractTypeId = 2)
@@ -340,7 +312,6 @@ BEGIN TRY
 								@intTransactionId		= 	@intPriceFixationDetailId,
 								@dblTransactionQty		= 	@QtyToDeleteNegative
 		END
-
 	END
 
 	IF ISNULL(@intPriceFixationDetailId,0) = 0 AND ISNULL(@intPriceFixationId, 0) <> 0
@@ -353,10 +324,10 @@ BEGIN TRY
 					INNER JOIN tblCTWeightGrade wg ON wg.intWeightGradeId IN (ch.intWeightId, ch.intGradeId) AND wg.strWhereFinalized = 'Destination'
 					WHERE intContractHeaderId = @intContractHeaderId AND intContractTypeId = 2)
 		BEGIN
-			DECLARE @intPriceFixationDetailIdToDelete INT = 0;
-			
+			DECLARE @intPriceFixationDetailIdToDelete int = 0;
 			SELECT @intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
-			WHILE ISNULL(@intPriceFixationDetailIdToDelete, 0) > 0
+			
+			WHILE ISNULL(@intPriceFixationDetailIdToDelete,0) > 0
 			BEGIN
 				SELECT @QtyToDelete = dblQuantity FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intPriceFixationDetailIdToDelete;
 				SELECT @QtyToDeleteNegative = @QtyToDelete * -1;
@@ -375,12 +346,10 @@ BEGIN TRY
 		END
 	END
 	
-	declare @strInvoiceDiscountsChargesIds nvarchar(500);
-	declare @InvoiceDiscountsChargesIds table (
-		intId nvarchar(20)
-	)
-	declare @intActiveId int = 0;
-
+	DECLARE @strInvoiceDiscountsChargesIds nvarchar(500);
+	DECLARE @InvoiceDiscountsChargesIds TABLE (intId NVARCHAR(20))
+	DECLARE @intActiveId int = 0;
+	
 	if EXISTS (select top 1 1 from #ItemInvoice)
 	select @DetailId = MIN(DetailId) FROM #ItemInvoice
 	while (@DetailId is not null)

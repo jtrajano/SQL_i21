@@ -77,8 +77,8 @@ RETURNS @tblTaxTable TABLE
 		,[ysnTaxOnly]					BIT
 		,[strTaxGroup]					NVARCHAR(100)
 		,[ysnInvalidSetup]				BIT
-		,[strNotes]						NVARCHAR(MAX)
 		,[strReason]					NVARCHAR(MAX)
+		,[strNotes]						NVARCHAR(MAX)
     )
 AS
 BEGIN
@@ -114,10 +114,16 @@ BEGIN
 		Record      varchar(1000)   
 	)
 
-	--IF (@strTaxState IS NULL OR @strTaxState = '')
-	--BEGIN 
-	--	SET @strTaxState = ''
-	--END
+	DECLARE @strStateForMessage NVARCHAR(MAX)
+
+	IF (@strTaxState IS NULL OR @strTaxState = '')
+	BEGIN 
+		SET @strStateForMessage = '(State not supplied)'
+	END
+	ELSE
+	BEGIN 
+		SET @strStateForMessage = @strTaxState
+	END
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
 			,@intItemCategoryId INT
@@ -355,7 +361,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax1
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax1
 			)
 		END
 	END
@@ -467,7 +473,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax2
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax2
 			)
 		END
 	END
@@ -579,7 +585,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax3
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax3
 			)
 		END
 	END
@@ -691,7 +697,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax4
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax4
 			)
 		END
 	END
@@ -803,7 +809,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax5
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax5
 			)
 		END
 	END
@@ -915,7 +921,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax6
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax6
 			)
 		END
 	END
@@ -1027,7 +1033,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax7
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax7
 			)
 		END
 	END
@@ -1139,7 +1145,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax8
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax8
 			)
 		END
 	END
@@ -1251,7 +1257,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax9
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax9
 			)
 		END
 	END
@@ -1363,7 +1369,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax10
+				,'Unable to find match for ' + @strStateForMessage + ', state tax ' + @Tax10
 			)
 		END
 	END
@@ -1476,7 +1482,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax Federal Excise Tax Rate'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax Federal Excise Tax Rate'
 			)
 		END
 	END
@@ -1589,7 +1595,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax State Excise Tax Rate 1'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax State Excise Tax Rate 1'
 			)
 		END
 	END
@@ -1702,7 +1708,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax State Excise Tax Rate 2'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax State Excise Tax Rate 2'
 			)
 		END
 	END
@@ -1817,7 +1823,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax County Excise Tax Rate'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax County Excise Tax Rate'
 			)
 		END
 	END
@@ -1931,7 +1937,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax City Excise Tax Rate'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax City Excise Tax Rate'
 			)
 		END
 	END
@@ -2047,7 +2053,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax State Sales Tax Percentage Rate'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax State Sales Tax Percentage Rate'
 			)
 		END
 	END
@@ -2163,7 +2169,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax County Sales Tax Percentage Rate'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax County Sales Tax Percentage Rate'
 			)
 		END
 	END
@@ -2279,7 +2285,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax City Sales Tax Percentage Rate'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax City Sales Tax Percentage Rate'
 			)
 		END
 	END
@@ -2396,7 +2402,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax Other Sales Tax Percentage Rate'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax Other Sales Tax Percentage Rate'
 			)
 		END
 	END
@@ -2507,7 +2513,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax Federal Excise Tax 1'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax Federal Excise Tax 1'
 			)
 		END
 	END
@@ -2619,7 +2625,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax Federal Excise Tax 2'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax Federal Excise Tax 2'
 			)
 		END
 	END
@@ -2731,7 +2737,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax State Excise Tax 1'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax State Excise Tax 1'
 			)
 		END
 	END
@@ -2842,7 +2848,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax State Excise Tax 2'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax State Excise Tax 2'
 			)
 		END
 	END
@@ -2953,7 +2959,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax State Excise Tax 3'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax State Excise Tax 3'
 			)
 		END
 	END
@@ -3064,7 +3070,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax County Tax 1'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax County Tax 1'
 			)
 		END
 	END
@@ -3176,7 +3182,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax City Tax 1'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax City Tax 1'
 			)
 		END
 	END
@@ -3287,7 +3293,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax State Sales Tax'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax State Sales Tax'
 			)
 		END
 	END
@@ -3398,7 +3404,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax County Sales Tax'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax County Sales Tax'
 			)
 		END
 	END
@@ -3509,7 +3515,7 @@ BEGIN
 			)
 			VALUES(
 				 1
-				,'Unable to find match for ' + @strTaxState + ' state tax City Sales Tax'
+				,'Unable to find match for ' + @strStateForMessage + ', state tax City Sales Tax'
 			)
 		END
 	END
@@ -3612,6 +3618,8 @@ BEGIN
 			END
 		
 	END
+
+
 
     RETURN
 END

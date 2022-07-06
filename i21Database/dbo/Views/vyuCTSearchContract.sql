@@ -84,8 +84,10 @@ AS
 			CH.strFreightTerm,
 			CH.strExternalEntity,
 			CH.strExternalContractNumber,
-			CH.ysnReceivedSignedFixationLetter
-
+			CH.ysnReceivedSignedFixationLetter, -- CT-5315
+			CH.strEntitySelectedLocation, -- CT-5315
+			CH.strReportTo,
+			CH.ysnEnableFutures
 	FROM	[vyuCTSearchContractHeader]  CH	WITH (NOLOCK) LEFT
 	JOIN
 	 (
@@ -98,8 +100,9 @@ AS
 				ON UM.intCommodityUnitMeasureId = HV.intCommodityUOMId 
 			LEFT JOIN tblCTContractDetail CD WITH (NOLOCK)
 				ON CD.intContractHeaderId   = HV.intContractHeaderId
+			LEFT JOIN tblICItemUOM IU on IU.intItemUOMId = CD.intItemUOMId
 		CROSS APPLY (
-			SELECT * FROM [dbo].[fnCTConvertQuantityToTargetItemUOM2](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId, CD.dblBalance,ISNULL(CD.intNoOfLoad,0),ISNULL(CD.dblQuantity,0),HV.ysnLoad)
+			SELECT * FROM [dbo].[fnCTConvertQuantityToTargetItemUOM2](CD.intItemId,IU.intUnitMeasureId,UM.intUnitMeasureId, CD.dblBalance,ISNULL(CD.intNoOfLoad,0),ISNULL(CD.dblQuantity,0),HV.ysnLoad)
 		) F
  GROUP BY HV.intContractHeaderId
  )BL ON  BL.intContractHeaderId = CH.intContractHeaderId

@@ -28,18 +28,21 @@ INSERT INTO tblICCategory (
 	,intConcurrencyId
 	,ysnAutoCalculateFreight
 	)
-SELECT RTRIM(agcls_cd)
+SELECT 
+	RTRIM(agcls_cd)
 	,RTRIM(agcls_desc)
 	,''
-	,case 
-	(select top 1 case when agitm_ga_com_cd is not null then 'Y' else agitm_phys_inv_ynbo end 
-	from agitmmst where agitm_class = oc.agcls_cd order by agitm_phys_inv_ynbo desc) 
-	when 'Y' then 'Inventory' 
-	when 'O' then 'Inventory' 
-	when 'S' then 'Non Inventory'
-	when 'B' then 'Inventory'
-	when 'A' then 'Inventory'
-	else 'Other Charge' end	'InventoryType'
+	,NULL 
+	--case 
+	--	(select top 1 case when agitm_ga_com_cd is not null then 'Y' else agitm_phys_inv_ynbo end 
+	--	from agitmmst where agitm_class = oc.agcls_cd order by agitm_phys_inv_ynbo desc) 
+	--	when 'Y' then 'Inventory' 
+	--	when 'O' then 'Inventory' 
+	--	when 'S' then 'Non Inventory'
+	--	when 'B' then 'Inventory'
+	--	when 'A' then 'Inventory'
+	--	else 'Other Charge' 
+	--end	'InventoryType'
 	,'1'
 	,'Item Level'
 	,1

@@ -212,6 +212,7 @@ BEGIN TRY
 				,12
 				) --Line / WIP Sample
 			AND S.intSampleStatusId = 1
+			AND S.intTypeId = 1
 
 		IF @strSampleNumber IS NOT NULL
 		BEGIN
@@ -697,6 +698,21 @@ BEGIN TRY
 	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
 		,@intTransactionTypeId = 34
 		,@ysnPosted = 1
+	
+	IF NOT EXISTS(SELECT *
+					FROM dbo.tblMFProductionPreStage
+					WHERE intWorkOrderId = @intWorkOrderId)
+	BEGIN
+		INSERT INTO dbo.tblMFProductionPreStage (
+				intWorkOrderId
+				,intProductionStatusId
+				,intUserId
+				)
+		SELECT @intWorkOrderId
+			,13
+			,@intUserId
+	END
+
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

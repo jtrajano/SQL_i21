@@ -15,12 +15,10 @@ begin try
         top 1 1
     from
         tblICInventoryReceipt ir
-        ,tblICInventoryReceiptItem ri
-        ,@voucherPayables vp
+        inner join tblICInventoryReceiptItem ri on ir.intInventoryReceiptId = ri.intInventoryReceiptId
+        inner join @voucherPayables vp on ri.intInventoryReceiptItemId = vp.intInventoryReceiptItemId
     where
-        ri.intInventoryReceiptItemId = vp.intInventoryReceiptItemId
-        and ir.intInventoryReceiptId = ri.intInventoryReceiptId
-        and (ir.strReceiptType <> 'Purchase Contract' or isnull(vp.intContractDetailId,0) = 0)
+        (ir.strReceiptType <> 'Purchase Contract' or isnull(vp.intContractDetailId,0) = 0)
     )
     begin
 
@@ -29,7 +27,7 @@ begin try
         ,@voucherPayableTax = @voucherPayableTax    
         ,@userId = @userId    
         ,@throwError = @throwError  
-        ,@error = @error    
+        ,@error = @error out
         ,@createdVouchersId  = @createdVouchersId out  
 
         goto _return;
@@ -94,7 +92,6 @@ begin try
 		,@intCCSiteDetailId				INT
 		,@intInvoiceId					INT
 		,@intBuybackChargeId			INT
-		,@intTicketId					INT
 		,@dblOrderQty					DECIMAL(38,15)
 		,@dblOrderUnitQty				DECIMAL(38,20)
 		,@intOrderUOMId					INT
@@ -137,9 +134,11 @@ begin try
 	declare @voucherPayablesDataTemp as table (
 		intVoucherPayableId int
 		,dblQuantityToBill decimal(38,15)
+		,dblNetWeight decimal(38,15)
 		,intContractDetailId int
 		,intInventoryReceiptItemId int
 		,intQtyToBillUOMId int
+		,intWeightUOMId int
 	);
 
 	declare @availablePrice as table (
@@ -155,6 +154,8 @@ begin try
 		,intPricingTypeId int
 		,intFreightTermId int
 		,intCompanyLocationId int
+		,intPriceContractId int
+		,strPriceContractNo NVARCHAR(50)
 	);
 
 	declare 
@@ -169,14 +170,18 @@ begin try
 		,@dblPriceQuantity numeric(18,6)
 		,@intAvailablePriceLoad int
 		,@dblTransactionQuantity numeric(18,6)
+		,@dblTransactionNetWeight numeric(18,6)
 		,@ysnLoad bit = 0
 		,@intInventoryReceiptId int
+		,@strReceiptNo NVARCHAR(50)
 		,@ysnSuccessBillPosting bit
 		,@intId int
 		,@intPriceItemUOMId int
 		,@intPricingTypeId int
 		,@intFreightTermId int
 		,@intCompanyLocationId int
+		,@intPriceContractId int
+		,@strPriceContractNo NVARCHAR(50)
 		;
 
 	declare @CreatedVoucher as table(
@@ -194,9 +199,11 @@ begin try
 		select
 			intVoucherPayableId = a.intVoucherPayableId
 			,dblQuantityToBill = a.dblQuantityToBill
+			,dblNetWeight = a.dblNetWeight
 			,intContractDetailId = a.intContractDetailId
 			,intInventoryReceiptItemId = a.intInventoryReceiptItemId
 			,intQtyToBillUOMId = a.intQtyToBillUOMId
+			,intWeightUOMId = a.intWeightUOMId
 		from
 			@voucherPayables a
 		where
@@ -211,19 +218,29 @@ begin try
 			select
 				@intVoucherPayableId = intVoucherPayableId
 				,@dblQuantityToBill = dblQuantityToBill
+				,@dblNetWeight = dblNetWeight
 				,@intContractDetailId = intContractDetailId
 				,@intInventoryReceiptItemId = intInventoryReceiptItemId
 				,@intQtyToBillUOMId = intQtyToBillUOMId
+				,@intWeightUOMId = intWeightUOMId
 			from
 				@voucherPayablesDataTemp
 			where
 				intVoucherPayableId = @intVoucherPayableId
 
 			--Get Receipt Id
-			select @intInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intInventoryReceiptItemId;
+			select @intInventoryReceiptId = ir.intInventoryReceiptId, @strReceiptNo = ir.strReceiptNumber
+			FROM tblICInventoryReceiptItem iri
+			JOIN tblICInventoryReceipt ir ON ir.intInventoryReceiptId = iri.intInventoryReceiptId
+			where intInventoryReceiptItemId = @intInventoryReceiptItemId;
 
 			--Check if Load base contract
-			select @ysnLoad = ysnLoad from tblCTContractDetail cd, tblCTContractHeader ch where cd.intContractDetailId = @intContractDetailId and ch.intContractHeaderId = cd.intContractHeaderId;
+			select @ysnLoad = ysnLoad 
+			from
+				tblCTContractDetail cd
+				inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			where cd.intContractDetailId = @intContractDetailId;
+
 			if (isnull(@ysnLoad,0) = 1)
 			begin
 				select @dblTransactionQuantity = count(distinct bd.intBillId) from tblAPBillDetail bd where bd.intInventoryReceiptItemId = @intInventoryReceiptItemId;
@@ -251,6 +268,8 @@ begin try
 				,intPricingTypeId = intPricingTypeId
 				,intFreightTermId = intFreightTermId
 				,intCompanyLocationId = intCompanyLocationId
+				,intPriceContractId = intPriceContractId
+				,strPriceContractNo = strPriceContractNo
 			from  
 				vyuCTGetAvailablePriceForVoucher  
 			where  
@@ -275,29 +294,48 @@ begin try
 					,@intPricingTypeId = intPricingTypeId
 					,@intFreightTermId = intFreightTermId
 					,@intCompanyLocationId = intCompanyLocationId
+					,@intPriceContractId = intPriceContractId
+					,@strPriceContractNo = strPriceContractNo
 				from  
 					@availablePrice  
 				where  
 					intId = @intId
 
+				IF (ISNULL(@intPriceContractId, 0) <> 0 )
+				BEGIN
+					-- Traceability Feature - CT-5847
+					DECLARE @TransactionLink udtICTransactionLinks
+					INSERT INTO @TransactionLink (strOperation
+						, intSrcId
+						, strSrcTransactionNo
+						, strSrcModuleName
+						, strSrcTransactionType
+						, intDestId
+						, strDestTransactionNo
+						, strDestModuleName
+						, strDestTransactionType)
+					SELECT 'Price Contract'
+						, intSrcId = @intInventoryReceiptId
+						, strSrcTransactionNo = @strReceiptNo
+						, strSrcModuleName = 'Inventory'
+						, strSrcTransactionType = 'Inventory Receipt'
+						, intDestId = @intPriceContractId
+						, strDestTransactionNo = @strPriceContractNo
+						, 'Contract Management'
+						, 'Price Contract'
+					
+					EXEC dbo.uspICAddTransactionLinks @TransactionLink
+				END
+
 				--Set @dblTransactionQuantity = @dblQuantityToBill by default (this is also correct quantity for Load Based)
 				set @dblTransactionQuantity = @dblQuantityToBill;
-
-				DECLARE @ysnIsNotLoadMultiplePrice bit = 0
+				set @dblTransactionNetWeight = @dblNetWeight;
 
 				if (isnull(@ysnLoad,0) = 0 and @dblTransactionQuantity > @dblAvailablePriceQuantity)
 				begin
 					--If not load based and the @dblAvailablePriceQuantity is less than the @dblQuantityToBill, price quantity should be the quantity to bill
+					set @dblTransactionNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intQtyToBillUOMId,@intWeightUOMId,@dblAvailablePriceQuantity)
 					set @dblTransactionQuantity = @dblAvailablePriceQuantity;
-					
-					if(
-					@intPricingTypeId = 1 and --if priced contract
-					EXISTS(SELECT TOP 1 1 FROM @voucherPayables WHERE strLoadShipmentNumber like '%LS-%') and --if load shipment
-					@intPriceFixationId is null --if not has multiple PriceFixation
-					)
-					BEGIN
-						SET @ysnIsNotLoadMultiplePrice = 1
-					END
 				end
 				else
 				begin
@@ -307,7 +345,8 @@ begin try
 
 				--Deduct the quantity
 				set @dblQuantityToBill = (@dblQuantityToBill - @dblTransactionQuantity);
-				update @voucherPayablesDataTemp set dblQuantityToBill = (dblQuantityToBill - @dblTransactionQuantity) where intVoucherPayableId = @intVoucherPayableId;
+				set @dblNetWeight = (@dblNetWeight - @dblTransactionNetWeight);
+				update @voucherPayablesDataTemp set dblQuantityToBill = (dblQuantityToBill - @dblTransactionQuantity), dblNetWeight = (dblNetWeight - @dblTransactionNetWeight) where intVoucherPayableId = @intVoucherPayableId;
 				update @availablePrice set dblAvailablePriceQuantity = (dblAvailablePriceQuantity - @dblTransactionQuantity) where intPriceFixationDetailId = @intPriceFixationDetailId;
 				
 				--Construct voucher data
@@ -405,6 +444,22 @@ begin try
 					,ysnStage
 					,intPriceFixationDetailId
 					,dblRatio
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]
+					, [intFreightTermId]
 				)
 				select
 					intPartitionId = vp.intPartitionId
@@ -464,9 +519,7 @@ begin try
 					,dblOrderQty = vp.dblOrderQty
 					,dblOrderUnitQty = vp.dblOrderUnitQty
 					,intOrderUOMId = vp.intOrderUOMId
-
-					,dblQuantityToBill = CASE WHEN @ysnIsNotLoadMultiplePrice = 1 THEN vp.dblQuantityToBill ELSE @dblTransactionQuantity END
-
+					,dblQuantityToBill = @dblTransactionQuantity
 					,dblQtyToBillUnitQty = vp.dblQtyToBillUnitQty
 					,intQtyToBillUOMId = vp.intQtyToBillUOMId
 					,dblCost = @dblFinalPrice
@@ -475,9 +528,7 @@ begin try
 					,intCostUOMId = vp.intCostUOMId
 					,intCostCurrencyId = vp.intCostCurrencyId
 					,dblWeight = vp.dblWeight
-					
-					,dblNetWeight = CASE WHEN @ysnIsNotLoadMultiplePrice = 1 THEN vp.dblNetWeight ELSE @dblTransactionQuantity END
-
+					,dblNetWeight = @dblTransactionNetWeight
 					,dblWeightUnitQty = vp.dblWeightUnitQty
 					,intWeightUOMId = vp.intWeightUOMId
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
@@ -521,6 +572,22 @@ begin try
 							@dblTransactionQuantity
 							,dblQuantityToBill
 						)
+					/*Payment Info*/
+					, vp.intPayFromBankAccountId
+					, vp.strFinancingSourcedFrom
+					, vp.strFinancingTransactionNumber
+					/*Trade Finance Info*/
+					, vp.strFinanceTradeNo
+					, vp.intBankId
+					, vp.intBankAccountId
+					, vp.intBorrowingFacilityId
+					, vp.strBankReferenceNo
+					, vp.intBorrowingFacilityLimitId
+					, vp.intBorrowingFacilityLimitDetailId
+					, vp.strReferenceNo
+					, vp.intBankValuationRuleId
+					, vp.strComments
+					, vp.intFreightTermId
 				from
 					@voucherPayables vp
 					LEFT JOIN tblEMEntityLocation em 
@@ -596,7 +663,22 @@ begin try
 					,[strBillOfLading]					
 					,[ysnReturn]
 					,[ysnStage]
-					,[dblRatio]			
+					,[dblRatio]
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]					
 				)
 				EXEC uspICGetProRatedReceiptCharges
 					@intInventoryReceiptItemId = @intInventoryReceiptItemId
@@ -659,6 +741,21 @@ begin try
 					,[ysnReturn]
 					,[ysnStage]
 					,[dblRatio]
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]
 				)
 				SELECT 
 					[intEntityVendorId]			
@@ -715,6 +812,21 @@ begin try
 					,[ysnReturn]
 					,[ysnStage]
 					,[dblRatio]
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]
 				FROM 
 					@voucherPayableProRatedCharges
 
@@ -821,6 +933,22 @@ begin try
 					,int1099Category
 					,dbl1099
 					,ysnStage
+					/*Payment Info*/
+					, [intPayFromBankAccountId]
+					, [strFinancingSourcedFrom]
+					, [strFinancingTransactionNumber]
+					/*Trade Finance Info*/
+					, [strFinanceTradeNo]
+					, [intBankId]
+					, [intBankAccountId]
+					, [intBorrowingFacilityId]
+					, [strBankReferenceNo]
+					, [intBorrowingFacilityLimitId]
+					, [intBorrowingFacilityLimitDetailId]
+					, [strReferenceNo]
+					, [intBankValuationRuleId]
+					, [strComments]
+					, [intFreightTermId]
 		)
 		SELECT
 			intPartitionId = vp.intPartitionId
@@ -914,6 +1042,22 @@ begin try
 			,int1099Category = vp.int1099Category
 			,dbl1099 = vp.dbl1099
 			,ysnStage = vp.ysnStage
+			/*Payment Info*/
+			, [intPayFromBankAccountId]
+			, [strFinancingSourcedFrom]
+			, [strFinancingTransactionNumber]
+			/*Trade Finance Info*/
+			, [strFinanceTradeNo]
+			, [intBankId]
+			, [intBankAccountId]
+			, [intBorrowingFacilityId]
+			, [strBankReferenceNo]
+			, [intBorrowingFacilityLimitId]
+			, [intBorrowingFacilityLimitDetailId]
+			, [strReferenceNo]
+			, [intBankValuationRuleId]
+			, [strComments]
+			, [intFreightTermId]
 		from
 			@voucherPayables vp
 		where
@@ -982,7 +1126,7 @@ begin try
 				,@voucherPayableTax = @voucherPayableTaxFinal  
 				,@userId = @userId  
 				,@throwError = @throwError
-				,@error = @error  
+				,@error = @error out
 				,@createdVouchersId  = @createdVouchersId out
 
 			insert into @CreatedVoucher
@@ -1012,6 +1156,10 @@ begin try
 					,@intCreatedInventoryReceiptItemId int
 					,@dblCreatedQtyReceived numeric(18,6);
 
+
+
+				declare @prePayId Id;
+				
 				declare @processedPayment table (
 					intBillId int
 				);
@@ -1042,31 +1190,17 @@ begin try
 					--2. Insert into Contract Helper table tblCTPriceFixationDetailAPAR
 					if (isnull(@intCreatedPriceFixationDetailId,0) > 0)
 					begin
-						INSERT INTO tblCTPriceFixationDetailAPAR(
-							intPriceFixationDetailId
-							,intBillId
-							,intBillDetailId
-							,intSourceId
-							,dblQuantity
-							,dtmCreatedDate
-							,ysnMarkDelete
-							,intConcurrencyId  
-						)  
-						SELECT   
-							intPriceFixationDetailId = @intCreatedPriceFixationDetailId  
-							,intBillId = @intCreatedBillId  
-							,intBillDetailId = @intCreatedBillDetailId 
-							,intSourceId = @intCreatedInventoryReceiptItemId
-							,dblQuantity = @dblCreatedQtyReceived
-							,dtmCreatedDate = GETUTCDATE()
-							,ysnMarkDelete = null
-							,intConcurrencyId = 1
+
+						exec uspCTCreatePricingAPARLink
+							@intPriceFixationDetailId = @intCreatedPriceFixationDetailId
+							,@intHeaderId = @intCreatedBillId
+							,@intDetailId = @intCreatedBillDetailId
+							,@intSourceHeaderId = null
+							,@intSourceDetailId = @intCreatedInventoryReceiptItemId
+							,@dblQuantity = @dblCreatedQtyReceived
+							,@strScreen = 'Voucher'
 					end
 
-					--4. Apply PrePay
-					select @intTicketId = intTicketId from tblSCTicket where intInventoryReceiptId = @intCreatedInventoryReceiptId;
-
-					declare @prePayId Id;
 					delete from @prePayId
 
 					insert into
@@ -1091,7 +1225,9 @@ begin try
 					select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
 				end
 
+				--CT-7098 - commented this block not to auto post voucher for ECOM demo purposes.
 				--3. Post all created Vuchers
+				/*
 				set @intCreatedBillId = 0;
 				select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				while (@intCreatedBillId is not null and @intCreatedBillId > 0)
@@ -1108,6 +1244,7 @@ begin try
 
 					select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				end
+				*/
 
 			end
 

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoicesIntegrations]
 	 @InvoiceIds			InvoiceId	READONLY
-	,@UserId				INT = NULL 
+	,@UserId				INT = NULL
+	,@strSessionId			NVARCHAR(50)  = NULL
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -11,6 +12,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @IIDs 				InvoiceId
 DECLARE @PaymentStaging		PaymentIntegrationStagingTable
+SET @strSessionId = ISNULL(@strSessionId, NEWID())
 
 IF EXISTS(SELECT NULL FROM @InvoiceIds WHERE [strSourceTransaction] IN ('Card Fueling Transaction','CF Tran','CF Invoice'))
 BEGIN
@@ -54,9 +56,11 @@ EXEC dbo.[uspARUpdateProvisionalOnStandardInvoices] @IIDs
 
 EXEC dbo.[uspARUpdateLineItemsCommitted] @IIDs
 
-EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @IIDs, NULL, 0, @PaymentStaging
+EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @IIDs, NULL, 0, @PaymentStaging, @strSessionId
 
-EXEC [dbo].[uspARLogRiskPosition] @IIDs, @UserId
+EXEC dbo.[uspARLogRiskPosition] @IIDs, @UserId
+
+EXEC dbo.[uspARInsertInvoiceTransactionLink] @IIDs
 
 DELETE FROM ARTD
 FROM tblARTransactionDetail ARTD WITH (NOLOCK)
@@ -67,6 +71,5 @@ INNER JOIN (
 	FROM tblARInvoice WITH (NOLOCK)
 ) ARI ON II.[intHeaderId] = ARI.[intInvoiceId] 
 	 AND ARTD .[strTransactionType] = ARI.[strTransactionType] 
-
 
 GO

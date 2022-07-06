@@ -9,15 +9,12 @@
 			,dblSalesOrderTotal = sum(tblSOSalesOrder.dblSalesOrderTotal)
 		from
 			tblSOSalesOrder
-			,tblEMEntity
-			,tblEMEntityToContact
-			,tblARCustomer
+			inner join tblEMEntity on tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
+			inner join tblEMEntityToContact on tblEMEntityToContact.intEntityId = tblEMEntity.intEntityId
+			inner join tblARCustomer on tblARCustomer.[intEntityId] = tblEMEntity.intEntityId
 		where
 			tblSOSalesOrder.strTransactionType = 'Order'
-			and tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
-			and tblEMEntityToContact.intEntityId = tblEMEntity.intEntityId
 			and tblEMEntityToContact.ysnDefaultContact = 1
-			and tblARCustomer.[intEntityId] = tblEMEntity.intEntityId
 		group by
 			tblSOSalesOrder.intEntityCustomerId
 			,tblEMEntity.strName

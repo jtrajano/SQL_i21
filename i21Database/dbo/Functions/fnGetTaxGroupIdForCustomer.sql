@@ -6,13 +6,15 @@
 	,@CustomerLocationId	INT
 	,@SiteId				INT
 	,@FreightTermId			INT
+	,@FOB					NVARCHAR(100)
 )
 RETURNS INT
 AS
 BEGIN
-
-	DECLARE @FOB NVARCHAR(150)
-	SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
+	IF ISNULL(@FOB, '') = ''
+		SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
+	ELSE
+		SET @FOB = LOWER(@FOB)
 
 	IF ISNULL(@FreightTermId,0) <> 0 AND @FOB = 'origin'
 		SET @CustomerLocationId = NULL

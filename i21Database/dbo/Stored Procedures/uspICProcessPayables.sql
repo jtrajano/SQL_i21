@@ -72,6 +72,24 @@ SET ANSI_WARNINGS ON
 			,[intFreightTermId]				
 			,[strBillOfLading]					
 			,[ysnReturn]
+			,[intBookId]
+			,[intSubBookId]
+			,[intLotId]
+			/*Payment Info*/
+			, [intPayFromBankAccountId]
+			, [strFinancingSourcedFrom]
+			, [strFinancingTransactionNumber]
+			/*Trade Finance Info*/
+			, [strFinanceTradeNo]
+			, [intBankId]
+			, [intBankAccountId]
+			, [intBorrowingFacilityId]
+			, [strBankReferenceNo]
+			, [intBorrowingFacilityLimitId]
+			, [intBorrowingFacilityLimitDetailId]
+			, [strReferenceNo]
+			, [intBankValuationRuleId]
+			, [strComments]
 		)
 		SELECT 
 			 GP.[intEntityVendorId]			
@@ -127,7 +145,25 @@ SET ANSI_WARNINGS ON
 			,GP.[intFreightTermId]				
 			,GP.[strBillOfLading]					
 			,GP.[ysnReturn]	 
-		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
+			,GP.[intBookId]
+			,GP.[intSubBookId]
+			,GP.intLotId
+			/*Payment Info*/
+			, [intPayFromBankAccountId]
+			, [strFinancingSourcedFrom]
+			, [strFinancingTransactionNumber]
+			/*Trade Finance Info*/
+			, [strFinanceTradeNo]
+			, [intBankId]
+			, [intBankAccountId]
+			, [intBorrowingFacilityId]
+			, [strBankReferenceNo]
+			, [intBorrowingFacilityLimitId]
+			, [intBorrowingFacilityLimitDetailId]
+			, [strReferenceNo]
+			, [intBankValuationRuleId]
+			, [strComments]
+		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT, DEFAULT) GP
 	END
 	
 	/* Get Shipment Charges */

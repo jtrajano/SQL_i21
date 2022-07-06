@@ -5,7 +5,7 @@ SELECT
 	StockUOM.intItemStockUOMId,
 	StockUOM.intItemId,
 	Item.strItemNo,
-	strItemDescription = Item.strDescription,
+	strItemDescription = COALESCE(ItemUOM.strUPCDescription, Item.strDescription),
 	strType = Item.strType,
 	Item.strBundleType,
 	Item.intCategoryId,
@@ -88,6 +88,7 @@ LEFT JOIN tblICLot Lot ON Lot.intItemId = StockUOM.intItemId
 	AND Lot.intItemUOMId = StockUOM.intItemUOMId
 	AND Lot.intSubLocationId = StockUOM.intSubLocationId
 	AND Lot.intStorageLocationId = StockUOM.intStorageLocationId
+WHERE ItemLoc.ysnActive = 1
 
 UNION
 
@@ -147,3 +148,4 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemStockUOM
 	WHERE intItemId = i.intItemId
 		AND intItemLocationId = l.intItemLocationId
 		AND im.intItemUOMId = intItemUOMId)
+	AND l.ysnActive = 1

@@ -3,7 +3,7 @@ AS
 SELECT 
 	intEntityId = tblPRPaycheck.intEntityEmployeeId
 	,tblPREmployee.strEmployeeId
-	,tblPREmployee.strSocialSecurity
+	,strSocialSecurity = dbo.[fnAESDecryptASym](tblPREmployee.strSocialSecurity)
 	,tblPREmployee.strFirstName
 	,tblPREmployee.strMiddleName
 	,tblPREmployee.strLastName

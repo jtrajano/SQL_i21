@@ -98,3 +98,4 @@ GO
 IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_tblICItemUOM_intItemId_ysnStockUnit' AND object_id = OBJECT_ID('dbo.tblICItemUOM'))
 	DROP INDEX [IX_tblICItemUOM_intItemId_ysnStockUnit] ON tblICItemUOM
 GO
+GO

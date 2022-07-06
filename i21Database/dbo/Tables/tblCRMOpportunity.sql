@@ -56,6 +56,13 @@
 	[strWinLossActionItem] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intLostToCompetitorId] [int] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
+    [intIndustrySegmentId] INT NULL,
+    [intOpportunityTypeId] INT NULL,
+    [intVolume] INT NULL,
+    [intGrossProfit] INT NULL,
+    [intGrossRevenue] INT NULL,
+    [strOpportunityDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intBrandMaintenanceId] INT NULL,
 
 	CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),
 	--CONSTRAINT [UQ_tblCRMOpportunity_strName] UNIQUE ([strName]),
@@ -74,7 +81,10 @@
     CONSTRAINT [FK_tblCRMOpportunity_tblCRMMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblCRMMilestone] ([intMilestoneId]),
     --CONSTRAINT [FK_tblCRMOpportunity_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
+    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
+    CONSTRAINT [FK_tblCRMOpportunity_tblCRMIndustrySegment_intIndustrySegmentId] FOREIGN KEY ([intIndustrySegmentId]) REFERENCES [dbo].[tblCRMIndustrySegment] ([intIndustrySegmentId]),
+    CONSTRAINT [FK_tblCRMOpportunity_tblCRMOpportunityType_intOpportunityTypeId] FOREIGN KEY ([intOpportunityTypeId]) REFERENCES [dbo].[tblCRMOpportunityType] ([intOpportunityTypeId]),
+    CONSTRAINT [FK_tblCRMOpportunity_tblCRMBrandMaintenance_intBrandMaintenanceId] FOREIGN KEY ([intBrandMaintenanceId]) REFERENCES [dbo].[tblCRMBrandMaintenance] ([intBrandMaintenanceId])
 )
 
 GO
@@ -525,4 +535,3 @@ GO
 
 CREATE INDEX [IX_tblCRMOpportunity_intInternalSalesPerson] ON [dbo].[tblCRMOpportunity] ([intInternalSalesPerson])
 GO
-

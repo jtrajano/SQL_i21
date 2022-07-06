@@ -948,7 +948,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 				---------------------------------------------------------------------------------------------------------
 
 				BEGIN
-					SELECT @intLoadContractId = LGLD.intPContractDetailId, @intLoadCostId = LGCOST.intLoadCostId FROM tblLGLoad LGL
+					SELECT TOP 1
+						@intLoadContractId = LGLD.intPContractDetailId
+						, @intLoadCostId = LGCOST.intLoadCostId 
+					FROM tblLGLoad LGL
 					INNER JOIN tblLGLoadDetail LGLD ON LGL.intLoadId = LGLD.intLoadId
 					INNER JOIN tblLGLoadCost LGCOST ON LGL.intLoadId = LGCOST.intLoadId  
 					WHERE LGL.intLoadId = @intLoadId
@@ -1249,6 +1252,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								SELECT * FROM tblCTContractCost WHERE intContractDetailId = RE.intContractDetailId 
 								AND dblRate != 0 
 								AND intItemId = @intFreightItemId
+								AND ISNULL(ysnBasis,0) = 0
 							) CT
 							WHERE SC.dblFreightRate != 0
 						END
@@ -1321,7 +1325,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-							WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
+							WHERE ContractCost.intItemId = @intFreightItemId 
+								AND RE.intContractDetailId IS NOT NULL 
+								AND ContractCost.dblRate != 0
+								AND ISNULL(ContractCost.ysnBasis,0) = 0
 
 							INSERT INTO @OtherCharges
 							(
@@ -1462,7 +1469,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 				LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
 				LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 				LEFT JOIN tblICItem IC ON IC.intItemId = ContractCost.intItemId
-				WHERE ContractCost.intItemId != @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
+				WHERE ContractCost.intItemId != @intFreightItemId 
+					AND RE.intContractDetailId IS NOT NULL 
+					AND ContractCost.dblRate != 0
+					AND ISNULL(ContractCost.ysnBasis,0) = 0
+				
 			END
 	END
 

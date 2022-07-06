@@ -87,6 +87,8 @@ BEGIN TRY
 				THEN 'Outbound'
 			WHEN 3
 				THEN 'Drop Ship'
+			WHEN 4
+				THEN 'Transfer'
 			END
 		,@intShipmentType = intShipmentType
 		,@strShipmentType = CASE intShipmentType
@@ -148,7 +150,7 @@ BEGIN TRY
 			,@strInsert = strInsert
 			,@strUpdate = strUpdate
 			,@strDelete = strDelete
-			,@intToCompanyLocationId = intCompanyLocationId
+			,@intToCompanyLocationId = CTC.intCompanyLocationId
 			,@intToBookId = intToBookId
 			,@intToSubBookId = @intToSubBookId
 		FROM tblSMInterCompanyTransactionConfiguration CTC

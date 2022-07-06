@@ -3,6 +3,7 @@
 	,@OtherCharges ReceiptOtherChargesTableType READONLY 
 	,@intUserId AS INT	
 	,@LotEntries ReceiptItemLotStagingTable READONLY
+	,@ReceiptTradeFinance ReceiptTradeFinance READONLY
 AS
 
 /*
@@ -48,6 +49,7 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_PURCHASE_ORDER AS INT = 6
 		,@SourceType_STORE AS INT = 7
 		,@SourceType_STORE_LOTTERY_MODULE AS INT = 8
+		,@SourceType_TRANSFER_SHIPMENT AS INT = 9
 
 
 DECLARE @STATUS_OPEN AS TINYINT = 1
@@ -376,6 +378,7 @@ BEGIN
 			,@SourceType_PURCHASE_ORDER 
 			,@SourceType_STORE 
 			,@SourceType_STORE_LOTTERY_MODULE
+			,@SourceType_TRANSFER_SHIPMENT
 		)
 			BEGIN
 				-- Source Type Id is invalid or missing.
@@ -511,7 +514,7 @@ BEGIN
 			UPDATE
 			SET 
 				dtmReceiptDate			= ISNULL(IntegrationData.dtmDate, GETDATE())
-				,intEntityVendorId		= IntegrationData.intEntityVendorId
+				,intEntityVendorId		= NULLIF(IntegrationData.intEntityVendorId, -1) 
 				,strReceiptType			= IntegrationData.strReceiptType
 				,intSourceType          = IntegrationData.intSourceType
 				,intBlanketRelease		= NULL
@@ -519,7 +522,7 @@ BEGIN
 				,strVendorRefNo			= dbo.fnSMGetVendorRefNoPrefix(IntegrationData.intLocationId, IntegrationData.strVendorRefNo) 
 				,strBillOfLading		= IntegrationData.strBillOfLadding
 				,intShipViaId			= IntegrationData.intShipViaId
-				,intShipFromId			= IntegrationData.intShipFromId
+				,intShipFromId			= NULLIF(IntegrationData.intShipFromId, -1) 
 				,intReceiverId			= @intUserId 
 				,intCurrencyId			= ISNULL(IntegrationData.intCurrencyId, @intFunctionalCurrencyId)
 				,intSubCurrencyCents	= IntegrationData.intSubCurrencyCents
@@ -549,7 +552,8 @@ BEGIN
 				,dtmDateModified		= GETDATE()
 				,intModifiedByUserId 	= @intUserId
 				,strDataSource			= ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType)
-				,intShipFromEntityId	= ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
+				,intShipFromEntityId	= ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
+				,dtmLastCargoInsuranceDate  = IntegrationData.dtmLastCargoInsuranceDate
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -593,11 +597,12 @@ BEGIN
 				,intCreatedByUserId
 				,strDataSource
 				,intShipFromEntityId
+				,dtmLastCargoInsuranceDate
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
 				/*dtmReceiptDate*/				,ISNULL(IntegrationData.dtmDate, GETDATE())
-				/*intEntityVendorId*/			,IntegrationData.intEntityVendorId
+				/*intEntityVendorId*/			,NULLIF(IntegrationData.intEntityVendorId, -1)
 				/*strReceiptType*/				,IntegrationData.strReceiptType
 				/*intSourceType*/				,IntegrationData.intSourceType
 				/*intBlanketRelease*/			,NULL
@@ -605,7 +610,7 @@ BEGIN
 				/*strVendorRefNo*/				,dbo.fnSMGetVendorRefNoPrefix(IntegrationData.intLocationId, IntegrationData.strVendorRefNo)
 				/*strBillOfLading*/				,IntegrationData.strBillOfLadding
 				/*intShipViaId*/				,IntegrationData.intShipViaId
-				/*intShipFromId*/				,IntegrationData.intShipFromId
+				/*intShipFromId*/				,NULLIF(IntegrationData.intShipFromId, -1) 
 				/*intReceiverId*/				,@intUserId 
 				/*intCurrencyId*/				,ISNULL(IntegrationData.intCurrencyId, @intFunctionalCurrencyId) 
 				/*intSubCurrencyCents*/			,IntegrationData.intSubCurrencyCents
@@ -635,7 +640,8 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				/*strDataSource*/				,ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType) 
-				/*intShipFromEntityId*/			,ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
+				/*intShipFromEntityId*/			,ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
+				/*dtmLastCargoInsuranceDate*/   ,IntegrationData.dtmLastCargoInsuranceDate
 			)
 		;
 				
@@ -652,6 +658,45 @@ BEGIN
 			EXEC uspICRaiseError 80004; 
 			RETURN;
 		END
+
+		-- Update the Trade Finance Record for the Receipt
+		UPDATE r
+		SET
+			[strTradeFinanceNumber] = tf.strTradeFinanceNumber
+			,[intBankId] = tf.intBankId
+			,[intBankAccountId] = tf.intBankAccountId
+			,[intBorrowingFacilityId] = tf.intBorrowingFacilityId
+			,[strBankReferenceNo] = tf.strBankReferenceNo
+			,[intLimitTypeId] = tf.intLimitTypeId
+			,[intSublimitTypeId] = tf.intSublimitTypeId
+			,[ysnSubmittedToBank] = tf.ysnSubmittedToBank
+			,[dtmDateSubmitted] = tf.dtmDateSubmitted
+			,[strApprovalStatus] = tf.strApprovalStatus
+			,[dtmDateApproved] = tf.dtmDateApproved
+			,[strWarrantNo] = tf.strWarrantNo
+			,[intWarrantStatus] = tf.intWarrantStatus
+			,[strReferenceNo] = tf.strReferenceNo
+			,[intOverrideFacilityValuation] = tf.intOverrideFacilityValuation
+			,[strComments] = tf.strComments
+		FROM 
+			tblICInventoryReceipt r CROSS APPLY (
+				SELECT TOP 1 
+					tf.* 
+				FROM 
+					@ReceiptTradeFinance tf
+				WHERE
+					ISNULL(tf.intEntityVendorId, 0) = ISNULL(r.intEntityVendorId, 0)
+					AND ISNULL(tf.strBillOfLadding,0) = ISNULL(r.strBillOfLading,0) 
+					AND ISNULL(tf.intCurrencyId, @intFunctionalCurrencyId) = ISNULL(r.intCurrencyId, @intFunctionalCurrencyId)
+					AND ISNULL(tf.intLocationId,0) = ISNULL(r.intLocationId,0)
+					AND ISNULL(tf.strReceiptType,0) = ISNULL(r.strReceiptType,0)
+					AND ISNULL(tf.intShipFromId,0) = ISNULL(r.intShipFromId,0)
+					AND ISNULL(tf.intShipViaId,0) = ISNULL(r.intShipViaId,0)
+					AND ISNULL(dbo.fnSMGetVendorRefNoPrefix(tf.intLocationId, tf.strVendorRefNo),'') = ISNULL(dbo.fnSMGetVendorRefNoPrefix(r.intLocationId, r.strVendorRefNo),'')	
+					AND COALESCE(tf.intShipFromEntityId,tf.intEntityVendorId,0) = ISNULL(r.intShipFromEntityId,0)	
+			) tf
+		WHERE
+			r.intInventoryReceiptId = @inventoryReceiptId		
 
 		-----------------------------------------------
 		----- Validate Receipt Item Detail Fields -----
@@ -932,6 +977,8 @@ BEGIN
 				,intLoadShipmentId
 				,intLoadShipmentDetailId
 				,ysnAddPayable
+				,strImportDescription
+				,intComputeItemTotalOption
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -957,6 +1004,8 @@ BEGIN
 																	ISNULL(TransportView.dblOrderedQuantity, 0)
 																WHEN RawData.intSourceType = 5 THEN -- Delivery Sheet
 																	0
+																WHEN RawData.intSourceType = 9 THEN -- Transfer Shipment
+																	ISNULL(LogisticsView.dblQuantity, 0)
 																ELSE 
 																	NULL
 														END
@@ -1030,6 +1079,8 @@ BEGIN
 				,RawData.intLoadShipmentId
 				,RawData.intLoadShipmentDetailId
 				,ysnAddPayable					= RawData.ysnAddPayable
+				,strImportDescription			= RawData.strImportDescription
+				,intComputeItemTotalOption		= Item.intComputeItemTotalOption
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1117,8 +1168,8 @@ BEGIN
 				-- 4. Logistics
 				LEFT JOIN vyuICLoadContainersSearch LogisticsView --vyuICLoadContainerReceiptContracts LogisticsView
 					ON LogisticsView.intLoadDetailId = RawData.intSourceId
-					AND RawData.strReceiptType = 'Purchase Contract'
-					AND RawData.intSourceType = 2
+					--AND RawData.strReceiptType = 'Purchase Contract'
+					AND RawData.intSourceType IN (2, 9)
 					AND RawData.intContainerId = LogisticsView.intLoadContainerId
 
 				-- 5. Transport Loads (New tables)
@@ -1257,7 +1308,7 @@ BEGIN
 		SELECT TOP 1 
 				@valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData   
-		WHERE	RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount', 'gross unit')
+		WHERE	RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount', 'gross unit', 'custom unit')
 		ORDER BY RawData.strCostMethod ASC
 
 		IF @valueChargeId IS NOT NULL
@@ -1281,7 +1332,7 @@ BEGIN
 		FROM	@OtherCharges RawData LEFT JOIN tblICItemUOM iu
 					ON RawData.intCostUOMId = iu.intItemUOMId
 		WHERE	iu.intItemUOMId IS NULL
-				AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) IN ('per unit', 'gross unit')
+				AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) IN ('per unit', 'gross unit', 'custom unit')
 
 		IF @valueChargeId IS NOT NULL
 		BEGIN
@@ -1465,6 +1516,8 @@ BEGIN
 				,intCreatedByUserId
 				,intLoadShipmentId
 				,intLoadShipmentCostId
+				,intSort
+				,dblQuantity
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1497,6 +1550,8 @@ BEGIN
 				,@intUserId
 				,intLoadShipmentId			= RawData.intLoadShipmentId
 				,intLoadShipmentCostId		= RawData.intLoadShipmentCostId
+				,intSort					= RawData.intSort
+				,dblQuantity				= RawData.dblQuantity 
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1537,6 +1592,7 @@ BEGIN
 				) taxHierarcy 
 
 		WHERE RawHeaderData.intId = @intId
+		ORDER BY RawData.intSort, RawData.intId
 
 		-- Add the taxes into the receipt. 
 		BEGIN 
@@ -1635,7 +1691,7 @@ BEGIN
 					@valueLotRecordNo = ItemLot.strLotNumber
 			FROM	@LotEntries ItemLot
 			WHERE	ItemLot.intSourceType IS NULL 
-					OR ItemLot.intSourceType > 5 
+					OR ItemLot.intSourceType > 9 
 					OR ItemLot.intSourceType < 0
 
 			IF @valueLotRecordNo IS NOT NULL
@@ -1792,6 +1848,7 @@ BEGIN
 						AND ItemLot.intParentLotId = l.intParentLotId
 			WHERE	ItemLot.intParentLotId IS NOT NULL 
 					AND l.intParentLotId IS NULL 
+					AND ItemLot.intLotId IS NOT NULL 
 
 			IF @valueLotRecordParentLotId > 0
 			BEGIN
@@ -1813,6 +1870,7 @@ BEGIN
 						AND ItemLot.strParentLotNumber = parentLot.strParentLotNumber
 			WHERE	ItemLot.intParentLotId IS NOT NULL 
 					AND parentLot.intParentLotId IS NULL 
+					AND RTRIM(LTRIM(LOWER(ItemLot.strReceiptType))) <> 'transfer order'
 
 			IF @valueLotRecordNo IS NOT NULL
 			BEGIN
@@ -1861,6 +1919,7 @@ BEGIN
 				FROM	@LotEntries ItemLot LEFT JOIN tblICCertification c
 							ON ItemLot.strCertificate = c.strCertificationName 
 				WHERE	ItemLot.strCertificate IS NOT NULL 
+						AND LTRIM(RTRIM(ItemLot.strCertificate)) <> ''
 						AND c.strCertificationName IS NULL 
 				IF (@strCertificateName IS NOT NULL)
 				BEGIN 
@@ -1910,10 +1969,14 @@ BEGIN
 				,[intProducerId]
 				,[strCertificateId]
 				,[strTrackingNumber]
+				,[intLotStatusId]
 				,[intSort]
 				,[intConcurrencyId]
 				,dtmDateCreated
 				,intCreatedByUserId
+				,dblStatedNetPerUnit
+				,dblStatedTotalNet
+				,dblPhysicalVsStated
 			)
 			SELECT
 				[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
@@ -1959,10 +2022,24 @@ BEGIN
 				,[intProducerId] = ItemLot.intProducerId
 				,[strCertificateId] = ItemLot.strCertificateId
 				,[strTrackingNumber] = ItemLot.strTrackingNumber 
-				,[intSort] = 1
+				,[intLotStatusId] = ItemLot.intLotStatusId
+				,[intSort] = ISNULL(ItemLot.intSort, 1) 
 				,[intConcurrencyId] = 1
 				,[dtmDateCreated] = GETDATE()
 				,[intCreatedByUserId] = @intUserId
+				,dblStatedNetPerUnit = ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+				,dblStatedTotalNet = 
+					dbo.fnMultiply( 
+						ISNULL(ItemLot.dblQuantity, 0) 
+						,ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+					) 
+ 				,dblPhysicalVsStated = 
+					(ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0))
+					- dbo.fnMultiply( 
+						ISNULL(ItemLot.dblQuantity, 0) 
+						,ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+					) 
+
 			FROM	
 				@LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
@@ -1986,6 +2063,9 @@ BEGIN
 			WHERE
 				Receipt.intInventoryReceiptId = @inventoryReceiptId
 				AND i.strLotTracking != 'No'
+			ORDER BY 
+				ItemLot.intSort, ItemLot.intId
+				
 		END 
 
 		-- Calculate the tax per line item 
@@ -2009,7 +2089,37 @@ BEGIN
 		SET		dblLineTotal = 
 					ROUND(
 						--ISNULL(dblTax, 0) + 
-						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+						--CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+						--			dbo.fnMultiply(
+						--				ISNULL(ReceiptItem.dblNet, 0)
+						--				,dbo.fnMultiply(
+						--					dbo.fnDivide(
+						--						ISNULL(dblUnitCost, 0) 
+						--						,ISNULL(Receipt.intSubCurrencyCents, 1) 
+						--					)
+						--					,dbo.fnDivide(
+						--						GrossNetUOM.dblUnitQty
+						--						,CostUOM.dblUnitQty 
+						--					)
+						--				)
+						--			)								 
+						--		ELSE 
+						--			dbo.fnMultiply(
+						--				ISNULL(ReceiptItem.dblOpenReceive, 0)
+						--				,dbo.fnMultiply(
+						--					dbo.fnDivide(
+						--						ISNULL(dblUnitCost, 0) 
+						--						,ISNULL(Receipt.intSubCurrencyCents, 1) 
+						--					)
+						--					,dbo.fnDivide(
+						--						ReceiveUOM.dblUnitQty
+						--						,CostUOM.dblUnitQty 
+						--					)
+						--				)
+						--			)
+						--END 
+
+						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL AND ReceiptItem.intComputeItemTotalOption = 0 THEN 
 									dbo.fnMultiply(
 										ISNULL(ReceiptItem.dblNet, 0)
 										,dbo.fnMultiply(
@@ -2063,6 +2173,9 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
+		-- Update the receipt sub total. 
+		EXEC uspICInventoryReceiptCalculateTotals @inventoryReceiptId, 1 
+
 		-- Update Cost UOM Id if null
 		UPDATE tblICInventoryReceiptItem
 		SET intCostUOMId = intUnitMeasureId
@@ -2094,7 +2207,7 @@ BEGIN
 			FROM	tblICInventoryReceipt r
 			WHERE	r.intInventoryReceiptId = @inventoryReceiptId
 					AND dbo.fnICGetReceiptTotals(@inventoryReceiptId, 6) < 0
-					AND r.intSourceType NOT IN (@SourceType_NONE, @SourceType_STORE)
+					AND r.intSourceType NOT IN (@SourceType_NONE, @SourceType_STORE) 
 		) 
 		BEGIN
 			-- Unable to create the Inventory Receipt. The receipt total is going to be negative.
@@ -2113,6 +2226,19 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		
+		-- Link Inventory Receipt Transaction
+		BEGIN
+			EXEC dbo.uspICLinkInventoryReceiptTransaction
+				@inventoryReceiptId,
+				true
+		END
+
+		-- Add the Log & History for the IR Trade Finance
+		EXEC uspICInventoryReceiptTradeFinance 
+				@ReceiptId = @inventoryReceiptId
+				,@UserId = @intUserId
+				,@strAction = 'Created'
+
 		-- Create an Audit Log
 		BEGIN 
 			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Receipt'

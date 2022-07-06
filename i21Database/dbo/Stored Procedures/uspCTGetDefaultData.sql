@@ -15,7 +15,9 @@
 	@intRateTypeId			INT = NULL,
 	@intInvoiceCurrencyId	INT = NULL,
 	@intLoggedInUserId		INT	= NULL,
-	@dtmEndDate				DATETIME = NULL
+	@dtmEndDate				DATETIME = NULL,
+	@intBorrowingFacilityId INT = NULL,
+	@intBorrowingFacilityLimitId INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -75,7 +77,7 @@ BEGIN
 
 		IF	ISNULL(@intFutureMarketId,0) > 0
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent, MY.intCurrencyID as intMainCurrencyId
 			FROM		tblRKFutureMarket M 
 			LEFT JOIN	tblICUnitMeasure	MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemId		=	@intItemId 
@@ -87,7 +89,7 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent, MY.intCurrencyID as intMainCurrencyId
 			FROM		tblRKFutureMarket			M 
 			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblRKCommodityMarketMapping C	ON	C.intFutureMarketId =	M.intFutureMarketId 
@@ -256,6 +258,32 @@ BEGIN
 		BEGIN
 			SELECT @intEntityId,@strEntityName,@intBrokerageAccountId,@strAccountNumber
 		END
+	END
+	
+	IF @strType = 'BorrowingFacility'
+	BEGIN
+
+			SELECT TOP 1 BFL.intBorrowingFacilityLimitId
+						,BFL.strBorrowingFacilityLimit
+						,BFLD.intBorrowingFacilityLimitDetailId
+						,BFLD.strLimitDescription
+						,BFLD.intBankValuationRuleId
+			FROM tblCMBorrowingFacilityLimit BFL
+			JOIN tblCMBorrowingFacility BF on BF.intBorrowingFacilityId = BFL.intBorrowingFacilityId
+			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitId = BFL.intBorrowingFacilityLimitId and BFLD.ysnDefault = 1
+			WHERE BF.intBorrowingFacilityId = @intBorrowingFacilityId and BFL.strBorrowingFacilityLimit = 'Contract'
+	END
+
+	IF @strType = 'Sublimit'
+	BEGIN
+
+			SELECT TOP 1 BFL.intBorrowingFacilityLimitId, BFL.strBorrowingFacilityLimit , BFLD.intBorrowingFacilityLimitDetailId, BFLD.strLimitDescription
+						,BFLD.intBankValuationRuleId
+			FROM tblCMBorrowingFacilityLimitDetail BFLD
+			JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = BFLD.intBorrowingFacilityLimitId and BFL.intBorrowingFacilityLimitId = @intBorrowingFacilityLimitId
+			JOIN tblCMBorrowingFacility BF on BF.intBorrowingFacilityId = BFL.intBorrowingFacilityId
+			LEFT JOIN tblCMBankValuationRule VR on VR.intBankValuationRuleId = BFLD.intBankValuationRuleId
+			WHERE BF.intBorrowingFacilityId = @intBorrowingFacilityId and BFLD.ysnDefault = 1
 	END
 
 END

@@ -57,6 +57,7 @@ RETURNS TABLE AS RETURN
 		,[intTermId]						=	A.intTermsId
 		,[strBillOfLading]					=	NULL
 		,[ysnReturn]						=	0
+		,[intFreightTermId]					=	A.intFreightTermId
 	FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN @poDetailIds ids ON B.intPurchaseDetailId = ids.intId

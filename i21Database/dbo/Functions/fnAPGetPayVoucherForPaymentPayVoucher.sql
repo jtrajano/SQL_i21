@@ -6,7 +6,8 @@
 	@showDeferred BIT,
 	@vendorId INT = NULL,
 	@payToAddress INT = 0,
-	@paymentId INT = 0
+	@paymentId INT = 0,
+	@bankAccountId INT = 0
 )
 RETURNS TABLE AS RETURN
 (
@@ -18,6 +19,7 @@ RETURNS TABLE AS RETURN
 		,forPay.intPayToAddressId
 		,forPay.ysnReadyForPayment
 		,forPay.dtmDueDate
+		,forPay.dtmCashFlowDate
 		,forPay.dtmDate
 		,forPay.dtmBillDate
 		,forPay.intAccountId
@@ -64,6 +66,7 @@ RETURNS TABLE AS RETURN
 		,forPay.strTempPaymentInfo
 		,forPay.strReference
 		,forPay.intCurrencyId
+		,currency.strCurrency
 		,forPay.ysnPosted
 		,forPay.ysnDiscountOverride
 		,forPay.intPaymentMethodId
@@ -84,11 +87,21 @@ RETURNS TABLE AS RETURN
 		-- ,forPay.ysnPaySchedule
 		,forPay.ysnOffset
 		,entityGroup.strEntityGroupName
+		,forPay.strPaymentScheduleNumber
+		,voucher.intPayFromBankAccountId
+		,account.strBankAccountNo strPayFromBankAccount
+		,voucher.intPayToBankAccountId
+		,eft.strAccountNumber strPayToBankAccount
+		,accountDetail.strAccountId strAPAccount
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail
 		ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
+	LEFT JOIN vyuCMBankAccount account ON account.intBankAccountId = voucher.intPayFromBankAccountId
+	LEFT JOIN vyuAPEntityEFTInformation eft ON eft.intEntityEFTInfoId = voucher.intPayToBankAccountId
+	LEFT JOIN vyuGLAccountDetail accountDetail ON accountDetail.intAccountId = voucher.intAccountId
+	LEFT JOIN tblSMCurrency currency ON currency.intCurrencyID = voucher.intCurrencyId
 	OUTER APPLY (
 		SELECT TOP 1
 			eg.strEntityGroupName,
@@ -103,8 +116,10 @@ RETURNS TABLE AS RETURN
 		WHERE APD.intBillId = voucher.intBillId AND APD.ysnApplied = 1
 	) appliedPrepays
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
-	AND forPay.intCurrencyId = @currencyId
 	AND forPay.ysnDeferredPay = @showDeferred
+	AND 1 = (CASE WHEN @currencyId > 0
+					THEN (CASE WHEN forPay.intCurrencyId = @currencyId THEN 1 ELSE 0 END)
+					ELSE 1 END)
 	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
 			ELSE 
 				(CASE WHEN forPay.intTransactionType = 14 THEN 1 ELSE 1 END) 
@@ -124,5 +139,8 @@ RETURNS TABLE AS RETURN
 					ELSE 1 END)
 	AND 1 = (CASE WHEN @paymentId = 0
 					THEN (CASE WHEN forPay.ysnInPaymentSched = 0 THEN 1 ELSE 0 END)
+					ELSE 1 END)
+	AND 1 = (CASE WHEN @bankAccountId > 0 AND voucher.intPayFromBankAccountId > 0
+					THEN (CASE WHEN @bankAccountId = voucher.intPayFromBankAccountId THEN 1 ELSE 0 END)
 					ELSE 1 END)
 )

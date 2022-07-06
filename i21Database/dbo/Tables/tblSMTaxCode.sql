@@ -15,6 +15,7 @@
 	[ysnMatchTaxAddress]		BIT		NOT NULL	DEFAULT 1,
 	[ysnAddToCost]				BIT		NOT NULL	DEFAULT 0,
 	[intSalesTaxAccountId]		INT		NULL, 
+	[intTaxAdjustmentAccountId]	INT		NULL, 
     [intPurchaseTaxAccountId]	INT		NULL, 
 	[ysnExpenseAccountOverride]	BIT		NOT NULL	DEFAULT 0,
     [strTaxableByOtherTaxes]	NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS NULL,

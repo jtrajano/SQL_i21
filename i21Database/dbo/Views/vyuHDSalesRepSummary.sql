@@ -8,14 +8,11 @@
 				,tblHDTicketType.strType
 			from
 				tblHDProject
-				,tblHDProjectTask
-				,tblHDTicket
-				,tblHDTicketType
+				inner join tblHDProjectTask on tblHDProjectTask.intProjectId = tblHDProject.intProjectId
+				inner join tblHDTicket on tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+				inner join tblHDTicketType on tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId
 			where
 				tblHDProject.strType = 'CRM'
-				and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
-				and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
-				and tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId
 		),
 		so as
 		(
@@ -31,12 +28,11 @@
 				,tblSOSalesOrder.dblAmountDue
 			from
 				tblHDProject
-				,tblHDOpportunityQuote
-				,tblSOSalesOrder
+				inner join tblHDOpportunityQuote on tblHDOpportunityQuote.intProjectId = tblHDProject.intProjectId
+				inner join tblSOSalesOrder on tblSOSalesOrder.intSalesOrderId = tblHDOpportunityQuote.intSalesOrderId
 			where
 				tblHDProject.strType = 'CRM'
-				and tblHDOpportunityQuote.intProjectId = tblHDProject.intProjectId
-				and tblSOSalesOrder.intSalesOrderId = tblHDOpportunityQuote.intSalesOrderId
+							
 		)
 
 				Select distinct

@@ -28,9 +28,11 @@ DECLARE @SourceType_SettleStorage AS INT = 4
 DECLARE @SourceType_DeliverySheet AS INT = 5
 DECLARE @SourceType_PurchaseOrder AS INT = 6
 DECLARE @SourceType_Store AS INT = 7
+DECLARE @SourceType_TransferShipment AS INT = 9
+
 
 DECLARE @ErrMsg NVARCHAR(MAX)
-		,@intReturnValue AS INT 
+		,@intReturnValue AS INT 		
 
 -- Iterate and process records
 DECLARE @Id INT = NULL,
@@ -40,13 +42,14 @@ DECLARE @Id INT = NULL,
 		@intFromItemUOMId			INT = NULL,
 		@intToItemUOMId				INT = NULL,
 		@dblQty						NUMERIC(18,6) = 0
+		
 
 -- Initialize the variables
 BEGIN
 	IF (@ForDelete = 1)
 	BEGIN
 		SELECT	@ReceiptType = intOrderType
-				,@SourceType = intSourceType 
+				,@SourceType = intSourceType
 		FROM	tblICTransactionDetailLog
 		WHERE	intTransactionId = @ReceiptId
 				AND strTransactionType = 'Inventory Receipt'		
@@ -170,7 +173,12 @@ BEGIN
 		--		 WHEN ISNULL(TransactionDetail.strItemType, '') <> '' THEN 0
 		--		 ELSE 1
 		--	END 
-		
+
+	-- Process the Trade Finance in the Receipt. 
+	EXEC uspICInventoryReceiptTradeFinance 
+		@ReceiptId = @ReceiptId
+		,@UserId = @UserId
+		,@strAction = DEFAULT 
 END 
 
 IF @ForDelete = 1
@@ -212,6 +220,63 @@ BEGIN
 	-- Call the quality sp when deleting the receipt.
 	EXEC uspQMInspectionDeleteResult @ReceiptId
 	IF @@ERROR <> 0 GOTO _Exit 
+
+
+	---- Call the Trade Finance sp when deleting the receipt
+	--BEGIN 		
+	--	INSERT INTO @TRFTradeFinance (
+	--		intTradeFinanceId 
+	--		, strTradeFinanceNumber 
+	--		, strTransactionType 
+	--		, strTransactionNumber 
+	--		, intTransactionHeaderId 
+	--		, intTransactionDetailId 
+	--		, intBankId 
+	--		, intBankAccountId 
+	--		, intBorrowingFacilityId 
+	--		, intLimitTypeId 
+	--		, intSublimitTypeId 
+	--		, ysnSubmittedToBank 
+	--		, dtmDateSubmitted 
+	--		, strApprovalStatus 
+	--		, dtmDateApproved 
+	--		, strRefNo 
+	--		, intOverrideFacilityValuation 
+	--		, strCommnents 
+	--	)
+	--	SELECT TOP 1 
+	--		tf.intTradeFinanceId 
+	--		, r.strTradeFinanceNumber 
+	--		, strTransactionType = CASE WHEN @ReceiptType = @ReceiptType_InventoryReturn THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
+	--		, strTransactionNumber = r.strTransactionId 
+	--		, intTransactionHeaderId = r.intTransactionId
+	--		, intTransactionDetailId = r.intTransactionDetailId
+	--		, intBankId = r.intBankId
+	--		, intBankAccountId = r.intBankAccountId
+	--		, intBorrowingFacilityId = r.intBorrowingFacilityId
+	--		, intLimitTypeId = r.intLimitTypeId
+	--		, intSublimitTypeId = r.intSublimitTypeId
+	--		, ysnSubmittedToBank = r.ysnSubmittedToBank
+	--		, dtmDateSubmitted = r.dtmDateSubmitted
+	--		, strApprovalStatus = r.strApprovalStatus
+	--		, dtmDateApproved = r.dtmDateApproved
+	--		, strRefNo = r.strReferenceNo
+	--		, intOverrideFacilityValuation = r.intOverrideFacilityValuation
+	--		, strCommnents = r.strComments
+	--	FROM 
+	--		tblICTransactionDetailLog r INNER JOIN tblTRFTradeFinance tf
+	--			ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
+	--	WHERE
+	--		r.intTransactionId = @ReceiptId
+	--		AND r.strTransactionType IN ('Inventory Receipt', 'Inventory Return')
+
+	--	EXEC [uspTRFModifyTFRecord]
+	--		@records = @TRFTradeFinance
+	--		, @intUserId = @UserId
+	--		, @strAction = 'DELETE'
+	--		, @dtmTransactionDate = @dtmDate 
+	--END
+
 END 
 
 -- Call the integration with contracts. 
@@ -221,7 +286,7 @@ END
 -- Inbound Shipment, Scale Ticket, and Purchase Order will be calling uspCTUpdateScheduleQuantity on their own. 
 IF	@ReceiptType = @ReceiptType_PurchaseContract
 	AND (
-		ISNULL(@SourceType, @SourceType_None) NOT IN (@SourceType_InboundShipment, @SourceType_Scale, @SourceType_PurchaseOrder)
+		ISNULL(@SourceType, @SourceType_None) NOT IN (@SourceType_InboundShipment, @SourceType_Scale, @SourceType_PurchaseOrder, @SourceType_TransferShipment)
 	)
 BEGIN 
 	-- Get the deleted, new, or modified data. 
@@ -1062,7 +1127,36 @@ END
 IF(@ReceiptType = @ReceiptType_TransferOrder)
 BEGIN
 	IF @ForDelete = 0 
+	BEGIN
 		EXEC dbo.[uspICUpdateTransferOrderStatus] @ReceiptId, 3 -- Set status of the transfer order to 'Closed'
+
+		-- Update logistics information
+		UPDATE td
+		SET td.strContainerNumber = lc.strContainerNumber, td.strMarks = marks.strMarks
+		FROM tblICInventoryTransferDetail td
+		JOIN tblICInventoryReceiptItem ri ON ri.intOrderId = td.intInventoryTransferId
+		JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		JOIN tblLGLoadContainer lc ON lc.intLoadContainerId = ri.intContainerId
+		OUTER APPLY (
+			SELECT strMarks = 
+				LEFT(LTRIM(
+					STUFF(
+							(
+								SELECT  ', ' + rl.strMarkings
+								FROM tblICInventoryReceiptItemLot rl
+								WHERE rl.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+								AND NULLIF(rl.strMarkings, '') IS NOT NULL
+								FOR xml path('')
+							)
+						, 1
+						, 1
+						, ''
+					)
+				), 800)
+		) marks 
+		WHERE ri.intInventoryReceiptId = @ReceiptId
+		AND r.strReceiptType = 'Transfer Order'
+	END
 	ELSE 
 		EXEC dbo.[uspICUpdateTransferOrderStatus] @ReceiptId, 1 -- Set status of the transfer order to 'Open'
 END
@@ -1104,6 +1198,10 @@ DELETE	FROM tblICTransactionDetailLog
 WHERE	strTransactionType = 'Inventory Receipt' 
 		AND intTransactionId = @ReceiptId
 
+-- Delete the data snapshot for Trade Finance
+DELETE FROM tblICInventoryReceiptBeforeSave
+WHERE intInventoryReceiptId = @ReceiptId
+
 _Exit: 
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBeforeSaveReceiptItems')) DROP TABLE #tmpBeforeSaveReceiptItems
@@ -1122,4 +1220,7 @@ IF @ForDelete = 0
 BEGIN
 	-- Recalculate Totals
 	EXEC dbo.uspICInventoryReceiptCalculateTotals @ReceiptId = @ReceiptId, @ForceRecalc = 0
+
+	-- Updates cargo #, warrant #, etc.
+	EXEC dbo.uspICInventoryReceiptUpdateInternalComments @ReceiptId = @ReceiptId, @UserId = @UserId
 END

@@ -47,21 +47,21 @@ BEGIN
 				
 				WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
 		
-				UNION ALL
-				SELECT	SubQuery.strTransactionId
-						,'' strText
-						,60016 intErrorCode
-						,strModuleName
-				FROM	(
-							SELECT	ToValidate.strTransactionId
-									,SUM(ISNULL(ToValidate.dblDebitForeign, 0)) dblDebit
-									,SUM(ISNULL(ToValidate.dblCreditForeign, 0)) dblCredit
-									,ToValidate.strModuleName
-							FROM	@GLEntriesToValidate ToValidate INNER JOIN dbo.tblGLAccount Account
-										ON ToValidate.intAccountId = Account.intAccountId
-							GROUP BY ToValidate.strTransactionId,ToValidate.strModuleName
-						) SubQuery
-				WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
+				-- UNION ALL
+				-- SELECT	SubQuery.strTransactionId
+				-- 		,'' strText
+				-- 		,60016 intErrorCode
+				-- 		,strModuleName
+				-- FROM	(
+				-- 			SELECT	ToValidate.strTransactionId
+				-- 					,SUM(ISNULL(ToValidate.dblDebitForeign, 0)) dblDebit
+				-- 					,SUM(ISNULL(ToValidate.dblCreditForeign, 0)) dblCredit
+				-- 					,ToValidate.strModuleName
+				-- 			FROM	@GLEntriesToValidate ToValidate INNER JOIN dbo.tblGLAccount Account
+				-- 						ON ToValidate.intAccountId = Account.intAccountId
+				-- 			GROUP BY ToValidate.strTransactionId,ToValidate.strModuleName
+				-- 		) SubQuery
+				-- WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
 
 				-- Unable to find an open fiscal year period to match the transaction date.
 				-- Allow audit adjustment transactions to be posted to a closed fiscal year period
@@ -71,7 +71,10 @@ BEGIN
 						,60004 intErrorCode
 						,GLEntries.strModuleName
 				FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate
-				WHERE ISNULL(strCode, '') <>'AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
+				WHERE 
+				ISNULL(strCode, '') <>'AA' 
+				AND ISNULL(strCode, '') <>'REVAL'
+				AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 				WHERE	dbo.isOpenAccountingDate(dtmDate) = 0
 		
 				UNION ALL 
@@ -89,7 +92,12 @@ BEGIN
 						,GLEntries.strModuleName strText
 						,60009 intErrorCode
 						,strModuleName
-				FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') <>'AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
+				FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName 
+				FROM @GLEntriesToValidate 
+				WHERE
+				ISNULL(strCode, '') <>'AA' 
+				AND ISNULL(strCode, '') <>'REVAL' 
+				AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 				WHERE	dbo.isOpenAccountingDateByModule(dtmDate,strModuleName) = 0
 		
 				UNION ALL 

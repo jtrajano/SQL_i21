@@ -99,6 +99,7 @@ BEGIN TRY
 		WHERE intProductTypeId = 8
 			AND intProductValueId = @intOrgParentDetailId
 			AND intSampleStatusId = @intSampleStatusId -- Taking rejected status
+			AND intTypeId = 1
 		ORDER BY intSampleId ASC
 	END
 	ELSE
@@ -112,6 +113,7 @@ BEGIN TRY
 		WHERE intProductTypeId = 8
 			AND intProductValueId = @intOrgParentDetailId
 			AND intSampleStatusId <> @intSampleStatusId -- Taking except rejected status
+			AND intTypeId = 1
 		ORDER BY intSampleId ASC
 	END
 
@@ -191,6 +193,7 @@ BEGIN TRY
 						WHERE intProductTypeId = 8
 							AND intProductValueId = @intCContractDetailId
 							AND intSampleStatusId = @intSampleStatusId -- Taking except rejected status
+							AND intTypeId = 1
 					END
 					ELSE
 					BEGIN
@@ -199,6 +202,7 @@ BEGIN TRY
 						WHERE intProductTypeId = 8
 							AND intProductValueId = @intCContractDetailId
 							AND intSampleStatusId <> @intSampleStatusId -- Taking except rejected status
+							AND intTypeId = 1
 					END
 
 					SELECT @dblCQuantity = (ISNULL(@dblCQuantity, 0) - ISNULL(@dblNewSRepresentingQty, 0))

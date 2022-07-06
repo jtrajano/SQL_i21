@@ -153,8 +153,8 @@ BEGIN
 		WHERE intImportRackPriceDetailId = @ImportRackPriceDetailId
 	END
 
-	DELETE FROM tblTRImportRackPrice
-	WHERE intImportRackPriceId = @ImportRackPriceId
+	--DELETE FROM tblTRImportRackPrice
+	--WHERE intImportRackPriceId = @ImportRackPriceId
 
 	DROP TABLE #tmpValidRackPrices
 END

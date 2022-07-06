@@ -5,8 +5,11 @@
 			from tblHDProject a
 		),
 		invoice as (
-			select a.intProjectId,dblAmountDue = isnull(sum(d.dblAmountDue),0.000000),dblPayment = isnull(sum(d.dblPayment),0.000000) from tblHDProject a, tblHDProjectTask b, tblHDTicketHoursWorked c, tblARInvoice d
-			where b.intProjectId = a.intProjectId and c.intTicketId = b.intTicketId and d.intInvoiceId = c.intInvoiceId
+			select a.intProjectId,dblAmountDue = isnull(sum(d.dblAmountDue),0.000000),dblPayment = isnull(sum(d.dblPayment),0.000000) 
+			from tblHDProject a
+				inner join tblHDProjectTask b on b.intProjectId = a.intProjectId 
+				inner join tblHDTicketHoursWorked c on c.intTicketId = b.intTicketId 
+				inner join tblARInvoice d on d.intInvoiceId = c.intInvoiceId
 			group by a.intProjectId
 		)
 		select

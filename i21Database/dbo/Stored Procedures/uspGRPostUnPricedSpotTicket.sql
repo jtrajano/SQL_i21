@@ -182,6 +182,9 @@ BEGIN TRY
 							,[intStorageLocationId]
 							,[intSubLocationId]
 							,[ysnStage]
+							,[intBookId]
+							,[intSubBookId]
+							,[intLotId]
 					)
 					SELECT 
 						GP.[intEntityVendorId]
@@ -239,7 +242,10 @@ BEGIN TRY
 						,GP.intStorageLocationId
 						,GP.intSubLocationId
 						,0
-					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1) GP
+						,GP.intBookId
+						,GP.intSubBookId
+						,GP.intLotId
+					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1, DEFAULT) GP
 
 					END 
 

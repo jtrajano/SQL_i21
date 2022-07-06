@@ -1,13 +1,16 @@
-﻿DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MT'
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MT')
+BEGIN
+	PRINT ('Deploying Montana Tax Forms')
+END
+GO
+
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MT'
 	, @TaxAuthorityId INT
 
-SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN
-
-	PRINT ('Deploying Montana Tax Forms')
-
 -- Product Codes
 /* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
 select 'UNION ALL SELECT intProductCodeId = ' + CAST(0 AS NVARCHAR(10)) 

@@ -69,6 +69,7 @@ AS
 		, @strFutureMonth NVARCHAR(15)
 		, @dblForecastWeeklyConsumption NUMERIC(24, 10)
 		, @strParamFutureMonth NVARCHAR(12)
+		, @ysnUseM2MDate BIT
 
 	SELECT @dblContractSize = convert(INT, dblContractSize)
 	FROM tblRKFutureMarket
@@ -92,6 +93,7 @@ AS
 	WHERE intCommodityId = @intCommodityId AND intUnitMeasureId = @intUOMId
 
 	SELECT TOP 1 @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge
+		, @ysnUseM2MDate = ysnUseM2MDate
 	FROM tblRKCompanyPreference
 
 	DECLARE @intForecastWeeklyConsumptionUOMId1 INT
@@ -304,7 +306,6 @@ AS
 		AND ISNULL(ot.intBookId, 0) = ISNULL(@intBookId, ISNULL(ot.intBookId, 0))
 		AND ISNULL(ot.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(ot.intSubBookId, 0))
 		AND ISNULL(ot.intLocationId, 0) = ISNULL(@intCompanyLocationId, ISNULL(ot.intLocationId, 0))
-		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= @dtmToDate
 		AND strNewBuySell = 'Buy'
 		AND ot.intSelectedInstrumentTypeId IN (1, 3) AND ot.intInstrumentTypeId = 1
 	
@@ -484,7 +485,10 @@ AS
 		, intBookId INT
 		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intSubBookId INT
-		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	)
 
 	DECLARE @ContractList AS TABLE (intRowNum INT
 		, strCommodityCode NVARCHAR (100)
@@ -524,7 +528,9 @@ AS
 		, dtmStartDate DATETIME
 		, intPricingTypeIdHeader INT
 		, ysnMultiplePriceFixation BIT
-		, dtmM2MDate DATETIME)
+		, dtmM2MDate DATETIME
+		, intCropYearId INT
+	)
 	
 	INSERT INTO @ContractList
 	SELECT intRowNum
@@ -566,6 +572,7 @@ AS
 		, intPricingTypeIdHeader
 		, ysnMultiplePriceFixation
 		, dtmM2MDate
+		, intCropYearId
 	FROM (
 		SELECT * FROM (
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY h.intContractDetailId ORDER BY dtmHistoryCreated DESC)
@@ -608,13 +615,17 @@ AS
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
 				, dtmM2MDate
+				, intCropYearId = ch.intCropYearId
 			FROM tblCTSequenceHistory h
 			JOIN tblCTContractDetail cd ON cd.intContractDetailId = h.intContractDetailId
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
 			JOIN tblICItem i ON h.intItemId = i.intItemId
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
-				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+			WHERE h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+				AND ((@ysnUseM2MDate = 0 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate)
+					 OR 
+					 (@ysnUseM2MDate = 1 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate)
+					)
 		) a
 		WHERE a.intRowNum = 1 AND strPricingStatus IN ('Fully Priced') AND intContractStatusId NOT IN (2, 3, 6) AND intPricingTypeId IN (1, 2, 8)
 		
@@ -660,13 +671,17 @@ AS
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
 				, dtmM2MDate
+				, intCropYearId = ch.intCropYearId
 			FROM tblCTSequenceHistory h
 			JOIN tblCTContractDetail cd ON cd.intContractDetailId = h.intContractDetailId
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
 			JOIN tblICItem i ON h.intItemId = i.intItemId
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
-				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+			WHERE h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+				AND ((@ysnUseM2MDate = 0 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate)
+					 OR 
+					 (@ysnUseM2MDate = 1 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate)
+					)
 		) a
 		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND intPricingTypeId IN(2, 8) AND strPricingStatus IN ('Partially Priced', 'Unpriced')
 		
@@ -710,6 +725,7 @@ AS
 			, intPricingTypeIdHeader
 			, ysnMultiplePriceFixation
 			, dtmM2MDate
+			, intCropYearId
 		FROM (
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY h.intContractDetailId ORDER BY dtmHistoryCreated DESC)
 				, dtmHistoryCreated
@@ -751,13 +767,17 @@ AS
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
 				, dtmM2MDate
+				, intCropYearId = ch.intCropYearId
 			FROM tblCTSequenceHistory h
 			JOIN tblCTContractDetail cd ON cd.intContractDetailId = h.intContractDetailId
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
 			JOIN tblICItem i ON h.intItemId = i.intItemId
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
-				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+			WHERE h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+				AND ((@ysnUseM2MDate = 0 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate)
+					 OR 
+					 (@ysnUseM2MDate = 1 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate)
+					)
 		) a
 		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND strPricingStatus = 'Partially Priced' AND intPricingTypeId IN (2, 8)
 	)t
@@ -810,6 +830,8 @@ AS
 		, strBook
 		, cv.intSubBookId
 		, strSubBook
+		, strCertificationName = certification.strCertificationName
+		, strCropYear = cropYear.strCropYear
 	INTO #PricedContractList
 	FROM @ContractList cv
 	JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
@@ -823,6 +845,10 @@ AS
 	LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 	LEFT JOIN tblCTBook book ON book.intBookId = cv.intBookId
 	LEFT JOIN tblCTSubBook subbook ON subbook.intBookId = cv.intSubBookId
+	LEFT JOIN tblICCertification certification
+		ON certification.intCertificationId = ic.intCertificationId
+	LEFT JOIN tblCTCropYear cropYear
+		ON cropYear.intCropYearId = cv.intCropYearId
 	WHERE cv.intCommodityId = @intCommodityId AND cv.intFutureMarketId = @intFutureMarketId AND cv.intContractStatusId NOT IN (2, 3)
 		AND ISNULL(cv.intBookId, 0) = ISNULL(@intBookId, ISNULL(cv.intBookId, 0))
 		AND ISNULL(cv.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(cv.intSubBookId, 0))
@@ -877,6 +903,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	INTO #ContractTransaction
 	FROM (
 		-- Direct Pricing
@@ -910,6 +938,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 		FROM #PricedContractList cv
 		WHERE cv.intPricingTypeId IN (1, 2, 8) AND ysnDeltaHedge = 0
 			AND intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId, 0) FROM #tmpLotsQtyByDetail)
@@ -945,6 +975,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber
@@ -991,6 +1023,8 @@ AS
 				, strBook
 				, intSubBookId
 				, strSubBook
+				, strCertificationName
+				, strCropYear
 			FROM #PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND ISNULL(ysnDeltaHedge, 0) = 0
 				AND intContractDetailId IN (SELECT ISNULL(intContractDetailId, 0) FROM #tmpLotsQtyByDetail)
@@ -1028,6 +1062,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber
@@ -1076,6 +1112,8 @@ AS
 				, strBook
 				, intSubBookId
 				, strSubBook
+				, strCertificationName
+				, strCropYear
 			FROM #PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND ISNULL(ysnDeltaHedge, 0) = 0
 				AND intContractDetailId IN (SELECT ISNULL(intContractDetailId, 0) FROM #tmpLotsQtyByDetail)
@@ -1113,7 +1151,10 @@ AS
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT 1 intRowNumber
 		, '1.Outright Coverage'
 		, Selection = 'Outright Coverage' COLLATE Latin1_General_CI_AS
@@ -1142,6 +1183,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM #ContractTransaction
 	WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId 
 		AND intFutureMarketId = @intFutureMarketId
@@ -1403,7 +1446,7 @@ AS
 				AND ft.intLocationId = ISNULL(@intCompanyLocationId, ft.intLocationId)
 				AND ISNULL(ft.intBookId, 0) = ISNULL(@intBookId, ISNULL(ft.intBookId, 0))
 				AND ISNULL(ft.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(ft.intSubBookId, 0))
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ft.dtmFilledDate, 110), 110) <= @dtmToDate AND CONVERT(DATETIME, '01 ' + strFutureMonth) >= @dtmFutureMonthsDate  
+				AND CONVERT(DATETIME, '01 ' + strFutureMonth) >= @dtmFutureMonthsDate  
 		) t
 	) t1
 	WHERE dblNoOfContract <> 0
@@ -1437,7 +1480,10 @@ AS
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT 4 intRowNumber
 		, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
 		, 'Market coverage' COLLATE Latin1_General_CI_AS Selection
@@ -1466,6 +1512,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM @ListFinal
 	WHERE intRowNumber IN (1, 2) AND strFutureMonth <> 'Previous'
 
@@ -1497,6 +1545,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM @ListFinal
 	WHERE intRowNumber IN (1, 2) AND strFutureMonth = 'Previous'
 
@@ -1529,7 +1579,10 @@ AS
 			, intBookId
 			, strBook
 			, intSubBookId
-			, strSubBook)
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+		)
 		SELECT 5 intRowNumber
 			, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
 			, Selection = 'Market Coverage' COLLATE Latin1_General_CI_AS
@@ -1558,6 +1611,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 		FROM @ListFinal
 		WHERE intRowNumber IN (4)
 	END
@@ -1620,7 +1675,10 @@ AS
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT intRowNumber
 		, strGroup
 		, Selection
@@ -1649,6 +1707,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM (
 		SELECT DISTINCT 7 intRowNumber
 			, strGroup = '2.Futures Required' COLLATE Latin1_General_CI_AS
@@ -1677,6 +1737,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 		FROM #ContractTransaction
 		WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId AND intFutureMarketId = @intFutureMarketId
 		AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId) AND intFutureMarketId = @intFutureMarketId
@@ -1747,7 +1809,10 @@ AS
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT 9 intRowNumber
 		, '2.Futures Required' COLLATE Latin1_General_CI_AS
 		, Selection = 'Futures Required' COLLATE Latin1_General_CI_AS
@@ -1776,6 +1841,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM @ListFinal
 	WHERE intRowNumber IN (2)
 
@@ -1800,7 +1867,10 @@ AS
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT 10 intRowNumber
 		, '2.Futures Required' COLLATE Latin1_General_CI_AS
 		, 'Futures Required' COLLATE Latin1_General_CI_AS Selection
@@ -1823,6 +1893,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM (
 		SELECT strFutureMonth= CASE WHEN strFutureMonth = 'Previous' THEN @strParamFutureMonth ELSE strFutureMonth END COLLATE Latin1_General_CI_AS
 			, 0 dblNoOfContract1
@@ -1843,6 +1915,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 		FROM @ListFinal
 		WHERE intRowNumber IN (7, 8)
 		GROUP BY strFutureMonth
@@ -1858,6 +1932,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 		
 		UNION ALL SELECT strFutureMonth
 			, dblNoOfContract1 = SUM(dblQuantity)
@@ -1878,6 +1954,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 		FROM @ListFinal
 		WHERE intRowNumber IN (9)
 		GROUP BY strFutureMonth
@@ -1893,6 +1971,8 @@ AS
 			, strBook
 			, intSubBookId
 			, strSubBook
+			, strCertificationName
+			, strCropYear
 	) t
 	GROUP BY strFutureMonth
 		, strProductType
@@ -1907,6 +1987,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 
 	INSERT INTO @ListFinal (intRowNumber
 		, strGroup
@@ -1968,143 +2050,155 @@ AS
 			AND CONVERT(DATETIME, '01 ' + ft.strFutureMonth) >= CONVERT(DATETIME, '01 ' + @strParamFutureMonth)
 	) t
 
-	INSERT INTO @ListFinal (intRowNumber
-		, strGroup
-		, Selection
-		, PriceStatus
-		, strFutureMonth
-		, strAccountNumber
-		, dblNoOfContract
-		, strTradeNo
-		, TransactionDate
-		, TranType
-		, CustVendor
-		, dblNoOfLot
-		, dblQuantity
-		, intOrderByHeading
-		, intContractHeaderId
-		, intFutOptTransactionHeaderId
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook)
-	SELECT 12
-		, strGroup
-		, Selection
-		, PriceStatus
-		, 'Total' COLLATE Latin1_General_CI_AS
-		, strAccountNumber
-		, dblNoOfContract
-		, strTradeNo
-		, TransactionDate
-		, TranType
-		, CustVendor
-		, dblNoOfLot
-		, dblQuantity
-		, intOrderByHeading
-		, intContractHeaderId
-		, intFutOptTransactionHeaderId
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook
-	FROM @ListFinal
-	WHERE strAccountNumber <> 'Avg Long Price'
-	ORDER BY intRowNumber
-		, CASE WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
-		, intOrderByHeading
-		, PriceStatus ASC
+	--INSERT INTO @ListFinal (intRowNumber
+	--	, strGroup
+	--	, Selection
+	--	, PriceStatus
+	--	, strFutureMonth
+	--	, strAccountNumber
+	--	, dblNoOfContract
+	--	, strTradeNo
+	--	, TransactionDate
+	--	, TranType
+	--	, CustVendor
+	--	, dblNoOfLot
+	--	, dblQuantity
+	--	, intOrderByHeading
+	--	, intContractHeaderId
+	--	, intFutOptTransactionHeaderId
+	--	, strProductType
+	--	, strProductLine
+	--	, strShipmentPeriod
+	--	, strLocation
+	--	, strOrigin
+	--	, intItemId
+	--	, strItemNo
+	--	, strItemDescription
+	--	, intBookId
+	--	, strBook
+	--	, intSubBookId
+	--	, strSubBook
+	--	, strCertificationName
+	--	, strCropYear
+	--)
+	--SELECT 12
+	--	, strGroup
+	--	, Selection
+	--	, PriceStatus
+	--	, 'Total' COLLATE Latin1_General_CI_AS
+	--	, strAccountNumber
+	--	, dblNoOfContract
+	--	, strTradeNo
+	--	, TransactionDate
+	--	, TranType
+	--	, CustVendor
+	--	, dblNoOfLot
+	--	, dblQuantity
+	--	, intOrderByHeading
+	--	, intContractHeaderId
+	--	, intFutOptTransactionHeaderId
+	--	, strProductType
+	--	, strProductLine
+	--	, strShipmentPeriod
+	--	, strLocation
+	--	, strOrigin
+	--	, intItemId
+	--	, strItemNo
+	--	, strItemDescription
+	--	, intBookId
+	--	, strBook
+	--	, intSubBookId
+	--	, strSubBook
+	--	, strCertificationName
+	--	, strCropYear
+	--FROM @ListFinal
+	--WHERE strAccountNumber <> 'Avg Long Price'
+	--ORDER BY intRowNumber
+	--	, CASE WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
+	--	, intOrderByHeading
+	--	, PriceStatus ASC
 
-	INSERT INTO @ListFinal (intRowNumber
-		, strGroup
-		, Selection
-		, PriceStatus
-		, strFutureMonth
-		, strAccountNumber
-		, dblNoOfContract
-		, strTradeNo
-		, TransactionDate
-		, TranType
-		, CustVendor
-		, dblNoOfLot
-		, dblQuantity
-		, intOrderByHeading
-		, intContractHeaderId
-		, intFutOptTransactionHeaderId
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook)
-	SELECT 12 intRowNumber
-		, strGroup
-		, Selection
-		, PriceStatus
-		, strFutureMonth = 'Total' COLLATE Latin1_General_CI_AS
-		, strAccountNumber
-		, dblNoOfContract = CASE WHEN ISNULL(SUM(dblNoOfLot), 0) <> 0 THEN SUM(dblQuantity) / SUM(dblNoOfLot) ELSE 0 END
-		, '' strTradeNo
-		, '' TransactionDate
-		, '' TranType
-		, '' CustVendor
-		, dblNoOfLot = SUM(dblNoOfLot)
-		, dblQuantity = SUM(dblQuantity)
-		, NULL intOrderByHeading
-		, NULL intContractHeaderId
-		, NULL intFutOptTransactionHeaderId
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook
-	FROM @ListFinal
-	WHERE strAccountNumber = 'Avg Long Price'
-	GROUP BY strGroup
-		, Selection
-		, PriceStatus
-		, strAccountNumber
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook
+	--INSERT INTO @ListFinal (intRowNumber
+	--	, strGroup
+	--	, Selection
+	--	, PriceStatus
+	--	, strFutureMonth
+	--	, strAccountNumber
+	--	, dblNoOfContract
+	--	, strTradeNo
+	--	, TransactionDate
+	--	, TranType
+	--	, CustVendor
+	--	, dblNoOfLot
+	--	, dblQuantity
+	--	, intOrderByHeading
+	--	, intContractHeaderId
+	--	, intFutOptTransactionHeaderId
+	--	, strProductType
+	--	, strProductLine
+	--	, strShipmentPeriod
+	--	, strLocation
+	--	, strOrigin
+	--	, intItemId
+	--	, strItemNo
+	--	, strItemDescription
+	--	, intBookId
+	--	, strBook
+	--	, intSubBookId
+	--	, strSubBook
+	--	, strCertificationName
+	--	, strCropYear
+	--)
+	--SELECT 12 intRowNumber
+	--	, strGroup
+	--	, Selection
+	--	, PriceStatus
+	--	, strFutureMonth = 'Total' COLLATE Latin1_General_CI_AS
+	--	, strAccountNumber
+	--	, dblNoOfContract = CASE WHEN ISNULL(SUM(dblNoOfLot), 0) <> 0 THEN SUM(dblQuantity) / SUM(dblNoOfLot) ELSE 0 END
+	--	, '' strTradeNo
+	--	, '' TransactionDate
+	--	, '' TranType
+	--	, '' CustVendor
+	--	, dblNoOfLot = SUM(dblNoOfLot)
+	--	, dblQuantity = SUM(dblQuantity)
+	--	, NULL intOrderByHeading
+	--	, NULL intContractHeaderId
+	--	, NULL intFutOptTransactionHeaderId
+	--	, strProductType
+	--	, strProductLine
+	--	, strShipmentPeriod
+	--	, strLocation
+	--	, strOrigin
+	--	, intItemId
+	--	, strItemNo
+	--	, strItemDescription
+	--	, intBookId
+	--	, strBook
+	--	, intSubBookId
+	--	, strSubBook
+	--	, strCertificationName
+	--	, strCropYear
+	--FROM @ListFinal
+	--WHERE strAccountNumber = 'Avg Long Price'
+	--GROUP BY strGroup
+	--	, Selection
+	--	, PriceStatus
+	--	, strAccountNumber
+	--	, strProductType
+	--	, strProductLine
+	--	, strShipmentPeriod
+	--	, strLocation
+	--	, strOrigin
+	--	, intItemId
+	--	, strItemNo
+	--	, strItemDescription
+	--	, intBookId
+	--	, strBook
+	--	, intSubBookId
+	--	, strSubBook
+	--	, strCertificationName
+	--	, strCropYear
 
 	IF (ISNULL(@intBookId, 0) = 0)
 	BEGIN
@@ -2162,8 +2256,11 @@ AS
 		, intBookId INT
 		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intSubBookId INT
-		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS)
-
+		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	)
+	
 	DECLARE @MonthList AS TABLE (strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 
 	INSERT INTO @MonthList (strFutureMonth)
@@ -2197,7 +2294,10 @@ AS
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT intRowNumber
 		, strGroup
 		, Selection
@@ -2226,6 +2326,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM @ListFinal
 	WHERE strFutureMonth = 'Previous'
 
@@ -2256,7 +2358,10 @@ AS
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT intRowNumber
 		, strGroup
 		, Selection
@@ -2285,6 +2390,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM @ListFinal
 	WHERE strFutureMonth NOT IN ('Previous', 'Total')
 	ORDER BY intRowNumber
@@ -2320,7 +2427,10 @@ AS
 		, intBookId
 		, strBook
 		, intSubBookId
-		, strSubBook)
+		, strSubBook
+		, strCertificationName
+		, strCropYear
+	)
 	SELECT intRowNumber
 		, strGroup
 		, Selection
@@ -2349,6 +2459,8 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM @ListFinal
 	WHERE strFutureMonth = 'Total'
 
@@ -2358,74 +2470,80 @@ AS
 	SELECT DISTINCT strFutureMonth INTO #MissingMonths FROM @MonthOrder
 	SELECT DISTINCT strFutureMonth INTO #MonthList FROM @ListFinal WHERE intRowNumber = @FirstRow
 
-	IF EXISTS (SELECT DISTINCT strFutureMonth FROM #MissingMonths WHERE strFutureMonth NOT IN (SELECT DISTINCT strFutureMonth FROM #MonthList))
-	BEGIN
-		INSERT INTO @MonthOrder (intRowNumber
-			, strGroup
-			, Selection
-			, PriceStatus
-			, strFutureMonth
-			, strAccountNumber
-			, dblNoOfContract
-			, strTradeNo
-			, TransactionDate
-			, TranType
-			, CustVendor
-			, dblNoOfLot
-			, dblQuantity
-			, intOrderByHeading
-			, intContractHeaderId
-			, intFutOptTransactionHeaderId
-			, strProductType
-			, strProductLine
-			, strShipmentPeriod
-			, strLocation
-			, strOrigin
-			, intItemId
-			, strItemNo
-			, strItemDescription
-			, intBookId
-			, strBook
-			, intSubBookId
-			, strSubBook)
-		SELECT DISTINCT intRowNumber
-			, strGroup
-			, Selection
-			, PriceStatus
-			, b.strFutureMonth
-			, strAccountNumber
-			, 0
-			, strTradeNo = ''
-			, TransactionDate = ''
-			, TranType
-			, CustVendor
-			, dblNoOfLot = 0
-			, dblQuantity = 0
-			, intOrderByHeading
-			, intContractHeaderId = NULL
-			, intFutOptTransactionHeaderId = NULL
-			, strProductType = NULL
-			, strProductLine = NULL
-			, strShipmentPeriod = ''
-			, strLocation = ''
-			, strOrigin = NULL
-			, intItemId = NULL
-			, strItemNo = ''
-			, strItemDescription = ''
-			, intBookId = intBookId
-			, strBook = strBook
-			, intSubBookId = intSubBookId
-			, strSubBook = strSubBook
-		FROM @ListFinal a
-		CROSS APPLY (
-			SELECT DISTINCT strFutureMonth
-			FROM #MissingMonths
-		) b
-		WHERE intRowNumber = @FirstRow
-	END
+	--IF EXISTS (SELECT DISTINCT strFutureMonth FROM #MissingMonths WHERE strFutureMonth NOT IN (SELECT DISTINCT strFutureMonth FROM #MonthList))
+	--BEGIN
+	--	INSERT INTO @MonthOrder (intRowNumber
+	--		, strGroup
+	--		, Selection
+	--		, PriceStatus
+	--		, strFutureMonth
+	--		, strAccountNumber
+	--		, dblNoOfContract
+	--		, strTradeNo
+	--		, TransactionDate
+	--		, TranType
+	--		, CustVendor
+	--		, dblNoOfLot
+	--		, dblQuantity
+	--		, intOrderByHeading
+	--		, intContractHeaderId
+	--		, intFutOptTransactionHeaderId
+	--		, strProductType
+	--		, strProductLine
+	--		, strShipmentPeriod
+	--		, strLocation
+	--		, strOrigin
+	--		, intItemId
+	--		, strItemNo
+	--		, strItemDescription
+	--		, intBookId
+	--		, strBook
+	--		, intSubBookId
+	--		, strSubBook
+	--		, strCertificationName
+	--		, strCropYear
+	--	)
+	--	SELECT DISTINCT intRowNumber
+	--		, strGroup 
+	--		, Selection
+	--		, PriceStatus = ''
+	--		, b.strFutureMonth
+	--		, strAccountNumber =''
+	--		, dblNoOfContract = NULL
+	--		, strTradeNo = ''
+	--		, TransactionDate = ''
+	--		, TranType
+	--		, CustVendor
+	--		, dblNoOfLot = NULL
+	--		, dblQuantity = NULL
+	--		, intOrderByHeading
+	--		, intContractHeaderId = NULL
+	--		, intFutOptTransactionHeaderId = NULL
+	--		, strProductType = NULL
+	--		, strProductLine = NULL
+	--		, strShipmentPeriod = ''
+	--		, strLocation = ''
+	--		, strOrigin = NULL
+	--		, intItemId = NULL
+	--		, strItemNo = ''
+	--		, strItemDescription = ''
+	--		, intBookId = intBookId
+	--		, strBook = strBook
+	--		, intSubBookId = intSubBookId
+	--		, strSubBook = strSubBook
+	--		, strCertificationName = NULL
+	--		, strCropYear = NULL
+	--	FROM @ListFinal a
+	--	CROSS APPLY (
+	--		SELECT DISTINCT strFutureMonth
+	--		FROM #MissingMonths
+	--	) b
+	--	WHERE intRowNumber = @FirstRow
+	--END
 	DROP TABLE #MissingMonths
 	DROP TABLE #MonthList
 
+	
 	SELECT intRowNumber1 intRowNumFinal
 		, intRowNumber
 		, strGroup
@@ -2455,12 +2573,18 @@ AS
 		, strBook
 		, intSubBookId
 		, strSubBook
+		, strCertificationName
+		, strCropYear
 	FROM @MonthOrder
 	ORDER BY strGroup
 		, PriceStatus
 		, strBook
 		, strSubBook
-		, CASE WHEN strFutureMonth = 'Previous' THEN '01/01/1900' WHEN strFutureMonth = 'Total' THEN '01/01/9999' ELSE CONVERT(DATETIME, '01 ' + strFutureMonth) END
+		--, CASE WHEN strFutureMonth = 'Previous' THEN '01/01/1900' WHEN strFutureMonth = 'Total' THEN '01/01/9999' ELSE CONVERT(DATETIME, '01 ' + strFutureMonth) END
+		, CASE WHEN strFutureMonth ='Previous' THEN '01/01/1900'
+					WHEN strFutureMonth ='Total' THEN '01/01/9999'
+					WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) 
+			END
 
 	DROP TABLE #PricedContractList
 	DROP TABLE #ContractTransaction

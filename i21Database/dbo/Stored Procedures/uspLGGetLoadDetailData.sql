@@ -5,15 +5,20 @@ BEGIN
 	SELECT LoadDetail.*
 		,strItemDescription = Item.strDescription
 		,strPLocationName = PCL.strLocationName
+		,strSLocationName = SCL.strLocationName
 		,strPSubLocationName = PCLSL.strSubLocationName
 		,strSSubLocationName = SCLSL.strSubLocationName
-		,strSLocationName = SCL.strLocationName
+		,strPStorageLocation = PSTL.strName
+		,strSStorageLocation = SSTL.strName
 		,strPContractNumber = PHeader.strContractNumber
 		,intPContractSeq = PDetail.intContractSeq
 		,strPPricingType = PTP.strPricingType
 		,intPPricingTypeId = PDetail.intPricingTypeId
 		,ysnPLoad = PHeader.ysnLoad
 		,dblPQuantityPerLoad = PDetail.dblQuantityPerLoad
+		,strPCropYear = PCY.strCropYear
+		,strPLoadingPort = PLP.strCity
+		,strPDestinationPort = PDP.strCity
 		,strSContractNumber = SHeader.strContractNumber
 		,intSContractSeq = SDetail.intContractSeq
 		,intPPricingTypeId = PDetail.intPricingTypeId
@@ -22,10 +27,15 @@ BEGIN
 		,strSPricingType = PTS.strPricingType
 		,ysnSLoad = SHeader.ysnLoad
 		,dblSQuantityPerLoad = SDetail.dblQuantityPerLoad
+		,strSCropYear = SCY.strCropYear
+		,strSLoadingPort = SLP.strCity
+		,strSDestinationPort = SDP.strCity
 		,strVendor = VEN.strName
 		,strCustomer = CEN.strName
 		,strShipFrom = VEL.strLocationName
 		,strShipTo = CEL.strLocationName
+		,strSeller = SLR.strName
+		,strSalesperson = SP.strName
 		,ysnBundle = CONVERT(BIT, CASE Item.strType
 				WHEN 'Bundle'
 					THEN 1
@@ -44,6 +54,7 @@ BEGIN
 		,dblWeightPerUnit = IsNull(dbo.fnLGGetItemUnitConversion (LoadDetail.intItemId, LoadDetail.intItemUOMId, ISNULL(L.intWeightUnitMeasureId, WeightUOM.intUnitMeasureId)), 0.0)
 		,dblUnMatchedQty = CASE WHEN (SELECT COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId) > 0 THEN 0 ELSE LoadDetail.dblQuantity END
 		,strOrigin = CO.strCountry
+		,strCropYear = CPY.strCropYear
 		,intCommodityAttributeId = CA.intCommodityAttributeId
 		,intCommodityId = Item.intCommodityId
 		,strExternalShipmentNumber
@@ -53,18 +64,28 @@ BEGIN
 		,strForexRateType = ERT.strCurrencyExchangeRateType
 		,strPriceUOM = PUM.strUnitMeasure
 		,ysnSubCurrency = PCU.ysnSubCurrency
+		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
 	LEFT JOIN tblSMCompanyLocation				SCL				ON		SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation	PCLSL			ON		PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation	SCLSL			ON		SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId
+	LEFT JOIN tblICStorageLocation				PSTL			ON		PSTL.intStorageLocationId = LoadDetail.intPStorageLocationId
+	LEFT JOIN tblICStorageLocation				SSTL			ON		SSTL.intStorageLocationId = LoadDetail.intSStorageLocationId
 	LEFT JOIN tblCTContractDetail				PDetail			ON		PDetail.intContractDetailId = LoadDetail.intPContractDetailId
 	LEFT JOIN tblCTContractHeader				PHeader			ON		PHeader.intContractHeaderId = PDetail.intContractHeaderId
 	LEFT JOIN tblCTContractDetail				SDetail			ON		SDetail.intContractDetailId = LoadDetail.intSContractDetailId
 	LEFT JOIN tblCTContractHeader				SHeader			ON		SHeader.intContractHeaderId = SDetail.intContractHeaderId
 	LEFT JOIN tblCTPricingType					PTP				ON		PTP.intPricingTypeId = PDetail.intPricingTypeId
 	LEFT JOIN tblCTPricingType					PTS				ON		PTS.intPricingTypeId = SDetail.intPricingTypeId
+	LEFT JOIN tblCTCropYear						PCY				ON		PCY.intCropYearId = PHeader.intCropYearId
+	LEFT JOIN tblCTCropYear						SCY				ON		SCY.intCropYearId = SHeader.intCropYearId
+	LEFT JOIN tblCTCropYear						CPY				ON		CPY.intCropYearId = LoadDetail.intCropYearId
+	LEFT JOIN tblSMCity							PLP				ON		PLP.intCityId = PDetail.intLoadingPortId
+	LEFT JOIN tblSMCity							PDP				ON		PDP.intCityId = PDetail.intDestinationPortId
+	LEFT JOIN tblSMCity							SLP				ON		SLP.intCityId = SDetail.intLoadingPortId
+	LEFT JOIN tblSMCity							SDP				ON		SDP.intCityId = SDetail.intDestinationPortId
 	LEFT JOIN tblEMEntity						VEN				ON		VEN.intEntityId = LoadDetail.intVendorEntityId
 	LEFT JOIN tblEMEntityLocation				VEL				ON		VEL.intEntityLocationId = LoadDetail.intVendorEntityLocationId
 	LEFT JOIN tblEMEntity						CEN				ON		CEN.intEntityId = LoadDetail.intCustomerEntityId
@@ -81,6 +102,8 @@ BEGIN
 	LEFT JOIN tblICItemUOM						WeightItemUOM	ON		WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
 	LEFT JOIN tblICUnitMeasure					WeightUOM		ON		WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute			CA				ON		CA.intCommodityAttributeId = Item.intOriginId
+	LEFT JOIN tblEMEntity						SLR				ON		SLR.intEntityId = LoadDetail.intSellerId
+	LEFT JOIN tblEMEntity						SP				ON		SP.intEntityId = LoadDetail.intSalespersonId
 	LEFT JOIN tblAPBillDetail					BD				ON		BD.intLoadDetailId = LoadDetail.intLoadDetailId AND BD.intItemId = LoadDetail.intItemId
 	LEFT JOIN tblAPBill							B				ON		B.intBillId = BD.intBillId
 	LEFT JOIN tblICItemContract					ICI				ON		ICI.intItemId = Item.intItemId AND PDetail.intItemContractId = ICI.intItemContractId

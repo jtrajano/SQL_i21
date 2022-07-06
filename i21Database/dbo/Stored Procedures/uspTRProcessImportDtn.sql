@@ -88,8 +88,24 @@ BEGIN
 					END
 					ELSE
 					BEGIN
+						SET @intBillId = @intExistBillId
 						UPDATE tblTRImportDtnDetail SET intBillId = @intExistBillId WHERE intImportDtnDetailId = @intImportDtnDetailId
 						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exists')
+					END
+
+					IF(@intBillId IS NOT NULL)
+					BEGIN
+						IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intBillId AND ysnPosted = 0)
+						BEGIN
+						-- ADD PAYMENT
+							EXEC [dbo].[uspTRImportDtnVoucherPayment] 
+								@intBillId = @intBillId,
+								@intImportLoadId = @intImportLoadId,
+								@intImportDtnDetailId = @intImportDtnDetailId
+
+						--TR-1730
+							UPDATE tblAPBill SET strVendorOrderNumber = @strInvoiceNo where intBillId = @intBillId
+						END
 					END
 
 					-- POST VOUCHER
@@ -110,13 +126,13 @@ BEGIN
 
 						END TRY
 						BEGIN CATCH
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher cannot be posted')
+							SELECT @strMessage = dbo.fnTRStringConcat(@strMessage, 'Voucher cannot be posted', ' / ')
 							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
 						END CATCH
 
 						IF (@success = 0)
 						BEGIN
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher cannot be posted')
+							SELECT @strMessage = dbo.fnTRStringConcat(@strMessage, 'Voucher cannot be posted', ' / ')
 							SELECT TOP 1 dbo.fnTRMessageConcat(@strMessage,strMessage) FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
 						END
 						ELSE

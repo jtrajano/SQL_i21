@@ -30,6 +30,8 @@ AS
 			CD.dblNetWeight,					CD.ysnUseFXPrice,				CD.intSplitId,
 			CD.intFarmFieldId,					CD.intRateTypeId,				CD.intCurrencyExchangeRateId,
 			CD.strItemSpecification,
+			CD.dblQualityPremium,
+			CD.dblOptionalityPremium,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -168,6 +170,38 @@ AS
 			CD.intFreightBasisUOMId,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
+		, CD.strFinanceTradeNo
+		, CD.intBankAccountId
+		, BA.intBankId
+		, strBankName = BN.strBankName
+		, strBankAccountNo = BA.strBankAccountNo
+		, CD.intFacilityId
+		, strFacility = FA.strBorrowingFacilityId
+		, CD.intLoanLimitId
+		, strLoanLimit = BL.strBankLoanId
+		, strLoanReferenceNo = BL.strLimitDescription
+		, CD.dblLoanAmount
+		, intOverrideFacilityId
+		, strOverrideFacility = BVR.strBankValuationRule
+		, CD.strBankReferenceNo
+		, CD.dblInterestRate
+		, CD.dtmPrepaymentDate
+		, CD.dblPrepaymentAmount
+		, strCostTerm = CostTerm.strFreightTerm
+        , CD.intCostTermId
+        , CD.dblBudgetPrice
+		, CD.dblTotalBudget
+		, CH.intSampleTypeId
+		, sam.strSampleTypeName
+		, CD.intLocalCurrencyId
+		, CD.intLocalUOMId
+		, CD.dblLocalCashPrice
+		, ILU.strUnitMeasure AS strLocalUOM
+		, LUC.strCurrency AS strLocalCurrency
+		, CD.intAverageUOMId
+		, CD.dblAverageQuantity
+		, IAU.strUnitMeasure AS strAverageUOM
+		, CD.ysnApplyDefaultTradeFinance
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -256,3 +290,15 @@ AS
 	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
 	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
 	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	 
+	LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
+	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intFacilityId
+	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId
+	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intOverrideFacilityId
+	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
+	LEFT JOIN tblQMSampleType sam on sam.intSampleTypeId = CH.intSampleTypeId
+	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
+	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
+	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
+	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
+	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM

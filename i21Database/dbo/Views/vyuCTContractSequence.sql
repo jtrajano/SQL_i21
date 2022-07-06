@@ -56,7 +56,10 @@ AS
 			intLoadingPortId,
 			CD.intProducerId,
 			CD.intItemContractId,
-			CH.ysnReadOnlyInterCoContract
+			CH.ysnReadOnlyInterCoContract,
+			CD.dblRate,
+			CD.intInvoiceCurrencyId,
+			strInvoiceCurrency = ICU.strCurrency
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
@@ -92,3 +95,4 @@ AS
 	JOIN	tblCTBook					BK	ON	BK.intBookId				=	CD.intBookId				LEFT
 	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId				=	CD.intSubBookId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	UL	ON	UL.intCompanyLocationSubLocationId	=	CD.intSubLocationId
+	LEFT JOIN tblSMCurrency ICU on ICU.intCurrencyID = CD.intInvoiceCurrencyId

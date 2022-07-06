@@ -5,6 +5,7 @@
     [intEntityId]        INT              NULL,
 	[strEntityName]	     NVARCHAR(500)    COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerName]    NVARCHAR(500)    COLLATE Latin1_General_CI_AS NULL,
+    [intOriginalScreenId]	INT				NULL,
 	[intTransactionId]	 INT			  NULL,
 	[strRoute]			 NVARCHAR(MAX)	  NULL,
     [intConcurrencyId]   INT              NOT NULL,

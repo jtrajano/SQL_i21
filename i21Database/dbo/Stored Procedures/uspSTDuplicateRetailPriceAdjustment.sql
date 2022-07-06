@@ -65,7 +65,7 @@ BEGIN
 		intConcurrencyId
 	)
 	SELECT 
-		dtmEffectiveDate					= NULL,
+		dtmEffectiveDate					= GETDATE(),
 		strDescription						= strDescription,
 		strRetailPriceAdjustmentNumber		= CASE
 												WHEN @ysnSuccess = CAST(1 AS BIT)
@@ -88,6 +88,7 @@ BEGIN
 	(
 		intRetailPriceAdjustmentId,
 		intCompanyLocationId,
+		intStoreGroupId,
 		strRegion,
 		strDistrict,
 		strState,
@@ -101,6 +102,8 @@ BEGIN
 		ysnPromo,
 		strPriceMethod,
 		dblFactor,
+		strRoundPrice,
+		strPriceEndingDigit,
 		dblPrice,
 		dblLastCost,
 		-- ysnActive,
@@ -116,6 +119,7 @@ BEGIN
 	SELECT 
 		@NewRetailPriceAdjustmentId,
 		intCompanyLocationId,
+		intStoreGroupId,
 		strRegion,
 		strDistrict,
 		strState,
@@ -129,6 +133,8 @@ BEGIN
 		ysnPromo,
 		strPriceMethod,
 		dblFactor,
+		strRoundPrice,
+		strPriceEndingDigit,
 		dblPrice,
 		dblLastCost,
 		-- ysnActive,
@@ -146,3 +152,4 @@ BEGIN
 	-- End duplication of RetailPriceAdjustment Detail table --
 	-----------------------------------------------------------
 END
+

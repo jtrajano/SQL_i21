@@ -12,7 +12,10 @@ SELECT	i21.intBankAccountId
 		,strGLAccountId = (SELECT strAccountId FROM dbo.tblGLAccount WHERE intAccountId = i21.intGLAccountId)
 		,i21.intCurrencyId
 		,strCurrency = (SELECT strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = i21.intCurrencyId)
-		,i21.intBankAccountType
+		,i21.intBankAccountTypeId
+		,BankAccountType.strBankAccountType
+		,i21.intBrokerageAccountId
+		,Brokerage.strAccountNumber strBrokerageAccount
 		,i21.strContact
 		,i21.strBankAccountHolder
 		,ISNULL(dbo.fnAESDecryptASym(i21.strBankAccountNo),strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo
@@ -28,6 +31,8 @@ SELECT	i21.intBankAccountId
 		,i21.strEmail
 		,i21.strIBAN
 		,i21.strSWIFT
+		,i21.strBICCode
+		,i21.strBranchCode
 		,i21.intCheckStartingNo
 		,i21.intCheckEndingNo
 		,i21.intCheckNextNo
@@ -100,8 +105,16 @@ SELECT	i21.intBankAccountId
 		,i21.strCbkNo
 		,i21.intConcurrencyId
 		,i21.intPayToDown
+		,i21.strACHClientId
 		,i21.intResponsibleEntityId
 		,strResponsibleEntity = E.strName
+		,i21.strCorrespondingBank
+		--Advanced Bank Recon
+		,i21.ysnABREnable
+		,i21.intABRDaysNoRef
+		,i21.strPaymentInstructions
+		--Advanced Bank Recon
+		
 		-- The following fields are from the origin system		
 		,apcbk_comment = CAST(NULL AS NVARCHAR(30))	 COLLATE Latin1_General_CI_AS -- CHAR (30)
 		,apcbk_password = CAST(NULL AS NVARCHAR(16)) COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -132,6 +145,8 @@ SELECT	i21.intBankAccountId
 						) tbl),0) AS bit)
 FROM	dbo.tblCMBankAccount i21
 LEFT JOIN dbo.tblEMEntity E on E.intEntityId = i21.intResponsibleEntityId
+LEFT JOIN dbo.tblCMBankAccountType BankAccountType ON BankAccountType.intBankAccountTypeId = i21.intBankAccountTypeId
+LEFT JOIN dbo.tblRKBrokerageAccount Brokerage ON Brokerage.intBrokerageAccountId = i21.intBrokerageAccountId
 GO
 --Create trigger that will insert on the main table
 
@@ -154,7 +169,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,ysnActive
 						,intGLAccountId
 						,intCurrencyId
-						,intBankAccountType
+						,intBankAccountTypeId
+						,intBrokerageAccountId
 						,strContact
 						,strBankAccountHolder
 						,strBankAccountNo
@@ -170,6 +186,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEmail
 						,strIBAN
 						,strSWIFT
+						,strBICCode
+						,strBranchCode
 						,intCheckStartingNo
 						,intCheckEndingNo
 						,intCheckNextNo
@@ -231,14 +249,20 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intConcurrencyId
 						,strCbkNo
 						,intPayToDown
+						,strACHClientId
 						,intResponsibleEntityId
+						,ysnABREnable
+						,intABRDaysNoRef
+						,strPaymentInstructions
+						,strCorrespondingBank
 				)
 				OUTPUT 	inserted.intBankAccountId
 				SELECT	intBankId							= i.intBankId
 						,ysnActive							= i.ysnActive
 						,intGLAccountId						= i.intGLAccountId
 						,intCurrencyId						= i.intCurrencyId
-						,intBankAccountType					= i.intBankAccountType
+						,intBankAccountTypeId				= i.intBankAccountTypeId
+						,intBrokerageAccountId				= i.intBrokerageAccountId
 						,strContact							= i.strContact
 						,strBankAccountHolder				= i.strBankAccountHolder
 						,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
@@ -254,6 +278,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEmail							= i.strEmail
 						,strIBAN							= i.strIBAN
 						,strSWIFT							= i.strSWIFT
+						,strBICCode							= i.strBICCode
+						,strBranchCode						= i.strBranchCode
 						,intCheckStartingNo					= i.intCheckStartingNo
 						,intCheckEndingNo					= i.intCheckEndingNo
 						,intCheckNextNo						= i.intCheckNextNo
@@ -315,7 +341,12 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intConcurrencyId					= i.intConcurrencyId
 						,strCbkNo							= i.strCbkNo
 						,intPayToDown						= i.intPayToDown
+						,strACHClientId						= i.strACHClientId
 						,intResponsibleEntityId				= i.intResponsibleEntityId
+						,ysnABREnable						= i.ysnABREnable
+						,intABRDaysNoRef					= i.intABRDaysNoRef
+						,strPaymentInstructions				= i.strPaymentInstructions
+						,strCorrespondingBank				= i.strCorrespondingBank
 				FROM	inserted i 
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
@@ -345,7 +376,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,ysnActive							= i.ysnActive
 					,intGLAccountId						= i.intGLAccountId
 					,intCurrencyId						= i.intCurrencyId
-					,intBankAccountType					= i.intBankAccountType
+					,intBankAccountTypeId				= i.intBankAccountTypeId
+					,intBrokerageAccountId				= i.intBrokerageAccountId
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
 					,strBankAccountNo                   = CASE WHEN i.strBankAccountNo = B.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END
@@ -361,6 +393,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strEmail							= i.strEmail
 					,strIBAN							= i.strIBAN
 					,strSWIFT							= i.strSWIFT
+					,strBICCode							= i.strBICCode
+					,strBranchCode						= i.strBranchCode
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
@@ -422,7 +456,12 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,strACHClientId						= i.strACHClientId
 					,intResponsibleEntityId				= i.intResponsibleEntityId
+					,ysnABREnable						= i.ysnABREnable
+					,intABRDaysNoRef					= i.intABRDaysNoRef
+					,strPaymentInstructions				= i.strPaymentInstructions
+					,strCorrespondingBank				= i.strCorrespondingBank
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
@@ -431,3 +470,22 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 
 			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 END
+GO
+
+CREATE TRIGGER trg_delete_vyuCMBankAccount
+ON [dbo].vyuCMBankAccount
+INSTEAD OF DELETE
+AS
+BEGIN 
+	IF EXISTS(SELECT 1 FROM deleted i JOIN dbo.tblCMBankTransaction B
+	ON i.intBankAccountId = B.intBankAccountId)
+	BEGIN
+		RAISERROR('Delete operation not allowed. Bank Account have transaction(s).',16,1)
+		RETURN
+	END
+
+	DELETE B FROM 
+	deleted i JOIN dbo.tblCMBankAccount B
+	ON i.intBankAccountId = B.intBankAccountId
+END
+GO

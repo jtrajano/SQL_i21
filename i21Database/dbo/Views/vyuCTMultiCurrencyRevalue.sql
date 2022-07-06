@@ -27,7 +27,8 @@ AS
 			,dblUnrealizedCreditGain=	0
 			,dblDebit				=	0
 			,dblCredit				=	0
-
+			,intCompanyLocationId	=	CL.intCompanyLocationId	
+			,intLOBSegmentCodeId	=	LB.intSegmentCodeId
 	FROM	tblCTContractDetail				CD
 	JOIN	tblCTContractHeader				CH	ON	CD.intContractHeaderId				=	CH.intContractHeaderId
 	JOIN	tblCTContractType				CT	ON	CT.intContractTypeId				=	CH.intContractTypeId
@@ -36,4 +37,5 @@ AS
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId				=	CD.intCompanyLocationId			LEFT
 	JOIN	tblICItem						IM	ON	IM.intItemId						=	CD.intItemId					LEFT
 	JOIN	tblICCategory					CG	ON	CG.intCategoryId					=	IM.intCategoryId				LEFT 
-	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId
+	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId				LEFT
+	JOIN	tblSMLineOfBusiness				LB	ON 	LB.intLineOfBusinessId				=	CG.intLineOfBusinessId

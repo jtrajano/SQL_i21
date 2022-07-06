@@ -2,15 +2,12 @@
 AS
 SELECT  
   strInvoiceNumber
-, COUNT(strInvoiceNumber) intInvoiceCount
 , strItemNo
 , strTaxGroup
 , dtmDate
 , SUM(dblTaxable) dblTaxable
 , SUM(dblNonTaxable) dblNonTaxable
 , SUM(dblTotalSales) dblTotalSales  
-, SUM(dblTotalTax) dblTotalTax
-, SUM(dblTotalAdjustedTax) dblTotalAdjustedTax
-, dblTotalAdjustment = SUM(dblTotalTax) - SUM(dblTotalAdjustedTax) 
+, SUM(dblTax) dblTax
 FROM vyuARSalesTaxReport
 GROUP BY strInvoiceNumber, strItemNo, strTaxGroup, dtmDate

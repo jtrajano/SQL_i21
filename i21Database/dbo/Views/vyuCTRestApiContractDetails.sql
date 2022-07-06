@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuCTRestApiContractDetails]
 AS
 SELECT
-	cd.intContractDetailId
+	  cd.intContractDetailId
 	, cd.intSplitFromId
 	, cd.intParentDetailId
 	, cd.ysnSlice
@@ -147,6 +147,11 @@ SELECT
 	, cd.dtmFinalPNL
 	, cd.intPricingStatus
 	, cd.dtmStartDateUTC
+	, cd.dblRefFuturesQty
+	, cd.intRefFuturesItemUOMId
+	, cd.intRefFuturesCurrencyId
+	, cd.intRefFuturesMarketId
+	, cd.intRefFuturesMonthId
 	, c.strLocationName
 	, c.strLocationNumber
 	, dbo.fnCTGetCurrencyExchangeRate(cd.intContractDetailId,0) AS dblRate

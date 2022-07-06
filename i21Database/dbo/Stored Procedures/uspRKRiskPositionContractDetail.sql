@@ -53,7 +53,7 @@ FROM (
 		,intDtlQtyUnitMeasureId intUnitMeasureId
 		,h.intPricingTypeId
 		,h.intContractTypeId
-		,intCompanyLocationId
+		,h.intCompanyLocationId
 		,strContractType
 		,strPricingType
 		,intDtlQtyInCommodityUOMId intCommodityUnitMeasureId
@@ -151,7 +151,7 @@ FROM (
 		intDtlQtyUnitMeasureId intUnitMeasureId
 		,2 intPricingTypeId
 		,h.intContractTypeId
-		,intCompanyLocationId
+		,h.intCompanyLocationId
 		,strContractType
 		,strPricingType
 		,intDtlQtyInCommodityUOMId intCommodityUnitMeasureId

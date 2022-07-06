@@ -15,12 +15,16 @@ BEGIN TRY
 
 	DECLARE @intSampleId INT
 	DECLARE @strMarks NVARCHAR(100)
-	DECLARE @intPreviousSampleStatusId INT
+	DECLARE @intPreviousSampleStatusId INT -- New Sample Status Id
+	DECLARE @intCurrentSampleStatusId INT
 	DECLARE @intShipperEntityId INT
 	DECLARE @ysnEnableParentLot BIT
 			,@intSampleTypeId INT
 		,@dblSampleQty NUMERIC(18, 6)
 		,@intLotId INT
+		,@intProductTypeId INT
+		,@intProductValueId INT
+		,@intSeqNo INT
 		,@dblQty NUMERIC(18, 6)
 		,@intItemUOMId INT
 		,@intStorageLocationId INT
@@ -36,13 +40,37 @@ BEGIN TRY
 		,@dblOldSampleQty NUMERIC(18, 6)
 		,@intConcurrencyId INT
 		,@intCurrentConcurrencyId INT
+		,@ysnImpactPricing BIT
+		,@ysnOldImpactPricing BIT
+		,@intContractDetailId INT
+		,@strErrorSampleNumber NVARCHAR(50)
+		,@strErrorMessage NVARCHAR(MAX)
 	DECLARE @intRepresentingUOMId INT
 		,@dblRepresentingQty NUMERIC(18, 6)
 		,@dblConvertedSampleQty NUMERIC(18, 6)
+		,@intContractHeaderId INT
+		,@ysnMultipleContractSeq BIT
+	DECLARE @intOrgSampleTypeId INT
+		,@intOrgItemId INT
+		,@intOrgCountryID INT
+		,@intOrgCompanyLocationSubLocationId INT
+
+	SELECT @strErrorSampleNumber = NULL
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblQMCompanyPreference
 
+	SELECT @intOrgSampleTypeId = intSampleTypeId
+		,@intOrgItemId = intItemId
+		,@intOrgCountryID = intCountryID
+		,@intOrgCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intSampleTypeId INT
+			,intItemId INT
+			,intCountryID INT
+			,intCompanyLocationSubLocationId INT
+			)
+	
 	SELECT @intSampleId = intSampleId
 		,@strMarks = strMarks
 		,@intPreviousSampleStatusId = intSampleStatusId
@@ -51,7 +79,11 @@ BEGIN TRY
 		,@dblRepresentingQty = dblRepresentingQty
 		,@intRepresentingUOMId = intRepresentingUOMId
 		,@intItemId = intItemId
+		,@intSampleTypeId = intSampleTypeId
+		,@intContractHeaderId = intContractHeaderId
 		,@intConcurrencyId = intConcurrencyId
+		,@ysnImpactPricing = ysnImpactPricing
+		,@intContractDetailId = intContractDetailId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
 			,strMarks NVARCHAR(100)
@@ -61,7 +93,11 @@ BEGIN TRY
 			,dblRepresentingQty NUMERIC(18, 6)
 			,intRepresentingUOMId INT
 			,intItemId INT
+			,intSampleTypeId INT
+			,intContractHeaderId INT
 			,intConcurrencyId INT
+			,ysnImpactPricing BIT
+			,intContractDetailId INT
 			)
 
 	IF NOT EXISTS (
@@ -121,12 +157,82 @@ BEGIN TRY
 		END
 	END
 
-	BEGIN TRAN
+	SELECT @ysnMultipleContractSeq = ysnMultipleContractSeq
+	FROM tblQMSampleType
+	WHERE intSampleTypeId = @intSampleTypeId
+
+	-- Contract Sequences check for Assign Contract to Multiple Sequences scenario
+	IF @ysnMultipleContractSeq = 1
+		AND ISNULL(@intContractHeaderId, 0) > 0
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+						intContractDetailId INT
+						,strRowState NVARCHAR(50)
+						) x
+				JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = x.intContractDetailId
+					AND x.strRowState <> 'DELETE'
+				WHERE CD.intContractHeaderId <> @intContractHeaderId
+				)
+		BEGIN
+			RAISERROR (
+					'Assigned Sequences should belongs to the same Contract. '
+					,16
+					,1
+					)
+		END
+	END
+
+	-- Impact Pricing validation
+	IF @ysnImpactPricing = 1
+		AND ISNULL(@intContractDetailId, 0) > 0
+	BEGIN
+		SELECT TOP 1 @strErrorSampleNumber = strSampleNumber
+		FROM tblQMSample
+		WHERE intContractDetailId = @intContractDetailId
+			AND ysnImpactPricing = 1
+			AND intSampleId <> @intSampleId
+
+		IF ISNULL(@strErrorSampleNumber, '') <> ''
+		BEGIN
+			SELECT @strErrorMessage = 'Impact Pricing is already selected in sample ' + @strErrorSampleNumber + ' which belongs to the same contract sequence.'
+
+			RAISERROR (
+					@strErrorMessage
+					,16
+					,1
+					)
+		END
+	END
 
 	SELECT @dblOldSampleQty = dblSampleQty
 		,@intCurrentConcurrencyId = intConcurrencyId
+		,@ysnOldImpactPricing = ISNULL(ysnImpactPricing, 0)
+		,@intCurrentSampleStatusId = intSampleStatusId
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
+
+	-- If sequence already has a voucher, do not allow user to uncheck Impact Pricing till the voucher is deleted
+	IF @ysnOldImpactPricing = 1
+		AND @ysnImpactPricing = 0
+		AND ISNULL(@intContractDetailId, 0) > 0
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM dbo.tblAPBillDetail
+				WHERE ISNULL(intContractDetailId, 0) = @intContractDetailId
+				)
+		BEGIN
+			RAISERROR (
+					'Voucher is already created for the contract sequence so you cannot uncheck Impact Pricing. '
+					,16
+					,1
+					)
+		END
+	END
+
+	BEGIN TRAN
 
 	IF ISNULL(@intConcurrencyId, 0) < ISNULL(@intCurrentConcurrencyId, 0)
 	BEGIN
@@ -162,8 +268,9 @@ BEGIN TRY
 		,intSampleStatusId = x.intSampleStatusId
 		,intItemId = x.intItemId
 		,intItemContractId = x.intItemContractId
-		--,intContractHeaderId = x.intContractHeaderId
+		,intContractHeaderId = x.intContractHeaderId
 		,intContractDetailId = x.intContractDetailId
+		,intRelatedSampleId = x.intRelatedSampleId
 		--,intShipmentBLContainerContractId = x.intShipmentBLContainerContractId
 		--,intShipmentId = x.intShipmentId
 		--,intShipmentContractQtyId = x.intShipmentContractQtyId
@@ -185,7 +292,7 @@ BEGIN TRY
 		,strLotNumber = x.strLotNumber
 		,strSampleNote = x.strSampleNote
 		,dtmSampleReceivedDate = x.dtmSampleReceivedDate
-		,dtmTestedOn = x.dtmTestedOn
+		--,dtmTestedOn = x.dtmTestedOn
 		--,intTestedById = x.intTestedById
 		,dblSampleQty = x.dblSampleQty
 		,intSampleUOMId = x.intSampleUOMId
@@ -195,6 +302,8 @@ BEGIN TRY
 		,dtmTestingStartDate = x.dtmTestingStartDate
 		,dtmTestingEndDate = x.dtmTestingEndDate
 		,dtmSamplingEndDate = x.dtmSamplingEndDate
+		,dtmRequestedDate = CASE WHEN x.dtmRequestedDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmRequestedDate END
+		,dtmSampleSentDate = CASE WHEN x.dtmSampleSentDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmSampleSentDate END
 		,strSamplingMethod = x.strSamplingMethod
 		,strContainerNumber = x.strContainerNumber
 		,strMarks = x.strMarks
@@ -212,6 +321,10 @@ BEGIN TRY
 		,strForwardingAgentRef = x.strForwardingAgentRef
 		,strSentBy = x.strSentBy
 		,intSentById = x.intSentById
+		,ysnImpactPricing = x.ysnImpactPricing
+		,intSamplingCriteriaId = CASE x.intSamplingCriteriaId WHEN 0 THEN NULL ELSE x.intSamplingCriteriaId END
+		,strSendSampleTo = x.strSendSampleTo
+		,strRepresentLotNumber = x.strRepresentLotNumber
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -221,8 +334,9 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT
-			--,intContractHeaderId INT
+			,intContractHeaderId INT
 			,intContractDetailId INT
+			,intRelatedSampleId INT
 			--,intShipmentBLContainerId INT
 			--,intShipmentBLContainerContractId INT
 			--,intShipmentId INT
@@ -243,7 +357,7 @@ BEGIN TRY
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
-			,dtmTestedOn DATETIME
+			--,dtmTestedOn DATETIME
 			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
@@ -253,6 +367,8 @@ BEGIN TRY
 			,dtmTestingStartDate DATETIME
 			,dtmTestingEndDate DATETIME
 			,dtmSamplingEndDate DATETIME
+			,dtmRequestedDate DATETIME
+			,dtmSampleSentDate DATETIME
 			,strSamplingMethod NVARCHAR(50)
 			,strContainerNumber NVARCHAR(100)
 			,strMarks NVARCHAR(100)
@@ -270,6 +386,10 @@ BEGIN TRY
 			,strForwardingAgentRef NVARCHAR(50)
 			,strSentBy NVARCHAR(50)
 			,intSentById INT
+			,ysnImpactPricing BIT
+			,intSamplingCriteriaId INT
+			,strSendSampleTo NVARCHAR(50)
+			,strRepresentLotNumber NVARCHAR(50)
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)
@@ -283,6 +403,96 @@ BEGIN TRY
 		UPDATE tblQMSample
 		SET intPreviousSampleStatusId = @intPreviousSampleStatusId
 		WHERE intSampleId = @intSampleId
+
+		UPDATE tblQMSample
+		SET dtmTestedOn = NULL
+			,intTestedById = NULL
+		WHERE intSampleId = @intSampleId
+	END
+
+	-- If current sample status is Approved / Rejected and new sample status is not Approved / Rejected, then it is reversal
+	-- Reverse the lot status
+	IF @intCurrentSampleStatusId IN (3, 4)
+		AND @intPreviousSampleStatusId NOT IN (3, 4)
+	BEGIN
+		UPDATE tblQMSample
+		SET intLotStatusId = 3 -- Quarantine
+		WHERE intSampleId = @intSampleId
+			AND intLotStatusId IS NOT NULL
+
+		EXEC uspQMSetLotStatus @intSampleId
+
+		SELECT @intProductTypeId = intProductTypeId
+			,@intProductValueId = intProductValueId
+			,@intLastModifiedUserId = intLastModifiedUserId
+		FROM tblQMSample
+		WHERE intSampleId = @intSampleId
+
+		-- Call IC SP to monitor the rejected samples at lot level
+		IF @intProductTypeId = 6
+			OR @intProductTypeId = 11
+		BEGIN
+			DECLARE @intLotLocationId INT
+			DECLARE @LotRecords TABLE (
+				intSeqNo INT IDENTITY(1, 1)
+				,intLotId INT
+				,strLotNumber NVARCHAR(50)
+				)
+
+			DELETE
+			FROM @LotRecords
+
+			IF @intProductTypeId = 11
+			BEGIN
+				INSERT INTO @LotRecords (
+					intLotId
+					,strLotNumber
+					)
+				SELECT intLotId
+					,strLotNumber
+				FROM tblICLot
+				WHERE intParentLotId = @intProductValueId
+					AND dblQty > 0
+			END
+			ELSE
+			BEGIN
+				SELECT @strLotNumber = strLotNumber
+					,@intLotLocationId = intLocationId
+				FROM tblICLot
+				WHERE intLotId = @intProductValueId
+
+				INSERT INTO @LotRecords (
+					intLotId
+					,strLotNumber
+					)
+				SELECT intLotId
+					,strLotNumber
+				FROM tblICLot
+				WHERE strLotNumber = @strLotNumber
+					AND dblQty > 0
+					--AND intLocationId = @intLotLocationId
+			END
+
+			SELECT @intSeqNo = MIN(intSeqNo)
+			FROM @LotRecords
+
+			WHILE (@intSeqNo > 0)
+			BEGIN
+				SELECT @intLotId = NULL
+
+				SELECT @intLotId = intLotId
+				FROM @LotRecords
+				WHERE intSeqNo = @intSeqNo
+
+				EXEC uspICRejectLot @intLotId = @intLotId
+					,@intEntityId = @intLastModifiedUserId
+					,@ysnAdd = 0
+
+				SELECT @intSeqNo = MIN(intSeqNo)
+				FROM @LotRecords
+				WHERE intSeqNo > @intSeqNo
+			END
+		END
 	END
 
 	-- Sample Detail Create, Update, Delete
@@ -348,6 +558,71 @@ BEGIN TRY
 					,strRowState NVARCHAR(50)
 					) x
 			WHERE x.intSampleDetailId = dbo.tblQMSampleDetail.intSampleDetailId
+				AND x.strRowState = 'DELETE'
+			)
+
+	-- Sample Contract Sequences Create, Update, Delete
+	INSERT INTO dbo.tblQMSampleContractSequence (
+		intConcurrencyId
+		,intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT 1
+		,@intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+			intContractDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intUnitMeasureId INT
+			,intCreatedUserId INT
+			,dtmCreated DATETIME
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.strRowState = 'ADDED'
+
+	UPDATE dbo.tblQMSampleContractSequence
+	SET intContractDetailId = x.intContractDetailId
+		,dblQuantity = x.dblQuantity
+		,intUnitMeasureId = x.intUnitMeasureId
+		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+		,intLastModifiedUserId = x.intLastModifiedUserId
+		,dtmLastModified = x.dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+			intSampleContractSequenceId INT
+			,intContractDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intUnitMeasureId INT
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intSampleContractSequenceId = dbo.tblQMSampleContractSequence.intSampleContractSequenceId
+		AND x.strRowState = 'MODIFIED'
+
+	DELETE
+	FROM dbo.tblQMSampleContractSequence
+	WHERE intSampleId = @intSampleId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+					intSampleContractSequenceId INT
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intSampleContractSequenceId = dbo.tblQMSampleContractSequence.intSampleContractSequenceId
 				AND x.strRowState = 'DELETE'
 			)
 
@@ -530,6 +805,7 @@ BEGIN TRY
 			)
 
 	EXEC sp_xml_removedocument @idoc
+	SET @idoc = 0
 
 	SELECT @intSampleTypeId = intSampleTypeId
 		,@dblSampleQty = dblSampleQty
@@ -540,9 +816,31 @@ BEGIN TRY
 		,@strSampleNumber = strSampleNumber
 		,@ysnAdjustInventoryQtyBySampleQty=IsNULL(ysnAdjustInventoryQtyBySampleQty,0)
 		,@intLastModifiedUserId=intLastModifiedUserId
+		,@ysnImpactPricing = ISNULL(ysnImpactPricing, 0)
+		,@intContractDetailId = intContractDetailId
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
 
+	-- Impact Pricing is selected
+	IF @ysnImpactPricing = 1
+		AND ISNULL(@intContractDetailId, 0) > 0
+	BEGIN
+		EXEC uspCTSaveContractSamplePremium @intContractDetailId = @intContractDetailId
+			,@intSampleId = @intSampleId
+			,@intUserId = @intLastModifiedUserId
+			,@ysnImpactPricing = 1
+	END
+
+	-- Impact Pricing is reversed
+	IF @ysnOldImpactPricing = 1
+		AND @ysnImpactPricing = 0
+		AND ISNULL(@intContractDetailId, 0) > 0
+	BEGIN
+		EXEC uspCTSaveContractSamplePremium @intContractDetailId = @intContractDetailId
+			,@intSampleId = @intSampleId
+			,@intUserId = @intLastModifiedUserId
+			,@ysnImpactPricing = 0
+	END
 
 	IF @ysnAdjustInventoryQtyBySampleQty=1
 		AND ISNULL(@dblSampleQty, 0) > 0
@@ -556,6 +854,8 @@ BEGIN TRY
 					,1
 					)
 		END
+
+		SELECT @intLotId = NULL
 
 		SELECT @intLotId = intLotId
 			,@dblQty = dblQty
@@ -605,6 +905,25 @@ BEGIN TRY
 	END
 
 	EXEC uspQMInterCompanyPreStageSample @intSampleId
+
+	EXEC uspQMPreStageSample @intSampleId
+		,'Modified'
+		,@strSampleNumber
+		,@intOrgSampleTypeId
+		,@intOrgItemId
+		,@intOrgCountryID
+		,@intOrgCompanyLocationSubLocationId
+	
+	-- Update parent sample if the sample being updated is a cupping sample
+	DECLARE @intTypeId INT
+	SELECT @intTypeId = intTypeId FROM tblQMSample WHERE intSampleId = @intSampleId
+	
+	IF(@intTypeId = 2)
+	BEGIN
+		EXEC uspQMCuppingSessionUpdateParentSample
+			@intCuppingSampleId = @intSampleId,
+			@intUserEntityId = @intLastModifiedUserId
+	END
 
 	COMMIT TRAN
 END TRY

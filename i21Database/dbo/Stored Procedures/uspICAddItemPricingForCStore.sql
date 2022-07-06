@@ -4,6 +4,7 @@
 	,@dblStandardCost AS NUMERIC(18, 6) = 0 
 	,@dblLastCost AS NUMERIC(18, 6) = 0 
 	,@dblSalePrice AS NUMERIC(18, 6) = 0 
+	,@dtmEffectiveDate AS DATETIME = NULL 
 	,@intEntityUserSecurityId AS INT 
 	,@intItemPricingId AS INT = NULL OUTPUT 
 AS
@@ -69,4 +70,86 @@ BEGIN
 			,@fromValue = NULL 
 			,@toValue = @intItemPricingId 
 	END
-END 
+END
+
+IF @dblStandardCost IS NOT NULL AND @dtmEffectiveDate IS NOT NULL
+BEGIN 
+
+	DECLARE @intEffectiveItemCostId  INT = NULL
+
+	INSERT INTO tblICEffectiveItemCost(
+		intItemId
+		,intItemLocationId 
+		,dblCost 
+		,dtmEffectiveCostDate 
+		,intConcurrencyId 
+		,dtmDateCreated 
+		,intCreatedByUserId 
+	)
+	SELECT
+		intItemId = @intItemId
+		,intItemLocationId = @intItemLocationId
+		,dblCost 			  = @dblStandardCost
+		,dtmEffectiveCostDate = @dtmEffectiveDate
+		,intConcurrencyId 	  = 1
+		,dtmDateCreated 	  = GETDATE()
+		,intCreatedByUserId   = @intEntityUserSecurityId
+
+	SELECT @intEffectiveItemCostId = SCOPE_IDENTITY();
+
+	-- Create an audit log. 
+	IF @intEffectiveItemCostId IS NOT NULL
+	AND @intItemId IS NOT NULL 
+	BEGIN 
+		EXEC dbo.uspSMAuditLog 
+			@keyValue = @intItemId
+			,@screenName = 'Inventory.view.Item'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = 'Updated'
+			,@changeDescription = 'C-Store created an Item Cost Pricing with Effective Date.'
+			,@fromValue = NULL 
+			,@toValue = @intEffectiveItemCostId 
+	END
+END
+
+
+IF @dblSalePrice IS NOT NULL AND @dtmEffectiveDate IS NOT NULL
+BEGIN 
+
+	DECLARE @intEffectiveItemPriceId  INT = NULL
+
+	INSERT INTO tblICEffectiveItemPrice(
+		intItemId
+		,intItemLocationId 
+		,dblRetailPrice 
+		,dtmEffectiveRetailPriceDate 
+		,intConcurrencyId 
+		,dtmDateCreated 
+		,intCreatedByUserId 
+	)
+	SELECT
+		intItemId						= @intItemId
+		,intItemLocationId				= @intItemLocationId
+		,dblRetailPrice 				= @dblSalePrice
+		,dtmEffectiveRetailPriceDate	= @dtmEffectiveDate
+		,intConcurrencyId 				= 1
+		,dtmDateCreated 				= GETDATE()
+		,intCreatedByUserId				= @intEntityUserSecurityId
+
+	SELECT @intEffectiveItemPriceId = SCOPE_IDENTITY();
+
+
+	-- Create an audit log. 
+	IF @intEffectiveItemPriceId IS NOT NULL
+	AND @intItemId IS NOT NULL 
+	BEGIN 
+		EXEC dbo.uspSMAuditLog 
+			@keyValue = @intItemId
+			,@screenName = 'Inventory.view.Item'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = 'Updated'
+			,@changeDescription = 'C-Store created an Item Price Pricing with Effective Date.'
+			,@fromValue = NULL 
+			,@toValue = @intEffectiveItemPriceId 
+	END
+END

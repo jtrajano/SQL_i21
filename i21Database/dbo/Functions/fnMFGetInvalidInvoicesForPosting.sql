@@ -228,6 +228,39 @@ BEGIN
 					ON mcp.intManufacturingCellId = mc.intManufacturingCellId
 		WHERE	mc.intManufacturingCellId=@intCellId
 
+		IF ISNULL(@intRecipeId, 0) = 0
+		BEGIN
+			SELECT @strItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intBlendItemId
+
+			SELECT @strLocationName = strLocationName
+			FROM tblSMCompanyLocation
+			WHERE intCompanyLocationId = @intLocationId
+
+			SET @ErrMsg = 'No Active Recipe found for item ' + @strItemNo + ' in location ' + @strLocationName + '.'
+
+			--Add the error msg to return table
+			INSERT INTO @returntable (
+				[intInvoiceId]
+				,[strInvoiceNumber]
+				,[strTransactionType]
+				,[intInvoiceDetailId]
+				,[intItemId]
+				,[strBatchId]
+				,[strPostingError]
+				)
+			SELECT intInvoiceId
+				,strInvoiceNumber
+				,strTransactionType
+				,intInvoiceDetailId
+				,intItemId
+				,strBatchId
+				,@ErrMsg
+			FROM @Invoices
+			WHERE intInvoiceDetailId = @intMinInvoice
+		END
+
 		SELECT	@dblQtyToProduce = dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId,@intBlendItemUOMId,@dblQtyToProduce)
 
 		--update cell,machine in tblInput table

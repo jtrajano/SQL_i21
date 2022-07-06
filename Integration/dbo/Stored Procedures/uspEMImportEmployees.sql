@@ -41,8 +41,8 @@ BEGIN
 	SELECT LTRIM(RTRIM(prwcc_code)) COLLATE Latin1_General_CI_AS 
 		,(LTRIM(RTRIM(prwcc_desc)) + '' '' + LTRIM(RTRIM(prwcc_desc2))) COLLATE Latin1_General_CI_AS
 		,prwcc_company_rate
-		,CASE WHEN prwcc_rate_type = 1 THEN ''Per Dollar'' 
-			  WHEN prwcc_rate_type = 2 THEN ''Per Hour'' 
+		,CASE WHEN prwcc_rate_type = ''1'' THEN ''Per Dollar'' 
+			  WHEN prwcc_rate_type = ''2'' THEN ''Per Hour'' 
 			END
 		,1
 	FROM prwccmst

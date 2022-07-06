@@ -326,12 +326,23 @@ END
 SELECT	@ysnGLEntriesRequired = 1
 FROM	tblICInventoryTransfer 
 WHERE	intInventoryTransferId = @intTransactionId 
-		AND intFromLocationId <> intToLocationId
+		AND (
+			intFromLocationId <> intToLocationId
+			OR ysnShipmentRequired = 1
+		)
 
 -- Add to the "not-to-log" list if shipment is not required 
 IF @ysnShipmentRequired <> 1
 BEGIN 
 	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
+END 
+
+-- Call any integration sp before doing the post/unpost. 
+BEGIN 
+	EXEC dbo.uspICBeforePostInventoryTransferIntegration
+			@ysnPost
+			,@intTransactionId 
+			,@intEntityUserSecurityId
 END 
 
 --------------------------------------------------------------------------------------------  
@@ -997,6 +1008,33 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@strGLDescription		
 	END
+
+	-- BEGIN 
+			
+	-- 	DECLARE @TransactionLinks udtICTransactionLinks
+	-- 	DELETE FROM @TransactionLinks
+		
+	-- 	IF EXISTS (SELECT intSourceId FROM dbo.vyuICGetTransferDetailSource WHERE intInventoryTransferId = @intTransactionId AND intSourceId IS NOT NULL)
+	-- 	BEGIN
+		
+	-- 		INSERT INTO @TransactionLinks (
+	-- 			strOperation, -- Operation
+	-- 			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+	-- 			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	-- 		)
+	-- 		SELECT 'Create',
+	-- 			Transfer.intSourceId, 
+	-- 			COALESCE(Transfer.strSourceTransactionNo, 'Missing Transaction No'), 
+	-- 			Transfer.strSourceModule, 
+	-- 			Transfer.strSourceScreen,
+	-- 			@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Transfer'
+	-- 		FROM dbo.vyuICGetTransferDetailSource Transfer
+	-- 		WHERE intInventoryTransferId = @intTransactionId
+
+	-- 		EXEC dbo.uspICAddTransactionLinks @TransactionLinks
+
+	-- 	END
+	-- END
 END   	
 
 --------------------------------------------------------------------------------------------  
@@ -1136,6 +1174,12 @@ BEGIN
 		SET		intStatusId = 1 -- Status: Open
 		WHERE	strTransferNo = @strTransactionId
 	END
+
+	-- Call the integration sp. 
+	EXEC dbo.uspICAfterPostInventoryTransferIntegration
+		@ysnPost
+		,@intTransactionId 
+		,@intEntityUserSecurityId
 
 	-- If shipment required, then update the in-transit quantities. 
 	IF @ysnShipmentRequired = 1

@@ -12,7 +12,13 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strCommodity				= commodity.strCommodityCode
 		,intLocationId				= t.intCompanyLocationId
 		,t.intItemLocationId
-		,strLocationName			= [location].strLocationName 
+		,strLocationName			= [location].strLocationName --ISNULL(InTransitLocation.strLocationName, [Location].strLocationName) --ISNULL([Location].strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
+		,intSummaryLocationId  		= t.intInTransitSourceLocationId
+		,strSummaryLocationName = CASE WHEN t.intInTransitSourceLocationId IS NOT NULL THEN 
+													[location].strLocationName + ' (In-Transit)'
+												ELSE 
+													[location].strLocationName
+											END
 		,t.intSubLocationId
 		,subLoc.strSubLocationName
 		,t.intStorageLocationId
@@ -54,6 +60,18 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strDescription				= t.strDescription 
 		,intItemStockUOM			= stockUOM.intItemUOMId 
 		,intUnitMeasureStockUOM		= stockUnitMeasure.intUnitMeasureId
+		,t.strAccountIdInventory
+		,t.strAccountIdInTransit
+
+		,i.intCertificationId
+		,Certification.strCertificationName
+		,strGrade					= Grade.strDescription
+		,strOrigin 					= Origin.strDescription
+		,strProductType				= ProductType.strDescription
+		,strRegion 					= Region.strDescription
+		,strSeason 					= Season.strDescription
+		,strClass 					= Class.strDescription
+		,strProductLine 			= ProductLine.strDescription
 FROM 	tblICInventoryTransaction t 
 		INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
@@ -107,6 +125,22 @@ FROM 	tblICInventoryTransaction t
 		LEFT JOIN tblEMEntity e 
 			ON e.intEntityId = t.intSourceEntityId 
 
+		LEFT JOIN tblICCertification Certification
+			ON Certification.intCertificationId = i.intCertificationId
+		LEFT JOIN tblICCommodityAttribute Grade 
+			ON Grade.intCommodityAttributeId = i.intGradeId
+		LEFT JOIN tblICCommodityAttribute Origin 
+			ON Origin.intCommodityAttributeId = i.intOriginId
+		LEFT JOIN tblICCommodityAttribute ProductType
+			ON ProductType.intCommodityAttributeId = i.intProductTypeId
+		LEFT JOIN tblICCommodityAttribute Region
+			ON Region.intCommodityAttributeId = i.intRegionId
+		LEFT JOIN tblICCommodityAttribute Season
+			ON Season.intCommodityAttributeId = i.intSeasonId
+		LEFT JOIN tblICCommodityAttribute Class
+			ON Class.intCommodityAttributeId = i.intClassVarietyId
+		LEFT JOIN tblICCommodityProductLine ProductLine
+			ON ProductLine.intCommodityProductLineId = i.intProductLineId
 WHERE	i.strType NOT IN (
 			'Other Charge'
 			,'Non-Inventory'

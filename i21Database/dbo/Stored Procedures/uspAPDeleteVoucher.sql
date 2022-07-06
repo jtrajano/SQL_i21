@@ -44,11 +44,11 @@ BEGIN TRY
 	INSERT INTO @voucherBillDetailIds
 	SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId
 
-	-- IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds))
-	-- BEGIN
-	-- 	RAISERROR('Voucher details already deleted.',16,1)
-	-- 	RETURN;
-	-- END
+	IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds))
+	BEGIN
+		RAISERROR('Voucher details already deleted.',16,1)
+		RETURN;
+	END
 
 	SELECT @vendorOrderNumber = strVendorOrderNumber FROM tblAPBill WHERE intBillId = @intBillId
 
@@ -65,7 +65,8 @@ BEGIN TRY
 	IF EXISTS(SELECT 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId)
 	BEGIN
 		--Do not allow to delete if details have associated storage and contract
-		IF @callerModule = 0 --AP
+		--IF DELETED ON VOUCHER SCREEN AND HAVE SETTLE STORAGE
+		IF @callerModule = 0 AND EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intBillId = @intBillId)
 		BEGIN
 			RAISERROR('Unable to delete. Please use pricing screen to delete the voucher.', 16, 1);
 			RETURN;	
@@ -109,6 +110,12 @@ BEGIN TRY
 
 	IF(EXISTS(SELECT TOP 1 1 FROM @voucherBillDetailIds))
 	BEGIN
+		UPDATE BD
+		SET BD.ysnStage = 1
+		FROM tblAPBillDetail BD
+		INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
+		WHERE B.intBillId = @intBillId AND B.ysnFinalVoucher = 1
+
 		--EXECUTE uspAPUpdateVoucherPayable for deleted.
 		EXEC [dbo].[uspAPUpdateVoucherPayable]
 			@voucherDetailIds = @voucherBillDetailIds,
@@ -116,7 +123,7 @@ BEGIN TRY
 		
 		EXEC [dbo].[uspAPUpdateIntegrationPayableAvailableQty]
 			@billDetailIds = @voucherBillDetailIds,
-			@decrease = 0
+			@decrease = 0 --decrease what we added before, we will call this again after deletion
 	END
 
 	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
@@ -129,6 +136,19 @@ BEGIN TRY
 	BEGIN
 		EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
 	END
+
+	EXEC uspAPAddTransactionLinks 1, @intBillId, 3, @UserId
+	
+	--UPDATE PO STATUS
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPurchaseId')) DROP TABLE #tmpPurchaseId
+	
+	SELECT DISTINCT
+		B.intPurchaseId
+	INTO #tmpPurchaseId
+	FROM tblAPBillDetail A 
+	INNER JOIN tblPOPurchaseDetail B 
+		ON A.[intPurchaseDetailId] = B.intPurchaseDetailId	
+	WHERE A.intBillId = @intBillId
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
@@ -149,6 +169,16 @@ BEGIN TRY
 
 	--Update the tblAPBillBatch
 	EXEC uspAPUpdateBillBatch @billBatchId = @billBatchId
+	
+	DECLARE @purchaseId INT;
+	WHILE EXISTS(SELECT 1 FROM #tmpPurchaseId)
+	BEGIN
+		SELECT TOP(1) 
+			@purchaseId = intPurchaseId
+		FROM #tmpPurchaseId
+		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
+		DELETE FROM #tmpPurchaseId WHERE intPurchaseId = @purchaseId
+	END
 
 	--Removed - FRM-9293
 	--DELETE FROM dbo.tblSMTransaction

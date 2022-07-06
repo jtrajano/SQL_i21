@@ -4,7 +4,13 @@ AS
 SELECT	ReceiptItem.intInventoryReceiptId
 		, ReceiptItem.intInventoryReceiptItemId
 		, Item.strItemNo
-		, strItemDescription = Item.strDescription
+		, strItemDescription = 
+			CASE 
+				WHEN placeHolderItem.intItemId IS NOT NULL THEN 
+					ReceiptItem.strImportDescription
+				ELSE 
+					Item.strDescription
+			END 
 		, Item.strLotTracking
 		, strUnitMeasure = ItemUnitMeasure.strUnitMeasure
 		, intItemUOMId = ItemUnitMeasure.intUnitMeasureId
@@ -22,10 +28,24 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, ItemLocation.ysnStorageUnitRequired
 		, dblItemUOMConvFactor = ISNULL(ItemUOM.dblUnitQty, 0)
 		, dblWeightUOMConvFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0)
-		, dblGrossMargin = (
-			CASE	WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
-					ELSE ((ISNULL(dblUnitRetail, 0) - dbo.fnCalculateCostBetweenUOM(ItemCostUOM.intItemUOMId, ReceiptItem.intUnitMeasureId, ISNULL(ReceiptItem.dblUnitCost, 0))) / dblUnitRetail) * 100 END
-		)
+		, dblGrossMargin = 
+			CASE	
+				WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
+				ELSE 				
+				-- (salesPrice - cost) / salesPrice * 100
+				dbo.fnDivide(
+					(
+						ISNULL(dblUnitRetail, 0) 
+						- dbo.fnCalculateCostBetweenUOM(
+							ISNULL(ItemCostUOM.intItemUOMId, ReceiptItem.intUnitMeasureId) 
+							,stockUOM.intItemUOMId  
+							, ISNULL(ReceiptItem.dblUnitCost, 0)
+						)
+					)
+					, ISNULL(dblUnitRetail, 0) 
+				) 
+				* 100 					
+			END		
 		, Item.strLifeTimeType
 		, Item.intLifeTime
 		, strCostUOM = CostUOM.strUnitMeasure
@@ -203,6 +223,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, ItemLocation.intLocationId
 		, intShipToLocationId = Receipt.intLocationId
 		, strContainer = LogisticsView.strContainerNumber
+		, strMarkings = LogisticsView.strMarkings
 		, ContractView.ysnLoad
 		, ContractView.dblAvailableQty
 		, ContractView.dblQuantityPerLoad
@@ -239,9 +260,12 @@ SELECT	ReceiptItem.intInventoryReceiptId
 				ELSE NULL
 				END
 			)
+		,dblLotTotalQuantity = ISNULL(receiptLot.dblLotTotalQuantity, 0) 
 		,dblLotTotalGross = ISNULL(receiptLot.dblLotTotalGross, 0)
 		,dblLotTotalTare = ISNULL(receiptLot.dblLotTotalTare, 0)
 		,dblLotTotalNet = ISNULL(receiptLot.dblLotTotalNet, 0)
+		,ReceiptItem.intComputeItemTotalOption
+		,strLongUPCCode = COALESCE(ItemWeightUOM.strLongUPCCode, ItemUOM.strLongUPCCode, '')
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -249,11 +273,23 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON ReceiptItem.intForexRateTypeId = forexType.intCurrencyExchangeRateTypeId
 		LEFT JOIN tblICItem Item 
 			ON Item.intItemId = ReceiptItem.intItemId
+		LEFT JOIN (
+			tblICItem placeHolderItem INNER JOIN tblICCompanyPreference pref
+				ON placeHolderItem.intItemId = pref.intItemIdHolderForReceiptImport
+		)
+			ON placeHolderItem.intItemId = ReceiptItem.intItemId
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
 			ON SubLocation.intCompanyLocationSubLocationId = ReceiptItem.intSubLocationId
 		LEFT JOIN tblICStorageLocation StorageLocation 
 			ON StorageLocation.intStorageLocationId = ReceiptItem.intStorageLocationId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Receipt.intLocationId AND ItemLocation.intItemId = Item.intItemId
+		OUTER APPLY (
+			SELECT TOP 1 
+				stockUOM.intItemUOMId
+			FROM tblICItemUOM stockUOM
+			WHERE stockUOM.intItemId = ReceiptItem.intItemId
+				AND stockUOM.ysnStockUnit = 1
+		) stockUOM
 		LEFT JOIN tblICItemUOM ItemUOM 
 			ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 			AND ItemUOM.intItemId = ReceiptItem.intItemId
@@ -291,6 +327,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		) rtn
 		OUTER APPLY (
 			SELECT	ril.intInventoryReceiptItemId
+					,dblLotTotalQuantity = SUM(ISNULL(ril.dblQuantity, 0))
 					,dblLotTotalGross = SUM(ISNULL(ril.dblGrossWeight, 0))
 					,dblLotTotalTare = SUM(ISNULL(ril.dblTareWeight, 0))
 					,dblLotTotalNet =  SUM(ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0))
@@ -351,7 +388,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 					,dblQuantity
 					,dblItemUOMCF
 					,strSourceNumber
-			FROM	vyuICGetInventoryTransferDetail TransferView
+			FROM	vyuICCompactInventoryTransferDetail TransferView
 			WHERE	TransferView.intInventoryTransferDetailId = ISNULL(ReceiptItem.intInventoryTransferDetailId, ReceiptItem.intSourceId)
 					AND (
 						Receipt.strReceiptType = 'Transfer Order'

@@ -150,8 +150,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, Transporter.strName AS strTransporterName
-					, Transporter.strFederalTaxId AS strTransporterFederalTaxId
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strCompanyName ELSE Transporter.strName END) AS strTransporterName
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strEin ELSE Transporter.strFederalTaxId END) AS strTransporterFederalTaxId
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFederalTaxId
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
@@ -260,6 +260,26 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 						OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
 					AND (CASE WHEN tblARInvoice.strType = 'Standard' AND tblARInvoice.strTransactionType = 'Customer Prepayment' THEN 'Invalid' ELSE 'Invoice' END) = 'Invoice'
+
+					AND ((
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						OR ((
+							tblCFSite.strSiteNumber IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) OR 
+							tblCFTransaction.strTransactionType IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1)) 
+							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+					)
+					AND ((
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						OR ((
+							tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) AND 
+							tblCFTransaction.strTransactionType NOT IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0)) 
+							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0)))
+						)
+					)
 				) Transactions
 		END
 		ELSE
@@ -357,8 +377,8 @@ BEGIN TRY
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
-					, Transporter.strName AS strTransporterName
-					, Transporter.strFederalTaxId AS strTransporterFederalTaxId
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strCompanyName ELSE Transporter.strName END) AS strTransporterName
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strEin ELSE Transporter.strFederalTaxId END) AS strTransporterFederalTaxId
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFederalTaxId
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
@@ -464,8 +484,27 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 						OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-						OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
-					AND (CASE WHEN tblARInvoice.strType = 'Standard' AND tblARInvoice.strTransactionType = 'Customer Prepayment' THEN 'Invalid' ELSE 'Invoice' END) = 'Invoice'
+						OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0)
+						)
+					AND ((
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0 AND
+						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						OR ((
+							tblCFSite.strSiteNumber IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 1) OR 
+							tblCFTransaction.strTransactionType IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 1)) 
+							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+					)
+					AND ((
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+						(SELECT COUNT(*) FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0 AND
+						(NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0))))
+						OR ((
+							tblCFSite.strSiteNumber NOT IN (SELECT strSiteNumber FROM vyuTFGetReportingComponentCardFuelingSite WHERE intReportingComponentId = @RCId AND ysnInclude = 0) AND 
+							tblCFTransaction.strTransactionType NOT IN (SELECT strTransactionType FROM vyuTFGetReportingComponentCardFuelingSiteType WHERE intReportingComponentId = @RCId AND ysnInclude = 0)) 
+							AND (NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE (strTransactionSource = 'CF Tran'AND ysnInclude = 0) OR (strTransactionSource = 'CF Invoice' AND ysnInclude = 0)))
+						)
+					)
 				) Transactions
 		END
 
@@ -541,6 +580,38 @@ BEGIN TRY
 					AND Trans.intReportingComponentId = @RCId
 					AND Invoice.strType <> 'Tank Delivery'
 				)
+			END
+		END
+
+		IF(@TaxAuthorityCode = 'FL')
+		BEGIN
+			IF (@ScheduleCode = '5LO')
+			BEGIN
+				-- Include Trans with County Location
+				DELETE @tmpTransaction WHERE intId IN (
+					SELECT Trans.intId
+					FROM @tmpTransaction Trans
+					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionDetailId
+					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					LEFT JOIN tblTFTaxAuthorityCountyLocation TCL ON TCL.intEntityId = Invoice.intEntityCustomerId AND TCL.intEntityLocationId = Invoice.intShipToLocationId
+					WHERE Trans.strTransactionType = 'Invoice'
+					AND Trans.intReportingComponentId = @RCId
+					AND TCL.intTaxAuthorityCountyLocationId IS NULL
+				)
+			END
+
+			IF (@ScheduleCode = '5LO_Sum')
+			BEGIN
+				-- Include Trans with County Location
+				UPDATE Trans SET Trans.intTaxAuthorityCountyLocationId = TCL.intTaxAuthorityCountyLocationId FROM @tmpTransaction Trans
+					LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionDetailId
+					LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+					LEFT JOIN tblTFTaxAuthorityCountyLocation TCL ON TCL.intEntityId = Invoice.intEntityCustomerId AND TCL.intEntityLocationId = Invoice.intShipToLocationId
+					WHERE Trans.strTransactionType = 'Invoice'
+					AND Trans.intReportingComponentId = @RCId
+					AND TCL.intTaxAuthorityCountyLocationId IS NOT NULL
+
+				DELETE @tmpTransaction WHERE intTaxAuthorityCountyLocationId IS NULL
 			END
 		END
 
@@ -660,7 +731,7 @@ BEGIN TRY
 		SELECT @intMaxId = ISNULL(MAX(intId), 0) FROM @tmpTransaction	
 
 		--INVENTORY TRANSFER - Track MFT Activity
-		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId)
+		IF (EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1)) 
 		BEGIN
 			INSERT INTO @tmpTransaction(intId
 				, intTransactionDetailId
@@ -838,133 +909,181 @@ BEGIN TRY
 
 		IF (@ReportingComponentId <> '')
 		BEGIN
-			INSERT INTO tblTFTransaction (uniqTransactionGuid
-				, intReportingComponentId
-				, intProductCodeId
-				, strProductCode
-				, intItemId
-				, dblQtyShipped
-				, dblGross
-				, dblNet
-				, dblBillQty
-				, strInvoiceNumber
-				, strPONumber
-				, strBillOfLading
-				, dtmDate
-				, strDestinationCity
-				, strDestinationCounty
-				, strDestinationState
-				, strOriginCity
-				, strOriginCounty
-				, strOriginState
-				, strCustomerName
-				, strCustomerFederalTaxId
-				, strShipVia
-				, strTransporterLicense
-				, strTransportationMode
-				, strTransporterName
-				, strTransporterFederalTaxId
-				, strConsignorName
-				, strConsignorFederalTaxId
-				, strTaxCode
-				, strTerminalControlNumber
-				, strVendorName
-				, strVendorFederalTaxId
-				, strTaxPayerName
-				, strTaxPayerAddress
-				, strCity
-				, strState
-				, strZipCode
-				, strTelephoneNumber
-				, strTaxPayerIdentificationNumber
-				, strTaxPayerFEIN
-				, dtmReportingPeriodBegin
-				, dtmReportingPeriodEnd
-				, strTransporterIdType
-				, strVendorIdType
-				, strCustomerIdType
-				, strVendorInvoiceNumber
-				, strCustomerLicenseNumber
-				, strCustomerAccountStatusCode
-				, strCustomerStreetAddress
-				, strCustomerZipCode
-				, strReportingComponentNote
-				, strDiversionNumber
-				, strDiversionOriginalDestinationState
-				, strTransactionType
-				, intTransactionNumberId
-				, strContactName
-				, strEmail
-				, strTransactionSource
-				, strTransportNumber
-				, strImportVerificationNumber)
-			SELECT DISTINCT @Guid
-				, intReportingComponentId
-				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
-					FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
-					ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
-					WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
-				, strProductCode = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.strProductCode 
-					FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
-					ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
-					WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
-				, intItemId
-				, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblQtyShipped) ELSE CONVERT(DECIMAL(18), dblQtyShipped) END
-				, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblGross) ELSE CONVERT(DECIMAL(18), dblGross) END
-				, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblNet) ELSE CONVERT(DECIMAL(18), dblNet) END
-				, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblBillQty) ELSE CONVERT(DECIMAL(18), dblBillQty) END
-				, strInvoiceNumber
-				, strPONumber
-				, strBillOfLading
-				, dtmDate
-				, strDestinationCity
-				, strDestinationCounty
-				, strDestinationState
-				, strOriginCity
-				, strOriginCounty
-				, strOriginState
-				, strCustomerName
-				, REPLACE(strCustomerFederalTaxId, '-', '')
-				, strShipVia
-				, strTransporterLicense
-				, strTransportationMode
-				, strTransporterName
-				, REPLACE(strTransporterFederalTaxId, '-', '')
-				, strConsignorName
-				, REPLACE(strConsignorFederalTaxId, '-', '')
-				, strTaxCode
-				, strTerminalControlNumber
-				, strVendorName
-				, REPLACE(strVendorFederalTaxId, '-', '')
-				, strHeaderCompanyName
-				, strHeaderAddress
-				, strHeaderCity
-				, strHeaderState
-				, strHeaderZip
-				, strHeaderPhone
-				, strHeaderStateTaxId
-				, REPLACE(strHeaderFederalTaxId, '-', '')
-				, @DateFrom
-				, @DateTo
-				, strTransporterIdType
-				, strVendorIdType
-				, strCustomerIdType
-				, strVendorInvoiceNumber
-				, strCustomerLicenseNumber
-				, strCustomerAccountStatusCode
-				, strCustomerStreetAddress
-				, strCustomerZipCode
-				, strReportingComponentNote
-				, strDiversionNumber
-				, strDiversionOriginalDestinationState
-				, strTransactionType
-				, intTransactionNumberId
-				, strContactName
-				, strEmail
-				, strTransactionSource
-				, strTransportNumber
-				, strImportVerificationNumber
-			FROM @tmpTransaction Trans
+			IF(@TaxAuthorityCode = 'FL' AND @ScheduleCode = '5LO_Sum')
+			BEGIN
+				INSERT INTO tblTFTransaction (uniqTransactionGuid
+					, intReportingComponentId
+					, intProductCodeId
+					, strProductCode
+					, intTaxAuthorityCountyLocationId
+					, dtmDate
+					, dtmReportingPeriodBegin
+					, dtmReportingPeriodEnd
+					, dblQtyShipped
+					, dblGross
+					, dblNet
+					, dblBillQty)
+				SELECT @Guid
+					, intReportingComponentId
+					, intProductCodeId
+					, strProductCode
+					, intTaxAuthorityCountyLocationId
+					, @DateFrom
+					, @DateFrom
+					, @DateTo
+					, SUM(dblQtyShipped) dblQtyShipped
+					, SUM(dblGross) dblGross
+					, SUM(dblNet) dblNet
+					, SUM(dblBillQty) dblBillQty
+				FROM (
+					SELECT  intReportingComponentId
+						, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
+							FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+							ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+							WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
+						, strProductCode = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.strProductCode 
+							FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+							ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+							WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
+						, intTaxAuthorityCountyLocationId
+						, CONVERT(DECIMAL(18), dblQtyShipped) dblQtyShipped
+						, CONVERT(DECIMAL(18), dblGross) dblGross
+						, CONVERT(DECIMAL(18), dblNet) dblNet
+						, CONVERT(DECIMAL(18), dblBillQty) dblBillQty
+					FROM @tmpTransaction Trans)
+				TranSum
+				GROUP BY intReportingComponentId, intProductCodeId, strProductCode, intTaxAuthorityCountyLocationId
+			END
+			ELSE
+			BEGIN
+				INSERT INTO tblTFTransaction (uniqTransactionGuid
+					, intReportingComponentId
+					, intProductCodeId
+					, strProductCode
+					, intItemId
+					, dblQtyShipped
+					, dblGross
+					, dblNet
+					, dblBillQty
+					, strInvoiceNumber
+					, strPONumber
+					, strBillOfLading
+					, dtmDate
+					, strDestinationCity
+					, strDestinationCounty
+					, strDestinationState
+					, strOriginCity
+					, strOriginCounty
+					, strOriginState
+					, strCustomerName
+					, strCustomerFederalTaxId
+					, strShipVia
+					, strTransporterLicense
+					, strTransportationMode
+					, strTransporterName
+					, strTransporterFederalTaxId
+					, strConsignorName
+					, strConsignorFederalTaxId
+					, strTaxCode
+					, strTerminalControlNumber
+					, strVendorName
+					, strVendorFederalTaxId
+					, strTaxPayerName
+					, strTaxPayerAddress
+					, strCity
+					, strState
+					, strZipCode
+					, strTelephoneNumber
+					, strTaxPayerIdentificationNumber
+					, strTaxPayerFEIN
+					, dtmReportingPeriodBegin
+					, dtmReportingPeriodEnd
+					, strTransporterIdType
+					, strVendorIdType
+					, strCustomerIdType
+					, strVendorInvoiceNumber
+					, strCustomerLicenseNumber
+					, strCustomerAccountStatusCode
+					, strCustomerStreetAddress
+					, strCustomerZipCode
+					, strReportingComponentNote
+					, strDiversionNumber
+					, strDiversionOriginalDestinationState
+					, strTransactionType
+					, intTransactionNumberId
+					, strContactName
+					, strEmail
+					, strTransactionSource
+					, strTransportNumber
+					, strImportVerificationNumber)
+				SELECT DISTINCT @Guid
+					, intReportingComponentId
+					, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
+						FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+						ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+						WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
+					, strProductCode = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.strProductCode 
+						FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+						ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+						WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
+					, intItemId
+					, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblQtyShipped) ELSE CONVERT(DECIMAL(18), dblQtyShipped) END
+					, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblGross) ELSE CONVERT(DECIMAL(18), dblGross) END
+					, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblNet) ELSE CONVERT(DECIMAL(18), dblNet) END
+					, CASE WHEN @TaxAuthorityCode = 'OR' AND @ScheduleCode IN ('5CRD', '6CRD') THEN CONVERT(DECIMAL(18, 3), dblBillQty) ELSE CONVERT(DECIMAL(18), dblBillQty) END
+					, strInvoiceNumber
+					, strPONumber
+					, strBillOfLading
+					, dtmDate
+					, strDestinationCity
+					, strDestinationCounty
+					, strDestinationState
+					, strOriginCity
+					, strOriginCounty
+					, strOriginState
+					, strCustomerName
+					, REPLACE(strCustomerFederalTaxId, '-', '')
+					, strShipVia
+					, strTransporterLicense
+					, strTransportationMode
+					, strTransporterName
+					, REPLACE(strTransporterFederalTaxId, '-', '')
+					, strConsignorName
+					, REPLACE(strConsignorFederalTaxId, '-', '')
+					, strTaxCode
+					, strTerminalControlNumber
+					, strVendorName
+					, REPLACE(strVendorFederalTaxId, '-', '')
+					, strHeaderCompanyName
+					, strHeaderAddress
+					, strHeaderCity
+					, strHeaderState
+					, strHeaderZip
+					, strHeaderPhone
+					, strHeaderStateTaxId
+					, REPLACE(strHeaderFederalTaxId, '-', '')
+					, @DateFrom
+					, @DateTo
+					, strTransporterIdType
+					, strVendorIdType
+					, strCustomerIdType
+					, strVendorInvoiceNumber
+					, strCustomerLicenseNumber
+					, strCustomerAccountStatusCode
+					, strCustomerStreetAddress
+					, strCustomerZipCode
+					, strReportingComponentNote
+					, strDiversionNumber
+					, strDiversionOriginalDestinationState
+					, strTransactionType
+					, intTransactionNumberId
+					, strContactName
+					, strEmail
+					, strTransactionSource
+					, strTransportNumber
+					, strImportVerificationNumber
+				FROM @tmpTransaction Trans
+			END
 		END
 		
 		IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpTransaction WHERE intReportingComponentId = @RCId))

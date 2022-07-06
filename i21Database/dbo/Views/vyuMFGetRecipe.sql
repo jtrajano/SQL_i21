@@ -4,14 +4,17 @@ Select r.intRecipeId,i.strItemNo,i.strDescription,
 r.dblQuantity,CASE WHEN ISNULL(r.intItemId,0)>0 THEN um.strUnitMeasure ELSE um1.strUnitMeasure END AS strUOM,r.intVersionNo,r.ysnActive,
 cl.strLocationName,mp.strProcessName,ISNULL(cs.strName,'') AS strCustomer,cs.strCustomerNumber,r.strName,r.dblQuantity AS dblQuantityCopy,
 r.intCostTypeId,ct.strName AS strCostType,r.intMarginById,mg.strName AS strMarginBy,r.dblMargin,r.dblDiscount,
-r.dtmValidFrom,r.dtmValidTo,r.strComment
+r.dtmValidFrom,r.dtmValidTo,r.strComment,r.strERPRecipeNo,sl.strSubLocationName,B.strBook,SB.strSubBook,r.ysnVirtualRecipe
 from tblMFRecipe r
 Left Join tblICItem i on r.intItemId=i.intItemId 
 Left Join tblICItemUOM iu on r.intItemUOMId=iu.intItemUOMId
 Left Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Left Join tblSMCompanyLocation cl on r.intLocationId=cl.intCompanyLocationId
+Left Join tblSMCompanyLocationSubLocation sl on r.intSubLocationId=sl.intCompanyLocationSubLocationId
 Left Join tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId 
 Left Join vyuARCustomer cs on r.intCustomerId=cs.[intEntityId]
 Left Join tblMFCostType ct on r.intCostTypeId=ct.intCostTypeId
 Left Join tblMFMarginBy mg on r.intMarginById=mg.intMarginById
 Left Join tblICUnitMeasure um1 on r.intMarginUOMId=um1.intUnitMeasureId
+LEFT JOIN tblCTBook B ON B.intBookId = r.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = r.intSubBookId

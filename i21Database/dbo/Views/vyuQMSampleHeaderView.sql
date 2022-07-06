@@ -134,6 +134,7 @@ SELECT S.intSampleId
 		END AS strSentByValue
 	,E4.strName AS strCreatedUser
 	,E5.strName AS strLastModifiedUser
+	,S.intTypeId
 FROM tblQMSample S WITH (NOLOCK)
 JOIN tblQMSampleType ST WITH (NOLOCK) ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS WITH (NOLOCK) ON SS.intSampleStatusId = S.intSampleStatusId

@@ -145,12 +145,15 @@ SELECT
 FROM tblSMUpload
 WHERE intAttachmentId = 
 (
-	SELECT TOP 1
-		intAttachmentId
-	FROM tblSMAttachment
-	WHERE strScreen = 'SystemManager.CompanyPreference'
-		AND strComment = 'Header'
-	ORDER BY intAttachmentId DESC
+	SELECT		TOP 1 intAttachmentId
+	FROM		tblSMAttachment AS a
+	INNER JOIN	tblSMTransaction AS b
+	ON			a.intTransactionId = b.intTransactionId
+	INNER JOIN	tblSMScreen AS c
+	ON			b.intScreenId = c.intScreenId
+	WHERE		c.strNamespace = 'SystemManager.view.CompanyPreference'
+			AND a.strComment = 'Header'
+	ORDER BY	intAttachmentId DESC
 )
 
 INSERT INTO @temp_xml_table
@@ -466,7 +469,6 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -771,7 +773,6 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1042,7 +1043,6 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1050,17 +1050,17 @@ BEGIN
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
 			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
-					AND Item.strType <> 'Other Charge'	
-			JOIN tblGRStorageHistory StrgHstry 
-				ON ( 
-						Bill.intBillId = StrgHstry.intBillId
-						or (BillDtl.intCustomerStorageId =  StrgHstry.intCustomerStorageId
-							and StrgHstry.strType = 'Settlement'
-							)
-				)
+					AND Item.strType <> 'Other Charge'
+			JOIN ( --DEV'S NOTE: GRN-2409; changed to cater multiple vouchers in settlements
+					tblGRSettleStorageBillDetail BD 
+					JOIN tblGRStorageHistory StrgHstry
+						ON StrgHstry.intSettleStorageId = BD.intSettleStorageId
+				) ON BD.intBillId = Bill.intBillId
+			-- JOIN tblGRStorageHistory StrgHstry 
+			-- 	ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
-			JOIN tblSCTicket SC 
+			LEFT JOIN tblSCTicket SC  
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
@@ -1340,7 +1340,6 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1673,7 +1672,6 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1965,7 +1963,6 @@ BEGIN
 			FROM tblAPPayment PYMT
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -2077,7 +2074,9 @@ BEGIN
 					) PartialPayment 
 					ON PartialPayment.intPaymentId = PYMT.intPaymentId
 			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
-				and INVRCPTITEM.intInventoryReceiptItemId is null
+				AND SC.intTicketType = 6 -- Direct In ticket
+				-- and INVRCPTITEM.intInventoryReceiptItemId is null
+				-- and InventoryReceipt.intSourceType = 1
 
 			/*-------------------------------------------------------
 			*****Temporary Settlement FROM SETTLE STORAGE*******
@@ -2234,7 +2233,6 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -2525,7 +2523,6 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -2679,5 +2676,12 @@ BEGIN
 			WHERE intPaymentKey > @intPaymentKey
 	END	
 END
+
+--The purpose of this code is for the report so that it will still have data even if there is no settlement
+--The scenenario is the selected voucher in the payment detail does not have a ticket. if we don't provide data, all the subreport will have an because there are expecting existing data.
+--GRN-2622
+if ( select count(*) from @Settlement ) <=0
+	insert @Settlement (intBillDetailId, intPaymentId, intContractDetailId, intEntityId)
+	select 0,0,0, 0
 
 SELECT * FROM @Settlement

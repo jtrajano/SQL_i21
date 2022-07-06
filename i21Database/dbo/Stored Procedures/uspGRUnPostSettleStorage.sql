@@ -488,6 +488,52 @@ BEGIN TRY
 			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 			BEGIN 
 				EXEC dbo.uspGLBookEntries @GLEntries, 0 
+
+				-- Unpost AP Clearing
+				DECLARE @APClearing AS APClearing;
+				DELETE FROM @APClearing
+				INSERT INTO @APClearing
+				(
+					[intTransactionId],
+					[strTransactionId],
+					[intTransactionType],
+					[strReferenceNumber],
+					[dtmDate],
+					[intEntityVendorId],
+					[intLocationId],
+					--DETAIL
+					[intTransactionDetailId],
+					[intAccountId],
+					[intItemId],
+					[intItemUOMId],
+					[dblQuantity],
+					[dblAmount],
+					--OTHER INFORMATION
+					[strCode]
+				)
+				SELECT
+					-- HEADER
+					[intTransactionId]
+					,[strTransactionId]
+					,[intTransactionType]
+					,[strReferenceNumber]
+					,[dtmDate]
+					,[intEntityVendorId]
+					,[intLocationId]
+					-- DETAIL
+					,[intTransactionDetailId]
+					,[intAccountId]
+					,[intItemId]
+					,[intItemUOMId]
+					,[dblQuantity]
+					,[dblAmount]
+					,[strCode]
+				FROM tblAPClearing
+				WHERE intTransactionId = @intSettleStorageId
+				AND intTransactionType = 6 --Grain
+				AND intOffsetId IS NULL
+
+				EXEC uspAPClearing @APClearing = @APClearing, @post = 0;
 			END
 		END
 
@@ -523,6 +569,12 @@ BEGIN TRY
 			WHERE intSettleStorageId = @intSettleStorageId
 
 			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			--Remove Transaction linking
+			exec uspSCAddTransactionLinks 
+				@intTransactionType = 4
+				,@intTransactionId = @intSettleStorageId
+				,@intAction = 2
 		END
 
 		--5. Delete applied charges and premiums

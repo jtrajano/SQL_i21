@@ -204,15 +204,15 @@ BEGIN
 			SET @resultAsHTML += N'</table>'; 
 		END 
 			   
-		-- Send the email 
-		EXEC msdb.dbo.sp_send_dbmail
-			@profile_name = @emailProfileName
-			,@recipients = @emailRecipient
-			,@subject = 'IC vs GL'
-			,@body = @resultAsHTML
-			,@body_format = 'HTML'			
+		---- Send the email 
+		--EXEC msdb.dbo.sp_send_dbmail
+		--	@profile_name = @emailProfileName
+		--	,@recipients = @emailRecipient
+		--	,@subject = 'IC vs GL'
+		--	,@body = @resultAsHTML
+		--	,@body_format = 'HTML'			
 
-		PRINT 'Email Sent to Queue.'
+		--PRINT 'Email Sent to Queue.'
 
 		RETURN 0; 
 	END 	

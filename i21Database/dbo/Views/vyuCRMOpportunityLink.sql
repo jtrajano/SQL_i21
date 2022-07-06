@@ -2,20 +2,21 @@
 	AS
 		with closed as (
 			select b.intRecordId, intClosed = convert(numeric(16,8),count(c.intActivityId))
-			from tblSMScreen a, tblSMTransaction b,tblSMActivity c
-			where a.strNamespace = 'CRM.view.Opportunity'
-			and b.intScreenId = a.intScreenId
-			and c.intTransactionId = b.intTransactionId
-			and c.strStatus = 'Closed'
+			from tblSMScreen a
+				inner join tblSMTransaction b on b.intScreenId = a.intScreenId
+				inner join tblSMActivity c on c.intTransactionId = b.intTransactionId
+			where 
+				a.strNamespace = 'CRM.view.Opportunity'
+				and c.strStatus = 'Closed'
 			group by b.intRecordId
 		),
 		notclosed as (
 			select b.intRecordId, intOpen = convert(numeric(16,8),count(c.intActivityId))
-			from tblSMScreen a, tblSMTransaction b,tblSMActivity c
+			from 
+				tblSMScreen a
+				inner join tblSMTransaction b on b.intScreenId = a.intScreenId
+				inner join tblSMActivity c on c.intTransactionId = b.intTransactionId
 			where a.strNamespace = 'CRM.view.Opportunity'
-			and b.intScreenId = a.intScreenId
-			and c.intTransactionId = b.intTransactionId
-			--and c.strStatus <> 'Closed'
 			group by b.intRecordId
 		)
 		select
@@ -94,6 +95,16 @@
 			,strLostToCompetitor = q.strName
 			,strDirectionEntityType = (case when a.strDirection = 'Purchase' then 'Vendor' else 'Customer' end) COLLATE Latin1_General_CI_AS
 			,strLOBType = (select top 1 r.strType from tblSMLineOfBusiness r, tblCRMOpportunityLob s where r.strType = 'Software' and r.intLineOfBusinessId = s.intLineOfBusinessId and s.intOpportunityId = a.intOpportunityId)
+			,a.intIndustrySegmentId
+			,a.intOpportunityTypeId
+			,a.intVolume
+			,a.intGrossProfit
+			,a.intGrossRevenue
+			,a.strOpportunityDescription
+			,a.intBrandMaintenanceId
+			,t.strIndustrySegment
+			,u.strOpportunityType
+			,v.strBrand
 		from
 			tblCRMOpportunity a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
@@ -114,3 +125,6 @@
 			left join tblEMEntity q on q.intEntityId = a.intLostToCompetitorId
 			left join closed r on r.intRecordId = a.intOpportunityId
 			left join notclosed s on s.intRecordId = a.intOpportunityId
+			left join tblCRMIndustrySegment t on t.intIndustrySegmentId = a.intIndustrySegmentId
+			left join tblCRMOpportunityType u on u.intOpportunityTypeId = a.intOpportunityTypeId
+			left join tblCRMBrandMaintenance v on v.intBrandMaintenanceId = a.intBrandMaintenanceId

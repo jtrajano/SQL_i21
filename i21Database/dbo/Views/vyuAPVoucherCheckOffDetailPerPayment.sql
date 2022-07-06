@@ -8,7 +8,7 @@ SELECT
   ,strVendorId  
   ,intEntityVendorId  
   ,strVendorName  
-  ,strVendorAddress COLLATE Latin1_General_CI_AS  as strVendorAddress
+  ,strVendorAddress  
   ,strVendorCity  
   ,strVendorState  
   ,strVendorZipCode  

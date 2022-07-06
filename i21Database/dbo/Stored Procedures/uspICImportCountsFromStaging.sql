@@ -1,4 +1,6 @@
 CREATE PROCEDURE uspICImportCountsFromStaging
+	@identifier UNIQUEIDENTIFIER,
+	@type NVARCHAR(50),
 	@intUserId INT = 1
 AS
 BEGIN
@@ -9,6 +11,7 @@ INSERT INTO @Count(strCountNo, intLocationId, dtmCountDate, ysnCountByLots)
 SELECT sc.strCountNo, c.intCompanyLocationId, sc.dtmDate, sc.ysnCountByLots
 FROM tblICStagingCount sc
 	INNER JOIN tblSMCompanyLocation c ON c.strLocationName = sc.strLocation
+WHERE guiIdentifier = @identifier
 
 DECLARE @strCountNo NVARCHAR(100)
 DECLARE @strTempCountNo NVARCHAR(100)
@@ -16,6 +19,16 @@ DECLARE @intLocationId INT
 DECLARE @dtmCountDate DATETIME
 DECLARE @ysnCountByLots BIT
 DECLARE @intCountId INT
+
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
+
+-- Log Invalid company locations
+INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
+SELECT 'The company location no: ''' + a.strLocation + ''' does not exists.' strError, a.strLocation strValue, 'location' strField, 1, 1, 'Error'
+FROM tblSMCompanyLocation c
+RIGHT OUTER JOIN tblICStagingCount a ON c.strLocationNumber = a.strLocation OR c.strLocationName = a.strLocation
+WHERE c.intCompanyLocationId IS NULL
+	AND a.guiIdentifier = @identifier
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
@@ -25,12 +38,14 @@ OPEN cur
 
 FETCH NEXT FROM cur INTO @strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots
 
+DECLARE @I INT = 1
+
 WHILE @@FETCH_STATUS = 0
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber 76, @strCountNo OUTPUT, @intLocationId
-
-	INSERT INTO tblICInventoryCount(strCountNo, intLocationId, dtmCountDate, ysnCountByLots, intCreatedByUserId, dtmDateCreated, strDataSource)
-	VALUES(@strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots, @intUserId, GETDATE(), 'JSON Import')
+	SET @I = @I + 1
+	INSERT INTO tblICInventoryCount(strCountNo, intLocationId, dtmCountDate, ysnCountByLots, intCreatedByUserId, dtmDateCreated, strDataSource, guiApiUniqueId)
+	VALUES(@strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots, @intUserId, GETDATE(), @type, @identifier)
 
 	SET @intCountId = SCOPE_IDENTITY()
 
@@ -67,10 +82,27 @@ BEGIN
 		LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = item.intItemId AND pricing.intItemLocationId = il.intItemLocationId
 	WHERE sd.strCountNo = @strTempCountNo
 		AND ((item.strLotTracking = 'No' AND @ysnCountByLots = 0) OR (item.strLotTracking <> 'No' AND @ysnCountByLots = 1))
+		AND sd.guiIdentifier = @identifier
+		AND il.ysnActive = 1
 
 	UPDATE tblICInventoryCount
-	SET strCountNo = @strCountNo
+	SET strCountNo = @strCountNo, guiApiUniqueId = @identifier
 	WHERE intInventoryCountId = @intCountId
+
+	INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
+	SELECT 'Can''t find the item number: "' + sad.strItemNo + '"', sad.strItemNo, 'itemNo', @I, 1, 'Error'
+	FROM tblICItem item
+		RIGHT OUTER JOIN tblICStagingCountDetail sad ON item.strItemNo = sad.strItemNo
+	WHERE item.intItemId IS NULL
+		AND sad.guiIdentifier = @identifier
+
+
+	IF NOT EXISTS(SELECT * FROM tblICInventoryCountDetail WHERE intInventoryCountId = @intCountId)
+	BEGIN
+		DELETE FROM tblICInventoryCount where intInventoryCountId = @intCountId
+		INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
+		SELECT 'Did not create a countsheet for "' + @strCountNo + '" because there are no details.', @strCountNo, 'Countsheet', 0, 0, 'Error'
+	END
 
 	FETCH NEXT FROM cur INTO @strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots
 END
@@ -79,7 +111,10 @@ CLOSE cur
 DEALLOCATE cur
 
 -- Cleanup Staging
-DELETE FROM tblICStagingCount
-DELETE FROM tblICStagingCountDetail
+DELETE FROM tblICStagingCount where guiIdentifier = @identifier
+DELETE FROM tblICStagingCountDetail where guiIdentifier = @identifier
+
+SELECT * FROM @Logs
 
 END
+

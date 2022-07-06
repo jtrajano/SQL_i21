@@ -33,6 +33,7 @@ SELECT
 	, Item.strShortName
 	, Item.strRequired
 	, Item.ysnBasisContract
+	, Item.ysnAutoAdjustAccrualDiff
 	, Item.intM2MComputationId
 	, M2M.strM2MComputation
 	, strTonnageTaxUOM = TonnageUOM.strUnitMeasure
@@ -68,6 +69,16 @@ SELECT
 	, Item.ysnDisplayInHelpdesk
 	, Module.strModule
 	, Item.strManufactureType
+	, Item.strRemarks
+	, Certification.strCertificationName
+	, Item.dblGAShrinkFactor
+	, Item.strMarketValuation
+	, Item.intValuationGroupId
+	, strValuationGroup = VG.strName
+	, attribute1.strAttribute1
+	, attribute2.strAttribute2
+	, attribute3.strAttribute3
+	, attribute4.strAttribute4
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -95,6 +106,7 @@ LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.
 LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = Item.intProductLineId
 LEFT JOIN tblICUnitMeasure ManufacturingPackingUOM ON ManufacturingPackingUOM.intUnitMeasureId = Item.intMaterialPackTypeId
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = Item.intLotStatusId
+LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = Item.intValuationGroupId
 LEFT JOIN (
 	tblICUnitMeasure mfgDimensionUOM INNER JOIN tblICItemUOM mfgDimensionItemUOM
 		ON mfgDimensionUOM.intUnitMeasureId = mfgDimensionItemUOM.intUnitMeasureId		
@@ -109,3 +121,17 @@ LEFT JOIN (
 	AND mfgWeightUOM.intUnitMeasureId = Item.intWeightUOMId
 LEFT JOIN tblSMModule Module
 	ON Module.intModuleId = Item.intModuleId
+LEFT JOIN tblICCertification Certification
+	ON Certification.intCertificationId = Item.intCertificationId
+
+LEFT JOIN tblICCommodityAttribute1 attribute1 
+	ON attribute1.intCommodityAttributeId1 = Item.intCommodityAttributeId1
+
+LEFT JOIN tblICCommodityAttribute2 attribute2
+	ON attribute2.intCommodityAttributeId2 = Item.intCommodityAttributeId2
+
+LEFT JOIN tblICCommodityAttribute3 attribute3
+	ON attribute3.intCommodityAttributeId3 = Item.intCommodityAttributeId3
+
+LEFT JOIN tblICCommodityAttribute4 attribute4
+	ON attribute4.intCommodityAttributeId4 = Item.intCommodityAttributeId4

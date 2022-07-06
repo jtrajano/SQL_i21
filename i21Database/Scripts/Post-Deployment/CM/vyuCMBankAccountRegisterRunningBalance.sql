@@ -4,16 +4,19 @@ SELECT @str = SUBSTRING(@str,1,2) + case WHEN LEN(@str) > 2 THEN '.' + SUBSTRING
 SELECT @str = LEFT(SUBSTRING(@str, PATINDEX('%[0-9.-]%', @str), 8000),
            PATINDEX('%[^0-9.-]%', SUBSTRING(@str, PATINDEX('%[0-9.-]%', @str), 8000) + 'X') -1)
 
-DECLARE @vyuString NVARCHAR(MAX) =
-'ALTER VIEW [dbo].[vyuCMBankAccountRegisterRunningBalance]
+IF @str >=11.0 -- update running balance function for higher sql server version
+exec ('
+ALTER VIEW [dbo].[vyuCMBankAccountRegisterRunningBalance]
 AS
-WITH cteOrdered as
+WITH cteSum as
 (
-	SELECT row_number() over(PARTITION by intBankAccountId ORDER BY dtmDate, intTransactionId) rowId, 
+	SELECT 
 	CM.dblAmount,
 	CM.intTransactionId,
 	CM.intBankAccountId,
 	CM.dtmDate,
+	SUM(ISNULL(CMD.dblCreditForeign,0) - ISNULL(CMD.dblDebitForeign,0)) dblDetailAmountForeign,
+	AVG(CMD.dblExchangeRate) dblExchangeRate, 
 	dblPayment = 
 		CASE WHEN CM.intBankTransactionTypeId IN ( 3, 9, 12, 13, 14, 15, 16, 20, 21, 22, 23 ) THEN CM.dblAmount 
 		WHEN CM.intBankTransactionTypeId IN ( 2, 5,51,52) AND ISNULL(CM.dblAmount,0) < 0 THEN CM.dblAmount * -1 ELSE 0 END                        , 
@@ -22,27 +25,35 @@ WITH cteOrdered as
 		WHEN CM.intBankTransactionTypeId = 5 AND ISNULL(CM.dblAmount,0) > 0 THEN CM.dblAmount ELSE 0 END
 	FROM
 	tblCMBankTransaction CM
+	LEFT JOIN tblCMBankTransactionDetail CMD ON CM.intTransactionId = CMD.intTransactionId
 	where CM.ysnPosted = 1
+	GROUP BY CM.intTransactionId,dblAmount,intBankAccountId,CM.dtmDate, CM.intBankTransactionTypeId
+),
+cteOrdered AS(
+	SELECT row_number() over(PARTITION by intBankAccountId ORDER BY dtmDate, intTransactionId) rowId, 
+	dblDebitForeign = CASE WHEN ISNULL(A.dblDetailAmountForeign,0) <0 THEN  ABS(A.dblDetailAmountForeign)  ELSE 0 END,
+	dblCreditForeign = CASE WHEN ISNULL(A.dblDetailAmountForeign,0) >0 THEN  A.dblDetailAmountForeign ELSE 0 END,
+	dblAmount,
+	intTransactionId,
+	intBankAccountId,
+	dtmDate,
+	dblExchangeRate,
+	dblPayment,
+	dblDeposit
+	from cteSum A
 ),
 cteRunningTotal as 
-('
-SELECT @vyuString +=
-CASE WHEN @str >=11.0
-THEN
-   'SELECT rowId, intBankAccountId , sum(dblDeposit - dblPayment) 
-	OVER (partition by intBankAccountId order by rowId ) balance
-	FROM cteOrdered'
-ELSE
-     'SELECT a.rowId, a.intBankAccountId, sum(b.dblDeposit - b.dblPayment) balance 
-	FROM cteOrdered a join cteOrdered b on a.rowId>= b.rowId AND a.intBankAccountId = b.intBankAccountId
-	GROUP BY a.rowId , a.intBankAccountId'
-END
-SELECT @vyuString +=
-')
+(
+	SELECT rowId, intBankAccountId, sum(dblDeposit - dblPayment) over (PARTITION BY intBankAccountId ORDER BY rowId) balance 
+	FROM cteOrdered 
+)
 SELECT
 Ordered.rowId, 
 dblPayment = Ordered.dblPayment,
 dblDeposit = Ordered.dblDeposit,
+Ordered.dblCreditForeign,
+Ordered.dblDebitForeign,
+Ordered.dblExchangeRate,
 ISNULL(BankRecon.dblStatementOpeningBalance, 0) + ( Total.balance - (Ordered.dblDeposit-Ordered.dblPayment) )   dblOpeningBalance,
 ISNULL(BankRecon.dblStatementOpeningBalance, 0) +  Total.balance dblEndingBalance,
 Ordered.intTransactionId, 
@@ -51,23 +62,25 @@ Ordered.intBankAccountId,
 CM.dtmDateReconciled,
 CM.intBankTransactionTypeId,
 CM.intCompanyLocationId,
-T.strBankTransactionTypeName,
-L.strLocationName,
+CM.strBankTransactionTypeName,
+CM.strLocationName,
 strMemo = 
 	CASE WHEN CM.strMemo = '''' AND CM.ysnCheckVoid = 1 THEN ''Void'' 
 	ELSE ISNULL(CM.strMemo, '''') END,
 strPayee = 
-	CASE WHEN Employee.ysnMaskEmployeeName = 1 AND CM.intBankTransactionTypeId IN ( 21, 23 ) THEN ''(restricted information)'' 
+	CASE WHEN Employee.ysnMaskEmployeeName = 1 AND CM.intBankTransactionTypeId IN ( 21, 23 ) THEN ''(restricted information)''
 	ELSE ISNULL(CM.strPayee, '''') END,
 CM.strReferenceNo,
 CM.strTransactionId,
 CM.ysnCheckVoid,
-CM.ysnClr
-FROM tblCMBankTransaction CM 
+CM.ysnClr,
+CM.strPeriod,
+dblAmountFees = ABS(CM.dblAmountFees),
+dblTotalPayment =CASE WHEN  Ordered.dblPayment > 0 THEN  ABS(CM.dblTotalAmount) ELSE 0 END,
+dblTotalDeposit = CASE WHEN  Ordered.dblDeposit > 0 THEN CM.dblTotalAmount ELSE 0 END
+FROM vyuCMGetBankTransaction CM 
 JOIN cteOrdered Ordered ON CM.intTransactionId= Ordered.intTransactionId
 JOIN cteRunningTotal Total ON Ordered.rowId = Total.rowId AND Total.intBankAccountId = Ordered.intBankAccountId
-LEFT JOIN tblCMBankTransactionType T on T.intBankTransactionTypeId = CM.intBankTransactionTypeId
-LEFT JOIN tblSMCompanyLocation L on L.intCompanyLocationId = CM.intCompanyLocationId
 OUTER APPLY 
 (
     SELECT TOP 1 ysnMaskEmployeeName 
@@ -76,7 +89,5 @@ OUTER APPLY
 OUTER APPLY (
     SELECT TOP 1 dblStatementOpeningBalance FROM tblCMBankReconciliation WHERE intBankAccountId = CM.intBankAccountId
 
-) BankRecon
-'
-exec( @vyuString)
+) BankRecon')
 GO

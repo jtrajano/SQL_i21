@@ -287,7 +287,7 @@ BEGIN
 	JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(W.intStorageLocationId,L.intStorageLocationId )
 	LEFT JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = W.intMachineId
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId

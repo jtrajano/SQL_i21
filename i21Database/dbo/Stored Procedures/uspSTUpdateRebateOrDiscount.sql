@@ -17,6 +17,7 @@ BEGIN TRY
 
 	DECLARE @ErrMsg					NVARCHAR(MAX),
 	        @idoc					INT,
+	    	@StoreGroup 			NVARCHAR(MAX),
 	    	@Location 			    NVARCHAR(MAX),
 			@Vendor                 NVARCHAR(MAX),
 			@Category               NVARCHAR(MAX),
@@ -37,7 +38,7 @@ BEGIN TRY
 	                  
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
-	SELECT	
+	SELECT	@StoreGroup			=   StoreGroup,
 			@Location	   	    =	Location,
             @Vendor             =   Vendor,
 			@Category           =   Category,
@@ -58,6 +59,7 @@ BEGIN TRY
 	FROM	OPENXML(@idoc, 'root',2)
 	WITH
 	(
+			StoreGroup		        NVARCHAR(MAX),
 			Location		        NVARCHAR(MAX),
 			Vendor	     	        NVARCHAR(MAX),
 			Category		        NVARCHAR(MAX),
@@ -152,6 +154,21 @@ BEGIN TRY
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Location)
 			END
 		
+		IF(@StoreGroup IS NOT NULL AND @StoreGroup != '')
+			BEGIN
+				INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Location (
+					intLocationId
+				)
+				SELECT st.intCompanyLocationId AS intLocationId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@StoreGroup)
+				INNER JOIN tblSTStoreGroup sg
+					ON sg.intStoreGroupId = intID
+				INNER JOIN tblSTStoreGroupDetail sgt
+					ON sgt.intStoreGroupId = sg.intStoreGroupId
+				INNER JOIN tblSTStore st
+					ON st.intStoreId = sgt.intStoreId
+			END
+
 		IF(@Vendor IS NOT NULL AND @Vendor != '')
 			BEGIN
 				INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Vendor (

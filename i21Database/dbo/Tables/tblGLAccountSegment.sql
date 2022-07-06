@@ -8,6 +8,7 @@
     [ysnActive]             BIT            CONSTRAINT [DF_tblGLAccountSegment_ysnActive] DEFAULT ((1)) NULL,
     [ysnSelected]           BIT            CONSTRAINT [DF_tblGLAccountSegment_ysnSelected] DEFAULT ((0)) NOT NULL,
     [ysnIsNotExisting]      BIT            CONSTRAINT [DF_tblGLAccountSegment_ysnIsNotExisting] DEFAULT ((0)) NULL,
+    [dtmObsoleteDate]   DATETIME       NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     [intAccountCategoryId] INT NULL, 
     [intEntityIdLastModified] INT NULL, 

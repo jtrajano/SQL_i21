@@ -42,7 +42,9 @@ BEGIN
 					   CAST((SELECT ysnGenerateInvShipmentStagingOrder ysnGenerateInvShipmentStagingOrder FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnGenerateInvShipmentStagingOrder,
 					   CAST((SELECT ysnSetDefaultQtyOnHandheld ysnSetDefaultQtyOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSetDefaultQtyOnHandheld,
 					   CAST((SELECT ISNULL(ysnSplitLotOnPartialQty,0) ysnSplitLotOnPartialQty FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSplitLotOnPartialQty,
-					   CAST((SELECT ISNULL(ysnAllowLotMoveacrossLocations,0) ysnAllowLotMoveacrossLocations FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnAllowLotMoveacrossLocations
+					   CAST((SELECT ISNULL(ysnAllowLotMoveacrossLocations,0) ysnAllowLotMoveacrossLocations FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnAllowLotMoveacrossLocations,
+					   CAST((SELECT ISNULL(ysnEnableItemMenuOnHandheld,0) ysnEnableItemMenuOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnEnableItemMenuOnHandheld,
+					   CAST((SELECT ISNULL(ysnSkipStorageUnitScreenInHandheld,0) ysnSkipStorageUnitScreenInHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSkipStorageUnitScreenInHandheld
 				FROM tblWHCompanyPreference
 				) p
 			UNPIVOT(SettingValue FOR SettingName IN (
@@ -69,6 +71,8 @@ BEGIN
 						,ysnSetDefaultQtyOnHandheld
 						,ysnSplitLotOnPartialQty
 						,ysnAllowLotMoveacrossLocations
+						,ysnEnableItemMenuOnHandheld
+						,ysnSkipStorageUnitScreenInHandheld
 						)) AS unpvt
 			) tblCompanyPreference
 		WHERE intCompanyLocationId = @intCompanyLocationId
@@ -103,7 +107,9 @@ BEGIN
 					   CAST((SELECT ysnGenerateInvShipmentStagingOrder ysnGenerateInvShipmentStagingOrder FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnGenerateInvShipmentStagingOrder,
 					   CAST((SELECT ysnSetDefaultQtyOnHandheld ysnSetDefaultQtyOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSetDefaultQtyOnHandheld,
 					   CAST((SELECT ISNULL(ysnSplitLotOnPartialQty,0) ysnSplitLotOnPartialQty FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSplitLotOnPartialQty,
-					   CAST((SELECT ISNULL(ysnAllowLotMoveacrossLocations,0) ysnAllowLotMoveacrossLocations FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnAllowLotMoveacrossLocations
+					   CAST((SELECT ISNULL(ysnAllowLotMoveacrossLocations,0) ysnAllowLotMoveacrossLocations FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnAllowLotMoveacrossLocations,
+					   CAST((SELECT ISNULL(ysnEnableItemMenuOnHandheld,0) ysnEnableItemMenuOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnEnableItemMenuOnHandheld,
+					   CAST((SELECT ISNULL(ysnSkipStorageUnitScreenInHandheld,0) ysnSkipStorageUnitScreenInHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSkipStorageUnitScreenInHandheld
 				FROM tblWHCompanyPreference
 			) p
 		UNPIVOT(SettingValue FOR SettingName IN (
@@ -130,6 +136,8 @@ BEGIN
 					,ysnSetDefaultQtyOnHandheld
 					,ysnSplitLotOnPartialQty
 					,ysnAllowLotMoveacrossLocations
+					,ysnEnableItemMenuOnHandheld
+					,ysnSkipStorageUnitScreenInHandheld
 					)) AS unpvt
 				) tblCompanyPreference
 	END

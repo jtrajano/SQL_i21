@@ -14,7 +14,7 @@ SELECT DISTINCT
 	strItemId				=	'' COLLATE Latin1_General_CI_AS,
 	dblQuantity				=	NULL,
 	dblUnitPrice			=	NULL,
-	dblAmount    			=   BankBalance.Value/Rate.Value, -- this is in functional currency  
+	dblAmount    			=   CASE WHEN Rate.Value IS NULL THEN 0 else BankBalance.Value/Rate.Value end, -- this is in functional currency  
 	intCurrencyId			=	BA.intCurrencyId,
 	intForexRateType		=	NewRateTypeId.intCashManagementRateTypeId,
 	strForexRateType		=	NewRateTypeId.strCurrencyExchangeRateType,
@@ -25,7 +25,8 @@ SELECT DISTINCT
     dblUnrealizedDebitGain  =    0, --Calcuate By GL
     dblUnrealizedCreditGain =    0, --Calcuate By GL
     dblDebit                =    0, --Calcuate By GL
-    dblCredit               =    0  --Calcuate By GL
+    dblCredit               =    0,  --Calcuate By GL
+	intCompanyLocationId	=	BT.intCompanyLocationId
 FROM
   tblCMBankTransaction BT
   JOIN vyuCMBankAccount BA ON BT.intBankAccountId = BA.intBankAccountId
@@ -48,7 +49,7 @@ FROM
 		SELECT [dbo].fnGLGetCMGLDetailBalance(EOP.Value, BA.intGLAccountId) Value -- this is in us / functional currency
   )GLBalance
   OUTER APPLY(
-		SELECT GLBalance.Value / BankBalance.Value  Value
+		SELECT case when BankBalance.Value = 0 then NULL else GLBalance.Value / BankBalance.Value  END  Value
   )Rate
 	
 WHERE
@@ -57,5 +58,4 @@ WHERE
     FROM     tblCMBankTransaction
     GROUP BY MONTH(dtmDate), YEAR(dtmDate), intBankAccountId
   )
-  AND BankBalance.Value <> 0
 GO

@@ -2,6 +2,7 @@
 	@strItemNo AS NVARCHAR(50)
 	,@dblQty AS NUMERIC(18, 6)
 	,@dblCost AS NUMERIC(18, 6)
+	,@strLotNumber AS NVARCHAR(50) = NULL 
 )
 RETURNS NVARCHAR(100)
 AS
@@ -15,7 +16,7 @@ BEGIN
 		SET @result = dbo.fnFormatMessage(
 						dbo.fnICGetErrorMessage(80179)
 						, @strItemNo
-						, DEFAULT
+						, @strLotNumber
 						, DEFAULT
 						, DEFAULT
 						, DEFAULT
@@ -30,8 +31,6 @@ BEGIN
 
 	ELSE 
 	BEGIN 
-		--DECLARE @strQty AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblQty AS MONEY), 1)
-		--DECLARE @strCost AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblCost AS MONEY), 1)		
 		DECLARE @strQty AS NVARCHAR(50) = dbo.fnFormatNumber(@dblQty) 
 		DECLARE @strCost AS NVARCHAR(50) = dbo.fnFormatNumber(@dblCost) 
 		
@@ -39,9 +38,9 @@ BEGIN
 		SET @result = dbo.fnFormatMessage(
 						dbo.fnICGetErrorMessage(80159)
 						, @strItemNo
+						, @strLotNumber
 						, @strQty
-						, @strCost
-						, DEFAULT
+						, @strCost						
 						, DEFAULT
 						, DEFAULT
 						, DEFAULT

@@ -53,11 +53,23 @@ IF @strLocationNameLocal IS NOT NULL
 		) C (intCompanyLocationId)
 	END
 
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom 					= @dtmAsOfDateFrom
-										, @dtmDateTo 					= @dtmAsOfDate
-										, @intEntityUserId 				= @intEntityUserId
-										, @strCompanyLocationIds		= @strCompanyLocationIdsLocal
-										, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal
+IF @strStatementFormat <> 'Balance Forward'
+BEGIN
+	EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom 					= @dtmAsOfDateFrom
+											, @dtmDateTo 					= @dtmAsOfDate
+											, @intEntityUserId 				= @intEntityUserId
+											, @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+											, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal
+END
+ELSE
+BEGIN
+	EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
+											, @dtmBalanceForwardDate	    = @dtmAsOfDateFrom
+											, @intEntityUserId 				= @intEntityUserId
+											, @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+											, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal
+										
+END
 
 DELETE FROM  tblARCustomerAgingStagingTable WHERE dblFuture <> 0 and ISNULL(@strStatementFormat, 'Open Item') = 'Open Item'
 

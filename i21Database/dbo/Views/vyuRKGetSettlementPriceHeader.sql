@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuRKGetSettlementPriceHeader  
+CREATE VIEW vyuRKGetSettlementPriceHeader  
   
 AS  
   

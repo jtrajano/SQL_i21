@@ -92,6 +92,8 @@ DECLARE @intInventoryShipmentItemUsed INT
 DECLARE @intInventoryReceiptItemUsed INT
 DECLARE @intShipmentReceiptItemId INT
 DECLARE @_intStorageHistoryId INT
+DECLARE @intTicketStorageScheduleTypeId INT
+DECLARE @intTicketContractUOMId INT
 
 DECLARE @strMatchTicketDistributionOption NVARCHAR(5)
 DECLARE @strTicketDistributionOption NVARCHAR(5)
@@ -105,8 +107,6 @@ DECLARE @dblTicketScheduleQty NUMERIC(18,6)
 DECLARE @dblTicketNetUnits NUMERIC(18,6)
 DECLARE @intTicketTypeId AS INT
 DECLARE @intTicketLoadId INT
-DECLARE @intTicketStorageScheduleTypeId INT
-DECLARE @intTicketContractUOMId INT
 
 DECLARE @strBatchId NVARCHAR(100)
 DECLARE @CurrentDate DATETIME = GETDATE()
@@ -120,6 +120,13 @@ DECLARE @_dblLoopLoadQuantity NUMERIC(38,20)
 DECLARE @_dblLoopContractUpdateQuantity NUMERIC(38,20)
 DECLARE @_ysnLoopContractLoadBase BIT
 DECLARE @_intLoopLoadDetailId INT
+DECLARE @intTicketAGWorkOrderId INT
+DECLARE @intTicketItemId INT
+DECLARE @dblAGWorkOrderReserveQuantity NUMERIC(38,20)
+DECLARE @strTicketNumber NVARCHAR(50)
+DECLARE @_strAuditDescription NVARCHAR(500)
+
+DECLARE @ItemReservationTableType AS ItemReservationTableType
 
 BEGIN TRY
 
@@ -152,7 +159,11 @@ BEGIN TRY
 			,@ysnTicketHasSpecialDiscount = ysnHasSpecialDiscount
 			,@intTicketLoadDetailId = intLoadDetailId
 			,@intTicketEntityId = intEntityId
-			,@intTicketStorageScheduleTypeId =intStorageScheduleTypeId
+			,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
+			,@intTicketAGWorkOrderId = intAGWorkOrderId
+			,@dblTicketNetUnits = dblNetUnits
+			,@intTicketItemId = intItemId
+			,@strTicketNumber = strTicketNumber
 		FROM tblSCTicket SC
 		WHERE intTicketId = @intTicketId
 
@@ -1504,6 +1515,27 @@ BEGIN TRY
 							END
 						END
 
+						---WORK ORDER
+						IF(@intTicketStorageScheduleTypeId = -9)
+						BEGIN
+							--Update Work order Shipped Quantity for the Ticket Item
+							SELECT TOP 1
+								@dblAGWorkOrderReserveQuantity = CASE WHEN (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits) < 0 THEN 0 ELSE (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits)  END
+							FROM tblAGWorkOrderDetail
+							WHERE intWorkOrderId = @intTicketAGWorkOrderId
+								AND intItemId = @intTicketItemId
+
+							IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) > 0)
+							BEGIN
+								SET @dblAGWorkOrderReserveQuantity = (SELECT ROUND(@dblAGWorkOrderReserveQuantity,6))
+								SET @_strAuditDescription = 'Undistribution of Ticket - ' +  @strTicketNumber
+								EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intTicketItemId, @dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
+							END
+							
+
+							--Update Work Order reservation
+							EXEC [uspSCUpdateAGWorkOrderItemReservation] @intTicketAGWorkOrderId, @intTicketId,@intTicketItemId, 0
+						END
 					END
 				END
 			END
@@ -1728,7 +1760,8 @@ BEGIN TRY
 
 		-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
 		UPDATE tblSCTicket
-		SET dblDWGOriginalNetUnits = 0, dtmDateModifiedUtc = GETUTCDATE()
+		SET dblDWGOriginalNetUnits = 0
+			,dtmDateModifiedUtc = GETUTCDATE()
 		WHERE intTicketId = @intTicketId
 
 		--Audit Log

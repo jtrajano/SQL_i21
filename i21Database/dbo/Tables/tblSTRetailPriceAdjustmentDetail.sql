@@ -3,6 +3,7 @@
 	[intRetailPriceAdjustmentDetailId] INT NOT NULL IDENTITY, 
     [intRetailPriceAdjustmentId] INT NOT NULL, 
 	[intItemPricingId] INT NULL,
+    [intStoreGroupId] INT NULL, 
     [intCompanyLocationId] INT NULL, 
     [strRegion] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strDistrict] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
@@ -33,7 +34,8 @@
 	[intConcurrencyId] INT NOT NULL, 
 
     CONSTRAINT [PK_tblSTRetailPriceAdjustmentDetail] PRIMARY KEY CLUSTERED ([intRetailPriceAdjustmentDetailId] ASC), 
-    CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTRetailPriceAdjustment] FOREIGN KEY ([intRetailPriceAdjustmentId]) REFERENCES [tblSTRetailPriceAdjustment]([intRetailPriceAdjustmentId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTRetailPriceAdjustment] FOREIGN KEY ([intRetailPriceAdjustmentId]) REFERENCES [tblSTRetailPriceAdjustment]([intRetailPriceAdjustmentId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTStoreGroup] FOREIGN KEY ([intStoreGroupId]) REFERENCES [tblSTStoreGroup]([intStoreGroupId]),  
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]), 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ,

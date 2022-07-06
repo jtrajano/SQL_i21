@@ -2,7 +2,8 @@
 	
 	@intContractHeaderId INT,
 	@userId INT,
-	@strXML	NVARCHAR(MAX)	
+	@strXML	NVARCHAR(MAX),
+	@strTFXML	NVARCHAR(MAX) = ''
 	
 AS
 
@@ -53,7 +54,51 @@ BEGIN TRY
 			@strCertificationName		NVARCHAR(MAX),
 			@strCustomerContract		NVARCHAR(100),
 			@intContractTypeId			INT,
-			@strAddToPayableMessage		NVARCHAR(MAX)
+			@strAddToPayableMessage		NVARCHAR(MAX),
+			@ysnEnableLetterOfCredit    BIT = 0,
+			@intLCApplicantId			INT,
+            @strLCType					NVARCHAR(100),
+            @strLCNumber				NVARCHAR(50)
+
+
+	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
+	from tblCTContractDetail cd
+	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	join tblCTPriceFixation pf1 on pf1.intContractDetailId = cd.intContractDetailId
+	cross apply (
+		select dblPricedQty = sum(pfd.dblQuantity) from tblCTPriceFixation pf
+		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+		where pf.intContractDetailId = cd.intContractDetailId
+	) pricing
+	where cd.intContractHeaderId = @intContractHeaderId
+	and cd.intPricingTypeId = 1
+	and ch.intPricingTypeId in (2,3)
+	and ch.ysnMultiplePriceFixation <> 1
+	and cd.dblQuantity > isnull(pricing.dblPricedQty,0);
+
+	update
+		cd
+	set
+		cd.dblFutures = null
+		,cd.dblCashPrice = null
+		,cd.intPricingTypeId = ch.intPricingTypeId
+		,cd.intPricingStatus = 1
+		,cd.dblTotalCost = null
+		,cd.ysnPriceChanged = 1
+	from tblCTContractDetail cd
+	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	cross apply (
+		select dblPricedQty = sum(pfd.dblQuantity) from tblCTPriceFixation pf
+		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+		where pf.intContractDetailId = cd.intContractDetailId
+	) pricing
+	where cd.intContractHeaderId = @intContractHeaderId
+	and cd.intPricingTypeId = 1
+	and ch.intPricingTypeId = 2
+	and ch.ysnMultiplePriceFixation <> 1
+	and isnull(pricing.dblPricedQty,0) > 0
+	and cd.dblQuantity > isnull(pricing.dblPricedQty,0)
+	and ISNULL(cd.intSplitFromId,0) = 0;
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -93,6 +138,13 @@ BEGIN TRY
 		, intBasisCurrencyId INT NULL
 		, strCertifications NVARCHAR(MAX)
 	)
+
+	if (isnull(@strTFXML,'') <> '')
+	begin
+		exec uspCTProcessTFLogs
+			@strXML = @strTFXML
+			,@intUserId = @userId;
+	end
 
 	INSERT INTO @CDTableUpdate(intContractDetailId
 		, intPricingTypeId
@@ -140,7 +192,7 @@ BEGIN TRY
 		, strCertifications
 	FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
+	SELECT @ysnEnableLetterOfCredit = ysnEnableLetterOfCredit, @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
@@ -216,13 +268,15 @@ BEGIN TRY
 			)p on p.intContractDetailId = cd.intContractDetailId
 			where cd.intContractDetailId = @intContractDetailId
 			and isnull(p.dblPricedQuantity,0) < cd.dblQuantity
+			and isnull(p.dblPricedQuantity,0) > 0
 		end
 
 		SELECT	@intPricingTypeId	=	NULL,
 				@dblCashPrice		=	NULL,
 				@dblBasis			=	NULL,
 				@dblOriginalBasis	=	NULL,
-				@ysnSlice			=	NULL
+				@ysnSlice			=	NULL,
+				@strLCNumber		=	null
 
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
 				@dblCashPrice		=	dblCashPrice,
@@ -240,16 +294,31 @@ BEGIN TRY
 				@intConcurrencyId	=	intConcurrencyId,
 				@intFutureMarketId	=	intFutureMarketId,
 				@intUnitMeasureId	=	intUnitMeasureId,
-				@intCurrencyId		=	intCurrencyId
+				@intCurrencyId		=	intCurrencyId,
+				@strLCNumber		=	strLCNumber,
+				@intLCApplicantId	=	intLCApplicantId,
+				@strLCType			=	strLCType
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
 		WHERE	intContractDetailId =	@intContractDetailId 
-		
-		SELECT @dblCorrectNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
 
-		IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
+		if (@ysnEnableLetterOfCredit = 1 and @strLCNumber is null and @intLCApplicantId > 0 and isnull(@strLCType,'') <> '')
+		begin
+			exec uspSMGetStartingNumber
+				@intStartingNumberId = 170,
+				@strID = @strLCNumber OUTPUT,
+				@intCompanyLocationId = default
+		end
+
+		
+		IF EXISTS (SELECT TOP 1 1 FROM tblCTCompanyPreference where ysnEnablePackingWeightAdjustment = 0)
 		BEGIN
-			UPDATE @CDTableUpdate SET dblNetWeight = @dblCorrectNetWeight where intContractDetailId = @intContractDetailId;
+			SELECT @dblCorrectNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
+
+			IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
+			BEGIN
+				UPDATE @CDTableUpdate SET dblNetWeight = @dblCorrectNetWeight where intContractDetailId = @intContractDetailId;
+			END
 		END
 
 		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1
@@ -270,6 +339,12 @@ BEGIN TRY
 
 		IF @intConcurrencyId = 1
 		BEGIN
+			-- Newly created sequence - CT-5847
+			EXEC uspICAddTransactionLinkOrigin @intTransactionId = @intContractHeaderId
+				, @strTransactionNo = @strContractNumber
+				, @strTransactionType = 'Contract'
+				, @strModuleName = 'Contract Management'
+
 			UPDATE @CDTableUpdate SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
 		END
 
@@ -372,6 +447,7 @@ BEGIN TRY
 			, ysnPriceChanged = CD.ysnPriceChanged
 			, dblOriginalBasis = CD.dblOriginalBasis
 			, dblConvertedBasis = CD.dblConvertedBasis
+			, strLCNumber = @strLCNumber
 		FROM @CDTableUpdate CD
 		WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
 
@@ -409,7 +485,21 @@ BEGIN TRY
 		END
 		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
 
-		EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+		if (@ysnMultiplePriceFixation = 1)
+		begin
+			declare @intPriceContractId int;
+
+			select top 1 @intPriceContractId = intPriceContractId from tblCTPriceFixationMultiplePrice where intContractDetailId = @intContractDetailId;
+			
+			exec uspCTProcessPriceFixationMultiplePrice
+				@intPriceContractId = @intPriceContractId
+				,@intUserId = @intLastModifiedById
+
+		end
+		else
+		begin
+			EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+		end
 
 		IF	@intContractStatusId	=	1	AND
 			@ysnOnceApproved		=	1	AND

@@ -2,7 +2,7 @@ CREATE VIEW [dbo].[vyuPRReportQuarterlySUI]
 AS
 SELECT DISTINCT intEntityId = tblPRPaycheck.intEntityEmployeeId
 	,tblPREmployee.strEmployeeId
-	,tblPREmployee.strSocialSecurity
+	,strSocialSecurity = dbo.[fnAESDecryptASym](tblPREmployee.strSocialSecurity)
 	,tblPREmployee.strFirstName
 	,tblPREmployee.strMiddleName
 	,strMiddleInitial = CASE WHEN (LEN(LTRIM(tblPREmployee.strMiddleName)) > 0) THEN UPPER(SUBSTRING(tblPREmployee.strMiddleName, 1, 1)) ELSE '' END

@@ -35,7 +35,7 @@ BEGIN TRY
     FROM (  
      SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName,TR.intSequenceNo  
 	FROM dbo.tblQMTestResult AS TR
-  JOIN @tblMFFinalLot AS L ON L.intLotId = TR.intProductValueId AND TR.intProductTypeId = 6 and TR.intSampleId in (Select Max(S1.intSampleId) from tblQMSample S1 Where S1.intSampleStatusId =3 and S1.strLotNumber=L.strLotNumber AND S1.intProductTypeId = 6 )' 
+  JOIN @tblMFFinalLot AS L ON L.intLotId = TR.intProductValueId AND TR.intProductTypeId = 6 and TR.intSampleId in (Select Max(S1.intSampleId) from tblQMSample S1 Where S1.intSampleStatusId =3 and S1.strLotNumber=L.strLotNumber AND S1.intProductTypeId = 6 and S1.intTypeId = 1 )' 
   SET @SQL = @SQL + ' JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
   JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
      ) t  

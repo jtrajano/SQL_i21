@@ -38,6 +38,7 @@ BEGIN TRY
 	FROM tblQMSample
 	WHERE intProductTypeId = 6
 		AND strLotNumber = @strOldLotNumber
+		AND intTypeId = 1
 	ORDER BY intSampleId DESC
 
 	IF (@strOldLotNumber = @strNewLotNumber)
