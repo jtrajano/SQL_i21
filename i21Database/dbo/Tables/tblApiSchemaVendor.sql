@@ -12,7 +12,7 @@
 	[strEntityNo]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,			--ENTITY NO
 	[strName]					NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,			--ENTITY NAME
 	[strWebsite]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,				--ENTITY WEBSITE
-	[strContactNumber]			NVARCHAR (20) COLLATE Latin1_General_CI_AS NOT NULL,			--ENTITY CONTACT NUMBER
+	[strContactNumber]			NVARCHAR (20) COLLATE Latin1_General_CI_AS  NULL,				--ENTITY CONTACT NUMBER
 	[strMobile]					NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,				--ENTITY MOBILE NUMBER
 	[strFax]					NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,				--ENTITY FAX
 	[strEmail]					NVARCHAR (75) COLLATE Latin1_General_CI_AS  NULL DEFAULT(''),	--ENTITY EMAIL

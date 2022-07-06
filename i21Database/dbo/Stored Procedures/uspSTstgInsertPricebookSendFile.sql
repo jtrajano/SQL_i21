@@ -731,8 +731,8 @@ BEGIN
 							, 'addchange' [RecordActionType] 
 							, CONVERT(nvarchar(10), GETDATE(), 21) [RecordActionEffectiveDate]
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [ITTDetailRecordActionType] 
-							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN 'plu' ELSE 'upcA' END [POSCodeFormat]
-							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
+							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [POSCodeFormat]
+							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
 									ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
 								END [POSCode]
 							, IUM.strUnitMeasure [PosCodeModifierName] 
@@ -801,7 +801,7 @@ BEGIN
 							, CASE WHEN R.strRegisterClass = @strRegisterClass
 										THEN CASE WHEN R.strRegisterName = 'Sapphire' THEN RIGHT('0000000000000'+ISNULL(IUOM.strLongUPCCode,''),13) 
 											WHEN R.strRegisterName = 'Commander' THEN 
-												CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) 
+												CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL
 													THEN IUOM.strUpcCode 
 													ELSE RIGHT('0000000000000'+ISNULL(IUOM.strLongUPCCode,''),13) 
 												END
@@ -879,8 +879,8 @@ BEGIN
 							, 'addchange' [RecordActionType] 
 							, CONVERT(nvarchar(10), GETDATE(), 21) [RecordActionEffectiveDate]
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [ITTDetailRecordActionType] 
-							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN 'plu' ELSE 'upcA' END [POSCodeFormat]
-							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
+							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [POSCodeFormat]
+							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
 									ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
 								END [POSCode]
 							, IUM.strUnitMeasure [PosCodeModifierName] 
@@ -898,13 +898,13 @@ BEGIN
 								END AS[InventoryValuePrice]
 							, Cat.strCategoryCode [MerchandiseCode]
 							, CASE WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
-								   WHEN (GETDATE() < (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
+								   WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
 																									WHERE EIP.intItemLocationId = IL.intItemLocationId
-																									AND GETDATE() <= dtmEffectiveRetailPriceDate
+																									AND GETDATE() >= dtmEffectiveRetailPriceDate
 																									ORDER BY dtmEffectiveRetailPriceDate ASC))
 																				THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
 																										WHERE EIP.intItemLocationId = IL.intItemLocationId
-																										AND GETDATE() <= dtmEffectiveRetailPriceDate
+																										AND GETDATE() >= dtmEffectiveRetailPriceDate
 																										ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
 									ELSE Prc.dblSalePrice 
 								END  [RegularSellPrice]
@@ -947,7 +947,7 @@ BEGIN
 							, CASE WHEN R.strRegisterClass = @strRegisterClass 
 										THEN CASE WHEN R.strRegisterName = 'Sapphire' THEN RIGHT('0000000000000'+ISNULL(IUOM.strLongUPCCode,''),13) 
 											WHEN R.strRegisterName = 'Commander' THEN 
-												CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) 
+												CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL
 													THEN IUOM.strUpcCode 
 													ELSE RIGHT('0000000000000'+ISNULL(IUOM.strLongUPCCode,''),13) 
 												END
@@ -1029,6 +1029,100 @@ BEGIN
 						--JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId
 
 					END
+
+					
+						-- -----------------------------------------------------------------------------
+						-- [Start] - Create Preview
+						-- -----------------------------------------------------------------------------
+						-- INSERT TO UPDATE REGISTER PREVIEW TABLE
+						INSERT INTO tblSTUpdateRegisterItemReport
+						(
+							strGuid, 
+							intStoreId,
+							strActionType,
+							strUpcCode,
+							strDescription,
+							dblSalePrice,
+							ysnSalesTaxed,
+							ysnIdRequiredLiquor,
+							ysnIdRequiredCigarette,
+							strRegProdCode,
+							intItemId,
+							intConcurrencyId
+						)
+						SELECT 
+							strGuid = @strGuid,
+							intStoreId = (SELECT intStoreNo FROM tblSTStore WHERE intStoreId = @intStoreId),
+							strActionType = t1.strActionType,
+							strUpcCode = t1.strUpcCode,
+							strDescription = t1.strDescription,
+							dblSalePrice = t1.dblSalePrice,
+							ysnSalesTaxed = t1.ysnSalesTaxed,
+							ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
+							ysnIdRequiredCigarette = t1.ysnIdRequiredCigarette,
+							strRegProdCode = t1.strRegProdCode,
+							intItemId = t1.intItemId,
+							intConcurrencyId = 1
+						FROM  
+						(
+							SELECT *,
+									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+							FROM 
+							(
+								SELECT DISTINCT
+									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+									, IUOM.strLongUPCCode AS strUpcCode
+									, I.strDescription AS strDescription
+									, CASE  WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
+											WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
+																							WHERE EIP.intItemLocationId = IL.intItemLocationId
+																							AND GETDATE() >= dtmEffectiveRetailPriceDate
+																							ORDER BY dtmEffectiveRetailPriceDate ASC))
+																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
+																								WHERE EIP.intItemLocationId = IL.intItemLocationId
+																								AND GETDATE() >= dtmEffectiveRetailPriceDate
+																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
+										ELSE Prc.dblSalePrice 
+									END AS dblSalePrice
+									, IL.ysnTaxFlag1 AS ysnSalesTaxed
+									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+									, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+									, SubCat.strRegProdCode AS strRegProdCode
+									, I.intItemId AS intItemId
+								FROM tblICItem I
+								JOIN tblICCategory Cat 
+									ON Cat.intCategoryId = I.intCategoryId
+								JOIN @tempTableItems tmpItem 
+									ON tmpItem.intItemId = I.intItemId
+								JOIN tblICItemLocation IL 
+									ON IL.intItemId = I.intItemId
+								LEFT JOIN tblSTSubcategoryRegProd SubCat 
+									ON SubCat.intRegProdId = IL.intProductCodeId
+								JOIN tblSTStore ST 
+									--ON ST.intStoreId = SubCat.intStoreId
+									ON IL.intLocationId = ST.intCompanyLocationId
+								JOIN tblSMCompanyLocation L 
+									ON L.intCompanyLocationId = IL.intLocationId
+								JOIN tblICItemUOM IUOM 
+									ON IUOM.intItemId = I.intItemId
+								JOIN tblICUnitMeasure IUM 
+									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+								JOIN tblSTRegister R 
+									ON R.intStoreId = ST.intStoreId
+								JOIN tblICItemPricing Prc 
+									ON Prc.intItemLocationId = IL.intItemLocationId
+								LEFT JOIN tblICItemSpecialPricing SplPrc 
+									ON SplPrc.intItemId = I.intItemId
+								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+									AND ST.intStoreId = @intStoreId
+									AND IUOM.strLongUPCCode IS NOT NULL
+									--AND IUOM.strLongUPCCode <> ''
+									--AND IUOM.strLongUPCCode <> '0'
+									AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+									AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
+							) as t
+						) t1
+						WHERE rn = 1
 
 
 

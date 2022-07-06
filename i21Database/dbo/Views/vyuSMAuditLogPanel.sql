@@ -3,6 +3,7 @@ AS
 
 SELECT 
 	tblSMAudit.intAuditId as intAuditLogId,
+	tblSMLog.intLogId as intLogId,
 	tblSMLog.strName,
 	ISNULL(B.strNamespace, tblSMScreen.strNamespace) as strScreenNamespace,
 	ISNULL(B.strScreenName, tblSMScreen.strScreenName) as strTransactionType,

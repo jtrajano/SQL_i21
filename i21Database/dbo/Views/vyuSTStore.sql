@@ -67,7 +67,7 @@ LEFT JOIN tblICItem ChangeFundEndBalanceItem
 	ON ST.intChangeFundEndBalanceItemId = ChangeFundEndBalanceItem.intItemId
 LEFT JOIN tblICItem ChangeFundReplenishItem 
 	ON ST.intChangeFundReplenishItemId = ChangeFundReplenishItem.intItemId
-
+WHERE ST.ysnActive = 1
 
 
 

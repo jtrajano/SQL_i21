@@ -220,3 +220,8 @@ CREATE NONCLUSTERED INDEX idxGL_tblGLDetail_FiscalPeriod ON [dbo].[tblGLDetail]
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 
+CREATE NONCLUSTERED INDEX [dpa_tblGLDetail_1] ON [tblGLDetail] ([intAccountId],[ysnIsUnposted],[dtmDate]) INCLUDE ([intFiscalPeriodId])
+GO
+
+CREATE NONCLUSTERED INDEX [dpa_tblGLDetail_2] ON [tblGLDetail] ([ysnIsUnposted],[dtmDate]) INCLUDE ([intAccountId],[intFiscalPeriodId])
+GO

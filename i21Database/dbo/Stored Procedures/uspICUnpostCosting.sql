@@ -112,8 +112,11 @@ BEGIN
 				OR t.intCostingMethod = 6
 			)
 
+	-- Exit immediately if there's nothing to unpost. 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToUnpost)
+		RETURN 0; 
+
 	-- Get the unpost date. 
-	--SET @dtmDate = dbo.fnRemoveTimeOnDate(GETDATE()) 
 	SELECT TOP 1 
 		@dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
 	FROM

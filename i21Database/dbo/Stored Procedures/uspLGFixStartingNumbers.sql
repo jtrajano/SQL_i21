@@ -55,7 +55,7 @@ BEGIN
  OUTER APPLY (
   SELECT strTransactionId = ISNULL(strPickLotNumber, '')
   FROM tblLGPickLotHeader 
-  WHERE intPickLotHeaderId = (SELECT MAX(intPickLotHeaderId) FROM tblLGPickLotHeader)
+  WHERE intPickLotHeaderId = (SELECT MAX(intPickLotHeaderId) FROM tblLGPickLotHeader WHERE intType = 1)
   ) B
  WHERE A.strModule = 'Logistics' 
   AND A.strTransactionType = 'Pick Lots' 
@@ -138,5 +138,18 @@ BEGIN
  WHERE A.strModule = 'Logistics' 
   AND A.strTransactionType = 'Allocation Detail' 
   AND A.intNumber <> CAST(LEFT(SUBSTRING(strTransactionId, PATINDEX('%[0-9]%', strTransactionId), 8000), 8000) AS INT) + 1
-
+ 
+ /* Pick Containers */
+ UPDATE A
+ SET A.intNumber = CAST(LEFT(SUBSTRING(strTransactionId, PATINDEX('%[0-9]%', strTransactionId), 8000), 8000) AS INT) + 1
+ FROM tblSMStartingNumber A
+ OUTER APPLY (
+  SELECT strTransactionId = ISNULL(strPickLotNumber, '')
+  FROM tblLGPickLotHeader 
+  WHERE intPickLotHeaderId = (SELECT MAX(intPickLotHeaderId) FROM tblLGPickLotHeader WHERE intType = 2)
+  ) B
+ WHERE A.strModule = 'Logistics' 
+  AND A.strTransactionType = 'Pick Containers' 
+  AND A.intNumber <> CAST(LEFT(SUBSTRING(strTransactionId, PATINDEX('%[0-9]%', strTransactionId), 8000), 8000) AS INT) + 1
+ 
 END

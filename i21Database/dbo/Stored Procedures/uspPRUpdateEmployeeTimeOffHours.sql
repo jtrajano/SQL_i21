@@ -52,9 +52,13 @@ BEGIN
  --Calculate Next Award Date    
  UPDATE #tmpEmployees     
   SET dtmNextAward = CASE WHEN (strAwardPeriod = 'Start of Week') THEN    
-                            CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE)    
+                        CASE WHEN CAST(DATEADD(WK, DATEDIFF(WK, 0, GETDATE()), 0) AS DATE) >= GETDATE() THEN
+							CAST(DATEADD(WK, DATEDIFF(WK,6 , GETDATE()), 0) AS DATE)
+						ELSE
+							CAST(DATEADD(WK, DATEDIFF(WK, 0, GETDATE()), 0) AS DATE) 
+						END
                     WHEN (strAwardPeriod = 'End of Week') THEN    
-                        CASE WHEN (dtmLastAward) < CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE) THEN    
+                        CASE WHEN (dtmLastAward) <= CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE) THEN    
                          DATEADD(DD, -7, CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE))    
                         ELSE     
                          CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())) + 7, GETDATE()) AS DATE)    
@@ -165,7 +169,16 @@ BEGIN
  BEGIN    
   SELECT TOP 1     
    @intEmployeeId = [intEntityId]    
-  FROM #tmpEmployees     
+  FROM #tmpEmployees 
+
+   --Update Hours earned > max earned
+  UPDATE #tmpEmployees    
+   SET dblEarnedHours = CASE WHEN dblEarnedHours >= T.dblMaxEarned THEN T.dblMaxEarned ELSE dblEarnedHours END    
+  FROM    
+  tblPREmployeeTimeOff T    
+  WHERE intEntityId = @intEmployeeId    
+    AND T.intEntityEmployeeId = @intEmployeeId    
+    AND intTypeTimeOffId = @intTypeTimeOffId     
     
   --Update Accrued Hours    
   UPDATE tblPREmployeeTimeOff    
@@ -179,8 +192,8 @@ BEGIN
   --Update Earned Hours    
   UPDATE tblPREmployeeTimeOff    
       SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN          
-                            CASE WHEN ((dblHoursEarned + T.dblEarnedHours) >= dblMaxEarned) THEN          
-								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover >= dblMaxBalance) THEN
+                            CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN          
+								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover > dblMaxBalance) THEN
 									T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)
 								ELSE
 									T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned)

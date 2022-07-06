@@ -8,6 +8,11 @@
     CONSTRAINT [FK_tblCFIndexPricingBySiteGroupHeader_tblCFPriceIndex] FOREIGN KEY ([intPriceIndexId]) REFERENCES [dbo].[tblCFPriceIndex] ([intPriceIndexId]),
     CONSTRAINT [FK_tblCFIndexPricingBySiteGroupHeader_tblCFSiteGroup] FOREIGN KEY ([intSiteGroupId]) REFERENCES [dbo].[tblCFSiteGroup] ([intSiteGroupId])
 );
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCFIndexPricingBySiteGroupHeader_dtmDate]
+ON [dbo].[tblCFIndexPricingBySiteGroupHeader]([dtmDate] ASC)
+GO
 
 
 

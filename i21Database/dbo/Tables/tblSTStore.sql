@@ -117,6 +117,7 @@
 	[guidStoreAppConnectionId] UNIQUEIDENTIFIER NULL, 
 	[strStoreAppMacAddress] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[dtmStoreAppLastDateLog] DATETIME NULL,
+	[strStoreAppFileVersion] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	--[strHandheldScannerServerFolderPath] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
 
 	-- ATM
@@ -132,6 +133,7 @@
 	[intChangeFundBegBalanceItemId]	INT NULL, 
 
     [ysnLotterySetupMode]           BIT NULL, 
+    [ysnActive]						BIT NULL DEFAULT 1, 
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
