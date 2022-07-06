@@ -573,21 +573,16 @@ BEGIN TRY
 				'Sale' strContractType,
 				AD.intAllocationHeaderId,
 				AH.strAllocationNumber,
-				AW.strSequenceNumber	AS	strAllocatedWith,
-				EY2.strName strCounterPartyName
+				AW.strSequenceNumber	AS	strAllocatedWith
 
 		FROM	tblLGAllocationDetail	AD
 		JOIN	tblLGAllocationHeader	AH	ON	AH.intAllocationHeaderId	=	AD.intAllocationHeaderId
-		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId AND	CD.intContractDetailId		=	@intContractDetailId
-		JOIN	tblCTContractDetail		CD2	ON	CD2.intContractDetailId		=	AD.intPContractDetailId 
-
+		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId
+											AND	CD.intContractDetailId		=	@intContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-		JOIN	tblCTContractHeader		CH2	ON	CH2.intContractHeaderId		=	CD2.intContractHeaderId
-
 		JOIN	vyuCTContractSequence	AW	ON	AW.intContractDetailId		=	AD.intPContractDetailId
-		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId		
-		JOIN	tblEMEntity				EY2	ON	EY2.intEntityId				=	CH2.intEntityId		
-		CROSS	APPLY	tblLGCompanyPreference	LP
+		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId		CROSS	
+		APPLY	tblLGCompanyPreference	LP
 
 		UNION ALL 
 
@@ -599,23 +594,16 @@ BEGIN TRY
 				'Purchase' strContractType,
 				AD.intAllocationHeaderId,
 				AH.strAllocationNumber,
-				AW.strSequenceNumber	AS	strAllocatedWith,
-				EY2.strName strCounterPartyName
+				AW.strSequenceNumber	AS	strAllocatedWith
 
 		FROM	tblLGAllocationDetail	AD
 		JOIN	tblLGAllocationHeader	AH	ON	AH.intAllocationHeaderId	=	AD.intAllocationHeaderId
-		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId AND	CD.intContractDetailId		=	@intContractDetailId
-		JOIN	tblCTContractDetail		CD2	ON	CD2.intContractDetailId		=	AD.intSContractDetailId 
-
-
+		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId
+											AND	CD.intContractDetailId		=	@intContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-		JOIN	tblCTContractHeader		CH2	ON	CH2.intContractHeaderId		=	CD2.intContractHeaderId
-
 		JOIN	vyuCTContractSequence	AW	ON	AW.intContractDetailId		=	AD.intSContractDetailId
-		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId			
-		JOIN	tblEMEntity				EY2	ON	EY2.intEntityId				=	CH2.intEntityId			
-		CROSS	APPLY	tblLGCompanyPreference	LP
-
+		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId			CROSS	
+		APPLY	tblLGCompanyPreference	LP
 	END
 
 END TRY
