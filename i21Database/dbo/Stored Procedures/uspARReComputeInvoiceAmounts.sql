@@ -133,11 +133,8 @@ LEFT JOIN vyuLGAdditionalColumnForContractDetailView LGACFDDV ON LGACFDDV.intCon
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	
-	
-UPDATE
-	tblARInvoice
-SET
-	 [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
+UPDATE tblARInvoice
+SET  [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 	,[dblBaseInvoiceSubtotal]				= ISNULL([dblBaseInvoiceSubtotal], @ZeroDecimal)
 	,[dblShipping]							= ISNULL([dblShipping], @ZeroDecimal)
 	,[dblBaseShipping]						= ISNULL([dblBaseShipping], @ZeroDecimal)
@@ -165,8 +162,8 @@ SET
 	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 	,[ysnImpactInventory]					= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
-WHERE
-	[intInvoiceId] = @InvoiceIdLocal
+	,[dblLoanAmount]						= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
+WHERE [intInvoiceId] = @InvoiceIdLocal
 
 
 --IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
