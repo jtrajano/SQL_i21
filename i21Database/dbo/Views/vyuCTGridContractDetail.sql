@@ -328,6 +328,10 @@ AS
 			, TG.strTaxGroup
 			, CD.strTaxLocation
 			, CD.intTaxLocationId
+			, CD.dtmHistoricalDate
+			, CD.dblHistoricalRate
+			, CD.intHistoricalRateTypeId
+			, strHistoricalRateType = HRT.strCurrencyExchangeRateType
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -414,6 +418,7 @@ AS
 	LEFT    JOIN	tblSMCurrency					FY	ON	FY.intCurrencyID					=		ER.intFromCurrencyId			
 	LEFT    JOIN	tblSMCurrency					TY	ON	TY.intCurrencyID					=		ER.intToCurrencyId	
 	LEFT    JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CD.intRateTypeId
+	LEFT    JOIN	tblSMCurrencyExchangeRateType	HRT	ON	HRT.intCurrencyExchangeRateTypeId	=		CD.intHistoricalRateTypeId
 	LEFT    JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId					=		CD.intFreightTermId			--strFreightTerm
 	LEFT	JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId				=		CD.intPurchasingGroupId		--strPurchasingGroup
 	LEFT    JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=		CD.intSubLocationId 		--strLocationName
